@@ -342,7 +342,7 @@ namespace DetectiveBoardUIExtension
 
 		public bool CanCreateUserLink(uint fromId, uint toId)
 		{
-			return !(m_TaskItems.IsTaskLocked(fromId) || m_TaskItems.HasUserLink(fromId, toId));
+			return !(m_TaskItems.IsTaskLocked(fromId) || m_TaskItems.HasUserLink(fromId, toId, true));
 		}
 
 		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, 
@@ -360,7 +360,7 @@ namespace DetectiveBoardUIExtension
 				}
 				
 				// If link (or its reverse) already exists we just update it
-				var link = m_TaskItems.FindUserLink(fromId, toId);
+				var link = m_TaskItems.FindUserLink(fromId, toId, true);
 
 				if (link == null)
 				{
@@ -393,7 +393,7 @@ namespace DetectiveBoardUIExtension
 				if ((SingleSelectedNode == null) || (m_SelectedUserLink == null))
 					return null;
 
-				if (!SingleSelectedNode.Data.Equals(m_SelectedUserLink.FromId))
+				if (SingleSelectedNode.Data != m_SelectedUserLink.FromId)
 				{
 					Debug.Assert(false);
 					return null;
@@ -452,14 +452,14 @@ namespace DetectiveBoardUIExtension
 			return true;
 		}
 
-		public bool SelectNode(uint taskId)
+		public new bool SelectNode(uint taskId, bool notify)
 		{
 			ClearUserLinkSelection();
 
-			if (base.SelectNode(taskId))
+			if (base.SelectNode(taskId, notify))
 				return true;
 
-			base.SelectNode(NodeControl.NullId);
+			base.SelectNode(NodeControl.NullId, notify);
 			return false;
 		}
 
@@ -812,7 +812,7 @@ namespace DetectiveBoardUIExtension
 						Point fromPos, toPos;
 
 						// Don't draw a dependency which is overlaid by a user link
-						if (!m_TaskItems.HasUserLink(taskItem.TaskId, dependId) &&
+						if (!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&
 							IsConnectionVisible(node, dependId, out fromPos, out toPos))
 						{
 							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
@@ -950,7 +950,7 @@ namespace DetectiveBoardUIExtension
 				if (m_TaskItems.HasDependency(nodeId, taskItem.ParentId)) 
 					return;
 
-				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
+				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId, true))
 					return;
 				
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
@@ -1266,7 +1266,7 @@ namespace DetectiveBoardUIExtension
 		{
 			var fromTask = GetTaskItem(node.Data);
 
-			if ((fromTask != null) && !fromTask.IsLocked && (fromTask?.UserLinks?.Count > 0))
+			if ((fromTask != null) && !fromTask.IsLocked && (fromTask.UserLinks?.Count > 0))
 			{
 				foreach (var link in fromTask.UserLinks)
 				{
@@ -1296,13 +1296,13 @@ namespace DetectiveBoardUIExtension
 			if (IsConnectionVisible(link, out fromPos, out toPos))
 			{
 				// Check for pin ends of selected link
-				if (Geometry2D.GetCentredRect(fromPos, (DefaultPinRadius * 2)).Contains(ptClient))
+				if (Geometry2D.GetCentredRect(fromPos, (DefaultPinRadius * 3)).Contains(ptClient))
 				{
 					from = true;
 					return true;
 				}
 
-				if (Geometry2D.GetCentredRect(toPos, (DefaultPinRadius * 2)).Contains(ptClient))
+				if (Geometry2D.GetCentredRect(toPos, (DefaultPinRadius * 3)).Contains(ptClient))
 				{
 					from = false;
 					return true;
@@ -1327,7 +1327,10 @@ namespace DetectiveBoardUIExtension
 				if (link != null)
 				{
 					if (link != m_SelectedUserLink)
+					{
+						SelectNode(link.FromId, true);
 						m_SelectedUserLink = link;
+					}
 
 					m_DraggingSelectedUserLink = true;
 					m_DraggedUserLinkEnd = GetNodeClientPos(GetNode(link.FromId));
@@ -1479,15 +1482,25 @@ namespace DetectiveBoardUIExtension
 		{
 			Cursor cursor = GetSelectedUserLinkCursor(ptClient);
 
-			if (cursor == null)
-			{
-				var link = HitTestUserLink(ptClient);
+			if (cursor != null)
+				return cursor;
 
-				if ((link != null) && m_TaskItems.IsTaskLocked(link.FromId))
-					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+			bool from = false;
+			var link = HitTestUserLinkEnds(ptClient, ref from);
+
+			if (link != null)
+			{
+				if (!from && !m_TaskItems.IsTaskLocked(link.FromId))
+					return Cursors.SizeAll;
 			}
 
-			return cursor;			
+
+			link = HitTestUserLink(ptClient);
+
+			if ((link != null) && m_TaskItems.IsTaskLocked(link.FromId))
+				return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+
+			return null;
 		}
 
 		protected Cursor GetSelectedUserLinkCursor(Point ptClient)
@@ -1591,6 +1604,8 @@ namespace DetectiveBoardUIExtension
 
 		protected bool IsAcceptableDropTarget(RadialTree.TreeNode<uint> node)
 		{
+			Debug.Assert(m_DraggingSelectedUserLink);
+
 			if (node == null)
 				return false;
 
@@ -1599,13 +1614,32 @@ namespace DetectiveBoardUIExtension
 			if (taskItem == null)
 				return false;
 
-			// TODO
+			// Check for an existing link between the selected task and the link target
+			var link = m_TaskItems.FindUserLink(m_SelectedUserLink.FromId, node.Data, false);
+
+			if ((link != null) && (link != m_SelectedUserLink))
+				return false;
+
+			// Check for the reverse also
+			link = m_TaskItems.FindUserLink(node.Data, m_SelectedUserLink.FromId, false);
+
+			if ((link != null) && (link != m_SelectedUserLink))
+				return false;
+
 			return true;
 		}
 
 		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
 		{
-			return (base.IsAcceptableDragSource(node) && (node != RootNode));
+			if (!base.IsAcceptableDragSource(node))
+				return false;
+			
+			if (node == RootNode)
+				return false;
+
+			var taskItem = GetTaskItem(node.Data);
+
+			return ((taskItem != null) && !taskItem.IsLocked);
 		}
 
 		protected bool OnDragDropNodes(object sender, IList<uint> nodeIds)
@@ -1614,11 +1648,11 @@ namespace DetectiveBoardUIExtension
 			foreach (uint nodeId in nodeIds)
 			{
 				var node = GetNode(nodeId);
-				var task = GetTaskItem(nodeId);
+				var taskItem = GetTaskItem(nodeId);
 
-				if ((node != null) && (task != null))
+				if ((node != null) && (taskItem != null))
 				{
-					task.UserPosition = node.Point.GetPosition();
+					taskItem.UserPosition = node.Point.GetPosition();
 				}
 			}
 
@@ -1633,10 +1667,8 @@ namespace DetectiveBoardUIExtension
 				if (m_DropHighlightedTaskId != 0)
 					m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
 
-				m_DraggingSelectedUserLink = false;
-				m_DropHighlightedTaskId = 0;
+				ResetUserLinkDrag();
 
-				Invalidate();
 				TaskModified?.Invoke(this, SelectedNodeIds);
 			}
 			else
@@ -1645,6 +1677,37 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
+		void ResetUserLinkDrag()
+		{
+			m_DraggingSelectedUserLink = false;
+			m_DropHighlightedTaskId = 0;
+			m_SelectedUserLink = null;
+
+			Invalidate();
+		}
+
+		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			if (m_DraggingSelectedUserLink)
+			{
+				if (((MouseButtons & MouseButtons.Left) != MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
+				{
+					e.Action = DragAction.Cancel;
+					ResetUserLinkDrag();
+				}
+				else if (e.EscapePressed)
+				{
+					e.Action = DragAction.Cancel;
+					ResetUserLinkDrag();
+				}
+			}
+			else
+			{
+				base.OnQueryContinueDrag(e);
+			}
+		}
 	}
 }
 

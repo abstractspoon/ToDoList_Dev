@@ -196,6 +196,23 @@ namespace DetectiveBoardUIExtension
 			return ((node != null) ? GetNodeClientRect(node) : Rectangle.Empty);
 		}
 
+		public bool SelectedNodesAreDraggable
+		{
+			get
+			{
+				if (SelectedNodeCount == 0)
+					return false;
+
+				foreach (var id in m_SelectedNodeIds)
+				{
+					if (!IsAcceptableDragSource(GetNode(id)))
+						return false;
+				}
+
+				return true;
+			}
+		}
+
 		protected uint DraggedNodeId
 		{
 			get { return ((m_SelectedNodeIds.Count > 0) ? m_SelectedNodeIds[0] : NullId); }
@@ -920,7 +937,7 @@ namespace DetectiveBoardUIExtension
 							m_SelectedNodeIds.Add(childIds);
 					}
 				}
-				else
+				else 
 				{
 					if (!m_SelectedNodeIds.Contains(hit.Data))
 					{
@@ -932,15 +949,18 @@ namespace DetectiveBoardUIExtension
 						m_SelectedNodeIds.Add(childIds);
 
 					// Initialise a drag operation
-					m_DragMode = DragMode.Node;
+					if (SelectedNodesAreDraggable)
+					{
+						m_DragMode = DragMode.Node;
 
-					m_DragTimer.Tag = e;
-					m_DragTimer.Start();
+						m_DragTimer.Tag = e;
+						m_DragTimer.Start();
 
-					m_DragOffset = GetNodeClientPos(hit);
-					m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
+						m_DragOffset = GetNodeClientPos(hit);
+						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
 
-					m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
+						m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
+					}
 				}
 
 				Invalidate();

@@ -417,19 +417,19 @@ namespace DetectiveBoardUIExtension
 			return true;
 		}
 
-		public UserLink FindUserLink(uint id1, uint id2)
+		public UserLink FindUserLink(uint id1, uint id2, bool andReverse)
 		{
 			var link = GetTask(id1)?.FindUserLink(id2);
 
-			if (link == null)
+			if ((link == null) && andReverse)
 				link = GetTask(id2)?.FindUserLink(id1);
 
 			return link;
 		}
 
-		public bool HasUserLink(uint id1, uint id2)
+		public bool HasUserLink(uint id1, uint id2, bool andReverse)
 		{
-			return (FindUserLink(id1, id2) != null);
+			return (FindUserLink(id1, id2, andReverse) != null);
 		}
 
 		public bool DeleteUserLink(UserLink link)
