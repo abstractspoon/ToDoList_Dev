@@ -944,6 +944,10 @@ namespace DetectiveBoardUIExtension
 						m_SelectedNodeIds.Clear();
 						m_SelectedNodeIds.Insert(0, hit.Data);
 					}
+					else
+					{
+						m_SelectedNodeIds.MoveToHead(hit.Data);
+					}
 
 					if (childIds?.Count > 0)
 						m_SelectedNodeIds.Add(childIds);

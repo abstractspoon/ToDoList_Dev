@@ -1362,20 +1362,18 @@ namespace DetectiveBoardUIExtension
 
 					return; // Prevent base class handling
 				}
-				else
-				{
-					link = HitTestUserLink(e.Location);
 
-					if ((link != null) && !m_TaskItems.IsTaskLocked(link.FromId))
-					{
-						// Cache the link to be checked in OnMouseClick
-						m_SelectedUserLink = link;
-						return;
-					}
-					else if (HasSelectedUserLink)
-					{
-						ClearUserLinkSelection();
-					}
+				link = HitTestUserLink(e.Location);
+
+				if ((link != null) && !m_TaskItems.IsTaskLocked(link.FromId))
+				{
+					// Cache the link to be checked in OnMouseClick
+					m_SelectedUserLink = link;
+					return;
+				}
+				else if (HasSelectedUserLink)
+				{
+					ClearUserLinkSelection();
 				}
 			}
 
