@@ -1652,7 +1652,10 @@ namespace DetectiveBoardUIExtension
 			if (m_HotTaskId != 0)
 			{
 				var hot = GetNode(m_HotTaskId);
-				Invalidate(GetCreateLinkPinRect(GetNodeClientPos(hot)));
+				var pin = GetCreateLinkPinRect(GetNodeClientPos(hot));
+
+				pin.Inflate(1, 1);
+				Invalidate(pin);
 			}
 
 			if (node == null)
@@ -1662,7 +1665,10 @@ namespace DetectiveBoardUIExtension
 			else
 			{
 				m_HotTaskId = node.Data;
-				Invalidate(GetCreateLinkPinRect(GetNodeClientPos(node)));
+				var pin = GetCreateLinkPinRect(GetNodeClientPos(node));
+
+				pin.Inflate(1, 1);
+				Invalidate();
 			}
 		}
 
