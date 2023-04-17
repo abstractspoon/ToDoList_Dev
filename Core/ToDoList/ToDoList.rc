@@ -3952,8 +3952,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Delete Task",                ID_DELETETASK
         MENUITEM SEPARATOR
-        MENUITEM "Select A&ll",                 ID_EDIT_SELECTALL
-        MENUITEM SEPARATOR
         MENUITEM "Archi&ve Selected Tasks",     ID_ARCHIVE_SELECTEDTASKS
         MENUITEM SEPARATOR
         MENUITEM "Email Selected &Tasks...",    ID_SEND_SELTASKS

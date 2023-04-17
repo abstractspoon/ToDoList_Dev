@@ -304,7 +304,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 	}
 	else if (GetSubMenu(AM_EDIT) == pPopupMenu)
 	{
-		PrepareEditMenu(pPopupMenu, tdc, prefs);
+		PrepareEditMenu(pPopupMenu, tdc, prefs, FALSE);
 		return TRUE;
 	}
 	else if (GetSubMenu(AM_SORT) == pPopupMenu)
@@ -348,7 +348,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CFilteredToDoCtrl& tdc,
 										  const CPreferencesDlg& prefs) const
 {
-	PrepareEditMenu(pMenu, tdc, prefs);
+	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
 }
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
@@ -356,7 +356,7 @@ void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
 											 const CPreferencesDlg& prefs) const
 {
 	PrepareFileMenu(pMenu, prefs);
-	PrepareEditMenu(pMenu, tdc, prefs);
+	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
 }
 
 void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
@@ -498,7 +498,7 @@ BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureIt
 	return FALSE;
 }
 
-void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
+void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, BOOL bContextMenu)
 {
 	ASSERT(pMenu);
 
@@ -525,7 +525,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 				if (pPopup)
 				{
-					PrepareEditMenu(pPopup, tdc, prefs);
+					PrepareEditMenu(pPopup, tdc, prefs, bContextMenu);
 
 					// if the popup is now empty remove it too
 					bDelete = !pPopup->GetMenuItemCount();
@@ -609,6 +609,12 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_EDIT_CLEARTASKICON:
 			break;
 
+		case ID_TASKLIST_COPYCOLUMNVALUES:
+		case ID_TASKLIST_COPYSELTASKSCOLUMNVALUES:
+			if (bContextMenu)
+				bDelete = tdc.IsExtensionView(tdc.GetTaskView());
+			break;
+			
 		case ID_SEPARATOR:
 			bIsSeparator = TRUE;
 			bDelete = (nCountLastSep == 0);
