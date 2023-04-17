@@ -808,7 +808,7 @@ namespace DetectiveBoardUIExtension
 				DrawSelectedUserLink(graphics);
 		}
 
-		private Rectangle GetSelectedUserLinkPinRect(Point pos)
+		private Rectangle GetSelectionPinRect(Point pos)
 		{
 			// Always the unzoomed size
 			return Geometry2D.GetCentredRect(pos, (DefaultPinRadius * 2));
@@ -879,7 +879,13 @@ namespace DetectiveBoardUIExtension
 			{
 				if (selected && m_DraggingSelectedUserLink)
 				{
-					fromPos = GetNodeClientPos(GetNode(link.FromId));
+					var node = GetNode(link.FromId);
+
+					fromPos = GetNodeClientPos(node);
+
+					if (m_HotTaskId == link.FromId)
+						fromPos = GetCreateLinkPinPos(fromPos);
+
 					toPos = m_DraggedUserLinkEnd;
 				}
 
@@ -924,7 +930,7 @@ namespace DetectiveBoardUIExtension
 
 		void DrawSelectionPin(Graphics graphics, Point pos, bool draggable)
 		{
-			var pin = GetSelectedUserLinkPinRect(pos);
+			var pin = GetSelectionPinRect(pos);
 
 			if (draggable)
 			{
@@ -939,6 +945,19 @@ namespace DetectiveBoardUIExtension
 				graphics.FillEllipse(SystemBrushes.Window, pin);
 				graphics.DrawEllipse(SystemPens.WindowText, pin);
 			}
+		}
+
+		private Point GetCreateLinkPinPos(Point nodePos)
+		{
+			// Offset it to avoid clashing with existing user links
+			nodePos.Offset(0, (DefaultPinRadius * 4));
+
+			return nodePos;
+		}
+
+		private Rectangle GetCreateLinkPinRect(Point pos)
+		{
+			return GetSelectionPinRect(GetCreateLinkPinPos(pos));
 		}
 
 		DrawState GetTaskDrawState(TaskItem task)
@@ -961,10 +980,10 @@ namespace DetectiveBoardUIExtension
 			{
 				DoPaintNode(graphics, taskItem, rect, GetTaskDrawState(taskItem));
 
-				if (m_HotTaskId == nodeId)
+				if ((m_HotTaskId == nodeId) && !m_DraggingSelectedUserLink)
 				{
 					// Draw a temporary 'pin' for initiating a new user link
-					DrawSelectionPin(graphics, Geometry2D.Centroid(rect), true);
+					DrawSelectionPin(graphics, GetCreateLinkPinPos(Geometry2D.Centroid(rect)), true);
 				}
 			}
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
@@ -1386,7 +1405,7 @@ namespace DetectiveBoardUIExtension
 
 				if ((link != null) && !from)
 				{
-					DoUserLinkDragDrop(link, e.Location);
+					DoUserLinkDragDrop(link);
 
 					// Prevent base class handling
 					return;
@@ -1409,9 +1428,9 @@ namespace DetectiveBoardUIExtension
 
 				var node = HitTestNode(e.Location, true);
 
-				if ((node != null) && GetSelectedUserLinkPinRect(GetNodeClientPos(node)).Contains(e.Location))
+				if ((node != null) && GetCreateLinkPinRect(GetNodeClientPos(node)).Contains(e.Location))
 				{
-					DoUserLinkDragDrop(new UserLink(node.Data, NullId), e.Location);
+					DoUserLinkDragDrop(new UserLink(node.Data, NullId));
 
 					// Prevent base class handling
 					return;
@@ -1421,13 +1440,15 @@ namespace DetectiveBoardUIExtension
 			base.OnMouseDown(e);
 		}
 
-		private void DoUserLinkDragDrop(UserLink link, Point pos)
+		private void DoUserLinkDragDrop(UserLink link)
 		{
 			// Create a special new link
 			SelectUserLink(link);
 
 			m_DraggingSelectedUserLink = true;
-			m_DraggedUserLinkEnd = GetNodeClientPos(GetNode(link.FromId));
+			m_DraggedUserLinkEnd = GetCreateLinkPinPos(GetNodeClientPos(GetNode(link.FromId)));
+
+			Invalidate();
 
 			DoDragDrop(this, DragDropEffects.Copy);
 		}
@@ -1619,28 +1640,41 @@ namespace DetectiveBoardUIExtension
 			return null;
 		}
 
+		private void UpdateHotTask(Point ptMouse)
+		{
+			// Keep track of the 'hot' task so we can display a 
+			// 'pin' for initiating a new link drag
+			var node = HitTestNode(ptMouse, true);
+
+			if (m_HotTaskId == node?.Data)
+				return;
+
+			if (m_HotTaskId != 0)
+			{
+				var hot = GetNode(m_HotTaskId);
+				Invalidate(GetCreateLinkPinRect(GetNodeClientPos(hot)));
+			}
+
+			if (node == null)
+			{
+				m_HotTaskId = 0;
+			}
+			else
+			{
+				m_HotTaskId = node.Data;
+				Invalidate(GetCreateLinkPinRect(GetNodeClientPos(node)));
+			}
+		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
  			base.OnMouseMove(e);
 
 			Cursor cursor = null;
-			m_HotTaskId = 0;
 
 			if (!ReadOnly)
 			{
-				// Keep track of the 'hot' task so we can display a 
-				// 'pin' for initiating a new link drag
-				var node = HitTestNode(e.Location);
-
-				if ((node != null) && (m_HotTaskId != node.Data))
-				{
-					Invalidate();
-					m_HotTaskId = node.Data;
-				}
-				else if ((node == null) && (m_HotTaskId != 0))
-				{
-					Invalidate();
-				}
+				UpdateHotTask(e.Location);
 
 				if (DrawNodesOnTop)
 				{
