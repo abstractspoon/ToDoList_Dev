@@ -15,7 +15,11 @@ namespace DetectiveBoardUIExtension
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
-	public delegate bool TaskModifiedEventHandler(object sender, IList<uint> taskIds);
+
+	public delegate bool TaskMovedEventHandler(object sender, IList<uint> taskIds);
+	public delegate bool ConnectionCreatedEventHandler(object sender, UserLink link);
+	public delegate bool ConnectionEditedEventHandler(object sender, UserLink link);
+	public delegate bool ConnectionDeletedEventHandler(object sender, uint taskId);
 
 	// ------------------------------------------------------------
 
@@ -38,7 +42,11 @@ namespace DetectiveBoardUIExtension
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
-		public event TaskModifiedEventHandler TaskModified;
+
+		public event TaskMovedEventHandler TaskMoved;
+		public event ConnectionCreatedEventHandler ConnectionCreated;
+		public event ConnectionEditedEventHandler ConnectionEdited;
+		public event ConnectionDeletedEventHandler ConnectionDeleted;
 
 		public EventHandler UserLinkSelectionChange;
 		public EventHandler DoubleClickUserLink;
@@ -74,7 +82,7 @@ namespace DetectiveBoardUIExtension
 
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
-		private uint m_DropHighlightedTaskId, m_HitTaskId;
+		private uint m_DropHighlightedTaskId, m_HotTaskId;
 
 		private bool m_DraggingSelectedUserLink = false;
 		private Point m_DraggedUserLinkEnd = Point.Empty;
@@ -345,6 +353,49 @@ namespace DetectiveBoardUIExtension
 			return !(m_TaskItems.IsTaskLocked(fromId) || m_TaskItems.HasUserLink(fromId, toId, true));
 		}
 
+		public UserLink SelectedUserLink
+		{
+			get
+			{
+				if (ReadOnly)
+					return null;
+
+				if ((SingleSelectedNode == null) || (m_SelectedUserLink == null))
+					return null;
+
+				if (SingleSelectedNode.Data != m_SelectedUserLink.FromId)
+				{
+					Debug.Assert(false);
+					return null;
+				}
+
+				if (m_TaskItems.IsTaskLocked(m_SelectedUserLink.FromId))
+					return null;
+
+				return m_SelectedUserLink;
+			}
+
+			set
+			{
+				if ((value != null) && m_TaskItems.HasUserLink(value.FromId, value.ToId, false))
+					SelectUserLink(value);
+				else
+					ClearUserLinkSelection();
+			}
+		}
+
+		public bool HasSelectedUserLink { get { return (SelectedUserLink != null); } }
+
+		public void ClearUserLinkSelection()
+		{
+			if (HasSelectedUserLink)
+			{
+				ResetUserLinkDrag();
+
+				UserLinkSelectionChange?.Invoke(this, null);
+			}
+		}
+		
 		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, 
 									UserLink.EndArrows arrows, string text, string type)
 		{
@@ -377,48 +428,13 @@ namespace DetectiveBoardUIExtension
 				Invalidate();
 
 				// Notify parent
-				return ((TaskModified == null) ? false : TaskModified(this, new List<uint>() { fromId }));
+				ConnectionCreated?.Invoke(this, link);
+				return true;
 			}
 
 			return false;
 		}
 
-		public UserLink SelectedUserLink
-		{
-			get
-			{
-				if (ReadOnly)
-					return null;
-
-				if ((SingleSelectedNode == null) || (m_SelectedUserLink == null))
-					return null;
-
-				if (SingleSelectedNode.Data != m_SelectedUserLink.FromId)
-				{
-					Debug.Assert(false);
-					return null;
-				}
-
-				if (m_TaskItems.IsTaskLocked(m_SelectedUserLink.FromId))
-					return null;
-
-				return m_SelectedUserLink;
-			}
-		}
-
-		public bool HasSelectedUserLink { get { return (SelectedUserLink != null); } }
-
-		public void ClearUserLinkSelection()
-		{
-			if (HasSelectedUserLink)
-			{
-				m_SelectedUserLink = null;
-				Invalidate();
-
-				UserLinkSelectionChange?.Invoke(this, null);
-			}
-		}
-		
 		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows,
 										string text, string type)
 		{
@@ -431,10 +447,9 @@ namespace DetectiveBoardUIExtension
 			m_SelectedUserLink.Label = text;
 			m_SelectedUserLink.Type = type;
 
-			// Clear selection so the changes are visible
-			ClearUserLinkSelection();
+			ConnectionEdited?.Invoke(this, m_SelectedUserLink);
 
-			TaskModified?.Invoke(this, SelectedNodeIds);
+			ClearUserLinkSelection();
 			return true;
 		}
 
@@ -446,9 +461,9 @@ namespace DetectiveBoardUIExtension
 			if (!m_TaskItems.DeleteUserLink(m_SelectedUserLink))
 				return false;
 
-			ClearUserLinkSelection();
+			ConnectionDeleted?.Invoke(this, m_SelectedUserLink.FromId);
 
-			TaskModified?.Invoke(this, SelectedNodeIds);
+			ClearUserLinkSelection();
 			return true;
 		}
 
@@ -860,7 +875,7 @@ namespace DetectiveBoardUIExtension
 
 			Point fromPos, toPos;
 
-			if (IsConnectionVisible(link, out fromPos, out toPos))
+			if (IsConnectionVisible(link, out fromPos, out toPos) || (selected && m_DraggingSelectedUserLink))
 			{
 				if (selected && m_DraggingSelectedUserLink)
 				{
@@ -946,7 +961,7 @@ namespace DetectiveBoardUIExtension
 			{
 				DoPaintNode(graphics, taskItem, rect, GetTaskDrawState(taskItem));
 
-				if (m_HitTaskId == nodeId)
+				if (m_HotTaskId == nodeId)
 				{
 					// Draw a temporary 'pin' for initiating a new user link
 					DrawSelectionPin(graphics, Geometry2D.Centroid(rect), true);
@@ -1369,16 +1384,12 @@ namespace DetectiveBoardUIExtension
 
 				var link = HitTestUserLinkEnds(e.Location, ref from);
 
-				if (link != null)
+				if ((link != null) && !from)
 				{
-					SelectUserLink(link);
+					DoUserLinkDragDrop(link, e.Location);
 
-					m_DraggingSelectedUserLink = true;
-					m_DraggedUserLinkEnd = GetNodeClientPos(GetNode(link.FromId));
-
-					DoDragDrop(this, DragDropEffects.Move);
-
-					return; // Prevent base class handling
+					// Prevent base class handling
+					return;
 				}
 
 				link = HitTestUserLink(e.Location);
@@ -1387,15 +1398,38 @@ namespace DetectiveBoardUIExtension
 				{
 					// Cache the link to be checked in OnMouseClick
 					m_SelectedUserLink = link;
+
+					// Prevent base class handling
 					return;
 				}
 				else if (HasSelectedUserLink)
 				{
 					ClearUserLinkSelection();
 				}
+
+				var node = HitTestNode(e.Location, true);
+
+				if ((node != null) && GetSelectedUserLinkPinRect(GetNodeClientPos(node)).Contains(e.Location))
+				{
+					DoUserLinkDragDrop(new UserLink(node.Data, NullId), e.Location);
+
+					// Prevent base class handling
+					return;
+				}
 			}
 
 			base.OnMouseDown(e);
+		}
+
+		private void DoUserLinkDragDrop(UserLink link, Point pos)
+		{
+			// Create a special new link
+			SelectUserLink(link);
+
+			m_DraggingSelectedUserLink = true;
+			m_DraggedUserLinkEnd = GetNodeClientPos(GetNode(link.FromId));
+
+			DoDragDrop(this, DragDropEffects.Copy);
 		}
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
@@ -1590,7 +1624,7 @@ namespace DetectiveBoardUIExtension
  			base.OnMouseMove(e);
 
 			Cursor cursor = null;
-			m_HitTaskId = 0;
+			m_HotTaskId = 0;
 
 			if (!ReadOnly)
 			{
@@ -1598,12 +1632,12 @@ namespace DetectiveBoardUIExtension
 				// 'pin' for initiating a new link drag
 				var node = HitTestNode(e.Location);
 
-				if ((node != null) && (m_HitTaskId != node.Data))
+				if ((node != null) && (m_HotTaskId != node.Data))
 				{
 					Invalidate();
-					m_HitTaskId = node.Data;
+					m_HotTaskId = node.Data;
 				}
-				else if ((node == null) && (m_HitTaskId != 0))
+				else if ((node == null) && (m_HotTaskId != 0))
 				{
 					Invalidate();
 				}
@@ -1642,7 +1676,7 @@ namespace DetectiveBoardUIExtension
 				if (IsAcceptableDropTarget(node))
 				{
 					m_DropHighlightedTaskId = node.Data;
-					e.Effect = DragDropEffects.Move;
+					e.Effect = e.AllowedEffect;
 				}
 				else
 				{
@@ -1712,7 +1746,7 @@ namespace DetectiveBoardUIExtension
 				}
 			}
 
-			TaskModified?.Invoke(this, nodeIds);
+			TaskMoved?.Invoke(this, nodeIds);
 			return true;
 		}
 
@@ -1721,11 +1755,32 @@ namespace DetectiveBoardUIExtension
 			if (m_DraggingSelectedUserLink)
 			{
 				if (m_DropHighlightedTaskId != 0)
+				{
+					bool newLink = (m_SelectedUserLink.ToId == NullId);
+
 					m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
 
-				ResetUserLinkDrag();
+					if (newLink)
+					{
+						Debug.Assert(m_SelectedUserLink.FromId == SingleSelectedNode.Data);
 
-				TaskModified?.Invoke(this, SelectedNodeIds);
+						var taskItem = GetTaskItem(m_SelectedUserLink.FromId);
+
+						if (taskItem != null)
+						{
+							taskItem.UserLinks.Add(m_SelectedUserLink);
+
+							if ((ConnectionCreated != null) && !ConnectionCreated(this, m_SelectedUserLink))
+								taskItem.UserLinks.Remove(m_SelectedUserLink);
+						}
+					}
+					else
+					{
+						ConnectionEdited?.Invoke(this, m_SelectedUserLink);
+					}
+				}
+
+				ResetUserLinkDrag();
 			}
 			else
 			{

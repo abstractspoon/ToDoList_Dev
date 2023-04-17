@@ -274,7 +274,11 @@ namespace DetectiveBoardUIExtension
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnDetectiveBoardSelectionChange);
-			m_Control.TaskModified += new TaskModifiedEventHandler(OnDetectiveBoardTaskModified);
+			m_Control.TaskMoved += new TaskMovedEventHandler(OnDetectiveBoardTaskMoved);
+			m_Control.ConnectionCreated += new ConnectionCreatedEventHandler(OnDetectiveBoardTaskLinkCreated);
+			m_Control.ConnectionEdited += new ConnectionEditedEventHandler(OnDetectiveBoardTaskLinkEdited);
+			m_Control.ConnectionDeleted += new ConnectionDeletedEventHandler(OnDetectiveBoardTaskLinkDeleted);
+
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveBoardEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveBoardEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveBoardEditTaskCompletion);
@@ -381,32 +385,46 @@ namespace DetectiveBoardUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		bool OnDetectiveBoardTaskModified(object sender, IList<uint> nodeIds)
+		bool OnDetectiveBoardTaskMoved(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			foreach (var nodeId in nodeIds)
 			{
-				var taskNode = m_Control.GetTaskItem(nodeId);
-				notify.AddMod(nodeId, Task.Attribute.MetaData, taskNode.EncodeMetaData());
+				var taskItem = m_Control.GetTaskItem(nodeId);
+				notify.AddMod(nodeId, Task.Attribute.MetaData, taskItem.EncodeMetaData());
 			}
 
 			return notify.NotifyMod();
-
-
-// 			if (e.copyNode)
-// 				return notify.NotifyCopy(e.dragged.uniqueID, 
-// 										 e.targetParent.uniqueID, 
-// 										 e.afterSibling.uniqueID);
-// 			
-// 			// else
-// 			return notify.NotifyMove(e.dragged.uniqueID,
-// 									 e.targetParent.uniqueID,
-// 									 e.afterSibling.uniqueID);
-//			return true;
 		}
 
-        protected override void OnSizeChanged(EventArgs e)
+		bool OnDetectiveBoardTaskLinkCreated(object sender, UserLink link)
+		{
+			m_Control.SelectedUserLink = link;
+
+			if (!m_Control.HasSelectedUserLink)
+				return false;
+
+			return EditSelectedUserLink();
+		}
+		
+		bool OnDetectiveBoardTaskLinkEdited(object sender, UserLink link)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			var taskItem = m_Control.GetTaskItem(link.FromId);
+
+			return notify.NotifyMod(Task.Attribute.MetaData, taskItem.EncodeMetaData());
+		}
+		
+		bool OnDetectiveBoardTaskLinkDeleted(object sender, uint taskId)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			var taskItem = m_Control.GetTaskItem(taskId);
+
+			return notify.NotifyMod(Task.Attribute.MetaData, taskItem.EncodeMetaData());
+		}
+
+		protected override void OnSizeChanged(EventArgs e)
         {
 			base.OnSizeChanged(e);
 
@@ -582,6 +600,11 @@ namespace DetectiveBoardUIExtension
 
 		private void OnEditUserLink(object sender, EventArgs e)
 		{
+			EditSelectedUserLink();
+		}
+
+		private bool EditSelectedUserLink()
+		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
 			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink);
@@ -590,11 +613,12 @@ namespace DetectiveBoardUIExtension
 			{
 				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 				UpdateToolbarButtonStates();
+
+				return true;
 			}
-			else
-			{
-				m_Control.ClearUserLinkSelection();
-			}
+
+			// else
+			return false;
 		}
 
 		private void OnDeleteTaskLink(object sender, EventArgs e)
