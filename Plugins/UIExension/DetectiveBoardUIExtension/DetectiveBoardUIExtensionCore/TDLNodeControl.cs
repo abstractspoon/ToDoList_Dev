@@ -1076,7 +1076,7 @@ namespace DetectiveBoardUIExtension
 
 			// Figure out the required colours
 			Color backColor = GetTaskBackgroundColor(taskItem, selected);
-			Color borderColor = GetTaskBorderColor(taskItem, selected);
+			Color borderColor = GetTaskBorderColor(taskItem, selected || dropHighlight);
 			Color textColor = GetTaskTextColor(taskItem, drawState);
 
 			// Draw background
