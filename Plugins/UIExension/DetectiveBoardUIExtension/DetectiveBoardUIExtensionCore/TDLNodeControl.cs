@@ -793,19 +793,29 @@ namespace DetectiveBoardUIExtension
 			return (nodeId != 0);
 		}
 
-		protected override void OnAfterDrawNodes(Graphics graphics)
-		{
-			if (DrawNodesOnTop)
-				DrawSelectedUserLink(graphics);
-		}
-
 		protected override void OnAfterDrawConnections(Graphics graphics)
 		{
 			DrawTaskDependencies(graphics, RootNode);
 			DrawUserLinks(graphics, RootNode);
+		}
 
-			if (!DrawNodesOnTop)
-				DrawSelectedUserLink(graphics);
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			base.OnPaint(e);
+
+			if (HasSelectedUserLink)
+			{
+				DrawSelectedUserLink(e.Graphics);
+			}
+
+			if (!m_DraggingSelectedUserLink && (m_HotTaskId != 0))
+			{
+				// Draw a temporary 'pin' for initiating a new user link
+				var hotNode = GetNode(m_HotTaskId);
+
+				if (IsAcceptableDragSource(hotNode))
+					DrawSelectionPin(e.Graphics, GetCreateLinkPinPos(GetNodeClientPos(hotNode)), true);
+			}
 		}
 
 		private Rectangle GetSelectionPinRect(Point pos)
@@ -949,9 +959,15 @@ namespace DetectiveBoardUIExtension
 
 		private Point GetCreateLinkPinPos(Point nodePos)
 		{
-			// Offset it to avoid clashing with existing user links
-			nodePos.Offset(0, (DefaultPinRadius * 4));
+			// Offset the hit rect left or right to avoid existing user links
+			var graphCentre = Geometry2D.Centroid(GraphToClient(Extents));
+			int offset = (DefaultPinRadius * 4);
 
+			if (nodePos.X < graphCentre.X)
+				nodePos.Offset(-offset, 0);
+			else
+				nodePos.Offset(offset, 0);
+			
 			return nodePos;
 		}
 
@@ -979,12 +995,6 @@ namespace DetectiveBoardUIExtension
 			if (taskItem != null)
 			{
 				DoPaintNode(graphics, taskItem, rect, GetTaskDrawState(taskItem));
-
-				if ((m_HotTaskId == nodeId) && !m_DraggingSelectedUserLink)
-				{
-					// Draw a temporary 'pin' for initiating a new user link
-					DrawSelectionPin(graphics, GetCreateLinkPinPos(Geometry2D.Centroid(rect)), true);
-				}
 			}
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
@@ -1364,13 +1374,13 @@ namespace DetectiveBoardUIExtension
 			if (IsConnectionVisible(link, out fromPos, out toPos))
 			{
 				// Check for pin ends of selected link
-				if (Geometry2D.GetCentredRect(fromPos, (DefaultPinRadius * 3)).Contains(ptClient))
+				if (Geometry2D.GetCentredRect(fromPos, (DefaultPinRadius * 2)).Contains(ptClient))
 				{
 					from = true;
 					return true;
 				}
 
-				if (Geometry2D.GetCentredRect(toPos, (DefaultPinRadius * 3)).Contains(ptClient))
+				if (Geometry2D.GetCentredRect(toPos, (DefaultPinRadius * 2)).Contains(ptClient))
 				{
 					from = false;
 					return true;
@@ -1396,7 +1406,6 @@ namespace DetectiveBoardUIExtension
 			m_EditTimer.Stop();
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
-			// Check for connection first to simplify logic
 			if (!ReadOnly)
 			{
 				bool from = false;
@@ -1499,10 +1508,9 @@ namespace DetectiveBoardUIExtension
 					UserLinkSelectionChange?.Invoke(this, null);
 					return;
 				}
-				else if (HasSelectedUserLink)
-				{
-					ClearUserLinkSelection();
-				}
+
+				// else
+				ClearUserLinkSelection();
 			}
 
 			base.OnMouseClick(e);
@@ -1586,8 +1594,14 @@ namespace DetectiveBoardUIExtension
 
 			if (link != null)
 			{
-				if (!from && !m_TaskItems.IsTaskLocked(link.FromId))
+				if (from)
+				{
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+				}
+				else if (!m_TaskItems.IsTaskLocked(link.FromId))
+				{
 					return Cursors.SizeAll;
+				}
 			}
 
 
@@ -1682,24 +1696,35 @@ namespace DetectiveBoardUIExtension
 			{
 				UpdateHotTask(e.Location);
 
-				if (DrawNodesOnTop)
+				if (m_HotTaskId != 0)
 				{
-					// Selected link ends overlap node edges
-					// so they take precedent
-					cursor = GetSelectedUserLinkCursor(e.Location);
+					var hotNode = GetNode(m_HotTaskId);
 
-					if (cursor == null)
-						cursor = GetNodeCursor(e.Location);
-
-					if (cursor == null)
-						cursor = GetUserLinkCursor(e.Location);
+					if ((hotNode != null) && GetCreateLinkPinRect(GetNodeClientPos(hotNode)).Contains(e.Location))
+						cursor = UIExtension.OleDragCursor(UIExtension.OleDragCursorType.Copy);
 				}
-				else
-				{
-					cursor = GetUserLinkCursor(e.Location);
 
-					if (cursor == null)
-						cursor = GetNodeCursor(e.Location);
+				if (cursor == null)
+				{
+					if (DrawNodesOnTop)
+					{
+						// Selected link ends overlap node edges
+						// so they take precedent
+						cursor = GetSelectedUserLinkCursor(e.Location);
+
+						if (cursor == null)
+							cursor = GetNodeCursor(e.Location);
+
+						if (cursor == null)
+							cursor = GetUserLinkCursor(e.Location);
+					}
+					else
+					{
+						cursor = GetUserLinkCursor(e.Location);
+
+						if (cursor == null)
+							cursor = GetNodeCursor(e.Location);
+					}
 				}
 			}
 

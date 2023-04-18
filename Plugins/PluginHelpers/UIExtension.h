@@ -99,13 +99,24 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
+				enum class OleDragCursorType
+				{
+					No,
+					Move,
+					Copy,
+					Link,
+				};
+
+				// -----------------------------------------------
+
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
 
 				static bool Map(IUI_APPCOMMAND nCmd, GetTask% getTask);
 				static bool Map(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
 
-				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
+				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursorType);
+				static Windows::Forms::Cursor^ OleDragCursor(OleDragCursorType cursorType);
 				static Windows::Forms::Cursor^ HandCursor();
 
 				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);

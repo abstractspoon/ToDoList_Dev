@@ -628,22 +628,11 @@ namespace DetectiveBoardUIExtension
 			{
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-// 				if (DrawNodesOnTop)
-// 				{
-// 					DrawParentAndChildConnections(e.Graphics, RootNode);
-// 					OnAfterDrawConnections(e.Graphics);
-// 
-// 					DrawParentAndChildNodes(e.Graphics, RootNode);
-// 					OnAfterDrawNodes(e.Graphics);
-// 				}
-// 				else // Connections on top
-				{
-					DrawParentAndChildNodes(e.Graphics, RootNode);
-					OnAfterDrawNodes(e.Graphics);
+				DrawParentAndChildNodes(e.Graphics, RootNode);
+				OnAfterDrawNodes(e.Graphics);
 
-					DrawParentAndChildConnections(e.Graphics, RootNode);
-					OnAfterDrawConnections(e.Graphics);
-				}
+				DrawParentAndChildConnections(e.Graphics, RootNode);
+				OnAfterDrawConnections(e.Graphics);
 			}
 
 			// Draw new selection box

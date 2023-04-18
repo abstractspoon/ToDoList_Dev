@@ -788,6 +788,35 @@ Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursor
 	return nullptr;
 }
 
+Windows::Forms::Cursor^ UIExtension::OleDragCursor(OleDragCursorType cursorType)
+{
+	HCURSOR hCursor = NULL;
+	
+	switch (cursorType)
+	{
+	case UIExtension::OleDragCursorType::No:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_NO);
+		break;
+
+	case UIExtension::OleDragCursorType::Copy:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_COPY);
+		break;
+
+	case UIExtension::OleDragCursorType::Move:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_MOVE);
+		break;
+
+	case UIExtension::OleDragCursorType::Link:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_LINK);
+		break;
+	}
+	
+	if (hCursor != NULL)
+		return gcnew Cursor(static_cast<IntPtr>(hCursor));
+
+	return nullptr;
+}
+
 Windows::Forms::Cursor^ UIExtension::HandCursor()
 {
 	static HCURSOR hCursor = ::LoadCursor(NULL, IDC_HAND);
