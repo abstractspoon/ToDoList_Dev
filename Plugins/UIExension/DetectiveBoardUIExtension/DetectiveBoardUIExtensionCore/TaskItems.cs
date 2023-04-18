@@ -305,6 +305,11 @@ namespace DetectiveBoardUIExtension
 			return UserLinks?.Find(x => (x.ToId == toId));
 		}
 
+		public bool HasUserLink(uint toId)
+		{
+			return (FindUserLink(toId) != null);
+		}
+
 		public bool DeleteUserLink(UserLink link)
 		{
 			if (UserLinks.Remove(link))
@@ -391,7 +396,7 @@ namespace DetectiveBoardUIExtension
 
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
-		public TaskItem GetTask(uint uniqueId)
+		public TaskItem GetTaskItem(uint uniqueId)
 		{
 			TaskItem item = null;
 			TryGetValue(uniqueId, out item);
@@ -419,10 +424,10 @@ namespace DetectiveBoardUIExtension
 
 		public UserLink FindUserLink(uint id1, uint id2, bool andReverse)
 		{
-			var link = GetTask(id1)?.FindUserLink(id2);
+			var link = GetTaskItem(id1)?.FindUserLink(id2);
 
 			if ((link == null) && andReverse)
-				link = GetTask(id2)?.FindUserLink(id1);
+				link = GetTaskItem(id2)?.FindUserLink(id1);
 
 			return link;
 		}
@@ -432,9 +437,23 @@ namespace DetectiveBoardUIExtension
 			return (FindUserLink(id1, id2, andReverse) != null);
 		}
 
+		public bool HasUserLink(uint id)
+		{
+			if (GetTaskItem(id)?.UserLinks?.Count > 0)
+				return true;
+
+			foreach (var taskItem in Values)
+			{
+				if ((taskItem.TaskId != id) && taskItem.HasUserLink(id))
+					return true;
+			}
+
+			return false;
+		}
+
 		public bool DeleteUserLink(UserLink link)
 		{
-			var task = GetTask(link.FromId);
+			var task = GetTaskItem(link.FromId);
 			
 			if (task == null)
 				return false;
@@ -444,8 +463,8 @@ namespace DetectiveBoardUIExtension
 
 		public bool ChangeUserLinkTarget(UserLink link, uint newToId)
 		{
-			var fromTask = GetTask(link.FromId);
-			var toTask = GetTask(newToId);
+			var fromTask = GetTaskItem(link.FromId);
+			var toTask = GetTaskItem(newToId);
 
 			return ((fromTask != null) && (toTask != null) && link.ChangeToId(newToId));
 		}
@@ -453,21 +472,21 @@ namespace DetectiveBoardUIExtension
 		public bool HasDependency(uint id1, uint id2)
 		{
 			// Check one way
-			var task1 = GetTask(id1);
+			var task1 = GetTaskItem(id1);
 
 			if ((task1 != null) && task1.DependIds.Contains(id2))
 				return true;
 
 			// then the other
-			var task2 = GetTask(id2);
+			var task2 = GetTaskItem(id2);
 
 			return ((task2 != null) && task2.DependIds.Contains(id1));
 		}
 
 		public bool AddUserLink(UserLink link)
 		{
-			var fromTask = GetTask(link.FromId);
-			var toTask = GetTask(link.ToId);
+			var fromTask = GetTaskItem(link.FromId);
+			var toTask = GetTaskItem(link.ToId);
 
 			if ((fromTask == null) || (toTask == null))
 				return false;
@@ -478,7 +497,7 @@ namespace DetectiveBoardUIExtension
 
 		public bool IsTaskLocked(uint id)
 		{
-			var task = GetTask(id);
+			var task = GetTaskItem(id);
 
 			return ((task == null) || task.IsLocked);
 		}

@@ -666,7 +666,7 @@ namespace DetectiveBoardUIExtension
 				return false;
 
 			uint taskId = task.GetID();
-			var taskItem = m_TaskItems.GetTask(taskId);
+			var taskItem = m_TaskItems.GetTaskItem(taskId);
 			RadialTree.TreeNode<uint> node = null;
 
 			if (taskItem == null)
@@ -814,7 +814,7 @@ namespace DetectiveBoardUIExtension
 				var hotNode = GetNode(m_HotTaskId);
 
 				if (IsAcceptableDragSource(hotNode))
-					DrawSelectionPin(e.Graphics, GetCreateLinkPinPos(GetNodeClientPos(hotNode)), true);
+					DrawSelectionPin(e.Graphics, GetCreateLinkPinPos(hotNode), true);
 			}
 		}
 
@@ -891,10 +891,10 @@ namespace DetectiveBoardUIExtension
 				{
 					var node = GetNode(link.FromId);
 
-					fromPos = GetNodeClientPos(node);
-
 					if (m_HotTaskId == link.FromId)
-						fromPos = GetCreateLinkPinPos(fromPos);
+						fromPos = GetCreateLinkPinPos(node);
+					//else
+					//	fromPos = GetNodeClientPos(node);
 
 					toPos = m_DraggedUserLinkEnd;
 				}
@@ -957,23 +957,28 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		private Point GetCreateLinkPinPos(Point nodePos)
+		private Point GetCreateLinkPinPos(RadialTree.TreeNode<uint> node)
 		{
-			// Offset the hit rect left or right to avoid existing user links
-			var graphCentre = Geometry2D.Centroid(GraphToClient(Extents));
-			int offset = (DefaultPinRadius * 4);
+			var pos = GetNodeClientPos(node);
 
-			if (nodePos.X < graphCentre.X)
-				nodePos.Offset(-offset, 0);
-			else
-				nodePos.Offset(offset, 0);
-			
-			return nodePos;
+			// Offset the hit rect left or right to avoid existing user links
+			if (!DrawNodesOnTop && m_TaskItems.HasUserLink(node.Data))
+			{
+				var graphCentre = Geometry2D.Centroid(GraphToClient(Extents));
+				int offset = (DefaultPinRadius * 4);
+
+				if (pos.X < graphCentre.X)
+					pos.Offset(-offset, 0);
+				else
+					pos.Offset(offset, 0);
+			}
+
+			return pos;
 		}
 
-		private Rectangle GetCreateLinkPinRect(Point pos)
+		private Rectangle GetCreateLinkPinRect(RadialTree.TreeNode<uint> node)
 		{
-			return GetSelectionPinRect(GetCreateLinkPinPos(pos));
+			return GetSelectionPinRect(GetCreateLinkPinPos(node));
 		}
 
 		DrawState GetTaskDrawState(TaskItem task)
@@ -990,7 +995,7 @@ namespace DetectiveBoardUIExtension
 
 		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
 		{
-			var taskItem = m_TaskItems.GetTask(nodeId);
+			var taskItem = m_TaskItems.GetTaskItem(nodeId);
 
 			if (taskItem != null)
 			{
@@ -1022,7 +1027,7 @@ namespace DetectiveBoardUIExtension
 		{
 			if (m_Options.HasFlag(DetectiveBoardOption.ShowParentChildLinks))
 			{
-				var taskItem = m_TaskItems.GetTask(nodeId);
+				var taskItem = m_TaskItems.GetTaskItem(nodeId);
 
 				// Don't draw parent/child connections if they are
 				// overlaid either by dependencies or user links
@@ -1437,7 +1442,7 @@ namespace DetectiveBoardUIExtension
 
 				var node = HitTestNode(e.Location, true);
 
-				if ((node != null) && GetCreateLinkPinRect(GetNodeClientPos(node)).Contains(e.Location))
+				if ((node != null) && GetCreateLinkPinRect(node).Contains(e.Location))
 				{
 					DoUserLinkDragDrop(new UserLink(node.Data, NullId));
 
@@ -1455,7 +1460,7 @@ namespace DetectiveBoardUIExtension
 			SelectUserLink(link);
 
 			m_DraggingSelectedUserLink = true;
-			m_DraggedUserLinkEnd = GetCreateLinkPinPos(GetNodeClientPos(GetNode(link.FromId)));
+			m_DraggedUserLinkEnd = GetCreateLinkPinPos(GetNode(link.FromId));
 
 			Invalidate();
 
@@ -1563,7 +1568,7 @@ namespace DetectiveBoardUIExtension
 
 		public TaskItem GetTaskItem(uint nodeId)
 		{
-			return m_TaskItems.GetTask(nodeId);
+			return m_TaskItems.GetTaskItem(nodeId);
 		}
 
 		protected bool SelectedTasksAreAllEditable
@@ -1666,7 +1671,7 @@ namespace DetectiveBoardUIExtension
 			if (m_HotTaskId != 0)
 			{
 				var hot = GetNode(m_HotTaskId);
-				var pin = GetCreateLinkPinRect(GetNodeClientPos(hot));
+				var pin = GetCreateLinkPinRect(hot);
 
 				pin.Inflate(1, 1);
 				Invalidate(pin);
@@ -1679,7 +1684,7 @@ namespace DetectiveBoardUIExtension
 			else
 			{
 				m_HotTaskId = node.Data;
-				var pin = GetCreateLinkPinRect(GetNodeClientPos(node));
+				var pin = GetCreateLinkPinRect(node);
 
 				pin.Inflate(1, 1);
 				Invalidate();
@@ -1700,7 +1705,7 @@ namespace DetectiveBoardUIExtension
 				{
 					var hotNode = GetNode(m_HotTaskId);
 
-					if ((hotNode != null) && GetCreateLinkPinRect(GetNodeClientPos(hotNode)).Contains(e.Location))
+					if ((hotNode != null) && GetCreateLinkPinRect(hotNode).Contains(e.Location))
 						cursor = UIExtension.OleDragCursor(UIExtension.OleDragCursorType.Copy);
 				}
 
