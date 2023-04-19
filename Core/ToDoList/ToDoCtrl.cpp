@@ -1899,6 +1899,14 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	// update data controls excluding comments
 	UpdateData(FALSE);
 
+	// and task header
+	UpdateSelectedTaskPath();
+	
+	// Do the control enabling before updating the comments
+	// to prevent unwanted intermediate states
+	EnableDisableControls(hti);
+
+	// Finally update comments
 	if (bIncComments)
 	{
 		ASSERT(!m_ctrlComments.IsUpdatingFormat());
@@ -1933,11 +1941,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		
 		UpdateComments(sTextComments, customComments);
 	}
-
-	// and task header
-	UpdateSelectedTaskPath();
-	
-	EnableDisableControls(hti);
 }
 
 void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
