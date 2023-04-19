@@ -158,6 +158,7 @@ BOOL CTDCLongestItemMap::IsSupportedColumn(TDC_COLUMN nColID)
 	case TDCC_ID:
 	case TDCC_FILELINK:
 	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
 		return TRUE;
 	}
 
@@ -320,18 +321,19 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, HTREEITEM hti, const T
 	{
 		switch (nColID)
 		{
-		case TDCC_ALLOCTO:		sLongest = m_formatter.GetTaskAllocTo(pTDI);			break;
-		case TDCC_CATEGORY:		sLongest = m_formatter.GetTaskCategories(pTDI);			break;	
-		case TDCC_TAGS:			sLongest = m_formatter.GetTaskTags(pTDI);				break;	
-		case TDCC_COMMENTSSIZE: sLongest = m_formatter.GetTaskCommentSize(pTDI);		break;
-		case TDCC_RECURRENCE:	sLongest = m_formatter.GetTaskRecurrence(pTDI);			break;
+		case TDCC_ALLOCTO:			sLongest = m_formatter.GetTaskAllocTo(pTDI);			break;
+		case TDCC_CATEGORY:			sLongest = m_formatter.GetTaskCategories(pTDI);			break;	
+		case TDCC_TAGS:				sLongest = m_formatter.GetTaskTags(pTDI);				break;	
+		case TDCC_COMMENTSSIZE:		sLongest = m_formatter.GetTaskCommentSize(pTDI);		break;
+		case TDCC_COMMENTSFORMAT:	sLongest = _T("");//m_formatter.GetTaskCommentSize(pTDI);		break;
+		case TDCC_RECURRENCE:		sLongest = m_formatter.GetTaskRecurrence(pTDI);			break;
 			
-		case TDCC_ALLOCBY:		sLongest = pTDI->sAllocBy;								break;
-		case TDCC_STATUS:		sLongest = pTDI->sStatus;								break;		
-		case TDCC_VERSION:		sLongest = pTDI->sVersion;								break;		
-		case TDCC_EXTERNALID:	sLongest = pTDI->sExternalID;							break;	
-		case TDCC_CREATEDBY:	sLongest = pTDI->sCreatedBy;							break;
-		case TDCC_LASTMODBY:	sLongest = pTDI->sLastModifiedBy;						break;
+		case TDCC_ALLOCBY:			sLongest = pTDI->sAllocBy;								break;
+		case TDCC_STATUS:			sLongest = pTDI->sStatus;								break;		
+		case TDCC_VERSION:			sLongest = pTDI->sVersion;								break;		
+		case TDCC_EXTERNALID:		sLongest = pTDI->sExternalID;							break;	
+		case TDCC_CREATEDBY:		sLongest = pTDI->sCreatedBy;							break;
+		case TDCC_LASTMODBY:		sLongest = pTDI->sLastModifiedBy;						break;
 
 		case TDCC_COST:
 		case TDCC_SUBTASKDONE:
@@ -1271,6 +1273,9 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 
 		if (mapLongest.HasColumn(TDCC_COMMENTSSIZE))
 			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
+
+		if (mapLongest.HasColumn(TDCC_COMMENTSFORMAT))
+			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, _T("")/*m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB())*/);
 
 		if (mapLongest.HasColumn(TDCC_ID))
 			mapLongest.UpdateValue(TDCC_ID, m_formatter.GetID(pTDS->GetTaskID(), pTDI->dwTaskRefID));

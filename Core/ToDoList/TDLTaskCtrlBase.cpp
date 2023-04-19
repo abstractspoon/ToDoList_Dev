@@ -996,6 +996,7 @@ BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelected
 	case TDCC_CREATIONTIME:
 	case TDCC_LASTMODBY:
 	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
 	case TDCC_CLIENT:
 		break;
 
@@ -2774,6 +2775,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_SUBTASKDONE:
 		case TDCC_TIMEESTIMATE:
 		case TDCC_LASTMODBY:
+		case TDCC_COMMENTSFORMAT:
 			DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
 			break;
 			
@@ -3855,6 +3857,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDI, pTDS);
 	case TDCC_SUBTASKDONE:		return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentSize(pTDI);
+	case TDCC_COMMENTSFORMAT:	return _T("");//m_formatter.GetTaskCommentSize(pTDI);
 
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:			return m_formatter.GetID(pTDS->GetParentTaskID());
@@ -5353,6 +5356,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 	case TDCC_SUBTASKDONE:
 	case TDCC_LASTMODBY:
 	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
 	case TDCC_COST:
 		{
 			// determine the longest visible string

@@ -483,6 +483,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
 			break;
 			
+		case TDCA_COMMENTSFORMAT:
+			bMatch = FALSE;//ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
+			break;
+
 		case TDCA_FLAG:
 			{
 				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
@@ -1622,6 +1626,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_COMMENTSSIZE:
 			nCompare = Compare(pTDI1->GetCommentsSizeInKB(), pTDI2->GetCommentsSizeInKB());
+			break;
+
+		case TDCC_COMMENTSFORMAT:
+			nCompare = 0;//Compare(pTDI1->GetCommentsSizeInKB(), pTDI2->GetCommentsSizeInKB());
 			break;
 
 		default:
