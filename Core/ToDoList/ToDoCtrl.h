@@ -239,7 +239,7 @@ public:
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
 	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
-	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const { return m_taskTree.GetSelectedTaskCustomComments(cfComments); }
+	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { return m_taskTree.GetSelectedTaskAllocTo(aAllocTo); }
@@ -395,6 +395,7 @@ public:
 	inline int GetSelectedTaskCount() const { return m_taskTree.GetSelectedCount(); }
 	inline BOOL HasSelection() const { return m_taskTree.HasSelection(); }
 	BOOL IsTaskLabelEditing() const;
+	void NotifyParentSelectionChange() const;
 
 	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
 	virtual BOOL CommentsHaveFocus() const { return m_ctrlComments.HasFocus(); }
@@ -834,6 +835,7 @@ protected:
 	void ShowHideControls();
 	void ShowHideControl(const CTRLITEM& ctrl);
 	void EnableDisableControls(HTREEITEM hti);
+	void EnableDisableComments(HTREEITEM hti);
 	void EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent);
 	void EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly);
 

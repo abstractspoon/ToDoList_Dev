@@ -1678,6 +1678,20 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	}
 
 	// comments
+	EnableDisableComments(hti);
+
+	// project name
+	BOOL bShowProjectName = (!bMaximized && HasStyle(TDCS_SHOWPROJECTNAME));
+	RT_CTRLSTATE nCtrlState =  (!bShowProjectName ? RTCS_DISABLED : 
+								(bReadOnly ? RTCS_READONLY : RTCS_ENABLED));
+	SetCtrlState(this, IDC_PROJECTNAME, nCtrlState);
+
+	RT_CTRLSTATE nLabelState = (CThemed::IsAppThemed() ? RTCS_ENABLED : RTCS_DISABLED);
+	SetCtrlState(this, IDC_PROJECTLABEL, nCtrlState);
+}
+
+void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
+{
 	CONTENTFORMAT cfComments;
 	GetSelectedTaskCustomComments(cfComments);
 	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
@@ -1689,7 +1703,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	{
 		nComboState = nCommentsState = RTCS_DISABLED;
 	}
-	else if (bReadOnlyCtrls)
+	else if ((IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE)))
 	{
 		nComboState = nCommentsState = RTCS_READONLY;
 	}
@@ -1699,15 +1713,6 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	}
 
 	m_ctrlComments.SetCtrlStates(nComboState, nCommentsState);
-
-	// project name
-	BOOL bShowProjectName = (!bMaximized && HasStyle(TDCS_SHOWPROJECTNAME));
-	RT_CTRLSTATE nCtrlState =  (!bShowProjectName ? RTCS_DISABLED : 
-								(bReadOnly ? RTCS_READONLY : RTCS_ENABLED));
-	SetCtrlState(this, IDC_PROJECTNAME, nCtrlState);
-
-	RT_CTRLSTATE nLabelState = (CThemed::IsAppThemed() ? RTCS_ENABLED : RTCS_DISABLED);
-	SetCtrlState(this, IDC_PROJECTLABEL, nCtrlState);
 }
 
 int CToDoCtrl::CalcMaxCommentSize() const
@@ -1903,7 +1908,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	UpdateSelectedTaskPath();
 	
 	// Do the control enabling before updating the comments
-	// to prevent unwanted intermediate states
+	// to prevent unwanted intermediate comments states
 	EnableDisableControls(hti);
 
 	// Finally update comments
@@ -1915,6 +1920,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// of a task's comments which can be huge
 		static CString sEmptyComments;
 		static CBinaryData emptyComments;
+
+		CONTENTFORMAT cfPrev;
+		m_ctrlComments.GetSelectedFormat(cfPrev);
 
 		CONTENTFORMAT cfComments;
 		const CBinaryData& customComments = (hti ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
@@ -1940,6 +1948,12 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		}
 		
 		UpdateComments(sTextComments, customComments);
+
+		// Update the enable state again if the comments 
+		// format changed because the new control will have 
+		// been created enabled and we may not want that
+		if (m_cfComments.IsEmpty() && (m_cfComments != cfPrev))
+			EnableDisableComments(hti);
 	}
 }
 
@@ -8921,12 +8935,17 @@ LRESULT CToDoCtrl::OnGetFont(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return (LRESULT)::SendMessage(::GetParent(*this), WM_GETFONT, 0, 0);
 }
 
+void CToDoCtrl::NotifyParentSelectionChange() const
+{
+	GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+}
+
 void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
 	UpdateControls(); 
-	GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+	NotifyParentSelectionChange();
 	
 	// There's a very subtle bug on Windows 8.1 and above:
 	// The auto-spell checking of the comments fields sends
@@ -8984,9 +9003,7 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 			UpdateControls(); // disable controls
 
 		UpdateSelectedTaskPath();
-
-		// notify parent
-		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+		NotifyParentSelectionChange();
 	}
 }
 
@@ -10983,6 +11000,19 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 
 	MessageBeep(MB_ICONHAND);
 	return FALSE;
+}
+
+const CBinaryData& CToDoCtrl::GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const 
+{ 
+	if (GetSelectedTaskCount() == 0)
+	{
+		static CBinaryData data;
+
+		cfComments.Empty();
+		return data;
+	}
+
+	return m_taskTree.GetSelectedTaskCustomComments(cfComments); 
 }
 
 int CToDoCtrl::GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted) const
