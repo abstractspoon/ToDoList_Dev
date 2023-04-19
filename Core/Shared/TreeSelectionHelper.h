@@ -53,6 +53,11 @@ public:
 
 		return TRUE;
 	}
+
+	BOOL HasItem(HTREEITEM hti) const
+	{
+		return (Find(hti) != NULL);
+	}
 };
 
 enum TSH_SELECT
