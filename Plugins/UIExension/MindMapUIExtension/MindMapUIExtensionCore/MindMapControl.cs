@@ -15,7 +15,7 @@ using System.Windows.Forms.VisualStyles;
 namespace MindMapUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, object itemData);
-	public delegate Boolean DragDropChangeEventHandler(object sender, MindMapDragEventArgs e);
+	public delegate bool DragDropChangeEventHandler(object sender, MindMapDragEventArgs e);
 
 	[System.ComponentModel.DesignerCategory("")]
 
@@ -259,7 +259,7 @@ namespace MindMapUIExtension
 			CollapseSelection
 		}
 
-		public Boolean Expand(ExpandNode expand)
+		public bool Expand(ExpandNode expand)
 		{
 			if (!CanExpand(expand))
 				return false;
@@ -300,7 +300,7 @@ namespace MindMapUIExtension
 			return true;
 		}
 
-		public Boolean CanExpand(ExpandNode expand)
+		public bool CanExpand(ExpandNode expand)
 		{
 			if (m_TreeView.Nodes.Count == 0)
 				return false;
@@ -345,7 +345,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-        public Boolean ReadOnly
+        public bool ReadOnly
         {
             set;
             get;
@@ -1071,7 +1071,7 @@ namespace MindMapUIExtension
             }
         }
 
-		protected Boolean HoldRedraw
+		protected bool HoldRedraw
 		{
 			get { return m_HoldRedraw; }
 			set 
@@ -1149,7 +1149,7 @@ namespace MindMapUIExtension
             return DropPos.On;
         }
 
-		private Boolean IsAcceptableDragSource(TreeNode node)
+		private bool IsAcceptableDragSource(TreeNode node)
 		{
             Debug.Assert(!ReadOnly);
 
@@ -1160,7 +1160,7 @@ namespace MindMapUIExtension
 			return IsAcceptableDragSource(ItemData(node));
 		}
 
-		private Boolean IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
+		private bool IsAcceptableDropTarget(TreeNode draggedNode, TreeNode dropTarget, DropPos dropPos, bool copy)
 		{
             Debug.Assert(!ReadOnly);
 
@@ -1183,14 +1183,14 @@ namespace MindMapUIExtension
 			return IsAcceptableDropTarget(ItemData(draggedNode), ItemData(dropTarget), dropPos, copy);
 		}
 
-		virtual protected Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
+		virtual protected bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
 		{
             Debug.Assert(!ReadOnly);
 
             return true;
 		}
 
-		virtual protected Boolean IsAcceptableDragSource(Object itemData)
+		virtual protected bool IsAcceptableDragSource(Object itemData)
 		{
             Debug.Assert(!ReadOnly);
 
@@ -1268,7 +1268,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-		virtual protected Boolean DoDrop(MindMapDragEventArgs e)
+		virtual protected bool DoDrop(MindMapDragEventArgs e)
 		{
             Debug.Assert(!ReadOnly);
 
@@ -1506,7 +1506,7 @@ namespace MindMapUIExtension
 			return 10;
 		}
 
-		protected Boolean IsEmpty()
+		protected bool IsEmpty()
 		{
 			return (m_TreeView.Nodes.Count == 0);
 		}
@@ -1570,7 +1570,7 @@ namespace MindMapUIExtension
 			return null;
 		}
 
-		protected Boolean IsleftOfRoot(TreeNode node)
+		protected bool IsleftOfRoot(TreeNode node)
 		{
 			if ((node == null) || (node == RootNode))
 				return false;
@@ -1578,7 +1578,7 @@ namespace MindMapUIExtension
 			return Item(node).IsFlipped;
 		}
 
-		protected Boolean IsRightOfRoot(TreeNode node)
+		protected bool IsRightOfRoot(TreeNode node)
 		{
 			if ((node == null) || (node == RootNode))
 				return false;
@@ -1586,14 +1586,28 @@ namespace MindMapUIExtension
 			return !Item(node).IsFlipped;
 		}
 
-		protected Boolean IsRoot(TreeNode node)
+		protected bool IsRoot(TreeNode node)
 		{
 			return ((node != null) && (node == RootNode));
 		}
 
-		protected Boolean IsParent(TreeNode node)
+		protected bool IsParent(TreeNode node)
 		{
 			return ((node != null) && (node.FirstNode != null));
+		}
+
+		protected bool AnyChildHasChildren(TreeNode parent)
+		{
+			if (parent == null)
+				return false;
+
+			foreach (TreeNode child in parent.Nodes)
+			{
+				if (IsParent(child))
+					return true;
+			}
+
+			return false;
 		}
 
 		protected MindMapItem Item(TreeNode node)
@@ -1642,7 +1656,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private Boolean IsAnyNodeExpanded(TreeNodeCollection nodes)
+		private bool IsAnyNodeExpanded(TreeNodeCollection nodes)
 		{
 			// Only need check this level of nodes
 			foreach (TreeNode node in nodes)
@@ -1654,7 +1668,7 @@ namespace MindMapUIExtension
 			return false;
 		}
 
-		private Boolean IsAnyNodeCollapsed(TreeNodeCollection nodes)
+		private bool IsAnyNodeCollapsed(TreeNodeCollection nodes)
 		{
 			// Need to check all levels of nodes
 			foreach (TreeNode node in nodes)
@@ -1971,7 +1985,7 @@ namespace MindMapUIExtension
             // which is what we will be using to render the text
             itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
 
-			if (IsParent(node) && !IsRoot(node))
+			if (!IsRoot(node) && (IsParent(node) || AnyChildHasChildren(node.Parent)))
                 itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
 
 			itemBounds.Width += GetExtraWidth(node);
@@ -2450,6 +2464,9 @@ namespace MindMapUIExtension
             Point ptFrom = new Point((flipped ? rectFrom.Left : rectFrom.Right), ((rectFrom.Top + rectFrom.Bottom) / 2));
 			Point ptTo = new Point((flipped ? rectTo.Right : rectTo.Left), ((rectTo.Top + rectTo.Bottom) / 2));
 
+			if (AnyChildHasChildren(nodeFrom))
+				ptTo.X += (flipped ? -DefaultExpansionButtonSize : DefaultExpansionButtonSize);
+
 			// Don't draw connections falling wholly outside the client rectangle
 			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
 
@@ -2517,7 +2534,7 @@ namespace MindMapUIExtension
 
 				var item = Item(node);
 
-				if ((item != null) && IsParent(node) && !IsRoot(node))
+				if ((item != null)&& !IsRoot(node) && (IsParent(node) || AnyChildHasChildren(node.Parent)))
 				{
 					int offset = (ExpansionButtonSize + ExpansionButtonSeparation);
 
