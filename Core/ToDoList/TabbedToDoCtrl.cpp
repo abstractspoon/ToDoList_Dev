@@ -3288,11 +3288,12 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		if (bCanCreate)
 		{
 			const VIEWDATA* pVData = GetViewData(nView);
 
 			if (pVData)
-				bCanCreate &= pVData->bCanPrepareNewTask;
+				bCanCreate = pVData->bCanPrepareNewTask;
 		}
 		break;
 

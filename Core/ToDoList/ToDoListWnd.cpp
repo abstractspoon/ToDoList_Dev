@@ -4515,7 +4515,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 
 		// reload any reminders
 		m_dlgReminders.AddToDoCtrl(pTDC);
-		
+
 		// And notify the tasklist if it's sorting by reminder
 		if (pTDC->IsSortingBy(TDCC_REMINDER))
 			pTDC->Resort();

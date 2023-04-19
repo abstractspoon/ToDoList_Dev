@@ -3901,10 +3901,6 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Edit Task &Dependency...",    ID_EDIT_DEPENDENCY
             MENUITEM "&Go To Task Dependency",      ID_EDIT_GOTODEPENDENCY
-            MENUITEM SEPARATOR
-            MENUITEM "&Clear Focused Task Attribute", 
-                                                    ID_EDIT_CLEARFOCUSEDFIELD
-
         END
         MENUITEM SEPARATOR
         MENUITEM "&Lock Task Attributes",       ID_EDIT_LOCKTASK

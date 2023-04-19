@@ -1695,10 +1695,10 @@ void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
 	CONTENTFORMAT cfComments;
 	GetSelectedTaskCustomComments(cfComments);
 	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
-	
+
 	BOOL bCommentsVis = IsCommentsVisible();
 	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
-	
+
 	if (!bCommentsVis || !hti)
 	{
 		nComboState = nCommentsState = RTCS_DISABLED;

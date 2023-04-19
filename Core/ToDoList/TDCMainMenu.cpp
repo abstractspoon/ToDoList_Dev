@@ -349,6 +349,19 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CPreferencesDlg& prefs) const
 {
 	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
+
+	// Remove all 'New Task' options for views not supporting them
+	if (!tdc.CanCreateNewTask(TDC_INSERTATTOP))
+	{
+		// Get the position of the last 'new task' option
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK);
+
+		nPos++;	// Add 1 for the trailing separator
+		nPos++; // Convert to 'number of items to remove'
+
+		while (nPos--)
+			pMenu->DeleteMenu(0, MF_BYPOSITION);
+	}
 }
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
@@ -613,6 +626,12 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_TASKLIST_COPYSELTASKSCOLUMNVALUES:
 			if (bContextMenu)
 				bDelete = tdc.IsExtensionView(tdc.GetTaskView());
+			break;
+
+		case ID_VIEW_TOGGLETASKEXPANDED:
+			if (bContextMenu)
+				bDelete = !tdc.CanExpandTasks(TDCEC_ALL, TRUE) &&
+							!tdc.CanExpandTasks(TDCEC_ALL, FALSE);
 			break;
 			
 		case ID_SEPARATOR:
