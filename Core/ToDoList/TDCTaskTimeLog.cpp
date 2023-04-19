@@ -369,7 +369,7 @@ CString CTDCTaskTimeLog::GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const
 	// use ref filename as the basis for the log filename
 	if (!m_sRefPath.IsEmpty())
 	{
-		CString sLogPath, sDrive, sFolder, sFileName;
+		CString sDrive, sFolder, sFileName;
 
 		FileMisc::SplitPath(m_sRefPath, &sDrive, &sFolder, &sFileName);
 
