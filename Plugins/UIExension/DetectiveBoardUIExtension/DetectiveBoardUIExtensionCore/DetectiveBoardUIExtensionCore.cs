@@ -544,12 +544,14 @@ namespace DetectiveBoardUIExtension
 				if (m_Control.SelectedNodeCount > 2)
 					return false;
 
-				if ((m_Control.SelectedNodeCount == 2))
+				if (m_Control.SelectedNodeCount == 2)
 				{
-					uint task1Id = m_Control.SelectedNodeIds[0], task2Id = m_Control.SelectedNodeIds[1];
+					// The 'from' task is always the second in the
+					// selection list because as tasks are selected
+					// they get added to the head of the list
+					uint fromId = m_Control.SelectedNodeIds[1];
 
-					if (m_Control.IsTaskLocked(task1Id) && m_Control.IsTaskLocked(task2Id))
-						return false;
+					return !m_Control.IsTaskLocked(fromId);
 				}
 
 				return true;
@@ -558,6 +560,9 @@ namespace DetectiveBoardUIExtension
 
 		private void OnNewTaskLink(object sender, EventArgs e)
 		{
+			if (!CanCreateNewConnection)
+				return;
+
 			switch (m_Control.SelectedNodeCount)
 			{
 			case 0:
@@ -567,30 +572,20 @@ namespace DetectiveBoardUIExtension
 
 			case 2:
 				{
-					uint firstId = m_Control.SelectedNodeIds[0], secondId = m_Control.SelectedNodeIds[1];
+					uint fromId = m_Control.SelectedNodeIds[1];
+					uint toId = m_Control.SelectedNodeIds[0];
 
-					if (!m_Control.CanCreateUserLink(firstId, secondId))
+					if (m_Control.UserLinkExists(fromId, toId))
 					{
-						// Try the reverse
-						if (m_Control.CanCreateUserLink(secondId, firstId))
-						{
-							uint temp = firstId;
-
-							firstId = secondId;
-							secondId = temp;
-						}
-						else
-						{
-							MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks"), m_UiName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
-							return;
-						}
+						MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks"), m_UiName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
+						return;
 					}
 
 					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, null);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
-						m_Control.CreateUserLink(firstId, secondId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
+						m_Control.CreateUserLink(fromId, toId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 						UpdateToolbarButtonStates();
 					}
 				}

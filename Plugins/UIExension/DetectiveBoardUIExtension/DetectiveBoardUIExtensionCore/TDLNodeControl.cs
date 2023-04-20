@@ -348,9 +348,20 @@ namespace DetectiveBoardUIExtension
 			return false;
 		}
 
+		public bool UserLinkExists(uint id1, uint id2)
+		{
+			return m_TaskItems.HasUserLink(id1, id2, true);
+		}
+
 		public bool CanCreateUserLink(uint fromId, uint toId)
 		{
-			return !(m_TaskItems.IsTaskLocked(fromId) || m_TaskItems.HasUserLink(fromId, toId, true));
+			if (ReadOnly)
+				return false;
+
+			if (m_TaskItems.IsTaskLocked(fromId))
+				return false;
+			
+			return !UserLinkExists(fromId, toId);
 		}
 
 		public UserLink SelectedUserLink
@@ -410,25 +421,20 @@ namespace DetectiveBoardUIExtension
 					return false;
 				}
 				
-				// If link (or its reverse) already exists we just update it
-				var link = m_TaskItems.FindUserLink(fromId, toId, true);
+				// Link cannot already exist
+				if (UserLinkExists(fromId, toId))
+					return false;
 
-				if (link == null)
-				{
-					link = new UserLink(fromId, toId);
-					fromTask.UserLinks.Add(link);
-				}
-
+				var link = new UserLink(fromId, toId);
 				link.Color = color;
 				link.Thickness = thickness;
 				link.Arrows = arrows;
 				link.Label = text;
 				link.Type = type;
 
+				fromTask.UserLinks.Add(link);
 				Invalidate();
 
-				// Notify parent
-				ConnectionCreated?.Invoke(this, link);
 				return true;
 			}
 
@@ -808,7 +814,10 @@ namespace DetectiveBoardUIExtension
 				DrawSelectedUserLink(e.Graphics);
 			}
 
-			if (!m_DraggingSelectedUserLink && (m_HotTaskId != 0))
+			if (!m_DraggingSelectedUserLink && 
+				(m_HotTaskId != 0) && 
+				!ModifierKeys.HasFlag(Keys.Control) &&
+				(DragMode == DragMode.None))
 			{
 				// Draw a temporary 'pin' for initiating a new user link
 				var hotNode = GetNode(m_HotTaskId);
@@ -1767,6 +1776,9 @@ namespace DetectiveBoardUIExtension
 			Debug.Assert(m_DraggingSelectedUserLink);
 
 			if (node == null)
+				return false;
+
+			if (node.Data == m_SelectedUserLink.FromId)
 				return false;
 
 			var taskItem = GetTaskItem(node.Data);
