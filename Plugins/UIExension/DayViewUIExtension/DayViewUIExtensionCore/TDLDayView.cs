@@ -1333,56 +1333,67 @@ namespace DayViewUIExtension
 
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
-			if ((e.Button == MouseButtons.Right) &&
-				!AppointmentSupportsTaskContextMenu(SelectedAppointment))
+			if (e.Button == MouseButtons.Right)
 			{
-				var menu = new ContextMenuStrip();
+				Calendar.Appointment appt = GetAppointmentAt(e.X, e.Y);
 
-				if (SelectedAppointment is CustomDateAttribute)
+				if ((appt != null) && !AppointmentSupportsTaskContextMenu(appt))
 				{
-					var item = new ToolStripMenuItem(m_Trans.Translate("Clear Custom Date"));
-					item.ShortcutKeys = Keys.Delete;
-					item.ShowShortcutKeys = true;
+					var menu = new ContextMenuStrip();
 
-					item.Click += (s, a) =>
+					if (appt is CustomDateAttribute)
 					{
-						DeleteSelectedAppointment();
-					};
+						var item = new ToolStripMenuItem(m_Trans.Translate("Clear Custom Date"));
+						item.ShortcutKeys = Keys.Delete;
+						item.ShowShortcutKeys = true;
 
-					menu.Items.Add(item);
+						item.Click += (s, a) =>
+						{
+							DeleteSelectedAppointment();
+						};
+
+						menu.Items.Add(item);
+					}
+					else if (appt is TimeBlock)
+					{
+						var item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block"));
+						item.ShortcutKeys = Keys.Delete;
+						item.ShowShortcutKeys = true;
+
+						item.Click += (s, a) =>
+						{
+							DeleteSelectedAppointment();
+						};
+
+						menu.Items.Add(item);
+
+						item = new ToolStripMenuItem(m_Trans.Translate("Duplicate Time Block"));
+
+						item.Click += (s, a) =>
+						{
+							DuplicateSelectedTimeBlock();
+						};
+
+						menu.Items.Add(item);
+					}
+					else
+					{
+						Debug.Assert(false);
+					}
+
+					if (menu.Items.Count > 0)
+					{
+						menu.Items.Add(new ToolStripSeparator());
+						menu.Items.Add(m_Trans.Translate("Cancel"));
+
+						menu.Renderer = m_ToolbarRenderer;
+						menu.Show(this, e.Location);
+					}
+
+					return; // always
 				}
-				else if (SelectedAppointment is TimeBlock)
-				{
-					var item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block"));
-					item.ShortcutKeys = Keys.Delete;
-					item.ShowShortcutKeys = true;
-
-					item.Click += (s, a) =>
-					{
-						DeleteSelectedAppointment();
-					};
-
-					menu.Items.Add(item);
-
-					item = new ToolStripMenuItem(m_Trans.Translate("Duplicate Time Block"));
-
-					item.Click += (s, a) =>
-					{
-						DuplicateSelectedTimeBlock();
-					};
-
-					menu.Items.Add(item);
-				}
-
-				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add(m_Trans.Translate("Cancel"));
-
-				menu.Renderer = m_ToolbarRenderer;
-				menu.Show(this, e.Location);
-
-				return; // always
 			}
-			
+						
 			base.OnMouseClick(e);
 		}
 
