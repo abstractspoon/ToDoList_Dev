@@ -10671,6 +10671,10 @@ void CToDoListWnd::ShowFindDialog(BOOL bAllowResizeApp)
 			if (!IsChildOrSame(m_dlgFindTasks, ::GetFocus()))
 				m_dlgFindTasks.SetFocus();
 		}
+		else
+		{
+			m_dlgFindTasks.SetForegroundWindow();
+		}
 
 		// If the find dialog was docked, fake a re-docking
 		// event to enlarge the app window appropriately
