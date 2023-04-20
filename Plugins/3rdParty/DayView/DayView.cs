@@ -983,15 +983,18 @@ namespace Calendar
 						selectionType = SelectionType.Appointment;
 						RaiseSelectionChanged(new AppointmentEventArgs(null));
 
-						DateTime click = GetDateTimeAt(e.X, e.Y);
-						selectionType = SelectionType.DateRange;
-
-						if ((click < SelectedDates.Start) || (click > SelectedDates.End))
+						if (GetTrueRectangle().Contains(e.Location))
 						{
-							SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
-							SelectedDates.End = SelectedDates.Start.AddMinutes(60);
+							DateTime click = GetDateTimeAt(e.X, e.Y);
+							selectionType = SelectionType.DateRange;
 
-							redraw = true;
+							if ((click < SelectedDates.Start) || (click > SelectedDates.End))
+							{
+								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
+								SelectedDates.End = SelectedDates.Start.AddMinutes(60);
+
+								redraw = true;
+							}
 						}
 					}
 					else if (appt != selectedAppointment)

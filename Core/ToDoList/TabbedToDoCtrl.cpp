@@ -880,7 +880,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	// notify parent
 	GetParent()->SendMessage(WM_TDCN_VIEWPRECHANGE, nOldTab, nNewTab);
 
-	// make sure something is selected
+	// make sure something is selected in the tree
 	if (GetSelectedTaskCount() == 0)
 	{
 		HTREEITEM hti = m_taskTree.GetSelectedItem();
@@ -888,7 +888,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 		if (!hti)
 			hti = m_taskTree.GetChildItem(NULL);
 		
-		if (hti)
+		if (hti && !m_taskTree.IsItemSelected(hti))
 			CToDoCtrl::SelectTask(GetTaskID(hti), FALSE);
 	}
 
@@ -1448,7 +1448,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 	if (bSelChange)
 	{
 		UpdateControls();
-		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+		NotifyParentSelectionChange();
 	}
 
 	return pVData->bHasSelectedTask;
@@ -3288,11 +3288,12 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		if (bCanCreate)
 		{
 			const VIEWDATA* pVData = GetViewData(nView);
 
 			if (pVData)
-				bCanCreate &= pVData->bCanPrepareNewTask;
+				bCanCreate = pVData->bCanPrepareNewTask;
 		}
 		break;
 
@@ -6435,7 +6436,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 	if (bSelChange)
 	{
 		UpdateControls(FALSE);
-		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+		NotifyParentSelectionChange();
 	}
 }
 
@@ -6500,7 +6501,7 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 	if (bSelChange)
 	{
 		UpdateControls();
-		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+		NotifyParentSelectionChange();
 	}
 }
 
@@ -6588,6 +6589,7 @@ void CTabbedToDoCtrl::OnListSelChanged()
 	else if (Misc::StateChanged(bListHadSelection, pLVData->bHasSelectedTask))
 	{
 		UpdateControls();
+		NotifyParentSelectionChange();
 	}
 }
 

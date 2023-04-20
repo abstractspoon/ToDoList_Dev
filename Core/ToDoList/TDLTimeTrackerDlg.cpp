@@ -787,21 +787,24 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		{
 			pDC->SetBkMode(TRANSPARENT);
 
-			if (!m_brBack.GetSafeHandle())
-				m_brBack.CreateSolidBrush(GetBkgndColor());
-
-			hbr = (HBRUSH)m_brBack.GetSafeHandle();
-
-			pDC->SetTextColor(m_theme.crAppText);
-		}
-
-		if (IsTrackingSelectedTasklistAndTask())
-		{
 			switch (pWnd->GetDlgCtrlID())
 			{
 			case IDC_TASKTIME:
 			case IDC_ELAPSEDTIME:
-				pDC->SetTextColor(255);
+				if (IsTrackingSelectedTasklistAndTask())
+					pDC->SetTextColor(255);
+				else
+					pDC->SetTextColor(COLOR_3DDKSHADOW);
+
+				//hbr = GetSysColorBrush(COLOR_3DHIGHLIGHT);
+				break;
+
+			default:
+				if (!m_brBack.GetSafeHandle())
+					m_brBack.CreateSolidBrush(GetBkgndColor());
+
+				hbr = (HBRUSH)m_brBack.GetSafeHandle();
+				pDC->SetTextColor(m_theme.crAppText);
 				break;
 			}
 		}

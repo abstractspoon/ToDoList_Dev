@@ -4515,6 +4515,10 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 
 		// reload any reminders
 		m_dlgReminders.AddToDoCtrl(pTDC);
+
+		// And notify the tasklist if it's sorting by reminder
+		if (pTDC->IsSortingBy(TDCC_REMINDER))
+			pTDC->Resort();
 		
 		// notify user of due tasks if req
 		if (bNotifyDueTasks)
@@ -10667,6 +10671,10 @@ void CToDoListWnd::ShowFindDialog(BOOL bAllowResizeApp)
 			if (!IsChildOrSame(m_dlgFindTasks, ::GetFocus()))
 				m_dlgFindTasks.SetFocus();
 		}
+		else
+		{
+			m_dlgFindTasks.SetForegroundWindow();
+		}
 
 		// If the find dialog was docked, fake a re-docking
 		// event to enlarge the app window appropriately
@@ -13082,11 +13090,20 @@ void CToDoListWnd::OnUpdateEditSettaskicon(CCmdUI* pCmdUI)
 LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 {
 	DWORD dwTaskID = lParam;
-	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
 
-	if (!dwTaskID || (nTDC == -1))
+	if (!dwTaskID)
 	{
 		ASSERT(0);
+		return 0L;
+	}
+
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
+
+	if (nTDC == -1)
+	{
+		// Currently there is no way to detect whether the 
+		// requester is bogus or just a tasklist not yet added 
+		// ASSERT(m_bReloading);
 		return 0L;
 	}
 

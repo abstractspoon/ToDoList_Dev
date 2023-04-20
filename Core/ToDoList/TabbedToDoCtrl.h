@@ -82,6 +82,7 @@ public:
 	void SetVisibleTaskViews(const CStringArray& aTypeIDs);
 	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
 
+	static BOOL IsExtensionView(FTC_VIEW nView);
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
 	
 	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
@@ -356,7 +357,6 @@ protected:
 	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
 
 	static FTC_VIEW GetExtensionView(int nExt) { return (FTC_VIEW)(nExt + FTCV_FIRSTUIEXTENSION); }
-	static BOOL IsExtensionView(FTC_VIEW nView);
 	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
