@@ -588,7 +588,10 @@ namespace DetectiveBoardUIExtension
 						var link = m_Control.CreateUserLink(fromId, toId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 
 						if (link != null)
+						{
+							m_Control.SelectNode(fromId, true);
 							OnDetectiveBoardTaskLinkEdited(this, link);
+						}
 
 						UpdateToolbarButtonStates();
 					}
