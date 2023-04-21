@@ -848,7 +848,7 @@ namespace DetectiveBoardUIExtension
 
 						// Don't draw a dependency which is overlaid by a user link
 						if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
-							IsConnectionVisible(node, dependId, out fromPos, out toPos))
+							IsConnectionVisible(node, dependId, out fromPos, out toPos, false))
 						{
 							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
 							DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, Color.Blue, fromPos, toPos, (PinRadius + 1));
@@ -910,25 +910,30 @@ namespace DetectiveBoardUIExtension
 				var color = (selected ? SystemColors.WindowText : link.Color);
 				var lineThickness = (selected ? 2 : link.Thickness);
 				var arrowThickness = Math.Max(2, lineThickness);
-				var offset = (selected ? (DefaultPinRadius + 2) : PinRadius);
-				var size = UIExtension.DependencyArrows.Size(TextFont);
+				var arrowOffset = (selected ? (DefaultPinRadius + 2) : PinRadius);
+				var arrowSize = UIExtension.DependencyArrows.Size(TextFont);
 				var pinBrush = (selected ? null : new SolidBrush(color));
 
 				DrawConnection(graphics, new Pen(color, lineThickness), pinBrush, fromPos, toPos);
-				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, offset);
+				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, arrowOffset);
 
 				if (!string.IsNullOrWhiteSpace(link.Label))
 				{
 					var matrix = new Matrix();
 					var textOffset = Geometry2D.MidPoint(fromPos, toPos);
-					float angle = Geometry2D.BestTextAngleInDegrees(fromPos, toPos, Geometry2D.AngleAxis.FromHorizontal);
+					float textAngle = Geometry2D.BestTextAngleInDegrees(fromPos, toPos, Geometry2D.AngleAxis.FromHorizontal);
+
+					// This is a little hack because it implies knowledge of Geometry2D internals
+					// Basically it's a way of determining whether to place the line text below the line
+					float lineAngle = Geometry2D.DegreesBetween(fromPos, toPos, Geometry2D.AngleAxis.FromHorizontal);
+
 					var format = new StringFormat()
 					{
 						Alignment = StringAlignment.Center,
-						LineAlignment = StringAlignment.Far
+						LineAlignment = ((lineAngle == textAngle) ? StringAlignment.Near : StringAlignment.Far)
 					};
 
-					matrix.Rotate(angle, MatrixOrder.Append);
+					matrix.Rotate(textAngle, MatrixOrder.Append);
 					matrix.Translate(textOffset.X, textOffset.Y, MatrixOrder.Append);
 
 					graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
@@ -1021,9 +1026,12 @@ namespace DetectiveBoardUIExtension
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
-		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, uint toId, out Point fromPos, out Point toPos)
+		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, uint toId, out Point fromPos, out Point toPos, bool userLink)
 		{
 			var toNode = GetNode(toId);
+
+			if (!userLink)
+				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
 
 			if (DrawNodesOnTop)
 			{
@@ -1061,7 +1069,7 @@ namespace DetectiveBoardUIExtension
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
 		{
-			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos);
+			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos, true);
 		}
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -1361,7 +1369,7 @@ namespace DetectiveBoardUIExtension
 					Point fromPos, toPos;
 					const double Tolerance = 5.0;
 
-					if (IsConnectionVisible(node, link.ToId, out fromPos, out toPos) && 
+					if (IsConnectionVisible(node, link.ToId, out fromPos, out toPos, true) && 
 						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, Tolerance))
 					{
 						return link;
