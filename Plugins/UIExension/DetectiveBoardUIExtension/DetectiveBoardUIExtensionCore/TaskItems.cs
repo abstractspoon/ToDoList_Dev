@@ -102,7 +102,6 @@ namespace DetectiveBoardUIExtension
 
 			uint toId;
 			int argb, thickness, arrows;
-			string text, type;
 
 			if (!uint.TryParse(parts[IdIndex], out toId) ||
 				!int.TryParse(parts[ColorIndex], out argb) ||
