@@ -670,17 +670,65 @@ namespace DetectiveBoardUIExtension
 
 		protected virtual void DrawParentAndChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
+			var selNodes = new List<RadialTree.TreeNode<uint>>();
+
+			DrawParentAndChildNodesExcludingSelectedNodes(graphics, node, ref selNodes);
+
+			// Draw selection
+			foreach (var selNode in selNodes)
+			{
+				CheckDrawNode(graphics, selNode);
+			}
+		}
+
+		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, RadialTree.TreeNode<uint> node, ref List<RadialTree.TreeNode<uint>> selNodes)
+		{
+			if (m_SelectedNodeIds?.Contains(node.Data) == true)
+			{
+				selNodes.Add(node);
+			}
+			else
+			{
+				CheckDrawNode(graphics, node);
+			}
+
+			foreach (var child in node.Children)
+			{
+				DrawParentAndChildNodesExcludingSelectedNodes(graphics, child, ref selNodes);
+			}
+		}
+
+		private void CheckDrawNode(Graphics graphics, RadialTree.TreeNode<uint> node)
+		{
 			Rectangle nodeRect;
 
 			if (IsNodeVisible(node, out nodeRect))
 			{
 				DrawNode(graphics, node.Data, nodeRect);
 			}
+		}
 
-			foreach (var child in node.Children)
+		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
+		{
+			Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
+			Pen border = Pens.Gray;
+
+			if (m_SelectedNodeIds.Contains(nodeId))
 			{
-				DrawParentAndChildNodes(graphics, child);
+				if (Focused)
+				{
+					fill = SystemBrushes.Highlight;
+					text = SystemBrushes.HighlightText;
+				}
+				else
+				{
+					fill = Brushes.LightGray;
+				}
 			}
+
+			graphics.FillRectangle(fill, rect);
+			graphics.DrawRectangle(border, rect);
+			graphics.DrawString(nodeId.ToString(), m_TextFont, text, rect);
 		}
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -709,30 +757,6 @@ namespace DetectiveBoardUIExtension
 			if ((PinRadius > 0) && (brush != null))
 				graphics.FillEllipse(brush, GetPinRect(pos));
 		}
-
-		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
-		{
-			Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
-			Pen border = Pens.Gray;
-
-			if (m_SelectedNodeIds.Contains(nodeId))
-			{
-				if (Focused)
-				{
-					fill = SystemBrushes.Highlight;
-					text = SystemBrushes.HighlightText;
-				}
-				else
-				{
-					fill = Brushes.LightGray;
-				}
-			}
-
-			graphics.FillRectangle(fill, rect);
-			graphics.DrawRectangle(border, rect);
-			graphics.DrawString(nodeId.ToString(), m_TextFont, text, rect);
-		}
-
 
 		public Rectangle Extents
 		{
