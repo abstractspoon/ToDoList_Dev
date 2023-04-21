@@ -547,38 +547,42 @@ namespace DetectiveBoardUIExtension
 			toPos = GetNodeClientPos(toNode);
 
 			if (DrawNodesOnTop)
-			{
-				// Intersect line segment with node rectangles
-				Rectangle fromRect = GetNodeClientRect(fromNode);
-				Point[] fromIntersect;
-
-				if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, fromRect, out fromIntersect) > 0)
-					fromPos = fromIntersect[0];
-
-				Rectangle toRect = GetNodeClientRect(toNode);
-				Point[] toIntersect;
-
-				if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, toRect, out toIntersect) > 0)
-					toPos = toIntersect[0];
-			}
+				ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
 
 			return IsConnectionVisible(fromPos, toPos);
 		}
-// 
-// 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
-// 										  out Rectangle fromRect, out Rectangle toRect)
-// 		{
-// 			if ((fromNode == null) || (toNode == null))
-// 			{
-// 				fromRect = toRect = Rectangle.Empty;
-// 				return false;
-// 			}
-// 
-// 			fromRect = GetNodeClientRect(fromNode);
-// 			toRect = GetNodeClientRect(toNode);
-// 
-// 			return IsConnectionVisible(fromPos, toPos);
-// 		}
+
+		protected void ClipLineToNodeBounds(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+											ref Point fromPos, ref Point toPos)
+		{
+			// Intersect line segment with node rectangles
+			Rectangle fromRect = GetNodeClientRect(fromNode);
+			Point[] fromIntersect;
+
+			if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, fromRect, out fromIntersect) > 0)
+				fromPos = fromIntersect[0];
+
+			Rectangle toRect = GetNodeClientRect(toNode);
+			Point[] toIntersect;
+
+			if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, toRect, out toIntersect) > 0)
+				toPos = toIntersect[0];
+		}
+
+		// 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+		// 										  out Rectangle fromRect, out Rectangle toRect)
+		// 		{
+		// 			if ((fromNode == null) || (toNode == null))
+		// 			{
+		// 				fromRect = toRect = Rectangle.Empty;
+		// 				return false;
+		// 			}
+		// 
+		// 			fromRect = GetNodeClientRect(fromNode);
+		// 			toRect = GetNodeClientRect(toNode);
+		// 
+		// 			return IsConnectionVisible(fromPos, toPos);
+		// 		}
 
 		protected bool IsConnectionVisible(Point fromPos, Point toPos)
 		{

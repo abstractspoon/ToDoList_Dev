@@ -1023,14 +1023,37 @@ namespace DetectiveBoardUIExtension
 
 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, uint toId, out Point fromPos, out Point toPos)
 		{
-			if (!base.IsConnectionVisible(fromNode, GetNode(toId), out fromPos, out toPos))
+			var toNode = GetNode(toId);
+
+			if (DrawNodesOnTop)
+			{
+				// If the reverse link exists then we need to offset 'our' ends
+				if (UserLinkExists(toId, fromNode.Data))
+				{
+					// need to offset BEFORE clipping
+					fromPos = GetNodeClientPos(fromNode);
+					toPos = GetNodeClientPos(toNode);
+					
+					if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, 10))
+						return false;
+
+					ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
+
+					return base.IsConnectionVisible(fromPos, toPos);
+				}
+
+				// else
+				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+			}
+
+			// else
+			if (!base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
 				return false;
 
-			// If the reverse link exists then we need to offset 'our' ends
-			if (UserLinkExists(toId, fromNode.Data))
+			if (UserLinkExists(toId, fromNode.Data) && 
+				!Geometry2D.OffsetLine(ref fromPos, ref toPos, 10))
 			{
-				if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, 10))
-					return false;
+				return false;
 			}
 
 			return true;

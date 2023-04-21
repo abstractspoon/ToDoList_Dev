@@ -236,8 +236,8 @@ namespace DetectiveBoardUIExtension
 				return false;
 			}
 
-			ptIntersect.X = (int)(((B2 * C1) - (B1 * C2)) / det);
-			ptIntersect.Y = (int)(((A1 * C2) - (A2 * C1)) / det);
+			ptIntersect.X = (int)Math.Round(((B2 * C1) - (B1 * C2)) / det);
+			ptIntersect.Y = (int)Math.Round(((A1 * C2) - (A2 * C1)) / det);
 
 			// If the intersection is within both bounding boxes
 			// then the segments have a proper intersection
