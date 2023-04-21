@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using BaseNode = RadialTree.TreeNode<uint>;
+
 namespace DetectiveBoardUIExtension
 {
 	public delegate void NodeSelectionChangeEventHandler(object sender, IList<uint> itemIds);
@@ -69,7 +71,8 @@ namespace DetectiveBoardUIExtension
 		Font m_TextFont;
 		Color m_WallColor = SystemColors.ControlDark;
 		
-		RadialTree.TreeNode<uint> m_RootNode = null;
+		BaseNode m_RootNode = null;
+		List<BaseNode> m_SelectedNodes = null;
 		RadialTree.RadialTree<uint> m_RadialTree = null;
 
 		bool m_AutoCalcRadialIncrement = false;
@@ -77,8 +80,6 @@ namespace DetectiveBoardUIExtension
 
 		Point m_MinExtents = Point.Empty;
 		Point m_MaxExtents = Point.Empty;
-
-		IList<uint> m_SelectedNodeIds = new List<uint>();
 		Rectangle m_SelectionBox = Rectangle.Empty;
 
 		Timer m_DragTimer;
@@ -103,6 +104,7 @@ namespace DetectiveBoardUIExtension
 			m_NodeSize = DefaulttNodeSize;
 			m_TextFont = new Font("Tahoma", 8);
 			m_BaseFontHeight = m_TextFont.Height;
+			m_SelectedNodes = new List<BaseNode>();
 
 			using (var graphics = CreateGraphics())
 				m_DpiFactor = graphics.DpiX / 96f;
@@ -164,7 +166,7 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		protected virtual Size GetNodeSize(RadialTree.TreeNode<uint> node)
+		protected virtual Size GetNodeSize(BaseNode node)
 		{
 			return NodeSize;
 		}
@@ -175,17 +177,34 @@ namespace DetectiveBoardUIExtension
 
 		public bool ReadOnly = false;
 		public bool DrawNodesOnTop = true;
-		public IList<uint> SelectedNodeIds { get { return m_SelectedNodeIds; } }
-		public int SelectedNodeCount { get { return m_SelectedNodeIds.Count; } }
+		public int SelectedNodeCount { get { return m_SelectedNodes.Count; } }
 
-		protected RadialTree.TreeNode<uint> SingleSelectedNode
+// 		public IList<BaseNode> SelectedNodes
+// 		{
+// 			get { return m_SelectedNodes; }
+// 		}
+
+		public IList<uint> SelectedNodeIds
 		{
 			get
 			{
-				if (m_SelectedNodeIds.Count != 1)
+				IList<uint> selIds = new List<uint>();
+
+				foreach (var node in m_SelectedNodes)
+					selIds.Add(node.Data);
+
+				return selIds;
+			}
+		}
+
+		protected BaseNode SingleSelectedNode
+		{
+			get
+			{
+				if (m_SelectedNodes.Count != 1)
 					return null;
 
-				return GetNode(m_SelectedNodeIds[0]);
+				return m_SelectedNodes[0];
 			}
 		}
 
@@ -203,9 +222,9 @@ namespace DetectiveBoardUIExtension
 				if (SelectedNodeCount == 0)
 					return false;
 
-				foreach (var id in m_SelectedNodeIds)
+				foreach (var node in m_SelectedNodes)
 				{
-					if (!IsAcceptableDragSource(GetNode(id)))
+					if (!IsAcceptableDragSource(node))
 						return false;
 				}
 
@@ -213,27 +232,29 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		protected uint DraggedNodeId
+		protected BaseNode DraggedNode
 		{
-			get { return ((m_SelectedNodeIds.Count > 0) ? m_SelectedNodeIds[0] : NullId); }
+			get { return ((m_SelectedNodes.Count > 0) ? m_SelectedNodes[0] : null); }
 		}
 
-		protected RadialTree.TreeNode<uint> DraggedNode
+		protected uint DraggedNodeId
 		{
-			get { return GetNode(DraggedNodeId); }
+			get { return ((DraggedNode == null) ? NullId : DraggedNode.Data); }
 		}
 
 		public bool SelectNode(uint nodeId, bool notify = false)
 		{
-			if (IsSelectableNode(nodeId))
+			var node = GetNode(nodeId);
+
+			if (IsSelectableNode(node))
 			{
-				m_SelectedNodeIds.Clear();
-				m_SelectedNodeIds.Add(nodeId);
+				m_SelectedNodes.Clear();
+				m_SelectedNodes.Add(node);
 
 				Invalidate();
 
 				if (notify)
-					NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+					NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 
 				return true;
 			}
@@ -243,36 +264,43 @@ namespace DetectiveBoardUIExtension
 
 		public bool SelectNodes(IList<uint> nodeIds, bool notify = false)
 		{
+			var nodes = new List<BaseNode>();
+
 			foreach (var nodeId in nodeIds)
 			{
-				if (!IsSelectableNode(nodeId))
+				var node = GetNode(nodeId);
+
+				if (IsSelectableNode(node))
+					nodes.Add(node);
+				else
 					return false;
+
 			}
 
-			m_SelectedNodeIds = nodeIds;
+			m_SelectedNodes = nodes;
 			Invalidate();
 
 			if (notify)
-				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 
 			return true;
 		}
 
 		public void SelectAllNodes(bool notify = false)
 		{
-			m_SelectedNodeIds.Clear();
+			m_SelectedNodes.Clear();
 
 			SelectAllNodes(RootNode);
 			Invalidate();
 
 			if (notify)
-				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 		}
 
-		public void SelectAllNodes(RadialTree.TreeNode<uint> node)
+		public void SelectAllNodes(BaseNode node)
 		{
-			if (IsSelectableNode(node.Data))
-				m_SelectedNodeIds.Add(node.Data);
+			if (IsSelectableNode(node))
+				m_SelectedNodes.Add(node);
 
 			foreach (var child in node.Children)
 				SelectAllNodes(child);
@@ -346,7 +374,7 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		public RadialTree.TreeNode<uint> RootNode
+		public BaseNode RootNode
 		{
 			get { return m_RootNode; }
 
@@ -464,12 +492,12 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		protected RadialTree.TreeNode<uint> HitTestNode(Point ptClient, bool excludeRoot = false)
+		protected BaseNode HitTestNode(Point ptClient, bool excludeRoot = false)
 		{
 			return HitTestNode(RootNode, ptClient, excludeRoot);
 		}
 
-		protected RadialTree.TreeNode<uint> HitTestNode(RadialTree.TreeNode<uint> node, Point ptClient, bool excludeRoot)
+		protected BaseNode HitTestNode(BaseNode node, Point ptClient, bool excludeRoot)
 		{
 			Rectangle rect;
 
@@ -490,19 +518,19 @@ namespace DetectiveBoardUIExtension
 			return null;
 		}
 
-		protected IList<RadialTree.TreeNode<uint>> HitTestNodes(Rectangle rectClient)
+		protected IList<BaseNode> HitTestNodes(Rectangle rectClient)
 		{
-			IList<RadialTree.TreeNode<uint>> hits = new List<RadialTree.TreeNode<uint>>();
+			IList<BaseNode> hits = new List<BaseNode>();
 
 			HitTestNodes(RootNode, rectClient, ref hits);
 			return hits;
 		}
 
-		protected void HitTestNodes(RadialTree.TreeNode<uint> node, Rectangle rectClient, ref IList<RadialTree.TreeNode<uint>> hits)
+		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref IList<BaseNode> hits)
 		{
 			Rectangle rect;
 
-			if (IsSelectableNode(node.Data) && IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
+			if (IsSelectableNode(node) && IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
 				hits.Add(node);
 
 			// check children
@@ -510,21 +538,21 @@ namespace DetectiveBoardUIExtension
 				HitTestNodes(child, rectClient, ref hits);
 		}
 
-		protected bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
+		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect)
 		{
 			nodeRect = GetNodeClientRect(node);
 
 			return nodeRect.IntersectsWith(ClientRectangle);
 		}
 
-		protected Point GetNodeClientPos(RadialTree.TreeNode<uint> node)
+		protected Point GetNodeClientPos(BaseNode node)
 		{
 			var pos = node.GetPosition();
 
 			return GraphToClient(pos);
 		}
 
-		protected Rectangle GetNodeClientRect(RadialTree.TreeNode<uint> node)
+		protected Rectangle GetNodeClientRect(BaseNode node)
 		{
 			var pos = GetNodeClientPos(node);
 			var size = GetNodeSize(node).Multiply(OverallScaleFactor);
@@ -534,7 +562,7 @@ namespace DetectiveBoardUIExtension
 			return new Rectangle(pos, size);
 		}
 
-		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
 										  out Point fromPos, out Point toPos)
 		{
 			if ((fromNode == null) || (toNode == null))
@@ -552,7 +580,7 @@ namespace DetectiveBoardUIExtension
 			return IsConnectionVisible(fromPos, toPos);
 		}
 
-		protected void ClipLineToNodeBounds(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+		protected void ClipLineToNodeBounds(BaseNode fromNode, BaseNode toNode,
 											ref Point fromPos, ref Point toPos)
 		{
 			// Intersect line segment with node rectangles
@@ -569,7 +597,7 @@ namespace DetectiveBoardUIExtension
 				toPos = toIntersect[0];
 		}
 
-		// 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+		// 		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
 		// 										  out Rectangle fromRect, out Rectangle toRect)
 		// 		{
 		// 			if ((fromNode == null) || (toNode == null))
@@ -591,7 +619,7 @@ namespace DetectiveBoardUIExtension
 			return ClientRectangle.IntersectsWith(lineBounds);
 		}
 
-		protected RadialTree.TreeNode<uint> GetNode(uint id)
+		protected BaseNode GetNode(uint id)
 		{
 			if (id == RootNode?.Data)
 				return RootNode;
@@ -599,17 +627,20 @@ namespace DetectiveBoardUIExtension
 			return RootNode.FindTreeNode(x => (x.Data == id));
 		}
 
-		protected bool GetChildIds(RadialTree.TreeNode<uint> node, bool recursive, ref IList<uint> ids)
+		protected bool GetChildNodes(BaseNode node, bool recursive, ref List<BaseNode> nodes)
 		{
-			foreach (var child in node.Children)
-			{
-				ids.Add(child.Data);
+			nodes.AddRange(node.Children);
 
-				if (recursive)
-					GetChildIds(child, true, ref ids);
+			if (recursive)
+			{
+				foreach (var child in node.Children)
+				{
+					nodes.Add(child);
+					GetChildNodes(child, true, ref nodes);
+				}
 			}
 
-			return (ids.Count > 0);
+			return (nodes.Count > 0);
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
@@ -653,7 +684,7 @@ namespace DetectiveBoardUIExtension
 			ControlPaint.DrawFocusRectangle(graphics, rect);
 		}
 
-		protected virtual void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected virtual void DrawParentAndChildConnections(Graphics graphics, BaseNode node)
 		{
 			Point nodePos, parentPos;
 
@@ -668,9 +699,9 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		protected virtual void DrawParentAndChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected virtual void DrawParentAndChildNodes(Graphics graphics, BaseNode node)
 		{
-			var selNodes = new List<RadialTree.TreeNode<uint>>();
+			var selNodes = new List<BaseNode>();
 
 			DrawParentAndChildNodesExcludingSelectedNodes(graphics, node, ref selNodes);
 
@@ -681,9 +712,9 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, RadialTree.TreeNode<uint> node, ref List<RadialTree.TreeNode<uint>> selNodes)
+		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, BaseNode node, ref List<BaseNode> selNodes)
 		{
-			if (m_SelectedNodeIds?.Contains(node.Data) == true)
+			if (m_SelectedNodes?.Contains(node) ?? false)
 			{
 				selNodes.Add(node);
 			}
@@ -698,22 +729,22 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		private void CheckDrawNode(Graphics graphics, RadialTree.TreeNode<uint> node)
+		private void CheckDrawNode(Graphics graphics, BaseNode node)
 		{
 			Rectangle nodeRect;
 
 			if (IsNodeVisible(node, out nodeRect))
 			{
-				DrawNode(graphics, node.Data, nodeRect);
+				DrawNode(graphics, node, nodeRect);
 			}
 		}
 
-		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
+		protected virtual void DrawNode(Graphics graphics, BaseNode node, Rectangle rect)
 		{
 			Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
 			Pen border = Pens.Gray;
 
-			if (m_SelectedNodeIds.Contains(nodeId))
+			if (m_SelectedNodes.Contains(node))
 			{
 				if (Focused)
 				{
@@ -728,7 +759,7 @@ namespace DetectiveBoardUIExtension
 
 			graphics.FillRectangle(fill, rect);
 			graphics.DrawRectangle(border, rect);
-			graphics.DrawString(nodeId.ToString(), m_TextFont, text, rect);
+			graphics.DrawString(node.ToString(), m_TextFont, text, rect);
 		}
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -837,7 +868,7 @@ namespace DetectiveBoardUIExtension
 			m_MaxExtents.Offset(Border, Border);
 		}
 
-		protected void RecalcExtents(RadialTree.TreeNode<uint> node)
+		protected void RecalcExtents(BaseNode node)
 		{
 			var nodeRect = node.GetRectangle(GetNodeSize(node));
 
@@ -882,7 +913,7 @@ namespace DetectiveBoardUIExtension
 			Invalidate();
 		}
 
-		protected virtual bool IsSelectableNode(uint nodeId)
+		protected virtual bool IsSelectableNode(BaseNode node)
 		{
 			return true;
 		}
@@ -896,7 +927,7 @@ namespace DetectiveBoardUIExtension
 			{
 				var hit = HitTestNode(e.Location);
 
-				if ((hit != null) && IsSelectableNode(hit.Data))
+				if ((hit != null) && IsSelectableNode(hit))
 				{
 					SelectNode(hit.Data, true);
 				}
@@ -925,49 +956,49 @@ namespace DetectiveBoardUIExtension
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
 			}
-			else if (IsSelectableNode(hit.Data))
+			else if (IsSelectableNode(hit))
 			{
-				IList<uint> childIds = null;
+				List<BaseNode> childNodes = null;
 
 				if (ModifierKeys.HasFlag(Keys.Alt))
 				{
-					childIds = new List<uint>();
-					GetChildIds(hit, true, ref childIds);
+					childNodes = new List<BaseNode>();
+					GetChildNodes(hit, true, ref childNodes);
 				}
 
 				if (ModifierKeys.HasFlag(Keys.Control))
 				{
-					if (m_SelectedNodeIds.Contains(hit.Data))
+					if (m_SelectedNodes.Contains(hit))
 					{
 						// Deselect
-						m_SelectedNodeIds.Remove(hit.Data);
+						m_SelectedNodes.Remove(hit);
 
-						if (childIds?.Count > 0)
-							m_SelectedNodeIds.Remove(childIds);
+						if (childNodes?.Count > 0)
+							m_SelectedNodes.Remove(childNodes);
 					}
 					else
 					{
 						// Select
-						m_SelectedNodeIds.MoveToHead(hit.Data);
+						m_SelectedNodes.MoveToHead(hit);
 
-						if (childIds?.Count > 0)
-							m_SelectedNodeIds.Add(childIds);
+						if (childNodes?.Count > 0)
+							m_SelectedNodes.AddRange(childNodes);
 					}
 				}
 				else 
 				{
-					if (!m_SelectedNodeIds.Contains(hit.Data))
+					if (!m_SelectedNodes.Contains(hit))
 					{
-						m_SelectedNodeIds.Clear();
-						m_SelectedNodeIds.Insert(0, hit.Data);
+						m_SelectedNodes.Clear();
+						m_SelectedNodes.Insert(0, hit);
 					}
 					else
 					{
-						m_SelectedNodeIds.MoveToHead(hit.Data);
+						m_SelectedNodes.MoveToHead(hit);
 					}
 
-					if (childIds?.Count > 0)
-						m_SelectedNodeIds.Add(childIds);
+					if (childNodes?.Count > 0)
+						m_SelectedNodes.AddRange(childNodes);
 
 					// Initialise a drag operation
 					if (SelectedNodesAreDraggable)
@@ -985,7 +1016,7 @@ namespace DetectiveBoardUIExtension
 				}
 
 				Invalidate();
-				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 			}
 #if DEBUG
 			else if (hit == RootNode)
@@ -1064,7 +1095,7 @@ namespace DetectiveBoardUIExtension
 			return (data != null);
 		}
 
-		protected virtual bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
+		protected virtual bool IsAcceptableDragSource(BaseNode node)
 		{
 			return ((node != null) && (node.Data != NullId));
 		}
@@ -1155,10 +1186,10 @@ namespace DetectiveBoardUIExtension
 
 					// Select intersecting nodes
 					var hits = HitTestNodes(m_SelectionBox);
-					m_SelectedNodeIds.Clear();
+					m_SelectedNodes.Clear();
 
 					foreach (var hit in hits)
-						m_SelectedNodeIds.Add(hit.Data);
+						m_SelectedNodes.Add(hit);
 
 					e.Effect = DragDropEffects.Move;
 					Invalidate();
@@ -1177,15 +1208,10 @@ namespace DetectiveBoardUIExtension
 
 					if (!offset.IsEmpty)
 					{
-						foreach (var nodeId in m_SelectedNodeIds)
+						foreach (var node in m_SelectedNodes)
 						{
-							var node = GetNode(nodeId);
-
-							if (node != null)
-							{
-								node.Point.X += offset.X;
-								node.Point.Y += offset.Y;
-							}
+							node.Point.X += offset.X;
+							node.Point.Y += offset.Y;
 						}
 					}
 
@@ -1263,15 +1289,10 @@ namespace DetectiveBoardUIExtension
 				{
 					var offset = new PointF((dragNode.Point.X - m_PreDragNodePos.X), (dragNode.Point.Y - m_PreDragNodePos.Y));
 
-					foreach (var nodeId in m_SelectedNodeIds)
+					foreach (var node in m_SelectedNodes)
 					{
-						var node = GetNode(nodeId);
-
-						if (node != null)
-						{
-							node.Point.X -= offset.X;
-							node.Point.Y -= offset.Y;
-						}
+						node.Point.X -= offset.X;
+						node.Point.Y -= offset.Y;
 					}
 
 					Invalidate();

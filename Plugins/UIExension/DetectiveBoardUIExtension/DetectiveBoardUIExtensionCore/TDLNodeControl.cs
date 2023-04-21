@@ -10,6 +10,8 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
+using BaseNode = RadialTree.TreeNode<uint>;
+
 namespace DetectiveBoardUIExtension
 {
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
@@ -62,6 +64,7 @@ namespace DetectiveBoardUIExtension
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
 		protected int DefaultPinRadius { get { return ScaleByDPIFactor(3); } }
+		protected int LinkOffset { get { return ScaleByDPIFactor(6); } }
 
 		// -------------------------------------------------------------------------
 
@@ -201,7 +204,7 @@ namespace DetectiveBoardUIExtension
 			ApplyUserPositions(RootNode);
 		}
 
-		private void ApplyUserPositions(RadialTree.TreeNode<uint> node)
+		private void ApplyUserPositions(BaseNode node)
 		{
 			var task = GetTaskItem(node);
 
@@ -633,11 +636,11 @@ namespace DetectiveBoardUIExtension
 
 		private void UpdateTaskAttributes(TaskList tasks)
 		{
-			RadialTree.TreeNode<uint> rootNode = base.RootNode;
+			BaseNode rootNode = base.RootNode;
 
 			if (m_TaskItems.Count == 0)
 			{
-				rootNode = new RadialTree.TreeNode<uint>(0);
+				rootNode = new BaseNode(0);
 			}
 
 			Task task = tasks.GetFirstTask();
@@ -667,14 +670,14 @@ namespace DetectiveBoardUIExtension
 			Invalidate();
 		}
 
-		private bool ProcessTaskUpdate(Task task, RadialTree.TreeNode<uint> parentNode)
+		private bool ProcessTaskUpdate(Task task, BaseNode parentNode)
 		{
 			if (!task.IsValid())
 				return false;
 
 			uint taskId = task.GetID();
 			var taskItem = m_TaskItems.GetTaskItem(taskId);
-			RadialTree.TreeNode<uint> node = null;
+			BaseNode node = null;
 
 			if (taskItem == null)
 			{
@@ -702,7 +705,7 @@ namespace DetectiveBoardUIExtension
 			return true;
 		}
 
-		protected override Size GetNodeSize(RadialTree.TreeNode<uint> node)
+		protected override Size GetNodeSize(BaseNode node)
 		{
 			var size = base.GetNodeSize(node);
 
@@ -795,9 +798,9 @@ namespace DetectiveBoardUIExtension
 			return TextFont;
 		}
 
-		protected override bool IsSelectableNode(uint nodeId)
+		protected override bool IsSelectableNode(BaseNode node)
 		{
-			return (nodeId != 0);
+			return (node.Data != 0);
 		}
 
 		protected override void OnAfterDrawConnections(Graphics graphics)
@@ -834,7 +837,7 @@ namespace DetectiveBoardUIExtension
 			return Geometry2D.GetCentredRect(pos, (DefaultPinRadius * 2));
 		}
 
-		protected void DrawTaskDependencies(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected void DrawTaskDependencies(Graphics graphics, BaseNode node)
 		{
 			if (m_Options.HasFlag(DetectiveBoardOption.ShowDependencies))
 			{
@@ -867,7 +870,7 @@ namespace DetectiveBoardUIExtension
 			DrawUserLink(graphics, m_SelectedUserLink, true);
 		}
 
-		protected void DrawUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected void DrawUserLinks(Graphics graphics, BaseNode node)
 		{
 			var taskItem = GetTaskItem(node);
 
@@ -970,7 +973,7 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		private Point GetCreateLinkPinPos(RadialTree.TreeNode<uint> node)
+		private Point GetCreateLinkPinPos(BaseNode node)
 		{
 			var pos = GetNodeClientPos(node);
 
@@ -989,7 +992,7 @@ namespace DetectiveBoardUIExtension
 			return pos;
 		}
 
-		private Rectangle GetCreateLinkPinRect(RadialTree.TreeNode<uint> node)
+		private Rectangle GetCreateLinkPinRect(BaseNode node)
 		{
 			return GetSelectionPinRect(GetCreateLinkPinPos(node));
 		}
@@ -1006,9 +1009,9 @@ namespace DetectiveBoardUIExtension
 			return DrawState.None;
 		}
 
-		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
+		protected override void DrawNode(Graphics graphics, BaseNode node, Rectangle rect)
 		{
-			var taskItem = m_TaskItems.GetTaskItem(nodeId);
+			var taskItem = m_TaskItems.GetTaskItem(node.Data);
 
 			if (taskItem != null)
 			{
@@ -1016,17 +1019,17 @@ namespace DetectiveBoardUIExtension
 			}
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
-				base.DrawNode(graphics, nodeId, rect);
+				base.DrawNode(graphics, node, rect);
 			}
 		}
 
-		protected override void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected override void DrawParentAndChildConnections(Graphics graphics, BaseNode node)
 		{
 			if (m_Options.HasFlag(DetectiveBoardOption.ShowParentChildLinks))
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
-		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, uint toId, out Point fromPos, out Point toPos, bool userLink)
+		protected bool IsConnectionVisible(BaseNode fromNode, uint toId, out Point fromPos, out Point toPos, bool userLink)
 		{
 			var toNode = GetNode(toId);
 
@@ -1042,7 +1045,7 @@ namespace DetectiveBoardUIExtension
 					fromPos = GetNodeClientPos(fromNode);
 					toPos = GetNodeClientPos(toNode);
 					
-					if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, 10))
+					if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
 						return false;
 
 					ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
@@ -1059,7 +1062,7 @@ namespace DetectiveBoardUIExtension
 				return false;
 
 			if (UserLinkExists(toId, fromNode.Data) && 
-				!Geometry2D.OffsetLine(ref fromPos, ref toPos, 10))
+				!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
 			{
 				return false;
 			}
@@ -1340,7 +1343,7 @@ namespace DetectiveBoardUIExtension
 			get { return ((SingleSelectedTask != null) && (SingleSelectedTask == m_PreviouslySelectedTask)); }
 		}
 
-		private bool HitTestIcon(RadialTree.TreeNode<uint> node, Point point)
+		private bool HitTestIcon(BaseNode node, Point point)
         {
 			var task = GetTaskItem(node);
 			
@@ -1356,7 +1359,7 @@ namespace DetectiveBoardUIExtension
 			return HitTestUserLink(RootNode, ptClient);
 		}
 
-		protected UserLink HitTestUserLink(RadialTree.TreeNode<uint> node, Point ptClient)
+		protected UserLink HitTestUserLink(BaseNode node, Point ptClient)
 		{
 			var fromTask = GetTaskItem(node.Data);
 
@@ -1394,7 +1397,7 @@ namespace DetectiveBoardUIExtension
 			return HitTestUserLinkEnds(RootNode, ptClient, ref from);
 		}
 
-		protected UserLink HitTestUserLinkEnds(RadialTree.TreeNode<uint> node, Point ptClient, ref bool from)
+		protected UserLink HitTestUserLinkEnds(BaseNode node, Point ptClient, ref bool from)
 		{
 			var fromTask = GetTaskItem(node.Data);
 
@@ -1610,7 +1613,7 @@ namespace DetectiveBoardUIExtension
 			return GetTaskItem(node);
 		}
 
-		protected TaskItem GetTaskItem(RadialTree.TreeNode<uint> node)
+		protected TaskItem GetTaskItem(BaseNode node)
 		{
 			return (node == null) ? null : GetTaskItem(node.Data);
 		}
@@ -1811,7 +1814,7 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
-		protected bool IsAcceptableDropTarget(RadialTree.TreeNode<uint> node)
+		protected bool IsAcceptableDropTarget(BaseNode node)
 		{
 			Debug.Assert(m_DraggingSelectedUserLink);
 
@@ -1835,7 +1838,7 @@ namespace DetectiveBoardUIExtension
 			return true;
 		}
 
-		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
+		protected override bool IsAcceptableDragSource(BaseNode node)
 		{
 			if (!base.IsAcceptableDragSource(node))
 				return false;

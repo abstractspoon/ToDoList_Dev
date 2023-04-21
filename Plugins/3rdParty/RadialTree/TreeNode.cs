@@ -12,7 +12,7 @@ namespace RadialTree
 
         private readonly T _data;
         private readonly int _level;
-        private readonly List<TreeNode<T>> _children;
+        private readonly IList<TreeNode<T>> _children;
         private TreeNode<T> _parent;
         private Point _point = new Point(0, 0);
 
@@ -29,7 +29,7 @@ namespace RadialTree
             _level = _parent != null ? _parent.Level + 1 : 0;
         }
 
-        public TreeNode(T data, List<TreeNode<T>> children, int level) : this(data)
+        public TreeNode(T data, IList<TreeNode<T>> children, int level) : this(data)
         {
             _children = children;
             _level = level;
@@ -62,7 +62,7 @@ namespace RadialTree
         /// <summary>
         /// The child nodes of the tree.
         /// </summary>
-        public List<TreeNode<T>> Children { get { return _children; } }
+        public IList<TreeNode<T>> Children { get { return _children; } }
 
         /// <summary>
         /// Object/Data assigned to the node.
