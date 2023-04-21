@@ -997,29 +997,29 @@ namespace DetectiveBoardUIExtension
 			return GetSelectionPinRect(GetCreateLinkPinPos(node));
 		}
 
-		DrawState GetTaskDrawState(TaskItem task)
+		DrawState GetDrawState(BaseNode node, bool selected)
 		{
-			if (m_DraggingSelectedUserLink && (m_DropHighlightedTaskId == task.TaskId))
-				return DrawState.DropHighlighted;
-
-			if (SelectedNodeIds.Contains(task.TaskId))
+			if (selected)
 				return DrawState.Selected;
+
+			if (m_DraggingSelectedUserLink && (m_DropHighlightedTaskId == node.Data))
+				return DrawState.DropHighlighted;
 
 			// all else
 			return DrawState.None;
 		}
 
-		protected override void DrawNode(Graphics graphics, BaseNode node, Rectangle rect)
+		protected override void DrawNode(Graphics graphics, BaseNode node, Rectangle rect, bool selected)
 		{
 			var taskItem = m_TaskItems.GetTaskItem(node.Data);
 
 			if (taskItem != null)
 			{
-				DoPaintNode(graphics, taskItem, rect, GetTaskDrawState(taskItem));
+				DoPaintNode(graphics, taskItem, rect, GetDrawState(node, selected));
 			}
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
-				base.DrawNode(graphics, node, rect);
+				base.DrawNode(graphics, node, rect, selected);
 			}
 		}
 

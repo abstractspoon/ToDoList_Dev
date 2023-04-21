@@ -179,11 +179,6 @@ namespace DetectiveBoardUIExtension
 		public bool DrawNodesOnTop = true;
 		public int SelectedNodeCount { get { return m_SelectedNodes.Count; } }
 
-// 		public IList<BaseNode> SelectedNodes
-// 		{
-// 			get { return m_SelectedNodes; }
-// 		}
-
 		public IList<uint> SelectedNodeIds
 		{
 			get
@@ -494,22 +489,33 @@ namespace DetectiveBoardUIExtension
 
 		protected BaseNode HitTestNode(Point ptClient, bool excludeRoot = false)
 		{
-			return HitTestNode(RootNode, ptClient, excludeRoot);
+			// Hit test selection first
+			foreach (var node in m_SelectedNodes)
+			{
+				if (HitTestNode(node, ptClient, excludeRoot))
+					return node;
+			}
+
+			// All the rest
+			return HitTestNodeAndChildren(RootNode, ptClient, excludeRoot);
 		}
 
-		protected BaseNode HitTestNode(BaseNode node, Point ptClient, bool excludeRoot)
+		protected bool HitTestNode(BaseNode node, Point ptClient, bool excludeRoot)
 		{
 			Rectangle rect;
 
-			if (IsNodeVisible(node, out rect) && rect.Contains(ptClient) && (!excludeRoot || !node.IsRoot))
-			{
+			return (IsNodeVisible(node, out rect) && rect.Contains(ptClient) && (!excludeRoot || !node.IsRoot));
+		}
+
+		protected BaseNode HitTestNodeAndChildren(BaseNode node, Point ptClient, bool excludeRoot)
+		{
+			if (HitTestNode(node, ptClient, excludeRoot))
 				return node;
-			}
 
 			// check children
 			foreach (var child in node.Children)
 			{
-				var hit = HitTestNode(child, ptClient, excludeRoot);
+				var hit = HitTestNodeAndChildren(child, ptClient, excludeRoot);
 
 				if (hit != null)
 					return hit;
@@ -701,50 +707,42 @@ namespace DetectiveBoardUIExtension
 
 		protected virtual void DrawParentAndChildNodes(Graphics graphics, BaseNode node)
 		{
-			var selNodes = new List<BaseNode>();
-
-			DrawParentAndChildNodesExcludingSelectedNodes(graphics, node, ref selNodes);
+			DrawParentAndChildNodesExcludingSelectedNodes(graphics, node);
 
 			// Draw selection
-			foreach (var selNode in selNodes)
+			foreach (var selNode in m_SelectedNodes)
 			{
-				CheckDrawNode(graphics, selNode);
+				CheckDrawNode(graphics, selNode, true);
 			}
 		}
 
-		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, BaseNode node, ref List<BaseNode> selNodes)
+		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, BaseNode node)
 		{
-			if (m_SelectedNodes?.Contains(node) ?? false)
-			{
-				selNodes.Add(node);
-			}
-			else
-			{
-				CheckDrawNode(graphics, node);
-			}
+			if (!m_SelectedNodes.Contains(node))
+				CheckDrawNode(graphics, node, false);
 
 			foreach (var child in node.Children)
 			{
-				DrawParentAndChildNodesExcludingSelectedNodes(graphics, child, ref selNodes);
+				DrawParentAndChildNodesExcludingSelectedNodes(graphics, child);
 			}
 		}
 
-		private void CheckDrawNode(Graphics graphics, BaseNode node)
+		private void CheckDrawNode(Graphics graphics, BaseNode node, bool selected)
 		{
 			Rectangle nodeRect;
 
 			if (IsNodeVisible(node, out nodeRect))
 			{
-				DrawNode(graphics, node, nodeRect);
+				DrawNode(graphics, node, nodeRect, selected);
 			}
 		}
 
-		protected virtual void DrawNode(Graphics graphics, BaseNode node, Rectangle rect)
+		protected virtual void DrawNode(Graphics graphics, BaseNode node, Rectangle rect, bool selected)
 		{
 			Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
 			Pen border = Pens.Gray;
 
-			if (m_SelectedNodes.Contains(node))
+			if (selected)
 			{
 				if (Focused)
 				{
