@@ -405,18 +405,20 @@ namespace DetectiveBoardUIExtension
 			if (!m_Control.HasSelectedUserLink)
 				return false;
 
-			return EditSelectedUserLink();
+			return NotifyParentTaskModified(link.FromId);
 		}
-		
+
 		bool OnDetectiveBoardTaskLinkEdited(object sender, UserLink link)
 		{
-			var notify = new UIExtension.ParentNotify(m_HwndParent);
-			var taskItem = m_Control.GetTaskItem(link.FromId);
-
-			return notify.NotifyMod(Task.Attribute.MetaData, taskItem.EncodeMetaData());
+			return NotifyParentTaskModified(link.FromId);
 		}
-		
+
 		bool OnDetectiveBoardTaskLinkDeleted(object sender, uint taskId)
+		{
+			return NotifyParentTaskModified(taskId);
+		}
+
+		bool NotifyParentTaskModified(uint taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 			var taskItem = m_Control.GetTaskItem(taskId);
@@ -588,10 +590,7 @@ namespace DetectiveBoardUIExtension
 						var link = m_Control.CreateUserLink(fromId, toId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 
 						if (link != null)
-						{
-							m_Control.SelectNode(fromId, true);
-							OnDetectiveBoardTaskLinkEdited(this, link);
-						}
+							NotifyParentTaskModified(fromId);
 
 						UpdateToolbarButtonStates();
 					}

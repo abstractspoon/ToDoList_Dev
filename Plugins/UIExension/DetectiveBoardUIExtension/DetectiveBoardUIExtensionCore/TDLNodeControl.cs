@@ -417,8 +417,8 @@ namespace DetectiveBoardUIExtension
 
 			if (fromTask != null)
 			{
-				// task must be selected
-				if (!SelectedNodeIds.Contains(fromId))
+				// task must be the only selection
+				if (!SelectNode(fromId, true))
 				{
 					Debug.Assert(false);
 					return null;
