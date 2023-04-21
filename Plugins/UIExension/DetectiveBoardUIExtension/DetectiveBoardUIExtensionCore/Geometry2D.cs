@@ -9,6 +9,34 @@ namespace DetectiveBoardUIExtension
 {
 	public class Geometry2D
 	{
+		public static PointF NormalizeVector(Point vector)
+		{
+			var length = Distance(Point.Empty, vector);
+
+			if (length == 0f)
+				return PointF.Empty;
+
+			return new PointF((float)(vector.X / length), (float)(vector.Y / length));
+		}
+
+		public static bool OffsetLine(ref Point ptFrom, ref Point ptTo, float amount)
+		{
+			var dir = NormalizeVector(Difference(ptFrom, ptTo));
+
+			if (dir == Point.Empty)
+				return false;
+
+			var offset = new Point((int)(dir.Y * amount), (int)(-dir.X * amount));
+
+			var newFromPt = new Point((ptFrom.X + offset.X), (ptFrom.Y + offset.Y));
+			var newToPt = new Point((ptTo.X + offset.X), (ptTo.Y + offset.Y));
+
+			ptFrom = newFromPt;
+			ptTo = newToPt;
+
+			return true;
+		}
+
 		public static Rectangle GetCentredRect(Point pos, int sideLength)
 		{
 			return new Rectangle((pos.X - (sideLength / 2)), (pos.Y - (sideLength / 2)), sideLength, sideLength);

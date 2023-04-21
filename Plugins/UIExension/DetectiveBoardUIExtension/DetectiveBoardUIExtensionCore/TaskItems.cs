@@ -116,6 +116,12 @@ namespace DetectiveBoardUIExtension
 			if ((toId <= 0) || (thickness < 0) || (arrows < 0) || (arrows >= 4))
 				return false;
 
+			if (toId == taskId)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
 			link = new UserLink(taskId, toId);
 			link.Color = ((argb == 0) ? Color.Empty : Color.FromArgb(argb));
 			link.Thickness = ((thickness == 0) ? 1 : thickness);
@@ -422,19 +428,19 @@ namespace DetectiveBoardUIExtension
 			return true;
 		}
 
-		public UserLink FindUserLink(uint id1, uint id2, bool andReverse)
+		public UserLink FindUserLink(uint fromId, uint toId)
 		{
-			var link = GetTaskItem(id1)?.FindUserLink(id2);
-
-			if ((link == null) && andReverse)
-				link = GetTaskItem(id2)?.FindUserLink(id1);
-
-			return link;
+			return GetTaskItem(fromId)?.FindUserLink(toId);
 		}
 
-		public bool HasUserLink(uint id1, uint id2, bool andReverse)
+		public bool HasUserLink(uint fromId, uint toId)
 		{
-			return (FindUserLink(id1, id2, andReverse) != null);
+			return (FindUserLink(fromId, toId) != null);
+		}
+
+		public bool HasUserLink(UserLink link)
+		{
+			return ((link != null) && (FindUserLink(link.FromId, link.ToId) != null));
 		}
 
 		public bool HasUserLink(uint id)

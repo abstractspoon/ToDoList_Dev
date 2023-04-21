@@ -348,9 +348,9 @@ namespace DetectiveBoardUIExtension
 			return false;
 		}
 
-		public bool UserLinkExists(uint id1, uint id2)
+		public bool UserLinkExists(uint fromId, uint toId)
 		{
-			return m_TaskItems.HasUserLink(id1, id2, true);
+			return m_TaskItems.HasUserLink(fromId, toId);
 		}
 
 		public bool CanCreateUserLink(uint fromId, uint toId)
@@ -388,7 +388,7 @@ namespace DetectiveBoardUIExtension
 
 			set
 			{
-				if ((value != null) && m_TaskItems.HasUserLink(value.FromId, value.ToId, false))
+				if ((value != null) && m_TaskItems.HasUserLink(value))
 					SelectUserLink(value);
 				else
 					ClearUserLinkSelection();
@@ -407,8 +407,8 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 		
-		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, 
-									UserLink.EndArrows arrows, string text, string type)
+		public UserLink CreateUserLink(uint fromId, uint toId, Color color, int thickness, 
+										UserLink.EndArrows arrows, string text, string type)
 		{
 			var fromTask = GetTaskItem(fromId);
 
@@ -418,27 +418,28 @@ namespace DetectiveBoardUIExtension
 				if (!SelectedNodeIds.Contains(fromId))
 				{
 					Debug.Assert(false);
-					return false;
+					return null;
 				}
 				
 				// Link cannot already exist
-				if (UserLinkExists(fromId, toId))
-					return false;
+				if (!UserLinkExists(fromId, toId))
+				{
+					var link = new UserLink(fromId, toId);
 
-				var link = new UserLink(fromId, toId);
-				link.Color = color;
-				link.Thickness = thickness;
-				link.Arrows = arrows;
-				link.Label = text;
-				link.Type = type;
+					link.Color = color;
+					link.Thickness = thickness;
+					link.Arrows = arrows;
+					link.Label = text;
+					link.Type = type;
 
-				fromTask.UserLinks.Add(link);
-				Invalidate();
+					fromTask.UserLinks.Add(link);
+					Invalidate();
 
-				return true;
+					return link;
+				}
 			}
 
-			return false;
+			return null;
 		}
 
 		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows,
@@ -846,7 +847,7 @@ namespace DetectiveBoardUIExtension
 						Point fromPos, toPos;
 
 						// Don't draw a dependency which is overlaid by a user link
-						if (!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&
+						if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
 							IsConnectionVisible(node, dependId, out fromPos, out toPos))
 						{
 							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
@@ -902,8 +903,6 @@ namespace DetectiveBoardUIExtension
 
 					if (m_HotTaskId == link.FromId)
 						fromPos = GetCreateLinkPinPos(node);
-					//else
-					//	fromPos = GetNodeClientPos(node);
 
 					toPos = m_DraggedUserLinkEnd;
 				}
@@ -1024,7 +1023,17 @@ namespace DetectiveBoardUIExtension
 
 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, uint toId, out Point fromPos, out Point toPos)
 		{
-			return base.IsConnectionVisible(fromNode, GetNode(toId), out fromPos, out toPos);
+			if (!base.IsConnectionVisible(fromNode, GetNode(toId), out fromPos, out toPos))
+				return false;
+
+			// If the reverse link exists then we need to offset 'our' ends
+			if (UserLinkExists(toId, fromNode.Data))
+			{
+				if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, 10))
+					return false;
+			}
+
+			return true;
 		}
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
@@ -1040,11 +1049,11 @@ namespace DetectiveBoardUIExtension
 
 				// Don't draw parent/child connections if they are
 				// overlaid either by dependencies or user links
-				if (m_TaskItems.HasDependency(nodeId, taskItem.ParentId)) 
-					return;
-
-				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId, true))
-					return;
+// 				if (m_TaskItems.HasDependency(nodeId, taskItem.ParentId)) 
+// 					return;
+// 
+// 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
+// 					return;
 				
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
@@ -1787,13 +1796,7 @@ namespace DetectiveBoardUIExtension
 				return false;
 
 			// Check for an existing link between the selected task and the link target
-			var link = m_TaskItems.FindUserLink(m_SelectedUserLink.FromId, node.Data, false);
-
-			if ((link != null) && (link != m_SelectedUserLink))
-				return false;
-
-			// Check for the reverse also
-			link = m_TaskItems.FindUserLink(node.Data, m_SelectedUserLink.FromId, false);
+			var link = m_TaskItems.FindUserLink(m_SelectedUserLink.FromId, node.Data);
 
 			if ((link != null) && (link != m_SelectedUserLink))
 				return false;
