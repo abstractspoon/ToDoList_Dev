@@ -24,12 +24,18 @@ namespace DetectiveBoardUIExtension
 
 		// ---------------------------------------------------
 
+		public static Color DefaultColor = Color.Red;
+		public static int DefaultThickness = 1;
+		public static EndArrows DefaultArrows = EndArrows.Finish;
+		public static string DefaultLabel = "";
+		public static string DefaultType = "";
+
+		// ---------------------------------------------------
+
 		private Color m_Color = Color.Empty;
 		private int m_Thickness = 1;
 
 		// ---------------------------------------------------
-
-		public static Color DefaultColor = Color.Red;
 
 		public uint FromId { get; private set; } = 0;
 		public uint ToId { get; private set; } = 0;
@@ -56,6 +62,12 @@ namespace DetectiveBoardUIExtension
 
 			FromId = fromId;
 			ToId = toId;
+
+			Color = DefaultColor;
+			Thickness = DefaultThickness;
+			Arrows = DefaultArrows;
+			Label = DefaultLabel;
+			Type = DefaultType;
 		}
 
 		public bool ChangeToId(uint toId)
@@ -85,15 +97,15 @@ namespace DetectiveBoardUIExtension
 			return Encode();
 		}
 
-		const int IdIndex = 0;
-		const int ColorIndex = 1;
-		const int ThicknessIndex = 2;
-		const int ArrowsIndex = 3;
-		const int LabelIndex = 4;
-		const int TypeIndex = 5;
-
 		public static bool TryParse(string input, uint taskId, out UserLink link)
 		{
+			const int IdIndex = 0;
+			const int ColorIndex = 1;
+			const int ThicknessIndex = 2;
+			const int ArrowsIndex = 3;
+			const int LabelIndex = 4;
+			const int TypeIndex = 5;
+
 			link = null;
 			string[] parts = input.Split(Delimiter);
 

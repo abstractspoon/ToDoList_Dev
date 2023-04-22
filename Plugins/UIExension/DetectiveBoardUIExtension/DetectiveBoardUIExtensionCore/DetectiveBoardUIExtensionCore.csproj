@@ -49,6 +49,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DetectiveBoardLinkAttributesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DetectiveBoardLinkAttributesPage.Designer.cs">
+      <DependentUpon>DetectiveBoardLinkAttributesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DetectiveBoardPreferencesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DetectiveBoardPreferencesDlg.Designer.cs">
+      <DependentUpon>DetectiveBoardPreferencesDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="DetectiveBoardAddEditLinkDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,6 +109,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DetectiveBoardLinkAttributesPage.resx">
+      <DependentUpon>DetectiveBoardLinkAttributesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DetectiveBoardPreferencesDlg.resx">
+      <DependentUpon>DetectiveBoardPreferencesDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="NodeControl.resx">
       <DependentUpon>NodeControl.cs</DependentUpon>
     </EmbeddedResource>

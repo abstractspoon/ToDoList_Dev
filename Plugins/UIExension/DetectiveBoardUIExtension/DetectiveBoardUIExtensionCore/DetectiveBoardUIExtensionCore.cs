@@ -24,9 +24,10 @@ namespace DetectiveBoardUIExtension
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-        private System.Drawing.Font m_ControlsFont;
+        private Font m_ControlsFont;
 
         private TDLNodeControl m_Control;
+		private DetectiveBoardPreferencesDlg m_PrefsDlg;
 
 		private Label m_OptionsLabel;
 		private DetectiveBoardOptionsComboBox m_OptionsCombo;
@@ -192,6 +193,8 @@ namespace DetectiveBoardUIExtension
         public void SavePreferences(Preferences prefs, String key)
         {
 			prefs.WriteProfileInt(key, "Options", (int)m_Control.Options);
+
+			m_PrefsDlg.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -201,6 +204,9 @@ namespace DetectiveBoardUIExtension
 				// private settings
 				m_Control.Options = (DetectiveBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
 				m_OptionsCombo.SelectedOptions = m_Control.Options;
+
+				m_PrefsDlg.LoadPreferences(prefs, key);
+				UpdateDetectiveBoardPreferences();
 			}
 
 			m_Control.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
@@ -263,6 +269,8 @@ namespace DetectiveBoardUIExtension
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+
+			m_PrefsDlg = new DetectiveBoardPreferencesDlg(m_Trans, m_ControlsFont);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -629,7 +637,24 @@ namespace DetectiveBoardUIExtension
 
 		private void OnPreferences(object sender, EventArgs e)
 		{
-			// TODO
+			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
+
+			if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_HwndParent)) == DialogResult.OK)
+			{
+				UpdateDetectiveBoardPreferences();
+			}
+		}
+
+		private void UpdateDetectiveBoardPreferences()
+		{
+			UserLink.DefaultColor = m_PrefsDlg.DefaultColor;
+			UserLink.DefaultThickness = m_PrefsDlg.DefaultThickness;
+			UserLink.DefaultArrows = m_PrefsDlg.DefaultArrows;
+			UserLink.DefaultLabel = m_PrefsDlg.DefaultLabel;
+			UserLink.DefaultType = m_PrefsDlg.DefaultType;
+
+			m_Control.DependencyColor = m_PrefsDlg.DependencyColor;
+			m_Control.ParentConnectionColor = m_PrefsDlg.ParentConnectionColor;
 		}
 
 		private void OnHelp(object sender, EventArgs e)

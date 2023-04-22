@@ -82,6 +82,7 @@ namespace DetectiveBoardUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 		//		private Size CheckboxSize;
+		private Color m_DependencyColor;
 
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
@@ -117,6 +118,7 @@ namespace DetectiveBoardUIExtension
 			Options = DefaultOptions;
 
 			m_TaskItems = null;
+			m_DependencyColor = Color.CornflowerBlue;
 
 			int nodeHeight = (int)(2 * BaseFontHeight) + 4;
 			int nodeWidth  = (4 * nodeHeight);
@@ -175,6 +177,22 @@ namespace DetectiveBoardUIExtension
 			{
 				m_StrikeThruDone = strikeThruDone;
 				RebuildFonts();
+			}
+		}
+
+		public Color DependencyColor
+		{
+			get { return m_DependencyColor; }
+
+			set
+			{
+				if (value != m_DependencyColor)
+				{
+					m_DependencyColor = value;
+
+					if (m_Options.HasFlag(DetectiveBoardOption.ShowDependencies))
+						Invalidate();
+				}
 			}
 		}
 
@@ -853,8 +871,14 @@ namespace DetectiveBoardUIExtension
 						if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
 							IsConnectionVisible(node, dependId, out fromPos, out toPos, false))
 						{
-							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
-							DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, Color.Blue, fromPos, toPos, (PinRadius + 1));
+							using (var pen = new Pen(DependencyColor))
+							{
+								using (var brush = new SolidBrush(DependencyColor))
+								{
+									DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
+									DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
+								}
+							}
 						}
 					}
 				}
@@ -910,15 +934,34 @@ namespace DetectiveBoardUIExtension
 					toPos = m_DraggedUserLinkEnd;
 				}
 
-				var color = (selected ? SystemColors.WindowText : link.Color);
 				var lineThickness = (selected ? 2 : link.Thickness);
 				var arrowThickness = Math.Max(2, lineThickness);
 				var arrowOffset = (selected ? (DefaultPinRadius + 2) : PinRadius);
 				var arrowSize = UIExtension.DependencyArrows.Size(TextFont);
-				var pinBrush = (selected ? null : new SolidBrush(color));
 
-				DrawConnection(graphics, new Pen(color, lineThickness), pinBrush, fromPos, toPos);
-				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, arrowOffset);
+				if (selected)
+				{
+					using (var pen = new Pen(SystemColors.WindowText, 2))
+						DrawConnection(graphics, pen, null, fromPos, toPos);
+
+					// Draw special pins
+					DrawSelectionPin(graphics, fromPos, false);
+					DrawSelectionPin(graphics, toPos, true);
+
+					DrawConnectionArrows(graphics, link.Arrows, arrowThickness, SystemColors.WindowText, fromPos, toPos, arrowOffset);
+				}
+				else
+				{
+					using (var pen = new Pen(link.Color, link.Thickness))
+					{
+						using (var brush = new SolidBrush(link.Color))
+						{
+							DrawConnection(graphics, pen, brush, fromPos, toPos);
+						}
+					}
+
+					DrawConnectionArrows(graphics, link.Arrows, arrowThickness, link.Color, fromPos, toPos, arrowOffset);
+				}
 
 				if (!string.IsNullOrWhiteSpace(link.Label))
 				{
@@ -926,8 +969,7 @@ namespace DetectiveBoardUIExtension
 					var textOffset = Geometry2D.MidPoint(fromPos, toPos);
 					float textAngle = Geometry2D.BestTextAngleInDegrees(fromPos, toPos, Geometry2D.AngleAxis.FromHorizontal);
 
-					// This is a little hack because it implies knowledge of Geometry2D internals
-					// Basically it's a way of determining whether to place the line text below the line
+					// This is a little trick to determine whether to place the line text above or below the line
 					float lineAngle = Geometry2D.DegreesBetween(fromPos, toPos, Geometry2D.AngleAxis.FromHorizontal);
 
 					var format = new StringFormat()
@@ -943,13 +985,6 @@ namespace DetectiveBoardUIExtension
 					graphics.Transform = matrix;
 					graphics.DrawString(link.Label, TextFont, SystemBrushes.WindowText/*new SolidBrush(color)*/, Point.Empty, format);
 					graphics.ResetTransform();
-				}
-
-				// Draw special pins
-				if (selected)
-				{
-					DrawSelectionPin(graphics, fromPos, false);
-					DrawSelectionPin(graphics, toPos, true);
 				}
 			}
 		}
@@ -1091,8 +1126,14 @@ namespace DetectiveBoardUIExtension
 				
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
-					DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
-					DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, Color.Gray, nodePos, parentPos, (PinRadius + 1));
+					using (var pen = new Pen(ParentConnectionColor, 1))
+					{
+						using (var brush = new SolidBrush(ParentConnectionColor))
+						{
+							DrawConnection(graphics, pen, brush, nodePos, parentPos);
+						}
+					}
+					DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
 				}
 			}
 		}

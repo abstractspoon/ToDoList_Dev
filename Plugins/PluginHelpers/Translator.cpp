@@ -84,6 +84,11 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 	}
 }
 
+void Translator::Translate(UserControl^ ctrl)
+{
+	Translate(ctrl->Controls);
+}
+
 void Translator::Translate(ToolStripItemCollection^ items)
 {
 	int nItem = items->Count;

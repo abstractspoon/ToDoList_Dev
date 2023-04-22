@@ -70,7 +70,8 @@ namespace DetectiveBoardUIExtension
 		Size m_NodeSize;
 		Font m_TextFont;
 		Color m_WallColor = SystemColors.ControlDark;
-		
+		Color m_ParentConnectionColor = Color.Gray;
+
 		BaseNode m_RootNode = null;
 		List<BaseNode> m_SelectedNodes = null;
 		RadialTree.RadialTree<uint> m_RadialTree = null;
@@ -161,6 +162,20 @@ namespace DetectiveBoardUIExtension
 				if (value != m_WallColor)
 				{
 					m_WallColor = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public Color ParentConnectionColor
+		{
+			get { return m_ParentConnectionColor; }
+
+			set
+			{
+				if (value != m_ParentConnectionColor)
+				{
+					m_ParentConnectionColor = value;
 					Invalidate();
 				}
 			}
@@ -762,7 +777,7 @@ namespace DetectiveBoardUIExtension
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			var pen = new Pen(Color.Gray);
+			var pen = new Pen(ParentConnectionColor);
 			pen.CustomEndCap = new AdjustableArrowCap(5, 5);
 
 			DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
