@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
-	class DetectiveBoardLinkArrowsComboBox : ComboBox
+	class EvidenceBoardLinkArrowsComboBox : ComboBox
 	{
-		class DetectiveBoardArrowsItem
+		class EvidenceBoardArrowsItem
 		{
-			public DetectiveBoardArrowsItem(string label, UserLink.EndArrows arrows)
+			public EvidenceBoardArrowsItem(string label, UserLink.EndArrows arrows)
 			{
 				Label = label;
 				Arrows = arrows;
@@ -27,12 +27,12 @@ namespace DetectiveBoardUIExtension
 
 		// ----------------------------------------------------------------
 
-		public DetectiveBoardLinkArrowsComboBox()
+		public EvidenceBoardLinkArrowsComboBox()
 		{
-			Items.Add(new DetectiveBoardArrowsItem("None", UserLink.EndArrows.None));
-			Items.Add(new DetectiveBoardArrowsItem("Start", UserLink.EndArrows.Start));
-			Items.Add(new DetectiveBoardArrowsItem("End", UserLink.EndArrows.Finish));
-			Items.Add(new DetectiveBoardArrowsItem("Both", UserLink.EndArrows.Both));
+			Items.Add(new EvidenceBoardArrowsItem("None", UserLink.EndArrows.None));
+			Items.Add(new EvidenceBoardArrowsItem("Start", UserLink.EndArrows.Start));
+			Items.Add(new EvidenceBoardArrowsItem("End", UserLink.EndArrows.Finish));
+			Items.Add(new EvidenceBoardArrowsItem("Both", UserLink.EndArrows.Both));
 		}
 
 		public UserLink.EndArrows SelectedOption
@@ -40,7 +40,7 @@ namespace DetectiveBoardUIExtension
 			get
 			{
 				if (SelectedItem != null)
-					return (SelectedItem as DetectiveBoardArrowsItem).Arrows;
+					return (SelectedItem as EvidenceBoardArrowsItem).Arrows;
 
 				// else
 				return UserLink.EndArrows.None;
@@ -50,7 +50,7 @@ namespace DetectiveBoardUIExtension
 			{
 				for (int index = 0; index < Items.Count; index++)
 				{
-					var item = (Items[index] as DetectiveBoardArrowsItem);
+					var item = (Items[index] as EvidenceBoardArrowsItem);
 
 					if (item.Arrows == value)
 					{

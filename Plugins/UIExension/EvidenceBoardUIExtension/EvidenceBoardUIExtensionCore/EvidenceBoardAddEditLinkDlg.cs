@@ -9,11 +9,11 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
-	public partial class DetectiveBoardAddEditLinkDlg : Form
+	public partial class EvidenceBoardAddEditLinkDlg : Form
 	{
-		public DetectiveBoardAddEditLinkDlg(Translator trans, UserLink link)
+		public EvidenceBoardAddEditLinkDlg(Translator trans, UserLink link)
 		{
 			InitializeComponent();
 			

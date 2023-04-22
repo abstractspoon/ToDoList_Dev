@@ -1,6 +1,6 @@
-﻿namespace DetectiveBoardUIExtension
+﻿namespace EvidenceBoardUIExtension
 {
-	partial class DetectiveBoardAddEditLinkDlg
+	partial class EvidenceBoardAddEditLinkDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -28,11 +28,11 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DetectiveBoardAddEditLinkDlg));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardAddEditLinkDlg));
 			this.okBtn = new System.Windows.Forms.Button();
 			this.cancelBtn = new System.Windows.Forms.Button();
 			this.divider = new System.Windows.Forms.Label();
-			this.m_Attribs = new DetectiveBoardUIExtension.DetectiveBoardLinkAttributesPage();
+			this.m_Attribs = new EvidenceBoardUIExtension.EvidenceBoardLinkAttributesPage();
 			this.SuspendLayout();
 			// 
 			// okBtn
@@ -75,7 +75,7 @@
 			this.m_Attribs.Size = new System.Drawing.Size(287, 147);
 			this.m_Attribs.TabIndex = 5;
 			// 
-			// DetectiveBoardAddEditLinkDlg
+			// EvidenceBoardAddEditLinkDlg
 			// 
 			this.AcceptButton = this.okBtn;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -89,7 +89,7 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "DetectiveBoardAddEditLinkDlg";
+			this.Name = "EvidenceBoardAddEditLinkDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -102,6 +102,6 @@
 		private System.Windows.Forms.Button okBtn;
 		private System.Windows.Forms.Button cancelBtn;
 		private System.Windows.Forms.Label divider;
-		private DetectiveBoardLinkAttributesPage m_Attribs;
+		private EvidenceBoardLinkAttributesPage m_Attribs;
 	}
 }

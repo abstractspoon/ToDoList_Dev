@@ -1,6 +1,6 @@
-﻿namespace DetectiveBoardUIExtension
+﻿namespace EvidenceBoardUIExtension
 {
-    partial class DetectiveBoardPreferencesDlg
+    partial class EvidenceBoardPreferencesDlg
     {
         /// <summary>
         /// Required designer variable.
@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DetectiveBoardPreferencesDlg));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardPreferencesDlg));
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.BtnOK = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.m_DefaultAttribs = new DetectiveBoardUIExtension.DetectiveBoardLinkAttributesPage();
+			this.m_DefaultAttribs = new EvidenceBoardUIExtension.EvidenceBoardLinkAttributesPage();
 			this.m_DependsLinkColor = new UIComponents.ColorButton();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
@@ -138,7 +138,7 @@
 			this.m_ParentLinkColor.Text = "Set...";
 			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
 			// 
-			// DetectiveBoardPreferencesDlg
+			// EvidenceBoardPreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -151,7 +151,7 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "DetectiveBoardPreferencesDlg";
+			this.Name = "EvidenceBoardPreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
 			this.ShowInTaskbar = false;
 			this.Text = "Week Planner Preferences";
@@ -168,7 +168,7 @@
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.GroupBox groupBox1;
-		private DetectiveBoardLinkAttributesPage m_DefaultAttribs;
+		private EvidenceBoardLinkAttributesPage m_DefaultAttribs;
 		private UIComponents.ColorButton m_DependsLinkColor;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label1;

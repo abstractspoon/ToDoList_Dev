@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
-    partial class DetectiveBoardPreferencesDlg : Form
+    partial class EvidenceBoardPreferencesDlg : Form
     {
 		private Translator m_Trans;
 		private IWin32Window m_Owner;
@@ -29,7 +29,7 @@ namespace DetectiveBoardUIExtension
 
 		// ------------------------------------------------------------------------
 
-		public DetectiveBoardPreferencesDlg(IWin32Window owner, Translator trans, Font font)
+		public EvidenceBoardPreferencesDlg(IWin32Window owner, Translator trans, Font font)
         {
 			m_Trans = trans;
 			m_Owner = owner;

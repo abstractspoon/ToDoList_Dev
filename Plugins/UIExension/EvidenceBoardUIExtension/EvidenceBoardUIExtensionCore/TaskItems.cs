@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
 	public class UserLink
 	{

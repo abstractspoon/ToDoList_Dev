@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
 	public delegate void NodeSelectionChangeEventHandler(object sender, IList<uint> itemIds);
 	public delegate bool NodeDragDropChangeEventHandler(object sender, IList<uint> itemIds);

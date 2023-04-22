@@ -10,10 +10,10 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class DetectiveBoardUIExtensionCore : Panel, IUIExtension
+	public class EvidenceBoardUIExtensionCore : Panel, IUIExtension
     {
         private const string FontName = "Tahoma";
 
@@ -27,17 +27,17 @@ namespace DetectiveBoardUIExtension
         private Font m_ControlsFont;
 
         private TDLNodeControl m_Control;
-		private DetectiveBoardPreferencesDlg m_PrefsDlg;
+		private EvidenceBoardPreferencesDlg m_PrefsDlg;
 
 		private Label m_OptionsLabel;
-		private DetectiveBoardOptionsComboBox m_OptionsCombo;
+		private EvidenceBoardOptionsComboBox m_OptionsCombo;
 		private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
 		// ----------------------------------------------------------------------------
 
-		public DetectiveBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
+		public EvidenceBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
         {
 			TaskItem.MetaDataKey = typeId;
 
@@ -202,11 +202,11 @@ namespace DetectiveBoardUIExtension
             if (!appOnly)
             {
 				// private settings
-				m_Control.Options = (DetectiveBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
+				m_Control.Options = (EvidenceBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
 				m_OptionsCombo.SelectedOptions = m_Control.Options;
 
 				m_PrefsDlg.LoadPreferences(prefs, key);
-				UpdateDetectiveBoardPreferences();
+				UpdateEvidenceBoardPreferences();
 			}
 
 			m_Control.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
@@ -270,7 +270,7 @@ namespace DetectiveBoardUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-			m_PrefsDlg = new DetectiveBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -281,15 +281,15 @@ namespace DetectiveBoardUIExtension
             else
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnDetectiveBoardSelectionChange);
-			m_Control.TaskMoved += new TaskMovedEventHandler(OnDetectiveBoardTaskMoved);
-			m_Control.ConnectionCreated += new ConnectionCreatedEventHandler(OnDetectiveBoardTaskLinkCreated);
-			m_Control.ConnectionEdited += new ConnectionEditedEventHandler(OnDetectiveBoardTaskLinkEdited);
-			m_Control.ConnectionDeleted += new ConnectionDeletedEventHandler(OnDetectiveBoardTaskLinkDeleted);
+			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnEvidenceBoardSelectionChange);
+			m_Control.TaskMoved += new TaskMovedEventHandler(OnEvidenceBoardTaskMoved);
+			m_Control.ConnectionCreated += new ConnectionCreatedEventHandler(OnEvidenceBoardTaskLinkCreated);
+			m_Control.ConnectionEdited += new ConnectionEditedEventHandler(OnEvidenceBoardTaskLinkEdited);
+			m_Control.ConnectionDeleted += new ConnectionDeletedEventHandler(OnEvidenceBoardTaskLinkDeleted);
 
-			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveBoardEditTaskLabel);
-            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveBoardEditTaskIcon);
-            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveBoardEditTaskCompletion);
+			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnEvidenceBoardEditTaskLabel);
+            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnEvidenceBoardEditTaskIcon);
+            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnEvidenceBoardEditTaskCompletion);
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
@@ -301,7 +301,7 @@ namespace DetectiveBoardUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new DetectiveBoardOptionsComboBox(m_Trans);
+			m_OptionsCombo = new EvidenceBoardOptionsComboBox(m_Trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
@@ -344,14 +344,14 @@ namespace DetectiveBoardUIExtension
 				m_Control.Options = m_OptionsCombo.SelectedOptions;
 		}
 
-		bool OnDetectiveBoardEditTaskLabel(object sender, UInt32 taskId)
+		bool OnEvidenceBoardEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyEditLabel();
 		}
 
-        bool OnDetectiveBoardEditTaskCompletion(object sender, UInt32 taskId, bool completed)
+        bool OnEvidenceBoardEditTaskCompletion(object sender, UInt32 taskId, bool completed)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -359,14 +359,14 @@ namespace DetectiveBoardUIExtension
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        bool OnDetectiveBoardEditTaskIcon(object sender, UInt32 taskId)
+        bool OnEvidenceBoardEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-		void OnDetectiveBoardSelectionChange(object sender, IList<uint> nodeIds)
+		void OnEvidenceBoardSelectionChange(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -393,7 +393,7 @@ namespace DetectiveBoardUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		bool OnDetectiveBoardTaskMoved(object sender, IList<uint> nodeIds)
+		bool OnEvidenceBoardTaskMoved(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -406,7 +406,7 @@ namespace DetectiveBoardUIExtension
 			return notify.NotifyMod();
 		}
 
-		bool OnDetectiveBoardTaskLinkCreated(object sender, UserLink link)
+		bool OnEvidenceBoardTaskLinkCreated(object sender, UserLink link)
 		{
 			m_Control.SelectedUserLink = link;
 
@@ -416,12 +416,12 @@ namespace DetectiveBoardUIExtension
 			return NotifyParentTaskModified(link.FromId);
 		}
 
-		bool OnDetectiveBoardTaskLinkEdited(object sender, UserLink link)
+		bool OnEvidenceBoardTaskLinkEdited(object sender, UserLink link)
 		{
 			return NotifyParentTaskModified(link.FromId);
 		}
 
-		bool OnDetectiveBoardTaskLinkDeleted(object sender, uint taskId)
+		bool OnEvidenceBoardTaskLinkDeleted(object sender, uint taskId)
 		{
 			return NotifyParentTaskModified(taskId);
 		}
@@ -453,7 +453,7 @@ namespace DetectiveBoardUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("DetectiveBoardUIExtension.toolbar_std.bmp"));
+			var images = new Bitmap(assembly.GetManifestResourceStream("EvidenceBoardUIExtension.toolbar_std.bmp"));
 
 			m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
@@ -591,7 +591,7 @@ namespace DetectiveBoardUIExtension
 						return;
 					}
 
-					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, null);
+					var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
@@ -616,7 +616,7 @@ namespace DetectiveBoardUIExtension
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
-			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink);
+			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
@@ -641,11 +641,11 @@ namespace DetectiveBoardUIExtension
 
 			if (m_PrefsDlg.ShowDialog(this/*Control.FromHandle(m_HwndParent)*/) == DialogResult.OK)
 			{
-				UpdateDetectiveBoardPreferences();
+				UpdateEvidenceBoardPreferences();
 			}
 		}
 
-		private void UpdateDetectiveBoardPreferences()
+		private void UpdateEvidenceBoardPreferences()
 		{
 			UserLink.DefaultColor = m_PrefsDlg.DefaultColor;
 			UserLink.DefaultThickness = m_PrefsDlg.DefaultThickness;

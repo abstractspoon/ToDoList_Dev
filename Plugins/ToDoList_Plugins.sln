@@ -198,13 +198,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomComboBox", "3rdParty\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkLabelEx", "3rdParty\LinkLabelEx\LinkLabelEx.csproj", "{6B24236C-6B0C-4BA4-9778-6D8A9388B419}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DetectiveBoardUIExtension", "DetectiveBoardUIExtension", "{0096D7E6-8C98-4841-A6F5-B093BF4316CA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EvidenceBoardUIExtension", "EvidenceBoardUIExtension", "{0096D7E6-8C98-4841-A6F5-B093BF4316CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadialTree", "3rdParty\RadialTree\RadialTree.csproj", "{1DB9C8CC-031B-49B5-AC6C-23D9C75FDB0C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DetectiveBoardUIExtensionBridge", "UIExension\DetectiveBoardUIExtension\DetectiveBoardUIExtensionBridge\DetectiveBoardUIExtensionBridge.vcxproj", "{13FC13FB-60BE-4735-9681-C3F84B4E3C54}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EvidenceBoardUIExtensionBridge", "UIExension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionBridge\EvidenceBoardUIExtensionBridge.vcxproj", "{13FC13FB-60BE-4735-9681-C3F84B4E3C54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DetectiveBoardUIExtensionCore", "UIExension\DetectiveBoardUIExtension\DetectiveBoardUIExtensionCore\DetectiveBoardUIExtensionCore.csproj", "{D03AA054-9987-44DC-B03F-691D79506DA9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvidenceBoardUIExtensionCore", "UIExension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionCore\EvidenceBoardUIExtensionCore.csproj", "{D03AA054-9987-44DC-B03F-691D79506DA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

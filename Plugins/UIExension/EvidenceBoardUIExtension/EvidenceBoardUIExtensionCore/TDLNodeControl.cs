@@ -12,7 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
@@ -26,7 +26,7 @@ namespace DetectiveBoardUIExtension
 	// ------------------------------------------------------------
 
 	[Flags]
-	enum DetectiveBoardOption
+	enum EvidenceBoardOption
 	{
 		None					= 0x00,
 		ShowParentChildLinks	= 0x01,
@@ -55,11 +55,11 @@ namespace DetectiveBoardUIExtension
 
 		// -------------------------------------------------------------------------
 
-		const DetectiveBoardOption DefaultOptions = (DetectiveBoardOption.ShowRootNode |
-													DetectiveBoardOption.ShowParentChildLinks |
-													DetectiveBoardOption.ShowDependencies |
-													DetectiveBoardOption.DrawLinksOnTop |
-													DetectiveBoardOption.DrawPins);
+		const EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.ShowRootNode |
+													EvidenceBoardOption.ShowParentChildLinks |
+													EvidenceBoardOption.ShowDependencies |
+													EvidenceBoardOption.DrawLinksOnTop |
+													EvidenceBoardOption.DrawPins);
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
@@ -77,7 +77,7 @@ namespace DetectiveBoardUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private DetectiveBoardOption m_Options = DetectiveBoardOption.None;
+		private EvidenceBoardOption m_Options = EvidenceBoardOption.None;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -190,7 +190,7 @@ namespace DetectiveBoardUIExtension
 				{
 					m_DependencyColor = value;
 
-					if (m_Options.HasFlag(DetectiveBoardOption.ShowDependencies))
+					if (m_Options.HasFlag(EvidenceBoardOption.ShowDependencies))
 						Invalidate();
 				}
 			}
@@ -234,7 +234,7 @@ namespace DetectiveBoardUIExtension
 				ApplyUserPositions(child);
 		}
 		
-		public DetectiveBoardOption Options
+		public EvidenceBoardOption Options
 		{
 			get { return m_Options; }
 		
@@ -244,8 +244,8 @@ namespace DetectiveBoardUIExtension
 				{
 					m_Options = value;
 
-					base.DrawNodesOnTop = !m_Options.HasFlag(DetectiveBoardOption.DrawLinksOnTop);
-					base.PinRadius = (m_Options.HasFlag(DetectiveBoardOption.DrawPins) ? DefaultPinRadius : 0);
+					base.DrawNodesOnTop = !m_Options.HasFlag(EvidenceBoardOption.DrawLinksOnTop);
+					base.PinRadius = (m_Options.HasFlag(EvidenceBoardOption.DrawPins) ? DefaultPinRadius : 0);
 
 					Invalidate();
 				}
@@ -857,7 +857,7 @@ namespace DetectiveBoardUIExtension
 
 		protected void DrawTaskDependencies(Graphics graphics, BaseNode node)
 		{
-			if (m_Options.HasFlag(DetectiveBoardOption.ShowDependencies))
+			if (m_Options.HasFlag(EvidenceBoardOption.ShowDependencies))
 			{
 				var taskItem = GetTaskItem(node);
 
@@ -1052,7 +1052,7 @@ namespace DetectiveBoardUIExtension
 			{
 				DoPaintNode(graphics, taskItem, rect, GetDrawState(node, selected));
 			}
-			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
+			else if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{
 				base.DrawNode(graphics, node, rect, selected);
 			}
@@ -1060,7 +1060,7 @@ namespace DetectiveBoardUIExtension
 
 		protected override void DrawParentAndChildConnections(Graphics graphics, BaseNode node)
 		{
-			if (m_Options.HasFlag(DetectiveBoardOption.ShowParentChildLinks))
+			if (m_Options.HasFlag(EvidenceBoardOption.ShowParentChildLinks))
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
@@ -1112,7 +1112,7 @@ namespace DetectiveBoardUIExtension
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			if (m_Options.HasFlag(DetectiveBoardOption.ShowParentChildLinks))
+			if (m_Options.HasFlag(EvidenceBoardOption.ShowParentChildLinks))
 			{
 				var taskItem = m_TaskItems.GetTaskItem(nodeId);
 
@@ -1124,7 +1124,7 @@ namespace DetectiveBoardUIExtension
 // 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
 // 					return;
 				
-				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
+				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 				{
 					using (var pen = new Pen(ParentConnectionColor, 1))
 					{
@@ -1743,7 +1743,7 @@ namespace DetectiveBoardUIExtension
 						return UIExtension.HandCursor();
 				}
 			}
-			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
+			else if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{
 				if (HitTestNode(ptClient) == RootNode)
 					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);

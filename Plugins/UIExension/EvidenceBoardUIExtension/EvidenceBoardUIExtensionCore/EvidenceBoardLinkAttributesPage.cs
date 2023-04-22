@@ -9,16 +9,16 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DetectiveBoardUIExtension
+namespace EvidenceBoardUIExtension
 {
-	public partial class DetectiveBoardLinkAttributesPage : UserControl
+	public partial class EvidenceBoardLinkAttributesPage : UserControl
 	{
-		public DetectiveBoardLinkAttributesPage()
+		public EvidenceBoardLinkAttributesPage()
 		{
 			InitializeComponent();
 		}
 
-		public DetectiveBoardLinkAttributesPage(Translator trans) : base()
+		public EvidenceBoardLinkAttributesPage(Translator trans) : base()
 		{
 			trans.Translate(this);
 			SetLink(null);

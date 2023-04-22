@@ -1,6 +1,6 @@
-﻿namespace DetectiveBoardUIExtension
+﻿namespace EvidenceBoardUIExtension
 {
-	partial class DetectiveBoardLinkAttributesPage
+	partial class EvidenceBoardLinkAttributesPage
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.m_LinkArrows = new DetectiveBoardUIExtension.DetectiveBoardLinkArrowsComboBox();
+			this.m_LinkArrows = new EvidenceBoardUIExtension.EvidenceBoardLinkArrowsComboBox();
 			this.m_LinkType = new System.Windows.Forms.ComboBox();
 			this.m_TextBox = new System.Windows.Forms.TextBox();
 			this.m_LineThickness = new System.Windows.Forms.ComboBox();
@@ -46,7 +46,7 @@
 			this.m_LinkArrows.FormattingEnabled = true;
 			this.m_LinkArrows.Location = new System.Drawing.Point(111, 125);
 			this.m_LinkArrows.Name = "m_LinkArrows";
-			this.m_LinkArrows.SelectedOption = DetectiveBoardUIExtension.UserLink.EndArrows.None;
+			this.m_LinkArrows.SelectedOption = EvidenceBoardUIExtension.UserLink.EndArrows.None;
 			this.m_LinkArrows.Size = new System.Drawing.Size(173, 21);
 			this.m_LinkArrows.TabIndex = 17;
 			// 
@@ -135,7 +135,7 @@
 			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_ColorButton.UseVisualStyleBackColor = true;
 			// 
-			// DetectiveBoardLinkAttributesPage
+			// EvidenceBoardLinkAttributesPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -149,7 +149,7 @@
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_ColorButton);
-			this.Name = "DetectiveBoardLinkAttributesPage";
+			this.Name = "EvidenceBoardLinkAttributesPage";
 			this.Size = new System.Drawing.Size(286, 149);
 			this.ResumeLayout(false);
 			this.PerformLayout();
@@ -158,7 +158,7 @@
 
 		#endregion
 
-		private DetectiveBoardLinkArrowsComboBox m_LinkArrows;
+		private EvidenceBoardLinkArrowsComboBox m_LinkArrows;
 		private System.Windows.Forms.ComboBox m_LinkType;
 		private System.Windows.Forms.TextBox m_TextBox;
 		private System.Windows.Forms.ComboBox m_LineThickness;

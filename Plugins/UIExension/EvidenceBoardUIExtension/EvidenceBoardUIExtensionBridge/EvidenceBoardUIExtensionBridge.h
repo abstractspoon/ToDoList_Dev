@@ -8,15 +8,15 @@
 #include <Interfaces\IUIExtension.h>
 
 #include <vcclr.h>
-using namespace DetectiveBoardUIExtension;
+using namespace EvidenceBoardUIExtension;
 
 /////////////////////////////////////////////////////////////////////////////////
-// This class is exported from DetectiveBoardUIExtensionBridge.dll
+// This class is exported from EvidenceBoardUIExtensionBridge.dll
 
-class CDetectiveBoardUIExtensionBridge : public IUIExtension
+class CEvidenceBoardUIExtensionBridge : public IUIExtension
 {
 public:
-	CDetectiveBoardUIExtensionBridge();
+	CEvidenceBoardUIExtensionBridge();
 
    void Release(); // releases the interface
 
@@ -39,12 +39,12 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////////
-// This class is exported from DetectiveBoardUIExtensionBridge.dll
+// This class is exported from EvidenceBoardUIExtensionBridge.dll
 
-class CDetectiveBoardUIExtensionBridgeWindow : public IUIExtensionWindow
+class CEvidenceBoardUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CDetectiveBoardUIExtensionBridgeWindow(ITransText* pTT);
+	CEvidenceBoardUIExtensionBridgeWindow(ITransText* pTT);
 
    void Release(); // releases the interface
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
@@ -81,7 +81,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
    
 protected:
-   gcroot<DetectiveBoardUIExtensionCore^> m_wnd;
+   gcroot<EvidenceBoardUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
 
 protected:
@@ -97,6 +97,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
-   return new CDetectiveBoardUIExtensionBridge();
+   return new CEvidenceBoardUIExtensionBridge();
 }
 
