@@ -270,7 +270,7 @@ namespace DetectiveBoardUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-			m_PrefsDlg = new DetectiveBoardPreferencesDlg(m_Trans, m_ControlsFont);
+			m_PrefsDlg = new DetectiveBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -639,7 +639,7 @@ namespace DetectiveBoardUIExtension
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
-			if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_HwndParent)) == DialogResult.OK)
+			if (m_PrefsDlg.ShowDialog(this/*Control.FromHandle(m_HwndParent)*/) == DialogResult.OK)
 			{
 				UpdateDetectiveBoardPreferences();
 			}

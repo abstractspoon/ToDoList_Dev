@@ -14,6 +14,7 @@ namespace DetectiveBoardUIExtension
     partial class DetectiveBoardPreferencesDlg : Form
     {
 		private Translator m_Trans;
+		private IWin32Window m_Owner;
 
 		// ------------------------------------------------------------------------
 
@@ -28,9 +29,10 @@ namespace DetectiveBoardUIExtension
 
 		// ------------------------------------------------------------------------
 
-		public DetectiveBoardPreferencesDlg(Translator trans, Font font)
+		public DetectiveBoardPreferencesDlg(IWin32Window owner, Translator trans, Font font)
         {
 			m_Trans = trans;
+			m_Owner = owner;
 			
             InitializeComponent();
 
@@ -64,7 +66,41 @@ namespace DetectiveBoardUIExtension
             
 			m_DependsLinkColor.Color = Color.FromArgb(prefs.GetProfileInt(prefsKey, "DependencyColor", Color.CornflowerBlue.ToArgb()));
 			m_ParentLinkColor.Color =  Color.FromArgb(prefs.GetProfileInt(prefsKey, "ParentConnectionColor", Color.Gray.ToArgb()));
+		}
 
+		public new DialogResult ShowDialog()
+		{
+			return ShowDialog(m_Owner);
+		}
+
+		public new DialogResult ShowDialog(IWin32Window owner)
+		{
+			// Snapshot current state
+			var orgColor = DefaultColor;
+			var orgThicknes = DefaultThickness;
+			var ordArrows = DefaultArrows;
+			var orgLabel = DefaultLabel;
+			var orgType = DefaultType;
+
+			var orgDependColor = DependencyColor;
+			var orgParentColor = ParentConnectionColor;
+
+			var ret = base.ShowDialog(owner);
+			
+			if (ret != DialogResult.OK)
+			{
+				// Restore previous state
+				m_DefaultAttribs.Color = orgColor;
+				m_DefaultAttribs.Thickness = orgThicknes;
+				m_DefaultAttribs.Arrows = ordArrows;
+				m_DefaultAttribs.Label = orgLabel;
+				m_DefaultAttribs.Type = orgType;
+
+				m_DependsLinkColor.Color = orgDependColor;
+				m_ParentLinkColor.Color = orgParentColor;
+			}
+
+			return ret;
 		}
 	}
 }
