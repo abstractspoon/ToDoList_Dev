@@ -33,7 +33,7 @@
 			this.m_DisplayContinuous = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.m_HideParentTasksTag = new System.Windows.Forms.TextBox();
-			this.m_ShowFutureOcurrences = new System.Windows.Forms.CheckBox();
+			this.m_ShowFutureOccurrences = new System.Windows.Forms.CheckBox();
 			this.m_HideParentTasksByTag = new System.Windows.Forms.CheckBox();
 			this.m_HideParentTasks = new System.Windows.Forms.CheckBox();
 			this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
@@ -85,7 +85,7 @@
 			// groupBox1
 			// 
 			this.groupBox1.Controls.Add(this.m_HideParentTasksTag);
-			this.groupBox1.Controls.Add(this.m_ShowFutureOcurrences);
+			this.groupBox1.Controls.Add(this.m_ShowFutureOccurrences);
 			this.groupBox1.Controls.Add(this.m_HideParentTasksByTag);
 			this.groupBox1.Controls.Add(this.m_HideParentTasks);
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningDays);
@@ -105,17 +105,17 @@
 			this.m_HideParentTasksTag.Size = new System.Drawing.Size(137, 20);
 			this.m_HideParentTasksTag.TabIndex = 5;
 			// 
-			// m_ShowFutureOcurrences
+			// m_ShowFutureOccurrences
 			// 
-			this.m_ShowFutureOcurrences.AutoSize = true;
-			this.m_ShowFutureOcurrences.Checked = true;
-			this.m_ShowFutureOcurrences.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.m_ShowFutureOcurrences.Location = new System.Drawing.Point(10, 162);
-			this.m_ShowFutureOcurrences.Name = "m_ShowFutureOcurrences";
-			this.m_ShowFutureOcurrences.Size = new System.Drawing.Size(236, 17);
-			this.m_ShowFutureOcurrences.TabIndex = 4;
-			this.m_ShowFutureOcurrences.Text = "Display &future occurrences of recurring tasks";
-			this.m_ShowFutureOcurrences.UseVisualStyleBackColor = true;
+			this.m_ShowFutureOccurrences.AutoSize = true;
+			this.m_ShowFutureOccurrences.Checked = true;
+			this.m_ShowFutureOccurrences.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_ShowFutureOccurrences.Location = new System.Drawing.Point(10, 162);
+			this.m_ShowFutureOccurrences.Name = "m_ShowFutureOccurrences";
+			this.m_ShowFutureOccurrences.Size = new System.Drawing.Size(236, 17);
+			this.m_ShowFutureOccurrences.TabIndex = 4;
+			this.m_ShowFutureOccurrences.Text = "Display &future occurrences of recurring tasks";
+			this.m_ShowFutureOccurrences.UseVisualStyleBackColor = true;
 			// 
 			// m_HideParentTasksByTag
 			// 
@@ -276,7 +276,7 @@
 		private System.Windows.Forms.ComboBox m_SlotMinuteCombo;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.CheckBox m_DisplayContinuous;
-		private System.Windows.Forms.CheckBox m_ShowFutureOcurrences;
+		private System.Windows.Forms.CheckBox m_ShowFutureOccurrences;
 		private System.Windows.Forms.TextBox m_HideParentTasksTag;
 		private System.Windows.Forms.CheckBox m_HideParentTasksByTag;
 	}
