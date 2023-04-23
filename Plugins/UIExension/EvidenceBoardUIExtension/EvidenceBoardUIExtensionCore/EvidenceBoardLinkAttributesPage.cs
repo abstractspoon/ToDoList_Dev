@@ -32,7 +32,7 @@ namespace EvidenceBoardUIExtension
 			if (link == null)
 			{
 				Color = UserLink.DefaultColor;
-				Thickness = UserLink.DefaultThickness - 1;
+				Thickness = UserLink.DefaultThickness;
 				Arrows = UserLink.DefaultArrows;
 				Label = UserLink.DefaultLabel;
 				Type = UserLink.DefaultType;
@@ -40,7 +40,7 @@ namespace EvidenceBoardUIExtension
 			else
 			{
 				Color = link.Color;
-				Thickness = (link.Thickness - 1);
+				Thickness = link.Thickness;
 				Arrows = link.Arrows;
 				Label = link.Label;
 				Type = link.Type;
