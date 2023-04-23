@@ -70,10 +70,15 @@
 			// 
 			// m_Attribs
 			// 
+			this.m_Attribs.Arrows = EvidenceBoardUIExtension.UserLink.EndArrows.None;
+			this.m_Attribs.Color = System.Drawing.Color.Empty;
+			this.m_Attribs.Label = "";
 			this.m_Attribs.Location = new System.Drawing.Point(12, 12);
 			this.m_Attribs.Name = "m_Attribs";
 			this.m_Attribs.Size = new System.Drawing.Size(287, 147);
 			this.m_Attribs.TabIndex = 5;
+			this.m_Attribs.Thickness = 0;
+			this.m_Attribs.Type = "";
 			// 
 			// EvidenceBoardAddEditLinkDlg
 			// 

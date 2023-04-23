@@ -30,14 +30,14 @@
         {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardPreferencesDlg));
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.BtnCancel = new System.Windows.Forms.Button();
-			this.BtnOK = new System.Windows.Forms.Button();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
+			this.m_ParentLinkColor = new UIComponents.ColorButton();
+			this.m_DependsLinkColor = new UIComponents.ColorButton();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.m_DefaultAttribs = new EvidenceBoardUIExtension.EvidenceBoardLinkAttributesPage();
-			this.m_DependsLinkColor = new UIComponents.ColorButton();
-			this.label1 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
-			this.m_ParentLinkColor = new UIComponents.ColorButton();
+			this.BtnCancel = new System.Windows.Forms.Button();
+			this.BtnOK = new System.Windows.Forms.Button();
 			this.panel1.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
@@ -60,6 +60,65 @@
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(501, 292);
 			this.panel1.TabIndex = 2;
+			// 
+			// label2
+			// 
+			this.label2.Location = new System.Drawing.Point(9, 231);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(100, 32);
+			this.label2.TabIndex = 2;
+			this.label2.Text = "Parent/child connection colour";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(9, 208);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(100, 13);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Dependency colour";
+			// 
+			// m_ParentLinkColor
+			// 
+			this.m_ParentLinkColor.Color = System.Drawing.Color.Empty;
+			this.m_ParentLinkColor.Location = new System.Drawing.Point(135, 236);
+			this.m_ParentLinkColor.Name = "m_ParentLinkColor";
+			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
+			this.m_ParentLinkColor.TabIndex = 1;
+			this.m_ParentLinkColor.Text = "Set...";
+			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
+			// 
+			// m_DependsLinkColor
+			// 
+			this.m_DependsLinkColor.Color = System.Drawing.Color.Empty;
+			this.m_DependsLinkColor.Location = new System.Drawing.Point(135, 203);
+			this.m_DependsLinkColor.Name = "m_DependsLinkColor";
+			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
+			this.m_DependsLinkColor.TabIndex = 1;
+			this.m_DependsLinkColor.Text = "Set...";
+			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.m_DefaultAttribs);
+			this.groupBox1.Location = new System.Drawing.Point(12, 12);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(473, 180);
+			this.groupBox1.TabIndex = 0;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Default Connection Attributes";
+			// 
+			// m_DefaultAttribs
+			// 
+			this.m_DefaultAttribs.Arrows = EvidenceBoardUIExtension.UserLink.EndArrows.None;
+			this.m_DefaultAttribs.Color = System.Drawing.Color.Empty;
+			this.m_DefaultAttribs.Label = "";
+			this.m_DefaultAttribs.Location = new System.Drawing.Point(12, 22);
+			this.m_DefaultAttribs.Name = "m_DefaultAttribs";
+			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 147);
+			this.m_DefaultAttribs.TabIndex = 0;
+			this.m_DefaultAttribs.Thickness = 1;
+			this.m_DefaultAttribs.Type = "";
 			// 
 			// BtnCancel
 			// 
@@ -84,60 +143,6 @@
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
-			// groupBox1
-			// 
-			this.groupBox1.Controls.Add(this.m_DefaultAttribs);
-			this.groupBox1.Location = new System.Drawing.Point(12, 12);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(473, 180);
-			this.groupBox1.TabIndex = 0;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Default Connection Attributes";
-			// 
-			// m_DefaultAttribs
-			// 
-			this.m_DefaultAttribs.Location = new System.Drawing.Point(12, 22);
-			this.m_DefaultAttribs.Name = "m_DefaultAttribs";
-			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 147);
-			this.m_DefaultAttribs.TabIndex = 0;
-			// 
-			// m_DependsLinkColor
-			// 
-			this.m_DependsLinkColor.Color = System.Drawing.Color.Empty;
-			this.m_DependsLinkColor.Location = new System.Drawing.Point(135, 203);
-			this.m_DependsLinkColor.Name = "m_DependsLinkColor";
-			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
-			this.m_DependsLinkColor.TabIndex = 1;
-			this.m_DependsLinkColor.Text = "Set...";
-			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(9, 208);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(100, 13);
-			this.label1.TabIndex = 2;
-			this.label1.Text = "Dependency colour";
-			// 
-			// label2
-			// 
-			this.label2.Location = new System.Drawing.Point(9, 231);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(100, 32);
-			this.label2.TabIndex = 2;
-			this.label2.Text = "Parent/child connection colour";
-			// 
-			// m_ParentLinkColor
-			// 
-			this.m_ParentLinkColor.Color = System.Drawing.Color.Empty;
-			this.m_ParentLinkColor.Location = new System.Drawing.Point(135, 236);
-			this.m_ParentLinkColor.Name = "m_ParentLinkColor";
-			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
-			this.m_ParentLinkColor.TabIndex = 1;
-			this.m_ParentLinkColor.Text = "Set...";
-			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
-			// 
 			// EvidenceBoardPreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
@@ -154,7 +159,7 @@
 			this.Name = "EvidenceBoardPreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
 			this.ShowInTaskbar = false;
-			this.Text = "Week Planner Preferences";
+			this.Text = "Evidence Board Preferences";
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
 			this.groupBox1.ResumeLayout(false);
