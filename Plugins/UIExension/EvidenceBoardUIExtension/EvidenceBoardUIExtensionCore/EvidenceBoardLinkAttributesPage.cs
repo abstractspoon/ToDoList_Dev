@@ -47,6 +47,15 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public void UpdateLink(UserLink link)
+		{
+			link.Color = Color;
+			link.Thickness = Thickness;
+			link.Arrows = Arrows;
+			link.Label = Label;
+			link.Type = Type;
+		}
+
 		public Color Color
 		{
 			get { return m_ColorButton.Color; }

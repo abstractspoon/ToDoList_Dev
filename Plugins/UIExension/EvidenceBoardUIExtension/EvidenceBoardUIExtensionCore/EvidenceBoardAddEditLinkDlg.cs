@@ -23,6 +23,11 @@ namespace EvidenceBoardUIExtension
 			trans.Translate(this);
 		}
 
+		public void UpdateLink(UserLink link)
+		{
+			m_Attribs.UpdateLink(link);
+		}
+
 		public Color Color { get { return m_Attribs.Color; } }
 		public int Thickness { get { return m_Attribs.Thickness; } }
 		public UserLink.EndArrows Arrows { get { return m_Attribs.Arrows; } }

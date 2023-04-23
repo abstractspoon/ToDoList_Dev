@@ -415,19 +415,18 @@ namespace EvidenceBoardUIExtension
 
 			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null);
 
-			if (dlg.ShowDialog() != DialogResult.OK)
-				return false;
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				dlg.UpdateLink(link);
 
-			link.Color = dlg.Color;
-			link.Thickness = dlg.Thickness;
-			link.Arrows = dlg.Arrows;
-			link.Label = dlg.Label;
-			link.Type = dlg.Type;
+				NotifyParentTaskModified(link.FromId);
+				UpdateToolbarButtonStates();
 
-			NotifyParentTaskModified(link.FromId);
-			UpdateToolbarButtonStates();
+				return true;
+			}
 
-			return true;
+			// else
+			return false;
 		}
 
 		bool OnEvidenceBoardTaskLinkEdited(object sender, UserLink link)
