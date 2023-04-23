@@ -670,17 +670,14 @@ namespace EvidenceBoardUIExtension
 			}
 
 			base.EnableLayoutUpdates = false;
-
-			base.InitialRadius = (float)((rootNode.Count * NodeSize.Width) / (2 * Math.PI));
 			base.RadialIncrementOrSpacing = NodeSize.Width;
 
-			// If the root only has one task, make it the root
-// 			if (rootNode.Count == 1)
-// 			{
-// 				var newRoot = rootNode.Children[0];
-// 				rootNode.RemoveChild(newRoot);
-// 				rootNode = newRoot;
-// 			}
+			// If the root only has one task, make the initial radius zero
+			// to place the only node in the position of the root node
+			if (rootNode.Count == 1)
+				base.InitialRadius = 0.1f;
+			else
+				base.InitialRadius = (float)((rootNode.Count * NodeSize.Width) / (2 * Math.PI));
 
 			base.RootNode = rootNode;
 			base.EnableLayoutUpdates = true;
