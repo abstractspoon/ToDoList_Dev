@@ -32,6 +32,8 @@ namespace EvidenceBoardUIExtension
 		public int NodeSpacing = 5;
 
 		int m_PinRadius = 2;
+		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
+
 
 		public int PinRadius
 		{
@@ -421,9 +423,14 @@ namespace EvidenceBoardUIExtension
 
 		public bool ZoomIn()
 		{
+			return ZoomIn(NullPoint);
+		}
+
+		protected bool ZoomIn(Point ptClient)
+		{
 			if (CanZoomIn)
 			{
-				SetZoomLevel(m_ZoomLevel - 1);
+				ZoomTo((m_ZoomLevel - 1), ptClient);
 				ZoomChange?.Invoke(this, new EventArgs());
 
 				return true;
@@ -434,9 +441,14 @@ namespace EvidenceBoardUIExtension
 
 		public bool ZoomOut()
 		{
+			return ZoomOut(NullPoint);
+		}
+
+		protected bool ZoomOut(Point ptClient)
+		{
 			if (CanZoomOut)
 			{
-				SetZoomLevel(m_ZoomLevel + 1);
+				ZoomTo((m_ZoomLevel + 1), ptClient);
 				ZoomChange?.Invoke(this, new EventArgs());
 
 				return true;
@@ -490,16 +502,45 @@ namespace EvidenceBoardUIExtension
 			// for derived classes
 		}
 
-		private void SetZoomLevel(int level)
+		private void ZoomTo(int level, Point ptClient)
 		{
 			if (level != m_ZoomLevel)
 			{
+				// Save the mouse pos in graphs coords
+				var ptGraph = ClientToGraph(ptClient);
+
+				// Recalculate the zoom
 				m_ZoomLevel = level;
 
 				RecalcZoomFactor();
 				RecalcTextFont();
 				Invalidate();
+
+				// Keep the previous position beneath the mouse
+				if (ptClient != NullPoint)
+				{
+					var ptClientNew = GraphToClient(ptGraph);
+
+					if (HorizontalScroll.Visible)
+					{
+						int newX = HorizontalScroll.Value + (ptClientNew.X - ptClient.X);
+						HorizontalScroll.Value = Validate(newX, HorizontalScroll);
+					}
+
+					if (VerticalScroll.Visible)
+					{
+						int newY = VerticalScroll.Value + (ptClientNew.Y - ptClient.Y);
+						VerticalScroll.Value = Validate(newY, VerticalScroll);
+ 					}
+
+					PerformLayout();
+				}
 			}
+		}
+
+		static int Validate(int pos, ScrollProperties scroll)
+		{
+			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
 		}
 
 		protected BaseNode HitTestNode(Point ptClient, bool excludeRoot = false)
@@ -1045,9 +1086,9 @@ namespace EvidenceBoardUIExtension
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
 			{
 				if (e.Delta > 0)
-					ZoomIn();
+					ZoomIn(e.Location);
 				else
-					ZoomOut();
+					ZoomOut(e.Location);
 			}
 			else
 			{
