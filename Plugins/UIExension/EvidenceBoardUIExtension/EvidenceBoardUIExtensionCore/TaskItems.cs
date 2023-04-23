@@ -139,10 +139,10 @@ namespace EvidenceBoardUIExtension
 			link.Arrows = (EndArrows)arrows;
 
 			if (parts.Count() > LabelIndex)
-				link.Label = parts[LabelIndex];
+				link.Label = parts[LabelIndex].DecodeBase64();
 
 			if (parts.Count() > TypeIndex)
-				link.Type = parts[TypeIndex];
+				link.Type = parts[TypeIndex].DecodeBase64();
 
 			return true;
 		}
@@ -154,8 +154,8 @@ namespace EvidenceBoardUIExtension
 								Color.ToArgb(), 
 								Thickness.ToString(), 
 								((int)Arrows).ToString(),
-								Label,
-								Type);
+								Label.EncodeBase64(),
+								Type.EncodeBase64());
 		}
 	}
 

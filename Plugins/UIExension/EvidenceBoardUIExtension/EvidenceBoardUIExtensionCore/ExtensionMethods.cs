@@ -7,6 +7,34 @@ namespace EvidenceBoardUIExtension
 {
 	public static class ExtensionMethods
 	{
+		public static string EncodeBase64(this string value)
+		{
+			try
+			{
+				var valueBytes = Encoding.Unicode.GetBytes(value);
+				return Convert.ToBase64String(valueBytes);
+			}
+			catch
+			{
+			}
+
+			return string.Empty;
+		}
+
+		public static string DecodeBase64(this string value)
+		{
+			try
+			{
+				var valueBytes = Convert.FromBase64String(value);
+				return Encoding.Unicode.GetString(valueBytes);
+			}
+			catch
+			{
+			}
+
+			return string.Empty;
+		}
+
 		public static System.Drawing.Point GetPosition(this RadialTree.Point point)
 		{
 			return new System.Drawing.Point((int)point.X, (int)point.Y);
