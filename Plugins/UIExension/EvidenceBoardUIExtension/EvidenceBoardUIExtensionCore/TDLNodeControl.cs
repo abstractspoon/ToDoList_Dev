@@ -1049,10 +1049,12 @@ namespace EvidenceBoardUIExtension
 			{
 				DoPaintNode(graphics, taskItem, rect, GetDrawState(node, selected));
 			}
+#if DEBUG
 			else if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{
 				base.DrawNode(graphics, node, rect, selected);
 			}
+#endif
 		}
 
 		protected override void DrawParentAndChildConnections(Graphics graphics, BaseNode node)
@@ -1109,29 +1111,37 @@ namespace EvidenceBoardUIExtension
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			if (m_Options.HasFlag(EvidenceBoardOption.ShowParentChildLinks))
-			{
-				var taskItem = m_TaskItems.GetTaskItem(nodeId);
+			if (!m_Options.HasFlag(EvidenceBoardOption.ShowParentChildLinks))
+				return;
 
-				// Don't draw parent/child connections if they are
-				// overlaid either by dependencies or user links
-// 				if (m_TaskItems.HasDependency(nodeId, taskItem.ParentId)) 
-// 					return;
-// 
-// 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
-// 					return;
-				
-				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
+			var taskItem = m_TaskItems.GetTaskItem(nodeId);
+			var parentId = taskItem?.ParentId;
+
+			if (parentId == 0)
+			{
+#if DEBUG
+				if (!m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
+					return;
+#else
+				return;
+#endif
+			}
+
+			// Don't draw parent/child connections if they are
+			// overlaid either by dependencies or user links
+			// 				if (m_TaskItems.HasDependency(nodeId, taskItem.ParentId)) 
+			// 					return;
+			// 
+			// 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
+			// 					return;
+
+			using (var pen = new Pen(ParentConnectionColor, 1))
+			{
+				using (var brush = new SolidBrush(ParentConnectionColor))
 				{
-					using (var pen = new Pen(ParentConnectionColor, 1))
-					{
-						using (var brush = new SolidBrush(ParentConnectionColor))
-						{
-							DrawConnection(graphics, pen, brush, nodePos, parentPos);
-						}
-					}
-					DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
+					DrawConnection(graphics, pen, brush, nodePos, parentPos);
 				}
+				DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
 			}
 		}
 
@@ -1740,12 +1750,14 @@ namespace EvidenceBoardUIExtension
 						return UIExtension.HandCursor();
 				}
 			}
+#if DEBUG
 			else if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{
+				// The only time we DON'T exclude the root node
 				if (HitTestNode(ptClient) == RootNode)
 					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 			}
-
+#endif
 			return null;
 		}
 

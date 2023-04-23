@@ -36,7 +36,9 @@ namespace EvidenceBoardUIExtension
 
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show dependencies"), EvidenceBoardOption.ShowDependencies));
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show parent/child connections"), EvidenceBoardOption.ShowParentChildLinks));
+#if DEBUG
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show root node"), EvidenceBoardOption.ShowRootNode));
+#endif
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Draw links on top"), EvidenceBoardOption.DrawLinksOnTop));
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Draw pins"), EvidenceBoardOption.DrawPins));
 		}
@@ -50,7 +52,6 @@ namespace EvidenceBoardUIExtension
 				foreach (var checkItem in CheckedItems)
 				{
 					var item = (EvidenceBoardOptionItem)checkItem;
-
 					options |= item.Option;
 				}
 
