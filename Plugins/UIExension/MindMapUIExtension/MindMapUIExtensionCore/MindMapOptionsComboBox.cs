@@ -62,6 +62,7 @@ namespace MindMapUIExtension
 
 					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
 				}
+				RefreshTooltipText();
 			}
 		}
 	}
