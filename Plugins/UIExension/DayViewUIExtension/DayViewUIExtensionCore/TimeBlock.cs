@@ -4,27 +4,39 @@ using System.Collections.Generic;
 namespace DayViewUIExtension
 {
 
-	public class TimeBlockHelper
+	public class TimeBlock : Calendar.AppointmentDates
 	{
+		public TimeBlock(DateTime start, DateTime end)
+		{
+			Start = start;
+			End = end;
+		}
+
+		public TimeBlock(Calendar.AppointmentDates dates)
+			:
+			this(dates.Start, dates.End)
+		{
+		}
+
 		private const long TicksPerMinute = (60 * 10000000);
 		private const long MinutesPerDay = (60 * 24);
 
-		private static string EncodeTimeBlock(Calendar.AppointmentDates block)
+		private string Encode()
 		{
-			long startMin = (block.Start.Ticks / TicksPerMinute);
-			long lenMinutes = (block.Length.Ticks / TicksPerMinute);
+			long startMin = (Start.Ticks / TicksPerMinute);
+			long lenMinutes = (Length.Ticks / TicksPerMinute);
 
 			return string.Format("{0}:{1}", startMin, lenMinutes);
 		}
 
-		public static string EncodeTimeBlocks(uint taskId, List<Calendar.AppointmentDates> blocks)
+		public static string EncodeTimeBlocks(uint taskId, List<TimeBlock> blocks)
 		{
 			if (blocks != null)
 			{
 				string timeBlocks = String.Empty;
 
 				foreach (var block in blocks)
-					timeBlocks = timeBlocks + EncodeTimeBlock(block) + '|';
+					timeBlocks = timeBlocks + block.Encode() + '|';
 
 				if (!string.IsNullOrWhiteSpace(timeBlocks))
 					return string.Format("{0}={1}", taskId, timeBlocks);
@@ -34,7 +46,7 @@ namespace DayViewUIExtension
 			return string.Empty;
 		}
 
-		private static Calendar.AppointmentDates DecodeTimeBlock(string block)
+		private static TimeBlock DecodeTimeBlock(string block)
 		{
 			var parts = block.Split(':');
 
@@ -55,10 +67,10 @@ namespace DayViewUIExtension
 			if (endDate <= startDate)
 				return null;
 
-			return new Calendar.AppointmentDates(startDate, endDate);
+			return new TimeBlock(startDate, endDate);
 		}
 
-		public static bool DecodeTimeBlocks(string blocks, out uint taskId, out List<Calendar.AppointmentDates> timeBlocks)
+		public static bool DecodeTimeBlocks(string blocks, out uint taskId, out List<TimeBlock> timeBlocks)
 		{
 			taskId = 0;
 			timeBlocks = null;
@@ -80,9 +92,9 @@ namespace DayViewUIExtension
 			return ((taskId > 0) && (timeBlocks != null));
 		}
 
-		public static List<Calendar.AppointmentDates> DecodeTimeBlocks(string blocks)
+		public static List<TimeBlock> DecodeTimeBlocks(string blocks)
 		{
-			List<Calendar.AppointmentDates> timeBlocks = null;
+			List<TimeBlock> timeBlocks = null;
 
 			if (!string.IsNullOrWhiteSpace(blocks))
 			{
@@ -95,7 +107,7 @@ namespace DayViewUIExtension
 					if (dates != null)
 					{
 						if (timeBlocks == null)
-							timeBlocks = new List<Calendar.AppointmentDates>();
+							timeBlocks = new List<TimeBlock>();
 
 						timeBlocks.Add(dates);
 					}

@@ -467,8 +467,8 @@ namespace DayViewUIExtension
 
 		private UInt32 GetRealTaskId(Calendar.Appointment appt)
 		{
-			if (appt is FutureOccurrence)
-				return (appt as FutureOccurrence).RealTaskId;
+			if (appt is FutureTaskOccurrence)
+				return (appt as FutureTaskOccurrence).RealTaskId;
 
 			return appt.Id;
 		}
@@ -487,7 +487,7 @@ namespace DayViewUIExtension
 		void GetTaskColors(Calendar.AppointmentView apptView,bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
 		{
 			TaskItem taskItem = GetTaskItem(apptView.Appointment);
-			bool isFutureItem = (apptView.Appointment is FutureOccurrence); 
+			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence); 
 
 			// Default colours
 			if (isSelected && SystemInformation.HighContrast)
@@ -545,8 +545,8 @@ namespace DayViewUIExtension
 								Color borderColor)
 		{
 			bool isLong = apptView.IsLong;
-			bool isFutureItem = (apptView.Appointment is FutureOccurrence);
-			bool isTimeBlock = (apptView.Appointment is TimeBlock);
+			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
+			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
 
 			if (isSelected)
 			{
@@ -659,7 +659,7 @@ namespace DayViewUIExtension
 
 			if (gripRect.Width > 0)
 			{
-				if (apptView.Appointment is TimeBlock)
+				if (apptView.Appointment is TaskTimeBlock)
 					barColor = Color.FromArgb(128, barColor);
 
 				using (SolidBrush brush = new SolidBrush(barColor))

@@ -66,13 +66,14 @@
     </Compile>
     <Compile Include="DayViewUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TDLCalendarItem.cs" />
+    <Compile Include="TaskExtensionItems.cs" />
+    <Compile Include="TaskItem.cs" />
     <Compile Include="TDLDayView.cs" />
     <Compile Include="TDLRenderer.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TDLSelectionTool.cs" />
-    <Compile Include="TimeBlockHelper.cs" />
+    <Compile Include="TimeBlock.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DayViewPreferencesDlg.resx">

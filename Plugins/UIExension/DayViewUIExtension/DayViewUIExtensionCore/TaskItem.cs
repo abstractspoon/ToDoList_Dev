@@ -36,7 +36,6 @@ namespace DayViewUIExtension
 
 		private Color m_TaskTextColor = Color.Empty;
 		private List<string> m_Tags = null;
-		private List<Calendar.AppointmentDates> m_TimeBlocks;
 
 		// --------------------
 
@@ -47,11 +46,6 @@ namespace DayViewUIExtension
 		public Dictionary<string, DateTime> CustomDates
 		{
 			get; private set;
-		}
-
-		public IEnumerable<Calendar.AppointmentDates> TimeBlocks
-		{
-			get { return m_TimeBlocks; }
 		}
 
 		public Boolean HasTaskTextColor
@@ -337,118 +331,6 @@ namespace DayViewUIExtension
 			// else
 			return date;
 		}
-	}
-
-	// ---------------------------------------------------------------
-
-	public class TaskExtensionItem : Calendar.Appointment
-	{
-		protected TaskItem m_RealItem;
-
-		protected TaskExtensionItem(TaskItem item, UInt32 id) : base(item)
-		{
-			m_RealItem = item;
-			Id = id;
-			TextColor = SystemColors.ControlDarkDark;
-		}
-
-		public UInt32 RealTaskId { get { return m_RealItem.Id; } }
-		public TaskItem RealTask { get { return m_RealItem; } }
-	}
-
-	// ---------------------------------------------------------------
-
-	public class FutureOccurrence : TaskExtensionItem
-	{
-		public FutureOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
-		{
-			Locked = true; // always (for now)
-
-			StartDate = start;
-			EndDate = TaskItem.CheckGetEndOfDay(end);
-		}
-
-		public override bool IsLongAppt(DateTime start, DateTime end)
-		{
-			return RealTask.IsLongAppt(start, end);
-		}
-	}
-
-	// ---------------------------------------------------------------
-
-	public class CustomDateAttribute : TaskExtensionItem
-	{
-		public CustomDateAttribute(TaskItem item, UInt32 id, string attribId, DateTime date) : base(item, id)
-		{
-			AttributeId = attribId;
-			StartDate = OriginalDate = date;
-			EndDate = StartDate.AddDays(1);
-
-			if (EndDate == EndDate.Date)
-				EndDate = EndDate.AddSeconds(-1);
-		}
-
-		public override bool IsLongAppt(DateTime start, DateTime end)
-		{
-			return true; // always 24 hours
-		}
-
-		public void RestoreOriginalDate()
-		{
-			RealTask.CustomDates[AttributeId] = OriginalDate;
-		}
-
-		public void UpdateTaskDate()
-		{
-			RealTask.CustomDates[AttributeId] = StartDate;
-		}
-
-		public void ClearDate()
-		{
-			RealTask.CustomDates[AttributeId] = DateTime.MinValue;
-		}
-
-		public string AttributeId { get; private set; }
-		public DateTime OriginalDate { get; private set; }
-	}
-
-	// ---------------------------------------------------------------
-
-	public class TimeBlock : TaskExtensionItem
-	{
-		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
-		private Calendar.AppointmentDates m_Dates = null; // Reference back to task 
-
-		public TimeBlock(TaskItem item, UInt32 id, Calendar.AppointmentDates dates) : base(item, id)
-		{
-			Locked = false; // Never
-
-			// Copy dates
-			StartDate = m_OrgDates.Start = dates.Start;
-			EndDate = m_OrgDates.End = TaskItem.CheckGetEndOfDay(dates.End);
-
-			// Reference back to original
-			m_Dates = dates;
-		}
-
-		public override bool IsLongAppt(DateTime start, DateTime end)
-		{
-			return false; // Always
-		}
-
-		public void RestoreOriginalDates()
-		{
-			m_Dates.Start = m_OrgDates.Start;
-			m_Dates.End = m_OrgDates.End;
-		}
-
-		public void UpdateTaskDates()
-		{
-			m_Dates.Start = StartDate;
-			m_Dates.End = EndDate;
-		}
-
-		public Calendar.AppointmentDates TaskDates { get { return m_Dates; } }
 	}
 
 }

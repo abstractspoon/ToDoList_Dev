@@ -51,17 +51,17 @@ namespace DayViewUIExtension
 			if (base.MoveAppointment(e))
 			{
 				// Copy date back to real task because custom dates are temporary
-				if (DayView.SelectedAppointment is CustomDateAttribute)
+				if (DayView.SelectedAppointment is CustomTaskDateAttribute)
 				{
-					var custDate = (DayView.SelectedAppointment as CustomDateAttribute);
+					var custDate = (DayView.SelectedAppointment as CustomTaskDateAttribute);
 
 					custDate.UpdateTaskDate();
 				}
-				else if (DayView.SelectedAppointment is TimeBlock)
+				else if (DayView.SelectedAppointment is TaskTimeBlock)
 				{
-					var block = (DayView.SelectedAppointment as TimeBlock);
+					var taskBlock = (DayView.SelectedAppointment as TaskTimeBlock);
 
-					block.UpdateTaskDates();
+					taskBlock.UpdateTimeBlock();
 				}
 
 				return true;
