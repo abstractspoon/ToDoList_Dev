@@ -18,6 +18,12 @@ namespace Calendar
 			End = new System.DateTime(0L);
 		}
 
+		public AppointmentDates(AppointmentDates other)
+		{
+			Start = other.Start;
+			End = other.End;
+		}
+
 		public AppointmentDates(DateTime start, DateTime end)
 		{
 			Start = start;

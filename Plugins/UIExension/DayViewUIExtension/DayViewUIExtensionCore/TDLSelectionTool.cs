@@ -44,22 +44,6 @@ namespace DayViewUIExtension
 			base.MouseUp(e);
 		}
 
-		override protected bool ResizeShortAppointment(System.Windows.Forms.MouseEventArgs e)
-		{
-			if (base.ResizeShortAppointment(e))
-			{
-				if (DayView.SelectedAppointment is TimeBlock)
-				{
-					var block = (DayView.SelectedAppointment as TimeBlock);
-					block.UpdateTaskDates();
-				}
-
-				return true;
-			}
-
-			return false;
-		}
-
 		override protected bool MoveAppointment(System.Windows.Forms.MouseEventArgs e)
 		{
 			// Default implementation handles move WITHIN the respective

@@ -15,16 +15,15 @@ namespace DayViewUIExtension
 	public class TDLMoveAppointmentEventArgs : Calendar.MoveAppointmentEventArgs
 	{
 		public string CustomAttributeId { get; private set; }
-		public bool IsTimeBlock { get; private set; }
+
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		{
+			CustomAttributeId = "";
+		}
 
 		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
 		{
 			CustomAttributeId = attribId;
-		}
-
-		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, bool timeBlock, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
-		{
-			IsTimeBlock = timeBlock;
 		}
 	}
 
@@ -50,6 +49,7 @@ namespace DayViewUIExtension
 
 		private Dictionary<uint, TaskItem> m_Items;
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
+		private Dictionary<uint, List<Calendar.AppointmentDates>> m_TimeBlocks;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
 		private TDLRenderer m_Renderer;
@@ -99,6 +99,7 @@ namespace DayViewUIExtension
 			m_TaskRecurrences = taskRecurrences;
 
 			m_Items = new Dictionary<uint, TaskItem>();
+			m_TimeBlocks = new Dictionary<uint, List<Calendar.AppointmentDates>>();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
 
@@ -222,10 +223,13 @@ namespace DayViewUIExtension
 						custAttribId = (args.Appointment as CustomDateAttribute).AttributeId;
 						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
 					}
+					else if (args.Appointment is TimeBlock)
+					{
+						(args.Appointment as TimeBlock).UpdateTaskDates();
+					}
 					else
 					{
-						bool isTimeBlock = (args.Appointment is TimeBlock);
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, isTimeBlock, move.Mode, move.Finished));
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.Finished));
 					}
 				}
 			}
@@ -583,20 +587,11 @@ namespace DayViewUIExtension
 					(SelectionType == Calendar.SelectionType.DateRange));
 		}
 
-		public bool CreateNewTaskBlock(uint taskID)
+		public bool CreateNewTaskBlock(uint taskId, Calendar.AppointmentDates timeBlock)
 		{
-			if (!HasSelection)
-				return false;
-
-			var task = (GetAppointment(taskID) as TaskItem);
-
-			if (task == null)
-				return false;
-
-			if (!task.AddTimeBlock(SelectedDates.Start, SelectedDates.End))
-				return false;
-
+			GetTaskTimeBlocks(taskId, true).Add(new Calendar.AppointmentDates(timeBlock));
 			Invalidate();
+
 			return true;
 		}
 
@@ -607,16 +602,7 @@ namespace DayViewUIExtension
 			if (block == null)
 				return false;
 
-			var task = block.RealTask;
-
-			if (task == null)
-				return false;
-
-			if (!task.AddTimeBlock(block.StartDate, block.EndDate))
-				return false;
-
-			Invalidate();
-			return true;
+			return CreateNewTaskBlock(block.RealTaskId, block.TaskDates);
 		}
 
 		public void GoToToday()
@@ -829,6 +815,69 @@ namespace DayViewUIExtension
             return true;
 		}
 
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			string prefsKey = (key + "\\TimeBlocks");
+			prefs.DeleteProfileSection(prefsKey, true);
+
+			prefs.WriteProfileInt(prefsKey, "Count", m_TimeBlocks.Count);
+
+			int i = 0;
+			foreach (var task in m_TimeBlocks)
+			{
+				var entry = string.Format("Task{0}", i++);
+				var value = TimeBlockHelper.EncodeTimeBlocks(task.Key, task.Value);
+
+				prefs.WriteProfileString(prefsKey, entry, value);
+			}
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			string prefsKey = (key + "\\TimeBlocks");
+
+			int count = prefs.GetProfileInt(prefsKey, "Count", 0);
+			m_TimeBlocks.Clear();
+
+			for (int i = 0; i < count; i++)
+			{
+				var entry = string.Format("Task{0}", i);
+				var value = prefs.GetProfileString(prefsKey, entry, "");
+
+				uint taskId;
+				List<Calendar.AppointmentDates> timeBlocks;
+
+				if (TimeBlockHelper.DecodeTimeBlocks(value, out taskId, out timeBlocks))
+				{
+					m_TimeBlocks.Add(taskId, timeBlocks);
+				}
+			}
+		}
+
+		protected List<Calendar.AppointmentDates> GetTaskTimeBlocks(uint taskId, bool autoCreate)
+		{
+			List<Calendar.AppointmentDates> timeBlocks = null;
+
+			if (!m_TimeBlocks.TryGetValue(taskId, out timeBlocks) && autoCreate)
+			{
+				timeBlocks = new List<Calendar.AppointmentDates>();
+				m_TimeBlocks[taskId] = timeBlocks;
+			}
+
+			return timeBlocks;
+		}
+
+		protected int FindTimeBlock(TimeBlock block, List<Calendar.AppointmentDates> timeBlocks)
+		{
+			if (timeBlocks == null)
+			{
+				Debug.Assert(timeBlocks != null);
+				return -1;
+			}
+
+			return timeBlocks.FindIndex(x => ((x.Start == block.StartDate) && (x.End == block.EndDate)));
+		}
+
 		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type, string metaDataKey)
 		{
 			// Make sure the selected task remains visible
@@ -881,12 +930,12 @@ namespace DayViewUIExtension
 				return false;
 
 			TaskItem item;
-			uint taskID = task.GetID();
+			uint taskId = task.GetID();
 
-			m_MaxTaskID = Math.Max(m_MaxTaskID, taskID); // needed for extension occurrences
+			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
 
 			// Built-in attributes
-			if (m_Items.TryGetValue(taskID, out item))
+			if (m_Items.TryGetValue(taskId, out item))
 			{
 				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false, metaDataKey);
 			}
@@ -896,7 +945,15 @@ namespace DayViewUIExtension
 				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true, metaDataKey);
 			}
 
-			m_Items[taskID] = item;
+			m_Items[taskId] = item;
+
+			if (item.TimeBlocks != null)
+			{
+				if (!m_TimeBlocks.ContainsKey(taskId))
+					m_TimeBlocks[taskId] = new List<Calendar.AppointmentDates>();
+
+				m_TimeBlocks[taskId].AddRange(item.TimeBlocks);
+			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
@@ -1261,9 +1318,11 @@ namespace DayViewUIExtension
 					}
 				}
 
-				if (item.TimeBlocks != null)
+				var timeBlocks = GetTaskTimeBlocks(pair.Key, false);
+
+				if (timeBlocks != null)
 				{
-					foreach (var block in item.TimeBlocks)
+					foreach (var block in timeBlocks)
 					{
 						var timeBlock = new TimeBlock(item, nextExtId, block);
 
@@ -1460,13 +1519,9 @@ namespace DayViewUIExtension
 			else if (SelectedAppointment is TimeBlock)
 			{
 				var block = (SelectedAppointment as TimeBlock);
-				block.DeleteBlock();
+				var timeBlocks = GetTaskTimeBlocks(block.RealTaskId, false);
 
-				// Notify parent of change
-				if (AppointmentMove != null)
-					AppointmentMove(this, new TDLMoveAppointmentEventArgs(block.RealTask, true, Calendar.SelectionTool.Mode.None, true));
-
-				handled = true;
+				handled = timeBlocks.Remove(block.TaskDates);
 			}
 
 			if (handled)
