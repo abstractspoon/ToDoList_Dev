@@ -80,6 +80,12 @@ namespace CustomComboBox
 				m_tooltip.SetToolTip(this, FormatItems("\n"));
 		}
 
+		public new bool Sorted
+		{
+			get { return m_ListBox.Sorted; }
+			set { m_ListBox.Sorted = value; }
+		}
+
 		protected override void OnFontChanged(EventArgs e)
 		{
 			base.OnFontChanged(e);

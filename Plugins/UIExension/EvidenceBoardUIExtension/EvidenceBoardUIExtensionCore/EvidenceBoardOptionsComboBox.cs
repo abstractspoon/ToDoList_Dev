@@ -41,6 +41,8 @@ namespace EvidenceBoardUIExtension
 #endif
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Draw links on top"), EvidenceBoardOption.DrawLinksOnTop));
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Draw pins"), EvidenceBoardOption.DrawPins));
+
+			Sorted = true;
 		}
 
 		public EvidenceBoardOption SelectedOptions
