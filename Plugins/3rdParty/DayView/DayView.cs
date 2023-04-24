@@ -156,6 +156,8 @@ namespace Calendar
 			if (IsResizingAppointment())
 			{
 				selectionTool.Reset();
+				activeTool = null;
+
 				return true;
 			}
 

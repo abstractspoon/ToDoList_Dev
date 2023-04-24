@@ -210,7 +210,8 @@ namespace DayViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-            m_PrefsDlg.SavePreferences(prefs, key);
+			m_DayView.SavePreferences(prefs, key);
+			m_PrefsDlg.SavePreferences(prefs, key);
 
 			prefs.WriteProfileInt(key, "DaysShowing", m_DayView.DaysShowing);
 		}
@@ -237,10 +238,11 @@ namespace DayViewUIExtension
             
             if (!appOnly)
             {
-                // private settings
-                m_PrefsDlg.LoadPreferences(prefs, key);
-				UpdateDayViewPreferences();
+				// private settings
+				m_DayView.LoadPreferences(prefs, key);
+				m_PrefsDlg.LoadPreferences(prefs, key);
 
+				UpdateDayViewPreferences();
 				SetDaysShowing(prefs.GetProfileInt(key, "DaysShowing", 7));
             }
 			else
@@ -526,6 +528,9 @@ namespace DayViewUIExtension
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
 		{
+			if (!m_DayView.HasSelection)
+				return;
+
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
 			var taskID = m_DayView.SelectedTaskID;
@@ -535,35 +540,13 @@ namespace DayViewUIExtension
 
 			if (taskID != 0)
 			{
-				if (m_DayView.CreateNewTaskBlock(taskID))
-				{
-					var notify = new UIExtension.ParentNotify(m_HwndParent);
-					TaskItem task = null;
-
-					if (m_DayView.SelectedAppointment is TaskExtensionItem)
-						task = (m_DayView.SelectedAppointment as TaskExtensionItem).RealTask;
-					else
-						task = (m_DayView.SelectedAppointment as TaskItem);
-
-					notify.NotifyMod(Task.Attribute.MetaData, task.EncodeTimeBlocks());
-				}
+				m_DayView.CreateNewTaskBlock(taskID, m_DayView.SelectedDates);
 			}
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)
 		{
-			if (m_DayView.DuplicateSelectedTimeBlock())
-			{
-				var notify = new UIExtension.ParentNotify(m_HwndParent);
-				TaskItem task = null;
-
-				if (m_DayView.SelectedAppointment is TaskExtensionItem)
-					task = (m_DayView.SelectedAppointment as TaskExtensionItem).RealTask;
-				else
-					task = (m_DayView.SelectedAppointment as TaskItem);
-
-				notify.NotifyMod(Task.Attribute.MetaData, task.EncodeTimeBlocks());
-			}
+			m_DayView.DuplicateSelectedTimeBlock();
 		}
 
 		private void UpdateToolbarButtonStates()
@@ -803,7 +786,7 @@ namespace DayViewUIExtension
 
 		private void ProcessTaskAppointmentChange(TDLMoveAppointmentEventArgs args)
 		{
-            if (!args.Finished && !args.IsTimeBlock)
+            if (!args.Finished)
             {
                 UpdatedSelectedTaskDatesText();
                 return;
@@ -816,13 +799,6 @@ namespace DayViewUIExtension
 
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			if (args.IsTimeBlock)
-			{
-				notify.NotifyMod(Task.Attribute.MetaData, item.EncodeTimeBlocks());
-				return;
-			}
-
-			// else
 			if (!string.IsNullOrEmpty(args.CustomAttributeId))
 			{
 				var date = item.CustomDates[args.CustomAttributeId];
