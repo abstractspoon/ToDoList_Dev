@@ -352,7 +352,7 @@ namespace EvidenceBoardUIExtension
 						{
 							ImagePath = path;
 							Image = image;
-							break;
+							return;
 						}
 					}
 				}
@@ -361,6 +361,9 @@ namespace EvidenceBoardUIExtension
 					// keep going
 				}
 			}
+
+			Image = null;
+			ImagePath = string.Empty;
 		}
 
 		public bool Update(Task task)
