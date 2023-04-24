@@ -53,6 +53,8 @@ BOOL CTDCAnonymizeTasklist::AnonymizeTasklist(CTaskFile& tasks)
 	if (!BuildContent(tasks))
 		return FALSE;
 
+	tasks.SetProjectName(AnonymizeText(tasks.GetProjectName()));
+
 	AnonymizeAutoListData(tasks);
 	AnonymizeCustomAttributeDefs(tasks);
 

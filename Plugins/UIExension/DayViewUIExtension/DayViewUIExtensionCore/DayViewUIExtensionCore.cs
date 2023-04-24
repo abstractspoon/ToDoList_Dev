@@ -292,7 +292,7 @@ namespace DayViewUIExtension
 		private void InitializeComponent()
 		{
 			m_ControlsFont = new Font(FontName, 8);
-			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
+			m_PrefsDlg = new DayViewPreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
@@ -581,7 +581,7 @@ namespace DayViewUIExtension
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
-            if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_HwndParent)) == DialogResult.OK)
+            if (m_PrefsDlg.ShowDialog() == DialogResult.OK)
             {
 				UpdateDayViewPreferences();
             }

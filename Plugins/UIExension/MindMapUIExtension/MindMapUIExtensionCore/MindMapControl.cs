@@ -620,11 +620,11 @@ namespace MindMapUIExtension
 						EndUpdate();
 						EnsureItemVisible(Item(hit));
 					}
-					else if (!ReadOnly)
+					else
 					{
 						SelectedNode = hit;
 
-						if (hit != RootNode)
+						if (!ReadOnly && (hit != RootNode))
 						{
 							m_DragTimer.Tag = e;
 							m_DragTimer.Start();

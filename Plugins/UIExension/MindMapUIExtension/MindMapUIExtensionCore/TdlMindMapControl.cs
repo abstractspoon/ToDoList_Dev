@@ -189,8 +189,9 @@ namespace MindMapUIExtension
 	[Flags]
 	enum MindMapOption
 	{
-		None = 0x00,
-		ShowDependencies = 0x01,
+		None				= 0x00,
+		ShowDependencies	= 0x01,
+		StraightConnections	= 0x02,
 	}
 
 	// ------------------------------------------------------------
@@ -1163,11 +1164,29 @@ namespace MindMapUIExtension
 		{
 			int midX = ((ptFrom.X + ptTo.X) / 2);
 
-			graphics.DrawBezier(new Pen(base.ConnectionColor), 
-								ptFrom,
-								new Point(midX, ptFrom.Y),
-								new Point(midX, ptTo.Y),
-								ptTo);
+			using (var pen = new Pen(base.ConnectionColor))
+			{
+				if (m_Options.HasFlag(MindMapOption.StraightConnections))
+				{
+					Point[] points = new Point[4]
+					{
+						ptFrom,
+						new Point(midX, ptFrom.Y),
+						new Point(midX, ptTo.Y),
+						ptTo
+					};
+
+					graphics.DrawLines(pen, points);
+				}
+				else
+				{
+					graphics.DrawBezier(new Pen(base.ConnectionColor),
+										ptFrom,
+										new Point(midX, ptFrom.Y),
+										new Point(midX, ptTo.Y),
+										ptTo);
+				}
+			}
 		}
 
 
