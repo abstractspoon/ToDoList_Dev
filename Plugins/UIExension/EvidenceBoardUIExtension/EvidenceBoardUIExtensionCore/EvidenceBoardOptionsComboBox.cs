@@ -30,12 +30,15 @@ namespace EvidenceBoardUIExtension
 
 		// ----------------------------------------------------------------
 
+		EvidenceBoardOption AllOptions = EvidenceBoardOption.DrawLinksOnTop | 
+										EvidenceBoardOption.DrawPins;
+
+		// ----------------------------------------------------------------
+
 		public EvidenceBoardOptionsComboBox(Translator trans)
 		{
 			None = trans.Translate("<none>");
 
-			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show dependencies"), EvidenceBoardOption.ShowDependencies));
-			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show parent/child connections"), EvidenceBoardOption.ShowParentChildLinks));
 #if DEBUG
 			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show root node"), EvidenceBoardOption.ShowRootNode));
 #endif
@@ -70,6 +73,18 @@ namespace EvidenceBoardUIExtension
 				}
 				RefreshTooltipText();
 			}
+		}
+
+		public EvidenceBoardOption LoadPreferences(Preferences prefs, String key)
+		{
+			SelectedOptions = prefs.GetProfileEnum(key, "Options", AllOptions);
+
+			return SelectedOptions;
+		}
+
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			prefs.WriteProfileEnum(key, "Options", (int)SelectedOptions);
 		}
 	}
 

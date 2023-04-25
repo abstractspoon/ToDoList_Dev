@@ -31,6 +31,9 @@ namespace EvidenceBoardUIExtension
 
 		private Label m_OptionsLabel;
 		private EvidenceBoardOptionsComboBox m_OptionsCombo;
+		private Label m_LinkVisibilityLabel;
+		private EvidenceBoardLinkVisibilityComboBox m_LinkVisibilityCombo;
+
 		private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
@@ -89,9 +92,18 @@ namespace EvidenceBoardUIExtension
         public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 			m_Control.UpdateTasks(tasks, type);
-        }
 
-        public bool WantTaskUpdate(Task.Attribute attrib)
+			switch (type)
+			{
+			case UIExtension.UpdateType.Delete:
+			case UIExtension.UpdateType.All:
+				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
+				m_Control.VisibleLinks = m_LinkVisibilityCombo.SelectedOptions;
+				break;
+			}
+		}
+
+		public bool WantTaskUpdate(Task.Attribute attrib)
         {
             return m_Control.WantTaskUpdate(attrib);
         }
@@ -195,20 +207,24 @@ namespace EvidenceBoardUIExtension
 			prefs.WriteProfileInt(key, "Options", (int)m_Control.Options);
 
 			m_PrefsDlg.SavePreferences(prefs, key);
+			m_OptionsCombo.SavePreferences(prefs, key);
+			m_LinkVisibilityCombo.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
-            if (!appOnly)
+            if (!appOnly) // private settings
             {
-				// private settings
-				m_Control.Options = (EvidenceBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
-				m_OptionsCombo.SelectedOptions = m_Control.Options;
+				// Combos
+				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
+				m_Control.VisibleLinks = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 
+				// Preferences
 				m_PrefsDlg.LoadPreferences(prefs, key);
 				UpdateEvidenceBoardPreferences();
 			}
 
+			// App preferences
 			m_Control.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_Control.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_Control.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeNode", false);
@@ -308,6 +324,16 @@ namespace EvidenceBoardUIExtension
 			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 
+			// Link vis combo and label
+			m_LinkVisibilityLabel = CreateLabel("Connection Visibility", m_OptionsCombo);
+			this.Controls.Add(m_LinkVisibilityLabel);
+
+			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox(m_Trans);
+			m_LinkVisibilityCombo.DropDownClosed += new EventHandler(OnLinkVisibilityComboClosed);
+
+			InitialiseCombo(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
+			this.Controls.Add(m_LinkVisibilityCombo);
+			
 			CreateToolbar();
 			UpdateToolbarButtonStates();
 		}
@@ -342,6 +368,12 @@ namespace EvidenceBoardUIExtension
 		{
 			if (!m_OptionsCombo.Cancelled)
 				m_Control.Options = m_OptionsCombo.SelectedOptions;
+		}
+
+		void OnLinkVisibilityComboClosed(object sender, EventArgs e)
+		{
+ 			if (!m_LinkVisibilityCombo.Cancelled)
+ 				m_Control.VisibleLinks = m_LinkVisibilityCombo.SelectedOptions;
 		}
 
 		bool OnEvidenceBoardEditTaskLabel(object sender, UInt32 taskId)
@@ -451,11 +483,11 @@ namespace EvidenceBoardUIExtension
         {
 			base.OnSizeChanged(e);
 
-			m_Toolbar.Location = new Point(m_OptionsCombo.Right + 10, 0);
+			m_Toolbar.Location = new Point(m_LinkVisibilityCombo.Right + 10, 0);
 
 			Rectangle rect = ClientRectangle;
-			rect.Y = m_OptionsCombo.Bottom + 6;
-			rect.Height -= (m_OptionsCombo.Bottom + 6);
+			rect.Y = m_LinkVisibilityCombo.Bottom + 6;
+			rect.Height -= (m_LinkVisibilityCombo.Bottom + 6);
 			
 			m_Control.Bounds = rect;
 

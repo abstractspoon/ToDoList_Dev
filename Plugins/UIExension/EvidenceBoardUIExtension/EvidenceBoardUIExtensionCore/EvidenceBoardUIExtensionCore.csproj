@@ -55,6 +55,7 @@
     <Compile Include="EvidenceBoardLinkAttributesPage.Designer.cs">
       <DependentUpon>EvidenceBoardLinkAttributesPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="EvidenceBoardLinkVisibilityComboBox.cs" />
     <Compile Include="EvidenceBoardPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>

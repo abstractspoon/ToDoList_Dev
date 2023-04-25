@@ -29,11 +29,22 @@ namespace EvidenceBoardUIExtension
 	enum EvidenceBoardOption
 	{
 		None					= 0x00,
-		ShowParentChildLinks	= 0x01,
-		ShowDependencies		= 0x02,
+		// deprecated
+		// deprecated
 		ShowRootNode			= 0x04,
 		DrawLinksOnTop			= 0x08,
 		DrawPins				= 0x10,
+	}
+
+	// ------------------------------------------------------------
+
+	[Flags]
+	enum EvidenceBoardLinkType
+	{
+		None,
+		ParentChild,
+		Dependency,
+		User,
 	}
 
 	// ------------------------------------------------------------
@@ -55,11 +66,24 @@ namespace EvidenceBoardUIExtension
 
 		// -------------------------------------------------------------------------
 
+		public class LinkType
+		{
+			public LinkType(string name, EvidenceBoardLinkType type)
+			{
+				Name = name;
+				Type = type;
+			}
+
+			public EvidenceBoardLinkType Type { get; private set; }
+			public string Name { get; private set; }
+		}
+		
+		// -------------------------------------------------------------------------
+
 		const EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.ShowRootNode |
-													EvidenceBoardOption.ShowParentChildLinks |
-													EvidenceBoardOption.ShowDependencies |
 													EvidenceBoardOption.DrawLinksOnTop |
 													EvidenceBoardOption.DrawPins);
+
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
@@ -78,6 +102,8 @@ namespace EvidenceBoardUIExtension
 		private bool m_ShowCompletionCheckboxes = true;
 
 		private EvidenceBoardOption m_Options = EvidenceBoardOption.None;
+		private List<LinkType> m_VisibleLinkTypes;
+		private HashSet<string> m_UserLinkTypes;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -180,6 +206,44 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public IList<LinkType> VisibleLinks
+		{
+			get { return m_VisibleLinkTypes; }
+
+			set
+			{
+				if ((value == null) && (m_VisibleLinkTypes == null))
+					return;
+
+				if (value == null)
+				{
+					m_VisibleLinkTypes = null;
+				}
+				else
+				{
+					if (m_VisibleLinkTypes != null)
+						m_VisibleLinkTypes.Clear();
+					else
+						m_VisibleLinkTypes = new List<LinkType>();
+
+					m_VisibleLinkTypes.AddRange(value);
+				}
+				Invalidate();
+			}
+		}
+
+		public 
+
+		bool ShowingDependencyLinks
+		{
+			get { return (m_VisibleLinkTypes?.Find(x => (x.Type == EvidenceBoardLinkType.Dependency)) != null); }
+		}
+
+		bool ShowingParentChildLinks
+		{
+			get { return (m_VisibleLinkTypes?.Find(x => (x.Type == EvidenceBoardLinkType.ParentChild)) != null); }
+		}
+
 		public Color DependencyColor
 		{
 			get { return m_DependencyColor; }
@@ -190,7 +254,7 @@ namespace EvidenceBoardUIExtension
 				{
 					m_DependencyColor = value;
 
-					if (m_Options.HasFlag(EvidenceBoardOption.ShowDependencies))
+					if (ShowingDependencyLinks)
 						Invalidate();
 				}
 			}
@@ -202,13 +266,12 @@ namespace EvidenceBoardUIExtension
 			{
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
-				UpdateTaskAttributes(tasks);
+				UpdateTaskAttributes(tasks, false);
 				break;
 
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
-				m_TaskItems = new TaskItems();
-				UpdateTaskAttributes(tasks);
+				UpdateTaskAttributes(tasks, true);
 				RecalcLayout();
 				break;
 
@@ -652,12 +715,15 @@ namespace EvidenceBoardUIExtension
 			return DPIScaling.Scale(value);
 		}
 
-		private void UpdateTaskAttributes(TaskList tasks)
+		private void UpdateTaskAttributes(TaskList tasks, bool rebuild)
 		{
 			BaseNode rootNode = base.RootNode;
 
-			if (m_TaskItems.Count == 0)
+			if (rebuild)
 			{
+				m_UserLinkTypes = null;
+				m_TaskItems = new TaskItems();
+
 				rootNode = new BaseNode(0);
 			}
 
@@ -672,7 +738,7 @@ namespace EvidenceBoardUIExtension
 			base.EnableLayoutUpdates = false;
 			base.RadialIncrementOrSpacing = NodeSize.Width;
 
-			// If the root only has one task, make the initial radius zero
+			// If the root only has one task, make the initial radius close to zero
 			// to place the only node in the position of the root node
 			if (rootNode.Count == 1)
 				base.InitialRadius = 0.1f;
@@ -683,6 +749,28 @@ namespace EvidenceBoardUIExtension
 			base.EnableLayoutUpdates = true;
 
 			Invalidate();
+		}
+
+		public IEnumerable<string> UserLinkTypes
+		{
+			get
+			{
+				if (m_UserLinkTypes == null)
+				{
+					m_UserLinkTypes = new HashSet<string>();
+
+					foreach (var taskItem in m_TaskItems.Values)
+					{
+						if (taskItem.UserLinks?.Count > 0)
+						{
+							foreach (var link in taskItem.UserLinks)
+								m_UserLinkTypes.Add(link.Type);
+						}
+					}
+				}
+				
+				return m_UserLinkTypes;
+			}
 		}
 
 		private bool ProcessTaskUpdate(Task task, BaseNode parentNode)
@@ -854,36 +942,36 @@ namespace EvidenceBoardUIExtension
 
 		protected void DrawTaskDependencies(Graphics graphics, BaseNode node)
 		{
-			if (m_Options.HasFlag(EvidenceBoardOption.ShowDependencies))
+ 			if (!ShowingDependencyLinks)
+				return;
+
+			var taskItem = GetTaskItem(node);
+
+			if (taskItem?.DependIds?.Count > 0)
 			{
-				var taskItem = GetTaskItem(node);
-
-				if (taskItem?.DependIds?.Count > 0)
+				foreach (var dependId in taskItem.DependIds)
 				{
-					foreach (var dependId in taskItem.DependIds)
-					{
-						Point fromPos, toPos;
+					Point fromPos, toPos;
 
-						// Don't draw a dependency which is overlaid by a user link
-						if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
-							IsConnectionVisible(node, dependId, out fromPos, out toPos, false))
+					// Don't draw a dependency which is overlaid by a user link
+					if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
+						IsConnectionVisible(node, dependId, out fromPos, out toPos, false))
+					{
+						using (var pen = new Pen(DependencyColor))
 						{
-							using (var pen = new Pen(DependencyColor))
+							using (var brush = new SolidBrush(DependencyColor))
 							{
-								using (var brush = new SolidBrush(DependencyColor))
-								{
-									DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
-									DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
-								}
+								DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
+								DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
 							}
 						}
 					}
 				}
-
-				// Children
-				foreach (var child in node.Children)
-					DrawTaskDependencies(graphics, child);
 			}
+
+			// Children
+			foreach (var child in node.Children)
+				DrawTaskDependencies(graphics, child);
 		}
 
 		protected void DrawSelectedUserLink(Graphics graphics)
@@ -1059,7 +1147,7 @@ namespace EvidenceBoardUIExtension
 
 		protected override void DrawParentAndChildConnections(Graphics graphics, BaseNode node)
 		{
-			if (m_Options.HasFlag(EvidenceBoardOption.ShowParentChildLinks))
+			if (ShowingParentChildLinks)
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
@@ -1106,12 +1194,20 @@ namespace EvidenceBoardUIExtension
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
 		{
+			bool visible = (m_VisibleLinkTypes.Find(x => ((x.Type == EvidenceBoardLinkType.User) && (x.Name == link.Type))) != null);
+
+			if (!visible)
+			{
+				fromPos = toPos = Point.Empty;
+				return false;
+			}
+
 			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos, true);
 		}
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			if (!m_Options.HasFlag(EvidenceBoardOption.ShowParentChildLinks))
+			if (!ShowingParentChildLinks)
 				return;
 
 			var taskItem = m_TaskItems.GetTaskItem(nodeId);

@@ -416,6 +416,8 @@ namespace EvidenceBoardUIExtension
 
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
+		public bool Empty { get { return (Count == 0); } }
+
 		public TaskItem GetTaskItem(uint uniqueId)
 		{
 			TaskItem item = null;
