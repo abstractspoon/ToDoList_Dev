@@ -535,12 +535,14 @@ namespace DayViewUIExtension
 			// to support tasks without dates
 			var taskID = m_DayView.SelectedTaskID;
 
-			// TODO 
+			var dlg = new DayViewCreateTimeBlockDlg();
 
-
-			if (taskID != 0)
+			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_DayView.CreateNewTaskBlock(taskID, m_DayView.SelectedDates);
+				if (taskID != 0)
+				{
+					m_DayView.CreateNewTaskBlock(taskID, m_DayView.SelectedDates);
+				}
 			}
 		}
 
@@ -557,7 +559,7 @@ namespace DayViewUIExtension
 			(m_Toolbar.Items["Show14DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 14);
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
 
-			m_Toolbar.Items["NewTimeBlock"].Enabled = m_DayView.CanCreateNewTimeBlock();
+			m_Toolbar.Items["NewTimeBlock"].Enabled = true/*m_DayView.CanCreateNewTimeBlock()*/;
 			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateTimeBlock();
 		}
 

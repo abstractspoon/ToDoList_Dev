@@ -50,6 +50,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DayViewCreateTimeBlockDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DayViewCreateTimeBlockDlg.Designer.cs">
+      <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="DayViewMonthComboBox.cs" />
     <Compile Include="DayViewWeekLabel.cs" />
     <Compile Include="DayViewYearComboBox.cs" />
@@ -76,6 +82,9 @@
     <Compile Include="TimeBlock.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DayViewCreateTimeBlockDlg.resx">
+      <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DayViewPreferencesDlg.resx">
       <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
     </EmbeddedResource>

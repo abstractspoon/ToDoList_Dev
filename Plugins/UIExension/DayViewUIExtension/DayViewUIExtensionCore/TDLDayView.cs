@@ -579,13 +579,13 @@ namespace DayViewUIExtension
 			return (SelectedAppointment is TaskTimeBlock);
 		}
 
-		public bool CanCreateNewTimeBlock()
+		/*public bool CanCreateNewTimeBlock()
 		{
 			// Enable button only if the user has dragged a time slot 
 			return ((SelectedAppointment != null) &&
 					(SelectedDates.Length.Ticks > 0) &&
 					(SelectionType == Calendar.SelectionType.DateRange));
-		}
+		}*/
 
 		public bool CreateNewTaskBlock(uint taskId, Calendar.AppointmentDates dates)
 		{
