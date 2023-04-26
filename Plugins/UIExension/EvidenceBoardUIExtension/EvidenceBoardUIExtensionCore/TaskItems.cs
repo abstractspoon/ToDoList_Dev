@@ -176,6 +176,11 @@ namespace EvidenceBoardUIExtension
 			return (FindUserLink(toId) != null);
 		}
 
+		public bool HasUserLink(string type)
+		{
+			return (UserLinks?.Find(x => (x.Attributes.Type == type)) != null);
+		}
+
 		public bool DeleteUserLink(UserLink link)
 		{
 			if (UserLinks.Remove(link))

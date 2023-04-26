@@ -28,5 +28,7 @@ namespace EvidenceBoardUIExtension
 		}
 
 		public UserLinkAttributes LinkAttributes { get { return m_Attribs.Attributes; } }
+
+		public bool WantModifyAllOfSameType { get { return m_ModAllCheckBox.Checked; } }
 	}
 }

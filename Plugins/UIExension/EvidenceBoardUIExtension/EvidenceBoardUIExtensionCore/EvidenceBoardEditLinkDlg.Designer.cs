@@ -34,13 +34,14 @@
 			this.cancelBtn = new System.Windows.Forms.Button();
 			this.divider = new System.Windows.Forms.Label();
 			this.m_Attribs = new EvidenceBoardUIExtension.EvidenceBoardLinkAttributesPage();
+			this.m_ModAllCheckBox = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// okBtn
 			// 
 			this.okBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.okBtn.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.okBtn.Location = new System.Drawing.Point(140, 182);
+			this.okBtn.Location = new System.Drawing.Point(198, 182);
 			this.okBtn.Name = "okBtn";
 			this.okBtn.Size = new System.Drawing.Size(75, 23);
 			this.okBtn.TabIndex = 3;
@@ -51,7 +52,7 @@
 			// 
 			this.cancelBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancelBtn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancelBtn.Location = new System.Drawing.Point(221, 182);
+			this.cancelBtn.Location = new System.Drawing.Point(279, 182);
 			this.cancelBtn.Name = "cancelBtn";
 			this.cancelBtn.Size = new System.Drawing.Size(75, 23);
 			this.cancelBtn.TabIndex = 3;
@@ -65,7 +66,7 @@
 			this.divider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.divider.Location = new System.Drawing.Point(0, 170);
 			this.divider.Name = "divider";
-			this.divider.Size = new System.Drawing.Size(310, 2);
+			this.divider.Size = new System.Drawing.Size(368, 2);
 			this.divider.TabIndex = 4;
 			this.divider.Text = "label3";
 			// 
@@ -78,8 +79,21 @@
 			this.m_Attribs.Attributes = userLinkAttributes1;
 			this.m_Attribs.Location = new System.Drawing.Point(12, 12);
 			this.m_Attribs.Name = "m_Attribs";
-			this.m_Attribs.Size = new System.Drawing.Size(284, 147);
+			this.m_Attribs.Size = new System.Drawing.Size(342, 147);
 			this.m_Attribs.TabIndex = 5;
+			// 
+			// m_ModAllCheckBox
+			// 
+			this.m_ModAllCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_ModAllCheckBox.CheckAlign = System.Drawing.ContentAlignment.TopLeft;
+			this.m_ModAllCheckBox.Location = new System.Drawing.Point(12, 179);
+			this.m_ModAllCheckBox.Name = "m_ModAllCheckBox";
+			this.m_ModAllCheckBox.Size = new System.Drawing.Size(180, 31);
+			this.m_ModAllCheckBox.TabIndex = 6;
+			this.m_ModAllCheckBox.Text = "&Modify all connections of the same type";
+			this.m_ModAllCheckBox.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+			this.m_ModAllCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// EvidenceBoardEditLinkDlg
 			// 
@@ -87,7 +101,8 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelBtn;
-			this.ClientSize = new System.Drawing.Size(308, 217);
+			this.ClientSize = new System.Drawing.Size(366, 217);
+			this.Controls.Add(this.m_ModAllCheckBox);
 			this.Controls.Add(this.m_Attribs);
 			this.Controls.Add(this.divider);
 			this.Controls.Add(this.cancelBtn);
@@ -109,5 +124,6 @@
 		private System.Windows.Forms.Button cancelBtn;
 		private System.Windows.Forms.Label divider;
 		private EvidenceBoardLinkAttributesPage m_Attribs;
+		private System.Windows.Forms.CheckBox m_ModAllCheckBox;
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -520,11 +521,36 @@ namespace EvidenceBoardUIExtension
 			return null;
 		}
 
-		public bool EditSelectedUserLink(UserLinkAttributes attrib)
+		public bool EditSelectedUserLink(UserLinkAttributes attrib, bool modAllOfSameType)
 		{
-			if (!HasSelectedUserLink || m_SelectedUserLink.Attributes.Match(attrib))
+			if (!HasSelectedUserLink || (!modAllOfSameType && m_SelectedUserLink.Attributes.Match(attrib)))
 				return false;
 
+			// Select all the tasks having a user link of the specified type
+			if (modAllOfSameType)
+			{
+				var ids = new List<uint>();
+				var matchingTasks = m_TaskItems.Values.Where(x => x.HasUserLink(attrib.Type));
+
+				if (matchingTasks.Count() > 1)
+				{
+					m_SelectedUserLink = null;
+
+					foreach (var taskItem in matchingTasks)
+					{
+						ids.Add(taskItem.TaskId);
+
+						var matchingLinks = taskItem.UserLinks.Where(x => (x.Attributes.Type == attrib.Type));
+
+						foreach (var link in matchingLinks)
+							link.Attributes = attrib;
+					}
+
+					base.SelectNodes(ids, true);
+					return (TaskMoved?.Invoke(this, ids) == true);
+				}
+			}
+			
 			m_SelectedUserLink.Attributes = attrib;
 			m_UserLinkTypes.Add(attrib.Type);
 

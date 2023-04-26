@@ -207,13 +207,6 @@ namespace EvidenceBoardUIExtension
 						continue;
 					}
 
-					if ((type == (int)EvidenceBoardLinkType.User) && 
-						string.IsNullOrWhiteSpace(parts[1]))
-					{
-						Debug.Assert(false);
-						continue;
-					}
-
 					int visible = 1;
 					int.TryParse(parts[2], out visible);
 					
