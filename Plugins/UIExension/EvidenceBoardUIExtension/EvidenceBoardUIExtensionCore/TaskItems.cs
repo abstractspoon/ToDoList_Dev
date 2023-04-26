@@ -70,6 +70,15 @@ namespace EvidenceBoardUIExtension
 			Type = DefaultType;
 		}
 
+		public bool Matches(Color color, int thickness, EndArrows arrows, string label, string type)
+		{
+			return ((thickness == Thickness) &&
+					(arrows == Arrows) &&
+					(color == Color) &&
+					(label == Label) &&
+					(type == Type));
+		}
+
 		public bool ChangeToId(uint toId)
 		{
 			if ((toId == 0) || (toId == FromId))

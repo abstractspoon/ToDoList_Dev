@@ -13,19 +13,16 @@ namespace EvidenceBoardUIExtension
 {
 	public partial class EvidenceBoardAddEditLinkDlg : Form
 	{
-		public EvidenceBoardAddEditLinkDlg(Translator trans, UserLink link)
+		public EvidenceBoardAddEditLinkDlg(Translator trans, UserLink link, IEnumerable<string> userLinkTypes)
 		{
 			InitializeComponent();
 			
 			Text = ((link == null) ? "New Connection" : "Edit Connection");
 
 			m_Attribs.SetLink(link);
-			trans.Translate(this);
-		}
+			m_Attribs.UserLinkTypes = userLinkTypes;
 
-		public void UpdateLink(UserLink link)
-		{
-			m_Attribs.UpdateLink(link);
+			trans.Translate(this);
 		}
 
 		public Color Color { get { return m_Attribs.Color; } }

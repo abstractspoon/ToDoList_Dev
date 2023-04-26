@@ -206,7 +206,7 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public IList<LinkType> VisibleLinks
+		public IList<LinkType> VisibleLinkTypes
 		{
 			get { return m_VisibleLinkTypes; }
 
@@ -516,6 +516,8 @@ namespace EvidenceBoardUIExtension
 					link.Label = text;
 					link.Type = type;
 
+					m_UserLinkTypes.Add(type);
+
 					fromTask.UserLinks.Add(link);
 					Invalidate();
 
@@ -529,7 +531,7 @@ namespace EvidenceBoardUIExtension
 		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows,
 										string text, string type)
 		{
-			if (!HasSelectedUserLink)
+			if (!HasSelectedUserLink || m_SelectedUserLink.Matches(color, thickness, arrows, text, type))
 				return false;
 
 			m_SelectedUserLink.Color = color;
@@ -537,6 +539,8 @@ namespace EvidenceBoardUIExtension
 			m_SelectedUserLink.Arrows = arrows;
 			m_SelectedUserLink.Label = text;
 			m_SelectedUserLink.Type = type;
+
+			m_UserLinkTypes.Add(type);
 
 			ConnectionEdited?.Invoke(this, m_SelectedUserLink);
 

@@ -47,13 +47,9 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public void UpdateLink(UserLink link)
+		public IEnumerable<string> UserLinkTypes
 		{
-			link.Color = Color;
-			link.Thickness = Thickness;
-			link.Arrows = Arrows;
-			link.Label = Label;
-			link.Type = Type;
+			set { m_LinkType.Items.AddRange(value.ToArray()); }
 		}
 
 		public Color Color

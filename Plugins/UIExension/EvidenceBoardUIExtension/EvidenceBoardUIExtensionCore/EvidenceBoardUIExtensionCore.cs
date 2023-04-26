@@ -98,7 +98,7 @@ namespace EvidenceBoardUIExtension
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
-				m_Control.VisibleLinks = m_LinkVisibilityCombo.SelectedOptions;
+				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 				break;
 			}
 		}
@@ -217,7 +217,7 @@ namespace EvidenceBoardUIExtension
             {
 				// Combos
 				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
-				m_Control.VisibleLinks = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
+				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 
 				// Preferences
 				m_PrefsDlg.LoadPreferences(prefs, key);
@@ -373,7 +373,7 @@ namespace EvidenceBoardUIExtension
 		void OnLinkVisibilityComboClosed(object sender, EventArgs e)
 		{
  			if (!m_LinkVisibilityCombo.Cancelled)
- 				m_Control.VisibleLinks = m_LinkVisibilityCombo.SelectedOptions;
+ 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 		}
 
 		bool OnEvidenceBoardEditTaskLabel(object sender, UInt32 taskId)
@@ -445,14 +445,18 @@ namespace EvidenceBoardUIExtension
 			if (!m_Control.HasSelectedUserLink)
 				return false;
 
-			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null);
+			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				dlg.UpdateLink(link);
+				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
+
+				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
+				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
 
 				NotifyParentTaskModified(link.FromId);
 				UpdateToolbarButtonStates();
+				Invalidate();
 
 				return true;
 			}
@@ -636,14 +640,19 @@ namespace EvidenceBoardUIExtension
 						return;
 					}
 
-					var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null);
+					var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
 						var link = m_Control.CreateUserLink(fromId, toId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 
 						if (link != null)
+						{
+							m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
+							m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
+
 							NotifyParentTaskModified(fromId);
+						}
 
 						UpdateToolbarButtonStates();
 					}
@@ -661,13 +670,22 @@ namespace EvidenceBoardUIExtension
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
-			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink);
+			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink, m_Control.UserLinkTypes);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
-				UpdateToolbarButtonStates();
+				string prevType = m_Control.SelectedUserLink.Type;
 
+				if (m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type))
+				{
+					if (dlg.Type != prevType)
+					{
+						m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
+						m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
+					}
+				}
+
+				UpdateToolbarButtonStates();
 				return true;
 			}
 

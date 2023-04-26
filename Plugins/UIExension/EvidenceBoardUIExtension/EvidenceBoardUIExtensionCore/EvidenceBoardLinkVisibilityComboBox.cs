@@ -13,28 +13,22 @@ namespace EvidenceBoardUIExtension
 	{
 		class EvidenceBoardLinkVisibilityItem : TDLNodeControl.LinkType
 		{
-			public EvidenceBoardLinkVisibilityItem(Translator trans, string label, EvidenceBoardLinkType type)
+			public EvidenceBoardLinkVisibilityItem(string label, EvidenceBoardLinkType type)
 				:
 				base(label, type)
 			{
-				m_Trans = trans;
 			}
 
 			public override string ToString()
 			{
-				if ((m_Trans != null) && (Type == EvidenceBoardLinkType.User))
-					return string.Format(m_Trans.Translate("{0} (User Type)"), Name);
-
 				return Name;
 			}
-
-			private Translator m_Trans;
 		}
 
 		// ----------------------------------------------------------------
 
 		Translator m_Trans;
-		List<string> m_UserTypes = new List<string>();
+		HashSet<string> m_UserTypes = new HashSet<string>();
 
 		class LinkTypeVisibility : TDLNodeControl.LinkType
 		{
@@ -77,19 +71,22 @@ namespace EvidenceBoardUIExtension
 
 			set
 			{
+				if ((value != null) && m_UserTypes.SetEquals(value))
+					return;
+
 				// Cache the current selection
 				var prevVisibility = LinkVisibility;
 
 				// Rebuild the combo
 				Items.Clear();
 
-				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, "Dependencies", EvidenceBoardLinkType.Dependency));
-				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, "Parent/Child", EvidenceBoardLinkType.ParentChild));
+				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans.Translate("Dependency"), EvidenceBoardLinkType.Dependency));
+				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans.Translate("Parent/Child"), EvidenceBoardLinkType.ParentChild));
 
 				if (value != null)
 				{
 					foreach (var name in value)
-						Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, name, EvidenceBoardLinkType.User));
+						Items.Add(new EvidenceBoardLinkVisibilityItem(name, EvidenceBoardLinkType.User));
 				}
 
 				// Restore the selection
@@ -104,7 +101,7 @@ namespace EvidenceBoardUIExtension
 				m_UserTypes.Clear();
 
 				if (value != null)
-					m_UserTypes.AddRange(value);
+					m_UserTypes = new HashSet<string>(value);
 			}
 		}
 
@@ -139,7 +136,7 @@ namespace EvidenceBoardUIExtension
 			return ((index == -1) ? true : vis[index].Visible);
 		}
 
-		public List<TDLNodeControl.LinkType> SelectedOptions
+		public List<TDLNodeControl.LinkType> SelectedLinkTypes
 		{
 			get
 			{
@@ -232,7 +229,7 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 
-			return SelectedOptions;
+			return SelectedLinkTypes;
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
