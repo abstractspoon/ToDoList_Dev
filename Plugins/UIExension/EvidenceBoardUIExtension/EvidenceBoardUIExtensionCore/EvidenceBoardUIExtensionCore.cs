@@ -445,7 +445,7 @@ namespace EvidenceBoardUIExtension
 			if (!m_Control.HasSelectedUserLink)
 				return false;
 
-			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
+			var dlg = new EvidenceBoardAddLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
@@ -640,7 +640,7 @@ namespace EvidenceBoardUIExtension
 						return;
 					}
 
-					var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
+					var dlg = new EvidenceBoardAddLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
@@ -670,7 +670,7 @@ namespace EvidenceBoardUIExtension
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
-			var dlg = new EvidenceBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink, m_Control.UserLinkTypes);
+			var dlg = new EvidenceBoardEditLinkDlg(m_Trans, m_Control.SelectedUserLink, m_Control.UserLinkTypes);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{

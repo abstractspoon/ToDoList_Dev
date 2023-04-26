@@ -11,14 +11,12 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	public partial class EvidenceBoardAddEditLinkDlg : Form
+	public partial class EvidenceBoardAddLinkDlg : Form
 	{
-		public EvidenceBoardAddEditLinkDlg(Translator trans, UserLink link, IEnumerable<string> userLinkTypes)
+		public EvidenceBoardAddLinkDlg(Translator trans, UserLink link, IEnumerable<string> userLinkTypes)
 		{
 			InitializeComponent();
 			
-			Text = ((link == null) ? "New Connection" : "Edit Connection");
-
 			m_Attribs.SetLink(link);
 			m_Attribs.UserLinkTypes = userLinkTypes;
 

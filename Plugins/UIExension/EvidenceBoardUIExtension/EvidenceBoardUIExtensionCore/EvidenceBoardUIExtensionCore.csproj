@@ -49,6 +49,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EvidenceBoardAddLinkDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EvidenceBoardAddLinkDlg.Designer.cs">
+      <DependentUpon>EvidenceBoardAddLinkDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EvidenceBoardEditLinkDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EvidenceBoardEditLinkDlg.Designer.cs">
+      <DependentUpon>EvidenceBoardEditLinkDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="EvidenceBoardLinkAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -61,12 +73,6 @@
     </Compile>
     <Compile Include="EvidenceBoardPreferencesDlg.Designer.cs">
       <DependentUpon>EvidenceBoardPreferencesDlg.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EvidenceBoardAddEditLinkDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EvidenceBoardAddEditLinkDlg.Designer.cs">
-      <DependentUpon>EvidenceBoardAddEditLinkDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="EvidenceBoardLinkArrowsComboBox.cs">
       <SubType>Component</SubType>
@@ -110,6 +116,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="EvidenceBoardAddLinkDlg.resx">
+      <DependentUpon>EvidenceBoardAddLinkDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EvidenceBoardEditLinkDlg.resx">
+      <DependentUpon>EvidenceBoardEditLinkDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="EvidenceBoardLinkAttributesPage.resx">
       <DependentUpon>EvidenceBoardLinkAttributesPage.cs</DependentUpon>
     </EmbeddedResource>
@@ -118,9 +130,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="NodeControl.resx">
       <DependentUpon>NodeControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EvidenceBoardAddEditLinkDlg.resx">
-      <DependentUpon>EvidenceBoardAddEditLinkDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TDLNodeControl.resx">
       <DependentUpon>TDLNodeControl.cs</DependentUpon>

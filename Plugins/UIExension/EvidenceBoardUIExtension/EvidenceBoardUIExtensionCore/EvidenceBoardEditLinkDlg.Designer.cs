@@ -1,6 +1,6 @@
 ﻿namespace EvidenceBoardUIExtension
 {
-	partial class EvidenceBoardAddEditLinkDlg
+	partial class EvidenceBoardEditLinkDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardAddEditLinkDlg));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardEditLinkDlg));
 			this.okBtn = new System.Windows.Forms.Button();
 			this.cancelBtn = new System.Windows.Forms.Button();
 			this.divider = new System.Windows.Forms.Label();
@@ -62,7 +62,7 @@
 			this.divider.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.divider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.divider.Location = new System.Drawing.Point(0, 168);
+			this.divider.Location = new System.Drawing.Point(0, 170);
 			this.divider.Name = "divider";
 			this.divider.Size = new System.Drawing.Size(310, 2);
 			this.divider.TabIndex = 4;
@@ -77,10 +77,10 @@
 			this.m_Attribs.Name = "m_Attribs";
 			this.m_Attribs.Size = new System.Drawing.Size(287, 147);
 			this.m_Attribs.TabIndex = 5;
-			this.m_Attribs.Thickness = 0;
+			this.m_Attribs.Thickness = 1;
 			this.m_Attribs.Type = "";
 			// 
-			// EvidenceBoardAddEditLinkDlg
+			// EvidenceBoardEditLinkDlg
 			// 
 			this.AcceptButton = this.okBtn;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -94,11 +94,11 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "EvidenceBoardAddEditLinkDlg";
+			this.Name = "EvidenceBoardEditLinkDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Edit Link";
+			this.Text = "Modify Connection";
 			this.ResumeLayout(false);
 
 		}
