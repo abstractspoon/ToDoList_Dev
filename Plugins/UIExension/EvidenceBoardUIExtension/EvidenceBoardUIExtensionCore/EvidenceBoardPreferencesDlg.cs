@@ -18,11 +18,7 @@ namespace EvidenceBoardUIExtension
 
 		// ------------------------------------------------------------------------
 
-		public Color DefaultColor { get { return m_DefaultAttribs.Color; } }
-		public int DefaultThickness { get { return m_DefaultAttribs.Thickness; } }
-		public UserLink.EndArrows DefaultArrows { get { return m_DefaultAttribs.Arrows; } }
-		public string DefaultLabel { get { return m_DefaultAttribs.Label; } }
-		public string DefaultType { get { return m_DefaultAttribs.Type; } }
+		public UserLinkAttributes DefaultUserLinkAttributes { get { return m_DefaultAttribs.Attributes; } }
 
 		public Color DependencyColor { get { return m_DependsLinkColor.Color; } }
 		public Color ParentConnectionColor { get { return m_ParentLinkColor.Color; } }
@@ -44,25 +40,32 @@ namespace EvidenceBoardUIExtension
 		{
             string prefsKey = (key + "\\Preferences");
 
-            prefs.WriteProfileInt(prefsKey, "DefaultUserLinkColor", DefaultColor.ToArgb());
-            prefs.WriteProfileInt(prefsKey, "DefaultUserLinkThickness", DefaultThickness);
-            prefs.WriteProfileInt(prefsKey, "DefaultUserLinkArrows", (int)DefaultArrows);
+			var defaults = DefaultUserLinkAttributes;
+
+            prefs.WriteProfileInt(prefsKey, "DefaultUserLinkColor", defaults.Color.ToArgb());
+            prefs.WriteProfileInt(prefsKey, "DefaultUserLinkThickness", defaults.Thickness);
+            prefs.WriteProfileInt(prefsKey, "DefaultUserLinkArrows", (int)defaults.Arrows);
             prefs.WriteProfileInt(prefsKey, "DependencyColor", DependencyColor.ToArgb());
 			prefs.WriteProfileInt(prefsKey, "ParentConnectionColor", ParentConnectionColor.ToArgb());
 
-			prefs.WriteProfileString(prefsKey, "DefaultUserLinkLabel", DefaultLabel);
-			prefs.WriteProfileString(prefsKey, "DefaultUserLinkType", DefaultType);
+			prefs.WriteProfileString(prefsKey, "DefaultUserLinkLabel", defaults.Label);
+			prefs.WriteProfileString(prefsKey, "DefaultUserLinkType", defaults.Type);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
         {
             string prefsKey = (key + "\\Preferences");
 
-            m_DefaultAttribs.Color = Color.FromArgb(prefs.GetProfileInt(prefsKey, "DefaultUserLinkColor", UserLink.DefaultColor.ToArgb()));
-			m_DefaultAttribs.Thickness = prefs.GetProfileInt(prefsKey, "DefaultUserLinkThickness", UserLink.DefaultThickness);
-			m_DefaultAttribs.Arrows = (UserLink.EndArrows)prefs.GetProfileInt(prefsKey, "DefaultUserLinkArrows", (int)DefaultArrows);
-			m_DefaultAttribs.Label = prefs.GetProfileString(prefsKey, "DefaultUserLinkLabel", UserLink.DefaultLabel);
-            m_DefaultAttribs.Type = prefs.GetProfileString(prefsKey, "DefaultUserLinkType", UserLink.DefaultType);
+			var defaults = new UserLinkAttributes()
+			{
+				Color = Color.FromArgb(prefs.GetProfileInt(prefsKey, "DefaultUserLinkColor", UserLinkAttributes.Defaults.Color.ToArgb())),
+				Thickness = prefs.GetProfileInt(prefsKey, "DefaultUserLinkThickness", UserLinkAttributes.Defaults.Thickness),
+				Arrows = (UserLinkAttributes.EndArrows)prefs.GetProfileInt(prefsKey, "DefaultUserLinkArrows", (int)UserLinkAttributes.Defaults.Arrows),
+				Label = prefs.GetProfileString(prefsKey, "DefaultUserLinkLabel", UserLinkAttributes.Defaults.Label),
+				Type = prefs.GetProfileString(prefsKey, "DefaultUserLinkType", UserLinkAttributes.Defaults.Type)
+			};
+
+			m_DefaultAttribs.Attributes = defaults;
             
 			m_DependsLinkColor.Color = Color.FromArgb(prefs.GetProfileInt(prefsKey, "DependencyColor", Color.CornflowerBlue.ToArgb()));
 			m_ParentLinkColor.Color =  Color.FromArgb(prefs.GetProfileInt(prefsKey, "ParentConnectionColor", Color.Gray.ToArgb()));
@@ -76,12 +79,7 @@ namespace EvidenceBoardUIExtension
 		public new DialogResult ShowDialog(IWin32Window owner)
 		{
 			// Snapshot current state
-			var orgColor = DefaultColor;
-			var orgThicknes = DefaultThickness;
-			var ordArrows = DefaultArrows;
-			var orgLabel = DefaultLabel;
-			var orgType = DefaultType;
-
+			var orgAttrib = m_DefaultAttribs.Attributes;
 			var orgDependColor = DependencyColor;
 			var orgParentColor = ParentConnectionColor;
 
@@ -90,12 +88,7 @@ namespace EvidenceBoardUIExtension
 			if (ret != DialogResult.OK)
 			{
 				// Restore previous state
-				m_DefaultAttribs.Color = orgColor;
-				m_DefaultAttribs.Thickness = orgThicknes;
-				m_DefaultAttribs.Arrows = ordArrows;
-				m_DefaultAttribs.Label = orgLabel;
-				m_DefaultAttribs.Type = orgType;
-
+				m_DefaultAttribs.Attributes = orgAttrib;
 				m_DependsLinkColor.Color = orgDependColor;
 				m_ParentLinkColor.Color = orgParentColor;
 			}

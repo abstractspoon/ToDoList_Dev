@@ -491,8 +491,7 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 		
-		public UserLink CreateUserLink(uint fromId, uint toId, Color color, int thickness, 
-										UserLink.EndArrows arrows, string text, string type)
+		public UserLink CreateUserLink(uint fromId, uint toId, UserLinkAttributes attrib)
 		{
 			var fromTask = GetTaskItem(fromId);
 
@@ -508,19 +507,12 @@ namespace EvidenceBoardUIExtension
 				// Link cannot already exist
 				if (!UserLinkExists(fromId, toId))
 				{
-					var link = new UserLink(fromId, toId);
+					m_UserLinkTypes.Add(attrib.Type);
 
-					link.Color = color;
-					link.Thickness = thickness;
-					link.Arrows = arrows;
-					link.Label = text;
-					link.Type = type;
-
-					m_UserLinkTypes.Add(type);
-
+					var link = new UserLink(fromId, toId, attrib);
 					fromTask.UserLinks.Add(link);
-					Invalidate();
 
+					Invalidate();
 					return link;
 				}
 			}
@@ -528,19 +520,13 @@ namespace EvidenceBoardUIExtension
 			return null;
 		}
 
-		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows,
-										string text, string type)
+		public bool EditSelectedUserLink(UserLinkAttributes attrib)
 		{
-			if (!HasSelectedUserLink || m_SelectedUserLink.Matches(color, thickness, arrows, text, type))
+			if (!HasSelectedUserLink || m_SelectedUserLink.Attributes.Match(attrib))
 				return false;
 
-			m_SelectedUserLink.Color = color;
-			m_SelectedUserLink.Thickness = thickness;
-			m_SelectedUserLink.Arrows = arrows;
-			m_SelectedUserLink.Label = text;
-			m_SelectedUserLink.Type = type;
-
-			m_UserLinkTypes.Add(type);
+			m_SelectedUserLink.Attributes = attrib;
+			m_UserLinkTypes.Add(attrib.Type);
 
 			ConnectionEdited?.Invoke(this, m_SelectedUserLink);
 
@@ -768,7 +754,7 @@ namespace EvidenceBoardUIExtension
 						if (taskItem.UserLinks?.Count > 0)
 						{
 							foreach (var link in taskItem.UserLinks)
-								m_UserLinkTypes.Add(link.Type);
+								m_UserLinkTypes.Add(link.Attributes.Type);
 						}
 					}
 				}
@@ -966,7 +952,7 @@ namespace EvidenceBoardUIExtension
 							using (var brush = new SolidBrush(DependencyColor))
 							{
 								DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
-								DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
+								DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
 							}
 						}
 					}
@@ -1023,7 +1009,7 @@ namespace EvidenceBoardUIExtension
 					toPos = m_DraggedUserLinkEnd;
 				}
 
-				var lineThickness = (selected ? 2 : link.Thickness);
+				var lineThickness = (selected ? 2 : link.Attributes.Thickness);
 				var arrowThickness = Math.Max(2, lineThickness);
 				var arrowOffset = (selected ? (DefaultPinRadius + 2) : PinRadius);
 				var arrowSize = UIExtension.DependencyArrows.Size(TextFont);
@@ -1037,22 +1023,22 @@ namespace EvidenceBoardUIExtension
 					DrawSelectionPin(graphics, fromPos, false);
 					DrawSelectionPin(graphics, toPos, true);
 
-					DrawConnectionArrows(graphics, link.Arrows, arrowThickness, SystemColors.WindowText, fromPos, toPos, arrowOffset);
+					DrawConnectionArrows(graphics, link.Attributes.Arrows, arrowThickness, SystemColors.WindowText, fromPos, toPos, arrowOffset);
 				}
 				else
 				{
-					using (var pen = new Pen(link.Color, link.Thickness))
+					using (var pen = new Pen(link.Attributes.Color, link.Attributes.Thickness))
 					{
-						using (var brush = new SolidBrush(link.Color))
+						using (var brush = new SolidBrush(link.Attributes.Color))
 						{
 							DrawConnection(graphics, pen, brush, fromPos, toPos);
 						}
 					}
 
-					DrawConnectionArrows(graphics, link.Arrows, arrowThickness, link.Color, fromPos, toPos, arrowOffset);
+					DrawConnectionArrows(graphics, link.Attributes.Arrows, arrowThickness, link.Attributes.Color, fromPos, toPos, arrowOffset);
 				}
 
-				if (!string.IsNullOrWhiteSpace(link.Label))
+				if (!string.IsNullOrWhiteSpace(link.Attributes.Label))
 				{
 					var matrix = new Matrix();
 					var textOffset = Geometry2D.MidPoint(fromPos, toPos);
@@ -1072,7 +1058,7 @@ namespace EvidenceBoardUIExtension
 
 					graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 					graphics.Transform = matrix;
-					graphics.DrawString(link.Label, TextFont, SystemBrushes.WindowText/*new SolidBrush(color)*/, Point.Empty, format);
+					graphics.DrawString(link.Attributes.Label, TextFont, SystemBrushes.WindowText/*new SolidBrush(color)*/, Point.Empty, format);
 					graphics.ResetTransform();
 				}
 			}
@@ -1198,7 +1184,7 @@ namespace EvidenceBoardUIExtension
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
 		{
-			bool visible = (m_VisibleLinkTypes.Find(x => ((x.Type == EvidenceBoardLinkType.User) && (x.Name == link.Type))) != null);
+			bool visible = (m_VisibleLinkTypes.Find(x => ((x.Type == EvidenceBoardLinkType.User) && (x.Name == link.Attributes.Type))) != null);
 
 			if (!visible)
 			{
@@ -1241,25 +1227,25 @@ namespace EvidenceBoardUIExtension
 				{
 					DrawConnection(graphics, pen, brush, nodePos, parentPos);
 				}
-				DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
+				DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
 			}
 		}
 
-		protected void DrawConnectionArrows(Graphics graphics, UserLink.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos, int offset)
+		protected void DrawConnectionArrows(Graphics graphics, UserLinkAttributes.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos, int offset)
 		{
-			if (arrows != UserLink.EndArrows.None)
+			if (arrows != UserLinkAttributes.EndArrows.None)
 			{
 				using (var pen = new Pen(color, thickness))
 				{
 					int size = UIExtension.DependencyArrows.Size(TextFont) + thickness;
 
-					if ((arrows == UserLink.EndArrows.Start) || (arrows == UserLink.EndArrows.Both))
+					if ((arrows == UserLinkAttributes.EndArrows.Start) || (arrows == UserLinkAttributes.EndArrows.Both))
 					{
 						var degrees = Geometry2D.DegreesBetween(toPos, fromPos, Geometry2D.AngleAxis.FromVertical);
 						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, offset, degrees);
 					}
 
-					if ((arrows == UserLink.EndArrows.Finish) || (arrows == UserLink.EndArrows.Both))
+					if ((arrows == UserLinkAttributes.EndArrows.Finish) || (arrows == UserLinkAttributes.EndArrows.Both))
 					{
 						var degrees = Geometry2D.DegreesBetween(fromPos, toPos, Geometry2D.AngleAxis.FromVertical);
 						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, offset, degrees);
@@ -1644,7 +1630,7 @@ namespace EvidenceBoardUIExtension
 
 				if ((node != null) && GetCreateLinkPinRect(node).Contains(e.Location))
 				{
-					DoUserLinkDragDrop(new UserLink(node.Data, NullId));
+					DoUserLinkDragDrop(new UserLink(node.Data, NullId, UserLinkAttributes.Defaults));
 
 					// Prevent base class handling
 					return;
@@ -1700,7 +1686,7 @@ namespace EvidenceBoardUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			// Check for connection first to simplify logic
+			// Check for connection first
 			if (!ReadOnly)
 			{
 				var link = HitTestUserLink(e.Location);
@@ -1719,31 +1705,6 @@ namespace EvidenceBoardUIExtension
 			}
 
 			base.OnMouseClick(e);
-
-			// 			TaskNode task = SelectedTaskNode;
-			// 
-			// 			if (task == null)
-			// 				return;
-			// 
-			// 			if (!ReadOnly && !task.IsLocked && (HitTestTask(e.Location) == task))
-			// 			{
-			// /*
-			// 				if (HitTestCheckbox(node, e.Location))
-			// 				{
-			// 					if (EditTaskDone != null)
-			// 						EditTaskDone(this, task.ID, !task.IsDone(false));
-			// 				}
-			// 				else*/ if (HitTestIcon(SelectedNode, e.Location))
-			// 				{
-			// 					if (EditTaskIcon != null)
-			// 					    EditTaskIcon(this, task.TaskId);
-			// 				}
-			// 				else if (SelectedNodeWasPreviouslySelected)
-			// 				{
-			// 					if (EditTaskLabel != null)
-			// 						m_EditTimer.Start();
-			// 				}
-			// 			}
 		}
 
 

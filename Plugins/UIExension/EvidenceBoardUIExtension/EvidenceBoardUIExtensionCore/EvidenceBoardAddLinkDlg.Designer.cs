@@ -62,7 +62,7 @@
 			this.divider.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.divider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.divider.Location = new System.Drawing.Point(0, 168);
+			this.divider.Location = new System.Drawing.Point(0, 170);
 			this.divider.Name = "divider";
 			this.divider.Size = new System.Drawing.Size(310, 2);
 			this.divider.TabIndex = 4;
@@ -70,15 +70,15 @@
 			// 
 			// m_Attribs
 			// 
-			this.m_Attribs.Arrows = EvidenceBoardUIExtension.UserLink.EndArrows.None;
-			this.m_Attribs.Color = System.Drawing.Color.Empty;
-			this.m_Attribs.Label = "";
+			this.m_Attribs.Attributes.Arrows = EvidenceBoardUIExtension.UserLinkAttributes.EndArrows.None;
+			this.m_Attribs.Attributes.Color = System.Drawing.Color.Empty;
+			this.m_Attribs.Attributes.Label = "";
 			this.m_Attribs.Location = new System.Drawing.Point(12, 12);
 			this.m_Attribs.Name = "m_Attribs";
 			this.m_Attribs.Size = new System.Drawing.Size(287, 147);
 			this.m_Attribs.TabIndex = 5;
-			this.m_Attribs.Thickness = 1;
-			this.m_Attribs.Type = "";
+			this.m_Attribs.Attributes.Thickness = 1;
+			this.m_Attribs.Attributes.Type = "";
 			// 
 			// EvidenceBoardAddLinkDlg
 			// 

@@ -445,11 +445,11 @@ namespace EvidenceBoardUIExtension
 			if (!m_Control.HasSelectedUserLink)
 				return false;
 
-			var dlg = new EvidenceBoardAddLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
+			var dlg = new EvidenceBoardAddLinkDlg(m_Trans, m_Control.UserLinkTypes);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
+				m_Control.EditSelectedUserLink(dlg.LinkAttributes);
 
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
@@ -640,11 +640,11 @@ namespace EvidenceBoardUIExtension
 						return;
 					}
 
-					var dlg = new EvidenceBoardAddLinkDlg(m_Trans, null, m_Control.UserLinkTypes);
+					var dlg = new EvidenceBoardAddLinkDlg(m_Trans, m_Control.UserLinkTypes);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
-						var link = m_Control.CreateUserLink(fromId, toId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
+						var link = m_Control.CreateUserLink(fromId, toId, dlg.LinkAttributes);
 
 						if (link != null)
 						{
@@ -674,11 +674,11 @@ namespace EvidenceBoardUIExtension
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				string prevType = m_Control.SelectedUserLink.Type;
+				string prevType = m_Control.SelectedUserLink.Attributes.Type;
 
-				if (m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type))
+				if (m_Control.EditSelectedUserLink(dlg.LinkAttributes))
 				{
-					if (dlg.Type != prevType)
+					if (dlg.LinkAttributes.Type != prevType)
 					{
 						m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 						m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
@@ -702,7 +702,7 @@ namespace EvidenceBoardUIExtension
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
-			if (m_PrefsDlg.ShowDialog(this/*Control.FromHandle(m_HwndParent)*/) == DialogResult.OK)
+			if (m_PrefsDlg.ShowDialog(this) == DialogResult.OK)
 			{
 				UpdateEvidenceBoardPreferences();
 			}
@@ -710,11 +710,7 @@ namespace EvidenceBoardUIExtension
 
 		private void UpdateEvidenceBoardPreferences()
 		{
-			UserLink.DefaultColor = m_PrefsDlg.DefaultColor;
-			UserLink.DefaultThickness = m_PrefsDlg.DefaultThickness;
-			UserLink.DefaultArrows = m_PrefsDlg.DefaultArrows;
-			UserLink.DefaultLabel = m_PrefsDlg.DefaultLabel;
-			UserLink.DefaultType = m_PrefsDlg.DefaultType;
+			UserLinkAttributes.Defaults = m_PrefsDlg.DefaultUserLinkAttributes;
 
 			m_Control.DependencyColor = m_PrefsDlg.DependencyColor;
 			m_Control.ParentConnectionColor = m_PrefsDlg.ParentConnectionColor;

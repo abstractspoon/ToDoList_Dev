@@ -13,20 +13,16 @@ namespace EvidenceBoardUIExtension
 {
 	public partial class EvidenceBoardAddLinkDlg : Form
 	{
-		public EvidenceBoardAddLinkDlg(Translator trans, UserLink link, IEnumerable<string> userLinkTypes)
+		public EvidenceBoardAddLinkDlg(Translator trans, IEnumerable<string> userLinkTypes)
 		{
 			InitializeComponent();
 			
-			m_Attribs.SetLink(link);
+			m_Attribs.Attributes = UserLinkAttributes.Defaults;
 			m_Attribs.UserLinkTypes = userLinkTypes;
 
 			trans.Translate(this);
 		}
 
-		public Color Color { get { return m_Attribs.Color; } }
-		public int Thickness { get { return m_Attribs.Thickness; } }
-		public UserLink.EndArrows Arrows { get { return m_Attribs.Arrows; } }
-		public string Label { get { return m_Attribs.Label; } }
-		public string Type { get { return m_Attribs.Type; } }
+		public UserLinkAttributes LinkAttributes { get { return m_Attribs.Attributes; } }
 	}
 }

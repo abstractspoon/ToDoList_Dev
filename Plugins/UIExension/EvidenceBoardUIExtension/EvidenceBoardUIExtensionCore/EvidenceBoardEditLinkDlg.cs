@@ -17,16 +17,16 @@ namespace EvidenceBoardUIExtension
 		{
 			InitializeComponent();
 			
-			m_Attribs.SetLink(link);
+			if (link == null)
+				m_Attribs.Attributes = UserLinkAttributes.Defaults;
+			else
+				m_Attribs.Attributes = link.Attributes;
+
 			m_Attribs.UserLinkTypes = userLinkTypes;
 
 			trans.Translate(this);
 		}
 
-		public Color Color { get { return m_Attribs.Color; } }
-		public int Thickness { get { return m_Attribs.Thickness; } }
-		public UserLink.EndArrows Arrows { get { return m_Attribs.Arrows; } }
-		public string Label { get { return m_Attribs.Label; } }
-		public string Type { get { return m_Attribs.Type; } }
+		public UserLinkAttributes LinkAttributes { get { return m_Attribs.Attributes; } }
 	}
 }

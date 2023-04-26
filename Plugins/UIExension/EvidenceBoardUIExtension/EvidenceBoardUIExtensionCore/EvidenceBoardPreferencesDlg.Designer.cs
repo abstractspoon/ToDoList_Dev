@@ -110,15 +110,15 @@
 			// 
 			// m_DefaultAttribs
 			// 
-			this.m_DefaultAttribs.Arrows = EvidenceBoardUIExtension.UserLink.EndArrows.None;
-			this.m_DefaultAttribs.Color = System.Drawing.Color.Empty;
-			this.m_DefaultAttribs.Label = "";
+			this.m_DefaultAttribs.Attributes.Arrows = EvidenceBoardUIExtension.UserLinkAttributes.EndArrows.None;
+			this.m_DefaultAttribs.Attributes.Color = System.Drawing.Color.Empty;
+			this.m_DefaultAttribs.Attributes.Label = "";
 			this.m_DefaultAttribs.Location = new System.Drawing.Point(12, 22);
 			this.m_DefaultAttribs.Name = "m_DefaultAttribs";
 			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 147);
 			this.m_DefaultAttribs.TabIndex = 0;
-			this.m_DefaultAttribs.Thickness = 1;
-			this.m_DefaultAttribs.Type = "";
+			this.m_DefaultAttribs.Attributes.Thickness = 1;
+			this.m_DefaultAttribs.Attributes.Type = "";
 			// 
 			// BtnCancel
 			// 

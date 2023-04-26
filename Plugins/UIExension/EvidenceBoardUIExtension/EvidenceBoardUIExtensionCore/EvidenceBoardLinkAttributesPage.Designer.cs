@@ -28,7 +28,6 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.m_LinkArrows = new EvidenceBoardUIExtension.EvidenceBoardLinkArrowsComboBox();
 			this.m_LinkType = new System.Windows.Forms.ComboBox();
 			this.m_TextBox = new System.Windows.Forms.TextBox();
 			this.m_LineThickness = new System.Windows.Forms.ComboBox();
@@ -38,17 +37,8 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_ColorButton = new UIComponents.ColorButton();
+			this.m_LinkArrows = new EvidenceBoardUIExtension.EvidenceBoardLinkArrowsComboBox();
 			this.SuspendLayout();
-			// 
-			// m_LinkArrows
-			// 
-			this.m_LinkArrows.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_LinkArrows.FormattingEnabled = true;
-			this.m_LinkArrows.Location = new System.Drawing.Point(111, 125);
-			this.m_LinkArrows.Name = "m_LinkArrows";
-			this.m_LinkArrows.SelectedOption = EvidenceBoardUIExtension.UserLink.EndArrows.None;
-			this.m_LinkArrows.Size = new System.Drawing.Size(173, 21);
-			this.m_LinkArrows.TabIndex = 17;
 			// 
 			// m_LinkType
 			// 
@@ -86,7 +76,7 @@
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(39, 13);
 			this.label5.TabIndex = 9;
-			this.label5.Text = "Arrows";
+			this.label5.Text = "&Arrows";
 			// 
 			// label4
 			// 
@@ -95,7 +85,7 @@
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(31, 13);
 			this.label4.TabIndex = 10;
-			this.label4.Text = "Type";
+			this.label4.Text = "&Type";
 			// 
 			// label3
 			// 
@@ -104,7 +94,7 @@
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(28, 13);
 			this.label3.TabIndex = 11;
-			this.label3.Text = "Text";
+			this.label3.Text = "T&ext";
 			// 
 			// label2
 			// 
@@ -113,7 +103,7 @@
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(75, 13);
 			this.label2.TabIndex = 12;
-			this.label2.Text = "Line thickness";
+			this.label2.Text = "&Line thickness";
 			// 
 			// label1
 			// 
@@ -122,7 +112,7 @@
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(37, 13);
 			this.label1.TabIndex = 13;
-			this.label1.Text = "Colour";
+			this.label1.Text = "&Colour";
 			// 
 			// m_ColorButton
 			// 
@@ -134,6 +124,16 @@
 			this.m_ColorButton.Text = "Set...";
 			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_ColorButton.UseVisualStyleBackColor = true;
+			// 
+			// m_LinkArrows
+			// 
+			this.m_LinkArrows.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_LinkArrows.FormattingEnabled = true;
+			this.m_LinkArrows.Location = new System.Drawing.Point(111, 125);
+			this.m_LinkArrows.Name = "m_LinkArrows";
+			this.m_LinkArrows.SelectedOption = EvidenceBoardUIExtension.UserLinkAttributes.EndArrows.None;
+			this.m_LinkArrows.Size = new System.Drawing.Size(173, 21);
+			this.m_LinkArrows.TabIndex = 17;
 			// 
 			// EvidenceBoardLinkAttributesPage
 			// 

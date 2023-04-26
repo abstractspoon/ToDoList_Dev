@@ -10,7 +10,7 @@ namespace EvidenceBoardUIExtension
 	{
 		class EvidenceBoardArrowsItem
 		{
-			public EvidenceBoardArrowsItem(string label, UserLink.EndArrows arrows)
+			public EvidenceBoardArrowsItem(string label, UserLinkAttributes.EndArrows arrows)
 			{
 				Label = label;
 				Arrows = arrows;
@@ -22,20 +22,20 @@ namespace EvidenceBoardUIExtension
 			}
 
 			public string Label;
-			public UserLink.EndArrows Arrows { get; private set; }
+			public UserLinkAttributes.EndArrows Arrows { get; private set; }
 		}
 
 		// ----------------------------------------------------------------
 
 		public EvidenceBoardLinkArrowsComboBox()
 		{
-			Items.Add(new EvidenceBoardArrowsItem("None", UserLink.EndArrows.None));
-			Items.Add(new EvidenceBoardArrowsItem("Start", UserLink.EndArrows.Start));
-			Items.Add(new EvidenceBoardArrowsItem("End", UserLink.EndArrows.Finish));
-			Items.Add(new EvidenceBoardArrowsItem("Both", UserLink.EndArrows.Both));
+			Items.Add(new EvidenceBoardArrowsItem("None", UserLinkAttributes.EndArrows.None));
+			Items.Add(new EvidenceBoardArrowsItem("Start", UserLinkAttributes.EndArrows.Start));
+			Items.Add(new EvidenceBoardArrowsItem("End", UserLinkAttributes.EndArrows.Finish));
+			Items.Add(new EvidenceBoardArrowsItem("Both", UserLinkAttributes.EndArrows.Both));
 		}
 
-		public UserLink.EndArrows SelectedOption
+		public UserLinkAttributes.EndArrows SelectedOption
 		{
 			get
 			{
@@ -43,7 +43,7 @@ namespace EvidenceBoardUIExtension
 					return (SelectedItem as EvidenceBoardArrowsItem).Arrows;
 
 				// else
-				return UserLink.EndArrows.None;
+				return UserLinkAttributes.EndArrows.None;
 			}
 
 			set

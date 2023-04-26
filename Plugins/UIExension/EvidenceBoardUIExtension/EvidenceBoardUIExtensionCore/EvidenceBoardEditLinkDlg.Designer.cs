@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			EvidenceBoardUIExtension.UserLinkAttributes userLinkAttributes1 = new EvidenceBoardUIExtension.UserLinkAttributes();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardEditLinkDlg));
 			this.okBtn = new System.Windows.Forms.Button();
 			this.cancelBtn = new System.Windows.Forms.Button();
@@ -70,15 +71,15 @@
 			// 
 			// m_Attribs
 			// 
-			this.m_Attribs.Arrows = EvidenceBoardUIExtension.UserLink.EndArrows.None;
-			this.m_Attribs.Color = System.Drawing.Color.Empty;
-			this.m_Attribs.Label = "";
+			this.m_Attribs.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			userLinkAttributes1.Color = System.Drawing.Color.Red;
+			userLinkAttributes1.Thickness = 1;
+			this.m_Attribs.Attributes = userLinkAttributes1;
 			this.m_Attribs.Location = new System.Drawing.Point(12, 12);
 			this.m_Attribs.Name = "m_Attribs";
-			this.m_Attribs.Size = new System.Drawing.Size(287, 147);
+			this.m_Attribs.Size = new System.Drawing.Size(284, 147);
 			this.m_Attribs.TabIndex = 5;
-			this.m_Attribs.Thickness = 1;
-			this.m_Attribs.Type = "";
 			// 
 			// EvidenceBoardEditLinkDlg
 			// 

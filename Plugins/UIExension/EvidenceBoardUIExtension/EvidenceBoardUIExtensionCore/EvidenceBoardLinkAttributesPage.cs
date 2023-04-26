@@ -21,30 +21,9 @@ namespace EvidenceBoardUIExtension
 		public EvidenceBoardLinkAttributesPage(Translator trans) : base()
 		{
 			trans.Translate(this);
-			SetLink(null);
 
 			FormsUtil.SetEditCue(m_TextBox, trans.Translate("<none>"));
 			FormsUtil.SetComboBoxCue(m_LinkType, trans.Translate("<none>"));
-		}
-
-		public void SetLink(UserLink link)
-		{
-			if (link == null)
-			{
-				Color = UserLink.DefaultColor;
-				Thickness = UserLink.DefaultThickness;
-				Arrows = UserLink.DefaultArrows;
-				Label = UserLink.DefaultLabel;
-				Type = UserLink.DefaultType;
-			}
-			else
-			{
-				Color = link.Color;
-				Thickness = link.Thickness;
-				Arrows = link.Arrows;
-				Label = link.Label;
-				Type = link.Type;
-			}
 		}
 
 		public IEnumerable<string> UserLinkTypes
@@ -52,34 +31,29 @@ namespace EvidenceBoardUIExtension
 			set { m_LinkType.Items.AddRange(value.ToArray()); }
 		}
 
-		public Color Color
+		public UserLinkAttributes Attributes
 		{
-			get { return m_ColorButton.Color; }
-			set { m_ColorButton.Color = value; }
-		}
+			get
+			{
+				var attrib = new UserLinkAttributes();
 
-		public int Thickness
-		{
-			get { return (m_LineThickness.SelectedIndex + 1); }
-			set { m_LineThickness.SelectedIndex = (Math.Min(Math.Max(1, value), 5) - 1); }
-		}
+				attrib.Color = m_ColorButton.Color;
+				attrib.Thickness = (m_LineThickness.SelectedIndex + 1);
+				attrib.Arrows = m_LinkArrows.SelectedOption;
+				attrib.Label = m_TextBox.Text;
+				attrib.Type = m_LinkType.Text;
 
-		public UserLink.EndArrows Arrows
-		{
-			get { return m_LinkArrows.SelectedOption; }
-			set { m_LinkArrows.SelectedOption = value; }
-		}
+				return attrib;
+			}
 
-		public string Label
-		{
-			get { return m_TextBox.Text; }
-			set { m_TextBox.Text = value; }
-		}
-
-		public string Type
-		{
-			get { return m_LinkType.Text; }
-			set { m_LinkType.Text = value; }
+			set
+			{
+				m_ColorButton.Color = value.Color;
+				m_LineThickness.SelectedIndex = (Math.Min(Math.Max(1, value.Thickness), 5) - 1);
+				m_LinkArrows.SelectedOption = value.Arrows;
+				m_TextBox.Text = value.Label;
+				m_LinkType.Text = value.Type;
+			}
 		}
 	}
 }

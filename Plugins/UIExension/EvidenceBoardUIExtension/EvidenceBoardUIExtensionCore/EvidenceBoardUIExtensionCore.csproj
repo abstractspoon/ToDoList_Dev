@@ -80,7 +80,6 @@
     <Compile Include="EvidenceBoardOptionsComboBox.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />
-    <Compile Include="TaskItems.cs" />
     <Compile Include="NodeControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -91,7 +90,9 @@
     </Compile>
     <Compile Include="EvidenceBoardUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskItems.cs" />
     <Compile Include="TDLNodeControl.cs" />
+    <Compile Include="UserLink.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\3rdParty\CustomComboBox\CustomComboBox.csproj">
