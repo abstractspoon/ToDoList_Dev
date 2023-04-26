@@ -298,7 +298,7 @@ namespace EvidenceBoardUIExtension
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnEvidenceBoardSelectionChange);
-			m_Control.TaskMoved += new TaskMovedEventHandler(OnEvidenceBoardTaskMoved);
+			m_Control.TaskModified += new TaskModifiedEventHandler(OnEvidenceBoardTaskModified);
 			m_Control.ConnectionCreated += new ConnectionCreatedEventHandler(OnEvidenceBoardTaskLinkCreated);
 			m_Control.ConnectionEdited += new ConnectionEditedEventHandler(OnEvidenceBoardTaskLinkEdited);
 			m_Control.ConnectionDeleted += new ConnectionDeletedEventHandler(OnEvidenceBoardTaskLinkDeleted);
@@ -425,7 +425,7 @@ namespace EvidenceBoardUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		bool OnEvidenceBoardTaskMoved(object sender, IList<uint> nodeIds)
+		bool OnEvidenceBoardTaskModified(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 

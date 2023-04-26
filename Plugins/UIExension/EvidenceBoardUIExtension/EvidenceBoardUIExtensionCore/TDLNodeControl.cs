@@ -19,7 +19,7 @@ namespace EvidenceBoardUIExtension
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
 
-	public delegate bool TaskMovedEventHandler(object sender, IList<uint> taskIds);
+	public delegate bool TaskModifiedEventHandler(object sender, IList<uint> taskIds);
 	public delegate bool ConnectionCreatedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionEditedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionDeletedEventHandler(object sender, uint taskId);
@@ -57,7 +57,7 @@ namespace EvidenceBoardUIExtension
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
 
-		public event TaskMovedEventHandler TaskMoved;
+		public event TaskModifiedEventHandler TaskModified;
 		public event ConnectionCreatedEventHandler ConnectionCreated;
 		public event ConnectionEditedEventHandler ConnectionEdited;
 		public event ConnectionDeletedEventHandler ConnectionDeleted;
@@ -547,7 +547,7 @@ namespace EvidenceBoardUIExtension
 					}
 
 					base.SelectNodes(ids, true);
-					return (TaskMoved?.Invoke(this, ids) == true);
+					return (TaskModified?.Invoke(this, ids) == true);
 				}
 			}
 			
@@ -2002,7 +2002,7 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 
-			TaskMoved?.Invoke(this, nodeIds);
+			TaskModified?.Invoke(this, nodeIds);
 			return true;
 		}
 
