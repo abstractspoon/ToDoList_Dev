@@ -23,7 +23,7 @@ namespace EvidenceBoardUIExtension
 			public override string ToString()
 			{
 				if ((m_Trans != null) && (Type == EvidenceBoardLinkType.User))
-					return string.Format(m_Trans.Translate("{0} (Custom)"), Name);
+					return string.Format(m_Trans.Translate("{0} (User Type)"), Name);
 
 				return Name;
 			}
@@ -36,13 +36,23 @@ namespace EvidenceBoardUIExtension
 		Translator m_Trans;
 		List<string> m_UserTypes = new List<string>();
 
-		struct LinkVisibilityItem
+		class LinkTypeVisibility : TDLNodeControl.LinkType
 		{
-			public EvidenceBoardLinkType Type;
-			public string Name;
-			public bool Visible;
+			public LinkTypeVisibility(string label, EvidenceBoardLinkType type)
+				:
+				base(label, type)
+			{
+			}
+
+			public LinkTypeVisibility(TDLNodeControl.LinkType other)
+				:
+				base(other.Name, other.Type)
+			{
+			}
+
+			public bool Visible = true;
 		}
-		List<LinkVisibilityItem> m_LinkVisibility;
+		List<LinkTypeVisibility> m_PrevLinkVisibility;
 
 		// ----------------------------------------------------------------
 
@@ -54,7 +64,7 @@ namespace EvidenceBoardUIExtension
 			UserLinkTypes = null;
 			Sorted = true;
 
-			DropDownClosed += (s, e) => { m_LinkVisibility = null; };
+			DropDownClosed += (s, e) => { m_PrevLinkVisibility = null; };
 
 		}
 
@@ -67,28 +77,28 @@ namespace EvidenceBoardUIExtension
 
 			set
 			{
-				// Rebuild the combo, preserving the selection
+				// Cache the current selection
+				var prevVisibility = LinkVisibility;
+
+				// Rebuild the combo
 				Items.Clear();
 
-				int index = Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, "Dependencies", EvidenceBoardLinkType.Dependency));
-				ListBox.SetItemChecked(index, IsTypeVisible(EvidenceBoardLinkType.Dependency));
-
-				index = Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, "Parent/Child", EvidenceBoardLinkType.ParentChild));
-				ListBox.SetItemChecked(index, IsTypeVisible(EvidenceBoardLinkType.ParentChild));
+				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, "Dependencies", EvidenceBoardLinkType.Dependency));
+				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, "Parent/Child", EvidenceBoardLinkType.ParentChild));
 
 				if (value != null)
 				{
 					foreach (var name in value)
-					{
-						var visItem = new EvidenceBoardLinkVisibilityItem(m_Trans, name, EvidenceBoardLinkType.User);
-						index = Items.Add(visItem);
+						Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans, name, EvidenceBoardLinkType.User));
+				}
 
-						// if the new item is a new user type then enable it
-						// else use the restore the previous state
-						ListBox.SetItemChecked(index, IsTypeVisible(visItem.Type, visItem.Name));
-					}
+				// Restore the selection
+				for (int index = 0; index < Items.Count; index++)
+				{
+					var item = (EvidenceBoardLinkVisibilityItem)Items[index];
+					var itemVis = prevVisibility.Find(x => ((x.Type == item.Type) && (x.Name == item.Name)));
 
-					m_LinkVisibility = null;
+					ListBox.SetItemChecked(index, ((itemVis == null) ? true : itemVis.Visible));
 				}
 
 				m_UserTypes.Clear();
@@ -98,36 +108,35 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		List<LinkVisibilityItem> LinkVisibility
+		private List<LinkTypeVisibility> LinkVisibility
 		{
 			get
 			{
-				if (m_LinkVisibility == null)
+				if (m_PrevLinkVisibility != null)
+					return m_PrevLinkVisibility;
+
+				// else
+				var linkVis = new List<LinkTypeVisibility>();
+
+				for (int index = 0; index < Items.Count; index++)
 				{
-					m_LinkVisibility = new List<LinkVisibilityItem>();
+					var item = (EvidenceBoardLinkVisibilityItem)Items[index];
 
-					for (int index = 0; index < Items.Count; index++)
+					linkVis.Add(new LinkTypeVisibility(item)
 					{
-						var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-
-						m_LinkVisibility.Add(new LinkVisibilityItem()
-						{
-							Name = item.Name,
-							Type = item.Type,
-							Visible = ListBox.GetItemChecked(index)
-						});
-					}
+						Visible = ListBox.GetItemChecked(index)
+					});
 				}
 
-				return m_LinkVisibility;
+				return linkVis;
 			}
 		}
 
-		bool IsTypeVisible(EvidenceBoardLinkType type, string name = "")
+		private bool IsTypeVisible(List<LinkTypeVisibility> vis, EvidenceBoardLinkType type, string name = "")
 		{
-			var index = LinkVisibility.FindIndex(x => ((x.Type == type) && (x.Name == name)));
+			int index = vis.FindIndex(x => ((x.Type == type) && (x.Name == name)));
 
-			return ((index == -1) ? true : LinkVisibility[index].Visible);
+			return ((index == -1) ? true : vis[index].Visible);
 		}
 
 		public List<TDLNodeControl.LinkType> SelectedOptions
@@ -161,17 +170,16 @@ namespace EvidenceBoardUIExtension
 
 		public List<TDLNodeControl.LinkType> LoadPreferences(Preferences prefs, String key)
 		{
-			// Then only hide what was explicitly hidden before
 			var prevVisibility = prefs.GetProfileString(key, "LinkTypeVisibility", "_");
 
 			if (prevVisibility == "_")
 			{
 				CheckAll();
-				m_LinkVisibility = null;
+				m_PrevLinkVisibility = null;
 			}
 			else
 			{
-				m_LinkVisibility = new List<LinkVisibilityItem>();
+				m_PrevLinkVisibility = new List<LinkTypeVisibility>();
 
 				var options = prevVisibility.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries );
 
@@ -217,10 +225,10 @@ namespace EvidenceBoardUIExtension
 					if (find != -1)
 						ListBox.SetItemChecked(find, (visible != 0));
 
-					m_LinkVisibility.Add(new LinkVisibilityItem() {
-						Name = parts[1],
-						Type = (EvidenceBoardLinkType)type,
-						Visible = (visible != 0) });
+					m_PrevLinkVisibility.Add(new LinkTypeVisibility(parts[1], (EvidenceBoardLinkType)type)
+					{
+						Visible = (visible != 0)
+					});
 				}
 			}
 
