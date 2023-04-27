@@ -449,7 +449,7 @@ namespace EvidenceBoardUIExtension
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_Control.EditSelectedUserLink(dlg.LinkAttributes, false);
+				m_Control.EditSelectedUserLink(dlg.LinkAttributes, UserLinkAttributes.Mask.All, false);
 
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
@@ -676,9 +676,9 @@ namespace EvidenceBoardUIExtension
 			{
 				string prevType = m_Control.SelectedUserLink.Attributes.Type;
 
-				if (m_Control.EditSelectedUserLink(dlg.LinkAttributes, dlg.WantModifyAllOfSameType))
+				if (m_Control.EditSelectedUserLink(dlg.Attributes, dlg.AttributeMask, dlg.WantModifyAllOfSameType))
 				{
-					if (dlg.LinkAttributes.Type != prevType)
+					if (dlg.Attributes.Type != prevType)
 					{
 						m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 						m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;

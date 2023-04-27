@@ -29,12 +29,13 @@ namespace EvidenceBoardUIExtension
 	[Flags]
 	enum EvidenceBoardOption
 	{
-		None					= 0x00,
+		None			= 0x00,
+
 		// deprecated
 		// deprecated
-		ShowRootNode			= 0x04,
-		DrawLinksOnTop			= 0x08,
-		DrawPins				= 0x10,
+		ShowRootNode	= 0x04,
+		DrawLinksOnTop	= 0x08,
+		DrawPins		= 0x10,
 	}
 
 	// ------------------------------------------------------------
@@ -43,6 +44,7 @@ namespace EvidenceBoardUIExtension
 	enum EvidenceBoardLinkType
 	{
 		None,
+
 		ParentChild,
 		Dependency,
 		User,
@@ -521,12 +523,20 @@ namespace EvidenceBoardUIExtension
 			return null;
 		}
 
-		public bool EditSelectedUserLink(UserLinkAttributes attrib, bool modAllOfSameType)
+		public bool EditSelectedUserLink(UserLinkAttributes attrib, UserLinkAttributes.Mask mask = UserLinkAttributes.Mask.All, bool modAllOfSameType = false)
 		{
-			if (!HasSelectedUserLink || (!modAllOfSameType && m_SelectedUserLink.Attributes.Match(attrib)))
+			if (!HasSelectedUserLink)
+				return false;
+
+			if (mask == UserLinkAttributes.Mask.None)
+				return false;
+
+			if (!modAllOfSameType && m_SelectedUserLink.Attributes.Matches(attrib, mask))
 				return false;
 
 			// Select all the tasks having a user link of the specified type
+			bool changes = false;
+
 			if (modAllOfSameType)
 			{
 				var ids = new List<uint>();
@@ -543,21 +553,31 @@ namespace EvidenceBoardUIExtension
 						var matchingLinks = taskItem.UserLinks.Where(x => (x.Attributes.Type == attrib.Type));
 
 						foreach (var link in matchingLinks)
-							link.Attributes = attrib;
+							changes |= link.Attributes.Copy(attrib, mask);
 					}
 
-					base.SelectNodes(ids, true);
-					return (TaskModified?.Invoke(this, ids) == true);
+					if (changes)
+					{
+						base.SelectNodes(ids, true);
+						return (TaskModified?.Invoke(this, ids) == true);
+					}
+
+					// else
+					return false;
 				}
 			}
 			
-			m_SelectedUserLink.Attributes = attrib;
-			m_UserLinkTypes.Add(attrib.Type);
+			changes = m_SelectedUserLink.Attributes.Copy(attrib, mask);
 
-			ConnectionEdited?.Invoke(this, m_SelectedUserLink);
+			if (changes)
+			{
+				m_UserLinkTypes.Add(attrib.Type);
+				ConnectionEdited?.Invoke(this, m_SelectedUserLink);
+			}
 
 			ClearUserLinkSelection();
-			return true;
+
+			return changes;
 		}
 
 		public bool DeleteSelectedUserLink()

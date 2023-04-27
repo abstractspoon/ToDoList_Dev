@@ -10,6 +10,24 @@ namespace EvidenceBoardUIExtension
 {
 	public class UserLinkAttributes
 	{
+		// ------------------------------------------------------------
+
+		[Flags]
+		public enum Mask
+		{
+			None		= 0x00,
+
+			Color		= 0x01,
+			Thickness	= 0x02,
+			Label		= 0x04,
+			Type		= 0x08,
+			Arrows		= 0x10,
+
+			All			= 0xff
+		}
+
+		// ------------------------------------------------------------
+
 		public enum EndArrows
 		{
 			None,
@@ -62,22 +80,50 @@ namespace EvidenceBoardUIExtension
 		public string Label = string.Empty;
 		public string Type = string.Empty;
 
-// 		public void Copy(UserLinkAttributes other)
-// 		{
-// 			Thickness = other.Thickness;
-// 			Arrows = other.Arrows;
-// 			Color = other.Color;
-// 			Label = other.Label;
-// 			Type = other.Type;
-// 		}
-
-		public bool Match(UserLinkAttributes other)
+		public bool Copy(UserLinkAttributes other, Mask mask = Mask.All)
 		{
-			return ((other.Thickness == Thickness) &&
-					(other.Arrows == Arrows) &&
-					(other.Color == Color) &&
-					(other.Label == Label) &&
-					(other.Type == Type));
+			if ((mask == Mask.None) || Matches(other, mask))
+				return false;
+
+			if (mask.HasFlag(Mask.Thickness))
+				Thickness = other.Thickness;
+
+			if (mask.HasFlag(Mask.Arrows))
+				Arrows = other.Arrows;
+
+			if (mask.HasFlag(Mask.Color))
+				Color = other.Color;
+
+			if (mask.HasFlag(Mask.Label))
+				Label = other.Label;
+
+			if (mask.HasFlag(Mask.Type))
+				Type = other.Type;
+
+			return true;
+		}
+
+		public bool Matches(UserLinkAttributes other, Mask mask = Mask.All)
+		{
+			if (mask == Mask.None)
+				return false;
+
+			if (mask.HasFlag(Mask.Thickness) && (other.Thickness != Thickness))
+				return false;
+
+			if (mask.HasFlag(Mask.Arrows) && (other.Arrows != Arrows))
+				return false;
+
+			if (mask.HasFlag(Mask.Color) && (other.Color != Color))
+				return false;
+
+			if (mask.HasFlag(Mask.Label) && (other.Label != Label))
+				return false;
+
+			if (mask.HasFlag(Mask.Type) && (other.Type != Type))
+				return false;
+
+			return true;
 		}
 	}
 

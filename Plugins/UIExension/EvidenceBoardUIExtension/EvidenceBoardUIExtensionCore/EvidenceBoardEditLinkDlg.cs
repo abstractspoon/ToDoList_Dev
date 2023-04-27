@@ -11,12 +11,15 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
+	// ------------------------------------------------------------
+
 	public partial class EvidenceBoardEditLinkDlg : Form
 	{
 		public EvidenceBoardEditLinkDlg(Translator trans, UserLink link, IEnumerable<string> userLinkTypes)
 		{
 			InitializeComponent();
-			
+			trans.Translate(this);
+
 			if (link == null)
 				m_Attribs.Attributes = UserLinkAttributes.Defaults;
 			else
@@ -24,11 +27,31 @@ namespace EvidenceBoardUIExtension
 
 			m_Attribs.UserLinkTypes = userLinkTypes;
 
-			trans.Translate(this);
+			m_ModAllCheckBox.CheckStateChanged += (s, e) => { m_Attribs.MultipleLinkEditing = WantModifyAllOfSameType; };
 		}
 
-		public UserLinkAttributes LinkAttributes { get { return m_Attribs.Attributes; } }
+		public UserLinkAttributes Attributes
+		{
+			get
+			{
+				return m_Attribs.Attributes;
+			}
+		}
 
-		public bool WantModifyAllOfSameType { get { return m_ModAllCheckBox.Checked; } }
+		public UserLinkAttributes.Mask AttributeMask
+		{
+			get
+			{
+				return m_Attribs.Mask;
+			}
+		}
+
+		public bool WantModifyAllOfSameType
+		{
+			get
+			{
+				return m_ModAllCheckBox.Checked;
+			}
+		}
 	}
 }
