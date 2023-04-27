@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			EvidenceBoardUIExtension.UserLinkAttributes userLinkAttributes1 = new EvidenceBoardUIExtension.UserLinkAttributes();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardAddLinkDlg));
 			this.okBtn = new System.Windows.Forms.Button();
 			this.cancelBtn = new System.Windows.Forms.Button();
@@ -39,9 +40,10 @@
 			// 
 			this.okBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.okBtn.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.okBtn.Location = new System.Drawing.Point(140, 182);
+			this.okBtn.Location = new System.Drawing.Point(210, 246);
+			this.okBtn.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.okBtn.Name = "okBtn";
-			this.okBtn.Size = new System.Drawing.Size(75, 23);
+			this.okBtn.Size = new System.Drawing.Size(112, 35);
 			this.okBtn.TabIndex = 3;
 			this.okBtn.Text = "OK";
 			this.okBtn.UseVisualStyleBackColor = true;
@@ -50,9 +52,10 @@
 			// 
 			this.cancelBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancelBtn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancelBtn.Location = new System.Drawing.Point(221, 182);
+			this.cancelBtn.Location = new System.Drawing.Point(332, 246);
+			this.cancelBtn.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.cancelBtn.Name = "cancelBtn";
-			this.cancelBtn.Size = new System.Drawing.Size(75, 23);
+			this.cancelBtn.Size = new System.Drawing.Size(112, 35);
 			this.cancelBtn.TabIndex = 3;
 			this.cancelBtn.Text = "Cancel";
 			this.cancelBtn.UseVisualStyleBackColor = true;
@@ -62,36 +65,38 @@
 			this.divider.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.divider.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.divider.Location = new System.Drawing.Point(0, 170);
+			this.divider.Location = new System.Drawing.Point(0, 228);
+			this.divider.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.divider.Name = "divider";
-			this.divider.Size = new System.Drawing.Size(310, 2);
+			this.divider.Size = new System.Drawing.Size(465, 3);
 			this.divider.TabIndex = 4;
 			this.divider.Text = "label3";
 			// 
 			// m_Attribs
 			// 
-			this.m_Attribs.Attributes.Arrows = EvidenceBoardUIExtension.UserLinkAttributes.EndArrows.None;
-			this.m_Attribs.Attributes.Color = System.Drawing.Color.Empty;
-			this.m_Attribs.Attributes.Label = "";
-			this.m_Attribs.Location = new System.Drawing.Point(12, 12);
+			userLinkAttributes1.Color = System.Drawing.Color.Red;
+			userLinkAttributes1.Thickness = 1;
+			this.m_Attribs.Attributes = userLinkAttributes1;
+			this.m_Attribs.Location = new System.Drawing.Point(18, 18);
+			this.m_Attribs.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
+			this.m_Attribs.MultipleLinkEditing = false;
 			this.m_Attribs.Name = "m_Attribs";
-			this.m_Attribs.Size = new System.Drawing.Size(287, 147);
+			this.m_Attribs.Size = new System.Drawing.Size(430, 196);
 			this.m_Attribs.TabIndex = 5;
-			this.m_Attribs.Attributes.Thickness = 1;
-			this.m_Attribs.Attributes.Type = "";
 			// 
 			// EvidenceBoardAddLinkDlg
 			// 
 			this.AcceptButton = this.okBtn;
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelBtn;
-			this.ClientSize = new System.Drawing.Size(308, 217);
+			this.ClientSize = new System.Drawing.Size(462, 300);
 			this.Controls.Add(this.m_Attribs);
 			this.Controls.Add(this.divider);
 			this.Controls.Add(this.cancelBtn);
 			this.Controls.Add(this.okBtn);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EvidenceBoardAddLinkDlg";
