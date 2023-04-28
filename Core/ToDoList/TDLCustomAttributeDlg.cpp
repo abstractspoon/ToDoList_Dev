@@ -1200,6 +1200,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 		m_sUniqueID.MakeLower();
 
 		m_pageList.SetDataType(m_dwDataType);
+		m_pageList.SetListType(attrib.GetListType());
 		m_pageList.SetDefaultListData(attrib.aDefaultListData);
 		m_pageCalc.SetCalculation(attrib.Calculation());
 
