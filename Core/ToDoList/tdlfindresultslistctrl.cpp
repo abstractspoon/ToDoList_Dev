@@ -286,11 +286,19 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 					int nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
 
-					pDC->DrawText(sColText, rRow, nFlags);
-
-					// references
-					if ((nSubItem == COL_TASKTITLE) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())
-						GraphicsMisc::DrawShortcutOverlay(pDC, &pLVCD->nmcd.rc);
+					if ((nSubItem == COL_TASKTITLE) && pRes->IsReference())
+					{
+						// Offset the task title to avoid the reference icon
+						rRow.left += GraphicsMisc::ScaleByDPIFactor(10);
+						pDC->DrawText(sColText, rRow, nFlags);
+						
+						if (pLVCD->nmcd.rc.top > 0)
+							GraphicsMisc::DrawShortcutOverlay(pDC, &pLVCD->nmcd.rc);
+					}
+					else
+					{
+						pDC->DrawText(sColText, rRow, nFlags);
+					}
 				}
 			}
 
@@ -381,7 +389,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	int nPos = GetItemCount();
 	CString sTitle = pTDC->GetTaskTitle(result.dwTaskID);
 	CString sPath = pTDC->GetTaskPath(result.dwTaskID);
-		
+
 	// add result
 	int nIndex = InsertItem(nPos, sTitle);
 	
