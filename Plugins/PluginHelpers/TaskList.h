@@ -145,13 +145,13 @@ namespace Abstractspoon
 				List<String^>^ GetTag();
 				List<String^>^ GetDependency();
 				List<UInt32>^  GetLocalDependency();
-				List<String^>^ GetFileLink();
+				List<String^>^ GetFileLink(bool fullPath);
 
 				String^ FormatAllocatedTo(String^ delimiter);
 				String^ FormatCategory(String^ delimiter);
 				String^ FormatTag(String^ delimiter);
 				String^ FormatDependency(String^ delimiter);
-				String^ FormatFileLink(String^ delimiter);
+				String^ FormatFileLink(String^ delimiter, bool fullPath);
 
 				Byte GetPercentDone(bool calculated);
 				double GetCost(bool calculated);
@@ -270,6 +270,7 @@ namespace Abstractspoon
 					FileLink,
 					TimePeriod,
 					Fraction,
+					Calculation,
 				};
 
 				enum class List
@@ -309,6 +310,7 @@ namespace Abstractspoon
 				String^ GetReportTitle();
 				String^ GetReportDate();
 				String^ GetProjectName();
+				String^ GetFilePath();
 				String^ GetMetaData(String^ sKey);
 
 				Boolean HasCustomAttributes();

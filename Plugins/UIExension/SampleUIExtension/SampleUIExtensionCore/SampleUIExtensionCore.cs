@@ -134,7 +134,7 @@ namespace SampleUIExtension
             if (tasks.IsAttributeAvailable(Task.Attribute.FileLink))
             {
                 attrib.Add("File Link");
-                value.Add(task.FormatFileLink(", "));
+                value.Add(task.FormatFileLink(", ", false));
             }
 
             if (tasks.IsAttributeAvailable(Task.Attribute.Comments))
