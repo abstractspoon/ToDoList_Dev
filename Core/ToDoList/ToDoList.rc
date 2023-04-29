@@ -1575,7 +1575,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_PAGEHOST,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
                     WS_DISABLED,210,201,199,84
-    PUSHBUTTON      "&Import...",IDC_IMPORT,78,300,50,14
+    PUSHBUTTON      "&Import...",IDC_IMPORT,26,300,50,14
     DEFPUSHBUTTON   "OK",IDOK,311,300,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,365,300,50,14
     LTEXT           "&Tasklist",IDC_STATIC,7,9,63,11
