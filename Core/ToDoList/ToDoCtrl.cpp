@@ -5825,7 +5825,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 {
 	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIBDEFS));
 
-	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, FALSE))
+	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, TRUE))
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
 

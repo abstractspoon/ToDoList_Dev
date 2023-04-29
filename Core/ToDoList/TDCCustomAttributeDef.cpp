@@ -368,7 +368,7 @@ TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel)
 	:
 	sLabel(szLabel),
 	dwAttribType(TDCCA_STRING),
-	nTextAlignment(DT_LEFT),
+	nHorzAlignment(DT_LEFT),
 	dwFeatures(TDCCAF_SORT),
 	nColID(TDCC_NONE),
 	nAttribID(TDCA_NONE),
@@ -388,26 +388,26 @@ TDCCUSTOMATTRIBUTEDEFINITION& TDCCUSTOMATTRIBUTEDEFINITION::operator=(const TDCC
 	sUniqueID = attribDef.sUniqueID;
 	sColumnTitle = attribDef.sColumnTitle;
 	sLabel = attribDef.sLabel;
-	nTextAlignment = attribDef.nTextAlignment;
+	nHorzAlignment = attribDef.nHorzAlignment;
 	dwFeatures = attribDef.dwFeatures;
 	nColID = attribDef.nColID;
 	nAttribID = attribDef.nAttribID;
 	bEnabled = attribDef.bEnabled;
 
-	if (attribDef.IsList())
+	calculation.Clear();
+	aDefaultListData.RemoveAll();
+	aAutoListData.RemoveAll();
+
+	if (IsDataType(TDCCA_CALCULATION))
+	{
+		calculation = attribDef.calculation;
+	}
+	else if (attribDef.IsList())
 	{
 		aDefaultListData.Copy(attribDef.aDefaultListData);
 
 		if (attribDef.IsAutoList())
 			aAutoListData.Copy(attribDef.aAutoListData);
-	}
-	else if (IsDataType(TDCCA_CALCULATION))
-	{
-		calculation = attribDef.calculation;
-	}
-	else
-	{
-		calculation.Clear();
 	}
 
 	return *this;
@@ -419,7 +419,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::Matches(const TDCCUSTOMATTRIBUTEDEFINITION& a
 		(sUniqueID.CompareNoCase(attribDef.sUniqueID) != 0) ||
 		(sColumnTitle != attribDef.sColumnTitle) ||
 		(sLabel != attribDef.sLabel) ||
-		(nTextAlignment != attribDef.nTextAlignment) ||
+		(nHorzAlignment != attribDef.nHorzAlignment) ||
 		(dwFeatures != attribDef.dwFeatures) ||
 		(nColID != attribDef.nColID) ||
 		(nAttribID != attribDef.nAttribID) ||
@@ -469,7 +469,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::GetToolTip() const
 
 UINT TDCCUSTOMATTRIBUTEDEFINITION::GetColumnHeaderAlignment() const
 {
-	switch (nTextAlignment)
+	switch (nHorzAlignment)
 	{
 	case DT_CENTER: return HDF_CENTER;
 	case DT_RIGHT:	return HDF_RIGHT;
@@ -481,7 +481,7 @@ UINT TDCCUSTOMATTRIBUTEDEFINITION::GetColumnHeaderAlignment() const
 	return HDF_LEFT;
 }
 
-UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultTextAlignment(DWORD dwAttribType)
+UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultHorzAlignment(DWORD dwAttribType)
 {
 	switch (dwAttribType & TDCCA_DATAMASK)
 	{
@@ -490,16 +490,21 @@ UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultTextAlignment(DWORD dwAttribType)
 	case TDCCA_DOUBLE:
 	case TDCCA_TIMEPERIOD:
 	case TDCCA_FRACTION:
-		return TA_RIGHT;
+		return DT_RIGHT;
+
+	case TDCCA_ICON:
+	case TDCCA_BOOL:
+	case TDCCA_FILELINK:
+		return DT_CENTER;
 	}
 
 	// All else
-	return TA_LEFT;
+	return DT_LEFT;
 }
 
-BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultTextAlignment() const
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultHorzAlignment() const
 {
-	return (nTextAlignment == GetDefaultTextAlignment(dwAttribType));
+	return (nHorzAlignment == GetDefaultHorzAlignment(dwAttribType));
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetAttributeType(DWORD dwType)
@@ -519,8 +524,8 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetDataType(DWORD dwDataType, BOOL bUpdateDef
 	// Set default alignment if the previous also had the default
 	if (bUpdateDefaultAlignment)
 	{
-		if (nTextAlignment == GetDefaultTextAlignment(dwPrevType))
-			nTextAlignment = GetDefaultTextAlignment(dwAttribType);
+		if (nHorzAlignment == GetDefaultHorzAlignment(dwPrevType))
+			nHorzAlignment = GetDefaultHorzAlignment(dwAttribType);
 	}
 
 	return TRUE;
@@ -831,7 +836,8 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetTypes(DWORD dwDataType, DWORD dwListType)
 	// Update calculation
 	BOOL bIsCalc = IsDataType(TDCCA_CALCULATION);
 
-	if ((bWasCalc && !bIsCalc) || (!bWasCalc && bIsCalc))
+	// Clear calculation if switching to or from
+	if (Misc::StateChanged(bWasCalc, bIsCalc))
 		calculation.Clear();
 
 	return TRUE;

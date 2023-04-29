@@ -1089,7 +1089,7 @@ int CTDLCustomAttributeDlg::AddAttributeToListCtrl(const TDCCUSTOMATTRIBUTEDEFIN
 
 	m_lcAttributes.SetItemText(nIndex, COL_DATATYPE, sDataType);
 	m_lcAttributes.SetItemText(nIndex, COL_LISTTYPE, sListType);
-	m_lcAttributes.SetItemText(nIndex, COL_ALIGNMENT, CEnString(ALIGNMENT[attrib.nTextAlignment]));
+	m_lcAttributes.SetItemText(nIndex, COL_ALIGNMENT, CEnString(ALIGNMENT[attrib.nHorzAlignment]));
 	m_lcAttributes.SetItemText(nIndex, COL_FEATURES, FormatFeatureList(attrib.dwFeatures));
 	
 	return nIndex;
@@ -1103,6 +1103,7 @@ CString CTDLCustomAttributeDlg::FormatFeatureList(DWORD dwFeatures)
 int CTDLCustomAttributeDlg::GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const
 {
 	aAttribDef.Copy(m_aAttribDef);
+
 	return aAttribDef.GetSize();
 }
 
@@ -1192,7 +1193,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 
 		m_sColumnTitle = attrib.sColumnTitle;
 		m_dwFeatures = attrib.dwFeatures;
-		m_nAlignment = attrib.nTextAlignment;
+		m_nAlignment = attrib.nHorzAlignment;
 		m_dwDataType = attrib.GetDataType();
 
 		// unique ID is special
@@ -1304,9 +1305,9 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	}
 	
 	// Update alignment if it changed
-	if (m_nAlignment != (int)attrib.nTextAlignment)
+	if (m_nAlignment != (int)attrib.nHorzAlignment)
 	{
-		m_nAlignment = (int)attrib.nTextAlignment;
+		m_nAlignment = (int)attrib.nHorzAlignment;
 		UpdateData(FALSE);
 
 		m_lcAttributes.SetItemText(nSel, COL_ALIGNMENT, CEnString(ALIGNMENT[m_nAlignment]));
@@ -1325,7 +1326,7 @@ void CTDLCustomAttributeDlg::OnSelchangeAlignment()
 
 	// update attribute
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
-	attrib.nTextAlignment = m_nAlignment;
+	attrib.nHorzAlignment = m_nAlignment;
 
 	// and list
 	m_lcAttributes.SetItemText(nSel, COL_ALIGNMENT, CEnString(ALIGNMENT[m_nAlignment]));

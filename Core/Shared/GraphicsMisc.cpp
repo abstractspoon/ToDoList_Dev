@@ -1338,6 +1338,45 @@ BOOL GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, 
 	return TRUE;
 }
 
+void GraphicsMisc::AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags)
+{
+	CPoint ptOtherRef = CentrePoint(prcOther);
+
+	int nWidth = (pRect->right - pRect->left);
+	int nHeight= (pRect->bottom - pRect->top);
+	
+	// Vertical
+	if (Misc::HasFlag(nDrawTextFlags, DT_BOTTOM))
+	{
+		ptOtherRef.y = (prcOther->bottom - (nHeight / 2));
+	}
+	else if (Misc::HasFlag(nDrawTextFlags, DT_VCENTER))
+	{
+		 // done
+	}
+	else // DT_TOP
+	{
+		ptOtherRef.y = (prcOther->top + (nHeight / 2));
+	}
+	
+	// Horizontal
+	if (Misc::HasFlag(nDrawTextFlags, DT_RIGHT))
+	{
+		ptOtherRef.x = (prcOther->right - (nWidth / 2));
+	}
+	else if (Misc::HasFlag(nDrawTextFlags, DT_CENTER))
+	{
+		 // done
+	}
+	else // DT_LEFT
+	{
+		ptOtherRef.x = (prcOther->left + (nWidth / 2));
+	}
+
+	CPoint ptRef = CentrePoint(pRect);
+	::OffsetRect(pRect, (ptOtherRef.x - ptRef.x), (ptOtherRef.y - ptRef.y));
+}
+
 COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
 {
 	if (nState != GMIS_NONE)
