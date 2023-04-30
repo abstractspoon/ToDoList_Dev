@@ -2476,8 +2476,15 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		ASSERT(CDateHelper().WorkingWeek().HasWeekend() ||
 				(CDateHelper().WorkingDay().GetLengthInHours(TRUE) < 24));
 
-		// Recalc the simple duration in hours to avoid day->weekday calculation weirdness
-		return AddDuration(dtNewStart, dSimpleDuration * 24, TDCU_HOURS, TRUE);
+		// Recalculate the simple duration in weekday-hours because this
+		// seems most likely to produce a coherent outcome ie. Avoiding 
+		// unit-mashing weirdness
+		int nWholeDays = (int)dSimpleDuration;
+		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
+
+		double dDurationInWeekdayHours = ((nWholeDays * CDateHelper().WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
+
+		return AddDuration(dtNewStart, dDurationInWeekdayHours, TDCU_HOURS, TRUE);
 	}
 
 	// Tasks whose current and new dates fall wholly within a single day 
