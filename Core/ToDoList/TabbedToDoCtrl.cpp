@@ -1608,7 +1608,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 		for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 		{
 			const double dDate = aDates[nOccur];
-			int nOffset = (int)(dDate - dtCur.m_dt);
+			int nOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
 
 			IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
 
