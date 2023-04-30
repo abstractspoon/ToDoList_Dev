@@ -239,33 +239,19 @@ namespace EvidenceBoardUIExtension
 			ptIntersect.X = (int)Math.Round(((B2 * C1) - (B1 * C2)) / det);
 			ptIntersect.Y = (int)Math.Round(((A1 * C2) - (A2 * C1)) / det);
 
-			// If the intersection is within both bounding boxes
-			// then the segments have a proper intersection
-			var line1Rect = RectFromPoints(line1Start, line1End);
-
-			if (!Geometry2D.LineExtentsContainsPoint(line1Rect, ptIntersect))
-				return false;
-			
-			var line2Rect = RectFromPoints(line2Start, line2End);
-
-			return Geometry2D.LineExtentsContainsPoint(line2Rect, ptIntersect);
+			// Check intersection is within both segments
+			return (LineSegmentContainsIntersectionPoint(line1Start, line1End, ptIntersect) &&
+					LineSegmentContainsIntersectionPoint(line2Start, line2End, ptIntersect));
 		}
 
-		private static bool LineExtentsContainsPoint(Rectangle lineExtents, Point pt)
+		private static bool LineSegmentContainsIntersectionPoint(Point lineStart, Point lineEnd, Point pt)
 		{
-			if (lineExtents.Contains(pt))
+			if ((pt.X <= Math.Max(lineStart.X, lineEnd.X)) && 
+				(pt.X >= Math.Min(lineStart.X, lineEnd.X)) &&
+				(pt.Y <= Math.Max(lineStart.Y, lineEnd.Y)) && 
+				(pt.Y >= Math.Min(lineStart.Y, lineEnd.Y)))
+			{
 				return true;
-
-			if (lineExtents.Width == 0)
-			{
-				// Vertical
-				return ((pt.X == lineExtents.X) && (pt.Y < lineExtents.Bottom) && (pt.Y >= lineExtents.Top));
-			}
-
-			if (lineExtents.Height == 0)
-			{
-				// Horizontal
-				return ((pt.Y == lineExtents.Y) && (pt.X >= lineExtents.Left) && (pt.X < lineExtents.Right));
 			}
 
 			// all else
@@ -294,7 +280,6 @@ namespace EvidenceBoardUIExtension
 				return 0;
 
 			// Intersect with each edge ----------------------------
-
 			int p = 0;
 
 			// Left edge
