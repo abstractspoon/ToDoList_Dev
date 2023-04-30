@@ -3064,8 +3064,14 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 		}
 		else if (elm.nOp == TDCUEO_MOVE)
 		{
-			TODOITEM* pTDI = NULL;
-			GET_TDI(elm.dwTaskID, pTDI, FALSE);
+			// We DON'T want the TRUE task
+			TODOITEM* pTDI = GetTask(elm.dwTaskID, FALSE);
+
+			if (!pTDI)
+			{
+				ASSERT(0);
+				return FALSE;
+			}
 
 			TDCUNDOELEMENT elmRet(TDCUEO_MOVE, elm.dwTaskID, elm.dwParentID, elm.dwPrevSiblingID, 0, pTDI);
 			aElms.Add(elmRet);
