@@ -2465,17 +2465,19 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	if (dRealDuration == 0.0)
 	{
 		// If the real duration is zero then it means that the task
-		// falls wholly within the weekend, which means that the user
-		// has performed some trickery so we fall back on the simple 
-		// duration instead
+		// falls between the end of one weekday and the start of the next
+		// which means that the user has performed an action to avoid our
+		// checks, so we fall back on the simple duration instead
 		ASSERT((nUnits == TDCU_MINS) ||
 				(nUnits == TDCU_HOURS) ||
 				(nUnits == TDCU_WEEKDAYS) ||
 				(nUnits == TDCU_WEEKS));
 
-		ASSERT(CDateHelper().WorkingWeek().HasWeekend());
+		ASSERT(CDateHelper().WorkingWeek().HasWeekend() ||
+				(CDateHelper().WorkingDay().GetLengthInHours(TRUE) < 24));
 
-		return AddDuration(dtNewStart, dSimpleDuration, TDCU_WEEKDAYS, TRUE);
+		// Recalc the simple duration in hours to avoid day->weekday calculation weirdness
+		return AddDuration(dtNewStart, dSimpleDuration * 24, TDCU_HOURS, TRUE);
 	}
 
 	// Tasks whose current and new dates fall wholly within a single day 
@@ -3816,7 +3818,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			// If date falls on the beginning of a day, move to end of previous day
 			if (dDuration > 0.0)
 			{
-				if (week.WorkDay().IsEndOfDay(dateEnd))
+				if (week.WorkingDay().IsEndOfDay(dateEnd))
 					dateEnd = CDateHelper::GetDateOnly(dateEnd);
 			}
 			else
@@ -3824,7 +3826,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				// End date comes before start date, so 'dateStart' is logically the end date
 				ASSERT(dateEnd < dateStart);
 
-				if (week.WorkDay().IsEndOfDay(dateStart))
+				if (week.WorkingDay().IsEndOfDay(dateStart))
 					dateEnd = (CDateHelper::GetDateOnly(dateEnd).m_dt + 1.0);
 			}
 		}
