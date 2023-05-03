@@ -53,8 +53,6 @@ protected:
 	int m_nNumHeadings;
 	BOOL m_bHasExtItemData;
 
-	static const int IMAGESIZE;
-
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COwnerdrawComboBoxBase)
@@ -89,10 +87,9 @@ protected:
 								COLORREF& crText, COLORREF& crBack) const;	
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	virtual BOOL HasIcon() const { return FALSE; }
 	virtual UINT GetDrawEllipsis() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
-	virtual int GetExtraListboxWidth() const;
+	virtual int GetExtraListboxWidth() const { return 0; }
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 

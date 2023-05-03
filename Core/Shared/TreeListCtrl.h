@@ -200,7 +200,7 @@ protected:
 	const int MIN_COL_WIDTH;
 	const int MIN_LABEL_WIDTH;
 
-	static int IMAGE_SIZE;
+	const static int IMAGE_SIZE;
 
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);

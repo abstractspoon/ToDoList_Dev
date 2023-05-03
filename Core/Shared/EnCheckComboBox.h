@@ -65,16 +65,17 @@ protected:
 	virtual void OnCheckChange(int nIndex);
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	virtual BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
+	virtual void DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
 	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
+	virtual int CalcMinItemHeight(BOOL bList) const;
+	virtual int GetExtraListboxWidth() const;
 
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;
 	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
 	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
-	BOOL HasIcon() const { return m_bMultiSel; }
-
+	
 	BOOL HasItemNone() const { return (GetItemNoneIndex() != CB_ERR); }
 	int GetItemNoneIndex() const;
 	BOOL IsItemNoneIndex(int nItem) const;

@@ -62,13 +62,15 @@ protected:
 
 protected:
 	BOOL InitFileEdit();
-	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	BOOL HasIcon() const { return TRUE; }
-	int GetMaxDropWidth() const { return 400; }
-	UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
 	BOOL DeleteLBItem(int nItem);
-	void HandleReturnKey();
+
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
+	virtual int GetExtraListboxWidth() const;
+	virtual int CalcMinItemHeight(BOOL bList) const;
+	virtual int GetMaxDropWidth() const { return 400; }
+	virtual UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
+	virtual void HandleReturnKey();
 
 };
 
