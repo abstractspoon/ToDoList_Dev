@@ -66,6 +66,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+IDI_SIMPLETEXT          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDR_MAINFRAME_STD       ICON    DISCARDABLE     "..\\ToDoList\\RES\\app_std.ico"
 IDI_TIME_TRACK          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_NULL                ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
