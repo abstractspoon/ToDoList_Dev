@@ -11374,7 +11374,8 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == IDC_FILEPATH)
+	if ((wParam == IDC_FILEPATH) ||
+		CTDCCustomAttributeUIHelper::IsCustomEditControl(wParam))
 	{
 		if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
 			return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
