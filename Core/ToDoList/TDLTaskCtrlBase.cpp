@@ -3198,7 +3198,7 @@ void CTDLTaskCtrlBase::DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, cons
 			if (!m_imageIcons.HasIcon(sFileLink))
 			{
 				if (CEnBitmap::IsSupportedImageFile(sFullPath) && FileMisc::PathExists(sFullPath))
-					VERIFY(m_imageIcons.Add(sFileLink, sFullPath));
+					m_imageIcons.Add(sFileLink, sFullPath);
 			}
 
 			if (m_imageIcons.Draw(pDC, sFileLink, ptTopLeft))
