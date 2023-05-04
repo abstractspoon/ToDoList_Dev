@@ -999,6 +999,17 @@ BOOL CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sA
 	return pTDI->GetCustomAttributeValue(sAttribID, data);
 }
 
+CString CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	TDCCADATA data;
+	pTDI->GetCustomAttributeValue(sAttribID, data);
+
+	return data.AsString();
+}
+
 BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
