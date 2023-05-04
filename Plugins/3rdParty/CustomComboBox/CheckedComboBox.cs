@@ -9,6 +9,7 @@ namespace CustomComboBox
     public class CheckedComboBox : CustomComboBox
     {
 		private CheckedListBox m_ListBox;
+		private ToolTip m_tooltip;
 		private Point m_LastScreenMouseMove;
 		private int[] m_PrevCheckedIndices;
 
@@ -29,6 +30,8 @@ namespace CustomComboBox
 			m_ListBox.ItemCheck += new ItemCheckEventHandler(OnListItemCheck);
 			m_ListBox.MouseMove += new MouseEventHandler(OnListMouseMove);
 			m_ListBox.KeyDown += new KeyEventHandler(OnListKeyDown);
+
+			m_tooltip = new ToolTip();
 
 			AllowResizeDropDown = false;
 			ControlSize = new Size(1, 1);
@@ -67,6 +70,40 @@ namespace CustomComboBox
 		public CheckedListBox.CheckedItemCollection CheckedItems
 		{
 			get { return m_ListBox.CheckedItems; }
+		}
+
+		public void CheckAll()
+		{
+			int i = Items.Count;
+
+			while (i-- > 0)
+				m_ListBox.SetItemChecked(i, true);
+
+			RefreshTooltipText();
+		}
+
+		public void CheckNone()
+		{
+			int i = Items.Count;
+
+			while (i-- > 0)
+				m_ListBox.SetItemChecked(i, false);
+
+			RefreshTooltipText();
+		}
+
+		public void RefreshTooltipText()
+		{
+			if (CheckedItems?.Count == 0)
+				m_tooltip.SetToolTip(this, null);
+			else
+				m_tooltip.SetToolTip(this, FormatItems("\n"));
+		}
+
+		public new bool Sorted
+		{
+			get { return m_ListBox.Sorted; }
+			set { m_ListBox.Sorted = value; }
 		}
 
 		protected override void OnFontChanged(EventArgs e)
@@ -131,6 +168,7 @@ namespace CustomComboBox
 			}
 
 			m_PrevCheckedIndices = null;
+			RefreshTooltipText();
 		}
 
 		private void OnListItemCheck(object sender, ItemCheckEventArgs e)

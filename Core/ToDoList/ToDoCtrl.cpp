@@ -178,7 +178,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
-	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
+	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
@@ -5575,6 +5575,14 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		// handled solely by tree-list
 		break;
 
+	case TDCS_SHOWFILELINKTHUMBNAILS:
+		{
+			m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
+			
+			CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
+		}
+		break;
+
 	case TDCS_SHOWINFOTIPS:
 		if (bEnable)
 		{
@@ -5825,7 +5833,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 {
 	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIBDEFS));
 
-	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, FALSE))
+	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, TRUE))
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
 
@@ -6160,6 +6168,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,
 													 IDC_VERSION,
+													 HasStyle(TDCS_SHOWFILELINKTHUMBNAILS),
 													 m_aCustomControls);
 
 	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
@@ -11365,7 +11374,8 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == IDC_FILEPATH)
+	if ((wParam == IDC_FILEPATH) ||
+		CTDCCustomAttributeUIHelper::IsCustomEditControl(wParam))
 	{
 		if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
 			return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);

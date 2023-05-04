@@ -99,13 +99,24 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
+				enum class OleDragCursorType
+				{
+					No,
+					Move,
+					Copy,
+					Link,
+				};
+
+				// -----------------------------------------------
+
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
 
 				static bool Map(IUI_APPCOMMAND nCmd, GetTask% getTask);
 				static bool Map(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
 
-				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
+				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursorType);
+				static Windows::Forms::Cursor^ OleDragCursor(OleDragCursorType cursorType);
 				static Windows::Forms::Cursor^ HandCursor();
 
 				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);
@@ -124,6 +135,14 @@ namespace Abstractspoon
 					bool AddMod(Task::Attribute nAttribute, bool value);
 					bool AddMod(Task::Attribute nAttribute, String^ value);
 					bool AddMod(String^ sCustAttribID, String^ value);
+
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, double value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, double time, Task::TimeUnits units);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, int value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value);
+					bool AddMod(UInt32 taskID, String^ sCustAttribID, String^ value);
 
 					bool NotifyMod();
 					bool NotifyMod(Task::Attribute nAttribute, DateTime value);
@@ -159,6 +178,15 @@ namespace Abstractspoon
 						IUITaskMod(Task::Attribute attrib, String^ value);
 
 						IUITaskMod(String^ customAttribId, String^ value);
+
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, DateTime value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, bool value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value);
+
+						IUITaskMod(UInt32 taskID, String^ customAttribId, String^ value);
 
 						bool CopyTo(IUITASKMOD& mod);
 
@@ -268,15 +296,37 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				ref class TaskDependency
+				ref class ArrowHeads
 				{
 				public:
-					static void DrawHorizontalArrowHead(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, bool left);
-					static void DrawVerticalArrowHead(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, bool up);
+					enum class Direction
+					{
+						None = -1,
+						Left,
+						Up,
+						Right,
+						Down,
+					};
 
-				private:
-					static cli::array<Drawing::Point>^ CalcHorizontalArrowHead(int x, int y, Drawing::Font^ font, bool left);
-					static cli::array<Drawing::Point>^ CalcVerticalArrowHead(int x, int y, Drawing::Font^ font, bool up);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, Direction dir);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, float angleDegrees);
+
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, int offset, Direction dir);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, int offset, float angleDegrees);
+
+				protected:
+					static cli::array<Drawing::Point>^ Calculate(int x, int y, int size, int offset, Direction dir);
+					static cli::array<Drawing::Point>^ Offset(cli::array<Drawing::Point>^ arrow, int amount, Direction dir);
+				};
+
+				// -----------------------------------------------
+
+				ref class DependencyArrows : ArrowHeads
+				{
+				public:
+					static void Draw(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, Direction dir);
+					static int Size(Drawing::Font^ font);
+
 				};
 
 				// -----------------------------------------------

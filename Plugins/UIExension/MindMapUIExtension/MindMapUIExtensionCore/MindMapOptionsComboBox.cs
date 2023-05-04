@@ -33,7 +33,11 @@ namespace MindMapUIExtension
 		public MindMapOptionsComboBox(Translator trans)
 		{
 			None = trans.Translate("<none>");
+
 			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies"), MindMapOption.ShowDependencies));
+			Items.Add(new MindMapOptionItem(trans.Translate("Straight line connections"), MindMapOption.StraightConnections));
+
+			Sorted = true;
 		}
 
 		public MindMapOption SelectedOptions
@@ -60,6 +64,7 @@ namespace MindMapUIExtension
 
 					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
 				}
+				RefreshTooltipText();
 			}
 		}
 	}

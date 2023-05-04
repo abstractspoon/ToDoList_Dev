@@ -212,7 +212,7 @@ CString CEnCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
 
 	if (aChecked[0].IsEmpty())
 	{
-		ASSERT(IsItemNoneChecked());
+		ASSERT(!m_bMultiSel || IsItemNoneChecked());
 		aChecked[0] = m_sNone;
 	}
 
@@ -553,7 +553,7 @@ void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	}
 }
 
-BOOL CEnCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const
+void CEnCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const
 {
 	ASSERT(m_bMultiSel);
 
@@ -562,6 +562,23 @@ BOOL CEnCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT 
 		bDisabled = TRUE;
 	}
 
-	return CCheckComboBox::DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, bDisabled);
+	CCheckComboBox::DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, bDisabled);
 }
 
+int CEnCheckComboBox::GetExtraListboxWidth() const
+{
+	if (m_bMultiSel)
+		return CCheckComboBox::GetExtraListboxWidth();
+
+	// else
+	return CAutoComboBox::GetExtraListboxWidth();
+}
+
+int CEnCheckComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	if (m_bMultiSel)
+		return CCheckComboBox::CalcMinItemHeight(bList);
+
+	// else
+	return CAutoComboBox::CalcMinItemHeight(bList);
+}

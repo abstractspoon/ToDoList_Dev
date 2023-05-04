@@ -183,7 +183,7 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 		return FALSE;
 
 	// we only process keypresses
-	if (pMsg->message != WM_KEYDOWN && pMsg->message != WM_SYSKEYDOWN)
+	if ((pMsg->message != WM_KEYDOWN) && (pMsg->message != WM_SYSKEYDOWN))
 		return FALSE;
 
 	// also check that it's one of our children with the focus

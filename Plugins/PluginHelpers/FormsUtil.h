@@ -22,6 +22,9 @@ namespace Abstractspoon
 				static bool SetEditCue(Windows::Forms::Control^ ctrl, String^ sCueText);
 				static bool SetEditCue(Windows::Forms::Control^ parent, String^ childName, String^ sCueText, bool recursiveSearch);
 
+				static bool SetComboBoxCue(Windows::Forms::ComboBox^ combo, String^ sCueText);
+				static bool SetComboBoxCue(Windows::Forms::Control^ parent, String^ childName, String^ sCueText, bool recursiveSearch);
+
 				static Windows::Forms::Control^ Find(Windows::Forms::Control^ parent, String^ childName, bool recursive);
 
 				static void RecalcDropWidth(Windows::Forms::ComboBox^ combo);

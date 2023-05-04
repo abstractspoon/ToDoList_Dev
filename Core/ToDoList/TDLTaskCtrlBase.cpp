@@ -422,21 +422,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 			if (nIndex != -1)
 			{
-				CString sFile(pTDI->aFileLinks[nIndex]);
-
-				// Forward to parent first
-				LPCTSTR szTitle = (LPCTSTR)CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sFile);
-
-				if (!Misc::IsEmpty(szTitle))
-				{
-					sTooltip = Misc::Format(_T("%s (%s)"), sFile, szTitle);
-				}
-				else
-				{
-					VERIFY(FileMisc::ExpandPathEnvironmentVariables(sFile));
-
-					sTooltip = FileMisc::GetFullPath(sFile, m_sTasklistFolder);
-				}
+				sTooltip = GetTaskColumnFileLinkTooltip(pTDI->aFileLinks[nIndex]);
 				
 				return GetUniqueToolTipID(dwTaskID, nColID, nIndex);
 			}
@@ -449,10 +435,73 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 		return -1;
 
 	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			sTooltip = GetTaskCustomColumnTooltip(pTDI, nColID);
+
+			if (!sTooltip.IsEmpty())
+				return GetUniqueToolTipID(dwTaskID, nColID);
+		}
 		break;
 	}
 	
 	return -1;
+}
+
+CString CTDLTaskCtrlBase::GetTaskColumnFileLinkTooltip(LPCTSTR szFileLink) const
+{
+	// Forward to parent first
+	LPCTSTR szTitle = (LPCTSTR)CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)szFileLink);
+
+	if (!Misc::IsEmpty(szTitle))
+		return Misc::Format(_T("%s (%s)"), szFileLink, szTitle);
+
+	// else
+	CString sFile(szFileLink);
+	VERIFY(FileMisc::ExpandPathEnvironmentVariables(sFile));
+
+	return FileMisc::GetFullPath(sFile, m_sTasklistFolder);
+}
+
+CString CTDLTaskCtrlBase::GetTaskCustomColumnTooltip(const TODOITEM* pTDI, TDC_COLUMN nColID) const
+{
+	CString sTooltip;
+
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, sTooltip);
+
+	ASSERT(pDef->bEnabled);
+
+	switch (pDef->GetAttributeType())
+	{
+	case TDCCA_FILELINK:
+		{
+			TDCCADATA data;
+			pTDI->GetCustomAttributeValue(pDef->sUniqueID, data);
+
+			if (!data.IsEmpty())
+				sTooltip = GetTaskColumnFileLinkTooltip(data.AsString());
+		}
+		break;
+
+	default:
+		if (pDef->IsMultiList())
+		{
+			TDCCADATA data;
+			pTDI->GetCustomAttributeValue(pDef->sUniqueID, data);
+			
+			if (data.IsArray())
+			{
+				CStringArray aData;
+				VERIFY (data.AsArray(aData) > 1);
+
+				sTooltip = Misc::FormatArray(aData, '\n');
+			}
+		}
+		break;
+	}
+
+	return sTooltip;
 }
 
 void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
@@ -2204,7 +2253,7 @@ BOOL CTDLTaskCtrlBase::SetPriorityColors(const CDWordArray& aColors)
 {
 	ASSERT (aColors.GetSize() == 11);
 	
-	if ((aColors.GetSize() == 11) && !Misc::MatchAllT(aColors, m_aPriorityColors, FALSE))
+	if ((aColors.GetSize() == 11) && !Misc::MatchAllT(aColors, m_aPriorityColors, TRUE))
 	{
 		m_aPriorityColors.Copy(aColors);
 			
@@ -3126,31 +3175,40 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 		if (!CalcFileIconRect(rect, rIcon, nFile))
 			break; // out of bounds
 
-		// first check for a tdl://
-		CString sFileLink = aFileLinks[nFile];
+		DrawFileLinkIcon(pDC, aFileLinks[nFile], rIcon.TopLeft());
+	}
+}
 
-		if (TDCTASKLINK::IsTaskLink(sFileLink, TRUE))
+void CTDLTaskCtrlBase::DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, const CPoint& ptTopLeft)
+{
+	// first check for a tdl://
+	if (TDCTASKLINK::IsTaskLink(sFileLink, TRUE))
+	{
+		// draw our app icon 
+		if (!m_imageIcons.HasIcon(APP_ICON))
+			m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE));
+
+		VERIFY(m_imageIcons.Draw(pDC, APP_ICON, ptTopLeft));
+	}
+	else
+	{
+		CString sFullPath = FileMisc::GetFullPath(Misc::GetUnquoted(sFileLink, 0), m_sTasklistFolder);
+
+		// Render the associated image if possible
+		if (HasStyle(TDCS_SHOWFILELINKTHUMBNAILS))
 		{
-			// draw our app icon 
-			if (!m_imageIcons.HasIcon(APP_ICON))
-				m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE));
-
-			VERIFY(m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft()));
-		}
-		else
-		{
-			FileMisc::MakeFullPath(Misc::MakeUnquoted(sFileLink, FALSE), m_sTasklistFolder);
-
-			// Render the associated image if possible
 			if (!m_imageIcons.HasIcon(sFileLink))
 			{
-				if (CEnBitmap::IsSupportedImageFile(sFileLink) && FileMisc::PathExists(sFileLink))
-					VERIFY(m_imageIcons.Add(sFileLink, sFileLink));
+				if (CEnBitmap::IsSupportedImageFile(sFullPath) && FileMisc::PathExists(sFullPath))
+					m_imageIcons.Add(sFileLink, sFullPath);
 			}
 
-			if (!m_imageIcons.Draw(pDC, sFileLink, rIcon.TopLeft()))
-				CFileIcons::Draw(pDC, sFileLink, rIcon.TopLeft());
+			if (m_imageIcons.Draw(pDC, sFileLink, ptTopLeft))
+				return;
 		}
+
+		// Draw associated file icon
+		CFileIcons::Draw(pDC, sFullPath, ptTopLeft);
 	}
 }
 
@@ -3203,7 +3261,7 @@ CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImage
 
 BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage) const
 {
-	// Note: Always pass a 'Count' value > 1 so that 
+	// Note: Always pass a 'Image Count' value > 1 so that 
 	// the images are left-aligned for consistency
 	int nImageSize = CFileIcons::GetImageSize();
 	CPoint ptTopLeft = CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, 2);
@@ -3248,7 +3306,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate);
 
 			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, 
-							pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nTextAlignment);
+							pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nHorzAlignment);
 		}
 		break;
 		
@@ -3275,13 +3333,13 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			rCol.bottom = (rCol.top + COL_ICON_SIZE);
 			GraphicsMisc::CentreRect(rCol, rSubItem, FALSE, TRUE); // centre vertically
 
-			int nTextAlign = pDef->nTextAlignment;
+			int nTextAlign = pDef->nHorzAlignment;
 			
 			switch (nTextAlign)
 			{
 			case DT_RIGHT:
 				// We still draw from the left just like text
-				rCol.left = (rCol.right - nReqWidth);
+				rCol.left = (rCol.right - nReqWidth + LV_COLPADDING);
 				break;
 				
 			case DT_CENTER:
@@ -3299,11 +3357,12 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 				
 			case DT_LEFT:
 			default:
+				if (nNumImage > 1)
+					rCol.left += LV_COLPADDING;
 				break;
 			}
 
 			BOOL bOverrun = FALSE;
-			rCol.left += LV_COLPADDING;
 
 			for (int nImg = 0; ((nImg < nNumImage) && !bOverrun); nImg++)
 			{
@@ -3327,22 +3386,30 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		break;
 		
 	case TDCCA_BOOL:
-		DrawColumnCheckBox(pDC, rSubItem, (data.AsBool() ? TTCBC_CHECKED : TTCNC_UNCHECKED));
+		{
+			rCol.DeflateRect(LV_COLPADDING, 0);
+			CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
+			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nHorzAlignment | DT_VCENTER);
+
+			DrawColumnCheckBox(pDC, rIcon, (data.AsBool() ? TTCBC_CHECKED : TTCNC_UNCHECKED));
+		}
 		break;
 
 	case TDCCA_FILELINK:
+		if (!data.IsEmpty())
 		{
-			CStringArray aItems;
-			
-			if (data.AsArray(aItems))
-				DrawColumnFileLinks(pDC, aItems, rSubItem);
+			rCol.DeflateRect(LV_COLPADDING, 0);
+			CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
+			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nHorzAlignment | DT_VCENTER);
+
+			DrawFileLinkIcon(pDC, data.AsString(), rIcon.TopLeft());
 		}
 		break;
 
 	default:
 		{
 			CString sData = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
-			DrawColumnText(pDC, sData, rCol, pDef->nTextAlignment, crText);
+			DrawColumnText(pDC, sData, rCol, pDef->nHorzAlignment, crText);
 		}
 		break;
 	}
@@ -4030,9 +4097,19 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					if (ItemColumnSupportsClickHandling(nHit, nColID))
 					{
 						if (nColID == TDCC_FILELINK)
+						{
 							HandleFileLinkColumnClick(nHit, dwTaskID, pNMIA->ptAction);
+						}
+						else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID) &&
+								 (m_aCustomAttribDefs.GetAttributeDataType(nColID) == TDCCA_FILELINK))
+						{
+							CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nColID);
+							ShowFileLink(m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID));
+						}
 						else
+						{
 							NotifyParentOfColumnEditClick(nColID, dwTaskID);
+						}
 					}
 				}
 				break;
@@ -4667,7 +4744,14 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 					break;
 
 				default: // Allow item cycling for fixed lists
-					return (pDef->GetListType() == TDCCA_FIXEDLIST);
+					if (pDef->GetListType() == TDCCA_FIXEDLIST)
+					{
+						TDCCADATA data;
+						m_data.GetTaskCustomAttributeData(dwTaskID, pDef->sUniqueID, data);
+
+						return data.IsArray();
+					}
+					break;
 				}
 			}
 			break;
@@ -4693,11 +4777,17 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	default: // try custom columns
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
-			switch (m_aCustomAttribDefs.GetAttributeDataType(nColID))
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
+
+			switch (pDef->GetDataType())
 			{
 			case TDCCA_FILELINK:
-				// TODO
-				return TRUE;
+				{
+					TDCCADATA data;
+					return m_data.GetTaskCustomAttributeData(dwTaskID, pDef->sUniqueID, data);
+				}
+				break;
 			}
 		}
 		break;

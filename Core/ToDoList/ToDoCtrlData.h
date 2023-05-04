@@ -134,6 +134,7 @@ public:
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
+	CString GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const;
 
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;

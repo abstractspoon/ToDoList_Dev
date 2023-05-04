@@ -323,7 +323,7 @@ void CTreeListTreeCtrl::OnDestroy()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -225,7 +225,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	case RECURS_MONTH_SPECIFIC_DAY_NMONTHS:
 		{
 			SYSTEMTIME st;
-			dtTemp.GetAsSystemTime(st);
+			dtTemp.GetAsSystemTime(st); // Preserves time component
 			
 			// Set day first and allow IncrementMonth() to clip it as necessary
 			st.wDay = (WORD)m_dwSpecific2;
@@ -240,7 +240,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	case RECURS_MONTH_EVERY_NMONTHS:
 		{
 			SYSTEMTIME st;
-			dtTemp.GetAsSystemTime(st);
+			dtTemp.GetAsSystemTime(st); // Preserves time component
 			
 			// add number of months specified by m_dwSpecific1 
 			dh.IncrementMonth(st, (int)m_dwSpecific1);
@@ -251,6 +251,9 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
 		{
+			// Cache time component
+			double dTimeOnly = CDateHelper::GetTimeOnly(dtTemp).m_dt;
+
 			// work out where we are
 			int nMonth = dtTemp.GetMonth();
 			int nYear = dtTemp.GetYear();
@@ -263,13 +266,14 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
 
 			dtTemp = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
+			dtTemp.m_dt += dTimeOnly;
 		}
 		break;
 		
 	case RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
 		{
 			SYSTEMTIME st;
-			dtTemp.GetAsSystemTime(st);
+			dtTemp.GetAsSystemTime(st); // Preserves time component
 
 			// add number of months specified by dwSpecific2 
 			dh.IncrementMonth(st, (int)m_dwSpecific2);
@@ -292,8 +296,9 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
 		{
-			SYSTEMTIME st = { 0 };
-			
+			SYSTEMTIME st;
+			dtTemp.GetAsSystemTime(st); // Preserves time component
+
 			st.wDay = (WORD)m_dwSpecific2;
 			st.wMonth = (WORD)m_dwSpecific1;
 			st.wYear = (WORD)dtTemp.GetYear();
@@ -322,13 +327,18 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
 		{
+			// Cache time component
+			double dTimeOnly = CDateHelper::GetTimeOnly(dtTemp).m_dt;
+
 			int nWhich = LOWORD(m_dwSpecific1);
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
 			int nMonth = m_dwSpecific2;
 			
 			// see if this year would work before trying next year
 			int nYear = dtTemp.GetYear();
+
 			dtTemp = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
+			dtTemp.m_dt += dTimeOnly;
 			
 			// else try incrementing the year
 			if (dtTemp <= dtPrev)
@@ -336,6 +346,8 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 				nYear++;
 				
 				dtTemp = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
+				dtTemp.m_dt += dTimeOnly;
+
 				ASSERT(dtTemp > dtPrev);
 			}
 		}
@@ -348,10 +360,22 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 #if _DEBUG
 	// Debug check that we are synced with FitDateToScheme
-	COleDateTime dtDebug(dtTemp);
-	
-	ASSERT(FitDayToScheme(dtDebug));
-	ASSERT(dtDebug == dtTemp);
+	switch (m_nRegularity)
+	{
+	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
+	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
+		break;
+
+	default:
+		{
+			COleDateTime dtDebug(dtTemp);
+
+			ASSERT(FitDayToScheme(dtDebug));
+			ASSERT(dtDebug == dtTemp);
+		}
+		break;
+	}
 #endif
 
 	if (!CDateHelper::IsDateSet(dtTemp))

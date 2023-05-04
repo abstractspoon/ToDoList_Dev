@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int IMAGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLIconComboBox
@@ -62,7 +62,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE);
 
 			// update image rect
-			rImage.left += IMAGE_WIDTH;
+			rImage.left += CHECKBOX_SIZE + 2;
 		}
 
 		aImages.Add(sItem);
@@ -95,7 +95,7 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 					CPoint pt = rImage.TopLeft();
 
 					m_ilImages.Draw(&dc, sImage, pt, ILD_TRANSPARENT);
-					rImage.left += (IMAGE_WIDTH + 2);
+					rImage.left += (ICON_SIZE + 2);
 				}
 
 				// draw optional text bypassing base class checkbox drawing
@@ -260,4 +260,19 @@ int CTDLIconComboBox::DecodeImageTags(const CStringArray& aImages, CStringArray&
 
 	ASSERT(aDecodedTags.GetSize() == aImages.GetSize());
 	return aDecodedTags.GetSize();
+}
+
+int CTDLIconComboBox::GetExtraListboxWidth() const
+{
+	return (CEnCheckComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CTDLIconComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = CEnCheckComboBox::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, ICON_SIZE);
+
+	return nMinHeight;
 }

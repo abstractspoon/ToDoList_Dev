@@ -326,7 +326,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	if (!WebMisc::IsURL(sFilePath))
 		FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
 
-	if (HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
 	{
 		if (m_ilImageIcon.GetSafeHandle() == NULL)
 			VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));

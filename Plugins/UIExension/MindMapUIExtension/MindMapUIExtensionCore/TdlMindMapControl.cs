@@ -189,8 +189,9 @@ namespace MindMapUIExtension
 	[Flags]
 	enum MindMapOption
 	{
-		None = 0x00,
-		ShowDependencies = 0x01,
+		None				= 0x00,
+		ShowDependencies	= 0x01,
+		StraightConnections	= 0x02,
 	}
 
 	// ------------------------------------------------------------
@@ -1163,11 +1164,29 @@ namespace MindMapUIExtension
 		{
 			int midX = ((ptFrom.X + ptTo.X) / 2);
 
-			graphics.DrawBezier(new Pen(base.ConnectionColor), 
-								ptFrom,
-								new Point(midX, ptFrom.Y),
-								new Point(midX, ptTo.Y),
-								ptTo);
+			using (var pen = new Pen(base.ConnectionColor))
+			{
+				if (m_Options.HasFlag(MindMapOption.StraightConnections))
+				{
+					Point[] points = new Point[4]
+					{
+						ptFrom,
+						new Point(midX, ptFrom.Y),
+						new Point(midX, ptTo.Y),
+						ptTo
+					};
+
+					graphics.DrawLines(pen, points);
+				}
+				else
+				{
+					graphics.DrawBezier(new Pen(base.ConnectionColor),
+										ptFrom,
+										new Point(midX, ptFrom.Y),
+										new Point(midX, ptTo.Y),
+										ptTo);
+				}
+			}
 		}
 
 
@@ -1230,9 +1249,11 @@ namespace MindMapUIExtension
 			bool fromIsBelowTo = (rectFrom.Top >= rectTo.Bottom);
 
 			int itemHeight = (rectFrom.Height - ItemVertSeparation);
-			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
-			bool horizontalArrow = false;
+			Point ptFrom = Point.Empty, ptTo = Point.Empty;
+			Point ptControlFrom = Point.Empty, ptControlTo = Point.Empty;
+
+			var dir = UIExtension.ArrowHeads.Direction.None;
 
 			// Leaf tasks on the same side of the root
 			// are a special case
@@ -1249,6 +1270,8 @@ namespace MindMapUIExtension
 					ptTo = RectUtil.MiddleLeft(rectTo);
 
 					controlX = (Math.Min(ptFrom.X, ptTo.X) - DependencyOffset);
+
+					dir = UIExtension.ArrowHeads.Direction.Right;
 				}
 				else // right side
 				{
@@ -1256,12 +1279,12 @@ namespace MindMapUIExtension
 					ptTo = RectUtil.MiddleRight(rectTo);
 
 					controlX = (Math.Max(ptFrom.X, ptTo.X) + DependencyOffset);
+
+					dir = UIExtension.ArrowHeads.Direction.Left;
 				}
 
 				ptControlFrom = new Point(controlX, ptFrom.Y);
 				ptControlTo = new Point(controlX, ptTo.Y);
-
-				horizontalArrow = true;
 			}
 			else // All other arrangements are just variations on a theme
 			{
@@ -1301,7 +1324,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
 					}
 
-					horizontalArrow = true;
+					dir = UIExtension.ArrowHeads.Direction.Right;
 				}
 				else if (fromIsRightOfTo)
 				{
@@ -1332,7 +1355,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
 					}
 
-					horizontalArrow = true;
+					dir = UIExtension.ArrowHeads.Direction.Left;
 				}
 				else if (fromIsAboveTo)
 				{
@@ -1344,7 +1367,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y + diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y - diff / 3);
 
-					horizontalArrow = false;
+					dir = UIExtension.ArrowHeads.Direction.Up;
 				}
 				else if (fromIsBelowTo)
 				{
@@ -1354,16 +1377,16 @@ namespace MindMapUIExtension
 					int diff = PointUtil.Distance(ptFrom, ptTo);
 
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y - diff / 3);
-					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3); ;
+					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3);
 
-					horizontalArrow = false;
+					dir = UIExtension.ArrowHeads.Direction.Down;
 				}
 				else
 				{
 					// Overlaps ??
-					return;
 				}
 			}
+			Debug.Assert(dir != UIExtension.ArrowHeads.Direction.None);
 
 			// Draw curve first
 			graphics.DrawBezier(Pens.DarkGray, ptFrom, ptControlFrom, ptControlTo, ptTo);
@@ -1373,10 +1396,7 @@ namespace MindMapUIExtension
 			var prevSmoothing = graphics.SmoothingMode;
 			graphics.SmoothingMode = SmoothingMode.None;
 			
-			if (horizontalArrow)
-				UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), !itemFrom.IsFlipped);
-			else
-				UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), false);
+			UIExtension.DependencyArrows.Draw(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), dir);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(ptTo.X - 1, ptTo.Y - 1, 3, 3);

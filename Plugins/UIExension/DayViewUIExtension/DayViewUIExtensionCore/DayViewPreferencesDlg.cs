@@ -14,6 +14,8 @@ namespace DayViewUIExtension
     partial class DayViewPreferencesDlg : Form
     {
 		private Translator m_Trans;
+		private IWin32Window m_Owner;
+
 		// ------------------------------------------------------------------------
 
 		protected class SlotMinutesItem
@@ -40,9 +42,10 @@ namespace DayViewUIExtension
 
 		// ------------------------------------------------------------------------
 
-        public DayViewPreferencesDlg(Translator trans, Font font)
+        public DayViewPreferencesDlg(IWin32Window owner, Translator trans, Font font)
         {
 			m_Trans = trans;
+			m_Owner = owner;
 			
             InitializeComponent();
 
@@ -68,13 +71,13 @@ namespace DayViewUIExtension
 
             prefs.WriteProfileBool(prefsKey, "HideParentTasks", m_HideParentTasks.Checked);
             prefs.WriteProfileBool(prefsKey, "HideParentTasksByTag", m_HideParentTasksByTag.Checked);
-            prefs.WriteProfileBool(prefsKey, "DisplayContinuous", DisplayTasksContinuous);
+			prefs.WriteProfileString(prefsKey, "HideParentTasksTag", m_HideParentTasksTag.Text);
+
+			prefs.WriteProfileBool(prefsKey, "DisplayContinuous", DisplayTasksContinuous);
             prefs.WriteProfileBool(prefsKey, "HideTasksWithoutTimes", HideTasksWithoutTimes);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningWeekends", HideTasksSpanningWeekends);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
 			prefs.WriteProfileBool(prefsKey, "ShowFutureOccurrences", ShowFutureOccurrences);
-
-			prefs.WriteProfileString(prefsKey, "HideParentTasksTag", m_HideParentTasksTag.Text);
 
 			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
 			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
@@ -86,20 +89,62 @@ namespace DayViewUIExtension
 
             m_HideParentTasks.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasks", true);
 			m_HideParentTasksByTag.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasksByTag", false);
+			m_HideParentTasksTag.Text = prefs.GetProfileString(prefsKey, "HideParentTasksTag", "");
+
 			m_DisplayContinuous.Checked = prefs.GetProfileBool(prefsKey, "DisplayContinuous", true);
 			m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
-			m_ShowFutureOcurrences.Checked = prefs.GetProfileBool(prefsKey, "ShowFutureOccurrences", true);
-
-			m_HideParentTasksTag.Text = prefs.GetProfileString(prefsKey, "HideParentTasksTag", "");
+			m_ShowFutureOccurrences.Checked = prefs.GetProfileBool(prefsKey, "ShowFutureOccurrences", true);
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
+		}
+
+		public new DialogResult ShowDialog()
+		{
+			return ShowDialog(m_Owner);
+		}
+
+		public new DialogResult ShowDialog(IWin32Window owner)
+		{
+			// Snapshot current state
+			var orgHideParents = m_HideParentTasks.Checked;
+			var orgParentByTag = m_HideParentTasksByTag.Checked;
+			var orgParentTagText = m_HideParentTasksTag.Text;
+
+			var orgDisplayCont = DisplayTasksContinuous;
+			var orgHideNoTimes = HideTasksWithoutTimes;
+			var orgHideSpanWeekends = HideTasksSpanningWeekends;
+			var orgHideSpanDays = HideTasksSpanningDays;
+			var orgShowFuture = ShowFutureOccurrences;
+			var orgSlotMins = SlotMinutes;
+			var orgSlotHeight = MinSlotHeight;
 
 			// Enable states
 			m_HideParentTasksByTag.Enabled = m_HideParentTasks.Checked;
 			m_HideParentTasksTag.Enabled = m_HideParentTasksByTag.Enabled && m_HideParentTasksByTag.Checked;
+
+			var ret = base.ShowDialog(owner);
+
+			if (ret != DialogResult.OK)
+			{
+				// Restore previous state
+				m_HideParentTasks.Checked = orgHideParents;
+				m_HideParentTasksByTag.Checked = orgParentByTag;
+				m_HideParentTasksTag.Text = orgParentTagText;
+
+				m_DisplayContinuous.Checked = orgDisplayCont;
+				m_HideTasksWithoutTimes.Checked = orgHideNoTimes;
+				m_HideTasksSpanningWeekends.Checked = orgHideSpanWeekends;
+				m_HideTasksSpanningDays.Checked = orgHideSpanDays;
+				m_ShowFutureOccurrences.Checked = orgShowFuture;
+
+				SlotMinutes = orgSlotMins;
+				MinSlotHeight = orgSlotHeight;
+			}
+
+			return ret;
 		}
 
 		public bool GetHideParentTasks(out string tag)
@@ -119,7 +164,7 @@ namespace DayViewUIExtension
         public bool HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
         public bool HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
 		public bool DisplayTasksContinuous { get { return m_DisplayContinuous.Checked; } }
-		public bool ShowFutureOccurrences { get { return m_ShowFutureOcurrences.Checked; } }
+		public bool ShowFutureOccurrences { get { return m_ShowFutureOccurrences.Checked; } }
 
 		public int SlotMinutes
 		{

@@ -16,6 +16,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox
 
 CImportExportComboBox::CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, 
@@ -116,13 +120,6 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 	rText.left += (nImageSize + 4); // for icon always
 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
-}
-
-int CImportExportComboBox::CalcMinItemHeight(BOOL bList) const
-{
-	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
-
-	return (nMinHeight + 2); // icon padding
 }
 
 void CImportExportComboBox::BuildCombo()
@@ -227,3 +224,19 @@ void CImportExportComboBox::DDX(CDataExchange* pDX, CString& value)
 	else
 		SetSelectedTypeID(value);
 }
+
+int CImportExportComboBox::GetExtraListboxWidth() const
+{
+	return (COwnerdrawComboBoxBase::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CImportExportComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
+
+	return nMinHeight;
+}
+

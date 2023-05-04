@@ -806,7 +806,7 @@ int CWorkingWeek::GetLengthInDays() const
 
 double CWorkingWeek::GetLengthInHours(bool bIncludingLunch) const
 {
-	return (GetLengthInDays() * WorkDay().GetLengthInHours(bIncludingLunch));
+	return (GetLengthInDays() * WorkingDay().GetLengthInHours(bIncludingLunch));
 }
 
 double CWorkingWeek::GetLengthInDaysAsRatio() const

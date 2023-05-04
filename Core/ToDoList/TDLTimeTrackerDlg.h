@@ -49,9 +49,9 @@ public:
 	BOOL SetTasks(const CToDoCtrl* pTDC, const CTaskFile& tasks);
 	BOOL RemoveTasklist(const CToDoCtrl* pTDC);
 	void RemoveAllTasklists();
-	BOOL UpdateAllTasks(const CToDoCtrl* pTDC);
-	BOOL UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib);
-	BOOL UpdateTracking(const CToDoCtrl* pTDC);
+	void UpdateAllTasks(const CToDoCtrl* pTDC);
+	void UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib);
+	void UpdateTracking(const CToDoCtrl* pTDC);
 	void UpdateTaskTime(const CToDoCtrl* pTDC);
 	void UpdateTasklistName(const CToDoCtrl* pTDC);
 	BOOL IsSelectedTasklist(const CToDoCtrl* pTDC) const;
@@ -120,6 +120,7 @@ protected:
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnToggleTopMost();
 	afx_msg void OnHelp();
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToolHitTest(WPARAM wParam, LPARAM lParam);
@@ -131,7 +132,9 @@ protected:
 	int GetTasklistCBIndex(const CToDoCtrl* pTDC) const;
 	BOOL HasTasklist(const CToDoCtrl* pTDC) const;
 	BOOL RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove);
-	
+	void DoUpdateAllTasks(const TRACKTASKLIST* pTTL);
+	void DoRebuildTaskCombo(TRACKTASKLIST* pTTL);
+
 	BOOL Create();
 	BOOL Recreate();
 	void UpdatePlayButton(BOOL bCheckVisibility = TRUE);

@@ -172,6 +172,13 @@ bool Win32::SetEditCue(IntPtr hWnd, String^ sCueText)
 	return (0 != ::SendMessage(GetHwnd(hWnd), EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
 }
 
+bool Win32::SetComboBoxCue(IntPtr hWnd, String^ sCueText)
+{
+	HWND hEdit = ::GetDlgItem(GetHwnd(hWnd), 1001);
+
+	return (0 != ::SendMessage(hEdit, EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
+}
+
 bool Win32::SetEditMargins(IntPtr hWnd, int nAllMargins)
 {
 	return SetEditMargins(hWnd, nAllMargins, nAllMargins, nAllMargins, nAllMargins);

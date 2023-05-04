@@ -77,7 +77,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Export Tasks"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Title",IDC_STATIC,7,9,28,8
+    LTEXT           "&Title",IDC_STATIC,7,9,56,8
     COMBOBOX        IDC_EXPORTTITLE,63,7,165,30,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "T&oday's date",IDC_EXPORTDATE,"Button",BS_AUTOCHECKBOX | 
@@ -643,7 +643,7 @@ BEGIN
                     WS_TABSTOP,363,10,25,17
 END
 
-IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 495
+IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 508
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -730,6 +730,9 @@ BEGIN
     CONTROL         "&Always hide parent tasks in List View",
                     IDC_HIDELISTPARENTS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,480,379,10
+    CONTROL         "Display '&File Link' images as thumbnails",
+                    IDC_FILELINKTHUMBNAILS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,495,379,10
 END
 
 IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 619
@@ -1104,7 +1107,7 @@ BEGIN
     LTEXT           "&Send:",IDC_STATIC,7,9,42,8
     COMBOBOX        IDC_SELTASKSSENDAS,52,7,178,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    LTEXT           "&Format",IDC_STATIC,7,28,22,8
+    LTEXT           "&Format",IDC_STATIC,7,28,45,8
     COMBOBOX        IDC_FORMATS,52,25,178,125,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     WS_VSCROLL | WS_TABSTOP
@@ -1575,7 +1578,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_PAGEHOST,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
                     WS_DISABLED,210,201,199,84
-    PUSHBUTTON      "&Import...",IDC_IMPORT,78,300,50,14
+    PUSHBUTTON      "&Import...",IDC_IMPORT,26,300,50,14
     DEFPUSHBUTTON   "OK",IDOK,311,300,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,365,300,50,14
     LTEXT           "&Tasklist",IDC_STATIC,7,9,63,11
@@ -1787,11 +1790,11 @@ BEGIN
     CONTROL         "List1",IDC_CONTRIBUTORS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_TABSTOP,7,45,318,110
-    LTEXT           "License:",IDC_STATIC,7,161,27,8
+    LTEXT           "License:",IDC_STATIC,7,161,64,8
     LTEXT           "Static",IDC_LICENSE,71,161,254,8
-    LTEXT           "Application:",IDC_STATIC,7,176,38,8
+    LTEXT           "Application:",IDC_STATIC,7,176,64,8
     EDITTEXT        IDC_APPPATH,71,174,254,13,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Preferences:",IDC_STATIC,7,192,42,8
+    LTEXT           "Preferences:",IDC_STATIC,7,192,64,8
     EDITTEXT        IDC_PREFSPATH,71,190,254,13,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,209,318,1
     CONTROL         "",IDC_TOOLBAR,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
@@ -1992,7 +1995,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Print Tasklist"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Title",-1,7,9,28,8
+    LTEXT           "&Title",-1,7,9,56,8
     COMBOBOX        IDC_PRINTTITLE,63,7,166,30,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "T&oday's date",IDC_PRINTDATE,"Button",BS_AUTOCHECKBOX | 
@@ -2115,20 +2118,20 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    LTEXT           "1st &Attribute",IDC_STATIC,0,2,54,8
+    LTEXT           "1st &attribute",IDC_STATIC,0,2,78,8
     COMBOBOX        IDC_FIRSTOPERAND,79,0,118,30,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Operation",IDC_STATIC,0,20,54,8
+    LTEXT           "&Operation",IDC_STATIC,0,20,79,8
     COMBOBOX        IDC_OPERATOR,79,18,118,30,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "2nd Attri&bute",IDC_SECONDOPISATTRIBUTE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,0,37,59,10
+    CONTROL         "2nd attri&bute",IDC_SECONDOPISATTRIBUTE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,0,37,79,10
     CONTROL         "&Value",IDC_SECONDOPISVALUE,"Button",BS_AUTORADIOBUTTON,
-                    0,54,33,10
+                    0,54,79,10
     COMBOBOX        IDC_SECONDOPERANDATTRIBUTE,79,35,118,30,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     EDITTEXT        IDC_SECONDOPERANDVALUE,79,53,118,13,ES_AUTOHSCROLL
-    LTEXT           "Result type",IDC_STATIC,0,72,38,8
+    LTEXT           "Result type",IDC_STATIC,0,72,79,8
     EDITTEXT        IDC_RESULTTYPE,79,70,118,13,ES_AUTOHSCROLL | ES_READONLY
 END
 
@@ -4244,6 +4247,11 @@ BEGIN
         RIGHTMARGIN, 394
         TOPMARGIN, 10
         BOTTOMMARGIN, 691
+    END
+
+    IDD_PREFUITASKLIST_PAGE, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 495
     END
 
     IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG
