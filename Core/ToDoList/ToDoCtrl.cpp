@@ -212,7 +212,6 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
-	m_taskTree(m_ilTaskIcons, m_data, m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 	m_formatter(m_data),
 	m_infoTip(m_data, m_aCustomAttribDefs),
@@ -220,7 +219,14 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_findReplace(*this),
 	m_reminders(*this),
 	m_matcher(m_data, m_reminders),
-	m_bPendingUpdateControls(FALSE)
+	m_bPendingUpdateControls(FALSE),
+	m_taskTree(m_ilTaskIcons, 
+			   m_data, 
+			   m_styles, 
+			   m_tldAll, 
+			   m_visColEdit.GetVisibleColumns(), 
+			   m_aCustomAttribDefs,
+			   mgrContent)
 {
 	SetBordersDLU(0);
 	

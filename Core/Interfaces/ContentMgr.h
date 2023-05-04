@@ -12,8 +12,16 @@
 #include "contentctrl.h"
 #include <afxtempl.h>
 
+/////////////////////////////////////////////////////////////////////////////
+
 class IContent;
 class CBinaryData;
+
+/////////////////////////////////////////////////////////////////////////////
+
+typedef CMap<CONTENTFORMAT, LPCTSTR, CString, CString&> CMapFormatToDescription;
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CContentMgr  
 {
@@ -42,7 +50,9 @@ public:
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
-	
+
+	void GetContentFormatMap(CMapFormatToDescription& mapContent) const;
+
 protected:
 	BOOL m_bInitialized;
 	BOOL m_bSomeBadVersions;

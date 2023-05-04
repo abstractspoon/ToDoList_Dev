@@ -284,14 +284,15 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 	const CTDCImageList ilIcons;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
+	const CContentMgr comments;
 
 	const CTDLTaskTreeCtrl colors(ilIcons,
 								  data,
 								  m_aStyles,
 								  tld,
 								  mapVisibleCols,
-								  m_aCustomAttribDefs);
-	CContentMgr comments;
+								  m_aCustomAttribDefs,
+								  comments);
 	// ----------------------------------------------
 	
 	DWORD dwTickStart = GetTickCount();

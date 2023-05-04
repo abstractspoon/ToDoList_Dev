@@ -146,7 +146,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
-								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
+								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								   const CContentMgr& mgrContent)
 	: 
 	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER | TLSF_SYNCSELECTION),
 	m_data(data),
@@ -193,6 +194,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 			s_mapColumns[tdcc.nColID] = &tdcc;
 		}
 	}
+
+	mgrContent.GetContentFormatMap(m_mapContent);
 }
 
 CTDLTaskCtrlBase::~CTDLTaskCtrlBase()
@@ -3924,7 +3927,16 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDI, pTDS);
 	case TDCC_SUBTASKDONE:		return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentSize(pTDI);
-	case TDCC_COMMENTSFORMAT:	return _T("");//m_formatter.GetTaskCommentSize(pTDI);
+
+	case TDCC_COMMENTSFORMAT:	
+		if (!pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
+		{
+			CString sFormat;
+			m_mapContent.Lookup(pTDI->cfComments, sFormat);
+
+			return sFormat;
+		}
+		return EMPTY_STR;
 
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:			return m_formatter.GetID(pTDS->GetParentTaskID());

@@ -30,6 +30,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#include "..\Interfaces\ContentMgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTreeCtrlHelper;
 class CToDoCtrlData;
 class CPreferences;
@@ -49,7 +53,8 @@ protected: // base class only
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
-					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+					 const CContentMgr& mgrContent);
 
 public:
 	virtual ~CTDLTaskCtrlBase();
@@ -266,6 +271,7 @@ protected:
 	float m_fAveHeaderCharWidth;
 	CString m_sTasklistFolder;
 	TDCDATETIMEWIDTHS m_dateTimeWidths;
+	CMapFormatToDescription m_mapContent;
 
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;

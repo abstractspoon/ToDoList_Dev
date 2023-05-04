@@ -286,3 +286,14 @@ void CContentMgr::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOO
 		pContent->LoadPreferences(pPrefs, sKey, (bAppOnly != FALSE));
 	}
 }
+
+void CContentMgr::GetContentFormatMap(CMapFormatToDescription& mapContent) const
+{
+	Initialize(); // initialize on demand
+
+	int nContent = m_aContent.GetSize();
+	mapContent.RemoveAll();
+	
+	while (nContent--)
+		mapContent[GetContentFormat(nContent)] = GetContentDescription(nContent);
+}
