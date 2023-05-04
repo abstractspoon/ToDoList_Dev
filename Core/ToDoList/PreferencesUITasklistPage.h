@@ -47,6 +47,7 @@ public:
 	BOOL GetAllowCheckboxAgainstTreeItem() const { return m_bAllowCheckboxAgainstTreeItem; }
 	BOOL GetHidePaneSplitBar() const { return m_bHidePaneSplitBar; }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_bShowRemindersAsDateAndTime; }
+	BOOL GetShowFileLinkThumbnails() const { return m_bShowFileLinkThumbnails; }
 //	BOOL Get() const { return m_b; }
 
 protected:
@@ -84,6 +85,7 @@ protected:
 	BOOL	m_bHidePercentForDoneTasks;
 	BOOL	m_bAllowCheckboxAgainstTreeItem;
 	BOOL	m_bHidePaneSplitBar;
+	BOOL	m_bShowFileLinkThumbnails;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

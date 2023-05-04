@@ -593,6 +593,7 @@
 #define IDC_SHOWDEFAULTTASKICONS        1303
 #define IDC_HIDELISTPARENTS             1303
 #define IDSNOOZE                        1304
+#define IDC_FILELINKTHUMBNAILS          1304
 #define IDGOTOTASK                      1305
 #define IDC_LIMITCOLWIDTHS              1306
 #define IDC_SEARCHLABEL                 1307

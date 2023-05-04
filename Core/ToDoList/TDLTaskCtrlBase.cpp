@@ -3193,14 +3193,20 @@ void CTDLTaskCtrlBase::DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, cons
 		CString sFullPath = FileMisc::GetFullPath(Misc::GetUnquoted(sFileLink, 0), m_sTasklistFolder);
 
 		// Render the associated image if possible
-		if (!m_imageIcons.HasIcon(sFileLink))
+		if (HasStyle(TDCS_SHOWFILELINKTHUMBNAILS))
 		{
-			if (CEnBitmap::IsSupportedImageFile(sFullPath) && FileMisc::PathExists(sFullPath))
-				VERIFY(m_imageIcons.Add(sFileLink, sFullPath));
+			if (!m_imageIcons.HasIcon(sFileLink))
+			{
+				if (CEnBitmap::IsSupportedImageFile(sFullPath) && FileMisc::PathExists(sFullPath))
+					VERIFY(m_imageIcons.Add(sFileLink, sFullPath));
+			}
+
+			if (m_imageIcons.Draw(pDC, sFileLink, ptTopLeft))
+				return;
 		}
 
-		if (!m_imageIcons.Draw(pDC, sFileLink, ptTopLeft))
-			CFileIcons::Draw(pDC, sFullPath, ptTopLeft);
+		// Draw associated file icon
+		CFileIcons::Draw(pDC, sFullPath, ptTopLeft);
 	}
 }
 

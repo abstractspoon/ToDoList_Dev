@@ -16,8 +16,10 @@ public:
 	CFileComboBox(int nEditStyle = FES_COMBOSTYLEBTN);
 	virtual ~CFileComboBox();
 
+	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
+
 	void SetReadOnly(BOOL bReadOnly = TRUE);
 
 	int GetFileList(CStringArray& aFiles);

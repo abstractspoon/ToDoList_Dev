@@ -245,4 +245,5 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_WARNADDDELETEARCHIVE] = prefs.GetWarnAddDeleteArchive();
 	styles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = prefs.GetWeightPercentCompletionByNumSubtasks();
 	styles[TDCS_USELATESTLASTMODIFIED] = prefs.GetUseLatestLastModifiedDate();
+	styles[TDCS_SHOWFILELINKTHUMBNAILS] = prefs.GetShowFileLinkThumbnails();
 }

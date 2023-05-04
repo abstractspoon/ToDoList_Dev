@@ -41,7 +41,10 @@ static char THIS_FILE[]=__FILE__;
 CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 													   const TDCCADATA& data,
 													   const CTDCImageList& ilImages,
-													   UINT nCtrlID, BOOL bBuddy, BOOL bMultiSelectionFilter)
+													   UINT nCtrlID, 
+													   BOOL bBuddy, 
+													   BOOL bMultiSelectionFilter,
+													   BOOL bFileLinkThumbnails)
 {
 	// Sanity check
 	BOOL bFilter = IsCustomFilterControl(nCtrlID);
@@ -142,7 +145,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			break;
 
 		case TDCCA_FILELINK:
-			pControl = new CFileEdit(FES_GOBUTTON);
+			pControl = new CFileEdit(FES_GOBUTTON | (bFileLinkThumbnails ? FES_DISPLAYIMAGETHUMBNAILS : 0));
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
@@ -612,11 +615,12 @@ int CTDCCustomAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribD
 BOOL CTDCCustomAttributeUIHelper::RebuildEditControls(CWnd* pParent, const CTDCCustomAttribDefinitionArray& aAttribDefs,
 													  const CTDCImageList& ilImages,
 													  UINT nCtrlIDPos,
+													  BOOL bFileLinkThumbnails,
 													  CTDCCustomControlArray& aControls)
 {
 	CTDCCustomAttributeDataMap mapUnused;
 
-	return RebuildControls(pParent, aAttribDefs, mapUnused, ilImages, nCtrlIDPos, IDC_FIRST_CUSTOMEDITFIELD, FALSE, FALSE, aControls);
+	return RebuildControls(pParent, aAttribDefs, mapUnused, ilImages, nCtrlIDPos, IDC_FIRST_CUSTOMEDITFIELD, FALSE, FALSE, bFileLinkThumbnails, aControls);
 }
 
 BOOL CTDCCustomAttributeUIHelper::RebuildFilterControls(CWnd* pParent, 
@@ -627,15 +631,18 @@ BOOL CTDCCustomAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 														BOOL bMultiSelection,
 														CTDCCustomControlArray& aControls)
 {
-	return RebuildControls(pParent, aAttribDefs, mapCtrlData, ilImages, nCtrlIDPos, IDC_FIRST_CUSTOMFILTERFIELD, TRUE, bMultiSelection, aControls);
+	return RebuildControls(pParent, aAttribDefs, mapCtrlData, ilImages, nCtrlIDPos, IDC_FIRST_CUSTOMFILTERFIELD, TRUE, bMultiSelection, FALSE, aControls);
 }
 
 BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent, 
 												  const CTDCCustomAttribDefinitionArray& aAttribDefs,
 												  const CTDCCustomAttributeDataMap& mapCtrlData,
 												  const CTDCImageList& ilImages,
-												  UINT nCtrlIDPos, UINT nCtrlIDStart,
-												  BOOL bFilter, BOOL bMultiSelectionFilter,
+												  UINT nCtrlIDPos, 
+												  UINT nCtrlIDStart,
+												  BOOL bFilter, 
+												  BOOL bMultiSelectionFilter,
+												  BOOL bFileLinkThumbnails,
 												  CTDCCustomControlArray& aControls)
 {
 	ASSERT_VALID(pParent);
@@ -695,7 +702,7 @@ BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent,
 		ctrl.nCtrlID = nID++;
 		ctrl.nLabelID = nID++;
 
-		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelectionFilter);
+		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelectionFilter, bFileLinkThumbnails);
 
 		if (pCtrl)
 			pLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nLabelID, FALSE);
@@ -708,7 +715,7 @@ BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent,
 			ctrl.nBuddyCtrlID = nID++;
 			ctrl.nBuddyLabelID = nID++;
 
-			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelectionFilter);
+			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelectionFilter, bFileLinkThumbnails);
 
 			if (pBuddyCtrl)
 				pBuddyLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nBuddyLabelID, TRUE);
@@ -1223,7 +1230,8 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 									 CTDCImageList(),		// not required
 									 ctrl.nBuddyCtrlID, 
 									 TRUE,					// buddy
-									 FALSE);				// multi-selection droplist
+									 FALSE,					// multi-selection droplist
+									 FALSE);				// file-links image thumbnails
 
 		bCreated = TRUE;
 	}
@@ -1611,22 +1619,40 @@ BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTR
 }
 
 int CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
-															CWnd* pParent, BOOL bEnable)
+															CWnd* pParent, 
+															BOOL bEnable)
 {
 	int nCtrl = aControls.GetSize(), nNumFound = 0;
 	
 	while (nCtrl--)
 	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
-
-		CWnd* pCtrl = ctrl.GetCtrl(pParent);
+		CWnd* pCtrl = aControls[nCtrl].GetCtrl(pParent);
 		ASSERT_VALID(pCtrl);
 
 		if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
 		{
-			CEnCheckComboBox* pCombo = (CEnCheckComboBox*)pCtrl;
+			((CEnCheckComboBox*)pCtrl)->EnableMultiSelection(bEnable);
+			nNumFound++;
+		}
+	}
 
-			pCombo->EnableMultiSelection(bEnable);
+	return nNumFound;
+}
+
+int CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(const CTDCCustomControlArray& aControls,
+														   const CWnd* pParent,
+														   BOOL bEnable)
+{
+	int nCtrl = aControls.GetSize(), nNumFound = 0;
+
+	while (nCtrl--)
+	{
+		CWnd* pCtrl = aControls[nCtrl].GetCtrl(pParent);
+		ASSERT_VALID(pCtrl);
+
+		if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CFileEdit)))
+		{
+			((CFileEdit*)pCtrl)->EnableStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
 			nNumFound++;
 		}
 	}
