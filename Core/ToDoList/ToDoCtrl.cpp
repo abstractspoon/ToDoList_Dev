@@ -9139,8 +9139,11 @@ BOOL CToDoCtrl::HandleUnsavedComments()
 		m_nCommentsState = CS_CHANGED;
 
 		// Update sort if required
-		if (m_visColEdit.IsColumnVisible(TDCC_COMMENTSSIZE) && IsSortingBy(TDCC_COMMENTSSIZE))
+		if ((m_visColEdit.IsColumnVisible(TDCC_COMMENTSSIZE) && IsSortingBy(TDCC_COMMENTSSIZE)) ||
+			(m_visColEdit.IsColumnVisible(TDCC_COMMENTSFORMAT) && IsSortingBy(TDCC_COMMENTSFORMAT)))
+		{
 			Resort();
+		}
 	}
 
 	return TRUE;

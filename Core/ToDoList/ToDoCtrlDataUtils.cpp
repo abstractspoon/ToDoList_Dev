@@ -485,7 +485,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 			
 		case TDCA_COMMENTSFORMAT:
-			bMatch = FALSE;//ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
+			bMatch = ValueMatches(m_mgrContent.GetContentDescription(pTDI->cfComments), rule, TRUE, sWhatMatched);
 			break;
 
 		case TDCA_FLAG:
@@ -1630,7 +1630,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			break;
 
 		case TDCC_COMMENTSFORMAT:
-			nCompare = Compare(m_formatter.GetTaskCommentType(pTDI1), m_formatter.GetTaskCommentType(pTDI2));
+			nCompare = Compare(m_formatter.GetTaskCommentFormat(pTDI1), m_formatter.GetTaskCommentFormat(pTDI2));
 			break;
 
 		default:
@@ -3710,12 +3710,12 @@ CString CTDCTaskFormatter::GetTaskCommentSize(DWORD dwTaskID) const
 	return GetTaskCommentSize(pTDI);
 }
 
-CString CTDCTaskFormatter::GetTaskCommentType(DWORD dwTaskID, BOOL bEmptyIsBlank) const
+CString CTDCTaskFormatter::GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
 
-	return GetTaskCommentType(pTDI, bEmptyIsBlank);
+	return GetTaskCommentFormat(pTDI, bEmptyIsBlank);
 }
 
 CString CTDCTaskFormatter::GetTaskRecentlyModified(DWORD dwTaskID) const
@@ -3779,7 +3779,7 @@ CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentType(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
+CString CTDCTaskFormatter::GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
 {
 	if (pTDI)
 	{

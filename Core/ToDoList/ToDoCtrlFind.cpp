@@ -328,9 +328,9 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, HTREEITEM hti, const T
 		case TDCC_ALLOCTO:			sLongest = m_formatter.GetTaskAllocTo(pTDI);		break;
 		case TDCC_CATEGORY:			sLongest = m_formatter.GetTaskCategories(pTDI);		break;	
 		case TDCC_TAGS:				sLongest = m_formatter.GetTaskTags(pTDI);			break;	
+		case TDCC_COMMENTSFORMAT:	sLongest = m_formatter.GetTaskCommentFormat(pTDI);	break;
 		case TDCC_COMMENTSSIZE:		sLongest = m_formatter.GetTaskCommentSize(pTDI);	break;
 		case TDCC_RECURRENCE:		sLongest = m_formatter.GetTaskRecurrence(pTDI);		break;
-		case TDCC_COMMENTSFORMAT:	sLongest = m_formatter.GetTaskCommentType(pTDI);	break;
 			
 		case TDCC_ALLOCBY:			sLongest = pTDI->sAllocBy;							break;
 		case TDCC_STATUS:			sLongest = pTDI->sStatus;							break;		
@@ -1280,7 +1280,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
 
 		if (mapLongest.HasColumn(TDCC_COMMENTSFORMAT))
-			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, _T("")/*m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB())*/);
+			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, m_formatter.GetTaskCommentFormat(pTDI));
 
 		if (mapLongest.HasColumn(TDCC_ID))
 			mapLongest.UpdateValue(TDCC_ID, m_formatter.GetID(pTDS->GetTaskID(), pTDI->dwTaskRefID));

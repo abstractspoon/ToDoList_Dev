@@ -147,7 +147,7 @@ public:
 	CString GetTaskTimeRemaining(DWORD dwTaskID) const;
 	CString GetTaskPercentDone(DWORD dwTaskID) const;
 	CString GetTaskCommentSize(DWORD dwTaskID) const;
-	CString GetTaskCommentType(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
+	CString GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(DWORD dwTaskID) const;
 	CString GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(DWORD dwTaskID) const;
@@ -172,7 +172,7 @@ public:
 	CString GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskCommentSize(const TODOITEM* pTDI) const;
-	CString GetTaskCommentType(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
+	CString GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
