@@ -63,7 +63,7 @@ void CContentMgr::Initialize() const
 	// we need a non-const pointer to update the array
 	CContentMgr* pMgr = const_cast<CContentMgr*>(this);
 
-	// look at every dll from whereever we are now
+	// look at every dll from wherever we are now
 	CFileFind ff;
     CString sSearchPath = FileMisc::GetModuleFilePath(), sFolder, sDrive;
 
