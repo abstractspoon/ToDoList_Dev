@@ -37,6 +37,9 @@ public:
 	BOOL SomePluginsHaveBadversions() const;
 	
 	CString GetContentDescription(int nContent) const;
+	CString GetContentDescription(const CONTENTFORMAT& cf) const;
+	CString GetLongestContentDescription() const;
+
 	CONTENTFORMAT GetContentFormat(int nContent) const;
 	HICON GetContentIcon(int nContent) const;
 
@@ -51,12 +54,13 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOOL bAppOnly);
 
-	void GetContentFormatMap(CMapFormatToDescription& mapContent) const;
 
 protected:
 	BOOL m_bInitialized;
 	BOOL m_bSomeBadVersions;
+
 	CArray<IContent*, IContent*> m_aContent;
+	CMapStringToString m_mapFormatToDescription;
 	
 protected:
 	virtual void Initialize() const;

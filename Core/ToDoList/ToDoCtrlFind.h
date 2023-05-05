@@ -19,6 +19,7 @@ class TODOSTRUCTURE;
 class CToDoCtrlData;
 class CTDCLongestItemMap;
 class CTreeCtrlHelper;
+class CContentMgr;
 
 struct TODOITEM;
 struct TDCCUSTOMATTRIBUTEDEFINITION;
@@ -62,7 +63,10 @@ class CToDoCtrlFind
 	friend struct LONGESTITEM;
 
 public:
-	CToDoCtrlFind(const CTreeCtrlHelper& tch, const CToDoCtrlData& data, const CTDCReminderHelper& reminders);
+	CToDoCtrlFind(const CTreeCtrlHelper& tch, 
+				  const CToDoCtrlData& data, 
+				  const CTDCReminderHelper& reminders,
+				  const CContentMgr& mgrContent);
 	virtual ~CToDoCtrlFind();
 	
 	DWORD GetTaskID(HTREEITEM hti) const;
@@ -109,6 +113,7 @@ public:
 protected:
 	const CTreeCtrlHelper& m_tch; 
 	const CToDoCtrlData& m_data;
+	const CContentMgr& m_mgrContent;
 
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;

@@ -256,6 +256,7 @@ protected:
 	const CTDCImageList& m_ilTaskIcons;
 	const CTDCColumnIDMap& m_mapVisibleCols;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+	const CContentMgr& m_mgrContent;
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
@@ -271,7 +272,6 @@ protected:
 	float m_fAveHeaderCharWidth;
 	CString m_sTasklistFolder;
 	TDCDATETIMEWIDTHS m_dateTimeWidths;
-	CMapFormatToDescription m_mapContent;
 
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;

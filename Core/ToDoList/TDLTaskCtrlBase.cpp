@@ -174,12 +174,13 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_bSortingColumns(FALSE),
 	m_nColorByAttrib(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
-	m_comparer(data),
+	m_comparer(data, mgrContent),
 	m_calculator(data),
-	m_formatter(data),
+	m_formatter(data, mgrContent),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(FALSE),
 	m_bEnableRecalcColumns(TRUE),
+	m_mgrContent(mgrContent),
 	m_bReadOnly(FALSE)
 {
 	// build one time column map
@@ -194,8 +195,6 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 			s_mapColumns[tdcc.nColID] = &tdcc;
 		}
 	}
-
-	mgrContent.GetContentFormatMap(m_mapContent);
 }
 
 CTDLTaskCtrlBase::~CTDLTaskCtrlBase()
@@ -3927,16 +3926,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDI, pTDS);
 	case TDCC_SUBTASKDONE:		return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentSize(pTDI);
-
-	case TDCC_COMMENTSFORMAT:	
-		if (!pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
-		{
-			CString sFormat;
-			m_mapContent.Lookup(pTDI->cfComments, sFormat);
-
-			return sFormat;
-		}
-		return EMPTY_STR;
+	case TDCC_COMMENTSFORMAT:	return m_formatter.GetTaskCommentType(pTDI);
 
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:			return m_formatter.GetID(pTDS->GetParentTaskID());

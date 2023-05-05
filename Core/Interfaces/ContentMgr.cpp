@@ -98,6 +98,7 @@ void CContentMgr::Initialize() const
 
 						// save
 						pMgr->m_aContent.Add(pContent);
+						pMgr->m_mapFormatToDescription[pContent->GetTypeID()] = CLocalizer::TranslateText(pContent->GetTypeDescription());
 					}
 					else
 					{
@@ -154,11 +155,21 @@ CString CContentMgr::GetContentDescription(int nContent) const
 	if (nContent >= 0 && nContent < m_aContent.GetSize())
 	{
 		ASSERT (m_aContent[nContent] != NULL);
-		return m_aContent[nContent]->GetTypeDescription();
+		return CLocalizer::TranslateText(m_aContent[nContent]->GetTypeDescription());
 	}
 	
 	// else
 	return "";
+}
+
+CString CContentMgr::GetContentDescription(const CONTENTFORMAT& cf) const
+{
+	Initialize(); // initialize on demand
+
+	CString sDesc;
+	m_mapFormatToDescription.Lookup(cf, sDesc);
+
+	return sDesc;
 }
 
 HICON CContentMgr::GetContentIcon(int nContent) const
@@ -287,13 +298,19 @@ void CContentMgr::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOO
 	}
 }
 
-void CContentMgr::GetContentFormatMap(CMapFormatToDescription& mapContent) const
+CString CContentMgr::GetLongestContentDescription() const
 {
-	Initialize(); // initialize on demand
-
+	CString sLongest;
 	int nContent = m_aContent.GetSize();
-	mapContent.RemoveAll();
-	
+
 	while (nContent--)
-		mapContent[GetContentFormat(nContent)] = GetContentDescription(nContent);
+	{
+		CString sDesc = GetContentDescription(nContent);
+
+		if (sDesc.GetLength() > sLongest.GetLength())
+			sLongest = sDesc;
+	}
+
+	return sLongest;
 }
+
