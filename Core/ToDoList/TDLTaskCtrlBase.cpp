@@ -5067,16 +5067,19 @@ BOOL CTDLTaskCtrlBase::ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) cons
 		return (HasStyle(TDCS_COLORTEXTBYATTRIBUTE) && (GetColorByAttribute() == nModType));
 
 	case TDCA_DONEDATE:
-		return (m_crDone != CLR_NONE);
+		return HasColor(m_crDone);
 
 	case TDCA_DUEDATE:
-		return ((m_crDue != CLR_NONE) || (m_crDueToday != CLR_NONE));
+		return (HasColor(m_crDue) || HasColor(m_crDueToday));
 
 	case TDCA_STARTDATE:
-		return ((m_crStarted != CLR_NONE) || (m_crStartedToday != CLR_NONE));
+		return (HasColor(m_crStarted) || HasColor(m_crStartedToday));
 
 	case TDCA_PRIORITY:
 		return HasStyle(TDCS_COLORTEXTBYPRIORITY);
+
+	case TDCA_FLAG:
+		return HasColor(m_crFlagged);
 	}
 
 	// all else

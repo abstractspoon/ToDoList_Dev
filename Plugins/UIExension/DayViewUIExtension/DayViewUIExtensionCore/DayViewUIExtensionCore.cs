@@ -100,6 +100,7 @@ namespace DayViewUIExtension
 			case Task.Attribute.Recurrence:
 			case Task.Attribute.Tags:
 			case Task.Attribute.CustomAttribute:
+			case Task.Attribute.Color:
 				return true;
 			}
 
