@@ -314,3 +314,16 @@ CString CContentMgr::GetLongestContentDescription() const
 	return sLongest;
 }
 
+int CContentMgr::GetContentDescriptions(CStringArray& aDescriptions) const
+{
+	Initialize(); // initialize on demand
+
+	int nContent = m_aContent.GetSize();
+	aDescriptions.RemoveAll();
+
+	while (nContent--)
+		aDescriptions.InsertAt(0, GetContentDescription(nContent));
+
+	return aDescriptions.GetSize();
+}
+

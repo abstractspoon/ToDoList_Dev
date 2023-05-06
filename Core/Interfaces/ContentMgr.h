@@ -39,6 +39,7 @@ public:
 	CString GetContentDescription(int nContent) const;
 	CString GetContentDescription(const CONTENTFORMAT& cf) const;
 	CString GetLongestContentDescription() const;
+	int GetContentDescriptions(CStringArray& aDescriptions) const;
 
 	CONTENTFORMAT GetContentFormat(int nContent) const;
 	HICON GetContentIcon(int nContent) const;
