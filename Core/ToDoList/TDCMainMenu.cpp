@@ -304,7 +304,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 	}
 	else if (GetSubMenu(AM_EDIT) == pPopupMenu)
 	{
-		PrepareEditMenu(pPopupMenu, tdc, prefs, FALSE);
+		PrepareEditMenu(pPopupMenu, tdc, prefs);
 		return TRUE;
 	}
 	else if (GetSubMenu(AM_SORT) == pPopupMenu)
@@ -348,7 +348,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CFilteredToDoCtrl& tdc,
 										  const CPreferencesDlg& prefs) const
 {
-	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
+	PrepareEditMenu(pMenu, tdc, prefs);
 
 	// Remove all 'New Task' options for views not supporting them
 	if (!tdc.CanCreateNewTask(TDC_INSERTATTOP))
@@ -356,11 +356,40 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 		// Get the position of the last 'new task' option
 		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK);
 
-		nPos++;	// Add 1 for the trailing separator
-		nPos++; // Convert to 'number of items to remove'
+		if (nPos != -1)
+		{
+			nPos++;	// Add 1 for the trailing separator
+			nPos++; // Convert to 'number of items to remove'
 
-		while (nPos--)
-			pMenu->DeleteMenu(0, MF_BYPOSITION);
+			while (nPos--)
+				pMenu->DeleteMenu(0, MF_BYPOSITION);
+		}
+	}
+
+	// Likewise for copying column attributes
+	if (tdc.IsExtensionView(tdc.GetTaskView()))
+	{
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_TASKLIST_COPYCOLUMNVALUES);
+
+		if (nPos != -1)
+		{
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // ID_TASKLIST_COPYCOLUMNVALUES
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // Trailing separator
+		}
+	}
+
+	// Add task expansion
+	if (!tdc.CanExpandTasks(TDCEC_ALL, TRUE) &&
+		!tdc.CanExpandTasks(TDCEC_ALL, FALSE))
+	{
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_VIEW_TOGGLETASKEXPANDED);
+
+		if (nPos != -1)
+		{
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // ID_VIEW_TOGGLETASKEXPANDED
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // Trailing separator
+		}
 	}
 }
 
@@ -369,7 +398,7 @@ void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
 											 const CPreferencesDlg& prefs) const
 {
 	PrepareFileMenu(pMenu, prefs);
-	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
+	PrepareEditMenu(pMenu, tdc, prefs);
 }
 
 void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
@@ -511,7 +540,7 @@ BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureIt
 	return FALSE;
 }
 
-void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, BOOL bContextMenu)
+void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
 {
 	ASSERT(pMenu);
 
@@ -538,7 +567,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 				if (pPopup)
 				{
-					PrepareEditMenu(pPopup, tdc, prefs, bContextMenu);
+					PrepareEditMenu(pPopup, tdc, prefs);
 
 					// if the popup is now empty remove it too
 					bDelete = !pPopup->GetMenuItemCount();
@@ -620,18 +649,6 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_SETTASKICON:
 		case ID_EDIT_CLEARTASKICON:
-			break;
-
-		case ID_TASKLIST_COPYCOLUMNVALUES:
-		case ID_TASKLIST_COPYSELTASKSCOLUMNVALUES:
-			if (bContextMenu)
-				bDelete = tdc.IsExtensionView(tdc.GetTaskView());
-			break;
-
-		case ID_VIEW_TOGGLETASKEXPANDED:
-			if (bContextMenu)
-				bDelete = !tdc.CanExpandTasks(TDCEC_ALL, TRUE) &&
-							!tdc.CanExpandTasks(TDCEC_ALL, FALSE);
 			break;
 			
 		case ID_SEPARATOR:
