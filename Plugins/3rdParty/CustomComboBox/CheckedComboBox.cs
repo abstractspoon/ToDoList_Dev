@@ -72,12 +72,38 @@ namespace CustomComboBox
 			get { return m_ListBox.CheckedItems; }
 		}
 
+		public void CheckAll()
+		{
+			int i = Items.Count;
+
+			while (i-- > 0)
+				m_ListBox.SetItemChecked(i, true);
+
+			RefreshTooltipText();
+		}
+
+		public void CheckNone()
+		{
+			int i = Items.Count;
+
+			while (i-- > 0)
+				m_ListBox.SetItemChecked(i, false);
+
+			RefreshTooltipText();
+		}
+
 		public void RefreshTooltipText()
 		{
 			if (CheckedItems?.Count == 0)
 				m_tooltip.SetToolTip(this, null);
 			else
 				m_tooltip.SetToolTip(this, FormatItems("\n"));
+		}
+
+		public new bool Sorted
+		{
+			get { return m_ListBox.Sorted; }
+			set { m_ListBox.Sorted = value; }
 		}
 
 		protected override void OnFontChanged(EventArgs e)

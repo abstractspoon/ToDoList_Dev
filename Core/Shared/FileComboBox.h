@@ -16,8 +16,10 @@ public:
 	CFileComboBox(int nEditStyle = FES_COMBOSTYLEBTN);
 	virtual ~CFileComboBox();
 
+	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
+
 	void SetReadOnly(BOOL bReadOnly = TRUE);
 
 	int GetFileList(CStringArray& aFiles);
@@ -62,13 +64,15 @@ protected:
 
 protected:
 	BOOL InitFileEdit();
-	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	BOOL HasIcon() const { return TRUE; }
-	int GetMaxDropWidth() const { return 400; }
-	UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
 	BOOL DeleteLBItem(int nItem);
-	void HandleReturnKey();
+
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
+	virtual int GetExtraListboxWidth() const;
+	virtual int CalcMinItemHeight(BOOL bList) const;
+	virtual int GetMaxDropWidth() const { return 400; }
+	virtual UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
+	virtual void HandleReturnKey();
 
 };
 

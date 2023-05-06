@@ -50,7 +50,7 @@ const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
-CTDLFindTasksDlg::CTDLFindTasksDlg()
+CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	: 
 	CRuntimeDlg(), 
 	m_bSplitting(FALSE),
@@ -59,8 +59,8 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	m_nDockPos(DMP_UNDOCKED),
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
-	m_rUndocked(0, 0, 0, 0)
-
+	m_rUndocked(0, 0, 0, 0),
+	m_lcFindSetup(mgrContent)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
@@ -1370,7 +1370,7 @@ int CTDLFindTasksDlg::GetSavedSearches(CStringArray& aNames) const
 {
 	aNames.Copy(m_aSavedSearches);
 
-	if (aNames.GetSize() == 0 && GetSafeHwnd() == NULL)
+	if (!aNames.GetSize() && !GetSafeHwnd())
 	{
 		CPreferences prefs;
 		int nNumItems = prefs.GetProfileInt(_T("FindTasks\\Searches"), _T("NumSearches"), 0);
@@ -1518,10 +1518,11 @@ BOOL CTDLFindTasksDlg::SaveSearch(LPCTSTR szName)
 
 int CTDLFindTasksDlg::LoadSearches()
 {
-	CPreferences prefs;
-
 	m_cbSearches.ResetContent();
+	m_aSavedSearches.RemoveAll();
 
+	// Reload last saved searches
+	CPreferences prefs;
 	int nNumItems = prefs.GetProfileInt(_T("FindTasks\\Searches"), _T("NumSearches"), 0);
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
@@ -1540,6 +1541,40 @@ int CTDLFindTasksDlg::LoadSearches()
 		}
 	}
 
+	// Delete obsolete searches
+	CStringArray aSearchSectons;
+	int nSection = prefs.GetProfileSectionNames(aSearchSectons, _T("FindTasks\\Searches\\"));
+
+	while (nSection--)
+	{
+		const CString& sSection = aSearchSectons[nSection];
+
+		int nSectionLen = sSection.GetLength();
+		int nSaved = m_aSavedSearches.GetSize();
+
+		while (nSaved--)
+		{
+			const CString& sSaved = m_aSavedSearches[nSaved];
+			int nFind = sSection.Find(sSaved);
+
+			if (nFind != -1)
+			{
+				int nSavedLen = sSaved.GetLength();
+
+				// We're interested in sections which either end in the saved name
+				if (nFind == (nSectionLen - nSavedLen))
+					break;
+
+				// or which are followed immediately by a backslash, indicating a rule
+				if (((nFind + nSavedLen + 1) < nSectionLen) && sSection[nFind + nSavedLen] == '\\')
+					break;
+			}
+		}
+
+		if (nSaved == -1)
+			prefs.DeleteProfileSection(sSection);
+	}
+	
 	// restore last named search
 	CString sSearch = prefs.GetProfileString(_T("FindTasks\\Searches"), _T("Current"));
 
@@ -1569,6 +1604,7 @@ int CTDLFindTasksDlg::LoadSearches()
 int CTDLFindTasksDlg::SaveSearches()
 {
 	CPreferences prefs;
+	prefs.DeleteProfileSection(_T("FindTasks\\Searches"));
 
 	int nNumSearches = m_cbSearches.GetCount();
 	prefs.WriteProfileInt(_T("FindTasks\\Searches"), _T("NumSearches"), nNumSearches);

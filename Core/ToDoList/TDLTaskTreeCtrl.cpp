@@ -66,9 +66,10 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
-								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
+								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								   const CContentMgr& mgrContent)
 	: 
-	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs),
+	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs, mgrContent),
 	CTreeDragDropRenderer(m_tsh, m_tcTasks),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
@@ -77,7 +78,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE),
 	m_reminders(*this),
-	m_find(m_tch, data, m_reminders)
+	m_find(m_tch, data, m_reminders, mgrContent)
 {
 	// We handle multiple selection
 	m_dwFlags &= ~TLSF_SYNCSELECTION;

@@ -999,6 +999,17 @@ BOOL CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sA
 	return pTDI->GetCustomAttributeValue(sAttribID, data);
 }
 
+CString CToDoCtrlData::GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	TDCCADATA data;
+	pTDI->GetCustomAttributeValue(sAttribID, data);
+
+	return data.AsString();
+}
+
 BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -2465,17 +2476,26 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	if (dRealDuration == 0.0)
 	{
 		// If the real duration is zero then it means that the task
-		// falls wholly within the weekend, which means that the user
-		// has performed some trickery so we fall back on the simple 
-		// duration instead
+		// falls between the end of one weekday and the start of the next
+		// which means that the user has performed an action to avoid our
+		// checks, so we fall back on the simple duration instead
 		ASSERT((nUnits == TDCU_MINS) ||
 				(nUnits == TDCU_HOURS) ||
 				(nUnits == TDCU_WEEKDAYS) ||
 				(nUnits == TDCU_WEEKS));
 
-		ASSERT(CDateHelper().WorkingWeek().HasWeekend());
+		ASSERT(CDateHelper().WorkingWeek().HasWeekend() ||
+				(CDateHelper().WorkingDay().GetLengthInHours(TRUE) < 24));
 
-		return AddDuration(dtNewStart, dSimpleDuration, TDCU_WEEKDAYS, TRUE);
+		// Recalculate the simple duration in weekday-hours because this
+		// seems most likely to produce a coherent outcome ie. Avoiding 
+		// unit-mashing weirdness
+		int nWholeDays = (int)dSimpleDuration;
+		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
+
+		double dDurationInWeekdayHours = ((nWholeDays * CDateHelper().WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
+
+		return AddDuration(dtNewStart, dDurationInWeekdayHours, TDCU_HOURS, TRUE);
 	}
 
 	// Tasks whose current and new dates fall wholly within a single day 
@@ -3055,8 +3075,14 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 		}
 		else if (elm.nOp == TDCUEO_MOVE)
 		{
-			TODOITEM* pTDI = NULL;
-			GET_TDI(elm.dwTaskID, pTDI, FALSE);
+			// We DON'T want the TRUE task
+			TODOITEM* pTDI = GetTask(elm.dwTaskID, FALSE);
+
+			if (!pTDI)
+			{
+				ASSERT(0);
+				return FALSE;
+			}
 
 			TDCUNDOELEMENT elmRet(TDCUEO_MOVE, elm.dwTaskID, elm.dwParentID, elm.dwPrevSiblingID, 0, pTDI);
 			aElms.Add(elmRet);
@@ -3816,7 +3842,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			// If date falls on the beginning of a day, move to end of previous day
 			if (dDuration > 0.0)
 			{
-				if (week.WorkDay().IsEndOfDay(dateEnd))
+				if (week.WorkingDay().IsEndOfDay(dateEnd))
 					dateEnd = CDateHelper::GetDateOnly(dateEnd);
 			}
 			else
@@ -3824,7 +3850,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 				// End date comes before start date, so 'dateStart' is logically the end date
 				ASSERT(dateEnd < dateStart);
 
-				if (week.WorkDay().IsEndOfDay(dateStart))
+				if (week.WorkingDay().IsEndOfDay(dateStart))
 					dateEnd = (CDateHelper::GetDateOnly(dateEnd).m_dt + 1.0);
 			}
 		}

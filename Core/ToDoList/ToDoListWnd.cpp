@@ -225,7 +225,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bLogCommands(FALSE),
 	m_bSplitting(FALSE),
 	m_statusBar(m_tdiDefault),
-	m_findFilterHelper(m_dlgFindTasks, m_filterBar)
+	m_findFilterHelper(m_dlgFindTasks, m_filterBar),
+	m_dlgFindTasks(m_mgrContent)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
 	
@@ -750,6 +751,7 @@ void CToDoListWnd::SetupUIStrings()
 	
 	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
+	CSpellCheckDlg::SetItemText(SCD_TITLE, IDS_TDC_SPELLCHECK_TITLE);
 	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
 	CWinHelpButton::SetDefaultTooltip(CEnString(IDS_ONLINEHELP));
 	CPasswordDialog::SetItemText(PD_TITLE, IDS_PD_TITLE);

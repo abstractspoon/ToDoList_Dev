@@ -111,6 +111,11 @@ String^ TaskList::GetProjectName()
 	return GETSTR(GetProjectName);
 }
 
+String^ TaskList::GetFilePath()
+{
+	return GETSTR_ARG(GetFileName, true);
+}
+
 String^ TaskList::GetMetaData(String^ sKey)
 {
 	return GETSTR_ARG(GetMetaData, MS(sKey));
@@ -693,13 +698,28 @@ List<UInt32>^ Task::GetLocalDependency()
 	return localDepends;
 }
 
-List<String^>^ Task::GetFileLink()
+List<String^>^ Task::GetFileLink(bool fullPath)
 {
 	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskFileLinkCount, 0);
 
+	String^ pathRoot = String::Empty;
+	
+	if (fullPath)
+	{
+		if (m_pConstTaskList)
+			pathRoot = (gcnew TaskList(m_pConstTaskList))->GetFilePath();
+		else
+			pathRoot = (gcnew TaskList(m_pTaskList))->GetFilePath();
+
+		pathRoot = System::IO::Path::GetDirectoryName(pathRoot);
+	}
+
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
-		items->Add(GETTASKSTR_ARG(GetTaskFileLink, nIndex));
+	{
+		String^ fileLinkPath = GETTASKSTR_ARG(GetTaskFileLink, nIndex);
+		items->Add(System::IO::Path::Combine(pathRoot, fileLinkPath));
+	}
 
 	return items;
 }
@@ -724,9 +744,9 @@ String^ Task::FormatDependency(String^ delimiter)
 	return FormatList(GetDependency(), delimiter);
 }
 
-String^ Task::FormatFileLink(String^ delimiter)
+String^ Task::FormatFileLink(String^ delimiter, bool fullPath)
 {
-	return FormatList(GetFileLink(), delimiter);
+	return FormatList(GetFileLink(fullPath), delimiter);
 }
 
 String^ Task::FormatList(List<String^>^ items, String^ delimiter)

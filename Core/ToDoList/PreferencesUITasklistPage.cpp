@@ -64,6 +64,7 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_HIDEPERCENTFORDONETASKS, m_bHidePercentForDoneTasks);
 	DDX_Check(pDX, IDC_ALLOWTREEITEMCHECKBOX, m_bAllowCheckboxAgainstTreeItem);
 	DDX_Check(pDX, IDC_HIDEPANESPLITBAR, m_bHidePaneSplitBar);
+	DDX_Check(pDX, IDC_FILELINKTHUMBNAILS, m_bShowFileLinkThumbnails);
 
 	CDialogHelper::DDX_CBValue(pDX, m_cbPercentIncrement, m_nPercentIncrement, 5);
 }
@@ -176,6 +177,7 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bAllowCheckboxAgainstTreeItem = pPrefs->GetProfileInt(szKey, _T("AllowCheckboxAgainstTreeItem"), TRUE);
 	m_bHidePaneSplitBar = pPrefs->GetProfileInt(szKey, _T("HidePaneSplitBar"), FALSE);
 	m_bShowRemindersAsDateAndTime = pPrefs->GetProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), FALSE);
+	m_bShowFileLinkThumbnails = pPrefs->GetProfileInt(szKey, _T("ShowFileLinkThumbnails"), FALSE);
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
@@ -211,6 +213,7 @@ void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR s
 	pPrefs->WriteProfileInt(szKey, _T("AllowCheckboxAgainstTreeItem"), m_bAllowCheckboxAgainstTreeItem);
 	pPrefs->WriteProfileInt(szKey, _T("HidePaneSplitBar"), m_bHidePaneSplitBar);
 	pPrefs->WriteProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), m_bShowRemindersAsDateAndTime);
+	pPrefs->WriteProfileInt(szKey, _T("ShowFileLinkThumbnails"), m_bShowFileLinkThumbnails);
 //	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 

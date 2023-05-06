@@ -109,7 +109,7 @@ double CTimeHelper::Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 				
 			case THU_WEEKDAYS:
 			case THU_DAYS:
-				dTime *= m_week.WorkDay().GetLengthInHours();
+				dTime *= m_week.WorkingDay().GetLengthInHours();
 				nFromUnits = THU_HOURS;
 				break;
 
@@ -147,7 +147,7 @@ double CTimeHelper::Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 				break;
 				
 			case THU_HOURS:
-				dTime /= m_week.WorkDay().GetLengthInHours();
+				dTime /= m_week.WorkingDay().GetLengthInHours();
 				nFromUnits = GetDaysToWeeksUnits(nToUnits);
 				break;
 
@@ -405,7 +405,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	
 	// and all the others up to years
 	double dHours = (dMins / MINS2HOURS);
-	double dDays = (dHours / m_week.WorkDay().GetLengthInHours());
+	double dDays = (dHours / m_week.WorkingDay().GetLengthInHours());
 	double dWeeks = (dDays / GetDaysToWeeksFactor(nUnitsFrom));
 	double dMonths = (dWeeks / WEEKS2MONTHS);
 	double dYears = (dMonths / MONTHS2YEARS);
@@ -426,7 +426,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	}
 	else if (dDays >= 1.0)
 	{
-		sTime = FormatTimeHMS(dDays, THU_DAYS, THU_HOURS, m_week.WorkDay().GetLengthInHours(), bDecPlaces, cDelim);
+		sTime = FormatTimeHMS(dDays, THU_DAYS, THU_HOURS, m_week.WorkingDay().GetLengthInHours(), bDecPlaces, cDelim);
 	}
 	else if (dHours >= 1.0)
 	{

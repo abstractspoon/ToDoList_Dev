@@ -50,7 +50,9 @@ TRACKTASKLIST::TRACKTASKLIST()
 	: 
 	pTDC(NULL), 
 	dwTrackedTaskID(0), 
-	bTrackingPaused(FALSE)
+	bTrackingPaused(FALSE),
+	bNeedFullTaskUpdate(FALSE),
+	bNeedComboRebuild(FALSE)
 {
 }
 	
@@ -62,11 +64,33 @@ int TRACKTASKLIST::SetTasks(const CTaskFile& tasks)
 {
 	aTasks.RemoveAll();
 
+	// Update flags first else UpdateTasks will fail
+	bNeedFullTaskUpdate = FALSE;
+	bNeedComboRebuild = TRUE;
+
 	UpdateTasks(tasks, CDWordArray());
 
 	return aTasks.GetSize();
 }
 	
+int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, CDWordArray& aModTaskIDs)
+{
+	if (bNeedFullTaskUpdate)
+		return 0L;
+
+	CMapTaskIndex mapTasks;
+	aTasks.BuildTaskMap(mapTasks);
+
+	aModTaskIDs.RemoveAll();
+
+	int nUpdated = UpdateTasks(tasks, NULL, 0, mapTasks, aModTaskIDs);
+
+	if (nUpdated)
+		bNeedComboRebuild = TRUE;
+
+	return nUpdated;
+}
+
 int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks, CDWordArray& aModTaskIDs)
 {
 	CString sTaskPath;
@@ -74,7 +98,7 @@ int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLev
 	if (hTask)
 	{
 		if (tasks.IsTaskDone(hTask) || tasks.IsTaskReference(hTask))
-			return FALSE;
+			return 0;
 
 		DWORD dwTaskID = tasks.GetTaskID(hTask);
 		ASSERT(dwTaskID);
@@ -121,19 +145,13 @@ int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLev
 	return aModTaskIDs.GetSize();
 }
 
-int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, CDWordArray& aModTaskIDs)
-{
-	CMapTaskIndex mapTasks;
-	aTasks.BuildTaskMap(mapTasks);
-
-	aModTaskIDs.RemoveAll();
-
-	return UpdateTasks(tasks, NULL, 0, mapTasks, aModTaskIDs);
-}
-
 BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 {
-	int nNumTask = aTasks.GetSize(), nTask = nNumTask;
+	if (bNeedFullTaskUpdate)
+		return 0L;
+
+	int nNumTask = aTasks.GetSize();
+	int nTask = nNumTask;
 
 	while (nTask--)
 	{
@@ -157,7 +175,10 @@ BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 			aTasks.RemoveAt(nTask);
 	}
 
-	return (aTasks.GetSize() != nNumTask);
+	bNeedFullTaskUpdate = FALSE;
+	bNeedComboRebuild = (aTasks.GetSize() != nNumTask);
+
+	return TRUE;
 }
 
 BOOL TRACKTASKLIST::IsTracking(DWORD dwTaskID) const

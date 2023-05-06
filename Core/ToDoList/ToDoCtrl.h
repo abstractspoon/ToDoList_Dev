@@ -19,7 +19,6 @@
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
 #include "tdlcommentsctrl.h"
-#include "tdlcontentmgr.h"
 #include "tdcTimeTracking.h"
 #include "tdcSourceControl.h"
 #include "tdcFindReplace.h"
@@ -57,6 +56,7 @@ class CDeferWndMove;
 class CSpellCheckDlg;
 class CPreferences;
 class CTDCTaskCompletionArray;
+class CTDCContentMgr;
 
 struct CTRLITEM;
 struct TDCTASKCOMPLETION;
@@ -71,7 +71,7 @@ class CToDoCtrl : public CRuntimeDlg
 
 // Construction
 public:
-	CToDoCtrl(const CTDLContentMgr& mgrContent, 
+	CToDoCtrl(const CTDCContentMgr& mgrContent, 
 			  const CShortcutManager& mgrShortcuts, 
 			  const CONTENTFORMAT& cfDefault, 
 			  const TDCCOLEDITFILTERVISIBILITY& visDefault);

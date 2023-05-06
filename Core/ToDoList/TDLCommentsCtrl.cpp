@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLCommentsCtrl.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
@@ -36,7 +36,7 @@ enum
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
 CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComboLenDLU, 
-								   const CTDLContentMgr* pMgrContent, const CShortcutManager* pMsgShortcuts)
+								   const CTDCContentMgr* pMgrContent, const CShortcutManager* pMsgShortcuts)
 	:
 	m_pMgrContent(pMgrContent), 
 	m_pMgrShortcuts(pMsgShortcuts),

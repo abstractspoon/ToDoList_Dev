@@ -30,6 +30,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#include "..\Interfaces\ContentMgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTreeCtrlHelper;
 class CToDoCtrlData;
 class CPreferences;
@@ -49,7 +53,8 @@ protected: // base class only
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
-					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+					 const CContentMgr& mgrContent);
 
 public:
 	virtual ~CTDLTaskCtrlBase();
@@ -251,6 +256,7 @@ protected:
 	const CTDCImageList& m_ilTaskIcons;
 	const CTDCColumnIDMap& m_mapVisibleCols;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+	const CContentMgr& m_mgrContent;
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
@@ -365,6 +371,8 @@ protected:
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
 	BOOL GetAttributeColor(const CString& sAttrib, COLORREF& color) const;
 	int GetTaskColumnTooltip(const CPoint& ptScreen, CString& sTooltip) const;
+	CString GetTaskColumnFileLinkTooltip(LPCTSTR szFileLink) const;
+	CString GetTaskCustomColumnTooltip(const TODOITEM* pTDI, TDC_COLUMN nColID) const;
 	BOOL TaskHasReminder(DWORD dwTaskID) const;
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
 	time_t GetTaskReminder(DWORD dwTaskID) const;
@@ -469,6 +477,7 @@ protected:
 							  CDC* pDC, const CRect& rSubItem, COLORREF crText);
 	enum TTCB_CHECK { TTCNC_UNCHECKED, TTCBC_CHECKED, TTCBC_MIXED };
 	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck);
+	void DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, const CPoint& ptTopLeft);
 
 	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
 						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);

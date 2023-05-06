@@ -700,6 +700,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		// Always update these
 		pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pWI->bParent = pTasks->IsTaskParent(hTask);
 	}
 
 	// detect update

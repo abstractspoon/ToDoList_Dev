@@ -63,7 +63,7 @@ const UINT TEN_MINUTES = (ONE_MINUTE * 10);
 //////////////////////////////////////////////////////////////////////
 
 CFilteredToDoCtrl::CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-									 CTDLContentMgr& mgrContent, 
+									 CTDCContentMgr& mgrContent, 
 									 CShortcutManager& mgrShortcuts,
 									 const CONTENTFORMAT& cfDefault, 
 									 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
@@ -696,8 +696,8 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 {
 	BOOL bWantTask = CTabbedToDoCtrl::WantAddTaskToTree(pTDI, pTDS, pContext);
 
-#ifdef _DEBUG
 	DWORD dwTaskID = pTDS->GetTaskID();
+#ifdef _DEBUG
 	DWORD dwParentID = pTDS->GetParentTaskID();
 #endif
 	
@@ -733,6 +733,10 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 		}
 		else // rest of attributes
 		{
+			// Special case: References
+			if (pTDI->IsReference())
+				pTDI = m_data.GetTrueTask(dwTaskID);
+
 			bWantTask = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), result);
 		}
 

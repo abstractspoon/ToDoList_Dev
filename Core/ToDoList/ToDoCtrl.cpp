@@ -22,6 +22,7 @@
 #include "ToDoCtrlDataDefines.h"
 #include "TDCDialogHelper.h"
 #include "TDCTaskCompletion.h"
+#include "tdccontentmgr.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -161,7 +162,7 @@ UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 
 //////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent, 
+CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent, 
 					 const CShortcutManager& mgrShortcuts, 
 					 const CONTENTFORMAT& cfDefault, 
 					 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
@@ -178,7 +179,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
-	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
+	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
@@ -212,15 +213,21 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
-	m_taskTree(m_ilTaskIcons, m_data, m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
-	m_exporter(m_data, m_taskTree, m_mgrContent),
-	m_formatter(m_data),
-	m_infoTip(m_data, m_aCustomAttribDefs),
+	m_exporter(m_data, m_taskTree, mgrContent),
+	m_formatter(m_data, mgrContent),
+	m_infoTip(m_data, m_aCustomAttribDefs, mgrContent),
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders),
-	m_bPendingUpdateControls(FALSE)
+	m_matcher(m_data, m_reminders, mgrContent),
+	m_bPendingUpdateControls(FALSE),
+	m_taskTree(m_ilTaskIcons, 
+			   m_data, 
+			   m_styles, 
+			   m_tldAll, 
+			   m_visColEdit.GetVisibleColumns(), 
+			   m_aCustomAttribDefs,
+			   mgrContent)
 {
 	SetBordersDLU(0);
 	
@@ -5575,6 +5582,14 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		// handled solely by tree-list
 		break;
 
+	case TDCS_SHOWFILELINKTHUMBNAILS:
+		{
+			m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
+			
+			CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
+		}
+		break;
+
 	case TDCS_SHOWINFOTIPS:
 		if (bEnable)
 		{
@@ -5825,7 +5840,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 {
 	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIBDEFS));
 
-	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, FALSE))
+	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, TRUE))
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
 
@@ -6160,6 +6175,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,
 													 IDC_VERSION,
+													 HasStyle(TDCS_SHOWFILELINKTHUMBNAILS),
 													 m_aCustomControls);
 
 	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
@@ -9124,8 +9140,11 @@ BOOL CToDoCtrl::HandleUnsavedComments()
 		m_nCommentsState = CS_CHANGED;
 
 		// Update sort if required
-		if (m_visColEdit.IsColumnVisible(TDCC_COMMENTSSIZE) && IsSortingBy(TDCC_COMMENTSSIZE))
+		if ((m_visColEdit.IsColumnVisible(TDCC_COMMENTSSIZE) && IsSortingBy(TDCC_COMMENTSSIZE)) ||
+			(m_visColEdit.IsColumnVisible(TDCC_COMMENTSFORMAT) && IsSortingBy(TDCC_COMMENTSFORMAT)))
+		{
 			Resort();
+		}
 	}
 
 	return TRUE;
@@ -11365,7 +11384,8 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == IDC_FILEPATH)
+	if ((wParam == IDC_FILEPATH) ||
+		CTDCCustomAttributeUIHelper::IsCustomEditControl(wParam))
 	{
 		if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
 			return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);

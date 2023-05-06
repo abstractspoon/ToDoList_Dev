@@ -84,6 +84,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		case TDCA_TASKNAMEORCOMMENTS:
 		case TDCA_ANYTEXTATTRIBUTE:
 		case TDCA_COMMENTSSIZE:
+		case TDCA_COMMENTSFORMAT:
 			continue;
 
 		case TDCA_NONE:

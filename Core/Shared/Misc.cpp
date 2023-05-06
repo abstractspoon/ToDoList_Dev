@@ -2579,6 +2579,14 @@ CString Misc::GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith)
 	return sText;
 }
 
+CString Misc::GetUnquoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith)
+{
+	CString sText(szText);
+	MakeUnquoted(sText, cEscapeEmbeddedQuotesWith);
+
+	return sText;
+}
+
 BOOL Misc::IsQuoted(LPCTSTR szText)
 {
 	if (!szText)

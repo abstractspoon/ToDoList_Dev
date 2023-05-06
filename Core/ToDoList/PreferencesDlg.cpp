@@ -114,7 +114,7 @@ enum SEARCH_BTNS { BTN_UPDATE = 1, BTN_CLEAR };
 // CPreferencesDlg dialog
 
 CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr, 
-								 const CTDLContentMgr* pContentMgr, 
+								 const CTDCContentMgr* pContentMgr, 
 								 const CTDCImportExportMgr* pExportMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
 								 CWnd* pParent /*=NULL*/)

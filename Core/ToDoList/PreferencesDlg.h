@@ -70,7 +70,7 @@ class CPreferencesDlg : public CPreferencesDlgBase
 // Construction
 public:
 	CPreferencesDlg(CShortcutManager* pShortcutMgr = NULL, 
-					const CTDLContentMgr* pContentMgr = NULL, 
+					const CTDCContentMgr* pContentMgr = NULL, 
 					const CTDCImportExportMgr* pExportMgr = NULL, 
 					const CUIExtensionMgr* pMgrUIExt = NULL,
 					CWnd* pParent = NULL);   // standard constructor
@@ -282,6 +282,7 @@ public:
 	BOOL GetAllowCheckboxAgainstTreeItem() const { return m_pageUITasklist.GetAllowCheckboxAgainstTreeItem(); }
 	BOOL GetHidePaneSplitBar() const { return m_pageUITasklist.GetHidePaneSplitBar(); }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_pageUITasklist.GetShowRemindersAsDateAndTime(); }
+	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }

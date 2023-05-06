@@ -42,6 +42,7 @@ namespace Abstractspoon
 				static float PointsToEms(int nPointSize);
 
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
+				static bool SetComboBoxCue(IntPtr hWnd, String^ sCueText);
 				static bool SetEditMargins(IntPtr hWnd, int nAllMargins);
 				static bool SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom);
 

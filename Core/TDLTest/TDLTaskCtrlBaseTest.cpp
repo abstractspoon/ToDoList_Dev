@@ -155,7 +155,8 @@ void CTDLTaskCtrlBaseTest::TestListColumnRecalculationPerformance()
 
 void CTDLTaskCtrlBaseTest::PopulateLongestMap(const CToDoCtrlData& data, CTDCLongestItemMap& mapLongest) const
 {
-	CTDCTaskFormatter formatter(data);
+	CContentMgr mgrContent;
+	CTDCTaskFormatter formatter(data, mgrContent);
 
 	DWORD dwMaxTaskID = data.GetTaskCount();
 

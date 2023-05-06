@@ -24,13 +24,17 @@
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CContentMgr;
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLFindTaskExpressionListCtrl window
 
 class CTDLFindTaskExpressionListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CTDLFindTaskExpressionListCtrl();
+	CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent);
 	virtual ~CTDLFindTaskExpressionListCtrl();
 
 	void SetSearchParams(const SEARCHPARAM& param);
@@ -75,6 +79,7 @@ protected:
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
 
+	const CContentMgr&				m_mgrContent;
 // Overrides
 protected:
 	// ClassWizard generated virtual function overrides

@@ -859,7 +859,7 @@ BOOL CPreferences::HasProfileSection(LPCTSTR lpszSection) const
 	return CRegKey2::KeyExists(HKEY_CURRENT_USER, sFullKey);
 }
 
-int CPreferences::GetProfileSectionNames(CStringArray& aSections)
+int CPreferences::GetProfileSectionNames(CStringArray& aSections, LPCTSTR szPrefix)
 {
 	// prevent anyone else changing the shared resources
 	// for the duration of this function
@@ -880,7 +880,8 @@ int CPreferences::GetProfileSectionNames(CStringArray& aSections)
 			s_mapSections.GetNextAssoc(pos, sUnused, pSection);
 			ASSERT(pSection);
 
-			aSections.Add(pSection->sSection);
+			if (Misc::IsEmpty(szPrefix) || (pSection->sSection.Find(szPrefix) == 0))
+				aSections.Add(pSection->sSection);
 		}
 	}
 

@@ -36,6 +36,8 @@ namespace MindMapUIExtension
 
 			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies"), MindMapOption.ShowDependencies));
 			Items.Add(new MindMapOptionItem(trans.Translate("Straight line connections"), MindMapOption.StraightConnections));
+
+			Sorted = true;
 		}
 
 		public MindMapOption SelectedOptions

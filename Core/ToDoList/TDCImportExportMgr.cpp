@@ -1,4 +1,4 @@
-// TDImportExportMgr.cpp: implementation of the CTDLImportExportMgr class.
+// TDImportExportMgr.cpp: implementation of the CTDCImportExportMgr class.
 //
 //////////////////////////////////////////////////////////////////////
 

@@ -3,8 +3,10 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 #include "TDCSimpleTextContent.h"
+
+#include "..\Shared\Localizer.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -16,28 +18,31 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLContentMgr::CTDLContentMgr() 
+CTDCContentMgr::CTDCContentMgr() 
 {
 }
 
-CTDLContentMgr::~CTDLContentMgr()
+CTDCContentMgr::~CTDCContentMgr()
 {
 }
 
-void CTDLContentMgr::Initialize() const
+void CTDCContentMgr::Initialize() const
 {
 	if (!m_bInitialized)
 	{
 		CContentMgr::Initialize();
 
 		// we need a non-const pointer to update the array
-		CTDLContentMgr* pMgr = const_cast<CTDLContentMgr*>(this);
+		CTDCContentMgr* pMgr = const_cast<CTDCContentMgr*>(this);
 
-		pMgr->m_aContent.InsertAt(0, new CTDCSimpleTextContent);
+		IContent* pSimpleText = new CTDCSimpleTextContent;
+
+		pMgr->m_aContent.InsertAt(0, pSimpleText);
+		pMgr->m_mapFormatToDescription[pSimpleText->GetTypeID()] = CLocalizer::TranslateText(pSimpleText->GetTypeDescription());
 	}
 }
 
-CONTENTFORMAT CTDLContentMgr::GetSimpleTextContentFormat() const
+CONTENTFORMAT CTDCContentMgr::GetSimpleTextContentFormat() const
 {
 	Initialize();
 

@@ -8,7 +8,7 @@
 #include "enbitmap.h"
 #include "enfiledialog.h"
 
-// CMultiFileEdit //////////////////////////////////////////////////////////
+// CFileComboBox::CMultiFileEdit //////////////////////////////////////////////////////////
 
 CFileComboBox::CMultiFileEdit::CMultiFileEdit(int nEditStyle) : CFileEdit(nEditStyle)
 {
@@ -47,6 +47,10 @@ void CFileComboBox::CMultiFileEdit::HandleBrowseForFile(CEnFileDialog& dlg)
 }
 
 // CFileComboBox //////////////////////////////////////////////////////////
+
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+
+///////////////////////////////////////////////////////////////////////////
 
 CFileComboBox::CFileComboBox(int nEditStyle) 
 	: 
@@ -290,7 +294,7 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 	{
 		BOOL bDrawn = FALSE;
 
-		if (m_fileEdit.HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sItem))
+		if (m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sItem))
 		{
 			CString sFullPath(sItem);
 			FileMisc::MakeFullPath(sFullPath, m_fileEdit.GetCurrentFolder());
@@ -410,4 +414,19 @@ void CFileComboBox::HandleReturnKey()
 		m_bEditChange = FALSE;
 	else
 		CAutoComboBox::HandleReturnKey();
+}
+
+int CFileComboBox::GetExtraListboxWidth() const
+{
+	return (CAutoComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CFileComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = CAutoComboBox::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
+
+	return nMinHeight;
 }

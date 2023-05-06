@@ -63,7 +63,7 @@ void CContentMgr::Initialize() const
 	// we need a non-const pointer to update the array
 	CContentMgr* pMgr = const_cast<CContentMgr*>(this);
 
-	// look at every dll from whereever we are now
+	// look at every dll from wherever we are now
 	CFileFind ff;
     CString sSearchPath = FileMisc::GetModuleFilePath(), sFolder, sDrive;
 
@@ -98,6 +98,7 @@ void CContentMgr::Initialize() const
 
 						// save
 						pMgr->m_aContent.Add(pContent);
+						pMgr->m_mapFormatToDescription[pContent->GetTypeID()] = CLocalizer::TranslateText(pContent->GetTypeDescription());
 					}
 					else
 					{
@@ -154,11 +155,21 @@ CString CContentMgr::GetContentDescription(int nContent) const
 	if (nContent >= 0 && nContent < m_aContent.GetSize())
 	{
 		ASSERT (m_aContent[nContent] != NULL);
-		return m_aContent[nContent]->GetTypeDescription();
+		return CLocalizer::TranslateText(m_aContent[nContent]->GetTypeDescription());
 	}
 	
 	// else
 	return "";
+}
+
+CString CContentMgr::GetContentDescription(const CONTENTFORMAT& cf) const
+{
+	Initialize(); // initialize on demand
+
+	CString sDesc;
+	m_mapFormatToDescription.Lookup(cf, sDesc);
+
+	return sDesc;
 }
 
 HICON CContentMgr::GetContentIcon(int nContent) const
@@ -286,3 +297,33 @@ void CContentMgr::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, BOO
 		pContent->LoadPreferences(pPrefs, sKey, (bAppOnly != FALSE));
 	}
 }
+
+CString CContentMgr::GetLongestContentDescription() const
+{
+	CString sLongest;
+	int nContent = m_aContent.GetSize();
+
+	while (nContent--)
+	{
+		CString sDesc = GetContentDescription(nContent);
+
+		if (sDesc.GetLength() > sLongest.GetLength())
+			sLongest = sDesc;
+	}
+
+	return sLongest;
+}
+
+int CContentMgr::GetContentDescriptions(CStringArray& aDescriptions) const
+{
+	Initialize(); // initialize on demand
+
+	int nContent = m_aContent.GetSize();
+	aDescriptions.RemoveAll();
+
+	while (nContent--)
+		aDescriptions.InsertAt(0, GetContentDescription(nContent));
+
+	return aDescriptions.GetSize();
+}
+

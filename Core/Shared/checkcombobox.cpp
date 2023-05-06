@@ -19,12 +19,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int CHECKBOX_WIDTH = GraphicsMisc::ScaleByDPIFactor(16);
-
-/////////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////////////////
-
 void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems)
 {
 	if (pDX->m_bSaveAndValidate)
@@ -35,6 +29,10 @@ void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems
 
 /////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox
+
+const int CCheckComboBox::CHECKBOX_SIZE = GraphicsMisc::ScaleByDPIFactor(13);
+
+/////////////////////////////////////////////////////////////////////////////
 
 CCheckComboBox::CCheckComboBox(DWORD dwFlags) : CAutoComboBox(dwFlags)
 {
@@ -74,12 +72,14 @@ void CCheckComboBox::OnDestroy()
 }
 
 void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL /*bList*/, COLORREF crText)
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	if (DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE))
+	if (bList)
 	{
+		DrawCheckBox(dc, rect, nItem, nItemState, dwItemData, FALSE);
+
 		CRect rText(rect);
-		rText.left += CHECKBOX_WIDTH;
+		rText.left += CHECKBOX_SIZE + 2;
 		
 		CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, TRUE, crText);
 	}
@@ -97,11 +97,8 @@ void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nI
 	}
 }
 
-BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*nItemState*/, DWORD dwItemData, BOOL bDisabled) const
+void CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*nItemState*/, DWORD dwItemData, BOOL bDisabled) const
 {
-	if (nItem < 0) 	// Don't draw a checkbox on the static portion of the combobox
-		return FALSE;
-
 	// Otherwise it is one of the items
 	UINT nCheckState = (DFCS_BUTTONCHECK | (bDisabled ? DFCS_INACTIVE : 0));
 
@@ -121,17 +118,25 @@ BOOL CCheckComboBox::DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT /*
 	}
 
 	CRect rCheck(rect);
-	rCheck.left = 0;
-	rCheck.right = (rCheck.left + CHECKBOX_WIDTH);
+	rCheck.left = 1;
+	rCheck.right = (rCheck.left + CHECKBOX_SIZE + 1);
 	
 	CThemed::DrawFrameControl(CWnd::FromHandle(GetListbox()), &dc, rCheck, DFC_BUTTON, nCheckState);
-
-	return TRUE;
 }
 
 int CCheckComboBox::GetExtraListboxWidth() const
 {
-	return (CAutoComboBox::GetExtraListboxWidth() + CHECKBOX_WIDTH);
+	return (CAutoComboBox::GetExtraListboxWidth() + CHECKBOX_SIZE + 2);
+}
+
+int CCheckComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	BOOL nMinHeight = CAutoComboBox::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (CHECKBOX_SIZE + 2));
+
+	return nMinHeight;
 }
 
 LRESULT CCheckComboBox::OnGetTextLen(WPARAM wParam, LPARAM lParam)

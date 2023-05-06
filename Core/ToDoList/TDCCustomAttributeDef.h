@@ -101,7 +101,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
-	BOOL HasDefaultTextAlignment() const;
+	BOOL HasDefaultHorzAlignment() const;
 
 	BOOL SetAttributeType(DWORD dwType);
 	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
@@ -138,7 +138,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
-	static UINT GetDefaultTextAlignment(DWORD dwAttribType);
+	static UINT GetDefaultHorzAlignment(DWORD dwAttribType);
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
@@ -149,7 +149,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString sUniqueID;
 	CString sColumnTitle;
 	CString sLabel;
-	UINT nTextAlignment;
+	UINT nHorzAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
 	DWORD dwFeatures;
 	CStringArray aDefaultListData;
 	mutable CStringArray aAutoListData;
@@ -227,7 +227,6 @@ public:
 
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
-	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const;
 
 	// Calculation helpers requiring access to all attribute definitions
 	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;

@@ -55,7 +55,8 @@ public:
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
-					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+					 const CContentMgr& mgrContent);
 
 	virtual ~CTDLTaskListCtrl();
 	operator HWND() const { return GetSafeHwnd(); }

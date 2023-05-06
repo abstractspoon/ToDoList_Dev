@@ -175,7 +175,7 @@ public:
 	double GetLengthInDaysAsRatio() const; // length in days / 7.0
 	double GetLengthInHoursAsRatio(bool bIncludingLunch = false) const; // length in hours / 7.0 * 24
 
-	const CWorkingDay& WorkDay() const { return m_WorkDay;	}
+	const CWorkingDay& WorkingDay() const { return m_WorkDay;	}
 	const CWeekend& Weekend() const { return m_Weekend; }
 
 protected:

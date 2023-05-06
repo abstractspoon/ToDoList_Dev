@@ -231,6 +231,7 @@ namespace GraphicsMisc
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
 	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
 	CPoint CentrePoint(LPCRECT prcRect);
+	void AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags); // DT_LEFT, etc
 
 	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags = GMIB_NONE, LPCRECT prClip = NULL); 
 	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags = GMIB_NONE);

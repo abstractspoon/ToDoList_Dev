@@ -26,11 +26,13 @@ static const CString EMPTY_STR;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLInfoTipCtrl
 
-CTDLInfoTipCtrl::CTDLInfoTipCtrl(const CToDoCtrlData& data, const CTDCCustomAttribDefinitionArray& aCustAttribs)
+CTDLInfoTipCtrl::CTDLInfoTipCtrl(const CToDoCtrlData& data, 
+								 const CTDCCustomAttribDefinitionArray& aCustAttribs, 
+								 const CContentMgr& mgrContent)
 	:
 	m_data(data),
 	m_aCustAttribs(aCustAttribs),
-	m_formatter(data),
+	m_formatter(data, mgrContent),
 	m_calculator(data)
 {
 }
