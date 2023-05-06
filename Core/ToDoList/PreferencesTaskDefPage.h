@@ -26,14 +26,14 @@
 #include "..\Shared\binarydata.h"
 #include "..\Shared\SoundEdit.h"
 
-#include "..\Interfaces\contentMgr.h"
-
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDefPage dialog
 
 struct TODOITEM;
+
+class CTDCContentMgr;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +43,7 @@ class CPreferencesTaskDefPage : public CPreferencesPageBase
 
 // Construction
 public:
-	CPreferencesTaskDefPage(const CTDLContentMgr* pMgrContent = NULL);
+	CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent = NULL);
 	~CPreferencesTaskDefPage();
 
 	void SetPriorityColors(const CDWordArray& aColors);
@@ -88,7 +88,8 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	int m_nDefReminderLeadinMins;
 
-	const CContentMgr* m_pMgrContent;
+	const CTDCContentMgr* m_pMgrContent;
+
 	CTDLCommentsCtrl m_ctrlComments;
 	CONTENTFORMAT m_cfDefault;
 	CBinaryData m_defCustomComments;

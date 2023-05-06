@@ -184,7 +184,7 @@
     <ClCompile Include="..\ToDoList\TDLColumnListBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLColumnSelectionDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\TDLContentMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDCContentMgr.cpp" />
     <ClCompile Include="..\ToDoList\TDLCsvImportExportDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCustomAttribFeatureComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLCustomAttributeDlg.cpp" />
@@ -343,7 +343,7 @@
     <ClInclude Include="..\ToDoList\TDLColumnListBox.h" />
     <ClInclude Include="..\ToDoList\TDLColumnSelectionDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCommentsCtrl.h" />
-    <ClInclude Include="..\ToDoList\TDLContentMgr.h" />
+    <ClInclude Include="..\ToDoList\TDCContentMgr.h" />
     <ClInclude Include="..\ToDoList\TDLCsvImportExportDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCustomAttribFeatureComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLCustomAttributeDlg.h" />

@@ -6,7 +6,7 @@
 #include "ToDoCtrlMgr.h"
 #include "tdstringres.h"
 #include "TDCTasktimelog.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
@@ -245,7 +245,7 @@ CFilteredToDoCtrl& CToDoCtrlMgr::GetFallbackToDoCtrl()
 {
 	// Only instantiated if called
 	static CUIExtensionMgr extm;
-	static CTDLContentMgr cm;
+	static CTDCContentMgr cm;
 	static CShortcutManager sm;
 	static CONTENTFORMAT cf;
 	static TDCCOLEDITFILTERVISIBILITY vis;

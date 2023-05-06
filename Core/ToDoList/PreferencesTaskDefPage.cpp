@@ -8,7 +8,7 @@
 #include "tdcmapping.h"
 #include "todoitem.h"
 #include "tdltaskicondlg.h"
-#include "tdlcontentmgr.h"
+#include "tdccontentmgr.h"
 #include "tdcdialoghelper.h"
 
 #include "..\shared\enstring.h"
@@ -44,7 +44,7 @@ const LPCTSTR NO_SOUND	= _T("None");
 
 IMPLEMENT_DYNCREATE(CPreferencesTaskDefPage, CPreferencesPageBase)
 
-CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDLContentMgr* pMgrContent) 
+CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent) 
 	: 
 	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
 	m_pMgrContent(pMgrContent), 

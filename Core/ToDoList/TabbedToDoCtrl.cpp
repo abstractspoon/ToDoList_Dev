@@ -13,6 +13,7 @@
 #include "TDLTaskViewListBox.h"
 #include "ToDoCtrlDataDefines.h"
 #include "TDCTaskCompletion.h"
+#include "TDCContentMgr.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\datehelper.h"
@@ -111,9 +112,9 @@ BOOL VIEWDATA::WantAnyAttribute(const CTDCAttributeMap& other) const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-								 CTDLContentMgr& mgrContent, 
-								 CShortcutManager& mgrShortcuts,
+CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt, 
+								 const CTDCContentMgr& mgrContent, 
+								 const CShortcutManager& mgrShortcuts,
 								 const CONTENTFORMAT& cfDefault, 
 								 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:

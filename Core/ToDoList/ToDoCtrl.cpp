@@ -22,6 +22,7 @@
 #include "ToDoCtrlDataDefines.h"
 #include "TDCDialogHelper.h"
 #include "TDCTaskCompletion.h"
+#include "tdccontentmgr.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -161,7 +162,7 @@ UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 
 //////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent, 
+CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent, 
 					 const CShortcutManager& mgrShortcuts, 
 					 const CONTENTFORMAT& cfDefault, 
 					 const TDCCOLEDITFILTERVISIBILITY& visDefault) 

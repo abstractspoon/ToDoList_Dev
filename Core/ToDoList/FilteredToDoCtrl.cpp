@@ -63,7 +63,7 @@ const UINT TEN_MINUTES = (ONE_MINUTE * 10);
 //////////////////////////////////////////////////////////////////////
 
 CFilteredToDoCtrl::CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-									 CTDLContentMgr& mgrContent, 
+									 CTDCContentMgr& mgrContent, 
 									 CShortcutManager& mgrShortcuts,
 									 const CONTENTFORMAT& cfDefault, 
 									 const TDCCOLEDITFILTERVISIBILITY& visDefault) 

@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 #include "TDCSimpleTextContent.h"
 
 #include "..\Shared\Localizer.h"
@@ -18,22 +18,22 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLContentMgr::CTDLContentMgr() 
+CTDCContentMgr::CTDCContentMgr() 
 {
 }
 
-CTDLContentMgr::~CTDLContentMgr()
+CTDCContentMgr::~CTDCContentMgr()
 {
 }
 
-void CTDLContentMgr::Initialize() const
+void CTDCContentMgr::Initialize() const
 {
 	if (!m_bInitialized)
 	{
 		CContentMgr::Initialize();
 
 		// we need a non-const pointer to update the array
-		CTDLContentMgr* pMgr = const_cast<CTDLContentMgr*>(this);
+		CTDCContentMgr* pMgr = const_cast<CTDCContentMgr*>(this);
 
 		IContent* pSimpleText = new CTDCSimpleTextContent;
 
@@ -42,7 +42,7 @@ void CTDLContentMgr::Initialize() const
 	}
 }
 
-CONTENTFORMAT CTDLContentMgr::GetSimpleTextContentFormat() const
+CONTENTFORMAT CTDCContentMgr::GetSimpleTextContentFormat() const
 {
 	Initialize();
 
