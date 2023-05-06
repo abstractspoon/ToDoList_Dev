@@ -38,6 +38,8 @@ namespace EvidenceBoardUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
+		private RangeSliderCtrl m_Slider;
+
 		// ----------------------------------------------------------------------------
 
 		public EvidenceBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
@@ -184,10 +186,12 @@ namespace EvidenceBoardUIExtension
         public void SetUITheme(UITheme theme)
         {
 			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_Slider.SetBackColor(BackColor);
 
 			// Set the toolbar colors to be the same as the back color
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
+
 
 			m_TBRenderer.SetUITheme(theme);
 		}
@@ -333,7 +337,11 @@ namespace EvidenceBoardUIExtension
 
 			InitialiseCombo(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
 			this.Controls.Add(m_LinkVisibilityCombo);
-			
+
+			m_Slider = new RangeSliderCtrl();
+			m_Slider.Bounds = new Rectangle((m_LinkVisibilityCombo.Right + 10), 0, 200, (m_LinkVisibilityCombo.Bottom + 6));
+			this.Controls.Add(m_Slider);
+
 			CreateToolbar();
 			UpdateToolbarButtonStates();
 		}
