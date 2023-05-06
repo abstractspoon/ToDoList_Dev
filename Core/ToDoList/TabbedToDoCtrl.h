@@ -48,9 +48,9 @@ struct VIEWDATA
 class CTabbedToDoCtrl : public CToDoCtrl 
 {
 public:
-	CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-					CTDLContentMgr& mgrContent, 
-					CShortcutManager& mgrShortcuts,
+	CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
+					const CTDCContentMgr& mgrContent,
+					const CShortcutManager& mgrShortcuts,
 					const CONTENTFORMAT& cfDefault,
 					const TDCCOLEDITFILTERVISIBILITY& visDefault);
 

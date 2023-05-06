@@ -7,6 +7,7 @@
 #include "ToDoCtrlTaskLinkTest.h"
 
 #include "..\ToDoList\ToDoCtrl.h"
+#include "..\ToDoList\TDCContentMgr.h"
 
 #include "..\Shared\ShortcutManager.h"
 
@@ -19,7 +20,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 // Stubs
-CTDLContentMgr mgrContent;
+CTDCContentMgr mgrContent;
 CShortcutManager mgrShortcuts;
 CONTENTFORMAT cfDefault;
 TDCCOLEDITFILTERVISIBILITY visDefault;

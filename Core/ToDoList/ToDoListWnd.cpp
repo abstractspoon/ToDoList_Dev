@@ -225,7 +225,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bLogCommands(FALSE),
 	m_bSplitting(FALSE),
 	m_statusBar(m_tdiDefault),
-	m_findFilterHelper(m_dlgFindTasks, m_filterBar)
+	m_findFilterHelper(m_dlgFindTasks, m_filterBar),
+	m_dlgFindTasks(m_mgrContent)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
 	

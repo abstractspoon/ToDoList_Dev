@@ -109,6 +109,7 @@ enum TDC_ATTRIBUTE
 	TDCA_REMINDER,
 
 	TDCA_TIMEREMAINING, 
+	TDCA_COMMENTSFORMAT,
 	// ADD NEW ATTRIBUTES HERE ONLY!
 	
 	// Hack to capture the value of the very last attribute

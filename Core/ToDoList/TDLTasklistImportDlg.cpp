@@ -21,12 +21,13 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLTaskTreeImportCtrl::CTDLTaskTreeImportCtrl() 
 	: 
-	CTDLTaskTreeCtrl(m_ilIcons, 
-					m_data, 
-					m_styles, 
-					m_tld, 
-					m_visibleCols.GetVisibleColumns(), 
-					m_aCustAttribDefs),
+	CTDLTaskTreeCtrl(m_ilIcons,
+					 m_data,
+					 m_styles,
+					 m_tld,
+					 m_visibleCols.GetVisibleColumns(),
+					 m_aCustAttribDefs,
+					 m_mgrContent),
 	m_data(m_styles, m_aCustAttribDefs),
 	m_exporter(m_data, *this, m_mgrContent)
 {

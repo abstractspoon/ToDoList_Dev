@@ -13,6 +13,7 @@
 #include "TDLTaskViewListBox.h"
 #include "ToDoCtrlDataDefines.h"
 #include "TDCTaskCompletion.h"
+#include "TDCContentMgr.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\datehelper.h"
@@ -111,9 +112,9 @@ BOOL VIEWDATA::WantAnyAttribute(const CTDCAttributeMap& other) const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-								 CTDLContentMgr& mgrContent, 
-								 CShortcutManager& mgrShortcuts,
+CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt, 
+								 const CTDCContentMgr& mgrContent, 
+								 const CShortcutManager& mgrShortcuts,
 								 const CONTENTFORMAT& cfDefault, 
 								 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:
@@ -125,7 +126,14 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt,
 	m_nListViewGroupBy(TDCC_NONE),
 	m_dwListOptions(0),
 	m_mgrUIExt(mgrUIExt),
-	m_taskList(m_ilTaskIcons, m_data, TCF(), m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
+	m_taskList(m_ilTaskIcons, 
+			   m_data, 
+			   TCF(), 
+			   m_styles, 
+			   m_tldAll, 
+			   m_visColEdit.GetVisibleColumns(), 
+			   m_aCustomAttribDefs,
+			   mgrContent)
 {
 	// add extra controls to implement list-view
 	for (int nCtrl = 0; nCtrl < NUM_TTDCCTRLS; nCtrl++)

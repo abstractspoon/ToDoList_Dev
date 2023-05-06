@@ -50,7 +50,7 @@ const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
-CTDLFindTasksDlg::CTDLFindTasksDlg()
+CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	: 
 	CRuntimeDlg(), 
 	m_bSplitting(FALSE),
@@ -59,8 +59,8 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	m_nDockPos(DMP_UNDOCKED),
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
-	m_rUndocked(0, 0, 0, 0)
-
+	m_rUndocked(0, 0, 0, 0),
+	m_lcFindSetup(mgrContent)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	

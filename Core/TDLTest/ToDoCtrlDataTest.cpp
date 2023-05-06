@@ -209,7 +209,9 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 
 	DWORD dwTickStart = GetTickCount();
 
-	CTDCTaskFormatter formatter(data);
+	CContentMgr mgrContent;
+	CTDCTaskFormatter formatter(data, mgrContent);
+
 	DWORD dwMaxTaskID = data.GetTaskCount();
 
 	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
@@ -254,7 +256,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 
 	DWORD dwTickStart = GetTickCount();
 
-	CTDCTaskFormatter formatter(data);
+	CContentMgr mgrContent;
+	CTDCTaskFormatter formatter(data, mgrContent);
+
 	DWORD dwMaxTaskID = data.GetTaskCount();
 
 	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
@@ -284,20 +288,21 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 	const CTDCImageList ilIcons;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
+	const CContentMgr mgrContent;
 
 	const CTDLTaskTreeCtrl colors(ilIcons,
 								  data,
 								  m_aStyles,
 								  tld,
 								  mapVisibleCols,
-								  m_aCustomAttribDefs);
-	CContentMgr comments;
+								  m_aCustomAttribDefs,
+								  mgrContent);
 	// ----------------------------------------------
 	
 	DWORD dwTickStart = GetTickCount();
 	CTaskFile tasks;
 	
-	CTDCTaskExporter exporter(data, colors, comments);
+	CTDCTaskExporter exporter(data, colors, mgrContent);
 	exporter.ExportAllTasks(tasks);
 	
 	DWORD dwDuration = (GetTickCount() - dwTickStart);

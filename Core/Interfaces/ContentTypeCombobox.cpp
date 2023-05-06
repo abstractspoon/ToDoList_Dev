@@ -21,8 +21,10 @@ const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox
 
-CContentTypeComboBox::CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID) :
-	m_pContentMgr(pContentMgr), m_iconNull(nNullIconID, 16)
+CContentTypeComboBox::CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID) 
+	:
+	m_pContentMgr(pContentMgr), 
+	m_iconNull(nNullIconID, 16)
 {
 }
 

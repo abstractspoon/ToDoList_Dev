@@ -41,11 +41,12 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 
 //////////////////////////////////////////////////////////////////////
 
-CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders)
+CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent)
 	: 
 	m_data(data),
+	m_mgrContent(mgrContent),
 	m_calculator(data),
-	m_formatter(data),
+	m_formatter(data, mgrContent),
 	m_reminders(reminders)
 {
 
@@ -483,6 +484,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
 			break;
 			
+		case TDCA_COMMENTSFORMAT:
+			bMatch = ValueMatches(m_mgrContent.GetContentDescription(pTDI->cfComments), rule, TRUE, sWhatMatched);
+			break;
+
 		case TDCA_FLAG:
 			{
 				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
@@ -1238,11 +1243,11 @@ BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& ru
 
 ///////////////////////////////////////////////////////////////////
 
-CTDCTaskComparer::CTDCTaskComparer(const CToDoCtrlData& data) 
+CTDCTaskComparer::CTDCTaskComparer(const CToDoCtrlData& data, const CContentMgr& mgrContent)
 	: 
 	m_data(data),
 	m_calculator(data),
-	m_formatter(data)
+	m_formatter(data, mgrContent)
 {
 
 }
@@ -1622,6 +1627,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_COMMENTSSIZE:
 			nCompare = Compare(pTDI1->GetCommentsSizeInKB(), pTDI2->GetCommentsSizeInKB());
+			break;
+
+		case TDCC_COMMENTSFORMAT:
+			nCompare = Compare(m_formatter.GetTaskCommentFormat(pTDI1), m_formatter.GetTaskCommentFormat(pTDI2));
 			break;
 
 		default:
@@ -3500,9 +3509,10 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data) 
+CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data, const CContentMgr& mgrContent)
 	: 
 	m_data(data),
+	m_mgrContent(mgrContent),
 	m_calculator(data)
 {
 
@@ -3700,6 +3710,14 @@ CString CTDCTaskFormatter::GetTaskCommentSize(DWORD dwTaskID) const
 	return GetTaskCommentSize(pTDI);
 }
 
+CString CTDCTaskFormatter::GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	return GetTaskCommentFormat(pTDI, bEmptyIsBlank);
+}
+
 CString CTDCTaskFormatter::GetTaskRecentlyModified(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -3753,12 +3771,26 @@ CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 
 CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
 {
-	ASSERT(pTDI);
-
 	if (pTDI)
 		return GetCommentSize(pTDI->GetCommentsSizeInKB());
 
 	// else
+	ASSERT(pTDI);
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
+{
+	if (pTDI)
+	{
+		if (!bEmptyIsBlank || !pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
+			return m_mgrContent.GetContentDescription(pTDI->cfComments);
+
+		return EMPTY_STR;
+	}
+
+	// else
+	ASSERT(pTDI);
 	return EMPTY_STR;
 }
 
@@ -4281,13 +4313,13 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 
 								   const CTDLTaskCtrlBase& colors,
-								   const CContentMgr& comments)
+								   const CContentMgr& mgrContent)
 	: 
 	m_data(data),
 	m_colors(colors),
-	m_comments(comments),
+	m_mgrContent(mgrContent),
 	m_calculator(m_data),
-	m_formatter(m_data)
+	m_formatter(m_data, m_mgrContent)
 {
 
 }
@@ -4584,7 +4616,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 
 		if (bHtmlComments && !pTDI->customComments.IsEmpty())
 		{
-			m_comments.ConvertContentToHtml(pTDI->customComments, 
+			m_mgrContent.ConvertContentToHtml(pTDI->customComments, 
 				sHtml, 
 				pTDI->cfComments, 
 				tasks.GetHtmlCharSet(), 

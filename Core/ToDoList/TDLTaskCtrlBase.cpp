@@ -146,7 +146,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
-								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
+								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								   const CContentMgr& mgrContent)
 	: 
 	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER | TLSF_SYNCSELECTION),
 	m_data(data),
@@ -173,12 +174,13 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_bSortingColumns(FALSE),
 	m_nColorByAttrib(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
-	m_comparer(data),
+	m_comparer(data, mgrContent),
 	m_calculator(data),
-	m_formatter(data),
+	m_formatter(data, mgrContent),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(FALSE),
 	m_bEnableRecalcColumns(TRUE),
+	m_mgrContent(mgrContent),
 	m_bReadOnly(FALSE)
 {
 	// build one time column map
@@ -1045,6 +1047,7 @@ BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelected
 	case TDCC_CREATIONTIME:
 	case TDCC_LASTMODBY:
 	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
 	case TDCC_CLIENT:
 		break;
 
@@ -2823,6 +2826,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_SUBTASKDONE:
 		case TDCC_TIMEESTIMATE:
 		case TDCC_LASTMODBY:
+		case TDCC_COMMENTSFORMAT:
 			DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
 			break;
 			
@@ -3922,6 +3926,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDI, pTDS);
 	case TDCC_SUBTASKDONE:		return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentSize(pTDI);
+	case TDCC_COMMENTSFORMAT:	return m_formatter.GetTaskCommentFormat(pTDI);
 
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:			return m_formatter.GetID(pTDS->GetParentTaskID());
@@ -5443,6 +5448,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 	case TDCC_SUBTASKDONE:
 	case TDCC_LASTMODBY:
 	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
 	case TDCC_COST:
 		{
 			// determine the longest visible string

@@ -30,6 +30,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#include "..\Interfaces\ContentMgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTreeCtrlHelper;
 class CToDoCtrlData;
 class CPreferences;
@@ -49,7 +53,8 @@ protected: // base class only
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
-					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+					 const CContentMgr& mgrContent);
 
 public:
 	virtual ~CTDLTaskCtrlBase();
@@ -251,6 +256,7 @@ protected:
 	const CTDCImageList& m_ilTaskIcons;
 	const CTDCColumnIDMap& m_mapVisibleCols;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+	const CContentMgr& m_mgrContent;
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;

@@ -12,6 +12,8 @@
 #include "tdcreminder.h"
 #include "tdcstruct.h"
 
+#include "..\Interfaces\ContentMgr.h"
+
 #include <afxtempl.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -129,7 +131,7 @@ protected:
 class CTDCTaskFormatter
 {
 public:
-	CTDCTaskFormatter(const CToDoCtrlData& data);
+	CTDCTaskFormatter(const CToDoCtrlData& data, const CContentMgr& mgrContent);
 	
 	CString GetCommentSize(float fSize) const;
 	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
@@ -145,6 +147,7 @@ public:
 	CString GetTaskTimeRemaining(DWORD dwTaskID) const;
 	CString GetTaskPercentDone(DWORD dwTaskID) const;
 	CString GetTaskCommentSize(DWORD dwTaskID) const;
+	CString GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(DWORD dwTaskID) const;
 	CString GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(DWORD dwTaskID) const;
@@ -169,6 +172,7 @@ public:
 	CString GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskCommentSize(const TODOITEM* pTDI) const;
+	CString GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -194,7 +198,10 @@ public:
 
 protected:
 	const CToDoCtrlData& m_data;
+	const CContentMgr& m_mgrContent;
+
 	CTDCTaskCalculator m_calculator;
+	
 
 protected:
 	CString FormatDate(const COleDateTime& date) const;
@@ -205,7 +212,7 @@ protected:
 class CTDCTaskMatcher
 {
 public:
-	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders);
+	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent);
 
 	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const;
 	int FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const;
@@ -223,6 +230,7 @@ public:
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCReminderHelper& m_reminders;
+	const CContentMgr& m_mgrContent;
 
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
@@ -256,7 +264,7 @@ protected:
 class CTDCTaskComparer
 {
 public:
-	CTDCTaskComparer(const CToDoCtrlData& data);
+	CTDCTaskComparer(const CToDoCtrlData& data, const CContentMgr& mgrContent);
 
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN nSortBy, BOOL bAscending, BOOL bCheckDueToday, BOOL bIncTime = FALSE) const;
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
@@ -306,7 +314,7 @@ public:
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDLTaskCtrlBase& m_colors;
-	const CContentMgr& m_comments;
+	const CContentMgr& m_mgrContent;
 
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;

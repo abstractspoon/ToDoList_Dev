@@ -22,6 +22,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CPreferences;
+class CContentMgr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,7 +41,7 @@ class CTDLFindTasksDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CTDLFindTasksDlg();   // standard constructor
+	CTDLFindTasksDlg(const CContentMgr& mgrContent);
 	~CTDLFindTasksDlg();
 
 	BOOL Create();

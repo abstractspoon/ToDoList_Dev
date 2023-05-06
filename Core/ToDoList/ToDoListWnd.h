@@ -13,7 +13,7 @@
 #include "tdlfindtasksDlg.h"
 #include "todoctrlmgr.h"
 #include "TDCImportExportMgr.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 #include "TDLfilterbar.h"
 #include "TDLSendTasksDlg.h"
 #include "taskselectiondlg.h"
@@ -132,7 +132,7 @@ protected:
 	CTDCImportExportMgr m_mgrImportExport;
 	CTDLTasklistStorageMgr m_mgrStorage;
 	CToDoCtrlMgr m_mgrToDoCtrls;
-	CTDLContentMgr m_mgrContent;
+	CTDCContentMgr m_mgrContent;
 	CWndPromptManager m_mgrPrompts;
 	CMenuIconMgr m_mgrMenuIcons;
 	CUIExtensionMgr m_mgrUIExtensions;

@@ -12,6 +12,8 @@
 #include "..\shared\localizer.h"
 #include "..\shared\GraphicsMisc.h"
 
+#include "..\Interfaces\ContentMgr.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -61,8 +63,9 @@ const UINT RELATIVEDATEPLACEHOLDER_BTNID = 1;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTaskExpressionListCtrl
 
-CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl()
+CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent)
 	:
+	m_mgrContent(mgrContent),
 	m_dtcDate(MCS_WEEKNUMBERS),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
@@ -283,6 +286,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 				case TDCA_CATEGORY:
 				case TDCA_VERSION:
 				case TDCA_TAGS: 
+				case TDCA_COMMENTSFORMAT: 
 					return &m_cbListValues;
 
 				case TDCA_PRIORITY:
@@ -492,6 +496,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				case TDCA_TAGS:
 				case TDCA_PRIORITY:
 				case TDCA_RISK:
+				case TDCA_COMMENTSFORMAT:
 					return ILCT_DROPLIST;
 
 				default:
@@ -872,7 +877,6 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			ASSERT(pDef->IsList());
 
-
 			CDialogHelper::SetComboBoxItems(m_cbCustomIcons, pDef->aDefaultListData);
 
 			CStringArray aIcons;
@@ -919,6 +923,15 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				case TDCA_VERSION:	CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aVersion); break;
 				case TDCA_TAGS:		CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aTags); break;
 				case TDCA_STATUS:	CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aStatus); break;
+
+				case TDCA_COMMENTSFORMAT:
+					{
+						CStringArray aFormats;
+						m_mgrContent.GetContentDescriptions(aFormats);
+
+						CDialogHelper::SetComboBoxItems(m_cbListValues, aFormats);
+					}
+					break;
 				}
 			}
 
