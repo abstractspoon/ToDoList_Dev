@@ -38,7 +38,7 @@ namespace EvidenceBoardUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
-		private RangeSliderCtrl m_Slider;
+		private MonthRangeSliderCtrl m_Slider;
 
 		// ----------------------------------------------------------------------------
 
@@ -186,7 +186,7 @@ namespace EvidenceBoardUIExtension
         public void SetUITheme(UITheme theme)
         {
 			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_Slider.SetBackColor(BackColor);
+			m_Slider.SetParentBackColor(BackColor);
 
 			// Set the toolbar colors to be the same as the back color
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
@@ -338,12 +338,24 @@ namespace EvidenceBoardUIExtension
 			InitialiseCombo(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
 			this.Controls.Add(m_LinkVisibilityCombo);
 
-			m_Slider = new RangeSliderCtrl();
-			m_Slider.Bounds = new Rectangle((m_LinkVisibilityCombo.Right + 10), 0, 200, (m_LinkVisibilityCombo.Bottom + 6));
+			m_Slider = new MonthRangeSliderCtrl();
+			m_Slider.Bounds = new Rectangle(0, 0, 200, RangeSliderCtrl.GetRequiredHeight());
 			this.Controls.Add(m_Slider);
 
 			CreateToolbar();
 			UpdateToolbarButtonStates();
+		}
+
+		private int ControlTop
+		{
+			get
+			{
+				if (m_LinkVisibilityCombo == null)
+					return 0;
+				
+				//else
+				return (m_LinkVisibilityCombo.Bottom + 6);
+			}
 		}
 
 		Label CreateLabel(string untranslatedText, Control prevControl)
@@ -496,10 +508,11 @@ namespace EvidenceBoardUIExtension
 			base.OnSizeChanged(e);
 
 			m_Toolbar.Location = new Point(m_LinkVisibilityCombo.Right + 10, 0);
+			m_Slider.Location = new Point(m_Toolbar.Right + 10, (ControlTop - m_Slider.Height) / 2);
 
 			Rectangle rect = ClientRectangle;
-			rect.Y = m_LinkVisibilityCombo.Bottom + 6;
-			rect.Height -= (m_LinkVisibilityCombo.Bottom + 6);
+			rect.Y = ControlTop;
+			rect.Height -= ControlTop;
 			
 			m_Control.Bounds = rect;
 

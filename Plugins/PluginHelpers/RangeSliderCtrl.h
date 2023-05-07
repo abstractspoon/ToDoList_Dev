@@ -20,7 +20,14 @@ namespace Abstractspoon
 				static HostedRangeSliderCtrl* Attach(IntPtr handleManaged);
 				
 				void Detach();
+
+				BOOL SetMinMax(double min, double max);		// < Set Interval [Min, Max] of RangeSlider
+				BOOL SetRange(double left, double right);	// < Set Selected Range in [Min, Max] 
+				BOOL SetStep(double step = -1);				// -1 == no step
+
 				void SetParentBackColor(COLORREF color);
+				BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
+				BOOL SetMinTickSpacing(int nPixels);
 
 			private:
 				CWnd m_WndOfManagedHandle;
@@ -33,8 +40,16 @@ namespace Abstractspoon
 			{
 			public:
 				RangeSliderCtrl();
+				
+				bool SetMinMax(double min, double max);
+				bool SetRange(double left, double right);
+				bool SetStep(double step);
 
-				void SetBackColor(System::Drawing::Color color);
+				void SetParentBackColor(System::Drawing::Color color);
+				bool SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth);
+				bool SetMinTickSpacing(int nPixels);
+
+				static int GetRequiredHeight();
 
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
@@ -60,6 +75,16 @@ namespace Abstractspoon
 				void ClearSelectedRange();
 
 				String^ FormatRange(char cDelim);
+
+			protected:
+				int m_nFromMonth, m_nToMonth;
+
+			protected:
+				void OnHandleCreated(EventArgs^ e) override;
+
+			protected:
+				int DateToMonths(DateTime^ date);
+				DateTime^ MonthsToDate(int nMonths);
 			};
 		}
 	}

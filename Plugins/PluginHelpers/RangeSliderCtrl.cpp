@@ -5,6 +5,7 @@
 #include "pluginhelpers.h"
 #include "Win32.h"
 #include "ColorUtil.h"
+#include "DPIScaling.h"
 #include "RangeSliderCtrl.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,10 +31,13 @@ HostedRangeSliderCtrl* HostedRangeSliderCtrl::Attach(IntPtr handleManaged)
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
 	// But height to match Core app
-	// TODO
-	// rClient.bottom = ;
+	rClient.bottom = RangeSliderCtrl::GetRequiredHeight();
 
 	pCtrl->m_Slider.Create(WS_CHILD | WS_VISIBLE, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
+
+	// Further app related initialisation
+	// TODO
+
 
 	return pCtrl;
 }
@@ -48,9 +52,71 @@ void HostedRangeSliderCtrl::Detach()
 	delete this;
 }
 
+BOOL HostedRangeSliderCtrl::SetMinMax(double min, double max)
+{
+	if (max <= min)
+		return FALSE;
+
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Slider.SetMinMax(min, max);
+	return TRUE;
+}
+
+BOOL HostedRangeSliderCtrl::SetRange(double left, double right)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (right <= left)
+		return FALSE;
+
+	if ((left < m_Slider.GetMin()) || (right > m_Slider.GetMax()))
+		return FALSE;
+	
+	m_Slider.SetRange(left, right);
+	return TRUE;
+}
+
+BOOL HostedRangeSliderCtrl::SetStep(double step)
+{
+	if (step < -1)
+		return FALSE;
+
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Slider.SetStep(step);
+	return TRUE;
+}
+
 void HostedRangeSliderCtrl::SetParentBackColor(COLORREF color)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	m_Slider.SetParentBackgroundColor(color);
+}
+
+BOOL HostedRangeSliderCtrl::SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth)
+{
+	if (dMinWidth < 0)
+		return FALSE;
+
+	if ((dMaxWidth != -1) && (dMaxWidth < dMinWidth))
+		return FALSE;
+
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Slider.SetMinMaxRangeWidths(dMinWidth, dMaxWidth);
+	return TRUE;
+}
+
+BOOL HostedRangeSliderCtrl::SetMinTickSpacing(int nPixels)
+{
+	if (nPixels < 2)
+		return FALSE;
+
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return m_Slider.SetMinTickSpacing(nPixels);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,18 +144,67 @@ void RangeSliderCtrl::OnHandleCreated(EventArgs^ e)
 
 void RangeSliderCtrl::OnHandleDestroyed(EventArgs^ e)
 {
-	Control::OnHandleCreated(e);
+	Control::OnHandleDestroyed(e);
 
 	if (m_pMFCInfo != IntPtr::Zero)
+	{
 		Slider(m_pMFCInfo)->Detach();
+		m_pMFCInfo = IntPtr::Zero;
+	}
 }
 
-void RangeSliderCtrl::SetBackColor(System::Drawing::Color color)
+int RangeSliderCtrl::GetRequiredHeight()
 {
-	Control::BackColor = color;
+	return DPIScaling::Scale(21);
+}
 
-	if (m_pMFCInfo != IntPtr::Zero)
-		Slider(m_pMFCInfo)->SetParentBackColor(ColorUtil::DrawingColor::ToRgb(color));
+bool RangeSliderCtrl::SetMinMax(double min, double max)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	return (Slider(m_pMFCInfo)->SetMinMax(min, max) != FALSE);
+}
+
+bool RangeSliderCtrl::SetRange(double left, double right)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	return (Slider(m_pMFCInfo)->SetRange(left, right) != FALSE);
+}
+
+bool RangeSliderCtrl::SetStep(double step)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	return (Slider(m_pMFCInfo)->SetStep(step) != FALSE);
+}
+
+void RangeSliderCtrl::SetParentBackColor(System::Drawing::Color color)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return;
+
+	Control::BackColor = color;
+	Slider(m_pMFCInfo)->SetParentBackColor(ColorUtil::DrawingColor::ToRgb(color));
+}
+
+bool RangeSliderCtrl::SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	return (Slider(m_pMFCInfo)->SetMinMaxRangeWidths(dMinWidth, dMaxWidth) != FALSE);
+}
+
+bool RangeSliderCtrl::SetMinTickSpacing(int nPixels)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	return (Slider(m_pMFCInfo)->SetMinTickSpacing(nPixels) != FALSE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,10 +214,39 @@ MonthRangeSliderCtrl::MonthRangeSliderCtrl()
 
 }
 
+void MonthRangeSliderCtrl::OnHandleCreated(EventArgs^ e)
+{
+	RangeSliderCtrl::OnHandleCreated(e);
+
+	SetMinMaxRangeWidths(1, -1); // min = one month, max = unset
+}
+
 bool MonthRangeSliderCtrl::SetDataRange(DateTime^ dtFrom, DateTime^ dtTo)
 {
-	// TODO
-	return false;
+	// Convert dates to month equivalents
+	int nFromMonth = DateToMonths(dtFrom);
+	int nToMonth = DateToMonths(dtTo) + 1; // Inclusive
+
+	if (nFromMonth <= nToMonth)
+		return false;
+
+	SetMinMax(m_nFromMonth, m_nToMonth);
+	SetRange(m_nFromMonth, m_nToMonth);
+
+	return true;;
+}
+
+int MonthRangeSliderCtrl::DateToMonths(DateTime^ date)
+{
+	return ((date->Year * 12) + date->Month);
+}
+
+DateTime^ MonthRangeSliderCtrl::MonthsToDate(int nMonths)
+{
+	int nYear = (nMonths / 12);
+	int nMonth = (nMonths % 12);
+
+	return gcnew DateTime(nYear, nMonth, 1);
 }
 
 bool MonthRangeSliderCtrl::HasSelectedRange()
