@@ -322,6 +322,18 @@ namespace MDContentControl
 		{
 			InputTextCtrl.Focus();
 		}
+
+		protected override void OnResize(EventArgs e)
+		{
+			base.OnResize(e);
+
+			// Adjust the splitter orientation to match the aspect ratio of the available space
+			if (ClientRectangle.Width > ClientRectangle.Height)
+				SplitContainer.Orientation = Orientation.Vertical;
+			else
+				SplitContainer.Orientation = Orientation.Horizontal;
+		}
+
 	}
 
 	// -----------------------------------------------------------------------
