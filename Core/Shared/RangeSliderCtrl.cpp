@@ -222,7 +222,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 				{
 					if (bPressed)
 					{
-						nState = TUS_PRESSED;
+						nState = TUS_HOT;//TUS_PRESSED;
 					}
 					else if (bHot)
 					{
@@ -278,7 +278,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo)
 {
-	if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
+	if ((m_Step > 0) && !(m_nSliderDrawStyles & TBS_NOTICKS))
 	{
 		double dNumTick = ((dTo - dFrom) / m_Step);
 		double dTickSpacing = (rTrack.Width() / dNumTick);

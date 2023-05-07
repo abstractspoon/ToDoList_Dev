@@ -209,6 +209,11 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public bool GetDateRange(out DateTime from, out DateTime to)
+		{
+			return m_TaskItems.GetDateRange(out from, out to);
+		}
+
 		public IList<LinkType> VisibleLinkTypes
 		{
 			get { return m_VisibleLinkTypes; }

@@ -95,13 +95,32 @@ namespace EvidenceBoardUIExtension
         {
 			m_Control.UpdateTasks(tasks, type);
 
+			bool dateChange = false;
+
 			switch (type)
 			{
+			case UIExtension.UpdateType.Edit:
+			case UIExtension.UpdateType.New:
+				dateChange = (tasks.IsAttributeAvailable(Task.Attribute.StartDate) ||
+								tasks.IsAttributeAvailable(Task.Attribute.DueDate) ||
+								tasks.IsAttributeAvailable(Task.Attribute.DoneDate));
+				break;
+
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
+
+				dateChange = true;
 				break;
+			}
+
+			if (dateChange)
+			{
+				DateTime min, max;
+
+				if (m_Control.GetDateRange(out min, out max))
+					m_Slider.SetMinMax(min, max);
 			}
 		}
 

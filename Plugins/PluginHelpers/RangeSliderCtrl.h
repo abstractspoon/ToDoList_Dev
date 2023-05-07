@@ -29,6 +29,9 @@ namespace Abstractspoon
 				BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
 				BOOL SetMinTickSpacing(int nPixels);
 
+			protected:
+				HostedRangeSliderCtrl();
+
 			private:
 				CWnd m_WndOfManagedHandle;
 				CRangeSliderCtrl m_Slider;
@@ -67,7 +70,7 @@ namespace Abstractspoon
 			public:
 				MonthRangeSliderCtrl();
 
-				bool SetDataRange(DateTime^ dtFrom, DateTime^ dtTo);
+				bool SetMinMax(DateTime^ dtFrom, DateTime^ dtTo);
 
 				bool HasSelectedRange();
 				bool GetSelectedRange(DateTime^% dtFrom, DateTime^% dtTo);
@@ -77,7 +80,6 @@ namespace Abstractspoon
 				String^ FormatRange(char cDelim);
 
 			protected:
-				int m_nFromMonth, m_nToMonth;
 
 			protected:
 				void OnHandleCreated(EventArgs^ e) override;

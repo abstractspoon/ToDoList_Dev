@@ -56,61 +56,57 @@
 			this.panel1.Controls.Add(this.m_ParentLinkColor);
 			this.panel1.Controls.Add(this.m_DependsLinkColor);
 			this.panel1.Controls.Add(this.groupBox1);
-			this.panel1.Location = new System.Drawing.Point(14, 15);
+			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(750, 384);
+			this.panel1.Size = new System.Drawing.Size(501, 250);
 			this.panel1.TabIndex = 2;
 			// 
 			// label2
 			// 
-			this.label2.Location = new System.Drawing.Point(14, 320);
-			this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label2.Location = new System.Drawing.Point(9, 208);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(150, 49);
+			this.label2.Size = new System.Drawing.Size(100, 32);
 			this.label2.TabIndex = 2;
 			this.label2.Text = "Parent/child connection colour";
 			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(14, 285);
-			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label1.Location = new System.Drawing.Point(9, 185);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(146, 20);
+			this.label1.Size = new System.Drawing.Size(100, 13);
 			this.label1.TabIndex = 2;
 			this.label1.Text = "Dependency colour";
 			// 
 			// m_ParentLinkColor
 			// 
 			this.m_ParentLinkColor.Color = System.Drawing.Color.Empty;
-			this.m_ParentLinkColor.Location = new System.Drawing.Point(202, 328);
-			this.m_ParentLinkColor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+			this.m_ParentLinkColor.Location = new System.Drawing.Point(135, 213);
 			this.m_ParentLinkColor.Name = "m_ParentLinkColor";
-			this.m_ParentLinkColor.Size = new System.Drawing.Size(112, 35);
+			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_ParentLinkColor.TabIndex = 1;
 			this.m_ParentLinkColor.Text = "Set...";
+			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
 			// 
 			// m_DependsLinkColor
 			// 
 			this.m_DependsLinkColor.Color = System.Drawing.Color.Empty;
-			this.m_DependsLinkColor.Location = new System.Drawing.Point(202, 277);
-			this.m_DependsLinkColor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+			this.m_DependsLinkColor.Location = new System.Drawing.Point(135, 180);
 			this.m_DependsLinkColor.Name = "m_DependsLinkColor";
-			this.m_DependsLinkColor.Size = new System.Drawing.Size(112, 35);
+			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_DependsLinkColor.TabIndex = 1;
 			this.m_DependsLinkColor.Text = "Set...";
+			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
 			// 
 			// groupBox1
 			// 
 			this.groupBox1.Controls.Add(this.m_DefaultAttribs);
-			this.groupBox1.Location = new System.Drawing.Point(18, 18);
-			this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.groupBox1.Size = new System.Drawing.Size(710, 247);
+			this.groupBox1.Size = new System.Drawing.Size(473, 161);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Default Connection Attributes";
@@ -120,21 +116,20 @@
 			userLinkAttributes1.Color = System.Drawing.Color.Red;
 			userLinkAttributes1.Thickness = 1;
 			this.m_DefaultAttribs.Attributes = userLinkAttributes1;
-			this.m_DefaultAttribs.Location = new System.Drawing.Point(18, 34);
-			this.m_DefaultAttribs.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
+			this.m_DefaultAttribs.Location = new System.Drawing.Point(12, 22);
+			this.m_DefaultAttribs.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_DefaultAttribs.MultipleLinkEditing = false;
 			this.m_DefaultAttribs.Name = "m_DefaultAttribs";
-			this.m_DefaultAttribs.Size = new System.Drawing.Size(430, 193);
+			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 125);
 			this.m_DefaultAttribs.TabIndex = 0;
 			// 
 			// BtnCancel
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(652, 419);
-			this.BtnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+			this.BtnCancel.Location = new System.Drawing.Point(435, 272);
 			this.BtnCancel.Name = "BtnCancel";
-			this.BtnCancel.Size = new System.Drawing.Size(112, 35);
+			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 1;
 			this.BtnCancel.Text = "Cancel";
 			this.BtnCancel.UseVisualStyleBackColor = true;
@@ -143,10 +138,10 @@
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(530, 419);
+			this.BtnOK.Location = new System.Drawing.Point(353, 272);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
-			this.BtnOK.Size = new System.Drawing.Size(112, 35);
+			this.BtnOK.Size = new System.Drawing.Size(75, 23);
 			this.BtnOK.TabIndex = 0;
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
@@ -154,19 +149,18 @@
 			// EvidenceBoardPreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
-			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(780, 468);
+			this.ClientSize = new System.Drawing.Size(520, 304);
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EvidenceBoardPreferencesDlg";
-			this.Padding = new System.Windows.Forms.Padding(15, 15, 15, 15);
+			this.Padding = new System.Windows.Forms.Padding(10, 10, 10, 10);
 			this.ShowInTaskbar = false;
 			this.Text = "Evidence Board Preferences";
 			this.panel1.ResumeLayout(false);

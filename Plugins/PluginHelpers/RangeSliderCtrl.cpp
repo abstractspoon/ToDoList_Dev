@@ -17,6 +17,10 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+HostedRangeSliderCtrl::HostedRangeSliderCtrl() : m_Slider(TBS_BOTTOM)
+{
+}
+
 HostedRangeSliderCtrl* HostedRangeSliderCtrl::Attach(IntPtr handleManaged)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -218,20 +222,21 @@ void MonthRangeSliderCtrl::OnHandleCreated(EventArgs^ e)
 {
 	RangeSliderCtrl::OnHandleCreated(e);
 
-	SetMinMaxRangeWidths(1, -1); // min = one month, max = unset
+	SetMinMaxRangeWidths(1.0, -1.0); // min = one month, max = unset
+	SetStep(1.0);
 }
 
-bool MonthRangeSliderCtrl::SetDataRange(DateTime^ dtFrom, DateTime^ dtTo)
+bool MonthRangeSliderCtrl::SetMinMax(DateTime^ dtFrom, DateTime^ dtTo)
 {
 	// Convert dates to month equivalents
 	int nFromMonth = DateToMonths(dtFrom);
 	int nToMonth = DateToMonths(dtTo) + 1; // Inclusive
 
-	if (nFromMonth <= nToMonth)
+	if (nFromMonth >= nToMonth)
 		return false;
 
-	SetMinMax(m_nFromMonth, m_nToMonth);
-	SetRange(m_nFromMonth, m_nToMonth);
+	RangeSliderCtrl::SetMinMax(nFromMonth, nToMonth);
+	SetRange(nFromMonth, nToMonth);
 
 	return true;;
 }

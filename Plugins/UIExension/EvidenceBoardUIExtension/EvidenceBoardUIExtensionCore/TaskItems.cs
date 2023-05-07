@@ -24,6 +24,8 @@ namespace EvidenceBoardUIExtension
 		public bool SomeSubtasksDone { get; private set; }
 		public bool IsLocked { get; private set; }
 
+		public DateTime StartDate, EndDate;
+
 		public uint TaskId { get; private set; }
 		public uint ParentId { get; private set; }
 
@@ -42,6 +44,7 @@ namespace EvidenceBoardUIExtension
 
 		public TaskItem()
 		{
+			StartDate = EndDate = DateTime.MinValue;
 		}
 
 		public TaskItem(Task task)
@@ -58,6 +61,9 @@ namespace EvidenceBoardUIExtension
 			GoodAsDone = task.IsGoodAsDone();
 			SomeSubtasksDone = task.HasSomeSubtasksDone();
 			IsLocked = task.IsLocked(true);
+
+			StartDate = task.GetStartDate(true);
+			EndDate = (Done ? task.GetDoneDate() : task.GetDueDate(true));
 
 			ParentId = task.GetParentID();
 			TaskId = task.GetID();
@@ -243,8 +249,17 @@ namespace EvidenceBoardUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
 				SomeSubtasksDone = task.HasSomeSubtasksDone();
 
+			if (task.HasAttribute(Task.Attribute.StartDate))
+				StartDate = task.GetStartDate(true);
+
+			if (!Done && task.HasAttribute(Task.Attribute.DueDate))
+				EndDate = task.GetDueDate(true);
+
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
+			{
 				Done = task.IsDone();
+				EndDate = task.GetDoneDate();
+			}
 
 			if (task.IsAttributeAvailable(Task.Attribute.FileLink))
 				UpdateImage(task);
@@ -263,6 +278,26 @@ namespace EvidenceBoardUIExtension
 			IsTopLevel = (task.GetParentID() == 0);
 
 			return true;
+		}
+
+		public static bool IsValidDate(DateTime date)
+		{
+			return (date != DateTime.MinValue);
+		}
+
+		public void MinMax(ref DateTime startDate, ref DateTime endDate)
+		{
+			if (IsValidDate(StartDate))
+			{
+				if (!IsValidDate(startDate) ||(StartDate < startDate))
+					startDate = StartDate;
+			}
+
+			if (IsValidDate(EndDate))
+			{
+				if (!IsValidDate(endDate) || (EndDate > endDate))
+					endDate = EndDate;
+			}
 		}
 	}
 
@@ -376,6 +411,16 @@ namespace EvidenceBoardUIExtension
 			var task = GetTaskItem(id);
 
 			return ((task == null) || task.IsLocked);
+		}
+
+		public bool GetDateRange(out DateTime from, out DateTime to)
+		{
+			from = to = DateTime.MinValue;
+
+			foreach (var task in Values)
+				task.MinMax(ref from, ref to);
+
+			return (TaskItem.IsValidDate(from) && TaskItem.IsValidDate(to) && (from < to));
 		}
 
 	}
