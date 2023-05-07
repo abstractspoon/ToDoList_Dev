@@ -21,12 +21,17 @@ HostedRangeSliderCtrl* HostedRangeSliderCtrl::Attach(IntPtr handleManaged)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	HostedRangeSliderCtrl* pCtrl = new HostedRangeSliderCtrl();
+	HWND hwndManaged = Win32::GetHwnd(handleManaged);
 
-	pCtrl->m_WndOfManagedHandle.Attach(Win32::GetHwnd(handleManaged));
+	pCtrl->m_WndOfManagedHandle.Attach(hwndManaged);
 
 	// Create slider to fill the entire managed client area
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
+
+	// But height to match Core app
+	// TODO
+	// rClient.bottom = ;
 
 	pCtrl->m_Slider.Create(WS_CHILD | WS_VISIBLE, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
 
@@ -89,3 +94,44 @@ void RangeSliderCtrl::SetBackColor(System::Drawing::Color color)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+MonthRangeSliderCtrl::MonthRangeSliderCtrl()
+{
+
+}
+
+bool MonthRangeSliderCtrl::SetDataRange(DateTime^ dtFrom, DateTime^ dtTo)
+{
+	// TODO
+	return false;
+}
+
+bool MonthRangeSliderCtrl::HasSelectedRange()
+{
+	// TODO
+	return false;
+}
+
+bool MonthRangeSliderCtrl::GetSelectedRange(DateTime^% dtFrom, DateTime^% dtTo)
+{
+	// TODO
+	return false;
+}
+
+bool MonthRangeSliderCtrl::SetSelectedRange(DateTime^ dtFrom, DateTime^ dtTo)
+{
+	// TODO
+	return false;
+}
+
+void MonthRangeSliderCtrl::ClearSelectedRange()
+{
+	// TODO
+}
+
+String^ MonthRangeSliderCtrl::FormatRange(char cDelim)
+{
+	// TODO
+	return gcnew String("");
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////

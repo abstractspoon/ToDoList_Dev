@@ -29,7 +29,7 @@ namespace Abstractspoon
 
 			// -------------------------------------------------------------------
 
-			public ref class RangeSliderCtrl : System::Windows::Forms::Control
+			public ref class RangeSliderCtrl : Windows::Forms::Control
 			{
 			public:
 				RangeSliderCtrl();
@@ -43,6 +43,23 @@ namespace Abstractspoon
 				void OnHandleCreated(EventArgs^ e) override;
 				void OnHandleDestroyed(EventArgs^ e) override;
 
+			};
+
+			// -------------------------------------------------------------------
+
+			public ref class MonthRangeSliderCtrl : RangeSliderCtrl
+			{
+			public:
+				MonthRangeSliderCtrl();
+
+				bool SetDataRange(DateTime^ dtFrom, DateTime^ dtTo);
+
+				bool HasSelectedRange();
+				bool GetSelectedRange(DateTime^% dtFrom, DateTime^% dtTo);
+				bool SetSelectedRange(DateTime^ dtFrom, DateTime^ dtTo);
+				void ClearSelectedRange();
+
+				String^ FormatRange(char cDelim);
 			};
 		}
 	}
