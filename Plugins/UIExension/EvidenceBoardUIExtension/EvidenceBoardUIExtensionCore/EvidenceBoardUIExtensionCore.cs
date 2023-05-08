@@ -402,7 +402,7 @@ namespace EvidenceBoardUIExtension
 					return 0;
 				
 				//else
-				return (m_LinkVisibilityCombo.Bottom + 8);
+				return (m_LinkVisibilityCombo.Bottom + DPIScaling.Scale(4));
 			}
 		}
 
@@ -428,9 +428,9 @@ namespace EvidenceBoardUIExtension
 			//label.Anchor = AnchorStyles.None;
 
 			if (prevControl != null)
-				label.Location = new Point((prevControl.Bounds.Right + 20), 7);
+				label.Location = new Point((prevControl.Bounds.Right + DPIScaling.Scale(13)), DPIScaling.Scale(5));
 			else
-				label.Location = new Point(-2, 7);
+				label.Location = new Point(0, DPIScaling.Scale(5));
 
 			return label;
 		}
@@ -442,14 +442,14 @@ namespace EvidenceBoardUIExtension
 
 			if (ctrl is ComboBox)
 			{
-				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + 5);
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(3));
 				ctrl.Height = DPIScaling.Scale(200);
 				(ctrl as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
 				(ctrl as ComboBox).Sorted = true;
 			}
 			else
 			{
-				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + 3);
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(2));
 			}
 		}
 
