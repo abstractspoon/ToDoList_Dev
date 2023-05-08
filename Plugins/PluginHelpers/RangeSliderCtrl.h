@@ -54,10 +54,13 @@ namespace Abstractspoon
 
 				static int GetRequiredHeight();
 
+				event System::EventHandler^ ChangeEvent;
+
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
 
 			protected:
+				void WndProc(Windows::Forms::Message% m) override;
 				void OnHandleCreated(EventArgs^ e) override;
 				void OnHandleDestroyed(EventArgs^ e) override;
 

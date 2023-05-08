@@ -211,6 +211,15 @@ bool RangeSliderCtrl::SetMinTickSpacing(int nPixels)
 	return (Slider(m_pMFCInfo)->SetMinTickSpacing(nPixels) != FALSE);
 }
 
+void RangeSliderCtrl::WndProc(Windows::Forms::Message% m)
+{
+	Control::WndProc(m);
+
+	// Handle slider event
+	if (m.Msg == RANGE_CHANGED)
+		ChangeEvent(this, gcnew EventArgs());
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 MonthRangeSliderCtrl::MonthRangeSliderCtrl()

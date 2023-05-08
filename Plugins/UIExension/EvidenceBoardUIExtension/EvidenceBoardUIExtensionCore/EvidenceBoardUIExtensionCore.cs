@@ -361,8 +361,15 @@ namespace EvidenceBoardUIExtension
 			m_Slider.Bounds = new Rectangle(0, 0, 200, RangeSliderCtrl.GetRequiredHeight());
 			this.Controls.Add(m_Slider);
 
+			m_Slider.ChangeEvent += new EventHandler(OnSliderChange);
+
 			CreateToolbar();
 			UpdateToolbarButtonStates();
+		}
+
+		protected void OnSliderChange(object sender, EventArgs e)
+		{
+			int breakpoint = 0;
 		}
 
 		private int ControlTop
