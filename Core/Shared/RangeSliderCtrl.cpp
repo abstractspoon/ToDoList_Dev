@@ -110,11 +110,6 @@ void CRangeSliderCtrl::SetParentBackgroundColor(COLORREF crBkgnd)
 	}
 }
 
-BOOL CRangeSliderCtrl::HasSelectedRange() const
-{
-	return ((m_Left > m_Min) || (m_Right < m_Max));
-}
-
 void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion)
 {
 	switch (nRegion)

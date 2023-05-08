@@ -119,7 +119,7 @@ namespace EvidenceBoardUIExtension
 			{
 				DateTime min, max;
 
-				if (m_Control.GetDateRange(out min, out max))
+				if (m_Control.GetMinMaxDateRange(out min, out max))
 					m_Slider.SetMinMax(min, max);
 			}
 		}
@@ -369,7 +369,14 @@ namespace EvidenceBoardUIExtension
 
 		protected void OnSliderChange(object sender, EventArgs e)
 		{
-			int breakpoint = 0;
+			DateTime from = DateTime.MinValue, to = DateTime.MaxValue;
+
+			if (m_Slider.GetSelectedRange(ref from, ref to))
+				m_Control.SetSelectedDateRange(from, to);
+			else
+				m_Control.ClearSelectedDateRange();
+
+			Invalidate();
 		}
 
 		private int ControlTop

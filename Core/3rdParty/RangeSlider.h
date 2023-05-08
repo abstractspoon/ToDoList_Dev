@@ -55,6 +55,9 @@ public:
 		right = (m_bInvertedMode) ? -m_Left : m_Right; 
 	};
 
+	void ClearRange() { SetRange(m_Min, m_Max); }
+	BOOL HasRange() const {	return ((m_Left > m_Min) || (m_Right < m_Max)); }
+	
 	double GetVisualMin() const { return (m_bInvertedMode) ? -m_VisualMax : m_VisualMin; }; 
 	double GetVisualMax() const { return (m_bInvertedMode) ? -m_VisualMin : m_VisualMax; };
 	void GetVisualMinMax(double &VisualMin, double &VisualMax) const 

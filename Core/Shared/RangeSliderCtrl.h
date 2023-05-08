@@ -22,7 +22,6 @@ public:
 
 	void SetParentBackgroundColor(COLORREF crBkgnd);
 	BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
-	BOOL HasSelectedRange() const;
 	BOOL SetMinTickSpacing(int nPixels); // affects tick visibility only
 
 protected:

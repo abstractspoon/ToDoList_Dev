@@ -67,18 +67,43 @@ BOOL HostedRangeSliderCtrl::SetMinMax(double min, double max)
 	return TRUE;
 }
 
-BOOL HostedRangeSliderCtrl::SetRange(double left, double right)
+BOOL HostedRangeSliderCtrl::SetSelectedRange(double dFrom, double dTo)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (right <= left)
+	if (dTo <= dFrom)
 		return FALSE;
 
-	if ((left < m_Slider.GetMin()) || (right > m_Slider.GetMax()))
+	if ((dFrom < m_Slider.GetMin()) || (dTo > m_Slider.GetMax()))
 		return FALSE;
 	
-	m_Slider.SetRange(left, right);
+	m_Slider.SetRange(dFrom, dTo);
 	return TRUE;
+}
+
+BOOL HostedRangeSliderCtrl::HasSelectedRange()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return m_Slider.HasRange();
+}
+
+BOOL HostedRangeSliderCtrl::GetSelectedRange(double& dFrom, double& dTo)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!HasSelectedRange())
+		return FALSE;
+
+	m_Slider.GetRange(dFrom, dTo);
+	return (dFrom < dTo);
+}
+
+void HostedRangeSliderCtrl::ClearSelectedRange()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Slider.ClearRange();
 }
 
 BOOL HostedRangeSliderCtrl::SetStep(double step)
@@ -170,12 +195,43 @@ bool RangeSliderCtrl::SetMinMax(double min, double max)
 	return (Slider(m_pMFCInfo)->SetMinMax(min, max) != FALSE);
 }
 
-bool RangeSliderCtrl::SetRange(double left, double right)
+bool RangeSliderCtrl::HasSelectedRange()
 {
 	if (m_pMFCInfo == IntPtr::Zero)
 		return false;
 
-	return (Slider(m_pMFCInfo)->SetRange(left, right) != FALSE);
+	return (Slider(m_pMFCInfo)->HasSelectedRange() != FALSE);
+}
+
+bool RangeSliderCtrl::SetSelectedRange(double dFrom, double dTo)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	return (Slider(m_pMFCInfo)->SetSelectedRange(dFrom, dTo) != FALSE);
+}
+
+bool RangeSliderCtrl::GetSelectedRange(double% dFrom, double% dTo)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	double from, to;
+	
+	if (!Slider(m_pMFCInfo)->GetSelectedRange(from, to))
+		return false;
+
+	dFrom = from;
+	dTo = to;
+	return true;
+}
+
+void RangeSliderCtrl::ClearSelectedRange()
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return;
+
+	Slider(m_pMFCInfo)->ClearSelectedRange();
 }
 
 bool RangeSliderCtrl::SetStep(double step)
@@ -245,7 +301,7 @@ bool MonthRangeSliderCtrl::SetMinMax(DateTime^ dtFrom, DateTime^ dtTo)
 		return false;
 
 	RangeSliderCtrl::SetMinMax(nFromMonth, nToMonth);
-	SetRange(nFromMonth, nToMonth);
+	RangeSliderCtrl::SetSelectedRange(nFromMonth, nToMonth);
 
 	return true;;
 }
@@ -255,35 +311,31 @@ int MonthRangeSliderCtrl::DateToMonths(DateTime^ date)
 	return ((date->Year * 12) + date->Month);
 }
 
-DateTime^ MonthRangeSliderCtrl::MonthsToDate(int nMonths)
+DateTime MonthRangeSliderCtrl::MonthsToDate(int nMonths)
 {
 	int nYear = (nMonths / 12);
 	int nMonth = (nMonths % 12);
 
-	return gcnew DateTime(nYear, nMonth, 1);
+	return DateTime(nYear, nMonth, 1);
 }
 
-bool MonthRangeSliderCtrl::HasSelectedRange()
+bool MonthRangeSliderCtrl::GetSelectedRange(DateTime% dtFrom, DateTime% dtTo)
+{
+	double dFrom, dTo;
+
+	if (!RangeSliderCtrl::GetSelectedRange(dFrom, dTo))
+		return false;
+
+	dtFrom = MonthsToDate((int)dFrom);
+	dtTo = MonthsToDate((int)dTo);
+
+	return true;
+}
+
+bool MonthRangeSliderCtrl::SetSelectedRange(DateTime dtFrom, DateTime dtTo)
 {
 	// TODO
 	return false;
-}
-
-bool MonthRangeSliderCtrl::GetSelectedRange(DateTime^% dtFrom, DateTime^% dtTo)
-{
-	// TODO
-	return false;
-}
-
-bool MonthRangeSliderCtrl::SetSelectedRange(DateTime^ dtFrom, DateTime^ dtTo)
-{
-	// TODO
-	return false;
-}
-
-void MonthRangeSliderCtrl::ClearSelectedRange()
-{
-	// TODO
 }
 
 String^ MonthRangeSliderCtrl::FormatRange(char cDelim)

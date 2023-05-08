@@ -299,6 +299,17 @@ namespace EvidenceBoardUIExtension
 					endDate = EndDate;
 			}
 		}
+
+		public bool IntersectsWith(DateTime min, DateTime max)
+		{
+			if (IsValidDate(StartDate) && (StartDate >= min) && (StartDate <= max))
+				return true;
+
+			if (IsValidDate(EndDate) && (EndDate >= min) && (EndDate <= max))
+				return true;
+
+			return false;
+		}
 	}
 
 	///////////////////////////////////////////////////////////////////////

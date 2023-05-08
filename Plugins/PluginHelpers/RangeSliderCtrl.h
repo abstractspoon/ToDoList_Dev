@@ -21,9 +21,13 @@ namespace Abstractspoon
 				
 				void Detach();
 
-				BOOL SetMinMax(double min, double max);		// < Set Interval [Min, Max] of RangeSlider
-				BOOL SetRange(double left, double right);	// < Set Selected Range in [Min, Max] 
-				BOOL SetStep(double step = -1);				// -1 == no step
+				BOOL SetMinMax(double min, double max);
+				BOOL SetStep(double step = -1);
+
+				BOOL HasSelectedRange();
+				BOOL GetSelectedRange(double& dFrom, double& dTo);
+				BOOL SetSelectedRange(double dFrom, double dTo);
+				void ClearSelectedRange();
 
 				void SetParentBackColor(COLORREF color);
 				BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
@@ -45,8 +49,12 @@ namespace Abstractspoon
 				RangeSliderCtrl();
 				
 				bool SetMinMax(double min, double max);
-				bool SetRange(double left, double right);
 				bool SetStep(double step);
+				
+				bool HasSelectedRange();
+				bool GetSelectedRange(double% dFrom, double% dTo);
+				bool SetSelectedRange(double dFrom, double dTo);
+				void ClearSelectedRange();
 
 				void SetParentBackColor(System::Drawing::Color color);
 				bool SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth);
@@ -75,10 +83,8 @@ namespace Abstractspoon
 
 				bool SetMinMax(DateTime^ dtFrom, DateTime^ dtTo);
 
-				bool HasSelectedRange();
-				bool GetSelectedRange(DateTime^% dtFrom, DateTime^% dtTo);
-				bool SetSelectedRange(DateTime^ dtFrom, DateTime^ dtTo);
-				void ClearSelectedRange();
+				bool GetSelectedRange(DateTime% dtFrom, DateTime% dtTo);
+				bool SetSelectedRange(DateTime dtFrom, DateTime dtTo);
 
 				String^ FormatRange(char cDelim);
 
@@ -89,7 +95,7 @@ namespace Abstractspoon
 
 			protected:
 				int DateToMonths(DateTime^ date);
-				DateTime^ MonthsToDate(int nMonths);
+				DateTime MonthsToDate(int nMonths);
 			};
 		}
 	}
