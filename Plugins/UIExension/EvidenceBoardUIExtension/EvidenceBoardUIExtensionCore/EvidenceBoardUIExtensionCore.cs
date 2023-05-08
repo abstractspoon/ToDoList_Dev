@@ -20,7 +20,7 @@ namespace EvidenceBoardUIExtension
         // ----------------------------------------------------------------------------
 
         private IntPtr m_HwndParent = IntPtr.Zero;
-        private String m_TypeId, m_UiName;
+        private String m_UiName;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
@@ -38,7 +38,8 @@ namespace EvidenceBoardUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
-		private MonthRangeSliderCtrl m_Slider;
+		private Label m_DateSliderLabel;
+		private MonthRangeSliderCtrl m_DateSlider;
 
 		// ----------------------------------------------------------------------------
 
@@ -120,7 +121,7 @@ namespace EvidenceBoardUIExtension
 				DateTime min, max;
 
 				if (m_Control.GetMinMaxDateRange(out min, out max))
-					m_Slider.SetMinMax(min, max);
+					m_DateSlider.SetMinMax(min, max);
 			}
 		}
 
@@ -205,7 +206,7 @@ namespace EvidenceBoardUIExtension
         public void SetUITheme(UITheme theme)
         {
 			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_Slider.SetParentBackColor(BackColor);
+			m_DateSlider.SetParentBackColor(BackColor);
 
 			// Set the toolbar colors to be the same as the back color
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
@@ -340,38 +341,52 @@ namespace EvidenceBoardUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new EvidenceBoardOptionsComboBox(m_Trans);
+			m_OptionsCombo = new EvidenceBoardOptionsComboBox();
+			m_OptionsCombo.Translate(m_Trans);
+
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
-			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
+			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 
 			// Link vis combo and label
 			m_LinkVisibilityLabel = CreateLabel("Connection Visibility", m_OptionsCombo);
 			this.Controls.Add(m_LinkVisibilityLabel);
 
-			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox(m_Trans);
+			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox();
+			m_LinkVisibilityCombo.Translate(m_Trans);
 			m_LinkVisibilityCombo.DropDownClosed += new EventHandler(OnLinkVisibilityComboClosed);
 
-			InitialiseCombo(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
+			InitialiseCtrl(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
 			this.Controls.Add(m_LinkVisibilityCombo);
 
-			m_Slider = new MonthRangeSliderCtrl();
-			m_Slider.Bounds = new Rectangle(0, 0, 200, RangeSliderCtrl.GetRequiredHeight());
-			this.Controls.Add(m_Slider);
-
-			m_Slider.ChangeEvent += new EventHandler(OnSliderChange);
-
+			// Toolbar 
 			CreateToolbar();
-			UpdateToolbarButtonStates();
+			m_Toolbar.Location = ToolbarLocation;
+
+// 
+// 			UpdateToolbarButtonStates();
+
+			// Date slider combo and label
+			m_DateSliderLabel = CreateLabel("Active Date Range", m_Toolbar);
+			this.Controls.Add(m_DateSliderLabel);
+
+			m_DateSlider = new MonthRangeSliderCtrl();
+			m_DateSlider.Height = MonthRangeSliderCtrl.GetRequiredHeight();
+
+			InitialiseCtrl(m_DateSlider, m_DateSliderLabel, 250);
+
+			this.Controls.Add(m_DateSlider);
+
+			m_DateSlider.ChangeEvent += new EventHandler(OnSliderChange);
 		}
 
 		protected void OnSliderChange(object sender, EventArgs e)
 		{
 			DateTime from = DateTime.MinValue, to = DateTime.MaxValue;
 
-			if (m_Slider.GetSelectedRange(ref from, ref to))
+			if (m_DateSlider.GetSelectedRange(ref from, ref to))
 				m_Control.SetSelectedDateRange(from, to);
 			else
 				m_Control.ClearSelectedDateRange();
@@ -387,7 +402,19 @@ namespace EvidenceBoardUIExtension
 					return 0;
 				
 				//else
-				return (m_LinkVisibilityCombo.Bottom + 6);
+				return (m_LinkVisibilityCombo.Bottom + 8);
+			}
+		}
+
+		private Point ToolbarLocation
+		{
+			get
+			{
+				if (m_LinkVisibilityCombo == null)
+					return Point.Empty;
+
+				// Centre the toolbar vertically on the combo
+				return new Point(m_LinkVisibilityCombo.Right + 10, m_LinkVisibilityCombo.Top - (m_Toolbar.Height - m_LinkVisibilityCombo.Height) / 2);
 			}
 		}
 
@@ -398,23 +425,32 @@ namespace EvidenceBoardUIExtension
 			label.Font = m_ControlsFont;
 			label.Text = m_Trans.Translate(untranslatedText);
 			label.AutoSize = true;
+			//label.Anchor = AnchorStyles.None;
 
 			if (prevControl != null)
-				label.Location = new Point((prevControl.Bounds.Right + 20), 8);
+				label.Location = new Point((prevControl.Bounds.Right + 20), 7);
 			else
-				label.Location = new Point(-2, 8);
+				label.Location = new Point(-2, 7);
 
 			return label;
 		}
 
-		void InitialiseCombo(ComboBox combo, Label prevLabel, int width)
+		void InitialiseCtrl(Control ctrl, Label associatedLabel, int width)
 		{
-			combo.Font = m_ControlsFont;
-			combo.Width = DPIScaling.Scale(width);
-			combo.Height = DPIScaling.Scale(200);
-			combo.Location = new Point(prevLabel.Right + 5, 4);
-			combo.DropDownStyle = ComboBoxStyle.DropDownList;
-			combo.Sorted = true;
+			ctrl.Font = m_ControlsFont;
+			ctrl.Width = DPIScaling.Scale(width);
+
+			if (ctrl is ComboBox)
+			{
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + 5);
+				ctrl.Height = DPIScaling.Scale(200);
+				(ctrl as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
+				(ctrl as ComboBox).Sorted = true;
+			}
+			else
+			{
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + 3);
+			}
 		}
 
 		void OnOptionsComboClosed(object sender, EventArgs e)
@@ -540,10 +576,15 @@ namespace EvidenceBoardUIExtension
         {
 			base.OnSizeChanged(e);
 
-			m_Toolbar.Location = new Point(m_LinkVisibilityCombo.Right + 10, 0);
-			m_Slider.Location = new Point(m_Toolbar.Right + 10, (ControlTop - m_Slider.Height) / 2);
+			// Somewhere in WinForms the toolbar gets repositioned even though the toolbar
+			// is not anchored, so we have to restore the correct position each time
+			m_Toolbar.Location = ToolbarLocation;
 
+			// Resize the slider to take up the rest of the width
 			Rectangle rect = ClientRectangle;
+			m_DateSlider.Width = (rect.Right - m_DateSlider.Left);
+
+			// Node control
 			rect.Y = ControlTop;
 			rect.Height -= ControlTop;
 			
@@ -626,6 +667,7 @@ namespace EvidenceBoardUIExtension
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			Controls.Add(m_Toolbar);
+
 		}
 
 		private void UpdateToolbarButtonStates()
