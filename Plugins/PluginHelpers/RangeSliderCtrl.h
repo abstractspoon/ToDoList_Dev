@@ -21,6 +21,7 @@ namespace Abstractspoon
 				
 				void Detach();
 
+				BOOL GetMinMax(double& min, double& max);
 				BOOL SetMinMax(double min, double max);
 				BOOL SetStep(double step = -1);
 
@@ -48,6 +49,7 @@ namespace Abstractspoon
 			public:
 				RangeSliderCtrl();
 				
+				bool GetMinMax(double% min, double% max);
 				bool SetMinMax(double min, double max);
 				bool SetStep(double step);
 				
@@ -81,12 +83,13 @@ namespace Abstractspoon
 			public:
 				MonthRangeSliderCtrl();
 
-				bool SetMinMax(DateTime^ dtFrom, DateTime^ dtTo);
+				bool GetMinMax(DateTime% dtFrom, DateTime% dtTo);
+				bool SetMinMax(DateTime dtFrom, DateTime dtTo);
 
 				bool GetSelectedRange(DateTime% dtFrom, DateTime% dtTo);
 				bool SetSelectedRange(DateTime dtFrom, DateTime dtTo);
 
-				String^ FormatRange(char cDelim);
+				String^ FormatRange();
 
 			protected:
 
@@ -94,8 +97,6 @@ namespace Abstractspoon
 				void OnHandleCreated(EventArgs^ e) override;
 
 			protected:
-				int DateToMonths(DateTime^ date);
-				DateTime MonthsToDate(int nMonths);
 			};
 		}
 	}

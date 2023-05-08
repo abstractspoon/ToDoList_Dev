@@ -6,6 +6,7 @@
 #include "Win32.h"
 #include "ColorUtil.h"
 #include "DPIScaling.h"
+#include "DateUtil.h"
 #include "RangeSliderCtrl.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,10 +40,6 @@ HostedRangeSliderCtrl* HostedRangeSliderCtrl::Attach(IntPtr handleManaged)
 
 	pCtrl->m_Slider.Create(WS_CHILD | WS_VISIBLE, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
 
-	// Further app related initialisation
-	// TODO
-
-
 	return pCtrl;
 }
 
@@ -54,6 +51,14 @@ void HostedRangeSliderCtrl::Detach()
 	m_Slider.DestroyWindow();
 
 	delete this;
+}
+
+BOOL HostedRangeSliderCtrl::GetMinMax(double& min, double& max)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Slider.GetMinMax(min, max);
+	return (max > min);
 }
 
 BOOL HostedRangeSliderCtrl::SetMinMax(double min, double max)
@@ -195,6 +200,21 @@ bool RangeSliderCtrl::SetMinMax(double min, double max)
 	return (Slider(m_pMFCInfo)->SetMinMax(min, max) != FALSE);
 }
 
+bool RangeSliderCtrl::GetMinMax(double% dFrom, double% dTo)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return false;
+
+	double from, to;
+	
+	if (!Slider(m_pMFCInfo)->GetMinMax(from, to))
+		return false;
+
+	dFrom = from;
+	dTo = to;
+	return true;
+}
+
 bool RangeSliderCtrl::HasSelectedRange()
 {
 	if (m_pMFCInfo == IntPtr::Zero)
@@ -291,32 +311,33 @@ void MonthRangeSliderCtrl::OnHandleCreated(EventArgs^ e)
 	SetStep(1.0);
 }
 
-bool MonthRangeSliderCtrl::SetMinMax(DateTime^ dtFrom, DateTime^ dtTo)
+bool MonthRangeSliderCtrl::SetMinMax(DateTime dtFrom, DateTime dtTo)
 {
-	// Convert dates to month equivalents
-	int nFromMonth = DateToMonths(dtFrom);
-	int nToMonth = DateToMonths(dtTo) + 1; // Inclusive
+	bool hasRange = HasSelectedRange();
 
-	if (nFromMonth >= nToMonth)
+	int nFromMonth = DateUtil::DateInMonths(dtFrom);
+	int nToMonth = DateUtil::DateInMonths(dtTo) + 1; // Inclusive
+
+	if (!RangeSliderCtrl::SetMinMax(nFromMonth, nToMonth))
 		return false;
 
-	RangeSliderCtrl::SetMinMax(nFromMonth, nToMonth);
-	RangeSliderCtrl::SetSelectedRange(nFromMonth, nToMonth);
+	if (!hasRange)
+		RangeSliderCtrl::SetSelectedRange(nFromMonth, nToMonth);
 
 	return true;;
 }
 
-int MonthRangeSliderCtrl::DateToMonths(DateTime^ date)
+bool MonthRangeSliderCtrl::GetMinMax(DateTime% dtFrom, DateTime% dtTo)
 {
-	return ((date->Year * 12) + date->Month);
-}
+	double dFrom, dTo;
 
-DateTime MonthRangeSliderCtrl::MonthsToDate(int nMonths)
-{
-	int nYear = (nMonths / 12);
-	int nMonth = (nMonths % 12);
+	if (!RangeSliderCtrl::GetMinMax(dFrom, dTo))
+		return false;
 
-	return DateTime(nYear, nMonth, 1);
+	dtFrom = DateUtil::DateFromMonths((int)dFrom);
+	dtTo = DateUtil::DateFromMonths((int)dTo);
+
+	return true;
 }
 
 bool MonthRangeSliderCtrl::GetSelectedRange(DateTime% dtFrom, DateTime% dtTo)
@@ -326,22 +347,41 @@ bool MonthRangeSliderCtrl::GetSelectedRange(DateTime% dtFrom, DateTime% dtTo)
 	if (!RangeSliderCtrl::GetSelectedRange(dFrom, dTo))
 		return false;
 
-	dtFrom = MonthsToDate((int)dFrom);
-	dtTo = MonthsToDate((int)dTo);
+	dtFrom = DateUtil::DateFromMonths((int)dFrom);
+	dtTo = DateUtil::DateFromMonths((int)dTo);
 
 	return true;
 }
 
 bool MonthRangeSliderCtrl::SetSelectedRange(DateTime dtFrom, DateTime dtTo)
 {
-	// TODO
-	return false;
+	// Convert dates to month equivalents
+	int nFromMonth = DateUtil::DateInMonths(dtFrom);
+	int nToMonth = DateUtil::DateInMonths(dtTo) + 1; // Inclusive
+
+	return RangeSliderCtrl::SetSelectedRange(nFromMonth, nToMonth);
 }
 
-String^ MonthRangeSliderCtrl::FormatRange(char cDelim)
+String^ MonthRangeSliderCtrl::FormatRange()
 {
-	// TODO
-	return gcnew String("");
+	DateTime from, to;
+
+	if (!GetSelectedRange(from, to) && !GetMinMax(from, to))
+		return String::Empty;
+
+	if (DateUtil::DateInMonths(from) == (DateUtil::DateInMonths(to) - 1))
+	{
+		return String::Format("{0} {1}",
+							  DateUtil::GetMonthName(from.Month, true),
+							  from.Year);
+	}
+
+	// else
+	return String::Format("{0} {1} - {2} {3}",
+						  DateUtil::GetMonthName(from.Month, true),
+						  from.Year,
+						  DateUtil::GetMonthName(to.Month - 1, true),
+						  to.Year);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -369,7 +369,7 @@ namespace EvidenceBoardUIExtension
 // 			UpdateToolbarButtonStates();
 
 			// Date slider combo and label
-			m_DateSliderLabel = CreateLabel("Active Date Range", m_Toolbar);
+			m_DateSliderLabel = CreateLabel("", m_Toolbar);
 			this.Controls.Add(m_DateSliderLabel);
 
 			m_DateSlider = new MonthRangeSliderCtrl();
@@ -391,7 +391,7 @@ namespace EvidenceBoardUIExtension
 			else
 				m_Control.ClearSelectedDateRange();
 
-			Invalidate();
+			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Active Date Range"), m_DateSlider.FormatRange());
 		}
 
 		private int ControlTop
