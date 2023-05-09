@@ -176,6 +176,8 @@ namespace Abstractspoon
 				Boolean IsFlagged(bool calculated);
 				Boolean IsParent();
 				Boolean IsLocked(bool calculated);
+				Boolean IsRecurring();
+				Boolean IsReference();
 
 				double GetTimeEstimate(TimeUnits% cUnits, bool calculated);
 				double GetTimeSpent(TimeUnits% cUnits, bool calculated);
@@ -186,9 +188,6 @@ namespace Abstractspoon
 				String^ GetCustomAttributeValue(String^ sID, bool display);
 				Dictionary<String^, String^>^ GetCustomAttributeValues(bool display);
 				String^ GetMetaDataValue(String^ sKey);
-
-				// TODO
-				Boolean IsRecurring();
 
 				// SETTERS ----------------------------------------------------
 

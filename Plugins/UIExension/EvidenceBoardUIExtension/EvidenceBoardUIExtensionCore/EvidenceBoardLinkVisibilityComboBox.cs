@@ -8,7 +8,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
 	class EvidenceBoardLinkVisibilityComboBox : CustomComboBox.CheckedComboBox
 	{
 		class EvidenceBoardLinkVisibilityItem : TDLNodeControl.LinkType
@@ -17,17 +16,19 @@ namespace EvidenceBoardUIExtension
 				:
 				base(label, type)
 			{
+				Label = label;
 			}
 
 			public override string ToString()
 			{
-				return Name;
+				return Label;
 			}
+
+			public string Label;
 		}
 
 		// ----------------------------------------------------------------
 
-		Translator m_Trans;
 		HashSet<string> m_UserTypes = new HashSet<string>();
 
 		class LinkTypeVisibility : TDLNodeControl.LinkType
@@ -50,16 +51,25 @@ namespace EvidenceBoardUIExtension
 
 		// ----------------------------------------------------------------
 
-		public EvidenceBoardLinkVisibilityComboBox(Translator trans)
+		public EvidenceBoardLinkVisibilityComboBox()
 		{
-			m_Trans = trans;
-			None = trans.Translate("<none>");
-
 			UserLinkTypes = null;
 			Sorted = true;
 
 			DropDownClosed += (s, e) => { m_PrevLinkVisibility = null; };
+		}
 
+		public void Translate(Translator trans)
+		{
+			None = trans.Translate(None);
+
+			foreach (var item in Items)
+			{
+				var link = (item as EvidenceBoardLinkVisibilityItem);
+
+				if (link.Type != EvidenceBoardLinkType.User)
+					link.Label = trans.Translate(link.Name);
+			}
 		}
 
 		public IEnumerable<string> UserLinkTypes
@@ -80,13 +90,17 @@ namespace EvidenceBoardUIExtension
 				// Rebuild the combo
 				Items.Clear();
 
-				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans.Translate("Dependency"), EvidenceBoardLinkType.Dependency));
-				Items.Add(new EvidenceBoardLinkVisibilityItem(m_Trans.Translate("Parent/Child"), EvidenceBoardLinkType.ParentChild));
+				Items.Add(new EvidenceBoardLinkVisibilityItem("Untyped", EvidenceBoardLinkType.None));
+				Items.Add(new EvidenceBoardLinkVisibilityItem("Dependency", EvidenceBoardLinkType.Dependency));
+				Items.Add(new EvidenceBoardLinkVisibilityItem("Parent/Child", EvidenceBoardLinkType.ParentChild));
 
 				if (value != null)
 				{
 					foreach (var name in value)
-						Items.Add(new EvidenceBoardLinkVisibilityItem(name, EvidenceBoardLinkType.User));
+					{
+						if (!String.IsNullOrWhiteSpace(name))
+							Items.Add(new EvidenceBoardLinkVisibilityItem(name, EvidenceBoardLinkType.User));
+					}
 				}
 
 				// Restore the selection
@@ -201,6 +215,7 @@ namespace EvidenceBoardUIExtension
 
 					if ((type != (int)EvidenceBoardLinkType.Dependency) && 
 						(type != (int)EvidenceBoardLinkType.ParentChild) &&
+						(type != (int)EvidenceBoardLinkType.None) &&
 						(type != (int)EvidenceBoardLinkType.User))
 					{
 						Debug.Assert(false);

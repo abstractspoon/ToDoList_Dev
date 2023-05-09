@@ -67,7 +67,9 @@
     <Compile Include="EvidenceBoardLinkAttributesPage.Designer.cs">
       <DependentUpon>EvidenceBoardLinkAttributesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="EvidenceBoardLinkVisibilityComboBox.cs" />
+    <Compile Include="EvidenceBoardLinkVisibilityComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="EvidenceBoardPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,7 +79,9 @@
     <Compile Include="EvidenceBoardLinkArrowsComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="EvidenceBoardOptionsComboBox.cs" />
+    <Compile Include="EvidenceBoardOptionsComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />
     <Compile Include="NodeControl.cs">

@@ -57,24 +57,24 @@ double WorkingDay::EndOfLunchInHours()
 	return m_EndOfLunchInHours;
 }
 
-DateTime^ WorkingDay::StartOfDay(DateTime^ date)
+DateTime WorkingDay::StartOfDay(DateTime date)
 {
-	return date->Date.AddMilliseconds(HoursToMilleseconds(m_StartOfDayInHours));
+	return date.Date.AddMilliseconds(HoursToMilleseconds(m_StartOfDayInHours));
 }
 
-DateTime^ WorkingDay::EndOfDay(DateTime^ date)
+DateTime WorkingDay::EndOfDay(DateTime date)
 {
-	return date->Date.AddMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
+	return date.Date.AddMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
 }
 
-DateTime^ WorkingDay::StartOfLunch(DateTime^ date)
+DateTime WorkingDay::StartOfLunch(DateTime date)
 {
-	return date->Date.AddMilliseconds(HoursToMilleseconds(m_StartOfLunchInHours));
+	return date.Date.AddMilliseconds(HoursToMilleseconds(m_StartOfLunchInHours));
 }
 
-DateTime^ WorkingDay::EndOfLunch(DateTime^ date)
+DateTime WorkingDay::EndOfLunch(DateTime date)
 {
-	return date->Date.AddMilliseconds(HoursToMilleseconds(m_EndOfLunchInHours));
+	return date.Date.AddMilliseconds(HoursToMilleseconds(m_EndOfLunchInHours));
 }
 
 Int32 WorkingDay::HoursToMilleseconds(double hours)
@@ -104,9 +104,9 @@ double WorkingDay::CalculateDurationInHours(double fromHour, double toHour)
 	return Math::Max(dDuration, 0.0);
 }
 
-double WorkingDay::GetTimeOfDayInHours(DateTime^ date)
+double WorkingDay::GetTimeOfDayInHours(DateTime date)
 {
-	return (double)(date->Hour + (date->Minute / 60.0) + (date->Second / 3600.0) + (date->Millisecond / 3600000));
+	return (double)(date.Hour + (date.Minute / 60.0) + (date.Second / 3600.0) + (date.Millisecond / 3600000));
 }
 
 double WorkingDay::DayLengthInHours(bool includingLunch)
@@ -202,9 +202,9 @@ void WorkingWeek::Load(Preferences^ prefs)
 		m_WeekendDays->Add(System::DayOfWeek::Friday);
 }
 
-double WorkingWeek::CalculateDurationInHours(System::DateTime^ from, DateTime^ to)
+double WorkingWeek::CalculateDurationInHours(System::DateTime from, DateTime to)
 {
-	int nDaysDuration = (to->Date - from->Date).Days;
+	int nDaysDuration = (to.Date - from.Date).Days;
 
 	if (nDaysDuration < 0)
 		return 0;
@@ -224,14 +224,14 @@ double WorkingWeek::CalculateDurationInHours(System::DateTime^ from, DateTime^ t
 		if (nDaysDuration > 1)
 		{
 			// count whole days
-			from = from->AddDays(1).Date;
+			from = from.AddDays(1).Date;
 
-			while (*from <= *to)
+			while (from <= to)
 			{
 				if (!IsWeekend(from))
 					dHoursDuration += m_WorkingDay->DayLengthInHours(false);
 
-				from = from->AddDays(1);
+				from = from.AddDays(1);
 			}
 		}
 		
@@ -246,16 +246,16 @@ double WorkingWeek::CalculateDurationInHours(System::DateTime^ from, DateTime^ t
 	return dHoursDuration;
 }
 
-bool WorkingWeek::IsWeekend(DateTime^ date)
+bool WorkingWeek::IsWeekend(DateTime date)
 {
-	return m_WeekendDays->Contains(date->DayOfWeek);
+	return m_WeekendDays->Contains(date.DayOfWeek);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-int DateUtil::WeekOfYear(DateTime^ date)
+int DateUtil::WeekOfYear(DateTime date)
 {
-	return CDateHelper::GetWeekofYear(date->ToOADate());
+	return CDateHelper::GetWeekofYear(date.ToOADate());
 }
 
 int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shortName)
@@ -290,4 +290,22 @@ int DateUtil::GetMaxMonthNameWidth(Graphics^ graphics, Font^ font, bool shortNam
 	graphics->ReleaseHdc();
 
 	return width;
+}
+
+String^ DateUtil::GetMonthName(int nMonth, bool shortName)
+{
+	return gcnew String(CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+}
+
+int DateUtil::DateInMonths(DateTime date)
+{
+	return ((date.Year * 12) + date.Month);
+}
+
+DateTime DateUtil::DateFromMonths(int nMonths)
+{
+	int nYear = (nMonths / 12);
+	int nMonth = (nMonths % 12);
+
+	return DateTime(nYear, nMonth, 1);
 }

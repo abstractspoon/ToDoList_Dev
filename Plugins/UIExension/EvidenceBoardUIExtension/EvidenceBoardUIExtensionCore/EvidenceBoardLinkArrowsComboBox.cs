@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Abstractspoon.Tdl.PluginHelpers;
+
 namespace EvidenceBoardUIExtension
 {
 	class EvidenceBoardLinkArrowsComboBox : ComboBox
@@ -33,6 +35,15 @@ namespace EvidenceBoardUIExtension
 			Items.Add(new EvidenceBoardArrowsItem("Start", UserLinkAttributes.EndArrows.Start));
 			Items.Add(new EvidenceBoardArrowsItem("End", UserLinkAttributes.EndArrows.Finish));
 			Items.Add(new EvidenceBoardArrowsItem("Both", UserLinkAttributes.EndArrows.Both));
+		}
+
+		public void Translate(Translator trans)
+		{
+			foreach (var item in Items)
+			{
+				var arrows = (item as EvidenceBoardArrowsItem);
+				arrows.Label = trans.Translate(arrows.Label);
+			}
 		}
 
 		public UserLinkAttributes.EndArrows SelectedOption

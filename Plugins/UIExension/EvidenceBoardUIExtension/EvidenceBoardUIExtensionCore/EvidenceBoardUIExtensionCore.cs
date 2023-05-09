@@ -20,7 +20,7 @@ namespace EvidenceBoardUIExtension
         // ----------------------------------------------------------------------------
 
         private IntPtr m_HwndParent = IntPtr.Zero;
-        private String m_TypeId, m_UiName;
+        private String m_UiName;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
@@ -37,6 +37,9 @@ namespace EvidenceBoardUIExtension
 		private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
+
+		private Label m_DateSliderLabel;
+		private MonthRangeSliderCtrl m_DateSlider;
 
 		// ----------------------------------------------------------------------------
 
@@ -93,13 +96,32 @@ namespace EvidenceBoardUIExtension
         {
 			m_Control.UpdateTasks(tasks, type);
 
+			bool dateChange = false;
+
 			switch (type)
 			{
+			case UIExtension.UpdateType.Edit:
+			case UIExtension.UpdateType.New:
+				dateChange = (tasks.IsAttributeAvailable(Task.Attribute.StartDate) ||
+								tasks.IsAttributeAvailable(Task.Attribute.DueDate) ||
+								tasks.IsAttributeAvailable(Task.Attribute.DoneDate));
+				break;
+
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				m_LinkVisibilityCombo.UserLinkTypes = m_Control.UserLinkTypes;
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.SelectedLinkTypes;
+
+				dateChange = true;
 				break;
+			}
+
+			if (dateChange)
+			{
+				DateTime min, max;
+
+				if (m_Control.GetMinMaxDateRange(out min, out max))
+					m_DateSlider.SetMinMax(min, max);
 			}
 		}
 
@@ -184,10 +206,12 @@ namespace EvidenceBoardUIExtension
         public void SetUITheme(UITheme theme)
         {
 			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_DateSlider.SetParentBackColor(BackColor);
 
 			// Set the toolbar colors to be the same as the back color
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
+
 
 			m_TBRenderer.SetUITheme(theme);
 		}
@@ -317,25 +341,81 @@ namespace EvidenceBoardUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new EvidenceBoardOptionsComboBox(m_Trans);
+			m_OptionsCombo = new EvidenceBoardOptionsComboBox();
+			m_OptionsCombo.Translate(m_Trans);
+
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
-			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
+			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 
 			// Link vis combo and label
 			m_LinkVisibilityLabel = CreateLabel("Connection Visibility", m_OptionsCombo);
 			this.Controls.Add(m_LinkVisibilityLabel);
 
-			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox(m_Trans);
+			m_LinkVisibilityCombo = new EvidenceBoardLinkVisibilityComboBox();
+			m_LinkVisibilityCombo.Translate(m_Trans);
 			m_LinkVisibilityCombo.DropDownClosed += new EventHandler(OnLinkVisibilityComboClosed);
 
-			InitialiseCombo(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
+			InitialiseCtrl(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
 			this.Controls.Add(m_LinkVisibilityCombo);
-			
+
+			// Toolbar 
 			CreateToolbar();
-			UpdateToolbarButtonStates();
+			m_Toolbar.Location = ToolbarLocation;
+
+// 
+// 			UpdateToolbarButtonStates();
+
+			// Date slider combo and label
+			m_DateSliderLabel = CreateLabel("", m_Toolbar);
+			this.Controls.Add(m_DateSliderLabel);
+
+			m_DateSlider = new MonthRangeSliderCtrl();
+			m_DateSlider.Height = MonthRangeSliderCtrl.GetRequiredHeight();
+
+			InitialiseCtrl(m_DateSlider, m_DateSliderLabel, 250);
+
+			this.Controls.Add(m_DateSlider);
+
+			m_DateSlider.ChangeEvent += new EventHandler(OnSliderChange);
+		}
+
+		protected void OnSliderChange(object sender, EventArgs e)
+		{
+			DateTime from = DateTime.MinValue, to = DateTime.MaxValue;
+
+			if (m_DateSlider.GetSelectedRange(ref from, ref to))
+				m_Control.SetSelectedDateRange(from, to);
+			else
+				m_Control.ClearSelectedDateRange();
+
+			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Active Date Range"), m_DateSlider.FormatRange());
+		}
+
+		private int ControlTop
+		{
+			get
+			{
+				if (m_LinkVisibilityCombo == null)
+					return 0;
+				
+				//else
+				return (m_LinkVisibilityCombo.Bottom + DPIScaling.Scale(4));
+			}
+		}
+
+		private Point ToolbarLocation
+		{
+			get
+			{
+				if (m_LinkVisibilityCombo == null)
+					return Point.Empty;
+
+				// Centre the toolbar vertically on the combo
+				return new Point(m_LinkVisibilityCombo.Right + 10, m_LinkVisibilityCombo.Top - (m_Toolbar.Height - m_LinkVisibilityCombo.Height) / 2);
+			}
 		}
 
 		Label CreateLabel(string untranslatedText, Control prevControl)
@@ -345,23 +425,32 @@ namespace EvidenceBoardUIExtension
 			label.Font = m_ControlsFont;
 			label.Text = m_Trans.Translate(untranslatedText);
 			label.AutoSize = true;
+			//label.Anchor = AnchorStyles.None;
 
 			if (prevControl != null)
-				label.Location = new Point((prevControl.Bounds.Right + 20), 8);
+				label.Location = new Point((prevControl.Bounds.Right + DPIScaling.Scale(13)), DPIScaling.Scale(5));
 			else
-				label.Location = new Point(-2, 8);
+				label.Location = new Point(0, DPIScaling.Scale(5));
 
 			return label;
 		}
 
-		void InitialiseCombo(ComboBox combo, Label prevLabel, int width)
+		void InitialiseCtrl(Control ctrl, Label associatedLabel, int width)
 		{
-			combo.Font = m_ControlsFont;
-			combo.Width = DPIScaling.Scale(width);
-			combo.Height = DPIScaling.Scale(200);
-			combo.Location = new Point(prevLabel.Right + 5, 4);
-			combo.DropDownStyle = ComboBoxStyle.DropDownList;
-			combo.Sorted = true;
+			ctrl.Font = m_ControlsFont;
+			ctrl.Width = DPIScaling.Scale(width);
+
+			if (ctrl is ComboBox)
+			{
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(3));
+				ctrl.Height = DPIScaling.Scale(200);
+				(ctrl as ComboBox).DropDownStyle = ComboBoxStyle.DropDownList;
+				(ctrl as ComboBox).Sorted = true;
+			}
+			else
+			{
+				ctrl.Location = new Point(associatedLabel.Left, associatedLabel.Bottom + DPIScaling.Scale(2));
+			}
 		}
 
 		void OnOptionsComboClosed(object sender, EventArgs e)
@@ -487,11 +576,17 @@ namespace EvidenceBoardUIExtension
         {
 			base.OnSizeChanged(e);
 
-			m_Toolbar.Location = new Point(m_LinkVisibilityCombo.Right + 10, 0);
+			// Somewhere in WinForms the toolbar gets repositioned even though the toolbar
+			// is not anchored, so we have to restore the correct position each time
+			m_Toolbar.Location = ToolbarLocation;
 
+			// Resize the slider to take up the rest of the width
 			Rectangle rect = ClientRectangle;
-			rect.Y = m_LinkVisibilityCombo.Bottom + 6;
-			rect.Height -= (m_LinkVisibilityCombo.Bottom + 6);
+			m_DateSlider.Width = (rect.Right - m_DateSlider.Left);
+
+			// Node control
+			rect.Y = ControlTop;
+			rect.Height -= ControlTop;
 			
 			m_Control.Bounds = rect;
 
@@ -572,6 +667,7 @@ namespace EvidenceBoardUIExtension
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			Controls.Add(m_Toolbar);
+
 		}
 
 		private void UpdateToolbarButtonStates()
@@ -710,7 +806,7 @@ namespace EvidenceBoardUIExtension
 
 		private void UpdateEvidenceBoardPreferences()
 		{
-			UserLinkAttributes.Defaults = m_PrefsDlg.DefaultUserLinkAttributes;
+			UserLinkAttributes.Defaults.Copy(m_PrefsDlg.DefaultUserLinkAttributes);
 
 			m_Control.DependencyColor = m_PrefsDlg.DependencyColor;
 			m_Control.ParentConnectionColor = m_PrefsDlg.ParentConnectionColor;
