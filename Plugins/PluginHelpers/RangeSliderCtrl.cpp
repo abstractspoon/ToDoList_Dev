@@ -369,7 +369,9 @@ String^ MonthRangeSliderCtrl::FormatRange()
 	if (!GetSelectedRange(from, to) && !GetMinMax(from, to))
 		return String::Empty;
 
-	if (DateUtil::DateInMonths(from) == (DateUtil::DateInMonths(to) - 1))
+	to = to.AddMonths(-1);
+
+	if (DateUtil::DateInMonths(from) == (DateUtil::DateInMonths(to)))
 	{
 		return String::Format("{0} {1}",
 							  DateUtil::GetMonthName(from.Month, true),
@@ -380,7 +382,7 @@ String^ MonthRangeSliderCtrl::FormatRange()
 	return String::Format("{0} {1} - {2} {3}",
 						  DateUtil::GetMonthName(from.Month, true),
 						  from.Year,
-						  DateUtil::GetMonthName(to.Month - 1, true),
+						  DateUtil::GetMonthName(to.Month, true),
 						  to.Year);
 }
 
