@@ -923,6 +923,11 @@ Boolean Task::IsRecurring()
 	return GETTASKVAL(IsTaskRecurring, false);
 }
 
+Boolean Task::IsReference()
+{
+	return GETTASKVAL(IsTaskReference, false);
+}
+
 String^ Task::GetCustomAttributeValue(String^ sID, bool display)
 {
 	LPCWSTR szValue = (m_pConstTaskList ? m_pConstTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), display) :
