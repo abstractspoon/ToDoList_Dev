@@ -90,7 +90,7 @@ namespace EvidenceBoardUIExtension
 				// Rebuild the combo
 				Items.Clear();
 
-				Items.Add(new EvidenceBoardLinkVisibilityItem("<Untyped>", EvidenceBoardLinkType.None));
+				Items.Add(new EvidenceBoardLinkVisibilityItem("Untyped", EvidenceBoardLinkType.None));
 				Items.Add(new EvidenceBoardLinkVisibilityItem("Dependency", EvidenceBoardLinkType.Dependency));
 				Items.Add(new EvidenceBoardLinkVisibilityItem("Parent/Child", EvidenceBoardLinkType.ParentChild));
 
