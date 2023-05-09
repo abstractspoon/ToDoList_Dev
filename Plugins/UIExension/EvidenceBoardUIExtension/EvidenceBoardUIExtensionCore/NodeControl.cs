@@ -980,7 +980,7 @@ namespace EvidenceBoardUIExtension
 
 		protected virtual bool IsSelectableNode(BaseNode node)
 		{
-			return true;
+			return (node != null);
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)

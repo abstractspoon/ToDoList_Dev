@@ -31,7 +31,10 @@ namespace EvidenceBoardUIExtension
 
 		public List<uint> ChildIds { get; private set; }
 		public List<uint> DependIds { get; private set; }
-		public List<UserLink> UserLinks { get; private set; }
+
+		List<UserLink> m_UserLinks;
+
+		public IEnumerable<UserLink> UserLinks { get { return m_UserLinks; } }
 
 		private bool Done;
 		private bool GoodAsDone;
@@ -70,7 +73,7 @@ namespace EvidenceBoardUIExtension
 
 			ChildIds = new List<uint>();
 			DependIds = task.GetLocalDependency();
-			UserLinks = null;
+			m_UserLinks = null;
 
 			UpdateImage(task);
 			DecodeMetaData(task.GetMetaDataValue(MetaDataKey));
@@ -107,10 +110,8 @@ namespace EvidenceBoardUIExtension
 		{
 			string metaData = string.Format("{0},{1}|", UserPosition.X, UserPosition.Y);
 
-			if (UserLinks?.Count > 0)
-			{
+			if (HasUserLinks)
 				metaData = metaData + string.Join(",", UserLinks);
-			}
 
 			return metaData;
 		}
@@ -118,7 +119,7 @@ namespace EvidenceBoardUIExtension
 		public void DecodeMetaData(string metaData)
 		{
 			UserPosition = NullPoint;
-			UserLinks = new List<UserLink>();
+			m_UserLinks = new List<UserLink>();
 
 			if (string.IsNullOrWhiteSpace(metaData))
 				return;
@@ -159,7 +160,7 @@ namespace EvidenceBoardUIExtension
 						UserLink link;
 
 						if (UserLink.TryParse(linkData, TaskId, out link))
-							UserLinks.Add(link);
+							m_UserLinks.Add(link);
 						else
 							Debug.Assert(false);
 					}
@@ -174,7 +175,7 @@ namespace EvidenceBoardUIExtension
 
 		public UserLink FindUserLink(uint toId)
 		{
-			return UserLinks?.Find(x => (x.ToId == toId));
+			return m_UserLinks?.Find(x => (x.ToId == toId));
 		}
 
 		public bool HasUserLink(uint toId)
@@ -182,18 +183,34 @@ namespace EvidenceBoardUIExtension
 			return (FindUserLink(toId) != null);
 		}
 
+		public bool HasUserLinks
+		{
+			get { return ((m_UserLinks != null) && (m_UserLinks.Count > 0)); }
+		}
+
 		public bool HasUserLink(string type)
 		{
-			return (UserLinks?.Find(x => (x.Attributes.Type == type)) != null);
+			return (m_UserLinks?.Find(x => (x.Attributes.Type == type)) != null);
 		}
 
 		public bool DeleteUserLink(UserLink link)
 		{
-			if (UserLinks.Remove(link))
+			if (m_UserLinks.Remove(link))
 				return true;
 
 			Debug.Assert(FindUserLink(link.ToId) == null);
 			return false;
+		}
+
+		public UserLink AddUserLink(uint toId, UserLinkAttributes attrib)
+		{
+			if ((toId == 0) || (toId == TaskId) || HasUserLink(toId))
+				return null;
+
+			var newLink = new UserLink(TaskId, toId, attrib);
+			m_UserLinks.Add(newLink);
+
+			return newLink;
 		}
 
 		private void UpdateImage(Task task)
@@ -361,12 +378,14 @@ namespace EvidenceBoardUIExtension
 
 		public bool HasUserLink(uint id)
 		{
-			if (GetTaskItem(id)?.UserLinks?.Count > 0)
-				return true;
+			var taskItem = GetTaskItem(id);
 
-			foreach (var taskItem in Values)
+			if ((taskItem == null) || (taskItem.UserLinks == null) || !taskItem.HasUserLinks)
+				return false;
+
+			foreach (var other in Values)
 			{
-				if ((taskItem.TaskId != id) && taskItem.HasUserLink(id))
+				if ((other.TaskId != id) && other.HasUserLink(id))
 					return true;
 			}
 
@@ -403,18 +422,6 @@ namespace EvidenceBoardUIExtension
 			var task2 = GetTaskItem(id2);
 
 			return ((task2 != null) && task2.DependIds.Contains(id1));
-		}
-
-		public bool AddUserLink(UserLink link)
-		{
-			var fromTask = GetTaskItem(link.FromId);
-			var toTask = GetTaskItem(link.ToId);
-
-			if ((fromTask == null) || (toTask == null))
-				return false;
-
-			fromTask.UserLinks.Add(link);
-			return true;
 		}
 
 		public bool IsTaskLocked(uint id)

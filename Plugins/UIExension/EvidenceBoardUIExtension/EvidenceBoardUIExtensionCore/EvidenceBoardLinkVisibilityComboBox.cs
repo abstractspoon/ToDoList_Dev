@@ -29,7 +29,6 @@ namespace EvidenceBoardUIExtension
 
 		// ----------------------------------------------------------------
 
-		Translator m_Trans;
 		HashSet<string> m_UserTypes = new HashSet<string>();
 
 		class LinkTypeVisibility : TDLNodeControl.LinkType
@@ -91,13 +90,17 @@ namespace EvidenceBoardUIExtension
 				// Rebuild the combo
 				Items.Clear();
 
+				Items.Add(new EvidenceBoardLinkVisibilityItem("<Untyped>", EvidenceBoardLinkType.None));
 				Items.Add(new EvidenceBoardLinkVisibilityItem("Dependency", EvidenceBoardLinkType.Dependency));
 				Items.Add(new EvidenceBoardLinkVisibilityItem("Parent/Child", EvidenceBoardLinkType.ParentChild));
 
 				if (value != null)
 				{
 					foreach (var name in value)
-						Items.Add(new EvidenceBoardLinkVisibilityItem(name, EvidenceBoardLinkType.User));
+					{
+						if (!String.IsNullOrWhiteSpace(name))
+							Items.Add(new EvidenceBoardLinkVisibilityItem(name, EvidenceBoardLinkType.User));
+					}
 				}
 
 				// Restore the selection
@@ -212,6 +215,7 @@ namespace EvidenceBoardUIExtension
 
 					if ((type != (int)EvidenceBoardLinkType.Dependency) && 
 						(type != (int)EvidenceBoardLinkType.ParentChild) &&
+						(type != (int)EvidenceBoardLinkType.None) &&
 						(type != (int)EvidenceBoardLinkType.User))
 					{
 						Debug.Assert(false);
