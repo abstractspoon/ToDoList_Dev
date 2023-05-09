@@ -57,6 +57,9 @@
       <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="DayViewMonthComboBox.cs" />
+    <Compile Include="DayViewTaskComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DayViewWeekLabel.cs" />
     <Compile Include="DayViewYearComboBox.cs" />
     <Compile Include="DayViewPreferencesDlg.cs">

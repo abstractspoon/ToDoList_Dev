@@ -88,6 +88,7 @@ namespace DayViewUIExtension
 		}
 
 		public String AllocTo { get; set; }
+		public String Position { get; private set; }
 		public Boolean IsParent { get; set; }
         public Boolean HasIcon { get; set; }
         public Boolean IsDone { get; set; }
@@ -222,6 +223,7 @@ namespace DayViewUIExtension
 
 			UInt32 taskID = task.GetID();
 
+
 			if (newTask)
 			{
 				Title = task.GetTitle();
@@ -229,9 +231,7 @@ namespace DayViewUIExtension
 				HasIcon = task.HasIcon();
 				Id = taskID;
 				IsParent = task.IsParent();
-				TaskTextColor = task.GetTextDrawingColor();
 				DrawBorder = true;
-				Locked = task.IsLocked(true);
 				HasDependencies = (task.GetDependency().Count > 0);
 				IsRecurring = task.IsRecurring();
 
@@ -277,9 +277,6 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.Dependency))
 					HasDependencies = (task.GetDependency().Count > 0);
 
-				TaskTextColor = task.GetTextDrawingColor();
-				Locked = task.IsLocked(true);
-
                 // Dates
                 bool hadValidDates = HasValidDates();
 
@@ -317,6 +314,11 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 					UpdateCustomDateAttributes(task, dateAttribs);
 			}
+
+			// Always
+			Position = task.GetPositionString();
+			TaskTextColor = task.GetTextDrawingColor();
+			Locked = task.IsLocked(true);
 
 			UpdateOriginalDates();
 
