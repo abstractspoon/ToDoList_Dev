@@ -25,10 +25,10 @@ namespace Abstractspoon
 				double StartOfLunchInHours();
 				double EndOfLunchInHours();
 				
-				DateTime^ StartOfDay(DateTime^ date);
-				DateTime^ EndOfDay(DateTime^ date);
-				DateTime^ StartOfLunch(DateTime^ date);
-				DateTime^ EndOfLunch(DateTime^ date);
+				DateTime StartOfDay(DateTime date);
+				DateTime EndOfDay(DateTime date);
+				DateTime StartOfLunch(DateTime date);
+				DateTime EndOfLunch(DateTime date);
 
 				double CalculateDurationInHours(double fromHour, double toHour);
 				double DayLengthInHours(bool includingLunch);
@@ -37,7 +37,7 @@ namespace Abstractspoon
 				void Load(Preferences^ prefs);
 
 				static Int32 HoursToMilleseconds(double hours);
-				static double GetTimeOfDayInHours(DateTime^ date);
+				static double GetTimeOfDayInHours(DateTime date);
 
 			protected:
 				double m_StartOfDayInHours;
@@ -54,8 +54,8 @@ namespace Abstractspoon
 				WorkingWeek();
 				WorkingWeek(Preferences^ prefs);
 
-				double CalculateDurationInHours(DateTime^ from, DateTime^ to);
-				bool IsWeekend(DateTime^ date);
+				double CalculateDurationInHours(DateTime from, DateTime to);
+				bool IsWeekend(DateTime date);
 
 				void Load(Preferences^ prefs);
 
@@ -73,9 +73,14 @@ namespace Abstractspoon
 			public ref class DateUtil
 			{
 			public:
-				static int WeekOfYear(DateTime^ date);
+				static int WeekOfYear(DateTime date);
 				static int GetMaxDayOfWeekNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
 				static int GetMaxMonthNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
+
+				static String^ GetMonthName(int nMonth, bool shortName);
+
+				static int DateInMonths(DateTime date);
+				static DateTime DateFromMonths(int nMonths);
 			};
 		}
 	}

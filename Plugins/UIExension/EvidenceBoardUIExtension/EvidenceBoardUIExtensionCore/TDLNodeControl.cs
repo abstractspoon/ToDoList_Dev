@@ -121,7 +121,8 @@ namespace EvidenceBoardUIExtension
 		private Point m_DraggedUserLinkEnd = Point.Empty;
 
 		private TaskItems m_TaskItems;
-		
+		private Tuple<DateTime, DateTime> m_SelectedDateRange;
+
 		// -------------------------------------------------------------------------
 
 		[Flags]
@@ -137,6 +138,8 @@ namespace EvidenceBoardUIExtension
 
 		public TDLNodeControl(Translator trans, UIExtension.TaskIcon icons)
 		{
+			ClearSelectedDateRange();
+
 			m_Trans = trans;
 			m_TaskIcons = icons;
 
@@ -183,6 +186,45 @@ namespace EvidenceBoardUIExtension
 				m_BoldDoneLabelFont = m_BoldLabelFont;
 				m_DoneLabelFont = null;
 			}
+		}
+
+		public bool GetMinMaxDateRange(out DateTime from, out DateTime to)
+		{
+			return m_TaskItems.GetDateRange(out from, out to);
+		}
+
+		public bool SetSelectedDateRange(DateTime from, DateTime to)
+		{
+			if (from >= to)
+				return false;
+
+			m_SelectedDateRange = new Tuple<DateTime, DateTime>(from, to);
+			Invalidate();
+
+			return true;
+		}
+
+		public void ClearSelectedDateRange()
+		{
+			m_SelectedDateRange = new Tuple<DateTime, DateTime>(DateTime.MinValue, DateTime.MaxValue);
+			Invalidate();
+		}
+
+		override protected bool IsNodeVisible(BaseNode node)
+		{
+			if (!base.IsNodeVisible(node))
+				return false;
+
+			if ((m_SelectedDateRange.Item1 == DateTime.MinValue) && (m_SelectedDateRange.Item2 == DateTime.MaxValue))
+				return true;
+#if DEBUG
+			if ((node.Data == 0) && m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
+				return true;
+#endif
+
+			var taskItem = GetTaskItem(node.Data);
+
+			return (taskItem?.IntersectsWith(m_SelectedDateRange.Item1, m_SelectedDateRange.Item2) == true);
 		}
 
 		protected override void OnTextFontChanged()

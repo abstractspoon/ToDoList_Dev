@@ -8,7 +8,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
 	class EvidenceBoardLinkVisibilityComboBox : CustomComboBox.CheckedComboBox
 	{
 		class EvidenceBoardLinkVisibilityItem : TDLNodeControl.LinkType
@@ -17,12 +16,15 @@ namespace EvidenceBoardUIExtension
 				:
 				base(label, type)
 			{
+				Label = label;
 			}
 
 			public override string ToString()
 			{
-				return Name;
+				return Label;
 			}
+
+			public string Label;
 		}
 
 		// ----------------------------------------------------------------
@@ -49,16 +51,25 @@ namespace EvidenceBoardUIExtension
 
 		// ----------------------------------------------------------------
 
-		public EvidenceBoardLinkVisibilityComboBox(Translator trans)
+		public EvidenceBoardLinkVisibilityComboBox()
 		{
-			//m_Trans = trans;
-			None = trans.Translate("<none>");
-
 			UserLinkTypes = null;
 			Sorted = true;
 
 			DropDownClosed += (s, e) => { m_PrevLinkVisibility = null; };
+		}
 
+		public void Translate(Translator trans)
+		{
+			None = trans.Translate(None);
+
+			foreach (var item in Items)
+			{
+				var link = (item as EvidenceBoardLinkVisibilityItem);
+
+				if (link.Type != EvidenceBoardLinkType.User)
+					link.Label = trans.Translate(link.Name);
+			}
 		}
 
 		public IEnumerable<string> UserLinkTypes

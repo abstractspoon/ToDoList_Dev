@@ -8,7 +8,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
 	class EvidenceBoardOptionsComboBox : CustomComboBox.CheckedComboBox
 	{
 		class EvidenceBoardOptionItem
@@ -35,17 +34,28 @@ namespace EvidenceBoardUIExtension
 
 		// ----------------------------------------------------------------
 
-		public EvidenceBoardOptionsComboBox(Translator trans)
+		public EvidenceBoardOptionsComboBox()
 		{
-			None = trans.Translate("<none>");
+			None = "<none>";
 
 #if DEBUG
-			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Show root node"), EvidenceBoardOption.ShowRootNode));
+			Items.Add(new EvidenceBoardOptionItem("Show root node", EvidenceBoardOption.ShowRootNode));
 #endif
-			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Draw links on top"), EvidenceBoardOption.DrawLinksOnTop));
-			Items.Add(new EvidenceBoardOptionItem(trans.Translate("Draw pins"), EvidenceBoardOption.DrawPins));
+			Items.Add(new EvidenceBoardOptionItem("Draw links on top", EvidenceBoardOption.DrawLinksOnTop));
+			Items.Add(new EvidenceBoardOptionItem("Draw pins", EvidenceBoardOption.DrawPins));
 
 			Sorted = true;
+		}
+
+		public void Translate(Translator trans)
+		{
+			None = trans.Translate(None);
+
+			foreach (var item in Items)
+			{
+				var option = (item as EvidenceBoardOptionItem);
+				option.Label = trans.Translate(option.Label);
+			}
 		}
 
 		public EvidenceBoardOption SelectedOptions

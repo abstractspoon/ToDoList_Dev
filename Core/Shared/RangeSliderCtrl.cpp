@@ -110,11 +110,6 @@ void CRangeSliderCtrl::SetParentBackgroundColor(COLORREF crBkgnd)
 	}
 }
 
-BOOL CRangeSliderCtrl::HasSelectedRange() const
-{
-	return ((m_Left > m_Min) || (m_Right < m_Max));
-}
-
 void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion)
 {
 	switch (nRegion)
@@ -222,7 +217,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 				{
 					if (bPressed)
 					{
-						nState = TUS_PRESSED;
+						nState = TUS_HOT;//TUS_PRESSED;
 					}
 					else if (bHot)
 					{
@@ -278,7 +273,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo)
 {
-	if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
+	if ((m_Step > 0) && !(m_nSliderDrawStyles & TBS_NOTICKS))
 	{
 		double dNumTick = ((dTo - dFrom) / m_Step);
 		double dTickSpacing = (rTrack.Width() / dNumTick);

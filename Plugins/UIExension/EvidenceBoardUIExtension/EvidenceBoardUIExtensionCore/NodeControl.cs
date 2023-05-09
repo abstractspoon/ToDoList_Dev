@@ -600,8 +600,19 @@ namespace EvidenceBoardUIExtension
 				HitTestNodes(child, rectClient, ref hits);
 		}
 
+		virtual protected bool IsNodeVisible(BaseNode node)
+		{
+			return (node != null);
+		}
+
 		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect)
 		{
+			if (!IsNodeVisible(node))
+			{
+				nodeRect = Rectangle.Empty;
+				return false;
+			}
+
 			nodeRect = GetNodeClientRect(node);
 
 			return nodeRect.IntersectsWith(ClientRectangle);
@@ -627,7 +638,7 @@ namespace EvidenceBoardUIExtension
 		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
 										  out Point fromPos, out Point toPos)
 		{
-			if ((fromNode == null) || (toNode == null))
+			if (!IsNodeVisible(fromNode) || !IsNodeVisible(toNode))
 			{
 				fromPos = toPos = Point.Empty;
 				return false;
