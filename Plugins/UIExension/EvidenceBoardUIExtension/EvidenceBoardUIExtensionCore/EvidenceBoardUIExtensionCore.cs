@@ -710,7 +710,7 @@ namespace EvidenceBoardUIExtension
 
 		private void UpdateEvidenceBoardPreferences()
 		{
-			UserLinkAttributes.Defaults = m_PrefsDlg.DefaultUserLinkAttributes;
+			UserLinkAttributes.Defaults.Copy(m_PrefsDlg.DefaultUserLinkAttributes);
 
 			m_Control.DependencyColor = m_PrefsDlg.DependencyColor;
 			m_Control.ParentConnectionColor = m_PrefsDlg.ParentConnectionColor;

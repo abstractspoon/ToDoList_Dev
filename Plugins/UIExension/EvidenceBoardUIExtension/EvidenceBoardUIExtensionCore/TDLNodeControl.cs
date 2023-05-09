@@ -235,8 +235,6 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public 
-
 		bool ShowingDependencyLinks
 		{
 			get { return (m_VisibleLinkTypes?.Find(x => (x.Type == EvidenceBoardLinkType.Dependency)) != null); }
@@ -245,6 +243,20 @@ namespace EvidenceBoardUIExtension
 		bool ShowingParentChildLinks
 		{
 			get { return (m_VisibleLinkTypes?.Find(x => (x.Type == EvidenceBoardLinkType.ParentChild)) != null); }
+		}
+
+		bool ShowingUntypedLinks
+		{
+			get { return (m_VisibleLinkTypes?.Find(x => (x.Type == EvidenceBoardLinkType.None)) != null); }
+		}
+
+		bool ShowingUserLinkType(string type)
+		{
+			if (String.IsNullOrWhiteSpace(type))
+				return ShowingUntypedLinks;
+
+			// else
+			return (m_VisibleLinkTypes?.Find(x => ((x.Type == EvidenceBoardLinkType.User) && (x.Name == type))) != null);
 		}
 
 		public Color DependencyColor
@@ -506,17 +518,15 @@ namespace EvidenceBoardUIExtension
 					Debug.Assert(false);
 					return null;
 				}
-				
-				// Link cannot already exist
-				if (!UserLinkExists(fromId, toId))
+
+				var newLink = fromTask.AddUserLink(toId, attrib);
+
+				if (newLink != null)
 				{
 					m_UserLinkTypes.Add(attrib.Type);
-
-					var link = new UserLink(fromId, toId, attrib);
-					fromTask.UserLinks.Add(link);
-
 					Invalidate();
-					return link;
+
+					return newLink;
 				}
 			}
 
@@ -797,7 +807,7 @@ namespace EvidenceBoardUIExtension
 
 					foreach (var taskItem in m_TaskItems.Values)
 					{
-						if (taskItem.UserLinks?.Count > 0)
+						if (taskItem.HasUserLinks)
 						{
 							foreach (var link in taskItem.UserLinks)
 								m_UserLinkTypes.Add(link.Attributes.Type);
@@ -811,7 +821,7 @@ namespace EvidenceBoardUIExtension
 
 		private bool ProcessTaskUpdate(Task task, BaseNode parentNode)
 		{
-			if (!task.IsValid())
+			if (!task.IsValid() || task.IsReference())
 				return false;
 
 			uint taskId = task.GetID();
@@ -939,7 +949,7 @@ namespace EvidenceBoardUIExtension
 
 		protected override bool IsSelectableNode(BaseNode node)
 		{
-			return (node.Data != 0);
+			return (base.IsSelectableNode(node) && (node.Data > 0));
 		}
 
 		protected override void OnAfterDrawConnections(Graphics graphics)
@@ -1019,7 +1029,7 @@ namespace EvidenceBoardUIExtension
 		{
 			var taskItem = GetTaskItem(node);
 
-			if (taskItem?.UserLinks?.Count > 0)
+			if ((taskItem != null) && taskItem.HasUserLinks)
 			{
 				foreach (var link in taskItem.UserLinks)
 					DrawUserLink(graphics, link, false);
@@ -1230,7 +1240,7 @@ namespace EvidenceBoardUIExtension
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
 		{
-			bool visible = (m_VisibleLinkTypes.Find(x => ((x.Type == EvidenceBoardLinkType.User) && (x.Name == link.Attributes.Type))) != null);
+			bool visible = ((link == m_SelectedUserLink) || ShowingUserLinkType(link.Attributes.Type));
 
 			if (!visible)
 			{
@@ -1543,7 +1553,7 @@ namespace EvidenceBoardUIExtension
 		{
 			var fromTask = GetTaskItem(node.Data);
 
-			if (fromTask?.UserLinks?.Count > 0)
+			if ((fromTask != null) && fromTask.HasUserLinks)
 			{
 				foreach (var link in fromTask.UserLinks)
 				{
@@ -1581,7 +1591,7 @@ namespace EvidenceBoardUIExtension
 		{
 			var fromTask = GetTaskItem(node.Data);
 
-			if ((fromTask != null) && !fromTask.IsLocked && (fromTask.UserLinks?.Count > 0))
+			if ((fromTask != null) && !fromTask.IsLocked && fromTask.HasUserLinks)
 			{
 				foreach (var link in fromTask.UserLinks)
 				{
@@ -1636,6 +1646,7 @@ namespace EvidenceBoardUIExtension
 			}
 			
 			m_SelectedUserLink = link;
+			m_UserLinkTypes.Add(link.Attributes.Type);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
@@ -1877,7 +1888,7 @@ namespace EvidenceBoardUIExtension
 			if (m_HotTaskId == node?.Data)
 				return;
 
-			if (m_HotTaskId != 0)
+			if ((m_HotTaskId != 0) && m_TaskItems.Keys.Contains(m_HotTaskId))
 			{
 				var hot = GetNode(m_HotTaskId);
 				var pin = GetCreateLinkPinRect(hot);
@@ -2032,11 +2043,7 @@ namespace EvidenceBoardUIExtension
 			{
 				if (m_DropHighlightedTaskId != 0)
 				{
-					bool newLink = (m_SelectedUserLink.ToId == NullId);
-
-					m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
-
-					if (newLink)
+					if (m_SelectedUserLink.ToId == NullId) // New link
 					{
 						Debug.Assert(m_SelectedUserLink.FromId == SingleSelectedNode.Data);
 
@@ -2044,14 +2051,16 @@ namespace EvidenceBoardUIExtension
 
 						if (taskItem != null)
 						{
-							taskItem.UserLinks.Add(m_SelectedUserLink);
+							var newLink = CreateUserLink(taskItem.TaskId, m_DropHighlightedTaskId, m_SelectedUserLink.Attributes);
 
-							if ((ConnectionCreated != null) && !ConnectionCreated(this, m_SelectedUserLink))
-								taskItem.UserLinks.Remove(m_SelectedUserLink);
+							if ((newLink != null) && (ConnectionCreated != null) && !ConnectionCreated(this, newLink))
+								taskItem.DeleteUserLink(newLink);
 						}
 					}
 					else
 					{
+						m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
+
 						ConnectionEdited?.Invoke(this, m_SelectedUserLink);
 					}
 				}

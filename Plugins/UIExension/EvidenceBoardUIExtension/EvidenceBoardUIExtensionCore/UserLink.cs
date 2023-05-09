@@ -38,7 +38,7 @@ namespace EvidenceBoardUIExtension
 
 		// ---------------------------------------------------
 
-		public static UserLinkAttributes Defaults = new UserLinkAttributes();
+		public static UserLinkAttributes Defaults { get; private set; } = new UserLinkAttributes();
 
 		// ---------------------------------------------------
 
@@ -139,13 +139,13 @@ namespace EvidenceBoardUIExtension
 			ToId = toId;
 
 			if (attrib != null)
-				Attributes = attrib;
+				Attributes.Copy(attrib);
 		}
 
 		public uint FromId { get; private set; } = 0;
 		public uint ToId { get; private set; } = 0;
 
-		public UserLinkAttributes Attributes = new UserLinkAttributes();
+		public UserLinkAttributes Attributes { get; private set; } = new UserLinkAttributes();
 
 		public bool ChangeToId(uint toId)
 		{
