@@ -140,6 +140,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="ContentControl.h" />
     <ClInclude Include="Preferences.h" />
     <ClInclude Include="TaskList.h" />
+    <ClInclude Include="TimeComboBox.h" />
     <ClInclude Include="Toolbars.h" />
     <ClInclude Include="Translator.h" />
     <ClInclude Include="TreeCtrl.h" />
@@ -168,6 +169,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="ContentControl.cpp" />
     <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="TaskList.cpp" />
+    <ClCompile Include="TimeComboBox.cpp" />
     <ClCompile Include="Toolbars.cpp" />
     <ClCompile Include="Translator.cpp" />
     <ClCompile Include="TreeCtrl.cpp" />

@@ -31,8 +31,6 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewCreateTimeBlockDlg));
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
-			this.m_FromTimeCombo = new System.Windows.Forms.ComboBox();
-			this.m_ToTimeCombo = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
@@ -41,6 +39,8 @@
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
 			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
+			this.m_FromTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
+			this.m_ToTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -60,22 +60,6 @@
 			this.label2.Size = new System.Drawing.Size(30, 13);
 			this.label2.TabIndex = 2;
 			this.label2.Text = "From";
-			// 
-			// m_FromTimeCombo
-			// 
-			this.m_FromTimeCombo.FormattingEnabled = true;
-			this.m_FromTimeCombo.Location = new System.Drawing.Point(132, 36);
-			this.m_FromTimeCombo.Name = "m_FromTimeCombo";
-			this.m_FromTimeCombo.Size = new System.Drawing.Size(97, 21);
-			this.m_FromTimeCombo.TabIndex = 3;
-			// 
-			// m_ToTimeCombo
-			// 
-			this.m_ToTimeCombo.FormattingEnabled = true;
-			this.m_ToTimeCombo.Location = new System.Drawing.Point(132, 63);
-			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
-			this.m_ToTimeCombo.Size = new System.Drawing.Size(97, 21);
-			this.m_ToTimeCombo.TabIndex = 5;
 			// 
 			// label3
 			// 
@@ -155,12 +139,30 @@
 			this.m_TaskCombo.Size = new System.Drawing.Size(232, 21);
 			this.m_TaskCombo.TabIndex = 0;
 			// 
+			// m_FromTimeCombo
+			// 
+			this.m_FromTimeCombo.Location = new System.Drawing.Point(132, 36);
+			this.m_FromTimeCombo.Name = "m_FromTimeCombo";
+			this.m_FromTimeCombo.Size = new System.Drawing.Size(113, 23);
+			this.m_FromTimeCombo.TabIndex = 12;
+			this.m_FromTimeCombo.Text = "timeComboBox1";
+			// 
+			// m_ToTimeCombo
+			// 
+			this.m_ToTimeCombo.Location = new System.Drawing.Point(132, 61);
+			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
+			this.m_ToTimeCombo.Size = new System.Drawing.Size(113, 23);
+			this.m_ToTimeCombo.TabIndex = 13;
+			this.m_ToTimeCombo.Text = "timeComboBox1";
+			// 
 			// DayViewCreateTimeBlockDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(377, 281);
+			this.Controls.Add(this.m_ToTimeCombo);
+			this.Controls.Add(this.m_FromTimeCombo);
 			this.Controls.Add(this.m_TaskCombo);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.Cancel);
@@ -168,9 +170,7 @@
 			this.Controls.Add(this.checkBox1);
 			this.Controls.Add(this.checkedListBox1);
 			this.Controls.Add(this.label4);
-			this.Controls.Add(this.m_ToTimeCombo);
 			this.Controls.Add(this.label3);
-			this.Controls.Add(this.m_FromTimeCombo);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -186,8 +186,6 @@
 
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ComboBox m_FromTimeCombo;
-		private System.Windows.Forms.ComboBox m_ToTimeCombo;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.CheckedListBox checkedListBox1;
@@ -196,5 +194,7 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
 		private DayViewTaskComboBox m_TaskCombo;
+		private Abstractspoon.Tdl.PluginHelpers.TimeComboBox m_FromTimeCombo;
+		private Abstractspoon.Tdl.PluginHelpers.TimeComboBox m_ToTimeCombo;
 	}
 }
