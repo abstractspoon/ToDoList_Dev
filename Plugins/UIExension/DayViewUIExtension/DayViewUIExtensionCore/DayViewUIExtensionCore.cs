@@ -56,7 +56,7 @@ namespace DayViewUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-            if (m_DayView.SelectedTaskID == dwTaskID)
+            if (m_DayView.SelectedTaskId == dwTaskID)
                 return true;
 
 			bool selected = m_DayView.SelectTask(dwTaskID);
@@ -294,7 +294,7 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
-			m_ControlsFont = new Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8.25f);
 			m_PrefsDlg = new DayViewPreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
@@ -528,19 +528,26 @@ namespace DayViewUIExtension
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
 		{
-// 			if (!m_DayView.HasSelection)
-// 				return;
-
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
-			var taskID = m_DayView.SelectedTaskID;
 
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
-													m_DayView.SelectedTaskID);
+													m_WorkWeek,
+													m_DayView.SelectedTaskId);
+
+			FormsUtil.SetFont(dlg, m_ControlsFont);
+
+ 			if (m_DayView.HasSelection)
+			{
+				dlg.FromTime = DateUtil.TimeOnly(m_DayView.SelectedDates.Start);
+				dlg.ToTime = DateUtil.TimeOnly(m_DayView.SelectedDates.End);
+			}
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
+				var taskID = dlg.SelectedTaskId;
+
 				if (taskID != 0)
 				{
 					m_DayView.CreateNewTaskBlock(taskID, m_DayView.SelectedDates);
@@ -717,7 +724,7 @@ namespace DayViewUIExtension
 				UpdatedSelectedTaskDatesText();
 				UpdateToolbarButtonStates();
 
-				notify.NotifySelChange(m_DayView.SelectedTaskID);
+				notify.NotifySelChange(m_DayView.SelectedTaskId);
 				break;
 
 			case Calendar.SelectionType.DateRange:

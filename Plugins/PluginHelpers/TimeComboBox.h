@@ -26,6 +26,8 @@ namespace Abstractspoon
 
 				void DrawItem(WPARAM wp, LPARAM lp);
 
+				static BOOL SetWorkingWeek(DWORD dwWeekendDays, double dLengthInHours, double dStartInHours, double dLunchStartInHours, double dLunchEndInHours);
+
 			protected:
 				HostedTimeComboBox(HWND hwndParent);
 
@@ -44,17 +46,21 @@ namespace Abstractspoon
 				TimeSpan GetTime();
 				bool SetTime(TimeSpan time);
 				bool SetTime(DateTime date);
+
+				static bool SetWorkingWeek(WorkingWeek^ workWeek);
 				
 				event System::EventHandler^ ChangeEvent;
 
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
+				TimeSpan m_Time;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
 				void OnHandleCreated(EventArgs^ e) override;
 				void OnHandleDestroyed(EventArgs^ e) override;
 
+				bool CheckSetTime();
 			};
 
 		}

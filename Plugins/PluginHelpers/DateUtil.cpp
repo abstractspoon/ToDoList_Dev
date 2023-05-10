@@ -176,30 +176,9 @@ WorkingWeek::WorkingWeek(Preferences^ prefs)
 void WorkingWeek::Load(Preferences^ prefs)
 {
 	m_WorkingDay->Load(prefs);
-	m_WeekendDays->Clear();
 
 	int dwWeekends = prefs->GetProfileInt("Preferences", "Weekends", 0);
-	
-	if ((dwWeekends & SUNDAY) == SUNDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Sunday);
-
-	if ((dwWeekends & SATURDAY) == SATURDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Saturday);
-
-	if ((dwWeekends & MONDAY) == MONDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Monday);
-
-	if ((dwWeekends & TUESDAY) == TUESDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Tuesday);
-
-	if ((dwWeekends & WEDNESDAY) == WEDNESDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Wednesday);
-
-	if ((dwWeekends & THURSDAY) == THURSDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Thursday);
-
-	if ((dwWeekends & FRIDAY) == FRIDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Friday);
+	m_WeekendDays = DateUtil::MapWeekDays(dwWeekends);
 }
 
 double WorkingWeek::CalculateDurationInHours(System::DateTime from, DateTime to)
@@ -308,4 +287,65 @@ DateTime DateUtil::DateFromMonths(int nMonths)
 	int nMonth = (nMonths % 12);
 
 	return DateTime(nYear, nMonth, 1);
+}
+
+TimeSpan DateUtil::TimeOnly(DateTime date)
+{
+	return (date - date.Date);
+}
+
+int DateUtil::MapWeekDays(List<System::DayOfWeek>^ weekDays)
+{
+	int dwWeekDays = 0;
+
+	if (weekDays->Contains(System::DayOfWeek::Sunday))
+		dwWeekDays |= SUNDAY;
+
+	if (weekDays->Contains(System::DayOfWeek::Saturday))
+		dwWeekDays |= SATURDAY;
+
+	if (weekDays->Contains(System::DayOfWeek::Monday))
+		dwWeekDays |= MONDAY;
+
+	if (weekDays->Contains(System::DayOfWeek::Tuesday))
+		dwWeekDays |= TUESDAY;
+
+	if (weekDays->Contains(System::DayOfWeek::Wednesday))
+		dwWeekDays |= WEDNESDAY;
+
+	if (weekDays->Contains(System::DayOfWeek::Thursday))
+		dwWeekDays |= THURSDAY;
+
+	if (weekDays->Contains(System::DayOfWeek::Friday))
+		dwWeekDays |= FRIDAY;
+
+	return dwWeekDays;
+}
+
+List<System::DayOfWeek>^ DateUtil::MapWeekDays(int dwWeekDays)
+{
+	auto weekDays = gcnew List<System::DayOfWeek>();
+
+	if ((dwWeekDays & SUNDAY) == SUNDAY)
+		weekDays->Add(System::DayOfWeek::Sunday);
+
+	if ((dwWeekDays & SATURDAY) == SATURDAY)
+		weekDays->Add(System::DayOfWeek::Saturday);
+
+	if ((dwWeekDays & MONDAY) == MONDAY)
+		weekDays->Add(System::DayOfWeek::Monday);
+
+	if ((dwWeekDays & TUESDAY) == TUESDAY)
+		weekDays->Add(System::DayOfWeek::Tuesday);
+
+	if ((dwWeekDays & WEDNESDAY) == WEDNESDAY)
+		weekDays->Add(System::DayOfWeek::Wednesday);
+
+	if ((dwWeekDays & THURSDAY) == THURSDAY)
+		weekDays->Add(System::DayOfWeek::Thursday);
+
+	if ((dwWeekDays & FRIDAY) == FRIDAY)
+		weekDays->Add(System::DayOfWeek::Friday);
+
+	return weekDays;
 }

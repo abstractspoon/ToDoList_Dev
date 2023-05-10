@@ -410,7 +410,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public uint SelectedTaskID
+		public uint SelectedTaskId
 		{
 			get
 			{
@@ -432,7 +432,7 @@ namespace DayViewUIExtension
 		{
 			from = to = Calendar.Appointment.NullDate;
 
-			uint selTaskID = SelectedTaskID;
+			uint selTaskID = SelectedTaskId;
 
 			if (selTaskID == 0)
 				return false;
@@ -521,7 +521,7 @@ namespace DayViewUIExtension
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
 			uint prevSelTaskID = m_VisibleSelectedTaskID;
-			uint selTaskID = SelectedTaskID;
+			uint selTaskID = SelectedTaskId;
 
 			m_VisibleSelectedTaskID = selTaskID;
 
@@ -557,7 +557,7 @@ namespace DayViewUIExtension
 			}
 
 			// Notify parent of changes
-			if (allowNotify && (SelectedTaskID != prevSelTaskID))
+			if (allowNotify && (SelectedTaskId != prevSelTaskID))
 			{
 				TaskItem item = null;
 				m_TaskItems.TryGetValue(m_VisibleSelectedTaskID, out item);
@@ -573,7 +573,7 @@ namespace DayViewUIExtension
 			m_SelectedTaskID = dwTaskID;
 			FixupSelection(true, false);
 
-			return (SelectedTaskID != 0);
+			return (SelectedTaskId != 0);
 		}
 
 		public bool CanDuplicateTimeBlock()
@@ -1179,7 +1179,7 @@ namespace DayViewUIExtension
 
 			if ((selAppt is TaskItem) || (selAppt is FutureTaskOccurrence))
 			{
-				var selRealID = SelectedTaskID;
+				var selRealID = SelectedTaskId;
 
 				if (appt is FutureTaskOccurrence)
 					return (selRealID == (appt as FutureTaskOccurrence).RealTaskId);

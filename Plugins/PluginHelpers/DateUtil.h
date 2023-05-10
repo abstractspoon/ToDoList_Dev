@@ -81,6 +81,11 @@ namespace Abstractspoon
 
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
+
+				static TimeSpan TimeOnly(DateTime date);
+
+				static int MapWeekDays(Collections::Generic::List<System::DayOfWeek>^ weekDays);
+				static Collections::Generic::List<System::DayOfWeek>^ MapWeekDays(int dwWeekDays);
 			};
 		}
 	}

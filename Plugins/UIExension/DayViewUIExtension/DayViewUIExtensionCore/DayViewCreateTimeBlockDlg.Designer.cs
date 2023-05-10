@@ -38,9 +38,9 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
-			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
-			this.m_FromTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
 			this.m_ToTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
+			this.m_FromTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
+			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -128,6 +128,22 @@
 			this.label5.Size = new System.Drawing.Size(386, 2);
 			this.label5.TabIndex = 11;
 			// 
+			// m_ToTimeCombo
+			// 
+			this.m_ToTimeCombo.Location = new System.Drawing.Point(132, 63);
+			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
+			this.m_ToTimeCombo.Size = new System.Drawing.Size(113, 23);
+			this.m_ToTimeCombo.TabIndex = 13;
+			this.m_ToTimeCombo.Text = "timeComboBox1";
+			// 
+			// m_FromTimeCombo
+			// 
+			this.m_FromTimeCombo.Location = new System.Drawing.Point(132, 36);
+			this.m_FromTimeCombo.Name = "m_FromTimeCombo";
+			this.m_FromTimeCombo.Size = new System.Drawing.Size(113, 23);
+			this.m_FromTimeCombo.TabIndex = 12;
+			this.m_FromTimeCombo.Text = "timeComboBox1";
+			// 
 			// m_TaskCombo
 			// 
 			this.m_TaskCombo.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
@@ -138,22 +154,6 @@
 			this.m_TaskCombo.Name = "m_TaskCombo";
 			this.m_TaskCombo.Size = new System.Drawing.Size(232, 21);
 			this.m_TaskCombo.TabIndex = 0;
-			// 
-			// m_FromTimeCombo
-			// 
-			this.m_FromTimeCombo.Location = new System.Drawing.Point(132, 36);
-			this.m_FromTimeCombo.Name = "m_FromTimeCombo";
-			this.m_FromTimeCombo.Size = new System.Drawing.Size(113, 23);
-			this.m_FromTimeCombo.TabIndex = 12;
-			this.m_FromTimeCombo.Text = "timeComboBox1";
-			// 
-			// m_ToTimeCombo
-			// 
-			this.m_ToTimeCombo.Location = new System.Drawing.Point(132, 61);
-			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
-			this.m_ToTimeCombo.Size = new System.Drawing.Size(113, 23);
-			this.m_ToTimeCombo.TabIndex = 13;
-			this.m_ToTimeCombo.Text = "timeComboBox1";
 			// 
 			// DayViewCreateTimeBlockDlg
 			// 

@@ -20,7 +20,7 @@ namespace DayViewUIExtension
 			DrawMode = DrawMode.OwnerDrawFixed;
 		}
 
-		public void Initialise(IEnumerable<TaskItem> taskItems, UIExtension.TaskIcon taskIcons)
+		public void Initialise(IEnumerable<TaskItem> taskItems, UIExtension.TaskIcon taskIcons, uint taskId)
 		{
 			m_TaskIcons = taskIcons;
 
@@ -28,7 +28,21 @@ namespace DayViewUIExtension
 			var sortedList = taskItems.OrderBy(x => x.Position);
 
 			foreach (var task in taskItems)
+			{
 				Items.Add(task);
+
+				if (task.Id == taskId)
+					SelectedItem = task;
+			}
+		}
+
+		public uint SelectedTaskId
+		{
+			get
+			{
+				var selItem = (SelectedItem as TaskItem);
+				return ((selItem == null) ? 0 : selItem.Id);
+			}
 		}
 
 		protected override void OnMeasureItem(MeasureItemEventArgs e)
