@@ -47,7 +47,7 @@ namespace DayViewUIExtension
 		private bool m_HideTasksSpanningDays = false;
 		private bool m_ShowFutureOcurrences = true;
 
-		private Dictionary<uint, TaskItem> m_Items;
+		private Dictionary<uint, TaskItem> m_TaskItems;
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
 		private Dictionary<uint, List<TimeBlock>> m_TimeBlocks;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
@@ -98,7 +98,7 @@ namespace DayViewUIExtension
 			m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
 
-			m_Items = new Dictionary<uint, TaskItem>();
+			m_TaskItems = new Dictionary<uint, TaskItem>();
 			m_TimeBlocks = new Dictionary<uint, List<TimeBlock>>();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
@@ -107,6 +107,8 @@ namespace DayViewUIExtension
 
 			InitializeComponent();
 		}
+
+		public IEnumerable<TaskItem> TaskItems { get { return m_TaskItems.Values; } }
 
 		// ILabelTipHandler implementation
 		public Font GetFont()
@@ -319,7 +321,7 @@ namespace DayViewUIExtension
 
 			TaskItem item;
 
-			if (m_Items.TryGetValue(dwTaskID, out item))
+			if (m_TaskItems.TryGetValue(dwTaskID, out item))
 				return IsItemDisplayable(item);
 
 			// else
@@ -437,7 +439,7 @@ namespace DayViewUIExtension
 
 			TaskItem item;
 
-			if (!m_Items.TryGetValue(selTaskID, out item))
+			if (!m_TaskItems.TryGetValue(selTaskID, out item))
 				return false;
 
 			if (!item.HasValidDates())
@@ -527,7 +529,7 @@ namespace DayViewUIExtension
 			{
 				TaskItem item;
 
-				if (m_Items.TryGetValue(selTaskID, out item))
+				if (m_TaskItems.TryGetValue(selTaskID, out item))
 				{
 					if (scrollToTask)
 					{
@@ -558,7 +560,7 @@ namespace DayViewUIExtension
 			if (allowNotify && (SelectedTaskID != prevSelTaskID))
 			{
 				TaskItem item = null;
-				m_Items.TryGetValue(m_VisibleSelectedTaskID, out item);
+				m_TaskItems.TryGetValue(m_VisibleSelectedTaskID, out item);
 
 				RaiseSelectionChanged(item);
 			}
@@ -682,7 +684,7 @@ namespace DayViewUIExtension
 
 			TaskItem item;
 
-			if (m_Items.TryGetValue(taskID, out item))
+			if (m_TaskItems.TryGetValue(taskID, out item))
 				return item;
 
 			return null;
@@ -893,7 +895,7 @@ namespace DayViewUIExtension
 				case UIExtension.UpdateType.Delete:
 				case UIExtension.UpdateType.All:
 					// Rebuild
-					m_Items.Clear();
+					m_TaskItems.Clear();
 					m_MaxTaskID = 0;
 					SelectedAppointment = null;
 					break;
@@ -911,7 +913,7 @@ namespace DayViewUIExtension
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, metaDataKey))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, metaDataKey, 0))
 				task = task.GetNextTask();
 
 			// Scroll to the selected item if it was modified and was 'visible'
@@ -924,7 +926,7 @@ namespace DayViewUIExtension
             Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth)
 		{
 			if (!task.IsValid())
 				return false;
@@ -935,22 +937,22 @@ namespace DayViewUIExtension
 			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
 
 			// Built-in attributes
-			if (m_Items.TryGetValue(taskId, out item))
+			if (m_TaskItems.TryGetValue(taskId, out item))
 			{
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false, metaDataKey);
+				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false, metaDataKey, depth);
 			}
 			else
 			{
 				item = new TaskItem();
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true, metaDataKey);
+				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true, metaDataKey, depth);
 			}
 
-			m_Items[taskId] = item;
+			m_TaskItems[taskId] = item;
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, metaDataKey))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, metaDataKey, depth + 1))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -1156,7 +1158,7 @@ namespace DayViewUIExtension
 			{
 				TaskItem item;
 
-				if (m_Items.TryGetValue(m_SelectedTaskID, out item))
+				if (m_TaskItems.TryGetValue(m_SelectedTaskID, out item))
 					appt = item;
 			}
 
@@ -1259,7 +1261,7 @@ namespace DayViewUIExtension
 			var appts = new List<Calendar.Appointment>();
 			uint nextExtId = (((m_MaxTaskID / 1000) + 1) * 1000);
 
-			foreach (var pair in m_Items)
+			foreach (var pair in m_TaskItems)
 			{
 				TaskItem item = pair.Value;
 

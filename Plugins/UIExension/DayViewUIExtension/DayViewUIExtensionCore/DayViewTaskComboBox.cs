@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -10,15 +11,6 @@ namespace DayViewUIExtension
 {
 	class DayViewTaskComboBox : ComboBox
 	{
-		private class ComboItem
-		{
-			string Title;
-			bool HasIcon = false;
-			int Level = 0;
-		}
-
-		// ------------------------------------------------------
-
 		private UIExtension.TaskIcon m_TaskIcons;
 
 		// ------------------------------------------------------
@@ -35,9 +27,41 @@ namespace DayViewUIExtension
 			// Populate combo
 			var sortedList = taskItems.OrderBy(x => x.Position);
 
-
-
+			foreach (var task in taskItems)
+				Items.Add(task);
 		}
 
+		protected override void OnMeasureItem(MeasureItemEventArgs e)
+		{
+			base.OnMeasureItem(e);
+
+			e.ItemHeight = UIExtension.TaskIcon.IconSize;
+		}
+
+		protected override void OnDrawItem(DrawItemEventArgs e)
+		{
+			var taskItem = (Items[e.Index] as TaskItem);
+
+			if (taskItem != null)
+			{
+				e.DrawBackground();
+
+				var rect = e.Bounds;
+
+				for (int i = 0; i < taskItem.Depth; i++)
+					rect.X += UIExtension.TaskIcon.IconSize;
+
+				if (taskItem.HasIcon && m_TaskIcons.Get(taskItem.Id))
+					m_TaskIcons.Draw(e.Graphics, rect.X, rect.Y);
+
+				rect.X += UIExtension.TaskIcon.IconSize;
+
+				using (var brush = new SolidBrush(e.ForeColor))
+					e.Graphics.DrawString(taskItem.Title, Font, brush, rect);
+
+				e.DrawFocusRectangle();
+			}
+
+		}
 	}
 }

@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using Abstractspoon.Tdl.PluginHelpers;
+
 namespace DayViewUIExtension
 {
 	public partial class DayViewCreateTimeBlockDlg : Form
@@ -16,9 +18,12 @@ namespace DayViewUIExtension
 			InitializeComponent();
 		}
 
-		public DayViewCreateTimeBlockDlg(uint taskId, float fromHours, float toHours)
+		public DayViewCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, UIExtension.TaskIcon taskIcons, 
+										uint taskId = 0, float fromHours = -1, float toHours = -1)
+			:
+			this()
 		{
-			InitializeComponent();
+			m_TaskCombo.Initialise(taskItems, taskIcons);
 		}
 	}
 }

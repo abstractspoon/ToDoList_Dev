@@ -246,7 +246,9 @@ namespace Abstractspoon
 
 					bool Get(UInt32 dwTaskID);
 					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y);
-					
+
+					static property int IconSize { int get(); }
+
 				private:
 					HWND m_hwndParent;
 					HIMAGELIST m_hilTaskImages;

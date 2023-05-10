@@ -528,14 +528,16 @@ namespace DayViewUIExtension
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
 		{
-			if (!m_DayView.HasSelection)
-				return;
+// 			if (!m_DayView.HasSelection)
+// 				return;
 
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
 			var taskID = m_DayView.SelectedTaskID;
 
-			var dlg = new DayViewCreateTimeBlockDlg();
+			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
+													new UIExtension.TaskIcon(m_HwndParent),
+													m_DayView.SelectedTaskID);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
@@ -823,7 +825,7 @@ namespace DayViewUIExtension
 					item.UpdateOriginalDates();
 
 					if (modifyTimeEst)
-						item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
+						item.RecalcTimeEstimate(m_WorkWeek);
 
 					return;
 				}

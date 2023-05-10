@@ -30,7 +30,6 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewCreateTimeBlockDlg));
 			this.label1 = new System.Windows.Forms.Label();
-			this.m_TaskCombo = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_FromTimeCombo = new System.Windows.Forms.ComboBox();
 			this.m_ToTimeCombo = new System.Windows.Forms.ComboBox();
@@ -41,6 +40,7 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
+			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -51,15 +51,6 @@
 			this.label1.Size = new System.Drawing.Size(31, 13);
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Task";
-			// 
-			// m_TaskCombo
-			// 
-			this.m_TaskCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_TaskCombo.FormattingEnabled = true;
-			this.m_TaskCombo.Location = new System.Drawing.Point(132, 10);
-			this.m_TaskCombo.Name = "m_TaskCombo";
-			this.m_TaskCombo.Size = new System.Drawing.Size(233, 21);
-			this.m_TaskCombo.TabIndex = 1;
 			// 
 			// label2
 			// 
@@ -118,9 +109,9 @@
 			this.checkBox1.AutoSize = true;
 			this.checkBox1.Location = new System.Drawing.Point(132, 208);
 			this.checkBox1.Name = "checkBox1";
-			this.checkBox1.Size = new System.Drawing.Size(136, 17);
+			this.checkBox1.Size = new System.Drawing.Size(181, 17);
 			this.checkBox1.TabIndex = 8;
-			this.checkBox1.Text = "Repeat until \'Due Date\'";
+			this.checkBox1.Text = "Repeat from \'Start\' to \'Due\' dates";
 			this.checkBox1.UseVisualStyleBackColor = true;
 			// 
 			// OK
@@ -153,12 +144,24 @@
 			this.label5.Size = new System.Drawing.Size(386, 2);
 			this.label5.TabIndex = 11;
 			// 
+			// m_TaskCombo
+			// 
+			this.m_TaskCombo.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+			this.m_TaskCombo.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+			this.m_TaskCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.m_TaskCombo.FormattingEnabled = true;
+			this.m_TaskCombo.Location = new System.Drawing.Point(132, 9);
+			this.m_TaskCombo.Name = "m_TaskCombo";
+			this.m_TaskCombo.Size = new System.Drawing.Size(232, 21);
+			this.m_TaskCombo.TabIndex = 0;
+			// 
 			// DayViewCreateTimeBlockDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(377, 281);
+			this.Controls.Add(this.m_TaskCombo);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.OK);
@@ -169,7 +172,6 @@
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.m_FromTimeCombo);
 			this.Controls.Add(this.label2);
-			this.Controls.Add(this.m_TaskCombo);
 			this.Controls.Add(this.label1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "DayViewCreateTimeBlockDlg";
@@ -183,7 +185,6 @@
 		#endregion
 
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.ComboBox m_TaskCombo;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.ComboBox m_FromTimeCombo;
 		private System.Windows.Forms.ComboBox m_ToTimeCombo;
@@ -194,5 +195,6 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
+		private DayViewTaskComboBox m_TaskCombo;
 	}
 }
