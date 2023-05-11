@@ -61,6 +61,7 @@ namespace Abstractspoon
 
 				WorkingDay^ WorkDay() { return m_WorkingDay; }
 				Collections::Generic::List<DayOfWeek>^ WeekendDays() { return m_WeekendDays; }
+				Collections::Generic::List<DayOfWeek>^ WeekDays();
 
 			protected:
 				WorkingDay^ m_WorkingDay;
@@ -86,6 +87,8 @@ namespace Abstractspoon
 				static int MapDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
 				static Collections::Generic::List<DayOfWeek>^ MapDaysOfWeek(int dwDays);
 				static int MapDayOfWeek(DayOfWeek day);
+				
+				static Collections::Generic::List<DayOfWeek>^ DaysOfWeek();
 			};
 		}
 	}

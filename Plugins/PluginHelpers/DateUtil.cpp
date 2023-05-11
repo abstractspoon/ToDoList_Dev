@@ -220,6 +220,17 @@ bool WorkingWeek::IsWeekend(DateTime date)
 	return m_WeekendDays->Contains(date.DayOfWeek);
 }
 
+List<DayOfWeek>^ WorkingWeek::WeekDays()
+{
+	auto weekDays = DateUtil::DaysOfWeek();
+	int i = m_WeekendDays->Count;
+
+	while (i--)
+		weekDays->Remove(m_WeekendDays[i]);
+
+	return weekDays;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 int DateUtil::WeekOfYear(DateTime date)
@@ -335,6 +346,21 @@ List<DayOfWeek>^ DateUtil::MapDaysOfWeek(int dwDays)
 
 	if (Misc::HasFlag(dwDays, DHW_FRIDAY))
 		days->Add(DayOfWeek::Friday);
+
+	return days;
+}
+
+List<DayOfWeek>^ DateUtil::DaysOfWeek()
+{
+	auto days = gcnew List<DayOfWeek>();
+
+	days->Add(DayOfWeek::Sunday);
+	days->Add(DayOfWeek::Saturday);
+	days->Add(DayOfWeek::Monday);
+	days->Add(DayOfWeek::Tuesday);
+	days->Add(DayOfWeek::Wednesday);
+	days->Add(DayOfWeek::Thursday);
+	days->Add(DayOfWeek::Friday);
 
 	return days;
 }
