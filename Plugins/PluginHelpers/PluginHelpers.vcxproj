@@ -126,6 +126,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
     <ClInclude Include="DateUtil.h" />
+    <ClInclude Include="DaysOfWeekCheckListBox.h" />
     <ClInclude Include="DPIScaling.h" />
     <ClInclude Include="DragDropUtil.h" />
     <ClInclude Include="FormsUtil.h" />
@@ -153,6 +154,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />
     <ClCompile Include="DateUtil.cpp" />
+    <ClCompile Include="DaysOfWeekCheckListBox.cpp" />
     <ClCompile Include="DPIScaling.cpp" />
     <ClCompile Include="DragDropUtil.cpp" />
     <ClCompile Include="FormsUtil.cpp" />

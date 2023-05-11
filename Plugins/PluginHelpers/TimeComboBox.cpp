@@ -151,7 +151,7 @@ bool TimeComboBox::SetTime(TimeSpan time)
 
 bool TimeComboBox::SetWorkingWeek(WorkingWeek^ workWeek)
 {
-	return (HostedTimeComboBox::SetWorkingWeek(DateUtil::MapWeekDays(workWeek->WeekendDays()),
+	return (HostedTimeComboBox::SetWorkingWeek(DateUtil::MapDaysOfWeek(workWeek->WeekendDays()),
 											   workWeek->WorkDay()->DayLengthInHours(false),
 											   workWeek->WorkDay()->StartOfDayInHours(),
 											   workWeek->WorkDay()->StartOfLunchInHours(),
