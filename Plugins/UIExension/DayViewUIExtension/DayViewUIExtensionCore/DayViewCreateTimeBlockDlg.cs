@@ -45,5 +45,16 @@ namespace DayViewUIExtension
 		{
 			get { return m_TaskCombo.SelectedTaskId; }
 		}
+
+		public List<DayOfWeek> DaysOfWeek
+		{
+			get { return m_DaysOfWeek.GetSelectedDays(); }
+			set { m_DaysOfWeek.SetSelectedDays(value); }
+		}
+
+		public DayOfWeek DayOfWeek
+		{
+			set { m_DaysOfWeek.SetSelectedDay(value); }
+		}
 	}
 }

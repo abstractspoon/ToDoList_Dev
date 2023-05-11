@@ -60,12 +60,11 @@ namespace Abstractspoon
 				void Load(Preferences^ prefs);
 
 				WorkingDay^ WorkDay() { return m_WorkingDay; }
-				Collections::Generic::List<System::DayOfWeek>^ WeekendDays() { return m_WeekendDays; }
+				Collections::Generic::List<DayOfWeek>^ WeekendDays() { return m_WeekendDays; }
 
 			protected:
 				WorkingDay^ m_WorkingDay;
-				Collections::Generic::List<System::DayOfWeek>^ m_WeekendDays;
-
+				Collections::Generic::List<DayOfWeek>^ m_WeekendDays;
 			};
 
 			// ------------------------------------------------------------------
@@ -74,8 +73,8 @@ namespace Abstractspoon
 			{
 			public:
 				static int WeekOfYear(DateTime date);
-				static int GetMaxDayOfWeekNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
-				static int GetMaxMonthNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
+				static int GetMaxDayOfWeekNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
+				static int GetMaxMonthNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
 
 				static String^ GetMonthName(int nMonth, bool shortName);
 
@@ -84,8 +83,9 @@ namespace Abstractspoon
 
 				static TimeSpan TimeOnly(DateTime date);
 
-				static int MapDaysOfWeek(Collections::Generic::List<System::DayOfWeek>^ days);
-				static Collections::Generic::List<System::DayOfWeek>^ MapDaysOfWeek(int dwDays);
+				static int MapDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
+				static Collections::Generic::List<DayOfWeek>^ MapDaysOfWeek(int dwDays);
+				static int MapDayOfWeek(DayOfWeek day);
 			};
 		}
 	}

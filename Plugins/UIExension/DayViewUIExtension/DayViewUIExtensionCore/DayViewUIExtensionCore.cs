@@ -530,7 +530,6 @@ namespace DayViewUIExtension
 		{
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
-
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
 													m_WorkWeek,
@@ -542,6 +541,8 @@ namespace DayViewUIExtension
 			{
 				dlg.FromTime = DateUtil.TimeOnly(m_DayView.SelectedDates.Start);
 				dlg.ToTime = DateUtil.TimeOnly(m_DayView.SelectedDates.End);
+
+				dlg.DayOfWeek = m_DayView.SelectedDates.Start.DayOfWeek;
 			}
 
 			if (dlg.ShowDialog() == DialogResult.OK)

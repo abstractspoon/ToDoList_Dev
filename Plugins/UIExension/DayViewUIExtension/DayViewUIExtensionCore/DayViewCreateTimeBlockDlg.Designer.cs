@@ -37,7 +37,7 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
-			this.daysOfWeekCheckListBox1 = new Abstractspoon.Tdl.PluginHelpers.DaysOfWeekCheckListBox();
+			this.m_DaysOfWeek = new Abstractspoon.Tdl.PluginHelpers.DaysOfWeekCheckListBox();
 			this.m_ToTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
 			this.m_FromTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
 			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
@@ -127,13 +127,13 @@
 			this.label5.Size = new System.Drawing.Size(579, 3);
 			this.label5.TabIndex = 11;
 			// 
-			// daysOfWeekCheckListBox1
+			// m_DaysOfWeek
 			// 
-			this.daysOfWeekCheckListBox1.Location = new System.Drawing.Point(198, 139);
-			this.daysOfWeekCheckListBox1.Name = "daysOfWeekCheckListBox1";
-			this.daysOfWeekCheckListBox1.Size = new System.Drawing.Size(348, 105);
-			this.daysOfWeekCheckListBox1.TabIndex = 14;
-			this.daysOfWeekCheckListBox1.Text = "daysOfWeekCheckListBox1";
+			this.m_DaysOfWeek.Location = new System.Drawing.Point(198, 139);
+			this.m_DaysOfWeek.Name = "m_DaysOfWeek";
+			this.m_DaysOfWeek.Size = new System.Drawing.Size(348, 105);
+			this.m_DaysOfWeek.TabIndex = 14;
+			this.m_DaysOfWeek.Text = "daysOfWeekCheckListBox1";
 			// 
 			// m_ToTimeCombo
 			// 
@@ -171,7 +171,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(566, 432);
-			this.Controls.Add(this.daysOfWeekCheckListBox1);
+			this.Controls.Add(this.m_DaysOfWeek);
 			this.Controls.Add(this.m_ToTimeCombo);
 			this.Controls.Add(this.m_FromTimeCombo);
 			this.Controls.Add(this.m_TaskCombo);
@@ -206,6 +206,6 @@
 		private DayViewTaskComboBox m_TaskCombo;
 		private Abstractspoon.Tdl.PluginHelpers.TimeComboBox m_FromTimeCombo;
 		private Abstractspoon.Tdl.PluginHelpers.TimeComboBox m_ToTimeCombo;
-		private Abstractspoon.Tdl.PluginHelpers.DaysOfWeekCheckListBox daysOfWeekCheckListBox1;
+		private Abstractspoon.Tdl.PluginHelpers.DaysOfWeekCheckListBox m_DaysOfWeek;
 	}
 }

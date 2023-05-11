@@ -93,6 +93,7 @@ void DaysOfWeekCheckListBox::OnHandleCreated(EventArgs^ e)
 	Control::OnHandleCreated(e);
 
 	m_pMFCInfo = IntPtr(HostedDaysOfWeekCheckListBox::Attach(Win32::GetHwnd(Handle), Win32::GetHfont(Font->ToHfont())));
+	CheckSetSelectedDays();
 }
 
 void DaysOfWeekCheckListBox::OnHandleDestroyed(EventArgs^ e)
@@ -114,15 +115,21 @@ List<System::DayOfWeek>^ DaysOfWeekCheckListBox::GetSelectedDays()
 	return DateUtil::MapDaysOfWeek(DayListBox(m_pMFCInfo)->GetSelectedDays());
 }
 
-void DaysOfWeekCheckListBox::SetSelectedDays(List<System::DayOfWeek>^ days)
+void DaysOfWeekCheckListBox::SetSelectedDays(List<DayOfWeek>^ days)
 {
-	if (m_pMFCInfo == IntPtr::Zero)
-		return;
+	m_SelectedDays = DateUtil::MapDaysOfWeek(days);
 
-	DayListBox(m_pMFCInfo)->SetSelectedDays(DateUtil::MapDaysOfWeek(days));
+	CheckSetSelectedDays();
 }
 
-void DaysOfWeekCheckListBox::WndProc(Windows::Forms::Message% m)
+void DaysOfWeekCheckListBox::SetSelectedDay(DayOfWeek day)
+{
+	m_SelectedDays = DateUtil::MapDayOfWeek(day);
+
+	CheckSetSelectedDays();
+}
+
+void DaysOfWeekCheckListBox::WndProc(Message% m)
 {
 	Control::WndProc(m);
 
@@ -142,4 +149,8 @@ void DaysOfWeekCheckListBox::WndProc(Windows::Forms::Message% m)
 	}
 }
 
-
+void DaysOfWeekCheckListBox::CheckSetSelectedDays()
+{
+	if (m_pMFCInfo != IntPtr::Zero)
+		DayListBox(m_pMFCInfo)->SetSelectedDays(m_SelectedDays);
+}

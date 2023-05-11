@@ -41,18 +41,22 @@ namespace Abstractspoon
 			public:
 				DaysOfWeekCheckListBox();
 
-				Collections::Generic::List<System::DayOfWeek>^ GetSelectedDays();
-				void SetSelectedDays(Collections::Generic::List<System::DayOfWeek>^ days);
+				Collections::Generic::List<DayOfWeek>^ GetSelectedDays();
+				void SetSelectedDays(Collections::Generic::List<DayOfWeek>^ days);
+				void SetSelectedDay(DayOfWeek day);
 
 				event System::EventHandler^ ChangeEvent;
 
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
+				int m_SelectedDays = 0;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;
 				void OnHandleCreated(EventArgs^ e) override;
 				void OnHandleDestroyed(EventArgs^ e) override;
+
+				void CheckSetSelectedDays();
 			};
 
 		}
