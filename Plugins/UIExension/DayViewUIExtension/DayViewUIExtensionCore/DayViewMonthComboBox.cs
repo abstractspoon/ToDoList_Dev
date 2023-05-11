@@ -11,7 +11,6 @@ namespace DayViewUIExtension
 		public DayViewMonthComboBox()
 		{
 			InitializeComponent();
-			System.Windows.Forms.Message m;
 		}
 
 		private void InitializeComponent()

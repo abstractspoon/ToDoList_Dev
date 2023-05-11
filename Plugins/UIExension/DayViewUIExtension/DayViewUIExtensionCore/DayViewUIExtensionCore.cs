@@ -530,28 +530,47 @@ namespace DayViewUIExtension
 		{
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
+			Calendar.AppointmentDates dates = null;
+
+			if (m_DayView.HasSelection)
+			{
+				dates = m_DayView.SelectedDates;
+			}
+			else if (m_DayView.SelectedAppointment != null)
+			{
+				dates = m_DayView.SelectedAppointment.Dates;
+;			}
+
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
 													m_WorkWeek,
-													m_DayView.SelectedTaskId);
+													m_DayView.SelectedTaskId,
+													dates);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 
- 			if (m_DayView.HasSelection)
-			{
-				dlg.FromTime = DateUtil.TimeOnly(m_DayView.SelectedDates.Start);
-				dlg.ToTime = DateUtil.TimeOnly(m_DayView.SelectedDates.End);
-
-				dlg.DayOfWeek = m_DayView.SelectedDates.Start.DayOfWeek;
-			}
-
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				var taskID = dlg.SelectedTaskId;
+				var taskId = dlg.SelectedTaskId;
+				var fromDate = dlg.FromDate;
+				var toDate = dlg.ToDate;
+				var fromTime = dlg.FromTime;
+				var toTime = dlg.ToTime;
 
-				if (taskID != 0)
+				if ((taskId != 0) && (fromDate <= toDate) && (fromTime < toTime))
 				{
-					m_DayView.CreateNewTaskBlock(taskID, m_DayView.SelectedDates);
+					m_DayView.SelectTask(taskId);
+
+					var date = fromDate;
+
+					do
+					{
+						dates = new Calendar.AppointmentDates((date + fromTime), (date + toTime));
+						m_DayView.CreateNewTaskBlock(taskId, dates);
+
+						date = date.AddDays(1);
+					}
+					while (date.Date <= toDate.Date);
 				}
 			}
 		}
