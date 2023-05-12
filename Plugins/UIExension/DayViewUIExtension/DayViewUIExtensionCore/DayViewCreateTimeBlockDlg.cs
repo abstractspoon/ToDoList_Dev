@@ -29,14 +29,33 @@ namespace DayViewUIExtension
 			m_TaskCombo.Initialise(taskItems, taskIcons, taskId);
 			TimeComboBox.SetWorkingWeek(workWeek);
 
+			m_DowListBox.SetSelectedDays(workWeek.WeekDays()); // default
+
 			if (dates != null)
 			{
 				m_FromDateCtrl.Value = dates.Start.Date;
-				m_ToDateCtrl.Value = dates.End.Date;
+				m_ToDateCtrl.Value = dates.End.Date.AddDays(1);
 				m_ToDateCtrl.Checked = (dates.Start.Date != dates.End.Date);
 
 				m_FromTimeCombo.SetTime(DateUtil.TimeOnly(dates.Start));
 				m_ToTimeCombo.SetTime(DateUtil.TimeOnly(dates.End));
+
+				if (m_FromDateCtrl.Value <= m_ToDateCtrl.Value)
+				{
+					var days = new List<DayOfWeek>();
+					var date = m_FromDateCtrl.Value;
+
+					do
+					{
+						if (!workWeek.IsWeekend(date))
+							days.Add(date.DayOfWeek);
+
+						date = date.AddDays(1);
+					}
+					while ((date < m_ToDateCtrl.Value) && (days.Count <= 7));
+
+					m_DowListBox.SetSelectedDays(days);
+				}
 			}
 		}
 
