@@ -562,6 +562,7 @@ namespace DayViewUIExtension
 				var toDate = dlg.ToDate;
 				var fromTime = dlg.FromTime;
 				var toTime = dlg.ToTime;
+				var days = dlg.DaysOfWeek;
 
 				if ((taskId != 0) && (fromDate <= toDate) && (fromTime < toTime))
 				{
@@ -572,7 +573,9 @@ namespace DayViewUIExtension
 					do
 					{
 						dates = new Calendar.AppointmentDates((date + fromTime), (date + toTime));
-						m_DayView.CreateNewTaskBlock(taskId, dates);
+
+						if (days.Contains(date.DayOfWeek))
+							m_DayView.CreateNewTaskBlock(taskId, dates);
 
 						date = date.AddDays(1);
 					}

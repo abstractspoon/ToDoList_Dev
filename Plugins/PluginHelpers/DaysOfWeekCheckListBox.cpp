@@ -102,6 +102,8 @@ void DaysOfWeekCheckListBox::OnHandleDestroyed(EventArgs^ e)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 	{
+		m_SelectedDays = DateUtil::MapDaysOfWeek(GetSelectedDays());
+
 		DayListBox(m_pMFCInfo)->Detach();
 		m_pMFCInfo = IntPtr::Zero;
 	}
@@ -109,10 +111,10 @@ void DaysOfWeekCheckListBox::OnHandleDestroyed(EventArgs^ e)
 
 List<System::DayOfWeek>^ DaysOfWeekCheckListBox::GetSelectedDays()
 {
-	if (m_pMFCInfo == IntPtr::Zero)
-		return nullptr;
+	if (m_pMFCInfo != IntPtr::Zero)
+		m_SelectedDays = DayListBox(m_pMFCInfo)->GetSelectedDays();
 
-	return DateUtil::MapDaysOfWeek(DayListBox(m_pMFCInfo)->GetSelectedDays());
+	return DateUtil::MapDaysOfWeek(m_SelectedDays);
 }
 
 void DaysOfWeekCheckListBox::SetSelectedDays(List<DayOfWeek>^ days)
