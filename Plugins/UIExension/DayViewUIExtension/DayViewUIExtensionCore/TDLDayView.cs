@@ -121,6 +121,10 @@ namespace DayViewUIExtension
 			return this;
 		}
 
+		public bool ForceShowSelection;
+
+		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
+
 		public uint ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
 		{
 			if (IsResizingAppointment())

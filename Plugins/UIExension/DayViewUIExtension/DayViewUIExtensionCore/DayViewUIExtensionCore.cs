@@ -549,7 +549,13 @@ namespace DayViewUIExtension
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 
-			if (dlg.ShowDialog() == DialogResult.OK)
+			m_DayView.ForceShowSelection = true;
+
+			var res = dlg.ShowDialog();
+
+			m_DayView.ForceShowSelection = false;
+			
+			if (res == DialogResult.OK)
 			{
 				var taskId = dlg.SelectedTaskId;
 				var fromDate = dlg.FromDate;
@@ -573,6 +579,7 @@ namespace DayViewUIExtension
 					while (date.Date <= toDate.Date);
 				}
 			}
+
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)
