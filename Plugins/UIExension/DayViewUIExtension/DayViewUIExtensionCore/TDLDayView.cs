@@ -606,7 +606,7 @@ namespace DayViewUIExtension
 			if (seriesList == null)
 				return false;
 
-			if (!seriesList.CreateNewSeries(fromDate, toDate, fromTime, toTime, days, syncToTaskDates))
+			if (!seriesList.AddSeries(fromDate, toDate, fromTime, toTime, days, syncToTaskDates))
 				return false;
 
 			return SelectTask(taskId);

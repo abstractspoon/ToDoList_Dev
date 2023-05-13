@@ -87,17 +87,17 @@ namespace DayViewUIExtension
 			TaskId = taskId;
 		}
 
-		public bool CreateNewSeries(DateTime fromDate,
-									DateTime toDate,
-									TimeSpan fromTime,
-									TimeSpan toTime,
-									List<DayOfWeek> days,
-									bool syncToTaskDates)
+		public bool AddSeries(DateTime fromDate,
+								DateTime toDate,
+								TimeSpan fromTime,
+								TimeSpan toTime,
+								List<DayOfWeek> days,
+								bool syncToTaskDates)
 		{
 			if ((fromDate > toDate) || (fromTime >= toTime))
 				return false;
 
-			var series = new TimeBlockSeries() { SyncToTaskDates = syncToTaskDates };
+			var series = new TimeBlockSeries(fromTime, toTime, days, syncToTaskDates);
 			var date = fromDate;
 
 			do
@@ -160,8 +160,6 @@ namespace DayViewUIExtension
 
 		static public TimeBlockSeriesList Decode(string blocks)
 		{
-			TimeBlockSeriesList seriesList = null;
-
 			var items = blocks.Split('=');
 			uint taskId = 0;
 
@@ -176,7 +174,7 @@ namespace DayViewUIExtension
 			if (items.Length == 0)
 				return null;
 
-			seriesList = new TimeBlockSeriesList(taskId);
+			var seriesList = new TimeBlockSeriesList(taskId);
 
 			foreach (var item in items)
 			{
@@ -200,14 +198,24 @@ namespace DayViewUIExtension
 	{
 		private List<TimeBlock> m_Blocks = new List<TimeBlock>();
 
+		private int m_FromMinute, m_ToMinute;
+		private int m_DaysOfWeek;
+		private bool m_SyncToTaskDates = false;
+
 		// ----------------------------
-
-		public bool SyncToTaskDates = false;
-
+		
 		public IEnumerable<TimeBlock> Blocks { get { return m_Blocks; } }
 		public int BlockCount { get { return m_Blocks.Count; } }
 
 		// ----------------------------
+
+		public TimeBlockSeries(TimeSpan from, TimeSpan to, List<DayOfWeek> days, bool syncToDates)
+		{
+			m_FromMinute = (int)from.TotalMinutes;
+			m_ToMinute = (int)to.TotalMinutes;
+			m_DaysOfWeek = DateUtil.MapDaysOfWeek(days);
+			m_SyncToTaskDates = syncToDates;
+		}
 
 		public bool AddTimeBlock(Calendar.AppointmentDates dates)
 		{
@@ -233,48 +241,61 @@ namespace DayViewUIExtension
 			foreach (var block in m_Blocks)
 				timeBlocks = timeBlocks + block.Encode() + '|';
 
-			return string.Format("{0}/{1}", (SyncToTaskDates ? 1 : 0), timeBlocks.TrimEnd('|'));
+			return string.Format("{0}:{1}:{2}:{3}/{4}", 
+								m_FromMinute,
+								m_ToMinute,
+								m_DaysOfWeek,
+								(m_SyncToTaskDates ? 1 : 0), timeBlocks.TrimEnd('|'));
 		}
 
 		static public TimeBlockSeries Decode(string blocks)
 		{
-			TimeBlockSeries series = null;
+			if (string.IsNullOrWhiteSpace(blocks))
+				return null;
 
-			if (!string.IsNullOrWhiteSpace(blocks))
+			// Split the header from the blocks
+			var items = blocks.Split('/');
+
+			if ((items.Length != 2) ||
+				string.IsNullOrWhiteSpace(items[0]) ||
+				string.IsNullOrWhiteSpace(items[1]))
 			{
-				// Split the header from the blocks
-				var items = blocks.Split('/');
-
-				if ((items.Length != 2) || 
-					string.IsNullOrWhiteSpace(items[0]) || 
-					string.IsNullOrWhiteSpace(items[1]))
-				{
-					return null;
-				}
-
-				int syncToDates = 0;
-
-				if (!int.TryParse(items[0], out syncToDates))
-				{
-					return null;
-				}
-				
-				series = new TimeBlockSeries();
-				series.SyncToTaskDates = (syncToDates != 0);
-
-				var pairs = blocks.Split('|');
-
-				foreach (var pair in pairs)
-				{
-					var dates = TimeBlock.Decode(pair);
-
-					if (dates != null)
-						series.m_Blocks.Add(dates);
-				}
-
-				if (series.m_Blocks.Count == 0)
-					return null;
+				return null;
 			}
+
+			var header = items[0].Split(':');
+
+			if (header.Length != 4)
+				return null;
+
+			int fromMins, toMins;
+			int daysOfWeek;
+			int syncToDates;
+
+			if (!int.TryParse(header[0], out fromMins) ||
+				!int.TryParse(header[1], out toMins) ||
+				!int.TryParse(header[2], out daysOfWeek) ||
+				!int.TryParse(header[3], out syncToDates))
+			{
+				return null;
+			}
+
+			var series = new TimeBlockSeries(TimeSpan.FromMinutes(fromMins), 
+											TimeSpan.FromMinutes(toMins), 
+											DateUtil.MapDaysOfWeek(daysOfWeek), 
+											(syncToDates != 0));
+			var pairs = items[1].Split('|');
+
+			foreach (var pair in pairs)
+			{
+				var dates = TimeBlock.Decode(pair);
+
+				if (dates != null)
+					series.m_Blocks.Add(dates);
+			}
+
+			if (series.m_Blocks.Count == 0)
+				return null;
 
 			return series;
 		}
