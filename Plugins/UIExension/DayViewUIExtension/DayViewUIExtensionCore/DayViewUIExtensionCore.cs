@@ -563,26 +563,10 @@ namespace DayViewUIExtension
 				var fromTime = dlg.FromTime;
 				var toTime = dlg.ToTime;
 				var days = dlg.DaysOfWeek;
+				var syncToDates = false;//dlg.SyncToTaskDates;
 
-				if ((taskId != 0) && (fromDate <= toDate) && (fromTime < toTime))
-				{
-					m_DayView.SelectTask(taskId);
-
-					var date = fromDate;
-
-					do
-					{
-						dates = new Calendar.AppointmentDates((date + fromTime), (date + toTime));
-
-						if (days.Contains(date.DayOfWeek))
-							m_DayView.CreateNewTaskBlock(taskId, dates);
-
-						date = date.AddDays(1);
-					}
-					while (date.Date <= toDate.Date);
-				}
+				m_DayView.CreateNewTaskBlockSeries(taskId, fromDate, toDate, fromTime, toTime, days, syncToDates);
 			}
-
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)

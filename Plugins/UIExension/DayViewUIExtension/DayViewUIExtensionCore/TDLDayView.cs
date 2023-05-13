@@ -49,7 +49,7 @@ namespace DayViewUIExtension
 
 		private Dictionary<uint, TaskItem> m_TaskItems;
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
-		private Dictionary<uint, List<TimeBlock>> m_TimeBlocks;
+		private TimeBlocks m_TimeBlocks;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
 		private TDLRenderer m_Renderer;
@@ -99,7 +99,7 @@ namespace DayViewUIExtension
 			m_TaskRecurrences = taskRecurrences;
 
 			m_TaskItems = new Dictionary<uint, TaskItem>();
-			m_TimeBlocks = new Dictionary<uint, List<TimeBlock>>();
+			m_TimeBlocks = new TimeBlocks();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
 
@@ -593,22 +593,34 @@ namespace DayViewUIExtension
 					(SelectionType == Calendar.SelectionType.DateRange));
 		}*/
 
-		public bool CreateNewTaskBlock(uint taskId, Calendar.AppointmentDates dates)
+		public bool CreateNewTaskBlockSeries(uint taskId,
+											DateTime fromDate,
+											DateTime toDate,
+											TimeSpan fromTime,
+											TimeSpan toTime,
+											List<DayOfWeek> days,
+											bool syncToTaskDates)
 		{
-			GetTaskTimeBlocks(taskId, true).Add(new TimeBlock(dates));
-			Invalidate();
+			var seriesList = m_TimeBlocks.GetTaskSeries(taskId, true);
 
-			return true;
+			if (seriesList == null)
+				return false;
+
+			if (!seriesList.CreateNewSeries(fromDate, toDate, fromTime, toTime, days, syncToTaskDates))
+				return false;
+
+			return SelectTask(taskId);
 		}
 
 		public bool DuplicateSelectedTimeBlock()
 		{
-			var block = (SelectedAppointment as TaskTimeBlock);
-
-			if (block == null)
-				return false;
-
-			return CreateNewTaskBlock(block.RealTaskId, block.TimeBlock);
+// 			var block = (SelectedAppointment as TaskTimeBlock);
+// 
+// 			if (block == null)
+// 				return false;
+// 
+// 			return CreateNewTaskBlock(block.RealTaskId, block.TimeBlock);
+			return false;
 		}
 
 		public void GoToToday()
@@ -823,54 +835,12 @@ namespace DayViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			string prefsKey = (key + "\\TimeBlocks");
-			prefs.DeleteProfileSection(prefsKey, true);
-
-			prefs.WriteProfileInt(prefsKey, "Count", m_TimeBlocks.Count);
-
-			int i = 0;
-			foreach (var task in m_TimeBlocks)
-			{
-				var entry = string.Format("Task{0}", i++);
-				var value = TimeBlock.EncodeTimeBlocks(task.Key, task.Value);
-
-				prefs.WriteProfileString(prefsKey, entry, value);
-			}
+			m_TimeBlocks.Save(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
 		{
-			string prefsKey = (key + "\\TimeBlocks");
-
-			int count = prefs.GetProfileInt(prefsKey, "Count", 0);
-			m_TimeBlocks.Clear();
-
-			for (int i = 0; i < count; i++)
-			{
-				var entry = string.Format("Task{0}", i);
-				var value = prefs.GetProfileString(prefsKey, entry, "");
-
-				uint taskId;
-				List<TimeBlock> timeBlocks;
-
-				if (TimeBlock.DecodeTimeBlocks(value, out taskId, out timeBlocks))
-				{
-					m_TimeBlocks.Add(taskId, timeBlocks);
-				}
-			}
-		}
-
-		protected List<TimeBlock> GetTaskTimeBlocks(uint taskId, bool autoCreate)
-		{
-			List<TimeBlock> timeBlocks = null;
-
-			if (!m_TimeBlocks.TryGetValue(taskId, out timeBlocks) && autoCreate)
-			{
-				timeBlocks = new List<TimeBlock>();
-				m_TimeBlocks[taskId] = timeBlocks;
-			}
-
-			return timeBlocks;
+			m_TimeBlocks.Load(prefs, key);
 		}
 
 		protected int FindTimeBlock(TaskTimeBlock block, List<Calendar.AppointmentDates> timeBlocks)
@@ -1316,18 +1286,21 @@ namespace DayViewUIExtension
 					}
 				}
 
-				var timeBlocks = GetTaskTimeBlocks(pair.Key, false);
+				var seriesList = m_TimeBlocks.GetTaskSeries(pair.Key, false);
 
-				if (timeBlocks != null)
+				if (seriesList != null)
 				{
-					foreach (var block in timeBlocks)
+					foreach (var series in seriesList.Series)
 					{
-						var timeBlock = new TaskTimeBlock(item, nextExtId, block);
-
-						if (IsItemWithinRange(timeBlock, start, end))
+						foreach (var block in series.Blocks)
 						{
-							m_ExtensionItems[nextExtId++] = timeBlock;
-							appts.Add(timeBlock);
+							var timeBlock = new TaskTimeBlock(item, nextExtId, block);
+
+							if (IsItemWithinRange(timeBlock, start, end))
+							{
+								m_ExtensionItems[nextExtId++] = timeBlock;
+								appts.Add(timeBlock);
+							}
 						}
 					}
 				}
@@ -1517,9 +1490,9 @@ namespace DayViewUIExtension
 			else if (SelectedAppointment is TaskTimeBlock)
 			{
 				var block = (SelectedAppointment as TaskTimeBlock);
-				var timeBlocks = GetTaskTimeBlocks(block.RealTaskId, false);
+				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
 
-				handled = timeBlocks.Remove(block.TimeBlock);
+				handled = seriesList.RemoveBlock(block.TimeBlock);
 			}
 
 			if (handled)
