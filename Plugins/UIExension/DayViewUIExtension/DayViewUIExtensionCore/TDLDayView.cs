@@ -614,13 +614,21 @@ namespace DayViewUIExtension
 
 		public bool DuplicateSelectedTimeBlock()
 		{
-// 			var block = (SelectedAppointment as TaskTimeBlock);
-// 
-// 			if (block == null)
-// 				return false;
-// 
-// 			return CreateNewTaskBlock(block.RealTaskId, block.TimeBlock);
-			return false;
+ 			var block = (SelectedAppointment as TaskTimeBlock);
+ 
+ 			if (block == null)
+ 				return false;
+
+			var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, true);
+
+			if (seriesList == null)
+				return false;
+
+			if (!seriesList.DuplicateBlock(block.TimeBlock))
+				return false;
+
+			Invalidate();
+			return true;
 		}
 
 		public void GoToToday()

@@ -75,7 +75,6 @@ namespace DayViewUIExtension
 		// ----------------------------
 
 		public IEnumerable<TimeBlockSeries> Series { get { return m_Series; } }
-
 		public uint TaskId { get; private set; }
 
 		// ----------------------------
@@ -113,6 +112,17 @@ namespace DayViewUIExtension
 
 			m_Series.Add(series);
 			return true;
+		}
+
+		public bool DuplicateBlock(TimeBlock block)
+		{
+			foreach (var series in m_Series)
+			{
+				if (series.DuplicateTimeBlock(block))
+					return true;
+			}
+
+			return false;
 		}
 
 		public bool RemoveBlock(TimeBlock block)
@@ -229,6 +239,15 @@ namespace DayViewUIExtension
 		public bool RemoveTimeBlock(TimeBlock block)
 		{
 			return m_Blocks.Remove(block);
+		}
+
+		public bool DuplicateTimeBlock(TimeBlock block)
+		{
+			if (!m_Blocks.Contains(block))
+				return false;
+
+			m_Blocks.Add(new TimeBlock(block));
+			return true;
 		}
 		
 		public string Encode()
