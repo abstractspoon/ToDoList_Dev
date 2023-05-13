@@ -145,7 +145,13 @@ namespace DayViewUIExtension
 						return m_DayView.CancelAppointmentResizing();
 
 					if (keyPress == Keys.Delete)
-						return m_DayView.DeleteSelectedAppointment();
+					{
+						if (m_DayView.CanDeleteSelectedCustomDate)
+							return m_DayView.DeleteSelectedCustomDate();
+
+						if (m_DayView.CanDeleteSelectedTimeBlock)
+							return m_DayView.DeleteSelectedTimeBlock();
+					}
 				}
 				break;
 			}
@@ -452,27 +458,50 @@ namespace DayViewUIExtension
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
-			btn8.Name = "DuplicateTimeBlock";
+			btn8.Name = "DeleteTimeBlock";
 			btn8.ImageIndex = 7;
-			btn8.Click += new EventHandler(OnDuplicateTimeBlock);
-			btn8.ToolTipText = m_Trans.Translate("Duplicate Time Block");
+			btn8.Click += new EventHandler(OnDeleteTimeBlock);
+			btn8.ToolTipText = m_Trans.Translate("Delete Time Block");
 			m_Toolbar.Items.Add(btn8);
 
-			m_Toolbar.Items.Add(new ToolStripSeparator());
-
 			var btn9 = new ToolStripButton();
+			btn9.Name = "DuplicateTimeBlock";
 			btn9.ImageIndex = 8;
-			btn9.Click += new EventHandler(OnPreferences);
-			btn9.ToolTipText = m_Trans.Translate("Preferences");
+			btn9.Click += new EventHandler(OnDuplicateTimeBlock);
+			btn9.ToolTipText = m_Trans.Translate("Duplicate Time Block");
 			m_Toolbar.Items.Add(btn9);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn10 = new ToolStripButton();
+			btn10.Name = "EditTimeBlockSeries";
 			btn10.ImageIndex = 9;
-			btn10.Click += new EventHandler(OnHelp);
-			btn10.ToolTipText = m_Trans.Translate("Online Help");
+			btn10.Click += new EventHandler(OnEditTimeBlockSeries);
+			btn10.ToolTipText = m_Trans.Translate("Edit Time Block Series");
 			m_Toolbar.Items.Add(btn10);
+
+			var btn11 = new ToolStripButton();
+			btn11.Name = "DeleteTimeBlockSeries";
+			btn11.ImageIndex = 10;
+			btn11.Click += new EventHandler(OnDeleteTimeBlockSeries);
+			btn11.ToolTipText = m_Trans.Translate("Delete Time Block Series");
+			m_Toolbar.Items.Add(btn11);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn12 = new ToolStripButton();
+			btn12.ImageIndex = 11;
+			btn12.Click += new EventHandler(OnPreferences);
+			btn12.ToolTipText = m_Trans.Translate("Preferences");
+			m_Toolbar.Items.Add(btn12);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn13 = new ToolStripButton();
+			btn13.ImageIndex = 12;
+			btn13.Click += new EventHandler(OnHelp);
+			btn13.ToolTipText = m_Trans.Translate("Online Help");
+			m_Toolbar.Items.Add(btn13);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
@@ -524,6 +553,22 @@ namespace DayViewUIExtension
 
 			UpdateToolbarButtonStates();
             UpdatedSelectedTaskDatesPosition();
+		}
+
+		private void OnDeleteTimeBlock(object sender, EventArgs e)
+		{
+			m_DayView.DeleteSelectedTimeBlock();
+		}
+
+		private void OnDeleteTimeBlockSeries(object sender, EventArgs e)
+		{
+			m_DayView.DeleteSelectedTimeBlockSeries();
+		}
+
+		private void OnEditTimeBlockSeries(object sender, EventArgs e)
+		{
+			// TODO
+			//m_DayView.EditSelectedTimeBlockSeries();
 		}
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
@@ -582,8 +627,12 @@ namespace DayViewUIExtension
 			(m_Toolbar.Items["Show14DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 14);
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
 
-			m_Toolbar.Items["NewTimeBlock"].Enabled = true/*m_DayView.CanCreateNewTimeBlock()*/;
-			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateTimeBlock();
+			m_Toolbar.Items["NewTimeBlock"].Enabled = true;
+			m_Toolbar.Items["DeleteTimeBlock"].Enabled = m_DayView.CanDeleteSelectedTimeBlock;
+			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateSelectedTimeBlock;
+
+			m_Toolbar.Items["EditTimeBlockSeries"].Enabled = m_DayView.CanEditSelectedTimeBlockSeries;
+			m_Toolbar.Items["DeleteTimeBlockSeries"].Enabled = m_DayView.CanDeleteSelectedTimeBlockSeries;
 		}
 
 		private void OnPreferences(object sender, EventArgs e)

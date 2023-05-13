@@ -580,18 +580,10 @@ namespace DayViewUIExtension
 			return (SelectedTaskId != 0);
 		}
 
-		public bool CanDuplicateTimeBlock()
+		public bool CanDuplicateSelectedTimeBlock
 		{
-			return (SelectedAppointment is TaskTimeBlock);
+			get { return (SelectedAppointment is TaskTimeBlock); }
 		}
-
-		/*public bool CanCreateNewTimeBlock()
-		{
-			// Enable button only if the user has dragged a time slot 
-			return ((SelectedAppointment != null) &&
-					(SelectedDates.Length.Ticks > 0) &&
-					(SelectionType == Calendar.SelectionType.DateRange));
-		}*/
 
 		public bool CreateNewTaskBlockSeries(uint taskId,
 											DateTime fromDate,
@@ -1387,9 +1379,8 @@ namespace DayViewUIExtension
 
 						item.Click += (s, a) =>
 						{
-							DeleteSelectedAppointment();
+							DeleteSelectedCustomDate();
 						};
-
 						menu.Items.Add(item);
 					}
 					else if (appt is TaskTimeBlock)
@@ -1400,18 +1391,35 @@ namespace DayViewUIExtension
 
 						item.Click += (s, a) =>
 						{
-							DeleteSelectedAppointment();
+							DeleteSelectedTimeBlock();
 						};
-
 						menu.Items.Add(item);
 
 						item = new ToolStripMenuItem(m_Trans.Translate("Duplicate Time Block"));
+						item.ShortcutKeys = Keys.Control | Keys.D;
 
 						item.Click += (s, a) =>
 						{
 							DuplicateSelectedTimeBlock();
 						};
+						menu.Items.Add(item);
 
+						menu.Items.Add(new ToolStripSeparator());
+
+						item = new ToolStripMenuItem(m_Trans.Translate("Edit Time Block Series"));
+
+						item.Click += (s, a) =>
+						{
+							EditSelectedTimeBlockSeries();
+						};
+						menu.Items.Add(item);
+
+						item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block Series"));
+
+						item.Click += (s, a) =>
+						{
+							DeleteSelectedTimeBlockSeries();
+						};
 						menu.Items.Add(item);
 					}
 					else
@@ -1480,10 +1488,13 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool DeleteSelectedAppointment()
+		public bool CanDeleteSelectedCustomDate
 		{
-			bool handled = false;
-
+			get { return (SelectedAppointment is CustomTaskDateAttribute); }
+		}
+		
+		public bool DeleteSelectedCustomDate()
+		{
 			if (SelectedAppointment is CustomTaskDateAttribute)
 			{
 				var custDate = (SelectedAppointment as CustomTaskDateAttribute);
@@ -1493,24 +1504,79 @@ namespace DayViewUIExtension
 				if (AppointmentMove != null)
 					AppointmentMove(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
 
-				handled = true;
+				// Move selection to 'real' task
+				SelectTask(custDate.RealTaskId);
+				Invalidate();
+
+				return true;
 			}
-			else if (SelectedAppointment is TaskTimeBlock)
+
+			// else
+			return false;
+		}
+
+		public bool CanDeleteSelectedTimeBlock
+		{
+			get { return CanEditSelectedTimeBlockSeries; }
+		}
+
+		public bool DeleteSelectedTimeBlock()
+		{
+			if (SelectedAppointment is TaskTimeBlock)
 			{
 				var block = (SelectedAppointment as TaskTimeBlock);
 				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
 
-				handled = seriesList.RemoveBlock(block.TimeBlock);
+				if (seriesList.RemoveBlock(block.TimeBlock))
+				{
+					// Move selection to 'real' task
+					SelectTask(block.RealTaskId);
+					Invalidate();
+
+					return true;
+				}
 			}
 
-			if (handled)
+			// else
+			return false;
+		}
+
+		public bool CanDeleteSelectedTimeBlockSeries
+		{
+			get { return CanDeleteSelectedTimeBlock; }
+		}
+
+		public bool DeleteSelectedTimeBlockSeries()
+		{
+			if (SelectedAppointment is TaskTimeBlock)
 			{
-				// Move selection to 'real' task
-				SelectTask((SelectedAppointment as TaskExtensionItem).RealTaskId);
-				Invalidate();
+				var block = (SelectedAppointment as TaskTimeBlock);
+				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+
+				if (seriesList.RemoveSeries(block.TimeBlock))
+				{
+					// Move selection to 'real' task
+					SelectTask(block.RealTaskId);
+					Invalidate();
+
+					return true;
+				}
 			}
 
-			return handled;
+			// else
+			return false;
+		}
+
+		public bool CanEditSelectedTimeBlockSeries
+		{
+			get { return (SelectedAppointment is TaskTimeBlock); }
+		}
+
+		public bool EditSelectedTimeBlockSeries()
+		{
+			
+
+			return false;
 		}
 
 		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
