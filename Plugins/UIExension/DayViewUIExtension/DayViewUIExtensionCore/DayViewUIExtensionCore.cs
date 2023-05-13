@@ -38,7 +38,7 @@ namespace DayViewUIExtension
 
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
-		private UIThemeToolbarRenderer m_TBRenderer;
+		private UIThemeToolbarRenderer m_ToolbarRenderer;
 		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 		
@@ -198,7 +198,7 @@ namespace DayViewUIExtension
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
 
 			m_DayView.SetUITheme(theme);
-			m_TBRenderer.SetUITheme(theme);
+			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
@@ -325,6 +325,7 @@ namespace DayViewUIExtension
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
 			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
+			m_DayView.ContextMenu += new TDLContextMenuEventHandler(OnDayViewContextMenu);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -341,6 +342,89 @@ namespace DayViewUIExtension
                 m_DayView.BorderStyle = BorderStyle.Fixed3D;
 
             Controls.Add(m_DayView);
+		}
+
+		bool OnDayViewContextMenu(object sender, MouseEventArgs e)
+		{
+			var appt = m_DayView.GetAppointmentAt(e.X, e.Y);
+
+			if ((appt == null) || m_DayView.AppointmentSupportsTaskContextMenu(appt))
+				return false;
+
+			var menu = new ContextMenuStrip();
+
+			if (appt is CustomTaskDateAttribute)
+			{
+				var item = new ToolStripMenuItem(m_Trans.Translate("Clear Custom Date"));
+				item.ShortcutKeys = Keys.Delete;
+				item.ShowShortcutKeys = true;
+
+				item.Click += (s, a) =>
+				{
+					m_DayView.DeleteSelectedCustomDate();
+				};
+				menu.Items.Add(item);
+			}
+			else if (appt is TaskTimeBlock)
+			{
+				var item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block"));
+				item.ShortcutKeys = Keys.Delete;
+				item.ShowShortcutKeys = true;
+
+				item.Click += (s, a) =>
+				{
+					m_DayView.DeleteSelectedTimeBlock();
+				};
+				menu.Items.Add(item);
+
+				// ----------------------------
+
+				item = new ToolStripMenuItem(m_Trans.Translate("Duplicate Time Block"));
+				item.ShortcutKeys = Keys.Control | Keys.D;
+
+				item.Click += (s, a) =>
+				{
+					m_DayView.DuplicateSelectedTimeBlock();
+				};
+				menu.Items.Add(item);
+
+				menu.Items.Add(new ToolStripSeparator());
+
+				// ----------------------------
+
+				item = new ToolStripMenuItem(m_Trans.Translate("Edit Time Block Series"));
+
+				item.Click += (s, a) =>
+				{
+					m_DayView.EditSelectedTimeBlockSeries();
+				};
+				menu.Items.Add(item);
+
+				// ----------------------------
+
+				item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block Series"));
+
+				item.Click += (s, a) =>
+				{
+					m_DayView.DeleteSelectedTimeBlockSeries();
+				};
+				menu.Items.Add(item);
+			}
+			else
+			{
+				Debug.Assert(false);
+			}
+
+			if (menu.Items.Count > 0)
+			{
+				menu.Items.Add(new ToolStripSeparator());
+				menu.Items.Add(m_Trans.Translate("Cancel"));
+
+				menu.Renderer = m_ToolbarRenderer;
+				menu.Show(m_DayView, e.Location);
+			}
+
+			return true; // handled
 		}
 
 		private void CreateWeekLabel()
@@ -401,8 +485,8 @@ namespace DayViewUIExtension
 			m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
             m_Toolbar.Height = (imageSize + 7); // MFC
 
-			m_TBRenderer = new UIThemeToolbarRenderer();
-			m_Toolbar.Renderer = m_TBRenderer;
+			m_ToolbarRenderer = new UIThemeToolbarRenderer();
+			m_Toolbar.Renderer = m_ToolbarRenderer;
 
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
@@ -734,7 +818,7 @@ namespace DayViewUIExtension
             Invalidate(true);
         }
 
-		private void HandleDayViewMouseClick(MouseEventArgs e, bool doubleClick)
+		private void HandleDayViewLeftMouseClick(MouseEventArgs e, bool doubleClick)
 		{
 			if (m_DayView.ReadOnly)
 				return;
@@ -758,12 +842,14 @@ namespace DayViewUIExtension
 
 		private void OnDayViewMouseClick(object sender, MouseEventArgs e)
         {
-			HandleDayViewMouseClick(e, false);
-        }
+			if (e.Button == MouseButtons.Left)
+				HandleDayViewLeftMouseClick(e, false);
+		}
 
 		private void OnDayViewMouseDoubleClick(object sender, MouseEventArgs e)
 		{
-			HandleDayViewMouseClick(e, true);
+			if (e.Button == MouseButtons.Left)
+				HandleDayViewLeftMouseClick(e, true);
 		}
 
 		private void OnDayViewMouseWheel(object sender, MouseEventArgs e)
