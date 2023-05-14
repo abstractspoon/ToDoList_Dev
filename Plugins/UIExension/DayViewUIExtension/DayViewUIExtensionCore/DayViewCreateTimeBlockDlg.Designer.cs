@@ -112,6 +112,7 @@
 			// m_FromDateCtrl
 			// 
 			this.m_FromDateCtrl.CalendarFont = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.m_FromDateCtrl.Enabled = false;
 			this.m_FromDateCtrl.Format = System.Windows.Forms.DateTimePickerFormat.Short;
 			this.m_FromDateCtrl.Location = new System.Drawing.Point(132, 77);
 			this.m_FromDateCtrl.Margin = new System.Windows.Forms.Padding(2);
@@ -122,6 +123,7 @@
 			// m_ToDateCtrl
 			// 
 			this.m_ToDateCtrl.CalendarFont = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.m_ToDateCtrl.Enabled = false;
 			this.m_ToDateCtrl.Format = System.Windows.Forms.DateTimePickerFormat.Short;
 			this.m_ToDateCtrl.Location = new System.Drawing.Point(260, 77);
 			this.m_ToDateCtrl.Margin = new System.Windows.Forms.Padding(2);
@@ -166,12 +168,10 @@
 			// m_FixedDatesRadioBtn
 			// 
 			this.m_FixedDatesRadioBtn.AutoSize = true;
-			this.m_FixedDatesRadioBtn.Checked = true;
 			this.m_FixedDatesRadioBtn.Location = new System.Drawing.Point(132, 57);
 			this.m_FixedDatesRadioBtn.Name = "m_FixedDatesRadioBtn";
 			this.m_FixedDatesRadioBtn.Size = new System.Drawing.Size(50, 17);
 			this.m_FixedDatesRadioBtn.TabIndex = 20;
-			this.m_FixedDatesRadioBtn.TabStop = true;
 			this.m_FixedDatesRadioBtn.Text = "&Fixed";
 			this.m_FixedDatesRadioBtn.UseVisualStyleBackColor = true;
 			this.m_FixedDatesRadioBtn.CheckedChanged += new System.EventHandler(this.OnDateOptionCheckChange);
@@ -179,10 +179,12 @@
 			// m_SyncToDatesRadioBtn
 			// 
 			this.m_SyncToDatesRadioBtn.AutoSize = true;
+			this.m_SyncToDatesRadioBtn.Checked = true;
 			this.m_SyncToDatesRadioBtn.Location = new System.Drawing.Point(132, 36);
 			this.m_SyncToDatesRadioBtn.Name = "m_SyncToDatesRadioBtn";
 			this.m_SyncToDatesRadioBtn.Size = new System.Drawing.Size(153, 17);
 			this.m_SyncToDatesRadioBtn.TabIndex = 21;
+			this.m_SyncToDatesRadioBtn.TabStop = true;
 			this.m_SyncToDatesRadioBtn.Text = "&Synchronised to task dates";
 			this.m_SyncToDatesRadioBtn.UseVisualStyleBackColor = true;
 			this.m_SyncToDatesRadioBtn.CheckedChanged += new System.EventHandler(this.OnDateOptionCheckChange);

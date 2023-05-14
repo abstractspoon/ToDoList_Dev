@@ -48,9 +48,10 @@ namespace DayViewUIExtension
 		private bool m_HideTasksSpanningDays = false;
 		private bool m_ShowFutureOcurrences = true;
 
-		private Dictionary<uint, TaskItem> m_TaskItems;
-		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
+		private TaskItems m_TaskItems;
 		private TimeBlocks m_TimeBlocks;
+
+		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
 		private TDLRenderer m_Renderer;
@@ -100,7 +101,7 @@ namespace DayViewUIExtension
 			m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
 
-			m_TaskItems = new Dictionary<uint, TaskItem>();
+			m_TaskItems = new TaskItems();
 			m_TimeBlocks = new TimeBlocks();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
@@ -306,7 +307,13 @@ namespace DayViewUIExtension
 			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnResolveAppointments);
 			this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
 			this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
+			this.AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
+		}
 
+		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
+		{
+			if ((SelectedAppointment != null) && SelectedAppointment.IsLongAppt() && e.Finished)
+				m_TimeBlocks.SynchroniseDates(SelectedAppointment as TaskItem);
 		}
 
 		public bool ShowLabelTips
@@ -325,13 +332,7 @@ namespace DayViewUIExtension
 			if (m_ExtensionItems.TryGetValue(dwTaskID, out extItem))
 				return IsItemDisplayable(extItem);
 
-			TaskItem item;
-
-			if (m_TaskItems.TryGetValue(dwTaskID, out item))
-				return IsItemDisplayable(item);
-
-			// else
-			return false;
+			return IsItemDisplayable(m_TaskItems.GetItem(dwTaskID));
 		}
 
 		public void SetHideParentTasks(bool hide, string tag)
@@ -443,12 +444,9 @@ namespace DayViewUIExtension
 			if (selTaskID == 0)
 				return false;
 
-			TaskItem item;
+			TaskItem item = m_TaskItems.GetItem(selTaskID);
 
-			if (!m_TaskItems.TryGetValue(selTaskID, out item))
-				return false;
-
-			if (!item.HasValidDates())
+			if ((item == null) || !item.HasValidDates())
 				return false;
 
 			from = item.StartDate;
@@ -533,9 +531,9 @@ namespace DayViewUIExtension
 
 			if (selTaskID > 0)
 			{
-				TaskItem item;
+				TaskItem item = m_TaskItems.GetItem(selTaskID);
 
-				if (m_TaskItems.TryGetValue(selTaskID, out item))
+				if (item != null)
 				{
 					if (scrollToTask)
 					{
@@ -565,9 +563,7 @@ namespace DayViewUIExtension
 			// Notify parent of changes
 			if (allowNotify && (SelectedTaskId != prevSelTaskID))
 			{
-				TaskItem item = null;
-				m_TaskItems.TryGetValue(m_VisibleSelectedTaskID, out item);
-
+				TaskItem item = m_TaskItems.GetItem(m_VisibleSelectedTaskID);
 				RaiseSelectionChanged(item);
 			}
 
@@ -700,12 +696,7 @@ namespace DayViewUIExtension
 			if (m_ExtensionItems.TryGetValue(taskID, out extItem))
 				return extItem;
 
-			TaskItem item;
-
-			if (m_TaskItems.TryGetValue(taskID, out item))
-				return item;
-
-			return null;
+			return m_TaskItems.GetItem(taskID);
 		}
 
 		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
@@ -769,6 +760,9 @@ namespace DayViewUIExtension
 
 		public bool IsItemDisplayable(Calendar.Appointment appt)
 		{
+			if (appt == null)
+				return false;
+
 			// Always show a task if it is currently being dragged
 			if (IsResizingAppointment())
 			{
@@ -866,15 +860,19 @@ namespace DayViewUIExtension
 									 IsItemDisplayable(selItem) &&
 									 IsItemWithinRange(selItem, StartDate, EndDate);
 
+			bool tasksWasEmpty = (m_TaskItems.Count == 0);
+
             switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
 				case UIExtension.UpdateType.All:
+				{
 					// Rebuild
 					m_TaskItems.Clear();
 					m_MaxTaskID = 0;
 					SelectedAppointment = null;
-					break;
+				}
+				break;
 
 				case UIExtension.UpdateType.New:
 				case UIExtension.UpdateType.Edit:
@@ -893,7 +891,7 @@ namespace DayViewUIExtension
 				task = task.GetNextTask();
 
 			// Scroll to the selected item if it was modified and was 'visible'
-			if (selTaskWasVisible && tasks.HasTask(m_SelectedTaskID))
+			if ((selTaskWasVisible || tasksWasEmpty) && tasks.HasTask(m_SelectedTaskID))
                 EnsureVisible(SelectedAppointment, true);
 
 			SelectedDates.Start = SelectedDates.End;
@@ -907,23 +905,22 @@ namespace DayViewUIExtension
 			if (!task.IsValid())
 				return false;
 
-			TaskItem item;
 			uint taskId = task.GetID();
-
 			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
 
-			// Built-in attributes
-			if (m_TaskItems.TryGetValue(taskId, out item))
-			{
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false, metaDataKey, depth);
-			}
-			else
-			{
-				item = new TaskItem();
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true, metaDataKey, depth);
-			}
+			// Get or create a new task and update it
+			bool newTask = (m_TaskItems.ContainsKey(taskId) == false);
 
-			m_TaskItems[taskId] = item;
+			TaskItem taskItem = m_TaskItems.GetItem(taskId, newTask);
+			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
+
+			// Update Time Blocks
+			if (newTask || 
+				task.HasAttribute(Task.Attribute.StartDate) || 
+				task.HasAttribute(Task.Attribute.DueDate))
+			{
+				m_TimeBlocks.SynchroniseDates(taskItem);
+			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();

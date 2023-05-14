@@ -12,6 +12,24 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
+	public class TaskItems : Dictionary<uint, TaskItem>
+	{
+		public TaskItem GetItem(uint taskId, bool autoCreate = false)
+		{
+			TaskItem taskItem;
+
+			if (!TryGetValue(taskId, out taskItem) && autoCreate)
+			{
+				taskItem = new TaskItem();
+				Add(taskId, taskItem);
+			}
+
+			return taskItem;
+		}
+	}
+
+	// ---------------------------------------------------------------
+
 	public class TDLAppointmentView : Calendar.AppointmentView
 	{
 		public TDLAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect,
@@ -234,7 +252,6 @@ namespace DayViewUIExtension
 				return false;
 
 			UInt32 taskID = task.GetID();
-
 
 			if (newTask)
 			{
