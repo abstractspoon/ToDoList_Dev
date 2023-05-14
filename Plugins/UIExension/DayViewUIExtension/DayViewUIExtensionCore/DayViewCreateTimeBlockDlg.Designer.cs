@@ -40,6 +40,8 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.m_DowCheckBox = new System.Windows.Forms.CheckBox();
+			this.m_FixedDatesRadioBtn = new System.Windows.Forms.RadioButton();
+			this.m_SyncToDatesRadioBtn = new System.Windows.Forms.RadioButton();
 			this.m_DowListBox = new Abstractspoon.Tdl.PluginHelpers.DaysOfWeekCheckListBox();
 			this.m_ToTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
 			this.m_FromTimeCombo = new Abstractspoon.Tdl.PluginHelpers.TimeComboBox();
@@ -53,22 +55,23 @@
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(31, 13);
 			this.label1.TabIndex = 0;
-			this.label1.Text = "Task";
+			this.label1.Text = "&Task";
 			// 
 			// label2
 			// 
+			this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(10, 62);
+			this.label2.Location = new System.Drawing.Point(10, 108);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(62, 13);
 			this.label2.TabIndex = 2;
-			this.label2.Text = "Time of day";
+			this.label2.Text = "Ti&me of day";
 			// 
 			// OK
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(208, 198);
+			this.OK.Location = new System.Drawing.Point(208, 228);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 9;
@@ -79,7 +82,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(289, 198);
+			this.Cancel.Location = new System.Drawing.Point(289, 228);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 10;
@@ -91,7 +94,7 @@
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-2, 186);
+			this.label5.Location = new System.Drawing.Point(-2, 216);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(386, 2);
 			this.label5.TabIndex = 11;
@@ -110,26 +113,26 @@
 			// 
 			this.m_FromDateCtrl.CalendarFont = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_FromDateCtrl.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-			this.m_FromDateCtrl.Location = new System.Drawing.Point(132, 34);
-			this.m_FromDateCtrl.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_FromDateCtrl.Location = new System.Drawing.Point(132, 77);
+			this.m_FromDateCtrl.Margin = new System.Windows.Forms.Padding(2);
 			this.m_FromDateCtrl.Name = "m_FromDateCtrl";
-			this.m_FromDateCtrl.Size = new System.Drawing.Size(105, 20);
+			this.m_FromDateCtrl.Size = new System.Drawing.Size(104, 20);
 			this.m_FromDateCtrl.TabIndex = 16;
 			// 
 			// m_ToDateCtrl
 			// 
 			this.m_ToDateCtrl.CalendarFont = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_ToDateCtrl.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-			this.m_ToDateCtrl.Location = new System.Drawing.Point(259, 34);
-			this.m_ToDateCtrl.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_ToDateCtrl.Location = new System.Drawing.Point(260, 77);
+			this.m_ToDateCtrl.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ToDateCtrl.Name = "m_ToDateCtrl";
 			this.m_ToDateCtrl.ShowCheckBox = true;
-			this.m_ToDateCtrl.Size = new System.Drawing.Size(105, 20);
+			this.m_ToDateCtrl.Size = new System.Drawing.Size(104, 20);
 			this.m_ToDateCtrl.TabIndex = 16;
 			// 
 			// label3
 			// 
-			this.label3.Location = new System.Drawing.Point(241, 35);
+			this.label3.Location = new System.Drawing.Point(241, 78);
 			this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(15, 15);
@@ -139,7 +142,8 @@
 			// 
 			// label7
 			// 
-			this.label7.Location = new System.Drawing.Point(241, 60);
+			this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.label7.Location = new System.Drawing.Point(241, 106);
 			this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(15, 15);
@@ -149,28 +153,55 @@
 			// 
 			// m_DowCheckBox
 			// 
+			this.m_DowCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.m_DowCheckBox.AutoSize = true;
-			this.m_DowCheckBox.Location = new System.Drawing.Point(13, 105);
+			this.m_DowCheckBox.Location = new System.Drawing.Point(13, 134);
 			this.m_DowCheckBox.Name = "m_DowCheckBox";
 			this.m_DowCheckBox.Size = new System.Drawing.Size(89, 17);
 			this.m_DowCheckBox.TabIndex = 19;
-			this.m_DowCheckBox.Text = "Specific days";
+			this.m_DowCheckBox.Text = "Sp&ecific days";
 			this.m_DowCheckBox.UseVisualStyleBackColor = true;
 			this.m_DowCheckBox.CheckedChanged += new System.EventHandler(this.OnDowCheckChange);
 			// 
+			// m_FixedDatesRadioBtn
+			// 
+			this.m_FixedDatesRadioBtn.AutoSize = true;
+			this.m_FixedDatesRadioBtn.Checked = true;
+			this.m_FixedDatesRadioBtn.Location = new System.Drawing.Point(132, 57);
+			this.m_FixedDatesRadioBtn.Name = "m_FixedDatesRadioBtn";
+			this.m_FixedDatesRadioBtn.Size = new System.Drawing.Size(50, 17);
+			this.m_FixedDatesRadioBtn.TabIndex = 20;
+			this.m_FixedDatesRadioBtn.TabStop = true;
+			this.m_FixedDatesRadioBtn.Text = "&Fixed";
+			this.m_FixedDatesRadioBtn.UseVisualStyleBackColor = true;
+			this.m_FixedDatesRadioBtn.CheckedChanged += new System.EventHandler(this.OnDateOptionCheckChange);
+			// 
+			// m_SyncToDatesRadioBtn
+			// 
+			this.m_SyncToDatesRadioBtn.AutoSize = true;
+			this.m_SyncToDatesRadioBtn.Location = new System.Drawing.Point(132, 36);
+			this.m_SyncToDatesRadioBtn.Name = "m_SyncToDatesRadioBtn";
+			this.m_SyncToDatesRadioBtn.Size = new System.Drawing.Size(153, 17);
+			this.m_SyncToDatesRadioBtn.TabIndex = 21;
+			this.m_SyncToDatesRadioBtn.Text = "&Synchronised to task dates";
+			this.m_SyncToDatesRadioBtn.UseVisualStyleBackColor = true;
+			this.m_SyncToDatesRadioBtn.CheckedChanged += new System.EventHandler(this.OnDateOptionCheckChange);
+			// 
 			// m_DowListBox
 			// 
+			this.m_DowListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.m_DowListBox.Enabled = false;
-			this.m_DowListBox.Location = new System.Drawing.Point(132, 105);
+			this.m_DowListBox.Location = new System.Drawing.Point(132, 134);
 			this.m_DowListBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_DowListBox.Name = "m_DowListBox";
-			this.m_DowListBox.Size = new System.Drawing.Size(232, 68);
+			this.m_DowListBox.Size = new System.Drawing.Size(232, 84);
 			this.m_DowListBox.TabIndex = 14;
 			this.m_DowListBox.Text = "daysOfWeekCheckListBox1";
 			// 
 			// m_ToTimeCombo
 			// 
-			this.m_ToTimeCombo.Location = new System.Drawing.Point(260, 58);
+			this.m_ToTimeCombo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_ToTimeCombo.Location = new System.Drawing.Point(260, 104);
 			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
 			this.m_ToTimeCombo.Size = new System.Drawing.Size(104, 23);
 			this.m_ToTimeCombo.TabIndex = 13;
@@ -178,7 +209,8 @@
 			// 
 			// m_FromTimeCombo
 			// 
-			this.m_FromTimeCombo.Location = new System.Drawing.Point(133, 59);
+			this.m_FromTimeCombo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_FromTimeCombo.Location = new System.Drawing.Point(132, 105);
 			this.m_FromTimeCombo.Name = "m_FromTimeCombo";
 			this.m_FromTimeCombo.Size = new System.Drawing.Size(104, 22);
 			this.m_FromTimeCombo.TabIndex = 12;
@@ -200,7 +232,10 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(377, 230);
+			this.ClientSize = new System.Drawing.Size(377, 260);
+			this.Controls.Add(this.label5);
+			this.Controls.Add(this.m_SyncToDatesRadioBtn);
+			this.Controls.Add(this.m_FixedDatesRadioBtn);
 			this.Controls.Add(this.m_DowCheckBox);
 			this.Controls.Add(this.label7);
 			this.Controls.Add(this.label3);
@@ -211,13 +246,14 @@
 			this.Controls.Add(this.m_ToTimeCombo);
 			this.Controls.Add(this.m_FromTimeCombo);
 			this.Controls.Add(this.m_TaskCombo);
-			this.Controls.Add(this.label5);
 			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "DayViewCreateTimeBlockDlg";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Create Time Block";
 			this.ResumeLayout(false);
@@ -242,5 +278,7 @@
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.CheckBox m_DowCheckBox;
+		private System.Windows.Forms.RadioButton m_FixedDatesRadioBtn;
+		private System.Windows.Forms.RadioButton m_SyncToDatesRadioBtn;
 	}
 }

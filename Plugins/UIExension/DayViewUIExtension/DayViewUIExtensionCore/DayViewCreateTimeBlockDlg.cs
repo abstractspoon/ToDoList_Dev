@@ -93,11 +93,17 @@ namespace DayViewUIExtension
 			set { m_DowListBox.SetSelectedDays(value); }
 		}
 
-		public bool SyncTimeBlocksToTaskDates { get { return false; } }
+		public bool SyncTimeBlocksToTaskDates { get { return m_SyncToDatesRadioBtn.Checked; } }
 
 		private void OnDowCheckChange(object sender, EventArgs e)
 		{
 			m_DowListBox.Enabled = m_DowCheckBox.Checked;
+		}
+
+		private void OnDateOptionCheckChange(object sender, EventArgs e)
+		{
+			m_FromDateCtrl.Enabled = m_FixedDatesRadioBtn.Checked;
+			m_ToDateCtrl.Enabled = m_FixedDatesRadioBtn.Checked;
 		}
 	}
 }
