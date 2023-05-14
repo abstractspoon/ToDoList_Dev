@@ -13,6 +13,20 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int CHECKSTATES[] =
+{
+	CBS_UNCHECKEDNORMAL,
+	CBS_UNCHECKEDDISABLED,
+	CBS_CHECKEDNORMAL,
+	CBS_CHECKEDDISABLED,
+	CBS_MIXEDNORMAL,
+	CBS_MIXEDDISABLED
+};
+
+const int NUMCHECKSTATES = sizeof(CHECKSTATES) / sizeof(int);
+
+/////////////////////////////////////////////////////////////////////////////
 // CCheckListBoxEx
 
 CCheckListBoxEx::CCheckListBoxEx() : m_nCheckHeight(0)
@@ -77,7 +91,6 @@ int CCheckListBoxEx::GetCheckedItems(CStringArray& aChecked) const
 	}
 	
 	return aChecked.GetSize();
-
 }
 
 BOOL CCheckListBoxEx::GetCheckByData(DWORD dwItemData) const
@@ -129,15 +142,12 @@ void CCheckListBoxEx::OnDestroy()
 void CCheckListBoxEx::PreSubclassWindow()
 {
 	CCheckListBox::PreSubclassWindow();
-
-	const int nStates[] = { CBS_UNCHECKEDNORMAL, CBS_CHECKEDNORMAL };//, CBS_MIXEDNORMAL };
-	const int nNumStates = sizeof(nStates) / sizeof(int);
 	
 	CThemed th;
 	
 	if (th.Open(this, _T("BUTTON")) && th.AreControlsThemed())
 	{
-		th.BuildImageList(m_ilCheck, BP_CHECKBOX, nStates, nNumStates);
+		th.BuildImageList(m_ilCheck, BP_CHECKBOX, CHECKSTATES, NUMCHECKSTATES);
 
 		IMAGEINFO ii;
 		m_ilCheck.GetImageInfo(0, &ii);
@@ -180,7 +190,10 @@ BOOL CCheckListBoxEx::DrawCheckbox(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		CRect rCheck;
 		GetItemCheckRect(rItem, rCheck);
 
-		m_ilCheck.Draw(pDC, GetCheck(nItem), rItem.TopLeft(), ILD_TRANSPARENT);
+		BOOL fDisabled = (!IsWindowEnabled() || !IsEnabled(lpDrawItemStruct->itemID));
+		int nImage = ((GetCheck(nItem) * 2) + (fDisabled ? 1 : 0));
+
+		m_ilCheck.Draw(pDC, nImage, rItem.TopLeft(), ILD_TRANSPARENT);
 	}
 
 	lpDrawItemStruct->rcItem.left += (m_nCheckHeight + 1);

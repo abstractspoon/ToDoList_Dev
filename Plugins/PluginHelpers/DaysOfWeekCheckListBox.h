@@ -25,6 +25,7 @@ namespace Abstractspoon
 				void SetSelectedDays(DWORD dwDays);
 
 				void DrawItem(WPARAM wp, LPARAM lp);
+				void SetEnabled(bool enabled);
 
 			protected:
 				HostedDaysOfWeekCheckListBox(HWND hwndParent);
@@ -45,6 +46,12 @@ namespace Abstractspoon
 				void SetSelectedDays(Collections::Generic::List<DayOfWeek>^ days);
 				void SetSelectedDay(DayOfWeek day);
 
+				property bool Enabled
+				{
+					bool get() { return Windows::Forms::Control::Enabled; }
+					void set(bool enabled) { SetEnabled(enabled); }
+				}
+
 				event System::EventHandler^ ChangeEvent;
 
 			private:
@@ -57,6 +64,7 @@ namespace Abstractspoon
 				void OnHandleDestroyed(EventArgs^ e) override;
 
 				void CheckSetSelectedDays();
+				void SetEnabled(bool enabled);
 			};
 
 		}

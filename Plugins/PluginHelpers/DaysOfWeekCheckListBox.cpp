@@ -32,11 +32,16 @@ HostedDaysOfWeekCheckListBox* HostedDaysOfWeekCheckListBox::Attach(HWND hwndPare
 
 	HostedDaysOfWeekCheckListBox* pCtrl = new HostedDaysOfWeekCheckListBox(hwndParent);
 
-	// Create slider to fill the entire managed client area
+	// Create control to fill the entire managed client area
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
-	pCtrl->m_ListBox.Create(WS_CHILD | WS_VISIBLE | WS_VSCROLL | /*WS_BORDER |*/ LBS_MULTICOLUMN | LBS_HASSTRINGS | LBS_OWNERDRAWFIXED, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
+	DWORD dwFlags = WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_MULTICOLUMN | LBS_HASSTRINGS | LBS_OWNERDRAWFIXED;
+
+	if (!pCtrl->m_WndOfManagedHandle.IsWindowEnabled())
+		dwFlags |= WS_DISABLED;
+
+	pCtrl->m_ListBox.Create(dwFlags, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
 	pCtrl->m_ListBox.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
 	pCtrl->m_ListBox.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
 
@@ -70,6 +75,13 @@ void HostedDaysOfWeekCheckListBox::DrawItem(WPARAM wp, LPARAM lp)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	m_ListBox.SendMessage(WM_DRAWITEM, wp, lp);
+}
+
+void HostedDaysOfWeekCheckListBox::SetEnabled(bool enabled)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_ListBox.EnableWindow(enabled);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,4 +167,12 @@ void DaysOfWeekCheckListBox::CheckSetSelectedDays()
 {
 	if (m_pMFCInfo != IntPtr::Zero)
 		DayListBox(m_pMFCInfo)->SetSelectedDays(m_SelectedDays);
+}
+
+void DaysOfWeekCheckListBox::SetEnabled(bool enabled)
+{
+	Windows::Forms::Control::Enabled = enabled;
+
+	if (m_pMFCInfo != IntPtr::Zero)
+		DayListBox(m_pMFCInfo)->SetEnabled(enabled);
 }

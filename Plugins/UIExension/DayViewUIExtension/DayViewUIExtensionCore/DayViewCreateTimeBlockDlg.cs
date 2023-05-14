@@ -81,10 +81,23 @@ namespace DayViewUIExtension
 
 		public List<DayOfWeek> DaysOfWeek
 		{
-			get { return m_DowListBox.GetSelectedDays(); }
+			get
+			{
+				if (m_DowCheckBox.Checked)
+					return m_DowListBox.GetSelectedDays();
+				
+				// else
+				return DateUtil.DaysOfWeek();
+			}
+
 			set { m_DowListBox.SetSelectedDays(value); }
 		}
 
 		public bool SyncTimeBlocksToTaskDates { get { return false; } }
+
+		private void OnDowCheckChange(object sender, EventArgs e)
+		{
+			m_DowListBox.Enabled = m_DowCheckBox.Checked;
+		}
 	}
 }
