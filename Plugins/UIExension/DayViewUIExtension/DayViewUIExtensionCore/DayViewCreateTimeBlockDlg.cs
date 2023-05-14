@@ -84,5 +84,7 @@ namespace DayViewUIExtension
 			get { return m_DowListBox.GetSelectedDays(); }
 			set { m_DowListBox.SetSelectedDays(value); }
 		}
+
+		public bool SyncTimeBlocksToTaskDates { get { return false; } }
 	}
 }

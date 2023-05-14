@@ -139,18 +139,28 @@ namespace DayViewUIExtension
 			{
 			case WM_KEYDOWN:
 				{
-					Keys keyPress = (Keys)wParam;
+					Keys keys = (Keys)wParam;
 
-					if (keyPress == Keys.Escape)
+					switch (keys)
+					{
+					case Keys.Escape:
 						return m_DayView.CancelAppointmentResizing();
 
-					if (keyPress == Keys.Delete)
-					{
-						if (m_DayView.CanDeleteSelectedCustomDate)
-							return m_DayView.DeleteSelectedCustomDate();
+					case Keys.Delete:
+						{
+							if (m_DayView.CanDeleteSelectedCustomDate)
+								return m_DayView.DeleteSelectedCustomDate();
 
-						if (m_DayView.CanDeleteSelectedTimeBlock)
-							return m_DayView.DeleteSelectedTimeBlock();
+							if (m_DayView.CanDeleteSelectedTimeBlock)
+								return m_DayView.DeleteSelectedTimeBlock();
+						}
+						break;
+
+					case (Keys.Control | Keys.F2):
+						return EditSelectedTimeBlockSeries();
+
+					case (Keys.Control | Keys.Delete):
+						return m_DayView.DeleteSelectedTimeBlockSeries();
 					}
 				}
 				break;
@@ -344,6 +354,19 @@ namespace DayViewUIExtension
             Controls.Add(m_DayView);
 		}
 
+		ToolStripMenuItem AddMenuItem(ContextMenuStrip menu, string text, Keys keys, int imageIndex)
+		{
+			var item = new ToolStripMenuItem(m_Trans.Translate(text));
+			item.ShortcutKeys = keys;
+			item.ShowShortcutKeys = (keys != Keys.None);
+
+			if (imageIndex >= 0)
+				item.Image = m_TBImageList.Images[imageIndex];
+
+			menu.Items.Add(item);
+			return item;
+		}
+
 		bool OnDayViewContextMenu(object sender, MouseEventArgs e)
 		{
 			var appt = m_DayView.GetAppointmentAt(e.X, e.Y);
@@ -355,60 +378,27 @@ namespace DayViewUIExtension
 
 			if (appt is CustomTaskDateAttribute)
 			{
-				var item = new ToolStripMenuItem(m_Trans.Translate("Clear Custom Date"));
-				item.ShortcutKeys = Keys.Delete;
-				item.ShowShortcutKeys = true;
-
-				item.Click += (s, a) =>
-				{
-					m_DayView.DeleteSelectedCustomDate();
-				};
-				menu.Items.Add(item);
+				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
+				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
 			}
 			else if (appt is TaskTimeBlock)
 			{
-				var item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block"));
-				item.ShortcutKeys = Keys.Delete;
-				item.ShowShortcutKeys = true;
+				var item = AddMenuItem(menu, "New Time Block", Keys.None, 6);
+				item.Click += (s, a) => { CreateTimeBlock(); };
 
-				item.Click += (s, a) =>
-				{
-					m_DayView.DeleteSelectedTimeBlock();
-				};
-				menu.Items.Add(item);
+				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
+				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlock(); };
 
-				// ----------------------------
-
-				item = new ToolStripMenuItem(m_Trans.Translate("Duplicate Time Block"));
-				item.ShortcutKeys = Keys.Control | Keys.D;
-
-				item.Click += (s, a) =>
-				{
-					m_DayView.DuplicateSelectedTimeBlock();
-				};
-				menu.Items.Add(item);
+				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
+				item.Click += (s, a) =>	{ m_DayView.DuplicateSelectedTimeBlock(); };
 
 				menu.Items.Add(new ToolStripSeparator());
 
-				// ----------------------------
+				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
+				item.Click += (s, a) => { m_DayView.EditSelectedTimeBlockSeries(); };
 
-				item = new ToolStripMenuItem(m_Trans.Translate("Edit Time Block Series"));
-
-				item.Click += (s, a) =>
-				{
-					m_DayView.EditSelectedTimeBlockSeries();
-				};
-				menu.Items.Add(item);
-
-				// ----------------------------
-
-				item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block Series"));
-
-				item.Click += (s, a) =>
-				{
-					m_DayView.DeleteSelectedTimeBlockSeries();
-				};
-				menu.Items.Add(item);
+				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
+				item.Click += (s, a) =>	{ m_DayView.DeleteSelectedTimeBlockSeries(); };
 			}
 			else
 			{
@@ -651,11 +641,21 @@ namespace DayViewUIExtension
 
 		private void OnEditTimeBlockSeries(object sender, EventArgs e)
 		{
+			EditSelectedTimeBlockSeries();
+		}
+
+		private bool EditSelectedTimeBlockSeries()
+		{
 			// TODO
-			//m_DayView.EditSelectedTimeBlockSeries();
+			return m_DayView.EditSelectedTimeBlockSeries();
 		}
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
+		{
+			CreateTimeBlock();
+		}
+
+		private bool CreateTimeBlock()
 		{
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
@@ -668,7 +668,7 @@ namespace DayViewUIExtension
 			else if (m_DayView.SelectedAppointment != null)
 			{
 				dates = m_DayView.SelectedAppointment.Dates;
-;			}
+			}
 
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
@@ -684,18 +684,16 @@ namespace DayViewUIExtension
 
 			m_DayView.ForceShowSelection = false;
 			
-			if (res == DialogResult.OK)
-			{
-				var taskId = dlg.SelectedTaskId;
-				var fromDate = dlg.FromDate;
-				var toDate = dlg.ToDate;
-				var fromTime = dlg.FromTime;
-				var toTime = dlg.ToTime;
-				var days = dlg.DaysOfWeek;
-				var syncToDates = false;//dlg.SyncToTaskDates;
+			if (res != DialogResult.OK)
+				return false;
 
-				m_DayView.CreateNewTaskBlockSeries(taskId, fromDate, toDate, fromTime, toTime, days, syncToDates);
-			}
+			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, 
+														dlg.FromDate, 
+														dlg.ToDate, 
+														dlg.FromTime, 
+														dlg.ToTime, 
+														dlg.DaysOfWeek, 
+														dlg.SyncTimeBlocksToTaskDates);
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)
