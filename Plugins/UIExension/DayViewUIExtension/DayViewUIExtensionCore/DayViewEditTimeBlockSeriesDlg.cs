@@ -11,28 +11,21 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-	public partial class DayViewCreateTimeBlockDlg : Form
+	public partial class DayViewEditTimeBlockSeriesDlg : Form
 	{
-		public DayViewCreateTimeBlockDlg()
+		public DayViewEditTimeBlockSeriesDlg()
 		{
 			InitializeComponent();
 		}
 
-		public DayViewCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
-										 UIExtension.TaskIcon taskIcons, 
-										 WorkingWeek workWeek,
-										 uint taskId,
-										 Calendar.AppointmentDates dates)
+		public DayViewEditTimeBlockSeriesDlg(string taskTitle,
+											WorkingWeek workWeek,
+											TimeBlockSeries series)
 			:
 			this()
 		{
-			m_TaskCombo.Initialise(taskItems, taskIcons, taskId);
-			m_Attributes.Initialise(workWeek, dates, false);
-		}
-
-		public uint SelectedTaskId
-		{
-			get { return m_TaskCombo.SelectedTaskId; }
+			m_TaskTitle.Text = taskTitle;
+			m_Attributes.Initialise(workWeek, series.Dates, true);
 		}
 
 		public DateTime FromDate { get { return m_Attributes.FromDate; } }
@@ -44,4 +37,6 @@ namespace DayViewUIExtension
 		public List<DayOfWeek> DaysOfWeek { get { return m_Attributes.DaysOfWeek; } }
 		public bool SyncTimeBlocksToTaskDates { get { return m_Attributes.SyncTimeBlocksToTaskDates; } }
 	}
+
+
 }

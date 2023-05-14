@@ -140,6 +140,17 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		public TimeBlockSeries GetSeries(TimeBlock block)
+		{
+			foreach (var series in m_Series)
+			{
+				if (series.Contains(block))
+					return series;
+			}
+
+			return null;
+		}
+
 		public bool RemoveBlock(TimeBlock block)
 		{
 			foreach (var series in m_Series)
@@ -219,13 +230,24 @@ namespace DayViewUIExtension
 
 	// --------------------------------------------------------------
 
+	public class TimeBlockSeriesAttributes
+	{
+		public TimeBlockSeriesAttributes() { }
+
+		public DateTime FromDate;
+		public DateTime ToDate;
+		public TimeSpan FromTime;
+		public TimeSpan ToTime;
+		public List<DayOfWeek> DaysOfWeek = DateUtil.DaysOfWeek();
+		public bool SyncToTaskDates = false;
+	}
+
+	// --------------------------------------------------------------
+
 	public class TimeBlockSeries
 	{
 		private List<TimeBlock> m_Blocks = new List<TimeBlock>();
-
-		private TimeSpan m_FromTime, m_ToTime;
-		private List<DayOfWeek> m_DaysOfWeek;
-		private bool m_SyncToTaskDates = false;
+		private TimeBlockSeriesAttributes m_Attributes = new TimeBlockSeriesAttributes();
 
 		// ----------------------------
 		
@@ -239,22 +261,46 @@ namespace DayViewUIExtension
 			Debug.Assert(from < to);
 			Debug.Assert(days.Count > 0);
 
-			m_FromTime = from;
-			m_ToTime = to;
-			m_DaysOfWeek = days;
-			m_SyncToTaskDates = syncToDates;
+			m_Attributes.FromTime = from;
+			m_Attributes.ToTime = to;
+			m_Attributes.DaysOfWeek = days;
+			m_Attributes.SyncToTaskDates = syncToDates;
+		}
+
+		public TimeBlockSeriesAttributes Attributes
+		{
+			get
+			{
+				var dates = Dates;
+
+				return new TimeBlockSeriesAttributes()
+				{
+					
+					FromDate = Dates.Start,
+					ToDate = Dates.End,
+					FromTime = m_Attributes.FromTime,
+					ToTime = m_Attributes.ToTime,
+					DaysOfWeek = DateUtil.MapDaysOfWeek(DateUtil.MapDaysOfWeek(m_Attributes.DaysOfWeek)),
+					SyncToTaskDates = m_Attributes.SyncToTaskDates,
+				};
+			}
+
+			set
+			{
+				// TODO
+			}
 		}
 
 		public bool SynchroniseDates(TaskItem taskItem)
 		{
-			if (!m_SyncToTaskDates)
+			if (!m_Attributes.SyncToTaskDates)
 				return false;
 
 			// Series should have been deleted if empty
 			Debug.Assert(BlockCount > 0);
 
 			bool synced = false;
-			var orgDates = MinMax();
+			var orgDates = Dates;
 
 			// Trim excess blocks outside of the new date range
 			if ((taskItem.StartDate.Date > orgDates.Start) || (taskItem.EndDate.Date < orgDates.End))
@@ -281,21 +327,24 @@ namespace DayViewUIExtension
 			return synced;
 		}
 
-		private Calendar.AppointmentDates MinMax()
+		public Calendar.AppointmentDates Dates
 		{
-			var min = DateTime.MaxValue;
-			var max = DateTime.MinValue;
-
-			foreach (var block in m_Blocks)
+			get
 			{
-				if (block.Start < min)
-					min = block.Start;
+				var min = DateTime.MaxValue;
+				var max = DateTime.MinValue;
 
-				if (block.End > max)
-					max = block.End;
+				foreach (var block in m_Blocks)
+				{
+					if (block.Start < min)
+						min = block.Start;
+
+					if (block.End > max)
+						max = block.End;
+				}
+
+				return new Calendar.AppointmentDates(min.Date, max.Date);
 			}
-
-			return new Calendar.AppointmentDates(min.Date, max.Date);
 		}
 
 		public bool AddTimeBlock(Calendar.AppointmentDates dates)
@@ -317,9 +366,9 @@ namespace DayViewUIExtension
 
 			do
 			{
-				var dates = new Calendar.AppointmentDates((date + m_FromTime), (date + m_ToTime));
+				var dates = new Calendar.AppointmentDates((date + m_Attributes.FromTime), (date + m_Attributes.ToTime));
 
-				if (m_DaysOfWeek.Contains(date.DayOfWeek) && AddTimeBlock(dates))
+				if (m_Attributes.DaysOfWeek.Contains(date.DayOfWeek) && AddTimeBlock(dates))
 					numAdded++;
 
 				date = date.AddDays(1);
@@ -327,6 +376,11 @@ namespace DayViewUIExtension
 			while (date.Date < to.Date);
 
 			return numAdded;
+		}
+
+		public bool Contains(TimeBlock block)
+		{
+			return m_Blocks.Contains(block);
 		}
 
 		public bool RemoveTimeBlock(TimeBlock block)

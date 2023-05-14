@@ -646,7 +646,28 @@ namespace DayViewUIExtension
 
 		private bool EditSelectedTimeBlockSeries()
 		{
-			// TODO
+			if (m_DayView.SelectedAppointment is TaskTimeBlock)
+			{
+				var block = (m_DayView.SelectedAppointment as TaskTimeBlock);
+				var seriesList = m_DayView.TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+
+				var series = seriesList?.GetSeries(block.TimeBlock);
+
+				if (series != null)
+				{
+					var dialog = new DayViewEditTimeBlockSeriesDlg();
+
+				}
+				if (seriesList?.RemoveSeries(block.TimeBlock) == true)
+				{
+					// Move selection to 'real' task
+					SelectTask(block.RealTaskId);
+					Invalidate();
+
+					return true;
+				}
+			}
+
 			return m_DayView.EditSelectedTimeBlockSeries();
 		}
 
