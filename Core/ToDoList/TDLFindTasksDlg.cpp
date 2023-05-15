@@ -47,6 +47,8 @@ const int DEF_BORDER_DLU	= 2;
 
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 
+const CString LAST_SEARCH(_T("_last_search_"));
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
@@ -1549,6 +1551,9 @@ int CTDLFindTasksDlg::LoadSearches()
 	{
 		const CString& sSection = aSearchSectons[nSection];
 
+		if (sSection.Find(LAST_SEARCH) >= 0)
+			continue;
+
 		int nSectionLen = sSection.GetLength();
 		int nSaved = m_aSavedSearches.GetSize();
 
@@ -1592,7 +1597,7 @@ int CTDLFindTasksDlg::LoadSearches()
 	}
 	else
 	{
-		LoadSearch(_T("_last_search_"));
+		LoadSearch(LAST_SEARCH);
 		m_sActiveSearch.Empty();
 	}
 
@@ -1622,7 +1627,7 @@ int CTDLFindTasksDlg::SaveSearches()
 	if (!m_sActiveSearch.IsEmpty())
 		SaveSearch(m_sActiveSearch);
 	else
-		SaveSearch(_T("_last_search_"));
+		SaveSearch(LAST_SEARCH);
 
 	return m_cbSearches.GetCount();
 }
