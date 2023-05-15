@@ -39,5 +39,10 @@ namespace DayViewUIExtension
 		{
 			get { return m_Attributes.Attributes; }
 		}
+
+		private void OnTaskComboSelChange(object sender, EventArgs e)
+		{
+			m_Attributes.SetDates(m_TaskCombo.SelectedTaskDates);
+		}
 	}
 }

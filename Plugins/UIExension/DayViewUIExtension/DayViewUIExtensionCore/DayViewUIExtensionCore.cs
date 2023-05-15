@@ -831,23 +831,38 @@ namespace DayViewUIExtension
 
 		private void HandleDayViewLeftMouseClick(MouseEventArgs e, bool doubleClick)
 		{
-			if (m_DayView.ReadOnly)
+			var appt = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
+
+			if (appt == null)
 				return;
 
-			var appt = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
+			// Handle icon click on all types
+			var realAppt = m_DayView.GetRealAppointment(appt);
 
-			if (appt == null || appt.Locked)
-				return;
-
-			if (m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0)
+			if (!m_DayView.ReadOnly && !realAppt.Locked &&
+				(m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0))
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
 				notify.NotifyEditIcon();
+
+				return;
 			}
-			else if (doubleClick)
+
+			// Handle double-click differently for each type
+			if (doubleClick)
 			{
-				var notify = new UIExtension.ParentNotify(m_HwndParent);
-				notify.NotifyEditLabel();
+				if (appt is TaskItem)
+				{
+					if (!m_DayView.ReadOnly && !appt.Locked)
+					{
+						var notify = new UIExtension.ParentNotify(m_HwndParent);
+						notify.NotifyEditLabel();
+					}
+				}
+				else if (appt is TaskTimeBlock)
+				{
+					EditSelectedTimeBlockSeries();
+				}
 			}
 		}
 

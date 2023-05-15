@@ -45,6 +45,15 @@ namespace DayViewUIExtension
 			}
 		}
 
+		public Calendar.AppointmentDates SelectedTaskDates
+		{
+			get
+			{
+				var selItem = (SelectedItem as TaskItem);
+				return ((selItem == null) ? null : selItem.Dates);
+			}
+		}
+
 		protected override void OnMeasureItem(MeasureItemEventArgs e)
 		{
 			base.OnMeasureItem(e);

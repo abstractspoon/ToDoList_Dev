@@ -41,16 +41,13 @@ namespace DayViewUIExtension
 
 			if (attribs != null)
 			{
-				m_SyncToDatesRadioBtn.Checked = attribs.SyncToTaskDates;
-
-				m_FromDateCtrl.Value = attribs.FromDate;
-				m_ToDateCtrl.Value = attribs.ToDate;
-				m_ToDateCtrl.Checked = (attribs.ToDate.Date > attribs.FromDate.Date);
+				SetDates(attribs.Dates);
 
 				m_FromTimeCombo.SetTime(attribs.FromTime);
 				m_ToTimeCombo.SetTime(attribs.ToTime);
 
 				m_DowListBox.SetSelectedDays(attribs.DaysOfWeek);
+				m_SyncToDatesRadioBtn.Checked = attribs.SyncToTaskDates;
 			}
 
 			EnableDisableControls();
@@ -96,6 +93,13 @@ namespace DayViewUIExtension
 					SyncToTaskDates = m_SyncToDatesRadioBtn.Checked,
 				};
 			}
+		}
+
+		public void SetDates(Calendar.AppointmentDates dates)
+		{
+			m_FromDateCtrl.Value = dates.Start.Date;
+			m_ToDateCtrl.Value = dates.End.Date;
+			m_ToDateCtrl.Checked = (dates.End.Date > dates.Start.Date);
 		}
 
 		private void OnDowCheckBoxCheckChange(object sender, EventArgs e)

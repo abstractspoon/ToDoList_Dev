@@ -247,7 +247,7 @@ namespace DayViewUIExtension
 		public uint IconHitTest(Point ptScreen)
 		{
 			var pt = PointToClient(ptScreen);
-			Calendar.Appointment appt = GetRealAppointmentAt(pt.X, pt.Y);
+			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (appt == null)
 				return 0;
