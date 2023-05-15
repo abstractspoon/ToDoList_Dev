@@ -101,14 +101,9 @@ namespace DayViewUIExtension
 			TaskId = taskId;
 		}
 
-		public bool AddSeries(DateTime fromDate,
-								DateTime toDate,
-								TimeSpan fromTime,
-								TimeSpan toTime,
-								List<DayOfWeek> days,
-								bool syncToTaskDates)
+		public bool AddSeries(TimeBlockSeriesAttributes attribs)
 		{
-			var series = TimeBlockSeries.Create(fromDate, toDate, fromTime, toTime, days, syncToTaskDates);
+			var series = TimeBlockSeries.Create(attribs);
 
 			if (series == null)
 				return false;
@@ -232,14 +227,91 @@ namespace DayViewUIExtension
 
 	public class TimeBlockSeriesAttributes
 	{
-		public TimeBlockSeriesAttributes() { }
+		public int m_DaysOfWeek = DateUtil.MapDaysOfWeek(DateUtil.DaysOfWeek());
 
-		public DateTime FromDate;
-		public DateTime ToDate;
+		// ---------------------------------
+
+		public DateTime FromDate = DateTime.MinValue;
+		public DateTime ToDate = DateTime.MaxValue;
 		public TimeSpan FromTime;
 		public TimeSpan ToTime;
-		public List<DayOfWeek> DaysOfWeek = DateUtil.DaysOfWeek();
 		public bool SyncToTaskDates = false;
+
+		public List<DayOfWeek> DaysOfWeek
+		{
+			get { return DateUtil.MapDaysOfWeek(m_DaysOfWeek); }
+			set { m_DaysOfWeek = DateUtil.MapDaysOfWeek(value); }
+		}
+
+		// ---------------------------------
+
+		public TimeBlockSeriesAttributes() { }
+		public TimeBlockSeriesAttributes(TimeBlockSeriesAttributes attribs)
+		{
+			Debug.Assert(attribs.IsValid);
+
+			FromDate = attribs.FromDate;
+			ToDate = attribs.ToDate;
+			FromTime = attribs.FromTime;
+			ToTime = attribs.ToTime;
+			m_DaysOfWeek = attribs.m_DaysOfWeek;
+			SyncToTaskDates = attribs.SyncToTaskDates;
+		}
+
+		public string Encode()
+		{
+			return string.Format("{0}:{1}:{2}:{3}/{4}",
+								FromTime.TotalMinutes,
+								ToTime.TotalMinutes,
+								m_DaysOfWeek,
+								(SyncToTaskDates ? 1 : 0));
+		}
+
+		static public TimeBlockSeriesAttributes Decode(string header)
+		{
+			var items = header.Split(':');
+
+			if (items.Length != 4)
+				return null;
+
+			int fromMins, toMins;
+			int daysOfWeek;
+			int syncToDates;
+
+			if (!int.TryParse(items[0], out fromMins) ||
+				!int.TryParse(items[1], out toMins) ||
+				!int.TryParse(items[2], out daysOfWeek) ||
+				!int.TryParse(items[3], out syncToDates))
+			{
+				return null;
+			}
+
+			return new TimeBlockSeriesAttributes()
+			{
+				FromTime = TimeSpan.FromMinutes(fromMins),
+				ToTime = TimeSpan.FromMinutes(toMins),
+				m_DaysOfWeek = daysOfWeek,
+				SyncToTaskDates =(syncToDates != 0)
+			};
+		}
+
+		public bool IsValid
+		{
+			get
+			{
+				return ((FromDate.Date > DateTime.MinValue) &&
+						(ToDate.Date < DateTime.MaxValue) &&
+						(FromDate.Date <= ToDate.Date) &&
+						(FromTime < ToTime) &&
+						(m_DaysOfWeek > 0));
+			}
+		}
+
+		public Calendar.AppointmentDates Dates
+		{
+			get { return new Calendar.AppointmentDates(FromDate.Date, ToDate.Date); }
+			set { FromDate = value.Start.Date; ToDate = value.End.Date; }
+		}
 	}
 
 	// --------------------------------------------------------------
@@ -247,7 +319,7 @@ namespace DayViewUIExtension
 	public class TimeBlockSeries
 	{
 		private List<TimeBlock> m_Blocks = new List<TimeBlock>();
-		private TimeBlockSeriesAttributes m_Attributes = new TimeBlockSeriesAttributes();
+		private TimeBlockSeriesAttributes m_Attributes;
 
 		// ----------------------------
 		
@@ -256,15 +328,25 @@ namespace DayViewUIExtension
 
 		// ----------------------------
 
-		public TimeBlockSeries(TimeSpan from, TimeSpan to, List<DayOfWeek> days, bool syncToDates)
+		public TimeBlockSeries()
 		{
-			Debug.Assert(from < to);
-			Debug.Assert(days.Count > 0);
+			m_Attributes = new TimeBlockSeriesAttributes();
+		}
 
-			m_Attributes.FromTime = from;
-			m_Attributes.ToTime = to;
-			m_Attributes.DaysOfWeek = days;
-			m_Attributes.SyncToTaskDates = syncToDates;
+		public TimeBlockSeries(TimeBlockSeriesAttributes attribs) : this(attribs, true)
+		{
+			
+		}
+
+		protected TimeBlockSeries(TimeBlockSeriesAttributes attribs, bool addBlocks)
+		{
+			if (attribs.IsValid)
+			{
+				m_Attributes = new TimeBlockSeriesAttributes(attribs);
+
+				if (addBlocks)
+					AddBlocks(attribs.FromDate, attribs.ToDate);
+			}
 		}
 
 		public TimeBlockSeriesAttributes Attributes
@@ -275,7 +357,6 @@ namespace DayViewUIExtension
 
 				return new TimeBlockSeriesAttributes()
 				{
-					
 					FromDate = Dates.Start,
 					ToDate = Dates.End,
 					FromTime = m_Attributes.FromTime,
@@ -284,11 +365,11 @@ namespace DayViewUIExtension
 					SyncToTaskDates = m_Attributes.SyncToTaskDates,
 				};
 			}
+		}
 
-			set
-			{
-				// TODO
-			}
+		public bool IsValid
+		{
+			get { return (m_Attributes.IsValid && (BlockCount > 0)); }
 		}
 
 		public bool SynchroniseDates(TaskItem taskItem)
@@ -407,29 +488,14 @@ namespace DayViewUIExtension
 			foreach (var block in m_Blocks)
 				timeBlocks = timeBlocks + block.Encode() + '|';
 
-			return string.Format("{0}:{1}:{2}:{3}/{4}", 
-								m_FromTime.TotalMinutes,
-								m_ToTime.TotalMinutes,
-								DateUtil.MapDaysOfWeek(m_DaysOfWeek),
-								(m_SyncToTaskDates ? 1 : 0), timeBlocks.TrimEnd('|'));
+			return string.Format("{0}/{1}", m_Attributes.Encode(), timeBlocks.TrimEnd('|'));
 		}
 
-		static public TimeBlockSeries Create(DateTime fromDate,
-											DateTime toDate,
-											TimeSpan fromTime,
-											TimeSpan toTime,
-											List<DayOfWeek> days,
-											bool syncToTaskDates)
+		static public TimeBlockSeries Create(TimeBlockSeriesAttributes attribs)
 		{
-			if ((fromDate > toDate) || (fromTime >= toTime))
-				return null;
+			var series = new TimeBlockSeries(attribs, true);
 
-			var series = new TimeBlockSeries(fromTime, toTime, days, syncToTaskDates);
-
-			if (series.AddBlocks(fromDate, toDate) == 0)
-				return null;
-
-			return series;
+			return series.IsValid ? series : null;
 		}
 
 		static public TimeBlockSeries Decode(string blocks)
@@ -447,27 +513,12 @@ namespace DayViewUIExtension
 				return null;
 			}
 
-			var header = items[0].Split(':');
+			var attribs = TimeBlockSeriesAttributes.Decode(items[0]);
 
-			if (header.Length != 4)
+			if (attribs == null)
 				return null;
 
-			int fromMins, toMins;
-			int daysOfWeek;
-			int syncToDates;
-
-			if (!int.TryParse(header[0], out fromMins) ||
-				!int.TryParse(header[1], out toMins) ||
-				!int.TryParse(header[2], out daysOfWeek) ||
-				!int.TryParse(header[3], out syncToDates))
-			{
-				return null;
-			}
-
-			var series = new TimeBlockSeries(TimeSpan.FromMinutes(fromMins), 
-											TimeSpan.FromMinutes(toMins), 
-											DateUtil.MapDaysOfWeek(daysOfWeek), 
-											(syncToDates != 0));
+			var series = new TimeBlockSeries(attribs, false);
 			var pairs = items[1].Split('|');
 
 			foreach (var pair in pairs)

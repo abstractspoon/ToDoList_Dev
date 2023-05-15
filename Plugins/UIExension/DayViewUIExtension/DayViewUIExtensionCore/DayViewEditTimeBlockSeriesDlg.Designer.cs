@@ -87,7 +87,6 @@
 			// 
 			// m_Attributes
 			// 
-			this.m_Attributes.DaysOfWeek = ((System.Collections.Generic.List<System.DayOfWeek>)(resources.GetObject("m_Attributes.DaysOfWeek")));
 			this.m_Attributes.Location = new System.Drawing.Point(5, 35);
 			this.m_Attributes.Name = "m_Attributes";
 			this.m_Attributes.Size = new System.Drawing.Size(364, 191);

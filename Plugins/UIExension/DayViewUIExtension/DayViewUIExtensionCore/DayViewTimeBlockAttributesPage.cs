@@ -33,38 +33,23 @@ namespace DayViewUIExtension
 			EnableDisableControls();
 		}
 
-		public void Initialise(WorkingWeek workWeek, Calendar.AppointmentDates dates, bool editMode)
+		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
 
 			m_DowListBox.SetSelectedDays(workWeek.WeekDays()); // default
 			m_EditMode = editMode;
 
-			if (dates != null)
+			if (attribs != null)
 			{
-				m_FromDateCtrl.Value = dates.Start.Date;
-				m_ToDateCtrl.Value = dates.End.Date.AddDays(1);
-				m_ToDateCtrl.Checked = (dates.Start.Date != dates.End.Date);
+				m_FromDateCtrl.Value = attribs.FromDate.Date;
+				m_ToDateCtrl.Value = attribs.ToDate.Date;
+				m_ToDateCtrl.Checked = (attribs.ToDate.Date > attribs.FromDate.Date);
 
-				m_FromTimeCombo.SetTime(DateUtil.TimeOnly(dates.Start));
-				m_ToTimeCombo.SetTime(DateUtil.TimeOnly(dates.End));
+				m_FromTimeCombo.SetTime(DateUtil.TimeOnly(attribs.FromDate));
+				m_ToTimeCombo.SetTime(DateUtil.TimeOnly(attribs.ToDate));
 
-				if (m_FromDateCtrl.Value <= m_ToDateCtrl.Value)
-				{
-					var days = new List<DayOfWeek>();
-					var date = m_FromDateCtrl.Value;
-
-					do
-					{
-						if (!workWeek.IsWeekend(date))
-							days.Add(date.DayOfWeek);
-
-						date = date.AddDays(1);
-					}
-					while ((date < m_ToDateCtrl.Value) && (days.Count <= 7));
-
-					m_DowListBox.SetSelectedDays(days);
-				}
+				m_DowListBox.SetSelectedDays(attribs.DaysOfWeek);
 			}
 		}
 
@@ -91,36 +76,21 @@ namespace DayViewUIExtension
 			}
 		}
 		
-		public DateTime FromDate { get { return m_FromDateCtrl.Value.Date; } }
-		public DateTime ToDate
+		public TimeBlockSeriesAttributes Attributes
 		{
 			get
 			{
-				if (m_ToDateCtrl.Checked)
-					return m_ToDateCtrl.Value.Date;
-
-				return FromDate;
+				return new TimeBlockSeriesAttributes()
+				{
+					FromDate = m_FromDateCtrl.Value.Date,
+					ToDate = (m_ToDateCtrl.Checked ? m_ToDateCtrl.Value.Date : m_FromDateCtrl.Value.Date),
+					FromTime = m_FromTimeCombo.GetTime(),
+					ToTime = m_ToTimeCombo.GetTime(),
+					DaysOfWeek = (m_DowCheckBox.Checked ? m_DowListBox.GetSelectedDays() : DateUtil.DaysOfWeek()),
+					SyncToTaskDates = m_SyncToDatesRadioBtn.Checked,
+				};
 			}
 		}
-
-		public TimeSpan FromTime { get { return m_FromTimeCombo.GetTime(); } }
-		public TimeSpan ToTime { get { return m_ToTimeCombo.GetTime(); } }
-
-		public List<DayOfWeek> DaysOfWeek
-		{
-			get
-			{
-				if (m_DowCheckBox.Checked)
-					return m_DowListBox.GetSelectedDays();
-				
-				// else
-				return DateUtil.DaysOfWeek();
-			}
-
-			set { m_DowListBox.SetSelectedDays(value); }
-		}
-
-		public bool SyncTimeBlocksToTaskDates { get { return m_SyncToDatesRadioBtn.Checked; } }
 
 		private void OnDowCheckChange(object sender, EventArgs e)
 		{

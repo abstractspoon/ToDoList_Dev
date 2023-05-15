@@ -395,7 +395,7 @@ namespace DayViewUIExtension
 				menu.Items.Add(new ToolStripSeparator());
 
 				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
-				item.Click += (s, a) => { m_DayView.EditSelectedTimeBlockSeries(); };
+				item.Click += (s, a) => { EditSelectedTimeBlockSeries(); };
 
 				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
 				item.Click += (s, a) =>	{ m_DayView.DeleteSelectedTimeBlockSeries(); };
@@ -649,26 +649,21 @@ namespace DayViewUIExtension
 			if (m_DayView.SelectedAppointment is TaskTimeBlock)
 			{
 				var block = (m_DayView.SelectedAppointment as TaskTimeBlock);
-				var seriesList = m_DayView.TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+				var attribs = m_DayView.SelectedTimeBlockSeriesAttributes;
 
-				var series = seriesList?.GetSeries(block.TimeBlock);
-
-				if (series != null)
+				if (attribs != null)
 				{
-					var dialog = new DayViewEditTimeBlockSeriesDlg();
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, attribs);
+					FormsUtil.SetFont(dlg, m_ControlsFont);
 
-				}
-				if (seriesList?.RemoveSeries(block.TimeBlock) == true)
-				{
-					// Move selection to 'real' task
-					SelectTask(block.RealTaskId);
-					Invalidate();
+					if (dlg.ShowDialog() != DialogResult.OK)
+						return false;
 
-					return true;
+					return m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes);
 				}
 			}
 
-			return m_DayView.EditSelectedTimeBlockSeries();
+			return false;
 		}
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
@@ -691,11 +686,14 @@ namespace DayViewUIExtension
 				dates = m_DayView.SelectedAppointment.Dates;
 			}
 
+			var attribs = new TimeBlockSeriesAttributes() { Dates = dates };
+
+
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
 													m_WorkWeek,
 													m_DayView.SelectedTaskId,
-													dates);
+													attribs);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 
@@ -708,13 +706,7 @@ namespace DayViewUIExtension
 			if (res != DialogResult.OK)
 				return false;
 
-			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, 
-														dlg.FromDate, 
-														dlg.ToDate, 
-														dlg.FromTime, 
-														dlg.ToTime, 
-														dlg.DaysOfWeek, 
-														dlg.SyncTimeBlocksToTaskDates);
+			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, dlg.Attributes);
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)

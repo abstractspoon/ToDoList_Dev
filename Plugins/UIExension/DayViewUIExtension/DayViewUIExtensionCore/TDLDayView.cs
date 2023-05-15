@@ -583,20 +583,14 @@ namespace DayViewUIExtension
 			get { return (SelectedAppointment is TaskTimeBlock); }
 		}
 
-		public bool CreateNewTaskBlockSeries(uint taskId,
-											DateTime fromDate,
-											DateTime toDate,
-											TimeSpan fromTime,
-											TimeSpan toTime,
-											List<DayOfWeek> days,
-											bool syncToTaskDates)
+		public bool CreateNewTaskBlockSeries(uint taskId, TimeBlockSeriesAttributes attribs)
 		{
 			var seriesList = m_TimeBlocks.GetTaskSeries(taskId, true);
 
 			if (seriesList == null)
 				return false;
 
-			if (!seriesList.AddSeries(fromDate, toDate, fromTime, toTime, days, syncToTaskDates))
+			if (!seriesList.AddSeries(attribs))
 				return false;
 
 			return SelectTask(taskId);
@@ -1494,12 +1488,31 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		public TimeBlockSeriesAttributes SelectedTimeBlockSeriesAttributes
+		{
+			get
+			{
+				if (SelectedAppointment is TaskTimeBlock)
+				{
+					var block = (SelectedAppointment as TaskTimeBlock);
+					var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+
+					var series = seriesList?.GetSeries(block.TimeBlock);
+
+					return series?.Attributes;
+				}
+
+				// else
+				return null;
+			}
+		}
+
 		public bool CanEditSelectedTimeBlockSeries
 		{
 			get { return (SelectedAppointment is TaskTimeBlock); }
 		}
 
-		public bool EditSelectedTimeBlockSeries()
+		public bool EditSelectedTimeBlockSeries(TimeBlockSeriesAttributes attribs)
 		{
 			
 
