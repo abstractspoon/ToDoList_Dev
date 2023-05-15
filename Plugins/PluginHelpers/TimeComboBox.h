@@ -25,6 +25,7 @@ namespace Abstractspoon
 				BOOL Set24HourTime(double dTime); // -1 for 'no time'
 
 				void DrawItem(WPARAM wp, LPARAM lp);
+				void SetEnabled(bool enabled);
 
 				static BOOL SetWorkingWeek(DWORD dwWeekendDays, double dLengthInHours, double dStartInHours, double dLunchStartInHours, double dLunchEndInHours);
 
@@ -47,8 +48,14 @@ namespace Abstractspoon
 				bool SetTime(TimeSpan time);
 				bool SetTime(DateTime date);
 
+				property bool Enabled
+				{
+					bool get() { return Windows::Forms::Control::Enabled; }
+					void set(bool enabled) { SetEnabled(enabled); }
+				}
+
 				static bool SetWorkingWeek(WorkingWeek^ workWeek);
-				
+
 				event System::EventHandler^ ChangeEvent;
 
 			private:
@@ -61,6 +68,7 @@ namespace Abstractspoon
 				void OnHandleDestroyed(EventArgs^ e) override;
 
 				bool CheckSetTime();
+				void SetEnabled(bool enabled);
 			};
 
 		}

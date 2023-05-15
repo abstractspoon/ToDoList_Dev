@@ -30,7 +30,6 @@ namespace DayViewUIExtension
 		public DayViewTimeBlockAttributesPage()
 		{
 			InitializeComponent();
-			EnableDisableControls();
 		}
 
 		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode)
@@ -42,15 +41,19 @@ namespace DayViewUIExtension
 
 			if (attribs != null)
 			{
-				m_FromDateCtrl.Value = attribs.FromDate.Date;
-				m_ToDateCtrl.Value = attribs.ToDate.Date;
+				m_SyncToDatesRadioBtn.Checked = attribs.SyncToTaskDates;
+
+				m_FromDateCtrl.Value = attribs.FromDate;
+				m_ToDateCtrl.Value = attribs.ToDate;
 				m_ToDateCtrl.Checked = (attribs.ToDate.Date > attribs.FromDate.Date);
 
-				m_FromTimeCombo.SetTime(DateUtil.TimeOnly(attribs.FromDate));
-				m_ToTimeCombo.SetTime(DateUtil.TimeOnly(attribs.ToDate));
+				m_FromTimeCombo.SetTime(attribs.FromTime);
+				m_ToTimeCombo.SetTime(attribs.ToTime);
 
 				m_DowListBox.SetSelectedDays(attribs.DaysOfWeek);
 			}
+
+			EnableDisableControls();
 		}
 
 		private void EnableDisableControls()
@@ -68,11 +71,14 @@ namespace DayViewUIExtension
 
 			if (m_EditMode)
 			{
+				m_SyncToDatesRadioBtn.Enabled = m_DateCheckBox.Checked;
+				m_FixedDatesRadioBtn.Enabled = m_DateCheckBox.Checked;
+
 				m_FromDateCtrl.Enabled &= m_DateCheckBox.Checked;
 				m_ToDateCtrl.Enabled &= m_DateCheckBox.Checked;
 
-				m_FromTimeCombo.Enabled &= m_TimeCheckBox.Checked;
-				m_ToTimeCombo.Enabled &= m_TimeCheckBox.Checked;
+				m_FromTimeCombo.Enabled = m_TimeCheckBox.Checked;
+				m_ToTimeCombo.Enabled = m_TimeCheckBox.Checked;
 			}
 		}
 		
@@ -92,7 +98,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private void OnDowCheckChange(object sender, EventArgs e)
+		private void OnDowCheckBoxCheckChange(object sender, EventArgs e)
 		{
 			EnableDisableControls();
 		}
@@ -102,5 +108,14 @@ namespace DayViewUIExtension
 			EnableDisableControls();
 		}
 
+		private void OnDateCheckBoxCheckChange(object sender, EventArgs e)
+		{
+			EnableDisableControls();
+		}
+
+		private void OnTimeCheckBoxCheckChange(object sender, EventArgs e)
+		{
+			EnableDisableControls();
+		}
 	}
 }

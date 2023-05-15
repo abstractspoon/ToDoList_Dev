@@ -38,7 +38,12 @@ HostedTimeComboBox* HostedTimeComboBox::Attach(HWND hwndParent, HFONT hFont)
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
-	pCtrl->m_Combo.Create(WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWN | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
+	DWORD dwFlags = WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWN | CBS_HASSTRINGS | CBS_OWNERDRAWFIXED;
+
+	if (!pCtrl->m_WndOfManagedHandle.IsWindowEnabled())
+		dwFlags |= WS_DISABLED;
+
+	pCtrl->m_Combo.Create(dwFlags, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
 	pCtrl->m_Combo.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
 
 	return pCtrl;
@@ -84,6 +89,13 @@ BOOL HostedTimeComboBox::SetWorkingWeek(DWORD dwWeekendDays, double dLengthInHou
 									dStartInHours,
 									dLunchStartInHours,
 									dLunchEndInHours);
+}
+
+void HostedTimeComboBox::SetEnabled(bool enabled)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Combo.EnableWindow(enabled);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,5 +198,12 @@ bool TimeComboBox::CheckSetTime()
 	return (Combo(m_pMFCInfo)->Set24HourTime(m_Time.Hours + (m_Time.Minutes / 60.0)) != FALSE);
 }
 
+void TimeComboBox::SetEnabled(bool enabled)
+{
+	Windows::Forms::Control::Enabled = enabled;
+
+	if (m_pMFCInfo != IntPtr::Zero)
+		Combo(m_pMFCInfo)->SetEnabled(enabled);
+}
 
 

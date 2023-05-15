@@ -248,8 +248,6 @@ namespace DayViewUIExtension
 		public TimeBlockSeriesAttributes() { }
 		public TimeBlockSeriesAttributes(TimeBlockSeriesAttributes attribs)
 		{
-			Debug.Assert(attribs.IsValid);
-
 			FromDate = attribs.FromDate;
 			ToDate = attribs.ToDate;
 			FromTime = attribs.FromTime;
@@ -260,7 +258,7 @@ namespace DayViewUIExtension
 
 		public string Encode()
 		{
-			return string.Format("{0}:{1}:{2}:{3}/{4}",
+			return string.Format("{0}:{1}:{2}:{3}",
 								FromTime.TotalMinutes,
 								ToTime.TotalMinutes,
 								m_DaysOfWeek,
@@ -340,13 +338,10 @@ namespace DayViewUIExtension
 
 		protected TimeBlockSeries(TimeBlockSeriesAttributes attribs, bool addBlocks)
 		{
-			if (attribs.IsValid)
-			{
-				m_Attributes = new TimeBlockSeriesAttributes(attribs);
+			m_Attributes = new TimeBlockSeriesAttributes(attribs);
 
-				if (addBlocks)
-					AddBlocks(attribs.FromDate, attribs.ToDate);
-			}
+			if (addBlocks)
+				AddBlocks(attribs.FromDate, attribs.ToDate);
 		}
 
 		public TimeBlockSeriesAttributes Attributes
@@ -369,7 +364,7 @@ namespace DayViewUIExtension
 
 		public bool IsValid
 		{
-			get { return (m_Attributes.IsValid && (BlockCount > 0)); }
+			get { return ((m_Attributes != null) && m_Attributes.IsValid && (BlockCount > 0)); }
 		}
 
 		public bool SynchroniseDates(TaskItem taskItem)
@@ -454,7 +449,7 @@ namespace DayViewUIExtension
 
 				date = date.AddDays(1);
 			}
-			while (date.Date < to.Date);
+			while (date.Date <= to.Date);
 
 			return numAdded;
 		}
