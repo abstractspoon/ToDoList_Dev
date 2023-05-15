@@ -96,6 +96,7 @@ void CTDLToolbarButtonListCtrl::InitState()
 	ShowGrid(TRUE, TRUE);
 
 	CreateControl(m_cbMenuItems, IDC_MENUID_COMBO, CBS_DROPDOWNLIST); // no sort
+	CLocalizer::EnableTranslation(m_cbMenuItems, FALSE);
 
 	CTDCMainMenu menu;
 	VERIFY(menu.LoadMenu());

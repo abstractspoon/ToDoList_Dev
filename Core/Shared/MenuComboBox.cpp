@@ -49,6 +49,7 @@ BOOL CMenuComboBox::Initialise(UINT nMenuID, UINT nSeparatorResID)
 		return FALSE;
 
 	CLocalizer::TranslateMenu(menu);
+	CLocalizer::EnableTranslation(*this, FALSE);
 
 	return Initialise(menu, nSeparatorResID);
 }
