@@ -92,10 +92,13 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 		
 		while (hSibling)
 		{
+			// Grab next sibling before we potentially delete this one
+			HTASKITEM hNextSibling = tasks.GetNextTask(hSibling);
+
 			// FALSE == don't recurse on siblings
 			RemoveTaskReferences(tasks, hSibling, FALSE);
 			
-			hSibling = tasks.GetNextTask(hSibling);
+			hSibling = hNextSibling;
 		}
 	}
 
