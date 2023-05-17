@@ -910,8 +910,16 @@ namespace Calendar
             // Flicker free
         }
 
-        protected override void OnMouseDown(MouseEventArgs e)
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
+			if (ActiveTool == selectionTool)
+				selectionTool.Reset();
+
+			base.OnMouseDoubleClick(e);
+		}
+
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
 			// Ignore all clicks on the day header
 			if (e.Y > DayHeaderHeight)
 			{
