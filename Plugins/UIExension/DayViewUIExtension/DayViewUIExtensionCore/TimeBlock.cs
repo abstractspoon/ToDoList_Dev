@@ -249,7 +249,7 @@ namespace DayViewUIExtension
 		public DateTime ToDate = DateTime.MaxValue;
 		public TimeSpan FromTime;
 		public TimeSpan ToTime;
-		public bool SyncToTaskDates = false;
+		public bool SyncToTaskDates = true;
 
 		public List<DayOfWeek> DaysOfWeek
 		{

@@ -41,6 +41,9 @@ namespace DayViewUIExtension
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
 		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
+
+		private TimeBlockSeriesAttributes m_DefaultNewTimeBlockAttributes;
+		private TimeBlockSeriesAttributes.EditMask m_DefaultTimeBlockEditMask;
 		
 		// --------------------------------------------------------------------------------------
 
@@ -50,6 +53,9 @@ namespace DayViewUIExtension
 			m_Trans = trans;
 			m_TypeId = typeID;
 			m_UiName = uiName;
+
+			m_DefaultNewTimeBlockAttributes = new TimeBlockSeriesAttributes();
+			m_DefaultTimeBlockEditMask = (TimeBlockSeriesAttributes.EditMask.Dates | TimeBlockSeriesAttributes.EditMask.Times);
 
 			InitializeComponent();
 		}
@@ -234,6 +240,9 @@ namespace DayViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
+			prefs.WriteProfileString(key, "DefaultNewTimeBlockAttributes", m_DefaultNewTimeBlockAttributes.Encode());
+
 			m_DayView.SavePreferences(prefs, key);
 			m_PrefsDlg.SavePreferences(prefs, key);
 
@@ -263,6 +272,20 @@ namespace DayViewUIExtension
             if (!appOnly)
             {
 				// private settings
+				m_DefaultTimeBlockEditMask = prefs.GetProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
+
+				var newTimeBlockAttrib = TimeBlockSeriesAttributes.Decode(prefs.GetProfileString(key, "DefaultNewTimeBlockAttributes", string.Empty));
+
+				if (newTimeBlockAttrib != null)
+				{
+					m_DefaultNewTimeBlockAttributes = newTimeBlockAttrib;
+				}
+				else
+				{
+					m_DefaultNewTimeBlockAttributes.FromTime = m_WorkWeek.WorkDay().StartOfDay();
+					m_DefaultNewTimeBlockAttributes.ToTime = m_WorkWeek.WorkDay().StartOfLunch();
+				}
+
 				m_DayView.LoadPreferences(prefs, key);
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
@@ -663,11 +686,13 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes);
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes, m_DefaultTimeBlockEditMask);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
 
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;
+
+					m_DefaultTimeBlockEditMask = dlg.EditMask;
 
 					if (!m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask))
 						return false;
@@ -689,25 +714,24 @@ namespace DayViewUIExtension
 		{
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
-			Calendar.AppointmentDates dates = null;
+			var attribs = new TimeBlockSeriesAttributes(m_DefaultNewTimeBlockAttributes);
 
-			if (m_DayView.HasSelection)
+			if (m_DayView.SelectionType == Calendar.SelectionType.DateRange)
 			{
-				dates = m_DayView.SelectedDates;
+				var dates = m_DayView.SelectedDates;
+
+				attribs.FromDate = attribs.ToDate = dates.Start.Date;
+				attribs.FromTime = dates.Start.TimeOfDay;
+				attribs.ToTime = dates.End.TimeOfDay;
+				attribs.SyncToTaskDates = false;
 			}
 			else if (m_DayView.SelectedAppointment != null)
 			{
-				dates = m_DayView.SelectedAppointment.Dates;
-			}
+				var dates = m_DayView.SelectedAppointment.Dates;
 
-			var attribs = new TimeBlockSeriesAttributes()
-			{
-				FromDate = dates.Start.Date,
-				ToDate = dates.End.Date,
-				FromTime = dates.Start.TimeOfDay,
-				ToTime = dates.End.TimeOfDay,
-				SyncToTaskDates = !m_DayView.HasSelection,
-			};
+				attribs.FromDate = dates.Start.Date;
+				attribs.ToDate = dates.End.Date;
+			}
 
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
@@ -725,6 +749,8 @@ namespace DayViewUIExtension
 			
 			if (res != DialogResult.OK)
 				return false;
+
+			m_DefaultNewTimeBlockAttributes = dlg.Attributes;
 
 			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, dlg.Attributes);
 		}

@@ -20,12 +20,13 @@ namespace DayViewUIExtension
 
 		public DayViewEditTimeBlockSeriesDlg(string taskTitle,
 											WorkingWeek workWeek,
-											TimeBlockSeriesAttributes attrbs)
+											TimeBlockSeriesAttributes attrbs,
+											TimeBlockSeriesAttributes.EditMask mask)
 			:
 			this()
 		{
 			m_TaskTitle.Text = taskTitle;
-			m_Attributes.Initialise(workWeek, attrbs, true);
+			m_Attributes.Initialise(workWeek, attrbs, true, mask);
 		}
 		
 		public TimeBlockSeriesAttributes Attributes

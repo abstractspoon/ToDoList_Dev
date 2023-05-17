@@ -30,6 +30,11 @@ namespace Abstractspoon
 				DateTime StartOfLunch(DateTime date);
 				DateTime EndOfLunch(DateTime date);
 
+				TimeSpan StartOfDay();
+				TimeSpan EndOfDay();
+				TimeSpan StartOfLunch();
+				TimeSpan EndOfLunch();
+
 				double CalculateDurationInHours(double fromHour, double toHour);
 				double DayLengthInHours(bool includingLunch);
 				double LunchLengthInHours();

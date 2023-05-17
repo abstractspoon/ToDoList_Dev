@@ -32,7 +32,8 @@ namespace DayViewUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode)
+		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode, 
+								TimeBlockSeriesAttributes.EditMask mask = TimeBlockSeriesAttributes.EditMask.None)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
 
@@ -53,9 +54,9 @@ namespace DayViewUIExtension
 
 			if (editMode)
 			{
-				// Enable all the options by default
-				m_DateCheckBox.Checked = m_TimeCheckBox.Checked = true;
-				m_DowCheckBox.Checked = !DateUtil.IsAllDaysOfWeek(attribs.DaysOfWeek);
+				m_DateCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates);
+				m_TimeCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times);
+				m_DowCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow);
 			}
 
 			EnableDisableControls();

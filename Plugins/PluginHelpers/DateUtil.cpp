@@ -60,22 +60,42 @@ double WorkingDay::EndOfLunchInHours()
 
 DateTime WorkingDay::StartOfDay(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(m_StartOfDayInHours));
+	return (date.Date + StartOfDay());
 }
 
 DateTime WorkingDay::EndOfDay(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
+	return (date.Date + EndOfDay());
 }
 
 DateTime WorkingDay::StartOfLunch(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(m_StartOfLunchInHours));
+	return (date.Date + StartOfLunch());
 }
 
 DateTime WorkingDay::EndOfLunch(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(m_EndOfLunchInHours));
+	return (date.Date + EndOfLunch());
+}
+
+TimeSpan WorkingDay::StartOfDay()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(m_StartOfDayInHours));
+}
+
+TimeSpan WorkingDay::EndOfDay()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
+}
+
+TimeSpan WorkingDay::StartOfLunch()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(m_StartOfLunchInHours));
+}
+
+TimeSpan WorkingDay::EndOfLunch()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(m_EndOfLunchInHours));
 }
 
 Int32 WorkingDay::HoursToMilleseconds(double hours)
