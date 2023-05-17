@@ -1521,28 +1521,33 @@ namespace DayViewUIExtension
 
 		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
 		{
-			if (appt.Locked)
-				return false;
-
-			// Disable start date editing for tasks with dependencies that are auto-calculated
-			// Disable resizing for custom date attributes
-			bool isCustomDate = (appt is CustomTaskDateAttribute);
-			bool hasDepends = ((appt is TaskItem) && (appt as TaskItem).HasDependencies);
-
-			switch (mode)
+			if ((appt != null) && !appt.Locked)
 			{
-			case Calendar.SelectionTool.Mode.Move:
-				return (!hasDepends || !AutoCalculateDependencyDates);
+				// Disable start date editing for tasks with dependencies that are auto-calculated
+				// Disable resizing for custom date attributes
+				bool isCustomDate = (appt is CustomTaskDateAttribute);
+				bool isTimeBlock = (appt is TaskTimeBlock);
+				bool hasDepends = ((appt is TaskItem) && (appt as TaskItem).HasDependencies);
+				bool hasLockedDepends = (hasDepends && AutoCalculateDependencyDates);
 
-			case Calendar.SelectionTool.Mode.ResizeTop:
-			case Calendar.SelectionTool.Mode.ResizeLeft:
-				return ((!hasDepends || !AutoCalculateDependencyDates) && !isCustomDate);
+				switch (mode)
+				{
+				case Calendar.SelectionTool.Mode.Move:
+					return (isTimeBlock || (!ReadOnly && !hasLockedDepends));
 
-			case Calendar.SelectionTool.Mode.ResizeBottom:
-			case Calendar.SelectionTool.Mode.ResizeRight:
-				return !isCustomDate;
+				case Calendar.SelectionTool.Mode.ResizeTop:
+					return (isTimeBlock || (!ReadOnly && (!isCustomDate && !hasLockedDepends)));
+
+				case Calendar.SelectionTool.Mode.ResizeLeft:
+					return (!isTimeBlock && !isCustomDate && !hasLockedDepends);
+
+				case Calendar.SelectionTool.Mode.ResizeBottom:
+					return (isTimeBlock || !isCustomDate);
+
+				case Calendar.SelectionTool.Mode.ResizeRight:
+					return (!isTimeBlock && !isCustomDate);
+				}
 			}
-
 			// catch all
 			return false;
 		}
@@ -1562,48 +1567,46 @@ namespace DayViewUIExtension
 
 			// Note: base class only shows 'resize' cursors for the currently
 			// selected item but we want them for all tasks
-			if (!ReadOnly)
+			var appt = GetAppointmentAt(e.Location.X, e.Location.Y);
+
+			if (appt != null)
 			{
-				var appt = GetAppointmentAt(e.Location.X, e.Location.Y);
+				var realAppt = GetRealAppointment(appt);
 
-				if (appt != null)
+				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
-					if (appt.Locked)
-					{
-						if (appt is TaskExtensionItem)
-							appt = GetRealAppointment(appt);
+					if (realAppt.Locked)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-						if (appt.Locked)
-							return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+					return UIExtension.HandCursor();
+				}
 
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-					}
+				var mode = GetMode(appt, e.Location);
 
-					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
-
-					if ((apptView != null) && apptView.IconRect.Contains(e.Location))
-						return UIExtension.HandCursor();
-
-					var mode = GetMode(appt, e.Location);
-
-					if (!CanModifyAppointmentDates(appt, mode))
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-
+				if (CanModifyAppointmentDates(appt, mode)) // handles readonly flag
+				{
 					// Same as Calendar.SelectionTool
 					switch (mode)
 					{
-						case Calendar.SelectionTool.Mode.ResizeBottom:
-						case Calendar.SelectionTool.Mode.ResizeTop:
-							return Cursors.SizeNS;
+					case Calendar.SelectionTool.Mode.ResizeBottom:
+					case Calendar.SelectionTool.Mode.ResizeTop:
+						return Cursors.SizeNS;
 
-						case Calendar.SelectionTool.Mode.ResizeLeft:
-						case Calendar.SelectionTool.Mode.ResizeRight:
-							return Cursors.SizeWE;
+					case Calendar.SelectionTool.Mode.ResizeLeft:
+					case Calendar.SelectionTool.Mode.ResizeRight:
+						return Cursors.SizeWE;
 
-						case Calendar.SelectionTool.Mode.Move:
-							// default cursor below
-							break;
+					case Calendar.SelectionTool.Mode.Move:
+						// default cursor below
+						break;
 					}
+				}
+				else
+				{
+					if (realAppt.Locked)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 				}
 			}
 

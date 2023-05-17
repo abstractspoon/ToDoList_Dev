@@ -222,7 +222,7 @@ bool WorkingWeek::IsWeekend(DateTime date)
 
 List<DayOfWeek>^ WorkingWeek::WeekDays()
 {
-	auto weekDays = DateUtil::DaysOfWeek();
+	auto weekDays = DateUtil::AllDaysOfWeek();
 	int i = m_WeekendDays->Count;
 
 	while (i--)
@@ -350,7 +350,7 @@ List<DayOfWeek>^ DateUtil::MapDaysOfWeek(int dwDays)
 	return days;
 }
 
-List<DayOfWeek>^ DateUtil::DaysOfWeek()
+List<DayOfWeek>^ DateUtil::AllDaysOfWeek()
 {
 	auto days = gcnew List<DayOfWeek>();
 
@@ -363,4 +363,12 @@ List<DayOfWeek>^ DateUtil::DaysOfWeek()
 	days->Add(DayOfWeek::Friday);
 
 	return days;
+}
+
+bool DateUtil::IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days)
+{
+	if (days->Count < 7)
+		return false;
+
+	return (MapDaysOfWeek(days) == DHW_ALL);
 }

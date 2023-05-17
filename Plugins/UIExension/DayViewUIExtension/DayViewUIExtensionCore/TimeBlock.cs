@@ -227,7 +227,7 @@ namespace DayViewUIExtension
 
 	public class TimeBlockSeriesAttributes
 	{
-		public int m_DaysOfWeek = DateUtil.MapDaysOfWeek(DateUtil.DaysOfWeek());
+		public int m_DaysOfWeek = DateUtil.MapDaysOfWeek(DateUtil.AllDaysOfWeek());
 
 		// ---------------------------------
 

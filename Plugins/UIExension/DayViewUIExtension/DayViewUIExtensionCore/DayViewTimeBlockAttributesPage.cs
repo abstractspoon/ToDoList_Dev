@@ -50,6 +50,13 @@ namespace DayViewUIExtension
 				m_SyncToDatesRadioBtn.Checked = attribs.SyncToTaskDates;
 			}
 
+			if (editMode)
+			{
+				// Enable all the options by default
+				m_DateCheckBox.Checked = m_TimeCheckBox.Checked = true;
+				m_DowCheckBox.Checked = !DateUtil.IsAllDaysOfWeek(attribs.DaysOfWeek);
+			}
+
 			EnableDisableControls();
 		}
 
@@ -89,7 +96,7 @@ namespace DayViewUIExtension
 					ToDate = (m_ToDateCtrl.Checked ? m_ToDateCtrl.Value.Date : m_FromDateCtrl.Value.Date),
 					FromTime = m_FromTimeCombo.GetTime(),
 					ToTime = m_ToTimeCombo.GetTime(),
-					DaysOfWeek = (m_DowCheckBox.Checked ? m_DowListBox.GetSelectedDays() : DateUtil.DaysOfWeek()),
+					DaysOfWeek = (m_DowCheckBox.Checked ? m_DowListBox.GetSelectedDays() : DateUtil.AllDaysOfWeek()),
 					SyncToTaskDates = m_SyncToDatesRadioBtn.Checked,
 				};
 			}

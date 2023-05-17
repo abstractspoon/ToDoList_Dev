@@ -88,7 +88,8 @@ namespace Abstractspoon
 				static Collections::Generic::List<DayOfWeek>^ MapDaysOfWeek(int dwDays);
 				static int MapDayOfWeek(DayOfWeek day);
 				
-				static Collections::Generic::List<DayOfWeek>^ DaysOfWeek();
+				static Collections::Generic::List<DayOfWeek>^ AllDaysOfWeek();
+				static bool IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
 			};
 		}
 	}
