@@ -593,6 +593,8 @@ namespace DayViewUIExtension
 			if (!seriesList.AddSeries(attribs))
 				return false;
 
+			SelectedAppointment = null;
+
 			return SelectTask(taskId);
 		}
 
@@ -1416,14 +1418,13 @@ namespace DayViewUIExtension
 		
 		public bool DeleteSelectedCustomDate()
 		{
-			if (SelectedAppointment is CustomTaskDateAttribute)
+			if (CanDeleteSelectedCustomDate)
 			{
 				var custDate = (SelectedAppointment as CustomTaskDateAttribute);
 				custDate.ClearDate();
 
 				// Notify parent of change
-				if (AppointmentMove != null)
-					AppointmentMove(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
+				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
 
 				// Move selection to 'real' task
 				SelectTask(custDate.RealTaskId);
@@ -1443,12 +1444,12 @@ namespace DayViewUIExtension
 
 		public bool DeleteSelectedTimeBlock()
 		{
-			if (SelectedAppointment is TaskTimeBlock)
+			if (CanDeleteSelectedTimeBlock)
 			{
 				var block = (SelectedAppointment as TaskTimeBlock);
 				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
 
-				if (seriesList.RemoveBlock(block.TimeBlock))
+				if (seriesList.DeleteBlock(block.TimeBlock))
 				{
 					// Move selection to 'real' task
 					SelectTask(block.RealTaskId);
@@ -1469,12 +1470,12 @@ namespace DayViewUIExtension
 
 		public bool DeleteSelectedTimeBlockSeries()
 		{
-			if (SelectedAppointment is TaskTimeBlock)
+			if (CanDeleteSelectedTimeBlockSeries)
 			{
 				var block = (SelectedAppointment as TaskTimeBlock);
 				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
 
-				if (seriesList.RemoveSeries(block.TimeBlock))
+				if (seriesList.DeleteSeries(block.TimeBlock))
 				{
 					// Move selection to 'real' task
 					SelectTask(block.RealTaskId);
@@ -1520,7 +1521,11 @@ namespace DayViewUIExtension
 			if (series == null)
 				return false;
 
-			// TODO
+			if (!series.EditAttributes(attribs, mask))
+				return false;
+
+			SelectedAppointment = null;
+			Invalidate();
 
 			return true;
 		}

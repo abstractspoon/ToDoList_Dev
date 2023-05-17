@@ -146,7 +146,7 @@ namespace DayViewUIExtension
 			return null;
 		}
 
-		public bool RemoveBlock(TimeBlock block)
+		public bool DeleteBlock(TimeBlock block)
 		{
 			foreach (var series in m_Series)
 			{
@@ -162,7 +162,7 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool RemoveSeries(TimeBlock block)
+		public bool DeleteSeries(TimeBlock block)
 		{
 			foreach (var series in m_Series)
 			{
@@ -389,30 +389,30 @@ namespace DayViewUIExtension
 			return UpdateDates(taskItem.StartDate, taskItem.EndDate);
 		}
 
-		public bool EditAttributes(TaskItem taskItem, TimeBlockSeriesAttributes attribs, TimeBlockSeriesAttributes.EditMask mask)
+		public bool EditAttributes(TimeBlockSeriesAttributes attribs, TimeBlockSeriesAttributes.EditMask mask)
 		{
+			bool edited = false;
+
 			if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow))
 			{
 				m_Attributes.DaysOfWeek = attribs.DaysOfWeek;
-
-				UpdateDaysOfWeek(attribs.DaysOfWeek);
+				edited |= UpdateDaysOfWeek(attribs.DaysOfWeek);
 			}
 
 			if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates))
 			{
 				m_Attributes.SyncToTaskDates = attribs.SyncToTaskDates;
-				UpdateDates(attribs.FromDate, attribs.ToDate);
+				edited |= UpdateDates(attribs.FromDate, attribs.ToDate);
 			}
 
 			if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times))
 			{
 				m_Attributes.FromTime = attribs.FromTime;
 				m_Attributes.ToTime = attribs.ToTime;
-
-				UpdateTimes(attribs.FromTime, attribs.ToTime);
+				edited |= UpdateTimes(attribs.FromTime, attribs.ToTime);
 			}
 
-			return false;
+			return edited;
 		}
 
 		public bool UpdateDates(DateTime from, DateTime to)
@@ -475,6 +475,8 @@ namespace DayViewUIExtension
 			bool updated = false;
 
 			// Delete existing blocks not falling on available days
+			// At the same time note the days already having a time block
+			var existingBlocks = new HashSet<DateTime>();
 			int block = m_Blocks.Count;
 
 			while (block-- > 0)
@@ -484,9 +486,26 @@ namespace DayViewUIExtension
 					m_Blocks.RemoveAt(block);
 					updated = true;
 				}
+				else
+				{
+					existingBlocks.Add(m_Blocks[block].Start.Date);
+				}
 			}
 
 			// Add new blocks where required
+			var dates = Dates;
+			var date = dates.Start;
+
+			do
+			{
+				if (!existingBlocks.Contains(date) && days.Contains(date.DayOfWeek))
+					AddTimeBlock(date, m_Attributes.FromTime, m_Attributes.ToTime);
+
+				date = date.AddDays(1);
+			}
+			while (date != dates.End);
+
+
 
 			return updated;
 		}
@@ -511,12 +530,14 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private bool AddTimeBlock(Calendar.AppointmentDates dates)
+		private bool AddTimeBlock(DateTime date, TimeSpan from, TimeSpan to)
 		{
-			if (dates.Start >= dates.End)
+			var block = TimeBlock.CreateBlock(date, from, to);
+
+			if (block == null)
 				return false;
 
-			m_Blocks.Add(new TimeBlock(dates));
+			m_Blocks.Add(block);
 			return true;
 		}
 
@@ -530,9 +551,7 @@ namespace DayViewUIExtension
 
 			do
 			{
-				var dates = new Calendar.AppointmentDates((date + m_Attributes.FromTime), (date + m_Attributes.ToTime));
-
-				if (m_Attributes.DaysOfWeek.Contains(date.DayOfWeek) && AddTimeBlock(dates))
+				if (m_Attributes.DaysOfWeek.Contains(date.DayOfWeek) && AddTimeBlock(date, m_Attributes.FromTime, m_Attributes.ToTime))
 					numAdded++;
 
 				date = date.AddDays(1);
@@ -557,7 +576,12 @@ namespace DayViewUIExtension
 			if (!m_Blocks.Contains(block))
 				return false;
 
-			m_Blocks.Add(new TimeBlock(block));
+			block = TimeBlock.CreateBlock(block);
+
+			if (block == null)
+				return false;
+
+			m_Blocks.Add(block);
 			return true;
 		}
 		
@@ -623,7 +647,7 @@ namespace DayViewUIExtension
 
 	public class TimeBlock : Calendar.AppointmentDates
 	{
-		public TimeBlock(DateTime start, DateTime end)
+		private TimeBlock(DateTime start, DateTime end)
 		{
 			Debug.Assert(start.Date == end.Date);
 
@@ -631,16 +655,26 @@ namespace DayViewUIExtension
 			End = end;
 		}
 
-// 		public TimeBlock(Calendar.AppointmentDates dates)
-// 			:
-// 			this(dates.Start, dates.End)
-// 		{
-// 		}
-
 		public DateTime Date { get { return Start.Date; } }
 
 		private const long TicksPerMinute = (60 * 10000000);
 		private const long MinutesPerDay = (60 * 24);
+
+		public static TimeBlock CreateBlock(DateTime date, TimeSpan from, TimeSpan to)
+		{
+			if (to <= from)
+				return null;
+
+			return new TimeBlock(date.Date + from, date.Date + to);
+		}
+
+		public static TimeBlock CreateBlock(Calendar.AppointmentDates dates)
+		{
+			if (dates.End.Date != dates.Start.Date)
+				return null;
+
+			return CreateBlock(dates.Start, dates.Start.TimeOfDay, dates.End.TimeOfDay);
+		}
 
 		public string Encode()
 		{

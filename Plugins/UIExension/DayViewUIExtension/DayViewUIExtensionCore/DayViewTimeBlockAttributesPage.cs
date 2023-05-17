@@ -48,6 +48,7 @@ namespace DayViewUIExtension
 
 				m_DowListBox.SetSelectedDays(attribs.DaysOfWeek);
 				m_SyncToDatesRadioBtn.Checked = attribs.SyncToTaskDates;
+				m_FixedDatesRadioBtn.Checked = !attribs.SyncToTaskDates;
 			}
 
 			if (editMode)

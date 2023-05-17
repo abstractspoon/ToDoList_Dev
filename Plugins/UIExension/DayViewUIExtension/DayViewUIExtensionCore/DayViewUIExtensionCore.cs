@@ -148,11 +148,14 @@ namespace DayViewUIExtension
 
 					case Keys.Delete:
 						{
-							if (m_DayView.CanDeleteSelectedCustomDate)
-								return m_DayView.DeleteSelectedCustomDate();
+							if (m_DayView.DeleteSelectedCustomDate())
+								return true;
 
-							if (m_DayView.CanDeleteSelectedTimeBlock)
-								return m_DayView.DeleteSelectedTimeBlock();
+							if (m_DayView.DeleteSelectedTimeBlock())
+							{
+								UpdateToolbarButtonStates();
+								return true;
+							}
 						}
 						break;
 
@@ -160,7 +163,12 @@ namespace DayViewUIExtension
 						return EditSelectedTimeBlockSeries();
 
 					case (Keys.Control | Keys.Delete):
-						return m_DayView.DeleteSelectedTimeBlockSeries();
+						if (m_DayView.DeleteSelectedTimeBlockSeries())
+						{
+							UpdateToolbarButtonStates();
+							return true;
+						}
+						break;
 					}
 				}
 				break;
@@ -631,12 +639,14 @@ namespace DayViewUIExtension
 
 		private void OnDeleteTimeBlock(object sender, EventArgs e)
 		{
-			m_DayView.DeleteSelectedTimeBlock();
+			if (m_DayView.DeleteSelectedTimeBlock())
+				UpdateToolbarButtonStates();
 		}
 
 		private void OnDeleteTimeBlockSeries(object sender, EventArgs e)
 		{
-			m_DayView.DeleteSelectedTimeBlockSeries();
+			if (m_DayView.DeleteSelectedTimeBlockSeries())
+				UpdateToolbarButtonStates();
 		}
 
 		private void OnEditTimeBlockSeries(object sender, EventArgs e)
@@ -659,7 +669,10 @@ namespace DayViewUIExtension
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;
 
-					return m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask);
+					if (!m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask))
+						return false;
+
+					return true;
 				}
 			}
 
@@ -668,7 +681,8 @@ namespace DayViewUIExtension
 
 		private void OnNewTimeBlock(object sender, EventArgs e)
 		{
-			CreateTimeBlock();
+			if (CreateTimeBlock())
+				UpdateToolbarButtonStates();
 		}
 
 		private bool CreateTimeBlock()
@@ -686,8 +700,14 @@ namespace DayViewUIExtension
 				dates = m_DayView.SelectedAppointment.Dates;
 			}
 
-			var attribs = new TimeBlockSeriesAttributes() { Dates = dates };
-
+			var attribs = new TimeBlockSeriesAttributes()
+			{
+				FromDate = dates.Start.Date,
+				ToDate = dates.End.Date,
+				FromTime = dates.Start.TimeOfDay,
+				ToTime = dates.End.TimeOfDay,
+				SyncToTaskDates = !m_DayView.HasSelection,
+			};
 
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
