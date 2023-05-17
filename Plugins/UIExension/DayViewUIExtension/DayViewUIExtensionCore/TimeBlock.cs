@@ -227,8 +227,22 @@ namespace DayViewUIExtension
 
 	public class TimeBlockSeriesAttributes
 	{
-		public int m_DaysOfWeek = DateUtil.MapDaysOfWeek(DateUtil.AllDaysOfWeek());
+		int m_DaysOfWeek = DateUtil.MapDaysOfWeek(DateUtil.AllDaysOfWeek());
 
+		// ---------------------------------
+
+		[Flags]
+		public enum EditMask
+		{
+			None	= 0x00,
+
+			Dates	= 0x01,
+			Times	= 0x02,
+			Dow		= 0x04,
+
+			All		= 0xff
+		}
+		
 		// ---------------------------------
 
 		public DateTime FromDate = DateTime.MinValue;
@@ -372,35 +386,109 @@ namespace DayViewUIExtension
 			if (!m_Attributes.SyncToTaskDates)
 				return false;
 
+			return UpdateDates(taskItem.StartDate, taskItem.EndDate);
+		}
+
+		public bool EditAttributes(TaskItem taskItem, TimeBlockSeriesAttributes attribs, TimeBlockSeriesAttributes.EditMask mask)
+		{
+			if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow))
+			{
+				m_Attributes.DaysOfWeek = attribs.DaysOfWeek;
+
+				UpdateDaysOfWeek(attribs.DaysOfWeek);
+			}
+
+			if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates))
+			{
+				m_Attributes.SyncToTaskDates = attribs.SyncToTaskDates;
+				UpdateDates(attribs.FromDate, attribs.ToDate);
+			}
+
+			if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times))
+			{
+				m_Attributes.FromTime = attribs.FromTime;
+				m_Attributes.ToTime = attribs.ToTime;
+
+				UpdateTimes(attribs.FromTime, attribs.ToTime);
+			}
+
+			return false;
+		}
+
+		public bool UpdateDates(DateTime from, DateTime to)
+		{
 			// Series should have been deleted if empty
 			Debug.Assert(BlockCount > 0);
 
-			bool synced = false;
+			bool updated = false;
 			var orgDates = Dates;
 
 			// Trim excess blocks outside of the new date range
-			if ((taskItem.StartDate.Date > orgDates.Start) || (taskItem.EndDate.Date < orgDates.End))
+			if ((from.Date > orgDates.Start) || (to.Date < orgDates.End))
 			{
 				int block = BlockCount;
 
 				while (block-- > 0)
 				{
-					if ((m_Blocks[block].Date < taskItem.StartDate.Date) ||
-						(m_Blocks[block].Date > taskItem.EndDate.Date))
+					if ((m_Blocks[block].Date < from.Date) ||
+						(m_Blocks[block].Date > to.Date))
 					{
 						m_Blocks.RemoveAt(block);
-						synced = true;
+						updated = true;
 					}
 				}
 			}
 
 			// Add new blocks at the start of the block range
-			synced |= (AddBlocks(taskItem.StartDate, orgDates.Start.AddDays(-1)) > 0);
+			updated |= (AddBlocks(from, orgDates.Start.AddDays(-1)) > 0);
 
 			// And at the end of the range
-			synced |= (AddBlocks(orgDates.End.AddDays(1), taskItem.EndDate) > 0);
+			updated |= (AddBlocks(orgDates.End.AddDays(1), to) > 0);
 
-			return synced;
+			return updated;
+		}
+
+		public bool UpdateTimes(TimeSpan from, TimeSpan to)
+		{
+			bool updated = false;
+
+			foreach (var block in m_Blocks)
+			{
+				if (block.Start.TimeOfDay != from)
+				{
+					block.Start = (block.Start.Date + from);
+					updated = true;
+				}
+
+				if (block.End.TimeOfDay != to)
+				{
+					block.End = (block.End.Date + to);
+					updated = true;
+				}
+			}
+
+			return updated;
+		}
+
+		public bool UpdateDaysOfWeek(List<DayOfWeek> days)
+		{
+			bool updated = false;
+
+			// Delete existing blocks not falling on available days
+			int block = m_Blocks.Count;
+
+			while (block-- > 0)
+			{
+				if (!days.Contains(m_Blocks[block].Start.DayOfWeek))
+				{
+					m_Blocks.RemoveAt(block);
+					updated = true;
+				}
+			}
+
+			// Add new blocks where required
+
+			return updated;
 		}
 
 		public Calendar.AppointmentDates Dates
@@ -423,7 +511,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool AddTimeBlock(Calendar.AppointmentDates dates)
+		private bool AddTimeBlock(Calendar.AppointmentDates dates)
 		{
 			if (dates.Start >= dates.End)
 				return false;
@@ -543,11 +631,11 @@ namespace DayViewUIExtension
 			End = end;
 		}
 
-		public TimeBlock(Calendar.AppointmentDates dates)
-			:
-			this(dates.Start, dates.End)
-		{
-		}
+// 		public TimeBlock(Calendar.AppointmentDates dates)
+// 			:
+// 			this(dates.Start, dates.End)
+// 		{
+// 		}
 
 		public DateTime Date { get { return Start.Date; } }
 

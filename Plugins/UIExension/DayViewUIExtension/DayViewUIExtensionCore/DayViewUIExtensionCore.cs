@@ -649,17 +649,17 @@ namespace DayViewUIExtension
 			if (m_DayView.SelectedAppointment is TaskTimeBlock)
 			{
 				var block = (m_DayView.SelectedAppointment as TaskTimeBlock);
-				var attribs = m_DayView.SelectedTimeBlockSeriesAttributes;
+				var series = m_DayView.SelectedTimeBlockSeries;
 
-				if (attribs != null)
+				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, attribs);
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
 
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;
 
-					return m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes);
+					return m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask);
 				}
 			}
 

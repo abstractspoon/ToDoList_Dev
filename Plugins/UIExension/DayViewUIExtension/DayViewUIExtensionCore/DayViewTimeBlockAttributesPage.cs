@@ -109,6 +109,33 @@ namespace DayViewUIExtension
 			m_ToDateCtrl.Checked = (dates.End.Date > dates.Start.Date);
 		}
 
+		public TimeBlockSeriesAttributes.EditMask EditMask
+		{
+			get
+			{
+				var mask = TimeBlockSeriesAttributes.EditMask.None;
+
+				if (m_EditMode)
+				{
+					if (m_DateCheckBox.Checked)
+						mask |= TimeBlockSeriesAttributes.EditMask.Dates;
+
+					if (m_TimeCheckBox.Checked)
+						mask |= TimeBlockSeriesAttributes.EditMask.Times;
+				}
+				else
+				{
+					mask = TimeBlockSeriesAttributes.EditMask.Dates |
+							TimeBlockSeriesAttributes.EditMask.Times;
+				}
+
+				if (m_DowCheckBox.Checked)
+					mask |= TimeBlockSeriesAttributes.EditMask.Dow;
+
+				return mask;
+			}
+		}
+
 		private void OnDowCheckBoxCheckChange(object sender, EventArgs e)
 		{
 			EnableDisableControls();

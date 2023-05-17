@@ -32,6 +32,11 @@ namespace DayViewUIExtension
 		{
 			get { return m_Attributes.Attributes; }
 		}
+
+		public TimeBlockSeriesAttributes.EditMask EditMask
+		{
+			get { return m_Attributes.EditMask; }
+		}
 	}
 
 

@@ -1488,7 +1488,7 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public TimeBlockSeriesAttributes SelectedTimeBlockSeriesAttributes
+		public TimeBlockSeries SelectedTimeBlockSeries
 		{
 			get
 			{
@@ -1497,9 +1497,7 @@ namespace DayViewUIExtension
 					var block = (SelectedAppointment as TaskTimeBlock);
 					var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
 
-					var series = seriesList?.GetSeries(block.TimeBlock);
-
-					return series?.Attributes;
+					return seriesList?.GetSeries(block.TimeBlock);
 				}
 
 				// else
@@ -1512,11 +1510,19 @@ namespace DayViewUIExtension
 			get { return (SelectedAppointment is TaskTimeBlock); }
 		}
 
-		public bool EditSelectedTimeBlockSeries(TimeBlockSeriesAttributes attribs)
+		public bool EditSelectedTimeBlockSeries(TimeBlockSeriesAttributes attribs, TimeBlockSeriesAttributes.EditMask mask)
 		{
-			
+			if (mask == TimeBlockSeriesAttributes.EditMask.None)
+				return false;
 
-			return false;
+			var series = SelectedTimeBlockSeries;
+
+			if (series == null)
+				return false;
+
+			// TODO
+
+			return true;
 		}
 
 		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
