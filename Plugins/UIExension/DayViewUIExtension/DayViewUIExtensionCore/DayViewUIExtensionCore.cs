@@ -725,9 +725,25 @@ namespace DayViewUIExtension
 				attribs.ToTime = dates.End.TimeOfDay;
 				attribs.SyncToTaskDates = false;
 			}
-			else if (m_DayView.SelectedAppointment != null)
+			else if (m_DayView.SelectedAppointment is TaskItem)
 			{
 				var dates = m_DayView.SelectedAppointment.Dates;
+
+				attribs.FromDate = dates.Start.Date;
+				attribs.ToDate = dates.End.Date;
+
+				// Use default times
+			}
+			else if (m_DayView.SelectedAppointment is TaskTimeBlock)
+			{
+				// Use time from time block
+				var dates = m_DayView.SelectedAppointment.Dates;
+
+				attribs.FromTime = dates.Start.TimeOfDay;
+				attribs.ToTime = dates.End.TimeOfDay;
+
+				// Use dates from real task
+				dates = m_DayView.GetRealAppointment(m_DayView.SelectedAppointment).Dates;
 
 				attribs.FromDate = dates.Start.Date;
 				attribs.ToDate = dates.End.Date;
@@ -768,7 +784,7 @@ namespace DayViewUIExtension
 			(m_Toolbar.Items["Show14DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 14);
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
 
-			m_Toolbar.Items["NewTimeBlock"].Enabled = true;
+			m_Toolbar.Items["NewTimeBlock"].Enabled = m_DayView.CanCreateNewTaskBlockSeries;
 			m_Toolbar.Items["DeleteTimeBlock"].Enabled = m_DayView.CanDeleteSelectedTimeBlock;
 			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateSelectedTimeBlock;
 

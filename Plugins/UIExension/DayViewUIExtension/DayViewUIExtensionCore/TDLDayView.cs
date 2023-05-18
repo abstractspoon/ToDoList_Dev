@@ -583,6 +583,16 @@ namespace DayViewUIExtension
 			get { return (SelectedAppointment is TaskTimeBlock); }
 		}
 
+		public bool CanCreateNewTaskBlockSeries
+		{
+			get
+			{
+				return ((SelectedAppointment == null) || 
+						(SelectedAppointment is TaskItem) || 
+						(SelectedAppointment is TaskTimeBlock));
+			}
+		}
+
 		public bool CreateNewTaskBlockSeries(uint taskId, TimeBlockSeriesAttributes attribs)
 		{
 			var seriesList = m_TimeBlocks.GetTaskSeries(taskId, true);
