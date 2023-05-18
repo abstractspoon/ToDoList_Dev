@@ -680,6 +680,11 @@ bool UIExtension::TaskIcon::Draw(Graphics^ g, Int32 x, Int32 y)
 	return bRes;
 }
 
+int UIExtension::TaskIcon::IconSize::get() 
+{ 
+	return DPIScaling::Scale(16); 
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool UIExtension::ShortcutOverlay::Draw(Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy)

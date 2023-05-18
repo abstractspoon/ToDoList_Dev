@@ -910,8 +910,16 @@ namespace Calendar
             // Flicker free
         }
 
-        protected override void OnMouseDown(MouseEventArgs e)
+        protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
+			if (ActiveTool == selectionTool)
+				selectionTool.Reset();
+
+			base.OnMouseDoubleClick(e);
+		}
+
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
 			// Ignore all clicks on the day header
 			if (e.Y > DayHeaderHeight)
 			{
@@ -1592,9 +1600,11 @@ namespace Calendar
             renderer.DrawHourRange(e.Graphics, hoursRect, false, false);
         }
 
+		protected virtual bool WantDrawDaySelection { get { return Focused; } }
+
 		protected void DrawDaySelection(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (Focused && (selectionType == SelectionType.DateRange) && (time.Date == SelectedDates.Start.Date))
+			if (WantDrawDaySelection && (selectionType == SelectionType.DateRange) && (time.Date == SelectedDates.Start.Date))
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(SelectedDates.Start, SelectedDates.End, rect);
 

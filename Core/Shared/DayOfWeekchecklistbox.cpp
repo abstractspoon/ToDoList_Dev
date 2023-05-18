@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CWeekdayCheckListBox
 
-CDayOfWeekCheckListBox::CDayOfWeekCheckListBox()
+CDayOfWeekCheckListBox::CDayOfWeekCheckListBox() : m_dwChecked(0)
 {
 }
 

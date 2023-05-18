@@ -12,6 +12,24 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
+	public class TaskItems : Dictionary<uint, TaskItem>
+	{
+		public TaskItem GetItem(uint taskId, bool autoCreate = false)
+		{
+			TaskItem taskItem;
+
+			if (!TryGetValue(taskId, out taskItem) && autoCreate)
+			{
+				taskItem = new TaskItem();
+				Add(taskId, taskItem);
+			}
+
+			return taskItem;
+		}
+	}
+
+	// ---------------------------------------------------------------
+
 	public class TDLAppointmentView : Calendar.AppointmentView
 	{
 		public TDLAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect,
@@ -48,9 +66,14 @@ namespace DayViewUIExtension
 			get; private set;
 		}
 
-		public Boolean HasTaskTextColor
+		public bool HasTaskTextColor
 		{
 			get { return !m_TaskTextColor.IsEmpty; }
+		}
+
+		public override string ToString()
+		{
+			return Title;
 		}
 
 		public Color TaskTextColor
@@ -87,16 +110,19 @@ namespace DayViewUIExtension
 			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
 		}
 
-		public String AllocTo { get; set; }
-		public Boolean IsParent { get; set; }
-        public Boolean HasIcon { get; set; }
-        public Boolean IsDone { get; set; }
-        public Boolean IsGoodAsDone { get; set; }
-        public Boolean IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
-		public Boolean HasDependencies { get; set; }
-		public Boolean IsRecurring { get; set; }
-		public double TimeEstimate { get; set; }
-        public Task.TimeUnits TimeEstUnits { get; set; }
+		//public string AllocTo { get; private set; }
+		public string Position { get; private set; }
+		public bool IsParent { get; private set; }
+        public bool HasIcon { get; private set; }
+        public bool IsDone { get; private set; }
+        public bool IsGoodAsDone { get; private set; }
+		public bool HasDependencies { get; private set; }
+		public bool IsRecurring { get; private set; }
+		public double TimeEstimate { get; private set; }
+        public Task.TimeUnits TimeEstUnits { get; private set; }
+		public int Depth { get; private set; }
+
+		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 
 		public bool HasTag(string tag)
 		{
@@ -129,6 +155,11 @@ namespace DayViewUIExtension
                 return m_OrgDates.Length;
             }
         }
+
+		public void RecalcTimeEstimate(WorkingWeek workWeek)
+		{
+			TimeEstimate = LengthAsTimeEstimate(workWeek, false);
+		}
 
 		public bool LengthDiffersFromOriginal()
 		{
@@ -215,7 +246,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey)
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey, int depth)
 		{
 			if (!task.IsValid())
 				return false;
@@ -225,15 +256,14 @@ namespace DayViewUIExtension
 			if (newTask)
 			{
 				Title = task.GetTitle();
-				AllocTo = String.Join(", ", task.GetAllocatedTo());
+				//AllocTo = string.Join(", ", task.GetAllocatedTo());
 				HasIcon = task.HasIcon();
 				Id = taskID;
 				IsParent = task.IsParent();
-				TaskTextColor = task.GetTextDrawingColor();
 				DrawBorder = true;
-				Locked = task.IsLocked(true);
 				HasDependencies = (task.GetDependency().Count > 0);
 				IsRecurring = task.IsRecurring();
+				Depth = depth;
 
 				m_Tags = task.GetTag();
 
@@ -262,8 +292,8 @@ namespace DayViewUIExtension
 					TimeEstUnits = units;
 				}
 
-				if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
-					AllocTo = String.Join(", ", task.GetAllocatedTo());
+				//if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
+					//AllocTo = string.Join(", ", task.GetAllocatedTo());
 
 				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = task.HasIcon();
@@ -276,9 +306,6 @@ namespace DayViewUIExtension
 
 				if (task.IsAttributeAvailable(Task.Attribute.Dependency))
 					HasDependencies = (task.GetDependency().Count > 0);
-
-				TaskTextColor = task.GetTextDrawingColor();
-				Locked = task.IsLocked(true);
 
                 // Dates
                 bool hadValidDates = HasValidDates();
@@ -317,6 +344,11 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 					UpdateCustomDateAttributes(task, dateAttribs);
 			}
+
+			// Always
+			Position = task.GetPositionString();
+			TaskTextColor = task.GetTextDrawingColor();
+			Locked = task.IsLocked(true);
 
 			UpdateOriginalDates();
 

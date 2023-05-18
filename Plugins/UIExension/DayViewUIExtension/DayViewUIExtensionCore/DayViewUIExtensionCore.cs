@@ -38,9 +38,12 @@ namespace DayViewUIExtension
 
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
-		private UIThemeToolbarRenderer m_TBRenderer;
+		private UIThemeToolbarRenderer m_ToolbarRenderer;
 		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
+
+		private TimeBlockSeriesAttributes m_DefaultNewTimeBlockAttributes;
+		private TimeBlockSeriesAttributes.EditMask m_DefaultTimeBlockEditMask;
 		
 		// --------------------------------------------------------------------------------------
 
@@ -51,12 +54,15 @@ namespace DayViewUIExtension
 			m_TypeId = typeID;
 			m_UiName = uiName;
 
+			m_DefaultNewTimeBlockAttributes = new TimeBlockSeriesAttributes();
+			m_DefaultTimeBlockEditMask = (TimeBlockSeriesAttributes.EditMask.Dates | TimeBlockSeriesAttributes.EditMask.Times);
+
 			InitializeComponent();
 		}
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-            if (m_DayView.SelectedTaskID == dwTaskID)
+            if (m_DayView.SelectedTaskId == dwTaskID)
                 return true;
 
 			bool selected = m_DayView.SelectTask(dwTaskID);
@@ -139,13 +145,37 @@ namespace DayViewUIExtension
 			{
 			case WM_KEYDOWN:
 				{
-					Keys keyPress = (Keys)wParam;
+					Keys keys = (Keys)wParam;
 
-					if (keyPress == Keys.Escape)
+					switch (keys)
+					{
+					case Keys.Escape:
 						return m_DayView.CancelAppointmentResizing();
 
-					if (keyPress == Keys.Delete)
-						return m_DayView.DeleteSelectedAppointment();
+					case Keys.Delete:
+						{
+							if (m_DayView.DeleteSelectedCustomDate())
+								return true;
+
+							if (m_DayView.DeleteSelectedTimeBlock())
+							{
+								UpdateToolbarButtonStates();
+								return true;
+							}
+						}
+						break;
+
+					case (Keys.Control | Keys.F2):
+						return EditSelectedTimeBlockSeries();
+
+					case (Keys.Control | Keys.Delete):
+						if (m_DayView.DeleteSelectedTimeBlockSeries())
+						{
+							UpdateToolbarButtonStates();
+							return true;
+						}
+						break;
+					}
 				}
 				break;
 			}
@@ -192,7 +222,7 @@ namespace DayViewUIExtension
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
 
 			m_DayView.SetUITheme(theme);
-			m_TBRenderer.SetUITheme(theme);
+			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
@@ -210,6 +240,9 @@ namespace DayViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
+			prefs.WriteProfileString(key, "DefaultNewTimeBlockAttributes", m_DefaultNewTimeBlockAttributes.Encode());
+
 			m_DayView.SavePreferences(prefs, key);
 			m_PrefsDlg.SavePreferences(prefs, key);
 
@@ -239,6 +272,20 @@ namespace DayViewUIExtension
             if (!appOnly)
             {
 				// private settings
+				m_DefaultTimeBlockEditMask = prefs.GetProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
+
+				var newTimeBlockAttrib = TimeBlockSeriesAttributes.Decode(prefs.GetProfileString(key, "DefaultNewTimeBlockAttributes", string.Empty));
+
+				if (newTimeBlockAttrib != null)
+				{
+					m_DefaultNewTimeBlockAttributes = newTimeBlockAttrib;
+				}
+				else
+				{
+					m_DefaultNewTimeBlockAttributes.FromTime = m_WorkWeek.WorkDay().StartOfDay();
+					m_DefaultNewTimeBlockAttributes.ToTime = m_WorkWeek.WorkDay().StartOfLunch();
+				}
+
 				m_DayView.LoadPreferences(prefs, key);
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
@@ -294,7 +341,7 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
-			m_ControlsFont = new Font(FontName, 8);
+			m_ControlsFont = new Font(FontName, 8.25f);
 			m_PrefsDlg = new DayViewPreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
@@ -319,6 +366,7 @@ namespace DayViewUIExtension
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
 			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
+			m_DayView.ContextMenu += new TDLContextMenuEventHandler(OnDayViewContextMenu);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -335,6 +383,69 @@ namespace DayViewUIExtension
                 m_DayView.BorderStyle = BorderStyle.Fixed3D;
 
             Controls.Add(m_DayView);
+		}
+
+		ToolStripMenuItem AddMenuItem(ContextMenuStrip menu, string text, Keys keys, int imageIndex)
+		{
+			var item = new ToolStripMenuItem(m_Trans.Translate(text));
+			item.ShortcutKeys = keys;
+			item.ShowShortcutKeys = (keys != Keys.None);
+
+			if (imageIndex >= 0)
+				item.Image = m_TBImageList.Images[imageIndex];
+
+			menu.Items.Add(item);
+			return item;
+		}
+
+		bool OnDayViewContextMenu(object sender, MouseEventArgs e)
+		{
+			var appt = m_DayView.GetAppointmentAt(e.X, e.Y);
+
+			if ((appt == null) || m_DayView.AppointmentSupportsTaskContextMenu(appt))
+				return false;
+
+			var menu = new ContextMenuStrip();
+
+			if (appt is CustomTaskDateAttribute)
+			{
+				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
+				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
+			}
+			else if (appt is TaskTimeBlock)
+			{
+				var item = AddMenuItem(menu, "New Time Block", Keys.None, 6);
+				item.Click += (s, a) => { CreateTimeBlock(); };
+
+				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
+				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlock(); };
+
+				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
+				item.Click += (s, a) =>	{ m_DayView.DuplicateSelectedTimeBlock(); };
+
+				menu.Items.Add(new ToolStripSeparator());
+
+				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
+				item.Click += (s, a) => { EditSelectedTimeBlockSeries(); };
+
+				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
+				item.Click += (s, a) =>	{ m_DayView.DeleteSelectedTimeBlockSeries(); };
+			}
+			else
+			{
+				Debug.Assert(false);
+			}
+
+			if (menu.Items.Count > 0)
+			{
+				menu.Items.Add(new ToolStripSeparator());
+				menu.Items.Add(m_Trans.Translate("Cancel"));
+
+				menu.Renderer = m_ToolbarRenderer;
+				menu.Show(m_DayView, e.Location);
+			}
+
+			return true; // handled
 		}
 
 		private void CreateWeekLabel()
@@ -395,8 +506,8 @@ namespace DayViewUIExtension
 			m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
             m_Toolbar.Height = (imageSize + 7); // MFC
 
-			m_TBRenderer = new UIThemeToolbarRenderer();
-			m_Toolbar.Renderer = m_TBRenderer;
+			m_ToolbarRenderer = new UIThemeToolbarRenderer();
+			m_Toolbar.Renderer = m_ToolbarRenderer;
 
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
@@ -452,27 +563,50 @@ namespace DayViewUIExtension
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
-			btn8.Name = "DuplicateTimeBlock";
+			btn8.Name = "DeleteTimeBlock";
 			btn8.ImageIndex = 7;
-			btn8.Click += new EventHandler(OnDuplicateTimeBlock);
-			btn8.ToolTipText = m_Trans.Translate("Duplicate Time Block");
+			btn8.Click += new EventHandler(OnDeleteTimeBlock);
+			btn8.ToolTipText = m_Trans.Translate("Delete Time Block");
 			m_Toolbar.Items.Add(btn8);
 
-			m_Toolbar.Items.Add(new ToolStripSeparator());
-
 			var btn9 = new ToolStripButton();
+			btn9.Name = "DuplicateTimeBlock";
 			btn9.ImageIndex = 8;
-			btn9.Click += new EventHandler(OnPreferences);
-			btn9.ToolTipText = m_Trans.Translate("Preferences");
+			btn9.Click += new EventHandler(OnDuplicateTimeBlock);
+			btn9.ToolTipText = m_Trans.Translate("Duplicate Time Block");
 			m_Toolbar.Items.Add(btn9);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn10 = new ToolStripButton();
+			btn10.Name = "EditTimeBlockSeries";
 			btn10.ImageIndex = 9;
-			btn10.Click += new EventHandler(OnHelp);
-			btn10.ToolTipText = m_Trans.Translate("Online Help");
+			btn10.Click += new EventHandler(OnEditTimeBlockSeries);
+			btn10.ToolTipText = m_Trans.Translate("Edit Time Block Series");
 			m_Toolbar.Items.Add(btn10);
+
+			var btn11 = new ToolStripButton();
+			btn11.Name = "DeleteTimeBlockSeries";
+			btn11.ImageIndex = 10;
+			btn11.Click += new EventHandler(OnDeleteTimeBlockSeries);
+			btn11.ToolTipText = m_Trans.Translate("Delete Time Block Series");
+			m_Toolbar.Items.Add(btn11);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn12 = new ToolStripButton();
+			btn12.ImageIndex = 11;
+			btn12.Click += new EventHandler(OnPreferences);
+			btn12.ToolTipText = m_Trans.Translate("Preferences");
+			m_Toolbar.Items.Add(btn12);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn13 = new ToolStripButton();
+			btn13.ImageIndex = 12;
+			btn13.Click += new EventHandler(OnHelp);
+			btn13.ToolTipText = m_Trans.Translate("Online Help");
+			m_Toolbar.Items.Add(btn13);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
@@ -526,22 +660,115 @@ namespace DayViewUIExtension
             UpdatedSelectedTaskDatesPosition();
 		}
 
+		private void OnDeleteTimeBlock(object sender, EventArgs e)
+		{
+			if (m_DayView.DeleteSelectedTimeBlock())
+				UpdateToolbarButtonStates();
+		}
+
+		private void OnDeleteTimeBlockSeries(object sender, EventArgs e)
+		{
+			if (m_DayView.DeleteSelectedTimeBlockSeries())
+				UpdateToolbarButtonStates();
+		}
+
+		private void OnEditTimeBlockSeries(object sender, EventArgs e)
+		{
+			EditSelectedTimeBlockSeries();
+		}
+
+		private bool EditSelectedTimeBlockSeries()
+		{
+			if (m_DayView.SelectedAppointment is TaskTimeBlock)
+			{
+				var block = (m_DayView.SelectedAppointment as TaskTimeBlock);
+				var series = m_DayView.SelectedTimeBlockSeries;
+
+				if (series != null)
+				{
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes, m_DefaultTimeBlockEditMask);
+					FormsUtil.SetFont(dlg, m_ControlsFont);
+
+					if (dlg.ShowDialog() != DialogResult.OK)
+						return false;
+
+					m_DefaultTimeBlockEditMask = dlg.EditMask;
+
+					if (!m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask))
+						return false;
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		private void OnNewTimeBlock(object sender, EventArgs e)
 		{
-			if (!m_DayView.HasSelection)
-				return;
+			if (CreateTimeBlock())
+				UpdateToolbarButtonStates();
+		}
 
+		private bool CreateTimeBlock()
+		{
 			// Display a dialog to retrieve the task ID from a list
 			// to support tasks without dates
-			var taskID = m_DayView.SelectedTaskID;
+			var attribs = new TimeBlockSeriesAttributes(m_DefaultNewTimeBlockAttributes);
 
-			// TODO 
-
-
-			if (taskID != 0)
+			if (m_DayView.SelectionType == Calendar.SelectionType.DateRange)
 			{
-				m_DayView.CreateNewTaskBlock(taskID, m_DayView.SelectedDates);
+				var dates = m_DayView.SelectedDates;
+
+				attribs.FromDate = attribs.ToDate = dates.Start.Date;
+				attribs.FromTime = dates.Start.TimeOfDay;
+				attribs.ToTime = dates.End.TimeOfDay;
+				attribs.SyncToTaskDates = false;
 			}
+			else if (m_DayView.SelectedAppointment is TaskItem)
+			{
+				var dates = m_DayView.SelectedAppointment.Dates;
+
+				attribs.FromDate = dates.Start.Date;
+				attribs.ToDate = dates.End.Date;
+
+				// Use default times
+			}
+			else if (m_DayView.SelectedAppointment is TaskTimeBlock)
+			{
+				// Use time from time block
+				var dates = m_DayView.SelectedAppointment.Dates;
+
+				attribs.FromTime = dates.Start.TimeOfDay;
+				attribs.ToTime = dates.End.TimeOfDay;
+
+				// Use dates from real task
+				dates = m_DayView.GetRealAppointment(m_DayView.SelectedAppointment).Dates;
+
+				attribs.FromDate = dates.Start.Date;
+				attribs.ToDate = dates.End.Date;
+			}
+
+			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
+													new UIExtension.TaskIcon(m_HwndParent),
+													m_WorkWeek,
+													m_DayView.SelectedTaskId,
+													attribs);
+
+			FormsUtil.SetFont(dlg, m_ControlsFont);
+
+			m_DayView.ForceShowSelection = true;
+
+			var res = dlg.ShowDialog();
+
+			m_DayView.ForceShowSelection = false;
+			
+			if (res != DialogResult.OK)
+				return false;
+
+			m_DefaultNewTimeBlockAttributes = dlg.Attributes;
+
+			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, dlg.Attributes);
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)
@@ -557,8 +784,12 @@ namespace DayViewUIExtension
 			(m_Toolbar.Items["Show14DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 14);
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
 
-			m_Toolbar.Items["NewTimeBlock"].Enabled = m_DayView.CanCreateNewTimeBlock();
-			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateTimeBlock();
+			m_Toolbar.Items["NewTimeBlock"].Enabled = m_DayView.CanCreateNewTaskBlockSeries;
+			m_Toolbar.Items["DeleteTimeBlock"].Enabled = m_DayView.CanDeleteSelectedTimeBlock;
+			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateSelectedTimeBlock;
+
+			m_Toolbar.Items["EditTimeBlockSeries"].Enabled = m_DayView.CanEditSelectedTimeBlockSeries;
+			m_Toolbar.Items["DeleteTimeBlockSeries"].Enabled = m_DayView.CanDeleteSelectedTimeBlockSeries;
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
@@ -660,36 +891,53 @@ namespace DayViewUIExtension
             Invalidate(true);
         }
 
-		private void HandleDayViewMouseClick(MouseEventArgs e, bool doubleClick)
+		private void HandleDayViewLeftMouseClick(MouseEventArgs e, bool doubleClick)
 		{
-			if (m_DayView.ReadOnly)
+			var appt = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
+
+			if (appt == null)
 				return;
 
-			var appt = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
+			// Handle icon click on all types
+			var realAppt = m_DayView.GetRealAppointment(appt);
 
-			if (appt == null || appt.Locked)
-				return;
-
-			if (m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0)
+			if (!m_DayView.ReadOnly && !realAppt.Locked &&
+				(m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0))
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
 				notify.NotifyEditIcon();
+
+				return;
 			}
-			else if (doubleClick)
+
+			// Handle double-click differently for each type
+			if (doubleClick)
 			{
-				var notify = new UIExtension.ParentNotify(m_HwndParent);
-				notify.NotifyEditLabel();
+				if (appt is TaskItem)
+				{
+					if (!m_DayView.ReadOnly && !appt.Locked)
+					{
+						var notify = new UIExtension.ParentNotify(m_HwndParent);
+						notify.NotifyEditLabel();
+					}
+				}
+				else if (appt is TaskTimeBlock)
+				{
+					EditSelectedTimeBlockSeries();
+				}
 			}
 		}
 
 		private void OnDayViewMouseClick(object sender, MouseEventArgs e)
         {
-			HandleDayViewMouseClick(e, false);
-        }
+			if (e.Button == MouseButtons.Left)
+				HandleDayViewLeftMouseClick(e, false);
+		}
 
 		private void OnDayViewMouseDoubleClick(object sender, MouseEventArgs e)
 		{
-			HandleDayViewMouseClick(e, true);
+			if (e.Button == MouseButtons.Left)
+				HandleDayViewLeftMouseClick(e, true);
 		}
 
 		private void OnDayViewMouseWheel(object sender, MouseEventArgs e)
@@ -713,7 +961,7 @@ namespace DayViewUIExtension
 				UpdatedSelectedTaskDatesText();
 				UpdateToolbarButtonStates();
 
-				notify.NotifySelChange(m_DayView.SelectedTaskID);
+				notify.NotifySelChange(m_DayView.SelectedTaskId);
 				break;
 
 			case Calendar.SelectionType.DateRange:
@@ -821,7 +1069,7 @@ namespace DayViewUIExtension
 					item.UpdateOriginalDates();
 
 					if (modifyTimeEst)
-						item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
+						item.RecalcTimeEstimate(m_WorkWeek);
 
 					return;
 				}

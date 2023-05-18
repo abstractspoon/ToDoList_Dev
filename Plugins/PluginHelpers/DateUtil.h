@@ -30,6 +30,11 @@ namespace Abstractspoon
 				DateTime StartOfLunch(DateTime date);
 				DateTime EndOfLunch(DateTime date);
 
+				TimeSpan StartOfDay();
+				TimeSpan EndOfDay();
+				TimeSpan StartOfLunch();
+				TimeSpan EndOfLunch();
+
 				double CalculateDurationInHours(double fromHour, double toHour);
 				double DayLengthInHours(bool includingLunch);
 				double LunchLengthInHours();
@@ -60,12 +65,12 @@ namespace Abstractspoon
 				void Load(Preferences^ prefs);
 
 				WorkingDay^ WorkDay() { return m_WorkingDay; }
-				Collections::Generic::List<System::DayOfWeek>^ WeekendDays() { return m_WeekendDays; }
+				Collections::Generic::List<DayOfWeek>^ WeekendDays() { return m_WeekendDays; }
+				Collections::Generic::List<DayOfWeek>^ WeekDays();
 
 			protected:
 				WorkingDay^ m_WorkingDay;
-				Collections::Generic::List<System::DayOfWeek>^ m_WeekendDays;
-
+				Collections::Generic::List<DayOfWeek>^ m_WeekendDays;
 			};
 
 			// ------------------------------------------------------------------
@@ -74,13 +79,22 @@ namespace Abstractspoon
 			{
 			public:
 				static int WeekOfYear(DateTime date);
-				static int GetMaxDayOfWeekNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
-				static int GetMaxMonthNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
+				static int GetMaxDayOfWeekNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
+				static int GetMaxMonthNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
 
 				static String^ GetMonthName(int nMonth, bool shortName);
 
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
+
+				static TimeSpan TimeOnly(DateTime date);
+
+				static int MapDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
+				static Collections::Generic::List<DayOfWeek>^ MapDaysOfWeek(int dwDays);
+				static int MapDayOfWeek(DayOfWeek day);
+				
+				static Collections::Generic::List<DayOfWeek>^ AllDaysOfWeek();
+				static bool IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
 			};
 		}
 	}

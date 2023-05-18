@@ -55,6 +55,7 @@ namespace DayViewUIExtension
 			AttributeId = attribId;
 			StartDate = OriginalDate = date;
 			EndDate = StartDate.AddDays(1);
+			Locked = item.Locked;
 
 			if (EndDate == EndDate.Date)
 				EndDate = EndDate.AddSeconds(-1);

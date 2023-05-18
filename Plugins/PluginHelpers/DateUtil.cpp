@@ -7,6 +7,7 @@
 #include "Win32.h"
 
 #include <Shared\DateHelper.h>
+#include <Shared\Misc.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,22 +60,42 @@ double WorkingDay::EndOfLunchInHours()
 
 DateTime WorkingDay::StartOfDay(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(m_StartOfDayInHours));
+	return (date.Date + StartOfDay());
 }
 
 DateTime WorkingDay::EndOfDay(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
+	return (date.Date + EndOfDay());
 }
 
 DateTime WorkingDay::StartOfLunch(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(m_StartOfLunchInHours));
+	return (date.Date + StartOfLunch());
 }
 
 DateTime WorkingDay::EndOfLunch(DateTime date)
 {
-	return date.Date.AddMilliseconds(HoursToMilleseconds(m_EndOfLunchInHours));
+	return (date.Date + EndOfLunch());
+}
+
+TimeSpan WorkingDay::StartOfDay()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(m_StartOfDayInHours));
+}
+
+TimeSpan WorkingDay::EndOfDay()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(EndOfDayInHours()));
+}
+
+TimeSpan WorkingDay::StartOfLunch()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(m_StartOfLunchInHours));
+}
+
+TimeSpan WorkingDay::EndOfLunch()
+{
+	return TimeSpan::FromMilliseconds(HoursToMilleseconds(m_EndOfLunchInHours));
 }
 
 Int32 WorkingDay::HoursToMilleseconds(double hours)
@@ -145,30 +166,19 @@ void WorkingDay::Load(Preferences^ prefs)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum 
-{
-	SUNDAY = 0X01,
-	MONDAY = 0X02,
-	TUESDAY = 0X04,
-	WEDNESDAY = 0X08,
-	THURSDAY = 0X10,
-	FRIDAY = 0X20,
-	SATURDAY = 0X40,
-};
-
 WorkingWeek::WorkingWeek() 
 	: 
 	m_WorkingDay(gcnew WorkingDay()),
-	m_WeekendDays(gcnew List<System::DayOfWeek>())
+	m_WeekendDays(gcnew List<DayOfWeek>())
 {
-	m_WeekendDays->Add(System::DayOfWeek::Saturday);
-	m_WeekendDays->Add(System::DayOfWeek::Sunday);
+	m_WeekendDays->Add(DayOfWeek::Saturday);
+	m_WeekendDays->Add(DayOfWeek::Sunday);
 }
 
 WorkingWeek::WorkingWeek(Preferences^ prefs)
 	:
 	m_WorkingDay(gcnew WorkingDay()),
-	m_WeekendDays(gcnew List<System::DayOfWeek>())
+	m_WeekendDays(gcnew List<DayOfWeek>())
 {
 	Load(prefs);
 }
@@ -176,33 +186,12 @@ WorkingWeek::WorkingWeek(Preferences^ prefs)
 void WorkingWeek::Load(Preferences^ prefs)
 {
 	m_WorkingDay->Load(prefs);
-	m_WeekendDays->Clear();
 
 	int dwWeekends = prefs->GetProfileInt("Preferences", "Weekends", 0);
-	
-	if ((dwWeekends & SUNDAY) == SUNDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Sunday);
-
-	if ((dwWeekends & SATURDAY) == SATURDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Saturday);
-
-	if ((dwWeekends & MONDAY) == MONDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Monday);
-
-	if ((dwWeekends & TUESDAY) == TUESDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Tuesday);
-
-	if ((dwWeekends & WEDNESDAY) == WEDNESDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Wednesday);
-
-	if ((dwWeekends & THURSDAY) == THURSDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Thursday);
-
-	if ((dwWeekends & FRIDAY) == FRIDAY)
-		m_WeekendDays->Add(System::DayOfWeek::Friday);
+	m_WeekendDays = DateUtil::MapDaysOfWeek(dwWeekends);
 }
 
-double WorkingWeek::CalculateDurationInHours(System::DateTime from, DateTime to)
+double WorkingWeek::CalculateDurationInHours(DateTime from, DateTime to)
 {
 	int nDaysDuration = (to.Date - from.Date).Days;
 
@@ -249,6 +238,17 @@ double WorkingWeek::CalculateDurationInHours(System::DateTime from, DateTime to)
 bool WorkingWeek::IsWeekend(DateTime date)
 {
 	return m_WeekendDays->Contains(date.DayOfWeek);
+}
+
+List<DayOfWeek>^ WorkingWeek::WeekDays()
+{
+	auto weekDays = DateUtil::AllDaysOfWeek();
+	int i = m_WeekendDays->Count;
+
+	while (i--)
+		weekDays->Remove(m_WeekendDays[i]);
+
+	return weekDays;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,4 +308,87 @@ DateTime DateUtil::DateFromMonths(int nMonths)
 	int nMonth = (nMonths % 12);
 
 	return DateTime(nYear, nMonth, 1);
+}
+
+TimeSpan DateUtil::TimeOnly(DateTime date)
+{
+	return (date - date.Date);
+}
+
+int DateUtil::MapDayOfWeek(DayOfWeek day)
+{
+	switch (day)
+	{
+		case DayOfWeek::Sunday:		return DHW_SUNDAY;
+		case DayOfWeek::Saturday:	return DHW_SATURDAY;
+		case DayOfWeek::Monday:		return DHW_MONDAY;
+		case DayOfWeek::Tuesday:	return DHW_TUESDAY;
+		case DayOfWeek::Wednesday:	return DHW_WEDNESDAY;
+		case DayOfWeek::Thursday:	return DHW_THURSDAY;
+		case DayOfWeek::Friday:		return DHW_FRIDAY;
+	}
+
+	ASSERT(0);
+	return 0;
+}
+
+int DateUtil::MapDaysOfWeek(List<DayOfWeek>^ days)
+{
+	int dwDays = 0;
+
+	for (int i = 0; i < days->Count; i++)
+		dwDays |= MapDayOfWeek(days[i]);
+
+	return dwDays;
+}
+
+List<DayOfWeek>^ DateUtil::MapDaysOfWeek(int dwDays)
+{
+	auto days = gcnew List<DayOfWeek>();
+
+	if (Misc::HasFlag(dwDays, DHW_SUNDAY))
+		days->Add(DayOfWeek::Sunday);
+
+	if (Misc::HasFlag(dwDays, DHW_SATURDAY))
+		days->Add(DayOfWeek::Saturday);
+
+	if (Misc::HasFlag(dwDays, DHW_MONDAY))
+		days->Add(DayOfWeek::Monday);
+
+	if (Misc::HasFlag(dwDays, DHW_TUESDAY))
+		days->Add(DayOfWeek::Tuesday);
+
+	if (Misc::HasFlag(dwDays, DHW_WEDNESDAY))
+		days->Add(DayOfWeek::Wednesday);
+
+	if (Misc::HasFlag(dwDays, DHW_THURSDAY))
+		days->Add(DayOfWeek::Thursday);
+
+	if (Misc::HasFlag(dwDays, DHW_FRIDAY))
+		days->Add(DayOfWeek::Friday);
+
+	return days;
+}
+
+List<DayOfWeek>^ DateUtil::AllDaysOfWeek()
+{
+	auto days = gcnew List<DayOfWeek>();
+
+	days->Add(DayOfWeek::Sunday);
+	days->Add(DayOfWeek::Saturday);
+	days->Add(DayOfWeek::Monday);
+	days->Add(DayOfWeek::Tuesday);
+	days->Add(DayOfWeek::Wednesday);
+	days->Add(DayOfWeek::Thursday);
+	days->Add(DayOfWeek::Friday);
+
+	return days;
+}
+
+bool DateUtil::IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days)
+{
+	if (days->Count < 7)
+		return false;
+
+	return (MapDaysOfWeek(days) == DHW_ALL);
 }

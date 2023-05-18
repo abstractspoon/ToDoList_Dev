@@ -79,6 +79,8 @@ namespace Calendar
 		
 		private AppointmentDates dates = new AppointmentDates();
 
+		public AppointmentDates Dates { get { return dates; } }
+
         public virtual DateTime StartDate
         {
             get
