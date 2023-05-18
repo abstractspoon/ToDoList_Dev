@@ -189,7 +189,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 
 	COleDateTimeRange dtActiveRange;
 
-	if (m_sliderDateRange.HasSelectedRange())
+	if (m_sliderDateRange.HasRange())
 	{
 		VERIFY(GetSliderDateRange(dtActiveRange));
 

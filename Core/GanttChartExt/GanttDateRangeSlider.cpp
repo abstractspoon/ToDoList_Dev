@@ -115,7 +115,7 @@ BOOL CGanttDateRangeSlider::HasSelectedRange() const
 		return FALSE;
 	}
 
-	return (m_dtDataRange.IsValid() && CRangeSliderCtrl::HasSelectedRange());
+	return (m_dtDataRange.IsValid() && CRangeSliderCtrl::HasRange());
 }
 
 BOOL CGanttDateRangeSlider::IsValid() const
