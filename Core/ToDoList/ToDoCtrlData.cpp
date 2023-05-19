@@ -3023,98 +3023,141 @@ BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 	if (!pAction)
 		return FALSE;
 	
-	// restore elements
 	int nNumElm = pAction->aElements.GetSize();
-	
-	// note: if we are undoing then we need to undo in the reverse order
-	// of the initial edits unless it was a move because moves always
-	// work off the first item.
-	int nStart = 0, nEnd = nNumElm, nInc = 1;
-	
-	if (bUndo && pAction->nType != TDCUAT_MOVE)
-	{
-		nStart = nNumElm - 1;
-		nEnd = -1;
-		nInc = -1;
-	}
-	
+
 	// copy the structure because we're going to be changing it and we need 
 	// to be able to lookup the original previous sibling IDs for undo info
 	CToDoCtrlDataStructure tdsCopy(m_struct);
 	
-	// now undo
-	for (int nElm = nStart; nElm != nEnd; nElm += nInc)
+	if (bUndo)
 	{
-		TDCUNDOELEMENT& elm = pAction->aElements[nElm];
-		
-		if (elm.nOp == TDCUEO_EDIT)
+		// If we are undoing then we need to undo in the reverse order
+		// of the initial edits.
+		// Unless it was a move which needs special handling because the
+		// undoing of the moves MUST occur in forward-order
+		if (pAction->nType == TDCUAT_MOVE)
 		{
-			TODOITEM* pTDI = NULL;
-			GET_TDI(elm.dwTaskID, pTDI, FALSE);
-			
-			// copy current task state so we can update redo info
-			TODOITEM tdiRedo = *pTDI;
-			*pTDI = elm.tdi;
-			elm.tdi = tdiRedo;
-			
-			// no need to return this item nothing to be done
-		}
-		else if ((elm.nOp == TDCUEO_ADD && bUndo) || (elm.nOp == TDCUEO_DELETE && !bUndo))
-		{
-			// this is effectively a delete so make the returned elem that way
-			TDCUNDOELEMENT elmRet(TDCUEO_DELETE, elm.dwTaskID);
-			aElms.Add(elmRet);
-			
-			DeleteTask(elm.dwTaskID, FALSE); // FALSE == no undo
-		}
-		else if ((elm.nOp == TDCUEO_DELETE && bUndo) || (elm.nOp == TDCUEO_ADD && !bUndo))
-		{
-			// this is effectively an add so make the returned elem that way
-			TDCUNDOELEMENT elmRet(TDCUEO_ADD, elm.dwTaskID, elm.dwParentID, elm.dwPrevSiblingID);
-			aElms.Add(elmRet);
-			
-			// restore task
-			if (HasTask(elm.dwTaskID))
-			{
-				// Should not exist
-				ASSERT(0);
-			}
-			else
-			{
-				TODOITEM* pTDI = NewTask(elm.tdi);
-				AddTask(elm.dwTaskID, pTDI, elm.dwParentID, elm.dwPrevSiblingID);
-			}
-		}
-		else if (elm.nOp == TDCUEO_MOVE)
-		{
-			// We DON'T want the TRUE task
-			TODOITEM* pTDI = GetTask(elm.dwTaskID, FALSE);
+			// Do the undo in 2 passes:
+			// 1. The 'non-move' elements in reverse order
+			int nElm = nNumElm;
 
-			if (!pTDI)
+			while (nElm--)
 			{
-				ASSERT(0);
-				return FALSE;
+				TDCUNDOELEMENT& elm = pAction->aElements[nElm];
+
+				if ((elm.nOp != TDCUEO_MOVE) && !ProcessUndoElement(bUndo, elm, aElms, tdsCopy))
+					return FALSE;
 			}
 
-			TDCUNDOELEMENT elmRet(TDCUEO_MOVE, elm.dwTaskID, elm.dwParentID, elm.dwPrevSiblingID, 0, pTDI);
-			aElms.Add(elmRet);
-			
-			MoveTask(elm.dwTaskID, elm.dwParentID, elm.dwPrevSiblingID);
-			
-			// adjust undo element so these changes can be undone
-			elm.dwParentID = tdsCopy.GetParentTaskID(elm.dwTaskID);
-			elm.dwPrevSiblingID = tdsCopy.GetPreviousTaskID(elm.dwTaskID);
+			// 2. The 'move' elements in forward order
+			for (nElm = 0; nElm < nNumElm; nElm++)
+			{
+				TDCUNDOELEMENT& elm = pAction->aElements[nElm];
 
-			TODOITEM tdiRedo = *pTDI;
-			*pTDI = elm.tdi;
-			elm.tdi = tdiRedo;
+				if ((elm.nOp == TDCUEO_MOVE) && !ProcessUndoElement(bUndo, elm, aElms, tdsCopy))
+					return FALSE;
+			}
 		}
 		else
 		{
-			return FALSE;
+			// All operations in reverse order
+			int nElm = nNumElm;
+
+			while (nElm--)
+			{
+				TDCUNDOELEMENT& elm = pAction->aElements[nElm];
+
+				if (!ProcessUndoElement(bUndo, elm, aElms, tdsCopy))
+					return FALSE;
+			}
+		}
+	}
+	else
+	{
+		// All operations in forward order
+		for (int nElm = 0; nElm < nNumElm; nElm++)
+		{
+			TDCUNDOELEMENT& elm = pAction->aElements[nElm];
+	
+			if (!ProcessUndoElement(bUndo, elm, aElms, tdsCopy))
+				return FALSE;
 		}
 	}
 	
+	return TRUE;
+}
+
+BOOL CToDoCtrlData::ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy)
+{
+	if (srcElement.nOp == TDCUEO_EDIT)
+	{
+		TODOITEM* pTDI = NULL;
+		GET_TDI(srcElement.dwTaskID, pTDI, FALSE);
+
+		// copy current task state so we can update redo info
+		TODOITEM tdiRedo = *pTDI;
+		*pTDI = srcElement.tdi;
+		srcElement.tdi = tdiRedo;
+
+		// no need to return this item nothing to be done
+	}
+	else if ((srcElement.nOp == TDCUEO_ADD && bUndo) || (srcElement.nOp == TDCUEO_DELETE && !bUndo))
+	{
+		// this is effectively a delete so make the returned elem that way
+		TDCUNDOELEMENT elmRet(TDCUEO_DELETE, srcElement.dwTaskID);
+		aReturnedElms.Add(elmRet);
+
+		DeleteTask(srcElement.dwTaskID, FALSE); // FALSE == no undo
+	}
+	else if ((srcElement.nOp == TDCUEO_DELETE && bUndo) || (srcElement.nOp == TDCUEO_ADD && !bUndo))
+	{
+		// this is effectively an add so make the returned elem that way
+		TDCUNDOELEMENT elmRet(TDCUEO_ADD, srcElement.dwTaskID, srcElement.dwParentID, srcElement.dwPrevSiblingID);
+		aReturnedElms.Add(elmRet);
+
+		// restore task
+		if (HasTask(srcElement.dwTaskID))
+		{
+			// Should not exist
+			ASSERT(0);
+		}
+		else
+		{
+			TODOITEM* pTDI = NewTask(srcElement.tdi);
+			AddTask(srcElement.dwTaskID, pTDI, srcElement.dwParentID, srcElement.dwPrevSiblingID);
+		}
+	}
+	else if (srcElement.nOp == TDCUEO_MOVE)
+	{
+		// We DON'T want the TRUE task
+		TODOITEM* pTDI = GetTask(srcElement.dwTaskID, FALSE);
+
+		if (!pTDI)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		TDCUNDOELEMENT elmRet(TDCUEO_MOVE, srcElement.dwTaskID, srcElement.dwParentID, srcElement.dwPrevSiblingID, 0, pTDI);
+		aReturnedElms.Add(elmRet);
+
+		MoveTask(srcElement.dwTaskID, srcElement.dwParentID, srcElement.dwPrevSiblingID);
+
+		// adjust undo element so these changes can be undone
+		srcElement.dwParentID = tdsCopy.GetParentTaskID(srcElement.dwTaskID);
+		srcElement.dwPrevSiblingID = tdsCopy.GetPreviousTaskID(srcElement.dwTaskID);
+
+		TODOITEM tdiRedo = *pTDI;
+		*pTDI = srcElement.tdi;
+		srcElement.tdi = tdiRedo;
+	}
+	else
+	{
+		// What else could it be?
+		ASSERT(0);
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
