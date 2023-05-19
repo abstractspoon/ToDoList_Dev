@@ -1679,10 +1679,22 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = m_mapParentAttribs.GetNext(pos);
+			nAttrib = m_mapParentAttribs.GetNext(pos);
 
-			if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib))
+			if (nAttrib == TDCA_CUSTOMATTRIB)
+			{
+				for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
+				{
+					nAttrib = m_aCustomAttribDefs[nAtt].GetAttributeID();
+
+					if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib)) // RECURSIVE CALL
+						return FALSE;
+				}
+			}
+			else if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib)) // RECURSIVE CALL
+			{
 				return FALSE;
+			}
 		}
 	}
 	else if (WantUpdateInheritedAttibute(nAttrib))
