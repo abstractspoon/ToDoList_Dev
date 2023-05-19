@@ -1683,9 +1683,9 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 
 			if (nAttrib == TDCA_CUSTOMATTRIB)
 			{
-				for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
+				for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
 				{
-					nAttrib = m_aCustomAttribDefs[nAtt].GetAttributeID();
+					nAttrib = m_aCustomAttribDefs[nCust].GetAttributeID();
 
 					if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib)) // RECURSIVE CALL
 						return FALSE;
