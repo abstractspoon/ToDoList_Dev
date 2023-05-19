@@ -217,6 +217,10 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCContentMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCCustomAttribData.cpp
 # End Source File
 # Begin Source File
@@ -374,10 +378,6 @@ SOURCE=..\ToDoList\TDLColumnSelectionDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLCommentsCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLContentMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -825,6 +825,10 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCContentMgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\tdccustomattribdata.h
 # End Source File
 # Begin Source File
@@ -1006,10 +1010,6 @@ SOURCE=..\ToDoList\TDLColumnSelectionDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLCommentsCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLContentMgr.h
 # End Source File
 # Begin Source File
 
