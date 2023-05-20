@@ -63,7 +63,23 @@ namespace MindMapUIExtension
             return m_MindMap.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
         }
 
-        public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public bool ScrollToSelectedTask()
+		{
+			if (CanScrollToSelectedTask())
+			{
+				m_MindMap.EnsureSelectionVisible();
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			return m_MindMap.HasSelection;
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 			m_MindMap.UpdateTasks(tasks, type);
         }

@@ -209,6 +209,41 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public bool ScrollToSelection()
+		{
+			if (m_SelectedNodes.Count == 0)
+				return false;
+
+			Rectangle nodeRect;
+
+			// Check for non-partial visibility
+			foreach (var node in m_SelectedNodes)
+			{
+				if (IsNodeVisible(node, out nodeRect, false))
+					return true;
+			}
+
+			// Check for partial visibility
+			BaseNode scrollToNode = null;
+
+			foreach (var node in m_SelectedNodes)
+			{
+				if (IsNodeVisible(node, out nodeRect, true))
+				{
+					scrollToNode = node;
+					break;
+				}
+			}
+
+			// Scroll to the first selected node
+			if (scrollToNode == null)
+				scrollToNode = m_SelectedNodes[0];
+
+			// TODO
+
+			return true;
+		}
+
 		protected BaseNode SingleSelectedNode
 		{
 			get
@@ -605,7 +640,7 @@ namespace EvidenceBoardUIExtension
 			return (node != null);
 		}
 
-		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect)
+		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect, bool allowPartial = true)
 		{
 			if (!IsNodeVisible(node))
 			{
@@ -615,7 +650,11 @@ namespace EvidenceBoardUIExtension
 
 			nodeRect = GetNodeClientRect(node);
 
-			return nodeRect.IntersectsWith(ClientRectangle);
+			if (allowPartial)
+				return ClientRectangle.IntersectsWith(nodeRect);
+
+			// else
+			return ClientRectangle.Contains(nodeRect);
 		}
 
 		protected Point GetNodeClientPos(BaseNode node)

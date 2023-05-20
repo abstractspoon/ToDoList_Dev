@@ -230,6 +230,9 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->SelectTask(m_wnd->ScrollToSelectedTask());
 	}
 
 	// all else
@@ -278,6 +281,9 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 
 	case IUI_SETFOCUS:
 		return !m_wnd->Focused;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->CanScrollToSelectedTask();
 	}
 
 	// all else

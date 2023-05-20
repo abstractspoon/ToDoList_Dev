@@ -1279,6 +1279,8 @@ namespace MindMapUIExtension
 			return true;
 		}
 
+		public bool HasSelection { get { return (SelectedItem != null); } }
+
 		protected TreeNode FindNode(UInt32 uniqueID)
 		{
 			var found = m_TreeView.Nodes.Find(uniqueID.ToString(), true);
@@ -1287,6 +1289,15 @@ namespace MindMapUIExtension
 				return null;
 
 			return found[0];
+		}
+
+		public bool EnsureSelectionVisible()
+		{
+			if (SelectedItem == null)
+				return false;
+
+			EnsureItemVisible(SelectedItem);
+			return true;
 		}
 
 		protected void EnsureItemVisible(MindMapItem item)

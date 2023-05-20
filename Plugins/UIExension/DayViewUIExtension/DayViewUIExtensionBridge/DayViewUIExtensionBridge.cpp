@@ -231,6 +231,9 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->SelectTask(m_wnd->ScrollToSelectedTask());
 	}
 
 	// all else
@@ -266,6 +269,9 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->SelectTask(m_wnd->CanScrollToSelectedTask());
 	}
 
 	// all else
