@@ -88,7 +88,6 @@ public:
 	BOOL EndCurrentUndoAction();
 	BOOL ExtendLastUndoAction(TDC_UNDOACTIONTYPE nType = TDCUAT_NONE);
 	BOOL UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms);
-
 	BOOL CanUndoLastAction(BOOL bUndo) const;
 	int GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const;
 	TDC_UNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
