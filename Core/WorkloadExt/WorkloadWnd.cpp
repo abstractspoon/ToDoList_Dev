@@ -558,10 +558,12 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		if (pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlWorkload.GetSelectedTaskID());
-
 			return (m_ctrlWorkload.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlWorkload.SelectTask(m_ctrlWorkload.GetSelectedTaskID()) != FALSE);
 	}
 
 	return false;
@@ -642,6 +644,9 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		if (pData)
 			return (m_ctrlWorkload.CanMoveSelectedTask(pData->move) != FALSE);
 		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlWorkload.GetSelectedTaskID() != 0);
 	}
 
 	// all else

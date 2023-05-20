@@ -655,6 +655,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlGantt.SelectTask(m_ctrlGantt.GetSelectedTaskID()) != FALSE);
 	}
 
 	return false;
@@ -734,7 +737,9 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	case IUI_MOVETASK:
 		if (pData)
 			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
-		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlGantt.GetSelectedTaskID() != 0);
 	}
 
 	// all else

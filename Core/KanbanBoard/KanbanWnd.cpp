@@ -624,6 +624,14 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 
 	case IUI_SELECTALL:
 		return (m_ctrlKanban.SelectAllInSelectedColumn() != FALSE);
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		if (m_ctrlKanban.GetSelectedCount())
+		{
+			m_ctrlKanban.ScrollToSelectedTask();
+			return true;
+		}
+		break;
 	}
 
 	return false;
@@ -673,6 +681,9 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* p
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		return (m_ctrlKanban.GetVisibleTaskCount() > 0);
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlKanban.GetSelectedCount() > 0);
 	}
 
 	// all else
