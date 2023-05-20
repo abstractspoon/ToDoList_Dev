@@ -561,6 +561,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = AnyTextAttributeMatches(pTDI, pTDS, rule, query.aAttribDefs, bCaseSensitive, sWhatMatched, nWhatMatched);
 			break;
 
+		case TDCA_SUBTASKDONE:
+			bMatch = ValueMatches(m_calculator.GetTaskSubtaskCompletion(pTDI, pTDS), rule, sWhatMatched);
+			break;
+
 		case TDCA_SELECTION:
 			break; // ignore
 
@@ -3523,9 +3527,7 @@ CString CTDCTaskFormatter::GetTaskSubtaskCompletion(const TODOITEM* pTDI, const 
 	int nSubtaskCount = 0, nSubtaskDone = 0;
 	CString sSubtasksDone;
 
-	CTDCTaskCalculator calc(m_data);
-
-	if (calc.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
+	if (m_calculator.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
 	{
 		sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);
 	}
