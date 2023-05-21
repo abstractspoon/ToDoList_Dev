@@ -544,6 +544,9 @@ namespace DayViewUIExtension
 								Color fillColor, 
 								Color borderColor)
 		{
+			if (rect.Width <= 0)
+				return;
+
 			bool isLong = apptView.IsLong;
 			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
@@ -604,6 +607,9 @@ namespace DayViewUIExtension
 
 		void DrawTaskIconAndGripper(Graphics g, Calendar.AppointmentView apptView, Color barColor, ref Rectangle rect)
 		{
+			if (rect.Width <= 0)
+				return;
+
 			bool hasIcon = false;
 			Rectangle gripRect = apptView.GripRect;
 
@@ -640,14 +646,19 @@ namespace DayViewUIExtension
 						gripRect.Height -= (imageSize + TextPadding);
 					}
 
-					var clipRgn = g.Clip;
-
-					if (rect.Bottom < (rectIcon.Y + imageSize))
+					if (((rect.Right - rectIcon.Left) < imageSize) || (rect.Height < imageSize))
+					{
+						var clipRgn = g.Clip;
 						g.Clip = new Region(RectangleF.Intersect(rect, g.ClipBounds));
 
-					m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
+						m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
 
-					g.Clip = clipRgn;
+						g.Clip = clipRgn;
+					}
+					else
+					{
+						m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
+					}
 
 					hasIcon = true;
 					tdlView.IconRect = rectIcon;
@@ -682,44 +693,44 @@ namespace DayViewUIExtension
 
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
 		{
-			if (rect.Width > 0)
+			if (rect.Width <= 0)
+				return;
+
+			using (StringFormat format = new StringFormat())
 			{
-				using (StringFormat format = new StringFormat())
+				format.Alignment = StringAlignment.Near;
+				format.LineAlignment = (apptView.IsLong ? StringAlignment.Center : StringAlignment.Near);
+
+				if (apptView.IsLong)
+					format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
+
+				rect.Y += TextOffset;
+
+				if (apptView.IsLong)
+					rect.Height = BaseFont.Height;
+				else
+					rect.Height -= TextOffset;
+
+				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+				using (SolidBrush brush = new SolidBrush(textColor))
 				{
-					format.Alignment = StringAlignment.Near;
-					format.LineAlignment = (apptView.IsLong ? StringAlignment.Center : StringAlignment.Near);
+					TaskItem taskItem = GetTaskItem(apptView.Appointment);
 
-					if (apptView.IsLong)
-						format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
-
-					rect.Y += TextOffset;
-
-					if (apptView.IsLong)
-						rect.Height = BaseFont.Height;
-					else
-						rect.Height -= TextOffset;
-
-					g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-					using (SolidBrush brush = new SolidBrush(textColor))
+					if (taskItem.IsDone && StrikeThruDoneTasks)
 					{
-						TaskItem taskItem = GetTaskItem(apptView.Appointment);
-
-						if (taskItem.IsDone && StrikeThruDoneTasks)
+						using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
 						{
-							using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
-							{
-								g.DrawString(taskItem.Title, font, brush, rect, format);
-							}
-						}
-						else
-						{
-							g.DrawString(taskItem.Title, this.BaseFont, brush, rect, format);
+							g.DrawString(taskItem.Title, font, brush, rect, format);
 						}
 					}
-
-					g.TextRenderingHint = TextRenderingHint.SystemDefault;
+					else
+					{
+						g.DrawString(taskItem.Title, this.BaseFont, brush, rect, format);
+					}
 				}
+
+				g.TextRenderingHint = TextRenderingHint.SystemDefault;
 			}
 		}
 

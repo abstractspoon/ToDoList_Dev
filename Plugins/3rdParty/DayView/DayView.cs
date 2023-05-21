@@ -2016,8 +2016,8 @@ namespace Calendar
 				}
 				else
 				{
-					apptView.EndOfStart = (rect.X + (int)((startDay + 1) * dayWidth));
-					apptView.StartOfEnd = (rect.X + (int)((endDay - 1) * dayWidth));
+					apptView.EndOfStart = (rect.X + ((int)(startDay + 1)) * dayWidth);
+					apptView.StartOfEnd = (rect.X + ((int)endDay) * dayWidth);
 
 					if (apptView.EndOfStart >= apptView.StartOfEnd)
 					{
