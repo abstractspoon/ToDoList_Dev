@@ -252,7 +252,7 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IU
 		}
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return m_wnd->CanScrollToSelectedTask();
+		return m_wnd->ScrollToSelectedTask();
 	}
 
 	return false;
@@ -326,6 +326,9 @@ bool CEvidenceBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd,
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->CanScrollToSelectedTask();
  	}
 
 	return false;

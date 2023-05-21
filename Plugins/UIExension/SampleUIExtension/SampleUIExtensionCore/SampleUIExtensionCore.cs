@@ -41,7 +41,17 @@ namespace SampleUIExtension
             return false;
         }
 
-	    public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public bool ScrollToSelectedTask()
+		{
+			return false;
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			return false;
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
             Task task = tasks.GetFirstTask();
             SampleListItem item = new SampleListItem();
