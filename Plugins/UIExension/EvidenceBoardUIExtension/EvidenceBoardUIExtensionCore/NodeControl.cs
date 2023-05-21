@@ -209,6 +209,61 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public bool ScrollToSelection()
+		{
+			if (m_SelectedNodes.Count == 0)
+				return false;
+
+			Rectangle nodeRect;
+
+			// Check for non-partial visibility
+			foreach (var node in m_SelectedNodes)
+			{
+				if (IsNodeVisible(node, out nodeRect, false))
+					return true;
+			}
+
+			// Check for partial visibility
+			BaseNode nodeToScroll = m_SelectedNodes[0];
+			nodeRect = GetNodeClientRect(nodeToScroll);
+
+			foreach (var node in m_SelectedNodes)
+			{
+				if (IsNodeVisible(node, out nodeRect, true))
+				{
+					nodeToScroll = node;
+				}
+			}
+
+			// Scroll minimum amount to bring it fully into view
+			var visibleRect = nodeRect;
+
+			if (visibleRect.Left < ClientRectangle.Left)
+			{
+				visibleRect.X = ClientRectangle.Left;
+			}
+			else if (visibleRect.Right > ClientRectangle.Right)
+			{
+				visibleRect.X = (ClientRectangle.Right - nodeRect.Width);
+			}
+
+			if (visibleRect.Top < ClientRectangle.Top)
+			{
+				visibleRect.Y = ClientRectangle.Top;
+			}
+			else if (visibleRect.Bottom > ClientRectangle.Bottom)
+			{
+				visibleRect.Y = (ClientRectangle.Bottom - nodeRect.Height);
+			}
+
+			HorizontalScroll.Value += (nodeRect.X - visibleRect.X);
+			VerticalScroll.Value += (nodeRect.Y - visibleRect.Y);
+
+			PerformLayout();
+
+			return true;
+		}
+
 		protected BaseNode SingleSelectedNode
 		{
 			get
@@ -254,7 +309,7 @@ namespace EvidenceBoardUIExtension
 			get { return ((DraggedNode == null) ? NullId : DraggedNode.Data); }
 		}
 
-		public bool SelectNode(uint nodeId, bool notify = false)
+		public bool SelectNode(uint nodeId, bool notify = false, bool ensureVisible = true)
 		{
 			var node = GetNode(nodeId);
 
@@ -262,6 +317,9 @@ namespace EvidenceBoardUIExtension
 			{
 				m_SelectedNodes.Clear();
 				m_SelectedNodes.Add(node);
+
+				if (ensureVisible)
+					ScrollToSelection();
 
 				Invalidate();
 
@@ -302,20 +360,20 @@ namespace EvidenceBoardUIExtension
 		{
 			m_SelectedNodes.Clear();
 
-			SelectAllNodes(RootNode);
+			SelectNodeAndChildren(RootNode);
 			Invalidate();
 
 			if (notify)
 				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 		}
 
-		public void SelectAllNodes(BaseNode node)
+		public void SelectNodeAndChildren(BaseNode node)
 		{
 			if (IsSelectableNode(node))
 				m_SelectedNodes.Add(node);
 
 			foreach (var child in node.Children)
-				SelectAllNodes(child);
+				SelectNodeAndChildren(child);
 		}
 
 		public bool AutoCalculateRadialIncrement
@@ -605,7 +663,7 @@ namespace EvidenceBoardUIExtension
 			return (node != null);
 		}
 
-		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect)
+		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect, bool allowPartial = true)
 		{
 			if (!IsNodeVisible(node))
 			{
@@ -615,7 +673,11 @@ namespace EvidenceBoardUIExtension
 
 			nodeRect = GetNodeClientRect(node);
 
-			return nodeRect.IntersectsWith(ClientRectangle);
+			if (allowPartial)
+				return ClientRectangle.IntersectsWith(nodeRect);
+
+			// else
+			return ClientRectangle.Contains(nodeRect);
 		}
 
 		protected Point GetNodeClientPos(BaseNode node)
@@ -1080,7 +1142,9 @@ namespace EvidenceBoardUIExtension
 					}
 				}
 
+				ScrollToSelection();
 				Invalidate();
+
 				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 			}
 #if DEBUG

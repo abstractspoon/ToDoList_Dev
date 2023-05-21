@@ -208,6 +208,8 @@ protected:
 	afx_msg void OnUpdateViewHideAllBars(CCmdUI* pCmdUI);
 	afx_msg void OnViewShowAllBars();
 	afx_msg void OnUpdateViewShowAllBars(CCmdUI* pCmdUI);
+	afx_msg void OnScrollToSelectedTask();
+	afx_msg void OnUpdateScrollToSelectedTask(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();

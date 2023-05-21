@@ -92,7 +92,17 @@ namespace EvidenceBoardUIExtension
 			return success;
         }
 
-        public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public bool ScrollToSelectedTask()
+		{
+			return m_Control.ScrollToSelection();
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			return (m_Control.SelectedNodeCount > 0);
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 			m_Control.UpdateTasks(tasks, type);
 

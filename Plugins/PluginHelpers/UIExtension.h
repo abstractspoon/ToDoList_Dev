@@ -338,6 +338,8 @@ namespace Abstractspoon
 			{
 				bool SelectTask(UInt32 taskID);
 				bool SelectTasks(cli::array<UInt32>^ taskIDs);
+				bool ScrollToSelectedTask();
+				bool CanScrollToSelectedTask();
 
 				void UpdateTasks(TaskList^ tasks, UIExtension::UpdateType update);
 				bool WantTaskUpdate(Task::Attribute attribute);

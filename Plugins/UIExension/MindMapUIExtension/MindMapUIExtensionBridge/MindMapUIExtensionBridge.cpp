@@ -279,6 +279,9 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->ScrollToSelectedTask();
 	}
 
 	return false;
@@ -357,7 +360,10 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
- 	}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->CanScrollToSelectedTask();
+	}
 
 	return false;
 }

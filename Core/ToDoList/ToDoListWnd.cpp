@@ -366,6 +366,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_SAVEALL, OnSaveall)
 	ON_COMMAND(ID_SAVEAS, OnSaveas)
 	ON_COMMAND(ID_SAVE_NORMAL, OnSave)
+	ON_COMMAND(ID_SCROLLTOSELTASK, OnScrollToSelectedTask)
 	ON_COMMAND(ID_SENDTASKS, OnSendTasks)
 	ON_COMMAND(ID_SEND_SELTASKS, OnSendSelectedTasks)
 	ON_COMMAND(ID_SHOWTIMELOGFILE, OnShowTimelogfile)
@@ -611,6 +612,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_SAVEALL, OnUpdateSaveall)
 	ON_UPDATE_COMMAND_UI(ID_SAVEAS, OnUpdateSaveas)
 	ON_UPDATE_COMMAND_UI(ID_SAVE_NORMAL, OnUpdateSave)
+	ON_UPDATE_COMMAND_UI(ID_SCROLLTOSELTASK, OnUpdateScrollToSelectedTask)
 	ON_UPDATE_COMMAND_UI(ID_SENDTASKS, OnUpdateSendTasks)
 	ON_UPDATE_COMMAND_UI(ID_SEND_SELTASKS, OnUpdateSendSelectedTasks)
 	ON_UPDATE_COMMAND_UI(ID_SHOWTIMELOGFILE, OnUpdateShowTimelogfile)
@@ -1055,6 +1057,7 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_PREVTASK,							VK_F7, 0);
 	m_mgrShortcuts.AddShortcut(ID_PRINT,							'P',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_SAVE_NORMAL,						'S',			HOTKEYF_CONTROL);
+	m_mgrShortcuts.AddShortcut(ID_SCROLLTOSELTASK,					VK_F3,			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_TOOLS_EXPORT,						'E',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_TOOLS_IMPORT,						'I',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_TOOLS_TRANSFORM,					'T',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
@@ -14056,4 +14059,14 @@ void CToDoListWnd::OnViewShowHideAllBars(BOOL bShow)
 	}
 
 	Resize();
+}
+
+void CToDoListWnd::OnScrollToSelectedTask() 
+{
+	GetToDoCtrl().ScrollToSelectedTask();
+}
+
+void CToDoListWnd::OnUpdateScrollToSelectedTask(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().HasSelection());
 }

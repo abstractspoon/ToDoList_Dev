@@ -145,6 +145,22 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
+		public bool ScrollToSelectedTask()
+		{
+			if (CanScrollToSelectedTask())
+			{
+				m_TaskMatchesList.EnsureSelectionVisible();
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			return (m_TaskMatchesList.GetSelectedMatchId() != 0);
+		}
+
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
 			m_CommentsTimer.Stop();

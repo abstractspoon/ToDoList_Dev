@@ -196,8 +196,6 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IU
 	case IUI_COLLAPSESELECTED:
 	case IUI_EXPANDALL:
 	case IUI_EXPANDSELECTED:
-		{
-		}
 		break;
 
 	case IUI_SELECTALL:
@@ -252,6 +250,9 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IU
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->ScrollToSelectedTask();
 	}
 
 	return false;
@@ -292,8 +293,6 @@ bool CEvidenceBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd,
 	case IUI_COLLAPSESELECTED:
 	case IUI_EXPANDALL:
 	case IUI_EXPANDSELECTED:
-		{
-		}
 		break;
 
 	case IUI_SELECTFIRSTTASK:
@@ -327,6 +326,9 @@ bool CEvidenceBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd,
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->CanScrollToSelectedTask();
  	}
 
 	return false;

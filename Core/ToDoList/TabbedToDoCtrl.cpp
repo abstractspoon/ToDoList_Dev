@@ -6023,6 +6023,43 @@ int CTabbedToDoCtrl::GetSelectedTaskCount() const
 	return CToDoCtrl::GetSelectedTaskCount();
 }
 
+BOOL CTabbedToDoCtrl::ScrollToSelectedTask() 
+{
+	// else
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::ScrollToSelectedTask();
+
+	case FTCV_TASKLIST:
+		return m_taskList.EnsureSelectionVisible(FALSE);
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		return (HasSelection() && ExtensionDoAppCommand(nView, IUI_SCROLLTOSELECTEDTASK));
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
 void CTabbedToDoCtrl::SetFocusToTasks()
 {
 	FTC_VIEW nView = GetTaskView();

@@ -307,8 +307,18 @@ namespace DayViewUIExtension
 		{
             return m_DayView.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
 		}
+		
+		public bool ScrollToSelectedTask()
+		{
+			return m_DayView.EnsureSelectionVisible(false);
+		}
 
-        public new Boolean Focus()
+		public bool CanScrollToSelectedTask()
+		{
+			return (m_DayView.SelectedTaskId != 0);
+		}
+
+		public new Boolean Focus()
         {
             if (Focused)
                 return false;

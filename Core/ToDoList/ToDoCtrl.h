@@ -197,6 +197,7 @@ public:
 	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect);
+	BOOL ScrollToSelectedTask() { return m_taskTree.EnsureSelectionVisible(FALSE); }
 	
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);

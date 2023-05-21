@@ -420,6 +420,9 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			if (m_BigCalendar.SaveToImage(bmImage))
 				return (CGdiPlusBitmap(bmImage).SaveAsFile(pData->szFilePath) != FALSE);
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_BigCalendar.EnsureSelectionVisible() != FALSE);
 	}
 
 	return false;
@@ -460,6 +463,9 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 	case IUI_SAVETOIMAGE:
 		return (m_BigCalendar.CanSaveToImage() != FALSE);
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_BigCalendar.GetSelectedTaskID() != 0);
 	}
 	
 	return false;
