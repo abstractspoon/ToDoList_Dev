@@ -310,7 +310,7 @@ namespace DayViewUIExtension
 		
 		public bool ScrollToSelectedTask()
 		{
-			return SelectTask(m_DayView.SelectedTaskId);
+			return m_DayView.EnsureSelectionVisible(false);
 		}
 
 		public bool CanScrollToSelectedTask()

@@ -646,7 +646,7 @@ namespace EvidenceBoardUIExtension
 			return true;
 		}
 
-		public new bool SelectNode(uint taskId, bool notify)
+		public bool SelectNode(uint taskId, bool notify)
 		{
 			ClearUserLinkSelection();
 
