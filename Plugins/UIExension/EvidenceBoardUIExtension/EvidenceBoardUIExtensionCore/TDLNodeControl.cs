@@ -555,7 +555,7 @@ namespace EvidenceBoardUIExtension
 			if (fromTask != null)
 			{
 				// task must be the only selection
-				if (!SelectNode(fromId, true))
+				if (!SelectNode(fromId, true, false))
 				{
 					Debug.Assert(false);
 					return null;
@@ -646,14 +646,19 @@ namespace EvidenceBoardUIExtension
 			return true;
 		}
 
-		public bool SelectNode(uint taskId, bool notify)
+		public bool SelectTask(uint taskId)
+		{
+			return SelectNode(taskId, false, true);
+		}
+
+		public new bool SelectNode(uint taskId, bool notify, bool ensureVisible)
 		{
 			ClearUserLinkSelection();
 
-			if (base.SelectNode(taskId, notify))
+			if (base.SelectNode(taskId, notify, ensureVisible))
 				return true;
 
-			base.SelectNode(NodeControl.NullId, notify);
+			base.SelectNode(NodeControl.NullId, notify, false);
 			return false;
 		}
 
@@ -1683,7 +1688,7 @@ namespace EvidenceBoardUIExtension
 		{
 			if ((link != null) && (link != m_SelectedUserLink))
 			{
-				SelectNode(link.FromId, true);
+				SelectNode(link.FromId, true, false);
 				Invalidate();
 			}
 			
@@ -1772,7 +1777,7 @@ namespace EvidenceBoardUIExtension
 
 				if (link != null)
 				{
-					SelectNode(link.FromId, true);
+					SelectNode(link.FromId, true, false);
 					m_SelectedUserLink = link;
 
 					DoubleClickUserLink?.Invoke(this, null);

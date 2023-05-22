@@ -58,7 +58,7 @@ namespace EvidenceBoardUIExtension
 
         public bool SelectTask(uint dwTaskID)
         {
-			bool success = m_Control.SelectNode(dwTaskID);
+			bool success = m_Control.SelectTask(dwTaskID);
 
 			UpdateToolbarButtonStates();
 

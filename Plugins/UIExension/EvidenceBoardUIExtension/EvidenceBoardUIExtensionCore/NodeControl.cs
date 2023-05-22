@@ -309,7 +309,7 @@ namespace EvidenceBoardUIExtension
 			get { return ((DraggedNode == null) ? NullId : DraggedNode.Data); }
 		}
 
-		public bool SelectNode(uint nodeId, bool notify = false, bool ensureVisible = true)
+		public bool SelectNode(uint nodeId, bool notify, bool ensureVisible)
 		{
 			var node = GetNode(nodeId);
 
@@ -1056,7 +1056,7 @@ namespace EvidenceBoardUIExtension
 
 				if ((hit != null) && IsSelectableNode(hit))
 				{
-					SelectNode(hit.Data, true);
+					SelectNode(hit.Data, true, false);
 				}
 			}
 		}
