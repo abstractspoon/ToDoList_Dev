@@ -204,23 +204,34 @@ namespace MindMapUIExtension
         public TreeNode AddRootNode(Object itemData, UInt32 uniqueID = 0)
         {
             if (IsEmpty())
-                return AddNode(itemData, m_TreeView.Nodes, uniqueID);
+                return InsertNode(itemData, m_TreeView.Nodes, -1, uniqueID);
 
             // else
             return m_TreeView.Nodes[0];
         }
 
+        public TreeNode InsertNode(Object itemData, TreeNode parent, int pos, UInt32 uniqueID = 0)
+        {
+			// Must add Root node first
+			if (IsEmpty() || (parent == null) || (pos > parent.Nodes.Count))
+			{
+				Debug.Assert(false);
+				return null;
+			}
+			
+            return InsertNode(itemData, parent.Nodes, pos, uniqueID);
+        }
+
         public TreeNode AddNode(Object itemData, TreeNode parent, UInt32 uniqueID = 0)
         {
 			// Must add Root node first
-            if (IsEmpty())
-                return null;
+			if (IsEmpty() || (parent == null))
+			{
+				Debug.Assert(false);
+				return null;
+			}
 
-            // Must have a parent
-            if (parent == null)
-                return null;
-
-            return AddNode(itemData, parent.Nodes, uniqueID);
+			return InsertNode(itemData, parent.Nodes, -1, uniqueID);
         }
 
         public void Clear()
@@ -1698,7 +1709,7 @@ namespace MindMapUIExtension
 			return false;
 		}
 
-        protected TreeNode AddNode(Object userData, TreeNodeCollection nodes, UInt32 uniqueID)
+        private TreeNode InsertNode(Object userData, TreeNodeCollection nodes, int pos, UInt32 uniqueID)
         {
             if ((userData == null) || (userData.ToString() == "") || (nodes == null))
                 return null;
@@ -1708,9 +1719,12 @@ namespace MindMapUIExtension
             newNode.Tag = new MindMapItem(userData);
             newNode.Name = uniqueID.ToString();
 
-            nodes.Add(newNode);
+			if (pos >= 0)
+				nodes.Insert(pos, newNode);
+			else
+				nodes.Add(newNode);
 
-            return newNode;
+			return newNode;
         }
 
         protected bool DebugMode()

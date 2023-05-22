@@ -749,6 +749,7 @@ namespace MindMapUIExtension
 			{
 				var parentId = task.GetParentTask().GetID();
 				var parentNode = FindNode(parentId);
+				int pos = -1;
 
 				if ((parentId == 0) && (parentNode == null))
 				{
@@ -772,8 +773,12 @@ namespace MindMapUIExtension
 						parentNode = RootNode;
 					}
 				}
+				else // insert in place
+				{
+					pos = (int)task.GetPosition();
+				}
 
-				AddTaskToTree(task, parentNode, true);
+				AddTaskToTree(task, parentNode, pos, true);
 			}
 			else if (item.ProcessTaskUpdate(task))
 			{
@@ -819,7 +824,6 @@ namespace MindMapUIExtension
 
                 m_Items.Add(taskItem.ID, taskItem);
 				rootNode = AddRootNode(taskItem, taskItem.ID);
-
 
 				// First Child
 				AddTaskToTree(task.GetFirstSubtask(), rootNode);
@@ -1442,7 +1446,7 @@ namespace MindMapUIExtension
 			base.Clear();
 		}
 
-		private bool AddTaskToTree(Task task, TreeNode parent, bool select = false)
+		private bool AddTaskToTree(Task task, TreeNode parent, int pos = -1, bool select = false)
 		{
 			if (!task.IsValid())
 				return true; // not an error
@@ -1450,7 +1454,7 @@ namespace MindMapUIExtension
 			var taskID = task.GetID();
 			var taskItem = new MindMapTaskItem(task);
 
-			var node = AddNode(taskItem, parent, taskID);
+			var node = InsertNode(taskItem, parent, pos, taskID);
 
 			if (node == null)
 				return false;
