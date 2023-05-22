@@ -828,30 +828,30 @@ namespace Calendar
         {
             Invalidate();
 
+            //scroll text box too
             if (editbox.Visible)
-                //scroll text box too
                 editbox.Top += e.OldValue - e.NewValue;
         }
 
         void OnHScroll(object sender, ScrollEventArgs e)
         {
-            if (e.NewValue > e.OldValue)
-            {
-                StartDate = StartDate.AddDays(HScrollStep);
-            }
-            else if (e.NewValue < e.OldValue)
-            {
-                StartDate = StartDate.AddDays(-HScrollStep);
-            }
-			else
-			{
+			if (e.NewValue == e.OldValue)
 				return;
-			}
+
+			DoHorizontalScroll(e.NewValue > e.OldValue);
+        }
+
+		protected void DoHorizontalScroll(bool right)
+		{
+			if (right)
+				StartDate = StartDate.AddDays(HScrollStep);
+			else
+				StartDate = StartDate.AddDays(-HScrollStep);
 
 			AdjustVScrollbar();
-            Invalidate();
+			Invalidate();
 			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
-        }
+		}
 
 		protected override void OnSizeChanged(EventArgs e)
 		{
@@ -1215,7 +1215,7 @@ namespace Calendar
 			return true;
 		}
 
-		public void MouseWheelScroll(bool down)
+		protected void MouseWheelScroll(bool down)
         {
             if (this.AllowScroll)
             {
