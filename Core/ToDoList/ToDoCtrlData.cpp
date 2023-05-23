@@ -118,7 +118,6 @@ BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttribID) const
 			GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 			return pDef->HasFeature(TDCCAF_INHERITPARENTCHANGES);
-
 		}
 		else if ((nAttribID == TDCA_ALL) && !m_mapParentAttribs.IsEmpty())
 		{
