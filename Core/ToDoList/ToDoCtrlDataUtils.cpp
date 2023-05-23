@@ -564,9 +564,12 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_SUBTASKDONE:
-			if (rule.OperatorIs(FOP_NOT_SET))
+			if (rule.OperatorIs(FOP_SET))
 			{
-				// Special case
+				bMatch = pTDS->HasSubTasks();
+			}
+			else if (rule.OperatorIs(FOP_NOT_SET))
+			{
 				bMatch = !pTDS->HasSubTasks();
 			}
 			else
