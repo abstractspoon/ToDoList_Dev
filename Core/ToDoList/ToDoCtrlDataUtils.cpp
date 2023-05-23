@@ -550,11 +550,13 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_POSITION:
-			// Position is 1-based in the UI, but 0-based internally
-			bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
+			{
+				// Position is 1-based in the UI, but 0-based internally
+				bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
 
-			if (bMatch)
-				sWhatMatched = m_formatter.GetTaskPosition(pTDS);
+				if (bMatch)
+					sWhatMatched = m_formatter.GetTaskPosition(pTDS);
+			}
 			break;
 			
 		case TDCA_ANYTEXTATTRIBUTE:
@@ -562,7 +564,15 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_SUBTASKDONE:
-			bMatch = ValueMatches(m_calculator.GetTaskSubtaskCompletion(pTDI, pTDS), rule, sWhatMatched);
+			if (rule.OperatorIs(FOP_NOT_SET))
+			{
+				// Special case
+				bMatch = !pTDS->HasSubTasks();
+			}
+			else
+			{
+				bMatch = ValueMatches(m_calculator.GetTaskSubtaskCompletion(pTDI, pTDS), rule, sWhatMatched);
+			}
 			break;
 
 		case TDCA_SELECTION:
