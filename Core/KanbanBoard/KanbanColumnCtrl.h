@@ -29,6 +29,7 @@ const UINT WM_KLCN_EDITTASKFLAG		= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/F
 const UINT WM_KLCN_EDITTASKPIN		= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_KLCN_EDITTASKLABEL	= (WM_APP+6); // WPARAM = HWND, LPARAM = TaskID
 const UINT WM_KLCN_SHOWFILELINK		= (WM_APP+7); // WPARAM = HWND, LPARAM = LPCTSTR
+const UINT WM_KLCN_EDITTASKLOCK		= (WM_APP+8); // WPARAM = HWND, LPARAM = TRUE/FALSE
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -100,6 +101,7 @@ public:
 	void SetMaximumTaskCount(int nMaxTasks);
 
 	void SetOptions(DWORD dwOptions);
+	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; Invalidate(); }
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nColWidth = -1) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
@@ -119,7 +121,8 @@ protected:
 	BOOL m_bSelected;
 	BOOL m_bSavingToImage;
 	BOOL m_bDropTarget;
-	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks;
+	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks, m_bDrawTaskLocks;
+	BOOL m_bReadOnly;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;

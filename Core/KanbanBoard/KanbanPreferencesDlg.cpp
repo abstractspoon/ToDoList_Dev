@@ -458,6 +458,7 @@ void CKanbanPreferencesPage::BuildDisplayAttributeListBox()
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,			TDCA_FLAG); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILELINK,		TDCA_FILELINK); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,		TDCA_LASTMODDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LOCK,			TDCA_LOCK); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,		TDCA_PERCENT); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,		TDCA_PRIORITY); 
 	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,		TDCA_RECURRENCE); 

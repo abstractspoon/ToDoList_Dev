@@ -282,6 +282,19 @@ void CKanbanColumnCtrlArray::SetOptions(DWORD dwOptions)
 	}
 }
 
+void CKanbanColumnCtrlArray::SetReadOnly(BOOL bReadOnly)
+{
+	int nCol = GetSize();
+
+	while (nCol--)
+	{
+		CKanbanColumnCtrl* pCol = GetAt(nCol);
+		ASSERT(pCol);
+
+		pCol->SetReadOnly(bReadOnly);
+	}
+}
+
 void CKanbanColumnCtrlArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
 	int nCol = GetSize();

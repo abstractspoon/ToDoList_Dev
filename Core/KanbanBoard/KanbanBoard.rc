@@ -412,6 +412,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_DISPLAY_TIMEREMAINING_SHORT "Rem."
+    IDS_DISPLAY_LOCK        "Lock"
 END
 
 #endif    // English (Australia) resources

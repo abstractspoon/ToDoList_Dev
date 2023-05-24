@@ -430,6 +430,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
 	case TDCA_FLAG:				// drawn separately
+	case TDCA_LOCK:				// drawn separately
 	case TDCA_PARENT:			// drawn separately
 	case TDCA_FILELINK:			// drawn separately
 	default:
@@ -477,6 +478,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_PARENT:			return (dwParentID != 0);
 
 	case TDCA_FLAG:				return FALSE; // handled separately
+	case TDCA_LOCK:				return FALSE; // handled separately
 	}
 
 	ASSERT(0);

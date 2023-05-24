@@ -168,6 +168,7 @@
 #define IDS_OPTIONS_HIDESUBTASKS        57726
 #define IDS_DISPLAY_TIMEREMAINING       57727
 #define IDS_DISPLAY_TIMEREMAINING_SHORT 57728
+#define IDS_DISPLAY_LOCK                57729
 
 // Next default values for new objects
 // 

@@ -121,6 +121,7 @@ protected:
 	afx_msg LRESULT OnKanbanNotifyGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnKanbanNotifyEditTaskLock(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyShowFileLink(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanPrefsHelp(WPARAM wp, LPARAM lp);
