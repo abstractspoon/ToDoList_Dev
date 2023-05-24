@@ -436,6 +436,9 @@ public:
 	virtual bool AddTaskDependency(HTASKITEM hTask, LPCWSTR szDepends, int nDaysLeanIn = 0) = 0;
 	virtual bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeanIn = 0) = 0;
 	virtual LPCWSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeanIn = NULL) const = 0;
+
+	virtual double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const = 0;
+
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

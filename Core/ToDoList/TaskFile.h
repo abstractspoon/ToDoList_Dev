@@ -201,6 +201,7 @@ public:
 	BOOL SetTaskPriorityColor(HTASKITEM hTask, COLORREF color);
 	BOOL SetTaskCalcTimeEstimate(HTASKITEM hTask, double dTime, TDC_UNITS cUnits);
 	BOOL SetTaskCalcTimeSpent(HTASKITEM hTask, double dTime, TDC_UNITS cUnits);
+	BOOL SetTaskCalcTimeRemaining(HTASKITEM hTask, double dTime, TDC_UNITS cUnits);
 	BOOL SetTaskCalcDueDate(HTASKITEM hTask, const COleDateTime& date);
 	BOOL SetTaskCalcStartDate(HTASKITEM hTask, const COleDateTime& date);
 	BOOL SetTaskCalcCompletion(HTASKITEM hTask, int nPercent);
@@ -250,9 +251,11 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList18 implementation 
-	bool AddTaskDependency(HTASKITEM hTask, LPCWSTR szDepends, int nDaysLeadIn);
+	bool AddTaskDependency(HTASKITEM hTask, LPCTSTR szDepends, int nDaysLeadIn);
 	bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeadIn);
-	LPCWSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeadIn) const;
+	LPCTSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeadIn) const;
+
+	double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
@@ -273,8 +276,8 @@ public:
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
 	
 	LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const;
-	LPCWSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
-	bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy);
+	LPCTSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
+	bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCTSTR szModifiedBy);
 
 	unsigned long GetCustomAttributeTypeByID(LPCTSTR szID) const;
 
@@ -318,7 +321,7 @@ public:
 		DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom, TDC_RECURREUSEOPTION nReuse, int nNumOccur);
 
 	LPCTSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const;
-	bool AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColumn, bool bList);
+	bool AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCTSTR szColumn, bool bList);
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList12 implementation 

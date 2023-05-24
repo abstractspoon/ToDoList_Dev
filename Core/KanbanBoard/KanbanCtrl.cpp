@@ -677,6 +677,7 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:
 	case TDCA_TASKNAME:
 	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMEREMAINING:
 	case TDCA_TIMESPENT:
 	case TDCA_VERSION:
 		return TRUE;
@@ -1021,6 +1022,9 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	
 	if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true); // calculated
+	
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEREMAINING))
+		pKI->sRemainingTime = pTasks->GetTaskTimeRemaining(hTask, pKI->nTimeSpentUnits); // always calculated
 	
 	if (pTasks->IsAttributeAvailable(TDCA_COST))
 	{

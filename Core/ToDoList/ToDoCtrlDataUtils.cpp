@@ -4543,6 +4543,11 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	if (dTime != 0)
 		tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
 
+	dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+
+	if (dTime != 0)
+		tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
+
 	// due date
 	if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE))
 	{

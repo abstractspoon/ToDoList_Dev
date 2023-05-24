@@ -1374,7 +1374,7 @@ const CXmlItem* CTaskFile::GetCustomAttribDefs(int nIndex) const
 	return pXIAttribDef;
 }
 
-bool CTaskFile::AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColumn, bool bList)
+bool CTaskFile::AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCTSTR szColumn, bool bList)
 {
 	return (AddCustomAttributeDef(szID, szLabel, szColumn, bList) != NULL);
 }
@@ -3118,6 +3118,12 @@ double CTaskFile::GetTaskTimeSpent(HTASKITEM hTask, TDC_UNITS& nUnits, bool bCal
 	return GetTaskDouble(hTask, TDL_TASKTIMESPENT);
 }
 
+double CTaskFile::GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const
+{
+	cUnits = GetTaskTimeUnits(hTask, TDL_TASKCALCTIMEREMAININGUNITS);
+	return GetTaskDouble(hTask, TDL_TASKCALCTIMEREMAINING);
+}
+
 time_t CTaskFile::GetTaskLastModified(HTASKITEM hTask) const
 {
 	return GetTaskDate(hTask, TDL_TASKLASTMOD, TRUE);
@@ -3773,7 +3779,7 @@ bool CTaskFile::SetTaskDependency(HTASKITEM hTask, LPCTSTR szDepends)
 	return SetTaskString(hTask, TDL_TASKDEPENDENCY, szDepends);
 }
 
-bool CTaskFile::SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy)
+bool CTaskFile::SetTaskLastModifiedBy(HTASKITEM hTask, LPCTSTR szModifiedBy)
 {
 	return SetTaskString(hTask, TDL_TASKLASTMODBY, szModifiedBy);
 }
@@ -4167,6 +4173,11 @@ BOOL CTaskFile::SetTaskCalcTimeEstimate(HTASKITEM hTask, double dTime, TDC_UNITS
 BOOL CTaskFile::SetTaskCalcTimeSpent(HTASKITEM hTask, double dTime, TDC_UNITS cUnits)
 {
 	return SetTaskTime(hTask, TDL_TASKCALCTIMESPENT, dTime, TDL_TASKCALCTIMESPENTUNITS, cUnits);
+}
+
+BOOL CTaskFile::SetTaskCalcTimeRemaining(HTASKITEM hTask, double dTime, TDC_UNITS cUnits)
+{
+	return SetTaskTime(hTask, TDL_TASKCALCTIMEREMAINING, dTime, TDL_TASKCALCTIMEREMAININGUNITS, cUnits);
 }
 
 BOOL CTaskFile::SetTaskCalcDueDate(HTASKITEM hTask, const COleDateTime& date)

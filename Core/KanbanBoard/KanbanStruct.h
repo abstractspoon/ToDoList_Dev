@@ -72,8 +72,8 @@ struct KANBANITEM
 	BOOL bLocked, bHasIcon;
 
 	CString sTitle, sFullPosition;
-	double dTimeEst, dTimeSpent, dCost;
-	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
+	double dTimeEst, dTimeSpent, dTimeRemaining, dCost;
+	TDC_UNITS nTimeEstUnits, nTimeSpentUnits, nTimeRemainingUnits;
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
 	CString sExternalID, sRecurrence, sCreatedBy;
 	CStringArray aFileLinks;

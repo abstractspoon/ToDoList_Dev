@@ -82,7 +82,7 @@ const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int DEF_IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 const int MAX_DRAG_ITEM_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200) + DEF_IMAGE_SIZE;
-const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
+const int PIN_FLAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(12);
 
 const int IMAGE_PADDING			= 2;
 const int BAR_PADDING			= 2;
@@ -947,23 +947,20 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 
 	BOOL bIconDrawn = DrawTaskIcon(pDC, pKI, rIcon);
 
-	// Draw placeholder image if icon not drawn
-	BOOL bLocked = pKI->bLocked;
+	// Allow for rest of images being smaller than default image size
+	rIcon.top -= IMAGE_PADDING;
 
-	if (!bLocked && !bIconDrawn)
-	{
-		// Allow for placeholder being smaller than default image size
-		rIcon.top -= IMAGE_PADDING;
+	// Draw placeholder image if icon not drawn and not locked
+	if (!pKI->bLocked && !bIconDrawn)
 		DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE);
-	}
 	
 	// Draw pin icon always
-	rIcon.left = (rItem.right - DEF_IMAGE_SIZE - IMAGE_PADDING);
+	rIcon.left = (rItem.right - PIN_FLAG_IMAGE_SIZE - IMAGE_PADDING);
 
 	DrawItemImage(pDC, rIcon, KBCI_PIN, pKI->bPinned);
-	rIcon.OffsetRect(0, PIN_FLAG_IMAGE_HEIGHT);
+	rIcon.OffsetRect(0, PIN_FLAG_IMAGE_SIZE);
 
-	// Draw flag icon if set or 
+	// Draw flag icon if set or not locked
 	if (m_bDrawTaskFlags && (pKI->bFlagged || !pKI->bLocked))
 	{
 		DrawItemImage(pDC, rIcon, KBCI_FLAG, pKI->bFlagged);
@@ -2211,7 +2208,7 @@ KBC_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
 	rIcon = rText;
 	rIcon.left = (rIcon.right + IMAGE_PADDING);
 	rIcon.right = (rIcon.left + DEF_IMAGE_SIZE);
-	rIcon.bottom = (rIcon.top + PIN_FLAG_IMAGE_HEIGHT);
+	rIcon.bottom = (rIcon.top + PIN_FLAG_IMAGE_SIZE);
 
 	if (rIcon.PtInRect(point))
 		return KBCI_PIN;
