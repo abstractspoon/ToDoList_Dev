@@ -4812,6 +4812,16 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 				tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
 		}
 
+		// time remaining
+		if (filter.WantAttribute(TDCA_TIMEREMAINING))
+		{
+			TDC_UNITS nUnits = TDCU_NULL;
+			double dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+
+			if (dTime != 0)
+				tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
+		}
+
 		// done date
 		if (bDone)
 		{

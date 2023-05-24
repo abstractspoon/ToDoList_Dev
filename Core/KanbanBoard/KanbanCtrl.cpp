@@ -1024,7 +1024,7 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true); // calculated
 	
 	if (pTasks->IsAttributeAvailable(TDCA_TIMEREMAINING))
-		pKI->sRemainingTime = pTasks->GetTaskTimeRemaining(hTask, pKI->nTimeSpentUnits); // always calculated
+		pKI->dTimeRemaining = pTasks->GetTaskTimeRemaining(hTask, pKI->nTimeRemainingUnits); // only calculated
 	
 	if (pTasks->IsAttributeAvailable(TDCA_COST))
 	{
