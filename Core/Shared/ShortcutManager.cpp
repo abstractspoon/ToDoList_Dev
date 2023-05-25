@@ -594,18 +594,42 @@ void CShortcutManager::LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey)
 	ASSERT(pPrefs);
 
 	// load shortcuts overriding any defaults
-	int nItem = pPrefs->GetProfileInt(szKey, _T("NumItems"), 0);
+	CString sShortcuts = pPrefs->GetProfileString(szKey, _T("Shortcuts"));
 
-	while (nItem--)
+	if (!sShortcuts.IsEmpty())
 	{
-		CString sKey;
-		sKey.Format(_T("%s\\Item%02d"), szKey, nItem);
+		CStringArray aCmdPairs;
+		int nPair = Misc::Split(sShortcuts, aCmdPairs, '|');
 
-		UINT nCmdID = (UINT)pPrefs->GetProfileInt(sKey, _T("CmdID"), 0);
-		DWORD dwShortcut = (DWORD)pPrefs->GetProfileInt(sKey, _T("Shortcut"), 0);
+		while (nPair--)
+		{
+			CString sShortcut, sCmdID = aCmdPairs[nPair];
+						
+			if (Misc::Split(sCmdID, sShortcut, ':'))
+			{
+				UINT nCmdID = (UINT)_ttoi(sCmdID);
+				DWORD dwShortcut = (DWORD)_ttoi(sShortcut);
 
-		if (nCmdID && dwShortcut)
-			SetShortcut(nCmdID, dwShortcut);
+				if (nCmdID && dwShortcut)
+					SetShortcut(nCmdID, dwShortcut);
+			}
+		}
+	}
+	else  // Backwards compatibility
+	{
+		int nItem = pPrefs->GetProfileInt(szKey, _T("NumItems"), 0);
+
+		while (nItem--)
+		{
+			CString sKey;
+			sKey.Format(_T("%s\\Item%02d"), szKey, nItem);
+
+			UINT nCmdID = (UINT)pPrefs->GetProfileInt(sKey, _T("CmdID"), 0);
+			DWORD dwShortcut = (DWORD)pPrefs->GetProfileInt(sKey, _T("Shortcut"), 0);
+
+			if (nCmdID && dwShortcut)
+				SetShortcut(nCmdID, dwShortcut);
+		}
 	}
 }
 
@@ -613,8 +637,7 @@ void CShortcutManager::SaveSettings(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	ASSERT(pPrefs);
 
-	pPrefs->WriteProfileInt(szKey, _T("NumItems"), m_mapID2Shortcut.GetCount());
-
+	CString sShortcuts;
 	POSITION pos = m_mapID2Shortcut.GetStartPosition();
 	int nItem = 0;
 
@@ -626,14 +649,13 @@ void CShortcutManager::SaveSettings(IPreferences* pPrefs, LPCTSTR szKey) const
 		m_mapID2Shortcut.GetNextAssoc(pos, nCmdID, dwShortcut);
 
 		if (nCmdID && dwShortcut)
-		{
-			CString sKey;
-			sKey.Format(_T("%s\\Item%02d"), szKey, nItem);
-
-			pPrefs->WriteProfileInt(sKey, _T("CmdID"), nCmdID);
-			pPrefs->WriteProfileInt(sKey, _T("Shortcut"), dwShortcut);
-
-			nItem++;
-		}
+			sShortcuts += Misc::Format(_T("%d:%ld|"), nCmdID, dwShortcut);
 	}
+	sShortcuts.TrimRight('|');
+
+	// Check and delete old preferences once only
+	if (pPrefs->HasProfileSection(Misc::Format(_T("%s\\Item00"), szKey)))
+		pPrefs->DeleteProfileSection(szKey, true);
+
+	pPrefs->WriteProfileString(szKey, _T("Shortcuts"), sShortcuts);
 }
