@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "monthcombobox.h"
 #include "datehelper.h"
+#include "dialoghelper.h"
 #include "localizer.h"
 
 #ifdef _DEBUG
@@ -11,6 +12,13 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+void DDX_Month(CDataExchange* pDX, CMonthComboBox& combo, int& nMonth)
+{
+	CDialogHelper::DDX_CBData(pDX, combo, nMonth, 1);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CMonthComboBox
@@ -57,7 +65,18 @@ void CMonthComboBox::InitCombo()
 	CLocalizer::EnableTranslation(*this, FALSE);
 
 	ResetContent();
+	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)
-		AddString(CDateHelper::GetMonthName(nMonth, FALSE));
+		CDialogHelper::AddString(*this, CDateHelper::GetMonthName(nMonth, FALSE), nMonth);
+}
+
+int CMonthComboBox::GetSelectedMonth() const
+{
+	return CDialogHelper::GetSelectedItemData(*this);
+}
+
+int CMonthComboBox::SetSelectedMonth(int nMonth)
+{
+	return CDialogHelper::SelectItemByData(*this, nMonth);
 }

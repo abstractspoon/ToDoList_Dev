@@ -451,7 +451,7 @@ int CWeekend::CalcLength(DWORD dwDays)
 
 	for (int nDay = 0; nDay < 7; nDay++)
 	{
-		if (dwDays & CDateHelper::Map(OLE_DAYSOFWEEK[nDay]))
+		if (dwDays & CDateHelper::MapOleDowToDH(OLE_DAYSOFWEEK[nDay]))
 			nLength++;
 	}
 
@@ -502,7 +502,7 @@ BOOL CWeekend::IsWeekend(DH_DAYOFWEEK nDOW) const
 BOOL CWeekend::IsWeekend(OLE_DAYOFWEEK nDOW) const
 {
 	if (m_dwDays)
-		return IsWeekend(CDateHelper::Map(nDOW));
+		return IsWeekend(CDateHelper::MapOleDowToDH(nDOW));
 
 	// else
 	return FALSE;
