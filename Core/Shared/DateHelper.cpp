@@ -1070,7 +1070,12 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 		dDateTime2 = GetTimeOnly(dDateTime2).m_dt;
 	}
 
-	return ((dDateTime1 < dDateTime2) ? -1 : (dDateTime1 > dDateTime2) ? 1 : 0);
+	double dDiff = (dDateTime1 - dDateTime2);
+
+	if (fabs(dDiff) < ONE_SECOND)
+		return 0;
+
+	return (dDiff < 0) ? -1 : 1;
 }
 
 BOOL CDateHelper::IsDateSet(const COleDateTime& date)
@@ -1786,7 +1791,7 @@ COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
 	if (dTime <= 0)
 		return date;
 
-	dTime = (int)(dTime * MINS_IN_DAY);
+	dTime = Misc::Round(dTime * MINS_IN_DAY);
 	dTime /= MINS_IN_DAY;
 
 	return MakeDate(date, dTime);

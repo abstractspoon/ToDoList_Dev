@@ -302,7 +302,5 @@ protected:
 	afx_msg void OnEndAfterNumRecur();
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	BOOL HasValidData();
 };
 

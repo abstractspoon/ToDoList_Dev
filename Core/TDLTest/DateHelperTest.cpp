@@ -248,6 +248,12 @@ void CDateHelperTest::TestCompare()
 		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_NOTIMEISENDOFDAY) == 0);
 	}
 
+	{
+		COleDateTime dt1(44000.125000001), dt2(44000.125);
+
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME | DHC_COMPARESECONDS) == 0);
+	}
+
 	// -----------------------------------------------------------------------
 	
 	EndTest();
