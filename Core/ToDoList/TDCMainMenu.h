@@ -74,6 +74,7 @@ protected:
 
 protected:
 	void LoadMenuCommon();
+	void TranslateDynamicMenuItems();
 
 	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
 	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);

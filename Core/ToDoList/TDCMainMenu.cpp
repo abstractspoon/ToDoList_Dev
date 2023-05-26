@@ -98,18 +98,32 @@ BOOL CTDCMainMenu::LoadMenu()
 		return FALSE;
 
 	LoadMenuCommon();
-
-	TranslateDynamicMenuItems(ID_FILE_MRU1, ID_FILE_MRU16, _T("Recent Tasklist %d"));
-	TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
-	TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
-	TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
-	TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
-	TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View %d"));
-	TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
-	TranslateDynamicMenuItems(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, _T("Default Filter %d"));
-	TranslateDynamicMenuItems(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, _T("Find Tasks Filter %d"));
+	TranslateDynamicMenuItems();
 
 	return TRUE;
+}
+
+void CTDCMainMenu::TranslateDynamicMenuItems()
+{
+	CEnMenu::TranslateDynamicMenuItems(ID_FILE_MRU1, ID_FILE_MRU16, _T("Recent Tasklist %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, _T("Default Filter %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, _T("Find Tasks Filter %d"));
+
+	HMENU hSubMenu = GetSubMenu(*this, ID_VIEW_SAVETOIMAGE);
+
+	if (hSubMenu)
+	{
+		CEnString sMenuItem(ID_VIEW_SAVETOIMAGE);
+		sMenuItem.Replace(_T("(%s)"), _T(""));
+
+		CEnMenu::SetMenuString(hSubMenu, ID_VIEW_SAVETOIMAGE, sMenuItem, MF_BYCOMMAND);
+	}
 }
 
 BOOL CTDCMainMenu::IsInRange(UINT nItem, UINT nStart, UINT nEnd)
