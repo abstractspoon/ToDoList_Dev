@@ -831,10 +831,10 @@ void CPreferencesShortcutsPage::LoadPreferences(const IPreferences* pPrefs, LPCT
 
 void CPreferencesShortcutsPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey*/) const
 {
-	pPrefs->WriteProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), m_bShowCommandIDs);
-
 	if (m_pShortcutMgr)
 		m_pShortcutMgr->SaveSettings(pPrefs, _T("KeyboardShortcuts"));
+
+	pPrefs->WriteProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), m_bShowCommandIDs);
 }
 
 void CPreferencesShortcutsPage::OnShowCmdIDs() 
