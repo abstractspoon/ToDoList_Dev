@@ -419,7 +419,7 @@ CString CiCalExporter::FormatRecurrence(int nRegularity, DWORD dwSpecific1, DWOR
 
 	// -----------------------------------------------
 	
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH: // TDIR_YEARLY
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS: // TDIR_YEARLY
 		sRecurrence.Format(_T("RRULE:FREQ=YEARLY;BYMONTH=%lu"), dwSpecific1);
 		break;
 		
@@ -427,7 +427,7 @@ CString CiCalExporter::FormatRecurrence(int nRegularity, DWORD dwSpecific1, DWOR
 		sRecurrence.Format(_T("RRULE:FREQ=YEARLY;INTERVAL=%lu"), dwSpecific1);
 		break;
 	
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 		sRecurrence.Format(_T("RRULE:FREQ=YEARLY;BYMONTH=%lu;BYDAY=%s"), dwSpecific2, FormatDayOfMonth(dwSpecific1));
 		break;
 	}

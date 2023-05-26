@@ -99,9 +99,9 @@ CString TDCRECURRENCE::GetRegularityText(TDC_REGULARITY nRegularity, BOOL bIncOn
 		
 		return sRegularity[MONTHLY];
 		
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 	case TDIR_YEAR_EVERY_NYEARS:
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
 		if (sRegularity[YEARLY].IsEmpty())
 			sRegularity[YEARLY].LoadString(IDS_YEARLY);   
 		

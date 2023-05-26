@@ -188,7 +188,7 @@ void CTDLRecurringTaskEdit::OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyl
 
 int CTDLRecurringTaskEdit::CalcMaxRegularityWidth(CDC* pDC, BOOL bIncOnce)
 {
-	int nReg = (int)TDIR_YEAR_SPECIFIC_DAY_MONTH + 1;
+	int nReg = (int)TDIR_YEAR_SPECIFIC_DAY_MONTHS + 1;
 	int nMax = 0;
 
 	while (nReg--)
@@ -242,8 +242,8 @@ CTDLRecurringTaskOptionDlg::CTDLRecurringTaskOptionDlg(const TDCRECURRENCE& tr, 
 		break;
 
 	case TDIR_YEAR_EVERY_NYEARS:
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 		m_nFrequency = TDIR_YEARLY;
 		break;
 	}
@@ -890,13 +890,13 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		m_nEveryNumYears = dwSpecific1;
 		break;
 		
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
 		m_nYearlyOption = 1;
 		m_dwEveryMonths = dwSpecific1;
 		m_nEveryDayOfMonth = dwSpecific2;
 		break;
 
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 		m_nYearlyOption = 2;
 		m_nSpecificNumber = (LOWORD(dwSpecific1) - 1);
 		m_nSpecificDayOfWeek = (HIWORD(dwSpecific1) - 1);
@@ -969,13 +969,13 @@ void CTDLRecurringTaskYearlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr) 
 		break;
 		
 	case 1:  
-		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 
+		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 
 						m_dwEveryMonths, 
 						m_nEveryDayOfMonth);
 		break;
 
 	case 2:
-		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH,
+		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS,
 						MAKELONG(m_nSpecificNumber + 1, m_nSpecificDayOfWeek + 1),
 						m_dwSpecificMonths);
 		break;
