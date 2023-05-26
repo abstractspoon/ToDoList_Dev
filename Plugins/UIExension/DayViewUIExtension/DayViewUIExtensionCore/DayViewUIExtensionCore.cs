@@ -522,7 +522,7 @@ namespace DayViewUIExtension
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
 			btn1.Click += new EventHandler(OnGoToToday);
-			btn1.ToolTipText = m_Trans.Translate("Go to Today");
+			btn1.ToolTipText = m_Trans.Translate("Go To Today");
 			m_Toolbar.Items.Add(btn1);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
