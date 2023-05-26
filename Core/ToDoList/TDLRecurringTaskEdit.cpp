@@ -865,9 +865,9 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 	m_nEveryDayOfMonth = 1;
 	m_nSpecificNumber = 0;
 	m_nEveryNumYears = 1;
-	m_nSpecificMonth = 1;
+	m_dwSpecificMonths = 1;
 	m_nSpecificDayOfWeek = 0;
-	m_nEveryMonth = 1;
+	m_dwEveryMonths = 1;
 	//}}AFX_DATA_INIT
 
 	// first set to default values
@@ -876,7 +876,7 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		SYSTEMTIME stDefault;
 		dtDefault.GetAsSystemTime(stDefault);
 
-		m_nEveryMonth = m_nSpecificMonth = (int)stDefault.wMonth;
+		m_dwEveryMonths = m_dwSpecificMonths = CDateHelper::MapMonthIndexToDHMonth((int)stDefault.wMonth);
 		m_nEveryDayOfMonth = stDefault.wDay;
 	}
 	
@@ -892,7 +892,7 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		
 	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
 		m_nYearlyOption = 1;
-		m_nEveryMonth = (int)dwSpecific1;
+		m_dwEveryMonths = dwSpecific1;
 		m_nEveryDayOfMonth = dwSpecific2;
 		break;
 
@@ -900,7 +900,7 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		m_nYearlyOption = 2;
 		m_nSpecificNumber = (LOWORD(dwSpecific1) - 1);
 		m_nSpecificDayOfWeek = (HIWORD(dwSpecific1) - 1);
-		m_nSpecificMonth = (int)dwSpecific2;
+		m_dwSpecificMonths = dwSpecific2;
 		break;
 
 	case TDIR_YEAR_RECREATEAFTERNYEARS_DEP:
@@ -917,10 +917,9 @@ CTDLRecurringTaskYearlyOptionPage::~CTDLRecurringTaskYearlyOptionPage()
 void CTDLRecurringTaskYearlyOptionPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+
 	//{{AFX_DATA_MAP(CTDLRecurringTaskYearlyOptionPage)
 	DDX_Radio(pDX, IDC_RECREATE, m_nYearlyOption);
-	CDialogHelper::DDX_Text(pDX, IDC_RECREATEYEARS, m_nEveryNumYears);
-	CDialogHelper::DDX_Text(pDX, IDC_EVERYMONTHDAY, m_nEveryDayOfMonth);
 	DDX_CBIndex(pDX, IDC_THESPECIFICWEEK, m_nSpecificNumber);
 	DDX_CBIndex(pDX, IDC_THEWEEKDAY, m_nSpecificDayOfWeek);
 	DDX_Control(pDX, IDC_THEMONTH, m_cbSpecificMonthList);
@@ -928,8 +927,11 @@ void CTDLRecurringTaskYearlyOptionPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EVERYMONTHLIST, m_cbEveryMonthList);
 	//}}AFX_DATA_MAP
 
-	DDX_Month(pDX, m_cbSpecificMonthList, m_nEveryMonth);
-	DDX_Month(pDX, m_cbEveryMonthList, m_nSpecificMonth);
+	CDialogHelper::DDX_Text(pDX, IDC_RECREATEYEARS, m_nEveryNumYears);
+	CDialogHelper::DDX_Text(pDX, IDC_EVERYMONTHDAY, m_nEveryDayOfMonth);
+
+	DDX_Months(pDX, m_cbSpecificMonthList, m_dwEveryMonths);
+	DDX_Months(pDX, m_cbEveryMonthList, m_dwSpecificMonths);
 }
 
 BEGIN_MESSAGE_MAP(CTDLRecurringTaskYearlyOptionPage, CCmdNotifyPropertyPage)
@@ -968,14 +970,14 @@ void CTDLRecurringTaskYearlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr) 
 		
 	case 1:  
 		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 
-						m_nEveryMonth, 
+						m_dwEveryMonths, 
 						m_nEveryDayOfMonth);
 		break;
 
 	case 2:
 		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH,
 						MAKELONG(m_nSpecificNumber + 1, m_nSpecificDayOfWeek + 1),
-						m_nSpecificMonth);
+						m_dwSpecificMonths);
 		break;
 
 	default:

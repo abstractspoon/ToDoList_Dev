@@ -104,6 +104,7 @@ protected:
 protected:
 	BOOL ValidateDay(SYSTEMTIME& st) const;
 	static BOOL IsValidRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
+	static BOOL IsValidSpecificMonths(DWORD dwMonths);
 };
 
 

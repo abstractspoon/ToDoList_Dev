@@ -531,6 +531,22 @@ BOOL CRecurrence::SetRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, DWORD
 	if (!IsValidRegularity(nReg, dwSpec1, dwSpec2))
 		return FALSE;
 
+	// Backward compatibility
+	switch (nReg)
+	{
+	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
+		// If the month argument looks like a month index, remap it
+		if ((dwSpec1 >= 1) && (dwSpec1 <= 12))
+			dwSpec1 = CDateHelper::MapMonthIndexToDHMonth((int)dwSpec1);
+		break;
+
+	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+		// If the month argument looks like a month index, remap it
+		if ((dwSpec2 >= 1) && (dwSpec2 <= 12))
+			dwSpec2 = CDateHelper::MapMonthIndexToDHMonth((int)dwSpec2);
+		break;
+	}
+
 	// All good
 	m_nRegularity = nReg;
 	m_dwSpecific1 = dwSpec1;
@@ -634,7 +650,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		
 	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
 		// Specific month
-		if ((dwSpec1 < 1) || (dwSpec1 > 12))
+		if (!IsValidSpecificMonths(dwSpec1))
 			return FALSE;
 
 		// Day of month
@@ -644,7 +660,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		
 	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
 		// Specific month
-		if ((dwSpec2 < 1) || (dwSpec2 > 12))
+		if (!IsValidSpecificMonths(dwSpec2))
 			return FALSE;
 		
 		// LOWORD = which week (1-5)
@@ -657,6 +673,20 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		ASSERT(0);
 		return FALSE;
 	}
+
+	return TRUE;
+}
+
+BOOL CRecurrence::IsValidSpecificMonths(DWORD dwMonths)
+{
+	if (dwMonths <= 12)
+		return (dwMonths >= 0);
+
+	if (dwMonths < DHM_JANUARY)
+		return FALSE;
+
+	if (dwMonths > DHM_ALL)
+		return FALSE;
 
 	return TRUE;
 }

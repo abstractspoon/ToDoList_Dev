@@ -17,10 +17,6 @@ static char THIS_FILE[] = __FILE__;
 
 void DDX_Months(CDataExchange* pDX, CMonthCheckComboBox& combo, DWORD& dwMonths)
 {
-	// If the month argument looks like a month index, remap it
-	if (!pDX->m_bSaveAndValidate && (dwMonths >= 1) && (dwMonths <= 12))
-		dwMonths = CDateHelper::MapMonthIndexToDHMonth((int)dwMonths);
-	
 	DDX_CheckItemData(pDX, combo, dwMonths);
 }
 
