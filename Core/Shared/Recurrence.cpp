@@ -268,7 +268,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
 		{
 			SYSTEMTIME st;
 			dtTemp.GetAsSystemTime(st); // Preserves time component
@@ -299,7 +299,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		{
 			// Cache time component
 			double dTimeOnly = CDateHelper::GetTimeOnly(dtTemp).m_dt;
@@ -336,7 +336,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	// Debug check that we are synced with FitDateToScheme
 	switch (m_nRegularity)
 	{
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 	case RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
 	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
 		break;
@@ -470,7 +470,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		{
 			int nWhich = LOWORD(m_dwSpecific1);
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
@@ -483,7 +483,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:  
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:  
 		{
 			SYSTEMTIME st;
 			dtRecur.GetAsSystemTime(st);
@@ -534,13 +534,13 @@ BOOL CRecurrence::SetRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, DWORD
 	// Backward compatibility
 	switch (nReg)
 	{
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
 		// If the month argument looks like a month index, remap it
 		if ((dwSpec1 >= 1) && (dwSpec1 <= 12))
 			dwSpec1 = CDateHelper::MapMonthIndexToDHMonth((int)dwSpec1);
 		break;
 
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		// If the month argument looks like a month index, remap it
 		if ((dwSpec2 >= 1) && (dwSpec2 <= 12))
 			dwSpec2 = CDateHelper::MapMonthIndexToDHMonth((int)dwSpec2);
@@ -648,7 +648,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 			return FALSE;
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
 		// Specific month
 		if (!IsValidSpecificMonths(dwSpec1))
 			return FALSE;
@@ -658,7 +658,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 			return FALSE;
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		// Specific month
 		if (!IsValidSpecificMonths(dwSpec2))
 			return FALSE;
