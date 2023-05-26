@@ -419,18 +419,20 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 			return dtLastMod.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case TDCA_ID:			return Misc::Format(dwTaskID);
-	case TDCA_PERCENT:		return Misc::Format(nPercent, _T("%"));
-	case TDCA_CREATEDBY:	return sCreatedBy;
-	case TDCA_EXTERNALID:	return sExternalID;
-	case TDCA_COST:			return Misc::Format(dCost, 2);
-	case TDCA_RECURRENCE:	return sRecurrence;
-	case TDCA_TIMEESTIMATE:	return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
-	case TDCA_TIMESPENT:	return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
+	case TDCA_ID:				return Misc::Format(dwTaskID);
+	case TDCA_PERCENT:			return Misc::Format(nPercent, _T("%"));
+	case TDCA_CREATEDBY:		return sCreatedBy;
+	case TDCA_EXTERNALID:		return sExternalID;
+	case TDCA_COST:				return Misc::Format(dCost, 2);
+	case TDCA_RECURRENCE:		return sRecurrence;
+	case TDCA_TIMEESTIMATE:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
+	case TDCA_TIMEREMAINING:	return CTimeHelper().FormatTime(dTimeRemaining, MapUnitsToTHUnits(nTimeRemainingUnits), 2);
+	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
-	case TDCA_FLAG:			// drawn separately
-	case TDCA_PARENT:		// drawn separately
-	case TDCA_FILELINK:		// drawn separately
+	case TDCA_FLAG:				// drawn separately
+	case TDCA_LOCK:				// drawn separately
+	case TDCA_PARENT:			// drawn separately
+	case TDCA_FILELINK:			// drawn separately
 	default:
 		ASSERT(0);
 		break;
@@ -457,24 +459,26 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_RISK:			
 		return HasTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib));
 		
-	case TDCA_DONEDATE:		return CDateHelper::IsDateSet(dtDone);
-	case TDCA_DUEDATE:		return CDateHelper::IsDateSet(dtDue);
-	case TDCA_STARTDATE:	return CDateHelper::IsDateSet(dtStart);
-	case TDCA_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
-	case TDCA_LASTMODDATE:	return CDateHelper::IsDateSet(dtLastMod);
+	case TDCA_DONEDATE:			return CDateHelper::IsDateSet(dtDone);
+	case TDCA_DUEDATE:			return CDateHelper::IsDateSet(dtDue);
+	case TDCA_STARTDATE:		return CDateHelper::IsDateSet(dtStart);
+	case TDCA_CREATIONDATE:		return CDateHelper::IsDateSet(dtCreate);
+	case TDCA_LASTMODDATE:		return CDateHelper::IsDateSet(dtLastMod);
 
-	case TDCA_FILELINK:		return (aFileLinks.GetSize() > 0);
-	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();
-	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();
-	case TDCA_RECURRENCE:	return !sRecurrence.IsEmpty();
+	case TDCA_FILELINK:			return (aFileLinks.GetSize() > 0);
+	case TDCA_CREATEDBY:		return !sCreatedBy.IsEmpty();
+	case TDCA_EXTERNALID:		return !sExternalID.IsEmpty();
+	case TDCA_RECURRENCE:		return !sRecurrence.IsEmpty();
 
-	case TDCA_COST:			return (dCost != 0.0);
-	case TDCA_PERCENT:		return (nPercent > 0);
-	case TDCA_TIMEESTIMATE:	return (dTimeEst > 0);
-	case TDCA_TIMESPENT:	return (dTimeSpent > 0);
-	case TDCA_PARENT:		return (dwParentID != 0);
+	case TDCA_COST:				return (dCost != 0.0);
+	case TDCA_PERCENT:			return (nPercent > 0);
+	case TDCA_TIMEESTIMATE:		return (dTimeEst > 0);
+	case TDCA_TIMEREMAINING:	return (dTimeRemaining > 0);
+	case TDCA_TIMESPENT:		return (dTimeSpent > 0);
+	case TDCA_PARENT:			return (dwParentID != 0);
 
-	case TDCA_FLAG:			return FALSE; // handled separately
+	case TDCA_FLAG:				return FALSE; // handled separately
+	case TDCA_LOCK:				return FALSE; // handled separately
 	}
 
 	ASSERT(0);

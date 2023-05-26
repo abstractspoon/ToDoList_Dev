@@ -37,6 +37,7 @@ public:
 	CKanbanColumnCtrl* GetBacklog() const;
 
 	void SetOptions(DWORD dwOptions);
+	void SetReadOnly(BOOL bReadOnly);
 	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
 	DWORD HitTestTask(const CPoint& ptScreen) const;

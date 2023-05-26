@@ -140,6 +140,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
 	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
 	ON_MESSAGE(WM_KLCN_EDITTASKPIN, OnColumnEditTaskPin)
+	ON_MESSAGE(WM_KLCN_EDITTASKLOCK, OnColumnEditTaskLock)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKLABEL, OnColumnEditLabel)
@@ -667,6 +668,7 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_FLAG:
 	case TDCA_ICON:
 	case TDCA_LASTMODDATE:
+	case TDCA_LOCK:
 	case TDCA_PERCENT:
 	case TDCA_PRIORITY:
 	case TDCA_RECURRENCE:
@@ -677,6 +679,7 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:
 	case TDCA_TASKNAME:
 	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMEREMAINING:
 	case TDCA_TIMESPENT:
 	case TDCA_VERSION:
 		return TRUE;
@@ -1021,6 +1024,9 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	
 	if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true); // calculated
+	
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEREMAINING))
+		pKI->dTimeRemaining = pTasks->GetTaskTimeRemaining(hTask, pKI->nTimeRemainingUnits); // only calculated
 	
 	if (pTasks->IsAttributeAvailable(TDCA_COST))
 	{
@@ -2598,12 +2604,13 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 
 					// Exclude 'File Link' and 'Parent' because these will 
 					// almost always push things over the limit
-					// Exclude 'flag' because that is rendered as an icon
+					// Exclude 'flag/lock' because that is rendered as an icon
 					switch (nAttribID)
 					{
 					case TDCA_FILELINK:
 					case TDCA_PARENT:
 					case TDCA_FLAG:
+					case TDCA_LOCK:
 						continue;
 					}
 
@@ -2681,6 +2688,7 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 void CKanbanCtrl::SetReadOnly(bool bReadOnly) 
 { 
 	m_bReadOnly = bReadOnly; 
+	m_aColumns.SetReadOnly(bReadOnly);
 }
 
 BOOL CKanbanCtrl::GetLabelEditRect(LPRECT pEdit)
@@ -3735,6 +3743,47 @@ LRESULT CKanbanCtrl::OnColumnEditTaskFlag(WPARAM /*wp*/, LPARAM lp)
 			if (m_nSortBy == TDCA_FLAG)
 			{
 				m_pSelectedColumn->Sort(TDCA_FLAG, m_bSortAscending);
+				ScrollToSelectedTask();
+			}
+
+			m_pSelectedColumn->Invalidate(FALSE);
+		}
+
+		return lr;
+	}
+
+	// else
+	ASSERT(0);
+	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnColumnEditTaskLock(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(!m_bReadOnly);
+
+	CDWordArray aTaskIDs;
+	int nID = GetSelectedTaskIDs(aTaskIDs);
+	ASSERT(nID);
+
+	LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKLOCK, 0, lp);
+
+	if (lr)
+	{
+		// Update item lock states
+		while (nID--)
+		{
+			DWORD dwTaskID = aTaskIDs[nID];
+			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+
+			if (pKI)
+				pKI->bLocked = lp;
+		}
+
+		if (m_pSelectedColumn)
+		{
+			if (m_nSortBy == TDCA_LOCK)
+			{
+				m_pSelectedColumn->Sort(TDCA_LOCK, m_bSortAscending);
 				ScrollToSelectedTask();
 			}
 

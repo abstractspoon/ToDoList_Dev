@@ -446,30 +446,32 @@ void CKanbanPreferencesPage::BuildDisplayAttributeListBox()
 {
 	ASSERT(m_lbDisplayAttrib.GetSafeHwnd());
 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCBY,	TDCA_ALLOCBY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCTO,	TDCA_ALLOCTO); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CATEGORY,	TDCA_CATEGORY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_COST,		TDCA_COST); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDATE,	TDCA_CREATIONDATE);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDBY,	TDCA_CREATEDBY);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DONEDATE,	TDCA_DONEDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DUEDATE,	TDCA_DUEDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_EXTERNALID,	TDCA_EXTERNALID); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,		TDCA_FLAG); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILELINK,	TDCA_FILELINK); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,	TDCA_LASTMODDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,	TDCA_PERCENT); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,	TDCA_PRIORITY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,	TDCA_RECURRENCE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RISK,		TDCA_RISK); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,	TDCA_STARTDATE);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,		TDCA_STATUS); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,		TDCA_TAGS); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,		TDCA_ID); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,	TDCA_TIMEESTIMATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,	TDCA_TIMESPENT); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,	TDCA_VERSION); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PARENT,		TDCA_PARENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCBY,		TDCA_ALLOCBY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCTO,		TDCA_ALLOCTO); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CATEGORY,		TDCA_CATEGORY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_COST,			TDCA_COST); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDATE,		TDCA_CREATIONDATE);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDBY,		TDCA_CREATEDBY);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DONEDATE,		TDCA_DONEDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DUEDATE,		TDCA_DUEDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_EXTERNALID,		TDCA_EXTERNALID); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,			TDCA_FLAG); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILELINK,		TDCA_FILELINK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,		TDCA_LASTMODDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LOCK,			TDCA_LOCK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,		TDCA_PERCENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,		TDCA_PRIORITY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,		TDCA_RECURRENCE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RISK,			TDCA_RISK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,		TDCA_STARTDATE);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,			TDCA_STATUS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,			TDCA_TAGS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,			TDCA_ID); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,		TDCA_TIMEESTIMATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEREMAINING,	TDCA_TIMEREMAINING); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,		TDCA_TIMESPENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,		TDCA_VERSION); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PARENT,			TDCA_PARENT); 
 
 	int nItem = m_aDisplayAttrib.GetSize();
 	

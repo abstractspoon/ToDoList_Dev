@@ -1833,6 +1833,15 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		}
 		break;
 
+	case TDCA_LOCK:
+		{
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskLock(dwTaskID, mod.bValue));
+			else
+				bChange = SetSelectedTaskLock(mod.bValue);
+		}
+		break;
+
 	case TDCA_RISK:			
 		{
 			if (dwTaskID)

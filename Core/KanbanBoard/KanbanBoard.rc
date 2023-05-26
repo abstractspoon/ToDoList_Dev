@@ -153,7 +153,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -406,6 +406,13 @@ BEGIN
     IDS_DISPLAY_TASKID_SHORT "ID"
     IDS_OPTIONS_NONE        "<none>"
     IDS_OPTIONS_HIDESUBTASKS "Hide subtasks"
+    IDS_DISPLAY_TIMEREMAINING "Remaining Time"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_TIMEREMAINING_SHORT "Rem."
+    IDS_DISPLAY_LOCK        "Lock"
 END
 
 #endif    // English (Australia) resources

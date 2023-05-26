@@ -68,6 +68,8 @@ enum // Icon images
 	FLAG_UNSET,
 	PIN_SET,
 	PIN_UNSET,
+	LOCK_SET,
+	LOCK_UNSET,
 	ICON_UNSET,
 };
 
@@ -82,7 +84,7 @@ const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int DEF_IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 const int MAX_DRAG_ITEM_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200) + DEF_IMAGE_SIZE;
-const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
+const int PIN_IMAGE_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(12);
 
 const int IMAGE_PADDING			= 2;
 const int BAR_PADDING			= 2;
@@ -117,10 +119,12 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
 	m_bDrawTaskFlags(FALSE),
+	m_bDrawTaskLocks(FALSE),
 	m_bDrawTaskFileLinks(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
 	m_crItemShadow(CLR_NONE),
+	m_bReadOnly(FALSE),
 	m_tch(*this)
 {
 }
@@ -331,6 +335,7 @@ void CKanbanColumnCtrl::SetMaximumTaskCount(int /*nMaxTasks*/)
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
 {
 	m_bDrawTaskFlags = (Misc::FindT(TDCA_FLAG, m_aDisplayAttrib) != -1);
+	m_bDrawTaskLocks = (Misc::FindT(TDCA_LOCK, m_aDisplayAttrib) != -1);
 	m_bDrawTaskFileLinks = (Misc::FindT(TDCA_FILELINK, m_aDisplayAttrib) != -1);
 
 	RecalcItemLineHeight();
@@ -385,6 +390,7 @@ int CKanbanColumnCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
 				break;
 
 			case TDCA_FLAG:
+			case TDCA_LOCK:
 				break; // handled separately
 
 			default:
@@ -775,6 +781,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 				break;
 
 			case TDCA_FLAG:
+			case TDCA_LOCK:
 				break; // handled elsewhere
 
 			default:
@@ -941,32 +948,38 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 	rClip.DeflateRect(1, 1);
 	pDC->IntersectClipRect(rClip);
 
-	// Task icon
+	// LHS - Task icon or placeholder
 	rIcon.left += IMAGE_PADDING;
 	rIcon.top += IMAGE_PADDING;
 
-	BOOL bIconDrawn = DrawTaskIcon(pDC, pKI, rIcon);
-
-	// Draw placeholder image if icon not drawn
-	BOOL bLocked = pKI->bLocked;
-
-	if (!bLocked && !bIconDrawn)
+	// Draw placeholder image if icon not drawn and not locked
+	if (!DrawTaskIcon(pDC, pKI, rIcon) && pKI->bLocked)
 	{
-		// Allow for placeholder being smaller than default image size
 		rIcon.top -= IMAGE_PADDING;
 		DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE);
 	}
 	
-	// Draw pin icon always
-	rIcon.left = (rItem.right - DEF_IMAGE_SIZE - IMAGE_PADDING);
+	// RHS - Draw pin icon always
+	rIcon.top = rItem.top;
+	rIcon.left = (rItem.right - DEF_IMAGE_SIZE);
 
 	DrawItemImage(pDC, rIcon, KBCI_PIN, pKI->bPinned);
-	rIcon.OffsetRect(0, PIN_FLAG_IMAGE_HEIGHT);
+	rIcon.OffsetRect(0, min(m_nItemTextHeight, DEF_IMAGE_SIZE));
 
-	// Draw flag icon if set or 
-	if (m_bDrawTaskFlags && (pKI->bFlagged || !pKI->bLocked))
+	// Draw flag icon if set or not locked
+	if (m_bDrawTaskFlags)
 	{
-		DrawItemImage(pDC, rIcon, KBCI_FLAG, pKI->bFlagged);
+		if (pKI->bFlagged || !pKI->bLocked)	
+			DrawItemImage(pDC, rIcon, KBCI_FLAG, pKI->bFlagged);
+
+		rIcon.OffsetRect(0, min(m_nItemTextHeight, DEF_IMAGE_SIZE));
+	}
+
+	// Draw lock icon if set or not disabled
+	if (m_bDrawTaskLocks)
+	{
+		if (pKI->bLocked || !m_bReadOnly)
+			DrawItemImage(pDC, rIcon, KBCI_LOCK, pKI->bLocked);
 	}
 
 	// Update available rect
@@ -998,6 +1011,11 @@ void CKanbanColumnCtrl::DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETY
 	case KBCI_PIN:
 		hIL = m_ilIcons;
 		nIndex = (bSet ? PIN_SET : PIN_UNSET);
+		break;
+
+	case KBCI_LOCK:
+		hIL = m_ilIcons;
+		nIndex = (bSet ? LOCK_SET : LOCK_UNSET);
 		break;
 
 	default:
@@ -1231,30 +1249,34 @@ UINT CKanbanColumnCtrl::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 {
 	switch (nAttrib)
 	{
-	case TDCA_ALLOCBY:		return (bLong ? IDS_DISPLAY_ALLOCBY : IDS_DISPLAY_ALLOCBY_SHORT);
-	case TDCA_ALLOCTO:		return (bLong ? IDS_DISPLAY_ALLOCTO : IDS_DISPLAY_ALLOCTO_SHORT);
-	case TDCA_CATEGORY:		return (bLong ? IDS_DISPLAY_CATEGORY : IDS_DISPLAY_CATEGORY_SHORT);
-	case TDCA_COST:			return (bLong ? IDS_DISPLAY_COST : IDS_DISPLAY_COST_SHORT);
-	case TDCA_CREATEDBY:	return (bLong ? IDS_DISPLAY_CREATEDBY : IDS_DISPLAY_CREATEDBY_SHORT);
-	case TDCA_CREATIONDATE:	return (bLong ? IDS_DISPLAY_CREATEDATE : IDS_DISPLAY_CREATEDATE_SHORT);
-	case TDCA_DONEDATE:		return (bLong ? IDS_DISPLAY_DONEDATE : IDS_DISPLAY_DONEDATE_SHORT);
-	case TDCA_DUEDATE:		return (bLong ? IDS_DISPLAY_DUEDATE : IDS_DISPLAY_DUEDATE_SHORT);
-	case TDCA_EXTERNALID:	return (bLong ? IDS_DISPLAY_EXTERNALID : IDS_DISPLAY_EXTERNALID_SHORT);
-	case TDCA_FLAG:			return (bLong ? IDS_DISPLAY_FLAG : IDS_DISPLAY_FLAG_SHORT);
-	case TDCA_FILELINK:		return (bLong ? IDS_DISPLAY_FILELINK : IDS_DISPLAY_FILELINK_SHORT);
-	case TDCA_ID:			return (bLong ? IDS_DISPLAY_TASKID : IDS_DISPLAY_TASKID_SHORT);
-	case TDCA_LASTMODDATE:	return (bLong ? IDS_DISPLAY_LASTMOD : IDS_DISPLAY_LASTMOD_SHORT);
-	case TDCA_PARENT:		return (bLong ? IDS_DISPLAY_PARENT : IDS_DISPLAY_PARENT_SHORT);
-	case TDCA_PERCENT:		return (bLong ? IDS_DISPLAY_PERCENT : IDS_DISPLAY_PERCENT_SHORT);
-	case TDCA_PRIORITY:		return (bLong ? IDS_DISPLAY_PRIORITY : IDS_DISPLAY_PRIORITY_SHORT);
-	case TDCA_RECURRENCE:	return (bLong ? IDS_DISPLAY_RECURRENCE : IDS_DISPLAY_RECURRENCE_SHORT);
-	case TDCA_RISK:			return (bLong ? IDS_DISPLAY_RISK : IDS_DISPLAY_RISK_SHORT);
-	case TDCA_STARTDATE:	return (bLong ? IDS_DISPLAY_STARTDATE : IDS_DISPLAY_STARTDATE_SHORT);
-	case TDCA_STATUS:		return (bLong ? IDS_DISPLAY_STATUS : IDS_DISPLAY_STATUS_SHORT);
-	case TDCA_TAGS:			return (bLong ? IDS_DISPLAY_TAGS : IDS_DISPLAY_TAGS_SHORT);
-	case TDCA_TIMEESTIMATE:	return (bLong ? IDS_DISPLAY_TIMEEST : IDS_DISPLAY_TIMEEST_SHORT);
-	case TDCA_TIMESPENT:	return (bLong ? IDS_DISPLAY_TIMESPENT : IDS_DISPLAY_TIMESPENT_SHORT);
-	case TDCA_VERSION:		return (bLong ? IDS_DISPLAY_VERSION : IDS_DISPLAY_VERSION_SHORT);
+	case TDCA_ALLOCBY:			return (bLong ? IDS_DISPLAY_ALLOCBY :		IDS_DISPLAY_ALLOCBY_SHORT);
+	case TDCA_ALLOCTO:			return (bLong ? IDS_DISPLAY_ALLOCTO :		IDS_DISPLAY_ALLOCTO_SHORT);
+	case TDCA_CATEGORY:			return (bLong ? IDS_DISPLAY_CATEGORY :		IDS_DISPLAY_CATEGORY_SHORT);
+	case TDCA_COST:				return (bLong ? IDS_DISPLAY_COST :			IDS_DISPLAY_COST_SHORT);
+	case TDCA_CREATEDBY:		return (bLong ? IDS_DISPLAY_CREATEDBY :		IDS_DISPLAY_CREATEDBY_SHORT);
+	case TDCA_CREATIONDATE:		return (bLong ? IDS_DISPLAY_CREATEDATE :	IDS_DISPLAY_CREATEDATE_SHORT);
+	case TDCA_DONEDATE:			return (bLong ? IDS_DISPLAY_DONEDATE :		IDS_DISPLAY_DONEDATE_SHORT);
+	case TDCA_DUEDATE:			return (bLong ? IDS_DISPLAY_DUEDATE :		IDS_DISPLAY_DUEDATE_SHORT);
+	case TDCA_EXTERNALID:		return (bLong ? IDS_DISPLAY_EXTERNALID :	IDS_DISPLAY_EXTERNALID_SHORT);
+	case TDCA_FILELINK:			return (bLong ? IDS_DISPLAY_FILELINK :		IDS_DISPLAY_FILELINK_SHORT);
+	case TDCA_ID:				return (bLong ? IDS_DISPLAY_TASKID :		IDS_DISPLAY_TASKID_SHORT);
+	case TDCA_LASTMODDATE:		return (bLong ? IDS_DISPLAY_LASTMOD :		IDS_DISPLAY_LASTMOD_SHORT);
+	case TDCA_PARENT:			return (bLong ? IDS_DISPLAY_PARENT :		IDS_DISPLAY_PARENT_SHORT);
+	case TDCA_PERCENT:			return (bLong ? IDS_DISPLAY_PERCENT :		IDS_DISPLAY_PERCENT_SHORT);
+	case TDCA_PRIORITY:			return (bLong ? IDS_DISPLAY_PRIORITY :		IDS_DISPLAY_PRIORITY_SHORT);
+	case TDCA_RECURRENCE:		return (bLong ? IDS_DISPLAY_RECURRENCE :	IDS_DISPLAY_RECURRENCE_SHORT);
+	case TDCA_RISK:				return (bLong ? IDS_DISPLAY_RISK :			IDS_DISPLAY_RISK_SHORT);
+	case TDCA_STARTDATE:		return (bLong ? IDS_DISPLAY_STARTDATE :		IDS_DISPLAY_STARTDATE_SHORT);
+	case TDCA_STATUS:			return (bLong ? IDS_DISPLAY_STATUS :		IDS_DISPLAY_STATUS_SHORT);
+	case TDCA_TAGS:				return (bLong ? IDS_DISPLAY_TAGS :			IDS_DISPLAY_TAGS_SHORT);
+	case TDCA_TIMEESTIMATE:		return (bLong ? IDS_DISPLAY_TIMEEST :		IDS_DISPLAY_TIMEEST_SHORT);
+	case TDCA_TIMEREMAINING:	return (bLong ? IDS_DISPLAY_TIMEREMAINING : IDS_DISPLAY_TIMEREMAINING_SHORT);
+	case TDCA_TIMESPENT:		return (bLong ? IDS_DISPLAY_TIMESPENT :		IDS_DISPLAY_TIMESPENT_SHORT);
+	case TDCA_VERSION:			return (bLong ? IDS_DISPLAY_VERSION :		IDS_DISPLAY_VERSION_SHORT);
+
+	// rendered as icons
+	case TDCA_FLAG:				return 0;
+	case TDCA_LOCK:				return 0;
 	}
 
 	ASSERT(0);
@@ -1819,6 +1841,10 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 		nCompare = Misc::CompareNumT(pKI1->bFlagged, pKI2->bFlagged);
 		break;
 
+	case TDCA_LOCK:
+		nCompare = Misc::CompareNumT(pKI1->bLocked, pKI2->bLocked);
+		break;
+
 	case TDCA_LASTMODDATE:
 		nCompare = CDateHelper::Compare(pKI1->dtLastMod, pKI2->dtLastMod, DHC_COMPARETIME);
 		break;
@@ -1838,6 +1864,11 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 	case TDCA_TIMEESTIMATE:
 		nCompare = CTimeHelper().Compare(pKI1->dTimeEst, MapUnitsToTHUnits(pKI1->nTimeEstUnits),
 										 pKI2->dTimeEst, MapUnitsToTHUnits(pKI2->nTimeEstUnits));
+		break;
+
+	case TDCA_TIMEREMAINING:
+		nCompare = CTimeHelper().Compare(pKI1->dTimeRemaining, MapUnitsToTHUnits(pKI1->nTimeRemainingUnits),
+										 pKI2->dTimeRemaining, MapUnitsToTHUnits(pKI2->nTimeRemainingUnits));
 		break;
 
 	case TDCA_TIMESPENT:
@@ -1907,15 +1938,23 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 				switch (nImage)
 				{
 				case KBCI_ICON:
-					if (!pKI->bLocked)
+					if (!m_bReadOnly && !pKI->bLocked)
 						nSetMsgID = WM_KLCN_EDITTASKICON;
 					break;
 
 				case KBCI_FLAG:
-					if (!pKI->bLocked)
+					if (!m_bReadOnly && !pKI->bLocked)
 					{
 						nSetMsgID = WM_KLCN_EDITTASKFLAG;
 						bSet = !pKI->bFlagged;
+					}
+					break;
+
+				case KBCI_LOCK:
+					if (!m_bReadOnly)
+					{
+						nSetMsgID = WM_KLCN_EDITTASKLOCK;
+						bSet = !pKI->bLocked;
 					}
 					break;
 
@@ -2207,11 +2246,11 @@ KBC_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
 	if (rIcon.PtInRect(point))
 		return KBCI_ICON;
 
-	// Pin
+	// Pin (always)
 	rIcon = rText;
 	rIcon.left = (rIcon.right + IMAGE_PADDING);
 	rIcon.right = (rIcon.left + DEF_IMAGE_SIZE);
-	rIcon.bottom = (rIcon.top + PIN_FLAG_IMAGE_HEIGHT);
+	rIcon.bottom = (rIcon.top + min(m_nItemTextHeight, DEF_IMAGE_SIZE));
 
 	if (rIcon.PtInRect(point))
 		return KBCI_PIN;
@@ -2223,6 +2262,17 @@ KBC_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
 
 		if (rIcon.PtInRect(point))
 			return KBCI_FLAG;
+		
+		rIcon.bottom = (rIcon.top + min(m_nItemTextHeight, DEF_IMAGE_SIZE));
+	}
+
+	// Lock
+	if (m_bDrawTaskLocks)
+	{
+		rIcon.OffsetRect(0, DEF_IMAGE_SIZE);
+
+		if (rIcon.PtInRect(point))
+			return KBCI_LOCK;
 	}
 
 	// all else
@@ -2314,7 +2364,12 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		{
 		case KBCI_FLAG:
 		case KBCI_ICON:
-			if (!bLocked)
+			if (!m_bReadOnly && !bLocked)
+				return GraphicsMisc::SetHandCursor();
+			break;
+
+		case KBCI_LOCK:
+			if (!m_bReadOnly)
 				return GraphicsMisc::SetHandCursor();
 			break;
 
@@ -2327,7 +2382,7 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 			break;
 		}
 
-		if (bLocked)
+		if (!m_bReadOnly && bLocked)
 			return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 	}
 
@@ -2398,6 +2453,7 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 				switch (nAttrib)
 				{
 				case TDCA_FLAG: 
+				case TDCA_LOCK:
 					// vertically below Pin icon
 					break;
 
