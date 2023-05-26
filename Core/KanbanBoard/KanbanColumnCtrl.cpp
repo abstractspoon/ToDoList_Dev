@@ -649,6 +649,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			
 			*pResult |= CDRF_SKIPDEFAULT;
 		}
+		break;
 	}
 }
 
