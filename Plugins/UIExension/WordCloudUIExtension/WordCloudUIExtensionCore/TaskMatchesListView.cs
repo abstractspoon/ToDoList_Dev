@@ -637,11 +637,6 @@ namespace WordCloudUIExtension
 			}
 
 			// Draw subitems
-			StringFormat stringFormat = new StringFormat();
-			stringFormat.Alignment = StringAlignment.Near;
-			stringFormat.LineAlignment = StringAlignment.Center;
-			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-            
 			Rectangle itemRect = e.Bounds;
 
 			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
@@ -722,13 +717,7 @@ namespace WordCloudUIExtension
 		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
 		{
 			e.DrawBackground();
-
-			DrawText(e.Graphics, 
-					Columns[e.ColumnIndex].Text, 
-					e.Bounds, 
-					SystemBrushes.WindowText, 
-					StringAlignment.Center, 
-					false);
+			e.DrawText(TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter |TextFormatFlags.SingleLine);
 		}
 
 		protected override void OnColumnClick(ColumnClickEventArgs e)
