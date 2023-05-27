@@ -993,8 +993,11 @@ namespace MindMapUIExtension
 			return false;
 		}
 
-		private void UpdateTreeFont(bool recalcPositions)
+		protected void UpdateTreeFont(bool recalcPositions)
 		{
+			if (RootNode == null)
+				return;
+
 			// Update the node fonts first so the tree is ready
 			// when we ask to recalculate the items heights
 			RefreshNodeFont(RootNode, true);
@@ -1027,10 +1030,13 @@ namespace MindMapUIExtension
 			}
 
 			// Update the item height
-			m_TreeView.ItemHeight = itemHeight;
+			if (itemHeight != prevItemHeight)
+			{
+				m_TreeView.ItemHeight = itemHeight;
 
-			if (recalcPositions)
-				RecalculatePositions();
+				if (recalcPositions)
+					RecalculatePositions();
+			}
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -1525,7 +1531,7 @@ namespace MindMapUIExtension
 
 		protected virtual int GetMinItemHeight()
 		{
-			return 10;
+			return ScaleByDPIFactor(10);
 		}
 
 		protected bool IsEmpty()

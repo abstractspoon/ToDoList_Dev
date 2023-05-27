@@ -843,9 +843,7 @@ namespace MindMapUIExtension
 
 			EndUpdate();
 			SetSelectedNode(selID);
-
-			if (rootNode != null)
-				RefreshNodeFont(rootNode, true);
+			UpdateTreeFont(true);
 		}
 
 		private String GetProjectName(TaskList tasks)
