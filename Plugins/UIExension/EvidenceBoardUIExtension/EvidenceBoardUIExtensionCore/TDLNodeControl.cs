@@ -1564,7 +1564,7 @@ namespace EvidenceBoardUIExtension
         private Rectangle CalcIconRect(Rectangle labelRect)
 		{
             Point topLeft = labelRect.Location;
-			topLeft.Offset(2, 2);
+			topLeft.Offset(2, 2); // border and padding
             
 //             if (ShowCompletionCheckboxes)
 //                 left += (int)(CheckboxSize.Width * ImageZoomFactor);
@@ -1579,17 +1579,6 @@ namespace EvidenceBoardUIExtension
 		{
 			get { return ((SingleSelectedTask != null) && (SingleSelectedTask == m_PreviouslySelectedTask)); }
 		}
-
-		private bool HitTestIcon(BaseNode node, Point point)
-        {
-			var task = GetTaskItem(node);
-			
-			if (task.IsLocked || !TaskHasIcon(task))
-				return false;
-
-			// else
-			return CalcIconRect(GetNodeClientRect(node)).Contains(point);
-        }
 
 		protected UserLink HitTestUserLink(Point ptClient)
 		{
@@ -1806,6 +1795,15 @@ namespace EvidenceBoardUIExtension
 
 				// else
 				ClearUserLinkSelection();
+
+				// Check for icon click
+				var taskItem = HitTestTaskIcon(e.Location);
+
+				if (taskItem != null)
+				{
+					EditTaskIcon?.Invoke(this, taskItem.TaskId);
+					return;
+				}
 			}
 
 			base.OnMouseClick(e);
@@ -1898,25 +1896,40 @@ namespace EvidenceBoardUIExtension
 			return null;
 		}
 
-		protected Cursor GetNodeCursor(Point ptClient)
+		protected TaskItem HitTestTaskIcon(Point ptClient)
 		{
 			var node = HitTestNode(ptClient, true); // exclude root node
 
-			if (node != null)
+			if (node == null)
+				return null;
+
+			var taskItem = GetTaskItem(node.Data);
+
+			if (taskItem == null)
+				return null;
+
+			if (!TaskHasIcon(taskItem))
+				return null;
+			
+			if (!CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
+				return null;
+
+			return taskItem;
+		}
+
+		protected Cursor GetNodeCursor(Point ptClient)
+		{
+			var taskItem = HitTestTaskIcon(ptClient);
+
+			if (taskItem != null)
 			{
-				var task = GetTaskItem(node.Data);
+				if (taskItem.IsLocked)
+					return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-				if (task != null)
-				{
-					if (task.IsLocked)
-						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-
-					if (TaskHasIcon(task) && HitTestIcon(node, ptClient))
-						return UIExtension.HandCursor();
-				}
+				return UIExtension.HandCursor();
 			}
 #if DEBUG
-			else if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
+			if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{
 				// The only time we DON'T exclude the root node
 				if (HitTestNode(ptClient) == RootNode)
