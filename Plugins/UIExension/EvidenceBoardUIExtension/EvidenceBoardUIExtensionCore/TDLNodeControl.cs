@@ -110,7 +110,6 @@ namespace EvidenceBoardUIExtension
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
-		//		private Size CheckboxSize;
 		private Color m_DependencyColor;
 
 		private TaskItem m_PreviouslySelectedTask;
@@ -152,7 +151,7 @@ namespace EvidenceBoardUIExtension
 			m_TaskItems = null;
 			m_DependencyColor = Color.CornflowerBlue;
 
-			int nodeHeight = (int)(2 * BaseFontHeight) + 4;
+			int nodeHeight = (int)Math.Max(((2 * BaseFontHeight) + 4), (BaseFontHeight + UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
@@ -162,10 +161,6 @@ namespace EvidenceBoardUIExtension
 			NodeSelectionChange += (s, ids) => { ClearUserLinkSelection(); };
 
 			RebuildFonts();
-
-
-			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
-			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
 			base.AutoCalculateRadialIncrement = true;
 		}
@@ -427,7 +422,8 @@ namespace EvidenceBoardUIExtension
 		protected float ImageZoomFactor
 		{
 			// Zoom images only half as much as text
-			get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+			//get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+			get { return ZoomFactor; }
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -1424,74 +1420,23 @@ namespace EvidenceBoardUIExtension
 					graphics.DrawRectangle(pen, taskRect);
 			}
 
-			// Icon
+			// LHS icons
+			Rectangle iconRect = Rectangle.Empty;
+
+			DrawTaskIcon(graphics, taskItem, taskRect, backColor, ref iconRect);
+			DrawTaskImageExpansionButton(graphics, taskItem, taskRect, backColor, ref iconRect);
+
+			// Title
 			var titleRect = taskRect;
 
-			if (TaskHasIcon(taskItem))
+			if (!iconRect.IsEmpty)
 			{
-				var iconRect = CalcIconRect(taskRect);
-
-				if (m_TaskIcons.Get(taskItem.TaskId))
-				{
-					if (!IsZoomed)
-					{
-						m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
-					}
-					else
-					{
-						int imageSize = ScaleByDPIFactor(16);
-
-						using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // original size
-						{
-							tempImage.MakeTransparent();
-							using (var gTemp = Graphics.FromImage(tempImage))
-							{
-								gTemp.Clear(backColor);
-								m_TaskIcons.Draw(gTemp, 0, 0);
-
-								DrawZoomedIcon(tempImage, graphics, iconRect, taskRect);
-							}
-						}
-					}
-				}
-
 				titleRect.Width = (titleRect.Right - iconRect.Right);
 				titleRect.X = iconRect.Right;
 			}
 
-			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
 			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
-
-			/*
-			// Checkbox
-			Rectangle checkRect = CalcCheckboxRect(rect);
-
-			if (ShowCompletionCheckboxes)
-			{
-				if (!IsZoomed)
-				{
-					CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetNodeCheckboxState(realNode));
-				}
-				else
-				{
-					var tempImage = new Bitmap(CheckboxSize.Width, CheckboxSize.Height); // original size
-
-					using (var gTemp = Graphics.FromImage(tempImage))
-					{
-						CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetNodeCheckboxState(realNode));
-
-						DrawZoomedImage(tempImage, graphics, checkRect);
-					}
-				}
-			}
-
-			else if (ShowCompletionCheckboxes)
-			{
-				rect.Width = (rect.Right - checkRect.Right - 2);
-				rect.X = checkRect.Right + 2;
-			}
-			*/
 
 			// Image
 			if (taskItem.Image != null)
@@ -1502,6 +1447,82 @@ namespace EvidenceBoardUIExtension
 			}
 
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+		}
+
+		void DrawTaskIcon(Graphics g, TaskItem taskItem, Rectangle nodeRect, Color backColor, ref Rectangle iconRect)
+		{
+			if (!TaskHasIcon(taskItem))
+				return;
+
+			iconRect = CalcIconRect(nodeRect);
+
+			if (m_TaskIcons.Get(taskItem.TaskId))
+			{
+				if (!IsZoomed)
+				{
+					m_TaskIcons.Draw(g, iconRect.X, iconRect.Y);
+				}
+				else
+				{
+					int imageSize = UIExtension.TaskIcon.IconSize;
+
+					using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // original size
+					{
+						tempImage.MakeTransparent();
+						using (var gTemp = Graphics.FromImage(tempImage))
+						{
+							gTemp.Clear(backColor);
+							m_TaskIcons.Draw(gTemp, 0, 0);
+
+							DrawZoomedIcon(tempImage, g, iconRect, nodeRect);
+						}
+					}
+				}
+			}
+		}
+
+		void DrawTaskImageExpansionButton(Graphics graphics, TaskItem taskItem, Rectangle nodeRect, Color backColor, ref Rectangle iconRect)
+		{
+			if (taskItem.Image == null)
+				return;
+
+			iconRect = CalcImageExpansionButtonRect(nodeRect);
+
+			if (!IsZoomed)
+			{
+				DrawTaskImageExpansionButton(graphics, iconRect, !taskItem.HasExpandedImage);
+			}
+			else
+			{
+				int imageSize = UIExtension.TaskIcon.IconSize;
+
+				using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // original size
+				{
+					tempImage.MakeTransparent();
+
+					using (var gTemp = Graphics.FromImage(tempImage))
+					{
+						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
+						gTemp.Clear(backColor);
+
+						DrawTaskImageExpansionButton(gTemp, tempRect, !taskItem.HasExpandedImage);
+						DrawZoomedIcon(tempImage, graphics, iconRect, nodeRect);
+					}
+				}
+			}
+		}
+
+		static void DrawTaskImageExpansionButton(Graphics graphics, Rectangle rect, bool expanded)
+		{
+			if (VisualStyleRenderer.IsSupported)
+			{
+				var renderer = new VisualStyleRenderer(expanded ? VisualStyleElement.ExplorerBar.NormalGroupExpand.Pressed : VisualStyleElement.ExplorerBar.NormalGroupCollapse.Pressed);
+				renderer.DrawBackground(graphics, rect);
+			}
+			else
+			{
+				ScrollBarRenderer.DrawArrowButton(graphics, rect, (expanded ? ScrollBarArrowButtonState.DownNormal : ScrollBarArrowButtonState.UpNormal));
+			}
 		}
 
 		protected override void DrawSelectionBox(Graphics graphics, Rectangle rect)
@@ -1565,14 +1586,19 @@ namespace EvidenceBoardUIExtension
 		{
             Point topLeft = labelRect.Location;
 			topLeft.Offset(2, 2); // border and padding
-            
-//             if (ShowCompletionCheckboxes)
-//                 left += (int)(CheckboxSize.Width * ImageZoomFactor);
 
-			int width = (int)(ScaleByDPIFactor(16) * ImageZoomFactor);
+			int width = (int)(UIExtension.TaskIcon.IconSize * ImageZoomFactor);
 			int height = width;
 
             return new Rectangle(topLeft.X, topLeft.Y, width, height);
+		}
+
+        private Rectangle CalcImageExpansionButtonRect(Rectangle labelRect)
+		{
+			var rect = CalcIconRect(labelRect);
+			rect.Y += rect.Height;
+
+            return rect;
 		}
 
 		private bool SelectedNodeWasPreviouslySelected
@@ -1728,6 +1754,15 @@ namespace EvidenceBoardUIExtension
 					// Prevent base class handling
 					return;
 				}
+
+				// Check for icon click
+				var taskItem = HitTestTaskIcon(e.Location);
+
+				if ((taskItem != null) && !taskItem.IsLocked)
+				{
+					EditTaskIcon?.Invoke(this, taskItem.TaskId);
+					return;
+				}
 			}
 
 			base.OnMouseDown(e);
@@ -1795,15 +1830,6 @@ namespace EvidenceBoardUIExtension
 
 				// else
 				ClearUserLinkSelection();
-
-				// Check for icon click
-				var taskItem = HitTestTaskIcon(e.Location);
-
-				if (taskItem != null)
-				{
-					EditTaskIcon?.Invoke(this, taskItem.TaskId);
-					return;
-				}
 			}
 
 			base.OnMouseClick(e);

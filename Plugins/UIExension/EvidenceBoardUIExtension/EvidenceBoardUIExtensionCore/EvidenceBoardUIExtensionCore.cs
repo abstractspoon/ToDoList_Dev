@@ -94,7 +94,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool ScrollToSelectedTask()
 		{
-			return m_Control.ScrollToSelection();
+			return m_Control.ScrollToSelection(false);
 		}
 
 		public bool CanScrollToSelectedTask()

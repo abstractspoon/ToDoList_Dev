@@ -209,7 +209,7 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public bool ScrollToSelection()
+		public bool ScrollToSelection(bool partialOk)
 		{
 			if (m_SelectedNodes.Count == 0)
 				return false;
@@ -231,6 +231,9 @@ namespace EvidenceBoardUIExtension
 			{
 				if (IsNodeVisible(node, out nodeRect, true))
 				{
+					if (partialOk)
+						return true;
+
 					nodeToScroll = node;
 				}
 			}
@@ -319,7 +322,7 @@ namespace EvidenceBoardUIExtension
 				m_SelectedNodes.Add(node);
 
 				if (ensureVisible)
-					ScrollToSelection();
+					ScrollToSelection(false);
 
 				Invalidate();
 
@@ -1142,7 +1145,7 @@ namespace EvidenceBoardUIExtension
 					}
 				}
 
-				ScrollToSelection();
+				ScrollToSelection(true);
 				Invalidate();
 
 				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
