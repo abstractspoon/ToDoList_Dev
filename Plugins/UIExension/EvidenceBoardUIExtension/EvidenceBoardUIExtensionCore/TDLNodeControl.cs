@@ -906,7 +906,7 @@ namespace EvidenceBoardUIExtension
 
 			var task = GetTaskItem(node);
 
-			if ((task != null) && (task.Image != null))
+			if ((task != null) && (task.Image != null) && task.HasExpandedImage)
 			{
 				size.Height += task.CalcImageHeight(base.NodeSize.Width);
 			}
@@ -1439,7 +1439,7 @@ namespace EvidenceBoardUIExtension
 			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			// Image
-			if (taskItem.Image != null)
+			if ((taskItem.Image != null) && taskItem.HasExpandedImage)
 			{
 				var imageRect = CalcImageRect(taskItem, taskRect, selected || dropHighlight);
 
@@ -1763,6 +1763,16 @@ namespace EvidenceBoardUIExtension
 					EditTaskIcon?.Invoke(this, taskItem.TaskId);
 					return;
 				}
+
+				// Check for image expandion click
+				taskItem = HitTestTaskImageExpansionButton(e.Location);
+
+				if (taskItem != null)
+				{
+					taskItem.HasExpandedImage = !taskItem.HasExpandedImage;
+					Invalidate();
+					return;
+				}
 			}
 
 			base.OnMouseDown(e);
@@ -1791,9 +1801,14 @@ namespace EvidenceBoardUIExtension
 				var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
 
 				if (imageRect.Contains(e.Location))
+				{
 					Process.Start(task.ImagePath);
-				else
+				}
+				else if ((HitTestTaskIcon(e.Location) == null) && 
+						(HitTestTaskImageExpansionButton(e.Location) == null))
+				{
 					EditTaskLabel(this, SingleSelectedNode.Data);
+				}
 			}
 			else
 			{
@@ -1934,10 +1949,31 @@ namespace EvidenceBoardUIExtension
 			if (taskItem == null)
 				return null;
 
-			if (!TaskHasIcon(taskItem))
-				return null;
+// 			if (!TaskHasIcon(taskItem))
+// 				return null;
 			
 			if (!CalcIconRect(GetNodeClientRect(node)).Contains(ptClient))
+				return null;
+
+			return taskItem;
+		}
+
+		protected TaskItem HitTestTaskImageExpansionButton(Point ptClient)
+		{
+			var node = HitTestNode(ptClient, true); // exclude root node
+
+			if (node == null)
+				return null;
+
+			var taskItem = GetTaskItem(node.Data);
+
+			if (taskItem == null)
+				return null;
+
+			if (taskItem.Image == null)
+				return null;
+			
+			if (!CalcImageExpansionButtonRect(GetNodeClientRect(node)).Contains(ptClient))
 				return null;
 
 			return taskItem;
@@ -1954,6 +1990,14 @@ namespace EvidenceBoardUIExtension
 
 				return UIExtension.HandCursor();
 			}
+
+			taskItem = HitTestTaskImageExpansionButton(ptClient);
+
+			if (taskItem != null)
+			{
+				return UIExtension.HandCursor();
+			}
+
 #if DEBUG
 			if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{
