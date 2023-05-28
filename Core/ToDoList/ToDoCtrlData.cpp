@@ -1784,135 +1784,144 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 	TODOITEM* pTDIChild = NULL;
 	GET_TDI(dwSubtaskID, pTDIChild, FALSE);
 
-	// save undo data
-	SaveEditUndo(dwSubtaskID, pTDIChild, nAttribID);
-
-	// apply the change based on nAttrib
-	switch (nAttribID)
+	if (!pTDIChild->bLocked)
 	{
-	case TDCA_DONEDATE:
-		if (bIncludeBlank || pTDIParent->IsDone())
-			pTDIChild->dateDone = pTDIParent->dateDone;
-		break;
+		// save undo data
+		SaveEditUndo(dwSubtaskID, pTDIChild, nAttribID);
 
-	case TDCA_DUEDATE:
-	case TDCA_DUETIME:
-		if (bIncludeBlank || pTDIParent->HasDue())
-			pTDIChild->dateDue = pTDIParent->dateDue;
-		break;
-
-	case TDCA_STARTDATE:
-	case TDCA_STARTTIME:
-		if (bIncludeBlank || pTDIParent->HasStart())
-			pTDIChild->dateStart = pTDIParent->dateStart;
-		break;
-
-	case TDCA_PRIORITY:
-		if (bIncludeBlank || pTDIParent->nPriority != FM_NOPRIORITY)
-			pTDIChild->nPriority = pTDIParent->nPriority;
-		break;
-
-	case TDCA_RISK:
-		if (bIncludeBlank || pTDIParent->nRisk != FM_NORISK)
-			pTDIChild->nRisk = pTDIParent->nRisk;
-		break;
-
-	case TDCA_COLOR:
-		if (bIncludeBlank || pTDIParent->color != 0)
-			pTDIChild->color = pTDIParent->color;
-		break;
-
-	case TDCA_ALLOCTO:
-		if (bIncludeBlank || pTDIParent->aAllocTo.GetSize())
-			pTDIChild->aAllocTo.Copy(pTDIParent->aAllocTo);
-		break;
-
-	case TDCA_ALLOCBY:
-		if (bIncludeBlank || !pTDIParent->sAllocBy.IsEmpty())
-			pTDIChild->sAllocBy = pTDIParent->sAllocBy;
-		break;
-
-	case TDCA_STATUS:
-		if (bIncludeBlank || !pTDIParent->sStatus.IsEmpty())
-			pTDIChild->sStatus = pTDIParent->sStatus;
-		break;
-
-	case TDCA_CATEGORY:
-		if (bIncludeBlank || pTDIParent->aCategories.GetSize())
-			pTDIChild->aCategories.Copy(pTDIParent->aCategories);
-		break;
-
-	case TDCA_TAGS:
-		if (bIncludeBlank || pTDIParent->aTags.GetSize())
-			pTDIChild->aTags.Copy(pTDIParent->aTags);
-		break;
-
-	case TDCA_PERCENT:
-		if (bIncludeBlank || pTDIParent->nPercentDone)
-			pTDIChild->nPercentDone = pTDIParent->nPercentDone;
-		break;
-
-	case TDCA_TIMEESTIMATE:
-		if (bIncludeBlank || pTDIParent->timeEstimate.dAmount > 0)
-			pTDIChild->timeEstimate = pTDIParent->timeEstimate;
-		break;
-
-	case TDCA_TIMESPENT:
-		if (bIncludeBlank || pTDIParent->timeSpent.dAmount > 0)
-			pTDIChild->timeSpent = pTDIParent->timeSpent;
-		break;
-
-	case TDCA_FILELINK:
-		if (bIncludeBlank || pTDIParent->aFileLinks.GetSize())
-			pTDIChild->aFileLinks.Copy(pTDIParent->aFileLinks);
-		break;
-
-	case TDCA_VERSION:
-		if (bIncludeBlank || !pTDIParent->sVersion.IsEmpty())
-			pTDIChild->sVersion = pTDIParent->sVersion;
-		break;
-
-	case TDCA_FLAG:
-		if (bIncludeBlank || pTDIParent->bFlagged)
-			pTDIChild->bFlagged = pTDIParent->bFlagged;
-		break;
-
-	case TDCA_LOCK:
-		if (bIncludeBlank || pTDIParent->bLocked)
-			pTDIChild->bLocked = pTDIParent->bLocked;
-		break;
-
-	case TDCA_EXTERNALID:
-		if (bIncludeBlank || !pTDIParent->sExternalID.IsEmpty())
-			pTDIChild->sExternalID = pTDIParent->sExternalID;
-		break;
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		// apply the change based on nAttrib
+		switch (nAttribID)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
+		case TDCA_DONEDATE:
+			if (bIncludeBlank || pTDIParent->IsDone())
+				pTDIChild->dateDone = pTDIParent->dateDone;
+			break;
 
-			if (pDef->HasFeature(TDCCAF_INHERITPARENTCHANGES))
+		case TDCA_DUEDATE:
+		case TDCA_DUETIME:
+			if (bIncludeBlank || pTDIParent->HasDue())
+				pTDIChild->dateDue = pTDIParent->dateDue;
+			break;
+
+		case TDCA_STARTDATE:
+		case TDCA_STARTTIME:
+			if (bIncludeBlank || pTDIParent->HasStart())
+				pTDIChild->dateStart = pTDIParent->dateStart;
+			break;
+
+		case TDCA_PRIORITY:
+			if (bIncludeBlank || pTDIParent->nPriority != FM_NOPRIORITY)
+				pTDIChild->nPriority = pTDIParent->nPriority;
+			break;
+
+		case TDCA_RISK:
+			if (bIncludeBlank || pTDIParent->nRisk != FM_NORISK)
+				pTDIChild->nRisk = pTDIParent->nRisk;
+			break;
+
+		case TDCA_COLOR:
+			if (bIncludeBlank || pTDIParent->color != 0)
+				pTDIChild->color = pTDIParent->color;
+			break;
+
+		case TDCA_ALLOCTO:
+			if (bIncludeBlank || pTDIParent->aAllocTo.GetSize())
+				pTDIChild->aAllocTo.Copy(pTDIParent->aAllocTo);
+			break;
+
+		case TDCA_ALLOCBY:
+			if (bIncludeBlank || !pTDIParent->sAllocBy.IsEmpty())
+				pTDIChild->sAllocBy = pTDIParent->sAllocBy;
+			break;
+
+		case TDCA_STATUS:
+			if (bIncludeBlank || !pTDIParent->sStatus.IsEmpty())
+				pTDIChild->sStatus = pTDIParent->sStatus;
+			break;
+
+		case TDCA_CATEGORY:
+			if (bIncludeBlank || pTDIParent->aCategories.GetSize())
+				pTDIChild->aCategories.Copy(pTDIParent->aCategories);
+			break;
+
+		case TDCA_TAGS:
+			if (bIncludeBlank || pTDIParent->aTags.GetSize())
+				pTDIChild->aTags.Copy(pTDIParent->aTags);
+			break;
+
+		case TDCA_PERCENT:
+			if (bIncludeBlank || pTDIParent->nPercentDone)
+				pTDIChild->nPercentDone = pTDIParent->nPercentDone;
+			break;
+
+		case TDCA_TIMEESTIMATE:
+			if (bIncludeBlank || pTDIParent->timeEstimate.dAmount > 0)
+				pTDIChild->timeEstimate = pTDIParent->timeEstimate;
+			break;
+
+		case TDCA_TIMESPENT:
+			if (bIncludeBlank || pTDIParent->timeSpent.dAmount > 0)
+				pTDIChild->timeSpent = pTDIParent->timeSpent;
+			break;
+
+		case TDCA_FILELINK:
+			if (bIncludeBlank || pTDIParent->aFileLinks.GetSize())
+				pTDIChild->aFileLinks.Copy(pTDIParent->aFileLinks);
+			break;
+
+		case TDCA_VERSION:
+			if (bIncludeBlank || !pTDIParent->sVersion.IsEmpty())
+				pTDIChild->sVersion = pTDIParent->sVersion;
+			break;
+
+		case TDCA_FLAG:
+			if (bIncludeBlank || pTDIParent->bFlagged)
+				pTDIChild->bFlagged = pTDIParent->bFlagged;
+			break;
+
+		case TDCA_LOCK:
+			if (bIncludeBlank || pTDIParent->bLocked)
+				pTDIChild->bLocked = pTDIParent->bLocked;
+			break;
+
+		case TDCA_EXTERNALID:
+			if (bIncludeBlank || !pTDIParent->sExternalID.IsEmpty())
+				pTDIChild->sExternalID = pTDIParent->sExternalID;
+			break;
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
-				if (bIncludeBlank || pTDIParent->HasCustomAttributeValue(pDef->sUniqueID))
-				{
-					TDCCADATA data;
-					pTDIParent->GetCustomAttributeValue(pDef->sUniqueID, data);
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
-					pTDIChild->SetCustomAttributeValue(pDef->sUniqueID, data);
+				if (pDef->HasFeature(TDCCAF_INHERITPARENTCHANGES))
+				{
+					if (bIncludeBlank || pTDIParent->HasCustomAttributeValue(pDef->sUniqueID))
+					{
+						TDCCADATA data;
+						pTDIParent->GetCustomAttributeValue(pDef->sUniqueID, data);
+
+						pTDIChild->SetCustomAttributeValue(pDef->sUniqueID, data);
+					}
 				}
 			}
-		}
-		else
-		{
-			ASSERT(0);
-			return FALSE;
+			else
+			{
+				ASSERT(0);
+				return FALSE;
+			}
 		}
 	}
 
+
 	// and its children too
-	return ApplyLastChangeToSubtasks(pTDIChild, pTDSParent->GetSubTask(nChildPos), nAttribID, bIncludeBlank);
+	if (!pTDIChild->bLocked || !HasStyle(TDCS_SUBTASKSINHERITLOCK))
+	{
+		return ApplyLastChangeToSubtasks(pTDIChild, pTDSParent->GetSubTask(nChildPos), nAttribID, bIncludeBlank);
+	}
+
+	return TRUE;
 }
 
 TDC_SET CToDoCtrlData::SetTaskColor(DWORD dwTaskID, COLORREF color)
