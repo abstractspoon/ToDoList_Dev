@@ -811,9 +811,9 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCRECURRENCE& trRecurrence, const SEAR
 		bMatch = ValueMatches(TDIR_MONTHLY, rule, sWhatMatched);
 		break;
 		
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 	case TDIR_YEAR_EVERY_NYEARS:
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
 		bMatch = ValueMatches(TDIR_YEARLY, rule, sWhatMatched);
 		break;
 		

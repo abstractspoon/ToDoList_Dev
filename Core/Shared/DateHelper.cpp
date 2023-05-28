@@ -1070,7 +1070,12 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 		dDateTime2 = GetTimeOnly(dDateTime2).m_dt;
 	}
 
-	return ((dDateTime1 < dDateTime2) ? -1 : (dDateTime1 > dDateTime2) ? 1 : 0);
+	double dDiff = (dDateTime1 - dDateTime2);
+
+	if (fabs(dDiff) < ONE_SECOND)
+		return 0;
+
+	return (dDiff < 0) ? -1 : 1;
 }
 
 BOOL CDateHelper::IsDateSet(const COleDateTime& date)
@@ -1241,7 +1246,7 @@ int CDateHelper::GetDayCount(DWORD dwDays)
 	return nCount;
 }
 
-DH_DAYOFWEEK CDateHelper::Map(OLE_DAYOFWEEK nDOW)
+DH_DAYOFWEEK CDateHelper::MapOleDowToDH(OLE_DAYOFWEEK nDOW)
 {
 	switch (nDOW)
 	{
@@ -1258,7 +1263,7 @@ DH_DAYOFWEEK CDateHelper::Map(OLE_DAYOFWEEK nDOW)
 	return DHW_NONE;
 }
 
-OLE_DAYOFWEEK CDateHelper::Map(DH_DAYOFWEEK nDOW)
+OLE_DAYOFWEEK CDateHelper::MapDHDowToOLE(DH_DAYOFWEEK nDOW)
 {
 	switch (nDOW)
 	{
@@ -1273,6 +1278,27 @@ OLE_DAYOFWEEK CDateHelper::Map(DH_DAYOFWEEK nDOW)
 
 	ASSERT(0);
 	return DHO_UNDEF;
+}
+
+DH_MONTH CDateHelper::MapMonthIndexToDHMonth(int nMonth)
+{
+	switch (nMonth)
+	{
+	case 1:		return DHM_JANUARY;
+	case 2:		return DHM_FEBRUARY;
+	case 3:		return DHM_MARCH;
+	case 4:		return DHM_APRIL;
+	case 5:		return DHM_MAY;
+	case 6:		return DHM_JUNE;
+	case 7:		return DHM_JULY;
+	case 8:		return DHM_AUGUST;
+	case 9:		return DHM_SEPTEMBER;
+	case 10:	return DHM_OCTOBER;
+	case 11:	return DHM_NOVEMBER;
+	case 12:	return DHM_DECEMBER;
+	}
+
+	return DHM_NONE;
 }
 
 COleDateTime CDateHelper::GetStartOfWeek(const COleDateTime& date)
@@ -1765,7 +1791,7 @@ COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
 	if (dTime <= 0)
 		return date;
 
-	dTime = (int)(dTime * MINS_IN_DAY);
+	dTime = Misc::Round(dTime * MINS_IN_DAY);
 	dTime /= MINS_IN_DAY;
 
 	return MakeDate(date, dTime);

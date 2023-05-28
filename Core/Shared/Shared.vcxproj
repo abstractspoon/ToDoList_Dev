@@ -369,6 +369,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="MonthCalCtrlEx.cpp" />
+    <ClCompile Include="monthcheckcombobox.cpp" />
     <ClCompile Include="monthcombobox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -733,6 +734,7 @@
     <ClInclude Include="MiniCalendarListCtrl.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="MonthCalCtrlEx.h" />
+    <ClInclude Include="monthcheckcombobox.h" />
     <ClInclude Include="monthcombobox.h" />
     <ClInclude Include="MouseWheelMgr.h" />
     <ClInclude Include="MSOutlookHelper.h" />

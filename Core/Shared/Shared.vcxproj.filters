@@ -490,6 +490,9 @@
     <ClCompile Include="ISMsgManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="monthcheckcombobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -1024,6 +1027,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ISMsgManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="monthcheckcombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

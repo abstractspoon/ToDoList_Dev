@@ -234,8 +234,9 @@ public:
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther, BOOL bNoTimeIsEndOfDay);
 
-	static DH_DAYOFWEEK Map(OLE_DAYOFWEEK nDOW);
-	static OLE_DAYOFWEEK Map(DH_DAYOFWEEK nDOW);
+	static DH_DAYOFWEEK MapOleDowToDH(OLE_DAYOFWEEK nDOW);
+	static OLE_DAYOFWEEK MapDHDowToOLE(DH_DAYOFWEEK nDOW);
+	static DH_MONTH MapMonthIndexToDHMonth(int nMonth); // 1-12
 
 	static int Compare(const COleDateTime& date1, const COleDateTime& date2, DWORD dwCompareFlags = DHC_COMPARETIME);
 

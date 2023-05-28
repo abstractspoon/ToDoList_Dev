@@ -19,32 +19,6 @@ static char THIS_FILE[]=__FILE__;
 const int OCCURS_INFINITELY = -1;	
 
 //////////////////////////////////////////////////////////////////////
-
-//  nRegularity										dwSpecific1				dwSpecific2
-
-//	RECURS_DAILY (RECURS_DAY_EVERY_NDAYS)
-//	RECURS_DAY_EVERY_NDAYS							every 'n' days			--- (0)
-//	RECURS_DAY_EVERY_WEEKDAY						--- (0)					--- (0)
-//	RECURS_DAY_EVERY_NWEEKDAYS						every 'n' days			--- (0)
-
-//	RECURS_WEEKLY	(RECURS_WEEK_SPECIFIC_DOWS_NWEEKS)				
-//	RECURS_WEEK_SPECIFIC_DOWS_NWEEKS				every 'n' weeks			weekdays (TDIW_...)
-//	RECURS_WEEK_EVERY_NWEEKS						every 'n' weeks			--- (0)
-
-//	RECURS_MONTHLY (RECURS_MONTH_SPECIFIC_DAY_NMONTHS)				
-//	RECURS_MONTH_EVERY_NMONTHS						every 'n' months		--- (0)
-//	RECURS_MONTH_SPECIFIC_DAY_NMONTHS				every 'n' months		day of month (1-31)
-//	RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTH			first(0), last(!0)		every 'n' months
-//	RECURS_MONTH_SPECIFIC_DOW_NMONTHS				LOWORD = which (1-5)	every 'n' months
-//													HIWORD = DOW (1-7)		
-
-//	RECURS_YEARLY	(RECURS_YEAR_SPECIFIC_DAY_MONTH)				
-//	RECURS_YEAR_SPECIFIC_DAY_MONTH					month (1-12)			day of month (1-31)
-//	RECURS_YEAR_EVERY_NYEARS						every 'n' years			--- (0)
-//  RECURS_YEAR_SPECIFIC_DOW_MONTH					LOWORD = which (1-5)	specific month (1-12)
-//													HIWORD = DOW (1-7)		
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -294,62 +268,54 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
 		{
 			SYSTEMTIME st;
 			dtTemp.GetAsSystemTime(st); // Preserves time component
 
-			st.wDay = (WORD)m_dwSpecific2;
-			st.wMonth = (WORD)m_dwSpecific1;
-			st.wYear = (WORD)dtTemp.GetYear();
-			
-			if (!ValidateDay(st))
-				return FALSE;
-			
-			// see if this year would work before trying next year
-			dtTemp = st;
-			
-			if (dtTemp <= dtPrev)
+			int nMonth = st.wMonth;
+			int nYear = st.wYear;
+
+			// Using a do loop means we test 'this' month and year before moving forward
+			do
 			{
-				// else try restoring the original day and incrementing the year
 				st.wDay = (WORD)m_dwSpecific2;
-				st.wYear++;
-				
+				st.wMonth = (WORD)nMonth;
+				st.wYear = (WORD)nYear;
+
 				if (!ValidateDay(st))
 					return FALSE;
-				
-				// calculate date
+
 				dtTemp = st;
-				ASSERT(dtTemp > dtPrev);
+
+				if (CDateHelper::Compare(dtTemp, dtPrev, 0) > 0)
+					break;
 			}
+			while (GetNextSpecificMonth(m_dwSpecific1, nMonth, nYear));
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		{
 			// Cache time component
 			double dTimeOnly = CDateHelper::GetTimeOnly(dtTemp).m_dt;
 
 			int nWhich = LOWORD(m_dwSpecific1);
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
-			int nMonth = m_dwSpecific2;
-			
-			// see if this year would work before trying next year
+	
+			int nMonth = dtTemp.GetMonth();
 			int nYear = dtTemp.GetYear();
 
-			dtTemp = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
-			dtTemp.m_dt += dTimeOnly;
-			
-			// else try incrementing the year
-			if (dtTemp <= dtPrev)
+			// Using a do loop means we test 'this' month and year before moving forward
+			do
 			{
-				nYear++;
-				
 				dtTemp = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
 				dtTemp.m_dt += dTimeOnly;
 
-				ASSERT(dtTemp > dtPrev);
+				if (CDateHelper::Compare(dtTemp, dtPrev, 0) > 0)
+					break;
 			}
+			while (GetNextSpecificMonth(m_dwSpecific2, nMonth, nYear));
 		}
 		break;
 		
@@ -362,7 +328,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	// Debug check that we are synced with FitDateToScheme
 	switch (m_nRegularity)
 	{
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 	case RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
 	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
 		break;
@@ -387,7 +353,27 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	dtNext = dtTemp;
 	return TRUE;
 }
-	
+
+BOOL CRecurrence::GetNextSpecificMonth(DWORD dwMonths, int& nMonth, int& nYear)
+{
+	if (!IsValidSpecificMonths(dwMonths))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	DWORD dwMonth = 0;
+
+	do
+	{
+		CDateHelper::IncrementMonth(nMonth, nYear);
+		dwMonth = CDateHelper::MapMonthIndexToDHMonth(nMonth);
+	} 
+	while ((dwMonths & dwMonth) == 0);
+
+	return TRUE;
+}
+
 int CRecurrence::CalcNextOccurences(const COleDateTime& dtPrev, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
 {
 	if (!dtRange.IsValid())
@@ -496,7 +482,7 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		{
 			int nWhich = LOWORD(m_dwSpecific1);
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)HIWORD(m_dwSpecific1);
@@ -509,13 +495,13 @@ BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 		}
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:  
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:  
 		{
 			SYSTEMTIME st;
 			dtRecur.GetAsSystemTime(st);
 			
 			st.wDay = (WORD)m_dwSpecific2;
-			st.wMonth = (WORD)m_dwSpecific1;
+			//st.wMonth = (WORD)m_dwSpecific1;
 			// year can be anything
 			
 			// clip day to the end of the month
@@ -556,6 +542,22 @@ BOOL CRecurrence::SetRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, DWORD
 {
 	if (!IsValidRegularity(nReg, dwSpec1, dwSpec2))
 		return FALSE;
+
+	// Backward compatibility
+	switch (nReg)
+	{
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
+		// If the month argument looks like a month index, remap it
+		if ((dwSpec1 >= 1) && (dwSpec1 <= 12))
+			dwSpec1 = CDateHelper::MapMonthIndexToDHMonth((int)dwSpec1);
+		break;
+
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
+		// If the month argument looks like a month index, remap it
+		if ((dwSpec2 >= 1) && (dwSpec2 <= 12))
+			dwSpec2 = CDateHelper::MapMonthIndexToDHMonth((int)dwSpec2);
+		break;
+	}
 
 	// All good
 	m_nRegularity = nReg;
@@ -658,9 +660,9 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 			return FALSE;
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DAY_MONTH:
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
 		// Specific month
-		if ((dwSpec1 < 1) || (dwSpec1 > 12))
+		if (!IsValidSpecificMonths(dwSpec1))
 			return FALSE;
 
 		// Day of month
@@ -668,9 +670,9 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 			return FALSE;
 		break;
 		
-	case RECURS_YEAR_SPECIFIC_DOW_MONTH:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
 		// Specific month
-		if ((dwSpec2 < 1) || (dwSpec2 > 12))
+		if (!IsValidSpecificMonths(dwSpec2))
 			return FALSE;
 		
 		// LOWORD = which week (1-5)
@@ -683,6 +685,20 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		ASSERT(0);
 		return FALSE;
 	}
+
+	return TRUE;
+}
+
+BOOL CRecurrence::IsValidSpecificMonths(DWORD dwMonths)
+{
+	if (dwMonths <= 12)
+		return (dwMonths > 0);
+
+	if (dwMonths < DHM_JANUARY)
+		return FALSE;
+
+	if (dwMonths > DHM_ALL)
+		return FALSE;
 
 	return TRUE;
 }

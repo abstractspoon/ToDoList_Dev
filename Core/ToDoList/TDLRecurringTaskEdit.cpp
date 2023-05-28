@@ -188,7 +188,7 @@ void CTDLRecurringTaskEdit::OnStyleChanging(int nStyleType, LPSTYLESTRUCT lpStyl
 
 int CTDLRecurringTaskEdit::CalcMaxRegularityWidth(CDC* pDC, BOOL bIncOnce)
 {
-	int nReg = (int)TDIR_YEAR_SPECIFIC_DAY_MONTH + 1;
+	int nReg = (int)TDIR_YEAR_SPECIFIC_DAY_MONTHS + 1;
 	int nMax = 0;
 
 	while (nReg--)
@@ -242,8 +242,8 @@ CTDLRecurringTaskOptionDlg::CTDLRecurringTaskOptionDlg(const TDCRECURRENCE& tr, 
 		break;
 
 	case TDIR_YEAR_EVERY_NYEARS:
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 		m_nFrequency = TDIR_YEARLY;
 		break;
 	}
@@ -523,7 +523,7 @@ CTDLRecurringTaskWeeklyOptionPage::CTDLRecurringTaskWeeklyOptionPage(const TDCRE
 		dtDefault.GetAsSystemTime(stDefault);
 
 		OLE_DAYOFWEEK nDOW = CDateHelper::GetDayOfWeek(stDefault);
-		m_dwWeekdays = CDateHelper::Map(nDOW);
+		m_dwWeekdays = CDateHelper::MapOleDowToDH(nDOW);
 	}
 	
 	// overwrite specific values
@@ -865,9 +865,9 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 	m_nEveryDayOfMonth = 1;
 	m_nSpecificNumber = 0;
 	m_nEveryNumYears = 1;
-	m_nSpecificMonth = 0;
+	m_dwSpecificMonths = 1;
 	m_nSpecificDayOfWeek = 0;
-	m_nEveryMonth = 0;
+	m_dwEveryMonths = 1;
 	//}}AFX_DATA_INIT
 
 	// first set to default values
@@ -876,7 +876,7 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		SYSTEMTIME stDefault;
 		dtDefault.GetAsSystemTime(stDefault);
 
-		m_nEveryMonth = stDefault.wMonth - 1;
+		m_dwEveryMonths = m_dwSpecificMonths = CDateHelper::MapMonthIndexToDHMonth((int)stDefault.wMonth);
 		m_nEveryDayOfMonth = stDefault.wDay;
 	}
 	
@@ -890,17 +890,17 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 		m_nEveryNumYears = dwSpecific1;
 		break;
 		
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
 		m_nYearlyOption = 1;
-		m_nEveryMonth = (dwSpecific1 - 1);
+		m_dwEveryMonths = dwSpecific1;
 		m_nEveryDayOfMonth = dwSpecific2;
 		break;
 
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 		m_nYearlyOption = 2;
 		m_nSpecificNumber = (LOWORD(dwSpecific1) - 1);
 		m_nSpecificDayOfWeek = (HIWORD(dwSpecific1) - 1);
-		m_nSpecificMonth = (dwSpecific2 - 1);
+		m_dwSpecificMonths = dwSpecific2;
 		break;
 
 	case TDIR_YEAR_RECREATEAFTERNYEARS_DEP:
@@ -917,18 +917,21 @@ CTDLRecurringTaskYearlyOptionPage::~CTDLRecurringTaskYearlyOptionPage()
 void CTDLRecurringTaskYearlyOptionPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+
 	//{{AFX_DATA_MAP(CTDLRecurringTaskYearlyOptionPage)
 	DDX_Radio(pDX, IDC_RECREATE, m_nYearlyOption);
-	CDialogHelper::DDX_Text(pDX, IDC_RECREATEYEARS, m_nEveryNumYears);
-	CDialogHelper::DDX_Text(pDX, IDC_EVERYMONTHDAY, m_nEveryDayOfMonth);
 	DDX_CBIndex(pDX, IDC_THESPECIFICWEEK, m_nSpecificNumber);
-	DDX_CBIndex(pDX, IDC_THEMONTH, m_nSpecificMonth);
 	DDX_CBIndex(pDX, IDC_THEWEEKDAY, m_nSpecificDayOfWeek);
-	DDX_CBIndex(pDX, IDC_EVERYMONTHLIST, m_nEveryMonth);
 	DDX_Control(pDX, IDC_THEMONTH, m_cbSpecificMonthList);
 	DDX_Control(pDX, IDC_THEWEEKDAY, m_cbDaysOfWeek);
 	DDX_Control(pDX, IDC_EVERYMONTHLIST, m_cbEveryMonthList);
 	//}}AFX_DATA_MAP
+
+	CDialogHelper::DDX_Text(pDX, IDC_RECREATEYEARS, m_nEveryNumYears);
+	CDialogHelper::DDX_Text(pDX, IDC_EVERYMONTHDAY, m_nEveryDayOfMonth);
+
+	DDX_Months(pDX, m_cbSpecificMonthList, m_dwSpecificMonths);
+	DDX_Months(pDX, m_cbEveryMonthList, m_dwEveryMonths);
 }
 
 BEGIN_MESSAGE_MAP(CTDLRecurringTaskYearlyOptionPage, CCmdNotifyPropertyPage)
@@ -966,15 +969,15 @@ void CTDLRecurringTaskYearlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr) 
 		break;
 		
 	case 1:  
-		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 
-						(m_nEveryMonth + 1), 
+		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 
+						m_dwEveryMonths, 
 						m_nEveryDayOfMonth);
 		break;
 
 	case 2:
-		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH,
+		tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS,
 						MAKELONG(m_nSpecificNumber + 1, m_nSpecificDayOfWeek + 1),
-						(m_nSpecificMonth + 1));
+						m_dwSpecificMonths);
 		break;
 
 	default:

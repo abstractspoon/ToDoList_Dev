@@ -89,7 +89,7 @@ DWORD CDayOfWeekCheckListBox::GetChecked(int& nNumChecked) const
 		if (pCLB->GetCheck(nDay))
 		{
 			OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)pCLB->GetItemData(nDay);
-			DH_DAYOFWEEK dwDay = CDateHelper::Map(nDOW);
+			DH_DAYOFWEEK dwDay = CDateHelper::MapOleDowToDH(nDOW);
 			ASSERT(dwDay);
 
 			m_dwChecked |= dwDay;
@@ -121,7 +121,7 @@ void CDayOfWeekCheckListBox::SetChecked(DWORD dwChecked)
 			for (int nDay = 0; nDay < 7; nDay++)
 			{
 				OLE_DAYOFWEEK nDOW = (OLE_DAYOFWEEK)GetItemData(nDay);
-				DH_DAYOFWEEK dwDay = CDateHelper::Map(nDOW);
+				DH_DAYOFWEEK dwDay = CDateHelper::MapOleDowToDH(nDOW);
 
 				SetCheck(nDay, (m_dwChecked & dwDay) ? 1 : 0);
 			}
