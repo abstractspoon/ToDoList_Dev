@@ -720,8 +720,8 @@ namespace EvidenceBoardUIExtension
 				return false;
 			}
 
-			fromPos = GetNodeClientPos(fromNode);
-			toPos = GetNodeClientPos(toNode);
+			fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+			toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
 
 			if (DrawNodesOnTop)
 				ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
@@ -745,21 +745,6 @@ namespace EvidenceBoardUIExtension
 			if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, toRect, out toIntersect) > 0)
 				toPos = toIntersect[0];
 		}
-
-		// 		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
-		// 										  out Rectangle fromRect, out Rectangle toRect)
-		// 		{
-		// 			if ((fromNode == null) || (toNode == null))
-		// 			{
-		// 				fromRect = toRect = Rectangle.Empty;
-		// 				return false;
-		// 			}
-		// 
-		// 			fromRect = GetNodeClientRect(fromNode);
-		// 			toRect = GetNodeClientRect(toNode);
-		// 
-		// 			return IsConnectionVisible(fromPos, toPos);
-		// 		}
 
 		protected bool IsConnectionVisible(Point fromPos, Point toPos)
 		{

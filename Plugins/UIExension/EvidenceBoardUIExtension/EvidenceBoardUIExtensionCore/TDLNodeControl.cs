@@ -1184,7 +1184,7 @@ namespace EvidenceBoardUIExtension
 
 		private Point GetCreateLinkPinPos(BaseNode node)
 		{
-			var pos = GetNodeClientPos(node);
+			var pos = Geometry2D.Centroid(GetNodeClientRect(node));
 
 			// Offset the hit rect left or right to avoid existing user links
 			if (!DrawNodesOnTop && m_TaskItems.HasUserLink(node.Data))
@@ -1253,9 +1253,9 @@ namespace EvidenceBoardUIExtension
 				if (UserLinkExists(toId, fromNode.Data))
 				{
 					// need to offset BEFORE clipping
-					fromPos = GetNodeClientPos(fromNode);
-					toPos = GetNodeClientPos(toNode);
-					
+					fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+					toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
+
 					if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
 						return false;
 
