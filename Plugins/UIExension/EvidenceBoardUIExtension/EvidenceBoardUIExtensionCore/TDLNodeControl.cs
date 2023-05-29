@@ -89,9 +89,9 @@ namespace EvidenceBoardUIExtension
 
 		// -------------------------------------------------------------------------
 
-		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-		protected int DefaultPinRadius { get { return ScaleByDPIFactor(3); } }
-		protected int LinkOffset { get { return ScaleByDPIFactor(6); } }
+		protected int LabelPadding { get { return DPIScaling.Scale(2); } }
+		protected int DefaultPinRadius { get { return DPIScaling.Scale(3); } }
+		protected int LinkOffset { get { return DPIScaling.Scale(6); } }
 
 		// -------------------------------------------------------------------------
 
@@ -154,7 +154,7 @@ namespace EvidenceBoardUIExtension
 			int nodeHeight = (int)Math.Max((2 * BaseFontHeight), (BaseFontHeight + UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
 			int nodeWidth  = (4 * nodeHeight);
 
-			base.NodeSize = new Size(nodeWidth, nodeHeight);
+			base.NodeSize = DPIScaling.UnScale(new Size(nodeWidth, nodeHeight));
 			base.PinRadius = DefaultPinRadius;
 
 			DragDropChange += new NodeDragDropChangeEventHandler(OnDragDropNodes);
@@ -798,11 +798,6 @@ namespace EvidenceBoardUIExtension
 		}
 
 		// Internal ------------------------------------------------------------
-
-		protected int ScaleByDPIFactor(int value)
-		{
-			return DPIScaling.Scale(value);
-		}
 
 		private void UpdateTaskAttributes(TaskList tasks, bool rebuild)
 		{
@@ -1760,7 +1755,9 @@ namespace EvidenceBoardUIExtension
 
 				if ((taskItem != null) && !taskItem.IsLocked)
 				{
+					SelectNode(taskItem.TaskId, true, false);
 					EditTaskIcon?.Invoke(this, taskItem.TaskId);
+
 					return;
 				}
 
@@ -1770,6 +1767,7 @@ namespace EvidenceBoardUIExtension
 				if (taskItem != null)
 				{
 					taskItem.HasExpandedImage = !taskItem.HasExpandedImage;
+					SelectNode(taskItem.TaskId, true, false);
 					RecalcExtents();
 
 					return;
