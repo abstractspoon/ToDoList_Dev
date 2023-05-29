@@ -1511,8 +1511,10 @@ namespace EvidenceBoardUIExtension
 		{
 			if (VisualStyleRenderer.IsSupported)
 			{
-				var renderer = new VisualStyleRenderer(expand ? VisualStyleElement.ExplorerBar.NormalGroupExpand.Pressed : VisualStyleElement.ExplorerBar.NormalGroupCollapse.Pressed);
-				renderer.DrawBackground(graphics, rect);
+				ScrollBarRenderer.DrawArrowButton(graphics, rect, (expand ? ScrollBarArrowButtonState.DownNormal : ScrollBarArrowButtonState.UpNormal));
+
+				// Try to match core app with a border
+				graphics.DrawRectangle(Pens.LightGray, rect);
 			}
 			else
 			{
