@@ -1770,7 +1770,8 @@ namespace EvidenceBoardUIExtension
 				if (taskItem != null)
 				{
 					taskItem.HasExpandedImage = !taskItem.HasExpandedImage;
-					Invalidate();
+					RecalcExtents();
+
 					return;
 				}
 			}
