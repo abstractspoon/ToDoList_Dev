@@ -151,7 +151,7 @@ namespace EvidenceBoardUIExtension
 			m_TaskItems = null;
 			m_DependencyColor = Color.CornflowerBlue;
 
-			int nodeHeight = (int)Math.Max(((2 * BaseFontHeight) + 4), (BaseFontHeight + UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
+			int nodeHeight = (int)Math.Max((2 * BaseFontHeight), (BaseFontHeight + UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
@@ -1512,16 +1512,16 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		static void DrawTaskImageExpansionButton(Graphics graphics, Rectangle rect, bool expanded)
+		static void DrawTaskImageExpansionButton(Graphics graphics, Rectangle rect, bool expand)
 		{
 			if (VisualStyleRenderer.IsSupported)
 			{
-				var renderer = new VisualStyleRenderer(expanded ? VisualStyleElement.ExplorerBar.NormalGroupExpand.Pressed : VisualStyleElement.ExplorerBar.NormalGroupCollapse.Pressed);
+				var renderer = new VisualStyleRenderer(expand ? VisualStyleElement.ExplorerBar.NormalGroupExpand.Pressed : VisualStyleElement.ExplorerBar.NormalGroupCollapse.Pressed);
 				renderer.DrawBackground(graphics, rect);
 			}
 			else
 			{
-				ScrollBarRenderer.DrawArrowButton(graphics, rect, (expanded ? ScrollBarArrowButtonState.DownNormal : ScrollBarArrowButtonState.UpNormal));
+				ControlPaint.DrawScrollButton(graphics, rect, (expand ? ScrollButton.Down : ScrollButton.Up), ButtonState.Normal);
 			}
 		}
 
@@ -1798,17 +1798,20 @@ namespace EvidenceBoardUIExtension
 
 			if (hit != null)
 			{
-				var task = GetTaskItem(hit);
-				var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
+				if ((HitTestTaskIcon(e.Location) == null) && 
+					(HitTestTaskImageExpansionButton(e.Location) == null))
+				{
+					var task = GetTaskItem(hit);
+					var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
 
-				if (imageRect.Contains(e.Location))
-				{
-					Process.Start(task.ImagePath);
-				}
-				else if ((HitTestTaskIcon(e.Location) == null) && 
-						(HitTestTaskImageExpansionButton(e.Location) == null))
-				{
-					EditTaskLabel(this, SingleSelectedNode.Data);
+					if (imageRect.Contains(e.Location))
+					{
+						Process.Start(task.ImagePath);
+					}
+					else
+					{
+						EditTaskLabel(this, SingleSelectedNode.Data);
+					}
 				}
 			}
 			else
