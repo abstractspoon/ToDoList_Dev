@@ -41,7 +41,9 @@ namespace EvidenceBoardUIExtension
 
 		public Point UserPosition;
 		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
+
 		public Image Image;
+		public bool HasExpandedImage = true;
 
 		// -----------------------------------------------------------------
 

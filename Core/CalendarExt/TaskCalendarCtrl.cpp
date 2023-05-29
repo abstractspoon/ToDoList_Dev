@@ -1165,19 +1165,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			CRect rOverflow;
 			CalcOverflowBtnRect(rCell, rOverflow);
 
-			CThemed th;
-
-			if (th.SupportsTheming(STAP_ALLOW_CONTROLS) && th.SupportsTheming(STAP_ALLOW_NONCLIENT))
-			{
-				if (th.Open(this, _T("EXPLORERBAR")))
-				{
-					th.DrawBackground(pDC, EBP_NORMALGROUPEXPAND, EBNGE_PRESSED, rOverflow);
-					return;
-				}
-			}
-
-			// else 
-			pDC->DrawFrameControl((LPRECT)(LPCRECT)rOverflow, DFC_SCROLL, DFCS_SCROLLDOWN);
+			CThemed::DrawFrameControl(this, pDC, rOverflow, DFC_SCROLL, DFCS_SCROLLDOWN, rOverflow);
 		}
 	}
 }

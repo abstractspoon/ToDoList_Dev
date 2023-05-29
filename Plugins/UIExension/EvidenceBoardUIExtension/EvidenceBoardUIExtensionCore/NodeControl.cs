@@ -209,7 +209,7 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public bool ScrollToSelection()
+		public bool ScrollToSelection(bool partialOk)
 		{
 			if (m_SelectedNodes.Count == 0)
 				return false;
@@ -231,6 +231,9 @@ namespace EvidenceBoardUIExtension
 			{
 				if (IsNodeVisible(node, out nodeRect, true))
 				{
+					if (partialOk)
+						return true;
+
 					nodeToScroll = node;
 				}
 			}
@@ -319,7 +322,7 @@ namespace EvidenceBoardUIExtension
 				m_SelectedNodes.Add(node);
 
 				if (ensureVisible)
-					ScrollToSelection();
+					ScrollToSelection(false);
 
 				Invalidate();
 
@@ -689,10 +692,21 @@ namespace EvidenceBoardUIExtension
 
 		protected Rectangle GetNodeClientRect(BaseNode node)
 		{
-			var pos = GetNodeClientPos(node);
 			var size = GetNodeSize(node).Multiply(OverallScaleFactor);
+			var baseSize = NodeSize.Multiply(OverallScaleFactor);
 
-			pos.Offset(-size.Width / 2, -size.Height / 2);
+			var pos = GetNodeClientPos(node);
+			pos.Offset(-size.Width / 2, -baseSize.Height / 2);
+
+			return new Rectangle(pos, size);
+		}
+
+		protected Rectangle GetNodeRect(BaseNode node)
+		{
+			var size = GetNodeSize(node);
+
+			var pos = node.Point.GetPosition();
+			pos.Offset(-size.Width / 2, -NodeSize.Height / 2);
 
 			return new Rectangle(pos, size);
 		}
@@ -706,8 +720,8 @@ namespace EvidenceBoardUIExtension
 				return false;
 			}
 
-			fromPos = GetNodeClientPos(fromNode);
-			toPos = GetNodeClientPos(toNode);
+			fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+			toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
 
 			if (DrawNodesOnTop)
 				ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
@@ -731,21 +745,6 @@ namespace EvidenceBoardUIExtension
 			if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, toRect, out toIntersect) > 0)
 				toPos = toIntersect[0];
 		}
-
-		// 		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
-		// 										  out Rectangle fromRect, out Rectangle toRect)
-		// 		{
-		// 			if ((fromNode == null) || (toNode == null))
-		// 			{
-		// 				fromRect = toRect = Rectangle.Empty;
-		// 				return false;
-		// 			}
-		// 
-		// 			fromRect = GetNodeClientRect(fromNode);
-		// 			toRect = GetNodeClientRect(toNode);
-		// 
-		// 			return IsConnectionVisible(fromPos, toPos);
-		// 		}
 
 		protected bool IsConnectionVisible(Point fromPos, Point toPos)
 		{
@@ -997,7 +996,8 @@ namespace EvidenceBoardUIExtension
 
 		protected void RecalcExtents(BaseNode node)
 		{
-			var nodeRect = node.GetRectangle(GetNodeSize(node));
+//			var nodeRect = node.GetRectangle(GetNodeSize(node));
+			var nodeRect = GetNodeRect(node);
 
 			m_MinExtents.X = Math.Min(m_MinExtents.X, (int)nodeRect.Left);
 			m_MinExtents.Y = Math.Min(m_MinExtents.Y, (int)nodeRect.Top);
@@ -1142,7 +1142,7 @@ namespace EvidenceBoardUIExtension
 					}
 				}
 
-				ScrollToSelection();
+				ScrollToSelection(true);
 				Invalidate();
 
 				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
