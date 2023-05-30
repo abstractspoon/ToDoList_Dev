@@ -272,6 +272,75 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public void ExpandSelected()
+		{
+			foreach (var id in SelectedNodeIds)
+			{
+				GetTaskItem(id).HasExpandedImage = true;
+			}
+			Invalidate();
+		}
+
+		public void CollapseSelected()
+		{
+			foreach (var id in SelectedNodeIds)
+			{
+				GetTaskItem(id).HasExpandedImage = false;
+			}
+			Invalidate();
+		}
+
+		public bool CanExpandSelected
+		{
+			get
+			{
+				// Look for first collapsed selection
+				foreach (var id in SelectedNodeIds)
+				{
+					if (!GetTaskItem(id).HasExpandedImage)
+						return true;
+				}
+
+				return false;
+			}
+		}
+
+		public bool CanCollapseSelected
+		{
+			get
+			{
+				// Look for first expanded selection
+				foreach (var id in SelectedNodeIds)
+				{
+					if (GetTaskItem(id).HasExpandedImage)
+						return true;
+				}
+
+				return false;
+			}
+		}
+
+		public void ExpandAll()
+		{
+			m_TaskItems.ExpandAll();
+			Invalidate();
+		}
+
+		public void CollapseAll()
+		{
+			m_TaskItems.CollapseAll();
+			Invalidate();
+		}
+
+		public bool CanExpandAll { get { return m_TaskItems.CanExpandAll; } }
+		public bool CanCollapseAll { get { return m_TaskItems.CanCollapseAll; } }
+		
+		public List<uint> CollapsedTaskIds
+		{
+			get { return m_TaskItems.CollapsedTaskIds; }
+			set { m_TaskItems.CollapsedTaskIds = value; }
+		}
+
 		bool ShowingDependencyLinks
 		{
 			get { return (m_VisibleLinkTypes?.Find(x => (x.Type == EvidenceBoardLinkType.Dependency)) != null); }

@@ -394,6 +394,62 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
+		public void ExpandAll()
+		{
+			foreach (var taskItem in Values)
+				taskItem.HasExpandedImage = true;
+		}
+
+		public void CollapseAll()
+		{
+			foreach (var taskItem in Values)
+				taskItem.HasExpandedImage = false;
+		}
+
+		public bool CanExpandAll
+		{
+			get { return (Values.First(x => x.HasExpandedImage) == null); }
+		}
+
+		public bool CanCollapseAll
+		{
+			get { return (Values.First(x => !x.HasExpandedImage) == null); }
+		}
+
+
+		public List<uint> CollapsedTaskIds
+		{
+			get
+			{
+				var ids = new List<uint>();
+
+				foreach (var taskItem in Values)
+				{
+					if (!taskItem.HasExpandedImage)
+						ids.Add(taskItem.TaskId);
+				}
+
+				return ids;
+			}
+
+			set
+			{
+				ExpandAll();
+
+				if (value != null)
+				{
+					foreach (var id in value)
+					{
+						var taskItem = GetTaskItem(id);
+
+						if (taskItem != null)
+							taskItem.HasExpandedImage = false;
+					}
+				}
+			}
+		}
+
+
 		public bool DeleteUserLink(UserLink link)
 		{
 			var task = GetTaskItem(link.FromId);
