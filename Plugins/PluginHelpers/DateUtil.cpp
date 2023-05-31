@@ -45,7 +45,7 @@ double WorkingDay::StartOfDayInHours()
 
 double WorkingDay::EndOfDayInHours()
 {
-	return (m_StartOfDayInHours + DayLengthInHours(true));
+	return min(24, (m_StartOfDayInHours + DayLengthInHours(true)));
 }
 
 double WorkingDay::StartOfLunchInHours()
