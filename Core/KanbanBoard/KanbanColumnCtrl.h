@@ -86,6 +86,7 @@ public:
 	int GetSelectedCount() const;
 	HTREEITEM GetFirstSelectedItem() const;
 	HTREEITEM GetLastSelectedItem() const;
+	HTREEITEM GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) const;
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;

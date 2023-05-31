@@ -144,6 +144,7 @@ public:
 	BOOL IsFlagged(DWORD dwTaskID) const;
 	BOOL IsPinned(DWORD dwTaskID) const;
 	BOOL IsDone(DWORD dwTaskID, BOOL bIncGoodAsDone = FALSE) const;
+	BOOL IsTopLevel(DWORD dwTaskID) const;
 
 	CString GetItemTitle(DWORD dwTaskID) const;
 

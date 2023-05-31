@@ -2852,17 +2852,29 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 		break;
 
 	case IUI_GETNEXTTOPLEVELTASK:
-		pCol = GetNextColumn(pCol, TRUE, TRUE);
-			
-		if (pCol)
-			hti = pCol->TCH().GetFirstItem();
+		while (pCol)
+		{
+			hti = pCol->GetNextTopLevelItem(hti, TRUE);
+
+			if (hti)
+				break;
+
+			// else
+			pCol = GetNextColumn(pCol, TRUE, TRUE);
+		}
 		break;
 
 	case IUI_GETPREVTOPLEVELTASK:
-		pCol = GetNextColumn(pCol, FALSE, TRUE);
-			
-		if (pCol)
-			hti = pCol->TCH().GetFirstItem();
+		while (pCol)
+		{
+			hti = pCol->GetNextTopLevelItem(hti, FALSE);
+
+			if (hti)
+				break;
+
+			// else
+			pCol = GetNextColumn(pCol, FALSE, TRUE);
+		}
 		break;
 
 	default:

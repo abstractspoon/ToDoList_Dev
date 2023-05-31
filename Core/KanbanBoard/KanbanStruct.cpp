@@ -774,6 +774,13 @@ BOOL CKanbanItemMap::IsPinned(DWORD dwTaskID) const
 	return (pKI && pKI->bPinned);
 }
 
+BOOL CKanbanItemMap::IsTopLevel(DWORD dwTaskID) const
+{
+	const KANBANITEM* pKI = GetItem(dwTaskID);
+
+	return (pKI && (pKI->dwParentID == 0));
+}
+
 BOOL CKanbanItemMap::IsDone(DWORD dwTaskID, BOOL bIncGoodAsDone) const
 {
 	const KANBANITEM* pKI = GetItem(dwTaskID);

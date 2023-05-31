@@ -1383,6 +1383,42 @@ HTREEITEM CKanbanColumnCtrl::GetLastSelectedItem() const
 	return NULL;
 }
 
+HTREEITEM CKanbanColumnCtrl::GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) const
+{
+	if (bNext)
+	{
+		if (hti)
+			hti = GetNextSiblingItem(hti);
+		else
+			hti = TCH().GetFirstItem();
+
+		while (hti)
+		{
+			if (m_data.IsTopLevel(GetTaskID(hti)))
+				return hti;
+
+			hti = GetNextSiblingItem(hti);
+		}
+	}
+	else // previous
+	{
+		if (hti)
+			hti = GetPrevSiblingItem(hti);
+		else
+			hti = TCH().GetLastItem();
+
+		while (hti)
+		{
+			if (m_data.IsTopLevel(GetTaskID(hti)))
+				return hti;
+
+			hti = GetPrevSiblingItem(hti);
+		}
+	}
+
+	return hti;
+}
+
 int CKanbanColumnCtrl::BuildSortedSelection(CHTIList& lstHTI) const
 {
 	lstHTI.RemoveAll();
