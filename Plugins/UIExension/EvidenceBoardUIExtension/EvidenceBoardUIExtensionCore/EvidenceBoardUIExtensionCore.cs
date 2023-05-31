@@ -243,13 +243,14 @@ namespace EvidenceBoardUIExtension
 			m_PrefsDlg.SavePreferences(prefs, key);
 			m_OptionsCombo.SavePreferences(prefs, key);
 			m_LinkVisibilityCombo.SavePreferences(prefs, key);
+			m_Control.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
             if (!appOnly) // private settings
             {
-				// Combos
+				m_Control.LoadPreferences(prefs, key);
 				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 

@@ -115,6 +115,7 @@ namespace EvidenceBoardUIExtension
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
 		private uint m_DropHighlightedTaskId, m_HotTaskId;
+		private List<uint> m_PrevCollapsedTaskIds;
 
 		private bool m_DraggingSelectedUserLink = false;
 		private Point m_DraggedUserLinkEnd = Point.Empty;
@@ -350,11 +351,36 @@ namespace EvidenceBoardUIExtension
 
 		public bool CanExpandAllTaskImages { get { return m_TaskItems.CanExpandAllTaskImages; } }
 		public bool CanCollapseAllTaskImages { get { return m_TaskItems.CanCollapseAllTaskImages; } }
-		
-		public List<uint> CollapsedTaskIds
+
+		public void SavePreferences(Preferences prefs, String key)
 		{
-			get { return m_TaskItems.CollapsedTaskIds; }
-			set { m_TaskItems.CollapsedTaskIds = value; }
+			string ids = String.Empty;
+
+			foreach (var id in m_TaskItems.CollapsedTaskIds)
+				ids = string.Format("{0}|{1}", ids, id);
+
+			prefs.WriteProfileString(key, "CollapsedTaskIds", ids);
+		}
+
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			// Cache the previously collapsed tasks until we get our first task update
+			var prevIds = prefs.GetProfileString(key, "CollapsedTaskIds", string.Empty);
+
+			if (!string.IsNullOrEmpty(prevIds))
+			{
+				m_PrevCollapsedTaskIds = new List<uint>();
+				var ids = prevIds.Split('|');
+
+				foreach (var prevId in ids)
+				{
+					uint id = 0;
+
+					if (uint.TryParse(prevId, out id) && (id > 0))
+						m_PrevCollapsedTaskIds.Add(id);
+				}
+			}
 		}
 
 		bool ShowingDependencyLinks
@@ -916,6 +942,12 @@ namespace EvidenceBoardUIExtension
 
 			base.RootNode = rootNode;
 			base.EnableLayoutUpdates = true;
+
+			if (rebuild && (m_PrevCollapsedTaskIds?.Count > 0))
+			{
+				m_TaskItems.CollapsedTaskIds = m_PrevCollapsedTaskIds;
+				m_PrevCollapsedTaskIds = null;
+			}
 
 			Invalidate();
 		}
@@ -1681,8 +1713,9 @@ namespace EvidenceBoardUIExtension
 		{
 			var rect = CalcIconRect(labelRect);
 			rect.Y += rect.Height;
+			rect.Height--;
 
-            return rect;
+			return rect;
 		}
 
 		private bool SelectedNodeWasPreviouslySelected
