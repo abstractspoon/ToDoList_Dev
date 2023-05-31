@@ -303,8 +303,21 @@ namespace EvidenceBoardUIExtension
         {
             return false;//m_Control.CanSaveToImage();
         }
-        		
-        // Message handlers ---------------------------------------------------------------------
+
+		public bool ExpandSelectedTaskImages() { return m_Control.ExpandSelectedTaskImages(); }
+		public bool CollapseSelectedTaskImages() { return m_Control.CollapseSelectedTaskImages(); }
+
+		public bool CanExpandSelectedTasks { get { return m_Control.CanExpandSelectedTaskImages; } }
+		public bool CanCollapseSelectedTasks	{ get { return m_Control.CanCollapseSelectedTaskImages; } }
+
+		public bool ExpandAllTaskImages()	{ return m_Control.ExpandAllTaskImages(); }
+		public bool CollapseAllTaskImages() { return m_Control.CollapseAllTaskImages(); }
+
+		public bool CanExpandAllTaskImages { get { return m_Control.CanExpandAllTaskImages; } }
+		public bool CanCollapseAllTaskImages { get { return m_Control.CanCollapseAllTaskImages; } }
+
+
+		// Message handlers ---------------------------------------------------------------------
 
 		protected override void OnGotFocus(EventArgs e)
 		{

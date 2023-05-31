@@ -43,16 +43,48 @@ namespace EvidenceBoardUIExtension
 		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
 
 		public Image Image;
-		public bool HasExpandedImage = true;
+		public bool HasImage { get { return (Image != null); } }
+
+		public enum ImageExpansionState
+		{
+			NoImage,
+			Expanded,
+			Collapsed
+		}
+
+		public ImageExpansionState ImageExpansion
+		{
+			get
+			{
+				if (!HasImage)
+					return ImageExpansionState.NoImage;
+
+				return (ImageExpanded ? ImageExpansionState.Expanded : ImageExpansionState.Collapsed);
+			}
+		}
+
+		public bool ExpandImage(bool expand)
+		{
+			if (!HasImage || (expand == ImageExpanded))
+				return false;
+
+			ImageExpanded = expand;
+			return true;
+		}
+
+		// -----------------------------------------------------------------
+
+		private bool ImageExpanded = true;
 
 		// -----------------------------------------------------------------
 
 		public TaskItem()
 		{
+			ImageExpanded = true;
 			StartDate = EndDate = DateTime.MinValue;
 		}
 
-		public TaskItem(Task task)
+		public TaskItem(Task task) : this()
 		{
 			Debug.Assert(!string.IsNullOrWhiteSpace(MetaDataKey));
 
@@ -92,7 +124,7 @@ namespace EvidenceBoardUIExtension
 
 		public int CalcImageHeight(int width)
 		{
-			if (Image == null)
+			if (!HasImage)
 				return 0;
 
 			return ((width * Image.Height) / Image.Width);
@@ -394,26 +426,36 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public void ExpandAll()
+		public bool ExpandAllTaskImages()
 		{
+			bool change = false;
+
 			foreach (var taskItem in Values)
-				taskItem.HasExpandedImage = true;
+				change |= taskItem.ExpandImage(true);
+
+			return change;
 		}
 
-		public void CollapseAll()
+		public bool CollapseAllTaskImages()
 		{
+			bool change = false;
+
 			foreach (var taskItem in Values)
-				taskItem.HasExpandedImage = false;
+				change |= taskItem.ExpandImage(false);
+
+			return change;
 		}
 
-		public bool CanExpandAll
+		public bool CanExpandAllTaskImages
 		{
-			get { return (Values.First(x => x.HasExpandedImage) == null); }
+			// Look for the first item having an image which is not expanded
+			get { return (Values.FirstOrDefault(x => (x.ImageExpansion == TaskItem.ImageExpansionState.Collapsed)) != null); }
 		}
 
-		public bool CanCollapseAll
+		public bool CanCollapseAllTaskImages
 		{
-			get { return (Values.First(x => !x.HasExpandedImage) == null); }
+			// Look for the first item having an image which is expanded
+			get { return (Values.FirstOrDefault(x => (x.ImageExpansion == TaskItem.ImageExpansionState.Expanded)) != null); }
 		}
 
 
@@ -425,7 +467,7 @@ namespace EvidenceBoardUIExtension
 
 				foreach (var taskItem in Values)
 				{
-					if (!taskItem.HasExpandedImage)
+					if (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed)
 						ids.Add(taskItem.TaskId);
 				}
 
@@ -434,7 +476,7 @@ namespace EvidenceBoardUIExtension
 
 			set
 			{
-				ExpandAll();
+				ExpandAllTaskImages();
 
 				if (value != null)
 				{
@@ -443,7 +485,7 @@ namespace EvidenceBoardUIExtension
 						var taskItem = GetTaskItem(id);
 
 						if (taskItem != null)
-							taskItem.HasExpandedImage = false;
+							taskItem.ExpandImage(false);
 					}
 				}
 			}

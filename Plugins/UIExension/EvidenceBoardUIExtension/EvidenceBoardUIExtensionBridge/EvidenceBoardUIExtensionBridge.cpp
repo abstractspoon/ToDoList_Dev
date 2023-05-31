@@ -193,10 +193,16 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IU
 	switch (nCmd)
 	{
 	case IUI_COLLAPSEALL:
+		return m_wnd->CollapseAllTaskImages();
+
 	case IUI_COLLAPSESELECTED:
+		return m_wnd->CollapseSelectedTaskImages();
+
 	case IUI_EXPANDALL:
+		return m_wnd->ExpandAllTaskImages();
+
 	case IUI_EXPANDSELECTED:
-		break;
+		return m_wnd->ExpandSelectedTaskImages();
 
 	case IUI_SELECTALL:
 		return m_wnd->SelectAll();
@@ -290,10 +296,16 @@ bool CEvidenceBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd,
 	switch (nCmd)
 	{
 	case IUI_COLLAPSEALL:
+		return m_wnd->CanCollapseAllTaskImages;
+
 	case IUI_COLLAPSESELECTED:
+		return m_wnd->CanCollapseSelectedTasks;
+
 	case IUI_EXPANDALL:
+		return m_wnd->CanExpandAllTaskImages;
+
 	case IUI_EXPANDSELECTED:
-		break;
+		return m_wnd->CanExpandSelectedTasks;
 
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
