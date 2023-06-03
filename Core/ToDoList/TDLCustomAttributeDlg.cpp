@@ -743,14 +743,14 @@ void CCustomAttributeCalcPage::BuildOperatorCombo()
 	m_cbOperators.ResetContent();
 
 	// Add/subtract supported by all
-	CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_ADD), TDCCAC_ADD);
-	CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_SUBTRACT), TDCCAC_SUBTRACT);
+	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (+)"), CEnString(IDS_CAD_CALC_ADD)), TDCCAC_ADD);
+	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (-)"), CEnString(IDS_CAD_CALC_SUBTRACT)), TDCCAC_SUBTRACT);
 
 	// Multiply/divide NOT supported by DATES
 	if (!IsDate(m_calc.opFirst.nAttribID))
 	{
-		CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_MULTIPLY), TDCCAC_MULTIPLY);
-		CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_DIVIDE), TDCCAC_DIVIDE);
+		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (*)"), CEnString(IDS_CAD_CALC_MULTIPLY)), TDCCAC_MULTIPLY);
+		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (/)"), CEnString(IDS_CAD_CALC_DIVIDE)), TDCCAC_DIVIDE);
 	}
 
 	// restore selection
