@@ -2565,7 +2565,12 @@ BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& hti
 	// Get selected tasks ordered, and without duplicate subtasks
 	// to ensure we get the correct upper/lowermost items
 	CHTIList selection;
-	TSH().CopySelection(selection, TRUE, TRUE);
+	
+	if (!TSH().CopySelection(selection, TRUE, TRUE))
+	{
+		ASSERT(TSH().IsEmpty());
+		return FALSE;
+	}
 
 	HTREEITEM htiTopSel = selection.GetHead();
 	HTREEITEM htiBotSel = selection.GetTail();

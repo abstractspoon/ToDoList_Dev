@@ -717,7 +717,8 @@ void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	// Rebuild data
 	m_data.RemoveAll();
 
-	VERIFY(AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE));
+	if (!AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE))
+		ASSERT(pTasks->GetTaskCount() == 0);
 
 	m_data.SetPinnedItems(m_aPrevPinnedTasks, FALSE);
 	m_aPrevPinnedTasks.RemoveAll();
