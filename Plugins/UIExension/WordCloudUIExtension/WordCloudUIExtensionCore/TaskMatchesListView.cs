@@ -460,6 +460,8 @@ namespace WordCloudUIExtension
 			const int WM_LBUTTONUP     = 0x0202;
 			const int WM_LBUTTONDBLCLK = 0x0203;
 
+			const int LVM_GETTOPINDEX  = 0x1039;
+			
 			switch (m.Msg)
 			{
 				case WM_LBUTTONDOWN:
@@ -480,11 +482,27 @@ namespace WordCloudUIExtension
 					}
 				}
 				break;
+
+			case LVM_GETTOPINDEX:
+				{
+					// There's a very strange bug where the first
+					// mouseover of an item causes it to be redrawn
+					// and it flickers regardless of whether we are
+					// double-buffered or not. The workaround is to
+					// not draw the item under these circumstances.
+					// See also OnDrawItem()
+					m_IgnoreNextItemDraw = true;
+					base.WndProc(ref m);
+					m_IgnoreNextItemDraw = false;
+				}
+				return;
 			}
 
 			// else default handling
 			base.WndProc(ref m);
 		}
+
+		private bool m_IgnoreNextItemDraw = false;
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -602,6 +620,9 @@ namespace WordCloudUIExtension
 		protected override void OnDrawItem(DrawListViewItemEventArgs e)
 		{
 			if (e.Item == null)
+				return;
+
+			if (m_IgnoreNextItemDraw && RectangleToScreen(e.Item.Bounds).Contains(MousePosition))
 				return;
 
 			// Draw the background

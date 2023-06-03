@@ -29,6 +29,7 @@ namespace Abstractspoon
 				static void RemoveClientEdge(IntPtr hWnd);
 				static void AddClientEdge(IntPtr hWnd);
 
+				static bool HasStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 
@@ -51,6 +52,8 @@ namespace Abstractspoon
 
 				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
+
+				static UInt32 GetWmNotifyCode(IntPtr lParam);
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd);

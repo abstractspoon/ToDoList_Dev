@@ -68,36 +68,42 @@ void Win32::DoFrameChange(IntPtr hWnd)
 			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 }
 
-bool Win32::RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
+bool Win32::HasStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 {
 	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
 	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
 
-	if ((nCurStyle & nStyle) == nStyle)
-	{
-		nCurStyle &= ~nStyle;
-		SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+	return ((nStyle & nCurStyle) == nStyle);
+}
 
-		return true;
-	}
+bool Win32::RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
+{
+	if (!HasStyle(hWnd, nStyle, bExStyle))
+		return false;
 
-	return false;
+	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
+	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
+	
+	nCurStyle &= ~nStyle;
+	SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+
+	// Sanity check
+	return !HasStyle(hWnd, nStyle, bExStyle);
 }
 
 bool Win32::AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 {
+	if (HasStyle(hWnd, nStyle, bExStyle))
+		return false;
+
 	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
 	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
 
-	if ((nCurStyle & nStyle) == 0)
-	{
-		nCurStyle |= nStyle;
-		SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+	nCurStyle |= nStyle;
+	SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
 
-		return true;
-	}
-
-	return false;
+	// Sanity check
+	return HasStyle(hWnd, nStyle, bExStyle);
 }
 
 int Win32::GetVScrollPos(IntPtr hWnd)
@@ -216,6 +222,15 @@ int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
 int Win32::PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
 {
 	return ::PostMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
+}
+
+UInt32 Win32::GetWmNotifyCode(IntPtr lParam)
+{
+	if (lParam == IntPtr::Zero)
+		return 0;
+
+	NMHDR* pNMHDR = (NMHDR*)lParam.ToPointer();
+	return pNMHDR->code;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
