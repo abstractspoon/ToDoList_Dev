@@ -354,7 +354,7 @@ void CTDLStatusBar::SetPaneTextAndTooltip(UINT nIDPane, UINT nIDTextFormat, cons
 	}
 	else if (!Misc::IsEmpty(szTipValue))
 	{
-		sTooltip = szTipValue;
+		sTooltip = CString(szTipValue);
 	}
 
 	int nPane = CommandToIndex(nIDPane);

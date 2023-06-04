@@ -45,12 +45,11 @@ CPreferencesShortcutsPage::CPreferencesShortcutsPage(CShortcutManager* pMgr)
 	m_tcCommands(NCGS_SHOWHEADER)
 {
 	//{{AFX_DATA_INIT(CPreferencesShortcutsPage)
-	m_sOtherCmdID = _T("");
 	m_bShowCommandIDs = FALSE;
 	//}}AFX_DATA_INIT
 
 	m_tcCommands.AddGutterColumn(PSP_SHORTCUTCOLUMNID, CEnString(IDS_PSP_SHORTCUT));
-	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(_T("ID")), 0, DT_CENTER);
+	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(IDS_TDC_COLUMN_ID), 0, DT_CENTER);
 	m_tcCommands.SetGutterColumnHeaderTitle(NCG_CLIENTCOLUMNID, CEnString(IDS_PSP_MENUITEM));
 	m_tcCommands.ShowGutterPosColumn(FALSE);
 	m_tcCommands.SetGridlineColor(OTC_GRIDCOLOR);

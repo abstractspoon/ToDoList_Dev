@@ -30,7 +30,8 @@ protected:
 	BOOL	m_bIncludeProject;
 	//}}AFX_DATA
 	BOOL m_bImport;
-	CEnString		m_sIndent, m_sTitle, m_sProjectLabel;
+	CEnString m_sTitle, m_sProjectLabel;
+	CString m_sIndent;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
