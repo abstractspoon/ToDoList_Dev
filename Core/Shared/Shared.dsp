@@ -413,6 +413,10 @@ SOURCE=.\MonthCalCtrlEx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\monthcheckcombobox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\monthcombobox.cpp
 # End Source File
 # Begin Source File
@@ -1094,6 +1098,10 @@ SOURCE=.\Misc.h
 # Begin Source File
 
 SOURCE=.\MonthCalCtrlEx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\monthcheckcombobox.h
 # End Source File
 # Begin Source File
 

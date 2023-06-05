@@ -197,7 +197,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 				const int MAXTIPLEN = 255; // CToolInfo
 				int nMaxTasks = max(nSelCount, 10), nNumTasks = nMaxTasks;
 
-				CEnString sFmtMore;
+				CString sFmtMore;
 
 				while (nNumTasks--)
 				{
@@ -212,7 +212,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 					{
 						if (sFmtMore.IsEmpty())
 						{
-							sFmtMore.LoadString(ID_SB_MULTISELTASKMORE_TIP);
+							sFmtMore = CEnString(ID_SB_MULTISELTASKMORE_TIP);
 							sFmtMore = _T("\n+ ") + sFmtMore;
 						}
 
@@ -354,7 +354,7 @@ void CTDLStatusBar::SetPaneTextAndTooltip(UINT nIDPane, UINT nIDTextFormat, cons
 	}
 	else if (!Misc::IsEmpty(szTipValue))
 	{
-		sTooltip = CString(szTipValue);
+		sTooltip = szTipValue;
 	}
 
 	int nPane = CommandToIndex(nIDPane);

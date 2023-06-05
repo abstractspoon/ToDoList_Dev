@@ -233,7 +233,6 @@ int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		if (nHeat > 0)
 		{
 			CEnString sTooltip(IDS_MINICAL_TOOLTIP, nHeat);
-
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (int)pSpot->m_dt, pSpot->m_rect);
 		}
 	}

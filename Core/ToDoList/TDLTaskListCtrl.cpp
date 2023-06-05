@@ -748,7 +748,7 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 	}
 
 	// Prefix the text by the column name
-	return CEnString(_T("%s: %s"), GetGroupByColumnName(), sGroupBy);
+	return Misc::Format(_T("%s: %s"), GetGroupByColumnName(), sGroupBy);
 }
 
 CString CTDLTaskListCtrl::GetGroupByColumnName() const

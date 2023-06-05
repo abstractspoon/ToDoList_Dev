@@ -1206,8 +1206,7 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 
 	if (bRemoteExists && (dwOptions & RMO_CONFIRMOVERWRITE))
 	{
-		CEnString sMessage;
-		sMessage.Format(_T("The remote file '%s' already exists on the server.\n\nAre you sure you want to overwrite it?"), sRemotePath);
+		CEnString sMessage(_T("The remote file '%s' already exists on the server.\n\nAre you sure you want to overwrite it?"), sRemotePath);
 
 		int nRet = CMessageBox::AfxShow(m_pParent, _T("Confirm Overwrite"), sMessage, MB_YESNO);
 
@@ -1229,7 +1228,8 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 			pDlg = &progDlg;
 		}
 
-		CEnString sDescription(_T("Uploading '%s' to '%s'"), pRemoteFile->sFileName, m_sServer);
+		CEnString sDescription;
+		sDescription.Format(_T("Uploading '%s' to '%s'"), pRemoteFile->sFileName, m_sServer);
 		pDlg->SetDescription(sDescription);
 	}
 

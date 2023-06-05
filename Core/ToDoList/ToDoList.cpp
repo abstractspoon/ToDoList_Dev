@@ -1351,7 +1351,7 @@ void CToDoListApp::OnImportPrefs()
 	}
 	else // notify user
 	{
-		CEnString sMessage(CEnString(IDS_INVALIDPREFFILE), sIniPath);
+		CEnString sMessage(IDS_INVALIDPREFFILE, sIniPath);
 		AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
 	}
 }

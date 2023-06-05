@@ -17,7 +17,7 @@ class CEnString : public CString
 {
 public:
 	CEnString();
-	CEnString(LPCTSTR lpszFormat, ... );
+	CEnString(LPCTSTR lpsz);
 	CEnString(UINT nStrID, HWND hwndRef = NULL);
 	CEnString(UINT nStrID, HMENU hMenu);
 	CEnString(const CString& str);
@@ -25,15 +25,25 @@ public:
 	template <class T>
 	CEnString(UINT nFormatID, T data)
 	{
-		if (nFormatID)
-		{
-			CString strFormat;
+		CString strFormat;
 
-			if (LoadString(nFormatID, NULL, strFormat))
-			{
-				CString::Format(strFormat, data);
-				CompareIgnoreString(strFormat);
-			}
+		if (nFormatID && LoadString(nFormatID, NULL, strFormat))
+		{
+			CString::Format(strFormat, data);
+			CompareIgnoreString(strFormat);
+		}
+	}
+
+	template <class T>
+	CEnString(LPCTSTR szFormat, T data)
+	{
+		if (!Misc::IsEmpty(szFormat))
+		{
+			CString strFormat(szFormat);
+			TranslateString(strFormat);
+
+			CString::Format(strFormat, data);
+			CompareIgnoreString(strFormat);
 		}
 	}
 

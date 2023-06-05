@@ -26,21 +26,14 @@ CEnString::CEnString() : CString()
 {
 }
 
-CEnString::CEnString(LPCTSTR lpszFormat, ... )
+CEnString::CEnString(LPCTSTR lpsz) : CString(lpsz)
 {
-	CString strFormat(lpszFormat);
-		
-	if (!strFormat.IsEmpty())
-	{
-		TranslateString(strFormat);
+	TranslateString(*this);
+}
 
-		va_list argList;
-		va_start(argList, lpszFormat);
-		CString::FormatV(strFormat, argList);
-		va_end(argList);
-
-		CompareIgnoreString(strFormat);
-	}
+CEnString::CEnString(const CString& str) : CString(str)
+{
+	TranslateString(*this);
 }
 
 CEnString::CEnString(UINT nStrID, HWND hwndRef)
@@ -51,11 +44,6 @@ CEnString::CEnString(UINT nStrID, HWND hwndRef)
 CEnString::CEnString(UINT nStrID, HMENU hMenu)
 {
 	LoadString(nStrID, hMenu);
-}
-
-CEnString::CEnString(const CString& str) : CString(str)
-{
-
 }
 
 CEnString::~CEnString()
