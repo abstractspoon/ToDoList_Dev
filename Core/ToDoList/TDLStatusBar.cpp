@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CTDLStatusBar, CStatusBarACTEx)
 	//{{AFX_MSG_MAP(CWelcomeWizard)
 	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,6 +97,12 @@ int CTDLStatusBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	return 0;
+}
+
+void CTDLStatusBar::OnLButtonDblClk(UINT nFlags, CPoint pt)
+{
+	if (HitTest(pt) == 0)
+		AfxGetMainWnd()->SendMessage(WM_COMMAND, ID_SCROLLTOSELTASK);
 }
 
 void CTDLStatusBar::SetUITheme(const CUIThemeFile& theme)
