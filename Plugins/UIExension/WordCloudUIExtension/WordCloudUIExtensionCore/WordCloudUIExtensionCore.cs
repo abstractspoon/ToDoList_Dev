@@ -539,7 +539,12 @@ namespace WordCloudUIExtension
                 }
             }
 
-            m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
+			// 'English (UK)' will not have path information like every other language
+			if (language == "English (UK)")
+				m_LangIgnoreFilePath = Path.Combine(appPath, "Resources\\Translations", language);
+			else 
+				m_LangIgnoreFilePath = Path.Combine(appPath, language);
+
             m_LangIgnoreFilePath = Path.ChangeExtension(m_LangIgnoreFilePath, "WordCloud.Ignore.txt");
 
             m_TaskMatchesList.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
