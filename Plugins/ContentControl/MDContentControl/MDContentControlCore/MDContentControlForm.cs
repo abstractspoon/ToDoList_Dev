@@ -201,13 +201,41 @@ namespace MDContentControl
 		{
 			get
 			{
-				return SplitContainer.ClientSize.Height - SplitContainer.SplitterDistance;
+				if (SplitContainer.Orientation == Orientation.Horizontal)
+					return (Height - SplitContainer.SplitterDistance);
+
+				// else
+				return (Width - SplitContainer.SplitterDistance);
+			}
+		}
+
+		public bool SetSplitPos(int pos)
+		{
+			var splitDist = 0;
+
+			if (SplitContainer.Orientation == Orientation.Horizontal)
+			{
+				splitDist = (Height - pos);
+
+				if (splitDist < SplitContainer.Panel1MinSize)
+					return false;
+
+				if (splitDist > (SplitContainer.Height - SplitContainer.Panel2MinSize))
+					return false;
+			}
+			else
+			{
+				splitDist = (Width - pos);
+
+				if (splitDist < SplitContainer.Panel1MinSize)
+					return false;
+
+				if (splitDist > (SplitContainer.Width - SplitContainer.Panel2MinSize))
+					return false;
 			}
 
-			set
-			{
-				SplitContainer.SplitterDistance = SplitContainer.ClientSize.Height - value;
-			}
+			SplitContainer.SplitterDistance = splitDist;
+			return true;
 		}
 
 		private readonly string m_BaseStyle = 
@@ -329,9 +357,13 @@ namespace MDContentControl
 
 			// Adjust the splitter orientation to match the aspect ratio of the available space
 			if (ClientRectangle.Width > ClientRectangle.Height)
+			{
 				SplitContainer.Orientation = Orientation.Vertical;
-			else
+			}
+			else if (ClientRectangle.Height > ClientRectangle.Width)
+			{
 				SplitContainer.Orientation = Orientation.Horizontal;
+			}
 		}
 
 	}

@@ -10,6 +10,9 @@ namespace MDContentControl
     public class MDContentControlCore : MDContentControlForm, IContentControlWnd
     {
         private IntPtr m_hwndParent;
+		private int m_PrevSplitPos = -1;
+
+		// ITDLContentControl ------------------------------------------------------------------
 
         public MDContentControlCore(IntPtr hwndParent)
         {
@@ -94,7 +97,7 @@ namespace MDContentControl
 			
 			if (!appOnly)
 			{
-				SplitPos = prefs.GetProfileInt(key, "SplitPos", ClientSize.Height / 2);
+				m_PrevSplitPos = prefs.GetProfileInt(key, "SplitPos", ClientSize.Height / 2);
 			}
 		}
 
@@ -109,6 +112,9 @@ namespace MDContentControl
         {
             base.OnResize(e);
 
+			if ((m_PrevSplitPos >= 0) && SetSplitPos(m_PrevSplitPos))
+				m_PrevSplitPos = -1;
+			
             Win32.RemoveClientEdge(Handle);
 		}
 
