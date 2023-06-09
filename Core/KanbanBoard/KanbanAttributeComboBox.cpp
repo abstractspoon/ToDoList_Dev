@@ -17,10 +17,36 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+struct ATTRIBUTE
+{
+	UINT nIDLabel;
+	TDC_ATTRIBUTE nAttrib;
+};
+
+static ATTRIBUTE DEFAULTATTRIB[]
+{
+	{ IDS_STATUSATTRIB,		TDCA_STATUS },
+	{ IDS_ALLOCTOATTRIB,	TDCA_ALLOCTO },
+	{ IDS_ALLOCBYATTRIB,	TDCA_ALLOCBY },
+	{ IDS_CATEGORYATTRIB,	TDCA_CATEGORY },
+	{ IDS_PRIORITYATTRIB,	TDCA_PRIORITY },
+	{ IDS_RISKATTRIB,		TDCA_RISK },
+	{ IDS_VERSIONATTRIB,	TDCA_VERSION },
+	{ IDS_TAGSATTRIB,		TDCA_TAGS },
+};
+
+const int NUM_DEFAULTATTRIB = sizeof(DEFAULTATTRIB) / sizeof(ATTRIBUTE);
+
+/////////////////////////////////////////////////////////////////////////////
 // CKanbanAttributeComboBox
 
-CKanbanAttributeComboBox::CKanbanAttributeComboBox() 
-	: m_bShowCustomAttrib(TRUE), m_bShowFixedColumns(FALSE)
+CKanbanAttributeComboBox::CKanbanAttributeComboBox(BOOL bIncludeNone) 
+	: 
+	m_bIncludeNone(bIncludeNone),
+	m_bShowCustomAttrib(TRUE), 
+	m_bShowFixedColumns(FALSE),
+	m_nExcludeAttribID(TDCA_NONE)
 {
 }
 
@@ -45,6 +71,17 @@ void CKanbanAttributeComboBox::PreSubclassWindow()
 	BuildCombo();
 }
 
+void CKanbanAttributeComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
+{
+	if (nAttrib != m_nExcludeAttribID || sCustomAttribID != m_sExcludeCustomAttribID)
+	{
+		m_nExcludeAttribID = nAttrib;
+		m_sExcludeCustomAttribID != sCustomAttribID;
+
+		BuildCombo();
+	}
+}
+
 void CKanbanAttributeComboBox::BuildCombo()
 {
 	// Cache selection
@@ -53,24 +90,31 @@ void CKanbanAttributeComboBox::BuildCombo()
 
 	ResetContent();
 
-	CDialogHelper::AddString(*this, CEnString(IDS_STATUSATTRIB), TDCA_STATUS);
-	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCTOATTRIB), TDCA_ALLOCTO);
-	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCBYATTRIB), TDCA_ALLOCBY);
-	CDialogHelper::AddString(*this, CEnString(IDS_CATEGORYATTRIB), TDCA_CATEGORY);
-	CDialogHelper::AddString(*this, CEnString(IDS_PRIORITYATTRIB), TDCA_PRIORITY);
-	CDialogHelper::AddString(*this, CEnString(IDS_RISKATTRIB), TDCA_RISK);
-	CDialogHelper::AddString(*this, CEnString(IDS_VERSIONATTRIB), TDCA_VERSION);
-	CDialogHelper::AddString(*this, CEnString(IDS_TAGSATTRIB), TDCA_TAGS);
+	if (m_bIncludeNone)
+		CDialogHelper::AddString(*this, CEnString(IDS_NONE), TDCA_NONE);
 
+	// Default attributes
+	for (int nAtt = 0; nAtt < NUM_DEFAULTATTRIB; nAtt++)
+	{
+		const ATTRIBUTE attrib = DEFAULTATTRIB[nAtt];
+
+		if (attrib.nAttrib != m_nExcludeAttribID)
+			CDialogHelper::AddString(*this, CEnString(attrib.nIDLabel), attrib.nAttrib);
+	}
+
+	// Custom attributes
 	for (int nCust = 0; nCust < m_aCustAttribDefs.GetSize(); nCust++)
 	{
 		const KANBANCUSTOMATTRIBDEF& kcaDef = m_aCustAttribDefs.GetData()[nCust];
 
-		CEnString sCustAttrib;
-		sCustAttrib.Format(IDS_CUSTOMATTRIB, kcaDef.sAttribName);
+		if (kcaDef.sAttribID != m_sExcludeCustomAttribID)
+		{
+			CEnString sCustAttrib;
+			sCustAttrib.Format(IDS_CUSTOMATTRIB, kcaDef.sAttribName);
 
-		CLocalizer::IgnoreString(sCustAttrib);
-		CDialogHelper::AddString(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
+			CLocalizer::IgnoreString(sCustAttrib);
+			CDialogHelper::AddString(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
+		}
 	}
 
 	if (m_bShowFixedColumns)
@@ -78,7 +122,12 @@ void CKanbanAttributeComboBox::BuildCombo()
 
 	// Restore selection
 	if (!SetSelectedAttribute(nSelAttrib, sSelCustID))
-		SetSelectedAttribute(TDCA_STATUS, _T(""));
+	{
+		if (m_bIncludeNone)
+			SetSelectedAttribute(TDCA_NONE, _T(""));
+		else
+			SetSelectedAttribute(TDCA_STATUS, _T(""));
+	}
 }
 
 void CKanbanAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID)

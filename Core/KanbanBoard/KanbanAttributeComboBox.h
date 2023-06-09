@@ -19,13 +19,14 @@ class CKanbanAttributeComboBox : public CComboBox
 {
 // Construction
 public:
-	CKanbanAttributeComboBox();
+	CKanbanAttributeComboBox(BOOL bIncludeNone = FALSE);
 
 	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
 	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
 	void SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
 	void ShowFixedColumns(BOOL bShow = TRUE);
+	void ExcludeAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID);
 
@@ -33,6 +34,9 @@ public:
 protected:
 	BOOL m_bShowCustomAttrib;
 	BOOL m_bShowFixedColumns;
+	BOOL m_bIncludeNone;
+	TDC_ATTRIBUTE m_nExcludeAttribID;
+	CString m_sExcludeCustomAttribID;
 
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 

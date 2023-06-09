@@ -45,7 +45,10 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
 	m_nTrackedAttrib(TDCA_NONE),
+	m_nGroupByAttrib(TDCA_NONE),
 	m_ctrlKanban(),
+	m_cbGroupBy(TRUE), // include 'none'
+
 	m_dlgPrefs(this)
 {
 	m_icon.Load(IDR_KANBAN);
@@ -62,19 +65,22 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
+	DDX_Control(pDX, IDC_GROUPBY, m_cbGroupBy);
 
 	m_cbAttributes.DDX(pDX, m_nTrackedAttrib, m_sTrackedCustomAttribID);
+	m_cbGroupBy.DDX(pDX, m_nGroupByAttrib, m_sGroupByCustomAttribID);
 }
 
 BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	//{{AFX_MSG_MAP(CKanbanWnd)
-	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeTrackedAttribute)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_SETFOCUS()
 	ON_COMMAND(ID_KANBAN_PREFS, OnKanbanPreferences)
 	ON_UPDATE_COMMAND_UI(ID_KANBAN_PREFS, OnUpdateKanbanPreferences)
 	ON_WM_SHOWWINDOW()
+	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeTrackedAttribute)
+	ON_CBN_SELCHANGE(IDC_GROUPBY, OnSelchangeGroupBy)
 	ON_CBN_SELCHANGE(IDC_OPTIONS, OnSelchangeOptions)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
@@ -176,7 +182,8 @@ BOOL CKanbanWnd::OnInitDialog()
 	m_ctrlKanban.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP, CRect(0, 0, 0, 0), this, 101);
 	m_ctrlKanban.SetFocus();
 
-	m_mgrPrompts.SetComboPrompt(m_cbOptions, CEnString(IDS_OPTIONS_NONE));
+	m_mgrPrompts.SetComboPrompt(m_cbOptions, CEnString(IDS_NONE));
+	m_mgrPrompts.SetComboPrompt(m_cbAttributes, CEnString(IDS_NONE));
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 	Resize();
@@ -390,11 +397,17 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 			if (m_sTrackedCustomAttribID.IsEmpty())
 				m_nTrackedAttrib = TDCA_STATUS;
 			break;
+
+		default:
+			if (!KANBANITEM::IsTrackableAttribute(m_nTrackedAttrib))
+				m_nTrackedAttrib = TDCA_STATUS;
+			break;
 		}
 
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
-		UpdateData(FALSE);
+		m_cbGroupBy.ExcludeAttribute(m_nTrackedAttrib, m_sTrackedCustomAttribID);
 
+		UpdateData(FALSE);
 		UpdateKanbanCtrlPreferences(FALSE);
 	}
 }
@@ -963,6 +976,13 @@ void CKanbanWnd::OnSelchangeTrackedAttribute()
 	ProcessTrackedAttributeChange();
 }
 
+void CKanbanWnd::OnSelchangeGroupBy()
+{
+	UpdateData();
+
+	//ProcessTrackedAttributeChange();
+}
+
 void CKanbanWnd::ProcessTrackedAttributeChange() 
 {
 	TDC_ATTRIBUTE nTrackAttrib = m_nTrackedAttrib;
@@ -987,6 +1007,9 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 		if (m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs))
 			SendParentSelectionUpdate();
 	}
+
+	// Exclude the tracked attribute from the Group By combo
+	m_cbGroupBy.ExcludeAttribute(nTrackAttrib, sCustomAttrib);
 }
 
 void CKanbanWnd::OnSelchangeOptions() 

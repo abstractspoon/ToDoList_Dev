@@ -70,7 +70,7 @@ protected:
 	//}}AFX_DATA
 	CKanbanCtrl m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
-	CKanbanAttributeComboBox m_cbAttributes;
+	CKanbanAttributeComboBox m_cbAttributes, m_cbGroupBy;
 	CKanbanOptionComboBox m_cbOptions;
 
 	CEnToolBar m_toolbar;
@@ -80,8 +80,8 @@ protected:
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CString	m_sTrackedCustomAttribID;
-	TDC_ATTRIBUTE m_nTrackedAttrib;
+	CString	m_sTrackedCustomAttribID, m_sGroupByCustomAttribID;
+	TDC_ATTRIBUTE m_nTrackedAttrib, m_nGroupByAttrib;
 	CDWordArray m_aSelTaskIDs;
 	CWndPromptManager m_mgrPrompts;
 
@@ -101,6 +101,7 @@ protected:
 	//{{AFX_MSG(CKanbanWnd)
 	afx_msg void OnSelchangeTrackedAttribute();
 	afx_msg void OnSelchangeOptions();
+	afx_msg void OnSelchangeGroupBy();
 	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
