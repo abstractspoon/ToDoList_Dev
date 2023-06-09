@@ -22,13 +22,14 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const double MINS_IN_DAY = (24 * 60);
+const double SECS_IN_DAY = (24 * 60 * 60);
 const double ONE_HOUR	= (1.0 / 24);
 const double HALF_HOUR	= (ONE_HOUR / 2);
-const double ONE_MINUTE = (1.0 / (24 * 60));
-const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally 'float' for less precision
+const double ONE_MINUTE = (1.0 / MINS_IN_DAY);
+const float  ONE_SECOND	= (float)(1.0f / SECS_IN_DAY); // intentionally 'float' for less precision
 const double END_OF_DAY = (1.0 - ONE_SECOND);
 const double START_OF_DAY = ONE_SECOND;
-const double MINS_IN_DAY = (24 * 60);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1791,8 +1792,11 @@ COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
 	if (dTime <= 0)
 		return date;
 
-	dTime = Misc::Round(dTime * MINS_IN_DAY);
-	dTime /= MINS_IN_DAY;
+	// Round UP/DOWN to nearest second
+	dTime = (Misc::Round(dTime * SECS_IN_DAY) / SECS_IN_DAY);
+
+	// Round DOWN to nearest minute
+	dTime = (((int)(dTime * MINS_IN_DAY)) / MINS_IN_DAY);
 
 	return MakeDate(date, dTime);
 }
