@@ -7,6 +7,7 @@
 #include "PluginHelpers.h"
 
 #include <Shared\MessageBox.h>
+#include <Shared\GraphicsMisc.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -224,13 +225,18 @@ int Win32::PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
 	return ::PostMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
 }
 
-UInt32 Win32::GetWmNotifyCode(IntPtr lParam)
+int Win32::GetWmNotifyCode(IntPtr lParam)
 {
 	if (lParam == IntPtr::Zero)
 		return 0;
 
 	NMHDR* pNMHDR = (NMHDR*)lParam.ToPointer();
-	return pNMHDR->code;
+	return (int)pNMHDR->code;
+}
+
+void Win32::SetArrowCursor()
+{
+	GraphicsMisc::SetStandardCursor(IDC_ARROW);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

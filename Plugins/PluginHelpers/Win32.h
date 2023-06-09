@@ -53,7 +53,8 @@ namespace Abstractspoon
 				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 
-				static UInt32 GetWmNotifyCode(IntPtr lParam);
+				static int GetWmNotifyCode(IntPtr lParam);
+				static void SetArrowCursor();
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd);
