@@ -7383,8 +7383,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 				return;
 		}
 
-		CTDCToolsHelper th(prefs.GetEnableTDLExtension(), 
-						   prefs.GetDisplayDatesInISO());
+		CTDCToolsHelper th(prefs.GetEnableTDLExtension());
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
@@ -7754,7 +7753,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 	}
 
 	BOOL bWantInToolbar = prefs.GetDisplayUDTsInToolbar();
-	CTDCToolsHelper th(FALSE, FALSE);
+	CTDCToolsHelper th(FALSE);
 
 	if (!bWantInToolbar || bRemoveFromMainToolbar)
 		th.RemoveToolsFromToolbar(m_toolbarMain, ID_PREFERENCES);
@@ -9553,15 +9552,12 @@ LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 	
 	if (pTool)
 	{
-		const CPreferencesDlg& prefs = Prefs();
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		CTDCToolsHelper th(prefs.GetEnableTDLExtension(), prefs.GetDisplayDatesInISO());
+		CTDCToolsHelper th(Prefs().GetEnableTDLExtension());
 
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
-		th.TestTool(*pTool, args, tdc.GetCustomAttributeDefs());
+		th.TestTool(*pTool, args, GetToDoCtrl().GetCustomAttributeDefs());
 	}
 	
 	return 0;

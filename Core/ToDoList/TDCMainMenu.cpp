@@ -912,5 +912,5 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	CUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
-	CTDCToolsHelper(FALSE, FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
+	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
 }

@@ -54,7 +54,7 @@ CTDLToolsUserInputDlg::TUINPUTITEM& CTDLToolsUserInputDlg::TUINPUTITEM::operator
 /////////////////////////////////////////////////////////////////////////////
 // CToolsUserInputDlg dialog
 
-CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDCAUTOLISTDATA& tdlListData, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bISODates)
+CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDCAUTOLISTDATA& tdlListData, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	: 
 	CRuntimeDlg(),
 	m_tdlListData(tdlListData),
@@ -62,7 +62,6 @@ CTDLToolsUserInputDlg::CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDC
 	m_rWindowOrg(0, 0, 0, 0),
 	m_nDividerID(0),
 	m_nHelpBtnID(0),
-	m_bISODates(bISODates),
 	m_btnHelp(IDD_USERTOOL_DIALOG)
 {
 	// process the user input items and save them off
@@ -250,10 +249,7 @@ void CTDLToolsUserInputDlg::OnOK()
 				SYSTEMTIME sysTime;
 
 				if (GDT_VALID == tuii.pCtrl->SendMessage(DTM_GETSYSTEMTIME, 0, (LPARAM) &sysTime))
-				{
-					COleDateTime date(sysTime);
-					sResult = CDateHelper::FormatDate(date, (m_bISODates ? DHFD_ISO : 0));
-				}
+					sResult = CDateHelper::FormatDate(COleDateTime(sysTime), DHFD_ISO);
 				else
 					ASSERT(0);
 			}
