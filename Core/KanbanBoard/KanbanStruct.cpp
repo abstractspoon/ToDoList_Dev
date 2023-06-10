@@ -655,7 +655,7 @@ CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib)
 		break;
 		
 	default:
-		ASSERT(0);
+		//ASSERT(0);
 		break;
 	}
 	
@@ -1115,4 +1115,15 @@ BOOL CKanbanColumnArray::MatchesAll(const CKanbanColumnArray& other, BOOL bIncDi
 	return TRUE;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+KANBANSORT::KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2)
+	:
+	data(map1),
+	items(map2),
+	dwOptions(0),
+	nNumSortCols(0)
+{
+}
+	
 //////////////////////////////////////////////////////////////////////

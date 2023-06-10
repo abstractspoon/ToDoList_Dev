@@ -2054,9 +2054,7 @@ void CKanbanCtrl::FixupColumnFocus()
 BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 {
 	if (nAttrib == m_nTrackAttribute)
-	{
 		return FALSE;
-	}
 
 	m_aColumns.GroupBy(nAttrib, bAscending);
 	return TRUE;

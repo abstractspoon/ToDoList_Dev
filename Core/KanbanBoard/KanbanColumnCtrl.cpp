@@ -1686,6 +1686,9 @@ void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 
 	DeleteGroupHeaders();
 
+	m_nGroupBy = nAttrib;
+	m_bGroupByAscending = bAscending;
+
 	Sort(m_nSortBy, m_bSortAscending, nAttrib, bAscending);
 
 	InsertGroupHeaders();
@@ -1703,6 +1706,9 @@ void CKanbanColumnCtrl::InsertGroupHeaders()
 
 void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
+	m_nSortBy = nBy;
+	m_bSortAscending = bAscending;
+
 	Sort(nBy, bAscending, m_nGroupBy, m_bGroupByAscending);
 }
 
@@ -1713,13 +1719,26 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATT
 
 	CHoldRedraw hr(*this);
 
-	m_nSortBy = nSortBy;
-	m_bSortAscending = bSortAscending;
+	KANBANSORT ks(m_data, m_mapHTItems);
+	int nCol = 0;
 
-	m_nGroupBy = nGroupBy;
-	m_bGroupByAscending = bGroupByAscending;
+	if (nGroupBy != TDCA_NONE)
+	{
+		ks.cols[nCol].nBy = nGroupBy;
+		ks.cols[nCol].sAttribID = KANBANITEM::GetAttributeID(nGroupBy);
+		ks.cols[nCol].bAscending = bGroupByAscending;
 
-	TVSORTCB tvs = { NULL, SortProc, (LPARAM)this };
+		nCol++;
+	}
+
+	ks.cols[nCol].nBy = nSortBy;
+	ks.cols[nCol].sAttribID = KANBANITEM::GetAttributeID(nSortBy);
+	ks.cols[nCol].bAscending = bSortAscending;
+
+	ks.nNumSortCols = (nCol + 1);
+	ks.dwOptions = m_dwOptions;
+
+	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 
 	SortChildrenCB(&tvs);
 	ScrollToSelection();
@@ -1728,60 +1747,60 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATT
 // static function
 int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	const CKanbanColumnCtrl* pThis = (CKanbanColumnCtrl*)lParamSort;
+	const KANBANSORT* pSort = (KANBANSORT*)lParamSort;
 
-	const KANBANITEM* pKI1 = pThis->m_data.GetItem(lParam1);
-	const KANBANITEM* pKI2 = pThis->m_data.GetItem(lParam2);
+	const KANBANITEM* pKI1 = pSort->data.GetItem(lParam1);
+	const KANBANITEM* pKI2 = pSort->data.GetItem(lParam2);
 
 	if (!pKI1 || !pKI2)
 		return 0;
 
 	// Top-level comparison
-	int nCompare = pThis->CompareParentAndPins(pKI1, pKI2);
+	int nCompare = CompareParentAndPins(pKI1, pKI2, *pSort);
 
 	if (nCompare != 0)
 		return nCompare;
 
-	// Group By comparison
-	if (pThis->m_nGroupBy != TDCA_NONE)
+	// Column comparison
+	for (int nCol = 0; nCol < pSort->nNumSortCols; nCol++)
 	{
-		nCompare = pThis->CompareAttributeValues(pKI1, pKI2, pThis->m_nGroupBy, pThis->m_bGroupByAscending);
+		nCompare = CompareAttributeValues(pKI1, pKI2, pSort->cols[nCol], pSort->dwOptions);
 
 		if (nCompare != 0)
 			return nCompare;
 	}
 
-	// Sort comparison
-	nCompare = pThis->CompareAttributeValues(pKI1, pKI2, pThis->m_nSortBy, pThis->m_bSortAscending);
-
-	if (nCompare != 0)
-		return nCompare;
-
 	// In the absence of a result we sort by POSITION to ensure a stable sort, 
-	// but without reversing the sign. This also handles sorting by 'TDCA_NONE'
-	if (pThis->m_data.HasSameParent(pKI1, pKI2))
+	// but without reversing the sign
+	if (pSort->data.HasSameParent(pKI1, pKI2))
 	{
+		// Compare relative position
 		return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);
+	}
+	else if (pSort->LastColumn().nBy == TDCA_NONE)
+	{
+		// Compare absolute position
+		return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
 	}
 
 	return 0;
 }
 
-int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const
+int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2, const KANBANSORT& sort)
 {
 	BOOL bPinned1 = pKI1->bPinned;
 	BOOL bPinned2 = pKI2->bPinned;
 
-	if (HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS) &&
-		!HasOption(KBCF_HIDEPARENTTASKS) &&
-		!m_data.HasSameParent(pKI1, pKI2))
+	if (sort.HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS) &&
+		!sort.HasOption(KBCF_HIDEPARENTTASKS) &&
+		!sort.data.HasSameParent(pKI1, pKI2))
 	{
-		BOOL bAggregatePinned1 = m_data.CalcInheritedPinState(pKI1);
-		BOOL bAggregatePinned2 = m_data.CalcInheritedPinState(pKI2);
+		BOOL bAggregatePinned1 = sort.data.CalcInheritedPinState(pKI1);
+		BOOL bAggregatePinned2 = sort.data.CalcInheritedPinState(pKI2);
 
 		// If one is the parent of another always sort below
 		// unless the child is pinned and the parent not
-		if (m_data.IsParent(pKI2, pKI1))
+		if (sort.data.IsParent(pKI2, pKI1))
 		{
 			if (bAggregatePinned1 && !bAggregatePinned2)
 				return SORT_1ABOVE2; // child above parent
@@ -1789,7 +1808,7 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM* pKI1, const KANBAN
 				return SORT_2ABOVE1; // parent above child
 		}
 
-		if (m_data.IsParent(pKI1, pKI2))
+		if (sort.data.IsParent(pKI1, pKI2))
 		{
 			if (bAggregatePinned2 && !bAggregatePinned1)
 				return SORT_2ABOVE1; // child above parent
@@ -1806,26 +1825,26 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM* pKI1, const KANBAN
 		if (pKI1->nLevel > pKI2->nLevel)
 		{
 			while (pKITemp1->nLevel > pKITemp2->nLevel)
-				pKITemp1 = m_data.GetParentItem(pKITemp1);
+				pKITemp1 = sort.data.GetParentItem(pKITemp1);
 		}
 		else if (pKI2->nLevel > pKI1->nLevel)
 		{
 			while (pKITemp2->nLevel > pKITemp1->nLevel)
-				pKITemp2 = m_data.GetParentItem(pKITemp2);
+				pKITemp2 = sort.data.GetParentItem(pKITemp2);
 		}
 		ASSERT(pKITemp1 && pKITemp2);
 
 		// Then we raise them to have the same parent
-		while (!m_data.HasSameParent(pKITemp1, pKITemp2))
+		while (!sort.data.HasSameParent(pKITemp1, pKITemp2))
 		{
-			pKITemp1 = m_data.GetParentItem(pKITemp1);
-			pKITemp2 = m_data.GetParentItem(pKITemp2);
+			pKITemp1 = sort.data.GetParentItem(pKITemp1);
+			pKITemp2 = sort.data.GetParentItem(pKITemp2);
 		}
 		ASSERT(pKITemp1 && pKITemp2);
 
 		// And both parents must exist in this tree
-		if (m_mapHTItems.HasItem(pKITemp1->dwTaskID) &&
-			m_mapHTItems.HasItem(pKITemp2->dwTaskID))
+		if (sort.items.HasItem(pKITemp1->dwTaskID) &&
+			sort.items.HasItem(pKITemp2->dwTaskID))
 		{
 			pKI1 = pKITemp1;
 			pKI2 = pKITemp2;
@@ -1845,14 +1864,14 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM* pKI1, const KANBAN
 	return 0;
 }
 
-int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const
+int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col, DWORD dwOptions)
 {
 	int nCompare = 0;
 
-	switch (nBy)
+	switch (col.nBy)
 	{
 	case TDCA_NONE:
-		return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
+		return 0; // Handled by caller
 
 	case TDCA_TASKNAME:
 		nCompare = Misc::NaturalCompare(pKI1->sTitle, pKI2->sTitle);
@@ -1865,8 +1884,10 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 	case TDCA_TAGS:
 	case TDCA_VERSION:
 		{
-			CString sValue1 = pKI1->GetAttributeDisplayValue(nBy);
-			CString sValue2 = pKI2->GetAttributeDisplayValue(nBy);
+			ASSERT(!col.sAttribID.IsEmpty());
+
+			CString sValue1 = pKI1->GetAttributeDisplayValue(col.nBy);
+			CString sValue2 = pKI2->GetAttributeDisplayValue(col.nBy);
 
 			nCompare = Misc::NaturalCompare(sValue1, sValue2);
 		}
@@ -1874,8 +1895,10 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 
 	case TDCA_PRIORITY:
 		{
-			int nPriority1 = pKI1->GetPriority(m_dwOptions);
-			int nPriority2 = pKI2->GetPriority(m_dwOptions);
+			ASSERT(!col.sAttribID.IsEmpty());
+
+			int nPriority1 = pKI1->GetPriority(dwOptions);
+			int nPriority2 = pKI2->GetPriority(dwOptions);
 
 			nCompare = Misc::CompareNumT(nPriority1, nPriority2);
 		}
@@ -1883,8 +1906,10 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 
 	case TDCA_RISK:
 		{
-			int nRisk1 = pKI1->GetRisk(m_dwOptions);
-			int nRisk2 = pKI2->GetRisk(m_dwOptions);
+			ASSERT(!col.sAttribID.IsEmpty());
+
+			int nRisk1 = pKI1->GetRisk(dwOptions);
+			int nRisk2 = pKI2->GetRisk(dwOptions);
 
 			nCompare = Misc::CompareNumT(nRisk1, nRisk2);
 		}
@@ -1962,7 +1987,7 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 		break;
 	}
 
-	return (bAscending ? nCompare : -nCompare);
+	return (col.bAscending ? nCompare : -nCompare);
 }
 
 void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)

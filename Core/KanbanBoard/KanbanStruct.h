@@ -208,4 +208,35 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct KANBANSORTCOLUMN
+{
+	KANBANSORTCOLUMN() : nBy(TDCA_NONE), bAscending(TRUE) { }
+
+	TDC_ATTRIBUTE nBy;
+	CString sAttribID;
+	BOOL bAscending;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CHTIMap;
+
+struct KANBANSORT
+{
+	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2);
+
+	BOOL HasOption(DWORD dwOption) const { return (dwOptions & dwOption) == dwOption; }
+	const KANBANSORTCOLUMN& LastColumn() const { return (nNumSortCols >= 2) ? cols[1] : cols[0]; }
+
+	const CKanbanItemMap& data;
+	const CHTIMap& items;
+
+	KANBANSORTCOLUMN cols[2];
+	int nNumSortCols;
+
+	DWORD dwOptions;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // !defined(AFX_KANBANSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)
