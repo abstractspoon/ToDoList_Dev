@@ -10,6 +10,7 @@
 #include "KanbanCtrl.h"
 #include "KanbanPreferencesDlg.h"
 #include "KanbanOptionComboBox.h"
+#include "KanbanGroupByComboBox.h"
 
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
@@ -70,7 +71,8 @@ protected:
 	//}}AFX_DATA
 	CKanbanCtrl m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
-	CKanbanAttributeComboBox m_cbAttributes, m_cbGroupBy;
+	CKanbanAttributeComboBox m_cbAttributes;
+	CKanbanGroupByComboBox m_cbGroupBy;
 	CKanbanOptionComboBox m_cbOptions;
 
 	CEnToolBar m_toolbar;

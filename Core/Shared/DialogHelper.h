@@ -200,8 +200,6 @@ public:
 	{
 		return InsertString(ctrl, nPos, CEnString(nIDItem), itemData);
 	}
-
-
 	
 	// comboboxes
 	static int SetComboBoxItems(CComboBox& combo, const CStringArray& aItems);

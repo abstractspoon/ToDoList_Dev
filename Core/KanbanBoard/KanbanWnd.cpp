@@ -47,8 +47,6 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_nTrackedAttrib(TDCA_NONE),
 	m_nGroupByAttrib(TDCA_NONE),
 	m_ctrlKanban(),
-	m_cbGroupBy(TRUE), // include 'none'
-
 	m_dlgPrefs(this)
 {
 	m_icon.Load(IDR_KANBAN);

@@ -179,6 +179,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="KanbanColumnCtrlArray.cpp" />
+    <ClCompile Include="KanbanGroupByComboBox.cpp" />
     <ClCompile Include="KanbanOptionComboBox.cpp" />
     <ClCompile Include="KanbanPreferencesDlg.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -223,6 +224,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
     <ClInclude Include="KanbanFixedColumnListCtrl.h" />
     <ClInclude Include="KanbanColumnCtrl.h" />
     <ClInclude Include="KanbanColumnCtrlArray.h" />
+    <ClInclude Include="KanbanGroupByComboBox.h" />
     <ClInclude Include="Kanbanmsg.h" />
     <ClInclude Include="KanbanOptionComboBox.h" />
     <ClInclude Include="KanbanPreferencesDlg.h" />

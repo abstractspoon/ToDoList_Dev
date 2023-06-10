@@ -19,14 +19,14 @@ class CKanbanAttributeComboBox : public CComboBox
 {
 // Construction
 public:
-	CKanbanAttributeComboBox(BOOL bIncludeNone = FALSE);
+	CKanbanAttributeComboBox();
+	virtual ~CKanbanAttributeComboBox();
 
 	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
 	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
 	void SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
 	void ShowFixedColumns(BOOL bShow = TRUE);
-	void ExcludeAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID);
 
@@ -34,22 +34,15 @@ public:
 protected:
 	BOOL m_bShowCustomAttrib;
 	BOOL m_bShowFixedColumns;
-	BOOL m_bIncludeNone;
-	TDC_ATTRIBUTE m_nExcludeAttribID;
-	CString m_sExcludeCustomAttribID;
 
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CKanbanAttributeComboBox)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CKanbanAttributeComboBox();
 
 	// Generated message map functions
 protected:
@@ -60,7 +53,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildCombo();
+	virtual void BuildCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////
