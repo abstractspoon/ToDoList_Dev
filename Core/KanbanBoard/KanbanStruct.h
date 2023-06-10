@@ -208,23 +208,4 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CHTIMap;
-
-struct KANBANSORT
-{
-	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2);
-
-	BOOL HasOption(DWORD dwOption) const { return (dwOptions & dwOption) == dwOption; }
-
-	const CKanbanItemMap& data;
-	const CHTIMap& items;
-
-	TDC_ATTRIBUTE nBy;
-	CString sAttribID;
-	BOOL bAscending;
-	DWORD dwOptions;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 #endif // !defined(AFX_KANBANSTRUCT_H__C83C53D4_887E_4D5C_A8A7_85C8FDB19307__INCLUDED_)

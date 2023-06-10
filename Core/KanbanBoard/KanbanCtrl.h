@@ -64,6 +64,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 
  	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending = TRUE);
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -83,6 +84,7 @@ public:
 	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
+
 
 	const CKanbanCustomAttributeDefinitionArray& GetCustomAttributeDefinitions() const { return m_aCustomAttribDefs; }
 	int GetAttributeValues(CKanbanAttributeValueMap& mapValues) const;

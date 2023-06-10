@@ -66,7 +66,8 @@ public:
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	
+	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
+
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
 	BOOL CreateDragImage(CImageList& ilDrag, CSize& sizeImage);
@@ -143,6 +144,10 @@ protected:
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
 	COLORREF m_crItemShadow;
+
+	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
+	CString m_sSortByAttribID, m_sGroupByAttribID;
+	BOOL m_bSortAscending, m_bGroupByAscending;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -206,6 +211,12 @@ protected:
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
 	void RecalcItemShadowColor();
+	void DeleteGroupHeaders();
+	void InsertGroupHeaders();
+	
+	void Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATTRIBUTE nGroupBy, BOOL bGroupByAscending/*const CString& sGroupByAttribID*/);
+	int CompareParentAndPins(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const;
+	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
@@ -232,7 +243,6 @@ protected:
 	BOOL DrawTaskIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rIcon) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORT& sort);
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
 
 };

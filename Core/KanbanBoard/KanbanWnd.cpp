@@ -978,7 +978,7 @@ void CKanbanWnd::OnSelchangeGroupBy()
 {
 	UpdateData();
 
-	//ProcessTrackedAttributeChange();
+	m_ctrlKanban.GroupBy(m_nGroupByAttrib);
 }
 
 void CKanbanWnd::ProcessTrackedAttributeChange() 
@@ -997,6 +997,9 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 	RefreshKanbanCtrlDisplayAttributes();
 
+	// Exclude the tracked attribute from the Group By combo
+	m_cbGroupBy.ExcludeAttribute(nTrackAttrib, sCustomAttrib);
+
 	// Track the new attribute
 	m_ctrlKanban.TrackAttribute(nTrackAttrib, sCustomAttrib, aColDefs);
 
@@ -1005,9 +1008,6 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 		if (m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs))
 			SendParentSelectionUpdate();
 	}
-
-	// Exclude the tracked attribute from the Group By combo
-	m_cbGroupBy.ExcludeAttribute(nTrackAttrib, sCustomAttrib);
 }
 
 void CKanbanWnd::OnSelchangeOptions() 
