@@ -649,13 +649,37 @@ CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib)
 	case TDCA_TAGS:		return _T("TAGS");
 	case TDCA_PRIORITY:	return _T("PRIORITY");
 	case TDCA_RISK:		return _T("RISK");
+	}
 
-	case TDCA_CUSTOMATTRIB:
-		ASSERT(0);
-		break;
-		
+	ASSERT(0);
+	return _T("");
+}
+
+CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
+{
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_CATEGORY:
+	case TDCA_VERSION:
+	case TDCA_TAGS:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		return GetAttributeID(nAttrib);
+
 	default:
-		//ASSERT(0);
+		if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib <= TDCA_CUSTOMATTRIB_LAST))
+		{
+			int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
+
+			if (nCust < aCustAttribs.GetSize())
+				return aCustAttribs[nCust].sAttribID;
+			
+			// else
+			ASSERT(0);
+		}
 		break;
 	}
 	

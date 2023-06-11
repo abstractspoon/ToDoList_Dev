@@ -108,6 +108,7 @@ struct KANBANITEM
 	void SetColor(COLORREF cr);
 	
 	static CString GetAttributeID(TDC_ATTRIBUTE nAttrib);
+	static CString GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
 	static BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib);
 
 protected:

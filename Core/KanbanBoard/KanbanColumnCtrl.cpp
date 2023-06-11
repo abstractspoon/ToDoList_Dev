@@ -102,13 +102,17 @@ const BOOL SORT_2ABOVE1 = 1;
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx
 
-CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOLUMN& columnDef,
-								CFontCache& fonts, const CDWordArray& aPriorityColors, 
-								const CKanbanAttributeArray& aDisplayAttrib)
+CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, 
+									 const KANBANCOLUMN& columnDef,
+									 CFontCache& fonts, 
+									 const CDWordArray& aPriorityColors, 
+									 const CKanbanAttributeArray& aDisplayAttrib,
+									 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 	:
 	m_data(data),
 	m_columnDef(columnDef),
 	m_aDisplayAttrib(aDisplayAttrib),
+	m_aCustAttribDefs(aCustAttribDefs),
 	m_fonts(fonts),
 	m_aPriorityColors(aPriorityColors),
 	m_bSelected(FALSE),
@@ -125,10 +129,6 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_dwOptions(0),
 	m_crItemShadow(CLR_NONE),
 	m_bReadOnly(FALSE),
-	m_nSortBy(TDCA_NONE),
-	m_bSortAscending(TRUE),
-	m_nGroupBy(TDCA_NONE),
-	m_bGroupByAscending(TRUE),
 	m_tch(*this)
 {
 }
@@ -1681,17 +1681,22 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 
 void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 {
-	if ((nAttrib == m_nGroupBy) && (bAscending == m_bGroupByAscending))
-		return;
+	CString sAttribID = KANBANITEM::GetAttributeID(nAttrib, m_aCustAttribDefs);
 
-	DeleteGroupHeaders();
+	if ((nAttrib != m_GroupBy.nBy) ||
+		(bAscending != m_GroupBy.bAscending) || 
+		(sAttribID != m_GroupBy.sAttribID))
+	{
+		DeleteGroupHeaders();
 
-	m_nGroupBy = nAttrib;
-	m_bGroupByAscending = bAscending;
+		m_GroupBy.nBy = nAttrib;
+		m_GroupBy.sAttribID = sAttribID;
+		m_GroupBy.bAscending = bAscending;
 
-	Sort(m_nSortBy, m_bSortAscending, nAttrib, bAscending);
+		InsertGroupHeaders();
 
-	InsertGroupHeaders();
+		DoSort();
+	}
 }
 
 void CKanbanColumnCtrl::DeleteGroupHeaders()
@@ -1706,13 +1711,14 @@ void CKanbanColumnCtrl::InsertGroupHeaders()
 
 void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
-	m_nSortBy = nBy;
-	m_bSortAscending = bAscending;
+	m_SortBy.nBy = nBy;
+	m_SortBy.sAttribID = KANBANITEM::GetAttributeID(nBy);
+	m_SortBy.bAscending = bAscending;
 
-	Sort(nBy, bAscending, m_nGroupBy, m_bGroupByAscending);
+	DoSort();
 }
 
-void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATTRIBUTE nGroupBy, BOOL bGroupByAscending/*const CString& sGroupByAttribID*/)
+void CKanbanColumnCtrl::DoSort()
 {
 	if (GetCount() < 2)
 		return;
@@ -1720,13 +1726,8 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATT
 	CHoldRedraw hr(*this);
 	KANBANSORT ks(m_data, m_mapHTItems, m_dwOptions);
 
-	ks.sort.nBy = nSortBy;
-	ks.sort.sAttribID = KANBANITEM::GetAttributeID(nSortBy);
-	ks.sort.bAscending = bSortAscending;
-
-	ks.group.nBy = nGroupBy;
-	ks.group.sAttribID = KANBANITEM::GetAttributeID(nGroupBy);
-	ks.group.bAscending = bGroupByAscending;
+	ks.sort = m_SortBy;
+	ks.group = m_GroupBy;
 
 	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 

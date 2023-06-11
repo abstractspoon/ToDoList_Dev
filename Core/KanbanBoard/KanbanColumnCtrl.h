@@ -40,11 +40,12 @@ class CKanbanColumnCtrl : public CTreeCtrl, protected CDragDropData
 
 // Construction
 public:
-	CKanbanColumnCtrl(const CKanbanItemMap& data, 
-					const KANBANCOLUMN& columnDef, 
-					CFontCache& fonts,
-					const CDWordArray& aPriorityColors,
-					const CKanbanAttributeArray& aDisplayAttrib);
+	CKanbanColumnCtrl(const CKanbanItemMap& data,
+					  const KANBANCOLUMN& columnDef,
+					  CFontCache& fonts,
+					  const CDWordArray& aPriorityColors,
+					  const CKanbanAttributeArray& aDisplayAttrib,
+					  const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 	
 	CString GetAttributeID() const;
 	int GetAttributeValues(CStringArray& aValues) const;
@@ -126,10 +127,11 @@ protected:
 	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks, m_bDrawTaskLocks;
 	BOOL m_bReadOnly;
 
-	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
+	const CKanbanItemMap& m_data;
 	const CDWordArray& m_aPriorityColors;
 	const CKanbanAttributeArray& m_aDisplayAttrib;
+	const CKanbanCustomAttributeDefinitionArray& m_aCustAttribDefs;
 
 	// For quick lookup
 	CHTIMap m_mapHTItems;
@@ -145,9 +147,7 @@ protected:
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
 	COLORREF m_crItemShadow;
 
-	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
-	CString m_sSortByAttribID, m_sGroupByAttribID;
-	BOOL m_bSortAscending, m_bGroupByAscending;
+	KANBANSORTCOLUMN m_SortBy, m_GroupBy;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -214,7 +214,7 @@ protected:
 	void DeleteGroupHeaders();
 	void InsertGroupHeaders();
 	
-	void Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATTRIBUTE nGroupBy, BOOL bGroupByAscending);
+	void DoSort();
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;

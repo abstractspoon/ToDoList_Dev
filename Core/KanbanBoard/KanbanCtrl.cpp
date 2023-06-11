@@ -2177,7 +2177,12 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 
 CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 {
-	CKanbanColumnCtrl* pCol = new CKanbanColumnCtrl(m_data, colDef, m_fonts, m_aPriorityColors, m_aDisplayAttrib);
+	CKanbanColumnCtrl* pCol = new CKanbanColumnCtrl(m_data, 
+													colDef, 
+													m_fonts, 
+													m_aPriorityColors, 
+													m_aDisplayAttrib,
+													m_aCustomAttribDefs);
 	ASSERT(pCol);
 
 	if (pCol)
