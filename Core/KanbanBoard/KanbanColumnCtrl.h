@@ -68,7 +68,6 @@ public:
 
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
-	void UpdateGrouping();
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;

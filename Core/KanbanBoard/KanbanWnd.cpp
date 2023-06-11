@@ -227,6 +227,14 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	else
 		pPrefs->DeleteProfileEntry(sKey, _T("CustomAttrib"));
 
+	// Last Group By attribute
+	pPrefs->WriteProfileInt(szKey, _T("GroupByAttribute"), m_nGroupByAttrib);
+
+	if (m_nGroupByAttrib == TDCA_CUSTOMATTRIB)
+		pPrefs->WriteProfileString(sKey, _T("GroupByCustomAttrib"), m_sGroupByCustomAttribID);
+	else
+		pPrefs->DeleteProfileEntry(sKey, _T("GroupByCustomAttrib"));
+
 	// Options
 	pPrefs->WriteProfileInt(sKey, _T("HideParents"), m_ctrlKanban.HasOption(KBCF_HIDEPARENTTASKS));
 	pPrefs->WriteProfileInt(sKey, _T("HideEmptyColumns"), m_ctrlKanban.HasOption(KBCF_HIDEEMPTYCOLUMNS));
@@ -236,40 +244,6 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
 	m_ctrlKanban.SavePreferences(pPrefs, szKey);
 }
-
-/*
-void CKanbanWnd::SaveColumnOrder(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const
-{
-	int nCol = aStates.GetSize();
-	pPrefs->WriteProfileInt(szKey, _T("Count"), nCol);
-
-	while (nCol--)
-	{
-		CString sItemKey;
-		sItemKey.Format(_T("Item%d"), nCol);
-		pPrefs->WriteProfileInt(szKey, sItemKey, aStates[nCol]);
-	}
-}
-
-int CKanbanWnd::LoadColumnOrder(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const
-{
-	int nCol = pPrefs->GetProfileInt(szKey, _T("Count"), 0);
-
-	if (!nCol)
-		return 0;
-
-	aStates.SetSize(nCol);
-	
-	while (nCol--)
-	{
-		CString sItemKey;
-		sItemKey.Format(_T("Item%d"), nCol);
-		aStates[nCol] = pPrefs->GetProfileInt(szKey, sItemKey);
-	}
-
-	return aStates.GetSize();
-}
-*/
 
 void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 {
@@ -401,6 +375,13 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 				m_nTrackedAttrib = TDCA_STATUS;
 			break;
 		}
+
+		m_nGroupByAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("GroupByAttribute"), TDCA_NONE);
+
+		if (m_nGroupByAttrib == TDCA_CUSTOMATTRIB)
+			m_sGroupByCustomAttribID = pPrefs->GetProfileString(szKey, _T("GroupByCustomAttrib"));
+
+		m_ctrlKanban.GroupBy(m_nGroupByAttrib, TRUE/*m_sGroupByCustomAttribID*/);
 
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 		m_cbGroupBy.ExcludeAttribute(m_nTrackedAttrib, m_sTrackedCustomAttribID);

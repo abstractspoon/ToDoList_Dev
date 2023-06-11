@@ -1780,6 +1780,7 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 {
 	CString sAttribID = KANBANITEM::GetAttributeID(nAttrib, m_aCustAttribDefs);
+	CStringSet aGroups;
 
 	if ((nAttrib != m_GroupBy.nBy) ||
 		(bAscending != m_GroupBy.bAscending) || 
@@ -1789,15 +1790,39 @@ void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 		m_GroupBy.sAttribID = sAttribID;
 		m_GroupBy.bAscending = bAscending;
 
-		CStringSet aGroups;
 		GetGroupValues(aGroups);
-		
-		RebuildGroupHeaders(aGroups);
 	}
+	else
+	{
+		// Compare to existing group headers
+		BOOL bAllMatch = (GetGroupValues(aGroups) == m_mapGroupHeaders.GetCount());
+
+		if (bAllMatch)
+		{
+			POSITION pos = m_mapGroupHeaders.GetStartPosition();
+
+			while (pos && bAllMatch)
+			{
+				DWORD dwUnused;
+				CString sValue;
+				m_mapGroupHeaders.GetNextAssoc(pos, dwUnused, sValue);
+
+				bAllMatch = aGroups.Has(sValue);
+			}
+		}
+
+		if (bAllMatch)
+			return;
+	}
+
+	RebuildGroupHeaders(aGroups);
 }
 
 void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)
 {
+	if (!GetCount())
+		return;
+
 	if (!m_mapGroupHeaders.GetCount() && !aValues.GetCount())
 		return;
 
@@ -1840,32 +1865,6 @@ void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)
 	DoSort();
 }
 
-void CKanbanColumnCtrl::UpdateGrouping()
-{
-	CStringSet aNewGroups;
-	GetGroupValues(aNewGroups);
-
-	// Compare to existing group headers
-	BOOL bAllMatch = (aNewGroups.GetCount() == m_mapGroupHeaders.GetCount());
-
-	if (bAllMatch)
-	{
-		POSITION pos = m_mapGroupHeaders.GetStartPosition();
-
-		while (pos && bAllMatch)
-		{
-			DWORD dwUnused;
-			CString sValue;
-			m_mapGroupHeaders.GetNextAssoc(pos, dwUnused, sValue);
-
-			bAllMatch = aNewGroups.Has(sValue);
-		}
-	}
-
-	if (!bAllMatch)
-		RebuildGroupHeaders(aNewGroups);
-}
- 
 BOOL CKanbanColumnCtrl::IsGroupHeaderTask(DWORD dwTaskID) const
 {
 	CString sUnused;

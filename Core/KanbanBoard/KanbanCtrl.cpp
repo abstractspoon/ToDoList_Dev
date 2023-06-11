@@ -99,18 +99,19 @@ const CPoint DRAG_NOT_SET(-10000, -10000);
 CKanbanCtrl::CKanbanCtrl() 
 	:
 	m_bSortAscending(-1), 
+	m_bGroupByAscending(TRUE),
 	m_dwOptions(0),
 	m_bReadOnly(FALSE),
 	m_nNextColor(0),
 	m_pSelectedColumn(NULL),
 	m_nTrackAttribute(TDCA_NONE),
 	m_nSortBy(TDCA_NONE),
+	m_nGroupBy(TDCA_NONE),
 	m_bSelectTasks(FALSE),
 	m_bResizingHeader(FALSE),
 	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE)
 {
-
 }
 
 CKanbanCtrl::~CKanbanCtrl()
@@ -568,7 +569,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 
 	RefreshColumnHeaderText();
 	
-	m_aColumns.UpdateGrouping();
+	m_aColumns.GroupBy(m_nGroupBy, m_bGroupByAscending);
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
@@ -2058,7 +2059,14 @@ BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 	if (nAttrib == m_nTrackAttribute)
 		return FALSE;
 
-	m_aColumns.GroupBy(nAttrib, bAscending);
+	if ((nAttrib != m_nGroupBy) || (bAscending != m_bGroupByAscending))
+	{
+		m_nGroupBy = nAttrib;
+		m_bGroupByAscending = bAscending;
+	
+		m_aColumns.GroupBy(nAttrib, bAscending);
+	}
+	
 	return TRUE;
 }
 

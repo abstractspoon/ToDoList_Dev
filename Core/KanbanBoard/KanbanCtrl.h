@@ -85,7 +85,6 @@ public:
 	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
 
-
 	const CKanbanCustomAttributeDefinitionArray& GetCustomAttributeDefinitions() const { return m_aCustomAttribDefs; }
 	int GetAttributeValues(CKanbanAttributeValueMap& mapValues) const;
 
@@ -98,6 +97,7 @@ public:
 protected:
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
+	BOOL m_bGroupByAscending;
 	BOOL m_bSelectTasks;
 	BOOL m_bSettingColumnFocus;
 	BOOL m_bResizingHeader;
@@ -106,7 +106,7 @@ protected:
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
-	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
+	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy, m_nGroupBy;
 	CString m_sTrackAttribID;
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPrevPinnedTasks;

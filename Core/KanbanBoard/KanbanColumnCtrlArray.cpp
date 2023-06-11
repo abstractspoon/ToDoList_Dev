@@ -347,19 +347,6 @@ void CKanbanColumnCtrlArray::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 	}
 }
 
-void CKanbanColumnCtrlArray::UpdateGrouping()
-{
-	int nCol = GetSize();
-
-	while (nCol--)
-	{
-		CKanbanColumnCtrl* pCol = GetAt(nCol);
-		ASSERT(pCol);
-
-		pCol->UpdateGrouping();
-	}
-}
-
 void CKanbanColumnCtrlArray::Sort()
 {
 	if (GetSize() > 1)
