@@ -1139,14 +1139,5 @@ BOOL CKanbanColumnArray::MatchesAll(const CKanbanColumnArray& other, BOOL bIncDi
 	return TRUE;
 }
 
-//////////////////////////////////////////////////////////////////////
 
-KANBANSORT::KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2, DWORD dwOpt)
-	:
-	data(map1),
-	items(map2),
-	dwOptions(dwOpt)
-{
-}
-	
 //////////////////////////////////////////////////////////////////////

@@ -1270,7 +1270,7 @@ int CKanbanCtrl::GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aVa
 
 int CKanbanCtrl::GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const
 {
-	CString sAttribID(KANBANITEM::GetAttributeID(nAttrib));
+	CString sAttribID(KANBANITEM::GetAttributeID(nAttrib, m_aCustomAttribDefs));
 
 	const CKanbanValueMap* pValues = m_mapAttributeValues.GetMapping(sAttribID);
 	aValues.SetSize(pValues->GetCount());

@@ -215,6 +215,9 @@ protected:
 	void InsertGroupHeaders();
 	
 	void DoSort();
+	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
+	int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const;
+	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col) const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
@@ -241,8 +244,6 @@ protected:
 	BOOL DrawTaskIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rIcon) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2, const KANBANSORT& sort);
-	static int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col, DWORD dwOptions);
 
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
 

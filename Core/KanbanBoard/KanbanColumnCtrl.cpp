@@ -743,7 +743,7 @@ BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBAN
 	// necessarily part of a fixed-column setup, and we need to do 
 	// some extra checks to see if we really do want to display it
 	if (KANBANITEM::IsTrackableAttribute(nAttrib) &&
-		(KANBANITEM::GetAttributeID(nAttrib) == GetAttributeID()) &&
+		(KANBANITEM::GetAttributeID(nAttrib, m_aCustAttribDefs) == GetAttributeID()) &&
 		(m_columnDef.aAttribValues.GetSize() == 1))
 	{
 		return FALSE;
@@ -1712,7 +1712,7 @@ void CKanbanColumnCtrl::InsertGroupHeaders()
 void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
 	m_SortBy.nBy = nBy;
-	m_SortBy.sAttribID = KANBANITEM::GetAttributeID(nBy);
+	m_SortBy.sAttribID = KANBANITEM::GetAttributeID(nBy, m_aCustAttribDefs);
 	m_SortBy.bAscending = bAscending;
 
 	DoSort();
@@ -1724,12 +1724,7 @@ void CKanbanColumnCtrl::DoSort()
 		return;
 
 	CHoldRedraw hr(*this);
-	KANBANSORT ks(m_data, m_mapHTItems, m_dwOptions);
-
-	ks.sort = m_SortBy;
-	ks.group = m_GroupBy;
-
-	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
+	TVSORTCB tvs = { NULL, SortProc, (LPARAM)this };
 
 	SortChildrenCB(&tvs);
 	ScrollToSelection();
@@ -1738,40 +1733,45 @@ void CKanbanColumnCtrl::DoSort()
 // static function
 int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	const KANBANSORT* pSort = (KANBANSORT*)lParamSort;
+	const CKanbanColumnCtrl* pThis = (CKanbanColumnCtrl*)lParamSort;
 
-	const KANBANITEM* pKI1 = pSort->data.GetItem(lParam1);
-	const KANBANITEM* pKI2 = pSort->data.GetItem(lParam2);
+	return pThis->CompareItems(lParam1, lParam2);
+}
+
+int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
+{
+	const KANBANITEM* pKI1 = m_data.GetItem(lParam1);
+	const KANBANITEM* pKI2 = m_data.GetItem(lParam2);
 
 	if (!pKI1 || !pKI2)
 		return 0;
 
 	// Top-level comparison
-	int nCompare = CompareParentAndPins(pKI1, pKI2, *pSort);
+	int nCompare = CompareParentAndPins(pKI1, pKI2);
 
 	if (nCompare != 0)
 		return nCompare;
 
 	// Group By comparison
-	nCompare = CompareAttributeValues(pKI1, pKI2, pSort->group, pSort->dwOptions);
+	nCompare = CompareAttributeValues(pKI1, pKI2, m_GroupBy);
 
 	if (nCompare != 0)
 		return nCompare;
 
 	// Sort comparison
-	nCompare = CompareAttributeValues(pKI1, pKI2, pSort->sort, pSort->dwOptions);
+	nCompare = CompareAttributeValues(pKI1, pKI2, m_SortBy);
 
 	if (nCompare != 0)
 		return nCompare;
 
 	// In the absence of a result we sort by POSITION to ensure a stable sort, 
 	// but without reversing the sign
-	if (pSort->data.HasSameParent(pKI1, pKI2))
+	if (m_data.HasSameParent(pKI1, pKI2))
 	{
 		// Compare relative position
 		return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);
 	}
-	else if (pSort->sort.nBy == TDCA_NONE)
+	else if (m_SortBy.nBy == TDCA_NONE)
 	{
 		// Compare absolute position
 		return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
@@ -1780,21 +1780,21 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 	return 0;
 }
 
-int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2, const KANBANSORT& sort)
+int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const
 {
 	BOOL bPinned1 = pKI1->bPinned;
 	BOOL bPinned2 = pKI2->bPinned;
 
-	if (sort.HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS) &&
-		!sort.HasOption(KBCF_HIDEPARENTTASKS) &&
-		!sort.data.HasSameParent(pKI1, pKI2))
+	if (HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS) &&
+		!HasOption(KBCF_HIDEPARENTTASKS) &&
+		!m_data.HasSameParent(pKI1, pKI2))
 	{
-		BOOL bAggregatePinned1 = sort.data.CalcInheritedPinState(pKI1);
-		BOOL bAggregatePinned2 = sort.data.CalcInheritedPinState(pKI2);
+		BOOL bAggregatePinned1 = m_data.CalcInheritedPinState(pKI1);
+		BOOL bAggregatePinned2 = m_data.CalcInheritedPinState(pKI2);
 
 		// If one is the parent of another always sort below
 		// unless the child is pinned and the parent not
-		if (sort.data.IsParent(pKI2, pKI1))
+		if (m_data.IsParent(pKI2, pKI1))
 		{
 			if (bAggregatePinned1 && !bAggregatePinned2)
 				return SORT_1ABOVE2; // child above parent
@@ -1802,7 +1802,7 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBA
 				return SORT_2ABOVE1; // parent above child
 		}
 
-		if (sort.data.IsParent(pKI1, pKI2))
+		if (m_data.IsParent(pKI1, pKI2))
 		{
 			if (bAggregatePinned2 && !bAggregatePinned1)
 				return SORT_2ABOVE1; // child above parent
@@ -1819,26 +1819,26 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBA
 		if (pKI1->nLevel > pKI2->nLevel)
 		{
 			while (pKITemp1->nLevel > pKITemp2->nLevel)
-				pKITemp1 = sort.data.GetParentItem(pKITemp1);
+				pKITemp1 = m_data.GetParentItem(pKITemp1);
 		}
 		else if (pKI2->nLevel > pKI1->nLevel)
 		{
 			while (pKITemp2->nLevel > pKITemp1->nLevel)
-				pKITemp2 = sort.data.GetParentItem(pKITemp2);
+				pKITemp2 = m_data.GetParentItem(pKITemp2);
 		}
 		ASSERT(pKITemp1 && pKITemp2);
 
 		// Then we raise them to have the same parent
-		while (!sort.data.HasSameParent(pKITemp1, pKITemp2))
+		while (!m_data.HasSameParent(pKITemp1, pKITemp2))
 		{
-			pKITemp1 = sort.data.GetParentItem(pKITemp1);
-			pKITemp2 = sort.data.GetParentItem(pKITemp2);
+			pKITemp1 = m_data.GetParentItem(pKITemp1);
+			pKITemp2 = m_data.GetParentItem(pKITemp2);
 		}
 		ASSERT(pKITemp1 && pKITemp2);
 
 		// And both parents must exist in this tree
-		if (sort.items.HasItem(pKITemp1->dwTaskID) &&
-			sort.items.HasItem(pKITemp2->dwTaskID))
+		if (m_mapHTItems.HasItem(pKITemp1->dwTaskID) &&
+			m_mapHTItems.HasItem(pKITemp2->dwTaskID))
 		{
 			pKI1 = pKITemp1;
 			pKI2 = pKITemp2;
@@ -1858,7 +1858,7 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBA
 	return 0;
 }
 
-int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col, DWORD dwOptions)
+int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col) const
 {
 	int nCompare = 0;
 
@@ -1891,8 +1891,8 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 		{
 			ASSERT(!col.sAttribID.IsEmpty());
 
-			int nPriority1 = pKI1->GetPriority(dwOptions);
-			int nPriority2 = pKI2->GetPriority(dwOptions);
+			int nPriority1 = pKI1->GetPriority(m_dwOptions);
+			int nPriority2 = pKI2->GetPriority(m_dwOptions);
 
 			nCompare = Misc::CompareNumT(nPriority1, nPriority2);
 		}
@@ -1902,8 +1902,8 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 		{
 			ASSERT(!col.sAttribID.IsEmpty());
 
-			int nRisk1 = pKI1->GetRisk(dwOptions);
-			int nRisk2 = pKI2->GetRisk(dwOptions);
+			int nRisk1 = pKI1->GetRisk(m_dwOptions);
+			int nRisk2 = pKI2->GetRisk(m_dwOptions);
 
 			nCompare = Misc::CompareNumT(nRisk1, nRisk2);
 		}
@@ -1911,6 +1911,7 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 
 	case TDCA_CUSTOMATTRIB:
 		// TODO
+		ASSERT(0);
 		break;
 
 	case TDCA_COST:
