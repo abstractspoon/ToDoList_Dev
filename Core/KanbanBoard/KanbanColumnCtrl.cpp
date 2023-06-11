@@ -1736,7 +1736,7 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
-		m_mapHTItems.RemoveKey(dwTaskID);
+		VERIFY(m_mapHTItems.RemoveKey(dwTaskID));
 		return TRUE;
 	}
 
@@ -1747,6 +1747,7 @@ BOOL CKanbanColumnCtrl::DeleteAll()
 {
 	m_mapHTItems.RemoveAll();
 	m_aSelTaskIDs.RemoveAll();
+	m_mapGroupHeaders.RemoveAll();
 
 	return CTreeCtrl::DeleteAllItems();
 }
@@ -1780,7 +1781,6 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 {
 	CString sAttribID = KANBANITEM::GetAttributeID(nAttrib, m_aCustAttribDefs);
-	CStringSet aGroups;
 
 	if ((nAttrib != m_GroupBy.nBy) ||
 		(bAscending != m_GroupBy.bAscending) || 
@@ -1790,32 +1790,39 @@ void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 		m_GroupBy.sAttribID = sAttribID;
 		m_GroupBy.bAscending = bAscending;
 
+		CStringSet aGroups;
 		GetGroupValues(aGroups);
+
+		RebuildGroupHeaders(aGroups);
 	}
 	else
 	{
-		// Compare to existing group headers
-		BOOL bAllMatch = (GetGroupValues(aGroups) == m_mapGroupHeaders.GetCount());
+		CheckRebuildGroupHeaders();
+	}
+}
 
-		if (bAllMatch)
+void CKanbanColumnCtrl::CheckRebuildGroupHeaders()
+{
+	// Compare to existing group headers
+	CStringSet aGroups;
+	BOOL bAllMatch = (GetGroupValues(aGroups) == m_mapGroupHeaders.GetCount());
+
+	if (bAllMatch)
+	{
+		POSITION pos = m_mapGroupHeaders.GetStartPosition();
+
+		while (pos && bAllMatch)
 		{
-			POSITION pos = m_mapGroupHeaders.GetStartPosition();
+			DWORD dwUnused;
+			CString sValue;
+			m_mapGroupHeaders.GetNextAssoc(pos, dwUnused, sValue);
 
-			while (pos && bAllMatch)
-			{
-				DWORD dwUnused;
-				CString sValue;
-				m_mapGroupHeaders.GetNextAssoc(pos, dwUnused, sValue);
-
-				bAllMatch = aGroups.Has(sValue);
-			}
+			bAllMatch = aGroups.Has(sValue);
 		}
-
-		if (bAllMatch)
-			return;
 	}
 
-	RebuildGroupHeaders(aGroups);
+	if (!bAllMatch)
+		RebuildGroupHeaders(aGroups);
 }
 
 void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)

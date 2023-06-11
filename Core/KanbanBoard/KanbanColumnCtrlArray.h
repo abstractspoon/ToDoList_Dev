@@ -56,11 +56,10 @@ public:
 	void Sort();
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
-	void UpdateGrouping();
 
 	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);
 	void SetDropTarget(const CKanbanColumnCtrl* pTarget);
-	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore);
+	BOOL DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore);
 
 	void Exclude(CDC* pDC);
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);

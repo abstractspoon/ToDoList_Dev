@@ -3479,6 +3479,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 	ASSERT(pSrcCol->HasTasks(aTaskIDs));
 
 	int nID = aTaskIDs.GetSize();
+	BOOL bSrcChanged = FALSE, bDestChanged = FALSE, bRestChanged = FALSE; 
 
 	while (nID--)
 	{
@@ -3500,7 +3501,8 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		// Remove from the source list(s) if moving
 		if (bSrcIsBacklog)
 		{
-			VERIFY(pSrcCol->DeleteTask(dwTaskID));
+			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			ASSERT(bSrcChanged);
 		}
 		else if (!bCopy) // move
 		{
@@ -3508,7 +3510,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 			pKI->RemoveAllTrackedAttributeValues(m_sTrackAttribID);
 
 			// Remove from all src lists
-			m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
+			bRestChanged |= m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
 		}
 		else if (bDestIsBacklog) // and 'copy'
 		{
@@ -3519,22 +3521,36 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 			while (nVal--)
 				pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
 
-			VERIFY(pSrcCol->DeleteTask(dwTaskID));
+			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			ASSERT(bSrcChanged);
 		}
 
 		// Append to the destination list
 		if (bDestIsBacklog)
 		{
 			if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-				pDestCol->AddTask(*pKI);
+				bDestChanged |= (pDestCol->AddTask(*pKI) != NULL);
 		}
 		else
 		{
 			pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
 			if (pDestCol->FindItem(dwTaskID) == NULL)
-				pDestCol->AddTask(*pKI);
+				bDestChanged |= (pDestCol->AddTask(*pKI) != NULL);
 		}
+	}
+
+	if (bRestChanged)
+	{
+		m_aColumns.GroupBy(m_nGroupBy, m_bGroupByAscending);
+	}
+	else
+	{
+		if (bSrcChanged)
+			pSrcCol->GroupBy(m_nGroupBy, m_bGroupByAscending);
+
+		if (bDestChanged)
+			pDestCol->GroupBy(m_nGroupBy, m_bGroupByAscending);
 	}
 
 	return TRUE;

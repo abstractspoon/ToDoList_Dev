@@ -568,9 +568,10 @@ void CKanbanColumnCtrlArray::SetDropTarget(const CKanbanColumnCtrl* pTarget)
 	}
 }
 
-void CKanbanColumnCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore)
+BOOL CKanbanColumnCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore)
 {
 	int nCol = GetSize();
+	BOOL bSomeDeleted = FALSE;
 
 	while (nCol--)
 	{
@@ -578,8 +579,10 @@ void CKanbanColumnCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanC
 		ASSERT(pCol);
 
 		if (pCol != pIgnore)
-			pCol->DeleteTask(dwTaskID);
+			bSomeDeleted |= pCol->DeleteTask(dwTaskID);
 	}
+
+	return bSomeDeleted;
 }
 
 CSize CKanbanColumnCtrlArray::CalcRequiredColumnSizeForImage() const

@@ -221,6 +221,7 @@ protected:
 	BOOL IsGroupHeaderItem(HTREEITEM hti) const;
 	int GetGroupValues(CStringSet& aValues) const;
 	int GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAttribID, CStringSet& aValues) const;
+	void CheckRebuildGroupHeaders();
 	void RebuildGroupHeaders(const CStringSet& aValues);
 	int CompareGrouping(LPARAM lParam1, LPARAM lParam2) const;
 	CString FormatTaskGroupHeaderText(DWORD dwHeaderID) const;
