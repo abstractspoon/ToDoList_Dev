@@ -223,17 +223,14 @@ class CHTIMap;
 
 struct KANBANSORT
 {
-	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2);
+	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2, DWORD dwOpt);
 
-	BOOL HasOption(DWORD dwOption) const { return (dwOptions & dwOption) == dwOption; }
-	const KANBANSORTCOLUMN& LastColumn() const { return (nNumSortCols >= 2) ? cols[1] : cols[0]; }
+	BOOL HasOption(DWORD dwOpt) const { return (dwOptions & dwOpt) == dwOpt; }
 
 	const CKanbanItemMap& data;
 	const CHTIMap& items;
 
-	KANBANSORTCOLUMN cols[2];
-	int nNumSortCols;
-
+	KANBANSORTCOLUMN sort, group;
 	DWORD dwOptions;
 };
 

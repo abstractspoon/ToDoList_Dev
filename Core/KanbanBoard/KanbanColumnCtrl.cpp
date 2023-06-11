@@ -1718,25 +1718,15 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending, TDC_ATT
 		return;
 
 	CHoldRedraw hr(*this);
+	KANBANSORT ks(m_data, m_mapHTItems, m_dwOptions);
 
-	KANBANSORT ks(m_data, m_mapHTItems);
-	int nCol = 0;
+	ks.sort.nBy = nSortBy;
+	ks.sort.sAttribID = KANBANITEM::GetAttributeID(nSortBy);
+	ks.sort.bAscending = bSortAscending;
 
-	if (nGroupBy != TDCA_NONE)
-	{
-		ks.cols[nCol].nBy = nGroupBy;
-		ks.cols[nCol].sAttribID = KANBANITEM::GetAttributeID(nGroupBy);
-		ks.cols[nCol].bAscending = bGroupByAscending;
-
-		nCol++;
-	}
-
-	ks.cols[nCol].nBy = nSortBy;
-	ks.cols[nCol].sAttribID = KANBANITEM::GetAttributeID(nSortBy);
-	ks.cols[nCol].bAscending = bSortAscending;
-
-	ks.nNumSortCols = (nCol + 1);
-	ks.dwOptions = m_dwOptions;
+	ks.group.nBy = nGroupBy;
+	ks.group.sAttribID = KANBANITEM::GetAttributeID(nGroupBy);
+	ks.group.bAscending = bGroupByAscending;
 
 	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 
@@ -1761,14 +1751,17 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 	if (nCompare != 0)
 		return nCompare;
 
-	// Column comparison
-	for (int nCol = 0; nCol < pSort->nNumSortCols; nCol++)
-	{
-		nCompare = CompareAttributeValues(pKI1, pKI2, pSort->cols[nCol], pSort->dwOptions);
+	// Group By comparison
+	nCompare = CompareAttributeValues(pKI1, pKI2, pSort->group, pSort->dwOptions);
 
-		if (nCompare != 0)
-			return nCompare;
-	}
+	if (nCompare != 0)
+		return nCompare;
+
+	// Sort comparison
+	nCompare = CompareAttributeValues(pKI1, pKI2, pSort->sort, pSort->dwOptions);
+
+	if (nCompare != 0)
+		return nCompare;
 
 	// In the absence of a result we sort by POSITION to ensure a stable sort, 
 	// but without reversing the sign
@@ -1777,7 +1770,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 		// Compare relative position
 		return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);
 	}
-	else if (pSort->LastColumn().nBy == TDCA_NONE)
+	else if (pSort->sort.nBy == TDCA_NONE)
 	{
 		// Compare absolute position
 		return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
