@@ -224,6 +224,7 @@ protected:
 	int GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAttribID, CStringSet& aValues) const;
 	void RebuildGroupHeaders(const CStringSet& aValues);
 	int CompareGrouping(LPARAM lParam1, LPARAM lParam2) const;
+	CString FormatTaskGroupHeaderText(DWORD dwHeaderID) const;
 
 	void DoSort();
 	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;

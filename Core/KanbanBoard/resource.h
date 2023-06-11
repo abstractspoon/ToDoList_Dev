@@ -172,6 +172,7 @@
 #define IDS_DISPLAY_TIMEREMAINING       57727
 #define IDS_DISPLAY_TIMEREMAINING_SHORT 57728
 #define IDS_DISPLAY_LOCK                57729
+#define IDS_NOBODY                      57730
 
 // Next default values for new objects
 // 

@@ -237,6 +237,9 @@ namespace GraphicsMisc
 	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags = GMIB_NONE);
 	COLORREF GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetSolidColor(HBRUSH hBrush);
+
+	COLORREF GetGroupHeaderColor();
+	void DrawGroupHeaderRow(CDC* pDC, const CRect& rRow, const CString& sText, COLORREF crText = CLR_NONE, COLORREF crBack = CLR_NONE, BOOL bTextAlwaysVisible = TRUE);
 	
 	BOOL ForceIconicRepresentation(HWND hWnd, BOOL bForce = TRUE);
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);

@@ -656,18 +656,54 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			else if (IsGroupHeaderTask(dwTaskID))
 			{
 				CRect rItem(pTVCD->nmcd.rc);
-				rItem.left = max(0, rItem.left);
 
-				CString sGroupValue;
-				m_mapGroupHeaders.Lookup(dwTaskID, sGroupValue);
-
-				pDC->DrawText(sGroupValue, rItem, DT_SINGLELINE);
+				if (rItem.Height() > 0)
+				{
+					CString sGroupValue = FormatTaskGroupHeaderText(dwTaskID);
+					GraphicsMisc::DrawGroupHeaderRow(pDC, rItem, sGroupValue, CLR_NONE, CLR_NONE);
+				}
 			}
 			
 			*pResult |= CDRF_SKIPDEFAULT;
 		}
 		break;
 	}
+}
+
+CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
+{
+	ASSERT(IsGroupHeaderTask(dwHeaderID));
+
+	CString sGroupBy;
+	m_mapGroupHeaders.Lookup(dwHeaderID, sGroupBy);
+
+	if (sGroupBy.IsEmpty())
+	{
+		switch (m_GroupBy.nBy)
+		{
+		case TDCA_CATEGORY:
+		case TDCA_TAGS:
+		case TDCA_VERSION:
+		case TDCA_STATUS:
+		case TDCA_PRIORITY:
+		case TDCA_RISK:
+		case TDCA_RECURRENCE:
+			sGroupBy.LoadString(IDS_NONE);
+			break;
+
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+			sGroupBy.LoadString(IDS_NOBODY);
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	// Prefix the text by the column name
+	return (GetAttributeLabel(m_GroupBy.nBy, KBCAL_LONG) + sGroupBy);
 }
 
 void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
@@ -1602,7 +1638,7 @@ LRESULT CKanbanColumnCtrl::OnHitTest(WPARAM /*wp*/, LPARAM /*lp*/)
 	return (LRESULT)hti;
 }
 
-LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM lp)
+LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM /*lp*/)
 {
 	HTREEITEM hti = (HTREEITEM)Default();
 
