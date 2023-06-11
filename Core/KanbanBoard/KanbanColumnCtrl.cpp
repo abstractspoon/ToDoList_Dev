@@ -158,7 +158,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(TVM_HITTEST, OnHitTest)
-
+	ON_MESSAGE(TVM_GETNEXTITEM, OnGetNextItem)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1592,12 +1592,51 @@ HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 	return m_mapHTItems.GetItem(dwTaskID);
 }
 
-LRESULT CKanbanColumnCtrl::OnHitTest(WPARAM wp, LPARAM lp)
+LRESULT CKanbanColumnCtrl::OnHitTest(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	HTREEITEM hti = (HTREEITEM)Default();
 
 	if (hti && IsGroupHeaderItem(hti))
 		hti = NULL;
+
+	return (LRESULT)hti;
+}
+
+LRESULT CKanbanColumnCtrl::OnGetNextItem(WPARAM wp, LPARAM lp)
+{
+	HTREEITEM hti = (HTREEITEM)Default();
+
+	if (hti && IsGroupHeaderItem(hti))
+	{
+		switch (wp)
+		{
+		case TVGN_NEXT:
+		case TVGN_PREVIOUS:
+		case TVGN_FIRSTVISIBLE:
+		case TVGN_NEXTVISIBLE:
+		case TVGN_PREVIOUSVISIBLE:
+		case TVGN_NEXTSELECTED:
+			hti = GetNextItem(hti, wp);
+			break;
+
+		case TVGN_CHILD:
+			hti = GetNextItem(hti, TVGN_NEXT);
+			break;
+
+		case TVGN_LASTVISIBLE:
+			hti = GetNextItem(hti, TVGN_PREVIOUSVISIBLE);
+			break;
+
+		case TVGN_ROOT:
+		case TVGN_DROPHILITE:
+		case TVGN_CARET:
+		case TVGN_PARENT:
+			// These should NEVER be group headers
+			ASSERT(0);
+			hti = NULL;
+			break;
+		}
+	}
 
 	return (LRESULT)hti;
 }
@@ -1723,30 +1762,31 @@ void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 
 void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)
 {
+	if (!m_mapGroupHeaders.GetCount() && !aValues.GetCount())
+		return;
+
 	CHoldRedraw hr(*this);
 
 	// Delete old headers
-	HTREEITEM hti = GetChildItem(NULL), htiNext;
-
-	while (hti)
-	{
-		htiNext = GetNextItem(hti, TVGN_NEXT);
-
-		if (IsGroupHeaderItem(hti))
-			CTreeCtrl::DeleteItem(hti);
-
-		hti = htiNext;
-	}
-
-	// Insert new headers
-	DWORD dwHeaderID = 0xFFFFFFFFF;
-	POSITION pos = aValues.GetStartPosition();
-
-	m_mapGroupHeaders.RemoveAll();
+	POSITION pos = m_mapGroupHeaders.GetStartPosition();
 
 	while (pos)
 	{
-		hti = CTreeCtrl::InsertItem(TVIF_TEXT | TVIF_PARAM,
+		DWORD dwHeaderID;
+		CString sUnused;
+		m_mapGroupHeaders.GetNextAssoc(pos, dwHeaderID, sUnused);
+
+		CTreeCtrl::DeleteItem(m_mapHTItems.GetItem(dwHeaderID));
+	}
+	m_mapGroupHeaders.RemoveAll();
+
+	// Insert new headers
+	DWORD dwHeaderID = 0xFFFFFFFF;
+	pos = aValues.GetStartPosition();
+
+	while (pos)
+	{
+		HTREEITEM hti = CTreeCtrl::InsertItem(TVIF_TEXT | TVIF_PARAM,
 									NULL,
 									0,
 									0,
@@ -1757,6 +1797,7 @@ void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)
 									TVI_LAST);
 		ASSERT(hti);
 		
+		m_mapHTItems[dwHeaderID] = hti;
 		m_mapGroupHeaders[dwHeaderID--] = aValues.GetNext(pos);
 	}
 
@@ -1809,14 +1850,13 @@ int CKanbanColumnCtrl::GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAtt
 {
 	aValues.RemoveAll();
 
-	if (nAttrib != TDCA_NONE)
+	if ((nAttrib != TDCA_NONE) && GetCount())
 	{
 		HTREEITEM hti = GetChildItem(NULL);
 
 		while (hti)
 		{
-			if (IsGroupHeaderItem(hti))
-				continue;
+			ASSERT(!IsGroupHeaderItem(hti));
 
 			const KANBANITEM* pKI = m_data.GetItem(GetTaskID(hti));
 			ASSERT(pKI);
@@ -1862,29 +1902,28 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 
 int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 {
-	if (IsGroupHeaderTask(lParam1) || IsGroupHeaderTask(lParam2))
-	{
-		return 0;
-	}
+	int nCompare = CompareGrouping(lParam1, lParam2);
 
+	if (nCompare != 0)
+		return nCompare;
 
+	// Pinning comparison
 	const KANBANITEM* pKI1 = m_data.GetItem(lParam1);
 	const KANBANITEM* pKI2 = m_data.GetItem(lParam2);
 
 	if (!pKI1 || !pKI2)
 		return 0;
 
-	// Top-level comparison
-	int nCompare = CompareParentAndPins(pKI1, pKI2);
+	nCompare = CompareParentAndPins(pKI1, pKI2);
 
 	if (nCompare != 0)
 		return nCompare;
 
-	// Group By comparison
-	nCompare = CompareAttributeValues(pKI1, pKI2, m_GroupBy);
-
-	if (nCompare != 0)
-		return nCompare;
+// 	// Group By comparison
+// 	nCompare = CompareAttributeValues(pKI1, pKI2, m_GroupBy);
+// 
+// 	if (nCompare != 0)
+// 		return nCompare;
 
 	// Sort comparison
 	nCompare = CompareAttributeValues(pKI1, pKI2, m_SortBy);
@@ -1906,6 +1945,46 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 	}
 
 	return 0;
+}
+
+int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
+{
+	if (m_GroupBy.nBy == TDCA_NONE)
+		return 0;
+
+	BOOL bIsGroupHeader1 = IsGroupHeaderTask(lParam1);
+	BOOL bIsGroupHeader2 = IsGroupHeaderTask(lParam2);
+
+	const KANBANITEM* pKI1 = m_data.GetItem(lParam1);
+	const KANBANITEM* pKI2 = m_data.GetItem(lParam2);
+
+	CString sItem1, sItem2;
+
+	if (bIsGroupHeader1)
+		m_mapGroupHeaders.Lookup(lParam1, sItem1);
+	else
+		sItem1 = pKI1->GetAttributeDisplayValue(m_GroupBy.nBy);
+		
+	if (bIsGroupHeader2)
+		m_mapGroupHeaders.Lookup(lParam2, sItem2);
+	else
+		sItem2 = pKI2->GetAttributeDisplayValue(m_GroupBy.nBy);
+
+	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
+
+	if (bIsGroupHeader1	&& bIsGroupHeader2)
+		return nCompare;
+
+	if (nCompare == 0) // Same Group
+	{
+		if (bIsGroupHeader1)
+			return SORT_1ABOVE2;
+
+		if (bIsGroupHeader2)
+			return SORT_2ABOVE1;
+	}
+
+	return nCompare;
 }
 
 int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const
@@ -2573,8 +2652,10 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && !IsGroupHeaderItem(hti))
+	if (hti)
 	{
+		ASSERT(!IsGroupHeaderItem(hti));
+
 		BOOL bLocked = m_data.IsLocked(GetTaskID(hti));
 		KBC_IMAGETYPE nImage = HitTestImage(hti, point);
 
@@ -2837,8 +2918,10 @@ int CKanbanColumnCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && !IsGroupHeaderItem(hti))
+	if (hti)
 	{
+		ASSERT(!IsGroupHeaderItem(hti));
+
 		CRect rText, rUnused;
 
 		if (GetItemLabelTextRect(hti, rText, FALSE) && rText.PtInRect(point))

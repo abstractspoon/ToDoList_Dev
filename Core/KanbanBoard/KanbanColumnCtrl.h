@@ -182,6 +182,7 @@ protected:
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnHitTest(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGetNextItem(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
@@ -222,6 +223,7 @@ protected:
 	int GetGroupValues(CStringSet& aValues) const;
 	int GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAttribID, CStringSet& aValues) const;
 	void RebuildGroupHeaders(const CStringSet& aValues);
+	int CompareGrouping(LPARAM lParam1, LPARAM lParam2) const;
 
 	void DoSort();
 	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
