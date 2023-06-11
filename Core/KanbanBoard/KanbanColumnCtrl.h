@@ -68,6 +68,7 @@ public:
 
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
+	void UpdateGrouping();
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
@@ -148,7 +149,10 @@ protected:
 	COLORREF m_crItemShadow;
 
 	KANBANSORTCOLUMN m_SortBy, m_GroupBy;
-	
+
+	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
+	CGroupHeaderMap m_mapGroupHeaders;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CKanbanListCtrlEx)
@@ -177,13 +181,14 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnHitTest(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	// Prevent anyone calling these
+	// Prevent anyone calling these directly
 	void DeleteAllItems() { ASSERT(0); }
 	void InsertItem() { ASSERT(0); }
 	void DeleteItem() { ASSERT(0); }
@@ -211,9 +216,13 @@ protected:
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
 	void RecalcItemShadowColor();
-	void DeleteGroupHeaders();
-	void InsertGroupHeaders();
-	
+
+	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
+	BOOL IsGroupHeaderItem(HTREEITEM hti) const;
+	int GetGroupValues(CStringSet& aValues) const;
+	int GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAttribID, CStringSet& aValues) const;
+	void RebuildGroupHeaders(const CStringSet& aValues);
+
 	void DoSort();
 	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
 	int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const;

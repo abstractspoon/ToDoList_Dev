@@ -567,6 +567,8 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	}
 
 	RefreshColumnHeaderText();
+	
+	m_aColumns.UpdateGrouping();
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
