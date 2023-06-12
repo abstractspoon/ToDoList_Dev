@@ -128,6 +128,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_dwDisplay(0),
 	m_dwOptions(0),
 	m_crItemShadow(CLR_NONE),
+	m_crGroupHeaderBkgnd(CLR_NONE),
 	m_bReadOnly(FALSE),
 	m_tch(*this)
 {
@@ -660,7 +661,9 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				if (rItem.Height() > 0)
 				{
 					CString sGroupValue = FormatTaskGroupHeaderText(dwTaskID);
-					GraphicsMisc::DrawGroupHeaderRow(pDC, rItem, sGroupValue, CLR_NONE, m_columnDef.crBackground);
+					COLORREF crBack = ((m_crGroupHeaderBkgnd != CLR_NONE) ? m_crGroupHeaderBkgnd : m_columnDef.crBackground);
+
+					GraphicsMisc::DrawGroupHeaderRow(pDC, *this, rItem, sGroupValue, CLR_NONE, crBack);
 				}
 			}
 			
@@ -703,7 +706,14 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 	}
 
 	// Prefix the text by the column name
-	return (GetAttributeLabel(m_GroupBy.nBy, KBCAL_LONG) + sGroupBy);
+	CString sLabel(GetAttributeLabel(m_GroupBy.nBy, KBCAL_LONG));
+
+#ifdef _DEBUG
+	return Misc::Format(_T("%s%s (%ld)"), sLabel, sGroupBy, dwHeaderID);
+#else
+	return (sLabel + sGroupBy);
+#endif
+
 }
 
 void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
@@ -1801,6 +1811,17 @@ void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
 	}
 }
 
+void CKanbanColumnCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
+{
+	if (color != m_crGroupHeaderBkgnd)
+	{
+		m_crGroupHeaderBkgnd = color;
+
+		if (GetSafeHwnd() && (m_GroupBy.nBy != TDCA_NONE))
+			Invalidate(FALSE);
+	}
+}
+
 void CKanbanColumnCtrl::CheckRebuildGroupHeaders()
 {
 	// Compare to existing group headers
@@ -1827,7 +1848,7 @@ void CKanbanColumnCtrl::CheckRebuildGroupHeaders()
 
 void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)
 {
-	if (!GetCount())
+	if (!GetSafeHwnd() || !GetCount())
 		return;
 
 	if (!m_mapGroupHeaders.GetCount() && !aValues.GetCount())
@@ -1892,7 +1913,7 @@ int CKanbanColumnCtrl::GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAtt
 {
 	aValues.RemoveAll();
 
-	if ((nAttrib != TDCA_NONE) && GetCount())
+	if (GetSafeHwnd() && GetCount() && (nAttrib != TDCA_NONE))
 	{
 		HTREEITEM hti = GetChildItem(NULL);
 

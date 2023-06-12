@@ -239,7 +239,7 @@ namespace GraphicsMisc
 	COLORREF GetSolidColor(HBRUSH hBrush);
 
 	COLORREF GetGroupHeaderColor();
-	void DrawGroupHeaderRow(CDC* pDC, const CRect& rRow, const CString& sText, COLORREF crText = CLR_NONE, COLORREF crBack = CLR_NONE, BOOL bTextAlwaysVisible = TRUE);
+	void DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CString& sText, COLORREF crText = CLR_NONE, COLORREF crBack = CLR_NONE);
 	
 	BOOL ForceIconicRepresentation(HWND hWnd, BOOL bForce = TRUE);
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);

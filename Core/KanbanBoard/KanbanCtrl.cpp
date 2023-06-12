@@ -110,7 +110,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bSelectTasks(FALSE),
 	m_bResizingHeader(FALSE),
 	m_bSettingColumnFocus(FALSE),
-	m_bSavingToImage(FALSE)
+	m_bSavingToImage(FALSE),
+	m_crGroupHeaderBkgnd(CLR_NONE)
 {
 }
 
@@ -1328,16 +1329,24 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 {
 	LoadDefaultAttributeListValues(pPrefs);
 
-	if (!bAppOnly)
-	{
-		CString sPinned = pPrefs->GetProfileString(szKey, _T("PinnedTasks"));
-		Misc::Split(sPinned, m_aPrevPinnedTasks, ',');
-	}
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyGroupHeaderBkgndColor"), FALSE))
+		m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GroupHeaderBkgnd"), CLR_NONE);
+	else
+		m_crGroupHeaderBkgnd = CLR_NONE;
+
+	m_aColumns.SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
 
 	if (m_nTrackAttribute != TDCA_NONE)
 	{
 		// Both column visibility AND contents may have changed
 		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
+	}
+
+	// Private preferences
+	if (!bAppOnly)
+	{
+		CString sPinned = pPrefs->GetProfileString(szKey, _T("PinnedTasks"));
+		Misc::Split(sPinned, m_aPrevPinnedTasks, ',');
 	}
 }
 
@@ -2008,7 +2017,10 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	// if the modification that caused this update matches the
 	// current sort, whereas we always need to be maintain some
 	// kind of sorted state even if we are technically 'unsorted'
-	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+	if (m_nGroupBy != TDCA_NONE)
+		m_aColumns.GroupBy(m_nGroupBy, m_bGroupByAscending);
+	else
+		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -2198,6 +2210,8 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 	if (pCol)
 	{
 		pCol->SetOptions(m_dwOptions);
+		pCol->SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
+		pCol->GroupBy(m_nGroupBy, m_bGroupByAscending);
 
 		if (pCol->Create(IDC_COLUMNCTRL, this))
 		{

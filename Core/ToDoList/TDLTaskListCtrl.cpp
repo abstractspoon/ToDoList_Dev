@@ -285,20 +285,6 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
-void CTDLTaskListCtrl::GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText)
-{
-	if (m_crGroupHeaderBkgnd == CLR_NONE)
-	{
-		crBack = GetSysColor(COLOR_WINDOW);
-		crText = GraphicsMisc::GetGroupHeaderColor();
-	}
-	else
-	{
-		crBack = m_crGroupHeaderBkgnd;
-		crText = GraphicsMisc::GetBestTextColor(crBack);
-	}
-}
-
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
@@ -326,23 +312,17 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 				if (rRow.Width())
 				{
-					rRow.right += GetSystemMetrics(SM_CXVSCROLL);
-
-					COLORREF crBack, crText;
-					GetGroupHeaderColors(crBack, crText);
-
-					// this call will update rFullWidth to full client width
-					CRect rFullWidth(rRow);
-					GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, hwndList);
-
-					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
-
+					// Header group text and line
 					CString sHeader;
 
 					if (hwndList == m_lcTasks)
 						sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
-					GraphicsMisc::DrawGroupHeaderRow(pDC, rFullWidth, sHeader, crText, crBack);
+					GraphicsMisc::DrawGroupHeaderRow(pDC, hwndList, rRow, sHeader, CLR_NONE, m_crGroupHeaderBkgnd);
+
+					// Gridlines
+					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
+
 				}
 	
 				dwRes = CDRF_SKIPDEFAULT;

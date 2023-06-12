@@ -111,6 +111,7 @@ protected:
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPrevPinnedTasks;
 	CPoint m_ptDragStart;
+	COLORREF m_crGroupHeaderBkgnd;
 
 	CKanbanColumnCtrl* m_pSelectedColumn;
 	CKanbanColumnCtrlArray m_aColumns;

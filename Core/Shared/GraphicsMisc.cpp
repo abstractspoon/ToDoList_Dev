@@ -1292,7 +1292,7 @@ BOOL GraphicsMisc::FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwn
 
 	COLORREF crOldBk = pDC->GetBkColor();
 
-	if (hwnd)
+	if (::IsWindow(hwnd))
 	{
 		CRect rClient;
 		::GetClientRect(hwnd, rClient);
@@ -2214,28 +2214,29 @@ COLORREF GraphicsMisc::GetGroupHeaderColor()
 	return GROUPHEADER;
 }
 
-void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, const CRect& rRow, const CString& sText,
-									  COLORREF crText, COLORREF crBack, BOOL bTextAlwaysVisible)
+void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CString& sText, COLORREF crText, COLORREF crBack)
 {
 	if (crText == CLR_NONE)
-		crText = GetGroupHeaderColor();
+	{
+		if (crBack == CLR_NONE)
+			crText = GetGroupHeaderColor();
+		else
+			crText = GetBestTextColor(crBack);
+	}
 
+	if (crBack == CLR_NONE)
+		crBack = GetSysColor(COLOR_WINDOW);
+
+	FillItemRect(pDC, rRow, crBack, hWnd);
 	DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
 
 	if (!sText.IsEmpty())
 	{
+		// Force text to always be visible on the LHS
 		CRect rText(rRow);
-
-		if (bTextAlwaysVisible)
-			rText.left = ScaleByDPIFactor(20);
-		else
-			rText.left += ScaleByDPIFactor(20);
+		rText.left = ScaleByDPIFactor(20);
 
 		pDC->SetTextColor(crText);
-
-		if (crBack == CLR_NONE)
-			crBack = GetSysColor(COLOR_WINDOW);
-
 		pDC->SetBkColor(crBack);
 		pDC->SetBkMode(OPAQUE);
 		pDC->DrawText(sText, rText, DT_LEFT | DT_SINGLELINE | DT_VCENTER);

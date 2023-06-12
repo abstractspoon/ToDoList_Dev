@@ -68,6 +68,7 @@ public:
 
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
+	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
@@ -145,7 +146,7 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
-	COLORREF m_crItemShadow;
+	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd;
 
 	KANBANSORTCOLUMN m_SortBy, m_GroupBy;
 
