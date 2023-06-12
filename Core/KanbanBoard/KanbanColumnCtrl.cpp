@@ -660,7 +660,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				if (rItem.Height() > 0)
 				{
 					CString sGroupValue = FormatTaskGroupHeaderText(dwTaskID);
-					GraphicsMisc::DrawGroupHeaderRow(pDC, rItem, sGroupValue, CLR_NONE, CLR_NONE);
+					GraphicsMisc::DrawGroupHeaderRow(pDC, rItem, sGroupValue, CLR_NONE, m_columnDef.crBackground);
 				}
 			}
 			
