@@ -67,7 +67,7 @@ public:
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
+	void GroupBy(TDC_ATTRIBUTE nAttrib);
 	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);

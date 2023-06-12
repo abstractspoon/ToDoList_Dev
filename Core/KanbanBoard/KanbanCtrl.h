@@ -64,7 +64,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 
  	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending = TRUE);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -97,7 +97,6 @@ public:
 protected:
 	BOOL m_bReadOnly;
 	BOOL m_bSortAscending;
-	BOOL m_bGroupByAscending;
 	BOOL m_bSelectTasks;
 	BOOL m_bSettingColumnFocus;
 	BOOL m_bResizingHeader;

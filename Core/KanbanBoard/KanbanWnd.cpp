@@ -239,6 +239,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	pPrefs->WriteProfileInt(sKey, _T("HideParents"), m_ctrlKanban.HasOption(KBCF_HIDEPARENTTASKS));
 	pPrefs->WriteProfileInt(sKey, _T("HideEmptyColumns"), m_ctrlKanban.HasOption(KBCF_HIDEEMPTYCOLUMNS));
 	pPrefs->WriteProfileInt(sKey, _T("HideSubtasks"), m_ctrlKanban.HasOption(KBCF_HIDESUBTASKS));
+	pPrefs->WriteProfileInt(sKey, _T("SortGroupsAscending"), m_ctrlKanban.HasOption(KBCF_SORTGROUPSASCENDING));
 
 	// Preferences
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
@@ -338,6 +339,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		Misc::SetFlag(dwComboOptions, KBCF_HIDEPARENTTASKS, bHideParents);
 		Misc::SetFlag(dwComboOptions, KBCF_HIDEEMPTYCOLUMNS, bHideEmptyCols);
 		Misc::SetFlag(dwComboOptions, KBCF_HIDESUBTASKS, pPrefs->GetProfileInt(szKey, _T("HideSubtasks"), FALSE));
+		Misc::SetFlag(dwComboOptions, KBCF_SORTGROUPSASCENDING, pPrefs->GetProfileInt(szKey, _T("SortGroupsAscending"), TRUE));
 		
 		m_cbOptions.SetSelectedOptions(dwComboOptions);
 		OnSelchangeOptions();
@@ -381,7 +383,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		if (m_nGroupByAttrib == TDCA_CUSTOMATTRIB)
 			m_sGroupByCustomAttribID = pPrefs->GetProfileString(szKey, _T("GroupByCustomAttrib"));
 
-		m_ctrlKanban.GroupBy(m_nGroupByAttrib, TRUE/*m_sGroupByCustomAttribID*/);
+		m_ctrlKanban.GroupBy(m_nGroupByAttrib);
 
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 		m_cbGroupBy.ExcludeAttribute(m_nTrackedAttrib, m_sTrackedCustomAttribID);
@@ -998,6 +1000,7 @@ void CKanbanWnd::OnSelchangeOptions()
 	Misc::SetFlag(dwNewOptions, KBCF_HIDEEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_HIDEEMPTYCOLUMNS));
 	Misc::SetFlag(dwNewOptions, KBCF_HIDEPARENTTASKS, m_cbOptions.HasSelectedOption(KBCF_HIDEPARENTTASKS));
 	Misc::SetFlag(dwNewOptions, KBCF_HIDESUBTASKS, m_cbOptions.HasSelectedOption(KBCF_HIDESUBTASKS));
+	Misc::SetFlag(dwNewOptions, KBCF_SORTGROUPSASCENDING, m_cbOptions.HasSelectedOption(KBCF_SORTGROUPSASCENDING));
 
 	if (dwNewOptions != dwCurOptions)
 	{

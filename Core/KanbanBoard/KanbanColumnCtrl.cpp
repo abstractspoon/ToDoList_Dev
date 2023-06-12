@@ -438,6 +438,16 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 			else
 				Invalidate(FALSE);
 
+			if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
+			{
+				m_GroupBy.bAscending = HasOption(KBCF_SORTGROUPSASCENDING);
+				DoSort();
+			}
+			else
+			{
+				Invalidate(FALSE);
+			}
+
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
 			{
 				InitTooltip();
@@ -1788,17 +1798,16 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 	return nNumDeleted;
 }
 
-void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
+void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
 {
 	CString sAttribID = KANBANITEM::GetAttributeID(nAttrib, m_aCustAttribDefs);
 
 	if ((nAttrib != m_GroupBy.nBy) ||
-		(bAscending != m_GroupBy.bAscending) || 
 		(sAttribID != m_GroupBy.sAttribID))
 	{
 		m_GroupBy.nBy = nAttrib;
 		m_GroupBy.sAttribID = sAttribID;
-		m_GroupBy.bAscending = bAscending;
+		m_GroupBy.bAscending = HasOption(KBCF_SORTGROUPSASCENDING);
 
 		CStringSet aGroups;
 		GetGroupValues(aGroups);
@@ -2023,30 +2032,26 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 	else
 		sItem1 = pKI1->GetAttributeDisplayValue(m_GroupBy.nBy);
 
-	ASSERT(!sItem1.IsEmpty());
-		
 	if (bIsGroupHeader2)
 		m_mapGroupHeaders.Lookup(lParam2, sItem2);
 	else
 		sItem2 = pKI2->GetAttributeDisplayValue(m_GroupBy.nBy);
 
-	ASSERT(!sItem2.IsEmpty());
-
 	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
-	if (bIsGroupHeader1	&& bIsGroupHeader2)
-		return nCompare;
-
-	if (nCompare == 0) // Same Group
+	if (!(bIsGroupHeader1 && bIsGroupHeader2))
 	{
-		if (bIsGroupHeader1)
-			return SORT_1ABOVE2;
+		if (nCompare == 0) // Same Group
+		{
+			if (bIsGroupHeader1)
+				return SORT_1ABOVE2;
 
-		if (bIsGroupHeader2)
-			return SORT_2ABOVE1;
+			if (bIsGroupHeader2)
+				return SORT_2ABOVE1;
+		}
 	}
 
-	return nCompare;
+	return (m_GroupBy.bAscending ? nCompare : -nCompare);
 }
 
 int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const

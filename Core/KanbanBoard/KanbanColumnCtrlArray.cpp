@@ -291,9 +291,9 @@ void CKanbanColumnCtrlArray::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	ARRAY_FN(pCol->Sort(nBy, bAscending));
 }
 
-void CKanbanColumnCtrlArray::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
+void CKanbanColumnCtrlArray::GroupBy(TDC_ATTRIBUTE nAttrib)
 {
-	ARRAY_FN(pCol->GroupBy(nAttrib, bAscending));
+	ARRAY_FN(pCol->GroupBy(nAttrib));
 }
 
 void CKanbanColumnCtrlArray::SetGroupHeaderBackgroundColor(COLORREF color)

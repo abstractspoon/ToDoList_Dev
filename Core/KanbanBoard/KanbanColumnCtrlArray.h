@@ -55,7 +55,7 @@ public:
 
 	void Sort();
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	void GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending);
+	void GroupBy(TDC_ATTRIBUTE nAttrib);
 	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);

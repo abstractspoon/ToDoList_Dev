@@ -417,6 +417,7 @@ BEGIN
     IDS_DISPLAY_TIMEREMAINING_SHORT "Rem."
     IDS_DISPLAY_LOCK        "Lock"
     IDS_NOBODY              "<nobody>"
+    IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
 END
 
 #endif    // English (Australia) resources

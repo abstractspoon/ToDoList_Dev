@@ -62,6 +62,7 @@ void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEPARENTS, KBCF_HIDEPARENTTASKS);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEEMPTYCOLS, KBCF_HIDEEMPTYCOLUMNS);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDESUBTASKS, KBCF_HIDESUBTASKS);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_SORTGROUPSASCENDING, KBCF_SORTGROUPSASCENDING);
 
 		EnableTooltip();
 	}

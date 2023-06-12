@@ -99,7 +99,6 @@ const CPoint DRAG_NOT_SET(-10000, -10000);
 CKanbanCtrl::CKanbanCtrl() 
 	:
 	m_bSortAscending(-1), 
-	m_bGroupByAscending(TRUE),
 	m_dwOptions(0),
 	m_bReadOnly(FALSE),
 	m_nNextColor(0),
@@ -570,7 +569,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 
 	RefreshColumnHeaderText();
 	
-	m_aColumns.GroupBy(m_nGroupBy, m_bGroupByAscending);
+	m_aColumns.GroupBy(m_nGroupBy);
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
@@ -2018,7 +2017,7 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	// current sort, whereas we always need to be maintain some
 	// kind of sorted state even if we are technically 'unsorted'
 	if (m_nGroupBy != TDCA_NONE)
-		m_aColumns.GroupBy(m_nGroupBy, m_bGroupByAscending);
+		m_aColumns.GroupBy(m_nGroupBy);
 	else
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
@@ -2066,17 +2065,15 @@ void CKanbanCtrl::FixupColumnFocus()
 	}
 }
 
-BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, BOOL bAscending)
+BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
 {
 	if (nAttrib == m_nTrackAttribute)
 		return FALSE;
 
-	if ((nAttrib != m_nGroupBy) || (bAscending != m_bGroupByAscending))
+	if (nAttrib != m_nGroupBy)
 	{
 		m_nGroupBy = nAttrib;
-		m_bGroupByAscending = bAscending;
-	
-		m_aColumns.GroupBy(nAttrib, bAscending);
+		m_aColumns.GroupBy(nAttrib);
 	}
 	
 	return TRUE;
@@ -2211,7 +2208,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 	{
 		pCol->SetOptions(m_dwOptions);
 		pCol->SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
-		pCol->GroupBy(m_nGroupBy, m_bGroupByAscending);
+		pCol->GroupBy(m_nGroupBy);
 
 		if (pCol->Create(IDC_COLUMNCTRL, this))
 		{
@@ -3556,15 +3553,15 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 
 	if (bRestChanged)
 	{
-		m_aColumns.GroupBy(m_nGroupBy, m_bGroupByAscending);
+		m_aColumns.GroupBy(m_nGroupBy);
 	}
 	else
 	{
 		if (bSrcChanged)
-			pSrcCol->GroupBy(m_nGroupBy, m_bGroupByAscending);
+			pSrcCol->GroupBy(m_nGroupBy);
 
 		if (bDestChanged)
-			pDestCol->GroupBy(m_nGroupBy, m_bGroupByAscending);
+			pDestCol->GroupBy(m_nGroupBy);
 	}
 
 	return TRUE;
