@@ -302,8 +302,6 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 		case CDDS_ITEMPREPAINT:
 			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
@@ -312,17 +310,15 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 				if (rRow.Width())
 				{
-					// Header group text and line
 					CString sHeader;
 
 					if (hwndList == m_lcTasks)
 						sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
+					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
 					GraphicsMisc::DrawGroupHeaderRow(pDC, hwndList, rRow, sHeader, CLR_NONE, m_crGroupHeaderBkgnd);
-
-					// Gridlines
 					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
-
 				}
 	
 				dwRes = CDRF_SKIPDEFAULT;

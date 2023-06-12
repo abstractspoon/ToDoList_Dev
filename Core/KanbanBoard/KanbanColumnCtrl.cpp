@@ -1965,12 +1965,13 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 
 int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 {
+	// 1. Grouping
 	int nCompare = CompareGrouping(lParam1, lParam2);
 
 	if (nCompare != 0)
 		return nCompare;
 
-	// Pinning comparison
+	// 2. Pinning and Parent/Child
 	const KANBANITEM* pKI1 = m_data.GetItem(lParam1);
 	const KANBANITEM* pKI2 = m_data.GetItem(lParam2);
 
@@ -1982,19 +1983,13 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 	if (nCompare != 0)
 		return nCompare;
 
-// 	// Group By comparison
-// 	nCompare = CompareAttributeValues(pKI1, pKI2, m_GroupBy);
-// 
-// 	if (nCompare != 0)
-// 		return nCompare;
-
-	// Sort comparison
+	// 3. Regular Sorting
 	nCompare = CompareAttributeValues(pKI1, pKI2, m_SortBy);
 
 	if (nCompare != 0)
 		return nCompare;
 
-	// In the absence of a result we sort by POSITION to ensure a stable sort, 
+	// 4. In the absence of a result we sort by POSITION to ensure a stable sort, 
 	// but without reversing the sign
 	if (m_data.HasSameParent(pKI1, pKI2))
 	{
@@ -2027,11 +2022,15 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 		m_mapGroupHeaders.Lookup(lParam1, sItem1);
 	else
 		sItem1 = pKI1->GetAttributeDisplayValue(m_GroupBy.nBy);
+
+	ASSERT(!sItem1.IsEmpty());
 		
 	if (bIsGroupHeader2)
 		m_mapGroupHeaders.Lookup(lParam2, sItem2);
 	else
 		sItem2 = pKI2->GetAttributeDisplayValue(m_GroupBy.nBy);
+
+	ASSERT(!sItem2.IsEmpty());
 
 	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
