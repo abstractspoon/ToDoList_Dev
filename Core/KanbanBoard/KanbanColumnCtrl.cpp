@@ -116,6 +116,9 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_fonts(fonts),
 	m_aPriorityColors(aPriorityColors),
 	m_bSelected(FALSE),
+	m_bSortAscending(-1),
+	m_nSortBy(TDCA_NONE),
+	m_nGroupBy(TDCA_NONE),
 	m_nItemTextHeight(-1),
 	m_nItemTextBorder(-1),
 	m_nNumTitleLines(2),
@@ -439,14 +442,9 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 				Invalidate(FALSE);
 
 			if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
-			{
-				m_GroupBy.bAscending = HasOption(KBCF_SORTGROUPSASCENDING);
 				DoSort();
-			}
 			else
-			{
 				Invalidate(FALSE);
-			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
 			{
@@ -692,7 +690,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 
 	if (sGroupBy.IsEmpty())
 	{
-		switch (m_GroupBy.nBy)
+		switch (m_nGroupBy)
 		{
 		case TDCA_CATEGORY:
 		case TDCA_TAGS:
@@ -710,13 +708,16 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 			break;
 
 		default:
-			ASSERT(0);
+			if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(m_nGroupBy))
+				sGroupBy.LoadString(IDS_NONE);
+			else
+				ASSERT(0);
 			break;
 		}
 	}
 
 	// Prefix the text by the column name
-	CString sLabel(GetAttributeLabel(m_GroupBy.nBy, KBCAL_LONG));
+	CString sLabel(GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
 
 #ifdef _DEBUG
 	return Misc::Format(_T("%s%s (%ld)"), sLabel, sGroupBy, dwHeaderID);
@@ -874,7 +875,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = GetAttributeLabel(TDCA_PARENT, nLabelVis);
+	CString sLabel = GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
@@ -957,7 +958,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = GetAttributeLabel(TDCA_FILELINK, nLabelVis);
+	CString sLabel = GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
 
 	if (!sLabel.IsEmpty())
 	{
@@ -1351,16 +1352,19 @@ UINT CKanbanColumnCtrl::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 	// rendered as icons
 	case TDCA_FLAG:				return 0;
 	case TDCA_LOCK:				return 0;
+
+	default:
+		ASSERT(KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib));
+		break;
 	}
 
-	ASSERT(0);
 	return 0;
 }
 
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
+	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
@@ -1372,23 +1376,31 @@ void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAtt
 	}
 }
 
-CString CKanbanColumnCtrl::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
+CString CKanbanColumnCtrl::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+										   const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	return GetAttributeLabel(nAttrib, nLabelVis) + sValue;
+	return GetAttributeLabel(nAttrib, nLabelVis, aCustAttribDefs) + sValue;
 }
 
-CString CKanbanColumnCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis)
+CString CKanbanColumnCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+											 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	UINT nFormatID = 0;
-
-	if (nLabelVis != KBCAL_NONE)
-		nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
-
-	if (nFormatID == 0)
+	if (nLabelVis == KBCAL_NONE)
 		return _T("");
 
-	CEnString sLabel(nFormatID);
-	sLabel += _T(": ");
+	CString sLabel;
+
+	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+	{
+		sLabel = aCustAttribDefs.GetDefinitionLabel(nAttrib) + _T(": ");
+	}
+	else
+	{
+		UINT nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
+
+		if (nFormatID != 0)
+			sLabel = CEnString(nFormatID) + _T(": ");
+	}
 
 	return sLabel;
 }
@@ -1798,16 +1810,23 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 	return nNumDeleted;
 }
 
-void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
+void CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
 {
-	CString sAttribID = KANBANITEM::GetAttributeID(nAttrib, m_aCustAttribDefs);
-
-	if ((nAttrib != m_GroupBy.nBy) ||
-		(sAttribID != m_GroupBy.sAttribID))
+	if ((nAttrib != m_nGroupBy) || (sCustomAttribID != m_sGroupByCustAttribID))
 	{
-		m_GroupBy.nBy = nAttrib;
-		m_GroupBy.sAttribID = sAttribID;
-		m_GroupBy.bAscending = HasOption(KBCF_SORTGROUPSASCENDING);
+		if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+		{
+			ASSERT(sCustomAttribID);
+
+			if (m_aCustAttribDefs.GetSize())
+			{
+				ASSERT(m_aCustAttribDefs.HasDefinition(sCustomAttribID));
+				nAttrib = m_aCustAttribDefs.GetDefinitionID(sCustomAttribID);
+			}
+		}
+
+		m_nGroupBy = nAttrib;
+		m_sGroupByCustAttribID = sCustomAttribID;
 
 		CStringSet aGroups;
 		GetGroupValues(aGroups);
@@ -1826,7 +1845,7 @@ void CKanbanColumnCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
 	{
 		m_crGroupHeaderBkgnd = color;
 
-		if (GetSafeHwnd() && (m_GroupBy.nBy != TDCA_NONE))
+		if (GetSafeHwnd() && (m_nGroupBy != TDCA_NONE))
 			Invalidate(FALSE);
 	}
 }
@@ -1915,7 +1934,7 @@ BOOL CKanbanColumnCtrl::IsGroupHeaderItem(HTREEITEM hti) const
 
 int CKanbanColumnCtrl::GetGroupValues(CStringSet& aValues) const
 {
-	return GetGroupValues(m_GroupBy.nBy, m_GroupBy.sAttribID, aValues);
+	return GetGroupValues(m_nGroupBy, m_sGroupByCustAttribID, aValues);
 }
 
 int CKanbanColumnCtrl::GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAttribID, CStringSet& aValues) const
@@ -1934,7 +1953,7 @@ int CKanbanColumnCtrl::GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAtt
 			ASSERT(pKI);
 
 			if (pKI)
-				aValues.Add(pKI->GetAttributeDisplayValue(nAttrib));
+				aValues.Add(pKI->GetAttributeDisplayValue(nAttrib, m_aCustAttribDefs));
 		
 			hti = GetNextItem(hti, TVGN_NEXT);
 		}
@@ -1945,9 +1964,8 @@ int CKanbanColumnCtrl::GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAtt
 
 void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
-	m_SortBy.nBy = nBy;
-	m_SortBy.sAttribID = KANBANITEM::GetAttributeID(nBy, m_aCustAttribDefs);
-	m_SortBy.bAscending = bAscending;
+	m_nSortBy = nBy;
+	m_bSortAscending = bAscending;
 
 	CHoldRedraw hr(*this);
 	DoSort();
@@ -1955,7 +1973,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 
 void CKanbanColumnCtrl::DoSort()
 {
-	if (GetCount() < 2)
+	if (CTreeCtrl::GetCount() < 2)
 		return;
 
 	TVSORTCB tvs = { NULL, SortProc, (LPARAM)this };
@@ -1993,7 +2011,7 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 		return nCompare;
 
 	// 3. Regular Sorting
-	nCompare = CompareAttributeValues(pKI1, pKI2, m_SortBy);
+	nCompare = CompareAttributeValues(pKI1, pKI2, m_nSortBy, m_bSortAscending);
 
 	if (nCompare != 0)
 		return nCompare;
@@ -2005,7 +2023,7 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 		// Compare relative position
 		return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);
 	}
-	else if (m_SortBy.nBy == TDCA_NONE)
+	else if (m_nSortBy == TDCA_NONE)
 	{
 		// Compare absolute position
 		return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
@@ -2016,7 +2034,7 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 
 int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 {
-	if (m_GroupBy.nBy == TDCA_NONE)
+	if (m_nGroupBy == TDCA_NONE)
 		return 0;
 
 	BOOL bIsGroupHeader1 = IsGroupHeaderTask(lParam1);
@@ -2030,12 +2048,12 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 	if (bIsGroupHeader1)
 		m_mapGroupHeaders.Lookup(lParam1, sItem1);
 	else
-		sItem1 = pKI1->GetAttributeDisplayValue(m_GroupBy.nBy);
+		sItem1 = pKI1->GetAttributeDisplayValue(m_nGroupBy, m_aCustAttribDefs);
 
 	if (bIsGroupHeader2)
 		m_mapGroupHeaders.Lookup(lParam2, sItem2);
 	else
-		sItem2 = pKI2->GetAttributeDisplayValue(m_GroupBy.nBy);
+		sItem2 = pKI2->GetAttributeDisplayValue(m_nGroupBy, m_aCustAttribDefs);
 
 	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
@@ -2051,7 +2069,7 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 		}
 	}
 
-	return (m_GroupBy.bAscending ? nCompare : -nCompare);
+	return (HasOption(KBCF_SORTGROUPSASCENDING) ? nCompare : -nCompare);
 }
 
 int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const
@@ -2132,11 +2150,11 @@ int CKanbanColumnCtrl::CompareParentAndPins(const KANBANITEM*& pKI1, const KANBA
 	return 0;
 }
 
-int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col) const
+int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const
 {
 	int nCompare = 0;
 
-	switch (col.nBy)
+	switch (nBy)
 	{
 	case TDCA_NONE:
 		return 0; // Handled by caller
@@ -2152,10 +2170,8 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 	case TDCA_TAGS:
 	case TDCA_VERSION:
 		{
-			ASSERT(!col.sAttribID.IsEmpty());
-
-			CString sValue1 = pKI1->GetAttributeDisplayValue(col.nBy);
-			CString sValue2 = pKI2->GetAttributeDisplayValue(col.nBy);
+			CString sValue1 = pKI1->GetAttributeDisplayValue(nBy);
+			CString sValue2 = pKI2->GetAttributeDisplayValue(nBy);
 
 			nCompare = Misc::NaturalCompare(sValue1, sValue2);
 		}
@@ -2163,8 +2179,6 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 
 	case TDCA_PRIORITY:
 		{
-			ASSERT(!col.sAttribID.IsEmpty());
-
 			int nPriority1 = pKI1->GetPriority(m_dwOptions);
 			int nPriority2 = pKI2->GetPriority(m_dwOptions);
 
@@ -2174,18 +2188,11 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 
 	case TDCA_RISK:
 		{
-			ASSERT(!col.sAttribID.IsEmpty());
-
 			int nRisk1 = pKI1->GetRisk(m_dwOptions);
 			int nRisk2 = pKI2->GetRisk(m_dwOptions);
 
 			nCompare = Misc::CompareNumT(nRisk1, nRisk2);
 		}
-		break;
-
-	case TDCA_CUSTOMATTRIB:
-		// TODO
-		ASSERT(0);
 		break;
 
 	case TDCA_COST:
@@ -2252,11 +2259,21 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 		break;
 
 	default:
-		ASSERT(0);
+		if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nBy))
+		{
+			CString sValue1 = pKI1->GetAttributeDisplayValue(nBy, m_aCustAttribDefs);
+			CString sValue2 = pKI2->GetAttributeDisplayValue(nBy, m_aCustAttribDefs);
+
+			nCompare = Misc::NaturalCompare(sValue1, sValue2);
+		}
+		else
+		{
+			ASSERT(0);
+		}
 		break;
 	}
 
-	return (col.bAscending ? nCompare : -nCompare);
+	return (bAscending ? nCompare : -nCompare);
 }
 
 void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
@@ -2689,7 +2706,7 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 			{
 				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility);
+					CString sLabel = GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
@@ -2833,9 +2850,10 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 				default: // Rest
 					{
-						CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
-						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
+						CString sValue = pKI->GetAttributeDisplayValue(nAttrib, m_aCustAttribDefs);
+						CString sAttrib = FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
 
+						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
 						nMaxAttribWidth = max(nMaxAttribWidth, nAttribWidth);
 					}
 					break;

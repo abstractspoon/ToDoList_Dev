@@ -30,6 +30,8 @@ struct KANBANCUSTOMATTRIBDEF
 
 	CString sAttribID, sAttribName;
 	BOOL bMultiValue;
+
+	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 };
 
 class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
@@ -38,6 +40,14 @@ public:
 	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal = FALSE);
 	BOOL HasDefinition(const CString& sAttribID) const;
 	int FindDefinition(const CString& sAttribID) const;
+
+	TDC_ATTRIBUTE GetDefinitionID(const CString& sAttribID) const;
+
+	CString GetDefinitionID(TDC_ATTRIBUTE nAttrib) const;
+	CString GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const;
+
+protected:
+	const KANBANCUSTOMATTRIBDEF& GetDefinition(TDC_ATTRIBUTE nAttrib) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -81,6 +91,7 @@ struct KANBANITEM
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
+	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const;
 	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
@@ -206,36 +217,6 @@ public:
 	BOOL MatchesAll(const CKanbanColumnArray& other, BOOL bIncDisplayAttribs = TRUE) const;
 
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-struct KANBANSORTCOLUMN
-{
-	KANBANSORTCOLUMN() : nBy(TDCA_NONE), bAscending(TRUE) { }
-
-	TDC_ATTRIBUTE nBy;
-	CString sAttribID;
-	BOOL bAscending;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-/*
-class CHTIMap;
-
-struct KANBANSORT
-{
-	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2, DWORD dwOpt);
-
-	BOOL HasOption(DWORD dwOpt) const { return (dwOptions & dwOpt) == dwOpt; }
-
-	const CKanbanItemMap& data;
-	const CHTIMap& items;
-
-	KANBANSORTCOLUMN sort, group;
-	DWORD dwOptions;
-};
-*/
 
 /////////////////////////////////////////////////////////////////////////////
 

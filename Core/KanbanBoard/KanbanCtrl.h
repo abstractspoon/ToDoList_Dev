@@ -64,7 +64,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 
  	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -79,9 +79,9 @@ public:
 	int GetVisibleColumnCount() const;
 	int GetVisibleTaskCount() const { return m_aColumns.GetVisibleTaskCount(); }
 
+	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
 	int GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const;
-	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
 
@@ -96,7 +96,6 @@ public:
 
 protected:
 	BOOL m_bReadOnly;
-	BOOL m_bSortAscending;
 	BOOL m_bSelectTasks;
 	BOOL m_bSettingColumnFocus;
 	BOOL m_bResizingHeader;
@@ -105,8 +104,6 @@ protected:
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
-	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy, m_nGroupBy;
-	CString m_sTrackAttribID;
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPrevPinnedTasks;
 	CPoint m_ptDragStart;
@@ -118,6 +115,10 @@ protected:
 	CFontCache m_fonts;
 	CImageList m_ilDrag;
 	CMidnightTimer m_timerMidnight;
+
+	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy, m_nGroupBy;
+	CString m_sTrackAttribID, m_sGroupByCustAttribID;
+	BOOL m_bSortAscending;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;

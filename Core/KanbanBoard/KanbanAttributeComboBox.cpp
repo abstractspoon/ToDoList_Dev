@@ -73,6 +73,10 @@ void CKanbanAttributeComboBox::BuildCombo()
 		CEnString sCustAttrib;
 		sCustAttrib.Format(IDS_CUSTOMATTRIB, kcaDef.sAttribName);
 
+#ifdef _DEBUG
+		sCustAttrib += Misc::Format(_T(" [%ld]"), (TDCA_CUSTOMATTRIB + nCust));
+#endif
+
 		CLocalizer::IgnoreString(sCustAttrib);
 		CDialogHelper::AddString(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
 	}
@@ -104,17 +108,21 @@ void CKanbanAttributeComboBox::ShowFixedColumns(BOOL bShow)
 	}
 }
 
+TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
+{
+	return CDialogHelper::GetSelectedItemData(*this, GetFallbackAttribute());
+}
+
 TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAttribID) const
 {
-	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemData(*this, TDCA_STATUS);
+	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemData(*this, GetFallbackAttribute());
 
-	if ((nSelAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nSelAttrib <= TDCA_CUSTOMATTRIB_LAST))
+	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nSelAttrib))
 	{
 		int nCust = (nSelAttrib - TDCA_CUSTOMATTRIB_FIRST);
 		ASSERT( nCust < m_aCustAttribDefs.GetSize());
 
 		sCustomAttribID = m_aCustAttribDefs[nCust].sAttribID;
-		nSelAttrib = TDCA_CUSTOMATTRIB;
 	}
 	else
 	{	
@@ -126,7 +134,7 @@ TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAtt
 
 BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
 {
-	BOOL bCustom = ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib <= TDCA_CUSTOMATTRIB_LAST));
+	BOOL bCustom = KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib);
 
 	if ((bCustom && sCustomAttribID.IsEmpty()) || (!bCustom && !sCustomAttribID.IsEmpty()))
 	{
@@ -134,17 +142,8 @@ BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const
 		return FALSE;
 	}
 
-	int nSelItem = CB_ERR;
-
 	if (bCustom)
-	{
-		int nCust = m_aCustAttribDefs.FindDefinition(sCustomAttribID);
-
-		if (nCust == -1)
-			return FALSE;
-
-		nAttrib = (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB + nCust);
-	}
+		nAttrib = m_aCustAttribDefs.GetDefinitionID(sCustomAttribID);
 
 	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttrib));
 }

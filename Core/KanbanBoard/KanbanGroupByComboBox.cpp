@@ -62,6 +62,9 @@ void CKanbanGroupByComboBox::BuildCombo()
 	CKanbanAttributeComboBox::BuildCombo();
 
 	// Remove excluded attribute
+	if (m_aCustAttribDefs.GetSize() && !m_sExcludeCustomAttribID.IsEmpty())
+		m_nExcludeAttribID = m_aCustAttribDefs.GetDefinitionID(m_sExcludeCustomAttribID);
+
 	int nExclude = CDialogHelper::FindItemByData(*this, m_nExcludeAttribID);
 	
 	if (nExclude != CB_ERR)

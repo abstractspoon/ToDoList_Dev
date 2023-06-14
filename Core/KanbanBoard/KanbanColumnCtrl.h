@@ -57,6 +57,7 @@ public:
 	BOOL IsBacklog() const;
 	BOOL IsEmpty() const { return (GetCount() == 0); }
 	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
+	UINT GetCount() const { return (CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
 
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	
@@ -67,7 +68,7 @@ public:
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	void GroupBy(TDC_ATTRIBUTE nAttrib);
+	void GroupBy(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
@@ -117,9 +118,9 @@ public:
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
-	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis);
-	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
+	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+								   const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 
 protected:
 	BOOL m_bSelected;
@@ -148,7 +149,9 @@ protected:
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
 	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd;
 
-	KANBANSORTCOLUMN m_SortBy, m_GroupBy;
+	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
+	BOOL m_bSortAscending;
+	CString m_sGroupByCustAttribID;
 
 	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
 	CGroupHeaderMap m_mapGroupHeaders;
@@ -230,7 +233,7 @@ protected:
 	void DoSort();
 	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
 	int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const;
-	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORTCOLUMN& col) const;
+	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
@@ -259,6 +262,8 @@ protected:
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
+	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+									 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 
 };
 

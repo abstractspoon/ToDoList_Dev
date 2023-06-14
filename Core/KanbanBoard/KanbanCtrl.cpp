@@ -569,7 +569,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 
 	RefreshColumnHeaderText();
 	
-	m_aColumns.GroupBy(m_nGroupBy);
+	m_aColumns.GroupBy(m_nGroupBy, m_sGroupByCustAttribID);
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
@@ -1172,19 +1172,19 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 		
 	case TDCA_CUSTOMATTRIB:
 		{
-			BOOL bChange = FALSE;
-			int nCustom = pTasks->GetCustomAttributeCount();
+			BOOL bChange = FALSE, bWasEmpty = (m_aCustomAttribDefs.GetSize() == 0);
+			int nNumCust = pTasks->GetCustomAttributeCount();
 
-			while (nCustom--)
+			for (int nCust = 0; nCust < nNumCust; nCust++)
 			{
 				// Save off each attribute ID
-				if (pTasks->IsCustomAttributeEnabled(nCustom))
+				if (pTasks->IsCustomAttributeEnabled(nCust))
 				{
-					CString sAttribID(pTasks->GetCustomAttributeID(nCustom));
-					CString sAttribName(pTasks->GetCustomAttributeLabel(nCustom));
+					CString sAttribID(pTasks->GetCustomAttributeID(nCust));
+					CString sAttribName(pTasks->GetCustomAttributeLabel(nCust));
 
 					// Hack (values from tdcenum.h)
-					DWORD dwListType = (pTasks->GetCustomAttributeType(nCustom) & 0xff00);
+					DWORD dwListType = (pTasks->GetCustomAttributeType(nCust) & 0xff00);
 					BOOL bMultiList = ((dwListType == 0x0300) || (dwListType == 0x0400));
 					
 					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
@@ -1195,7 +1195,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 
 					pDefValues->RemoveAll();
 
-					CString sListData = pTasks->GetCustomAttributeListData(nCustom);
+					CString sListData = pTasks->GetCustomAttributeListData(nCust);
 
 					// 'Auto' list values follow 'default' list values
 					//  separated by a TAB
@@ -2017,7 +2017,7 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	// current sort, whereas we always need to be maintain some
 	// kind of sorted state even if we are technically 'unsorted'
 	if (m_nGroupBy != TDCA_NONE)
-		m_aColumns.GroupBy(m_nGroupBy);
+		m_aColumns.GroupBy(m_nGroupBy, m_sGroupByCustAttribID);
 	else
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
@@ -2065,15 +2065,21 @@ void CKanbanCtrl::FixupColumnFocus()
 	}
 }
 
-BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
+BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
 {
-	if (nAttrib == m_nTrackAttribute)
+	if ((nAttrib == m_nTrackAttribute) && (sCustomAttribID == m_sTrackAttribID))
 		return FALSE;
 
-	if (nAttrib != m_nGroupBy)
+	if ((nAttrib != m_nGroupBy) || (sCustomAttribID != m_sGroupByCustAttribID))
 	{
-		m_nGroupBy = nAttrib;
-		m_aColumns.GroupBy(nAttrib);
+		if (!sCustomAttribID.IsEmpty() && m_aCustomAttribDefs.GetSize())
+			m_nGroupBy = m_aCustomAttribDefs.GetDefinitionID(sCustomAttribID);
+		else
+			m_nGroupBy = nAttrib;
+
+		m_sGroupByCustAttribID = sCustomAttribID;
+
+		m_aColumns.GroupBy(nAttrib, sCustomAttribID);
 	}
 	
 	return TRUE;
@@ -2093,35 +2099,40 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 								 const CKanbanColumnArray& aColumnDefs)
 {
 	// validate input and check for changes
-	BOOL bChange = (nAttrib != m_nTrackAttribute);
-
-	switch (nAttrib)
+	BOOL bChange = FALSE;
+	
+	if (!sCustomAttribID.IsEmpty())
 	{
-	case TDCA_STATUS:
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_CATEGORY:
-	case TDCA_VERSION:
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-	case TDCA_TAGS:
-		break;
-		
-	case TDCA_CUSTOMATTRIB:
-		if (sCustomAttribID.IsEmpty())
+		ASSERT(KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib));
+		bChange = (sCustomAttribID != m_sTrackAttribID);
+
+		if (m_aCustomAttribDefs.GetSize())
+			m_nTrackAttribute = m_aCustomAttribDefs.GetDefinitionID(sCustomAttribID);
+	}
+	else
+	{
+		switch (nAttrib)
+		{
+		case TDCA_STATUS:
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+		case TDCA_CATEGORY:
+		case TDCA_VERSION:
+		case TDCA_PRIORITY:
+		case TDCA_RISK:
+		case TDCA_TAGS:
+			bChange = (nAttrib != m_nTrackAttribute);
+			break;
+
+		default:
+			ASSERT(0);
 			return FALSE;
-
-		if (!bChange)
-			bChange = (sCustomAttribID != m_sTrackAttribID);
-		break;
-
-	default:
-		return FALSE;
+		}
 	}
 
-	// Check if only display attributes have changed
 	if (!bChange)
 	{
+		// Check if only display attributes have changed
 		if (UsingFixedColumns())
 		{
 			if (m_aColumnDefs.MatchesAll(aColumnDefs))
@@ -2176,7 +2187,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 		m_sTrackAttribID = KANBANITEM::GetAttributeID(nAttrib);
 		break;
 		
-	case TDCA_CUSTOMATTRIB:
+	default:
 		m_sTrackAttribID = sCustomAttribID;
 		break;
 	}
@@ -2208,7 +2219,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 	{
 		pCol->SetOptions(m_dwOptions);
 		pCol->SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
-		pCol->GroupBy(m_nGroupBy);
+		pCol->GroupBy(m_nGroupBy, m_sGroupByCustAttribID);
 
 		if (pCol->Create(IDC_COLUMNCTRL, this))
 		{
@@ -2614,7 +2625,7 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 			while (nAtt--)
 			{
 				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
-				CString sLabel = CKanbanColumnCtrl::FormatAttribute(nAttribID, _T(""), nLabelVis);
+				CString sLabel = CKanbanColumnCtrl::FormatAttribute(nAttribID, _T(""), nLabelVis, m_aCustomAttribDefs);
 
 				aLabelLen[nAtt] = sLabel.GetLength();
 
@@ -3553,15 +3564,15 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 
 	if (bRestChanged)
 	{
-		m_aColumns.GroupBy(m_nGroupBy);
+		m_aColumns.GroupBy(m_nGroupBy, m_sGroupByCustAttribID);
 	}
 	else
 	{
 		if (bSrcChanged)
-			pSrcCol->GroupBy(m_nGroupBy);
+			pSrcCol->GroupBy(m_nGroupBy, m_sGroupByCustAttribID);
 
 		if (bDestChanged)
-			pDestCol->GroupBy(m_nGroupBy);
+			pDestCol->GroupBy(m_nGroupBy, m_sGroupByCustAttribID);
 	}
 
 	return TRUE;

@@ -38,6 +38,7 @@ protected:
 
 protected:
 	virtual void BuildCombo();
+	virtual TDC_ATTRIBUTE GetFallbackAttribute() const { return TDCA_NONE; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

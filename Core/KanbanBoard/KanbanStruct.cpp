@@ -30,6 +30,11 @@ BOOL KANBANCUSTOMATTRIBDEF::operator==(const KANBANCUSTOMATTRIBDEF& kca) const
 			(bMultiValue == kca.bMultiValue));
 }
 
+BOOL KANBANCUSTOMATTRIBDEF::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
+{
+	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
+}
+
 int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal)
 {
 	ASSERT(!sAttribID.IsEmpty());
@@ -74,6 +79,41 @@ int CKanbanCustomAttributeDefinitionArray::FindDefinition(const CString& sAttrib
 
 	// else
 	return -1;
+}
+
+TDC_ATTRIBUTE CKanbanCustomAttributeDefinitionArray::GetDefinitionID(const CString& sAttribID) const
+{
+	int nAtt = FindDefinition(sAttribID);
+
+	if (nAtt == -1)
+		return TDCA_NONE;
+
+	return (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB + nAtt);
+}
+
+CString CKanbanCustomAttributeDefinitionArray::GetDefinitionID(TDC_ATTRIBUTE nAttrib) const
+{
+	return GetDefinition(nAttrib).sAttribID;
+}
+
+CString CKanbanCustomAttributeDefinitionArray::GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const
+{
+	return GetDefinition(nAttrib).sAttribName;
+}
+
+const KANBANCUSTOMATTRIBDEF& CKanbanCustomAttributeDefinitionArray::GetDefinition(TDC_ATTRIBUTE nAttrib) const
+{
+	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+	{
+		int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
+
+		if ((nCust >= 0) && (nCust < GetSize()))
+			return GetAt(nCust);
+	}
+	 
+	//else
+	static KANBANCUSTOMATTRIBDEF dummy;
+	return dummy;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -377,6 +417,15 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 	return (Misc::Find(select.szWords, sAttrib, select.bCaseSensitive, select.bWholeWord) != -1);
 }
 
+CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const
+{
+	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+		return GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib, aCustAttribDefs));
+
+	// else
+	return GetAttributeDisplayValue(nAttrib);
+}
+
 CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 {
 	switch (nAttrib)
@@ -584,7 +633,7 @@ COLORREF KANBANITEM::GetBorderColor(BOOL bColorIsBkgnd) const
 
 BOOL KANBANITEM::HasColor() const
 {
-	return ((color != CLR_NONE)/* && (color != GetSysColor(COLOR_WINDOWTEXT))*/);
+	return (color != CLR_NONE);
 }
 
 BOOL KANBANITEM::IsDone(BOOL bIncludeGoodAs) const
@@ -670,7 +719,7 @@ CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAtt
 		return GetAttributeID(nAttrib);
 
 	default:
-		if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib <= TDCA_CUSTOMATTRIB_LAST))
+		if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib) && aCustAttribs.GetSize())
 		{
 			int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
 
