@@ -81,7 +81,6 @@ public:
 
 	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
-	int GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const;
 	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
 

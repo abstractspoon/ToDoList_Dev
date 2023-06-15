@@ -1271,25 +1271,6 @@ int CKanbanCtrl::GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aVa
 	return aValues.GetSize();
 }
 
-int CKanbanCtrl::GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const
-{
-	CString sAttribID(KANBANITEM::GetAttributeID(nAttrib, m_aCustomAttribDefs));
-
-	const CKanbanValueMap* pValues = m_mapAttributeValues.GetMapping(sAttribID);
-	aValues.SetSize(pValues->GetCount());
-
-	if (pValues)
-	{
-		POSITION pos = pValues->GetStartPosition();
-		int nItem = 0;
-
-		while (pos)
-			pValues->GetNextValue(pos, aValues[nItem++]);
-	}
-
-	return aValues.GetSize();
-}
-
 int CKanbanCtrl::GetAttributeValues(CKanbanAttributeValueMap& mapValues) const
 {
 	CString sAttribID;
