@@ -210,6 +210,7 @@ public:
 	int Find(TDC_ATTRIBUTE nCustAttribID, int nIgnore = -1) const;
 	int Find(TDC_COLUMN nCustColID, int nIgnore = -1) const;
 
+	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	

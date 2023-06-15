@@ -4228,30 +4228,34 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			double dValue = 0.0;
 			TDC_UNITS nUnits = TDCU_DAYS;
 
-			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
-				return EMPTY_STR;
-
+			BOOL bSuccess = m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
 			DWORD dwResultType = m_data.m_aCustomAttribDefs.GetCalculationResultDataType(attribDef.Calculation());
 			
 			switch (dwResultType)
 			{
 			case TDCCA_TIMEPERIOD:
-				return GetTimePeriod(dValue, nUnits, TRUE);
+				if (bSuccess)
+				{
+					return GetTimePeriod(dValue, nUnits, TRUE);
+				}
+				break;
 
 			case TDCCA_DATE:
-				return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), attribDef.HasFeature(TDCCAF_SHOWTIME));
+				if (bSuccess)
+				{
+					return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO),
+														  m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+				}
+				break;
 
 			case TDCCA_DOUBLE:
 			case TDCCA_INTEGER:
 			case TDCCA_FRACTION:
+				if ((dValue != 0.0) || !m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_HIDEZERO))
 				{
-					if ((dValue == 0.0) && attribDef.HasFeature(TDCCAF_HIDEZERO))
-						return EMPTY_STR;
-
 					return TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(dValue, dwResultType, attribDef.dwFeatures);
 				}
 				break;
-
 			}
 
 			return EMPTY_STR;
