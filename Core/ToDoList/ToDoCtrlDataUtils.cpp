@@ -3519,6 +3519,19 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	{
 		return attribDef.GetDataAsDouble(data, dValue, nUnits);
 	}
+	else
+	{
+		// Allow strictly numeric types to be empty == 0.0
+		switch (attribDef.GetDataType())
+		{
+		case TDCCA_INTEGER:
+		case TDCCA_DOUBLE:
+		case TDCCA_TIMEPERIOD:
+		case TDCCA_FRACTION:
+			dValue = 0.0;
+			return TRUE;
+		}
+	}
 
 	// else
 	return FALSE;
