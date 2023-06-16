@@ -3,19 +3,93 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "resource.h"
 #include "KanbanStruct.h"
 #include "Kanbanstatic.h"
-#include "Kanbanenum.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\EnString.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+CString KanbanDisplay::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+										const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+{
+	return GetAttributeLabel(nAttrib, nLabelVis, aCustAttribDefs) + sValue;
+}
+
+CString KanbanDisplay::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+										 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+{
+	if (nLabelVis == KBCAL_NONE)
+		return _T("");
+
+	CString sLabel;
+
+	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+	{
+		sLabel = aCustAttribDefs.GetDefinitionLabel(nAttrib) + _T(": ");
+	}
+	else
+	{
+		UINT nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
+
+		if (nFormatID != 0)
+			sLabel = CEnString(nFormatID) + _T(": ");
+	}
+
+	return sLabel;
+}
+
+UINT KanbanDisplay::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
+{
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCBY:			return (bLong ? IDS_DISPLAY_ALLOCBY : IDS_DISPLAY_ALLOCBY_SHORT);
+	case TDCA_ALLOCTO:			return (bLong ? IDS_DISPLAY_ALLOCTO : IDS_DISPLAY_ALLOCTO_SHORT);
+	case TDCA_CATEGORY:			return (bLong ? IDS_DISPLAY_CATEGORY : IDS_DISPLAY_CATEGORY_SHORT);
+	case TDCA_COST:				return (bLong ? IDS_DISPLAY_COST : IDS_DISPLAY_COST_SHORT);
+	case TDCA_CREATEDBY:		return (bLong ? IDS_DISPLAY_CREATEDBY : IDS_DISPLAY_CREATEDBY_SHORT);
+	case TDCA_CREATIONDATE:		return (bLong ? IDS_DISPLAY_CREATEDATE : IDS_DISPLAY_CREATEDATE_SHORT);
+	case TDCA_DONEDATE:			return (bLong ? IDS_DISPLAY_DONEDATE : IDS_DISPLAY_DONEDATE_SHORT);
+	case TDCA_DUEDATE:			return (bLong ? IDS_DISPLAY_DUEDATE : IDS_DISPLAY_DUEDATE_SHORT);
+	case TDCA_EXTERNALID:		return (bLong ? IDS_DISPLAY_EXTERNALID : IDS_DISPLAY_EXTERNALID_SHORT);
+	case TDCA_FILELINK:			return (bLong ? IDS_DISPLAY_FILELINK : IDS_DISPLAY_FILELINK_SHORT);
+	case TDCA_ID:				return (bLong ? IDS_DISPLAY_TASKID : IDS_DISPLAY_TASKID_SHORT);
+	case TDCA_LASTMODDATE:		return (bLong ? IDS_DISPLAY_LASTMOD : IDS_DISPLAY_LASTMOD_SHORT);
+	case TDCA_PARENT:			return (bLong ? IDS_DISPLAY_PARENT : IDS_DISPLAY_PARENT_SHORT);
+	case TDCA_PERCENT:			return (bLong ? IDS_DISPLAY_PERCENT : IDS_DISPLAY_PERCENT_SHORT);
+	case TDCA_PRIORITY:			return (bLong ? IDS_DISPLAY_PRIORITY : IDS_DISPLAY_PRIORITY_SHORT);
+	case TDCA_RECURRENCE:		return (bLong ? IDS_DISPLAY_RECURRENCE : IDS_DISPLAY_RECURRENCE_SHORT);
+	case TDCA_RISK:				return (bLong ? IDS_DISPLAY_RISK : IDS_DISPLAY_RISK_SHORT);
+	case TDCA_STARTDATE:		return (bLong ? IDS_DISPLAY_STARTDATE : IDS_DISPLAY_STARTDATE_SHORT);
+	case TDCA_STATUS:			return (bLong ? IDS_DISPLAY_STATUS : IDS_DISPLAY_STATUS_SHORT);
+	case TDCA_TAGS:				return (bLong ? IDS_DISPLAY_TAGS : IDS_DISPLAY_TAGS_SHORT);
+	case TDCA_TIMEESTIMATE:		return (bLong ? IDS_DISPLAY_TIMEEST : IDS_DISPLAY_TIMEEST_SHORT);
+	case TDCA_TIMEREMAINING:	return (bLong ? IDS_DISPLAY_TIMEREMAINING : IDS_DISPLAY_TIMEREMAINING_SHORT);
+	case TDCA_TIMESPENT:		return (bLong ? IDS_DISPLAY_TIMESPENT : IDS_DISPLAY_TIMESPENT_SHORT);
+	case TDCA_VERSION:			return (bLong ? IDS_DISPLAY_VERSION : IDS_DISPLAY_VERSION_SHORT);
+
+		// rendered as icons
+	case TDCA_FLAG:				return 0;
+	case TDCA_LOCK:				return 0;
+
+	default:
+		ASSERT(KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib));
+		break;
+	}
+
+	return 0;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Kanbanenum.h"
+
 #include "..\shared\mapex.h"
 
 #include "..\Interfaces\iuiextension.h"
@@ -34,6 +36,8 @@ struct KANBANCUSTOMATTRIBDEF
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
 {
 public:
@@ -49,6 +53,18 @@ public:
 protected:
 	const KANBANCUSTOMATTRIBDEF& GetDefinition(TDC_ATTRIBUTE nAttrib) const;
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+namespace KanbanDisplay
+{
+	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
+	CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+							 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

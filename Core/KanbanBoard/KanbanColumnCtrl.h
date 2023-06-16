@@ -119,8 +119,6 @@ public:
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
-	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
-								   const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 
 protected:
 	BOOL m_bSelected;
@@ -260,10 +258,6 @@ protected:
 	BOOL DrawTaskIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rIcon) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-
-	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
-	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
-									 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 
 };
 

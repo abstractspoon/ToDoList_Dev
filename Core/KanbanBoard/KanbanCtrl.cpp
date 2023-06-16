@@ -2606,7 +2606,7 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 			while (nAtt--)
 			{
 				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
-				CString sLabel = CKanbanColumnCtrl::FormatAttribute(nAttribID, _T(""), nLabelVis, m_aCustomAttribDefs);
+				CString sLabel = KanbanDisplay::FormatAttribute(nAttribID, _T(""), nLabelVis, m_aCustomAttribDefs);
 
 				aLabelLen[nAtt] = sLabel.GetLength();
 

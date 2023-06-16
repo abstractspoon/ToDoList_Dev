@@ -717,7 +717,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 	}
 
 	// Prefix the text by the column name
-	CString sLabel(GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
+	CString sLabel(KanbanDisplay::GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
 
 #ifdef _DEBUG
 	return Misc::Format(_T("%s%s (%ld)"), sLabel, sGroupBy, dwHeaderID);
@@ -875,7 +875,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KanbanDisplay::GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
@@ -958,7 +958,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KanbanDisplay::GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
 
 	if (!sLabel.IsEmpty())
 	{
@@ -1320,51 +1320,10 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip) const
 	return TRUE;
 }
 
-UINT CKanbanColumnCtrl::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
-{
-	switch (nAttrib)
-	{
-	case TDCA_ALLOCBY:			return (bLong ? IDS_DISPLAY_ALLOCBY :		IDS_DISPLAY_ALLOCBY_SHORT);
-	case TDCA_ALLOCTO:			return (bLong ? IDS_DISPLAY_ALLOCTO :		IDS_DISPLAY_ALLOCTO_SHORT);
-	case TDCA_CATEGORY:			return (bLong ? IDS_DISPLAY_CATEGORY :		IDS_DISPLAY_CATEGORY_SHORT);
-	case TDCA_COST:				return (bLong ? IDS_DISPLAY_COST :			IDS_DISPLAY_COST_SHORT);
-	case TDCA_CREATEDBY:		return (bLong ? IDS_DISPLAY_CREATEDBY :		IDS_DISPLAY_CREATEDBY_SHORT);
-	case TDCA_CREATIONDATE:		return (bLong ? IDS_DISPLAY_CREATEDATE :	IDS_DISPLAY_CREATEDATE_SHORT);
-	case TDCA_DONEDATE:			return (bLong ? IDS_DISPLAY_DONEDATE :		IDS_DISPLAY_DONEDATE_SHORT);
-	case TDCA_DUEDATE:			return (bLong ? IDS_DISPLAY_DUEDATE :		IDS_DISPLAY_DUEDATE_SHORT);
-	case TDCA_EXTERNALID:		return (bLong ? IDS_DISPLAY_EXTERNALID :	IDS_DISPLAY_EXTERNALID_SHORT);
-	case TDCA_FILELINK:			return (bLong ? IDS_DISPLAY_FILELINK :		IDS_DISPLAY_FILELINK_SHORT);
-	case TDCA_ID:				return (bLong ? IDS_DISPLAY_TASKID :		IDS_DISPLAY_TASKID_SHORT);
-	case TDCA_LASTMODDATE:		return (bLong ? IDS_DISPLAY_LASTMOD :		IDS_DISPLAY_LASTMOD_SHORT);
-	case TDCA_PARENT:			return (bLong ? IDS_DISPLAY_PARENT :		IDS_DISPLAY_PARENT_SHORT);
-	case TDCA_PERCENT:			return (bLong ? IDS_DISPLAY_PERCENT :		IDS_DISPLAY_PERCENT_SHORT);
-	case TDCA_PRIORITY:			return (bLong ? IDS_DISPLAY_PRIORITY :		IDS_DISPLAY_PRIORITY_SHORT);
-	case TDCA_RECURRENCE:		return (bLong ? IDS_DISPLAY_RECURRENCE :	IDS_DISPLAY_RECURRENCE_SHORT);
-	case TDCA_RISK:				return (bLong ? IDS_DISPLAY_RISK :			IDS_DISPLAY_RISK_SHORT);
-	case TDCA_STARTDATE:		return (bLong ? IDS_DISPLAY_STARTDATE :		IDS_DISPLAY_STARTDATE_SHORT);
-	case TDCA_STATUS:			return (bLong ? IDS_DISPLAY_STATUS :		IDS_DISPLAY_STATUS_SHORT);
-	case TDCA_TAGS:				return (bLong ? IDS_DISPLAY_TAGS :			IDS_DISPLAY_TAGS_SHORT);
-	case TDCA_TIMEESTIMATE:		return (bLong ? IDS_DISPLAY_TIMEEST :		IDS_DISPLAY_TIMEEST_SHORT);
-	case TDCA_TIMEREMAINING:	return (bLong ? IDS_DISPLAY_TIMEREMAINING : IDS_DISPLAY_TIMEREMAINING_SHORT);
-	case TDCA_TIMESPENT:		return (bLong ? IDS_DISPLAY_TIMESPENT :		IDS_DISPLAY_TIMESPENT_SHORT);
-	case TDCA_VERSION:			return (bLong ? IDS_DISPLAY_VERSION :		IDS_DISPLAY_VERSION_SHORT);
-
-	// rendered as icons
-	case TDCA_FLAG:				return 0;
-	case TDCA_LOCK:				return 0;
-
-	default:
-		ASSERT(KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib));
-		break;
-	}
-
-	return 0;
-}
-
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
+	CString sAttrib = KanbanDisplay::FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
@@ -1374,35 +1333,6 @@ void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAtt
 
 		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
 	}
-}
-
-CString CKanbanColumnCtrl::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
-										   const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
-{
-	return GetAttributeLabel(nAttrib, nLabelVis, aCustAttribDefs) + sValue;
-}
-
-CString CKanbanColumnCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
-											 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
-{
-	if (nLabelVis == KBCAL_NONE)
-		return _T("");
-
-	CString sLabel;
-
-	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
-	{
-		sLabel = aCustAttribDefs.GetDefinitionLabel(nAttrib) + _T(": ");
-	}
-	else
-	{
-		UINT nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
-
-		if (nFormatID != 0)
-			sLabel = CEnString(nFormatID) + _T(": ");
-	}
-
-	return sLabel;
 }
 
 BOOL CKanbanColumnCtrl::GetLabelEditRect(LPRECT pEdit)
@@ -2706,7 +2636,7 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 			{
 				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
+					CString sLabel = KanbanDisplay::GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
@@ -2851,7 +2781,7 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 				default: // Rest
 					{
 						CString sValue = pKI->GetAttributeDisplayValue(nAttrib, m_aCustAttribDefs);
-						CString sAttrib = FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
+						CString sAttrib = KanbanDisplay::FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
 
 						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
 						nMaxAttribWidth = max(nMaxAttribWidth, nAttribWidth);
