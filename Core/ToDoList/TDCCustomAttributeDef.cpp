@@ -1138,6 +1138,19 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 	return FALSE;
 }
 
+BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
+{
+	if (!attribDef.IsDataType(TDCCA_CALCULATION))
+		return FALSE;
+
+	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
+		return FALSE;
+
+	DWORD dwResultType = GetCalculationResultDataType(attribDef.Calculation());
+
+	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
+}
+
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
 	int nAttrib = Find(nCustColID);
