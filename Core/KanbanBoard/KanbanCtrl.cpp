@@ -1125,7 +1125,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
 		{
-			CString sAttribID(KanbanHelper::GetAttributeID(nAttribute));
+			CString sAttribID(KanbanMisc::GetAttributeID(nAttribute));
 
 			// create once only
 			if (!m_mapAttributeValues.HasMapping(sAttribID))
@@ -1153,7 +1153,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_TAGS:	
 		{
 			CString sXMLTag(GetXMLTag(nAttribute)); 
-			CString sAttribID(KanbanHelper::GetAttributeID(nAttribute));
+			CString sAttribID(KanbanMisc::GetAttributeID(nAttribute));
 
 			CStringArray aNewValues;
 			int nValue = pTasks->GetAttributeCount(sXMLTag);
@@ -1425,7 +1425,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 		CStringArray aNewValues;
 		aNewValues.Add(sNewValue);
 
-		pKI->SetTrackedAttributeValues(KanbanHelper::GetAttributeID(nAttrib), aNewValues);
+		pKI->SetTrackedAttributeValues(KanbanMisc::GetAttributeID(nAttrib), aNewValues);
 		return FALSE;
 	}
 
@@ -1483,7 +1483,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 	CStringArray aNewValues;
 	aNewValues.Add(sNewValue);
 
-	return UpdateTrackableTaskAttribute(pKI, KanbanHelper::GetAttributeID(nAttrib), aNewValues);
+	return UpdateTrackableTaskAttribute(pKI, KanbanMisc::GetAttributeID(nAttrib), aNewValues);
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
@@ -1507,7 +1507,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 		return FALSE;
 	}
 
-	return UpdateTrackableTaskAttribute(pKI, KanbanHelper::GetAttributeID(nAttrib), aNewValues);
+	return UpdateTrackableTaskAttribute(pKI, KanbanMisc::GetAttributeID(nAttrib), aNewValues);
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
@@ -2051,7 +2051,7 @@ void CKanbanCtrl::FixupColumnFocus()
 
 BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
 {
-	if (KanbanHelper::IsCustomAttribute(nAttrib) && !m_aCustomAttribDefs.HasDefinition(nAttrib))
+	if (KanbanMisc::IsCustomAttribute(nAttrib) && !m_aCustomAttribDefs.HasDefinition(nAttrib))
 		return FALSE;
 
 	if (nAttrib == m_nTrackAttribute)
@@ -2082,7 +2082,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 	// Sanity checks
 	if (!sCustomAttribID.IsEmpty())
 	{
-		if (!KanbanHelper::IsCustomAttribute(nAttrib))
+		if (!KanbanMisc::IsCustomAttribute(nAttrib))
 		{
 			ASSERT(0);
 			return FALSE;
@@ -2109,7 +2109,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 	}
 
 	// Has the attribute changed
-	CString sNewAttribID = (!sCustomAttribID.IsEmpty() ? sCustomAttribID : KanbanHelper::GetAttributeID(nAttrib));
+	CString sNewAttribID = (!sCustomAttribID.IsEmpty() ? sCustomAttribID : KanbanMisc::GetAttributeID(nAttrib));
 
 	if (sNewAttribID == m_sTrackAttribID)
 	{
@@ -2589,7 +2589,7 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 			while (nAtt--)
 			{
 				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
-				CString sLabel = KanbanHelper::FormatAttribute(nAttribID, _T(""), nLabelVis, m_aCustomAttribDefs);
+				CString sLabel = KanbanMisc::FormatAttribute(nAttribID, _T(""), nLabelVis, m_aCustomAttribDefs);
 
 				aLabelLen[nAtt] = sLabel.GetLength();
 
@@ -2668,7 +2668,7 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 // Called externally only
 BOOL CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
-	if (KanbanHelper::IsCustomAttribute(nBy) && !m_aCustomAttribDefs.HasDefinition(nBy))
+	if (KanbanMisc::IsCustomAttribute(nBy) && !m_aCustomAttribDefs.HasDefinition(nBy))
 		return FALSE;
 
 	if (nBy == m_nTrackAttribute)

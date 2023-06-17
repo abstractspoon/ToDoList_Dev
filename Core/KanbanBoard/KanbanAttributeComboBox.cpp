@@ -118,7 +118,7 @@ TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAtt
 {
 	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemData(*this, GetFallbackAttribute());
 
-	if (KanbanHelper::IsCustomAttribute(nSelAttrib))
+	if (KanbanMisc::IsCustomAttribute(nSelAttrib))
 		sCustomAttribID = m_aCustAttribDefs.GetDefinitionID(nSelAttrib);
 	else
 		sCustomAttribID.Empty();
@@ -128,7 +128,7 @@ TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAtt
 
 BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
 {
-	BOOL bCustom = KanbanHelper::IsCustomAttribute(nAttrib);
+	BOOL bCustom = KanbanMisc::IsCustomAttribute(nAttrib);
 
 	if ((bCustom && sCustomAttribID.IsEmpty()) || (!bCustom && !sCustomAttribID.IsEmpty()))
 	{

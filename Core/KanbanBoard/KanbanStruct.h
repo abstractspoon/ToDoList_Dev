@@ -55,7 +55,7 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-namespace KanbanHelper
+namespace KanbanMisc
 {
 	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
