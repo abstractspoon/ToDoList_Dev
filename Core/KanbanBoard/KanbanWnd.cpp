@@ -567,7 +567,9 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	if (!m_ctrlKanban.SelectTasks(m_aSelTaskIDs))
 		m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs);
 
-	// Update custom attribute combos
+	// Update UI elements
+	m_dlgPrefs.SetCustomAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
+
 	m_cbAttributes.SetAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
 	m_cbAttributes.SetSelectedAttribute(m_nTrackedAttrib, m_sTrackedCustomAttribID);
 
@@ -978,11 +980,17 @@ void CKanbanWnd::OnKanbanPreferences()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	// Prepare the preferences
+	CKanbanAttributeValueMap mapValues;
+	m_ctrlKanban.GetAttributeValues(mapValues);
+
+	m_dlgPrefs.SetAttributeValues(mapValues);
+
 	// If the user creates fixed column defs for the first time
 	// we will automatically turn them on
 	BOOL bHadFixedColumns = m_dlgPrefs.HasFixedColumns();
 	
-	if (m_dlgPrefs.DoModal(m_ctrlKanban) == IDOK)
+	if (m_dlgPrefs.DoModal() == IDOK)
 	{
 		UpdateKanbanCtrlPreferences(bHadFixedColumns != m_dlgPrefs.HasFixedColumns());
 

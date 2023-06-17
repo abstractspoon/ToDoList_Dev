@@ -6,7 +6,6 @@
 #include "KanbanPreferencesDlg.h"
 #include "Kanbanenum.h"
 #include "KanbanMsg.h"
-#include "KanbanCtrl.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
@@ -112,14 +111,24 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 
 TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomAttribID) const
 {
+	sCustomAttribID.Empty();
+
 	if (HasFixedColumns())
 	{
 		if (IsCustomFixedAttribute())
-			sCustomAttribID = m_sFixedCustomAttribID;
+		{
+			TDC_ATTRIBUTE nAttrib = m_aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
+
+			if (nAttrib != TDCA_NONE)
+			{
+				sCustomAttribID = m_sFixedCustomAttribID;
+				return nAttrib;
+			}
+		}
 		else
-			sCustomAttribID.Empty();
-		
-		return m_nFixedAttrib;
+		{
+			return m_nFixedAttrib;
+		}
 	}
 
 	// else
@@ -532,16 +541,14 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CPreferencesDlgBase)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-int CKanbanPreferencesDlg::DoModal(const CKanbanCtrl& ctrlKanban)
+void CKanbanPreferencesDlg::SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs)
 {
-	m_page.SetCustomAttributes(ctrlKanban.GetCustomAttributeDefinitions());
+	m_page.SetCustomAttributes(aCustomAttribDefs);
+}
 
-	CKanbanAttributeValueMap mapValues;
-	ctrlKanban.GetAttributeValues(mapValues);
-
+void CKanbanPreferencesDlg::SetAttributeValues(const CKanbanAttributeValueMap& mapValues)
+{
 	m_page.SetAttributeValues(mapValues);
-	
-	return CPreferencesDlgBase::DoModal();
 }
 
 BOOL CKanbanPreferencesDlg::OnInitDialog() 

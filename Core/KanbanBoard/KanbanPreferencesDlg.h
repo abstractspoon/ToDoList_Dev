@@ -136,7 +136,8 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	int DoModal(const CKanbanCtrl& ctrlKanban);
+	void SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
+	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:
 	CKanbanPreferencesPage m_page;
