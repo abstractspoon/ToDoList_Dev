@@ -117,13 +117,13 @@ TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomA
 	{
 		if (IsCustomFixedAttribute())
 		{
-			TDC_ATTRIBUTE nAttrib = m_aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
+			sCustomAttribID = m_sFixedCustomAttribID;
 
-			if (nAttrib != TDCA_NONE)
-			{
-				sCustomAttribID = m_sFixedCustomAttribID;
-				return nAttrib;
-			}
+			if (m_aCustAttribDefs.GetSize())
+				return m_aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
+
+			// else
+			return TDCA_CUSTOMATTRIB;
 		}
 		else
 		{

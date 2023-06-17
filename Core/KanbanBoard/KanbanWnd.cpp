@@ -1033,10 +1033,10 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 	if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
 	{
 		VERIFY(m_dlgPrefs.GetFixedColumnDefinitions(aColDefs));
-		nTrackAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustomAttrib);
-	}
 
-	RefreshKanbanCtrlDisplayAttributes();
+		nTrackAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustomAttrib);
+		ASSERT(nTrackAttrib != TDCA_NONE);
+	}
 
 	// Track the new attribute
 	m_ctrlKanban.TrackAttribute(nTrackAttrib, sCustomAttrib, aColDefs);
@@ -1059,6 +1059,8 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 			RefreshGrouping();
 		}
 	}
+
+	RefreshKanbanCtrlDisplayAttributes();
 }
 
 void CKanbanWnd::OnSelchangeOptions() 

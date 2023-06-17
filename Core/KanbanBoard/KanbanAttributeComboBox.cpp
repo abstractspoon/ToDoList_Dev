@@ -75,7 +75,7 @@ void CKanbanAttributeComboBox::BuildCombo()
 		sCustAttrib.Format(IDS_CUSTOMATTRIB, kcaDef.sAttribName);
 
 #ifdef _DEBUG
-		sCustAttrib += Misc::Format(_T(" [%ld]"), (TDCA_CUSTOMATTRIB + nCust));
+		//sCustAttrib += Misc::Format(_T(" [%ld]"), (TDCA_CUSTOMATTRIB + nCust));
 #endif
 
 		CLocalizer::IgnoreString(sCustAttrib);
