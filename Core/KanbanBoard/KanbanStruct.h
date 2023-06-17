@@ -32,8 +32,6 @@ struct KANBANCUSTOMATTRIBDEF
 
 	CString sAttribID, sAttribName;
 	BOOL bMultiValue;
-
-	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -46,17 +44,18 @@ public:
 	int FindDefinition(const CString& sAttribID) const;
 
 	TDC_ATTRIBUTE GetDefinitionID(const CString& sAttribID) const;
+	BOOL HasDefinition(TDC_ATTRIBUTE nAttrib) const;
 
 	CString GetDefinitionID(TDC_ATTRIBUTE nAttrib) const;
 	CString GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const;
 
 protected:
-	const KANBANCUSTOMATTRIBDEF& GetDefinition(TDC_ATTRIBUTE nAttrib) const;
+	int FindDefinition(TDC_ATTRIBUTE nAttrib) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-namespace KanbanDisplay
+namespace KanbanHelper
 {
 	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
@@ -64,6 +63,16 @@ namespace KanbanDisplay
 	UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
 							 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	CString GetAttributeID(TDC_ATTRIBUTE nAttrib);
+	CString GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
+
+	BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
+	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib);
+	BOOL IsSortableAttribute(TDC_ATTRIBUTE nAttrib);
+
+	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -133,10 +142,6 @@ struct KANBANITEM
 	void SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStringArray& aValues);
 	void SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue);
 	void SetColor(COLORREF cr);
-	
-	static CString GetAttributeID(TDC_ATTRIBUTE nAttrib);
-	static CString GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
-	static BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib);
 
 protected:
 	CMapStringToStringArray mapAttribValues;
@@ -191,7 +196,6 @@ public:
 	BOOL IsParent(const KANBANITEM* pKIParent, const KANBANITEM* pKIChild) const;
 	BOOL CalcInheritedPinState(const KANBANITEM* pKI) const;
 	BOOL HasSameParent(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const;
-
 		
 #ifdef _DEBUG
 	void TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const;
@@ -201,7 +205,6 @@ protected:
 	DWORD GetNextKey(POSITION& pos);
 
 	static void AddItemToMap(const KANBANITEM* pKI, const CString& sValue, CKanbanItemArrayMap& map);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

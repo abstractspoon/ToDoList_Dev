@@ -40,16 +40,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanGroupByComboBox message handlers
 
-void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
+void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttrib)
 {
-	if ((nAttrib != m_nExcludeAttribID) || 
-		(sCustomAttribID != m_sExcludeCustomAttribID))
-	{
-		m_nExcludeAttribID = nAttrib;
-		m_sExcludeCustomAttribID != sCustomAttribID;
+	ASSERT(nAttrib != TDCA_FIXEDCOLUMNS);
+	ASSERT(!KanbanHelper::IsCustomAttribute(nAttrib) || m_aCustAttribDefs.GetSize());
 
-		BuildCombo();
-	}
+	if (nAttrib == m_nExcludeAttribID)
+		return;
+
+	m_nExcludeAttribID = nAttrib;
+	BuildCombo();
 }
 
 void CKanbanGroupByComboBox::BuildCombo()
@@ -62,9 +62,6 @@ void CKanbanGroupByComboBox::BuildCombo()
 	CKanbanAttributeComboBox::BuildCombo();
 
 	// Remove excluded attribute
-	if (m_aCustAttribDefs.GetSize() && !m_sExcludeCustomAttribID.IsEmpty())
-		m_nExcludeAttribID = m_aCustAttribDefs.GetDefinitionID(m_sExcludeCustomAttribID);
-
 	int nExclude = CDialogHelper::FindItemByData(*this, m_nExcludeAttribID);
 	
 	if (nExclude != CB_ERR)

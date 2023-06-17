@@ -67,8 +67,8 @@ public:
 	BOOL DeleteAll();
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
-	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	void GroupBy(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
+	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
 	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
@@ -149,7 +149,6 @@ protected:
 
 	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
 	BOOL m_bSortAscending;
-	CString m_sGroupByCustAttribID;
 
 	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
 	CGroupHeaderMap m_mapGroupHeaders;
@@ -213,7 +212,6 @@ protected:
 	void NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse);
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL IsOnlySelectedTask(DWORD dwTaskID);
-	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
@@ -222,16 +220,17 @@ protected:
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderItem(HTREEITEM hti) const;
 	int GetGroupValues(CStringSet& aValues) const;
-	int GetGroupValues(TDC_ATTRIBUTE nAttrib, const CString& sAttribID, CStringSet& aValues) const;
 	void CheckRebuildGroupHeaders();
 	void RebuildGroupHeaders(const CStringSet& aValues);
 	int CompareGrouping(LPARAM lParam1, LPARAM lParam2) const;
 	CString FormatTaskGroupHeaderText(DWORD dwHeaderID) const;
+	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttrib) const;
 
 	void DoSort();
 	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
 	int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const;
 	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
+	int BuildSortedSelection(CHTIList& lstHTI) const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;

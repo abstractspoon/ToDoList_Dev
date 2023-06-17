@@ -20,13 +20,13 @@ public:
 	CKanbanGroupByComboBox();
 	virtual ~CKanbanGroupByComboBox();
 
-	void ShowFixedColumns(BOOL /*bShow*/) { m_bShowFixedColumns = FALSE; } // always
-	void ExcludeAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
+	void ShowFixedColumns(BOOL /*bShow*/) { m_bShowFixedColumns = FALSE; } // never
+	void ExcludeAttribute(TDC_ATTRIBUTE nAttrib);
 
 // Attributes
 protected:
 	TDC_ATTRIBUTE m_nExcludeAttribID;
-	CString m_sExcludeCustomAttribID;
+	//CString m_sExcludeCustomAttribID;
 
 	// Generated message map functions
 protected:

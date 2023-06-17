@@ -63,8 +63,8 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
- 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL GroupBy(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
+ 	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }

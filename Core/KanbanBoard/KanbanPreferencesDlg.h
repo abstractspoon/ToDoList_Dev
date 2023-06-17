@@ -107,9 +107,10 @@ protected:
 
 protected:
 	void EnableDisableControls();
-	void UpdateAttributeValueCombo();
+	void UpdateFixedAttributeValueCombo();
 	CString GetFixedAttributeID() const;
 	void BuildDisplayAttributeListBox();
+	BOOL IsCustomFixedAttribute() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -150,7 +151,6 @@ protected:
 	//{{AFX_MSG(CKanbanPreferencesDlg)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
 
 //{{AFX_INSERT_LOCATION}}

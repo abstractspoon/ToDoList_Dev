@@ -44,6 +44,7 @@ void CKanbanAttributeComboBox::PreSubclassWindow()
 {
 	CComboBox::PreSubclassWindow();
 
+	CLocalizer::EnableTranslation(*this, FALSE);
 	BuildCombo();
 }
 
@@ -117,24 +118,17 @@ TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAtt
 {
 	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemData(*this, GetFallbackAttribute());
 
-	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nSelAttrib))
-	{
-		int nCust = (nSelAttrib - TDCA_CUSTOMATTRIB_FIRST);
-		ASSERT( nCust < m_aCustAttribDefs.GetSize());
-
-		sCustomAttribID = m_aCustAttribDefs[nCust].sAttribID;
-	}
+	if (KanbanHelper::IsCustomAttribute(nSelAttrib))
+		sCustomAttribID = m_aCustAttribDefs.GetDefinitionID(nSelAttrib);
 	else
-	{	
 		sCustomAttribID.Empty();
-	}
 
 	return nSelAttrib;
 }
 
 BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
 {
-	BOOL bCustom = KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib);
+	BOOL bCustom = KanbanHelper::IsCustomAttribute(nAttrib);
 
 	if ((bCustom && sCustomAttribID.IsEmpty()) || (!bCustom && !sCustomAttribID.IsEmpty()))
 	{

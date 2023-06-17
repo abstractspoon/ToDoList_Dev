@@ -20,13 +20,13 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-CString KanbanDisplay::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+CString KanbanHelper::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 										const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	return GetAttributeLabel(nAttrib, nLabelVis, aCustAttribDefs) + sValue;
 }
 
-CString KanbanDisplay::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+CString KanbanHelper::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
 										 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	if (nLabelVis == KBCAL_NONE)
@@ -34,7 +34,7 @@ CString KanbanDisplay::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS
 
 	CString sLabel;
 
-	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+	if (IsCustomAttribute(nAttrib))
 	{
 		sLabel = aCustAttribDefs.GetDefinitionLabel(nAttrib) + _T(": ");
 	}
@@ -49,7 +49,7 @@ CString KanbanDisplay::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS
 	return sLabel;
 }
 
-UINT KanbanDisplay::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
+UINT KanbanHelper::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 {
 	switch (nAttrib)
 	{
@@ -83,13 +83,90 @@ UINT KanbanDisplay::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 	case TDCA_LOCK:				return 0;
 
 	default:
-		ASSERT(KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib));
+		ASSERT(IsCustomAttribute(nAttrib));
 		break;
 	}
 
 	return 0;
 }
 
+CString KanbanHelper::GetAttributeID(TDC_ATTRIBUTE nAttrib)
+{
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCTO:	return _T("ALLOCTO");
+	case TDCA_ALLOCBY:	return _T("ALLOCBY");
+	case TDCA_STATUS:	return _T("STATUS");
+	case TDCA_CATEGORY:	return _T("CATEGORY");
+	case TDCA_VERSION:	return _T("VERSION");
+	case TDCA_TAGS:		return _T("TAGS");
+	case TDCA_PRIORITY:	return _T("PRIORITY");
+	case TDCA_RISK:		return _T("RISK");
+	}
+
+	ASSERT(0);
+	return _T("");
+}
+
+CString KanbanHelper::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
+{
+	if (IsCustomAttribute(nAttrib))
+		return aCustAttribs.GetDefinitionID(nAttrib);
+
+	return GetAttributeID(nAttrib);
+}
+
+BOOL KanbanHelper::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
+{
+	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
+}
+
+BOOL KanbanHelper::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
+{
+	switch (nAttrib)
+	{
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_CATEGORY:
+	case TDCA_VERSION:
+	case TDCA_TAGS:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL KanbanHelper::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+{
+	if (IsTrackableAttribute(nAttrib))
+		return TRUE;
+
+	// else
+	return (IsCustomAttribute(nAttrib) ? aCustAttribDefs.HasDefinition(nAttrib) : FALSE);
+}
+
+BOOL KanbanHelper::IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+{
+	if (IsTrackableAttribute(nAttrib, aCustAttribDefs))
+		return TRUE;
+
+	switch (nAttrib)
+	{
+	case TDCA_RECURRENCE:
+	case TDCA_NONE:
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL KanbanHelper::IsSortableAttribute(TDC_ATTRIBUTE nAttrib)
+{
+	return !IsCustomAttribute(nAttrib);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -102,11 +179,6 @@ BOOL KANBANCUSTOMATTRIBDEF::operator==(const KANBANCUSTOMATTRIBDEF& kca) const
 	return ((sAttribID == kca.sAttribID) &&
 			(sAttribName == kca.sAttribName) &&
 			(bMultiValue == kca.bMultiValue));
-}
-
-BOOL KANBANCUSTOMATTRIBDEF::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
-{
-	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
 }
 
 int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal)
@@ -136,11 +208,6 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 	return nFind;
 }
 
-BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(const CString& sAttribID) const
-{
-	return (FindDefinition(sAttribID) != -1);
-}
-
 int CKanbanCustomAttributeDefinitionArray::FindDefinition(const CString& sAttribID) const
 {
 	int nDef = GetSize();
@@ -165,29 +232,41 @@ TDC_ATTRIBUTE CKanbanCustomAttributeDefinitionArray::GetDefinitionID(const CStri
 	return (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB + nAtt);
 }
 
+BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(const CString& sAttribID) const
+{
+	return (FindDefinition(sAttribID) != -1);
+}
+
+BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(TDC_ATTRIBUTE nAttrib) const
+{
+	return (FindDefinition(nAttrib) != -1);
+}
+
 CString CKanbanCustomAttributeDefinitionArray::GetDefinitionID(TDC_ATTRIBUTE nAttrib) const
 {
-	return GetDefinition(nAttrib).sAttribID;
+	int nCust = FindDefinition(nAttrib);
+
+	return ((nCust != -1) ? GetAt(nCust).sAttribID : _T(""));
 }
 
 CString CKanbanCustomAttributeDefinitionArray::GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const
 {
-	return GetDefinition(nAttrib).sAttribName;
+	int nCust = FindDefinition(nAttrib);
+
+	return ((nCust != -1) ? GetAt(nCust).sAttribName : _T(""));
 }
 
-const KANBANCUSTOMATTRIBDEF& CKanbanCustomAttributeDefinitionArray::GetDefinition(TDC_ATTRIBUTE nAttrib) const
+int CKanbanCustomAttributeDefinitionArray::FindDefinition(TDC_ATTRIBUTE nAttrib) const
 {
-	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
+	if (KanbanHelper::IsCustomAttribute(nAttrib))
 	{
 		int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
 
 		if ((nCust >= 0) && (nCust < GetSize()))
-			return GetAt(nCust);
+			return nCust;
 	}
-	 
-	//else
-	static KANBANCUSTOMATTRIBDEF dummy;
-	return dummy;
+
+	return -1;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -328,7 +407,7 @@ KANBANITEM::~KANBANITEM()
 
 void KANBANITEM::SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStringArray& aValues)
 {
-	SetTrackedAttributeValues(GetAttributeID(nAttribID), aValues);
+	SetTrackedAttributeValues(KanbanHelper::GetAttributeID(nAttribID), aValues);
 }
 
 void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
@@ -412,7 +491,7 @@ void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
 
 void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, LPCTSTR szValue)
 {
-	SetTrackedAttributeValue(GetAttributeID(nAttribID), szValue);
+	SetTrackedAttributeValue(KanbanHelper::GetAttributeID(nAttribID), szValue);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue)
@@ -493,8 +572,8 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 
 CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const
 {
-	if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib))
-		return GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib, aCustAttribDefs));
+	if (KanbanHelper::IsCustomAttribute(nAttrib))
+		return GetTrackedAttributeValue(KanbanHelper::GetAttributeID(nAttrib, aCustAttribDefs));
 
 	// else
 	return GetAttributeDisplayValue(nAttrib);
@@ -515,7 +594,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:		
 	case TDCA_PRIORITY:	
 	case TDCA_RISK:			
-		return GetTrackedAttributeValue(KANBANITEM::GetAttributeID(nAttrib));
+		return GetTrackedAttributeValue(KanbanHelper::GetAttributeID(nAttrib));
 		
 	case TDCA_DONEDATE:		
 		if (CDateHelper::IsDateSet(dtDone))
@@ -580,7 +659,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:		
 	case TDCA_PRIORITY:	
 	case TDCA_RISK:			
-		return HasTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib));
+		return HasTrackedAttributeValues(KanbanHelper::GetAttributeID(nAttrib));
 		
 	case TDCA_DONEDATE:			return CDateHelper::IsDateSet(dtDone);
 	case TDCA_DUEDATE:			return CDateHelper::IsDateSet(dtDue);
@@ -755,80 +834,9 @@ int KANBANITEM::GetPriorityOrRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const
 	if ((dwOptions & KBCF_DUEHAVEHIGHESTPRIORITYRISK) && IsDue())
 		return 11;
 
-	CString sValue(GetTrackedAttributeValue(GetAttributeID(nAttrib)));
+	CString sValue(GetTrackedAttributeValue(KanbanHelper::GetAttributeID(nAttrib)));
 
 	return (sValue.IsEmpty() ? -2 : _ttoi(sValue));
-}
-
-CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib)
-{
-	switch (nAttrib)
-	{
-	case TDCA_ALLOCTO:	return _T("ALLOCTO");
-	case TDCA_ALLOCBY:	return _T("ALLOCBY");
-	case TDCA_STATUS:	return _T("STATUS");
-	case TDCA_CATEGORY:	return _T("CATEGORY");
-	case TDCA_VERSION:	return _T("VERSION");
-	case TDCA_TAGS:		return _T("TAGS");
-	case TDCA_PRIORITY:	return _T("PRIORITY");
-	case TDCA_RISK:		return _T("RISK");
-	}
-
-	ASSERT(0);
-	return _T("");
-}
-
-CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
-{
-	switch (nAttrib)
-	{
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_CATEGORY:
-	case TDCA_VERSION:
-	case TDCA_TAGS:
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-		return GetAttributeID(nAttrib);
-
-	default:
-		if (KANBANCUSTOMATTRIBDEF::IsCustomAttribute(nAttrib) && aCustAttribs.GetSize())
-		{
-			int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
-
-			if (nCust < aCustAttribs.GetSize())
-				return aCustAttribs[nCust].sAttribID;
-			
-			// else
-			ASSERT(0);
-		}
-		break;
-	}
-	
-	return _T("");
-}
-
-BOOL KANBANITEM::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
-{
-	switch (nAttrib)
-	{
-	case TDCA_ALLOCTO:	
-	case TDCA_ALLOCBY:	
-	case TDCA_STATUS:	
-	case TDCA_CATEGORY:	
-	case TDCA_VERSION:	
-	case TDCA_TAGS:		
-	case TDCA_PRIORITY:	
-	case TDCA_RISK:		
-		return TRUE;
-
-	case TDCA_CUSTOMATTRIB:
-		// TODO
-		break;
-	}
-
-	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////

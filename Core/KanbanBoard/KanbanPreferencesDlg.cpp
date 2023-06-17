@@ -103,7 +103,7 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	m_lcFixedColumnDefs.SetColumnDefinitions(m_aFixedColumnDefs);
 	m_lcFixedColumnDefs.SetCurSel(0);
 
-	UpdateAttributeValueCombo();
+	UpdateFixedAttributeValueCombo();
 	BuildDisplayAttributeListBox();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -114,7 +114,7 @@ TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomA
 {
 	if (HasFixedColumns())
 	{
-		if (m_nFixedAttrib == TDCA_CUSTOMATTRIB)
+		if (IsCustomFixedAttribute())
 			sCustomAttribID = m_sFixedCustomAttribID;
 		else
 			sCustomAttribID.Empty();
@@ -127,15 +127,25 @@ TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomA
 	return TDCA_NONE;
 }
 
-void CKanbanPreferencesPage::UpdateAttributeValueCombo()
+BOOL CKanbanPreferencesPage::IsCustomFixedAttribute() const 
+{ 
+	if (!KanbanHelper::IsCustomAttribute(m_nFixedAttrib))
+		return FALSE;
+
+	ASSERT(!m_sFixedCustomAttribID.IsEmpty());
+	return TRUE;
+}
+
+void CKanbanPreferencesPage::UpdateFixedAttributeValueCombo()
 {
+	ASSERT(HasFixedColumns());
+
 	UpdateData();
 
-	CStringArray aValues;
-
-	CString sAttribID = ((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
+	CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KanbanHelper::GetAttributeID(m_nFixedAttrib));
 	ASSERT(!sAttribID.IsEmpty());
 
+	CStringArray aValues;
 	const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
 
 	if (pValues)
@@ -198,7 +208,11 @@ int CKanbanPreferencesPage::GetFixedColumnDefinitions(CKanbanColumnArray& aColum
 void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	pPrefs->WriteProfileInt(szKey, _T("FixedAttribute"), m_nFixedAttrib);
-	pPrefs->WriteProfileString(szKey, _T("FixedCustomAttributeID"), m_sFixedCustomAttribID);
+
+	if (IsCustomFixedAttribute())
+		pPrefs->WriteProfileString(szKey, _T("FixedCustomAttributeID"), m_sFixedCustomAttribID);
+	else
+		pPrefs->DeleteProfileEntry(szKey, _T("FixedCustomAttributeID"));
 
 	pPrefs->WriteProfileInt(szKey, _T("AlwaysShowBacklog"), m_bAlwaysShowBacklog);
 	pPrefs->WriteProfileInt(szKey, _T("SortSubtaskBelowParent"), m_bSortSubtaskBelowParent);
@@ -238,7 +252,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 {
 	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_STATUS);
 	m_sFixedCustomAttribID = pPrefs->GetProfileString(szKey, _T("FixedCustomAttributeID"));
-	
+
 	m_bAlwaysShowBacklog = pPrefs->GetProfileInt(szKey, _T("AlwaysShowBacklog"), TRUE);
 	m_bSortSubtaskBelowParent = pPrefs->GetProfileInt(szKey, _T("SortSubtaskBelowParent"), TRUE);
 	m_bShowTaskColorAsBar = pPrefs->GetProfileInt(szKey, _T("ShowTaskColorAsBar"), FALSE);
@@ -330,7 +344,7 @@ void CKanbanPreferencesPage::OnSelchangeAttribute()
 	}
 
 	EnableDisableControls();
-	UpdateAttributeValueCombo();
+	UpdateFixedAttributeValueCombo();
 }
 
 void CKanbanPreferencesPage::OnSortSubtasksBelowParents()
@@ -364,7 +378,14 @@ void CKanbanPreferencesPage::OnUpdateMoveFixedColUp(CCmdUI* pCmdUI)
 
 CString CKanbanPreferencesPage::GetFixedAttributeID() const
 {
-	return ((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
+	if (IsCustomFixedAttribute())
+	{
+		ASSERT(!m_sFixedCustomAttribID.IsEmpty());
+		return m_sFixedCustomAttribID;
+	}
+	
+	// else
+	return KanbanHelper::GetAttributeID(m_nFixedAttrib);
 }
 
 void CKanbanPreferencesPage::OnPopulateFixedColumns()
