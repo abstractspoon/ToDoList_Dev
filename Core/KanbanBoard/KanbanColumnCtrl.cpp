@@ -1792,7 +1792,7 @@ void CKanbanColumnCtrl::CheckRebuildGroupHeaders()
 
 void CKanbanColumnCtrl::RebuildGroupHeaders(const CStringSet& aValues)
 {
-	if (!GetSafeHwnd() || !GetCount())
+	if (!GetSafeHwnd() || !CTreeCtrl::GetCount())
 		return;
 
 	if (!m_mapGroupHeaders.GetCount() && !aValues.GetCount())
