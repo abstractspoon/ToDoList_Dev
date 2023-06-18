@@ -10,6 +10,7 @@
 #include "KanbanCtrl.h"
 #include "KanbanPreferencesDlg.h"
 #include "KanbanOptionComboBox.h"
+#include "KanbanGroupByComboBox.h"
 
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
@@ -71,6 +72,7 @@ protected:
 	CKanbanCtrl m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
+	CKanbanGroupByComboBox m_cbGroupBy;
 	CKanbanOptionComboBox m_cbOptions;
 
 	CEnToolBar m_toolbar;
@@ -80,8 +82,8 @@ protected:
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CString	m_sTrackedCustomAttribID;
-	TDC_ATTRIBUTE m_nTrackedAttrib;
+	CString	m_sTrackedCustomAttribID, m_sGroupByCustomAttribID;
+	TDC_ATTRIBUTE m_nTrackedAttrib, m_nGroupByAttrib;
 	CDWordArray m_aSelTaskIDs;
 	CWndPromptManager m_mgrPrompts;
 
@@ -101,6 +103,7 @@ protected:
 	//{{AFX_MSG(CKanbanWnd)
 	afx_msg void OnSelchangeTrackedAttribute();
 	afx_msg void OnSelchangeOptions();
+	afx_msg void OnSelchangeGroupBy();
 	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
@@ -134,6 +137,7 @@ protected:
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
 	void RefreshKanbanCtrlDisplayAttributes();
+	void RefreshGrouping();
 
 };
 

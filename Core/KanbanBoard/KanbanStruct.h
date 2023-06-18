@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "Kanbanenum.h"
+
 #include "..\shared\mapex.h"
 
 #include "..\Interfaces\iuiextension.h"
@@ -32,13 +34,46 @@ struct KANBANCUSTOMATTRIBDEF
 	BOOL bMultiValue;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
 {
 public:
 	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal = FALSE);
 	BOOL HasDefinition(const CString& sAttribID) const;
 	int FindDefinition(const CString& sAttribID) const;
+
+	TDC_ATTRIBUTE GetDefinitionID(const CString& sAttribID) const;
+	BOOL HasDefinition(TDC_ATTRIBUTE nAttrib) const;
+
+	CString GetDefinitionID(TDC_ATTRIBUTE nAttrib) const;
+	CString GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const;
+
+protected:
+	int FindDefinition(TDC_ATTRIBUTE nAttrib) const;
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+namespace KBUtils
+{
+	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
+	CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+							 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	CString GetAttributeID(TDC_ATTRIBUTE nAttrib);
+	CString GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
+
+	BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
+	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib);
+	BOOL IsSortableAttribute(TDC_ATTRIBUTE nAttrib);
+
+	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -81,6 +116,7 @@ struct KANBANITEM
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
+	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const;
 	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
@@ -106,9 +142,6 @@ struct KANBANITEM
 	void SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStringArray& aValues);
 	void SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue);
 	void SetColor(COLORREF cr);
-	
-	static CString GetAttributeID(TDC_ATTRIBUTE nAttrib);
-	static BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib);
 
 protected:
 	CMapStringToStringArray mapAttribValues;
@@ -163,7 +196,6 @@ public:
 	BOOL IsParent(const KANBANITEM* pKIParent, const KANBANITEM* pKIChild) const;
 	BOOL CalcInheritedPinState(const KANBANITEM* pKI) const;
 	BOOL HasSameParent(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const;
-
 		
 #ifdef _DEBUG
 	void TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const;
@@ -173,7 +205,6 @@ protected:
 	DWORD GetNextKey(POSITION& pos);
 
 	static void AddItemToMap(const KANBANITEM* pKI, const CString& sValue, CKanbanItemArrayMap& map);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -199,30 +230,13 @@ struct KANBANCOLUMN
 	COLORREF crExcess;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CKanbanColumnArray : public CArray<KANBANCOLUMN, KANBANCOLUMN&>
 {
 public:
 	BOOL MatchesAll(const CKanbanColumnArray& other, BOOL bIncDisplayAttribs = TRUE) const;
 
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CHTIMap;
-
-struct KANBANSORT
-{
-	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2);
-
-	BOOL HasOption(DWORD dwOption) const { return (dwOptions & dwOption) == dwOption; }
-
-	const CKanbanItemMap& data;
-	const CHTIMap& items;
-
-	TDC_ATTRIBUTE nBy;
-	CString sAttribID;
-	BOOL bAscending;
-	DWORD dwOptions;
 };
 
 /////////////////////////////////////////////////////////////////////////////

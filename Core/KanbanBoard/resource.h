@@ -71,6 +71,7 @@
 #define IDC_SORTSUBTASKSBELOWPARENT     16036
 #define IDC_OPTIONS                     16036
 #define IDC_CUSTOMATTRIBID              16037
+#define IDC_GROUPBY                     16037
 #define IDC_ALWAYSSHOWBACKLOG           16038
 #define IDC_INDENTSUBTASKS              16039
 #define IDC_CUSTOMATTRIB                16040
@@ -80,6 +81,7 @@
 #define IDC_COLORBARBYPRIORITY          16044
 #define IDC_OPTIONS_LABEL               16044
 #define IDC_DISPLAYATTRIBUTES           16045
+#define IDC_GROUPBY_LABEL               16045
 #define IDC_HIDEEMPTYATTRIBS            16046
 #define ID_KANBAN_GOTOTODAY             32774
 #define ID_KANBAN_PREFS                 32775
@@ -165,10 +167,14 @@
 #define IDS_DISPLAY_PARENT_SHORT        57723
 #define IDS_DISPLAY_TASKID_SHORT        57724
 #define IDS_OPTIONS_NONE                57725
+#define IDS_NONE                        57725
 #define IDS_OPTIONS_HIDESUBTASKS        57726
 #define IDS_DISPLAY_TIMEREMAINING       57727
 #define IDS_DISPLAY_TIMEREMAINING_SHORT 57728
 #define IDS_DISPLAY_LOCK                57729
+#define IDS_NOBODY                      57730
+#define IDS_OPTIONS_SORTGROUPSASCENDING 57731
+#define IDS_OPTIONS_HIDENOGROUP         57732
 
 // Next default values for new objects
 // 

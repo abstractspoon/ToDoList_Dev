@@ -42,7 +42,6 @@ const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edi
 
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
-const COLORREF GROUPHEADERCOLOR = RGB(63, 118, 179);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -286,18 +285,6 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
-void CTDLTaskListCtrl::GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText)
-{
-	crBack = GetSysColor(COLOR_WINDOW);
-	crText = GROUPHEADERCOLOR;
-
-	if (m_crGroupHeaderBkgnd != CLR_NONE)
-	{
-		crBack = m_crGroupHeaderBkgnd;
-		crText = GraphicsMisc::GetBestTextColor(crBack);
-	}
-}
-
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
@@ -315,8 +302,6 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 		case CDDS_ITEMPREPAINT:
 			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
@@ -325,30 +310,15 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 				if (rRow.Width())
 				{
-					rRow.right += GetSystemMetrics(SM_CXVSCROLL);
-
-					COLORREF crBack, crText;
-					GetGroupHeaderColors(crBack, crText);
-
-					// this call will update rFullWidth to full client width
-					CRect rFullWidth(rRow);
-					GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, hwndList);
-
-					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
-
-					GraphicsMisc::DrawHorzLine(pDC, rFullWidth.left, rFullWidth.right, rFullWidth.CenterPoint().y, crText);
+					CString sHeader;
 
 					if (hwndList == m_lcTasks)
-					{
-						rRow.left = 20; // Always ensure the text is visible
+						sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
-						CString sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
+					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
-						pDC->SetTextColor(crText);
-						pDC->SetBkColor(crBack);
-						pDC->SetBkMode(OPAQUE);
-						pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
-					}
+					GraphicsMisc::DrawGroupHeaderRow(pDC, hwndList, rRow, sHeader, CLR_NONE, m_crGroupHeaderBkgnd);
+					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 				}
 	
 				dwRes = CDRF_SKIPDEFAULT;

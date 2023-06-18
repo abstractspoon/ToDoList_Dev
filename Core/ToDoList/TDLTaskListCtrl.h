@@ -197,7 +197,6 @@ protected:
 	CString GetGroupByColumnName() const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
-	void GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText);
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

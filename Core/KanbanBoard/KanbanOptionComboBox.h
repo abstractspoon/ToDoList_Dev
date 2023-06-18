@@ -24,6 +24,8 @@ public:
 	void SetSelectedOptions(DWORD dwOptions);
 	BOOL HasSelectedOption(DWORD dwOption) const;
 
+	DWORD GetOptionMask() const;
+
 // Attributes
 protected:
 	DWORD m_dwOptions;

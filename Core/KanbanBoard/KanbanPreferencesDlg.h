@@ -107,9 +107,10 @@ protected:
 
 protected:
 	void EnableDisableControls();
-	void UpdateAttributeValueCombo();
+	void UpdateFixedAttributeValueCombo();
 	CString GetFixedAttributeID() const;
 	void BuildDisplayAttributeListBox();
+	BOOL IsCustomFixedAttribute() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -135,7 +136,8 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	int DoModal(const CKanbanCtrl& ctrlKanban);
+	void SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
+	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:
 	CKanbanPreferencesPage m_page;
@@ -150,7 +152,6 @@ protected:
 	//{{AFX_MSG(CKanbanPreferencesDlg)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
 
 //{{AFX_INSERT_LOCATION}}

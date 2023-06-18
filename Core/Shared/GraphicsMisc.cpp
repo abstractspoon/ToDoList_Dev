@@ -15,6 +15,7 @@
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\GdiPlus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include <windef.h>
 #include <afxpriv.h>
@@ -58,8 +59,10 @@ const static int DEFAULT_DPI = 96;
 
 //////////////////////////////////////////////////////////////////////
 
-const static COLORREF WHITE = RGB(255, 255, 255);
-const static COLORREF BLACK = RGB(0, 0, 0);
+const static COLORREF WHITE			= RGB(255, 255, 255);
+const static COLORREF BLACK			= RGB(0, 0, 0);
+const static COLORREF GROUPHEADER	= RGB(63, 118, 179);
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1289,7 +1292,7 @@ BOOL GraphicsMisc::FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwn
 
 	COLORREF crOldBk = pDC->GetBkColor();
 
-	if (hwnd)
+	if (::IsWindow(hwnd))
 	{
 		CRect rClient;
 		::GetClientRect(hwnd, rClient);
@@ -2204,6 +2207,40 @@ COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
 	VERIFY(::GetObject(hBrush, sizeof(lb), &lb));
 
 	return lb.lbColor;
+}
+
+COLORREF GraphicsMisc::GetGroupHeaderColor() 
+{
+	return GROUPHEADER;
+}
+
+void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CString& sText, COLORREF crText, COLORREF crBack)
+{
+	if (crText == CLR_NONE)
+	{
+		if (crBack == CLR_NONE)
+			crText = GetGroupHeaderColor();
+		else
+			crText = GetBestTextColor(crBack);
+	}
+
+	if (crBack == CLR_NONE)
+		crBack = GetSysColor(COLOR_WINDOW);
+
+	FillItemRect(pDC, rRow, crBack, hWnd);
+	DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
+
+	if (!sText.IsEmpty())
+	{
+		// Force text to always be visible on the LHS
+		CRect rText(rRow);
+		rText.left = ScaleByDPIFactor(20);
+
+		pDC->SetTextColor(crText);
+		pDC->SetBkColor(crBack);
+		pDC->SetBkMode(OPAQUE);
+		pDC->DrawText(sText, rText, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+	}
 }
 
 BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)

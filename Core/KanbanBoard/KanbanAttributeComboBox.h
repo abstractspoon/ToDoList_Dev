@@ -20,7 +20,9 @@ class CKanbanAttributeComboBox : public CComboBox
 // Construction
 public:
 	CKanbanAttributeComboBox();
+	virtual ~CKanbanAttributeComboBox();
 
+	TDC_ATTRIBUTE GetSelectedAttribute() const;
 	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
 	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
@@ -39,13 +41,9 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CKanbanAttributeComboBox)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CKanbanAttributeComboBox();
 
 	// Generated message map functions
 protected:
@@ -56,7 +54,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildCombo();
+	virtual void BuildCombo();
+	virtual TDC_ATTRIBUTE GetFallbackAttribute() const { return TDCA_STATUS; }
 };
 
 /////////////////////////////////////////////////////////////////////////////
