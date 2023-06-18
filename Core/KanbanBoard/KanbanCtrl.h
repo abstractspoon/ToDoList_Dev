@@ -233,6 +233,9 @@ protected:
 	BOOL WantShowColumn(LPCTSTR szAttribID, const CKanbanItemArrayMap& mapKIArray) const;
 	BOOL WantShowColumn(const CKanbanColumnCtrl* pCol) const;
 
+	BOOL IsSorting() const { return (m_nSortBy != TDCA_NONE); }
+	BOOL IsGrouping() const { return (m_nGroupBy != TDCA_NONE); }
+	
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);

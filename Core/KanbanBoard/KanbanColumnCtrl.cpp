@@ -441,10 +441,13 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 			else
 				Invalidate(FALSE);
 
-			if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
-				DoSort();
-			else
-				Invalidate(FALSE);
+			if (IsGrouping())
+			{
+				if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
+					DoSort();
+				else
+					Invalidate(FALSE);
+			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
 			{
@@ -1761,7 +1764,7 @@ void CKanbanColumnCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
 	{
 		m_crGroupHeaderBkgnd = color;
 
-		if (GetSafeHwnd() && (m_nGroupBy != TDCA_NONE))
+		if (GetSafeHwnd() && IsGrouping())
 			Invalidate(FALSE);
 	}
 }
@@ -1852,7 +1855,7 @@ int CKanbanColumnCtrl::GetGroupValues(CStringSet& aValues) const
 {
 	aValues.RemoveAll();
 
-	if (GetSafeHwnd() && GetCount() && (m_nGroupBy != TDCA_NONE))
+	if (GetSafeHwnd() && GetCount() && IsGrouping())
 	{
 		HTREEITEM hti = GetChildItem(NULL);
 
@@ -1939,7 +1942,7 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 		// Compare relative position
 		return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);
 	}
-	else if (m_nSortBy == TDCA_NONE)
+	else if (!IsSorting())
 	{
 		// Compare absolute position
 		return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
@@ -1950,7 +1953,7 @@ int CKanbanColumnCtrl::CompareItems(LPARAM lParam1, LPARAM lParam2) const
 
 int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 {
-	if (m_nGroupBy == TDCA_NONE)
+	if (!IsGrouping())
 		return 0;
 
 	BOOL bIsGroupHeader1 = IsGroupHeaderTask(lParam1);

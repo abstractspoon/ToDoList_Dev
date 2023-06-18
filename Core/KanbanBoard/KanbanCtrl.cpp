@@ -1973,7 +1973,7 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
-	BOOL bHideNoGroup = (HasOption(KBCF_HIDENOGROUP) && (m_nGroupBy != TDCA_NONE));
+	BOOL bHideNoGroup = (HasOption(KBCF_HIDENOGROUP) && IsGrouping());
 
 	while (nCol--)
 	{
@@ -2001,7 +2001,7 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	// if the modification that caused this update matches the
 	// current sort, whereas we always need to be maintain some
 	// kind of sorted state even if we are technically 'unsorted'
-	if (m_nGroupBy != TDCA_NONE)
+	if (IsGrouping())
 		m_aColumns.GroupBy(m_nGroupBy);
 	else
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
@@ -2361,7 +2361,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
 		}
-		else if ((m_nGroupBy != TDCA_NONE) && Misc::FlagHasChanged(KBCF_HIDENOGROUP, m_dwOptions, dwPrevOptions))
+		else if (IsGrouping() && Misc::FlagHasChanged(KBCF_HIDENOGROUP, m_dwOptions, dwPrevOptions))
 		{
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
@@ -2689,7 +2689,7 @@ BOOL CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 		// sort state unless it's currently not set
 		if (nBy != TDCA_NONE)
 		{
-			if (m_nSortBy == TDCA_NONE)
+			if (!IsSorting())
 			{
 				m_nSortBy = nBy;
 				m_bSortAscending = bAscending;
@@ -3157,7 +3157,7 @@ void CKanbanCtrl::OnHeaderClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	// If the sort column is not set then set it to 'title'
 	// else flip the sort direction
-	if (m_nSortBy == TDCA_NONE)
+	if (!IsSorting())
 	{
 		m_nSortBy = TDCA_TASKNAME;
 		m_bSortAscending = TRUE;
@@ -3206,7 +3206,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				*pResult = CDRF_NEWFONT;
 			}
 
-			if (m_nSortBy != TDCA_NONE)
+			if (IsSorting())
 				*pResult |= CDRF_NOTIFYPOSTPAINT;
 		}
 		break;
@@ -3242,7 +3242,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				*pResult = CDRF_SKIPDEFAULT;
 			}
 
-			if ((m_nSortBy != TDCA_NONE) && (m_nSortBy != m_nTrackAttribute))
+			if (IsSorting() && (m_nSortBy != m_nTrackAttribute))
 				m_header.DrawItemSortArrow(pDC, (int)pNMCD->dwItemSpec, m_bSortAscending);
 		}
 		break;
@@ -3346,7 +3346,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 						Resize();
 
 						// Resort before fixing up selection
-						if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+						if (IsSorting() || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
 						{	
 							pDestCol->Sort(m_nSortBy, m_bSortAscending);
 							pSrcCol->Sort(m_nSortBy, m_bSortAscending);

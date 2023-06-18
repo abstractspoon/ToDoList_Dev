@@ -224,13 +224,14 @@ protected:
 	void RebuildGroupHeaders(const CStringSet& aValues);
 	int CompareGrouping(LPARAM lParam1, LPARAM lParam2) const;
 	CString FormatTaskGroupHeaderText(DWORD dwHeaderID) const;
-	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttrib) const;
+	BOOL IsGrouping() const { return (m_nGroupBy != TDCA_NONE); }
 
 	void DoSort();
 	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
 	int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const;
 	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
 	int BuildSortedSelection(CHTIList& lstHTI) const;
+	BOOL IsSorting() const { return (m_nSortBy != TDCA_NONE); }
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
