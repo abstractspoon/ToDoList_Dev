@@ -842,6 +842,7 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 	CString sAttribID;
 	UINT nBuddyCtrlID;
 	UINT nBuddyLabelID;
+	CString sPrompt, sBuddyPrompt;
 
 protected:
 	CRuntimeClass* pBuddyClass;

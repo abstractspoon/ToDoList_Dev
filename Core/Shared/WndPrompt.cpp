@@ -41,6 +41,9 @@ BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg,
 	{
 		if (HookWindow(hWnd))
 		{
+#ifdef _DEBUG
+			int nID = ::GetDlgCtrlID(hWnd);
+#endif
 			m_sPrompt = szPrompt;
 			m_nCheckMsg = nCheckMsg;
 			m_lCheckResult = lCheckRes;

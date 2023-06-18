@@ -44,7 +44,8 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 													   UINT nCtrlID, 
 													   BOOL bBuddy, 
 													   BOOL bMultiSelectionFilter,
-													   BOOL bFileLinkThumbnails)
+													   BOOL bFileLinkThumbnails,
+													   CString& sPrompt)
 {
 	// Sanity check
 	BOOL bFilter = IsCustomFilterControl(nCtrlID);
@@ -62,6 +63,8 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 	DWORD dwStyle = (WS_CHILD | WS_TABSTOP); // Invisible
 	DWORD dwExStyle = WS_EX_CLIENTEDGE;
 	LPCTSTR szClass = NULL;
+
+	sPrompt.Empty();
 
 	if (dwListType == TDCCA_NOTALIST)
 	{
@@ -130,18 +133,21 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			pControl = new CMaskEdit(_T("-0123456789"));
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			sPrompt = _T("0");
 			break;
 
 		case TDCCA_DOUBLE:
 			pControl = new CMaskEdit(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			sPrompt = _T("0.0");
 			break;
 
 		case TDCCA_FRACTION:
 			pControl = new CMaskEdit(_T("0123456789/"));
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			sPrompt = _T("0");
 			break;
 
 		case TDCCA_FILELINK:
@@ -154,6 +160,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			pControl = new CTimeEdit;
 			szClass = WC_EDIT;
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+			sPrompt = _T("0.0");
 			break;
 
 		case TDCCA_BOOL:
@@ -490,22 +497,30 @@ void CTDCCustomAttributeUIHelper::CleanupControls(CTDCCustomControlArray& aContr
 void CTDCCustomAttributeUIHelper::AddWindowPrompts(const CTDCCustomControlArray& aControls, CWnd* pParent, CWndPromptManager& mgrPrompts)
 {
 	int nCtrl = aControls.GetSize();
+	CEnString sDefaultPrompt(IDS_TDC_NONE);
 
 	while (nCtrl--)
 	{
-		const CWnd* pCtrl = aControls[nCtrl].GetCtrl(pParent);
+		const CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
+
+		SetControlPrompt(ctrl.GetCtrl(pParent), (ctrl.sPrompt.IsEmpty() ? sDefaultPrompt : ctrl.sPrompt), mgrPrompts);
+		SetControlPrompt(ctrl.GetBuddy(pParent), (ctrl.sBuddyPrompt.IsEmpty() ? sDefaultPrompt : ctrl.sBuddyPrompt), mgrPrompts);
+	}
+}
+
+void CTDCCustomAttributeUIHelper::SetControlPrompt(const CWnd* pCtrl, LPCTSTR szPrompt, CWndPromptManager& mgrPrompts)
+{
+	if (pCtrl)
+	{
 		ASSERT_VALID(pCtrl);
 
-		if (pCtrl)
+		if (pCtrl->IsKindOf(RUNTIME_CLASS(CEdit)))
 		{
-			if (pCtrl->IsKindOf(RUNTIME_CLASS(CEdit)))
-			{
-				mgrPrompts.SetEditPrompt(*pCtrl, IDS_TDC_NONE);
-			}
-			else if (pCtrl->IsKindOf(RUNTIME_CLASS(CComboBox)))
-			{
-				mgrPrompts.SetComboPrompt(*pCtrl, IDS_TDC_NONE);
-			}
+			mgrPrompts.SetEditPrompt(*pCtrl, szPrompt);
+		}
+		else if (pCtrl->IsKindOf(RUNTIME_CLASS(CComboBox)))
+		{
+			mgrPrompts.SetComboPrompt(*pCtrl, szPrompt);
 		}
 	}
 }
@@ -702,7 +717,7 @@ BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent,
 		ctrl.nCtrlID = nID++;
 		ctrl.nLabelID = nID++;
 
-		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelectionFilter, bFileLinkThumbnails);
+		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelectionFilter, bFileLinkThumbnails, ctrl.sPrompt);
 
 		if (pCtrl)
 			pLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nLabelID, FALSE);
@@ -715,7 +730,7 @@ BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent,
 			ctrl.nBuddyCtrlID = nID++;
 			ctrl.nBuddyLabelID = nID++;
 
-			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelectionFilter, bFileLinkThumbnails);
+			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelectionFilter, bFileLinkThumbnails, ctrl.sBuddyPrompt);
 
 			if (pBuddyCtrl)
 				pBuddyLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nBuddyLabelID, TRUE);
@@ -1231,7 +1246,8 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 									 ctrl.nBuddyCtrlID, 
 									 TRUE,					// buddy
 									 FALSE,					// multi-selection droplist
-									 FALSE);				// file-links image thumbnails
+									 FALSE,					// file-links image thumbnails
+									 CString());
 
 		bCreated = TRUE;
 	}

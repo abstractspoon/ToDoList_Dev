@@ -6172,7 +6172,7 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
-	// and add fields after the 'version' control
+	// Add fields after the 'version' control
 	CTDCCustomAttributeUIHelper::RebuildEditControls(this,
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,

@@ -127,7 +127,6 @@ public:
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 					CTDCCustomAttributeDataMap& value);
 
-
 protected:
 	static CWnd* CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 									 const TDCCADATA& data,
@@ -135,7 +134,8 @@ protected:
 									 UINT nCtrlID, 
 									 BOOL bBuddy, 
 									 BOOL bMultiSelectionFilter,
-									 BOOL bFileLinkThumbnails);
+									 BOOL bFileLinkThumbnails,
+									 CString& sPrompt);
 
 	static CWnd* CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 										  const TDCCADATA& data, UINT nCtrlID, BOOL bBuddy);
@@ -173,6 +173,7 @@ protected:
 	static CWnd* CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter, 
 											  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated);
 	static void SetBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data);
+	static void SetControlPrompt(const CWnd* pCtrl, LPCTSTR szPrompt, CWndPromptManager& mgrPrompts);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)
