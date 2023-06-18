@@ -1973,19 +1973,20 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
+	BOOL bHideNoGroup = (HasOption(KBCF_HIDENOGROUP) && (m_nGroupBy != TDCA_NONE));
 
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 		ASSERT(pCol);
 		
-		RebuildColumnContents(pCol, mapKIArray, bHideParents, bHideSubtasks);
+		RebuildColumnContents(pCol, mapKIArray, bHideParents, bHideSubtasks, bHideNoGroup);
 		
-		// The list can still end up empty if parent tasks are 
+		// The list can still end up empty if specific tasks are 
 		// omitted in Dynamic columns so we recheck and delete if required
 		if (UsingDynamicColumns())
 		{
-			if ((bHideParents || bHideSubtasks) && !WantShowColumn(pCol))
+			if ((bHideParents || bHideSubtasks || bHideNoGroup) && !WantShowColumn(pCol))
 			{
 				DeleteColumn(nCol);
 			}
@@ -2200,7 +2201,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 }
 
 BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, 
-										BOOL bHideParents, BOOL bHideSubtasks)
+										BOOL bHideParents, BOOL bHideSubtasks, BOOL bHideNoGroup)
 {
 	ASSERT(pCol && pCol->GetSafeHwnd());
 
@@ -2218,6 +2219,9 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 
 	for (int nVal = 0; nVal < nNumVals; nVal++)
 	{
+		if (bHideNoGroup && aValueIDs[nVal].IsEmpty())
+			continue;
+
 		const CKanbanItemArray* pKIArr = mapKIArray.GetMapping(aValueIDs[nVal]);
 		
 		if (pKIArr)
@@ -2357,6 +2361,11 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
 		}
+		else if ((m_nGroupBy != TDCA_NONE) && Misc::FlagHasChanged(KBCF_HIDENOGROUP, m_dwOptions, dwPrevOptions))
+		{
+			// Column visibility AND contents may have changed
+			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
+		}
 		else if (Misc::FlagHasChanged(KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwPrevOptions))
 		{
 			// Update column visibility only
@@ -2372,7 +2381,8 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		CDialogHelper::SetStyle(&m_header, HDS_BUTTONS, Misc::HasFlag(m_dwOptions, KBCF_COLUMNHEADERSORTING));
 
 		// Column preferences
-		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG | KBCF_COLUMNHEADERSORTING);
+		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDENOGROUP | 
+					   KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG | KBCF_COLUMNHEADERSORTING);
 		m_aColumns.SetOptions(dwOptions);
 
 		if (Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))

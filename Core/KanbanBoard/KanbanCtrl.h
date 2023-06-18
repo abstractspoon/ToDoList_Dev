@@ -236,7 +236,8 @@ protected:
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskCategories(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
-	static BOOL RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, BOOL bHideParents, BOOL bHideSubtasks);
+	static BOOL RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, 
+									  BOOL bHideParents, BOOL bHideSubtasks, BOOL bHideNoGroup);
 	static CString GetXMLTag(TDC_ATTRIBUTE nAttrib);
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
 	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask);

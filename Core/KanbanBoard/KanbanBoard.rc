@@ -418,6 +418,7 @@ BEGIN
     IDS_DISPLAY_LOCK        "Lock"
     IDS_NOBODY              "<nobody>"
     IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
+    IDS_OPTIONS_HIDENOGROUP "Hide <none> group"
 END
 
 #endif    // English (Australia) resources

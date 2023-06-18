@@ -49,6 +49,16 @@ void CKanbanOptionComboBox::OnCheckChange(int /*nIndex*/)
 	m_dwOptions = GetCheckedItemData();
 }
 
+DWORD CKanbanOptionComboBox::GetOptionMask() const
+{
+	// Must match options added to combo
+	return (KBCF_HIDEPARENTTASKS | 
+			KBCF_HIDEEMPTYCOLUMNS |
+			KBCF_HIDESUBTASKS |
+			KBCF_HIDENOGROUP |
+			KBCF_SORTGROUPSASCENDING);
+}
+
 void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 {
 	ASSERT(GetSafeHwnd());
@@ -62,6 +72,7 @@ void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEPARENTS, KBCF_HIDEPARENTTASKS);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEEMPTYCOLS, KBCF_HIDEEMPTYCOLUMNS);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDESUBTASKS, KBCF_HIDESUBTASKS);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDENOGROUP, KBCF_HIDENOGROUP);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_SORTGROUPSASCENDING, KBCF_SORTGROUPSASCENDING);
 
 		EnableTooltip();
