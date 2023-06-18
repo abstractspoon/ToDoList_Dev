@@ -2380,7 +2380,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		// Column header sorting
 		CDialogHelper::SetStyle(&m_header, HDS_BUTTONS, Misc::HasFlag(m_dwOptions, KBCF_COLUMNHEADERSORTING));
 
-		// Column preferences
+		// Column preferences (Excluding irrelevant options)
 		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDENOGROUP | 
 					   KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG | KBCF_COLUMNHEADERSORTING);
 		m_aColumns.SetOptions(dwOptions);
