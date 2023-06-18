@@ -43,7 +43,7 @@ END_MESSAGE_MAP()
 void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttrib)
 {
 	ASSERT(nAttrib != TDCA_FIXEDCOLUMNS);
-	ASSERT(!KanbanMisc::IsCustomAttribute(nAttrib) || m_aCustAttribDefs.GetSize());
+	ASSERT(!KBUtils::IsCustomAttribute(nAttrib) || m_aCustAttribDefs.GetSize());
 
 	if (nAttrib == m_nExcludeAttribID)
 		return;

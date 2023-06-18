@@ -138,7 +138,7 @@ TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomA
 
 BOOL CKanbanPreferencesPage::IsCustomFixedAttribute() const 
 { 
-	if (!KanbanMisc::IsCustomAttribute(m_nFixedAttrib))
+	if (!KBUtils::IsCustomAttribute(m_nFixedAttrib))
 		return FALSE;
 
 	ASSERT(!m_sFixedCustomAttribID.IsEmpty());
@@ -151,7 +151,7 @@ void CKanbanPreferencesPage::UpdateFixedAttributeValueCombo()
 
 	UpdateData();
 
-	CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KanbanMisc::GetAttributeID(m_nFixedAttrib));
+	CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KBUtils::GetAttributeID(m_nFixedAttrib));
 	ASSERT(!sAttribID.IsEmpty());
 
 	CStringArray aValues;
@@ -394,7 +394,7 @@ CString CKanbanPreferencesPage::GetFixedAttributeID() const
 	}
 	
 	// else
-	return KanbanMisc::GetAttributeID(m_nFixedAttrib);
+	return KBUtils::GetAttributeID(m_nFixedAttrib);
 }
 
 void CKanbanPreferencesPage::OnPopulateFixedColumns()

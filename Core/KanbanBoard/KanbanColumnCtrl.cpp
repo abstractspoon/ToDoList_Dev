@@ -708,7 +708,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 			break;
 
 		default:
-			if (KanbanMisc::IsCustomAttribute(m_nGroupBy))
+			if (KBUtils::IsCustomAttribute(m_nGroupBy))
 				sGroupBy.LoadString(IDS_NONE);
 			else
 				ASSERT(0);
@@ -717,7 +717,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 	}
 
 	// Prefix the text by the column name
-	CString sLabel(KanbanMisc::GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
+	CString sLabel(KBUtils::GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
 	
 	return (sLabel + sGroupBy);
 }
@@ -805,8 +805,8 @@ BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBAN
 	// If this attribute matches the tracked attribute then we are
 	// necessarily part of a fixed-column setup, and we need to do 
 	// some extra checks to see if we really do want to display it
-	if (KanbanMisc::IsTrackableAttribute(nAttrib) &&
-		(KanbanMisc::GetAttributeID(nAttrib) == GetAttributeID()) &&
+	if (KBUtils::IsTrackableAttribute(nAttrib) &&
+		(KBUtils::GetAttributeID(nAttrib) == GetAttributeID()) &&
 		(m_columnDef.aAttribValues.GetSize() == 1))
 	{
 		return FALSE;
@@ -868,7 +868,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KanbanMisc::GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
@@ -951,7 +951,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KanbanMisc::GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
 
 	if (!sLabel.IsEmpty())
 	{
@@ -1316,7 +1316,7 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip) const
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sAttrib = KanbanMisc::FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
+	CString sAttrib = KBUtils::FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
@@ -1735,7 +1735,7 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 
 BOOL CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
 {
-	if (!KanbanMisc::IsGroupableAttribute(nAttrib, m_aCustAttribDefs))
+	if (!KBUtils::IsGroupableAttribute(nAttrib, m_aCustAttribDefs))
 		return FALSE;
 
 	if (nAttrib != m_nGroupBy)
@@ -1875,7 +1875,7 @@ int CKanbanColumnCtrl::GetGroupValues(CStringSet& aValues) const
 
 BOOL CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
-	if (!KanbanMisc::IsSortableAttribute(nBy))
+	if (!KBUtils::IsSortableAttribute(nBy))
 		return FALSE;
 
 	m_nSortBy = nBy;
@@ -2175,7 +2175,7 @@ int CKanbanColumnCtrl::CompareAttributeValues(const KANBANITEM* pKI1, const KANB
 		break;
 
 	default:
-		if (KanbanMisc::IsCustomAttribute(nBy))
+		if (KBUtils::IsCustomAttribute(nBy))
 		{
 			CString sValue1 = pKI1->GetAttributeDisplayValue(nBy, m_aCustAttribDefs);
 			CString sValue2 = pKI2->GetAttributeDisplayValue(nBy, m_aCustAttribDefs);
@@ -2622,7 +2622,7 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 			{
 				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = KanbanMisc::GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
+					CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
@@ -2767,7 +2767,7 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 				default: // Rest
 					{
 						CString sValue = pKI->GetAttributeDisplayValue(nAttrib, m_aCustAttribDefs);
-						CString sAttrib = KanbanMisc::FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
+						CString sAttrib = KBUtils::FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
 
 						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
 						nMaxAttribWidth = max(nMaxAttribWidth, nAttribWidth);

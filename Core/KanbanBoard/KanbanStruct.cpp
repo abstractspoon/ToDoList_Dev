@@ -20,13 +20,13 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-CString KanbanMisc::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+CString KBUtils::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 										const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	return GetAttributeLabel(nAttrib, nLabelVis, aCustAttribDefs) + sValue;
 }
 
-CString KanbanMisc::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+CString KBUtils::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
 										 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	if (nLabelVis == KBCAL_NONE)
@@ -49,7 +49,7 @@ CString KanbanMisc::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nL
 	return sLabel;
 }
 
-UINT KanbanMisc::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
+UINT KBUtils::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 {
 	switch (nAttrib)
 	{
@@ -90,7 +90,7 @@ UINT KanbanMisc::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 	return 0;
 }
 
-CString KanbanMisc::GetAttributeID(TDC_ATTRIBUTE nAttrib)
+CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -108,7 +108,7 @@ CString KanbanMisc::GetAttributeID(TDC_ATTRIBUTE nAttrib)
 	return _T("");
 }
 
-CString KanbanMisc::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
+CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
 {
 	if (IsCustomAttribute(nAttrib))
 		return aCustAttribs.GetDefinitionID(nAttrib);
@@ -116,12 +116,12 @@ CString KanbanMisc::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAtt
 	return GetAttributeID(nAttrib);
 }
 
-BOOL KanbanMisc::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
+BOOL KBUtils::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 {
 	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
 }
 
-BOOL KanbanMisc::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
 {
 	switch (nAttrib)
 	{
@@ -139,7 +139,7 @@ BOOL KanbanMisc::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-BOOL KanbanMisc::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	if (IsTrackableAttribute(nAttrib))
 		return TRUE;
@@ -148,7 +148,7 @@ BOOL KanbanMisc::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustom
 	return (IsCustomAttribute(nAttrib) ? aCustAttribDefs.HasDefinition(nAttrib) : FALSE);
 }
 
-BOOL KanbanMisc::IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+BOOL KBUtils::IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	if (IsTrackableAttribute(nAttrib, aCustAttribDefs))
 		return TRUE;
@@ -163,7 +163,7 @@ BOOL KanbanMisc::IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustom
 	return FALSE;
 }
 
-BOOL KanbanMisc::IsSortableAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL KBUtils::IsSortableAttribute(TDC_ATTRIBUTE nAttrib)
 {
 	return !IsCustomAttribute(nAttrib);
 }
@@ -258,7 +258,7 @@ CString CKanbanCustomAttributeDefinitionArray::GetDefinitionLabel(TDC_ATTRIBUTE 
 
 int CKanbanCustomAttributeDefinitionArray::FindDefinition(TDC_ATTRIBUTE nAttrib) const
 {
-	if (KanbanMisc::IsCustomAttribute(nAttrib))
+	if (KBUtils::IsCustomAttribute(nAttrib))
 	{
 		int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
 
@@ -407,7 +407,7 @@ KANBANITEM::~KANBANITEM()
 
 void KANBANITEM::SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStringArray& aValues)
 {
-	SetTrackedAttributeValues(KanbanMisc::GetAttributeID(nAttribID), aValues);
+	SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aValues);
 }
 
 void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
@@ -491,7 +491,7 @@ void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
 
 void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, LPCTSTR szValue)
 {
-	SetTrackedAttributeValue(KanbanMisc::GetAttributeID(nAttribID), szValue);
+	SetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID), szValue);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue)
@@ -572,8 +572,8 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 
 CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const
 {
-	if (KanbanMisc::IsCustomAttribute(nAttrib))
-		return GetTrackedAttributeValue(KanbanMisc::GetAttributeID(nAttrib, aCustAttribDefs));
+	if (KBUtils::IsCustomAttribute(nAttrib))
+		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttrib, aCustAttribDefs));
 
 	// else
 	return GetAttributeDisplayValue(nAttrib);
@@ -594,7 +594,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:		
 	case TDCA_PRIORITY:	
 	case TDCA_RISK:			
-		return GetTrackedAttributeValue(KanbanMisc::GetAttributeID(nAttrib));
+		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttrib));
 		
 	case TDCA_DONEDATE:		
 		if (CDateHelper::IsDateSet(dtDone))
@@ -659,7 +659,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:		
 	case TDCA_PRIORITY:	
 	case TDCA_RISK:			
-		return HasTrackedAttributeValues(KanbanMisc::GetAttributeID(nAttrib));
+		return HasTrackedAttributeValues(KBUtils::GetAttributeID(nAttrib));
 		
 	case TDCA_DONEDATE:			return CDateHelper::IsDateSet(dtDone);
 	case TDCA_DUEDATE:			return CDateHelper::IsDateSet(dtDue);
@@ -834,7 +834,7 @@ int KANBANITEM::GetPriorityOrRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const
 	if ((dwOptions & KBCF_DUEHAVEHIGHESTPRIORITYRISK) && IsDue())
 		return 11;
 
-	CString sValue(GetTrackedAttributeValue(KanbanMisc::GetAttributeID(nAttrib)));
+	CString sValue(GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttrib)));
 
 	return (sValue.IsEmpty() ? -2 : _ttoi(sValue));
 }

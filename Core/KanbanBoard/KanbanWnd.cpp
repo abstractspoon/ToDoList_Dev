@@ -220,7 +220,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	CString sKey(szKey);
 
 	// Last 'Tracked' attribute
-	if (KanbanMisc::IsCustomAttribute(m_nTrackedAttrib))
+	if (KBUtils::IsCustomAttribute(m_nTrackedAttrib))
 	{
 		pPrefs->WriteProfileInt(szKey, _T("LastTrackedAttribute"), TDCA_CUSTOMATTRIB);
 		pPrefs->WriteProfileString(sKey, _T("CustomAttrib"), m_sTrackedCustomAttribID);
@@ -232,7 +232,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	}
 
 	// Last 'Group By' attribute
-	if (KanbanMisc::IsCustomAttribute(m_nGroupByAttrib))
+	if (KBUtils::IsCustomAttribute(m_nGroupByAttrib))
 	{
 		pPrefs->WriteProfileInt(szKey, _T("GroupByAttribute"), TDCA_CUSTOMATTRIB);
 		pPrefs->WriteProfileString(sKey, _T("GroupByCustomAttrib"), m_sGroupByCustomAttribID);
@@ -381,7 +381,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 			break;
 
 		default:
-			if (!KanbanMisc::IsTrackableAttribute(m_nTrackedAttrib))
+			if (!KBUtils::IsTrackableAttribute(m_nTrackedAttrib))
 				m_nTrackedAttrib = TDCA_STATUS;
 			break;
 		}
@@ -389,7 +389,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		// Last 'Group By' attribute
 		m_nGroupByAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("GroupByAttribute"), TDCA_NONE);
 
-		if (KanbanMisc::IsCustomAttribute(m_nGroupByAttrib))
+		if (KBUtils::IsCustomAttribute(m_nGroupByAttrib))
 		{
 			m_sGroupByCustomAttribID = pPrefs->GetProfileString(szKey, _T("GroupByCustomAttrib"));
 
@@ -399,7 +399,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 		
-		if (KanbanMisc::IsTrackableAttribute(m_nTrackedAttrib)) // Excludes custom attributes
+		if (KBUtils::IsTrackableAttribute(m_nTrackedAttrib)) // Excludes custom attributes
 			m_cbGroupBy.ExcludeAttribute(m_nTrackedAttrib);
 
 		UpdateData(FALSE);
@@ -409,7 +409,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 
 void CKanbanWnd::RefreshGrouping()
 {
-	if (KanbanMisc::IsCustomAttribute(m_nGroupByAttrib))
+	if (KBUtils::IsCustomAttribute(m_nGroupByAttrib))
 	{
 		if (!m_ctrlKanban.GetCustomAttributeDefinitions().GetSize())
 		{
@@ -902,7 +902,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 			break;
 
 		default:
-			if (KanbanMisc::IsCustomAttribute(nAttrib))
+			if (KBUtils::IsCustomAttribute(nAttrib))
 			{
 				ASSERT(!sCustAttribID.IsEmpty());
 
@@ -1048,7 +1048,7 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 	}
 
 	// Exclude the tracked attribute from the Group By combo
-	if (KanbanMisc::IsTrackableAttribute(nTrackAttrib, m_ctrlKanban.GetCustomAttributeDefinitions()))
+	if (KBUtils::IsTrackableAttribute(nTrackAttrib, m_ctrlKanban.GetCustomAttributeDefinitions()))
 	{
 		TDC_ATTRIBUTE nPrevSel = m_cbGroupBy.GetSelectedAttribute();
 		m_cbGroupBy.ExcludeAttribute(nTrackAttrib);

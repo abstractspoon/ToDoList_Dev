@@ -55,7 +55,7 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-namespace KanbanMisc
+namespace KBUtils
 {
 	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
@@ -229,6 +229,8 @@ struct KANBANCOLUMN
 	COLORREF crBackground;
 	COLORREF crExcess;
 };
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CKanbanColumnArray : public CArray<KANBANCOLUMN, KANBANCOLUMN&>
 {
