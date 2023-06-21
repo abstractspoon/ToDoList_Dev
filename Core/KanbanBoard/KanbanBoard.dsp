@@ -131,6 +131,10 @@ SOURCE=.\KanbanFixedColumnListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanGroupByComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanOptionComboBox.cpp
 # End Source File
 # Begin Source File
@@ -186,6 +190,10 @@ SOURCE=.\KanbanEnum.h
 # Begin Source File
 
 SOURCE=.\KanbanFixedColumnListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\KanbanGroupByComboBox.h
 # End Source File
 # Begin Source File
 

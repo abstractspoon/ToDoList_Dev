@@ -46,6 +46,10 @@ static char THIS_FILE[] = __FILE__;
 #	define TVS_NOHSCROLL        0x8000
 #endif
 
+#ifndef TVGN_NEXTSELECTED
+#define TVGN_NEXTSELECTED       0x000B
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef WM_THEMECHANGED
