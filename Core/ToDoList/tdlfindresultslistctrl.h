@@ -69,7 +69,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-  	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn);
+
+	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
 	CFont* GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot);
 	BOOL IsResultHot(const RECT& rResult) const;
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;

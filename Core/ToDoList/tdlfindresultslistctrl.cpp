@@ -489,3 +489,21 @@ CString CTDLFindResultsListCtrl::GetAttributeName(TDC_ATTRIBUTE nAttribID, const
 	ASSERT(!sAttrib.IsEmpty());
 	return sAttrib;
 }
+
+int CTDLFindResultsListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
+{
+	// Handle date sorting
+	if (nSortColumn == COL_WHATMATCHED)
+	{
+		COleDateTime date1, date2;
+		
+		BOOL bIsDate1 = CDateHelper::DecodeDate(GetSortString(dwItemData1), date1, TRUE);
+		BOOL bIsDate2 = CDateHelper::DecodeDate(GetSortString(dwItemData2), date2, TRUE);
+
+		if (bIsDate1 || bIsDate2)
+			return CDateHelper::Compare(date1, date2);
+	}
+
+	// all else
+	return CEnListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
+}

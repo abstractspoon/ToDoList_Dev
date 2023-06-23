@@ -947,8 +947,10 @@ CString CTDCTaskMatcher::FormatResultDate(const COleDateTime& date) const
 	{
 		DWORD dwFmt = 0;
 		
-		if (m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES))
-			dwFmt |= DHFD_DOW;
+		// Don't include leading weekdays because it makes sorting
+		// results very difficult
+		//if (m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES))
+		//	dwFmt |= DHFD_DOW;
 		
 		if (m_data.HasStyle(TDCS_SHOWDATESINISO))
 			dwFmt |= DHFD_ISO;
