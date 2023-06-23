@@ -10865,9 +10865,9 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 	ASSERT(lp);
 	LPCTSTR szFilter = (LPCTSTR)lp;
 
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	if (tdc.GetAdvancedFilterName().CompareNoCase(szFilter) == 0)
+	if (tdc.HasAdvancedFilter() && (tdc.GetAdvancedFilterName().CompareNoCase(szFilter) == 0))
 		OnViewClearfilter();
 
 	// Notify the filter bar

@@ -17,6 +17,7 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
 #include "..\shared\osversion.h"
+#include "..\shared\messagebox.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uithemefile.h"
@@ -1669,43 +1670,46 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 {
 	CString sDeletedSearch = GetCurrentSearch();
 
-	if (!sDeletedSearch.IsEmpty())
-	{
-		// Remove deleted search
-		int nSearch = m_cbSearches.FindStringExact(-1, sDeletedSearch);
-		
-		if (nSearch != CB_ERR)
-			m_cbSearches.DeleteString(nSearch);
+	if (sDeletedSearch.IsEmpty())
+		return;
 
-		Misc::RemoveItem(sDeletedSearch, m_aSavedSearches);
-		
-		m_lcFindSetup.ClearSearch();
-		
-		// set the selection to the next search
-		if (nSearch >= m_cbSearches.GetCount())
-			nSearch = m_cbSearches.GetCount() - 1;
-		
-		if (nSearch != CB_ERR)
+	if (CMessageBox::AfxShow(IDS_FINDTASKS, CEnString(IDS_FIND_CONFIRMDELETESEARCH, sDeletedSearch), MB_YESNO) == IDNO)
+		return;
+
+	// Remove deleted search
+	int nSearch = m_cbSearches.FindStringExact(-1, sDeletedSearch);
+
+	if (nSearch != CB_ERR)
+		m_cbSearches.DeleteString(nSearch);
+
+	Misc::RemoveItem(sDeletedSearch, m_aSavedSearches);
+
+	m_lcFindSetup.ClearSearch();
+
+	// set the selection to the next search
+	if (nSearch >= m_cbSearches.GetCount())
+		nSearch = m_cbSearches.GetCount() - 1;
+
+	if (nSearch != CB_ERR)
+	{
+		CString sNextSearch;
+		m_cbSearches.GetLBText(nSearch, sNextSearch);
+
+		CSearchParamArray params;
+
+		if (LoadSearch(sNextSearch))
 		{
-			CString sNextSearch;
-			m_cbSearches.GetLBText(nSearch, sNextSearch);
-			
-			CSearchParamArray params;
-			
-			if (LoadSearch(sNextSearch))
-			{
-				m_sActiveSearch = sNextSearch;
-			}
-			else
-			{
-				nSearch = -1;
-				m_sActiveSearch.Empty();
-			}
+			m_sActiveSearch = sNextSearch;
 		}
-		
-		m_cbSearches.SetCurSel(nSearch);
+		else
+		{
+			nSearch = -1;
+			m_sActiveSearch.Empty();
+		}
 	}
-	
+
+	m_cbSearches.SetCurSel(nSearch);
+
 	m_toolbar.RefreshButtonStates();
 
 	// notify parent

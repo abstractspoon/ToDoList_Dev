@@ -1784,7 +1784,7 @@ BEGIN
     ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-22",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-23",IDC_STATIC,213,7,87,8
     ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
@@ -4939,6 +4939,8 @@ BEGIN
                             "Are you sure you want to delete all the tasks in this tasklist?"
     IDS_TDC_CONFIRMDELETE_TITLE "Confirm Delete"
     IDS_TDC_CONFIRMADD_TITLE "Confirm Addition"
+    IDS_FIND_CONFIRMDELETESEARCH 
+                            "Are you sure you want to delete the '%s' search?"
     IDS_TDC_CONFIRMOVERWRITE 
                             "The tasklist '%s' has been modified \nsince you opened it or last saved your changes.\n\nIf you continue you will overwrite those changes.\n\nAre you sure you want to proceed?"
     IDS_TDC_CONFIRMOVERWRITE_TITLE "Confirm Overwrite"
