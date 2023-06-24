@@ -277,6 +277,9 @@ namespace HTMLReportExporter
 			this.htmlReportTitleControl.SetUITheme(theme);
 			this.htmlReportTasksControl.SetUITheme(theme);
 			this.htmlReportFooterControl.SetUITheme(theme);
+
+			this.Toolbar.RefreshControlTooltip(this.Toolbar.Items["toolStripFileHistory"]);
+
 		}
 
 		private void UpdateControls()

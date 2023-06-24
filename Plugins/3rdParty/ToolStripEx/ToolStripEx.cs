@@ -173,7 +173,16 @@ namespace IIControls
             timer.Tick += new EventHandler(timer_Tick);
         }
 
-        protected void OnControlAdded(object sender, ControlEventArgs e)
+		public bool RefreshControlTooltip(ToolStripItem item)
+		{
+			if ((item == null) || !(item is ToolStripControlHost))
+				return false;
+
+			Tooltips.SetToolTip((item as ToolStripControlHost).Control, item.ToolTipText);
+			return true;
+		}
+
+		protected void OnControlAdded(object sender, ControlEventArgs e)
         {
             var item = FindControlItem(e.Control);
 
