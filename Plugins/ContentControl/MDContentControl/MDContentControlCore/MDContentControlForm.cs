@@ -129,6 +129,9 @@ namespace MDContentControl
 
 				if (PreviewBrowser.Document != null)
 					PreviewBrowser.Document.BackColor = (InputTextCtrl.ReadOnly ? SystemColors.ButtonFace : SystemColors.Window);
+
+				// Hide the edit pane if readonly
+				SplitContainer.Panel1Collapsed = ReadOnly;
 			}
 		}
 

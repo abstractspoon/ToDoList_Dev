@@ -365,6 +365,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 	if (m_hContentFont)
 		m_ctrlComments.SetContentFont(m_hContentFont);
 
+	m_ctrlComments.SetReadOnly(m_bReadOnlyComments);
+
 	if (CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);
 	
