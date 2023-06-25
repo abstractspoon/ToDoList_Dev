@@ -86,8 +86,6 @@ namespace HTMLReportExporter
 			foreach (var attrib in custAttrib)
 				m_CustomAttributes.Add(attrib.Id.ToLower(), attrib.Label);
 
-			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
-
 			var prevSize = LoadPreferences();
 
 			if ((prevSize.Width > 0) && (prevSize.Height > 0))
@@ -224,6 +222,9 @@ namespace HTMLReportExporter
 
 			this.tableHeaderRowCombobox.Initialise(m_Trans);
 
+			// Only initialise custom attributes after setting translator
+			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
+			
 			this.tabControl.SelectedIndex = (int)PageType.Tasks;
 			this.htmlReportTasksControl.SetActive();
 

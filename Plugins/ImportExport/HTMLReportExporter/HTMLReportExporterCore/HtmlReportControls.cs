@@ -803,15 +803,20 @@ namespace HTMLReportExporter
 
 		public void SetCustomAttributes(HtmlReportUtils.CustomAttributes customAttributes)
 		{
-			foreach (var attrib in customAttributes)
+			if (customAttributes.Count > 0)
 			{
-				var menuItem = new ToolStripMenuItem();
+				foreach (var attrib in customAttributes)
+				{
+					var menuItem = new ToolStripMenuItem();
 
-				menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)"), attrib.Value);
-				menuItem.Name = attrib.Key.ToLower();
-				menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
-				
-				ToolStripAttributeMenu.DropDownItems.Add(menuItem);
+					menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)"), attrib.Value);
+					menuItem.Name = attrib.Key.ToLower();
+					menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
+
+					ToolStripAttributeMenu.DropDownItems.Add(menuItem);
+				}
+
+				Toolbars.Sort(ToolStripAttributeMenu.DropDownItems);
 			}
 		}
 	}
