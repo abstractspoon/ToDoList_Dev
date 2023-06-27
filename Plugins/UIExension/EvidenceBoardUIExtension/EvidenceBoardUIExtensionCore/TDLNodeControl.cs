@@ -1607,8 +1607,9 @@ namespace EvidenceBoardUIExtension
 
 		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect)
 		{
-			var rect = imageRect;
-
+			var rect = CalcIconRect(imageRect);
+			rect.Width *= 2;
+			
 			return rect;
 		}
 		
@@ -1616,9 +1617,11 @@ namespace EvidenceBoardUIExtension
 		{
 			Debug.Assert(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded);
 
-			var spinRect = CalcImageSpinButtonRect(imageRect);
-
-
+			if (taskItem.FileLinkCount > 1)
+			{
+				var spinRect = CalcImageSpinButtonRect(imageRect);
+				DrawTaskImageSpinButton(graphics, spinRect, false, false);
+			}
 		}
 
 		void DrawTaskImageExpansionButton(Graphics graphics, TaskItem taskItem, Rectangle nodeRect, Color backColor, ref Rectangle iconRect)
@@ -1660,7 +1663,7 @@ namespace EvidenceBoardUIExtension
 			backRect.Width /= 2;
 
 			var forwardRect = backRect;
-			forwardRect.X = forwardRect.Left;
+			forwardRect.X = forwardRect.Right;
 
 			if (VisualStyleRenderer.IsSupported)
 			{
@@ -2125,9 +2128,26 @@ namespace EvidenceBoardUIExtension
 
 		protected TaskItem HitTestTaskImageSpinButton(Point ptClient, ref bool forward)
 		{
-			forward = false;
+			var node = HitTestNode(ptClient, true); // exclude root node
 
-			return null;
+			if (node == null)
+				return null;
+
+			var taskItem = GetTaskItem(node.Data);
+
+			if ((taskItem == null) || (taskItem.ImageExpansion != TaskItem.ImageExpansionState.Expanded))
+				return null;
+
+			var imageRect = CalcImageRect(taskItem, GetNodeClientRect(node), false);
+			var spinRect = CalcImageSpinButtonRect(imageRect);
+
+			if (!spinRect.Contains(ptClient))
+				return null;
+
+			spinRect.Width /= 2;
+			forward = !spinRect.Contains(ptClient);
+
+			return taskItem;
 		}
 
 		protected TaskItem HitTestTaskImageExpansionButton(Point ptClient)

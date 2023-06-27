@@ -112,6 +112,7 @@ namespace EvidenceBoardUIExtension
 			DependIds = task.GetLocalDependency();
 
 			m_UserLinks = null;
+			m_FileLinks = null;
 
 			UpdateImage(task);
 			DecodeMetaData(task.GetMetaDataValue(MetaDataKey));
@@ -296,6 +297,8 @@ namespace EvidenceBoardUIExtension
 
 			return false;
 		}
+
+		public int FileLinkCount { get { return ((m_FileLinks == null) ? 0 : m_FileLinks.Count); } }
 
 		bool ImageFromFile(string filePath)
 		{
