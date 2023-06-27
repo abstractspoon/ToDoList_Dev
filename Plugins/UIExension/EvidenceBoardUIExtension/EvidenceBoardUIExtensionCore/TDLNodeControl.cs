@@ -1607,6 +1607,8 @@ namespace EvidenceBoardUIExtension
 
 		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect)
 		{
+			imageRect.Inflate(1, 1);
+
 			var rect = CalcIconRect(imageRect);
 			rect.Width *= 2;
 			
@@ -1714,6 +1716,11 @@ namespace EvidenceBoardUIExtension
 
 		private Rectangle CalcImageRect(TaskItem task, Rectangle nodeRect, bool selected)
 		{
+			int headerHeight = (int)(NodeSize.Height * OverallScaleFactor);
+
+			nodeRect.Y += headerHeight;
+			nodeRect.Height -= NodeSize.Height;
+
 			nodeRect.Inflate(-1, -1);
 
 			if (!selected)
@@ -1722,9 +1729,7 @@ namespace EvidenceBoardUIExtension
 				nodeRect.Height++;
 			}
 
-			int height = task.CalcImageHeight(nodeRect.Width);
-
-			return new Rectangle(nodeRect.X, nodeRect.Bottom - height, nodeRect.Width, height);
+			return nodeRect;
 		}
 
 		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
@@ -1878,6 +1883,8 @@ namespace EvidenceBoardUIExtension
 			m_EditTimer.Stop();
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
+			TaskItem taskItem = null;
+
 			if (!ReadOnly)
 			{
 				bool from = false;
@@ -1918,7 +1925,7 @@ namespace EvidenceBoardUIExtension
 				}
 
 				// Check for icon click
-				var taskItem = HitTestTaskIcon(e.Location);
+				taskItem = HitTestTaskIcon(e.Location);
 
 				if ((taskItem != null) && !taskItem.IsLocked)
 				{
@@ -1927,20 +1934,37 @@ namespace EvidenceBoardUIExtension
 
 					return;
 				}
+			}
 
-				// Check for image expansion click
-				taskItem = HitTestTaskImageExpansionButton(e.Location);
+			// Check for image expansion click
+			taskItem = HitTestTaskImageExpansionButton(e.Location);
 
-				if (taskItem != null)
-				{
-					// Toggle expansion state
-					taskItem.ExpandImage(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed);
+			if (taskItem != null)
+			{
+				// Toggle expansion state
+				taskItem.ExpandImage(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed);
 
-					SelectNode(taskItem.TaskId, true, false);
-					RecalcExtents();
+				SelectNode(taskItem.TaskId, true, false);
+				RecalcExtents();
 
-					return;
-				}
+				return;
+			}
+
+			// Check for image cycling
+			bool forwardBtn = false;
+			taskItem = HitTestTaskImageSpinButton(e.Location, ref forwardBtn);
+
+			if (taskItem != null)
+			{
+				if (forwardBtn)
+					taskItem.SelectNextImage();
+				else
+					taskItem.SelectPreviousImage();
+
+				SelectNode(taskItem.TaskId, true, false);
+				RecalcExtents();
+
+				return;
 			}
 
 			base.OnMouseDown(e);
@@ -1965,15 +1989,24 @@ namespace EvidenceBoardUIExtension
 
 			if (hit != null)
 			{
-				if ((HitTestTaskIcon(e.Location) == null) && 
-					(HitTestTaskImageExpansionButton(e.Location) == null))
-				{
-					var task = GetTaskItem(hit);
-					var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
+				var taskItem = HitTestTaskIcon(e.Location);
 
+				if (taskItem != null)
+					return;
+
+				taskItem = HitTestTaskImageExpansionButton(e.Location);
+
+				if (taskItem != null)
+					return;
+
+				taskItem = GetTaskItem(hit);
+				var imageRect = CalcImageRect(taskItem, GetNodeClientRect(hit), false);
+
+				if ((taskItem.FileLinkCount < 2) || !CalcImageSpinButtonRect(imageRect).Contains(e.Location))
+				{
 					if (imageRect.Contains(e.Location))
 					{
-						Process.Start(task.ImagePath);
+						Process.Start(taskItem.ImagePath);
 					}
 					else
 					{
