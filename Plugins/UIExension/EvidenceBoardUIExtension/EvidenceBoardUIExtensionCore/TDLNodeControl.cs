@@ -1018,7 +1018,7 @@ namespace EvidenceBoardUIExtension
 
 			var task = GetTaskItem(node);
 
-			if ((task != null) && (task.ImageExpansion == TaskItem.ImageExpansionState.Expanded))
+			if (task?.IsExpanded == true)
 			{
 				size.Height += task.CalcImageHeight(base.NodeSize.Width);
 			}
@@ -1551,13 +1551,13 @@ namespace EvidenceBoardUIExtension
 			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			// Image
-			if (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded)
+			if (taskItem.IsExpanded)
 			{
 				var imageRect = CalcImageRect(taskItem, taskRect, selected || dropHighlight);
 				graphics.DrawImage(taskItem.Image, imageRect);
 
 				// Image spin button
-				DrawTaskImageSpinButton(graphics, taskItem, imageRect);
+				DrawTaskImageSpinButtons(graphics, taskItem, imageRect);
 			}
 
 
@@ -1581,7 +1581,7 @@ namespace EvidenceBoardUIExtension
 				{
 					int imageSize = UIExtension.TaskIcon.IconSize;
 
-					using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // original size
+					using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
 					{
 						tempImage.MakeTransparent();
 						using (var gTemp = Graphics.FromImage(tempImage))
@@ -1615,19 +1615,17 @@ namespace EvidenceBoardUIExtension
 			iconRect = CalcImageExpansionButtonRect(nodeRect);
 
 			var mousePos = PointToClient(MousePosition);
-			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && iconRect.Contains(mousePos));
-
 			ScrollButton btn = ((state == TaskItem.ImageExpansionState.Collapsed) ? ScrollButton.Down : ScrollButton.Up);
 
 			if (!IsZoomed)
 			{
-				DrawTaskImageButton(graphics, iconRect, btn, true, pressed);
+				DrawTaskImageButton(graphics, iconRect, btn, mousePos, true);
 			}
 			else
 			{
 				int imageSize = UIExtension.TaskIcon.IconSize;
 
-				using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // original size
+				using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
 				{
 					tempImage.MakeTransparent();
 
@@ -1636,7 +1634,7 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
 						gTemp.Clear(backColor);
 
-						DrawTaskImageButton(gTemp, tempRect, btn, true, pressed);
+						DrawTaskImageButton(gTemp, tempRect, btn, mousePos, true);
 						DrawZoomedIcon(tempImage, graphics, iconRect, nodeRect);
 					}
 				}
@@ -1653,34 +1651,59 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		void DrawTaskImageSpinButton(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
+		void DrawTaskImageSpinButtons(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
 		{
-			Debug.Assert(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded);
+			Debug.Assert(taskItem.IsExpanded);
 
-			if (!ReadOnly && !taskItem.IsLocked && (taskItem.ImageCount > 1))
+			if (ReadOnly || taskItem.IsLocked || (taskItem.ImageCount <= 1))
+				return;
+
+			var mousePos = PointToClient(MousePosition);
+			var spinRect = CalcImageSpinButtonRect(imageRect);
+
+			bool backEnabled = taskItem.CanSelectNextImage(false);
+			bool forwardEnabled = taskItem.CanSelectNextImage(true);
+
+			if (!IsZoomed)
 			{
-				var mousePos = PointToClient(MousePosition);
+				DrawTaskImageSpinButtons(graphics, spinRect, mousePos, backEnabled, forwardEnabled);
+			}
+			else
+			{
+				int imageSize = UIExtension.TaskIcon.IconSize;
 
-				var backRect = CalcImageSpinButtonRect(imageRect);
-				backRect.Width /= 2;
+				using (var tempImage = new Bitmap(2 * imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
+				{
+					tempImage.MakeTransparent();
 
-				bool enabled = (taskItem.ImageIndex > 0); 
-				bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && backRect.Contains(mousePos));
+					using (var gTemp = Graphics.FromImage(tempImage))
+					{
+						var tempRect = new Rectangle(0, 0, spinRect.Width, spinRect.Height);
 
-				DrawTaskImageButton(graphics, backRect, ScrollButton.Left, enabled, pressed);
-
-				var forwardRect = backRect;
-				forwardRect.X = forwardRect.Right;
-
-				enabled = (taskItem.ImageIndex < (taskItem.ImageCount - 1));
-				pressed = (MouseButtons.HasFlag(MouseButtons.Left) && forwardRect.Contains(mousePos));
-
-				DrawTaskImageButton(graphics, forwardRect, ScrollButton.Right, enabled, pressed);
+						DrawTaskImageSpinButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
+						DrawZoomedIcon(tempImage, graphics, spinRect, imageRect);
+					}
+				}
 			}
 		}
 
-		static void DrawTaskImageButton(Graphics graphics, Rectangle rect, ScrollButton btn, bool enabled, bool pressed)
+		static void DrawTaskImageSpinButtons(Graphics graphics, Rectangle spinRect, Point mousePos, bool backEnabled, bool forwardEnabled)
 		{
+			var backRect = spinRect;
+			backRect.Width /= 2;
+
+			DrawTaskImageButton(graphics, backRect, ScrollButton.Left, mousePos, backEnabled);
+
+			var forwardRect = backRect;
+			forwardRect.X = forwardRect.Right;
+
+			DrawTaskImageButton(graphics, forwardRect, ScrollButton.Right, mousePos, forwardEnabled);
+		}
+
+		static void DrawTaskImageButton(Graphics graphics, Rectangle rect, ScrollButton btn, Point mousePos, bool enabled)
+		{
+			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && rect.Contains(mousePos));
+
 			if (VisualStyleRenderer.IsSupported)
 			{
 				// Map to visual styles

@@ -69,6 +69,8 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public bool IsExpanded { get { return (ImageExpansion == ImageExpansionState.Expanded); } }
+
 		public bool ExpandImage(bool expand)
 		{
 			if (!HasImage || (expand == ImageExpanded))
