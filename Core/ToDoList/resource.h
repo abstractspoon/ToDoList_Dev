@@ -2477,7 +2477,8 @@
 #define IDS_CUSTOM_FEATURE_SHOWEDITFIELD 51627
 #define IDS_COMMENTSMEMORYERROR         51628
 #define IDS_FIND_TASKS                  51629
-#define IDS_TDLBC_COMMENTSFORMAT        51630
+#define IDS_RECURS_WEEKDAY              51630
+#define IDS_TDLBC_COMMENTSFORMAT        51631
 
 // Next default values for new objects
 // 
