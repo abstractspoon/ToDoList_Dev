@@ -1605,27 +1605,6 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect)
-		{
-			imageRect.Inflate(1, 1);
-
-			var rect = CalcIconRect(imageRect);
-			rect.Width *= 2;
-			
-			return rect;
-		}
-		
-		void DrawTaskImageSpinButton(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
-		{
-			Debug.Assert(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded);
-
-			if (taskItem.FileLinkCount > 1)
-			{
-				var spinRect = CalcImageSpinButtonRect(imageRect);
-				DrawTaskImageSpinButton(graphics, spinRect, false, false);
-			}
-		}
-
 		void DrawTaskImageExpansionButton(Graphics graphics, TaskItem taskItem, Rectangle nodeRect, Color backColor, ref Rectangle iconRect)
 		{
 			var state = taskItem.ImageExpansion;
@@ -1635,9 +1614,14 @@ namespace EvidenceBoardUIExtension
 
 			iconRect = CalcImageExpansionButtonRect(nodeRect);
 
+			var mousePos = PointToClient(MousePosition);
+			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && iconRect.Contains(mousePos));
+
+			ScrollButton btn = ((state == TaskItem.ImageExpansionState.Collapsed) ? ScrollButton.Down : ScrollButton.Up);
+
 			if (!IsZoomed)
 			{
-				DrawTaskImageExpansionButton(graphics, iconRect, (state == TaskItem.ImageExpansionState.Collapsed));
+				DrawTaskImageButton(graphics, iconRect, btn, true, pressed);
 			}
 			else
 			{
@@ -1652,48 +1636,103 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
 						gTemp.Clear(backColor);
 
-						DrawTaskImageExpansionButton(gTemp, tempRect, (state == TaskItem.ImageExpansionState.Collapsed));
+						DrawTaskImageButton(gTemp, tempRect, btn, true, pressed);
 						DrawZoomedIcon(tempImage, graphics, iconRect, nodeRect);
 					}
 				}
 			}
 		}
 
-		static void DrawTaskImageSpinButton(Graphics graphics, Rectangle rect, bool backPressed, bool forwardPressed)
+		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect)
 		{
-			var backRect = rect;
-			backRect.Width /= 2;
+			imageRect.Inflate(1, 1);
 
-			var forwardRect = backRect;
-			forwardRect.X = forwardRect.Right;
+			var rect = CalcIconRect(imageRect);
+			rect.Width *= 2;
 
-			if (VisualStyleRenderer.IsSupported)
+			return rect;
+		}
+
+		void DrawTaskImageSpinButton(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
+		{
+			Debug.Assert(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded);
+
+			if (!ReadOnly && !taskItem.IsLocked && (taskItem.ImageCount > 1))
 			{
-				ScrollBarRenderer.DrawArrowButton(graphics, backRect, (backPressed ? ScrollBarArrowButtonState.LeftPressed : ScrollBarArrowButtonState.LeftNormal));
-				ScrollBarRenderer.DrawArrowButton(graphics, forwardRect, (forwardPressed ? ScrollBarArrowButtonState.RightPressed : ScrollBarArrowButtonState.RightNormal));
+				var mousePos = PointToClient(MousePosition);
 
-				// Try to match core app with a border
-				graphics.DrawRectangle(Pens.LightGray, rect);
-			}
-			else
-			{
-				ControlPaint.DrawScrollButton(graphics, backRect, ScrollButton.Left, (backPressed ? ButtonState.Pushed : ButtonState.Normal));
-				ControlPaint.DrawScrollButton(graphics, forwardRect, ScrollButton.Right, (forwardPressed ? ButtonState.Pushed : ButtonState.Normal));
+				var backRect = CalcImageSpinButtonRect(imageRect);
+				backRect.Width /= 2;
+
+				bool enabled = (taskItem.ImageIndex > 0); 
+				bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && backRect.Contains(mousePos));
+
+				DrawTaskImageButton(graphics, backRect, ScrollButton.Left, enabled, pressed);
+
+				var forwardRect = backRect;
+				forwardRect.X = forwardRect.Right;
+
+				enabled = (taskItem.ImageIndex < (taskItem.ImageCount - 1));
+				pressed = (MouseButtons.HasFlag(MouseButtons.Left) && forwardRect.Contains(mousePos));
+
+				DrawTaskImageButton(graphics, forwardRect, ScrollButton.Right, enabled, pressed);
 			}
 		}
 
-		static void DrawTaskImageExpansionButton(Graphics graphics, Rectangle rect, bool expand)
+		static void DrawTaskImageButton(Graphics graphics, Rectangle rect, ScrollButton btn, bool enabled, bool pressed)
 		{
 			if (VisualStyleRenderer.IsSupported)
 			{
-				ScrollBarRenderer.DrawArrowButton(graphics, rect, (expand ? ScrollBarArrowButtonState.DownNormal : ScrollBarArrowButtonState.UpNormal));
+				// Map to visual styles
+				ScrollBarArrowButtonState vsBtn;
+
+				switch (btn)
+				{
+				case ScrollButton.Down:
+					if (pressed)
+						vsBtn = ScrollBarArrowButtonState.DownPressed;
+					else
+						vsBtn = ScrollBarArrowButtonState.DownNormal;
+					break;
+
+				case ScrollButton.Up:
+					if (pressed)
+						vsBtn = ScrollBarArrowButtonState.UpPressed;
+					else
+						vsBtn = ScrollBarArrowButtonState.UpNormal;
+					break;
+
+				case ScrollButton.Left:
+					if (!enabled)
+						vsBtn = ScrollBarArrowButtonState.LeftDisabled;
+					else if (pressed)
+						vsBtn = ScrollBarArrowButtonState.LeftPressed;
+					else
+						vsBtn = ScrollBarArrowButtonState.LeftNormal;
+					break;
+
+				case ScrollButton.Right:
+					if (!enabled)
+						vsBtn = ScrollBarArrowButtonState.RightDisabled;
+					else if (pressed)
+						vsBtn = ScrollBarArrowButtonState.RightPressed;
+					else
+						vsBtn = ScrollBarArrowButtonState.RightNormal;
+					break;
+
+				default:
+					return;
+				}
+				ScrollBarRenderer.DrawArrowButton(graphics, rect, vsBtn);
 
 				// Try to match core app with a border
 				graphics.DrawRectangle(Pens.LightGray, rect);
 			}
 			else
 			{
-				ControlPaint.DrawScrollButton(graphics, rect, (expand ? ScrollButton.Down : ScrollButton.Up), ButtonState.Normal);
+				ButtonState state = (!enabled ? ButtonState.Inactive : (pressed ? ButtonState.Pushed : ButtonState.Normal));
+
+				ControlPaint.DrawScrollButton(graphics, rect, btn, state);
 			}
 		}
 
@@ -1719,7 +1758,7 @@ namespace EvidenceBoardUIExtension
 			int headerHeight = (int)(NodeSize.Height * OverallScaleFactor);
 
 			nodeRect.Y += headerHeight;
-			nodeRect.Height -= NodeSize.Height;
+			nodeRect.Height -= headerHeight;
 
 			nodeRect.Inflate(-1, -1);
 
@@ -1884,6 +1923,7 @@ namespace EvidenceBoardUIExtension
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
 			TaskItem taskItem = null;
+			BaseNode node = null;
 
 			if (!ReadOnly)
 			{
@@ -1914,7 +1954,7 @@ namespace EvidenceBoardUIExtension
 					ClearUserLinkSelection();
 				}
 
-				var node = HitTestNode(e.Location, true);
+				node = HitTestNode(e.Location, true);
 
 				if ((node != null) && GetCreateLinkPinRect(node).Contains(e.Location))
 				{
@@ -1934,37 +1974,49 @@ namespace EvidenceBoardUIExtension
 
 					return;
 				}
+
+				// Check for image cycling
+				bool forwardBtn = false;
+				taskItem = HitTestTaskImageSpinButton(e.Location, ref forwardBtn);
+
+				if ((taskItem != null) && taskItem.CanSelectNextImage(forwardBtn))
+				{
+					// Redraw the spin control
+					Invalidate(CalcImageSpinButtonRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
+					Update();
+
+					SelectNode(taskItem.TaskId, true, false);
+
+					// Next/Prev image
+					if (taskItem.SelectNextImage(forwardBtn))
+					{
+						RecalcExtents();
+						TaskModified?.Invoke(this, new List<uint>() { taskItem.TaskId });
+					}
+
+					return;
+				}
 			}
 
 			// Check for image expansion click
-			taskItem = HitTestTaskImageExpansionButton(e.Location);
-
-			if (taskItem != null)
+			if (node != null)
 			{
-				// Toggle expansion state
-				taskItem.ExpandImage(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed);
+				taskItem = HitTestTaskImageExpansionButton(e.Location);
 
-				SelectNode(taskItem.TaskId, true, false);
-				RecalcExtents();
+				if (taskItem != null)
+				{
+					// Redraw the button
+					Invalidate(CalcImageExpansionButtonRect(GetNodeClientRect(node)));
+					Update();
 
-				return;
-			}
+					// Toggle expansion state
+					taskItem.ExpandImage(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed);
 
-			// Check for image cycling
-			bool forwardBtn = false;
-			taskItem = HitTestTaskImageSpinButton(e.Location, ref forwardBtn);
+					SelectNode(taskItem.TaskId, true, false);
+					RecalcExtents();
 
-			if (taskItem != null)
-			{
-				if (forwardBtn)
-					taskItem.SelectNextImage();
-				else
-					taskItem.SelectPreviousImage();
-
-				SelectNode(taskItem.TaskId, true, false);
-				RecalcExtents();
-
-				return;
+					return;
+				}
 			}
 
 			base.OnMouseDown(e);
@@ -2002,7 +2054,7 @@ namespace EvidenceBoardUIExtension
 				taskItem = GetTaskItem(hit);
 				var imageRect = CalcImageRect(taskItem, GetNodeClientRect(hit), false);
 
-				if ((taskItem.FileLinkCount < 2) || !CalcImageSpinButtonRect(imageRect).Contains(e.Location))
+				if ((taskItem.ImageCount < 2) || !CalcImageSpinButtonRect(imageRect).Contains(e.Location))
 				{
 					if (imageRect.Contains(e.Location))
 					{
@@ -2212,14 +2264,6 @@ namespace EvidenceBoardUIExtension
 
 				return UIExtension.HandCursor();
 			}
-
-			taskItem = HitTestTaskImageExpansionButton(ptClient);
-
-			if (taskItem != null)
-			{
-				return UIExtension.HandCursor();
-			}
-
 #if DEBUG
 			if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 			{

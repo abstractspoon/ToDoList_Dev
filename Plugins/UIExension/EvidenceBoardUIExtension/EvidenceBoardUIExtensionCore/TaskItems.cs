@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Diagnostics;
+using System.IO;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -43,8 +44,10 @@ namespace EvidenceBoardUIExtension
 		public Image Image {  get { return m_Image; } }
 		public bool HasImage { get { return (m_Image != null); } }
 		public string ImagePath { get { return m_ImagePath; } }
+		public int ImageIndex { get { return m_ImageFileLinks.IndexOf(m_ImagePath); } }
+		public int ImageCount { get { return ((m_ImageFileLinks == null) ? 0 : m_ImageFileLinks.Count); } }
 
-		private List<string> m_FileLinks;
+		private List<string> m_ImageFileLinks;
 		private string m_ImagePath;
 		private Image m_Image;
 
@@ -112,10 +115,10 @@ namespace EvidenceBoardUIExtension
 			DependIds = task.GetLocalDependency();
 
 			m_UserLinks = null;
-			m_FileLinks = null;
+			m_ImageFileLinks = null;
 
-			UpdateImage(task);
 			DecodeMetaData(task.GetMetaDataValue(MetaDataKey));
+			UpdateImage(task);
 		}
 
 		public override string ToString()
@@ -152,6 +155,9 @@ namespace EvidenceBoardUIExtension
 			if (HasUserLinks)
 				metaData = metaData + string.Join(",", UserLinks);
 
+			if (!string.IsNullOrEmpty(m_ImagePath))
+				metaData = metaData + '|' + Path.GetFileName(m_ImagePath);
+
 			return metaData;
 		}
 
@@ -163,7 +169,7 @@ namespace EvidenceBoardUIExtension
 			if (string.IsNullOrWhiteSpace(metaData))
 				return;
 
-			string[] parts = metaData.Split(new char[1] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+			string[] parts = metaData.Split('|');
 
 			if (parts.Count() > 0)
 			{
@@ -190,7 +196,7 @@ namespace EvidenceBoardUIExtension
 					return;
 				}
 
-				if (parts.Count() == 2)
+				if ((parts.Count() == 2) && !string.IsNullOrWhiteSpace(parts[1]))
 				{
 					string[] linkDatas = parts[1].Split(',');
 
@@ -203,6 +209,11 @@ namespace EvidenceBoardUIExtension
 						else
 							Debug.Assert(false);
 					}
+				}
+
+				if (parts.Count() == 3)
+				{
+					m_ImagePath = parts[2];
 				}
 			}
 			else
@@ -254,66 +265,106 @@ namespace EvidenceBoardUIExtension
 
 		private void UpdateImage(Task task)
 		{
-			m_FileLinks = task.GetFileLink(true);
+			m_ImageFileLinks = task.GetFileLink(true);
 
-			// Check if the current image is still present
-			if (m_FileLinks.IndexOf(m_ImagePath) != -1)
-				return;
-
-			// If not Use the first valid image
-			foreach (var path in m_FileLinks)
+			if (m_ImageFileLinks != null)
 			{
-				if (ImageFromFile(path))
+				// Remove all non image files
+				int iFile = m_ImageFileLinks.Count;
+
+				while (iFile-- > 0)
+				{
+					if (!IsImageFile(m_ImageFileLinks[iFile]))
+						m_ImageFileLinks.RemoveAt(iFile);
+				}
+
+				// Check if the current image is still present
+				if (m_ImageFileLinks.IndexOf(m_ImagePath) != -1)
 					return;
+
+				// Check also just by filename which is what gets encoded in the metadata
+				var imagePath = m_ImageFileLinks.Find(x => (Path.GetFileName(x) == m_ImagePath));
+
+				if (ImageFromFile(imagePath))
+					return;
+
+				// Use the first valid image
+				foreach (var path in m_ImageFileLinks)
+				{
+					if (ImageFromFile(path))
+						return;
+				}
 			}
 
-			// Clear image
+			// All else -> Clear image
 			m_Image = null;
 			m_ImagePath = string.Empty;
 		}
 
-		public bool SelectNextImage()
+		public bool CanSelectNextImage(bool next)
 		{
-			int index = m_FileLinks.IndexOf(m_ImagePath);
+			int index = m_ImageFileLinks.IndexOf(m_ImagePath);
 
-			for (int i = index + 1; i < m_FileLinks.Count; i++)
+			if (next)
+				return (index < (ImageCount - 1));
+
+			// Previous
+			return (index > 0);
+		}
+
+		public bool SelectNextImage(bool next)
+		{
+			int index = m_ImageFileLinks.IndexOf(m_ImagePath);
+
+			if (next)
 			{
-				if (ImageFromFile(m_FileLinks[i]))
-					return true;
+				for (int i = index + 1; i < ImageCount; i++)
+				{
+					if (ImageFromFile(m_ImageFileLinks[i]))
+						return true;
+				}
+			}
+			else
+			{
+				for (int i = index - 1; i >= 0; i--)
+				{
+					if (ImageFromFile(m_ImageFileLinks[i]))
+						return true;
+				}
 			}
 
 			return false;
 		}
 
-		public bool SelectPreviousImage()
+		static bool IsImageFile(string filePath)
 		{
-			int index = m_FileLinks.IndexOf(m_ImagePath);
+			var ext = Path.GetExtension(filePath).ToLower();
 
-			for (int i = index - 1; i >= 0; i--)
-			{
-				if (ImageFromFile(m_FileLinks[i]))
-					return true;
-			}
-
-			return false;
+			return ((ext == ".bmp") ||
+					(ext == ".gif") ||
+					(ext == ".jpeg") ||
+					(ext == ".jpg") ||
+					(ext == ".png") ||
+					(ext == ".tiff"));
 		}
-
-		public int FileLinkCount { get { return ((m_FileLinks == null) ? 0 : m_FileLinks.Count); } }
 
 		bool ImageFromFile(string filePath)
 		{
-			try
+			if (!string.IsNullOrWhiteSpace(filePath))
 			{
-				m_Image = Image.FromFile(filePath);
-
-				if (m_Image != null)
+				try
 				{
-					m_ImagePath = filePath;
-					return true;
+					m_Image = Image.FromFile(filePath);
+
+					if (m_Image != null)
+					{
+						m_ImagePath = filePath;
+						return true;
+					}
 				}
-			}
-			catch (Exception /*e*/)
-			{
+				catch (Exception /*e*/)
+				{
+				}
 			}
 
 			m_Image = null;
