@@ -305,7 +305,7 @@ int DateUtil::DateInMonths(DateTime date)
 DateTime DateUtil::DateFromMonths(int nMonths)
 {
 	int nYear = (nMonths / 12);
-	int nMonth = (nMonths % 12);
+	int nMonth = (nMonths % 12) + 1;// one-based 
 
 	return DateTime(nYear, nMonth, 1);
 }

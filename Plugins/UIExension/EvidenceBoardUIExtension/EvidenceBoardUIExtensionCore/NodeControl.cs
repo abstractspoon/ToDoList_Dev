@@ -89,6 +89,13 @@ namespace EvidenceBoardUIExtension
 		Point m_DragOffset;
 		PointF m_PreDragNodePos;
 		DragMode m_DragMode = DragMode.None;
+		Size m_LastDragScroll = Size.Empty;
+		int m_LastDragScrollTick = 0;
+
+		const int DragScrollInterval = 100;
+
+		int DragScrollMargin { get { return (int)(20 * m_DpiFactor); } }
+		int TicksSinceLastDragScroll { get { return (Environment.TickCount - m_LastDragScrollTick); } }
 
 		private IContainer components = null;
 
@@ -651,10 +658,13 @@ namespace EvidenceBoardUIExtension
 
 		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref IList<BaseNode> hits)
 		{
-			Rectangle rect;
+			if (IsSelectableNode(node))
+			{
+				var rect = GetNodeClientRect(node);
 
-			if (IsSelectableNode(node) && IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
-				hits.Add(node);
+				if (rect.IntersectsWith(rectClient))
+					hits.Add(node);
+			}
 
 			// check children
 			foreach (var child in node.Children)
@@ -1314,6 +1324,46 @@ namespace EvidenceBoardUIExtension
 			return ptGraph;
 		}
 
+		Size CalcDragScrollAmount(Point mousePos)
+		{
+			Size amount = Size.Empty;
+
+			if (ClientRectangle.Contains(mousePos))
+			{
+				var nonScrollRect = ClientRectangle;
+				nonScrollRect.Inflate(-DragScrollMargin, -DragScrollMargin);
+
+				if (!nonScrollRect.Contains(mousePos))
+				{
+					if (HorizontalScroll.Visible)
+					{
+						if (mousePos.X < nonScrollRect.Left)
+						{
+							amount.Width = (mousePos.X - nonScrollRect.Left); // -ve
+						}
+						else if (mousePos.X > nonScrollRect.Right)
+						{
+							amount.Width = (mousePos.X - nonScrollRect.Right); // +ve
+						}
+					}
+
+					if (VerticalScroll.Visible)
+					{
+						if (mousePos.Y < nonScrollRect.Top)
+						{
+							amount.Height = (mousePos.Y - nonScrollRect.Top); // -ve
+						}
+						else if (mousePos.Y > nonScrollRect.Bottom)
+						{
+							amount.Height = (mousePos.Y - nonScrollRect.Bottom); // +ve
+						}
+					}
+				}
+			}
+
+			return amount;
+		}
+
 		protected override void OnDragOver(DragEventArgs e)
 		{
 			Debug.Assert(RootNode.Children.Count > 0);
@@ -1344,11 +1394,12 @@ namespace EvidenceBoardUIExtension
 				{
 					Debug.Assert(!ReadOnly);
 
-					dragPt.Offset(m_DragOffset);
-					dragPt = ClientToGraph(dragPt);
+					var tempPt = dragPt;
+					tempPt.Offset(m_DragOffset);
+					tempPt = ClientToGraph(tempPt);
 
 					var dragNode = DraggedNode;
-					var offset = new PointF(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
+					var offset = new PointF(tempPt.X - dragNode.Point.X, tempPt.Y - dragNode.Point.Y);
 
 					if (!offset.IsEmpty)
 					{
@@ -1364,6 +1415,31 @@ namespace EvidenceBoardUIExtension
 				}
 				break;
 			}
+
+			var dragScroll = CalcDragScrollAmount(dragPt);
+
+			// Reset the tick count whenever we transition
+			if ((m_LastDragScroll == Size.Empty) || (dragScroll == Size.Empty))
+			{
+				m_LastDragScrollTick = Environment.TickCount;
+			}
+			else if (TicksSinceLastDragScroll >= DragScrollInterval)
+			{
+				int horzScroll = Validate((HorizontalScroll.Value + dragScroll.Width), HorizontalScroll);
+				int vertScroll = Validate((VerticalScroll.Value + dragScroll.Height), VerticalScroll);
+
+				if ((horzScroll != HorizontalScroll.Value) || (vertScroll != VerticalScroll.Value))
+				{
+					HorizontalScroll.Value = horzScroll;
+					VerticalScroll.Value = vertScroll;
+
+					PerformLayout();
+
+					m_LastDragScrollTick = Environment.TickCount;
+				}
+			}
+
+			m_LastDragScroll = dragScroll;
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)

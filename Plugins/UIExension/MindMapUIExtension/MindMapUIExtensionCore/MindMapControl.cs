@@ -170,7 +170,7 @@ namespace MindMapUIExtension
 		private float m_ZoomFactor = 1f;
 
 		private Timer m_DragTimer;
-		private Size m_LastDragScroll;
+		private Size m_LastDragScroll = Size.Empty;
 		private int m_LastDragMoveTick = 0;
 		private int m_LastDragScrollTick = 0;
 
