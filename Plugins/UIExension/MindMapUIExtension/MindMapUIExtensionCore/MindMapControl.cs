@@ -76,9 +76,6 @@ namespace MindMapUIExtension
 		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
 		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
 
-		const int WM_HSCROLL = 0x0114;
-		const int WM_VSCROLL = 0x0115;
-
 		// Constants ---------------------------------------------------------------------
 
 		private double m_DpiFactor = 1.0;
@@ -95,7 +92,10 @@ namespace MindMapUIExtension
         virtual protected int GraphPadding					{ get { return ScaleByDPIFactor(6); } }
         virtual protected int DefaultExpansionButtonSize	{ get { return ScaleByDPIFactor(8); } }
 
-		int DragScrollBorder { get { return ScaleByDPIFactor(20); } }
+		// Following to match core app
+		int DragScrollMargin								{ get { return ScaleByDPIFactor(20); } } 
+		const int DragScrollInterval = 100;
+		const int DragExpandInterval = 500;
 
 		private int ExpansionButtonSize 
         { 
@@ -158,16 +158,6 @@ namespace MindMapUIExtension
             Below,
         }
 
-		[Flags]
-		enum DragScrollEdge
-		{
-			None	= 0x0,
-			Left	= 0x1,
-			Right	= 0x2,
-			Up		= 0x4,
-			Down	= 0x8,
-		}
-
 		// Data --------------------------------------------------------------------------
 
 		private Point m_DrawOffset;
@@ -175,14 +165,14 @@ namespace MindMapUIExtension
 		private TreeNode m_PrevSelection;
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
-		private Timer m_DragTimer;
 		private Color m_ConnectionColor;
-		private bool m_InDragScrollRegion = false;
         private int m_ThemedGlyphSize = 0;
 		private float m_ZoomFactor = 1f;
-		private DragScrollEdge m_LastDragScrollEdge;
 
-		private int m_LastDragMoveTick = 0, m_LastDragScrollTick = 0;
+		private Timer m_DragTimer;
+		private Size m_LastDragScroll;
+		private int m_LastDragMoveTick = 0;
+		private int m_LastDragScrollTick = 0;
 
 		private int TicksSinceLastDragMove { get { return (Environment.TickCount - m_LastDragMoveTick); } }
 		private int TicksSinceLastDragScroll { get { return (Environment.TickCount - m_LastDragScrollTick); } }
@@ -834,38 +824,44 @@ namespace MindMapUIExtension
 				CheckStartDragging(MousePosition);
 		}
 
-		DragScrollEdge HitTestDragScrollRegion(Point pos)
+		Size CalcDragScrollAmount(Point mousePos)
 		{
-			DragScrollEdge hit = DragScrollEdge.None;
+			Size amount = Size.Empty;
 
-			if (ClientRectangle.Contains(pos))
+			if (ClientRectangle.Contains(mousePos))
 			{
 				var nonScrollRect = ClientRectangle;
-				nonScrollRect.Inflate(-DragScrollBorder, -DragScrollBorder);
+				nonScrollRect.Inflate(-DragScrollMargin, -DragScrollMargin);
 
-				if (!nonScrollRect.Contains(pos))
+				if (!nonScrollRect.Contains(mousePos))
 				{
-					if (pos.X < nonScrollRect.Left)
+					if (HorizontalScroll.Visible)
 					{
-						hit = DragScrollEdge.Left;
-					}
-					else if (pos.X > nonScrollRect.Right)
-					{
-						hit = DragScrollEdge.Right;
+						if (mousePos.X < nonScrollRect.Left)
+						{
+							amount.Width = (mousePos.X - nonScrollRect.Left); // -ve
+						}
+						else if (mousePos.X > nonScrollRect.Right)
+						{
+							amount.Width = (mousePos.X - nonScrollRect.Right); // +ve
+						}
 					}
 
-					if (pos.Y < nonScrollRect.Top)
+					if (VerticalScroll.Visible)
 					{
-						hit |= DragScrollEdge.Up;
-					}
-					else if (pos.Y > nonScrollRect.Bottom)
-					{
-						hit = DragScrollEdge.Down;
+						if (mousePos.Y < nonScrollRect.Top)
+						{
+							amount.Height = (mousePos.Y - nonScrollRect.Top); // -ve
+						}
+						else if (mousePos.Y > nonScrollRect.Bottom)
+						{
+							amount.Height = (mousePos.Y - nonScrollRect.Bottom); // +ve
+						}
 					}
 				}
 			}
 
-			return hit;
+			return amount;
 		}
 
 		protected override void OnDragOver(DragEventArgs e)
@@ -913,49 +909,38 @@ namespace MindMapUIExtension
 				}
 				else if (IsParent(m_DropTarget) && !m_DropTarget.IsExpanded)
 				{
-					if (TicksSinceLastDragMove >= 500)
+					if (TicksSinceLastDragMove >= DragExpandInterval)
 						m_DropTarget.Expand();
 				}
 				else
 				{
-					var dragScrollEdge = HitTestDragScrollRegion(dragPt);
+					var dragScroll = CalcDragScrollAmount(dragPt);
 
-					if (dragScrollEdge != m_LastDragScrollEdge)
+					// Reset the tick count whenever we transition
+					if ((m_LastDragScroll == Size.Empty) || (dragScroll == Size.Empty))
 					{
-						m_LastDragScrollEdge = dragScrollEdge;
 						m_LastDragScrollTick = Environment.TickCount;
 					}
-					else if (TicksSinceLastDragScroll >= 200)
+					else if (TicksSinceLastDragScroll >= DragScrollInterval)
 					{
-						if (dragScrollEdge == DragScrollEdge.None)
-						{
+						int horzScroll = Validate((HorizontalScroll.Value + dragScroll.Width), HorizontalScroll);
+						int vertScroll = Validate((VerticalScroll.Value + dragScroll.Height), VerticalScroll);
 
-						}
-						else
+						if ((horzScroll != HorizontalScroll.Value) || (vertScroll != VerticalScroll.Value))
 						{
-							if (dragScrollEdge.HasFlag(DragScrollEdge.Left))
-							{
-								SendMessage(Handle, WM_HSCROLL/*, TODO*/);
-							}
-							else if (dragScrollEdge.HasFlag(DragScrollEdge.Right))
-							{
-								SendMessage(Handle, WM_HSCROLL/*, TODO*/);
-							}
+							HorizontalScroll.Value = horzScroll;
+							VerticalScroll.Value = vertScroll;
 
-							if (dragScrollEdge.HasFlag(DragScrollEdge.Up))
-							{
-								SendMessage(Handle, WM_VSCROLL/*, TODO*/);
-							}
-							else if (dragScrollEdge.HasFlag(DragScrollEdge.Down))
-							{
-								SendMessage(Handle, WM_VSCROLL/*, TODO*/);
-							}
+							PerformLayout();
+
+							m_LastDragScrollTick = Environment.TickCount;
 						}
 					}
+
+					m_LastDragScroll = dragScroll;
 				}
 			}
 		}
-
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
