@@ -128,11 +128,11 @@ enum
 {
 	DELAY_INTERVAL = 150, 
 	SCROLL_INTERVAL = 100, 
-	SCROLL_MARGIN = 20, 
 	EXPAND_INTERVAL = 500,
 };
 
 const CPoint OUTERSPACE(-10000, -10000);
+const int SCROLL_MARGIN = GraphicsMisc::ScaleByDPIFactor(20);
 
 CTreeDragDropHelper::CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree, CTreeDragDropRenderer* pAltRenderer)
 	: 

@@ -85,12 +85,17 @@ namespace MindMapUIExtension
             return (int)(m_DpiFactor * value);
         }
 
-		virtual protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
-		virtual protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
-        virtual protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
-		virtual protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-        virtual protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
-        virtual protected int DefaultExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
+		virtual protected int ItemHorzSeparation			{ get { return ScaleByDPIFactor(40); } }
+		virtual protected int ItemVertSeparation			{ get { return ScaleByDPIFactor(4); } }
+        virtual protected int InsertionMarkerHeight			{ get { return ScaleByDPIFactor(6); } }
+		virtual protected int LabelPadding					{ get { return ScaleByDPIFactor(2); } }
+        virtual protected int GraphPadding					{ get { return ScaleByDPIFactor(6); } }
+        virtual protected int DefaultExpansionButtonSize	{ get { return ScaleByDPIFactor(8); } }
+
+		// Following to match core app
+		int DragScrollMargin								{ get { return ScaleByDPIFactor(20); } } 
+		const int DragScrollInterval = 100;
+		const int DragExpandInterval = 500;
 
 		private int ExpansionButtonSize 
         { 
@@ -155,16 +160,22 @@ namespace MindMapUIExtension
 
 		// Data --------------------------------------------------------------------------
 
-        private Point m_DrawOffset;
+		private Point m_DrawOffset;
 		private TreeNode m_DropTarget;
 		private TreeNode m_PrevSelection;
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
-		private Timer m_DragTimer;
 		private Color m_ConnectionColor;
-		private int m_LastDragTick = 0;
         private int m_ThemedGlyphSize = 0;
 		private float m_ZoomFactor = 1f;
+
+		private Timer m_DragTimer;
+		private Size m_LastDragScroll;
+		private int m_LastDragMoveTick = 0;
+		private int m_LastDragScrollTick = 0;
+
+		private int TicksSinceLastDragMove { get { return (Environment.TickCount - m_LastDragMoveTick); } }
+		private int TicksSinceLastDragScroll { get { return (Environment.TickCount - m_LastDragScrollTick); } }
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
@@ -812,7 +823,47 @@ namespace MindMapUIExtension
 			if (mouseDown)
 				CheckStartDragging(MousePosition);
 		}
-	
+
+		Size CalcDragScrollAmount(Point mousePos)
+		{
+			Size amount = Size.Empty;
+
+			if (ClientRectangle.Contains(mousePos))
+			{
+				var nonScrollRect = ClientRectangle;
+				nonScrollRect.Inflate(-DragScrollMargin, -DragScrollMargin);
+
+				if (!nonScrollRect.Contains(mousePos))
+				{
+					if (HorizontalScroll.Visible)
+					{
+						if (mousePos.X < nonScrollRect.Left)
+						{
+							amount.Width = (mousePos.X - nonScrollRect.Left); // -ve
+						}
+						else if (mousePos.X > nonScrollRect.Right)
+						{
+							amount.Width = (mousePos.X - nonScrollRect.Right); // +ve
+						}
+					}
+
+					if (VerticalScroll.Visible)
+					{
+						if (mousePos.Y < nonScrollRect.Top)
+						{
+							amount.Height = (mousePos.Y - nonScrollRect.Top); // -ve
+						}
+						else if (mousePos.Y > nonScrollRect.Bottom)
+						{
+							amount.Height = (mousePos.Y - nonScrollRect.Bottom); // +ve
+						}
+					}
+				}
+			}
+
+			return amount;
+		}
+
 		protected override void OnDragOver(DragEventArgs e)
 		{
             Debug.Assert(!ReadOnly);
@@ -851,15 +902,42 @@ namespace MindMapUIExtension
 				{
 					m_DropTarget = dropTarget;
                     m_DropPos = dropPos;
-					m_LastDragTick = Environment.TickCount;
+					m_LastDragMoveTick = Environment.TickCount;
 
                     Invalidate();
 					Update();
 				}
-				else if ((Environment.TickCount - m_LastDragTick) >= 500)
+				else if (IsParent(m_DropTarget) && !m_DropTarget.IsExpanded)
 				{
-					if (IsParent(m_DropTarget) && !m_DropTarget.IsExpanded)
+					if (TicksSinceLastDragMove >= DragExpandInterval)
 						m_DropTarget.Expand();
+				}
+				else
+				{
+					var dragScroll = CalcDragScrollAmount(dragPt);
+
+					// Reset the tick count whenever we transition
+					if ((m_LastDragScroll == Size.Empty) || (dragScroll == Size.Empty))
+					{
+						m_LastDragScrollTick = Environment.TickCount;
+					}
+					else if (TicksSinceLastDragScroll >= DragScrollInterval)
+					{
+						int horzScroll = Validate((HorizontalScroll.Value + dragScroll.Width), HorizontalScroll);
+						int vertScroll = Validate((VerticalScroll.Value + dragScroll.Height), VerticalScroll);
+
+						if ((horzScroll != HorizontalScroll.Value) || (vertScroll != VerticalScroll.Value))
+						{
+							HorizontalScroll.Value = horzScroll;
+							VerticalScroll.Value = vertScroll;
+
+							PerformLayout();
+
+							m_LastDragScrollTick = Environment.TickCount;
+						}
+					}
+
+					m_LastDragScroll = dragScroll;
 				}
 			}
 		}
@@ -1119,7 +1197,7 @@ namespace MindMapUIExtension
 			{
 				// DoDragDrop is a modal loop so we can't use a timer
 				// to implement auto-expansion of dragged-over parent nodes
-				m_LastDragTick = Environment.TickCount;
+				m_LastDragMoveTick = Environment.TickCount;
 
 				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
 				return true;
