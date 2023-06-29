@@ -179,7 +179,7 @@ protected:
 	int		m_nEveryNumMonths;
 	int		m_nMonthlyOption;
 	//}}AFX_DATA
-	CDayOfWeekComboBox	m_cbWeekdays;
+	CDayOfWeekComboBox	m_cbDaysOfWeek;
 	CComboBox			m_cbSpecificWeek;
 	CStringArray		m_aSpecificWeek;
 	BOOL				m_bFirstLastWeekday;

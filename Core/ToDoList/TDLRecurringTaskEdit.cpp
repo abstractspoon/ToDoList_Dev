@@ -696,7 +696,7 @@ void CTDLRecurringTaskMonthlyOptionPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLRecurringTaskMonthlyOptionPage)
-	DDX_Control(pDX, IDC_THEWEEKDAY, m_cbWeekdays);
+	DDX_Control(pDX, IDC_THEWEEKDAY, m_cbDaysOfWeek);
 	DDX_Control(pDX, IDC_THESPECIFICWEEK, m_cbSpecificWeek);
 	DDX_CBIndex(pDX, IDC_THESPECIFICWEEK, m_nSpecificNumber);
 	DDX_CBIndex(pDX, IDC_THEWEEKDAY, m_nSpecificDayOfWeek);
@@ -817,17 +817,13 @@ void CTDLRecurringTaskMonthlyOptionPage::FixupWeekdayCombo(int iWeek, int iPrevW
 {
 	if ((iWeek == 0) || (iWeek == (m_cbSpecificWeek.GetCount() - 1)))
 	{
-		if (m_cbWeekdays.GetCount() == 7)
-		{
-			m_cbWeekdays.AddString(_T("weekday"));
-		}
+		if (m_cbDaysOfWeek.GetCount() == 7)
+			m_cbDaysOfWeek.AddString(CEnString(IDS_RECURS_WEEKDAY));
 	}
 	else if ((iPrevWeek == 0) || (iPrevWeek == (m_cbSpecificWeek.GetCount() - 1)))
 	{
-		if (m_cbWeekdays.GetCount() == 8)
-		{
-			m_cbWeekdays.DeleteString(7);
-		}
+		if (m_cbDaysOfWeek.GetCount() == 8)
+			m_cbDaysOfWeek.DeleteString(7);
 	}
 }
 
