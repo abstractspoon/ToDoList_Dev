@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Diagnostics;
+using System.IO;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -14,7 +15,6 @@ namespace EvidenceBoardUIExtension
 		public static string MetaDataKey = string.Empty;
 
 		public string Title { get; private set; }
-		public string ImagePath { get; private set; }
 		public Color TextColor { get; private set; }
 
 		public bool HasIcon { get; private set; }
@@ -33,7 +33,6 @@ namespace EvidenceBoardUIExtension
 		public List<uint> DependIds { get; private set; }
 
 		List<UserLink> m_UserLinks;
-
 		public IEnumerable<UserLink> UserLinks { get { return m_UserLinks; } }
 
 		private bool Done;
@@ -42,8 +41,15 @@ namespace EvidenceBoardUIExtension
 		public Point UserPosition;
 		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
 
-		public Image Image;
-		public bool HasImage { get { return (Image != null); } }
+		public Image Image {  get { return m_Image; } }
+		public bool HasImage { get { return (m_Image != null); } }
+		public string ImagePath { get { return m_ImagePath; } }
+		public int ImageIndex { get { return m_ImageFileLinks.IndexOf(m_ImagePath); } }
+		public int ImageCount { get { return ((m_ImageFileLinks == null) ? 0 : m_ImageFileLinks.Count); } }
+
+		private List<string> m_ImageFileLinks;
+		private string m_ImagePath;
+		private Image m_Image;
 
 		public enum ImageExpansionState
 		{
@@ -62,6 +68,8 @@ namespace EvidenceBoardUIExtension
 				return (ImageExpanded ? ImageExpansionState.Expanded : ImageExpansionState.Collapsed);
 			}
 		}
+
+		public bool IsExpanded { get { return (ImageExpansion == ImageExpansionState.Expanded); } }
 
 		public bool ExpandImage(bool expand)
 		{
@@ -107,10 +115,12 @@ namespace EvidenceBoardUIExtension
 
 			ChildIds = new List<uint>();
 			DependIds = task.GetLocalDependency();
-			m_UserLinks = null;
 
-			UpdateImage(task);
+			m_UserLinks = null;
+			m_ImageFileLinks = null;
+
 			DecodeMetaData(task.GetMetaDataValue(MetaDataKey));
+			UpdateImage(task);
 		}
 
 		public override string ToString()
@@ -147,6 +157,9 @@ namespace EvidenceBoardUIExtension
 			if (HasUserLinks)
 				metaData = metaData + string.Join(",", UserLinks);
 
+			if (!string.IsNullOrEmpty(m_ImagePath))
+				metaData = metaData + '|' + Path.GetFileName(m_ImagePath);
+
 			return metaData;
 		}
 
@@ -158,7 +171,7 @@ namespace EvidenceBoardUIExtension
 			if (string.IsNullOrWhiteSpace(metaData))
 				return;
 
-			string[] parts = metaData.Split(new char[1] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+			string[] parts = metaData.Split('|');
 
 			if (parts.Count() > 0)
 			{
@@ -185,7 +198,7 @@ namespace EvidenceBoardUIExtension
 					return;
 				}
 
-				if (parts.Count() == 2)
+				if ((parts.Count() == 2) && !string.IsNullOrWhiteSpace(parts[1]))
 				{
 					string[] linkDatas = parts[1].Split(',');
 
@@ -198,6 +211,11 @@ namespace EvidenceBoardUIExtension
 						else
 							Debug.Assert(false);
 					}
+				}
+
+				if (parts.Count() == 3)
+				{
+					m_ImagePath = parts[2];
 				}
 			}
 			else
@@ -249,32 +267,112 @@ namespace EvidenceBoardUIExtension
 
 		private void UpdateImage(Task task)
 		{
-			var filePaths = task.GetFileLink(true);
+			m_ImageFileLinks = task.GetFileLink(true);
 
-			foreach (var path in filePaths)
+			if (m_ImageFileLinks != null)
+			{
+				// Remove all non image files
+				int iFile = m_ImageFileLinks.Count;
+
+				while (iFile-- > 0)
+				{
+					if (!IsImageFile(m_ImageFileLinks[iFile]))
+						m_ImageFileLinks.RemoveAt(iFile);
+				}
+
+				// Check if the current image is still present
+				if (m_ImageFileLinks.IndexOf(m_ImagePath) != -1)
+					return;
+
+				// Check also just by filename which is what gets encoded in the metadata
+				var imagePath = m_ImageFileLinks.Find(x => (Path.GetFileName(x) == m_ImagePath));
+
+				if (ImageFromFile(imagePath))
+					return;
+
+				// Use the first valid image
+				foreach (var path in m_ImageFileLinks)
+				{
+					if (ImageFromFile(path))
+						return;
+				}
+			}
+
+			// All else -> Clear image
+			m_Image = null;
+			m_ImagePath = string.Empty;
+		}
+
+		public bool CanSelectNextImage(bool next)
+		{
+			int index = m_ImageFileLinks.IndexOf(m_ImagePath);
+
+			if (next)
+				return (index < (ImageCount - 1));
+
+			// Previous
+			return (index > 0);
+		}
+
+		public bool SelectNextImage(bool next)
+		{
+			int index = m_ImageFileLinks.IndexOf(m_ImagePath);
+
+			if (next)
+			{
+				for (int i = index + 1; i < ImageCount; i++)
+				{
+					if (ImageFromFile(m_ImageFileLinks[i]))
+						return true;
+				}
+			}
+			else
+			{
+				for (int i = index - 1; i >= 0; i--)
+				{
+					if (ImageFromFile(m_ImageFileLinks[i]))
+						return true;
+				}
+			}
+
+			return false;
+		}
+
+		static bool IsImageFile(string filePath)
+		{
+			var ext = Path.GetExtension(filePath).ToLower();
+
+			return ((ext == ".bmp") ||
+					(ext == ".gif") ||
+					(ext == ".jpeg") ||
+					(ext == ".jpg") ||
+					(ext == ".png") ||
+					(ext == ".tiff"));
+		}
+
+		bool ImageFromFile(string filePath)
+		{
+			if (!string.IsNullOrWhiteSpace(filePath))
 			{
 				try
 				{
-					if (path != ImagePath)
-					{
-						var image = Image.FromFile(path);
+					m_Image = Image.FromFile(filePath);
 
-						if (image != null)
-						{
-							ImagePath = path;
-							Image = image;
-							return;
-						}
+					if (m_Image != null)
+					{
+						m_ImagePath = filePath;
+						return true;
 					}
 				}
 				catch (Exception /*e*/)
 				{
-					// keep going
 				}
 			}
 
-			Image = null;
-			ImagePath = string.Empty;
+			m_Image = null;
+			m_ImagePath = string.Empty;
+
+			return false;
 		}
 
 		public bool Update(Task task)
