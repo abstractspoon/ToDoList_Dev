@@ -329,7 +329,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 	// then a non-empty commandline without a file path, task link or title 
 	// prefix is treated as an error
 	BOOL bHasFilePath = startup.HasFilePath();
-	BOOL bTaskLink = startup.HasFlag(TLD_TASKLINK);
+	BOOL bTaskLink = cmdInfo.HasOption(SWITCH_TASKLINK);
 	BOOL bHasTitlePrefix = !startup.GetTitlePrefix().IsEmpty();
 
 	if ((nNumWnds > 1) && !bHasFilePath && !bTaskLink && !bHasTitlePrefix && !startup.IsEmpty(TRUE))
