@@ -329,7 +329,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 	// then a non-empty commandline without a file path, task link or title 
 	// prefix is treated as an error
 	BOOL bHasFilePath = startup.HasFilePath();
-	BOOL bTaskLink = cmdInfo.HasOption(SWITCH_TASKLINK);
+	BOOL bTaskLink = startup.HasFlag(TLD_TASKLINK);
 	BOOL bHasTitlePrefix = !startup.GetTitlePrefix().IsEmpty();
 
 	if ((nNumWnds > 1) && !bHasFilePath && !bTaskLink && !bHasTitlePrefix && !startup.IsEmpty(TRUE))
@@ -408,9 +408,10 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		// 2. A tasklist was opened or imported
 		// 3. A new task name requires editing
 		// 4. A command requiring UI executed
-		BOOL bShow = (startup.IsEmpty(TRUE) || bTaskLink ||
-					(startup.HasFilePath() && bTasklistOpened) ||
-					(startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskTitle()));
+		BOOL bShow = (startup.IsEmpty(TRUE) || 
+					  cmdInfo.HasOption(SWITCH_TASKLINK) ||
+					  (startup.HasFilePath() && bTasklistOpened) ||
+					  (startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskTitle()));
 
 		if (!bShow && startup.HasCommandID())
 		{
