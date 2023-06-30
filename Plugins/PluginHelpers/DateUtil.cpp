@@ -299,13 +299,13 @@ String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 
 int DateUtil::DateInMonths(DateTime date)
 {
-	return ((date.Year * 12) + date.Month);
+	return ((date.Year * 12) + (date.Month - 1)); // zero-based months
 }
 
 DateTime DateUtil::DateFromMonths(int nMonths)
 {
 	int nYear = (nMonths / 12);
-	int nMonth = (nMonths % 12);
+	int nMonth = (nMonths % 12) + 1;// one-based months
 
 	return DateTime(nYear, nMonth, 1);
 }

@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using ScrollHelper;
+
 using BaseNode = RadialTree.TreeNode<uint>;
 
 namespace EvidenceBoardUIExtension
@@ -55,8 +57,7 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 		}
-
-
+		
 		public const uint NullId = uint.MaxValue;
 
 		float m_InitialRadius = 50f;
@@ -89,6 +90,7 @@ namespace EvidenceBoardUIExtension
 		Point m_DragOffset;
 		PointF m_PreDragNodePos;
 		DragMode m_DragMode = DragMode.None;
+		DragScroller m_DragScroll;
 
 		private IContainer components = null;
 
@@ -102,15 +104,16 @@ namespace EvidenceBoardUIExtension
 
 		public NodeControl()
 		{
+			using (var graphics = CreateGraphics())
+				m_DpiFactor = graphics.DpiX / 96f;
+
 			m_InitialRadius = DefaultInitialRadius;
 			m_RadialIncrementOrSpacing = DefaultInitialRadius;
 			m_NodeSize = DefaulttNodeSize;
 			m_TextFont = new Font("Tahoma", 8);
 			m_BaseFontHeight = m_TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
-
-			using (var graphics = CreateGraphics())
-				m_DpiFactor = graphics.DpiX / 96f;
+			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)(m_DpiFactor * 20) };
 
 			InitializeComponent();
 		}
@@ -582,26 +585,12 @@ namespace EvidenceBoardUIExtension
 				{
 					var ptClientNew = GraphToClient(ptGraph);
 
-					if (HorizontalScroll.Visible)
-					{
-						int newX = HorizontalScroll.Value + (ptClientNew.X - ptClient.X);
-						HorizontalScroll.Value = Validate(newX, HorizontalScroll);
-					}
-
-					if (VerticalScroll.Visible)
-					{
-						int newY = VerticalScroll.Value + (ptClientNew.Y - ptClient.Y);
-						VerticalScroll.Value = Validate(newY, VerticalScroll);
- 					}
+					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
+					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
 
 					PerformLayout();
 				}
 			}
-		}
-
-		static int Validate(int pos, ScrollProperties scroll)
-		{
-			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
 		}
 
 		protected BaseNode HitTestNode(Point ptClient, bool excludeRoot = false)
@@ -651,10 +640,13 @@ namespace EvidenceBoardUIExtension
 
 		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref IList<BaseNode> hits)
 		{
-			Rectangle rect;
+			if (IsSelectableNode(node))
+			{
+				var rect = GetNodeClientRect(node);
 
-			if (IsSelectableNode(node) && IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
-				hits.Add(node);
+				if (rect.IntersectsWith(rectClient))
+					hits.Add(node);
+			}
 
 			// check children
 			foreach (var child in node.Children)
@@ -1210,7 +1202,9 @@ namespace EvidenceBoardUIExtension
 			switch (m_DragMode)
 			{
 			case DragMode.SelectionBox:
-				data = ptOrg;
+				// Selection box is always in 'absolute' client coords
+				// to handle auto drag scrolling
+				data = this.FromScrolled(ptOrg);
 				dde = DragDropEffects.Move;
 				break;
 
@@ -1249,7 +1243,7 @@ namespace EvidenceBoardUIExtension
 			DragDropEffects dde = DragDropEffects.None;
 
 			if (WantStartDragging(ref data, ref dde))
-				DoDragDrop(this, dde);
+				DoDragDrop(data, dde);
 		}
 
 		protected Point GraphToClient(Point ptGraph)
@@ -1310,8 +1304,9 @@ namespace EvidenceBoardUIExtension
 			{
 			case DragMode.SelectionBox:
 				{
+					// Origin point is in 'absolute' client coords to handle auto drag scrolling
 					Point orgPt = (Point)e.Data.GetData(typeof(Point));
-					m_SelectionBox = Geometry2D.RectFromPoints(orgPt, dragPt);
+					m_SelectionBox = Geometry2D.RectFromPoints(this.ToScrolled(orgPt), dragPt);
 
 					// Select intersecting nodes
 					var hits = HitTestNodes(m_SelectionBox);
@@ -1349,6 +1344,8 @@ namespace EvidenceBoardUIExtension
 				}
 				break;
 			}
+
+			m_DragScroll.DoDragScroll(e);
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)
