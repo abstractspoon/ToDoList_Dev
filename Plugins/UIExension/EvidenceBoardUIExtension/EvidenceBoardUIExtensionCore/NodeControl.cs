@@ -585,17 +585,8 @@ namespace EvidenceBoardUIExtension
 				{
 					var ptClientNew = GraphToClient(ptGraph);
 
-					if (HorizontalScroll.Visible)
-					{
-						int newX = HorizontalScroll.Value + (ptClientNew.X - ptClient.X);
-						HorizontalScroll.Value = ScrollbarValidator.Validate(newX, HorizontalScroll);
-					}
-
-					if (VerticalScroll.Visible)
-					{
-						int newY = VerticalScroll.Value + (ptClientNew.Y - ptClient.Y);
-						VerticalScroll.Value = ScrollbarValidator.Validate(newY, VerticalScroll);
- 					}
+					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
+					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
 
 					PerformLayout();
 				}
@@ -1191,18 +1182,6 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		Point FromScrolled(Point ptScrolled)
-		{
-			ptScrolled.Offset(HorizontalScroll.Value, VerticalScroll.Value);
-			return ptScrolled;
-		}
-
-		Point ToScrolled(Point ptUnscrolled)
-		{
-			ptUnscrolled.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
-			return ptUnscrolled;
-		}
-
 		private bool WantStartDragging(ref object data, ref DragDropEffects dde)
 		{
 			data = null;
@@ -1225,7 +1204,7 @@ namespace EvidenceBoardUIExtension
 			case DragMode.SelectionBox:
 				// Selection box is always in 'absolute' client coords
 				// to handle auto drag scrolling
-				data = FromScrolled(ptOrg);
+				data = this.FromScrolled(ptOrg);
 				dde = DragDropEffects.Move;
 				break;
 
@@ -1327,7 +1306,7 @@ namespace EvidenceBoardUIExtension
 				{
 					// Origin point is in 'absolute' client coords to handle auto drag scrolling
 					Point orgPt = (Point)e.Data.GetData(typeof(Point));
-					m_SelectionBox = Geometry2D.RectFromPoints(ToScrolled(orgPt), dragPt);
+					m_SelectionBox = Geometry2D.RectFromPoints(this.ToScrolled(orgPt), dragPt);
 
 					// Select intersecting nodes
 					var hits = HitTestNodes(m_SelectionBox);

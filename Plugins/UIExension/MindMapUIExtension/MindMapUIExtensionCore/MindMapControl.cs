@@ -718,15 +718,13 @@ namespace MindMapUIExtension
 					if (HorizontalScroll.Visible)
 					{
 						int newX = (int)(relX * HorizontalScroll.Maximum) - e.Location.X;
-
-						HorizontalScroll.Value = ScrollbarValidator.Validate(newX, HorizontalScroll);
+						HorizontalScroll.SetValue(newX);
 					}
 
 					if (VerticalScroll.Visible)
 					{
 						int newY = (int)(relY * VerticalScroll.Maximum) - e.Location.Y;
-
-						VerticalScroll.Value = ScrollbarValidator.Validate(newY, VerticalScroll);
+						VerticalScroll.SetValue(newY);
 					}
 
 					PerformLayout();
@@ -1348,12 +1346,7 @@ namespace MindMapUIExtension
                     xOffset = (itemRect.Right - ClientRectangle.Right);
                 }
 
-                if (xOffset != 0)
-                {
-                    int scrollX = (HorizontalScroll.Value + xOffset);
-  
-                    HorizontalScroll.Value = ScrollbarValidator.Validate(scrollX, HorizontalScroll);
-                }
+                HorizontalScroll.OffsetValue(xOffset);
             }
 
             if (VerticalScroll.Visible)
@@ -1369,12 +1362,7 @@ namespace MindMapUIExtension
                     yOffset = (itemRect.Bottom - ClientRectangle.Bottom);
                 }
 
-                if (yOffset != 0)
-                {
-                    int scrollY = (VerticalScroll.Value + yOffset);
-  
-                    VerticalScroll.Value = ScrollbarValidator.Validate(scrollY, VerticalScroll);
-                }
+                VerticalScroll.OffsetValue(yOffset);
             }
 
             PerformLayout();

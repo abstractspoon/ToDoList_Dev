@@ -7,12 +7,35 @@ using System.Drawing;
 
 namespace ScrollHelper
 {
-
-	public class ScrollbarValidator
+	public static class ExtensionMethods
 	{
-		public static int Validate(int pos, ScrollProperties scroll)
+		public static void SetValue(this ScrollProperties scroll, int pos)
+		{
+			if (scroll.Visible && (pos != scroll.Value))
+				scroll.Value = scroll.Validate(pos);
+		}
+
+		public static void OffsetValue(this ScrollProperties scroll, int offset)
+		{
+			if (scroll.Visible && (offset != 0))
+				scroll.Value = scroll.Validate(scroll.Value + offset);
+		}
+
+		public static int Validate(this ScrollProperties scroll, int pos)
 		{
 			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
+		}
+
+		public static Point FromScrolled(this ScrollableControl ctrl, Point ptScrolled)
+		{
+			ptScrolled.Offset(ctrl.HorizontalScroll.Value, ctrl.VerticalScroll.Value);
+			return ptScrolled;
+		}
+
+		public static Point ToScrolled(this ScrollableControl ctrl, Point ptUnscrolled)
+		{
+			ptUnscrolled.Offset(-ctrl.HorizontalScroll.Value, -ctrl.VerticalScroll.Value);
+			return ptUnscrolled;
 		}
 	}
 
@@ -46,8 +69,8 @@ namespace ScrollHelper
 			}
 			else if (TicksSinceLastDragScroll >= DragScrollInterval)
 			{
-				int horzScroll = ScrollbarValidator.Validate((m_Control.HorizontalScroll.Value + dragScroll.Width), m_Control.HorizontalScroll);
-				int vertScroll = ScrollbarValidator.Validate((m_Control.VerticalScroll.Value + dragScroll.Height), m_Control.VerticalScroll);
+				int horzScroll = m_Control.HorizontalScroll.Validate(m_Control.HorizontalScroll.Value + dragScroll.Width);
+				int vertScroll = m_Control.VerticalScroll.Validate(m_Control.VerticalScroll.Value + dragScroll.Height);
 
 				if ((horzScroll != m_Control.HorizontalScroll.Value) || (vertScroll != m_Control.VerticalScroll.Value))
 				{
