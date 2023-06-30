@@ -107,6 +107,10 @@
       <Project>{1db9c8cc-031b-49b5-ac6c-23d9c75fdb0c}</Project>
       <Name>RadialTree</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\ScrollHelper\ScrollHelper.csproj">
+      <Project>{f189401e-ab95-40cb-96ac-d6a0371117c1}</Project>
+      <Name>ScrollHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>

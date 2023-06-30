@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Windows.Forms.VisualStyles;
 
+using ScrollHelper;
+
 namespace MindMapUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, object itemData);
@@ -78,7 +80,9 @@ namespace MindMapUIExtension
 
 		// Constants ---------------------------------------------------------------------
 
-		private double m_DpiFactor = 1.0;
+		const int DragExpandInterval = 500;
+
+		double m_DpiFactor = 1.0;
 
         protected int ScaleByDPIFactor(int value)
         {
@@ -91,11 +95,6 @@ namespace MindMapUIExtension
 		virtual protected int LabelPadding					{ get { return ScaleByDPIFactor(2); } }
         virtual protected int GraphPadding					{ get { return ScaleByDPIFactor(6); } }
         virtual protected int DefaultExpansionButtonSize	{ get { return ScaleByDPIFactor(8); } }
-
-		// Following to match core app
-		int DragScrollMargin								{ get { return ScaleByDPIFactor(20); } } 
-		const int DragScrollInterval = 100;
-		const int DragExpandInterval = 500;
 
 		private int ExpansionButtonSize 
         { 
@@ -170,12 +169,10 @@ namespace MindMapUIExtension
 		private float m_ZoomFactor = 1f;
 
 		private Timer m_DragTimer;
-		private Size m_LastDragScroll = Size.Empty;
 		private int m_LastDragMoveTick = 0;
-		private int m_LastDragScrollTick = 0;
-
 		private int TicksSinceLastDragMove { get { return (Environment.TickCount - m_LastDragMoveTick); } }
-		private int TicksSinceLastDragScroll { get { return (Environment.TickCount - m_LastDragScrollTick); } }
+
+		private DragScroller m_DragScroll;
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
@@ -192,14 +189,15 @@ namespace MindMapUIExtension
 
         public MindMapControl()
         {
-            m_DrawOffset = new Point(0, 0);
+			using (var graphics = CreateGraphics())
+				m_DpiFactor = graphics.DpiX / 96.0;
+
+			m_DrawOffset = new Point(0, 0);
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
 			m_ConnectionColor = Color.Magenta;
 			m_Alignment = RootAlignment.Centre;
-
-			using (var graphics = CreateGraphics())
-				m_DpiFactor = graphics.DpiX / 96.0;
+			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)(m_DpiFactor * 20) };
 
 			InitializeComponent();
 		}
@@ -721,14 +719,14 @@ namespace MindMapUIExtension
 					{
 						int newX = (int)(relX * HorizontalScroll.Maximum) - e.Location.X;
 
-						HorizontalScroll.Value = Validate(newX, HorizontalScroll);
+						HorizontalScroll.Value = ScrollbarValidator.Validate(newX, HorizontalScroll);
 					}
 
 					if (VerticalScroll.Visible)
 					{
 						int newY = (int)(relY * VerticalScroll.Maximum) - e.Location.Y;
 
-						VerticalScroll.Value = Validate(newY, VerticalScroll);
+						VerticalScroll.Value = ScrollbarValidator.Validate(newY, VerticalScroll);
 					}
 
 					PerformLayout();
@@ -739,11 +737,6 @@ namespace MindMapUIExtension
 				// Default scroll
 				base.OnMouseWheel(e);
 			}
-		}
-
-		static int Validate(int pos, ScrollProperties scroll)
-		{
-			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
 		}
 
 		protected List<TreeNode> GetExpandedNodes(TreeNode node)
@@ -824,46 +817,6 @@ namespace MindMapUIExtension
 				CheckStartDragging(MousePosition);
 		}
 
-		Size CalcDragScrollAmount(Point mousePos)
-		{
-			Size amount = Size.Empty;
-
-			if (ClientRectangle.Contains(mousePos))
-			{
-				var nonScrollRect = ClientRectangle;
-				nonScrollRect.Inflate(-DragScrollMargin, -DragScrollMargin);
-
-				if (!nonScrollRect.Contains(mousePos))
-				{
-					if (HorizontalScroll.Visible)
-					{
-						if (mousePos.X < nonScrollRect.Left)
-						{
-							amount.Width = (mousePos.X - nonScrollRect.Left); // -ve
-						}
-						else if (mousePos.X > nonScrollRect.Right)
-						{
-							amount.Width = (mousePos.X - nonScrollRect.Right); // +ve
-						}
-					}
-
-					if (VerticalScroll.Visible)
-					{
-						if (mousePos.Y < nonScrollRect.Top)
-						{
-							amount.Height = (mousePos.Y - nonScrollRect.Top); // -ve
-						}
-						else if (mousePos.Y > nonScrollRect.Bottom)
-						{
-							amount.Height = (mousePos.Y - nonScrollRect.Bottom); // +ve
-						}
-					}
-				}
-			}
-
-			return amount;
-		}
-
 		protected override void OnDragOver(DragEventArgs e)
 		{
             Debug.Assert(!ReadOnly);
@@ -914,30 +867,7 @@ namespace MindMapUIExtension
 				}
 				else
 				{
-					var dragScroll = CalcDragScrollAmount(dragPt);
-
-					// Reset the tick count whenever we transition
-					if ((m_LastDragScroll == Size.Empty) || (dragScroll == Size.Empty))
-					{
-						m_LastDragScrollTick = Environment.TickCount;
-					}
-					else if (TicksSinceLastDragScroll >= DragScrollInterval)
-					{
-						int horzScroll = Validate((HorizontalScroll.Value + dragScroll.Width), HorizontalScroll);
-						int vertScroll = Validate((VerticalScroll.Value + dragScroll.Height), VerticalScroll);
-
-						if ((horzScroll != HorizontalScroll.Value) || (vertScroll != VerticalScroll.Value))
-						{
-							HorizontalScroll.Value = horzScroll;
-							VerticalScroll.Value = vertScroll;
-
-							PerformLayout();
-
-							m_LastDragScrollTick = Environment.TickCount;
-						}
-					}
-
-					m_LastDragScroll = dragScroll;
+					m_DragScroll.DoDragScroll(e);
 				}
 			}
 		}
@@ -1422,7 +1352,7 @@ namespace MindMapUIExtension
                 {
                     int scrollX = (HorizontalScroll.Value + xOffset);
   
-                    HorizontalScroll.Value = Validate(scrollX, HorizontalScroll);
+                    HorizontalScroll.Value = ScrollbarValidator.Validate(scrollX, HorizontalScroll);
                 }
             }
 
@@ -1443,7 +1373,7 @@ namespace MindMapUIExtension
                 {
                     int scrollY = (VerticalScroll.Value + yOffset);
   
-                    VerticalScroll.Value = Validate(scrollY, VerticalScroll);
+                    VerticalScroll.Value = ScrollbarValidator.Validate(scrollY, VerticalScroll);
                 }
             }
 
