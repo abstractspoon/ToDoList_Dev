@@ -37,8 +37,7 @@ namespace ScrollHelper
 
 		public void DoDragScroll(DragEventArgs e, bool allowHorz = true, bool allowVert = true)
 		{
-			var dragPt = m_Control.PointToClient(new Point(e.X, e.Y));
-			var dragScroll = CalcDragScrollAmount(dragPt, allowHorz, allowVert);
+			var dragScroll = CalcDragScrollAmount(new Point(e.X, e.Y), allowHorz, allowVert);
 
 			// Reset the tick count whenever we transition
 			if ((m_LastDragScroll == Size.Empty) || (dragScroll == Size.Empty))
@@ -64,42 +63,38 @@ namespace ScrollHelper
 			m_LastDragScroll = dragScroll;
 		}
 
-
 		// ----------------------------------------------
 
-		Size CalcDragScrollAmount(Point mousePos, bool allowHorz, bool allowVert)
+		Size CalcDragScrollAmount(Point screenPos, bool allowHorz, bool allowVert)
 		{
 			Size amount = Size.Empty;
 
-			if (m_Control.ClientRectangle.Contains(mousePos))
+			var nonScrollRect = m_Control.RectangleToScreen(m_Control.ClientRectangle);
+			nonScrollRect.Inflate(-DragScrollMargin, -DragScrollMargin);
+
+			if (!nonScrollRect.Contains(screenPos))
 			{
-				var nonScrollRect = m_Control.ClientRectangle;
-				nonScrollRect.Inflate(-DragScrollMargin, -DragScrollMargin);
-
-				if (!nonScrollRect.Contains(mousePos))
+				if (allowHorz && m_Control.HorizontalScroll.Visible)
 				{
-					if (allowHorz && m_Control.HorizontalScroll.Visible)
+					if (screenPos.X < nonScrollRect.Left)
 					{
-						if (mousePos.X < nonScrollRect.Left)
-						{
-							amount.Width = (mousePos.X - nonScrollRect.Left); // -ve
-						}
-						else if (mousePos.X > nonScrollRect.Right)
-						{
-							amount.Width = (mousePos.X - nonScrollRect.Right); // +ve
-						}
+						amount.Width = (screenPos.X - nonScrollRect.Left); // -ve
 					}
-
-					if (allowVert && m_Control.VerticalScroll.Visible)
+					else if (screenPos.X > nonScrollRect.Right)
 					{
-						if (mousePos.Y < nonScrollRect.Top)
-						{
-							amount.Height = (mousePos.Y - nonScrollRect.Top); // -ve
-						}
-						else if (mousePos.Y > nonScrollRect.Bottom)
-						{
-							amount.Height = (mousePos.Y - nonScrollRect.Bottom); // +ve
-						}
+						amount.Width = (screenPos.X - nonScrollRect.Right); // +ve
+					}
+				}
+
+				if (allowVert && m_Control.VerticalScroll.Visible)
+				{
+					if (screenPos.Y < nonScrollRect.Top)
+					{
+						amount.Height = (screenPos.Y - nonScrollRect.Top); // -ve
+					}
+					else if (screenPos.Y > nonScrollRect.Bottom)
+					{
+						amount.Height = (screenPos.Y - nonScrollRect.Bottom); // +ve
 					}
 				}
 			}
