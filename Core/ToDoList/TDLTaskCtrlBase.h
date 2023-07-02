@@ -149,6 +149,7 @@ public:
 	DWORD GetSelectedTaskParentID() const;
 	BOOL IsSelectedTaskDone() const;
 	BOOL IsSelectedTaskDue() const;
+	BOOL CanSplitSelectedTask() const;
 
 	BOOL SelectionHasDependencies() const;
 	BOOL SelectionHasCircularDependencies() const;
@@ -165,7 +166,7 @@ public:
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionAreAllDone() const;
-	BOOL CanSplitSelectedTask() const;
+	BOOL SelectionHasTaskColor() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);

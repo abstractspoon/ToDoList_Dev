@@ -2672,9 +2672,10 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 		}
 
 		SetModified(TDCA_COLOR, aModTaskIDs);
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::EditSelectedTaskIcon()

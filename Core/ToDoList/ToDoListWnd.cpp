@@ -3197,7 +3197,7 @@ void CToDoListWnd::OnEditTaskcolor()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	if (!tdc.IsReadOnly() && tdc.HasSelection())
+	if (tdc.CanEditSelectedTask(TDCA_COLOR))
 	{
 		CEnColorDialog dialog(tdc.GetSelectedTaskColor());
 
@@ -3214,10 +3214,7 @@ void CToDoListWnd::OnEditTaskcolor()
 
 void CToDoListWnd::OnEditCleartaskcolor() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	if (!tdc.IsReadOnly() && tdc.HasSelection())
-		tdc.ClearSelectedTaskColor();
+	GetToDoCtrl().ClearSelectedTaskColor();
 }
 
 void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI) 
@@ -3226,7 +3223,7 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_COLOR) && 
 					(Prefs().GetTextColorOption() == COLOROPT_DEFAULT) &&
-					(tdc.GetSelectedTaskColor() != 0));	
+					tdc.SelectedTasksHaveColors());	
 }
 
 void CToDoListWnd::OnEditToggleTaskDone() 

@@ -410,8 +410,9 @@ public:
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
 	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
-	BOOL SelectedTasksHaveDependencies() { return m_taskTree.SelectionHasDependencies(); }
-	BOOL SelectedTasksHaveDependents() { return m_taskTree.SelectionHasDependents(); }
+	BOOL SelectedTasksHaveDependencies() const { return m_taskTree.SelectionHasDependencies(); }
+	BOOL SelectedTasksHaveDependents() const { return m_taskTree.SelectionHasDependents(); }
+	BOOL SelectedTasksHaveColors() const { return m_taskTree.SelectionHasTaskColor(); }
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);

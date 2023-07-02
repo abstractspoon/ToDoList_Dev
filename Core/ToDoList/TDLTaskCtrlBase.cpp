@@ -5920,6 +5920,21 @@ BOOL CTDLTaskCtrlBase::SelectionHasSubtasks() const
 	return FALSE;
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasTaskColor() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (m_data.GetTaskColor(dwTaskID) != 0)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 void CTDLTaskCtrlBase::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
 {
 	if (bCtrl)
