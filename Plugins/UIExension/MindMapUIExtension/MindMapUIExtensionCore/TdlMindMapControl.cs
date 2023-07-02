@@ -1576,8 +1576,9 @@ namespace MindMapUIExtension
 			{
 				case MouseButtons.Left:
 					{
-						// Cache the previous selected item
-						m_PreviouslySelectedNode = SelectedNode;
+						// Cache the previous selected item for label editing
+						// but only if we are currently focused
+						m_PreviouslySelectedNode = Focused ? SelectedNode : null;
                         m_IgnoreMouseClick = false;
 
 						TreeNode hit = HitTestPositions(e.Location);
