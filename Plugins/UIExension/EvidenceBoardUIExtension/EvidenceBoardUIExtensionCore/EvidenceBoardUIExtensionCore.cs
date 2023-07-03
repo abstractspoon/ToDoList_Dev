@@ -264,7 +264,8 @@ namespace EvidenceBoardUIExtension
 			m_Control.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_Control.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeNode", false);
 			m_Control.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
-        }
+			m_Control.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+		}
 
 		public new bool Focus()
 		{

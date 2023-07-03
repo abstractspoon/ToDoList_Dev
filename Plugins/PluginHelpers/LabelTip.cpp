@@ -26,17 +26,28 @@ static Point OUTSIDE(-10000, -10000);
 
 static int BORDERS = 4;
 
+static int DEF_INITIAL_DELAY = 50;
+static int DEF_AUTOPOP_DELAY = 10000;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-LabelTip::LabelTip(ILabelTipHandler^ owner) : m_Handler(owner)
+LabelTip::LabelTip(ILabelTipHandler^ handler) 
+	: 
+	LabelTip(handler, DEF_INITIAL_DELAY, DEF_AUTOPOP_DELAY)
+{
+}
+
+LabelTip::LabelTip(ILabelTipHandler^ handler, int initialDelayMs, int autoPopDelayMs) 
+	: 
+	m_Handler(handler)
 {
 	OwnerDraw = true;
 
 	this->Draw += gcnew DrawToolTipEventHandler(OnDrawLabelTip);
 	this->Popup += gcnew PopupEventHandler(OnShowLabelTip);
 
-	this->AutoPopDelay = 10000;
-	this->InitialDelay = 50;
+	this->AutoPopDelay = autoPopDelayMs;
+	this->InitialDelay = initialDelayMs;
 
 	// Stops the tooltip disappearing because the mouse is over it
 	Win32::AddStyle(GetHandle(), WS_EX_TRANSPARENT, true);
@@ -169,7 +180,7 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 			String^ tipText = nullptr;
 			bool multiline = false;
 
-			UInt32 tipId = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline);
+			UInt32 tipId = m_Handler->ToolHitTest(this, pos, tipText, hitRect, multiline);
 
 			if (tipId == 0)
 			{
@@ -264,7 +275,7 @@ void LabelTip::CheckShowTip()
 	String^ tipText = nullptr;
 	bool multiline = false;
 
-	UInt32 nHit = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline);
+	UInt32 nHit = m_Handler->ToolHitTest(this, pos, tipText, hitRect, multiline);
 
 	if (nHit == 0)
 	{

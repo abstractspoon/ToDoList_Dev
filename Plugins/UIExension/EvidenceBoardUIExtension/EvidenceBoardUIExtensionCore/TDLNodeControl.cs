@@ -11,6 +11,8 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
+using IIControls;
+
 using BaseNode = RadialTree.TreeNode<uint>;
 
 namespace EvidenceBoardUIExtension
@@ -53,7 +55,8 @@ namespace EvidenceBoardUIExtension
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class TDLNodeControl : NodeControl
+
+	class TDLNodeControl : NodeControl, ILabelTipHandler
 	{
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
@@ -98,6 +101,7 @@ namespace EvidenceBoardUIExtension
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
+		private LabelTip m_LabelTip, m_ToolTip;
 
 		private bool m_ShowParentAsFolder = false;
 		private bool m_TaskColorIsBkgnd = false;
@@ -142,6 +146,8 @@ namespace EvidenceBoardUIExtension
 
 			m_Trans = trans;
 			m_TaskIcons = icons;
+			m_LabelTip = new LabelTip(this);
+			m_ToolTip = new LabelTip(this, 500, 5000);
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -566,19 +572,33 @@ namespace EvidenceBoardUIExtension
 			return node?.Data ?? 0;
 		}
 
+		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect)
+		{
+			if (taskItem.HasIcon || taskItem.HasImage)
+			{
+				var iconRect = CalcIconRect(rect);
+
+				rect.X = (iconRect.Right + LabelPadding);
+				rect.Width -= (iconRect.Width + (2 * LabelPadding));
+			}
+
+			rect.Y += LabelPadding;
+			rect.Height = (2 * GetTaskLabelFont(taskItem).Height);
+
+			return rect;
+		}
+		
+		Rectangle CalcTaskLabelRect(BaseNode node)
+		{
+			if (node == null || node.IsRoot)
+				return Rectangle.Empty;
+
+			return CalcTaskLabelRect(GetTaskItem(node), GetNodeClientRect(node));
+		}
+
 		public Rectangle GetSelectedTaskLabelRect()
 		{
-			//EnsureNodeVisible(SelectedNode);
-			
-			var labelRect = base.GetSingleSelectedNodeRect();
-			
-			labelRect.X -= LabelPadding;
-			//labelRect.X += GetExtraWidth(SelectedNode);
-					 
-			// Make sure the rect is big enough for the unscaled font
-			labelRect.Height = (Font.Height + (2 * LabelPadding)); 
-			
-			return labelRect;
+			return CalcTaskLabelRect(SingleSelectedNode);
 		}
 
 		public bool IsTaskLocked(uint taskId)
@@ -972,6 +992,23 @@ namespace EvidenceBoardUIExtension
 				
 				return m_UserLinkTypes;
 			}
+		}
+
+		public bool ShowLabelTips
+		{
+			set { m_LabelTip.Active = value; }
+			get { return m_LabelTip.Active; }
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+// 			if (m_LabelTip != null)
+// 				m_LabelTip.ProcessMessage(m);
+
+			if (m_ToolTip != null)
+				m_ToolTip.ProcessMessage(m);
+
+			base.WndProc(ref m);
 		}
 
 		private bool ProcessTaskUpdate(Task task, BaseNode parentNode)
@@ -1533,21 +1570,11 @@ namespace EvidenceBoardUIExtension
 			}
 
 			// LHS icons
-			Rectangle iconRect = Rectangle.Empty;
-
-			DrawTaskIcon(graphics, taskItem, taskRect, backColor, ref iconRect);
-			DrawTaskImageExpansionButton(graphics, taskItem, taskRect, backColor, ref iconRect);
+			DrawTaskIcon(graphics, taskItem, taskRect, backColor);
+			DrawTaskImageExpansionButton(graphics, taskItem, taskRect, backColor);
 
 			// Title
-			var titleRect = taskRect;
-
-			if (!iconRect.IsEmpty)
-			{
-				titleRect.Width = (titleRect.Right - iconRect.Right);
-				titleRect.X = iconRect.Right;
-			}
-
-			titleRect.Inflate(-LabelPadding, -LabelPadding);
+			var titleRect = CalcTaskLabelRect(taskItem, taskRect);
 			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			// Image
@@ -1564,12 +1591,12 @@ namespace EvidenceBoardUIExtension
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 		}
 
-		void DrawTaskIcon(Graphics g, TaskItem taskItem, Rectangle nodeRect, Color backColor, ref Rectangle iconRect)
+		void DrawTaskIcon(Graphics g, TaskItem taskItem, Rectangle nodeRect, Color backColor)
 		{
 			if (!TaskHasIcon(taskItem))
 				return;
 
-			iconRect = CalcIconRect(nodeRect);
+			var iconRect = CalcIconRect(nodeRect);
 
 			if (m_TaskIcons.Get(taskItem.TaskId))
 			{
@@ -1605,14 +1632,14 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		void DrawTaskImageExpansionButton(Graphics graphics, TaskItem taskItem, Rectangle nodeRect, Color backColor, ref Rectangle iconRect)
+		void DrawTaskImageExpansionButton(Graphics graphics, TaskItem taskItem, Rectangle nodeRect, Color backColor)
 		{
 			var state = taskItem.ImageExpansion;
 
 			if (state == TaskItem.ImageExpansionState.NoImage)
 				return;
 
-			iconRect = CalcImageExpansionButtonRect(nodeRect);
+			var iconRect = CalcImageExpansionButtonRect(nodeRect);
 
 			var mousePos = PointToClient(MousePosition);
 			ScrollButton btn = ((state == TaskItem.ImageExpansionState.Collapsed) ? ScrollButton.Down : ScrollButton.Up);
@@ -1647,6 +1674,17 @@ namespace EvidenceBoardUIExtension
 
 			var rect = CalcIconRect(imageRect);
 			rect.Width *= 2;
+
+			return rect;
+		}
+
+		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect, bool forward)
+		{
+			var rect = CalcImageSpinButtonRect(imageRect);
+			rect.Width /= 2;
+
+			if (forward)
+				rect.X = rect.Right;
 
 			return rect;
 		}
@@ -2247,15 +2285,21 @@ namespace EvidenceBoardUIExtension
 				return null;
 
 			var imageRect = CalcImageRect(taskItem, GetNodeClientRect(node), false);
-			var spinRect = CalcImageSpinButtonRect(imageRect);
 
-			if (!spinRect.Contains(ptClient))
-				return null;
+			if (CalcImageSpinButtonRect(imageRect, true).Contains(ptClient)) // forward button
+			{
+				forward = true;
+				return taskItem;
+			}
 
-			spinRect.Width /= 2;
-			forward = !spinRect.Contains(ptClient);
+			if (CalcImageSpinButtonRect(imageRect, false).Contains(ptClient)) // back button
+			{
+				forward = false;
+				return taskItem;
+			}
 
-			return taskItem;
+			// All else
+			return null;
 		}
 
 		protected TaskItem HitTestTaskImageExpansionButton(Point ptClient)
@@ -2523,6 +2567,130 @@ namespace EvidenceBoardUIExtension
 				base.OnQueryContinueDrag(e);
 			}
 		}
+
+		// ILabelTipHandler implementation
+		public Font GetFont()
+		{
+			return TextFont;
+		}
+
+		public Control GetOwner()
+		{
+			return this;
+		}
+
+		enum TipId
+		{
+			TaskTitle,
+			ExpansionBtn,
+			SpinForwardBtn,
+			SpinBackBtn,
+
+			NumTips,
+		}
+
+		uint TooltipId(TaskItem taskItem, TipId tipId)
+		{
+			return ((taskItem.TaskId * (uint)TipId.NumTips) + (uint)tipId);
+		}
+
+		public uint ToolHitTest(LabelTip tip, Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
+		{
+			if (DragMode != DragMode.None)
+				return 0;
+
+			Point clientPos = PointToClient(ptScreen);
+			var node = HitTestNode(clientPos, true);
+
+			if (node == null)
+				return 0;
+
+			var taskItem = GetTaskItem(node);
+			var nodeRect = GetNodeClientRect(node);
+
+			if (tip == m_ToolTip)
+			{
+				if (taskItem.HasImage)
+				{
+					uint tipId = 0;
+					var imageRect = CalcImageRect(taskItem, nodeRect, false);
+
+					// Image expansion button
+					toolRect = CalcImageExpansionButtonRect(nodeRect);
+
+					if (toolRect.Contains(clientPos))
+					{
+						tipText = m_Trans.Translate("Toggle Image Visibility");
+						tipId = TooltipId(taskItem, TipId.ExpansionBtn);
+					}
+					else
+					{
+						if (taskItem.ImageCount > 1)
+						{
+							// Image spin buttons
+							// Forward button
+							toolRect = CalcImageSpinButtonRect(imageRect, true);
+
+							if (toolRect.Contains(clientPos))
+							{
+								tipText = m_Trans.Translate("Next Image");
+								tipId = TooltipId(taskItem, TipId.SpinForwardBtn);
+							}
+							else // Back button
+							{
+								toolRect = CalcImageSpinButtonRect(imageRect, false);
+
+								if (toolRect.Contains(clientPos))
+								{
+									tipText = m_Trans.Translate("Previous Image");
+									tipId = TooltipId(taskItem, TipId.SpinBackBtn);
+								}
+							}
+						}
+					}
+
+					if (tipId != 0)
+					{
+						// These are really tooltips not label tips so offset them
+						clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+						toolRect.Location = clientPos;
+
+						return tipId;
+					}
+				}
+			}
+			else if (tip == m_LabelTip)
+			{
+				if ((nodeRect.Top < 0) || (nodeRect.Left < 0))
+				{
+					// If the top of the text rectangle is hidden we always 
+					// need a label tip so we just clip to the avail space
+					toolRect = nodeRect;
+					toolRect.Intersect(ClientRectangle);
+				}
+				else // check available space
+				{
+					toolRect = CalcTaskLabelRect(node);
+
+					if (toolRect.Contains(clientPos))
+					{
+						Size tipSize = m_LabelTip.CalcTipSize(taskItem.ToString(), toolRect.Width);
+
+						if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
+							return 0;
+
+						multiLine = true; // always
+						tipText = taskItem.ToString();
+
+						return TooltipId(taskItem, TipId.TaskTitle);
+					}
+				}
+			}
+
+			// All else
+			return 0;
+		}
 	}
+
 }
 

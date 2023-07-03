@@ -98,7 +98,7 @@ namespace WordCloudUIExtension
             return this;
         }
 
-        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
+        public UInt32 ToolHitTest(LabelTip tip, Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
         {
             var pt = PointToClient(ptScreen);
             var hit = HitTest(pt);

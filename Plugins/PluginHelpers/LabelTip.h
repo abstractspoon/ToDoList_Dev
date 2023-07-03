@@ -12,12 +12,14 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
+			ref class LabelTip;
+
 			public interface class ILabelTipHandler
 			{
 				Drawing::Font^ GetFont();
 				Windows::Forms::Control^ GetOwner();
 
-				UInt32 ToolHitTest(Drawing::Point ptScreen, String^% tipText, Drawing::Rectangle% toolRect, bool% multiLine);
+				UInt32 ToolHitTest(LabelTip^ tip, Drawing::Point ptScreen, String^% tipText, Drawing::Rectangle% toolRect, bool% multiLine);
 			};
 
 			// -----------------------------------------------------------------
@@ -25,7 +27,8 @@ namespace Abstractspoon
 			public ref class LabelTip : Windows::Forms::ToolTip
 			{
 			public:
-				LabelTip(ILabelTipHandler^ handler);
+				LabelTip(ILabelTipHandler^ handler); // Initial delay = 50ms, auto pop delay = 10000ms
+				LabelTip(ILabelTipHandler^ handler, int initialDelayMs, int autoPopDelayMs);
 
 				void ProcessMessage(Windows::Forms::Message^ msg);
 				int CalcTipHeight(String^ tipText, int availWidth);
