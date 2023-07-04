@@ -37,6 +37,19 @@ enum TIMER_ID
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+LabelTipInfo::LabelTipInfo()
+	:
+	Id(0), 
+	Text(nullptr), 
+	Font(nullptr), 
+	Rect(Drawing::Rectangle::Empty), 
+	MultiLine(false),
+	InitialDelay(DEF_INITIAL_DELAY)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 LabelTip::LabelTip(ILabelTipHandler^ handler) 
 	: 
 	m_Handler(handler),
@@ -81,14 +94,13 @@ void LabelTip::OnShowLabelTip(Object^ sender, PopupEventArgs^ args)
 Drawing::Size LabelTip::CalcFinalTipSize(Drawing::Size defaultSize)
 {
 	auto tipText = GetToolTip(m_Handler->GetOwner());
-	auto tipFont = m_Handler->GetFont();
+	auto singleLineTextSize = TextRenderer::MeasureText(tipText, m_Font);
 
-	auto singleLineTextSize = TextRenderer::MeasureText(tipText, tipFont);
 	Size textSize(0, 0);
 	
 	if (m_Multiline && (m_HitRect.Height > singleLineTextSize.Height))
 	{
-		textSize = TextRenderer::MeasureText(tipText, tipFont, m_HitRect.Size, TextFormatFlags::WordBreak);
+		textSize = TextRenderer::MeasureText(tipText, m_Font, m_HitRect.Size, TextFormatFlags::WordBreak);
 
 		// if the measured text height exceeds the height
 		// of the available rectangle, then we keep widening the
@@ -99,7 +111,7 @@ Drawing::Size LabelTip::CalcFinalTipSize(Drawing::Size defaultSize)
 		while ((textSize.Height + BORDERS) > m_HitRect.Height)
 		{
 			availSize.Width += nIncrement;
-			textSize = TextRenderer::MeasureText(tipText, tipFont, availSize, TextFormatFlags::WordBreak);
+			textSize = TextRenderer::MeasureText(tipText, m_Font, availSize, TextFormatFlags::WordBreak);
 		}
 	}
 	else 
@@ -111,17 +123,16 @@ Drawing::Size LabelTip::CalcFinalTipSize(Drawing::Size defaultSize)
 	return (textSize + Size(BORDERS, BORDERS));
 }
 
-int LabelTip::CalcTipHeight(String^ tipText, int availWidth)
+int LabelTip::CalcTipHeight(String^ tipText, Font^ font, int availWidth)
 {
-	auto tipFont = m_Handler->GetFont();
-	int textHeight = TextRenderer::MeasureText(tipText, tipFont, Size(availWidth, 0), TextFormatFlags::WordBreak).Height;
+	int textHeight = TextRenderer::MeasureText(tipText, font, Size(availWidth, 0), TextFormatFlags::WordBreak).Height;
 
 	return (textHeight + BORDERS);
 }
 
-Size LabelTip::CalcTipSize(String^ tipText, int availWidth)
+Size LabelTip::CalcTipSize(String^ tipText, Font^ font, int availWidth)
 {
-	return TextRenderer::MeasureText(tipText, m_Handler->GetFont(), Size(availWidth, 0), TextFormatFlags::WordBreak);
+	return TextRenderer::MeasureText(tipText, font, Size(availWidth, 0), TextFormatFlags::WordBreak);
 }
 
 TextFormatFlags LabelTip::TipFormatFlags()
@@ -159,8 +170,12 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 	args->Graphics->FillRectangle(backBrush, args->Bounds);
 	args->DrawBorder();
 
-	TextRenderer::DrawText(args->Graphics, args->ToolTipText, labelTip->m_Handler->GetFont(), 
-						   args->Bounds, *textColor, labelTip->TipFormatFlags());
+	TextRenderer::DrawText(args->Graphics, 
+						   args->ToolTipText, 
+						   labelTip->m_Font, 
+						   args->Bounds, 
+						   *textColor, 
+						   labelTip->TipFormatFlags());
 }
 
 void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
@@ -172,16 +187,10 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 	{
 	case WM_MOUSEMOVE:
 		{
-			Point pos = Control::MousePosition;
+			auto pos = Control::MousePosition;
+			auto tip = m_Handler->ToolHitTest(pos);
 
-			Drawing::Rectangle hitRect;
-			String^ tipText = nullptr;
-			bool multiline = false;
-			int initialDelay = DEF_INITIAL_DELAY;
-
-			UInt32 tipId = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline, initialDelay);
-
-			if (tipId == 0)
+			if ((tip == nullptr) || (tip->Id == 0))
 			{
 				// If the mouse is no longer over an item
 				// hide the tooltip
@@ -189,7 +198,7 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 				return;
 			}
 
-			if (tipId != m_TipId)
+			if (tip->Id != m_TipId)
 			{
 				bool visible = IsShowing();
 
@@ -220,7 +229,7 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 					m_HoverStartScreenPos = pos;
 
 					m_HoverTimer->Tag = gcnew int(TIMER_INITIAL);
-					m_HoverTimer->Interval = initialDelay;
+					m_HoverTimer->Interval = tip->InitialDelay;
 					m_HoverTimer->Start();
 				}
 			}
@@ -282,40 +291,37 @@ void LabelTip::CheckShowTip()
 	}
 
 	// else
-	Drawing::Rectangle hitRect;
-	String^ tipText = nullptr;
-	bool multiline = false;
-	int unused = 0;
+	auto tip = m_Handler->ToolHitTest(pos);
 
-	UInt32 nHit = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline, unused);
-
-	if (nHit == 0)
+	if ((tip == nullptr) || (tip->Id == 0))
 	{
 		m_HoverStartScreenPos = pos;
 		Hide(m_Handler->GetOwner());
+
 		return;
 	}
 
-	if (nHit != m_TipId)
+	if (tip->Id != m_TipId)
 	{
 		m_HoverStartScreenPos = pos;
 		Hide(m_Handler->GetOwner());
 	}
 	
-	m_HitRect = hitRect;
-	m_TipId = nHit;
-	m_Multiline = multiline;
+	m_HitRect = tip->Rect;
+	m_TipId = tip->Id;
+	m_Multiline = tip->MultiLine;
+	m_Font = tip->Font;
 
 	// Minimum height is single line
 	if (m_Multiline)
 	{
-		auto singleLineTextSize = TextRenderer::MeasureText(tipText, m_Handler->GetFont());
+		auto singleLineTextSize = TextRenderer::MeasureText(tip->Text, m_Font);
 
-		if (hitRect.Height < (singleLineTextSize.Height + 4))
+		if (m_HitRect.Height < (singleLineTextSize.Height + 4))
 			m_Multiline = false;
 	}
 
-	Show(tipText, m_Handler->GetOwner(), hitRect.Location);
+	Show(tip->Text, m_Handler->GetOwner(), m_HitRect.Location);
 
 	// Restart the timer
 	m_HoverTimer->Tag = gcnew int (TIMER_AUTOPOP);

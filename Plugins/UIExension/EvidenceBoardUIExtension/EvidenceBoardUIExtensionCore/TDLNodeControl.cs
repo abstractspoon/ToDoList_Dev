@@ -2569,11 +2569,6 @@ namespace EvidenceBoardUIExtension
 		}
 
 		// ILabelTipHandler implementation
-		public Font GetFont()
-		{
-			return TextFont;
-		}
-
 		public Control GetOwner()
 		{
 			return this;
@@ -2594,32 +2589,33 @@ namespace EvidenceBoardUIExtension
 			return ((taskItem.TaskId * (uint)TipId.NumTips) + (uint)tipId);
 		}
 
-		public uint ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine, ref int initialDelay)
+		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
 			if (DragMode != DragMode.None)
-				return 0;
+				return null;
 
 			Point clientPos = PointToClient(ptScreen);
 			var node = HitTestNode(clientPos, true);
 
 			if (node == null)
-				return 0;
+				return null;
 
 			var taskItem = GetTaskItem(node);
 			var nodeRect = GetNodeClientRect(node);
 
+			var tip = new LabelTipInfo();
+
 			if (taskItem.HasImage)
 			{
-				uint tipId = 0;
 				var imageRect = CalcImageRect(taskItem, nodeRect, false);
 
 				// Image expansion button
-				toolRect = CalcImageExpansionButtonRect(nodeRect);
+				tip.Rect = CalcImageExpansionButtonRect(nodeRect);
 
-				if (toolRect.Contains(clientPos))
+				if (tip.Rect.Contains(clientPos))
 				{
-					tipText = m_Trans.Translate("Toggle Image Visibility");
-					tipId = TooltipId(taskItem, TipId.ExpansionBtn);
+					tip.Text = m_Trans.Translate("Toggle Image Visibility");
+					tip.Id = TooltipId(taskItem, TipId.ExpansionBtn);
 				}
 				else
 				{
@@ -2627,69 +2623,71 @@ namespace EvidenceBoardUIExtension
 					{
 						// Image spin buttons
 						// Forward button
-						toolRect = CalcImageSpinButtonRect(imageRect, true);
+						tip.Rect = CalcImageSpinButtonRect(imageRect, true);
 
-						if (toolRect.Contains(clientPos))
+						if (tip.Rect.Contains(clientPos))
 						{
-							tipText = m_Trans.Translate("Next Image");
-							tipId = TooltipId(taskItem, TipId.SpinForwardBtn);
+							tip.Text = m_Trans.Translate("Next Image");
+							tip.Id = TooltipId(taskItem, TipId.SpinForwardBtn);
 						}
 						else // Back button
 						{
-							toolRect = CalcImageSpinButtonRect(imageRect, false);
+							tip.Rect = CalcImageSpinButtonRect(imageRect, false);
 
-							if (toolRect.Contains(clientPos))
+							if (tip.Rect.Contains(clientPos))
 							{
-								tipText = m_Trans.Translate("Previous Image");
-								tipId = TooltipId(taskItem, TipId.SpinBackBtn);
+								tip.Text = m_Trans.Translate("Previous Image");
+								tip.Id = TooltipId(taskItem, TipId.SpinBackBtn);
 							}
 						}
 					}
 				}
 
-				if (tipId != 0)
+				if (tip.Id != 0)
 				{
 					// These are really tooltips not label tips so offset them
 					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-					toolRect.Location = clientPos;
-					initialDelay = 500;
-					multiLine = false;
 
-					return tipId;
+					tip.Rect.Location = clientPos;
+					tip.InitialDelay = 500;
+					tip.MultiLine = false;
+
+					return tip;
 				}
 			}
 
 			// Title tip
-			toolRect = CalcTaskLabelRect(node, true);
-			tipText = taskItem.ToString();
+			tip.Rect = CalcTaskLabelRect(node, true);
+			tip.Text = taskItem.ToString();
+			tip.Font = GetTaskLabelFont(taskItem);
 
-			var labelFont = GetTaskLabelFont(taskItem);
-			var sizeText = TextRenderer.MeasureText(tipText, labelFont, new Size(toolRect.Width, 0), TextFormatFlags.WordBreak);
+			var sizeText = TextRenderer.MeasureText(tip.Text, tip.Font, new Size(tip.Rect.Width, 0), TextFormatFlags.WordBreak);
 
-			multiLine = (sizeText.Height > labelFont.Height);
+			tip.MultiLine = (sizeText.Height > tip.Font.Height);
 
-			if (!multiLine)
-				toolRect.Size = sizeText;
+			if (!tip.MultiLine)
+				tip.Rect.Size = sizeText;
 
-			if (!ClientRectangle.Contains(toolRect))
+			if (!ClientRectangle.Contains(tip.Rect))
 			{
 				// If the text rectangle is not wholly visible we always 
 				// need a label tip so we just clip to the avail space
-				toolRect.X = Math.Max(0, Math.Min(ClientRectangle.Right - toolRect.Width, toolRect.Left));
-				toolRect.Y = Math.Max(0, Math.Min(ClientRectangle.Bottom - toolRect.Height, toolRect.Top));
+				tip.Rect.X = Math.Max(0, Math.Min(ClientRectangle.Right - tip.Rect.Width, tip.Rect.Left));
+				tip.Rect.Y = Math.Max(0, Math.Min(ClientRectangle.Bottom - tip.Rect.Height, tip.Rect.Top));
 			}
-			else if (!toolRect.Contains(clientPos)) // check available space
+			else if (!tip.Rect.Contains(clientPos)) // check available space
 			{
-				return 0;
+				return null;
 			}
-			else if ((sizeText.Width <= toolRect.Width) && (sizeText.Height <= toolRect.Height))
+			else if ((sizeText.Width <= tip.Rect.Width) && (sizeText.Height <= tip.Rect.Height))
 			{
-				return 0;
+				return null;
 			}
 
-			toolRect.Inflate(LabelPadding, LabelPadding);
+			tip.Rect.Inflate(LabelPadding, LabelPadding);
+			tip.Id = TooltipId(taskItem, TipId.TaskTitle);
 
-			return TooltipId(taskItem, TipId.TaskTitle);
+			return tip;
 		}
 	}
 

@@ -88,46 +88,44 @@ namespace WordCloudUIExtension
 		}
 
 		// ILabelTipHandler implementation
-		public Font GetFont()
-        {
-            return Font;
-        }
-
         public Control GetOwner()
         {
             return this;
         }
 
-        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine, ref int initialDelay)
+        public LabelTipInfo ToolHitTest(Point ptScreen)
         {
             var pt = PointToClient(ptScreen);
             var hit = HitTest(pt);
 
             if ((hit == null) || (hit.Item == null))
-                return 0;
+                return null;
 
             // Only interested in first (label) column
             var labelRect = LabelTextRect(hit.Item.GetBounds(ItemBoundsPortion.Entire));
 
             if (!labelRect.Contains(pt))
-                return 0;
+                return null;
 
             var item = (hit.Item.Tag as CloudTaskItem);
 
             if (item == null)
-                return 0;
+                return null;
 
 			// Check if there's enough room already
-			if (m_LabelTip.CalcTipHeight(item.Title, labelRect.Width) <= labelRect.Height)
-				return 0;
+			if (m_LabelTip.CalcTipHeight(item.Title, Font, labelRect.Width) <= labelRect.Height)
+				return null;
 
-			tipText = item.Title;
-			multiLine = false; // always
+			labelRect.Offset(-1, -1);
 
-			toolRect = labelRect;
-			toolRect.Offset(-1, -1);
-
-			return item.Id;
+			return new LabelTipInfo()
+			{
+				Id = item.Id,
+				Text = item.Title,
+				MultiLine = false,
+				Rect = labelRect,
+				Font = Font,
+			};
         }
 
         public Boolean TaskColorIsBackground

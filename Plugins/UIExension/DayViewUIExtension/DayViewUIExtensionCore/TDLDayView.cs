@@ -114,11 +114,6 @@ namespace DayViewUIExtension
 		public IEnumerable<TaskItem> TaskItems { get { return m_TaskItems.Values; } }
 
 		// ILabelTipHandler implementation
-		public Font GetFont()
-		{
-			return m_Renderer.BaseFont;
-		}
-
 		public Control GetOwner()
 		{
 			return this;
@@ -128,21 +123,26 @@ namespace DayViewUIExtension
 
 		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
 
-		public uint ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine, ref int initialDelay)
+		public LabelTipInfo ToolHitTest(Point ptScreen)
 		{
 			if (IsResizingAppointment())
-				return 0;
+				return null;
+
+			var tip = new LabelTipInfo()
+			{
+				Font = m_Renderer.BaseFont,
+			};
 
 			var pt = PointToClient(ptScreen);
-			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out toolRect) as TDLAppointmentView);
+			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tip.Rect) as TDLAppointmentView);
 
 			if (tdlView == null)
-				return 0;
+				return null;
 
-			bool startPortion = (toolRect.Right < tdlView.Rectangle.Right);
+			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
 
-			toolRect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_Renderer.TextOffset);
-			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_Renderer.TextOffset);
+			tip.Rect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
 
 			var appt = tdlView.Appointment;
 
@@ -151,18 +151,18 @@ namespace DayViewUIExtension
 				// NOTE: - Must match 'Calendar' View in 'Core' project
 				if (appt is FutureTaskOccurrence)
 				{
-					tipText = m_Trans.Translate("Future Occurrence");
+					tip.Text = m_Trans.Translate("Future Occurrence");
 				}
 				else if (appt is CustomTaskDateAttribute)
 				{
 					var apptDate = (appt as CustomTaskDateAttribute);
 					var custAttrib = m_CustomDateDefs.Find(x => (x.Id == apptDate.AttributeId));
 
-					tipText = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
+					tip.Text = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
 				}
 				else if (appt is TaskTimeBlock)
 				{
-					tipText = m_Trans.Translate("Time Block");
+					tip.Text = m_Trans.Translate("Time Block");
 				}
 				else
 				{
@@ -171,50 +171,50 @@ namespace DayViewUIExtension
 
 				var pos = PointToClient(MousePosition);
 				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				tip.Rect.Location = pos;
 
-				toolRect.Location = pos;
-				initialDelay = 500;
+				tip.InitialDelay = 500;
 			}
 			else // 'Real' task
 			{
+				tip.Text = appt.Title;
+
 				if (IsLongAppt(appt))
 				{
 					// single line tooltips
-					Size tipSize = m_LabelTip.CalcTipSize(appt.Title, toolRect.Width);
+					Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
 
-					if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
-						return 0;
+					if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
+						return null;
 
-					multiLine = false; // always
+					tip.MultiLine = false; // always
 				}
 				else
 				{
 					var availRect = GetTrueRectangle();
 
-					if (toolRect.Top < availRect.Top)
+					if (tip.Rect.Top < availRect.Top)
 					{
 						// If the top of the text rectangle is hidden we always 
 						// need a label tip so we just clip to the avail space
-						toolRect.Intersect(availRect);
+						tip.Rect.Intersect(availRect);
 					}
 					else
 					{
 						// Determine if text will fit in what's visible of the task
-						toolRect.Intersect(availRect);
+						tip.Rect.Intersect(availRect);
 
-						Size tipSize = m_LabelTip.CalcTipSize(appt.Title, toolRect.Width);
+						Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
 
-						if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
-							return 0;
+						if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
+							return null;
 					}
 
-					multiLine = true; // always
+					tip.MultiLine = true; // always
 				}
-
-				tipText = appt.Title;
 			}
 
-			return appt.Id;
+			return tip;
 		}
 
 		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)

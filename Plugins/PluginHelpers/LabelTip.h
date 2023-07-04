@@ -12,18 +12,27 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			ref class LabelTip;
+			public ref class LabelTipInfo
+			{
+			public:
+				LabelTipInfo();
 
+			public:
+				UInt32 Id;
+				String^ Text;
+				Drawing::Font^ Font;
+				Drawing::Rectangle Rect;
+				bool MultiLine;
+				int InitialDelay; // defaults = 50ms
+			};
+
+			// -----------------------------------------------------------------
+			
 			public interface class ILabelTipHandler
 			{
-				Drawing::Font^ GetFont();
 				Windows::Forms::Control^ GetOwner();
 
-				UInt32 ToolHitTest(Drawing::Point ptScreen, 
-								   String^% tipText, 
-								   Drawing::Rectangle% toolRect, 
-								   bool% multiLine, 
-								   int% initialDelayMs); // defaults = 50ms
+				LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 			};
 
 			// -----------------------------------------------------------------
@@ -34,8 +43,8 @@ namespace Abstractspoon
 				LabelTip(ILabelTipHandler^ handler);
 
 				void ProcessMessage(Windows::Forms::Message^ msg);
-				int CalcTipHeight(String^ tipText, int availWidth);
-				Drawing::Size CalcTipSize(String^ tipText, int availWidth);
+				int CalcTipHeight(String^ tipText, Drawing::Font^ font, int availWidth);
+				Drawing::Size CalcTipSize(String^ tipText, Drawing::Font^ font, int availWidth);
 
 			protected:
 				ILabelTipHandler^ m_Handler;
@@ -43,6 +52,7 @@ namespace Abstractspoon
 				Windows::Forms::Timer^ m_HoverTimer;
 				Drawing::Point m_HoverStartScreenPos;
 
+				Drawing::Font^ m_Font;
 				Drawing::Rectangle m_HitRect;
 				UInt32 m_TipId;
 				bool m_Multiline;
