@@ -197,7 +197,7 @@ namespace MindMapUIExtension
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class TdlMindMapControl : MindMapControl, IDragRenderer
+	class TdlMindMapControl : MindMapControl, IDragRenderer, ILabelTipHandler
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
         public event EditTaskIconEventHandler       EditTaskIcon;
@@ -220,6 +220,7 @@ namespace MindMapUIExtension
         private Size m_CheckboxSize;
 		private MindMapOption m_Options;
 		private DragImage m_DragImage;
+		private LabelTip m_LabelTip;
 
 		// -------------------------------------------------------------------------
 
@@ -230,6 +231,7 @@ namespace MindMapUIExtension
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
 			m_DragImage = new DragImage();
+			m_LabelTip = new LabelTip(this);
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -285,6 +287,48 @@ namespace MindMapUIExtension
             
             base.SetFont(fontName, fontSize);
         }
+
+		// ILabelTipHandler implementation
+		public Control GetOwner()
+		{
+			return this;
+		}
+
+		public LabelTipInfo ToolHitTest(Point ptScreen)
+		{
+			var pt = PointToClient(ptScreen);
+			var hit = HitTestPositions(pt);
+
+			if ((hit == null) || IsRoot(hit))
+				return null;
+
+			var labelRect = GetItemLabelRect(hit);
+
+			if (!labelRect.Contains(pt))
+				return null;
+
+			if (ClientRectangle.Contains(labelRect))
+				return null;
+
+			labelRect.Offset(-1, -1);
+
+			return new LabelTipInfo()
+			{
+				Id = UniqueID(hit),
+				Text = hit.Text,
+				MultiLine = false,
+				Rect = labelRect,
+				Font = GetNodeFont(hit),
+			};
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			if (m_LabelTip != null)
+				m_LabelTip.ProcessMessage(m);
+
+			base.WndProc(ref m);
+		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
@@ -425,11 +469,15 @@ namespace MindMapUIExtension
 		public new Rectangle GetSelectedItemLabelRect()
 		{
 			EnsureItemVisible(SelectedItem);
+			return GetItemLabelRect(SelectedNode);
+		}
 
-			var labelRect = base.GetSelectedItemLabelRect();
+		public new Rectangle GetItemLabelRect(TreeNode node)
+		{
+			var labelRect = base.GetItemLabelRect(node);
 
 			labelRect.X -= LabelPadding;
-			labelRect.X += GetExtraWidth(SelectedNode);
+			labelRect.X += GetExtraWidth(node);
 
 			// Make sure the rect is big enough for the unscaled font
 			labelRect.Height = Math.Max(labelRect.Height, (this.Font.Height + (2 * LabelPadding))); 
@@ -1554,7 +1602,7 @@ namespace MindMapUIExtension
             if (!m_ShowCompletionCheckboxes)
                 return false;
 
-            return CalcCheckboxRect(GetItemLabelRect(node)).Contains(point);
+            return CalcCheckboxRect(base.GetItemLabelRect(node)).Contains(point);
         }
 
 		private bool HitTestIcon(TreeNode node, Point point)
@@ -1565,7 +1613,7 @@ namespace MindMapUIExtension
 				return false;
 
 			// else
-			return CalcIconRect(GetItemLabelRect(node)).Contains(point);
+			return CalcIconRect(base.GetItemLabelRect(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
