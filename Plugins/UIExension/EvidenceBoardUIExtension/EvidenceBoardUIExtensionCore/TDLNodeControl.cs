@@ -571,7 +571,7 @@ namespace EvidenceBoardUIExtension
 			return node?.Data ?? 0;
 		}
 
-		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect)
+		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect, bool multiLine)
 		{
 			if (taskItem.HasIcon || taskItem.HasImage)
 			{
@@ -582,22 +582,25 @@ namespace EvidenceBoardUIExtension
 			}
 
 			rect.Y += LabelPadding;
-			rect.Height = (2 * GetTaskLabelFont(taskItem).Height);
+			rect.Height = GetTaskLabelFont(taskItem).Height;
+
+			if (multiLine)
+				rect.Height += GetTaskLabelFont(taskItem).Height;
 
 			return rect;
 		}
 		
-		Rectangle CalcTaskLabelRect(BaseNode node)
+		Rectangle CalcTaskLabelRect(BaseNode node, bool multiLine)
 		{
 			if (node == null || node.IsRoot)
 				return Rectangle.Empty;
 
-			return CalcTaskLabelRect(GetTaskItem(node), GetNodeClientRect(node));
+			return CalcTaskLabelRect(GetTaskItem(node), GetNodeClientRect(node), multiLine);
 		}
 
 		public Rectangle GetSelectedTaskLabelRect()
 		{
-			return CalcTaskLabelRect(SingleSelectedNode);
+			return CalcTaskLabelRect(SingleSelectedNode, false);
 		}
 
 		public bool IsTaskLocked(uint taskId)
@@ -1570,7 +1573,7 @@ namespace EvidenceBoardUIExtension
 			DrawTaskImageExpansionButton(graphics, taskItem, taskRect, backColor);
 
 			// Title
-			var titleRect = CalcTaskLabelRect(taskItem, taskRect);
+			var titleRect = CalcTaskLabelRect(taskItem, taskRect, true);
 			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			// Image
@@ -2119,6 +2122,7 @@ namespace EvidenceBoardUIExtension
 					}
 					else
 					{
+						ScrollToSelection(false);
 						EditTaskLabel(this, SingleSelectedNode.Data);
 					}
 				}
@@ -2649,34 +2653,41 @@ namespace EvidenceBoardUIExtension
 					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 					toolRect.Location = clientPos;
 					initialDelay = 500;
+					multiLine = false;
 
 					return tipId;
 				}
 			}
 
 			// Title tip
-			if ((nodeRect.Top < 0) || (nodeRect.Left < 0))
-			{
-				// If the top of the text rectangle is hidden we always 
-				// need a label tip so we just clip to the avail space
-				toolRect = nodeRect;
-				toolRect.Intersect(ClientRectangle);
-			}
-			else // check available space
-			{
-				toolRect = CalcTaskLabelRect(node);
-
-				if (toolRect.Contains(clientPos))
-				{
-					Size tipSize = m_LabelTip.CalcTipSize(taskItem.ToString(), toolRect.Width);
-
-					if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
-						return 0;
-				}
-			}
-
-			multiLine = true; // always
+			toolRect = CalcTaskLabelRect(node, true);
 			tipText = taskItem.ToString();
+
+			var labelFont = GetTaskLabelFont(taskItem);
+			var sizeText = TextRenderer.MeasureText(tipText, labelFont, new Size(toolRect.Width, 0), TextFormatFlags.WordBreak);
+
+			multiLine = (sizeText.Height > labelFont.Height);
+
+			if (!multiLine)
+				toolRect.Size = sizeText;
+
+			if (!ClientRectangle.Contains(toolRect))
+			{
+				// If the text rectangle is not wholly visible we always 
+				// need a label tip so we just clip to the avail space
+				toolRect.X = Math.Max(0, Math.Min(ClientRectangle.Right - toolRect.Width, toolRect.Left));
+				toolRect.Y = Math.Max(0, Math.Min(ClientRectangle.Bottom - toolRect.Height, toolRect.Top));
+			}
+			else if (!toolRect.Contains(clientPos)) // check available space
+			{
+				return 0;
+			}
+			else if ((sizeText.Width <= toolRect.Width) && (sizeText.Height <= toolRect.Height))
+			{
+				return 0;
+			}
+
+			toolRect.Inflate(LabelPadding, LabelPadding);
 
 			return TooltipId(taskItem, TipId.TaskTitle);
 		}
