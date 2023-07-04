@@ -27,35 +27,33 @@ static Point OUTSIDE(-10000, -10000);
 static int BORDERS = 4;
 
 static int DEF_INITIAL_DELAY = 50;
-static int DEF_AUTOPOP_DELAY = 10000;
+static int DEF_AUTOPOP_DELAY = 5000;
+
+enum TIMER_ID
+{
+	TIMER_INITIAL,
+	TIMER_AUTOPOP,
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 LabelTip::LabelTip(ILabelTipHandler^ handler) 
 	: 
-	LabelTip(handler, DEF_INITIAL_DELAY, DEF_AUTOPOP_DELAY)
-{
-}
-
-LabelTip::LabelTip(ILabelTipHandler^ handler, int initialDelayMs, int autoPopDelayMs) 
-	: 
-	m_Handler(handler)
+	m_Handler(handler),
+	m_Multiline(false),
+	m_TipId(0)
 {
 	OwnerDraw = true;
 
-	this->Draw += gcnew DrawToolTipEventHandler(OnDrawLabelTip);
-	this->Popup += gcnew PopupEventHandler(OnShowLabelTip);
-
-	this->AutoPopDelay = autoPopDelayMs;
-	this->InitialDelay = initialDelayMs;
+	Draw += gcnew DrawToolTipEventHandler(OnDrawLabelTip);
+	Popup += gcnew PopupEventHandler(OnShowLabelTip);
 
 	// Stops the tooltip disappearing because the mouse is over it
 	Win32::AddStyle(GetHandle(), WS_EX_TRANSPARENT, true);
 
 	m_HoverTimer = gcnew Timer();
-	m_HoverTimer->Interval = 10;// Win32::GetMouseHoverDelay();
-
 	m_HoverTimer->Tick += gcnew EventHandler(this, &LabelTip::OnHoverTick);
+
 	HideTooltip(); // initialises everything
 }
 
@@ -179,8 +177,9 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 			Drawing::Rectangle hitRect;
 			String^ tipText = nullptr;
 			bool multiline = false;
+			int initialDelay = DEF_INITIAL_DELAY;
 
-			UInt32 tipId = m_Handler->ToolHitTest(this, pos, tipText, hitRect, multiline);
+			UInt32 tipId = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline, initialDelay);
 
 			if (tipId == 0)
 			{
@@ -219,6 +218,9 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 				if (nOffset > SystemInformation::MouseHoverSize.Width)
 				{
 					m_HoverStartScreenPos = pos;
+
+					m_HoverTimer->Tag = gcnew int(TIMER_INITIAL);
+					m_HoverTimer->Interval = initialDelay;
 					m_HoverTimer->Start();
 				}
 			}
@@ -252,11 +254,20 @@ void LabelTip::OnHoverTick(Object^ sender, EventArgs^ args)
 	// to restart it as required
 	m_HoverTimer->Stop();
 
-	// Ignore if a tooltip is still visible
-	if (IsShowing())
-		return;
+	int timerId = *ASTYPE(m_HoverTimer->Tag, int);
+
+	switch (timerId)
+	{
+	case TIMER_INITIAL:
+		if (!IsShowing())
+			CheckShowTip();
+		break;
 	
-	CheckShowTip();
+	case TIMER_AUTOPOP:
+		if (IsShowing())
+			Hide(m_Handler->GetOwner());
+		break;
+	}
 }
 
 void LabelTip::CheckShowTip()
@@ -274,8 +285,9 @@ void LabelTip::CheckShowTip()
 	Drawing::Rectangle hitRect;
 	String^ tipText = nullptr;
 	bool multiline = false;
+	int unused = 0;
 
-	UInt32 nHit = m_Handler->ToolHitTest(this, pos, tipText, hitRect, multiline);
+	UInt32 nHit = m_Handler->ToolHitTest(pos, tipText, hitRect, multiline, unused);
 
 	if (nHit == 0)
 	{
@@ -304,4 +316,9 @@ void LabelTip::CheckShowTip()
 	}
 
 	Show(tipText, m_Handler->GetOwner(), hitRect.Location);
+
+	// Restart the timer
+	m_HoverTimer->Tag = gcnew int (TIMER_AUTOPOP);
+	m_HoverTimer->Interval = DEF_AUTOPOP_DELAY;
+	m_HoverTimer->Start();
 }

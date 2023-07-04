@@ -128,7 +128,7 @@ namespace DayViewUIExtension
 
 		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
 
-		public uint ToolHitTest(LabelTip tip, Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
+		public uint ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine, ref int initialDelay)
 		{
 			if (IsResizingAppointment())
 				return 0;
@@ -171,7 +171,9 @@ namespace DayViewUIExtension
 
 				var pos = PointToClient(MousePosition);
 				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+
 				toolRect.Location = pos;
+				initialDelay = 500;
 			}
 			else // 'Real' task
 			{

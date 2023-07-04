@@ -101,7 +101,7 @@ namespace EvidenceBoardUIExtension
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
-		private LabelTip m_LabelTip, m_ToolTip;
+		private LabelTip m_LabelTip;
 
 		private bool m_ShowParentAsFolder = false;
 		private bool m_TaskColorIsBkgnd = false;
@@ -147,7 +147,6 @@ namespace EvidenceBoardUIExtension
 			m_Trans = trans;
 			m_TaskIcons = icons;
 			m_LabelTip = new LabelTip(this);
-			m_ToolTip = new LabelTip(this, 500, 5000);
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -1002,11 +1001,8 @@ namespace EvidenceBoardUIExtension
 
 		protected override void WndProc(ref Message m)
 		{
-// 			if (m_LabelTip != null)
-// 				m_LabelTip.ProcessMessage(m);
-
-			if (m_ToolTip != null)
-				m_ToolTip.ProcessMessage(m);
+			if (m_LabelTip != null)
+				m_LabelTip.ProcessMessage(m);
 
 			base.WndProc(ref m);
 		}
@@ -2594,7 +2590,7 @@ namespace EvidenceBoardUIExtension
 			return ((taskItem.TaskId * (uint)TipId.NumTips) + (uint)tipId);
 		}
 
-		public uint ToolHitTest(LabelTip tip, Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
+		public uint ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine, ref int initialDelay)
 		{
 			if (DragMode != DragMode.None)
 				return 0;
@@ -2608,87 +2604,81 @@ namespace EvidenceBoardUIExtension
 			var taskItem = GetTaskItem(node);
 			var nodeRect = GetNodeClientRect(node);
 
-			if (tip == m_ToolTip)
+			if (taskItem.HasImage)
 			{
-				if (taskItem.HasImage)
+				uint tipId = 0;
+				var imageRect = CalcImageRect(taskItem, nodeRect, false);
+
+				// Image expansion button
+				toolRect = CalcImageExpansionButtonRect(nodeRect);
+
+				if (toolRect.Contains(clientPos))
 				{
-					uint tipId = 0;
-					var imageRect = CalcImageRect(taskItem, nodeRect, false);
-
-					// Image expansion button
-					toolRect = CalcImageExpansionButtonRect(nodeRect);
-
-					if (toolRect.Contains(clientPos))
+					tipText = m_Trans.Translate("Toggle Image Visibility");
+					tipId = TooltipId(taskItem, TipId.ExpansionBtn);
+				}
+				else
+				{
+					if (taskItem.ImageCount > 1)
 					{
-						tipText = m_Trans.Translate("Toggle Image Visibility");
-						tipId = TooltipId(taskItem, TipId.ExpansionBtn);
-					}
-					else
-					{
-						if (taskItem.ImageCount > 1)
+						// Image spin buttons
+						// Forward button
+						toolRect = CalcImageSpinButtonRect(imageRect, true);
+
+						if (toolRect.Contains(clientPos))
 						{
-							// Image spin buttons
-							// Forward button
-							toolRect = CalcImageSpinButtonRect(imageRect, true);
+							tipText = m_Trans.Translate("Next Image");
+							tipId = TooltipId(taskItem, TipId.SpinForwardBtn);
+						}
+						else // Back button
+						{
+							toolRect = CalcImageSpinButtonRect(imageRect, false);
 
 							if (toolRect.Contains(clientPos))
 							{
-								tipText = m_Trans.Translate("Next Image");
-								tipId = TooltipId(taskItem, TipId.SpinForwardBtn);
-							}
-							else // Back button
-							{
-								toolRect = CalcImageSpinButtonRect(imageRect, false);
-
-								if (toolRect.Contains(clientPos))
-								{
-									tipText = m_Trans.Translate("Previous Image");
-									tipId = TooltipId(taskItem, TipId.SpinBackBtn);
-								}
+								tipText = m_Trans.Translate("Previous Image");
+								tipId = TooltipId(taskItem, TipId.SpinBackBtn);
 							}
 						}
 					}
+				}
 
-					if (tipId != 0)
-					{
-						// These are really tooltips not label tips so offset them
-						clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-						toolRect.Location = clientPos;
+				if (tipId != 0)
+				{
+					// These are really tooltips not label tips so offset them
+					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+					toolRect.Location = clientPos;
+					initialDelay = 500;
 
-						return tipId;
-					}
+					return tipId;
 				}
 			}
-			else if (tip == m_LabelTip)
+
+			// Title tip
+			if ((nodeRect.Top < 0) || (nodeRect.Left < 0))
 			{
-				if ((nodeRect.Top < 0) || (nodeRect.Left < 0))
+				// If the top of the text rectangle is hidden we always 
+				// need a label tip so we just clip to the avail space
+				toolRect = nodeRect;
+				toolRect.Intersect(ClientRectangle);
+			}
+			else // check available space
+			{
+				toolRect = CalcTaskLabelRect(node);
+
+				if (toolRect.Contains(clientPos))
 				{
-					// If the top of the text rectangle is hidden we always 
-					// need a label tip so we just clip to the avail space
-					toolRect = nodeRect;
-					toolRect.Intersect(ClientRectangle);
-				}
-				else // check available space
-				{
-					toolRect = CalcTaskLabelRect(node);
+					Size tipSize = m_LabelTip.CalcTipSize(taskItem.ToString(), toolRect.Width);
 
-					if (toolRect.Contains(clientPos))
-					{
-						Size tipSize = m_LabelTip.CalcTipSize(taskItem.ToString(), toolRect.Width);
-
-						if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
-							return 0;
-
-						multiLine = true; // always
-						tipText = taskItem.ToString();
-
-						return TooltipId(taskItem, TipId.TaskTitle);
-					}
+					if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
+						return 0;
 				}
 			}
 
-			// All else
-			return 0;
+			multiLine = true; // always
+			tipText = taskItem.ToString();
+
+			return TooltipId(taskItem, TipId.TaskTitle);
 		}
 	}
 
