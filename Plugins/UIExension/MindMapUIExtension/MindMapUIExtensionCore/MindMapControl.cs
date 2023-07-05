@@ -633,9 +633,14 @@ namespace MindMapUIExtension
 						BeginUpdate();
 
 						if (hit.IsExpanded)
+						{
 							hit.Collapse(true); // don't collapse children
+						}
 						else
+						{
 							hit.Expand();
+							RefreshNodeFont(hit, true);
+						}
 
 						EndUpdate();
 						EnsureItemVisible(Item(hit));
@@ -927,6 +932,9 @@ namespace MindMapUIExtension
 
     	protected void OnTreeViewAfterExpandCollapse(object sender, TreeViewEventArgs e)
 		{
+			if (e.Action == TreeViewAction.Expand)
+				RefreshNodeFont(e.Node, true);
+
 			RecalculatePositions();
             EnsureItemVisible(Item(e.Node));
 		}
@@ -993,6 +1001,15 @@ namespace MindMapUIExtension
 			UpdateTreeFont(true);
 		}
 
+		private void ClearNodeFonts(TreeNode node)
+		{
+			node.NodeFont = null;
+
+			// children
+			foreach (TreeNode childNode in node.Nodes)
+				ClearNodeFonts(childNode);
+		}
+
 		// Hook for derived classes
 		virtual protected bool RefreshNodeFont(TreeNode node, bool andChildren)
 		{
@@ -1004,13 +1021,14 @@ namespace MindMapUIExtension
 			if (RootNode == null)
 				return;
 
-			// Update the node fonts first so the tree is ready
-			// when we ask to recalculate the items heights
-			RefreshNodeFont(RootNode, true);
-
 			// We'll need these to fixup the item height below
 			int prevItemHeight = m_TreeView.ItemHeight;
 			int prevFontHeight = m_TreeView.Font.Height;
+
+			// Clear node fonts before changing the tree font to work around 
+			// a .NET bug which allocates resources without immediately freeing 
+			// them, causing big trees to run out of GDI objects (> 10000)
+			ClearNodeFonts(RootNode);
 
 			// Change the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
@@ -1034,6 +1052,9 @@ namespace MindMapUIExtension
 			{
 				itemHeight--;
 			}
+
+			// Restore task fonts
+			RefreshNodeFont(RootNode, true);
 
 			// Update the item height
 			if (itemHeight != prevItemHeight)

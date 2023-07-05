@@ -262,6 +262,9 @@ namespace MindMapUIExtension
 
 		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
 		{
+			if (m_Items.Count > 500)
+				Cursor = Cursors.WaitCursor;
+
 			bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
             bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
 
@@ -286,7 +289,9 @@ namespace MindMapUIExtension
                 RecalculatePositions();
             
             base.SetFont(fontName, fontSize);
-        }
+
+			Cursor = Cursors.Default;
+		}
 
 		// ILabelTipHandler implementation
 		public Control GetOwner()
@@ -701,7 +706,7 @@ namespace MindMapUIExtension
                 node.NodeFont = newFont;
             
             // children
-            if (andChildren)
+            if (andChildren && node.IsExpanded)
             {
                 foreach (TreeNode childNode in node.Nodes)
                     fontChange |= RefreshNodeFont(childNode, true);
