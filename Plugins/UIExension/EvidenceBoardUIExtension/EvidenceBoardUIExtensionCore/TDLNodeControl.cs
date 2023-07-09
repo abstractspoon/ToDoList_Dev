@@ -573,7 +573,7 @@ namespace EvidenceBoardUIExtension
 
 		Rectangle CalcTaskLabelRect(TaskItem taskItem, Rectangle rect, bool multiLine)
 		{
-			if (taskItem.HasIcon || taskItem.HasImage)
+			if (taskItem.HasIcon || taskItem.HasImage || (taskItem.IsParent && ShowParentsAsFolders))
 			{
 				var iconRect = CalcIconRect(rect);
 
