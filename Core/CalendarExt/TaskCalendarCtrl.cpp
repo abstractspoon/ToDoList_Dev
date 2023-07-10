@@ -3002,17 +3002,18 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 
 	BOOL bCustomDate = IsCustomDate(pTCI);
 	BOOL bHasDepends = (!bCustomDate && HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
+	BOOL bCalcedParents = (pTCI->IsParent() && HasOption(TCCO_USECALCULATEDPARENTDATES));
 			
 	switch (nHit)
 	{
 	case TCCHT_BEGIN:
-		return !bCustomDate && !bHasDepends;
+		return (!bCustomDate && !bHasDepends && !bCalcedParents);
 
 	case TCCHT_MIDDLE:
-		return !bHasDepends;
+		return (!bHasDepends && !bCalcedParents);
 
 	case TCCHT_END:
-		return !bCustomDate;
+		return (!bCustomDate && !bCalcedParents);
 	}
 
 	// all else

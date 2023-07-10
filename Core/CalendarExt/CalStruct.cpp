@@ -91,9 +91,11 @@ void TASKCALITEMDATES::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 		dtCreation = GetDate(tDate);
 
 	// retrieve new dates
+	bool bCalc = (pTasks->IsTaskParent(hTask) && Misc::HasFlag(dwCalcDates, TCCO_USECALCULATEDPARENTDATES));
+
 	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 	{
-		if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
+		if (pTasks->GetTaskStartDate64(hTask, bCalc, tDate))
 			dtStart = GetDate(tDate);
 		else
 			CDateHelper::ClearDate(dtStart);
@@ -101,7 +103,7 @@ void TASKCALITEMDATES::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
-		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
+		if (pTasks->GetTaskDueDate64(hTask, bCalc, tDate))
 			dtDue = GetDate(tDate);
 		else
 			CDateHelper::ClearDate(dtDue);

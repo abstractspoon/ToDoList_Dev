@@ -32,13 +32,15 @@ enum // options
 	TCCO_SHOWFUTUREITEMS						= 0x00080000,
 	TCCO_SHOWDATEINEVERYCELL					= 0x00100000,
 	TCCO_SHOWWEEKNUMINCELLDATE					= 0x00200000,
+	TCCO_USECALCULATEDPARENTDATES				= 0x00400000,
 
 	TCCO_DATEDISPLAYOPTIONS						= (TCCO_DISPLAYCONTINUOUS | 
 													TCCO_DISPLAYSTART | 
 													TCCO_DISPLAYDUE | 
 													TCCO_DISPLAYDONE | 
 													TCCO_DISPLAYCALCSTART | 
-													TCCO_DISPLAYCALCDUE)
+													TCCO_DISPLAYCALCDUE |
+												   TCCO_USECALCULATEDPARENTDATES)
 };
 
 /////////////////////////////////////////////////////////////////////////////
