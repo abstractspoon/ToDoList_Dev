@@ -159,7 +159,10 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 	if (dwCurOptions != dwNewOptions)
 	{
 		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
+		m_dwOptions = (dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS)); // preserve parent status
+
+		// This must come before any date function calls
+		m_mapData.SetDateOptions(m_dwOptions);
 
 		RecalcCellHeaderDateFormats();
 		RecalcTaskDates();
@@ -204,7 +207,7 @@ void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
 		RecalcTaskDates();
 		RebuildCellTasks();
 
-		// Scroll to task is hidden parent is being reshown
+		// Scroll to task if hidden parent is being reshown
 		BOOL bScrollToTask = (!bHide && m_mapData.IsParentTask(GetSelectedTaskID()));
 		FixupSelection(bScrollToTask);
 	}
@@ -222,7 +225,7 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 		ASSERT(pTCI);
 		ASSERT(pTCI->GetTaskID() == dwTaskID);
 
-		pTCI->RecalcDates(m_dwOptions);
+		pTCI->RecalcDates();
 	}
 }
 
@@ -465,7 +468,7 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
-			bChange = pTCI->UpdateTask(pTasks, hTask, m_mapCustomDateAttrib, m_dwOptions);
+			bChange = pTCI->UpdateTask(pTasks, hTask, m_mapCustomDateAttrib);
 
 			// Update our list of recurring tasks
 			if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
@@ -2801,7 +2804,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 
 	// Recalc dates if either start/end is not set
 	if (!pTCI->IsStartDateSet() || !pTCI->IsEndDateSet())
-		pTCI->RecalcDates(m_dwOptions);
+		pTCI->RecalcDates();
 
 	Invalidate();
 	UpdateWindow();
@@ -3000,20 +3003,22 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	if (IsFutureOccurrence(pTCI))
 		return FALSE;
 
+	if (pTCI->IsParent() && (HasOption(TCCO_USECALCULATEDPARENTSTART) || HasOption(TCCO_USECALCULATEDPARENTDUE)))
+		return FALSE;
+
 	BOOL bCustomDate = IsCustomDate(pTCI);
 	BOOL bHasDepends = (!bCustomDate && HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
-	BOOL bCalcedParents = (pTCI->IsParent() && HasOption(TCCO_USECALCULATEDPARENTDATES));
 			
 	switch (nHit)
 	{
 	case TCCHT_BEGIN:
-		return (!bCustomDate && !bHasDepends && !bCalcedParents);
+		return (!bCustomDate && !bHasDepends);
 
 	case TCCHT_MIDDLE:
-		return (!bHasDepends && !bCalcedParents);
+		return !bHasDepends;
 
 	case TCCHT_END:
-		return (!bCustomDate && !bCalcedParents);
+		return !bCustomDate;
 	}
 
 	// all else

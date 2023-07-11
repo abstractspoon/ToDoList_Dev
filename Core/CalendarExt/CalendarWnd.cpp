@@ -233,9 +233,8 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 
 	const int NO_CALCDATES = 2; // from ToDoList/PreferencesTaskCalcPage.cpp
-	BOOL bCalcedParentDates = ((pPrefs->GetProfileInt(_T("Preferences"), _T("CalcStartDate"), NO_CALCDATES) != NO_CALCDATES) ||
-								(pPrefs->GetProfileInt(_T("Preferences"), _T("CalcDueDate"), NO_CALCDATES) != NO_CALCDATES));
-	Misc::SetFlag(dwPrefs, TCCO_USECALCULATEDPARENTDATES, bCalcedParentDates);
+	Misc::SetFlag(dwPrefs, TCCO_USECALCULATEDPARENTSTART, (pPrefs->GetProfileInt(_T("Preferences"), _T("CalcStartDate"), NO_CALCDATES) != NO_CALCDATES));
+	Misc::SetFlag(dwPrefs, TCCO_USECALCULATEDPARENTDUE, (pPrefs->GetProfileInt(_T("Preferences"), _T("CalcDueDate"), NO_CALCDATES) != NO_CALCDATES));
 
 	m_BigCalendar.SetOptions(dwPrefs);
 
@@ -304,7 +303,8 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
 	Misc::SetFlag(dwOptions, TCCO_SHOWPARENTTASKSASFOLDER,			m_BigCalendar.HasOption(TCCO_SHOWPARENTTASKSASFOLDER));
 	Misc::SetFlag(dwOptions, TCCO_ENABLELABELTIPS,					m_BigCalendar.HasOption(TCCO_ENABLELABELTIPS));
-	Misc::SetFlag(dwOptions, TCCO_USECALCULATEDPARENTDATES,			m_BigCalendar.HasOption(TCCO_USECALCULATEDPARENTDATES));
+	Misc::SetFlag(dwOptions, TCCO_USECALCULATEDPARENTSTART,			m_BigCalendar.HasOption(TCCO_USECALCULATEDPARENTSTART));
+	Misc::SetFlag(dwOptions, TCCO_USECALCULATEDPARENTDUE,			m_BigCalendar.HasOption(TCCO_USECALCULATEDPARENTDUE));
 
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);

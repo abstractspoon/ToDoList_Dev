@@ -26,13 +26,13 @@ struct TASKCALITEMDATES
 public:
 	TASKCALITEMDATES();
 	TASKCALITEMDATES(const TASKCALITEMDATES& tcid);
-	TASKCALITEMDATES(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
+	TASKCALITEMDATES(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs);
 
 	TASKCALITEMDATES& operator=(const TASKCALITEMDATES& tcid);
 	BOOL operator==(const TASKCALITEMDATES& tcid) const;
 
-	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
-	void Recalc(DWORD dwCalcDates);
+	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs);
+	void Recalc();
 
 	BOOL IsValid() const;
 	BOOL IsDone() const;
@@ -58,15 +58,25 @@ public:
 
 	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
 
+public:
+	DWORD dwOptions;
+
 protected:
 	COleDateTime dtCreation, dtStart, dtDue, dtDone;
+	COleDateTime dtParentStart, dtParentDue;
 	COleDateTime dtStartCalc, dtEndCalc;
-	BOOL bTreatOverdueAsDueToday;
+
+	BOOL bParent;
 
 	CMapCustomDates mapCustomDates;
 
 protected:
 	void ClearCalculatedDates();
+	BOOL HasOption(DWORD dwOption) const { return ((dwOptions & dwOption) == dwOption); }
+	BOOL UseCalcParentStart() const;
+	BOOL UseCalcParentDue() const;
+	COleDateTime GetStart() const { return (UseCalcParentStart() ? dtParentStart : dtStart); }
+	COleDateTime GetDue() const { return (UseCalcParentDue() ? dtParentDue : dtDue); }
 
 	static COleDateTime GetDate(time64_t tDate);
 	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
@@ -77,16 +87,15 @@ protected:
 struct TASKCALITEM
 {
 public:
-	TASKCALITEM();
 	TASKCALITEM(const TASKCALITEM& tci);
-	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
+	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwDateOptions);
 	virtual ~TASKCALITEM() {}
 
 	TASKCALITEM& operator=(const TASKCALITEM& tci);
 	TASKCALITEM& operator=(const TASKCALITEMDATES& tcid);
 	BOOL operator==(const TASKCALITEM& tci) const;
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs);
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
 	virtual COLORREF GetFillColor(BOOL bTextIsBack) const;
@@ -102,7 +111,9 @@ public:
 	BOOL HasTag(LPCTSTR szTag) const;
 
 	// Date wrappers
-	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
+	void SetDateOptions(DWORD dwOptions) { dates.dwOptions = dwOptions; }
+
+	void RecalcDates() { dates.Recalc(); }
 	BOOL IsValid() const { return dates.IsValid(); }
 	BOOL IsDone(BOOL bIncGoodAs) const;
 
@@ -200,6 +211,8 @@ public:
 
 	void RemoveAll();
 	void RemoveKey(DWORD dwTaskID);
+
+	void SetDateOptions(DWORD dwOptions);
 
 	TASKCALITEM* GetTaskItem(DWORD dwTaskID) const;
 	TASKCALITEM* GetNextTask(POSITION& pos) const;
