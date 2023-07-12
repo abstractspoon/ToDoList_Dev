@@ -152,6 +152,8 @@ copy unicode_release\burndownExt.dll ..\todolist\unicode_release /y
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Debug/BurndownExt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>

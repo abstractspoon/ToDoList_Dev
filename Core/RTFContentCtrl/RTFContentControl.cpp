@@ -557,7 +557,6 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	InitMenuIconManager();
 	InitShortcutManager();
 
-#ifndef _DEBUG
 	// if MS word is not installed we remove features that
 	// our backup RTF2HTML converter cannot handle
 	BOOL bRemoveAdvancedFeatures = !CMSWordHelper::IsWordInstalled(12);
@@ -578,7 +577,7 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 		m_toolbar.GetToolBarCtrl().DeleteButton(nBtn);
 	}
-#endif
+
 	m_rtf.EnableInlineSpellChecking(s_bInlineSpellChecking);
 
 	// helper for toolbar tooltips
