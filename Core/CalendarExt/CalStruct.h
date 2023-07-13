@@ -36,6 +36,7 @@ public:
 
 	BOOL IsValid() const;
 	BOOL IsDone() const;
+	BOOL IsCalculatedParent() const { return (IsUsingCalcParentStart() || IsUsingCalcParentDue()); }
 
 	BOOL IsStartSet() const;
 	BOOL IsEndSet() const;
@@ -73,10 +74,10 @@ protected:
 protected:
 	void ClearCalculatedDates();
 	BOOL HasOption(DWORD dwOption) const { return ((dwOptions & dwOption) == dwOption); }
-	BOOL UseCalcParentStart() const;
-	BOOL UseCalcParentDue() const;
-	COleDateTime GetStart() const { return (UseCalcParentStart() ? dtParentStart : dtStart); }
-	COleDateTime GetDue() const { return (UseCalcParentDue() ? dtParentDue : dtDue); }
+	BOOL IsUsingCalcParentStart() const;
+	BOOL IsUsingCalcParentDue() const;
+	COleDateTime GetStart() const { return (IsUsingCalcParentStart() ? dtParentStart : dtStart); }
+	COleDateTime GetDue() const { return (IsUsingCalcParentDue() ? dtParentDue : dtDue); }
 
 	static COleDateTime GetDate(time64_t tDate);
 	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
@@ -112,6 +113,7 @@ public:
 
 	// Date wrappers
 	void SetDateOptions(DWORD dwOptions) { dates.dwOptions = dwOptions; }
+	BOOL IsCalculatedParent() const { return dates.IsCalculatedParent(); }
 
 	void RecalcDates() { dates.Recalc(); }
 	BOOL IsValid() const { return dates.IsValid(); }

@@ -3000,10 +3000,10 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	if (pTCI->bLocked)
 		return FALSE;
 
-	if (IsFutureOccurrence(pTCI))
+	if (pTCI->IsCalculatedParent())
 		return FALSE;
 
-	if (pTCI->IsParent() && (HasOption(TCCO_USECALCULATEDPARENTSTART) || HasOption(TCCO_USECALCULATEDPARENTDUE)))
+	if (IsFutureOccurrence(pTCI))
 		return FALSE;
 
 	BOOL bCustomDate = IsCustomDate(pTCI);

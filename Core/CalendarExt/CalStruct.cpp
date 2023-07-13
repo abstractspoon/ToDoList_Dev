@@ -161,12 +161,12 @@ void TASKCALITEMDATES::ClearCalculatedDates()
 	CDateHelper::ClearDate(dtEndCalc);
 }
 
-BOOL TASKCALITEMDATES::UseCalcParentStart() const 
+BOOL TASKCALITEMDATES::IsUsingCalcParentStart() const 
 { 
 	return (bParent && HasOption(TCCO_USECALCULATEDPARENTSTART)); 
 }
 
-BOOL TASKCALITEMDATES::UseCalcParentDue() const
+BOOL TASKCALITEMDATES::IsUsingCalcParentDue() const
 {
 	return (bParent && HasOption(TCCO_USECALCULATEDPARENTDUE));
 }
@@ -268,7 +268,7 @@ void TASKCALITEMDATES::Recalc()
 		// adjust due date to point to end of day if it has no time component
 		if (!CDateHelper::DateHasTime(dtDueDate))
 		{
-			if (UseCalcParentDue())
+			if (IsUsingCalcParentDue())
 				dtParentDue = CDateHelper::GetEndOfDay(dtDueDate);
 			else
 				dtDue = CDateHelper::GetEndOfDay(dtDueDate);
@@ -402,7 +402,7 @@ void TASKCALITEMDATES::MinMax(const COleDateTime& date, COleDateTime& dtMin, COl
 void TASKCALITEMDATES::SetStart(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
-	ASSERT(!UseCalcParentStart());
+	ASSERT(!IsUsingCalcParentStart());
 
 	dtStart = date;
 	CDateHelper::ClearDate(dtStartCalc);
@@ -411,7 +411,7 @@ void TASKCALITEMDATES::SetStart(const COleDateTime& date)
 void TASKCALITEMDATES::SetDue(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
-	ASSERT(!UseCalcParentDue());
+	ASSERT(!IsUsingCalcParentDue());
 
 	dtDue = date;
 	CDateHelper::ClearDate(dtEndCalc);
