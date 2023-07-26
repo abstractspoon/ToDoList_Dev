@@ -253,9 +253,13 @@ namespace DayViewUIExtension
 		{
 			m_DayView.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_DayView.ShowParentsAsFolder = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-			m_DayView.AutoCalculateDependencyDates = prefs.GetProfileBool("Preferences", "AutoAdjustDependents", false);
+			m_DayView.DependencyDatesAreCalculated = prefs.GetProfileBool("Preferences", "AutoAdjustDependents", false);
             m_DayView.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_DayView.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+
+			const int NotCalced = 2;
+			m_DayView.UseParentCalcStartDate = (prefs.GetProfileInt("Preferences", "CalcStartDate", NotCalced) != NotCalced);
+			m_DayView.UseParentCalcEndDate = (prefs.GetProfileInt("Preferences", "CalcDueDate", NotCalced) != NotCalced);
 
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 

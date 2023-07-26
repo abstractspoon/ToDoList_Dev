@@ -349,6 +349,16 @@ namespace DayViewUIExtension
 			FixupSelection(false, true);
 		}
 
+		public bool UseParentCalcStartDate
+		{
+			set { m_TaskItems.UseParentCalcStartDate = value; }
+		}
+
+		public bool UseParentCalcEndDate
+		{
+			set { m_TaskItems.UseParentCalcEndDate = value; }
+		}
+
 		public bool ShowFutureOccurrences
 		{
 			get { return m_ShowFutureOcurrences; }
@@ -362,7 +372,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool AutoCalculateDependencyDates
+		public bool DependencyDatesAreCalculated
 		{
 			get; set;
 		}
@@ -964,7 +974,7 @@ namespace DayViewUIExtension
                 }
             }
         }
-
+		
 		public bool ShowParentsAsFolder
 		{
 			get { return m_Renderer.ShowParentsAsFolder; }
@@ -1546,12 +1556,18 @@ namespace DayViewUIExtension
 		{
 			if ((appt != null) && !appt.Locked)
 			{
+				// Disable modification of parents with calculated dates
+				var taskItem = (appt as TaskItem);
+
+				if (taskItem != null && (taskItem.IsUsingCalcedParentStartDate || taskItem.IsUsingCalcedParentEndDate))
+					return false;
+
 				// Disable start date editing for tasks with dependencies that are auto-calculated
 				// Disable resizing for custom date attributes
 				bool isCustomDate = (appt is CustomTaskDateAttribute);
 				bool isTimeBlock = (appt is TaskTimeBlock);
-				bool hasDepends = ((appt is TaskItem) && (appt as TaskItem).HasDependencies);
-				bool hasLockedDepends = (hasDepends && AutoCalculateDependencyDates);
+				bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
+				bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
 
 				switch (mode)
 				{
