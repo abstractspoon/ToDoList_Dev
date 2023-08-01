@@ -4150,10 +4150,11 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 		// attribute, then we assume that it won't want the update.
 		//
 		// Unless the modification may also have auto-modified
-		// the task's subtasks.
+		// the task's subtasks or parents.
 		if (AttributeMatchesExtensionMod(nAttrib) &&
 			(nAttrib != TDCA_DONEDATE) &&
-			!m_data.WantUpdateInheritedAttibute(nAttrib))
+			!m_data.WantUpdateInheritedAttibute(nAttrib) &&
+			!ModAffectsAggregatedAttributes(nAttrib))
 		{
 			return FALSE;
 		}
