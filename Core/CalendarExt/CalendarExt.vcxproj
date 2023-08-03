@@ -99,6 +99,8 @@
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Debug/CalendarExt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>

@@ -2493,12 +2493,12 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 
 	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
 
+	// If the real duration is zero then it means that the task
+	// falls between the end of one weekday and the start of the next
+	// which means that the user has performed an action to avoid our
+	// checks, so we fall back on the simple duration instead
 	if (dRealDuration == 0.0)
 	{
-		// If the real duration is zero then it means that the task
-		// falls between the end of one weekday and the start of the next
-		// which means that the user has performed an action to avoid our
-		// checks, so we fall back on the simple duration instead
 		ASSERT((nUnits == TDCU_MINS) ||
 				(nUnits == TDCU_HOURS) ||
 				(nUnits == TDCU_WEEKDAYS) ||
@@ -2518,12 +2518,20 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		return AddDuration(dtNewStart, dDurationInWeekdayHours, TDCU_HOURS, TRUE);
 	}
 
+	// If adding the simple duration to the start date to produce the 
+	// due date would result in no change to the real duration, just do 
+	// that because it's the least confusing outcome for the user
+	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
+
+	if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
+	{
+		return AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, TRUE);
+	}
+
 	// Tasks whose current and new dates fall wholly within a single day 
 	// and where at least one of dates has a time component are kept simple
 	if (CDateHelper::DateHasTime(dtCurStart) || CDateHelper::DateHasTime(dtCurDue))
 	{
-		COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
-
 		if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
 			CDateHelper::IsSameDay(dtNewStart, dtSimpleDue))
 		{

@@ -152,6 +152,8 @@ copy unicode_release\ftpstorage.dll ..\todolist\unicode_release /y
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Debug/FtpStorage.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
