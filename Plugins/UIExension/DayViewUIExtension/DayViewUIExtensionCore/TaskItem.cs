@@ -14,18 +14,49 @@ namespace DayViewUIExtension
 {
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
+		private bool m_UseParentCalcStartDate = true;
+		private bool m_UseParentCalcEndDate = true;
+
 		public TaskItem GetItem(uint taskId, bool autoCreate = false)
 		{
 			TaskItem taskItem;
 
 			if (!TryGetValue(taskId, out taskItem) && autoCreate)
 			{
-				taskItem = new TaskItem();
+				taskItem = new TaskItem()
+				{
+					UseParentCalcStartDate = m_UseParentCalcStartDate,
+					UseParentCalcEndDate = m_UseParentCalcEndDate
+				};
+
 				Add(taskId, taskItem);
 			}
 
 			return taskItem;
 		}
+
+		public bool UseParentCalcStartDate
+		{
+			set
+			{
+				m_UseParentCalcStartDate = value;
+
+				foreach (var taskItem in Values)
+					taskItem.UseParentCalcStartDate = value;
+			}
+		}
+
+		public bool UseParentCalcEndDate
+		{
+			set
+			{
+				m_UseParentCalcEndDate = value;
+
+				foreach (var taskItem in Values)
+					taskItem.UseParentCalcEndDate = value;
+			}
+		}
+
 	}
 
 	// ---------------------------------------------------------------
@@ -50,6 +81,7 @@ namespace DayViewUIExtension
 	public class TaskItem : Calendar.Appointment
 	{
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
+		private Calendar.AppointmentDates m_ParentCalcedDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
 
 		private Color m_TaskTextColor = Color.Empty;
@@ -88,6 +120,54 @@ namespace DayViewUIExtension
 			set { m_TaskTextColor = value; }
 		}
 
+		public bool UseParentCalcStartDate;
+		public bool UseParentCalcEndDate;
+
+		public bool IsUsingCalcedParentStartDate
+		{
+			get { return (IsParent && UseParentCalcStartDate); }
+		}
+
+		public bool IsUsingCalcedParentEndDate
+		{
+			get { return (IsParent && UseParentCalcEndDate); }
+		}
+		
+		public override DateTime StartDate
+		{
+			get
+			{
+				if (IsUsingCalcedParentStartDate)
+					return m_ParentCalcedDates.Start;
+				
+				return base.StartDate;
+			}
+			set
+			{
+				base.StartDate = value;
+			}
+		}
+
+		public override DateTime EndDate
+		{
+			get
+			{
+				if (IsUsingCalcedParentEndDate)
+					return m_ParentCalcedDates.End;
+
+				return base.EndDate;
+			}
+			set
+			{
+				base.EndDate = value;
+			}
+		}
+
+		override public bool HasValidDates()
+		{
+			return (base.HasValidDates() || IsUsingCalcedParentStartDate || IsUsingCalcedParentEndDate);
+		}
+
 		public void UpdateOriginalDates()
 		{
 			m_OrgDates.Start = StartDate;
@@ -110,7 +190,6 @@ namespace DayViewUIExtension
 			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
 		}
 
-		//public string AllocTo { get; private set; }
 		public string Position { get; private set; }
 		public bool IsParent { get; private set; }
         public bool HasIcon { get; private set; }
@@ -187,6 +266,9 @@ namespace DayViewUIExtension
 
 		protected override void OnEndDateChanged()
 		{
+			if (IsUsingCalcedParentEndDate)
+				return;
+
 			// Prevent end date being set to exactly midnight
 			if ((EndDate != NullDate) && (EndDate == EndDate.Date))
 				EndDate = EndDate.AddSeconds(-1);
@@ -253,13 +335,17 @@ namespace DayViewUIExtension
 
 			UInt32 taskID = task.GetID();
 
+			// Always
+			Position = task.GetPositionString();
+			TaskTextColor = task.GetTextDrawingColor();
+			Locked = task.IsLocked(true);
+			IsParent = task.IsParent();
+
 			if (newTask)
 			{
 				Title = task.GetTitle();
-				//AllocTo = string.Join(", ", task.GetAllocatedTo());
 				HasIcon = task.HasIcon();
 				Id = taskID;
-				IsParent = task.IsParent();
 				DrawBorder = true;
 				HasDependencies = (task.GetDependency().Count > 0);
 				IsRecurring = task.IsRecurring();
@@ -278,6 +364,12 @@ namespace DayViewUIExtension
 				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
+				if (IsParent)
+				{
+					m_ParentCalcedDates.Start = task.GetStartDate(true);
+					m_ParentCalcedDates.End = CheckGetEndOfDay(task.GetDueDate(true));
+				}
+
 				UpdateCustomDateAttributes(task, dateAttribs);
 			}
 			else
@@ -291,9 +383,6 @@ namespace DayViewUIExtension
 					TimeEstimate = task.GetTimeEstimate(ref units, false);
 					TimeEstUnits = units;
 				}
-
-				//if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
-					//AllocTo = string.Join(", ", task.GetAllocatedTo());
 
 				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = task.HasIcon();
@@ -311,11 +400,19 @@ namespace DayViewUIExtension
                 bool hadValidDates = HasValidDates();
 
 				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
+				{
 					StartDate = task.GetStartDate(false);
+
+					if (IsParent)
+						m_ParentCalcedDates.Start = task.GetStartDate(true);
+				}
 
 				if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 				{
 					m_PrevDueDate = task.GetDueDate(false); // always
+
+					if (IsParent)
+						m_ParentCalcedDates.End = CheckGetEndOfDay(task.GetDueDate(true)); 
 
 					if (!IsDone)
 						EndDate = CheckGetEndOfDay(m_PrevDueDate);
@@ -344,11 +441,6 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
 					UpdateCustomDateAttributes(task, dateAttribs);
 			}
-
-			// Always
-			Position = task.GetPositionString();
-			TaskTextColor = task.GetTextDrawingColor();
-			Locked = task.IsLocked(true);
 
 			UpdateOriginalDates();
 

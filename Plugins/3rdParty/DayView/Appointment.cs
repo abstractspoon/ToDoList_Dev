@@ -70,7 +70,7 @@ namespace Calendar
 
 		static public DateTime NullDate { get { return DateTime.MinValue; } }
 
-		public bool HasValidDates()
+		virtual public bool HasValidDates()
 		{
 			return ((StartDate != NullDate) &&
 					(EndDate != NullDate) &&
@@ -260,7 +260,7 @@ namespace Calendar
 
 		public virtual bool IsLongAppt()
         {
-            return IsLongAppt(dates.Start, dates.End);
+            return IsLongAppt(StartDate, EndDate);
         }
 
 		public bool IntersectsWith(Appointment other, bool displayLongAppointmentsContinuous)
