@@ -230,7 +230,11 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 		double dStartHour = GetTimeOfDayInHours(date);
 		double dHoursBeforeLunch = (m_dStartOfLunchInHours - dStartHour);
 
-		if (dHoursBeforeLunch > 0)
+		if (dHoursBeforeLunch == 0.0)
+		{
+			dStartHour = m_dEndOfLunchInHours;
+		}
+		else if (dHoursBeforeLunch > 0.0)
 		{
 			if (dHours <= dHoursBeforeLunch)
 			{
@@ -269,7 +273,7 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 			}
 		}
 	}
-	else if (dHours < 0)
+	else if (dHours < 0.0)
 	{
 		if (date > GetEndOfDay(date))
 		{
@@ -289,7 +293,11 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 		// Hours after lunch
 		double dHoursAfterLunch = (dStartHour - m_dEndOfLunchInHours);
 
-		if (dHoursAfterLunch > 0)
+		if (dHoursAfterLunch == 0.0)
+		{
+			dStartHour = m_dStartOfLunchInHours;
+		}
+		else if (dHoursAfterLunch > 0.0)
 		{
 			if (fabs(dHours) <= dHoursAfterLunch)
 			{
