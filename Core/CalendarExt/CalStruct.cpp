@@ -277,7 +277,7 @@ BOOL TASKCALITEMDATES::IsStartSet() const
 	if (CDateHelper::IsDateSet(dtStart))
 	{
 		// sanity check
-		ASSERT(!CDateHelper::IsDateSet(dtStartCalc) || (IsEndSet() && (dtStart > GetAnyEnd())));
+		ASSERT(!CDateHelper::IsDateSet(dtStartCalc) || (IsEndSet() && (dtStart < GetAnyEnd())));
 		return TRUE;
 	}
 
