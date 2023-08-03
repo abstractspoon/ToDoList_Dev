@@ -232,6 +232,10 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
 	Misc::SetFlag(dwPrefs, TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 
+	const int NO_CALCDATES = 2; // from ToDoList/PreferencesTaskCalcPage.cpp
+	Misc::SetFlag(dwPrefs, TCCO_USECALCULATEDPARENTSTART, (pPrefs->GetProfileInt(_T("Preferences"), _T("CalcStartDate"), NO_CALCDATES) != NO_CALCDATES));
+	Misc::SetFlag(dwPrefs, TCCO_USECALCULATEDPARENTDUE, (pPrefs->GetProfileInt(_T("Preferences"), _T("CalcDueDate"), NO_CALCDATES) != NO_CALCDATES));
+
 	m_BigCalendar.SetOptions(dwPrefs);
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
@@ -245,16 +249,6 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 	m_BigCalendar.SetGridLineColor(crGrid);
 	m_MiniCalendar.SetBorderColor(crGrid);
-
-/*
-	// And alternate day colour which we will use for alternate weeks
-	COLORREF crAlt = CLR_NONE;
-
-	if (pPrefs->GetProfileInt(_T("Preferences"), _T("AlternateLineColor"), TRUE))
-		crAlt = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTLINECOLOR);
-
-	m_BigCalendar.SetAlternateWeekColor(crAlt);
-*/
 
 	// calendar specific preferences
 	if (!bAppOnly)
@@ -309,6 +303,8 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
 	Misc::SetFlag(dwOptions, TCCO_SHOWPARENTTASKSASFOLDER,			m_BigCalendar.HasOption(TCCO_SHOWPARENTTASKSASFOLDER));
 	Misc::SetFlag(dwOptions, TCCO_ENABLELABELTIPS,					m_BigCalendar.HasOption(TCCO_ENABLELABELTIPS));
+	Misc::SetFlag(dwOptions, TCCO_USECALCULATEDPARENTSTART,			m_BigCalendar.HasOption(TCCO_USECALCULATEDPARENTSTART));
+	Misc::SetFlag(dwOptions, TCCO_USECALCULATEDPARENTDUE,			m_BigCalendar.HasOption(TCCO_USECALCULATEDPARENTDUE));
 
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);

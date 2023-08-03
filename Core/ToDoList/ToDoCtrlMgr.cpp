@@ -1377,6 +1377,7 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 
 	case IM_NONE:
 		sTooltip = tdci.pTDC->GetFilePath();
+		sTooltip.DoNotTranslate();
 		break;
 	}
 
