@@ -156,7 +156,7 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const COleDateTime& date)
 		}
 		else // Change attributes to DONE state
 		{
-			if (!m_sDoneStatus.IsEmpty())
+			//if (!m_sDoneStatus.IsEmpty())
 				task.sStatus = m_sDoneStatus;
 
 			// Note: We leave the percentage as-is

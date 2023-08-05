@@ -236,11 +236,13 @@ void CPreferencesTaskCalcPage::OnSetStatusOnDone()
 
 BOOL CPreferencesTaskCalcPage::GetCompletionStatus(CString& sStatus) const
 {
-	if (m_bSetCompletionStatus)
-		sStatus = m_sCompletionStatus;
+	if (!m_bSetCompletionStatus)
+		return FALSE;
 
-	Misc::Trim(sStatus);
-	return !sStatus.IsEmpty();
+	sStatus = m_sCompletionStatus;
+	return TRUE;
+// 	Misc::Trim(sStatus);
+// 	return !sStatus.IsEmpty();
 }
 
 void CPreferencesTaskCalcPage::OnChangeCompletionStatus()
