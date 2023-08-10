@@ -2141,8 +2141,12 @@ TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffs
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	if (bOffset && (pTDI->nPriority != FM_NOPRIORITY))
+	if (bOffset)
 	{
+		if (pTDI->nPriority == FM_NOPRIORITY)
+			return SET_NOCHANGE;
+
+		// else
 		nPriority += pTDI->nPriority;
 		nPriority = max(0, min(10, nPriority));
 	}
@@ -2158,8 +2162,11 @@ TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	if (bOffset && (pTDI->nRisk != FM_NOPRIORITY))
+	if (bOffset)
 	{
+		if (pTDI->nRisk == FM_NORISK)
+			return SET_NOCHANGE;
+
 		nRisk += pTDI->nRisk;
 		nRisk = max(0, min(10, nRisk));
 	}
