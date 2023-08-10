@@ -982,7 +982,13 @@ BOOL CTDCTaskMatcher::ValueMatches(const CString& sText, const SEARCHPARAM& rule
 			CStringArray aWords;
 			
 			if (!Misc::ParseSearchString(rule.ValueAsString(), aWords))
-				return FALSE;
+			{
+				// Handle searching for whitespace
+				if (rule.TypeIs(FT_STRING) && !rule.ValueAsString().IsEmpty())
+					aWords.Add(rule.ValueAsString());
+				else
+					return FALSE;
+			}
 			
 			// cycle all the words
 			for (int nWord = 0; nWord < aWords.GetSize() && !bMatch; nWord++)

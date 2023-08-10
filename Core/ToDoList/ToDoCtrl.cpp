@@ -10372,6 +10372,9 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect,
 
 	case TDC_SELECTNEXT:
 		htiStart = TCH().GetNextItem(GetSelectedItem());
+
+		if (htiStart == NULL)
+			htiStart = TCH().GetFirstItem();
 		break;
 
 	case TDC_SELECTNEXTINCLCURRENT:
@@ -10380,6 +10383,10 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect,
 
 	case TDC_SELECTPREV:
 		htiStart = TCH().GetPrevItem(GetSelectedItem());
+
+		if (htiStart == NULL)
+			htiStart = TCH().GetLastItem();
+
 		bForwards = FALSE;
 		break;
 
@@ -10988,8 +10995,6 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 						m_findReplace.WantCaseSensitive(), 
 						m_findReplace.WantWholeWord()))
 	{
-		Misc::Trim(sSelAttrib);
-
 		switch (nAttrib)
 		{
 		case TDCA_TASKNAME:
