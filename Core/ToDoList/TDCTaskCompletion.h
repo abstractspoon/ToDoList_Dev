@@ -31,6 +31,9 @@ struct TDCTASKCOMPLETION
 	BOOL PercentCausesStateChange(int nNewPercent) const;
 	BOOL StatusCausesStateChange(const CString& sNewStatus, const CString& sDefaultStatus, const CString& sDoneStatus) const;
 
+	BOOL StatusMatches(const CString& sOtherStatus) const;
+	static BOOL StatusMatches(const CString& sStatus, const CString& sOtherStatus);
+
 	DWORD dwID;
 	COleDateTime dtDone;
 	CString sStatus;

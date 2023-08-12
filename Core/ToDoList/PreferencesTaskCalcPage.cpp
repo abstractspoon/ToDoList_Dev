@@ -72,7 +72,6 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskCalcPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SETSTATUSONDONE, OnSetStatusOnDone)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_AVERAGEPERCENTSUBCOMPLETION, OnAveragepercentChange)
-	ON_EN_CHANGE(IDC_DONESTATUS, OnChangeCompletionStatus)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,7 +94,7 @@ void CPreferencesTaskCalcPage::OnFirstShow()
 	GetDlgItem(IDC_INCLUDEDONEINPRIORITYCALC)->EnableWindow(m_bUseHighestPriority);
 	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
 
-	OnChangeCompletionStatus();
+	m_mgrPrompts.SetEditPrompt(IDC_DONESTATUS, *this, CEnString(IDS_TDC_NONE));
 }
 
 void CPreferencesTaskCalcPage::OnAveragepercentChange() 
@@ -229,32 +228,17 @@ COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const
 void CPreferencesTaskCalcPage::OnSetStatusOnDone() 
 {
 	UpdateData();
-	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
 
-	OnChangeCompletionStatus();
+	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
+	GetDlgItem(IDC_SYNCCOMPLETIONTOSTATUS)->EnableWindow(m_bSetCompletionStatus);
 }
 
 BOOL CPreferencesTaskCalcPage::GetCompletionStatus(CString& sStatus) const
 {
 	if (!m_bSetCompletionStatus)
-		return FALSE;
+		sStatus.Empty();
+	else
+		sStatus = m_sCompletionStatus;
 
-	sStatus = m_sCompletionStatus;
-	return TRUE;
-// 	Misc::Trim(sStatus);
-// 	return !sStatus.IsEmpty();
-}
-
-void CPreferencesTaskCalcPage::OnChangeCompletionStatus()
-{
-	UpdateData();
-
-	CString sStatus;
-	GetDlgItem(IDC_SYNCCOMPLETIONTOSTATUS)->EnableWindow(GetCompletionStatus(sStatus));
-}
-
-BOOL CPreferencesTaskCalcPage::GetSyncCompletionToStatus() const
-{
-	CString sStatus;
-	return (GetCompletionStatus(sStatus) && m_bSyncCompletionToStatus);
+	return m_bSetCompletionStatus;
 }
