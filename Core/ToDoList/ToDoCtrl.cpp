@@ -5814,7 +5814,7 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 		m_sCompletionStatus = sStatus; 
 		m_taskTree.SetCompletionStatus(sStatus);
 
-		if (m_sCompletionStatus)
+		if (!m_sCompletionStatus.IsEmpty())
 		{
 			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
 			UpdateAutoListData(TDCA_STATUS);

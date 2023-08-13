@@ -57,16 +57,26 @@ BOOL TDCTASKCOMPLETION::StatusCausesStateChange(const CString& sNewStatus, const
 {
 	if (IsDone())
 	{
-		if (!sDoneStatus.IsEmpty() && (sNewStatus != sDoneStatus))
-			return (sStatus == sDoneStatus);
+		if (!StatusMatches(sNewStatus, sDoneStatus))
+			return StatusMatches(sDoneStatus);
 	}
 	else
 	{
-		if (!sDoneStatus.IsEmpty() && (sNewStatus == sDoneStatus))
-			return (sStatus != sDoneStatus);
+		if (StatusMatches(sNewStatus, sDoneStatus))
+			return !StatusMatches(sDoneStatus);
 	}
 
 	return FALSE;
+}
+
+BOOL TDCTASKCOMPLETION::StatusMatches(const CString& sOtherStatus) const
+{
+	return StatusMatches(sStatus, sOtherStatus);
+}
+
+BOOL TDCTASKCOMPLETION::StatusMatches(const CString& sStatus, const CString& sOtherStatus)
+{
+	return (sStatus.CompareNoCase(sOtherStatus) == 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -151,13 +161,12 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const COleDateTime& date)
 			if (task.nPercent == 100)
 				task.nPercent = 95;
 
-			if (!m_sDoneStatus.IsEmpty() && (task.sStatus == m_sDoneStatus))
+			if (task.StatusMatches(m_sDoneStatus))
 				task.sStatus = m_data.GetDefaultStatus();
 		}
 		else // Change attributes to DONE state
 		{
-			if (!m_sDoneStatus.IsEmpty())
-				task.sStatus = m_sDoneStatus;
+			task.sStatus = m_sDoneStatus;
 
 			// Note: We leave the percentage as-is
 		}
@@ -172,8 +181,11 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const COleDateTime& date)
 
 BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const CString& sStatus)
 {
-	if (!m_data.HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+	if (!m_data.HasStyle(TDCS_SETCOMPLETIONSTATUS) || 
+		!m_data.HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+	{
 		return FALSE;
+	}
 
 	TDCTASKCOMPLETION task(m_data, dwTaskID);
 
@@ -217,16 +229,14 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, int nPercent)
 	if (task.IsDone())
 	{
 		// Change attributes to NON-DONE state
-		if (!m_sDoneStatus.IsEmpty() && (task.sStatus == m_sDoneStatus))
+		if (task.StatusMatches(m_sDoneStatus))
 			task.sStatus = m_data.GetDefaultStatus();
 
 		task.ClearDate();
 	}
 	else // Change attributes to DONE state
 	{
-		if (!m_sDoneStatus.IsEmpty())
-			task.sStatus = m_sDoneStatus;
-
+		task.sStatus = m_sDoneStatus;
 		task.dtDone = COleDateTime::GetCurrentTime();
 	}
 

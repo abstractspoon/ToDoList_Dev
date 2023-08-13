@@ -5169,7 +5169,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 			mapAttribIDs.Add(TDCA_PRIORITY);
 		}
 
-		if (!m_sCompletionStatus.IsEmpty())
+		if (HasStyle(TDCS_SETCOMPLETIONSTATUS))
 		{
 			mapAttribIDs.Add(TDCA_STATUS);
 		}
@@ -5201,7 +5201,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 		break;
 
 	case TDCA_STATUS: // ---------------------------------------------------------
-		if (!m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+		if (HasStyle(TDCS_SETCOMPLETIONSTATUS) && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
 		{
 			mapAttribIDs.Add(TDCA_DONEDATE);
 		}
