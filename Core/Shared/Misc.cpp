@@ -640,6 +640,9 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 	if (bWholeWord)
 		Trim(sWord); // because whitespace is a delimiter
 
+	if (sWord.IsEmpty() || sText.IsEmpty())
+		return -1;
+
 	if (!bCaseSensitive)
 	{
 		MakeUpper(sText);

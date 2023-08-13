@@ -794,7 +794,7 @@ protected:
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
 	void EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) const;
 	void IncrementTrackedTime(BOOL bEnding);
-	BOOL FindReplaceSelectedTaskAttribute();
+	BOOL FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks);
 
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
