@@ -9539,6 +9539,23 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
 }
 
+BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs)
+{
+	if (!CanEditSelectedTask(mapAttribs))
+		return FALSE;
+
+	POSITION pos = TSH().GetFirstItemPos();
+	BOOL bSomeMods = FALSE;
+
+// 	while (pos)
+// 	{
+// 		DWORD dwTaskID = TSH().GetNextItemData(pos);
+// 		bSomeMods |= (m_data.CopyTaskAttributeValues(tdi, dwTaskID, mapAttribs, FALSE) == SET_CHANGE);
+// 	}
+
+	return bSomeMods;
+}
+
 BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll)
 {
 	if (!CanEditSelectedTask(TDCA_PASTE))
@@ -12190,6 +12207,22 @@ CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMax
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
+BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID) const
+{
+	if (mapAttribs.IsEmpty())
+		return FALSE;
+
+	POSITION pos = mapAttribs.GetStartPosition();
+
+	while (pos)
+	{
+		if (!CanEditSelectedTask(mapAttribs.GetNext(pos)), dwTaskID)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
 { 
 	if (IsReadOnly())
@@ -12223,6 +12256,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		}
 		return TRUE;
 
+	case TDCA_ALL:		
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
 	case TDCA_ANYTEXTATTRIBUTE:		
@@ -12318,9 +12352,9 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
-	if (!CanCopyAttributeData(nFromAttrib, nToAttrib))
+	if (!CanCopyAttributeValue(nFromAttrib, nToAttrib))
 		return FALSE;
 
 	Flush();
@@ -12344,7 +12378,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 		{
 			//int breakpoint = 0;
 		}
-		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
+		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
 		{
 			return FALSE;
 		}
@@ -12365,12 +12399,12 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pToDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
 
-	if (!CanCopyAttributeData(nFromAttrib, *pToDef))
+	if (!CanCopyAttributeValue(nFromAttrib, *pToDef))
 		return FALSE;
 
 	Flush();
@@ -12384,7 +12418,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, sToCustomAttribID), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, nFromAttrib, sToCustomAttribID), aModTaskIDs))
 			return FALSE;
 	}
 
@@ -12399,12 +12433,12 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pFromDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
 
-	if (!CanCopyAttributeData(*pFromDef, nToAttrib))
+	if (!CanCopyAttributeValue(*pFromDef, nToAttrib))
 		return FALSE;
 
 	Flush();
@@ -12427,7 +12461,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		{
 			// int breakpoint = 0;
 		}
-		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, nToAttrib), aModTaskIDs))
+		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, sFromCustomAttribID, nToAttrib), aModTaskIDs))
 		{
 			return FALSE;
 		}
@@ -12448,7 +12482,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
 {
 	// Doesn't make sense to copy to self
 	if (sToCustomAttribID == sFromCustomAttribID)
@@ -12474,7 +12508,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, sToCustomAttribID), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, sFromCustomAttribID, sToCustomAttribID), aModTaskIDs))
 			return FALSE;
 	}
 
@@ -12489,7 +12523,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
 	// Doesn't make sense to copy to self
 	if (nFromAttrib == nToAttrib)
@@ -12596,7 +12630,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom)
+BOOL CToDoCtrl::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom)
 {
 	switch (nFromAttrib)
 	{
@@ -12647,7 +12681,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CanCopyAttributeValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib)
 {
 	switch (attribDefFrom.GetDataType())
 	{

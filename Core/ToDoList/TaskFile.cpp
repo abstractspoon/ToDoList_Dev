@@ -1883,15 +1883,20 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 
 BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 {
-	return GetTaskAttributes(hTask, tdi, TRUE); // overwrite
+	return GetTaskAttributes(hTask, tdi, TDCA_ALL, TRUE); // overwrite
 }
 
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 {
-	return GetTaskAttributes(hTask, tdi, FALSE); // merge
+	return GetTaskAttributes(hTask, tdi, TDCA_ALL, FALSE); // merge
 }
 
-BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const
+BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttributeMap& mapAttribs) const
+{
+	return GetTaskAttributes(hTask, tdi, mapAttribs, FALSE); // merge
+}
+
+BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttributeMap& mapAttribs, BOOL bOverwrite) const
 {
 	ASSERT(m_mapReadableAttrib.GetCount() == 0);
 
@@ -1903,96 +1908,97 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 	// Load attributes _only_ if this is a 'real' task
 	if (tdi.dwTaskRefID == 0)
 	{
-#define WANTATTRIB(att) (bOverwrite || TaskHasAttribute(hTask, att))
-#define GETATTRIB(att, expr) if WANTATTRIB(att) expr
+		BOOL bWantAll = mapAttribs.Has(TDCA_ALL);
+
+#define WANTATTRIB(a, s) ((bWantAll || mapAttribs.Has(a)) && (bOverwrite || TaskHasAttribute(hTask, s)))
+#define GETATTRIB(a, s, expr) if WANTATTRIB(a, s) expr
 
 		// Call GetTaskString wherever possible to avoid string copying
-		GETATTRIB(TDL_TASKTITLE,				tdi.sTitle = GetTaskString(hTask, TDL_TASKTITLE));
-		GETATTRIB(TDL_TASKALLOCBY,				tdi.sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY));
-		GETATTRIB(TDL_TASKSTATUS,				tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS));
-		GETATTRIB(TDL_TASKCREATEDBY,			tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY));
-		GETATTRIB(TDL_TASKEXTERNALID,			tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID));
-		GETATTRIB(TDL_TASKVERSION,				tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
-		GETATTRIB(TDL_TASKICON,					tdi.sIcon = GetTaskString(hTask, TDL_TASKICON));
-		GETATTRIB(TDL_TASKLASTMODBY,			tdi.sLastModifiedBy = GetTaskString(hTask, TDL_TASKLASTMODBY));
+		GETATTRIB(TDCA_TASKNAME, TDL_TASKTITLE,				tdi.sTitle = GetTaskString(hTask, TDL_TASKTITLE));
+		GETATTRIB(TDCA_ALLOCBY, TDL_TASKALLOCBY,			tdi.sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY));
+		GETATTRIB(TDCA_STATUS, TDL_TASKSTATUS,				tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS));
+		GETATTRIB(TDCA_CREATEDBY, TDL_TASKCREATEDBY,		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY));
+		GETATTRIB(TDCA_EXTERNALID, TDL_TASKEXTERNALID,		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID));
+		GETATTRIB(TDCA_VERSION, TDL_TASKVERSION,			tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
+		GETATTRIB(TDCA_ICON, TDL_TASKICON,					tdi.sIcon = GetTaskString(hTask, TDL_TASKICON));
+		GETATTRIB(TDCA_LASTMODBY, TDL_TASKLASTMODBY,		tdi.sLastModifiedBy = GetTaskString(hTask, TDL_TASKLASTMODBY));
 
-		// Historical bug
-		if ((tdi.sIcon.GetLength() == 2) && (tdi.sIcon == _T("-1")))
-			tdi.sIcon.Empty();
-		
-		GETATTRIB(TDL_TASKFLAG,					tdi.bFlagged = IsTaskFlagged(hTask, false));
-		GETATTRIB(TDL_TASKLOCK,					tdi.bLocked = IsTaskLocked(hTask, false));
+		GETATTRIB(TDCA_FLAG, TDL_TASKFLAG,					tdi.bFlagged = IsTaskFlagged(hTask, false));
+		GETATTRIB(TDCA_LOCK, TDL_TASKLOCK,					tdi.bLocked = IsTaskLocked(hTask, false));
 
-		GETATTRIB(TDL_TASKCOLOR,				tdi.color = (COLORREF)GetTaskColor(hTask));
-		GETATTRIB(TDL_TASKPERCENTDONE,			tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false));
-		GETATTRIB(TDL_TASKTIMEESTIMATE,			tdi.timeEstimate.dAmount = GetTaskTimeEstimate(hTask, tdi.timeEstimate.nUnits, false));
-		GETATTRIB(TDL_TASKTIMESPENT,			tdi.timeSpent.dAmount = GetTaskTimeSpent(hTask, tdi.timeSpent.nUnits, false));
-		GETATTRIB(TDL_TASKPRIORITY,				tdi.nPriority = (int)GetTaskPriority(hTask, false));
-		GETATTRIB(TDL_TASKRISK,					tdi.nRisk = GetTaskRisk(hTask, false));
-		GETATTRIB(TDL_TASKCOST,					tdi.cost.Parse(GetTaskString(hTask, TDL_TASKCOST)));
+		GETATTRIB(TDCA_COLOR, TDL_TASKCOLOR,				tdi.color = (COLORREF)GetTaskColor(hTask));
+		GETATTRIB(TDCA_PERCENT, TDL_TASKPERCENTDONE,		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false));
+		GETATTRIB(TDCA_TIMEESTIMATE, TDL_TASKTIMEESTIMATE,	tdi.timeEstimate.dAmount = GetTaskTimeEstimate(hTask, tdi.timeEstimate.nUnits, false));
+		GETATTRIB(TDCA_TIMESPENT, TDL_TASKTIMESPENT,		tdi.timeSpent.dAmount = GetTaskTimeSpent(hTask, tdi.timeSpent.nUnits, false));
+		GETATTRIB(TDCA_PRIORITY, TDL_TASKPRIORITY,			tdi.nPriority = (int)GetTaskPriority(hTask, false));
+		GETATTRIB(TDCA_RISK, TDL_TASKRISK,					tdi.nRisk = GetTaskRisk(hTask, false));
+		GETATTRIB(TDCA_COST, TDL_TASKCOST,					tdi.cost.Parse(GetTaskString(hTask, TDL_TASKCOST)));
 
-		GETATTRIB(TDL_TASKDUEDATE,				tdi.dateDue = GetTaskDueDateOle(hTask));
-		GETATTRIB(TDL_TASKSTARTDATE,			tdi.dateStart = GetTaskStartDateOle(hTask));
-		GETATTRIB(TDL_TASKDONEDATE,				tdi.dateDone = GetTaskDoneDateOle(hTask));
-		GETATTRIB(TDL_TASKCREATIONDATE,			tdi.dateCreated = GetTaskCreationDateOle(hTask));
-		GETATTRIB(TDL_TASKLASTMOD,				tdi.dateLastMod = GetTaskLastModifiedOle(hTask));
+		GETATTRIB(TDCA_DUEDATE, TDL_TASKDUEDATE,			tdi.dateDue = GetTaskDueDateOle(hTask));
+		GETATTRIB(TDCA_STARTDATE, TDL_TASKSTARTDATE,		tdi.dateStart = GetTaskStartDateOle(hTask));
+		GETATTRIB(TDCA_DONEDATE, TDL_TASKDONEDATE,			tdi.dateDone = GetTaskDoneDateOle(hTask));
+		GETATTRIB(TDCA_CREATIONDATE, TDL_TASKCREATIONDATE,	tdi.dateCreated = GetTaskCreationDateOle(hTask));
+		GETATTRIB(TDCA_LASTMODDATE, TDL_TASKLASTMOD,		tdi.dateLastMod = GetTaskLastModifiedOle(hTask));
 
-		GETATTRIB(TDL_TASKCATEGORY,				GetTaskCategories(hTask, tdi.aCategories));
-		GETATTRIB(TDL_TASKTAG,					GetTaskTags(hTask, tdi.aTags));
-		GETATTRIB(TDL_TASKALLOCTO,				GetTaskAllocatedTo(hTask, tdi.aAllocTo));
-		GETATTRIB(TDL_TASKRECURRENCE,			GetTaskRecurrence(hTask, tdi.trRecurrence));
-		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
-		GETATTRIB(TDL_TASKFILELINKPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
+		GETATTRIB(TDCA_CATEGORY, TDL_TASKCATEGORY,			GetTaskCategories(hTask, tdi.aCategories));
+		GETATTRIB(TDCA_TAGS, TDL_TASKTAG,					GetTaskTags(hTask, tdi.aTags));
+		GETATTRIB(TDCA_ALLOCTO, TDL_TASKALLOCTO,			GetTaskAllocatedTo(hTask, tdi.aAllocTo));
+		GETATTRIB(TDCA_RECURRENCE, TDL_TASKRECURRENCE,		GetTaskRecurrence(hTask, tdi.trRecurrence));
+		GETATTRIB(TDCA_DEPENDENCY, TDL_TASKDEPENDENCY,		GetTaskDependencies(hTask, tdi.aDependencies));
+		GETATTRIB(TDCA_FILELINK, TDL_TASKFILELINKPATH,		GetTaskFileLinks(hTask, tdi.aFileLinks));
 
-		// Comments are special
-		if (bOverwrite)
+		if (bWantAll || mapAttribs.Has(TDCA_COMMENTS))
 		{
-			tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
-			GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments);
-		}
-		else // merge
-		{
-			// To replace what we already have, the 'other' task must have
-			// the full set of text comments, comments type and custom comments 
-			// OR
-			// it must have text comments and the comments type must of 'text' type
-			// OR
-			// 'we' have no comments and the 'other' task has a different comments type
-			CString sOtherTextComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
-
-			CONTENTFORMAT cfOtherComments;
-			CBinaryData otherCustomComments;
-			GetTaskCustomComments(hTask, otherCustomComments, cfOtherComments);
-
-			BOOL bOtherIsTextFormat = cfOtherComments.FormatIsText();
-
-			if (!sOtherTextComments.IsEmpty())
+			// Comments are special
+			if (bOverwrite)
 			{
-				if (!otherCustomComments.IsEmpty() && !bOtherIsTextFormat)
-				{
-					tdi.sComments = sOtherTextComments;
-					tdi.cfComments = cfOtherComments;
-					tdi.customComments = otherCustomComments;
-				}
-				else if (bOtherIsTextFormat)
-				{
-					tdi.sComments = sOtherTextComments;
-					tdi.cfComments = cfOtherComments;
-					tdi.customComments.Empty();
-				}
+				tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+				GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments);
 			}
-			else if (tdi.sComments.IsEmpty() &&
-					 tdi.customComments.IsEmpty() &&
-					 !cfOtherComments.IsEmpty() &&
-					 !bOtherIsTextFormat &&
-					 (cfOtherComments != tdi.cfComments))
+			else // merge
 			{
-				tdi.cfComments = cfOtherComments;
+				// To replace what we already have, the 'other' task must have
+				// the full set of text comments, comments type and custom comments 
+				// OR
+				// it must have text comments and the comments type must of 'text' type
+				// OR
+				// 'we' have no comments and the 'other' task has a different comments type
+				CString sOtherTextComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+
+				CONTENTFORMAT cfOtherComments;
+				CBinaryData otherCustomComments;
+				GetTaskCustomComments(hTask, otherCustomComments, cfOtherComments);
+
+				BOOL bOtherIsTextFormat = cfOtherComments.FormatIsText();
+
+				if (!sOtherTextComments.IsEmpty())
+				{
+					if (!otherCustomComments.IsEmpty() && !bOtherIsTextFormat)
+					{
+						tdi.sComments = sOtherTextComments;
+						tdi.cfComments = cfOtherComments;
+						tdi.customComments = otherCustomComments;
+					}
+					else if (bOtherIsTextFormat)
+					{
+						tdi.sComments = sOtherTextComments;
+						tdi.cfComments = cfOtherComments;
+						tdi.customComments.Empty();
+					}
+				}
+				else if (tdi.sComments.IsEmpty() &&
+						 tdi.customComments.IsEmpty() &&
+						 !cfOtherComments.IsEmpty() &&
+						 !bOtherIsTextFormat &&
+						 (cfOtherComments != tdi.cfComments))
+				{
+					tdi.cfComments = cfOtherComments;
+				}
 			}
 		}
 
 		// custom data
-		if (WANTATTRIB(TDL_TASKCUSTOMATTRIBDATA))
+		if (WANTATTRIB(TDCA_CUSTOMATTRIB, TDL_TASKCUSTOMATTRIBDATA))
 		{
 			CTDCCustomAttributeDataMap mapData;
 
@@ -2001,7 +2007,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		}
 
 		// meta data
-		if (WANTATTRIB(TDL_TASKMETADATA))
+		if (WANTATTRIB(TDCA_METADATA, TDL_TASKMETADATA))
 		{
 			CTDCMetaDataMap mapData;
 

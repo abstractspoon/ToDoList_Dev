@@ -17,8 +17,10 @@ public:
 	static void Reset();
 	static BOOL IsEmpty();
 	static BOOL SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskTitles);
-	static BOOL GetTasks(CTaskFile& tasks, const CString& sID);
 	static BOOL ClipIDMatches(const CString& sID);
+
+	static int GetTasks(CTaskFile& tasks, const CString& sID);
+	static int GetTaskCount(const CString& sID = _T(""));
 
 protected:
 	static CString GetClipID();

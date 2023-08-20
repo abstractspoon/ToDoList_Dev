@@ -3183,6 +3183,8 @@ BEGIN
         MENUITEM "&Paste &Below Selected Task", ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
+        MENUITEM "Paste Task Attrib&utes",      ID_EDIT_PASTEATTRIBUTES
+        MENUITEM SEPARATOR
         MENUITEM "&Delete Selected Task",       ID_DELETETASK
         MENUITEM "Delete All Tasks",            ID_DELETEALLTASKS
         MENUITEM SEPARATOR
@@ -3936,6 +3938,8 @@ BEGIN
         MENUITEM "Paste as Subtask",            ID_EDIT_PASTESUB
         MENUITEM "Paste &Below",                ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
+        MENUITEM SEPARATOR
+        MENUITEM "Paste Task Attrib&utes",      ID_EDIT_PASTEATTRIBUTES
         MENUITEM SEPARATOR
         MENUITEM "&Delete Task",                ID_DELETETASK
         MENUITEM SEPARATOR

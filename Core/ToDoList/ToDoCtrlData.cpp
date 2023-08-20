@@ -203,9 +203,7 @@ TODOITEM* CToDoCtrlData::NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID) c
 {
 	TODOITEM* pTDI = new TODOITEM(tdiRef);
 
-	// copy over parent attribs
-	if (dwParentTaskID && !m_mapParentAttribs.IsEmpty())
-		CopyTaskAttributes(pTDI, dwParentTaskID, m_mapParentAttribs);
+	CopyInheritedParentTaskAttributes(pTDI, dwParentTaskID);
 	
 	return pTDI;
 }
@@ -1335,95 +1333,98 @@ BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent,
 	return bRemoved;
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, const CTDCAttributeMap& mapAttribs) const
+TDC_SET CToDoCtrlData::CopyInheritedParentTaskAttributes(TODOITEM* pTDIChild, DWORD dwParentID) const
 {
-	if (!pToTDI || pToTDI->bLocked)
+	if (!pTDIChild || pTDIChild->bLocked)
 		return SET_FAILED;
 	
-	const TODOITEM* pFromTDI = NULL;
-	GET_TDI(dwFromTaskID, pFromTDI, SET_FAILED);
+	if (!dwParentID || m_mapParentAttribs.IsEmpty())
+		return SET_NOCHANGE;
+
+	const TODOITEM* pTDIParent = NULL;
+	GET_TDI(dwParentID, pTDIParent, SET_FAILED);
 	
 	TDC_SET nRes = SET_NOCHANGE;
 	
 	// helper macros
-#define COPYATTRIB(a) if (pToTDI->a != pFromTDI->a) { pToTDI->a = pFromTDI->a; nRes = SET_CHANGE; }
-#define COPYATTRIBARR(a) if (!Misc::MatchAll(pToTDI->a, pFromTDI->a)) { pToTDI->a.Copy(pFromTDI->a); nRes = SET_CHANGE; }
+#define COPYATTRIB(a) if (pTDIChild->a != pTDIParent->a) { pTDIChild->a = pTDIParent->a; nRes = SET_CHANGE; }
+#define COPYATTRIBARR(a) if (!Misc::MatchAll(pTDIChild->a, pTDIParent->a)) { pTDIChild->a.Copy(pTDIParent->a); nRes = SET_CHANGE; }
 	
 	// note: we don't use the public SetTask* methods purely so we can
 	// capture all the edits as a single atomic change that can be undone
-	for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
+	POSITION pos = m_mapParentAttribs.GetStartPosition();
+
+	while (pos)
 	{
-		if (mapAttribs.Has((TDC_ATTRIBUTE)nAttrib))
+		switch (m_mapParentAttribs.GetNext(pos))
 		{
-			switch (nAttrib)
+		case TDCA_DUEDATE:
+		case TDCA_DUETIME:		COPYATTRIB(dateDue); break;
+		case TDCA_STARTDATE:
+		case TDCA_STARTTIME:	COPYATTRIB(dateStart); break;
+
+		case TDCA_TASKNAME:		COPYATTRIB(sTitle); break;
+		case TDCA_DONEDATE:		COPYATTRIB(dateDone); break;
+		case TDCA_PRIORITY:		COPYATTRIB(nPriority); break;
+		case TDCA_RISK:			COPYATTRIB(nRisk); break;
+		case TDCA_COLOR:		COPYATTRIB(color); break;
+		case TDCA_ALLOCBY:		COPYATTRIB(sAllocBy); break;
+		case TDCA_STATUS:		COPYATTRIB(sStatus); break;
+		case TDCA_PERCENT:		COPYATTRIB(nPercentDone); break;
+		case TDCA_VERSION:		COPYATTRIB(sVersion); break;
+		case TDCA_EXTERNALID:	COPYATTRIB(sExternalID); break;
+		case TDCA_FLAG:			COPYATTRIB(bFlagged); break;
+		case TDCA_LOCK:			COPYATTRIB(bLocked); break;
+
+		case TDCA_TIMEESTIMATE:	COPYATTRIB(timeEstimate.dAmount);
+								COPYATTRIB(timeEstimate.nUnits); break;
+		case TDCA_TIMESPENT:	COPYATTRIB(timeSpent.dAmount);
+								COPYATTRIB(timeSpent.nUnits); break;
+		case TDCA_COST:			COPYATTRIB(cost.dAmount);
+								COPYATTRIB(cost.bIsRate); break;
+
+		case TDCA_COMMENTS:		COPYATTRIB(sComments);
+								COPYATTRIB(customComments);
+								COPYATTRIB(cfComments); break;
+
+		case TDCA_FILELINK:		COPYATTRIBARR(aFileLinks); break;
+		case TDCA_ALLOCTO:		COPYATTRIBARR(aAllocTo); break;
+		case TDCA_CATEGORY:		COPYATTRIBARR(aCategories); break;
+		case TDCA_TAGS:			COPYATTRIBARR(aTags); break;
+
+		case TDCA_DEPENDENCY:
+			if (!pTDIChild->aDependencies.MatchAll(pTDIParent->aDependencies))
 			{
-			case TDCA_DUEDATE:
-			case TDCA_DUETIME:		COPYATTRIB(dateDue); break;
-			case TDCA_STARTDATE:
-			case TDCA_STARTTIME:	COPYATTRIB(dateStart); break;
-
-			case TDCA_TASKNAME:		COPYATTRIB(sTitle); break;
-			case TDCA_DONEDATE:		COPYATTRIB(dateDone); break;
-			case TDCA_PRIORITY:		COPYATTRIB(nPriority); break;
-			case TDCA_RISK:			COPYATTRIB(nRisk); break;
-			case TDCA_COLOR:		COPYATTRIB(color); break;
-			case TDCA_ALLOCBY:		COPYATTRIB(sAllocBy); break;
-			case TDCA_STATUS:		COPYATTRIB(sStatus); break;
-			case TDCA_PERCENT:		COPYATTRIB(nPercentDone); break;
-			case TDCA_VERSION:		COPYATTRIB(sVersion); break;
-			case TDCA_EXTERNALID:	COPYATTRIB(sExternalID); break;
-			case TDCA_FLAG:			COPYATTRIB(bFlagged); break;
-			case TDCA_LOCK:			COPYATTRIB(bLocked); break;
-			
-			case TDCA_TIMEESTIMATE:	COPYATTRIB(timeEstimate.dAmount); 
-									COPYATTRIB(timeEstimate.nUnits); break;
-			case TDCA_TIMESPENT:	COPYATTRIB(timeSpent.dAmount);	
-									COPYATTRIB(timeSpent.nUnits); break;
-			case TDCA_COST:			COPYATTRIB(cost.dAmount);	
-									COPYATTRIB(cost.bIsRate); break;
-			
-			case TDCA_COMMENTS:		COPYATTRIB(sComments); 
-									COPYATTRIB(customComments); 
-									COPYATTRIB(cfComments); break;
-			
-			case TDCA_FILELINK:		COPYATTRIBARR(aFileLinks); break;
-			case TDCA_ALLOCTO:		COPYATTRIBARR(aAllocTo); break;
-			case TDCA_CATEGORY:		COPYATTRIBARR(aCategories); break;
-			case TDCA_TAGS:			COPYATTRIBARR(aTags); break;
-
-			case TDCA_DEPENDENCY:
-				if (!pToTDI->aDependencies.MatchAll(pFromTDI->aDependencies)) 
-				{ 
-					pToTDI->aDependencies.Copy(pFromTDI->aDependencies); 
-					nRes = SET_CHANGE; 
-				}
-				break;
-
-			default:
-				ASSERT(0);
+				pTDIChild->aDependencies.Copy(pTDIParent->aDependencies);
+				nRes = SET_CHANGE;
 			}
-		}
-	}
+			break;
 
-	if (mapAttribs.Has(TDCA_CUSTOMATTRIB))
-	{
-		// Copy those custom attributes that have the 'Inherit' feature enabled
-		for (int nDef = 0; nDef < m_aCustomAttribDefs.GetSize(); nDef++)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nDef];
-
-			if (attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES))
+		case TDCA_CUSTOMATTRIB:
 			{
-				TDCCADATA dataFrom, dataTo;
-				pFromTDI->GetCustomAttributeValue(attribDef.sUniqueID, dataFrom);
-				pToTDI->GetCustomAttributeValue(attribDef.sUniqueID, dataTo);
-
-				if (dataFrom != dataTo)
+				// Copy those custom attributes that have the 'Inherit' feature enabled
+				for (int nDef = 0; nDef < m_aCustomAttribDefs.GetSize(); nDef++)
 				{
-					pToTDI->SetCustomAttributeValue(attribDef.sUniqueID, dataFrom);
-					nRes = SET_CHANGE;
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nDef];
+
+					if (attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES))
+					{
+						TDCCADATA dataFrom, dataTo;
+						pTDIParent->GetCustomAttributeValue(attribDef.sUniqueID, dataFrom);
+						pTDIChild->GetCustomAttributeValue(attribDef.sUniqueID, dataTo);
+
+						if (dataFrom != dataTo)
+						{
+							pTDIChild->SetCustomAttributeValue(attribDef.sUniqueID, dataFrom);
+							nRes = SET_CHANGE;
+						}
+					}
 				}
 			}
+			break;
+
+		default:
+			ASSERT(0);
 		}
 	}
 		
@@ -1636,7 +1637,7 @@ TDC_SET CToDoCtrlData::ClearTaskCustomAttribute(DWORD dwTaskID, const CString& s
 	return nRes;
 }
 
-BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib)
 {
 	// special case: 
 	if (nAttrib == TDCA_ALL)
@@ -1648,27 +1649,27 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRI
 			// FALSE means do not apply if parent is blank
 			TDC_ATTRIBUTE nAttrib = m_mapParentAttribs.GetNext(pos);
 			
-			if (!ApplyLastChangeToSubtasks(dwTaskID, nAttrib, FALSE))
+			if (!ApplyLastChangeToSubtasks(dwParentID, nAttrib, FALSE))
 				return FALSE;
 		}
 	}
 	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib) &&
 			WantUpdateInheritedAttibute(TDCA_CUSTOMATTRIB))
 	{
-		return ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
+		return ApplyLastChangeToSubtasks(dwParentID, nAttrib);
 	}
 	else if (WantUpdateInheritedAttibute(nAttrib))
 	{
-		return ApplyLastChangeToSubtasks(dwTaskID, nAttrib);
+		return ApplyLastChangeToSubtasks(dwParentID, nAttrib);
 	}
 
 	return TRUE; // not an error
 }
 
-BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTRIBUTE nAttrib)
 {
 	// Exclude references and undo/redo operations
-	if (m_bUndoRedoing || IsTaskReference(dwTaskID))
+	if (m_bUndoRedoing || IsTaskReference(dwChildID))
 		return TRUE; // not an error
 
 	// special case: 
@@ -1686,11 +1687,11 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 				{
 					nAttrib = m_aCustomAttribDefs[nCust].GetAttributeID();
 
-					if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib)) // RECURSIVE CALL
+					if (!ApplyLastInheritedChangeFromParent(dwChildID, nAttrib)) // RECURSIVE CALL
 						return FALSE;
 				}
 			}
-			else if (!ApplyLastInheritedChangeFromParent(dwTaskID, nAttrib)) // RECURSIVE CALL
+			else if (!ApplyLastInheritedChangeFromParent(dwChildID, nAttrib)) // RECURSIVE CALL
 			{
 				return FALSE;
 			}
@@ -1698,7 +1699,7 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 	}
 	else if (WantUpdateInheritedAttibute(nAttrib))
 	{
-		const TODOSTRUCTURE* pTDS = LocateTask(dwTaskID);
+		const TODOSTRUCTURE* pTDS = LocateTask(dwChildID);
 		ASSERT(pTDS);
 
 		if (pTDS && !pTDS->IsRoot() && !pTDS->ParentIsRoot())
@@ -1715,7 +1716,7 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 			}
 
 			int nPos = GetTaskPosition(pTDS);
-			ASSERT((nPos != -1) && (pTDSParent->GetSubTaskID(nPos) == dwTaskID));
+			ASSERT((nPos != -1) && (pTDSParent->GetSubTaskID(nPos) == dwChildID));
 
 			if (!ApplyLastChangeToSubtask(pTDIParent, pTDSParent, nPos, nAttrib, FALSE))
 				return FALSE;
@@ -1725,15 +1726,15 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
+BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
 {
 	// Exclude references
-	if (dwTaskID && !IsTaskReference(dwTaskID))
+	if (dwParentID && !IsTaskReference(dwParentID))
 	{
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
 
-		if (GetTask(dwTaskID, pTDI, pTDS))
+		if (GetTask(dwParentID, pTDI, pTDS))
 			return ApplyLastChangeToSubtasks(pTDI, pTDS, nAttrib, bIncludeBlank);
 		else
 			ASSERT(0);
@@ -1743,13 +1744,13 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 	return FALSE;
 }
 
-BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDS, 
 											  TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
 {
 	ASSERT(m_undo.IsActive());
 
 	// Exclude references
-	if (!pTDI || pTDI->dwTaskRefID || !pTDS)
+	if (!pTDIParent || pTDIParent->dwTaskRefID || !pTDS)
 	{
 		ASSERT(0);
 		return FALSE;
@@ -1757,7 +1758,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 	
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
-		if (!ApplyLastChangeToSubtask(pTDI, pTDS, nSubTask, nAttrib, bIncludeBlank))
+		if (!ApplyLastChangeToSubtask(pTDIParent, pTDS, nSubTask, nAttrib, bIncludeBlank))
 			return FALSE;
 	}
 	
@@ -4022,7 +4023,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
 	TDCCADATA data;
 
@@ -4033,7 +4034,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFr
 	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
 	TDCCADATA data;
 
@@ -4052,7 +4053,7 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 	return pTDI->GetAttributeValues(nAttrib, data);
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -4147,7 +4148,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 	return SET_FAILED;
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
+TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);

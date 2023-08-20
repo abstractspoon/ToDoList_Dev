@@ -187,6 +187,7 @@ public:
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
 	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttributeMap& mapAttribs) const;
 
 	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod, const CString& sModifiedBy);
 	BOOL SetTaskDoneDate(HTASKITEM hTask, const COleDateTime& date);
@@ -562,7 +563,7 @@ protected:
 	const CString& GetTaskString(HTASKITEM hTask, const CString& sStringItem) const;
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
+	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttributeMap& mapAttribs, BOOL bOverwrite) const;
 	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);

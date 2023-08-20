@@ -1580,6 +1580,7 @@
 #define ID_COMMENTS_INSERTTIME          34752
 #define ID_COMMENTS_INSERTDATETIME      34753
 #define ID_SCROLLTOSELTASK              34755
+#define ID_EDIT_PASTEATTRIBUTES         34756
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2485,7 +2486,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
-#define _APS_NEXT_COMMAND_VALUE         34756
+#define _APS_NEXT_COMMAND_VALUE         34757
 #define _APS_NEXT_CONTROL_VALUE         1561
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
