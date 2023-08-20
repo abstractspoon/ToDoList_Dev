@@ -1900,9 +1900,6 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttr
 {
 	ASSERT(m_mapReadableAttrib.GetCount() == 0);
 
-	const CXmlItem* pXITask = NULL;
-	GET_TASK(pXITask, hTask, FALSE);
-
 	tdi.dwTaskRefID = GetTaskReferenceID(hTask);
 
 	// Load attributes _only_ if this is a 'real' task
