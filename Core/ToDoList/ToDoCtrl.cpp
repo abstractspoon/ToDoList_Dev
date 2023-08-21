@@ -9544,16 +9544,35 @@ BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask
 	if (!CanEditSelectedTask(mapAttribs))
 		return FALSE;
 
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
 	POSITION pos = TSH().GetFirstItemPos();
-	BOOL bSomeMods = FALSE;
+	CDWordArray aModTaskIDs;
 
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-// 		bSomeMods |= (m_data.CopyTaskAttributeValues(tdi, dwTaskID, mapAttribs, FALSE) == SET_CHANGE);
-// 	}
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		const TODOITEM* pTDI = GetTask(dwTaskID);
 
-	return bSomeMods;
+		if (pTDI)
+		{
+			TODOITEM tdiCopy = *pTDI;
+
+			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs))
+			{
+				if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
+					aModTaskIDs.Add(dwTaskID);
+			}
+		}
+	}
+
+	if (aModTaskIDs.GetSize())
+	{
+		TDC_ATTRIBUTE nAttrib = ((mapAttribs.GetCount() == 1) ? mapAttribs.GetFirst() : TDCA_ALL);
+		SetModified(nAttrib, aModTaskIDs);
+	}
+
+	return aModTaskIDs.GetSize();
 }
 
 BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll)
