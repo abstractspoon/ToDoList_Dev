@@ -5857,6 +5857,10 @@ void CToDoListWnd::OnEditPasteAttributes()
 	if (CTaskClipboard::GetTasks(tasks, _T("")) != 1)
 		return;
 
+	// Get attributes to paste from user
+	// TODO
+
+
 	GetToDoCtrl().PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), TDCA_ALL);
 }
 
