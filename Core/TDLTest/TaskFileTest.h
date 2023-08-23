@@ -32,18 +32,18 @@ public:
 	void PopulateHierarchy(CTaskFile& tasks, int nNumLevels, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
 	void PopulateFlatList(CTaskFile& tasks, int nNumTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
 
-	BOOL WantPopulateAttributes() const { return m_bPopulateAttributes; }
+	BOOL WantPerformanceAttributes() const { return m_bWantPerformanceAttributes; }
 	
-	const int NUM_TESTLEVELS;
+	const int NUM_PERFTESTLEVELS;
 
 protected:
-	BOOL m_bPopulateAttributes;
+	BOOL m_bWantPerformanceAttributes;
 
 protected:
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
 
-	void BeginTest(LPCTSTR szFunction);
+	void BeginPerformanceTest(LPCTSTR szFunction);
 
 	static void TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType);
 	static void TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType);

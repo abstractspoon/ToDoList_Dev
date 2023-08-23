@@ -88,9 +88,9 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 	CTaskFileTest tasksTest(m_utils);
 
-	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPopulateAttributes());
+	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPerformanceAttributes());
 
-	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
+	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_PERFTESTLEVELS; nNumLevels++)
 	{
 		CTaskFile tasks;
 		tasksTest.PopulateHierarchy(tasks, nNumLevels);
@@ -120,9 +120,9 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 	CTaskFileTest tasksTest(m_utils);
 	
-	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPopulateAttributes());
+	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPerformanceAttributes());
 
-	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
+	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_PERFTESTLEVELS; nNumLevels++)
 	{
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
