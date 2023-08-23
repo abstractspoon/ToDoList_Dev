@@ -225,7 +225,7 @@ TODOITEM* CToDoCtrlData::NewTask(const CTaskFile& tasks, HTASKITEM hTask, const 
 	
 	// Don't overwrite default attributes except with actual values
 	if (pTDIRef)
-		tasks.MergeTaskAttributes(hTask, *pTDI);
+		tasks.MergeTaskAttributes(hTask, *pTDI, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 	else
 		tasks.GetTaskAttributes(hTask, *pTDI);
 	

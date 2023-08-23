@@ -1883,74 +1883,75 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 
 BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 {
-	return GetTaskAttributes(hTask, tdi, TDCA_ALL, TRUE); // overwrite
+	return MergeTaskAttributes(hTask, tdi, TDLMTA_NONE);
 }
 
-BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
+BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const
 {
-	return GetTaskAttributes(hTask, tdi, TDCA_ALL, FALSE); // merge
+	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, CTDCCustomAttribDefinitionArray(), dwFlags);
 }
 
-BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttributeMap& mapAttribs) const
-{
-	return GetTaskAttributes(hTask, tdi, mapAttribs, FALSE); // merge
-}
-
-BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttributeMap& mapAttribs, BOOL bOverwrite) const
+BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const CTDCAttributeMap& mapAttribs, 
+									const CTDCCustomAttribDefinitionArray& aCustAttribs, DWORD dwFlags) const
 {
 	ASSERT(m_mapReadableAttrib.GetCount() == 0);
 
-	tdi.dwTaskRefID = GetTaskReferenceID(hTask);
+	tdiDest.dwTaskRefID = GetTaskReferenceID(hSrcTask);
 
 	// Load attributes _only_ if this is a 'real' task
-	if (tdi.dwTaskRefID == 0)
+	if (tdiDest.dwTaskRefID == 0)
 	{
-		BOOL bWantAll = mapAttribs.Has(TDCA_ALL);
-
-#define WANTATTRIB(a, s) ((bWantAll || mapAttribs.Has(a)) && (bOverwrite || TaskHasAttribute(hTask, s)))
-#define GETATTRIB(a, s, expr) if WANTATTRIB(a, s) expr
+#define WANTATTRIB(a, s) WantGetTaskAttribute(hSrcTask, s, tdiDest, a, mapAttribs, dwFlags)
+#define GETATTRIB(a, s, expr) if (WANTATTRIB(a, s)) expr
 
 		// Call GetTaskString wherever possible to avoid string copying
-		GETATTRIB(TDCA_TASKNAME, TDL_TASKTITLE,				tdi.sTitle = GetTaskString(hTask, TDL_TASKTITLE));
-		GETATTRIB(TDCA_ALLOCBY, TDL_TASKALLOCBY,			tdi.sAllocBy = GetTaskString(hTask, TDL_TASKALLOCBY));
-		GETATTRIB(TDCA_STATUS, TDL_TASKSTATUS,				tdi.sStatus = GetTaskString(hTask, TDL_TASKSTATUS));
-		GETATTRIB(TDCA_CREATEDBY, TDL_TASKCREATEDBY,		tdi.sCreatedBy = GetTaskString(hTask, TDL_TASKCREATEDBY));
-		GETATTRIB(TDCA_EXTERNALID, TDL_TASKEXTERNALID,		tdi.sExternalID = GetTaskString(hTask, TDL_TASKEXTERNALID));
-		GETATTRIB(TDCA_VERSION, TDL_TASKVERSION,			tdi.sVersion = GetTaskString(hTask, TDL_TASKVERSION));
-		GETATTRIB(TDCA_ICON, TDL_TASKICON,					tdi.sIcon = GetTaskString(hTask, TDL_TASKICON));
-		GETATTRIB(TDCA_LASTMODBY, TDL_TASKLASTMODBY,		tdi.sLastModifiedBy = GetTaskString(hTask, TDL_TASKLASTMODBY));
+		GETATTRIB(TDCA_TASKNAME,	TDL_TASKTITLE,			tdiDest.sTitle = GetTaskString(hSrcTask, TDL_TASKTITLE));
+		GETATTRIB(TDCA_ALLOCBY,		TDL_TASKALLOCBY,		tdiDest.sAllocBy = GetTaskString(hSrcTask, TDL_TASKALLOCBY));
+		GETATTRIB(TDCA_STATUS,		TDL_TASKSTATUS,			tdiDest.sStatus = GetTaskString(hSrcTask, TDL_TASKSTATUS));
+		GETATTRIB(TDCA_CREATEDBY,	TDL_TASKCREATEDBY,		tdiDest.sCreatedBy = GetTaskString(hSrcTask, TDL_TASKCREATEDBY));
+		GETATTRIB(TDCA_EXTERNALID,	TDL_TASKEXTERNALID,		tdiDest.sExternalID = GetTaskString(hSrcTask, TDL_TASKEXTERNALID));
+		GETATTRIB(TDCA_VERSION,		TDL_TASKVERSION,		tdiDest.sVersion = GetTaskString(hSrcTask, TDL_TASKVERSION));
+		GETATTRIB(TDCA_ICON,		TDL_TASKICON,			tdiDest.sIcon = GetTaskString(hSrcTask, TDL_TASKICON));
+		GETATTRIB(TDCA_LASTMODBY,	TDL_TASKLASTMODBY,		tdiDest.sLastModifiedBy = GetTaskString(hSrcTask, TDL_TASKLASTMODBY));
 
-		GETATTRIB(TDCA_FLAG, TDL_TASKFLAG,					tdi.bFlagged = IsTaskFlagged(hTask, false));
-		GETATTRIB(TDCA_LOCK, TDL_TASKLOCK,					tdi.bLocked = IsTaskLocked(hTask, false));
+		GETATTRIB(TDCA_FLAG,		TDL_TASKFLAG,			tdiDest.bFlagged = IsTaskFlagged(hSrcTask, false));
+		GETATTRIB(TDCA_LOCK,		TDL_TASKLOCK,			tdiDest.bLocked = IsTaskLocked(hSrcTask, false));
 
-		GETATTRIB(TDCA_COLOR, TDL_TASKCOLOR,				tdi.color = (COLORREF)GetTaskColor(hTask));
-		GETATTRIB(TDCA_PERCENT, TDL_TASKPERCENTDONE,		tdi.nPercentDone = (int)GetTaskPercentDone(hTask, false));
-		GETATTRIB(TDCA_TIMEESTIMATE, TDL_TASKTIMEESTIMATE,	tdi.timeEstimate.dAmount = GetTaskTimeEstimate(hTask, tdi.timeEstimate.nUnits, false));
-		GETATTRIB(TDCA_TIMESPENT, TDL_TASKTIMESPENT,		tdi.timeSpent.dAmount = GetTaskTimeSpent(hTask, tdi.timeSpent.nUnits, false));
-		GETATTRIB(TDCA_PRIORITY, TDL_TASKPRIORITY,			tdi.nPriority = (int)GetTaskPriority(hTask, false));
-		GETATTRIB(TDCA_RISK, TDL_TASKRISK,					tdi.nRisk = GetTaskRisk(hTask, false));
-		GETATTRIB(TDCA_COST, TDL_TASKCOST,					tdi.cost.Parse(GetTaskString(hTask, TDL_TASKCOST)));
+		GETATTRIB(TDCA_COLOR,		TDL_TASKCOLOR,			tdiDest.color = (COLORREF)GetTaskColor(hSrcTask));
+		GETATTRIB(TDCA_PERCENT,		TDL_TASKPERCENTDONE,	tdiDest.nPercentDone = (int)GetTaskPercentDone(hSrcTask, false));
+		GETATTRIB(TDCA_TIMEESTIMATE, TDL_TASKTIMEESTIMATE,	tdiDest.timeEstimate.dAmount = GetTaskTimeEstimate(hSrcTask, tdiDest.timeEstimate.nUnits, false));
+		GETATTRIB(TDCA_TIMESPENT,	TDL_TASKTIMESPENT,		tdiDest.timeSpent.dAmount = GetTaskTimeSpent(hSrcTask, tdiDest.timeSpent.nUnits, false));
+		GETATTRIB(TDCA_PRIORITY,	TDL_TASKPRIORITY,		tdiDest.nPriority = (int)GetTaskPriority(hSrcTask, false));
+		GETATTRIB(TDCA_RISK,		TDL_TASKRISK,			tdiDest.nRisk = GetTaskRisk(hSrcTask, false));
+		GETATTRIB(TDCA_COST,		TDL_TASKCOST,			tdiDest.cost.Parse(GetTaskString(hSrcTask, TDL_TASKCOST)));
 
-		GETATTRIB(TDCA_DUEDATE, TDL_TASKDUEDATE,			tdi.dateDue = GetTaskDueDateOle(hTask));
-		GETATTRIB(TDCA_STARTDATE, TDL_TASKSTARTDATE,		tdi.dateStart = GetTaskStartDateOle(hTask));
-		GETATTRIB(TDCA_DONEDATE, TDL_TASKDONEDATE,			tdi.dateDone = GetTaskDoneDateOle(hTask));
-		GETATTRIB(TDCA_CREATIONDATE, TDL_TASKCREATIONDATE,	tdi.dateCreated = GetTaskCreationDateOle(hTask));
-		GETATTRIB(TDCA_LASTMODDATE, TDL_TASKLASTMOD,		tdi.dateLastMod = GetTaskLastModifiedOle(hTask));
+		GETATTRIB(TDCA_DUEDATE,		TDL_TASKDUEDATE,		tdiDest.dateDue = GetTaskDueDateOle(hSrcTask));
+		GETATTRIB(TDCA_STARTDATE,	TDL_TASKSTARTDATE,		tdiDest.dateStart = GetTaskStartDateOle(hSrcTask));
+		GETATTRIB(TDCA_DONEDATE,	TDL_TASKDONEDATE,		tdiDest.dateDone = GetTaskDoneDateOle(hSrcTask));
+		GETATTRIB(TDCA_CREATIONDATE, TDL_TASKCREATIONDATE,	tdiDest.dateCreated = GetTaskCreationDateOle(hSrcTask));
+		GETATTRIB(TDCA_LASTMODDATE, TDL_TASKLASTMOD,		tdiDest.dateLastMod = GetTaskLastModifiedOle(hSrcTask));
 
-		GETATTRIB(TDCA_CATEGORY, TDL_TASKCATEGORY,			GetTaskCategories(hTask, tdi.aCategories));
-		GETATTRIB(TDCA_TAGS, TDL_TASKTAG,					GetTaskTags(hTask, tdi.aTags));
-		GETATTRIB(TDCA_ALLOCTO, TDL_TASKALLOCTO,			GetTaskAllocatedTo(hTask, tdi.aAllocTo));
-		GETATTRIB(TDCA_RECURRENCE, TDL_TASKRECURRENCE,		GetTaskRecurrence(hTask, tdi.trRecurrence));
-		GETATTRIB(TDCA_DEPENDENCY, TDL_TASKDEPENDENCY,		GetTaskDependencies(hTask, tdi.aDependencies));
-		GETATTRIB(TDCA_FILELINK, TDL_TASKFILELINKPATH,		GetTaskFileLinks(hTask, tdi.aFileLinks));
+		GETATTRIB(TDCA_CATEGORY,	TDL_TASKCATEGORY,		GetTaskCategories(hSrcTask, tdiDest.aCategories));
+		GETATTRIB(TDCA_TAGS,		TDL_TASKTAG,			GetTaskTags(hSrcTask, tdiDest.aTags));
+		GETATTRIB(TDCA_ALLOCTO,		TDL_TASKALLOCTO,		GetTaskAllocatedTo(hSrcTask, tdiDest.aAllocTo));
+		GETATTRIB(TDCA_RECURRENCE,	TDL_TASKRECURRENCE,		GetTaskRecurrence(hSrcTask, tdiDest.trRecurrence));
+		GETATTRIB(TDCA_DEPENDENCY,	TDL_TASKDEPENDENCY,		GetTaskDependencies(hSrcTask, tdiDest.aDependencies));
+		GETATTRIB(TDCA_FILELINK,	TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
 
-		if (bWantAll || mapAttribs.Has(TDCA_COMMENTS))
+		// Comments are trickier
+		if (mapAttribs.Has(TDCA_ALL) || mapAttribs.Has(TDCA_COMMENTS))
 		{
-			// Comments are special
-			if (bOverwrite)
+			if (Misc::HasFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES) && 
+				!TaskHasAttribute(hSrcTask, TDL_TASKCOMMENTS) &&
+				!TaskHasAttribute(hSrcTask, TDL_TASKCUSTOMCOMMENTS))
 			{
-				tdi.sComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
-				GetTaskCustomComments(hTask, tdi.customComments, tdi.cfComments);
+				// Do nothing
+			}
+			else if (!Misc::HasFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES))
+			{
+				// Overwrite
+				tdiDest.sComments = GetTaskString(hSrcTask, TDL_TASKCOMMENTS);
+				GetTaskCustomComments(hSrcTask, tdiDest.customComments, tdiDest.cfComments);
 			}
 			else // merge
 			{
@@ -1960,11 +1961,11 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttr
 				// it must have text comments and the comments type must of 'text' type
 				// OR
 				// 'we' have no comments and the 'other' task has a different comments type
-				CString sOtherTextComments = GetTaskString(hTask, TDL_TASKCOMMENTS);
+				CString sOtherTextComments = GetTaskString(hSrcTask, TDL_TASKCOMMENTS);
 
 				CONTENTFORMAT cfOtherComments;
 				CBinaryData otherCustomComments;
-				GetTaskCustomComments(hTask, otherCustomComments, cfOtherComments);
+				GetTaskCustomComments(hSrcTask, otherCustomComments, cfOtherComments);
 
 				BOOL bOtherIsTextFormat = cfOtherComments.FormatIsText();
 
@@ -1972,35 +1973,74 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttr
 				{
 					if (!otherCustomComments.IsEmpty() && !bOtherIsTextFormat)
 					{
-						tdi.sComments = sOtherTextComments;
-						tdi.cfComments = cfOtherComments;
-						tdi.customComments = otherCustomComments;
+						tdiDest.sComments = sOtherTextComments;
+						tdiDest.cfComments = cfOtherComments;
+						tdiDest.customComments = otherCustomComments;
 					}
 					else if (bOtherIsTextFormat)
 					{
-						tdi.sComments = sOtherTextComments;
-						tdi.cfComments = cfOtherComments;
-						tdi.customComments.Empty();
+						tdiDest.sComments = sOtherTextComments;
+						tdiDest.cfComments = cfOtherComments;
+						tdiDest.customComments.Empty();
 					}
 				}
-				else if (tdi.sComments.IsEmpty() &&
-						 tdi.customComments.IsEmpty() &&
+				else if (tdiDest.sComments.IsEmpty() &&
+						 tdiDest.customComments.IsEmpty() &&
 						 !cfOtherComments.IsEmpty() &&
 						 !bOtherIsTextFormat &&
-						 (cfOtherComments != tdi.cfComments))
+						 (cfOtherComments != tdiDest.cfComments))
 				{
-					tdi.cfComments = cfOtherComments;
+					tdiDest.cfComments = cfOtherComments;
 				}
 			}
 		}
 
-		// custom data
-		if (WANTATTRIB(TDCA_CUSTOMATTRIB, TDL_TASKCUSTOMATTRIBDATA))
+		// Custom data is tricky too
+		if (mapAttribs.Has(TDCA_ALL))
 		{
-			CTDCCustomAttributeDataMap mapData;
+			CTDCCustomAttributeDataMap mapSrcData;
+			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
 
-			GetTaskCustomAttributeData(hTask, mapData); 
-			tdi.SetCustomAttributeValues(mapData);
+			if (dwFlags == TDLMTA_NONE)
+			{
+				tdiDest.SetCustomAttributeValues(mapSrcData);
+			}
+			else
+			{
+				POSITION pos = mapSrcData.GetStartPosition();
+
+				while (pos)
+				{
+					CString sID;
+					TDCCADATA dataSrc;
+
+					mapSrcData.GetNextAssoc(pos, sID, dataSrc);
+
+					if (WantMergeCustomAttribute(sID, dataSrc, tdiDest, dwFlags))
+						tdiDest.SetCustomAttributeValue(sID, dataSrc);
+				}
+			}
+		}
+		else
+		{
+			// Sanity check
+			ASSERT(aCustAttribs.GetSize());
+
+			CTDCCustomAttributeDataMap mapSrcData;
+			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
+
+			int nCust = aCustAttribs.GetSize();
+
+			while (nCust--)
+			{
+				CString sID = aCustAttribs[nCust].sUniqueID;
+
+				TDCCADATA data;
+				mapSrcData.Lookup(sID, data);
+
+				if (WantMergeCustomAttribute(sID, data, tdiDest, dwFlags))
+					tdiDest.SetCustomAttributeValue(sID, data);
+			}
 		}
 
 		// meta data
@@ -2008,10 +2048,50 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, const CTDCAttr
 		{
 			CTDCMetaDataMap mapData;
 
-			GetTaskMetaData(hTask, mapData); 
-			tdi.SetMetaData(mapData);
+			GetTaskMetaData(hSrcTask, mapData); 
+			tdiDest.SetMetaData(mapData);
 		}
 	}
+
+	return TRUE;
+}
+
+BOOL CTaskFile::WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
+									 const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const
+{
+	if (!mapAttribs.Has(TDCA_ALL) && !mapAttribs.Has(nDestAttrib))
+		return FALSE;
+
+	BOOL bHasSrc = TaskHasAttribute(hSrcTask, szSrcAttrib);
+
+	if (Misc::HasFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES) && !bHasSrc)
+		return FALSE;
+
+	BOOL bHasDest = tdiDest.HasAttributeValue(nDestAttrib);
+
+	if (Misc::HasFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES) && bHasDest)
+		return FALSE;
+
+	if (!bHasSrc && !bHasDest)
+		return FALSE;
+
+	return TRUE;
+}
+
+BOOL CTaskFile::WantMergeCustomAttribute(LPCTSTR szAttribID, TDCCADATA dataSrc, TODOITEM& tdiDest, DWORD dwFlags)
+{
+	BOOL bHasSrc = !dataSrc.IsEmpty();
+
+	if (Misc::HasFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES) && !bHasSrc)
+		return FALSE;
+
+	BOOL bHasDest = tdiDest.HasCustomAttributeValue(szAttribID);
+
+	if (Misc::HasFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES) && bHasDest)
+		return FALSE;
+
+	if (!bHasSrc && !bHasDest)
+		return FALSE;
 
 	return TRUE;
 }

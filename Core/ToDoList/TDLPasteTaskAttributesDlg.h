@@ -21,6 +21,9 @@ public:
 
 	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib) const;
 
+	BOOL GetWantPreserveNonEmptyDestinationValues() const { return m_bOnlyOverwriteEmpty; }
+	BOOL GetExcludeEmptySourceValues() const { return m_bOnlyOverwriteWithNonEmpty; }
+
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLPasteTaskAttributesDlg)

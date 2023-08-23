@@ -5864,8 +5864,16 @@ void CToDoListWnd::OnEditPasteAttributes()
 
 	if (dlg.DoModal() == IDOK)
 	{
-		// TODO
-		tdc.PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), TDCA_ALL);
+		CTDCAttributeMap mapAttribs;
+
+		if (dlg.GetSelectedAttributes(mapAttribs))
+		{
+			DWORD dwFlags = 0;
+			Misc::SetFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES, dlg.GetWantPreserveNonEmptyDestinationValues());
+			Misc::SetFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES, dlg.GetExcludeEmptySourceValues());
+
+			tdc.PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), mapAttribs, dwFlags);
+		}
 	}
 }
 

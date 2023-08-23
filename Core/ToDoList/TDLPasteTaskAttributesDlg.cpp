@@ -76,6 +76,8 @@ int CTDLPasteTaskAttributesDlg::GetSelectedAttributes(CTDCAttributeMap& mapAttri
 	// else
 	m_lbSpecificAttributes.GetAvailableAttributes(mapAttrib, m_bIncludeCustomAttribs);
 
+	mapAttrib.Add(TDCA_METADATA);
+
 	if (!m_bIncludeTaskTitle)
 		mapAttrib.Remove(TDCA_TASKNAME);
 

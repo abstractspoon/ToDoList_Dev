@@ -9539,7 +9539,7 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
 }
 
-BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs)
+BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs, DWORD dwFlags)
 {
 	if (!CanEditSelectedTask(mapAttribs))
 		return FALSE;
@@ -9558,7 +9558,7 @@ BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask
 		{
 			TODOITEM tdiCopy = *pTDI;
 
-			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs))
+			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs, m_aCustomAttribDefs, dwFlags))
 			{
 				if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
 					aModTaskIDs.Add(dwTaskID);
@@ -9681,7 +9681,7 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD
 		TODOITEM tdi;
 		VERIFY(m_data.GetTaskAttributes(dwTaskID, tdi));
 
-		if (tasks.MergeTaskAttributes(hTask, tdi))
+		if (tasks.MergeTaskAttributes(hTask, tdi, TDLMTA_EXCLUDEEMPTYSOURCEVALUES))
 			m_data.SetTaskAttributes(dwTaskID, tdi);
 	}
 	else 

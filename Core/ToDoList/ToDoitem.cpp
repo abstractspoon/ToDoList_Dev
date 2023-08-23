@@ -1200,6 +1200,7 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 	case TDCD_DONE:			return dateDone;
 	case TDCD_DONEDATE:		return CDateHelper::GetDateOnly(dateDone);
 	case TDCD_DONETIME:		return CDateHelper::GetTimeOnly(dateDone);
+	case TDCD_LASTMOD:		return dateLastMod;
 	}
 	
 	// else
@@ -1368,7 +1369,7 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_EXTERNALID:	return sExternalID.IsEmpty();	
 	case TDCA_STATUS:		return sStatus.IsEmpty();		
 	case TDCA_TASKNAME:		return sTitle.IsEmpty();			
-	case TDCA_COMMENTS:		return sComments.IsEmpty();		
+	case TDCA_COMMENTS:		return sComments.IsEmpty() && customComments.IsEmpty();		
 	case TDCA_LASTMODBY:	return sLastModifiedBy.IsEmpty();
 	case TDCA_ICON:			return sIcon.IsEmpty();			
 							 
@@ -1398,6 +1399,13 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_DONETIME:
 	case TDCA_DUETIME:
 	case TDCA_STARTTIME:	return CDateHelper::IsDateSet(GetDate(TDC::MapAttributeToDate(nAttribID)));
+
+	case TDCA_METADATA:		return mapMetaData.GetCount();
+	case TDCA_CUSTOMATTRIB:	return mapCustomData.GetCount();
+
+	default:
+		ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
+		break;
 	}
 
 	return FALSE;
