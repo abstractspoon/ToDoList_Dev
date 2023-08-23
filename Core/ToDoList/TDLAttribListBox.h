@@ -25,7 +25,7 @@ class CTDLAttributeListBox : public CCheckListBoxEx
 {
 // Construction
 public:
-	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs);
+	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bIncludeReadonly = TRUE);
 
 	void SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
 

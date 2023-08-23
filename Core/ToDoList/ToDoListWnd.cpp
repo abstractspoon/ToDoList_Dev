@@ -37,6 +37,7 @@
 #include "TDLCleanupIniPreferencesDlg.h"
 #include "TDLTasklistSaveAsDlg.h"
 #include "TDCAnonymizeTasklist.h"
+#include "TDLPasteTaskAttributesDlg.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -5858,10 +5859,14 @@ void CToDoListWnd::OnEditPasteAttributes()
 		return;
 
 	// Get attributes to paste from user
-	// TODO
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLPasteTaskAttributesDlg dlg(tdc.GetCustomAttributeDefs());
 
-
-	GetToDoCtrl().PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), TDCA_ALL);
+	if (dlg.DoModal() == IDOK)
+	{
+		// TODO
+		tdc.PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), TDCA_ALL);
+	}
 }
 
 void CToDoListWnd::OnUpdateEditPasteAttributes(CCmdUI* pCmdUI)

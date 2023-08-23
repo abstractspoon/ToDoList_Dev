@@ -146,6 +146,7 @@
 #define IDD_CUSTOMATTRIBLIST_PAGE       324
 #define IDD_CUSTOMATTRIBCALC_PAGE       325
 #define IDD_DEBUG_FORMATGETLASTERROR_DIALOG 326
+#define IDD_PASTETASKATTRIB_DIALOG      327
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -851,6 +852,12 @@
 #define IDC_SECONDOPISVALUE             1556
 #define IDC_SECONDOPERANDVALUE          1557
 #define IDC_RESULTTYPE                  1560
+#define IDC_SELECTSPECIFIC              1562
+#define IDC_INCLUDECUSTOMATTRIB         1564
+#define IDC_INCLUDEDATES                1565
+#define IDC_SPECIFICATTRIBS             1566
+#define IDC_ONLYOVERWRITEMPTY           1567
+#define IDC_ONLYOVERWRITEWITHNONEMPTY   1568
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2485,9 +2492,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        327
+#define _APS_NEXT_RESOURCE_VALUE        328
 #define _APS_NEXT_COMMAND_VALUE         34757
-#define _APS_NEXT_CONTROL_VALUE         1561
+#define _APS_NEXT_CONTROL_VALUE         1568
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

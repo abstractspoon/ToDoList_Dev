@@ -900,7 +900,7 @@ END
 IDD_TASKSELECTION_DIALOG DIALOGEX 0, 0, 369, 172
 STYLE DS_NOIDLEMSG | DS_CONTROL | WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     GROUPBOX        "Tasks",IDC_STATIC,0,0,109,172
     CONTROL         "&All tasks",IDC_ALLTASKS,"Button",BS_AUTORADIOBUTTON | 
@@ -924,7 +924,7 @@ BEGIN
                     BS_AUTORADIOBUTTON,125,26,235,10
     CONTROL         "&Visible columns only",IDC_VISIBLEATTRIB,"Button",
                     BS_AUTORADIOBUTTON,125,40,234,10
-    CONTROL         "&Custom",IDC_CUSTOMATTRIB,"Button",BS_AUTORADIOBUTTON,
+    CONTROL         "&Specific",IDC_CUSTOMATTRIB,"Button",BS_AUTORADIOBUTTON,
                     125,70,234,10
     CONTROL         "I&ncluding comments",IDC_INCLUDECOMMENTS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,135,54,221,10
@@ -2175,6 +2175,38 @@ BEGIN
     PUSHBUTTON      "&Complete",IDC_COMPLETETASK,167,176,50,14
     PUSHBUTTON      "&Go To Task",IDC_GOTOTASK,224,176,50,14
     DEFPUSHBUTTON   "&Dismiss",IDC_DISMISS,281,176,50,14
+END
+
+IDD_PASTETASKATTRIB_DIALOG DIALOG DISCARDABLE  0, 0, 278, 252
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Paste Task Attributes"
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "Attribute Selection",IDC_STATIC,7,7,264,176
+    CONTROL         "All",IDC_SELECTALL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,15,23,23,10
+    CONTROL         "Specific",IDC_SELECTSPECIFIC,"Button",
+                    BS_AUTORADIOBUTTON,15,91,41,10
+    CONTROL         "Comments",IDC_INCLUDECOMMENTS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,37,50,49,10
+    CONTROL         "Custom attributes",IDC_INCLUDECUSTOMATTRIB,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,37,63,70,10
+    CONTROL         "Dates",IDC_INCLUDEDATES,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,37,77,35,10
+    LISTBOX         IDC_SPECIFICATTRIBS,27,104,234,69,LBS_SORT | 
+                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
+                    LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Only overwrite empty destination values",
+                    IDC_ONLYOVERWRITEMPTY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,190,140,10
+    CONTROL         "Only overwrite with non-empty source values",
+                    IDC_ONLYOVERWRITEWITHNONEMPTY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,205,156,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,222,264,1
+    DEFPUSHBUTTON   "OK",IDOK,165,231,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,221,231,50,14
+    LTEXT           "Including:",IDC_STATIC,27,37,32,8
 END
 
 
@@ -4533,6 +4565,14 @@ BEGIN
         RIGHTMARGIN, 331
         TOPMARGIN, 7
         BOTTOMMARGIN, 190
+    END
+
+    IDD_PASTETASKATTRIB_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 271
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 245
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -505,6 +505,10 @@ SOURCE=..\ToDoList\TDLOleMessageFilter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLPasteTaskAttributesDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLPrefMigrationDlg.cpp
 # End Source File
 # Begin Source File
@@ -1134,6 +1138,10 @@ SOURCE=..\ToDoList\TDLOffsetDatesDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLOleMessageFilter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLPasteTaskAttributesDlg.h
 # End Source File
 # Begin Source File
 
