@@ -19,6 +19,9 @@ class CTDLPasteTaskAttributesDlg : public CTDLDialog
 public:
 	CTDLPasteTaskAttributesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribs, CWnd* pParent = NULL);   // standard constructor
 
+	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib) const;
+
+protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLPasteTaskAttributesDlg)
 	enum { IDD = IDD_PASTETASKATTRIB_DIALOG };
@@ -29,24 +32,29 @@ public:
 	BOOL	m_bOnlyOverwriteEmpty;
 	BOOL	m_bOnlyOverwriteWithNonEmpty;
 	int		m_bSelectSpecificAttribs;
+	BOOL	m_bIncludeTaskTitle;
 	//}}AFX_DATA
 
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLPasteTaskAttributesDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLPasteTaskAttributesDlg)
-		// NOTE: the ClassWizard will add member functions here
+	afx_msg void OnSelectAllAttributes();
+	afx_msg void OnSelectSpecificAttributes();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	void EnableDisableControls();
 };
 
 //{{AFX_INSERT_LOCATION}}

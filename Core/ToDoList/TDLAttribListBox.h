@@ -30,7 +30,9 @@ public:
 	void SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
 
 	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib, CStringSet& mapCustomAttribIDs) const;
-	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib) const; // includes custom attributes
+	int GetSelectedAttributes(CTDCAttributeMap& mapAttrib, BOOL bIncCustAttrib = TRUE) const;
+
+	int GetAvailableAttributes(CTDCAttributeMap& mapAttrib, BOOL bIncCustAttrib = TRUE) const;
 
 // Attributes
 protected:
@@ -75,6 +77,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	int FindAttribute(TDC_ATTRIBUTE nAttrib) const;
+	int GetAttributes(CTDCAttributeMap& mapAttrib, BOOL bSelected, BOOL bIncCustAttrib) const;
 
 };
 

@@ -212,7 +212,17 @@ int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib, CSt
 	return (mapAttrib.GetCount() + mapCustomAttribIDs.GetCount());
 }
 
-int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib) const
+int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib, BOOL bIncCustAttrib) const
+{
+	return GetAttributes(mapAttrib, TRUE, bIncCustAttrib);
+}
+
+int CTDLAttributeListBox::GetAvailableAttributes(CTDCAttributeMap& mapAttrib, BOOL bIncCustAttrib) const
+{
+	return GetAttributes(mapAttrib, FALSE, bIncCustAttrib);
+}
+
+int CTDLAttributeListBox::GetAttributes(CTDCAttributeMap& mapAttrib, BOOL bSelected, BOOL bIncCustAttrib) const
 {
 	mapAttrib.RemoveAll();
 
@@ -222,9 +232,10 @@ int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib) con
 	{
 		const ATTRIBVIS& vis = m_aAttribs[nIndex];
 
-		if (vis.bVisible)
+		if (!bSelected || vis.bVisible)
 		{
-			mapAttrib.Add(vis.nTDCAttrib);
+			if (vis.sCustAttribID.IsEmpty() || bIncCustAttrib)
+				mapAttrib.Add(vis.nTDCAttrib);
 
 			// parent ID
 			if (vis.nTDCAttrib == TDCA_ID)

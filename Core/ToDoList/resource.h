@@ -858,6 +858,7 @@
 #define IDC_SPECIFICATTRIBS             1566
 #define IDC_ONLYOVERWRITEMPTY           1567
 #define IDC_ONLYOVERWRITEWITHNONEMPTY   1568
+#define IDC_INCLUDETITLE                1569
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2494,7 +2495,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        328
 #define _APS_NEXT_COMMAND_VALUE         34757
-#define _APS_NEXT_CONTROL_VALUE         1568
+#define _APS_NEXT_CONTROL_VALUE         1570
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
