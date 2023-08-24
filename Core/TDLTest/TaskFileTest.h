@@ -17,6 +17,7 @@
 //////////////////////////////////////////////////////////////////////
 
 struct TDCAUTOLISTDATA;
+struct TODOITEM;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -40,9 +41,19 @@ protected:
 	BOOL m_bWantPerformanceAttributes;
 
 protected:
+	void TestMergeTaskAttributesOverwriteAll();
+	void TestMergeTaskAttributesExcludingEmptySrcValues();
+	void TestMergeTaskAttributesPreservingNonEmptyDestValues();
+	void TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues();
+
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
 
+	// Merge related functions
+	static void PrepareMergeTestTasks(CTaskFile& tasks, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 
+									   TODOITEM& tdiDestEmpty, TODOITEM& tdiDestFull, BOOL bPartial);
+
+	// Performance related functions
 	void BeginPerformanceTest(LPCTSTR szFunction);
 
 	static void TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType);

@@ -7,6 +7,9 @@
 #include "TaskFileTest.h"
 
 #include "..\todolist\tdcstruct.h"
+#include "..\todolist\todoitem.h"
+
+#include "..\shared\DateHelper.h"
 
 #include <math.h>
 
@@ -47,10 +50,194 @@ TESTRESULT CTaskFileTest::Run()
 {
 	ClearTotals();
 
+	TestMergeTaskAttributesOverwriteAll();
+	TestMergeTaskAttributesExcludingEmptySrcValues();
+	TestMergeTaskAttributesPreservingNonEmptyDestValues();
+	TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues();
+
 	TestHierarchyConstructionPerformance();
 	TestFlatListConstructionPerformance();
 
 	return GetTotals();
+}
+
+void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
+{
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+
+	CTaskFile tasksSrc;
+	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
+	TODOITEM tdiDestEmpty, tdiDestFull;
+
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+
+	{
+		TODOITEM tdiDestCopy(tdiDestFull), tdiSrcEmpty;
+		tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_NONE);
+		tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiSrcEmpty, TDLMTA_NONE);
+
+		ExpectTrue(tdiDestCopy == tdiSrcEmpty);
+	}
+
+	{
+		TODOITEM tdiDestCopy(tdiDestFull), tdiSrcFull;
+		tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_NONE);
+		tasksSrc.MergeTaskAttributes(hSrcFull, tdiSrcFull, TDLMTA_NONE);
+
+		ExpectTrue(tdiDestCopy == tdiSrcFull);
+	}
+	
+	EndTest();
+}
+
+void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
+{
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+
+	// Test with empty and fully populated 
+	{
+		CTaskFile tasksSrc;
+		HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
+		TODOITEM tdiDestEmpty, tdiDestFull;
+
+		PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiDestFull); // no change
+		}
+
+		{
+			TODOITEM tdiDestCopy(tdiDestFull), tdiSrcFull;
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiSrcFull, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiSrcFull);
+		}
+	}
+
+	// Test with empty and fully populated 
+	{
+		CTaskFile tasksSrc;
+		HTASKITEM hSrcEmpty = NULL, hSrcPartial = NULL;
+		TODOITEM tdiDestEmpty, tdiDestPartial;
+
+		PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcPartial, tdiDestEmpty, tdiDestPartial, TRUE);
+
+		{
+			TODOITEM tdiDestCopy(tdiDestPartial);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiDestPartial); 
+		}
+
+		{
+			TODOITEM tdiDestCopy(tdiDestPartial), tdiSrcFull;
+			tasksSrc.MergeTaskAttributes(hSrcPartial, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+			tasksSrc.MergeTaskAttributes(hSrcPartial, tdiSrcFull, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiSrcFull);
+		}
+	}
+	
+	EndTest();
+}
+
+void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
+{
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+
+	// Initialise source tasklist with an empty task and a full task
+	CTaskFile tasksSrc;
+	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
+	TODOITEM tdiDestEmpty, tdiDestFull;
+
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+
+
+
+
+	EndTest();
+}
+
+void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues()
+{
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+
+	// Initialise source tasklist with an empty task and a full task
+	CTaskFile tasksSrc;
+	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
+
+	TODOITEM tdiDestEmpty, tdiDestFull;
+
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+
+
+
+
+	EndTest();
+}
+
+void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 
+										   TODOITEM& tdiDestEmpty, TODOITEM& tdiDestFull, BOOL bPartial)
+{
+	// Initialise empty and full source tasks
+	hSrcEmpty = tasksSrc.NewTask(_T(""), NULL, 0, 0);
+	hSrcFull = tasksSrc.NewSiblingTask(_T("Src.FullTask"), hSrcEmpty, 1, TRUE);
+
+	tasksSrc.SetTaskComments(hSrcFull, _T("Comments"));
+	tasksSrc.SetTaskAllocatedBy(hSrcFull, _T("Src.AllocBy"));
+	tasksSrc.SetTaskStatus(hSrcFull, _T("Src.Status"));
+	tasksSrc.SetTaskVersion(hSrcFull, _T("Src.Version"));
+	tasksSrc.SetTaskExternalID(hSrcFull, _T("Src.ExternalID"));
+
+	tasksSrc.SetTaskPriority(hSrcFull, 5);
+	tasksSrc.SetTaskRisk(hSrcFull, 3);
+	tasksSrc.SetTaskColor(hSrcFull, RGB(255, 0, 0));
+	tasksSrc.SetTaskCost(hSrcFull, 5.67);
+	tasksSrc.SetTaskTimeEstimate(hSrcFull, 2.34, TDCU_WEEKS);
+	tasksSrc.SetTaskTimeSpent(hSrcFull, 1.23, TDCU_HOURS);
+	//tasksSrc.SetTaskRecurrence(hSrcFull, _T("Src."));
+
+	tasksSrc.AddTaskAllocatedTo(hSrcFull, _T("Src.AllocTo"));
+	tasksSrc.AddTaskCategory(hSrcFull, _T("Src.Category"));
+	tasksSrc.AddTaskTag(hSrcFull, _T("Src.Tag"));
+	tasksSrc.AddTaskDependency(hSrcFull, _T("Src.Dependency"));
+	tasksSrc.AddTaskFileLink(hSrcFull, _T("Src.FileLink"));
+
+	tasksSrc.SetTaskStartDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_YESTERDAY)));
+	tasksSrc.SetTaskDueDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_TOMORROW)));
+	tasksSrc.SetTaskDoneDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_TODAY)));
+	tasksSrc.SetTaskLastModified(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_TODAY)), _T("Src.ModifiedBy"));
+
+	// Initialise similar destination tasks
+	tdiDestFull.aAllocTo.Add(_T("Dest.AllocTo"));
+	tdiDestFull.aCategories.Add(_T("Dest.Category"));
+	tdiDestFull.aTags.Add(_T("Dest.Tag"));
+	tdiDestFull.aDependencies.Add(_T("Dest.Dependency"));
+	tdiDestFull.aFileLinks.Add(_T("Dest.FileLink"));
+
+	tdiDestFull.sTitle = _T("Dest.FullTask");
+	tdiDestFull.sComments = _T("Dest.Comments");
+	tdiDestFull.sAllocBy = _T("Dest.AllocBy");
+	tdiDestFull.sStatus = _T("Dest.Status");
+	tdiDestFull.sVersion = _T("Dest.Version");
+	tdiDestFull.sExternalID = _T("Dest.ExternalID");
+	tdiDestFull.sLastModifiedBy = _T("Dest.ModifiedBy");
+
+	tdiDestFull.nPriority = 4;
+	tdiDestFull.nRisk = 7;
+	tdiDestFull.color = RGB(0, 255, 0);
+	tdiDestFull.cost.dAmount = 3.45;
+	tdiDestFull.timeEstimate = TDCTIMEPERIOD(8.90, TDCU_MINS);
+	tdiDestFull.timeSpent = TDCTIMEPERIOD(7.89, TDCU_MONTHS);
+
+	tdiDestFull.dateStart = CDateHelper::GetDate(DHD_YESTERDAY);
+	tdiDestFull.dateDue = CDateHelper::GetDate(DHD_TOMORROW);
+	tdiDestFull.dateDone = CDateHelper::GetDate(DHD_TODAY);
+	tdiDestFull.dateLastMod = CDateHelper::GetDate(DHD_TODAY);
 }
 
 void CTaskFileTest::BeginPerformanceTest(LPCTSTR szFunction)

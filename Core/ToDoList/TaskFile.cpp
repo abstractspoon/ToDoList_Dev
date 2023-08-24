@@ -2021,11 +2021,8 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 				}
 			}
 		}
-		else
+		else if (aCustAttribs.GetSize())
 		{
-			// Sanity check
-			ASSERT(aCustAttribs.GetSize());
-
 			CTDCCustomAttributeDataMap mapSrcData;
 			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
 
@@ -2961,7 +2958,11 @@ int CTaskFile::GetTaskPriority(HTASKITEM hTask, bool bHighest) const
 	if (bHighest && TaskHasAttribute(hTask, TDL_TASKHIGHESTPRIORITY))
 		return GetTaskInt(hTask, TDL_TASKHIGHESTPRIORITY);
 
-	return GetTaskInt(hTask, TDL_TASKPRIORITY);
+	if (TaskHasAttribute(hTask, TDL_TASKPRIORITY))
+		return GetTaskInt(hTask, TDL_TASKPRIORITY);
+
+	// else
+	return TDC_NOPRIORITYORISK;
 }
 
 unsigned char CTaskFile::GetTaskPercentDone(HTASKITEM hTask, bool bCalc) const
@@ -3707,7 +3708,11 @@ int CTaskFile::GetTaskRisk(HTASKITEM hTask, bool bHighest) const
 	if (bHighest && TaskHasAttribute(hTask, TDL_TASKHIGHESTRISK))
 		return GetTaskInt(hTask, TDL_TASKHIGHESTRISK);
 
-	return GetTaskInt(hTask, TDL_TASKRISK);
+	if (TaskHasAttribute(hTask, TDL_TASKRISK))
+		return GetTaskInt(hTask, TDL_TASKRISK);
+
+	// else
+	return TDC_NOPRIORITYORISK;
 }
 
 LPCTSTR CTaskFile::GetTaskExternalID(HTASKITEM hTask) const

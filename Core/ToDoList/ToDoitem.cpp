@@ -1363,19 +1363,19 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
-	case TDCA_VERSION:		return sVersion.IsEmpty();		
-	case TDCA_ALLOCBY:		return sAllocBy.IsEmpty();		
-	case TDCA_CREATEDBY:	return sCreatedBy.IsEmpty();		
-	case TDCA_EXTERNALID:	return sExternalID.IsEmpty();	
-	case TDCA_STATUS:		return sStatus.IsEmpty();		
-	case TDCA_TASKNAME:		return sTitle.IsEmpty();			
-	case TDCA_COMMENTS:		return sComments.IsEmpty() && customComments.IsEmpty();		
-	case TDCA_LASTMODBY:	return sLastModifiedBy.IsEmpty();
-	case TDCA_ICON:			return sIcon.IsEmpty();			
+	case TDCA_VERSION:		return !sVersion.IsEmpty();		
+	case TDCA_ALLOCBY:		return !sAllocBy.IsEmpty();		
+	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();		
+	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();	
+	case TDCA_STATUS:		return !sStatus.IsEmpty();		
+	case TDCA_TASKNAME:		return !sTitle.IsEmpty();			
+	case TDCA_COMMENTS:		return !sComments.IsEmpty() || !customComments.IsEmpty();		
+	case TDCA_LASTMODBY:	return !sLastModifiedBy.IsEmpty();
+	case TDCA_ICON:			return !sIcon.IsEmpty();			
 							 
 	case TDCA_COLOR:		return (color != 0);		
-	case TDCA_PRIORITY:		return (nPriority != FM_NOPRIORITY);		
-	case TDCA_RISK:			return (nRisk != FM_NORISK);			
+	case TDCA_PRIORITY:		return (nPriority != TDC_NOPRIORITYORISK);		
+	case TDCA_RISK:			return (nRisk != TDC_NOPRIORITYORISK);			
 	case TDCA_PERCENT:		return (nPercentDone > 0);	
 	case TDCA_FLAG:			return bFlagged;		
 	case TDCA_LOCK:			return bLocked;		
