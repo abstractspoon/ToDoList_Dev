@@ -1883,7 +1883,7 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 
 BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
 {
-	return MergeTaskAttributes(hTask, tdi, TDLMTA_NONE);
+	return MergeTaskAttributes(hTask, tdi, TDLMTA_OVERWRITEALL);
 }
 
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const
@@ -1947,6 +1947,11 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 			{
 				// Do nothing
 			}
+			else if (Misc::HasFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES) &&
+					 tdiDest.HasAttributeValue(TDCA_COMMENTS))
+			{
+				// Do nothing
+			}
 			else if (!Misc::HasFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES))
 			{
 				// Overwrite
@@ -2001,7 +2006,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 			CTDCCustomAttributeDataMap mapSrcData;
 			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
 
-			if (dwFlags == TDLMTA_NONE)
+			if (dwFlags == TDLMTA_OVERWRITEALL)
 			{
 				tdiDest.SetCustomAttributeValues(mapSrcData);
 			}

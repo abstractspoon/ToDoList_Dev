@@ -29,6 +29,20 @@ const int MAX_GLOBAL_STRINGS = 100;
 const int MAX_TASK_STRINGS = 10;
 
 //////////////////////////////////////////////////////////////////////
+
+static const CTDCCustomAttribDefinitionArray EMPTY_CUSTATTRIB;
+
+//////////////////////////////////////////////////////////////////////
+
+#define TESTMERGE(from, cmp, att, val, flag) \
+			tasksSrc.MergeTaskAttributes(from, tdiDestCopy, att, CTDCCustomAttribDefinitionArray(), flag); \
+			ExpectTrue(tdiDestCopy.val == cmp.val);
+
+#define TESTMERGEARR(from, cmp, att, arr, match, flag) \
+			tasksSrc.MergeTaskAttributes(from, tdiDestCopy, att, CTDCCustomAttribDefinitionArray(), flag); \
+			ExpectTrue(Misc::match(tdiDestCopy.arr, cmp.arr, FALSE));
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -55,6 +69,8 @@ TESTRESULT CTaskFileTest::Run()
 	TestMergeTaskAttributesPreservingNonEmptyDestValues();
 	TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues();
 
+	// -----------------------------------------------------
+
 	TestHierarchyConstructionPerformance();
 	TestFlatListConstructionPerformance();
 
@@ -63,28 +79,55 @@ TESTRESULT CTaskFileTest::Run()
 
 void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(OverwriteAll)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
-	TODOITEM tdiDestEmpty, tdiDestFull;
+	TODOITEM tdiSrcEmpty, tdiSrcFull, tdiDestFull;
 
-	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiSrcFull, tdiDestFull);
 
+	// Test merging of all attributes -----------------------------------------------------
 	{
-		TODOITEM tdiDestCopy(tdiDestFull), tdiSrcEmpty;
-		tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_NONE);
-		tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiSrcEmpty, TDLMTA_NONE);
+		// Empty source values into non-empty destination -> destination == source
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_OVERWRITEALL);
 
-		ExpectTrue(tdiDestCopy == tdiSrcEmpty);
+			ExpectTrue(tdiDestCopy == tdiSrcEmpty);
+		}
+
+		// Full source values into non-empty destination -> destination == source
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_OVERWRITEALL);
+
+			ExpectTrue(tdiDestCopy == tdiSrcFull);
+		}
 	}
 
+	// Test merging of some attributes -----------------------------------------------------
 	{
-		TODOITEM tdiDestCopy(tdiDestFull), tdiSrcFull;
-		tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_NONE);
-		tasksSrc.MergeTaskAttributes(hSrcFull, tdiSrcFull, TDLMTA_NONE);
+		CTDCAttributeMap mapMerge, mapRest;
+		PopulateMergeAttributeMaps(mapMerge, mapRest);
 
-		ExpectTrue(tdiDestCopy == tdiSrcFull);
+		// Empty source values into non-empty destination -> destination == source
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_OVERWRITEALL);
+
+			ExpectTrue(tdiDestCopy.Matches(tdiSrcEmpty, mapMerge));
+			ExpectTrue(tdiDestCopy.Matches(tdiDestFull, mapRest));
+		}
+
+		// Full source values into non-empty destination
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_OVERWRITEALL);
+
+			ExpectTrue(tdiDestCopy.Matches(tdiSrcFull, mapMerge));
+			ExpectTrue(tdiDestCopy.Matches(tdiDestFull, mapRest));
+		}
 	}
 	
 	EndTest();
@@ -92,102 +135,179 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 
 void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(ExcludeEmptySrcValues)"));
 
-	// Test with empty and fully populated 
+	CTaskFile tasksSrc;
+	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
+	TODOITEM tdiSrcFull, tdiDestFull;
+
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiSrcFull, tdiDestFull);
+
+	// Test merging of all attributes -----------------------------------------------------
 	{
-		CTaskFile tasksSrc;
-		HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
-		TODOITEM tdiDestEmpty, tdiDestFull;
-
-		PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
-
+		// Empty source values into non-empty destination -> No change
 		{
 			TODOITEM tdiDestCopy(tdiDestFull);
 			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
-			ExpectTrue(tdiDestCopy == tdiDestFull); // no change
+			ExpectTrue(tdiDestCopy == tdiDestFull);
 		}
 
+		// Full source values into non-empty destination -> destination == source
 		{
-			TODOITEM tdiDestCopy(tdiDestFull), tdiSrcFull;
+			TODOITEM tdiDestCopy(tdiDestFull);
 			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
-			tasksSrc.MergeTaskAttributes(hSrcFull, tdiSrcFull, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
 			ExpectTrue(tdiDestCopy == tdiSrcFull);
 		}
 	}
 
-	// Test with empty and fully populated 
+	// Test merging of some attributes -----------------------------------------------------
 	{
-		CTaskFile tasksSrc;
-		HTASKITEM hSrcEmpty = NULL, hSrcPartial = NULL;
-		TODOITEM tdiDestEmpty, tdiDestPartial;
+		CTDCAttributeMap mapMerge, mapRest;
+		PopulateMergeAttributeMaps(mapMerge, mapRest);
 
-		PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcPartial, tdiDestEmpty, tdiDestPartial, TRUE);
-
+		// Empty source values into non-empty destination -> No change
 		{
-			TODOITEM tdiDestCopy(tdiDestPartial);
-			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
-			ExpectTrue(tdiDestCopy == tdiDestPartial); 
+			ExpectTrue(tdiDestCopy == tdiDestFull);
 		}
 
+		// Full source values into non-empty destination
 		{
-			TODOITEM tdiDestCopy(tdiDestPartial), tdiSrcFull;
-			tasksSrc.MergeTaskAttributes(hSrcPartial, tdiDestCopy, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
-			tasksSrc.MergeTaskAttributes(hSrcPartial, tdiSrcFull, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
-			ExpectTrue(tdiDestCopy == tdiSrcFull);
+			ExpectTrue(tdiDestCopy.Matches(tdiSrcFull, mapMerge));
+			ExpectTrue(tdiDestCopy.Matches(tdiDestFull, mapRest));
 		}
 	}
-	
+		
 	EndTest();
 }
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
 
-	// Initialise source tasklist with an empty task and a full task
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
-	TODOITEM tdiDestEmpty, tdiDestFull;
+	TODOITEM tdiSrcFull, tdiDestEmpty, tdiDestFull;
 
-	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiSrcFull, tdiDestFull);
 
+	// Test merging of all attributes -----------------------------------------------------
+	{
+		// Empty source values into non-empty destination -> No change
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_PRESERVENONEMPTYDESTVALUES);
 
+			ExpectTrue(tdiDestCopy == tdiDestFull);
+		}
 
+		// Full source values into non-empty destination -> no change
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiDestFull);
+		}
+
+		// Full source values into empty destination -> destination == source
+		{
+			TODOITEM tdiDestCopy(tdiDestEmpty);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiSrcFull);
+		}
+	}
+
+	// Test merging of some attributes -----------------------------------------------------
+	{
+		CTDCAttributeMap mapMerge, mapRest;
+		PopulateMergeAttributeMaps(mapMerge, mapRest);
+
+		// Empty source values into non-empty destination -> No change
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiDestFull);
+		}
+
+		// Full source values into non-empty destination -> no change
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiDestFull);
+		}
+
+		// Full source values into empty destination -> destination == source
+		{
+			TODOITEM tdiDestCopy(tdiDestEmpty);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+
+			ExpectTrue(tdiDestCopy.Matches(tdiSrcFull, mapMerge));
+			ExpectTrue(tdiDestCopy.Matches(tdiDestEmpty, mapRest));
+		}
+	}
 
 	EndTest();
 }
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes"));
+	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
 
-	// Initialise source tasklist with an empty task and a full task
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
+	TODOITEM tdiSrcFull, tdiDestEmpty, tdiDestFull;
 
-	TODOITEM tdiDestEmpty, tdiDestFull;
+	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiSrcFull, tdiDestFull);
 
-	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiDestEmpty, tdiDestFull, FALSE);
+	// Test merging of all attributes -----------------------------------------------------
+	{
+		// Test merging empty source values into non-empty destination -> No change
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, TDLMTA_PRESERVENONEMPTYDESTVALUES | TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
+			ExpectTrue(tdiDestCopy == tdiDestFull);
+		}
 
+		// Test merging non-empty source values into non-empty destination -> no change
+		{
+			TODOITEM tdiDestCopy(tdiDestFull);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_PRESERVENONEMPTYDESTVALUES | TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
+			ExpectTrue(tdiDestCopy == tdiDestFull);
+		}
+
+		// Test merging non-empty source values into empty destination -> destination == source
+		{
+			TODOITEM tdiDestCopy(tdiDestEmpty);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, TDLMTA_PRESERVENONEMPTYDESTVALUES | TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+
+			ExpectTrue(tdiDestCopy == tdiSrcFull);
+		}
+	}
 
 	EndTest();
 }
 
 void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 
-										   TODOITEM& tdiDestEmpty, TODOITEM& tdiDestFull, BOOL bPartial)
+										   TODOITEM& tdiSrcFull, TODOITEM& tdiDestFull)
 {
 	// Initialise empty and full source tasks
 	hSrcEmpty = tasksSrc.NewTask(_T(""), NULL, 0, 0);
-	hSrcFull = tasksSrc.NewSiblingTask(_T("Src.FullTask"), hSrcEmpty, 1, TRUE);
+	hSrcFull = tasksSrc.NewSiblingTask(_T(""), hSrcEmpty, 1, TRUE);
 
-	tasksSrc.SetTaskComments(hSrcFull, _T("Comments"));
+	tasksSrc.SetTaskTitle(hSrcFull, _T("Src.FullTask"));
+	tasksSrc.SetTaskComments(hSrcFull, _T("Src.Comments"));
 	tasksSrc.SetTaskAllocatedBy(hSrcFull, _T("Src.AllocBy"));
 	tasksSrc.SetTaskStatus(hSrcFull, _T("Src.Status"));
 	tasksSrc.SetTaskVersion(hSrcFull, _T("Src.Version"));
@@ -199,7 +319,6 @@ void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEm
 	tasksSrc.SetTaskCost(hSrcFull, 5.67);
 	tasksSrc.SetTaskTimeEstimate(hSrcFull, 2.34, TDCU_WEEKS);
 	tasksSrc.SetTaskTimeSpent(hSrcFull, 1.23, TDCU_HOURS);
-	//tasksSrc.SetTaskRecurrence(hSrcFull, _T("Src."));
 
 	tasksSrc.AddTaskAllocatedTo(hSrcFull, _T("Src.AllocTo"));
 	tasksSrc.AddTaskCategory(hSrcFull, _T("Src.Category"));
@@ -207,18 +326,15 @@ void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEm
 	tasksSrc.AddTaskDependency(hSrcFull, _T("Src.Dependency"));
 	tasksSrc.AddTaskFileLink(hSrcFull, _T("Src.FileLink"));
 
+	tasksSrc.SetTaskCreationDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_NOW)));
 	tasksSrc.SetTaskStartDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_YESTERDAY)));
 	tasksSrc.SetTaskDueDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_TOMORROW)));
 	tasksSrc.SetTaskDoneDate(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_TODAY)));
 	tasksSrc.SetTaskLastModified(hSrcFull, COleDateTime(CDateHelper::GetDate(DHD_TODAY)), _T("Src.ModifiedBy"));
 
-	// Initialise similar destination tasks
-	tdiDestFull.aAllocTo.Add(_T("Dest.AllocTo"));
-	tdiDestFull.aCategories.Add(_T("Dest.Category"));
-	tdiDestFull.aTags.Add(_T("Dest.Tag"));
-	tdiDestFull.aDependencies.Add(_T("Dest.Dependency"));
-	tdiDestFull.aFileLinks.Add(_T("Dest.FileLink"));
-
+	tasksSrc.MergeTaskAttributes(hSrcFull, tdiSrcFull, TDLMTA_OVERWRITEALL);
+	
+	// Initialise full destination task
 	tdiDestFull.sTitle = _T("Dest.FullTask");
 	tdiDestFull.sComments = _T("Dest.Comments");
 	tdiDestFull.sAllocBy = _T("Dest.AllocBy");
@@ -234,10 +350,48 @@ void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEm
 	tdiDestFull.timeEstimate = TDCTIMEPERIOD(8.90, TDCU_MINS);
 	tdiDestFull.timeSpent = TDCTIMEPERIOD(7.89, TDCU_MONTHS);
 
+	tdiDestFull.aAllocTo.Add(_T("Dest.AllocTo"));
+	tdiDestFull.aCategories.Add(_T("Dest.Category"));
+	tdiDestFull.aTags.Add(_T("Dest.Tag"));
+	tdiDestFull.aDependencies.Add(_T("Dest.Dependency"));
+	tdiDestFull.aFileLinks.Add(_T("Dest.FileLink"));
+
+	tdiDestFull.dateCreated = CDateHelper::GetDate(DHD_NOW);
 	tdiDestFull.dateStart = CDateHelper::GetDate(DHD_YESTERDAY);
 	tdiDestFull.dateDue = CDateHelper::GetDate(DHD_TOMORROW);
 	tdiDestFull.dateDone = CDateHelper::GetDate(DHD_TODAY);
 	tdiDestFull.dateLastMod = CDateHelper::GetDate(DHD_TODAY);
+}
+
+void CTaskFileTest::PopulateMergeAttributeMaps(CTDCAttributeMap& mapMerge, CTDCAttributeMap& mapRest)
+{
+	mapMerge.RemoveAll();
+	mapRest.RemoveAll();
+
+	mapMerge.Add(TDCA_TASKNAME);
+	mapMerge.Add(TDCA_ALLOCBY);
+	mapMerge.Add(TDCA_VERSION);
+	mapMerge.Add(TDCA_LASTMODBY);
+	mapMerge.Add(TDCA_RISK);
+	mapMerge.Add(TDCA_COLOR);
+	mapMerge.Add(TDCA_TIMEESTIMATE);
+	mapMerge.Add(TDCA_ALLOCTO);
+	mapMerge.Add(TDCA_TAGS);
+	mapMerge.Add(TDCA_FILELINK);
+	mapMerge.Add(TDCA_STARTDATE);
+	mapMerge.Add(TDCA_DONEDATE);
+
+	mapRest.Add(TDCA_COMMENTS);
+	mapRest.Add(TDCA_STATUS);
+	mapRest.Add(TDCA_EXTERNALID);
+	mapRest.Add(TDCA_PRIORITY);
+	mapRest.Add(TDCA_COST);
+	mapRest.Add(TDCA_TIMESPENT);
+	mapRest.Add(TDCA_CATEGORY);
+	mapRest.Add(TDCA_DEPENDENCY);
+	mapRest.Add(TDCA_CREATIONDATE);
+	mapRest.Add(TDCA_DUEDATE);
+	mapRest.Add(TDCA_LASTMODDATE);
 }
 
 void CTaskFileTest::BeginPerformanceTest(LPCTSTR szFunction)

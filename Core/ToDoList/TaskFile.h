@@ -58,7 +58,7 @@ enum
 // Flags for use with MergeTaskAttributes
 enum
 {
-	TDLMTA_NONE							= 0x0,
+	TDLMTA_OVERWRITEALL					= 0x0,
 	TDLMTA_PRESERVENONEMPTYDESTVALUES	= 0x1,
 	TDLMTA_EXCLUDEEMPTYSOURCEVALUES		= 0x2,
 };

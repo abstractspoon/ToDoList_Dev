@@ -50,8 +50,8 @@ protected:
 	void TestFlatListConstructionPerformance();
 
 	// Merge related functions
-	static void PrepareMergeTestTasks(CTaskFile& tasks, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 
-									   TODOITEM& tdiDestEmpty, TODOITEM& tdiDestFull, BOOL bPartial);
+	static void PrepareMergeTestTasks(CTaskFile& tasks, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, TODOITEM& tdiSrcFull, TODOITEM& tdiDestFull);
+	static void PopulateMergeAttributeMaps(CTDCAttributeMap& mapMerge, CTDCAttributeMap& mapRest);
 
 	// Performance related functions
 	void BeginPerformanceTest(LPCTSTR szFunction);

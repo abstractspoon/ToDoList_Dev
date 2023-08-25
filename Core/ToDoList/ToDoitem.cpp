@@ -772,9 +772,9 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	CDateHelper::ClearDate(dateLastMod);
 }
 
-TODOITEM::TODOITEM(const TODOITEM& tdi)
+TODOITEM::TODOITEM(const TODOITEM& tdiOther)
 { 
-	*this = tdi;
+	*this = tdiOther;
 	
     if (!CDateHelper::IsDateSet(dateCreated))
 		dateCreated = COleDateTime::GetCurrentTime();
@@ -784,93 +784,167 @@ TODOITEM::TODOITEM(const TODOITEM& tdi)
 	dateDue = GetDefaultStartDueDate(dateCreated, dateDue);
 }
 
-TODOITEM& TODOITEM::operator=(const TODOITEM& tdi) 
+TODOITEM& TODOITEM::operator=(const TODOITEM& tdiOther) 
 {
-	sTitle = tdi.sTitle;
-	sComments = tdi.sComments;
-	customComments = tdi.customComments;
-	cfComments = tdi.cfComments;
-	color = tdi.color; 
-	sAllocBy = tdi.sAllocBy;
-	sStatus = tdi.sStatus;
-	nPriority = tdi.nPriority;
-	nPercentDone = tdi.nPercentDone;
-	timeEstimate = tdi.timeEstimate;
-	timeSpent = tdi.timeSpent;
-	cost = tdi.cost;
-	dateStart = tdi.dateStart;
-	dateDue = tdi.dateDue;
-	dateDone = tdi.dateDone;
-	dateCreated = tdi.dateCreated;
-	dateLastMod = tdi.dateLastMod;
-	bFlagged = tdi.bFlagged;
-	bLocked = tdi.bLocked;
-	sCreatedBy = tdi.sCreatedBy;
-	nRisk = tdi.nRisk;
-	sExternalID = tdi.sExternalID;
-	trRecurrence = tdi.trRecurrence;
-	sLastModifiedBy = tdi.sLastModifiedBy;
-	sVersion = tdi.sVersion;
-	sIcon = tdi.sIcon;
-	dwTaskRefID = tdi.dwTaskRefID;
+	sTitle = tdiOther.sTitle;
+	sComments = tdiOther.sComments;
+	customComments = tdiOther.customComments;
+	cfComments = tdiOther.cfComments;
+	color = tdiOther.color; 
+	sAllocBy = tdiOther.sAllocBy;
+	sStatus = tdiOther.sStatus;
+	nPriority = tdiOther.nPriority;
+	nPercentDone = tdiOther.nPercentDone;
+	timeEstimate = tdiOther.timeEstimate;
+	timeSpent = tdiOther.timeSpent;
+	cost = tdiOther.cost;
+	dateStart = tdiOther.dateStart;
+	dateDue = tdiOther.dateDue;
+	dateDone = tdiOther.dateDone;
+	dateCreated = tdiOther.dateCreated;
+	dateLastMod = tdiOther.dateLastMod;
+	bFlagged = tdiOther.bFlagged;
+	bLocked = tdiOther.bLocked;
+	sCreatedBy = tdiOther.sCreatedBy;
+	nRisk = tdiOther.nRisk;
+	sExternalID = tdiOther.sExternalID;
+	trRecurrence = tdiOther.trRecurrence;
+	sLastModifiedBy = tdiOther.sLastModifiedBy;
+	sVersion = tdiOther.sVersion;
+	sIcon = tdiOther.sIcon;
+	dwTaskRefID = tdiOther.dwTaskRefID;
 	
-	aCategories.Copy(tdi.aCategories);
-	aTags.Copy(tdi.aTags);
-	aAllocTo.Copy(tdi.aAllocTo);
-	aDependencies.Copy(tdi.aDependencies);
-	aFileLinks.Copy(tdi.aFileLinks);
+	aCategories.Copy(tdiOther.aCategories);
+	aTags.Copy(tdiOther.aTags);
+	aAllocTo.Copy(tdiOther.aAllocTo);
+	aDependencies.Copy(tdiOther.aDependencies);
+	aFileLinks.Copy(tdiOther.aFileLinks);
 
 	// meta data
-	Misc::Copy(tdi.mapMetaData, mapMetaData);
+	Misc::Copy(tdiOther.mapMetaData, mapMetaData);
 	
 	// custom attributes
-	mapCustomData.Copy(tdi.mapCustomData);
+	mapCustomData.Copy(tdiOther.mapCustomData);
 
 	return *this;
 }
 
-BOOL TODOITEM::operator==(const TODOITEM& tdi) 
+BOOL TODOITEM::operator==(const TODOITEM& tdiOther) const
 {
 	// least expensive checks first
-	return ((dwTaskRefID == tdi.dwTaskRefID) &&
-			(bFlagged == tdi.bFlagged) &&
-			(bLocked == tdi.bLocked) &&
-			(color == tdi.color) && 
-			(nPriority == tdi.nPriority) &&
-			(nRisk == tdi.nRisk) &&
-			(nPercentDone == tdi.nPercentDone) &&
-			(timeEstimate == tdi.timeEstimate) &&
-			(timeSpent == tdi.timeSpent) &&
-			(cost == tdi.cost) &&
-			(dateStart == tdi.dateStart) &&
-			(dateDue == tdi.dateDue) &&
-			(dateDone == tdi.dateDone) &&
-			(dateCreated == tdi.dateCreated) &&
-			(dateLastMod == tdi.dateLastMod) &&
-			(sLastModifiedBy == tdi.sLastModifiedBy) &&
-			(sTitle = tdi.sTitle) &&
-			(sComments == tdi.sComments) &&
-			(customComments == tdi.customComments) &&
-			(cfComments == tdi.cfComments) &&
-			(sAllocBy == tdi.sAllocBy) &&
-			(sStatus == tdi.sStatus) &&
-			(sCreatedBy == tdi.sCreatedBy) &&
-			(sExternalID == tdi.sExternalID) &&
-			(sVersion == tdi.sVersion) &&
-			(sIcon == tdi.sIcon) &&
-			(trRecurrence == tdi.trRecurrence) &&
-			Misc::MatchAll(aCategories, tdi.aCategories) &&
-			Misc::MatchAll(aTags, tdi.aTags) &&
-			Misc::MatchAll(aAllocTo, tdi.aAllocTo) &&
-			Misc::MatchAllT(aDependencies, tdi.aDependencies, FALSE) &&
-			Misc::MatchAll(aFileLinks, tdi.aFileLinks) &&
-			Misc::MatchAll(tdi.mapMetaData, mapMetaData) &&
-			mapCustomData.MatchAll(tdi.mapCustomData));
+	return ((dwTaskRefID == tdiOther.dwTaskRefID) &&
+			(bFlagged == tdiOther.bFlagged) &&
+			(bLocked == tdiOther.bLocked) &&
+			(color == tdiOther.color) && 
+			(nPriority == tdiOther.nPriority) &&
+			(nRisk == tdiOther.nRisk) &&
+			(nPercentDone == tdiOther.nPercentDone) &&
+			(timeEstimate == tdiOther.timeEstimate) &&
+			(timeSpent == tdiOther.timeSpent) &&
+			(cost == tdiOther.cost) &&
+			(dateStart == tdiOther.dateStart) &&
+			(dateDue == tdiOther.dateDue) &&
+			(dateDone == tdiOther.dateDone) &&
+			(dateCreated == tdiOther.dateCreated) &&
+			(dateLastMod == tdiOther.dateLastMod) &&
+			(sLastModifiedBy == tdiOther.sLastModifiedBy) &&
+			(sTitle == tdiOther.sTitle) &&
+			(sComments == tdiOther.sComments) &&
+			(customComments == tdiOther.customComments) &&
+			(cfComments == tdiOther.cfComments) &&
+			(sAllocBy == tdiOther.sAllocBy) &&
+			(sStatus == tdiOther.sStatus) &&
+			(sCreatedBy == tdiOther.sCreatedBy) &&
+			(sExternalID == tdiOther.sExternalID) &&
+			(sVersion == tdiOther.sVersion) &&
+			(sIcon == tdiOther.sIcon) &&
+			(trRecurrence == tdiOther.trRecurrence) &&
+			Misc::MatchAll(aCategories, tdiOther.aCategories) &&
+			Misc::MatchAll(aTags, tdiOther.aTags) &&
+			Misc::MatchAll(aAllocTo, tdiOther.aAllocTo) &&
+			Misc::MatchAllT(aDependencies, tdiOther.aDependencies, FALSE) &&
+			Misc::MatchAll(aFileLinks, tdiOther.aFileLinks) &&
+			Misc::MatchAll(tdiOther.mapMetaData, mapMetaData) &&
+			mapCustomData.MatchAll(tdiOther.mapCustomData));
 }
 
-BOOL TODOITEM::operator!=(const TODOITEM& tdi) 
+BOOL TODOITEM::operator!=(const TODOITEM& tdiOther) const
 {
-	return !(*this == tdi);
+	return !(*this == tdiOther);
+}
+
+BOOL TODOITEM::Matches(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const
+{
+	if (!mapAttrib.GetCount())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (mapAttrib.Has(TDCA_ALL))
+		return (*this == tdiOther);
+
+#define ATTRIBMATCHES(att, var) case att: if (var == tdiOther.var) bMatches = TRUE; break
+#define ATTRIBARRMATCHES(att, var, fn) case att: if (Misc::fn(var, tdiOther.var, FALSE)) bMatches = TRUE; break
+
+	POSITION pos = mapAttrib.GetStartPosition();
+	BOOL bMatches = TRUE;
+
+	while (pos && bMatches)
+	{
+		switch (mapAttrib.GetNext(pos))
+		{
+		ATTRIBMATCHES(TDCA_TASKNAME, sTitle);
+		ATTRIBMATCHES(TDCA_ALLOCBY, sAllocBy);
+		ATTRIBMATCHES(TDCA_STATUS, sStatus);
+		ATTRIBMATCHES(TDCA_VERSION, sVersion);
+		ATTRIBMATCHES(TDCA_EXTERNALID, sExternalID);
+		ATTRIBMATCHES(TDCA_LASTMODBY, sLastModifiedBy);
+		ATTRIBMATCHES(TDCA_ICON, sLastModifiedBy);
+
+		ATTRIBMATCHES(TDCA_PRIORITY, nPriority);
+		ATTRIBMATCHES(TDCA_RISK, nRisk);
+		ATTRIBMATCHES(TDCA_COLOR, color);
+		ATTRIBMATCHES(TDCA_COST, cost);
+		ATTRIBMATCHES(TDCA_TIMEESTIMATE, timeEstimate);
+		ATTRIBMATCHES(TDCA_TIMESPENT, timeSpent);
+		ATTRIBMATCHES(TDCA_LOCK, bLocked);
+		ATTRIBMATCHES(TDCA_FLAG, bFlagged);
+		ATTRIBMATCHES(TDCA_RECURRENCE, trRecurrence);
+		ATTRIBMATCHES(TDCA_PERCENT, nPercentDone);
+
+		ATTRIBMATCHES(TDCA_CREATIONDATE, dateCreated);
+		ATTRIBMATCHES(TDCA_STARTDATE, dateStart);
+		ATTRIBMATCHES(TDCA_DUEDATE, dateDue);
+		ATTRIBMATCHES(TDCA_DONEDATE, dateDone);
+		ATTRIBMATCHES(TDCA_LASTMODDATE, dateLastMod);
+
+		ATTRIBARRMATCHES(TDCA_CATEGORY, aAllocTo, MatchAll);
+		ATTRIBARRMATCHES(TDCA_ALLOCTO, aCategories, MatchAll);
+		ATTRIBARRMATCHES(TDCA_TAGS, aTags, MatchAll);
+		ATTRIBARRMATCHES(TDCA_FILELINK, aFileLinks, MatchAll);
+		ATTRIBARRMATCHES(TDCA_DEPENDENCY, aDependencies, MatchAllT);
+
+		case TDCA_COMMENTS:
+			bMatches |= (sComments == tdiOther.sComments) &&
+						(customComments == tdiOther.customComments) &&
+						(cfComments == tdiOther.cfComments);
+
+		case TDCA_METADATA:
+			bMatches |= Misc::MatchAll(tdiOther.mapMetaData, mapMetaData);
+			break;
+			
+		case TDCA_CUSTOMATTRIB:
+			bMatches |= mapCustomData.MatchAll(tdiOther.mapCustomData);
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return bMatches;
 }
 
 // only interested in dependencies within this tasklist
@@ -1309,7 +1383,7 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 	return TRUE;
 }
 
-BOOL TODOITEM::GetAttributeValues(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
+BOOL TODOITEM::GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	data.Clear();
 
