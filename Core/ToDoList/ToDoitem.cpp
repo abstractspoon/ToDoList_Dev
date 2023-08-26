@@ -864,7 +864,7 @@ BOOL TODOITEM::operator==(const TODOITEM& tdiOther) const
 			Misc::MatchAll(aAllocTo, tdiOther.aAllocTo) &&
 			Misc::MatchAllT(aDependencies, tdiOther.aDependencies, FALSE) &&
 			Misc::MatchAll(aFileLinks, tdiOther.aFileLinks) &&
-			Misc::MatchAll(tdiOther.mapMetaData, mapMetaData) &&
+			Misc::MatchAll(mapMetaData, tdiOther.mapMetaData) &&
 			mapCustomData.MatchAll(tdiOther.mapCustomData));
 }
 
@@ -873,9 +873,9 @@ BOOL TODOITEM::operator!=(const TODOITEM& tdiOther) const
 	return !(*this == tdiOther);
 }
 
-BOOL TODOITEM::Matches(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const
+BOOL TODOITEM::MatchAll(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const
 {
-	if (!mapAttrib.GetCount())
+	if (!mapAttrib.GetCount() || mapAttrib.Has(TDCA_NONE))
 	{
 		ASSERT(0);
 		return FALSE;

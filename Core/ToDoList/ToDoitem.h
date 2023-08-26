@@ -175,7 +175,7 @@ public:
 	BOOL operator==(const TODOITEM& tdiOther) const;
 	BOOL operator!=(const TODOITEM& tdiOther) const;
 
-	BOOL Matches(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const;
+	BOOL MatchAll(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const;
 	
 	// helpers
 	BOOL HasLastMod() const;

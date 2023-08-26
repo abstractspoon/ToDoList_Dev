@@ -116,8 +116,8 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 			TODOITEM tdiDestCopy(tdiDestFull);
 			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_OVERWRITEALL);
 
-			ExpectTrue(tdiDestCopy.Matches(tdiSrcEmpty, mapMerge));
-			ExpectTrue(tdiDestCopy.Matches(tdiDestFull, mapRest));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiSrcEmpty, mapMerge));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapRest));
 		}
 
 		// Full source values into non-empty destination
@@ -125,8 +125,8 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 			TODOITEM tdiDestCopy(tdiDestFull);
 			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_OVERWRITEALL);
 
-			ExpectTrue(tdiDestCopy.Matches(tdiSrcFull, mapMerge));
-			ExpectTrue(tdiDestCopy.Matches(tdiDestFull, mapRest));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiSrcFull, mapMerge));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapRest));
 		}
 	}
 	
@@ -180,8 +180,8 @@ void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 			TODOITEM tdiDestCopy(tdiDestFull);
 			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
-			ExpectTrue(tdiDestCopy.Matches(tdiSrcFull, mapMerge));
-			ExpectTrue(tdiDestCopy.Matches(tdiDestFull, mapRest));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiSrcFull, mapMerge));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapRest));
 		}
 	}
 		
@@ -251,8 +251,8 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 			TODOITEM tdiDestCopy(tdiDestEmpty);
 			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_PRESERVENONEMPTYDESTVALUES);
 
-			ExpectTrue(tdiDestCopy.Matches(tdiSrcFull, mapMerge));
-			ExpectTrue(tdiDestCopy.Matches(tdiDestEmpty, mapRest));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiSrcFull, mapMerge));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiDestEmpty, mapRest));
 		}
 	}
 
