@@ -17,18 +17,20 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLPasteTaskAttributesDlg::CTDLPasteTaskAttributesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribs, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLPasteTaskAttributesDlg::IDD, _T(""), pParent),
+	CTDLDialog(CTDLPasteTaskAttributesDlg::IDD, _T("PasteTaskAttributes"), pParent),
 	m_lbSpecificAttributes(aCustAttribs, FALSE)
 {
 	//{{AFX_DATA_INIT(CTDLPasteTaskAttributesDlg)
-	m_bIncludeComments = FALSE;
-	m_bIncludeCustomAttribs = FALSE;
-	m_bIncludeDates = FALSE;
-	m_bOnlyOverwriteEmpty = TRUE;
-	m_bOnlyOverwriteWithNonEmpty = TRUE;
-	m_bSelectSpecificAttribs = 0;
-	m_bIncludeTaskTitle = FALSE;
 	//}}AFX_DATA_INIT
+	CPreferences prefs;
+
+	m_bIncludeComments = prefs.GetProfileInt(m_sPrefsKey, _T("IncludeComments"), FALSE);
+	m_bIncludeCustomAttribs = prefs.GetProfileInt(m_sPrefsKey, _T("IncludeCustomAttribs"), FALSE);
+	m_bIncludeDates = prefs.GetProfileInt(m_sPrefsKey, _T("IncludeDates"), FALSE);
+	m_bOnlyOverwriteEmpty = prefs.GetProfileInt(m_sPrefsKey, _T("OnlyOverwriteEmpty"), TRUE);
+	m_bOnlyOverwriteWithNonEmpty = prefs.GetProfileInt(m_sPrefsKey, _T("OnlyOverwriteWithNonEmpty"), TRUE);
+	m_bSelectSpecificAttribs = prefs.GetProfileInt(m_sPrefsKey, _T("SelectSpecificAttribs"), FALSE);
+	m_bIncludeTaskTitle = prefs.GetProfileInt(m_sPrefsKey, _T("IncludeTaskTitle"), FALSE);
 }
 
 
@@ -61,6 +63,15 @@ END_MESSAGE_MAP()
 BOOL CTDLPasteTaskAttributesDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
+
+	CPreferences prefs;
+	CTDCAttributeMap mapAttrib;
+	CStringArray aCustAttrib;
+
+	mapAttrib.Load(prefs, m_sPrefsKey + ("\\SelectedAttrib"));
+	prefs.GetProfileArray(m_sPrefsKey + ("\\SelectedCustAttrib"), aCustAttrib);
+
+	m_lbSpecificAttributes.SetSelectedAttributes(mapAttrib, aCustAttrib);
 	
 	EnableDisableControls();
 	
@@ -115,4 +126,30 @@ void CTDLPasteTaskAttributesDlg::EnableDisableControls()
 	GetDlgItem(IDC_INCLUDECUSTOMATTRIB)->EnableWindow(!m_bSelectSpecificAttribs);
 	GetDlgItem(IDC_INCLUDEDATES)->EnableWindow(!m_bSelectSpecificAttribs);
 	GetDlgItem(IDC_INCLUDETITLE)->EnableWindow(!m_bSelectSpecificAttribs);
+}
+
+void CTDLPasteTaskAttributesDlg::OnOK()
+{
+	CTDLDialog::OnOK();
+
+	CPreferences prefs;
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("IncludeComments"), m_bIncludeComments);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("IncludeCustomAttribs"), m_bIncludeCustomAttribs);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("IncludeDates"), m_bIncludeDates);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("OnlyOverwriteEmpty"), m_bOnlyOverwriteEmpty);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("OnlyOverwriteWithNonEmpty"), m_bOnlyOverwriteWithNonEmpty);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SelectSpecificAttribs"), m_bSelectSpecificAttribs);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("IncludeTaskTitle"), m_bIncludeTaskTitle);
+
+	CTDCAttributeMap mapAttrib;
+	CStringSet mapCustAttrib;
+	m_lbSpecificAttributes.GetSelectedAttributes(mapAttrib, mapCustAttrib);
+
+	mapAttrib.Save(prefs, m_sPrefsKey + ("\\SelectedAttrib"));
+
+	CStringArray aCustAttrib;
+	mapCustAttrib.CopyTo(aCustAttrib);
+
+	prefs.WriteProfileArray(m_sPrefsKey + ("\\SelectedCustAttrib"), aCustAttrib);
 }

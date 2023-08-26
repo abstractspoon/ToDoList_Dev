@@ -277,6 +277,9 @@ public:
 class CStringSet : public CSetBase<CString, LPCTSTR>
 {
 public:
+	CStringSet() { }
+	CStringSet(const CStringArray& other) { CopyFrom(other); }
+
 	int CopyFrom(const CStringArray& other) { return CSetBase<CString, LPCTSTR>::CopyFrom(other); }
 	int CopyTo(CStringArray& other) const { return CSetBase<CString, LPCTSTR>::CopyTo(other); }
 
