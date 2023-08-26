@@ -123,10 +123,10 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 		// Full source values into non-empty destination
 		{
 			TODOITEM tdiDestCopy(tdiDestFull);
-			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_OVERWRITEALL);
+			tasksSrc.MergeTaskAttributes(hSrcFull, tdiDestCopy, mapRest, EMPTY_CUSTATTRIB, TDLMTA_OVERWRITEALL);
 
-			ExpectTrue(tdiDestCopy.MatchAll(tdiSrcFull, mapMerge));
-			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapRest));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiSrcFull, mapRest));
+			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapMerge));
 		}
 	}
 	
@@ -170,7 +170,7 @@ void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 		// Empty source values into non-empty destination -> No change
 		{
 			TODOITEM tdiDestCopy(tdiDestFull);
-			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapRest, EMPTY_CUSTATTRIB, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 
 			ExpectTrue(tdiDestCopy == tdiDestFull);
 		}
@@ -233,7 +233,7 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 		// Empty source values into non-empty destination -> No change
 		{
 			TODOITEM tdiDestCopy(tdiDestFull);
-			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapMerge, EMPTY_CUSTATTRIB, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+			tasksSrc.MergeTaskAttributes(hSrcEmpty, tdiDestCopy, mapRest, EMPTY_CUSTATTRIB, TDLMTA_PRESERVENONEMPTYDESTVALUES);
 
 			ExpectTrue(tdiDestCopy == tdiDestFull);
 		}
