@@ -2232,7 +2232,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 	}
 	else if (HasStyle(TDCS_TASKCOLORISBACKGROUND) &&
-			 !bSelected && !bDone && (crText != GetSysColor(COLOR_WINDOWTEXT)))
+			 !bSelected && (crText != GetSysColor(COLOR_WINDOWTEXT)))
 	{
 		crBack = crText;
 		crText = GraphicsMisc::GetBestTextColor(crBack);

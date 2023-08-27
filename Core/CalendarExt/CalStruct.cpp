@@ -602,7 +602,7 @@ COLORREF TASKCALITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 		if (bSelected)
 			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
-		if (bColorIsBkgnd && !IsDone(TRUE))
+		if (bColorIsBkgnd)
 			return GraphicsMisc::GetBestTextColor(color);
 
 		// else
@@ -615,16 +615,13 @@ COLORREF TASKCALITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 
 COLORREF TASKCALITEM::GetFillColor(BOOL bColorIsBkgnd) const
 {
-	if (HasColor() && !IsDone(TRUE))
+	if (HasColor())
 	{
 		if (bColorIsBkgnd)
-		{
 			return color;
-		}
-		else if (!Misc::IsHighContrastActive())
-		{
+
+		if (!Misc::IsHighContrastActive())
 			return GraphicsMisc::Lighter(color, 0.9);
-		}
 	}
 	
 	// else
@@ -635,14 +632,11 @@ COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !IsDone(TRUE))
-		{
+		if (bColorIsBkgnd)
 			return GraphicsMisc::Darker(color, 0.4);
-		}
-		else if (!Misc::IsHighContrastActive())
-		{
+
+		if (!Misc::IsHighContrastActive())
 			return color;
-		}
 	}
 	
 	// else

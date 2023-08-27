@@ -1018,9 +1018,8 @@ namespace MindMapUIExtension
 			if (m_TaskColorIsBkgnd)
 			{
 				var taskItem = (itemData as MindMapTaskItem);
-				var realItem = GetRealTaskItem(taskItem);
 
-				if (!taskItem.TextColor.IsEmpty && !realItem.IsDone(true))
+				if (!taskItem.TextColor.IsEmpty)
 					return taskItem.TextColor;
 			}
 
@@ -1136,7 +1135,7 @@ namespace MindMapUIExtension
 					else
 						textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 				}
-				else if (m_TaskColorIsBkgnd && !realItem.IsDone(true))
+				else if (m_TaskColorIsBkgnd)
 				{
 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
 				}

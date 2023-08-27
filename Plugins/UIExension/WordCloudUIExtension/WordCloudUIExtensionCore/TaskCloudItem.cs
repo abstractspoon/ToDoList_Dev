@@ -66,7 +66,7 @@ namespace WordCloudUIExtension
 					return DrawingColor.SetLuminance(TextColor, 0.3f);
 				}
 
-                if (taskColorIsBkgnd && !IsDone(true))
+                if (taskColorIsBkgnd)
                     return DrawingColor.GetBestTextColor(TextColor);
             }
             else
@@ -79,11 +79,8 @@ namespace WordCloudUIExtension
 
         public System.Drawing.Color GetBackColor(Boolean taskColorIsBkgnd)
         {
-            if (!taskTextColor.IsEmpty)
-            {
-                if (taskColorIsBkgnd && !IsDone(true))
-                    return TextColor;
-            }
+            if (!taskTextColor.IsEmpty && taskColorIsBkgnd)
+                return TextColor;
 
             // else
             return System.Drawing.Color.Empty;
