@@ -216,6 +216,7 @@
     <ClCompile Include="..\ToDoList\TDLMultiSortDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLOffsetDatesDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLOleMessageFilter.cpp" />
+    <ClCompile Include="..\ToDoList\TDLPasteTaskAttributesDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLPrefMigrationDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLPrintDialog.cpp" />
     <ClCompile Include="..\ToDoList\TDLPriorityComboBox.cpp" />
@@ -375,6 +376,7 @@
     <ClInclude Include="..\ToDoList\TDLMultiSortDlg.h" />
     <ClInclude Include="..\ToDoList\TDLOffsetDatesDlg.h" />
     <ClInclude Include="..\ToDoList\TDLOleMessageFilter.h" />
+    <ClInclude Include="..\ToDoList\TDLPasteTaskAttributesDlg.h" />
     <ClInclude Include="..\ToDoList\TDLPrefMigrationDlg.h" />
     <ClInclude Include="..\ToDoList\TDLPrintDialog.h" />
     <ClInclude Include="..\ToDoList\TDLPriorityComboBox.h" />

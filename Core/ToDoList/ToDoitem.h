@@ -170,10 +170,12 @@ public:
 	TODOITEM(LPCTSTR szTitle = NULL, LPCTSTR szComments = NULL); 
 	TODOITEM(const TODOITEM& tdi); 
 	
-	TODOITEM& operator=(const TODOITEM& tdi); 
+	TODOITEM& operator=(const TODOITEM& tdiOther); 
 	
-	BOOL operator==(const TODOITEM& tdi); 
-	BOOL operator!=(const TODOITEM& tdi); 
+	BOOL operator==(const TODOITEM& tdiOther) const;
+	BOOL operator!=(const TODOITEM& tdiOther) const;
+
+	BOOL MatchAll(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const;
 	
 	// helpers
 	BOOL HasLastMod() const;
@@ -231,7 +233,7 @@ public:
 
 	float GetCommentsSizeInKB() const;
 
-	BOOL GetAttributeValues(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
+	BOOL GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 	BOOL HasAttributeValue(TDC_ATTRIBUTE nAttribID) const;
 		
 	static COleDateTimeSpan GetRemainingTime(const COleDateTime& date); // in days

@@ -449,6 +449,7 @@ protected:
 	afx_msg void OnEditOpenFileLink(UINT nCmdID);
 	afx_msg void OnEditPasteAfter();
 	afx_msg void OnEditPasteSub();
+	afx_msg void OnEditPasteAttributes();
 	afx_msg void OnEditAddFileLink();
 	afx_msg void OnEditTaskcolor();
 	afx_msg void OnEditToggleTaskDone();
@@ -523,6 +524,7 @@ protected:
 	afx_msg void OnUpdateEditOpenFileLink(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAfter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteSub(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditPasteAttributes(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditAddFileLink(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditTasktext(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditTimeTrackTask(CCmdUI* pCmdUI);

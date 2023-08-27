@@ -101,6 +101,7 @@ public:
 
 	BOOL Add(TDC_ATTRIBUTE nAttrib);
 	int Append(const CTDCAttributeMap& other);
+	TDC_ATTRIBUTE GetFirst() const;
 
 	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
 

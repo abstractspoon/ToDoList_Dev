@@ -37,6 +37,7 @@
 #include "TDLCleanupIniPreferencesDlg.h"
 #include "TDLTasklistSaveAsDlg.h"
 #include "TDCAnonymizeTasklist.h"
+#include "TDLPasteTaskAttributesDlg.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -318,6 +319,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_PASTEAFTER, OnEditPasteAfter)
 	ON_COMMAND(ID_EDIT_PASTEASREF, OnEditPasteAsRef)
 	ON_COMMAND(ID_EDIT_PASTESUB, OnEditPasteSub)
+	ON_COMMAND(ID_EDIT_PASTEATTRIBUTES, OnEditPasteAttributes)
 	ON_COMMAND(ID_EDIT_QUICKFIND, OnQuickFind)
 	ON_COMMAND(ID_EDIT_QUICKFINDNEXT, OnQuickFindNext)
 	ON_COMMAND(ID_EDIT_QUICKFINDPREV, OnQuickFindPrev)
@@ -570,6 +572,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEAFTER, OnUpdateEditPasteAfter)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEASREF, OnUpdateEditPasteAsRef)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTESUB, OnUpdateEditPasteSub)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEATTRIBUTES, OnUpdateEditPasteAttributes)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_QUICKFIND, OnUpdateQuickFind)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_QUICKFINDNEXT, OnUpdateQuickFindNext)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_QUICKFINDPREV, OnUpdateQuickFindPrev)
@@ -1164,6 +1167,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_VIEW_DECREMENTTASKVIEWFONTSIZE);
 	aCmdIDs.Add(ID_EXIT);
 	aCmdIDs.Add(ID_FILE_ENCRYPT);
+	aCmdIDs.Add(ID_EDIT_PASTEATTRIBUTES);
 
 	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, colorMagenta);
 
@@ -5669,19 +5673,19 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 	if (startup.GetCopyTaskAttribute(nFrom, nTo))
 	{
-		tdc.CopySelectedTaskAttributeData(nFrom, nTo);
+		tdc.CopySelectedTaskAttributeValue(nFrom, nTo);
 	}
 	else if (startup.GetCopyTaskAttribute(nFrom, sTo))
 	{
-		tdc.CopySelectedTaskAttributeData(nFrom, sTo);
+		tdc.CopySelectedTaskAttributeValue(nFrom, sTo);
 	}
 	else if (startup.GetCopyTaskAttribute(sFrom, nTo))
 	{
-		tdc.CopySelectedTaskAttributeData(sFrom, nTo);
+		tdc.CopySelectedTaskAttributeValue(sFrom, nTo);
 	}
 	else if (startup.GetCopyTaskAttribute(sFrom, sTo))
 	{
-		tdc.CopySelectedTaskAttributeData(sFrom, sTo);
+		tdc.CopySelectedTaskAttributeValue(sFrom, sTo);
 	}
 
 	tdc.EndSelectedTaskEdit();
@@ -5845,6 +5849,37 @@ void CToDoListWnd::OnEditPasteSub()
 void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(CanPasteTasks(TDCP_ONSELTASK, FALSE));
+}
+
+void CToDoListWnd::OnEditPasteAttributes()
+{
+	CTaskFile tasks;
+	
+	if (CTaskClipboard::GetTasks(tasks, _T("")) != 1)
+		return;
+
+	// Get attributes to paste from user
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLPasteTaskAttributesDlg dlg(tdc.GetCustomAttributeDefs());
+
+	if (dlg.DoModal() == IDOK)
+	{
+		CTDCAttributeMap mapAttribs;
+
+		if (dlg.GetSelectedAttributes(mapAttribs))
+		{
+			DWORD dwFlags = 0;
+			Misc::SetFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES, dlg.GetWantPreserveNonEmptyDestinationValues());
+			Misc::SetFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES, dlg.GetExcludeEmptySourceValues());
+
+			tdc.PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), mapAttribs, dwFlags);
+		}
+	}
+}
+
+void CToDoListWnd::OnUpdateEditPasteAttributes(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(CTaskClipboard::GetTaskCount() == 1);
 }
 
 void CToDoListWnd::OnEditPasteAfter() 

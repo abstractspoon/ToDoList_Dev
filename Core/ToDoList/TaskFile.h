@@ -48,11 +48,19 @@ enum
 	TDL_FILEFORMAT_CUSTATTRIB,
 	TDL_FILEFORMAT_RECUR_MOD,
 	TDL_FILEFORMAT_LOCKING,
-	//TDL_FILEFORMAT_COSTISRATE,
+	TDL_FILEFORMAT_COSTISRATE,
 	// insert here when format changes
 
 	TDL_FILEFORMAT_NEXT,
 	TDL_FILEFORMAT_CURRENT = (TDL_FILEFORMAT_NEXT - 1) // ALWAYS LAST
+};
+
+// Flags for use with MergeTaskAttributes
+enum
+{
+	TDLMTA_OVERWRITEALL					= 0x0,
+	TDLMTA_PRESERVENONEMPTYDESTVALUES	= 0x1,
+	TDLMTA_EXCLUDEEMPTYSOURCEVALUES		= 0x2,
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +194,12 @@ public:
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
-	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
+
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const;
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi,
+							 const CTDCAttributeMap& mapAttribs,
+							 const CTDCCustomAttribDefinitionArray& aCustAttribs,
+							 DWORD dwFlags) const;
 
 	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod, const CString& sModifiedBy);
 	BOOL SetTaskDoneDate(HTASKITEM hTask, const COleDateTime& date);
@@ -552,6 +565,8 @@ protected:
 	int GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aSelTaskIDs) const;
 	void RemoveNonSelectedTasks(HTASKITEM hTask);
 	void CleanUp(HTASKITEM hTask = NULL);
+	BOOL WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
+							  const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const;
 
 	double GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const;
 	time_t GetTaskDate(HTASKITEM hTask, const CString& sDateItem, BOOL bIncTime) const;
@@ -562,7 +577,6 @@ protected:
 	const CString& GetTaskString(HTASKITEM hTask, const CString& sStringItem) const;
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
 	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
@@ -612,6 +626,7 @@ protected:
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
 	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
 	static LPCTSTR GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay);
+	static BOOL WantMergeCustomAttribute(LPCTSTR szAttribID, TDCCADATA dataSrc, TODOITEM& tdiDest, DWORD dwFlags);
 };
 
 #endif // !defined(AFX_TASKFILE_H__BA5D71E7_2770_45FD_A693_A2344B589DF4__INCLUDED_)

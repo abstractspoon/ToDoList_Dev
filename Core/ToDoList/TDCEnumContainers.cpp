@@ -162,6 +162,18 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib);
 }
 
+TDC_ATTRIBUTE CTDCAttributeMap::GetFirst() const
+{
+	if (GetCount())
+	{
+		POSITION pos = GetStartPosition();
+		return GetNext(pos);
+	}
+
+	// else
+	return TDCA_NONE;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CTDCAttributeArray::CTDCAttributeArray()
