@@ -349,9 +349,6 @@ namespace DayViewUIExtension
 			FixupSelection(false, true);
 		}
 
-		public bool UseParentCalcedStartDate;
-		public bool UseParentCalcedEndDate;
-
 		public bool ShowFutureOccurrences
 		{
 			get { return m_ShowFutureOcurrences; }
@@ -1551,15 +1548,9 @@ namespace DayViewUIExtension
 			{
 				var taskItem = (appt as TaskItem);
 
-				if (taskItem != null)
-				{
-					// Disable modification of parents with calculated dates
-					if ((UseParentCalcedStartDate && taskItem.IsUsingParentCalcedStartDate) || 
-						(UseParentCalcedEndDate && taskItem.IsUsingParentCalcedEndDate))
-					{
-						return false;
-					}
-				}
+				// Disable modification of parents with calculated dates
+				if ((taskItem != null) && (taskItem.IsUsingParentCalcedStartDate || taskItem.IsUsingParentCalcedEndDate))
+					return false;
 
 				// Disable start date editing for tasks with dependencies that are auto-calculated
 				// Disable resizing for custom date attributes

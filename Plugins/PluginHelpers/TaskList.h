@@ -184,6 +184,7 @@ namespace Abstractspoon
 
 				String^ GetAttributeValue(Attribute attrib, bool calculated, bool display);
 				Boolean HasAttribute(Attribute attrib);
+				Boolean HasCalculatedAttribute(Attribute attrib);
 
 				String^ GetCustomAttributeValue(String^ sID, bool display);
 				Dictionary<String^, String^>^ GetCustomAttributeValues(bool display);

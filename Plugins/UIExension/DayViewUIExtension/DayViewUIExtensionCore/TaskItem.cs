@@ -280,14 +280,14 @@ namespace DayViewUIExtension
 				TimeEstimate = task.GetTimeEstimate(ref units, false);
 				TimeEstUnits = units;
 
-				StartDate = task.GetStartDate(IsParent); // calculated if parent
-				IsUsingParentCalcedStartDate = (IsParent && (StartDate != task.GetStartDate(false)));
+				StartDate = task.GetStartDate(IsParent);
+				IsUsingParentCalcedStartDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.StartDate));
 
 				IsDone = task.IsDone();
                 IsGoodAsDone = task.IsGoodAsDone();
 
 				var dueDate = task.GetDueDate(IsParent);
-				IsUsingParentCalcedEndDate = (IsParent && (dueDate != task.GetDueDate(false)));
+				IsUsingParentCalcedEndDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.DueDate));
 
 				m_PrevDueDate = CheckGetEndOfDay(dueDate);
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
@@ -324,13 +324,13 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
 				{
 					StartDate = task.GetStartDate(IsParent); // calculated if parent
-					IsUsingParentCalcedStartDate = (IsParent && (StartDate != task.GetStartDate(false)));
+					IsUsingParentCalcedStartDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.StartDate));
 				}
 
 				if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 				{
 					var dueDate = task.GetDueDate(IsParent); // calculated if parent
-					IsUsingParentCalcedEndDate = (IsParent && (dueDate != task.GetDueDate(false)));
+					IsUsingParentCalcedEndDate = (IsParent && task.HasCalculatedAttribute(Task.Attribute.DueDate));
 
 					m_PrevDueDate = dueDate; // always
 
