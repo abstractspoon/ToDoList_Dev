@@ -14,49 +14,18 @@ namespace DayViewUIExtension
 {
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{
-		private bool m_UseParentCalcStartDate = true;
-		private bool m_UseParentCalcEndDate = true;
-
 		public TaskItem GetItem(uint taskId, bool autoCreate = false)
 		{
 			TaskItem taskItem;
 
 			if (!TryGetValue(taskId, out taskItem) && autoCreate)
 			{
-				taskItem = new TaskItem()
-				{
-					UseParentCalcStartDate = m_UseParentCalcStartDate,
-					UseParentCalcEndDate = m_UseParentCalcEndDate
-				};
-
+				taskItem = new TaskItem();
 				Add(taskId, taskItem);
 			}
 
 			return taskItem;
 		}
-
-		public bool UseParentCalcStartDate
-		{
-			set
-			{
-				m_UseParentCalcStartDate = value;
-
-				foreach (var taskItem in Values)
-					taskItem.UseParentCalcStartDate = value;
-			}
-		}
-
-		public bool UseParentCalcEndDate
-		{
-			set
-			{
-				m_UseParentCalcEndDate = value;
-
-				foreach (var taskItem in Values)
-					taskItem.UseParentCalcEndDate = value;
-			}
-		}
-
 	}
 
 	// ---------------------------------------------------------------
@@ -81,7 +50,6 @@ namespace DayViewUIExtension
 	public class TaskItem : Calendar.Appointment
 	{
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
-		private Calendar.AppointmentDates m_ParentCalcedDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
 
 		private Color m_TaskTextColor = Color.Empty;
@@ -120,53 +88,8 @@ namespace DayViewUIExtension
 			set { m_TaskTextColor = value; }
 		}
 
-		public bool UseParentCalcStartDate;
-		public bool UseParentCalcEndDate;
-
-		public bool IsUsingCalcedParentStartDate
-		{
-			get { return (IsParent && UseParentCalcStartDate); }
-		}
-
-		public bool IsUsingCalcedParentEndDate
-		{
-			get { return (IsParent && UseParentCalcEndDate); }
-		}
-		
-		public override DateTime StartDate
-		{
-			get
-			{
-				if (IsUsingCalcedParentStartDate)
-					return m_ParentCalcedDates.Start;
-				
-				return base.StartDate;
-			}
-			set
-			{
-				base.StartDate = value;
-			}
-		}
-
-		public override DateTime EndDate
-		{
-			get
-			{
-				if (IsUsingCalcedParentEndDate)
-					return m_ParentCalcedDates.End;
-
-				return base.EndDate;
-			}
-			set
-			{
-				base.EndDate = value;
-			}
-		}
-
-		override public bool HasValidDates()
-		{
-			return (base.HasValidDates() || IsUsingCalcedParentStartDate || IsUsingCalcedParentEndDate);
-		}
+		public bool IsUsingParentCalcedStartDate { get; private set; }
+		public bool IsUsingParentCalcedEndDate { get; private set; }
 
 		public void UpdateOriginalDates()
 		{
@@ -266,7 +189,7 @@ namespace DayViewUIExtension
 
 		protected override void OnEndDateChanged()
 		{
-			if (IsUsingCalcedParentEndDate)
+			if (IsUsingParentCalcedEndDate)
 				return;
 
 			// Prevent end date being set to exactly midnight
@@ -357,18 +280,17 @@ namespace DayViewUIExtension
 				TimeEstimate = task.GetTimeEstimate(ref units, false);
 				TimeEstUnits = units;
 
-				StartDate = task.GetStartDate(false);
+				StartDate = task.GetStartDate(IsParent); // calculated if parent
+				IsUsingParentCalcedStartDate = (IsParent && (StartDate != task.GetStartDate(false)));
+
 				IsDone = task.IsDone();
                 IsGoodAsDone = task.IsGoodAsDone();
 
-				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
-				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
+				var dueDate = task.GetDueDate(IsParent);
+				IsUsingParentCalcedEndDate = (IsParent && (dueDate != task.GetDueDate(false)));
 
-				if (IsParent)
-				{
-					m_ParentCalcedDates.Start = task.GetStartDate(true);
-					m_ParentCalcedDates.End = CheckGetEndOfDay(task.GetDueDate(true));
-				}
+				m_PrevDueDate = CheckGetEndOfDay(dueDate);
+				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
 				UpdateCustomDateAttributes(task, dateAttribs);
 			}
@@ -401,18 +323,16 @@ namespace DayViewUIExtension
 
 				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
 				{
-					StartDate = task.GetStartDate(false);
-
-					if (IsParent)
-						m_ParentCalcedDates.Start = task.GetStartDate(true);
+					StartDate = task.GetStartDate(IsParent); // calculated if parent
+					IsUsingParentCalcedStartDate = (IsParent && (StartDate != task.GetStartDate(false)));
 				}
 
 				if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 				{
-					m_PrevDueDate = task.GetDueDate(false); // always
+					var dueDate = task.GetDueDate(IsParent); // calculated if parent
+					IsUsingParentCalcedEndDate = (IsParent && (dueDate != task.GetDueDate(false)));
 
-					if (IsParent)
-						m_ParentCalcedDates.End = CheckGetEndOfDay(task.GetDueDate(true)); 
+					m_PrevDueDate = dueDate; // always
 
 					if (!IsDone)
 						EndDate = CheckGetEndOfDay(m_PrevDueDate);

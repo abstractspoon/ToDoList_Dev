@@ -258,8 +258,8 @@ namespace DayViewUIExtension
 			m_DayView.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 
 			const int NotCalced = 2;
-			m_DayView.UseParentCalcStartDate = (prefs.GetProfileInt("Preferences", "CalcStartDate", NotCalced) != NotCalced);
-			m_DayView.UseParentCalcEndDate = (prefs.GetProfileInt("Preferences", "CalcDueDate", NotCalced) != NotCalced);
+			m_DayView.UseParentCalcedStartDate = (prefs.GetProfileInt("Preferences", "CalcStartDate", NotCalced) != NotCalced);
+			m_DayView.UseParentCalcedEndDate = (prefs.GetProfileInt("Preferences", "CalcDueDate", NotCalced) != NotCalced);
 
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
