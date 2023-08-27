@@ -159,10 +159,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 	if (dwCurOptions != dwNewOptions)
 	{
 		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = (dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS)); // preserve parent status
-
-		// This must come before any date function calls
-		m_mapData.SetDateOptions(m_dwOptions);
+		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
 
 		RecalcCellHeaderDateFormats();
 		RecalcTaskDates();
@@ -225,7 +222,7 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 		ASSERT(pTCI);
 		ASSERT(pTCI->GetTaskID() == dwTaskID);
 
-		pTCI->RecalcDates();
+		pTCI->RecalcDates(m_dwOptions);
 	}
 }
 
@@ -468,7 +465,7 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
-			bChange = pTCI->UpdateTask(pTasks, hTask, m_mapCustomDateAttrib);
+			bChange = pTCI->UpdateTask(pTasks, hTask, m_mapCustomDateAttrib, m_dwOptions);
 
 			// Update our list of recurring tasks
 			if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
@@ -2804,7 +2801,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 
 	// Recalc dates if either start/end is not set
 	if (!pTCI->IsStartDateSet() || !pTCI->IsEndDateSet())
-		pTCI->RecalcDates();
+		pTCI->RecalcDates(m_dwOptions);
 
 	Invalidate();
 	UpdateWindow();

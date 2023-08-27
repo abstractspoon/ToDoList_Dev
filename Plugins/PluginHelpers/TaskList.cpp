@@ -435,6 +435,13 @@ bool Task::HasAttribute(Task::Attribute attrib)
 			(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, nAttrib) : false));
 }
 
+bool Task::HasCalculatedAttribute(Task::Attribute attrib)
+{
+	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+
+	return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, nAttrib, true) : false);
+}
+
 Task^ Task::GetFirstSubtask()
 {
 	if (m_pConstTaskList)
