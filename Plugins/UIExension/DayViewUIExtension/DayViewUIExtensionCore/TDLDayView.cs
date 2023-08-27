@@ -1549,7 +1549,7 @@ namespace DayViewUIExtension
 				var taskItem = (appt as TaskItem);
 
 				// Disable modification of parents with calculated dates
-				if ((taskItem != null) && (taskItem.IsUsingParentCalcedStartDate || taskItem.IsUsingParentCalcedEndDate))
+				if ((taskItem != null) && taskItem.IsCalculatedParent)
 					return false;
 
 				// Disable start date editing for tasks with dependencies that are auto-calculated

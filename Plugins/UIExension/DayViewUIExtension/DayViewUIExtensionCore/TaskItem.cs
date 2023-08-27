@@ -88,8 +88,20 @@ namespace DayViewUIExtension
 			set { m_TaskTextColor = value; }
 		}
 
-		public bool IsUsingParentCalcedStartDate { get; private set; }
-		public bool IsUsingParentCalcedEndDate { get; private set; }
+		private bool IsUsingParentCalcedStartDate;
+		private bool IsUsingParentCalcedEndDate;
+
+		public bool IsCalculatedParent
+		{
+			get
+			{
+				if (!IsUsingParentCalcedStartDate && !IsUsingParentCalcedEndDate)
+					return false;
+
+				Debug.Assert(IsParent);
+				return true;
+			}
+		}
 
 		public void UpdateOriginalDates()
 		{

@@ -552,6 +552,15 @@ BOOL TASKCALITEM::IsParent() const
 	return bIsParent;
 }
 
+BOOL TASKCALITEM::IsCalculatedParent() const
+{
+	if (!dates.IsCalculatedParent())
+		return FALSE;
+
+	ASSERT(bIsParent);
+	return TRUE;
+}
+
 BOOL TASKCALITEM::HasIcon(BOOL bShowParentsAsFolder) const
 {
 	return (bHasIcon || (bIsParent && bShowParentsAsFolder));
