@@ -704,7 +704,7 @@ namespace WordCloudUIExtension
 
 			Brush textBrush = new SolidBrush(textColor);
 
-			if (m_TaskColorIsBkgnd && !backColor.IsEmpty)
+			if (m_TaskColorIsBkgnd)
 			{
 				using (Brush backBrush = new SolidBrush(backColor))
 					e.Graphics.FillRectangle(backBrush, e.Bounds);

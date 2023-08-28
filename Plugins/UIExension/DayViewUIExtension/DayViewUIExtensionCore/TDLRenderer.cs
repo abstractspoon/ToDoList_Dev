@@ -524,7 +524,7 @@ namespace DayViewUIExtension
 					if (!isFutureItem)
 						barColor = taskItem.TaskTextColor;
 				}
-				else if (TaskColorIsBackground && !taskItem.IsDoneOrGoodAsDone && !isFutureItem)
+				else if (TaskColorIsBackground && !isFutureItem)
 				{
 					barColor = textColor;
 					fillColor = textColor;

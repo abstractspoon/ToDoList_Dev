@@ -1067,7 +1067,7 @@ namespace EvidenceBoardUIExtension
 			if (selected)
 				return Color.Empty;
 
-			if ((taskItem.TextColor != Color.Empty) && !taskItem.IsDone(true))
+			if (!taskItem.TextColor.IsEmpty)
 			{
 				if (m_TaskColorIsBkgnd && !selected)
 					return taskItem.TextColor;
@@ -1085,11 +1085,11 @@ namespace EvidenceBoardUIExtension
 			if (state.HasFlag(DrawState.DragImage))
 				return SystemColors.WindowText;
 
-			if (taskItem.TextColor != Color.Empty)
+			if (!taskItem.TextColor.IsEmpty)
 			{
 				bool selected = state.HasFlag(DrawState.Selected);
 
-				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+				if (m_TaskColorIsBkgnd && !selected)
 					return DrawingColor.GetBestTextColor(taskItem.TextColor);
 
 				if (selected)
@@ -1108,7 +1108,7 @@ namespace EvidenceBoardUIExtension
 			if (selected)
 				return Color.Empty;
 
-			if (taskItem.TextColor != Color.Empty)
+			if (!taskItem.TextColor.IsEmpty)
 			{
 				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
 					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);

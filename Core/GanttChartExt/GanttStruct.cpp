@@ -334,7 +334,7 @@ COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 		if (bSelected)
 			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
-		if (bColorIsBkgnd && !IsDone(TRUE))
+		if (bColorIsBkgnd)
 			return GraphicsMisc::GetBestTextColor(color);
 
 		// else
@@ -347,11 +347,8 @@ COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 
 COLORREF GANTTITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
-	if (!bSelected && HasColor())
-	{
-		if (bColorIsBkgnd && !IsDone(TRUE))
-			return color;
-	}
+	if (!bSelected && HasColor() && bColorIsBkgnd)
+		return color;
 	
 	// else
 	return CLR_NONE;
@@ -359,35 +356,16 @@ COLORREF GANTTITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 
 COLORREF GANTTITEM::GetFillColor(BOOL /*bSelected*/) const
 {
-	if (IsDone(TRUE))
-	{
-		if (!Misc::IsHighContrastActive())
-			return GraphicsMisc::Lighter(color, 0.8);
-	}
-	else if (HasColor())
-	{
-		return color;
-	}
-	
-	// else
-	return CLR_NONE;
+	return (HasColor() ? color : CLR_NONE);
 }
 
 COLORREF GANTTITEM::GetBorderColor(BOOL bSelected) const
 {
 	if (bSelected && Misc::IsHighContrastActive())
-	{
 		return GetSysColor(COLOR_HIGHLIGHTTEXT);
-	}
-	else if (IsDone(TRUE))
-	{
-		if (!Misc::IsHighContrastActive())
-			return color;
-	}
-	else if (HasColor())
-	{
+
+	if (HasColor())
 		return GraphicsMisc::Darker(color, 0.4);
-	}
 	
 	// else
 	return CLR_NONE;

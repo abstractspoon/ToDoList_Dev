@@ -540,7 +540,7 @@ COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 		if (bSelected)
 			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
-		if (bColorIsBkgnd && !IsDone(TRUE))
+		if (bColorIsBkgnd)
 			return GraphicsMisc::GetBestTextColor(color);
 
 		// else
@@ -553,11 +553,8 @@ COLORREF WORKLOADITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 
 COLORREF WORKLOADITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
-	if (!bSelected && HasColor())
-	{
-		if (bColorIsBkgnd && !IsDone(TRUE))
-			return color;
-	}
+	if (!bSelected && HasColor() && bColorIsBkgnd)
+		return color;
 	
 	// else
 	return CLR_NONE;
