@@ -145,6 +145,7 @@ namespace DayViewUIExtension
 			tip.Rect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
 
 			var appt = tdlView.Appointment;
+			tip.Id = appt.Id;
 
 			if (appt is TaskExtensionItem)
 			{
