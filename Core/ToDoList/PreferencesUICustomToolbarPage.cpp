@@ -119,6 +119,7 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 		aButtons.Add(TOOLBARBUTTON());							// separator
 		aButtons.Add(TOOLBARBUTTON(ID_EDIT_FLAGTASK,			_T("49")));
 		aButtons.Add(TOOLBARBUTTON(ID_EDIT_LOCKTASK,			_T("100")));
+		aButtons.Add(TOOLBARBUTTON(ID_EDIT_PASTEATTRIBUTES,		_T("258")));
 		aButtons.Add(TOOLBARBUTTON());							// separator
 		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,			_T("62")));
 		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,		_T("99")));
