@@ -80,7 +80,23 @@ LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=donations%2eabstractspoon%2etodolist%40gmail%2ecom&item_name=ToDoList%20Software"); 
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoListApp
+// The one and only CToDoListApp object
+
+CToDoListApp theApp;
+
+/////////////////////////////////////////////////////////////////////////////
+// CToDoListApp construction
+
+CToDoListApp::CToDoListApp() : CWinApp()
+{
+	// Perhaps because we are a Win32 app, using a manifest limits our options
+	// so we set our DPI awareness programmatically
+	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+}
+
+CToDoListApp::~CToDoListApp()
+{
+}
 
 BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	//{{AFX_MSG_MAP(CToDoListApp)
@@ -112,25 +128,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CToDoListApp construction
-
-CToDoListApp::CToDoListApp() : CWinApp()
-{
-	// Perhaps because we are a Win32 app, using a manifest limits our options
-	// so we set our DPI awareness programmatically
-	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-}
-
-CToDoListApp::~CToDoListApp()
-{
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// The one and only CToDoListApp object
-
-CToDoListApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp initialization
