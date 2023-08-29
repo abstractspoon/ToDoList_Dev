@@ -39,6 +39,7 @@
 #include "..\3rdparty\base64coder.h"
 #include "..\3rdparty\LimitSingleInstance.h"
 #include "..\3rdparty\gdiplus.h"
+#include "..\3rdParty\Detours\detours.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -80,6 +81,77 @@ LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=donations%2eabstractspoon%2etodolist%40gmail%2ecom&item_name=ToDoList%20Software"); 
 
 /////////////////////////////////////////////////////////////////////////////
+
+DWORD(WINAPI * TrueMyGetSysColor)(int nColor) = GetSysColor;
+HBRUSH(WINAPI * TrueMyGetSysColorBrush)(int nColor) = GetSysColorBrush;
+
+class CDarkMode
+{
+public:
+	static void Enable(BOOL bEnable = TRUE)
+	{
+		if ((bEnable && s_bDarkMode) || (!bEnable && !s_bDarkMode))
+			return;
+
+		if (bEnable)
+		{
+			VERIFY(DetourTransactionBegin() == 0);
+			VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
+			VERIFY(DetourAttach(&(PVOID&)TrueMyGetSysColor, MyGetSysColor) == 0);
+			VERIFY(DetourAttach(&(PVOID&)TrueMyGetSysColorBrush, MyGetSysColorBrush) == 0);
+			VERIFY(DetourTransactionCommit() == 0);
+		}
+		else
+		{
+			VERIFY(DetourTransactionBegin() == 0);
+			VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
+			VERIFY(DetourDetach(&(PVOID&)TrueMyGetSysColor, MyGetSysColor) == 0);
+			VERIFY(DetourDetach(&(PVOID&)TrueMyGetSysColorBrush, MyGetSysColorBrush) == 0);
+			VERIFY(DetourTransactionCommit() == 0);
+		}
+
+		s_bDarkMode = bEnable;
+	}
+
+protected:
+	CDarkMode();
+
+protected:
+	static BOOL s_bDarkMode;
+
+protected:
+	static DWORD WINAPI MyGetSysColor(int nColor)
+	{
+		switch (nColor)
+		{
+		case COLOR_WINDOWTEXT:
+			return TrueMyGetSysColor(COLOR_3DHIGHLIGHT);
+
+		default:
+			return TrueMyGetSysColor(COLOR_3DSHADOW);
+		}
+
+//		return TrueMyGetSysColor(nColor);
+	}
+
+	static HBRUSH WINAPI MyGetSysColorBrush(int nColor)
+	{
+		switch (nColor)
+		{
+		case COLOR_WINDOWTEXT:
+			return TrueMyGetSysColorBrush(COLOR_3DHIGHLIGHT);
+
+		default:
+			return TrueMyGetSysColorBrush(COLOR_3DSHADOW);
+		}
+
+//		return TrueMyGetSysColor(nColor);
+	}
+};
+
+BOOL CDarkMode::s_bDarkMode = FALSE;
+
+/////////////////////////////////////////////////////////////////////////////
 // The one and only CToDoListApp object
 
 CToDoListApp theApp;
@@ -92,6 +164,7 @@ CToDoListApp::CToDoListApp() : CWinApp()
 	// Perhaps because we are a Win32 app, using a manifest limits our options
 	// so we set our DPI awareness programmatically
 	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
 }
 
 CToDoListApp::~CToDoListApp()
@@ -250,6 +323,7 @@ BOOL CToDoListApp::InitInstance()
 		AfxMessageBox(CEnString(IDS_BADMSXML));
 		return FALSE; // quit app
 	}
+	CDarkMode::Enable(TRUE);
 
 	// init prefs 
 	if (!InitPreferences(cmdInfo))
