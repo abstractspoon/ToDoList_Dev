@@ -33,7 +33,8 @@ BOOL CDarkMode::s_bDarkMode = FALSE;
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_3DFACE = RGB(96, 96, 96);
+const COLORREF DM_3DFACE = RGB(120, 120, 120);
+const COLORREF DM_WINDOW = RGB(64, 64, 64);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,107 +69,123 @@ void CDarkMode::Enable(BOOL bEnable)
 	}
 
 	s_bDarkMode = bEnable;
+}
 
+#define RETURN_STATIC_COLOR_OR_BRUSH(color) if (bColor) return color; else { static HBRUSH hbr = CreateSolidBrush(color); return (DWORD)hbr; }
+
+DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
+{
+	switch (nColor)
+	{
+	case COLOR_SCROLLBAR:		
+		return TrueGetSysColor(nColor);
+
+	case COLOR_WINDOWTEXT:
+	case COLOR_BTNTEXT:			
+		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
+
+	case COLOR_3DFACE:
+		RETURN_STATIC_COLOR_OR_BRUSH(DM_3DFACE);
+
+	case COLOR_WINDOW:
+		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
+
+	case COLOR_HIGHLIGHT:
+	case COLOR_BTNSHADOW:
+	case COLOR_BTNHIGHLIGHT:
+	case COLOR_3DDKSHADOW:
+	case COLOR_3DLIGHT:		
+		nColor = COLOR_3DDKSHADOW;
+		break;
+
+	case COLOR_GRAYTEXT:
+	case COLOR_HIGHLIGHTTEXT:
+	case COLOR_MENUTEXT:
+		nColor = COLOR_BTNHIGHLIGHT;
+		break;
+
+	case COLOR_WINDOWFRAME:
+	case COLOR_CAPTIONTEXT:
+	case COLOR_ACTIVEBORDER:
+	case COLOR_INACTIVEBORDER:
+	case COLOR_APPWORKSPACE:
+	case COLOR_INACTIVECAPTIONTEXT:
+	case COLOR_INFOTEXT:
+	case COLOR_INFOBK:
+	case COLOR_HOTLIGHT:
+	case COLOR_GRADIENTACTIVECAPTION:
+	case COLOR_GRADIENTINACTIVECAPTION:
+	case COLOR_MENUHILIGHT:
+	case COLOR_MENU:
+	case COLOR_MENUBAR:
+	case COLOR_BACKGROUND:
+	case COLOR_ACTIVECAPTION:
+	case COLOR_INACTIVECAPTION:	
+		RETURN_STATIC_COLOR_OR_BRUSH(255);
+	}
+
+	return (bColor ? TrueGetSysColor(nColor) : (DWORD)TrueGetSysColorBrush(nColor));
 }
 
 DWORD WINAPI MyGetSysColor(int nColor)
 {
-	switch (nColor)
-	{
-	case COLOR_SCROLLBAR:
-		return TrueGetSysColor(nColor);
-
-	case COLOR_WINDOWTEXT:
-	case COLOR_BTNTEXT:
-		//			return TrueGetSysColor(COLOR_3DHIGHLIGHT);
-		return RGB(255, 255, 255);
-
-	case COLOR_3DFACE:
-		return DM_3DFACE;
-
-	default:
-		return TrueGetSysColor(COLOR_3DSHADOW);
-	}
-
-	//		return TrueMyGetSysColor(nColor);
+	return GetSysColorOrBrush(nColor, TRUE);
 }
 
 HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 {
-	switch (nColor)
-	{
-	case COLOR_WINDOWTEXT:
-	case COLOR_BTNTEXT:
-		//			return TrueGetSysColorBrush(COLOR_3DHIGHLIGHT);
-		return (HBRUSH)GetStockObject(WHITE_BRUSH);
-
-	case COLOR_3DFACE:
-		{
-			static HBRUSH hBrush = CreateSolidBrush(DM_3DFACE);
-			return hBrush;
-		}
-
-	default:
-		return TrueGetSysColorBrush(COLOR_3DSHADOW);
-	}
-
-	//		return TrueMyGetSysColor(nColor);
+	return (HBRUSH)GetSysColorOrBrush(nColor, FALSE);
 }
 
-LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
+BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM /*lp*/, LRESULT& lr)
 {
 	switch (nMsg)
 	{
 	case WM_CTLCOLOR:
-		return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
+		return TRUE;
 
+	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORMSGBOX:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORDLG:
 	case WM_CTLCOLORSCROLLBAR:
-	case WM_CTLCOLOREDIT:
-		return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
+		return TRUE;
 
 	case WM_CTLCOLORBTN:
 	case WM_CTLCOLORSTATIC:
-		::SetTextColor((HDC)wp, TrueGetSysColor(COLOR_3DHIGHLIGHT));
-		::SetBkColor((HDC)wp, TrueGetSysColor(COLOR_3DSHADOW));
-		return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetBkColor((HDC)wp, MyGetSysColor(COLOR_3DFACE));
+		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
+		return TRUE;
 
 	case WM_SHOWWINDOW:
-		if (CWinClasses::IsClass(hWnd, WC_TREEVIEW))
-			::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)TrueGetSysColor(COLOR_3DSHADOW));
+		if (wp && CWinClasses::IsClass(hWnd, WC_TREEVIEW))
+			::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
 		break;
 	}
+
+	return FALSE;
+}
+
+LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = 0;
+
+	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+		return lr;
 
 	return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 }
 
 static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
 {
-	switch (nMsg)
-	{
-	case WM_CTLCOLOR:
-		return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+	LRESULT lr = 0;
 
-	case WM_CTLCOLOREDIT:
-	case WM_CTLCOLORMSGBOX:
-	case WM_CTLCOLORLISTBOX:
-	case WM_CTLCOLORDLG:
-	case WM_CTLCOLORSCROLLBAR:
-		return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-	case WM_CTLCOLORBTN:
-	case WM_CTLCOLORSTATIC:
-		::SetTextColor((HDC)wp, TrueGetSysColor(COLOR_3DHIGHLIGHT));
-		::SetBkColor((HDC)wp, TrueGetSysColor(COLOR_3DSHADOW));
-		return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-	case WM_SHOWWINDOW:
-		if (CWinClasses::IsClass(hWnd, WC_TREEVIEW))
-			::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)TrueGetSysColor(COLOR_3DSHADOW));
-		break;
-	}
+	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+		return lr;
 
 	return TrueDefWindowProc(hWnd, nMsg, wp, lp);
 }
+
