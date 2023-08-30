@@ -17,6 +17,8 @@
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
 
+#include "DarkMode.h"
+
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\dialoghelper.h"
@@ -33,14 +35,12 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
-#include "..\shared\winclasses.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\base64coder.h"
 #include "..\3rdparty\LimitSingleInstance.h"
 #include "..\3rdparty\gdiplus.h"
-#include "..\3rdParty\Detours\detours.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -80,153 +80,6 @@ LPCTSTR WIKI_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=");
 LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/"); 
 LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=donations%2eabstractspoon%2etodolist%40gmail%2ecom&item_name=ToDoList%20Software"); 
-
-/////////////////////////////////////////////////////////////////////////////
-
-DWORD (WINAPI * TrueGetSysColor)(int nColor) = GetSysColor;
-HBRUSH (WINAPI * TrueGetSysColorBrush)(int nColor) = GetSysColorBrush;
-LRESULT (WINAPI * TrueCallWindowProc)(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = CallWindowProc;
-LRESULT (WINAPI * TrueDefWindowProc)(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = DefWindowProc;
-
-class CDarkMode
-{
-public:
-	static void Enable(BOOL bEnable = TRUE)
-	{
-		if ((bEnable && s_bDarkMode) || (!bEnable && !s_bDarkMode))
-			return;
-
-		if (bEnable)
-		{
-			VERIFY(DetourTransactionBegin() == 0);
-			VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
-
-			VERIFY(DetourAttach(&(PVOID&)TrueCallWindowProc, MyCallWindowProc) == 0);
-			VERIFY(DetourAttach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
-			VERIFY(DetourAttach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
-			VERIFY(DetourAttach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
-
-			VERIFY(DetourTransactionCommit() == 0);
-		}
-		else
-		{
-			VERIFY(DetourTransactionBegin() == 0);
-			VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
-
-			VERIFY(DetourDetach(&(PVOID&)TrueCallWindowProc, MyCallWindowProc) == 0);
-			VERIFY(DetourDetach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
-			VERIFY(DetourDetach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
-			VERIFY(DetourDetach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
-
-			VERIFY(DetourTransactionCommit() == 0);
-		}
-
-		s_bDarkMode = bEnable;
-
-	}
-
-protected:
-	CDarkMode();
-
-protected:
-	static BOOL s_bDarkMode;
-
-protected:
-	static DWORD WINAPI MyGetSysColor(int nColor)
-	{
-		switch (nColor)
-		{
-		case COLOR_SCROLLBAR:
-		case COLOR_BTNTEXT:
- 			return TrueGetSysColor(nColor);
-
- 		case COLOR_WINDOWTEXT:
-//			return TrueGetSysColor(COLOR_3DHIGHLIGHT);
-			return RGB(255, 255, 255);
-
-		default:
-			return TrueGetSysColor(COLOR_3DSHADOW);
-		}
-
-//		return TrueMyGetSysColor(nColor);
-	}
-
-	static HBRUSH WINAPI MyGetSysColorBrush(int nColor)
-	{
-		switch (nColor)
-		{
-		case COLOR_WINDOWTEXT:
-//			return TrueGetSysColorBrush(COLOR_3DHIGHLIGHT);
-			return (HBRUSH)GetStockObject(WHITE_BRUSH);
-
-		default:
-			return TrueGetSysColorBrush(COLOR_3DSHADOW);
-		}
-
-//		return TrueMyGetSysColor(nColor);
-	}
-
-	static LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
-	{
-		switch (nMsg)
-		{
-		case WM_CTLCOLOR:
-			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-		case WM_CTLCOLORMSGBOX:
-		case WM_CTLCOLORLISTBOX:
-		case WM_CTLCOLORDLG:
-		case WM_CTLCOLORSCROLLBAR:
-			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-		case WM_CTLCOLOREDIT:
-		case WM_CTLCOLORBTN:
-		case WM_CTLCOLORSTATIC:
-			::SetTextColor((HDC)wp, 255/*TrueGetSysColor(COLOR_3DHIGHLIGHT)*/);
-			::SetBkColor((HDC)wp, TrueGetSysColor(COLOR_3DSHADOW));
-			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-		case WM_SHOWWINDOW:
-			if (CWinClasses::IsClass(hWnd, WC_TREEVIEW))
-				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)TrueGetSysColor(COLOR_3DSHADOW));
-			break;
-		}
-
-		return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-	}
-
-	static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
-	{
-		switch (nMsg)
-		{
-		case WM_CTLCOLOR:
-			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-		case WM_CTLCOLOREDIT:
-		case WM_CTLCOLORMSGBOX:
-		case WM_CTLCOLORLISTBOX:
-		case WM_CTLCOLORDLG:
-		case WM_CTLCOLORSCROLLBAR:
-			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-		case WM_CTLCOLORBTN:
-		case WM_CTLCOLORSTATIC:
-			::SetTextColor((HDC)wp, 255/*TrueGetSysColor(COLOR_3DHIGHLIGHT)*/);
-			::SetBkColor((HDC)wp, TrueGetSysColor(COLOR_3DSHADOW));
-			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
-
-		case WM_SHOWWINDOW:
-			if (CWinClasses::IsClass(hWnd, WC_TREEVIEW))
-				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)TrueGetSysColor(COLOR_3DSHADOW));
-			break;
-		}
-
-		return TrueDefWindowProc(hWnd, nMsg, wp, lp);
-	}
-
-};
-
-BOOL CDarkMode::s_bDarkMode = FALSE;
 
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CToDoListApp object
@@ -370,6 +223,8 @@ BOOL CToDoListApp::InitInstance()
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
 
+	CDarkMode::Enable(TRUE);
+
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
 	{
@@ -400,7 +255,6 @@ BOOL CToDoListApp::InitInstance()
 		AfxMessageBox(CEnString(IDS_BADMSXML));
 		return FALSE; // quit app
 	}
-	CDarkMode::Enable(TRUE);
 
 	// init prefs 
 	if (!InitPreferences(cmdInfo))
