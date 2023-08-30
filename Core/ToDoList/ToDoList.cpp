@@ -33,6 +33,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
+#include "..\shared\winclasses.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -82,8 +83,10 @@ LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&bus
 
 /////////////////////////////////////////////////////////////////////////////
 
-DWORD(WINAPI * TrueMyGetSysColor)(int nColor) = GetSysColor;
-HBRUSH(WINAPI * TrueMyGetSysColorBrush)(int nColor) = GetSysColorBrush;
+DWORD (WINAPI * TrueGetSysColor)(int nColor) = GetSysColor;
+HBRUSH (WINAPI * TrueGetSysColorBrush)(int nColor) = GetSysColorBrush;
+LRESULT (WINAPI * TrueCallWindowProc)(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = CallWindowProc;
+LRESULT (WINAPI * TrueDefWindowProc)(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = DefWindowProc;
 
 class CDarkMode
 {
@@ -97,20 +100,29 @@ public:
 		{
 			VERIFY(DetourTransactionBegin() == 0);
 			VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
-			VERIFY(DetourAttach(&(PVOID&)TrueMyGetSysColor, MyGetSysColor) == 0);
-			VERIFY(DetourAttach(&(PVOID&)TrueMyGetSysColorBrush, MyGetSysColorBrush) == 0);
+
+			VERIFY(DetourAttach(&(PVOID&)TrueCallWindowProc, MyCallWindowProc) == 0);
+			VERIFY(DetourAttach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
+			VERIFY(DetourAttach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
+			VERIFY(DetourAttach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
+
 			VERIFY(DetourTransactionCommit() == 0);
 		}
 		else
 		{
 			VERIFY(DetourTransactionBegin() == 0);
 			VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
-			VERIFY(DetourDetach(&(PVOID&)TrueMyGetSysColor, MyGetSysColor) == 0);
-			VERIFY(DetourDetach(&(PVOID&)TrueMyGetSysColorBrush, MyGetSysColorBrush) == 0);
+
+			VERIFY(DetourDetach(&(PVOID&)TrueCallWindowProc, MyCallWindowProc) == 0);
+			VERIFY(DetourDetach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
+			VERIFY(DetourDetach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
+			VERIFY(DetourDetach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
+
 			VERIFY(DetourTransactionCommit() == 0);
 		}
 
 		s_bDarkMode = bEnable;
+
 	}
 
 protected:
@@ -124,11 +136,16 @@ protected:
 	{
 		switch (nColor)
 		{
-		case COLOR_WINDOWTEXT:
-			return TrueMyGetSysColor(COLOR_3DHIGHLIGHT);
+		case COLOR_SCROLLBAR:
+		case COLOR_BTNTEXT:
+ 			return TrueGetSysColor(nColor);
+
+ 		case COLOR_WINDOWTEXT:
+//			return TrueGetSysColor(COLOR_3DHIGHLIGHT);
+			return RGB(255, 255, 255);
 
 		default:
-			return TrueMyGetSysColor(COLOR_3DSHADOW);
+			return TrueGetSysColor(COLOR_3DSHADOW);
 		}
 
 //		return TrueMyGetSysColor(nColor);
@@ -139,14 +156,74 @@ protected:
 		switch (nColor)
 		{
 		case COLOR_WINDOWTEXT:
-			return TrueMyGetSysColorBrush(COLOR_3DHIGHLIGHT);
+//			return TrueGetSysColorBrush(COLOR_3DHIGHLIGHT);
+			return (HBRUSH)GetStockObject(WHITE_BRUSH);
 
 		default:
-			return TrueMyGetSysColorBrush(COLOR_3DSHADOW);
+			return TrueGetSysColorBrush(COLOR_3DSHADOW);
 		}
 
 //		return TrueMyGetSysColor(nColor);
 	}
+
+	static LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
+	{
+		switch (nMsg)
+		{
+		case WM_CTLCOLOR:
+			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+
+		case WM_CTLCOLORMSGBOX:
+		case WM_CTLCOLORLISTBOX:
+		case WM_CTLCOLORDLG:
+		case WM_CTLCOLORSCROLLBAR:
+			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+
+		case WM_CTLCOLOREDIT:
+		case WM_CTLCOLORBTN:
+		case WM_CTLCOLORSTATIC:
+			::SetTextColor((HDC)wp, 255/*TrueGetSysColor(COLOR_3DHIGHLIGHT)*/);
+			::SetBkColor((HDC)wp, TrueGetSysColor(COLOR_3DSHADOW));
+			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+
+		case WM_SHOWWINDOW:
+			if (CWinClasses::IsClass(hWnd, WC_TREEVIEW))
+				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)TrueGetSysColor(COLOR_3DSHADOW));
+			break;
+		}
+
+		return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+	}
+
+	static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
+	{
+		switch (nMsg)
+		{
+		case WM_CTLCOLOR:
+			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+
+		case WM_CTLCOLOREDIT:
+		case WM_CTLCOLORMSGBOX:
+		case WM_CTLCOLORLISTBOX:
+		case WM_CTLCOLORDLG:
+		case WM_CTLCOLORSCROLLBAR:
+			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+
+		case WM_CTLCOLORBTN:
+		case WM_CTLCOLORSTATIC:
+			::SetTextColor((HDC)wp, 255/*TrueGetSysColor(COLOR_3DHIGHLIGHT)*/);
+			::SetBkColor((HDC)wp, TrueGetSysColor(COLOR_3DSHADOW));
+			return (LRESULT)TrueGetSysColorBrush(COLOR_3DSHADOW);
+
+		case WM_SHOWWINDOW:
+			if (CWinClasses::IsClass(hWnd, WC_TREEVIEW))
+				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)TrueGetSysColor(COLOR_3DSHADOW));
+			break;
+		}
+
+		return TrueDefWindowProc(hWnd, nMsg, wp, lp);
+	}
+
 };
 
 BOOL CDarkMode::s_bDarkMode = FALSE;
