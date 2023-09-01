@@ -19,6 +19,8 @@ static HBRUSH WINAPI MyGetSysColorBrush(int nColor);
 static LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 
+static HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor);
+
 //////////////////////////////////////////////////////////////////////
 
 DWORD (WINAPI *TrueGetSysColor)(int nColor) = GetSysColor;
@@ -26,6 +28,8 @@ HBRUSH (WINAPI *TrueGetSysColorBrush)(int nColor) = GetSysColorBrush;
 
 LRESULT (WINAPI *TrueCallWindowProc)(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = CallWindowProc;
 LRESULT (WINAPI *TrueDefWindowProc)(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = DefWindowProc;
+
+HRESULT (STDAPICALLTYPE *TrueGetThemeColor)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor) = GetThemeColor;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -52,6 +56,7 @@ void CDarkMode::Enable(BOOL bEnable)
 		VERIFY(DetourAttach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
 		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
 		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
+		VERIFY(DetourAttach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
@@ -64,6 +69,7 @@ void CDarkMode::Enable(BOOL bEnable)
 		VERIFY(DetourDetach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
 		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
 		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
+		VERIFY(DetourDetach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
@@ -78,10 +84,12 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	switch (nColor)
 	{
 	case COLOR_SCROLLBAR:		
+		RETURN_STATIC_COLOR_OR_BRUSH(colorGreen);
+
+	case COLOR_BTNTEXT:
 		return TrueGetSysColor(nColor);
 
 	case COLOR_WINDOWTEXT:
-	case COLOR_BTNTEXT:			
 		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
 
 	case COLOR_3DFACE:
@@ -91,15 +99,28 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
 
 	case COLOR_HIGHLIGHT:
-	case COLOR_BTNSHADOW:
-	case COLOR_BTNHIGHLIGHT:
-	case COLOR_3DDKSHADOW:
-	case COLOR_3DLIGHT:		
-		nColor = COLOR_3DDKSHADOW;
+		nColor = COLOR_BTNHIGHLIGHT;
 		break;
 
-	case COLOR_GRAYTEXT:
 	case COLOR_HIGHLIGHTTEXT:
+		nColor = COLOR_WINDOWTEXT;
+		break;
+
+	case COLOR_BTNSHADOW:
+		RETURN_STATIC_COLOR_OR_BRUSH(colorYellow);
+
+	case COLOR_BTNHIGHLIGHT:
+		RETURN_STATIC_COLOR_OR_BRUSH(colorBlue);
+
+	case COLOR_3DDKSHADOW:
+		RETURN_STATIC_COLOR_OR_BRUSH(colorPurple);
+
+	case COLOR_3DLIGHT:		
+// 		nColor = COLOR_3DDKSHADOW;
+// 		break;
+		RETURN_STATIC_COLOR_OR_BRUSH(colorOrange);
+
+	case COLOR_GRAYTEXT:
 	case COLOR_MENUTEXT:
 		nColor = COLOR_BTNHIGHLIGHT;
 		break;
@@ -121,10 +142,94 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_BACKGROUND:
 	case COLOR_ACTIVECAPTION:
 	case COLOR_INACTIVECAPTION:	
-		RETURN_STATIC_COLOR_OR_BRUSH(255);
+		RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
 	}
 
 	return (bColor ? TrueGetSysColor(nColor) : (DWORD)TrueGetSysColorBrush(nColor));
+}
+
+#define RETURN_LRESULT_STATIC_BRUSH(color) { static HBRUSH hbr = CreateSolidBrush(color); lr = (LRESULT)hbr; return TRUE; }
+
+BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM /*lp*/, LRESULT& lr)
+{
+	switch (nMsg)
+	{
+	case WM_CTLCOLOR:
+// 		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
+// 		return TRUE;
+		RETURN_LRESULT_STATIC_BRUSH(colorBlack);
+
+	case WM_CTLCOLORMSGBOX:
+		RETURN_LRESULT_STATIC_BRUSH(colorLightBlue);
+
+	case WM_CTLCOLORLISTBOX:
+		RETURN_LRESULT_STATIC_BRUSH(colorOrange);
+
+	case WM_CTLCOLORDLG:
+		RETURN_LRESULT_STATIC_BRUSH(colorDarkGreen);
+
+	case WM_CTLCOLORSCROLLBAR:
+// 		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
+// 		return TRUE;
+		RETURN_LRESULT_STATIC_BRUSH(colorDarkOrange)
+
+	case WM_CTLCOLORBTN:
+		RETURN_LRESULT_STATIC_BRUSH(colorTeal)
+
+	case WM_CTLCOLOREDIT:
+		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetBkColor((HDC)wp, MyGetSysColor(COLOR_WINDOW));
+// 		lr = (LRESULT)MyGetSysColorBrush(COLOR_WINDOW);
+// 		return TRUE;
+		RETURN_LRESULT_STATIC_BRUSH(MyGetSysColor(COLOR_WINDOW))
+
+	case WM_CTLCOLORSTATIC:
+		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetBkMode((HDC)wp, TRANSPARENT);
+		lr = (LRESULT)MyGetSysColorBrush(COLOR_WINDOW);
+		return TRUE;
+
+	case WM_SHOWWINDOW:
+		if (wp)
+		{
+			CString sClass = CWinClasses::GetClass(hWnd);
+
+			if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
+			{
+				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
+				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOWTEXT));
+			}
+			else if (CWinClasses::IsClass(sClass, WC_BUTTON))
+			{
+				switch (::GetWindowLong(hWnd, GWL_STYLE) & BS_TYPEMASK)
+				{
+				case BS_CHECKBOX:
+				case BS_AUTOCHECKBOX:
+				case BS_RADIOBUTTON:
+				case BS_3STATE:
+				case BS_AUTO3STATE:
+				case BS_AUTORADIOBUTTON:
+					// Turn off theming so we can change the font colour
+					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
+					break;
+				}
+			}
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
+{
+	if ((iPartId == EP_EDITTEXT) && (iStateId == ETS_CUEBANNER) && (iPropId == TMT_TEXTCOLOR))
+	{
+		*pColor = MyGetSysColor(COLOR_WINDOWTEXT);
+		return S_OK;
+	}
+
+	return TrueGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
 }
 
 DWORD WINAPI MyGetSysColor(int nColor)
@@ -135,38 +240,6 @@ DWORD WINAPI MyGetSysColor(int nColor)
 HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 {
 	return (HBRUSH)GetSysColorOrBrush(nColor, FALSE);
-}
-
-BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM /*lp*/, LRESULT& lr)
-{
-	switch (nMsg)
-	{
-	case WM_CTLCOLOR:
-		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
-		return TRUE;
-
-	case WM_CTLCOLOREDIT:
-	case WM_CTLCOLORMSGBOX:
-	case WM_CTLCOLORLISTBOX:
-	case WM_CTLCOLORDLG:
-	case WM_CTLCOLORSCROLLBAR:
-		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
-		return TRUE;
-
-	case WM_CTLCOLORBTN:
-	case WM_CTLCOLORSTATIC:
-		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
-		::SetBkColor((HDC)wp, MyGetSysColor(COLOR_3DFACE));
-		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
-		return TRUE;
-
-	case WM_SHOWWINDOW:
-		if (wp && CWinClasses::IsClass(hWnd, WC_TREEVIEW))
-			::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
-		break;
-	}
-
-	return FALSE;
 }
 
 LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)

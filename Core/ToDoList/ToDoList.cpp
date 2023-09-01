@@ -95,6 +95,8 @@ CToDoListApp::CToDoListApp() : CWinApp()
 	// so we set our DPI awareness programmatically
 	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 
+	CDarkMode::Enable(TRUE);
+
 }
 
 CToDoListApp::~CToDoListApp()
@@ -222,8 +224,6 @@ BOOL CToDoListApp::InitInstance()
 
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
-
-	CDarkMode::Enable(TRUE);
 
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
