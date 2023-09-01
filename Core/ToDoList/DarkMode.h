@@ -13,6 +13,7 @@ class CDarkMode
 {
 public:
 	static void Enable(BOOL bEnable = TRUE);
+	static BOOL IsEnabled() { return s_bDarkMode; }
 
 protected:
 	CDarkMode();

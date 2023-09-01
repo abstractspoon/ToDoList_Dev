@@ -84,10 +84,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	switch (nColor)
 	{
 	case COLOR_SCROLLBAR:		
-		RETURN_STATIC_COLOR_OR_BRUSH(colorGreen);
-
 	case COLOR_BTNTEXT:
-		return TrueGetSysColor(nColor);
+		break;
 
 	case COLOR_WINDOWTEXT:
 		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
@@ -107,10 +105,13 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_BTNSHADOW:
-		RETURN_STATIC_COLOR_OR_BRUSH(colorYellow);
+//		RETURN_STATIC_COLOR_OR_BRUSH(colorYellow);
+		nColor = COLOR_3DDKSHADOW;
+		break;
 
 	case COLOR_BTNHIGHLIGHT:
-		RETURN_STATIC_COLOR_OR_BRUSH(colorBlue);
+		//RETURN_STATIC_COLOR_OR_BRUSH(colorBlue);
+		break;
 
 	case COLOR_3DDKSHADOW:
 		RETURN_STATIC_COLOR_OR_BRUSH(colorPurple);
@@ -126,6 +127,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWFRAME:
+		RETURN_STATIC_COLOR_OR_BRUSH(colorBlack);
+
 	case COLOR_CAPTIONTEXT:
 	case COLOR_ACTIVEBORDER:
 	case COLOR_INACTIVEBORDER:
@@ -178,15 +181,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM /*lp*/, LRESULT& lr)
 
 	case WM_CTLCOLOREDIT:
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
-		::SetBkColor((HDC)wp, MyGetSysColor(COLOR_WINDOW));
-// 		lr = (LRESULT)MyGetSysColorBrush(COLOR_WINDOW);
-// 		return TRUE;
+		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(MyGetSysColor(COLOR_WINDOW))
 
 	case WM_CTLCOLORSTATIC:
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
-		lr = (LRESULT)MyGetSysColorBrush(COLOR_WINDOW);
+		lr = (LRESULT)GetStockObject(NULL_BRUSH);//MyGetSysColorBrush(COLOR_WINDOW);
 		return TRUE;
 
 	case WM_SHOWWINDOW:
@@ -225,7 +226,7 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 {
 	if ((iPartId == EP_EDITTEXT) && (iStateId == ETS_CUEBANNER) && (iPropId == TMT_TEXTCOLOR))
 	{
-		*pColor = MyGetSysColor(COLOR_WINDOWTEXT);
+		*pColor = TrueGetSysColor(COLOR_3DHIGHLIGHT);
 		return S_OK;
 	}
 

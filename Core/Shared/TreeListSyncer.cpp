@@ -1494,7 +1494,7 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 		rContent.DeflateRect(1, 1);
 		pDC->ExcludeClipRect(rContent);
 
-		pDC->FillSolidRect(rBounding, GetSysColor(COLOR_3DSHADOW));
+		pDC->FillSolidRect(rBounding, GetSysColor(COLOR_WINDOWFRAME));
 		pDC->ExcludeClipRect(rBounding);
 
 		bHandled = TRUE;

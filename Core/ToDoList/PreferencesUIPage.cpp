@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "PreferencesUIPage.h"
 #include "tdcenum.h"
+#include "darkmode.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
@@ -107,7 +108,7 @@ void CPreferencesUIPage::OnFirstShow()
 	GetDlgItem(IDC_STACKCOMMENTSABOVEFIELDS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	// theming only available if XP themes are active
-	if (CThemed::IsAppThemed())
+	if (CThemed::IsAppThemed() && !CDarkMode::IsEnabled())
 	{
 		m_cbThemes.SetThemePath(m_sUIThemeFile);
 		GetDlgItem(IDC_UITHEMEFILE)->EnableWindow(m_bUseUITheme);
@@ -243,7 +244,7 @@ void CPreferencesUIPage::OnUseuitheme()
 
 CString CPreferencesUIPage::GetUITheme() const 
 { 
-	if (m_bUseUITheme)
+	if (m_bUseUITheme && !CDarkMode::IsEnabled())
 		return FileMisc::GetFullPath(m_sUIThemeFile, FileMisc::GetAppResourceFolder() + "\\Themes");
 	
 	// else

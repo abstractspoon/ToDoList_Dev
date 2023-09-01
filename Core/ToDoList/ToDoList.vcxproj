@@ -190,7 +190,6 @@ unicode_release\TDLTest.exe
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DarkMode.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
@@ -209,7 +208,6 @@ unicode_release\TDLTest.exe
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DarkMode.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="ToDoList.h" />
