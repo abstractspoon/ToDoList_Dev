@@ -74,6 +74,7 @@
 			this.m_DisplayContinuous.AutoSize = true;
 			this.m_DisplayContinuous.Checked = true;
 			this.m_DisplayContinuous.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_DisplayContinuous.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_DisplayContinuous.Location = new System.Drawing.Point(13, 63);
 			this.m_DisplayContinuous.Name = "m_DisplayContinuous";
 			this.m_DisplayContinuous.Size = new System.Drawing.Size(407, 17);
@@ -91,6 +92,7 @@
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningDays);
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningWeekends);
 			this.groupBox1.Controls.Add(this.m_HideTasksWithoutTimes);
+			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox1.Location = new System.Drawing.Point(13, 91);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(475, 187);
@@ -110,6 +112,7 @@
 			this.m_ShowFutureOccurrences.AutoSize = true;
 			this.m_ShowFutureOccurrences.Checked = true;
 			this.m_ShowFutureOccurrences.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_ShowFutureOccurrences.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ShowFutureOccurrences.Location = new System.Drawing.Point(10, 162);
 			this.m_ShowFutureOccurrences.Name = "m_ShowFutureOccurrences";
 			this.m_ShowFutureOccurrences.Size = new System.Drawing.Size(236, 17);
@@ -122,6 +125,7 @@
 			this.m_HideParentTasksByTag.AutoSize = true;
 			this.m_HideParentTasksByTag.Checked = true;
 			this.m_HideParentTasksByTag.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_HideParentTasksByTag.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_HideParentTasksByTag.Location = new System.Drawing.Point(28, 42);
 			this.m_HideParentTasksByTag.Name = "m_HideParentTasksByTag";
 			this.m_HideParentTasksByTag.Size = new System.Drawing.Size(143, 17);
@@ -135,6 +139,7 @@
 			this.m_HideParentTasks.AutoSize = true;
 			this.m_HideParentTasks.Checked = true;
 			this.m_HideParentTasks.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_HideParentTasks.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_HideParentTasks.Location = new System.Drawing.Point(10, 19);
 			this.m_HideParentTasks.Name = "m_HideParentTasks";
 			this.m_HideParentTasks.Size = new System.Drawing.Size(109, 17);
@@ -146,6 +151,7 @@
 			// m_HideTasksSpanningDays
 			// 
 			this.m_HideTasksSpanningDays.AutoSize = true;
+			this.m_HideTasksSpanningDays.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_HideTasksSpanningDays.Location = new System.Drawing.Point(10, 139);
 			this.m_HideTasksSpanningDays.Name = "m_HideTasksSpanningDays";
 			this.m_HideTasksSpanningDays.Size = new System.Drawing.Size(338, 17);
@@ -156,6 +162,7 @@
 			// m_HideTasksSpanningWeekends
 			// 
 			this.m_HideTasksSpanningWeekends.AutoSize = true;
+			this.m_HideTasksSpanningWeekends.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_HideTasksSpanningWeekends.Location = new System.Drawing.Point(10, 116);
 			this.m_HideTasksSpanningWeekends.Name = "m_HideTasksSpanningWeekends";
 			this.m_HideTasksSpanningWeekends.Size = new System.Drawing.Size(348, 17);
@@ -168,6 +175,7 @@
 			this.m_HideTasksWithoutTimes.AutoSize = true;
 			this.m_HideTasksWithoutTimes.Checked = true;
 			this.m_HideTasksWithoutTimes.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_HideTasksWithoutTimes.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_HideTasksWithoutTimes.Location = new System.Drawing.Point(10, 93);
 			this.m_HideTasksWithoutTimes.Name = "m_HideTasksWithoutTimes";
 			this.m_HideTasksWithoutTimes.Size = new System.Drawing.Size(259, 17);
@@ -178,6 +186,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
+			this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label2.Location = new System.Drawing.Point(10, 40);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(156, 13);
@@ -206,6 +215,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
+			this.label1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label1.Location = new System.Drawing.Point(10, 12);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(123, 13);

@@ -40,6 +40,7 @@
 			// m_TaskLabel
 			// 
 			this.m_TaskLabel.AutoSize = true;
+			this.m_TaskLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TaskLabel.Location = new System.Drawing.Point(10, 12);
 			this.m_TaskLabel.Name = "m_TaskLabel";
 			this.m_TaskLabel.Size = new System.Drawing.Size(31, 13);
