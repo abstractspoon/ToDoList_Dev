@@ -165,7 +165,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
 	int nTrueColor = nColor;
 
-	//RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
 	switch (nColor)
 	{
 	case COLOR_SCROLLBAR:		
@@ -227,6 +226,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_ACTIVECAPTION:
 	case COLOR_INACTIVECAPTION:	
 	case COLOR_MENUBAR:
+		// TODO
 		RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
 	}
 
@@ -271,7 +271,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
- 	case WM_CTLCOLORBTN:
+// 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
 		{
 // 			HWND hwndParent = ::GetParent(hWnd);
@@ -295,7 +295,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 // 			}
 
 			::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
-			//::SetBkColor((HDC)wp, MyGetSysColor(COLOR_3DFACE));
 			::SetBkMode((HDC)wp, TRANSPARENT);
 			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
 		}

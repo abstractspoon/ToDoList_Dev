@@ -27,7 +27,6 @@
 #include "..\shared\preferencesbase.h"
 #include "..\shared\enstatic.h"
 #include "..\shared\winhelpbutton.h"
-#include "..\shared\SizeGrip.h"
 #include "..\shared\EnEdit.h"
 #include "..\shared\Icon.h"
 
