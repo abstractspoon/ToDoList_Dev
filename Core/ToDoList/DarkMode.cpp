@@ -11,6 +11,8 @@
 #include "..\shared\themed.h"
 #include "..\Shared\PreferencesBase.h"
 #include "..\shared\subclass.h"
+#include "..\shared\GraphicsMisc.h"
+#include "..\shared\DialogHelper.h"
 
 #include "..\shared\misc.h"
 
@@ -57,18 +59,8 @@ protected:
 	LRESULT Draw(HWND hRealWnd, UINT nButtonType)
 	{
 		CWnd* pWnd = CWnd::FromHandle(hRealWnd);
-
-#ifdef _DEBUG
-		CString sLabel;
-		pWnd->GetWindowText(sLabel);
-#endif
 		CPaintDC dc(pWnd);
 		
-		CRect rButton;
-		GetClientRect(rButton);
-
-		rButton.right = (rButton.left + GetSystemMetrics(SM_CXVSCROLL));
-
 		UINT nState = nButtonType;
 
 		if (SendMessage(BM_GETCHECK) != 0)
@@ -77,13 +69,39 @@ protected:
 		if (!IsWindowEnabled())
 			nState |= DFCS_INACTIVE;
 
-		CThemed::DrawFrameControl(pWnd->GetParent(), &dc, rButton, DFC_BUTTON, nState);
+		CRect rClient;
+		GetClientRect(rClient);
 
-		// Clip out our drawing
-		dc.ExcludeClipRect(rButton);
+		CRect rBtn = rClient;
+		rBtn.right = GetSystemMetrics(SM_CXVSCROLL);
 
-		// default drawing
-		CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0);
+		CThemed::DrawFrameControl(pWnd->GetParent(), &dc, rBtn, DFC_BUTTON, nState);
+
+		if (!IsWindowEnabled())
+		{
+			// Embossed text looks awful on a dark background
+			CString sLabel;
+			pWnd->GetWindowText(sLabel);
+
+			rClient.left = rBtn.right + 1;
+			rClient.top++;
+
+			CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, hRealWnd);
+
+			dc.SetTextColor(GetSysColor(COLOR_GRAYTEXT));
+			dc.SetBkMode(TRANSPARENT);
+			dc.DrawText(sLabel, rClient, DT_VCENTER);
+			dc.SelectObject(pOldFont);
+		}
+		else
+		{
+			// Clip out the button
+			dc.ExcludeClipRect(rBtn);
+
+			// default drawing
+			CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0);
+		}
+
 		return 0L;
 	}
 };
@@ -169,7 +187,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	{
 	case COLOR_SCROLLBAR:		
 	case COLOR_BTNTEXT:
-	case COLOR_GRAYTEXT:
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
 		break;
@@ -187,6 +204,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		nTrueColor = COLOR_3DHIGHLIGHT;
 		break;
 
+	case COLOR_GRAYTEXT:
 	case COLOR_3DSHADOW:
 		nTrueColor = COLOR_3DLIGHT;
 		break;
@@ -271,7 +289,9 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
-// 	case WM_CTLCOLORBTN:
+//  	case WM_CTLCOLORBTN:
+// 		break;
+
  	case WM_CTLCOLORSTATIC:
 		{
 // 			HWND hwndParent = ::GetParent(hWnd);
@@ -299,6 +319,21 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
 		}
  		break;
+
+	case WM_ENABLE:
+		if (CWinClasses::IsClass(hWnd, WC_BUTTON))
+		{
+			switch (CWinClasses::GetButtonType(hWnd))
+			{
+			case BS_CHECKBOX:
+			case BS_AUTOCHECKBOX:
+			case BS_RADIOBUTTON:
+			case BS_AUTORADIOBUTTON:
+				::InvalidateRect(::GetParent(hWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hWnd)), TRUE);
+				break;
+			}
+		}
+		break;
 
 	case WM_SHOWWINDOW:
 		if (wp)

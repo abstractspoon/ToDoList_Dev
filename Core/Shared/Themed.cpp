@@ -240,21 +240,26 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 		if (!th.Open(pWnd, sThClass))
 			return FALSE;
 
-		// Don't scale check boxes
+		// Don't scale check boxes or radio buttons
 		CRect rImage(rect);
 
-		if (nThPart == BP_CHECKBOX)
+		switch (nThPart)
 		{
-			CSize size;
-			th.GetSize(nThPart, 1, size);
+		case BP_CHECKBOX:
+		case BP_RADIOBUTTON:
+			{
+				CSize size;
+				th.GetSize(nThPart, 1, size);
 
-			rImage.OffsetRect((rImage.Width() - size.cx) / 2, 
-								(rImage.Height() - size.cy) / 2);
+				rImage.OffsetRect((rImage.Width() - size.cx) / 2,
+					(rImage.Height() - size.cy) / 2);
 
-			rImage.right = (rImage.left + size.cx);
-			rImage.bottom = (rImage.top + size.cy);
+				rImage.right = (rImage.left + size.cx);
+				rImage.bottom = (rImage.top + size.cy);
+			}
+			break;
 		}
-		
+				
 		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
 		
 		return TRUE;
