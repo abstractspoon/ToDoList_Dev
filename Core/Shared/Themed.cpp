@@ -684,12 +684,26 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 					nThState = PBS_HOT;
 				}
 			}
-			/* 
 			else if (nState & DFCS_BUTTONRADIO) 
 			{
 				nThPart = BP_RADIOBUTTON;
+
+				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				{
+					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					{
+						nThState = RBS_CHECKEDDISABLED;
+					}
+					else if ((nState & DFCS_HOT) == DFCS_HOT)
+					{
+						nThState = RBS_CHECKEDHOT;
+					}
+					else
+					{
+						nThState = RBS_CHECKEDNORMAL;
+					}
+				}
 			}
-			*/
 			else if ((nState & DFCS_BUTTONCHECK) == DFCS_BUTTONCHECK) 
 			{
 				nThPart = BP_CHECKBOX;

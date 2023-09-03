@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+struct CRuntimeClass;
+
 // global helper function for everyone to use
 void TRACEWND(LPCTSTR szFunctionName, HWND hWnd);
 
@@ -37,7 +39,9 @@ public:
 	static BOOL IsClassEx(LPCTSTR szClass, LPCTSTR szWndClass);
 
 	static BOOL IsDialog(HWND hWnd);
+	static BOOL IsPropertyPage(HWND hWnd);
 	static BOOL IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType = WCD_ANY);
+	static BOOL IsKindOf(HWND hWnd, const CRuntimeClass* pClass);
 
 	static BOOL IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit = TRUE);
 	static BOOL IsEditControl(HWND hWnd, BOOL bOrRichEdit = TRUE);

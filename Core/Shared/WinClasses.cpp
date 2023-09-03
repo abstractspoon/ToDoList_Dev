@@ -293,6 +293,18 @@ BOOL CWinClasses::IsDialog(HWND hWnd)
 	return IsClass(hWnd, WC_DIALOGBOX);
 }
 
+BOOL CWinClasses::IsPropertyPage(HWND hWnd)
+{
+	return IsKindOf(hWnd, RUNTIME_CLASS(CPropertyPage));
+}
+
+BOOL CWinClasses::IsKindOf(HWND hWnd, const CRuntimeClass* pClass)
+{
+	CWnd* pWnd = CWnd::FromHandle(hWnd);
+
+	return (pWnd ? pWnd->IsKindOf(pClass) : FALSE);
+}
+
 BOOL CWinClasses::IsChild(HWND hWnd)
 {
 	return (::GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD);

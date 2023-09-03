@@ -864,7 +864,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			rArrow.right -= 2;
 		}
 
-		pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_3DSHADOW));
+		pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 		GraphicsMisc::DrawAnsiSymbol(pDC, MENU_DROPBTN, rArrow, nFlags, &GraphicsMisc::Marlett());
 	}
 	
@@ -928,7 +928,7 @@ void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& 
 	}
 	else if (CThemed::IsAppThemed())
 	{
-		pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+		pDC->SetTextColor(GetSysColor(COLOR_GRAYTEXT));
 		DrawText(pDC, ptTopLeft, sText, rect, bSymbol);
 	}
 	else // classic mode
