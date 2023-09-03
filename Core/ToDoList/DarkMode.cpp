@@ -72,7 +72,7 @@ protected:
 
 		CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
 
-		pDC->SetTextColor(GetSysColor(COLOR_GRAYTEXT));
+		pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sLabel, rText, DT_VCENTER);
 		pDC->SelectObject(pOldFont);
@@ -123,7 +123,7 @@ protected:
 		rBtn.right = GetSystemMetrics(SM_CXVSCROLL);
 
 		CThemed::DrawFrameControl(pWnd->GetParent(), &dc, rBtn, DFC_BUTTON, nState);
-		rClient.left = rBtn.right;
+		rClient.left = rBtn.right + 1;
 
 		if (!IsWindowEnabled())
 		{
@@ -225,6 +225,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_BTNTEXT:
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
+	case COLOR_GRAYTEXT:
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -240,7 +241,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		nTrueColor = COLOR_3DHIGHLIGHT;
 		break;
 
-	case COLOR_GRAYTEXT:
 	case COLOR_3DSHADOW:
 		nTrueColor = COLOR_3DLIGHT;
 		break;
@@ -300,63 +300,28 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	switch (nMsg)
 	{
-// 	case WM_CTLCOLOR:
-// // 		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
-// // 		return TRUE;
-// 		RETURN_LRESULT_STATIC_BRUSH(colorBlack);
-// 
-// 	case WM_CTLCOLORMSGBOX:
-// 		RETURN_LRESULT_STATIC_BRUSH(colorLightBlue);
-// 
-// 	case WM_CTLCOLORLISTBOX:
-// 		RETURN_LRESULT_STATIC_BRUSH(colorOrange);
+ 	case WM_CTLCOLOR:
+		ASSERT(0);
+		break;
 
 	case WM_CTLCOLORDLG:
+	case WM_CTLCOLORMSGBOX:
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
-// 	case WM_CTLCOLORSCROLLBAR:
-// // 		lr = (LRESULT)MyGetSysColorBrush(COLOR_3DFACE);
-// // 		return TRUE;
-// 		RETURN_LRESULT_STATIC_BRUSH(colorDarkOrange)
-// 
-// 	case WM_CTLCOLORBTN:
-// 		RETURN_LRESULT_STATIC_BRUSH(colorTeal)
-
+	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLOREDIT:
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
-//  	case WM_CTLCOLORBTN:
-// 		break;
+	case WM_CTLCOLORBTN:
+ 	case WM_CTLCOLORSCROLLBAR:
+ 		break;
 
  	case WM_CTLCOLORSTATIC:
-		{
-// 			HWND hwndParent = ::GetParent(hWnd);
-// 
-// 			if (CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CPreferencesPageBase)))
-// 			{
-// 				// ignore
-// 				break;
-// 			}
-// 
-// 			// Get popup parent
-// 			HWND hwndPopup = hWnd;
-// 
-// 			while (hwndPopup && (::GetWindowLong(hwndPopup, GWL_STYLE) & WS_CHILD))
-// 				hwndPopup = ::GetParent(hwndPopup);
-// 
-// 			if (CWinClasses::IsKindOf(hwndPopup, RUNTIME_CLASS(CFrameWnd)))
-// 			{
-// 				// ignore
-// 				break;
-// 			}
-
-			::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
-			::SetBkMode((HDC)wp, TRANSPARENT);
-			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
-		}
- 		break;
+		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetBkMode((HDC)wp, TRANSPARENT);
+		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
 
 	case WM_ENABLE:
 		{
