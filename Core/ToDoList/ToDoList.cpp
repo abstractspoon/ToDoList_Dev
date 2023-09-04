@@ -17,8 +17,6 @@
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
 
-#include "DarkMode.h"
-
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\dialoghelper.h"
@@ -35,6 +33,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
+#include "..\shared\DarkMode.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"

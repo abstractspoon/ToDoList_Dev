@@ -5,13 +5,13 @@
 #include "resource.h"
 #include "PreferencesUIPage.h"
 #include "tdcenum.h"
-#include "darkmode.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\osversion.h"
 #include "..\shared\themed.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\darkmode.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

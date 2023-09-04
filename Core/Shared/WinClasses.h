@@ -52,7 +52,9 @@ public:
 	static BOOL IsListBox(LPCTSTR szClass);
 	static BOOL IsListBox(HWND hWnd);
 	static BOOL IsChild(HWND hWnd);
+
 	static int GetButtonType(HWND hWnd); // BS_*
+	static int GetStaticType(HWND hWnd); // SS_*
 	
 protected:
 	static CMapStringToPtr s_mapCtrlClasses;

@@ -111,7 +111,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\ToDoList\DarkMode.cpp" />
     <ClCompile Include="..\ToDoList\FilteredToDoCtrl.cpp" />
     <ClCompile Include="..\ToDoList\MultiTaskFile.cpp" />
     <ClCompile Include="..\ToDoList\PreferencesDlg.cpp" />
@@ -266,7 +265,6 @@
     <ClCompile Include="..\ToDoList\ToDoListWnd.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ToDoList\DarkMode.h" />
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h" />
     <ClInclude Include="..\ToDoList\MultiTaskFile.h" />
     <ClInclude Include="..\ToDoList\PreferencesDlg.h" />

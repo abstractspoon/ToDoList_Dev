@@ -372,9 +372,14 @@ BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 
 int CWinClasses::GetButtonType(HWND hWnd)
 {
-	if (!IsClass(hWnd, WC_BUTTON))
-		return -1;
+	ASSERT(IsClass(hWnd, WC_BUTTON));
 
-	UINT BTN_TYPEMASK = 0xf;
-	return (::GetWindowLong(hWnd, GWL_STYLE) & BTN_TYPEMASK);
+	return (::GetWindowLong(hWnd, GWL_STYLE) & BS_TYPEMASK);
+}
+
+int CWinClasses::GetStaticType(HWND hWnd)
+{
+	ASSERT(IsClass(hWnd, WC_STATIC));
+
+	return (::GetWindowLong(hWnd, GWL_STYLE) & SS_TYPEMASK);
 }

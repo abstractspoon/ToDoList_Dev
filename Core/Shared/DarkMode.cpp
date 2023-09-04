@@ -4,17 +4,15 @@
 
 #include "stdafx.h"
 #include "DarkMode.h"
-#include "TDLDialog.h"
 
-#include "..\shared\winclasses.h"
-#include "..\shared\wclassdefines.h"
-#include "..\shared\themed.h"
-#include "..\Shared\PreferencesBase.h"
-#include "..\shared\subclass.h"
-#include "..\shared\GraphicsMisc.h"
-#include "..\shared\DialogHelper.h"
-
-#include "..\shared\misc.h"
+#include "winclasses.h"
+#include "wclassdefines.h"
+#include "themed.h"
+#include "PreferencesBase.h"
+#include "subclass.h"
+#include "GraphicsMisc.h"
+#include "DialogHelper.h"
+#include "misc.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
@@ -42,21 +40,38 @@ HRESULT (STDAPICALLTYPE *TrueGetThemeColor)(HTHEME hTheme, int iPartId, int iSta
 
 //////////////////////////////////////////////////////////////////////
 
-BOOL CDarkMode::s_bDarkMode = FALSE;
-
 static CMap<HWND, HWND, CSubclassWnd*, CSubclassWnd*&> s_mapWnds;
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_3DFACE = RGB(120, 120, 120);
-const COLORREF DM_WINDOW = RGB(64, 64, 64);
+BOOL IsHooked(HWND hWnd)
+{
+	CSubclassWnd* pUnused;
+
+	return s_mapWnds.Lookup(hWnd, pUnused);
+}
+
+BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
+{
+	if (IsHooked(hWnd))
+		return TRUE;
+
+	if (pWnd && pWnd->HookWindow(hWnd))
+	{
+		s_mapWnds[hWnd] = pWnd;
+		return TRUE;
+	}
+
+	delete pWnd;
+	return FALSE;
+}
 
 //////////////////////////////////////////////////////////////////////
 
 class CDarkModeStaticText : public CSubclassWnd
 {
 protected:
-	void DrawDisabledText(CDC* pDC, CWnd* pWnd, CRect& rText = CRect())
+	void DrawDisabledText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText = CRect())
 	{
 		ASSERT(!IsWindowEnabled());
 
@@ -74,7 +89,7 @@ protected:
 
 		pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->DrawText(sLabel, rText, DT_VCENTER);
+		pDC->DrawText(sLabel, rText, (nAlign | DT_VCENTER));
 		pDC->SelectObject(pOldFont);
 	}
 
@@ -90,7 +105,19 @@ private:
 				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
 				CPaintDC dc(pWnd);
 
-				DrawDisabledText(&dc, pWnd);
+				int nType = CWinClasses::GetStaticType(hRealWnd);
+				int nAlign = DT_LEFT;
+
+				if (nType == SS_CENTER)
+				{
+					nAlign = DT_CENTER;
+				}
+				else if (nType == SS_RIGHT)
+				{
+					nAlign = DT_RIGHT;
+				}
+
+				DrawDisabledText(&dc, pWnd, nAlign);
 				return 0L;
 			}
 			break;
@@ -127,7 +154,19 @@ protected:
 
 		if (!IsWindowEnabled())
 		{
-			DrawDisabledText(&dc, pWnd, rClient);
+			DWORD dwStyle = GetStyle();
+			int nAlign = DT_LEFT;
+		
+			if (Misc::HasFlag(dwStyle, BS_CENTER))
+			{
+				nAlign = DT_CENTER;
+			}
+			else if (Misc::HasFlag(dwStyle, BS_RIGHT))
+			{
+				nAlign = DT_RIGHT;
+			}
+
+			DrawDisabledText(&dc, pWnd, nAlign, rClient);
 		}
 		else
 		{
@@ -180,7 +219,9 @@ void CDarkMode::Enable(BOOL bEnable)
 	if (!CThemed::IsAppThemed())
 		return;
 
-	if ((bEnable && s_bDarkMode) || (!bEnable && !s_bDarkMode))
+	BOOL bIsEnabled = IsEnabled();
+
+	if ((bEnable && bIsEnabled) || (!bEnable && !bIsEnabled))
 		return;
 
 	if (bEnable)
@@ -209,8 +250,6 @@ void CDarkMode::Enable(BOOL bEnable)
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
-
-	s_bDarkMode = bEnable;
 }
 
 #define RETURN_STATIC_COLOR_OR_BRUSH(color) if (bColor) return color; else { static HBRUSH hbr = CreateSolidBrush(color); return (DWORD)hbr; }
@@ -344,12 +383,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
-				CSubclassWnd* pWnd = new CDarkModeStaticText();
-
-				if (pWnd && pWnd->HookWindow(hWnd))
-					s_mapWnds[hWnd] = pWnd;
-				else
-					delete pWnd;
+				switch (CWinClasses::GetStaticType(hWnd))
+				{
+				case SS_LEFT:
+				case SS_CENTER:
+				case SS_RIGHT:
+					HookWindow(hWnd, new CDarkModeStaticText());
+					break;
+				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_BUTTON))
 			{
@@ -368,29 +409,15 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 				case BS_CHECKBOX:
 				case BS_AUTOCHECKBOX:
-					pWnd = new CDarkModeCheckBox();
+					if (HookWindow(hWnd, new CDarkModeCheckBox()))
+						::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
 					break;
 
 				case BS_RADIOBUTTON:
 				case BS_AUTORADIOBUTTON:
-					pWnd = new CDarkModeRadioButton();
+					if (HookWindow(hWnd, new CDarkModeRadioButton()))
+						::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
 					break;
-				}
-
-				if (pWnd && pWnd->HookWindow(hWnd))
-				{
-#ifdef _DEBUG
-					CString sLabel;
-					pWnd->GetCWnd()->GetWindowText(sLabel);
-#endif
-					// Turn off theming so we can change the font colour
-					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
-
-					s_mapWnds[hWnd] = pWnd;
-				}
-				else
-				{
-					delete pWnd;
 				}
 			}
 		}
