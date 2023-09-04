@@ -266,6 +266,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_MENU:
 	case COLOR_GRAYTEXT:
 		break;
+
 	case COLOR_WINDOWTEXT:
 		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
 
@@ -291,11 +292,11 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		nTrueColor = COLOR_3DDKSHADOW;
 		break;
 
-	case COLOR_HIGHLIGHT:				// Selection colour
+	case COLOR_HIGHLIGHT:
 		nTrueColor = COLOR_3DLIGHT;
 		break;
 
-	case COLOR_HIGHLIGHTTEXT:			// Selection text colour
+	case COLOR_HIGHLIGHTTEXT:
 		nTrueColor = COLOR_WINDOWTEXT;
 		break;
 
