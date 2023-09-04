@@ -1386,7 +1386,8 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 	if (nState != GMIS_NONE)
 	{
 		BOOL bHighContrast = Misc::IsHighContrastActive();
-		BOOL bThemed = (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+		BOOL bDarkMode = CDarkMode::IsEnabled();
+		BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA) && !bDarkMode);
 		
 		if (bHighContrast)
 		{
