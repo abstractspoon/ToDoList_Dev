@@ -1503,8 +1503,8 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	}
 	
 	// Do the draw
-	BOOL bPreDraw = (dwFlags & GMIB_PREDRAW), bPostDraw = (dwFlags & GMIB_POSTDRAW);
-	BOOL bSingleStageDraw = ((!bPreDraw && !bPostDraw) || bDarkMode);
+	BOOL bPreDraw = (!bDarkMode && (dwFlags & GMIB_PREDRAW)), bPostDraw = (!bDarkMode && (dwFlags & GMIB_POSTDRAW));
+	BOOL bSingleStageDraw = (!bPreDraw && !bPostDraw);
 	BOOL bDrawn = FALSE;
 
 	// Fill background with white if single stage draw
