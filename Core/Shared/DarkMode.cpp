@@ -71,25 +71,16 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 class CDarkModeStaticText : public CSubclassWnd
 {
 protected:
-	void DrawDisabledText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText = CRect())
+	void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
 	{
-		ASSERT(!IsWindowEnabled());
-
-		// Embossed text looks awful on a dark background
 		CString sLabel;
 		pWnd->GetWindowText(sLabel);
 
-		if (rText.IsRectEmpty())
-			GetClientRect(rText);
-
-		rText.left++;
-		rText.top++;
-
 		CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
 
-		pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
+		pDC->SetTextColor(GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_3DSHADOW));
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->DrawText(sLabel, rText, (nAlign | DT_VCENTER));
+		pDC->DrawText(sLabel, rText, nAlign);
 		pDC->SelectObject(pOldFont);
 	}
 
@@ -98,7 +89,7 @@ private:
 	{
 		switch (msg)
 		{
-		case  WM_PAINT:
+		case WM_PAINT:
 			if (!IsWindowEnabled())
 			{
 				// Embossed text looks awful on a dark background
@@ -107,6 +98,12 @@ private:
 
 				int nType = CWinClasses::GetStaticType(hRealWnd);
 				int nAlign = DT_LEFT;
+
+				CRect rText;
+				GetClientRect(rText);
+
+				rText.left++;
+				rText.top++;
 
 				if (nType == SS_CENTER)
 				{
@@ -117,7 +114,7 @@ private:
 					nAlign = DT_RIGHT;
 				}
 
-				DrawDisabledText(&dc, pWnd, nAlign);
+				DrawText(&dc, pWnd, nAlign, rText);
 				return 0L;
 			}
 			break;
@@ -127,86 +124,111 @@ private:
 	}
 };
 
-class CDarkModeButtonBase : public CDarkModeStaticText
+class CDarkModeRadioButtonOrCheckBoxText : public CDarkModeStaticText
 {
+public:
+	CDarkModeRadioButtonOrCheckBoxText() 
+		: 
+		m_nTextOffset(GetSystemMetrics(SM_CXVSCROLL)),
+		m_crParentBkgnd(DM_3DFACE)
+	{
+	}
+
 protected:
-	void Draw(HWND hRealWnd, UINT nButtonType)
+	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
 	{
-		CWnd* pWnd = CWnd::FromHandle(hRealWnd);
-		CPaintDC dc(pWnd);
-		
-		UINT nState = nButtonType;
+		if (!CDarkModeStaticText::HookWindow(hRealWnd, pSubclasser))
+			return FALSE;
 
-		if (SendMessage(BM_GETCHECK) != 0)
-			nState |= DFCS_CHECKED;
+		CThemed th;
 
-		if (!IsWindowEnabled())
-			nState |= DFCS_INACTIVE;
-
-		CRect rClient;
-		GetClientRect(rClient);
-
-		CRect rBtn = rClient;
-		rBtn.right = GetSystemMetrics(SM_CXVSCROLL);
-
-		CThemed::DrawFrameControl(pWnd->GetParent(), &dc, rBtn, DFC_BUTTON, nState);
-		rClient.left = rBtn.right + 1;
-
-		if (!IsWindowEnabled())
+		if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
 		{
-			DWORD dwStyle = GetStyle();
-			int nAlign = DT_LEFT;
-		
-			if (Misc::HasFlag(dwStyle, BS_CENTER))
-			{
-				nAlign = DT_CENTER;
-			}
-			else if (Misc::HasFlag(dwStyle, BS_RIGHT))
-			{
-				nAlign = DT_RIGHT;
-			}
+			CSize sizeBtn;
 
-			DrawDisabledText(&dc, pWnd, nAlign, rClient);
+			if (th.GetSize(BP_CHECKBOX, CBS_CHECKEDNORMAL, sizeBtn))
+				m_nTextOffset = (sizeBtn.cx + 3);
 		}
-		else
+
+		HWND hwndParent = ::GetParent(hRealWnd);
+
+		if (CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CPreferencesPageBase)))
 		{
-			// Clip out the button
-			dc.ExcludeClipRect(rBtn);
-
-			// default drawing
-			CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0);
+			CPreferencesPageBase* pParent = (CPreferencesPageBase*)CWnd::FromHandle(hwndParent);
+			m_crParentBkgnd = pParent->GetBackgroundColor();
 		}
+
+		return TRUE;
 	}
-};
-
-class CDarkModeRadioButton : public CDarkModeButtonBase
-{
+	
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		switch (msg)
 		{
-		case  WM_PAINT:
-			Draw(hRealWnd, DFCS_BUTTONRADIO);
-			return 0L;
+		case WM_PAINT:
+			{
+				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
+				CPaintDC dc(pWnd);
+
+				CRect rText;
+				GetClientRect(rText);
+
+				DWORD dwStyle = GetStyle();
+
+				if (Misc::HasFlag(dwStyle, BS_LEFTTEXT))
+					rText.right -= m_nTextOffset;
+				else
+					rText.left += m_nTextOffset;
+
+				int nAlign = DT_LEFT;
+
+				if (Misc::HasFlag(dwStyle, BS_CENTER))
+				{
+					nAlign = DT_CENTER;
+				}
+				else if (Misc::HasFlag(dwStyle, BS_RIGHT))
+				{
+					nAlign = DT_RIGHT;
+				}
+
+				if (Misc::HasFlag(dwStyle, BS_TOP))
+				{
+					nAlign |= DT_TOP;
+				}
+				else if (Misc::HasFlag(dwStyle, BS_VCENTER))
+				{
+					nAlign |= DT_VCENTER;
+				}
+				else if (Misc::HasFlag(dwStyle, BS_BOTTOM))
+				{
+					nAlign |= DT_BOTTOM;
+				}
+
+				// Calc minimum rect required
+				DrawText(&dc, pWnd, nAlign | DT_CALCRECT, rText);
+
+				// Redraw background
+				dc.FillSolidRect(rText, m_crParentBkgnd);
+
+				// Draw actual text
+				DrawText(&dc, pWnd, nAlign, rText);
+
+				// Clip out the text
+				rText.top++;
+				dc.ExcludeClipRect(rText);
+
+				// default drawing
+				return CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0);
+			}
 		}
-		
+
+		// all else
 		return Default();
 	}
-};
 
-class CDarkModeCheckBox : public CDarkModeButtonBase
-{
-	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
-	{
-		switch (msg)
-		{
-		case  WM_PAINT:
-			Draw(hRealWnd, DFCS_BUTTONCHECK);
-			return 0L;
-		}
-
-		return Default();
-	}
+private:
+	int m_nTextOffset;
+	COLORREF m_crParentBkgnd;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -350,7 +372,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_CTLCOLORDLG:
-	case WM_CTLCOLORMSGBOX:
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_CTLCOLORLISTBOX:
@@ -361,6 +382,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSCROLLBAR:
+	case WM_CTLCOLORMSGBOX:
  		break;
 
  	case WM_CTLCOLORSTATIC:
@@ -369,12 +391,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
 
 	case WM_ENABLE:
-		{
-			CSubclassWnd* pUnused;
-
-			if (s_mapWnds.Lookup(hWnd, pUnused))
-				::InvalidateRect(::GetParent(hWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hWnd)), TRUE);
-		}
+		if (IsHooked(hWnd))
+			::InvalidateRect(::GetParent(hWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hWnd)), TRUE);
 		break;
 
 	case WM_SHOWWINDOW:
@@ -404,8 +422,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 				switch (CWinClasses::GetButtonType(hWnd))
 				{
-				case BS_3STATE:
-				case BS_AUTO3STATE:
 					ASSERT(0);
 					break;
 
@@ -413,16 +429,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
 					break;
 
+				case BS_3STATE:
+				case BS_AUTO3STATE:
 				case BS_CHECKBOX:
 				case BS_AUTOCHECKBOX:
-					if (HookWindow(hWnd, new CDarkModeCheckBox()))
-						::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
-					break;
-
 				case BS_RADIOBUTTON:
 				case BS_AUTORADIOBUTTON:
-					if (HookWindow(hWnd, new CDarkModeRadioButton()))
-						::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
+					HookWindow(hWnd, new CDarkModeRadioButtonOrCheckBoxText());
 					break;
 				}
 			}

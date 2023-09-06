@@ -122,7 +122,7 @@ CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID)
 	: 
 	CPropertyPage(nDlgTemplateID), 
 	m_brBack(NULL), 
-	m_crback(CLR_NONE), 
+	m_crBack(CLR_NONE), 
 	m_bFirstShow(TRUE), 
 	m_nHelpID(nDlgTemplateID)
 {
@@ -153,8 +153,8 @@ BOOL CPreferencesPageBase::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	
-	if (m_crback != CLR_NONE)
-		SetBackgroundColor(m_crback);
+	if (m_crBack != CLR_NONE)
+		SetBackgroundColor(m_crBack);
 	else
 		SetBackgroundColor(GetSysColor(COLOR_WINDOW));
 
@@ -187,7 +187,7 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 	{
 		CRect rClient;
 		pDC->GetClipBox(rClient);
-		pDC->FillSolidRect(rClient, m_crback);
+		pDC->FillSolidRect(rClient, m_crBack);
 	}
 	else
 	{
@@ -260,10 +260,10 @@ void CPreferencesPageBase::OnControlChange(UINT nID)
 
 void CPreferencesPageBase::SetBackgroundColor(COLORREF color)
 {
-	if (color == m_crback)
+	if (color == m_crBack)
 		return;
 
-	m_crback = color;
+	m_crBack = color;
 
 	GraphicsMisc::VerifyDeleteObject(m_brBack);
 
@@ -274,6 +274,14 @@ void CPreferencesPageBase::SetBackgroundColor(COLORREF color)
 		Invalidate(TRUE);
 }
 
+COLORREF CPreferencesPageBase::GetBackgroundColor() const 
+{ 
+	if (m_crBack != CLR_NONE)
+		return m_crBack; 
+
+	// else
+	return GetSysColor(COLOR_WINDOW);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlgBase dialog

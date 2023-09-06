@@ -43,6 +43,8 @@ public:
 	virtual void SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const = 0;
 
 	void SetBackgroundColor(COLORREF color);
+	COLORREF GetBackgroundColor() const;
+
 	CWnd* GetDlgItem(UINT nID) const;
 	UINT GetHelpID() const { return m_nHelpID; }
 
@@ -52,7 +54,7 @@ public:
 
 protected:
 	HBRUSH m_brBack;
-	COLORREF m_crback;
+	COLORREF m_crBack;
 	BOOL m_bFirstShow;
 	UINT m_nHelpID;
 

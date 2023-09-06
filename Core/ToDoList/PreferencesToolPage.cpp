@@ -1079,7 +1079,7 @@ BOOL CPreferencesToolPage::InitializeToolbar()
 	if (!m_toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return FALSE;
 
-	m_toolbar.SetBackgroundColor(m_crback);
+	m_toolbar.SetBackgroundColor(m_crBack);
 	
 	VERIFY(m_toolbar.LoadToolBar(IDR_UDTPREFS_TOOLBAR, IDB_UDTPREFS_TOOLBAR_STD, colorMagenta));
 	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
