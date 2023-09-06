@@ -13,6 +13,7 @@
 #include "GraphicsMisc.h"
 #include "DialogHelper.h"
 #include "misc.h"
+#include "osversion.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
@@ -89,6 +90,10 @@ private:
 	{
 		switch (msg)
 		{
+		case WM_ENABLE:
+			InvalidateRect(::GetParent(hRealWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hRealWnd)), TRUE);
+			break;
+
 		case WM_PAINT:
 			if (!IsWindowEnabled())
 			{
@@ -102,7 +107,7 @@ private:
 				CRect rText;
 				GetClientRect(rText);
 
-				rText.left++;
+				//rText.left++;
 				rText.top++;
 
 				if (nType == SS_CENTER)
@@ -235,19 +240,82 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-class CDarkModeDateTimeCtrl : public CSubclassWnd
+class CDarkModeDateTimeCtrl : public CDarkModeStaticText
 {
 protected:
+	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
+	{
+		if (!CDarkModeStaticText::HookWindow(hRealWnd, pSubclasser))
+			return FALSE;
+
+		if (COSVersion() >= OSV_VISTA)
+		{
+			DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
+
+			if (::SendMessage(hRealWnd, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		switch (msg)
 		{
 		case WM_PAINT:
 			{
-				CDateTimeCtrl* pDTC = (CDateTimeCtrl*)GetCWnd();
-				CPaintDC dc(pDTC);
+				DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
 
-				// TODO
+				if (!SendMessage(DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
+				{
+					ASSERT(0);
+				}
+				else
+				{
+					CWnd* pDTC = GetCWnd();
+					CPaintDC dc(pDTC);
+
+					CRect rEdit;
+					GetClientRect(rEdit);
+
+					BOOL bHasCheckbox = (GetStyle() & DTS_SHOWNONE);
+
+					if (dtpi.rcButton.left == 0)
+					{
+						rEdit.left = dtpi.rcButton.right;
+
+						if (bHasCheckbox)
+							rEdit.right = dtpi.rcCheck.left;
+						else
+							rEdit.right -= 2;
+					}
+					else
+					{
+						if (bHasCheckbox)
+							rEdit.left = dtpi.rcCheck.right;
+						else
+							rEdit.left += 2;
+
+						rEdit.right = dtpi.rcButton.left;
+					}
+					rEdit.DeflateRect(0, 2);
+
+					dc.FillSolidRect(rEdit, (IsWindowEnabled() ? DM_WINDOW : DM_3DFACE));
+
+					// Only draw the text if the edit field is not active
+					if (!::IsWindowVisible(dtpi.hwndEdit))
+					{
+						CRect rText(rEdit);
+						rText.DeflateRect(2, 2);
+
+						DrawText(&dc, pDTC, DT_LEFT | DT_VCENTER, rText);
+					}
+					dc.ExcludeClipRect(rEdit);
+
+					// Default rendering for the rest
+					return CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0L);
+				}
 			}
 			break;
 		}
@@ -315,9 +383,11 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
+	case COLOR_CAPTIONTEXT: // MonthCalCtrl
 		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
 
 	case COLOR_WINDOW:
+	case COLOR_ACTIVECAPTION: // MonthCalCtrl
 		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
 
 	case COLOR_3DFACE:
@@ -359,18 +429,18 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		nTrueColor = COLOR_WINDOW;
 		break;
 
-	case COLOR_CAPTIONTEXT:
+	case COLOR_HOTLIGHT:
 	case COLOR_ACTIVEBORDER:
 	case COLOR_INACTIVEBORDER:
+	case COLOR_INACTIVECAPTION:	
+		RETURN_STATIC_COLOR_OR_BRUSH(colorBlue);
+
 	case COLOR_APPWORKSPACE:
 	case COLOR_INACTIVECAPTIONTEXT:
-	case COLOR_HOTLIGHT:
 	case COLOR_GRADIENTACTIVECAPTION:
 	case COLOR_GRADIENTINACTIVECAPTION:
 	case COLOR_MENUHILIGHT:
 	case COLOR_BACKGROUND:
-	case COLOR_ACTIVECAPTION:
-	case COLOR_INACTIVECAPTION:	
 	case COLOR_MENUBAR:
 		// TODO
 		RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
@@ -414,11 +484,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
-
-	case WM_ENABLE:
-		if (IsHooked(hWnd))
-			::InvalidateRect(::GetParent(hWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hWnd)), TRUE);
-		break;
 
 	case WM_SHOWWINDOW:
 		if (wp)
@@ -466,15 +531,30 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK))
 			{
-				::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
 				HookWindow(hWnd, new CDarkModeDateTimeCtrl());
 			}
-			else if (CWinClasses::IsClass(sClass, WC_MONTHCAL))
-			{
-				//::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
-				//::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOWTEXT));
-			}
+// 			else if (CWinClasses::IsClass(sClass, _T("dropdown")))
+// 			{
+// 				hWnd = ::GetDlgItem(hWnd, 0);
+// 
+// 				if (CWinClasses::IsClass(hWnd, WC_MONTHCAL))
+// 					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
+// 			}
+		}
+		break;
 
+	case WM_NOTIFY:
+		{
+			NMHDR* pNMHDR = (NMHDR*)lp;
+
+			switch (pNMHDR->code)
+			{
+			case DTN_DATETIMECHANGE:
+				::PostMessage(pNMHDR->hwndFrom, WM_KILLFOCUS, 0, 0L);
+// 				::InvalidateRect(pNMHDR->hwndFrom, NULL, TRUE);
+// 				::UpdateWindow(pNMHDR->hwndFrom);
+				break;
+			}
 		}
 		break;
 
