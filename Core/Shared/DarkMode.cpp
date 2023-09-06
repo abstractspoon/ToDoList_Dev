@@ -124,6 +124,8 @@ private:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeRadioButtonOrCheckBoxText : public CDarkModeStaticText
 {
 public:
@@ -229,6 +231,29 @@ protected:
 private:
 	int m_nTextOffset;
 	COLORREF m_crParentBkgnd;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CDarkModeDateTimeCtrl : public CSubclassWnd
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			{
+				CDateTimeCtrl* pDTC = (CDateTimeCtrl*)GetCWnd();
+				CPaintDC dc(pDTC);
+
+				// TODO
+			}
+			break;
+		}
+
+		return Default();
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -439,6 +464,17 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK))
+			{
+				::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
+				HookWindow(hWnd, new CDarkModeDateTimeCtrl());
+			}
+			else if (CWinClasses::IsClass(sClass, WC_MONTHCAL))
+			{
+				//::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
+				//::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOWTEXT));
+			}
+
 		}
 		break;
 
