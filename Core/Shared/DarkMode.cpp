@@ -85,6 +85,15 @@ protected:
 		pDC->SelectObject(pOldFont);
 	}
 
+	CDC* GetPaintDC(WPARAM wp)
+	{
+		if (wp)
+			return CDC::FromHandle((HDC)wp);
+
+		// else
+		return new CPaintDC(GetCWnd());
+	}
+
 private:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
@@ -99,7 +108,7 @@ private:
 			{
 				// Embossed text looks awful on a dark background
 				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
-				CPaintDC dc(pWnd);
+				CDC* pDC = GetPaintDC(wp);
 
 				int nType = CWinClasses::GetStaticType(hRealWnd);
 				int nAlign = DT_LEFT;
@@ -119,7 +128,11 @@ private:
 					nAlign = DT_RIGHT;
 				}
 
-				DrawText(&dc, pWnd, nAlign, rText);
+				DrawText(pDC, pWnd, nAlign, rText);
+
+				if (wp)
+					delete pDC;
+
 				return 0L;
 			}
 			break;
@@ -175,7 +188,7 @@ protected:
 		case WM_PAINT:
 			{
 				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
-				CPaintDC dc(pWnd);
+				CDC* pDC = GetPaintDC(wp);
 
 				CRect rText;
 				GetClientRect(rText);
@@ -212,20 +225,26 @@ protected:
 				}
 
 				// Calc minimum rect required
-				DrawText(&dc, pWnd, nAlign | DT_CALCRECT, rText);
+				DrawText(pDC, pWnd, nAlign | DT_CALCRECT, rText);
 
 				// Redraw background
-				dc.FillSolidRect(rText, m_crParentBkgnd);
+				pDC->FillSolidRect(rText, m_crParentBkgnd);
 
 				// Draw actual text
-				DrawText(&dc, pWnd, nAlign, rText);
+				DrawText(pDC, pWnd, nAlign, rText);
 
 				// Clip out the text
 				rText.top++;
-				dc.ExcludeClipRect(rText);
+				pDC->ExcludeClipRect(rText);
 
 				// default drawing
-				return CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0);
+				CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
+
+				// cleanup
+				if (wp)
+					delete pDC;
+
+				return 0L;
 			}
 		}
 
@@ -273,8 +292,7 @@ protected:
 				}
 				else
 				{
-					CWnd* pDTC = GetCWnd();
-					CPaintDC dc(pDTC);
+					CDC* pDC = GetPaintDC(wp);
 
 					CRect rEdit;
 					GetClientRect(rEdit);
@@ -301,20 +319,32 @@ protected:
 					}
 					rEdit.DeflateRect(0, 2);
 
-					dc.FillSolidRect(rEdit, (IsWindowEnabled() ? DM_WINDOW : DM_3DFACE));
+					pDC->FillSolidRect(rEdit, (IsWindowEnabled() ? DM_WINDOW : DM_3DFACE));
 
 					// Only draw the text if the edit field is not active
-					if (!::IsWindowVisible(dtpi.hwndEdit))
+					if (::IsWindowVisible(dtpi.hwndEdit))
+					{
+						int breakpoint = 0;
+					}
+					else
 					{
 						CRect rText(rEdit);
 						rText.DeflateRect(2, 2);
 
-						DrawText(&dc, pDTC, DT_LEFT | DT_VCENTER, rText);
+						DrawText(pDC, GetCWnd(), DT_LEFT | DT_VCENTER, rText);
 					}
-					dc.ExcludeClipRect(rEdit);
+					pDC->ExcludeClipRect(rEdit);
+
+					pDC->SetTextColor(DM_WINDOW);
+					pDC->SetBkColor(DM_3DFACE);
 
 					// Default rendering for the rest
-					return CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0L);
+					CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0L);
+
+					if (!wp)
+						delete pDC;
+
+					return 0L;
 				}
 			}
 			break;
@@ -540,21 +570,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 // 				if (CWinClasses::IsClass(hWnd, WC_MONTHCAL))
 // 					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
 // 			}
-		}
-		break;
-
-	case WM_NOTIFY:
-		{
-			NMHDR* pNMHDR = (NMHDR*)lp;
-
-			switch (pNMHDR->code)
-			{
-			case DTN_DATETIMECHANGE:
-				::PostMessage(pNMHDR->hwndFrom, WM_KILLFOCUS, 0, 0L);
-// 				::InvalidateRect(pNMHDR->hwndFrom, NULL, TRUE);
-// 				::UpdateWindow(pNMHDR->hwndFrom);
-				break;
-			}
 		}
 		break;
 
