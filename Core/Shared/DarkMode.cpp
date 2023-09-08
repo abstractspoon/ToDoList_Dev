@@ -263,6 +263,103 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+class CDarkModeDateTimeCtrl : public CDarkModeStaticText
+{
+protected:
+	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
+	{
+		if (!CDarkModeStaticText::HookWindow(hRealWnd, pSubclasser))
+			return FALSE;
+
+		if (COSVersion() >= OSV_VISTA)
+		{
+			DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
+
+			if (::SendMessage(hRealWnd, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			{
+				DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
+
+				if (!SendMessage(DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
+				{
+					ASSERT(0);
+				}
+				else
+				{
+					CDC* pDC = GetPaintDC(wp);
+
+					CRect rEdit;
+					GetClientRect(rEdit);
+
+					BOOL bHasCheckbox = (GetStyle() & DTS_SHOWNONE);
+
+					if (dtpi.rcButton.left == 0)
+					{
+						rEdit.left = dtpi.rcButton.right;
+
+						if (bHasCheckbox)
+							rEdit.right = dtpi.rcCheck.left;
+						else
+							rEdit.right -= 2;
+					}
+					else
+					{
+						if (bHasCheckbox)
+							rEdit.left = dtpi.rcCheck.right;
+						else
+							rEdit.left += 2;
+
+						rEdit.right = dtpi.rcButton.left;
+					}
+					rEdit.DeflateRect(0, 2);
+
+					pDC->FillSolidRect(rEdit, (IsWindowEnabled() ? DM_WINDOW : DM_3DFACE));
+
+					// Only draw the text if the edit field is not active
+					if (::IsWindowVisible(dtpi.hwndEdit))
+					{
+						int breakpoint = 0;
+					}
+					else
+					{
+						CRect rText(rEdit);
+						rText.DeflateRect(2, 2);
+
+						DrawText(pDC, GetCWnd(), DT_LEFT | DT_VCENTER, rText);
+					}
+					pDC->ExcludeClipRect(rEdit);
+
+					pDC->SetTextColor(DM_WINDOW);
+					pDC->SetBkColor(DM_3DFACE);
+
+					// Default rendering for the rest
+					CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0L);
+
+					if (!wp)
+						delete pDC;
+
+					return 0L;
+				}
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 void CDarkMode::Enable(BOOL bEnable)
 {
 	if (Misc::IsHighContrastActive())
@@ -470,6 +567,17 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK))
+			{
+				//HookWindow(hWnd, new CDarkModeDateTimeCtrl());
+			}
+// 			else if (CWinClasses::IsClass(sClass, _T("dropdown")))
+// 			{
+// 				hWnd = ::GetDlgItem(hWnd, 0);
+// 
+// 				if (CWinClasses::IsClass(hWnd, WC_MONTHCAL))
+// 					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
+// 			}
 		}
 		break;
 
@@ -510,6 +618,22 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 
 HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
 {
+	switch (iPartId)
+	{
+	case DP_DATETEXT:
+		{
+			::SetTextColor(hdc, 255);
+			::SetBkColor(hdc, 255);
+			::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+			return S_OK;
+			//int breakpoint = 0;
+		}
+		break;
+
+	default:
+		break;
+	}
+
 	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
 }
 
