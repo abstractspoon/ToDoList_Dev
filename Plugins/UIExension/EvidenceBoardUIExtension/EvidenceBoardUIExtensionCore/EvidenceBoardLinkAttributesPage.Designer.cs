@@ -108,7 +108,7 @@
 			// 
 			this.m_ColorLabel.AutoSize = true;
 			this.m_ColorLabel.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.m_ColorLabel.Location = new System.Drawing.Point(0, 8);
+			this.m_ColorLabel.Location = new System.Drawing.Point(0, 9);
 			this.m_ColorLabel.Name = "m_ColorLabel";
 			this.m_ColorLabel.Size = new System.Drawing.Size(37, 13);
 			this.m_ColorLabel.TabIndex = 13;
@@ -132,7 +132,7 @@
 			this.m_ColorCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.m_ColorCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ColorCheckBox.Location = new System.Drawing.Point(0, 8);
-			this.m_ColorCheckBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_ColorCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ColorCheckBox.Name = "m_ColorCheckBox";
 			this.m_ColorCheckBox.Size = new System.Drawing.Size(56, 17);
 			this.m_ColorCheckBox.TabIndex = 18;
@@ -146,7 +146,7 @@
 			this.m_ThicknessCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.m_ThicknessCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ThicknessCheckBox.Location = new System.Drawing.Point(0, 32);
-			this.m_ThicknessCheckBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_ThicknessCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ThicknessCheckBox.Name = "m_ThicknessCheckBox";
 			this.m_ThicknessCheckBox.Size = new System.Drawing.Size(75, 17);
 			this.m_ThicknessCheckBox.TabIndex = 19;
@@ -160,7 +160,7 @@
 			this.m_TextCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.m_TextCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TextCheckBox.Location = new System.Drawing.Point(0, 57);
-			this.m_TextCheckBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_TextCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_TextCheckBox.Name = "m_TextCheckBox";
 			this.m_TextCheckBox.Size = new System.Drawing.Size(52, 17);
 			this.m_TextCheckBox.TabIndex = 20;
@@ -174,7 +174,7 @@
 			this.m_TypeCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.m_TypeCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TypeCheckBox.Location = new System.Drawing.Point(0, 82);
-			this.m_TypeCheckBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_TypeCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_TypeCheckBox.Name = "m_TypeCheckBox";
 			this.m_TypeCheckBox.Size = new System.Drawing.Size(50, 17);
 			this.m_TypeCheckBox.TabIndex = 21;
@@ -188,7 +188,7 @@
 			this.m_ArrowsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.m_ArrowsCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ArrowsCheckBox.Location = new System.Drawing.Point(0, 107);
-			this.m_ArrowsCheckBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_ArrowsCheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ArrowsCheckBox.Name = "m_ArrowsCheckBox";
 			this.m_ArrowsCheckBox.Size = new System.Drawing.Size(58, 17);
 			this.m_ArrowsCheckBox.TabIndex = 22;
