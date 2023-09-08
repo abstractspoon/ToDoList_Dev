@@ -33,6 +33,10 @@ void TRACEWND(LPCTSTR, HWND) {}
 
 #define ADDCONTROL(ctrlname) { CString sCtrl(ctrlname); sCtrl.MakeLower(); s_mapCtrlClasses[sCtrl] = NULL; }
 
+#ifndef BS_TYPEMASK
+#define BS_TYPEMASK 0x0000000FL
+#endif
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
