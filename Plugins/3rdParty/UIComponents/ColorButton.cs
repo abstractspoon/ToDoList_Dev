@@ -16,6 +16,7 @@ namespace UIComponents
 			InitializeComponent();
 
 			Color = Color.Empty;
+			ForeColor = SystemColors.ControlText;
 		}
 
 		protected override void OnPaint(PaintEventArgs pe)
