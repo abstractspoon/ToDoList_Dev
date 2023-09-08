@@ -39,9 +39,9 @@ HBRUSH (WINAPI *TrueGetSysColorBrush)(int nColor) = GetSysColorBrush;
 LRESULT (WINAPI *TrueCallWindowProc)(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = CallWindowProc;
 LRESULT (WINAPI *TrueDefWindowProc)(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = DefWindowProc;
 
-HRESULT (STDAPICALLTYPE *TrueGetThemeColor)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor) = GetThemeColor;
-HRESULT (STDAPICALLTYPE *TrueDrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect) = DrawThemeBackground;
-HRESULT (STDAPICALLTYPE *TrueDrawThemeText)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect) = DrawThemeText;
+// HRESULT (STDAPICALLTYPE *TrueGetThemeColor)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor) = GetThemeColor;
+// HRESULT (STDAPICALLTYPE *TrueDrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect) = DrawThemeBackground;
+// HRESULT (STDAPICALLTYPE *TrueDrawThemeText)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect) = DrawThemeText;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -285,9 +285,9 @@ void CDarkMode::Enable(BOOL bEnable)
 		VERIFY(DetourAttach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
 		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
 		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
-		VERIFY(DetourAttach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
-		VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
-		VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+// 		VERIFY(DetourAttach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
+// 		VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
+// 		VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
@@ -300,9 +300,9 @@ void CDarkMode::Enable(BOOL bEnable)
 		VERIFY(DetourDetach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
 		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
 		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
-		VERIFY(DetourDetach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
-		VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
-		VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+// 		VERIFY(DetourDetach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
+// 		VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
+// 		VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
@@ -320,7 +320,10 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_BTNTEXT:
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
+		break;
+
 	case COLOR_GRAYTEXT:
+		nTrueColor = COLOR_3DFACE;
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -380,9 +383,9 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_INACTIVECAPTIONTEXT:
 	case COLOR_GRADIENTACTIVECAPTION:
 	case COLOR_GRADIENTINACTIVECAPTION:
-	case COLOR_MENUHILIGHT:
+// 	case COLOR_MENUHILIGHT:
+// 	case COLOR_MENUBAR:
 	case COLOR_BACKGROUND:
-	case COLOR_MENUBAR:
 		// TODO
 		RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
 	}
@@ -457,7 +460,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 
 				case BS_GROUPBOX:
-					::SetWindowTheme(hWnd, _T("DM"), _T("DM"));
+					CThemed::SetWindowTheme(CWnd::FromHandle(hWnd), _T("DM"));
 					break;
 
 				case BS_3STATE:
@@ -492,6 +495,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	return FALSE;
 }
 
+/*
 HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
 {
 	if ((iPartId == EP_EDITTEXT) && (iStateId == ETS_CUEBANNER) && (iPropId == TMT_TEXTCOLOR))
@@ -512,6 +516,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 {
 	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
 }
+*/
 
 DWORD WINAPI MyGetSysColor(int nColor)
 {

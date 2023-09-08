@@ -165,6 +165,10 @@ SOURCE=.\custombutton.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DarkMode.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DatabaseEx.cpp
 # End Source File
 # Begin Source File
@@ -830,6 +834,10 @@ SOURCE=.\CtrlTextHighlighter.h
 # Begin Source File
 
 SOURCE=.\custombutton.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DarkMode.h
 # End Source File
 # Begin Source File
 
