@@ -64,6 +64,7 @@
 			// 
 			// label2
 			// 
+			this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label2.Location = new System.Drawing.Point(9, 208);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(100, 32);
@@ -73,6 +74,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
+			this.label1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label1.Location = new System.Drawing.Point(9, 185);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(100, 13);
@@ -104,6 +106,7 @@
 			// groupBox1
 			// 
 			this.groupBox1.Controls.Add(this.m_DefaultAttribs);
+			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox1.Location = new System.Drawing.Point(12, 12);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(473, 161);
@@ -160,7 +163,7 @@
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EvidenceBoardPreferencesDlg";
-			this.Padding = new System.Windows.Forms.Padding(10, 10, 10, 10);
+			this.Padding = new System.Windows.Forms.Padding(10);
 			this.ShowInTaskbar = false;
 			this.Text = "Evidence Board Preferences";
 			this.panel1.ResumeLayout(false);

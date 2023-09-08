@@ -11,6 +11,7 @@
 #include "icon.h"
 #include "EnImageList.h"
 #include "EnBitmapEx.h"
+#include "darkmode.h"
 
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\ShellIcons.h"
@@ -1385,7 +1386,8 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 	if (nState != GMIS_NONE)
 	{
 		BOOL bHighContrast = Misc::IsHighContrastActive();
-		BOOL bThemed = (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+		BOOL bDarkMode = CDarkMode::IsEnabled();
+		BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA) && !bDarkMode);
 		
 		if (bHighContrast)
 		{
@@ -1449,9 +1451,10 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 		return FALSE;
 
 	BOOL bHighContrast = Misc::IsHighContrastActive();
+	BOOL bDarkMode = CDarkMode::IsEnabled();
 
 	int nOSVer = COSVersion();
-	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA));
+	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA) && !bDarkMode);
 
 	// Adjust drawing rect/flags accordingly
 	CRect rDraw(rItem), rClip(prClip);
@@ -1500,7 +1503,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	}
 	
 	// Do the draw
-	BOOL bPreDraw = (dwFlags & GMIB_PREDRAW), bPostDraw = (dwFlags & GMIB_POSTDRAW);
+	BOOL bPreDraw = (!bDarkMode && (dwFlags & GMIB_PREDRAW)), bPostDraw = (!bDarkMode && (dwFlags & GMIB_POSTDRAW));
 	BOOL bSingleStageDraw = (!bPreDraw && !bPostDraw);
 	BOOL bDrawn = FALSE;
 

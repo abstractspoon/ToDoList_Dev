@@ -293,6 +293,18 @@ BOOL CWinClasses::IsDialog(HWND hWnd)
 	return IsClass(hWnd, WC_DIALOGBOX);
 }
 
+BOOL CWinClasses::IsPropertyPage(HWND hWnd)
+{
+	return IsKindOf(hWnd, RUNTIME_CLASS(CPropertyPage));
+}
+
+BOOL CWinClasses::IsKindOf(HWND hWnd, const CRuntimeClass* pClass)
+{
+	CWnd* pWnd = CWnd::FromHandle(hWnd);
+
+	return (pWnd ? pWnd->IsKindOf(pClass) : FALSE);
+}
+
 BOOL CWinClasses::IsChild(HWND hWnd)
 {
 	return (::GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD);
@@ -360,9 +372,14 @@ BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 
 int CWinClasses::GetButtonType(HWND hWnd)
 {
-	if (!IsClass(hWnd, WC_BUTTON))
-		return -1;
+	ASSERT(IsClass(hWnd, WC_BUTTON));
 
-	UINT BTN_TYPEMASK = 0xf;
-	return (::GetWindowLong(hWnd, GWL_STYLE) & BTN_TYPEMASK);
+	return (::GetWindowLong(hWnd, GWL_STYLE) & BS_TYPEMASK);
+}
+
+int CWinClasses::GetStaticType(HWND hWnd)
+{
+	ASSERT(IsClass(hWnd, WC_STATIC));
+
+	return (::GetWindowLong(hWnd, GWL_STYLE) & SS_TYPEMASK);
 }

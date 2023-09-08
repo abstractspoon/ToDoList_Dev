@@ -420,7 +420,7 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 
 		if (crBack == CLR_NONE)
 		{
-			pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+			pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 		}
 		else
 		{
@@ -431,7 +431,7 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 			// and adjust tab height to make space
 			if (nTab == GetCurSel())
 			{
-				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+				pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
 				switch (m_eTabOrientation)
 				{

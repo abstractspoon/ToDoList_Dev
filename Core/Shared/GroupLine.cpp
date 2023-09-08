@@ -95,26 +95,16 @@ LRESULT CGroupLine::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				nFlags |= DT_LEFT;
 			
 			HFONT hOld = (HFONT)::SelectObject(dc, m_fontLabel);
-			dc.SetBkMode(TRANSPARENT);
-
-			CSize sizeText = dc.GetTextExtent(sText); // default
 			
-			if (theme.Open(pWnd, _T("BUTTON")))
-			{
-				theme.DrawText(&dc, BP_GROUPBOX, GBS_NORMAL, sText, nFlags, 0, rClient);
+			dc.SetBkMode(TRANSPARENT);
+			dc.SetTextColor(GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_3DSHADOW));
+			dc.DrawText(sText, rClient, nFlags);
 
-				CRect rExtents;
-				theme.GetTextExtent(&dc, BP_GROUPBOX, GBS_NORMAL, sText, nFlags, rExtents, rClient);
-
-				sizeText = rExtents.Size();
-			}
-			else // unthemed
-			{
-				dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-				dc.DrawText(sText, rClient, nFlags);
-			}
+			// cleanup
+			::SelectObject(dc, hOld);
 
 			// draw line
+			CSize sizeText = dc.GetTextExtent(sText); // default
 			sizeText.cx += 4;
 			
 			int nYPos = ((rClient.top + rClient.bottom) / 2);
@@ -136,11 +126,6 @@ LRESULT CGroupLine::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				GraphicsMisc::DrawHorzLine(&dc, rClient.left + sizeText.cx, rClient.right, nYPos,
 											GetSysColor(COLOR_3DDKSHADOW), GetSysColor(COLOR_WINDOW));
 			}
-
-			// cleanup
-			::SelectObject(dc, hOld);
-
-
 			return 0;
 		}
 		break;

@@ -89,6 +89,7 @@
 			this.m_ModAllCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_ModAllCheckBox.CheckAlign = System.Drawing.ContentAlignment.TopLeft;
+			this.m_ModAllCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ModAllCheckBox.Location = new System.Drawing.Point(12, 152);
 			this.m_ModAllCheckBox.Name = "m_ModAllCheckBox";
 			this.m_ModAllCheckBox.Size = new System.Drawing.Size(180, 31);

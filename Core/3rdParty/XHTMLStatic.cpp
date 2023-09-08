@@ -1352,9 +1352,6 @@ void CXHTMLStatic::PreSubclassWindow()
     ::SetWindowLong(GetSafeHwnd(), GWL_STYLE, dwStyle | SS_NOTIFY);
 
 	CStatic::PreSubclassWindow();
-
-	// create the tooltip
-	m_ToolTip.Create(this);
 }
 
 //=============================================================================

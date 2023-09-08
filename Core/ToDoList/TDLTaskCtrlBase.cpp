@@ -2626,8 +2626,9 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 						if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
 							dwFlags |= GMIB_CLIPLEFT;
 
-						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 						GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_PREDRAW | GMIB_POSTDRAW);
+
+						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 					}
 
 					// draw row text and column dividers

@@ -109,6 +109,9 @@ public:
 	void EnableTooltip(BOOL bFlag) 
 	{ 
 		m_bToolTip = bFlag; 
+
+		if (m_bToolTip && !m_ToolTip.GetSafeHwnd())
+			m_ToolTip.Create(this);
 	}
 	BOOL IsTooltipEmabled() const 
 	{ 

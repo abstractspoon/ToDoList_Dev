@@ -8,6 +8,7 @@
 #include <Shared\OSVersion.h>
 #include <Shared\Themed.h>
 #include <Shared\GraphicsMisc.h>
+#include <Shared\DarkMode.h>
 
 #include <math.h>
 #include <CommCtrl.h>
@@ -154,7 +155,7 @@ void LabelTip::OnDrawLabelTip(Object^ sender, DrawToolTipEventArgs^ args)
 	Color^ textColor = SystemColors::InfoText;
 	Brush^ backBrush = SystemBrushes::Info;
 
-	if (COSVersion() >= OSV_VISTA)
+	if ((COSVersion() >= OSV_VISTA) && !CDarkMode::IsEnabled())
 	{
 		CThemed th(::GetDesktopWindow(), L"Tooltip");
 		COLORREF crText;

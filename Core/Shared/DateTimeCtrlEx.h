@@ -11,8 +11,24 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#if _MSC_VER < 1500
-struct DATETIMEPICKERINFO;
+#ifndef DTM_GETDATETIMEPICKERINFO
+#	define DTM_GETDATETIMEPICKERINFO (DTM_FIRST + 14)
+
+struct DATETIMEPICKERINFO
+{
+	DWORD cbSize;
+
+	RECT rcCheck;
+	DWORD stateCheck;
+
+	RECT rcButton;
+	DWORD stateButton;
+
+	HWND hwndEdit;
+	HWND hwndUD;
+	HWND hwndDropDown;
+};
+
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

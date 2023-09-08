@@ -16,7 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CSizeGrip
 
-CSizeGrip::CSizeGrip() : m_crBack(CLR_NONE)
+CSizeGrip::CSizeGrip() : m_crBack(GetSysColor(COLOR_3DFACE))
 {
 }
 

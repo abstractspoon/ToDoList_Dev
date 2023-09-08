@@ -732,11 +732,11 @@ void KANBANITEM::SetColor(COLORREF cr)
 
 COLORREF KANBANITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
+	if (bSelected)
+		return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
 	if (HasColor())
 	{
-		if (bSelected)
- 			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
-
 		if (bColorIsBkgnd)
 			return GraphicsMisc::GetBestTextColor(color);
 

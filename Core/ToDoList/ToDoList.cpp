@@ -33,6 +33,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
+#include "..\shared\DarkMode.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -92,6 +93,7 @@ CToDoListApp::CToDoListApp() : CWinApp()
 	// Perhaps because we are a Win32 app, using a manifest limits our options
 	// so we set our DPI awareness programmatically
 	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
 }
 
 CToDoListApp::~CToDoListApp()
@@ -219,6 +221,9 @@ BOOL CToDoListApp::InitInstance()
 
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
+
+	if (cmdInfo.HasOption(SWITCH_DARKMODE) && !Misc::IsHighContrastActive())
+		CDarkMode::Enable();
 
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
