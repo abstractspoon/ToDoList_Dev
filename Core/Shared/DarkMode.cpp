@@ -148,6 +148,48 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+class CDarkModeEdit : public CSubclassWnd
+{
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_ENABLE:
+		case WM_SETFOCUS:
+		case WM_KILLFOCUS:
+			InvalidateRect(hRealWnd, NULL, TRUE);
+			break;
+
+		case WM_ERASEBKGND:
+			if (wp)
+			{
+				//Default();
+
+				CRect rClient;
+				GetClientRect(rClient);
+
+				CDC::FromHandle((HDC)wp)->FillSolidRect(rClient, DM_WINDOW);
+				return TRUE;
+			}
+			break;
+
+		case WM_PAINT:
+			if (::GetFocus() != hRealWnd)
+ 			{
+				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
+				CPaintDC dc(pWnd);
+
+ 				return 0L;//CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0L);
+ 			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeRadioButtonOrCheckBoxText : public CDarkModeStaticText
 {
 public:
@@ -323,7 +365,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_GRAYTEXT:
-		nTrueColor = COLOR_3DFACE;
+		//nTrueColor = COLOR_3DFACE;
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -414,6 +456,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_CTLCOLORLISTBOX:
+		if (!IsWindowEnabled(hWnd))
+		{
+			::SetTextColor((HDC)wp, MyGetSysColor(COLOR_GRAYTEXT));
+			::SetBkMode((HDC)wp, TRANSPARENT);
+			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+		}
+		// else fall thru to edit
+
 	case WM_CTLCOLOREDIT:
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
@@ -452,8 +502,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_BUTTON))
 			{
-				CSubclassWnd* pWnd = NULL;
-
 				switch (CWinClasses::GetButtonType(hWnd))
 				{
 					ASSERT(0);
