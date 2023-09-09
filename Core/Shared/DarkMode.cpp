@@ -14,9 +14,16 @@
 #include "DialogHelper.h"
 #include "misc.h"
 #include "osversion.h"
+#include "datetimectrlex.h"
+#include "AutoFlag.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
+
+//////////////////////////////////////////////////////////////////////
+
+LPCTSTR TC_DATETIMEPICK = _T("DATEPICKER");
+LPCTSTR TC_EDIT			= _T("EDIT");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -27,6 +34,8 @@ static HBRUSH WINAPI MyGetSysColorBrush(int nColor);
 static LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 
+static HTHEME  STDAPICALLTYPE MyOpenThemeData(HWND hwnd, LPCWSTR pszClassList);
+static HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme);
 static HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor);
 static HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect);
 static HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect);
@@ -39,13 +48,22 @@ HBRUSH (WINAPI *TrueGetSysColorBrush)(int nColor) = GetSysColorBrush;
 LRESULT (WINAPI *TrueCallWindowProc)(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = CallWindowProc;
 LRESULT (WINAPI *TrueDefWindowProc)(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = DefWindowProc;
 
-// HRESULT (STDAPICALLTYPE *TrueGetThemeColor)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor) = GetThemeColor;
-// HRESULT (STDAPICALLTYPE *TrueDrawThemeBackground)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect) = DrawThemeBackground;
-// HRESULT (STDAPICALLTYPE *TrueDrawThemeText)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect) = DrawThemeText;
+// We link to UxTheme.dll dynamically
+typedef HTHEME  (STDAPICALLTYPE *PFNOPENTHEMEDATA)(HWND hwnd, LPCWSTR pszClassList);
+typedef HRESULT (STDAPICALLTYPE *PFNCLOSETHEMEDATA)(HTHEME hTheme);
+typedef HRESULT (STDAPICALLTYPE *PFNGETTHEMECOLOR)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor);
+typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEBACKGROUND)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect);
+typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMETEXT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect);
+
+PFNOPENTHEMEDATA TrueOpenThemeData = NULL;
+PFNCLOSETHEMEDATA TrueCloseThemeData = NULL;
+PFNGETTHEMECOLOR TrueGetThemeColor = NULL;
+PFNDRAWTHEMEBACKGROUND TrueDrawThemeBackground = NULL;
+PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
 
 //////////////////////////////////////////////////////////////////////
 
-static CMap<HWND, HWND, CSubclassWnd*, CSubclassWnd*&> s_mapWnds;
+static CMap<HWND, HWND, CSubclassWnd*, CSubclassWnd*&> s_mapScWnds;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,7 +71,7 @@ BOOL IsHooked(HWND hWnd)
 {
 	CSubclassWnd* pUnused;
 
-	return s_mapWnds.Lookup(hWnd, pUnused);
+	return s_mapScWnds.Lookup(hWnd, pUnused);
 }
 
 BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
@@ -63,7 +81,7 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 
 	if (pWnd && pWnd->HookWindow(hWnd))
 	{
-		s_mapWnds[hWnd] = pWnd;
+		s_mapScWnds[hWnd] = pWnd;
 		return TRUE;
 	}
 
@@ -73,7 +91,98 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 
 //////////////////////////////////////////////////////////////////////
 
-class CDarkModeStaticText : public CSubclassWnd
+struct THEMEELEMENT
+{
+	THEMEELEMENT() : nRefCount(0) {}
+
+	CString sClass;
+	int nRefCount;
+};
+
+static CMap<HTHEME, HTHEME, THEMEELEMENT, THEMEELEMENT&> s_mapThWnds;
+
+//////////////////////////////////////////////////////////////////////
+
+void MapTheme(HTHEME hTheme, LPCWSTR szClass)
+{
+	if (hTheme)
+	{
+		if (CWinClasses::IsClass(szClass, TC_DATETIMEPICK) ||
+			CWinClasses::IsClass(szClass, TC_EDIT))
+		{
+			THEMEELEMENT elm;
+			
+			if (!s_mapThWnds.Lookup(hTheme, elm))
+				elm.sClass = szClass;
+			else
+				ASSERT(elm.nRefCount > 0);
+
+			elm.nRefCount++;
+			s_mapThWnds[hTheme] = elm;
+		}
+	}
+}
+
+void UnMapTheme(HTHEME hTheme)
+{
+	if (hTheme)
+	{
+		THEMEELEMENT elm;
+		s_mapThWnds.Lookup(hTheme, elm);
+
+		elm.nRefCount--;
+
+		if (elm.nRefCount == 0)
+			s_mapThWnds.RemoveKey(hTheme);
+	}
+}
+
+BOOL IsMapped(HTHEME hTheme)
+{
+	THEMEELEMENT elmUnused;
+
+	return (s_mapThWnds.Lookup(hTheme, elmUnused));
+}
+
+CString GetClass(HTHEME hTheme)
+{
+	THEMEELEMENT elm;
+	s_mapThWnds.Lookup(hTheme, elm);
+
+	return elm.sClass;
+}
+
+BOOL IsClass(HTHEME hTheme, LPCWSTR szClass)
+{
+	return CWinClasses::IsClass(GetClass(hTheme), szClass);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+class CDarkModeCtrlBase : public CSubclassWnd
+{
+protected:
+	CDC* GetPaintDC(WPARAM wp)
+	{
+		if (wp)
+			return CDC::FromHandle((HDC)wp);
+
+		// else
+		return new CPaintDC(GetCWnd());
+	}
+
+	void CleanupDC(WPARAM wp, CDC*& pDC)
+	{
+		if (!wp)
+			delete pDC;
+
+		pDC = NULL;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CDarkModeStaticText : public CDarkModeCtrlBase
 {
 protected:
 	void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
@@ -87,15 +196,6 @@ protected:
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sLabel, rText, nAlign);
 		pDC->SelectObject(pOldFont);
-	}
-
-	CDC* GetPaintDC(WPARAM wp)
-	{
-		if (wp)
-			return CDC::FromHandle((HDC)wp);
-
-		// else
-		return new CPaintDC(GetCWnd());
 	}
 
 private:
@@ -133,9 +233,7 @@ private:
 				}
 
 				DrawText(pDC, pWnd, nAlign, rText);
-
-				if (wp)
-					delete pDC;
+				CleanupDC(wp, pDC);
 
 				return 0L;
 			}
@@ -287,8 +385,7 @@ protected:
 				CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
 
 				// cleanup
-				if (wp)
-					delete pDC;
+				CleanupDC(wp, pDC);
 
 				return 0L;
 			}
@@ -301,6 +398,36 @@ protected:
 private:
 	int m_nTextOffset;
 	COLORREF m_crParentBkgnd;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+HWND s_hwndCurrentDateTime = NULL;
+
+class CDarkModeDateTimeCtrl : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			ASSERT(s_hwndCurrentDateTime == NULL);
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hRealWnd);
+				CDC* pDC = GetPaintDC(wp);
+
+				LRESULT lr = CDarkModeCtrlBase::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0L);
+
+				CleanupDC(wp, pDC);
+
+				return lr;
+			}
+			break;
+		}
+
+		return Default();
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -327,9 +454,37 @@ void CDarkMode::Enable(BOOL bEnable)
 		VERIFY(DetourAttach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
 		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
 		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
-// 		VERIFY(DetourAttach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
-// 		VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
-// 		VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+
+		// We link to UxTheme.dll dynamically
+		HMODULE hUxTheme = LoadLibrary(_T("UxTheme.dll"));
+
+		if (hUxTheme)
+		{
+			TrueOpenThemeData = (PFNOPENTHEMEDATA)GetProcAddress(hUxTheme, "OpenThemeData");
+
+			if (TrueOpenThemeData)
+			{
+				VERIFY(DetourAttach(&(PVOID&)TrueOpenThemeData, MyOpenThemeData) == 0);
+
+				TrueCloseThemeData = (PFNCLOSETHEMEDATA)GetProcAddress(hUxTheme, "CloseThemeData");
+				TrueGetThemeColor = (PFNGETTHEMECOLOR)GetProcAddress(hUxTheme, "GetThemeColor");
+				TrueDrawThemeBackground = (PFNDRAWTHEMEBACKGROUND)GetProcAddress(hUxTheme, "DrawThemeBackground");
+				TrueDrawThemeText = (PFNDRAWTHEMETEXT)GetProcAddress(hUxTheme, "DrawThemeText");
+
+				if (TrueCloseThemeData)
+					VERIFY(DetourAttach(&(PVOID&)TrueCloseThemeData, MyCloseThemeData) == 0);
+
+				if (TrueGetThemeColor)
+					VERIFY(DetourAttach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
+
+				if (TrueDrawThemeBackground)
+					VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
+
+				if (TrueDrawThemeText)
+					VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+			}
+
+		}
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
@@ -342,13 +497,27 @@ void CDarkMode::Enable(BOOL bEnable)
 		VERIFY(DetourDetach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
 		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
 		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
-// 		VERIFY(DetourDetach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
-// 		VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
-// 		VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+
+		if (TrueOpenThemeData)
+			VERIFY(DetourDetach(&(PVOID&)TrueOpenThemeData, MyOpenThemeData) == 0);
+
+		if (TrueCloseThemeData)
+			VERIFY(DetourDetach(&(PVOID&)TrueCloseThemeData, MyCloseThemeData) == 0);
+
+		if (TrueGetThemeColor)
+			VERIFY(DetourDetach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
+
+		if (TrueDrawThemeBackground)
+			VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
+
+		if (TrueDrawThemeText)
+			VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
 
 		VERIFY(DetourTransactionCommit() == 0);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////
 
 #define RETURN_STATIC_COLOR_OR_BRUSH(color) if (bColor) return color; else { static HBRUSH hbr = CreateSolidBrush(color); return (DWORD)hbr; }
 
@@ -439,6 +608,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	return (DWORD)TrueGetSysColorBrush(nTrueColor);
 }
 
+//////////////////////////////////////////////////////////////////////
+
 #define RETURN_LRESULT_STATIC_BRUSH(color) { static HBRUSH hbr = CreateSolidBrush(color); lr = (LRESULT)hbr; return TRUE; }
 #define RETURN_LRESULT_TRUECOLOUR_BRUSH(color) lr = (LRESULT)TrueGetSysColorBrush(color); return TRUE
 
@@ -478,6 +649,9 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
+
+	case WM_PAINT:
+		break;
 
 	case WM_SHOWWINDOW:
 		if (wp)
@@ -521,6 +695,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK))
+			{
+				HookWindow(hWnd, new CDarkModeDateTimeCtrl());
+			}
 		}
 		break;
 
@@ -528,43 +706,21 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		{
 			CSubclassWnd* pWnd = NULL;
 
-			if (s_mapWnds.Lookup(hWnd, pWnd))
+			if (s_mapScWnds.Lookup(hWnd, pWnd))
 			{
 				pWnd->HookWindow(NULL);
 				delete pWnd;
 
-				s_mapWnds.RemoveKey(hWnd);
+				s_mapScWnds.RemoveKey(hWnd);
 			}
 		}
 		break;
-
 	}
 
 	return FALSE;
 }
 
-/*
-HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
-{
-	if ((iPartId == EP_EDITTEXT) && (iStateId == ETS_CUEBANNER) && (iPropId == TMT_TEXTCOLOR))
-	{
-		*pColor = TrueGetSysColor(COLOR_3DHIGHLIGHT);
-		return S_OK;
-	}
-
-	return TrueGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-}
-
-HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect)
-{
-	return TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-}
-
-HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
-{
-	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
-}
-*/
+//////////////////////////////////////////////////////////////////////
 
 DWORD WINAPI MyGetSysColor(int nColor)
 {
@@ -596,3 +752,171 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 	return TrueDefWindowProc(hWnd, nMsg, wp, lp);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)
+{
+	HTHEME hTheme = TrueOpenThemeData(hWnd, pszClassList);
+
+	MapTheme(hTheme, pszClassList);
+
+	return hTheme;
+}
+
+HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme)
+{
+	UnMapTheme(hTheme);
+
+	return TrueCloseThemeData(hTheme);
+}
+
+HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
+{
+	CString sClass = GetClass(hTheme);
+
+	if (CWinClasses::IsClass(sClass, TC_EDIT))
+	{
+		switch (iPartId)
+		{
+		case EP_EDITTEXT:
+			{
+				switch (iStateId)
+				{
+				case ETS_CUEBANNER:
+					if (iPropId == TMT_TEXTCOLOR)
+					{
+						*pColor = TrueGetSysColor(COLOR_3DHIGHLIGHT);
+						return S_OK;
+					}
+					else
+					{
+						int breakpoint = 0;
+					}
+					break;
+
+				case ETS_NORMAL:
+					{
+						int breakpoint = 0;
+					}
+					break;
+
+				default:
+					{
+						int breakpoint = 0;
+					}
+					break;
+				}
+			}
+			break;
+
+		default:
+			{
+				int breakpoint = 0;
+			}
+			break;
+		}
+	}
+
+	return TrueGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+}
+
+HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect)
+{
+	CString sClass = GetClass(hTheme);
+
+	if (CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
+	{
+		switch (iPartId)
+		{
+		case DP_DATEBORDER:
+			if (s_hwndCurrentDateTime)
+			{
+				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+
+				if (hr == S_OK)
+				{
+					DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
+
+					if (!SendMessage(s_hwndCurrentDateTime, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
+					{
+						ASSERT(0);
+					}
+					else
+					{
+						// Clip out the drop button
+						CRect Bkgnd(pRect);
+
+						if (dtpi.rcButton.left == 0)
+						{
+							Bkgnd.left = dtpi.rcButton.right;
+							Bkgnd.right -= 2;
+						}
+						else
+						{
+							Bkgnd.left += 2;
+							Bkgnd.right = dtpi.rcButton.left;
+						}
+						Bkgnd.DeflateRect(0, 2);
+
+						BOOL bEnabled = ::IsWindowEnabled(s_hwndCurrentDateTime);
+
+						if (bEnabled)
+						{
+							SYSTEMTIME st;
+							bEnabled = (GDT_VALID == SendMessage(s_hwndCurrentDateTime, DTM_GETSYSTEMTIME, 0, (LPARAM)&st));
+						}
+
+ 						CDC::FromHandle(hdc)->FillSolidRect(Bkgnd, (bEnabled ? DM_WINDOW : DM_3DFACE));
+					}
+				}
+
+				return hr;
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	return TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+}
+
+HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
+{
+	CString sClass = GetClass(hTheme);
+
+	if (CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
+	{
+		switch (iPartId)
+		{
+		case DP_DATETEXT:
+			{
+				switch (iStateId)
+				{
+				case DPDT_NORMAL:
+					::SetTextColor(hdc, MyGetSysColor(COLOR_WINDOWTEXT));
+					break;
+
+				case DPDT_DISABLED:
+					::SetTextColor(hdc, MyGetSysColor(COLOR_GRAYTEXT));
+					break;
+
+				case DPDT_SELECTED:
+					::SetTextColor(hdc, MyGetSysColor(COLOR_HIGHLIGHTTEXT));
+					break;
+				}
+
+				::SetBkMode(hdc, TRANSPARENT);
+				::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+				return S_OK;
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
+}
