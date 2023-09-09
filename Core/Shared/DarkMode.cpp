@@ -102,7 +102,8 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 {
 	if (hTheme)
 	{
-		if (CWinClasses::IsClass(szClass, _T("DATEPICKER")))
+		if (CWinClasses::IsClass(szClass, _T("DATEPICKER")) ||
+			CWinClasses::IsClass(szClass, _T("EDIT")))
 		{
 			THEMEELEMENT elm;
 			
