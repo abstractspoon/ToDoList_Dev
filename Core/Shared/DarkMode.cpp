@@ -22,6 +22,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
+LPCTSTR TC_DATETIMEPICK = _T("DATEPICKER");
+LPCTSTR TC_EDIT			= _T("EDIT");
+
+//////////////////////////////////////////////////////////////////////
+
 // Replacement function declarations
 static DWORD WINAPI MyGetSysColor(int nColor);
 static HBRUSH WINAPI MyGetSysColorBrush(int nColor);
@@ -102,8 +107,8 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 {
 	if (hTheme)
 	{
-		if (CWinClasses::IsClass(szClass, _T("DATEPICKER")) ||
-			CWinClasses::IsClass(szClass, _T("EDIT")))
+		if (CWinClasses::IsClass(szClass, TC_DATETIMEPICK) ||
+			CWinClasses::IsClass(szClass, TC_EDIT))
 		{
 			THEMEELEMENT elm;
 			
@@ -721,7 +726,7 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 {
 	CString sClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, _T("EDIT")))
+	if (CWinClasses::IsClass(sClass, TC_EDIT))
 	{
 		switch (iPartId)
 		{
@@ -771,7 +776,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 {
 	CString sClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, _T("DATEPICKER")))
+	if (CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
 	{
 		switch (iPartId)
 		{
@@ -833,7 +838,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 {
 	CString sClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, _T("DATEPICKER")))
+	if (CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
 	{
 		switch (iPartId)
 		{
