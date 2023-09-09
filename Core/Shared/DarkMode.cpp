@@ -60,8 +60,6 @@ PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
 
 static CMap<HWND, HWND, CSubclassWnd*, CSubclassWnd*&> s_mapScWnds;
 
-static CMap<HTHEME, HTHEME, CString, CString&> s_mapThWnds;
-
 //////////////////////////////////////////////////////////////////////
 
 BOOL IsHooked(HWND hWnd)
@@ -86,19 +84,66 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 	return FALSE;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+struct THEMEELEMENT
+{
+	THEMEELEMENT() : nRefCount(0) {}
+
+	CString sClass;
+	int nRefCount;
+};
+
+static CMap<HTHEME, HTHEME, THEMEELEMENT, THEMEELEMENT&> s_mapThWnds;
+
+//////////////////////////////////////////////////////////////////////
+
+void MapTheme(HTHEME hTheme, LPCWSTR szClass)
+{
+	if (hTheme)
+	{
+		if (CWinClasses::IsClass(szClass, _T("DATEPICKER")))
+		{
+			THEMEELEMENT elm;
+			
+			if (!s_mapThWnds.Lookup(hTheme, elm))
+				elm.sClass = szClass;
+			else
+				ASSERT(elm.nRefCount > 0);
+
+			elm.nRefCount++;
+			s_mapThWnds[hTheme] = elm;
+		}
+	}
+}
+
+void UnMapTheme(HTHEME hTheme)
+{
+	if (hTheme)
+	{
+		THEMEELEMENT elm;
+		s_mapThWnds.Lookup(hTheme, elm);
+
+		elm.nRefCount--;
+
+		if (elm.nRefCount == 0)
+			s_mapThWnds.RemoveKey(hTheme);
+	}
+}
+
 BOOL IsMapped(HTHEME hTheme)
 {
-	CString sUnused;
+	THEMEELEMENT elmUnused;
 
-	return (s_mapThWnds.Lookup(hTheme, sUnused));
+	return (s_mapThWnds.Lookup(hTheme, elmUnused));
 }
 
 CString GetClass(HTHEME hTheme)
 {
-	CString sClass;
-	s_mapThWnds.Lookup(hTheme, sClass);
+	THEMEELEMENT elm;
+	s_mapThWnds.Lookup(hTheme, elm);
 
-	return sClass;
+	return elm.sClass;
 }
 
 BOOL IsClass(HTHEME hTheme, LPCWSTR szClass)
@@ -119,8 +164,15 @@ protected:
 		// else
 		return new CPaintDC(GetCWnd());
 	}
-};
 
+	void CleanupDC(WPARAM wp, CDC*& pDC)
+	{
+		if (!wp)
+			delete pDC;
+
+		pDC = NULL;
+	}
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -175,9 +227,7 @@ private:
 				}
 
 				DrawText(pDC, pWnd, nAlign, rText);
-
-				if (!wp)
-					delete pDC;
+				CleanupDC(wp, pDC);
 
 				return 0L;
 			}
@@ -287,8 +337,7 @@ protected:
 				CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
 
 				// cleanup
-				if (!wp)
-					delete pDC;
+				CleanupDC(wp, pDC);
 
 				return 0L;
 			}
@@ -322,8 +371,7 @@ protected:
 
 				LRESULT lr = CDarkModeCtrlBase::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0L);
 
-				if (!wp)
-					delete pDC;
+				CleanupDC(wp, pDC);
 
 				return lr;
 			}
@@ -421,6 +469,8 @@ void CDarkMode::Enable(BOOL bEnable)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////
+
 #define RETURN_STATIC_COLOR_OR_BRUSH(color) if (bColor) return color; else { static HBRUSH hbr = CreateSolidBrush(color); return (DWORD)hbr; }
 
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
@@ -509,6 +559,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	// else
 	return (DWORD)TrueGetSysColorBrush(nTrueColor);
 }
+
+//////////////////////////////////////////////////////////////////////
 
 #define RETURN_LRESULT_STATIC_BRUSH(color) { static HBRUSH hbr = CreateSolidBrush(color); lr = (LRESULT)hbr; return TRUE; }
 #define RETURN_LRESULT_TRUECOLOUR_BRUSH(color) lr = (LRESULT)TrueGetSysColorBrush(color); return TRUE
@@ -614,25 +666,52 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	return FALSE;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+DWORD WINAPI MyGetSysColor(int nColor)
+{
+	return GetSysColorOrBrush(nColor, TRUE);
+}
+
+HBRUSH WINAPI MyGetSysColorBrush(int nColor)
+{
+	return (HBRUSH)GetSysColorOrBrush(nColor, FALSE);
+}
+
+LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = 0;
+
+	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+		return lr;
+
+	return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+}
+
+static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = 0;
+
+	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+		return lr;
+
+	return TrueDefWindowProc(hWnd, nMsg, wp, lp);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)
 {
 	HTHEME hTheme = TrueOpenThemeData(hWnd, pszClassList);
 
-	if (hTheme)
-	{
-		if (CWinClasses::IsClass(pszClassList, _T("DATEPICKER")))
-		{
-			//ASSERT(!IsMapped(hTheme));
-			s_mapThWnds[hTheme] = pszClassList;
-		}
-	}
+	MapTheme(hTheme, pszClassList);
 
 	return hTheme;
 }
 
 HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme)
 {
-	//s_mapThWnds.RemoveKey(hTheme);
+	UnMapTheme(hTheme);
 
 	return TrueCloseThemeData(hTheme);
 }
@@ -641,18 +720,7 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 {
 	CString sClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, _T("DATEPICKER")))
-	{
-		switch (iPartId)
-		{
-		default:
-			{
-				int breakpoint = 0;
-			}
-			break;
-		}
-	}
-	else if (CWinClasses::IsClass(sClass, _T("EDIT")))
+	if (CWinClasses::IsClass(sClass, _T("EDIT")))
 	{
 		switch (iPartId)
 		{
@@ -798,34 +866,3 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 	
 	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
 }
-
-DWORD WINAPI MyGetSysColor(int nColor)
-{
-	return GetSysColorOrBrush(nColor, TRUE);
-}
-
-HBRUSH WINAPI MyGetSysColorBrush(int nColor)
-{
-	return (HBRUSH)GetSysColorOrBrush(nColor, FALSE);
-}
-
-LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
-{
-	LRESULT lr = 0;
-
-	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
-		return lr;
-
-	return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-}
-
-static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
-{
-	LRESULT lr = 0;
-
-	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
-		return lr;
-
-	return TrueDefWindowProc(hWnd, nMsg, wp, lp);
-}
-
