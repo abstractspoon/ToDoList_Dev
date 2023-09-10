@@ -1673,7 +1673,7 @@ void CNcGutter::NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, co
 		pDC->FillSolidRect(rHeader, ::GetSysColor(COLOR_3DFACE));
 
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+	pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
 	CFont* pOldFont = PrepareFont(pDC, TRUE); // default header font
 	CRect rColumn(rHeader);

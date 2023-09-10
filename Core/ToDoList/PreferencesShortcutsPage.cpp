@@ -32,7 +32,6 @@ static char THIS_FILE[] = __FILE__;
 
 #define ID_SUBMENU ((UINT)-1)
 
-const COLORREF SUBMENU_COLOR	= RGB(192, 192, 192);
 const int TEXT_PADDING			= 3;
 const int SHORTCUTCOL_MINWIDTH	= 75;
 
@@ -548,7 +547,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		else
 		{
 			if (bSubMenu)
-				pNCGDI->pDC->FillSolidRect(rItem, SUBMENU_COLOR);
+				pNCGDI->pDC->FillSolidRect(rItem, GetSysColor(COLOR_3DSHADOW));
 			else
 				GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
 
@@ -700,11 +699,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			// Note: we set text color to same as back color 
 			// so default text rendering does not show
 			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
-
-			if (bSubMenu)
-				pTVCD->clrText = pTVCD->clrTextBk = SUBMENU_COLOR;
-			else
-				pTVCD->clrText = pTVCD->clrTextBk = GetSysColor(COLOR_WINDOW);
+			pTVCD->clrText = pTVCD->clrTextBk = GetSysColor(bSubMenu ? COLOR_3DSHADOW : COLOR_WINDOW);
 		}
 		break;
 
@@ -719,7 +714,8 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			pDC->FillSolidRect(pNMCD->rc.left, pNMCD->rc.bottom - 1, pNMCD->rc.right - pNMCD->rc.left, 1, m_tcCommands.GetGridlineColor());
 
 			// Draw Text
-			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
+			COLORREF crText = GetSysColor(bSubMenu ? COLOR_3DHILIGHT : COLOR_WINDOWTEXT);
 
 			BOOL bThemedSel = FALSE;
 
@@ -764,6 +760,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			BOOL bBold = (m_tcCommands.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
 			HGDIOBJ hOldFont = pDC->SelectObject(m_fonts.GetHFont(bBold, FALSE, FALSE, FALSE));
 
+			pDC->SetTextColor(crText);
 			pDC->SetBkMode(TRANSPARENT);
 			pDC->DrawText(sItem, rText, (DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX));
 			pDC->SelectObject(hOldFont);
