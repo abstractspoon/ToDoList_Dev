@@ -541,7 +541,7 @@ void CEnCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			else if (sEnText == m_sAny)
 			{
 				// Display <any> in window prompt colour if nothing is checked
-				crText = CWndPrompt::GetTextColor(*this);
+				crText = CWndPrompt::GetTextColor();
 			}
 		}
 

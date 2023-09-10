@@ -173,7 +173,7 @@ void CTDLReminderPeriodComboBox::DrawItemText(CDC& dc, const CRect& rect, int nI
 	// Draw <none> in window prompt color
 	if ((dwItemData == TDLRPC_NOREMINDER) && !(nItemState & ODS_SELECTED) && !bList)
 	{
-		crText = CWndPrompt::GetTextColor(*this);
+		crText = CWndPrompt::GetTextColor();
 	}
 
 	// all else

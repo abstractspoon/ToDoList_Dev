@@ -95,7 +95,7 @@ void CTDLRegularityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem,
 	// Draw <any> in window prompt color
 	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
 	{
-		crText = CWndPrompt::GetTextColor(*this);
+		crText = CWndPrompt::GetTextColor();
 	}
 
 	// all else

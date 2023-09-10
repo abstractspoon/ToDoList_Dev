@@ -636,21 +636,6 @@ BOOL CThemed::GetThemeTextExtent(HDC hdc, int iPartId, int iStateId, LPCWSTR psz
 
 BOOL CThemed::GetThemeColor(int iPartId, int iStateId, int iPropId, COLORREF& color)
 {
-	if (CDarkMode::IsEnabled())
-	{
-		switch (iPartId)
-		{
-		case EP_EDITTEXT:
-			if ((iStateId == ETS_CUEBANNER) && (iPropId == TMT_TEXTCOLOR))
-			{
-				color = GetSysColor(COLOR_3DDKSHADOW);
-				return TRUE;
-			}
-			break;
-		}
-	}
-
-
 	if (InitUxTheme() && m_hTheme)
 	{
 		PFNGETTHEMECOLOR fnGetThemeColor = (PFNGETTHEMECOLOR)GetProcAddress(s_hUxTheme, "GetThemeColor");
