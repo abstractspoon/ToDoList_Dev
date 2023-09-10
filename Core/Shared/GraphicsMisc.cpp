@@ -1444,10 +1444,7 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 
 BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip)
 {
-	if (hwnd == NULL)
-		hwnd = ::WindowFromDC(*pDC);
-
-	if ((nState == GMIS_NONE) || (hwnd == NULL))
+	if (nState == GMIS_NONE)
 		return FALSE;
 
 	BOOL bHighContrast = Misc::IsHighContrastActive();
@@ -1455,6 +1452,21 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 
 	int nOSVer = COSVersion();
 	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA) && !bDarkMode);
+
+	if (hwnd == NULL)
+	{
+		hwnd = ::WindowFromDC(*pDC);
+		
+		// Certain options are not doable without a valid HWND
+		if (hwnd == NULL)
+		{
+			if (!prClip && (dwFlags & (GMIB_EXTENDLEFT | GMIB_EXTENDRIGHT | GMIB_CLIPLEFT | GMIB_CLIPRIGHT)))
+				return FALSE;
+
+			if (bThemed)
+				return FALSE;
+		}
+	}
 
 	// Adjust drawing rect/flags accordingly
 	CRect rDraw(rItem), rClip(prClip);
