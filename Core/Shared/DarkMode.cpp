@@ -25,6 +25,7 @@
 
 LPCTSTR TC_DATETIMEPICK = _T("DATEPICKER");
 LPCTSTR TC_EDIT			= _T("EDIT");
+LPCTSTR TC_EXPLORER		= _T("EXPLORER");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -35,6 +36,7 @@ static HBRUSH WINAPI MyGetSysColorBrush(int nColor);
 static LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 
+static HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList);
 static HTHEME  STDAPICALLTYPE MyOpenThemeData(HWND hwnd, LPCWSTR pszClassList);
 static HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme);
 static HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor);
@@ -50,17 +52,109 @@ LRESULT (WINAPI *TrueCallWindowProc)(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg
 LRESULT (WINAPI *TrueDefWindowProc)(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) = DefWindowProc;
 
 // We link to UxTheme.dll dynamically
+typedef HRESULT (STDAPICALLTYPE *PFNSETWINDOWTHEME)(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList);
 typedef HTHEME  (STDAPICALLTYPE *PFNOPENTHEMEDATA)(HWND hwnd, LPCWSTR pszClassList);
 typedef HRESULT (STDAPICALLTYPE *PFNCLOSETHEMEDATA)(HTHEME hTheme);
 typedef HRESULT (STDAPICALLTYPE *PFNGETTHEMECOLOR)(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMEBACKGROUND)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect);
 typedef HRESULT (STDAPICALLTYPE *PFNDRAWTHEMETEXT)(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect);
 
+PFNSETWINDOWTHEME TrueSetWindowTheme = NULL;
 PFNOPENTHEMEDATA TrueOpenThemeData = NULL;
 PFNCLOSETHEMEDATA TrueCloseThemeData = NULL;
 PFNGETTHEMECOLOR TrueGetThemeColor = NULL;
 PFNDRAWTHEMEBACKGROUND TrueDrawThemeBackground = NULL;
 PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
+
+//////////////////////////////////////////////////////////////////////
+
+void CDarkMode::Enable(BOOL bEnable)
+{
+	if (Misc::IsHighContrastActive())
+		return;
+
+	if (!CThemed::IsAppThemed())
+		return;
+
+	BOOL bIsEnabled = IsEnabled();
+
+	if ((bEnable && bIsEnabled) || (!bEnable && !bIsEnabled))
+		return;
+
+	if (bEnable)
+	{
+		VERIFY(DetourTransactionBegin() == 0);
+		VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
+
+		VERIFY(DetourAttach(&(PVOID&)TrueCallWindowProc, MyCallWindowProc) == 0);
+		VERIFY(DetourAttach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
+		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
+		VERIFY(DetourAttach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
+
+		// We link to UxTheme.dll dynamically
+		HMODULE hUxTheme = LoadLibrary(_T("UxTheme.dll"));
+
+		if (hUxTheme)
+		{
+			TrueSetWindowTheme = (PFNSETWINDOWTHEME)GetProcAddress(hUxTheme, "SetWindowTheme");
+			TrueOpenThemeData = (PFNOPENTHEMEDATA)GetProcAddress(hUxTheme, "OpenThemeData");
+			TrueCloseThemeData = (PFNCLOSETHEMEDATA)GetProcAddress(hUxTheme, "CloseThemeData");
+			TrueGetThemeColor = (PFNGETTHEMECOLOR)GetProcAddress(hUxTheme, "GetThemeColor");
+			TrueDrawThemeBackground = (PFNDRAWTHEMEBACKGROUND)GetProcAddress(hUxTheme, "DrawThemeBackground");
+			TrueDrawThemeText = (PFNDRAWTHEMETEXT)GetProcAddress(hUxTheme, "DrawThemeText");
+
+			if (TrueSetWindowTheme)
+				VERIFY(DetourAttach(&(PVOID&)TrueSetWindowTheme, MySetWindowTheme) == 0);
+
+			if (TrueOpenThemeData)
+				VERIFY(DetourAttach(&(PVOID&)TrueOpenThemeData, MyOpenThemeData) == 0);
+
+			if (TrueCloseThemeData)
+				VERIFY(DetourAttach(&(PVOID&)TrueCloseThemeData, MyCloseThemeData) == 0);
+
+			if (TrueGetThemeColor)
+				VERIFY(DetourAttach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
+
+			if (TrueDrawThemeBackground)
+				VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
+
+			if (TrueDrawThemeText)
+				VERIFY(DetourAttach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+		}
+
+		VERIFY(DetourTransactionCommit() == 0);
+	}
+	else
+	{
+		VERIFY(DetourTransactionBegin() == 0);
+		VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
+
+		VERIFY(DetourDetach(&(PVOID&)TrueCallWindowProc, MyCallWindowProc) == 0);
+		VERIFY(DetourDetach(&(PVOID&)TrueDefWindowProc, MyDefWindowProc) == 0);
+		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColor, MyGetSysColor) == 0);
+		VERIFY(DetourDetach(&(PVOID&)TrueGetSysColorBrush, MyGetSysColorBrush) == 0);
+
+		if (TrueSetWindowTheme)
+			VERIFY(DetourDetach(&(PVOID&)TrueSetWindowTheme, MySetWindowTheme) == 0);
+
+		if (TrueOpenThemeData)
+			VERIFY(DetourDetach(&(PVOID&)TrueOpenThemeData, MyOpenThemeData) == 0);
+
+		if (TrueCloseThemeData)
+			VERIFY(DetourDetach(&(PVOID&)TrueCloseThemeData, MyCloseThemeData) == 0);
+
+		if (TrueGetThemeColor)
+			VERIFY(DetourDetach(&(PVOID&)TrueGetThemeColor, MyGetThemeColor) == 0);
+
+		if (TrueDrawThemeBackground)
+			VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeBackground, MyDrawThemeBackground) == 0);
+
+		if (TrueDrawThemeText)
+			VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
+
+		VERIFY(DetourTransactionCommit() == 0);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -761,6 +855,17 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 }
 
 //////////////////////////////////////////////////////////////////////
+
+HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
+{
+	// Disable explorer-style selection for now
+	if (_tcsicmp(pszSubAppName, TC_EXPLORER) == 0)
+	{
+		return S_OK;
+	}
+
+	return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
+}
 
 HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)
 {

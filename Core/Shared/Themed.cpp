@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Themed.h"
-#include "DarkMode.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -204,9 +203,6 @@ BOOL CThemed::IsWebContentThemed()
 // static 
 BOOL CThemed::SetWindowTheme(const CWnd* pWnd, LPCTSTR szAppName)
 {
-	if (CDarkMode::IsEnabled() && (_tcsicmp(szAppName, _T("EXPLORER")) == 0))
-		return FALSE;
-
 	if (InitUxTheme())
 	{
 		PFNSETWINDOWTHEME fnSetWindowTheme = (PFNSETWINDOWTHEME)GetProcAddress(s_hUxTheme, "SetWindowTheme");
