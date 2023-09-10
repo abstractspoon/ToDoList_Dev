@@ -429,7 +429,15 @@ void CDateTimeCtrlEx::OnPaint()
 		}
 		else if (bWantDPIScaling)
 		{
-			dc.FillSolidRect(rCheck, GetSysColor(COLOR_WINDOW));
+			BOOL bEnabled = IsWindowEnabled();
+
+			if (bEnabled)
+			{
+				SYSTEMTIME st;
+				bEnabled = (GDT_VALID == SendMessage(DTM_GETSYSTEMTIME, 0, (LPARAM)&st));
+			}
+
+			dc.FillSolidRect(rCheck, GetSysColor(bEnabled ? COLOR_WINDOW : COLOR_3DFACE));
 		}
 
 		// Always draw the checkbox because Windows gets
