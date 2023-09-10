@@ -348,8 +348,9 @@ void CPreferencesShortcutsPage::OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pR
 	m_hkCur.SetHotKey(wVKeyCode, wModifiers);
 	m_hkNew.SetHotKey(wVKeyCode, wModifiers);
 
-	// if it's a misc item then disable keys
-	BOOL bCanHaveShortcut = (nCmdID && !IsMiscCommandID(nCmdID));
+	// if it's a misc item or a sub-menu then disable keys
+	BOOL bSubMenu = (pNMTreeView->itemNew.lParam == ID_SUBMENU);
+	BOOL bCanHaveShortcut = (!bSubMenu && nCmdID && !IsMiscCommandID(nCmdID));
 
 	m_hkNew.EnableWindow(bCanHaveShortcut);
 	GetDlgItem(IDC_CURLABEL)->EnableWindow(bCanHaveShortcut);
