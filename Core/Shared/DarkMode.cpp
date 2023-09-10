@@ -16,6 +16,7 @@
 #include "osversion.h"
 #include "datetimectrlex.h"
 #include "AutoFlag.h"
+#include "OwnerdrawComboBoxBase.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
@@ -329,6 +330,10 @@ protected:
 	{
 		switch (msg)
 		{
+		case WM_ENABLE:
+			InvalidateRect(::GetParent(hRealWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hRealWnd)), TRUE);
+			break;
+
 		case WM_PAINT:
 			{
 				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
@@ -534,7 +539,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_GRAYTEXT:
-		//nTrueColor = COLOR_3DFACE;
+		nTrueColor = COLOR_3DFACE;
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -734,10 +739,13 @@ HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 
 LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
 {
-	LRESULT lr = 0;
+	if (!CWinClasses::IsKindOf(hWnd, RUNTIME_CLASS(COwnerdrawComboBoxBase)))
+	{
+		LRESULT lr = 0;
 
-	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
-		return lr;
+		if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+			return lr;
+	}
 
 	return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 }
