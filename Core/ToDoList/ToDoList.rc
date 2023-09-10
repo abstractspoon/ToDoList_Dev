@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,2,997,3
+ FILEVERSION 8,2,997,4
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 2, 997, 3\0"
+            VALUE "FileVersion", "8, 2, 997, 4\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-23\0"
             VALUE "LegalTrademarks", "\0"
@@ -96,7 +96,7 @@ BEGIN
     EDITTEXT        IDC_SEARCH,7,7,120,13,ES_AUTOHSCROLL
     CONTROL         "Tree1",IDC_PAGES,"SysTreeView32",TVS_DISABLEDRAGDROP | 
                     TVS_SHOWSELALWAYS | TVS_FULLROWSELECT | WS_BORDER | 
-                    WS_TABSTOP,7,19,120,247
+                    WS_TABSTOP,7,20,120,246
     CONTROL         "",IDC_HOSTFRAME,"Static",SS_GRAYFRAME,136,20,404,246,
                     WS_EX_TRANSPARENT
     DEFPUSHBUTTON   "OK",IDOK,436,274,50,14
