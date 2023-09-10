@@ -682,6 +682,35 @@ BEGIN_TM_PART_STATES(LISTITEM)
 END_TM_PART_STATES()
 
 //---------------------------------------------------------------------------------------
+//   "DatePicker" Parts & States
+//---------------------------------------------------------------------------------------
+BEGIN_TM_CLASS_PARTS(DATEPICKER)
+    TM_PART(1, DP, DATETEXT)
+	TM_PART(2, DP, DATEBORDER)
+    TM_PART(3, DP, SHOWCALENDARBUTTONRIGHT)
+END_TM_CLASS_PARTS()
+
+BEGIN_TM_PART_STATES(DATETEXT)
+    TM_STATE(1, DPDT, NORMAL)
+    TM_STATE(2, DPDT, DISABLED)
+    TM_STATE(3, DPDT, SELECTED)
+END_TM_PART_STATES()
+
+BEGIN_TM_PART_STATES(DATEBORDER)
+    TM_STATE(1, DPDB, NORMAL)
+    TM_STATE(2, DPDB, HOT)
+    TM_STATE(3, DPDB, FOCUSED)
+    TM_STATE(4, DPDB, DISABLED)
+END_TM_PART_STATES()
+
+BEGIN_TM_PART_STATES(SHOWCALENDARBUTTONRIGHT)
+    TM_STATE(1, DPSCBR, NORMAL)
+    TM_STATE(2, DPSCBR, HOT)
+    TM_STATE(3, DPSCBR, PRESSED)
+    TM_STATE(4, DPSCBR, DISABLED)
+END_TM_PART_STATES()
+
+//---------------------------------------------------------------------------------------
 //   "Header" Parts & States
 //---------------------------------------------------------------------------------------
 BEGIN_TM_CLASS_PARTS(HEADER)
