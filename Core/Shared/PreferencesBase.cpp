@@ -318,6 +318,8 @@ BEGIN_MESSAGE_MAP(CPreferencesDlgBase, CDialog)
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
+IMPLEMENT_DYNAMIC(CPreferencesDlgBase, CDialog);
+
 void CPreferencesDlgBase::OnOK()
 {
 	CDialog::OnOK();

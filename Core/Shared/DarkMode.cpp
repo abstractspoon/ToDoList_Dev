@@ -254,6 +254,11 @@ BOOL IsClass(HTHEME hTheme, LPCWSTR szClass)
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsParentPreferencePage(HWND hWnd)
+{
+	return CWinClasses::IsKindOf(::GetParent(hWnd), RUNTIME_CLASS(CPreferencesPageBase));
+}
+
 COLORREF GetParentBkgndColor(HWND hWnd)
 {
 	HWND hwndParent = ::GetParent(hWnd);
@@ -567,11 +572,9 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
-	case COLOR_CAPTIONTEXT: // MonthCalCtrl
 		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
 
 	case COLOR_WINDOW:
-	case COLOR_ACTIVECAPTION: // MonthCalCtrl
 		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
 
 	case COLOR_3DFACE:
@@ -619,6 +622,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_INACTIVECAPTION:	
 		RETURN_STATIC_COLOR_OR_BRUSH(colorBlue);
 
+	case COLOR_CAPTIONTEXT:
+	case COLOR_ACTIVECAPTION:
 	case COLOR_APPWORKSPACE:
 	case COLOR_INACTIVECAPTIONTEXT:
 	case COLOR_GRADIENTACTIVECAPTION:
@@ -656,7 +661,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_CTLCOLORLISTBOX:
-		if (!IsWindowEnabled(hWnd))
+ 		if (!IsWindowEnabled((HWND)lp))
 		{
 			::SetTextColor((HDC)wp, MyGetSysColor(COLOR_GRAYTEXT));
 			::SetBkMode((HDC)wp, TRANSPARENT);
@@ -679,7 +684,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetBkMode((HDC)wp, TRANSPARENT);
 
 		// Temporary hack to fixed interference of CToolbarHelper in CPreferencesToolPage
-		if (CWinClasses::IsKindOf(hWnd, RUNTIME_CLASS(CPreferencesDlgBase)))
+		if (IsParentPreferencePage((HWND)lp))
 			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
 
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);

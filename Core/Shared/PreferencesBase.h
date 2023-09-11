@@ -84,6 +84,8 @@ protected:
 
 class CPreferencesDlgBase : public CDialog, protected CDialogHelper
 {
+	DECLARE_DYNAMIC(CPreferencesDlgBase);
+
 	// Construction
 public:
 	CPreferencesDlgBase(UINT nDlgTemplateID, 
