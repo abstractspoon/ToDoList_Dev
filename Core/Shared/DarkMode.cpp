@@ -667,15 +667,20 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
-	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSCROLLBAR:
 	case WM_CTLCOLORMSGBOX:
  		break;
 
+	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
-		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE)
+
+		// Temporary hack to fixed interference of CToolbarHelper in CPreferencesToolPage
+		if (CWinClasses::IsKindOf(hWnd, RUNTIME_CLASS(CPreferencesDlgBase)))
+			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
+
+		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_PAINT:
 		break;
