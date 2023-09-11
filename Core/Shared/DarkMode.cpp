@@ -254,9 +254,40 @@ BOOL IsClass(HTHEME hTheme, LPCWSTR szClass)
 
 //////////////////////////////////////////////////////////////////////
 
+COLORREF GetParentBkgndColor(HWND hWnd)
+{
+	HWND hwndParent = ::GetParent(hWnd);
+
+	if (CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CPreferencesPageBase)))
+	{
+		CPreferencesPageBase* pParent = (CPreferencesPageBase*)CWnd::FromHandle(hwndParent);
+		return pParent->GetBackgroundColor();
+	}
+
+	// else
+	return DM_3DFACE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeCtrlBase : public CSubclassWnd
 {
+public:
+	CDarkModeCtrlBase() : m_crParentBkgnd(DM_3DFACE) {}
+
 protected:
+	COLORREF m_crParentBkgnd;
+
+protected:
+	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
+	{
+		if (!CSubclassWnd::HookWindow(hRealWnd, pSubclasser))
+			return FALSE;
+
+		m_crParentBkgnd = GetParentBkgndColor(hRealWnd);
+		return TRUE;
+	}
+
 	CDC* GetPaintDC(WPARAM wp)
 	{
 		if (wp)
@@ -385,11 +416,13 @@ class CDarkModeEdit : public CSubclassWnd
 
 class CDarkModeRadioButtonOrCheckBoxText : public CDarkModeStaticText
 {
+private:
+	int m_nTextOffset;
+
 public:
 	CDarkModeRadioButtonOrCheckBoxText() 
 		: 
-		m_nTextOffset(GetSystemMetrics(SM_CXVSCROLL)),
-		m_crParentBkgnd(DM_3DFACE)
+		m_nTextOffset(GetSystemMetrics(SM_CXVSCROLL))
 	{
 	}
 
@@ -407,14 +440,6 @@ protected:
 
 			if (th.GetSize(BP_CHECKBOX, CBS_CHECKEDNORMAL, sizeBtn))
 				m_nTextOffset = (sizeBtn.cx + 3);
-		}
-
-		HWND hwndParent = ::GetParent(hRealWnd);
-
-		if (CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CPreferencesPageBase)))
-		{
-			CPreferencesPageBase* pParent = (CPreferencesPageBase*)CWnd::FromHandle(hwndParent);
-			m_crParentBkgnd = pParent->GetBackgroundColor();
 		}
 
 		return TRUE;
@@ -493,10 +518,6 @@ protected:
 		// all else
 		return Default();
 	}
-
-private:
-	int m_nTextOffset;
-	COLORREF m_crParentBkgnd;
 };
 
 //////////////////////////////////////////////////////////////////////
