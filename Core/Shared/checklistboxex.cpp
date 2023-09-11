@@ -290,7 +290,7 @@ void CCheckListBoxEx::GetItemColors(LPDRAWITEMSTRUCT lpDrawItemStruct, COLORREF&
 	BOOL fDisabled = (!IsWindowEnabled() || !IsEnabled(lpDrawItemStruct->itemID));
 	
 	crText = GetSysColor(fDisabled ? COLOR_3DSHADOW : COLOR_WINDOWTEXT);
-	crBackgnd = GetSysColor(COLOR_WINDOW);
+	crBackgnd = GetSysColor(fDisabled ? COLOR_3DFACE : COLOR_WINDOW);
 	
 	if (crText == crBackgnd)
 		crText = GetSysColor(COLOR_3DDKSHADOW);   // darker gray
