@@ -465,10 +465,14 @@ protected:
 				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
 				CDC* pDC = GetPaintDC(wp);
 
-				CRect rText;
-				GetClientRect(rText);
+				// Redraw background
+				CRect rClient;
+				GetClientRect(rClient);
+
+				pDC->FillSolidRect(rClient, m_crParentBkgnd);
 
 				DWORD dwStyle = GetStyle();
+				CRect rText(rClient);
 
 				if (Misc::HasFlag(dwStyle, BS_LEFTTEXT))
 					rText.right -= m_nTextOffset;
@@ -490,26 +494,26 @@ protected:
 				{
 					nAlign |= DT_TOP;
 				}
-				else if (Misc::HasFlag(dwStyle, BS_VCENTER))
-				{
-					nAlign |= DT_VCENTER;
-				}
 				else if (Misc::HasFlag(dwStyle, BS_BOTTOM))
 				{
 					nAlign |= DT_BOTTOM;
+				}
+				else //if (Misc::HasFlag(dwStyle, BS_VCENTER))
+				{
+					nAlign |= DT_VCENTER;
 				}
 
 				// Calc minimum rect required
 				DrawText(pDC, pWnd, nAlign | DT_CALCRECT, rText);
 
-				// Redraw background
-				pDC->FillSolidRect(rText, m_crParentBkgnd);
+				if (nAlign & DT_VCENTER)
+					GraphicsMisc::CentreRect(rText, rClient, FALSE, TRUE);
 
 				// Draw actual text
 				DrawText(pDC, pWnd, nAlign, rText);
 
 				// Clip out the text
-				rText.top++;
+				//rText.top++;
 				pDC->ExcludeClipRect(rText);
 
 				// default drawing
