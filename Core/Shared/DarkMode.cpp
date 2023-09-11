@@ -514,13 +514,7 @@ protected:
 			ASSERT(s_hwndCurrentDateTime == NULL);
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hRealWnd);
-				CDC* pDC = GetPaintDC(wp);
-
-				LRESULT lr = CDarkModeCtrlBase::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0L);
-
-				CleanupDC(wp, pDC);
-
-				return lr;
+				return Default();
 			}
 			break;
 		}
