@@ -25,6 +25,7 @@
 
 LPCTSTR TC_DATETIMEPICK = _T("DATEPICKER");
 LPCTSTR TC_EDIT			= _T("EDIT");
+LPCTSTR TC_BUTTON		= _T("BUTTON");
 LPCTSTR TC_EXPLORER		= _T("EXPLORER");
 
 //////////////////////////////////////////////////////////////////////
@@ -203,6 +204,7 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 	if (hTheme)
 	{
 		if (CWinClasses::IsClass(szClass, TC_DATETIMEPICK) ||
+			CWinClasses::IsClass(szClass, TC_BUTTON) ||
 			CWinClasses::IsClass(szClass, TC_EDIT))
 		{
 			THEMEELEMENT elm;
@@ -277,22 +279,7 @@ COLORREF GetParentBkgndColor(HWND hWnd)
 
 class CDarkModeCtrlBase : public CSubclassWnd
 {
-public:
-	CDarkModeCtrlBase() : m_crParentBkgnd(DM_3DFACE) {}
-
 protected:
-	COLORREF m_crParentBkgnd;
-
-protected:
-	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
-	{
-		if (!CSubclassWnd::HookWindow(hRealWnd, pSubclasser))
-			return FALSE;
-
-		m_crParentBkgnd = GetParentBkgndColor(hRealWnd);
-		return TRUE;
-	}
-
 	CDC* GetPaintDC(WPARAM wp)
 	{
 		if (wp)
@@ -310,11 +297,25 @@ protected:
 		pDC = NULL;
 	}
 };
-
 //////////////////////////////////////////////////////////////////////
 
 class CDarkModeStaticText : public CDarkModeCtrlBase
 {
+public:
+	static COLORREF GetTextColor(HWND hWnd)
+	{
+		if (::IsWindowEnabled(hWnd))
+			return GetSysColor(COLOR_WINDOWTEXT);
+
+		COLORREF crParent = GetParentBkgndColor(hWnd);
+
+		if (crParent == DM_WINDOW)
+			return TrueGetSysColor(COLOR_3DSHADOW);
+
+		// else
+		return TrueGetSysColor(COLOR_3DLIGHT);
+	}
+
 protected:
 	void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
 	{
@@ -323,7 +324,7 @@ protected:
 
 		CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
 
-		pDC->SetTextColor(GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_3DSHADOW));
+		pDC->SetTextColor(GetTextColor(*pWnd));
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sLabel, rText, nAlign);
 		pDC->SelectObject(pOldFont);
@@ -421,112 +422,24 @@ class CDarkModeEdit : public CSubclassWnd
 
 //////////////////////////////////////////////////////////////////////
 
-class CDarkModeRadioButtonOrCheckBoxText : public CDarkModeStaticText
+HWND s_hwndCurrentBtnStatic = NULL;
+
+class CDarkModeStaticButtonText : public CDarkModeCtrlBase
 {
-private:
-	int m_nTextOffset;
-
-public:
-	CDarkModeRadioButtonOrCheckBoxText() 
-		: 
-		m_nTextOffset(GetSystemMetrics(SM_CXVSCROLL))
-	{
-	}
-
 protected:
-	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
-	{
-		if (!CDarkModeStaticText::HookWindow(hRealWnd, pSubclasser))
-			return FALSE;
-
-		CThemed th;
-
-		if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
-		{
-			CSize sizeBtn;
-
-			if (th.GetSize(BP_CHECKBOX, CBS_CHECKEDNORMAL, sizeBtn))
-				m_nTextOffset = (sizeBtn.cx + 3);
-		}
-
-		return TRUE;
-	}
-	
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		switch (msg)
 		{
-		case WM_ENABLE:
-			InvalidateRect(::GetParent(hRealWnd), CDialogHelper::GetChildRect(CWnd::FromHandle(hRealWnd)), TRUE);
-			break;
-
 		case WM_PAINT:
+			ASSERT(s_hwndCurrentBtnStatic == NULL);
 			{
-				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
-				CDC* pDC = GetPaintDC(wp);
-
-				// Redraw background
-				CRect rClient;
-				GetClientRect(rClient);
-
-				pDC->FillSolidRect(rClient, m_crParentBkgnd);
-
-				DWORD dwStyle = GetStyle();
-				CRect rText(rClient);
-
-				if (Misc::HasFlag(dwStyle, BS_LEFTTEXT))
-					rText.right -= m_nTextOffset;
-				else
-					rText.left += m_nTextOffset;
-
-				int nAlign = DT_LEFT;
-
-				if (Misc::HasFlag(dwStyle, BS_CENTER))
-				{
-					nAlign = DT_CENTER;
-				}
-				else if (Misc::HasFlag(dwStyle, BS_RIGHT))
-				{
-					nAlign = DT_RIGHT;
-				}
-
-				if (Misc::HasFlag(dwStyle, BS_TOP))
-				{
-					nAlign |= DT_TOP;
-				}
-				else if (Misc::HasFlag(dwStyle, BS_BOTTOM))
-				{
-					nAlign |= DT_BOTTOM;
-				}
-				else //if (Misc::HasFlag(dwStyle, BS_VCENTER))
-				{
-					nAlign |= DT_VCENTER;
-				}
-
-				// Calc minimum rect required
-				DrawText(pDC, pWnd, nAlign | DT_CALCRECT, rText);
-
-				if (nAlign & DT_VCENTER)
-					GraphicsMisc::CentreRect(rText, rClient, FALSE, TRUE);
-
-				// Draw actual text
-				DrawText(pDC, pWnd, nAlign, rText);
-
-				// Clip out the text
-				//rText.top++;
-				pDC->ExcludeClipRect(rText);
-
-				// default drawing
-				CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
-
-				// cleanup
-				CleanupDC(wp, pDC);
-
-				return 0L;
+				CAutoFlagT<HWND> af(s_hwndCurrentBtnStatic, hRealWnd);
+				return Default();
 			}
+			break;
 		}
 
-		// all else
 		return Default();
 	}
 };
@@ -687,7 +600,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
 		::SetBkMode((HDC)wp, TRANSPARENT);
 
-		// Temporary hack to fixed interference of CToolbarHelper in CPreferencesToolPage
+		// 'Temporary' hack to fixed interference of CToolbarHelper in CPreferencesToolPage
 		if (IsParentPreferencePage((HWND)lp))
 			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
 
@@ -725,16 +638,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 
 				case BS_GROUPBOX:
-					CThemed::SetWindowTheme(CWnd::FromHandle(hWnd), _T("DM"));
-					break;
-
 				case BS_3STATE:
 				case BS_AUTO3STATE:
 				case BS_CHECKBOX:
 				case BS_AUTOCHECKBOX:
 				case BS_RADIOBUTTON:
 				case BS_AUTORADIOBUTTON:
-					HookWindow(hWnd, new CDarkModeRadioButtonOrCheckBoxText());
+					HookWindow(hWnd, new CDarkModeStaticButtonText());
 					break;
 				}
 			}
@@ -743,6 +653,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				HookWindow(hWnd, new CDarkModeDateTimeCtrl());
 			}
 		}
+		break;
+
+	case WM_ENABLE:
+		InvalidateRect(hWnd, NULL, TRUE);
 		break;
 
 	case WM_DESTROY:
@@ -881,12 +795,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 {
 	CString sClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
+	if (s_hwndCurrentDateTime && CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
 	{
 		switch (iPartId)
 		{
 		case DP_DATEBORDER:
-			if (s_hwndCurrentDateTime)
 			{
 				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 
@@ -943,7 +856,17 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 {
 	CString sClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
+	if (s_hwndCurrentBtnStatic)
+	{
+		ASSERT(CWinClasses::IsClass(sClass, TC_BUTTON));
+
+		::SetTextColor(hdc, CDarkModeStaticText::GetTextColor(s_hwndCurrentBtnStatic));
+		::SetBkMode(hdc, TRANSPARENT);
+		::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+
+		return S_OK;
+	}
+	else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
 	{
 		switch (iPartId)
 		{
