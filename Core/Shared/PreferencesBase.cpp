@@ -188,13 +188,12 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 		CRect rClient;
 		pDC->GetClipBox(rClient);
 		pDC->FillSolidRect(rClient, m_crBack);
-	}
-	else
-	{
-		CPropertyPage::OnEraseBkgnd(pDC);
+		
+		return TRUE;
 	}
 
-	return TRUE;
+	// else
+	return CPropertyPage::OnEraseBkgnd(pDC);
 }
 
 HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
