@@ -810,30 +810,8 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 						*pColor = TrueGetSysColor(COLOR_3DHIGHLIGHT);
 						return S_OK;
 					}
-					else
-					{
-						int breakpoint = 0;
-					}
-					break;
-
-				case ETS_NORMAL:
-					{
-						int breakpoint = 0;
-					}
-					break;
-
-				default:
-					{
-						int breakpoint = 0;
-					}
 					break;
 				}
-			}
-			break;
-
-		default:
-			{
-				int breakpoint = 0;
 			}
 			break;
 		}
@@ -920,8 +898,28 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				return hr;
 			}
 			break;
+		}
+	}
+	else if (CWinClasses::IsClass(sClass, TC_EDIT))
+	{
+		switch (iPartId)
+		{
+		case EP_BACKGROUND:
+			{
+				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+				COLORREF crBack = DM_WINDOW;
 
-		default:
+				switch (iStateId)
+				{
+				case EBS_DISABLED:
+				case EBS_READONLY:
+					crBack = DM_3DFACE;
+					break;
+				}
+				CDC::FromHandle(hdc)->FillSolidRect(pRect, crBack);
+
+				return hr;
+			}
 			break;
 		}
 	}
