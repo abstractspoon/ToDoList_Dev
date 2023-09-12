@@ -76,7 +76,7 @@ CString TransText::GetFriendlyClass(const CString& sClass, HWND hWndRef)
 	}
 	else if (CWinClasses::IsClass(sClass, WC_BUTTON) && hWndRef)
 	{
-		int nBtnType = CWinClasses::GetButtonType(hWndRef);
+		int nBtnType = CWinClasses::GetStyleType(hWndRef, BS_TYPEMASK);
 		
 		switch (nBtnType)
 		{

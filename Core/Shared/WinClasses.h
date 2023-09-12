@@ -9,10 +9,16 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 struct CRuntimeClass;
+
+//////////////////////////////////////////////////////////////////////
 
 // global helper function for everyone to use
 void TRACEWND(LPCTSTR szFunctionName, HWND hWnd);
+
+//////////////////////////////////////////////////////////////////////
 
 enum WCLS_COMMONDIALOG
 {
@@ -25,6 +31,16 @@ enum WCLS_COMMONDIALOG
 	WCD_OPENSAVE,
 	WCD_BROWSEFOLDER,
 };
+
+//////////////////////////////////////////////////////////////////////
+
+#ifndef BS_TYPEMASK
+#define BS_TYPEMASK 0x0000000FL
+#endif
+
+#define CBS_TYPEMASK 0x0000000FL
+
+//////////////////////////////////////////////////////////////////////
 
 class CWinClasses  
 {
@@ -53,8 +69,7 @@ public:
 	static BOOL IsListBox(HWND hWnd);
 	static BOOL IsChild(HWND hWnd);
 
-	static int GetButtonType(HWND hWnd); // BS_*
-	static int GetStaticType(HWND hWnd); // SS_*
+	static int GetStyleType(HWND hWnd, DWORD dwTypeMask);
 	
 protected:
 	static CMapStringToPtr s_mapCtrlClasses;

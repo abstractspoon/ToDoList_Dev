@@ -350,7 +350,7 @@ private:
 				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
 				CDC* pDC = GetPaintDC(wp);
 
-				int nType = CWinClasses::GetStaticType(hRealWnd);
+				int nType = CWinClasses::GetStyleType(hRealWnd, SS_TYPEMASK);
 				int nAlign = DT_LEFT;
 
 				CRect rText;
@@ -625,7 +625,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
-				switch (CWinClasses::GetStaticType(hWnd))
+				switch (CWinClasses::GetStyleType(hWnd, SS_TYPEMASK))
 				{
 				case SS_LEFT:
 				case SS_CENTER:
@@ -636,7 +636,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_BUTTON))
 			{
-				switch (CWinClasses::GetButtonType(hWnd))
+				switch (CWinClasses::GetStyleType(hWnd, BS_TYPEMASK))
 				{
 					ASSERT(0);
 					break;

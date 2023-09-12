@@ -33,10 +33,6 @@ void TRACEWND(LPCTSTR, HWND) {}
 
 #define ADDCONTROL(ctrlname) { CString sCtrl(ctrlname); sCtrl.MakeLower(); s_mapCtrlClasses[sCtrl] = NULL; }
 
-#ifndef BS_TYPEMASK
-#define BS_TYPEMASK 0x0000000FL
-#endif
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -374,16 +370,7 @@ BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 	return FALSE;
 }
 
-int CWinClasses::GetButtonType(HWND hWnd)
+int CWinClasses::GetStyleType(HWND hWnd, DWORD dwTypeMask)
 {
-	ASSERT(IsClass(hWnd, WC_BUTTON));
-
-	return (::GetWindowLong(hWnd, GWL_STYLE) & BS_TYPEMASK);
-}
-
-int CWinClasses::GetStaticType(HWND hWnd)
-{
-	ASSERT(IsClass(hWnd, WC_STATIC));
-
-	return (::GetWindowLong(hWnd, GWL_STYLE) & SS_TYPEMASK);
+	return (::GetWindowLong(hWnd, GWL_STYLE) & dwTypeMask);
 }
