@@ -48,8 +48,6 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTimeComboBox)
-	protected:
-	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -59,10 +57,10 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTimeComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	DECLARE_MESSAGE_MAP()
 

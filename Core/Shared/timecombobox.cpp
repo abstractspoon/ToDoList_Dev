@@ -37,30 +37,21 @@ CTimeComboBox::~CTimeComboBox()
 
 BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTimeComboBox)
-	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 	ON_WM_CTLCOLOR()
 	ON_WM_CAPTURECHANGED()
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox message handlers
 
-void CTimeComboBox::PreSubclassWindow() 
+void CTimeComboBox::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-	VERIFY(Initialize());
+	if (bShow && !GetCount())
+		BuildCombo();
 
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-}
-
-int CTimeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	VERIFY(Initialize());
-	
-	return 0;
+	COwnerdrawComboBoxBase::OnShowWindow(bShow, nStatus);
 }
 
 BOOL CTimeComboBox::Initialize()
