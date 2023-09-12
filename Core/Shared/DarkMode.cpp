@@ -30,6 +30,10 @@ LPCTSTR TC_EXPLORER		= _T("EXPLORER");
 
 //////////////////////////////////////////////////////////////////////
 
+const COLORREF DM_GRAYTEXT = RGB(170, 170, 170);
+
+//////////////////////////////////////////////////////////////////////
+
 // Replacement function declarations
 static DWORD WINAPI MyGetSysColor(int nColor);
 static HBRUSH WINAPI MyGetSysColorBrush(int nColor);
@@ -485,7 +489,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_GRAYTEXT:
-		nTrueColor = COLOR_3DFACE;
+		RETURN_STATIC_COLOR_OR_BRUSH(DM_GRAYTEXT);
 		break;
 
 	case COLOR_WINDOWTEXT:
