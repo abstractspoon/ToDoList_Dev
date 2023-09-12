@@ -56,7 +56,7 @@ protected:
 
 protected:
 	void BuildLanguageList();
-	int AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID);
+	int AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID, COLORREF crBack = CLR_NONE);
 	int SelectLanguage(LPCTSTR szLanguage);
 
 	static CString GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTSTR szExt = _T("csv"), BOOL bRelative = FALSE);

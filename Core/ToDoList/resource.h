@@ -60,8 +60,8 @@
 #define IDD_LANGUAGE_DIALOG             227
 #define IDD_TDLIMPORTEXPORT_DIALOG      228
 #define IDD_CMDLINEOPTIONS_DIALOG       229
-#define IDR_GB_FLAG                     235
-#define IDR_YOURLANG_FLAG               236
+#define IDB_UK_FLAG                     235
+#define IDB_YOURLANG_FLAG               236
 #define IDD_OUTLOOKMSGIMPORT_DIALOG     238
 #define IDI_TASKTREE_STD                240
 #define IDD_ADDCUSTOMATTRIB_DIALOG      241

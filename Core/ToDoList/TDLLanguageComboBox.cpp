@@ -11,6 +11,8 @@
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\misc.h"
 
+#include "..\3rdParty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -94,8 +96,10 @@ void CTDLLanguageComboBox::BuildLanguageList()
 		// to dynamically determine the default language position
 		if (!bDefaultAdded && (DEFAULT_LANG.CompareNoCase(sFileName) < 0))
 		{
-			HBITMAP hbmFlag = CEnBitmap::LoadImageResource(IDR_GB_FLAG, _T("GIF"));
-			AddString(DEFAULT_LANG, hbmFlag, LANG_ENGLISH);
+			CBitmap bm;
+			bm.LoadBitmap(IDB_UK_FLAG);
+
+			AddString(DEFAULT_LANG, (HBITMAP)bm.Detach(), LANG_ENGLISH, colorMagenta);
 
 			bDefaultAdded = TRUE;
 		}
@@ -112,8 +116,10 @@ void CTDLLanguageComboBox::BuildLanguageList()
 
 	if (!bDefaultAdded)
 	{
-		HBITMAP hbmFlag = CEnBitmap::LoadImageResource(IDR_GB_FLAG, _T("GIF"));
-		AddString(DEFAULT_LANG, hbmFlag, LANG_ENGLISH);
+		CBitmap bm;
+		bm.LoadBitmap(IDB_UK_FLAG);
+
+		AddString(DEFAULT_LANG, (HBITMAP)bm.Detach(), LANG_ENGLISH, colorMagenta);
 	}
 
 	m_il.ScaleByDPIFactor();
@@ -144,7 +150,7 @@ LANGID CTDLLanguageComboBox::GetLanguageID(const CString& sTransFile)
 	return (LANGID)PRIMARYLANGID(_ttoi(sLangID));
 }
 
-int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID)
+int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID, COLORREF crBack)
 {
 	// create and associate the image list first time around
 	if (m_il.GetSafeHandle() == NULL)
@@ -162,11 +168,17 @@ int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID 
 	cbe.iImage = cbe.iSelectedImage = GetCount();
 
 	if (hbmFlag == NULL)
-		hbmFlag = CEnBitmap::LoadImageResource(IDR_YOURLANG_FLAG, _T("GIF"));
+	{
+		CBitmap bm;
+		bm.LoadBitmap(IDB_YOURLANG_FLAG);
+
+		hbmFlag = (HBITMAP)bm.Detach();
+		crBack = colorMagenta;
+	}
 
 	CBitmap tmp;
 	tmp.Attach(hbmFlag); // will auto cleanup
-	m_il.Add(&tmp, CLR_NONE);
+	m_il.Add(&tmp, crBack);
 
 	return InsertItem(&cbe);
 }
