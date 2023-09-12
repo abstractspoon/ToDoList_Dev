@@ -856,7 +856,7 @@ void GraphicsMisc::CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& 
 	if (crBase == CLR_NONE)
 	{
 		crFill = CLR_NONE;
-		crBorder = GetSysColor(bEnabled ? COLOR_3DDKSHADOW : COLOR_3DSHADOW);
+		crBorder = GetSysColor(bEnabled ? COLOR_3DDKSHADOW : COLOR_GRAYTEXT);
 	}
 	else
 	{
