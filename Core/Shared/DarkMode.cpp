@@ -401,50 +401,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-/*
-class CDarkModeEdit : public CSubclassWnd
-{
-	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
-	{
-		switch (msg)
-		{
-		case WM_ENABLE:
-		case WM_SETFOCUS:
-		case WM_KILLFOCUS:
-			InvalidateRect(hRealWnd, NULL, TRUE);
-			break;
-
-		case WM_ERASEBKGND:
-			if (wp)
-			{
-				//Default();
-
-				CRect rClient;
-				GetClientRect(rClient);
-
-				CDC::FromHandle((HDC)wp)->FillSolidRect(rClient, DM_WINDOW);
-				return TRUE;
-			}
-			break;
-
-		case WM_PAINT:
-			if (::GetFocus() != hRealWnd)
- 			{
-				CWnd* pWnd = CWnd::FromHandle(hRealWnd);
-				CPaintDC dc(pWnd);
-
- 				return 0L;//CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)dc.m_hDC, 0L);
- 			}
-			break;
-		}
-
-		return Default();
-	}
-};
-*/
-
-//////////////////////////////////////////////////////////////////////
-
 HWND s_hwndCurrentComboBox = NULL;
 
 class CDarkModeComboBox : public CDarkModeCtrlBase
