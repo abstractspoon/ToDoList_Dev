@@ -27,6 +27,7 @@ LPCTSTR TC_DATETIMEPICK = _T("DATEPICKER");
 LPCTSTR TC_EDIT			= _T("EDIT");
 LPCTSTR TC_BUTTON		= _T("BUTTON");
 LPCTSTR TC_EXPLORER		= _T("EXPLORER");
+LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -176,6 +177,8 @@ BOOL IsHooked(HWND hWnd)
 
 BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 {
+	ASSERT(hWnd);
+
 	if (IsHooked(hWnd))
 		return TRUE;
 
@@ -187,6 +190,21 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 
 	delete pWnd;
 	return FALSE;
+}
+
+void UnhookWindow(HWND hWnd)
+{
+	ASSERT(hWnd);
+
+	CSubclassWnd* pWnd = NULL;
+
+	if (s_mapScWnds.Lookup(hWnd, pWnd))
+	{
+		pWnd->HookWindow(NULL);
+		delete pWnd;
+
+		s_mapScWnds.RemoveKey(hWnd);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -209,6 +227,7 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 	{
 		if (CWinClasses::IsClass(szClass, TC_DATETIMEPICK) ||
 			CWinClasses::IsClass(szClass, TC_BUTTON) ||
+			CWinClasses::IsClass(szClass, TC_COMBOBOX) ||
 			CWinClasses::IsClass(szClass, TC_EDIT))
 		{
 			THEMEELEMENT elm;
@@ -426,6 +445,30 @@ class CDarkModeEdit : public CSubclassWnd
 
 //////////////////////////////////////////////////////////////////////
 
+HWND s_hwndCurrentComboBox = NULL;
+
+class CDarkModeComboBox : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			ASSERT(s_hwndCurrentComboBox == NULL);
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hRealWnd);
+				return Default();
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 HWND s_hwndCurrentBtnStatic = NULL;
 
 class CDarkModeStaticButtonText : public CDarkModeCtrlBase
@@ -623,6 +666,16 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOWTEXT));
 			}
+			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX))
+			{
+				switch (CWinClasses::GetStyleType(hWnd, 0xf))
+				{
+				case CBS_DROPDOWN:
+				case CBS_SIMPLE:
+					HookWindow(hWnd, new CDarkModeComboBox());
+					break;
+				}
+			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
 				switch (CWinClasses::GetStyleType(hWnd, SS_TYPEMASK))
@@ -657,24 +710,18 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				HookWindow(hWnd, new CDarkModeDateTimeCtrl());
 			}
 		}
+		else
+		{
+			UnhookWindow(hWnd);
+		}
+		break;
+
+	case WM_DESTROY:
+		UnhookWindow(hWnd);
 		break;
 
 	case WM_ENABLE:
 		InvalidateRect(hWnd, NULL, TRUE);
-		break;
-
-	case WM_DESTROY:
-		{
-			CSubclassWnd* pWnd = NULL;
-
-			if (s_mapScWnds.Lookup(hWnd, pWnd))
-			{
-				pWnd->HookWindow(NULL);
-				delete pWnd;
-
-				s_mapScWnds.RemoveKey(hWnd);
-			}
-		}
 		break;
 	}
 
@@ -842,6 +889,32 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 
  						CDC::FromHandle(hdc)->FillSolidRect(Bkgnd, (bEnabled ? DM_WINDOW : DM_3DFACE));
 					}
+				}
+
+				return hr;
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
+	{
+		switch (iPartId)
+		{
+		case CP_BORDER:
+			{
+				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+
+				if (hr == S_OK)
+				{
+					BOOL bEnabled = ::IsWindowEnabled(s_hwndCurrentComboBox);
+
+					CRect rEdit = CDialogHelper::GetCtrlRect(CWnd::FromHandle(s_hwndCurrentComboBox), 1001);
+					rEdit.InflateRect(1, 1);
+
+					CDC::FromHandle(hdc)->FillSolidRect(rEdit, (bEnabled ? DM_WINDOW : DM_3DFACE));
 				}
 
 				return hr;
