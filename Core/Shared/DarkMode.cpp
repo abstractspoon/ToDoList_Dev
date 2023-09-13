@@ -25,6 +25,7 @@
 
 LPCTSTR TC_DATETIMEPICK = _T("DATEPICKER");
 LPCTSTR TC_EDIT			= _T("EDIT");
+LPCTSTR TC_TABCTRL		= _T("TAB");
 LPCTSTR TC_BUTTON		= _T("BUTTON");
 LPCTSTR TC_EXPLORER		= _T("EXPLORER");
 LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
@@ -228,6 +229,7 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 		if (CWinClasses::IsClass(szClass, TC_DATETIMEPICK) ||
 			CWinClasses::IsClass(szClass, TC_BUTTON) ||
 			CWinClasses::IsClass(szClass, TC_COMBOBOX) ||
+			CWinClasses::IsClass(szClass, TC_TABCTRL) ||
 			CWinClasses::IsClass(szClass, TC_EDIT))
 		{
 			THEMEELEMENT elm;
@@ -624,7 +626,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
 			{
-				switch (CWinClasses::GetStyleType(hWnd, 0xf))
+				switch (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK))
 				{
 				case CBS_DROPDOWN:
 				case CBS_SIMPLE:
@@ -677,7 +679,15 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_ENABLE:
-		InvalidateRect(hWnd, NULL, TRUE);
+		{
+			CString sClass = CWinClasses::GetClass(hWnd);
+
+			if (CWinClasses::IsClass(sClass, WC_STATIC) ||
+				CWinClasses::IsClass(sClass, WC_BUTTON))
+			{
+				InvalidateRect(hWnd, NULL, TRUE);
+			}
+		}
 		break;
 	}
 
@@ -852,6 +862,23 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				}
 
 				return hr;
+			}
+			break;
+		}
+	}
+	else if (CWinClasses::IsClass(sClass, TC_TABCTRL))
+	{
+		switch (iPartId)
+		{
+		case TABP_PANE:
+			{
+				CRect rBkgnd(pRect);
+				rBkgnd.DeflateRect(1, 1);
+
+				CDC* pDC = CDC::FromHandle(hdc);
+
+				pDC->FillSolidRect(rBkgnd, DM_3DFACE);
+				pDC->ExcludeClipRect(rBkgnd);
 			}
 			break;
 		}
