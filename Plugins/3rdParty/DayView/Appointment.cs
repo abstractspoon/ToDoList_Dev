@@ -168,7 +168,7 @@ namespace Calendar
             }
         }
 
-		private Color fillColor = Color.White;
+		private Color fillColor = SystemColors.Window;
 
 		public Color FillColor
 		{
@@ -191,7 +191,7 @@ namespace Calendar
 			// for derived classes
 		}
 
-		private Color textColor = Color.Black;
+		private Color textColor = SystemColors.WindowText;
 
         public Color TextColor
         {
@@ -220,7 +220,7 @@ namespace Calendar
         {
             get
             {
-                if (textColor.IsEmpty)
+                if (borderColor.IsEmpty)
                     return SystemColors.ControlDark;
 
                 return borderColor;

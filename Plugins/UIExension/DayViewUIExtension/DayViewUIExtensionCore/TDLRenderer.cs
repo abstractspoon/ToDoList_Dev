@@ -484,55 +484,60 @@ namespace DayViewUIExtension
 			return (appt as TaskItem);
 		}
 
-		void GetTaskColors(Calendar.AppointmentView apptView,bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
+		void GetTaskColors(Calendar.AppointmentView apptView, bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
 		{
 			TaskItem taskItem = GetTaskItem(apptView.Appointment);
-			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence); 
+			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
 
-			// Default colours
-			if (isSelected && SystemInformation.HighContrast)
-			{
-				textColor = borderColor = SystemColors.HighlightText;
-				fillColor = SystemColors.Highlight;
+			textColor = borderColor = fillColor = barColor = Color.Empty;
 
-				barColor = isFutureItem ? SystemColors.Window : apptView.Appointment.TextColor;
-			}
-			else
-			{
-				if (isFutureItem)
-				{
-					fillColor = SystemColors.Window;
-					textColor = apptView.Appointment.TextColor;
-				}
-				else
-				{
-					textColor = taskItem.TaskTextColor;
-					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-				}
-
-				borderColor = taskItem.DrawBorder ? textColor : Color.Empty;
-				barColor = textColor;
-			}
-
-			if (taskItem.HasTaskTextColor)
+			if (SystemInformation.HighContrast)
 			{
 				if (isSelected)
 				{
-					if (!SystemInformation.HighContrast)
-						textColor = DrawingColor.SetLuminance(textColor, 0.3f);
+					textColor = borderColor = SystemColors.HighlightText;
+					fillColor = SystemColors.Highlight;
 
 					if (!isFutureItem)
 						barColor = taskItem.TaskTextColor;
 				}
-				else if (TaskColorIsBackground && !isFutureItem)
+				else
 				{
-					barColor = textColor;
-					fillColor = textColor;
+					textColor = borderColor = taskItem.TaskTextColor;
 
-					textColor = DrawingColor.GetBestTextColor(textColor);
+					if (taskItem.HasTaskTextColor)
+					{
+						fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+
+						if (!isFutureItem)
+							barColor = taskItem.TaskTextColor;
+					}
 
 					if (taskItem.DrawBorder)
-						borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
+						borderColor = textColor;
+				}
+			}
+			else // NOT high contrast
+			{
+				if (isSelected)
+				{
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
+
+					if (!isFutureItem)
+						barColor = taskItem.TaskTextColor;
+				}
+// 				else if (isFutureItem)
+// 				{
+// 					textColor = borderColor = taskItem.TaskTextColor;
+// 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+// 				}
+				else
+				{
+					textColor = barColor = taskItem.TaskTextColor;
+					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+
+					if (taskItem.DrawBorder)
+						borderColor = textColor;
 				}
 			}
 		}
@@ -556,31 +561,21 @@ namespace DayViewUIExtension
 				if (isLong)
 					rect.Height++;
 
-				if (isFutureItem || isTimeBlock)
-				{
-					UIExtension.SelectionRect.Draw(m_hWnd,
-													g,
-													rect.Left,
-													rect.Top,
-													rect.Width,
-													rect.Height,
-													UIExtension.SelectionRect.Style.DropHighlighted,
-													isTimeBlock);
-				}
-				else
-				{
-					UIExtension.SelectionRect.Draw(m_hWnd,
-													g,
-													rect.Left,
-													rect.Top,
-													rect.Width,
-													rect.Height,
-													isTimeBlock);
-				}
+				var style = (isFutureItem || isTimeBlock) ? UIExtension.SelectionRect.Style.DropHighlighted :
+															UIExtension.SelectionRect.Style.Selected;
+
+				UIExtension.SelectionRect.Draw(m_hWnd,
+												g,
+												rect.Left,
+												rect.Top,
+												rect.Width,
+												rect.Height,
+												style,
+												isTimeBlock);
 			}
 			else
 			{
-				if (isTimeBlock)
+				if (isTimeBlock && !SystemInformation.HighContrast)
 					fillColor = Color.FromArgb(64, fillColor);
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
