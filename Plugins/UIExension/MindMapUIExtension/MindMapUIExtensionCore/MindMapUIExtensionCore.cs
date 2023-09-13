@@ -305,6 +305,7 @@ namespace MindMapUIExtension
 			label.Font = m_ControlsFont;
 			label.Text = m_Trans.Translate(untranslatedText);
 			label.AutoSize = true;
+			label.ForeColor = SystemColors.WindowText;
 
 			if (prevControl != null)
 				label.Location = new Point((prevControl.Bounds.Right + 20), 8);

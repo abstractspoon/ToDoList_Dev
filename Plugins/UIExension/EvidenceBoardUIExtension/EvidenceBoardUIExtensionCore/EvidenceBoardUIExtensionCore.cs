@@ -450,7 +450,7 @@ namespace EvidenceBoardUIExtension
 			label.Font = m_ControlsFont;
 			label.Text = m_Trans.Translate(untranslatedText);
 			label.AutoSize = true;
-			//label.Anchor = AnchorStyles.None;
+			label.ForeColor = SystemColors.WindowText;
 
 			if (prevControl != null)
 				label.Location = new Point((prevControl.Bounds.Right + DPIScaling.Scale(13)), DPIScaling.Scale(5));
