@@ -560,7 +560,7 @@ System::Drawing::Color Task::GetTextDrawingColor()
 {
 	UInt32 color = GETTASKVAL(GetTaskTextColor, 0);
 
-	if (color == 0)
+	if ((color == 0) || (color == ::GetSysColor(COLOR_WINDOWTEXT)))
 		return System::Drawing::Color::Empty;
 
 	// else
@@ -571,7 +571,7 @@ System::Windows::Media::Color Task::GetTextMediaColor()
 {
 	UInt32 color = GETTASKVAL(GetTaskTextColor, 0);
 
-	if (color == 0)
+	if ((color == 0) || (color == ::GetSysColor(COLOR_WINDOWTEXT)))
 		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);
 
 	return ColorUtil::MediaColor::ToColor(color);

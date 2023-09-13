@@ -1518,10 +1518,11 @@ namespace EvidenceBoardUIExtension
 			Color textColor = GetTaskTextColor(taskItem, drawState);
 
 			// Draw background
-			if (selected)
+			if (selected || dropHighlight)
 			{
-				UIExtension.SelectionRect.Style style = (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
-
+				UIExtension.SelectionRect.Style style = (dropHighlight ? UIExtension.SelectionRect.Style.DropHighlighted :
+														(Focused ? UIExtension.SelectionRect.Style.Selected : 
+																	UIExtension.SelectionRect.Style.SelectedNotFocused));
 				UIExtension.SelectionRect.Draw(Handle,
 												graphics,
 												taskRect.X,
@@ -1532,19 +1533,7 @@ namespace EvidenceBoardUIExtension
 												false); // opaque
 
 				backColor = UIExtension.SelectionRect.GetColor(style);
-			}
-			else if (dropHighlight)
-			{
-				UIExtension.SelectionRect.Draw(Handle,
-												graphics,
-												taskRect.X,
-												taskRect.Y,
-												taskRect.Width,
-												taskRect.Height,
-												UIExtension.SelectionRect.Style.DropHighlighted,
-												false); // opaque
-
-				backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
+				textColor = UIExtension.SelectionRect.GetTextColor(style, textColor);
 			}
 			else if (backColor != Color.Empty)
 			{

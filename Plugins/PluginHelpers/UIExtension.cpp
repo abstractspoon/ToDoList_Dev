@@ -764,6 +764,14 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 	return ColorUtil::DrawingColor::ToColor(color);
 }
 
+Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Color baseColor)
+{
+	GM_ITEMSTATE state = Map(style);
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionTextColor(ColorUtil::DrawingColor::ToRgb(baseColor), state, GMIB_THEMECLASSIC);
+
+	return ColorUtil::DrawingColor::ToColor(color);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursorType)
