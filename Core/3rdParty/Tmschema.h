@@ -1075,6 +1075,7 @@ END_TM_PART_STATES()
 BEGIN_TM_CLASS_PARTS(EDIT)
     TM_PART(1, EP, EDITTEXT)
     TM_PART(2, EP, CARET)
+    TM_PART(3, EP, BACKGROUND)
 END_TM_CLASS_PARTS()
 
 BEGIN_TM_PART_STATES(EDITTEXT)
@@ -1088,11 +1089,17 @@ BEGIN_TM_PART_STATES(EDITTEXT)
 	TM_STATE(8, ETS, CUEBANNER)
 END_TM_PART_STATES()
 
+BEGIN_TM_PART_STATES(BACKGROUND)
+TM_STATE(3, EBS, DISABLED)
+TM_STATE(5, EBS, READONLY)
+END_TM_PART_STATES()
+
 //---------------------------------------------------------------------------------------
 //   "ComboBox" Parts & States
 //---------------------------------------------------------------------------------------
 BEGIN_TM_CLASS_PARTS(COMBOBOX)
     TM_PART(1, CP, DROPDOWNBUTTON)
+    TM_PART(4, CP, BORDER)
 END_TM_CLASS_PARTS()
 
 BEGIN_TM_PART_STATES(COMBOBOX)
