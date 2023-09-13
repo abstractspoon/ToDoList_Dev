@@ -679,15 +679,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_ENABLE:
-		{
-			CString sClass = CWinClasses::GetClass(hWnd);
-
-			if (CWinClasses::IsClass(sClass, WC_STATIC) ||
-				CWinClasses::IsClass(sClass, WC_BUTTON))
-			{
-				InvalidateRect(hWnd, NULL, TRUE);
-			}
-		}
+		InvalidateRect(hWnd, NULL, TRUE);
 		break;
 	}
 
