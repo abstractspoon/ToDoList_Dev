@@ -663,7 +663,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
-			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK))
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || (sClass.Find(_T(".sysdatetimepick32.app.")) != -1))
 			{
 				HookWindow(hWnd, new CDarkModeDateTimeCtrl());
 			}
