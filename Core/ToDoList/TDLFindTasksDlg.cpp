@@ -1968,9 +1968,19 @@ BOOL CTDLFindTasksDlg::SetSplitterPos(int nSplitPos)
 	nSplitPos = (nSplitPos - (SPLITTER_WIDTH / 2));
 
 	if (IsSplitterVertical())
+	{
+		if (nSplitPos == rRules.right)
+			return TRUE;
+
 		ResizeChild(&m_lcFindSetup, (nSplitPos - rRules.right), 0);
+	}
 	else
+	{
+		if (nSplitPos == rRules.bottom)
+			return TRUE;
+
 		ResizeChild(&m_lcFindSetup, 0, (nSplitPos - rRules.bottom));
+	}
 
 	ResizeDlg(FALSE);
 	UpdateWindow();
