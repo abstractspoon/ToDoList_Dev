@@ -1448,10 +1448,9 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 		return FALSE;
 
 	BOOL bHighContrast = Misc::IsHighContrastActive();
-	BOOL bDarkMode = CDarkMode::IsEnabled();
 
 	int nOSVer = COSVersion();
-	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA) && !bDarkMode);
+	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA));
 
 	if (hwnd == NULL)
 	{
@@ -1515,8 +1514,8 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	}
 	
 	// Do the draw
-	BOOL bPreDraw = (!bDarkMode && (dwFlags & GMIB_PREDRAW)), bPostDraw = (!bDarkMode && (dwFlags & GMIB_POSTDRAW));
-	BOOL bSingleStageDraw = (!bPreDraw && !bPostDraw);
+	BOOL bPreDraw = ((dwFlags & GMIB_PREDRAW)), bPostDraw = ((dwFlags & GMIB_POSTDRAW));
+	BOOL bSingleStageDraw = ((!bPreDraw && !bPostDraw) || CDarkMode::IsEnabled());
 	BOOL bDrawn = FALSE;
 
 	// Fill background with white if single stage draw

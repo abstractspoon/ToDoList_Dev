@@ -28,6 +28,8 @@ LPCTSTR TC_EDIT			= _T("EDIT");
 LPCTSTR TC_TABCTRL		= _T("TAB");
 LPCTSTR TC_BUTTON		= _T("BUTTON");
 LPCTSTR TC_EXPLORER		= _T("EXPLORER");
+LPCTSTR TC_TREEVIEW		= _T("TREEVIEW");
+LPCTSTR TC_LISTVIEW		= _T("LISTVIEW");
 LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
@@ -230,6 +232,8 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 			CWinClasses::IsClass(szClass, TC_BUTTON) ||
 			CWinClasses::IsClass(szClass, TC_COMBOBOX) ||
 			CWinClasses::IsClass(szClass, TC_TABCTRL) ||
+			CWinClasses::IsClass(szClass, TC_TREEVIEW) ||
+			CWinClasses::IsClass(szClass, TC_LISTVIEW) ||
 			CWinClasses::IsClass(szClass, TC_EDIT))
 		{
 			THEMEELEMENT elm;
@@ -464,6 +468,30 @@ protected:
 			ASSERT(s_hwndCurrentDateTime == NULL);
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hRealWnd);
+				return Default();
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
+HWND s_hwndCurrentExplorerTreeOrList = NULL;
+
+class CDarkModeExplorerTreeOrListCtrl : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			ASSERT(s_hwndCurrentExplorerTreeOrList == NULL);
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hRealWnd);
 				return Default();
 			}
 			break;
@@ -725,13 +753,17 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	// Disable explorer-style selection for now
+	HRESULT hr = TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
+
 	if (_tcsicmp(pszSubAppName, TC_EXPLORER) == 0)
 	{
-		return S_OK;
+		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		{
+			HookWindow(hwnd, new CDarkModeExplorerTreeOrListCtrl());
+		}
 	}
 
-	return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
+	return hr;
 }
 
 HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)
@@ -896,6 +928,27 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				return hr;
 			}
 			break;
+		}
+	}
+	else if (s_hwndCurrentExplorerTreeOrList)
+	{
+		if (CWinClasses::IsClass(sClass, TC_TREEVIEW))
+		{
+			switch (iPartId)
+			{
+			case TVP_TREEITEM:
+				CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
+				break;
+			}
+		}
+		else if (sClass.IsEmpty() || CWinClasses::IsClass(sClass, TC_LISTVIEW))
+		{
+			switch (iPartId)
+			{
+			case LVP_LISTITEM:
+				CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
+				break;
+			}
 		}
 	}
 	
