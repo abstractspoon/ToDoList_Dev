@@ -654,11 +654,21 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
 			{
-				switch (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK))
+				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
+
+				switch (dwStyle & CBS_TYPEMASK)
 				{
 				case CBS_DROPDOWN:
 				case CBS_SIMPLE:
 					HookWindow(hWnd, new CDarkModeComboBox());
+					break;
+
+				default:
+					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
+						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
+					{
+						HookWindow(hWnd, new CDarkModeComboBox());
+					}
 					break;
 				}
 			}
@@ -888,6 +898,47 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				return hr;
 			}
 			break;
+
+		case CP_READONLY:
+			{
+				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+
+				if (hr == S_OK)
+				{
+#ifdef _DEBUG
+					DWORD dwStyle = ::GetWindowLong(s_hwndCurrentComboBox, GWL_STYLE);
+
+					ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
+					ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED));
+					ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
+#endif
+
+					CRect rBkgnd;
+					GetClientRect(s_hwndCurrentComboBox, rBkgnd);
+
+					rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
+					rBkgnd.DeflateRect(2, 2);
+
+					COLORREF crBkgnd = DM_WINDOW;
+
+					switch (iStateId)
+					{
+					case CBRO_DISABLED:
+						crBkgnd = DM_3DFACE;
+						break;
+
+					default:
+						if (::GetFocus() == s_hwndCurrentComboBox)
+							crBkgnd = GetSysColor(COLOR_HIGHLIGHT);
+						break;
+					}
+
+					CDC::FromHandle(hdc)->FillSolidRect(rBkgnd, crBkgnd);
+				}
+
+				return hr;
+			}
+			break;
 		}
 	}
 	else if (CWinClasses::IsClass(sClass, TC_TABCTRL))
@@ -1000,6 +1051,33 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 			break;
 		}
 	}
-	
+	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
+	{
+		switch (iPartId)
+		{
+		case CP_READONLY:
+			{
+#ifdef _DEBUG
+				DWORD dwStyle = ::GetWindowLong(s_hwndCurrentComboBox, GWL_STYLE);
+
+				ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
+				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED));
+				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
+#endif
+				COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+
+				if (::GetFocus() == s_hwndCurrentComboBox)
+					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+				::SetTextColor(hdc, crText);
+				::SetBkMode(hdc, TRANSPARENT);
+				::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+
+				return S_OK;
+			}
+			break;
+		}
+	}
+
 	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
 }
