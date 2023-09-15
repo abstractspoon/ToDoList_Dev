@@ -488,6 +488,7 @@ namespace DayViewUIExtension
 		{
 			TaskItem taskItem = GetTaskItem(apptView.Appointment);
 			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
+			bool isLong = apptView.IsLong;
 
 			textColor = borderColor = fillColor = barColor = Color.Empty;
 
@@ -503,7 +504,7 @@ namespace DayViewUIExtension
 				}
 				else
 				{
-					textColor = borderColor = taskItem.TaskTextColor;
+					textColor = borderColor = borderColor = taskItem.TaskTextColor;
 
 					if (taskItem.HasTaskTextColor)
 					{
@@ -512,9 +513,6 @@ namespace DayViewUIExtension
 						if (!isFutureItem)
 							barColor = taskItem.TaskTextColor;
 					}
-
-					if (taskItem.DrawBorder)
-						borderColor = textColor;
 				}
 			}
 			else // NOT high contrast
@@ -523,21 +521,23 @@ namespace DayViewUIExtension
 				{
 					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
 
-					if (!isFutureItem)
-						barColor = taskItem.TaskTextColor;
+					if (isFutureItem)
+ 						borderColor = (isLong ? AllDayEventsBackColor : textColor);
+					else
+						barColor = textColor;
 				}
-// 				else if (isFutureItem)
-// 				{
-// 					textColor = borderColor = taskItem.TaskTextColor;
-// 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-// 				}
-				else
+				else if (taskItem.HasTaskTextColor)
 				{
-					textColor = barColor = taskItem.TaskTextColor;
+					textColor = borderColor = taskItem.TaskTextColor;
 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
 
-					if (taskItem.DrawBorder)
-						borderColor = textColor;
+					if (!isFutureItem)
+						barColor = textColor;
+				}
+				else
+				{
+					textColor = borderColor = SystemColors.WindowText;
+					fillColor = SystemColors.Window;
 				}
 			}
 		}
@@ -572,6 +572,17 @@ namespace DayViewUIExtension
 												rect.Height,
 												style,
 												isTimeBlock);
+
+				if (isFutureItem && !borderColor.IsEmpty)
+				{
+					rect.Height--; // drawing with pen adds 1 to height
+
+					using (Pen pen = new Pen(borderColor, 1))
+					{
+						pen.DashStyle = DashStyle.Dash;
+						g.DrawRectangle(pen, rect);
+					}
+				}
 			}
 			else
 			{
