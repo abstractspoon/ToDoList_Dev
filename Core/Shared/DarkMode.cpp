@@ -28,11 +28,14 @@ LPCTSTR TC_EDIT			= _T("EDIT");
 LPCTSTR TC_TABCTRL		= _T("TAB");
 LPCTSTR TC_BUTTON		= _T("BUTTON");
 LPCTSTR TC_EXPLORER		= _T("EXPLORER");
+LPCTSTR TC_TREEVIEW		= _T("TREEVIEW");
+LPCTSTR TC_LISTVIEW		= _T("LISTVIEW");
 LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_GRAYTEXT = RGB(170, 170, 170);
+const COLORREF DM_GRAYTEXT   = RGB(170, 170, 170);
+const COLORREF DM_WINDOWTEXT = RGB(253, 254, 255);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -181,7 +184,10 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 	ASSERT(hWnd);
 
 	if (IsHooked(hWnd))
+	{
+		delete pWnd;
 		return TRUE;
+	}
 
 	if (pWnd && pWnd->HookWindow(hWnd))
 	{
@@ -230,6 +236,8 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 			CWinClasses::IsClass(szClass, TC_BUTTON) ||
 			CWinClasses::IsClass(szClass, TC_COMBOBOX) ||
 			CWinClasses::IsClass(szClass, TC_TABCTRL) ||
+			CWinClasses::IsClass(szClass, TC_TREEVIEW) ||
+			CWinClasses::IsClass(szClass, TC_LISTVIEW) ||
 			CWinClasses::IsClass(szClass, TC_EDIT))
 		{
 			THEMEELEMENT elm;
@@ -330,7 +338,7 @@ public:
 	static COLORREF GetTextColor(HWND hWnd)
 	{
 		if (::IsWindowEnabled(hWnd))
-			return GetSysColor(COLOR_WINDOWTEXT);
+			return DM_WINDOWTEXT;
 
 		COLORREF crParent = GetParentBkgndColor(hWnd);
 
@@ -475,6 +483,30 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+HWND s_hwndCurrentExplorerTreeOrList = NULL;
+
+class CDarkModeExplorerTreeOrListCtrl : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			ASSERT(s_hwndCurrentExplorerTreeOrList == NULL);
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hRealWnd);
+				return Default();
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 #define RETURN_STATIC_COLOR_OR_BRUSH(color) if (bColor) return color; else { static HBRUSH hbr = CreateSolidBrush(color); return (DWORD)hbr; }
 
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
@@ -494,7 +526,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
-		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
+		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOWTEXT);
 
 	case COLOR_WINDOW:
 		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
@@ -567,7 +599,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 //////////////////////////////////////////////////////////////////////
 
 #define RETURN_LRESULT_STATIC_BRUSH(color) { static HBRUSH hbr = CreateSolidBrush(color); lr = (LRESULT)hbr; return TRUE; }
-#define RETURN_LRESULT_TRUECOLOUR_BRUSH(color) lr = (LRESULT)TrueGetSysColorBrush(color); return TRUE
 
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
@@ -592,7 +623,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		// else fall thru to edit
 
 	case WM_CTLCOLOREDIT:
-		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
@@ -602,7 +633,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
-		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 		::SetBkMode((HDC)wp, TRANSPARENT);
 
 		// 'Temporary' hack to fixed interference of CToolbarHelper in CPreferencesToolPage
@@ -612,25 +643,39 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_PAINT:
+		{
+			int breakpoint = 0;
+		}
 		break;
 
-	case WM_SHOWWINDOW:
+	case WM_SHOWWINDOW:	// Leave hooking as late as possible
+
 		if (wp)
 		{
 			CString sClass = CWinClasses::GetClass(hWnd);
 
 			if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
 			{
-				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
-				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOWTEXT));
+				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
+				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOW);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
 			{
-				switch (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK))
+				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
+
+				switch (dwStyle & CBS_TYPEMASK)
 				{
 				case CBS_DROPDOWN:
 				case CBS_SIMPLE:
 					HookWindow(hWnd, new CDarkModeComboBox());
+					break;
+
+				case CBS_DROPDOWNLIST:
+					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
+						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
+					{
+						HookWindow(hWnd, new CDarkModeComboBox());
+					}
 					break;
 				}
 			}
@@ -700,13 +745,10 @@ HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 
 LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
 {
-	if (!CWinClasses::IsKindOf(hWnd, RUNTIME_CLASS(COwnerdrawComboBoxBase)))
-	{
-		LRESULT lr = 0;
+	LRESULT lr = 0;
 
-		if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
-			return lr;
-	}
+	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+		return lr;
 
 	return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 }
@@ -725,13 +767,18 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	// Disable explorer-style selection for now
-	if (_tcsicmp(pszSubAppName, TC_EXPLORER) == 0)
+	HRESULT hr = TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
+
+	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 	{
-		return S_OK;
+		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || 
+			CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		{
+			HookWindow(hwnd, new CDarkModeExplorerTreeOrListCtrl());
+		}
 	}
 
-	return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
+	return hr;
 }
 
 HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)
@@ -830,9 +877,6 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				return hr;
 			}
 			break;
-
-		default:
-			break;
 		}
 	}
 	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
@@ -851,6 +895,47 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 					rEdit.InflateRect(1, 1);
 
 					CDC::FromHandle(hdc)->FillSolidRect(rEdit, (bEnabled ? DM_WINDOW : DM_3DFACE));
+				}
+
+				return hr;
+			}
+			break;
+
+		case CP_READONLY:
+			{
+				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+
+				if (hr == S_OK)
+				{
+#ifdef _DEBUG
+					DWORD dwStyle = ::GetWindowLong(s_hwndCurrentComboBox, GWL_STYLE);
+
+					ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
+					ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED));
+					ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
+#endif
+
+					CRect rBkgnd;
+					GetClientRect(s_hwndCurrentComboBox, rBkgnd);
+
+					rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
+					rBkgnd.DeflateRect(2, 2);
+
+					COLORREF crBkgnd = DM_WINDOW;
+
+					switch (iStateId)
+					{
+					case CBRO_DISABLED:
+						crBkgnd = DM_3DFACE;
+						break;
+
+					default:
+						if (::GetFocus() == s_hwndCurrentComboBox)
+							crBkgnd = GetSysColor(COLOR_HIGHLIGHT);
+						break;
+					}
+
+					CDC::FromHandle(hdc)->FillSolidRect(rBkgnd, crBkgnd);
 				}
 
 				return hr;
@@ -898,6 +983,27 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 			break;
 		}
 	}
+	else if (s_hwndCurrentExplorerTreeOrList)
+	{
+		if (CWinClasses::IsClass(sClass, TC_TREEVIEW))
+		{
+			switch (iPartId)
+			{
+			case TVP_TREEITEM:
+				CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
+				break;
+			}
+		}
+		else if (sClass.IsEmpty() || CWinClasses::IsClass(sClass, TC_LISTVIEW))
+		{
+			switch (iPartId)
+			{
+			case LVP_LISTITEM:
+				CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
+				break;
+			}
+		}
+	}
 	
 	return TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 }
@@ -925,11 +1031,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 				switch (iStateId)
 				{
 				case DPDT_NORMAL:
-					::SetTextColor(hdc, MyGetSysColor(COLOR_WINDOWTEXT));
+					::SetTextColor(hdc, DM_WINDOWTEXT);
 					break;
 
 				case DPDT_DISABLED:
-					::SetTextColor(hdc, MyGetSysColor(COLOR_GRAYTEXT));
+					::SetTextColor(hdc, DM_GRAYTEXT);
 					break;
 
 				case DPDT_SELECTED:
@@ -947,6 +1053,33 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 			break;
 		}
 	}
-	
+	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
+	{
+		switch (iPartId)
+		{
+		case CP_READONLY:
+			{
+#ifdef _DEBUG
+				DWORD dwStyle = ::GetWindowLong(s_hwndCurrentComboBox, GWL_STYLE);
+
+				ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
+				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED));
+				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
+#endif
+				COLORREF crText = DM_WINDOWTEXT;
+
+				if (::GetFocus() == s_hwndCurrentComboBox)
+					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+				::SetTextColor(hdc, crText);
+				::SetBkMode(hdc, TRANSPARENT);
+				::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+
+				return S_OK;
+			}
+			break;
+		}
+	}
+
 	return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
 }

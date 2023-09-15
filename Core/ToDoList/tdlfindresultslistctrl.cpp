@@ -311,27 +311,23 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-COLORREF CTDLFindResultsListCtrl::GetResultTextColor(const FTDRESULT* pRes, BOOL /*bSelected*/, BOOL bHot) const
+COLORREF CTDLFindResultsListCtrl::GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const
 {
 	ASSERT(pRes);
 
 	COLORREF crText = CLR_NONE;
 
-	if ((m_crDone != CLR_NONE) || (m_crRef != CLR_NONE))
+	if ((m_crDone != CLR_NONE) && (pRes->IsDone() || pRes->IsGoodAsDone()))
 	{
-		if (pRes->IsDone() || pRes->IsGoodAsDone())
-		{
-			crText = m_crDone;
-		}
-		else if (pRes->IsReference())
-		{
-			crText = m_crRef;
-		}
-
-		// darken the colour for hot items
-		if (bHot && (crText != CLR_NONE))
-			crText = GraphicsMisc::Darker(crText, 0.3);
+		crText = m_crDone;
 	}
+	else if ((m_crRef != CLR_NONE) && pRes->IsReference())
+	{
+		crText = m_crRef;
+	}
+
+	if (bSelected || bHot)
+		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 	return ((crText == CLR_NONE) ? GetSysColor(COLOR_WINDOWTEXT) : crText);
 }
