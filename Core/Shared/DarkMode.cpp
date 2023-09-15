@@ -769,7 +769,7 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 {
 	HRESULT hr = TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
 
-	if (_tcsicmp(pszSubAppName, TC_EXPLORER) == 0)
+	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 	{
 		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || 
 			CWinClasses::IsClass(hwnd, WC_LISTVIEW))
