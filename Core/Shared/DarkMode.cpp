@@ -34,7 +34,8 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_GRAYTEXT = RGB(170, 170, 170);
+const COLORREF DM_GRAYTEXT   = RGB(170, 170, 170);
+const COLORREF DM_WINDOWTEXT = RGB(253, 254, 255);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -183,7 +184,10 @@ BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
 	ASSERT(hWnd);
 
 	if (IsHooked(hWnd))
+	{
+		delete pWnd;
 		return TRUE;
+	}
 
 	if (pWnd && pWnd->HookWindow(hWnd))
 	{
@@ -334,7 +338,7 @@ public:
 	static COLORREF GetTextColor(HWND hWnd)
 	{
 		if (::IsWindowEnabled(hWnd))
-			return GetSysColor(COLOR_WINDOWTEXT);
+			return DM_WINDOWTEXT;
 
 		COLORREF crParent = GetParentBkgndColor(hWnd);
 
@@ -522,7 +526,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
-		RETURN_STATIC_COLOR_OR_BRUSH(colorWhite);
+		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOWTEXT);
 
 	case COLOR_WINDOW:
 		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
@@ -620,7 +624,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		// else fall thru to edit
 
 	case WM_CTLCOLOREDIT:
-		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 		::SetBkMode((HDC)wp, TRANSPARENT);
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
@@ -630,7 +634,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
-		::SetTextColor((HDC)wp, MyGetSysColor(COLOR_WINDOWTEXT));
+		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 		::SetBkMode((HDC)wp, TRANSPARENT);
 
 		// 'Temporary' hack to fixed interference of CToolbarHelper in CPreferencesToolPage
@@ -640,17 +644,21 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_PAINT:
+		{
+			int breakpoint = 0;
+		}
 		break;
 
-	case WM_SHOWWINDOW:
+	case WM_SHOWWINDOW:	// Leave hooking as late as possible
+
 		if (wp)
 		{
 			CString sClass = CWinClasses::GetClass(hWnd);
 
 			if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
 			{
-				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOW));
-				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)MyGetSysColor(COLOR_WINDOWTEXT));
+				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
+				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOW);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
 			{
@@ -663,7 +671,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					HookWindow(hWnd, new CDarkModeComboBox());
 					break;
 
-				default:
+				case CBS_DROPDOWNLIST:
 					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
 						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
 					{
@@ -738,13 +746,10 @@ HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 
 LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
 {
-	if (!CWinClasses::IsKindOf(hWnd, RUNTIME_CLASS(COwnerdrawComboBoxBase)))
-	{
-		LRESULT lr = 0;
+	LRESULT lr = 0;
 
-		if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
-			return lr;
-	}
+	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+		return lr;
 
 	return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 }
@@ -767,7 +772,8 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 
 	if (_tcsicmp(pszSubAppName, TC_EXPLORER) == 0)
 	{
-		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || 
+			CWinClasses::IsClass(hwnd, WC_LISTVIEW))
 		{
 			HookWindow(hwnd, new CDarkModeExplorerTreeOrListCtrl());
 		}
@@ -1029,11 +1035,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 				switch (iStateId)
 				{
 				case DPDT_NORMAL:
-					::SetTextColor(hdc, MyGetSysColor(COLOR_WINDOWTEXT));
+					::SetTextColor(hdc, DM_WINDOWTEXT);
 					break;
 
 				case DPDT_DISABLED:
-					::SetTextColor(hdc, MyGetSysColor(COLOR_GRAYTEXT));
+					::SetTextColor(hdc, DM_GRAYTEXT);
 					break;
 
 				case DPDT_SELECTED:
@@ -1064,7 +1070,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED));
 				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
 #endif
-				COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+				COLORREF crText = DM_WINDOWTEXT;
 
 				if (::GetFocus() == s_hwndCurrentComboBox)
 					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
