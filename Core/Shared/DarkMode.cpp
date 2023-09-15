@@ -877,9 +877,6 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				return hr;
 			}
 			break;
-
-		default:
-			break;
 		}
 	}
 	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
