@@ -429,7 +429,7 @@ namespace DayViewUIExtension
 			rText.X += m_HeaderPadding;
 			rText.Width -= m_HeaderPadding;
 
-			g.DrawString(text, font, SystemBrushes.WindowText, rText, fmt);
+			g.DrawString(text, font, SystemBrushes.ControlText, rText, fmt);
 		}
 
 		public override void DrawDayBackground(Graphics g, Rectangle rect)
