@@ -435,11 +435,14 @@ namespace Calendar
 					Complete(this, EventArgs.Empty);
 			}
 
-			m_dayView.Invalidate();
-			m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
+			if (m_mode != Mode.None)
+			{
+				m_dayView.Invalidate();
+				m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
 
-			m_mode = Mode.None;
-			m_delta = TimeSpan.Zero;
+				m_mode = Mode.None;
+				m_delta = TimeSpan.Zero;
+			}
 		}
 
 		public virtual void MouseDown(MouseEventArgs e)
