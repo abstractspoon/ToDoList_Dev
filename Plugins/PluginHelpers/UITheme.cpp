@@ -157,7 +157,7 @@ bool UITheme::HasAppColor(AppColor color)
 
 bool UITheme::IsDarkMode()
 {
-	return CDarkMode::IsEnabled();
+	return (CDarkMode::IsEnabled() != FALSE);
 }
 
 void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style)
@@ -201,14 +201,14 @@ void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIThemeToolbarRenderer::UIThemeToolbarRenderer()
+	:
+	m_HotFillColor(Drawing::Color::Transparent),
+	m_HotBorderColor(Drawing::Color::Transparent),
+	m_PressedFillColor(Drawing::Color::Transparent),
+	m_BkgndLightColor(Drawing::Color::Transparent),
+	m_BkgndDarkColor(Drawing::Color::Transparent),
+	m_Style(UITheme::RenderStyle::Gradient)
 {
-	m_HotFillColor = Drawing::Color::Transparent;
-	m_HotBorderColor = Drawing::Color::Transparent;
-	m_PressedFillColor = Drawing::Color::Transparent;
-	m_BkgndLightColor = Drawing::Color::Transparent;
-	m_BkgndDarkColor = Drawing::Color::Transparent;
-
-	m_Style = UITheme::RenderStyle::Gradient;
 }
 
 void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
@@ -292,9 +292,9 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
 
 		if (isMenuBar)
-			e->Graphics->FillRectangle(Drawing::Brushes::White, rect);
+			e->Graphics->FillRectangle(Drawing::Brushes::White, rect); // to match core app
 		else
-			e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
+			e->Graphics->FillRectangle(Drawing::SystemBrushes::Menu, rect);
 
 		auto itemState = Toolbars::GetItemState(e->Item);
 
@@ -332,17 +332,37 @@ void UIThemeToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparato
 		(COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
+		e->Graphics->FillRectangle(Drawing::SystemBrushes::Menu, rect);
 
 		rect.Y += (rect.Height / 2);
-		e->Graphics->DrawLine(Drawing::SystemPens::ButtonHighlight, rect.Left, rect.Y, rect.Right, rect.Y);
+		e->Graphics->DrawLine(Pens::LightGray, rect.Left, rect.Y, rect.Right, rect.Y);
+//		e->Graphics->DrawLine(Drawing::SystemPens::ButtonHighlight, rect.Left, rect.Y, rect.Right, rect.Y);
 
-		rect.Y -= 1;
-		e->Graphics->DrawLine(Drawing::SystemPens::ButtonShadow, rect.Left, rect.Y, rect.Right, rect.Y);
+//		rect.Y -= 1;
+//		e->Graphics->DrawLine(Drawing::SystemPens::ButtonShadow, rect.Left, rect.Y, rect.Right, rect.Y);
 	}
 	else
 	{
 		BaseToolbarRenderer::OnRenderSeparator(e);
+	}
+}
+
+void UIThemeToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
+{
+	BaseToolbarRenderer::OnRenderToolStripBorder(e);
+
+	// Mimic core app menu border rendering
+	if (ISTYPE(e->ToolStrip, ToolStripDropDownMenu) &&
+		(COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
+	{
+		auto rect = e->AffectedBounds;
+
+		rect.Width--;
+		rect.Height--;
+		e->Graphics->DrawRectangle(Pens::LightGray, rect);
+		
+		rect.Inflate(-1, -1);
+		e->Graphics->DrawRectangle(SystemPens::Menu, rect);
 	}
 }
 
