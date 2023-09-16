@@ -487,7 +487,9 @@ namespace DayViewUIExtension
 		void GetTaskColors(Calendar.AppointmentView apptView, bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
 		{
 			TaskItem taskItem = GetTaskItem(apptView.Appointment);
+
 			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
+			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
 			bool isLong = apptView.IsLong;
 
 			textColor = borderColor = fillColor = barColor = Color.Empty;
@@ -539,6 +541,19 @@ namespace DayViewUIExtension
 					textColor = borderColor = SystemColors.WindowText;
 					fillColor = SystemColors.Window;
 				}
+			}
+
+			if (TaskColorIsBackground && 
+				taskItem.HasTaskTextColor && 
+				!isSelected && 
+				!isFutureItem && 
+				!isTimeBlock)
+			{
+				barColor = textColor;
+				fillColor = textColor;
+
+				textColor = DrawingColor.GetBestTextColor(textColor);
+				borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
 			}
 		}
 
