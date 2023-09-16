@@ -65,6 +65,7 @@ namespace Abstractspoon
 
 				bool HasAppColor(AppColor color);
 				void RecalcToolbarHotColor();
+				bool IsDarkMode();
 
 				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
 

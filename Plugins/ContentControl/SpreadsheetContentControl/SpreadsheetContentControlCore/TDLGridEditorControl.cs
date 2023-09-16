@@ -938,6 +938,8 @@ namespace SpreadsheetContentControl
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedNotFocusedEnd, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadSelectedNotFocused, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadFullSelectedNotFocused, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridText, SystemColors.WindowText);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridBackground, SystemColors.Window);
 
 			// Focused colours
 			color = DrawingColor.AdjustLighting(color, -0.15f, false);

@@ -9,6 +9,7 @@
 
 #include <Shared\OSVersion.h>
 #include <Shared\GraphicsMisc.h>
+#include <Shared\DarkMode.h>
 
 #include <Interfaces\UIThemeFile.h>
 
@@ -152,6 +153,11 @@ void UITheme::RecalcToolbarHotColor()
 bool UITheme::HasAppColor(AppColor color)
 {
 	return (GetColor(color) != CLR_NONE);
+}
+
+bool UITheme::IsDarkMode()
+{
+	return CDarkMode::IsEnabled();
 }
 
 void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style)
