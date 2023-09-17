@@ -231,13 +231,9 @@ void CFileEdit::OnPaint()
 				rClient.DeflateRect(4, 1, 1, 1);
 				
 				dc.SetBkMode(TRANSPARENT);
-				
-				if (!IsWindowEnabled())
-					dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
-				else
-					dc.SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
-				
+				dc.SetTextColor(::GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
 				dc.DrawText(sText, rClient, DT_PATH_ELLIPSIS);
+
 				m_bTipNeeded = TRUE;
 			}
 
