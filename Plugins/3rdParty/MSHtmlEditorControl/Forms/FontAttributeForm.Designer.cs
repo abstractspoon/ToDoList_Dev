@@ -47,9 +47,10 @@ namespace MSDN.Html.Editor
 			this.bCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.bCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bCancel.Location = new System.Drawing.Point(240, 200);
+			this.bCancel.Location = new System.Drawing.Point(360, 308);
+			this.bCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.bCancel.Name = "bCancel";
-			this.bCancel.Size = new System.Drawing.Size(75, 23);
+			this.bCancel.Size = new System.Drawing.Size(112, 35);
 			this.bCancel.TabIndex = 11;
 			this.bCancel.Text = "Cancel";
 			// 
@@ -58,18 +59,21 @@ namespace MSDN.Html.Editor
 			this.bApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.bApply.DialogResult = System.Windows.Forms.DialogResult.OK;
 			this.bApply.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.bApply.Location = new System.Drawing.Point(160, 200);
+			this.bApply.Location = new System.Drawing.Point(240, 308);
+			this.bApply.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.bApply.Name = "bApply";
-			this.bApply.Size = new System.Drawing.Size(75, 23);
+			this.bApply.Size = new System.Drawing.Size(112, 35);
 			this.bApply.TabIndex = 10;
 			this.bApply.Text = "OK";
 			// 
 			// checkBold
 			// 
 			this.checkBold.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkBold.Location = new System.Drawing.Point(160, 57);
+			this.checkBold.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkBold.Location = new System.Drawing.Point(240, 88);
+			this.checkBold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkBold.Name = "checkBold";
-			this.checkBold.Size = new System.Drawing.Size(104, 16);
+			this.checkBold.Size = new System.Drawing.Size(156, 25);
 			this.checkBold.TabIndex = 4;
 			this.checkBold.Text = "Bold";
 			this.checkBold.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
@@ -77,9 +81,11 @@ namespace MSDN.Html.Editor
 			// checkUnderline
 			// 
 			this.checkUnderline.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkUnderline.Location = new System.Drawing.Point(160, 96);
+			this.checkUnderline.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkUnderline.Location = new System.Drawing.Point(240, 148);
+			this.checkUnderline.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkUnderline.Name = "checkUnderline";
-			this.checkUnderline.Size = new System.Drawing.Size(104, 16);
+			this.checkUnderline.Size = new System.Drawing.Size(156, 25);
 			this.checkUnderline.TabIndex = 6;
 			this.checkUnderline.Text = "Underline";
 			this.checkUnderline.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
@@ -87,27 +93,33 @@ namespace MSDN.Html.Editor
 			// checkItalic
 			// 
 			this.checkItalic.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkItalic.Location = new System.Drawing.Point(160, 77);
+			this.checkItalic.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkItalic.Location = new System.Drawing.Point(240, 118);
+			this.checkItalic.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkItalic.Name = "checkItalic";
-			this.checkItalic.Size = new System.Drawing.Size(104, 16);
+			this.checkItalic.Size = new System.Drawing.Size(156, 25);
 			this.checkItalic.TabIndex = 5;
 			this.checkItalic.Text = "Italic";
 			this.checkItalic.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// labelSize
 			// 
-			this.labelSize.Location = new System.Drawing.Point(160, 8);
+			this.labelSize.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.labelSize.Location = new System.Drawing.Point(240, 12);
+			this.labelSize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.labelSize.Name = "labelSize";
-			this.labelSize.Size = new System.Drawing.Size(120, 16);
+			this.labelSize.Size = new System.Drawing.Size(180, 25);
 			this.labelSize.TabIndex = 2;
 			this.labelSize.Text = "Font Size";
 			// 
 			// checkStrikeout
 			// 
 			this.checkStrikeout.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkStrikeout.Location = new System.Drawing.Point(160, 114);
+			this.checkStrikeout.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkStrikeout.Location = new System.Drawing.Point(240, 175);
+			this.checkStrikeout.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkStrikeout.Name = "checkStrikeout";
-			this.checkStrikeout.Size = new System.Drawing.Size(104, 16);
+			this.checkStrikeout.Size = new System.Drawing.Size(156, 25);
 			this.checkStrikeout.TabIndex = 7;
 			this.checkStrikeout.Text = "Strikethrough";
 			this.checkStrikeout.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
@@ -115,18 +127,22 @@ namespace MSDN.Html.Editor
 			// checkSubscript
 			// 
 			this.checkSubscript.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkSubscript.Location = new System.Drawing.Point(160, 141);
+			this.checkSubscript.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkSubscript.Location = new System.Drawing.Point(240, 217);
+			this.checkSubscript.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkSubscript.Name = "checkSubscript";
-			this.checkSubscript.Size = new System.Drawing.Size(104, 16);
+			this.checkSubscript.Size = new System.Drawing.Size(156, 25);
 			this.checkSubscript.TabIndex = 8;
 			this.checkSubscript.Text = "Subscript";
 			// 
 			// checkSuperscript
 			// 
 			this.checkSuperscript.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.checkSuperscript.Location = new System.Drawing.Point(160, 160);
+			this.checkSuperscript.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkSuperscript.Location = new System.Drawing.Point(240, 246);
+			this.checkSuperscript.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkSuperscript.Name = "checkSuperscript";
-			this.checkSuperscript.Size = new System.Drawing.Size(104, 16);
+			this.checkSuperscript.Size = new System.Drawing.Size(156, 25);
 			this.checkSuperscript.TabIndex = 9;
 			this.checkSuperscript.Text = "Superscript";
 			// 
@@ -134,9 +150,10 @@ namespace MSDN.Html.Editor
 			// 
 			this.listFontName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
 			this.listFontName.FormattingEnabled = true;
-			this.listFontName.Location = new System.Drawing.Point(16, 24);
+			this.listFontName.Location = new System.Drawing.Point(24, 37);
+			this.listFontName.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.listFontName.Name = "listFontName";
-			this.listFontName.Size = new System.Drawing.Size(121, 160);
+			this.listFontName.Size = new System.Drawing.Size(180, 244);
 			this.listFontName.TabIndex = 1;
 			this.listFontName.SelectedIndexChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
@@ -154,25 +171,30 @@ namespace MSDN.Html.Editor
             "5 : 18 points",
             "6 : 24 points",
             "7 : 36 points"});
-			this.listFontSize.Location = new System.Drawing.Point(160, 24);
+			this.listFontSize.Location = new System.Drawing.Point(240, 37);
+			this.listFontSize.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.listFontSize.Name = "listFontSize";
-			this.listFontSize.Size = new System.Drawing.Size(121, 21);
+			this.listFontSize.Size = new System.Drawing.Size(180, 28);
 			this.listFontSize.TabIndex = 3;
 			// 
 			// labelName
 			// 
-			this.labelName.Location = new System.Drawing.Point(16, 8);
+			this.labelName.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.labelName.Location = new System.Drawing.Point(24, 12);
+			this.labelName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.labelName.Name = "labelName";
-			this.labelName.Size = new System.Drawing.Size(120, 16);
+			this.labelName.Size = new System.Drawing.Size(180, 25);
 			this.labelName.TabIndex = 0;
 			this.labelName.Text = "Font Name";
 			// 
 			// labelSample
 			// 
 			this.labelSample.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.labelSample.Location = new System.Drawing.Point(16, 192);
+			this.labelSample.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.labelSample.Location = new System.Drawing.Point(24, 295);
+			this.labelSample.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.labelSample.Name = "labelSample";
-			this.labelSample.Size = new System.Drawing.Size(120, 23);
+			this.labelSample.Size = new System.Drawing.Size(180, 35);
 			this.labelSample.TabIndex = 12;
 			this.labelSample.Text = "Sample AaZa";
 			this.labelSample.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -180,10 +202,10 @@ namespace MSDN.Html.Editor
 			// FontAttributeForm
 			// 
 			this.AcceptButton = this.bApply;
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.bCancel;
-			this.ClientSize = new System.Drawing.Size(322, 232);
+			this.ClientSize = new System.Drawing.Size(483, 357);
 			this.Controls.Add(this.labelSample);
 			this.Controls.Add(this.labelName);
 			this.Controls.Add(this.listFontSize);
@@ -199,6 +221,7 @@ namespace MSDN.Html.Editor
 			this.Controls.Add(this.bCancel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "FontAttributeForm";

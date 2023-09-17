@@ -46,18 +46,22 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(10, 21);
+			this.label1.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.label1.Location = new System.Drawing.Point(15, 32);
+			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(102, 13);
+			this.label1.Size = new System.Drawing.Size(154, 20);
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Horizontal alignment";
 			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(10, 45);
+			this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.label2.Location = new System.Drawing.Point(15, 69);
+			this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(90, 13);
+			this.label2.Size = new System.Drawing.Size(135, 20);
 			this.label2.TabIndex = 2;
 			this.label2.Text = "Vertical alignment";
 			// 
@@ -65,27 +69,31 @@
 			// 
 			this.hAlignComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.hAlignComboBox.FormattingEnabled = true;
-			this.hAlignComboBox.Location = new System.Drawing.Point(157, 17);
+			this.hAlignComboBox.Location = new System.Drawing.Point(236, 26);
+			this.hAlignComboBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.hAlignComboBox.Name = "hAlignComboBox";
-			this.hAlignComboBox.Size = new System.Drawing.Size(104, 21);
+			this.hAlignComboBox.Size = new System.Drawing.Size(154, 28);
 			this.hAlignComboBox.TabIndex = 1;
 			// 
 			// vAlignComboBox
 			// 
 			this.vAlignComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.vAlignComboBox.FormattingEnabled = true;
-			this.vAlignComboBox.Location = new System.Drawing.Point(157, 42);
+			this.vAlignComboBox.Location = new System.Drawing.Point(236, 65);
+			this.vAlignComboBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.vAlignComboBox.Name = "vAlignComboBox";
-			this.vAlignComboBox.Size = new System.Drawing.Size(104, 21);
+			this.vAlignComboBox.Size = new System.Drawing.Size(154, 28);
 			this.vAlignComboBox.TabIndex = 3;
 			// 
 			// cancel
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(202, 141);
+			this.cancel.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.cancel.Location = new System.Drawing.Point(303, 217);
+			this.cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.cancel.Name = "cancel";
-			this.cancel.Size = new System.Drawing.Size(75, 23);
+			this.cancel.Size = new System.Drawing.Size(112, 35);
 			this.cancel.TabIndex = 2;
 			this.cancel.Text = "Cancel";
 			this.cancel.UseVisualStyleBackColor = true;
@@ -94,9 +102,11 @@
 			// 
 			this.ok.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.ok.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.ok.Location = new System.Drawing.Point(121, 141);
+			this.ok.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.ok.Location = new System.Drawing.Point(182, 217);
+			this.ok.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.ok.Name = "ok";
-			this.ok.Size = new System.Drawing.Size(75, 23);
+			this.ok.Size = new System.Drawing.Size(112, 35);
 			this.ok.TabIndex = 1;
 			this.ok.Text = "OK";
 			this.ok.UseVisualStyleBackColor = true;
@@ -111,18 +121,22 @@
 			this.groupBox1.Controls.Add(this.hAlignComboBox);
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this.label1);
-			this.groupBox1.Location = new System.Drawing.Point(6, 3);
+			this.groupBox1.Location = new System.Drawing.Point(9, 5);
+			this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(271, 130);
+			this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
+			this.groupBox1.Size = new System.Drawing.Size(406, 200);
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			// 
 			// checkBorderColor
 			// 
 			this.checkBorderColor.AutoSize = true;
-			this.checkBorderColor.Location = new System.Drawing.Point(13, 73);
+			this.checkBorderColor.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkBorderColor.Location = new System.Drawing.Point(20, 112);
+			this.checkBorderColor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkBorderColor.Name = "checkBorderColor";
-			this.checkBorderColor.Size = new System.Drawing.Size(89, 17);
+			this.checkBorderColor.Size = new System.Drawing.Size(130, 24);
 			this.checkBorderColor.TabIndex = 4;
 			this.checkBorderColor.Text = "Border colour";
 			this.checkBorderColor.UseVisualStyleBackColor = true;
@@ -131,9 +145,11 @@
 			// btnBorderColor
 			// 
 			this.btnBorderColor.Color = System.Drawing.Color.Empty;
-			this.btnBorderColor.Location = new System.Drawing.Point(157, 69);
+			this.btnBorderColor.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.btnBorderColor.Location = new System.Drawing.Point(236, 106);
+			this.btnBorderColor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.btnBorderColor.Name = "btnBorderColor";
-			this.btnBorderColor.Size = new System.Drawing.Size(75, 22);
+			this.btnBorderColor.Size = new System.Drawing.Size(112, 34);
 			this.btnBorderColor.TabIndex = 5;
 			this.btnBorderColor.Text = "Set...";
 			this.btnBorderColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -142,9 +158,11 @@
 			// checkBackColor
 			// 
 			this.checkBackColor.AutoSize = true;
-			this.checkBackColor.Location = new System.Drawing.Point(13, 101);
+			this.checkBackColor.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.checkBackColor.Location = new System.Drawing.Point(20, 155);
+			this.checkBackColor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.checkBackColor.Name = "checkBackColor";
-			this.checkBackColor.Size = new System.Drawing.Size(116, 17);
+			this.checkBackColor.Size = new System.Drawing.Size(168, 24);
 			this.checkBackColor.TabIndex = 6;
 			this.checkBackColor.Text = "Background colour";
 			this.checkBackColor.UseVisualStyleBackColor = true;
@@ -153,9 +171,11 @@
 			// btnBackColor
 			// 
 			this.btnBackColor.Color = System.Drawing.Color.Empty;
-			this.btnBackColor.Location = new System.Drawing.Point(157, 97);
+			this.btnBackColor.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.btnBackColor.Location = new System.Drawing.Point(236, 149);
+			this.btnBackColor.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.btnBackColor.Name = "btnBackColor";
-			this.btnBackColor.Size = new System.Drawing.Size(75, 22);
+			this.btnBackColor.Size = new System.Drawing.Size(112, 34);
 			this.btnBackColor.TabIndex = 7;
 			this.btnBackColor.Text = "Set...";
 			this.btnBackColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -163,15 +183,17 @@
 			// 
 			// TableRowPropertyForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancel;
-			this.ClientSize = new System.Drawing.Size(284, 172);
+			this.ClientSize = new System.Drawing.Size(426, 265);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.ok);
 			this.Controls.Add(this.cancel);
+			this.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "TableRowPropertyForm";

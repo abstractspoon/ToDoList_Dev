@@ -48,7 +48,7 @@ namespace UIComponents
 				}
 				else
 				{
-					pe.Graphics.DrawRectangle(SystemPens.ControlDarkDark, rColor);
+					pe.Graphics.DrawRectangle(SystemPens.GrayText, rColor);
 				}
 			}
 		}

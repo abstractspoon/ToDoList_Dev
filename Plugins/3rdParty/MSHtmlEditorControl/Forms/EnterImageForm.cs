@@ -207,7 +207,7 @@ namespace MSDN.Html.Editor
 
 		private void OnPixelWidthCheckChange(object sender, EventArgs e)
 		{
-			pixelWidth.Enabled = (enablePixelWidth.Checked && pixelWidth.Enabled);
+			pixelWidth.Enabled = enablePixelWidth.Checked;
 		}
 	}
 }
