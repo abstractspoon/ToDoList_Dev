@@ -112,7 +112,6 @@ namespace unvell.ReoGrid.Editor
 			arrowControl = new PushdownArrowControl()
 			{
 				Dock = DockStyle.Right,
-				Width = SystemInformation.VerticalScrollBarWidth
 			};
 
 			Controls.Add(addressBox);
@@ -131,6 +130,8 @@ namespace unvell.ReoGrid.Editor
 		{
 			base.OnResize(e);
 
+			arrowControl.Width = SystemInformation.VerticalScrollBarWidth;
+
 			addressBox.Location = new Point(2, 2);
 			addressBox.Width = ClientRectangle.Width - arrowControl.Width - 2;
 			addressBox.Top = (ClientRectangle.Height - addressBox.Height) / 2;
@@ -140,7 +141,7 @@ namespace unvell.ReoGrid.Editor
 		{
 			Rectangle rect = ClientRectangle;
 
-			if (VisualStyleRenderer.IsSupported)
+			if (ComboBoxRenderer.IsSupported)
 			{
 				ComboBoxRenderer.DrawTextBox(e.Graphics, rect, ComboBoxState.Normal);
 				rect.Inflate(-2, -2);
@@ -389,7 +390,7 @@ namespace unvell.ReoGrid.Editor
 	{
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if (VisualStyleRenderer.IsSupported)
+			if (ComboBoxRenderer.IsSupported)
 			{
 				ComboBoxRenderer.DrawDropDownButton(e.Graphics, ClientRectangle, ComboBoxState.Normal);
 			}
