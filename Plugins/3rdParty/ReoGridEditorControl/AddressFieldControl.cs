@@ -109,7 +109,11 @@ namespace unvell.ReoGrid.Editor
 				Height = ClientSize.Height - 4,
 			};
 
-			arrowControl = new PushdownArrowControl() { Dock = DockStyle.Right, Width = SystemInformation.VerticalScrollBarWidth };
+			arrowControl = new PushdownArrowControl()
+			{
+				Dock = DockStyle.Right,
+				Width = SystemInformation.VerticalScrollBarWidth
+			};
 
 			Controls.Add(addressBox);
 			Controls.Add(arrowControl);
