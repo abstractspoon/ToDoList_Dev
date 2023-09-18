@@ -556,7 +556,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLORLISTBOX:
  		if (!IsWindowEnabled((HWND)lp))
 		{
-			::SetTextColor((HDC)wp, MyGetSysColor(COLOR_GRAYTEXT));
+			::SetTextColor((HDC)wp, DM_GRAY3DFACETEXT);
 			::SetBkMode((HDC)wp, TRANSPARENT);
 			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 		}
