@@ -71,7 +71,8 @@ CFPSMiniCalendarCtrlFontInfo::CFPSMiniCalendarCtrlFontInfo()
 	m_crTextColor(CLR_NONE), 
 	m_crBkColor(CLR_NONE),
 	m_pFont(NULL),
-	m_bFontCreated(FALSE)
+	m_bFontCreated(FALSE),
+	m_bSymbol(FALSE)
 {
 }
 
@@ -96,6 +97,7 @@ CFPSMiniCalendarCtrlFontInfo& CFPSMiniCalendarCtrlFontInfo::operator=(const CFPS
 	m_crTextColor = font.m_crTextColor;
 	m_crBkColor = font.m_crBkColor;
 	m_pFont = font.m_pFont;
+	m_bSymbol = font.m_bSymbol;
 
 	m_bFontCreated = FALSE; // always
 
@@ -127,6 +129,7 @@ void CFPSMiniCalendarCtrlFontInfo::CreateFont(CDC* pDC)
 		FontInfo.lfHeight = -MulDiv(m_iFontSize, GetDeviceCaps(pDC->GetSafeHdc(), LOGPIXELSY), 72);
 		FontInfo.lfWeight = 100;
 		FontInfo.lfQuality = PROOF_QUALITY;
+		FontInfo.lfCharSet = (m_bSymbol ? SYMBOL_CHARSET : DEFAULT_CHARSET);
 		
 		if (m_bBold)
 			FontInfo.lfWeight = 700;
@@ -136,6 +139,7 @@ void CFPSMiniCalendarCtrlFontInfo::CreateFont(CDC* pDC)
 
 		if (m_bUnderline)
 			FontInfo.lfUnderline = TRUE;
+
 		
 		delete m_pFont;
 		
@@ -193,6 +197,7 @@ CFPSMiniCalendarCtrl::CFPSMiniCalendarCtrl()
 	SetFontInfo(FMC_FONT_DAYSOFWEEK, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE);
 	SetFontInfo(FMC_FONT_DAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE);
 	SetFontInfo(FMC_FONT_SPECIALDAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE, TRUE);
+	SetFontInfo(FMC_FONT_SCROLLBTNS, _T("Marlett"), FMC_DEFAULT_FONT_SIZE, TRUE, FALSE, FALSE, TRUE);
 
 	// set month names
 	setlocale(LC_TIME, "");		// should I be doing this here AND am I doing it right???
@@ -302,7 +307,7 @@ void CFPSMiniCalendarCtrl::SetCurrentMonthAndYear(const COleDateTime& date)
 	SetCurrentMonthAndYear(date.GetMonth(), date.GetYear());
 }
 
-void CFPSMiniCalendarCtrl::SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, int iSize, BOOL bBold, BOOL bItalic, BOOL bUnderline, COLORREF crText, COLORREF crBkgnd)
+void CFPSMiniCalendarCtrl::SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, int iSize, BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bSymbol, COLORREF crText, COLORREF crBkgnd)
 {
 	ASSERT(nFont >= 0 && nFont < FMC_NUM_FONTS);
 
@@ -322,6 +327,7 @@ void CFPSMiniCalendarCtrl::SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, in
 		font.m_strFontName = lpszFont;
 		font.m_crTextColor = crText;
 		font.m_crBkColor = crBkgnd;
+		font.m_bSymbol = bSymbol;
 
 		// make sure font object gets recreated
 		m_bFontsCreated = FALSE;
@@ -733,50 +739,44 @@ int CFPSMiniCalendarCtrl::DrawHeader(CDC &dc, int iY, int iLeftX, int iMonthRow,
 	dc.SetBkMode(TRANSPARENT);
 
 	dc.DrawText(strText, CRect(iLeftX+1, iY+1, iLeftX+m_szMonthSize.cx - 10, iY+m_iHeaderHeight-2), DEFTEXTFLAGS);
-
 	dc.SelectObject(pOldFont);
 
 	SetCellHeaderPosition(iMonthRow, iMonthCol, CRect(iLeftX+10, iY+1, iLeftX+m_szMonthSize.cx - 20, iY+m_iHeaderHeight-2));
 
-	// deal with left scroll bar
-	if (iMonthRow == 1 && iMonthCol == 1)
+	// Draw scroll bars
+	if (iMonthRow == 1)
 	{
+		pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_SCROLLBTNS].m_pFont);
+
 		int iMiddle = iY + (m_iHeaderHeight / 2);
 		int iTop = iMiddle - (m_iHeaderHeight / 4);
 		int iBottom = iMiddle + (m_iHeaderHeight / 4);
 
-		int iX1 = iLeftX + 6;
-		int iX2 = iX1 + ((m_iHeaderHeight / 4));
-
-		for (int iLineY = iTop; iLineY <= iBottom; iLineY++)
+		// left
+		if (iMonthCol == 1)
 		{
-			dc.MoveTo(iX1, iMiddle);
-			dc.LineTo(iX2, iLineY);
+			int iX1 = iLeftX + 6;
+			int iX2 = iX1 + ((m_iHeaderHeight / 4));
+
+			m_rectScrollLeft.SetRect(iX1 - 3, iTop - 3, iX2 + 3, iBottom + 3);
+
+			const char LEFTSCROLL[] = { 0x33, 0 };
+			::DrawTextA(dc, LEFTSCROLL, 1, (LPRECT)(LPCRECT)m_rectScrollLeft, DT_CENTER);
 		}
 
-		m_rectScrollLeft.SetRect(iX1-3, iTop-3, iX2+3, iBottom+3);
-	}
-
-	// deal with right scroll bar
-	if (iMonthRow == 1 && iMonthCol == m_iCols)
-	{
-		int iMiddle = iY + (m_iHeaderHeight / 2);
-		int iTop = iMiddle - (m_iHeaderHeight / 4);
-		int iBottom = iMiddle + (m_iHeaderHeight / 4);
-
-		int iX1 = iLeftX + m_szMonthSize.cx - 10;
-		int iX2 = iX1 - (m_iHeaderHeight / 4);
-
-		//int iLeftX = ClientRect.Width() - 10;
-		//int iRightX = iLeftX - (m_iHeaderHeight / 4);
-
-		for (int iLineY = iTop; iLineY <= iBottom; iLineY++)
+		// right
+		if (iMonthCol == m_iCols)
 		{
-			dc.MoveTo(iX1, iMiddle);
-			dc.LineTo(iX2, iLineY);
+			int iX1 = iLeftX + m_szMonthSize.cx - 10;
+			int iX2 = iX1 - (m_iHeaderHeight / 4);
+
+			m_rectScrollRight.SetRect(iX2-3, iTop-3, iX1+3, iBottom+3);
+
+			const char RIGHTSCROLL[] = { 0x34, 0 };
+			::DrawTextA(dc, RIGHTSCROLL, 1, (LPRECT)(LPCRECT)m_rectScrollRight, DT_CENTER);
 		}
 
-		m_rectScrollRight.SetRect(iX2-3, iTop-3, iX1+3, iBottom+3);
+		dc.SelectObject(pOldFont);
 	}
 
 	return m_iHeaderHeight;
@@ -1794,7 +1794,7 @@ void CFPSMiniCalendarCtrl::AutoSize()
 	}
 }
 
-// auto-configue attempts to optimize the font size for the control
+// auto-configure attempts to optimize the font size for the control
 // based on 1) maximum final size of the control, 2) number of rows
 // and columns, 3) screen resolution, 4) minimum allowed font size
 void CFPSMiniCalendarCtrl::AutoConfigure()
@@ -1819,6 +1819,7 @@ void CFPSMiniCalendarCtrl::AutoConfigure()
 		SetFontInfo(FMC_FONT_DAYSOFWEEK, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE);
 		SetFontInfo(FMC_FONT_DAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE);
 		SetFontInfo(FMC_FONT_SPECIALDAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE, TRUE);
+		SetFontInfo(FMC_FONT_SCROLLBTNS, _T("Marlett"), FMC_DEFAULT_FONT_SIZE, TRUE, FALSE, FALSE, TRUE);
 
 		CSize szMax = m_szMaxSize;
 		CSize size = ComputeTotalSize();

@@ -252,5 +252,5 @@ void CTaskMiniCalendarCtrl::Draw(CDC& dc, const CRect& rDraw)
 	}
 
 	// Then default
-	CFPSMiniCalendarCtrl::Draw(dc, rDraw);
+	CMiniCalendarCtrl::Draw(dc, rDraw);
 }
