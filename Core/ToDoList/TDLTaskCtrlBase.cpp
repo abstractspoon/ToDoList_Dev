@@ -2241,13 +2241,13 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	return TRUE;
 }
 
-COLORREF CTDLTaskCtrlBase::GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+COLORREF CTDLTaskCtrlBase::GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack) const
 {
-	COLORREF crText = COMMENTSCOLOR;
-
+	COLORREF crText = ((RGBX(crBack).Luminance() > 128) ? COMMENTSCOLOR : ALTCOMMENTSCOLOR);
+	
 	if (HasColor(m_crDone) && m_calculator.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
-		crText = m_crDone;
-
+		return m_crDone;
+	
 	return crText;
 }
 
@@ -2404,7 +2404,7 @@ COLORREF CTDLTaskCtrlBase::GetPriorityColor(int nPriority) const
 	return (COLORREF)m_aPriorityColors[nPriority];
 }
 
-void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS)
+void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack)
 {
 	// Avoid drawing wherever possible
 	if (m_bSavingToImage || IsEditingTask(pTDS->GetTaskID()) || pTDI->sComments.IsEmpty())
@@ -2423,7 +2423,7 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 	}
 
 	// Draw the minimum necessary
-	COLORREF crText = GetTaskCommentsTextColor(pTDI, pTDS);
+	COLORREF crText = GetTaskCommentsTextColor(pTDI, pTDS, crBack);
 
 	if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
 	{
@@ -2456,7 +2456,7 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 				case '\n':
 				case '\t':
 					cChar = ' ';
-					// fall thru
+					break;
 				}
 
 				szBuffer[nChar] = cChar;
@@ -2745,7 +2745,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			// render comment text
 			pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 
-			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
+			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS, crBack);
 			
 			if (pOldFont)
 				pDC->SelectObject(pOldFont);
