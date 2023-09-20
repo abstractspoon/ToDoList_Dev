@@ -1239,7 +1239,9 @@ void CFilteredToDoCtrl::OnTimerNow()
 	
 	if (FindNewNowFilterTasks(pTDS, params, m_taskTree.TreeItemMap()))
 	{
-		TDC_ATTRIBUTE nNowAttrib;
+		RefreshFilter(FALSE);
+
+		/*TDC_ATTRIBUTE nNowAttrib;
 
 		if (m_filter.HasNowFilter(nNowAttrib))
 		{
@@ -1275,7 +1277,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 			{
 				SetTimer(TIMER_NOWFILTER, TEN_MINUTES, NULL);
 			}
-		}
+		}*/
 	}
 }
 
