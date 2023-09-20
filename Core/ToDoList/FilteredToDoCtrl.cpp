@@ -16,7 +16,6 @@
 #include "..\shared\enstring.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
-#include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\savefocus.h"
@@ -329,39 +328,50 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 
 BOOL CFilteredToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged)
 {
-	if (CTabbedToDoCtrl::ArchiveDoneTasks(nFlags, bRemoveFlagged))
-	{
-		if (HasAnyFilter())
-			RefreshFilter(FALSE);
+	// Toggle off any active filter if we are removing tasks, 
+	// to ensure hidden subtasks do not get missed
+	BOOL bToggleFilter = ((nFlags != TDC_REMOVENONE) && HasAnyFilter());
 
-		return TRUE;
-	}
+	// Prevent redraws only if toggling
+	CHoldRedraw hr(bToggleFilter ? GetSafeHwnd() : NULL);
 
-	// else
-	return FALSE;
+	if (bToggleFilter)
+		ToggleFilter();
+
+	BOOL bArchived = CTabbedToDoCtrl::ArchiveDoneTasks(nFlags, bRemoveFlagged);
+
+	if (bToggleFilter)
+		ToggleFilter();
+
+	return bArchived;
 }
 
 BOOL CFilteredToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 {
-	if (CTabbedToDoCtrl::ArchiveSelectedTasks(bRemove))
-	{
-		if (HasAnyFilter())
-			RefreshFilter(FALSE);
+	// Toggle off any active filter if we are removing tasks, 
+	// to ensure hidden subtasks do not get missed
+	BOOL bToggleFilter = (bRemove && HasAnyFilter() && m_taskTree.SelectionHasSubtasks());
 
-		return TRUE;
-	}
+	// Prevent redraws only if toggling
+	CHoldRedraw hr(bToggleFilter ? GetSafeHwnd() : NULL);
 
-	// else
-	return FALSE;
+	// Prevent redraws only if toggling
+	if (bToggleFilter)
+		ToggleFilter();
+
+	BOOL bArchived = CTabbedToDoCtrl::ArchiveSelectedTasks(bRemove);
+
+	if (bToggleFilter)
+		ToggleFilter();
+
+	return bArchived;
 }
 
 int CFilteredToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) const
 {
-	if (bSelectedOnly || !HasAnyFilter())
-		return CTabbedToDoCtrl::GetArchivableTasks(tasks, bSelectedOnly);
+	ASSERT(!HasAnyFilter()); // We should have toggled it
 
-	// else process the entire data hierarchy
-	return m_exporter.ExportCompletedTasks(tasks);
+	return CTabbedToDoCtrl::GetArchivableTasks(tasks, bSelectedOnly);
 }
 
 BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
@@ -760,14 +770,14 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 			//       reasoning behind it when I later came back.
 			bWantTask = FALSE;
 
-			int nNumRules = pFilter->aRules.GetSize();
+			int nNumRules = pFilter->aRules.GetSize(), bMultiRule = (nNumRules > 1);
 			
 			for (int nRule = 0; (nRule < nNumRules) && !bWantTask; nRule++)
 			{
 				const SEARCHPARAM& rule = pFilter->aRules[nRule];
 								
 				CString sWhatMatched;
-				VERIFY(result.GetWhatMatched(rule.GetAttribute(), m_aCustomAttribDefs, sWhatMatched) && !sWhatMatched.IsEmpty());
+				VERIFY(result.GetWhatMatched(rule.GetAttribute(), m_aCustomAttribDefs, sWhatMatched) && (!sWhatMatched.IsEmpty() || bMultiRule));
 
 				switch (rule.GetOperator())
 				{
@@ -775,7 +785,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 					// eg. "Give me all tasks where the category is not empty"
 					// User is explicitly interested in tasks WITH attribute values
 					// so we always want these tasks
-					ASSERT(rule.AttributeIs(TDCA_SELECTION) || !sWhatMatched.IsEmpty());
+					ASSERT(rule.AttributeIs(TDCA_SELECTION) || !sWhatMatched.IsEmpty() || bMultiRule);
 					bWantTask = TRUE;
 					break;
 
