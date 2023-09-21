@@ -247,6 +247,14 @@ namespace HTMLReportExporter
 			m_ChangeTimer.Start();
 		}
 
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			m_ChangeTimer.Stop();
+			m_ChangeTimer = null;
+
+			base.OnHandleDestroyed(e);
+		}
+
 		private void InitialiseToolbars()
 		{
 			// Main toolbar
