@@ -390,11 +390,11 @@ CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncE
 			{
 				if (!bFirstItem)
 				{
-					_tcscpy(szBufPtr, sSep);
+					_tcsncpy(szBufPtr, sSep, sSep.GetLength());
 					szBufPtr += sSep.GetLength();
 				}
 				
-				_tcscpy(szBufPtr, sItem);
+				_tcsncpy(szBufPtr, sItem, sItem.GetLength());
 				szBufPtr += sItem.GetLength();
 
 				bFirstItem = FALSE;

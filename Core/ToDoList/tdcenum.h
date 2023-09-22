@@ -390,6 +390,7 @@ enum // TDL_SAVETASKLIST
 	TDLS_CLOSINGWINDOWS		= 0x04, 
 	TDLS_NOFLUSH			= 0x08,
 	TDLS_AUTOSAVE			= 0x10,
+	TDLS_INCLUDEPREFERENCES	= 0x20, 
 };
  
 /////////////////////////////////////////////////////////////////////////////

@@ -3344,7 +3344,7 @@ void CToDoListWnd::MinimizeToTray()
 	CPreferences().WriteProfileInt(_T("Pos"), _T("Maximized"), IsZoomed());
 	
 	if (Prefs().GetAutoSaveOnSwitchApp())
-		SaveAll(TDLS_AUTOSAVE);
+		SaveAll(TDLS_AUTOSAVE | TDLS_INCLUDEPREFERENCES);
 	
 	// hide main window
 	Gui::MinToTray(*this); // courtesy of floyd
@@ -8857,7 +8857,7 @@ void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 
 void CToDoListWnd::OnSaveall() 
 {
-	SaveAll(TDLS_INCLUDEUNSAVED);
+	SaveAll(TDLS_INCLUDEUNSAVED | TDLS_INCLUDEPREFERENCES);
 }
 
 void CToDoListWnd::OnUpdateSaveall(CCmdUI* pCmdUI) 
@@ -8868,7 +8868,7 @@ void CToDoListWnd::OnUpdateSaveall(CCmdUI* pCmdUI)
 void CToDoListWnd::OnCloseall() 
 {
 	// save first
-	TDC_FILE nSaveAll = SaveAll(TDLS_INCLUDEUNSAVED | TDLS_CLOSINGTASKLISTS);
+	TDC_FILE nSaveAll = SaveAll(TDLS_INCLUDEUNSAVED | TDLS_CLOSINGTASKLISTS | TDLS_INCLUDEPREFERENCES);
 
 	if (nSaveAll != TDCF_SUCCESS)
 		return;
@@ -11182,6 +11182,9 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
 	BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
+	if (Misc::HasFlag(dwFlags, TDLS_INCLUDEPREFERENCES))
+		CPreferences::Save();
+
 	DOPROGRESS(IDS_SAVINGPROGRESS);
 
 	int nCtrl = GetTDCCount();
@@ -11557,7 +11560,7 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 	{
 		// save tasklists if required
 		if (Prefs().GetAutoSaveOnSwitchApp())
-			SaveAll(TDLS_AUTOSAVE);
+			SaveAll(TDLS_AUTOSAVE | TDLS_INCLUDEPREFERENCES);
 	}
 	else
 	{

@@ -10,6 +10,7 @@
 #include "..\shared\driveinfo.h"
 #include "..\shared\regkey.h"
 #include "..\shared\autoflag.h"
+#include "..\shared\scopedtimer.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
@@ -72,7 +73,7 @@ INISECTION::INISECTION(const INISECTION& other) : sSection(other.sSection)
 
 //////////////////////////////////////////////////////////////////////
 
-static LPCTSTR ENDL = _T("\r\n");
+static CString ENDL = _T("\r\n");
 static CString NULLSTR;
 
 //////////////////////////////////////////////////////////////////////
@@ -275,7 +276,7 @@ BOOL CPreferences::Save()
 	// for the duration of this function
 	LOCKPREFSRET(FALSE);
 
-	return SaveInternal(FALSE);
+	return SaveInternal(TRUE);
 }
 
 // THIS IS AN INTERNAL METHOD THAT ASSUMES CALLERS HAVE INITIALISED A LOCK ALREADY
@@ -290,30 +291,32 @@ BOOL CPreferences::SaveInternal(BOOL bExternal)
 	if (!s_bDirty)
 		return TRUE; // nothing to do
 
+	///////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	CScopedLogTimer log(_T("CPreferences::SaveInternal()"));
+
 	if (bExternal)
 		FileMisc::LogTextRaw(_T("External call to CPreferences::Save()"));
 	else
 		FileMisc::LogTextRaw(_T("Saving preferences in ~CPreferences()"));
+	///////////////////////////////////////////////////////////////////
 	
 	// insert application version
 	WriteIniString(_T("AppVer"), _T("Version"), FileMisc::GetAppVersion(), FALSE);
 
 	// Build output as a single formatted string so that the 
-	// time the prefs file is open is as short as possible
-	CString sPrefsContents;
-	
+	// time the preferences file is open is as short as possible
 	CIniSectionArray aSections;
 	int nNumSection = GetSortedSections(aSections);
+
+	CStringArray aSectionValues;
+	aSectionValues.SetSize(nNumSection * 2);
 
 	for (int nSection = 0; nSection < nNumSection; nSection++)
 	{
 		// write section line
 		const INISECTION* pSection = aSections[nSection];
-		
-		CString sLine;
-		sLine.Format(_T("[%s]%s"), pSection->sSection, ENDL);
-		
-		sPrefsContents += sLine;
+		aSectionValues[nSection * 2].Format(_T("[%s]"), pSection->sSection);
 		
 		// write entries to a CStringArray, then sort it and write it to file
 		CStringArray aEntries;
@@ -329,19 +332,19 @@ BOOL CPreferences::SaveInternal(BOOL bExternal)
 			INIENTRY ie;
 			
 			pSection->aEntries.GetNextAssoc(pos, sDummy, ie);
-
 			aEntries.SetAt(nEntry++, ie.Format());
 		}
 		
 		// sort array
 		Misc::SortArray(aEntries);
 		
-		// format by newlines
-		sPrefsContents += Misc::FormatArray(aEntries, ENDL);
-		sPrefsContents += ENDL;
-		sPrefsContents += ENDL;
+		// format entries by newlines
+		aSectionValues.SetAt((nSection * 2) + 1, Misc::FormatArray(aEntries, ENDL) + ENDL);
 	}
-	
+
+	// Format final string by newlines
+	CString sPrefsContents = Misc::FormatArray(aSectionValues, ENDL);
+
 	// backup file first
 	CFileBackup backup(s_sPrefsPath, FBS_OVERWRITE | FBS_DATESTAMP, _T("ini.Backup"));
 	
