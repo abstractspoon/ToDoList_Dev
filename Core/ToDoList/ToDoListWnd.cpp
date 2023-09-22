@@ -5039,6 +5039,8 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 	if (bModified)
 	{
+		CPreferences::Save();
+
 		// language changes may require restart so do that first
 		if (UpdateLanguageTranslationAndCheckForRestart(oldPrefs))
 		{
@@ -10936,6 +10938,8 @@ LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 		GetToDoCtrl().SetAdvancedFilter(filter);
 	}
 
+	CPreferences::Save();
+
 	return 0;
 }
 
@@ -13249,6 +13253,7 @@ void CToDoListWnd::OnEditSetReminder()
 	}
 	
 	tdc.RedrawReminders();
+	CPreferences::Save();
 }
 
 void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI) 
