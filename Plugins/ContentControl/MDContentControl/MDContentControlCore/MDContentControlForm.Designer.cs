@@ -38,7 +38,7 @@
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
-			this.InputTextCtrl = new MDContentControl.RichTextBoxEx();
+			this.InputTextCtrl = new Abstractspoon.Tdl.PluginHelpers.RichTextBoxEx();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
 			this.SplitContainer.Panel2.SuspendLayout();
@@ -176,7 +176,7 @@
 		#endregion
 
 		private System.Windows.Forms.SplitContainer SplitContainer;
-		private RichTextBoxEx InputTextCtrl;
+		private Abstractspoon.Tdl.PluginHelpers.RichTextBoxEx InputTextCtrl;
 		private System.Windows.Forms.WebBrowser PreviewBrowser;
 		private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;

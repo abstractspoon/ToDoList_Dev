@@ -6,10 +6,16 @@ using System.Data;
 using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.IO;
+using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
+
 using Markdig;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
+using Markdig.Renderers;
 
 namespace MDContentControl
 {
@@ -17,6 +23,8 @@ namespace MDContentControl
 	{
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
+
+		public event LinkClickedEventHandler LinkClicked;
 
 		// -----------------------------------------------------------------
 
@@ -40,12 +48,17 @@ namespace MDContentControl
 
 			InputTextCtrl.TextChanged += (s, e) =>
 			{
-				InputTextChanged?.Invoke(this, new EventArgs());
+				InputTextChanged?.Invoke(this, e);
 			};
 			
 			InputTextCtrl.LostFocus += (s, e) =>
 			{
-				InputLostFocus?.Invoke(this, new EventArgs());
+				InputLostFocus?.Invoke(this, e);
+			};
+
+			InputTextCtrl.LinkClicked += (s, e) =>
+			{
+				LinkClicked?.Invoke(this, e);
 			};
 		}
 
@@ -64,9 +77,28 @@ namespace MDContentControl
 			if (content.Length == 0)
 				return string.Empty;
 
-			var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+			MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+			MarkdownDocument document = Markdown.Parse(content, pipeline);
 
-			return Markdig.Markdown.ToHtml(content, pipeline);
+			foreach (LinkInline link in document.Descendants().OfType<LinkInline>())
+			{
+				System.Uri uri = null;
+
+				if (System.Uri.TryCreate(link.Url, UriKind.RelativeOrAbsolute, out uri) && !uri.IsAbsoluteUri)
+				{
+					// Assume it's a local path
+					var path = Path.Combine(Directory.GetCurrentDirectory(), link.Url);
+					link.Url = new Uri(path).AbsoluteUri;
+				}
+			}
+
+			var writer = new StringWriter();
+			var renderer = new HtmlRenderer(writer);
+
+			pipeline.Setup(renderer);
+			renderer.Render(document);
+
+			return writer.ToString();
 		}
 
 		public string OutputHtml
@@ -378,20 +410,31 @@ namespace MDContentControl
 
 	}
 
-	// -----------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////
 
-	public class RichTextBoxEx : RichTextBox
+	[StructLayout(LayoutKind.Sequential)]
+	struct CHARRANGE
 	{
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				CreateParams cp = base.CreateParams;
-				cp.ClassName = "RichEdit50W";
+		public int cpMin;
+		public int cpMax;
+	};
 
-				return cp;
-			}
-		}
-	}
+	[StructLayout(LayoutKind.Sequential)]
+	struct NMHDR
+	{
+		public IntPtr hwndFrom;
+		public IntPtr idFrom;
+		public int code;
+	};
+
+	[StructLayout(LayoutKind.Sequential)]
+	struct ENLINK
+	{
+		public NMHDR nmhdr;
+		public int msg;
+		public IntPtr wParam;
+		public IntPtr lParam;
+		public CHARRANGE chrg;
+	};
 
 }
