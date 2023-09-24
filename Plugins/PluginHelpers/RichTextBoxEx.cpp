@@ -5,6 +5,7 @@
 #include "PluginHelpers.h"
 #include "RichTextBoxEx.h"
 #include "UIExtension.h"
+#include "ContentControl.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -12,6 +13,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace System::Diagnostics;
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
 
@@ -118,7 +120,14 @@ void RichTextBoxEx::WndProc(Message% m)
 	RichTextBox::WndProc(m);
 }
 
-bool RichTextBoxEx::SelectionContainsPos(Drawing::Point ptClient)
+void RichTextBoxEx::OnLinkClicked(LinkClickedEventArgs^ e)
+{
+	Debug::Assert(Misc::IsKeyPressed(VK_CONTROL) != FALSE);
+
+	ContentControlWnd::GoToLink(e->LinkText, Parent->Handle, Handle);
+}
+
+bool RichTextBoxEx::SelectionContainsPos(Point ptClient)
 {
 	if (SelectionLength == 0)
 		return false;

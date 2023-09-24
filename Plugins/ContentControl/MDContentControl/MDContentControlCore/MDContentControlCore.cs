@@ -30,12 +30,6 @@ namespace MDContentControl
 				ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 				notify.NotifyKillFocus();
 			};
-
-			LinkClicked += (s, e) =>
-			{
-				if (ModifierKeys.HasFlag(Keys.Control))
-					ContentControlWnd.GoToLink(e.LinkText, m_hwndParent, Handle);
-			};
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------

@@ -29,6 +29,7 @@ namespace Abstractspoon
 				}
 
 				virtual void WndProc(Windows::Forms::Message% m) override;
+				virtual void OnLinkClicked(Windows::Forms::LinkClickedEventArgs^ e) override;
 
 				String^ GetTextRange(const CHARRANGE& cr);
 

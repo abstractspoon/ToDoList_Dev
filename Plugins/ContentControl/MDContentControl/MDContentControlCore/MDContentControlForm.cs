@@ -24,8 +24,6 @@ namespace MDContentControl
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
 
-		public event LinkClickedEventHandler LinkClicked;
-
 		// -----------------------------------------------------------------
 
 		bool m_RestoreInputFocusAfterUpdate;
@@ -54,11 +52,6 @@ namespace MDContentControl
 			InputTextCtrl.LostFocus += (s, e) =>
 			{
 				InputLostFocus?.Invoke(this, e);
-			};
-
-			InputTextCtrl.LinkClicked += (s, e) =>
-			{
-				LinkClicked?.Invoke(this, e);
 			};
 		}
 
