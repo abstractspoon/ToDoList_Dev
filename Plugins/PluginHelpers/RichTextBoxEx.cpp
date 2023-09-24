@@ -111,6 +111,22 @@ void RichTextBoxEx::WndProc(Message% m)
 		}
 		break;
 
+	case WM_RBUTTONDOWN:
+		{
+			// Move the Caret to the click location unless
+			// the position is already over some selected text
+			Drawing::Point ptClient((int)m.LParam);
+
+			if (!SelectionContainsPos(ptClient))
+			{
+				Focus();
+
+				SelectionLength = 0;
+				SelectionStart = GetCharIndexFromPosition(ptClient);
+			}
+		}
+		break;
+
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
 		m_ContextUrl = String::Empty;

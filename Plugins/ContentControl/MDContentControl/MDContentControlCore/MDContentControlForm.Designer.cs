@@ -154,7 +154,6 @@
 			this.InputTextCtrl.TabIndex = 0;
 			this.InputTextCtrl.Text = "";
 			this.InputTextCtrl.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-			this.InputTextCtrl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.InputTextCtrl_MouseDown);
 			// 
 			// MDContentControlForm
 			// 
