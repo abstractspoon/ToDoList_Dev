@@ -1,16 +1,14 @@
 ﻿
 #include "stdafx.h"
-#include "UITheme.h"
 #include "Win32.h"
 #include "DPIScaling.h"
-#include "Translator.h"
-#include "FormsUtil.h"
 #include "PluginHelpers.h"
 #include "RichTextBoxEx.h"
 #include "UIExtension.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
+#include <shared\GraphicsMisc.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,6 +27,11 @@ CreateParams^ RichTextBoxEx::CreateParams::get()
 	return cp;
 }
 
+HWND RichTextBoxEx::HWnd()
+{
+	return Win32::GetHwnd(Handle);
+}
+
 void RichTextBoxEx::WndProc(Message% m)
 {
 	const int WM_REFLECT = (WM_USER + 0x1C00);
@@ -42,66 +45,111 @@ void RichTextBoxEx::WndProc(Message% m)
 			if (pNMHDR->code == EN_LINK)
 			{
 				ENLINK* pENL = (ENLINK*)pNMHDR;
-
 				m_ContextUrl = GetTextRange(pENL->chrg);
-				m.Result = (IntPtr)1;
 
-				return;
+				switch (pENL->msg)
+				{
+				case WM_SETCURSOR:
+					if (SelectionContainsMessagePos())
+					{
+						GraphicsMisc::SetStandardCursor(IDC_ARROW);
+					}
+					else if (Misc::IsKeyPressed(VK_CONTROL))
+					{
+						GraphicsMisc::SetHandCursor();
+					}
+					else
+					{
+						GraphicsMisc::SetStandardCursor(IDC_IBEAM);
+					}
+					m.Result = (IntPtr)1; // No further processing
+					return;
+
+				case WM_LBUTTONDOWN:
+					if (!Misc::IsKeyPressed(VK_CONTROL))
+					{
+						// If pENL->lParam is zero then this is a synthesized 
+						// message in response to the <enter> key being pressed
+						// when the caret is within a hyperlink
+						Drawing::Point ptClient((int)pENL->lParam);
+
+						if (pENL->lParam == 0)
+						{
+							// Insert a newline at the caret position
+							SelectedText = "\r\n";
+							return;
+						}
+						else if (!SelectionContainsPos(ptClient))
+						{
+							if (!Focused)
+								Focus();
+
+ 							SelectionLength = 0;
+ 							SelectionStart = GetCharIndexFromPosition(ptClient);
+							return;
+						}
+					}
+					break; // else default behaviour
+				}
 			}
 		}
 		break;
 
 	case WM_SETCURSOR:
 		{
-// 			m_ShowHandCursor = false;
-// 			DefWndProc(m);
-// 
-// 			if (m_ShowHandCursor)
-// 			{
-// 				Cursor = UIExtension::HandCursor();
-// 			}
-// 			else if (SelectionContainsMessagePos())
-// 			{
-// 				Cursor = Cursors::Arrow;
-// 			}
-// 			else
-// 			{
-// 				Cursor = Cursors::IBeam;
-// 			}
-// 
-// 			m.Result = (IntPtr)1;
-// 			return;
+			m_ContextUrl = String::Empty;
+			DefWndProc(m);
+
+			if (!String::IsNullOrEmpty(m_ContextUrl))
+			{
+				// Handled above
+				m.Result = (IntPtr)1;
+				return;
+			}
 		}
+		break;
+
+	case WM_MOUSEMOVE:
+	case WM_MOUSELEAVE:
+		m_ContextUrl = String::Empty;
 		break;
 	}
 
 	RichTextBox::WndProc(m);
 }
 
+bool RichTextBoxEx::SelectionContainsPos(Drawing::Point ptClient)
+{
+	if (SelectionLength == 0)
+		return false;
+
+	int charAtPos = GetCharIndexFromPosition(ptClient);
+
+	if (charAtPos <= SelectionStart)
+		return false;
+
+	if (charAtPos >= (SelectionStart + SelectionLength))
+		return false;
+
+	return true;
+}
+
 bool RichTextBoxEx::SelectionContainsMessagePos()
 {
-	Point pos = PointToClient(MousePosition);
-
-	int selStart = SelectionStart;
-	int selEnd = SelectionStart + SelectionLength;
-
-	int charAtPos = GetCharIndexFromPosition(pos);
-
-	return ((charAtPos < selStart) || (charAtPos > selEnd));
+	return SelectionContainsPos(PointToClient(MousePosition));
 }
 
 String^ RichTextBoxEx::GetTextRange(const CHARRANGE& cr)
 {
 	int nLength = int(cr.cpMax - cr.cpMin + 1);
 
-	// create an ANSI buffer 
 	LPTSTR szChar = new TCHAR[nLength];
 	ZeroMemory(szChar, nLength * sizeof(TCHAR));
 
 	TEXTRANGE tr;
 	tr.chrg = cr;
 	tr.lpstrText = szChar;
-	::SendMessage(Win32::GetHwnd(Handle), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+	::SendMessage(HWnd(), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
 	CString sText(szChar);
 	delete[] szChar;

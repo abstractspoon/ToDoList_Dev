@@ -15,6 +15,7 @@ namespace Abstractspoon
 			public ref class RichTextBoxEx : Windows::Forms::RichTextBox
 			{
 			public:
+				bool SelectionContainsPos(Drawing::Point ptClient);
 				bool SelectionContainsMessagePos();
 
 			protected:
@@ -30,6 +31,8 @@ namespace Abstractspoon
 				virtual void WndProc(Windows::Forms::Message% m) override;
 
 				String^ GetTextRange(const CHARRANGE& cr);
+
+				HWND HWnd();
 			};
 		}
 	}
