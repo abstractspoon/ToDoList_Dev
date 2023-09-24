@@ -13,11 +13,14 @@ namespace MDContentControl
         private IntPtr m_hwndParent;
 		private int m_PrevSplitPos = -1;
 
+		private Translator m_Trans;
+
 		// ITDLContentControl ------------------------------------------------------------------
 
-        public MDContentControlCore(IntPtr hwndParent)
+		public MDContentControlCore(IntPtr hwndParent, Translator trans)
         {
             m_hwndParent = hwndParent;
+			m_Trans = trans;
 
             InputTextChanged += (s, e) =>
 			{
@@ -30,6 +33,17 @@ namespace MDContentControl
 				ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 				notify.NotifyKillFocus();
 			};
+
+			NeedLinkTooltip += (s, e) =>
+			{
+				var tooltip = ContentControlWnd.HandleNeedLinkTooltip(e.linkUri, m_hwndParent, Handle);
+
+				if (!string.IsNullOrEmpty(tooltip))
+					tooltip = (tooltip + "\n");
+
+				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link"));
+			};
+
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------

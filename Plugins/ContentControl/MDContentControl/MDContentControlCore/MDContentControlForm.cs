@@ -23,6 +23,7 @@ namespace MDContentControl
 	{
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
+		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// -----------------------------------------------------------------
 
@@ -52,6 +53,11 @@ namespace MDContentControl
 			InputTextCtrl.LostFocus += (s, e) =>
 			{
 				InputLostFocus?.Invoke(this, e);
+			};
+
+			InputTextCtrl.NeedLinkTooltip += (s, e) =>
+			{
+				NeedLinkTooltip?.Invoke(this, e);
 			};
 		}
 

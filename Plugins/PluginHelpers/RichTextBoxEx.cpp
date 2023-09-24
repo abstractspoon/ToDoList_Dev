@@ -38,6 +38,9 @@ void RichTextBoxEx::WndProc(Message% m)
 {
 	const int WM_REFLECT = (WM_USER + 0x1C00);
 
+	if (m_LinkTip != nullptr)
+		m_LinkTip->ProcessMessage(m);
+
 	switch (m.Msg)
 	{
 	case WM_NOTIFY + WM_REFLECT:
@@ -52,19 +55,21 @@ void RichTextBoxEx::WndProc(Message% m)
 				switch (pENL->msg)
 				{
 				case WM_SETCURSOR:
-					if (SelectionContainsMessagePos())
 					{
-						GraphicsMisc::SetStandardCursor(IDC_ARROW);
+						if (SelectionContainsMessagePos())
+						{
+							GraphicsMisc::SetStandardCursor(IDC_ARROW);
+						}
+						else if (Misc::IsKeyPressed(VK_CONTROL))
+						{
+							GraphicsMisc::SetHandCursor();
+						}
+						else
+						{
+							GraphicsMisc::SetStandardCursor(IDC_IBEAM);
+						}
+						m.Result = (IntPtr)1; // No further processing
 					}
-					else if (Misc::IsKeyPressed(VK_CONTROL))
-					{
-						GraphicsMisc::SetHandCursor();
-					}
-					else
-					{
-						GraphicsMisc::SetStandardCursor(IDC_IBEAM);
-					}
-					m.Result = (IntPtr)1; // No further processing
 					return;
 
 				case WM_LBUTTONDOWN:
@@ -104,6 +109,10 @@ void RichTextBoxEx::WndProc(Message% m)
 
 			if (!String::IsNullOrEmpty(m_ContextUrl))
 			{
+				// Initialise label tip first time
+				if ((NeedLinkTooltip != nullptr) && (m_LinkTip == nullptr))
+					m_LinkTip = gcnew LabelTip(this);
+
 				// Handled above
 				m.Result = (IntPtr)1;
 				return;
@@ -128,6 +137,8 @@ void RichTextBoxEx::WndProc(Message% m)
 		break;
 
 	case WM_MOUSEMOVE:
+		break;
+
 	case WM_MOUSELEAVE:
 		m_ContextUrl = String::Empty;
 		break;
@@ -180,4 +191,18 @@ String^ RichTextBoxEx::GetTextRange(const CHARRANGE& cr)
 	delete[] szChar;
 
 	return gcnew String(sText);
+}
+
+LabelTipInfo^ RichTextBoxEx::ToolHitTest(Drawing::Point ptScreen)
+{
+	if (!String::IsNullOrEmpty(m_ContextUrl) && (NeedLinkTooltip != nullptr))
+	{
+		auto e = gcnew NeedLinkTooltipEventArgs(m_ContextUrl);
+		NeedLinkTooltip(this, e);
+
+		return nullptr;
+	}
+
+
+	return nullptr;
 }

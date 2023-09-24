@@ -52,9 +52,10 @@ void CMDContentBridge::Release()
 	delete this;
 }
 
-void CMDContentBridge::SetLocalizer(ITransText* /*pTT*/)
+void CMDContentBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 LPCWSTR CMDContentBridge::GetTypeDescription() const
@@ -75,7 +76,7 @@ LPCWSTR CMDContentBridge::GetTypeID() const
 IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CMDContentControlBridge* pCtrl = new CMDContentControlBridge();
+	CMDContentControlBridge* pCtrl = new CMDContentControlBridge(m_pTT);
 
 	if (!pCtrl->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -131,14 +132,16 @@ void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CMDContentControlBridge::CMDContentControlBridge()
+CMDContentControlBridge::CMDContentControlBridge(ITransText* pTT)
+	: m_pTT(pTT)
 {
 }
 
 BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
