@@ -18,6 +18,7 @@ using namespace System::Drawing;
 using namespace System::Windows::Forms;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace IIControls;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,12 +51,14 @@ void RichTextBoxEx::WndProc(Message% m)
 			if (pNMHDR->code == EN_LINK)
 			{
 				ENLINK* pENL = (ENLINK*)pNMHDR;
-				m_ContextUrl = GetTextRange(pENL->chrg);
+				m_CurrentLink = GetTextRange(pENL->chrg);
 
 				switch (pENL->msg)
 				{
 				case WM_SETCURSOR:
 					{
+						m_LinkTipVOffset = ToolStripEx::GetActualCursorHeight(Cursors::Arrow); // default
+
 						if (SelectionContainsMessagePos())
 						{
 							GraphicsMisc::SetStandardCursor(IDC_ARROW);
@@ -67,6 +70,7 @@ void RichTextBoxEx::WndProc(Message% m)
 						else
 						{
 							GraphicsMisc::SetStandardCursor(IDC_IBEAM);
+							m_LinkTipVOffset /= 2;
 						}
 						m.Result = (IntPtr)1; // No further processing
 					}
@@ -104,10 +108,10 @@ void RichTextBoxEx::WndProc(Message% m)
 
 	case WM_SETCURSOR:
 		{
-			m_ContextUrl = String::Empty;
+			m_CurrentLink = String::Empty;
 			DefWndProc(m);
 
-			if (!String::IsNullOrEmpty(m_ContextUrl))
+			if (!String::IsNullOrEmpty(m_CurrentLink))
 			{
 				// Initialise label tip first time
 				if ((NeedLinkTooltip != nullptr) && (m_LinkTip == nullptr))
@@ -140,7 +144,7 @@ void RichTextBoxEx::WndProc(Message% m)
 		break;
 
 	case WM_MOUSELEAVE:
-		m_ContextUrl = String::Empty;
+		m_CurrentLink = String::Empty;
 		break;
 	}
 
@@ -195,14 +199,25 @@ String^ RichTextBoxEx::GetTextRange(const CHARRANGE& cr)
 
 LabelTipInfo^ RichTextBoxEx::ToolHitTest(Drawing::Point ptScreen)
 {
-	if (!String::IsNullOrEmpty(m_ContextUrl) && (NeedLinkTooltip != nullptr))
+	if (!String::IsNullOrEmpty(m_CurrentLink) && (NeedLinkTooltip != nullptr))
 	{
-		auto e = gcnew NeedLinkTooltipEventArgs(m_ContextUrl);
+		auto e = gcnew NeedLinkTooltipEventArgs(m_CurrentLink);
 		NeedLinkTooltip(this, e);
 
-		return nullptr;
+		if (!String::IsNullOrEmpty(e->tooltip))
+		{
+			auto ttInfo = gcnew LabelTipInfo();
+
+			ttInfo->Font = Parent->Font;
+			ttInfo->Text = e->tooltip;
+			ttInfo->Id = e->tooltip->GetHashCode();
+
+			ttInfo->Rect.Location = PointToClient(ptScreen);
+			ttInfo->Rect.Offset(0, m_LinkTipVOffset);
+
+			return ttInfo;
+		}
 	}
-
-
+	
 	return nullptr;
 }

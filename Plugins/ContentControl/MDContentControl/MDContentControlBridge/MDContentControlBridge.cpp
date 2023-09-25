@@ -35,7 +35,7 @@ const LPCWSTR MARKDOWN_NAME = L"Markdown";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMDContentBridge::CMDContentBridge() : m_hIcon(NULL)
+CMDContentBridge::CMDContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
    HMODULE hMod = LoadLibrary(L"MDContentControlBridge.dll"); // us
 

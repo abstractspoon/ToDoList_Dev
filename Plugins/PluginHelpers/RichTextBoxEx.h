@@ -29,9 +29,9 @@ namespace Abstractspoon
 				NeedLinkTooltipEventHandler^ NeedLinkTooltip;
 
 			protected:
-				bool m_ShowHandCursor = false;
-				String^ m_ContextUrl;
+				String^ m_CurrentLink;
 				LabelTip^ m_LinkTip;
+				int m_LinkTipVOffset = 0;
 
 			protected:
 				virtual property Windows::Forms::CreateParams^ CreateParams
