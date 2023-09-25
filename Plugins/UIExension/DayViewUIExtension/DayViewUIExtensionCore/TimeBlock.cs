@@ -67,7 +67,11 @@ namespace DayViewUIExtension
 
 		public bool SynchroniseDates(TaskItem taskItem)
 		{
-			Debug.Assert(taskItem != null);
+			if (taskItem == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
 
 			if (taskItem.IsDone)
 				return false;

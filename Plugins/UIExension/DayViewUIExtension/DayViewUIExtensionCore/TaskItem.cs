@@ -80,8 +80,8 @@ namespace DayViewUIExtension
 		{
 			get
 			{
-				if (m_TaskTextColor.IsEmpty)
-					return base.TextColor;
+// 				if (m_TaskTextColor.IsEmpty)
+// 					return base.TextColor;
 
 				return m_TaskTextColor;
 			}
