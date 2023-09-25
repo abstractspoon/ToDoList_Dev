@@ -1,25 +1,49 @@
 ﻿
 using System;
+using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MDContentControl
 {
-    [System.ComponentModel.DesignerCategory("")]
+	[System.ComponentModel.DesignerCategory("")]
     public class MDContentControlCore : MDContentControlForm, IContentControlWnd
     {
         private IntPtr m_hwndParent;
 		private int m_PrevSplitPos = -1;
 
+		private Translator m_Trans;
+
 		// ITDLContentControl ------------------------------------------------------------------
 
-        public MDContentControlCore(IntPtr hwndParent)
+		public MDContentControlCore(IntPtr hwndParent, Translator trans)
         {
             m_hwndParent = hwndParent;
+			m_Trans = trans;
 
-            InputTextChanged += new System.EventHandler(OnInputTextChanged);
-            InputLostFocus += new System.EventHandler(OnInputTextLostFocus);
+            InputTextChanged += (s, e) =>
+			{
+				ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+				notify.NotifyChange();
+			};
+
+			InputLostFocus += (s, e) =>
+			{
+				ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+				notify.NotifyKillFocus();
+			};
+
+			NeedLinkTooltip += (s, e) =>
+			{
+				var tooltip = ContentControlWnd.HandleNeedLinkTooltip(e.linkUri, m_hwndParent, Handle);
+
+				if (!string.IsNullOrEmpty(tooltip))
+					tooltip = (tooltip + "\n");
+
+				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link"));
+			};
+
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -62,7 +86,7 @@ namespace MDContentControl
 			return false;
         }
 
-        public new bool Undo()
+		public new bool Undo()
         {
 			return base.Undo();
         }
@@ -118,19 +142,6 @@ namespace MDContentControl
             Win32.RemoveClientEdge(Handle);
 		}
 
-        private void OnInputTextChanged(object sender, EventArgs e)
-        {
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
-
-            notify.NotifyChange();
-        }
-
-        private void OnInputTextLostFocus(object sender, EventArgs e)
-        {
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
-
-            notify.NotifyKillFocus();
-        }
 
     }
 }

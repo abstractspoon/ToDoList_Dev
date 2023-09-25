@@ -6,10 +6,16 @@ using System.Data;
 using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
+using System.IO;
+using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
+
 using Markdig;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
+using Markdig.Renderers;
 
 namespace MDContentControl
 {
@@ -17,6 +23,7 @@ namespace MDContentControl
 	{
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
+		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// -----------------------------------------------------------------
 
@@ -40,12 +47,17 @@ namespace MDContentControl
 
 			InputTextCtrl.TextChanged += (s, e) =>
 			{
-				InputTextChanged?.Invoke(this, new EventArgs());
+				InputTextChanged?.Invoke(this, e);
 			};
 			
 			InputTextCtrl.LostFocus += (s, e) =>
 			{
-				InputLostFocus?.Invoke(this, new EventArgs());
+				InputLostFocus?.Invoke(this, e);
+			};
+
+			InputTextCtrl.NeedLinkTooltip += (s, e) =>
+			{
+				NeedLinkTooltip?.Invoke(this, e);
 			};
 		}
 
@@ -64,9 +76,28 @@ namespace MDContentControl
 			if (content.Length == 0)
 				return string.Empty;
 
-			var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+			MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+			MarkdownDocument document = Markdown.Parse(content, pipeline);
 
-			return Markdig.Markdown.ToHtml(content, pipeline);
+			foreach (LinkInline link in document.Descendants().OfType<LinkInline>())
+			{
+				System.Uri uri = null;
+
+				if (System.Uri.TryCreate(link.Url, UriKind.RelativeOrAbsolute, out uri) && !uri.IsAbsoluteUri)
+				{
+					// Assume it's a local path
+					var path = Path.Combine(Directory.GetCurrentDirectory(), link.Url);
+					link.Url = new Uri(path).AbsoluteUri;
+				}
+			}
+
+			var writer = new StringWriter();
+			var renderer = new HtmlRenderer(writer);
+
+			pipeline.Setup(renderer);
+			renderer.Render(document);
+
+			return writer.ToString();
 		}
 
 		public string OutputHtml
@@ -337,25 +368,6 @@ namespace MDContentControl
 			CommandHandling.EnableCommand("pasteToolStripMenuItem", InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
 		}
 
-		private void InputTextCtrl_MouseDown(object sender, MouseEventArgs e)
-		{
-			if (e.Button == MouseButtons.Right)
-			{
-				// Move the Caret to the click location unless
-				// the position is already over some selected text
-				int selStart = InputTextCtrl.SelectionStart;
-				int selEnd = InputTextCtrl.SelectionStart + InputTextCtrl.SelectionLength;
-
-				int charAtPos = InputTextCtrl.GetCharIndexFromPosition(e.Location);
-
-				if (charAtPos < selStart || charAtPos > selEnd)
-				{
-					InputTextCtrl.SelectionStart = charAtPos;
-					InputTextCtrl.SelectionLength = 0;
-				}
-			}
-		}
-
 		protected override void OnGotFocus(EventArgs e)
 		{
 			InputTextCtrl.Focus();
@@ -378,20 +390,31 @@ namespace MDContentControl
 
 	}
 
-	// -----------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////
 
-	public class RichTextBoxEx : RichTextBox
+	[StructLayout(LayoutKind.Sequential)]
+	struct CHARRANGE
 	{
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				CreateParams cp = base.CreateParams;
-				cp.ClassName = "RichEdit50W";
+		public int cpMin;
+		public int cpMax;
+	};
 
-				return cp;
-			}
-		}
-	}
+	[StructLayout(LayoutKind.Sequential)]
+	struct NMHDR
+	{
+		public IntPtr hwndFrom;
+		public IntPtr idFrom;
+		public int code;
+	};
+
+	[StructLayout(LayoutKind.Sequential)]
+	struct ENLINK
+	{
+		public NMHDR nmhdr;
+		public int msg;
+		public IntPtr wParam;
+		public IntPtr lParam;
+		public CHARRANGE chrg;
+	};
 
 }
