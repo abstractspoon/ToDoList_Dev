@@ -94,6 +94,9 @@ namespace unvell.ReoGrid.Editor
 			SuspendLayout();
 			isUIUpdating = true;
 
+			toolStrip1.RemapSysColors();
+			fontToolStrip.RemapSysColors();
+
 			fontToolStripComboBox.Text = Worksheet.DefaultStyle.FontName;
 
 			fontSizeToolStripComboBox.Text = Worksheet.DefaultStyle.FontSize.ToString();
