@@ -564,7 +564,7 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 		if ((crTab != CLR_NONE) && (nTab != GetCurSel()))
 			dc.SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
 		else
-			dc.SetTextColor(GetSysColor(COLOR_BTNTEXT));
+			dc.SetTextColor(GetSysColor(COLOR_GRAYTEXT));
 	}
 	
 	dc.SetTextAlign(TA_TOP | TA_LEFT);
