@@ -50,15 +50,14 @@ CToolbarHelper::~CToolbarHelper()
 
 }
 
-BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const CShortcutManager* pShortcutMgr)
+BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, const CShortcutManager* pShortcutMgr)
 {
 	ASSERT_VALID(pToolbar);
-	ASSERT_VALID(pToolbarParent);
 
 	if (!pToolbar || !pToolbar->GetSafeHwnd())
 		return FALSE;
 
-	if (!pToolbarParent || !HookWindow(*pToolbarParent))
+	if (!HookWindow(*pToolbar))
 		return FALSE;
 
 	m_pToolbar = pToolbar;
@@ -70,8 +69,8 @@ BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const 
 }
 
 BOOL CToolbarHelper::Release(BOOL bClearDropBtns) 
-{ 
-	if (HookWindow(NULL) && m_scToolbar.HookWindow(NULL))
+{
+	if (HookWindow(NULL))
 	{
 		if (bClearDropBtns)
 		{
@@ -90,7 +89,6 @@ BOOL CToolbarHelper::Release(BOOL bClearDropBtns)
 
 		m_pToolbar = NULL;
 		m_mapTHButtons.RemoveAll();
-		m_tt.DestroyWindow();
 
 		return TRUE;
 	}
@@ -403,22 +401,6 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 		}
 		break;
 
-	case WM_DESTROY:
-		{
-			// must call rest of chain first
-			LRESULT lr =  CSubclassWnd::Default();
-			HookWindow(NULL);
-			return lr;
-		}
-	}
-
-	return CSubclassWnd::Default();
-}
-
-LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
 		m_tt.RelayEvent(const_cast<MSG*>(CSubclassWnd::GetCurrentMessage()));
@@ -426,13 +408,21 @@ LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 
 	case WM_SIZE:
 		{
-			LRESULT lr = CSubclasser::ScDefault(m_scToolbar);
+			LRESULT lr = CSubclassWnd::Default();
 			RefreshTooltipRects();
+			return lr;
+		}
+
+	case WM_DESTROY:
+		{
+			// must call rest of chain first
+			LRESULT lr =  CSubclassWnd::Default();
+			Release();
 			return lr;
 		}
 	}
 
-	return CSubclasser::ScDefault(m_scToolbar);
+	return CSubclassWnd::Default();
 }
 
 void CToolbarHelper::InitTooltips()
@@ -447,9 +437,6 @@ void CToolbarHelper::InitTooltips()
 		return;
 
 	m_pToolbar->GetToolBarCtrl().SetToolTips(&m_tt);
-
-	// hook the toolbar for mouse messages
-	VERIFY(m_scToolbar.HookWindow(*m_pToolbar, this));
 
 	// turn off default tooltips
 	m_pToolbar->SetBarStyle(m_pToolbar->GetBarStyle() & ~CBRS_TOOLTIPS);

@@ -133,7 +133,7 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 			VERIFY(m_toolbar.LoadToolBar(IDR_COMMENTS_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
 
 			if (m_pMgrShortcuts)
-				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
+				m_tbHelper.Initialize(&m_toolbar, m_pMgrShortcuts);
 
 			// Need care to ensure toolbar does not encroach on content window 
 			CRect rToolbar = GetChildRect(&m_cbCommentsFmt);

@@ -576,7 +576,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 		::SetBkMode((HDC)wp, TRANSPARENT);
 
-		// 'Temporary' hack to fixed interference of CToolbarHelper in CPreferencesToolPage
 		if (IsParentPreferencePage((HWND)lp))
 			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
 

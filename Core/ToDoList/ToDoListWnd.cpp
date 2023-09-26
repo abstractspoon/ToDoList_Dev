@@ -1475,7 +1475,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 
 	m_mgrPrompts.SetComboEditPrompt(m_cbQuickFind, IDS_QUICKFIND);
 	
-	m_tbHelperMain.Initialize(&m_toolbarMain, this, &m_mgrShortcuts);
+	m_tbHelperMain.Initialize(&m_toolbarMain, &m_mgrShortcuts);
 	
 	return TRUE;
 }
@@ -7806,7 +7806,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 
 			// refresh tooltips
 			m_tbHelperMain.Release();
-			m_tbHelperMain.Initialize(&m_toolbarMain, this, &m_mgrShortcuts);
+			m_tbHelperMain.Initialize(&m_toolbarMain, &m_mgrShortcuts);
 		}
 		else
 		{

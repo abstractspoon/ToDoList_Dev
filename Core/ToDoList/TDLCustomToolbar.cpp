@@ -83,7 +83,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 	GetToolBarCtrl().SetImageList(&m_ilNormal);
 	
 	// tooltips
-	if (!m_tbHelper.Initialize(this, GetParent(), &mgrShortcuts))
+	if (!m_tbHelper.Initialize(this, &mgrShortcuts))
 	{
 		ASSERT(0);
 		return FALSE;

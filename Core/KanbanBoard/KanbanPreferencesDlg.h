@@ -30,6 +30,8 @@ class CKanbanCtrl;
 
 class CKanbanPreferencesPage : public CPreferencesPageBase
 {
+	DECLARE_DYNCREATE(CKanbanPreferencesPage)
+
 // Construction
 public:
 	CKanbanPreferencesPage(CWnd* pParent = NULL);   // standard constructor

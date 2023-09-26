@@ -20,13 +20,13 @@ class CShortcutManager;
 
 //////////////////////////////////////////////////////////////////////
 
-class CToolbarHelper : protected CSubclassWnd, protected CSubclasser 
+class CToolbarHelper : protected CSubclassWnd
 {
 public:
 	CToolbarHelper();
 	virtual ~CToolbarHelper();
 
-	BOOL Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const CShortcutManager* pShortcutMgr = NULL);
+	BOOL Initialize(CToolBar* pToolbar, const CShortcutManager* pShortcutMgr = NULL);
 	BOOL Release(BOOL bClearDropBtns = TRUE);
 	void InitTooltips();
 
@@ -48,7 +48,6 @@ public:
 
 protected:
 	CToolBar* m_pToolbar;
-	CSubclassWnd m_scToolbar;
 
 	const CShortcutManager* m_pShortcutMgr;
 
@@ -79,7 +78,6 @@ protected:
 	void RefreshTooltipRects();
 
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
-	LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 };
 
 #endif // !defined(AFX_TOOLBARHELPER_H__86A32540_80BF_421C_97E3_6E760BF427A8__INCLUDED_)

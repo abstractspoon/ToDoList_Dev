@@ -301,7 +301,7 @@ BOOL CTDLFindTasksDlg::InitializeToolbar()
 	
 	m_toolbar.SetBorders(4, 4, 0, 0);
 
-	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+	VERIFY(m_tbHelper.Initialize(&m_toolbar));
 	
 	// very important - turn OFF all the auto positioning and sizing
 	// by default have no borders
