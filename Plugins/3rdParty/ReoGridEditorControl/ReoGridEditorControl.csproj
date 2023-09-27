@@ -338,9 +338,12 @@
     <None Include="Resources\bold.bmp" />
     <None Include="Resources\font_larger.bmp" />
     <None Include="Resources\font_smaller.bmp" />
+    <None Include="Resources\CutHS.bmp" />
+    <Content Include="Resources\CopyHS.bmp" />
     <Content Include="Resources\grid_select.cur" />
     <None Include="Resources\italic.bmp" />
     <None Include="Resources\PageWidthHS.bmp" />
+    <None Include="Resources\PasteHS.bmp" />
     <Content Include="Resources\placeholder.png" />
     <None Include="Resources\strikethrough.bmp" />
     <None Include="Resources\textwrap.bmp" />
@@ -375,7 +378,6 @@
     <None Include="Resources\RadialChartHS.png" />
     <None Include="Resources\PropertiesHS.png" />
     <None Include="Resources\PrintPreviewHS.png" />
-    <None Include="Resources\PasteHS.png" />
     <None Include="Resources\outline_solid.png" />
     <None Include="Resources\outline_dot.png" />
     <None Include="Resources\outline_dash.png" />
@@ -409,8 +411,6 @@
     <None Include="Resources\FontDialogHS.png" />
     <None Include="Resources\Edit_UndoHS.png" />
     <None Include="Resources\Edit_RedoHS.png" />
-    <None Include="Resources\CutHS.png" />
-    <None Include="Resources\CopyHS.png" />
     <None Include="Resources\ColorHS.png" />
     <None Include="Resources\center_line_dot.png" />
     <None Include="Resources\center_line_dash.png" />
