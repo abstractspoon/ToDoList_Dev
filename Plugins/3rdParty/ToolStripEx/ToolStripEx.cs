@@ -19,10 +19,10 @@ namespace IIControls
         public string ToolTipText;
         public bool ToolTipShowUp;
 
-		private static Color Black		= Color.FromArgb(0x00, 0x00, 0x00); // -> COLOR_WINDOWTEXT        
-		private static Color DarkGray	= Color.FromArgb(0x80, 0x80, 0x80); // -> COLOR_BTNSHADOW      
-		private static Color LightGray  = Color.FromArgb(0xC0, 0xC0, 0xC0); // -> COLOR_BTNFACE        
-		private static Color White		= Color.FromArgb(0xFF, 0xFF, 0xFF);	// -> COLOR_BTNHIGHLIGHT   
+		private static Color Black		= Color.FromArgb(0, 0, 0);		 // -> COLOR_WINDOWTEXT        
+		private static Color DarkGray	= Color.FromArgb(128, 128, 128); // -> COLOR_BTNSHADOW      
+		private static Color LightGray  = Color.FromArgb(192, 192, 192); // -> COLOR_BTNFACE        
+		private static Color White		= Color.FromArgb(255, 255, 255); // -> COLOR_BTNHIGHLIGHT   
 
 		public void RemapSysColors()
 		{
@@ -53,7 +53,7 @@ namespace IIControls
 		{
 			if (color == Black)
 			{
-				color = SystemColors.WindowText;
+				color = SystemColors.ControlDarkDark;
 			}
 			else if (color == DarkGray)
 			{
@@ -61,11 +61,11 @@ namespace IIControls
 			}
 			else if (color == LightGray)
 			{
-				color = SystemColors.Control;
+				color = SystemColors.ControlLight;
 			}
 			else if (color == White)
 			{
-				color = SystemColors.ControlLight;
+				color = SystemColors.ControlLightLight;
 			}
 			else
 			{
