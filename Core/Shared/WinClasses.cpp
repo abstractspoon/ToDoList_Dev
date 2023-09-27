@@ -41,17 +41,19 @@ CMapStringToPtr CWinClasses::s_mapCtrlClasses;
 
 CString CWinClasses::GetClass(HWND hWnd)
 {
-	static CString sWndClass;
-	sWndClass.Empty(); // reset each time
-	
-	if (hWnd)
+	if (hWnd == NULL)
 	{
-		int nLen = ::GetClassName(hWnd, sWndClass.GetBuffer(128), 128);
-
-		sWndClass.ReleaseBuffer(nLen);
-		sWndClass.MakeLower();
+		static CString EMPTY_STR;
+		return EMPTY_STR;
 	}
-	
+
+	// else
+	CString sWndClass;
+	int nLen = ::GetClassName(hWnd, sWndClass.GetBuffer(128), 128);
+
+	sWndClass.ReleaseBuffer(nLen);
+	sWndClass.MakeLower();
+
 	return sWndClass;
 }
 
