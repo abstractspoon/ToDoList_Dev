@@ -27,29 +27,27 @@ namespace IIControls
 		public void RemapSysColors()
 		{
 			foreach (ToolStripItem item in Items)
+				RemapSysColors(item.Image as Bitmap);
+		}
+
+		public static void RemapSysColors(Bitmap image)
+		{
+			if (image != null)
 			{
-				if (item.Image != null)
+				for (int i = 0; i < image.Width; i++)
 				{
-					Bitmap image = (item.Image as Bitmap);
-
-					if (image != null)
+					for (int j = 0; j < image.Height; j++)
 					{
-						for (int i = 0; i < image.Width; i++)
-						{
-							for (int j = 0; j < image.Height; j++)
-							{
-								Color color = image.GetPixel(i, j);
+						Color color = image.GetPixel(i, j);
 
-								if (MapColor(ref color))
-									image.SetPixel(i, j, color);
-							}
-						}
+						if (MapColor(ref color))
+							image.SetPixel(i, j, color);
 					}
 				}
 			}
 		}
 
-		protected bool MapColor(ref Color color)
+		protected static bool MapColor(ref Color color)
 		{
 			if (color == Black)
 			{
