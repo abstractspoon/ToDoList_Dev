@@ -57,8 +57,8 @@
 			this.toolstripJustifyCenter = new System.Windows.Forms.ToolStripButton();
 			this.toolstripJustifyRight = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolstripListOrdered = new System.Windows.Forms.ToolStripButton();
 			this.toolstripListUnordered = new System.Windows.Forms.ToolStripButton();
+			this.toolstripListOrdered = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolstripFontOutdent = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFontIndent = new System.Windows.Forms.ToolStripButton();
@@ -207,8 +207,8 @@
             this.toolstripJustifyCenter,
             this.toolstripJustifyRight,
             this.toolStripSeparator4,
-            this.toolstripListOrdered,
             this.toolstripListUnordered,
+            this.toolstripListOrdered,
             this.toolStripSeparator5,
             this.toolstripFontOutdent,
             this.toolstripFontIndent,
@@ -433,15 +433,6 @@
 			this.toolStripSeparator4.Name = "toolStripSeparator4";
 			resources.ApplyResources(this.toolStripSeparator4, "toolStripSeparator4");
 			// 
-			// toolstripListOrdered
-			// 
-			this.toolstripListOrdered.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolstripListOrdered.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarListOrdered;
-			resources.ApplyResources(this.toolstripListOrdered, "toolstripListOrdered");
-			this.toolstripListOrdered.Name = "toolstripListOrdered";
-			this.toolstripListOrdered.Tag = "ListOrdered";
-			this.toolstripListOrdered.Click += new System.EventHandler(this.toolstripEditorClick);
-			// 
 			// toolstripListUnordered
 			// 
 			this.toolstripListUnordered.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -450,6 +441,15 @@
 			this.toolstripListUnordered.Name = "toolstripListUnordered";
 			this.toolstripListUnordered.Tag = "ListUnordered";
 			this.toolstripListUnordered.Click += new System.EventHandler(this.toolstripEditorClick);
+			// 
+			// toolstripListOrdered
+			// 
+			this.toolstripListOrdered.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.toolstripListOrdered.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarListOrdered;
+			resources.ApplyResources(this.toolstripListOrdered, "toolstripListOrdered");
+			this.toolstripListOrdered.Name = "toolstripListOrdered";
+			this.toolstripListOrdered.Tag = "ListOrdered";
+			this.toolstripListOrdered.Click += new System.EventHandler(this.toolstripEditorClick);
 			// 
 			// toolStripSeparator5
 			// 
@@ -590,7 +590,6 @@
             this.toolStripSeparator8,
             this.contextInsert});
 			this.contextEditor.Name = "contextEditor";
-			this.contextEditor.ShowImageMargin = false;
 			resources.ApplyResources(this.contextEditor, "contextEditor");
 			// 
 			// contextTable
