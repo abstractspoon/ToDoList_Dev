@@ -244,7 +244,7 @@ void MapTheme(HTHEME hTheme, LPCWSTR szClass)
 			THEMEELEMENT elm;
 			
 			if (!s_mapThWnds.Lookup(hTheme, elm))
-				elm.sClass = szClass;
+				elm.sClass = Misc::ToLower(szClass);
 			else
 				ASSERT(elm.nRefCount > 0);
 
@@ -362,8 +362,7 @@ public:
 		return DM_GRAY3DFACETEXT;
 	}
 
-protected:
-	void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
+	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
 	{
 		CString sLabel;
 		pWnd->GetWindowText(sLabel);
@@ -441,6 +440,125 @@ protected:
 		}
 
 		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CDarkModeManagedButtonText : public CDarkModeCtrlBase
+{
+protected:
+	int m_nTextOffset;
+
+protected:
+	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
+	{
+		if (!CDarkModeCtrlBase::HookWindow(hRealWnd, pSubclasser))
+			return FALSE;
+
+		CThemed th;
+
+		if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
+		{
+			CSize sizeBtn;
+
+			if (th.GetSize(BP_CHECKBOX, CBS_CHECKEDNORMAL, sizeBtn))
+				m_nTextOffset = (sizeBtn.cx + 6);
+		}
+
+		return TRUE;
+	}
+
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			if (::IsWindowEnabled(hRealWnd) == FALSE)
+			{
+				CThemed th;
+
+				if (th.Open(hRealWnd, _T("EDIT")) && th.AreControlsThemed())
+				{
+					CDC* pDC = GetPaintDC(wp);
+					CWnd* pWnd = CWnd::FromHandle(hRealWnd);
+
+					// Redraw background
+					CRect rClient;
+					GetClientRect(rClient);
+
+					th.DrawParentBackground(pWnd, pDC, rClient);
+
+					// Draw Text
+					CRect rText(rClient);
+
+					if (Misc::HasFlag(GetStyle(), BS_LEFTTEXT))
+						rText.right -= m_nTextOffset;
+					else
+						rText.left += m_nTextOffset;
+
+					// Calc minimum rect required
+					int nAlign = GetTextAlignment();
+
+					if (nAlign & DT_VCENTER)
+					{
+						CRect rTextMin;
+						CDarkModeStaticText::DrawText(pDC, pWnd, nAlign | DT_CALCRECT, rTextMin);
+
+						GraphicsMisc::CentreRect(rTextMin, rClient, FALSE, TRUE);
+
+						rText.top = rTextMin.top;
+						rText.bottom = rTextMin.bottom;
+					}
+					
+					// Draw actual text
+					CString sText;
+					pWnd->GetWindowText(sText);
+
+					th.DrawText(pDC, EP_EDITTEXT, ETS_DISABLED, sText, nAlign, 0, rText);
+
+					// Clip out the text
+					pDC->ExcludeClipRect(rText);
+
+					// default drawing
+					return CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
+				}
+			}
+			break;
+		}
+
+		return Default();
+	}
+
+	int GetTextAlignment() const
+	{
+		DWORD dwStyle = GetStyle();
+
+		int nAlign = DT_LEFT;
+
+		if (Misc::HasFlag(dwStyle, BS_CENTER))
+		{
+			nAlign = DT_CENTER;
+		}
+		else if (Misc::HasFlag(dwStyle, BS_RIGHT))
+		{
+			nAlign = DT_RIGHT;
+		}
+
+		if (Misc::HasFlag(dwStyle, BS_TOP))
+		{
+			nAlign |= DT_TOP;
+		}
+		else if (Misc::HasFlag(dwStyle, BS_BOTTOM))
+		{
+			nAlign |= DT_BOTTOM;
+		}
+		else //if (Misc::HasFlag(dwStyle, BS_VCENTER))
+		{
+			nAlign |= DT_VCENTER;
+		}
+
+		return nAlign;
 	}
 };
 
@@ -582,7 +700,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
-
 		if (wp)
 		{
 			CString sClass = CWinClasses::GetClass(hWnd);
@@ -617,6 +734,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					HookWindow(hWnd, new CDarkModeStaticButtonText());
 					break;
 				}
+			}
+			else if (sClass.Find(_T(".button.app.")) != -1)
+			{
+				HookWindow(hWnd, new CDarkModeManagedButtonText());
 			}
 		}
 		else
