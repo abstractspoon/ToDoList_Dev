@@ -393,16 +393,15 @@ private:
 				CRect rText;
 				GetClientRect(rText);
 
-				//rText.left++;
-				rText.top++;
-
-				if (nType == SS_CENTER)
+				switch (nType)
 				{
+				case SS_CENTER:
 					nAlign = DT_CENTER;
-				}
-				else if (nType == SS_RIGHT)
-				{
+					break;
+
+				case SS_RIGHT:
 					nAlign = DT_RIGHT;
+					break;
 				}
 
 				DrawText(pDC, pWnd, nAlign, rText);
@@ -419,7 +418,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-class CDarkModeStaticButtonText : public CDarkModeCtrlBase
+class CDarkModeButtonStaticText : public CDarkModeCtrlBase
 {
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -441,10 +440,10 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CDarkModeManagedStaticButtonText : public CDarkModeCtrlBase
+class CDarkModeManagedButtonStaticText : public CDarkModeCtrlBase
 {
 public:
-	CDarkModeManagedStaticButtonText() : m_nTextOffset(0) {}
+	CDarkModeManagedButtonStaticText() : m_nTextOffset(0) {}
 
 protected:
 	int m_nTextOffset;
@@ -473,7 +472,7 @@ protected:
 		switch (msg)
 		{
 		case WM_PAINT:
-			if (!::IsWindowEnabled(hRealWnd))
+			if (!IsWindowEnabled())
 			{
 				CThemed th;
 
@@ -729,13 +728,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				case BS_AUTOCHECKBOX:
 				case BS_RADIOBUTTON:
 				case BS_AUTORADIOBUTTON:
-					HookWindow(hWnd, new CDarkModeStaticButtonText());
+					HookWindow(hWnd, new CDarkModeButtonStaticText());
 					break;
 				}
 			}
 			else if (sClass.Find(_T(".button.app.")) != -1)
 			{
-				HookWindow(hWnd, new CDarkModeManagedStaticButtonText());
+				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
 			}
 		}
 		else
@@ -1058,7 +1057,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 		default:
 			// It's not a checkbox or radiobutton
 			if (s_hwndCurrentManagedBtnStatic)
+			{
 				UnhookWindow(s_hwndCurrentManagedBtnStatic);
+				s_hwndCurrentManagedBtnStatic = NULL;
+			}
+			break;
 		}
 	}
 	else if (s_hwndCurrentExplorerTreeOrList)
