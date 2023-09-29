@@ -315,6 +315,7 @@ static HWND s_hwndCurrentComboBox			= NULL;
 static HWND s_hwndCurrentEditText			= NULL;
 static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
+static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
 
 //////////////////////////////////////////////////////////////////////
@@ -445,8 +446,11 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CDarkModeManagedButtonText : public CDarkModeCtrlBase
+class CDarkModeManagedStaticButtonText : public CDarkModeCtrlBase
 {
+public:
+	CDarkModeManagedStaticButtonText() : m_nTextOffset(0) {}
+
 protected:
 	int m_nTextOffset;
 
@@ -474,7 +478,7 @@ protected:
 		switch (msg)
 		{
 		case WM_PAINT:
-			if (::IsWindowEnabled(hRealWnd) == FALSE)
+			if (!::IsWindowEnabled(hRealWnd))
 			{
 				CThemed th;
 
@@ -498,23 +502,22 @@ protected:
 						rText.left += m_nTextOffset;
 
 					// Calc minimum rect required
+					CString sText;
+					pWnd->GetWindowText(sText);
+
 					int nAlign = GetTextAlignment();
+					CRect rTextMin;
 
 					if (nAlign & DT_VCENTER)
 					{
-						CRect rTextMin;
-						CDarkModeStaticText::DrawText(pDC, pWnd, nAlign | DT_CALCRECT, rTextMin);
-
+						th.GetTextExtent(pDC, EP_EDITTEXT, ETS_DISABLED, sText, nAlign, rTextMin);
 						GraphicsMisc::CentreRect(rTextMin, rClient, FALSE, TRUE);
 
 						rText.top = rTextMin.top;
 						rText.bottom = rTextMin.bottom;
 					}
-					
-					// Draw actual text
-					CString sText;
-					pWnd->GetWindowText(sText);
 
+					// Draw actual text
 					th.DrawText(pDC, EP_EDITTEXT, ETS_DISABLED, sText, nAlign, 0, rText);
 
 					// Clip out the text
@@ -737,7 +740,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (sClass.Find(_T(".button.app.")) != -1)
 			{
-				HookWindow(hWnd, new CDarkModeManagedButtonText());
+				HookWindow(hWnd, new CDarkModeManagedStaticButtonText());
 			}
 		}
 		else
@@ -798,6 +801,11 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		else if (s_mapExplorerThemedWnds.Has(hWnd))
 		{
 			CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
+			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+		}
+		else if (sClass.Find(_T(".button.app.")) != -1)
+		{
+			CAutoFlagT<HWND> af(s_hwndCurrentManagedBtnStatic, hWnd);
 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
 	}
@@ -1042,6 +1050,20 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				return hr;
 			}
 			break;
+		}
+	}
+	else if (CWinClasses::IsClass(sClass, TC_BUTTON))
+	{
+		switch (iPartId)
+		{
+		case BP_CHECKBOX:
+		case BP_RADIOBUTTON:
+			break;
+
+		default:
+			// It's not a checkbox or radiobutton
+			if (s_hwndCurrentManagedBtnStatic)
+				UnhookWindow(s_hwndCurrentManagedBtnStatic);
 		}
 	}
 	else if (s_hwndCurrentExplorerTreeOrList)
