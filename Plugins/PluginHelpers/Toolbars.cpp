@@ -169,7 +169,7 @@ void BaseToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
 	//int breakpoint = 0;
 }
 
-void BaseToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
+void BaseToolbarRenderer::OnRenderSeparator(ToolStripSeparatorRenderEventArgs^ e)
 {
 	auto rect = e->Item->Bounds;
 

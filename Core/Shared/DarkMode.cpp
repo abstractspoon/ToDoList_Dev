@@ -34,8 +34,7 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_GRAYWINDOWTEXT	= RGB(191, 192, 193);
-const COLORREF DM_GRAY3DFACETEXT	= RGB(221, 222, 223);
+const COLORREF DM_GRAY3DFACETEXT	= GraphicsMisc::GetBestTextColor(DM_3DFACE, FALSE);
 const COLORREF DM_WINDOWTEXT		= RGB(253, 254, 255);
 
 //////////////////////////////////////////////////////////////////////
@@ -356,11 +355,7 @@ public:
 
 		COLORREF crParent = GetParentBkgndColor(hWnd);
 
-		if (crParent == DM_WINDOW)
-			return DM_GRAYWINDOWTEXT;
-
-		// else
-		return DM_GRAY3DFACETEXT;
+		return GraphicsMisc::GetBestTextColor(crParent, FALSE);
 	}
 
 	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)

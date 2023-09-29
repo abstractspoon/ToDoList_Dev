@@ -67,7 +67,7 @@ namespace WordCloudUIExtension
 				}
 
                 if (taskColorIsBkgnd)
-                    return DrawingColor.GetBestTextColor(TextColor);
+                    return DrawingColor.GetBestTextColor(TextColor, true);
             }
             else
             {

@@ -1090,7 +1090,7 @@ namespace EvidenceBoardUIExtension
 				bool selected = state.HasFlag(DrawState.Selected);
 
 				if (m_TaskColorIsBkgnd && !selected)
-					return DrawingColor.GetBestTextColor(taskItem.TextColor);
+					return DrawingColor.GetBestTextColor(taskItem.TextColor, true);
 
 				if (selected)
 					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);

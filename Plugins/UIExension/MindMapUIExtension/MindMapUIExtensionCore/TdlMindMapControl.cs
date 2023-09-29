@@ -1137,7 +1137,7 @@ namespace MindMapUIExtension
 				}
 				else if (m_TaskColorIsBkgnd)
 				{
-					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
+					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor, true);
 				}
                 else
                 {

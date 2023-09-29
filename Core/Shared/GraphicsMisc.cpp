@@ -60,8 +60,6 @@ const static int DEFAULT_DPI = 96;
 
 //////////////////////////////////////////////////////////////////////
 
-const static COLORREF WHITE			= RGB(255, 255, 255);
-const static COLORREF BLACK			= RGB(0, 0, 0);
 const static COLORREF GROUPHEADER	= RGB(63, 118, 179);
 
 
@@ -823,10 +821,26 @@ CFont* GraphicsMisc::PrepareDCFont(CDC* pDC, HWND hwndRef, CFont* pFont, int nSt
 	return (CFont*)pDC->SelectStockObject(nStockFont);
 }
 
-COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack)
+COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack, BOOL bEnabled)
 {
-	// base text color on luminance
-	return ((RGBX(crBack).Luminance() < 128) ? WHITE : BLACK);
+	BYTE bLum = RGBX(crBack).Luminance();
+
+	if (bLum < 128) // darker
+	{
+		if (bEnabled)
+			bLum = 255; // white
+		else
+			bLum += 96; // lighter
+	}
+	else // lighter
+	{
+		if (bEnabled)
+			bLum = 0; // black
+		else
+			bLum -= 96; // darker
+	}
+	
+	return RGB(bLum, bLum, bLum);
 }
 
 COLORREF GraphicsMisc::Lighter(COLORREF color, double dAmount, BOOL bRGB)
@@ -1532,9 +1546,9 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 
 		// Themed Windows 7 and Vista require a round-rect
 		if (bThemed && (nOSVer < OSV_WIN8))
-			GraphicsMisc::DrawRect(pDC, rBkgnd, WHITE, CLR_NONE, 1);
+			GraphicsMisc::DrawRect(pDC, rBkgnd, colorWhite, CLR_NONE, 1);
 		else
-			pDC->FillSolidRect(rBkgnd, WHITE);
+			pDC->FillSolidRect(rBkgnd, colorWhite);
 
 		bDrawn = TRUE;
 	}

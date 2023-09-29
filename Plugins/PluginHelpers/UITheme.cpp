@@ -366,6 +366,20 @@ void UIThemeToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e
 	}
 }
 
+void UIThemeToolbarRenderer::OnRenderItemText(ToolStripItemTextRenderEventArgs^ e)
+{
+	if (!e->Item->Enabled)
+	{
+		auto brush = gcnew SolidBrush(DrawingColor::GetBestTextColor(m_BkgndLightColor, false));
+		
+		e->Graphics->DrawString(e->Text, e->TextFont, brush, e->TextRectangle);
+	}
+	else
+	{
+		BaseToolbarRenderer::OnRenderItemText(e);
+	}
+}
+
 void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
 	if (!RenderButtonBackground(e))
