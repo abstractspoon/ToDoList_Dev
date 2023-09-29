@@ -278,9 +278,9 @@ namespace HTMLReportExporter
 
 			// Page toolbars
 			var theme = new UITheme();
-			theme.SetAppDrawingColor(UITheme.AppColor.AppBackLight, headerPage.BackColor);
-			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, headerPage.BackColor);
-			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, headerPage.BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.AppBackLight, tabControl.BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, tabControl.BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, tabControl.BackColor);
 
 			this.htmlReportHeaderControl.SetUITheme(theme);
 			this.htmlReportTitleControl.SetUITheme(theme);
