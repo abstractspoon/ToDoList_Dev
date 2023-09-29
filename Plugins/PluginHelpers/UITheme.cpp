@@ -368,7 +368,7 @@ void UIThemeToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e
 
 void UIThemeToolbarRenderer::OnRenderItemText(ToolStripItemTextRenderEventArgs^ e)
 {
-	if (!e->Item->Enabled)
+	if (!ISTYPE(e->Item->Owner, ToolStripDropDownMenu) && !e->Item->Enabled)
 	{
 		auto brush = gcnew SolidBrush(DrawingColor::GetBestTextColor(m_BkgndLightColor, false));
 		
