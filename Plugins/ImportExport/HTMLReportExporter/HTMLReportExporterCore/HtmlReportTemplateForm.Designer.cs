@@ -282,7 +282,7 @@
 			// toolStripHelp
 			// 
 			this.toolStripHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripHelp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripHelp.Image")));
+			this.toolStripHelp.Image = global::HTMLReportExporter.Properties.Resources.ToolbarHelp;
 			this.toolStripHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripHelp.Name = "toolStripHelp";
 			this.toolStripHelp.Size = new System.Drawing.Size(23, 22);

@@ -153,6 +153,16 @@ namespace HTMLReportExporter.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ToolbarHelp {
+            get {
+                object obj = ResourceManager.GetObject("ToolbarHelp", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ToolbarImage {
             get {
                 object obj = ResourceManager.GetObject("ToolbarImage", resourceCulture);
