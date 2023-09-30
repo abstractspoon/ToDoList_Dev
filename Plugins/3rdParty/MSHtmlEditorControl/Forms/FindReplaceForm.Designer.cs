@@ -194,7 +194,6 @@ namespace MSDN.Html.Editor
 			// 
 			// optionMatchWhole
 			// 
-			this.optionMatchWhole.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.optionMatchWhole.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.optionMatchWhole.Location = new System.Drawing.Point(16, 157);
 			this.optionMatchWhole.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -205,7 +204,6 @@ namespace MSDN.Html.Editor
 			// 
 			// optionMatchCase
 			// 
-			this.optionMatchCase.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.optionMatchCase.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.optionMatchCase.Location = new System.Drawing.Point(16, 118);
 			this.optionMatchCase.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
