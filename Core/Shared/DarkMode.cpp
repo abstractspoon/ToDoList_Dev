@@ -424,6 +424,28 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+class CDarkModeComboBox : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			if (s_hwndCurrentComboBox == NULL)
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hRealWnd);
+				return Default();
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeButtonStaticText : public CDarkModeCtrlBase
 {
 protected:
@@ -708,6 +730,21 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
 			}
+			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
+			{
+				// Hook readonly non-ownerdraw combos
+				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
+
+				if ((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST)
+				{
+					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
+						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
+					{
+						HookWindow(hWnd, new CDarkModeComboBox());
+					}
+					break;
+				}
+			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
 				switch (CWinClasses::GetStyleType(hWnd, SS_TYPEMASK))
@@ -781,8 +818,11 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 		if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
 		{
-			CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
-			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+			if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
+				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+			}
 		}
 		else if (CWinClasses::IsClass(sClass, WC_EDIT))
 		{
