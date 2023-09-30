@@ -394,7 +394,7 @@ private:
 				CDC* pDC = GetPaintDC(wp);
 
 				int nType = CWinClasses::GetStyleType(hRealWnd, SS_TYPEMASK);
-				int nAlign = DT_LEFT;
+				int nAlign = DT_LEFT | DT_VCENTER;
 
 				CRect rText;
 				GetClientRect(rText);
@@ -402,11 +402,11 @@ private:
 				switch (nType)
 				{
 				case SS_CENTER:
-					nAlign = DT_CENTER;
+					nAlign |= DT_CENTER;
 					break;
 
 				case SS_RIGHT:
-					nAlign = DT_RIGHT;
+					nAlign |= DT_RIGHT;
 					break;
 				}
 
