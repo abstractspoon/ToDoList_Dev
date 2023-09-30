@@ -746,6 +746,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
+			else if (CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
+			{
+				if (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK) == CBS_DROPDOWNLIST)
+				{
+					HookWindow(hWnd, new CDarkModeComboBox());
+				}
+			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
 				switch (CWinClasses::GetStyleType(hWnd, SS_TYPEMASK))
@@ -817,7 +824,7 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		// Avoid subclassing wherever possible
 		CString sClass = CWinClasses::GetClass(hWnd);
 
-		if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
+		if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||	(sClass.Find(_T(".combobox.app.")) != -1))
 		{
 			if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
 			{
@@ -894,9 +901,9 @@ HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme)
 
 HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
 {
-	CString sClass = GetClass(hTheme);
+	CString sThClass = GetClass(hTheme);
 
-	if (CWinClasses::IsClass(sClass, TC_EDIT))
+	if (CWinClasses::IsClass(sThClass, TC_EDIT))
 	{
 		switch (iPartId)
 		{
@@ -922,9 +929,9 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 
 HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect)
 {
-	CString sClass = GetClass(hTheme);
+	CString sThClass = GetClass(hTheme);
 
-	if (s_hwndCurrentDateTime && CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
+	if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
 	{
 		switch (iPartId)
 		{
@@ -974,7 +981,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 			break;
 		}
 	}
-	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
+	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sThClass, TC_COMBOBOX))
 	{
 		switch (iPartId)
 		{
@@ -1009,42 +1016,34 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 
 				if (hr == S_OK)
 				{
-					DWORD dwStyle = ::GetWindowLong(s_hwndCurrentComboBox, GWL_STYLE);
+					CRect rBkgnd;
+					GetClientRect(s_hwndCurrentComboBox, rBkgnd);
 
-					if (((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST) &&
-						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
-						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
+					rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
+					rBkgnd.DeflateRect(2, 2);
+
+					COLORREF crBkgnd = DM_WINDOW;
+
+					switch (iStateId)
 					{
-						CRect rBkgnd;
-						GetClientRect(s_hwndCurrentComboBox, rBkgnd);
+					case CBRO_DISABLED:
+						crBkgnd = DM_3DFACE;
+						break;
 
-						rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
-						rBkgnd.DeflateRect(2, 2);
-
-						COLORREF crBkgnd = DM_WINDOW;
-
-						switch (iStateId)
-						{
-						case CBRO_DISABLED:
-							crBkgnd = DM_3DFACE;
-							break;
-
-						default:
-							if (::GetFocus() == s_hwndCurrentComboBox)
-								crBkgnd = GetSysColor(COLOR_HIGHLIGHT);
-							break;
-						}
-
-						CDC::FromHandle(hdc)->FillSolidRect(rBkgnd, crBkgnd);
+					default:
+						if (::GetFocus() == s_hwndCurrentComboBox)
+							crBkgnd = GetSysColor(COLOR_HIGHLIGHT);
+						break;
 					}
-				}
 
+					CDC::FromHandle(hdc)->FillSolidRect(rBkgnd, crBkgnd);
+				}
 				return hr;
 			}
 			break;
 		}
 	}
-	else if (CWinClasses::IsClass(sClass, TC_TABCTRL))
+	else if (CWinClasses::IsClass(sThClass, TC_TABCTRL))
 	{
 		switch (iPartId)
 		{
@@ -1061,7 +1060,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 			break;
 		}
 	}
-	else if (CWinClasses::IsClass(sClass, TC_EDIT))
+	else if (CWinClasses::IsClass(sThClass, TC_EDIT))
 	{
 		switch (iPartId)
 		{
@@ -1084,7 +1083,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 			break;
 		}
 	}
-	else if (s_hwndCurrentManagedBtnStatic && CWinClasses::IsClass(sClass, TC_BUTTON))
+	else if (s_hwndCurrentManagedBtnStatic && CWinClasses::IsClass(sThClass, TC_BUTTON))
 	{
 		switch (iPartId)
 		{
@@ -1097,15 +1096,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 					((CDarkModeManagedButtonStaticText*)pHook)->SetIsCheckBoxOrRadioButton();
 			}
 			break;
-
-		default:
-			// It's not a checkbox or radiobutton
-			break;
 		}
 	}
 	else if (s_hwndCurrentExplorerTreeOrList)
 	{
-		if (CWinClasses::IsClass(sClass, TC_TREEVIEW))
+		if (CWinClasses::IsClass(sThClass, TC_TREEVIEW))
 		{
 			switch (iPartId)
 			{
@@ -1114,7 +1109,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				break;
 			}
 		}
-		else if (sClass.IsEmpty() || CWinClasses::IsClass(sClass, TC_LISTVIEW))
+		else if (sThClass.IsEmpty() || CWinClasses::IsClass(sThClass, TC_LISTVIEW))
 		{
 			switch (iPartId)
 			{
@@ -1130,11 +1125,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 
 HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
 {
-	CString sClass = GetClass(hTheme);
+	CString sThClass = GetClass(hTheme);
 
 	if (s_hwndCurrentBtnStatic)
 	{
-		ASSERT(CWinClasses::IsClass(sClass, TC_BUTTON));
+		ASSERT(CWinClasses::IsClass(sThClass, TC_BUTTON));
 
 		::SetTextColor(hdc, CDarkModeStaticText::GetTextColor(s_hwndCurrentBtnStatic));
 		::SetBkMode(hdc, TRANSPARENT);
@@ -1142,11 +1137,11 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 
 		return S_OK;
 	}
-	else if (CWinClasses::IsClass(sClass, TC_EDIT))
+	else if (CWinClasses::IsClass(sThClass, TC_EDIT))
 	{
 		int breakpoint = 0;
 	}
-	else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
+	else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
 	{
 		switch (iPartId)
 		{
@@ -1177,7 +1172,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 			break;
 		}
 	}
-	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sClass, TC_COMBOBOX))
+	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sThClass, TC_COMBOBOX))
 	{
 		switch (iPartId)
 		{
