@@ -360,14 +360,20 @@ public:
 
 	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
 	{
-		CString sLabel;
-		pWnd->GetWindowText(sLabel);
+		CString sText;
+		pWnd->GetWindowText(sText);
 
 		CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
 
+		if (nAlign & DT_VCENTER)
+		{
+			CSize sizeText = pDC->GetTextExtent(sText);
+			rText.OffsetRect(0, ((rText.Height() - sizeText.cy) / 2));
+		}
+
 		pDC->SetTextColor(GetTextColor(*pWnd));
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->DrawText(sLabel, rText, nAlign);
+		pDC->DrawText(sText, rText, nAlign);
 		pDC->SelectObject(pOldFont);
 	}
 
@@ -443,83 +449,77 @@ protected:
 class CDarkModeManagedButtonStaticText : public CDarkModeCtrlBase
 {
 public:
-	CDarkModeManagedButtonStaticText() : m_nTextOffset(0) {}
+	CDarkModeManagedButtonStaticText() : m_bDrawDisabledText(FALSE) {}
+
+	void EnableDisabledTextDraw() { m_bDrawDisabledText = TRUE; }
 
 protected:
-	int m_nTextOffset;
+	static int s_nCheckOffset;
+	BOOL m_bDrawDisabledText;
 
 protected:
-	BOOL HookWindow(HWND hRealWnd, CSubclasser* pSubclasser = NULL)
-	{
-		if (!CDarkModeCtrlBase::HookWindow(hRealWnd, pSubclasser))
-			return FALSE;
-
-		CThemed th;
-
-		if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
-		{
-			CSize sizeBtn;
-
-			if (th.GetSize(BP_CHECKBOX, CBS_CHECKEDNORMAL, sizeBtn))
-				m_nTextOffset = (sizeBtn.cx + 6);
-		}
-
-		return TRUE;
-	}
-
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		switch (msg)
 		{
 		case WM_PAINT:
-			if (!IsWindowEnabled())
 			{
-				CThemed th;
+				CDC* pDC = GetPaintDC(wp);
+				LRESULT lr = CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
 
-				if (th.Open(hRealWnd, _T("EDIT")) && th.AreControlsThemed())
+				if (m_bDrawDisabledText && !IsWindowEnabled())
 				{
-					CDC* pDC = GetPaintDC(wp);
-					CWnd* pWnd = CWnd::FromHandle(hRealWnd);
+					CThemed th;
 
-					// Redraw background
-					CRect rClient;
-					GetClientRect(rClient);
-
-					th.DrawParentBackground(pWnd, pDC, rClient);
-
-					// Draw Text
-					CRect rText(rClient);
-
-					if (Misc::HasFlag(GetStyle(), BS_LEFTTEXT))
-						rText.right -= m_nTextOffset;
-					else
-						rText.left += m_nTextOffset;
-
-					// Calc minimum rect required
-					CString sText;
-					pWnd->GetWindowText(sText);
-
-					int nAlign = GetTextAlignment();
-					CRect rTextMin;
-
-					if (nAlign & DT_VCENTER)
+					if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
 					{
-						th.GetTextExtent(pDC, EP_EDITTEXT, ETS_DISABLED, sText, nAlign, rTextMin);
-						GraphicsMisc::CentreRect(rTextMin, rClient, FALSE, TRUE);
+						// Calculate the size of the checkbox/radiobutton portion
+						if (s_nCheckOffset == -1)
+						{
+							CSize sizeBtn;
 
-						rText.top = rTextMin.top;
-						rText.bottom = rTextMin.bottom;
+							if (th.GetSize(BP_CHECKBOX, CBS_CHECKEDNORMAL, sizeBtn))
+								s_nCheckOffset = (sizeBtn.cx + 6);
+						}
+
+						// Clip out the button portion
+						CRect rClient;
+						GetClientRect(rClient);
+
+						CRect rBtn(rClient), rText(rClient);
+
+						if (Misc::HasFlag(GetStyle(), BS_LEFTTEXT))
+						{
+							rText.right -= s_nCheckOffset;
+							rBtn.left = rText.right;
+						}
+						else
+						{
+							rText.left += s_nCheckOffset;
+							rBtn.right = rText.left;
+						}
+
+						pDC->ExcludeClipRect(rBtn);
+
+						// Redraw background
+						CWnd* pWnd = CWnd::FromHandle(hRealWnd);
+						th.DrawParentBackground(pWnd, pDC, rText);
+
+						// Draw actual text
+						rText.OffsetRect(-1, -1);
+						CDarkModeStaticText::DrawText(pDC, pWnd, GetTextAlignment(), rText);
 					}
-
-					// Draw actual text
-					th.DrawText(pDC, EP_EDITTEXT, ETS_DISABLED, sText, nAlign, 0, rText);
-
-					// Clip out the text
-					pDC->ExcludeClipRect(rText);
-
-					// default drawing
-					return CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
 				}
+				CleanupDC(wp, pDC);
+
+				// We can safely unhook the window if it's not a checkbox/radiobutton
+				if (!m_bDrawDisabledText)
+				{
+					s_hwndCurrentManagedBtnStatic = NULL;
+					UnhookWindow(hRealWnd);
+				}
+
+				return lr;
 			}
 			break;
 		}
@@ -558,6 +558,8 @@ protected:
 		return nAlign;
 	}
 };
+
+BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1046,21 +1048,22 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 			break;
 		}
 	}
-	else if (CWinClasses::IsClass(sClass, TC_BUTTON))
+	else if (s_hwndCurrentManagedBtnStatic && CWinClasses::IsClass(sClass, TC_BUTTON))
 	{
 		switch (iPartId)
 		{
 		case BP_CHECKBOX:
 		case BP_RADIOBUTTON:
+			{
+				CSubclassWnd* pHook = NULL;
+
+				if (s_mapScWnds.Lookup(s_hwndCurrentManagedBtnStatic, pHook) && pHook)
+					((CDarkModeManagedButtonStaticText*)pHook)->EnableDisabledTextDraw();
+			}
 			break;
 
 		default:
 			// It's not a checkbox or radiobutton
-			if (s_hwndCurrentManagedBtnStatic)
-			{
-				UnhookWindow(s_hwndCurrentManagedBtnStatic);
-				s_hwndCurrentManagedBtnStatic = NULL;
-			}
 			break;
 		}
 	}
@@ -1102,6 +1105,10 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 		::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
 
 		return S_OK;
+	}
+	else if (CWinClasses::IsClass(sClass, TC_EDIT))
+	{
+		int breakpoint = 0;
 	}
 	else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sClass, TC_DATETIMEPICK))
 	{
