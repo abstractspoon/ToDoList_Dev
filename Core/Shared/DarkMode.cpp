@@ -471,13 +471,13 @@ protected:
 class CDarkModeManagedButtonStaticText : public CDarkModeCtrlBase
 {
 public:
-	CDarkModeManagedButtonStaticText() : m_bDrawDisabledText(FALSE) {}
+	CDarkModeManagedButtonStaticText() : m_bCheckOrRadio(FALSE) {}
 
-	void EnableDisabledTextDraw() { m_bDrawDisabledText = TRUE; }
+	void SetIsCheckBoxOrRadioButton() { m_bCheckOrRadio = TRUE; }
 
 protected:
 	static int s_nCheckOffset;
-	BOOL m_bDrawDisabledText;
+	BOOL m_bCheckOrRadio;
 
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -486,10 +486,12 @@ protected:
 		{
 		case WM_PAINT:
 			{
+				CAutoFlagT<HWND> af(s_hwndCurrentManagedBtnStatic, hRealWnd);
+
 				CDC* pDC = GetPaintDC(wp);
 				LRESULT lr = CSubclassWnd::WindowProc(hRealWnd, WM_PAINT, (WPARAM)pDC->m_hDC, 0);
 
-				if (m_bDrawDisabledText && !IsWindowEnabled())
+				if (m_bCheckOrRadio && !IsWindowEnabled())
 				{
 					CThemed th;
 
@@ -535,7 +537,7 @@ protected:
 				CleanupDC(wp, pDC);
 
 				// We can safely unhook the window if it's not a checkbox/radiobutton
-				if (!m_bDrawDisabledText)
+				if (!m_bCheckOrRadio)
 				{
 					s_hwndCurrentManagedBtnStatic = NULL;
 					UnhookWindow(hRealWnd);
@@ -839,11 +841,6 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
-		else if (sClass.Find(_T(".button.app.")) != -1)
-		{
-			CAutoFlagT<HWND> af(s_hwndCurrentManagedBtnStatic, hWnd);
-			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-		}
 	}
 
 	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
@@ -1098,7 +1095,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 				CSubclassWnd* pHook = NULL;
 
 				if (s_mapScWnds.Lookup(s_hwndCurrentManagedBtnStatic, pHook) && pHook)
-					((CDarkModeManagedButtonStaticText*)pHook)->EnableDisabledTextDraw();
+					((CDarkModeManagedButtonStaticText*)pHook)->SetIsCheckBoxOrRadioButton();
 			}
 			break;
 
