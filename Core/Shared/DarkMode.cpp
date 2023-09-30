@@ -687,10 +687,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	switch (nMsg)
 	{
- 	case WM_CTLCOLOR:
-		ASSERT(0);
-		break;
-
 	case WM_CTLCOLORDLG:
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
@@ -704,8 +700,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		// else fall thru to edit
 
 	case WM_CTLCOLOREDIT:
-		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-		::SetBkMode((HDC)wp, TRANSPARENT);
+		{
+			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
+			::SetBkMode((HDC)wp, TRANSPARENT);
+		}
 		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
  	case WM_CTLCOLORSCROLLBAR:
@@ -714,12 +712,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
-		::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-		::SetBkMode((HDC)wp, TRANSPARENT);
+		{
+			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
+			::SetBkMode((HDC)wp, TRANSPARENT);
 
-		if (IsParentPreferencePage((HWND)lp))
-			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
-
+			if (IsParentPreferencePage((HWND)lp))
+				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
+		}
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
@@ -1184,13 +1183,6 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 		{
 		case CP_READONLY:
 			{
-#ifdef _DEBUG
-				DWORD dwStyle = ::GetWindowLong(s_hwndCurrentComboBox, GWL_STYLE);
-
-				ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
-				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED));
-				ASSERT(!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
-#endif
 				COLORREF crText = DM_WINDOWTEXT;
 
 				if (::GetFocus() == s_hwndCurrentComboBox)
