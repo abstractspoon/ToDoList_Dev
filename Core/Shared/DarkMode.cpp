@@ -311,7 +311,7 @@ COLORREF GetParentBkgndColor(HWND hWnd)
 //////////////////////////////////////////////////////////////////////
 
 static HWND s_hwndCurrentComboBox			= NULL;
-static HWND s_hwndCurrentEditText			= NULL;
+static HWND s_hwndCurrentEdit				= NULL;
 static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
 static HWND s_hwndCurrentManagedBtnStatic	= NULL;
@@ -446,6 +446,28 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+class CDarkModeEditCtrl : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			if (s_hwndCurrentEdit == NULL)
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentEdit, hRealWnd);
+				return Default();
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeButtonStaticText : public CDarkModeCtrlBase
 {
 protected:
@@ -454,7 +476,7 @@ protected:
 		switch (msg)
 		{
 		case WM_PAINT:
-			ASSERT(s_hwndCurrentBtnStatic == NULL);
+			if (s_hwndCurrentBtnStatic == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentBtnStatic, hRealWnd);
 				return Default();
@@ -602,7 +624,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_GRAYTEXT:
-		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEditText)
+		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
 			RETURN_STATIC_COLOR_OR_BRUSH(DM_GRAY3DFACETEXT);
 		break;
 
@@ -753,6 +775,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					HookWindow(hWnd, new CDarkModeComboBox());
 				}
 			}
+			else if (CWinClasses::IsClass(sClass, WC_EDIT) || (sClass.Find(_T(".edit.app.")) != -1))
+			{
+				HookWindow(hWnd, new CDarkModeEditCtrl());
+			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
 				switch (CWinClasses::GetStyleType(hWnd, SS_TYPEMASK))
@@ -790,7 +816,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		}
 		break;
 
-	case WM_DESTROY:
+	case WM_NCDESTROY:
 		UnhookWindow(hWnd);
 		s_mapExplorerThemedWnds.Remove(hWnd);
 		break;
@@ -821,7 +847,6 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 	if (nMsg == WM_PAINT)
 	{
-		// Avoid subclassing wherever possible
 		CString sClass = CWinClasses::GetClass(hWnd);
 
 		if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||	(sClass.Find(_T(".combobox.app.")) != -1))
@@ -831,11 +856,6 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
-		}
-		else if (CWinClasses::IsClass(sClass, WC_EDIT))
-		{
-			CAutoFlagT<HWND> af(s_hwndCurrentEditText, hWnd);
-			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
 		else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || (sClass.Find(_T(".sysdatetimepick32.app.")) != -1))
 		{

@@ -120,6 +120,7 @@ BEGIN_MESSAGE_MAP(CTimeEdit, CEnEdit)
 	//{{AFX_MSG_MAP(CTimeEdit)
 	//}}AFX_MSG_MAP
 	ON_WM_CHAR()
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 void CTimeEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -195,12 +196,13 @@ void CTimeEdit::EnableUnitsChanges(BOOL bEnable)
 	EnableButton(TEBTN_UNITS, bEnable);
 }
 
-void CTimeEdit::PreSubclassWindow() 
+void CTimeEdit::OnShowWindow(BOOL bShow, UINT nStatus)
 {
-	CEnEdit::PreSubclassWindow();
-
-	UpdateButtonText(m_nUnits);
-	SetTime(Convert());
+	if (bShow)
+	{
+		UpdateButtonText(m_nUnits);
+		SetTime(Convert());
+	}
 }
 
 void CTimeEdit::UpdateButtonText(TH_UNITS nUnits)
