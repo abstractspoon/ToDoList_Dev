@@ -811,7 +811,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (sClass.Find(_T(".button.app.")) != -1)
 			{
-				// .Net always draws disabled checkboxes in COLOR_BTNTEXT
+				// .Net incorrectly draws disabled checkboxes in COLOR_BTNTEXT
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
 			}
 		}
