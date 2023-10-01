@@ -2311,14 +2311,15 @@ namespace EvidenceBoardUIExtension
 
 		protected Cursor GetNodeCursor(Point ptClient)
 		{
-			var taskItem = HitTestTaskIcon(ptClient);
+			var taskItem = HitTestTask(ptClient);
 
 			if (taskItem != null)
 			{
 				if (taskItem.IsLocked)
 					return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-				return UIExtension.HandCursor();
+				if (HitTestTaskIcon(ptClient) != null)
+					return UIExtension.HandCursor();
 			}
 #if DEBUG
 			if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
@@ -2349,7 +2350,7 @@ namespace EvidenceBoardUIExtension
 				Invalidate(pin);
 			}
 
-			if (node == null)
+			if ((node == null) || m_TaskItems.IsTaskLocked(node.Data))
 			{
 				m_HotTaskId = 0;
 			}
