@@ -713,24 +713,30 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 
 	case WM_CTLCOLORLISTBOX:
- 		if (!IsWindowEnabled((HWND)lp))
 		{
-			::SetTextColor((HDC)wp, DM_GRAY3DFACETEXT);
 			::SetBkMode((HDC)wp, TRANSPARENT);
-			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+
+			if (!IsWindowEnabled((HWND)lp))
+			{
+				::SetTextColor((HDC)wp, DM_GRAY3DFACETEXT);
+				RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+			}
+			else
+			{
+				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
+				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
+			}
 		}
-		// else fall thru to edit
+		break;
 
 	case WM_CTLCOLOREDIT:
 		{
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 			::SetBkMode((HDC)wp, TRANSPARENT);
-		}
-		RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 
- 	case WM_CTLCOLORSCROLLBAR:
-	case WM_CTLCOLORMSGBOX:
- 		break;
+			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
+		}
+		break;
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
@@ -740,8 +746,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 			if (IsParentPreferencePage((HWND)lp))
 				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
+			
+			// else
+			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
 		}
-		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+		break;
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
