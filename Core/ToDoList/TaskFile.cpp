@@ -3483,6 +3483,9 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 	}
 
 	// some fallbacks
+	if (pXIAttrib && STR_MATCH(szAttrib, TDL_TASKMETADATA))
+		return (pXIAttrib->GetItemCount() > 0);
+
 	if (STR_MATCH(szAttrib, TDL_TASKCOLOR))
 		return (pXITask->ItemHasValue(TDL_TASKTEXTCOLOR) != FALSE);
 
