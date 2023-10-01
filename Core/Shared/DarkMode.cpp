@@ -755,7 +755,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
 			{
-				// Hook readonly non-ownerdraw combos
 				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
 
 				if ((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST)
@@ -763,6 +762,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
 						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
 					{
+						// To make read-only combos consistent with others
 						HookWindow(hWnd, new CDarkModeComboBox());
 					}
 					break;
@@ -772,11 +772,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			{
 				if (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK) == CBS_DROPDOWNLIST)
 				{
+					// To make read-only combos consistent with others
 					HookWindow(hWnd, new CDarkModeComboBox());
 				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_EDIT) || (sClass.Find(_T(".edit.app.")) != -1))
 			{
+				// Required to handle COLOR_GRAYTEXT correctly
 				HookWindow(hWnd, new CDarkModeEditCtrl());
 			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
@@ -786,6 +788,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				case SS_LEFT:
 				case SS_CENTER:
 				case SS_RIGHT:
+					// Embossed (disabled) text looks awful on dark backgrounds
 					HookWindow(hWnd, new CDarkModeStaticText());
 					break;
 				}
@@ -801,12 +804,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				case BS_AUTOCHECKBOX:
 				case BS_RADIOBUTTON:
 				case BS_AUTORADIOBUTTON:
+					// Embossed (disabled) text looks awful on dark backgrounds
 					HookWindow(hWnd, new CDarkModeButtonStaticText());
 					break;
 				}
 			}
 			else if (sClass.Find(_T(".button.app.")) != -1)
 			{
+				// .Net always draws disabled checkboxes in COLOR_BTNTEXT
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
 			}
 		}
