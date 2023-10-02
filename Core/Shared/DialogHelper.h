@@ -102,17 +102,18 @@ public:
     static HFONT GetFont(const CWnd* pWnd);
     static HFONT GetFont(HWND hWnd);
 
+	static void ModifyChildCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove,
+									  DWORD dwAdd, UINT nFlags = 0, LPCTSTR szClass = NULL);
+	static void ModifyEditCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove,
+									 DWORD dwAdd, UINT nFlags = 0);
+	static void SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet = TRUE);
+	static BOOL HasStyle(HWND hWnd, DWORD dwStyle, BOOL bExStyle = FALSE);
+
 	// covers static text, radiobuttons, checkboxes
 	static void ResizeButtonStaticTextFieldsToFit(CWnd* pParent);
 	static void ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
 	static void ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
 
-	static void ModifyChildCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove, 
-										DWORD dwAdd, UINT nFlags = 0, LPCTSTR szClass = NULL);
-	static void ModifyEditCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove, 
-										DWORD dwAdd, UINT nFlags = 0);
-	static void SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet = TRUE);
-	
 	// CEdit and CRichEditCtrl
 	static BOOL SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen);
 	static BOOL SelectText(const CWnd* pParent, UINT nCtrlID, LPCTSTR szText, int nSearchStart, int nSearchLen);

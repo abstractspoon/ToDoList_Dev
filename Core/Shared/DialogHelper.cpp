@@ -1863,6 +1863,13 @@ void CDialogHelper::SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet)
 		pWnd->ModifyStyle(dwStyle, 0);
 }
 
+BOOL CDialogHelper::HasStyle(HWND hWnd, DWORD dwStyle, BOOL bExStyle)
+{
+	DWORD dwStyles = ::GetWindowLong(hWnd, (bExStyle ? GWL_EXSTYLE : GWL_STYLE));
+
+	return Misc::HasFlag(dwStyles, dwStyle);
+}
+
 void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 {
 	ASSERT (pParent);

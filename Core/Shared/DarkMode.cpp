@@ -16,7 +16,6 @@
 #include "osversion.h"
 #include "datetimectrlex.h"
 #include "AutoFlag.h"
-#include "OwnerdrawComboBoxBase.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
@@ -448,7 +447,22 @@ protected:
 
 class CDarkModeEditCtrl : public CDarkModeCtrlBase
 {
+public:
+	CDarkModeEditCtrl() : m_bParentIsCombo(FALSE) {}
+
 protected:
+	BOOL m_bParentIsCombo;
+
+protected:
+	BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
+	{
+		if (!CDarkModeCtrlBase::HookWindow(hWnd))
+			return FALSE;
+
+		m_bParentIsCombo = CWinClasses::IsComboBox(::GetParent(hWnd));
+		return TRUE;
+	}
+
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		switch (msg)
@@ -458,6 +472,16 @@ protected:
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentEdit, hRealWnd);
 				return Default();
+			}
+			break;
+
+		case WM_STYLECHANGED:
+			if (m_bParentIsCombo && (wp == GWL_STYLE))
+			{
+				const STYLESTRUCT* pSS = (const STYLESTRUCT*)lp;
+
+				if (Misc::StateChanged((pSS->styleOld & ES_READONLY), (pSS->styleNew & ES_READONLY)))
+					InvalidateRect(GetParent(), NULL, TRUE);
 			}
 			break;
 		}
@@ -1030,13 +1054,15 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 					case CBS_DROPDOWN:
 					case CBS_SIMPLE:
 						{
-							BOOL bEnabled = ::IsWindowEnabled(s_hwndCurrentComboBox);
+							HWND hwndEdit = ::GetDlgItem(s_hwndCurrentComboBox, 1001);
+							BOOL bDisabled = ((iStateId == CBB_DISABLED) || CDialogHelper::HasStyle(hwndEdit, ES_READONLY));
 
-							CRect rEdit = CDialogHelper::GetCtrlRect(CWnd::FromHandle(s_hwndCurrentComboBox), 1001);
+							CRect rEdit = CDialogHelper::GetChildRect(CWnd::FromHandle(hwndEdit));
 							rEdit.InflateRect(1, 1);
 
-							CDC::FromHandle(hdc)->FillSolidRect(rEdit, (bEnabled ? DM_WINDOW : DM_3DFACE));
+							CDC::FromHandle(hdc)->FillSolidRect(rEdit, (bDisabled ? DM_3DFACE : DM_WINDOW));
 						}
+						break;
 					}
 				}
 
