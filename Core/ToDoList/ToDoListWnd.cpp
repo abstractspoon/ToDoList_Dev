@@ -1020,6 +1020,7 @@ void CToDoListWnd::InitShortcutManager()
 {
 	// setup defaults first
 	m_mgrShortcuts.AddShortcut(ID_CLOSE,							VK_F4,			HOTKEYF_CONTROL);
+	m_mgrShortcuts.AddShortcut(ID_COMMENTS_INSERTDATETIME,			'D',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_DELETETASK,						VK_DELETE,		HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_CLOCK_TASK,					'T',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPY,						'C',			HOTKEYF_CONTROL);
@@ -1109,6 +1110,12 @@ void CToDoListWnd::InitShortcutManager()
 			if (!m_mgrShortcuts.GetShortcut(ID_EDIT_PASTESUB))
 				m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESUB, 'V', HOTKEYF_CONTROL);
 		}
+
+		// Duplicate 'insert date/time'
+		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTDATETIME, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTDATETIME));
+		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTDATE, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTDATE));
+		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTTIME, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTTIME));
+
 	}
 
 	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
