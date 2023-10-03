@@ -285,6 +285,10 @@ SOURCE=..\ToDoList\TDCSearchParamHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCShortcutManager.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCSimpleTextContent.cpp
 # End Source File
 # Begin Source File
@@ -906,6 +910,10 @@ SOURCE=..\ToDoList\tdcreminder.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCSearchParamHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCShortcutManager.h
 # End Source File
 # Begin Source File
 

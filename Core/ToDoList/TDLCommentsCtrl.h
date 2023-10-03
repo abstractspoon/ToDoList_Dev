@@ -118,10 +118,6 @@ protected:
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam);
 
-	afx_msg void OnInsertDate();
-	afx_msg void OnInsertTime();
-	afx_msg void OnInsertDateAndTime();
-
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;
 	BOOL UpdateControlFormat();
