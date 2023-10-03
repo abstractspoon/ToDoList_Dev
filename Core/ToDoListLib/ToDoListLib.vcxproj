@@ -160,6 +160,7 @@
     <ClCompile Include="..\ToDoList\TDCRecurrence.cpp" />
     <ClCompile Include="..\ToDoList\tdcreminder.cpp" />
     <ClCompile Include="..\ToDoList\TDCSearchParamHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCShortcutManager.cpp" />
     <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp" />
     <ClCompile Include="..\ToDoList\tdcsort.cpp" />
     <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="..\ToDoList\TDCRecurrence.h" />
     <ClInclude Include="..\ToDoList\tdcreminder.h" />
     <ClInclude Include="..\ToDoList\TDCSearchParamHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCShortcutManager.h" />
     <ClInclude Include="..\ToDoList\TDCSimpleTextContent.h" />
     <ClInclude Include="..\ToDoList\tdcsort.h" />
     <ClInclude Include="..\ToDoList\TDCSourceControl.h" />

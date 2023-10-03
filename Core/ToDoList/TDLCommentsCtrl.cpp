@@ -94,9 +94,6 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETATTRIBUTELIST, OnCommentsGetAttributeList)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
-	ON_COMMAND(ID_COMMENTS_INSERTDATE, OnInsertDate)
-	ON_COMMAND(ID_COMMENTS_INSERTTIME, OnInsertTime)
-	ON_COMMAND(ID_COMMENTS_INSERTDATETIME, OnInsertDateAndTime)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,6 +128,9 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 			m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 			VERIFY(m_toolbar.LoadToolBar(IDR_COMMENTS_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
+
+			// HACK TO GET TOOLTIPS TO WORK ON FIRST BUTTON
+			m_toolbar.InsertSeparator(0);
 
 			if (m_pMgrShortcuts)
 				m_tbHelper.Initialize(&m_toolbar, m_pMgrShortcuts);
@@ -629,21 +629,6 @@ void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)
 void CTDLCommentsCtrl::UpdateAppPreferences()
 {
 	LoadPreferences(TRUE);
-}
-
-void CTDLCommentsCtrl::OnInsertDate()
-{
-	SendMessage(WM_COMMAND, ID_EDIT_INSERTDATE);
-}
-
-void CTDLCommentsCtrl::OnInsertTime()
-{
-	SendMessage(WM_COMMAND, ID_EDIT_INSERTTIME);
-}
-
-void CTDLCommentsCtrl::OnInsertDateAndTime()
-{
-	SendMessage(WM_COMMAND, ID_EDIT_INSERTDATETIME);
 }
 
 BOOL CTDLCommentsCtrl::IsCommentsEditable() const

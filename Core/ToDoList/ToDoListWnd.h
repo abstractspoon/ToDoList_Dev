@@ -27,6 +27,7 @@
 #include "TDCMainMenu.h"
 #include "TDLStatusBar.h"
 #include "TDCFindFilterHelper.h"
+#include "TDCShortcutManager.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -128,7 +129,7 @@ protected:
 	UINT m_nContextMenuID;
 	TDC_COLUMN m_nContextColumnID;
 
-	CShortcutManager m_mgrShortcuts;
+	CTDCShortcutManager m_mgrShortcuts;
 	CTDCImportExportMgr m_mgrImportExport;
 	CTDLTasklistStorageMgr m_mgrStorage;
 	CToDoCtrlMgr m_mgrToDoCtrls;
