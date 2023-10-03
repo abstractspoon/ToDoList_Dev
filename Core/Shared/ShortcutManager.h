@@ -59,7 +59,7 @@ public:
 	void LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	UINT GetCommandID(DWORD dwShortcut) const;
-	virtual DWORD GetShortcut(UINT nCmdID) const;
+	DWORD GetShortcut(UINT nCmdID) const;
 	WORD ValidateModifiers(WORD wModifiers, WORD wVirtKeyCode) const;
 
 	static CString GetShortcutText(DWORD dwShortcut);
