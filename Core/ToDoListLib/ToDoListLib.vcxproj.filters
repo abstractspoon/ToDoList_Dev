@@ -467,6 +467,9 @@
     <ClCompile Include="..\ToDoList\TDLPasteTaskAttributesDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCShortcutManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -947,6 +950,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLPasteTaskAttributesDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCShortcutManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
