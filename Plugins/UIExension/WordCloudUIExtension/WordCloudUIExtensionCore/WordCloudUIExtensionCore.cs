@@ -212,6 +212,10 @@ namespace WordCloudUIExtension
 					}
 				}
 			}
+			else if (tasks.IsAttributeAvailable(Task.Attribute.Color))
+			{
+				m_TaskMatchesList.Invalidate();
+			}
 		}
 
 		private void OnUpdateTimer(object sender, EventArgs e)
@@ -258,6 +262,7 @@ namespace WordCloudUIExtension
 			}
 
             m_TaskMatchesList.EnsureSelectionVisible();
+			m_TaskMatchesList.Invalidate();
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
