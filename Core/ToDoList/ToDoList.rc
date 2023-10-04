@@ -4187,6 +4187,8 @@ IDR_FINDTASKS MENU DISCARDABLE
 BEGIN
     POPUP "RelativeDatePlaceholders"
     BEGIN
+        MENUITEM "&Now",                        ID_RELATIVEDATE_NOW
+        MENUITEM SEPARATOR
         MENUITEM "&Today",                      ID_RELATIVEDATE_TODAY
         MENUITEM "T&omorrow",                   ID_RELATIVEDATE_TOMORROW
         MENUITEM "&Yesterday",                  ID_RELATIVEDATE_YESTERDAY
