@@ -2309,6 +2309,8 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 			{
 				if (Misc::IsHighContrastActive())
 					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+				else
+					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 				if (crBack != CLR_NONE)
 					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);

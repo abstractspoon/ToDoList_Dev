@@ -3517,11 +3517,20 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF
 		else
 		{
 			crDefFill = GetSysColor(COLOR_WINDOW);
+			crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
 
-			if (bSelected && Misc::IsHighContrastActive())
-				crDefBorder = GetSysColor(COLOR_HIGHLIGHTTEXT);
-			else
-				crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
+			if (bSelected)
+			{
+				if (Misc::IsHighContrastActive())
+				{
+					crDefBorder = GetSysColor(COLOR_HIGHLIGHTTEXT);
+				}
+				else
+				{
+					crDefBorder = GraphicsMisc::GetExplorerItemSelectionTextColor(crDefBorder, GMIS_SELECTED, GMIB_THEMECLASSIC);
+					crDefFill = CLR_NONE;
+				}
+			}
 		}
 	}
 
@@ -3929,10 +3938,17 @@ void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect&
 
 	if (bDrawStart || bDrawEnd)
 	{
-		if (bSelected && Misc::IsHighContrastActive())
-			pDC->SelectObject(GetSysColorBrush(COLOR_HIGHLIGHTTEXT));
+		if (bSelected)
+		{
+			if (Misc::IsHighContrastActive())
+				pDC->SelectObject(GetSysColorBrush(COLOR_HIGHLIGHTTEXT));
+			else
+				pDC->SelectStockObject(BLACK_BRUSH);
+		}
 		else
+		{
 			pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
+		}
 
 		pDC->SelectStockObject(NULL_PEN);
 
@@ -4949,7 +4965,6 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 
 				GetTaskStartEndDates(*pGI1, dtUnused, dtDue1);
 				GetTaskStartEndDates(*pGI2, dtUnused, dtDue2);
-
 
 				nCompare = CDateHelper::Compare(dtDue1, dtDue2, (DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY));
 			}
