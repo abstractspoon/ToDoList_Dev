@@ -445,6 +445,52 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+class CDarkModeFontDialog : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_DRAWITEM:
+			switch (wp)
+			{
+			case 1136:
+			case 1137:
+				{
+					LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT)lp;
+					ASSERT(CWinClasses::IsClass(pDIS->hwndItem, WC_COMBOBOX));
+
+					CComboBox* pCB = (CComboBox*)CWnd::FromHandle(pDIS->hwndItem);
+					CDC* pDC = CDC::FromHandle(pDIS->hDC);
+
+					CRect rItem(pDIS->rcItem);
+					BOOL bSelected = (pDIS->itemState & ODS_SELECTED);
+
+					if (bSelected)
+						pDC->FillSolidRect(rItem, GetSysColor(COLOR_HIGHLIGHT));
+
+					CString sText;
+					pCB->GetLBText(pDIS->itemID, sText);
+
+					int nHeight = pDC->GetTextExtent(sText).cy;
+					rItem.DeflateRect(0, (rItem.Height() - nHeight) / 2);
+
+					pDC->SetTextColor(GetSysColor(bSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
+					pDC->DrawText(sText, rItem, DT_LEFT | DT_BOTTOM);
+
+					return TRUE;
+				}
+				break;
+			}
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeEditCtrl : public CDarkModeCtrlBase
 {
 public:
@@ -846,6 +892,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			{
 				// .Net incorrectly draws disabled checkboxes in COLOR_BTNTEXT
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
+			}
+			else if (CWinClasses::IsCommonDialog(hWnd, WCD_FONT))
+			{
+				// Combos in the font dialog do not play by the rules
+				HookWindow(hWnd, new CDarkModeFontDialog());
 			}
 		}
 		else
