@@ -809,13 +809,9 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLOREDIT:
 		{
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-			::SetBkMode((HDC)wp, TRANSPARENT);
+			::SetBkColor((HDC)wp, DM_WINDOW);
+			::SetBkMode((HDC)wp, OPAQUE);
 
-			if (CDialogHelper::HasStyle((HWND)lp, ES_MULTILINE)
-			{
-				::SetBkColor((HDC)wp, DM_WINDOW);
-				::SetBkMode((HDC)wp, OPAQUE);
-			}
 			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
 		}
 		break;
