@@ -37,6 +37,7 @@ const COLORREF DM_GRAY3DFACETEXT	= GraphicsMisc::GetBestTextColor(DM_3DFACE, FAL
 const COLORREF DM_WINDOWTEXT		= RGB(253, 254, 255);
 const COLORREF DM_HIGHLIGHTTEXT		= DM_WINDOWTEXT;
 const COLORREF DM_HIGHLIGHT			= RGB(55, 90, 120);
+const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -695,6 +696,9 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_MENU:
 		break;
 
+	case COLOR_HOTLIGHT: // Used for Web Browser links
+		RETURN_STATIC_COLOR_OR_BRUSH(DM_HOTLIGHT);
+
 	case COLOR_GRAYTEXT:
 		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
 			RETURN_STATIC_COLOR_OR_BRUSH(DM_GRAY3DFACETEXT);
@@ -747,7 +751,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		nTrueColor = COLOR_WINDOW;
 		break;
 
-	case COLOR_HOTLIGHT:
 	case COLOR_ACTIVEBORDER:
 	case COLOR_INACTIVEBORDER:
 	case COLOR_INACTIVECAPTION:	

@@ -970,8 +970,12 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 	{
 		int nFlags = (DT_LEFT | DT_PATH_ELLIPSIS | DT_NOPREFIX);
 
+		// Make sure colour is dark enough
+		HLSX hlsText(GetSysColor(COLOR_HOTLIGHT));
+		hlsText.fLuminosity = min(hlsText.fLuminosity, 0.3f);
+
+		pDC->SetTextColor(hlsText);
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(GetSysColor(COLOR_HOTLIGHT));
 
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_UNDERLINED));
 

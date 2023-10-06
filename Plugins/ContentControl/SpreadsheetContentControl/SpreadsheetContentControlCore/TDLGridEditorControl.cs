@@ -67,6 +67,8 @@ namespace SpreadsheetContentControl
 			m_ControlsFont = font;
 			m_Trans = trans;
 
+			HyperlinkCell.LinkColor = HyperlinkCell.ActivateColor = HyperlinkCell.VisitedColor = SystemColors.HotTrack;
+
 			InitialiseFeatures();
 			InitialiseToolbars();
 			InitialiseChangeCallbacks();
@@ -910,7 +912,7 @@ namespace SpreadsheetContentControl
 					var link = (sender as HyperlinkCell);
 
 					if (link != null)
-						link.Cell.Style.TextColor = link.VisitedColor;
+						link.Cell.Style.TextColor = HyperlinkCell.VisitedColor;
 				}
 			}
 		}
