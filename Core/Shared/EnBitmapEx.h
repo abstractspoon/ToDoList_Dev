@@ -32,7 +32,7 @@ public:
 	BOOL GrayImage(COLORREF crMask = -1);
 	BOOL BlurImage(int nAmount = 5);
 	BOOL SharpenImage(int nAmount = 5);
-	BOOL ResizeImage(double dFactor);
+	BOOL ResizeImage(double dFactor, COLORREF crMask = CLR_NONE);
 	BOOL FlipImage(BOOL bHorz, BOOL bVert = 0);
 	BOOL NegateImage();
 	BOOL ReplaceColor(COLORREF crFrom, COLORREF crTo);

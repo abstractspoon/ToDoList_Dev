@@ -252,10 +252,6 @@ unicode_release\TDLTest.exe
     <None Include="res\social_toolbar.bmp" />
     <None Include="res\social_toolbar_std.bmp" />
     <None Include="res\src_control_std.bmp" />
-    <None Include="res\style_image.ico" />
-    <None Include="res\style_para.ico" />
-    <None Include="res\style_table.ico" />
-    <None Include="res\style_wrap.ico" />
     <None Include="res\task_icons_std.bmp" />
     <None Include="res\task_tree_std.ico" />
     <None Include="res\timetrac.bmp" />
@@ -302,6 +298,10 @@ unicode_release\TDLTest.exe
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\reset.ico" />
+    <Image Include="res\style_image.bmp" />
+    <Image Include="res\style_para.bmp" />
+    <Image Include="res\style_table.bmp" />
+    <Image Include="res\style_wrap.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

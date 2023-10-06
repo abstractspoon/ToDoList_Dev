@@ -125,15 +125,6 @@
     <None Include="res\src_control_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\style_para.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\style_table.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\style_wrap.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\task_icons_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -177,9 +168,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\app_timetrack.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\style_image.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\udtprefs_toolbar.bmp">
@@ -254,6 +242,18 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\reset.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\style_image.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\style_para.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\style_table.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\style_wrap.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

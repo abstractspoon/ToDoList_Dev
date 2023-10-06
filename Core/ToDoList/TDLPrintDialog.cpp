@@ -11,8 +11,11 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\DateHelper.h"
+#include "..\shared\GraphicsMisc.h"
 
 #include "..\Interfaces\Preferences.h"
+
+#include "..\3rdParty\XNamedColors.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -24,25 +27,32 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-BEGIN_MESSAGE_MAP(CTDLHtmlStyleComboBox, CComboBox)
-	ON_WM_CREATE()
-END_MESSAGE_MAP()
+BOOL LoadBitmapAsIconOnce(UINT nResID, CIcon& icon)
+{
+	if (icon.IsValid())
+		return TRUE;
+
+	CEnBitmapEx bm(colorMagenta);
+	
+	if (!bm.LoadSysBitmap(nResID))
+		return FALSE;
+
+	if (GraphicsMisc::WantDPIScaling())
+	{
+		int nSize = GraphicsMisc::ScaleByDPIFactor(32);
+		VERIFY(bm.ResizeImage(GraphicsMisc::GetDPIScaleFactor(), colorMagenta));	
+	}
+
+	return icon.Attach(bm.ExtractIcon(colorMagenta));
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 void CTDLHtmlStyleComboBox::PreSubclassWindow()
 {
 	CComboBox::PreSubclassWindow();
 
 	BuildCombo();
-}
-
-int CTDLHtmlStyleComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	BuildCombo();
-
-	return 0;
 }
 
 void CTDLHtmlStyleComboBox::BuildCombo()
@@ -62,25 +72,43 @@ void CTDLHtmlStyleComboBox::DDX(CDataExchange* pDX, TDLPD_STYLE& value)
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum STYLE_IMAGE
+{
+	IMAGE_NONE = -1,
+	IMAGE_WRAP,
+	IMAGE_PARA,
+	IMAGE_TABLE
+};
+
 void CTDLHtmlStyleStatic::SetStyle(TDLPD_STYLE nFormat)
 {
+	STYLE_IMAGE nImage = IMAGE_NONE;
+	UINT nResID = 0;
+
 	switch (nFormat)
 	{
-	case TDLPDS_WRAP:
-		SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_WRAP));
+	case TDLPDS_WRAP:  
+		nImage = IMAGE_WRAP; 
+		nResID = IDB_STYLE_WRAP;
 		break;
 
-	case TDLPDS_PARA:
-		SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_PARA));
+	case TDLPDS_PARA:  
+		nImage = IMAGE_PARA; 
+		nResID = IDB_STYLE_PARA;
 		break;
-
-	case TDLPDS_TABLE:
-		SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_TABLE));
+	
+	case TDLPDS_TABLE: 
+		nImage = IMAGE_TABLE; 
+		nResID = IDB_STYLE_TABLE;
 		break;
 
 	default:
 		ASSERT(0);
+		return;
 	}
+
+	LoadBitmapAsIconOnce(nResID, m_iconStyles[nImage]);
+	SetIcon(m_iconStyles[nImage]);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -225,6 +253,7 @@ void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STYLESHEET, m_eStylesheet);
 	DDX_Text(pDX, IDC_STYLESHEET, m_sStylesheet);
 	DDX_Radio(pDX, IDC_STYLE_STYLESHEET, m_nStyleOption);
+	DDX_Control(pDX, IDC_IMAGE_ICON, m_stImageIcon);
 
 	m_cbOtherExporters.DDX(pDX, m_sOtherExporterTypeID);
 	m_cbSimpleOptions.DDX(pDX, m_nSimpleStyle);
@@ -311,6 +340,9 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 		break;
 	}
 
+	VERIFY(LoadBitmapAsIconOnce(IDB_STYLE_IMAGE, m_iconImage));
+	m_stImageIcon.SetIcon(m_iconImage);
+	
 	// Dynamically update the 'task view' option
 	CEnString sCtrlText(IDS_PRINT_TASKVIEW);
 

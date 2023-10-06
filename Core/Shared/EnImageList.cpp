@@ -166,3 +166,23 @@ int CEnImageList::AddReplace(HICON hIcon, COLORREF crBkgnd, int nImage)
 	// else
 	return CImageList::Replace(nImage, CIcon(bmp.ExtractIcon(MAGENTA)));
 }
+
+int CEnImageList::AddBitmap(UINT nBitmapID, COLORREF crMask)
+{
+	CBitmap bm;
+
+	if (!bm.LoadBitmap(nBitmapID))
+		return -1;
+
+	return Add(&bm, crMask);
+}
+
+int CEnImageList::AddIcon(UINT nIconID, COLORREF crMask)
+{
+	CIcon icon;
+
+	if (!icon.Load(nIconID))
+		return -1;
+
+	return Add(icon, crMask);
+}
