@@ -941,28 +941,43 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 {
 	LRESULT lr = 0;
 
-	if (nMsg == WM_PAINT)
+	switch (nMsg)
 	{
-		CString sClass = CWinClasses::GetClass(hWnd);
-
-		if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||	(sClass.Find(_T(".combobox.app.")) != -1))
+	case WM_PAINT:
 		{
-			if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
+			CString sClass = CWinClasses::GetClass(hWnd);
+
+			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || (sClass.Find(_T(".combobox.app.")) != -1))
 			{
-				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
+				if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
+				{
+					CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
+					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				}
+			}
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || (sClass.Find(_T(".sysdatetimepick32.app.")) != -1))
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hWnd);
+				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+			}
+			else if (s_mapExplorerThemedWnds.Has(hWnd))
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
 		}
-		else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || (sClass.Find(_T(".sysdatetimepick32.app.")) != -1))
+		break;
+
+	case WM_CTLCOLOREDIT:
+	case WM_CTLCOLORLISTBOX:
 		{
-			CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hWnd);
-			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+			// Always do default first to allow CAutoComboBox hooking
+			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+	
+			WindowProcEx(hWnd, nMsg, wp, lp, lr);
+			return lr;
 		}
-		else if (s_mapExplorerThemedWnds.Has(hWnd))
-		{
-			CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
-			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-		}
+		break;
 	}
 
 	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
