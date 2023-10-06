@@ -36,7 +36,7 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 const COLORREF DM_GRAY3DFACETEXT	= GraphicsMisc::GetBestTextColor(DM_3DFACE, FALSE);
 const COLORREF DM_WINDOWTEXT		= RGB(253, 254, 255);
 const COLORREF DM_HIGHLIGHTTEXT		= DM_WINDOWTEXT;
-const COLORREF DM_HIGHLIGHT			= RGB(55, 90, 120);
+const COLORREF DM_HIGHLIGHT			= RGB(45, 105, 150);
 const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
 
 //////////////////////////////////////////////////////////////////////
