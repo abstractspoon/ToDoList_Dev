@@ -1418,10 +1418,8 @@ struct SEARCHPARAM
 			
 		case FT_INTEGER:
 		case FT_BOOL:
-			nValue = _ttoi(val);
-			break;
-
 		case FT_RECURRENCE:
+			nValue = _ttoi(val);
 			break;
 
 		default:
@@ -1486,23 +1484,33 @@ struct SEARCHPARAM
 			return Misc::Format(dValue, 3);
 
 		case FT_INTEGER:
-			if (AttributeIs(TDCA_PRIORITY) && (nValue == FM_NOPRIORITY))
+			switch (GetAttribute())
 			{
-				return CEnString(IDS_TDC_NONE);
+			case TDCA_PRIORITY:
+				if (nValue == FM_NOPRIORITY)
+					return CEnString(IDS_TDC_NONE);
+				break;
+
+			case TDCA_RISK:
+				if (nValue == FM_NORISK)
+					return CEnString(IDS_TDC_NONE);
 			}
-			else if (AttributeIs(TDCA_RISK) && (nValue == FM_NORISK))
-			{
-				return CEnString(IDS_TDC_NONE);
-			}
-			// else
-			return Misc::Format(nValue);
+			// else fall thru
 
 		case FT_BOOL:
+		case FT_RECURRENCE:
 			return Misc::Format(nValue);
+
+		case FT_STRING:
+		case FT_DATERELATIVE:
+		case FT_ICON:
+		case FT_DEPENDENCY:
+			return sValue;
 		}
 
 		// all else
-		return sValue;
+		ASSERT(0);
+		return _T("");
 	}
 
 	double ValueAsDouble() const
@@ -1519,6 +1527,7 @@ struct SEARCHPARAM
 
 		case FT_INTEGER:
 		case FT_BOOL:
+		case FT_RECURRENCE:
 			return (double)nValue;
 		}
 
@@ -1552,31 +1561,28 @@ struct SEARCHPARAM
 
 	COleDateTime ValueAsDate() const
 	{
-		COleDateTime date;
-
 		switch (GetAttribType())
 		{
 		case FT_DATE:
-			date = dValue;
-			break;
+			return dValue;
 
 		case FT_DATERELATIVE:
 			{
 				CTwentyFourSevenWeek week;
 				CDateHelper dh(week);
+				COleDateTime date;
 
 				if (!dh.DecodeRelativeDate(sValue, date, FALSE))
 					CDateHelper::ClearDate(date);
-			}
-			break;
 
-		default:
-			// all else
-			ASSERT(0);
+				return date;
+			}
 			break;
 		}
 
-		return date;
+		// all else
+		ASSERT(0);
+		return CDateHelper::NullDate();
 	}
 
 protected:
