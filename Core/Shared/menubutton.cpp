@@ -62,14 +62,8 @@ void CMenuButton::SetWindowText(TCHAR nChar)
 
 void CMenuButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
-	if (m_dwStyle & MBS_RIGHT)
-	{
-		GraphicsMisc::DrawAnsiSymbol(pDC, 0x34, rExtra, DT_RIGHT, &GraphicsMisc::Marlett());
-	}
-	else // down
-	{
-		GraphicsMisc::DrawAnsiSymbol(pDC, 0x36, rExtra, DT_RIGHT, &GraphicsMisc::Marlett());
-	}
+	int nSymbol = ((m_dwStyle & MBS_RIGHT) ? MARLETT_MENURIGHT : MARLETT_MENUDOWN);
+	GraphicsMisc::DrawAnsiSymbol(pDC, nSymbol, rExtra, DT_RIGHT, &GraphicsMisc::Marlett());
 }
 
 UINT CMenuButton::TrackPopupMenu(CMenu* pMenu, int nSubMenu)

@@ -789,8 +789,8 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 
-				UINT nFlags = DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
-				GraphicsMisc::DrawAnsiSymbol(pDC, '6', rButton, nFlags, &GraphicsMisc::Marlett());
+				UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
+				GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rButton, nFlags, &GraphicsMisc::Marlett());
 			}
 			break;
 

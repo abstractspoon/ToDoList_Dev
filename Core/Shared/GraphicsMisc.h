@@ -73,6 +73,13 @@ enum GM_OLECURSOR // OLE drag'n'drop cursors
 	GMOC_COUNT
 };
 
+enum GM_ANSISYMBOL // DrawAnsiSymbol
+{
+	MARLETT_MENURIGHT	= 0x34,
+	MARLETT_MENUDOWN	= 0x36,
+	MARLETT_CLOSE		= 0x72,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef DCX_NODELETERGN

@@ -10,6 +10,8 @@
 #include "graphicsmisc.h"
 #include "dialoghelper.h"
 
+#include "..\3rdParty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -20,8 +22,6 @@ static char THIS_FILE[] = __FILE__;
 
 const LPCTSTR STR_CLOSEBTN	= _T("r");
 const int SIZE_CLOSEBTN		= GraphicsMisc::ScaleByDPIFactor(8);
-const COLORREF RED			= RGB(200, 90, 90);
-const COLORREF WHITE		= RGB(240, 240, 240);
 
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox
@@ -347,10 +347,10 @@ BOOL CAutoComboBox::GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) con
 		return FALSE;
 
 	rBtn = rItem;
-
 	rBtn.left = rBtn.right - SIZE_CLOSEBTN;
-	rBtn.DeflateRect(0, ((rBtn.Height() - SIZE_CLOSEBTN) / 2));
+	rBtn.bottom = rBtn.top + SIZE_CLOSEBTN;
 
+	GraphicsMisc::CentreRect(rBtn, rItem, FALSE, TRUE);
 	return TRUE;
 }
 
@@ -385,7 +385,7 @@ void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 	{
 		// create font first time
 		if (m_fontClose.GetSafeHandle() == NULL)
-			GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6);
+			GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6, GMFS_SYMBOL);
 		
 		CFont* pOldFont = dc.SelectObject(&m_fontClose);
 		
@@ -400,18 +400,16 @@ void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 		// set the color to white-on-red if highlighted
 		if (bHighlightDeleteBtn)
 		{
-			dc.SetTextColor(WHITE);
-			dc.FillSolidRect(rBtn, RED);
+			dc.SetTextColor(colorWhite);
+			dc.FillSolidRect(rBtn, colorIndianRed);
 		}
 		else
 		{
 			dc.SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
 		}
 
-		dc.SetTextAlign(TA_TOP | TA_LEFT);
-		dc.SetBkMode(TRANSPARENT);
-		dc.TextOut(rBtn.left + 1, rBtn.top + 1, STR_CLOSEBTN);
-		dc.SelectObject(pOldFont);
+		rBtn.OffsetRect(1, 1);
+		GraphicsMisc::DrawAnsiSymbol(&dc, MARLETT_CLOSE, rBtn, DT_CENTER | DT_VCENTER, &m_fontClose);
 	}
 }
 

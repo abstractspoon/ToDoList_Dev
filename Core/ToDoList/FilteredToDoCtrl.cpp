@@ -1419,13 +1419,13 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM 
 	// If the parent has been filtered out we just add 
 	// directly to the data model
 	if (dwParentTaskID && !m_taskTree.GetItem(dwParentTaskID))
-		return MergeNewTaskIntoTree(tasks, hTask, dwParentTaskID, 0, bAndSubtasks);
+		return MergeNewTaskIntoDataModel(tasks, hTask, dwParentTaskID, 0, bAndSubtasks);
 
 	// else
 	return CTabbedToDoCtrl::MergeNewTaskIntoTree(tasks, hTask, dwParentTaskID, bAndSubtasks);
 }
 
-DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks)
+DWORD CFilteredToDoCtrl::MergeNewTaskIntoDataModel(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks)
 {
 	TODOITEM* pTDI = m_data.NewTask(tasks, hTask);
 
@@ -1439,7 +1439,7 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM 
 
 		while (hSubtask)
 		{
-			dwSubtaskID = MergeNewTaskIntoTree(tasks, hSubtask, dwTaskID, dwSubtaskID, TRUE);
+			dwSubtaskID = MergeNewTaskIntoDataModel(tasks, hSubtask, dwTaskID, dwSubtaskID, TRUE);
 			hSubtask = tasks.GetNextTask(hSubtask);
 		}
 	}
@@ -1450,30 +1450,18 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM 
 DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate)
 {
 	DWORD dwTaskID = task.GetTaskID(task.GetFirstTask());
+	BOOL bToggleFilter = (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL));
 
-	// If the just completed task no longer exists in the tree
-	// because it has been filtered out as part of its completion
-	// then the default implementation will fail, so we need to
-	// handle this specific case
-	if (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL))
-	{
-		// Merge task into data structure after the existing task
-		DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
-		DWORD dwNewTaskID = MergeNewTaskIntoTree(task, task.GetFirstTask(), dwParentID, dwTaskID, TRUE);
+	CHoldRedraw hr(bToggleFilter ? GetSafeHwnd() : NULL);
 
-		InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, dtNext, bDueDate);
-		RefreshFilter(FALSE);
+	if (bToggleFilter)
+		ToggleFilter();
 
-		// Note: there is no guarantee that this new task will not
-		// also have been filtered out
-		if (m_taskTree.GetItem(dwNewTaskID) == NULL)
-			return 0L;
+	BOOL bRes = CTabbedToDoCtrl::RecreateRecurringTaskInTree(task, dtNext, bDueDate);
 
-		// else
-		return dwNewTaskID;
-	}
+	if (bToggleFilter)
+		ToggleFilter(); // restore filter
 
-	// all else
-	return CTabbedToDoCtrl::RecreateRecurringTaskInTree(task, dtNext, bDueDate);
+	return bRes;
 }
 

@@ -9,6 +9,8 @@
 #include "autoflag.h"
 #include "osversion.h"
 
+#include "..\3rdParty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -17,13 +19,9 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR  STR_CLOSEBTN	= _T("r");
-
-const COLORREF RED			= RGB(200, 90, 90);
-const COLORREF WHITE		= RGB(255, 255, 255);
-
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
+const int SIZE_CLOSEBTN		= GraphicsMisc::ScaleByDPIFactor(8);
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
 
@@ -40,7 +38,6 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	m_dwFlags(dwFlags), 
 	m_nBtnDown(VK_CANCEL), 
 	m_nMouseInCloseButton(-1),
-	m_sizeClose(0, 0),
 	m_bUpdatingTabWidth(FALSE),
 	m_bFirstPaint(TRUE)
 {
@@ -180,7 +177,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 
 	// add space for close button
 	if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
-		nExtra += (m_sizeClose.cx + 2);
+		nExtra += (SIZE_CLOSEBTN + 2);
 
 	// add space for bold font
 	if ((nTab == GetCurSel()) && HasFlag(TCE_BOLDSELTEXT))
@@ -325,7 +322,7 @@ CRect CTabCtrlEx::GetTabTextRect(int nTab, LPCRECT pRect)
 
 	// handle close button
 	if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
-		rTab.right -= m_sizeClose.cx;
+		rTab.right -= SIZE_CLOSEBTN;
 
 	return rTab;
 }
@@ -437,28 +434,28 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 				{
 				case e_tabTop:
 					rColor.bottom = (rColor.top + COLORBAR_WIDTH);
-					rColor.right -= (m_sizeClose.cx + PADDING);
+					rColor.right -= (SIZE_CLOSEBTN + PADDING);
 					rColor.left += PADDING;
 					rTab.top += (COLORBAR_WIDTH - 1);
 					break;
 
 				case e_tabBottom:
 					rColor.top = (rColor.bottom - COLORBAR_WIDTH);
-					rColor.right -= (m_sizeClose.cx + PADDING);
+					rColor.right -= (SIZE_CLOSEBTN + PADDING);
 					rColor.left += PADDING;
 					rTab.bottom -= (COLORBAR_WIDTH - 1);
 					break;
 
 				case e_tabLeft:
 					rColor.right = (rColor.left + COLORBAR_WIDTH);
-					rColor.top += (m_sizeClose.cx + PADDING);
+					rColor.top += (SIZE_CLOSEBTN + PADDING);
 					rColor.bottom += PADDING;
 					rTab.left += (COLORBAR_WIDTH - 1);
 					break;
 
 				case e_tabRight:
 					rColor.left = (rColor.right - COLORBAR_WIDTH);
-					rColor.top += (m_sizeClose.cx + PADDING);
+					rColor.top += (SIZE_CLOSEBTN + PADDING);
 					rColor.bottom -= PADDING;
 					rTab.right -= (COLORBAR_WIDTH - 1);
 					break;
@@ -535,18 +532,7 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 
 	// create font first time
 	if (m_fontClose.GetSafeHandle() == NULL)
-		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6);
-
-	CFont* pOldFont = dc.SelectObject(&m_fontClose);
-	
-	// calc button size first time
-	if (!m_sizeClose.cx || !m_sizeClose.cy)
-	{
-		m_sizeClose = dc.GetTextExtent(STR_CLOSEBTN);
-
-		// make height same as width
-		m_sizeClose.cy = m_sizeClose.cx + 1;
-	}
+		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6, GMFS_SYMBOL);
 
 	// set the color to white-on-red if the cursor is over the 'x' else gray
 	CRect rBtn;
@@ -554,8 +540,8 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	
 	if (m_nMouseInCloseButton == nTab)
 	{
-		dc.SetTextColor(WHITE);
-		dc.FillSolidRect(rBtn, RED);
+		dc.SetTextColor(colorWhite);
+		dc.FillSolidRect(rBtn, colorIndianRed);
 	}
 	else
 	{
@@ -564,13 +550,11 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 		if ((crTab != CLR_NONE) && (nTab != GetCurSel()))
 			dc.SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
 		else
-			dc.SetTextColor(GetSysColor(COLOR_GRAYTEXT));
+			dc.SetTextColor(GetSysColor(COLOR_BTNTEXT));
 	}
 	
-	dc.SetTextAlign(TA_TOP | TA_LEFT);
-	dc.SetBkMode(TRANSPARENT);
-	dc.TextOut(rBtn.left + 1, rBtn.top + 1, STR_CLOSEBTN);
-	dc.SelectObject(pOldFont);
+	rBtn.OffsetRect(1, 1);
+	GraphicsMisc::DrawAnsiSymbol(&dc, MARLETT_CLOSE, rBtn, DT_CENTER | DT_VCENTER, &m_fontClose);
 }
 
 void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
@@ -856,8 +840,8 @@ BOOL CTabCtrlEx::GetTabCloseButtonRect(int nTab, CRect& rBtn) const
 	switch (GetOrientation())
 	{
 	case e_tabTop:
-		rBtn.left = rBtn.right - m_sizeClose.cx;
-		rBtn.bottom = rBtn.top + m_sizeClose.cy;
+		rBtn.left = rBtn.right - SIZE_CLOSEBTN;
+		rBtn.bottom = rBtn.top + SIZE_CLOSEBTN;
 		
 		if (bSel)
 			rBtn.OffsetRect(0, 1);
@@ -866,8 +850,8 @@ BOOL CTabCtrlEx::GetTabCloseButtonRect(int nTab, CRect& rBtn) const
 		break;
 
 	case e_tabBottom:
-		rBtn.left = rBtn.right - m_sizeClose.cx;
-		rBtn.top = rBtn.bottom - m_sizeClose.cy;
+		rBtn.left = rBtn.right - SIZE_CLOSEBTN;
+		rBtn.top = rBtn.bottom - SIZE_CLOSEBTN;
 		
 		if (!bSel)
 			rBtn.OffsetRect(-2, -2);

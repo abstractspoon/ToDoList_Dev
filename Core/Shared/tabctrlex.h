@@ -94,7 +94,6 @@ protected:
 	int m_nMouseInCloseButton; // tab index
 	BOOL m_bDragging;
 	int m_nDragTab, m_nDropTab, m_nDropPos;
-	CSize m_sizeClose;
 	BOOL m_bUpdatingTabWidth;
 	CFont m_fontBold;
 	BOOL m_bFirstPaint;

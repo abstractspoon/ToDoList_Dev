@@ -1447,6 +1447,8 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
 
 				switch (nID)
 				{
+				case ID_RELATIVEDATE_NOW:			sRelDate = _T("n");	  break;
+
 				case ID_RELATIVEDATE_TODAY:			sRelDate = _T("t");	  break;
 				case ID_RELATIVEDATE_TOMORROW:		sRelDate = _T("t+1"); break;
 				case ID_RELATIVEDATE_YESTERDAY:		sRelDate = _T("t-1"); break;
