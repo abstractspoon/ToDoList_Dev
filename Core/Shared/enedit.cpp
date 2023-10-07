@@ -22,8 +22,6 @@ static char THIS_FILE[] = __FILE__;
 
 int MENUSIZE = -1;
 
-const TCHAR MENU_DROPBTN = '6';
-
 const COLORREF GRAYTEXTCOLOR = RGB(96, 96, 96); 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -868,7 +866,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 		}
 
 		pDC->SetTextColor(bEnabled ? GetSysColor(COLOR_BTNTEXT) : GRAYTEXTCOLOR);
-		GraphicsMisc::DrawAnsiSymbol(pDC, MENU_DROPBTN, rArrow, nFlags, &GraphicsMisc::Marlett());
+		GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rArrow, nFlags, &GraphicsMisc::Marlett());
 	}
 	
 	// draw caption/image

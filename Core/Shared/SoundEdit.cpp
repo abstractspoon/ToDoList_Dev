@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "soundedit.h"
 #include "filemisc.h"
+#include "graphicsmisc.h"
 
 #pragma warning(disable: 4201)
 #include <Mmsystem.h> 
@@ -35,7 +36,7 @@ CString CSoundEdit::s_sPlayBtnTip = _T("Play");
 CSoundEdit::CSoundEdit() : CFileEdit(FES_COMBOSTYLEBTN)
 {
 	SetFilter(s_sFilter);
-	AddButton(ID_PLAYSOUNDBTN, 0x38, s_sPlayBtnTip, CALC_BTNWIDTH, _T("Marlett"));
+	AddButton(ID_PLAYSOUNDBTN, MARLETT_MENURIGHT, s_sPlayBtnTip, CALC_BTNWIDTH, _T("Marlett"));
 	SetButtonTip(FEBTN_BROWSE, s_sBrowseBtnTip);
 }
 
