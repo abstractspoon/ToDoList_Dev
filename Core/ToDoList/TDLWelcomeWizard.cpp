@@ -12,6 +12,7 @@
 #include "..\shared\filemisc.h"
 #include "..\Shared\enstring.h"
 #include "..\Shared\Localizer.h"
+#include "..\Shared\icon.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,16 +51,17 @@ void CTDLWelcomeWizard::InitSheet()
 	AddPage(&m_page2);
 	AddPage(&m_page3);
 
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID;		
+	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
 	m_psh.dwFlags &= ~(PSH_HASHELP);
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_WIZ_HEADER);
+	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 }
 
 CTDLWelcomeWizard::~CTDLWelcomeWizard()
 {
+	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 

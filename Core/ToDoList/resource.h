@@ -130,7 +130,6 @@
 #define IDI_ADD_LOGGED_TIME             308
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
-#define IDB_TDLUPDATE_WIZ_HEADER        310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDI_TRAY_LIGHT                  316

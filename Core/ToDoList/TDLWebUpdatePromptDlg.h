@@ -71,6 +71,7 @@ public:
 
 protected:
 	CTDLWebUpdatePromptDlg(LPCTSTR szExeVer, const CStringArray& aChanges);
+	virtual ~CTDLWebUpdatePromptDlg();
 
 	// Attributes
 protected:
@@ -78,7 +79,8 @@ protected:
 	HFONT m_hFont;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	
+	HBITMAP m_hbmHeader;
+
 	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CWelcomeWizard)
@@ -86,10 +88,6 @@ protected:
 	//}}AFX_VIRTUAL
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	
-	// Implementation
-public:
-	virtual ~CTDLWebUpdatePromptDlg();
 	
 	// Generated message map functions
 protected:

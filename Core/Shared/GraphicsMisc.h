@@ -139,6 +139,7 @@ namespace GraphicsMisc
 	CSize GetIconSize(HICON hIcon);
 	CSize GetBitmapSize(HBITMAP hBmp);
 	HICON GetAppWindowIcon(BOOL bLarge);
+	HBITMAP MakeWizardImage(HICON hIcon); // 49x49
 
 	HCURSOR LoadHandCursor();
 	HCURSOR LoadDragDropCursor(GM_OLECURSOR nCursor);

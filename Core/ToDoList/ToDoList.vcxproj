@@ -214,7 +214,6 @@ unicode_release\TDLTest.exe
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TDLUpdate\RES\TDLUpdate.ico" />
-    <None Include="..\TDLUpdate\res\TDLUpdate_wiz_header.bmp" />
     <None Include="res\abstractspoon.ico" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
@@ -261,7 +260,6 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar.bmp" />
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
-    <None Include="res\wiz_header.bmp" />
     <None Include="RES\XPcheckboxes.bmp" />
     <None Include="res\YourLanguage.GIF" />
     <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll" />

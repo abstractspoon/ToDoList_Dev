@@ -1862,6 +1862,31 @@ CSize GraphicsMisc::GetBitmapSize(HBITMAP hBmp)
 	return CSize(bitmap.bmWidth, bitmap.bmHeight);
 }
 
+HBITMAP GraphicsMisc::MakeWizardImage(HICON hIcon)
+{
+	// The wizard demands an image of size 49x49 which is a bit of a nuisance
+	CClientDC dcDesktop(CWnd::GetDesktopWindow());
+	ASSERT_VALID(&dcDesktop);
+
+	CDC dcMem;
+
+	if (!dcMem.CreateCompatibleDC(&dcDesktop))
+		return NULL;
+
+	CBitmap bmMem;
+
+	if (!bmMem.CreateCompatibleBitmap(&dcDesktop, 49, 49))
+		return NULL;
+
+	CBitmap* pOldBM = dcMem.SelectObject(&bmMem);
+
+	dcMem.FillSolidRect(0, 0, 49, 49, GetSysColor(COLOR_WINDOW));
+	::DrawIconEx(dcMem, 0, 0, hIcon, 48, 48, 0, NULL, DI_NORMAL);
+	dcMem.SelectObject(pOldBM);
+
+	return (HBITMAP)bmMem.Detach();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // private helper for IconToPARGB32Bitmap
 void InitBitmapInfo(BITMAPINFO *pbmi, ULONG cbInfo, LONG cx, LONG cy, WORD bpp)

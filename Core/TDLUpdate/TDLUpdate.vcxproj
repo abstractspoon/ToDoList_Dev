@@ -226,9 +226,6 @@ copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\TDLUpdate_wiz_header.bmp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

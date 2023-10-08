@@ -143,9 +143,6 @@
     <None Include="res\update_filter.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\wiz_header.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="RES\XPcheckboxes.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -198,9 +195,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\TDLUpdate\RES\TDLUpdate.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\TDLUpdate\res\TDLUpdate_wiz_header.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\datetime_toolbar.bmp">
