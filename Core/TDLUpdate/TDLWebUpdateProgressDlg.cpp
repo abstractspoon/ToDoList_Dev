@@ -11,6 +11,7 @@
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\filemisc.h"
 #include "..\Shared\windowicons.h"
+#include "..\Shared\icon.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -51,14 +52,19 @@ CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	m_page.AttachFont(m_hFont);
 	AddPage(&m_page);
 	
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID/* | PSH_WATERMARK*/;		
+	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
 	m_psh.dwFlags &= ~(PSH_HASHELP);
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_WIZ_HEADER);
-	
+	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
+
 	SetWizardMode();
+}
+
+CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
+{
+	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CPropertySheetEx)
@@ -352,7 +358,7 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 	
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROGRESSHEADER), Misc::GetUserName());
-	m_strHeaderSubTitle = CEnString(IDS_WEBUPDATE_PROGRESS);
+	m_strHeaderSubTitle = "\n" + CEnString(IDS_WEBUPDATE_PROGRESS);
 
 	m_sDone = CEnString(IDS_WEBUPDATEDONE);
 

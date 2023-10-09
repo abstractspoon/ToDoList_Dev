@@ -1113,7 +1113,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_HTMLOPTIONS,234,25,108,48,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    ICON            IDI_STYLE_WRAP,IDC_HTMLOPTIONS_ICON,350,22,20,20
+    ICON            "",IDC_HTMLOPTIONS_ICON,350,22,20,20
     CONTROL         "",IDC_FRAME,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
                     WS_DISABLED,7,45,370,172
     DEFPUSHBUTTON   "OK",IDOK,273,225,50,14
@@ -2028,8 +2028,8 @@ BEGIN
                     8,NOT WS_VISIBLE
     COMBOBOX        IDC_SIMPLEPAGE_OPTIONS,19,54,184,48,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    ICON            IDI_STYLE_WRAP,IDC_SIMPLE_ICON,209,51,20,20
-    ICON            IDI_STYLE_IMAGE,-1,18,87,20,20
+    ICON            "",IDC_SIMPLE_ICON,209,51,20,20
+    ICON            "",IDC_IMAGE_ICON,18,87,20,20
     COMBOBOX        IDC_OTHEREXPORTERS,19,124,184,30,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     WS_VSCROLL | WS_TABSTOP
@@ -2079,7 +2079,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_HTMLOPTIONS,229,43,108,48,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    ICON            IDI_STYLE_WRAP,IDC_HTMLOPTIONS_ICON,345,40,21,20
+    ICON            "",IDC_HTMLOPTIONS_ICON,345,40,20,20
     GROUPBOX        "Export To",IDC_STATIC,0,69,366,52
     CONTROL         "F&ile",IDC_TOPATH,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,8,84,47,10
@@ -2745,9 +2745,6 @@ IDI_VISTASHIELD         ICON    DISCARDABLE     "res\\shield.ico"
 IDI_TASKTREE_STD        ICON    DISCARDABLE     "res\\task_tree_std.ico"
 IDI_LISTVIEW_STD        ICON    DISCARDABLE     "res\\list_view_std.ico"
 IDI_PREFERENCES_DIALOG_STD ICON    DISCARDABLE     "res\\prefs_dlg_std.ico"
-IDI_STYLE_WRAP          ICON    DISCARDABLE     "res\\style_wrap.ico"
-IDI_STYLE_TABLE         ICON    DISCARDABLE     "res\\style_table.ico"
-IDI_STYLE_PARA          ICON    DISCARDABLE     "res\\style_para.ico"
 IDI_ABSTRACTSPOON       ICON    DISCARDABLE     "res\\abstractspoon.ico"
 IDI_FILEEDIT_GO         ICON    DISCARDABLE     "res\\fileedit_go.ico"
 IDI_FILEEDIT_BROWSE     ICON    DISCARDABLE     "res\\fileedit_browse.ico"
@@ -2760,7 +2757,6 @@ IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 IDI_SIMPLETEXT          ICON    DISCARDABLE     "res\\simpletext.ico"
 IDI_OUTLOOK             ICON    DISCARDABLE     "res\\outlook_16.ico"
 IDI_TIMETRACK_STD       ICON    DISCARDABLE     "res\\app_timetrack.ico"
-IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
 IDI_RESET               ICON    DISCARDABLE     "res\\reset.ico"
 IDI_SEARCH_PREFS        ICON    DISCARDABLE     "res\\search_prefs.ico"
@@ -2777,6 +2773,10 @@ IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
 // Bitmap
 //
 
+IDB_STYLE_IMAGE         BITMAP  MOVEABLE PURE   "res\\style_image.bmp"
+IDB_STYLE_WRAP          BITMAP  MOVEABLE PURE   "res\\style_wrap.bmp"
+IDB_STYLE_TABLE         BITMAP  MOVEABLE PURE   "res\\style_table.bmp"
+IDB_STYLE_PARA          BITMAP  MOVEABLE PURE   "res\\style_para.bmp"
 IDB_SOURCECONTROL_STD   BITMAP  MOVEABLE PURE   "res\\src_control_std.bmp"
 IDB_APP_TOOLBAR_STD     BITMAP  MOVEABLE PURE   "RES\\app_toolbar_std.bmp"
 IDB_FIND_TOOLBAR_STD    BITMAP  MOVEABLE PURE   "RES\\find_toolbar_std.bmp"
@@ -2787,7 +2787,6 @@ IDR_APP_TOOLBAR         BITMAP  MOVEABLE PURE   "res\\app_toolbar.bmp"
 IDB_APP_EXTRA_STD       BITMAP  MOVEABLE PURE   "res\\app_extra_std.bmp"
 IDB_CUSTATTRIB_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\custattrib_toolbar_std.bmp"
 IDR_CUSTATTRIB_TOOLBAR  BITMAP  MOVEABLE PURE   "res\\custattrib_toolbar.bmp"
-IDB_WIZ_HEADER          BITMAP  MOVEABLE PURE   "res\\wiz_header.bmp"
 IDR_SOCIAL_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\social_toolbar.bmp"
 IDB_SOCIAL_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\social_toolbar_std.bmp"
 IDB_COLUMN_SYMBOLS      BITMAP  MOVEABLE PURE   "res\\column_header.bmp"
@@ -2798,7 +2797,6 @@ IDB_UDTPREFS_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar_std.bmp"
 IDR_UDTPREFS_TOOLBAR    BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar.bmp"
 IDB_OUTLOOKTYPES        BITMAP  MOVEABLE PURE   "res\\outlooktypes.bmp"
 IDR_COMMENTS_DATETIME_TOOLBAR BITMAP  DISCARDABLE     "res\\datetime_toolbar.bmp"
-IDB_TDLUPDATE_WIZ_HEADER BITMAP  DISCARDABLE     "..\\TDLUpdate\\res\\TDLUpdate_wiz_header.bmp"
 IDB_DATETIME_TOOLBAR_STD BITMAP  DISCARDABLE     "res\\datetime_toolbar_std.bmp"
 IDB_UK_FLAG             BITMAP  DISCARDABLE     "res\\uk_flag.bmp"
 IDB_YOURLANG_FLAG       BITMAP  DISCARDABLE     "res\\yourlang_flag.bmp"
@@ -5663,7 +5661,7 @@ BEGIN
     IDS_ANALYSEXML_FORMAT   "XML (.xml)|XML Files (*.xml)|*.xml||"
     IDS_NO_WEBUPDATE_AVAIL  "There are no updates available at this time."
     IDS_CSV_CUSTOMLISTATTRIB "<New Custom Attribute (List)>"
-    IDS_WEBUPDATE_PROMPT    "\nWould you like to update to this version?"
+    IDS_WEBUPDATE_PROMPT    "Would you like to update to this version?"
     IDS_WEBUPDATE_PROMPTHEADER "Hi %s, version %s is now available."
     IDS_UNINSTALLER_RUNFAILURE 
                             "The uninstaller could not be run at this time.\n\nPlease try again after your next reboot."
