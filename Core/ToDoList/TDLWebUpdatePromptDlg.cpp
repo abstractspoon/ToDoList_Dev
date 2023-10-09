@@ -206,7 +206,7 @@ END_MESSAGE_MAP()
 void CTDLWebUpdatePromptPage::SetInfo(LPCTSTR szExeVer, const CStringArray& aChanges)
 {
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROMPTHEADER), Misc::GetUserName(), szExeVer);
-	m_strHeaderSubTitle = CEnString(IDS_WEBUPDATE_PROMPT);
+	m_strHeaderSubTitle = "\n" + CEnString(IDS_WEBUPDATE_PROMPT);
 
 	m_sChanges = Misc::FormatArrayAsNumberedList(aChanges, _T(".\t"));
 

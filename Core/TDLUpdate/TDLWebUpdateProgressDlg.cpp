@@ -358,7 +358,7 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 	
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROGRESSHEADER), Misc::GetUserName());
-	m_strHeaderSubTitle = CEnString(IDS_WEBUPDATE_PROGRESS);
+	m_strHeaderSubTitle = "\n" + CEnString(IDS_WEBUPDATE_PROGRESS);
 
 	m_sDone = CEnString(IDS_WEBUPDATEDONE);
 
