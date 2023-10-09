@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
-const int SIZE_CLOSEBTN		= GraphicsMisc::ScaleByDPIFactor(8);
+const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
 

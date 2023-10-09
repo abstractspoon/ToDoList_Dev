@@ -20,8 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR STR_CLOSEBTN	= _T("r");
-const int SIZE_CLOSEBTN		= GraphicsMisc::ScaleByDPIFactor(8);
+const int SIZE_CLOSEBTN = (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
 
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox
