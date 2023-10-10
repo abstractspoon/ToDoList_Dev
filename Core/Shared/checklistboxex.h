@@ -52,6 +52,8 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnEnable(BOOL bEnable);
 	DECLARE_MESSAGE_MAP()
 
 	virtual void PreDrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
