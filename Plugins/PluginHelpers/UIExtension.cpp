@@ -767,7 +767,9 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Color baseColor)
 {
 	GM_ITEMSTATE state = Map(style);
-	COLORREF color = GraphicsMisc::GetExplorerItemSelectionTextColor(ColorUtil::DrawingColor::ToRgb(baseColor), state, GMIB_THEMECLASSIC);
+	COLORREF crBase = (baseColor.IsEmpty ? CLR_NONE : ColorUtil::DrawingColor::ToRgb(baseColor));
+
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionTextColor(crBase, state, GMIB_THEMECLASSIC);
 
 	return ColorUtil::DrawingColor::ToColor(color);
 }

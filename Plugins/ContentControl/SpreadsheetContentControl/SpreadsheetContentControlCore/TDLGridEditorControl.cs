@@ -931,9 +931,9 @@ namespace SpreadsheetContentControl
 			FormulaBar.BackColor = backColor;
 
 			// Unfocused colours
-			var color = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarHot);
-			var gridColor = new unvell.ReoGrid.Graphics.SolidColor(color.A, color.R, color.G, color.B);
-			
+			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.SelectedNotFocused);
+			var gridColor = new unvell.ReoGrid.Graphics.SolidColor(backColor);
+
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedNotFocusedStart, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedNotFocusedEnd, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedNotFocusedStart, gridColor);
@@ -944,8 +944,8 @@ namespace SpreadsheetContentControl
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridBackground, SystemColors.Window);
 
 			// Focused colours
-			color = DrawingColor.AdjustLighting(color, -0.15f, false);
-			gridColor = new unvell.ReoGrid.Graphics.SolidColor(color.A, color.R, color.G, color.B);
+			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+			gridColor = new unvell.ReoGrid.Graphics.SolidColor(backColor);
 
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedStart, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedEnd, gridColor);
