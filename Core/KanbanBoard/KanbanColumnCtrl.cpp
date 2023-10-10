@@ -3067,7 +3067,7 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 		rItem.bottom = rItem.top + nItemHeight;
 		rItem.right = min(rItem.right, rc.right);
 
-		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem);
+		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem, GMIB_THEMECLASSIC);
 
 		CRect rBody(rItem);
 		rBody.DeflateRect(1, 1);
@@ -3080,8 +3080,10 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 
 		DrawTaskIcon(&dc, pKI, rIcon);
 
+		COLORREF crText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
 		rBody.left += DEF_IMAGE_SIZE + IMAGE_PADDING;
-		DrawItemTitle(&dc, pKI, rBody, ::GetSysColor(COLOR_WINDOWTEXT));
+
+		DrawItemTitle(&dc, pKI, rBody, crText);
 
 		nVPos += nItemHeight;
 	}
