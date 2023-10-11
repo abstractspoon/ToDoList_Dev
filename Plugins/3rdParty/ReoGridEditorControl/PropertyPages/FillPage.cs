@@ -111,9 +111,9 @@ namespace unvell.ReoGrid.PropertyPages
 
 				// pattern style need a back color
 				// when pattern style setted but back color is not setted, set the backcolor to white
-				if (patternStyleComboBox.HasPatternStyle)
+				if (patternStyleComboBox.HasPatternStyle && colorPanel.SolidColor.IsEmpty)
 				{
-					style.BackColor = Color.White;
+					style.BackColor = new Graphics.SolidColor(1, 255, 255, 255);
 					style.Flag |= PlainStyleFlag.BackColor;
 				}
 
