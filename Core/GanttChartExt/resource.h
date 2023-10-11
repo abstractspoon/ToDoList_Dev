@@ -116,6 +116,7 @@
 #define IDS_COL_DONEDATE                57687
 #define IDS_ACTIVEDATERANGE             57688
 #define IDS_DISPLAYHINT                 57689
+#define IDS_COL_TITLE                   57690
 
 // Next default values for new objects
 // 

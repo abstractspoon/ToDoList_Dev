@@ -1337,7 +1337,7 @@ void CGanttCtrl::BuildTreeColumns()
 	while (m_treeHeader.DeleteItem(0));
 
 	// add columns
-	m_treeHeader.InsertItem(0, 0, _T("Title"), (HDF_LEFT | HDF_STRING), 0, GTLCC_TITLE);
+	m_treeHeader.InsertItem(0, 0, CEnString(IDS_COL_TITLE), (HDF_LEFT | HDF_STRING), 0, GTLCC_TITLE);
 	m_treeHeader.EnableItemDragging(0, FALSE);
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
