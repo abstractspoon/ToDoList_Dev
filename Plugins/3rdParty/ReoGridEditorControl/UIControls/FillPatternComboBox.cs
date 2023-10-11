@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows.Forms.VisualStyles;
 
 namespace unvell.UIControls
 {
@@ -65,9 +66,23 @@ namespace unvell.UIControls
 		{
 			base.OnResize(e);
 
-			buttonRect = new Rectangle(ClientRectangle.Right - 22, ClientRectangle.Top + 1, 21, ClientRectangle.Bottom - 2);
-			patternRect = new Rectangle(ClientRectangle.Left + 6, ClientRectangle.Top + 6,
-				ClientRectangle.Width - 32, ClientRectangle.Bottom - 12);
+			if (ComboBoxRenderer.IsSupported)
+			{
+				int buttonWidth = SystemInformation.HorizontalScrollBarArrowWidth;
+
+				buttonRect = ClientRectangle;
+				buttonRect.X = buttonRect.Right - buttonWidth;
+				buttonRect.Width = buttonWidth;
+
+				patternRect = ClientRectangle;
+				patternRect.Width -= buttonWidth;
+			}
+			else
+			{
+				buttonRect = new Rectangle(ClientRectangle.Right - 22, ClientRectangle.Top + 1, 21, ClientRectangle.Bottom - 2);
+				patternRect = new Rectangle(ClientRectangle.Left + 6, ClientRectangle.Top + 6,
+					ClientRectangle.Width - 32, ClientRectangle.Bottom - 12);
+			}
 		}
 
 		public HatchStyle PatternStyle
@@ -124,7 +139,10 @@ namespace unvell.UIControls
 			{
 				case Keys.Space:
 				case Keys.Enter:
-					if (dropdown) Pullup(); else Dropdown();
+					if (dropdown)
+					Pullup();
+				else
+					Dropdown();
 					break;
 
 				default:
@@ -152,34 +170,42 @@ namespace unvell.UIControls
 		{
 			Graphics g = e.Graphics;
 
+			if (ComboBoxRenderer.IsSupported)
+			{
+				ComboBoxRenderer.DrawTextBox(g, patternRect, ComboBoxState.Normal);
+				ComboBoxRenderer.DrawDropDownButton(g, buttonRect, (pressed ? ComboBoxState.Pressed : ComboBoxState.Normal));
+			}
+			else
+			{
+				ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
+				ControlPaint.DrawComboButton(g, buttonRect, pressed ? ButtonState.Pushed : ButtonState.Normal);
+			}
+
+			var rect = patternRect;
+			rect.Inflate(-2, -2);
+
 			if (!HasPatternStyle)
 			{
-				g.DrawRectangle(Pens.Black, patternRect);
+				g.DrawRectangle(Pens.Black, rect);
 			}
 			else
 			{
 				using (HatchBrush hb = new HatchBrush(pickerWindow.PatternStyle, patternColor, Color.White))
 				{
-					g.FillRectangle(hb, patternRect);
+					g.FillRectangle(hb, rect);
 				}
 			}
 
 			if (Focused)
 			{
-				Rectangle focusRect = patternRect;
-				focusRect.Inflate(3, 3);
-				ControlPaint.DrawFocusRectangle(g, focusRect);
+				ControlPaint.DrawFocusRectangle(g, rect);
 			}
-
-			ControlPaint.DrawComboButton(g, buttonRect, pressed ? ButtonState.Pushed : ButtonState.Normal);
-			ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
 		}
 
 		public void Dropdown()
 		{
-			pickerWindow.Show(this, 0, Height);
-
 			dropdown = true;
+			pickerWindow.Show(this, 0, Height);
 			Invalidate();
 		}
 

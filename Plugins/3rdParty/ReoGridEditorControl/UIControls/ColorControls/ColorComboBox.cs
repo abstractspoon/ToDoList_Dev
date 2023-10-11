@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace unvell.UIControls
 {
@@ -66,9 +67,23 @@ namespace unvell.UIControls
 		{
 			base.OnResize(e);
 
-			btnRect = new Rectangle(ClientRectangle.Right - 22, ClientRectangle.Top + 1, 21, ClientRectangle.Bottom - 2);
-			colorRect = new Rectangle(ClientRectangle.Left + 6, ClientRectangle.Top + 6,
-				ClientRectangle.Width - 32, ClientRectangle.Bottom - 12);
+			if (ComboBoxRenderer.IsSupported)
+			{
+				int buttonWidth = SystemInformation.HorizontalScrollBarArrowWidth;
+
+				btnRect = ClientRectangle;
+				btnRect.X = btnRect.Right - buttonWidth;
+				btnRect.Width = buttonWidth;
+
+				colorRect = ClientRectangle;
+				colorRect.Width -= buttonWidth;
+			}
+			else
+			{
+				btnRect = new Rectangle(ClientRectangle.Right - 22, ClientRectangle.Top + 1, 21, ClientRectangle.Bottom - 2);
+				colorRect = new Rectangle(ClientRectangle.Left + 6, ClientRectangle.Top + 6,
+					ClientRectangle.Width - 32, ClientRectangle.Bottom - 12);
+			}
 		}
 
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -131,6 +146,19 @@ namespace unvell.UIControls
 		{
 			Graphics g = e.Graphics;
 
+			if (ComboBoxRenderer.IsSupported)
+			{
+				ComboBoxRenderer.DrawTextBox(g, colorRect, ComboBoxState.Normal);
+				ComboBoxRenderer.DrawDropDownButton(g, btnRect, (pressed ? ComboBoxState.Pressed : ComboBoxState.Normal));
+			}
+			else
+			{
+				ControlPaint.DrawComboButton(g, btnRect, pressed ? ButtonState.Pushed : ButtonState.Normal);
+				ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
+			}
+			var rect = colorRect;
+			rect.Inflate(-2, -2);
+
 			var color = CurrentColor;
 
 			if (color is SolidColor)
@@ -139,7 +167,7 @@ namespace unvell.UIControls
 
 				if (solidColor.IsEmpty)
 				{
-					g.DrawRectangle(Pens.Black, colorRect);
+					g.DrawRectangle(Pens.Black, rect);
 				}
 				else
 				{
@@ -147,10 +175,10 @@ namespace unvell.UIControls
 					{
 						if (solidColor.A < 255)
 						{
-							unvell.Common.GraphicsToolkit.DrawTransparentBlock(g, colorRect);
+							unvell.Common.GraphicsToolkit.DrawTransparentBlock(g, rect);
 						}
 
-						g.FillRectangle(b, colorRect);
+						g.FillRectangle(b, rect);
 					}
 				}
 			}
@@ -158,9 +186,9 @@ namespace unvell.UIControls
 			{
 				var lgc = (LinearGradientColor)color;
 
-				using (var lgb = lgc.CreateGradientBrush(colorRect))
+				using (var lgb = lgc.CreateGradientBrush(rect))
 				{
-					g.FillRectangle(lgb, colorRect);
+					g.FillRectangle(lgb, rect);
 				}
 			}
 			else if (color is HatchPatternColor)
@@ -174,14 +202,8 @@ namespace unvell.UIControls
 			}
 
 			if (Focused)
-			{
-				Rectangle focusRect = colorRect;
-				focusRect.Inflate(3, 3);
-				ControlPaint.DrawFocusRectangle(g, focusRect);
-			}
+				ControlPaint.DrawFocusRectangle(g, rect);
 
-			ControlPaint.DrawComboButton(g, btnRect, pressed ? ButtonState.Pushed : ButtonState.Normal);
-			ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
 		}
 
 		public void Dropdown()
