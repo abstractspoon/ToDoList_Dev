@@ -69,15 +69,6 @@ namespace unvell.ReoGrid.PropertyPages
 			set { this.grid = value; }
 		}
 
-		public void SetupUILanguage()
-		{
-			labBackgroundColor.Text = LangResource.FillPage_Background_Color;
-			grpSample.Text = LangResource.Sample;
-			grpPattern.Text = LangResource.FillPage_Fill_Pattern;
-			labPatternColor.Text = LangResource.FillPage_Fill_Pattern_Color;
-			labPatternStyle.Text = LangResource.FillPage_Fill_Pattern_Style;
-		}
-
 		private bool backuphasPatternStyle = false;
 		private Color backupBackColor = Color.Empty;
 		private Color backupPatternColor = Color.Empty;

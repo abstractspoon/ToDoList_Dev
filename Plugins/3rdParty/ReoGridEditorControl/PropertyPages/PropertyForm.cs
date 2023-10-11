@@ -29,7 +29,6 @@ namespace unvell.ReoGrid.PropertyPages
 	internal interface IPropertyPage
 	{
 		ReoGridControl Grid { get; set; }
-		void SetupUILanguage();
 		void LoadPage();
 		WorksheetReusableAction CreateUpdateAction();
 		event EventHandler Done;
@@ -55,25 +54,9 @@ namespace unvell.ReoGrid.PropertyPages
 			
 			InitializeComponent();
 
-			SetupUILanguage();
-
 			numberPage.Done += new EventHandler(IPropertyPage_Done);
 			
 			tabControl1.SelectedIndex = lastTabPageIndex;
-		}
-
-		void SetupUILanguage()
-		{
-			this.Text = LangResource.FormatPage_Caption;
-
-			this.tabFormat.Text = LangResource.Format;
-			this.tabAlignment.Text = LangResource.Alignment;
-			this.tabBorder.Text = LangResource.Border;
-			this.tabFill.Text = LangResource.Fill;
-			this.tabProtection.Text = LangResource.Protection;
-
-			this.btnOK.Text = LangResource.Btn_OK;
-			this.btnCancel.Text = LangResource.Btn_Cancel;
 		}
 
 		void IPropertyPage_Done(object sender, EventArgs e)
@@ -114,7 +97,6 @@ namespace unvell.ReoGrid.PropertyPages
 			this.ProcessAllPages(p =>
 			{
 				p.Grid = grid;
-				p.SetupUILanguage();
 				p.LoadPage();
 			});
 		}

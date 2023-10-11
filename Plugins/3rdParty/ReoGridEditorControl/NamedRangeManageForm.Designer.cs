@@ -114,6 +114,7 @@ namespace unvell.ReoGrid.Editor
 			// labNamedRange
 			// 
 			this.labNamedRange.Dock = System.Windows.Forms.DockStyle.Top;
+			this.labNamedRange.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labNamedRange.Location = new System.Drawing.Point(4, 4);
 			this.labNamedRange.Name = "labNamedRange";
 			this.labNamedRange.Size = new System.Drawing.Size(322, 24);

@@ -97,6 +97,7 @@ namespace unvell.ReoGrid.PropertyPages
 			// labCategory
 			// 
 			this.labCategory.AutoSize = true;
+			this.labCategory.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labCategory.Location = new System.Drawing.Point(13, 13);
 			this.labCategory.Name = "labCategory";
 			this.labCategory.Size = new System.Drawing.Size(52, 13);
@@ -106,6 +107,7 @@ namespace unvell.ReoGrid.PropertyPages
 			// grpSample
 			// 
 			this.grpSample.Controls.Add(this.labSample);
+			this.grpSample.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.grpSample.Location = new System.Drawing.Point(165, 18);
 			this.grpSample.Name = "grpSample";
 			this.grpSample.Size = new System.Drawing.Size(377, 50);
@@ -115,6 +117,7 @@ namespace unvell.ReoGrid.PropertyPages
 			// 
 			// labSample
 			// 
+			this.labSample.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labSample.Location = new System.Drawing.Point(15, 23);
 			this.labSample.Name = "labSample";
 			this.labSample.Size = new System.Drawing.Size(349, 20);

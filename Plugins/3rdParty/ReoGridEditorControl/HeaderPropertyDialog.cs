@@ -45,8 +45,6 @@ namespace unvell.ReoGrid.Editor
 
 			InitializeComponent();
 
-			SetupUILanguage();
-
 			this.cmbCellBody.Items.Add("(null)");
 
 			foreach (var cellType in CellTypesManager.CellTypes)
@@ -74,20 +72,6 @@ namespace unvell.ReoGrid.Editor
 			{
 				if (e.KeyCode == Keys.Enter) btnOK.PerformClick();
 			};
-		}
-
-		void SetupUILanguage()
-		{
-			this.Text = LangResource.HeaderProperty_Caption;
-
-			this.labText.Text = LangResource.HeaderProperty_Text;
-			this.labTextColor.Text = LangResource.HeaderProperty_Text_Color;
-			this.chkAutoFit.Text = LangResource.HeaderProperty_Auto_Fit_To_Cell;
-			this.labRowHeaderWidth.Text = LangResource.HeaderProperty_Panel_Width;
-			this.labCellBody.Text = LangResource.HeaderProperty_Default_Column_Type;
-
-			this.btnOK.Text = btnOK.Text;
-			this.btnCancel.Text = btnCancel.Text;
 		}
 
 		protected override void OnLoad(EventArgs e)

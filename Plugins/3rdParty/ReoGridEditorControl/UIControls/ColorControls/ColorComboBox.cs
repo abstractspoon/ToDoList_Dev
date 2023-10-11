@@ -25,7 +25,7 @@ namespace unvell.UIControls
 {
 	public class ColorComboBox : Control
 	{
-		private ColorPickerWindow pickerWindow = new ColorPickerWindow();
+		private ColorPickerWindow pickerWindow = new ColorPickerWindow(SystemColors.Window);
 
 		public ColorComboBox()
 		{

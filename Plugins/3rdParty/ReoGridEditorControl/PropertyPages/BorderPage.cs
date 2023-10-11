@@ -66,17 +66,6 @@ namespace unvell.ReoGrid.PropertyPages
 			borderSetter.CurrentColor = borderColorSelector.SolidColor;
 		}
 
-		public void SetupUILanguage()
-		{
-			grpLine.Text = LangResource.BorderPage_Line;
-
-			labStyle.Text = LangResource.BorderPage_Style;
-			labColor.Text = LangResource.Label_Color;
-
-			formLinePresets.Text = LangResource.BorderPage_Presets;
-			formLineBorder.Text = LangResource.Border;
-		}
-
 #pragma warning disable 67 // variable is never used
 		/// <summary>
 		/// Setting dialog will be closed when this event rasied
@@ -213,7 +202,7 @@ namespace unvell.ReoGrid.PropertyPages
 			}
 		}
 
-		private Color borderColor = Color.Black;
+		private Color borderColor = SystemColors.WindowText;
 
 		public Color BorderColor
 		{
@@ -275,24 +264,17 @@ namespace unvell.ReoGrid.PropertyPages
 		
 			foreach(var i in items)
 			{
+				g.FillRectangle(i.IsSelected ? SystemBrushes.Highlight : SystemBrushes.Window, i.Bounds);
+
 				if (i.Style == BorderLineStyle.None)
 				{
-					g.DrawString(LangResource.None, SystemFonts.DefaultFont, Brushes.Black, i.Bounds, sf);
+					g.DrawString(LangResource.None, SystemFonts.DefaultFont, SystemBrushes.WindowText, i.Bounds, sf);
 				}
 				else
 				{
 					BorderPainter.Instance.DrawLine(g, 
 						i.Bounds.Left, i.Bounds.Top + i.Bounds.Height / 2,
 						i.Bounds.Right, i.Bounds.Top + i.Bounds.Height / 2, i.Style, borderColor);
-				}
-
-				if (i.IsSelected)
-				{
-					using (Pen p = new Pen(Color.Black))
-					{
-						p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-						g.DrawRectangle(p, i.Bounds);
-					}
 				}
 
 				if (i.IsFocus)

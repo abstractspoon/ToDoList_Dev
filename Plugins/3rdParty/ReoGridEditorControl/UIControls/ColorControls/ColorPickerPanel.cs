@@ -68,18 +68,21 @@ namespace unvell.UIControls
 			set { currentColor = new SolidColor(value); solidPanel.CurrentColor = value; }
 		}
 
-		private SolidColorPickerPanel solidPanel = new SolidColorPickerPanel();
+		private SolidColorPickerPanel solidPanel;
 
 		private List<Control> panels = new List<Control>();
 
 		private Panel panel;
 
-		public ColorPickerPanel()
-			: base()
+		public ColorPickerPanel(Color backColor)
+			: 
+			base()
 		{
 			this.TabStop = false;
 			this.Margin = this.Padding = new Padding(1);
 			this.AutoSize = false;
+
+			solidPanel = new SolidColorPickerPanel(backColor);
 
 			panel = new Panel();
 			panel.TabStop = false;
@@ -92,6 +95,7 @@ namespace unvell.UIControls
 			tab.Tabs = new string[] { unvell.ReoGrid.Editor.LangRes.LangResource.SolidColor };
 			tab.Size = new Size(ClientRectangle.Width, 20);
 			tab.Dock = DockStyle.Top;
+			tab.SelectedBackColor = backColor;
 			tab.SelectedIndexChanged += (s, e) => panels[tab.SelectedIndex].BringToFront();
 
 			Controls.Add(tab);
@@ -134,9 +138,9 @@ namespace unvell.UIControls
 		
 		internal event EventHandler ColorPicked;
 	
-		public SolidColorPickerPanel()
-			: base()
+		public SolidColorPickerPanel(Color backColor) : base()
 		{
+			this.BackColor = backColor;
 			this.DoubleBuffered = true;
 		}
 
@@ -380,8 +384,8 @@ namespace unvell.UIControls
 					g.DrawRectangle(SystemPens.Highlight, 6, 113, 80, 21);
 				}
 
-				g.DrawRectangle(Pens.Black, 8, 116, 14, 14);
-				g.DrawLine(Pens.Black, 8, 130, 22, 116);
+				g.DrawRectangle(SystemPens.WindowText, 8, 116, 14, 14);
+				g.DrawLine(SystemPens.WindowText, 8, 130, 22, 116);
 				g.DrawString(ReoGrid.Editor.LangRes.LangResource.NoColor, Font,
 					index == hoverColorIndex ?
 					SystemBrushes.HighlightText : SystemBrushes.WindowText,
@@ -407,7 +411,7 @@ namespace unvell.UIControls
 				b.Color = currentColor;
 				g.FillRectangle(b, 100, 116, 14, 14);
 
-				g.DrawRectangle(Pens.Black, 100, 116, 14, 14);
+				g.DrawRectangle(SystemPens.WindowText, 100, 116, 14, 14);
 				g.DrawString(ReoGrid.Editor.LangRes.LangResource.Menu_More, Font,
 					index == hoverColorIndex ?
 					SystemBrushes.HighlightText : SystemBrushes.WindowText,

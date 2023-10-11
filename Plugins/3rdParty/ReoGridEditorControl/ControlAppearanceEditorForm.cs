@@ -39,22 +39,6 @@ namespace unvell.ReoGrid.Editor
 			colorPickerControl.ColorSelected += colorPickerControl_ColorPicked;
 			lstColors.SelectedIndexChanged += lstColors_SelectedIndexChanged;
 			numSelectionWidth.ValueChanged += NumSelectionWidth_ValueChanged;
-
-			SetupUILanguage();
-		}
-
-		void SetupUILanguage()
-		{
-			this.Text = LangResource.AppearanceEditor_Caption;
-
-			this.labMain.Text = LangResource.AppearanceEditor_Main;
-			this.labHighligh.Text = LangResource.AppearanceEditor_Highlight;
-			this.chkUseSystemHighlight.Text = LangResource.AppearanceEditor_Use_System_Highligh_Color;
-			this.labSelectionBorderWidth.Text = LangResource.AppearanceEditor_Selection_Border_Width;
-			this.labPixel.Text = LangResource.Pixel;
-			this.btnReset.Text = LangResource.AppearanceEditor_Reset_To_Default;
-			this.btnExportCSharp.Text = LangResource.AppearanceEditor_Export_CSharp;
-			this.btnExportVBNET.Text = LangResource.AppearanceEditor_Export_VBNET;
 		}
 
 		private ReoGridControl grid;

@@ -51,19 +51,21 @@ namespace unvell.ReoGrid.PropertyPages
 			this.grpSample = new System.Windows.Forms.GroupBox();
 			this.labSample = new System.Windows.Forms.Label();
 			this.labPatternColor = new System.Windows.Forms.Label();
-			this.labBackgroundColor = new System.Windows.Forms.Label();
 			this.labPatternStyle = new System.Windows.Forms.Label();
 			this.grpPattern = new System.Windows.Forms.GroupBox();
 			this.patternStyleComboBox = new unvell.UIControls.FillPatternComboBox();
 			this.patternColorComboBox = new unvell.UIControls.ColorComboBox();
-			this.colorPanel = new unvell.UIControls.ColorPickerPanel();
+			this.colorPanel = new unvell.UIControls.ColorPickerPanel(System.Drawing.SystemColors.Control);
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.grpSample.SuspendLayout();
 			this.grpPattern.SuspendLayout();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// grpSample
 			// 
 			this.grpSample.Controls.Add(this.labSample);
+			this.grpSample.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.grpSample.Location = new System.Drawing.Point(13, 270);
 			this.grpSample.Name = "grpSample";
 			this.grpSample.Size = new System.Drawing.Size(485, 68);
@@ -81,29 +83,22 @@ namespace unvell.ReoGrid.PropertyPages
 			// labPatternColor
 			// 
 			this.labPatternColor.AutoSize = true;
-			this.labPatternColor.Location = new System.Drawing.Point(28, 31);
+			this.labPatternColor.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.labPatternColor.Location = new System.Drawing.Point(14, 27);
 			this.labPatternColor.Name = "labPatternColor";
-			this.labPatternColor.Size = new System.Drawing.Size(71, 13);
+			this.labPatternColor.Size = new System.Drawing.Size(31, 13);
 			this.labPatternColor.TabIndex = 3;
-			this.labPatternColor.Text = "Pattern &Color:";
-			// 
-			// labBackgroundColor
-			// 
-			this.labBackgroundColor.AutoSize = true;
-			this.labBackgroundColor.Location = new System.Drawing.Point(10, 11);
-			this.labBackgroundColor.Name = "labBackgroundColor";
-			this.labBackgroundColor.Size = new System.Drawing.Size(95, 13);
-			this.labBackgroundColor.TabIndex = 4;
-			this.labBackgroundColor.Text = "&Background Color:";
+			this.labPatternColor.Text = "&Color";
 			// 
 			// labPatternStyle
 			// 
 			this.labPatternStyle.AutoSize = true;
-			this.labPatternStyle.Location = new System.Drawing.Point(28, 91);
+			this.labPatternStyle.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.labPatternStyle.Location = new System.Drawing.Point(14, 87);
 			this.labPatternStyle.Name = "labPatternStyle";
-			this.labPatternStyle.Size = new System.Drawing.Size(70, 13);
+			this.labPatternStyle.Size = new System.Drawing.Size(30, 13);
 			this.labPatternStyle.TabIndex = 3;
-			this.labPatternStyle.Text = "&Pattern Style:";
+			this.labPatternStyle.Text = "Style";
 			// 
 			// grpPattern
 			// 
@@ -111,9 +106,10 @@ namespace unvell.ReoGrid.PropertyPages
 			this.grpPattern.Controls.Add(this.patternColorComboBox);
 			this.grpPattern.Controls.Add(this.labPatternColor);
 			this.grpPattern.Controls.Add(this.labPatternStyle);
-			this.grpPattern.Location = new System.Drawing.Point(270, 31);
+			this.grpPattern.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.grpPattern.Location = new System.Drawing.Point(241, 14);
 			this.grpPattern.Name = "grpPattern";
-			this.grpPattern.Size = new System.Drawing.Size(228, 151);
+			this.grpPattern.Size = new System.Drawing.Size(196, 140);
 			this.grpPattern.TabIndex = 6;
 			this.grpPattern.TabStop = false;
 			this.grpPattern.Text = "Fill Pattern";
@@ -123,7 +119,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.patternStyleComboBox.BackColor = System.Drawing.Color.White;
 			this.patternStyleComboBox.CloseOnClick = false;
 			this.patternStyleComboBox.dropdown = false;
-			this.patternStyleComboBox.Location = new System.Drawing.Point(28, 107);
+			this.patternStyleComboBox.Location = new System.Drawing.Point(14, 103);
 			this.patternStyleComboBox.Name = "patternStyleComboBox";
 			this.patternStyleComboBox.PatternColor = System.Drawing.Color.Black;
 			this.patternStyleComboBox.PatternStyle = System.Drawing.Drawing2D.HatchStyle.Horizontal;
@@ -136,7 +132,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.patternColorComboBox.BackColor = System.Drawing.Color.White;
 			this.patternColorComboBox.CloseOnClick = true;
 			this.patternColorComboBox.dropdown = false;
-			this.patternColorComboBox.Location = new System.Drawing.Point(28, 51);
+			this.patternColorComboBox.Location = new System.Drawing.Point(14, 47);
 			this.patternColorComboBox.Name = "patternColorComboBox";
 			this.patternColorComboBox.Size = new System.Drawing.Size(170, 23);
 			this.patternColorComboBox.SolidColor = System.Drawing.Color.Black;
@@ -145,32 +141,42 @@ namespace unvell.ReoGrid.PropertyPages
 			// 
 			// colorPanel
 			// 
-			this.colorPanel.BackColor = System.Drawing.SystemColors.Window;
-			this.colorPanel.Location = new System.Drawing.Point(13, 31);
+			this.colorPanel.BackColor = System.Drawing.SystemColors.Control;
+			this.colorPanel.Location = new System.Drawing.Point(14, 27);
 			this.colorPanel.Margin = new System.Windows.Forms.Padding(1);
 			this.colorPanel.Name = "colorPanel";
 			this.colorPanel.Padding = new System.Windows.Forms.Padding(1);
-			this.colorPanel.Size = new System.Drawing.Size(173, 230);
-			this.colorPanel.SolidColor = System.Drawing.Color.Empty;
+			this.colorPanel.Size = new System.Drawing.Size(173, 216);
+			this.colorPanel.SolidColor = System.Drawing.SystemColors.ButtonFace;
 			this.colorPanel.TabIndex = 0;
 			this.colorPanel.TabStop = false;
 			this.colorPanel.Text = "colorPickPanel1";
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.colorPanel);
+			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.groupBox1.Location = new System.Drawing.Point(13, 14);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(216, 247);
+			this.groupBox1.TabIndex = 7;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Background Colour";
 			// 
 			// FillPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.grpPattern);
-			this.Controls.Add(this.labBackgroundColor);
 			this.Controls.Add(this.grpSample);
-			this.Controls.Add(this.colorPanel);
+			this.Controls.Add(this.groupBox1);
 			this.Name = "FillPage";
 			this.Size = new System.Drawing.Size(554, 359);
 			this.grpSample.ResumeLayout(false);
 			this.grpPattern.ResumeLayout(false);
 			this.grpPattern.PerformLayout();
+			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 
@@ -181,9 +187,9 @@ namespace unvell.ReoGrid.PropertyPages
 		private System.Windows.Forms.Label labSample;
 		private ColorComboBox patternColorComboBox;
 		private System.Windows.Forms.Label labPatternColor;
-		private System.Windows.Forms.Label labBackgroundColor;
 		private System.Windows.Forms.Label labPatternStyle;
 		private FillPatternComboBox patternStyleComboBox;
 		private System.Windows.Forms.GroupBox grpPattern;
+		private System.Windows.Forms.GroupBox groupBox1;
 	}
 }

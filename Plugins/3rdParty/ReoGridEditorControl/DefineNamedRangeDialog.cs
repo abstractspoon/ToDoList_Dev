@@ -44,19 +44,6 @@ namespace unvell.ReoGrid.Editor
 				}
 			};
 
-			SetupUILanguage();
-		}
-
-		void SetupUILanguage()
-		{
-			this.Text = LangResource.DefineNamedRange_Caption;
-
-			this.labName.Text = LangResource.DefineNamedRange_Name;
-			this.labComment.Text = LangResource.DefineNamedRange_Comment;
-			this.labRange.Text = LangResource.DefineNamedRange_Range;
-
-			this.btnOK.Text = LangResource.Btn_OK;
-			this.btnCancel.Text = LangResource.Btn_Cancel;
 		}
 
 		public string RangeName { get; set; }
