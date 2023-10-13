@@ -1237,6 +1237,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, colorMagenta) == -1))
 		return FALSE;
 	
+	// Use near white as most common background colour
 	m_ilColSymbols.ScaleByDPIFactor(RGB(254, 254, 254));
 
 	// primary header
