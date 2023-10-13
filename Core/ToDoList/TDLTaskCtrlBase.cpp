@@ -1237,7 +1237,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, colorMagenta) == -1))
 		return FALSE;
 	
-	m_ilColSymbols.ScaleByDPIFactor(RGB(253, 253, 253)); // near white
+	m_ilColSymbols.ScaleByDPIFactor();
 
 	// primary header
 	const TDCCOLUMN* pClient = GetColumn(TDCC_CLIENT);
