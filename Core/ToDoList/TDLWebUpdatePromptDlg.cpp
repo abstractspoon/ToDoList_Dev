@@ -48,14 +48,13 @@ CTDLWebUpdatePromptDlg::CTDLWebUpdatePromptDlg(LPCTSTR szExeVer, const CStringAr
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDI_TDLUPDATE);
-	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
+	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_WIZ_HEADER);
 
 	SetWizardMode();
 }
 
 CTDLWebUpdatePromptDlg::~CTDLWebUpdatePromptDlg()
 {
-	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptDlg, CPropertySheetEx)
@@ -140,7 +139,7 @@ BOOL CTDLWebUpdatePromptDlg::OnInitDialog()
 	if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT, WS_CHILD | CBRS_TOOLTIPS | WS_VISIBLE)))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_SOCIAL_TOOLBAR, IDB_SOCIAL_TOOLBAR, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDCANCEL);
 

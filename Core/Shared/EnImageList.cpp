@@ -111,6 +111,9 @@ BOOL CEnImageList::ScaleByDPIFactor(CImageList& il, COLORREF crBkgnd)
 	
 	if (!ilTemp.Create(nNewCx, nNewCy, ILC_COLOR32 | ILC_MASK, nCount, 1)) 
 		return FALSE;
+
+	if (crBkgnd == DEFAULT_BKGNDCOLOR)
+		crBkgnd = (::GetSysColor(COLOR_WINDOW) - 1);
 	
 	for (int nImage = 0; nImage < nCount; nImage++)
 	{
@@ -153,9 +156,12 @@ int CEnImageList::AddReplace(HICON hIcon, COLORREF crBkgnd, int nImage)
 		// else
 		return CImageList::Replace(nImage, hIcon);
 	}
-	
+
 	CEnBitmapEx bmp;
 	
+	if (crBkgnd == DEFAULT_BKGNDCOLOR)
+		crBkgnd = (::GetSysColor(COLOR_WINDOW) - 1);
+
 	bmp.CopyImage(hIcon, crBkgnd);
 	bmp.ResizeImage(GraphicsMisc::GetDPIScaleFactor());
 	bmp.ReplaceColor(crBkgnd, MAGENTA);
