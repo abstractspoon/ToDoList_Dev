@@ -2029,7 +2029,7 @@ BEGIN
     COMBOBOX        IDC_SIMPLEPAGE_OPTIONS,19,54,184,48,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     ICON            "",IDC_SIMPLE_ICON,209,51,20,20
-    ICON            "",-1,18,87,20,20
+    ICON            "",IDC_IMAGE_ICON,18,87,20,20
     COMBOBOX        IDC_OTHEREXPORTERS,19,124,184,30,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     WS_VSCROLL | WS_TABSTOP
@@ -2767,16 +2767,16 @@ IDI_TRAY_DARK           ICON    DISCARDABLE     "res\\app_tray_dark.ico"
 IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.ico"
 IDI_QUICKFIND_NEXT      ICON    DISCARDABLE     "res\\quickfind_next.ico"
 IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
-IDI_STYLE_IMAGE         ICON    DISCARDABLE     "res\\style_image.ico"
-IDI_STYLE_WRAP          ICON    DISCARDABLE     "res\\style_wrap.ico"
-IDI_STYLE_TABLE         ICON    DISCARDABLE     "res\\style_table.ico"
-IDI_STYLE_PARA          ICON    DISCARDABLE     "res\\style_para.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
+IDB_STYLE_IMAGE         BITMAP  MOVEABLE PURE   "res\\style_image.bmp"
+IDB_STYLE_WRAP          BITMAP  MOVEABLE PURE   "res\\style_wrap.bmp"
+IDB_STYLE_TABLE         BITMAP  MOVEABLE PURE   "res\\style_table.bmp"
+IDB_STYLE_PARA          BITMAP  MOVEABLE PURE   "res\\style_para.bmp"
 IDB_SOURCECONTROL_STD   BITMAP  MOVEABLE PURE   "res\\src_control_std.bmp"
 IDB_APP_TOOLBAR_STD     BITMAP  MOVEABLE PURE   "RES\\app_toolbar_std.bmp"
 IDB_FIND_TOOLBAR_STD    BITMAP  MOVEABLE PURE   "RES\\find_toolbar_std.bmp"
