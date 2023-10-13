@@ -57,9 +57,14 @@ CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDR_MAINFRAME);
-	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_WIZ_HEADER);
+	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
 	SetWizardMode();
+}
+
+CTDLWebUpdateProgressDlg::~CTDLWebUpdateProgressDlg()
+{
+	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressDlg, CPropertySheetEx)

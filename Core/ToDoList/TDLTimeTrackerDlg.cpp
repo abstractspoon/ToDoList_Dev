@@ -211,7 +211,7 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	if (m_toolbar.CreateEx(this))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_TIMETRACKER_TOOLBAR, IDB_TIMETRACK_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 
 		m_toolbar.SetDlgCtrlID(IDC_TOOLBAR);
 		m_toolbar.MoveWindow(GetCtrlRect(this, IDC_TOOLBAR));

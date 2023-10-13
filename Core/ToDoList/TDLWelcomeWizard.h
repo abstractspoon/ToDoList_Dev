@@ -83,7 +83,6 @@ protected:
 	//}}AFX_DATA
 	HFONT m_hFont;
 
-
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CWelcomePage2)
@@ -179,6 +178,7 @@ protected:
 	HFONT m_hFont;
 	CWinHelpButton m_btnHelp;
 	CString m_sTitle;
+	HBITMAP m_hbmHeader;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

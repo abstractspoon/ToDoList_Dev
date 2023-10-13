@@ -55,26 +55,20 @@ namespace WordCloudUIExtension
 
         public System.Drawing.Color GetTextColor(Boolean isSelected, Boolean taskColorIsBkgnd)
         {
+			if (isSelected)
+			{
+				if (SystemInformation.HighContrast)
+					return SystemColors.HighlightText;
+
+				// else
+				return UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskTextColor);
+			}
+
             if (!taskTextColor.IsEmpty)
-            {
-				if (isSelected)
-				{
-					if (SystemInformation.HighContrast)
-						return SystemColors.HighlightText;
+                return (taskColorIsBkgnd ? DrawingColor.GetBestTextColor(TextColor, true) : taskTextColor);
 
-					// else
-					return DrawingColor.SetLuminance(TextColor, 0.3f);
-				}
-
-                if (taskColorIsBkgnd)
-                    return DrawingColor.GetBestTextColor(TextColor);
-            }
-            else
-            {
-                return System.Drawing.SystemColors.WindowText;
-            }
-
-            return TextColor;
+			// else
+			return System.Drawing.SystemColors.WindowText;
         }
 
         public System.Drawing.Color GetBackColor(Boolean taskColorIsBkgnd)

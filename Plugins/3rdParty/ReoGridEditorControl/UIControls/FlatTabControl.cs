@@ -36,8 +36,8 @@ namespace unvell.UIControls
 		/// </summary>
 		public FlatTabControl()
 		{
-			this.SelectedBackColor = SystemColors.Window;
-			this.SelectedTextColor = Color.DimGray;
+			this.SelectedBackColor = SystemColors.Control;
+			this.SelectedTextColor = SystemColors.WindowText;
 
 			DoubleBuffered = true;
 		}
@@ -166,7 +166,7 @@ namespace unvell.UIControls
 					if (i != selectedIndex)
 					{
 						string tab = tabs[i];
-						g.DrawString(tab, tabFont, Brushes.DimGray, rect.Left + 4, rect.Top + 2);
+						g.DrawString(tab, tabFont, SystemBrushes.ControlDarkDark, rect.Left + 4, rect.Top + 2);
 					}
 
 					rect.Offset(rect.Width, 0);
@@ -193,7 +193,7 @@ namespace unvell.UIControls
 
 						if (this.BorderStyle != TabBorderStyle.NoBorder)
 						{
-							if (this.BorderStyle == TabBorderStyle.SplitRouned)
+							if (this.BorderStyle == TabBorderStyle.SplitRounded)
 							{
 								x++; x2--;
 							}
@@ -204,7 +204,7 @@ namespace unvell.UIControls
 								case TabControlPosition.Top:
 									y = rect.Top; y2 = rect.Bottom;
 
-									if (this.BorderStyle == TabBorderStyle.SplitRouned)
+									if (this.BorderStyle == TabBorderStyle.SplitRounded)
 									{
 										y++; y2--;
 									}
@@ -214,7 +214,7 @@ namespace unvell.UIControls
 								case TabControlPosition.Bottom:
 									y = rect.Bottom - 1; y2 = rect.Top;
 
-									if (this.BorderStyle == TabBorderStyle.SplitRouned)
+									if (this.BorderStyle == TabBorderStyle.SplitRounded)
 									{
 										y--; y2++;
 									}
@@ -316,7 +316,7 @@ namespace unvell.UIControls
 		/// <summary>
 		/// Separated Rounded Rectangle
 		/// </summary>
-		SplitRouned,
+		SplitRounded,
 
 		/// <summary>
 		/// No Borders (Windows 8 Style)

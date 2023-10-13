@@ -528,6 +528,8 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 
 	if (pNCGDI->nColID != OTC_POSCOLUMNID)
 	{
+		BOOL bFocused = (::GetFocus() == m_tcCommands);
+
 		CRect rItem(pNCGDI->rItem);
 		HTREEITEM hti = (HTREEITEM)pNCGDI->dwItem;
 
@@ -537,7 +539,6 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 
 		if (bThemedSel)
 		{
-			BOOL bFocused = (GetFocus() == &m_tcCommands);
 			DWORD dwFlags = GMIB_CLIPRIGHT;
 
 			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
@@ -559,7 +560,12 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		if (!bSubMenu)
 		{
 			UINT nCmdID = m_tcCommands.GetItemData(hti);
-			pNCGDI->pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+
+			if (bThemedSel)
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), 0);
+
+			pNCGDI->pDC->SetTextColor(crText);
 
 			rItem.left += TEXT_PADDING;
 

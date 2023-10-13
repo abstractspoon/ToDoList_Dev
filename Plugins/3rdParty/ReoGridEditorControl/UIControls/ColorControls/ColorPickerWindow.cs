@@ -33,17 +33,17 @@ namespace unvell.UIControls
 {
 	internal class ColorPickerWindow : ToolStripDropDown
 	{
-		private ColorPickerPanel colorPickerPanel = new ColorPickerPanel();
+		private ColorPickerPanel colorPickerPanel;
 
 		private ToolStripControlHost controlHost;
 
-		public ColorPickerWindow()
-			: base()
+		public ColorPickerWindow(Color backColor) : base()
 		{
 			this.TabStop = false;
 			this.Margin = this.Padding = new Padding(1);
 			this.AutoSize = false;
-		
+
+			colorPickerPanel = new ColorPickerPanel(backColor);
 			colorPickerPanel.Dock = DockStyle.Fill;
 			colorPickerPanel.Location = new Point(0, 0);
 			colorPickerPanel.ColorPicked += (s, e) =>

@@ -1056,7 +1056,7 @@ BOOL CTDLCustomAttributeDlg::InitializeToolbar()
 		return FALSE;
 
 	VERIFY(m_toolbar.LoadToolBar(IDR_CUSTATTRIB_TOOLBAR, IDB_CUSTATTRIB_TOOLBAR_STD, colorMagenta));
-	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+	VERIFY(m_tbHelper.Initialize(&m_toolbar));
 	
 	// very important - turn OFF all the auto positioning and sizing
 	// by default have no borders

@@ -49,7 +49,7 @@ namespace unvell.Common
 		}
 		public static void FillTriangle(Graphics g, float size, PointF loc, TriangleDirection dir)
 		{
-			FillTriangle(g, size, loc, dir, Pens.Black);
+			FillTriangle(g, size, loc, dir, SystemPens.WindowFrame);
 		}
 		public static void FillTriangle(Graphics g, float size, PointF loc, TriangleDirection dir, Pen p)
 		{

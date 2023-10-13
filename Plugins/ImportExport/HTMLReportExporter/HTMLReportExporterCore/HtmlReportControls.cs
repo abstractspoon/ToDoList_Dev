@@ -152,7 +152,7 @@ namespace HTMLReportExporter
 
 			InitialiseFeatures();
 
-			m_ToolStripAttributeMenu = new ToolStripDropDownButton();
+			m_ToolStripAttributeMenu = new ToolStripDropDownButton() { ForeColor = SystemColors.WindowText };
 			InitialiseToolbar();
 
 			EnableAtomicSelection();
@@ -704,7 +704,7 @@ namespace HTMLReportExporter
 			base.InitialiseToolbar();
 
 			// additional 'level' menu
-			m_ToolStripAttributeLevelMenu = new ToolStripDropDownButton();
+			m_ToolStripAttributeLevelMenu = new ToolStripDropDownButton() { ForeColor = SystemColors.WindowText }; 
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(1)) { Name = "1" });
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());

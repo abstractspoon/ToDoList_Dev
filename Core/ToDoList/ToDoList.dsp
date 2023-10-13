@@ -295,19 +295,19 @@ SOURCE=.\res\src_control_std.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\style_image.ico
+SOURCE=.\res\style_image.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\style_para.ico
+SOURCE=.\res\style_para.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\style_table.ico
+SOURCE=.\res\style_table.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\style_wrap.ico
+SOURCE=.\res\style_wrap.bmp
 # End Source File
 # Begin Source File
 

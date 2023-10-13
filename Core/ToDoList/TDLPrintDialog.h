@@ -11,6 +11,7 @@
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
+#include "..\shared\icon.h"
 #include "..\shared\historycombobox.h"
 #include "..\shared\TabbedPropertyPageHost.h"
 
@@ -22,30 +23,20 @@ class CTDLHtmlStyleStatic : public CStatic
 {
 public:
 	void SetStyle(TDLPD_STYLE nFormat);
+
+protected:
+	CIcon m_iconStyles[3];
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDLHtmlStyleComboBox : public CComboBox
 {
-	// Construction
 public:
 	void DDX(CDataExchange* pDX, TDLPD_STYLE& value);
 
 protected:
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLLanguageComboBox)
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLLanguageComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
-	DECLARE_MESSAGE_MAP()
 
 protected:
 	void BuildCombo();
@@ -77,6 +68,7 @@ protected:
 	CTDLHtmlStyleComboBox m_cbSimpleOptions;
 	CImportExportComboBox m_cbOtherExporters;
 	CFileEdit m_eStylesheet;
+	CStatic m_stImageIcon;
 
 	CString	m_sStylesheet;
 	int m_nStyleOption;
@@ -84,6 +76,7 @@ protected:
 	CString m_sPrefsKey;
 	CString m_sOtherExporterTypeID;
 	TDLPD_STYLE m_nSimpleStyle;
+	CIcon m_iconImage;
 
 	const CTDCImportExportMgr& m_mgrImpExp;
 

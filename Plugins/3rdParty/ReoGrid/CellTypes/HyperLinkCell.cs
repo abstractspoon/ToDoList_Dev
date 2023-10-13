@@ -40,17 +40,17 @@ namespace unvell.ReoGrid.CellTypes
 		/// <summary>
 		/// Get or set color of mouse-hover status.
 		/// </summary>
-		public SolidColor ActivateColor { get; set; }
+		public static SolidColor ActivateColor = SolidColor.Red;
 
 		/// <summary>
 		/// Get or set color of normal hyperlink.
 		/// </summary>
-		public SolidColor LinkColor { get; set; }
+		public static SolidColor LinkColor = SolidColor.Blue;
 
 		/// <summary>
 		/// Get or set color of visited status.
 		/// </summary>
-		public SolidColor VisitedColor { get; set; }
+		public static SolidColor VisitedColor = SolidColor.Purple;
 
 		/// <summary>
 		/// Get or set the navigation url. (Redirected when AutoNavigation property is true)
@@ -82,10 +82,6 @@ namespace unvell.ReoGrid.CellTypes
 		/// when hyperlink clicked automatically. (Default is true)</param>
 		public HyperlinkCell(string navigationURL, bool autoNavigate)
 		{
-			this.ActivateColor = SolidColor.Red;
-			this.LinkColor = SolidColor.Blue;
-			this.VisitedColor = SolidColor.Purple;
-
 			this.LinkURL = navigationURL;
 			this.AutoNavigate = autoNavigate;
 		}

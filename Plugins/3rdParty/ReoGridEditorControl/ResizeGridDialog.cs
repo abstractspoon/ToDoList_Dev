@@ -34,20 +34,6 @@ namespace unvell.ReoGrid.Editor
 			numRows.KeyDown += numRows_KeyDown;
 			numCols.KeyDown += numRows_KeyDown;
 
-			SetupUILanguage();
-		}
-
-		private void SetupUILanguage()
-		{
-			this.Text = LangResource.Resize_Caption;
-
-			this.labRows.Text = LangResource.Resize_Rows;
-			this.labCols.Text = LangResource.Resize_Columns;
-			this.labRowsRemark.Text = LangResource.Resize_Rows_Remark;
-			this.labColsRemark.Text = LangResource.Resize_Columns_Remark;
-
-			this.btnOK.Text = LangResource.Btn_OK;
-			this.btnCancel.Text = LangResource.Btn_Cancel;
 		}
 
 		void numRows_KeyDown(object sender, KeyEventArgs e)

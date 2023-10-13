@@ -222,7 +222,7 @@ BOOL CToDoListApp::InitInstance()
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
 
-	if (cmdInfo.HasOption(SWITCH_DARKMODE) && !Misc::IsHighContrastActive())
+	if (cmdInfo.HasOption(SWITCH_DARKMODE))
 		CDarkMode::Enable();
 
 	// If this is a restart, wait until the previous instance has closed
@@ -1487,11 +1487,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
-		
-	// the helper app path
-	CString sAppFolder = FileMisc::GetAppFolder();
-	CString sAppPath = GetHelperAppPath(sAppName, bTestDownload);
-
+	
 #ifdef _DEBUG // ----------------------------------------------------
 	if (bTestDownload)
 		params.SetOption(SWITCH_TESTDOWNLOAD);
@@ -1510,10 +1506,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	params.SetOption(SWITCH_CMDLINE, Base64Coder::Encode(m_lpCmdLine));
 #endif // -----------------------------------------------------------
 	
-	// and the current language
-	if (CRTLStyleMgr::IsRTL())
-		params.SetOption(SWITCH_RTL);
-
+	// Inherited commandline options
 	if (m_sLanguageFile != CTDLLanguageComboBox::GetDefaultLanguage())
 	{
 		CString sLangFile = FileMisc::GetFullPath(m_sLanguageFile, FileMisc::GetAppFolder());
@@ -1528,15 +1521,22 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		}
 	}
 
-	// and whether this is a pre-prelease
+	if (CDarkMode::IsEnabled())
+		params.SetOption(SWITCH_DARKMODE);
+
+	if (CRTLStyleMgr::IsRTL())
+		params.SetOption(SWITCH_RTL);
+
 	if (bPreRelease)
 		params.SetOption(SWITCH_PRERELEASE);
 
-	// And whether we want to be restarted with admin rights
 	if (FileMisc::IsAdminProcess())
 		params.SetOption(SWITCH_RESTARTELEVATED);
 
 	// Use the "RunAs" verb if the install folder is readonly
+	CString sAppFolder = FileMisc::GetAppFolder();
+	CString sAppPath = GetHelperAppPath(sAppName, bTestDownload);
+
 	LPCTSTR szVerb = (FileMisc::IsFolderWritable(sAppFolder) ? NULL : _T("runas"));
 
 	return RunHelperApp(sAppPath, params, nIDGenErrorMsg, nIDSmartScreenErrorMsg, szVerb);
@@ -1791,10 +1791,13 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	FileMisc::TerminatePath(sAppPath) += _T("TDLUpdate.exe");
 
 	// pass our app id to app 
-	CEnCommandLineInfo cmdLine;
+	CEnCommandLineInfo cmdInfo;
 
-	cmdLine.SetOption(SWITCH_APPID, TDLAPPID);
-	cmdLine.SetOption(SWITCH_SHOWUI);
+	cmdInfo.SetOption(SWITCH_APPID, TDLAPPID);
+	cmdInfo.SetOption(SWITCH_SHOWUI);
+
+	if (CDarkMode::IsEnabled())
+		cmdInfo.SetOption(SWITCH_DARKMODE);
 
 	// Pass the centroid of the main wnd so that the
 	// updater appears in that same location
@@ -1804,10 +1807,10 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 		m_pMainWnd->GetWindowRect(rWindow);
 		CPoint ptPos = rWindow.CenterPoint();
 
-		cmdLine.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
+		cmdInfo.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 
-	DWORD dwRes = FileMisc::Run(NULL, sAppPath, cmdLine.GetCommandLine());
+	DWORD dwRes = FileMisc::Run(NULL, sAppPath, cmdInfo.GetCommandLine());
 }
 
 void CToDoListApp::OnDebugShowScriptDlg() 
@@ -1820,7 +1823,6 @@ void CToDoListApp::OnDebugShowLanguageDlg()
 	CTDLLanguageDlg dialog;
 	dialog.DoModal();
 }
-
 
 void CToDoListApp::OnDebugTestStableReleaseDownload() 
 {

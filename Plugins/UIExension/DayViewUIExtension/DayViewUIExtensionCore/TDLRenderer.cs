@@ -559,7 +559,7 @@ namespace DayViewUIExtension
 				barColor = textColor;
 				fillColor = textColor;
 
-				textColor = DrawingColor.GetBestTextColor(textColor);
+				textColor = DrawingColor.GetBestTextColor(textColor, true);
 				borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
 			}
 		}

@@ -42,7 +42,7 @@ namespace unvell.UIControls
 			}
 		}
 
-		private ColorPickerWindow dropPanel = new ColorPickerWindow();
+		private ColorPickerWindow dropPanel = new ColorPickerWindow(SystemColors.Window);
 
 		public ColorPickerToolStripItem()
 			: base()

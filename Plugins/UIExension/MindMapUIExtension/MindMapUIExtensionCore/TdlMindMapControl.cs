@@ -1126,23 +1126,19 @@ namespace MindMapUIExtension
 			// Text Colour
 			Color textColor = SystemColors.WindowText;
 
-			if (!isDragImage && !taskItem.TextColor.IsEmpty)
+			if (isSelected)
 			{
-				if (isSelected)
-				{
-					if (SystemInformation.HighContrast)
-						textColor = SystemColors.HighlightText;
-					else
-						textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
-				}
-				else if (m_TaskColorIsBkgnd)
-				{
-					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
-				}
+				if (SystemInformation.HighContrast)
+					textColor = SystemColors.HighlightText;
+				else
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TextColor);
+			}
+			else if (!taskItem.TextColor.IsEmpty)
+			{
+				if (m_TaskColorIsBkgnd)
+					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor, true);
                 else
-                {
                     textColor = taskItem.TextColor;
-                }
             }
 
 			switch (nodeState)

@@ -30,34 +30,8 @@ namespace unvell.ReoGrid.Editor
 		public PrintSettingsDialog()
 		{
 			InitializeComponent();
-
-			SetupUILanguage();
 		}
 
-		private void SetupUILanguage()
-		{
-			this.Text = LangResource.PrintSettings_Caption;
-
-			this.grpPaper.Text = LangResource.Paper;
-			this.labPaperSize.Text = LangResource.PrintSettings_Paper_Size;
-			this.labOrientation.Text = LangResource.PrintSettings_Orientation;
-			this.btnPaperSetup.Text = LangResource.PrintSettings_Setup;
-
-			this.grpPagingOrder.Text = LangResource.Paging_Order;
-			this.rdoDownThenOver.Text = LangResource.PrintSettings_Down_Then_Over;
-			this.rdoOverThenDown.Text = LangResource.PrintSettings_Over_Then_Down;
-
-			this.grpScaling.Text = LangResource.Scaling;
-			this.labAdjustTo.Text = LangResource.PrintSettings_Adjust_To;
-			this.labPercentNormalSize.Text = LangResource.PrintSettings_Percent_Normal_Size;
-
-			this.grpVisibleSettings.Text = LangResource.PrintSettings_Visible_Settings;
-			this.chkShowMargins.Text = LangResource.PrintSettings_Show_Margins;
-			this.chkPrintGridLines.Text = LangResource.PrintSettings_Show_Grid_Lines;
-
-			this.btnOK.Text = LangResource.Btn_OK;
-			this.btnCancel.Text = LangResource.Btn_Cancel;
-		}
 
 		protected override void OnLoad(EventArgs e)
 		{

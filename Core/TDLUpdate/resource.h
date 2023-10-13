@@ -5,7 +5,6 @@
 #define IDR_MANIFEST                    1
 #define IDD_TDLUPDATE_DIALOG            102
 #define IDR_MAINFRAME                   128
-#define IDB_WIZ_HEADER                  267
 #define IDD_WEBUPDATE_PROGRESS_PAGE     272
 #define IDC_PROGRESS                    1427
 #define IDS_WEBUPDATE_SUCCESS           58383

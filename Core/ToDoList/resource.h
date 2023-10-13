@@ -11,6 +11,7 @@
 #define IDC_CLEARFILTER                 105
 #define IDC_QUICKFIND                   106
 #define IDC_FILENAME                    107
+#define IDC_IMAGE_ICON                  108
 #define IDR_MAINFRAME                   128
 #define IDR_MAINFRAME_STD               128
 #define IDD_RECURRING_TASK_DIALOG_OLD   129
@@ -77,11 +78,8 @@
 #define IDB_FIND_TOOLBAR_STD            247
 #define IDD_PASTEIMPORT_DIALOG          247
 #define IDB_SOURCECONTROL_STD           248
-#define IDI_STYLE_WRAP                  248
 #define IDB_TASKICONS_STD               249
-#define IDI_STYLE_TABLE                 249
 #define IDR_APP_TOOLBAR                 250
-#define IDI_STYLE_PARA                  250
 #define IDR_FIND_TOOLBAR                251
 #define IDB_APP_TOOLBAR_METRO           252
 #define IDB_FIND_TOOLBAR_METRO          253
@@ -90,9 +88,10 @@
 #define IDR_CUSTATTRIB_TOOLBAR          257
 #define IDB_CUSTATTRIB_TOOLBAR_METRO    258
 #define IDB_CUSTATTRIB_TOOLBAR_STD      259
-#define IDI_DROPBOX                     263
-#define IDI_GOOGLEDRIVE                 264
-#define IDI_SKYDRIVE                    265
+#define IDB_STYLE_PARA                  260
+#define IDB_STYLE_TABLE                 261
+#define IDB_STYLE_WRAP                  262
+#define IDB_STYLE_IMAGE                 263
 #define IDB_WIZ_HEADER                  267
 #define IDR_TASKVIEWVISIBILITY          268
 #define IDD_ANALYSELOGGEDTIME_DIALOG    269
@@ -126,13 +125,11 @@
 #define IDB_UDTPREFS_TOOLBAR_STD        301
 #define IDI_SIMPLETEXT                  302
 #define IDI_TIMETRACK_STD               304
-#define IDI_STYLE_IMAGE                 305
 #define IDD_GOTOTASK_DIALOG             306
 #define IDD_CLEANUPINIPREFERENCES_DIALOG 307
 #define IDI_ADD_LOGGED_TIME             308
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
-#define IDB_TDLUPDATE_WIZ_HEADER        310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDI_TRAY_LIGHT                  316

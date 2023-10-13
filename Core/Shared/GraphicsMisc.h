@@ -139,6 +139,7 @@ namespace GraphicsMisc
 	CSize GetIconSize(HICON hIcon);
 	CSize GetBitmapSize(HBITMAP hBmp);
 	HICON GetAppWindowIcon(BOOL bLarge);
+	HBITMAP MakeWizardImage(HICON hIcon); // 49x49
 
 	HCURSOR LoadHandCursor();
 	HCURSOR LoadDragDropCursor(GM_OLECURSOR nCursor);
@@ -219,7 +220,7 @@ namespace GraphicsMisc
 	COLORREF Lighter(COLORREF color, double dAmount, BOOL bRGB = TRUE);
 	COLORREF Darker(COLORREF color, double dAmount, BOOL bRGB = TRUE);
 	COLORREF Blend(COLORREF color1, COLORREF color2, double dAmount);
-	COLORREF GetBestTextColor(COLORREF crBack);
+	COLORREF GetBestTextColor(COLORREF crBack, BOOL bEnabled = TRUE);
 	void CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nNumColors, CDWordArray& aColors, BOOL bRGB = TRUE);
 	CString GetWebColor(COLORREF color);
 	COLORREF ParseWebColor(const CString& sHexColor);
@@ -240,8 +241,8 @@ namespace GraphicsMisc
 	CPoint CentrePoint(LPCRECT prcRect);
 	void AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags); // DT_LEFT, etc
 
-	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags = GMIB_NONE, LPCRECT prClip = NULL); 
-	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags = GMIB_NONE);
+	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip = NULL); 
+	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetSolidColor(HBRUSH hBrush);
 

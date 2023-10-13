@@ -72,9 +72,4 @@
       <Filter>Libs</Filter>
     </Library>
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\TDLUpdate_wiz_header.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
 </Project>

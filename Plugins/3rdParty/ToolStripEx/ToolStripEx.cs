@@ -19,41 +19,39 @@ namespace IIControls
         public string ToolTipText;
         public bool ToolTipShowUp;
 
+		private static Color Black		= Color.FromArgb(0, 0, 0);		 // -> COLOR_3DDKSHADOW
+		private static Color DarkGray	= Color.FromArgb(128, 128, 128); // -> COLOR_3DSHADOW      
+		private static Color LightGray  = Color.FromArgb(192, 192, 192); // -> COLOR_3DLIGHT        
+		private static Color White		= Color.FromArgb(255, 255, 255); // -> COLOR_3DHIGHLIGHT   
+
 		public void RemapSysColors()
 		{
 			foreach (ToolStripItem item in Items)
+				RemapSysColors(item.Image as Bitmap);
+		}
+
+		public static void RemapSysColors(Bitmap image)
+		{
+			if (image != null)
 			{
-				if (item.Image != null)
+				for (int i = 0; i < image.Width; i++)
 				{
-					Bitmap image = (item.Image as Bitmap);
-
-					if (image != null)
+					for (int j = 0; j < image.Height; j++)
 					{
-						for (int i = 0; i < image.Width; i++)
-						{
-							for (int j = 0; j < image.Height; j++)
-							{
-								Color color = image.GetPixel(i, j);
+						Color color = image.GetPixel(i, j);
 
-								if (MapColor(ref color))
-									image.SetPixel(i, j, color);
-							}
-						}
+						if (MapColor(ref color))
+							image.SetPixel(i, j, color);
 					}
 				}
 			}
 		}
 
-		protected bool MapColor(ref Color color)
+		protected static bool MapColor(ref Color color)
 		{
-			Color Black		= Color.FromArgb(0x00, 0x00, 0x00); // -> COLOR_BTNTEXT        
-			Color DarkGray	= Color.FromArgb(0x80, 0x80, 0x80); // -> COLOR_BTNSHADOW      
-			Color LightGray = Color.FromArgb(0xC0, 0xC0, 0xC0);	// -> COLOR_BTNFACE        
-			Color White		= Color.FromArgb(0xFF, 0xFF, 0xFF);	// -> COLOR_BTNHIGHLIGHT   
-
 			if (color == Black)
 			{
-				color = SystemColors.ControlText;
+				color = SystemColors.ControlDarkDark;
 			}
 			else if (color == DarkGray)
 			{
@@ -61,11 +59,11 @@ namespace IIControls
 			}
 			else if (color == LightGray)
 			{
-				color = SystemColors.Control;
+				color = SystemColors.ControlLight;
 			}
 			else if (color == White)
 			{
-				color = SystemColors.ControlLight;
+				color = SystemColors.ControlLightLight;
 			}
 			else
 			{

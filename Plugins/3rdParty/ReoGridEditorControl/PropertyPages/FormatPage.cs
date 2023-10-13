@@ -41,27 +41,6 @@ namespace unvell.ReoGrid.PropertyPages
 			set { this.grid = value; }
 		}
 
-		public void SetupUILanguage()
-		{
-			labCategory.Text = LangResource.FormatPage_Category;
-			grpSample.Text = LangResource.Sample;
-
-			labDecimalPlacesNum.Text = LangResource.FormatPage_Decimal_Places;
-			labDecimalPlacesCurrency.Text = LangResource.FormatPage_Decimal_Places;
-			labDecimalPlacesPercent.Text = LangResource.FormatPage_Decimal_Places;
-
-			labNegativeNumbersNum.Text = LangResource.FormatPage_Negative_Numbers;
-			labNegativeNumberCurrency.Text = LangResource.FormatPage_Negative_Numbers;
-
-			chkNumberUseSeparator.Text = string.Format(LangResource.FormatPage_Use_1000_Separator,
-				Thread.CurrentThread.CurrentCulture.NumberFormat.NumberGroupSeparator);
-
-			labSymbol.Text = LangResource.FormatPage_Symbol;
-			labType.Text = LangResource.FormatPage_Type;
-			labDateTimePattern.Text = LangResource.FormatPage_Pattern;
-			labLocale.Text = LangResource.FormatPage_Locale;
-		}
-
 		private Cell sampleCell;
 
 		private object originalData = null;
@@ -366,7 +345,7 @@ namespace unvell.ReoGrid.PropertyPages
 					labSample.Text = sampleCell.DisplayText;
 
 				var renderColor = sampleCell.RenderColor;
-				labSample.ForeColor = renderColor.IsTransparent ? Color.Black : (Color)renderColor;
+				labSample.ForeColor = renderColor.IsTransparent ? SystemColors.WindowText : (Color)renderColor;
 			}
 		}
 

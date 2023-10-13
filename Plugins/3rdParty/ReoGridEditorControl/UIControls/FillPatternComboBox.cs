@@ -390,27 +390,27 @@ namespace unvell.UIControls
 			for (int i = 0; i < items.Length; i++)
 			{
 				Rectangle rect = items[i].rect;
+				Color backColor = BackColor;
 
-				if (currentHover == i)
+				if ((currentHover == i) || (HasPatternStyle && (items[i].style == PatternStyle)))
 				{
-					Rectangle highlightRect = new Rectangle(rect.X - 1, rect.Y - 1, rect.Width + 3, rect.Height + 3);
+					Rectangle highlightRect = rect;
+					highlightRect.Inflate(spacing, spacing);
 
-					using (Pen p = new Pen(SystemColors.Highlight, 2))
-					{
-						g.DrawRectangle(p, highlightRect);
-					}
+					g.FillRectangle(SystemBrushes.Highlight, highlightRect);
+					backColor = SystemColors.Highlight;
 				}
 
 				if (i == 0)
 				{
-					g.DrawRectangle(Pens.Black, rect);
+					g.DrawRectangle(SystemPens.WindowText, rect);
 				}
 				else
 				{
-					using (HatchBrush hb = new HatchBrush(items[i].style, Color.Black, BackColor))
+					using (HatchBrush hb = new HatchBrush(items[i].style, SystemColors.WindowText, backColor))
 					{
 						g.FillRectangle(hb, rect);
-						g.DrawRectangle(Pens.Black, rect);
+						g.DrawRectangle(SystemPens.WindowText, rect);
 					}
 				}
 			}

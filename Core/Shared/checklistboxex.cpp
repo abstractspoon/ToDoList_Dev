@@ -45,6 +45,8 @@ BEGIN_MESSAGE_MAP(CCheckListBoxEx, CCheckListBox)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_ERASEBKGND()
+	ON_WM_ENABLE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -336,3 +338,20 @@ void CCheckListBoxEx::OnLButtonDown(UINT nFlags, CPoint point)
 	SendMessage(WM_LBUTTONDOWN, nFlags, MAKELPARAM(point.x, point.y));
 	InvalidateRect(rCheck);
 }
+
+BOOL CCheckListBoxEx::OnEraseBkgnd(CDC* pDC)
+{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	pDC->FillSolidRect(rClient, GetSysColor(IsWindowEnabled() ? COLOR_WINDOW : COLOR_3DFACE));
+	return TRUE;
+}
+
+void CCheckListBoxEx::OnEnable(BOOL bEnable)
+{
+	Invalidate(TRUE);
+
+	CCheckListBox::OnEnable(bEnable);
+}
+

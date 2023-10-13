@@ -353,7 +353,7 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 		CreateToolbar();
 
 		m_tbHelper.Release();
-		m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts);
+		m_tbHelper.Initialize(&m_toolbar, &m_mgrShortcuts);
 
 		CRect rClient;
 		GetClientRect(rClient);
@@ -582,7 +582,7 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// helper for toolbar tooltips
 	// initialize after hiding table button
-	VERIFY(m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts));
+	VERIFY(m_tbHelper.Initialize(&m_toolbar, &m_mgrShortcuts));
 
 	return 0;
 }

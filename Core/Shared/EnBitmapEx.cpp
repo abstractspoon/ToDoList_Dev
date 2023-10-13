@@ -72,8 +72,17 @@ BOOL CEnBitmapEx::SharpenImage(int nAmount)
 	return ProcessImage(&proc);
 }
 
-BOOL CEnBitmapEx::ResizeImage(double dFactor)
+BOOL CEnBitmapEx::ResizeImage(double dFactor, COLORREF crMask)
 {
+	if (crMask != CLR_NONE)
+	{
+		CSize size = GetSize();
+		GraphicsMisc::ScaleByDPIFactor(&size);
+
+		return CEnBitmap::ResizeImage(size.cx, size.cy, crMask);
+	}
+
+	// else
 	CImageResizer proc(dFactor);
 	return ProcessImage(&proc);
 }

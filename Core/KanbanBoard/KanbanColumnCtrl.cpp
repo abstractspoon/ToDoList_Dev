@@ -970,8 +970,12 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 	{
 		int nFlags = (DT_LEFT | DT_PATH_ELLIPSIS | DT_NOPREFIX);
 
+		// Make sure colour is dark enough
+		HLSX hlsText(GetSysColor(COLOR_HOTLIGHT));
+		hlsText.fLuminosity = min(hlsText.fLuminosity, 0.3f);
+
+		pDC->SetTextColor(hlsText);
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(GetSysColor(COLOR_HOTLIGHT));
 
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_UNDERLINED));
 
@@ -3063,7 +3067,7 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 		rItem.bottom = rItem.top + nItemHeight;
 		rItem.right = min(rItem.right, rc.right);
 
-		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem);
+		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem, GMIB_THEMECLASSIC);
 
 		CRect rBody(rItem);
 		rBody.DeflateRect(1, 1);
@@ -3076,8 +3080,10 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 
 		DrawTaskIcon(&dc, pKI, rIcon);
 
+		COLORREF crText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
 		rBody.left += DEF_IMAGE_SIZE + IMAGE_PADDING;
-		DrawItemTitle(&dc, pKI, rBody, ::GetSysColor(COLOR_WINDOWTEXT));
+
+		DrawItemTitle(&dc, pKI, rBody, crText);
 
 		nVPos += nItemHeight;
 	}

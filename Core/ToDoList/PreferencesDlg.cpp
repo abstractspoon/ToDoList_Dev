@@ -916,8 +916,7 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	switch (pTVCD->nmcd.dwDrawStage)
 	{
 		case CDDS_PREPAINT:
-			if (m_aSearchTerms.GetSize())
-				*pResult = CDRF_NOTIFYITEMDRAW;
+			*pResult = CDRF_NOTIFYITEMDRAW;
 			break;
 
 		case CDDS_ITEMPREPAINT:
@@ -929,7 +928,14 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				{
 					pTVCD->clrTextBk = HILITE_COLOUR;
 					*pResult = CDRF_NEWFONT;
+					break;
 				}
+			}
+			// All else
+			if (m_tcPages.GetSelectedItem() == hti)
+			{
+				pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
+				*pResult = CDRF_NEWFONT;
 			}
 			break;
 	}

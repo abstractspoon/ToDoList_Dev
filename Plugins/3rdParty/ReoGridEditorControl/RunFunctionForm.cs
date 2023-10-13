@@ -48,18 +48,6 @@ namespace unvell.ReoGrid.Editor
 			};
 #endif // EX_SCRIPT
 
-			SetupUILanguage();
-		}
-
-		private void SetupUILanguage()
-		{
-			this.Text = LangResource.RunFunction_Caption;
-
-			this.labFunctions.Text = LangResource.RunFunction_Functions;
-			this.chkCloseAfterRun.Text = LangResource.RunFunction_Close_This_Window_After_Running;
-
-			this.btnRun.Text = LangResource.RunFunction_Run;
-			this.btnClose.Text = LangResource.Btn_Close;
 		}
 
 		protected override void OnLoad(EventArgs e)

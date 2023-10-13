@@ -118,400 +118,406 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="AlignLayoutBottom" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AlignLayoutBottom.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AlignLayoutMiddle" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AlignLayoutMiddle.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AlignLayoutTop" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AlignLayoutTop.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AlignTableCellMiddleCenterHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AlignTableCellMiddleCenterHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AlignTableCellMiddleLeftJustHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AlignTableCellMiddleLeftJustHS.PNG;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AlignTableCellMiddleRightHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AlignTableCellMiddleRightHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="all_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\all_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="all_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\all_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="all_design" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\all_design.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="all_design_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\all_design_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="all_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\all_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="all_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\all_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bottom_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bottom_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bottom_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bottom_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bottom_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bottom_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bottom_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\bottom_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bottom_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bottom_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bounds_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bounds_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bounds_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bounds_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bounds_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bounds_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="bounds_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\bounds_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="cell_merge" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cell_merge.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="cell_merge_bak" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cell_merge_bak.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="cell_unmerge" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\cell_unmerge.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="center_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\center_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="center_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\center_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="center_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\center_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="center_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\center_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="center_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\center_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ColorHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ColorHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="CopyHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\CopyHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="CutHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\CutHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Edit_RedoHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Edit_RedoHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Edit_UndoHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Edit_UndoHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="FontDialogHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\FontDialogHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="font_larger" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\font_larger.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="font_smaller" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\font_smaller.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="full_col_select" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\full_col_select.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="full_row_select" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\full_row_select.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="FunctionHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\FunctionHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="inside_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\inside_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="inside_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\inside_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="inside_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\inside_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="inside_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\inside_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="inside_solid_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\inside_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="inside_solid_321" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\inside_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="italic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\italic.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_bottom_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_bottom_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_bottom_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_bottom_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_bottom_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_bottom_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_bottom_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\left_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_right_blod" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_right_blod.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_right_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_right_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_right_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_right_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_right_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_right_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_top_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_top_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="left_top_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\left_top_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="left_top_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\left_top_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="middle_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\middle_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="middle_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\middle_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="middle_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\middle_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="middle_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\middle_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="middle_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\middle_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NewDocumentHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\NewDocumentHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="none_border" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\none_border.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="none_border_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\none_border_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="none_border_321" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\none_border_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="openHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\openHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="outline_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\outline_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="outline_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\outline_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="outline_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\outline_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="outline_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\outline_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="outline_solid_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\outline_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="outline_solid_321" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\outline_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PageWidthHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PageWidthHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PasteHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PasteHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="pick_range" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\pick_range.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="PrintPreviewHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PrintPreviewHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="PropertiesHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PropertiesHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RadialChartHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RadialChartHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="RepeatHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RepeatHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_bottom_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_bottom_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_bottom_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_bottom_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_bottom_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\right_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_top_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_top_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_top_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_top_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="right_top_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\right_top_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="saveHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\saveHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ShowGridlines2HS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShowGridlines2HS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_left_blod" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_left_blod.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_left_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_left_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_left_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_left_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_left_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\slash_left_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_left_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_left_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_right_blod" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_right_blod.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_right_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_right_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_right_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_right_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_right_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\slash_right_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="slash_right_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\slash_right_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="strikethrough" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\strikethrough.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="style_brush" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\style_brush.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="toolbar_get_info" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\toolbar_get_info.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_bottom_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_bottom_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="slash_left_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_left_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_bottom_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_bottom_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="center_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\center_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_bottom_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_bottom_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="right_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_bottom_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\top_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="center_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\center_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_bottom_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ColorHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ColorHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="RepeatHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RepeatHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="AlignTableCellMiddleLeftJustHS1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AlignTableCellMiddleLeftJustHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ShowGridlines2HS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ShowGridlines2HS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\top_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="slash_left_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\slash_left_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="top_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\top_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="slash_left_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_left_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="underlinee" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\underlinee.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="outline_solid_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\outline_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="VSProject_script" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\VSProject_script.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="_default" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\script\default.reo;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="bounds_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bounds_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="textwrap" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\textwrap.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="bottom_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bottom_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_left_blod" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_left_blod.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_bottom_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_bottom_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_right_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_right_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bottom_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bottom_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_bottom_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\right_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\left_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_bottom_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_bottom_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_right_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_right_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="pick_range" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\pick_range.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="bold1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bold.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AlignTableCellMiddleRightHS1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AlignTableCellMiddleRightHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="cell_unmerge" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cell_unmerge.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_bottom_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_bottom_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_bottom_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_bottom_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="italic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\italic.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="center_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\center_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="cell_merge" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cell_merge.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bounds_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bounds_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="underlinee1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\underlinee.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_right_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_right_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="all_design" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\all_design.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="style_brush" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\style_brush.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="full_row_select" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\full_row_select.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="all_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\all_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_left_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_left_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="inside_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\inside_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="all_design_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\all_design_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="trash" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\trash.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Filter2HS" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Filter2HS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="bounds_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bounds_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PrintPreviewHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PrintPreviewHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="LandscapeHH" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\LandscapeHH.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PortraitHH" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PortraitHH.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="bottom_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\bottom_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="middle_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\middle_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_top_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_top_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_bottom_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\top_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="textwrap1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\textwrap.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AlignLayoutBottom1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AlignLayoutBottom.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="outline_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\outline_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="all_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\all_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AlignLayoutMiddle1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AlignLayoutMiddle.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="placeholder" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\placeholder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_bottom_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_bottom_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="none_border" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\none_border.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="all_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\all_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="inside_solid_321" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\inside_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_right_blod" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_right_blod.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_top_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_top_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="outline_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\outline_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AlignTableCellMiddleCenterHS1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AlignTableCellMiddleCenterHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bottom_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bottom_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="_default" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\script\default.reo;System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="inside_solid_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\inside_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Edit_RedoHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Edit_RedoHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FunctionHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FunctionHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="outline_solid_321" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\outline_solid_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="inside_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\inside_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PortraitHH" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PortraitHH.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewDocumentHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewDocumentHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_right_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_right_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_bottom_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_bottom_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_right_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_right_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="middle_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\middle_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Filter2HS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Filter2HS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PageWidthHS1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PageWidthHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_top_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_top_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="center_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\center_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_right_blod" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_right_blod.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="font_smaller1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\font_smaller.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Edit_UndoHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Edit_UndoHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="middle_line_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\middle_line_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_top_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_top_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="italic1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\italic.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_right_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\slash_right_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_bottom_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_bottom_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="all_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\all_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="middle_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\middle_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="none_border_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\none_border_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="outline_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\outline_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="font_larger1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\font_larger.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="AlignLayoutTop1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AlignLayoutTop.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="openHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\openHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="cell_merge_bak" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\cell_merge_bak.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_top_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_top_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="inside_dot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\inside_dot.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_bottom_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_line_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\top_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="right_bottom_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\right_bottom_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slash_right_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slash_right_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="strikethrough1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\strikethrough.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="full_col_select" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\full_col_select.cur;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="FontDialogHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FontDialogHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="center_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\center_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="outline_solid" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\outline_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="top_line_solid1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\top_line_solid.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="none_border_321" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\none_border_32.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bounds_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bounds_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RadialChartHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RadialChartHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="left_bottom_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\left_bottom_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="saveHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\saveHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="middle_line_bold" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\middle_line_bold.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PropertiesHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PropertiesHS.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="inside_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\inside_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bottom_line_dash" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bottom_line_dash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CopyHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CopyHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CutHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CutHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PasteHS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PasteHS.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

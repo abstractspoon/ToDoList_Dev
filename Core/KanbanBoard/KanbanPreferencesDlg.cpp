@@ -21,6 +21,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesPage dialog
 
+IMPLEMENT_DYNCREATE(CKanbanPreferencesPage, CPreferencesPageBase)
+
 CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE), 
@@ -54,7 +56,6 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	m_cbAttributes.DDX(pDX, m_nFixedAttrib, m_sFixedCustomAttribID);
 }
 
-
 BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
@@ -86,7 +87,7 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 		m_toolbar.SetBackgroundColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW), FALSE, FALSE);
 
 		VERIFY(m_toolbar.LoadToolBar(IDR_COLUMN_TOOLBAR, IDB_COLUMN_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 		
 		CRect rToolbar = GetCtrlRect(this, IDC_TB_PLACEHOLDER);
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
@@ -147,32 +148,33 @@ BOOL CKanbanPreferencesPage::IsCustomFixedAttribute() const
 
 void CKanbanPreferencesPage::UpdateFixedAttributeValueCombo()
 {
-	ASSERT(HasFixedColumns());
-
-	UpdateData();
-
-	CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KBUtils::GetAttributeID(m_nFixedAttrib));
-	ASSERT(!sAttribID.IsEmpty());
-
-	CStringArray aValues;
-	const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
-
-	if (pValues)
+	if (HasFixedColumns())
 	{
-		POSITION pos = pValues->GetStartPosition();
-		CString sValueID, sValue;
+		UpdateData();
 
-		while (pos)
+		CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KBUtils::GetAttributeID(m_nFixedAttrib));
+		ASSERT(!sAttribID.IsEmpty());
+
+		CStringArray aValues;
+		const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
+
+		if (pValues)
 		{
-			pValues->GetNextAssoc(pos, sValueID, sValue);
+			POSITION pos = pValues->GetStartPosition();
+			CString sValueID, sValue;
 
-			// Omit backlog
-			if (!sValue.IsEmpty())
-				aValues.Add(sValue);
+			while (pos)
+			{
+				pValues->GetNextAssoc(pos, sValueID, sValue);
+
+				// Omit backlog
+				if (!sValue.IsEmpty())
+					aValues.Add(sValue);
+			}
 		}
-	}
 
-	m_lcFixedColumnDefs.SetAttributeValues(aValues);
+		m_lcFixedColumnDefs.SetAttributeValues(aValues);
+	}
 }
 
 void CKanbanPreferencesPage::OnOK()

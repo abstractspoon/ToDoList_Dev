@@ -133,7 +133,7 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 			m_toolbar.InsertSeparator(0);
 
 			if (m_pMgrShortcuts)
-				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
+				m_tbHelper.Initialize(&m_toolbar, m_pMgrShortcuts);
 
 			// Need care to ensure toolbar does not encroach on content window 
 			CRect rToolbar = GetChildRect(&m_cbCommentsFmt);

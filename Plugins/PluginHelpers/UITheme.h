@@ -95,6 +95,7 @@ namespace Abstractspoon
 				virtual void OnRenderSplitButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e) override;
 				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
+				virtual void OnRenderItemText(Windows::Forms::ToolStripItemTextRenderEventArgs^ e) override;
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar) override;
 				virtual Drawing::Pen^ GetSeperatorLightPen() override;
