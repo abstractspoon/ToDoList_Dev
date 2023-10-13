@@ -66,6 +66,8 @@ public:
 	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) const;
 	BOOL GetColorTaskBackground() const { return m_bColorTaskBackground; }
 	BOOL GetCommentsUseTreeFont() const { return m_bSpecifyTreeFont && m_bCommentsUseTreeFont; }
+	BOOL GetRemindersUseTreeFont() const { return m_bSpecifyTreeFont && m_bRemindersUseTreeFont; }
+	BOOL GetFindTasksUseTreeFont() const { return m_bSpecifyTreeFont && m_bFindTasksUseTreeFont; }
 	COLORREF GetFlaggedTaskColor() const { return m_bSpecifyFlaggedColor ? m_crFlagged : CLR_NONE; }
 	COLORREF GetReferenceTaskColor() const { return m_bSpecifyReferenceColor ? m_crReference : CLR_NONE; }
 	COLORREF GetGroupHeaderBackgroundColor() const { return m_bSpecifyGroupHeaderBkgndColor ? m_crGroupHeaderBkgnd : CLR_NONE; }
@@ -95,6 +97,8 @@ protected:
 	BOOL	m_bSpecifyFlaggedColor; 
 	BOOL	m_bSpecifyReferenceColor;
 	BOOL	m_bSpecifyGroupHeaderBkgndColor;
+	BOOL	m_bRemindersUseTreeFont;
+	BOOL	m_bFindTasksUseTreeFont;
 	CColourButton	m_btFilteredColor;
 	CColourButton	m_btAttribColor;
 	CColourButton	m_btDoneColor;

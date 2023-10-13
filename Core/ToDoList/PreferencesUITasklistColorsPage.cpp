@@ -77,12 +77,14 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PRIORITYSCHEMES, m_cbPriorityScheme);
 	DDX_Control(pDX, IDC_ATTRIBUTETOCOLORBY, m_cbColorByAttribute);
 	DDX_Check(pDX, IDC_COLORTASKBKGND, m_bColorTaskBackground);
-	DDX_Check(pDX, IDC_COMMENTSUSETREEFONT, m_bCommentsUseTreeFont);
 	DDX_Check(pDX, IDC_USEHLSGRADIENT, m_bHLSColorGradient);
 	DDX_Check(pDX, IDC_HIDEPRIORITYNUMBER, m_bHidePriorityNumber);
 	DDX_Check(pDX, IDC_ALTERNATELINECOLOR, m_bSpecifyAlternateLineColor);
 	DDX_Check(pDX, IDC_SPECIFYGROUPHEADERBKCOLOR, m_bSpecifyGroupHeaderBkgndColor);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_COMMENTSUSETREEFONT, m_bCommentsUseTreeFont);
+	DDX_Check(pDX, IDC_REMINDERSUSETREEFONT, m_bRemindersUseTreeFont);
+	DDX_Check(pDX, IDC_FINDTASKSUSETREEFONT, m_bFindTasksUseTreeFont);
 	DDX_CBString(pDX, IDC_ATTRIBUTECOLORS, m_sSelAttribValue);
 	DDX_Control(pDX, IDC_SETATTRIBUTECOLOR, m_btAttribColor);
 	DDX_Control(pDX, IDC_SETGROUPHEADERBKCOLOR, m_btGroupHeaderBkgndColor);
@@ -214,6 +216,8 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	GetDlgItem(IDC_TREEFONTSIZELABEL)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_TREEFONTLIST)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_COMMENTSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
+	GetDlgItem(IDC_REMINDERSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
+	GetDlgItem(IDC_FINDTASKSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_SPECIFYCOMMENTSFONT)->EnableWindow(!m_bCommentsUseTreeFont || !m_bSpecifyTreeFont);
 
 	BOOL bColorByAttrib = (m_nTextColorOption == COLOROPT_ATTRIB);
@@ -444,6 +448,8 @@ void CPreferencesUITasklistColorsPage::OnSpecifytreefont()
 	GetDlgItem(IDC_TREEFONTSIZE)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_TREEFONTSIZELABEL)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_COMMENTSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
+	GetDlgItem(IDC_REMINDERSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
+	GetDlgItem(IDC_FINDTASKSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
 
 	BOOL bCommentsUseTreeFont = (m_bSpecifyTreeFont && m_bCommentsUseTreeFont);
 
@@ -932,6 +938,8 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bSpecifyDueTodayColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDueTodayColor"), TRUE);
 	m_bColorTaskBackground = pPrefs->GetProfileInt(szKey, _T("ColorTaskBackground"), FALSE);
 	m_bCommentsUseTreeFont = pPrefs->GetProfileInt(szKey, _T("CommentsUseTreeFont"), FALSE);
+	m_bRemindersUseTreeFont = pPrefs->GetProfileInt(szKey, _T("RemindersUseTreeFont"), FALSE);
+	m_bFindTasksUseTreeFont = pPrefs->GetProfileInt(szKey, _T("FindTasksUseTreeFont"), FALSE);
 	m_bHLSColorGradient = pPrefs->GetProfileInt(szKey, _T("HLSColorGradient"), TRUE);
 	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
 	m_bSpecifyAlternateLineColor = pPrefs->GetProfileInt(szKey, _T("AlternateLineColor"), TRUE);
@@ -1119,7 +1127,8 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyStartColor"), m_bSpecifyStartColor);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyStartTodayColor"), m_bSpecifyStartTodayColor);
 	pPrefs->WriteProfileInt(szKey, _T("ColorTaskBackground"), m_bColorTaskBackground);
-	pPrefs->WriteProfileInt(szKey, _T("CommentsUseTreeFont"), m_bCommentsUseTreeFont);
+	pPrefs->WriteProfileInt(szKey, _T("RemindersUseTreeFont"), m_bRemindersUseTreeFont);
+	pPrefs->WriteProfileInt(szKey, _T("FindTasksUseTreeFont"), m_bFindTasksUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("HLSColorGradient"), m_bHLSColorGradient);
 	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
 	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bSpecifyAlternateLineColor);

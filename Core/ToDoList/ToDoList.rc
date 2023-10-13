@@ -740,14 +740,19 @@ STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "&Tasklist font",IDC_SPECIFYTREEFONT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,10,387,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,10,195,10
     COMBOBOX        IDC_TREEFONTLIST,18,22,185,237,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Point size",IDC_TREEFONTSIZELABEL,18,40,376,8
-    COMBOBOX        IDC_TREEFONTSIZE,18,52,55,237,CBS_DROPDOWNLIST | 
+    LTEXT           "&Point size",IDC_TREEFONTSIZELABEL,211,10,176,8
+    COMBOBOX        IDC_TREEFONTSIZE,211,22,55,237,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "&Use same font for comments field also",
-                    IDC_COMMENTSUSETREEFONT,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "&Use same font for 'Comments'",IDC_COMMENTSUSETREEFONT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,40,383,10
+    CONTROL         "&Use same font for 'Task Reminders' ",
+                    IDC_REMINDERSUSETREEFONT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,55,383,10
+    CONTROL         "&Use same font for 'Find Tasks Results'",
+                    IDC_FINDTASKSUSETREEFONT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,18,70,383,10
     CONTROL         "&Comments font",IDC_SPECIFYCOMMENTSFONT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,85,387,10
