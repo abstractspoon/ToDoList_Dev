@@ -77,6 +77,7 @@ public:
 	
 	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
 	void SetUITheme(const CUIThemeFile& theme);
+	void SetResultsFont(HFONT hFont) { m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
 
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
 	DM_POS GetDockPosition() const { return m_nDockPos; }

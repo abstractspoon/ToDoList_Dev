@@ -2436,6 +2436,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// reminders
 	m_dlgReminders.Initialize(this);
+	m_dlgReminders.SetRemindersFont(m_fontTree);
 
 	// with or without Stickies Support
 	CString sStickiesPath;
@@ -10618,6 +10619,8 @@ BOOL CToDoListWnd::InitFindDialog()
 
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
+
+		m_dlgFindTasks.SetResultsFont(m_fontTree);
 	}
 
 	return TRUE;
@@ -13790,7 +13793,16 @@ void CToDoListWnd::OnViewRestoreDefaultTaskViewFontSize()
 
 void CToDoListWnd::UpdateTreeAndCommentsFonts()
 {
-	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), Prefs(), m_fontMain, m_fontTree, m_fontComments);
+	const CPreferencesDlg& prefs = Prefs();
+
+	// Call this first because it's responsible for setting up the tree font
+	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), prefs, m_fontMain, m_fontTree, m_fontComments);
+
+	if (m_dlgFindTasks.GetSafeHwnd())
+		m_dlgFindTasks.SetResultsFont(m_fontTree);
+
+	if (m_dlgReminders.GetSafeHwnd())
+		m_dlgReminders.SetRemindersFont(m_fontTree);
 }
 
 void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI) 

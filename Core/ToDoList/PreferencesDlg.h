@@ -287,6 +287,8 @@ public:
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }
 	BOOL GetColorTaskBackground() const { return m_pageUITasklistColors.GetColorTaskBackground(); }
 	BOOL GetCommentsUseTreeFont() const { return m_pageUITasklistColors.GetCommentsUseTreeFont(); }
+	BOOL GetRemindersUseTreeFont() const { return m_pageUITasklistColors.GetRemindersUseTreeFont(); }
+	BOOL GetFindTasksUseTreeFont() const { return m_pageUITasklistColors.GetFindTasksUseTreeFont(); }
 	BOOL GetColorPriority() const { return m_pageUITasklistColors.GetColorPriority(); }
 	int GetPriorityColors(CDWordArray& aColors) const { return m_pageUITasklistColors.GetPriorityColors(aColors); }
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { m_pageUITasklistColors.GetDueTaskColors(crDue, crDueToday); }
