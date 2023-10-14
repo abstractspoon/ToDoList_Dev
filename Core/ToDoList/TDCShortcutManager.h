@@ -19,6 +19,8 @@ public:
 	CTDCShortcutManager(BOOL bAutoSendCmds = TRUE);
 	virtual ~CTDCShortcutManager();
 
+	UINT ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const;
+
 	virtual DWORD GetShortcut(UINT nCmdID) const;
 
 };
