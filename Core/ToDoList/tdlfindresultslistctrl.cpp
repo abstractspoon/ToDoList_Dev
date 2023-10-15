@@ -82,7 +82,10 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 
 LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
-	m_fonts.Initialise((HFONT)wp);
+	if (wp)
+		m_fonts.Initialise((HFONT)wp);
+	else
+		m_fonts.Initialise(GetSafeHwnd());
 
 	return Default();
 }
