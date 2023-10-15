@@ -14,7 +14,11 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCShortcutManager::CTDCShortcutManager(BOOL bAutoSendCmds) : CShortcutManager(bAutoSendCmds)
+CTDCShortcutManager::CTDCShortcutManager(BOOL bAutoSendCmds) 
+	: 
+	CShortcutManager(bAutoSendCmds),
+	m_bRemindersUseTreeFont(FALSE),
+	m_bFindTasksUseTreeFont(FALSE)
 {
 
 }
@@ -24,47 +28,38 @@ CTDCShortcutManager::~CTDCShortcutManager()
 
 }
 
+BOOL CTDCShortcutManager::NeedCustomProcessing() const
+{
+	return (m_bRemindersUseTreeFont || 
+			m_bFindTasksUseTreeFont);
+}
+
 UINT CTDCShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 {
 	UINT nCmdID = CShortcutManager::ProcessMessage(pMsg, pShortcut);
 
-	if (nCmdID > 0)
-		return nCmdID;
-
-	// only process accelerators if we are enabled and visible
-	if (!IsWindowEnabled() || !IsWindowVisible())
-		return 0;
-
-	// we only process keypresses
-	if ((pMsg->message != WM_KEYDOWN) && (pMsg->message != WM_SYSKEYDOWN))
-		return 0;
-
-	// Special cases not restricted to having the focus on the main window
-	CWnd* pFocus = CWnd::FromHandle(pMsg->hwnd);
-
-	if (!pFocus)
-		return 0;
-
-	CWnd* pParent = pFocus->GetParentOwner();
-
-	if (!pParent)
-		return 0;
-
-	if (CWinClasses::IsKindOf(*pParent, RUNTIME_CLASS(CTDLFindTasksDlg)) ||
-		CWinClasses::IsKindOf(*pParent, RUNTIME_CLASS(CTDLShowReminderDlg)))
+	if (!nCmdID && NeedCustomProcessing() && WantProcessMessage(pMsg))
 	{
-		nCmdID = CShortcutManager::ProcessKeyDown(pMsg, *pParent, ID_VIEW_INCREMENTTASKVIEWFONTSIZE, pShortcut);
+		// Special cases not restricted to having the focus on the main window
+		HWND hwndParent = CDialogHelper::GetParentOwner(pMsg->hwnd);
 
-		if (nCmdID)
-			return nCmdID;
+		if (hwndParent)
+		{
+			if ((m_bFindTasksUseTreeFont && CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CTDLFindTasksDlg))) ||
+				(m_bRemindersUseTreeFont && CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CTDLShowReminderDlg))))
+			{
+				nCmdID = CShortcutManager::ProcessKeyDown(pMsg, hwndParent, ID_VIEW_INCREMENTTASKVIEWFONTSIZE, pShortcut);
 
-		nCmdID = CShortcutManager::ProcessKeyDown(pMsg, *pParent, ID_VIEW_DECREMENTTASKVIEWFONTSIZE, pShortcut);
+				if (nCmdID == 0)
+					nCmdID = CShortcutManager::ProcessKeyDown(pMsg, hwndParent, ID_VIEW_DECREMENTTASKVIEWFONTSIZE, pShortcut);
 
-		if (nCmdID)
-			return nCmdID;
+				if (nCmdID)
+					return nCmdID;
+			}
+		}
 	}
 
-	return 0;
+	return nCmdID;
 }
 
 DWORD CTDCShortcutManager::GetShortcut(UINT nCmdID) const

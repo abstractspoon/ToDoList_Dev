@@ -78,7 +78,6 @@ protected:
 	enum { IDD = IDD_PREFUITASKLISTCOLORS_PAGE };
 	CComboBox	m_cbColorByAttribute;
 	BOOL	m_bColorTaskBackground;
-	BOOL	m_bCommentsUseTreeFont;
 	BOOL	m_bHLSColorGradient;
 	BOOL	m_bHidePriorityNumber;
 	BOOL	m_bSpecifyAlternateLineColor;
@@ -97,6 +96,7 @@ protected:
 	BOOL	m_bSpecifyFlaggedColor; 
 	BOOL	m_bSpecifyReferenceColor;
 	BOOL	m_bSpecifyGroupHeaderBkgndColor;
+	BOOL	m_bCommentsUseTreeFont;
 	BOOL	m_bRemindersUseTreeFont;
 	BOOL	m_bFindTasksUseTreeFont;
 	CColourButton	m_btFilteredColor;

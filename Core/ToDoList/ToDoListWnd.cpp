@@ -1119,6 +1119,9 @@ void CToDoListWnd::InitShortcutManager()
 		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTDATE, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTDATE));
 		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTTIME, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTTIME));
 
+		m_mgrShortcuts.SetRemindersUseTreeFont(Prefs().GetRemindersUseTreeFont());
+		m_mgrShortcuts.SetFindTasksUseTreeFont(Prefs().GetFindTasksUseTreeFont());
+
 	}
 
 	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
@@ -13804,18 +13807,18 @@ void CToDoListWnd::UpdateFindTasksAndRemindersFonts()
 {
 	if (m_dlgFindTasks.GetSafeHwnd())
 	{
-		if (Prefs().GetFindTasksUseTreeFont())
-			m_dlgFindTasks.SetResultsFont(m_fontTree);
-		else
-			m_dlgFindTasks.SetResultsFont(m_fontMain);
+		BOOL bUseTreeFont = Prefs().GetFindTasksUseTreeFont();
+
+		m_dlgFindTasks.SetResultsFont(bUseTreeFont ? m_fontTree : m_fontMain);
+		m_mgrShortcuts.SetFindTasksUseTreeFont(bUseTreeFont);
 	}
 	
 	if (m_dlgReminders.GetSafeHwnd())
 	{
-		if (Prefs().GetRemindersUseTreeFont())
-			m_dlgReminders.SetRemindersFont(m_fontTree);
-		else
-			m_dlgReminders.SetRemindersFont(m_fontMain);
+		BOOL bUseTreeFont = Prefs().GetRemindersUseTreeFont();
+
+		m_dlgReminders.SetRemindersFont(bUseTreeFont ? m_fontTree : m_fontMain);
+		m_mgrShortcuts.SetRemindersUseTreeFont(bUseTreeFont);
 	}
 }
 

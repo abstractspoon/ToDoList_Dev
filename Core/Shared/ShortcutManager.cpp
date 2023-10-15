@@ -182,14 +182,28 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 	return ProcessKeyDown(pMsg, GetHwnd(), 0, pShortcut);
 }
 
-UINT CShortcutManager::ProcessKeyDown(const MSG* pMsg, HWND hwndAllowedParent, UINT nAllowedCmdID, DWORD* pShortcut) const
+
+BOOL CShortcutManager::WantProcessMessage(const MSG* pMsg) const
 {
 	// only process accelerators if we are enabled and visible
-	if (!IsWindowEnabled() || !IsWindowVisible())
-		return 0;
+	if (IsWindowEnabled() && IsWindowVisible())
+	{
+		switch (pMsg->message)
+		{
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+			// we only process keypresses
+			return TRUE;
+		}
+	}
 
-	// we only process keypresses
-	if ((pMsg->message != WM_KEYDOWN) && (pMsg->message != WM_SYSKEYDOWN))
+	// All else
+	return FALSE;
+}
+
+UINT CShortcutManager::ProcessKeyDown(const MSG* pMsg, HWND hwndAllowedParent, UINT nAllowedCmdID, DWORD* pShortcut) const
+{
+	if (!WantProcessMessage(pMsg))
 		return 0;
 
 	// also check that it's one of our children with the focus
