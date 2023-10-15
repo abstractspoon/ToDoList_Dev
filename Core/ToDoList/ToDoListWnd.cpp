@@ -5166,6 +5166,10 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		CheckUpdateActiveToDoCtrlPreferences();
 		UpdateTimeTrackerPreferences();
 
+		// This has to come after updating the current tasklist
+		// because that also updates the task tree font
+		UpdateFindTasksAndRemindersFonts();
+
 		// then refresh filter bar for any new default cats, statuses, etc
 		RefreshFilterBarControls(TDCA_ALL);
 
@@ -8848,9 +8852,7 @@ void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 	
 	if (m_mgrToDoCtrls.GetNeedsPreferenceUpdate(nSel))
 	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
-
-		UpdateToDoCtrlPreferences(&tdc);
+		UpdateToDoCtrlPreferences(&GetToDoCtrl(nSel));
 
 		// and filter bar relies on this tdc's visible columns
 		RefreshFilterBarControls(TDCA_ALL);
@@ -8865,7 +8867,6 @@ void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(tdc, userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
 												m_fontMain, m_fontTree, m_fontComments);
-
 }
 
 void CToDoListWnd::OnSaveall() 
@@ -10620,7 +10621,8 @@ BOOL CToDoListWnd::InitFindDialog()
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
 
-		m_dlgFindTasks.SetResultsFont(m_fontTree);
+		if (Prefs().GetFindTasksUseTreeFont())
+			m_dlgFindTasks.SetResultsFont(m_fontTree);
 	}
 
 	return TRUE;
@@ -13774,7 +13776,8 @@ void CToDoListWnd::OnViewIncrementTaskViewFontSize(BOOL bLarger)
 {
 	if (m_pPrefs->IncrementTreeFontSize(bLarger, m_fontMain))
 	{
-		UpdateTreeAndCommentsFonts();
+		UpdateTaskTreeAndCommentsFonts();
+		UpdateFindTasksAndRemindersFonts();
 	}
 }
 
@@ -13787,22 +13790,33 @@ void CToDoListWnd::OnViewRestoreDefaultTaskViewFontSize()
 {
 	if (m_pPrefs->RestoreTreeFontSize(m_fontMain))
 	{
-		UpdateTreeAndCommentsFonts();
+		UpdateTaskTreeAndCommentsFonts();
+		UpdateFindTasksAndRemindersFonts();
 	}
 }
 
-void CToDoListWnd::UpdateTreeAndCommentsFonts()
+void CToDoListWnd::UpdateTaskTreeAndCommentsFonts()
 {
-	const CPreferencesDlg& prefs = Prefs();
+	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), Prefs(), m_fontMain, m_fontTree, m_fontComments);
+}
 
-	// Call this first because it's responsible for setting up the tree font
-	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), prefs, m_fontMain, m_fontTree, m_fontComments);
-
+void CToDoListWnd::UpdateFindTasksAndRemindersFonts()
+{
 	if (m_dlgFindTasks.GetSafeHwnd())
-		m_dlgFindTasks.SetResultsFont(m_fontTree);
-
+	{
+		if (Prefs().GetFindTasksUseTreeFont())
+			m_dlgFindTasks.SetResultsFont(m_fontTree);
+		else
+			m_dlgFindTasks.SetResultsFont(m_fontMain);
+	}
+	
 	if (m_dlgReminders.GetSafeHwnd())
-		m_dlgReminders.SetRemindersFont(m_fontTree);
+	{
+		if (Prefs().GetRemindersUseTreeFont())
+			m_dlgReminders.SetRemindersFont(m_fontTree);
+		else
+			m_dlgReminders.SetRemindersFont(m_fontMain);
+	}
 }
 
 void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI) 
