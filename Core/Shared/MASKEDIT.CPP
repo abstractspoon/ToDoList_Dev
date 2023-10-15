@@ -8,6 +8,10 @@
 #include "clipboard.h"
 
 #ifdef _DEBUG
+	#include "DarkMode.h" // see destructor
+#endif
+
+#ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
@@ -25,6 +29,15 @@ CMaskEdit::CMaskEdit(LPCTSTR szMask, DWORD dwFlags) : m_sMask(szMask), m_dwFlags
 
 CMaskEdit::~CMaskEdit()
 {
+#ifdef _DEBUG
+	// ** HUGE HACK
+	// I don't understand the mechanism of this, but it relates
+	// to hooking edit controls to implement Dark Mode.
+	// Doesn't see to cause any problem in release mode, so
+	// this is just to suppress an ASSERT in wincore.cpp.
+	if (GetSafeHwnd() && CDarkMode::IsEnabled())
+		Detach();
+#endif
 }
 
 BEGIN_MESSAGE_MAP(CMaskEdit, CEdit)
