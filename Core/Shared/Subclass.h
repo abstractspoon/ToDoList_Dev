@@ -101,7 +101,6 @@ protected:
 	WNDPROC			m_pOldWndProc;		// ..and original window proc
 	CSubclassWnd*	m_pNext;			// next in chain of hooks for this window
 	CSubclasser*	m_pSubclasser;
-	BOOL			m_bPreMFCSubclass;
 	BOOL			m_bTracing;
 
 #ifdef _DEBUG
