@@ -898,7 +898,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			}
 			else if (sClass.Find(_T(".button.app.")) != -1)
 			{
-				// .Net incorrectly draws disabled checkboxes in COLOR_BTNTEXT
+				// Required to handle disabled checkbox text correctly
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
 			}
 			else if (CWinClasses::IsCommonDialog(hWnd, WCD_FONT))
