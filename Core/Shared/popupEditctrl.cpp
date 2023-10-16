@@ -30,6 +30,7 @@ CPopupEditCtrl::~CPopupEditCtrl()
 {
 }
 
+IMPLEMENT_DYNAMIC(CPopupEditCtrl, CEnEdit)
 
 BEGIN_MESSAGE_MAP(CPopupEditCtrl, CEnEdit)
 	//{{AFX_MSG_MAP(CPopupEditCtrl)
