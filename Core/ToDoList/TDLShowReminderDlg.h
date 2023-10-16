@@ -32,6 +32,7 @@ public:
 	CTDLShowReminderDlg(CWnd* pParent = NULL);   // standard constructor
 
 	BOOL Create(CWnd* pParent, BOOL bVisible = TRUE);
+	void SetRemindersFont(HFONT hFont) { m_lcReminders.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
 
 	BOOL AddListReminder(const TDCREMINDER& rem);
 	BOOL UpdateListReminder(const TDCREMINDER& rem);

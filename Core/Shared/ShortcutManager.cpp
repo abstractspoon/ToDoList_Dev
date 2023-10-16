@@ -178,25 +178,44 @@ WORD CShortcutManager::ValidateModifiers(WORD wModifiers, WORD wVirtKeyCode) con
 
 UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 {
-	// only process accelerators if we are enabled and visible
-	if (!IsWindowEnabled() || !IsWindowVisible())
-		return FALSE;
+	// Default handling
+	return ProcessKeyDown(pMsg, GetHwnd(), 0, pShortcut);
+}
 
-	// we only process keypresses
-	if ((pMsg->message != WM_KEYDOWN) && (pMsg->message != WM_SYSKEYDOWN))
-		return FALSE;
+
+BOOL CShortcutManager::WantProcessMessage(const MSG* pMsg) const
+{
+	// only process accelerators if we are enabled and visible
+	if (IsWindowEnabled() && IsWindowVisible())
+	{
+		switch (pMsg->message)
+		{
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+			// we only process keypresses
+			return TRUE;
+		}
+	}
+
+	// All else
+	return FALSE;
+}
+
+UINT CShortcutManager::ProcessKeyDown(const MSG* pMsg, HWND hwndAllowedParent, UINT nAllowedCmdID, DWORD* pShortcut) const
+{
+	if (!WantProcessMessage(pMsg))
+		return 0;
 
 	// also check that it's one of our children with the focus
 	// not another popup window, unless it's an edit control
 	HWND hFocus = pMsg->hwnd;
-	HWND hMainWnd = GetHwnd();
 
-	if ((hFocus != hMainWnd) && !::IsChild(hMainWnd, hFocus))
+	if ((hFocus != hwndAllowedParent) && !::IsChild(hwndAllowedParent, hFocus))
 	{
 		UINT nStyle = ::GetWindowLong(hFocus, GWL_STYLE);
 		
 		if (!(nStyle & WS_POPUP) || !CWinClasses::IsClass(hFocus, WC_EDIT))
-			return FALSE;
+			return 0;
 	}
 			
 	switch (pMsg->wParam)
@@ -207,21 +226,22 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 	case VK_NUMLOCK:
 	case VK_SCROLL:
 	case VK_CAPITAL:
-		return FALSE;
+		return 0;
 		
 	case VK_RETURN:
 	case VK_CANCEL:
 		// don't handle return/cancel keys
-		return FALSE;
+		return 0;
 
 	case VK_MBUTTON:
-		break;
+		// Used for closing tabs
+		return 0;
 
 	case VK_UP:
 	case VK_DOWN:
 		// Don't process 'Alt + Up/Down' destined for a date time control
 		if (Misc::IsKeyPressed(VK_MENU) && CWinClasses::IsClass(hFocus, WC_DATETIMEPICK))
-			return FALSE;
+			return 0;
 		// else fall through
 		
 	default: 
@@ -229,13 +249,13 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 		{
 			// don't process messages destined for hotkey controls!
 			if (CWinClasses::IsClass(hFocus, WC_HOTKEY))
-				return FALSE;
+				return 0;
 
 			// don't process AltGr if destined for edit control
 			BOOL bEdit = CWinClasses::IsEditControl(hFocus);
 
 			if (bEdit && Misc::IsKeyPressed(VK_RMENU))
-				return FALSE;
+				return 0;
 			
 			// get DWORD shortcut
 			BOOL bExtKey = (pMsg->lParam & 0x01000000);
@@ -245,7 +265,10 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 			UINT nCmdID = 0;
 			
 			if (!m_mapShortcut2ID.Lookup(dwShortcut, nCmdID) || !nCmdID)
-				return FALSE;
+				return 0;
+
+			if (nAllowedCmdID && (nCmdID != nAllowedCmdID))
+				return 0;
 			
 			// check if HKCOMB_EDITCTRLS is set and a edit has the focus
 			// and the shortcut clashes
@@ -253,7 +276,7 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 			{
 				// 1. check does not clash with edit shortcuts
 				if (IsEditShortcut(dwShortcut))
-					return FALSE;
+					return 0;
 				
 				//WORD wVirtKeyCode = LOWORD(dwShortcut);
 				WORD wModifiers = HIWORD(dwShortcut);
@@ -266,7 +289,7 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 				// 3. else must have <ctrl> or <alt>
 				else if (!(wModifiers & (HOTKEYF_ALT | HOTKEYF_CONTROL)))
 				{
-					return FALSE;
+					return 0;
 				}
 			}
 			
@@ -281,7 +304,7 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 		}
 	}
 	
-	return FALSE;
+	return 0;
 }
 
 BOOL CShortcutManager::IsEditShortcut(DWORD dwShortcut)
@@ -291,7 +314,6 @@ BOOL CShortcutManager::IsEditShortcut(DWORD dwShortcut)
 	case MAKELONG('C', HOTKEYF_CONTROL): // copy
 	case MAKELONG('V', HOTKEYF_CONTROL): // paste
 	case MAKELONG('X', HOTKEYF_CONTROL): // cut
-//	case MAKELONG('Z', HOTKEYF_CONTROL): // undo
 	case MAKELONG(VK_LEFT, HOTKEYF_CONTROL | HOTKEYF_EXT): // left one word
 	case MAKELONG(VK_RIGHT, HOTKEYF_CONTROL | HOTKEYF_EXT): // right one word
 	case MAKELONG(VK_DELETE, 0):

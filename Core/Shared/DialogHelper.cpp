@@ -2057,6 +2057,21 @@ HWND CDialogHelper::GetWindowFromPoint(HWND hwndParent, POINT ptScreen)
 	return hWnd;
 }
 
+HWND CDialogHelper::GetParentOwner(HWND hWnd)
+{
+	CWnd* pFocus = CWnd::FromHandle(hWnd);
+
+	if (!pFocus)
+		return NULL;
+
+	CWnd* pParent = pFocus->GetParentOwner();
+
+	if (!pParent)
+		return NULL;
+
+	return pParent->GetSafeHwnd();
+}
+
 BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)
 {
 	DWORD dwFlags = (TME_LEAVE | (bIncludeNonClient ? TME_NONCLIENT : 0));

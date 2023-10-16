@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CTDLFindResultsListCtrl, CEnListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -79,6 +80,16 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
 	RefreshUserPreferences();
+}
+
+LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	if (wp)
+		m_fonts.Initialise((HFONT)wp);
+	else
+		m_fonts.Initialise(GetSafeHwnd());
+
+	return Default();
 }
 
 int CTDLFindResultsListCtrl::GetColumnWidths(CIntArray& aWidths) const

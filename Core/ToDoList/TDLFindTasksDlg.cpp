@@ -360,6 +360,7 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 {
 	BOOL bWasDocked = IsDocked();
 	BOOL bIsDocked = IsDocked(nPos);
+	CFont* pOldResultsFont = NULL;
 
 	if (GetSafeHwnd())
 	{
@@ -367,6 +368,8 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 			return TRUE;
 
 		// else
+		pOldResultsFont = m_lcResults.GetFont();
+
 		DestroyWindow();
 	}
 
@@ -412,7 +415,13 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 		dwExStyle = RTD_DEFEXSTYLE;
 	}
 
-	return CRuntimeDlg::Create(CEnString(IDS_FIND_TASKS), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC);
+	if (!CRuntimeDlg::Create(CEnString(IDS_FIND_TASKS), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC))
+		return FALSE;
+
+	if (pOldResultsFont)
+		m_lcResults.SetFont(pOldResultsFont);
+
+	return TRUE;
 }
 
 BOOL CTDLFindTasksDlg::Create()

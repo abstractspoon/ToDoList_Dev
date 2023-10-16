@@ -81,6 +81,7 @@ public:
 	static CString GetCtrlLabel(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
 	static CString GetCtrlText(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
 	static HWND GetWindowFromPoint(HWND hwndParent, POINT ptScreen);
+	static HWND GetParentOwner(HWND hWnd);
 
 	static int GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass = NULL);
 	static int GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);

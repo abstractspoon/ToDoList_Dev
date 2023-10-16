@@ -805,7 +805,8 @@ protected:
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
 	void PostAppRestoreFocus(BOOL bActivate = FALSE);
-	void UpdateTreeAndCommentsFonts();
+	void UpdateTaskTreeAndCommentsFonts();
+	void UpdateFindTasksAndRemindersFonts();
 	int CalcEditFieldInset() const;
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);

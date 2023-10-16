@@ -1119,6 +1119,8 @@ void CToDoListWnd::InitShortcutManager()
 		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTDATE, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTDATE));
 		m_mgrShortcuts.SetShortcut(ID_COMMENTS_INSERTTIME, m_mgrShortcuts.GetShortcut(ID_EDIT_INSERTTIME));
 
+		m_mgrShortcuts.SetRemindersUseTreeFont(Prefs().GetRemindersUseTreeFont());
+		m_mgrShortcuts.SetFindTasksUseTreeFont(Prefs().GetFindTasksUseTreeFont());
 	}
 
 	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
@@ -2436,6 +2438,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// reminders
 	m_dlgReminders.Initialize(this);
+	m_dlgReminders.SetRemindersFont(m_fontTree);
 
 	// with or without Stickies Support
 	CString sStickiesPath;
@@ -5164,6 +5167,10 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		// active tasklist userPrefs
 		CheckUpdateActiveToDoCtrlPreferences();
 		UpdateTimeTrackerPreferences();
+
+		// This has to come after updating the current tasklist
+		// because that also updates the task tree font
+		UpdateFindTasksAndRemindersFonts();
 
 		// then refresh filter bar for any new default cats, statuses, etc
 		RefreshFilterBarControls(TDCA_ALL);
@@ -8847,9 +8854,7 @@ void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 	
 	if (m_mgrToDoCtrls.GetNeedsPreferenceUpdate(nSel))
 	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
-
-		UpdateToDoCtrlPreferences(&tdc);
+		UpdateToDoCtrlPreferences(&GetToDoCtrl(nSel));
 
 		// and filter bar relies on this tdc's visible columns
 		RefreshFilterBarControls(TDCA_ALL);
@@ -8864,7 +8869,6 @@ void CToDoListWnd::UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pTDC)
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(tdc, userPrefs, m_tdiDefault, 
 												m_bShowProjectName, m_bShowTreeListBar, 
 												m_fontMain, m_fontTree, m_fontComments);
-
 }
 
 void CToDoListWnd::OnSaveall() 
@@ -10618,6 +10622,9 @@ BOOL CToDoListWnd::InitFindDialog()
 
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
+
+		if (Prefs().GetFindTasksUseTreeFont())
+			m_dlgFindTasks.SetResultsFont(m_fontTree);
 	}
 
 	return TRUE;
@@ -13771,7 +13778,8 @@ void CToDoListWnd::OnViewIncrementTaskViewFontSize(BOOL bLarger)
 {
 	if (m_pPrefs->IncrementTreeFontSize(bLarger, m_fontMain))
 	{
-		UpdateTreeAndCommentsFonts();
+		UpdateTaskTreeAndCommentsFonts();
+		UpdateFindTasksAndRemindersFonts();
 	}
 }
 
@@ -13784,13 +13792,33 @@ void CToDoListWnd::OnViewRestoreDefaultTaskViewFontSize()
 {
 	if (m_pPrefs->RestoreTreeFontSize(m_fontMain))
 	{
-		UpdateTreeAndCommentsFonts();
+		UpdateTaskTreeAndCommentsFonts();
+		UpdateFindTasksAndRemindersFonts();
 	}
 }
 
-void CToDoListWnd::UpdateTreeAndCommentsFonts()
+void CToDoListWnd::UpdateTaskTreeAndCommentsFonts()
 {
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), Prefs(), m_fontMain, m_fontTree, m_fontComments);
+}
+
+void CToDoListWnd::UpdateFindTasksAndRemindersFonts()
+{
+	if (m_dlgFindTasks.GetSafeHwnd())
+	{
+		BOOL bUseTreeFont = Prefs().GetFindTasksUseTreeFont();
+
+		m_dlgFindTasks.SetResultsFont(bUseTreeFont ? m_fontTree : m_fontMain);
+		m_mgrShortcuts.SetFindTasksUseTreeFont(bUseTreeFont);
+	}
+	
+	if (m_dlgReminders.GetSafeHwnd())
+	{
+		BOOL bUseTreeFont = Prefs().GetRemindersUseTreeFont();
+
+		m_dlgReminders.SetRemindersFont(bUseTreeFont ? m_fontTree : m_fontMain);
+		m_mgrShortcuts.SetRemindersUseTreeFont(bUseTreeFont);
+	}
 }
 
 void CToDoListWnd::OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI) 

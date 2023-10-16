@@ -461,7 +461,9 @@
 #define IDC_PAGEHOST                    1142
 #define IDC_PASSWORD                    1144
 #define IDC_COMMENTSUSETREEFONT         1145
+#define IDC_REMINDERSUSETREEFONT        1146
 #define IDC_USEISODATEFORMAT            1147
+#define IDC_FINDTASKSUSETREEFONT        1147
 #define IDC_USEHLSGRADIENT              1148
 #define IDC_SHOWWEEKDAYINDATES          1149
 #define IDC_INHERITATTRIBUTES           1149
