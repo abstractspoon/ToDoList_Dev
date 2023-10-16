@@ -36,16 +36,20 @@ public:
 class CListCtrlItemGrouping
 {
 public:
-	CListCtrlItemGrouping(CWnd& list) : m_list(list) {}
+	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList) {}
 
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
+	BOOL EnableGroupView(HWND hwndList, BOOL bEnable = TRUE);
 	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
-	int GetItemGroupId(int nRow);
 	BOOL SetItemGroupId(int nRow, int nGroupID);
 	void RemoveAllGroups();
 
+	BOOL HasGroups() const;
+	int GetItemGroupId(int nRow) const;
+	CString GetGroupHeaderText(int nGroupID) const;
+
 protected:
-	CWnd& m_list;
+	HWND m_hwndList;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -98,7 +98,26 @@ DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
-	return (m_list.SendMessage(LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+	if (!m_hwndList)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+}
+
+BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
+{
+	if (!hwndList)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_hwndList = hwndList;
+
+	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
 }
 
 BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/)
@@ -110,8 +129,8 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.state = LVGS_NORMAL;//dwState;
 	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
 	lvg.uAlign = LVGA_HEADER_LEFT;//dwAlign;
-
-								  // Header-title must be unicode (Convert if necessary)
+	
+	// Header-title must be unicode (Convert if necessary)
 #ifdef UNICODE
 	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
 	lvg.cchHeader = strHeader.GetLength();
@@ -121,17 +140,33 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.cchHeader = header.Length();
 #endif
 
-	return (-1 != m_list.SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
+	return (-1 != ::SendMessage(m_hwndList, LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
 }
 
-int CListCtrlItemGrouping::GetItemGroupId(int nRow)
+CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
+{
+	LVGROUP lvg = { 0 };
+	TCHAR szHeader[256] = { 0 };
+
+	lvg.cbSize = sizeof(lvg);
+	lvg.mask = LVGF_GROUPID | LVGF_HEADER;
+	lvg.iGroupId = nGroupID;
+	lvg.pszHeader = szHeader;
+	lvg.cchHeader = 256;
+
+	VERIFY(-1 != ::SendMessage(m_hwndList, LVM_GETGROUPINFO, 0, (LPARAM)&lvg));
+
+	return szHeader;
+}
+
+int CListCtrlItemGrouping::GetItemGroupId(int nRow) const
 {
 	LVGROUPITEM lvgi = { 0 };
 
 	lvgi.mask = LVIF_GROUPID;
 	lvgi.iItem = nRow;
 
-	VERIFY(m_list.SendMessage(LVM_GETITEM, 0, (LPARAM)&lvgi));
+	VERIFY(::SendMessage(m_hwndList, LVM_GETITEM, 0, (LPARAM)&lvgi));
 
 	return lvgi.iGroupId;
 }
@@ -145,12 +180,17 @@ BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
 	lvgi.iSubItem = 0;
 	lvgi.iGroupId = nGroupID;
 
-	return (BOOL)m_list.SendMessage(LVM_SETITEM, 0, (LPARAM)&lvgi);
+	return (BOOL)::SendMessage(m_hwndList, LVM_SETITEM, 0, (LPARAM)&lvgi);
+}
+
+BOOL CListCtrlItemGrouping::HasGroups() const
+{
+	return (::SendMessage(m_hwndList, LVM_GETGROUPCOUNT, 0, 0) > 0);
 }
 
 void CListCtrlItemGrouping::RemoveAllGroups()
 {
-	m_list.SendMessage(LVM_REMOVEALLGROUPS);
+	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////

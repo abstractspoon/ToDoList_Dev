@@ -60,11 +60,6 @@ const static int DEFAULT_DPI = 96;
 
 //////////////////////////////////////////////////////////////////////
 
-const static COLORREF GROUPHEADER	= RGB(63, 118, 179);
-
-
-//////////////////////////////////////////////////////////////////////
-
 // private helpers
 void InitBitmapInfo(BITMAPINFO *pbmi, ULONG cbInfo, LONG cx, LONG cy, WORD bpp);
 BOOL Create32BitHBITMAP(HDC hdc, const SIZE *psize, void **ppvBits, HBITMAP* phBmp);
@@ -2260,11 +2255,13 @@ COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
 
 COLORREF GraphicsMisc::GetGroupHeaderColor() 
 {
-	return GROUPHEADER;
+	return GetSysColor(COLOR_HOTLIGHT);
 }
 
 void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CString& sText, COLORREF crText, COLORREF crBack)
 {
+	CSaveDC dc(pDC);
+
 	if (crText == CLR_NONE)
 	{
 		if (crBack == CLR_NONE)
