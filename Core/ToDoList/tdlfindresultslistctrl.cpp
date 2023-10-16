@@ -43,7 +43,9 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	: 
 	m_nCurGroupID(-1), 
 	m_bStrikeThruDone(FALSE), 
-	m_lcGrouping(*this)
+	m_crGroupBkgnd(CLR_NONE),
+	m_crRef(CLR_NONE),
+	m_crDone(CLR_NONE)
 {
 }
 
@@ -217,7 +219,19 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
+		{
+			*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
+
+			if (pLVCD->dwItemType == LVCDI_GROUP)
+			{
+				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+				CString sHeader = m_lcGrouping.GetGroupHeaderText(nItem);
+				CRect rRow(pLVCD->rcText);
+
+				GraphicsMisc::DrawGroupHeaderRow(pDC, GetSafeHwnd(), rRow, sHeader, CLR_NONE, m_crGroupBkgnd);
+				*pResult = CDRF_SKIPDEFAULT;
+			}
+		}
 		break;
 
 	case CDDS_ITEMPREPAINT:
@@ -352,21 +366,23 @@ CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, int nCol, B
 	return NULL;
 }
 
+COLORREF CTDLFindResultsListCtrl::GetUserColour(const CPreferences& prefs, LPCTSTR szSpecifiedKey, LPCTSTR szColorKey)
+{
+	if (prefs.GetProfileInt(_T("Preferences"), szSpecifiedKey, FALSE))
+		return (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), szColorKey, CLR_NONE);
+
+	// else
+	return CLR_NONE;
+}
+
 void CTDLFindResultsListCtrl::RefreshUserPreferences()
 {
 	CPreferences prefs;
 	
-	// update user completed tasks colour
-	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyDoneColor"), FALSE))
-		m_crDone = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), CLR_NONE);
-	else
-		m_crDone = CLR_NONE;
-	
-	// update user reference tasks colour
-	if (prefs.GetProfileInt(_T("Preferences"), _T("ReferenceColor"), FALSE))
-		m_crRef = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("Reference"), CLR_NONE);
-	else
-		m_crRef = CLR_NONE;
+	// update user colour
+	m_crDone = GetUserColour(prefs, _T("SpecifyDoneColor"), _T("TaskDone"));
+	m_crRef = GetUserColour(prefs, _T("ReferenceColor"), _T("Reference"));
+	m_crGroupBkgnd = GetUserColour(prefs, _T("SpecifyGroupHeaderBkgndColor"), _T("GroupHeaderBkgnd"));
 
 	// update strike thru font
 	BOOL bWasStrikeThru = m_bStrikeThruDone;
@@ -407,7 +423,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
 	if (m_nCurGroupID == -1)
-		m_lcGrouping.EnableGroupView();
+		m_lcGrouping.EnableGroupView(*this);
 
 	return m_lcGrouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }

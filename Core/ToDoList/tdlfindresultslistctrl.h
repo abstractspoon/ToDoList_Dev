@@ -43,7 +43,7 @@ public:
 	BOOL SetColumnWidths(const CIntArray& aWidths);
 
 protected:
-	COLORREF m_crDone, m_crRef;
+	COLORREF m_crDone, m_crRef, m_crGroupBkgnd;
 	int m_nCurGroupID;
 	BOOL m_bStrikeThruDone;
 	CFontCache m_fonts;
@@ -78,6 +78,7 @@ protected:
 	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
 
 	static BOOL OsIsXP();
+	static COLORREF GetUserColour(const CPreferences& prefs, LPCTSTR szSpecifiedKey, LPCTSTR szColorKey);
 };
 
 /////////////////////////////////////////////////////////////////////////////
