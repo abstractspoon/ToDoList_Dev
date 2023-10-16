@@ -16,6 +16,7 @@
 #include "osversion.h"
 #include "datetimectrlex.h"
 #include "AutoFlag.h"
+#include "PopupEditCtrl.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
@@ -520,7 +521,20 @@ protected:
 			if (s_hwndCurrentEdit == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentEdit, hRealWnd);
-				return Default();
+				LRESULT lr = Default();
+
+				CWnd* pEdit = CWnd::FromHandle(hRealWnd);
+
+				if (pEdit->IsKindOf(RUNTIME_CLASS(CPopupEditCtrl)))
+				{
+					CRect rBorder;
+					GetClientRect(rBorder);
+
+					CClientDC dc(pEdit);
+					GraphicsMisc::DrawRect(&dc, rBorder, CLR_NONE, DM_HOTLIGHT);
+				}
+
+				return lr;
 			}
 			break;
 
