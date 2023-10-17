@@ -2438,7 +2438,9 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// reminders
 	m_dlgReminders.Initialize(this);
-	m_dlgReminders.SetRemindersFont(m_fontTree);
+
+	if (userPrefs.GetRemindersUseTreeFont())
+		m_dlgReminders.SetRemindersFont(m_fontTree);
 
 	// with or without Stickies Support
 	CString sStickiesPath;
