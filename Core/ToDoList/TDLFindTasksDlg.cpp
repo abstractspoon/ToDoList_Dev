@@ -98,6 +98,7 @@ void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_RESULTSLABEL, m_sResultsLabel);
 }
 
+IMPLEMENT_DYNAMIC(CTDLFindTasksDlg, CRuntimeDlg)
 
 BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CRuntimeDlg)
 	//{{AFX_MSG_MAP(CTDLFindTasksDlg)

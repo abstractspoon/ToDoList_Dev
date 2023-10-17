@@ -135,6 +135,7 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
+IMPLEMENT_DYNAMIC(CTDLShowReminderDlg, CTDLDialog)
 
 BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLShowReminderDlg)

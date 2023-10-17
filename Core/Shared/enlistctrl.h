@@ -47,6 +47,9 @@ public:
 	BOOL HasGroups() const;
 	int GetItemGroupId(int nRow) const;
 	CString GetGroupHeaderText(int nGroupID) const;
+	
+	static BOOL IsGroupItem(const LPNMLVCUSTOMDRAW pLVCD);
+	static void GetGroupHeaderTextRect(const LPNMLVCUSTOMDRAW pLVCD, CRect& rText);
 
 protected:
 	HWND m_hwndList;

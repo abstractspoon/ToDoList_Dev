@@ -20,6 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 #if _MSC_VER >= 1400
 #	define LVGROUPITEM LVITEM
+#	define LVCUSTOMDRAW NMLVCUSTOMDRAW
 #else
 struct LVGROUPITEM
 {
@@ -39,6 +40,28 @@ struct LVGROUPITEM
 	int* piColFmt;
 	int iGroup; // readonly. only valid for owner data.
 };
+
+struct LVCUSTOMDRAW
+{
+	NMCUSTOMDRAW nmcd;
+	COLORREF clrText;
+	COLORREF clrTextBk;
+	int iSubItem;
+	DWORD dwItemType;
+
+	// Item custom draw
+	COLORREF clrFace;
+	int iIconEffect;
+	int iIconPhase;
+	int iPartId;
+	int iStateId;
+
+	// Group Custom Draw
+	RECT rcText;
+	UINT uAlign;      // Alignment. Use LVGA_HEADER_CENTER, LVGA_HEADER_RIGHT, LVGA_HEADER_LEFT
+};
+#	define LVCDI_GROUP 1
+
 #endif
 
 #ifndef LVIF_GROUPID
@@ -84,6 +107,8 @@ struct LVGROUP
 };
 
 #define LVM_INSERTGROUP         (LVM_FIRST + 145)
+#define LVM_GETGROUPINFO        (LVM_FIRST + 149)
+#define LVM_GETGROUPCOUNT       (LVM_FIRST + 152)
 #define LVM_ENABLEGROUPVIEW     (LVM_FIRST + 157)
 #define LVM_REMOVEALLGROUPS     (LVM_FIRST + 160)
 
@@ -191,6 +216,16 @@ BOOL CListCtrlItemGrouping::HasGroups() const
 void CListCtrlItemGrouping::RemoveAllGroups()
 {
 	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
+}
+
+BOOL CListCtrlItemGrouping::IsGroupItem(const LPNMLVCUSTOMDRAW pLVCD)
+{
+	return (((const LVCUSTOMDRAW*)pLVCD)->dwItemType == LVCDI_GROUP);
+}
+
+void CListCtrlItemGrouping::GetGroupHeaderTextRect(const LPNMLVCUSTOMDRAW pLVCD, CRect& rText)
+{
+	rText = ((const LVCUSTOMDRAW*)pLVCD)->rcText;
 }
 
 /////////////////////////////////////////////////////////////////////////////

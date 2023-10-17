@@ -46,6 +46,8 @@ void CTDLDialog::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+IMPLEMENT_DYNAMIC(CTDLDialog, CDialog)
+
 BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	//{{AFX_MSG_MAP(CTDLDialog)
 	ON_WM_SIZE()

@@ -39,6 +39,8 @@ enum DM_POS
 
 class CTDLFindTasksDlg : public CRuntimeDlg
 {
+	DECLARE_DYNAMIC(CTDLFindTasksDlg)
+
 // Construction
 public:
 	CTDLFindTasksDlg(const CContentMgr& mgrContent);

@@ -42,6 +42,8 @@ protected:
 
 class CTDLShowReminderDlg : public CTDLDialog
 {
+	DECLARE_DYNAMIC(CTDLShowReminderDlg)
+
 // Construction
 public:
 	CTDLShowReminderDlg(CWnd* pParent = NULL);   // standard constructor

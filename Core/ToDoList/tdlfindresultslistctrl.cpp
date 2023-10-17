@@ -233,11 +233,13 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
 
-			if (pLVCD->dwItemType == LVCDI_GROUP)
+			if (m_lcGrouping.IsGroupItem(pLVCD))
 			{
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 				CString sHeader = m_lcGrouping.GetGroupHeaderText(nItem);
-				CRect rRow(pLVCD->rcText);
+
+				CRect rRow;
+				m_lcGrouping.GetGroupHeaderTextRect(pLVCD, rRow);
 
 				GraphicsMisc::DrawGroupHeaderRow(pDC, GetSafeHwnd(), rRow, sHeader, CLR_NONE, m_crGroupBkgnd);
 				*pResult = CDRF_SKIPDEFAULT;
