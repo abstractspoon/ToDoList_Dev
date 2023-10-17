@@ -150,7 +150,7 @@ protected:
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData2; }
-	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn);
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell);
 	virtual void PrepareControl(CWnd& /*ctrl*/, int /*nRow*/, int /*nCol*/) {}
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;

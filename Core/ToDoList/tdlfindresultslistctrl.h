@@ -70,7 +70,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn);
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 
 	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
 	CFont* GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot);

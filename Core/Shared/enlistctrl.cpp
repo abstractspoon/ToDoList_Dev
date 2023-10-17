@@ -1524,13 +1524,10 @@ void CEnListCtrl::Sort()
 
 int CALLBACK CEnListCtrl::CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam)
 {
-	CEnListCtrl* pListCtrl;
-	int nResult;
-
-	pListCtrl = (CEnListCtrl*)lParam;
+	const CEnListCtrl* pListCtrl = (const CEnListCtrl*)lParam;
 	ASSERT (pListCtrl->IsKindOf(RUNTIME_CLASS(CEnListCtrl)));
 
-	nResult = pListCtrl->CompareItems(lParam1, lParam2, pListCtrl->m_nSortColumn);
+	int nResult = pListCtrl->CompareItems(lParam1, lParam2, pListCtrl->m_nSortColumn);
 
 	if (!pListCtrl->m_bSortAscending)
 		nResult = -nResult;
@@ -1563,7 +1560,7 @@ CString CEnListCtrl::GetSortString(DWORD dwItemData) const
 	return sItem;
 }
 
-int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/)
+int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/) const
 {
 	// -1 if dwItemData1 should go BEFORE dwItemData2
 	//  1 if dwItemData1 should go AFTER dwItemData2

@@ -513,7 +513,7 @@ CString CTDLFindResultsListCtrl::GetAttributeName(TDC_ATTRIBUTE nAttribID, const
 	return sAttrib;
 }
 
-int CTDLFindResultsListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
+int CTDLFindResultsListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	// Handle date sorting
 	if (nSortColumn == COL_WHATMATCHED)

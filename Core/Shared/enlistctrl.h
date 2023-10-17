@@ -148,6 +148,7 @@ private:
 	
 	int m_nMinItemHeight;
 	DWORD m_dwSelectionTheming;
+
 	static DWORD s_dwSelectionTheming;
 
 // Operations
@@ -192,10 +193,10 @@ protected:
 	virtual void Delete() {} // derived class override provides logic
 	virtual void Cut() {} // derived class override provides logic
 	virtual void Paste() {} // derived class override provides logic
-	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn);
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	virtual CFont* GetItemFont(int /*nItem*/, int /*nSubItem*/) { return NULL; }
+	virtual CFont* GetItemFont(int /*nItem*/, int /*nSubItem*/) const { return NULL; }
 	virtual CString GetNoItemsText() const { return ""; }
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;

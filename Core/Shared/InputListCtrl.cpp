@@ -1819,7 +1819,7 @@ IL_COLUMNTYPE CInputListCtrl::GetColumnType(int nCol) const
 	return pData ? pData->nType : ILCT_TEXT;
 }
 
-int CInputListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
+int CInputListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	// if one of the items is the prompt then this is always last
 	if (dwItemData1 == PROMPT || dwItemData2 == PROMPT)
