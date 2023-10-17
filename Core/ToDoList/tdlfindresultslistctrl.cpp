@@ -231,19 +231,10 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 	case CDDS_PREPAINT:
 		{
-			*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
-
-			if (m_lcGrouping.IsGroupItem(pLVCD))
-			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-				CString sHeader = m_lcGrouping.GetGroupHeaderText(nItem);
-
-				CRect rRow;
-				m_lcGrouping.GetGroupHeaderTextRect(pLVCD, rRow);
-
-				GraphicsMisc::DrawGroupHeaderRow(pDC, GetSafeHwnd(), rRow, sHeader, CLR_NONE, m_crGroupBkgnd);
+			if (m_lcGrouping.DrawGroupHeader(pLVCD, m_crGroupBkgnd))
 				*pResult = CDRF_SKIPDEFAULT;
-			}
+			else
+				*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
 		}
 		break;
 
@@ -294,6 +285,7 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 					COLORREF crText = GetResultTextColor(pRes, bSelected, bHot);
 					pDC->SetTextColor(crText);
+					pDC->SetBkMode(TRANSPARENT);
 
 					// set the font for each column item
 					CFont* pFont = GetResultFont(pRes, nSubItem, bHot);

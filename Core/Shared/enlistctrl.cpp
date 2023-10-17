@@ -218,14 +218,20 @@ void CListCtrlItemGrouping::RemoveAllGroups()
 	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
-BOOL CListCtrlItemGrouping::IsGroupItem(const LPNMLVCUSTOMDRAW pLVCD)
+BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORREF crBkgnd)
 {
-	return (((const LVCUSTOMDRAW*)pLVCD)->dwItemType == LVCDI_GROUP);
-}
+	const LVCUSTOMDRAW* pNMLV = (const LVCUSTOMDRAW*)pLVCD;
 
-void CListCtrlItemGrouping::GetGroupHeaderTextRect(const LPNMLVCUSTOMDRAW pLVCD, CRect& rText)
-{
-	rText = ((const LVCUSTOMDRAW*)pLVCD)->rcText;
+	if (pNMLV->dwItemType != LVCDI_GROUP)
+		return FALSE;
+
+	CDC* pDC = CDC::FromHandle(pNMLV->nmcd.hdc);
+	CString sHeader = GetGroupHeaderText(pNMLV->nmcd.dwItemSpec);
+
+	CRect rRow(pNMLV->rcText);
+	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, crBkgnd);
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
