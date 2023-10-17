@@ -2160,8 +2160,7 @@ CAPTION "Task Reminders"
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "List1",IDC_REMINDERS,"SysListView32",LVS_REPORT | 
-                    LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,7,324,115
+                    LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,7,7,324,115
     CONTROL         "&Remind me again in:",IDC_SNOOZEOPTIONFOR,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,128,109,10
     CONTROL         "&Remind me again at:",IDC_SNOOZEOPTIONUNTIL,"Button",

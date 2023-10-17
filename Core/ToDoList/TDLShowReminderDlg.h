@@ -23,6 +23,21 @@
 class CFilteredToDoCtrl;
 
 /////////////////////////////////////////////////////////////////////////////
+// CTDLShowReminderListCtrl
+
+class CTDLShowReminderListCtrl : public CEnListCtrl
+{
+public:
+	CTDLShowReminderListCtrl(const CTDCReminderMap& mapReminders);
+
+protected:
+	const CTDCReminderMap& m_mapReminders;
+
+protected:
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderDlg dialog
 
 class CTDLShowReminderDlg : public CTDLDialog
@@ -32,7 +47,7 @@ public:
 	CTDLShowReminderDlg(CWnd* pParent = NULL);   // standard constructor
 
 	BOOL Create(CWnd* pParent, BOOL bVisible = TRUE);
-	void SetRemindersFont(HFONT hFont) { m_lcReminders.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
+	void SetRemindersFont(HFONT hFont);
 
 	BOOL AddListReminder(const TDCREMINDER& rem);
 	BOOL UpdateListReminder(const TDCREMINDER& rem);
@@ -61,7 +76,7 @@ protected:
 	CDateTimeCtrlEx m_dtcSnoozeDate;
 	CTimeComboBox m_cbSnoozeTime;
 	COleDateTime m_dtSnoozeUntil;
-	CEnListCtrl m_lcReminders;
+	CTDLShowReminderListCtrl m_lcReminders;
 	CIcon m_icon;
 
 	CTDCReminderMap m_mapReminders;
