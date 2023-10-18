@@ -12470,13 +12470,31 @@ LRESULT CToDoListWnd::OnReminderCompleteTask(WPARAM wParam, LPARAM lParam)
 	DWORD dwTaskID = wParam;
 	CString sPath((LPCTSTR)lParam);
 
-	// We should only receive this from CToDoCtrlReminders so there should be a path 
-	ASSERT(!sPath.IsEmpty());
+	// We should only receive this from CToDoCtrlReminders 
+	// so there should be a full path and we should have it loaded
+	ASSERT(dwTaskID);
+	ASSERT(!PathIsRelative(sPath));
 
-	if (ValidateTaskLinkFilePath(sPath) && DoTaskLink(sPath, dwTaskID, FALSE))
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
+	ASSERT(nTDC != -1);
+
+	if (nTDC != -1)
 	{
-		GetToDoCtrl().SetSelectedTaskCompletion(TDCTC_DONE);
+		int nSelTDC = GetSelToDoCtrl();
+
+		if (SelectToDoCtrl(nTDC, (nTDC != nSelTDC)))
+		{
+			CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+			if (tdc.SelectTask(dwTaskID, TRUE))
+				return tdc.SetSelectedTaskCompletion(TDCTC_DONE);
+		}
+
+		ASSERT(0);
 	}
+
+	// Error reporting
+	// TODO
 
 	return 0L;
 }
