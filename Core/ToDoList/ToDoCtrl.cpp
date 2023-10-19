@@ -231,13 +231,20 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 {
 	SetBordersDLU(0);
 	
-	// add controls
+	// HACK
+	//
+	// I don't yet understand the mechanism of this, but when Dark Mode
+	// hooks some controls ahead of MFC's subclassing, the subsequent
+	// unsubclassing by MFC causes an assert in WinCore.cpp because the
+	// HWND has not been detached by the time the destructor is called.
+	//
+	// To avoid this we create the controls hidden to delay the Dark Mode hooking.
 	for (int nCtrl = 0; nCtrl < NUM_TDCCTRLS; nCtrl++)
 	{
 		const TDCCONTROL& ctrl = TDCCONTROLS[nCtrl];
 
 		AddRCControl(_T("CONTROL"), ctrl.szClass, CString((LPCTSTR)ctrl.nIDCaption), 
-					ctrl.dwStyle, ctrl.dwExStyle,
+					(ctrl.dwStyle | WS_NOTVISIBLE), ctrl.dwExStyle,
 					ctrl.nX, ctrl.nY, ctrl.nCx, ctrl.nCy, ctrl.nID);
 	}
 	
