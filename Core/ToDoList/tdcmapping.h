@@ -533,28 +533,6 @@ namespace TDC
 		return TDCA_NONE;
 	}
 	
-	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttrib)
-	{
-		switch (nAttrib)
-		{
-		case TDCA_CREATIONDATE:	return TDCD_CREATE;
-		case TDCA_LASTMODDATE:	return TDCD_LASTMOD;
-			
-		case TDCA_STARTDATE:	return TDCD_STARTDATE;
-		case TDCA_STARTTIME:	return TDCD_STARTTIME;
-			
-		case TDCA_DUEDATE:		return TDCD_DUEDATE;
-		case TDCA_DUETIME:		return TDCD_DUETIME;
-
-		case TDCA_DONEDATE:		return TDCD_DONEDATE;	
-		case TDCA_DONETIME:		return TDCD_DONETIME;	
-		}
-		
-		// else
-		ASSERT(0);
-		return TDCD_NONE;
-	}
-
 	static TDC_DATE MapColumnToDate(TDC_COLUMN nCol)
 	{
 		switch (nCol)

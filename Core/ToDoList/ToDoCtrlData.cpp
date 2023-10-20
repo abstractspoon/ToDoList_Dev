@@ -4103,19 +4103,15 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 		}
 		break;
 
-	case TDCA_DONEDATE:			
-	case TDCA_DUEDATE:			
-	case TDCA_STARTDATE:		
-	case TDCA_DONETIME:			
-	case TDCA_DUETIME:			
-	case TDCA_STARTTIME:
-		{
-			COleDateTime date = data.AsDate();
-			TDC_DATE nDate = TDC::MapAttributeToDate(nAttrib);
+	// Copies date and time
+	case TDCA_DONEDATE:		return SetTaskDate(dwTaskID, TDCD_DONE, data.AsDate());
+	case TDCA_DUEDATE:		return SetTaskDate(dwTaskID, TDCD_DUE, data.AsDate());	
+	case TDCA_STARTDATE:	return SetTaskDate(dwTaskID, TDCD_START, data.AsDate());	
 
-			return SetTaskDate(dwTaskID, nDate, date);
-		}
-		break;
+	// Copies time only
+	case TDCA_DONETIME:		return SetTaskDate(dwTaskID, TDCD_DONETIME, data.AsDate());	
+	case TDCA_DUETIME:		return SetTaskDate(dwTaskID, TDCD_DUETIME, data.AsDate());	
+	case TDCA_STARTTIME:	return SetTaskDate(dwTaskID, TDCD_STARTTIME, data.AsDate());
 
 	case TDCA_TIMEESTIMATE:			
 		{

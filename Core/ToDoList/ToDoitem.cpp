@@ -1389,40 +1389,43 @@ BOOL TODOITEM::GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 
 	switch (nAttribID)
 	{
-	case TDCA_VERSION:		data.Set(sVersion);			break;
-	case TDCA_ALLOCBY:		data.Set(sAllocBy);			break;
-	case TDCA_CREATEDBY:	data.Set(sCreatedBy);		break;
-	case TDCA_EXTERNALID:	data.Set(sExternalID);		break;
-	case TDCA_STATUS:		data.Set(sStatus);			break;
-	case TDCA_TASKNAME:		data.Set(sTitle);			break;
-	case TDCA_COMMENTS:		data.Set(sComments);		break;
-	case TDCA_LASTMODBY:	data.Set(sLastModifiedBy);	break;
+	case TDCA_VERSION:		data.Set(sVersion);					break;
+	case TDCA_ALLOCBY:		data.Set(sAllocBy);					break;
+	case TDCA_CREATEDBY:	data.Set(sCreatedBy);				break;
+	case TDCA_EXTERNALID:	data.Set(sExternalID);				break;
+	case TDCA_STATUS:		data.Set(sStatus);					break;
+	case TDCA_TASKNAME:		data.Set(sTitle);					break;
+	case TDCA_COMMENTS:		data.Set(sComments);				break;
+	case TDCA_LASTMODBY:	data.Set(sLastModifiedBy);			break;
 
-	case TDCA_COLOR:		data.Set((int)color);		break;
-	case TDCA_PRIORITY:		data.Set(nPriority);		break;
-	case TDCA_RISK:			data.Set(nRisk);			break;
-	case TDCA_PERCENT:		data.Set(nPercentDone);		break;
-	case TDCA_FLAG:			data.Set(bFlagged);			break;
-	case TDCA_ICON:			data.Set(sIcon);			break;
-	case TDCA_LOCK:			data.Set(bLocked);			break;
+	case TDCA_COLOR:		data.Set((int)color);				break;
+	case TDCA_PRIORITY:		data.Set(nPriority);				break;
+	case TDCA_RISK:			data.Set(nRisk);					break;
+	case TDCA_PERCENT:		data.Set(nPercentDone);				break;
+	case TDCA_FLAG:			data.Set(bFlagged);					break;
+	case TDCA_ICON:			data.Set(sIcon);					break;
+	case TDCA_LOCK:			data.Set(bLocked);					break;
 
-	case TDCA_FILELINK:		data.Set(aFileLinks);		break;
-	case TDCA_ALLOCTO:		data.Set(aAllocTo);			break;
-	case TDCA_CATEGORY:		data.Set(aCategories);		break;
-	case TDCA_TAGS:			data.Set(aTags);			break;
+	case TDCA_FILELINK:		data.Set(aFileLinks);				break;
+	case TDCA_ALLOCTO:		data.Set(aAllocTo);					break;
+	case TDCA_CATEGORY:		data.Set(aCategories);				break;
+	case TDCA_TAGS:			data.Set(aTags);					break;
 
-	case TDCA_TIMEESTIMATE:	data.Set(timeEstimate);		break;
-	case TDCA_TIMESPENT:	data.Set(timeSpent);		break;
-	case TDCA_COST:			data.Set(cost);				break;
+	case TDCA_TIMEESTIMATE:	data.Set(timeEstimate);				break;
+	case TDCA_TIMESPENT:	data.Set(timeSpent);				break;
+	case TDCA_COST:			data.Set(cost);						break;
 
-	case TDCA_CREATIONDATE: 
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_STARTDATE:
-	case TDCA_DONETIME:
-	case TDCA_DUETIME:
-	case TDCA_STARTTIME:	data.Set(GetDate(TDC::MapAttributeToDate(nAttribID)));	break;
+	// Date and Time
+	case TDCA_CREATIONDATE: data.Set(GetDate(TDCD_CREATE));		break;
+	case TDCA_DONEDATE:		data.Set(GetDate(TDCD_DONE));		break;
+	case TDCA_DUEDATE:		data.Set(GetDate(TDCD_DUE));		break;
+	case TDCA_LASTMODDATE:	data.Set(GetDate(TDCD_LASTMOD));	break;
+	case TDCA_STARTDATE:	data.Set(GetDate(TDCD_START));		break;
+
+	// Time only
+	case TDCA_DONETIME:		data.Set(GetDate(TDCD_DONETIME));	break;
+	case TDCA_DUETIME:		data.Set(GetDate(TDCD_DUETIME));	break;
+	case TDCA_STARTTIME:	data.Set(GetDate(TDCD_STARTTIME));	break;
 
 	case TDCA_DEPENDENCY:
 	case TDCA_RECURRENCE:
@@ -1465,14 +1468,15 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_TIMESPENT:	return (timeSpent.dAmount != 0);		
 	case TDCA_COST:			return (cost.dAmount != 0);			
 
-	case TDCA_CREATIONDATE: 
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_STARTDATE:
-	case TDCA_DONETIME:
-	case TDCA_DUETIME:
-	case TDCA_STARTTIME:	return CDateHelper::IsDateSet(GetDate(TDC::MapAttributeToDate(nAttribID)));
+	case TDCA_CREATIONDATE: return CDateHelper::IsDateSet(GetDate(TDCD_CREATE));
+	case TDCA_DONEDATE:		return CDateHelper::IsDateSet(GetDate(TDCD_DONE));
+	case TDCA_DUEDATE:		return CDateHelper::IsDateSet(GetDate(TDCD_DUE));
+	case TDCA_LASTMODDATE:	return CDateHelper::IsDateSet(GetDate(TDCD_LASTMOD));
+	case TDCA_STARTDATE:	return CDateHelper::IsDateSet(GetDate(TDCD_START));
+
+	case TDCA_DONETIME:		return CDateHelper::IsDateSet(GetDate(TDCD_DONETIME));
+	case TDCA_DUETIME:		return CDateHelper::IsDateSet(GetDate(TDCD_DUETIME));
+	case TDCA_STARTTIME:	return CDateHelper::IsDateSet(GetDate(TDCD_STARTTIME));
 
 	case TDCA_METADATA:		return mapMetaData.GetCount();
 	case TDCA_CUSTOMATTRIB:	return mapCustomData.GetCount();
