@@ -3843,14 +3843,11 @@ CString CTDCTaskFormatter::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 {
 	double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
 
-	if (dCost != 0.0)
-		return Misc::Format(dCost, 2);
+	if ((dCost == 0.0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+		return EMPTY_STR;
 
-	if (!m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
-		return _T("0.00");
-
-	// else
-	return EMPTY_STR;
+	// We remove any currency symbol for backwards-compatibility
+	return Misc::TrimAlpha(Misc::FormatCost(dCost));
 }
 
 CString CTDCTaskFormatter::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const

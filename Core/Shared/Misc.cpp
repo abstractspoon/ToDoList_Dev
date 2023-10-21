@@ -586,7 +586,7 @@ CString& Misc::TrimAlpha(CString& sText)
 
 		while (nEnd--)
 		{
-			if (_istdigit(sText[nStart]))
+			if (_istdigit(sText[nEnd]))
 				break;
 		}
 
