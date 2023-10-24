@@ -2442,6 +2442,8 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (userPrefs.GetRemindersUseTreeFont())
 		m_dlgReminders.SetRemindersFont(m_fontTree);
 
+	m_dlgReminders.EnableReducedFlashing(userPrefs.GetReduceReminderDialogFlashing());
+
 	// with or without Stickies Support
 	CString sStickiesPath;
 	BOOL bShowFullTaskPathInSticky = FALSE;
@@ -5165,6 +5167,8 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		// colours
 		if (m_dlgFindTasks.GetSafeHwnd())
 			m_dlgFindTasks.RefreshUserPreferences();
+
+		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
 		
 		// active tasklist userPrefs
 		CheckUpdateActiveToDoCtrlPreferences();

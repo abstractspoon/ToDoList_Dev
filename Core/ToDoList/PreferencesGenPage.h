@@ -62,6 +62,7 @@ public:
 	BOOL GetUseStickies(CString& sStickiesPath, BOOL& bShowFullTaskPath) const;
 	BOOL GetReloadTasklists() const { return m_bReloadTasklists; }
 	BOOL GetEnableRTLInput() const { return m_bEnableRTLInput; }
+	BOOL GetReduceReminderDialogFlashing() const { return m_bReduceReminderDialogFlashing; }
 //	BOOL Get() const { return m_b; }
 
 // Dialog Data
@@ -98,6 +99,7 @@ public:
 	DWORD	m_dwGlobalHotkey;
 	int		m_nMinimizeNoEditTime;
 	BOOL	m_bShowFullTaskPathInSticky;
+	BOOL	m_bReduceReminderDialogFlashing;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

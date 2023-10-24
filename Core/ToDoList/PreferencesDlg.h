@@ -107,6 +107,7 @@ public:
 	BOOL GetUseStickies(CString& sStickiesPath, BOOL& bShowFullTaskPath) const { return m_pageGen.GetUseStickies(sStickiesPath, bShowFullTaskPath); }
 	BOOL GetReloadTasklists() const { return m_pageGen.GetReloadTasklists(); }
 	BOOL GetEnableRTLInput() const { return m_pageGen.GetEnableRTLInput(); }
+	BOOL GetReduceReminderDialogFlashing() const { return m_pageGen.GetReduceReminderDialogFlashing(); }
 
 	// CPreferencesMultiUserPage
 	RELOAD_OPTION GetReadonlyReloadOption() const { return m_pageMultiUser.GetReadonlyReloadOption(); }
