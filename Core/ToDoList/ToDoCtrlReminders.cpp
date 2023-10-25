@@ -567,7 +567,7 @@ void CToDoCtrlReminders::DoCheckReminders()
 	// our owner is not disabled (showing a modal dialog)
 	if (bFlashTaskBar && IsWindowVisible() && m_pWndNotify->IsWindowEnabled())
 	{
-		GraphicsMisc::FlashWindowEx(m_hWnd, (FLASHW_ALL | FLASHW_TIMERNOFG), 10, 0);
+		GraphicsMisc::FlashWindowEx(m_hWnd, FLASHW_ALL, 5, 0);
 	}
 }
 
