@@ -196,6 +196,7 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
 
 	m_lcReminders.SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
+	m_lcReminders.SetSortEmptyValuesBelow(FALSE);
 
 	EnableControls();
 	UpdateColumnWidths();

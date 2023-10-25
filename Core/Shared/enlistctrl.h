@@ -100,6 +100,7 @@ public:
 	BOOL IsItemSelected(int nItem) const;
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
+	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
 	virtual void Sort();
 	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
@@ -144,6 +145,7 @@ protected:
 	BOOL m_bInitColumns; // up to derived class to set: gets cleared in OnDestroy
 	BOOL m_bAlternateRowColoring;
 	BOOL m_bAllowOffItemClickDeslection;
+	BOOL m_bSortEmptyBelow;
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
