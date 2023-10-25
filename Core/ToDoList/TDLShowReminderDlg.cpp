@@ -267,7 +267,7 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
 
-	if ((m_lcReminders.GetSortColumn() != -1) && (m_lcReminders.GetItemCount() > 1))
+	if (bNewReminder && m_lcReminders.IsSorting())
 		m_lcReminders.Sort();
 	
 	return bNewReminder;

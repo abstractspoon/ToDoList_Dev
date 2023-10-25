@@ -1551,16 +1551,13 @@ void CEnListCtrl::SetSortColumn(int nColumn, BOOL bResort)
 
 void CEnListCtrl::Sort()
 {
-	// rebuild sort map
-	BuildSortMap(m_nSortColumn);
+	if (BuildSortMap(m_nSortColumn))
+	{
+		SortItems(CompareProc, (LPARAM)this);
+		EnsureVisible(GetCurSel(), FALSE);
 
-	// do sort
-	SortItems(CompareProc, (LPARAM)this);
-
-	// cleanup
-	m_mapSortStrings.RemoveAll();
-
-	EnsureVisible(GetCurSel(), FALSE);
+		m_mapSortStrings.RemoveAll();
+	}
 }
 
 int CALLBACK CEnListCtrl::CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam)
@@ -1576,21 +1573,27 @@ int CALLBACK CEnListCtrl::CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lPa
 	return nResult;
 }
 
-void CEnListCtrl::BuildSortMap(int nCol)
+BOOL CEnListCtrl::BuildSortMap(int nCol)
 {
 	// because we can't reliably get back from the itemdata to the item index
 	// during a sort, we map the itemdata of each item index directly to
 	// the column string
-	BuildSortMap(nCol, m_mapSortStrings);
+	return BuildSortMap(nCol, m_mapSortStrings);
 }
 
-void CEnListCtrl::BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const
+BOOL CEnListCtrl::BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const
 {
-	mapSortStrings.RemoveAll();
 	int nItem = GetItemCount();
+
+	if (nItem < 2)
+		return FALSE;
+
+	mapSortStrings.RemoveAll();
 
 	while (nItem--)
 		mapSortStrings[GetItemData(nItem)] = GetItemText(nItem, nCol);
+
+	return TRUE;
 }
 
 CString CEnListCtrl::GetSortString(DWORD dwItemData) const

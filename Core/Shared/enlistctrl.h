@@ -110,6 +110,7 @@ public:
 	// column methods
 	int GetColumnCount() const;
 	int GetSortColumn() const { return m_nSortColumn; }
+	BOOL IsSorting() const { return (m_nSortColumn != -1); }
 	void SetSortColumn(int nColumn, BOOL bResort = TRUE);
 	COLORREF GetColumnTextColor(int nCol) const;
 	void SetColumnTextColor(int nCol, COLORREF color);
@@ -214,12 +215,12 @@ protected:
 	void RefreshItemHeight();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
-	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
+	BOOL BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 	BOOL WantSelChange(int nSel) const;
 
 private:
-	void BuildSortMap(int nCol);
+	BOOL BuildSortMap(int nCol);
 	int CalcItemHeight() const;
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };
