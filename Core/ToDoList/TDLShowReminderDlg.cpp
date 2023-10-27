@@ -196,6 +196,7 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
 
 	m_lcReminders.SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
+	m_lcReminders.SetSortEmptyValuesBelow(FALSE);
 
 	EnableControls();
 	UpdateColumnWidths();
@@ -267,7 +268,7 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
 
-	if ((m_lcReminders.GetSortColumn() != -1) && (m_lcReminders.GetItemCount() > 1))
+	if (bNewReminder && m_lcReminders.IsSorting())
 		m_lcReminders.Sort();
 	
 	return bNewReminder;

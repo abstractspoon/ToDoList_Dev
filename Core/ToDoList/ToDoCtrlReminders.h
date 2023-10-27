@@ -31,6 +31,7 @@ public:
 
 	BOOL Initialize(CWnd* pNotify);
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
+	void EnableReducedFlashing(BOOL bEnable) { m_bReduceFlashing = bEnable; }
 
 	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
@@ -54,6 +55,7 @@ public:
 protected:
 	CWnd* m_pWndNotify;
 	CArray<TDCREMINDER, TDCREMINDER&> m_aReminders;
+	BOOL m_bReduceFlashing;
 	BOOL m_bUseStickies, m_bShowFullTaskPathInSticky;
 	CString m_sStickiesPath;
 	CStickiesWnd m_stickies;

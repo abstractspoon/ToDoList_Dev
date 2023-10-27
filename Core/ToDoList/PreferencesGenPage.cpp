@@ -81,6 +81,7 @@ void CPreferencesGenPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CONFIRMDELETE, m_bConfirmDelete);
 	DDX_Check(pDX, IDC_CONFIRMSAVEONEXIT, m_bConfirmSaveOnExit);
 	DDX_Check(pDX, IDC_SHOWFULLPATHINSTICKY, m_bShowFullTaskPathInSticky);
+	DDX_Check(pDX, IDC_REDUCEREMINDERDLGFLASHING, m_bReduceReminderDialogFlashing);
 
 	CDialogHelper::DDX_CBValue(pDX, m_cbNoEditTime, m_nMinimizeNoEditTime, 10);
 
@@ -237,6 +238,7 @@ void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 	m_bEnableRTLInput = pPrefs->GetProfileInt(szKey, _T("EnableRTLInput"), FALSE);
 	m_bEnableTDLExtension = pPrefs->GetProfileInt(szKey, _T("EnableTDLExtension"), TRUE);
 	m_bEnableTDLProtocol = pPrefs->GetProfileInt(szKey, _T("EnableTDLProtocol"), FALSE);
+	m_bReduceReminderDialogFlashing = pPrefs->GetProfileInt(szKey, _T("ReduceReminderDialogFlashing"), FALSE);
 
 	CString sLangFile = pPrefs->GetProfileString(szKey, _T("LanguageFile"), _T(""));
 	m_cbLanguages.SelectLanguageFile(sLangFile);
@@ -274,6 +276,7 @@ void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 	pPrefs->WriteProfileInt(szKey, _T("EnableRTLInput"), m_bEnableRTLInput);
 	pPrefs->WriteProfileInt(szKey, _T("EnableTDLExtension"), m_bEnableTDLExtension);
 	pPrefs->WriteProfileInt(szKey, _T("EnableTDLProtocol"), m_bEnableTDLProtocol);
+	pPrefs->WriteProfileInt(szKey, _T("ReduceReminderDialogFlashing"), m_bReduceReminderDialogFlashing);
 
 	pPrefs->WriteProfileInt(szKey, _T("UseStickies"), m_bUseStickies);
 	pPrefs->WriteProfileInt(szKey, _T("ShowFullTaskPathInSticky"), m_bShowFullTaskPathInSticky);

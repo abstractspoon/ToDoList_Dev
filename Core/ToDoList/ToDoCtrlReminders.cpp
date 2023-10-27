@@ -31,7 +31,8 @@ CToDoCtrlReminders::CToDoCtrlReminders()
 	: 
 	m_pWndNotify(NULL), 
 	m_bUseStickies(FALSE),
-	m_bShowFullTaskPathInSticky(FALSE)
+	m_bShowFullTaskPathInSticky(FALSE),
+	m_bReduceFlashing(FALSE)
 {
 }
 
@@ -520,6 +521,9 @@ void CToDoCtrlReminders::DoCheckReminders()
 	// Iterate all the reminders looking for matches
 	int nRem = m_aReminders.GetSize();
 
+	// Only flash the taskbar once per check
+	BOOL bFlashTaskBar = FALSE;
+
 	while (nRem--)
 	{
 		TDCREMINDER& rem = m_aReminders[nRem];
@@ -537,7 +541,13 @@ void CToDoCtrlReminders::DoCheckReminders()
 			
 			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
 			{
-				if (!ShowReminder(rem))
+				BOOL bRemWasVisible = (FindListReminder(rem) != -1);
+
+				if (ShowReminder(rem))
+				{
+					bFlashTaskBar = (!m_bReduceFlashing || !bRemWasVisible);
+				}
+				else
 				{
 					// This means that Stickies is handling the reminder
 					// so we can now delete it, except for recurring tasks
@@ -551,6 +561,13 @@ void CToDoCtrlReminders::DoCheckReminders()
 
 		if (bDelete)
 			DeleteReminder(nRem);
+	}
+
+	// Only flash the titlebar if we are visible and 
+	// our owner is not disabled (showing a modal dialog)
+	if (bFlashTaskBar && IsWindowVisible() && m_pWndNotify->IsWindowEnabled())
+	{
+		GraphicsMisc::FlashWindowEx(m_hWnd, FLASHW_ALL, 5, 0);
 	}
 }
 
@@ -662,11 +679,6 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 	// all else (fallback)
 	if (AddListReminder(rem))
 		ShowWindow();
-
-	// Only flash the titlebar if we are visible and 
-	// our owner is not disabled (showing a modal dialog)
-	if (IsWindowVisible() && m_pWndNotify->IsWindowEnabled()) 
-		GraphicsMisc::FlashWindowEx(m_hWnd, (FLASHW_ALL | FLASHW_TIMERNOFG), 10, 0);
 
 	return TRUE;
 }
