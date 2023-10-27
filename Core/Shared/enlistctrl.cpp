@@ -154,16 +154,8 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.state = LVGS_NORMAL;//dwState;
 	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
 	lvg.uAlign = LVGA_HEADER_LEFT;//dwAlign;
-	
-	// Header-title must be unicode (Convert if necessary)
-#ifdef UNICODE
 	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
 	lvg.cchHeader = strHeader.GetLength();
-#else
-	CComBSTR header = strHeader;
-	lvg.pszHeader = header;
-	lvg.cchHeader = header.Length();
-#endif
 
 	return (-1 != ::SendMessage(m_hwndList, LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
 }
@@ -174,12 +166,11 @@ CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
 	TCHAR szHeader[256] = { 0 };
 
 	lvg.cbSize = sizeof(lvg);
-	lvg.mask = LVGF_GROUPID | LVGF_HEADER;
-	lvg.iGroupId = nGroupID;
+	lvg.mask = LVGF_HEADER;
 	lvg.pszHeader = szHeader;
 	lvg.cchHeader = 256;
 
-	VERIFY(-1 != ::SendMessage(m_hwndList, LVM_GETGROUPINFO, 0, (LPARAM)&lvg));
+	VERIFY(-1 != ::SendMessage(m_hwndList, LVM_GETGROUPINFO, nGroupID, (LPARAM)&lvg));
 
 	return szHeader;
 }
