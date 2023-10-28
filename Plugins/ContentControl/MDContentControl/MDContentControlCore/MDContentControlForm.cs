@@ -27,7 +27,8 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
-		bool m_RestoreInputFocusAfterUpdate;
+		bool m_RestoreInputFocusAfterUpdate = false;
+		bool m_SettingTextOrFont = false;
 
 		// -----------------------------------------------------------------
 
@@ -133,8 +134,21 @@ namespace MDContentControl
 
 			set
 			{
+				m_SettingTextOrFont = true;
+
 				InputTextCtrl.Text = value;
+
+				m_SettingTextOrFont = false;
 			}
+		}
+
+		public void SetInputFont(string fontName, int pointSize)
+		{
+			m_SettingTextOrFont = true;
+
+			InputTextCtrl.Font = new System.Drawing.Font(fontName, pointSize);
+
+			m_SettingTextOrFont = false;
 		}
 
 		public bool InsertTextContent(String content, bool bAtEnd)
@@ -142,11 +156,15 @@ namespace MDContentControl
 			if (ReadOnly || !InputTextCtrl.Enabled)
 				return false;
 
+			m_SettingTextOrFont = true;
+
 			if (bAtEnd)
 				InputText += content;
 
 			// else
 			InputTextCtrl.SelectedText = content;
+
+			m_SettingTextOrFont = false;
 			return true;
 		}
 
@@ -170,11 +188,6 @@ namespace MDContentControl
 			}
 		}
 
-		public void SetInputFont(string fontName, int pointSize)
-		{
-			InputTextCtrl.Font = new System.Drawing.Font(fontName, pointSize);
-		}
-
 		// We delay the very first update until after 'about:blank'
 		// has finished loading else we get visual artifacts because
 		// we are eating OnPaintBackground
@@ -188,11 +201,9 @@ namespace MDContentControl
 			m_RestoreInputFocusAfterUpdate = restoreInputFocus;
 
 			if (PreviewBrowser.Document != null)
-			{
-				PreviewBrowser.Document.OpenNew(false);
-				PreviewBrowser.Document.Write(OutputHtmlAsPage);
-				PreviewBrowser.Refresh();
-			}
+				PreviewBrowser.DocumentText = OutputHtmlAsPage;
+			else
+				Debug.Assert(false);
 		}
 
 		private void HtmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -217,7 +228,9 @@ namespace MDContentControl
 
 		private void textBox1_TextChanged(object sender, EventArgs e)
 		{
-			UpdateOutput(true);
+			// We don't restore the focus to the input control
+			// if the origin of the text change was external
+			UpdateOutput(!m_SettingTextOrFont);
 		}
 
 		protected override void OnPaintBackground(PaintEventArgs e)
@@ -390,31 +403,5 @@ namespace MDContentControl
 
 	}
 
-	////////////////////////////////////////////////////////////////////////
-
-	[StructLayout(LayoutKind.Sequential)]
-	struct CHARRANGE
-	{
-		public int cpMin;
-		public int cpMax;
-	};
-
-	[StructLayout(LayoutKind.Sequential)]
-	struct NMHDR
-	{
-		public IntPtr hwndFrom;
-		public IntPtr idFrom;
-		public int code;
-	};
-
-	[StructLayout(LayoutKind.Sequential)]
-	struct ENLINK
-	{
-		public NMHDR nmhdr;
-		public int msg;
-		public IntPtr wParam;
-		public IntPtr lParam;
-		public CHARRANGE chrg;
-	};
 
 }
