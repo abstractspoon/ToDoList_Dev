@@ -641,7 +641,7 @@ namespace unvell.ReoGrid.Editor
 			{
 				if (scriptEditor == null || scriptEditor.IsDisposed)
 				{
-					scriptEditor = new ReoScriptEditor();
+					scriptEditor = NewScriptEditor();
 					scriptEditor.Srm = this.grid.Srm;
 
 					// synchronize script from the editor to control once the script is compiled 
@@ -1055,6 +1055,12 @@ namespace unvell.ReoGrid.Editor
 #if EX_SCRIPT
 		private ReoScriptEditor scriptEditor;
 		public ReoScriptEditor ScriptEditor { get { return scriptEditor; } }
+
+		virtual protected ReoScriptEditor NewScriptEditor()
+		{
+			return new ReoScriptEditor();
+		}
+
 #endif // EX_SCRIPT
 
 		internal void ShowStatus(string msg)
@@ -1437,11 +1443,9 @@ namespace unvell.ReoGrid.Editor
 					{
 						if (scriptEditor == null || scriptEditor.IsDisposed)
 						{
-							scriptEditor = new ReoScriptEditor()
-							{
-								Script = this.grid.Script,
-								Srm = this.grid.Srm,
-							};
+							scriptEditor = NewScriptEditor();
+							scriptEditor.Script = this.grid.Script;
+							scriptEditor.Srm = this.grid.Srm;
 						}
 
 						// run init script

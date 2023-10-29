@@ -19,7 +19,7 @@ namespace unvell.ReoScript.Editor.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -73,9 +73,9 @@ namespace unvell.ReoScript.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CopyHS {
+        internal static System.Drawing.Bitmap CopyHS1 {
             get {
-                object obj = ResourceManager.GetObject("CopyHS", resourceCulture);
+                object obj = ResourceManager.GetObject("CopyHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace unvell.ReoScript.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CutHS {
+        internal static System.Drawing.Bitmap CutHS1 {
             get {
-                object obj = ResourceManager.GetObject("CutHS", resourceCulture);
+                object obj = ResourceManager.GetObject("CutHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -143,9 +143,9 @@ namespace unvell.ReoScript.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap PasteHS {
+        internal static System.Drawing.Bitmap PasteHS1 {
             get {
-                object obj = ResourceManager.GetObject("PasteHS", resourceCulture);
+                object obj = ResourceManager.GetObject("PasteHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

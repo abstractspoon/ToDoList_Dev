@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>unvell.ReoScript.Editor</RootNamespace>
     <AssemblyName>unvell.ReoScriptEditor</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -151,15 +151,6 @@
     <None Include="Resources\StopHS.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\CutHS.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\PasteHS.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\CopyHS.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Edit_UndoHS.png" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +164,9 @@
     <Content Include="FastColoredTextBox License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\PasteHS.bmp" />
+    <None Include="Resources\CopyHS.bmp" />
+    <None Include="Resources\CutHS.bmp" />
     <None Include="Resources\CheckGrammarHS.png" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +182,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+      <Name>ToolStripEx</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ReoScript\ReoScript.csproj">
       <Project>{544005e7-f55a-42e2-8ddb-b43f95f27c69}</Project>
       <Name>ReoScript</Name>

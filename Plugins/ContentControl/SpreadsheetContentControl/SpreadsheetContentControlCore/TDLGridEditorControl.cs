@@ -18,7 +18,6 @@ using unvell.ReoGrid.CellTypes;
 using unvell.ReoGrid.DataFormat;
 
 using Abstractspoon.Tdl.PluginHelpers;
-using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using Command.Handling;
 
@@ -32,6 +31,7 @@ namespace SpreadsheetContentControl
 		private UIThemeToolbarRenderer m_toolbarRenderer;
 		private Font m_ControlsFont;
 		private Translator m_Trans;
+		private UITheme m_Theme;
 
 		private Byte[] m_PrevContent;
 
@@ -653,7 +653,15 @@ namespace SpreadsheetContentControl
 			CommandHandling.RemoveCommand("slashRightSolidToolStripButton", this.ToolBar.Items);
 
 			CommandHandling.RemoveCommand("zoomToolStripDropDownButton", this.FontBar.Items);
+		}
 
+		override protected unvell.ReoScript.Editor.ReoScriptEditor NewScriptEditor()
+		{
+			var editor = new TDLScriptEditorControl(m_ControlsFont, m_Trans);
+
+			editor.SetUITheme(m_Theme);
+
+			return editor;
 		}
 
 		private void OnAfterPaste(object sender, RangeEventArgs e)
@@ -919,6 +927,7 @@ namespace SpreadsheetContentControl
 
 		public void SetUITheme(UITheme theme)
 		{
+			m_Theme = theme;
 			m_toolbarRenderer.SetUITheme(theme);
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
