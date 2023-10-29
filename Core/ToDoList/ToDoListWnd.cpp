@@ -708,6 +708,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_MOVE()
 	ON_WM_NCLBUTTONDBLCLK()
+	ON_WM_NCDESTROY()
 	ON_WM_QUERYENDSESSION()
 	ON_WM_QUERYOPEN()
 	ON_WM_SETCURSOR()
@@ -8975,7 +8976,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
         return FALSE; // user cancelled
 
 	// Hold a reference to the preferences so that
-	// changes only get written once right at the end
+	// changes only get written once in OnNcDestroy
 	CPreferences hold;
 	
 	// save settings before we close the tasklists
@@ -9049,10 +9050,6 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 		if (!bClosingWindows)
 			DestroyWindow();
 #endif
-
-		if (hold.UsesIni())
-			hold.Save();
-
 		// cleanup the shutdown reason created in OnQueryEndSession.
 		// This allows Windows to forcibly close the app hence no need
 		// to call DestroyWindow
@@ -9099,6 +9096,14 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	Misc::ShutdownBlockReasonDestroy(GetSafeHwnd());
 
 	return FALSE;
+}
+
+void CToDoListWnd::OnNcDestroy()
+{
+	if (CPreferences::UsesIni())
+		CPreferences::Save();
+
+	CFrameWnd::OnNcDestroy();
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)

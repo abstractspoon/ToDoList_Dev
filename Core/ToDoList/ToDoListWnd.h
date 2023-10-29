@@ -473,6 +473,7 @@ protected:
 	afx_msg void OnMovetaskright();
 	afx_msg void OnMovetaskup();
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
+	afx_msg void OnNcDestroy();
 	afx_msg void OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNewTasklist();
 	afx_msg void OnNewTask(UINT nCmdID);
