@@ -404,8 +404,9 @@ LRESULT CPreferencesTaskDefPage::OnInitComments(WPARAM /*wParam*/, LPARAM /*lPar
 	m_ctrlComments.SetContent(m_sDefTextComments, m_defCustomComments, TRUE);
 
 	CUIThemeFile theme;
-	theme.crToolbarDark = theme.crToolbarLight = RGB(255, 255, 255);
-	theme.crAppBackDark = theme.crAppBackLight = RGB(255, 255, 255);
+	theme.crAppBackDark = theme.crAppBackLight = m_crBack;
+	theme.crToolbarDark = theme.crToolbarLight = m_crBack;
+	theme.crToolbarHot = GraphicsMisc::Darker(m_crBack, 0.3);
 	
 	m_ctrlComments.SetUITheme(theme);
 
