@@ -42,7 +42,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;VP_DEBUG_OFF;ALWAYS_CELL_CLIP;WINFORM;FORMULA;LANG_JP;OUTLINE;DRAWING;COMMENT;PRINT;RICHTEXT;</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VP_DEBUG_OFF;ALWAYS_CELL_CLIP;WINFORM;FORMULA;LANG_JP;OUTLINE;DRAWING;COMMENT;PRINT;RICHTEXT;EX_SCRIPT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -159,14 +159,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFMinimum|AnyCPU' " />
-    <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFRelease|AnyCPU' " />
-    <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFReleasePro|AnyCPU' " />
     <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtension|AnyCPU' " />
     <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtensionPro|AnyCPU' " />
-    <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFMinimum|AnyCPU' " />
-    <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFRelease|AnyCPU' " />
-    <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFReleasePro|AnyCPU' " />
     <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtension|AnyCPU' " />
     <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtensionPro|AnyCPU' " />
     <Reference Include="ReachFramework" />
@@ -606,6 +600,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Test\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ReoScript\ReoScript\ReoScript.csproj">
+      <Project>{544005e7-f55a-42e2-8ddb-b43f95f27c69}</Project>
+      <Name>ReoScript</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

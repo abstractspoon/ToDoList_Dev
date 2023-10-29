@@ -1,0 +1,6 @@
+﻿// ReoScript - .NET Script Language Engine
+//
+// copyright (c) 2012-2013 unvell.com, all rights reserved.
+//
+
+console.log('hello world!');

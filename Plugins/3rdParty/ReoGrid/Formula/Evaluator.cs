@@ -973,20 +973,20 @@ namespace unvell.ReoGrid.Formula
 
 					#region ReoScript Extension Function
 #if EX_SCRIPT
-					if (cell.Worksheet != null && cell.Worksheet.Srm.IsFunction(funNode.Name))
-					{
-						if (objArgs == null)
-						{
-							objArgs = new object[funNode.Children.Count];
-
-							for (i = 0; i < objArgs.Length; i++)
-							{
-								objArgs[i] = Evaluate(cell, funNode.Children[i]).value;
-							}
-						}
-
-						return CreateFormulaValue(cell.Worksheet.Srm.InvokeFunctionIfExisted(funNode.Name, objArgs));
-					}
+					//if (cell.Worksheet != null && cell.Worksheet.Srm.IsFunction(funNode.Name))
+					//{
+					//	if (objArgs == null)
+					//	{
+					//		objArgs = new object[funNode.Children.Count];
+					//
+					//		for (i = 0; i < objArgs.Length; i++)
+					//		{
+					//			objArgs[i] = Evaluate(cell, funNode.Children[i]).value;
+					//		}
+					//	}
+					//
+					//	return CreateFormulaValue(cell.Worksheet.Srm.InvokeFunctionIfExisted(funNode.Name, objArgs));
+					//}
 #endif
 					#endregion // ReoScript Extension Function
 

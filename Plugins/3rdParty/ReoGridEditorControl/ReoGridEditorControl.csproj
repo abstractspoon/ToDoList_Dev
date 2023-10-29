@@ -34,7 +34,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;RG_DEBUG</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;RG_DEBUG;EX_SCRIPT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -70,7 +70,6 @@
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -462,6 +461,14 @@
     <ProjectReference Include="..\ReoGrid\ReoGrid.csproj">
       <Project>{8b62357a-abbc-4db0-8633-f1d6a6c1ea53}</Project>
       <Name>ReoGrid</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReoScript\ReoScriptEditor\ReoScriptEditor.csproj">
+      <Project>{0802dfe2-d172-4099-8538-dc2c114152d1}</Project>
+      <Name>ReoScriptEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReoScript\ReoScript\ReoScript.csproj">
+      <Project>{544005e7-f55a-42e2-8ddb-b43f95f27c69}</Project>
+      <Name>ReoScript</Name>
     </ProjectReference>
     <ProjectReference Include="..\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>

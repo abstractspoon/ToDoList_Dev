@@ -1,0 +1,18 @@
+﻿
+// this code demos to cause an exception: attmpt to call non-existed method
+// call-stack information can be retrieved by application
+
+
+function get_system_path(key) {
+  get_env('path=' + key);  // throw exception that get_env is not defined
+}
+
+function get_current_instance() {
+  get_system_path('startup-path');
+}
+
+function get_login_user() {
+  get_current_instance();
+}
+
+get_login_user();

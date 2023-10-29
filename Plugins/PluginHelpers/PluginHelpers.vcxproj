@@ -81,6 +81,8 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
 copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 
+copy $(SolutionDir)$(ConfigurationName)\Antlr3.Runtime.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)$(ConfigurationName)\FastColoredTextBox.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -119,7 +121,9 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
 
 copy $(SolutionDir)$(ConfigurationName)\HtmlAgilityPack.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
-</Command>
+
+copy $(SolutionDir)$(ConfigurationName)\Antlr3.Runtime.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)$(ConfigurationName)\FastColoredTextBox.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

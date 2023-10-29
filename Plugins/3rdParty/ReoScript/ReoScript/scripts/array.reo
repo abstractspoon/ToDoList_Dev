@@ -1,0 +1,113 @@
+﻿/*****************************************************************************
+ * 
+ * ReoScript - .NET Script Language Engine
+ * 
+ * https://github.com/unvell/ReoScript
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
+ * PURPOSE.
+ *
+ * This software released under MIT license.
+ * Copyright (c) 2012-2019 Jingwood, unvell.com, all rights reserved.
+ * 
+ ****************************************************************************/
+
+if (Array != null && Array.prototype != null) {
+  
+  // compare two arrays
+  Array.prototype.equals = targetArray => {
+    if (targetArray == null || this.length != targetArray.length) {
+      return false;
+		}
+    
+	  for (var i = 0; i < this.length; i++) {
+		  if (this[i] != targetArray[i]) {
+        return false;
+			}
+		}
+
+		return true;
+	};
+  
+  // filter array by given predicate lambda function
+	Array.prototype.where = function(predicate) {
+		if (predicate == null) {
+			return null;
+		}
+		
+		var result = [];
+		
+		for (var element in this) {
+			if (predicate(element)) {
+				result.push(element);
+			}
+		}
+
+		return result;
+	};
+
+  // return the first element
+	Array.prototype.first = function(predicate) {
+		if (this.length <= 0) return null;
+
+		if (predicate == null) {
+			return this[0];
+		}
+
+		for (var element in this) {
+			if (predicate(element)) {
+				return element;
+			}
+		}
+
+		return null;
+	};
+	
+	// return the last element
+	Array.prototype.last = function() {
+		if (this.length <= 0) return null;
+
+		if (predicate == null) {
+			return this[this.length - 1];
+		}
+
+		for (var i = this.length - 1; i >= 0; i--) {
+			var element = this[i];
+
+			if (predicate(element)) {
+				return element;
+			}
+		}
+
+		return null;
+	};
+	
+	Array.prototype.each = function(iterator) {
+	  for (var element in this) {
+	    iterator.call(element);
+	  }
+	};
+
+	Array.prototype.map = function(mapper) {
+		var arr = new Array(this.length);
+
+		for (var i = 0; i < this.length; i++) {
+			arr[i] = mapper(this[i]);
+		}
+
+		return arr;
+	};
+
+	Array.prototype.reduce = function(callback, initValue) {
+		var current = initValue == 0 ? null : initValue;
+
+		for (var i = 0; i < this.length; i++) {
+			var element = this[i];
+			current = callback(current, element, i);
+		}
+
+		return current;
+	}
+}

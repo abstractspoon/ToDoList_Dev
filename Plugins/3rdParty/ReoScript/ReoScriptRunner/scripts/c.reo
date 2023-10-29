@@ -1,0 +1,75 @@
+﻿
+//var t = function(a,b){ alert(a + ' -> ' + b);};
+
+////var outer = function() {
+////  var a = 10;
+////  
+////  var inner = function () {
+////    var c = 5;
+////    
+////    var inner2 = function() {
+////      t(a, 10);
+////      t(c, 5);
+////      
+////      t(script.a, null);
+////      t(script.c, null);
+////    };
+////    
+////    inner2();
+////  };
+////  
+////  inner();
+////};
+
+////outer();
+////      
+////      
+////return;
+
+//function outer() {
+//  var a = 10;
+//  
+//  function inner() {
+//    var c = 5;
+//    
+//    function inner2() {
+//      another_other();
+//    }
+//    
+//    inner2();
+//  };
+//  
+//  inner();
+//}
+
+//function another_other()
+//{
+//  t(a, 10);
+//      t(c, 5);
+//      
+//      t(script.a, null);
+//      t(script.c, null);
+//}
+
+//outer();
+//      
+//      
+////return;
+function a() { }
+for (var i = 0; i <500000; i++)a();
+
+//var x = 20;
+
+//function write() {
+//  var a = 10;
+//}
+
+//var f = function(xx) { return a.xx * 2; };
+
+//return f(3);
+
+//function() {
+//  console.log(f(5));
+
+//}();
+

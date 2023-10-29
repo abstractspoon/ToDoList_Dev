@@ -1,0 +1,70 @@
+﻿/*****************************************************************************
+ * 
+ * ReoScript - .NET Script Language Engine
+ * 
+ * https://github.com/unvell/ReoScript
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
+ * PURPOSE.
+ *
+ * This software released under MIT license.
+ * Copyright (c) 2012-2019 Jingwood, unvell.com, all rights reserved.
+ * 
+ ****************************************************************************/
+
+// console
+if (this.console != null) {
+  this.console.read = function() { return __stdin__(); };
+  this.console.readline = function() { return __stdinln__(); };
+
+  this.console.write = function(t) { __stdout__(t); };
+  this.console.log = function(t) { __stdoutln__(t); };
+}
+
+// Math
+if (Math != null) {
+  Math.PI = 3.141592653589793;
+  Math.E = 2.71828182845904;
+  Math.LN2 = 0.6931471805599453;
+  Math.LN10 = 2.302585092994046;
+
+  Math.min = function() {
+		if (__args__.length <= 0) return -Infinity;
+		if (__args__.length == 1) return __args__[0];
+
+		if (isNaN(__args__[0])) return NaN;
+
+		var m = __args__[0];
+		
+		for (var i = 1; i < __args__.length; i++) {
+			var v = __args__[i];
+			if (m > v) m = v;
+		}
+
+		return m;
+	};
+
+  Math.max = function() {
+		if (__args__.length <= 0) return Infinity;
+		if (__args__.length == 1) return __args__[0];
+
+		if (isNaN(__args__[0])) return NaN;
+
+		var m = __args__[0];
+		
+		for (var i = 1; i < __args__.length; i++) {
+			var v = __args__[i];
+			if (m < v) m = v;
+		}
+
+		return m;
+	};
+}
+
+// Error
+if (Error == null) {
+  Error = function() {
+  };
+}

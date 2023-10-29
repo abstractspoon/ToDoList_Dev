@@ -1,0 +1,59 @@
+﻿/*****************************************************************************
+ * 
+ * ReoScript - .NET Script Language Engine
+ * 
+ * https://github.com/unvell/ReoScript
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
+ * PURPOSE.
+ *
+ * This software released under MIT license.
+ * Copyright (c) 2012-2019 Jingwood, unvell.com, all rights reserved.
+ * 
+ ****************************************************************************/
+
+if (Array != null && Array.prototype != null) {
+  
+	Array.prototype.sum = function(predicate) {
+		var arr = (predicate == null) ? this : this.where(predicate);
+  
+		var total = 0;
+  
+		for (e in this) {
+			total += e;
+		}
+  
+		return total;
+	};
+	
+	Array.prototype.avg = function(predicate) {
+		var arr = (predicate == null) ? this : this.where(predicate);
+		return arr.length == 0 ? 0 : (arr.sum() / this.length);
+	};
+
+	Array.prototype.min = function(predicate) {
+		var arr = (predicate == null) ? this : this.where(predicate);
+  
+		var min = 0;
+  
+		for (v in this) {
+			if (min > v) min = v;
+		}
+  
+		return min;
+	};
+
+	Array.prototype.max = function(predicate) {
+		var arr = (predicate == null) ? this : this.where(predicate);
+  
+		var max = 0;
+  
+		for (v in this) {
+			if (max < v) max = v;
+		}
+  
+		return max;
+	};
+}

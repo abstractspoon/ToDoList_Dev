@@ -1,0 +1,51 @@
+﻿/*****************************************************************************
+ * 
+ * ReoScript - .NET Script Language Engine
+ * 
+ * https://github.com/unvell/ReoScript
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
+ * PURPOSE.
+ *
+ * This software released under MIT license.
+ * Copyright (c) 2012-2019 Jingwood, unvell.com, all rights reserved.
+ * 
+ ****************************************************************************/
+
+if (debug != null) {
+
+  /* Stopwatch */
+
+  debug.Stopwatch = function() {
+    this.startTime = null;
+    this.endTime = null;
+  };
+
+  debug.Stopwatch.startNew = function() {
+    var sw = new debug.Stopwatch();
+    sw.start();
+    return sw;
+  };
+
+  debug.Stopwatch.prototype.start = function() {
+    if (this.startTime == null) {
+      this.startTime = new Date();
+    }
+    this.endTime = null;
+  };
+
+  debug.Stopwatch.prototype.stop = function() {
+    this.endTime = new Date();
+    this.elapsed = this.endTime - this.startTime;
+  };
+
+  debug.Stopwatch.prototype.restart = function() {
+    this.startTime = new Date();
+    this.endTime = null;
+  };
+
+  /* End of Stopwatch */
+
+}

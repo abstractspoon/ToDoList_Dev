@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
-using System.Windows.Resources;
+//using System.Windows.Resources;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -616,7 +616,7 @@ namespace SpreadsheetContentControl
 			}
 
 			// Hide unwanted menubar options
-			CommandHandling.RemoveCommand("scriptToolStripMenuItem", this.MenuBar.Items);
+			//CommandHandling.RemoveCommand("scriptToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("toolsToolStripMenuItem", this.MenuBar.Items);
 
 			CommandHandling.RemoveCommand("printPreviewToolStripMenuItem", this.MenuBar.Items);
