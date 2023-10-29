@@ -34,6 +34,19 @@ namespace SpreadsheetContentControl
 			ContextMenu.Renderer = m_toolbarRenderer;
 			ToolBar.Renderer = m_toolbarRenderer;
 
+			var theme = new UITheme();
+			m_toolbarRenderer.SetUITheme(theme);
+
+			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
+			BackColor = backColor;
+
+			MenuBar.BackColor = SystemColors.Menu;
+			ToolBar.BackColor = backColor;
+
+			m_Trans.Translate(MenuBar.Items);
+			m_Trans.Translate(ContextMenu.Items);
+			m_Trans.Translate(ToolBar.Items);
+
 			Toolbars.FixupButtonSizes(ToolBar);
 
 			if (m_ControlsFont != null)
@@ -53,26 +66,13 @@ namespace SpreadsheetContentControl
 				ToolBar.ImageScalingSize = scalingSize;
 			}
 
-			m_Trans.Translate(MenuBar.Items);
-			m_Trans.Translate(ContextMenu.Items);
-			m_Trans.Translate(ToolBar.Items);
+			this.ToolBar.GripStyle = ToolStripGripStyle.Hidden;
 
 			// After all resizing has occurred, set menu bar height to 
 			// match application and make its top-level items full height
 			MenuBar.AutoSize = false;
 			MenuBar.Height = SystemInformation.MenuHeight;
 			MenuBar.Padding = new Padding(0);
-		}
-
-		public void SetUITheme(UITheme theme)
-		{
-			m_toolbarRenderer.SetUITheme(theme);
-
-			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
-			BackColor = backColor;
-
-			MenuBar.BackColor = SystemColors.Menu;
-			ToolBar.BackColor = backColor;
 		}
 	}
 }

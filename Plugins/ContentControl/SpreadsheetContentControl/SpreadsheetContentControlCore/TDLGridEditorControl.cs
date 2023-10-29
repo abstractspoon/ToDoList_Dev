@@ -657,11 +657,7 @@ namespace SpreadsheetContentControl
 
 		override protected unvell.ReoScript.Editor.ReoScriptEditor NewScriptEditor()
 		{
-			var editor = new TDLScriptEditorControl(m_ControlsFont, m_Trans);
-
-			editor.SetUITheme(m_Theme);
-
-			return editor;
+			return new TDLScriptEditorControl(m_ControlsFont, m_Trans);
 		}
 
 		private void OnAfterPaste(object sender, RangeEventArgs e)

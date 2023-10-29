@@ -30,6 +30,8 @@ namespace unvell.ReoScript.Editor
 		{
 			InitializeComponent();
 
+			toolStrip1.RemapSysColors();
+
 			newToolStripButton.Click += (s, e) => NewFile();
 			newToolStripMenuItem.Click += (s, e) => NewFile();
 
@@ -128,7 +130,7 @@ namespace unvell.ReoScript.Editor
 
 		protected ToolStrip ToolBar { get { return toolStrip1; } }
 		protected MenuStrip MenuBar { get { return menuStrip1; } }
-		protected ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
+		protected new ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
 
 		protected override void OnClosing(CancelEventArgs e)
 		{

@@ -48,13 +48,24 @@ namespace unvell.ReoScript.Editor
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ReoScriptEditor));
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
+			this.checkSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.enableDirectAccessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.enableImportNamespacesAndClassesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,34 +76,23 @@ namespace unvell.ReoScript.Editor
 			this.splitter1 = new System.Windows.Forms.Splitter();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.toolStrip1 = new IIControls.ToolStripEx();
-			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-			this.editor = new unvell.ReoScript.Editor.ReoScriptEditorControl();
-			this.console = new unvell.ReoScript.Editor.FctbConsoleControl();
 			this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.openToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.cutToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.copyToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.pasteToolStripDropDownButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.undoToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.redoToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
 			this.checkSyntaxStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
 			this.runToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.stopToolStripButton = new System.Windows.Forms.ToolStripButton();
-			this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.checkSyntaxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.editor = new unvell.ReoScript.Editor.ReoScriptEditorControl();
+			this.console = new unvell.ReoScript.Editor.FctbConsoleControl();
 			this.menuStrip1.SuspendLayout();
 			this.toolStrip1.SuspendLayout();
 			this.SuspendLayout();
@@ -123,6 +123,31 @@ namespace unvell.ReoScript.Editor
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
 			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
 			this.fileToolStripMenuItem.Text = "&File";
+			// 
+			// newToolStripMenuItem
+			// 
+			this.newToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.NewDocumentHS;
+			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+			this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+			this.newToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+			this.newToolStripMenuItem.Text = "&New";
+			// 
+			// openToolStripMenuItem
+			// 
+			this.openToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.openHS;
+			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+			this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+			this.openToolStripMenuItem.Text = "&Open...";
+			// 
+			// saveToolStripMenuItem
+			// 
+			this.saveToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.saveHS1;
+			this.saveToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+			this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+			this.saveToolStripMenuItem.Text = "&Save";
 			// 
 			// saveAsToolStripMenuItem
 			// 
@@ -155,10 +180,53 @@ namespace unvell.ReoScript.Editor
 			this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
 			this.editToolStripMenuItem.Text = "&Edit";
 			// 
+			// undoToolStripMenuItem
+			// 
+			this.undoToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.Edit_UndoHS;
+			this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
+			this.undoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
+			this.undoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+			this.undoToolStripMenuItem.Text = "&Undo";
+			// 
+			// redoToolStripMenuItem
+			// 
+			this.redoToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.Edit_RedoHS;
+			this.redoToolStripMenuItem.Name = "redoToolStripMenuItem";
+			this.redoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
+			this.redoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+			this.redoToolStripMenuItem.Text = "&Redo";
+			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
 			this.toolStripMenuItem2.Size = new System.Drawing.Size(141, 6);
+			// 
+			// cutToolStripMenuItem
+			// 
+			this.cutToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.CutHS1;
+			this.cutToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
+			this.cutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
+			this.cutToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+			this.cutToolStripMenuItem.Text = "C&ut";
+			// 
+			// copyToolStripMenuItem
+			// 
+			this.copyToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.CopyHS1;
+			this.copyToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
+			this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+			this.copyToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+			this.copyToolStripMenuItem.Text = "&Copy";
+			// 
+			// pasteToolStripMenuItem
+			// 
+			this.pasteToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.PasteHS1;
+			this.pasteToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
+			this.pasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+			this.pasteToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+			this.pasteToolStripMenuItem.Text = "&Paste";
 			// 
 			// scriptToolStripMenuItem
 			// 
@@ -171,10 +239,35 @@ namespace unvell.ReoScript.Editor
 			this.scriptToolStripMenuItem.Size = new System.Drawing.Size(49, 20);
 			this.scriptToolStripMenuItem.Text = "&Script";
 			// 
+			// runToolStripMenuItem
+			// 
+			this.runToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.PlayHS;
+			this.runToolStripMenuItem.Name = "runToolStripMenuItem";
+			this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+			this.runToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.runToolStripMenuItem.Text = "&Run";
+			// 
+			// stopToolStripMenuItem
+			// 
+			this.stopToolStripMenuItem.Enabled = false;
+			this.stopToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.StopHS;
+			this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
+			this.stopToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.stopToolStripMenuItem.Text = "&Stop";
+			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
 			this.toolStripMenuItem4.Size = new System.Drawing.Size(161, 6);
+			// 
+			// checkSyntaxToolStripMenuItem
+			// 
+			this.checkSyntaxToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.CheckGrammarHS;
+			this.checkSyntaxToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.checkSyntaxToolStripMenuItem.Name = "checkSyntaxToolStripMenuItem";
+			this.checkSyntaxToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
+			this.checkSyntaxToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.checkSyntaxToolStripMenuItem.Text = "Check Syntax";
 			// 
 			// toolsToolStripMenuItem
 			// 
@@ -270,44 +363,6 @@ namespace unvell.ReoScript.Editor
 			this.toolStrip1.TabIndex = 8;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
-			// toolStripSeparator1
-			// 
-			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-			// 
-			// toolStripSeparator2
-			// 
-			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-			// 
-			// toolStripSeparator3
-			// 
-			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-			// 
-			// toolStripSeparator4
-			// 
-			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-			// 
-			// editor
-			// 
-			this.editor.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.editor.Location = new System.Drawing.Point(0, 49);
-			this.editor.Margin = new System.Windows.Forms.Padding(6);
-			this.editor.Name = "editor";
-			this.editor.Size = new System.Drawing.Size(747, 201);
-			this.editor.TabIndex = 6;
-			// 
-			// console
-			// 
-			this.console.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.console.Location = new System.Drawing.Point(0, 253);
-			this.console.Margin = new System.Windows.Forms.Padding(6);
-			this.console.Name = "console";
-			this.console.Size = new System.Drawing.Size(747, 153);
-			this.console.TabIndex = 9;
-			// 
 			// newToolStripButton
 			// 
 			this.newToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -329,11 +384,16 @@ namespace unvell.ReoScript.Editor
 			// saveToolStripButton
 			// 
 			this.saveToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.saveToolStripButton.Image = global::unvell.ReoScript.Editor.Properties.Resources.saveHS;
+			this.saveToolStripButton.Image = global::unvell.ReoScript.Editor.Properties.Resources.saveHS1;
 			this.saveToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.saveToolStripButton.Name = "saveToolStripButton";
 			this.saveToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.saveToolStripButton.Text = "Save Script";
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
 			// 
 			// cutToolStripButton
 			// 
@@ -362,6 +422,11 @@ namespace unvell.ReoScript.Editor
 			this.pasteToolStripDropDownButton.Size = new System.Drawing.Size(23, 22);
 			this.pasteToolStripDropDownButton.Text = "Paste";
 			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+			// 
 			// undoToolStripButton
 			// 
 			this.undoToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -380,6 +445,11 @@ namespace unvell.ReoScript.Editor
 			this.redoToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.redoToolStripButton.Text = "Redo";
 			// 
+			// toolStripSeparator3
+			// 
+			this.toolStripSeparator3.Name = "toolStripSeparator3";
+			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+			// 
 			// checkSyntaxStripButton
 			// 
 			this.checkSyntaxStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -388,6 +458,11 @@ namespace unvell.ReoScript.Editor
 			this.checkSyntaxStripButton.Name = "checkSyntaxStripButton";
 			this.checkSyntaxStripButton.Size = new System.Drawing.Size(23, 22);
 			this.checkSyntaxStripButton.Text = "Check syntax errors by compiling script (F4)";
+			// 
+			// toolStripSeparator4
+			// 
+			this.toolStripSeparator4.Name = "toolStripSeparator4";
+			this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
 			// 
 			// runToolStripButton
 			// 
@@ -408,93 +483,23 @@ namespace unvell.ReoScript.Editor
 			this.stopToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.stopToolStripButton.Text = "Stop";
 			// 
-			// newToolStripMenuItem
+			// editor
 			// 
-			this.newToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.NewDocumentHS;
-			this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-			this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-			this.newToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-			this.newToolStripMenuItem.Text = "&New";
+			this.editor.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.editor.Location = new System.Drawing.Point(0, 49);
+			this.editor.Margin = new System.Windows.Forms.Padding(6);
+			this.editor.Name = "editor";
+			this.editor.Size = new System.Drawing.Size(747, 201);
+			this.editor.TabIndex = 6;
 			// 
-			// openToolStripMenuItem
+			// console
 			// 
-			this.openToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.openHS;
-			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-			this.openToolStripMenuItem.Text = "&Open...";
-			// 
-			// saveToolStripMenuItem
-			// 
-			this.saveToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.saveHS;
-			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-			this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-			this.saveToolStripMenuItem.Text = "&Save";
-			// 
-			// undoToolStripMenuItem
-			// 
-			this.undoToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.Edit_UndoHS;
-			this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
-			this.undoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-			this.undoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-			this.undoToolStripMenuItem.Text = "&Undo";
-			// 
-			// redoToolStripMenuItem
-			// 
-			this.redoToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.Edit_RedoHS;
-			this.redoToolStripMenuItem.Name = "redoToolStripMenuItem";
-			this.redoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-			this.redoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-			this.redoToolStripMenuItem.Text = "&Redo";
-			// 
-			// cutToolStripMenuItem
-			// 
-			this.cutToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.CutHS1;
-			this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
-			this.cutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-			this.cutToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-			this.cutToolStripMenuItem.Text = "C&ut";
-			// 
-			// copyToolStripMenuItem
-			// 
-			this.copyToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.CopyHS1;
-			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-			this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-			this.copyToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-			this.copyToolStripMenuItem.Text = "&Copy";
-			// 
-			// pasteToolStripMenuItem
-			// 
-			this.pasteToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.PasteHS1;
-			this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
-			this.pasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-			this.pasteToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-			this.pasteToolStripMenuItem.Text = "&Paste";
-			// 
-			// runToolStripMenuItem
-			// 
-			this.runToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.PlayHS;
-			this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-			this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-			this.runToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
-			this.runToolStripMenuItem.Text = "&Run";
-			// 
-			// stopToolStripMenuItem
-			// 
-			this.stopToolStripMenuItem.Enabled = false;
-			this.stopToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.StopHS;
-			this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-			this.stopToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
-			this.stopToolStripMenuItem.Text = "&Stop";
-			// 
-			// checkSyntaxToolStripMenuItem
-			// 
-			this.checkSyntaxToolStripMenuItem.Image = global::unvell.ReoScript.Editor.Properties.Resources.CheckGrammarHS;
-			this.checkSyntaxToolStripMenuItem.Name = "checkSyntaxToolStripMenuItem";
-			this.checkSyntaxToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
-			this.checkSyntaxToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
-			this.checkSyntaxToolStripMenuItem.Text = "Check Syntax";
+			this.console.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.console.Location = new System.Drawing.Point(0, 253);
+			this.console.Margin = new System.Windows.Forms.Padding(6);
+			this.console.Name = "console";
+			this.console.Size = new System.Drawing.Size(747, 153);
+			this.console.TabIndex = 9;
 			// 
 			// ReoScriptEditor
 			// 

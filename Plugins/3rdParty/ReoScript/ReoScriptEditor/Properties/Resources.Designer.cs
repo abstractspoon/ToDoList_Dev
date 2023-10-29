@@ -163,19 +163,9 @@ namespace unvell.ReoScript.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SaveAllHS {
+        internal static System.Drawing.Bitmap saveHS1 {
             get {
-                object obj = ResourceManager.GetObject("SaveAllHS", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap saveHS {
-            get {
-                object obj = ResourceManager.GetObject("saveHS", resourceCulture);
+                object obj = ResourceManager.GetObject("saveHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

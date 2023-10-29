@@ -56,6 +56,7 @@ namespace unvell.ReoGrid.Editor
 			// labFunctions
 			// 
 			this.labFunctions.AutoSize = true;
+			this.labFunctions.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labFunctions.Location = new System.Drawing.Point(12, 12);
 			this.labFunctions.Name = "labFunctions";
 			this.labFunctions.Size = new System.Drawing.Size(56, 13);
@@ -72,7 +73,6 @@ namespace unvell.ReoGrid.Editor
 			// 
 			// btnRun
 			// 
-			this.btnRun.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.btnRun.Location = new System.Drawing.Point(285, 28);
 			this.btnRun.Name = "btnRun";
 			this.btnRun.Size = new System.Drawing.Size(75, 23);
@@ -96,6 +96,7 @@ namespace unvell.ReoGrid.Editor
 			this.chkCloseAfterRun.AutoSize = true;
 			this.chkCloseAfterRun.Checked = true;
 			this.chkCloseAfterRun.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkCloseAfterRun.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.chkCloseAfterRun.Location = new System.Drawing.Point(12, 272);
 			this.chkCloseAfterRun.Name = "chkCloseAfterRun";
 			this.chkCloseAfterRun.Size = new System.Drawing.Size(172, 17);

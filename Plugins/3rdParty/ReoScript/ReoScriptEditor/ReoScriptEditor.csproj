@@ -94,8 +94,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="ReoScriptEditor.resx">
       <DependentUpon>ReoScriptEditor.cs</DependentUpon>
@@ -103,17 +103,17 @@
     <EmbeddedResource Include="ReoScriptEditorControl.resx">
       <DependentUpon>ReoScriptEditorControl.cs</DependentUpon>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <None Include="app.config" />
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -142,12 +142,6 @@
     <None Include="Resources\PlayHS.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SaveAllHS.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\saveHS.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\StopHS.png" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +158,8 @@
     <Content Include="FastColoredTextBox License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\SaveAllHS.bmp" />
+    <None Include="Resources\saveHS.bmp" />
     <None Include="Resources\PasteHS.bmp" />
     <None Include="Resources\CopyHS.bmp" />
     <None Include="Resources\CutHS.bmp" />
