@@ -1095,7 +1095,7 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 void CWorkloadCtrl::BuildTaskTreeColumns()
 {
 	// add columns
-	m_treeHeader.InsertItem(0, 0, _T("Title"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
+	m_treeHeader.InsertItem(0, 0, CEnString(IDS_COL_TITLE), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
 	m_treeHeader.EnableItemDragging(0, FALSE);
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)

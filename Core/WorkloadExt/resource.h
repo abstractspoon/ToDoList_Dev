@@ -80,6 +80,7 @@
 #define IDS_ATTRIB_TIMEEST              57693
 #define IDS_COL_WEEKDAYS                57694
 #define IDS_UNALLOCATEDTO               57695
+#define IDS_COL_TITLE                   57696
 
 // Next default values for new objects
 // 

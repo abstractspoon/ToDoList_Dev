@@ -449,6 +449,11 @@ BEGIN
     ID_MOVEPERIODENDBACKONEMONTH "\nMove end of period back one month"
 END
 
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COL_TITLE           "Title"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
