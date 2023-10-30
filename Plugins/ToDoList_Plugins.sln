@@ -167,8 +167,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpreadsheetContentControlBr
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoGrid", "3rdParty\ReoGrid\ReoGrid.csproj", "{8B62357A-ABBC-4DB0-8633-F1D6A6C1EA53}"
+	ProjectSection(ProjectDependencies) = postProject
+		{544005E7-F55A-42E2-8DDB-B43F95F27C69} = {544005E7-F55A-42E2-8DDB-B43F95F27C69}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoGridEditorControl", "3rdParty\ReoGridEditorControl\ReoGridEditorControl.csproj", "{8307DFFB-7E57-42B4-B402-601A80923F4E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0802DFE2-D172-4099-8538-DC2C114152D1} = {0802DFE2-D172-4099-8538-DC2C114152D1}
+		{544005E7-F55A-42E2-8DDB-B43F95F27C69} = {544005E7-F55A-42E2-8DDB-B43F95F27C69}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MarkdeepExporterBridge", "ImportExport\MarkdeepExporter\MarkdeepExporterBridge\MarkdeepExporterBridge.vcxproj", "{4BD0C76E-2582-470F-9468-FDC94389159F}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -213,6 +220,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoScript", "3rdParty\ReoScript\ReoScript\ReoScript.csproj", "{544005E7-F55A-42E2-8DDB-B43F95F27C69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoScriptEditor", "3rdParty\ReoScript\ReoScriptEditor\ReoScriptEditor.csproj", "{0802DFE2-D172-4099-8538-DC2C114152D1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8B62357A-ABBC-4DB0-8633-F1D6A6C1EA53} = {8B62357A-ABBC-4DB0-8633-F1D6A6C1EA53}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -60,7 +60,7 @@
   <ItemGroup>
     <Reference Include="FastColoredTextBox, Version=2.9.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\ReoGridEditorControl\Ref\FastColoredTextBox.dll</HintPath>
+      <HintPath>Ref\FastColoredTextBox.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -104,7 +104,6 @@
       <DependentUpon>ReoScriptEditorControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -152,12 +151,6 @@
     <None Include="scripts\default.reo" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ANTLR 3 License.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="FastColoredTextBox License.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\SaveAllHS.bmp" />
     <None Include="Resources\saveHS.bmp" />
     <None Include="Resources\PasteHS.bmp" />
