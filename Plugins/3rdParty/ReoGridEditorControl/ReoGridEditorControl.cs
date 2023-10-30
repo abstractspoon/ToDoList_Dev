@@ -649,9 +649,11 @@ namespace unvell.ReoGrid.Editor
 					{
 						this.grid.Script = scriptEditor.Script;
 					};
+					scriptEditor.Disposed += (ss, ee) =>
+					{
+						this.grid.Script = scriptEditor.Script;
+					};
 				}
-
-				scriptEditor.Show();
 
 				if (this.grid.Script == null)
 				{
@@ -659,8 +661,9 @@ namespace unvell.ReoGrid.Editor
 				}
 
 				scriptEditor.Script = this.grid.Script;
+				scriptEditor.ShowDialog();
 
-				scriptEditor.Disposed += (ss, ee) => this.grid.Script = scriptEditor.Script;
+				this.grid.Script = scriptEditor.Script;
 			};
 
 			runFunctionToolStripMenuItem.Click += (s, e) =>
@@ -1452,10 +1455,9 @@ namespace unvell.ReoGrid.Editor
 						this.grid.RunScript();
 
 						// show script editor window
-						if (!scriptEditor.Visible)
-						{
-							scriptEditor.Show();
-						}
+						scriptEditor.ShowDialog();
+
+						this.grid.Script = scriptEditor.Script;
 					}
 				}
 #endif
