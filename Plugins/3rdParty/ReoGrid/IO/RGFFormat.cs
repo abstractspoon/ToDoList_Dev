@@ -1508,11 +1508,11 @@ namespace unvell.ReoGrid
 										 if (cell.HasFormula || !(cell.InnerData is bool))
 										 {
 											 xmlCell.data = Convert.ToString(cell.InnerData);
-											 xmlCell.formula = cell.HasFormula ? new RGXmlCellFormual { val = cell.InnerFormula } : null;
+											 xmlCell.formula = cell.HasFormula ? new RGXmlCellFormula { val = cell.InnerFormula } : null;
 										 }
 										 else if (cell.InnerData is bool)
 										 {
-											 xmlCell.formula = new RGXmlCellFormual { val = (bool)cell.InnerData ? "True" : "False" };
+											 xmlCell.formula = new RGXmlCellFormula { val = (bool)cell.InnerData ? "True" : "False" };
 										 }
 
 										 if (cell.body is CellTypes.ImageCell)
