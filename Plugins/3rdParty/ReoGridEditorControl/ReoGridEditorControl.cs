@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -978,7 +979,6 @@ namespace unvell.ReoGrid.Editor
 
 				if (droplistCell != null)
 				{
-					var items = droplistCell.Candidates;
 
 					// Display form for editing
 					// var dlg = new DropdownListCellItemsDialog(droplistCell.Candidates);
