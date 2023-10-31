@@ -94,6 +94,11 @@ namespace unvell.ReoGrid.CellTypes
 
 		private List<object> candidates;
 
+		public IEnumerable<object> Candidates
+		{
+			get { return candidates; }
+		}
+
 		/// <summary>
 		/// Push down the dropdown panel.
 		/// </summary>
