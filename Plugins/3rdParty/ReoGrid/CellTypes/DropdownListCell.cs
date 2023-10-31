@@ -97,6 +97,7 @@ namespace unvell.ReoGrid.CellTypes
 		public IEnumerable<object> Candidates
 		{
 			get { return candidates; }
+			set { candidates = new List<object>(value); }
 		}
 
 		/// <summary>

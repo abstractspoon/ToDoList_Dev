@@ -552,6 +552,23 @@ namespace unvell.ReoGrid.Editor
 				CurrentWorksheet.StartEdit();
 			};
 
+			editDroplistItemsToolStripMenuItem.Click += (s, e) =>
+			{
+				var cell = CurrentWorksheet.GetCell(CurrentWorksheet.SelectionRange.StartPos);
+				var droplistCell = (cell?.Body as DropdownListCell);
+
+				if (droplistCell != null)
+				{
+					var items = droplistCell.Candidates;
+
+					// Display form for editing
+					// TODO
+
+
+
+				}
+			};
+
 			rowCutToolStripMenuItem.Click += this.cutRangeToolStripMenuItem_Click;
 			rowCopyToolStripMenuItem.Click += this.copyRangeToolStripMenuItem_Click;
 			rowPasteToolStripMenuItem.Click += this.pasteRangeToolStripMenuItem_Click;
@@ -621,6 +638,14 @@ namespace unvell.ReoGrid.Editor
 				removeColPageBreakToolStripMenuItem.Enabled = this.grid.CurrentWorksheet.ColumnPageBreaks.Contains(this.grid.CurrentWorksheet.FocusPos.Col);
 			};
 
+			cellContextMenuStrip.Opening += (s, e) =>
+			{
+				var selRange = CurrentWorksheet.SelectionRange;
+				bool isDropdownList = (selRange.IsSingleCell && (CurrentWorksheet.GetCell(selRange.StartPos)?.Body is DropdownListCell));
+
+				editDroplistItemsToolStripMenuItem.Visible = isDropdownList;
+			};
+
 			this.AutoFunctionSumToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("SUM");
 			this.AutoFunctionAverageToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("AVERAGE");
 			this.AutoFunctionCountToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("COUNT");
@@ -628,13 +653,13 @@ namespace unvell.ReoGrid.Editor
 			this.AutoFunctionMinToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("MIN");
 
 			this.focusStyleDefaultToolStripMenuItem.CheckedChanged += (s, e) =>
-				{
-					if (this.focusStyleDefaultToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.Default;
-				};
+			{
+				if (this.focusStyleDefaultToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.Default;
+			};
 			this.focusStyleNoneToolStripMenuItem.CheckedChanged += (s, e) =>
-				{
-					if (focusStyleNoneToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.None;
-				};
+			{
+				if (focusStyleNoneToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.None;
+			};
 
 #if EX_SCRIPT
 			scriptEditorToolStripMenuItem.Click += (s, e) =>
