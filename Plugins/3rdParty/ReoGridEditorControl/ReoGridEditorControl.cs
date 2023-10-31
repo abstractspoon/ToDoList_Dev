@@ -288,7 +288,7 @@ namespace unvell.ReoGrid.Editor
 				{
 					if (MessageBox.Show(LangResource.Msg_Save_File_Immediately,
 						"Edit XML", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
-						== System.Windows.Forms.DialogResult.Cancel)
+						== DialogResult.Cancel)
 					{
 						return;
 					}
@@ -419,7 +419,7 @@ namespace unvell.ReoGrid.Editor
 						dnrf.Comment = namedRange.Comment;
 					}
 
-					if (ShowDialog(dnrf) == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(dnrf) == DialogResult.OK)
 					{
 						var newName = dnrf.RangeName;
 
@@ -428,7 +428,7 @@ namespace unvell.ReoGrid.Editor
 						{
 							if (MessageBox.Show(this, LangRes.LangResource.Msg_Named_Range_Overwrite,
 								Application.ProductName, MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
-								== System.Windows.Forms.DialogResult.Cancel)
+								== DialogResult.Cancel)
 							{
 								return;
 							}
@@ -483,7 +483,7 @@ namespace unvell.ReoGrid.Editor
 					hf.DefaultCellBody = sampleHeader.DefaultCellBody;
 					hf.AutoFitToCell = sampleHeader.IsAutoWidth;
 
-					if (ShowDialog(hf) == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(hf) == DialogResult.OK)
 					{
 						var newText = string.IsNullOrEmpty(hf.HeaderText) ? null : hf.HeaderText;
 
@@ -521,7 +521,7 @@ namespace unvell.ReoGrid.Editor
 					hpf.RowHeaderWidth = sheet.RowHeaderWidth;
 					hpf.AutoFitToCell = sampleHeader.IsAutoHeight;
 
-					if (ShowDialog(hpf) == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(hpf) == DialogResult.OK)
 					{
 						var newText = string.IsNullOrEmpty(hpf.HeaderText) ? null : hpf.HeaderText;
 
@@ -562,10 +562,10 @@ namespace unvell.ReoGrid.Editor
 					var items = droplistCell.Candidates;
 
 					// Display form for editing
-					// TODO
-
-
-
+					// var dlg = new DropdownListCellItemsDialog(droplistCell.Candidates);
+					//
+					// if (dlg.ShowDialog(this) == DialogResult.OK)
+					//     droplistCell.Candidates = dlg.Items;
 				}
 			};
 
@@ -849,7 +849,7 @@ namespace unvell.ReoGrid.Editor
 				dlg.Filter = LangResource.Filter_Export_As_CSV;
 				dlg.FileName = Path.GetFileNameWithoutExtension(this.CurrentFilePath);
 
-				if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
 					using (FileStream fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write, FileShare.Read))
 					{
@@ -1708,9 +1708,9 @@ namespace unvell.ReoGrid.Editor
 
 			var dr = MessageBox.Show(LangResource.Msg_Save_Changes, "ReoGrid Editor", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
-			if (dr == System.Windows.Forms.DialogResult.No)
+			if (dr == DialogResult.No)
 				return true;
-			else if (dr == System.Windows.Forms.DialogResult.Cancel)
+			else if (dr == DialogResult.Cancel)
 				return false;
 
 			FileFormat format = FileFormat._Auto;
@@ -2269,7 +2269,7 @@ namespace unvell.ReoGrid.Editor
 				rgf.Rows = worksheet.RowCount;
 				rgf.Cols = worksheet.ColumnCount;
 
-				if (ShowDialog(rgf) == System.Windows.Forms.DialogResult.OK)
+				if (ShowDialog(rgf) == DialogResult.OK)
 				{
 					WorksheetActionGroup ag = new WorksheetActionGroup();
 
@@ -2666,12 +2666,12 @@ namespace unvell.ReoGrid.Editor
 				return;
 			}
 
-			using (var pd = new System.Windows.Forms.PrintDialog())
+			using (var pd = new PrintDialog())
 			{
 				pd.Document = session.PrintDocument;
 				pd.UseEXDialog = true;
 
-				if (pd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				if (pd.ShowDialog() == DialogResult.OK)
 				{
 					session.Print();
 				}
@@ -2698,7 +2698,7 @@ namespace unvell.ReoGrid.Editor
 
 				psf.PrintSettings = (PrintSettings)sheet.PrintSettings.Clone();
 
-				if (ShowDialog(psf) == System.Windows.Forms.DialogResult.OK)
+				if (ShowDialog(psf) == DialogResult.OK)
 				{
 					sheet.PrintSettings = psf.PrintSettings;
 					sheet.AutoSplitPage();
