@@ -162,6 +162,7 @@ namespace unvell.ReoGrid.Editor
 				worksheet.Resetted += worksheet_Resetted;
 				worksheet.SettingsChanged += worksheet_SettingsChanged;
 				worksheet.Scaled += worksheet_GridScaled;
+				worksheet.CellBodyChanged += worksheet_CellBodyChanged;
 			};
 
 			this.grid.WorksheetRemoved += (ss, ee) =>
@@ -177,6 +178,7 @@ namespace unvell.ReoGrid.Editor
 				worksheet.Resetted -= worksheet_Resetted;
 				worksheet.SettingsChanged -= worksheet_SettingsChanged;
 				worksheet.Scaled -= worksheet_GridScaled;
+				worksheet.CellBodyChanged -= worksheet_CellBodyChanged;
 			};
 
 			selModeNoneToolStripMenuItem.Click += (s, e) => this.grid.CurrentWorksheet.SelectionMode = WorksheetSelectionMode.None;
@@ -552,21 +554,9 @@ namespace unvell.ReoGrid.Editor
 				CurrentWorksheet.StartEdit();
 			};
 
-			editDroplistItemsToolStripMenuItem.Click += (s, e) =>
+			editDroplistItemsToolStripMenuItem.Click += (s, e) => 
 			{
-				var cell = CurrentWorksheet.GetCell(CurrentWorksheet.SelectionRange.StartPos);
-				var droplistCell = (cell?.Body as DropdownListCell);
-
-				if (droplistCell != null)
-				{
-					var items = droplistCell.Candidates;
-
-					// Display form for editing
-					// var dlg = new DropdownListCellItemsDialog(droplistCell.Candidates);
-					//
-					// if (dlg.ShowDialog(this) == DialogResult.OK)
-					//     droplistCell.Candidates = dlg.Items;
-				}
+				worksheet_CellBodyChanged(s, null);
 			};
 
 			rowCutToolStripMenuItem.Click += this.cutRangeToolStripMenuItem_Click;
@@ -977,6 +967,26 @@ namespace unvell.ReoGrid.Editor
 		{
 			var worksheet = (Worksheet)sender;
 			zoomToolStripDropDownButton.Text = worksheet.ScaleFactor * 100 + "%";
+		}
+
+		void worksheet_CellBodyChanged(object sender, CellEventArgs e)
+		{
+			if (CurrentWorksheet.SelectionRange.IsSingleCell)
+			{
+				var cell = CurrentWorksheet.GetCell(CurrentWorksheet.SelectionRange.StartPos);
+				var droplistCell = (cell?.Body as DropdownListCell);
+
+				if (droplistCell != null)
+				{
+					var items = droplistCell.Candidates;
+
+					// Display form for editing
+					// var dlg = new DropdownListCellItemsDialog(droplistCell.Candidates);
+					//
+					// if (dlg.ShowDialog(this) == DialogResult.OK)
+					//     droplistCell.Candidates = dlg.Items;
+				}
+			}
 		}
 
 		#endregion // Constructor
