@@ -326,7 +326,26 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 	}
 }
 
-void UIThemeToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
+void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs^ e)
+{
+	if ((COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
+	{
+		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
+		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
+
+		Drawing::Rectangle rect(Point::Empty, Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
+		e->Graphics->DrawImage(e->Image, rect, 0, 0, e->ImageRectangle.Width, e->ImageRectangle.Height, System::Drawing::GraphicsUnit::Pixel);
+
+		auto selColor = Color::FromArgb(128, Drawing::SystemColors::MenuHighlight);
+		e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), rect);
+	}
+	else
+	{
+		BaseToolbarRenderer::OnRenderItemCheck(e);
+	}
+}
+
+void UIThemeToolbarRenderer::OnRenderSeparator(ToolStripSeparatorRenderEventArgs^ e)
 {
 	if (!e->Vertical && ISTYPE(e->ToolStrip, ToolStripDropDownMenu) && 
 		(COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
@@ -336,10 +355,6 @@ void UIThemeToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparato
 
 		rect.Y += (rect.Height / 2);
 		e->Graphics->DrawLine(Pens::LightGray, rect.Left, rect.Y, rect.Right, rect.Y);
-//		e->Graphics->DrawLine(Drawing::SystemPens::ButtonHighlight, rect.Left, rect.Y, rect.Right, rect.Y);
-
-//		rect.Y -= 1;
-//		e->Graphics->DrawLine(Drawing::SystemPens::ButtonShadow, rect.Left, rect.Y, rect.Right, rect.Y);
 	}
 	else
 	{
