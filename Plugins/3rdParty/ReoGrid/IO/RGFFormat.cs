@@ -826,6 +826,10 @@ namespace unvell.ReoGrid
 							}
 						}
 					}
+					else if (type == typeof(CellTypes.DropdownListCell) && !String.IsNullOrEmpty(xmlCell.items))
+					{
+						((CellTypes.DropdownListCell)cell.body).Candidates = xmlCell.items.Split('|');
+					}
 				}
 				#endregion // Body
 
@@ -1504,6 +1508,14 @@ namespace unvell.ReoGrid
 											 traceDependents = cell.TraceFormulaDependents ? TextFormatHelper.EncodeBool(cell.TraceFormulaDependents) : null,
 #endif // FORMULA
 										 };
+
+										 if (cell.body is CellTypes.DropdownListCell)
+										 {
+											 var dropCell = ((CellTypes.DropdownListCell)cell.body);
+
+											 if (dropCell.Candidates.Count() > 0)
+												xmlCell.items = string.Join("|", dropCell.Candidates);
+										 }
 
 										 if (cell.HasFormula || !(cell.InnerData is bool))
 										 {
