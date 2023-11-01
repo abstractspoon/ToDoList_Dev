@@ -981,7 +981,7 @@ namespace unvell.ReoGrid.Editor
 				{
 					var dlg = new DropdownListCellItemsDialog(droplistCell.ListData);
 
-					if (dlg.ShowDialog(this) == DialogResult.OK)
+					if (ShowDialog(dlg) == DialogResult.OK)
 					   droplistCell.ListData = dlg.Items;
 				}
 			}
