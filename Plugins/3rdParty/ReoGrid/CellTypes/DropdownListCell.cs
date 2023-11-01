@@ -119,7 +119,7 @@ namespace unvell.ReoGrid.CellTypes
 				this.listBox = new ListBox()
 				{
 					Dock = DockStyle.Fill,
-					BorderStyle = System.Windows.Forms.BorderStyle.None,
+					BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle,
 				};
 
 				listBox.Click += ListBox_Click;
@@ -136,6 +136,9 @@ namespace unvell.ReoGrid.CellTypes
 				}
 
 				base.DropdownControl = listBox;
+
+				if (listBox.Items.Count > 0)
+					base.DropdownPanelHeight = Math.Min(200, (listBox.Items.Count * listBox.GetItemRectangle(0).Height) + 6);
 			}
 
 			listBox.SelectedItem = this.Cell.InnerData;
