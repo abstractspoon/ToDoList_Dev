@@ -403,7 +403,16 @@ namespace CustomComboBox
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         protected override void WndProc(ref Message m)
         {
-            if (!ProcessGrip(ref m, false))
+			const int WM_FLOATSTATUS = 0x036D;
+
+			// Prevent top-level parent losing activation when we gain focus
+			if (m.Msg == WM_FLOATSTATUS)
+			{
+				m.Result = (IntPtr)1;
+				return;
+			}
+
+			if (!ProcessGrip(ref m, false))
                 base.WndProc(ref m);
         }
 

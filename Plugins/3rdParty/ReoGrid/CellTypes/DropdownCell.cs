@@ -493,6 +493,20 @@ namespace unvell.ReoGrid.CellTypes
 				}
 			}
 
+			protected override void WndProc(ref Message m)
+			{
+				const int WM_FLOATSTATUS = 0x036D;
+
+				// Prevent top-level parent losing activation when we gain focus
+				if (m.Msg == WM_FLOATSTATUS)
+				{
+					m.Result = (IntPtr)1;
+					return;
+				}
+
+				base.WndProc(ref m);
+			}
+
 			/// <summary>
 			/// Handle event when size property changed.
 			/// </summary>
