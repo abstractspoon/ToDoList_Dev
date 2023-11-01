@@ -163,7 +163,7 @@ namespace unvell.ReoGrid.Editor
 				worksheet.Resetted += worksheet_Resetted;
 				worksheet.SettingsChanged += worksheet_SettingsChanged;
 				worksheet.Scaled += worksheet_GridScaled;
-				worksheet.CellBodyChanged += worksheet_CellBodyChanged;
+				//worksheet.CellBodyChanged += worksheet_CellBodyChanged;
 			};
 
 			this.grid.WorksheetRemoved += (ss, ee) =>
@@ -179,7 +179,7 @@ namespace unvell.ReoGrid.Editor
 				worksheet.Resetted -= worksheet_Resetted;
 				worksheet.SettingsChanged -= worksheet_SettingsChanged;
 				worksheet.Scaled -= worksheet_GridScaled;
-				worksheet.CellBodyChanged -= worksheet_CellBodyChanged;
+				//worksheet.CellBodyChanged -= worksheet_CellBodyChanged;
 			};
 
 			selModeNoneToolStripMenuItem.Click += (s, e) => this.grid.CurrentWorksheet.SelectionMode = WorksheetSelectionMode.None;
@@ -979,12 +979,10 @@ namespace unvell.ReoGrid.Editor
 
 				if (droplistCell != null)
 				{
+					var dlg = new DropdownListCellItemsDialog(droplistCell.ListData);
 
-					// Display form for editing
-					// var dlg = new DropdownListCellItemsDialog(droplistCell.Candidates);
-					//
-					// if (dlg.ShowDialog(this) == DialogResult.OK)
-					//     droplistCell.Candidates = dlg.Items;
+					if (dlg.ShowDialog(this) == DialogResult.OK)
+					   droplistCell.ListData = dlg.Items;
 				}
 			}
 		}

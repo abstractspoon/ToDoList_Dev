@@ -51,7 +51,11 @@ namespace unvell.ReoGrid.CellTypes
 		/// When the body set into a cell.
 		/// </summary>
 		/// <param name="cell">Current owner cell</param>
-		public virtual void OnSetup(Cell cell) { this.cell = cell; }
+		public virtual void OnSetup(Cell cell)
+		{
+			this.cell = cell;
+			this.cell.DataFormat = DataFormat.CellDataFormatFlag.General;
+		}
 
 		/// <summary>
 		/// Get cell body bounds rectangle.

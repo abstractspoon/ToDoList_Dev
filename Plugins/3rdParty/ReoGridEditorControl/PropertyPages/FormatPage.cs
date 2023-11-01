@@ -383,14 +383,15 @@ namespace unvell.ReoGrid.PropertyPages
 
 			backupFormatArgs = null;
 
-			if (currentFormat != null)
+			if ((currentFormat != null) && (sampleCell.DataFormatArgs != null))
 			{
 				switch (currentFormat)
 				{
 					case CellDataFormatFlag.Number:
 						if (sampleCell.DataFormatArgs is NumberDataFormatter.NumberFormatArgs)
 						{
-							NumberDataFormatter.NumberFormatArgs nargs = (NumberDataFormatter.NumberFormatArgs)sampleCell.DataFormatArgs;
+							var nargs = (NumberDataFormatter.NumberFormatArgs)sampleCell.DataFormatArgs;
+
 							numberDecimalPlaces.Value = nargs.DecimalPlaces;
 							chkNumberUseSeparator.Checked = nargs.UseSeparator;
 							foreach (NegativeStyleListItem item in numberNegativeStyleList.Items)
@@ -406,57 +407,65 @@ namespace unvell.ReoGrid.PropertyPages
 						break;
 
 					case CellDataFormatFlag.DateTime:
-						DateTimeDataFormatter.DateTimeFormatArgs dargs = (DateTimeDataFormatter.DateTimeFormatArgs)sampleCell.DataFormatArgs;
-						txtDatetimeFormat.Text = dargs.Format;
-						int dfindex =-1;
-						for (int i = 0; i < datetimeFormatList.Items.Count; i++)
+						if (sampleCell.DataFormatArgs is DateTimeDataFormatter.DateTimeFormatArgs)
 						{
-							DatetimeFormatListItem item = (DatetimeFormatListItem)datetimeFormatList.Items[i];
-							if (item.Pattern.Equals(dargs.Format, StringComparison.CurrentCultureIgnoreCase))
+							var dargs = (DateTimeDataFormatter.DateTimeFormatArgs)sampleCell.DataFormatArgs;
+
+							txtDatetimeFormat.Text = dargs.Format;
+							int dfindex = -1;
+							for (int i = 0; i < datetimeFormatList.Items.Count; i++)
 							{
-								dfindex = i;
-								break;
+								DatetimeFormatListItem item = (DatetimeFormatListItem)datetimeFormatList.Items[i];
+								if (item.Pattern.Equals(dargs.Format, StringComparison.CurrentCultureIgnoreCase))
+								{
+									dfindex = i;
+									break;
+								}
 							}
+							datetimeFormatList.SelectedIndex = dfindex;
+							backupFormatArgs = dargs;
 						}
-						datetimeFormatList.SelectedIndex = dfindex;
-						backupFormatArgs = dargs;
 						break;
 
 					case CellDataFormatFlag.Currency:
-						var cargs = (CurrencyDataFormatter.CurrencyFormatArgs)sampleCell.DataFormatArgs;
-
-						var cultureName = cargs.CultureEnglishName;
-
-						foreach (var currencyCultureItem in currencySymbolList.Items)
+						if (sampleCell.DataFormatArgs is CurrencyDataFormatter.CurrencyFormatArgs)
 						{
-							if (string.Compare(((CurrencySymbolListItem)currencyCultureItem).Culture.EnglishName, cultureName, true) == 0)
+							var cargs = (CurrencyDataFormatter.CurrencyFormatArgs)sampleCell.DataFormatArgs;
+							var cultureName = cargs.CultureEnglishName;
+
+							foreach (var currencyCultureItem in currencySymbolList.Items)
 							{
-								currencySymbolList.SelectedItem = currencyCultureItem;
-								break;
+								if (string.Compare(((CurrencySymbolListItem)currencyCultureItem).Culture.EnglishName, cultureName, true) == 0)
+								{
+									currencySymbolList.SelectedItem = currencyCultureItem;
+									break;
+								}
 							}
-						}
 
-						currencyDecimalPlaces.Value = cargs.DecimalPlaces;
+							currencyDecimalPlaces.Value = cargs.DecimalPlaces;
 
-						int cnindex = (int)cargs.NegativeStyle;
-						if (cnindex >= 0 && cnindex < currencyNegativeStyleList.Items.Count) currencyNegativeStyleList.SelectedIndex = cnindex;
+							int cnindex = (int)cargs.NegativeStyle;
+							if (cnindex >= 0 && cnindex < currencyNegativeStyleList.Items.Count)
+								currencyNegativeStyleList.SelectedIndex = cnindex;
 
-						foreach (NegativeStyleListItem item in currencyNegativeStyleList.Items)
-						{
-							if (item.NegativeStyle == cargs.NegativeStyle)
+							foreach (NegativeStyleListItem item in currencyNegativeStyleList.Items)
 							{
-								currencyNegativeStyleList.SelectedItem = item;
-								break;
+								if (item.NegativeStyle == cargs.NegativeStyle)
+								{
+									currencyNegativeStyleList.SelectedItem = item;
+									break;
+								}
 							}
-						}
 
-						backupFormatArgs = cargs;
+							backupFormatArgs = cargs;
+						}
 						break;
 
 					case CellDataFormatFlag.Percent:
-						if (sampleCell.DataFormatArgs != null)
+						if (sampleCell.DataFormatArgs is NumberDataFormatter.NumberFormatArgs)
 						{
 							var pargs = (NumberDataFormatter.NumberFormatArgs)sampleCell.DataFormatArgs;
+
 							percentDecimalPlaces.Value = pargs.DecimalPlaces;
 							backupFormatArgs = pargs;
 						}

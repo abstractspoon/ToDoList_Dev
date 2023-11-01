@@ -95,6 +95,12 @@
     <Compile Include="DefineNamedRangeDialog.Designer.cs">
       <DependentUpon>DefineNamedRangeDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="DropdownListCellItemsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DropdownListCellItemsDialog.Designer.cs">
+      <DependentUpon>DropdownListCellItemsDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormulaBarControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -251,6 +257,9 @@
   <ItemGroup>
     <EmbeddedResource Include="DefineNamedRangeDialog.resx">
       <DependentUpon>DefineNamedRangeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DropdownListCellItemsDialog.resx">
+      <DependentUpon>DropdownListCellItemsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormulaBarControl.resx">
       <DependentUpon>FormulaBarControl.cs</DependentUpon>

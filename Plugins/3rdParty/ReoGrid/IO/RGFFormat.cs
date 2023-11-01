@@ -826,9 +826,9 @@ namespace unvell.ReoGrid
 							}
 						}
 					}
-					else if (type == typeof(CellTypes.DropdownListCell) && !String.IsNullOrEmpty(xmlCell.items))
+					else if (type == typeof(CellTypes.DropdownListCell) && !String.IsNullOrEmpty(xmlCell.listData))
 					{
-						((CellTypes.DropdownListCell)cell.body).Candidates = xmlCell.items.Split('|');
+						((CellTypes.DropdownListCell)cell.body).ListData = xmlCell.listData.Split('|');
 					}
 				}
 				#endregion // Body
@@ -1513,8 +1513,8 @@ namespace unvell.ReoGrid
 										 {
 											 var dropCell = ((CellTypes.DropdownListCell)cell.body);
 
-											 if (dropCell.Candidates.Count() > 0)
-												xmlCell.items = string.Join("|", dropCell.Candidates);
+											 if (dropCell.ListData.Count() > 0)
+												xmlCell.listData = string.Join("|", dropCell.ListData);
 										 }
 
 										 if (cell.HasFormula || !(cell.InnerData is bool))
