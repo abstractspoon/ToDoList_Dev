@@ -33,7 +33,7 @@ namespace unvell.ReoGrid.CellTypes
 	public class DropdownListCell : DropdownCell
 	{
 		/// <summary>
-		/// Construct dropdown control with an empty candidates list
+		/// Construct dropdown control with an empty items list
 		/// </summary>
 		public DropdownListCell()
 			: base()
@@ -42,27 +42,27 @@ namespace unvell.ReoGrid.CellTypes
 		}
 
 		/// <summary>
-		/// Construct dropdown control with specified candidates array
+		/// Construct dropdown control with specified items array
 		/// </summary>
-		/// <param name="candidates">candidate object array to be displayed in the listbox</param>
-		public DropdownListCell(params object[] candidates)
+		/// <param name="items">candidate object array to be displayed in the listbox</param>
+		public DropdownListCell(params object[] items)
 			: this()
 		{
-			this.listData.AddRange(candidates);
+			this.listData.AddRange(items);
 		}
 
 		/// <summary>
-		/// Construct dropdown control with specified candidates array
+		/// Construct dropdown control with specified items array
 		/// </summary>
-		/// <param name="candidates">candidate object array to be displayed in the listbox</param>
-		public DropdownListCell(IEnumerable<object> candidates)
+		/// <param name="items">candidate object array to be displayed in the listbox</param>
+		public DropdownListCell(IEnumerable<object> items)
 			: this()
 		{
-			this.listData.AddRange(candidates);
+			this.listData.AddRange(items);
 		}
 
 		/// <summary>
-		/// Get or set the selected index in candidates list
+		/// Get or set the selected index in items list
 		/// </summary>
 		public int SelectedIndex
 		{
