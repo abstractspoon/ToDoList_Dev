@@ -379,7 +379,7 @@ namespace unvell.ReoGrid.CellTypes
 			OnDropdownControlLostFocus();
 		}
 
-		private int dropdownHeight = 200;
+		private int dropdownHeight = (int)PlatformUtility.ScaleByDPI(200);
 
 		/// <summary>
 		/// Get or set height of dropdown-panel
@@ -390,7 +390,7 @@ namespace unvell.ReoGrid.CellTypes
 			set { this.dropdownHeight = value; }
 		}
 
-		private int minimumDropdownWidth = 120;
+		private int minimumDropdownWidth = (int)PlatformUtility.ScaleByDPI(120);
 
 		/// <summary>
 		/// Minimum width of dropdown panel
