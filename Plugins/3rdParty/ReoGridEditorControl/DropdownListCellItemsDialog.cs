@@ -11,6 +11,8 @@ namespace unvell.ReoGrid.Editor
 {
 	public partial class DropdownListCellItemsDialog : Form
 	{
+		private string[] delimiter = new string[] { "\r\n" };
+
 		public DropdownListCellItemsDialog()
 		{
 			InitializeComponent();
@@ -18,12 +20,12 @@ namespace unvell.ReoGrid.Editor
 
 		public DropdownListCellItemsDialog(IEnumerable<object> items) : this()
 		{
-			textBox1.Text = string.Join("\n", items);
+			textBox1.Text = string.Join(delimiter[0], items);
 		}
 
 		public IEnumerable<object> Items
 		{
-			get { return textBox1.Text.Split('\n'); }
+			get { return textBox1.Text.Split(delimiter, StringSplitOptions.RemoveEmptyEntries); }
 		}
 	}
 }

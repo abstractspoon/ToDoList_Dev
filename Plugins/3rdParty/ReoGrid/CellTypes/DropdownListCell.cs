@@ -102,7 +102,12 @@ namespace unvell.ReoGrid.CellTypes
 				if (!value.SequenceEqual(ListData))
 				{
 					listData = new List<object>(value);
-					listBox = null;
+
+					if (listBox != null)
+					{
+						listBox.Items.Clear();
+						listBox.Items.AddRange(this.listData.ToArray());
+					}
 
 					this.Cell.Worksheet.RaiseCellDataChangedEvent(this.Cell);
 				}
