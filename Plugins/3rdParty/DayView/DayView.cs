@@ -2044,6 +2044,7 @@ namespace Calendar
 						var gSave = g.Save();
 						g.ExcludeClip(middlePart);
 
+						// Redraw the end
 						DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
 
 						g.Restore(gSave);
