@@ -106,9 +106,21 @@ namespace DayViewUIExtension
 
 		public void SetDates(Calendar.AppointmentDates dates)
 		{
-			m_FromDateCtrl.Value = dates.Start.Date;
-			m_ToDateCtrl.Value = dates.End.Date;
-			m_ToDateCtrl.Checked = (dates.End.Date > dates.Start.Date);
+			if (dates.Start.Date == DateTime.MinValue)
+				m_FromDateCtrl.Value = DateTime.Now.Date;
+			else
+				m_FromDateCtrl.Value = dates.Start.Date;
+
+			if (dates.Start.Date == DateTime.MinValue)
+			{
+				m_ToDateCtrl.Value = DateTime.Now.Date;
+				m_ToDateCtrl.Checked = false;
+			}
+			else
+			{
+				m_ToDateCtrl.Value = dates.End.Date;
+				m_ToDateCtrl.Checked = (dates.End.Date > dates.Start.Date);
+			}
 		}
 
 		public TimeBlockSeriesAttributes.EditMask EditMask
