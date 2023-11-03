@@ -276,11 +276,9 @@ namespace DayViewUIExtension
 			return new TDLSelectionTool();
 		}
 
-		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect,
-																		bool isLong, bool drawLongContinuous,
-																		int endOfStart = -1, int startOfEnd = -1)
+		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt)
 		{
-			return new TDLAppointmentView(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd);
+			return new TDLAppointmentView(appt);
 		}
 
 		protected void InitializeComponent()

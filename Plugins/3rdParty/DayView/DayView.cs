@@ -1697,11 +1697,9 @@ namespace Calendar
         private Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
         private Dictionary<Appointment, AppointmentView> longAppointmentViews = new Dictionary<Appointment, AppointmentView>();
 
-		virtual protected AppointmentView NewAppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect,
-															bool isLong = false, bool drawLongContinuous = true, 
-															int endOfStart = -1, int startOfEnd = -1)
+		virtual protected AppointmentView NewAppointmentView(Appointment appt)
 		{
-			return new AppointmentView(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd);
+			return new AppointmentView(appt);
 		}
 
 		protected AppointmentView GetAppointmentView(Appointment appt)
@@ -1800,8 +1798,11 @@ namespace Calendar
                     Rectangle gripRect = GetHourRangeRectangle(appt.StartDate, appt.EndDate, apptRect);
                     gripRect.Width = appointmentGripWidth;
 
-					var apptView = NewAppointmentView(appt, apptRect, gripRect);
-                    appointmentViews[appt] = apptView;
+					var apptView = NewAppointmentView(appt);
+					appointmentViews[appt] = apptView;
+
+					apptView.Rectangle = apptRect;
+					apptView.GripRect = gripRect;
 
                     if (this.DrawAllAppBorder)
                         appt.DrawBorder = true;
@@ -2007,8 +2008,13 @@ namespace Calendar
                 Rectangle gripRect = apptRect;
                 gripRect.Width = appointmentGripWidth;
 
-				var apptView = NewAppointmentView(appt, apptRect, gripRect, true, DisplayLongAppointmentsContinuous);
+				var apptView = NewAppointmentView(appt);
 				longAppointmentViews[appt] = apptView;
+
+				apptView.Rectangle = apptRect;
+				apptView.GripRect = gripRect;
+				apptView.IsLong = true;
+				apptView.DrawLongContinuous = DisplayLongAppointmentsContinuous;
 
 				if (DisplayLongAppointmentsContinuous)
 				{

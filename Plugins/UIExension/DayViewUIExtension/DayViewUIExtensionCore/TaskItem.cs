@@ -32,17 +32,12 @@ namespace DayViewUIExtension
 
 	public class TDLAppointmentView : Calendar.AppointmentView
 	{
-		public TDLAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect,
-								bool isLong, bool drawLongContinuous, int endOfStart, int startOfEnd) 
-			: 
-			base(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd)
+		public TDLAppointmentView(Calendar.Appointment appt) : base(appt)
 		{
-			IconRect = Rectangle.Empty;
-			TextHorzOffset = 0;
 		}
 
-		public Rectangle IconRect;
-		public int TextHorzOffset;
+		public Rectangle IconRect = Rectangle.Empty;
+		public int TextHorzOffset = 0;
 	}
 
 	// ---------------------------------------------------------------

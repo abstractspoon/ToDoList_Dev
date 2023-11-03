@@ -300,26 +300,19 @@ namespace Calendar
 
 	public class AppointmentView
 	{
-		public AppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect,
-								bool isLong, bool drawLongContinuous, int endOfStart, int startOfEnd)
+		public AppointmentView(Appointment appt)
 		{
 			Appointment = appt;
-			Rectangle = rect;
-			GripRect = gripRect;
-			IsLong = isLong;
-			DrawLongContinuous = IsLong ? drawLongContinuous : true;
-			EndOfStart = DrawLongContinuous ? -1 : endOfStart;
-			StartOfEnd = DrawLongContinuous ? -1 : startOfEnd;
 		}
 
 		public Appointment Appointment;
-		public Rectangle Rectangle;
-		public Rectangle GripRect;
+		public Rectangle Rectangle = Rectangle.Empty;
+		public Rectangle GripRect = Rectangle.Empty;
 
-		public bool IsLong;
-		public bool DrawLongContinuous;
-		public int EndOfStart;
-		public int StartOfEnd;
+		public bool IsLong = false;
+		public bool DrawLongContinuous = false;
+		public int EndOfStart = -1;
+		public int StartOfEnd = -1;
 	}
 
 	class AppointmentList : List<Appointment>
