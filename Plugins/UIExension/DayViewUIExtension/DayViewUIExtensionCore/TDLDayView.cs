@@ -130,7 +130,7 @@ namespace DayViewUIExtension
 
 			var tip = new LabelTipInfo()
 			{
-				Font = m_Renderer.BaseFont,
+				Font = m_Renderer.BaseFont(),
 			};
 
 			var pt = PointToClient(ptScreen);
@@ -286,29 +286,29 @@ namespace DayViewUIExtension
 			Calendar.DrawTool drawTool = new Calendar.DrawTool();
 			drawTool.DayView = this;
 
-			this.ActiveTool = drawTool;
-			this.AllowInplaceEditing = true;
-			this.AllowNew = false;
-			this.AmPmDisplay = true;
-			this.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+			ActiveTool = drawTool;
+			AllowInplaceEditing = true;
+			AllowNew = false;
+			AmPmDisplay = true;
+			Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
 									 System.Windows.Forms.AnchorStyles.Left |
 									 System.Windows.Forms.AnchorStyles.Right);
-			this.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-			this.DrawAllAppBorder = false;
-			this.Location = new System.Drawing.Point(0, 0);
-			this.MinHalfHourApp = false;
-			this.Name = "m_dayView";
-			this.Renderer = m_Renderer;
-			this.Size = new System.Drawing.Size(798, 328);
-			this.SlotsPerHour = 4;
-			this.TabIndex = 0;
-			this.Text = "m_dayView";
-			this.ReadOnly = false;
+			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+			DrawAllAppBorder = false;
+			Location = new Point(0, 0);
+			MinHalfHourApp = false;
+			Name = "m_dayView";
+			Renderer = m_Renderer;
+			Size = new Size(798, 328);
+			SlotsPerHour = 4;
+			TabIndex = 0;
+			Text = "m_dayView";
+			ReadOnly = false;
 
-			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnResolveAppointments);
-			this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
-			this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
-			this.AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
+			ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(OnResolveAppointments);
+			SelectionChanged += new Calendar.AppointmentEventHandler(OnSelectionChanged);
+			WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
+			AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
 		}
 
 		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
@@ -658,7 +658,7 @@ namespace DayViewUIExtension
 
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
-			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (appt != null)
@@ -677,7 +677,7 @@ namespace DayViewUIExtension
 
 		public uint HitTestTask(Int32 xScreen, Int32 yScreen)
 		{
-			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (AppointmentSupportsTaskContextMenu(appt))
@@ -985,9 +985,9 @@ namespace DayViewUIExtension
 			int fontHeight = 0;
 			
 			if (DPIScaling.WantScaling())
-				fontHeight = m_Renderer.BaseFont.Height;
+				fontHeight = m_Renderer.BaseFont().Height;
 			else
-				fontHeight = Win32.GetPixelHeight(m_Renderer.BaseFont.ToHfont());
+				fontHeight = Win32.GetPixelHeight(m_Renderer.BaseFont().ToHfont());
 
 			int itemHeight = (fontHeight + 6 - longAppointmentSpacing);
 
@@ -1112,10 +1112,10 @@ namespace DayViewUIExtension
 			{
 				Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
 
-				if (hoursRect.Y < this.HeaderHeight)
+				if (hoursRect.Y < HeaderHeight)
 				{
-					hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
-					hoursRect.Y = this.HeaderHeight;
+					hoursRect.Height -= HeaderHeight - hoursRect.Y;
+					hoursRect.Y = HeaderHeight;
 				}
 
 				e.Graphics.FillRectangle(brush, hoursRect);
@@ -1695,9 +1695,9 @@ namespace DayViewUIExtension
 
 		protected void ValidateMinSlotHeight()
 		{
-			using (var g = Graphics.FromHwnd(this.Handle))
+			using (var g = Graphics.FromHwnd(Handle))
 			{
-				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont).Height;
+				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont()).Height;
 
 				if ((minSlotHeight * SlotsPerHour) < minHourHeight)
 					minSlotHeight = ((minHourHeight / SlotsPerHour) + 1);

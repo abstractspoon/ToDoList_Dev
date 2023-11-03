@@ -70,17 +70,14 @@ namespace DayViewUIExtension
                 m_BaseFont.Dispose();
         }
 
-        public override Font BaseFont
+        public override Font BaseFont()
         {
-            get
-            {
                 if (m_BaseFont == null)
                 {
                     m_BaseFont = new Font("Tahoma", 8, FontStyle.Regular);
                 }
 
                 return m_BaseFont;
-            }
         }
 
 		public Font BoldFont
@@ -89,7 +86,7 @@ namespace DayViewUIExtension
 			{
 				if (m_BoldFont == null)
 				{
-					m_BoldFont = new Font(BaseFont, FontStyle.Bold);
+					m_BoldFont = new Font(BaseFont(), FontStyle.Bold);
 				}
 
 				return m_BoldFont;
@@ -146,7 +143,7 @@ namespace DayViewUIExtension
 
 		public int CalculateMinimumDayWidthForImage(Graphics g)
 		{
-			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
+			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont()).Width);
 		}
 
 		private void UpdateHeaderStyles(Graphics g)
@@ -154,8 +151,8 @@ namespace DayViewUIExtension
 			int availWidth = (m_ColWidth - (m_HeaderPadding * 2));
 
 			// Basic header string format is '<Day of week> <Day of month> <Month>'
-			int maxDayNum = (int)(g.MeasureString("31", BaseFont).Width);
-			int maxDayAndMonthNum = (int)(g.MeasureString("31/12", BaseFont).Width);
+			int maxDayNum = (int)(g.MeasureString("31", BaseFont()).Width);
+			int maxDayAndMonthNum = (int)(g.MeasureString("31/12", BaseFont()).Width);
 
 			int maxLongDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, false);
 			int maxShortDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, true);
@@ -231,56 +228,38 @@ namespace DayViewUIExtension
 
 		public int GetFontHeight()
         {
-            return BaseFont.Height;
+            return BaseFont().Height;
         }
 
-        public override Color HourColor
+        public override Color HourColor()
         {
-            get
-            {
-                return Color.FromArgb(230, 237, 247);
-            }
+            return Color.FromArgb(230, 237, 247);
         }
 
-        public override Color HalfHourSeperatorColor
+        public override Color HalfHourSeperatorColor()
         {
-            get
-            {
-                return GridlineColor;
-            }
+            return GridlineColor;
         }
 
-        public override Color HourSeperatorColor
+        public override Color HourSeperatorColor()
         {
-            get
-            {
-				// Slightly darker
-                return DrawingColor.AdjustLighting(GridlineColor, -0.2f, false);
-            }
+			// Slightly darker
+            return DrawingColor.AdjustLighting(GridlineColor, -0.2f, false);
         }
 
-        public override Color WorkingHourColor
+        public override Color WorkingHourColor()
         {
-            get
-            {
-                return Color.FromArgb(255, 255, 255);
-            }
+            return Color.FromArgb(255, 255, 255);
         }
 
-        public override Color BackColor
+        public override Color BackColor()
         {
-            get
-            {
-				return Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-            }
+			return Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
         }
 
-        public override Color SelectionColor
+        public override Color SelectionColor()
         {
-            get
-            {
-                return Color.FromArgb(41, 76, 122);
-            }
+            return Color.FromArgb(41, 76, 122);
         }
 
         public Color TextColor
@@ -296,7 +275,7 @@ namespace DayViewUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            using (SolidBrush brush = new SolidBrush(this.TextColor))
+            using (SolidBrush brush = new SolidBrush(TextColor))
             {
 				// Ignore 'ampm' and format for the current regional settings
                 string amPmTime = "00";
@@ -315,11 +294,11 @@ namespace DayViewUIExtension
 				String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
                 
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-				g.DrawString(hourStr, HourFont, brush, rect);
+				g.DrawString(hourStr, HourFont(), brush, rect);
 
-                rect.X += ((int)g.MeasureString(hourStr, HourFont).Width + 2);
+                rect.X += ((int)g.MeasureString(hourStr, HourFont()).Width + 2);
 
-                g.DrawString(amPmTime, MinuteFont, brush, rect);
+                g.DrawString(amPmTime, MinuteFont(), brush, rect);
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
 			}
         }
@@ -339,7 +318,7 @@ namespace DayViewUIExtension
                     {
                         g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
                     }
-                    else if (rect.Height > MinuteFont.Height)
+                    else if (rect.Height > MinuteFont().Height)
                     {
                         // 30 min mark - halve line width
                         rect.X += rect.Width / 2;
@@ -348,10 +327,10 @@ namespace DayViewUIExtension
 						g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
 
                         // Draw label beneath
-                        using (SolidBrush brush = new SolidBrush(this.TextColor)) 
+                        using (SolidBrush brush = new SolidBrush(TextColor)) 
                         {
                             g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                            g.DrawString("30", MinuteFont, brush, rect);
+                            g.DrawString("30", MinuteFont(), brush, rect);
                             g.TextRenderingHint = TextRenderingHint.SystemDefault;
                         }
                     }
@@ -365,7 +344,7 @@ namespace DayViewUIExtension
             {
                 Color appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
-                if (appLineColor == BackColor)
+                if (appLineColor == BackColor())
                     appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
 
                 return appLineColor;
@@ -423,7 +402,7 @@ namespace DayViewUIExtension
 
 			// Use bold font for first-day-of-month
 			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay);
-			Font font = ((date.Day == 1) ? BoldFont : BaseFont);
+			Font font = ((date.Day == 1) ? BoldFont : BaseFont());
 
 			Rectangle rText = rect;
 			rText.X += m_HeaderPadding;
@@ -528,7 +507,7 @@ namespace DayViewUIExtension
 					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
 
 					if (isFutureItem)
- 						borderColor = (isLong ? AllDayEventsBackColor : textColor);
+ 						borderColor = (isLong ? AllDayEventsBackColor() : textColor);
 					else
 						barColor = (taskItem.HasTaskTextColor ? taskItem.TaskTextColor : textColor);
 				}
@@ -735,7 +714,7 @@ namespace DayViewUIExtension
 				rect.Y += TextOffset;
 
 				if (apptView.IsLong)
-					rect.Height = BaseFont.Height;
+					rect.Height = BaseFont().Height;
 				else
 					rect.Height -= TextOffset;
 
@@ -747,14 +726,14 @@ namespace DayViewUIExtension
 
 					if (taskItem.IsDone && StrikeThruDoneTasks)
 					{
-						using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
+						using (Font font = new Font(BaseFont(), FontStyle.Strikeout))
 						{
 							g.DrawString(taskItem.Title, font, brush, rect, format);
 						}
 					}
 					else
 					{
-						g.DrawString(taskItem.Title, this.BaseFont, brush, rect, format);
+						g.DrawString(taskItem.Title, BaseFont(), brush, rect, format);
 					}
 				}
 
