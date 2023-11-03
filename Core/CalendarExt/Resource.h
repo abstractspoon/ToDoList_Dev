@@ -43,6 +43,7 @@
 #define IDC_USESTARTFORDUE              2008
 #define IDC_USESTARTORTODAYFORDUE       2009
 #define IDC_SHOWDONEDATES               2010
+#define IDC_SHOWACTIVETODAY             2011
 #define IDC_WEEKENDCOLOR                16004
 #define IDR_TOOLBAR                     16006
 #define IDC_COLORSGROUP                 16008

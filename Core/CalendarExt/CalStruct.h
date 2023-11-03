@@ -40,6 +40,7 @@ public:
 
 	BOOL IsStartSet() const;
 	BOOL IsEndSet() const;
+	BOOL IsActive(const COleDateTime& date) const;
 
 	COleDateTime GetAnyStart() const;
 	COleDateTime GetAnyEnd() const;
@@ -110,6 +111,7 @@ public:
 	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
 	BOOL IsValid() const { return dates.IsValid(); }
 	BOOL IsDone(BOOL bIncGoodAs) const;
+	BOOL IsActive(const COleDateTime& date) const { return dates.IsActive(date); }
 
 	BOOL IsStartDateSet() const { return dates.IsStartSet(); }
 	void SetStartDate(const COleDateTime& date);

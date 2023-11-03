@@ -59,6 +59,7 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	m_bTreatOverdueAsDueToday = FALSE;
 	m_bShowDueDates = TRUE;
 	m_bShowStartDates = TRUE;
+	m_bShowActiveToday = TRUE;
 
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
@@ -85,6 +86,7 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWOVERDUEASDUETODAY, m_bTreatOverdueAsDueToday);
 	DDX_Check(pDX, IDC_HIDEPARENTTASKS, m_bHideParentTasks);
 	DDX_Check(pDX, IDC_HIDEPARENTTASKSBYTAG, m_bHideParentTasksByTag);
+	DDX_Check(pDX, IDC_SHOWACTIVETODAY, m_bShowActiveToday);
 	DDX_Text(pDX, IDC_HIDEPARENTTAG, m_sHideParentTag);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SHOWFUTUREITEMS, m_bShowFutureOcurrences);
@@ -137,6 +139,7 @@ void CCalendarPreferencesPage::EnableDisableControls()
 {
 	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
+	GetDlgItem(IDC_SHOWACTIVETODAY)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowStartDates);
 	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
@@ -176,6 +179,7 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("ShowStartDates"), m_bShowStartDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowDueDates"), m_bShowDueDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowDoneDates"), m_bShowDoneDates);
+	pPrefs->WriteProfileInt(szKey, _T("ShowActiveToday"), m_bShowActiveToday);
 	pPrefs->WriteProfileInt(szKey, _T("ShowCalcStartDates"), m_bShowCalcStartDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowCalcDueDates"), m_bShowCalcDueDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowFutureOcurrences"), m_bShowFutureOcurrences);
@@ -204,6 +208,7 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), TRUE);
 	m_bShowDueDates = pPrefs->GetProfileInt(szKey, _T("ShowDueDates"), TRUE);
 	m_bShowDoneDates = pPrefs->GetProfileInt(szKey, _T("ShowDoneDates"), FALSE);
+	m_bShowActiveToday = pPrefs->GetProfileInt(szKey, _T("ShowActiveToday"), TRUE);
 	m_bShowCalcStartDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcStartDates"), TRUE);
 	m_bShowCalcDueDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcDueDates"), TRUE);
 	m_bShowFutureOcurrences = pPrefs->GetProfileInt(szKey, _T("ShowFutureOcurrences"), TRUE);

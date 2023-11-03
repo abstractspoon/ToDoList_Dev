@@ -415,6 +415,20 @@ void TASKCALITEMDATES::SetCustomDates(const CMapCustomDates& dates)
 	Misc::CopyStrT<COleDateTime>(dates, mapCustomDates);
 }
 
+BOOL TASKCALITEMDATES::IsActive(const COleDateTime& date) const
+{
+	if (IsDone() || !HasAnyStart() || !HasAnyEnd())
+		return FALSE;
+
+	if (GetAnyStart() > CDateHelper::GetDateOnly(date))
+		return FALSE;
+
+	if (GetAnyEnd() <= CDateHelper::GetEndOfDay(date))
+		return FALSE;
+
+	return TRUE;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 TASKCALITEM::TASKCALITEM()

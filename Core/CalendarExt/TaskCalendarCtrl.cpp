@@ -1808,6 +1808,8 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 #endif
 
 	double dCellStart = dtCell, dCellEnd = (dCellStart + 1.0);
+	BOOL bToday = CDateHelper::IsToday(dtCell);
+
 	POSITION pos = mapTasks.GetStartPosition();
 
 	while (pos)
@@ -1829,36 +1831,41 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 		}
 		else
 		{
-			BOOL bAdded = FALSE; // only add once
-
 			if (HasOption(TCCO_DISPLAYCALCSTART) || (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet()))
 			{
 				if (CDateHelper::GetDateOnly(pTCI->GetAnyStartDate()).m_dt == dCellStart)
 				{
 					pTasks->Add(pTCI);
-					bAdded = TRUE;
+					continue;
 				}
 			}
 
-			// only test for due/done if start not added
-			if (!bAdded)
+			if (HasOption(TCCO_DISPLAYCALCDUE) || (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet()))
 			{
-				if (HasOption(TCCO_DISPLAYCALCDUE) || (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet()))
+				if (CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt == dCellStart)
 				{
-					if (CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt == dCellStart)
-					{
-						pTasks->Add(pTCI);
-						bAdded = TRUE;
-					}
-				}
-
-				if (!bAdded && HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
-				{
-					if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()).m_dt == dCellStart)
-						pTasks->Add(pTCI);
+					pTasks->Add(pTCI);
+					continue;
 				}
 			}
-		}
+
+			if (HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
+			{
+				if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()).m_dt == dCellStart)
+				{
+					pTasks->Add(pTCI);
+					continue;
+				}
+			}
+
+			if (HasOption(TCCO_DISPLAYACTIVETODAY))
+			{
+				if (bToday && pTCI->IsActive(dtCell))
+				{
+					pTasks->Add(pTCI);
+					continue;
+				}
+			}		}
 	}
 }
 

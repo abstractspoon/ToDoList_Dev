@@ -56,12 +56,7 @@ void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
 	{
 		m_dwOptions = dwOptions;
 
-		if (dwOptions & (TCCO_DISPLAYCONTINUOUS | 
-						TCCO_DISPLAYSTART | 
-						TCCO_DISPLAYDUE | 
-						TCCO_DISPLAYDONE | 
-						TCCO_DISPLAYCALCSTART | 
-						TCCO_DISPLAYCALCDUE))
+		if (dwOptions & TCCO_DATEDISPLAYOPTIONS)
 		{
 			RecalcSpecialDates();
 		}

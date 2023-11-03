@@ -36,6 +36,7 @@ public:
 	BOOL GetDisplayDue() const { return m_bShowDueDates; }
 	BOOL GetDisplayCalcDue() const { return (m_bShowDueDates && m_bShowCalcDueDates); }
 	BOOL GetDisplayDone() const { return m_bShowDoneDates; }
+	BOOL GetDisplayActiveToday() const { return m_bShowActiveToday; }
 	BOOL GetDisplayFutureOcurrences() const { return m_bShowFutureOcurrences; }
 	BOOL GetDisplayDateInEveryCell() const { return m_bShowDateInEveryCell; }
 	BOOL GetDisplayWeekNumberInCell() const { return m_bShowWeekNumInCell; }
@@ -66,6 +67,7 @@ protected:
 	BOOL	m_bShowCalcDueDates;
 	BOOL	m_bAdjustTaskHeights;
 	BOOL	m_bShowDoneDates;
+	BOOL	m_bShowActiveToday;
 	BOOL	m_bTreatOverdueAsDueToday;
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
@@ -124,6 +126,7 @@ public:
 	BOOL GetDisplayDue() const { return m_page.GetDisplayDue(); }
 	BOOL GetDisplayCalcDue() const { return m_page.GetDisplayCalcDue(); }
 	BOOL GetDisplayDone() const { return m_page.GetDisplayDone(); }
+	BOOL GetDisplayActiveToday() const { return m_page.GetDisplayActiveToday(); }
 	BOOL GetDisplayFutureOcurrences() const { return m_page.GetDisplayFutureOcurrences(); }
 	BOOL GetDisplayDateInEveryCell() const { return m_page.GetDisplayDateInEveryCell(); }
 	BOOL GetDisplayWeekNumberInCell() const { return m_page.GetDisplayWeekNumberInCell(); }

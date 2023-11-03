@@ -285,6 +285,7 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYSTART,						m_dlgPrefs.GetDisplayStart());
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYDUE,						m_dlgPrefs.GetDisplayDue());
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYDONE,						m_dlgPrefs.GetDisplayDone());
+	Misc::SetFlag(dwOptions, TCCO_DISPLAYACTIVETODAY,				m_dlgPrefs.GetDisplayActiveToday());
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYCALCSTART,					m_dlgPrefs.GetDisplayCalcStart());
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYCALCDUE,					m_dlgPrefs.GetDisplayCalcDue());
 	Misc::SetFlag(dwOptions, TCCO_ADJUSTTASKHEIGHTS,				m_dlgPrefs.GetAdjustTaskHeights());
