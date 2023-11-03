@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -162,6 +163,7 @@ namespace unvell.ReoGrid.Editor
 				worksheet.Resetted += worksheet_Resetted;
 				worksheet.SettingsChanged += worksheet_SettingsChanged;
 				worksheet.Scaled += worksheet_GridScaled;
+				//worksheet.CellBodyChanged += worksheet_CellBodyChanged;
 			};
 
 			this.grid.WorksheetRemoved += (ss, ee) =>
@@ -177,6 +179,7 @@ namespace unvell.ReoGrid.Editor
 				worksheet.Resetted -= worksheet_Resetted;
 				worksheet.SettingsChanged -= worksheet_SettingsChanged;
 				worksheet.Scaled -= worksheet_GridScaled;
+				//worksheet.CellBodyChanged -= worksheet_CellBodyChanged;
 			};
 
 			selModeNoneToolStripMenuItem.Click += (s, e) => this.grid.CurrentWorksheet.SelectionMode = WorksheetSelectionMode.None;
@@ -288,7 +291,7 @@ namespace unvell.ReoGrid.Editor
 				{
 					if (MessageBox.Show(LangResource.Msg_Save_File_Immediately,
 						"Edit XML", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
-						== System.Windows.Forms.DialogResult.Cancel)
+						== DialogResult.Cancel)
 					{
 						return;
 					}
@@ -419,7 +422,7 @@ namespace unvell.ReoGrid.Editor
 						dnrf.Comment = namedRange.Comment;
 					}
 
-					if (ShowDialog(dnrf) == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(dnrf) == DialogResult.OK)
 					{
 						var newName = dnrf.RangeName;
 
@@ -428,7 +431,7 @@ namespace unvell.ReoGrid.Editor
 						{
 							if (MessageBox.Show(this, LangRes.LangResource.Msg_Named_Range_Overwrite,
 								Application.ProductName, MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
-								== System.Windows.Forms.DialogResult.Cancel)
+								== DialogResult.Cancel)
 							{
 								return;
 							}
@@ -483,7 +486,7 @@ namespace unvell.ReoGrid.Editor
 					hf.DefaultCellBody = sampleHeader.DefaultCellBody;
 					hf.AutoFitToCell = sampleHeader.IsAutoWidth;
 
-					if (ShowDialog(hf) == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(hf) == DialogResult.OK)
 					{
 						var newText = string.IsNullOrEmpty(hf.HeaderText) ? null : hf.HeaderText;
 
@@ -521,7 +524,7 @@ namespace unvell.ReoGrid.Editor
 					hpf.RowHeaderWidth = sheet.RowHeaderWidth;
 					hpf.AutoFitToCell = sampleHeader.IsAutoHeight;
 
-					if (ShowDialog(hpf) == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(hpf) == DialogResult.OK)
 					{
 						var newText = string.IsNullOrEmpty(hpf.HeaderText) ? null : hpf.HeaderText;
 
@@ -550,6 +553,11 @@ namespace unvell.ReoGrid.Editor
 			editCellToolStripMenuItem.Click += (s, e) =>
 			{
 				CurrentWorksheet.StartEdit();
+			};
+
+			editDroplistItemsToolStripMenuItem.Click += (s, e) => 
+			{
+				worksheet_CellBodyChanged(s, null);
 			};
 
 			rowCutToolStripMenuItem.Click += this.cutRangeToolStripMenuItem_Click;
@@ -621,6 +629,14 @@ namespace unvell.ReoGrid.Editor
 				removeColPageBreakToolStripMenuItem.Enabled = this.grid.CurrentWorksheet.ColumnPageBreaks.Contains(this.grid.CurrentWorksheet.FocusPos.Col);
 			};
 
+			cellContextMenuStrip.Opening += (s, e) =>
+			{
+				var selRange = CurrentWorksheet.SelectionRange;
+				bool isDropdownList = (selRange.IsSingleCell && (CurrentWorksheet.GetCell(selRange.StartPos)?.Body is DropdownListCell));
+
+				editDroplistItemsToolStripMenuItem.Visible = isDropdownList;
+			};
+
 			this.AutoFunctionSumToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("SUM");
 			this.AutoFunctionAverageToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("AVERAGE");
 			this.AutoFunctionCountToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("COUNT");
@@ -628,13 +644,13 @@ namespace unvell.ReoGrid.Editor
 			this.AutoFunctionMinToolStripMenuItem.Click += (s, e) => ApplyFunctionToSelectedRange("MIN");
 
 			this.focusStyleDefaultToolStripMenuItem.CheckedChanged += (s, e) =>
-				{
-					if (this.focusStyleDefaultToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.Default;
-				};
+			{
+				if (this.focusStyleDefaultToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.Default;
+			};
 			this.focusStyleNoneToolStripMenuItem.CheckedChanged += (s, e) =>
-				{
-					if (focusStyleNoneToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.None;
-				};
+			{
+				if (focusStyleNoneToolStripMenuItem.Checked) this.CurrentWorksheet.FocusPosStyle = FocusPosStyle.None;
+			};
 
 #if EX_SCRIPT
 			scriptEditorToolStripMenuItem.Click += (s, e) =>
@@ -824,7 +840,7 @@ namespace unvell.ReoGrid.Editor
 				dlg.Filter = LangResource.Filter_Export_As_CSV;
 				dlg.FileName = Path.GetFileNameWithoutExtension(this.CurrentFilePath);
 
-				if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
 					using (FileStream fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write, FileShare.Read))
 					{
@@ -952,6 +968,23 @@ namespace unvell.ReoGrid.Editor
 		{
 			var worksheet = (Worksheet)sender;
 			zoomToolStripDropDownButton.Text = worksheet.ScaleFactor * 100 + "%";
+		}
+
+		void worksheet_CellBodyChanged(object sender, CellEventArgs e)
+		{
+			if (CurrentWorksheet.SelectionRange.IsSingleCell)
+			{
+				var cell = CurrentWorksheet.GetCell(CurrentWorksheet.SelectionRange.StartPos);
+				var droplistCell = (cell?.Body as DropdownListCell);
+
+				if (droplistCell != null)
+				{
+					var dlg = new DropdownListCellItemsDialog(droplistCell.ListData);
+
+					if (ShowDialog(dlg) == DialogResult.OK)
+					   droplistCell.ListData = dlg.Items;
+				}
+			}
 		}
 
 		#endregion // Constructor
@@ -1683,9 +1716,9 @@ namespace unvell.ReoGrid.Editor
 
 			var dr = MessageBox.Show(LangResource.Msg_Save_Changes, "ReoGrid Editor", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
-			if (dr == System.Windows.Forms.DialogResult.No)
+			if (dr == DialogResult.No)
 				return true;
-			else if (dr == System.Windows.Forms.DialogResult.Cancel)
+			else if (dr == DialogResult.Cancel)
 				return false;
 
 			FileFormat format = FileFormat._Auto;
@@ -2244,7 +2277,7 @@ namespace unvell.ReoGrid.Editor
 				rgf.Rows = worksheet.RowCount;
 				rgf.Cols = worksheet.ColumnCount;
 
-				if (ShowDialog(rgf) == System.Windows.Forms.DialogResult.OK)
+				if (ShowDialog(rgf) == DialogResult.OK)
 				{
 					WorksheetActionGroup ag = new WorksheetActionGroup();
 
@@ -2641,12 +2674,12 @@ namespace unvell.ReoGrid.Editor
 				return;
 			}
 
-			using (var pd = new System.Windows.Forms.PrintDialog())
+			using (var pd = new PrintDialog())
 			{
 				pd.Document = session.PrintDocument;
 				pd.UseEXDialog = true;
 
-				if (pd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				if (pd.ShowDialog() == DialogResult.OK)
 				{
 					session.Print();
 				}
@@ -2673,7 +2706,7 @@ namespace unvell.ReoGrid.Editor
 
 				psf.PrintSettings = (PrintSettings)sheet.PrintSettings.Clone();
 
-				if (ShowDialog(psf) == System.Windows.Forms.DialogResult.OK)
+				if (ShowDialog(psf) == DialogResult.OK)
 				{
 					sheet.PrintSettings = psf.PrintSettings;
 					sheet.AutoSplitPage();

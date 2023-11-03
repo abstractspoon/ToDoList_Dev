@@ -159,13 +159,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFMinimum|AnyCPU' " />
-    <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFRelease|AnyCPU' " />
     <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFReleasePro|AnyCPU' " />
     <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtension|AnyCPU' " />
     <Reference Include="PresentationCore" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtensionPro|AnyCPU' " />
-    <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFMinimum|AnyCPU' " />
-    <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFRelease|AnyCPU' " />
     <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFReleasePro|AnyCPU' " />
     <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtension|AnyCPU' " />
     <Reference Include="PresentationFramework" Condition=" '$(Configuration)|$(Platform)' == 'WPFExtensionPro|AnyCPU' " />

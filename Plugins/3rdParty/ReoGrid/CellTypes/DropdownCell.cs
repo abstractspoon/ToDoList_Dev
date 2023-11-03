@@ -357,10 +357,6 @@ namespace unvell.ReoGrid.CellTypes
 				if (this.dropdownPanel == null)
 				{
 					this.dropdownPanel = new DropdownWindow(this);
-					//dropdown.VisibleChanged += dropdown_VisibleChanged;
-
-					//this.dropdownPanel.LostFocus -= DropdownControl_LostFocus;
-					//this.dropdownPanel.OwnerItem = this.dropdownControl;
 					this.dropdownPanel.VisibleChanged += DropdownPanel_VisibleChanged;
 				}
 
@@ -383,7 +379,7 @@ namespace unvell.ReoGrid.CellTypes
 			OnDropdownControlLostFocus();
 		}
 
-		private int dropdownHeight = 200;
+		private int dropdownHeight = (int)PlatformUtility.ScaleByDPI(200);
 
 		/// <summary>
 		/// Get or set height of dropdown-panel
@@ -394,7 +390,7 @@ namespace unvell.ReoGrid.CellTypes
 			set { this.dropdownHeight = value; }
 		}
 
-		private int minimumDropdownWidth = 120;
+		private int minimumDropdownWidth = (int)PlatformUtility.ScaleByDPI(120);
 
 		/// <summary>
 		/// Minimum width of dropdown panel
@@ -466,10 +462,15 @@ namespace unvell.ReoGrid.CellTypes
 				AutoSize = false;
 				TabStop = true;
 
-				Items.Add(controlHost = new ToolStripControlHost(this.owner.DropdownControl));
+				controlHost = new ToolStripControlHost(this.owner.DropdownControl)
+				{
+					AutoSize = false,
+					Margin = Padding.Empty,
+					Padding = Padding.Empty
+				};
 
-				controlHost.Margin = controlHost.Padding = new Padding(0);
-				controlHost.AutoSize = false;
+				Items.Add(controlHost);
+
 			}
 
 			/// <summary>
@@ -491,6 +492,20 @@ namespace unvell.ReoGrid.CellTypes
 						BackColor = owner.DropdownControl.BackColor;
 					}
 				}
+			}
+
+			protected override void WndProc(ref Message m)
+			{
+				const int WM_FLOATSTATUS = 0x036D;
+
+				// Prevent top-level parent losing activation when we gain focus
+				if (m.Msg == WM_FLOATSTATUS)
+				{
+					m.Result = (IntPtr)1;
+					return;
+				}
+
+				base.WndProc(ref m);
 			}
 
 			/// <summary>

@@ -774,8 +774,12 @@ namespace unvell.ReoGrid
 			[XmlText]
 			public string data;
 
+			// Support for DropdownList cell type
+			[XmlAttribute("list-data")]
+			public string listData; 
+
 			[XmlElement]
-			public RGXmlCellFormual formula;
+			public RGXmlCellFormula formula;
 
 			[XmlAttribute("format")]
 			public string dataFormat;
@@ -797,9 +801,10 @@ namespace unvell.ReoGrid
 
 			[XmlAttribute("trace-dependents")]
 			public string traceDependents;
+
 		}
 
-		public class RGXmlCellFormual
+		public class RGXmlCellFormula
 		{
 			[XmlText]
 			public string val;

@@ -826,6 +826,10 @@ namespace unvell.ReoGrid
 							}
 						}
 					}
+					else if (type == typeof(CellTypes.DropdownListCell) && !String.IsNullOrEmpty(xmlCell.listData))
+					{
+						((CellTypes.DropdownListCell)cell.body).ListData = xmlCell.listData.Split('|');
+					}
 				}
 				#endregion // Body
 
@@ -1505,14 +1509,22 @@ namespace unvell.ReoGrid
 #endif // FORMULA
 										 };
 
+										 if (cell.body is CellTypes.DropdownListCell)
+										 {
+											 var dropCell = ((CellTypes.DropdownListCell)cell.body);
+
+											 if (dropCell.ListData.Count() > 0)
+												xmlCell.listData = string.Join("|", dropCell.ListData);
+										 }
+
 										 if (cell.HasFormula || !(cell.InnerData is bool))
 										 {
 											 xmlCell.data = Convert.ToString(cell.InnerData);
-											 xmlCell.formula = cell.HasFormula ? new RGXmlCellFormual { val = cell.InnerFormula } : null;
+											 xmlCell.formula = cell.HasFormula ? new RGXmlCellFormula { val = cell.InnerFormula } : null;
 										 }
 										 else if (cell.InnerData is bool)
 										 {
-											 xmlCell.formula = new RGXmlCellFormual { val = (bool)cell.InnerData ? "True" : "False" };
+											 xmlCell.formula = new RGXmlCellFormula { val = (bool)cell.InnerData ? "True" : "False" };
 										 }
 
 										 if (cell.body is CellTypes.ImageCell)

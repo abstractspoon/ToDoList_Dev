@@ -212,6 +212,7 @@ namespace unvell.ReoGrid.Editor
 			this.rowFormatCellsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
 			this.editCellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.editDroplistItemsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cellContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.cutRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.copyRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1869,10 +1870,17 @@ namespace unvell.ReoGrid.Editor
 			this.editCellToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
 			this.editCellToolStripMenuItem.Text = "Edit Cell";
 			// 
+			// editDroplistItemsToolStripMenuItem
+			// 
+			this.editDroplistItemsToolStripMenuItem.Name = "editDroplistItemsToolStripMenuItem";
+			this.editDroplistItemsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+			this.editDroplistItemsToolStripMenuItem.Text = "Edit Dropdown List Items...";
+			// 
 			// cellContextMenuStrip
 			// 
 			this.cellContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editCellToolStripMenuItem,
+            this.editDroplistItemsToolStripMenuItem,
             this.toolStripSeparator15,
             this.cutRangeToolStripMenuItem,
             this.copyRangeToolStripMenuItem,
@@ -3640,6 +3648,7 @@ namespace unvell.ReoGrid.Editor
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator15;
 		private System.Windows.Forms.ToolStripMenuItem editCellToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem editDroplistItemsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripButton cutToolStripButton;
 		private System.Windows.Forms.ToolStripButton copyToolStripButton;
 		private System.Windows.Forms.ToolStripButton pasteToolStripButton;
