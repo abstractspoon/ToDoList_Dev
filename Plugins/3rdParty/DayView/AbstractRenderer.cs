@@ -15,8 +15,7 @@ namespace Calendar
         void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight);
         void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth);
         void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected);
-
-		void SetColumnWidth(Graphics g, int colWidth);
+		void DrawAllDayBackground(Graphics g, Rectangle rect);
 
 		Color AllDayEventsBackColor();
 		Color HourSeperatorColor();
@@ -53,11 +52,13 @@ namespace Calendar
                 minuteFont.Dispose();
         }
 
-		// Derived classes must implement
+		// Derived classes must implement -------------------------------------------------
 		public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
 		public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
 		public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay);
 		public abstract void DrawDayBackground(Graphics g, Rectangle rect);
+		public abstract void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected);
+		// --------------------------------------------------------------------------------
 
 		public virtual Color AllDayEventsBackColor()
         {
@@ -123,34 +124,36 @@ namespace Calendar
 			return minuteFont;
 		}
 
-		public virtual void SetColumnWidth(Graphics g, int colWidth)
-		{
-			// To allow derived classes to cache calculations
-		}
-
-        public virtual void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
+		public virtual void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
         {
-            if (g == null)
-                throw new ArgumentNullException("g");
-
-            using (SolidBrush brush = new SolidBrush(hilight ? SelectionColor() : WorkingHourColor()))
-            {
-                g.FillRectangle(brush, rect);
-            }
-
-            if (drawBorder)
-                g.DrawRectangle(SystemPens.WindowFrame, rect);
+			DrawHourRange(g, rect, drawBorder, (hilight ? SelectionColor() : WorkingHourColor()));
         }
 
         public virtual void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth)
         {
+			DrawDayGripper(g, rect, gripWidth, HourSeperatorColor());
+        }
+
+        public virtual void DrawAllDayBackground(Graphics g, Rectangle rect)
+        {
+            if (g == null)
+                throw new ArgumentNullException("g");
+
+            using (Brush brush = new SolidBrush(InterpolateColors(BackColor(), Color.Black, 0.5f)))
+                g.FillRectangle(brush, rect);
+        }
+
+		// static helpers ------------------------------------------------------------------------
+
+		public static void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth, Color color)
+		{
             if (g == null)
                 throw new ArgumentNullException("g");
 
 			if (gripWidth <= 0)
 				return;
 
-			using (Pen pen = new Pen(HourSeperatorColor()))
+			using (Pen pen = new Pen(color))
 			{
 				if (gripWidth > 2)
 				{
@@ -163,17 +166,21 @@ namespace Calendar
 				else 
 					g.DrawRectangle(pen, rect.Left, rect.Top - 1, gripWidth - 1, rect.Height);
 			}
-        }
 
-        public abstract void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected);
+		}
 
-        public void DrawAllDayBackground(Graphics g, Rectangle rect)
+        public static void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, Color color)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            using (Brush brush = new SolidBrush(InterpolateColors(BackColor(), Color.Black, 0.5f)))
+            using (SolidBrush brush = new SolidBrush(color))
+            {
                 g.FillRectangle(brush, rect);
+            }
+
+            if (drawBorder)
+                g.DrawRectangle(SystemPens.WindowFrame, rect);
         }
 
         public static Color InterpolateColors(Color color1, Color color2, float percentage)

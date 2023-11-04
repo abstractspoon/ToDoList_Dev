@@ -37,6 +37,8 @@ namespace Calendar
         }
     }
 
+	public delegate void DayWidthEventHandler(object sender, Graphics g, int colWidth);
+
 	[System.ComponentModel.DesignerCategory("")]
 	public class DayView : UserControl
     {
@@ -64,7 +66,9 @@ namespace Calendar
         protected int groupSpacing = 1;
         protected int daySpacing = 1;
 
-        static protected int minSlotHeight = 5;
+		public event DayWidthEventHandler NotifyDayWidth;
+
+		static protected int minSlotHeight = 5;
 
         public enum AppHeightDrawMode
         {
@@ -221,11 +225,11 @@ namespace Calendar
             Invalidate();
         }
 
-        private AbstractRenderer renderer;
+        private IRenderer renderer;
 
         [System.ComponentModel.Browsable(false)]
         [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
-        public AbstractRenderer Renderer
+        public IRenderer Renderer
         {
             get
             {
@@ -1535,10 +1539,16 @@ namespace Calendar
                 e.Graphics.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
         }
 
+		protected void UpdateColumnWidth(Graphics g, int colWidth)
+		{
+			// For derived classes
+		}
+
 		protected void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
         {
             int dayWidth = (rect.Width / daysToShow);
-			renderer.SetColumnWidth(e.Graphics, dayWidth);
+
+			NotifyDayWidth?.Invoke(this, e.Graphics, dayWidth);
 
             // one day header rectangle
             Rectangle dayHeaderRectangle = new Rectangle(rect.Left, rect.Top, dayWidth, rect.Height);
@@ -1808,7 +1818,7 @@ namespace Calendar
                     if (DrawAllAppBorder)
                         appt.DrawBorder = true;
 
-                    DrawAppointment(e.Graphics, apptView, WantDrawAppointmentSelected(appt));
+                    renderer.DrawAppointment(e.Graphics, apptView, WantDrawAppointmentSelected(appt));
                 }
             }
         }
@@ -2019,7 +2029,7 @@ namespace Calendar
 
 				if (DisplayLongAppointmentsContinuous)
 				{
-					DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+					renderer.DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
 				}
 				else
 				{
@@ -2031,7 +2041,7 @@ namespace Calendar
 						// Task is effectively continuous
 						apptView.StartOfEnd = apptView.EndOfStart;
 
-						DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+						renderer.DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
 					}
 					else
 					{
@@ -2046,7 +2056,7 @@ namespace Calendar
 						g.ExcludeClip(middlePart);
 
 						// Redraw the end
-						DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+						renderer.DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
 
 						g.Restore(gSave);
 					}
@@ -2063,11 +2073,6 @@ namespace Calendar
 		protected virtual bool WantDrawAppointmentSelected(Calendar.Appointment appt)
 		{
 			return (!SavingToImage && (activeTool != drawTool) && (appt == selectedAppointment));
-		}
-
-		protected virtual void DrawAppointment(Graphics g, AppointmentView apptView, bool isSelected)
-		{
-			renderer.DrawAppointment(g, apptView, isSelected);
 		}
 
 		#endregion
