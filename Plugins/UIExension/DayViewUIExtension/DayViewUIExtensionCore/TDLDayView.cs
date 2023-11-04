@@ -355,14 +355,16 @@ namespace DayViewUIExtension
 			get; set;
 		}
 
-		public bool DisplayTasksContinuous
+		private bool m_DisplayLongTasksContinuous = true;
+
+		public bool DisplayLongTasksContinuous
 		{
-			get { return DisplayLongAppointmentsContinuous; }
+			get { return m_DisplayLongTasksContinuous; }
 			set
 			{
-				if (value != DisplayLongAppointmentsContinuous)
+				if (value != m_DisplayLongTasksContinuous)
 				{
-					DisplayLongAppointmentsContinuous = value;
+					m_DisplayLongTasksContinuous = value;
 					FixupSelection(false, true);
 				}
 			}
@@ -685,6 +687,43 @@ namespace DayViewUIExtension
 			return GetRealAppointment(GetAppointmentAt(x, y));
 		}
 
+		override public Calendar.AppointmentView GetAppointmentViewAt(int x, int y, out Rectangle apptRect)
+		{
+			var view = base.GetAppointmentViewAt(x, y, out apptRect);
+
+			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			{
+				var tdlView = (view as TDLAppointmentView);
+
+				if (x < tdlView.EndOfStart)
+				{
+					apptRect.Width = (tdlView.EndOfStart - apptRect.X);
+				}
+				else
+				{
+					apptRect.Width = (apptRect.Right - tdlView.StartOfEnd);
+					apptRect.X = tdlView.StartOfEnd;
+				}
+			}
+
+			return view;
+		}
+
+		override protected Calendar.AppointmentView GetAppointmentViewAt(int x, int y)
+		{
+			var view = base.GetAppointmentViewAt(x, y);
+
+			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			{
+				var tdlView = (view as TDLAppointmentView);
+
+				if ((x < tdlView.EndOfStart) || (x > tdlView.StartOfEnd))
+					return view;
+			}
+
+			return null;
+		}
+
 		public Calendar.Appointment GetAppointment(uint taskID)
 		{
 			TaskExtensionItem extItem;
@@ -816,7 +855,7 @@ namespace DayViewUIExtension
 			if ((appt.StartDate >= endDate) || (appt.EndDate <= startDate))
 				return false;
 
-			if (!DisplayTasksContinuous)
+			if (!DisplayLongTasksContinuous)
 			{
 				if ((appt.StartDate < startDate) && (appt.EndDate > endDate))
 					return false;

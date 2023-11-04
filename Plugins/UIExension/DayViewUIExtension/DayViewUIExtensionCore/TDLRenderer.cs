@@ -790,24 +790,21 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
-        {
-            if (apptView == null)
-                throw new ArgumentNullException("appointment view");
+		public bool CalcAppointmentRects(Calendar.AppointmentView apptView, out Rectangle apptRect, out Rectangle gripRect)
+		{
+			if (apptView.Rectangle.Width == 0 || apptView.Rectangle.Height == 0)
+			{
+				apptRect = Rectangle.Empty;
+				gripRect = Rectangle.Empty;
 
-            if (g == null)
-                throw new ArgumentNullException("g");
+				return false;
+			}
 
 			var appt = apptView.Appointment;
-			var rect = apptView.Rectangle;
-
-			if (rect.Width == 0 || rect.Height == 0)
-				return;
-
-			isSelected = WantDrawAppointmentSelected(appt);
+			apptRect = apptView.Rectangle;
 
 			// Our custom gripper bar
-			var gripRect = rect;
+			gripRect = apptRect;
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
@@ -820,67 +817,97 @@ namespace DayViewUIExtension
 				// so the edge is clipped and likewise for the end date.
 				if (appt.StartDate < StartDate)
 				{
-					rect.X -= 4;
-					rect.Width += 4;
+					apptRect.X -= 4;
+					apptRect.Width += 4;
 
-					gripRect.X = rect.X;
+					gripRect.X = apptRect.X;
 					gripRect.Width = 0;
 				}
 				else if (appt.StartDate > StartDate)
 				{
-					rect.X++;
-					rect.Width--;
+					apptRect.X++;
+					apptRect.Width--;
 
 					gripRect.X++;
 				}
 
 				if (appt.EndDate >= EndDate)
 				{
-					rect.Width += 5;
+					apptRect.Width += 5;
 				}
 			}
 			else // day appt
 			{
 				if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
 				{
-					rect.Y++;
-					rect.Height--;
+					apptRect.Y++;
+					apptRect.Height--;
 				}
 
-				rect.Width -= 1;
+				apptRect.Width -= 1;
 			}
 
-			apptView.Rectangle = rect;
+			return true;
+		}
+
+		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)
+        {
+            if (apptView == null)
+                throw new ArgumentNullException("appointment view");
+
+            if (g == null)
+                throw new ArgumentNullException("g");
+
+			Rectangle apptRect, gripRect;
+
+			if (!CalcAppointmentRects(apptView, out apptRect, out gripRect))
+				return;
+
+			var appt = apptView.Appointment;
+			isSelected = WantDrawAppointmentSelected(appt);
+
+			apptView.Rectangle = apptRect;
 			apptView.GripRect = gripRect;
 
-//			var rect = apptView.Rectangle;
+			double startDay = (appt.StartDate - StartDate).TotalDays;
+			double endDay = (appt.EndDate - StartDate).TotalDays;
 
-//			var appt = apptView.Appointment;
+			var tdlView = (apptView as TDLAppointmentView);
+
+			tdlView.EndOfStart = (daysRect.X + ((int)(startDay + 1)) * m_DayWidth);
+			tdlView.StartOfEnd = (daysRect.X + ((int)endDay) * m_DayWidth);
+
+			if (tdlView.EndOfStart >= tdlView.StartOfEnd)
+			{
+				// Task is effectively continuous
+				tdlView.StartOfEnd = tdlView.EndOfStart;
+			}
+
+			bool drawContinuous = (!apptView.IsLong || DisplayLongTasksContinuous || (tdlView.StartOfEnd == tdlView.EndOfStart));
 
 			Color textColor, fillColor, borderColor, barColor;
 			GetTaskColors(apptView, isSelected, out textColor, out fillColor, out borderColor, out barColor);
 
 			g.SmoothingMode = SmoothingMode.None;
 
-			if (!apptView.IsLong || apptView.DrawLongContinuous || (apptView.StartOfEnd == apptView.EndOfStart))
+			if (drawContinuous)
 			{
 				// Draw the background of the appointment
-				DrawTaskBackground(g, rect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor);
 
 				// Draw appointment icon and gripper
-				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref rect);
+				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
 
 				// draw appointment text
-				DrawTaskText(g, apptView, rect, textColor);
+				DrawTaskText(g, apptView, apptRect, textColor);
 
-				var tdlView = (apptView as TDLAppointmentView);
-				tdlView.TextHorzOffset = (apptView.Rectangle.X - rect.X);
+				tdlView.TextHorzOffset = (apptView.Rectangle.X - apptRect.X);
 			}
 			else // Draw long task discontinuously
 			{
 				// Start Part ------------------------------------------
-				Rectangle startRect = rect;
-				startRect.Width = apptView.EndOfStart - rect.Left;
+				Rectangle startRect = apptRect;
+				startRect.Width = tdlView.EndOfStart - apptRect.Left;
 
 				// Draw the background of the appointment
 				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor);
@@ -891,13 +918,12 @@ namespace DayViewUIExtension
 				// draw appointment text
 				DrawTaskText(g, apptView, startRect, textColor);
 
-				var tdlView = (apptView as TDLAppointmentView);
 				tdlView.TextHorzOffset = (startRect.X - apptView.Rectangle.X);
 
 				// End Part --------------------------------------------
-				Rectangle endRect = rect;
-				endRect.X = apptView.StartOfEnd;
-				endRect.Width = rect.Right - endRect.X;
+				Rectangle endRect = apptRect;
+				endRect.X = tdlView.StartOfEnd;
+				endRect.Width = apptRect.Right - endRect.X;
 
 				// Draw the background of the appointment
 				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor);

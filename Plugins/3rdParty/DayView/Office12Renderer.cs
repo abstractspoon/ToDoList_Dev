@@ -206,7 +206,7 @@ namespace Calendar
                 g.FillRectangle(backBrush, rect);
         }
 
-        public override void DrawAppointment(System.Drawing.Graphics g, AppointmentView apptView, bool isSelected)
+        public override void DrawAppointment(System.Drawing.Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected)
         {
             if (apptView == null)
                 throw new ArgumentNullException("apptView");

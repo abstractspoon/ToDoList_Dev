@@ -194,7 +194,6 @@ namespace Calendar
 		}
 
 		protected bool SavingToImage { get; set; }
-		protected bool DisplayLongAppointmentsContinuous { get; set; } = true;
 		
 		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
 
@@ -1385,48 +1384,26 @@ namespace Calendar
 			return (apptView == null) ? null : apptView.Appointment;
         }
 
-		public AppointmentView GetAppointmentViewAt(int x, int y, out Rectangle apptRect)
+		virtual public AppointmentView GetAppointmentViewAt(int x, int y, out Rectangle apptRect)
 		{
 			var apptView = GetAppointmentViewAt(x, y);
 
 			if (apptView == null)
-			{
 				apptRect = Rectangle.Empty;
-				return null;
-			}
-
-			apptRect = apptView.Rectangle;
-
-			if (apptView.IsLong && !apptView.DrawLongContinuous)
-			{
-				if (x < apptView.EndOfStart)
-				{
-					apptRect.Width = (apptView.EndOfStart - apptRect.X);
-				}
-				else
-				{
-					apptRect.Width = (apptRect.Right - apptView.StartOfEnd);
-					apptRect.X = apptView.StartOfEnd;
-				}
-			}
+			else
+				apptRect = apptView.Rectangle;
 
 			return apptView;
 		}
 
-		protected AppointmentView GetAppointmentViewAt(int x, int y)
+		virtual protected AppointmentView GetAppointmentViewAt(int x, int y)
 		{
 			if (GetFullDayApptsRectangle().Contains(x, y))
 			{
 				foreach (AppointmentView view in longAppointmentViews.Values)
 				{
 					if (view.Rectangle.Contains(x, y))
-					{
-						if (DisplayLongAppointmentsContinuous)
-							return view;
-
-						if ((x < view.EndOfStart) || (x > view.StartOfEnd))
-							return view;
-					}
+						return view;
 				}
 			}
 			else
@@ -1818,7 +1795,7 @@ namespace Calendar
                     if (DrawAllAppBorder)
                         appt.DrawBorder = true;
 
-                    renderer.DrawAppointment(e.Graphics, apptView, WantDrawAppointmentSelected(appt));
+                    renderer.DrawAppointment(e.Graphics, rect, apptView, WantDrawAppointmentSelected(appt));
                 }
             }
         }
@@ -1920,6 +1897,11 @@ namespace Calendar
             }
         }
 
+		protected virtual bool AppointmentsIntersect(Appointment appt, Appointment apptOther)
+		{
+			return appt.IntersectsWith(apptOther);
+		}
+
         private int RecalcAppointmentLayers(AppointmentList appointments)
         {
             if ((appointments == null) || (appointments.Count == 0))
@@ -1943,7 +1925,7 @@ namespace Calendar
 
 						foreach (var processedAppt in processed)
                         {
-                            if ((processedAppt.Layer == lay) && appt.IntersectsWith(processedAppt, DisplayLongAppointmentsContinuous))
+                            if ((processedAppt.Layer == lay) && AppointmentsIntersect(appt, processedAppt))
                             {
 								// If we find an intersection we update the current
 								// appt's layer and move on to the next layer
@@ -1970,7 +1952,7 @@ namespace Calendar
             return layers.Count;
         }
 
-        virtual protected void DrawLongAppointments(Graphics g, Rectangle rect)
+        protected void DrawLongAppointments(Graphics g, Rectangle daysRect)
         {
             AppointmentList appointments = (AppointmentList)cachedAppointments[-1];
 
@@ -1979,13 +1961,13 @@ namespace Calendar
             if (numLayers == 0)
                 return;
 
-            int dayWidth = rect.Width / daysToShow;
+            int dayWidth = (daysRect.Width / daysToShow);
             int y = DayHeaderHeight;
             longAppointmentViews.Clear();
 
             allDayEventsHeaderHeight = ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
 
-            Rectangle backRectangle = rect;
+            Rectangle backRectangle = daysRect;
             backRectangle.Y = y;
             backRectangle.Height = allDayEventsHeaderHeight;
 
@@ -1996,19 +1978,19 @@ namespace Calendar
 
             foreach (Appointment appt in appointments)
             {
-                Rectangle apptRect = rect;
+                Rectangle apptRect = daysRect;
 
                 double startDay = (appt.StartDate - startDate).TotalDays;
-                int startPos = (rect.X + (int)(startDay * dayWidth));
+                int startPos = (daysRect.X + (int)(startDay * dayWidth));
 
-                if (startPos <= rect.Left)
-                    startPos = (rect.Left + 2);
+                if (startPos <= daysRect.Left)
+                    startPos = (daysRect.Left + 2);
 
                 double endDay = (appt.EndDate - startDate).TotalDays;
-                int endPos = (rect.X + (int)(endDay * dayWidth));
+                int endPos = (daysRect.X + (int)(endDay * dayWidth));
 
-                if ((endPos >= rect.Right) || (appt.EndDate >= endOfLastDay))
-                    endPos = (rect.Right - 2);
+                if ((endPos >= daysRect.Right) || (appt.EndDate >= endOfLastDay))
+                    endPos = (daysRect.Right - 2);
 
                 apptRect.X = startPos;
                 apptRect.Width = (endPos - startPos);
@@ -2025,49 +2007,15 @@ namespace Calendar
 				apptView.Rectangle = apptRect;
 				apptView.GripRect = gripRect;
 				apptView.IsLong = true;
-				apptView.DrawLongContinuous = DisplayLongAppointmentsContinuous;
 
-				if (DisplayLongAppointmentsContinuous)
-				{
-					renderer.DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
-				}
-				else
-				{
-					apptView.EndOfStart = (rect.X + ((int)(startDay + 1)) * dayWidth);
-					apptView.StartOfEnd = (rect.X + ((int)endDay) * dayWidth);
-
-					if (apptView.EndOfStart >= apptView.StartOfEnd)
-					{
-						// Task is effectively continuous
-						apptView.StartOfEnd = apptView.EndOfStart;
-
-						renderer.DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
-					}
-					else
-					{
-						// Clip out the middle part
-						var middlePart = apptView.Rectangle;
-
-						middlePart.X = apptView.EndOfStart - 1;
-						middlePart.Width = (apptView.StartOfEnd - apptView.EndOfStart) + 2;
-						middlePart.Height += 1;
-
-						var gSave = g.Save();
-						g.ExcludeClip(middlePart);
-
-						// Redraw the end
-						renderer.DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
-
-						g.Restore(gSave);
-					}
-				}
+				renderer.DrawAppointment(g, daysRect, apptView, WantDrawAppointmentSelected(appt));
 			}
 
 			// Draw a vertical line to close off the long appointments on the left
 			using (Pen m_Pen = new Pen(Color.DarkGray))
-                g.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, rect.Bottom);
+                g.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, daysRect.Bottom);
 
-            g.SetClip(rect);
+            g.SetClip(daysRect);
         }
 
 		protected virtual bool WantDrawAppointmentSelected(Calendar.Appointment appt)

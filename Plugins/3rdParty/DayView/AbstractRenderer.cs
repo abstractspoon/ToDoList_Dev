@@ -14,7 +14,7 @@ namespace Calendar
         void DrawDayBackground(Graphics g, Rectangle rect);
         void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight);
         void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth);
-        void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected);
+        void DrawAppointment(Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected);
 		void DrawAllDayBackground(Graphics g, Rectangle rect);
 
 		Color AllDayEventsBackColor();
@@ -57,7 +57,7 @@ namespace Calendar
 		public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
 		public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay);
 		public abstract void DrawDayBackground(Graphics g, Rectangle rect);
-		public abstract void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected);
+		public abstract void DrawAppointment(Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected);
 		// --------------------------------------------------------------------------------
 
 		public virtual Color AllDayEventsBackColor()
