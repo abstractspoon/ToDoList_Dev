@@ -6,6 +6,7 @@
 #include "ColorUtil.h"
 #include "PluginHelpers.h"
 #include "UIExtension.h"
+#include "DPIScaling.h"
 
 #include <Shared\OSVersion.h>
 #include <Shared\GraphicsMisc.h>
@@ -333,11 +334,13 @@ void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs
 		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
 		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
 
-		Drawing::Rectangle rect(Point::Empty, Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
-		e->Graphics->DrawImage(e->Image, rect, 0, 0, e->ImageRectangle.Width, e->ImageRectangle.Height, System::Drawing::GraphicsUnit::Pixel);
+		Drawing::Rectangle checkRect(Point::Empty, Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
+		Drawing::Rectangle imageRect(Point::Empty, DPIScaling::UnScale(e->ImageRectangle.Size));
+
+		e->Graphics->DrawImage(e->Image, checkRect, imageRect, System::Drawing::GraphicsUnit::Pixel);
 
 		auto selColor = Color::FromArgb(128, Drawing::SystemColors::MenuHighlight);
-		e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), rect);
+		e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), checkRect);
 	}
 	else
 	{
