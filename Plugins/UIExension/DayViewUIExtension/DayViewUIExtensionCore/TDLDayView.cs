@@ -825,7 +825,7 @@ namespace DayViewUIExtension
 		private bool IsTodayInRange(DateTime start, DateTime end)
 		{
 			var today = DateTime.Now.Date;
-			return ((today >= start) || (today <= end));
+			return ((today >= start) && (today < end));
 		}
 
 		public bool IsItemDisplayable(Calendar.Appointment appt)
