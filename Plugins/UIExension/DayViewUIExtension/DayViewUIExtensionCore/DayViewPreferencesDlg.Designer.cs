@@ -30,7 +30,8 @@
         {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewPreferencesDlg));
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.m_DisplayContinuous = new System.Windows.Forms.CheckBox();
+			this.m_ShowActiveToday = new System.Windows.Forms.CheckBox();
+			this.m_DisplayDiscontinuous = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.m_HideParentTasksTag = new System.Windows.Forms.TextBox();
 			this.m_ShowFutureOccurrences = new System.Windows.Forms.CheckBox();
@@ -57,7 +58,8 @@
 			this.panel1.AutoScroll = true;
 			this.panel1.BackColor = System.Drawing.SystemColors.Window;
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.panel1.Controls.Add(this.m_DisplayContinuous);
+			this.panel1.Controls.Add(this.m_ShowActiveToday);
+			this.panel1.Controls.Add(this.m_DisplayDiscontinuous);
 			this.panel1.Controls.Add(this.groupBox1);
 			this.panel1.Controls.Add(this.label2);
 			this.panel1.Controls.Add(this.m_MinSlotHeightCombo);
@@ -66,22 +68,34 @@
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(501, 292);
+			this.panel1.Size = new System.Drawing.Size(501, 331);
 			this.panel1.TabIndex = 2;
 			// 
-			// m_DisplayContinuous
+			// m_ShowActiveToday
 			// 
-			this.m_DisplayContinuous.AutoSize = true;
-			this.m_DisplayContinuous.Checked = true;
-			this.m_DisplayContinuous.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.m_DisplayContinuous.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.m_DisplayContinuous.Location = new System.Drawing.Point(13, 63);
-			this.m_DisplayContinuous.Name = "m_DisplayContinuous";
-			this.m_DisplayContinuous.Size = new System.Drawing.Size(407, 17);
-			this.m_DisplayContinuous.TabIndex = 4;
-			this.m_DisplayContinuous.Text = "&Display tasks as continuous between their \'Start\' and \'Due\' (or \'Completion\') da" +
-    "tes";
-			this.m_DisplayContinuous.UseVisualStyleBackColor = true;
+			this.m_ShowActiveToday.AutoSize = true;
+			this.m_ShowActiveToday.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.m_ShowActiveToday.Location = new System.Drawing.Point(32, 86);
+			this.m_ShowActiveToday.Name = "m_ShowActiveToday";
+			this.m_ShowActiveToday.Size = new System.Drawing.Size(172, 17);
+			this.m_ShowActiveToday.TabIndex = 6;
+			this.m_ShowActiveToday.Text = "Display active tasks on \'Today\'";
+			this.m_ShowActiveToday.UseVisualStyleBackColor = true;
+			// 
+			// m_DisplayDiscontinuous
+			// 
+			this.m_DisplayDiscontinuous.AutoSize = true;
+			this.m_DisplayDiscontinuous.Checked = true;
+			this.m_DisplayDiscontinuous.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_DisplayDiscontinuous.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.m_DisplayDiscontinuous.Location = new System.Drawing.Point(13, 63);
+			this.m_DisplayDiscontinuous.Name = "m_DisplayDiscontinuous";
+			this.m_DisplayDiscontinuous.Size = new System.Drawing.Size(413, 17);
+			this.m_DisplayDiscontinuous.TabIndex = 4;
+			this.m_DisplayDiscontinuous.Text = "&Display tasks discontinuously between their \'Start\' and \'Due\' (or \'Completion\') " +
+    "dates";
+			this.m_DisplayDiscontinuous.UseVisualStyleBackColor = true;
+			this.m_DisplayDiscontinuous.CheckedChanged += new System.EventHandler(this.OnDisplayTasksContinuous);
 			// 
 			// groupBox1
 			// 
@@ -93,7 +107,7 @@
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningWeekends);
 			this.groupBox1.Controls.Add(this.m_HideTasksWithoutTimes);
 			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.groupBox1.Location = new System.Drawing.Point(13, 91);
+			this.groupBox1.Location = new System.Drawing.Point(13, 114);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(475, 187);
 			this.groupBox1.TabIndex = 5;
@@ -227,7 +241,7 @@
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(435, 314);
+			this.BtnCancel.Location = new System.Drawing.Point(435, 353);
 			this.BtnCancel.Name = "BtnCancel";
 			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 1;
@@ -238,7 +252,7 @@
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(353, 314);
+			this.BtnOK.Location = new System.Drawing.Point(353, 353);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -251,7 +265,7 @@
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(520, 346);
+			this.ClientSize = new System.Drawing.Size(520, 385);
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
@@ -285,9 +299,10 @@
 		private System.Windows.Forms.ComboBox m_MinSlotHeightCombo;
 		private System.Windows.Forms.ComboBox m_SlotMinuteCombo;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.CheckBox m_DisplayContinuous;
+		private System.Windows.Forms.CheckBox m_DisplayDiscontinuous;
 		private System.Windows.Forms.CheckBox m_ShowFutureOccurrences;
 		private System.Windows.Forms.TextBox m_HideParentTasksTag;
 		private System.Windows.Forms.CheckBox m_HideParentTasksByTag;
+		private System.Windows.Forms.CheckBox m_ShowActiveToday;
 	}
 }

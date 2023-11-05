@@ -872,8 +872,55 @@ namespace DayViewUIExtension
 			{
 				// Task is effectively continuous
 				tdlView.StartOfEnd = tdlView.EndOfStart;
+				return false;
 			}
 
+			// Start is discontinuous from end, so now we calculate today's extents
+			// and see if they is continuous with either the start or end
+			if (DisplayActiveTasksToday && IsTodayVisible)
+			{
+				var taskItem = (appt as TaskItem);
+
+				if (taskItem != null)
+				{
+					double startToday = (DateTime.Now.Date - StartDate).TotalDays;
+					double endToday = (startToday + 1);
+
+					// Today must not coincide with start day or end day
+					if ((startToday > startDay) && (endToday < endDay))
+					{
+						tdlView.StartOfToday = (daysRect.X + ((int)startToday) * m_DayWidth);
+						tdlView.EndOfToday = (tdlView.StartOfToday + m_DayWidth);
+
+						// if 'today' is continuous with the start or end piece
+						// absorb it into that adjacent piece
+						if (tdlView.StartOfToday == tdlView.EndOfStart)
+						{
+							tdlView.EndOfStart = tdlView.EndOfToday;
+						}
+						else if (tdlView.EndOfToday == tdlView.StartOfEnd)
+						{
+							tdlView.StartOfEnd = tdlView.StartOfToday;
+						}
+						else
+						{
+							todayRect = tdlView.Rectangle;
+							todayRect.X = tdlView.StartOfToday;
+							todayRect.Width = m_DayWidth;
+						}
+					}
+
+					// Check again
+					if (tdlView.EndOfStart >= tdlView.StartOfEnd)
+					{
+						// Task is effectively continuous
+						tdlView.StartOfEnd = tdlView.EndOfStart;
+						return false;
+					}
+				}
+			}
+
+			//else
 			var apptRect = tdlView.Rectangle;
 
 			startRect = apptRect;
@@ -883,10 +930,7 @@ namespace DayViewUIExtension
 			endRect.X = tdlView.StartOfEnd;
 			endRect.Width = apptRect.Right - endRect.X;
 
-			todayRect = Rectangle.Empty; // TODO
-
-
-			return (tdlView.StartOfEnd != tdlView.EndOfStart);
+			return true; // Discontinuous to some degree
 		}
 
 		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)

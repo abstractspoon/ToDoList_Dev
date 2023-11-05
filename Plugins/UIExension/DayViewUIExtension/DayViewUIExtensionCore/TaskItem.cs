@@ -38,8 +38,8 @@ namespace DayViewUIExtension
 
 		public Rectangle IconRect = Rectangle.Empty;
 		public int TextHorzOffset = 0;
-		public int EndOfStart = -1;
-		public int StartOfEnd = -1;
+		public int EndOfStart = -1, StartOfEnd = -1;
+		public int StartOfToday = -1, EndOfToday = -1;
 	}
 
 	// ---------------------------------------------------------------
@@ -261,6 +261,15 @@ namespace DayViewUIExtension
 			}
 
 			return true;
+		}
+
+		public bool IntersectsToday
+		{
+			get
+			{
+				var today = DateTime.Now.Date;
+				return ((today >= StartDate) && (today <= EndDate));
+			}
 		}
 
 		private void UpdateCustomDateAttributes(Task task, List<CustomAttributeDefinition> dateAttribs)

@@ -370,6 +370,21 @@ namespace DayViewUIExtension
 			}
 		}
 
+		private bool m_DisplayActiveTasksToday = true;
+
+		public bool DisplayActiveTasksToday
+		{
+			get { return m_DisplayActiveTasksToday; }
+			set
+			{
+				if (value != m_DisplayActiveTasksToday)
+				{
+					m_DisplayActiveTasksToday = value;
+					FixupSelection(false, true);
+				}
+			}
+		}
+
 		public bool HideTasksWithoutTimes
 		{
 			get { return m_HideTasksWithoutTimes; }
@@ -719,6 +734,12 @@ namespace DayViewUIExtension
 
 				if ((x < tdlView.EndOfStart) || (x > tdlView.StartOfEnd))
 					return view;
+
+				if (DisplayActiveTasksToday && IsTodayVisible)
+				{
+					if ((x > tdlView.StartOfToday) && (x < tdlView.EndOfToday))
+						return view;
+				}
 			}
 
 			return null;
@@ -793,6 +814,20 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		private bool IsTodayVisible
+		{
+			get
+			{
+				return IsTodayInRange(StartDate, EndDate);
+			}
+		}
+
+		private bool IsTodayInRange(DateTime start, DateTime end)
+		{
+			var today = DateTime.Now.Date;
+			return ((today >= start) || (today <= end));
+		}
+
 		public bool IsItemDisplayable(Calendar.Appointment appt)
 		{
 			if (appt == null)
@@ -857,6 +892,14 @@ namespace DayViewUIExtension
 
 			if (!DisplayLongTasksContinuous)
 			{
+				if (DisplayActiveTasksToday && IsTodayInRange(startDate, endDate))
+				{
+					var taskItem = (appt as TaskItem);
+
+					if (taskItem.IntersectsToday)
+						return true;
+				}
+
 				if ((appt.StartDate < startDate) && (appt.EndDate > endDate))
 					return false;
 			}

@@ -74,7 +74,8 @@ namespace DayViewUIExtension
 			prefs.WriteProfileString(prefsKey, "HideParentTasksTag", m_HideParentTasksTag.Text);
 
 			prefs.WriteProfileBool(prefsKey, "DisplayContinuous", DisplayTasksContinuous);
-            prefs.WriteProfileBool(prefsKey, "HideTasksWithoutTimes", HideTasksWithoutTimes);
+			prefs.WriteProfileBool(prefsKey, "ShowActiveToday", DisplayActiveTasksToday);
+			prefs.WriteProfileBool(prefsKey, "HideTasksWithoutTimes", HideTasksWithoutTimes);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningWeekends", HideTasksSpanningWeekends);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
 			prefs.WriteProfileBool(prefsKey, "ShowFutureOccurrences", ShowFutureOccurrences);
@@ -91,7 +92,8 @@ namespace DayViewUIExtension
 			m_HideParentTasksByTag.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasksByTag", false);
 			m_HideParentTasksTag.Text = prefs.GetProfileString(prefsKey, "HideParentTasksTag", "");
 
-			m_DisplayContinuous.Checked = prefs.GetProfileBool(prefsKey, "DisplayContinuous", true);
+			m_DisplayDiscontinuous.Checked = !prefs.GetProfileBool(prefsKey, "DisplayContinuous", true);
+			m_ShowActiveToday.Checked = prefs.GetProfileBool(prefsKey, "ShowActiveToday", true);
 			m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
@@ -114,6 +116,7 @@ namespace DayViewUIExtension
 			var orgParentTagText = m_HideParentTasksTag.Text;
 
 			var orgDisplayCont = DisplayTasksContinuous;
+			var orgDisplayToday = DisplayActiveTasksToday;
 			var orgHideNoTimes = HideTasksWithoutTimes;
 			var orgHideSpanWeekends = HideTasksSpanningWeekends;
 			var orgHideSpanDays = HideTasksSpanningDays;
@@ -124,6 +127,7 @@ namespace DayViewUIExtension
 			// Enable states
 			m_HideParentTasksByTag.Enabled = m_HideParentTasks.Checked;
 			m_HideParentTasksTag.Enabled = m_HideParentTasksByTag.Enabled && m_HideParentTasksByTag.Checked;
+			m_ShowActiveToday.Enabled = !DisplayTasksContinuous;
 
 			var ret = base.ShowDialog(owner);
 
@@ -134,7 +138,8 @@ namespace DayViewUIExtension
 				m_HideParentTasksByTag.Checked = orgParentByTag;
 				m_HideParentTasksTag.Text = orgParentTagText;
 
-				m_DisplayContinuous.Checked = orgDisplayCont;
+				m_DisplayDiscontinuous.Checked = orgDisplayCont;
+				m_ShowActiveToday.Checked = orgDisplayToday;
 				m_HideTasksWithoutTimes.Checked = orgHideNoTimes;
 				m_HideTasksSpanningWeekends.Checked = orgHideSpanWeekends;
 				m_HideTasksSpanningDays.Checked = orgHideSpanDays;
@@ -163,7 +168,8 @@ namespace DayViewUIExtension
         public bool HideTasksWithoutTimes { get { return m_HideTasksWithoutTimes.Checked; } }
         public bool HideTasksSpanningWeekends { get { return m_HideTasksSpanningWeekends.Checked; } }
         public bool HideTasksSpanningDays { get { return m_HideTasksSpanningDays.Checked; } }
-		public bool DisplayTasksContinuous { get { return m_DisplayContinuous.Checked; } }
+		public bool DisplayTasksContinuous { get { return !m_DisplayDiscontinuous.Checked; } }
+		public bool DisplayActiveTasksToday { get { return m_ShowActiveToday.Checked; } }
 		public bool ShowFutureOccurrences { get { return m_ShowFutureOccurrences.Checked; } }
 
 		public int SlotMinutes
@@ -242,6 +248,11 @@ namespace DayViewUIExtension
 		private void OnHideParentTasksByTag(object sender, EventArgs e)
 		{
 			m_HideParentTasksTag.Enabled = m_HideParentTasksByTag.Checked;
+		}
+
+		private void OnDisplayTasksContinuous(object sender, EventArgs e)
+		{
+			m_ShowActiveToday.Enabled = !DisplayTasksContinuous;
 		}
 	}
 }

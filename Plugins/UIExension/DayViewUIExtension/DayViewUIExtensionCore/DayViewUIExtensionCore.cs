@@ -818,6 +818,7 @@ namespace DayViewUIExtension
             m_DayView.SetHideParentTasks(m_PrefsDlg.GetHideParentTasks(out tag), tag);
 
 			m_DayView.DisplayLongTasksContinuous = m_PrefsDlg.DisplayTasksContinuous;
+			m_DayView.DisplayActiveTasksToday = m_PrefsDlg.DisplayActiveTasksToday;
 			m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
             m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
