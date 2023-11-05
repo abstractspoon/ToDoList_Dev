@@ -790,21 +790,18 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool CalcAppointmentRects(Calendar.AppointmentView apptView, out Rectangle apptRect, out Rectangle gripRect)
+		public bool CalcAppointmentRects(Calendar.AppointmentView apptView)
 		{
 			if (apptView.Rectangle.Width == 0 || apptView.Rectangle.Height == 0)
 			{
-				apptRect = Rectangle.Empty;
-				gripRect = Rectangle.Empty;
-
 				return false;
 			}
 
 			var appt = apptView.Appointment;
-			apptRect = apptView.Rectangle;
+			var apptRect = apptView.Rectangle;
 
 			// Our custom gripper bar
-			gripRect = apptRect;
+			var gripRect = apptRect;
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
@@ -846,6 +843,9 @@ namespace DayViewUIExtension
 
 				apptRect.Width -= 1;
 			}
+
+			apptView.Rectangle = apptRect;
+			apptView.GripRect = gripRect;
 
 			return true;
 		}
@@ -897,7 +897,7 @@ namespace DayViewUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-			if (!CalcAppointmentRects(apptView, out apptView.Rectangle, out apptView.GripRect))
+			if (!CalcAppointmentRects(apptView))
 				return;
 
 			Color textColor, fillColor, borderColor, barColor;
