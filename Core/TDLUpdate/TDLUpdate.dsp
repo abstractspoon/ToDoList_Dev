@@ -170,10 +170,6 @@ SOURCE=.\res\TDLUpdate.ico
 
 SOURCE=.\res\TDLUpdate.rc2
 # End Source File
-# Begin Source File
-
-SOURCE=.\res\TDLUpdate_wiz_header.bmp
-# End Source File
 # End Group
 # Begin Group "Libs"
 
