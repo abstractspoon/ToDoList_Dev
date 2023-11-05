@@ -263,7 +263,7 @@ namespace Calendar
             return IsLongAppt(StartDate, EndDate);
         }
 
-		public bool IntersectsWith(Appointment other)
+		public bool Intersects(Appointment other)
 		{
 			if (!HasValidDates() || !other.HasValidDates())
 				return false;

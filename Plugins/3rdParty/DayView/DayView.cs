@@ -1899,7 +1899,7 @@ namespace Calendar
 
 		protected virtual bool AppointmentsIntersect(Appointment appt, Appointment apptOther)
 		{
-			return appt.IntersectsWith(apptOther);
+			return appt.Intersects(apptOther);
 		}
 
         private int RecalcAppointmentLayers(AppointmentList appointments)

@@ -247,9 +247,9 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool IntersectsWith(Calendar.Appointment other, bool displayLongAppointmentsContinuous)
+		public bool Intersects(Calendar.Appointment other, bool displayLongAppointmentsContinuous)
 		{
-			if (!base.IntersectsWith(other))
+			if (!base.Intersects(other))
 				return false;
 
 			if (IsLongAppt() && !displayLongAppointmentsContinuous)
