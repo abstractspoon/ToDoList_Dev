@@ -216,22 +216,22 @@ BEGIN
     CONTROL         "Dynamically reduce items heights to display more tasks",
                     IDC_DYNAMICTASKHEIGHT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,111,334,10
-    CONTROL         "Display tasks continuously between their 'Start' and 'Due' (or 'Completion') dates",
-                    IDC_SHOWTASKSCONTINUOUS,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Display tasks discontinuously between their 'Start' and 'Due' (or 'Completion') dates",
+                    IDC_SHOWTASKSDISCONTINUOUS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,126,334,10
+    CONTROL         "Display active tasks on 'Today'",IDC_SHOWACTIVETODAY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,141,322,10
     CONTROL         "Display task 'Start' dates",IDC_SHOWSTARTDATES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,141,334,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,156,316,10
     CONTROL         "I&ncluding 'Calculated Start' dates",
                     IDC_SHOWCALCSTARTDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,17,157,324,10
+                    WS_TABSTOP,29,172,312,10
     CONTROL         "Display task 'Due' dates",IDC_SHOWDUEDATES,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,171,334,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,19,186,316,10
     CONTROL         "Incl&uding 'Calculated Due' dates",IDC_SHOWCALCDUEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,186,323,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,30,201,311,10
     CONTROL         "Display task 'Completion' dates",IDC_SHOWDONEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,201,334,10
-    CONTROL         "Display active tasks on 'Today'",IDC_SHOWACTIVETODAY,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,216,334,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,216,316,10
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,231,334,10

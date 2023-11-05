@@ -30,7 +30,7 @@ public:
 	BOOL GetTreatOverdueAsDueToday() const { return m_bTreatOverdueAsDueToday; }
 	BOOL GetHideParentTasks(CString& sTag) const;
 
-	BOOL GetDisplayAsContinuous() const { return m_bShowTasksContinuous; }
+	BOOL GetDisplayAsContinuous() const { return !m_bShowTasksDiscontinuous; }
 	BOOL GetDisplayStart() const { return m_bShowStartDates; }
 	BOOL GetDisplayCalcStart() const { return (m_bShowStartDates && m_bShowCalcStartDates); }
 	BOOL GetDisplayDue() const { return m_bShowDueDates; }
@@ -62,7 +62,7 @@ protected:
 	BOOL	m_bShowDueDates;
 	BOOL	m_bShowMiniCalendar;
 	BOOL	m_bShowStartDates;
-	BOOL	m_bShowTasksContinuous;
+	BOOL	m_bShowTasksDiscontinuous;
 	BOOL	m_bShowCalcStartDates;
 	BOOL	m_bShowCalcDueDates;
 	BOOL	m_bAdjustTaskHeights;

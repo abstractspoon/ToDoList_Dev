@@ -78,7 +78,7 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWDUEDATES, m_bShowDueDates);
 	DDX_Check(pDX, IDC_SHOWMINICALENDAR, m_bShowMiniCalendar);
 	DDX_Check(pDX, IDC_SHOWSTARTDATES, m_bShowStartDates);
-	DDX_Check(pDX, IDC_SHOWTASKSCONTINUOUS, m_bShowTasksContinuous);
+	DDX_Check(pDX, IDC_SHOWTASKSDISCONTINUOUS, m_bShowTasksDiscontinuous);
 	DDX_Check(pDX, IDC_SHOWCALCSTARTDATES, m_bShowCalcStartDates);
 	DDX_Check(pDX, IDC_SHOWCALCDUEDATES, m_bShowCalcDueDates);
 	DDX_Check(pDX, IDC_DYNAMICTASKHEIGHT, m_bAdjustTaskHeights);
@@ -105,7 +105,7 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CCalendarPreferencesPage)
-	ON_BN_CLICKED(IDC_SHOWTASKSCONTINUOUS, OnOptionChanged)
+	ON_BN_CLICKED(IDC_SHOWTASKSDISCONTINUOUS, OnOptionChanged)
 	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnOptionChanged)
 	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnOptionChanged)
 	ON_BN_CLICKED(IDC_SHOWMINICALENDAR, OnOptionChanged)
@@ -137,11 +137,11 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 
 void CCalendarPreferencesPage::EnableDisableControls()
 {
-	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
-	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
-	GetDlgItem(IDC_SHOWACTIVETODAY)->EnableWindow(!m_bShowTasksContinuous);
-	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowStartDates);
-	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
+	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(m_bShowTasksDiscontinuous);
+	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(m_bShowTasksDiscontinuous);
+	GetDlgItem(IDC_SHOWACTIVETODAY)->EnableWindow(m_bShowTasksDiscontinuous);
+	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(m_bShowTasksDiscontinuous && m_bShowStartDates);
+	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(m_bShowTasksDiscontinuous && m_bShowDueDates);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
 
@@ -151,7 +151,7 @@ void CCalendarPreferencesPage::EnableDisableControls()
 	CString sCurLabel;
 	GetDlgItem(IDC_SHOWDONEDATES)->GetWindowText(sCurLabel);
 
-	CEnString sNewLabel(m_bShowTasksContinuous ? IDS_DISPLAYDONETASKS : IDS_DISPLAYTASKDONEDATES);
+	CEnString sNewLabel(m_bShowTasksDiscontinuous ? IDS_DISPLAYTASKDONEDATES : IDS_DISPLAYDONETASKS);
 
 	if (sNewLabel != sCurLabel)
 	{
@@ -175,7 +175,7 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("HideParentTasksByTag"), m_bHideParentTasksByTag);
 	pPrefs->WriteProfileString(szKey, _T("HideParentTag"), m_sHideParentTag);
 
-	pPrefs->WriteProfileInt(szKey, _T("ShowTasksContinuous"), m_bShowTasksContinuous);
+	pPrefs->WriteProfileInt(szKey, _T("ShowTasksContinuous"), !m_bShowTasksDiscontinuous);
 	pPrefs->WriteProfileInt(szKey, _T("ShowStartDates"), m_bShowStartDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowDueDates"), m_bShowDueDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowDoneDates"), m_bShowDoneDates);
@@ -204,7 +204,7 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bHideParentTasksByTag = pPrefs->GetProfileInt(szKey, _T("HideParentTasksByTag"), FALSE);
 	m_sHideParentTag = pPrefs->GetProfileString(szKey, _T("HideParentTag"));
 
-	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
+	m_bShowTasksDiscontinuous = !pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), FALSE);
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), TRUE);
 	m_bShowDueDates = pPrefs->GetProfileInt(szKey, _T("ShowDueDates"), TRUE);
 	m_bShowDoneDates = pPrefs->GetProfileInt(szKey, _T("ShowDoneDates"), FALSE);
