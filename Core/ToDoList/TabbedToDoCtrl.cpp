@@ -2071,8 +2071,7 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
 	DWORD dwTaskID = GetSelectedTaskID();
-
-	TDC_SET nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtNewStart);
+	TDC_SET nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, dtNewStart);
 
 	if (nRes != SET_CHANGE)
 		return FALSE;

@@ -147,3 +147,34 @@ TDC_REGULARITY TDCRECURRENCE::GetRegularity() const
 	return TDC::MapRegularityToTDCRegularity(nRegularity);
 }
 
+BOOL TDCRECURRENCE::GetSimpleOffsetAmount(int& nAmount, TDC_UNITS& nUnits) const
+{
+	switch (m_nRegularity)
+	{
+	case RECURS_DAY_EVERY_NDAYS:
+	case RECURS_DAY_EVERY_NWEEKDAYS:
+	case RECURS_WEEK_EVERY_NWEEKS:
+	case RECURS_MONTH_EVERY_NMONTHS:
+	case RECURS_YEAR_EVERY_NYEARS:
+		{
+			nAmount = (int)m_dwSpecific1;
+			nUnits = GetRegularityUnits();
+		}
+		return TRUE;
+
+	case RECURS_DAY_EVERY_WEEKDAY:
+		{
+			nAmount = 1;
+			nUnits = TDCU_WEEKDAYS;
+		}
+		return TRUE;
+	}
+
+	// All else
+	return FALSE;
+}
+
+TDC_UNITS TDCRECURRENCE::GetRegularityUnits() const
+{
+	return TDC::MapTDCRegularityToUnits(GetRegularity());
+}
