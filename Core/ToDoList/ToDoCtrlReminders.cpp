@@ -849,7 +849,8 @@ BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UN
 
 	if (dAmount)
 	{
-		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits)))
+		// Preserve end of month
+		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE))
 			return FALSE;
 	}
 

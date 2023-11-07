@@ -99,8 +99,10 @@ public:
 	int CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const;
 	int CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) const;
 	
-	BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) const;
+	BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE) const;
 	BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bMustHaveSign = TRUE) const;
+
+	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay);
 
 	const CWorkingWeek& WorkingWeek() const { return m_week; }
 	const CWorkingDay& WorkingDay() const { return m_week.WorkingDay(); }

@@ -159,7 +159,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_DAY_EVERY_WEEKDAY:
 		{
-			// add one day ensuring that the result is also a weekday
+			// add one day, ensuring that the result is also a weekday
 			dh.OffsetDate(dtTemp, 1, DHU_WEEKDAYS);
 		}
 		break;
@@ -213,13 +213,8 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_MONTH_EVERY_NMONTHS:
 		{
-			SYSTEMTIME st;
-			dtTemp.GetAsSystemTime(st); // Preserves time component
-			
-			// add number of months specified by m_dwSpecific1 
-			dh.IncrementMonth(st, (int)m_dwSpecific1);
-			
-			dtTemp = st;
+			// add number of years specified by dwSpecific1, preserving end of month
+			dh.IncrementMonth(dtTemp, (int)m_dwSpecific1, TRUE);
 		}
 		break;
 		
@@ -263,8 +258,8 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_YEAR_EVERY_NYEARS:
 		{
-			// add number of years specified by dwSpecific1
-			dh.OffsetDate(dtTemp, (int)m_dwSpecific1, DHU_YEARS);
+			// add number of years specified by dwSpecific1, preserving end of month
+			dh.OffsetDate(dtTemp, (int)m_dwSpecific1, DHU_YEARS, TRUE);
 		}
 		break;
 		

@@ -2383,6 +2383,8 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
+	ASSERT(nAmount != 0);
+
 	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, TDCOTD_FITTORECURRINGSCHEME);
 	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, TDCOTD_OFFSETSUBTASKS);
 	BOOL bFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
@@ -2397,37 +2399,35 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
 		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
 
-		if (nAmount != 0)
+		if (bModTimeOnly)
 		{
-			if (bModTimeOnly)
+			// Modify time only
+			ASSERT(date.m_dt < 1.0);
+
+			switch (TDC::MapUnitsToTHUnits(nUnits))
 			{
-				// Modify time only
-				ASSERT(date.m_dt < 1.0);
+			case THU_HOURS:
+				date.m_dt += (nAmount / 24.0);
+				break;
 
-				switch (TDC::MapUnitsToTHUnits(nUnits))
-				{
-				case THU_HOURS:
-					date.m_dt += (nAmount / 24.0);
-					break;
+			case THU_MINS:
+				date.m_dt += (nAmount / (24.0 * 60));
+				break;
 
-				case THU_MINS:
-					date.m_dt += (nAmount / (24.0 * 60));
-					break;
-
-				default:
-					ASSERT(0);
-				}
-			}
-			else // Modify date AND time
-			{
-				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
+			default:
+				ASSERT(0);
 			}
 		}
-
-		// Special case: Task is recurring and the date was changed -> must fall on a valid date
-		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bModTimeOnly)
+		else // Modify date AND time
 		{
-			pTDI->trRecurrence.FitDayToScheme(date);
+			// Preserve end of month
+			VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE));
+
+			// Special case: Task is recurring and the date was changed -> must fall on a valid date
+			if (bFitToRecurringScheme && pTDI->IsRecurring())
+			{
+				pTDI->trRecurrence.FitDayToScheme(date);
+			}
 		}
 
 		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
@@ -4041,24 +4041,26 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 		return 0.0;
 	}
 
-		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
-	
 	switch (nUnits)
 	{
 	case TDCU_DAYS:
-		return (dateEnd.m_dt - dateStart.m_dt);
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
-		{
-			CTwentyFourSevenWeek week;
-			return CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-		}
-		break;
+	case TDCU_WEEKDAYS:
+	case TDCU_WEEKS:
+		return CDateHelper().CalcDuration(dateStart, dateDue, TDC::MapUnitsToDHUnits(nUnits), TRUE);
 
 	case TDCU_MINS:
 	case TDCU_HOURS:
-	case TDCU_WEEKDAYS:
 		{
+			// Handle due date 'end of day'
+			COleDateTime dateEnd(dateDue);
+
+			if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
+				dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+	
+			return CWorkingWeek().CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+		}
 	}
 
 	ASSERT(0);
