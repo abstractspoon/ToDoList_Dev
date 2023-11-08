@@ -1067,7 +1067,10 @@ BOOL CToDoCtrlData::GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, 
 int CToDoCtrlData::CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
+	GET_TDI(dwTaskID, pTDI, 0);
+
+	return pTDI->CalcNextOccurences(dtRange, aOccur);
+/*
 
 	CArray<double, double&> aTemp;
 	BOOL bDueDate = FALSE;
@@ -1126,6 +1129,7 @@ int CToDoCtrlData::CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRang
 	}
 
 	return nNumOccur;
+*/
 }
 
 COleDateTime CToDoCtrlData::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const

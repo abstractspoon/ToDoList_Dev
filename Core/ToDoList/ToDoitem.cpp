@@ -1195,7 +1195,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return TRUE;
 }
 
-int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
+int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	ASSERT(!IsDone());
 
@@ -1209,13 +1209,63 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double
 	COleDateTimeRange dtExtended(dtRange);
 	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
 
-	if (!trRecurrence.CalcNextOccurences(dateStart, dtExtended, aDates))
+	CArray<double, double&> aDates;
+
+	int nNumOccur = trRecurrence.CalcNextOccurences(dateStart, dtExtended, aDates);
+
+	if (!nNumOccur)
 		return 0;
 
-	// else
-	bDue = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
+	CDateHelper dh;
 
-	return aDates.GetSize();
+	aOccur.SetSize(nNumOccur);
+
+	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
+	{
+		const double dOccur = aDates[nOccur];
+
+		DH_UNITS nUnits = TDC::MapUnitsToDHUnits(trRecurrence.GetRegularityUnits());
+		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, bDueDate);
+
+		int nOffset = 0;
+
+		if (dOffset == (int)dOffset)
+		{
+			nOffset = (int)dOffset;
+		}
+		else
+		{
+			nOffset = (int)dh.CalcDuration(dtCur, dOccur, DHU_DAYS, bDueDate);
+			nUnits = DHU_DAYS;
+		}
+
+		COleDateTimeRange& dtOccur = aOccur[nOccur];
+
+		if (bDueDate)
+		{
+			COleDateTime dtNewStart(dateStart);
+			VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
+
+			ASSERT((dtNewStart.m_dt <= dOccur) ||
+				(CDateHelper::IsSameDay(dOccur, dtNewStart) && !CDateHelper::DateHasTime(dOccur)));
+
+			dtOccur.Set(dtNewStart, dOccur);
+		}
+		else // start date
+		{
+			COleDateTime dtNewDue(dateDue);
+			VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
+
+			ASSERT((dOccur <= dtNewDue.m_dt) ||
+				(CDateHelper::IsSameDay(dOccur, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
+
+			dtOccur.Set(dOccur, dtNewDue);
+		}
+	}
+
+	return nNumOccur;
 }
 
 BOOL TODOITEM::IsRecentlyModified() const
