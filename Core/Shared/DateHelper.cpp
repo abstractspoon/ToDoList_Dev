@@ -543,7 +543,7 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, B
 		break;
 
 	case DHU_YEARS:
-		IncrementMonth(date, (nAmount * 12), bPreserveEndOfMonth);
+		IncrementYear(date, nAmount, bPreserveEndOfMonth);
 		break;
 	}
 
@@ -2283,6 +2283,11 @@ void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndO
 		IncrementMonth(st, nBy, bPreserveEndOfMonth);
 		date = COleDateTime(st);
 	}
+}
+
+void CDateHelper::IncrementYear(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
+{
+	IncrementMonth(date, (nBy * 12), bPreserveEndOfMonth);
 }
 
 void CDateHelper::IncrementMonth(int& nMonth, int& nYear, int nBy)

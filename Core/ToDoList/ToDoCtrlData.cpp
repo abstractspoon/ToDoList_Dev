@@ -3938,7 +3938,7 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 			if (nUnits == TDCU_MONTHS)
 				CDateHelper::IncrementMonth(dateEnd, (int)dDuration, TRUE);
 			else
-				CDateHelper::IncrementMonth(dateEnd, (int)(dDuration * 12), TRUE);
+				CDateHelper::IncrementYear(dateEnd, (int)dDuration, TRUE);
 
 			// If date falls on the beginning of a day, move to end of previous day
 			if (dDuration > 0.0)

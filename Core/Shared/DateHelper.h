@@ -157,6 +157,7 @@ public:
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
 	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
 	static void IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
+	static void IncrementYear(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
 	
 	static int CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 	static int GetDateInMonths(int nMonth, int nYear);
