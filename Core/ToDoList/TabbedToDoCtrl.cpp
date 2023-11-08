@@ -1605,42 +1605,52 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 			return 0;
 		}
 
-		int nNumOccur = aDates.GetSize();
-		nNumOccur = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
-
 		COleDateTime dtCur = m_data.GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START));
+		CDateHelper dh;
 
 		TDCRECURRENCE tr;
 		VERIFY(m_data.GetTaskRecurrence(dwTaskID, tr));
 
+		int nNumOccur = aDates.GetSize();
+		nNumOccur = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
+
 		for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 		{
 			const double dDate = aDates[nOccur];
-			int nOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
+			
+			DH_UNITS nUnits = TDC::MapUnitsToDHUnits(tr.GetRegularityUnits());
+			double dDuration = dh.CalcDuration(dtCur, dDate, nUnits, bDueDate);
+			int nOffset = 0;
+
+			if (dDuration == (int)dDuration)
+			{
+				nOffset = (int)dDuration;
+			}
+			else
+			{
+				nOffset = (int)dh.CalcDuration(dtCur, dDate, DHU_DAYS, bDueDate);
+				nUnits = DHU_DAYS;
+			}
 
 			IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
 
 			if (bDueDate)
 			{
-				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tEnd));
-
 				COleDateTime dtNewStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
-				VERIFY(CDateHelper().OffsetDate(dtNewStart, nOffset, DHU_DAYS));
+				VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
 
-				// Note: Don't fit start date to recurring scheme
 				VERIFY(CDateHelper::GetTimeT64(dtNewStart, occur.tStart));
+				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tEnd));
 
 				ASSERT((occur.tStart <= occur.tEnd) ||
 					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
 			}
 			else // start date
 			{
-				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tStart));
-
 				COleDateTime dtNewDue = m_data.GetTaskDate(dwTaskID, TDCD_DUE);
-				VERIFY(CDateHelper().OffsetDate(dtNewDue, nOffset, DHU_DAYS));
+				VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
 
-				// Note: Don't fit due date to recurring scheme
+				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tStart));
 				VERIFY(CDateHelper::GetTimeT64(dtNewDue, occur.tEnd));
 
 				ASSERT((occur.tStart <= occur.tEnd) ||

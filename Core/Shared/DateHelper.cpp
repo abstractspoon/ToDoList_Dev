@@ -366,6 +366,12 @@ BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
+BOOL COleDateTimeRange::Expand(int nAmount, DH_UNITS nUnits)
+{
+	// Handles expansion and contraction
+	return (OffsetStart(-nAmount, nUnits) && OffsetEnd(nAmount, nUnits));
+}
+
 BOOL COleDateTimeRange::OffsetStart(int nAmount, DH_UNITS nUnits)
 {
 	if (!IsValid())

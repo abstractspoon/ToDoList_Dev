@@ -73,6 +73,7 @@ public:
 	BOOL Offset(int nAmount, DH_UNITS nUnits);
 	BOOL OffsetStart(int nAmount, DH_UNITS nUnits);
 	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
+	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
 	double CalcProportion(const COleDateTime& date) const; // returns 0.0-1.0
