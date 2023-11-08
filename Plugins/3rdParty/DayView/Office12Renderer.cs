@@ -19,68 +19,47 @@ namespace Calendar
 
         Font baseFont;
 
-        public override Font BaseFont
-        {
-            get
-            {
-                if (baseFont == null)
-                {
-                    baseFont = new Font("Segoe UI", 8, FontStyle.Regular);
-                }
+		public override Font BaseFont()
+		{
+			if (baseFont == null)
+			{
+				baseFont = new Font("Segoe UI", 8, FontStyle.Regular);
+			}
 
-                return baseFont;
-            }
-        }
+			return baseFont;
+		}
 
-        public override Color HourColor
-        {
-            get
-            {
-                return System.Drawing.Color.FromArgb(230, 237, 247);
-            }
-        }
+		public override Color HourColor()
+		{
+			return System.Drawing.Color.FromArgb(230, 237, 247);
+		}
 
-        public override Color HalfHourSeperatorColor
-        {
-            get
-            {
-                return System.Drawing.Color.FromArgb(213, 215, 241);
-            }
-        }
+		public override Color HalfHourSeperatorColor()
+		{
+			return System.Drawing.Color.FromArgb(213, 215, 241);
+		}
 
-        public override Color HourSeperatorColor
-        {
-            get
-            {
-                return System.Drawing.Color.FromArgb(165, 191, 225);
-            }
-        }
+		public override Color HourSeperatorColor()
+		{
+			return System.Drawing.Color.FromArgb(165, 191, 225);
+		}
 
-        public override Color WorkingHourColor
-        {
-            get
-            {
-                return System.Drawing.Color.FromArgb(255, 255, 255);
-            }
-        }
+		public override Color WorkingHourColor()
+		{
+			return System.Drawing.Color.FromArgb(255, 255, 255);
+		}
 
-        public override System.Drawing.Color BackColor
-        {
-            get
-            {
-                return Color.FromArgb(213, 228, 242);
-            }
-        }
+		public override System.Drawing.Color BackColor()
+		{
+			return Color.FromArgb(213, 228, 242);
+		}
 
-        public override Color SelectionColor
-        {
-            get
-            {
-                return System.Drawing.Color.FromArgb(41, 76, 122);
-            }
-        }
+		public override Color SelectionColor()
+		{
+			return System.Drawing.Color.FromArgb(41, 76, 122);
+		}
 
-        public Color TextColor
+		public Color TextColor
         {
             get
             {
@@ -110,10 +89,10 @@ namespace Calendar
                 else
                     ampmtime = "00";
 
-                g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont, brush, rect);
+                g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont(), brush, rect);
 
                 rect.X += 27;
-                g.DrawString(ampmtime, MinuteFont, brush, rect);
+                g.DrawString(ampmtime, MinuteFont(), brush, rect);
             }
         }
 
@@ -143,7 +122,7 @@ namespace Calendar
                     formatdd.FormatFlags = StringFormatFlags.NoWrap;
                     formatdd.LineAlignment = StringAlignment.Center;
 
-                    using (SolidBrush brush = new SolidBrush(this.BackColor))
+                    using (SolidBrush brush = new SolidBrush(this.BackColor()))
                         g.FillRectangle(brush, rect);
 
                     using (Pen aPen = new Pen(Color.FromArgb(205, 219, 238)))
@@ -227,7 +206,7 @@ namespace Calendar
                 g.FillRectangle(backBrush, rect);
         }
 
-        public override void DrawAppointment(System.Drawing.Graphics g, AppointmentView apptView, bool isSelected)
+        public override void DrawAppointment(System.Drawing.Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected)
         {
             if (apptView == null)
                 throw new ArgumentNullException("apptView");
@@ -344,7 +323,7 @@ namespace Calendar
                     rect.Width -= 6;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                    g.DrawString(appt.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
+                    g.DrawString(appt.Title, this.BaseFont(), SystemBrushes.WindowText, rect, format);
                     g.TextRenderingHint = TextRenderingHint.SystemDefault;
                 }
             }

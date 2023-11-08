@@ -38,6 +38,8 @@ namespace DayViewUIExtension
 
 		public Rectangle IconRect = Rectangle.Empty;
 		public int TextHorzOffset = 0;
+		public int EndOfStart = -1, StartOfEnd = -1;
+		public int StartOfToday = -1, EndOfToday = -1;
 	}
 
 	// ---------------------------------------------------------------
@@ -243,6 +245,31 @@ namespace DayViewUIExtension
 				return true;
 
 			return false;
+		}
+
+		public bool Intersects(Calendar.Appointment other, bool displayLongAppointmentsContinuous)
+		{
+			if (!base.Intersects(other))
+				return false;
+
+			if (IsLongAppt() && !displayLongAppointmentsContinuous)
+			{
+				return ((StartDate.Date == other.StartDate.Date) ||
+						(StartDate.Date == other.EndDate.Date) ||
+						(EndDate.Date == other.EndDate.Date) ||
+						(EndDate.Date == other.StartDate.Date));
+			}
+
+			return true;
+		}
+
+		public bool IntersectsToday
+		{
+			get
+			{
+				var today = DateTime.Now.Date;
+				return ((today >= StartDate) && (today <= EndDate));
+			}
 		}
 
 		private void UpdateCustomDateAttributes(Task task, List<CustomAttributeDefinition> dateAttribs)

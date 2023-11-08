@@ -32,7 +32,7 @@ namespace DayViewUIExtension
 
 	// ------------------------------------------------------------------------------
 
-	public class TDLDayView : Calendar.DayView, ILabelTipHandler
+	public partial class TDLDayView : Calendar.DayView, ILabelTipHandler
 	{
 		private uint m_SelectedTaskID = 0;
 		private uint m_VisibleSelectedTaskID = 0;
@@ -54,7 +54,7 @@ namespace DayViewUIExtension
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
-		private TDLRenderer m_Renderer;
+		//private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
 		private Translator m_Trans;
@@ -63,18 +63,6 @@ namespace DayViewUIExtension
 		private int LabelTipBorder
 		{
 			get { return DPIScaling.Scale(4); }
-		}
-
-		public Color GridlineColor
-		{
-			set
-			{
-				if (value != m_Renderer.GridlineColor)
-				{
-					m_Renderer.GridlineColor = value;
-					Invalidate();
-				}
-			}
 		}
 
 		public bool ReadOnly { get; set; }
@@ -95,7 +83,7 @@ namespace DayViewUIExtension
 			dayGripWidth = 1; // to match app styling
 
 			m_Trans = trans;
-			m_Renderer = new TDLRenderer(Handle, taskIcons);
+			m_TaskIcons = taskIcons;
 			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
@@ -107,6 +95,7 @@ namespace DayViewUIExtension
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
 
 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
+			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
 			InitializeComponent();
 		}
@@ -130,7 +119,7 @@ namespace DayViewUIExtension
 
 			var tip = new LabelTipInfo()
 			{
-				Font = m_Renderer.BaseFont,
+				Font = BaseFont(),
 			};
 
 			var pt = PointToClient(ptScreen);
@@ -141,8 +130,8 @@ namespace DayViewUIExtension
 
 			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
 
-			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_Renderer.TextOffset);
-			tip.Rect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, TextOffset);
+			tip.Rect.Inflate(TextPadding, TextPadding);
 
 			var appt = tdlView.Appointment;
 			tip.Id = appt.Id;
@@ -286,29 +275,29 @@ namespace DayViewUIExtension
 			Calendar.DrawTool drawTool = new Calendar.DrawTool();
 			drawTool.DayView = this;
 
-			this.ActiveTool = drawTool;
-			this.AllowInplaceEditing = true;
-			this.AllowNew = false;
-			this.AmPmDisplay = true;
-			this.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+			ActiveTool = drawTool;
+			AllowInplaceEditing = true;
+			AllowNew = false;
+			AmPmDisplay = true;
+			Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
 									 System.Windows.Forms.AnchorStyles.Left |
 									 System.Windows.Forms.AnchorStyles.Right);
-			this.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-			this.DrawAllAppBorder = false;
-			this.Location = new System.Drawing.Point(0, 0);
-			this.MinHalfHourApp = false;
-			this.Name = "m_dayView";
-			this.Renderer = m_Renderer;
-			this.Size = new System.Drawing.Size(798, 328);
-			this.SlotsPerHour = 4;
-			this.TabIndex = 0;
-			this.Text = "m_dayView";
-			this.ReadOnly = false;
+			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+			DrawAllAppBorder = false;
+			Location = new Point(0, 0);
+			MinHalfHourApp = false;
+			Name = "m_dayView";
+			Renderer = this;
+			Size = new Size(798, 328);
+			SlotsPerHour = 4;
+			TabIndex = 0;
+			Text = "m_dayView";
+			ReadOnly = false;
 
-			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnResolveAppointments);
-			this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
-			this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
-			this.AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
+			ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(OnResolveAppointments);
+			SelectionChanged += new Calendar.AppointmentEventHandler(OnSelectionChanged);
+			WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
+			AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
 		}
 
 		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
@@ -366,14 +355,31 @@ namespace DayViewUIExtension
 			get; set;
 		}
 
-		public bool DisplayTasksContinuous
+		private bool m_DisplayLongTasksContinuous = true;
+
+		public bool DisplayLongTasksContinuous
 		{
-			get { return DisplayLongAppointmentsContinuous; }
+			get { return m_DisplayLongTasksContinuous; }
 			set
 			{
-				if (value != DisplayLongAppointmentsContinuous)
+				if (value != m_DisplayLongTasksContinuous)
 				{
-					DisplayLongAppointmentsContinuous = value;
+					m_DisplayLongTasksContinuous = value;
+					FixupSelection(false, true);
+				}
+			}
+		}
+
+		private bool m_DisplayActiveTasksToday = true;
+
+		public bool DisplayActiveTasksToday
+		{
+			get { return m_DisplayActiveTasksToday; }
+			set
+			{
+				if (value != m_DisplayActiveTasksToday)
+				{
+					m_DisplayActiveTasksToday = value;
 					FixupSelection(false, true);
 				}
 			}
@@ -658,7 +664,7 @@ namespace DayViewUIExtension
 
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
-			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (appt != null)
@@ -677,7 +683,7 @@ namespace DayViewUIExtension
 
 		public uint HitTestTask(Int32 xScreen, Int32 yScreen)
 		{
-			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (AppointmentSupportsTaskContextMenu(appt))
@@ -694,6 +700,49 @@ namespace DayViewUIExtension
 		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
 		{
 			return GetRealAppointment(GetAppointmentAt(x, y));
+		}
+
+		override public Calendar.AppointmentView GetAppointmentViewAt(int x, int y, out Rectangle apptRect)
+		{
+			var view = base.GetAppointmentViewAt(x, y, out apptRect);
+
+			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			{
+				var tdlView = (view as TDLAppointmentView);
+
+				if (x < tdlView.EndOfStart)
+				{
+					apptRect.Width = (tdlView.EndOfStart - apptRect.X);
+				}
+				else
+				{
+					apptRect.Width = (apptRect.Right - tdlView.StartOfEnd);
+					apptRect.X = tdlView.StartOfEnd;
+				}
+			}
+
+			return view;
+		}
+
+		override protected Calendar.AppointmentView GetAppointmentViewAt(int x, int y)
+		{
+			var view = base.GetAppointmentViewAt(x, y);
+
+			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			{
+				var tdlView = (view as TDLAppointmentView);
+
+				if ((x < tdlView.EndOfStart) || (x > tdlView.StartOfEnd))
+					return view;
+
+				if (DisplayActiveTasksToday && IsTodayVisible)
+				{
+					if ((x > tdlView.StartOfToday) && (x < tdlView.EndOfToday))
+						return view;
+				}
+			}
+
+			return null;
 		}
 
 		public Calendar.Appointment GetAppointment(uint taskID)
@@ -725,7 +774,7 @@ namespace DayViewUIExtension
 			if (GetAppointmentRect(appt, ref rect))
 			{
 				TaskItem item = (appt as TaskItem);
-				bool hasIcon = m_Renderer.TaskHasIcon(item);
+				bool hasIcon = TaskHasIcon(item);
 
 				if (IsLongAppt(appt))
 				{
@@ -763,6 +812,20 @@ namespace DayViewUIExtension
 			}
 
 			return false;
+		}
+
+		private bool IsTodayVisible
+		{
+			get
+			{
+				return IsTodayInRange(StartDate, EndDate);
+			}
+		}
+
+		private bool IsTodayInRange(DateTime start, DateTime end)
+		{
+			var today = DateTime.Now.Date;
+			return ((today >= start) && (today < end));
 		}
 
 		public bool IsItemDisplayable(Calendar.Appointment appt)
@@ -827,8 +890,16 @@ namespace DayViewUIExtension
 			if ((appt.StartDate >= endDate) || (appt.EndDate <= startDate))
 				return false;
 
-			if (!DisplayTasksContinuous)
+			if (!DisplayLongTasksContinuous)
 			{
+				if (DisplayActiveTasksToday && IsTodayInRange(startDate, endDate))
+				{
+					var taskItem = (appt as TaskItem);
+
+					if (taskItem.IntersectsToday)
+						return true;
+				}
+
 				if ((appt.StartDate < startDate) && (appt.EndDate > endDate))
 					return false;
 			}
@@ -938,70 +1009,54 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		private bool m_StrikeThruDoneTasks;
+
 		public bool StrikeThruDoneTasks
 		{
-			get { return m_Renderer.StrikeThruDoneTasks; }
+			get { return m_StrikeThruDoneTasks; }
 			set
 			{
-                if (m_Renderer.StrikeThruDoneTasks != value)
+                if (m_StrikeThruDoneTasks != value)
 				{
-                    m_Renderer.StrikeThruDoneTasks = value;
+                    m_StrikeThruDoneTasks = value;
 					Invalidate();
 				}
 			}
 		}
 
-        public bool TaskColorIsBackground
+		private bool m_TaskColorIsBackground;
+
+		public bool TaskColorIsBackground
         {
-            get { return m_Renderer.TaskColorIsBackground; }
+            get { return m_TaskColorIsBackground; }
             set
             {
-                if (m_Renderer.TaskColorIsBackground != value)
+                if (m_TaskColorIsBackground != value)
                 {
-                    m_Renderer.TaskColorIsBackground = value;
+                    m_TaskColorIsBackground = value;
                     Invalidate();
                 }
             }
         }
-		
+
+		private bool m_ShowParentsAsFolder;
+
 		public bool ShowParentsAsFolder
 		{
-			get { return m_Renderer.ShowParentsAsFolder; }
+			get { return m_ShowParentsAsFolder; }
 			set
 			{
-				if (m_Renderer.ShowParentsAsFolder != value)
+				if (m_ShowParentsAsFolder != value)
 				{
-					m_Renderer.ShowParentsAsFolder = value;
+					m_ShowParentsAsFolder = value;
 					Invalidate();
 				}
 			}
 		}
 
-        public void SetFont(String fontName, int fontSize)
-        {
-            m_Renderer.SetFont(fontName, fontSize);
-
-			// Long appt height to match Calendar in core app
-			int fontHeight = 0;
-			
-			if (DPIScaling.WantScaling())
-				fontHeight = m_Renderer.BaseFont.Height;
-			else
-				fontHeight = Win32.GetPixelHeight(m_Renderer.BaseFont.ToHfont());
-
-			int itemHeight = (fontHeight + 6 - longAppointmentSpacing);
-
-            LongAppointmentHeight = Math.Max(itemHeight, 17);
-        }
-        
-        public int GetFontHeight()
-        {
-            return m_Renderer.GetFontHeight();
-        }
-
    		public void SetUITheme(UITheme theme)
 		{
-            m_Renderer.Theme = theme;
+            Theme = theme;
 			m_ToolbarRenderer.SetUITheme(theme);
 
             Invalidate(true);
@@ -1059,7 +1114,7 @@ namespace DayViewUIExtension
 
 		private bool WantDrawToday(DateTime time)
 		{
-			if (!m_Renderer.Theme.HasAppColor(UITheme.AppColor.Today))
+			if (!Theme.HasAppColor(UITheme.AppColor.Today))
 				return false;
 			
 			return (time.Date == DateTime.Now.Date);
@@ -1070,15 +1125,15 @@ namespace DayViewUIExtension
 			if (!WantDrawToday(time))
 				return;
 
-			using (var brush = new SolidBrush(m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
 				e.Graphics.FillRectangle(brush, rect);
 		}
 
 		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (m_Renderer.Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(time.DayOfWeek))
+			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(time.DayOfWeek))
 			{
-				var weekendColor = m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
+				var weekendColor = Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
@@ -1088,9 +1143,9 @@ namespace DayViewUIExtension
 				using (var brush = new SolidBrush(weekendColor))
 					e.Graphics.FillRectangle(brush, rect);
 			}
-			else if (m_Renderer.Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
+			else if (Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
 			{
-				var nonWorkColor = m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
+				var nonWorkColor = Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
@@ -1112,10 +1167,10 @@ namespace DayViewUIExtension
 			{
 				Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
 
-				if (hoursRect.Y < this.HeaderHeight)
+				if (hoursRect.Y < HeaderHeight)
 				{
-					hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
-					hoursRect.Y = this.HeaderHeight;
+					hoursRect.Height -= HeaderHeight - hoursRect.Y;
+					hoursRect.Y = HeaderHeight;
 				}
 
 				e.Graphics.FillRectangle(brush, hoursRect);
@@ -1169,63 +1224,6 @@ namespace DayViewUIExtension
 			}
 
 			return false;
-		}
-
-		protected override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
-		{
-			var appt = apptView.Appointment;
-			var rect = apptView.Rectangle;
-
-			isSelected = WantDrawAppointmentSelected(appt);
-			
-			// Our custom gripper bar
-			var gripRect = rect;
-			gripRect.Inflate(-2, -2);
-			gripRect.Width = 5;
-
-            bool longAppt = apptView.IsLong;
-
-            if (longAppt)
-            {
-				// If and the start date precedes the 
-				// start of the week then extend the draw rect to the left 
-				// so the edge is clipped and likewise for the end date.
-				if (appt.StartDate < StartDate)
-				{
-					rect.X -= 4;
-					rect.Width += 4;
-
-					gripRect.X = rect.X;
-					gripRect.Width = 0;
-				}
-				else if (appt.StartDate > StartDate)
-				{
-					rect.X++;
-					rect.Width--;
-
-					gripRect.X++;
-				}
-
-				if (appt.EndDate >= EndDate)
-				{
-					rect.Width += 5;
-				}
-			}
-            else // day appt
-            {
-                if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
-                {
-                    rect.Y++;
-                    rect.Height--;
-                }
-
-                rect.Width -= 1;
-            }
-
-			apptView.Rectangle = rect;
-			apptView.GripRect = gripRect;
-
-			m_Renderer.DrawAppointment(g, apptView, isSelected);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
@@ -1695,9 +1693,9 @@ namespace DayViewUIExtension
 
 		protected void ValidateMinSlotHeight()
 		{
-			using (var g = Graphics.FromHwnd(this.Handle))
+			using (var g = Graphics.FromHwnd(Handle))
 			{
-				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont).Height;
+				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont()).Height;
 
 				if ((minSlotHeight * SlotsPerHour) < minHourHeight)
 					minSlotHeight = ((minHourHeight / SlotsPerHour) + 1);
@@ -1716,7 +1714,7 @@ namespace DayViewUIExtension
 			int minDayWidth = 0;
 
 			using (Graphics g = Graphics.FromHwnd(Handle))
-				minDayWidth = m_Renderer.CalculateMinimumDayWidthForImage(g);
+				minDayWidth = CalculateMinimumDayWidthForImage(g);
 
 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
 

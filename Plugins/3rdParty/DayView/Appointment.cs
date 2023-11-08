@@ -263,21 +263,13 @@ namespace Calendar
             return IsLongAppt(StartDate, EndDate);
         }
 
-		public bool IntersectsWith(Appointment other, bool displayLongAppointmentsContinuous)
+		public bool Intersects(Appointment other)
 		{
 			if (!HasValidDates() || !other.HasValidDates())
 				return false;
 
 			if (IsLongAppt() != other.IsLongAppt())
 				return false;
-
-			if (IsLongAppt() && !displayLongAppointmentsContinuous)
-			{
-				return ((StartDate.Date == other.StartDate.Date) ||
-						(StartDate.Date == other.EndDate.Date) ||
-						(EndDate.Date == other.EndDate.Date) ||
-						(EndDate.Date == other.StartDate.Date));
-			}
 
 			if (StartDate >= other.EndDate)
 				return false;
@@ -308,11 +300,7 @@ namespace Calendar
 		public Appointment Appointment;
 		public Rectangle Rectangle = Rectangle.Empty;
 		public Rectangle GripRect = Rectangle.Empty;
-
 		public bool IsLong = false;
-		public bool DrawLongContinuous = false;
-		public int EndOfStart = -1;
-		public int StartOfEnd = -1;
 	}
 
 	class AppointmentList : List<Appointment>
