@@ -1070,66 +1070,6 @@ int CToDoCtrlData::CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRang
 	GET_TDI(dwTaskID, pTDI, 0);
 
 	return pTDI->CalcNextOccurences(dtRange, aOccur);
-/*
-
-	CArray<double, double&> aTemp;
-	BOOL bDueDate = FALSE;
-
-	int nNumOccur = pTDI->CalcNextOccurences(dtRange, aTemp, bDueDate);
-
-	if (!nNumOccur)
-		return 0;
-
-	COleDateTime dtCur = GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START));
-	CDateHelper dh;
-
-	aOccur.SetSize(nNumOccur);
-
-	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
-	{
-		const double dOccur = aTemp[nOccur];
-
-		DH_UNITS nUnits = TDC::MapUnitsToDHUnits(pTDI->trRecurrence.GetRegularityUnits());
-
-		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, bDueDate);
-		int nOffset = 0;
-
-		if (dOffset == (int)dOffset)
-		{
-			nOffset = (int)dOffset;
-		}
-		else
-		{
-			nOffset = (int)dh.CalcDuration(dtCur, dOccur, DHU_DAYS, bDueDate);
-			nUnits = DHU_DAYS;
-		}
-
-		COleDateTimeRange& dtOccur = aOccur[nOccur];
-
-		if (bDueDate)
-		{
-			COleDateTime dtNewStart = GetTaskDate(dwTaskID, TDCD_START);
-			VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
-
-			ASSERT((dtNewStart.m_dt <= dOccur) ||
-				(CDateHelper::IsSameDay(dOccur, dtNewStart) && !CDateHelper::DateHasTime(dOccur)));
-
-			dtOccur.Set(dtNewStart, dOccur);
-		}
-		else // start date
-		{
-			COleDateTime dtNewDue = GetTaskDate(dwTaskID, TDCD_DUE);
-			VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
-
-			ASSERT((dOccur <= dtNewDue.m_dt) ||
-				(CDateHelper::IsSameDay(dOccur, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
-
-			dtOccur.Set(dOccur, dtNewDue);
-		}
-	}
-
-	return nNumOccur;
-*/
 }
 
 COleDateTime CToDoCtrlData::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
