@@ -1828,7 +1828,7 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 				pTasks->Add(pTCI);
 			}
 		}
-		else
+		else // discontinuous options
 		{
 			if (HasOption(TCCO_DISPLAYCALCSTART) || (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet()))
 			{
