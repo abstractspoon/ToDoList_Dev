@@ -1195,7 +1195,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return TRUE;
 }
 
-BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
+int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
 {
 	ASSERT(!IsDone());
 
@@ -1203,20 +1203,19 @@ BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<doubl
 		return FALSE;
 
 	if (!HasStart() || !HasDue() || (dateDue < dateStart))
-		return FALSE;
+		return 0;
 
 	// Expand range by task duration to ensure full coverage
 	COleDateTimeRange dtExtended(dtRange);
 	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
 
-	if (trRecurrence.CalcNextOccurences(dateStart, dtExtended, aDates))
-	{
-		bDue = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
-		return TRUE;
-	}
+	if (!trRecurrence.CalcNextOccurences(dateStart, dtExtended, aDates))
+		return 0;
 
 	// else
-	return FALSE;
+	bDue = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+
+	return aDates.GetSize();
 }
 
 BOOL TODOITEM::IsRecentlyModified() const

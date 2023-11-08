@@ -1588,81 +1588,36 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 		DWORD dwTaskID = wParam;
 		IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
 
+		// Get the range for which we want the future occurrences
 		COleDateTimeRange dtRange;
 
 		if (!dtRange.Set(CDateHelper::GetDate(pOccurrences->tRangeStart),
 						 CDateHelper::GetDate(pOccurrences->tRangeEnd)))
 		{
 			ASSERT(0);
-			return 0;
+			return FALSE;
 		}
 
-		CArray<double, double&> aDates;
-		BOOL bDueDate = FALSE;
+		// Get the raw date pairs
+		CArray<COleDateTimeRange, COleDateTimeRange&> aOccur;
+		int nNumOccur = m_data.CalcNextTaskOccurences(dwTaskID, dtRange, aOccur);
 
-		if (!m_data.CalcNextTaskOccurences(dwTaskID, dtRange, aDates, bDueDate))
+		pOccurrences->nNumOccurrences = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
+
+		// Convert to the format required by the caller
+		for (int nOccur = 0; nOccur < pOccurrences->nNumOccurrences; nOccur++)
 		{
-			return 0;
-		}
-
-		COleDateTime dtCur = m_data.GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START));
-		CDateHelper dh;
-
-		TDCRECURRENCE tr;
-		VERIFY(m_data.GetTaskRecurrence(dwTaskID, tr));
-
-		int nNumOccur = aDates.GetSize();
-		nNumOccur = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
-
-		for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
-		{
-			const double dDate = aDates[nOccur];
-			
-			DH_UNITS nUnits = TDC::MapUnitsToDHUnits(tr.GetRegularityUnits());
-			double dDuration = dh.CalcDuration(dtCur, dDate, nUnits, bDueDate);
-			int nOffset = 0;
-
-			if (dDuration == (int)dDuration)
-			{
-				nOffset = (int)dDuration;
-			}
-			else
-			{
-				nOffset = (int)dh.CalcDuration(dtCur, dDate, DHU_DAYS, bDueDate);
-				nUnits = DHU_DAYS;
-			}
-
+			const COleDateTimeRange& dtOccur = aOccur[nOccur];
 			IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
 
-			if (bDueDate)
-			{
-				COleDateTime dtNewStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
-				VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
-
-				VERIFY(CDateHelper::GetTimeT64(dtNewStart, occur.tStart));
-				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tEnd));
-
-				ASSERT((occur.tStart <= occur.tEnd) ||
-					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
-			}
-			else // start date
-			{
-				COleDateTime dtNewDue = m_data.GetTaskDate(dwTaskID, TDCD_DUE);
-				VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
-
-				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tStart));
-				VERIFY(CDateHelper::GetTimeT64(dtNewDue, occur.tEnd));
-
-				ASSERT((occur.tStart <= occur.tEnd) ||
-					(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
-			}
+			VERIFY(CDateHelper::GetTimeT64(dtOccur.GetStart(), occur.tStart));
+			VERIFY(CDateHelper::GetTimeT64(dtOccur.GetEnd(), occur.tEnd));
 		}
 
-		pOccurrences->nNumOccurrences = nNumOccur;
 		return TRUE;
 	}
 
-	return 0L;
+	return FALSE;
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM /*lParam*/)
