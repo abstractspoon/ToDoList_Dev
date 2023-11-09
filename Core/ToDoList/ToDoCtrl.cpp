@@ -3275,7 +3275,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 
 BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
 {
-	if (!CanEditSelectedTask(TDCA_STARTDATE))
+	if (!CanOffsetSelectedTaskStartAndDueDates())
 		return FALSE;
 	
 	Flush();
@@ -3318,6 +3318,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
 {
 	ASSERT(CanEditSelectedTask(TDCA_STARTDATE));
+	ASSERT(!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
 
 	if (mapProcessed.Has(dwTaskID))
 		return SET_NOCHANGE;
