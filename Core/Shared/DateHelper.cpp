@@ -609,10 +609,10 @@ double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime&
 		break;
 
 	case DHU_WEEKDAYS:
-		return m_week.CalculateDuration(dtFrom, dateEnd, WWD_DAYS);
+		return m_week.CalcDuration(dtFrom, dateEnd, WWD_DAYS);
 
 	case DHU_WEEKS:
-		return m_week.CalculateDuration(dtFrom, dateEnd, WWD_WEEKS);
+		return m_week.CalcDuration(dtFrom, dateEnd, WWD_WEEKS);
 	}
 
 	ASSERT(0);

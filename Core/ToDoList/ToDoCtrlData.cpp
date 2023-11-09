@@ -4059,7 +4059,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 			if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
 				dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
 	
-			return CWorkingWeek().CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+			return CWorkingWeek().CalcDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
 		}
 	}
 
