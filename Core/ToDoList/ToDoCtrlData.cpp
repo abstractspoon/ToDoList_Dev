@@ -2397,37 +2397,39 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		EDIT_GET_TDI(dwTaskID, pTDI);
 
 		COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
-		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
 
-		if (bModTimeOnly)
+		switch (nUnits)
 		{
-			// Modify time only
-			ASSERT(date.m_dt < 1.0);
-
-			switch (TDC::MapUnitsToTHUnits(nUnits))
+		case TDCU_HOURS:
 			{
-			case THU_HOURS:
+				// Modify time only
+				ASSERT(date.m_dt < 1.0);
+
 				date.m_dt += (nAmount / 24.0);
-				break;
-
-			case THU_MINS:
-				date.m_dt += (nAmount / (24.0 * 60));
-				break;
-
-			default:
-				ASSERT(0);
 			}
-		}
-		else // Modify date AND time
-		{
-			// Preserve end of month
-			VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE));
+			break;
 
-			// Special case: Task is recurring and the date was changed -> must fall on a valid date
-			if (bFitToRecurringScheme && pTDI->IsRecurring())
+		case TDCU_MINS:
 			{
-				pTDI->trRecurrence.FitDayToScheme(date);
+				// Modify time only
+				ASSERT(date.m_dt < 1.0);
+
+				date.m_dt += (nAmount / (24.0 * 60));
 			}
+			break;
+
+		default: // All the rest
+			{
+				// Modify date AND time
+				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE)); // Preserve end of month
+
+				// Special case: Task is recurring and the date was changed -> must fall on a valid date
+				if (bFitToRecurringScheme && pTDI->IsRecurring())
+				{
+					pTDI->trRecurrence.FitDayToScheme(date);
+				}
+			}
+			break;
 		}
 
 		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
