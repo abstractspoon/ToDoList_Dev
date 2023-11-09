@@ -2463,14 +2463,6 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	return OffsetTaskStartAndDueDates(dwTaskID, pTDI, dtNewStart, pTDI->timeEstimate.nUnits);
-}
-
-TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, TODOITEM* pTDI, const COleDateTime& dtNewStart, TDC_UNITS nUnits)
-{
-	if (!pTDI)
-		EDIT_GET_TDI(dwTaskID, pTDI);
-
 	// Sanity checks
 	if (!COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
 	{
@@ -2492,7 +2484,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, TODOITEM* pTDI
 	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart); // may get modified
-	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, nUnits, dtStart);
+	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
 
 	// FALSE -> don't recalc time estimate until due date is set
 	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
