@@ -36,6 +36,16 @@ enum
 	ADJUSTED_DONE	= 0x04,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+// OffsetTaskDate private flags
+enum
+{
+	OFFSET_SUBTASKS				= 0x01,
+	OFFSET_FROMTODAY			= 0x02,
+	OFFSET_FITTORECURRINGSCHEME = 0x04,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define EDIT_GET_TDI(id, tdi)	\
@@ -2381,13 +2391,24 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	return FALSE;
 }
 
+// External
+TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+{
+	DWORD dwFlags = 0;
+	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
+	Misc::SetFlag(dwFlags, OFFSET_SUBTASKS, bAndSubtasks);
+
+	return OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags);
+}
+
+// Internal
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
 	ASSERT(nAmount != 0);
 
-	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, TDCOTD_FITTORECURRINGSCHEME);
-	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, TDCOTD_OFFSETSUBTASKS);
-	BOOL bFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
+	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, OFFSET_FITTORECURRINGSCHEME);
+	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, OFFSET_SUBTASKS);
+	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
 
 	TDC_SET nRes = SET_NOCHANGE;
 
@@ -2496,6 +2517,17 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 	return nRes;
 }
 
+// External
+TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+{
+	DWORD dwFlags = 0;
+	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
+	Misc::SetFlag(dwFlags, OFFSET_SUBTASKS, bAndSubtasks);
+
+	return OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, dwFlags);
+}
+
+// Internal
 TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
 	TODOITEM* pTDI = NULL;
@@ -2509,7 +2541,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 		return SET_FAILED;
 	}
 
-	BOOL bFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
+	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
 
 	if (!bFromToday && !COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
 	{
@@ -4358,7 +4390,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasDue)
 			{
 				// Make sure the new date fits the recurring scheme
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nRecurAmount, nRecurUnits, TDCOTD_FITTORECURRINGSCHEME | TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nRecurAmount, nRecurUnits, OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
@@ -4382,7 +4414,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // offset children
 			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nRecurAmount, nRecurUnits, TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nRecurAmount, nRecurUnits, OFFSET_SUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}
@@ -4410,7 +4442,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // bump
 			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nRecurAmount, nRecurUnits, TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nRecurAmount, nRecurUnits, OFFSET_SUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}
@@ -4429,7 +4461,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasStart)
 			{
 				// Make sure the new date fits the recurring scheme
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nRecurAmount, nRecurUnits, TDCOTD_FITTORECURRINGSCHEME | TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nRecurAmount, nRecurUnits, OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else

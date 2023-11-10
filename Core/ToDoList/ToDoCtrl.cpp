@@ -3216,10 +3216,6 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
 
-	DWORD dwFlags = 0;
-	Misc::SetFlag(dwFlags, TDCOTD_OFFSETFROMTODAY, bFromToday);
-	Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKS, bAndSubtasks);
-	
 	while (pos)
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
@@ -3227,7 +3223,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		if (!HandleModResult(dwTaskID, m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, bFromToday), aModTaskIDs))
 			return FALSE;
 
 		mapProcessed.Add(dwTaskID);
@@ -3337,20 +3333,18 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 	TDC_SET nRes = SET_NOCHANGE;
 
 	// Handle subtasks at the end
-	DWORD dwFlags = (bFromToday ? TDCOTD_OFFSETFROMTODAY : 0);
-
 	if ((pTDI->HasStart() && pTDI->HasDue()) || bFromToday)
 	{
 		// Offset as a block
-		nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, dwFlags);
+		nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, FALSE, bFromToday);
 	}
 	else if (pTDI->HasStart())
 	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, bFromToday);
 	}
 	else if (pTDI->HasDue())
 	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, bFromToday);
 	}
 	else
 	{
