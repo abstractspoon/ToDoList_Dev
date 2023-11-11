@@ -4446,12 +4446,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
 			if (bWantInheritStart)
 			{
-				// don't offset children
 				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
 												  TDCD_STARTDATE, 
 												  nRecurAmount, 
 												  nRecurUnits, 
-												  0);
+												  0); // don't offset children
 				
 				if (nDateRes == SET_CHANGE)
 				{
@@ -4486,12 +4485,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
 			if (bWantInheritDue)
 			{
-				// don't update children
 				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
 												  TDCD_DUEDATE, 
 												  nRecurAmount, 
 												  nRecurUnits, 
-												  0);
+												  0); // don't update children
 				
 				if (nDateRes == SET_CHANGE)
 				{
@@ -4501,7 +4499,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // bump
 			{
-				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nRecurAmount, nRecurUnits, OFFSET_SUBTASKS);
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
+												  TDCD_DUEDATE, 
+												  nRecurAmount, 
+												  nRecurUnits, 
+												  OFFSET_SUBTASKS);
 				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
