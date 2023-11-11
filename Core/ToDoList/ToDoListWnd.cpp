@@ -12113,18 +12113,37 @@ void CToDoListWnd::OnEditOffsetDates()
 		{
 			// special case: Moving due dates as well
 			if (dwWhat & ODD_DUEDATE)
-				tdc.OffsetSelectedTaskStartAndDueDates(nAmount, nUnits, bSubtasks, bFromToday);
+			{
+				tdc.OffsetSelectedTaskStartAndDueDates(nAmount, 
+													   nUnits, 
+													   bSubtasks, 
+													   bFromToday);
+			}
 			else
-				tdc.OffsetSelectedTaskDate(TDCD_START, nAmount, nUnits, bSubtasks, bFromToday);
+			{
+				tdc.OffsetSelectedTaskDate(TDCD_START, 
+										   nAmount, 
+										   nUnits, 
+										   bSubtasks, 
+										   bFromToday);
+			}
 		}
 		else if (dwWhat & ODD_DUEDATE)
 		{
-			tdc.OffsetSelectedTaskDate(TDCD_DUE, nAmount, nUnits, bSubtasks, bFromToday);
+			tdc.OffsetSelectedTaskDate(TDCD_DUE, 
+									   nAmount, 
+									   nUnits, 
+									   bSubtasks, 
+									   bFromToday);
 		}
 		
 		if (dwWhat & ODD_DONEDATE)
 		{
-			tdc.OffsetSelectedTaskDate(TDCD_DONE, nAmount, nUnits, bSubtasks, bFromToday);
+			tdc.OffsetSelectedTaskDate(TDCD_DONE, 
+									   nAmount, 
+									   nUnits, 
+									   bSubtasks, 
+									   bFromToday);
 		}
 		
 		if (dwWhat & ODD_REMINDER)
@@ -12135,7 +12154,14 @@ void CToDoListWnd::OnEditOffsetDates()
 			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, bSubtasks);
 
 			while (nTask--)
-				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], nAmount, nUnits, &tdc, bSubtasks, bFromToday);
+			{
+				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], 
+											  nAmount, 
+											  nUnits, 
+											  &tdc, 
+											  bSubtasks, 
+											  bFromToday);
+			}
 		}
 	}
 }

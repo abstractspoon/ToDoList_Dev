@@ -3193,7 +3193,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
+									   BOOL bAndSubtasks, BOOL bFromToday)
 {
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3223,7 +3224,14 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		if (!HandleModResult(dwTaskID, m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, bFromToday), aModTaskIDs))
+		TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID, 
+											 nDate, 
+											 nAmount, 
+											 nUnits, 
+											 bAndSubtasks, 
+											 bFromToday);
+
+		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
 			return FALSE;
 
 		mapProcessed.Add(dwTaskID);
@@ -3269,7 +3277,8 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, 
+												   BOOL bAndSubtasks, BOOL bFromToday)
 {
 	if (!CanOffsetSelectedTaskStartAndDueDates())
 		return FALSE;
@@ -3293,8 +3302,14 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 	while (pos)
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
+		TDC_SET nRes = OffsetTaskStartAndDueDates(dwTaskID, 
+												  nAmount, 
+												  nUnits, 
+												  bAndSubtasks, 
+												  bFromToday, 
+												  mapProcessed);
 
-		if (!HandleModResult(dwTaskID, OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, bAndSubtasks, bFromToday, mapProcessed), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
 			return FALSE;
 	}
 	
@@ -3311,7 +3326,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 	return TRUE;
 }
 
-TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
+TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
+											  BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
 {
 	ASSERT(CanEditSelectedTask(TDCA_STARTDATE));
 	ASSERT(!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
@@ -3332,19 +3348,32 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	// Handle subtasks at the end
 	if ((pTDI->HasStart() && pTDI->HasDue()) || bFromToday)
 	{
 		// Offset as a block
-		nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, FALSE, bFromToday);
+		nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, 
+												 nAmount, 
+												 nUnits, 
+												 FALSE, // Handle subtasks at the end
+												 bFromToday);
 	}
 	else if (pTDI->HasStart())
 	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, bFromToday);
+		nRes = m_data.OffsetTaskDate(dwTaskID, 
+									 TDCD_START, 
+									 nAmount, 
+									 nUnits, 
+									 FALSE, // Handle subtasks at the end
+									 bFromToday);
 	}
 	else if (pTDI->HasDue())
 	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, bFromToday);
+		nRes = m_data.OffsetTaskDate(dwTaskID, 
+									 TDCD_DUE, 
+									 nAmount, 
+									 nUnits, 
+									 FALSE, // Handle subtasks at the end
+									 bFromToday);
 	}
 	else
 	{
@@ -3365,8 +3394,14 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 			{
 				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
+				TDC_SET nChildRes = OffsetTaskStartAndDueDates(dwChildID, 
+															   nAmount, 
+															   nUnits, 
+															   TRUE, // Include subtasks
+															   bFromToday, 
+															   mapProcessed); // RECURSIVE CALL
 
-				if (SET_CHANGE == OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, bFromToday, mapProcessed)) // RECURSIVE CALL
+				if (nChildRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}
