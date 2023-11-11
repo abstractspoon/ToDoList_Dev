@@ -233,9 +233,9 @@ public:
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
-	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday);
+	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE);
 	BOOL CanOffsetSelectedTaskStartAndDueDates() const;
-	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday);
+	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE);
 	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }

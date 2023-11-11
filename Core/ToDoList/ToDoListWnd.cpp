@@ -5627,7 +5627,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nUnits, FALSE, FALSE);
+			tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_START, dItem);
 	}
@@ -5638,7 +5638,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_STARTTIME, (int)dItem, nUnits, FALSE, FALSE);
+			tdc.OffsetSelectedTaskDate(TDCD_STARTTIME, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_STARTTIME, dItem);
 	}
@@ -5649,7 +5649,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nUnits, FALSE, FALSE);
+			tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DUE, dItem);
 	}
@@ -5660,7 +5660,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DUETIME, (int)dItem, nUnits, FALSE, FALSE);
+			tdc.OffsetSelectedTaskDate(TDCD_DUETIME, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DUETIME, dItem);
 	}
@@ -5671,7 +5671,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nUnits, FALSE, FALSE);
+			tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DONE, dItem);
 	}
@@ -5682,7 +5682,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DONETIME, (int)dItem, nUnits, FALSE, FALSE);
+			tdc.OffsetSelectedTaskDate(TDCD_DONETIME, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DONETIME, dItem);
 	}
@@ -12157,7 +12157,7 @@ void CToDoListWnd::OnEditOffsetStartDueDatesForwards(UINT nCmdID)
 		return;
 	}
 
-	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits, FALSE, FALSE);
+	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits);
 }
 
 void CToDoListWnd::OnEditOffsetStartDueDatesBackwards(UINT nCmdID)
@@ -12177,7 +12177,7 @@ void CToDoListWnd::OnEditOffsetStartDueDatesBackwards(UINT nCmdID)
 		return;
 	}
 
-	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(-1, nUnits, FALSE, FALSE);
+	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(-1, nUnits);
 }
 
 void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
