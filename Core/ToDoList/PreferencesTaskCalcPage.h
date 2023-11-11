@@ -62,10 +62,10 @@ public:
 	BOOL GetNoDueDateIsDueTodayOrStart() const { return m_bNoDueDateDueTodayOrStart; }
 	BOOL GetCompletionStatus(CString& sStatus) const;
 	BOOL GetSyncCompletionToStatus() const { return (m_bSetCompletionStatus && m_bSyncCompletionToStatus); }
-
 	BOOL GetSubtasksInheritLockStatus() const { return m_bSubtasksInheritLockStatus; }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_bTaskInheritsSubtaskFlags; }
 	BOOL GetUseLatestLastModifiedDate() const { return m_bUseLatestLastModifiedDate; }
+	BOOL GetPreserveWeekdays() const { return m_bPreserveWeekdays; }
 
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const;
 
@@ -106,6 +106,7 @@ protected:
 	BOOL	m_bSubtasksInheritLockStatus;
 	BOOL	m_bTaskInheritsSubtaskFlags;
 	BOOL	m_bUseLatestLastModifiedDate;
+	BOOL	m_bPreserveWeekdays;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
