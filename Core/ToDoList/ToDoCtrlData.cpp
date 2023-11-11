@@ -2393,7 +2393,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 
 // External
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
-									  BOOL bAndSubtasks, BOOL bFromToday)
+									  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	DWORD dwFlags = 0;
 	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
@@ -2523,7 +2523,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 
 // External
 TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
-												  BOOL bAndSubtasks, BOOL bFromToday)
+												  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	DWORD dwFlags = 0;
 	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);

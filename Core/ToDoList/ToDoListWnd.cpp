@@ -12118,7 +12118,8 @@ void CToDoListWnd::OnEditOffsetDates()
 				tdc.OffsetSelectedTaskStartAndDueDates(nAmount, 
 													   nUnits, 
 													   bAndSubtasks, 
-													   bFromToday);
+													   bFromToday,
+													   bPreserveWeekdays);
 			}
 			else
 			{
@@ -12126,7 +12127,8 @@ void CToDoListWnd::OnEditOffsetDates()
 										   nAmount, 
 										   nUnits, 
 										   bAndSubtasks, 
-										   bFromToday);
+										   bFromToday,
+										   bPreserveWeekdays);
 			}
 		}
 		else if (dwWhat & ODD_DUEDATE)
@@ -12135,7 +12137,8 @@ void CToDoListWnd::OnEditOffsetDates()
 									   nAmount, 
 									   nUnits, 
 									   bAndSubtasks, 
-									   bFromToday);
+									   bFromToday,
+									   bPreserveWeekdays);
 		}
 		
 		if (dwWhat & ODD_DONEDATE)
@@ -12144,7 +12147,8 @@ void CToDoListWnd::OnEditOffsetDates()
 									   nAmount, 
 									   nUnits, 
 									   bAndSubtasks, 
-									   bFromToday);
+									   bFromToday,
+									   bPreserveWeekdays);
 		}
 		
 		if (dwWhat & ODD_REMINDER)
