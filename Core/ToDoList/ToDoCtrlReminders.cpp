@@ -812,15 +812,21 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 }
 
 int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, 
-									   BOOL bAndSubtasks, BOOL bFromToday)
+									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	int nRem = FindReminder(dwTaskID, pTDC);
 	int nNumOffset = 0;
 
 	if (nRem != -1)
 	{
-		if (OffsetReminder(m_aReminders[nRem], dAmount, nUnits, bFromToday))
+		if (OffsetReminder(m_aReminders[nRem],
+						   dAmount,
+						   nUnits,
+						   bFromToday,
+						   bPreserveWeekday))
+		{
 			nNumOffset++;
+		}
 	}
 
 	if (bAndSubtasks)
@@ -834,8 +840,9 @@ int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS
 										 dAmount,
 										 nUnits,
 										 pTDC,
-										 TRUE,
-										 bFromToday); // RECURSIVE CALL
+										 TRUE, // And subtasks
+										 bFromToday,
+										 bPreserveWeekday); // RECURSIVE CALL
 		}
 	}
 
@@ -843,7 +850,7 @@ int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS
 }
 
 BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, 
-										BOOL bFromToday)
+										BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	if (rem.bRelative)
 		return FALSE;

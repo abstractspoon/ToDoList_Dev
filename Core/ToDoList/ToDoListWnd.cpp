@@ -12095,8 +12095,9 @@ void CToDoListWnd::OnEditOffsetDates()
 	if (dialog.DoModal() == IDOK)
 	{
 		DWORD dwWhat = dialog.GetOffsetWhat();
-		BOOL bSubtasks = dialog.GetOffsetSubtasks();
+		BOOL bAndSubtasks = dialog.GetOffsetSubtasks();
 		BOOL bFromToday = dialog.GetOffsetFromToday();
+		BOOL bPreserveWeekdays = dialog.GetPreserveWeekdays();
 
 		TDC_UNITS nUnits = TDCU_NULL;
 		int nAmount = dialog.GetOffsetAmount(nUnits);
@@ -12116,7 +12117,7 @@ void CToDoListWnd::OnEditOffsetDates()
 			{
 				tdc.OffsetSelectedTaskStartAndDueDates(nAmount, 
 													   nUnits, 
-													   bSubtasks, 
+													   bAndSubtasks, 
 													   bFromToday);
 			}
 			else
@@ -12124,7 +12125,7 @@ void CToDoListWnd::OnEditOffsetDates()
 				tdc.OffsetSelectedTaskDate(TDCD_START, 
 										   nAmount, 
 										   nUnits, 
-										   bSubtasks, 
+										   bAndSubtasks, 
 										   bFromToday);
 			}
 		}
@@ -12133,7 +12134,7 @@ void CToDoListWnd::OnEditOffsetDates()
 			tdc.OffsetSelectedTaskDate(TDCD_DUE, 
 									   nAmount, 
 									   nUnits, 
-									   bSubtasks, 
+									   bAndSubtasks, 
 									   bFromToday);
 		}
 		
@@ -12142,7 +12143,7 @@ void CToDoListWnd::OnEditOffsetDates()
 			tdc.OffsetSelectedTaskDate(TDCD_DONE, 
 									   nAmount, 
 									   nUnits, 
-									   bSubtasks, 
+									   bAndSubtasks, 
 									   bFromToday);
 		}
 		
@@ -12151,7 +12152,7 @@ void CToDoListWnd::OnEditOffsetDates()
 			CDWordArray aTaskIDs;
 			DWORD dwUnused;
 
-			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, bSubtasks);
+			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, bAndSubtasks);
 
 			while (nTask--)
 			{
@@ -12159,8 +12160,9 @@ void CToDoListWnd::OnEditOffsetDates()
 											  nAmount, 
 											  nUnits, 
 											  &tdc, 
-											  bSubtasks, 
-											  bFromToday);
+											  bAndSubtasks, 
+											  bFromToday,
+											  bPreserveWeekdays);
 			}
 		}
 	}
