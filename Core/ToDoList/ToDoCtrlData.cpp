@@ -3995,23 +3995,17 @@ BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, const TDCDEPENDE
 	
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
-		DH_UNITS nDHUnits = DHU_WEEKDAYS;
+		BOOL bPreserveWeekday = GetWantPreserveWeekday(pTDI);
 
-		switch (pTDI->timeEstimate.nUnits)
-		{
-		case TDCU_DAYS:
-		case TDCU_MONTHS:
-		case TDCU_YEARS:
-			nDHUnits = DHU_DAYS;
-			break;
-		}
-
-		if (nDHUnits = DHU_WEEKDAYS)
+		if (bPreserveWeekday)
 			CWorkingWeek().MakeWeekday(dtNewStart);
 
 		// Add lead-in time
 		if (depend.nDaysLeadIn)
+		{
+			DH_UNITS nDHUnits = (bPreserveWeekday ? DHU_WEEKDAYS : DHU_DAYS);
 			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
+		}
 
 		return TRUE;
 	}
