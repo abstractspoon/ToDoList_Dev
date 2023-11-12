@@ -178,3 +178,20 @@ TDC_UNITS TDCRECURRENCE::GetRegularityUnits() const
 {
 	return TDC::MapTDCRegularityToUnits(GetRegularity());
 }
+
+BOOL TDCRECURRENCE::GetWantPreserveWeekday() const
+{
+	switch (m_nRegularity)
+	{
+	case RECURS_MONTH_EVERY_NMONTHS:
+	case RECURS_YEAR_EVERY_NYEARS:
+		return (BOOL)m_dwSpecific2;
+
+	case RECURS_DAY_EVERY_WEEKDAY:
+	case RECURS_DAY_EVERY_NWEEKDAYS:
+		return TRUE;
+	}
+
+	// All else
+	return FALSE;
+}

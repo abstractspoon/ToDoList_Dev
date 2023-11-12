@@ -44,6 +44,7 @@ enum
 	OFFSET_SUBTASKS				= 0x01,
 	OFFSET_FROMTODAY			= 0x02,
 	OFFSET_FITTORECURRINGSCHEME = 0x04,
+	OFFSET_PRESERVEWEEKDAY		= 0x08,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -2398,6 +2399,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	DWORD dwFlags = 0;
 	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
 	Misc::SetFlag(dwFlags, OFFSET_SUBTASKS, bAndSubtasks);
+	Misc::SetFlag(dwFlags, OFFSET_PRESERVEWEEKDAY, bPreserveWeekday);
 
 	return OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags);
 }
@@ -2410,6 +2412,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, OFFSET_SUBTASKS);
 	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
 	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, OFFSET_FITTORECURRINGSCHEME);
+	BOOL bPreserveWeekdays = Misc::HasFlag(dwFlags, OFFSET_PRESERVEWEEKDAY);
 
 	TDC_SET nRes = SET_NOCHANGE;
 
@@ -2418,7 +2421,9 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTaskID, pTDI);
 
-		COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		CDateHelper dh;
+		COleDateTime date = (bFromToday ? dh.GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		BOOL bIsWeekday = !dh.Weekend().IsWeekend(date);
 
 		switch (nUnits)
 		{
@@ -2443,16 +2448,20 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		default: // All the rest
 			{
 				// Modify date AND time
-				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE)); // Preserve end of month
+				VERIFY(dh.OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE)); // Preserve end of month
 
 				// Special case: Task is recurring and the date was changed -> must fall on a valid date
-				if (bFitToRecurringScheme && pTDI->IsRecurring())
+				if (bFitToRecurringScheme)
 				{
+					ASSERT(pTDI->IsRecurring());
 					pTDI->trRecurrence.FitDayToScheme(date);
 				}
 			}
 			break;
 		}
+
+		if (bPreserveWeekdays && bIsWeekday)
+			dh.WorkingWeek().MakeWeekday(date);
 
 		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
 	}
@@ -2528,6 +2537,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 	DWORD dwFlags = 0;
 	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
 	Misc::SetFlag(dwFlags, OFFSET_SUBTASKS, bAndSubtasks);
+	Misc::SetFlag(dwFlags, OFFSET_PRESERVEWEEKDAY, bPreserveWeekday);
 
 	return OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, dwFlags);
 }
@@ -4425,11 +4435,16 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasDue)
 			{
 				// Make sure the new date fits the recurring scheme
+				DWORD dwFlags = (OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS);
+
+				if (trPrev.GetWantPreserveWeekday())
+					dwFlags |= OFFSET_PRESERVEWEEKDAY;
+
 				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID,
 												 TDCD_DUEDATE,
 												 nRecurAmount,
 												 nRecurUnits,
-												 (OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS));
+												 dwFlags);
 				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
@@ -4526,11 +4541,16 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasStart)
 			{
 				// Make sure the new date fits the recurring scheme
-				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
+				DWORD dwFlags = (OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS);
+
+				if (trPrev.GetWantPreserveWeekday())
+					dwFlags |= OFFSET_PRESERVEWEEKDAY;
+
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID,
 												  TDCD_STARTDATE, 
 												  nRecurAmount, 
 												  nRecurUnits, 
-												  (OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS));
+												  dwFlags);
 				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;

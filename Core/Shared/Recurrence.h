@@ -58,7 +58,7 @@ struct CRecurrence
 	//	RECURS_WEEK_EVERY_NWEEKS						every 'n' weeks				--- (0)
 	//
 	//	RECURS_MONTHLY (RECURS_MONTH_SPECIFIC_DAY_NMONTHS)				
-	//	RECURS_MONTH_EVERY_NMONTHS						every 'n' months			--- (0)
+	//	RECURS_MONTH_EVERY_NMONTHS						every 'n' months			preserve weekday (BOOL)
 	//	RECURS_MONTH_SPECIFIC_DAY_NMONTHS				every 'n' months			day of month (1-31)
 	//	RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTH			first(0), last(!0)			every 'n' months
 	//	RECURS_MONTH_SPECIFIC_DOW_NMONTHS				LOWORD = which (1-5)		every 'n' months
@@ -66,7 +66,7 @@ struct CRecurrence
 	//
 	//	RECURS_YEARLY	(RECURS_YEAR_SPECIFIC_DAY_MONTH)				
 	//	RECURS_YEAR_SPECIFIC_DAY_MONTH					month (1-12, or DHM_...)	day of month (1-31)
-	//	RECURS_YEAR_EVERY_NYEARS						every 'n' years				--- (0)
+	//	RECURS_YEAR_EVERY_NYEARS						every 'n' years				preserve weekday (BOOL)
 	//  RECURS_YEAR_SPECIFIC_DOW_MONTH					LOWORD = which (1-5)		specific month (1-12, or DHM_...)
 	//													HIWORD = DOW (1-7)			
 
