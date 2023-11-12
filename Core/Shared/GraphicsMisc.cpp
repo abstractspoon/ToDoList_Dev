@@ -336,8 +336,13 @@ HFONT GraphicsMisc::CreateFont(LPCTSTR szFaceName, int nPoint, DWORD dwFlags)
 	LOGFONT lf;
 	::GetObject(hDefFont, sizeof(lf), &lf);
 	
-	// set the charset
-	if (dwFlags & GMFS_SYMBOL)
+	// Fix for regional settings option
+	// "Beta: Use Unicode UTF-8 for worldwide language support"
+	if (::GetACP() != CP_UTF8)
+	{
+		lf.lfCharSet = DEFAULT_CHARSET;
+	}
+	else if (dwFlags & GMFS_SYMBOL)
 	{
 		lf.lfCharSet = SYMBOL_CHARSET;
 	}
