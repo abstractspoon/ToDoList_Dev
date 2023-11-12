@@ -2412,7 +2412,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, OFFSET_SUBTASKS);
 	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
 	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, OFFSET_FITTORECURRINGSCHEME);
-	BOOL bPreserveWeekdays = Misc::HasFlag(dwFlags, OFFSET_PRESERVEWEEKDAY);
+	BOOL bPreserveWeekday = Misc::HasFlag(dwFlags, OFFSET_PRESERVEWEEKDAY);
 
 	TDC_SET nRes = SET_NOCHANGE;
 
@@ -2460,7 +2460,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			break;
 		}
 
-		if (bPreserveWeekdays && bIsWeekday)
+		if (bPreserveWeekday && bIsWeekday)
 			dh.WorkingWeek().MakeWeekday(date);
 
 		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
