@@ -2517,15 +2517,25 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 	COleDateTime dtStart(dtNewStart); // may get modified
 	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, 
 										   pTDI->dateDue, 
-										   pTDI->timeEstimate.nUnits, 
+										   GetWantPreserveWeekday(pTDI),
 										   dtStart);
 
-	// FALSE -> don't recalc time estimate until due date is set
-	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
+	TDC_SET nRes = SetTaskDate(dwTaskID, 
+							   pTDI, 
+							   TDCD_START, 
+							   dtStart, 
+							   FALSE); // don't recalc time estimate for a move
+	
 	ASSERT(nRes != SET_FAILED);
 
 	if (nRes == SET_CHANGE)
-		SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, TRUE); // Recalc time estimate
+	{
+		SetTaskDate(dwTaskID,
+					pTDI,
+					TDCD_DUE,
+					dtNewDue,
+					FALSE); // don't recalc time estimate for a move
+	}
 
 	return nRes;
 }
@@ -2589,6 +2599,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 	return nRes;
 }
 
+/*
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, 
 										   TDC_UNITS nUnits, COleDateTime& dtNewStart)
 {
@@ -2596,6 +2607,9 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	ASSERT(dSimpleDuration > 0.0);
 
 	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+
+	CDateHelper dh;
+	COleDateTime dtNewDue;
 
 	// If the real duration is zero then it means that the task
 	// falls between the end of one weekday and the start of the next
@@ -2608,8 +2622,8 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 				(nUnits == TDCU_WEEKDAYS) ||
 				(nUnits == TDCU_WEEKS));
 
-		ASSERT(CDateHelper().WorkingWeek().HasWeekend() ||
-				(CDateHelper().WorkingDay().GetLengthInHours(TRUE) < 24));
+		ASSERT(dh.WorkingWeek().HasWeekend() ||
+				(dh.WorkingDay().GetLengthInHours(TRUE) < 24));
 
 		// Recalculate the simple duration in weekday-hours because this
 		// seems most likely to produce a coherent outcome ie. Avoiding 
@@ -2617,47 +2631,135 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		int nWholeDays = (int)dSimpleDuration;
 		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
 
-		double dDurationInWeekdayHours = ((nWholeDays * CDateHelper().WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
+		double dDurationInWeekdayHours = ((nWholeDays * dh.WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
 
-		return AddDuration(dtNewStart, 
-						   dDurationInWeekdayHours, 
-						   TDCU_HOURS, 
-						   TRUE); // Allow modify start date
-					   
-	}
-
-	// If adding the simple duration to the start date to produce the 
-	// due date would result in no change to the real duration, just do 
-	// that because it's the least confusing outcome for the user
-	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
-
-	if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
-	{
-		return AddDuration(dtNewStart, 
-						   dSimpleDuration, 
-						   TDCU_DAYS, 
-						   TRUE); // Allow modify start date
-	}
-
-	// Tasks whose current and new dates fall wholly within a single day 
-	// and where at least one of dates has a time component are kept simple
-	if (CDateHelper::DateHasTime(dtCurStart) || CDateHelper::DateHasTime(dtCurDue))
-	{
-		if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
-			CDateHelper::IsSameDay(dtNewStart, dtSimpleDue))
-		{
-			return AddDuration(dtNewStart, 
-							   dSimpleDuration, 
-							   TDCU_DAYS, 
+		dtNewDue = AddDuration(dtNewStart,
+							   dDurationInWeekdayHours,
+							   TDCU_HOURS,
 							   TRUE); // Allow modify start date
+	}
+	else
+	{
+		// If adding the simple duration to the start date to produce the 
+		// due date would result in no change to the real duration, just do 
+		// that because it's the least confusing outcome for the user
+		COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
+
+		if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
+		{
+			dtNewDue = AddDuration(dtNewStart,
+								   dSimpleDuration,
+								   TDCU_DAYS,
+								   TRUE); // Allow modify start date
+		}
+		else if (dh.DateHasTime(dtCurStart) || dh.DateHasTime(dtCurDue))
+		{
+			// Tasks whose current and new dates fall wholly within a single day 
+			// and where at least one of dates has a time component are kept simple
+			if (dh.IsSameDay(dtCurStart, dtCurDue) &&
+				dh.IsSameDay(dtNewStart, dtSimpleDue))
+			{
+				dtNewDue = AddDuration(dtNewStart,
+									   dSimpleDuration,
+									   TDCU_DAYS,
+									   TRUE); // Allow modify start date
+			}
 		}
 	}
 
-	// else
-	return AddDuration(dtNewStart, 
-					   dRealDuration, 
-					   nUnits, 
-					   TRUE); // Allow modify start date
+	// All else
+	if (!dh.IsDateSet(dtNewDue))
+	{
+		dtNewDue = AddDuration(dtNewStart,
+							   dRealDuration,
+							   nUnits,
+							   TRUE); // Allow modify start date
+	}
+
+	return dtNewDue;
+}
+*/
+
+COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, 
+										   BOOL bPreserveWeekday, COleDateTime& dtNewStart)
+{
+	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
+	ASSERT(dSimpleDuration > 0.0);
+
+	TDC_UNITS nUnits = (bPreserveWeekday ? TDCU_WEEKDAYS : TDCU_DAYS);
+	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+
+	CDateHelper dh;
+	COleDateTime dtNewDue;
+
+	// If the real duration is zero then it means that the task
+	// falls between the end of one weekday and the start of the next
+	// which means that the user has performed an action to avoid our
+	// checks, so we fall back on the simple duration instead
+	if (dRealDuration == 0.0)
+	{
+		ASSERT(bPreserveWeekday);
+		ASSERT(dh.WorkingWeek().HasWeekend() ||
+				(dh.WorkingDay().GetLengthInHours(TRUE) < 24));
+
+		// Recalculate the simple duration in weekday-hours because this
+		// seems most likely to produce a coherent outcome ie. Avoiding 
+		// unit-mashing weirdness
+		int nWholeDays = (int)dSimpleDuration;
+		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
+
+		double dDurationInWeekdayHours = ((nWholeDays * dh.WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
+
+		dtNewDue = AddDuration(dtNewStart,
+							   dDurationInWeekdayHours,
+							   TDCU_HOURS,
+							   TRUE); // Allow modify start date
+	}
+	else
+	{
+		// If adding the simple duration to the start date to produce the 
+		// due date would result in no change to the real duration, just do 
+		// that because it's the least confusing outcome for the user
+		COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
+
+		if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
+		{
+			dtNewDue = AddDuration(dtNewStart,
+								   dSimpleDuration,
+								   TDCU_DAYS,
+								   TRUE); // Allow modify start date
+		}
+		else if (dh.DateHasTime(dtCurStart) || dh.DateHasTime(dtCurDue))
+		{
+			// Tasks whose current and new dates fall wholly within a single day 
+			// and where at least one of dates has a time component are kept simple
+			if (dh.IsSameDay(dtCurStart, dtCurDue) &&
+				dh.IsSameDay(dtNewStart, dtSimpleDue))
+			{
+				dtNewDue = AddDuration(dtNewStart,
+									   dSimpleDuration,
+									   TDCU_DAYS,
+									   TRUE); // Allow modify start date
+			}
+		}
+	}
+
+	// All else
+	if (!dh.IsDateSet(dtNewDue))
+	{
+		dtNewDue = AddDuration(dtNewStart,
+							   dRealDuration,
+							   nUnits,
+							   TRUE); // Allow modify start date
+	}
+
+	if (bPreserveWeekday)
+	{
+		dh.WorkingWeek().MakeWeekday(dtNewStart);
+		dh.WorkingWeek().MakeWeekday(dtNewDue);
+	}
+
+	return dtNewDue;
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -2749,16 +2851,34 @@ TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& tim
 	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->timeSpent, newSpent);
 }
 
+BOOL CToDoCtrlData::GetWantPreserveWeekday(const TODOITEM* pTDI) const
+{
+	ASSERT(pTDI);
+
+	// Backwards compatibility
+	switch (pTDI->timeEstimate.nUnits)
+	{
+	case TDCU_WEEKDAYS:	return TRUE;
+	case TDCU_DAYS:		return FALSE;
+	}
+
+	if (pTDI->IsRecurring())
+		return pTDI->trRecurrence.GetWantPreserveWeekday();
+
+	// All else
+	return HasStyle(TDCS_PRESERVEWEEKDAYS);
+}
+
 BOOL CToDoCtrlData::CalcMissingStartDateFromDue(TODOITEM* pTDI) const
 {
 	if (pTDI->HasStart() || !pTDI->HasDue() || (pTDI->timeEstimate.dAmount <= 0.0))
 		return FALSE;
 
 	// Subtract time estimate from due date
-	pTDI->dateStart = AddDuration(pTDI->dateDue, 
-									-pTDI->timeEstimate.dAmount, 
-									pTDI->timeEstimate.nUnits, 
-									FALSE); // don't modify due date
+	pTDI->dateStart = AddDuration(pTDI->dateDue,
+								  -pTDI->timeEstimate.dAmount,
+								  pTDI->timeEstimate.nUnits,
+								  FALSE); // don't modify due date
 
 	return TRUE;
 }
@@ -2769,7 +2889,6 @@ BOOL CToDoCtrlData::CalcMissingDueDateFromStart(TODOITEM* pTDI) const
 		return FALSE;
 
 	// Add time estimate to start date
-	COleDateTime dtStart(pTDI->dateStart);
 	pTDI->dateDue = AddDuration(pTDI->dateStart, 
 								pTDI->timeEstimate.dAmount, 
 								pTDI->timeEstimate.nUnits, 
@@ -3920,7 +4039,7 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 	{
 		dtNewDue = CalcNewDueDate(pTDI->dateStart, 
 								  pTDI->dateDue, 
-								  pTDI->timeEstimate.nUnits, 
+								  GetWantPreserveWeekday(pTDI),
 								  dtStart);
 	}
 	else if ((pTDI->timeEstimate.dAmount > 0.0) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
