@@ -710,22 +710,26 @@ List<String^>^ Task::GetFileLink(bool fullPath)
 	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskFileLinkCount, 0);
 
-	String^ pathRoot = String::Empty;
-	
-	if (fullPath)
+	if (numItems > 0)
 	{
-		if (m_pConstTaskList)
-			pathRoot = (gcnew TaskList(m_pConstTaskList))->GetFilePath();
-		else
-			pathRoot = (gcnew TaskList(m_pTaskList))->GetFilePath();
+		String^ pathRoot = String::Empty;
 
-		pathRoot = System::IO::Path::GetDirectoryName(pathRoot);
-	}
+		if (fullPath)
+		{
+			if (m_pConstTaskList)
+				pathRoot = (gcnew TaskList(m_pConstTaskList))->GetFilePath();
+			else
+				pathRoot = (gcnew TaskList(m_pTaskList))->GetFilePath();
 
-	for (int nIndex = 0; nIndex < numItems; nIndex++)
-	{
-		String^ fileLinkPath = GETTASKSTR_ARG(GetTaskFileLink, nIndex);
-		items->Add(System::IO::Path::Combine(pathRoot, fileLinkPath));
+			if (!String::IsNullOrEmpty(pathRoot))
+				pathRoot = System::IO::Path::GetDirectoryName(pathRoot);
+		}
+
+		for (int nIndex = 0; nIndex < numItems; nIndex++)
+		{
+			String^ fileLinkPath = GETTASKSTR_ARG(GetTaskFileLink, nIndex);
+			items->Add(System::IO::Path::Combine(pathRoot, fileLinkPath));
+		}
 	}
 
 	return items;
