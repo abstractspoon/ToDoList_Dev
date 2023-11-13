@@ -168,6 +168,7 @@ BEGIN_MESSAGE_MAP(CCustomAttributeListPage, CDialog)
 	ON_EN_CHANGE(IDC_DEFAULTLISTDATA, OnChangeDefaultlistdata)
 	ON_BN_CLICKED(IDC_BROWSEIMAGES, OnBrowseimages)
 	ON_BN_CLICKED(IDC_INSERTSYMBOL, OnInsertsymbol)
+	ON_WM_ENABLE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -355,6 +356,11 @@ void CCustomAttributeListPage::EnableControls()
 	GetDlgItem(IDC_DEFAULTLISTDATA)->EnableWindow(bEnableListData);
 	GetDlgItem(IDC_INSERTSYMBOL)->EnableWindow(bEnableListData);
 	GetDlgItem(IDC_BROWSEIMAGES)->EnableWindow(bEnableIconBtn);
+}
+
+void CCustomAttributeListPage::OnEnable(BOOL bEnable)
+{
+	GetDlgItem(IDC_LISTTYPE)->EnableWindow(bEnable);
 }
 
 void CCustomAttributeListPage::UpdateListDataMask()
@@ -1259,10 +1265,10 @@ void CTDLCustomAttributeDlg::EnableControls()
 		m_eUniqueID.EnableWindow(FALSE);
 	}
 	
-	m_pageList.EnableWindow(!bIsCalculation);
+	m_pageList.EnableWindow(!bIsCalculation && (nSel >= 0));
 	m_pageList.ShowWindow(bIsCalculation ? SW_HIDE : SW_SHOW);
 
-	m_pageCalc.EnableWindow(bIsCalculation);
+	m_pageCalc.EnableWindow(bIsCalculation && (nSel >= 0));
 	m_pageCalc.ShowWindow(bIsCalculation ? SW_SHOW : SW_HIDE);
 }
 
