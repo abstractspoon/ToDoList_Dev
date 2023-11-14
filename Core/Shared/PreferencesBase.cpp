@@ -316,7 +316,6 @@ BEGIN_MESSAGE_MAP(CPreferencesDlgBase, CDialog)
 	ON_WM_HELPINFO()
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
-	ON_WM_ENABLE()
 END_MESSAGE_MAP()
 
 IMPLEMENT_DYNAMIC(CPreferencesDlgBase, CDialog);
@@ -335,13 +334,6 @@ void CPreferencesDlgBase::OnOK()
 
 	if (m_pDoModalPrefs)
 		SavePreferences(m_pDoModalPrefs, m_sDoModalKey);
-}
-
-void CPreferencesDlgBase::OnEnable(BOOL bEnable)
-{
-	GetActivePage()->Invalidate(TRUE);
-
-	CDialog::OnEnable(bEnable);
 }
 
 void CPreferencesDlgBase::OnApply()
@@ -655,6 +647,11 @@ void CPreferencesDlgBase::DoHelp()
 		AfxGetApp()->WinHelp(pPage->GetHelpID());
 	else
 		AfxGetApp()->WinHelp(m_nDlgTemplateID);
+}
+
+void CPreferencesDlgBase::InvalidateActivePage(BOOL bErase)
+{
+	m_ppHost.InvalidateActivePage(bErase);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -100,6 +100,8 @@ public:
 
 	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* prefs, LPCTSTR szKey) const;
+
+	void InvalidateActivePage(BOOL bErase = TRUE);
 	
 protected:
 	CScrollingPropertyPageHost m_ppHost;
@@ -126,7 +128,6 @@ protected:
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI);
 	afx_msg void OnClickHelpButton();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-	afx_msg void OnEnable(BOOL bEnable);
 	DECLARE_MESSAGE_MAP()
 		
 protected:
