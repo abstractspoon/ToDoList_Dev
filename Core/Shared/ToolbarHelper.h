@@ -20,7 +20,7 @@ class CShortcutManager;
 
 //////////////////////////////////////////////////////////////////////
 
-class CToolbarHelper : protected CSubclassWnd
+class CToolbarHelper : protected CSubclassWnd, protected CSubclasser 
 {
 public:
 	CToolbarHelper();
@@ -48,6 +48,7 @@ public:
 
 protected:
 	CToolBar* m_pToolbar;
+	CSubclassWnd m_scToolbar;
 
 	const CShortcutManager* m_pShortcutMgr;
 
@@ -78,6 +79,7 @@ protected:
 	void RefreshTooltipRects();
 
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 };
 
 #endif // !defined(AFX_TOOLBARHELPER_H__86A32540_80BF_421C_97E3_6E760BF427A8__INCLUDED_)
