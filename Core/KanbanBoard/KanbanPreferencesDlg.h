@@ -60,8 +60,6 @@ protected:
 	CKanbanAttributeComboBox	m_cbAttributes;
 	CKanbanFixedColumnListCtrl	m_lcFixedColumnDefs;
 	CGroupLineManager m_mgrGroupLines;
-	CEnToolBar m_toolbar;
-	CToolbarHelper m_tbHelper;
 	CCheckListBoxEx	m_lbDisplayAttrib;
 
 	BOOL	m_bShowTaskColorAsBar;
@@ -102,7 +100,6 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnShowColorAsBar();
 	afx_msg void OnPopulateFixedColumns();
-	afx_msg void OnUpdatePopulateColumns(CCmdUI* pCmdUI);
 	afx_msg void OnSortSubtasksBelowParents();
 
 	DECLARE_MESSAGE_MAP()

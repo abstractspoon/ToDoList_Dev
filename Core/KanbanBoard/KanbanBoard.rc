@@ -156,7 +156,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -181,15 +181,16 @@ BEGIN
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "List1",IDC_COLUMNDEFS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
-                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,313,94
-    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,278,261,53,16
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,243,94
     GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
                     330,147,0,WS_EX_TRANSPARENT
     GROUPBOX        "Display the following attributes for each task:",
                     IDC_STATIC,7,69,330,124
     CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,175,313,10
+    PUSHBUTTON      "Move &Up",IDC_MOVECOL_UP,268,278,59,14
+    PUSHBUTTON      "Move &Down",IDC_MOVECOL_DOWN,268,297,59,14
+    PUSHBUTTON      "&Populate",IDC_POPULATECOLUMNS,268,358,59,14
 END
 
 
@@ -274,8 +275,6 @@ END
 
 IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
 IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
-IDR_COLUMN_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\column_toolbar.bmp"
-IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
 IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
 IDB_ICONS               BITMAP  DISCARDABLE     "res\\icons.bmp"
 
@@ -291,14 +290,6 @@ BEGIN
     BUTTON      ID_HELP
 END
 
-IDR_COLUMN_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
-BEGIN
-    BUTTON      ID_MOVECOL_UP
-    BUTTON      ID_MOVECOL_DOWN
-    SEPARATOR
-    BUTTON      ID_POPULATECOLUMNS
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -309,7 +300,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_PREFS                "\nKanban Preferences"
     IDS_BACKLOG             "Backlog"
-    ID_POPULATECOLUMNS      "\nPopulate Columns"
 END
 
 STRINGTABLE DISCARDABLE 
