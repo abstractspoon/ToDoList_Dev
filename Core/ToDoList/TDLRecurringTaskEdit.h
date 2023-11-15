@@ -178,16 +178,17 @@ protected:
 	int		m_nSpecificNumMonths;
 	int		m_nEveryNumMonths;
 	int		m_nMonthlyOption;
+	BOOL	m_bFirstLastWeekday;
+	BOOL	m_bPreserveWeekdays;
 	//}}AFX_DATA
 	CDayOfWeekComboBox	m_cbDaysOfWeek;
 	CComboBox			m_cbSpecificWeek;
 	CStringArray		m_aSpecificWeek;
-	BOOL				m_bFirstLastWeekday;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CTDLRecurringTaskMonthlyOptionPage)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
@@ -231,6 +232,8 @@ protected:
 	DWORD	m_dwSpecificMonths;
 	int		m_nSpecificDayOfWeek;
 	DWORD	m_dwEveryMonths;
+	BOOL	m_bPreserveWeekdays;
+
 	//}}AFX_DATA
 	CMonthCheckComboBox	m_cbSpecificMonthList;
 	CMonthCheckComboBox	m_cbEveryMonthList;

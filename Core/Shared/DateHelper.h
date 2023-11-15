@@ -73,6 +73,7 @@ public:
 	BOOL Offset(int nAmount, DH_UNITS nUnits);
 	BOOL OffsetStart(int nAmount, DH_UNITS nUnits);
 	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
+	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
 	double CalcProportion(const COleDateTime& date) const; // returns 0.0-1.0
@@ -99,8 +100,10 @@ public:
 	int CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const;
 	int CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) const;
 	
-	BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) const;
+	BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE) const;
 	BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bMustHaveSign = TRUE) const;
+
+	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay);
 
 	const CWorkingWeek& WorkingWeek() const { return m_week; }
 	const CWorkingDay& WorkingDay() const { return m_week.WorkingDay(); }
@@ -155,6 +158,7 @@ public:
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
 	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
 	static void IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
+	static void IncrementYear(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
 	
 	static int CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 	static int GetDateInMonths(int nMonth, int nYear);

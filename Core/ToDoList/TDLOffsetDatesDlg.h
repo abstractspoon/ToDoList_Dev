@@ -33,6 +33,7 @@ public:
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetFromToday() const { return m_bOffsetFromToday; }
+	BOOL GetPreserveWeekdays() const;
 
 protected:
 // Dialog Data
@@ -48,7 +49,7 @@ protected:
 	BOOL	m_bOffsetSubtasks;
 	BOOL	m_bOffsetFromToday;
 	//}}AFX_DATA
-
+	BOOL	m_bPreserveWeekdays;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -57,13 +58,13 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(COffsetDatesDlg)
-		// NOTE: the ClassWizard will add member functions here
+	afx_msg void OnSelchangeUnits();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

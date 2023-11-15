@@ -366,6 +366,12 @@ BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
+BOOL COleDateTimeRange::Expand(int nAmount, DH_UNITS nUnits)
+{
+	// Handles expansion and contraction
+	return (OffsetStart(-nAmount, nUnits) && OffsetEnd(nAmount, nUnits));
+}
+
 BOOL COleDateTimeRange::OffsetStart(int nAmount, DH_UNITS nUnits)
 {
 	if (!IsValid())
@@ -490,7 +496,7 @@ int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) con
 	return CalcDaysFromTo(GetDate(nFrom), GetDate(nTo), bInclusive);
 }
 
-BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) const
+BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth) const
 {
 	// sanity checks
 	if (!IsDateSet(date) || (!IsValidUnit(nUnits) && (nUnits != DHU_NULL)))
@@ -539,15 +545,78 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) c
 		break;
 
 	case DHU_MONTHS:
-		IncrementMonth(date, nAmount);
+		IncrementMonth(date, nAmount, bPreserveEndOfMonth);
 		break;
 
 	case DHU_YEARS:
-		IncrementMonth(date, nAmount * 12);
+		IncrementYear(date, nAmount, bPreserveEndOfMonth);
 		break;
 	}
 
 	return IsDateSet(date);
+}
+
+double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay)
+{
+	// Sanity check
+	if (!COleDateTimeRange::IsValid(dtFrom, dtTo))
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	// Handle due date 'end of day'
+	COleDateTime dateEnd(dtTo);
+
+	if (CDateHelper::IsEndOfDay(dateEnd, bNoTimeIsEndOfDay))
+		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+
+	switch (nUnits)
+	{
+	case DHU_DAYS:
+		return (dateEnd.m_dt - dtFrom.m_dt);
+
+	case DHU_MONTHS:
+	case DHU_YEARS:
+		{
+			// Check for exact months
+			double dDuration = (dateEnd.m_dt - dtFrom.m_dt); // in days
+
+			if (dDuration = (int)dDuration)
+			{
+				int nStartDay = dtFrom.GetDay();
+				int nEndDay = dateEnd.GetDay();
+
+				if (nEndDay == nStartDay)
+				{
+					int nNumMonths = (CDateHelper::GetDateInMonths(dateEnd) - CDateHelper::GetDateInMonths(dtFrom));
+
+					if (nUnits == DHU_MONTHS)
+						return nNumMonths;
+
+					// else Years
+					if ((nNumMonths % 12) == 0)
+						return (nNumMonths / 12);
+				}
+			}
+
+			// else
+			CTwentyFourSevenWeek week;
+			CTimeHelper th(week);
+
+			return th.Convert(dDuration, THU_DAYS, ((nUnits == DHU_MONTHS) ? THU_MONTHS : THU_YEARS));
+		}
+		break;
+
+	case DHU_WEEKDAYS:
+		return m_week.CalcDuration(dtFrom, dateEnd, WWD_DAYS);
+
+	case DHU_WEEKS:
+		return m_week.CalcDuration(dtFrom, dateEnd, WWD_WEEKS);
+	}
+
+	ASSERT(0);
+	return 0.0;
 }
 
 // Static helpers ------------------------------------------------------------
@@ -2220,6 +2289,11 @@ void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndO
 		IncrementMonth(st, nBy, bPreserveEndOfMonth);
 		date = COleDateTime(st);
 	}
+}
+
+void CDateHelper::IncrementYear(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
+{
+	IncrementMonth(date, (nBy * 12), bPreserveEndOfMonth);
 }
 
 void CDateHelper::IncrementMonth(int& nMonth, int& nYear, int nBy)

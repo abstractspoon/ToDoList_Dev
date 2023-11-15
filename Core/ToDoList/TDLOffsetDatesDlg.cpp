@@ -49,6 +49,7 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	m_bOffsetSubtasks = prefs.GetProfileInt(m_sPrefsKey, _T("Subtasks"), TRUE);
 	m_nOffsetByUnits = prefs.GetProfileInt(m_sPrefsKey, _T("AmountPeriod"), WEEKDAYS);
 	m_bOffsetFromToday = prefs.GetProfileInt(m_sPrefsKey, _T("FromToday"), FALSE);
+	m_bPreserveWeekdays = prefs.GetProfileInt(m_sPrefsKey, _T("PreserveWeekdays"), TRUE);
 }
 
 
@@ -71,12 +72,19 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLOffsetDatesDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(COffsetDatesDlg)
-		// NOTE: the ClassWizard will add message map macros here
+	ON_CBN_SELCHANGE(IDC_BYUNITS, OnSelchangeUnits)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg message handlers
+
+BOOL CTDLOffsetDatesDlg::OnInitDialog()
+{
+	GetDlgItem(IDC_PRESERVEWEEKDAYS)->EnableWindow(m_nOffsetByUnits != WEEKDAYS);
+
+	return CTDLDialog::OnInitDialog();
+}
 
 DWORD CTDLOffsetDatesDlg::GetOffsetWhat() const
 {
@@ -122,6 +130,11 @@ int CTDLOffsetDatesDlg::GetOffsetAmount(TDC_UNITS& nUnits) const
 	return (m_bForward ? m_nOffsetBy : -m_nOffsetBy);
 }
 
+BOOL CTDLOffsetDatesDlg::GetPreserveWeekdays() const 
+{ 
+	return (m_bPreserveWeekdays || (m_nOffsetByUnits == WEEKDAYS)); 
+}
+
 void CTDLOffsetDatesDlg::OnOK()
 {
 	CTDLDialog::OnOK();
@@ -138,5 +151,13 @@ void CTDLOffsetDatesDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Subtasks"), m_bOffsetSubtasks);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("FromToday"), m_bOffsetFromToday);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("PreserveWeekdays"), m_bPreserveWeekdays);
 }
 
+
+void CTDLOffsetDatesDlg::OnSelchangeUnits() 
+{
+	UpdateData();
+
+	GetDlgItem(IDC_PRESERVEWEEKDAYS)->EnableWindow(m_nOffsetByUnits != WEEKDAYS);
+}

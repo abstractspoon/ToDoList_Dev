@@ -36,6 +36,17 @@ enum
 	ADJUSTED_DONE	= 0x04,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+// OffsetTaskDate private flags
+enum
+{
+	OFFSET_SUBTASKS				= 0x01,
+	OFFSET_FROMTODAY			= 0x02,
+	OFFSET_FITTORECURRINGSCHEME = 0x04,
+	OFFSET_PRESERVEWEEKDAY		= 0x08,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define EDIT_GET_TDI(id, tdi)	\
@@ -1064,12 +1075,12 @@ BOOL CToDoCtrlData::GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, 
 	return pTDI->GetNextOccurence(dtNext, bDue);
 }
 
-BOOL CToDoCtrlData::CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
+int CToDoCtrlData::CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
+	GET_TDI(dwTaskID, pTDI, 0);
 
-	return pTDI->CalcNextOccurences(dtRange, aDates, bDue);
+	return pTDI->CalcNextOccurences(dtRange, aOccur);
 }
 
 COleDateTime CToDoCtrlData::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
@@ -2381,11 +2392,27 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	return FALSE;
 }
 
+// External
+TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
+									  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
+{
+	DWORD dwFlags = 0;
+	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
+	Misc::SetFlag(dwFlags, OFFSET_SUBTASKS, bAndSubtasks);
+	Misc::SetFlag(dwFlags, OFFSET_PRESERVEWEEKDAY, bPreserveWeekday);
+
+	return OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags);
+}
+
+// Internal
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
-	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, TDCOTD_FITTORECURRINGSCHEME);
-	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, TDCOTD_OFFSETSUBTASKS);
-	BOOL bFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
+	ASSERT(nAmount != 0);
+
+	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, OFFSET_SUBTASKS);
+	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
+	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, OFFSET_FITTORECURRINGSCHEME);
+	BOOL bPreserveWeekday = Misc::HasFlag(dwFlags, OFFSET_PRESERVEWEEKDAY);
 
 	TDC_SET nRes = SET_NOCHANGE;
 
@@ -2394,41 +2421,47 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTaskID, pTDI);
 
-		COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
-		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+		CDateHelper dh;
+		COleDateTime date = (bFromToday ? dh.GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		BOOL bIsWeekday = !dh.Weekend().IsWeekend(date);
 
-		if (nAmount != 0)
+		switch (nUnits)
 		{
-			if (bModTimeOnly)
+		case TDCU_HOURS:
 			{
 				// Modify time only
 				ASSERT(date.m_dt < 1.0);
 
-				switch (TDC::MapUnitsToTHUnits(nUnits))
+				date.m_dt += (nAmount / 24.0);
+			}
+			break;
+
+		case TDCU_MINS:
+			{
+				// Modify time only
+				ASSERT(date.m_dt < 1.0);
+
+				date.m_dt += (nAmount / (24.0 * 60));
+			}
+			break;
+
+		default: // All the rest
+			{
+				// Modify date AND time
+				VERIFY(dh.OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE)); // Preserve end of month
+
+				// Special case: Task is recurring and the date was changed -> must fall on a valid date
+				if (bFitToRecurringScheme)
 				{
-				case THU_HOURS:
-					date.m_dt += (nAmount / 24.0);
-					break;
-
-				case THU_MINS:
-					date.m_dt += (nAmount / (24.0 * 60));
-					break;
-
-				default:
-					ASSERT(0);
+					ASSERT(pTDI->IsRecurring());
+					pTDI->trRecurrence.FitDayToScheme(date);
 				}
 			}
-			else // Modify date AND time
-			{
-				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
-			}
+			break;
 		}
 
-		// Special case: Task is recurring and the date was changed -> must fall on a valid date
-		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bModTimeOnly)
-		{
-			pTDI->trRecurrence.FitDayToScheme(date);
-		}
+		if (bPreserveWeekday && bIsWeekday)
+			dh.WorkingWeek().MakeWeekday(date);
 
 		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
 	}
@@ -2456,7 +2489,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	return nRes;
 }
 
-TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
+TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -2482,24 +2515,101 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	
 	// recalc due date
 	COleDateTime dtStart(dtNewStart); // may get modified
-	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
+	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, 
+										   pTDI->dateDue, 
+										   GetWantPreserveWeekday(pTDI),
+										   dtStart);
 
-	// FALSE -> don't recalc time estimate until due date is set
-	TDC_SET nRes = SetTaskDate(dwTaskID, pTDI, TDCD_START, dtStart, FALSE);
+	TDC_SET nRes = SetTaskDate(dwTaskID, 
+							   pTDI, 
+							   TDCD_START, 
+							   dtStart, 
+							   FALSE); // don't recalc time estimate for a move
+	
 	ASSERT(nRes != SET_FAILED);
 
 	if (nRes == SET_CHANGE)
-		SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, TRUE); // Recalc time estimate
+	{
+		SetTaskDate(dwTaskID,
+					pTDI,
+					TDCD_DUE,
+					dtNewDue,
+					FALSE); // don't recalc time estimate for a move
+	}
 
 	return nRes;
 }
 
-COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart)
+// External
+TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
+												  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
+{
+	DWORD dwFlags = 0;
+	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
+	Misc::SetFlag(dwFlags, OFFSET_SUBTASKS, bAndSubtasks);
+	Misc::SetFlag(dwFlags, OFFSET_PRESERVEWEEKDAY, bPreserveWeekday);
+
+	return OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, dwFlags);
+}
+
+// Internal
+TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
+{
+	TODOITEM* pTDI = NULL;
+	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	// Sanity checks
+	if (!CanOffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags) ||
+		!CanOffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags))
+	{
+		ASSERT(0);
+		return SET_FAILED;
+	}
+
+	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
+
+	if (!bFromToday && !COleDateTimeRange::IsValid(pTDI->dateStart, pTDI->dateDue))
+	{
+		ASSERT(0);
+		return SET_FAILED;
+	}
+
+	// Ignore tasks with dependencies where their dates 
+	// are automatically calculated
+	if (pTDI->aDependencies.GetSize() && HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+	{
+		return SET_NOCHANGE;
+	}
+
+	TDC_SET nRes = SET_NOCHANGE;
+
+	if (nAmount > 0)
+	{
+		// Make sure that DUE date is moved first else the time estimate recalculation will assert
+		nRes = OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
+		nRes = OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
+	}
+	else
+	{
+		// Make sure that START date is moved first else the time estimate recalculation will assert
+		nRes = OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
+		nRes = OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
+	}
+
+	return nRes;
+}
+
+/*
+COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, 
+										   TDC_UNITS nUnits, COleDateTime& dtNewStart)
 {
 	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
 	ASSERT(dSimpleDuration > 0.0);
 
 	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+
+	CDateHelper dh;
+	COleDateTime dtNewDue;
 
 	// If the real duration is zero then it means that the task
 	// falls between the end of one weekday and the start of the next
@@ -2512,8 +2622,8 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 				(nUnits == TDCU_WEEKDAYS) ||
 				(nUnits == TDCU_WEEKS));
 
-		ASSERT(CDateHelper().WorkingWeek().HasWeekend() ||
-				(CDateHelper().WorkingDay().GetLengthInHours(TRUE) < 24));
+		ASSERT(dh.WorkingWeek().HasWeekend() ||
+				(dh.WorkingDay().GetLengthInHours(TRUE) < 24));
 
 		// Recalculate the simple duration in weekday-hours because this
 		// seems most likely to produce a coherent outcome ie. Avoiding 
@@ -2521,34 +2631,135 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		int nWholeDays = (int)dSimpleDuration;
 		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
 
-		double dDurationInWeekdayHours = ((nWholeDays * CDateHelper().WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
+		double dDurationInWeekdayHours = ((nWholeDays * dh.WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
 
-		return AddDuration(dtNewStart, dDurationInWeekdayHours, TDCU_HOURS, TRUE);
+		dtNewDue = AddDuration(dtNewStart,
+							   dDurationInWeekdayHours,
+							   TDCU_HOURS,
+							   TRUE); // Allow modify start date
 	}
-
-	// If adding the simple duration to the start date to produce the 
-	// due date would result in no change to the real duration, just do 
-	// that because it's the least confusing outcome for the user
-	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
-
-	if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
+	else
 	{
-		return AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, TRUE);
-	}
+		// If adding the simple duration to the start date to produce the 
+		// due date would result in no change to the real duration, just do 
+		// that because it's the least confusing outcome for the user
+		COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
 
-	// Tasks whose current and new dates fall wholly within a single day 
-	// and where at least one of dates has a time component are kept simple
-	if (CDateHelper::DateHasTime(dtCurStart) || CDateHelper::DateHasTime(dtCurDue))
-	{
-		if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
-			CDateHelper::IsSameDay(dtNewStart, dtSimpleDue))
+		if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
 		{
-			return AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, TRUE);
+			dtNewDue = AddDuration(dtNewStart,
+								   dSimpleDuration,
+								   TDCU_DAYS,
+								   TRUE); // Allow modify start date
+		}
+		else if (dh.DateHasTime(dtCurStart) || dh.DateHasTime(dtCurDue))
+		{
+			// Tasks whose current and new dates fall wholly within a single day 
+			// and where at least one of dates has a time component are kept simple
+			if (dh.IsSameDay(dtCurStart, dtCurDue) &&
+				dh.IsSameDay(dtNewStart, dtSimpleDue))
+			{
+				dtNewDue = AddDuration(dtNewStart,
+									   dSimpleDuration,
+									   TDCU_DAYS,
+									   TRUE); // Allow modify start date
+			}
 		}
 	}
 
-	// else
-	return AddDuration(dtNewStart, dRealDuration, nUnits, TRUE);
+	// All else
+	if (!dh.IsDateSet(dtNewDue))
+	{
+		dtNewDue = AddDuration(dtNewStart,
+							   dRealDuration,
+							   nUnits,
+							   TRUE); // Allow modify start date
+	}
+
+	return dtNewDue;
+}
+*/
+
+COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, 
+										   BOOL bPreserveWeekday, COleDateTime& dtNewStart)
+{
+	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
+	ASSERT(dSimpleDuration > 0.0);
+
+	TDC_UNITS nUnits = (bPreserveWeekday ? TDCU_WEEKDAYS : TDCU_DAYS);
+	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+
+	CDateHelper dh;
+	COleDateTime dtNewDue;
+
+	// If the real duration is zero then it means that the task
+	// falls between the end of one weekday and the start of the next
+	// which means that the user has performed an action to avoid our
+	// checks, so we fall back on the simple duration instead
+	if (dRealDuration == 0.0)
+	{
+		ASSERT(bPreserveWeekday);
+		ASSERT(dh.WorkingWeek().HasWeekend() ||
+				(dh.WorkingDay().GetLengthInHours(TRUE) < 24));
+
+		// Recalculate the simple duration in weekday-hours because this
+		// seems most likely to produce a coherent outcome ie. Avoiding 
+		// unit-mashing weirdness
+		int nWholeDays = (int)dSimpleDuration;
+		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
+
+		double dDurationInWeekdayHours = ((nWholeDays * dh.WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
+
+		dtNewDue = AddDuration(dtNewStart,
+							   dDurationInWeekdayHours,
+							   TDCU_HOURS,
+							   TRUE); // Allow modify start date
+	}
+	else
+	{
+		// If adding the simple duration to the start date to produce the 
+		// due date would result in no change to the real duration, just do 
+		// that because it's the least confusing outcome for the user
+		COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
+
+		if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
+		{
+			dtNewDue = AddDuration(dtNewStart,
+								   dSimpleDuration,
+								   TDCU_DAYS,
+								   TRUE); // Allow modify start date
+		}
+		else if (dh.DateHasTime(dtCurStart) || dh.DateHasTime(dtCurDue))
+		{
+			// Tasks whose current and new dates fall wholly within a single day 
+			// and where at least one of dates has a time component are kept simple
+			if (dh.IsSameDay(dtCurStart, dtCurDue) &&
+				dh.IsSameDay(dtNewStart, dtSimpleDue))
+			{
+				dtNewDue = AddDuration(dtNewStart,
+									   dSimpleDuration,
+									   TDCU_DAYS,
+									   TRUE); // Allow modify start date
+			}
+		}
+	}
+
+	// All else
+	if (!dh.IsDateSet(dtNewDue))
+	{
+		dtNewDue = AddDuration(dtNewStart,
+							   dRealDuration,
+							   nUnits,
+							   TRUE); // Allow modify start date
+	}
+
+	if (bPreserveWeekday)
+	{
+		dh.WorkingWeek().MakeWeekday(dtNewStart);
+		dh.WorkingWeek().MakeWeekday(dtNewDue);
+	}
+
+	return dtNewDue;
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -2614,7 +2825,10 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& 
 			// Make sure the task has a start date
 			CalcMissingStartDateFromDue(pTDI);
 
-			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, newEst.dAmount, newEst.nUnits, FALSE); // Don't modify start date
+			COleDateTime dtNewDue = AddDuration(pTDI->dateStart, 
+												newEst.dAmount, 
+												newEst.nUnits, 
+												FALSE); // Don't modify start date
 
 			// FALSE = don't recalc time estimate
 			SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, FALSE); 
@@ -2637,13 +2851,34 @@ TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& tim
 	return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMESPENT, pTDI->timeSpent, newSpent);
 }
 
+BOOL CToDoCtrlData::GetWantPreserveWeekday(const TODOITEM* pTDI) const
+{
+	ASSERT(pTDI);
+
+	// Backwards compatibility
+	switch (pTDI->timeEstimate.nUnits)
+	{
+	case TDCU_WEEKDAYS:	return TRUE;
+	case TDCU_DAYS:		return FALSE;
+	}
+
+	if (pTDI->IsRecurring())
+		return pTDI->trRecurrence.GetWantPreserveWeekday();
+
+	// All else
+	return HasStyle(TDCS_PRESERVEWEEKDAYS);
+}
+
 BOOL CToDoCtrlData::CalcMissingStartDateFromDue(TODOITEM* pTDI) const
 {
 	if (pTDI->HasStart() || !pTDI->HasDue() || (pTDI->timeEstimate.dAmount <= 0.0))
 		return FALSE;
 
 	// Subtract time estimate from due date
-	pTDI->dateStart = AddDuration(pTDI->dateDue, -pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits, FALSE); // don't modify due date
+	pTDI->dateStart = AddDuration(pTDI->dateDue,
+								  -pTDI->timeEstimate.dAmount,
+								  pTDI->timeEstimate.nUnits,
+								  FALSE); // don't modify due date
 
 	return TRUE;
 }
@@ -2654,8 +2889,10 @@ BOOL CToDoCtrlData::CalcMissingDueDateFromStart(TODOITEM* pTDI) const
 		return FALSE;
 
 	// Add time estimate to start date
-	COleDateTime dtStart(pTDI->dateStart);
-	pTDI->dateDue = AddDuration(pTDI->dateStart, pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits, FALSE); // don't modify start date
+	pTDI->dateDue = AddDuration(pTDI->dateStart, 
+								pTDI->timeEstimate.dAmount, 
+								pTDI->timeEstimate.nUnits, 
+								FALSE); // don't modify start date
 
 	return TRUE;
 }
@@ -3758,23 +3995,17 @@ BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, const TDCDEPENDE
 	
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
-		DH_UNITS nDHUnits = DHU_WEEKDAYS;
+		BOOL bPreserveWeekday = GetWantPreserveWeekday(pTDI);
 
-		switch (pTDI->timeEstimate.nUnits)
-		{
-		case TDCU_DAYS:
-		case TDCU_MONTHS:
-		case TDCU_YEARS:
-			nDHUnits = DHU_DAYS;
-			break;
-		}
-
-		if (nDHUnits = DHU_WEEKDAYS)
+		if (bPreserveWeekday)
 			CWorkingWeek().MakeWeekday(dtNewStart);
 
 		// Add lead-in time
 		if (depend.nDaysLeadIn)
+		{
+			DH_UNITS nDHUnits = (bPreserveWeekday ? DHU_WEEKDAYS : DHU_DAYS);
 			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
+		}
 
 		return TRUE;
 	}
@@ -3800,11 +4031,17 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 
 	if (pTDI->HasDue() && pTDI->HasStart())
 	{
-		dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
+		dtNewDue = CalcNewDueDate(pTDI->dateStart, 
+								  pTDI->dateDue, 
+								  GetWantPreserveWeekday(pTDI),
+								  dtStart);
 	}
 	else if ((pTDI->timeEstimate.dAmount > 0.0) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 	{
-		dtNewDue = AddDuration(dtStart, pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits, TRUE);
+		dtNewDue = AddDuration(dtStart, 
+							   pTDI->timeEstimate.dAmount, 
+							   pTDI->timeEstimate.nUnits, 
+							   TRUE); // Allow update start date
 	}
 
 	if (CDateHelper::IsDateSet(dtNewDue) && (dtNewDue != pTDI->dateDue))
@@ -3864,7 +4101,8 @@ UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDat
 	return ADJUSTED_NONE;
 }
 
-COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart)
+COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, 
+										BOOL bAllowUpdateStart)
 {
 	if (!CDateHelper::IsDateSet(dateStart) || (dDuration == 0.0) || (nUnits == TDCU_NULL))
 	{
@@ -3877,19 +4115,43 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	
 	switch (nUnits)
 	{
-	case TDCU_DAYS:
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
+		if (dDuration == (int)dDuration) // whole months/years
 		{
-			// work in days
-			if (nUnits != TDCU_DAYS)
-			{
-				CTwentyFourSevenWeek week;
+			if (nUnits == TDCU_MONTHS)
+				CDateHelper::IncrementMonth(dateEnd, (int)dDuration, TRUE);
+			else
+				CDateHelper::IncrementYear(dateEnd, (int)dDuration, TRUE);
 
-				dDuration = CTimeHelper(week).Convert(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
-				nUnits = TDCU_DAYS;
+			// If date falls on the beginning of a day, move to end of previous day
+			if (dDuration > 0.0)
+			{
+				if (!CDateHelper::DateHasTime(dateEnd))
+					dateEnd.m_dt--;
+			}
+			else
+			{
+				// End date comes before start date, so 'dateStart' is logically the end date
+				ASSERT(dateEnd < dateStart);
+
+				if (!CDateHelper::DateHasTime(dateStart))
+					dateEnd.m_dt++;
 			}
 
+			break;
+		}
+		else // handle in days
+		{
+			CTwentyFourSevenWeek week;
+
+			dDuration = CTimeHelper(week).Convert(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
+			nUnits = TDCU_DAYS;
+		}
+		// fall thru
+
+	case TDCU_DAYS:
+		{
 			dateEnd.m_dt += dDuration;
 
 			// If date falls on the beginning of a day, move to end of previous day
@@ -3963,32 +4225,26 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 		return 0.0;
 	}
 
-	// Handle due date 'end of day'
-	COleDateTime dateEnd(dateDue);
-
-	if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
-		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
-	
 	switch (nUnits)
 	{
 	case TDCU_DAYS:
-		return (dateEnd.m_dt - dateStart.m_dt);
-
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
-		{
-			CTwentyFourSevenWeek week;
-			double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
-
-			return CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-		}
-		break;
+	case TDCU_WEEKDAYS:
+	case TDCU_WEEKS:
+		return CDateHelper().CalcDuration(dateStart, dateDue, TDC::MapUnitsToDHUnits(nUnits), TRUE);
 
 	case TDCU_MINS:
 	case TDCU_HOURS:
-	case TDCU_WEEKDAYS:
-	case TDCU_WEEKS:
-		return CWorkingWeek().CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+		{
+			// Handle due date 'end of day'
+			COleDateTime dateEnd(dateDue);
+
+			if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
+				dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+	
+			return CWorkingWeek().CalcDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+		}
 	}
 
 	ASSERT(0);
@@ -4257,6 +4513,14 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	COleDateTime dtStart = GetTaskDate(dwPrevTaskID, TDCD_START);
 	COleDateTime dtDue = GetTaskDate(dwPrevTaskID, TDCD_DUE);
 
+	// Work in recurrence units where possible
+	TDCRECURRENCE trPrev;
+	TDC_UNITS nRecurUnits = TDCU_NULL;
+	int nRecurAmount = 0;
+
+	VERIFY(GetTaskRecurrence(dwPrevTaskID, trPrev));
+	BOOL bIsSimple = trPrev.GetSimpleOffsetAmount(nRecurAmount, nRecurUnits);
+
 	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
 
@@ -4265,7 +4529,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 
 	if (bDueDate) // dtNext is the new due date
 	{
-		int nOffsetDays = (bHasDue ? ((int)dtNext - (int)dtDue) : 0);
+		if (!bIsSimple)
+		{
+			nRecurUnits = trPrev.GetRegularityUnits();
+			nRecurAmount = (bHasDue ? (int)CalcDuration(dtDue, dtNext, nRecurUnits) : 0);
+		}
 
 		if (bWantInheritDue)
 		{
@@ -4280,7 +4548,18 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasDue)
 			{
 				// Make sure the new date fits the recurring scheme
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TDCOTD_FITTORECURRINGSCHEME | TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				DWORD dwFlags = (OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS);
+
+				if (trPrev.GetWantPreserveWeekday())
+					dwFlags |= OFFSET_PRESERVEWEEKDAY;
+
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID,
+												 TDCD_DUEDATE,
+												 nRecurAmount,
+												 nRecurUnits,
+												 dwFlags);
+				
+				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
@@ -4295,8 +4574,13 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
 			if (bWantInheritStart)
 			{
-				// don't offset children
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, 0) == SET_CHANGE)
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
+												  TDCD_STARTDATE, 
+												  nRecurAmount, 
+												  nRecurUnits, 
+												  0); // don't offset children
+				
+				if (nDateRes == SET_CHANGE)
 				{
 					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
 					nRes = SET_CHANGE;
@@ -4304,18 +4588,62 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // offset children
 			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
+												  TDCD_STARTDATE, 
+												  nRecurAmount, 
+												  nRecurUnits, 
+												  OFFSET_SUBTASKS);
+				
+				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}
 	}
 	else // dtNext is the new start date
 	{
-		int nOffsetDays = (bHasStart ? ((int)dtNext - (int)dtStart) : 0);
+		if (!bIsSimple)
+		{
+			nRecurUnits = trPrev.GetRegularityUnits();
+			nRecurAmount = (bHasStart ? (int)CalcDuration(dtStart, dtNext, nRecurUnits) : 0);
+		}
 
+		// Move due date first so the Time Estimate recalculation does not assert
+		if (bHasDue)
+		{
+			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
+			if (bWantInheritDue)
+			{
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
+												  TDCD_DUEDATE, 
+												  nRecurAmount, 
+												  nRecurUnits, 
+												  0); // don't update children
+				
+				if (nDateRes == SET_CHANGE)
+				{
+					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
+					nRes = SET_CHANGE;
+				}
+			}
+			else // bump
+			{
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID, 
+												  TDCD_DUEDATE, 
+												  nRecurAmount, 
+												  nRecurUnits, 
+												  OFFSET_SUBTASKS);
+				
+				if (nDateRes == SET_CHANGE)
+					nRes = SET_CHANGE;
+			}
+		}
+
+		// Then move start date
 		if (bWantInheritStart)
 		{
-			if (SetTaskDate(dwNewTaskID, TDCD_START, dtNext) == SET_CHANGE)
+			TDC_SET nDateRes = SetTaskDate(dwNewTaskID, TDCD_START, dtNext);
+			
+			if (nDateRes == SET_CHANGE)
 			{
 				ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
 				nRes = SET_CHANGE;
@@ -4326,32 +4654,23 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasStart)
 			{
 				// Make sure the new date fits the recurring scheme
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TDCOTD_FITTORECURRINGSCHEME | TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
+				DWORD dwFlags = (OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS);
+
+				if (trPrev.GetWantPreserveWeekday())
+					dwFlags |= OFFSET_PRESERVEWEEKDAY;
+
+				TDC_SET nDateRes = OffsetTaskDate(dwNewTaskID,
+												  TDCD_STARTDATE, 
+												  nRecurAmount, 
+												  nRecurUnits, 
+												  dwFlags);
+				
+				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
 			{
 				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_START, dtNext);
-			}
-		}
-
-		// adjust due dates similarly
-		if (bHasDue)
-		{
-			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
-			if (bWantInheritDue)
-			{
-				// don't update children
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, 0) == SET_CHANGE)
-				{
-					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
-					nRes = SET_CHANGE;
-				}
-			}
-			else // bump
-			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
-					nRes = SET_CHANGE;
 			}
 		}
 	}

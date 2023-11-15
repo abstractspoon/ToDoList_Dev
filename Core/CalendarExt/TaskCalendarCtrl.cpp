@@ -1823,13 +1823,12 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 
 		if (HasOption(TCCO_DISPLAYCONTINUOUS))
 		{
-			if ((pTCI->GetAnyStartDate().m_dt < dCellEnd) && 
-				(pTCI->GetAnyEndDate().m_dt >= dCellStart))
+			if ((pTCI->GetAnyStartDate().m_dt < dCellEnd) && (pTCI->GetAnyEndDate().m_dt >= dCellStart))
 			{
 				pTasks->Add(pTCI);
 			}
 		}
-		else
+		else // discontinuous options
 		{
 			if (HasOption(TCCO_DISPLAYCALCSTART) || (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet()))
 			{

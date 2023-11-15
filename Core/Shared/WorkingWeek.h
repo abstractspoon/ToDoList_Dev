@@ -61,7 +61,7 @@ public:
 	// and modifies 'dHours' appropriately
 	void AddDurationInHours(COleDateTime& date, double& dHours) const;
 
-	double CalculateDurationInHours(double fromHour, double toHour) const;
+	double CalcDurationInHours(double fromHour, double toHour) const;
 	double GetLengthInHours(bool bIncludingLunch = false) const;
 	double GetLunchLengthInHours() const;
 
@@ -150,11 +150,11 @@ public:
 						   double dStartOfLunchInHours,		// eg. 12
 						   double dEndOfLunchInHours);		// eg. 13
 
-	double CalculateDurationInMinutes(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const;
+	double CalcDurationInMinutes(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const;
 
 	// dtFrom will be modified if it falls on a weekend
 	COleDateTime AddDurationInMinutes(COleDateTime& dtFrom, double dMins) const;

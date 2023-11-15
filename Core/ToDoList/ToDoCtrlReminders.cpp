@@ -811,15 +811,22 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday)
+int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, 
+									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	int nRem = FindReminder(dwTaskID, pTDC);
 	int nNumOffset = 0;
 
 	if (nRem != -1)
 	{
-		if (OffsetReminder(m_aReminders[nRem], dAmount, nUnits, bFromToday))
+		if (OffsetReminder(m_aReminders[nRem],
+						   dAmount,
+						   nUnits,
+						   bFromToday,
+						   bPreserveWeekday))
+		{
 			nNumOffset++;
+		}
 	}
 
 	if (bAndSubtasks)
@@ -828,13 +835,22 @@ int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS
 		int nSubtask = pTDC->GetSubTaskIDs(dwTaskID, aSubtaskIDs);
 
 		while (nSubtask--)
-			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask], dAmount, nUnits, pTDC, TRUE, bFromToday); // RECURSIVE CALL
+		{
+			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask],
+										 dAmount,
+										 nUnits,
+										 pTDC,
+										 TRUE, // And subtasks
+										 bFromToday,
+										 bPreserveWeekday); // RECURSIVE CALL
+		}
 	}
 
 	return nNumOffset;
 }
 
-BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday)
+BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, 
+										BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	if (rem.bRelative)
 		return FALSE;
@@ -849,7 +865,8 @@ BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UN
 
 	if (dAmount)
 	{
-		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits)))
+		// Preserve end of month
+		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE))
 			return FALSE;
 	}
 
