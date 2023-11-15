@@ -649,4 +649,9 @@ void CPreferencesDlgBase::DoHelp()
 		AfxGetApp()->WinHelp(m_nDlgTemplateID);
 }
 
+void CPreferencesDlgBase::InvalidateActivePage(BOOL bErase)
+{
+	m_ppHost.InvalidateActivePage(bErase);
+}
+
 /////////////////////////////////////////////////////////////////////////////

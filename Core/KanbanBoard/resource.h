@@ -9,7 +9,6 @@
 #define IDI_HELP_BUTTON                 293
 #define IDR_KANBAN                      1000
 #define IDC_TREEHEADER                  1004
-#define IDC_KanbanLIST                  1005
 #define IDC_KANBANTREE                  1006
 #define IDC_DISPLAY                     1015
 #define IDC_DISPLAYALLOCTO              1016
@@ -83,6 +82,9 @@
 #define IDC_DISPLAYATTRIBUTES           16045
 #define IDC_GROUPBY_LABEL               16045
 #define IDC_HIDEEMPTYATTRIBS            16046
+#define IDC_POPULATECOLUMNS             16048
+#define IDC_MOVECOL_UP                  16049
+#define IDC_MOVECOL_DOWN                16050
 #define ID_KANBAN_GOTOTODAY             32774
 #define ID_KANBAN_PREFS                 32775
 #define ID_PREFS                        32775
@@ -95,7 +97,6 @@
 #define IDS_PICKINGFROMDEPEND_EDIT      32781
 #define IDS_PICKINGFROMDEPEND_DELETE    32782
 #define IDS_PICKINGTOTASKEDIT           32783
-#define ID_POPULATECOLUMNS              32783
 #define IDS_PICKED                      32786
 #define IDS_CREATEDEPEND_TITLE          32787
 #define IDS_EDITDEPEND_TITLE            32788
@@ -182,7 +183,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16015
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         16047
+#define _APS_NEXT_CONTROL_VALUE         16051
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

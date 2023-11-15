@@ -57,7 +57,7 @@ BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, const CShortcutManager* pSho
 	if (!pToolbar || !pToolbar->GetSafeHwnd())
 		return FALSE;
 
-	if (!HookWindow(*pToolbar))
+	if (!HookWindow(::GetParent(*pToolbar)))
 		return FALSE;
 
 	m_pToolbar = pToolbar;
@@ -69,8 +69,8 @@ BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, const CShortcutManager* pSho
 }
 
 BOOL CToolbarHelper::Release(BOOL bClearDropBtns) 
-{
-	if (HookWindow(NULL))
+{ 
+	if (HookWindow(NULL) && m_scToolbar.HookWindow(NULL))
 	{
 		if (bClearDropBtns)
 		{
@@ -89,6 +89,7 @@ BOOL CToolbarHelper::Release(BOOL bClearDropBtns)
 
 		m_pToolbar = NULL;
 		m_mapTHButtons.RemoveAll();
+		m_tt.DestroyWindow();
 
 		return TRUE;
 	}
@@ -401,6 +402,22 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 		}
 		break;
 
+	case WM_DESTROY:
+		{
+			// must call rest of chain first
+			LRESULT lr =  CSubclassWnd::Default();
+			HookWindow(NULL);
+			return lr;
+		}
+	}
+
+	return CSubclassWnd::Default();
+}
+
+LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
 		m_tt.RelayEvent(const_cast<MSG*>(CSubclassWnd::GetCurrentMessage()));
@@ -408,21 +425,13 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 
 	case WM_SIZE:
 		{
-			LRESULT lr = CSubclassWnd::Default();
+			LRESULT lr = CSubclasser::ScDefault(m_scToolbar);
 			RefreshTooltipRects();
-			return lr;
-		}
-
-	case WM_DESTROY:
-		{
-			// must call rest of chain first
-			LRESULT lr =  CSubclassWnd::Default();
-			Release();
 			return lr;
 		}
 	}
 
-	return CSubclassWnd::Default();
+	return CSubclasser::ScDefault(m_scToolbar);
 }
 
 void CToolbarHelper::InitTooltips()
@@ -437,6 +446,9 @@ void CToolbarHelper::InitTooltips()
 		return;
 
 	m_pToolbar->GetToolBarCtrl().SetToolTips(&m_tt);
+
+	// hook the toolbar for mouse messages
+	VERIFY(m_scToolbar.HookWindow(*m_pToolbar, this));
 
 	// turn off default tooltips
 	m_pToolbar->SetBarStyle(m_pToolbar->GetBarStyle() & ~CBRS_TOOLTIPS);

@@ -59,17 +59,14 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
-	ON_COMMAND(ID_MOVECOL_DOWN, OnMoveFixedColDown)
-	ON_UPDATE_COMMAND_UI(ID_MOVECOL_DOWN, OnUpdateFixedMoveColDown)
-	ON_COMMAND(ID_MOVECOL_UP, OnMoveFixedColUp)
-	ON_UPDATE_COMMAND_UI(ID_MOVECOL_UP, OnUpdateMoveFixedColUp)
+	ON_BN_CLICKED(ID_MOVECOL_DOWN, OnMoveFixedColDown)
+	ON_BN_CLICKED(ID_MOVECOL_UP, OnMoveFixedColUp)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COLUMNDEFS, OnItemchangedColumndefs)
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnChangeColumnType)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnSortSubtasksBelowParents)
 	ON_BN_CLICKED(IDC_SHOWTASKCOLORASBAR, OnShowColorAsBar)
-	ON_COMMAND(ID_POPULATECOLUMNS, OnPopulateFixedColumns)
-	ON_UPDATE_COMMAND_UI(ID_POPULATECOLUMNS, OnUpdatePopulateColumns)
+	ON_BN_CLICKED(IDC_POPULATECOLUMNS, OnPopulateFixedColumns)
 	ON_COMMAND(IDC_SORTSUBTASKSBELOWPARENT, OnSortSubtasksBelowParents)
 END_MESSAGE_MAP()
 
@@ -79,19 +76,6 @@ END_MESSAGE_MAP()
 BOOL CKanbanPreferencesPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
-	
-	// create toolbar
-	if (m_toolbar.CreateEx(this))
-	{
-		// Set colours first because these affect image scaling
-		m_toolbar.SetBackgroundColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW), FALSE, FALSE);
-
-		VERIFY(m_toolbar.LoadToolBar(IDR_COLUMN_TOOLBAR, IDB_COLUMN_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar));
-		
-		CRect rToolbar = GetCtrlRect(this, IDC_TB_PLACEHOLDER);
-		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
-	}
 	
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);
 	
@@ -340,8 +324,8 @@ void CKanbanPreferencesPage::EnableDisableControls()
 	GetDlgItem(IDC_INDENTSUBTASKS)->EnableWindow(m_bSortSubtaskBelowParent);
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	GetDlgItem(IDC_MOVECOL_DOWN)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
+	GetDlgItem(IDC_MOVECOL_UP)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
 }
 
 void CKanbanPreferencesPage::OnSelchangeAttribute() 
@@ -370,21 +354,9 @@ void CKanbanPreferencesPage::OnMoveFixedColDown()
 	VERIFY(m_lcFixedColumnDefs.MoveSelectedColumnRow(FALSE));
 }
 
-void CKanbanPreferencesPage::OnUpdateFixedMoveColDown(CCmdUI* pCmdUI) 
-{
-	int nRow = m_lcFixedColumnDefs.GetCurSel();
-
-	pCmdUI->Enable(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
-}
-
 void CKanbanPreferencesPage::OnMoveFixedColUp() 
 {
 	VERIFY(m_lcFixedColumnDefs.MoveSelectedColumnRow(TRUE));
-}
-
-void CKanbanPreferencesPage::OnUpdateMoveFixedColUp(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
 }
 
 CString CKanbanPreferencesPage::GetFixedAttributeID() const
@@ -437,15 +409,9 @@ void CKanbanPreferencesPage::OnPopulateFixedColumns()
 	m_lcFixedColumnDefs.SetCurSel(0);
 }
 
-void CKanbanPreferencesPage::OnUpdatePopulateColumns(CCmdUI* pCmdUI)
-{
-	pCmdUI->Enable(TRUE);
-}
-
 void CKanbanPreferencesPage::OnItemchangedColumndefs(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	EnableDisableControls();
 	
 	*pResult = 0;
 }

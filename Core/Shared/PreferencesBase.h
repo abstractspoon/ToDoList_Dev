@@ -100,6 +100,8 @@ public:
 
 	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* prefs, LPCTSTR szKey) const;
+
+	void InvalidateActivePage(BOOL bErase = TRUE);
 	
 protected:
 	CScrollingPropertyPageHost m_ppHost;

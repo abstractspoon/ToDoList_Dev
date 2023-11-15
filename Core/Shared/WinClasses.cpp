@@ -304,7 +304,30 @@ BOOL CWinClasses::IsKindOf(HWND hWnd, const CRuntimeClass* pClass)
 {
 	CWnd* pWnd = CWnd::FromHandle(hWnd);
 
-	return (pWnd ? pWnd->IsKindOf(pClass) : FALSE);
+	if (!pWnd)
+		return FALSE;
+
+	// simple Single inheritance case: copied from CWnd::IsKindOf
+	const CRuntimeClass* pWndClass = pWnd->GetRuntimeClass();
+
+	for (;;)
+	{
+		if (pWndClass == pClass)
+			return TRUE;
+
+		// This is our extra part to work around problems cause by
+		// multiple hooking of classes
+		if (StrCmpA(pWndClass->m_lpszClassName, pClass->m_lpszClassName) == 0)
+			return TRUE;
+
+		if (pWndClass->m_pfnGetBaseClass == NULL)
+			break;
+
+		pWndClass = (*pWndClass->m_pfnGetBaseClass)();
+	}
+
+	// walked to the top, no match
+	return FALSE;       
 }
 
 BOOL CWinClasses::IsChild(HWND hWnd)
