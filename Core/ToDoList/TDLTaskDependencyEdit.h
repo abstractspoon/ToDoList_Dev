@@ -46,6 +46,7 @@ protected:
 
 protected:
 	virtual void PreSubclassWindow();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 // Implementation
 protected:
@@ -55,10 +56,13 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnChange();
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
 
 	DECLARE_MESSAGE_MAP()
 
 	int Parse(CTDCDependencyArray& aDepends) const;
+	BOOL UpdateDepends();
+	BOOL UpdateDepends(const CTDCDependencyArray& aDepends);
 };
 
 /////////////////////////////////////////////////////////////////////////////
