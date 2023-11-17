@@ -1971,7 +1971,6 @@ LANGID Misc::GetUserDefaultUILanguage()
 {
 	typedef LANGID (WINAPI *FNGETUSERDEFAULTUILANGUAGE)(VOID);
 
-	// must link dynamically to kernel32 else problem with win95/NT4
 	static HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
 	LANGID nLangID = 0;
 
@@ -1984,7 +1983,34 @@ LANGID Misc::GetUserDefaultUILanguage()
 	}
 
 	return nLangID;
-//	return ::GetUserDefaultUILanguage();
+}
+
+BOOL Misc::IsFullScreenAppActive()
+{
+	typedef HRESULT (*FNSHQUERYUSERNOTIFICATIONSTATE)(int*);
+
+	static HMODULE hLib = LoadLibrary(_T("Shell32.dll"));
+
+	if (hLib)
+	{
+		FNSHQUERYUSERNOTIFICATIONSTATE pFN = (FNSHQUERYUSERNOTIFICATIONSTATE)GetProcAddress(hLib, "SHQueryUserNotificationState");
+		int nState = 0;
+
+		if (pFN && (pFN(&nState) == S_OK))
+		{
+			switch (nState)
+			{
+			case 2: // QUNS_BUSY
+			case 3: // QUNS_RUNNING_D3D_FULL_SCREEN
+			case 4:	// QUNS_PRESENTATION_MODE
+			case 7:	// QUNS_APP
+				return TRUE;
+			}
+		}
+	}
+
+	// All else
+	return FALSE;
 }
 
 LANGID Misc::GetUserKeyboardLanguage()

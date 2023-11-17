@@ -215,6 +215,7 @@ namespace Misc
 	LANGID GetUserKeyboardLanguage();
 	BOOL IsMetricMeasurementSystem();
 	BOOL IsHighContrastActive();
+	BOOL IsFullScreenAppActive();
 
 	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
 	BOOL ShutdownBlockReasonDestroy(HWND hWnd);
