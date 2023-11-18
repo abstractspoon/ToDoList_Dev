@@ -12920,7 +12920,15 @@ void CToDoListWnd::DoInsertDateAndTime(BOOL bDate, BOOL bTime)
 		sInsert += (' ' + m_tdiDefault.sCreatedBy);
 
 	// add trailing text
-	sInsert += userPrefs.GetDateTimePasteTrailingText();
+	CString sTrailing = userPrefs.GetDateTimePasteTrailingText();
+
+	if (!sTrailing.IsEmpty())
+	{
+		if (IsCharAlphaNumeric(sTrailing[0]))
+			sInsert += ' ';
+
+		sInsert += sTrailing;
+	}
 
 	GetToDoCtrl().PasteText(sInsert);
 }
