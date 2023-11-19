@@ -1209,15 +1209,15 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 	COleDateTimeRange dtExtended(dtRange);
 	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
 
-	CArray<double, double&> aDates;
+	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
 
-	int nNumOccur = trRecurrence.CalcNextOccurences(dateStart, dtExtended, aDates);
+	CArray<double, double&> aDates;
+	int nNumOccur = trRecurrence.CalcNextOccurences(dtCur, dtExtended, aDates);
 
 	if (!nNumOccur)
 		return 0;
 
-	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
-	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
 	CDateHelper dh;
 
 	aOccur.SetSize(nNumOccur);
