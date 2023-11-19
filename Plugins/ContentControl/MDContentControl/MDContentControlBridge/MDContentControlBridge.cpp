@@ -113,11 +113,10 @@ int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 
 	MarshalledString msHtml(html);
 
-	int nCharLen = ((nLength / 2) + 1);
+	int nCharLen = (html->Length + 1); // Includes a NULL terminator
 	szHtml = new WCHAR[nCharLen];
 	
-	ZeroMemory(szHtml, nCharLen * sizeof(WCHAR));
-	CopyMemory(szHtml, msHtml, nLength);
+	CopyMemory(szHtml, msHtml, nCharLen * sizeof(WCHAR));
 
 	return nCharLen;
 }
