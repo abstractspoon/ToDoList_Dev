@@ -299,11 +299,11 @@ BOOL IsParentPreferencePage(HWND hWnd)
 
 COLORREF GetParentBkgndColor(HWND hWnd)
 {
-	HWND hwndParent = ::GetParent(hWnd);
-
-	if (CWinClasses::IsKindOf(hwndParent, RUNTIME_CLASS(CPreferencesPageBase)))
+	if (IsParentPreferencePage(hWnd))
 	{
+		HWND hwndParent = ::GetParent(hWnd);
 		CPreferencesPageBase* pParent = (CPreferencesPageBase*)CWnd::FromHandle(hwndParent);
+
 		return pParent->GetBackgroundColor();
 	}
 
