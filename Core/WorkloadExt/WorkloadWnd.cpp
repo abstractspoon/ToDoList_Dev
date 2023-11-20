@@ -400,13 +400,13 @@ bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen) const
+IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// try tree header
 	if (m_ctrlWorkload.PointInHeader(ptScreen))
-		return IUI_NOWHERE;//IUI_COLUMNHEADER;
+		return IUI_NOWHERE;
 
 	// then specific task
 	if (m_ctrlWorkload.HitTestTask(ptScreen, false))
@@ -416,11 +416,11 @@ IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen) const
 	return IUI_NOWHERE;
 }
 
-DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return m_ctrlWorkload.HitTestTask(ptScreen, bTitleColumnOnly);
+	return m_ctrlWorkload.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)

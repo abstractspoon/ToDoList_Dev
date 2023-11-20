@@ -43,11 +43,12 @@ public:
 	BOOL CanSaveToImage() const;
 	
 	BOOL CancelDrag();
-	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
 	BOOL EnsureSelectionVisible();
+
+	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
 
 	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
@@ -188,6 +189,7 @@ protected:
 	void RecalcCellHeaderDateFormats();
 	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const;
 
+	DWORD HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;

@@ -455,8 +455,8 @@ public:
 	virtual void NotifyBeginPreferencesUpdate() { /* do nothing */ }
 	virtual void NotifyEndPreferencesUpdate();
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
-	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
-	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
+	virtual TDC_HITTEST HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
+	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	virtual TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);

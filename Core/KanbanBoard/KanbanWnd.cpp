@@ -495,7 +495,7 @@ bool CKanbanWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen) const
+IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON /*nReason*/) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -514,7 +514,7 @@ IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen) const
 	return IUI_NOWHERE;
 }
 
-DWORD CKanbanWnd::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CKanbanWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON /*nReason*/) const
 {
 	return m_ctrlKanban.HitTestTask(ptScreen);
 }

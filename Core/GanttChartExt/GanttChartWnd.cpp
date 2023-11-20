@@ -469,27 +469,27 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen) const
+IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	// try tree header
 	if (m_ctrlGantt.PointInHeader(ptScreen))
-		return IUI_NOWHERE;//IUI_COLUMNHEADER;
+		return IUI_NOWHERE;
 
 	// then specific task
-	if (m_ctrlGantt.HitTestTask(ptScreen, false))
+	if (m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP)))
 		return IUI_TASK;
 
 	// else 
 	return IUI_NOWHERE;
 }
 
-DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return m_ctrlGantt.HitTestTask(ptScreen, bTitleColumnOnly);
+	return m_ctrlGantt.HitTestTask(ptScreen, nReason);
 }
 
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)

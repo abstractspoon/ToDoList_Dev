@@ -485,7 +485,7 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
+IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -493,7 +493,7 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
 	// 6.9: disable header click because it changes the 
 	// tree/list columns not the calendar columns
 	if (m_BigCalendar.PtInHeader(ptScreen))
-		return IUI_NOWHERE;//IUI_COLUMNHEADER;
+		return IUI_NOWHERE;
 
 	// then specific task
 	CPoint ptBigCal(ptScreen);
@@ -502,7 +502,13 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
 	BOOL bCustomDate = FALSE;
 
 	if (m_BigCalendar.HitTestTask(ptBigCal, bCustomDate))
-		return (bCustomDate ? IUI_NOWHERE : IUI_TASK);
+	{
+		if (bCustomDate && (nReason == IUI_CONTEXTMENU))
+			return IUI_NOWHERE;
+
+		// else
+		return IUI_TASK;
+	}
 
 	// else try rest of big cal
 	CRect rCal;
@@ -511,16 +517,20 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
 	return (rCal.PtInRect(ptBigCal) ? IUI_TASKLIST : IUI_NOWHERE);
 }
 
-DWORD CCalendarWnd::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	BOOL bUnused = FALSE;
+	BOOL bCustomDate = FALSE;
+	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bCustomDate);
 
-	return m_BigCalendar.HitTestTask(ptBigCal, bUnused);
+	if (bCustomDate && (nReason == IUI_CONTEXTMENU))
+		dwTaskID = 0;
+
+	return dwTaskID;
 }
 
 bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)

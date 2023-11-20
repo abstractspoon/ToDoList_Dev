@@ -309,14 +309,14 @@ bool CBurndownWnd::PrepareNewTask(ITaskList* /*pTask*/) const
 	return false; 
 }
 
-IUI_HITTEST CBurndownWnd::HitTest(POINT /*ptScreen*/) const
+IUI_HITTEST CBurndownWnd::HitTest(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return IUI_NOWHERE;
 }
 
-DWORD CBurndownWnd::HitTestTask(POINT /*ptScreen*/, bool /*bTitleColumnOnly*/) const
+DWORD CBurndownWnd::HitTestTask(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
