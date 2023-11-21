@@ -427,19 +427,19 @@ namespace WordCloudUIExtension
 			return false;
 		}
 
-		public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+		public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 		{
 			Point ptClient = m_TaskMatchesList.PointToClient(new Point(xPos, yPos));
 			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);
 
 			if (lvHit.Item != null)
-				return UIExtension.HitResult.Task;
+				return UIExtension.HitTestResult.Task;
 
             // else
-			return UIExtension.HitResult.Nowhere;
+			return UIExtension.HitTestResult.Nowhere;
 		}
 
-		public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 		{
 			Point ptClient = m_TaskMatchesList.PointToClient(new Point(xPos, yPos));
 			ListViewHitTestInfo lvHit = m_TaskMatchesList.HitTest(ptClient);

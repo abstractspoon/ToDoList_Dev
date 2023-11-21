@@ -197,18 +197,18 @@ namespace EvidenceBoardUIExtension
             return true;
         }
 
-        public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			UInt32 taskId = m_Control.HitTest(new Point(xPos, yPos));
 
 			if (taskId != 0)
-				return UIExtension.HitResult.Task;
+				return UIExtension.HitTestResult.Task;
 
 			// else
-            return UIExtension.HitResult.Tasklist;
+            return UIExtension.HitTestResult.Tasklist;
         }
 
-        public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+        public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			return m_Control.HitTest(new Point(xPos, yPos));
         }

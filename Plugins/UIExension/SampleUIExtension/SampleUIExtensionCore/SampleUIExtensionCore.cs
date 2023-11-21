@@ -285,12 +285,12 @@ namespace SampleUIExtension
 			return false;
 	    }
 
-        public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 	    {
-            return UIExtension.HitResult.Nowhere;
+            return UIExtension.HitTestResult.Nowhere;
 	    }
 
-		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, bool titleColumnOnly)
+		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 		{
 			return 0;
 		}

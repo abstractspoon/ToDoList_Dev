@@ -152,7 +152,7 @@ void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UP
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CSampleUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -205,14 +205,14 @@ bool CSampleUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CSampleUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CSampleUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CSampleUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+DWORD CSampleUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, bTitleColumnOnly);
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CSampleUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

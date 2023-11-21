@@ -31,7 +31,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
+UIExtension::UpdateType UIExtension::MapUpdateType(IUI_UPDATETYPE type)
 {
 	switch (type)
 	{
@@ -45,20 +45,33 @@ UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
 	return UIExtension::UpdateType::Unknown;
 }
 
-IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
+IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTestResult result)
 {
-	switch (test)
+	switch (result)
 	{
-	case UIExtension::HitResult::Nowhere:		return IUI_NOWHERE;
-	case UIExtension::HitResult::Tasklist:		return IUI_TASKLIST;
-	case UIExtension::HitResult::ColumnHeader:	return IUI_COLUMNHEADER;
-	case UIExtension::HitResult::Task:			return IUI_TASK;
+	case UIExtension::HitTestResult::Nowhere:		return IUI_NOWHERE;
+	case UIExtension::HitTestResult::Tasklist:		return IUI_TASKLIST;
+	case UIExtension::HitTestResult::ColumnHeader:	return IUI_COLUMNHEADER;
+	case UIExtension::HitTestResult::Task:			return IUI_TASK;
 	}
 
 	return IUI_NOWHERE;
 }
 
-bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
+UIExtension::HitTestReason UIExtension::MapHitTestReason(IUI_HITTESTREASON reason)
+{
+	switch (reason)
+	{
+	case IUI_NONE:			return UIExtension::HitTestReason::None;
+	case IUI_INFOTIP:		return UIExtension::HitTestReason::InfoTip;
+	case IUI_CONTEXTMENU:	return UIExtension::HitTestReason::ContextMenu;
+	}
+
+	ASSERT(0);
+	return UIExtension::HitTestReason::None;
+}
+
+bool UIExtension::MapGetTaskCmd(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
 {
 	switch (nCmd)
 	{
@@ -91,7 +104,7 @@ bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
 	return false;
 }
 
-bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::SelectTask% selectTask)
+bool UIExtension::MapSelectTaskCmd(IUI_APPCOMMAND nCmd, UIExtension::SelectTask% selectTask)
 {
 	switch (nCmd)
 	{

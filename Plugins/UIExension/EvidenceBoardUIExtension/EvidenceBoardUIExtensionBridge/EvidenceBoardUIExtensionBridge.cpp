@@ -162,7 +162,7 @@ void CEvidenceBoardUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks,
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CEvidenceBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -268,7 +268,7 @@ DWORD CEvidenceBoardUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DW
 {
 	UIExtension::GetTask getTask;
 
-	if (!UIExtension::Map(nCmd, getTask))
+	if (!UIExtension::MapGetTaskCmd(nCmd, getTask))
 		return 0;
 
 	UInt32 taskID = dwFromTaskID;
@@ -283,7 +283,7 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nC
 {
 	UIExtension::SelectTask selectWhat;
 
-	if (!UIExtension::Map(nCmd, selectWhat))
+	if (!UIExtension::MapSelectTaskCmd(nCmd, selectWhat))
 		return false;
 
 	String^ sWords = gcnew String(select.szWords);
@@ -351,14 +351,14 @@ bool CEvidenceBoardUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CEvidenceBoardUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CEvidenceBoardUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CEvidenceBoardUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CEvidenceBoardUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CEvidenceBoardUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

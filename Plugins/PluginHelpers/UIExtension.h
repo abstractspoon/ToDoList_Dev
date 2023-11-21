@@ -81,7 +81,16 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				enum class HitResult
+				enum class HitTestReason
+				{
+					None,
+					InfoTip,
+					ContextMenu,
+				};
+
+				// -----------------------------------------------
+
+				enum class HitTestResult
 				{
 					Nowhere,
 					Tasklist,
@@ -109,11 +118,12 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				static UpdateType Map(IUI_UPDATETYPE type);
-				static IUI_HITTEST Map(HitResult test);
+				static UpdateType MapUpdateType(IUI_UPDATETYPE type);
+				static IUI_HITTEST MapHitTestResult(HitTestResult result);
+				static HitTestReason MapHitTestReason(IUI_HITTESTREASON reason);
 
-				static bool Map(IUI_APPCOMMAND nCmd, GetTask% getTask);
-				static bool Map(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
+				static bool MapGetTaskCmd(IUI_APPCOMMAND nCmd, GetTask% getTask);
+				static bool MapSelectTaskCmd(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
 
 				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursorType);
 				static Windows::Forms::Cursor^ OleDragCursor(OleDragCursorType cursorType);
@@ -349,9 +359,10 @@ namespace Abstractspoon
 				bool PrepareNewTask(Task^% task);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
-
 				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
-				UIExtension::HitResult HitTest(Int32 xPos, Int32 yPos);
+
+				UIExtension::HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);
+				UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);
 
 				void SetUITheme(UITheme^ theme);
 				void SetReadOnly(bool bReadOnly);
