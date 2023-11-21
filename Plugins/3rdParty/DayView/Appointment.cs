@@ -81,7 +81,16 @@ namespace Calendar
 
 		public AppointmentDates Dates { get { return dates; } }
 
-        public virtual DateTime StartDate
+		public bool IntersectsToday
+		{
+			get
+			{
+				var today = DateTime.Now.Date;
+				return ((today >= StartDate) && (today <= EndDate));
+			}
+		}
+
+		public virtual DateTime StartDate
         {
             get
             {
