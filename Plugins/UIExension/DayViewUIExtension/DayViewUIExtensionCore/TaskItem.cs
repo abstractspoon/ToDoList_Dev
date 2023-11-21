@@ -263,15 +263,6 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public bool IntersectsToday
-		{
-			get
-			{
-				var today = DateTime.Now.Date;
-				return ((today >= StartDate) && (today <= EndDate));
-			}
-		}
-
 		private void UpdateCustomDateAttributes(Task task, List<CustomAttributeDefinition> dateAttribs)
 		{
 			CustomDates = new Dictionary<string, DateTime>();

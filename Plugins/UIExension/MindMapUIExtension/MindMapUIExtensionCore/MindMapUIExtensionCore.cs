@@ -121,21 +121,21 @@ namespace MindMapUIExtension
             return true;
         }
 
-        public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			var ptScreen = new Point(xPos, yPos);
 
 			if (m_MindMap.HitTestTask(ptScreen) != 0)
-				return UIExtension.HitResult.Task;
+				return UIExtension.HitTestResult.Task;
 
 			// else
 			if (m_MindMap.RectangleToScreen(m_MindMap.ClientRectangle).Contains(ptScreen))
-				return UIExtension.HitResult.Tasklist;
+				return UIExtension.HitTestResult.Tasklist;
 			
-			return UIExtension.HitResult.Nowhere;
+			return UIExtension.HitTestResult.Nowhere;
         }
 
-        public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+        public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			return m_MindMap.HitTestTask(new Point(xPos, yPos));
         }

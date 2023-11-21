@@ -619,6 +619,19 @@ namespace TDC
 		return IUI_EDIT;
 	}
 
+	static IUI_HITTESTREASON MapHitTestReasonToIUIReason(TDC_HITTESTREASON nReason)
+	{
+		switch (nReason)
+		{
+		case TDCHTR_NONE:			return IUI_NONE;
+		case TDCHTR_INFOTIP:		return IUI_INFOTIP;
+		case TDCHTR_CONTEXTMENU:	return IUI_CONTEXTMENU;
+		}
+
+		ASSERT(0);
+		return IUI_NONE;
+	}
+
 	static IUI_UPDATETYPE MapAttributesToIUIUpdateType(const CTDCAttributeMap& mapAttribIDs)
 	{
 		// Sanity check

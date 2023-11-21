@@ -5764,7 +5764,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	{
 		CWnd::ClientToScreen(&point);
 
-		DWORD dwTaskID = HitTestTask(point, TRUE);
+		DWORD dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
 
 		if (dwTaskID)
 		{
@@ -7957,14 +7957,14 @@ void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CRuntimeDlg::OnContextMenu(pWnd, point);
 }
 
-TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen) const
+TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON /*nReason*/) const
 {
 	return m_taskTree.HitTest(ptScreen);
 }
 
-DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	return m_taskTree.HitTestTask(ptScreen, bTitleColumnOnly);
+	return m_taskTree.HitTestTask(ptScreen, (nReason == TDCHTR_INFOTIP));
 }
 
 TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const

@@ -203,14 +203,14 @@ namespace DayViewUIExtension
             return false;
 		}
 
-		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
+		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			return m_DayView.HitTest(xScreen, yScreen);
+			return m_DayView.HitTest(xScreen, yScreen, reason);
 		}
 
-		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen)
+		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			return m_DayView.HitTestTask(xScreen, yScreen);
+			return m_DayView.HitTestTask(xScreen, yScreen, reason);
 		}
 
 		public void SetUITheme(UITheme theme)

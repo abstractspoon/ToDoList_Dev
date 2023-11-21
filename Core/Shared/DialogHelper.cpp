@@ -2052,9 +2052,12 @@ HWND CDialogHelper::GetWindowFromPoint(HWND hwndParent, POINT ptScreen)
 		
 		hWnd = hwndChild; // keep going
 	}
-	ASSERT(hWnd && ::IsChild(hwndParent, hWnd));
+	
+	if (hWnd && IsChildOrSame(hwndParent, hWnd))
+		return hWnd;
 
-	return hWnd;
+	ASSERT(hWnd == NULL);
+	return NULL;
 }
 
 HWND CDialogHelper::GetParentOwner(HWND hWnd)

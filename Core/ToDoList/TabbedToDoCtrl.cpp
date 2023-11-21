@@ -2653,7 +2653,7 @@ void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 	m_taskList.SetEditTitleTaskID(dwTaskID);
 }
 
-DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -2661,10 +2661,10 @@ DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::HitTestTask(ptScreen, bTitleColumnOnly);
+		return CToDoCtrl::HitTestTask(ptScreen, nReason);
 
 	case FTCV_TASKLIST:
-		return m_taskList.HitTestTask(ptScreen, bTitleColumnOnly);
+		return m_taskList.HitTestTask(ptScreen, (nReason == TDCHTR_INFOTIP));
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -2691,7 +2691,10 @@ DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly
 				::GetWindowRect(pExtWnd->GetHwnd(), rExtWnd);
 
 				if (rExtWnd.PtInRect(ptScreen))
-					return pExtWnd->HitTestTask(ptScreen, (bTitleColumnOnly != FALSE));
+				{
+					IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
+					return pExtWnd->HitTestTask(ptScreen, nIUIReason);
+				}
 			}
 		}
 		break;
@@ -4625,7 +4628,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen) const
+TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -4633,7 +4636,7 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen) const
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::HitTest(ptScreen);
+		return CToDoCtrl::HitTest(ptScreen, nReason);
 
 	case FTCV_TASKLIST:
 		return m_taskList.HitTest(ptScreen);
@@ -4660,7 +4663,8 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen) const
 
 			if (pExt)
 			{
-				IUI_HITTEST nHit = pExt->HitTest(ptScreen);
+				IUI_HITTESTREASON nIUIReason = TDC::MapHitTestReasonToIUIReason(nReason);
+				IUI_HITTEST nHit = pExt->HitTest(ptScreen, nIUIReason);
 
 				switch (nHit)
 				{

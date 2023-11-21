@@ -2120,7 +2120,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					}
 					else // centre on the task beneath the mouse
 					{
-						dwScrollID = HitTestTask(::GetMessagePos(), true);
+						dwScrollID = HitTestTask(::GetMessagePos(), IUI_NONE);
 					}
 
 					// For reasons I don't understand, the resource context is

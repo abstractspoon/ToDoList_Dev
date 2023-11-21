@@ -1868,7 +1868,14 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
+// External method
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
+{
+	return HitTestTask(ptClient, TRUE, bCustomDate);
+}
+
+// Internal method
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
@@ -1878,7 +1885,7 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) 
 
 	bCustomDate = IsCustomDate(dwTaskID);
 
-	if (!bCustomDate)
+	if (bRealTaskID)
 		dwTaskID = GetRealTaskID(dwTaskID);
 
 	return dwTaskID;
@@ -3269,7 +3276,7 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
 	BOOL bUnused;
-	DWORD dwTaskID = HitTestTask(point, bUnused);
+	DWORD dwTaskID = HitTestTask(point, FALSE, bUnused);
 
 	SelectTask(dwTaskID, FALSE, TRUE);
 	

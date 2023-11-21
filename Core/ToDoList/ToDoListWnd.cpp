@@ -3960,7 +3960,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 			}
 		}
 
-		TDC_HITTEST nHit = tdc.HitTest(point);
+		TDC_HITTEST nHit = tdc.HitTest(point, TDCHTR_CONTEXTMENU);
 
 		switch (nHit)
 		{

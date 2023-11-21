@@ -302,8 +302,13 @@ namespace DayViewUIExtension
 
 		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
 		{
-			if ((SelectedAppointment != null) && SelectedAppointment.IsLongAppt() && e.Finished)
+			if ((SelectedAppointment != null) && 
+				(SelectedAppointment is TaskItem) && 
+				SelectedAppointment.IsLongAppt() && 
+				e.Finished)
+			{
 				m_TimeBlocks.SynchroniseDates(SelectedAppointment as TaskItem);
+			}
 		}
 
 		public bool ShowLabelTips
@@ -662,31 +667,36 @@ namespace DayViewUIExtension
 			return ((appt != null) && ((appt is TaskItem) || (appt is FutureTaskOccurrence)));
 		}
 
-		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
+		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
 			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (appt != null)
 			{
-				if (AppointmentSupportsTaskContextMenu(appt))
-					return UIExtension.HitResult.Task;
+				if ((reason != UIExtension.HitTestReason.ContextMenu) ||
+					AppointmentSupportsTaskContextMenu(appt))
+				{
+					return UIExtension.HitTestResult.Task;
+				}
 			}
 			else if (GetTrueRectangle().Contains(pt))
 			{
-				return UIExtension.HitResult.Tasklist;
+				return UIExtension.HitTestResult.Tasklist;
 			}
 
 			// else
-			return UIExtension.HitResult.Nowhere;
+			return UIExtension.HitTestResult.Nowhere;
 		}
 
-		public uint HitTestTask(Int32 xScreen, Int32 yScreen)
+		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
 			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (AppointmentSupportsTaskContextMenu(appt))
+			if ((appt != null) &&
+				(reason != UIExtension.HitTestReason.ContextMenu) ||
+				AppointmentSupportsTaskContextMenu(appt))
 			{
 				if (appt is TaskExtensionItem)
 					return (appt as TaskExtensionItem).RealTaskId;
@@ -894,9 +904,7 @@ namespace DayViewUIExtension
 			{
 				if (DisplayActiveTasksToday && IsTodayInRange(startDate, endDate))
 				{
-					var taskItem = (appt as TaskItem);
-
-					if (taskItem.IntersectsToday)
+					if (appt.IntersectsToday)
 						return true;
 				}
 
