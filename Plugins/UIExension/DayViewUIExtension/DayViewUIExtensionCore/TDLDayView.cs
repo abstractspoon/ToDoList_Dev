@@ -742,7 +742,7 @@ namespace DayViewUIExtension
 				}
 			}
 
-			return null;
+			return view;
 		}
 
 		public Calendar.Appointment GetAppointment(uint taskID)
