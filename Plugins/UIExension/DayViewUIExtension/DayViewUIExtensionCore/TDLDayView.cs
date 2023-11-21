@@ -302,8 +302,13 @@ namespace DayViewUIExtension
 
 		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
 		{
-			if ((SelectedAppointment != null) && SelectedAppointment.IsLongAppt() && e.Finished)
+			if ((SelectedAppointment != null) && 
+				(SelectedAppointment is TaskItem) && 
+				SelectedAppointment.IsLongAppt() && 
+				e.Finished)
+			{
 				m_TimeBlocks.SynchroniseDates(SelectedAppointment as TaskItem);
+			}
 		}
 
 		public bool ShowLabelTips
