@@ -338,7 +338,7 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		static bool IsImageFile(string filePath)
+		public static bool IsImageFile(string filePath)
 		{
 			var ext = Path.GetExtension(filePath).ToLower();
 

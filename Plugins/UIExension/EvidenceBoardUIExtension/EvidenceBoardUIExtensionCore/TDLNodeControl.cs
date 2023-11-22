@@ -2411,31 +2411,51 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
+			var ptClient = PointToClient(new Point(e.X, e.Y));
+			var node = HitTestNode(ptClient, true);
+
+			m_DropHighlightedTaskId = 0;
+			e.Effect = DragDropEffects.None;
+
 			if (m_DraggingSelectedUserLink)
 			{
-				var ptClient = m_DraggedUserLinkEnd = PointToClient(new Point(e.X, e.Y));
-				var node = HitTestNode(ptClient, true);
+				m_DraggedUserLinkEnd = ptClient;
 
-				if (IsAcceptableDropTarget(node))
+				if (IsAcceptableLinkDropTarget(node))
 				{
 					m_DropHighlightedTaskId = node.Data;
 					e.Effect = e.AllowedEffect;
 				}
-				else
+
+				Invalidate();
+				return;
+			}
+			else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				if (!ReadOnly && !IsTaskLocked(node.Data))
 				{
-					m_DropHighlightedTaskId = 0;
-					e.Effect = DragDropEffects.None;
+					string[] filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+					// Check for at least one image file
+					foreach (string file in filePaths)
+					{
+						if (TaskItem.IsImageFile(file))
+						{
+							m_DropHighlightedTaskId = node.Data;
+							e.Effect = e.AllowedEffect;
+						}
+					}
 				}
 
 				Invalidate();
+				return;
 			}
-			else
-			{
-				base.OnDragOver(e);
-			}
+
+			// else
+			base.OnDragOver(e);
 		}
 
-		protected bool IsAcceptableDropTarget(BaseNode node)
+		protected bool IsAcceptableLinkDropTarget(BaseNode node)
 		{
 			Debug.Assert(m_DraggingSelectedUserLink);
 
