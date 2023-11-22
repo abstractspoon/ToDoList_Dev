@@ -409,7 +409,7 @@ IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) con
 		return IUI_NOWHERE;
 
 	// then specific task
-	if (m_ctrlWorkload.HitTestTask(ptScreen, false))
+	if (m_ctrlWorkload.HitTestTask(ptScreen, (nReason == IUI_INFOTIP)))
 		return IUI_TASK;
 
 	// else 
