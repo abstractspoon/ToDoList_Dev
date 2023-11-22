@@ -761,7 +761,8 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 				if (bThemedSel)
 					rText.top++;
 
-				pDC->FillSolidRect(rText, m_ctrlHighlighter.GetColor());
+				pDC->FillSolidRect(rText, m_ctrlHighlighter.GetBkColor());
+				crText = m_ctrlHighlighter.GetTextColor();
 			}
 
 			BOOL bBold = (m_tcCommands.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);

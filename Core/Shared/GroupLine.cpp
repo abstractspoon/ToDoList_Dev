@@ -95,9 +95,12 @@ LRESULT CGroupLine::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				nFlags |= DT_LEFT;
 			
 			HFONT hOld = (HFONT)::SelectObject(dc, m_fontLabel);
-			
+
 			dc.SetBkMode(TRANSPARENT);
 			dc.SetTextColor(GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_3DSHADOW));
+			
+			::SendMessage(::GetParent(hRealWnd), WM_CTLCOLORSTATIC, (WPARAM)dc.GetSafeHdc(), (LPARAM)hRealWnd);
+
 			dc.DrawText(sText, rClient, nFlags);
 
 			// cleanup

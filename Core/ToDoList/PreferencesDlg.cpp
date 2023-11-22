@@ -927,6 +927,8 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
 				{
 					pTVCD->clrTextBk = HILITE_COLOUR;
+					pTVCD->clrText = GraphicsMisc::GetBestTextColor(HILITE_COLOUR);
+
 					*pResult = CDRF_NEWFONT;
 					break;
 				}

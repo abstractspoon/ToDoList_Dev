@@ -1275,8 +1275,10 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 	{
 		ASSERT(CWinClasses::IsClass(sThClass, TC_BUTTON));
 
-		::SetTextColor(hdc, CDarkModeStaticText::GetTextColor(s_hwndCurrentBtnStatic));
-		::SetBkMode(hdc, TRANSPARENT);
+		// Get the appropriate text colour
+		::SendMessage(::GetParent(s_hwndCurrentBtnStatic), WM_CTLCOLORSTATIC, (WPARAM)hdc, (LPARAM)s_hwndCurrentBtnStatic);
+
+		//::SetBkMode(hdc, TRANSPARENT);
 		::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
 
 		return S_OK;

@@ -29,7 +29,9 @@ public:
 
 	BOOL HasSearch() const { return m_aSearch.GetSize(); }
 	HWND GetFirstCtrl() const;
-	COLORREF GetColor() const { return m_crHighlight; }
+
+	COLORREF GetBkColor() const { return m_crHighlight; }
+	COLORREF GetTextColor() const;
 
 	BOOL TextContainsOneOf(const CString& sUIText) const;
 	static BOOL TextContainsOneOf(const CString& sUIText, const CStringArray& aSearch);
