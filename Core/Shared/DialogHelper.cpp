@@ -1751,10 +1751,17 @@ void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
 {
 	CWnd* pChild = pParent->GetWindow(GW_CHILD);
 
-	while (pChild)
+	if (pChild)
 	{
-		pChild->Invalidate(bErase);
-		pChild = pChild->GetNextWindow();
+		while (pChild)
+		{
+			InvalidateAllCtrls(pChild);
+			pChild = pChild->GetNextWindow();
+		}
+	}
+	else
+	{
+		::InvalidateRect(*pParent, NULL, bErase);
 	}
 }
 

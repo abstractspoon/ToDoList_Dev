@@ -929,15 +929,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_ENABLE:
-		if (CWinClasses::IsKindOf(hWnd, RUNTIME_CLASS(CPreferencesDlgBase)))
-		{
-			CPreferencesDlgBase* pPDB = (CPreferencesDlgBase*)CWnd::FromHandle(hWnd);
-			pPDB->InvalidateActivePage(TRUE);
-		}
-		else
-		{
-			InvalidateRect(hWnd, NULL, TRUE);
-		}
+		CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
 		break;
 	}
 
