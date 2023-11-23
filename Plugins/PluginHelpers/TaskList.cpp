@@ -7,6 +7,8 @@
 #include "UIExtension.h"
 #include "ColorUtil.h"
 
+#include <Shared\WebMisc.h>
+
 #include <3rdParty\T64Utils.h>
 
 #include <Interfaces\IEnums.h>
@@ -729,7 +731,7 @@ List<String^>^ Task::GetFileLink(bool fullPath)
 		{
 			String^ fileLinkPath = GETTASKSTR_ARG(GetTaskFileLink, nIndex);
 
-			if (fullPath)
+			if (fullPath && !WebMisc::IsURL(MS(fileLinkPath)))
 			{
 				fileLinkPath = System::IO::Path::Combine(pathRoot, fileLinkPath);
 				fileLinkPath = System::IO::Path::GetFullPath(fileLinkPath); // Canonical
