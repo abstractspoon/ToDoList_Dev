@@ -2561,8 +2561,10 @@ namespace EvidenceBoardUIExtension
 					if (!SelectedNodeIds.Contains(m_DropHighlightedTaskId))
 						SelectNode(m_DropHighlightedTaskId, true, true);
 
+					// Notify the app
 					if ((ImageDropped != null) && ImageDropped(this, m_DropHighlightedTaskId, filePaths))
 					{
+						// Add the images to each of the selected tasks
 						foreach (var id in SelectedNodeIds)
 						{
 							var taskItem = GetTaskItem(id);
