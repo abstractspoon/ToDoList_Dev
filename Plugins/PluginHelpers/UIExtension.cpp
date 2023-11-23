@@ -185,7 +185,18 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String
 	:
 	nAttrib(attrib),
 	dataType(DataType::Text),
-	szValue(value)
+	szValue(value),
+	bAppend(false)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String^ value, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Text),
+	szValue(value),
+	bAppend(append)
 {
 
 }
@@ -257,7 +268,19 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute
 	dwSelectedTaskID(taskID),
 	nAttrib(attrib),
 	dataType(DataType::Text),
-	szValue(value)
+	szValue(value),
+	bAppend(false)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Text),
+	szValue(value),
+	bAppend(append)
 {
 
 }
@@ -304,6 +327,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 		{
 			MarshalledString^ msString = gcnew MarshalledString(szValue);
 			mod.szValue = msString;
+			mod.bAppend = bAppend;
 		}
 		break;
 
@@ -405,6 +429,15 @@ bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value
 	return true;
 }
 
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value, bool append)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value, append));
+	return true;
+}
+
 // -----------------------------------------------------------------------------------
 
 bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime date)
@@ -467,6 +500,15 @@ bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value, bool append)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value, append));
 	return true;
 }
 
@@ -558,6 +600,14 @@ bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ va
 {
 	ClearMods();
 	AddMod(nAttribute, value);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ value, bool append)
+{
+	ClearMods();
+	AddMod(nAttribute, value, append);
 
 	return NotifyMod(true);
 }

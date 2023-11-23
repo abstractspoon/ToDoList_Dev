@@ -728,7 +728,14 @@ List<String^>^ Task::GetFileLink(bool fullPath)
 		for (int nIndex = 0; nIndex < numItems; nIndex++)
 		{
 			String^ fileLinkPath = GETTASKSTR_ARG(GetTaskFileLink, nIndex);
-			items->Add(System::IO::Path::Combine(pathRoot, fileLinkPath));
+
+			if (fullPath)
+			{
+				fileLinkPath = System::IO::Path::Combine(pathRoot, fileLinkPath);
+				fileLinkPath = System::IO::Path::GetFullPath(fileLinkPath); // Canonical
+			}
+
+			items->Add(fileLinkPath);
 		}
 	}
 

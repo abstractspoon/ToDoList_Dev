@@ -47,6 +47,30 @@ namespace EvidenceBoardUIExtension
 		public int ImageIndex { get { return m_ImageFileLinks.IndexOf(m_ImagePath); } }
 		public int ImageCount { get { return ((m_ImageFileLinks == null) ? 0 : m_ImageFileLinks.Count); } }
 
+		public int AddImages(string[] imagePaths)
+		{
+			int numAdded = 0;
+
+			foreach (var path in imagePaths)
+			{
+				if (IsImageFile(path) && !m_ImageFileLinks.Contains(path))
+				{
+					if (numAdded == 0)
+					{
+						if (ImageFromFile(path))
+						{
+							m_ImageFileLinks.Add(path);
+							m_ImagePath = path;
+
+							numAdded++;
+						}
+					}
+				}
+			}
+
+			return numAdded;
+		}
+
 		private List<string> m_ImageFileLinks;
 		private string m_ImagePath;
 		private Image m_Image;

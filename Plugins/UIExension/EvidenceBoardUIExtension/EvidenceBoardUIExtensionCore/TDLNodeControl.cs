@@ -22,9 +22,12 @@ namespace EvidenceBoardUIExtension
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
 
 	public delegate bool TaskModifiedEventHandler(object sender, IList<uint> taskIds);
+	public delegate bool ImageDroppedEventHandler(object sender, uint taskId, string[] imagePaths);
+
 	public delegate bool ConnectionCreatedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionEditedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionDeletedEventHandler(object sender, uint taskId);
+
 
 	// ------------------------------------------------------------
 
@@ -63,6 +66,8 @@ namespace EvidenceBoardUIExtension
 		public event EditTaskCompletionEventHandler EditTaskDone;
 
 		public event TaskModifiedEventHandler TaskModified;
+		public event ImageDroppedEventHandler ImageDropped;
+
 		public event ConnectionCreatedEventHandler ConnectionCreated;
 		public event ConnectionEditedEventHandler ConnectionEdited;
 		public event ConnectionDeletedEventHandler ConnectionDeleted;
@@ -2545,7 +2550,28 @@ namespace EvidenceBoardUIExtension
 			}
 			else if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
-				// TODO
+				// Retrieve all the image files
+				string[] filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+				filePaths = filePaths.Where(file => TaskItem.IsImageFile(file)).ToArray();
+
+				if (filePaths.Count() > 0)
+				{
+					// Select the highlighted task
+					if (!SelectedNodeIds.Contains(m_DropHighlightedTaskId))
+						SelectNode(m_DropHighlightedTaskId, true, true);
+
+					if ((ImageDropped != null) && ImageDropped(this, m_DropHighlightedTaskId, filePaths))
+					{
+						foreach (var id in SelectedNodeIds)
+						{
+							var taskItem = GetTaskItem(id);
+
+							if ((taskItem != null) && (taskItem.AddImages(filePaths) > 0))
+								taskItem.ExpandImage(true);
+						}
+					}
+				}
 			}
 			else
 			{
@@ -2581,7 +2607,8 @@ namespace EvidenceBoardUIExtension
 			}
 			else if (m_DropHighlightedTaskId > 0)
 			{
-				// Nothing to do
+				// Never called
+				int breakpoint = 0;
 			}
 			else
 			{
