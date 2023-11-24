@@ -706,13 +706,22 @@ void CWorkloadWnd::Resize(int cx, int cy)
 		rWorkload.bottom = cy;
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
-
-		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-		int nSliderWidth = m_sliderDateRange.GetPreferredWidth(cx - 10 - rSlider.left);
-
-		rSlider.right = (rSlider.left + nSliderWidth);
-		m_sliderDateRange.MoveWindow(rSlider);
+		ResizeSlider(cx);
 	}
+}
+
+void CWorkloadWnd::ResizeSlider(int nParentWidth)
+{
+	if (nParentWidth == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nParentWidth = rClient.Width();
+	}
+
+	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+	m_sliderDateRange.ResizeToFit(nParentWidth - 10 - rSlider.left);
 }
 
 HBRUSH CWorkloadWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
@@ -1048,6 +1057,7 @@ void CWorkloadWnd::UpdateRangeSlider()
 	}
 
 	m_sliderDateRange.SetStep(1.0); // 1 day
+	ResizeSlider();
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI) 

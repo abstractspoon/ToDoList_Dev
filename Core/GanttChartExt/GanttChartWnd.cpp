@@ -547,6 +547,8 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 		
 	// Month Display may change for large date ranges
 	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
+	
+	ResizeSlider();
 	UpdateActiveRangeLabel();
 }
 
@@ -792,14 +794,22 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		rGantt.top = CDlgUnits(this).ToPixelsY(28);
 
 		m_ctrlGantt.MoveWindow(rGantt);
-
-		// selected task dates takes available space
-		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-		int nSliderWidth = m_sliderDateRange.GetPreferredWidth(cx - 10 - rSlider.left);
-
-		rSlider.right = (rSlider.left + nSliderWidth);
-		m_sliderDateRange.MoveWindow(rSlider);
+		ResizeSlider(cx);
 	}
+}
+
+void CGanttChartWnd::ResizeSlider(int nParentWidth)
+{
+	if (nParentWidth == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nParentWidth = rClient.Width();
+	}
+
+	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+	m_sliderDateRange.ResizeToFit(nParentWidth - 10 - rSlider.left);
 }
 
 HBRUSH CGanttChartWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 

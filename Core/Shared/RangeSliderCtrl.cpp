@@ -7,6 +7,7 @@
 #include "Themed.h"
 #include "Misc.h"
 #include "GraphicsMisc.h"
+#include "DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -297,14 +298,23 @@ void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, dou
 	}
 }
 
-int CRangeSliderCtrl::GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing) const
+int CRangeSliderCtrl::ResizeToFit(int nMaxWidth, int nMaxTickSpacing)
 {
 	int nTickCount = abs(Misc::Round((m_Max - m_Min) / m_Step));
 
 	if (nMaxTickSpacing == -1)
 		nMaxTickSpacing = GraphicsMisc::ScaleByDPIFactor(100);
 
-	return min((nTickCount * nMaxTickSpacing), nMaxWidth);
+	int nNewWidth = min((nTickCount * nMaxTickSpacing), nMaxWidth);
+	CRect rSlider = CDialogHelper::GetChildRect(this);
+
+	if (nNewWidth != rSlider.Width())
+	{
+		rSlider.right = rSlider.left + nNewWidth;
+		MoveWindow(rSlider);
+	}
+
+	return nNewWidth;
 }
 
 void CRangeSliderCtrl::RegionToTrack(CRect& rRegion) const

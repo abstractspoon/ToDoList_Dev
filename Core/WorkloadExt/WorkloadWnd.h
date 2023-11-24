@@ -157,6 +157,7 @@ protected:
 	BOOL CanMovePeriodEndForwards() const;
 	BOOL CanMovePeriodStartBackwards() const;
 	BOOL ValidatePeriod();
+	void ResizeSlider(int nParentWidth = -1);
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);

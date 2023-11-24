@@ -136,7 +136,7 @@ protected:
 	void UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange);
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
-	void RecalcSliderWidth(int nParentWidth = -1);
+	void ResizeSlider(int nParentWidth = -1);
 
 };
 

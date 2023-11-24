@@ -156,6 +156,7 @@ protected:
 	void SaveSnapModePreference(IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay) const;
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
+	void ResizeSlider(int nParentWidth = -1);
 
 	static void InitWorkingWeek(const IPreferences* pPrefs);
 };

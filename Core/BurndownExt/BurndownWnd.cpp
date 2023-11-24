@@ -636,15 +636,14 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		m_chart.MoveWindow(rFrame);
 
 		// selected task dates takes available space
-		RecalcSliderWidth(cx);
-		//CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, (cx - 10 - rSlider.right), 0);
+		ResizeSlider(cx);
 
 		CAutoFlag af(m_bUpdatingSlider, TRUE);
 		UpdateRangeSliderStep();
 	}
 }
 
-void CBurndownWnd::RecalcSliderWidth(int nParentWidth)
+void CBurndownWnd::ResizeSlider(int nParentWidth)
 {
 	if (nParentWidth == -1)
 	{
@@ -655,10 +654,7 @@ void CBurndownWnd::RecalcSliderWidth(int nParentWidth)
 	}
 
 	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-	int nSliderWidth = m_sliderDateRange.GetPreferredWidth(nParentWidth - 10 - rSlider.left);
-
-	rSlider.right = (rSlider.left + nSliderWidth);
-	m_sliderDateRange.MoveWindow(rSlider);
+	m_sliderDateRange.ResizeToFit(nParentWidth - 10 - rSlider.left);
 }
 
 void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility)
@@ -805,7 +801,7 @@ void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 		m_sliderDateRange.SetRange(nActiveStart, nActiveEnd);
 		m_sliderDateRange.EnableWindow(TRUE);
 
-		RecalcSliderWidth();
+		ResizeSlider();
 	}
 	else
 	{
