@@ -290,7 +290,7 @@ void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, dou
 			if ((nTickPos - nLastTickPos) > m_nMinTickSpacing)
 			{
 				CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
-				dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
+				dc.FillSolidRect(rTick, GetSysColor(COLOR_3DDKSHADOW));
 
 				nLastTickPos = nTickPos;
 			}
