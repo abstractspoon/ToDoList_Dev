@@ -948,6 +948,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 				}
 			}
 
+			ResizeSlider();
 			UpdateActiveRangeLabel();
 		}
 		else
@@ -1031,6 +1032,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 		}
 	}
 
+	ResizeSlider();
 	UpdateActiveRangeLabel();
 
 	return 0L;
