@@ -38,6 +38,8 @@
 #define IDC_GRAPHCOLORS                 17007
 #define IDC_COLORSLABEL                 17008
 #define IDC_SHOWEMPTYINFREQUENCYCHARTS  17009
+#define IDC_DISPLAY_LABEL               17010
+#define IDC_OPTIONS_LABEL               17011
 #define ID_BURNDOWN_PREF                32771
 #define IDS_ACTIVEDATERANGE             57688
 #define IDS_TOOLTIP_STARTEDCOMPLETED    57689
@@ -73,7 +75,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        17004
 #define _APS_NEXT_COMMAND_VALUE         32772
-#define _APS_NEXT_CONTROL_VALUE         17010
+#define _APS_NEXT_CONTROL_VALUE         17012
 #define _APS_NEXT_SYMED_VALUE           17000
 #endif
 #endif

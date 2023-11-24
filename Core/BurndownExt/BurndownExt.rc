@@ -138,9 +138,9 @@ END
 IDD_STATISTICS_DLG DIALOGEX 0, 0, 477, 281
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Dis&play",IDC_STATIC,0,2,120,8
+    LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,120,8
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
@@ -153,7 +153,7 @@ BEGIN
                     8
     CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,309,
                     12,112,13
-    LTEXT           "Option",IDC_STATIC,126,2,120,8
+    LTEXT           "Option",IDC_OPTIONS_LABEL,126,2,120,8
     COMBOBOX        IDC_OPTIONS,126,13,121,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
 END
