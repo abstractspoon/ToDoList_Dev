@@ -795,8 +795,9 @@ void CGanttChartWnd::Resize(int cx, int cy)
 
 		// selected task dates takes available space
 		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-		rSlider.right = (cx - 10);
+		int nSliderWidth = m_sliderDateRange.GetPreferredWidth(cx - 10 - rSlider.left);
 
+		rSlider.right = (rSlider.left + nSliderWidth);
 		m_sliderDateRange.MoveWindow(rSlider);
 	}
 }

@@ -708,8 +708,9 @@ void CWorkloadWnd::Resize(int cx, int cy)
 		m_ctrlWorkload.MoveWindow(rWorkload);
 
 		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-		rSlider.right = (cx - 10);
+		int nSliderWidth = m_sliderDateRange.GetPreferredWidth(cx - 10 - rSlider.left);
 
+		rSlider.right = (rSlider.left + nSliderWidth);
 		m_sliderDateRange.MoveWindow(rSlider);
 	}
 }

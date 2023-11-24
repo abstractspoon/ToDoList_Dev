@@ -636,14 +636,29 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		m_chart.MoveWindow(rFrame);
 
 		// selected task dates takes available space
-		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-
-		CDialogHelper::ResizeChild(&m_sliderDateRange, (cx - 10 - rSlider.right), 0);
-		CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, (cx - 10 - rSlider.right), 0);
+		RecalcSliderWidth(cx);
+		//CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, (cx - 10 - rSlider.right), 0);
 
 		CAutoFlag af(m_bUpdatingSlider, TRUE);
 		UpdateRangeSliderStep();
 	}
+}
+
+void CBurndownWnd::RecalcSliderWidth(int nParentWidth)
+{
+	if (nParentWidth == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nParentWidth = rClient.Width();
+	}
+
+	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+	int nSliderWidth = m_sliderDateRange.GetPreferredWidth(nParentWidth - 10 - rSlider.left);
+
+	rSlider.right = (rSlider.left + nSliderWidth);
+	m_sliderDateRange.MoveWindow(rSlider);
 }
 
 void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility)
@@ -789,6 +804,8 @@ void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 
 		m_sliderDateRange.SetRange(nActiveStart, nActiveEnd);
 		m_sliderDateRange.EnableWindow(TRUE);
+
+		RecalcSliderWidth();
 	}
 	else
 	{
