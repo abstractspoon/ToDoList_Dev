@@ -607,7 +607,7 @@ namespace EvidenceBoardUIExtension
 
 			// Resize the slider to take up the rest of the width
 			Rectangle rect = ClientRectangle;
-			m_DateSlider.Width = (rect.Right - m_DateSlider.Left);
+			m_DateSlider.Width = m_DateSlider.GetPreferredWidth(rect.Right - m_DateSlider.Left - DPIScaling.Scale(10), -1);
 
 			// Node control
 			rect.Y = ControlTop;

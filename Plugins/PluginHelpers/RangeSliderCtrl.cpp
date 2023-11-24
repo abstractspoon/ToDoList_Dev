@@ -53,6 +53,21 @@ void HostedRangeSliderCtrl::Detach()
 	delete this;
 }
 
+void HostedRangeSliderCtrl::UpdateSize()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CRect rSlider;
+	m_WndOfManagedHandle.GetClientRect(rSlider);
+
+	m_Slider.MoveWindow(rSlider);
+}
+
+int HostedRangeSliderCtrl::GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing)
+{
+	return m_Slider.GetPreferredWidth(nMaxWidth, nMaxTickSpacing);
+}
+
 BOOL HostedRangeSliderCtrl::GetMinMax(double& min, double& max)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -187,6 +202,14 @@ void RangeSliderCtrl::OnHandleDestroyed(EventArgs^ e)
 	}
 }
 
+void RangeSliderCtrl::OnSizeChanged(EventArgs^ e)
+{
+	Control::OnSizeChanged(e);
+
+	if (m_pMFCInfo != IntPtr::Zero)
+		Slider(m_pMFCInfo)->UpdateSize();
+}
+
 int RangeSliderCtrl::GetRequiredHeight()
 {
 	return DPIScaling::Scale(21);
@@ -285,6 +308,14 @@ bool RangeSliderCtrl::SetMinTickSpacing(int nPixels)
 		return false;
 
 	return (Slider(m_pMFCInfo)->SetMinTickSpacing(nPixels) != FALSE);
+}
+
+int RangeSliderCtrl::GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing)
+{
+	if (m_pMFCInfo == IntPtr::Zero)
+		return 0;
+
+	return (Slider(m_pMFCInfo)->GetPreferredWidth(nMaxWidth, nMaxTickSpacing));
 }
 
 void RangeSliderCtrl::WndProc(Windows::Forms::Message% m)

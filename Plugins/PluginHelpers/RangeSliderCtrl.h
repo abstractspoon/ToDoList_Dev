@@ -34,6 +34,9 @@ namespace Abstractspoon
 				BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
 				BOOL SetMinTickSpacing(int nPixels);
 
+				int GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing);
+				void UpdateSize();
+
 			protected:
 				HostedRangeSliderCtrl();
 
@@ -61,6 +64,8 @@ namespace Abstractspoon
 				void SetParentBackColor(System::Drawing::Color color);
 				bool SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth);
 				bool SetMinTickSpacing(int nPixels);
+				
+				int GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing);
 
 				static int GetRequiredHeight();
 
@@ -73,6 +78,7 @@ namespace Abstractspoon
 				void WndProc(Windows::Forms::Message% m) override;
 				void OnHandleCreated(EventArgs^ e) override;
 				void OnHandleDestroyed(EventArgs^ e) override;
+				void OnSizeChanged(EventArgs^ e) override;
 
 			};
 

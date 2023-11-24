@@ -24,6 +24,8 @@ public:
 	BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
 	BOOL SetMinTickSpacing(int nPixels); // affects tick visibility only
 
+	int GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing = -1) const;
+
 protected:
 	CHotTracker m_hotTrack;
 	COLORREF m_crParentBkgnd;

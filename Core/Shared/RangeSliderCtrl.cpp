@@ -297,6 +297,16 @@ void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, dou
 	}
 }
 
+int CRangeSliderCtrl::GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing) const
+{
+	int nTickCount = abs(Misc::Round((m_Max - m_Min) / m_Step));
+
+	if (nMaxTickSpacing == -1)
+		nMaxTickSpacing = GraphicsMisc::ScaleByDPIFactor(100);
+
+	return min((nTickCount * nMaxTickSpacing), nMaxWidth);
+}
+
 void CRangeSliderCtrl::RegionToTrack(CRect& rRegion) const
 {
 	int nStyle = GetStyle();
