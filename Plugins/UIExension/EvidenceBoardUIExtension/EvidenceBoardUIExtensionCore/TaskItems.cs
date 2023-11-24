@@ -41,10 +41,9 @@ namespace EvidenceBoardUIExtension
 		public Point UserPosition;
 		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
 
-		public Image Image {  get { return m_Image; } }
-		public bool HasImage { get { return (m_Image != null); } }
-		public string ImagePath { get { return m_ImagePath; } }
-		public int ImageIndex { get { return m_ImageFileLinks.IndexOf(m_ImagePath); } }
+		public Image ActiveImage {  get { return m_ActiveImage; } }
+		public bool HasImage { get { return (m_ActiveImage != null); } }
+		public string ActiveImagePath { get { return m_ActiveImagePath; } }
 		public int ImageCount { get { return ((m_ImageFileLinks == null) ? 0 : m_ImageFileLinks.Count); } }
 
 		public int AddImages(string[] imagePaths)
@@ -60,7 +59,7 @@ namespace EvidenceBoardUIExtension
 						if (ImageFromFile(path))
 						{
 							m_ImageFileLinks.Add(path);
-							m_ImagePath = path;
+							m_ActiveImagePath = path;
 
 							numAdded++;
 						}
@@ -72,8 +71,8 @@ namespace EvidenceBoardUIExtension
 		}
 
 		private List<string> m_ImageFileLinks;
-		private string m_ImagePath;
-		private Image m_Image;
+		private string m_ActiveImagePath;
+		private Image m_ActiveImage;
 
 		public enum ImageExpansionState
 		{
@@ -156,12 +155,12 @@ namespace EvidenceBoardUIExtension
 #endif
 		}
 
-		public int CalcImageHeight(int width)
+		public int CalcActiveImageHeight(int width)
 		{
 			if (!HasImage)
 				return 0;
 
-			return ((width * Image.Height) / Image.Width);
+			return ((width * ActiveImage.Height) / ActiveImage.Width);
 		}
 
 		public bool HasLocalDependencies { get { return (DependIds != null) && (DependIds.Count > 0); } }
@@ -181,8 +180,8 @@ namespace EvidenceBoardUIExtension
 			if (HasUserLinks)
 				metaData = metaData + string.Join(",", UserLinks);
 
-			if (!string.IsNullOrEmpty(m_ImagePath))
-				metaData = metaData + '|' + Path.GetFileName(m_ImagePath);
+			if (!string.IsNullOrEmpty(m_ActiveImagePath))
+				metaData = metaData + '|' + Path.GetFileName(m_ActiveImagePath);
 
 			return metaData;
 		}
@@ -239,7 +238,7 @@ namespace EvidenceBoardUIExtension
 
 				if (parts.Count() == 3)
 				{
-					m_ImagePath = parts[2];
+					m_ActiveImagePath = parts[2];
 				}
 			}
 			else
@@ -305,11 +304,11 @@ namespace EvidenceBoardUIExtension
 				}
 
 				// Check if the current image is still present
-				if (m_ImageFileLinks.IndexOf(m_ImagePath) != -1)
+				if (m_ImageFileLinks.IndexOf(m_ActiveImagePath) != -1)
 					return;
 
 				// Check also just by filename which is what gets encoded in the metadata
-				var imagePath = m_ImageFileLinks.Find(x => (Path.GetFileName(x) == m_ImagePath));
+				var imagePath = m_ImageFileLinks.Find(x => (Path.GetFileName(x) == m_ActiveImagePath));
 
 				if (ImageFromFile(imagePath))
 					return;
@@ -323,13 +322,13 @@ namespace EvidenceBoardUIExtension
 			}
 
 			// All else -> Clear image
-			m_Image = null;
-			m_ImagePath = string.Empty;
+			m_ActiveImage = null;
+			m_ActiveImagePath = string.Empty;
 		}
 
 		public bool CanSelectNextImage(bool next)
 		{
-			int index = m_ImageFileLinks.IndexOf(m_ImagePath);
+			int index = m_ImageFileLinks.IndexOf(m_ActiveImagePath);
 
 			if (next)
 				return (index < (ImageCount - 1));
@@ -340,7 +339,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool SelectNextImage(bool next)
 		{
-			int index = m_ImageFileLinks.IndexOf(m_ImagePath);
+			int index = m_ImageFileLinks.IndexOf(m_ActiveImagePath);
 
 			if (next)
 			{
@@ -380,11 +379,11 @@ namespace EvidenceBoardUIExtension
 			{
 				try
 				{
-					m_Image = Image.FromFile(filePath);
+					m_ActiveImage = Image.FromFile(filePath);
 
-					if (m_Image != null)
+					if (m_ActiveImage != null)
 					{
-						m_ImagePath = filePath;
+						m_ActiveImagePath = filePath;
 						return true;
 					}
 				}
@@ -393,8 +392,8 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 
-			m_Image = null;
-			m_ImagePath = string.Empty;
+			m_ActiveImage = null;
+			m_ActiveImagePath = string.Empty;
 
 			return false;
 		}

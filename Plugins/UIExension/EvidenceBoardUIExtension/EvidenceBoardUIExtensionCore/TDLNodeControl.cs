@@ -1061,7 +1061,7 @@ namespace EvidenceBoardUIExtension
 
 			if (task?.IsExpanded == true)
 			{
-				size.Height += task.CalcImageHeight(base.NodeSize.Width);
+				size.Height += task.CalcActiveImageHeight(base.NodeSize.Width);
 			}
 
 			return size;
@@ -1574,7 +1574,7 @@ namespace EvidenceBoardUIExtension
 			if (taskItem.IsExpanded)
 			{
 				var imageRect = CalcImageRect(taskItem, taskRect, selected || dropHighlight);
-				graphics.DrawImage(taskItem.Image, imageRect);
+				graphics.DrawImage(taskItem.ActiveImage, imageRect);
 
 				// Image spin button
 				DrawTaskImageSpinButtons(graphics, taskItem, imageRect);
@@ -2112,7 +2112,7 @@ namespace EvidenceBoardUIExtension
 				{
 					if (imageRect.Contains(e.Location))
 					{
-						Process.Start(taskItem.ImagePath);
+						Process.Start(taskItem.ActiveImagePath);
 					}
 					else
 					{
