@@ -34,7 +34,7 @@ namespace Abstractspoon
 				BOOL SetMinMaxRangeWidths(double dMinWidth = 0, double dMaxWidth = -1);
 				BOOL SetMinTickSpacing(int nPixels);
 
-				int GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing);
+				int ResizeToFit(int nMaxWidth);
 				void UpdateSize();
 
 			protected:
@@ -65,7 +65,7 @@ namespace Abstractspoon
 				bool SetMinMaxRangeWidths(double dMinWidth, double dMaxWidth);
 				bool SetMinTickSpacing(int nPixels);
 				
-				int GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing);
+				void ResizeToFit(int nMaxWidth);
 
 				static int GetRequiredHeight();
 

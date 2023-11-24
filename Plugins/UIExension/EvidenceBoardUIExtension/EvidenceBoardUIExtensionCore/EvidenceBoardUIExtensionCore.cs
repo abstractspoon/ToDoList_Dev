@@ -390,9 +390,6 @@ namespace EvidenceBoardUIExtension
 			CreateToolbar();
 			m_Toolbar.Location = ToolbarLocation;
 
-// 
-// 			UpdateToolbarButtonStates();
-
 			// Date slider combo and label
 			m_DateSliderLabel = CreateLabel("", m_Toolbar);
 			this.Controls.Add(m_DateSliderLabel);
@@ -453,7 +450,7 @@ namespace EvidenceBoardUIExtension
 			label.ForeColor = SystemColors.WindowText;
 
 			if (prevControl != null)
-				label.Location = new Point((prevControl.Bounds.Right + DPIScaling.Scale(13)), DPIScaling.Scale(5));
+				label.Location = new Point((prevControl.Bounds.Right + DPIScaling.Scale(7)), DPIScaling.Scale(5));
 			else
 				label.Location = new Point(0, DPIScaling.Scale(5));
 
@@ -607,7 +604,7 @@ namespace EvidenceBoardUIExtension
 
 			// Resize the slider to take up the rest of the width
 			Rectangle rect = ClientRectangle;
-			m_DateSlider.Width = m_DateSlider.GetPreferredWidth(rect.Right - m_DateSlider.Left - DPIScaling.Scale(10), -1);
+			m_DateSlider.ResizeToFit(rect.Right - m_DateSlider.Left - 10);
 
 			// Node control
 			rect.Y = ControlTop;

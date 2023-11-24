@@ -63,9 +63,9 @@ void HostedRangeSliderCtrl::UpdateSize()
 	m_Slider.MoveWindow(rSlider);
 }
 
-int HostedRangeSliderCtrl::GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing)
+int HostedRangeSliderCtrl::ResizeToFit(int nMaxWidth)
 {
-	return m_Slider.GetPreferredWidth(nMaxWidth, nMaxTickSpacing);
+	return m_Slider.ResizeToFit(nMaxWidth);
 }
 
 BOOL HostedRangeSliderCtrl::GetMinMax(double& min, double& max)
@@ -310,12 +310,10 @@ bool RangeSliderCtrl::SetMinTickSpacing(int nPixels)
 	return (Slider(m_pMFCInfo)->SetMinTickSpacing(nPixels) != FALSE);
 }
 
-int RangeSliderCtrl::GetPreferredWidth(int nMaxWidth, int nMaxTickSpacing)
+void RangeSliderCtrl::ResizeToFit(int nMaxWidth)
 {
-	if (m_pMFCInfo == IntPtr::Zero)
-		return 0;
-
-	return (Slider(m_pMFCInfo)->GetPreferredWidth(nMaxWidth, nMaxTickSpacing));
+	if (m_pMFCInfo != IntPtr::Zero)
+		this->Width = Slider(m_pMFCInfo)->ResizeToFit(nMaxWidth);
 }
 
 void RangeSliderCtrl::WndProc(Windows::Forms::Message% m)
