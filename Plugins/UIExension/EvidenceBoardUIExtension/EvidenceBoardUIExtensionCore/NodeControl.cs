@@ -25,6 +25,15 @@ namespace EvidenceBoardUIExtension
 		None = -1,
 		Node,
 		SelectionBox,
+
+		BkgndImageLeft,
+		BkgndImageTop,
+		BkgndImageRight,
+		BkgndImageBottom,
+		BkgndImageTopLeft,
+		BkgndImageTopRight,
+		BkgndImageBottomLeft,
+		BkgndImageBottomRight,
 	}
 
 	// -------------------------------------------------------------------
