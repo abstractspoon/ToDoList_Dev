@@ -22,9 +22,12 @@ namespace EvidenceBoardUIExtension
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
 
 	public delegate bool TaskModifiedEventHandler(object sender, IList<uint> taskIds);
+	public delegate bool ImageDroppedEventHandler(object sender, uint taskId, string[] imagePaths);
+
 	public delegate bool ConnectionCreatedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionEditedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionDeletedEventHandler(object sender, uint taskId);
+
 
 	// ------------------------------------------------------------
 
@@ -63,6 +66,8 @@ namespace EvidenceBoardUIExtension
 		public event EditTaskCompletionEventHandler EditTaskDone;
 
 		public event TaskModifiedEventHandler TaskModified;
+		public event ImageDroppedEventHandler ImageDropped;
+
 		public event ConnectionCreatedEventHandler ConnectionCreated;
 		public event ConnectionEditedEventHandler ConnectionEdited;
 		public event ConnectionDeletedEventHandler ConnectionDeleted;
@@ -1056,7 +1061,7 @@ namespace EvidenceBoardUIExtension
 
 			if (task?.IsExpanded == true)
 			{
-				size.Height += task.CalcImageHeight(base.NodeSize.Width);
+				size.Height += task.CalcActiveImageHeight(base.NodeSize.Width);
 			}
 
 			return size;
@@ -1359,7 +1364,7 @@ namespace EvidenceBoardUIExtension
 			if (selected)
 				return DrawState.Selected;
 
-			if (m_DraggingSelectedUserLink && (m_DropHighlightedTaskId == node.Data))
+			if ((m_DropHighlightedTaskId != 0) && (m_DropHighlightedTaskId == node.Data))
 				return DrawState.DropHighlighted;
 
 			// all else
@@ -1569,7 +1574,7 @@ namespace EvidenceBoardUIExtension
 			if (taskItem.IsExpanded)
 			{
 				var imageRect = CalcImageRect(taskItem, taskRect, selected || dropHighlight);
-				graphics.DrawImage(taskItem.Image, imageRect);
+				graphics.DrawImage(taskItem.ActiveImage, imageRect);
 
 				// Image spin button
 				DrawTaskImageSpinButtons(graphics, taskItem, imageRect);
@@ -2107,7 +2112,7 @@ namespace EvidenceBoardUIExtension
 				{
 					if (imageRect.Contains(e.Location))
 					{
-						Process.Start(taskItem.ImagePath);
+						Process.Start(taskItem.ActiveImagePath);
 					}
 					else
 					{
@@ -2411,31 +2416,54 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			if (m_DraggingSelectedUserLink)
+			if (m_DraggingSelectedUserLink || e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
-				var ptClient = m_DraggedUserLinkEnd = PointToClient(new Point(e.X, e.Y));
+				var prevDropId = m_DropHighlightedTaskId;
+
+				m_DropHighlightedTaskId = 0;
+				e.Effect = DragDropEffects.None;
+
+				var ptClient = PointToClient(new Point(e.X, e.Y));
 				var node = HitTestNode(ptClient, true);
 
-				if (IsAcceptableDropTarget(node))
+				if (m_DraggingSelectedUserLink)
 				{
-					m_DropHighlightedTaskId = node.Data;
-					e.Effect = e.AllowedEffect;
+					m_DraggedUserLinkEnd = ptClient;
+
+					if (IsAcceptableLinkDropTarget(node))
+					{
+						m_DropHighlightedTaskId = node.Data;
+						e.Effect = e.AllowedEffect;
+					}
 				}
-				else
+				else if ((node != null) && !ReadOnly && !IsTaskLocked(node.Data))
 				{
-					m_DropHighlightedTaskId = 0;
-					e.Effect = DragDropEffects.None;
+					// file drag-drop
+					string[] filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+					// Check for at least one image file
+					foreach (string file in filePaths)
+					{
+						if (TaskItem.IsImageFile(file))
+						{
+							m_DropHighlightedTaskId = node.Data;
+							e.Effect = e.AllowedEffect;
+						}
+					}
+
+					if (m_DropHighlightedTaskId == prevDropId)
+						return;
 				}
 
 				Invalidate();
+				return;
 			}
-			else
-			{
-				base.OnDragOver(e);
-			}
+			
+			// else
+			base.OnDragOver(e);
 		}
 
-		protected bool IsAcceptableDropTarget(BaseNode node)
+		protected bool IsAcceptableLinkDropTarget(BaseNode node)
 		{
 			Debug.Assert(m_DraggingSelectedUserLink);
 
@@ -2520,6 +2548,33 @@ namespace EvidenceBoardUIExtension
 
 				ResetUserLinkDrag();
 			}
+			else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				// Retrieve all the image files
+				string[] filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+				filePaths = filePaths.Where(file => TaskItem.IsImageFile(file)).ToArray();
+
+				if (filePaths.Count() > 0)
+				{
+					// Select the highlighted task
+					if (!SelectedNodeIds.Contains(m_DropHighlightedTaskId))
+						SelectNode(m_DropHighlightedTaskId, true, true);
+
+					// Notify the app
+					if ((ImageDropped != null) && ImageDropped(this, m_DropHighlightedTaskId, filePaths))
+					{
+						// Add the images to each of the selected tasks
+						foreach (var id in SelectedNodeIds)
+						{
+							var taskItem = GetTaskItem(id);
+
+							if ((taskItem != null) && (taskItem.AddImages(filePaths) > 0))
+								taskItem.ExpandImage(true);
+						}
+					}
+				}
+			}
 			else
 			{
 				base.OnDragDrop(e);
@@ -2541,7 +2596,7 @@ namespace EvidenceBoardUIExtension
 
 			if (m_DraggingSelectedUserLink)
 			{
-				if (((MouseButtons & MouseButtons.Left) != MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
+				if (!MouseButtons.HasFlag(MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
 				{
 					e.Action = DragAction.Cancel;
 					ResetUserLinkDrag();
@@ -2551,6 +2606,11 @@ namespace EvidenceBoardUIExtension
 					e.Action = DragAction.Cancel;
 					ResetUserLinkDrag();
 				}
+			}
+			else if (m_DropHighlightedTaskId > 0)
+			{
+				// Never called
+				int breakpoint = 0;
 			}
 			else
 			{

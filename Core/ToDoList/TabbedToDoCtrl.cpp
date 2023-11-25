@@ -1883,10 +1883,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			Misc::Split(mod.szValue, aValues, '\n');
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskAllocTo(dwTaskID, aValues, FALSE));
+				bChange = (SET_CHANGE == m_data.SetTaskAllocTo(dwTaskID, aValues, mod.bAppend));
 			else 
 				bChange = SetSelectedTaskAllocTo(aValues);
-
 		}
 		break;
 		
@@ -1895,7 +1894,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			Misc::Split(mod.szValue, aValues, '\n');
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskCategories(dwTaskID, aValues, FALSE));
+				bChange = (SET_CHANGE == m_data.SetTaskCategories(dwTaskID, aValues, mod.bAppend));
 			else 
 				bChange = SetSelectedTaskCategories(aValues);
 		}
@@ -1906,7 +1905,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			Misc::Split(mod.szValue, aValues, '\n');
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTags(dwTaskID, aValues, FALSE));
+				bChange = (SET_CHANGE == m_data.SetTaskTags(dwTaskID, aValues, mod.bAppend));
 			else 
 				bChange = SetSelectedTaskTags(aValues);
 		}
@@ -1917,7 +1916,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			Misc::Split(mod.szValue, aValues, '\n');
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskFileLinks(dwTaskID, aValues, FALSE));
+				bChange = (SET_CHANGE == m_data.SetTaskFileLinks(dwTaskID, aValues, mod.bAppend));
 			else 
 				bChange = SetSelectedTaskFileLinks(aValues);
 		}

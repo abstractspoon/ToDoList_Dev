@@ -144,6 +144,7 @@ namespace Abstractspoon
 					bool AddMod(Task::Attribute nAttribute, int value);
 					bool AddMod(Task::Attribute nAttribute, bool value);
 					bool AddMod(Task::Attribute nAttribute, String^ value);
+					bool AddMod(Task::Attribute nAttribute, String^ value, bool append);
 					bool AddMod(String^ sCustAttribID, String^ value);
 
 					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime value);
@@ -152,6 +153,7 @@ namespace Abstractspoon
 					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, int value);
 					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value);
 					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value, bool append);
 					bool AddMod(UInt32 taskID, String^ sCustAttribID, String^ value);
 
 					bool NotifyMod();
@@ -161,6 +163,7 @@ namespace Abstractspoon
 					bool NotifyMod(Task::Attribute nAttribute, int value);
 					bool NotifyMod(Task::Attribute nAttribute, bool value);
 					bool NotifyMod(Task::Attribute nAttribute, String^ value);
+					bool NotifyMod(Task::Attribute nAttribute, String^ value, bool append);
 					bool NotifyMod(String^ sCustAttribID, String^ value);
 
 					bool NotifyMove(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID);
@@ -186,6 +189,7 @@ namespace Abstractspoon
 						IUITaskMod(Task::Attribute attrib, int value);
 						IUITaskMod(Task::Attribute attrib, bool value);
 						IUITaskMod(Task::Attribute attrib, String^ value);
+						IUITaskMod(Task::Attribute attrib, String^ value, bool append);
 
 						IUITaskMod(String^ customAttribId, String^ value);
 
@@ -195,6 +199,7 @@ namespace Abstractspoon
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value);
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, bool value);
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append);
 
 						IUITaskMod(UInt32 taskID, String^ customAttribId, String^ value);
 
@@ -218,6 +223,7 @@ namespace Abstractspoon
 						//union
 						//{
 							Task::TimeUnits nTimeUnits;	
+							bool bAppend;
 						//};
 
 					private:

@@ -348,6 +348,8 @@ namespace EvidenceBoardUIExtension
 
 			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnEvidenceBoardSelectionChange);
 			m_Control.TaskModified += new TaskModifiedEventHandler(OnEvidenceBoardTaskModified);
+			m_Control.ImageDropped += new ImageDroppedEventHandler(OnEvidenceBoardImageDropped);
+
 			m_Control.ConnectionCreated += new ConnectionCreatedEventHandler(OnEvidenceBoardTaskLinkCreated);
 			m_Control.ConnectionEdited += new ConnectionEditedEventHandler(OnEvidenceBoardTaskLinkEdited);
 			m_Control.ConnectionDeleted += new ConnectionDeletedEventHandler(OnEvidenceBoardTaskLinkDeleted);
@@ -547,6 +549,13 @@ namespace EvidenceBoardUIExtension
 			}
 
 			return notify.NotifyMod();
+		}
+
+		bool OnEvidenceBoardImageDropped(object sender, uint taskId, string[] imagePaths)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+			return notify.NotifyMod(Task.Attribute.FileLink, string.Join("\n", imagePaths));
 		}
 
 		bool OnEvidenceBoardTaskLinkCreated(object sender, UserLink link)
