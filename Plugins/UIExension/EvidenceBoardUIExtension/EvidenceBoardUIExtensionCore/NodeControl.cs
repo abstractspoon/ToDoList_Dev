@@ -631,36 +631,36 @@ namespace EvidenceBoardUIExtension
 			// check children
 			foreach (var child in node.Children)
 			{
-				var hit = HitTestNodeAndChildren(child, ptClient, excludeRoot);
+				var childNode = HitTestNodeAndChildren(child, ptClient, excludeRoot);
 
-				if (hit != null)
-					return hit;
+				if (childNode != null)
+					return childNode;
 			}
 
 			return null;
 		}
 
-		protected IList<BaseNode> HitTestNodes(Rectangle rectClient)
+		protected List<BaseNode> HitTestNodes(Rectangle rectClient)
 		{
-			IList<BaseNode> hits = new List<BaseNode>();
+			List<BaseNode> nodes = new List<BaseNode>();
+			HitTestNodes(RootNode, rectClient, ref nodes);
 
-			HitTestNodes(RootNode, rectClient, ref hits);
-			return hits;
+			return nodes;
 		}
 
-		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref IList<BaseNode> hits)
+		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref List<BaseNode> nodes)
 		{
 			if (IsSelectableNode(node))
 			{
 				var rect = GetNodeClientRect(node);
 
 				if (rect.IntersectsWith(rectClient))
-					hits.Add(node);
+					nodes.Add(node);
 			}
 
 			// check children
 			foreach (var child in node.Children)
-				HitTestNodes(child, rectClient, ref hits);
+				HitTestNodes(child, rectClient, ref nodes); // RECURSIVE CALL
 		}
 
 		virtual protected bool IsNodeVisible(BaseNode node)
@@ -1060,11 +1060,11 @@ namespace EvidenceBoardUIExtension
 			if (!ModifierKeys.HasFlag(Keys.Control) &&
 				!ModifierKeys.HasFlag(Keys.Alt))
 			{
-				var hit = HitTestNode(e.Location);
+				var node = HitTestNode(e.Location);
 
-				if ((hit != null) && IsSelectableNode(hit))
+				if ((node != null) && IsSelectableNode(node))
 				{
-					SelectNode(hit.Data, true, false);
+					SelectNode(node.Data, true, false);
 				}
 			}
 		}
@@ -1081,9 +1081,9 @@ namespace EvidenceBoardUIExtension
 		{
 			base.OnMouseDown(e);
 
-			var hit = HitTestNode(e.Location);
+			var node = HitTestNode(e.Location);
 
-			if (hit == null)
+			if (node == null)
 			{
 				// Start a selection box drag
 				m_DragMode = DragMode.SelectionBox;
@@ -1091,22 +1091,22 @@ namespace EvidenceBoardUIExtension
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
 			}
-			else if (IsSelectableNode(hit))
+			else if (IsSelectableNode(node))
 			{
 				List<BaseNode> childNodes = null;
 
 				if (ModifierKeys.HasFlag(Keys.Alt))
 				{
 					childNodes = new List<BaseNode>();
-					GetChildNodes(hit, true, ref childNodes);
+					GetChildNodes(node, true, ref childNodes);
 				}
 
 				if (ModifierKeys.HasFlag(Keys.Control))
 				{
-					if (m_SelectedNodes.Contains(hit))
+					if (m_SelectedNodes.Contains(node))
 					{
 						// Deselect
-						m_SelectedNodes.Remove(hit);
+						m_SelectedNodes.Remove(node);
 
 						if (childNodes?.Count > 0)
 							m_SelectedNodes.Remove(childNodes);
@@ -1114,7 +1114,7 @@ namespace EvidenceBoardUIExtension
 					else
 					{
 						// Select
-						m_SelectedNodes.MoveToHead(hit);
+						m_SelectedNodes.MoveToHead(node);
 
 						if (childNodes?.Count > 0)
 							m_SelectedNodes.AddRange(childNodes);
@@ -1122,14 +1122,14 @@ namespace EvidenceBoardUIExtension
 				}
 				else 
 				{
-					if (!m_SelectedNodes.Contains(hit))
+					if (!m_SelectedNodes.Contains(node))
 					{
 						m_SelectedNodes.Clear();
-						m_SelectedNodes.Insert(0, hit);
+						m_SelectedNodes.Insert(0, node);
 					}
 					else
 					{
-						m_SelectedNodes.MoveToHead(hit);
+						m_SelectedNodes.MoveToHead(node);
 					}
 
 					if (childNodes?.Count > 0)
@@ -1143,10 +1143,10 @@ namespace EvidenceBoardUIExtension
 						m_DragTimer.Tag = e;
 						m_DragTimer.Start();
 
-						m_DragOffset = GetNodeClientPos(hit);
+						m_DragOffset = GetNodeClientPos(node);
 						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
 
-						m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
+						m_PreDragNodePos = new PointF(node.Point.X, node.Point.Y);
 					}
 				}
 
@@ -1156,7 +1156,7 @@ namespace EvidenceBoardUIExtension
 				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 			}
 #if DEBUG
-			else if (hit == RootNode)
+			else if (node == RootNode)
 			{
 				Point ptGraph = ClientToGraph(e.Location);
 				//int breakpoint = 0;
@@ -1325,11 +1325,8 @@ namespace EvidenceBoardUIExtension
 					m_SelectionBox = Geometry2D.RectFromPoints(this.ToScrolled(orgPt), dragPt);
 
 					// Select intersecting nodes
-					var hits = HitTestNodes(m_SelectionBox);
 					m_SelectedNodes.Clear();
-
-					foreach (var hit in hits)
-						m_SelectedNodes.Add(hit);
+					m_SelectedNodes = HitTestNodes(m_SelectionBox);
 
 					e.Effect = DragDropEffects.Move;
 					Invalidate();
