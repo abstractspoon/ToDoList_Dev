@@ -288,7 +288,10 @@ namespace EvidenceBoardUIExtension
 			bool change = false;
 
 			foreach (var id in SelectedNodeIds)
-				change |= GetTaskItem(id).ExpandImage(true);
+			{
+				var taskItem = GetTaskItem(id);
+				change |= ((taskItem != null) && taskItem.ExpandImage(true));
+			}
 
 			if (!change)
 				return false;
@@ -302,7 +305,10 @@ namespace EvidenceBoardUIExtension
 			bool change = false;
 
 			foreach (var id in SelectedNodeIds)
-				change |= GetTaskItem(id).ExpandImage(false);
+			{
+				var taskItem = GetTaskItem(id);
+				change |= ((taskItem != null) && taskItem.ExpandImage(false));
+			}
 
 			if (!change)
 				return false;
@@ -318,7 +324,9 @@ namespace EvidenceBoardUIExtension
 				// Look for first selected task having a collapsed image
 				foreach (var id in SelectedNodeIds)
 				{
-					if (GetTaskItem(id).ImageExpansion == TaskItem.ImageExpansionState.Collapsed)
+					var taskItem = GetTaskItem(id);
+
+					if ((taskItem != null) && (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed))
 						return true;
 				}
 
@@ -333,7 +341,9 @@ namespace EvidenceBoardUIExtension
 				// Look for first selected task having an expanded image
 				foreach (var id in SelectedNodeIds)
 				{
-					if (GetTaskItem(id).ImageExpansion == TaskItem.ImageExpansionState.Expanded)
+					var taskItem = GetTaskItem(id);
+
+					if ((taskItem != null) && (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded))
 						return true;
 				}
 
@@ -556,6 +566,8 @@ namespace EvidenceBoardUIExtension
 			case Task.Attribute.Icon:
 			case Task.Attribute.Flag:
 			case Task.Attribute.Color:
+			case Task.Attribute.StartDate:
+			case Task.Attribute.DueDate:
 			case Task.Attribute.DoneDate:
 			case Task.Attribute.Position:
 			case Task.Attribute.SubtaskDone:

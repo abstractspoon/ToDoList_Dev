@@ -131,7 +131,10 @@ namespace EvidenceBoardUIExtension
 				DateTime min, max;
 
 				if (m_Control.GetMinMaxDateRange(out min, out max))
+				{
 					m_DateSlider.SetMinMax(min, max);
+					m_DateSlider.ResizeToFit(ClientRectangle.Right - m_DateSlider.Left - 10);
+				}
 			}
 		}
 
