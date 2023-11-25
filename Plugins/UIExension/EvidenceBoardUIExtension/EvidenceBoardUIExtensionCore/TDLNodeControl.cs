@@ -27,8 +27,7 @@ namespace EvidenceBoardUIExtension
 	public delegate bool ConnectionCreatedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionEditedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionDeletedEventHandler(object sender, uint taskId);
-
-
+	
 	// ------------------------------------------------------------
 
 	[Flags]
@@ -120,6 +119,7 @@ namespace EvidenceBoardUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 		private Color m_DependencyColor;
+		private Image m_BackgroundImage;
 
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
@@ -372,6 +372,8 @@ namespace EvidenceBoardUIExtension
 		public bool CanExpandAllTaskImages { get { return m_TaskItems.CanExpandAllTaskImages; } }
 		public bool CanCollapseAllTaskImages { get { return m_TaskItems.CanCollapseAllTaskImages; } }
 
+		public bool HasBackgroundImage { get { return (m_BackgroundImage != null); } }
+
 		public void SavePreferences(Preferences prefs, String key)
 		{
 			string ids = String.Empty;
@@ -381,7 +383,6 @@ namespace EvidenceBoardUIExtension
 
 			prefs.WriteProfileString(key, "CollapsedTaskIds", ids);
 		}
-
 
 		public void LoadPreferences(Preferences prefs, String key)
 		{

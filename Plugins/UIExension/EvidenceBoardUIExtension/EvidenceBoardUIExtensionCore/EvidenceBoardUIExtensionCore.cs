@@ -684,8 +684,24 @@ namespace EvidenceBoardUIExtension
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
+			var btn5 = new ToolStripButton();
+			btn5.Name = "SetBackgroundImage";
+			btn5.ImageIndex = 4;
+			btn5.Click += new EventHandler(OnSetBackgroundImage);
+			btn5.ToolTipText = m_Trans.Translate("Set Background Image");
+			m_Toolbar.Items.Add(btn5);
+
+			var btn6 = new ToolStripButton();
+			btn6.Name = "ClearBackgroundImage";
+			btn6.ImageIndex = 5;
+			btn6.Click += new EventHandler(OnClearBackgroundImage);
+			btn6.ToolTipText = m_Trans.Translate("Clear Background Image");
+			m_Toolbar.Items.Add(btn6);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
 			var btn9 = new ToolStripButton();
-			btn9.ImageIndex = 4;
+			btn9.ImageIndex = 6;
 			btn9.Click += new EventHandler(OnPreferences);
 			btn9.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn9);
@@ -693,7 +709,7 @@ namespace EvidenceBoardUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn10 = new ToolStripButton();
-			btn10.ImageIndex = 5;
+			btn10.ImageIndex = 7;
 			btn10.Click += new EventHandler(OnHelp);
 			btn10.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn10);
@@ -716,6 +732,9 @@ namespace EvidenceBoardUIExtension
 
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Checked = false;
+
+			(m_Toolbar.Items["SetBackgroundImage"] as ToolStripButton).Enabled = !m_Control.HasBackgroundImage;
+			(m_Toolbar.Items["ClearBackgroundImage"] as ToolStripButton).Enabled = m_Control.HasBackgroundImage;
 		}
 
 		private void OnZoomToExtents(object sender, EventArgs e)
@@ -847,6 +866,16 @@ namespace EvidenceBoardUIExtension
 		}
 
 		private void OnHelp(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		private void OnSetBackgroundImage(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		private void OnClearBackgroundImage(object sender, EventArgs e)
 		{
 			// TODO
 		}
