@@ -341,6 +341,9 @@ const UINT WM_IUI_GETTASKICON				= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON
 // WPARAM = Task ID, LPARAM = &IUITASKNEXTOCCURRENCES
 const UINT WM_IUI_GETNEXTTASKOCCURRENCES	= ::RegisterWindowMessageW(L"WM_IUI_GETTASKNEXTOCCURRENCES"); 
 
+// wParam = 0, lParam = tasklist metadata (LPCTSTR)
+const UINT WM_IUI_SETTASKLISTMETADATA		= ::RegisterWindowMessageW(L"WM_IUI_SETTASKLISTMETADATA"); 
+
 //////////////////////////////////////////////////////////////////////
 
 class IUIExtensionWindow

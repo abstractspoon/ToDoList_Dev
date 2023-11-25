@@ -175,6 +175,8 @@ namespace Abstractspoon
 					bool NotifyEditLabel();
 					bool NotifyEditIcon();
 
+					bool NotifyTasklistMetaData(String^ metaData);
+
 					bool NotifyDoHelp(String^ helpID);
 
 				private:

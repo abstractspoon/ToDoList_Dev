@@ -697,6 +697,11 @@ bool UIExtension::ParentNotify::NotifyDoHelp(String^ helpID)
 	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_DOHELP, 0, (LPARAM)(LPCWSTR)MS(helpID)));
 }
 
+bool UIExtension::ParentNotify::NotifyTasklistMetaData(String^ metaData)
+{
+	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_SETTASKLISTMETADATA, 0, (LPARAM)(LPCWSTR)MS(metaData)));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIExtension::TaskIcon::TaskIcon(IntPtr hwndParent) : m_hwndParent(NULL), m_hilTaskImages(NULL), m_iImage(-1)

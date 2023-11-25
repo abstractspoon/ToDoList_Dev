@@ -29,6 +29,9 @@ namespace EvidenceBoardUIExtension
         private TDLNodeControl m_Control;
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
 
+		private String m_LastBrowsedImageFolder;
+		static string s_ImageFilter;
+
 		private Label m_OptionsLabel;
 		private EvidenceBoardOptionsComboBox m_OptionsCombo;
 		private Label m_LinkVisibilityLabel;
@@ -51,7 +54,10 @@ namespace EvidenceBoardUIExtension
 			m_HwndParent = hwndParent;
             m_Trans = trans;
 
-            InitializeComponent();
+			if (s_ImageFilter == null)
+				s_ImageFilter = m_Trans.Translate("Image Files") + " (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
+
+			InitializeComponent();
         }
 
         // IUIExtension ------------------------------------------------------------------
@@ -242,6 +248,7 @@ namespace EvidenceBoardUIExtension
         public void SavePreferences(Preferences prefs, String key)
         {
 			prefs.WriteProfileInt(key, "Options", (int)m_Control.Options);
+			prefs.WriteProfileString(key, "LastBrowsedImageFolder", m_LastBrowsedImageFolder);
 
 			m_PrefsDlg.SavePreferences(prefs, key);
 			m_OptionsCombo.SavePreferences(prefs, key);
@@ -253,6 +260,8 @@ namespace EvidenceBoardUIExtension
         {
             if (!appOnly) // private settings
             {
+				m_LastBrowsedImageFolder = prefs.GetProfileString(key, "LastBrowsedImageFolder", @"C:\");
+
 				m_Control.LoadPreferences(prefs, key);
 				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
@@ -363,6 +372,14 @@ namespace EvidenceBoardUIExtension
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
+			m_Control.BackgroundImageChanged += (s, e) => 
+			{
+				var notify = new UIExtension.ParentNotify(m_HwndParent);
+				notify.NotifyTasklistMetaData(m_Control.EncodeBackgroundImageState());
+
+				UpdateToolbarButtonStates();
+			};
+
 			m_Control.DoubleClickUserLink += new EventHandler(OnEditUserLink);
 
 			this.Controls.Add(m_Control);
@@ -733,8 +750,8 @@ namespace EvidenceBoardUIExtension
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Checked = false;
 
-			(m_Toolbar.Items["SetBackgroundImage"] as ToolStripButton).Enabled = !m_Control.HasBackgroundImage;
-			(m_Toolbar.Items["ClearBackgroundImage"] as ToolStripButton).Enabled = m_Control.HasBackgroundImage;
+			(m_Toolbar.Items["SetBackgroundImage"] as ToolStripButton).Enabled = !m_Control.ReadOnly;
+			(m_Toolbar.Items["ClearBackgroundImage"] as ToolStripButton).Enabled = (!m_Control.ReadOnly && m_Control.HasBackgroundImage);
 		}
 
 		private void OnZoomToExtents(object sender, EventArgs e)
@@ -872,12 +889,32 @@ namespace EvidenceBoardUIExtension
 
 		private void OnSetBackgroundImage(object sender, EventArgs e)
 		{
-			// TODO
+			var dialog = new OpenFileDialog
+			{
+				InitialDirectory = m_LastBrowsedImageFolder,
+				Title = m_Trans.Translate("Select Background Image"),
+
+				AutoUpgradeEnabled = true,
+				CheckFileExists = true,
+				CheckPathExists = true,
+
+				Filter = s_ImageFilter,
+				FilterIndex = 0,
+				RestoreDirectory = true,
+
+				ShowReadOnly = false
+			};
+
+			if (dialog.ShowDialog() == DialogResult.OK)
+			{
+				m_LastBrowsedImageFolder = System.IO.Path.GetDirectoryName(dialog.FileName);
+				m_Control.SetBackgroundImage(dialog.FileName);
+			}
 		}
 
 		private void OnClearBackgroundImage(object sender, EventArgs e)
 		{
-			// TODO
+			m_Control.ClearBackgroundImage();
 		}
 
 	}

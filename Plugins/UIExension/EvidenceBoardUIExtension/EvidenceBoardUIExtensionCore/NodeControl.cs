@@ -36,7 +36,6 @@ namespace EvidenceBoardUIExtension
 		int m_PinRadius = 2;
 		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
 
-
 		public int PinRadius
 		{
 			get
@@ -72,6 +71,7 @@ namespace EvidenceBoardUIExtension
 		float m_FontScaleFactor = 1f;
 		Size m_NodeSize;
 		Font m_TextFont;
+
 		Color m_WallColor = SystemColors.ControlDark;
 		Color m_ParentConnectionColor = Color.Gray;
 
@@ -92,12 +92,18 @@ namespace EvidenceBoardUIExtension
 		DragMode m_DragMode = DragMode.None;
 		DragScroller m_DragScroll;
 
+		Image m_BackgroundImage;
+		string m_BackgroundImagePath = string.Empty;
+		Rectangle m_BackgroundImageRect = Rectangle.Empty;
+
 		private IContainer components = null;
 
 		// -------------------------------------------------------------------
 
 		public event NodeSelectionChangeEventHandler NodeSelectionChange;
 		public event NodeDragDropChangeEventHandler DragDropChange;
+
+		public new EventHandler BackgroundImageChanged;
 		public EventHandler ZoomChange;
 
 		// -------------------------------------------------------------------
@@ -143,6 +149,10 @@ namespace EvidenceBoardUIExtension
 			this.ResumeLayout(false);
 
 		}
+
+		public bool HasBackgroundImage { get { return (m_BackgroundImage != null); } }
+		public Rectangle BackgroundImageRect { get { return m_BackgroundImageRect; } }
+		public string BackgroundImagePath { get { return m_BackgroundImagePath; } }
 
 		public Size NodeSize
 		{
@@ -783,6 +793,12 @@ namespace EvidenceBoardUIExtension
 					e.Graphics.FillRectangle(brush, ClientRectangle);
 
 				e.Graphics.FillRectangle(SystemBrushes.Window, graphRect);
+			}
+
+			if (HasBackgroundImage)
+			{
+				var rect = GraphToClient(m_BackgroundImageRect);
+				e.Graphics.DrawImage(m_BackgroundImage, rect);
 			}
 
 			if (RootNode != null)
@@ -1436,14 +1452,58 @@ namespace EvidenceBoardUIExtension
 			m_PreDragNodePos = PointF.Empty;
 		}
 
-		// 		protected override void OnDragLeave(EventArgs e)
-		// 		{
-		// 			Debug.Assert(!ReadOnly);
-		// 
-		// 			base.OnDragLeave(e);
-		// 
-		// 			Invalidate();
-		// 		}
+		public bool SetBackgroundImage(string filePath)
+		{
+			return SetBackgroundImage(filePath, Rectangle.Empty, true);
+		}
+
+		protected bool SetBackgroundImage(string filePath, Rectangle rect, bool notify)
+		{
+			if (string.IsNullOrWhiteSpace(filePath))
+			{
+				ClearBackgroundImage();
+				return true;
+			}
+
+			if (filePath == m_BackgroundImagePath)
+				return true;
+
+			var image = Image.FromFile(filePath);
+
+			if (image == null)
+				return false;
+
+			m_BackgroundImage = image;
+			m_BackgroundImagePath = filePath;
+
+			if (rect == Rectangle.Empty)
+			{
+				rect = Extents;
+				rect.Inflate(-10, -10);
+			}
+
+			m_BackgroundImageRect = rect;
+
+			Invalidate();
+
+			if (notify)
+				BackgroundImageChanged?.Invoke(this, null);
+
+			return true;
+		}
+
+		public void ClearBackgroundImage()
+		{
+			if (m_BackgroundImage != null)
+			{
+				m_BackgroundImage = null;
+				m_BackgroundImagePath = string.Empty;
+				m_BackgroundImageRect = Rectangle.Empty;
+
+				Invalidate();
+				BackgroundImageChanged?.Invoke(this, null);
+			}
+		}
 
 	}
 

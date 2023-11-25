@@ -119,7 +119,6 @@ namespace EvidenceBoardUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 		private Color m_DependencyColor;
-		private Image m_BackgroundImage;
 
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
@@ -372,8 +371,6 @@ namespace EvidenceBoardUIExtension
 		public bool CanExpandAllTaskImages { get { return m_TaskItems.CanExpandAllTaskImages; } }
 		public bool CanCollapseAllTaskImages { get { return m_TaskItems.CanCollapseAllTaskImages; } }
 
-		public bool HasBackgroundImage { get { return (m_BackgroundImage != null); } }
-
 		public void SavePreferences(Preferences prefs, String key)
 		{
 			string ids = String.Empty;
@@ -454,8 +451,13 @@ namespace EvidenceBoardUIExtension
 				break;
 
 			case UIExtension.UpdateType.Delete:
+				UpdateTaskAttributes(tasks, true);
+				RecalcLayout();
+				break;
+
 			case UIExtension.UpdateType.All:
 				UpdateTaskAttributes(tasks, true);
+				UpdateBackgroundImage(tasks);
 				RecalcLayout();
 				break;
 
@@ -949,6 +951,17 @@ namespace EvidenceBoardUIExtension
 		}
 
 		// Internal ------------------------------------------------------------
+
+		private void UpdateBackgroundImage(TaskList tasks)
+		{
+			string filePath;
+			Rectangle rect;
+
+			if (DecodeBackgroundImageState(tasks.GetMetaData(TaskItem.MetaDataKey), out filePath, out rect))
+				SetBackgroundImage(filePath, rect, false);
+			else
+				ClearBackgroundImage();
+		}
 
 		private void UpdateTaskAttributes(TaskList tasks, bool rebuild)
 		{
@@ -2752,6 +2765,50 @@ namespace EvidenceBoardUIExtension
 
 			return tip;
 		}
+
+		public string EncodeBackgroundImageState()
+		{
+			if (!HasBackgroundImage)
+				return string.Empty;
+
+			return string.Format("{0}|{1},{2},{3},{4}", 
+								BackgroundImagePath, 
+								BackgroundImageRect.Left, 
+								BackgroundImageRect.Top, 
+								BackgroundImageRect.Right, 
+								BackgroundImageRect.Bottom);
+		}
+
+		static private bool DecodeBackgroundImageState(string metaData, out string filePath, out Rectangle rect)
+		{
+			filePath = string.Empty;
+			rect = Rectangle.Empty;
+
+			var parts = metaData.Split('|');
+
+			if (parts.Count() >= 2)
+			{
+				var dims = parts[1].Split(',');
+
+				if (dims.Count() != 4)
+					return false;
+
+				rect = Rectangle.FromLTRB(int.Parse(dims[0]),
+										int.Parse(dims[1]),
+										int.Parse(dims[2]),
+										int.Parse(dims[3]));
+				filePath = parts[0];
+			}
+
+			/*
+			if (parts.Count() >= 3)
+			{
+			}  
+			*/
+
+			return true;
+		}
+
 	}
 
 }
