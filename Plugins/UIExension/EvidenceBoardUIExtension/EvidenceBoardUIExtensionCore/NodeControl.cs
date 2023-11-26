@@ -26,14 +26,10 @@ namespace EvidenceBoardUIExtension
 		Node,
 		SelectionBox,
 
-		BkgndImageLeft,
-		BkgndImageTop,
-		BkgndImageRight,
-		BkgndImageBottom,
-		BkgndImageTopLeft,
-		BkgndImageTopRight,
-		BkgndImageBottomLeft,
-		BkgndImageBottomRight,
+		BackgroundLeft,
+		BackgroundTop,
+		BackgroundRight,
+		BackgroundBottom,
 	}
 
 	// -------------------------------------------------------------------
@@ -1083,6 +1079,14 @@ namespace EvidenceBoardUIExtension
 			base.OnMouseUp(e);
 		}
 
+		private DragMode HitTestEdges(Point ptClient)
+		{
+			var ptGraph = ClientToGraph(ptClient);
+			int hitWidth = (int)(SystemInformation.DoubleClickSize.Width / OverallScaleFactor);
+
+			return m_BackgroundImage.HitTestEdges(ptGraph, hitWidth);
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
@@ -1091,11 +1095,22 @@ namespace EvidenceBoardUIExtension
 
 			if (node == null)
 			{
-				// Start a selection box drag
-				m_DragMode = DragMode.SelectionBox;
+				var edge = HitTestEdges(e.Location);
 
-				m_DragTimer.Tag = e;
-				m_DragTimer.Start();
+				if (edge != DragMode.None)
+				{
+					m_DragMode = edge;
+
+					m_DragTimer.Tag = e;
+					m_DragTimer.Start();
+				}
+				else // Start a selection box drag
+				{
+					m_DragMode = DragMode.SelectionBox;
+
+					m_DragTimer.Tag = e;
+					m_DragTimer.Start();
+				}
 			}
 			else if (IsSelectableNode(node))
 			{
@@ -1185,9 +1200,28 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		protected virtual Cursor GetCursor(MouseEventArgs e)
+		{
+			switch (HitTestEdges(e.Location))
+			{
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+				return Cursors.SizeWE;
+
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				return Cursors.SizeNS;
+			}
+
+			return null;
+		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
+
+			var cursor = GetCursor(e);
+			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
 
 			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
 			{

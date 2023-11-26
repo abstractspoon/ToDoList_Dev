@@ -2395,10 +2395,8 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		protected override void OnMouseMove(MouseEventArgs e)
+		protected override Cursor GetCursor(MouseEventArgs e)
 		{
- 			base.OnMouseMove(e);
-
 			Cursor cursor = null;
 
 			if (!ReadOnly)
@@ -2437,7 +2435,7 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 
-			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
+			return ((cursor != null) ? cursor : base.GetCursor(e));
 		}
 
 		protected override void OnDragOver(DragEventArgs e)
