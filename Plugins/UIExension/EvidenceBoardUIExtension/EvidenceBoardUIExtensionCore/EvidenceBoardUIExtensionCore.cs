@@ -908,6 +908,7 @@ namespace EvidenceBoardUIExtension
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
 				m_LastBrowsedImageFolder = System.IO.Path.GetDirectoryName(dialog.FileName);
+
 				m_Control.SetBackgroundImage(dialog.FileName);
 			}
 		}

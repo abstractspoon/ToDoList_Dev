@@ -2766,17 +2766,29 @@ namespace EvidenceBoardUIExtension
 			return tip;
 		}
 
+
+		public bool SetBackgroundImage(string filePath)
+		{
+			if (!SetBackgroundImage(filePath, Rectangle.Empty, false))
+				return false;
+
+			BackgroundImage.ResizeToFit(Rectangle.Inflate(Extents, -10, -10));
+			BackgroundImageChanged?.Invoke(this, null);
+
+			return true;
+		}
+
 		public string EncodeBackgroundImageState()
 		{
 			if (!HasBackgroundImage)
 				return string.Empty;
 
 			return string.Format("{0}|{1},{2},{3},{4}", 
-								BackgroundImagePath, 
-								BackgroundImageRect.Left, 
-								BackgroundImageRect.Top, 
-								BackgroundImageRect.Right, 
-								BackgroundImageRect.Bottom);
+								BackgroundImage.FilePath, 
+								BackgroundImage.Bounds.Left, 
+								BackgroundImage.Bounds.Top, 
+								BackgroundImage.Bounds.Right, 
+								BackgroundImage.Bounds.Bottom);
 		}
 
 		static private bool DecodeBackgroundImageState(string metaData, out string filePath, out Rectangle rect)

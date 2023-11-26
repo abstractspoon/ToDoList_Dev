@@ -101,9 +101,7 @@ namespace EvidenceBoardUIExtension
 		DragMode m_DragMode = DragMode.None;
 		DragScroller m_DragScroll;
 
-		Image m_BackgroundImage;
-		string m_BackgroundImagePath = string.Empty;
-		Rectangle m_BackgroundImageRect = Rectangle.Empty;
+		NodeControlBackgroundImage m_BackgroundImage = new NodeControlBackgroundImage();
 
 		private IContainer components = null;
 
@@ -159,9 +157,8 @@ namespace EvidenceBoardUIExtension
 
 		}
 
-		public bool HasBackgroundImage { get { return (m_BackgroundImage != null); } }
-		public Rectangle BackgroundImageRect { get { return m_BackgroundImageRect; } }
-		public string BackgroundImagePath { get { return m_BackgroundImagePath; } }
+		public bool HasBackgroundImage { get { return (m_BackgroundImage?.HasImage == true); } }
+		public new NodeControlBackgroundImage BackgroundImage { get { return m_BackgroundImage; } }
 
 		public Size NodeSize
 		{
@@ -806,8 +803,8 @@ namespace EvidenceBoardUIExtension
 
 			if (HasBackgroundImage)
 			{
-				var rect = GraphToClient(m_BackgroundImageRect);
-				e.Graphics.DrawImage(m_BackgroundImage, rect);
+				var rect = GraphToClient(m_BackgroundImage.Bounds);
+				e.Graphics.DrawImage(m_BackgroundImage.Image, rect);
 			}
 
 			if (RootNode != null)
@@ -1458,37 +1455,10 @@ namespace EvidenceBoardUIExtension
 			m_PreDragNodePos = PointF.Empty;
 		}
 
-		public bool SetBackgroundImage(string filePath)
-		{
-			return SetBackgroundImage(filePath, Rectangle.Empty, true);
-		}
-
 		protected bool SetBackgroundImage(string filePath, Rectangle rect, bool notify)
 		{
-			if (string.IsNullOrWhiteSpace(filePath))
-			{
-				ClearBackgroundImage();
-				return true;
-			}
-
-			if (filePath == m_BackgroundImagePath)
-				return true;
-
-			var image = Image.FromFile(filePath);
-
-			if (image == null)
+			if (!m_BackgroundImage.Set(filePath, rect))
 				return false;
-
-			m_BackgroundImage = image;
-			m_BackgroundImagePath = filePath;
-
-			if (rect == Rectangle.Empty)
-			{
-				rect = Extents;
-				rect.Inflate(-10, -10);
-			}
-
-			m_BackgroundImageRect = rect;
 
 			Invalidate();
 
@@ -1500,12 +1470,8 @@ namespace EvidenceBoardUIExtension
 
 		public void ClearBackgroundImage()
 		{
-			if (m_BackgroundImage != null)
+			if (m_BackgroundImage.Clear())
 			{
-				m_BackgroundImage = null;
-				m_BackgroundImagePath = string.Empty;
-				m_BackgroundImageRect = Rectangle.Empty;
-
 				Invalidate();
 				BackgroundImageChanged?.Invoke(this, null);
 			}

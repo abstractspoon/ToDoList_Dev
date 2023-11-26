@@ -9,6 +9,11 @@ namespace EvidenceBoardUIExtension
 {
 	public class Geometry2D
 	{
+		public static float GetAspectRatio(Size size)
+		{
+			return ((float)size.Width / (float)size.Height);
+		}
+
 		public static PointF NormalizeVector(Point vector)
 		{
 			var length = Distance(Point.Empty, vector);
@@ -37,9 +42,11 @@ namespace EvidenceBoardUIExtension
 			return true;
 		}
 
-		public static Rectangle GetCentredRect(Point pos, int sideLength)
+		public static Rectangle GetCentredRect(Point pos, int width, float aspectRatio = 1f)
 		{
-			return new Rectangle((pos.X - (sideLength / 2)), (pos.Y - (sideLength / 2)), sideLength, sideLength);
+			int height = (int)(width / aspectRatio);
+
+			return new Rectangle((pos.X - (width / 2)), (pos.Y - (height / 2)), width, height);
 		}
 
 		public enum AngleAxis
