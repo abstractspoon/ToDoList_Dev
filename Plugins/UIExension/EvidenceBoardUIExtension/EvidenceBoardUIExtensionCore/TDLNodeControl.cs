@@ -2773,6 +2773,8 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			BackgroundImage.ResizeToFit(Rectangle.Inflate(Extents, -10, -10));
+			ZoomToExtents();
+
 			BackgroundImageChanged?.Invoke(this, null);
 
 			return true;
