@@ -26,6 +26,7 @@ namespace EvidenceBoardUIExtension
 		Node,
 		SelectionBox,
 
+		Background,
 		BackgroundLeft,
 		BackgroundTop,
 		BackgroundRight,
@@ -1079,12 +1080,12 @@ namespace EvidenceBoardUIExtension
 			base.OnMouseUp(e);
 		}
 
-		private DragMode HitTestEdges(Point ptClient)
+		private DragMode HitTestBackgroundImageEdges(Point ptClient)
 		{
 			var ptGraph = ClientToGraph(ptClient);
 			int hitWidth = (int)(SystemInformation.DoubleClickSize.Width / OverallScaleFactor);
 
-			return m_BackgroundImage.HitTestEdges(ptGraph, hitWidth);
+			return m_BackgroundImage.HitTest(ptGraph, hitWidth);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
@@ -1095,7 +1096,7 @@ namespace EvidenceBoardUIExtension
 
 			if (node == null)
 			{
-				var edge = HitTestEdges(e.Location);
+				var edge = HitTestBackgroundImageEdges(e.Location);
 
 				if (edge != DragMode.None)
 				{
@@ -1202,16 +1203,8 @@ namespace EvidenceBoardUIExtension
 
 		protected virtual Cursor GetCursor(MouseEventArgs e)
 		{
-			switch (HitTestEdges(e.Location))
-			{
-			case DragMode.BackgroundLeft:
-			case DragMode.BackgroundRight:
-				return Cursors.SizeWE;
-
-			case DragMode.BackgroundTop:
-			case DragMode.BackgroundBottom:
-				return Cursors.SizeNS;
-			}
+			if (!ReadOnly)
+				return m_BackgroundImage.GetCursor(HitTestBackgroundImageEdges(e.Location));
 
 			return null;
 		}
@@ -1223,17 +1216,54 @@ namespace EvidenceBoardUIExtension
 			var cursor = GetCursor(e);
 			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
 
-			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
+			if (e.Button == MouseButtons.Left)
 			{
-				Debug.Assert(!ReadOnly);
-
-				object data = null;
-				DragDropEffects dde = DragDropEffects.None;
-
-				if (WantStartDragging(ref data, ref dde))
+				if (m_DragTimer.Enabled)
 				{
-					m_DragTimer.Stop();
-					DoDragDrop(data, dde);
+					Debug.Assert(!ReadOnly);
+
+					object data = null;
+					DragDropEffects dde = DragDropEffects.None;
+
+					if (WantStartDragging(ref data, ref dde))
+					{
+						m_DragTimer.Stop();
+
+						switch (m_DragMode)
+						{
+						case DragMode.BackgroundLeft:
+						case DragMode.BackgroundRight:
+						case DragMode.BackgroundTop:
+						case DragMode.BackgroundBottom:
+							Capture = true;
+							break;
+
+						case DragMode.SelectionBox:
+						case DragMode.Node:
+							DoDragDrop(data, dde);
+							break;
+						}
+					}
+				}
+				else
+				{
+					bool moved = false;
+
+					switch (m_DragMode)
+					{
+					case DragMode.BackgroundLeft:
+					case DragMode.BackgroundRight:
+						moved = m_BackgroundImage.Resize(m_DragMode, ClientToGraph(e.Location).X);
+						break;
+
+					case DragMode.BackgroundTop:
+					case DragMode.BackgroundBottom:
+						moved = m_BackgroundImage.Resize(m_DragMode, ClientToGraph(e.Location).Y);
+						break;
+					}
+
+					if (moved)
+						Invalidate();
 				}
 			}
 		}
@@ -1246,8 +1276,8 @@ namespace EvidenceBoardUIExtension
 			if (!MouseButtons.HasFlag(MouseButtons.Left))
 				return false;
 
-			if (RootNode.Children.Count == 0)
-				return false;
+// 			if (RootNode.Children.Count == 0)
+// 				return false;
 
 			// Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
@@ -1257,6 +1287,13 @@ namespace EvidenceBoardUIExtension
 
 			switch (m_DragMode)
 			{
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				Debug.Assert(!ReadOnly);
+				return true;
+
 			case DragMode.SelectionBox:
 				// Selection box is always in 'absolute' client coords
 				// to handle auto drag scrolling
@@ -1299,7 +1336,26 @@ namespace EvidenceBoardUIExtension
 			DragDropEffects dde = DragDropEffects.None;
 
 			if (WantStartDragging(ref data, ref dde))
-				DoDragDrop(data, dde);
+			{
+				switch (m_DragMode)
+				{
+				case DragMode.BackgroundLeft:
+				case DragMode.BackgroundRight:
+				case DragMode.BackgroundTop:
+				case DragMode.BackgroundBottom:
+					Capture = true;
+					break;
+
+				case DragMode.SelectionBox:
+				case DragMode.Node:
+					DoDragDrop(data, dde);
+					break;
+				}
+			}
+			else
+			{
+				m_DragMode = DragMode.None;
+			}
 		}
 
 		protected Point GraphToClient(Point ptGraph)
