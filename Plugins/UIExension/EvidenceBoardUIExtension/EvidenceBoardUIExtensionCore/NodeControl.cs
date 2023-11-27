@@ -1094,9 +1094,6 @@ namespace EvidenceBoardUIExtension
 				break;
 			}
 
-			m_DragTimer.Stop();
-			m_DragMode = DragMode.None;
-
 			base.OnMouseUp(e);
 		}
 
@@ -1104,6 +1101,7 @@ namespace EvidenceBoardUIExtension
 		{
 			if (Capture == false)
 			{
+				// Cancel image drag
 				switch (m_DragMode)
 				{
 				case DragMode.Background:
