@@ -221,7 +221,7 @@ namespace EvidenceBoardUIExtension
 					return;
 				}
 
-				if ((parts.Count() == 2) && !string.IsNullOrWhiteSpace(parts[1]))
+				if ((parts.Count() >= 2) && !string.IsNullOrWhiteSpace(parts[1]))
 				{
 					string[] linkDatas = parts[1].Split(',');
 
@@ -236,7 +236,7 @@ namespace EvidenceBoardUIExtension
 					}
 				}
 
-				if (parts.Count() == 3)
+				if (parts.Count() >= 3)
 				{
 					m_ActiveImagePath = parts[2];
 				}

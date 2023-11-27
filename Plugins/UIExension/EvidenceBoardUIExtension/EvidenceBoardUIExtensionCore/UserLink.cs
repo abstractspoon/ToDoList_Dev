@@ -137,6 +137,23 @@ namespace EvidenceBoardUIExtension
 
 			FromId = fromId;
 			ToId = toId;
+			RelativeImageCoords = PointF.Empty;
+
+			if (attrib != null)
+				Attributes.Copy(attrib);
+		}
+
+		public UserLink(uint fromId, PointF relativeImageCoords, UserLinkAttributes attrib)
+		{
+			Debug.Assert((fromId != 0) && 
+						(relativeImageCoords.X >= 0) &&
+						(relativeImageCoords.X <= 1) &&
+						(relativeImageCoords.Y >= 0) &&
+						(relativeImageCoords.Y <= 1));
+
+			FromId = fromId;
+			ToId = 0;
+			RelativeImageCoords = relativeImageCoords;
 
 			if (attrib != null)
 				Attributes.Copy(attrib);
@@ -144,15 +161,21 @@ namespace EvidenceBoardUIExtension
 
 		public uint FromId { get; private set; } = 0;
 		public uint ToId { get; private set; } = 0;
+		public PointF RelativeImageCoords { get; private set; } = PointF.Empty;
 
 		public UserLinkAttributes Attributes { get; private set; } = new UserLinkAttributes();
 
 		public bool ChangeToId(uint toId)
 		{
 			if ((toId == 0) || (toId == FromId))
+			{
+				Debug.Assert(false);
 				return false;
+			}
 
 			ToId = toId;
+			RelativeImageCoords = PointF.Empty;
+
 			return true;
 		}
 
@@ -167,6 +190,23 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			return ((FromId == other.FromId) && (ToId == other.ToId));
+		}
+
+		public bool SetRelativeImageCoords(PointF relativeImageCoords)
+		{
+			if ((relativeImageCoords.X < 0) ||
+				(relativeImageCoords.X > 1) ||
+				(relativeImageCoords.Y < 0) ||
+				(relativeImageCoords.Y > 1))
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			RelativeImageCoords = relativeImageCoords;
+			ToId = 0;
+
+			return true;
 		}
 
 		public override string ToString()
@@ -189,11 +229,28 @@ namespace EvidenceBoardUIExtension
 			if (parts.Count() <= ArrowsIndex)
 				return false;
 
-			uint toId;
-			int argb, thickness, arrows;
+			uint toId = 0;
+			float relX = 0, relY = 0;
+			bool hasRelCoords = false;
+			int argb = 0, thickness = 0, arrows = 0;
 
-			if (!uint.TryParse(parts[IdIndex], out toId) ||
-				!int.TryParse(parts[ColorIndex], out argb) ||
+			if (!uint.TryParse(parts[IdIndex], out toId))
+			{
+				string[] coords = parts[IdIndex].Split(',');
+
+				if (coords.Count() != 2)
+					return false;
+
+				if (!float.TryParse(coords[0], out relX) ||
+					!float.TryParse(coords[1], out relY))
+				{
+					return false;
+				}
+
+				hasRelCoords = true;
+			}
+
+			if (!int.TryParse(parts[ColorIndex], out argb) ||
 				!int.TryParse(parts[ThicknessIndex], out thickness) ||
 				!int.TryParse(parts[ArrowsIndex], out arrows))
 			{
@@ -201,7 +258,10 @@ namespace EvidenceBoardUIExtension
 			}
 
 			// some validation
-			if ((toId <= 0) || (thickness < 0) || (arrows < 0) || (arrows >= 4))
+			if (!hasRelCoords && (toId == 0))
+				return false;
+
+			if ((thickness < 0) || (arrows < 0) || (arrows >= 4))
 				return false;
 
 			if (toId == taskId)
@@ -219,17 +279,28 @@ namespace EvidenceBoardUIExtension
 				Type = ((parts.Count() > TypeIndex) ? parts[TypeIndex].DecodeBase64() : string.Empty),
 			};
 
-			link = new UserLink(taskId, toId, attrib);
+			if (toId == 0)
+				link = new UserLink(taskId, new PointF(relX, relY), attrib);
+			else
+				link = new UserLink(taskId, toId, attrib);
+
 			return true;
 		}
 
 		public string Encode()
 		{
+			string target;
+
+			if (ToId != 0)
+				target = ToId.ToString();
+			else
+				target = string.Format("{0},{1}", RelativeImageCoords.X, RelativeImageCoords.Y);
+
 			return string.Format("{0}:{1}:{2}:{3}:{4}:{5}", 
-								ToId.ToString(), 
+								target, 
 								Attributes.Color.ToArgb(), 
-								Attributes.Thickness.ToString(), 
-								((int)Attributes.Arrows).ToString(),
+								Attributes.Thickness, 
+								(int)Attributes.Arrows,
 								Attributes.Label.EncodeBase64(),
 								Attributes.Type.EncodeBase64());
 		}
