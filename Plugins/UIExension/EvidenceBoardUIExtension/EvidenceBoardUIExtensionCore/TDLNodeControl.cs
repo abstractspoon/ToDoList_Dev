@@ -807,7 +807,7 @@ namespace EvidenceBoardUIExtension
 			if (base.SelectNode(taskId, notify, ensureVisible))
 				return true;
 
-			base.SelectNode(NodeControl.NullId, notify, false);
+			base.SelectNode(NullId, notify, false);
 			return false;
 		}
 
@@ -1470,7 +1470,7 @@ namespace EvidenceBoardUIExtension
 				return false;
 			}
 
-			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos, true);
+			return IsConnectionVisible(GetNode(link.FromId), link.Target.Id, out fromPos, out toPos, true);
 		}
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -1910,7 +1910,7 @@ namespace EvidenceBoardUIExtension
 					Point fromPos, toPos;
 					const double Tolerance = 5.0;
 
-					if (IsConnectionVisible(node, link.ToId, out fromPos, out toPos, true) && 
+					if (IsConnectionVisible(node, link.Target.Id, out fromPos, out toPos, true) && 
 						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, Tolerance))
 					{
 						return link;
@@ -2459,6 +2459,10 @@ namespace EvidenceBoardUIExtension
 						m_DropHighlightedTaskId = node.Data;
 						e.Effect = e.AllowedEffect;
 					}
+					else if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					{
+						e.Effect = e.AllowedEffect;
+					}
 				}
 				else if ((node != null) && !ReadOnly && !IsTaskLocked(node.Data))
 				{
@@ -2548,7 +2552,7 @@ namespace EvidenceBoardUIExtension
 			{
 				if (m_DropHighlightedTaskId != 0)
 				{
-					if (m_SelectedUserLink.ToId == NullId) // New link
+					if (m_SelectedUserLink.Target.Id == NullId) // New link
 					{
 						Debug.Assert(m_SelectedUserLink.FromId == SingleSelectedNode.Data);
 
@@ -2567,6 +2571,25 @@ namespace EvidenceBoardUIExtension
 						m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
 
 						ConnectionEdited?.Invoke(this, m_SelectedUserLink);
+					}
+				}
+				else
+				{
+					var ptClient = new Point(e.X, e.Y);
+
+					if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					{
+						// Convert to relative image coordinates
+						PointF ptGraph = ClientToGraph(ptClient);
+						var imageBounds = BackgroundImage.Bounds;
+
+						ptGraph.X -= imageBounds.X;
+						ptGraph.Y -= imageBounds.Y;
+
+						ptGraph.X /= imageBounds.Width;
+						ptGraph.Y /= imageBounds.Height;
+
+
 					}
 				}
 

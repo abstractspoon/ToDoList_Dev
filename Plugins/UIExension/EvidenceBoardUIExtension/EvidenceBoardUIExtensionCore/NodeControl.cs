@@ -1122,7 +1122,7 @@ namespace EvidenceBoardUIExtension
 			base.OnMouseCaptureChanged(e);
 		}
 
-		private DragMode HitTestBackgroundImage(Point ptClient)
+		protected DragMode HitTestBackgroundImage(Point ptClient)
 		{
 			var ptGraph = ClientToGraph(ptClient);
 			int hitWidth = (int)(SystemInformation.DoubleClickSize.Width / OverallScaleFactor);

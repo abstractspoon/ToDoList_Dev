@@ -250,7 +250,7 @@ namespace EvidenceBoardUIExtension
 
 		public UserLink FindUserLink(uint toId)
 		{
-			return m_UserLinks?.Find(x => (x.ToId == toId));
+			return m_UserLinks?.Find(x => (x.Target.Id == toId));
 		}
 
 		public bool HasUserLink(uint toId)
@@ -273,7 +273,7 @@ namespace EvidenceBoardUIExtension
 			if (m_UserLinks.Remove(link))
 				return true;
 
-			Debug.Assert(FindUserLink(link.ToId) == null);
+			Debug.Assert(FindUserLink(link.Target.Id) == null);
 			return false;
 		}
 
@@ -283,6 +283,14 @@ namespace EvidenceBoardUIExtension
 				return null;
 
 			var newLink = new UserLink(TaskId, toId, attrib);
+			m_UserLinks.Add(newLink);
+
+			return newLink;
+		}
+
+		public UserLink AddUserLink(PointF relativeImageCoords, UserLinkAttributes attrib)
+		{
+			var newLink = new UserLink(TaskId, relativeImageCoords, attrib);
 			m_UserLinks.Add(newLink);
 
 			return newLink;
@@ -528,7 +536,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool HasUserLink(UserLink link)
 		{
-			return ((link != null) && (FindUserLink(link.FromId, link.ToId) != null));
+			return ((link != null) && (FindUserLink(link.FromId, link.Target.Id) != null));
 		}
 
 		public bool HasUserLink(uint id)
