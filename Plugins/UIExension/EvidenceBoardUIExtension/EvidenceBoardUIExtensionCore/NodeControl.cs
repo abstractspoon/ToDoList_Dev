@@ -1080,7 +1080,7 @@ namespace EvidenceBoardUIExtension
 			base.OnMouseUp(e);
 		}
 
-		private DragMode HitTestBackgroundImageEdges(Point ptClient)
+		private DragMode HitTestBackgroundImage(Point ptClient)
 		{
 			var ptGraph = ClientToGraph(ptClient);
 			int hitWidth = (int)(SystemInformation.DoubleClickSize.Width / OverallScaleFactor);
@@ -1096,14 +1096,20 @@ namespace EvidenceBoardUIExtension
 
 			if (node == null)
 			{
-				var edge = HitTestBackgroundImageEdges(e.Location);
+				var imageHit = HitTestBackgroundImage(e.Location);
 
-				if (edge != DragMode.None)
+				if (imageHit != DragMode.None)
 				{
-					m_DragMode = edge;
+					m_DragMode = imageHit;
 
 					m_DragTimer.Tag = e;
 					m_DragTimer.Start();
+
+					if (imageHit == DragMode.Background)
+					{
+						m_DragOffset = GraphToClient(Geometry2D.Centroid(m_BackgroundImage.Bounds));
+						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
+					}
 				}
 				else // Start a selection box drag
 				{
@@ -1204,7 +1210,7 @@ namespace EvidenceBoardUIExtension
 		protected virtual Cursor GetCursor(MouseEventArgs e)
 		{
 			if (!ReadOnly)
-				return m_BackgroundImage.GetCursor(HitTestBackgroundImageEdges(e.Location));
+				return m_BackgroundImage.GetCursor(HitTestBackgroundImage(e.Location));
 
 			return null;
 		}
@@ -1231,6 +1237,7 @@ namespace EvidenceBoardUIExtension
 
 						switch (m_DragMode)
 						{
+						case DragMode.Background:
 						case DragMode.BackgroundLeft:
 						case DragMode.BackgroundRight:
 						case DragMode.BackgroundTop:
@@ -1255,6 +1262,12 @@ namespace EvidenceBoardUIExtension
 					switch (m_DragMode)
 					{
 					case DragMode.Background:
+						{
+							var dragPt = e.Location;
+							dragPt.Offset(m_DragOffset);
+
+							moved = m_BackgroundImage.Reposition(ClientToGraph(dragPt));
+						}
 						break;
 
 					case DragMode.BackgroundLeft:
@@ -1275,7 +1288,10 @@ namespace EvidenceBoardUIExtension
 					}
 
 					if (moved)
+					{
+						BackgroundImageChanged?.Invoke(this, null);
 						Invalidate();
+					}
 				}
 			}
 		}
@@ -1287,9 +1303,6 @@ namespace EvidenceBoardUIExtension
 
 			if (!MouseButtons.HasFlag(MouseButtons.Left))
 				return false;
-
-// 			if (RootNode.Children.Count == 0)
-// 				return false;
 
 			// Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
@@ -1352,6 +1365,7 @@ namespace EvidenceBoardUIExtension
 			{
 				switch (m_DragMode)
 				{
+				case DragMode.Background:
 				case DragMode.BackgroundLeft:
 				case DragMode.BackgroundRight:
 				case DragMode.BackgroundTop:

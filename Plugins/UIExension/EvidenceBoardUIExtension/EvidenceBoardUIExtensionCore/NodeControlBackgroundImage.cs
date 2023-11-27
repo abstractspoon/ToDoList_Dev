@@ -71,53 +71,56 @@ namespace EvidenceBoardUIExtension
 
 		public void ResizeToFit(Rectangle extents)
 		{
-			Rectangle rect = Rectangle.Empty;
-
 			if (HasImage)
 			{
 				var size = CalcSizeToFit(extents.Size);
-				rect = Geometry2D.GetCentredRect(Geometry2D.Centroid(extents), size.Width, size.Height);
+				Bounds = Geometry2D.GetCentredRect(Geometry2D.Centroid(extents), size.Width, size.Height);
 			}
-
-			Bounds = rect;
+			else
+			{
+				Bounds = Rectangle.Empty;
+			}
 		}
 		
 		public DragMode HitTest(Point point, int edgeWidth)
 		{
-			var outerRect = Rectangle.Inflate(Bounds, (edgeWidth / 2), (edgeWidth / 2));
-
-			if (!outerRect.Contains(point))
-				return DragMode.None;
-
-			var innerRect = Rectangle.Inflate(Bounds, -(edgeWidth / 2), -edgeWidth / 2);
-
-			if (innerRect.Contains(point))
-				return DragMode.Background;
-
-			if ((point.Y > innerRect.Top) && (point.Y < innerRect.Bottom))
+			if (HasImage)
 			{
-				if (point.X <= innerRect.Left)
-					return DragMode.BackgroundLeft;
+				var outerRect = Rectangle.Inflate(Bounds, (edgeWidth / 2), (edgeWidth / 2));
 
-				// else
-				return DragMode.BackgroundRight;
-			}
-			else if ((point.X > innerRect.Left) && (point.X < innerRect.Right))
-			{
-				if (point.Y <= innerRect.Top)
-					return DragMode.BackgroundTop;
+				if (!outerRect.Contains(point))
+					return DragMode.None;
 
-				// else
-				return DragMode.BackgroundBottom;
+				var innerRect = Rectangle.Inflate(Bounds, -(edgeWidth / 2), -edgeWidth / 2);
+
+				if (innerRect.Contains(point))
+					return DragMode.Background;
+
+				if ((point.Y > innerRect.Top) && (point.Y < innerRect.Bottom))
+				{
+					if (point.X <= innerRect.Left)
+						return DragMode.BackgroundLeft;
+
+					// else
+					return DragMode.BackgroundRight;
+				}
+				else if ((point.X > innerRect.Left) && (point.X < innerRect.Right))
+				{
+					if (point.Y <= innerRect.Top)
+						return DragMode.BackgroundTop;
+
+					// else
+					return DragMode.BackgroundBottom;
+				}
 			}
 
 			// else
 			return DragMode.None;
 		}
 
-		public bool SetPosition(Point newCentre)
+		public bool Reposition(Point newCentre)
 		{
-			if (HasImage)
+			if (!HasImage)
 				return false;
 
 			var centre = Geometry2D.Centroid(Bounds);
