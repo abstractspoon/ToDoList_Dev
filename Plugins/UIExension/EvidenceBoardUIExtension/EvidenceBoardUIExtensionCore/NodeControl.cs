@@ -1249,16 +1249,28 @@ namespace EvidenceBoardUIExtension
 				{
 					bool moved = false;
 
+					var ptGraph = ClientToGraph(e.Location);
+					var minSize = new Size(100, 100).Divide(OverallScaleFactor);
+
 					switch (m_DragMode)
 					{
+					case DragMode.Background:
+						break;
+
 					case DragMode.BackgroundLeft:
+						moved = m_BackgroundImage.InflateWidth((-ptGraph.X + BackgroundImage.Bounds.Left), minSize);
+						break;
+
 					case DragMode.BackgroundRight:
-						moved = m_BackgroundImage.Resize(m_DragMode, ClientToGraph(e.Location).X);
+						moved = m_BackgroundImage.InflateWidth((ptGraph.X - BackgroundImage.Bounds.Right), minSize);
 						break;
 
 					case DragMode.BackgroundTop:
+						moved = m_BackgroundImage.InflateHeight((-ptGraph.Y + BackgroundImage.Bounds.Top), minSize);
+						break;
+
 					case DragMode.BackgroundBottom:
-						moved = m_BackgroundImage.Resize(m_DragMode, ClientToGraph(e.Location).Y);
+						moved = m_BackgroundImage.InflateHeight((ptGraph.Y - BackgroundImage.Bounds.Bottom), minSize);
 						break;
 					}
 
@@ -1287,6 +1299,7 @@ namespace EvidenceBoardUIExtension
 
 			switch (m_DragMode)
 			{
+			case DragMode.Background:
 			case DragMode.BackgroundLeft:
 			case DragMode.BackgroundRight:
 			case DragMode.BackgroundTop:
@@ -1381,7 +1394,7 @@ namespace EvidenceBoardUIExtension
 		protected Rectangle GraphToClient(Rectangle rectGraph)
 		{
 			var ptClient = GraphToClient(rectGraph.Location);
-			var sizeClient = rectGraph.Multiply(OverallScaleFactor).Size;
+			var sizeClient = rectGraph.Size.Multiply(OverallScaleFactor);
 
 			return new Rectangle(ptClient, sizeClient);
 		}

@@ -50,24 +50,33 @@ namespace EvidenceBoardUIExtension
 
 		private float AspectRatio { get { return Geometry2D.GetAspectRatio(Image.Size); } }
 
+		public Size CalcSizeToFit(Size size)
+		{
+			if (!HasImage)
+				return Size.Empty;
+
+			float imageAspect = AspectRatio;
+			float extentAspect = Geometry2D.GetAspectRatio(size);
+
+			int newWidth = size.Width;
+
+			if (imageAspect < extentAspect)
+			{
+				// Extents height is the limiting factor
+				newWidth = (int)(size.Height * imageAspect);
+			}
+
+			return new Size(newWidth, (int)(newWidth / imageAspect));
+		}
+
 		public void ResizeToFit(Rectangle extents)
 		{
 			Rectangle rect = Rectangle.Empty;
 
 			if (HasImage)
 			{
-				float imageAspect = AspectRatio;
-				float extentAspect = Geometry2D.GetAspectRatio(extents.Size);
-
-				int newWidth = extents.Width;
-
-				if (imageAspect < extentAspect)
-				{
-					// Extents height is the limiting factor
-					newWidth = (int)(extents.Height * imageAspect);
-				}
-
-				rect = Geometry2D.GetCentredRect(Geometry2D.Centroid(extents), newWidth, imageAspect);
+				var size = CalcSizeToFit(extents.Size);
+				rect = Geometry2D.GetCentredRect(Geometry2D.Centroid(extents), size.Width, size.Height);
 			}
 
 			Bounds = rect;
@@ -106,60 +115,55 @@ namespace EvidenceBoardUIExtension
 			return DragMode.None;
 		}
 
-		public bool Resize(DragMode edge, int newValue)
+		public bool SetPosition(Point newCentre)
 		{
-			var bounds = Bounds;
-
-			switch (edge)
-			{
-			case DragMode.BackgroundLeft:
-				bounds.Width += (bounds.Left - newValue);
-				bounds.X = newValue;
-				break;
-
-			case DragMode.BackgroundRight:
-				bounds.Width -= (bounds.Right - newValue);
-				break;
-
-			case DragMode.BackgroundTop:
-				bounds.Height += (bounds.Top - newValue);
-				bounds.Y = newValue;
-				break;
-
-			case DragMode.BackgroundBottom:
-				bounds.Height -= (bounds.Bottom - newValue);
-				break;
-
-			default:
-				return false;
-			}
-
-			if (bounds.Equals(Bounds))
+			if (HasImage)
 				return false;
 
-			// Preserve aspect ratio
-			float imageAspect = AspectRatio;
+			var centre = Geometry2D.Centroid(Bounds);
 
-			if (bounds.Width != Bounds.Width)
-			{
-				// Recalculate height
-				int newHeight = (int)(bounds.Width / imageAspect);
-				int diff = (bounds.Height - newHeight);
+			if (newCentre == centre)
+				return false;
 
-				bounds.Y += (diff / 2);
-				bounds.Height -= diff;
-			}
-			else // height changed
-			{
-				// Recalculate width
-				int newWidth = (int)(bounds.Height * imageAspect);
-				int diff = (bounds.Width - newWidth);
+			Bounds = Geometry2D.GetCentredRect(newCentre, Bounds.Width, Bounds.Height);
+			return true;
+		}
 
-				bounds.X += (diff / 2);
-				bounds.Width -= diff;
-			}
+		public bool InflateWidth(int amount, Size minSize)
+		{
+			if (!HasImage || (minSize.Width <= 0))
+				return false;
 
-			Bounds = bounds;
+			if ((Bounds.Width + amount) < minSize.Width)
+				amount = (minSize.Width - Bounds.Width);
+
+			if (amount == 0)
+				return false;
+
+			// Calc new width and height preserving aspect ratio
+			int newWidth = (Bounds.Width + amount);
+			int newHeight = (int)(newWidth / AspectRatio);
+
+			Bounds = Geometry2D.GetCentredRect(Geometry2D.Centroid(Bounds), newWidth, newHeight);
+			return true;
+		}
+
+		public bool InflateHeight(int amount, Size minSize)
+		{
+			if (!HasImage || (minSize.Height <= 0))
+				return false;
+
+			if (amount < 0)
+				amount = Math.Max(minSize.Height, (Bounds.Height + amount)) - Bounds.Height;
+
+			if (amount == 0)
+				return false;
+
+			// Calc new width and height preserving aspect ratio
+			int newHeight = (Bounds.Height + amount);
+			int newWidth = (int)(newHeight * AspectRatio);
+
+			Bounds = Geometry2D.GetCentredRect(Geometry2D.Centroid(Bounds), newWidth, newHeight);
 			return true;
 		}
 

@@ -44,8 +44,11 @@ namespace EvidenceBoardUIExtension
 
 		public static Rectangle GetCentredRect(Point pos, int width, float aspectRatio = 1f)
 		{
-			int height = (int)(width / aspectRatio);
+			return GetCentredRect(pos, width, (int)(width / aspectRatio));
+		}
 
+		public static Rectangle GetCentredRect(Point pos, int width, int height)
+		{
 			return new Rectangle((pos.X - (width / 2)), (pos.Y - (height / 2)), width, height);
 		}
 
