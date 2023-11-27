@@ -97,6 +97,7 @@ namespace EvidenceBoardUIExtension
 		PointF m_PreDragNodePos;
 		DragMode m_DragMode = DragMode.None;
 		DragScroller m_DragScroll;
+		Rectangle m_PreDragBackgroundImageBounds = Rectangle.Empty;
 
 		NodeControlBackgroundImage m_BackgroundImage = new NodeControlBackgroundImage();
 
@@ -1074,10 +1075,53 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
+			switch (m_DragMode)
+			{
+			case DragMode.Background:
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				{
+					m_DragTimer.Stop();
+					m_DragMode = DragMode.None;
+
+					Capture = false;
+
+					if (m_BackgroundImage.Bounds != m_PreDragBackgroundImageBounds)
+						BackgroundImageChanged?.Invoke(this, null);
+				}
+				break;
+			}
+
 			m_DragTimer.Stop();
 			m_DragMode = DragMode.None;
 
 			base.OnMouseUp(e);
+		}
+
+		protected override void OnMouseCaptureChanged(EventArgs e)
+		{
+			if (Capture == false)
+			{
+				switch (m_DragMode)
+				{
+				case DragMode.Background:
+				case DragMode.BackgroundLeft:
+				case DragMode.BackgroundRight:
+				case DragMode.BackgroundTop:
+				case DragMode.BackgroundBottom:
+					{
+						m_DragTimer.Stop();
+						m_DragMode = DragMode.None;
+
+						m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds);
+					}
+					break;
+				}
+			}
+
+			base.OnMouseCaptureChanged(e);
 		}
 
 		private DragMode HitTestBackgroundImage(Point ptClient)
@@ -1104,6 +1148,8 @@ namespace EvidenceBoardUIExtension
 
 					m_DragTimer.Tag = e;
 					m_DragTimer.Start();
+
+					m_PreDragBackgroundImageBounds = m_BackgroundImage.Bounds;
 
 					if (imageHit == DragMode.Background)
 					{
@@ -1266,7 +1312,7 @@ namespace EvidenceBoardUIExtension
 							var dragPt = e.Location;
 							dragPt.Offset(m_DragOffset);
 
-							moved = m_BackgroundImage.Reposition(ClientToGraph(dragPt));
+							moved = m_BackgroundImage.SetReposition(ClientToGraph(dragPt));
 						}
 						break;
 
@@ -1288,12 +1334,32 @@ namespace EvidenceBoardUIExtension
 					}
 
 					if (moved)
-					{
-						BackgroundImageChanged?.Invoke(this, null);
 						Invalidate();
-					}
 				}
 			}
+		}
+
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+			switch (m_DragMode)
+			{
+			case DragMode.Background:
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				if (e.KeyCode == Keys.Escape)
+				{
+					m_DragTimer.Stop();
+					m_DragMode = DragMode.None;
+
+					if (m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds))
+						Invalidate();
+				}
+				break;
+			}
+
+			base.OnKeyDown(e);
 		}
 
 		private bool WantStartDragging(ref object data, ref DragDropEffects dde)

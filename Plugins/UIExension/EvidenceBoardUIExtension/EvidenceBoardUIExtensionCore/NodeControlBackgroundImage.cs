@@ -118,7 +118,7 @@ namespace EvidenceBoardUIExtension
 			return DragMode.None;
 		}
 
-		public bool Reposition(Point newCentre)
+		public bool SetReposition(Point newCentre)
 		{
 			if (!HasImage)
 				return false;
@@ -129,6 +129,21 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			Bounds = Geometry2D.GetCentredRect(newCentre, Bounds.Width, Bounds.Height);
+			return true;
+		}
+
+		public bool SetBounds(Rectangle bounds)
+		{
+			if (!HasImage)
+				return false;
+
+			if (bounds.Width <= 0 && bounds.Height <= 0)
+				return false;
+
+			if (bounds == Bounds)
+				return false;
+
+			Bounds = bounds;
 			return true;
 		}
 
