@@ -242,5 +242,48 @@ namespace EvidenceBoardUIExtension
 
 			return null;
 		}
+
+		public string Encode()
+		{
+			if (!HasImage)
+				return string.Empty;
+
+			return string.Format("{0}|{1},{2},{3},{4}",
+								FilePath,
+								Bounds.Left,
+								Bounds.Top,
+								Bounds.Right,
+								Bounds.Bottom);
+		}
+
+		static public bool TryParse(string metaData, out string filePath, out Rectangle rect)
+		{
+			filePath = string.Empty;
+			rect = Rectangle.Empty;
+
+			var parts = metaData.Split('|');
+
+			if (parts.Count() >= 2)
+			{
+				var dims = parts[1].Split(',');
+
+				if (dims.Count() != 4)
+					return false;
+
+				rect = Rectangle.FromLTRB(int.Parse(dims[0]),
+										int.Parse(dims[1]),
+										int.Parse(dims[2]),
+										int.Parse(dims[3]));
+				filePath = parts[0];
+			}
+
+			/*
+			if (parts.Count() >= 3)
+			{
+			}  
+			*/
+
+			return true;
+		}
 	}
 }
