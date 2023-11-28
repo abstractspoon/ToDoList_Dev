@@ -160,7 +160,7 @@ namespace EvidenceBoardUIExtension
 			return (!m_UsesId || (m_Id != fromId));
 		}
 
-		private static bool IsValid(PointF ptImage)
+		public static bool IsValid(PointF ptImage)
 		{
 			return ((ptImage.X >= 0) ||
 					(ptImage.X <= 1) ||

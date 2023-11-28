@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace EvidenceBoardUIExtension
 {
@@ -49,6 +50,44 @@ namespace EvidenceBoardUIExtension
 		}
 
 		private float AspectRatio { get { return Geometry2D.GetAspectRatio(Image.Size); } }
+
+		public Point RelativeToAbsolute(PointF ptRelative)
+		{
+			if (!UserLinkTarget.IsValid(ptRelative))
+			{
+				Debug.Assert(false);
+				return Point.Empty;
+			}
+
+			var ptAbsolute = ptRelative;
+
+			ptAbsolute.X *= Bounds.Width;
+			ptAbsolute.Y *= Bounds.Height;
+
+			ptAbsolute.X += Bounds.X;
+			ptAbsolute.Y += Bounds.Y;
+
+			return Point.Round(ptAbsolute);
+		}
+
+		public PointF AbsoluteToRelative(Point ptAbsolute)
+		{
+			if (!Bounds.Contains(ptAbsolute))
+			{
+				Debug.Assert(false);
+				return PointF.Empty;
+			}
+
+			PointF ptRelative = ptAbsolute;
+
+			ptRelative.X -= Bounds.X;
+			ptRelative.Y -= Bounds.Y;
+
+			ptRelative.X /= Bounds.Width;
+			ptRelative.Y /= Bounds.Height;
+
+			return ptRelative;
+		}
 
 		public Size CalcSizeToFit(Size size)
 		{

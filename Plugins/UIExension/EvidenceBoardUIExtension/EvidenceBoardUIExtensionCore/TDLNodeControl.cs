@@ -1435,7 +1435,7 @@ namespace EvidenceBoardUIExtension
 
 			if (!target.UsesId)
 			{
-				toPos = RelativeBackgroundImageCoordsToClient(target.RelativeImageCoords);
+				toPos = GraphToClient(BackgroundImage.RelativeToAbsolute(target.RelativeImageCoords));
 				return base.IsConnectionVisible(fromNode, toPos, out fromPos);
 			}
 			
@@ -2581,7 +2581,8 @@ namespace EvidenceBoardUIExtension
 
 					if (HitTestBackgroundImage(ptClient) == DragMode.Background)
 					{
-						target = new UserLinkTarget(ClientToRelativeBackgroundImageCoords(ptClient));
+						var ptImage = BackgroundImage.AbsoluteToRelative(ClientToGraph(ptClient));
+						target = new UserLinkTarget(ptImage);
 					}
 				}
 
@@ -2642,34 +2643,6 @@ namespace EvidenceBoardUIExtension
 			{
 				base.OnDragDrop(e);
 			}
-		}
-
-		private PointF ClientToRelativeBackgroundImageCoords(Point ptClient)
-		{
-			PointF ptImage = ClientToGraph(ptClient);
-			var imageBounds = BackgroundImage.Bounds;
-
-			ptImage.X -= imageBounds.X;
-			ptImage.Y -= imageBounds.Y;
-
-			ptImage.X /= imageBounds.Width;
-			ptImage.Y /= imageBounds.Height;
-
-			return ptImage;
-		}
-
-		private Point RelativeBackgroundImageCoordsToClient(PointF ptImage)
-		{
-			var ptGraph = ptImage;
-			var imageBounds = BackgroundImage.Bounds;
-
-			ptGraph.X *= imageBounds.Width;
-			ptGraph.Y *= imageBounds.Height;
-
-			ptGraph.X += imageBounds.X;
-			ptGraph.Y += imageBounds.Y;
-
-			return GraphToClient(Point.Round(ptGraph));
 		}
 
 		void ResetUserLinkDrag()
