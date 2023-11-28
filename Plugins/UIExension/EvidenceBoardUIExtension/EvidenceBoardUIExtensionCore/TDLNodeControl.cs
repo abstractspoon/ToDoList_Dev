@@ -1284,10 +1284,12 @@ namespace EvidenceBoardUIExtension
 			{
 				if (selected && m_DraggingSelectedUserLink)
 				{
-					var node = GetNode(link.FromId);
+					var fromNode = GetNode(link.FromId);
 
 					if (m_HotTaskId == link.FromId)
-						fromPos = GetCreateLinkPinPos(node);
+						fromPos = GetCreateLinkPinPos(fromNode);
+					else
+						IsConnectionVisible(fromNode, m_DraggedUserLinkEnd, out fromPos);
 
 					toPos = m_DraggedUserLinkEnd;
 				}
@@ -1431,52 +1433,50 @@ namespace EvidenceBoardUIExtension
 			if (!target.IsValid())
 				return false;
 
-			if (target.UsesId)
+			if (!target.UsesId)
 			{
-				var toNode = GetNode(target.Id);
+				toPos = RelativeBackgroundImageCoordsToClient(target.RelativeImageCoords);
+				return base.IsConnectionVisible(fromNode, toPos, out fromPos);
+			}
+			
+			// else using Id
+			var toNode = GetNode(target.Id);
 
-				if (!userLink)
-					return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+			if (!userLink)
+				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
 
-				if (DrawNodesOnTop)
+			if (DrawNodesOnTop)
+			{
+				// If the reverse link exists then we need to offset 'our' ends
+				if (UserLinkExists(target.Id, fromNode.Data))
 				{
-					// If the reverse link exists then we need to offset 'our' ends
-					if (UserLinkExists(target.Id, fromNode.Data))
-					{
-						// need to offset BEFORE clipping
-						fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
-						toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
+					// need to offset BEFORE clipping
+					fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+					toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
 
-						if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
-							return false;
+					if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
+						return false;
 
-						ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
+					ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
 
-						return base.IsConnectionVisible(fromPos, toPos);
-					}
-
-					// else
-					return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+					return base.IsConnectionVisible(fromPos, toPos);
 				}
 
 				// else
-				if (!base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
-					return false;
-
-				if (UserLinkExists(target.Id, fromNode.Data) && 
-					!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
-				{
-					return false;
-				}
-
-				return true;
+				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
 			}
 
 			// else
-			fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
-			toPos = RelativeBackgroundImageCoordsToClient(target.RelativeImageCoords);
+			if (!base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
+				return false;
 
-			return IsConnectionVisible(fromPos, toPos);
+			if (UserLinkExists(target.Id, fromNode.Data) &&
+				!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)

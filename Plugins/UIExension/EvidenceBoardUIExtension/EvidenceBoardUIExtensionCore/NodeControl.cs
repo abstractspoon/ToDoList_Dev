@@ -735,16 +735,32 @@ namespace EvidenceBoardUIExtension
 			return IsConnectionVisible(fromPos, toPos);
 		}
 
-		protected void ClipLineToNodeBounds(BaseNode fromNode, BaseNode toNode,
-											ref Point fromPos, ref Point toPos)
+		protected bool IsConnectionVisible(BaseNode fromNode, Point toPos, out Point fromPos)
 		{
-			// Intersect line segment with node rectangles
+			fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+
+			if (DrawNodesOnTop)
+				ClipLineToNodeBounds(fromNode, toPos, ref fromPos);
+
+			return IsConnectionVisible(fromPos, toPos);
+		}
+
+		protected void ClipLineToNodeBounds(BaseNode fromNode, Point toPos, ref Point fromPos)
+		{
 			Rectangle fromRect = GetNodeClientRect(fromNode);
 			Point[] fromIntersect;
 
 			if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, fromRect, out fromIntersect) > 0)
 				fromPos = fromIntersect[0];
+		}
 
+		protected void ClipLineToNodeBounds(BaseNode fromNode, BaseNode toNode,
+											ref Point fromPos, ref Point toPos)
+		{
+			// Intersect line segment with 'from' node rectangle
+			ClipLineToNodeBounds(fromNode, toPos, ref fromPos);
+
+			// Intersect line segment with 'to' node rectangle
 			Rectangle toRect = GetNodeClientRect(toNode);
 			Point[] toIntersect;
 
