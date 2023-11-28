@@ -699,6 +699,11 @@ namespace EvidenceBoardUIExtension
 		
 		public UserLink CreateUserLink(uint fromId, uint toId, UserLinkAttributes attrib)
 		{
+			return CreateUserLink(fromId, new UserLinkTarget(toId), attrib);
+		}
+		
+		public UserLink CreateUserLink(uint fromId, UserLinkTarget target, UserLinkAttributes attrib)
+		{
 			var fromTask = GetTaskItem(fromId);
 
 			if (fromTask != null)
@@ -710,7 +715,7 @@ namespace EvidenceBoardUIExtension
 					return null;
 				}
 
-				var newLink = fromTask.AddUserLink(toId, attrib);
+				var newLink = fromTask.AddUserLink(target, attrib);
 
 				if (newLink != null)
 				{
@@ -1223,7 +1228,7 @@ namespace EvidenceBoardUIExtension
 
 					// Don't draw a dependency which is overlaid by a user link
 					if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
-						IsConnectionVisible(node, dependId, out fromPos, out toPos, false))
+						IsConnectionVisible(node, new UserLinkTarget(dependId), out fromPos, out toPos, false))
 					{
 						using (var pen = new Pen(DependencyColor))
 						{
@@ -1419,45 +1424,59 @@ namespace EvidenceBoardUIExtension
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
-		protected bool IsConnectionVisible(BaseNode fromNode, uint toId, out Point fromPos, out Point toPos, bool userLink)
+		protected bool IsConnectionVisible(BaseNode fromNode, UserLinkTarget target, out Point fromPos, out Point toPos, bool userLink)
 		{
-			var toNode = GetNode(toId);
+			fromPos = toPos = Point.Empty;
 
-			if (!userLink)
-				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+			if (!target.IsValid())
+				return false;
 
-			if (DrawNodesOnTop)
+			if (target.UsesId)
 			{
-				// If the reverse link exists then we need to offset 'our' ends
-				if (UserLinkExists(toId, fromNode.Data))
+				var toNode = GetNode(target.Id);
+
+				if (!userLink)
+					return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+
+				if (DrawNodesOnTop)
 				{
-					// need to offset BEFORE clipping
-					fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
-					toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
+					// If the reverse link exists then we need to offset 'our' ends
+					if (UserLinkExists(target.Id, fromNode.Data))
+					{
+						// need to offset BEFORE clipping
+						fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+						toPos = Geometry2D.Centroid(GetNodeClientRect(toNode));
 
-					if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
-						return false;
+						if (!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
+							return false;
 
-					ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
+						ClipLineToNodeBounds(fromNode, toNode, ref fromPos, ref toPos);
 
-					return base.IsConnectionVisible(fromPos, toPos);
+						return base.IsConnectionVisible(fromPos, toPos);
+					}
+
+					// else
+					return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
 				}
 
 				// else
-				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+				if (!base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
+					return false;
+
+				if (UserLinkExists(target.Id, fromNode.Data) && 
+					!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
+				{
+					return false;
+				}
+
+				return true;
 			}
 
 			// else
-			if (!base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
-				return false;
+			fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+			toPos = RelativeBackgroundImageCoordsToClient(target.RelativeImageCoords);
 
-			if (UserLinkExists(toId, fromNode.Data) && 
-				!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
-			{
-				return false;
-			}
-
-			return true;
+			return IsConnectionVisible(fromPos, toPos);
 		}
 
 		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
@@ -1470,7 +1489,7 @@ namespace EvidenceBoardUIExtension
 				return false;
 			}
 
-			return IsConnectionVisible(GetNode(link.FromId), link.Target.Id, out fromPos, out toPos, true);
+			return IsConnectionVisible(GetNode(link.FromId), link.Target, out fromPos, out toPos, true);
 		}
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -1910,7 +1929,7 @@ namespace EvidenceBoardUIExtension
 					Point fromPos, toPos;
 					const double Tolerance = 5.0;
 
-					if (IsConnectionVisible(node, link.Target.Id, out fromPos, out toPos, true) && 
+					if (IsConnectionVisible(node, link.Target, out fromPos, out toPos, true) && 
 						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, Tolerance))
 					{
 						return link;
@@ -2550,7 +2569,23 @@ namespace EvidenceBoardUIExtension
 		{
 			if (m_DraggingSelectedUserLink)
 			{
+				UserLinkTarget target = null;
+
 				if (m_DropHighlightedTaskId != 0)
+				{
+					target = new UserLinkTarget(m_DropHighlightedTaskId);
+				}
+				else
+				{
+					var ptClient = PointToClient(new Point(e.X, e.Y));
+
+					if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					{
+						target = new UserLinkTarget(ClientToRelativeBackgroundImageCoords(ptClient));
+					}
+				}
+
+				if (target != null)
 				{
 					if (m_SelectedUserLink.Target.Id == NullId) // New link
 					{
@@ -2560,7 +2595,7 @@ namespace EvidenceBoardUIExtension
 
 						if (taskItem != null)
 						{
-							var newLink = CreateUserLink(taskItem.TaskId, m_DropHighlightedTaskId, m_SelectedUserLink.Attributes);
+							var newLink = CreateUserLink(taskItem.TaskId, target, m_SelectedUserLink.Attributes);
 
 							if ((newLink != null) && (ConnectionCreated != null) && !ConnectionCreated(this, newLink))
 								taskItem.DeleteUserLink(newLink);
@@ -2568,28 +2603,9 @@ namespace EvidenceBoardUIExtension
 					}
 					else
 					{
-						m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
+						m_SelectedUserLink.SetTarget(target);
 
 						ConnectionEdited?.Invoke(this, m_SelectedUserLink);
-					}
-				}
-				else
-				{
-					var ptClient = new Point(e.X, e.Y);
-
-					if (HitTestBackgroundImage(ptClient) == DragMode.Background)
-					{
-						// Convert to relative image coordinates
-						PointF ptGraph = ClientToGraph(ptClient);
-						var imageBounds = BackgroundImage.Bounds;
-
-						ptGraph.X -= imageBounds.X;
-						ptGraph.Y -= imageBounds.Y;
-
-						ptGraph.X /= imageBounds.Width;
-						ptGraph.Y /= imageBounds.Height;
-
-
 					}
 				}
 
@@ -2628,6 +2644,34 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		private PointF ClientToRelativeBackgroundImageCoords(Point ptClient)
+		{
+			PointF ptImage = ClientToGraph(ptClient);
+			var imageBounds = BackgroundImage.Bounds;
+
+			ptImage.X -= imageBounds.X;
+			ptImage.Y -= imageBounds.Y;
+
+			ptImage.X /= imageBounds.Width;
+			ptImage.Y /= imageBounds.Height;
+
+			return ptImage;
+		}
+
+		private Point RelativeBackgroundImageCoordsToClient(PointF ptImage)
+		{
+			var ptGraph = ptImage;
+			var imageBounds = BackgroundImage.Bounds;
+
+			ptGraph.X *= imageBounds.Width;
+			ptGraph.Y *= imageBounds.Height;
+
+			ptGraph.X += imageBounds.X;
+			ptGraph.Y += imageBounds.Y;
+
+			return GraphToClient(Point.Round(ptGraph));
+		}
+
 		void ResetUserLinkDrag()
 		{
 			m_DraggingSelectedUserLink = false;
@@ -2643,12 +2687,7 @@ namespace EvidenceBoardUIExtension
 
 			if (m_DraggingSelectedUserLink)
 			{
-				if (!MouseButtons.HasFlag(MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
-				{
-					e.Action = DragAction.Cancel;
-					ResetUserLinkDrag();
-				}
-				else if (e.EscapePressed)
+				if (e.EscapePressed)
 				{
 					e.Action = DragAction.Cancel;
 					ResetUserLinkDrag();

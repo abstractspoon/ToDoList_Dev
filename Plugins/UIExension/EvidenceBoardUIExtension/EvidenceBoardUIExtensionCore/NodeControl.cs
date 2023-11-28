@@ -1008,7 +1008,6 @@ namespace EvidenceBoardUIExtension
 
 		protected void RecalcExtents(BaseNode node)
 		{
-//			var nodeRect = node.GetRectangle(GetNodeSize(node));
 			var nodeRect = GetNodeRect(node);
 
 			m_MinExtents.X = Math.Min(m_MinExtents.X, (int)nodeRect.Left);

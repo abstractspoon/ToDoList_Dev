@@ -132,7 +132,8 @@ namespace EvidenceBoardUIExtension
 	public class UserLinkTarget
 	{
 		private uint m_Id = 0;
-		private PointF m_ImageCoords = PointF.Empty;
+		private PointF m_ImageCoords = new PointF(-1, -1);
+		private bool m_UsesId = false;
 
 		// -------------------------------------------------
 
@@ -146,31 +147,53 @@ namespace EvidenceBoardUIExtension
 			Set(relativeImageCoords);
 		}
 
-		public uint Id
-		{
-			get { return m_Id; }
-			private set { m_Id = value; }
-		}
+		public uint Id { get { return m_Id; } }
+		public bool UsesId { get { return m_UsesId; } }
+		public PointF RelativeImageCoords {	get { return m_ImageCoords; } }
 
-		public PointF RelativeImageCoords
+		public bool IsValid(uint fromId)
 		{
-			get { return m_ImageCoords; }
-			private set { m_ImageCoords = value; }
-		}
+			if (!IsValid())
+				return false;
 
-		public static bool IsValid(UserLinkTarget target, uint fromId)
-		{
-			return false;
+			// else
+			return (!m_UsesId || (m_Id != fromId));
 		}
 
 		public bool IsValid()
 		{
-			return false;
+			if (m_UsesId)
+				return (m_Id != 0);
+
+			// else
+			return ((m_ImageCoords.X >= 0) ||
+					(m_ImageCoords.X <= 1) ||
+					(m_ImageCoords.Y >= 0) ||
+					(m_ImageCoords.Y <= 1));
+		}
+
+		public bool Set(UserLinkTarget target)
+		{
+			if (target.m_UsesId)
+				return Set(target.Id);
+
+			// else
+			return Set(target.RelativeImageCoords);
 		}
 
 		public bool Set(uint toId)
 		{
-			return false;
+			if (toId == 0)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			m_Id = toId;
+			m_UsesId = true;
+			m_ImageCoords = PointF.Empty;
+
+			return true;
 		}
 
 		public bool Set(PointF relativeImageCoords)
@@ -184,8 +207,11 @@ namespace EvidenceBoardUIExtension
 				return false;
 			}
 
-			RelativeImageCoords = relativeImageCoords;
-			return false;
+			m_ImageCoords = relativeImageCoords;
+			m_Id = 0;
+			m_UsesId = false;
+
+			return true;
 		}
 
 		public static bool TryParse(string input, uint taskId, out UserLinkTarget target)
@@ -209,7 +235,7 @@ namespace EvidenceBoardUIExtension
 
 			// else
 			float relX = 0, relY = 0;
-			string[] coords = input.Split(',');
+			string[] coords = input.Split('-');
 
 			if ((coords.Count() != 2) || 
 				!float.TryParse(coords[0], out relX) ||
@@ -230,7 +256,7 @@ namespace EvidenceBoardUIExtension
 				return Id.ToString();
 
 			// else
-			return string.Format("{0},{1}", RelativeImageCoords.X, RelativeImageCoords.Y);
+			return string.Format("{0}-{1}", m_ImageCoords.X, m_ImageCoords.Y);
 		}
 	}
 
@@ -262,7 +288,7 @@ namespace EvidenceBoardUIExtension
 		}
 
 		public uint FromId { get; private set; } = 0;
-		public UserLinkTarget Target { get; private set; } = new UserLinkTarget(0);
+		public UserLinkTarget Target { get; private set; } = new UserLinkTarget(PointF.Empty);
 
 		public UserLinkAttributes Attributes { get; private set; } = new UserLinkAttributes();
 
@@ -281,7 +307,9 @@ namespace EvidenceBoardUIExtension
 
 		public bool IdsMatch(uint fromId, uint toId)
 		{
-			return ((FromId == fromId) && (Target.Id == toId));
+			return ((FromId == fromId) && 
+					(toId != 0) && 
+					(Target.Id == toId));
 		}
 
 		public bool IdsMatch(UserLink other)
@@ -289,7 +317,15 @@ namespace EvidenceBoardUIExtension
 			if (other == null)
 				return false;
 
-			return ((FromId == other.FromId) && (Target.Id == other.Target.Id));
+			return ((FromId == other.FromId) && 
+					(Target.Id == other.Target.Id) && 
+					(Target.RelativeImageCoords == other.Target.RelativeImageCoords));
+		}
+
+		public bool SetTarget(UserLinkTarget target)
+		{
+			return Target.Set(target);
+
 		}
 
 		public bool SetRelativeImageCoords(PointF relativeImageCoords)

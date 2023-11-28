@@ -277,20 +277,12 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public UserLink AddUserLink(uint toId, UserLinkAttributes attrib)
+		public UserLink AddUserLink(UserLinkTarget target, UserLinkAttributes attrib)
 		{
-			if ((toId == 0) || (toId == TaskId) || HasUserLink(toId))
+			if (!target.IsValid(TaskId) || HasUserLink(target.Id))
 				return null;
 
-			var newLink = new UserLink(TaskId, toId, attrib);
-			m_UserLinks.Add(newLink);
-
-			return newLink;
-		}
-
-		public UserLink AddUserLink(PointF relativeImageCoords, UserLinkAttributes attrib)
-		{
-			var newLink = new UserLink(TaskId, relativeImageCoords, attrib);
+			var newLink = new UserLink(TaskId, target, attrib);
 			m_UserLinks.Add(newLink);
 
 			return newLink;
