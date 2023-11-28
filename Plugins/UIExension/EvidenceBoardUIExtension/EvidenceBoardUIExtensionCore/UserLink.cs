@@ -160,16 +160,21 @@ namespace EvidenceBoardUIExtension
 			return (!m_UsesId || (m_Id != fromId));
 		}
 
+		private static bool IsValid(PointF ptImage)
+		{
+			return ((ptImage.X >= 0) ||
+					(ptImage.X <= 1) ||
+					(ptImage.Y >= 0) ||
+					(ptImage.Y <= 1));
+		}
+
 		public bool IsValid()
 		{
 			if (m_UsesId)
 				return (m_Id != 0);
 
 			// else
-			return ((m_ImageCoords.X >= 0) ||
-					(m_ImageCoords.X <= 1) ||
-					(m_ImageCoords.Y >= 0) ||
-					(m_ImageCoords.Y <= 1));
+			return IsValid(m_ImageCoords);
 		}
 
 		public bool Set(UserLinkTarget target)
@@ -198,10 +203,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool Set(PointF relativeImageCoords)
 		{
-			if ((relativeImageCoords.X < 0) ||
-				(relativeImageCoords.X > 1) ||
-				(relativeImageCoords.Y < 0) ||
-				(relativeImageCoords.Y > 1))
+			if (!IsValid(relativeImageCoords))
 			{
 				Debug.Assert(false);
 				return false;
