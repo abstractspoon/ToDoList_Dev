@@ -2483,6 +2483,10 @@ namespace EvidenceBoardUIExtension
 						m_DropHighlightedTaskId = node.Data;
 						e.Effect = e.AllowedEffect;
 					}
+					else if (node != null)
+					{
+						e.Effect = DragDropEffects.None;
+					}
 					else if (HitTestBackgroundImage(ptClient) == DragMode.Background)
 					{
 						e.Effect = e.AllowedEffect;
