@@ -2665,7 +2665,18 @@ namespace EvidenceBoardUIExtension
 
 			if (m_DraggingSelectedUserLink)
 			{
-				if (e.EscapePressed)
+				bool cancel = e.EscapePressed;
+
+				if (!cancel && !MouseButtons.HasFlag(MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
+				{
+					if (!HasBackgroundImage ||
+						(HitTestBackgroundImage(m_DraggedUserLinkEnd) != DragMode.Background))
+					{
+						cancel = true;
+					}
+				}
+
+				if (cancel)
 				{
 					e.Action = DragAction.Cancel;
 					ResetUserLinkDrag();
