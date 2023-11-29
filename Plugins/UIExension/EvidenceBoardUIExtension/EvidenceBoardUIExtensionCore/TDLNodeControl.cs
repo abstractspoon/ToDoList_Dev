@@ -1306,7 +1306,18 @@ namespace EvidenceBoardUIExtension
 
 				if (selected)
 				{
-					using (var pen = new Pen(SystemColors.WindowText, 2))
+					if (HasBackgroundImage)
+					{
+						// Draw a thicker version of the line in the background colour
+						// so the overdrawn line is always visible
+						using (var pen = new Pen(SystemColors.Window, lineThickness + 1))
+							DrawConnection(graphics, pen, null, fromPos, toPos);
+
+						DrawConnectionArrows(graphics, link.Attributes.Arrows, arrowThickness + 1, SystemColors.Window, fromPos, toPos, arrowOffset);
+					}
+
+					// Draw actual connection
+					using (var pen = new Pen(SystemColors.WindowText, lineThickness))
 						DrawConnection(graphics, pen, null, fromPos, toPos);
 
 					// Draw special pins
