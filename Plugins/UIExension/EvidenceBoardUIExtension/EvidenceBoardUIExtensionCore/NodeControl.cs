@@ -155,7 +155,7 @@ namespace EvidenceBoardUIExtension
 
 		}
 
-		public bool HasBackgroundImage { get { return (m_BackgroundImage?.HasImage == true); } }
+		public bool HasBackgroundImage { get { return (m_BackgroundImage?.IsValid == true); } }
 		protected new NodeControlBackgroundImage BackgroundImage { get { return m_BackgroundImage; } }
 
 		public Size NodeSize

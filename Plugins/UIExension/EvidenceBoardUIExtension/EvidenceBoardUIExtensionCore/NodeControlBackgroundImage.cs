@@ -14,7 +14,7 @@ namespace EvidenceBoardUIExtension
 		public string FilePath { get; private set; } = string.Empty;
 		public Rectangle Bounds { get; private set; } = Rectangle.Empty;
 
-		public bool HasImage { get { return (Image != null); } }
+		public bool IsValid { get { return (Image != null); } }
 
 		public bool Set(string filePath, Rectangle rect)
 		{
@@ -91,7 +91,7 @@ namespace EvidenceBoardUIExtension
 
 		public Size CalcSizeToFit(Size size)
 		{
-			if (!HasImage)
+			if (!IsValid)
 				return Size.Empty;
 
 			float imageAspect = AspectRatio;
@@ -110,7 +110,7 @@ namespace EvidenceBoardUIExtension
 
 		public void ResizeToFit(Rectangle extents)
 		{
-			if (HasImage)
+			if (IsValid)
 			{
 				var size = CalcSizeToFit(extents.Size);
 				Bounds = Geometry2D.GetCentredRect(Geometry2D.Centroid(extents), size.Width, size.Height);
@@ -123,7 +123,7 @@ namespace EvidenceBoardUIExtension
 		
 		public DragMode HitTest(Point point, int edgeWidth)
 		{
-			if (HasImage)
+			if (IsValid)
 			{
 				var outerRect = Rectangle.Inflate(Bounds, (edgeWidth / 2), (edgeWidth / 2));
 
@@ -159,7 +159,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool SetReposition(Point newCentre)
 		{
-			if (!HasImage)
+			if (!IsValid)
 				return false;
 
 			var centre = Geometry2D.Centroid(Bounds);
@@ -173,7 +173,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool SetBounds(Rectangle bounds)
 		{
-			if (!HasImage)
+			if (!IsValid)
 				return false;
 
 			if (bounds.Width <= 0 && bounds.Height <= 0)
@@ -188,7 +188,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool InflateWidth(int amount, Size minSize)
 		{
-			if (!HasImage || (minSize.Width <= 0))
+			if (!IsValid || (minSize.Width <= 0))
 				return false;
 
 			if ((Bounds.Width + amount) < minSize.Width)
@@ -207,7 +207,7 @@ namespace EvidenceBoardUIExtension
 
 		public bool InflateHeight(int amount, Size minSize)
 		{
-			if (!HasImage || (minSize.Height <= 0))
+			if (!IsValid || (minSize.Height <= 0))
 				return false;
 
 			if (amount < 0)
@@ -245,7 +245,7 @@ namespace EvidenceBoardUIExtension
 
 		public string Encode()
 		{
-			if (!HasImage)
+			if (!IsValid)
 				return string.Empty;
 
 			return string.Format("{0}|{1},{2},{3},{4}",
