@@ -2058,10 +2058,9 @@ namespace EvidenceBoardUIExtension
 					ClearUserLinkSelection();
 				}
 
-				node = HitTestNode(e.Location, true);
-
-				if ((node != null) && GetCreateLinkPinRect(node).Contains(e.Location))
+				if (HitTestHotNodeCreateLink(e.Location))
 				{
+					node = GetNode(m_HotTaskId);
 					DoUserLinkDragDrop(new UserLink(node.Data, NullId, UserLinkAttributes.Defaults));
 
 					// Prevent base class handling
@@ -2375,6 +2374,8 @@ namespace EvidenceBoardUIExtension
 
 				if (HitTestTaskIcon(ptClient) != null)
 					return UIExtension.HandCursor();
+
+				return Cursors.Arrow;
 			}
 #if DEBUG
 			if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
@@ -2419,6 +2420,22 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		private bool HitTestHotNodeCreateLink(Point ptClient)
+		{
+			if (m_HotTaskId != 0)
+			{
+				var hotNode = GetNode(m_HotTaskId);
+
+				if (hotNode == null)
+					return false;
+
+				if (Rectangle.Inflate(GetCreateLinkPinRect(hotNode), 1, 1).Contains(ptClient))
+					return true;
+			}
+
+			return false;
+		}
+		
 		protected override Cursor GetCursor(MouseEventArgs e)
 		{
 			Cursor cursor = null;
@@ -2427,15 +2444,11 @@ namespace EvidenceBoardUIExtension
 			{
 				UpdateHotTask(e.Location);
 
-				if (m_HotTaskId != 0)
+				if (HitTestHotNodeCreateLink(e.Location))
 				{
-					var hotNode = GetNode(m_HotTaskId);
-
-					if ((hotNode != null) && GetCreateLinkPinRect(hotNode).Contains(e.Location))
-						cursor = UIExtension.OleDragCursor(UIExtension.OleDragCursorType.Copy);
+					cursor = UIExtension.OleDragCursor(UIExtension.OleDragCursorType.Copy);
 				}
-
-				if (cursor == null)
+				else
 				{
 					if (DrawNodesOnTop)
 					{
@@ -2576,6 +2589,8 @@ namespace EvidenceBoardUIExtension
 
 		override protected void OnDragDrop(DragEventArgs e)
 		{
+			m_HotTaskId = 0;
+
 			if (m_DraggingSelectedUserLink)
 			{
 				UserLinkTarget target = null;
@@ -2673,8 +2688,16 @@ namespace EvidenceBoardUIExtension
 
 				if (!cancel && !MouseButtons.HasFlag(MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
 				{
-					if (!HasBackgroundImage ||
-						(HitTestBackgroundImage(m_DraggedUserLinkEnd) != DragMode.Background))
+					if (HitTestTask(m_DraggedUserLinkEnd) != null)
+					{
+						// Must be an invalid drop target
+						cancel = true;
+					}
+					else if (!HasBackgroundImage)
+					{
+						cancel = true;
+					}
+					else if (HitTestBackgroundImage(m_DraggedUserLinkEnd) != DragMode.Background)
 					{
 						cancel = true;
 					}
