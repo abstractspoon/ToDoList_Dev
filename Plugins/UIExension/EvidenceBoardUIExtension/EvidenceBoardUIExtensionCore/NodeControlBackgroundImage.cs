@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 
 namespace EvidenceBoardUIExtension
 {
@@ -21,7 +22,7 @@ namespace EvidenceBoardUIExtension
 			if (string.IsNullOrWhiteSpace(filePath))
 				return Clear();
 
-			if (filePath == FilePath)
+			if ((filePath == FilePath) || !File.Exists(filePath))
 				return false;
 
 			var image = Image.FromFile(filePath);
