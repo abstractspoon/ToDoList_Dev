@@ -533,11 +533,13 @@ namespace EvidenceBoardUIExtension
 
 		public bool HasUserLink(uint id)
 		{
+			// Has this task got any links?
 			var taskItem = GetTaskItem(id);
 
-			if ((taskItem == null) || (taskItem.UserLinks == null) || !taskItem.HasUserLinks)
-				return false;
+			if (taskItem?.HasUserLinks == true)
+				return true;
 
+			// Does any other task link to this task?
 			foreach (var other in Values)
 			{
 				if ((other.TaskId != id) && other.HasUserLink(id))
