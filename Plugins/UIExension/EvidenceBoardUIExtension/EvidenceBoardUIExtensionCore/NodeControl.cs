@@ -35,7 +35,7 @@ namespace EvidenceBoardUIExtension
 
 	// -------------------------------------------------------------------
 
-	public partial class NodeControl : UserControl
+	public class NodeControl : UserControl
 	{
 		public int NodeSpacing = 5;
 
@@ -1149,7 +1149,7 @@ namespace EvidenceBoardUIExtension
 		{
 			base.OnMouseDown(e);
 
-			var node = HitTestNode(e.Location);
+			var node = HitTestNode(e.Location, true);
 
 			if (node == null)
 			{
