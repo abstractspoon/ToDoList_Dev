@@ -620,7 +620,12 @@ namespace EvidenceBoardUIExtension
 
 		public Rectangle GetSelectedTaskLabelRect()
 		{
-			return CalcTaskLabelRect(SingleSelectedNode, false);
+			var rect = CalcTaskLabelRect(SingleSelectedNode, false);
+
+			// Use the unscaled font for the label height
+			rect.Height = (Font.Height + (2 * LabelPadding));
+
+			return rect;
 		}
 
 		public bool IsTaskLocked(uint taskId)
