@@ -1244,11 +1244,11 @@ namespace EvidenceBoardUIExtension
 					if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
 						IsConnectionVisible(node, new UserLinkTarget(dependId), out fromPos, out toPos, false))
 					{
-						using (var pen = new Pen(DependencyColor))
+						using (var pen = NewPen(DependencyColor))
 						{
 							using (var brush = new SolidBrush(DependencyColor))
 							{
-								DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
+								DrawConnection(graphics, pen, brush, fromPos, toPos);
 								DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
 							}
 						}
@@ -1315,18 +1315,7 @@ namespace EvidenceBoardUIExtension
 
 				if (selected)
 				{
-					if (HasBackgroundImage)
-					{
-						// Draw a thicker version of the line in the background colour
-						// so the overdrawn line is always visible
-						using (var pen = new Pen(SystemColors.Window, lineThickness + 1))
-							DrawConnection(graphics, pen, null, fromPos, toPos);
-
-						DrawConnectionArrows(graphics, link.Attributes.Arrows, arrowThickness + 1, SystemColors.Window, fromPos, toPos, arrowOffset);
-					}
-
-					// Draw actual connection
-					using (var pen = new Pen(SystemColors.WindowText, lineThickness))
+					using (var pen = NewPen(SystemColors.WindowText, lineThickness))
 						DrawConnection(graphics, pen, null, fromPos, toPos);
 
 					// Draw special pins
@@ -1337,7 +1326,7 @@ namespace EvidenceBoardUIExtension
 				}
 				else
 				{
-					using (var pen = new Pen(link.Attributes.Color, link.Attributes.Thickness))
+					using (var pen = NewPen(link.Attributes.Color, link.Attributes.Thickness))
 					{
 						using (var brush = new SolidBrush(link.Attributes.Color))
 						{
@@ -1517,12 +1506,12 @@ namespace EvidenceBoardUIExtension
 			return IsConnectionVisible(GetNode(link.FromId), link.Target, out fromPos, out toPos, true);
 		}
 
-		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
+		protected override void DrawParentConnection(Graphics graphics, uint childId, Point childPos, Point parentPos)
 		{
 			if (!ShowingParentChildLinks)
 				return;
 
-			var taskItem = m_TaskItems.GetTaskItem(nodeId);
+			var taskItem = m_TaskItems.GetTaskItem(childId);
 			var parentId = taskItem?.ParentId;
 
 			if (parentId == 0)
@@ -1543,37 +1532,69 @@ namespace EvidenceBoardUIExtension
 			// 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
 			// 					return;
 
-			using (var pen = new Pen(ParentConnectionColor, 1))
+			using (var pen = NewPen(ParentConnectionColor, 1))
 			{
 				using (var brush = new SolidBrush(ParentConnectionColor))
 				{
-					DrawConnection(graphics, pen, brush, nodePos, parentPos);
+					DrawConnection(graphics, pen, brush, childPos, parentPos);
 				}
-				DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
+				DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Finish, 2, ParentConnectionColor, childPos, parentPos, (PinRadius + 1));
 			}
 		}
 
+		protected new void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
+		{
+			if (HasBackgroundImage)
+			{
+				// Draw a thicker version of the line in the background colour
+				// so the overdrawn line is always visible
+				if (linePen.Color != SystemColors.Window)
+				{
+					using (var backPen = NewPen(SystemColors.Window, (linePen.Width + ScaleByDpi(1))))
+						base.DrawConnection(graphics, backPen, pinBrush, node1Pos, node2Pos);
+				}
+			}
+
+			base.DrawConnection(graphics, linePen, pinBrush, node1Pos, node2Pos);
+		}
+		
 		protected void DrawConnectionArrows(Graphics graphics, UserLinkAttributes.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos, int offset)
 		{
 			if (arrows != UserLinkAttributes.EndArrows.None)
 			{
-				using (var pen = new Pen(color, thickness))
+				using (var arrowPen = NewPen(color, thickness))
 				{
-					int size = UIExtension.DependencyArrows.Size(TextFont) + thickness;
+					int size = (UIExtension.DependencyArrows.Size(TextFont) + (int)ScaleByDpi(thickness));
 
 					if ((arrows == UserLinkAttributes.EndArrows.Start) || (arrows == UserLinkAttributes.EndArrows.Both))
 					{
 						var degrees = Geometry2D.DegreesBetween(toPos, fromPos, Geometry2D.AngleAxis.FromVertical);
-						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, offset, degrees);
+						DrawConnectionArrow(graphics, arrowPen, fromPos, degrees, size, offset);
 					}
 
 					if ((arrows == UserLinkAttributes.EndArrows.Finish) || (arrows == UserLinkAttributes.EndArrows.Both))
 					{
 						var degrees = Geometry2D.DegreesBetween(fromPos, toPos, Geometry2D.AngleAxis.FromVertical);
-						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, offset, degrees);
+						DrawConnectionArrow(graphics, arrowPen, toPos, degrees, size, offset);
 					}
 				}
 			}
+		}
+
+		protected void DrawConnectionArrow(Graphics graphics, Pen arrowPen, Point arrowPos, float degrees, int size, int offset)
+		{
+			if (HasBackgroundImage)
+			{
+				// Under-draw a thicker version of the arrow in the background colour
+				// so the overdrawn line is always visible
+				if (arrowPen.Color != SystemColors.Window)
+				{
+					using (var backPen = NewPen(SystemColors.Window, (arrowPen.Width + ScaleByDpi(1))))
+						UIExtension.ArrowHeads.Draw(graphics, arrowPen, arrowPos.X, arrowPos.Y, size, offset, degrees);
+				}
+			}
+
+			UIExtension.ArrowHeads.Draw(graphics, arrowPen, arrowPos.X, arrowPos.Y, size, offset, degrees);
 		}
 
 		protected void DoPaintNode(Graphics graphics, TaskItem taskItem, Rectangle taskRect, DrawState drawState)
@@ -1628,7 +1649,7 @@ namespace EvidenceBoardUIExtension
 				taskRect.Width--;
 				taskRect.Height--;
 
-				using (var pen = new Pen(borderColor, 0f))
+				using (var pen = NewPen(borderColor, 0))
 					graphics.DrawRectangle(pen, taskRect);
 			}
 

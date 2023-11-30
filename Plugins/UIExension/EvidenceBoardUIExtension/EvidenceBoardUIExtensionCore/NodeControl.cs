@@ -124,7 +124,7 @@ namespace EvidenceBoardUIExtension
 			m_TextFont = new Font("Tahoma", 8);
 			m_BaseFontHeight = m_TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
-			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)(m_DpiFactor * 20) };
+			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)ScaleByDpi(20) };
 
 			InitializeComponent();
 		}
@@ -156,7 +156,9 @@ namespace EvidenceBoardUIExtension
 		}
 
 		public bool HasBackgroundImage { get { return (m_BackgroundImage?.IsValid == true); } }
+
 		protected new NodeControlBackgroundImage BackgroundImage { get { return m_BackgroundImage; } }
+		protected float ScaleByDpi(int value) { return (value * m_DpiFactor); }
 
 		public Size NodeSize
 		{
@@ -818,7 +820,9 @@ namespace EvidenceBoardUIExtension
 			if (HasBackgroundImage)
 			{
 				var rect = GraphToClient(m_BackgroundImage.Bounds);
+
 				e.Graphics.DrawImage(m_BackgroundImage.Image, rect);
+				e.Graphics.DrawRectangle(SystemPens.ControlDark, rect);
 			}
 
 			if (RootNode != null)
@@ -918,10 +922,21 @@ namespace EvidenceBoardUIExtension
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			var pen = new Pen(ParentConnectionColor);
-			pen.CustomEndCap = new AdjustableArrowCap(5, 5);
+			using (var pen = NewPen(ParentConnectionColor))
+			{
+				pen.CustomEndCap = new AdjustableArrowCap(5, 5);
+				DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+			}
+		}
 
-			DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+		protected Pen NewPen(Color color, int thickness = 1)
+		{
+			return NewPen(color, ScaleByDpi(thickness));
+		}
+
+		protected Pen NewPen(Color color, float width)
+		{
+			return new Pen(color, width);
 		}
 
 		protected void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
@@ -1140,7 +1155,7 @@ namespace EvidenceBoardUIExtension
 		protected DragMode HitTestBackgroundImage(Point ptClient)
 		{
 			var ptGraph = ClientToGraph(ptClient);
-			int hitWidth = (int)(SystemInformation.DoubleClickSize.Width / OverallScaleFactor);
+			int hitWidth = (int)(SystemInformation.FrameBorderSize.Width / OverallScaleFactor);
 
 			return m_BackgroundImage.HitTest(ptGraph, hitWidth);
 		}
