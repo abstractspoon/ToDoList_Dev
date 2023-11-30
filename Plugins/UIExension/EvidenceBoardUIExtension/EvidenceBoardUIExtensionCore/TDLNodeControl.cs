@@ -1544,7 +1544,7 @@ namespace EvidenceBoardUIExtension
 
 		protected new void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
 		{
-			if (HasBackgroundImage)
+			//if (HasBackgroundImage)
 			{
 				// Draw a thicker version of the line in the background colour
 				// so the overdrawn line is always visible
@@ -1583,7 +1583,7 @@ namespace EvidenceBoardUIExtension
 
 		protected void DrawConnectionArrow(Graphics graphics, Pen arrowPen, Point arrowPos, float degrees, int size, int offset)
 		{
-			if (HasBackgroundImage)
+			//if (HasBackgroundImage)
 			{
 				// Under-draw a thicker version of the arrow in the background colour
 				// so the overdrawn line is always visible
