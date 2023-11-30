@@ -266,6 +266,8 @@ namespace EvidenceBoardUIExtension
 				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 
+				m_DateSlider.Visible = m_DateSliderLabel.Visible = m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider);
+
 				// Preferences
 				m_PrefsDlg.LoadPreferences(prefs, key);
 				UpdateEvidenceBoardPreferences();
@@ -413,7 +415,7 @@ namespace EvidenceBoardUIExtension
 			m_Toolbar.Location = ToolbarLocation;
 
 			// Date slider combo and label
-			m_DateSliderLabel = CreateLabel("", m_Toolbar);
+			m_DateSliderLabel = CreateLabel("Visible Date Range", m_Toolbar);
 			this.Controls.Add(m_DateSliderLabel);
 
 			m_DateSlider = new MonthRangeSliderCtrl();
@@ -423,10 +425,10 @@ namespace EvidenceBoardUIExtension
 
 			this.Controls.Add(m_DateSlider);
 
-			m_DateSlider.ChangeEvent += new EventHandler(OnSliderChange);
+			m_DateSlider.ChangeEvent += new EventHandler(OnDateSliderChange);
 		}
 
-		protected void OnSliderChange(object sender, EventArgs e)
+		protected void OnDateSliderChange(object sender, EventArgs e)
 		{
 			DateTime from = DateTime.MinValue, to = DateTime.MaxValue;
 
@@ -435,7 +437,7 @@ namespace EvidenceBoardUIExtension
 			else
 				m_Control.ClearSelectedDateRange();
 
-			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Active Date Range"), m_DateSlider.FormatRange());
+			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Visible Date Range"), m_DateSlider.FormatRange());
 		}
 
 		private int ControlTop
@@ -500,7 +502,19 @@ namespace EvidenceBoardUIExtension
 		void OnOptionsComboClosed(object sender, EventArgs e)
 		{
 			if (!m_OptionsCombo.Cancelled)
+			{
 				m_Control.Options = m_OptionsCombo.SelectedOptions;
+
+				if (m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider))
+				{
+					m_DateSlider.Visible = m_DateSliderLabel.Visible = true;
+				}
+				else
+				{
+					m_DateSlider.Visible = m_DateSliderLabel.Visible = false;
+					m_Control.ClearSelectedDateRange();
+				}
+			}
 		}
 
 		void OnLinkVisibilityComboClosed(object sender, EventArgs e)

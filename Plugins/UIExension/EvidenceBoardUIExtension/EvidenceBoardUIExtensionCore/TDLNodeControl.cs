@@ -40,6 +40,7 @@ namespace EvidenceBoardUIExtension
 		ShowRootNode	= 0x04,
 		DrawLinksOnTop	= 0x08,
 		DrawPins		= 0x10,
+		ShowDateSlider	= 0x20,
 	}
 
 	// ------------------------------------------------------------

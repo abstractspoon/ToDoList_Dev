@@ -29,8 +29,7 @@ namespace EvidenceBoardUIExtension
 
 		// ----------------------------------------------------------------
 
-		EvidenceBoardOption AllOptions = EvidenceBoardOption.DrawLinksOnTop | 
-										EvidenceBoardOption.DrawPins;
+		EvidenceBoardOption DefaultOptions = (EvidenceBoardOption.DrawPins | EvidenceBoardOption.ShowDateSlider);
 
 		// ----------------------------------------------------------------
 
@@ -43,6 +42,7 @@ namespace EvidenceBoardUIExtension
 #endif
 			Items.Add(new EvidenceBoardOptionItem("Draw links on top", EvidenceBoardOption.DrawLinksOnTop));
 			Items.Add(new EvidenceBoardOptionItem("Draw pins", EvidenceBoardOption.DrawPins));
+			Items.Add(new EvidenceBoardOptionItem("Show 'Visible Date Range' slider", EvidenceBoardOption.ShowDateSlider));
 
 			Sorted = true;
 		}
@@ -87,7 +87,7 @@ namespace EvidenceBoardUIExtension
 
 		public EvidenceBoardOption LoadPreferences(Preferences prefs, String key)
 		{
-			SelectedOptions = prefs.GetProfileEnum(key, "Options", AllOptions);
+			SelectedOptions = prefs.GetProfileEnum(key, "Options", DefaultOptions);
 
 			return SelectedOptions;
 		}
