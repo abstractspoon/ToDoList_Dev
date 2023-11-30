@@ -81,6 +81,11 @@ namespace EvidenceBoardUIExtension
 			return new System.Drawing.Point((int)(pt.X / div), (int)(pt.Y / div));
 		}
 
+		public static System.Drawing.Size Divide(this System.Drawing.Size size, float div)
+		{
+			return new System.Drawing.Size((int)(size.Width / div), (int)(size.Height / div));
+		}
+
 		public static void MoveToHead<T>(this IList<T> list, T item)
 		{
 			list.Remove(item);

@@ -1777,7 +1777,7 @@ namespace MindMapUIExtension
 			// Always calculate the width of the text because the tree 
 			// doesn't seem to return the same widths as the Graphics object
 			// which is what we will be using to render the text
-			int nodeWidth = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
+			int nodeWidth = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeTitleFont(node))).Width;
 			int horzOffset = (nodeWidth + (int)(ItemHorzSeparation * m_ZoomFactor) + GetExtraWidth(node));
 
             if (!IsRoot(node))
@@ -2031,7 +2031,7 @@ namespace MindMapUIExtension
             // Always calculate the width of the text because the tree 
             // doesn't seem to return the same widths as the Graphics object
             // which is what we will be using to render the text
-            itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
+            itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeTitleFont(node))).Width;
 
 			if (!IsRoot(node) && (IsParent(node) || AnyChildHasChildren(node.Parent)))
                 itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
@@ -2134,7 +2134,7 @@ namespace MindMapUIExtension
 				NodeDrawState drawState = GetDrawState(node);
                 NodeDrawPos drawPos = GetDrawPos(node);
 
-				DrawNodeLabel(graphics, node.Text, labelRect, drawState, drawPos, GetNodeFont(node), item.ItemData);
+				DrawNodeLabel(graphics, node.Text, labelRect, drawState, drawPos, GetNodeTitleFont(node), item.ItemData);
 
 				// Children
 				if (node.IsExpanded)
@@ -2212,13 +2212,22 @@ namespace MindMapUIExtension
 			graphics.DrawString(label, nodeFont, textColor, rect, format);
 		}
 
-        protected Font GetNodeFont(TreeNode node)
+        protected Font GetNodeTitleFont(TreeNode node)
         {
 			if (node.NodeFont != null)
 				return node.NodeFont;
 			
 			// else
-			return m_TreeView.Font;
+			return Font;
+        }
+
+        protected Font GetNodeTooltipFont(TreeNode node)
+        {
+			if (node.NodeFont?.Bold == true)
+				return new Font(Font.Name, Font.Size, FontStyle.Bold);
+
+			// else
+			return Font;
         }
 
 		protected Font ScaledFont(Font font)

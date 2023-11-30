@@ -25,17 +25,22 @@ namespace EvidenceBoardUIExtension
 		None = -1,
 		Node,
 		SelectionBox,
+
+		Background,
+		BackgroundLeft,
+		BackgroundTop,
+		BackgroundRight,
+		BackgroundBottom,
 	}
 
 	// -------------------------------------------------------------------
 
-	public partial class NodeControl : UserControl
+	public class NodeControl : UserControl
 	{
 		public int NodeSpacing = 5;
 
 		int m_PinRadius = 2;
 		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
-
 
 		public int PinRadius
 		{
@@ -72,6 +77,7 @@ namespace EvidenceBoardUIExtension
 		float m_FontScaleFactor = 1f;
 		Size m_NodeSize;
 		Font m_TextFont;
+
 		Color m_WallColor = SystemColors.ControlDark;
 		Color m_ParentConnectionColor = Color.Gray;
 
@@ -91,6 +97,9 @@ namespace EvidenceBoardUIExtension
 		PointF m_PreDragNodePos;
 		DragMode m_DragMode = DragMode.None;
 		DragScroller m_DragScroll;
+		Rectangle m_PreDragBackgroundImageBounds = Rectangle.Empty;
+
+		NodeControlBackgroundImage m_BackgroundImage = new NodeControlBackgroundImage();
 
 		private IContainer components = null;
 
@@ -98,6 +107,8 @@ namespace EvidenceBoardUIExtension
 
 		public event NodeSelectionChangeEventHandler NodeSelectionChange;
 		public event NodeDragDropChangeEventHandler DragDropChange;
+
+		public new EventHandler BackgroundImageChanged;
 		public EventHandler ZoomChange;
 
 		// -------------------------------------------------------------------
@@ -113,7 +124,7 @@ namespace EvidenceBoardUIExtension
 			m_TextFont = new Font("Tahoma", 8);
 			m_BaseFontHeight = m_TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
-			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)(m_DpiFactor * 20) };
+			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)ScaleByDpi(20) };
 
 			InitializeComponent();
 		}
@@ -143,6 +154,11 @@ namespace EvidenceBoardUIExtension
 			this.ResumeLayout(false);
 
 		}
+
+		public bool HasBackgroundImage { get { return (m_BackgroundImage?.IsValid == true); } }
+
+		protected new NodeControlBackgroundImage BackgroundImage { get { return m_BackgroundImage; } }
+		protected float ScaleByDpi(int value) { return (value * m_DpiFactor); }
 
 		public Size NodeSize
 		{
@@ -621,36 +637,36 @@ namespace EvidenceBoardUIExtension
 			// check children
 			foreach (var child in node.Children)
 			{
-				var hit = HitTestNodeAndChildren(child, ptClient, excludeRoot);
+				var childNode = HitTestNodeAndChildren(child, ptClient, excludeRoot);
 
-				if (hit != null)
-					return hit;
+				if (childNode != null)
+					return childNode;
 			}
 
 			return null;
 		}
 
-		protected IList<BaseNode> HitTestNodes(Rectangle rectClient)
+		protected List<BaseNode> HitTestNodes(Rectangle rectClient)
 		{
-			IList<BaseNode> hits = new List<BaseNode>();
+			List<BaseNode> nodes = new List<BaseNode>();
+			HitTestNodes(RootNode, rectClient, ref nodes);
 
-			HitTestNodes(RootNode, rectClient, ref hits);
-			return hits;
+			return nodes;
 		}
 
-		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref IList<BaseNode> hits)
+		protected void HitTestNodes(BaseNode node, Rectangle rectClient, ref List<BaseNode> nodes)
 		{
 			if (IsSelectableNode(node))
 			{
 				var rect = GetNodeClientRect(node);
 
 				if (rect.IntersectsWith(rectClient))
-					hits.Add(node);
+					nodes.Add(node);
 			}
 
 			// check children
 			foreach (var child in node.Children)
-				HitTestNodes(child, rectClient, ref hits);
+				HitTestNodes(child, rectClient, ref nodes); // RECURSIVE CALL
 		}
 
 		virtual protected bool IsNodeVisible(BaseNode node)
@@ -721,16 +737,32 @@ namespace EvidenceBoardUIExtension
 			return IsConnectionVisible(fromPos, toPos);
 		}
 
-		protected void ClipLineToNodeBounds(BaseNode fromNode, BaseNode toNode,
-											ref Point fromPos, ref Point toPos)
+		protected bool IsConnectionVisible(BaseNode fromNode, Point toPos, out Point fromPos)
 		{
-			// Intersect line segment with node rectangles
+			fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
+
+			if (DrawNodesOnTop)
+				ClipLineToNodeBounds(fromNode, toPos, ref fromPos);
+
+			return IsConnectionVisible(fromPos, toPos);
+		}
+
+		protected void ClipLineToNodeBounds(BaseNode fromNode, Point toPos, ref Point fromPos)
+		{
 			Rectangle fromRect = GetNodeClientRect(fromNode);
 			Point[] fromIntersect;
 
 			if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, fromRect, out fromIntersect) > 0)
 				fromPos = fromIntersect[0];
+		}
 
+		protected void ClipLineToNodeBounds(BaseNode fromNode, BaseNode toNode,
+											ref Point fromPos, ref Point toPos)
+		{
+			// Intersect line segment with 'from' node rectangle
+			ClipLineToNodeBounds(fromNode, toPos, ref fromPos);
+
+			// Intersect line segment with 'to' node rectangle
 			Rectangle toRect = GetNodeClientRect(toNode);
 			Point[] toIntersect;
 
@@ -783,6 +815,14 @@ namespace EvidenceBoardUIExtension
 					e.Graphics.FillRectangle(brush, ClientRectangle);
 
 				e.Graphics.FillRectangle(SystemBrushes.Window, graphRect);
+			}
+
+			if (HasBackgroundImage)
+			{
+				var rect = GraphToClient(m_BackgroundImage.Bounds);
+
+				e.Graphics.DrawImage(m_BackgroundImage.Image, rect);
+				e.Graphics.DrawRectangle(SystemPens.ControlDark, rect);
 			}
 
 			if (RootNode != null)
@@ -882,10 +922,21 @@ namespace EvidenceBoardUIExtension
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			var pen = new Pen(ParentConnectionColor);
-			pen.CustomEndCap = new AdjustableArrowCap(5, 5);
+			using (var pen = NewPen(ParentConnectionColor))
+			{
+				pen.CustomEndCap = new AdjustableArrowCap(5, 5);
+				DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+			}
+		}
 
-			DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+		protected Pen NewPen(Color color, int thickness = 1)
+		{
+			return NewPen(color, ScaleByDpi(thickness));
+		}
+
+		protected Pen NewPen(Color color, float width)
+		{
+			return new Pen(color, width);
 		}
 
 		protected void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
@@ -988,7 +1039,6 @@ namespace EvidenceBoardUIExtension
 
 		protected void RecalcExtents(BaseNode node)
 		{
-//			var nodeRect = node.GetRectangle(GetNodeSize(node));
 			var nodeRect = GetNodeRect(node);
 
 			m_MinExtents.X = Math.Min(m_MinExtents.X, (int)nodeRect.Left);
@@ -1044,53 +1094,121 @@ namespace EvidenceBoardUIExtension
 			if (!ModifierKeys.HasFlag(Keys.Control) &&
 				!ModifierKeys.HasFlag(Keys.Alt))
 			{
-				var hit = HitTestNode(e.Location);
+				var node = HitTestNode(e.Location);
 
-				if ((hit != null) && IsSelectableNode(hit))
+				if ((node != null) && IsSelectableNode(node))
 				{
-					SelectNode(hit.Data, true, false);
+					SelectNode(node.Data, true, false);
 				}
 			}
 		}
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-			m_DragTimer.Stop();
-			m_DragMode = DragMode.None;
+			switch (m_DragMode)
+			{
+			case DragMode.Background:
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				{
+					m_DragTimer.Stop();
+					m_DragMode = DragMode.None;
+
+					Capture = false;
+
+					if (m_BackgroundImage.Bounds != m_PreDragBackgroundImageBounds)
+						BackgroundImageChanged?.Invoke(this, null);
+				}
+				break;
+			}
 
 			base.OnMouseUp(e);
+		}
+
+		protected override void OnMouseCaptureChanged(EventArgs e)
+		{
+			if (Capture == false)
+			{
+				// Cancel image drag
+				switch (m_DragMode)
+				{
+				case DragMode.Background:
+				case DragMode.BackgroundLeft:
+				case DragMode.BackgroundRight:
+				case DragMode.BackgroundTop:
+				case DragMode.BackgroundBottom:
+					{
+						m_DragTimer.Stop();
+						m_DragMode = DragMode.None;
+
+						m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds);
+					}
+					break;
+				}
+			}
+
+			base.OnMouseCaptureChanged(e);
+		}
+
+		protected DragMode HitTestBackgroundImage(Point ptClient)
+		{
+			var ptGraph = ClientToGraph(ptClient);
+			int hitWidth = (int)(SystemInformation.FrameBorderSize.Width / OverallScaleFactor);
+
+			return m_BackgroundImage.HitTest(ptGraph, hitWidth);
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
 
-			var hit = HitTestNode(e.Location);
+			var node = HitTestNode(e.Location, true);
 
-			if (hit == null)
+			if (node == null)
 			{
-				// Start a selection box drag
-				m_DragMode = DragMode.SelectionBox;
+				var imageHit = HitTestBackgroundImage(e.Location);
 
-				m_DragTimer.Tag = e;
-				m_DragTimer.Start();
+				if (imageHit != DragMode.None)
+				{
+					m_DragMode = imageHit;
+
+					m_DragTimer.Tag = e;
+					m_DragTimer.Start();
+
+					m_PreDragBackgroundImageBounds = m_BackgroundImage.Bounds;
+
+					if (imageHit == DragMode.Background)
+					{
+						m_DragOffset = GraphToClient(Geometry2D.Centroid(m_BackgroundImage.Bounds));
+						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
+					}
+				}
+				else // Start a selection box drag
+				{
+					m_DragMode = DragMode.SelectionBox;
+
+					m_DragTimer.Tag = e;
+					m_DragTimer.Start();
+				}
 			}
-			else if (IsSelectableNode(hit))
+			else if (IsSelectableNode(node))
 			{
 				List<BaseNode> childNodes = null;
 
 				if (ModifierKeys.HasFlag(Keys.Alt))
 				{
 					childNodes = new List<BaseNode>();
-					GetChildNodes(hit, true, ref childNodes);
+					GetChildNodes(node, true, ref childNodes);
 				}
 
 				if (ModifierKeys.HasFlag(Keys.Control))
 				{
-					if (m_SelectedNodes.Contains(hit))
+					if (m_SelectedNodes.Contains(node))
 					{
 						// Deselect
-						m_SelectedNodes.Remove(hit);
+						m_SelectedNodes.Remove(node);
 
 						if (childNodes?.Count > 0)
 							m_SelectedNodes.Remove(childNodes);
@@ -1098,7 +1216,7 @@ namespace EvidenceBoardUIExtension
 					else
 					{
 						// Select
-						m_SelectedNodes.MoveToHead(hit);
+						m_SelectedNodes.MoveToHead(node);
 
 						if (childNodes?.Count > 0)
 							m_SelectedNodes.AddRange(childNodes);
@@ -1106,14 +1224,14 @@ namespace EvidenceBoardUIExtension
 				}
 				else 
 				{
-					if (!m_SelectedNodes.Contains(hit))
+					if (!m_SelectedNodes.Contains(node))
 					{
 						m_SelectedNodes.Clear();
-						m_SelectedNodes.Insert(0, hit);
+						m_SelectedNodes.Insert(0, node);
 					}
 					else
 					{
-						m_SelectedNodes.MoveToHead(hit);
+						m_SelectedNodes.MoveToHead(node);
 					}
 
 					if (childNodes?.Count > 0)
@@ -1127,10 +1245,10 @@ namespace EvidenceBoardUIExtension
 						m_DragTimer.Tag = e;
 						m_DragTimer.Start();
 
-						m_DragOffset = GetNodeClientPos(hit);
+						m_DragOffset = GetNodeClientPos(node);
 						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
 
-						m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
+						m_PreDragNodePos = new PointF(node.Point.X, node.Point.Y);
 					}
 				}
 
@@ -1140,7 +1258,7 @@ namespace EvidenceBoardUIExtension
 				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 			}
 #if DEBUG
-			else if (hit == RootNode)
+			else if (node == RootNode)
 			{
 				Point ptGraph = ClientToGraph(e.Location);
 				//int breakpoint = 0;
@@ -1163,23 +1281,113 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		protected virtual Cursor GetCursor(MouseEventArgs e)
+		{
+			if (!ReadOnly)
+				return m_BackgroundImage.GetCursor(HitTestBackgroundImage(e.Location));
+
+			return null;
+		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
 
-			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
+			var cursor = GetCursor(e);
+			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
+
+			if (e.Button == MouseButtons.Left)
 			{
-				Debug.Assert(!ReadOnly);
-
-				object data = null;
-				DragDropEffects dde = DragDropEffects.None;
-
-				if (WantStartDragging(ref data, ref dde))
+				if (m_DragTimer.Enabled)
 				{
-					m_DragTimer.Stop();
-					DoDragDrop(data, dde);
+					Debug.Assert(!ReadOnly);
+
+					object data = null;
+					DragDropEffects dde = DragDropEffects.None;
+
+					if (WantStartDragging(ref data, ref dde))
+					{
+						m_DragTimer.Stop();
+
+						switch (m_DragMode)
+						{
+						case DragMode.Background:
+						case DragMode.BackgroundLeft:
+						case DragMode.BackgroundRight:
+						case DragMode.BackgroundTop:
+						case DragMode.BackgroundBottom:
+							Capture = true;
+							break;
+
+						case DragMode.SelectionBox:
+						case DragMode.Node:
+							DoDragDrop(data, dde);
+							break;
+						}
+					}
+				}
+				else
+				{
+					bool moved = false;
+
+					var ptGraph = ClientToGraph(e.Location);
+					var minSize = new Size(100, 100).Divide(OverallScaleFactor);
+
+					switch (m_DragMode)
+					{
+					case DragMode.Background:
+						{
+							var dragPt = e.Location;
+							dragPt.Offset(m_DragOffset);
+
+							moved = m_BackgroundImage.SetReposition(ClientToGraph(dragPt));
+						}
+						break;
+
+					case DragMode.BackgroundLeft:
+						moved = m_BackgroundImage.InflateWidth((-ptGraph.X + BackgroundImage.Bounds.Left), minSize);
+						break;
+
+					case DragMode.BackgroundRight:
+						moved = m_BackgroundImage.InflateWidth((ptGraph.X - BackgroundImage.Bounds.Right), minSize);
+						break;
+
+					case DragMode.BackgroundTop:
+						moved = m_BackgroundImage.InflateHeight((-ptGraph.Y + BackgroundImage.Bounds.Top), minSize);
+						break;
+
+					case DragMode.BackgroundBottom:
+						moved = m_BackgroundImage.InflateHeight((ptGraph.Y - BackgroundImage.Bounds.Bottom), minSize);
+						break;
+					}
+
+					if (moved)
+						Invalidate();
 				}
 			}
+		}
+
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+			switch (m_DragMode)
+			{
+			case DragMode.Background:
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				if (e.KeyCode == Keys.Escape)
+				{
+					m_DragTimer.Stop();
+					m_DragMode = DragMode.None;
+
+					if (m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds))
+						Invalidate();
+				}
+				break;
+			}
+
+			base.OnKeyDown(e);
 		}
 
 		private bool WantStartDragging(ref object data, ref DragDropEffects dde)
@@ -1190,9 +1398,6 @@ namespace EvidenceBoardUIExtension
 			if (!MouseButtons.HasFlag(MouseButtons.Left))
 				return false;
 
-			if (RootNode.Children.Count == 0)
-				return false;
-
 			// Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
 
@@ -1201,6 +1406,14 @@ namespace EvidenceBoardUIExtension
 
 			switch (m_DragMode)
 			{
+			case DragMode.Background:
+			case DragMode.BackgroundLeft:
+			case DragMode.BackgroundRight:
+			case DragMode.BackgroundTop:
+			case DragMode.BackgroundBottom:
+				Debug.Assert(!ReadOnly);
+				return true;
+
 			case DragMode.SelectionBox:
 				// Selection box is always in 'absolute' client coords
 				// to handle auto drag scrolling
@@ -1243,7 +1456,27 @@ namespace EvidenceBoardUIExtension
 			DragDropEffects dde = DragDropEffects.None;
 
 			if (WantStartDragging(ref data, ref dde))
-				DoDragDrop(data, dde);
+			{
+				switch (m_DragMode)
+				{
+				case DragMode.Background:
+				case DragMode.BackgroundLeft:
+				case DragMode.BackgroundRight:
+				case DragMode.BackgroundTop:
+				case DragMode.BackgroundBottom:
+					Capture = true;
+					break;
+
+				case DragMode.SelectionBox:
+				case DragMode.Node:
+					DoDragDrop(data, dde);
+					break;
+				}
+			}
+			else
+			{
+				m_DragMode = DragMode.None;
+			}
 		}
 
 		protected Point GraphToClient(Point ptGraph)
@@ -1269,7 +1502,7 @@ namespace EvidenceBoardUIExtension
 		protected Rectangle GraphToClient(Rectangle rectGraph)
 		{
 			var ptClient = GraphToClient(rectGraph.Location);
-			var sizeClient = rectGraph.Multiply(OverallScaleFactor).Size;
+			var sizeClient = rectGraph.Size.Multiply(OverallScaleFactor);
 
 			return new Rectangle(ptClient, sizeClient);
 		}
@@ -1309,11 +1542,8 @@ namespace EvidenceBoardUIExtension
 					m_SelectionBox = Geometry2D.RectFromPoints(this.ToScrolled(orgPt), dragPt);
 
 					// Select intersecting nodes
-					var hits = HitTestNodes(m_SelectionBox);
 					m_SelectedNodes.Clear();
-
-					foreach (var hit in hits)
-						m_SelectedNodes.Add(hit);
+					m_SelectedNodes = HitTestNodes(m_SelectionBox);
 
 					e.Effect = DragDropEffects.Move;
 					Invalidate();
@@ -1436,14 +1666,27 @@ namespace EvidenceBoardUIExtension
 			m_PreDragNodePos = PointF.Empty;
 		}
 
-		// 		protected override void OnDragLeave(EventArgs e)
-		// 		{
-		// 			Debug.Assert(!ReadOnly);
-		// 
-		// 			base.OnDragLeave(e);
-		// 
-		// 			Invalidate();
-		// 		}
+		protected bool SetBackgroundImage(string filePath, Rectangle rect, bool notify)
+		{
+			if (!m_BackgroundImage.Set(filePath, rect))
+				return false;
+
+			Invalidate();
+
+			if (notify)
+				BackgroundImageChanged?.Invoke(this, null);
+
+			return true;
+		}
+
+		public void ClearBackgroundImage()
+		{
+			if (m_BackgroundImage.Clear())
+			{
+				Invalidate();
+				BackgroundImageChanged?.Invoke(this, null);
+			}
+		}
 
 	}
 

@@ -323,7 +323,7 @@ namespace MindMapUIExtension
 				Text = hit.Text,
 				MultiLine = false,
 				Rect = labelRect,
-				Font = GetNodeFont(hit),
+				Font = GetNodeTooltipFont(hit),
 			};
 		}
 
@@ -1446,7 +1446,7 @@ namespace MindMapUIExtension
 			var prevSmoothing = graphics.SmoothingMode;
 			graphics.SmoothingMode = SmoothingMode.None;
 			
-			UIExtension.DependencyArrows.Draw(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), dir);
+			UIExtension.DependencyArrows.Draw(graphics, ptFrom.X, ptFrom.Y, GetNodeTitleFont(nodeFrom), dir);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(ptTo.X - 1, ptTo.Y - 1, 3, 3);
@@ -1742,7 +1742,7 @@ namespace MindMapUIExtension
 							new Rectangle(0, 0, width, height),
 							NodeDrawState.Selected,
 							NodeDrawPos.Root,
-							GetNodeFont(node),
+							GetNodeTitleFont(node),
 							true); // drag image
 		}
 

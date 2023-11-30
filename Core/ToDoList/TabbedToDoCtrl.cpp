@@ -194,6 +194,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_IUI_GETTASKICON, OnUIExtGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_IUI_GETNEXTTASKOCCURRENCES, OnUIExtGetNextTaskOcurrences)
 	ON_REGISTERED_MESSAGE(WM_IUI_SHOWFILELINK, OnUIExtShowFileLink)
+	ON_REGISTERED_MESSAGE(WM_IUI_SETTASKLISTMETADATA, OnUIExtSetTasklistMetaData)
 
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
@@ -2052,6 +2053,28 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 	CToDoCtrl::SetModified(TDCA_OFFSETTASK, aModTaskIDs);
 
 	UpdateControls(FALSE); // don't update comments
+
+	return TRUE;
+}
+
+LRESULT CTabbedToDoCtrl::OnUIExtSetTasklistMetaData(WPARAM wParam, LPARAM lParam)
+{
+	if (IsReadOnly())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	VIEWDATA* pVData = GetActiveViewData();
+	
+	if (!pVData || !pVData->pExtension)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_mapMetaData[pVData->pExtension->GetTypeID()] = (LPCTSTR)lParam;
+	SetModified(TRUE);
 
 	return TRUE;
 }

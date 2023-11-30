@@ -221,7 +221,7 @@ namespace EvidenceBoardUIExtension
 					return;
 				}
 
-				if ((parts.Count() == 2) && !string.IsNullOrWhiteSpace(parts[1]))
+				if ((parts.Count() >= 2) && !string.IsNullOrWhiteSpace(parts[1]))
 				{
 					string[] linkDatas = parts[1].Split(',');
 
@@ -236,7 +236,7 @@ namespace EvidenceBoardUIExtension
 					}
 				}
 
-				if (parts.Count() == 3)
+				if (parts.Count() >= 3)
 				{
 					m_ActiveImagePath = parts[2];
 				}
@@ -250,7 +250,7 @@ namespace EvidenceBoardUIExtension
 
 		public UserLink FindUserLink(uint toId)
 		{
-			return m_UserLinks?.Find(x => (x.ToId == toId));
+			return m_UserLinks?.Find(x => (x.Target.Id == toId));
 		}
 
 		public bool HasUserLink(uint toId)
@@ -273,16 +273,16 @@ namespace EvidenceBoardUIExtension
 			if (m_UserLinks.Remove(link))
 				return true;
 
-			Debug.Assert(FindUserLink(link.ToId) == null);
+			Debug.Assert(FindUserLink(link.Target.Id) == null);
 			return false;
 		}
 
-		public UserLink AddUserLink(uint toId, UserLinkAttributes attrib)
+		public UserLink AddUserLink(UserLinkTarget target, UserLinkAttributes attrib)
 		{
-			if ((toId == 0) || (toId == TaskId) || HasUserLink(toId))
+			if (!target.IsValid(TaskId) || HasUserLink(target.Id))
 				return null;
 
-			var newLink = new UserLink(TaskId, toId, attrib);
+			var newLink = new UserLink(TaskId, target, attrib);
 			m_UserLinks.Add(newLink);
 
 			return newLink;
@@ -528,16 +528,18 @@ namespace EvidenceBoardUIExtension
 
 		public bool HasUserLink(UserLink link)
 		{
-			return ((link != null) && (FindUserLink(link.FromId, link.ToId) != null));
+			return ((link != null) && (FindUserLink(link.FromId, link.Target.Id) != null));
 		}
 
 		public bool HasUserLink(uint id)
 		{
+			// Has this task got any links?
 			var taskItem = GetTaskItem(id);
 
-			if ((taskItem == null) || (taskItem.UserLinks == null) || !taskItem.HasUserLinks)
-				return false;
+			if (taskItem?.HasUserLinks == true)
+				return true;
 
+			// Does any other task link to this task?
 			foreach (var other in Values)
 			{
 				if ((other.TaskId != id) && other.HasUserLink(id))

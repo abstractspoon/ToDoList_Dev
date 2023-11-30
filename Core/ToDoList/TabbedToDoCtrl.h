@@ -228,6 +228,7 @@ protected:
 	afx_msg LRESULT OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtShowFileLink(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUIExtSetTasklistMetaData(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 

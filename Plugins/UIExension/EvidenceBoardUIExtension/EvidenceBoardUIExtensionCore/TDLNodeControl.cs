@@ -27,8 +27,7 @@ namespace EvidenceBoardUIExtension
 	public delegate bool ConnectionCreatedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionEditedEventHandler(object sender, UserLink link);
 	public delegate bool ConnectionDeletedEventHandler(object sender, uint taskId);
-
-
+	
 	// ------------------------------------------------------------
 
 	[Flags]
@@ -382,7 +381,6 @@ namespace EvidenceBoardUIExtension
 			prefs.WriteProfileString(key, "CollapsedTaskIds", ids);
 		}
 
-
 		public void LoadPreferences(Preferences prefs, String key)
 		{
 			// Cache the previously collapsed tasks until we get our first task update
@@ -453,8 +451,13 @@ namespace EvidenceBoardUIExtension
 				break;
 
 			case UIExtension.UpdateType.Delete:
+				UpdateTaskAttributes(tasks, true);
+				RecalcLayout();
+				break;
+
 			case UIExtension.UpdateType.All:
 				UpdateTaskAttributes(tasks, true);
+				UpdateBackgroundImage(tasks);
 				RecalcLayout();
 				break;
 
@@ -617,7 +620,12 @@ namespace EvidenceBoardUIExtension
 
 		public Rectangle GetSelectedTaskLabelRect()
 		{
-			return CalcTaskLabelRect(SingleSelectedNode, false);
+			var rect = CalcTaskLabelRect(SingleSelectedNode, false);
+
+			// Use the unscaled font for the label height
+			rect.Height = (Font.Height + (2 * LabelPadding));
+
+			return rect;
 		}
 
 		public bool IsTaskLocked(uint taskId)
@@ -696,6 +704,11 @@ namespace EvidenceBoardUIExtension
 		
 		public UserLink CreateUserLink(uint fromId, uint toId, UserLinkAttributes attrib)
 		{
+			return CreateUserLink(fromId, new UserLinkTarget(toId), attrib);
+		}
+		
+		public UserLink CreateUserLink(uint fromId, UserLinkTarget target, UserLinkAttributes attrib)
+		{
 			var fromTask = GetTaskItem(fromId);
 
 			if (fromTask != null)
@@ -707,7 +720,7 @@ namespace EvidenceBoardUIExtension
 					return null;
 				}
 
-				var newLink = fromTask.AddUserLink(toId, attrib);
+				var newLink = fromTask.AddUserLink(target, attrib);
 
 				if (newLink != null)
 				{
@@ -804,7 +817,7 @@ namespace EvidenceBoardUIExtension
 			if (base.SelectNode(taskId, notify, ensureVisible))
 				return true;
 
-			base.SelectNode(NodeControl.NullId, notify, false);
+			base.SelectNode(NullId, notify, false);
 			return false;
 		}
 
@@ -948,6 +961,22 @@ namespace EvidenceBoardUIExtension
 		}
 
 		// Internal ------------------------------------------------------------
+
+		private void UpdateBackgroundImage(TaskList tasks)
+		{
+			string filePath;
+			Rectangle rect;
+
+			if (NodeControlBackgroundImage.TryParse(tasks.GetMetaData(TaskItem.MetaDataKey), out filePath, out rect))
+				SetBackgroundImage(filePath, rect, false);
+			else
+				ClearBackgroundImage();
+		}
+
+		public string EncodeBackgroundImageState()
+		{
+			return BackgroundImage.Encode();
+		}
 
 		private void UpdateTaskAttributes(TaskList tasks, bool rebuild)
 		{
@@ -1155,6 +1184,15 @@ namespace EvidenceBoardUIExtension
 			return TextFont;
 		}
 
+		protected Font GetTaskTooltipFont(TaskItem taskItem)
+		{
+			if (taskItem.IsTopLevel)
+				return new Font(Font.Name, Font.Size, FontStyle.Bold);
+
+			// else
+			return Font;
+		}
+
 		protected override bool IsSelectableNode(BaseNode node)
 		{
 			return (base.IsSelectableNode(node) && (node.Data > 0));
@@ -1209,13 +1247,13 @@ namespace EvidenceBoardUIExtension
 
 					// Don't draw a dependency which is overlaid by a user link
 					if (/*!m_TaskItems.HasUserLink(taskItem.TaskId, dependId, true) &&*/
-						IsConnectionVisible(node, dependId, out fromPos, out toPos, false))
+						IsConnectionVisible(node, new UserLinkTarget(dependId), out fromPos, out toPos, false))
 					{
-						using (var pen = new Pen(DependencyColor))
+						using (var pen = NewPen(DependencyColor))
 						{
 							using (var brush = new SolidBrush(DependencyColor))
 							{
-								DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
+								DrawConnection(graphics, pen, brush, fromPos, toPos);
 								DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Start, 2, DependencyColor, fromPos, toPos, (PinRadius + 1));
 							}
 						}
@@ -1265,10 +1303,12 @@ namespace EvidenceBoardUIExtension
 			{
 				if (selected && m_DraggingSelectedUserLink)
 				{
-					var node = GetNode(link.FromId);
+					var fromNode = GetNode(link.FromId);
 
 					if (m_HotTaskId == link.FromId)
-						fromPos = GetCreateLinkPinPos(node);
+						fromPos = GetCreateLinkPinPos(fromNode);
+					else
+						IsConnectionVisible(fromNode, m_DraggedUserLinkEnd, out fromPos);
 
 					toPos = m_DraggedUserLinkEnd;
 				}
@@ -1280,7 +1320,7 @@ namespace EvidenceBoardUIExtension
 
 				if (selected)
 				{
-					using (var pen = new Pen(SystemColors.WindowText, 2))
+					using (var pen = NewPen(SystemColors.WindowText, lineThickness))
 						DrawConnection(graphics, pen, null, fromPos, toPos);
 
 					// Draw special pins
@@ -1291,7 +1331,7 @@ namespace EvidenceBoardUIExtension
 				}
 				else
 				{
-					using (var pen = new Pen(link.Attributes.Color, link.Attributes.Thickness))
+					using (var pen = NewPen(link.Attributes.Color, link.Attributes.Thickness))
 					{
 						using (var brush = new SolidBrush(link.Attributes.Color))
 						{
@@ -1405,9 +1445,21 @@ namespace EvidenceBoardUIExtension
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
-		protected bool IsConnectionVisible(BaseNode fromNode, uint toId, out Point fromPos, out Point toPos, bool userLink)
+		protected bool IsConnectionVisible(BaseNode fromNode, UserLinkTarget target, out Point fromPos, out Point toPos, bool userLink)
 		{
-			var toNode = GetNode(toId);
+			fromPos = toPos = Point.Empty;
+
+			if (!target.IsValid())
+				return false;
+
+			if (!target.UsesId)
+			{
+				toPos = GraphToClient(BackgroundImage.RelativeToAbsolute(target.RelativeImageCoords));
+				return base.IsConnectionVisible(fromNode, toPos, out fromPos);
+			}
+			
+			// else using Id
+			var toNode = GetNode(target.Id);
 
 			if (!userLink)
 				return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
@@ -1415,7 +1467,7 @@ namespace EvidenceBoardUIExtension
 			if (DrawNodesOnTop)
 			{
 				// If the reverse link exists then we need to offset 'our' ends
-				if (UserLinkExists(toId, fromNode.Data))
+				if (UserLinkExists(target.Id, fromNode.Data))
 				{
 					// need to offset BEFORE clipping
 					fromPos = Geometry2D.Centroid(GetNodeClientRect(fromNode));
@@ -1437,7 +1489,7 @@ namespace EvidenceBoardUIExtension
 			if (!base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
 				return false;
 
-			if (UserLinkExists(toId, fromNode.Data) && 
+			if (UserLinkExists(target.Id, fromNode.Data) &&
 				!Geometry2D.OffsetLine(ref fromPos, ref toPos, LinkOffset))
 			{
 				return false;
@@ -1456,15 +1508,15 @@ namespace EvidenceBoardUIExtension
 				return false;
 			}
 
-			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos, true);
+			return IsConnectionVisible(GetNode(link.FromId), link.Target, out fromPos, out toPos, true);
 		}
 
-		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
+		protected override void DrawParentConnection(Graphics graphics, uint childId, Point childPos, Point parentPos)
 		{
 			if (!ShowingParentChildLinks)
 				return;
 
-			var taskItem = m_TaskItems.GetTaskItem(nodeId);
+			var taskItem = m_TaskItems.GetTaskItem(childId);
 			var parentId = taskItem?.ParentId;
 
 			if (parentId == 0)
@@ -1485,37 +1537,69 @@ namespace EvidenceBoardUIExtension
 			// 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
 			// 					return;
 
-			using (var pen = new Pen(ParentConnectionColor, 1))
+			using (var pen = NewPen(ParentConnectionColor, 1))
 			{
 				using (var brush = new SolidBrush(ParentConnectionColor))
 				{
-					DrawConnection(graphics, pen, brush, nodePos, parentPos);
+					DrawConnection(graphics, pen, brush, childPos, parentPos);
 				}
-				DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Finish, 2, ParentConnectionColor, nodePos, parentPos, (PinRadius + 1));
+				DrawConnectionArrows(graphics, UserLinkAttributes.EndArrows.Finish, 2, ParentConnectionColor, childPos, parentPos, (PinRadius + 1));
 			}
 		}
 
+		protected new void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
+		{
+			//if (HasBackgroundImage)
+			{
+				// Draw a thicker version of the line in the background colour
+				// so the overdrawn line is always visible
+				if (linePen.Color != SystemColors.Window)
+				{
+					using (var backPen = NewPen(SystemColors.Window, (linePen.Width + ScaleByDpi(1))))
+						base.DrawConnection(graphics, backPen, pinBrush, node1Pos, node2Pos);
+				}
+			}
+
+			base.DrawConnection(graphics, linePen, pinBrush, node1Pos, node2Pos);
+		}
+		
 		protected void DrawConnectionArrows(Graphics graphics, UserLinkAttributes.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos, int offset)
 		{
 			if (arrows != UserLinkAttributes.EndArrows.None)
 			{
-				using (var pen = new Pen(color, thickness))
+				using (var arrowPen = NewPen(color, thickness))
 				{
-					int size = UIExtension.DependencyArrows.Size(TextFont) + thickness;
+					int size = (UIExtension.DependencyArrows.Size(TextFont) + (int)ScaleByDpi(thickness));
 
 					if ((arrows == UserLinkAttributes.EndArrows.Start) || (arrows == UserLinkAttributes.EndArrows.Both))
 					{
 						var degrees = Geometry2D.DegreesBetween(toPos, fromPos, Geometry2D.AngleAxis.FromVertical);
-						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, offset, degrees);
+						DrawConnectionArrow(graphics, arrowPen, fromPos, degrees, size, offset);
 					}
 
 					if ((arrows == UserLinkAttributes.EndArrows.Finish) || (arrows == UserLinkAttributes.EndArrows.Both))
 					{
 						var degrees = Geometry2D.DegreesBetween(fromPos, toPos, Geometry2D.AngleAxis.FromVertical);
-						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, offset, degrees);
+						DrawConnectionArrow(graphics, arrowPen, toPos, degrees, size, offset);
 					}
 				}
 			}
+		}
+
+		protected void DrawConnectionArrow(Graphics graphics, Pen arrowPen, Point arrowPos, float degrees, int size, int offset)
+		{
+			//if (HasBackgroundImage)
+			{
+				// Under-draw a thicker version of the arrow in the background colour
+				// so the overdrawn line is always visible
+				if (arrowPen.Color != SystemColors.Window)
+				{
+					using (var backPen = NewPen(SystemColors.Window, (arrowPen.Width + ScaleByDpi(1))))
+						UIExtension.ArrowHeads.Draw(graphics, arrowPen, arrowPos.X, arrowPos.Y, size, offset, degrees);
+				}
+			}
+
+			UIExtension.ArrowHeads.Draw(graphics, arrowPen, arrowPos.X, arrowPos.Y, size, offset, degrees);
 		}
 
 		protected void DoPaintNode(Graphics graphics, TaskItem taskItem, Rectangle taskRect, DrawState drawState)
@@ -1570,7 +1654,7 @@ namespace EvidenceBoardUIExtension
 				taskRect.Width--;
 				taskRect.Height--;
 
-				using (var pen = new Pen(borderColor, 0f))
+				using (var pen = NewPen(borderColor, 0))
 					graphics.DrawRectangle(pen, taskRect);
 			}
 
@@ -1896,7 +1980,7 @@ namespace EvidenceBoardUIExtension
 					Point fromPos, toPos;
 					const double Tolerance = 5.0;
 
-					if (IsConnectionVisible(node, link.ToId, out fromPos, out toPos, true) && 
+					if (IsConnectionVisible(node, link.Target, out fromPos, out toPos, true) && 
 						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, Tolerance))
 					{
 						return link;
@@ -2020,10 +2104,9 @@ namespace EvidenceBoardUIExtension
 					ClearUserLinkSelection();
 				}
 
-				node = HitTestNode(e.Location, true);
-
-				if ((node != null) && GetCreateLinkPinRect(node).Contains(e.Location))
+				if (HitTestHotNodeCreateLink(e.Location))
 				{
+					node = GetNode(m_HotTaskId);
 					DoUserLinkDragDrop(new UserLink(node.Data, NullId, UserLinkAttributes.Defaults));
 
 					// Prevent base class handling
@@ -2337,6 +2420,8 @@ namespace EvidenceBoardUIExtension
 
 				if (HitTestTaskIcon(ptClient) != null)
 					return UIExtension.HandCursor();
+
+				return Cursors.Arrow;
 			}
 #if DEBUG
 			if (m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
@@ -2381,25 +2466,35 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		protected override void OnMouseMove(MouseEventArgs e)
+		private bool HitTestHotNodeCreateLink(Point ptClient)
 		{
- 			base.OnMouseMove(e);
+			if (m_HotTaskId != 0)
+			{
+				var hotNode = GetNode(m_HotTaskId);
 
+				if (hotNode == null)
+					return false;
+
+				if (Rectangle.Inflate(GetCreateLinkPinRect(hotNode), 1, 1).Contains(ptClient))
+					return true;
+			}
+
+			return false;
+		}
+		
+		protected override Cursor GetCursor(MouseEventArgs e)
+		{
 			Cursor cursor = null;
 
 			if (!ReadOnly)
 			{
 				UpdateHotTask(e.Location);
 
-				if (m_HotTaskId != 0)
+				if (HitTestHotNodeCreateLink(e.Location))
 				{
-					var hotNode = GetNode(m_HotTaskId);
-
-					if ((hotNode != null) && GetCreateLinkPinRect(hotNode).Contains(e.Location))
-						cursor = UIExtension.OleDragCursor(UIExtension.OleDragCursorType.Copy);
+					cursor = UIExtension.OleDragCursor(UIExtension.OleDragCursorType.Copy);
 				}
-
-				if (cursor == null)
+				else
 				{
 					if (DrawNodesOnTop)
 					{
@@ -2423,7 +2518,7 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 
-			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
+			return ((cursor != null) ? cursor : base.GetCursor(e));
 		}
 
 		protected override void OnDragOver(DragEventArgs e)
@@ -2445,6 +2540,14 @@ namespace EvidenceBoardUIExtension
 					if (IsAcceptableLinkDropTarget(node))
 					{
 						m_DropHighlightedTaskId = node.Data;
+						e.Effect = e.AllowedEffect;
+					}
+					else if (node != null)
+					{
+						e.Effect = DragDropEffects.None;
+					}
+					else if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					{
 						e.Effect = e.AllowedEffect;
 					}
 				}
@@ -2532,11 +2635,30 @@ namespace EvidenceBoardUIExtension
 
 		override protected void OnDragDrop(DragEventArgs e)
 		{
+			m_HotTaskId = 0;
+
 			if (m_DraggingSelectedUserLink)
 			{
+				UserLinkTarget target = null;
+
 				if (m_DropHighlightedTaskId != 0)
 				{
-					if (m_SelectedUserLink.ToId == NullId) // New link
+					target = new UserLinkTarget(m_DropHighlightedTaskId);
+				}
+				else
+				{
+					var ptClient = PointToClient(new Point(e.X, e.Y));
+
+					if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					{
+						var ptImage = BackgroundImage.AbsoluteToRelative(ClientToGraph(ptClient));
+						target = new UserLinkTarget(ptImage);
+					}
+				}
+
+				if (target != null)
+				{
+					if (m_SelectedUserLink.Target.Id == NullId) // New link
 					{
 						Debug.Assert(m_SelectedUserLink.FromId == SingleSelectedNode.Data);
 
@@ -2544,7 +2666,7 @@ namespace EvidenceBoardUIExtension
 
 						if (taskItem != null)
 						{
-							var newLink = CreateUserLink(taskItem.TaskId, m_DropHighlightedTaskId, m_SelectedUserLink.Attributes);
+							var newLink = CreateUserLink(taskItem.TaskId, target, m_SelectedUserLink.Attributes);
 
 							if ((newLink != null) && (ConnectionCreated != null) && !ConnectionCreated(this, newLink))
 								taskItem.DeleteUserLink(newLink);
@@ -2552,7 +2674,7 @@ namespace EvidenceBoardUIExtension
 					}
 					else
 					{
-						m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
+						m_SelectedUserLink.SetTarget(target);
 
 						ConnectionEdited?.Invoke(this, m_SelectedUserLink);
 					}
@@ -2608,12 +2730,26 @@ namespace EvidenceBoardUIExtension
 
 			if (m_DraggingSelectedUserLink)
 			{
-				if (!MouseButtons.HasFlag(MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
+				bool cancel = e.EscapePressed;
+
+				if (!cancel && !MouseButtons.HasFlag(MouseButtons.Left) && (m_DropHighlightedTaskId == 0))
 				{
-					e.Action = DragAction.Cancel;
-					ResetUserLinkDrag();
+					if (HitTestTask(m_DraggedUserLinkEnd) != null)
+					{
+						// Must be an invalid drop target
+						cancel = true;
+					}
+					else if (!HasBackgroundImage)
+					{
+						cancel = true;
+					}
+					else if (HitTestBackgroundImage(m_DraggedUserLinkEnd) != DragMode.Background)
+					{
+						cancel = true;
+					}
 				}
-				else if (e.EscapePressed)
+
+				if (cancel)
 				{
 					e.Action = DragAction.Cancel;
 					ResetUserLinkDrag();
@@ -2642,6 +2778,7 @@ namespace EvidenceBoardUIExtension
 			ExpansionBtn,
 			SpinForwardBtn,
 			SpinBackBtn,
+			CreateLinkPin,
 
 			NumTips,
 		}
@@ -2667,7 +2804,12 @@ namespace EvidenceBoardUIExtension
 
 			var tip = new LabelTipInfo();
 
-			if (taskItem.HasImage)
+			if (Rectangle.Inflate(GetCreateLinkPinRect(node), 1, 1).Contains(clientPos))
+			{
+				tip.Text = m_Trans.Translate("Create New Link");
+				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
+			}
+			else if (taskItem.HasImage)
 			{
 				var imageRect = CalcImageRect(taskItem, nodeRect, false);
 
@@ -2679,78 +2821,90 @@ namespace EvidenceBoardUIExtension
 					tip.Text = m_Trans.Translate("Toggle Image Visibility");
 					tip.Id = TooltipId(taskItem, TipId.ExpansionBtn);
 				}
-				else
+				else if (taskItem.ImageCount > 1)
 				{
-					if (taskItem.ImageCount > 1)
+					// Image spin buttons
+					// Forward button
+					tip.Rect = CalcImageSpinButtonRect(imageRect, true);
+
+					if (tip.Rect.Contains(clientPos))
 					{
-						// Image spin buttons
-						// Forward button
-						tip.Rect = CalcImageSpinButtonRect(imageRect, true);
+						tip.Text = m_Trans.Translate("Next Image");
+						tip.Id = TooltipId(taskItem, TipId.SpinForwardBtn);
+					}
+					else // Back button
+					{
+						tip.Rect = CalcImageSpinButtonRect(imageRect, false);
 
 						if (tip.Rect.Contains(clientPos))
 						{
-							tip.Text = m_Trans.Translate("Next Image");
-							tip.Id = TooltipId(taskItem, TipId.SpinForwardBtn);
-						}
-						else // Back button
-						{
-							tip.Rect = CalcImageSpinButtonRect(imageRect, false);
-
-							if (tip.Rect.Contains(clientPos))
-							{
-								tip.Text = m_Trans.Translate("Previous Image");
-								tip.Id = TooltipId(taskItem, TipId.SpinBackBtn);
-							}
+							tip.Text = m_Trans.Translate("Previous Image");
+							tip.Id = TooltipId(taskItem, TipId.SpinBackBtn);
 						}
 					}
 				}
+			}
 
-				if (tip.Id != 0)
+			if (tip.Id != 0)
+			{
+				// These are really tooltips not label tips so offset them
+				clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+
+				tip.Rect.Location = clientPos;
+				tip.InitialDelay = 500;
+				tip.MultiLine = false;
+				tip.Font = Font;
+			}
+			else // check for title tip
+			{
+				tip.Rect = CalcTaskLabelRect(node, true);
+				tip.Text = taskItem.ToString();
+				tip.Font = GetTaskTooltipFont(taskItem);
+
+				var sizeText = TextRenderer.MeasureText(tip.Text, tip.Font, new Size(tip.Rect.Width, 0), TextFormatFlags.WordBreak);
+
+				tip.MultiLine = (sizeText.Height > tip.Font.Height);
+
+				if (!tip.MultiLine)
+					tip.Rect.Size = sizeText;
+
+				if (!ClientRectangle.Contains(tip.Rect))
 				{
-					// These are really tooltips not label tips so offset them
-					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-
-					tip.Rect.Location = clientPos;
-					tip.InitialDelay = 500;
-					tip.MultiLine = false;
-
-					return tip;
+					// If the text rectangle is not wholly visible we always 
+					// need a label tip so we just clip to the avail space
+					tip.Rect.X = Math.Max(0, Math.Min(ClientRectangle.Right - tip.Rect.Width, tip.Rect.Left));
+					tip.Rect.Y = Math.Max(0, Math.Min(ClientRectangle.Bottom - tip.Rect.Height, tip.Rect.Top));
 				}
+				else if (!tip.Rect.Contains(clientPos)) // check available space
+				{
+					return null;
+				}
+				else if ((sizeText.Width <= tip.Rect.Width) && (sizeText.Height <= tip.Rect.Height))
+				{
+					return null;
+				}
+
+				tip.Rect.Inflate(LabelPadding, LabelPadding);
+				tip.Id = TooltipId(taskItem, TipId.TaskTitle);
 			}
-
-			// Title tip
-			tip.Rect = CalcTaskLabelRect(node, true);
-			tip.Text = taskItem.ToString();
-			tip.Font = GetTaskLabelFont(taskItem);
-
-			var sizeText = TextRenderer.MeasureText(tip.Text, tip.Font, new Size(tip.Rect.Width, 0), TextFormatFlags.WordBreak);
-
-			tip.MultiLine = (sizeText.Height > tip.Font.Height);
-
-			if (!tip.MultiLine)
-				tip.Rect.Size = sizeText;
-
-			if (!ClientRectangle.Contains(tip.Rect))
-			{
-				// If the text rectangle is not wholly visible we always 
-				// need a label tip so we just clip to the avail space
-				tip.Rect.X = Math.Max(0, Math.Min(ClientRectangle.Right - tip.Rect.Width, tip.Rect.Left));
-				tip.Rect.Y = Math.Max(0, Math.Min(ClientRectangle.Bottom - tip.Rect.Height, tip.Rect.Top));
-			}
-			else if (!tip.Rect.Contains(clientPos)) // check available space
-			{
-				return null;
-			}
-			else if ((sizeText.Width <= tip.Rect.Width) && (sizeText.Height <= tip.Rect.Height))
-			{
-				return null;
-			}
-
-			tip.Rect.Inflate(LabelPadding, LabelPadding);
-			tip.Id = TooltipId(taskItem, TipId.TaskTitle);
 
 			return tip;
 		}
+
+
+		public bool SetBackgroundImage(string filePath)
+		{
+			if (!SetBackgroundImage(filePath, Rectangle.Empty, false))
+				return false;
+
+			BackgroundImage.ResizeToFit(Rectangle.Inflate(Extents, -10, -10));
+			ZoomToExtents();
+
+			BackgroundImageChanged?.Invoke(this, null);
+
+			return true;
+		}
+
 	}
 
 }
