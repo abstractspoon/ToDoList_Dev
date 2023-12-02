@@ -130,14 +130,13 @@ const LPCTSTR PREF_KEY		= _T("Preferences");
 const LPCTSTR ENDL			= _T("\n");
 const LPCTSTR TDL_EXT		= _T("tdl");
 const LPCTSTR XML_EXT		= _T("xml");
-const LPCTSTR HTMLIMG_EXT	= _T("html_images");
 
 static CEnString TDL_FILEFILTER;
 
 /////////////////////////////////////////////////////////////////////////////
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
-const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
+const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"));
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
 
 /////////////////////////////////////////////////////////////////////////////
@@ -6652,8 +6651,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, TEMP_PRINT_FILEPATH);
-
-
+	
 	switch (nStyle)
 	{
 	case TDLPDS_IMAGE:
@@ -10343,9 +10341,6 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments,
 
 		ASSERT(!sHtmlImageDir.IsEmpty());
 		tasks.SetHtmlImageFolder(sHtmlImageDir);
-
-		// And delete all existing images in that folder
-		FileMisc::DeleteFolderContents(sHtmlImageDir, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 	}
 
 	// get the tasks
@@ -10520,17 +10515,13 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 
 CString CToDoListWnd::GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath)
 {
-	CString sHtmlImgFolder;
-
 	if (bHtmlComments)
 	{
 		ASSERT(!sTasklistPath.IsEmpty());
-
-		sHtmlImgFolder = sTasklistPath;
-		FileMisc::ReplaceExtension(sHtmlImgFolder, HTMLIMG_EXT);
+		return FileMisc::GetFolderFromFilePath(sTasklistPath);
 	}
 
-	return sHtmlImgFolder;
+	return _T("");
 }
 
 BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks)

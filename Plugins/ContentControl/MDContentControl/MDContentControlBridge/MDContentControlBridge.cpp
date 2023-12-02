@@ -106,7 +106,7 @@ int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	for (int i = 0; i < nLength; i++)
 		content[i] = pContent[i];
 
-	String^ html = MDContentControlCore::ConvertToHtml(content);
+	String^ html = MDContentControlCore::ConvertToHtml(content, gcnew String(szImageDir));
 
 	if (String::IsNullOrWhiteSpace(html))
 		return 0;
@@ -116,7 +116,8 @@ int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	int nCharLen = (html->Length + 1); // Includes a NULL terminator
 	szHtml = new WCHAR[nCharLen];
 	
-	CopyMemory(szHtml, msHtml, nCharLen * sizeof(WCHAR));
+	CopyMemory(szHtml, msHtml, (html->Length * sizeof(WCHAR)));
+	szHtml[html->Length] = 0;
 
 	return nCharLen;
 }

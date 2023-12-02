@@ -6,6 +6,7 @@
 #include "ContentMgr.h"
 #include "IContentControl.h"
 
+#include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\binarydata.h"
 #include "..\shared\localizer.h"
@@ -249,6 +250,9 @@ BOOL CContentMgr::ConvertContentToHtml(const CBinaryData& content, CString& sHtm
 	if (nContent == -1)
 		return FALSE;
 
+	if (!Misc::IsEmpty(szImageDir))
+		FileMisc::CreateFolder(szImageDir);
+
 	IContent* pContent = m_aContent[nContent];
 	ASSERT (pContent);
 
@@ -259,7 +263,10 @@ BOOL CContentMgr::ConvertContentToHtml(const CBinaryData& content, CString& sHtm
 		sHtml = szHtml;
 
 	pContent->FreeHtmlBuffer(szHtml); // cleanup
-	
+
+	if (!Misc::IsEmpty(szImageDir))
+		RemoveDirectory(szImageDir); // This will fail intentionally if not empty
+
 	return (nHtmlLen > 0);
 }
 

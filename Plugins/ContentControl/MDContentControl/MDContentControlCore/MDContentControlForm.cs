@@ -62,17 +62,17 @@ namespace MDContentControl
 			};
 		}
 
-		public static string ConvertToHtml(Byte[] content)
+		public static string ConvertToHtml(Byte[] content, string imageDir)
 		{
 			if (content.Length == 0)
 				return string.Empty;
 
 			var inputText = System.Text.Encoding.Unicode.GetString(content);
 
-			return ConvertToHtml(inputText);
+			return ConvertToHtml(inputText, imageDir);
 		}
 
-		public static string ConvertToHtml(string content)
+		protected static string ConvertToHtml(string content, string imageDir)
 		{
 			if (content.Length == 0)
 				return string.Empty;
@@ -80,15 +80,42 @@ namespace MDContentControl
 			MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 			MarkdownDocument document = Markdown.Parse(content, pipeline);
 
+			// If an image directory path has been provided, copy images there
+			// else convert image paths to absolute relative to CWD
+			bool hasImageDir = Directory.Exists(imageDir);
+			var cwdPath = Directory.GetCurrentDirectory();
+
 			foreach (LinkInline link in document.Descendants().OfType<LinkInline>())
 			{
 				System.Uri uri = null;
 
 				if (System.Uri.TryCreate(link.Url, UriKind.RelativeOrAbsolute, out uri) && !uri.IsAbsoluteUri)
 				{
-					// Assume it's a local path
-					var path = Path.Combine(Directory.GetCurrentDirectory(), link.Url);
-					link.Url = new Uri(path).AbsoluteUri;
+					try
+					{
+						var absPath = Path.GetFullPath(Path.Combine(cwdPath, link.Url));
+
+						if (hasImageDir)
+						{
+							var targetPath = Path.GetFullPath(Path.Combine(imageDir, link.Url));
+
+							if (0 != string.Compare(absPath, targetPath, StringComparison.InvariantCultureIgnoreCase))
+							{
+								// Ensure the target folder exists (may be a subfolder)
+								Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+
+								// This will not overwrite an existing image
+								File.Copy(absPath, targetPath, true);
+							}
+						}
+						else
+						{
+							link.Url = new Uri(absPath).AbsoluteUri;
+						}
+					}
+					catch (Exception)
+					{
+					}
 				}
 			}
 
@@ -105,7 +132,7 @@ namespace MDContentControl
 		{
 			get
 			{
-				return ConvertToHtml(InputText);
+				return ConvertToHtml(InputText, "");
 			}
 		}
 
