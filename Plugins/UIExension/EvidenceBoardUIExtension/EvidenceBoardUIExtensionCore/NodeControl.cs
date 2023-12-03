@@ -838,9 +838,7 @@ namespace EvidenceBoardUIExtension
 
 			// Draw new selection box
 			if (m_DragMode == DragMode.SelectionBox)
-			{
 				DrawSelectionBox(e.Graphics, m_SelectionBox);
-			}
 		}
 
 		protected virtual void DrawSelectionBox(Graphics graphics, Rectangle rect)
@@ -854,14 +852,13 @@ namespace EvidenceBoardUIExtension
 		{
 			Point nodePos, parentPos;
 
-			if (IsConnectionVisible(node, node.Parent, out nodePos, out parentPos))
+			if (node.IsRoot || (node.Parent?.IsExpanded == true))
 			{
-				DrawParentConnection(graphics, node.Data, nodePos, parentPos);
-			}
+				if (IsConnectionVisible(node, node.Parent, out nodePos, out parentPos))
+					DrawParentConnection(graphics, node.Data, nodePos, parentPos);
 
-			foreach (var child in node.Children)
-			{
-				DrawParentAndChildConnections(graphics, child);
+				foreach (var child in node.Children)
+					DrawParentAndChildConnections(graphics, child);
 			}
 		}
 
@@ -871,9 +868,7 @@ namespace EvidenceBoardUIExtension
 
 			// Draw selection
 			foreach (var selNode in m_SelectedNodes)
-			{
 				CheckDrawNode(graphics, selNode, true);
-			}
 		}
 
 		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, BaseNode node)
@@ -881,9 +876,10 @@ namespace EvidenceBoardUIExtension
 			if (!m_SelectedNodes.Contains(node))
 				CheckDrawNode(graphics, node, false);
 
-			foreach (var child in node.Children)
+			if (node.IsExpanded)
 			{
-				DrawParentAndChildNodesExcludingSelectedNodes(graphics, child);
+				foreach (var child in node.Children)
+					DrawParentAndChildNodesExcludingSelectedNodes(graphics, child);
 			}
 		}
 
@@ -1005,9 +1001,8 @@ namespace EvidenceBoardUIExtension
 					m_RadialTree.CalculatePositions(m_InitialRadius, m_RadialIncrementOrSpacing);
 
 				OnAfterRecalcLayout();
-				Invalidate();
-
 				RecalcExtents();
+
 				AutoScrollMinSize = ZoomedSize;
 			}
 		}
@@ -1029,12 +1024,17 @@ namespace EvidenceBoardUIExtension
 
 		protected void RecalcExtents()
 		{
+			var oldExtents = Extents;
+
 			m_MinExtents = m_MaxExtents = Point.Empty;
 			RecalcExtents(RootNode);
 
 			const int Border = 50;
 			m_MinExtents.Offset(-Border, -Border);
 			m_MaxExtents.Offset(Border, Border);
+
+			if (!Extents.Equals(oldExtents))
+				Invalidate();
 		}
 
 		protected void RecalcExtents(BaseNode node)
@@ -1047,8 +1047,11 @@ namespace EvidenceBoardUIExtension
 			m_MaxExtents.X = Math.Max(m_MaxExtents.X, (int)nodeRect.Right);
 			m_MaxExtents.Y = Math.Max(m_MaxExtents.Y, (int)nodeRect.Bottom);
 
-			foreach (var child in node.Children)
-				RecalcExtents(child);
+			if (node.IsExpanded)
+			{
+				foreach (var child in node.Children)
+					RecalcExtents(child); // RECURSIVE CALL
+			}
 		}
 
 		protected override void OnSizeChanged(EventArgs e)
@@ -1608,7 +1611,6 @@ namespace EvidenceBoardUIExtension
 						{
 							ClearDragState();
 							RecalcExtents();
-							Invalidate();
 
 							AutoScrollMinSize = ZoomedSize;
 						}
@@ -1686,6 +1688,124 @@ namespace EvidenceBoardUIExtension
 				Invalidate();
 				BackgroundImageChanged?.Invoke(this, null);
 			}
+		}
+
+		public bool ExpandAllNodes()
+		{
+			if (!ExpandNode(RootNode, true, true)) // and children
+				return false;
+
+			RecalcExtents();
+			return true;
+		}
+
+		public bool CanExpandAllNodes
+		{
+			get
+			{
+				// Look for the first collapsed node 
+				return (RootNode.FindTreeNode(x => x.IsCollapsed) != null);
+			}
+		}
+
+		public bool CollapseAllNodes()
+		{
+			if (!ExpandNode(RootNode, false, true)) // and children
+				return false;
+
+			RecalcExtents();
+			ValidateSelectedNodeVisibility();
+
+			return true;
+		}
+
+		public bool CanCollapseAllNodes
+		{
+			get
+			{
+				// Look for the first expanded node 
+				return (RootNode.FindTreeNode(x => x.IsExpanded) != null);
+			}
+		}
+
+		private void ValidateSelectedNodeVisibility()
+		{
+			int numItems = m_SelectedNodes.Count, item = numItems;
+
+			while (item-- > 0)
+			{
+				if (!m_SelectedNodes[item].AllParentsExpanded)
+					m_SelectedNodes.RemoveAt(item);
+			}
+
+			if (m_SelectedNodes.Count < numItems)
+				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+		}
+
+		public bool ExpandSelectedNodes()
+		{
+			bool someExpanded = false;
+
+			foreach (var node in m_SelectedNodes)
+				someExpanded |= node.Expand(true, true); // and children
+
+			if (someExpanded)
+				RecalcExtents();
+
+			return someExpanded;
+		}
+
+		public bool CollapseSelectedNodes()
+		{
+			bool someCollapsed = false;
+
+			foreach (var node in m_SelectedNodes)
+				someCollapsed |= node.Expand(false, true); // and children
+
+			if (someCollapsed)
+			{
+				RecalcExtents();
+				ValidateSelectedNodeVisibility();
+			}
+
+			return someCollapsed;
+		}
+
+		public bool CanExpandSelectedNodes
+		{
+			get
+			{
+				foreach (var node in m_SelectedNodes)
+				{
+					// Look for the first collapsed node 
+					if (node.IsCollapsed)
+						return true;
+				}
+
+				// else
+				return false;
+			}
+		}
+
+		public bool CanCollapseSelectedNodes
+		{
+			get
+			{
+				// Look for the first expanded node 
+				foreach (var node in m_SelectedNodes)
+				{
+					if (node.IsExpanded)
+						return true;
+				}
+
+				// else
+				return false;
+			}
+		}
+
+		protected virtual bool ExpandNode(BaseNode node, bool expand, bool andChildren)
+		{
+			return node.Expand(expand, andChildren);
 		}
 
 	}

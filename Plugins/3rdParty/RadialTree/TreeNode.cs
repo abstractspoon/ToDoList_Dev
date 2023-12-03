@@ -63,11 +63,81 @@ namespace RadialTree
         /// The child nodes of the tree.
         /// </summary>
         public IList<TreeNode<T>> Children { get { return _children; } }
+		
+		public enum ExpansionState
+		{
+			NoChildren,
+			Expanded,
+			Collapsed
+		}
 
-        /// <summary>
-        /// Object/Data assigned to the node.
-        /// </summary>
-        public T Data { get { return _data; } }
+		private bool _expanded = true;
+
+		public ExpansionState Expansion
+		{
+			get
+			{
+				if (IsLeaf)
+					return ExpansionState.NoChildren;
+
+				return (_expanded ? ExpansionState.Expanded : ExpansionState.Collapsed);
+			}
+		}
+
+		public bool IsExpanded { get { return (Expansion == ExpansionState.Expanded); } }
+		public bool IsCollapsed { get { return (Expansion == ExpansionState.Collapsed); } }
+
+		public bool AllParentsExpanded
+		{
+			get
+			{
+				var parent = _parent;
+
+				while (parent != null)
+				{
+					if (parent.IsCollapsed)
+						return false;
+
+					parent = parent._parent;
+				}
+
+				// Root Node
+				return true;
+			}
+		}
+
+		public bool Expand(bool expand, bool andChildren)
+		{
+			if (IsLeaf)
+				return false;
+
+			bool someChanged = (_expanded != expand);
+			_expanded = expand;
+
+			if (andChildren)
+				someChanged |= ExpandChildren(expand);
+
+			return someChanged;
+		}
+
+
+		public bool ExpandChildren(bool expand)
+		{
+			if (IsLeaf)
+				return false;
+
+			bool someChanged = (_expanded != expand);
+
+			foreach (var child in _children)
+				someChanged |= child.Expand(expand, true);
+
+			return someChanged;
+		}
+		
+		/// <summary>
+		/// Object/Data assigned to the node.
+		/// </summary>
+		public T Data { get { return _data; } }
 
         /// <summary>
         /// The parent of the node.

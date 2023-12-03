@@ -88,7 +88,7 @@ namespace EvidenceBoardUIExtension
 				if (!HasImage)
 					return ImageExpansionState.NoImage;
 
-				return (ImageExpanded ? ImageExpansionState.Expanded : ImageExpansionState.Collapsed);
+				return (m_ImageExpanded ? ImageExpansionState.Expanded : ImageExpansionState.Collapsed);
 			}
 		}
 
@@ -96,22 +96,22 @@ namespace EvidenceBoardUIExtension
 
 		public bool ExpandImage(bool expand)
 		{
-			if (!HasImage || (expand == ImageExpanded))
+			if (!HasImage || (expand == m_ImageExpanded))
 				return false;
 
-			ImageExpanded = expand;
+			m_ImageExpanded = expand;
 			return true;
 		}
 
 		// -----------------------------------------------------------------
 
-		private bool ImageExpanded = true;
+		private bool m_ImageExpanded = true;
 
 		// -----------------------------------------------------------------
 
 		public TaskItem()
 		{
-			ImageExpanded = true;
+			m_ImageExpanded = true;
 			StartDate = EndDate = DateTime.MinValue;
 		}
 

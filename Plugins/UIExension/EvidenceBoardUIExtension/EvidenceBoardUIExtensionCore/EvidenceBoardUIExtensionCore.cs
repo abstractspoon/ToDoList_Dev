@@ -319,18 +319,17 @@ namespace EvidenceBoardUIExtension
             return false;//m_Control.CanSaveToImage();
         }
 
-		public bool ExpandSelectedTaskImages() { return m_Control.ExpandSelectedTaskImages(); }
-		public bool CollapseSelectedTaskImages() { return m_Control.CollapseSelectedTaskImages(); }
+		public bool ExpandSelectedTasks() { return m_Control.ExpandSelectedNodes(); }
+		public bool CollapseSelectedTasks() { return m_Control.CollapseSelectedNodes(); }
 
-		public bool CanExpandSelectedTasks { get { return m_Control.CanExpandSelectedTaskImages; } }
-		public bool CanCollapseSelectedTasks	{ get { return m_Control.CanCollapseSelectedTaskImages; } }
+		public bool CanExpandSelectedTasks { get { return m_Control.CanExpandSelectedNodes; } }
+		public bool CanCollapseSelectedTasks { get { return m_Control.CanCollapseSelectedNodes; } }
 
-		public bool ExpandAllTaskImages()	{ return m_Control.ExpandAllTaskImages(); }
-		public bool CollapseAllTaskImages() { return m_Control.CollapseAllTaskImages(); }
+		public bool ExpandAllTasks() { return m_Control.ExpandAllNodes(); }
+		public bool CollapseAllTasks() { return m_Control.CollapseAllNodes(); }
 
-		public bool CanExpandAllTaskImages { get { return m_Control.CanExpandAllTaskImages; } }
-		public bool CanCollapseAllTaskImages { get { return m_Control.CanCollapseAllTaskImages; } }
-
+		public bool CanExpandAllTasks { get { return m_Control.CanExpandAllNodes; } }
+		public bool CanCollapseAllTasks { get { return m_Control.CanCollapseAllNodes; } }
 
 		// Message handlers ---------------------------------------------------------------------
 

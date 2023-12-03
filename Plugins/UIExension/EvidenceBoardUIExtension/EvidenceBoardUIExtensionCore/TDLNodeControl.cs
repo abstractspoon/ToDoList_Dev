@@ -377,6 +377,15 @@ namespace EvidenceBoardUIExtension
 		public bool CanExpandAllTaskImages { get { return (m_TaskItems?.CanExpandAllTaskImages == true); } }
 		public bool CanCollapseAllTaskImages { get { return (m_TaskItems?.CanCollapseAllTaskImages == true); } }
 
+		protected override bool ExpandNode(BaseNode node, bool expand, bool andChildren)
+		{
+			if (node == RootNode)
+				return node.ExpandChildren(expand);
+
+			// else
+			return node.Expand(expand, andChildren);
+		}
+
 		public void SavePreferences(Preferences prefs, String key)
 		{
 			string ids = String.Empty;
