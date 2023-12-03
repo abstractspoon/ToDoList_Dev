@@ -999,7 +999,10 @@ namespace WordCloudUIExtension
 
 		private void OnWordCloudEditIgnoreList(object sender, EventArgs e)
 		{
-			// TODO
+			if (EditIgnoreListDlg.DoEdit(m_UserIgnoreFilePath))
+			{
+				UpdateBlacklist();
+			}
 		}
 
 		private void OnHelp(object sender, EventArgs e)

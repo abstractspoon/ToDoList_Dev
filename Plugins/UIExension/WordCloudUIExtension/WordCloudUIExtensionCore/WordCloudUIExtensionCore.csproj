@@ -54,6 +54,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ColorSchemeComboBox.cs" />
+    <Compile Include="EditIgnoreListDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditIgnoreListDlg.Designer.cs">
+      <DependentUpon>EditIgnoreListDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="TaskCloudItem.cs" />
     <Compile Include="TaskMatchesListView.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -77,6 +83,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="EditIgnoreListDlg.resx">
+      <DependentUpon>EditIgnoreListDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -90,6 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="toolbar_std.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WordCloud.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
