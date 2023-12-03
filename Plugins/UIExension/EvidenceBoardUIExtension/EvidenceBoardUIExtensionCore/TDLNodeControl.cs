@@ -2132,6 +2132,8 @@ namespace EvidenceBoardUIExtension
 				if ((taskItem != null) && taskItem.CanSelectNextImage(forwardBtn))
 				{
 					// Redraw the spin control
+					node = GetNode(taskItem.TaskId);
+
 					Invalidate(CalcImageSpinButtonRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
 					Update();
 
