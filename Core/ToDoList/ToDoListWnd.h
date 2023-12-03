@@ -821,7 +821,7 @@ protected:
 	static void EnableTDLProtocol(BOOL bEnable);
 	static void SetupUIStrings();
 	static CString GetEndSessionFilePath();
-	static CString GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath);
+	static CString GetHtmlImageFolder(BOOL bHtmlComments, const CString& sFilePath);
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);

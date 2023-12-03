@@ -6656,10 +6656,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 	{
 	case TDLPDS_IMAGE:
 		{
-			CString sTempImg = TEMP_TASKVIEW_FILEPATH;
-
-			// export
-			if (tdc.SaveTaskViewToImage(sTempImg))
+			if (tdc.SaveTaskViewToImage(TEMP_TASKVIEW_FILEPATH))
 			{
 				// Make a simple web page container
 				CString sHtmlOutput(_T("<!DOCTYPE html>\n"));
@@ -6683,7 +6680,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 				}
 
 				CString sImage;
-				sImage.Format(_T("<img src=\"%s\">"), sTempImg);
+				sImage.Format(_T("<img src=\"%s\">"), TEMP_TASKVIEW_FILEPATH);
 
 				sHtmlOutput += sImage;
 				sHtmlOutput += _T("</body>\n</html>\n");
@@ -10513,15 +10510,16 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	}
 }
 
-CString CToDoListWnd::GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath)
+CString CToDoListWnd::GetHtmlImageFolder(BOOL bHtmlComments, const CString& sFilePath)
 {
-	if (bHtmlComments)
-	{
-		ASSERT(!sTasklistPath.IsEmpty());
-		return FileMisc::GetFolderFromFilePath(sTasklistPath);
-	}
+	if (!bHtmlComments)
+		return _T("");
 
-	return _T("");
+	ASSERT(!sFilePath.IsEmpty());
+	CString sImgFolder = FileMisc::GetFolderFromFilePath(sFilePath);
+
+	VERIFY(FileMisc::CreateFolder(sImgFolder));
+	return sImgFolder;
 }
 
 BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks)

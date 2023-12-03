@@ -80,8 +80,7 @@ namespace MDContentControl
 			MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 			MarkdownDocument document = Markdown.Parse(content, pipeline);
 
-			// If an image directory path has been provided, copy images there
-			// else convert image paths to absolute relative to CWD
+			// Handle relative image paths
 			bool hasImageDir = Directory.Exists(imageDir);
 			var cwdPath = Directory.GetCurrentDirectory();
 
@@ -99,16 +98,23 @@ namespace MDContentControl
 						{
 							var targetPath = Path.GetFullPath(Path.Combine(imageDir, link.Url));
 
-							if (0 != string.Compare(absPath, targetPath, StringComparison.InvariantCultureIgnoreCase))
+							// If the resolved image path is NOT equal to, or a subfolder of, the image directory
+							// then we use the full path relative to CWD
+							if (0 != targetPath.IndexOf(imageDir, StringComparison.InvariantCultureIgnoreCase))
+							{
+								link.Url = new Uri(absPath).AbsoluteUri;
+							}
+							// Else if the target and source are NOT the same, we copy the image
+							else if (0 != string.Compare(absPath, targetPath, StringComparison.InvariantCultureIgnoreCase))
 							{
 								// Ensure the target folder exists (may be a subfolder)
 								Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
 
-								// This will not overwrite an existing image
+								// Overwrite existing image
 								File.Copy(absPath, targetPath, true);
 							}
 						}
-						else
+						else // convert to absolute path
 						{
 							link.Url = new Uri(absPath).AbsoluteUri;
 						}
