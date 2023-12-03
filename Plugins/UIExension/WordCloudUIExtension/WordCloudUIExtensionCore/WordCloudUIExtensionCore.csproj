@@ -67,6 +67,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+      <Name>ToolStripEx</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>
@@ -83,6 +87,9 @@
       <Project>{34649D7D-04A9-4092-AD0B-F7022C123FD7}</Project>
       <Name>Controls</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="toolbar_std.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

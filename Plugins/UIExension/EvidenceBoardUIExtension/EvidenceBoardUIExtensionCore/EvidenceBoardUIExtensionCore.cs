@@ -231,7 +231,6 @@ namespace EvidenceBoardUIExtension
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
 
-
 			m_TBRenderer.SetUITheme(theme);
 		}
 
