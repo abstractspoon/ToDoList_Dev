@@ -399,6 +399,7 @@ void CTDLPrintStylePage::EnableDisableControls()
 	GetDlgItem(IDC_STYLESHEET)->EnableWindow(m_nStyleOption == OPT_STYLESHEET);
 	GetDlgItem(IDC_SIMPLEPAGE_OPTIONS)->EnableWindow(m_nStyleOption == OPT_SIMPLE);
 	GetDlgItem(IDC_OTHEREXPORTERS)->EnableWindow(m_nStyleOption == OPT_OTHEREXPORTER);
+	GetDlgItem(IDC_STYLE_TASKVIEW)->EnableWindow(!m_sExportToImageView.IsEmpty());
 
 	// Disable OK if stylesheet not valid
 	CString sUnused;
