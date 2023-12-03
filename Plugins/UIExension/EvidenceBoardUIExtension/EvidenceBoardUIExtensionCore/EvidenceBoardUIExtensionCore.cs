@@ -373,6 +373,7 @@ namespace EvidenceBoardUIExtension
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
+			m_Control.ImageExpansionChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.BackgroundImageChanged += (s, e) => 
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
@@ -715,23 +716,39 @@ namespace EvidenceBoardUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn5 = new ToolStripButton();
-			btn5.Name = "SetBackgroundImage";
+			btn5.Name = "ExpandAllImages";
 			btn5.ImageIndex = 4;
-			btn5.Click += new EventHandler(OnSetBackgroundImage);
-			btn5.ToolTipText = m_Trans.Translate("Set Background Image");
+			btn5.Click += (s, e) => { m_Control.ExpandAllTaskImages(); };
+			btn5.ToolTipText = m_Trans.Translate("Expand All Images");
 			m_Toolbar.Items.Add(btn5);
 
 			var btn6 = new ToolStripButton();
-			btn6.Name = "ClearBackgroundImage";
+			btn6.Name = "CollapseAllImages";
 			btn6.ImageIndex = 5;
-			btn6.Click += new EventHandler(OnClearBackgroundImage);
-			btn6.ToolTipText = m_Trans.Translate("Clear Background Image");
+			btn6.Click += (s, e) => { m_Control.CollapseAllTaskImages(); };
+			btn6.ToolTipText = m_Trans.Translate("Collapse All Images");
 			m_Toolbar.Items.Add(btn6);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
+			var btn7 = new ToolStripButton();
+			btn7.Name = "SetBackgroundImage";
+			btn7.ImageIndex = 6;
+			btn7.Click += new EventHandler(OnSetBackgroundImage);
+			btn7.ToolTipText = m_Trans.Translate("Set Background Image");
+			m_Toolbar.Items.Add(btn7);
+
+			var btn8 = new ToolStripButton();
+			btn8.Name = "ClearBackgroundImage";
+			btn8.ImageIndex = 7;
+			btn8.Click += new EventHandler(OnClearBackgroundImage);
+			btn8.ToolTipText = m_Trans.Translate("Clear Background Image");
+			m_Toolbar.Items.Add(btn8);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
 			var btn9 = new ToolStripButton();
-			btn9.ImageIndex = 6;
+			btn9.ImageIndex = 8;
 			btn9.Click += new EventHandler(OnPreferences);
 			btn9.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn9);
@@ -739,7 +756,7 @@ namespace EvidenceBoardUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn10 = new ToolStripButton();
-			btn10.ImageIndex = 7;
+			btn10.ImageIndex = 9;
 			btn10.Click += new EventHandler(OnHelp);
 			btn10.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn10);
@@ -762,6 +779,9 @@ namespace EvidenceBoardUIExtension
 
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Checked = false;
+
+			(m_Toolbar.Items["ExpandAllImages"] as ToolStripButton).Enabled = m_Control.CanExpandAllTaskImages;
+			(m_Toolbar.Items["CollapseAllImages"] as ToolStripButton).Enabled = m_Control.CanCollapseAllTaskImages;
 
 			(m_Toolbar.Items["SetBackgroundImage"] as ToolStripButton).Enabled = !m_Control.ReadOnly;
 			(m_Toolbar.Items["ClearBackgroundImage"] as ToolStripButton).Enabled = (!m_Control.ReadOnly && m_Control.HasBackgroundImage);

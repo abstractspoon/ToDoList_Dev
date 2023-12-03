@@ -74,6 +74,7 @@ namespace EvidenceBoardUIExtension
 
 		public EventHandler UserLinkSelectionChange;
 		public EventHandler DoubleClickUserLink;
+		public EventHandler ImageExpansionChange;
 
 		// -------------------------------------------------------------------------
 
@@ -357,6 +358,8 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			Invalidate();
+			ImageExpansionChange?.Invoke(this, null);
+
 			return true;
 		}
 
@@ -366,11 +369,13 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			Invalidate();
+			ImageExpansionChange?.Invoke(this, null);
+
 			return true;
 		}
 
-		public bool CanExpandAllTaskImages { get { return m_TaskItems.CanExpandAllTaskImages; } }
-		public bool CanCollapseAllTaskImages { get { return m_TaskItems.CanCollapseAllTaskImages; } }
+		public bool CanExpandAllTaskImages { get { return (m_TaskItems?.CanExpandAllTaskImages == true); } }
+		public bool CanCollapseAllTaskImages { get { return (m_TaskItems?.CanCollapseAllTaskImages == true); } }
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
@@ -2163,6 +2168,8 @@ namespace EvidenceBoardUIExtension
 
 					SelectNode(taskItem.TaskId, true, false);
 					RecalcExtents();
+
+					ImageExpansionChange?.Invoke(this, null);
 
 					return;
 				}
