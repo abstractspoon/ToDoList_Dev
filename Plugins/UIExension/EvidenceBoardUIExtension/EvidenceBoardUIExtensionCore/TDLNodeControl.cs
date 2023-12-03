@@ -2074,7 +2074,7 @@ namespace EvidenceBoardUIExtension
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
 			TaskItem taskItem = null;
-			BaseNode node = null;
+			BaseNode node = HitTestNode(e.Location, true);
 
 			if (!ReadOnly)
 			{
@@ -2107,7 +2107,6 @@ namespace EvidenceBoardUIExtension
 
 				if (HitTestHotNodeCreateLink(e.Location))
 				{
-					node = GetNode(m_HotTaskId);
 					DoUserLinkDragDrop(new UserLink(node.Data, NullId, UserLinkAttributes.Defaults));
 
 					// Prevent base class handling
@@ -2132,8 +2131,6 @@ namespace EvidenceBoardUIExtension
 				if ((taskItem != null) && taskItem.CanSelectNextImage(forwardBtn))
 				{
 					// Redraw the spin control
-					node = GetNode(taskItem.TaskId);
-
 					Invalidate(CalcImageSpinButtonRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
 					Update();
 
