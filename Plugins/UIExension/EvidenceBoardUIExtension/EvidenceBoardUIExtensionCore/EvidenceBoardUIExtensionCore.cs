@@ -589,7 +589,7 @@ namespace EvidenceBoardUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			return notify.NotifyMod(Task.Attribute.FileLink, string.Join("\n", imagePaths));
+			return notify.NotifyMod(Task.Attribute.FileLink, string.Join("\n", imagePaths), true);
 		}
 
 		bool OnEvidenceBoardTaskLinkCreated(object sender, UserLink link)
