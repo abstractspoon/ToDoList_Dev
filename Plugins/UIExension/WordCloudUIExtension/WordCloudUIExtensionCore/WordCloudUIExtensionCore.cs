@@ -61,6 +61,10 @@ namespace WordCloudUIExtension
         private Label m_ColorsLabel;
 		private TaskMatchesListView m_TaskMatchesList;
 
+		private IIControls.ToolStripEx m_Toolbar;
+		private ImageList m_TBImageList;
+		private UIThemeToolbarRenderer m_TBRenderer;
+
 		private Font m_ControlsFont;
 		private String m_UserIgnoreFilePath, m_LangIgnoreFilePath;
 		private Timer m_CommentsTimer;
@@ -290,7 +294,6 @@ namespace WordCloudUIExtension
 				m_Items[item.Id] = item;
 			}
 
-
 			if (taskIds != null)
 				taskIds.Add(item.Id);
 
@@ -458,7 +461,7 @@ namespace WordCloudUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+            this.BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 			m_SplitterColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 
 			Color labelColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
@@ -466,6 +469,12 @@ namespace WordCloudUIExtension
 			m_AttributeLabel.ForeColor = labelColor;
 			m_ColorsLabel.ForeColor = labelColor;
 			m_StylesLabel.ForeColor = labelColor;
+
+			// Set the toolbar colors to be the same as the back color
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
+
+			m_TBRenderer.SetUITheme(theme);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -583,6 +592,7 @@ namespace WordCloudUIExtension
             CreateAttributeCombo();
 			CreateColorSchemeCombo();
 			CreateStyleCombo();
+			CreateToolbar();
 
 			Invalidate(true);
 		}
@@ -713,6 +723,71 @@ namespace WordCloudUIExtension
 			return combo;
 		}
 
+		private void CreateToolbar()
+		{
+			var assembly = Assembly.GetExecutingAssembly();
+			var images = new Bitmap(assembly.GetManifestResourceStream("WordCloudUIExtension.toolbar_std.bmp"));
+
+			m_TBImageList = new ImageList();
+			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
+			m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
+			m_TBImageList.TransparentColor = Color.Magenta;
+			m_TBImageList.Images.AddStrip(images);
+
+			m_Toolbar = new IIControls.ToolStripEx();
+			m_Toolbar.Anchor = AnchorStyles.None;
+			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
+			m_Toolbar.ImageList = m_TBImageList;
+
+			int imageSize = DPIScaling.Scale(16);
+
+			m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
+			m_Toolbar.Height = (imageSize + 7); // MFC
+
+			m_TBRenderer = new UIThemeToolbarRenderer();
+			m_Toolbar.Renderer = m_TBRenderer;
+
+			var btn1 = new ToolStripButton()
+			{
+				Name = "IgnoreWord",
+				ImageIndex = 0,
+				ToolTipText = m_Trans.Translate("Ignore Selected Word")
+			};
+
+			btn1.Click += new EventHandler(OnWordCloudIgnoreWord);
+			m_Toolbar.Items.Add(btn1);
+
+			var btn2 = new ToolStripButton()
+			{
+				Name = "EditIgnoreList",
+				ImageIndex = 1,
+				ToolTipText = m_Trans.Translate("Edit Ignore List")
+			};
+		
+			btn2.Click += (s, e) => { OnWordCloudEditIgnoreList(s, e); };
+			m_Toolbar.Items.Add(btn2);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn10 = new ToolStripButton()
+			{
+				ImageIndex = 2,
+				ToolTipText = m_Trans.Translate("Online Help")
+			};
+			btn10.Click += (s, e) => { OnHelp(s, e); };
+			m_Toolbar.Items.Add(btn10);
+
+			Toolbars.FixupButtonSizes(m_Toolbar);
+
+			Controls.Add(m_Toolbar);
+		}
+
+		private void UpdateToolbarButtonStates()
+		{
+			(m_Toolbar.Items["IgnoreWord"] as ToolStripButton).Enabled = (m_WordCloud.SelectedWord != null);
+			(m_Toolbar.Items["EditIgnoreList"] as ToolStripButton).Enabled = File.Exists(m_UserIgnoreFilePath);
+		}
+
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
@@ -769,12 +844,28 @@ namespace WordCloudUIExtension
 			}
         }
 
-        protected override void OnSizeChanged(EventArgs e)
+		private Point ToolbarLocation
+		{
+			get
+			{
+				if (m_StylesCombo == null)
+					return Point.Empty;
+
+				// Centre the toolbar vertically on the combo
+				return new Point(m_StylesCombo.Right + 10, m_StylesCombo.Top - (m_Toolbar.Height - m_StylesCombo.Height) / 2);
+			}
+		}
+
+		protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
 
 			if (ClientRectangle.IsEmpty)
 				return;
+
+			// Somewhere in WinForms the toolbar gets repositioned even though the toolbar
+			// is not anchored, so we have to restore the correct position each time
+			m_Toolbar.Location = ToolbarLocation;
 
 			Rectangle baseRect = ClientRectangle;
 
@@ -784,9 +875,10 @@ namespace WordCloudUIExtension
 			baseRect.Height -= (ControlTop + 1);
 
 			Rectangle wordCloudRect = baseRect, matchListRect = baseRect;
-			Rectangle splitterRect = SplitterRect();
 
 			// Always make sure the splitter is visible
+			Rectangle splitterRect = SplitterRect();
+
 			splitterRect.X = Math.Max(splitterRect.X, MinSplitWidth);
 			splitterRect.X = Math.Min(splitterRect.X, ClientRectangle.Right - MinSplitWidth);
 			
@@ -879,6 +971,7 @@ namespace WordCloudUIExtension
 
 				item.Click += OnWordCloudIgnoreWord;
 				item.Tag = m_WordCloud.SelectedWord;
+				item.Image = m_TBImageList.Images[0];
 				
 				menu.Show(m_WordCloud, e.Location);
 			}
@@ -886,15 +979,14 @@ namespace WordCloudUIExtension
 
 		private void OnWordCloudIgnoreWord(object sender, EventArgs e)
 		{
-			var item = sender as ToolStripItem;
-
-			if (item != null)
+			if (m_WordCloud.SelectedWord != null)
 			{
-				// Look for user-defined 'Ignore' file
                 try
                 {
-                    File.AppendAllText(m_UserIgnoreFilePath, item.Tag.ToString() + Environment.NewLine);
+                    File.AppendAllText(m_UserIgnoreFilePath, m_WordCloud.SelectedWord + Environment.NewLine);
+
 				    UpdateBlacklist();
+					m_WordCloud.SelectedWord = null;
                 }
                 catch (Exception /*exception*/)
                 {
@@ -905,9 +997,23 @@ namespace WordCloudUIExtension
 			}
 		}
 
+		private void OnWordCloudEditIgnoreList(object sender, EventArgs e)
+		{
+			if (EditIgnoreListDlg.DoEdit(m_UserIgnoreFilePath))
+			{
+				UpdateBlacklist();
+			}
+		}
+
+		private void OnHelp(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
 		private void OnWordSelectionChanged(object sender)
 		{
 			RebuldMatchList();
+			UpdateToolbarButtonStates();
 		}
 
 		private String FixupWordCloudSelection(CloudTaskItem selMatch = null)

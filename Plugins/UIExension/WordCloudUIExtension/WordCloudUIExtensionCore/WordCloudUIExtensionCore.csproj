@@ -54,6 +54,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ColorSchemeComboBox.cs" />
+    <Compile Include="EditIgnoreListDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditIgnoreListDlg.Designer.cs">
+      <DependentUpon>EditIgnoreListDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="TaskCloudItem.cs" />
     <Compile Include="TaskMatchesListView.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -67,12 +73,19 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+      <Name>ToolStripEx</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="EditIgnoreListDlg.resx">
+      <DependentUpon>EditIgnoreListDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -83,6 +96,12 @@
       <Project>{34649D7D-04A9-4092-AD0B-F7022C123FD7}</Project>
       <Name>Controls</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="toolbar_std.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WordCloud.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
