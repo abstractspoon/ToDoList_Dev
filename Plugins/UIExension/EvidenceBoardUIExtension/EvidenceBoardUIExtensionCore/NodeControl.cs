@@ -1079,8 +1079,6 @@ namespace EvidenceBoardUIExtension
 
 				OnAfterRecalcLayout();
 				RecalcExtents();
-
-				AutoScrollMinSize = ZoomedSize;
 			}
 		}
 
@@ -1111,7 +1109,10 @@ namespace EvidenceBoardUIExtension
 			m_MaxExtents.Offset(Border, Border);
 
 			if (!Extents.Equals(oldExtents))
+			{
+				AutoScrollMinSize = ZoomedSize;
 				Invalidate();
+			}
 		}
 
 		protected void RecalcExtents(BaseNode node)
@@ -1689,8 +1690,6 @@ namespace EvidenceBoardUIExtension
 						{
 							ClearDragState();
 							RecalcExtents();
-
-							AutoScrollMinSize = ZoomedSize;
 						}
 					}
 				}
