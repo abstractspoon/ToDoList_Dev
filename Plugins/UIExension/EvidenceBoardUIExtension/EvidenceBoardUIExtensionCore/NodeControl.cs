@@ -719,6 +719,15 @@ namespace EvidenceBoardUIExtension
 			return new Rectangle(pos, size);
 		}
 
+		protected Rectangle CalcExpansionButtonRect(Rectangle nodeRect)
+		{
+			// Top-right
+			int buttonSize = TreeViewHelper.Utils.GetExpansionButtonSize(this);
+			int offset = ((buttonSize / 2) + 1);
+
+			return Geometry2D.GetCentredRect(new Point(nodeRect.Right - offset, nodeRect.Top + offset), buttonSize);
+		}
+
 		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
 										  out Point fromPos, out Point toPos)
 		{
@@ -890,6 +899,7 @@ namespace EvidenceBoardUIExtension
 			if (IsNodeVisible(node, out nodeRect))
 			{
 				DrawNode(graphics, node, nodeRect, selected);
+				DrawExpansionButton(graphics, node, nodeRect);
 			}
 		}
 
@@ -914,6 +924,17 @@ namespace EvidenceBoardUIExtension
 			graphics.FillRectangle(fill, rect);
 			graphics.DrawRectangle(border, rect);
 			graphics.DrawString(node.ToString(), m_TextFont, text, rect);
+		}
+
+		protected void DrawExpansionButton(Graphics graphics, BaseNode node, Rectangle nodeRect)
+		{
+			if (!node.IsRoot && !node.IsLeaf)
+			{
+				var button = CalcExpansionButtonRect(nodeRect);
+				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
+
+				TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
+			}
 		}
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -1195,6 +1216,13 @@ namespace EvidenceBoardUIExtension
 					m_DragTimer.Tag = e;
 					m_DragTimer.Start();
 				}
+			}
+			else if (CalcExpansionButtonRect(GetNodeClientRect(node)).Contains(e.Location))
+			{
+				node.Expand(!node.IsExpanded, false);
+
+				RecalcExtents();
+				ValidateSelectedNodeVisibility();
 			}
 			else if (IsSelectableNode(node))
 			{

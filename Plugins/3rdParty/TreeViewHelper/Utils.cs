@@ -10,7 +10,7 @@ namespace TreeViewHelper
 {
     public class Utils
     {
-		static public void DrawExpansionButton(Graphics graphics, Rectangle button, bool opened, bool hot)
+		static public void DrawExpansionButton(Graphics graphics, Rectangle button, bool opened, bool pressed)
 		{
 			if (!button.IsEmpty)
 			{
@@ -24,7 +24,7 @@ namespace TreeViewHelper
 				}
 				else
 				{
-					graphics.FillRectangle((hot ? SystemBrushes.Window : SystemBrushes.Control), button);
+					graphics.FillRectangle((pressed ? SystemBrushes.Control : SystemBrushes.Window), button);
 					graphics.DrawRectangle(SystemPens.ControlDark, button);
 
 					using (var pen = SystemPens.WindowText)
@@ -44,7 +44,7 @@ namespace TreeViewHelper
 
 		static int ExpansionButtonSize = 0;
 
-		static public int GetExpansionButtonSize(Control ctrl, int defaultSize)
+		static public int GetExpansionButtonSize(Control ctrl, int defaultSize = 0)
 		{
 			if (ExpansionButtonSize == 0)
 			{

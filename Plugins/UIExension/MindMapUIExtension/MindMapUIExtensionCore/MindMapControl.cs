@@ -2419,9 +2419,9 @@ namespace MindMapUIExtension
 				return;
 
 			Rectangle button = CalculateExpansionButtonRect(node);
-			bool hot = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
+			bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
 
-			TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, hot);
+			TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
 		}
 
 		private void DrawConnections(Graphics graphics, TreeNode node)
