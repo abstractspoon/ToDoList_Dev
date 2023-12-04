@@ -208,7 +208,8 @@ namespace EvidenceBoardUIExtension
 
         public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
-			UInt32 taskId = m_Control.HitTest(new Point(xPos, yPos));
+			var ptClient = m_Control.PointToClient(new Point(xPos, yPos));
+			UInt32 taskId = m_Control.HitTestTaskId(ptClient);
 
 			if (taskId != 0)
 				return UIExtension.HitTestResult.Task;
@@ -219,7 +220,8 @@ namespace EvidenceBoardUIExtension
 
         public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
-			return m_Control.HitTest(new Point(xPos, yPos));
+			var ptClient = m_Control.PointToClient(new Point(xPos, yPos));
+			return m_Control.HitTestTaskId(ptClient);
         }
 
         public void SetUITheme(UITheme theme)

@@ -599,9 +599,9 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public uint HitTest(Point screenPos)
+		public uint HitTestTaskId(Point ptClient)
 		{
-			var node = base.HitTestNode(PointToClient(screenPos), true);
+			var node = base.HitTestNode(ptClient, true);
 			
 			return node?.Data ?? 0;
 		}
