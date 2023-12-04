@@ -582,7 +582,7 @@ namespace EvidenceBoardUIExtension
 		}
 
 
-		public List<uint> CollapsedTaskIds
+		public List<uint> CollapsedImageTaskIds
 		{
 			get
 			{

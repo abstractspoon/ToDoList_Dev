@@ -228,6 +228,46 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public IList<uint> CollapsedNodeIds
+		{
+			get
+			{
+				List<uint> ids = new List<uint>();
+				AddCollapsedNodeIdsToList(RootNode, ref ids);
+				
+				return ids;
+			}
+
+			set
+			{
+				ExpandAllNodes(false);
+
+				foreach (var id in value)
+				{
+					var node = GetNode(id);
+
+					if (node != null)
+						node.Expand(false, false);
+				}
+
+				RecalcExtents();
+				ValidateSelectedNodeVisibility();
+			}
+		}
+
+		private void AddCollapsedNodeIdsToList(BaseNode node, ref List<uint> ids)
+		{
+			if (node.IsCollapsed)
+			{
+				ids.Add(node.Data);
+			}
+			else // check children
+			{
+				foreach (var childNode in node.Children)
+					AddCollapsedNodeIdsToList(childNode, ref ids);
+			}
+		}
+
 		public bool ScrollToSelection(bool partialOk)
 		{
 			if (m_SelectedNodes.Count == 0)
@@ -721,11 +761,15 @@ namespace EvidenceBoardUIExtension
 
 		protected Rectangle CalcExpansionButtonRect(Rectangle nodeRect)
 		{
-			// Top-right
 			int buttonSize = TreeViewHelper.Utils.GetExpansionButtonSize(this);
-			int offset = ((buttonSize / 2) + 1);
 
-			return Geometry2D.GetCentredRect(new Point(nodeRect.Right - offset, nodeRect.Top + offset), buttonSize);
+			// Place at top right
+			var rect = Rectangle.FromLTRB(nodeRect.Right - buttonSize, nodeRect.Top, nodeRect.Right, nodeRect.Top + buttonSize);
+
+			// small border
+			rect.Offset(-2, 2);
+
+			return rect;
 		}
 
 		protected bool IsConnectionVisible(BaseNode fromNode, BaseNode toNode,
@@ -1718,12 +1762,14 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public bool ExpandAllNodes()
+		public bool ExpandAllNodes(bool recalcExtents = true)
 		{
 			if (!ExpandNode(RootNode, true, true)) // and children
 				return false;
 
-			RecalcExtents();
+			if (recalcExtents)
+				RecalcExtents();
+
 			return true;
 		}
 
