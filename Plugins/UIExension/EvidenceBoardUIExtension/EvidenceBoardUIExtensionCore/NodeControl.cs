@@ -671,12 +671,12 @@ namespace EvidenceBoardUIExtension
 
 		virtual protected bool IsNodeVisible(BaseNode node)
 		{
-			return (node != null);
+			return (node?.AllParentsExpanded == true);
 		}
 
 		protected bool IsNodeVisible(BaseNode node, out Rectangle nodeRect, bool allowPartial = true)
 		{
-			if (!IsNodeVisible(node))
+			if (!IsNodeVisible(node) || !node.AllParentsExpanded)
 			{
 				nodeRect = Rectangle.Empty;
 				return false;
@@ -1108,7 +1108,7 @@ namespace EvidenceBoardUIExtension
 
 		protected virtual bool IsSelectableNode(BaseNode node)
 		{
-			return (node != null);
+			return (node?.AllParentsExpanded == true);
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
