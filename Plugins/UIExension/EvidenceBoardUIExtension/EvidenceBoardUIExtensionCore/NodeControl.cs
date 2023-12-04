@@ -983,8 +983,12 @@ namespace EvidenceBoardUIExtension
 			if (!node.IsRoot && !node.IsLeaf)
 			{
 				var button = CalcExpansionButtonRect(nodeRect);
-				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
 
+				// Add an additional border for emphasis
+				graphics.DrawRectangle(SystemPens.ControlDark, Rectangle.Inflate(button, 1, 1));
+
+				// Draw the button itself
+				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
 				TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
 			}
 		}
