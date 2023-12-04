@@ -133,7 +133,19 @@ namespace RadialTree
 
 			return someChanged;
 		}
-		
+
+		public void OffsetNode(Point offset, bool andChildren)
+		{
+			Point.X += offset.X;
+			Point.Y += offset.Y;
+
+			if (andChildren)
+			{
+				foreach (var childNode in Children)
+					childNode.OffsetNode(offset, true);
+			}
+		}
+
 		/// <summary>
 		/// Object/Data assigned to the node.
 		/// </summary>

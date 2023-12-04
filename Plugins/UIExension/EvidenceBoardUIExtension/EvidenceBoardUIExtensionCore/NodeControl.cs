@@ -1645,16 +1645,10 @@ namespace EvidenceBoardUIExtension
 					dragPt = ClientToGraph(dragPt);
 
 					var dragNode = DraggedNode;
-					var offset = new PointF(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
+					var offset = new RadialTree.Point(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
 
-					if (!offset.IsEmpty)
-					{
-						foreach (var node in m_SelectedNodes)
-						{
-							node.Point.X += offset.X;
-							node.Point.Y += offset.Y;
-						}
-					}
+					foreach (var node in m_SelectedNodes)
+						node.OffsetNode(offset, node.IsCollapsed);
 
 					e.Effect = DragDropEffects.Move;
 					Invalidate();
@@ -1729,13 +1723,11 @@ namespace EvidenceBoardUIExtension
 
 				if (dragNode != null)
 				{
-					var offset = new PointF((dragNode.Point.X - m_PreDragNodePos.X), (dragNode.Point.Y - m_PreDragNodePos.Y));
+					// Undo the drag
+					var offset = new RadialTree.Point((m_PreDragNodePos.X - dragNode.Point.X), (m_PreDragNodePos.Y - dragNode.Point.Y));
 
 					foreach (var node in m_SelectedNodes)
-					{
-						node.Point.X -= offset.X;
-						node.Point.Y -= offset.Y;
-					}
+						node.OffsetNode(offset, node.IsCollapsed);
 
 					Invalidate();
 				}
