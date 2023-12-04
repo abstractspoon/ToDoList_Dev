@@ -100,22 +100,7 @@ namespace MindMapUIExtension
         { 
             get 
             {
-                if (VisualStyleRenderer.IsSupported)
-                {
-                    if (m_ThemedGlyphSize == 0)
-                    {
-                        var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
-
-                        using (var graphics = Graphics.FromHwnd(this.Handle))
-                        {
-                            m_ThemedGlyphSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
-                        }
-                    }
-
-                    return m_ThemedGlyphSize;
-                }
-
-                return DefaultExpansionButtonSize; 
+				return TreeViewHelper.Utils.GetExpansionButtonSize(this, DefaultExpansionButtonSize);
             } 
         }
 
@@ -124,9 +109,7 @@ namespace MindMapUIExtension
             get 
             { 
                 int separation = ScaleByDPIFactor(2);
-
-                if (VisualStyleRenderer.IsSupported)
-                    separation -= (ExpansionButtonSize - DefaultExpansionButtonSize);
+                separation -= (ExpansionButtonSize - DefaultExpansionButtonSize);
 
                 return separation; 
             } 
@@ -165,7 +148,6 @@ namespace MindMapUIExtension
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
 		private Color m_ConnectionColor;
-        private int m_ThemedGlyphSize = 0;
 		private float m_ZoomFactor = 1f;
 
 		private Timer m_DragTimer;

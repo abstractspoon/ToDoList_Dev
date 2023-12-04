@@ -41,5 +41,36 @@ namespace TreeViewHelper
 				}
 			}
 		}
+
+		static int ExpansionButtonSize = 0;
+
+		static public int GetExpansionButtonSize(Control ctrl, int defaultSize)
+		{
+			if (ExpansionButtonSize == 0)
+			{
+				if (VisualStyleRenderer.IsSupported)
+				{
+					var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
+
+					using (var graphics = Graphics.FromHwnd(ctrl.Handle))
+					{
+						ExpansionButtonSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
+					}
+				}
+				else if (defaultSize > 0)
+				{
+					ExpansionButtonSize = defaultSize;
+				}
+				else 
+				{
+					using (var graphics = Graphics.FromHwnd(ctrl.Handle))
+					{
+						ExpansionButtonSize = (int)((8 * graphics.DpiX) / 96);
+					}
+				}
+			}
+
+			return ExpansionButtonSize;
+		}
 	}
 }
