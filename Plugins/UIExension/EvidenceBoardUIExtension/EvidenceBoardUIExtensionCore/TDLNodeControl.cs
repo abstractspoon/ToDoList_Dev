@@ -457,6 +457,7 @@ namespace EvidenceBoardUIExtension
 				break;
 
 			case UIExtension.UpdateType.Delete:
+				ClearSelection();
 				UpdateTaskAttributes(tasks, true);
 				RecalcLayout();
 				break;

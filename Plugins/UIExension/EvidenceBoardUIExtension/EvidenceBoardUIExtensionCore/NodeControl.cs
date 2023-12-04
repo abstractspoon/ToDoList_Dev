@@ -354,6 +354,14 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
+		public void ClearSelection()
+		{
+			m_SelectedNodes.Clear();
+			Invalidate();
+
+			NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+		}
+
 		public bool SelectNodes(IList<uint> nodeIds, bool notify = false)
 		{
 			var nodes = new List<BaseNode>();
