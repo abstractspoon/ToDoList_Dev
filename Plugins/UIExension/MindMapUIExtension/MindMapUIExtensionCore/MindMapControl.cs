@@ -100,22 +100,7 @@ namespace MindMapUIExtension
         { 
             get 
             {
-                if (VisualStyleRenderer.IsSupported)
-                {
-                    if (m_ThemedGlyphSize == 0)
-                    {
-                        var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
-
-                        using (var graphics = Graphics.FromHwnd(this.Handle))
-                        {
-                            m_ThemedGlyphSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
-                        }
-                    }
-
-                    return m_ThemedGlyphSize;
-                }
-
-                return DefaultExpansionButtonSize; 
+				return TreeViewHelper.Utils.GetExpansionButtonSize(this, DefaultExpansionButtonSize);
             } 
         }
 
@@ -124,9 +109,7 @@ namespace MindMapUIExtension
             get 
             { 
                 int separation = ScaleByDPIFactor(2);
-
-                if (VisualStyleRenderer.IsSupported)
-                    separation -= (ExpansionButtonSize - DefaultExpansionButtonSize);
+                separation -= (ExpansionButtonSize - DefaultExpansionButtonSize);
 
                 return separation; 
             } 
@@ -165,7 +148,6 @@ namespace MindMapUIExtension
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
 		private Color m_ConnectionColor;
-        private int m_ThemedGlyphSize = 0;
 		private float m_ZoomFactor = 1f;
 
 		private Timer m_DragTimer;
@@ -2437,42 +2419,9 @@ namespace MindMapUIExtension
 				return;
 
 			Rectangle button = CalculateExpansionButtonRect(node);
+			bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
 
-			if (!button.IsEmpty)
-			{
-                if (VisualStyleRenderer.IsSupported)
-                {
-					var renderer = new VisualStyleRenderer(node.IsExpanded ? 
-						VisualStyleElement.TreeView.Glyph.Opened : VisualStyleElement.TreeView.Glyph.Closed);
-
-					renderer.DrawBackground(graphics, button);
-				}
-				else
-				{
-					Color backColor = Color.White;
-
-					if ((MouseButtons == MouseButtons.Left) &&
-						Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)))
-					{
-						backColor = Color.LightGray;
-					}
-
-					graphics.FillRectangle(new SolidBrush(backColor), button);
-					graphics.DrawRectangle(new Pen(Color.DarkGray), button);
-
-					using (var pen = new Pen(Color.Black))
-					{
-						int midY = ((button.Top + button.Bottom) / 2);
-						graphics.DrawLine(pen, button.Left + 2, midY, button.Right - 2, midY);
-
-						if (!node.IsExpanded)
-						{
-							int midX = ((button.Left + button.Right) / 2);
-							graphics.DrawLine(pen, midX, button.Top + 2, midX, button.Bottom - 2);
-						}
-					}
-				}
-			}
+			TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
 		}
 
 		private void DrawConnections(Graphics graphics, TreeNode node)

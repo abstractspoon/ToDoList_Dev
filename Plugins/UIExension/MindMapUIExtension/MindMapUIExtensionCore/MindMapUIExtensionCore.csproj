@@ -72,6 +72,10 @@
       <Project>{f189401e-ab95-40cb-96ac-d6a0371117c1}</Project>
       <Name>ScrollHelper</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\TreeViewHelper\TreeViewHelper.csproj">
+      <Project>{86d7f721-7008-4727-b827-e83ed1d34aca}</Project>
+      <Name>TreeViewHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>

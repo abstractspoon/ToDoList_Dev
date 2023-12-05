@@ -208,7 +208,8 @@ namespace EvidenceBoardUIExtension
 
         public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
-			UInt32 taskId = m_Control.HitTest(new Point(xPos, yPos));
+			var ptClient = m_Control.PointToClient(new Point(xPos, yPos));
+			UInt32 taskId = m_Control.HitTestTaskId(ptClient);
 
 			if (taskId != 0)
 				return UIExtension.HitTestResult.Task;
@@ -219,7 +220,8 @@ namespace EvidenceBoardUIExtension
 
         public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
-			return m_Control.HitTest(new Point(xPos, yPos));
+			var ptClient = m_Control.PointToClient(new Point(xPos, yPos));
+			return m_Control.HitTestTaskId(ptClient);
         }
 
         public void SetUITheme(UITheme theme)
@@ -319,18 +321,17 @@ namespace EvidenceBoardUIExtension
             return false;//m_Control.CanSaveToImage();
         }
 
-		public bool ExpandSelectedTaskImages() { return m_Control.ExpandSelectedTaskImages(); }
-		public bool CollapseSelectedTaskImages() { return m_Control.CollapseSelectedTaskImages(); }
+		public bool ExpandSelectedTasks() { return m_Control.ExpandSelectedNodes(); }
+		public bool CollapseSelectedTasks() { return m_Control.CollapseSelectedNodes(); }
 
-		public bool CanExpandSelectedTasks { get { return m_Control.CanExpandSelectedTaskImages; } }
-		public bool CanCollapseSelectedTasks	{ get { return m_Control.CanCollapseSelectedTaskImages; } }
+		public bool CanExpandSelectedTasks { get { return m_Control.CanExpandSelectedNodes; } }
+		public bool CanCollapseSelectedTasks { get { return m_Control.CanCollapseSelectedNodes; } }
 
-		public bool ExpandAllTaskImages()	{ return m_Control.ExpandAllTaskImages(); }
-		public bool CollapseAllTaskImages() { return m_Control.CollapseAllTaskImages(); }
+		public bool ExpandAllTasks() { return m_Control.ExpandAllNodes(); }
+		public bool CollapseAllTasks() { return m_Control.CollapseAllNodes(); }
 
-		public bool CanExpandAllTaskImages { get { return m_Control.CanExpandAllTaskImages; } }
-		public bool CanCollapseAllTaskImages { get { return m_Control.CanCollapseAllTaskImages; } }
-
+		public bool CanExpandAllTasks { get { return m_Control.CanExpandAllNodes; } }
+		public bool CanCollapseAllTasks { get { return m_Control.CanCollapseAllNodes; } }
 
 		// Message handlers ---------------------------------------------------------------------
 

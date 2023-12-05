@@ -125,7 +125,7 @@ namespace EvidenceBoardUIExtension
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
 		private uint m_DropHighlightedTaskId, m_HotTaskId;
-		private List<uint> m_PrevCollapsedTaskIds;
+		private List<uint> m_PrevCollapsedImageIds, m_PrevCollapsedTaskIds;
 
 		private bool m_DraggingSelectedUserLink = false;
 		private Point m_DraggedUserLinkEnd = Point.Empty;
@@ -377,24 +377,26 @@ namespace EvidenceBoardUIExtension
 		public bool CanExpandAllTaskImages { get { return (m_TaskItems?.CanExpandAllTaskImages == true); } }
 		public bool CanCollapseAllTaskImages { get { return (m_TaskItems?.CanCollapseAllTaskImages == true); } }
 
-		public void SavePreferences(Preferences prefs, String key)
+		protected override bool ExpandNode(BaseNode node, bool expand, bool andChildren)
 		{
-			string ids = String.Empty;
+			if (node == RootNode)
+				return node.ExpandChildren(expand);
 
-			foreach (var id in m_TaskItems.CollapsedTaskIds)
-				ids = string.Format("{0}|{1}", ids, id);
-
-			prefs.WriteProfileString(key, "CollapsedTaskIds", ids);
+			// else
+			return node.Expand(expand, andChildren);
 		}
 
-		public void LoadPreferences(Preferences prefs, String key)
+		public void SavePreferences(Preferences prefs, String key)
 		{
-			// Cache the previously collapsed tasks until we get our first task update
-			var prevIds = prefs.GetProfileString(key, "CollapsedTaskIds", string.Empty);
+			prefs.WriteProfileString(key, "CollapsedTaskIds", string.Join("|", CollapsedNodeIds));
+			prefs.WriteProfileString(key, "CollapsedImageIds", string.Join("|", m_TaskItems.CollapsedImageTaskIds));
+		}
 
+		private List<uint> ParseTaskIds(string prevIds)
+		{
 			if (!string.IsNullOrEmpty(prevIds))
 			{
-				m_PrevCollapsedTaskIds = new List<uint>();
+				var taskIds = new List<uint>();
 				var ids = prevIds.Split('|');
 
 				foreach (var prevId in ids)
@@ -402,9 +404,20 @@ namespace EvidenceBoardUIExtension
 					uint id = 0;
 
 					if (uint.TryParse(prevId, out id) && (id > 0))
-						m_PrevCollapsedTaskIds.Add(id);
+						taskIds.Add(id);
 				}
+
+				return taskIds;
 			}
+
+			return null;
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			// Cache the previously collapsed items until we get our first task update
+			m_PrevCollapsedTaskIds = ParseTaskIds(prefs.GetProfileString(key, "CollapsedTaskIds", string.Empty));
+			m_PrevCollapsedImageIds = ParseTaskIds(prefs.GetProfileString(key, "CollapsedImageIds", string.Empty));
 		}
 
 		bool ShowingDependencyLinks
@@ -591,9 +604,9 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
-		public uint HitTest(Point screenPos)
+		public uint HitTestTaskId(Point ptClient)
 		{
-			var node = base.HitTestNode(PointToClient(screenPos), true);
+			var node = base.HitTestNode(ptClient, true);
 			
 			return node?.Data ?? 0;
 		}
@@ -1018,10 +1031,19 @@ namespace EvidenceBoardUIExtension
 			base.RootNode = rootNode;
 			base.EnableLayoutUpdates = true;
 
-			if (rebuild && (m_PrevCollapsedTaskIds?.Count > 0))
+			if (rebuild)
 			{
-				m_TaskItems.CollapsedTaskIds = m_PrevCollapsedTaskIds;
-				m_PrevCollapsedTaskIds = null;
+				if (m_PrevCollapsedTaskIds?.Count > 0)
+				{
+					CollapsedNodeIds = m_PrevCollapsedTaskIds;
+					m_PrevCollapsedTaskIds = null;
+				}
+
+				if (m_PrevCollapsedImageIds?.Count > 0)
+				{
+					m_TaskItems.CollapsedImageTaskIds = m_PrevCollapsedImageIds;
+					m_PrevCollapsedImageIds = null;
+				}
 			}
 
 			Invalidate();
