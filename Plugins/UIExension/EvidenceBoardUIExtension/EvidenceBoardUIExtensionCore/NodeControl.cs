@@ -659,15 +659,34 @@ namespace EvidenceBoardUIExtension
 
 		protected BaseNode HitTestNode(Point ptClient, bool excludeRoot = false)
 		{
-			// Hit test selection first
-			foreach (var node in m_SelectedNodes)
+			// We always hit-test in reverse order so that the nodes rendered last
+			// (ie. the tasks rendered on top) are hit-tested first
+
+			// Selected nodes first because they are rendered above other nodes
+			int selItem = m_SelectedNodes.Count;
+
+			while (selItem-- > 0)
 			{
-				if (HitTestNode(node, ptClient, excludeRoot))
-					return node;
+				if (HitTestNode(m_SelectedNodes[selItem], ptClient, excludeRoot))
+					return m_SelectedNodes[selItem];
 			}
 
-			// All the rest
-			return HitTestNodeAndChildren(RootNode, ptClient, excludeRoot);
+			// Rest of the (unselected) nodes
+			var restOfNodes = HitTestNodes(ClientRectangle);
+
+			if (restOfNodes.Count > 0)
+			{
+				restOfNodes.RemoveAll(x => m_SelectedNodes.Contains(x));
+				restOfNodes.Reverse();
+
+				foreach (var node in restOfNodes)
+				{
+					if (HitTestNode(node, ptClient, excludeRoot))
+						return node;
+				}
+			}
+
+			return null;
 		}
 
 		protected bool HitTestNode(BaseNode node, Point ptClient, bool excludeRoot)
@@ -983,12 +1002,8 @@ namespace EvidenceBoardUIExtension
 			if (!node.IsRoot && !node.IsLeaf)
 			{
 				var button = CalcExpansionButtonRect(nodeRect);
-
-				// Add an additional border for emphasis
-				graphics.DrawRectangle(SystemPens.ControlDark, Rectangle.Inflate(button, 1, 1));
-
-				// Draw the button itself
 				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
+
 				TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
 			}
 		}
@@ -1179,7 +1194,17 @@ namespace EvidenceBoardUIExtension
 
 				if ((node != null) && IsSelectableNode(node))
 				{
-					SelectNode(node.Data, true, false);
+					if (HitTestExpansionButton(node, e.Location))
+					{
+						node.Expand(!node.IsExpanded, false);
+
+						RecalcExtents();
+						ValidateSelectedNodeVisibility();
+					}
+					else
+					{
+						SelectNode(node.Data, true, false);
+					}
 				}
 			}
 		}
@@ -1241,6 +1266,11 @@ namespace EvidenceBoardUIExtension
 			return m_BackgroundImage.HitTest(ptGraph, hitWidth);
 		}
 
+		protected bool HitTestExpansionButton(BaseNode node, Point ptClient)
+		{
+			return CalcExpansionButtonRect(GetNodeClientRect(node)).Contains(ptClient);
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
@@ -1274,12 +1304,10 @@ namespace EvidenceBoardUIExtension
 					m_DragTimer.Start();
 				}
 			}
-			else if (CalcExpansionButtonRect(GetNodeClientRect(node)).Contains(e.Location))
+			else if (HitTestExpansionButton(node, e.Location))
 			{
-				node.Expand(!node.IsExpanded, false);
-
-				RecalcExtents();
-				ValidateSelectedNodeVisibility();
+				// Handle in OnMouseClick else the graph can change between
+				// mouse down and mouse up causing weirdness
 			}
 			else if (IsSelectableNode(node))
 			{
@@ -1727,8 +1755,6 @@ namespace EvidenceBoardUIExtension
 
 					foreach (var node in m_SelectedNodes)
 						node.OffsetNode(offset, node.IsCollapsed);
-
-					Invalidate();
 				}
 			}
 
