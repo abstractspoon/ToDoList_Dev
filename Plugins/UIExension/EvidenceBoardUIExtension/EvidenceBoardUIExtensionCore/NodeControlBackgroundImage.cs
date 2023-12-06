@@ -134,23 +134,23 @@ namespace EvidenceBoardUIExtension
 				var innerRect = Rectangle.Inflate(Bounds, -(edgeWidth / 2), -edgeWidth / 2);
 
 				if (innerRect.Contains(point))
-					return DragMode.Background;
+					return DragMode.BackgroundImage;
 
 				if ((point.Y > innerRect.Top) && (point.Y < innerRect.Bottom))
 				{
 					if (point.X <= innerRect.Left)
-						return DragMode.BackgroundLeft;
+						return DragMode.BackgroundImageLeft;
 
 					// else
-					return DragMode.BackgroundRight;
+					return DragMode.BackgroundImageRight;
 				}
 				else if ((point.X > innerRect.Left) && (point.X < innerRect.Right))
 				{
 					if (point.Y <= innerRect.Top)
-						return DragMode.BackgroundTop;
+						return DragMode.BackgroundImageTop;
 
 					// else
-					return DragMode.BackgroundBottom;
+					return DragMode.BackgroundImageBottom;
 				}
 			}
 
@@ -229,15 +229,15 @@ namespace EvidenceBoardUIExtension
 		{
 			switch (edge)
 			{
-			case DragMode.Background:
+			case DragMode.BackgroundImage:
 				return Cursors.Arrow;
 
-			case DragMode.BackgroundLeft:
-			case DragMode.BackgroundRight:
+			case DragMode.BackgroundImageLeft:
+			case DragMode.BackgroundImageRight:
 				return Cursors.SizeWE;
 
-			case DragMode.BackgroundTop:
-			case DragMode.BackgroundBottom:
+			case DragMode.BackgroundImageTop:
+			case DragMode.BackgroundImageBottom:
 				return Cursors.SizeNS;
 			}
 

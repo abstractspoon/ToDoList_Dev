@@ -2576,7 +2576,7 @@ namespace EvidenceBoardUIExtension
 					{
 						e.Effect = DragDropEffects.None;
 					}
-					else if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					else if (HitTestBackgroundImage(ptClient) == DragMode.BackgroundImage)
 					{
 						e.Effect = e.AllowedEffect;
 					}
@@ -2679,7 +2679,7 @@ namespace EvidenceBoardUIExtension
 				{
 					var ptClient = PointToClient(new Point(e.X, e.Y));
 
-					if (HitTestBackgroundImage(ptClient) == DragMode.Background)
+					if (HitTestBackgroundImage(ptClient) == DragMode.BackgroundImage)
 					{
 						var ptImage = BackgroundImage.AbsoluteToRelative(ClientToGraph(ptClient));
 						target = new UserLinkTarget(ptImage);
@@ -2773,7 +2773,7 @@ namespace EvidenceBoardUIExtension
 					{
 						cancel = true;
 					}
-					else if (HitTestBackgroundImage(m_DraggedUserLinkEnd) != DragMode.Background)
+					else if (HitTestBackgroundImage(m_DraggedUserLinkEnd) != DragMode.BackgroundImage)
 					{
 						cancel = true;
 					}
