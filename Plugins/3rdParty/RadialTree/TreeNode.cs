@@ -87,18 +87,20 @@ namespace RadialTree
 		public bool IsExpanded { get { return (Expansion == ExpansionState.Expanded); } }
 		public bool IsCollapsed { get { return (Expansion == ExpansionState.Collapsed); } }
 
+		public TreeNode<T> FirstChild { get { return (IsLeaf ? null : Children[0]); } }
+
 		public bool AllParentsExpanded
 		{
 			get
 			{
-				var parent = _parent;
+				var parent = Parent;
 
 				while (parent != null)
 				{
 					if (parent.IsCollapsed)
 						return false;
 
-					parent = parent._parent;
+					parent = parent.Parent;
 				}
 
 				// Root Node
@@ -106,7 +108,7 @@ namespace RadialTree
 			}
 		}
 
-		public bool Expand(bool expand, bool andChildren)
+		public bool Expand(bool expand, bool andChildren = false)
 		{
 			if (IsLeaf)
 				return false;
