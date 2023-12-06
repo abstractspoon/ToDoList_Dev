@@ -2167,7 +2167,7 @@ namespace EvidenceBoardUIExtension
 					// Next/Prev image
 					if (taskItem.SelectNextImage(forwardBtn))
 					{
-						RecalcExtents();
+						RecalcExtents(false);
 						TaskModified?.Invoke(this, new List<uint>() { taskItem.TaskId });
 					}
 
@@ -2190,7 +2190,7 @@ namespace EvidenceBoardUIExtension
 					taskItem.ExpandImage(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed);
 
 					SelectNode(taskItem.TaskId, true, false);
-					RecalcExtents();
+					RecalcExtents(false);
 
 					ImageExpansionChange?.Invoke(this, null);
 

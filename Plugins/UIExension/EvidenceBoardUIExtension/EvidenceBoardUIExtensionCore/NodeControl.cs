@@ -110,6 +110,7 @@ namespace EvidenceBoardUIExtension
 
 		public new EventHandler BackgroundImageChanged;
 		public EventHandler ZoomChange;
+		public EventHandler ExtentsChange;
 
 		// -------------------------------------------------------------------
 
@@ -240,6 +241,7 @@ namespace EvidenceBoardUIExtension
 
 			set
 			{
+				bool zoomedToExtents = IsZoomedToExtents;
 				ExpandAllNodes(false);
 
 				foreach (var id in value)
@@ -250,7 +252,7 @@ namespace EvidenceBoardUIExtension
 						node.Expand(false, false);
 				}
 
-				RecalcExtents();
+				RecalcExtents(zoomedToExtents);
 				ValidateSelectedNodeVisibility();
 			}
 		}
@@ -550,6 +552,7 @@ namespace EvidenceBoardUIExtension
 
 		protected float ZoomFactor { get { return m_ZoomFactor; } }
 		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
+		protected bool IsZoomedToExtents { get { return ((m_RootNode?.Count > 0) && !CanZoomOut); } }
 
 		public bool CanZoomIn { get { return (m_ZoomLevel > 0); } }
 		public bool CanZoomOut { get { return (HorizontalScroll.Visible || VerticalScroll.Visible); } }
@@ -592,17 +595,21 @@ namespace EvidenceBoardUIExtension
 
 		public void ZoomToExtents()
 		{
-			if (ClientRectangle.Width < ZoomedSize.Width ||
-				ClientRectangle.Height < ZoomedSize.Height)
-			{
-				do
-				{
-					m_ZoomLevel++;
-					m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
-				}
-				while (ClientRectangle.Width < ZoomedSize.Width ||
-						ClientRectangle.Height < ZoomedSize.Height);
+			var curSize = ZoomedSize;
 
+			// Always reset the zoom first
+			m_ZoomFactor = 1.0f;
+			m_ZoomLevel = 0;
+
+			while (ClientRectangle.Width < ZoomedSize.Width ||
+					ClientRectangle.Height < ZoomedSize.Height)
+			{
+				m_ZoomLevel++;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+			}
+
+			if (ZoomedSize != curSize)
+			{
 				AutoScrollMinSize = ZoomedSize;
 				RecalcTextFont();
 				Invalidate();
@@ -1098,7 +1105,7 @@ namespace EvidenceBoardUIExtension
 					m_RadialTree.CalculatePositions(m_InitialRadius, m_RadialIncrementOrSpacing);
 
 				OnAfterRecalcLayout();
-				RecalcExtents();
+				RecalcExtents(false);
 			}
 		}
 
@@ -1117,7 +1124,7 @@ namespace EvidenceBoardUIExtension
 			// For derived class
 		}
 
-		protected void RecalcExtents()
+		protected void RecalcExtents(bool zoomToExtents)
 		{
 			var oldExtents = Extents;
 
@@ -1130,8 +1137,17 @@ namespace EvidenceBoardUIExtension
 
 			if (!Extents.Equals(oldExtents))
 			{
-				AutoScrollMinSize = ZoomedSize;
-				Invalidate();
+				if (zoomToExtents)
+				{
+					ZoomToExtents();
+				}
+				else
+				{
+					AutoScrollMinSize = ZoomedSize;
+					Invalidate();
+				}
+
+				ExtentsChange?.Invoke(this, null);
 			}
 		}
 
@@ -1204,7 +1220,7 @@ namespace EvidenceBoardUIExtension
 						node.Expand(!node.IsExpanded, false);
 						Invalidate();
 
-						RecalcExtents();
+						RecalcExtents(IsZoomedToExtents);
 						ValidateSelectedNodeVisibility();
 					}
 					else
@@ -1485,7 +1501,10 @@ namespace EvidenceBoardUIExtension
 			else if (SelectedNodeCount > 0)
 			{
 				// handle keyboard navigation
-				var nextNode = NodeNavigation.GetNextNode(m_SelectedNodes.Last(), e.KeyCode);
+				bool extentsChange = false;
+				bool zoomedToExtents = IsZoomedToExtents;
+
+				var nextNode = NodeNavigation.GetNextNode(m_SelectedNodes.Last(), e.KeyCode, ref extentsChange);
 
 				if ((nextNode != null) && IsSelectableNode(nextNode))
 				{
@@ -1494,6 +1513,9 @@ namespace EvidenceBoardUIExtension
 
 					Invalidate();
 					NotifySelectionChange();
+
+					if (extentsChange)
+						RecalcExtents(zoomedToExtents);
 				}
 			}
 
@@ -1729,7 +1751,7 @@ namespace EvidenceBoardUIExtension
 						else
 						{
 							ClearDragState();
-							RecalcExtents();
+							RecalcExtents(false);
 						}
 					}
 				}
@@ -1805,11 +1827,13 @@ namespace EvidenceBoardUIExtension
 
 		public bool ExpandAllNodes(bool recalcExtents = true)
 		{
+			bool zoomedToExtents = IsZoomedToExtents;
+
 			if (!ExpandNode(RootNode, true, true)) // and children
 				return false;
 
 			if (recalcExtents)
-				RecalcExtents();
+				RecalcExtents(zoomedToExtents);
 
 			return true;
 		}
@@ -1825,10 +1849,12 @@ namespace EvidenceBoardUIExtension
 
 		public bool CollapseAllNodes()
 		{
+			bool zoomedToExtents = IsZoomedToExtents;
+
 			if (!ExpandNode(RootNode, false, true)) // and children
 				return false;
 
-			RecalcExtents();
+			RecalcExtents(zoomedToExtents);
 			ValidateSelectedNodeVisibility();
 
 			return true;
@@ -1862,19 +1888,21 @@ namespace EvidenceBoardUIExtension
 
 		public bool ExpandSelectedNodes()
 		{
+			bool zoomedToExtents = IsZoomedToExtents;
 			bool someExpanded = false;
 
 			foreach (var node in m_SelectedNodes)
 				someExpanded |= node.Expand(true, true); // and children
 
 			if (someExpanded)
-				RecalcExtents();
+				RecalcExtents(zoomedToExtents);
 
 			return someExpanded;
 		}
 
 		public bool CollapseSelectedNodes()
 		{
+			bool zoomedToExtents = IsZoomedToExtents;
 			bool someCollapsed = false;
 
 			foreach (var node in m_SelectedNodes)
@@ -1882,7 +1910,7 @@ namespace EvidenceBoardUIExtension
 
 			if (someCollapsed)
 			{
-				RecalcExtents();
+				RecalcExtents(zoomedToExtents);
 				ValidateSelectedNodeVisibility();
 			}
 

@@ -8,7 +8,7 @@ namespace EvidenceBoardUIExtension
 {
 	class NodeNavigation
 	{
-		static public BaseNode GetNextNode(BaseNode node, Keys keypress)
+		static public BaseNode GetNextNode(BaseNode node, Keys keypress, ref bool extentsChange)
 		{
 			if (Control.ModifierKeys != Keys.None)
 				return null;
@@ -17,8 +17,8 @@ namespace EvidenceBoardUIExtension
 			{
 			case Keys.Up:		return NextNodeUp(node);
 			case Keys.Down:		return NextNodeDown(node, node.IsExpanded);
-			case Keys.Left:		return NextNodeLeft(node);
-			case Keys.Right:	return NextNodeRight(node);
+			case Keys.Left:		return NextNodeLeft(node, ref extentsChange);
+			case Keys.Right:	return NextNodeRight(node, ref extentsChange);
 			}
 
 			return null;
@@ -38,19 +38,25 @@ namespace EvidenceBoardUIExtension
 			return node.Children.Last();
 		}
 
-		static BaseNode NextNodeLeft(BaseNode node)
+		static BaseNode NextNodeLeft(BaseNode node, ref bool extentsChange)
 		{
 			if (node.Expand(false))
+			{
+				extentsChange = true;
 				return node;
+			}
 			
 			// else
 			return node.Parent;
 		}
 
-		static BaseNode NextNodeRight(BaseNode node)
+		static BaseNode NextNodeRight(BaseNode node, ref bool extentsChange)
 		{
 			if (node.Expand(true))
+			{
+				extentsChange = true;
 				return node;
+			}
 
 			// else
 			return node.FirstChild;

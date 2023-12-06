@@ -373,6 +373,7 @@ namespace EvidenceBoardUIExtension
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnEvidenceBoardEditTaskCompletion);
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
+			m_Control.ExtentsChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.ImageExpansionChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.BackgroundImageChanged += (s, e) => 
