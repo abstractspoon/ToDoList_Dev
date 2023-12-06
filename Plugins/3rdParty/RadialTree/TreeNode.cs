@@ -89,72 +89,6 @@ namespace RadialTree
 
 		public TreeNode<T> FirstChild { get { return (IsLeaf ? null : Children[0]); } }
 
-		protected TreeNode<T> LastVisibleChild
-		{
-			get
-			{
-				if (IsLeaf || IsCollapsed)
-					return null;
-
-				var lastChild = Children.Last().LastVisibleChild;
-
-				if (lastChild != null)
-					return lastChild;
-				
-				// else
-				return Children.Last();
-			}
-		}
-
-		protected TreeNode<T> GetPrevNode(bool incChildren)
-		{
-
-			return null;
-		}
-
-		public TreeNode<T> PrevNode
-		{
-			get
-			{
-				if (Parent == null)
-					return null;
-
-				int pos = Parent.Children.IndexOf(this);
-
-				if (pos == 0)
-					return Parent;
-
-				var prevNode = Parent.Children[pos - 1].LastVisibleChild;
-
-				if (prevNode != null)
-					return prevNode;
-
-				return Parent.Children[pos - 1];
-			}
-		}
-
-		protected TreeNode<T> GetNextNode(bool incChildren)
-		{
-			// 1. If expanded, retrieve first child
-			if (incChildren && IsExpanded)
-				return FirstChild;
-
-			// 2. look for next sibling
-			if (Parent == null)
-				return null;
-
-			int pos = Parent.Children.IndexOf(this);
-
-			if (pos < (Parent.Children.Count - 1))
-				return Parent.Children[pos + 1];
-
-			// 3. Pass on to our parent but excluding
-			// its children which includes us
-			return Parent.GetNextNode(false);
-		}
-
-		public TreeNode<T> NextNode { get { return GetNextNode(true); } }
-
 		public bool AllParentsExpanded
 		{
 			get
@@ -174,7 +108,7 @@ namespace RadialTree
 			}
 		}
 
-		public bool Expand(bool expand, bool andChildren)
+		public bool Expand(bool expand, bool andChildren = false)
 		{
 			if (IsLeaf)
 				return false;
