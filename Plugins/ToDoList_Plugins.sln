@@ -83,7 +83,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordCloudUIExtensionBridge"
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Controls", "3rdParty\CloudControl\Controls.csproj", "{34649D7D-04A9-4092-AD0B-F7022C123FD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudControl", "3rdParty\CloudControl\CloudControl.csproj", "{34649D7D-04A9-4092-AD0B-F7022C123FD7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OutlookExporter", "OutlookExporter", "{9AE05D75-D889-4AE7-BD19-23612BBAB2C5}"
 EndProject
