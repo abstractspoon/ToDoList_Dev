@@ -1202,6 +1202,7 @@ namespace EvidenceBoardUIExtension
 					if (HitTestExpansionButton(node, e.Location))
 					{
 						node.Expand(!node.IsExpanded, false);
+						Invalidate();
 
 						RecalcExtents();
 						ValidateSelectedNodeVisibility();
@@ -1861,7 +1862,10 @@ namespace EvidenceBoardUIExtension
 			}
 
 			if (m_SelectedNodes.Count < numItems)
+			{
 				NotifySelectionChange();
+				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+			}
 		}
 
 		public bool ExpandSelectedNodes()
