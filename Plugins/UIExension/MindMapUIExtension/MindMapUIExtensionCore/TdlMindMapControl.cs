@@ -1027,22 +1027,6 @@ namespace MindMapUIExtension
 			return base.GetNodeBackgroundColor(itemData);
 		}
 
-		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
-		{
-			Debug.Assert(IsZoomed);
-
-			var gSave = graphics.Save();
-
-			graphics.CompositingMode = CompositingMode.SourceCopy;
-			graphics.CompositingQuality = CompositingQuality.HighQuality;
-			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
-			graphics.Restore(gSave);
-		}
-
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											  NodeDrawState nodeState, NodeDrawPos nodePos,
 											  Font nodeFont, Object itemData)
@@ -1081,8 +1065,7 @@ namespace MindMapUIExtension
 						using (var gTemp = Graphics.FromImage(tempImage))
 						{
 							CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
-
-							DrawZoomedImage(tempImage, graphics, checkRect);
+							UIExtension.DrawZoomedImage(tempImage, graphics, checkRect, rect);
 						}
 					}
 				}
@@ -1108,7 +1091,7 @@ namespace MindMapUIExtension
 								gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
 								m_TaskIcons.Draw(gTemp, 0, 0);
 
-								DrawZoomedImage(tempImage, graphics, iconRect);
+								UIExtension.DrawZoomedImage(tempImage, graphics, iconRect, rect);
 							}
 						}
 					}

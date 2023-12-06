@@ -1734,7 +1734,7 @@ namespace EvidenceBoardUIExtension
 							gTemp.Clear(backColor);
 							m_TaskIcons.Draw(gTemp, 0, 0);
 
-							DrawZoomedIcon(tempImage, g, iconRect, nodeRect);
+							UIExtension.DrawZoomedImage(tempImage, g, iconRect, nodeRect);
 						}
 					}
 				}
@@ -1780,7 +1780,7 @@ namespace EvidenceBoardUIExtension
 						gTemp.Clear(backColor);
 
 						DrawTaskImageButton(gTemp, tempRect, btn, mousePos, true);
-						DrawZoomedIcon(tempImage, graphics, iconRect, nodeRect);
+						UIExtension.DrawZoomedImage(tempImage, graphics, iconRect, nodeRect);
 					}
 				}
 			}
@@ -1837,7 +1837,7 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, spinRect.Width, spinRect.Height);
 
 						DrawTaskImageSpinButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
-						DrawZoomedIcon(tempImage, graphics, spinRect, imageRect);
+						UIExtension.DrawZoomedImage(tempImage, graphics, spinRect, imageRect);
 					}
 				}
 			}
@@ -1948,23 +1948,6 @@ namespace EvidenceBoardUIExtension
 			}
 
 			return nodeRect;
-		}
-
-		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
-		{
-			Debug.Assert(IsZoomed);
-
-			var gSave = graphics.Save();
-
-			var attrib = new ImageAttributes();
-			attrib.SetWrapMode(WrapMode.TileFlipXY);
-
-			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
-
-			graphics.IntersectClip(clipRect);
-			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrib);
-			graphics.Restore(gSave);
 		}
 
 		private bool TaskHasIcon(TaskItem task)
