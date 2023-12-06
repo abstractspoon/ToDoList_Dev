@@ -1481,8 +1481,27 @@ namespace EvidenceBoardUIExtension
 						Invalidate();
 				}
 			}
-			else
+			else if ((SelectedNodeCount > 0) && (ModifierKeys == Keys.None)) 
 			{
+				// handle keyboard navigation
+				BaseNode curNode = m_SelectedNodes.Last(), nextNode = null;
+
+				switch (e.KeyCode)
+				{
+				case Keys.Up:		nextNode = curNode.PrevNode;   break;
+				case Keys.Down:		nextNode = curNode.NextNode;   break;
+				case Keys.Left:		nextNode = curNode.Parent;	   break;
+				case Keys.Right:	nextNode = curNode.FirstChild; break;
+				}
+
+				if (nextNode != null)
+				{
+					m_SelectedNodes.Clear();
+					m_SelectedNodes.Add(nextNode);
+
+					Invalidate();
+					NotifySelectionChange();
+				}
 			}
 
 			base.OnKeyDown(e);
