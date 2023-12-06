@@ -954,8 +954,6 @@ bool UIExtension::SaveImageToFile(Bitmap^ image, String^ filepath)
 
 void UIExtension::DrawZoomedImage(Drawing::Image^ image, Drawing::Graphics^ graphics, Drawing::Rectangle destRect, Drawing::Rectangle clipRect)
 {
-	Diagnostics::Debug::Assert(IsZoomed);
-
 	auto gSave = graphics->Save();
 
 	auto attrib = gcnew Imaging::ImageAttributes();
