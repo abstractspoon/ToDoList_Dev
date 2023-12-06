@@ -386,7 +386,7 @@ namespace EvidenceBoardUIExtension
 				Invalidate();
 
 				if (notify)
-					NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+					NotifySelectionChange();
 
 				return true;
 			}
@@ -394,12 +394,17 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
+		protected void NotifySelectionChange()
+		{
+			NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+		}
+
 		public void ClearSelection()
 		{
 			m_SelectedNodes.Clear();
-			Invalidate();
 
-			NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+			Invalidate();
+			NotifySelectionChange();
 		}
 
 		public bool SelectNodes(IList<uint> nodeIds, bool notify = false)
@@ -421,7 +426,7 @@ namespace EvidenceBoardUIExtension
 			Invalidate();
 
 			if (notify)
-				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				NotifySelectionChange();
 
 			return true;
 		}
@@ -434,7 +439,7 @@ namespace EvidenceBoardUIExtension
 			Invalidate();
 
 			if (notify)
-				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				NotifySelectionChange();
 		}
 
 		public void SelectNodeAndChildren(BaseNode node)
@@ -1370,8 +1375,7 @@ namespace EvidenceBoardUIExtension
 
 				ScrollToSelection(true);
 				Invalidate();
-
-				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				NotifySelectionChange();
 			}
 #if DEBUG
 			else if (node == RootNode)
@@ -1699,7 +1703,7 @@ namespace EvidenceBoardUIExtension
 					ClearDragState();
 					Invalidate();
 
-					NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+					NotifySelectionChange();
 				}
 				break;
 
@@ -1842,7 +1846,7 @@ namespace EvidenceBoardUIExtension
 			}
 
 			if (m_SelectedNodes.Count < numItems)
-				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				NotifySelectionChange();
 		}
 
 		public bool ExpandSelectedNodes()
