@@ -670,33 +670,35 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		List<BaseNode> HitTestableNodes
+		{
+			get
+			{
+				var nodes = new List<BaseNode>(m_SelectedNodes);
+
+				// Remove any outside of the client rect
+				nodes.RemoveAll(x => !GetNodeClientRect(x).IntersectsWith(ClientRectangle));
+
+				// Rest of the (unselected) nodes
+				var restOfNodes = HitTestNodes(ClientRectangle);
+
+				// Remove any duplicates
+				restOfNodes.RemoveAll(x => nodes.Contains(x));
+
+				// Insert these at the start so when we reverse the list the selected nodes come first
+				nodes.InsertRange(0, restOfNodes);
+				nodes.Reverse();
+
+				return nodes;
+			}
+		}
+
 		protected BaseNode HitTestNode(Point ptClient, bool excludeRoot = false)
 		{
-			// We always hit-test in reverse order so that the nodes rendered last
-			// (ie. the tasks rendered on top) are hit-tested first
-
-			// Selected nodes first because they are rendered above other nodes
-			int selItem = m_SelectedNodes.Count;
-
-			while (selItem-- > 0)
+			foreach (var node in HitTestableNodes)
 			{
-				if (HitTestNode(m_SelectedNodes[selItem], ptClient, excludeRoot))
-					return m_SelectedNodes[selItem];
-			}
-
-			// Rest of the (unselected) nodes
-			var restOfNodes = HitTestNodes(ClientRectangle);
-
-			if (restOfNodes.Count > 0)
-			{
-				restOfNodes.RemoveAll(x => m_SelectedNodes.Contains(x));
-				restOfNodes.Reverse();
-
-				foreach (var node in restOfNodes)
-				{
-					if (HitTestNode(node, ptClient, excludeRoot))
-						return node;
-				}
+				if (HitTestNode(node, ptClient, excludeRoot))
+					return node;
 			}
 
 			return null;
@@ -1127,6 +1129,7 @@ namespace EvidenceBoardUIExtension
 
 		protected void RecalcExtents(bool zoomToExtents)
 		{
+			Cursor = Cursors.WaitCursor;
 			var oldExtents = Extents;
 
 			m_MinExtents = m_MaxExtents = Point.Empty;
@@ -1212,23 +1215,25 @@ namespace EvidenceBoardUIExtension
 			if (!ModifierKeys.HasFlag(Keys.Control) &&
 				!ModifierKeys.HasFlag(Keys.Alt))
 			{
-				var node = HitTestNode(e.Location);
+				var node = HitTestExpansionButton(e.Location);
+
+				if (node != null)
+				{
+					Cursor = Cursors.WaitCursor;
+
+					node.Expand(!node.IsExpanded, false);
+					Invalidate();
+
+					RecalcExtents(IsZoomedToExtents);
+					ValidateSelectedNodeVisibility();
+
+					return;
+				}
+
+				node = HitTestNode(e.Location);
 
 				if ((node != null) && IsSelectableNode(node))
-				{
-					if (HitTestExpansionButton(node, e.Location))
-					{
-						node.Expand(!node.IsExpanded, false);
-						Invalidate();
-
-						RecalcExtents(IsZoomedToExtents);
-						ValidateSelectedNodeVisibility();
-					}
-					else
-					{
-						SelectNode(node.Data, true, false);
-					}
-				}
+					SelectNode(node.Data, true, false);
 			}
 		}
 
@@ -1270,9 +1275,15 @@ namespace EvidenceBoardUIExtension
 			return m_BackgroundImage.HitTest(ptGraph, hitWidth);
 		}
 
-		protected bool HitTestExpansionButton(BaseNode node, Point ptClient)
+		protected BaseNode HitTestExpansionButton(Point ptClient)
 		{
-			return CalcExpansionButtonRect(GetNodeClientRect(node)).Contains(ptClient);
+			foreach (var node in HitTestableNodes)
+			{
+				if (CalcExpansionButtonRect(GetNodeClientRect(node)).Contains(ptClient))
+					return node;
+			}
+
+			return null;
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
@@ -1308,7 +1319,7 @@ namespace EvidenceBoardUIExtension
 					m_DragTimer.Start();
 				}
 			}
-			else if (HitTestExpansionButton(node, e.Location))
+			else if (HitTestExpansionButton(e.Location) != null)
 			{
 				// Handle in OnMouseClick else the graph can change between
 				// mouse down and mouse up causing weirdness
