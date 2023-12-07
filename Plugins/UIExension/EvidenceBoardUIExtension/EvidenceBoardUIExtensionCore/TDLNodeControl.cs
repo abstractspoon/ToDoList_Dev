@@ -2162,7 +2162,7 @@ namespace EvidenceBoardUIExtension
 			// Check for image expansion click
 			if (node != null)
 			{
-				taskItem = HitTestTaskImageExpansionButton(e.Location);
+				taskItem = HitTestTaskImageExpansionButton(node, e.Location);
 
 				if (taskItem != null)
 				{
@@ -2171,7 +2171,7 @@ namespace EvidenceBoardUIExtension
 					Update();
 
 					// Toggle expansion state
-					taskItem.ExpandImage(taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed);
+					taskItem.ExpandImage(!taskItem.IsExpanded);
 
 					SelectNode(taskItem.TaskId, true, false);
 					RecalcExtents(false);
@@ -2409,6 +2409,11 @@ namespace EvidenceBoardUIExtension
 		{
 			var node = HitTestNode(ptClient, true); // exclude root node
 
+			return HitTestTaskImageExpansionButton(node, ptClient);
+		}
+
+		protected TaskItem HitTestTaskImageExpansionButton(BaseNode node, Point ptClient)
+		{
 			if (node == null)
 				return null;
 
