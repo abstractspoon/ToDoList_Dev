@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Windows.Forms.VisualStyles;
 
 using ScrollHelper;
+using TreeViewHelper;
 
 namespace MindMapUIExtension
 {
@@ -100,7 +101,7 @@ namespace MindMapUIExtension
         { 
             get 
             {
-				return TreeViewHelper.Utils.GetExpansionButtonSize(this, DefaultExpansionButtonSize);
+				return TreeViewUtils.GetExpansionButtonSize(this, DefaultExpansionButtonSize);
             } 
         }
 
@@ -2421,7 +2422,7 @@ namespace MindMapUIExtension
 			Rectangle button = CalculateExpansionButtonRect(node);
 			bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
 
-			TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
+			TreeViewUtils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
 		}
 
 		private void DrawConnections(Graphics graphics, TreeNode node)

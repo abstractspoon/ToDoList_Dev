@@ -8,7 +8,7 @@ using System.Windows.Forms.VisualStyles;
 
 namespace TreeViewHelper
 {
-    public class Utils
+    public class TreeViewUtils
     {
 		static public void DrawExpansionButton(Graphics graphics, Rectangle button, bool opened, bool pressed)
 		{

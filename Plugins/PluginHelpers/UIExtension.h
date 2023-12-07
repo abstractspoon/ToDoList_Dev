@@ -130,7 +130,6 @@ namespace Abstractspoon
 				static Windows::Forms::Cursor^ HandCursor();
 
 				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);
-				static void DrawZoomedImage(Drawing::Image^ image, Drawing::Graphics^ graphics, Drawing::Rectangle destRect, Drawing::Rectangle clipRect);
 
 				// -----------------------------------------------
 

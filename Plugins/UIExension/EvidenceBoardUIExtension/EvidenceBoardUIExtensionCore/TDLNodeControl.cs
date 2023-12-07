@@ -12,6 +12,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using IIControls;
+using ImageHelper;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
@@ -1734,7 +1735,7 @@ namespace EvidenceBoardUIExtension
 							gTemp.Clear(backColor);
 							m_TaskIcons.Draw(gTemp, 0, 0);
 
-							UIExtension.DrawZoomedImage(tempImage, g, iconRect, nodeRect);
+							ImageUtils.DrawZoomedImage(tempImage, g, iconRect, nodeRect);
 						}
 					}
 				}
@@ -1780,7 +1781,7 @@ namespace EvidenceBoardUIExtension
 						gTemp.Clear(backColor);
 
 						DrawTaskImageButton(gTemp, tempRect, btn, mousePos, true);
-						UIExtension.DrawZoomedImage(tempImage, graphics, iconRect, nodeRect);
+						ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, nodeRect);
 					}
 				}
 			}
@@ -1837,7 +1838,7 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, spinRect.Width, spinRect.Height);
 
 						DrawTaskImageSpinButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
-						UIExtension.DrawZoomedImage(tempImage, graphics, spinRect, imageRect);
+						ImageUtils.DrawZoomedImage(tempImage, graphics, spinRect, imageRect);
 					}
 				}
 			}

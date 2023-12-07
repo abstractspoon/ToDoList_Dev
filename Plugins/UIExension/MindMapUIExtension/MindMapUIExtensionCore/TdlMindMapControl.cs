@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
 
+using ImageHelper;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -1065,7 +1067,7 @@ namespace MindMapUIExtension
 						using (var gTemp = Graphics.FromImage(tempImage))
 						{
 							CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
-							UIExtension.DrawZoomedImage(tempImage, graphics, checkRect, rect);
+							ImageUtils.DrawZoomedImage(tempImage, graphics, checkRect, rect);
 						}
 					}
 				}
@@ -1091,7 +1093,7 @@ namespace MindMapUIExtension
 								gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
 								m_TaskIcons.Draw(gTemp, 0, 0);
 
-								UIExtension.DrawZoomedImage(tempImage, graphics, iconRect, rect);
+								ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, rect);
 							}
 						}
 					}

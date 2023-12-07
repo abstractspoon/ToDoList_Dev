@@ -951,22 +951,6 @@ bool UIExtension::SaveImageToFile(Bitmap^ image, String^ filepath)
 	return true;
 }
 
-
-void UIExtension::DrawZoomedImage(Drawing::Image^ image, Drawing::Graphics^ graphics, Drawing::Rectangle destRect, Drawing::Rectangle clipRect)
-{
-	auto gSave = graphics->Save();
-
-	auto attrib = gcnew Imaging::ImageAttributes();
-	attrib->SetWrapMode(WrapMode::TileFlipXY);
-
-	graphics->InterpolationMode = InterpolationMode::HighQualityBicubic;
-	graphics->SmoothingMode = SmoothingMode::HighQuality;
-
-	graphics->IntersectClip(clipRect);
-	graphics->DrawImage(image, destRect, 0, 0, image->Width, image->Height, GraphicsUnit::Pixel, attrib);
-	graphics->Restore(gSave);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIExtension::TaskRecurrences::TaskRecurrences(IntPtr hwndParent) : m_hwndParent(NULL)

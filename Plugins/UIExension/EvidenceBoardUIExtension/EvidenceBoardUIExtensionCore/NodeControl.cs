@@ -10,6 +10,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using ScrollHelper;
+using TreeViewHelper;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
@@ -800,7 +801,7 @@ namespace EvidenceBoardUIExtension
 
 		protected Rectangle CalcExpansionButtonRect(Rectangle nodeRect)
 		{
-			int buttonSize = TreeViewHelper.Utils.GetExpansionButtonSize(this);
+			int buttonSize = TreeViewUtils.GetExpansionButtonSize(this);
 
 			// Place at top right
 			var rect = Rectangle.FromLTRB(nodeRect.Right - buttonSize, nodeRect.Top, nodeRect.Right, nodeRect.Top + buttonSize);
@@ -1016,7 +1017,7 @@ namespace EvidenceBoardUIExtension
 				var button = CalcExpansionButtonRect(nodeRect);
 				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
 
-				TreeViewHelper.Utils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
+				TreeViewUtils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
 			}
 		}
 
