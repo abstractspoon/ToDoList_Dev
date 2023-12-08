@@ -594,6 +594,33 @@ namespace EvidenceBoardUIExtension
 			return false;
 		}
 
+		private void ZoomTo(int level, Point ptClient)
+		{
+			if (level != m_ZoomLevel)
+			{
+				// Save the mouse pos in graphs coords
+				var ptGraph = ClientToGraph(ptClient);
+
+				// Recalculate the zoom
+				m_ZoomLevel = level;
+
+				RecalcZoomFactor();
+				RecalcTextFont();
+				Invalidate();
+
+				// Keep the previous position beneath the mouse
+				if (ptClient != NullPoint)
+				{
+					var ptClientNew = GraphToClient(ptGraph);
+
+					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
+					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
+
+					PerformLayout();
+				}
+			}
+		}
+
 		public void ZoomToExtents()
 		{
 			var curSize = ZoomedSize;
@@ -641,33 +668,6 @@ namespace EvidenceBoardUIExtension
 		protected virtual void OnTextFontChanged()
 		{
 			// for derived classes
-		}
-
-		private void ZoomTo(int level, Point ptClient)
-		{
-			if (level != m_ZoomLevel)
-			{
-				// Save the mouse pos in graphs coords
-				var ptGraph = ClientToGraph(ptClient);
-
-				// Recalculate the zoom
-				m_ZoomLevel = level;
-
-				RecalcZoomFactor();
-				RecalcTextFont();
-				Invalidate();
-
-				// Keep the previous position beneath the mouse
-				if (ptClient != NullPoint)
-				{
-					var ptClientNew = GraphToClient(ptGraph);
-
-					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
-					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
-
-					PerformLayout();
-				}
-			}
 		}
 
 		List<BaseNode> HitTestableNodes

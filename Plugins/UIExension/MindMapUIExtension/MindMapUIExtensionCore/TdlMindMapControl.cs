@@ -437,7 +437,7 @@ namespace MindMapUIExtension
 		protected float ImageZoomFactor
 		{
 			// Zoom images only half as much as text
-			get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+			get { return (ZoomFactor/* + ((1.0f - ZoomFactor) / 2)*/); }
 		}
 
         public bool WantTaskUpdate(Task.Attribute attrib)

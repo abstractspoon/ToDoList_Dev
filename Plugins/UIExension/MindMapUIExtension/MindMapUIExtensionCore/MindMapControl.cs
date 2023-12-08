@@ -83,12 +83,7 @@ namespace MindMapUIExtension
 
 		const int DragExpandInterval = 500;
 
-		double m_DpiFactor = 1.0;
-
-        protected int ScaleByDPIFactor(int value)
-        {
-            return (int)(m_DpiFactor * value);
-        }
+        protected int ScaleByDPIFactor(int value) { return (int)(m_DpiFactor * value); }
 
 		virtual protected int ItemHorzSeparation			{ get { return ScaleByDPIFactor(40); } }
 		virtual protected int ItemVertSeparation			{ get { return ScaleByDPIFactor(4); } }
@@ -115,9 +110,6 @@ namespace MindMapUIExtension
                 return separation; 
             } 
         }
-
-		protected float ZoomFactor { get { return m_ZoomFactor; } }
-		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
 
 		protected enum NodeDrawState
 		{
@@ -149,7 +141,12 @@ namespace MindMapUIExtension
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
 		private Color m_ConnectionColor;
+
 		private float m_ZoomFactor = 1f;
+		private int m_ZoomLevel = 0;
+		double m_DpiFactor = 1.0;
+
+		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
 
 		private Timer m_DragTimer;
 		private int m_LastDragMoveTick = 0;
@@ -642,86 +639,151 @@ namespace MindMapUIExtension
 			}
         }
 
-		const float MaxZoom = 1f;
-		const float MinZoom = 0.4f;
-		const float ZoomIncrement = 0.1f;
-
-		protected bool CanZoomIn
-		{
-			get { return (m_ZoomFactor < MaxZoom); }
-		}
-
-		protected bool CanZoomOut
-		{
-			get { return (HorizontalScroll.Visible || VerticalScroll.Visible) && (m_ZoomFactor > MinZoom); }
-		}
-
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
 			{
-				float newFactor = m_ZoomFactor;
-
 				if (e.Delta > 0)
-				{
-					if (!CanZoomIn)
-						return;
-
-					newFactor += ZoomIncrement;
-				}
+					ZoomIn(e.Location);
 				else
-				{
-					if (!CanZoomOut)
-						return;
+					ZoomOut(e.Location);
+			}
+			else
+			{
+				base.OnMouseWheel(e);
+			}
+		}
 
-					newFactor -= ZoomIncrement;
+		protected float ZoomFactor { get { return m_ZoomFactor; } }
+		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
+		protected bool IsZoomedToExtents { get { return !CanZoomOut; } }
+
+		public bool CanZoomIn { get { return (m_ZoomLevel > 0); } }
+		public bool CanZoomOut { get { return (HorizontalScroll.Visible || VerticalScroll.Visible); } }
+
+		public bool ZoomIn()
+		{
+			return ZoomIn(NullPoint);
+		}
+
+		protected bool ZoomIn(Point ptClient)
+		{
+			if (CanZoomIn)
+			{
+				ZoomTo((m_ZoomLevel - 1), ptClient);
+				//ZoomChange?.Invoke(this, new EventArgs());
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool ZoomOut()
+		{
+			return ZoomOut(NullPoint);
+		}
+
+		protected bool ZoomOut(Point ptClient)
+		{
+			if (CanZoomOut)
+			{
+				ZoomTo((m_ZoomLevel + 1), ptClient);
+				//ZoomChange?.Invoke(this, new EventArgs());
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private void ZoomTo(int level, Point ptClient)
+		{
+			if (level != m_ZoomLevel)
+			{
+				Cursor = Cursors.WaitCursor;
+
+				// Convert mouse pos to relative coordinates
+				float relX = 0f, relY = 0f;
+				
+				if (ptClient != NullPoint)
+				{
+					relX = ((ptClient.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
+					relY = ((ptClient.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 				}
 
-				if (newFactor != m_ZoomFactor)
+				// Prevent all selection and expansion changes for the duration
+				BeginUpdate();
+
+				// The process of changing the fonts and recalculating the 
+				// item height can cause the tree-view to spontaneously 
+				// collapse tree nodes so we save the expansion state
+				// and restore it afterwards
+				var expandedNodes = GetExpandedNodes(RootNode);
+
+				// Recalculate the zoom
+				m_ZoomLevel = level;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+
+				UpdateTreeFont(false);
+
+				// 'Cleanup'
+				SetExpandedNodes(expandedNodes);
+				EndUpdate();
+
+				AutoScrollMinSize = ZoomedSize;
+
+				// Scroll the view to keep the mouse located in the 
+				// same relative position as before
+				if (ptClient != NullPoint)
 				{
-					Cursor = Cursors.WaitCursor;
-
-					// Convert mouse pos to relative coordinates
-					float relX = ((e.Location.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
-					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
-
-					// Prevent all selection and expansion changes for the duration
- 					BeginUpdate();
-
-					// The process of changing the fonts and recalculating the 
-					// item height can cause the tree-view to spontaneously 
-					// collapse tree nodes so we save the expansion state
-					// and restore it afterwards
-					var expandedNodes = GetExpandedNodes(RootNode);
-
-					m_ZoomFactor = newFactor;
-					UpdateTreeFont(false);
-
-					// 'Cleanup'
-					SetExpandedNodes(expandedNodes);
- 					EndUpdate();
-
-					// Scroll the view to keep the mouse located in the 
-					// same relative position as before
 					if (HorizontalScroll.Visible)
 					{
-						int newX = (int)(relX * HorizontalScroll.Maximum) - e.Location.X;
+						int newX = (int)(relX * HorizontalScroll.Maximum) - ptClient.X;
 						HorizontalScroll.SetValue(newX);
 					}
 
 					if (VerticalScroll.Visible)
 					{
-						int newY = (int)(relY * VerticalScroll.Maximum) - e.Location.Y;
+						int newY = (int)(relY * VerticalScroll.Maximum) - ptClient.Y;
 						VerticalScroll.SetValue(newY);
 					}
-
-					PerformLayout();
 				}
+
+				PerformLayout();
 			}
-			else
+		}
+
+		Size ZoomedSize
+		{
+			get
 			{
-				// Default scroll
-				base.OnMouseWheel(e);
+				return Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding).Size;
+			}
+		}
+
+		public void ZoomToExtents()
+		{
+			var curSize = ZoomedSize;
+
+			// Always reset the zoom first
+			m_ZoomFactor = 1.0f;
+			m_ZoomLevel = 0;
+
+			while (ClientRectangle.Width < ZoomedSize.Width ||
+					ClientRectangle.Height < ZoomedSize.Height)
+			{
+				m_ZoomLevel++;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+			}
+
+			if (ZoomedSize != curSize)
+			{
+				AutoScrollMinSize = ZoomedSize;
+				UpdateTreeFont(false);
+				Invalidate();
+
+				//ZoomChange?.Invoke(this, new EventArgs());
 			}
 		}
 
@@ -1531,7 +1593,7 @@ namespace MindMapUIExtension
 
 		protected virtual int GetMinItemHeight()
 		{
-			return ScaleByDPIFactor(10);
+			return 3;//ScaleByDPIFactor(10);
 		}
 
 		protected bool IsEmpty()
@@ -1777,7 +1839,6 @@ namespace MindMapUIExtension
 #if DEBUG
 			var startTick = Environment.TickCount;
 #endif
-
 			TreeNode rootNode = RootNode;
             MindMapItem rootItem = RootItem;
 
@@ -2201,7 +2262,7 @@ namespace MindMapUIExtension
 				return node.NodeFont;
 			
 			// else
-			return Font;
+			return m_TreeView.Font;
         }
 
         protected Font GetNodeTooltipFont(TreeNode node)
