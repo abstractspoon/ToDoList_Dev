@@ -248,7 +248,7 @@ namespace MindMapUIExtension
             using (Graphics graphics = Graphics.FromHwnd(Handle))
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
-			ZoomChange += (s, e) => { RebuildFonts(); };
+			ZoomChange += (s, e) => { ClearFonts(); };
 		}
         
         public void SetStrikeThruDone(bool strikeThruDone)
@@ -278,22 +278,11 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private void RebuildFonts()
+		private void ClearFonts()
 		{
-			var newFont = this.Font;
-
-			m_BoldLabelFont = ScaledFont(new Font(newFont.Name, newFont.Size, FontStyle.Bold));
-
-			if (m_StrikeThruDone)
-			{
-				m_BoldDoneLabelFont = ScaledFont(new Font(newFont.Name, newFont.Size, FontStyle.Bold | FontStyle.Strikeout));
-				m_DoneLabelFont = ScaledFont(new Font(newFont.Name, newFont.Size, FontStyle.Strikeout));
-			}
-			else
-			{
-				m_BoldDoneLabelFont = m_BoldLabelFont;
-				m_DoneLabelFont = null;
-			}
+			m_BoldLabelFont = null;
+			m_BoldDoneLabelFont = null;
+			m_DoneLabelFont = null;
 		}
 
 		// ILabelTipHandler implementation
@@ -680,31 +669,49 @@ namespace MindMapUIExtension
         override protected bool RefreshNodeFont(TreeNode node, bool andChildren)
         {
 			if (node == RootNode)
-				RebuildFonts();
+				ClearFonts();
 
 			var taskItem = RealTaskItem(node);
 
             if (taskItem == null)
                 return false;
 
-            Font curFont = node.NodeFont, newFont = null;
+            Font newFont = null;
 
-            if (taskItem.IsTask)
+			if (taskItem.IsTask) // else non-task root item
             {
+				bool isDone = taskItem.IsDone(false);
+
                 if (taskItem.ParentID == 0)
                 {
-                    if (taskItem.IsDone(false))
-                        newFont = m_BoldDoneLabelFont;
+                    if (m_StrikeThruDone && isDone)
+					{
+						// Create on demand
+						if (m_BoldDoneLabelFont == null)
+							m_BoldDoneLabelFont = new Font(TreeFont, FontStyle.Bold | FontStyle.Strikeout);
+
+						newFont = m_BoldDoneLabelFont;
+					}
                     else
-                        newFont = m_BoldLabelFont;
-                }
-                else if (taskItem.IsDone(false))
+					{
+						// Create on demand
+						if (m_BoldLabelFont == null)
+							m_BoldLabelFont = new Font(TreeFont, FontStyle.Bold);
+
+						newFont = m_BoldLabelFont;
+					}
+				}
+				else if (isDone)
                 {
-                    newFont = m_DoneLabelFont;
+					// Create on demand
+					if (m_StrikeThruDone && (m_DoneLabelFont == null))
+						m_DoneLabelFont = new Font(TreeFont, FontStyle.Strikeout);
+
+					newFont = m_DoneLabelFont;
                 }
             }
 
-            bool fontChange = (newFont != curFont);
+            bool fontChange = (newFont != node.NodeFont);
 
             if (fontChange)
                 node.NodeFont = newFont;
