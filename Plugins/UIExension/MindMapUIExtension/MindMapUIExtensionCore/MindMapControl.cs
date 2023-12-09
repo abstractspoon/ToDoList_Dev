@@ -513,7 +513,7 @@ namespace MindMapUIExtension
             if (!m_HoldRedraw)
             {
 #if DEBUG
-				var startTick = Environment.TickCount;
+//				var startTick = Environment.TickCount;
 #endif
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -1109,18 +1109,15 @@ namespace MindMapUIExtension
 			}
 
 			// Update the item height
-			if (itemHeight != prevItemHeight)
-			{
-				m_TreeView.ItemHeight = itemHeight;
+			m_TreeView.ItemHeight = itemHeight;
 #if DEBUG
-				Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
-				watch.Restart();
+			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
+			watch.Restart();
 #endif
-				RefreshNodeFont(RootNode, true);
+			RefreshNodeFont(RootNode, true);
 
-				if (recalcPositions)
-					RecalculatePositions();
-			}
+			if (recalcPositions)
+				RecalculatePositions();
 #if DEBUG
 			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
 #endif
