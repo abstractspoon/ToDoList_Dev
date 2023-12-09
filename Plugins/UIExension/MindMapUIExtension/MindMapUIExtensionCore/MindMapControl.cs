@@ -17,11 +17,6 @@ using TreeViewHelper;
 
 namespace MindMapUIExtension
 {
-	public delegate void SelectionChangeEventHandler(object sender, object itemData);
-	public delegate bool DragDropChangeEventHandler(object sender, MindMapDragEventArgs e);
-
-	[System.ComponentModel.DesignerCategory("")]
-
 	public class MindMapDragEventItem
 	{
 		public MindMapDragEventItem(TreeNode n)
@@ -61,6 +56,83 @@ namespace MindMapUIExtension
 		public bool copyItem = false;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+
+	public class TreeViewEx : TreeView
+	{
+		// --------------------------
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct NMHDR
+		{
+			public IntPtr hwndFrom;
+			public IntPtr idFrom;
+			public int code;
+		}
+
+		[DllImport("User32.dll")]
+		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+
+		const int WM_SETREDRAW		= 0x000B;
+		const int WM_NOTIFY			= 0x004E;
+		const int WM_REFLECT		= (0x0400 + 0x1C00);
+
+		const int NM_CUSTOMDRAW		= (0x00 - 12);
+
+		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
+		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
+
+		// --------------------------
+
+		private bool m_HoldRedraw = false;
+
+		public bool HoldRedraw
+		{
+			get { return m_HoldRedraw; }
+
+			set
+			{
+				if (value != m_HoldRedraw)
+				{
+					m_HoldRedraw = value;
+					SendMessage(Handle, WM_SETREDRAW, (m_HoldRedraw ? 0 : 1), 0);
+
+					if (!m_HoldRedraw)
+						Invalidate();
+				}
+			}
+		}
+
+		public new int ItemHeight
+		{
+			get { return SendMessage(Handle, TVM_GETITEMHEIGHT); }
+			set { SendMessage(Handle, TVM_SETITEMHEIGHT, value); }
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			switch (m.Msg)
+			{
+			case (WM_NOTIFY + WM_REFLECT):
+				{
+					var nmhdr = (NMHDR)m.GetLParam(typeof(NMHDR));
+
+					if ((nmhdr.code == NM_CUSTOMDRAW) && m_HoldRedraw)
+						return;
+				}
+				break;
+			}
+
+			base.WndProc(ref m);
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
+	public delegate void SelectionChangeEventHandler(object sender, object itemData);
+	public delegate bool DragDropChangeEventHandler(object sender, MindMapDragEventArgs e);
+
+	[System.ComponentModel.DesignerCategory("")]
 	public partial class MindMapControl : UserControl
     {
 		// Win32 Imports -----------------------------------------------------------------
@@ -70,14 +142,6 @@ namespace MindMapUIExtension
 
 		static int SB_HORZ = 0;
 		static int SB_VERT = 1;
-
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
-
-		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
-		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
 
 		// Constants ---------------------------------------------------------------------
 
@@ -482,7 +546,7 @@ namespace MindMapUIExtension
 
 		protected void BeginUpdate()
 		{
-			HoldRedraw = true;
+			m_TreeView.HoldRedraw = HoldRedraw = true;
 
             EnableExpandNotifications(false);
 			EnableSelectionNotifications(false);
@@ -490,7 +554,7 @@ namespace MindMapUIExtension
 
 		protected void EndUpdate()
 		{
-			HoldRedraw = false;
+			m_TreeView.HoldRedraw = HoldRedraw = false;
 
 			EnableExpandNotifications(true);
 			EnableSelectionNotifications(true);
@@ -1079,7 +1143,7 @@ namespace MindMapUIExtension
 			if (RootNode == null)
 				return;
 #if DEBUG
-//			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
+			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
 #endif
 			// We'll need these to fix up the item height below
 			int prevItemHeight = m_TreeView.ItemHeight;
@@ -1091,19 +1155,21 @@ namespace MindMapUIExtension
 			ClearNodeFonts(RootNode);
 
 #if DEBUG
-//			Stopwatch watch = Stopwatch.StartNew();
+			Stopwatch watch = Stopwatch.StartNew();
 #endif
 
-			// Change the font and get the tree to recalc the default item height
+			// Update the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
 
 #if DEBUG
-// 			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
-// 			watch.Restart();
+			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
+			watch.Restart();
 #endif
-			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
+			// Reset item height to force recalculation
+			m_TreeView.ItemHeight = -1;
 
-			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
+			// Retrieve new item height
+			int itemHeight = m_TreeView.ItemHeight;
 
 			// Adjust for zoom and item separation
 			itemHeight = Math.Max(itemHeight, (int)(GetMinItemHeight() * m_ZoomFactor));
@@ -1125,15 +1191,15 @@ namespace MindMapUIExtension
 			// Update the item height
 			m_TreeView.ItemHeight = itemHeight;
 #if DEBUG
-// 			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
-// 			watch.Restart();
+			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
+			watch.Restart();
 #endif
 			RefreshNodeFont(RootNode, true);
 
 			if (recalcPositions)
 				RecalculatePositions();
 #if DEBUG
-// 			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
+			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
 #endif
 		}
 

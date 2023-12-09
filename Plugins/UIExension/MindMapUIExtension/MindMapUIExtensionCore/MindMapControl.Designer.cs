@@ -31,7 +31,7 @@ namespace MindMapUIExtension
         /// </summary>
         private void InitializeComponent()
         {
-            this.m_TreeView = new System.Windows.Forms.TreeView();
+            this.m_TreeView = new TreeViewEx();
             this.SuspendLayout();
             // 
             // DebugMode
@@ -102,6 +102,6 @@ namespace MindMapUIExtension
 #if DEBUG
 		private System.Windows.Forms.CheckBox m_DebugMode;
 #endif
-        private System.Windows.Forms.TreeView m_TreeView;
+        private TreeViewEx m_TreeView;
     }
 }
