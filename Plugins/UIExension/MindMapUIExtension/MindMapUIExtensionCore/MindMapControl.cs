@@ -1619,7 +1619,7 @@ namespace MindMapUIExtension
 
 		protected virtual int GetMinItemHeight()
 		{
-			return 3;//ScaleByDPIFactor(10);
+			return ScaleByDPIFactor(10);
 		}
 
 		protected bool IsEmpty()
