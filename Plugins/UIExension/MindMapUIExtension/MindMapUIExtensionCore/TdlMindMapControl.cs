@@ -247,6 +247,8 @@ namespace MindMapUIExtension
 
             using (Graphics graphics = Graphics.FromHwnd(Handle))
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
+
+			ZoomChange += (s, e) => { RebuildFonts(); };
 		}
         
         public void SetStrikeThruDone(bool strikeThruDone)
@@ -264,35 +266,34 @@ namespace MindMapUIExtension
 
 		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
 		{
-			if (m_Items.Count > 500)
-				Cursor = Cursors.WaitCursor;
+			if (base.SetFont(fontName, fontSize))
+			{
+				if (m_Items.Count > 500)
+					Cursor = Cursors.WaitCursor;
 
-			bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
-            bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
+				if (RefreshNodeFont(RootNode, true))
+					RecalculatePositions();
 
-            if (baseFontChange)
-                m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
+				Cursor = Cursors.Default;
+			}
+		}
 
-            if (doneFontChange)
-            {
-                if (strikeThruDone)
-                {
-                    m_BoldDoneLabelFont = new Font(fontName, fontSize, FontStyle.Bold | FontStyle.Strikeout);
-                    m_DoneLabelFont = new Font(fontName, fontSize, FontStyle.Strikeout);
-                }
-                else
-                {
-                    m_BoldDoneLabelFont = m_BoldLabelFont;
-                    m_DoneLabelFont = null;
-                }
-            }
+		private void RebuildFonts()
+		{
+			var newFont = this.Font;
 
-            if ((baseFontChange || doneFontChange) && RefreshNodeFont(RootNode, true))
-                RecalculatePositions();
-            
-            base.SetFont(fontName, fontSize);
+			m_BoldLabelFont = ScaledFont(new Font(newFont.Name, newFont.Size, FontStyle.Bold));
 
-			Cursor = Cursors.Default;
+			if (m_StrikeThruDone)
+			{
+				m_BoldDoneLabelFont = ScaledFont(new Font(newFont.Name, newFont.Size, FontStyle.Bold | FontStyle.Strikeout));
+				m_DoneLabelFont = ScaledFont(new Font(newFont.Name, newFont.Size, FontStyle.Strikeout));
+			}
+			else
+			{
+				m_BoldDoneLabelFont = m_BoldLabelFont;
+				m_DoneLabelFont = null;
+			}
 		}
 
 		// ILabelTipHandler implementation
@@ -678,7 +679,10 @@ namespace MindMapUIExtension
 
         override protected bool RefreshNodeFont(TreeNode node, bool andChildren)
         {
-            var taskItem = RealTaskItem(node);
+			if (node == RootNode)
+				RebuildFonts();
+
+			var taskItem = RealTaskItem(node);
 
             if (taskItem == null)
                 return false;
@@ -699,8 +703,6 @@ namespace MindMapUIExtension
                     newFont = m_DoneLabelFont;
                 }
             }
-
-			newFont = ScaledFont(newFont);
 
             bool fontChange = (newFont != curFont);
 

@@ -166,8 +166,9 @@ namespace MindMapUIExtension
 
 		public event SelectionChangeEventHandler SelectionChange;
 		public event DragDropChangeEventHandler DragDropChange;
+		public EventHandler ZoomChange;
 
-        public MindMapControl()
+		public MindMapControl()
         {
 			using (var graphics = CreateGraphics())
 				m_DpiFactor = graphics.DpiX / 96.0;
@@ -182,12 +183,13 @@ namespace MindMapUIExtension
 			InitializeComponent();
 		}
 
-		public void SetFont(String fontName, int fontSize)
+		public bool SetFont(String fontName, int fontSize)
         {
             if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
-                return;
+                return false;
 
             this.Font = new Font(fontName, fontSize, FontStyle.Regular);
+			return true;
         }
 
         public TreeNode AddRootNode(Object itemData, UInt32 uniqueID = 0)
@@ -671,7 +673,7 @@ namespace MindMapUIExtension
 			if (CanZoomIn)
 			{
 				ZoomTo((m_ZoomLevel - 1), ptClient);
-				//ZoomChange?.Invoke(this, new EventArgs());
+				ZoomChange?.Invoke(this, new EventArgs());
 
 				return true;
 			}
@@ -689,7 +691,7 @@ namespace MindMapUIExtension
 			if (CanZoomOut)
 			{
 				ZoomTo((m_ZoomLevel + 1), ptClient);
-				//ZoomChange?.Invoke(this, new EventArgs());
+				ZoomChange?.Invoke(this, new EventArgs());
 
 				return true;
 			}
@@ -783,7 +785,7 @@ namespace MindMapUIExtension
 				UpdateTreeFont(false);
 				Invalidate();
 
-				//ZoomChange?.Invoke(this, new EventArgs());
+				ZoomChange?.Invoke(this, new EventArgs());
 			}
 		}
 
@@ -2258,11 +2260,7 @@ namespace MindMapUIExtension
 
         protected Font GetNodeTitleFont(TreeNode node)
         {
-			if (node.NodeFont != null)
-				return node.NodeFont;
-			
-			// else
-			return m_TreeView.Font;
+			return (node.NodeFont ?? m_TreeView.Font);
         }
 
         protected Font GetNodeTooltipFont(TreeNode node)
