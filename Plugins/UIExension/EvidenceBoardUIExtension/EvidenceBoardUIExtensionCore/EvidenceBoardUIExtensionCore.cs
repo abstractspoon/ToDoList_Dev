@@ -771,9 +771,7 @@ namespace EvidenceBoardUIExtension
 			m_Toolbar.Items.Add(btn10);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
-
 			Controls.Add(m_Toolbar);
-
 		}
 
 		private void UpdateToolbarButtonStates()
