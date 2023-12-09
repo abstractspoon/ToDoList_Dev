@@ -1079,7 +1079,7 @@ namespace MindMapUIExtension
 			if (RootNode == null)
 				return;
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
+//			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
 #endif
 			// We'll need these to fix up the item height below
 			int prevItemHeight = m_TreeView.ItemHeight;
@@ -1091,15 +1091,15 @@ namespace MindMapUIExtension
 			ClearNodeFonts(RootNode);
 
 #if DEBUG
-			Stopwatch watch = Stopwatch.StartNew();
+//			Stopwatch watch = Stopwatch.StartNew();
 #endif
 
 			// Change the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
 
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
-			watch.Restart();
+// 			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
 #endif
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
@@ -1125,15 +1125,15 @@ namespace MindMapUIExtension
 			// Update the item height
 			m_TreeView.ItemHeight = itemHeight;
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
-			watch.Restart();
+// 			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
 #endif
 			RefreshNodeFont(RootNode, true);
 
 			if (recalcPositions)
 				RecalculatePositions();
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
+// 			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
 #endif
 		}
 
