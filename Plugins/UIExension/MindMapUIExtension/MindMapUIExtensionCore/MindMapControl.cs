@@ -532,14 +532,14 @@ namespace MindMapUIExtension
 				PostDraw(e.Graphics, m_TreeView.Nodes);
 
 #if DEBUG
-				int xOffset = (DebugMode() ? m_TreeView.Width : 0);
-				int yOffset = 0;
+// 				int xOffset = (DebugMode() ? m_TreeView.Width : 0);
+// 				int yOffset = 0;
 // 
 // 				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
 // 				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
 // 				e.Graphics.DrawString(String.Format("Font Height = {0}", Tree.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
 // 				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
-				e.Graphics.DrawString(String.Format("Zoom Level = {0}", m_ZoomLevel), this.Font, Brushes.Black, xOffset, yOffset + 64);
+// 				e.Graphics.DrawString(String.Format("Zoom Level = {0}", m_ZoomLevel), this.Font, Brushes.Black, xOffset, yOffset + 64);
 #endif
 			}
 		}
