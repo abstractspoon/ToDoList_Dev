@@ -177,7 +177,7 @@ namespace EvidenceBoardUIExtension
 					case Keys.F2:
 						if (m_Control.HasSelectedUserLink)
 						{
-							OnEditUserLink(this, null);
+							EditSelectedUserLink();
 							return true;
 						}
 						break;
@@ -376,6 +376,8 @@ namespace EvidenceBoardUIExtension
 			m_Control.ExtentsChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.ImageExpansionChange += (s, e) => { UpdateToolbarButtonStates(); };
+			m_Control.DoubleClickUserLink += (s, e) => { EditSelectedUserLink(); };
+
 			m_Control.BackgroundImageChanged += (s, e) => 
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
@@ -383,8 +385,6 @@ namespace EvidenceBoardUIExtension
 
 				UpdateToolbarButtonStates();
 			};
-
-			m_Control.DoubleClickUserLink += new EventHandler(OnEditUserLink);
 
 			this.Controls.Add(m_Control);
 
@@ -685,80 +685,87 @@ namespace EvidenceBoardUIExtension
 			m_TBRenderer = new UIThemeToolbarRenderer();
 			m_Toolbar.Renderer = m_TBRenderer;
 
-			var btn1 = new ToolStripButton();
-			btn1.Name = "ZoomToExtents";
-			btn1.ImageIndex = 0;
-			btn1.Click += new EventHandler(OnZoomToExtents);
-			btn1.ToolTipText = m_Trans.Translate("Zoom to Extents");
-			m_Toolbar.Items.Add(btn1);
+			var btn = new ToolStripButton();
+			btn.Name = "ZoomToExtents";
+			btn.ImageIndex = 0;
+			btn.Click += (s, e) => { m_Control.ZoomToExtents(); };
+			btn.ToolTipText = m_Trans.Translate("Zoom to Extents");
+			m_Toolbar.Items.Add(btn);
+
+			btn = new ToolStripButton();
+			btn.Name = "ClearZoom";
+			btn.ImageIndex = 1;
+			btn.Click += (s, e) => { m_Control.ClearZoom(); };
+			btn.ToolTipText = m_Trans.Translate("Clear Zoom");
+			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
-			var btn2 = new ToolStripButton();
-			btn2.Name = "NewConnection";
-			btn2.ImageIndex = 1;
-			btn2.Click += new EventHandler(OnNewTaskLink);
-			btn2.ToolTipText = m_Trans.Translate("New Connection");
-			m_Toolbar.Items.Add(btn2);
+			btn = new ToolStripButton();
+			btn.Name = "NewConnection";
+			btn.ImageIndex = 2;
+			btn.Click += new EventHandler(OnNewTaskLink);
+			btn.ToolTipText = m_Trans.Translate("New Connection");
+			m_Toolbar.Items.Add(btn);
 
-			var btn3 = new ToolStripButton();
-			btn3.Name = "EditConnection";
-			btn3.ImageIndex = 2;
-			btn3.Click += new EventHandler(OnEditUserLink);
-			btn3.ToolTipText = m_Trans.Translate("Edit Connection");
-			m_Toolbar.Items.Add(btn3);
+			btn = new ToolStripButton();
+			btn.Name = "EditConnection";
+			btn.ImageIndex = 3;
+			btn.Click += (s, e) => { EditSelectedUserLink(); };
+			btn.ToolTipText = m_Trans.Translate("Edit Connection");
+			m_Toolbar.Items.Add(btn);
 
-			var btn4 = new ToolStripButton();
-			btn4.Name = "DeleteConnection";
-			btn4.ImageIndex = 3;
-			btn4.Click += new EventHandler(OnDeleteTaskLink);
-			btn4.ToolTipText = m_Trans.Translate("Delete Connection");
-			m_Toolbar.Items.Add(btn4);
-
-			m_Toolbar.Items.Add(new ToolStripSeparator());
-
-			var btn5 = new ToolStripButton();
-			btn5.Name = "ExpandAllImages";
-			btn5.ImageIndex = 4;
-			btn5.Click += (s, e) => { m_Control.ExpandAllTaskImages(); };
-			btn5.ToolTipText = m_Trans.Translate("Expand All Images");
-			m_Toolbar.Items.Add(btn5);
-
-			var btn6 = new ToolStripButton();
-			btn6.Name = "CollapseAllImages";
-			btn6.ImageIndex = 5;
-			btn6.Click += (s, e) => { m_Control.CollapseAllTaskImages(); };
-			btn6.ToolTipText = m_Trans.Translate("Collapse All Images");
-			m_Toolbar.Items.Add(btn6);
+			btn = new ToolStripButton();
+			btn.Name = "DeleteConnection";
+			btn.ImageIndex = 4;
+			btn.Click += (s, e) => { m_Control.DeleteSelectedUserLink(); };
+			btn.ToolTipText = m_Trans.Translate("Delete Connection");
+			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
-			var btn7 = new ToolStripButton();
-			btn7.Name = "SetBackgroundImage";
-			btn7.ImageIndex = 6;
-			btn7.Click += new EventHandler(OnSetBackgroundImage);
-			btn7.ToolTipText = m_Trans.Translate("Set Background Image");
-			m_Toolbar.Items.Add(btn7);
+			btn = new ToolStripButton();
+			btn.Name = "ExpandAllImages";
+			btn.ImageIndex = 5;
+			btn.Click += (s, e) => { m_Control.ExpandAllTaskImages(); };
+			btn.ToolTipText = m_Trans.Translate("Expand All Images");
+			m_Toolbar.Items.Add(btn);
 
-			var btn8 = new ToolStripButton();
-			btn8.Name = "ClearBackgroundImage";
-			btn8.ImageIndex = 7;
-			btn8.Click += new EventHandler(OnClearBackgroundImage);
-			btn8.ToolTipText = m_Trans.Translate("Clear Background Image");
-			m_Toolbar.Items.Add(btn8);
+			btn = new ToolStripButton();
+			btn.Name = "CollapseAllImages";
+			btn.ImageIndex = 6;
+			btn.Click += (s, e) => { m_Control.CollapseAllTaskImages(); };
+			btn.ToolTipText = m_Trans.Translate("Collapse All Images");
+			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
-			var btn9 = new ToolStripButton();
-			btn9.ImageIndex = 8;
-			btn9.Click += new EventHandler(OnPreferences);
-			btn9.ToolTipText = m_Trans.Translate("Preferences");
-			m_Toolbar.Items.Add(btn9);
+			btn = new ToolStripButton();
+			btn.Name = "SetBackgroundImage";
+			btn.ImageIndex = 7;
+			btn.Click += new EventHandler(OnSetBackgroundImage);
+			btn.ToolTipText = m_Trans.Translate("Set Background Image");
+			m_Toolbar.Items.Add(btn);
+
+			btn = new ToolStripButton();
+			btn.Name = "ClearBackgroundImage";
+			btn.ImageIndex = 8;
+			btn.Click += (s, e) => { m_Control.ClearBackgroundImage(); };
+			btn.ToolTipText = m_Trans.Translate("Clear Background Image");
+			m_Toolbar.Items.Add(btn);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			btn = new ToolStripButton();
+			btn.ImageIndex = 9;
+			btn.Click += new EventHandler(OnPreferences);
+			btn.ToolTipText = m_Trans.Translate("Preferences");
+			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn10 = new ToolStripButton();
-			btn10.ImageIndex = 9;
+			btn10.ImageIndex = 10;
 			btn10.Click += new EventHandler(OnHelp);
 			btn10.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn10);
@@ -772,6 +779,7 @@ namespace EvidenceBoardUIExtension
 		private void UpdateToolbarButtonStates()
 		{
 			(m_Toolbar.Items["ZoomToExtents"] as ToolStripButton).Enabled = m_Control.CanZoomOut;
+			(m_Toolbar.Items["ClearZoom"] as ToolStripButton).Enabled = m_Control.CanZoomIn;
 
 			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Checked = false;
 			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = CanCreateNewConnection;
@@ -787,11 +795,6 @@ namespace EvidenceBoardUIExtension
 
 			(m_Toolbar.Items["SetBackgroundImage"] as ToolStripButton).Enabled = !m_Control.ReadOnly;
 			(m_Toolbar.Items["ClearBackgroundImage"] as ToolStripButton).Enabled = (!m_Control.ReadOnly && m_Control.HasBackgroundImage);
-		}
-
-		private void OnZoomToExtents(object sender, EventArgs e)
-		{
-			m_Control.ZoomToExtents();
 		}
 
 		private bool CanCreateNewConnection
@@ -862,11 +865,6 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		private void OnEditUserLink(object sender, EventArgs e)
-		{
-			EditSelectedUserLink();
-		}
-
 		private bool EditSelectedUserLink()
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
@@ -892,11 +890,6 @@ namespace EvidenceBoardUIExtension
 
 			// else
 			return false;
-		}
-
-		private void OnDeleteTaskLink(object sender, EventArgs e)
-		{
-			m_Control.DeleteSelectedUserLink();
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
@@ -946,11 +939,6 @@ namespace EvidenceBoardUIExtension
 
 				m_Control.SetBackgroundImage(dialog.FileName);
 			}
-		}
-
-		private void OnClearBackgroundImage(object sender, EventArgs e)
-		{
-			m_Control.ClearBackgroundImage();
 		}
 
 	}

@@ -619,6 +619,21 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		public void ClearZoom()
+		{
+			if (m_ZoomLevel == 0)
+				return;
+
+			m_ZoomFactor = 1.0f;
+			m_ZoomLevel = 0;
+
+			AutoScrollMinSize = ZoomedSize;
+			RecalcTextFont();
+			Invalidate();
+
+			ZoomChange?.Invoke(this, new EventArgs());
+		}
+
 		protected float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor * m_DpiFactor); } }
 
 		private void RecalcZoomFactor()
