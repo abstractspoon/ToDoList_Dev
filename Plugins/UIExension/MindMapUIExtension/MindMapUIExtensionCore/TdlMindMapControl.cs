@@ -247,6 +247,8 @@ namespace MindMapUIExtension
 
             using (Graphics graphics = Graphics.FromHwnd(Handle))
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
+
+			ZoomChange += (s, e) => { ClearFonts(); };
 		}
         
         public void SetStrikeThruDone(bool strikeThruDone)
@@ -264,35 +266,23 @@ namespace MindMapUIExtension
 
 		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
 		{
-			if (m_Items.Count > 500)
-				Cursor = Cursors.WaitCursor;
+			if (base.SetFont(fontName, fontSize))
+			{
+				if (m_Items.Count > 500)
+					Cursor = Cursors.WaitCursor;
 
-			bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
-            bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
+				if (RefreshNodeFont(RootNode, true))
+					RecalculatePositions();
 
-            if (baseFontChange)
-                m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
+				Cursor = Cursors.Default;
+			}
+		}
 
-            if (doneFontChange)
-            {
-                if (strikeThruDone)
-                {
-                    m_BoldDoneLabelFont = new Font(fontName, fontSize, FontStyle.Bold | FontStyle.Strikeout);
-                    m_DoneLabelFont = new Font(fontName, fontSize, FontStyle.Strikeout);
-                }
-                else
-                {
-                    m_BoldDoneLabelFont = m_BoldLabelFont;
-                    m_DoneLabelFont = null;
-                }
-            }
-
-            if ((baseFontChange || doneFontChange) && RefreshNodeFont(RootNode, true))
-                RecalculatePositions();
-            
-            base.SetFont(fontName, fontSize);
-
-			Cursor = Cursors.Default;
+		private void ClearFonts()
+		{
+			m_BoldLabelFont = null;
+			m_BoldDoneLabelFont = null;
+			m_DoneLabelFont = null;
 		}
 
 		// ILabelTipHandler implementation
@@ -437,7 +427,7 @@ namespace MindMapUIExtension
 		protected float ImageZoomFactor
 		{
 			// Zoom images only half as much as text
-			get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+			get { return (ZoomFactor/* + ((1.0f - ZoomFactor) / 2)*/); }
 		}
 
         public bool WantTaskUpdate(Task.Attribute attrib)
@@ -678,31 +668,50 @@ namespace MindMapUIExtension
 
         override protected bool RefreshNodeFont(TreeNode node, bool andChildren)
         {
-            var taskItem = RealTaskItem(node);
+			if (node == RootNode)
+				ClearFonts();
+
+			var taskItem = RealTaskItem(node);
 
             if (taskItem == null)
                 return false;
 
-            Font curFont = node.NodeFont, newFont = null;
+            Font newFont = null;
 
-            if (taskItem.IsTask)
+			if (taskItem.IsTask) // else non-task root item
             {
+				bool isDone = taskItem.IsDone(false);
+
                 if (taskItem.ParentID == 0)
                 {
-                    if (taskItem.IsDone(false))
-                        newFont = m_BoldDoneLabelFont;
+                    if (m_StrikeThruDone && isDone)
+					{
+						// Create on demand
+						if (m_BoldDoneLabelFont == null)
+							m_BoldDoneLabelFont = new Font(TreeFont, FontStyle.Bold | FontStyle.Strikeout);
+
+						newFont = m_BoldDoneLabelFont;
+					}
                     else
-                        newFont = m_BoldLabelFont;
-                }
-                else if (taskItem.IsDone(false))
+					{
+						// Create on demand
+						if (m_BoldLabelFont == null)
+							m_BoldLabelFont = new Font(TreeFont, FontStyle.Bold);
+
+						newFont = m_BoldLabelFont;
+					}
+				}
+				else if (isDone)
                 {
-                    newFont = m_DoneLabelFont;
+					// Create on demand
+					if (m_StrikeThruDone && (m_DoneLabelFont == null))
+						m_DoneLabelFont = new Font(TreeFont, FontStyle.Strikeout);
+
+					newFont = m_DoneLabelFont;
                 }
             }
 
-			newFont = ScaledFont(newFont);
-
-            bool fontChange = (newFont != curFont);
+            bool fontChange = (newFont != node.NodeFont);
 
             if (fontChange)
                 node.NodeFont = newFont;

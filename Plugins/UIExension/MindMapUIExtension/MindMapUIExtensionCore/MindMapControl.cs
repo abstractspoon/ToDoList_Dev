@@ -83,12 +83,11 @@ namespace MindMapUIExtension
 
 		const int DragExpandInterval = 500;
 
-		double m_DpiFactor = 1.0;
+		// Below a certain sized font, the tree views starts to behave strangely
+		const int MaxZoomLevel = 9;
 
-        protected int ScaleByDPIFactor(int value)
-        {
-            return (int)(m_DpiFactor * value);
-        }
+		protected int ScaleByDPIFactor(int value) { return (int)(m_DpiFactor * value); }
+		protected Font TreeFont { get { return m_TreeView.Font; } }
 
 		virtual protected int ItemHorzSeparation			{ get { return ScaleByDPIFactor(40); } }
 		virtual protected int ItemVertSeparation			{ get { return ScaleByDPIFactor(4); } }
@@ -115,9 +114,6 @@ namespace MindMapUIExtension
                 return separation; 
             } 
         }
-
-		protected float ZoomFactor { get { return m_ZoomFactor; } }
-		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
 
 		protected enum NodeDrawState
 		{
@@ -149,7 +145,12 @@ namespace MindMapUIExtension
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
 		private Color m_ConnectionColor;
+
 		private float m_ZoomFactor = 1f;
+		private int m_ZoomLevel = 0;
+		double m_DpiFactor = 1.0;
+
+		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
 
 		private Timer m_DragTimer;
 		private int m_LastDragMoveTick = 0;
@@ -161,16 +162,13 @@ namespace MindMapUIExtension
         private bool m_HoldRedraw = false;
         private bool m_IsSavingToImage = false;
 
-#if DEBUG
-		private int m_RecalcDuration;
-#endif
-
 		// Public ------------------------------------------------------------------------
 
 		public event SelectionChangeEventHandler SelectionChange;
 		public event DragDropChangeEventHandler DragDropChange;
+		public EventHandler ZoomChange;
 
-        public MindMapControl()
+		public MindMapControl()
         {
 			using (var graphics = CreateGraphics())
 				m_DpiFactor = graphics.DpiX / 96.0;
@@ -185,12 +183,13 @@ namespace MindMapUIExtension
 			InitializeComponent();
 		}
 
-		public void SetFont(String fontName, int fontSize)
+		public bool SetFont(String fontName, int fontSize)
         {
             if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
-                return;
+                return false;
 
             this.Font = new Font(fontName, fontSize, FontStyle.Regular);
+			return true;
         }
 
         public TreeNode AddRootNode(Object itemData, UInt32 uniqueID = 0)
@@ -517,7 +516,7 @@ namespace MindMapUIExtension
             if (!m_HoldRedraw)
             {
 #if DEBUG
-				var startTick = Environment.TickCount;
+// 				var startTick = Environment.TickCount;
 #endif
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -538,9 +537,9 @@ namespace MindMapUIExtension
 // 
 // 				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
 // 				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
-// 				e.Graphics.DrawString(String.Format("Font Height = {0}", m_TreeView.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
+// 				e.Graphics.DrawString(String.Format("Font Height = {0}", Tree.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
 // 				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
-// 				e.Graphics.DrawString(String.Format("Zoom = {0}", m_ZoomFactor), this.Font, Brushes.Black, xOffset, yOffset + 64);
+// 				e.Graphics.DrawString(String.Format("Zoom Level = {0}", m_ZoomLevel), this.Font, Brushes.Black, xOffset, yOffset + 64);
 #endif
 			}
 		}
@@ -642,86 +641,162 @@ namespace MindMapUIExtension
 			}
         }
 
-		const float MaxZoom = 1f;
-		const float MinZoom = 0.4f;
-		const float ZoomIncrement = 0.1f;
-
-		protected bool CanZoomIn
-		{
-			get { return (m_ZoomFactor < MaxZoom); }
-		}
-
-		protected bool CanZoomOut
-		{
-			get { return (HorizontalScroll.Visible || VerticalScroll.Visible) && (m_ZoomFactor > MinZoom); }
-		}
-
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
 			{
-				float newFactor = m_ZoomFactor;
-
 				if (e.Delta > 0)
-				{
-					if (!CanZoomIn)
-						return;
-
-					newFactor += ZoomIncrement;
-				}
+					ZoomIn(e.Location);
 				else
-				{
-					if (!CanZoomOut)
-						return;
-
-					newFactor -= ZoomIncrement;
-				}
-
-				if (newFactor != m_ZoomFactor)
-				{
-					Cursor = Cursors.WaitCursor;
-
-					// Convert mouse pos to relative coordinates
-					float relX = ((e.Location.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
-					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
-
-					// Prevent all selection and expansion changes for the duration
- 					BeginUpdate();
-
-					// The process of changing the fonts and recalculating the 
-					// item height can cause the tree-view to spontaneously 
-					// collapse tree nodes so we save the expansion state
-					// and restore it afterwards
-					var expandedNodes = GetExpandedNodes(RootNode);
-
-					m_ZoomFactor = newFactor;
-					UpdateTreeFont(false);
-
-					// 'Cleanup'
-					SetExpandedNodes(expandedNodes);
- 					EndUpdate();
-
-					// Scroll the view to keep the mouse located in the 
-					// same relative position as before
-					if (HorizontalScroll.Visible)
-					{
-						int newX = (int)(relX * HorizontalScroll.Maximum) - e.Location.X;
-						HorizontalScroll.SetValue(newX);
-					}
-
-					if (VerticalScroll.Visible)
-					{
-						int newY = (int)(relY * VerticalScroll.Maximum) - e.Location.Y;
-						VerticalScroll.SetValue(newY);
-					}
-
-					PerformLayout();
-				}
+					ZoomOut(e.Location);
 			}
 			else
 			{
-				// Default scroll
 				base.OnMouseWheel(e);
+			}
+		}
+
+		protected float ZoomFactor { get { return m_ZoomFactor; } }
+		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
+		protected bool IsZoomedToExtents { get { return !CanZoomOut; } }
+
+		public bool CanZoomIn { get { return (m_ZoomLevel > 0); } }
+		public bool CanZoomOut
+		{
+			get
+			{
+				if (m_ZoomLevel >= MaxZoomLevel)
+					return false;
+				
+				// else
+				return (HorizontalScroll.Visible || VerticalScroll.Visible);
+			}
+		}
+
+		public bool ZoomIn()
+		{
+			return ZoomIn(NullPoint);
+		}
+
+		protected bool ZoomIn(Point ptClient)
+		{
+			if (CanZoomIn)
+			{
+				ZoomTo((m_ZoomLevel - 1), ptClient);
+				ZoomChange?.Invoke(this, new EventArgs());
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool ZoomOut()
+		{
+			return ZoomOut(NullPoint);
+		}
+
+		protected bool ZoomOut(Point ptClient)
+		{
+			if (CanZoomOut)
+			{
+				ZoomTo((m_ZoomLevel + 1), ptClient);
+				ZoomChange?.Invoke(this, new EventArgs());
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private bool ZoomTo(int level, Point ptClient)
+		{
+			if ((level == m_ZoomLevel) || (level > MaxZoomLevel))
+				return false;
+
+			Cursor = Cursors.WaitCursor;
+
+			// Convert mouse pos to relative coordinates
+			float relX = 0f, relY = 0f;
+
+			if (ptClient != NullPoint)
+			{
+				relX = ((ptClient.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
+				relY = ((ptClient.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
+			}
+
+			// Prevent all selection and expansion changes for the duration
+			BeginUpdate();
+
+			// The process of changing the fonts and recalculating the 
+			// item height can cause the tree-view to spontaneously 
+			// collapse tree nodes so we save the expansion state
+			// and restore it afterwards
+			var expandedNodes = GetExpandedNodes(RootNode);
+
+			// Recalculate the zoom
+			m_ZoomLevel = level;
+			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+
+			UpdateTreeFont(false);
+
+			// 'Cleanup'
+			SetExpandedNodes(expandedNodes);
+			EndUpdate();
+
+			AutoScrollMinSize = ZoomedSize;
+
+			// Scroll the view to keep the mouse located in the 
+			// same relative position as before
+			if (ptClient != NullPoint)
+			{
+				if (HorizontalScroll.Visible)
+				{
+					int newX = (int)(relX * HorizontalScroll.Maximum) - ptClient.X;
+					HorizontalScroll.SetValue(newX);
+				}
+
+				if (VerticalScroll.Visible)
+				{
+					int newY = (int)(relY * VerticalScroll.Maximum) - ptClient.Y;
+					VerticalScroll.SetValue(newY);
+				}
+			}
+
+			PerformLayout();
+			return true;
+		}
+
+		Size ZoomedSize
+		{
+			get
+			{
+				return Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding).Size;
+			}
+		}
+
+		public void ZoomToExtents()
+		{
+			var curSize = ZoomedSize;
+
+			// Always reset the zoom first
+			m_ZoomFactor = 1.0f;
+			m_ZoomLevel = 0;
+
+			while (ClientRectangle.Width < ZoomedSize.Width ||
+					ClientRectangle.Height < ZoomedSize.Height)
+			{
+				m_ZoomLevel++;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+			}
+
+			if (ZoomedSize != curSize)
+			{
+				AutoScrollMinSize = ZoomedSize;
+				UpdateTreeFont(false);
+				Invalidate();
+
+				ZoomChange?.Invoke(this, new EventArgs());
 			}
 		}
 
@@ -1003,18 +1078,29 @@ namespace MindMapUIExtension
 		{
 			if (RootNode == null)
 				return;
-
-			// We'll need these to fixup the item height below
+#if DEBUG
+//			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
+#endif
+			// We'll need these to fix up the item height below
 			int prevItemHeight = m_TreeView.ItemHeight;
-			int prevFontHeight = m_TreeView.Font.Height;
+			int prevFontHeight = TreeFont.Height;
 
 			// Clear node fonts before changing the tree font to work around 
 			// a .NET bug which allocates resources without immediately freeing 
-			// them, causing big trees to run out of GDI objects (> 10000)
+			// them, causing big trees to exceed the GDI object limit (> 10000)
 			ClearNodeFonts(RootNode);
+
+#if DEBUG
+//			Stopwatch watch = Stopwatch.StartNew();
+#endif
 
 			// Change the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
+
+#if DEBUG
+// 			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
+#endif
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
 			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
@@ -1036,17 +1122,19 @@ namespace MindMapUIExtension
 				itemHeight--;
 			}
 
-			// Restore task fonts
+			// Update the item height
+			m_TreeView.ItemHeight = itemHeight;
+#if DEBUG
+// 			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
+#endif
 			RefreshNodeFont(RootNode, true);
 
-			// Update the item height
-			if (itemHeight != prevItemHeight)
-			{
-				m_TreeView.ItemHeight = itemHeight;
-
-				if (recalcPositions)
-					RecalculatePositions();
-			}
+			if (recalcPositions)
+				RecalculatePositions();
+#if DEBUG
+// 			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
+#endif
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -1775,9 +1863,8 @@ namespace MindMapUIExtension
             if (IsEmpty())
                 return;
 #if DEBUG
-			var startTick = Environment.TickCount;
+			Stopwatch watch = Stopwatch.StartNew();
 #endif
-
 			TreeNode rootNode = RootNode;
             MindMapItem rootItem = RootItem;
 
@@ -1862,13 +1949,12 @@ namespace MindMapUIExtension
 
             RecalculateDrawOffset();
 			Invalidate();
-
 #if DEBUG
-			m_RecalcDuration = (Environment.TickCount - startTick);
+			Debug.WriteLine("RecalculatePositions took " + watch.ElapsedMilliseconds + " ms");
 #endif
 		}
 
-        protected Point CentrePoint(Rectangle rect)
+		protected Point CentrePoint(Rectangle rect)
         {
             return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
         }
@@ -2197,11 +2283,7 @@ namespace MindMapUIExtension
 
         protected Font GetNodeTitleFont(TreeNode node)
         {
-			if (node.NodeFont != null)
-				return node.NodeFont;
-			
-			// else
-			return Font;
+			return (node.NodeFont ?? TreeFont);
         }
 
         protected Font GetNodeTooltipFont(TreeNode node)
