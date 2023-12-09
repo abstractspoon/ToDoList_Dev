@@ -1064,7 +1064,6 @@ namespace MindMapUIExtension
 		{
 			if (RootNode == null)
 				return;
-
 #if DEBUG
 			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
 #endif
@@ -1074,7 +1073,7 @@ namespace MindMapUIExtension
 
 			// Clear node fonts before changing the tree font to work around 
 			// a .NET bug which allocates resources without immediately freeing 
-			// them, causing big trees to run out of GDI objects (> 10000)
+			// them, causing big trees to exceed the GDI object limit (> 10000)
 			ClearNodeFonts(RootNode);
 
 #if DEBUG
