@@ -84,6 +84,7 @@ namespace MindMapUIExtension
 		const int DragExpandInterval = 500;
 
         protected int ScaleByDPIFactor(int value) { return (int)(m_DpiFactor * value); }
+		protected Font TreeFont { get { return m_TreeView.Font; } }
 
 		virtual protected int ItemHorzSeparation			{ get { return ScaleByDPIFactor(40); } }
 		virtual protected int ItemVertSeparation			{ get { return ScaleByDPIFactor(4); } }
@@ -157,10 +158,6 @@ namespace MindMapUIExtension
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
         private bool m_IsSavingToImage = false;
-
-#if DEBUG
-		private int m_RecalcDuration;
-#endif
 
 		// Public ------------------------------------------------------------------------
 
@@ -537,7 +534,7 @@ namespace MindMapUIExtension
 // 
 // 				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
 // 				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
-// 				e.Graphics.DrawString(String.Format("Font Height = {0}", m_TreeView.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
+// 				e.Graphics.DrawString(String.Format("Font Height = {0}", Tree.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
 // 				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
 // 				e.Graphics.DrawString(String.Format("Zoom = {0}", m_ZoomFactor), this.Font, Brushes.Black, xOffset, yOffset + 64);
 #endif
@@ -1068,17 +1065,29 @@ namespace MindMapUIExtension
 			if (RootNode == null)
 				return;
 
-			// We'll need these to fixup the item height below
+#if DEBUG
+			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
+#endif
+			// We'll need these to fix up the item height below
 			int prevItemHeight = m_TreeView.ItemHeight;
-			int prevFontHeight = m_TreeView.Font.Height;
+			int prevFontHeight = TreeFont.Height;
 
 			// Clear node fonts before changing the tree font to work around 
 			// a .NET bug which allocates resources without immediately freeing 
 			// them, causing big trees to run out of GDI objects (> 10000)
 			ClearNodeFonts(RootNode);
 
+#if DEBUG
+			Stopwatch watch = Stopwatch.StartNew();
+#endif
+
 			// Change the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
+
+#if DEBUG
+			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
+			watch.Restart();
+#endif
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
 			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
@@ -1100,17 +1109,22 @@ namespace MindMapUIExtension
 				itemHeight--;
 			}
 
-			// Restore task fonts
-			RefreshNodeFont(RootNode, true);
-
 			// Update the item height
 			if (itemHeight != prevItemHeight)
 			{
 				m_TreeView.ItemHeight = itemHeight;
+#if DEBUG
+				Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
+				watch.Restart();
+#endif
+				RefreshNodeFont(RootNode, true);
 
 				if (recalcPositions)
 					RecalculatePositions();
 			}
+#if DEBUG
+			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
+#endif
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -1839,7 +1853,7 @@ namespace MindMapUIExtension
             if (IsEmpty())
                 return;
 #if DEBUG
-			var startTick = Environment.TickCount;
+			Stopwatch watch = Stopwatch.StartNew();
 #endif
 			TreeNode rootNode = RootNode;
             MindMapItem rootItem = RootItem;
@@ -1925,13 +1939,12 @@ namespace MindMapUIExtension
 
             RecalculateDrawOffset();
 			Invalidate();
-
 #if DEBUG
-			m_RecalcDuration = (Environment.TickCount - startTick);
+			Debug.WriteLine("RecalculatePositions took " + watch.ElapsedMilliseconds + " ms");
 #endif
 		}
 
-        protected Point CentrePoint(Rectangle rect)
+		protected Point CentrePoint(Rectangle rect)
         {
             return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
         }
@@ -2260,7 +2273,7 @@ namespace MindMapUIExtension
 
         protected Font GetNodeTitleFont(TreeNode node)
         {
-			return (node.NodeFont ?? m_TreeView.Font);
+			return (node.NodeFont ?? TreeFont);
         }
 
         protected Font GetNodeTooltipFont(TreeNode node)
