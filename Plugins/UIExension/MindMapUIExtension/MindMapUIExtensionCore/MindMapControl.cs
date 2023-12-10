@@ -787,7 +787,9 @@ namespace MindMapUIExtension
 				relX = ((ptClient.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
 				relY = ((ptClient.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 			}
-
+#if DEBUG
+			Stopwatch watch = Stopwatch.StartNew();
+#endif
 			// Prevent all selection and expansion changes for the duration
 			BeginUpdate();
 
@@ -807,8 +809,6 @@ namespace MindMapUIExtension
 
 			// Restore expanded nodes
 			SetExpandedNodes(expandedNodes);
-
-			AutoScrollMinSize = ZoomedSize;
 
 			// Scroll the view to keep the mouse located in the 
 			// same relative position as before
@@ -830,36 +830,38 @@ namespace MindMapUIExtension
 			// Restore callbacks
 			EndUpdate();
 			PerformLayout();
-
+#if DEBUG
+			Debug.WriteLine("ZoomTo took " + watch.ElapsedMilliseconds + " ms");
+#endif
 			return true;
 		}
 
-		Size ZoomedSize
+		Rectangle GraphRect
 		{
 			get
 			{
-				return Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding).Size;
+				return Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding);
 			}
 		}
 
 		public void ZoomToExtents()
 		{
-			var curSize = ZoomedSize;
+			var curSize = GraphRect;
 
 			// Always reset the zoom first
 			m_ZoomFactor = 1.0f;
 			m_ZoomLevel = 0;
 
-			while (ClientRectangle.Width < ZoomedSize.Width ||
-					ClientRectangle.Height < ZoomedSize.Height)
+			while (ClientRectangle.Width < GraphRect.Width ||
+					ClientRectangle.Height < GraphRect.Height)
 			{
 				m_ZoomLevel++;
 				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 			}
 
-			if (ZoomedSize != curSize)
+			if (GraphRect != curSize)
 			{
-				AutoScrollMinSize = ZoomedSize;
+				AutoScrollMinSize = GraphRect.Size;
 				UpdateTreeFont(false);
 				Invalidate();
 
@@ -1989,11 +1991,11 @@ namespace MindMapUIExtension
             }
 
             // Move the whole graph so that the top-left is (0,0)
-            Rectangle graphRect = Rectangle.Inflate(rootItem.TotalBounds, GraphPadding, GraphPadding);
+            var graphRect = GraphRect;
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
             
-			this.AutoScrollMinSize = graphRect.Size;
-			this.VerticalScroll.SmallChange = graphRect.Height / 100;
+			AutoScrollMinSize = graphRect.Size;
+			VerticalScroll.SmallChange = (graphRect.Height / 100);
 
             RecalculateDrawOffset();
 			Invalidate();
