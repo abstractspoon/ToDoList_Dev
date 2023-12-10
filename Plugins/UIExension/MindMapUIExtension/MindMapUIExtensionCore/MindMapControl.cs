@@ -1081,6 +1081,7 @@ namespace MindMapUIExtension
         void OnDebugModeChanged(object sender, EventArgs e)
         {
             m_TreeView.Visible = DebugMode();
+			m_TreeView.HoldRedraw = !m_TreeView.Visible;
 
             if (!RecalculateDrawOffset())
 				Invalidate();
@@ -1891,13 +1892,18 @@ namespace MindMapUIExtension
 			// doesn't seem to return the same widths as the Graphics object
 			// which is what we will be using to render the text
 			int nodeWidth = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeTitleFont(node))).Width;
-			int horzOffset = (nodeWidth + (int)(ItemHorzSeparation * m_ZoomFactor) + GetExtraWidth(node));
+			int horzOffset = (nodeWidth + ZoomedItemHorzSeparation + GetExtraWidth(node));
 
             if (!IsRoot(node))
                 horzOffset += ExpansionButtonSize;
 
             return horzOffset;
         }
+
+		private int ZoomedItemHorzSeparation
+		{
+			get	{ return Math.Max(5 + ExpansionButtonSize, (int)(ItemHorzSeparation * m_ZoomFactor)); }
+		}
 
 		protected void RecalculatePositions()
 		{
@@ -1955,7 +1961,7 @@ namespace MindMapUIExtension
 						RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
 
 						// Left side
-						horzOffset = (int)(ItemHorzSeparation * m_ZoomFactor);
+						horzOffset = ZoomedItemHorzSeparation;
 
 						TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
 						TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
