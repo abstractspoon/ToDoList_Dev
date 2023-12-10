@@ -923,18 +923,13 @@ namespace MindMapUIExtension
 
 		protected List<UInt32> GetExpandedItems()
 		{
-			var nodes = GetExpandedNodes(RootNode);
+			var expanded = new List<TreeNode>();
+			GetExpandedNodes(RootNode, ref expanded);
 
-			if (nodes == null)
-				return null;
-
-			// else
 			var expandedIDs = new List<UInt32>();
 
-			foreach (TreeNode node in nodes)
-			{
+			foreach (TreeNode node in expanded)
    				expandedIDs.Add(UniqueID(node));
-			}
 
 			return expandedIDs;
 		}

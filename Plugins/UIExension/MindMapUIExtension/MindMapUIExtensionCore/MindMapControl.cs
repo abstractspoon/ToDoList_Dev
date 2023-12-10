@@ -796,8 +796,8 @@ namespace MindMapUIExtension
 			// item height can cause the tree-view to spontaneously 
 			// collapse tree nodes so we save the expansion state
 			// and restore it afterwards
-			var expandedNodes = GetExpandedNodes(RootNode);
-
+			var expandedNodes = new List<TreeNode>();
+			GetExpandedNodes(RootNode, ref expandedNodes);
 			// Recalculate the zoom
 			m_ZoomLevel = level;
 			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
@@ -864,27 +864,16 @@ namespace MindMapUIExtension
 			}
 		}
 
-		protected List<TreeNode> GetExpandedNodes(TreeNode node)
+		protected void GetExpandedNodes(TreeNode node, ref List<TreeNode> expanded)
 		{
 			if ((node != null) && (node.IsExpanded || IsRoot(node)))
 			{
-				var expanded = new List<TreeNode>();
 				expanded.Add(node);
 
 				// child nodes
 				foreach (TreeNode child in node.Nodes)
-				{
-					var expandedChildren = GetExpandedNodes(child); // RECURSIVE CALL
-
-					if (expandedChildren != null)
-						expanded.AddRange(expandedChildren);
-				}
-
-				return expanded;
+					GetExpandedNodes(child, ref expanded); // RECURSIVE CALL
 			}
-
-			// else
-			return null;
 		}
 
 		protected void SetExpandedNodes(List<TreeNode> nodes)
