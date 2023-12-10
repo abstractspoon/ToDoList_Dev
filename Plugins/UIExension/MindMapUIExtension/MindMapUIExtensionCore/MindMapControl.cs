@@ -2105,12 +2105,14 @@ namespace MindMapUIExtension
             while (node != null)
 			{
 				// Children of this node First
-                int childOffset = (horzOffset + CalculateHorizontalChildOffset(graphics, node));
-
-                RecalculatePositions(graphics, node.Nodes, childOffset, vertOffset);
+				if (node.IsExpanded)
+				{
+					int childOffset = (horzOffset + CalculateHorizontalChildOffset(graphics, node));
+					RecalculatePositions(graphics, node.Nodes, childOffset, vertOffset);
+				}
 
 				// Build the items' child bounding rectangle
-                Rectangle childBounds = CalculateChildBoundingBox(node);
+				Rectangle childBounds = CalculateChildBoundingBox(node);
 
                 // Centre the item vertically within the bounds of its children
                 Rectangle itemBounds = CalculateItemBounds(graphics, node, childBounds, horzOffset, vertOffset);
