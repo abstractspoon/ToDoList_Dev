@@ -166,8 +166,7 @@ namespace MindMapUIExtension
 
         public void SavePreferences(Preferences prefs, String key)
         {
-			prefs.WriteProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
-			prefs.WriteProfileInt(key, "Options", (int)m_MindMap.Options);
+			m_MindMap.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -175,10 +174,9 @@ namespace MindMapUIExtension
             if (!appOnly)
             {
 				// private settings
-				m_MindMap.Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
-				m_AlignmentCombo.SelectedAlignment = m_MindMap.Alignment;
+				m_MindMap.LoadPreferences(prefs, key);
 
-				m_MindMap.Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)m_MindMap.Options);
+				m_AlignmentCombo.SelectedAlignment = m_MindMap.Alignment;
 				m_OptionsCombo.SelectedOptions = m_MindMap.Options;
 			}
 

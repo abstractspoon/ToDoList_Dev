@@ -223,6 +223,7 @@ namespace MindMapUIExtension
 		private MindMapOption m_Options;
 		private DragImage m_DragImage;
 		private LabelTip m_LabelTip;
+		List<uint> m_PrevExpandedItems;
 
 		// -------------------------------------------------------------------------
 
@@ -277,6 +278,31 @@ namespace MindMapUIExtension
 				Cursor = Cursors.Default;
 			}
 		}
+
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			prefs.WriteProfileInt(key, "RootAlignment", (int)Alignment);
+			prefs.WriteProfileInt(key, "Options", (int)Options);
+
+			prefs.WriteProfileString(key, "ExpandedItems", string.Join("|", ExpandedItems));
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+				Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)Alignment);
+				Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)Options);
+
+				m_PrevExpandedItems = null;
+				var prevExpanded = prefs.GetProfileString(key, "ExpandedItems", "").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+				if (prevExpanded?.Length > 0)
+				{
+					m_PrevExpandedItems = new List<uint>();
+
+					foreach (var prev in prevExpanded)
+						m_PrevExpandedItems.Add(uint.Parse(prev));
+				}
+			}
 
 		private void ClearFonts()
 		{
@@ -865,7 +891,8 @@ namespace MindMapUIExtension
 		private void RebuildTreeView(TaskList tasks)
 		{
 			// Snapshot the expanded tasks so we can restore them afterwards
-			var expandedIDs = GetExpandedItems();
+			var expandedIDs = (m_PrevExpandedItems ?? ExpandedItems);
+			m_PrevExpandedItems = null;
 
 			// And the selection
 			var selID = UniqueID(SelectedNode);
@@ -902,7 +929,9 @@ namespace MindMapUIExtension
 			}
 
 			// Restore expanded state
-			if (!SetExpandedItems(expandedIDs))
+			ExpandedItems = expandedIDs;
+
+			if (expandedIDs?.Count == 0)
 				rootNode.Expand();
 
 			EndUpdate();
@@ -921,33 +950,34 @@ namespace MindMapUIExtension
 			return m_Trans.Translate("Root");
 		}
 
-		protected List<UInt32> GetExpandedItems()
+		public List<UInt32> ExpandedItems
 		{
-			var expanded = new List<TreeNode>();
-			GetExpandedNodes(RootNode, ref expanded);
-
-			var expandedIDs = new List<UInt32>();
-
-			foreach (TreeNode node in expanded)
-   				expandedIDs.Add(UniqueID(node));
-
-			return expandedIDs;
-		}
-
-		private bool SetExpandedItems(List<UInt32> expandedItems)
-		{
-            if (expandedItems == null)
-                return false;
-
-			foreach (var id in expandedItems)
+			get
 			{
-				var node = FindNode(id);
+				var expanded = new List<TreeNode>();
+				GetExpandedNodes(RootNode, ref expanded);
 
-                if (node != null)
-                    node.Expand();
+				var expandedIDs = new List<UInt32>();
+
+				foreach (TreeNode node in expanded)
+					expandedIDs.Add(UniqueID(node));
+
+				return expandedIDs;
 			}
 
-            return true;
+			set
+			{
+				if (value != null)
+				{
+					foreach (var id in value)
+					{
+						var node = FindNode(id);
+
+						if (node != null)
+							node.Expand();
+					}
+				}
+			}
 		}
 
 		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
