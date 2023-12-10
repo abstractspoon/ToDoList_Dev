@@ -1,145 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
-using System.Data;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Windows.Forms.VisualStyles;
 
+/////////////////////////////////////////////////////////////////////////////////////
+
 using ScrollHelper;
 using TreeViewHelper;
 
+/////////////////////////////////////////////////////////////////////////////////////
+
 namespace MindMapUIExtension
 {
-	public class MindMapDragEventItem
-	{
-		public MindMapDragEventItem(TreeNode n)
-		{
-			if (n == null)
-				return;
-
-			var item = (n.Tag as MindMapItem);
-
-			if (item == null)
-				return;
-
-			node = n;
-			uniqueID = Convert.ToUInt32(node.Name);
-			itemData = item.ItemData;			
-		}
-
-		public TreeNode node = null;
-		public UInt32 uniqueID = 0;
-		public Object itemData = null;
-	}
-
-	public class MindMapDragEventArgs : EventArgs
-	{
-		public MindMapDragEventArgs(TreeNode node, TreeNode parent, TreeNode sibling, bool copy)
-		{
-			dragged = new MindMapDragEventItem(node);
-			targetParent = new MindMapDragEventItem(parent);
-			afterSibling = new MindMapDragEventItem(sibling);
-			copyItem = copy;
-		}
-
-		public MindMapDragEventItem dragged = null;
-		public MindMapDragEventItem targetParent = null;
-		public MindMapDragEventItem afterSibling = null;
-	
-		public bool copyItem = false;
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-
-	public class TreeViewEx : TreeView
-	{
-		// --------------------------
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NMHDR
-		{
-			public IntPtr hwndFrom;
-			public IntPtr idFrom;
-			public int code;
-		}
-
-		[DllImport("User32.dll")]
-		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
-
-		const int WM_SETREDRAW		= 0x000B;
-		const int WM_NOTIFY			= 0x004E;
-		const int WM_REFLECT		= (0x0400 + 0x1C00);
-
-		const int NM_CUSTOMDRAW		= (0x00 - 12);
-
-		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
-		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
-
-		// --------------------------
-
-		private bool m_HoldRedraw = false;
-
-		public bool HoldRedraw
-		{
-			get { return m_HoldRedraw; }
-
-			set
-			{
-				if (value != m_HoldRedraw)
-				{
-					m_HoldRedraw = value;
-					SendMessage(Handle, WM_SETREDRAW, (m_HoldRedraw ? 0 : 1), 0);
-				}
-			}
-		}
-
-		public new int ItemHeight
-		{
-			get { return SendMessage(Handle, TVM_GETITEMHEIGHT); }
-			set { SendMessage(Handle, TVM_SETITEMHEIGHT, value); }
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			switch (m.Msg)
-			{
-			case (WM_NOTIFY + WM_REFLECT):
-				{
-					var nmhdr = (NMHDR)m.GetLParam(typeof(NMHDR));
-
-					if ((nmhdr.code == NM_CUSTOMDRAW) && m_HoldRedraw)
-						return;
-				}
-				break;
-			}
-
-			base.WndProc(ref m);
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-
 	public delegate void SelectionChangeEventHandler(object sender, object itemData);
 	public delegate bool DragDropChangeEventHandler(object sender, MindMapDragEventArgs e);
 
 	[System.ComponentModel.DesignerCategory("")]
 	public partial class MindMapControl : UserControl
     {
-		// Win32 Imports -----------------------------------------------------------------
-
-		[DllImport("User32.dll")]
-		static extern int GetScrollPos(IntPtr hWnd, int nScrollBar);
-
-		static int SB_HORZ = 0;
-		static int SB_VERT = 1;
-
 		// Constants ---------------------------------------------------------------------
 
 		const int DragExpandInterval = 500;
@@ -206,6 +90,8 @@ namespace MindMapUIExtension
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
 		private Color m_ConnectionColor;
+
+		private PerfData m_PerfData = new PerfData();
 
 		private float m_ZoomFactor = 1f;
 		private int m_ZoomLevel = 0;
@@ -578,9 +464,6 @@ namespace MindMapUIExtension
 
             if (!m_HoldRedraw)
             {
-#if DEBUG
-// 				var startTick = Environment.TickCount;
-#endif
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -595,14 +478,7 @@ namespace MindMapUIExtension
 				PostDraw(e.Graphics, m_TreeView.Nodes);
 
 #if DEBUG
-// 				int xOffset = (DebugMode() ? m_TreeView.Width : 0);
-// 				int yOffset = 0;
-// 
-// 				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
-// 				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
-// 				e.Graphics.DrawString(String.Format("Font Height = {0}", Tree.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
-// 				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
-// 				e.Graphics.DrawString(String.Format("Zoom Level = {0}", m_ZoomLevel), this.Font, Brushes.Black, xOffset, yOffset + 64);
+				m_PerfData.Draw(e.Graphics, (DebugMode() ? m_TreeView.Width : 0), 0);
 #endif
 			}
 		}
@@ -788,7 +664,7 @@ namespace MindMapUIExtension
 				relY = ((ptClient.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 			}
 #if DEBUG
-			Stopwatch watch = Stopwatch.StartNew();
+			m_PerfData.Reset();
 #endif
 			// Prevent all selection and expansion changes for the duration
 			BeginUpdate();
@@ -800,16 +676,24 @@ namespace MindMapUIExtension
 			var expandedNodes = new List<TreeNode>();
 			GetExpandedNodes(RootNode, ref expandedNodes);
 
+#if DEBUG
+			m_PerfData.GetExpandedNodesMs = m_PerfData.LocalElapsedMs;
+#endif
 			// Recalculate the zoom
 			m_ZoomLevel = level;
 			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 
-			// Don't recalc positions here because we'll do it in EndUpdate
+			// Don't recalc positions here because it'll get done in EndUpdate
 			UpdateTreeFont(false);
 
+#if DEBUG
+			m_PerfData.UpdateTreeFontMs = m_PerfData.LocalElapsedMs;
+#endif
 			// Restore expanded nodes
 			SetExpandedNodes(expandedNodes);
-
+#if DEBUG
+			m_PerfData.SetExpandedNodesMs = m_PerfData.LocalElapsedMs;
+#endif
 			// Scroll the view to keep the mouse located in the 
 			// same relative position as before
 			if (ptClient != NullPoint)
@@ -831,7 +715,8 @@ namespace MindMapUIExtension
 			EndUpdate();
 			PerformLayout();
 #if DEBUG
-			Debug.WriteLine("ZoomTo took " + watch.ElapsedMilliseconds + " ms");
+			m_PerfData.EndUpdateMs = m_PerfData.LocalElapsedMs;
+			m_PerfData.ZoomToMs = m_PerfData.TotalElapsedMs;
 #endif
 			return true;
 		}
@@ -2159,8 +2044,8 @@ namespace MindMapUIExtension
 
 			itemBounds.Width += GetExtraWidth(node);
 
-            int horzOffset = GetScrollPos(m_TreeView.Handle, SB_HORZ);
-            int vertOffset = (GetScrollPos(m_TreeView.Handle, SB_VERT) * node.Bounds.Height);
+            int horzOffset = m_TreeView.HorzScrollPos;
+            int vertOffset = (m_TreeView.VertScrollPos * node.Bounds.Height);
 
             itemBounds.Offset(horzOffset, vertOffset);
 
