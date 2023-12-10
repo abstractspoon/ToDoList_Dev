@@ -96,9 +96,6 @@ namespace MindMapUIExtension
 				{
 					m_HoldRedraw = value;
 					SendMessage(Handle, WM_SETREDRAW, (m_HoldRedraw ? 0 : 1), 0);
-
-					if (!m_HoldRedraw)
-						Invalidate();
 				}
 			}
 		}
@@ -245,6 +242,8 @@ namespace MindMapUIExtension
 			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)(m_DpiFactor * 20) };
 
 			InitializeComponent();
+
+			m_TreeView.HoldRedraw = true;
 		}
 
 		public bool SetFont(String fontName, int fontSize)
@@ -546,7 +545,7 @@ namespace MindMapUIExtension
 
 		protected void BeginUpdate()
 		{
-			m_TreeView.HoldRedraw = HoldRedraw = true;
+			HoldRedraw = true;
 
             EnableExpandNotifications(false);
 			EnableSelectionNotifications(false);
@@ -554,7 +553,7 @@ namespace MindMapUIExtension
 
 		protected void EndUpdate()
 		{
-			m_TreeView.HoldRedraw = HoldRedraw = false;
+			HoldRedraw = false;
 
 			EnableExpandNotifications(true);
 			EnableSelectionNotifications(true);
@@ -791,6 +790,12 @@ namespace MindMapUIExtension
 
 			// Prevent all selection and expansion changes for the duration
 			BeginUpdate();
+#if DEBUG
+			Debug.WriteLine("ZoomTo.Begin ----------------------------------");
+// 			Stopwatch watch = Stopwatch.StartNew();
+// 			long elapsed = 0, prevElapsed = 0;
+			Stopwatch watch2 = Stopwatch.StartNew();
+#endif
 
 			// The process of changing the fonts and recalculating the 
 			// item height can cause the tree-view to spontaneously 
@@ -798,18 +803,45 @@ namespace MindMapUIExtension
 			// and restore it afterwards
 			var expandedNodes = new List<TreeNode>();
 			GetExpandedNodes(RootNode, ref expandedNodes);
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// 			Debug.WriteLine("ZoomTo.GetExpandedNodes took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
 			// Recalculate the zoom
 			m_ZoomLevel = level;
 			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 
+			// Don't recalc positions here because we'll do it in EndUpdate
 			UpdateTreeFont(false);
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// 			Debug.WriteLine("ZoomTo.UpdateTreeFont took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
 
 			// 'Cleanup'
 			SetExpandedNodes(expandedNodes);
-			EndUpdate();
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// 			Debug.WriteLine("ZoomTo.SetExpandedNodes took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
 
 			AutoScrollMinSize = ZoomedSize;
 
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// 			Debug.WriteLine("ZoomTo.AutoScrollMinSize took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
+			EndUpdate();
+
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// //			Debug.WriteLine("ZoomTo.EndUpdate took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
 			// Scroll the view to keep the mouse located in the 
 			// same relative position as before
 			if (ptClient != NullPoint)
@@ -826,8 +858,23 @@ namespace MindMapUIExtension
 					VerticalScroll.SetValue(newY);
 				}
 			}
-
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// 			Debug.WriteLine("ZoomTo updating scrollbars took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
 			PerformLayout();
+
+#if DEBUG
+// 			elapsed = watch.ElapsedMilliseconds;
+// 			Debug.WriteLine("ZoomTo.PerformLayout took " + (elapsed - prevElapsed) + " ms");
+// 			prevElapsed = elapsed;
+#endif
+
+#if DEBUG
+			Debug.WriteLine("ZoomTo took " + watch2.ElapsedMilliseconds + " ms");
+			Debug.WriteLine("ZoomTo.End ----------------------------------");
+#endif
 			return true;
 		}
 
@@ -1132,7 +1179,9 @@ namespace MindMapUIExtension
 			if (RootNode == null)
 				return;
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
+//			Debug.WriteLine("UpdateTreeFont.Begin ----------------------------------");
+//			Stopwatch watch = Stopwatch.StartNew();
+//			Stopwatch watch2 = Stopwatch.StartNew();
 #endif
 			// We'll need these to fix up the item height below
 			int prevItemHeight = m_TreeView.ItemHeight;
@@ -1144,15 +1193,16 @@ namespace MindMapUIExtension
 			ClearNodeFonts(RootNode);
 
 #if DEBUG
-			Stopwatch watch = Stopwatch.StartNew();
+// 			Debug.WriteLine("UpdateTreeFont.ClearNodeFonts took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
 #endif
 
 			// Update the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
 
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
-			watch.Restart();
+// 			Debug.WriteLine("UpdateTreeFont.Setting tree font took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
 #endif
 			// Reset item height to force recalculation
 			m_TreeView.ItemHeight = -1;
@@ -1180,15 +1230,20 @@ namespace MindMapUIExtension
 			// Update the item height
 			m_TreeView.ItemHeight = itemHeight;
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
-			watch.Restart();
+// 			Debug.WriteLine("UpdateTreeFont.Setting tree item height took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
 #endif
 			RefreshNodeFont(RootNode, true);
+#if DEBUG
+// 			Debug.WriteLine("UpdateTreeFont.RefreshNodeFont took " + watch.ElapsedMilliseconds + " ms");
+// 			watch.Restart();
+#endif
 
 			if (recalcPositions)
 				RecalculatePositions();
 #if DEBUG
-			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
+// 			Debug.WriteLine("UpdateTreeFont took " + watch2.ElapsedMilliseconds + " ms");
+// 			Debug.WriteLine("UpdateTreeFont.End ----------------------------------");
 #endif
 		}
 
