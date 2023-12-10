@@ -1240,9 +1240,9 @@ namespace MindMapUIExtension
 				{
 					if (!value) // release redraw
 						Invalidate();
-				}
 
-				m_HoldRedraw = value; 
+					m_HoldRedraw = value; 
+				}
 			}
 		}
 
@@ -2231,11 +2231,12 @@ namespace MindMapUIExtension
 
 		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
 		{
+			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
+
 			foreach (TreeNode node in nodes)
 			{
 				// Don't draw items falling wholly outside the clip rectangle
 				MindMapItem item = Item(node);
-				Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
 
 				if (!GetItemDrawRect(item.TotalBounds).IntersectsWith(clipRect))
 					continue;
