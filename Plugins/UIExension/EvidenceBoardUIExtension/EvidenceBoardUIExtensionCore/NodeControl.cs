@@ -1726,14 +1726,19 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnDragLeave(EventArgs e)
 		{
-			// Start the timer 
-			if (MouseButtons == MouseButtons.Left)
-				m_DragLeaveTimer.Start();
+			// Start the timer if the mouse is down and outside of the window bounds
+			if (MouseButtons != MouseButtons.Left)
+				return;
+
+			if (Bounds.Contains(Parent.PointToClient(MousePosition)))
+				return;
+
+			m_DragLeaveTimer.Start();
 		}
 
 		protected override void OnDragEnter(DragEventArgs e)
 		{
-			// Stop the timer 
+			// Stop the timer regardless
 			m_DragLeaveTimer.Stop();
 		}
 
@@ -1741,11 +1746,11 @@ namespace EvidenceBoardUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			// If we received this message then it MUST mean that 
-			// a drag ended outside of the window rect so we must 
-			// make sure that the drag is properly cancelled
 			if (MouseButtons == MouseButtons.None)
 			{
+				// If we received this message and the mouse has been released
+				// then it MUST mean that a drag ended outside of the window 
+				// rect so we must make sure that the drag is properly cancelled
 				CancelDrag();
 			}
 		}
