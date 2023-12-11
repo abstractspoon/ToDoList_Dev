@@ -1256,22 +1256,6 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			if (IsDraggingBackgroundImage)
-			{
-				m_DragStartTimer.Stop();
-				m_DragMode = DragMode.None;
-
-				Capture = false;
-
-				if (m_BackgroundImage.Bounds != m_PreDragBackgroundImageBounds)
-					BackgroundImageChanged?.Invoke(this, null);
-			}
-
-			base.OnMouseUp(e);
-		}
-
 		protected override void OnMouseCaptureChanged(EventArgs e)
 		{
 			if (!Capture && IsDraggingBackgroundImage)
@@ -1415,6 +1399,29 @@ namespace EvidenceBoardUIExtension
 #endif
 		}
 
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			if (IsDraggingBackgroundImage)
+			{
+				m_DragStartTimer.Stop();
+				m_DragMode = DragMode.None;
+
+				Capture = false;
+
+				if (!ClientRectangle.Contains(e.Location))
+				{
+					if (m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds))
+						Invalidate();
+				}
+				else if (m_BackgroundImage.Bounds != m_PreDragBackgroundImageBounds)
+				{
+					BackgroundImageChanged?.Invoke(this, null);
+				}
+			}
+
+			base.OnMouseUp(e);
+		}
+
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
@@ -1479,39 +1486,48 @@ namespace EvidenceBoardUIExtension
 				{
 					bool moved = false;
 
-					var ptGraph = ClientToGraph(e.Location);
-					var minSize = new Size(100, 100).Divide(OverallScaleFactor);
-
-					switch (m_DragMode)
+					if (ClientRectangle.Contains(e.Location))
 					{
-					case DragMode.BackgroundImage:
+						Cursor = Cursors.Arrow;
+
+						var ptGraph = ClientToGraph(e.Location);
+						var minSize = new Size(100, 100).Divide(OverallScaleFactor);
+
+						switch (m_DragMode)
 						{
-							var dragPt = e.Location;
-							dragPt.Offset(m_DragOffset);
+						case DragMode.BackgroundImage:
+							{
+								var dragPt = e.Location;
+								dragPt.Offset(m_DragOffset);
 
-							moved = m_BackgroundImage.SetReposition(ClientToGraph(dragPt));
+								moved = m_BackgroundImage.SetReposition(ClientToGraph(dragPt));
+							}
+							break;
+
+						case DragMode.BackgroundImageLeft:
+							moved = m_BackgroundImage.InflateWidth((-ptGraph.X + BackgroundImage.Bounds.Left), minSize);
+							break;
+
+						case DragMode.BackgroundImageRight:
+							moved = m_BackgroundImage.InflateWidth((ptGraph.X - BackgroundImage.Bounds.Right), minSize);
+							break;
+
+						case DragMode.BackgroundImageTop:
+							moved = m_BackgroundImage.InflateHeight((-ptGraph.Y + BackgroundImage.Bounds.Top), minSize);
+							break;
+
+						case DragMode.BackgroundImageBottom:
+							moved = m_BackgroundImage.InflateHeight((ptGraph.Y - BackgroundImage.Bounds.Bottom), minSize);
+							break;
 						}
-						break;
 
-					case DragMode.BackgroundImageLeft:
-						moved = m_BackgroundImage.InflateWidth((-ptGraph.X + BackgroundImage.Bounds.Left), minSize);
-						break;
-
-					case DragMode.BackgroundImageRight:
-						moved = m_BackgroundImage.InflateWidth((ptGraph.X - BackgroundImage.Bounds.Right), minSize);
-						break;
-
-					case DragMode.BackgroundImageTop:
-						moved = m_BackgroundImage.InflateHeight((-ptGraph.Y + BackgroundImage.Bounds.Top), minSize);
-						break;
-
-					case DragMode.BackgroundImageBottom:
-						moved = m_BackgroundImage.InflateHeight((ptGraph.Y - BackgroundImage.Bounds.Bottom), minSize);
-						break;
+						if (moved)
+							Invalidate();
 					}
-
-					if (moved)
-						Invalidate();
+					else
+					{
+						Cursor = Cursors.No;
+					}
 				}
 			}
 		}
