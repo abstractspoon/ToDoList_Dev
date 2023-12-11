@@ -1798,7 +1798,7 @@ namespace EvidenceBoardUIExtension
 			{
 				e.Action = DragAction.Cancel;
 
-				if (m_DragMode != DragMode.SelectionBox)
+				if (m_DragMode == DragMode.Node)
 					CancelNodeDrag();
 			}
 		}
@@ -1820,6 +1820,7 @@ namespace EvidenceBoardUIExtension
 			}
 
 			ClearDragState();
+			Invalidate();
 		}
 
 		private void ClearDragState()
