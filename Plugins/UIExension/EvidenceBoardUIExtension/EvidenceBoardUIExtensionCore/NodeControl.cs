@@ -93,7 +93,7 @@ namespace EvidenceBoardUIExtension
 		Point m_MaxExtents = Point.Empty;
 		Rectangle m_SelectionBox = Rectangle.Empty;
 
-		Timer m_DragTimer;
+		Timer m_DragStartTimer, m_DragLeaveTimer;
 		Point m_DragOffset;
 		PointF m_PreDragNodePos;
 		DragMode m_DragMode = DragMode.None;
@@ -134,13 +134,17 @@ namespace EvidenceBoardUIExtension
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.m_DragTimer = new System.Windows.Forms.Timer(this.components);
-			this.SuspendLayout();
+
+			m_DragStartTimer = new Timer(this.components);
+			m_DragLeaveTimer = new Timer(this.components);
+
+			SuspendLayout();
 			// 
-			// m_DragTimer
+			// m_DragTimers
 			// 
-			this.m_DragTimer.Interval = 500;
-			this.m_DragTimer.Tick += new System.EventHandler(this.OnDragTimer);
+			m_DragStartTimer.Interval = m_DragLeaveTimer.Interval = 500;
+			m_DragStartTimer.Tick += new System.EventHandler(OnDragStartTimer);
+			m_DragLeaveTimer.Tick += new System.EventHandler(OnDragLeaveTimer);
 			// 
 			// NodeControl
 			// 
@@ -1256,7 +1260,7 @@ namespace EvidenceBoardUIExtension
 		{
 			if (IsDraggingBackgroundImage)
 			{
-				m_DragTimer.Stop();
+				m_DragStartTimer.Stop();
 				m_DragMode = DragMode.None;
 
 				Capture = false;
@@ -1273,7 +1277,7 @@ namespace EvidenceBoardUIExtension
 			if (!Capture && IsDraggingBackgroundImage)
 			{
 				// Cancel image drag
-				m_DragTimer.Stop();
+				m_DragStartTimer.Stop();
 				m_DragMode = DragMode.None;
 
 				m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds);
@@ -1315,8 +1319,8 @@ namespace EvidenceBoardUIExtension
 				{
 					m_DragMode = imageHit;
 
-					m_DragTimer.Tag = e;
-					m_DragTimer.Start();
+					m_DragStartTimer.Tag = e;
+					m_DragStartTimer.Start();
 
 					m_PreDragBackgroundImageBounds = m_BackgroundImage.Bounds;
 
@@ -1330,8 +1334,8 @@ namespace EvidenceBoardUIExtension
 				{
 					m_DragMode = DragMode.SelectionBox;
 
-					m_DragTimer.Tag = e;
-					m_DragTimer.Start();
+					m_DragStartTimer.Tag = e;
+					m_DragStartTimer.Start();
 				}
 			}
 			else if (HitTestExpansionButton(e.Location) != null)
@@ -1388,8 +1392,8 @@ namespace EvidenceBoardUIExtension
 					{
 						m_DragMode = DragMode.Node;
 
-						m_DragTimer.Tag = e;
-						m_DragTimer.Start();
+						m_DragStartTimer.Tag = e;
+						m_DragStartTimer.Start();
 
 						m_DragOffset = GetNodeClientPos(node);
 						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
@@ -1443,7 +1447,7 @@ namespace EvidenceBoardUIExtension
 
 			if (e.Button == MouseButtons.Left)
 			{
-				if (m_DragTimer.Enabled)
+				if (m_DragStartTimer.Enabled)
 				{
 					Debug.Assert(!ReadOnly);
 
@@ -1452,7 +1456,7 @@ namespace EvidenceBoardUIExtension
 
 					if (WantStartDragging(ref data, ref dde))
 					{
-						m_DragTimer.Stop();
+						m_DragStartTimer.Stop();
 
 						switch (m_DragMode)
 						{
@@ -1518,7 +1522,7 @@ namespace EvidenceBoardUIExtension
 			{
 				if (e.KeyCode == Keys.Escape)
 				{
-					m_DragTimer.Stop();
+					m_DragStartTimer.Stop();
 					m_DragMode = DragMode.None;
 
 					if (m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds))
@@ -1558,7 +1562,7 @@ namespace EvidenceBoardUIExtension
 				return false;
 
 			// Check for drag movement
-			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
+			Point ptOrg = (m_DragStartTimer.Tag as MouseEventArgs).Location;
 
 			if (GetDragRect(ptOrg).Contains(PointToClient(MousePosition)))
 				return false;
@@ -1623,11 +1627,11 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		protected void OnDragTimer(object sender, EventArgs e)
+		protected void OnDragStartTimer(object sender, EventArgs e)
 		{
 			Debug.Assert(!ReadOnly);
 
-			m_DragTimer.Stop();
+			m_DragStartTimer.Stop();
 
 			object data = null;
 			DragDropEffects dde = DragDropEffects.None;
@@ -1702,6 +1706,36 @@ namespace EvidenceBoardUIExtension
 			ptGraph.Offset(m_MinExtents);
 
 			return ptGraph;
+		}
+
+		protected override void OnDragLeave(EventArgs e)
+		{
+			// Start a timer 
+			if (m_DragMode == DragMode.Node)
+			{
+				m_DragLeaveTimer.Start();
+			}
+		}
+
+		protected override void OnDragEnter(DragEventArgs e)
+		{
+			m_DragLeaveTimer.Stop();
+		}
+
+		protected void OnDragLeaveTimer(object sender, EventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			// If we received this message then it MUST mean that 
+			// a drag ended outside of the window rect so we must 
+			// make sure that the drag is properly cancelled
+			if (MouseButtons == MouseButtons.None)
+			{
+				Debug.Assert(!Bounds.Contains(Parent.PointToClient(MousePosition)));
+
+				m_DragLeaveTimer.Stop();
+				CancelNodeDrag();
+			}
 		}
 
 		protected override void OnDragOver(DragEventArgs e)
