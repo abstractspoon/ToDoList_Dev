@@ -2734,6 +2734,13 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
+		protected override void CancelDrag()
+		{
+			base.CancelDrag();
+
+			ResetUserLinkDrag();
+		}
+
 		void ResetUserLinkDrag()
 		{
 			m_DraggingSelectedUserLink = false;
@@ -2771,18 +2778,13 @@ namespace EvidenceBoardUIExtension
 				if (cancel)
 				{
 					e.Action = DragAction.Cancel;
-					ResetUserLinkDrag();
+					CancelDrag();
 				}
+
+				return;
 			}
-			else if (m_DropHighlightedTaskId > 0)
-			{
-				// Never called
-				int breakpoint = 0;
-			}
-			else
-			{
-				base.OnQueryContinueDrag(e);
-			}
+
+			base.OnQueryContinueDrag(e);
 		}
 
 		// ILabelTipHandler implementation

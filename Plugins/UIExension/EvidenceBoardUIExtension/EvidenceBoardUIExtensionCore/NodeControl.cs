@@ -1726,15 +1726,14 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnDragLeave(EventArgs e)
 		{
-			// Start a timer 
-			if (m_DragMode == DragMode.Node)
-			{
+			// Start the timer 
+			if (MouseButtons == MouseButtons.Left)
 				m_DragLeaveTimer.Start();
-			}
 		}
 
 		protected override void OnDragEnter(DragEventArgs e)
 		{
+			// Stop the timer 
 			m_DragLeaveTimer.Stop();
 		}
 
@@ -1747,10 +1746,7 @@ namespace EvidenceBoardUIExtension
 			// make sure that the drag is properly cancelled
 			if (MouseButtons == MouseButtons.None)
 			{
-				Debug.Assert(!Bounds.Contains(Parent.PointToClient(MousePosition)));
-
-				m_DragLeaveTimer.Stop();
-				CancelNodeDrag();
+				CancelDrag();
 			}
 		}
 
@@ -1823,7 +1819,7 @@ namespace EvidenceBoardUIExtension
 					{
 						if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeIds))
 						{
-							CancelNodeDrag();
+							CancelDrag();
 						}
 						else
 						{
@@ -1847,13 +1843,11 @@ namespace EvidenceBoardUIExtension
 			if (e.EscapePressed)
 			{
 				e.Action = DragAction.Cancel;
-
-				if (m_DragMode == DragMode.Node)
-					CancelNodeDrag();
+				CancelDrag();
 			}
 		}
 
-		private void CancelNodeDrag()
+		protected virtual void CancelDrag()
 		{
 			if (m_DragMode == DragMode.Node)
 			{
@@ -1873,12 +1867,14 @@ namespace EvidenceBoardUIExtension
 			Invalidate();
 		}
 
-		private void ClearDragState()
+		protected virtual void ClearDragState()
 		{
 			m_DragMode = DragMode.None;
 			m_DragOffset = Point.Empty;
 			m_SelectionBox = Rectangle.Empty;
 			m_PreDragNodePos = PointF.Empty;
+
+			m_DragLeaveTimer.Stop();
 		}
 
 		protected bool SetBackgroundImage(string filePath, Rectangle rect, bool notify)
