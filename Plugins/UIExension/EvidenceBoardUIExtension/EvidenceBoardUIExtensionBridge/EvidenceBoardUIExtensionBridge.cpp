@@ -256,6 +256,7 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IU
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return m_wnd->ScrollToSelectedTask();
