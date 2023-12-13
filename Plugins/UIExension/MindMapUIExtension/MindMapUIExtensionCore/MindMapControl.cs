@@ -487,9 +487,9 @@ namespace MindMapUIExtension
                     DrawInsertionMarker(e.Graphics, m_DropTarget);
 
 				PostDraw(e.Graphics, m_TreeView.Nodes);
-
 #if DEBUG
-				m_PerfData.Draw(e.Graphics, (DebugMode() ? m_TreeView.Width : 0), 0);
+				if (!SavingToImage)
+					m_PerfData.Draw(e.Graphics, (DebugMode() ? m_TreeView.Width : 0), 0);
 #endif
 			}
 		}
@@ -2451,33 +2451,12 @@ namespace MindMapUIExtension
 		private void DrawExpansionButton(Graphics graphics, TreeNode node)
 		{
 			// Only for parent nodes and Root is always expanded
-			if (!IsParent(node) || IsRoot(node))
-				return;
-
-			Rectangle btnRect = CalculateExpansionButtonRect(node);
-			bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(btnRect, 2, 4).Contains(PointToClient(MousePosition)));
-
-			if (!IsZoomed || !SavingToImage)
+			if (IsParent(node) && !IsRoot(node))
 			{
+				var btnRect = CalculateExpansionButtonRect(node);
+				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(btnRect, 2, 4).Contains(PointToClient(MousePosition)));
+
 				TreeViewUtils.DrawExpansionButton(graphics, btnRect, node.IsExpanded, pressed);
-			}
-			else
-			{
-				int imageSize = TreeViewUtils.ExpansionButtonSize;
-
-				using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
-				{
-					tempImage.MakeTransparent();
-
-					using (var gTemp = Graphics.FromImage(tempImage))
-					{
-						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
-						gTemp.Clear(SystemColors.Window);
-
-						TreeViewUtils.DrawExpansionButton(gTemp, tempRect, node.IsExpanded, pressed);
-						ImageUtils.DrawZoomedImage(tempImage, graphics, btnRect, btnRect);
-					}
-				}
 			}
 		}
 

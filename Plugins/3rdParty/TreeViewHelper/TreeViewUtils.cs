@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms.VisualStyles;
+
+using ImageHelper;
 
 namespace TreeViewHelper
 {
@@ -14,8 +17,14 @@ namespace TreeViewHelper
 
 		static public void DrawExpansionButton(Graphics graphics, Rectangle btnRect, bool opened, bool pressed)
 		{
-			if (!btnRect.IsEmpty)
+			if (btnRect.IsEmpty)
+				return;
+
+			int btnSize = ExpansionButtonSize;
+
+			if ((btnRect.Width == btnSize) && (btnRect.Height == btnSize))
 			{
+				// Expand as-is - no resizing
 				if (VisualStyleRenderer.IsSupported)
 				{
 					var renderer = new VisualStyleRenderer(opened ?
@@ -39,6 +48,25 @@ namespace TreeViewHelper
 							int midX = ((btnRect.Left + btnRect.Right) / 2);
 							graphics.DrawLine(pen, midX, btnRect.Top + 2, midX, btnRect.Bottom - 2);
 						}
+					}
+				}
+			}
+			else // resize to fit
+			{
+				// Draw into a temporary dc
+				using (var tempImage = new Bitmap(btnSize, btnSize, PixelFormat.Format32bppRgb)) // unscaled size
+				{
+					tempImage.MakeTransparent();
+
+					using (var gTemp = Graphics.FromImage(tempImage))
+					{
+						var tempRect = new Rectangle(0, 0, btnSize, btnSize);
+						gTemp.Clear(SystemColors.Window);
+
+						DrawExpansionButton(gTemp, tempRect, opened, pressed); // RECURSIVE CALL
+
+						// Resize to output dc
+						ImageUtils.DrawZoomedImage(tempImage, graphics, btnRect, btnRect);
 					}
 				}
 			}
