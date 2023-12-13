@@ -10,9 +10,9 @@ namespace TreeViewHelper
 {
     public class TreeViewUtils
     {
-		static public void DrawExpansionButton(Graphics graphics, Rectangle button, bool opened, bool pressed)
+		static public void DrawExpansionButton(Graphics graphics, Rectangle btnRect, bool opened, bool pressed)
 		{
-			if (!button.IsEmpty)
+			if (!btnRect.IsEmpty)
 			{
 				if (VisualStyleRenderer.IsSupported)
 				{
@@ -20,22 +20,22 @@ namespace TreeViewHelper
 															VisualStyleElement.TreeView.Glyph.Opened : 
 															VisualStyleElement.TreeView.Glyph.Closed);
 
-					renderer.DrawBackground(graphics, button);
+					renderer.DrawBackground(graphics, btnRect);
 				}
 				else
 				{
-					graphics.FillRectangle((pressed ? SystemBrushes.Control : SystemBrushes.Window), button);
-					graphics.DrawRectangle(SystemPens.ControlDark, button);
+					graphics.FillRectangle((pressed ? SystemBrushes.Control : SystemBrushes.Window), btnRect);
+					graphics.DrawRectangle(SystemPens.ControlDark, btnRect);
 
 					using (var pen = SystemPens.WindowText)
 					{
-						int midY = ((button.Top + button.Bottom) / 2);
-						graphics.DrawLine(pen, button.Left + 2, midY, button.Right - 2, midY);
+						int midY = ((btnRect.Top + btnRect.Bottom) / 2);
+						graphics.DrawLine(pen, btnRect.Left + 2, midY, btnRect.Right - 2, midY);
 
 						if (!opened)
 						{
-							int midX = ((button.Left + button.Right) / 2);
-							graphics.DrawLine(pen, midX, button.Top + 2, midX, button.Bottom - 2);
+							int midX = ((btnRect.Left + btnRect.Right) / 2);
+							graphics.DrawLine(pen, midX, btnRect.Top + 2, midX, btnRect.Bottom - 2);
 						}
 					}
 				}
