@@ -313,12 +313,12 @@ namespace EvidenceBoardUIExtension
 
         public Bitmap SaveToImage()
         {
-			return null;//m_Control.SaveToImage();
+			return m_Control.SaveToImage();
         }
 
         public bool CanSaveToImage()
         {
-            return false;//m_Control.CanSaveToImage();
+            return m_Control.CanSaveToImage();
         }
 
 		public bool ExpandSelectedTasks() { return m_Control.ExpandSelectedNodes(); }

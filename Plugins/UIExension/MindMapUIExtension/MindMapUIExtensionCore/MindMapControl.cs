@@ -13,6 +13,7 @@ using System.Windows.Forms.VisualStyles;
 
 using ScrollHelper;
 using TreeViewHelper;
+using ImageHelper;
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,6 +60,8 @@ namespace MindMapUIExtension
                 return separation; 
             } 
         }
+
+		protected bool SavingToImage { get; private set; } = false;
 
 		protected enum NodeDrawState
 		{
@@ -107,7 +110,6 @@ namespace MindMapUIExtension
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
-        private bool m_IsSavingToImage = false;
 
 		// Public ------------------------------------------------------------------------
 
@@ -342,7 +344,7 @@ namespace MindMapUIExtension
             Point drawOffset = new Point(m_DrawOffset.X, m_DrawOffset.Y);
 
             // And reset
-            m_IsSavingToImage = true;
+            SavingToImage = true;
             m_DrawOffset = new Point(0, 0);
 
             HorizontalScroll.Value = 0;
@@ -365,55 +367,64 @@ namespace MindMapUIExtension
                                                    border, 
                                                    ClientRectangle.Width - border, 
                                                    ClientRectangle.Height - border);
-	
-            // The output image
-            Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
 
-            // The temporary image allowing us to clip out the top and left borders
-            Bitmap srcImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
+			Bitmap finalImage = null;
 
-            // The current position in the output image for rendering the temporary image
-            Rectangle drawRect = srcRect;
-            drawRect.Offset(-border, -border);
+			try
+			{
+				// The output image
+				finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
 
-            // Note: If the last horz or vert page is empty because of an 
-            // exact division then it will get handled within the loop
-            int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
-            int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
+				// The temporary image allowing us to clip out the top and left borders
+				Bitmap srcImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
 
-            using (Graphics graphics = Graphics.FromImage(finalImage))
-            {
-                for (int vertPage = 0; vertPage < numVertPages; vertPage++)
-                {
-                    for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
-                    {
-                        DrawToBitmap(srcImage, ClientRectangle);
-                        graphics.DrawImage(srcImage, drawRect.X, drawRect.Y, srcRect, GraphicsUnit.Pixel);
+				// The current position in the output image for rendering the temporary image
+				Rectangle drawRect = srcRect;
+				drawRect.Offset(-border, -border);
 
-                        int xOffset = Math.Min(srcRect.Width, (graphRect.Width - drawRect.Right));
+				// Note: If the last horz or vert page is empty because of an 
+				// exact division then it will get handled within the loop
+				int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
+				int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
 
-                        if (xOffset == 0)
-                            break;
+				using (Graphics graphics = Graphics.FromImage(finalImage))
+				{
+					for (int vertPage = 0; vertPage < numVertPages; vertPage++)
+					{
+						for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
+						{
+							DrawToBitmap(srcImage, ClientRectangle);
+							graphics.DrawImage(srcImage, drawRect.X, drawRect.Y, srcRect, GraphicsUnit.Pixel);
 
-                        m_DrawOffset.X -= xOffset;
-                        drawRect.X += xOffset;
-                    }
+							int xOffset = Math.Min(srcRect.Width, (graphRect.Width - drawRect.Right));
 
-					m_DrawOffset.X = 0;
-					drawRect.X = 0;
+							if (xOffset == 0)
+								break;
 
-                    int yOffset = Math.Min(srcRect.Height, (graphRect.Height - drawRect.Bottom));
+							m_DrawOffset.X -= xOffset;
+							drawRect.X += xOffset;
+						}
 
-                    if (yOffset == 0)
-                        break;
+						m_DrawOffset.X = 0;
+						drawRect.X = 0;
 
-                    m_DrawOffset.Y -= yOffset;
-                    drawRect.Y += yOffset;
-                }
-            }
+						int yOffset = Math.Min(srcRect.Height, (graphRect.Height - drawRect.Bottom));
+
+						if (yOffset == 0)
+							break;
+
+						m_DrawOffset.Y -= yOffset;
+						drawRect.Y += yOffset;
+					}
+				}
+			}
+			catch (Exception)
+			{
+				finalImage = null;
+			}
 			
             // Restore state
-            m_IsSavingToImage = false;
+            SavingToImage = false;
             m_DrawOffset = drawOffset;
 
             HorizontalScroll.Value = scrollPos.X;
@@ -2355,7 +2366,7 @@ namespace MindMapUIExtension
 
 		private NodeDrawState GetDrawState(TreeNode node)
 		{
-            if (!m_IsSavingToImage)
+            if (!SavingToImage)
             {
                 if (node.IsSelected)
                     return NodeDrawState.Selected;
@@ -2388,23 +2399,27 @@ namespace MindMapUIExtension
 			MindMapItem item = Item(node);
 			Rectangle labelRect = GetItemDrawRect(item.ItemBounds);
 
-			int buttonLeft = 0;
+			int btnLeft = 0;
+			int btnSize = ExpansionButtonSize;
+
+			if (SavingToImage)
+				btnSize = (int)(btnSize * m_ZoomFactor);
 
 			if (item.IsFlipped) // Place the button to the right of the label
 			{
-				buttonLeft = (labelRect.Right - ExpansionButtonSize - LabelPadding);
+				btnLeft = (labelRect.Right - btnSize - LabelPadding);
 			}
 			else // Place the button to the left of the label
 			{
-				buttonLeft = (labelRect.Left + LabelPadding - 1);
+				btnLeft = (labelRect.Left + LabelPadding - 1);
 			}
 
-            int buttonTop = (labelRect.Top + ((labelRect.Height - ExpansionButtonSize) / 2));
+            int btnTop = (labelRect.Top + ((labelRect.Height - btnSize) / 2));
 
             if (VisualStyleRenderer.IsSupported)
-                buttonTop++;
+                btnTop++;
 
-			return new Rectangle(buttonLeft, buttonTop, ExpansionButtonSize, ExpansionButtonSize);
+			return new Rectangle(btnLeft, btnTop, btnSize, btnSize);
 		}
 
 		private void RedrawExpansionButton(TreeNode node, bool update = true)
@@ -2439,10 +2454,31 @@ namespace MindMapUIExtension
 			if (!IsParent(node) || IsRoot(node))
 				return;
 
-			Rectangle button = CalculateExpansionButtonRect(node);
-			bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
+			Rectangle btnRect = CalculateExpansionButtonRect(node);
+			bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(btnRect, 2, 4).Contains(PointToClient(MousePosition)));
 
-			TreeViewUtils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
+			if (!IsZoomed || !SavingToImage)
+			{
+				TreeViewUtils.DrawExpansionButton(graphics, btnRect, node.IsExpanded, pressed);
+			}
+			else
+			{
+				int imageSize = TreeViewUtils.GetExpansionButtonSize(this);
+
+				using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
+				{
+					tempImage.MakeTransparent();
+
+					using (var gTemp = Graphics.FromImage(tempImage))
+					{
+						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
+						gTemp.Clear(SystemColors.Window);
+
+						TreeViewUtils.DrawExpansionButton(gTemp, tempRect, node.IsExpanded, pressed);
+						ImageUtils.DrawZoomedImage(tempImage, graphics, btnRect, btnRect);
+					}
+				}
+			}
 		}
 
 		private void DrawConnections(Graphics graphics, TreeNode node)

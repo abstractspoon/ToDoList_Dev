@@ -8,9 +8,11 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
 
 using ScrollHelper;
 using TreeViewHelper;
+using ImageHelper;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
@@ -63,7 +65,9 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 		}
-		
+
+		protected bool SavingToImage { get; private set; } = false;
+
 		public const uint NullId = uint.MaxValue;
 
 		float m_InitialRadius = 50f;
@@ -785,6 +789,9 @@ namespace EvidenceBoardUIExtension
 
 			nodeRect = GetNodeClientRect(node);
 
+			if (SavingToImage)
+				return true;
+
 			if (allowPartial)
 				return ClientRectangle.IntersectsWith(nodeRect);
 
@@ -822,13 +829,18 @@ namespace EvidenceBoardUIExtension
 
 		protected Rectangle CalcExpansionButtonRect(Rectangle nodeRect)
 		{
-			int buttonSize = TreeViewUtils.GetExpansionButtonSize(this);
+			int border = 2;
+			int btnSize = TreeViewUtils.GetExpansionButtonSize(this);
+
+			if (SavingToImage)
+			{
+				btnSize = (int)(btnSize * m_ZoomFactor);
+				border = Math.Max(1, (int)(border * m_ZoomFactor));
+			}
 
 			// Place at top right
-			var rect = Rectangle.FromLTRB(nodeRect.Right - buttonSize, nodeRect.Top, nodeRect.Right, nodeRect.Top + buttonSize);
-
-			// small border
-			rect.Offset(-2, 2);
+			var rect = Rectangle.FromLTRB(nodeRect.Right - btnSize, nodeRect.Top, nodeRect.Right, nodeRect.Top + btnSize);
+			rect.Offset(-border, border);
 
 			return rect;
 		}
@@ -886,6 +898,9 @@ namespace EvidenceBoardUIExtension
 
 		protected bool IsConnectionVisible(Point fromPos, Point toPos)
 		{
+			if (SavingToImage)
+				return true;
+
 			var lineBounds = Geometry2D.RectFromPoints(fromPos, toPos);
 
 			return ClientRectangle.IntersectsWith(lineBounds);
@@ -921,14 +936,17 @@ namespace EvidenceBoardUIExtension
 
 			// Draw the wall colour behind the graph if the 
 			// graph is smaller than the client rect
-			var graphRect = GraphToClient(Extents);
-
-			if (!graphRect.Contains(ClientRectangle))
+			if (!SavingToImage)
 			{
-				using (var brush = new SolidBrush(m_WallColor))
-					e.Graphics.FillRectangle(brush, ClientRectangle);
+				var graphRect = GraphToClient(Extents);
 
-				e.Graphics.FillRectangle(SystemBrushes.Window, graphRect);
+				if (!graphRect.Contains(ClientRectangle))
+				{
+					using (var brush = new SolidBrush(m_WallColor))
+						e.Graphics.FillRectangle(brush, ClientRectangle);
+
+					e.Graphics.FillRectangle(SystemBrushes.Window, graphRect);
+				}
 			}
 
 			if (HasBackgroundImage)
@@ -982,7 +1000,7 @@ namespace EvidenceBoardUIExtension
 
 			// Draw selection
 			foreach (var selNode in m_SelectedNodes)
-				CheckDrawNode(graphics, selNode, true);
+				CheckDrawNode(graphics, selNode, !SavingToImage);
 		}
 
 		private void DrawParentAndChildNodesExcludingSelectedNodes(Graphics graphics, BaseNode node)
@@ -1035,10 +1053,31 @@ namespace EvidenceBoardUIExtension
 		{
 			if (!node.IsRoot && !node.IsLeaf)
 			{
-				var button = CalcExpansionButtonRect(nodeRect);
-				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(button, 2, 4).Contains(PointToClient(MousePosition)));
+				var btnRect = CalcExpansionButtonRect(nodeRect);
+				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(btnRect, 2, 4).Contains(PointToClient(MousePosition)));
 
-				TreeViewUtils.DrawExpansionButton(graphics, button, node.IsExpanded, pressed);
+				if (!IsZoomed || !SavingToImage)
+				{
+					TreeViewUtils.DrawExpansionButton(graphics, btnRect, node.IsExpanded, pressed);
+				}
+				else
+				{
+					int imageSize = TreeViewUtils.GetExpansionButtonSize(this);
+
+					using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
+					{
+						tempImage.MakeTransparent();
+
+						using (var gTemp = Graphics.FromImage(tempImage))
+						{
+							var tempRect = new Rectangle(0, 0, imageSize, imageSize);
+							gTemp.Clear(SystemColors.Window);
+
+							TreeViewUtils.DrawExpansionButton(gTemp, tempRect, node.IsExpanded, pressed);
+							ImageUtils.DrawZoomedImage(tempImage, graphics, btnRect, nodeRect);
+						}
+					}
+				}
 			}
 		}
 
@@ -2031,6 +2070,76 @@ namespace EvidenceBoardUIExtension
 		protected virtual bool ExpandNode(BaseNode node, bool expand, bool andChildren)
 		{
 			return node.Expand(expand, andChildren);
+		}
+
+		public Bitmap SaveToImage()
+		{
+			// Cache state
+			Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
+
+			// And reset
+			HorizontalScroll.Value = 0;
+			VerticalScroll.Value = 0;
+
+			if (!scrollPos.IsEmpty)
+				PerformLayout();
+
+			SavingToImage = true;
+
+			// The output image
+			Bitmap finalImage = null;
+
+			try
+			{
+				// Total size of the graph
+				var graphRect = new Rectangle(Point.Empty, ZoomedSize);
+				var drawRect = Rectangle.Union(graphRect, ClientRectangle);
+
+				// if either of the scrollbars is NOT visible then we need to use a 
+				// temporary image in order to clip out the 'wall' area
+				if (!HorizontalScroll.Visible || !VerticalScroll.Visible)
+				{
+					var tempImage = new Bitmap(drawRect.Width, drawRect.Height, PixelFormat.Format32bppRgb);
+					finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
+
+					using (Graphics gTemp = Graphics.FromImage(tempImage))
+					{
+						gTemp.Clear(SystemColors.Window);
+						OnPaint(new PaintEventArgs(gTemp, drawRect));
+
+						using (Graphics gFinal = Graphics.FromImage(finalImage))
+						{
+							gFinal.Clear(SystemColors.Window);
+							gFinal.DrawImage(tempImage, 0, 0, GraphToClient(Extents), GraphicsUnit.Pixel);
+						}
+					}
+				}
+				else
+				{
+					finalImage = new Bitmap(drawRect.Width, drawRect.Height, PixelFormat.Format32bppRgb);
+
+					using (Graphics gFinal = Graphics.FromImage(finalImage))
+					{
+						gFinal.Clear(SystemColors.Window);
+						OnPaint(new PaintEventArgs(gFinal, drawRect));
+					}
+				}
+			}
+			catch (Exception)
+			{
+				finalImage = null;
+			}
+
+			SavingToImage = false;
+
+			// Restore state
+			HorizontalScroll.Value = scrollPos.X;
+			VerticalScroll.Value = scrollPos.Y;
+
+			if (!scrollPos.IsEmpty)
+				PerformLayout();
+
+			return finalImage;
 		}
 
 	}

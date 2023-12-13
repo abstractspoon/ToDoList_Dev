@@ -1579,7 +1579,7 @@ namespace EvidenceBoardUIExtension
 
 		protected new void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
 		{
-			//if (HasBackgroundImage)
+			if (!SavingToImage)
 			{
 				// Draw a thicker version of the line in the background colour
 				// so the overdrawn line is always visible
@@ -1753,6 +1753,9 @@ namespace EvidenceBoardUIExtension
 
 		void DrawTaskImageExpansionButton(Graphics graphics, TaskItem taskItem, Rectangle nodeRect, Color backColor)
 		{
+			if (SavingToImage)
+				return;
+
 			var state = taskItem.ImageExpansion;
 
 			if (state == TaskItem.ImageExpansionState.NoImage)
@@ -1765,7 +1768,7 @@ namespace EvidenceBoardUIExtension
 
 			if (!IsZoomed)
 			{
-				DrawTaskImageButton(graphics, iconRect, btn, mousePos, true);
+				DrawTaskImageScrollButton(graphics, iconRect, btn, mousePos, true);
 			}
 			else
 			{
@@ -1780,7 +1783,7 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
 						gTemp.Clear(backColor);
 
-						DrawTaskImageButton(gTemp, tempRect, btn, mousePos, true);
+						DrawTaskImageScrollButton(gTemp, tempRect, btn, mousePos, true);
 						ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, nodeRect);
 					}
 				}
@@ -1812,7 +1815,7 @@ namespace EvidenceBoardUIExtension
 		{
 			Debug.Assert(taskItem.IsExpanded);
 
-			if (ReadOnly || taskItem.IsLocked || (taskItem.ImageCount <= 1))
+			if (ReadOnly || SavingToImage || taskItem.IsLocked || (taskItem.ImageCount <= 1))
 				return;
 
 			var mousePos = PointToClient(MousePosition);
@@ -1849,15 +1852,15 @@ namespace EvidenceBoardUIExtension
 			var backRect = spinRect;
 			backRect.Width /= 2;
 
-			DrawTaskImageButton(graphics, backRect, ScrollButton.Left, mousePos, backEnabled);
+			DrawTaskImageScrollButton(graphics, backRect, ScrollButton.Left, mousePos, backEnabled);
 
 			var forwardRect = backRect;
 			forwardRect.X = forwardRect.Right;
 
-			DrawTaskImageButton(graphics, forwardRect, ScrollButton.Right, mousePos, forwardEnabled);
+			DrawTaskImageScrollButton(graphics, forwardRect, ScrollButton.Right, mousePos, forwardEnabled);
 		}
 
-		static void DrawTaskImageButton(Graphics graphics, Rectangle rect, ScrollButton btn, Point mousePos, bool enabled)
+		static void DrawTaskImageScrollButton(Graphics graphics, Rectangle rect, ScrollButton btn, Point mousePos, bool enabled)
 		{
 			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && rect.Contains(mousePos));
 
