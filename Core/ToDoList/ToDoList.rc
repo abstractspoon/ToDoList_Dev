@@ -5785,7 +5785,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_VIEW_SAVETOIMAGE     "Save &Screenshot of Active Task View (%s)..."
+    ID_VIEW_SAVETOIMAGE     "&Save Task View (%s) to Image..."
     ID_UDTPREFS_COPY        "\nDuplicate Tool"
     ID_UDTPREFS_DELETE      "\nDelete Tool"
 END
@@ -5909,7 +5909,7 @@ BEGIN
     IDS_FIND_ALLTASKLISTS   "All tasklists"
     IDS_CONFIRMSAVEAS       "%s already exists.\nDo you want to replace it?"
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
-    IDS_PRINT_TASKVIEW      "Screenshot of active task view (%s)"
+    IDS_PRINT_TASKVIEW      "Image of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
     IDS_CUSTOM_FEATURE_SHOWEDITFIELD "Show edit field"
     IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
