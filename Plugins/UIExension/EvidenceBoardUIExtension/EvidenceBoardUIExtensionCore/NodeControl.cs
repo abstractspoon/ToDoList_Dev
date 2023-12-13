@@ -830,7 +830,7 @@ namespace EvidenceBoardUIExtension
 		protected Rectangle CalcExpansionButtonRect(Rectangle nodeRect)
 		{
 			int border = 2;
-			int btnSize = TreeViewUtils.GetExpansionButtonSize(this);
+			int btnSize = TreeViewUtils.ExpansionButtonSize;
 
 			if (SavingToImage)
 			{
@@ -1062,7 +1062,7 @@ namespace EvidenceBoardUIExtension
 				}
 				else
 				{
-					int imageSize = TreeViewUtils.GetExpansionButtonSize(this);
+					int imageSize = TreeViewUtils.ExpansionButtonSize;
 
 					using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
 					{

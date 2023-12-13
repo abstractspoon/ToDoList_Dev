@@ -46,7 +46,7 @@ namespace MindMapUIExtension
         { 
             get 
             {
-				return TreeViewUtils.GetExpansionButtonSize(this, DefaultExpansionButtonSize);
+				return TreeViewUtils.ExpansionButtonSize;
             } 
         }
 
@@ -2463,7 +2463,7 @@ namespace MindMapUIExtension
 			}
 			else
 			{
-				int imageSize = TreeViewUtils.GetExpansionButtonSize(this);
+				int imageSize = TreeViewUtils.ExpansionButtonSize;
 
 				using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // unscaled size
 				{

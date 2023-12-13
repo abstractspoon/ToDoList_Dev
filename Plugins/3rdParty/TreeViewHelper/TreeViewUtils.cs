@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
 using System.Drawing;
-using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
 namespace TreeViewHelper
 {
     public class TreeViewUtils
     {
+		[DllImport("User32.dll")]
+		static extern IntPtr GetDesktopWindow();
+
+		// --------------------------
+
 		static public void DrawExpansionButton(Graphics graphics, Rectangle btnRect, bool opened, bool pressed)
 		{
 			if (!btnRect.IsEmpty)
@@ -42,35 +44,36 @@ namespace TreeViewHelper
 			}
 		}
 
-		static int ExpansionButtonSize = 0;
+		static int s_ExpansionButtonSize = 0;
 
-		static public int GetExpansionButtonSize(Control ctrl, int defaultSize = 0)
+		static public int ExpansionButtonSize
 		{
-			if (ExpansionButtonSize == 0)
+			get
 			{
-				if (VisualStyleRenderer.IsSupported)
+				if (s_ExpansionButtonSize == 0)
 				{
-					var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
+					var desktop = GetDesktopWindow();
 
-					using (var graphics = Graphics.FromHwnd(ctrl.Handle))
+					if (VisualStyleRenderer.IsSupported)
 					{
-						ExpansionButtonSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
+						var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
+
+						using (var graphics = Graphics.FromHwnd(desktop))
+						{
+							s_ExpansionButtonSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
+						}
+					}
+					else
+					{
+						using (var graphics = Graphics.FromHwnd(desktop))
+						{
+							s_ExpansionButtonSize = (int)((9 * graphics.DpiX) / 96);
+						}
 					}
 				}
-				else if (defaultSize > 0)
-				{
-					ExpansionButtonSize = defaultSize;
-				}
-				else 
-				{
-					using (var graphics = Graphics.FromHwnd(ctrl.Handle))
-					{
-						ExpansionButtonSize = (int)((8 * graphics.DpiX) / 96);
-					}
-				}
+
+				return s_ExpansionButtonSize;
 			}
-
-			return ExpansionButtonSize;
 		}
 	}
 }
