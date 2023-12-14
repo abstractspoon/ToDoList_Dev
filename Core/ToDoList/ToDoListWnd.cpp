@@ -6689,7 +6689,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 			}
 			else
 			{
-				CMessageBox::AfxShow(IDS_SAVETOIMAGEERROR);
+				CMessageBox::AfxShow(IDS_SAVETOIMAGEERROR, MB_ICONWARNING | MB_OK);
 				return FALSE;
 			}
 		}
@@ -13720,7 +13720,7 @@ void CToDoListWnd::OnViewSaveToImage()
 	}
 	else
 	{
-		CMessageBox::AfxShow(IDS_SAVETOIMAGEERROR);
+		CMessageBox::AfxShow(IDS_SAVETOIMAGEERROR, MB_ICONWARNING | MB_OK);
 	}
 }
 

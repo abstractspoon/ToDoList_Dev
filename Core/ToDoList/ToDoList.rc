@@ -4696,7 +4696,7 @@ BEGIN
     IDS_CAD_CALC_DIVIDE     "Divide"
     IDS_ATTRIBNOTSET        "not set"
     IDS_ATTRIBSET           "set"
-    IDS_SAVETOIMAGEERROR    "The requested image could not be saved.\n\nTry using the filter options to reduce the visible task date range."
+    IDS_SAVETOIMAGEERROR    "The requested image was too large to be created.\n\nTry zooming out or otherwise reducing the extents of the tasks to be rendered."
     IDS_SB_SELTASKTITLEPATHID_TIP "Selected task [Path] (Task ID)"
     IDS_REQUIRESADMINTOMODIFY "Requires Admin Privileges to modify"
     IDS_REMINDER_DBLCLK_TIP "Double-click to go to task"
