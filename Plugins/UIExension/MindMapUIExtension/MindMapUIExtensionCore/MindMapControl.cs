@@ -607,6 +607,7 @@ namespace MindMapUIExtension
 		}
 
 		protected float ZoomFactor { get { return m_ZoomFactor; } }
+		protected int ZoomLevel { get { return m_ZoomLevel; } }
 		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
 		protected bool IsZoomedToExtents { get { return !CanZoomOut; } }
 
@@ -657,6 +658,11 @@ namespace MindMapUIExtension
 			}
 
 			return false;
+		}
+
+		protected bool ZoomTo(int level)
+		{
+			return ZoomTo(level, NullPoint);
 		}
 
 		private bool ZoomTo(int level, Point ptClient)

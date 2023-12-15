@@ -223,7 +223,9 @@ namespace MindMapUIExtension
 		private MindMapOption m_Options;
 		private DragImage m_DragImage;
 		private LabelTip m_LabelTip;
-		List<uint> m_PrevExpandedItems;
+
+		private List<uint> m_PrevExpandedItems;
+		private int m_PrevZoomLevel = -1;
 
 		// -------------------------------------------------------------------------
 
@@ -281,6 +283,7 @@ namespace MindMapUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileInt(key, "ZoomLevel", ZoomLevel);
 			prefs.WriteProfileInt(key, "RootAlignment", (int)Alignment);
 			prefs.WriteProfileInt(key, "Options", (int)Options);
 
@@ -289,20 +292,23 @@ namespace MindMapUIExtension
 
 		public void LoadPreferences(Preferences prefs, String key)
 		{
-				Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)Alignment);
-				Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)Options);
+			Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)Alignment);
+			Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)Options);
 
-				m_PrevExpandedItems = null;
-				var prevExpanded = prefs.GetProfileString(key, "ExpandedItems", "").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+			// Cache previous session values until our first task update
+			m_PrevZoomLevel = prefs.GetProfileInt(key, "ZoomLevel", -1);
 
-				if (prevExpanded?.Length > 0)
-				{
-					m_PrevExpandedItems = new List<uint>();
+			m_PrevExpandedItems = null;
+			var prevExpanded = prefs.GetProfileString(key, "ExpandedItems", "").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 
-					foreach (var prev in prevExpanded)
-						m_PrevExpandedItems.Add(uint.Parse(prev));
-				}
+			if (prevExpanded?.Length > 0)
+			{
+				m_PrevExpandedItems = new List<uint>();
+
+				foreach (var prev in prevExpanded)
+					m_PrevExpandedItems.Add(uint.Parse(prev));
 			}
+		}
 
 		private void ClearFonts()
 		{
@@ -933,6 +939,13 @@ namespace MindMapUIExtension
 
 			if (expandedIDs?.Count == 0)
 				rootNode.Expand();
+
+			// Restore zoom
+			if (m_PrevZoomLevel != -1)
+			{
+				ZoomTo(m_PrevZoomLevel);
+				m_PrevZoomLevel = -1;
+			}
 
 			EndUpdate();
 			SetSelectedNode(selID);

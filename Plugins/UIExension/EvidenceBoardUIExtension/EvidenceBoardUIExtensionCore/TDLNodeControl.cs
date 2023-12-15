@@ -126,7 +126,9 @@ namespace EvidenceBoardUIExtension
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
 		private uint m_DropHighlightedTaskId, m_HotTaskId;
+
 		private List<uint> m_PrevExpandedImageIds, m_PrevExpandedTaskIds;
+		private int m_PrevZoomLevel = -1;
 
 		private bool m_DraggingSelectedUserLink = false;
 		private Point m_DraggedUserLinkEnd = Point.Empty;
@@ -385,10 +387,12 @@ namespace EvidenceBoardUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileInt(key, "ZoomLevel", ZoomLevel);
 			prefs.WriteProfileString(key, "ExpandedTaskIds", string.Join("|", ExpandedNodeIds));
 
 			var imageIds = string.Join("|", m_TaskItems.ExpandedImageIds);
 			prefs.WriteProfileString(key, "ExpandedImageIds", ((imageIds == string.Empty) ? "0" : imageIds));
+
 		}
 
 		private List<uint> ParseTaskIds(string prevIds)
@@ -415,6 +419,7 @@ namespace EvidenceBoardUIExtension
 		public void LoadPreferences(Preferences prefs, String key)
 		{
 			// Cache the previously collapsed items until we get our first task update
+			m_PrevZoomLevel = prefs.GetProfileInt(key, "ZoomLevel", -1);
 			m_PrevExpandedTaskIds = ParseTaskIds(prefs.GetProfileString(key, "ExpandedTaskIds", string.Empty));
 			m_PrevExpandedImageIds = ParseTaskIds(prefs.GetProfileString(key, "ExpandedImageIds", string.Empty));
 		}
@@ -570,13 +575,6 @@ namespace EvidenceBoardUIExtension
 					Invalidate();
 				}
 			}
-		}
-
-		protected float ImageZoomFactor
-		{
-			// Zoom images only half as much as text
-			//get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
-			get { return ZoomFactor; }
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -1030,6 +1028,7 @@ namespace EvidenceBoardUIExtension
 			base.RootNode = rootNode;
 			base.EnableLayoutUpdates = true;
 
+			// Restore previous session state
 			if (rebuild)
 			{
 				if (m_PrevExpandedTaskIds?.Count > 0)
@@ -1042,6 +1041,12 @@ namespace EvidenceBoardUIExtension
 				{
 					m_TaskItems.ExpandedImageIds = m_PrevExpandedImageIds;
 					m_PrevExpandedImageIds = null;
+				}
+
+				if (m_PrevZoomLevel != -1)
+				{
+					ZoomTo(m_PrevZoomLevel);
+					m_PrevZoomLevel = -1;
 				}
 			}
 
@@ -1963,7 +1968,7 @@ namespace EvidenceBoardUIExtension
             Point topLeft = labelRect.Location;
 			topLeft.Offset(2, 2); // border and padding
 
-			int width = (int)(UIExtension.TaskIcon.IconSize * ImageZoomFactor);
+			int width = (int)(UIExtension.TaskIcon.IconSize * ZoomFactor);
 			int height = width;
 
             return new Rectangle(topLeft.X, topLeft.Y, width, height);

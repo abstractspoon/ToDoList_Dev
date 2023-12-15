@@ -551,6 +551,7 @@ namespace EvidenceBoardUIExtension
 		}
 
 		protected float ZoomFactor { get { return m_ZoomFactor; } }
+		protected int ZoomLevel { get { return m_ZoomLevel; } }
 		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
 		protected bool IsZoomedToExtents { get { return ((m_RootNode?.Count > 0) && !CanZoomOut); } }
 
@@ -591,6 +592,11 @@ namespace EvidenceBoardUIExtension
 			}
 
 			return false;
+		}
+
+		protected void ZoomTo(int level)
+		{
+			ZoomTo(level, NullPoint);
 		}
 
 		private void ZoomTo(int level, Point ptClient)
