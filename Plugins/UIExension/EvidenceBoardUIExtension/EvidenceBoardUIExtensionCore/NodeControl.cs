@@ -238,12 +238,12 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public IList<uint> CollapsedNodeIds
+		public IList<uint> ExpandedNodeIds
 		{
 			get
 			{
 				List<uint> ids = new List<uint>();
-				AddCollapsedNodeIdsToList(RootNode, ref ids);
+				AddExpandedNodeIdsToList(RootNode, ref ids);
 				
 				return ids;
 			}
@@ -251,32 +251,23 @@ namespace EvidenceBoardUIExtension
 			set
 			{
 				bool zoomedToExtents = IsZoomedToExtents;
-				ExpandAllNodes(false);
+				CollapseAllNodes();
 
 				foreach (var id in value)
-				{
-					var node = GetNode(id);
-
-					if (node != null)
-						node.Expand(false, false);
-				}
+					GetNode(id)?.Expand(true, false);
 
 				RecalcExtents(zoomedToExtents);
 				ValidateSelectedNodeVisibility();
 			}
 		}
 
-		private void AddCollapsedNodeIdsToList(BaseNode node, ref List<uint> ids)
+		private void AddExpandedNodeIdsToList(BaseNode node, ref List<uint> ids)
 		{
-			if (node.IsCollapsed)
-			{
+			if (node.IsExpanded)
 				ids.Add(node.Data);
-			}
-			else // check children
-			{
-				foreach (var childNode in node.Children)
-					AddCollapsedNodeIdsToList(childNode, ref ids);
-			}
+
+			foreach (var childNode in node.Children)
+				AddExpandedNodeIdsToList(childNode, ref ids);
 		}
 
 		public bool ScrollToSelection(bool partialOk)

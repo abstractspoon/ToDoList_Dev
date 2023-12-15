@@ -126,7 +126,7 @@ namespace EvidenceBoardUIExtension
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
 		private uint m_DropHighlightedTaskId, m_HotTaskId;
-		private List<uint> m_PrevCollapsedImageIds, m_PrevCollapsedTaskIds;
+		private List<uint> m_PrevExpandedImageIds, m_PrevExpandedTaskIds;
 
 		private bool m_DraggingSelectedUserLink = false;
 		private Point m_DraggedUserLinkEnd = Point.Empty;
@@ -326,9 +326,7 @@ namespace EvidenceBoardUIExtension
 				// Look for first selected task having a collapsed image
 				foreach (var id in SelectedNodeIds)
 				{
-					var taskItem = GetTaskItem(id);
-
-					if ((taskItem != null) && (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed))
+					if (GetTaskItem(id)?.IsImageCollapsed == true)
 						return true;
 				}
 
@@ -343,9 +341,7 @@ namespace EvidenceBoardUIExtension
 				// Look for first selected task having an expanded image
 				foreach (var id in SelectedNodeIds)
 				{
-					var taskItem = GetTaskItem(id);
-
-					if ((taskItem != null) && (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Expanded))
+					if (GetTaskItem(id)?.IsImageExpanded == true)
 						return true;
 				}
 
@@ -389,8 +385,10 @@ namespace EvidenceBoardUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			prefs.WriteProfileString(key, "CollapsedTaskIds", string.Join("|", CollapsedNodeIds));
-			prefs.WriteProfileString(key, "CollapsedImageIds", string.Join("|", m_TaskItems.CollapsedImageTaskIds));
+			prefs.WriteProfileString(key, "ExpandedTaskIds", string.Join("|", ExpandedNodeIds));
+
+			var imageIds = string.Join("|", m_TaskItems.ExpandedImageIds);
+			prefs.WriteProfileString(key, "ExpandedImageIds", ((imageIds == string.Empty) ? "0" : imageIds));
 		}
 
 		private List<uint> ParseTaskIds(string prevIds)
@@ -404,7 +402,7 @@ namespace EvidenceBoardUIExtension
 				{
 					uint id = 0;
 
-					if (uint.TryParse(prevId, out id) && (id > 0))
+					if (uint.TryParse(prevId, out id))
 						taskIds.Add(id);
 				}
 
@@ -417,8 +415,8 @@ namespace EvidenceBoardUIExtension
 		public void LoadPreferences(Preferences prefs, String key)
 		{
 			// Cache the previously collapsed items until we get our first task update
-			m_PrevCollapsedTaskIds = ParseTaskIds(prefs.GetProfileString(key, "CollapsedTaskIds", string.Empty));
-			m_PrevCollapsedImageIds = ParseTaskIds(prefs.GetProfileString(key, "CollapsedImageIds", string.Empty));
+			m_PrevExpandedTaskIds = ParseTaskIds(prefs.GetProfileString(key, "ExpandedTaskIds", string.Empty));
+			m_PrevExpandedImageIds = ParseTaskIds(prefs.GetProfileString(key, "ExpandedImageIds", string.Empty));
 		}
 
 		bool ShowingDependencyLinks
@@ -1034,16 +1032,16 @@ namespace EvidenceBoardUIExtension
 
 			if (rebuild)
 			{
-				if (m_PrevCollapsedTaskIds?.Count > 0)
+				if (m_PrevExpandedTaskIds?.Count > 0)
 				{
-					CollapsedNodeIds = m_PrevCollapsedTaskIds;
-					m_PrevCollapsedTaskIds = null;
+					ExpandedNodeIds = m_PrevExpandedTaskIds;
+					m_PrevExpandedTaskIds = null;
 				}
 
-				if (m_PrevCollapsedImageIds?.Count > 0)
+				if (m_PrevExpandedImageIds?.Count > 0)
 				{
-					m_TaskItems.CollapsedImageTaskIds = m_PrevCollapsedImageIds;
-					m_PrevCollapsedImageIds = null;
+					m_TaskItems.ExpandedImageIds = m_PrevExpandedImageIds;
+					m_PrevExpandedImageIds = null;
 				}
 			}
 
@@ -1130,7 +1128,7 @@ namespace EvidenceBoardUIExtension
 
 			var task = GetTaskItem(node);
 
-			if (task?.IsExpanded == true)
+			if (task?.IsImageExpanded == true)
 			{
 				size.Height += task.CalcActiveImageHeight(base.NodeSize.Width);
 			}
@@ -1697,7 +1695,7 @@ namespace EvidenceBoardUIExtension
 			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			// Image
-			if (taskItem.IsExpanded)
+			if (taskItem.IsImageExpanded)
 			{
 				var imageRect = CalcImageRect(taskItem, taskRect, selected || dropHighlight);
 				graphics.DrawImage(taskItem.ActiveImage, imageRect);
@@ -1756,15 +1754,13 @@ namespace EvidenceBoardUIExtension
 			if (SavingToImage)
 				return;
 
-			var state = taskItem.ImageExpansion;
-
-			if (state == TaskItem.ImageExpansionState.NoImage)
+			if (!taskItem.HasImage)
 				return;
 
 			var iconRect = CalcImageExpansionButtonRect(nodeRect);
 
 			var mousePos = PointToClient(MousePosition);
-			ScrollButton btn = ((state == TaskItem.ImageExpansionState.Collapsed) ? ScrollButton.Down : ScrollButton.Up);
+			ScrollButton btn = (taskItem.IsImageCollapsed ? ScrollButton.Down : ScrollButton.Up);
 
 			if (!IsZoomed)
 			{
@@ -1813,7 +1809,7 @@ namespace EvidenceBoardUIExtension
 
 		void DrawTaskImageSpinButtons(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
 		{
-			Debug.Assert(taskItem.IsExpanded);
+			Debug.Assert(taskItem.IsImageExpanded);
 
 			if (ReadOnly || SavingToImage || taskItem.IsLocked || (taskItem.ImageCount <= 1))
 				return;
@@ -2174,7 +2170,7 @@ namespace EvidenceBoardUIExtension
 					Update();
 
 					// Toggle expansion state
-					taskItem.ExpandImage(!taskItem.IsExpanded);
+					taskItem.ExpandImage(!taskItem.IsImageExpanded);
 
 					SelectNode(taskItem.TaskId, true, false);
 					RecalcExtents(false);
@@ -2387,7 +2383,7 @@ namespace EvidenceBoardUIExtension
 
 			var taskItem = GetTaskItem(node.Data);
 
-			if ((taskItem == null) || (taskItem.ImageExpansion != TaskItem.ImageExpansionState.Expanded))
+			if (taskItem?.IsImageExpanded == false)
 				return null;
 
 			var imageRect = CalcImageRect(taskItem, GetNodeClientRect(node), false);

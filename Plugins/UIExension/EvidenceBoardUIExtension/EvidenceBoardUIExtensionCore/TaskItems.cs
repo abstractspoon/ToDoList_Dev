@@ -74,25 +74,14 @@ namespace EvidenceBoardUIExtension
 		private string m_ActiveImagePath;
 		private Image m_ActiveImage;
 
-		public enum ImageExpansionState
-		{
-			NoImage,
-			Expanded,
-			Collapsed
-		}
+		// -----------------------------------------------------------------
 
-		public ImageExpansionState ImageExpansion
-		{
-			get
-			{
-				if (!HasImage)
-					return ImageExpansionState.NoImage;
+		private bool m_ImageExpanded = true; // Default state
 
-				return (m_ImageExpanded ? ImageExpansionState.Expanded : ImageExpansionState.Collapsed);
-			}
-		}
+		// -----------------------------------------------------------------
 
-		public bool IsExpanded { get { return (ImageExpansion == ImageExpansionState.Expanded); } }
+		public bool IsImageExpanded { get { return (HasImage && m_ImageExpanded); } }
+		public bool IsImageCollapsed { get { return (HasImage && !m_ImageExpanded); } }
 
 		public bool ExpandImage(bool expand)
 		{
@@ -102,12 +91,6 @@ namespace EvidenceBoardUIExtension
 			m_ImageExpanded = expand;
 			return true;
 		}
-
-		// -----------------------------------------------------------------
-
-		private bool m_ImageExpanded = true;
-
-		// -----------------------------------------------------------------
 
 		public TaskItem()
 		{
@@ -579,41 +562,28 @@ namespace EvidenceBoardUIExtension
 		{
 			// Look for the first item having an image which is expanded
 			get { return (Values.FirstOrDefault(x => (x.ImageExpansion == TaskItem.ImageExpansionState.Expanded)) != null); }
+			get { return (Values.FirstOrDefault(x => x.IsImageExpanded) != null); }
 		}
 
 
-		public List<uint> CollapsedImageTaskIds
+		public List<uint> ExpandedImageIds
 		{
 			get
 			{
-				var ids = new List<uint>();
-
-				foreach (var taskItem in Values)
-				{
-					if (taskItem.ImageExpansion == TaskItem.ImageExpansionState.Collapsed)
-						ids.Add(taskItem.TaskId);
-				}
-
-				return ids;
+				return new List<uint>(this.Where(x => x.Value.IsImageExpanded).Select(x => x.Key));
 			}
 
 			set
 			{
-				ExpandAllTaskImages();
+				CollapseAllTaskImages();
 
 				if (value != null)
 				{
 					foreach (var id in value)
-					{
-						var taskItem = GetTaskItem(id);
-
-						if (taskItem != null)
-							taskItem.ExpandImage(false);
-					}
+						GetTaskItem(id)?.ExpandImage(true);
 				}
 			}
 		}
-
 
 		public bool DeleteUserLink(UserLink link)
 		{

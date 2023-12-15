@@ -64,28 +64,10 @@ namespace RadialTree
         /// </summary>
         public IList<TreeNode<T>> Children { get { return _children; } }
 		
-		public enum ExpansionState
-		{
-			NoChildren,
-			Expanded,
-			Collapsed
-		}
+		private bool _expanded = false; // Default state
 
-		private bool _expanded = true;
-
-		public ExpansionState Expansion
-		{
-			get
-			{
-				if (IsLeaf)
-					return ExpansionState.NoChildren;
-
-				return (_expanded ? ExpansionState.Expanded : ExpansionState.Collapsed);
-			}
-		}
-
-		public bool IsExpanded { get { return (Expansion == ExpansionState.Expanded); } }
-		public bool IsCollapsed { get { return (Expansion == ExpansionState.Collapsed); } }
+		public bool IsExpanded { get { return (!IsLeaf && (_expanded || IsRoot)); } }
+		public bool IsCollapsed { get { return (!IsLeaf && (!_expanded && !IsRoot)); } }
 
 		public TreeNode<T> FirstChild { get { return (IsLeaf ? null : Children[0]); } }
 
