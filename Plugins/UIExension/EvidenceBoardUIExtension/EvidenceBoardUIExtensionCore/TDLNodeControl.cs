@@ -231,7 +231,6 @@ namespace EvidenceBoardUIExtension
 			if ((node.Data == 0) && m_Options.HasFlag(EvidenceBoardOption.ShowRootNode))
 				return true;
 #endif
-
 			var taskItem = GetTaskItem(node.Data);
 
 			return (taskItem?.IntersectsWith(m_SelectedDateRange.Item1, m_SelectedDateRange.Item2) == true);
@@ -480,9 +479,8 @@ namespace EvidenceBoardUIExtension
 				break;
 
 			case UIExtension.UpdateType.All:
-				UpdateTaskAttributes(tasks, true);
 				UpdateBackgroundImage(tasks);
-				RecalcLayout();
+				UpdateTaskAttributes(tasks, true);
 				break;
 
 			case UIExtension.UpdateType.Unknown:
@@ -1427,7 +1425,7 @@ namespace EvidenceBoardUIExtension
 			// Offset the hit rect left or right to avoid existing user links
 			if (!DrawNodesOnTop && m_TaskItems.HasUserLink(node.Data))
 			{
-				var graphCentre = Geometry2D.Centroid(GraphToClient(Extents));
+				var graphCentre = Geometry2D.Centroid(GraphToClient(DataExtents));
 				int offset = (DefaultPinRadius * 4);
 
 				if (pos.X < graphCentre.X)
@@ -2922,7 +2920,7 @@ namespace EvidenceBoardUIExtension
 			if (!SetBackgroundImage(filePath, Rectangle.Empty, false))
 				return false;
 
-			BackgroundImage.ResizeToFit(Rectangle.Inflate(Extents, -10, -10));
+			BackgroundImage.ResizeToFit(DataExtents);
 			ZoomToExtents();
 
 			BackgroundImageChanged?.Invoke(this, null);

@@ -43,6 +43,8 @@ namespace EvidenceBoardUIExtension
 		public int NodeSpacing = 5;
 
 		int m_PinRadius = 2;
+		const int GraphBorder = 50;
+
 		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
 
 		public int PinRadius
@@ -93,8 +95,7 @@ namespace EvidenceBoardUIExtension
 		bool m_AutoCalcRadialIncrement = false;
 		bool m_EnableLayoutUpdates = true;
 
-		Point m_MinExtents = Point.Empty;
-		Point m_MaxExtents = Point.Empty;
+		Rectangle m_DataExtents = Rectangle.Empty;
 		Rectangle m_SelectionBox = Rectangle.Empty;
 
 		Timer m_DragStartTimer, m_DragLeaveTimer;
@@ -553,7 +554,7 @@ namespace EvidenceBoardUIExtension
 		protected float ZoomFactor { get { return m_ZoomFactor; } }
 		protected int ZoomLevel { get { return m_ZoomLevel; } }
 		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
-		protected bool IsZoomedToExtents { get { return ((m_RootNode?.Count > 0) && !CanZoomOut); } }
+		protected bool IsZoomedToExtents { get { return (((m_RootNode?.Count > 0) || HasBackgroundImage) && !CanZoomOut); } }
 
 		public bool CanZoomIn { get { return (m_ZoomLevel > 0); } }
 		public bool CanZoomOut { get { return (HorizontalScroll.Visible || VerticalScroll.Visible); } }
@@ -626,7 +627,7 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		public void ZoomToExtents()
+		public bool ZoomToExtents()
 		{
 			var curSize = ZoomedSize;
 
@@ -641,14 +642,17 @@ namespace EvidenceBoardUIExtension
 				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 			}
 
-			if (ZoomedSize != curSize)
-			{
-				AutoScrollMinSize = ZoomedSize;
-				RecalcTextFont();
-				Invalidate();
+			if (ZoomedSize == curSize)
+				return false;
 
-				ZoomChange?.Invoke(this, new EventArgs());
-			}
+			// else
+			AutoScrollMinSize = ZoomedSize;
+			RecalcTextFont();
+			Invalidate();
+
+			ZoomChange?.Invoke(this, new EventArgs());
+
+			return true;
 		}
 
 		public void ClearZoom()
@@ -935,7 +939,7 @@ namespace EvidenceBoardUIExtension
 			// graph is smaller than the client rect
 			if (!SavingToImage)
 			{
-				var graphRect = GraphToClient(Extents);
+				var graphRect = GraphToClient(GraphExtents);
 
 				if (!graphRect.Contains(ClientRectangle))
 				{
@@ -948,7 +952,7 @@ namespace EvidenceBoardUIExtension
 
 			if (HasBackgroundImage)
 			{
-				var rect = GraphToClient(m_BackgroundImage.Bounds);
+				var rect = GraphToClient(m_BackgroundImage.Extents);
 
 				e.Graphics.DrawImage(m_BackgroundImage.Image, rect);
 				e.Graphics.DrawRectangle(SystemPens.ControlDark, rect);
@@ -1095,28 +1099,32 @@ namespace EvidenceBoardUIExtension
 				graphics.FillEllipse(brush, GetPinRect(pos));
 		}
 
-		public Rectangle Extents
+		public Rectangle GraphExtents
 		{
 			get
 			{
-				return Rectangle.FromLTRB(m_MinExtents.X, 
-											m_MinExtents.Y, 
-											m_MaxExtents.X, 
-											m_MaxExtents.Y);
+				var extents = DataExtents;
+
+				if (HasBackgroundImage)
+					extents = Rectangle.Union(extents, m_BackgroundImage.Extents);
+
+				return Rectangle.Inflate(extents, GraphBorder, GraphBorder);
 			}
 		}
+
+		protected Rectangle DataExtents { get {	return m_DataExtents; } }
 
 		public Size ZoomedSize
 		{
 			get
 			{
-				return Extents.Multiply(OverallScaleFactor).Size;
+				return GraphExtents.Multiply(OverallScaleFactor).Size;
 			}
 		}
 
 		public void CentreGraph()
 		{
-			var extents = Extents;
+			var extents = GraphExtents;
 
 			if (HorizontalScroll.Visible)
 			{
@@ -1164,16 +1172,11 @@ namespace EvidenceBoardUIExtension
 		protected void RecalcExtents(bool zoomToExtents)
 		{
 			Cursor = Cursors.WaitCursor;
-			var oldExtents = Extents;
+			var oldExtents = GraphExtents;
 
-			m_MinExtents = m_MaxExtents = Point.Empty;
-			RecalcExtents(RootNode);
+			m_DataExtents = CalcDataExtents(RootNode);
 
-			const int Border = 50;
-			m_MinExtents.Offset(-Border, -Border);
-			m_MaxExtents.Offset(Border, Border);
-
-			if (!Extents.Equals(oldExtents))
+			if (!GraphExtents.Equals(oldExtents))
 			{
 				AutoScrollMinSize = ZoomedSize;
 
@@ -1186,21 +1189,17 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		protected void RecalcExtents(BaseNode node)
+		protected Rectangle CalcDataExtents(BaseNode node)
 		{
 			var nodeRect = GetNodeRect(node);
-
-			m_MinExtents.X = Math.Min(m_MinExtents.X, (int)nodeRect.Left);
-			m_MinExtents.Y = Math.Min(m_MinExtents.Y, (int)nodeRect.Top);
-
-			m_MaxExtents.X = Math.Max(m_MaxExtents.X, (int)nodeRect.Right);
-			m_MaxExtents.Y = Math.Max(m_MaxExtents.Y, (int)nodeRect.Bottom);
 
 			if (node.IsExpanded)
 			{
 				foreach (var child in node.Children)
-					RecalcExtents(child); // RECURSIVE CALL
+					nodeRect = Rectangle.Union(nodeRect, CalcDataExtents(child)); // RECURSIVE CALL
 			}
+
+			return nodeRect;
 		}
 
 		protected override void OnSizeChanged(EventArgs e)
@@ -1308,7 +1307,7 @@ namespace EvidenceBoardUIExtension
 		{
 			base.OnMouseDown(e);
 
-			var node = HitTestNode(e.Location, true);
+			var node = HitTestNode(e.Location, false);
 
 			if (node == null)
 			{
@@ -1321,11 +1320,11 @@ namespace EvidenceBoardUIExtension
 					m_DragStartTimer.Tag = e;
 					m_DragStartTimer.Start();
 
-					m_PreDragBackgroundImageBounds = m_BackgroundImage.Bounds;
+					m_PreDragBackgroundImageBounds = m_BackgroundImage.Extents;
 
 					if (imageHit == DragMode.BackgroundImage)
 					{
-						m_DragOffset = GraphToClient(Geometry2D.Centroid(m_BackgroundImage.Bounds));
+						m_DragOffset = GraphToClient(Geometry2D.Centroid(m_BackgroundImage.Extents));
 						m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
 					}
 				}
@@ -1405,13 +1404,6 @@ namespace EvidenceBoardUIExtension
 				Invalidate();
 				NotifySelectionChange();
 			}
-#if DEBUG
-			else if (node == RootNode)
-			{
-				Point ptGraph = ClientToGraph(e.Location);
-				//int breakpoint = 0;
-			}
-#endif
 		}
 
 		protected override void OnMouseUp(MouseEventArgs e)
@@ -1428,8 +1420,19 @@ namespace EvidenceBoardUIExtension
 					if (m_BackgroundImage.SetBounds(m_PreDragBackgroundImageBounds))
 						Invalidate();
 				}
-				else if (m_BackgroundImage.Bounds != m_PreDragBackgroundImageBounds)
+				else if (m_BackgroundImage.Extents != m_PreDragBackgroundImageBounds)
 				{
+					bool zoomToExtents = IsZoomedToExtents;
+
+					if (Rectangle.Union(DataExtents, m_PreDragBackgroundImageBounds) !=
+						Rectangle.Union(DataExtents, m_BackgroundImage.Extents))
+					{
+						AutoScrollMinSize = ZoomedSize;
+
+						if (!zoomToExtents || !ZoomToExtents())
+							Invalidate();
+					}
+
 					BackgroundImageChanged?.Invoke(this, null);
 				}
 			}
@@ -1520,19 +1523,19 @@ namespace EvidenceBoardUIExtension
 							break;
 
 						case DragMode.BackgroundImageLeft:
-							moved = m_BackgroundImage.InflateWidth((-ptGraph.X + BackgroundImage.Bounds.Left), minSize);
+							moved = m_BackgroundImage.InflateWidth((-ptGraph.X + BackgroundImage.Extents.Left), minSize);
 							break;
 
 						case DragMode.BackgroundImageRight:
-							moved = m_BackgroundImage.InflateWidth((ptGraph.X - BackgroundImage.Bounds.Right), minSize);
+							moved = m_BackgroundImage.InflateWidth((ptGraph.X - BackgroundImage.Extents.Right), minSize);
 							break;
 
 						case DragMode.BackgroundImageTop:
-							moved = m_BackgroundImage.InflateHeight((-ptGraph.Y + BackgroundImage.Bounds.Top), minSize);
+							moved = m_BackgroundImage.InflateHeight((-ptGraph.Y + BackgroundImage.Extents.Top), minSize);
 							break;
 
 						case DragMode.BackgroundImageBottom:
-							moved = m_BackgroundImage.InflateHeight((ptGraph.Y - BackgroundImage.Bounds.Bottom), minSize);
+							moved = m_BackgroundImage.InflateHeight((ptGraph.Y - BackgroundImage.Extents.Bottom), minSize);
 							break;
 						}
 
@@ -1695,7 +1698,7 @@ namespace EvidenceBoardUIExtension
 		{
 			var ptClient = ptGraph.Multiply(OverallScaleFactor);
 
-			var minExtents = m_MinExtents.Multiply(OverallScaleFactor);
+			var minExtents = GraphExtents.Location.Multiply(OverallScaleFactor);
 			ptClient.Offset(-minExtents.X, -minExtents.Y);
 
 			if (HorizontalScroll.Visible)
@@ -1734,7 +1737,7 @@ namespace EvidenceBoardUIExtension
 				ptGraph.Y -= (ClientRectangle.Height - AutoScrollMinSize.Height) / 2;
 
 			ptGraph = ptGraph.Divide(OverallScaleFactor);
-			ptGraph.Offset(m_MinExtents);
+			ptGraph.Offset(GraphExtents.Location);
 
 			return ptGraph;
 		}
@@ -1772,8 +1775,6 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			Debug.Assert(RootNode.Children.Count > 0);
-
 			Point dragPt = PointToClient(new Point(e.X, e.Y));
 
 			switch (m_DragMode)
@@ -1795,6 +1796,7 @@ namespace EvidenceBoardUIExtension
 
 			case DragMode.Node:
 				{
+					Debug.Assert(RootNode.Children.Count > 0);
 					Debug.Assert(!ReadOnly);
 
 					dragPt.Offset(m_DragOffset);
@@ -2086,7 +2088,7 @@ namespace EvidenceBoardUIExtension
 						using (Graphics gFinal = Graphics.FromImage(finalImage))
 						{
 							gFinal.Clear(SystemColors.Window);
-							gFinal.DrawImage(tempImage, 0, 0, GraphToClient(Extents), GraphicsUnit.Pixel);
+							gFinal.DrawImage(tempImage, 0, 0, GraphToClient(GraphExtents), GraphicsUnit.Pixel);
 						}
 					}
 				}
