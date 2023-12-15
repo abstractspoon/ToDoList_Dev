@@ -1169,15 +1169,12 @@ namespace EvidenceBoardUIExtension
 
 			if (!Extents.Equals(oldExtents))
 			{
+				AutoScrollMinSize = ZoomedSize;
+
 				if (zoomToExtents)
-				{
 					ZoomToExtents();
-				}
 				else
-				{
-					AutoScrollMinSize = ZoomedSize;
 					Invalidate();
-				}
 
 				ExtentsChange?.Invoke(this, null);
 			}
@@ -1249,11 +1246,14 @@ namespace EvidenceBoardUIExtension
 				{
 					Cursor = Cursors.WaitCursor;
 
-					node.Expand(!node.IsExpanded, false);
-					Invalidate();
+					if (node.Expand(!node.IsExpanded, false))
+					{
+						Invalidate();
+						RecalcExtents(IsZoomedToExtents);
 
-					RecalcExtents(IsZoomedToExtents);
-					ValidateSelectedNodeVisibility();
+						if (node.IsCollapsed)
+							ValidateSelectedNodeVisibility();
+					}
 
 					return;
 				}
