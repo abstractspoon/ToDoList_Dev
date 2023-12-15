@@ -555,13 +555,12 @@ namespace EvidenceBoardUIExtension
 		public bool CanExpandAllTaskImages
 		{
 			// Look for the first item having an image which is not expanded
-			get { return (Values.FirstOrDefault(x => (x.ImageExpansion == TaskItem.ImageExpansionState.Collapsed)) != null); }
+			get { return (Values.FirstOrDefault(x => x.IsImageCollapsed) != null); }
 		}
 
 		public bool CanCollapseAllTaskImages
 		{
 			// Look for the first item having an image which is expanded
-			get { return (Values.FirstOrDefault(x => (x.ImageExpansion == TaskItem.ImageExpansionState.Expanded)) != null); }
 			get { return (Values.FirstOrDefault(x => x.IsImageExpanded) != null); }
 		}
 
