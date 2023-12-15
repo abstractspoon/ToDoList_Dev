@@ -1169,24 +1169,25 @@ namespace EvidenceBoardUIExtension
 			// For derived class
 		}
 
-		protected void RecalcExtents(bool zoomToExtents)
+		protected bool RecalcExtents(bool zoomToExtents)
 		{
 			Cursor = Cursors.WaitCursor;
 			var oldExtents = GraphExtents;
 
 			m_DataExtents = CalcDataExtents(RootNode);
 
-			if (!GraphExtents.Equals(oldExtents))
-			{
-				AutoScrollMinSize = ZoomedSize;
+			if (GraphExtents.Equals(oldExtents))
+				return false;
 
-				if (zoomToExtents)
-					ZoomToExtents();
-				else
-					Invalidate();
+			AutoScrollMinSize = ZoomedSize;
 
-				ExtentsChange?.Invoke(this, null);
-			}
+			if (zoomToExtents)
+				ZoomToExtents();
+			else
+				Invalidate();
+
+			ExtentsChange?.Invoke(this, null);
+			return true;
 		}
 
 		protected Rectangle CalcDataExtents(BaseNode node)

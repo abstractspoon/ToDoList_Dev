@@ -355,7 +355,9 @@ namespace EvidenceBoardUIExtension
 			if (!m_TaskItems.ExpandAllTaskImages())
 				return false;
 
-			Invalidate();
+			if (!RecalcExtents(IsZoomedToExtents))
+				Invalidate();
+
 			ImageExpansionChange?.Invoke(this, null);
 
 			return true;
@@ -366,7 +368,9 @@ namespace EvidenceBoardUIExtension
 			if (!m_TaskItems.CollapseAllTaskImages())
 				return false;
 
-			Invalidate();
+			if (!RecalcExtents(IsZoomedToExtents))
+				Invalidate();
+
 			ImageExpansionChange?.Invoke(this, null);
 
 			return true;
