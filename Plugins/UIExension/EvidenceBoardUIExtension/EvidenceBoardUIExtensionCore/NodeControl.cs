@@ -1181,9 +1181,7 @@ namespace EvidenceBoardUIExtension
 
 			AutoScrollMinSize = ZoomedSize;
 
-			if (zoomToExtents)
-				ZoomToExtents();
-			else
+			if (!zoomToExtents || !ZoomToExtents())
 				Invalidate();
 
 			ExtentsChange?.Invoke(this, null);
