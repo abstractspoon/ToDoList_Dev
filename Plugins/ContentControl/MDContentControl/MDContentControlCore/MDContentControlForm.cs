@@ -41,6 +41,11 @@ namespace MDContentControl
 			// in the form designer.cs file
 			SplitContainer.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 
+			int imageSize = DPIScaling.Scale(16);
+
+			contextMenuStrip1.ImageScalingSize = new Size(imageSize, imageSize);
+			contextMenuStrip1.Renderer = new UIThemeToolbarRenderer();
+
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
 			Win32.RemoveClientEdge(InputTextCtrl.Handle);
 			Win32.AddBorder(InputTextCtrl.Handle);

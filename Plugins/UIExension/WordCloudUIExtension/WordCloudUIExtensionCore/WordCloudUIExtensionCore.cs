@@ -972,7 +972,18 @@ namespace WordCloudUIExtension
 				item.Click += OnWordCloudIgnoreWord;
 				item.Tag = m_WordCloud.SelectedWord;
 				item.Image = m_TBImageList.Images[0];
-				
+				item.Name = "IgnoreWord";
+
+				item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List"));
+
+				item.Click += OnWordCloudEditIgnoreList;
+				item.Image = m_TBImageList.Images[1];
+				item.Name = "EditIgnoreList";
+
+				int imageSize = DPIScaling.Scale(16);
+
+				menu.ImageScalingSize = new Size(imageSize, imageSize);
+				menu.Renderer = new UIThemeToolbarRenderer();
 				menu.Show(m_WordCloud, e.Location);
 			}
 		}
