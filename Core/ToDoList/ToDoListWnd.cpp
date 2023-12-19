@@ -199,7 +199,7 @@ CToDoListWnd::CToDoListWnd()
 	m_mgrShortcuts(FALSE),
 	m_pPrefs(NULL),
 	m_bClosing(FALSE),
-	m_tabCtrl(TCE_POSTDRAW | TCE_MBUTTONCLOSE | TCE_DRAGDROP | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT | TCE_TABCOLORS),
+	m_tabCtrl(TCE_MBUTTONCLOSE | TCE_DRAGDROP | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT | TCE_TABCOLORS | TCE_TAGCOLORS),
 	m_mgrToDoCtrls(m_tabCtrl),
 	m_bFindShowing(FALSE),
 	m_bShowProjectName(TRUE),
@@ -474,7 +474,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(TCN_CLOSETAB, IDC_TABCONTROL, OnTabCtrlCloseTab)
 	ON_NOTIFY(TCN_ENDDRAG, IDC_TABCONTROL, OnTabCtrlEndDrag)
 	ON_NOTIFY(TCN_GETBACKCOLOR, IDC_TABCONTROL, OnTabCtrlGetBackColor)
-	ON_NOTIFY(TCN_POSTDRAW, IDC_TABCONTROL, OnTabCtrlPostDrawTab)
+	ON_NOTIFY(TCN_GETTAGCOLOR, IDC_TABCONTROL, OnTabCtrlGetTagColor)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCONTROL, OnTabCtrlSelchange)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TABCONTROL, OnTabCtrlSelchanging)
 	ON_NOTIFY(TTN_NEEDTEXT, 0, OnNeedTooltipText)
@@ -8062,58 +8062,26 @@ void CToDoListWnd::InitGlobalStyles(CFilteredToDoCtrl& tdc)
 void CToDoListWnd::OnTabCtrlGetBackColor(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
-	*pResult = 0;
+	pNMTCE->dwExtra = m_mgrToDoCtrls.GetTabColor(pNMTCE->iTab);
 
-	COLORREF crTab = m_mgrToDoCtrls.GetTabColor(pNMTCE->iTab);
-
-	if (crTab != CLR_NONE)
-	{
-		if (crTab == 0)
-			*pResult = 1;
-		else
-			*pResult = crTab;
-	}
+	*pResult = (pNMTCE->dwExtra != CLR_NONE);
 } 
 
-void CToDoListWnd::OnTabCtrlPostDrawTab(NMHDR* pNMHDR, LRESULT* pResult)
+void CToDoListWnd::OnTabCtrlGetTagColor(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
-	DRAWITEMSTRUCT* pDIS = (DRAWITEMSTRUCT*)pNMTCE->dwExtra;
-
-	TDCM_DUESTATUS nStatus = m_mgrToDoCtrls.GetDueItemStatus(pDIS->itemID);
+	TDCM_DUESTATUS nStatus = m_mgrToDoCtrls.GetDueItemStatus(pNMTCE->iTab);
 
 	if (nStatus == TDCM_PAST || nStatus == TDCM_TODAY)
 	{
 		// determine appropriate due colour
 		COLORREF crDue, crDueToday;
-		GetToDoCtrl(pDIS->itemID).GetDueTaskColors(crDue, crDueToday);
+		GetToDoCtrl(pNMTCE->iTab).GetDueTaskColors(crDue, crDueToday);
 
-		COLORREF crTag = (nStatus == TDCM_PAST) ? crDue : crDueToday;
-
-		if (crTag != CLR_NONE)
-		{
-			// draw a little tag in the top left corner
-			CRect rect;
-			m_tabCtrl.GetTabContentRect(&pDIS->rcItem, pNMTCE->iTab, rect);
-
-			CDC* pDC = CDC::FromHandle(pDIS->hDC);
-
-			for (int nHPos = 0; nHPos < 6; nHPos++)
-			{
-				for (int nVPos = 0; nVPos < 6 - nHPos; nVPos++)
-				{
-					pDC->SetPixelV(rect.left + nHPos, rect.top + nVPos, crTag);
-				}
-			}
-
-			// draw a black line between the two
-			pDC->SelectStockObject(BLACK_PEN);
-			pDC->MoveTo(rect.left, rect.top + 6);
-			pDC->LineTo(rect.left + 7, rect.top - 1);
-		}
+		pNMTCE->dwExtra = ((nStatus == TDCM_PAST) ? crDue : crDueToday);
 	}
 
-	*pResult = 0;
+	*pResult = (pNMTCE->dwExtra != CLR_NONE);
 } 
 
 void CToDoListWnd::OnTabCtrlCloseTab(NMHDR* pNMHDR, LRESULT* pResult) 

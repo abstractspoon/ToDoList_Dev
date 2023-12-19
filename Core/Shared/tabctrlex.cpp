@@ -10,6 +10,7 @@
 #include "osversion.h"
 
 #include "..\3rdParty\XNamedColors.h"
+#include "..\3rdParty\ColorDef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -334,15 +335,33 @@ COLORREF CTabCtrlEx::GetItemBkColor(int nTab)
 		NMTABCTRLEX nmtce = { 0 };
 		
 		nmtce.iTab = nTab;
+		nmtce.dwExtra = CLR_NONE;
+
 		nmtce.hdr.code = TCN_GETBACKCOLOR;
 		nmtce.hdr.hwndFrom = GetSafeHwnd();
 		nmtce.hdr.idFrom = GetDlgCtrlID();
 		
-		COLORREF crBack = GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr));
-		
-		if (crBack != 0)
-			return crBack;
+		if (GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr)))
+			return nmtce.dwExtra;
 	}
+
+	// all else
+	return CLR_NONE;
+}
+
+COLORREF CTabCtrlEx::GetItemTagColor(int nTab)
+{
+	NMTABCTRLEX nmtce = { 0 };
+		
+	nmtce.iTab = nTab;
+	nmtce.dwExtra = CLR_NONE;
+
+	nmtce.hdr.code = TCN_GETTAGCOLOR;
+	nmtce.hdr.hwndFrom = GetSafeHwnd();
+	nmtce.hdr.idFrom = GetDlgCtrlID();
+		
+	if (GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr)))
+		return nmtce.dwExtra;
 
 	// all else
 	return CLR_NONE;
@@ -409,71 +428,19 @@ void CTabCtrlEx::GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent)
 
 void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags)
 {
-	CRect rTab(rcItem);
+	CRect rTab;
+	GetTabContentRect(rcItem, nTab, rTab);
+
+	// DrawTabBackColor may modify the tab rect (to be passed to DrawTabItem)
+	// but we need to preserve the original rect for DrawTabTag
+	CRect rTabOrg(rTab);
 
 	if (HasFlag(TCE_TABCOLORS))
-	{
-		COLORREF crBack = GetItemBkColor(nTab);
+		DrawTabBackColor(pDC, nTab, (uiFlags & 4), rTab);
 
-		if (crBack == CLR_NONE)
-		{
-			pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
-		}
-		else
-		{
-			CRect rColor;
-			GetTabContentRect(rcItem, nTab, rColor);
-
-			// Show the selected tab as a thin bar only
-			// and adjust tab height to make space
-			if (nTab == GetCurSel())
-			{
-				pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
-
-				switch (m_eTabOrientation)
-				{
-				case e_tabTop:
-					rColor.bottom = (rColor.top + COLORBAR_WIDTH);
-					rColor.right -= (SIZE_CLOSEBTN + PADDING);
-					rColor.left += PADDING;
-					rTab.top += (COLORBAR_WIDTH - 1);
-					break;
-
-				case e_tabBottom:
-					rColor.top = (rColor.bottom - COLORBAR_WIDTH);
-					rColor.right -= (SIZE_CLOSEBTN + PADDING);
-					rColor.left += PADDING;
-					rTab.bottom -= (COLORBAR_WIDTH - 1);
-					break;
-
-				case e_tabLeft:
-					rColor.right = (rColor.left + COLORBAR_WIDTH);
-					rColor.top += (SIZE_CLOSEBTN + PADDING);
-					rColor.bottom += PADDING;
-					rTab.left += (COLORBAR_WIDTH - 1);
-					break;
-
-				case e_tabRight:
-					rColor.left = (rColor.right - COLORBAR_WIDTH);
-					rColor.top += (SIZE_CLOSEBTN + PADDING);
-					rColor.bottom -= PADDING;
-					rTab.right -= (COLORBAR_WIDTH - 1);
-					break;
-				}
-				
-				GraphicsMisc::DrawRect(pDC, rColor, crBack);
-			}
-			else
-			{
-				pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
-
-				if (uiFlags & 4) // hot
-					crBack = GraphicsMisc::Lighter(crBack, 0.3, TRUE);
-				
-				GraphicsMisc::DrawRect(pDC, rColor, crBack, CLR_NONE, 2);
-			}
-		}
-	}
+	// Then tag
+	if (HasFlag(TCE_TAGCOLORS))
+		DrawTabTag(pDC, nTab, rTabOrg);
 
 	CXPTabCtrl::DrawTabItem(pDC, nTab, rTab, uiFlags);
 }
@@ -521,40 +488,148 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, const CRect& rClip)
 	
 	// then close button
 	if (bCloseBtn)
-		DrawTabCloseButton(dc, nTab);
+		DrawTabCloseButton(&dc, nTab);
 }
 
-void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
+void CTabCtrlEx::DrawTabCloseButton(CDC* pDC, int nTab)
 {
 	ASSERT(HasFlag(TCE_CLOSEBUTTON));
 
-	CSaveDC sdc(dc);
+	CSaveDC sdc(pDC);
 
 	// create font first time
 	if (m_fontClose.GetSafeHandle() == NULL)
 		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6, GMFS_SYMBOL);
 
-	// set the color to white-on-red if the cursor is over the 'x' else gray
 	CRect rBtn;
-	VERIFY(GetTabCloseButtonRect(nTab, rBtn));
+	GetTabCloseButtonRect(nTab, rBtn);
 	
+	// set the color to white-on-red if the cursor is over the 'x' else gray
 	if (m_nMouseInCloseButton == nTab)
 	{
-		dc.SetTextColor(colorWhite);
-		dc.FillSolidRect(rBtn, colorIndianRed);
+		pDC->SetTextColor(colorWhite);
+		pDC->FillSolidRect(rBtn, colorIndianRed);
 	}
 	else
 	{
 		COLORREF crTab = GetItemBkColor(nTab);
 
 		if ((crTab != CLR_NONE) && (nTab != GetCurSel()))
-			dc.SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
+			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
 		else
-			dc.SetTextColor(GetSysColor(COLOR_BTNTEXT));
+			pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 	}
 	
 	rBtn.OffsetRect(1, 1);
-	GraphicsMisc::DrawAnsiSymbol(&dc, MARLETT_CLOSE, rBtn, DT_CENTER | DT_VCENTER, &m_fontClose);
+	GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_CLOSE, rBtn, DT_CENTER | DT_VCENTER, &m_fontClose);
+}
+
+void CTabCtrlEx::DrawTabTag(CDC* pDC, int nTab, const CRect& rTab)
+{
+	ASSERT(HasFlag(TCE_TAGCOLORS));
+
+	COLORREF crTag = GetItemTagColor(nTab);
+
+	if (crTag == CLR_NONE)
+		return;
+
+	CSaveDC sdc(pDC);
+
+	const int TAG_SIZE = GraphicsMisc::ScaleByDPIFactor(6);
+
+	for (int nHPos = 0; nHPos < TAG_SIZE; nHPos++)
+	{
+		for (int nVPos = 0; nVPos < TAG_SIZE - nHPos; nVPos++)
+		{
+			pDC->SetPixelV(rTab.left + nHPos, rTab.top + nVPos, crTag);
+		}
+	}
+
+	// draw a dividing line if the tab has colour and the 
+	// difference in luminance is small(ish)
+	COLORREF crTab = GetItemBkColor(nTab);
+
+	if ((crTab != CLR_NONE) && (crTab != colorWhite))
+	{
+		int nTabLum = RGBX(crTab).Luminance();
+		int nTagLum = RGBX(crTag).Luminance();
+
+		if (fabs(nTagLum - nTabLum) < 128)
+		{
+			int nAveLum = ((nTabLum + nTagLum) / 2);
+
+			pDC->SelectStockObject((nAveLum > 128) ? BLACK_PEN : WHITE_PEN);
+			pDC->MoveTo(rTab.left, rTab.top + TAG_SIZE);
+			pDC->LineTo(rTab.left + TAG_SIZE + 1, rTab.top - 1);
+		}
+	}
+}
+
+void CTabCtrlEx::DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab)
+{
+	ASSERT(HasFlag(TCE_TABCOLORS));
+
+	COLORREF crTab = GetItemBkColor(nTab);
+
+	if (crTab == CLR_NONE)
+		return;
+
+	CSaveDC sdc(pDC);
+	CRect rColor(rTab);
+
+	// Show the selected tab as a thin bar only
+	// and adjust tab height to make space
+	if (nTab == GetCurSel())
+	{
+		int nCloseBtnSize = 0;
+
+		if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
+			nCloseBtnSize = (SIZE_CLOSEBTN + PADDING);
+
+		pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
+
+		switch (m_eTabOrientation)
+		{
+		case e_tabTop:
+			rColor.bottom = (rColor.top + COLORBAR_WIDTH);
+			rColor.right -= nCloseBtnSize;
+			rColor.left += PADDING;
+			rTab.top += (COLORBAR_WIDTH - PADDING);
+			break;
+
+		case e_tabBottom:
+			rColor.top = (rColor.bottom - COLORBAR_WIDTH);
+			rColor.right -= nCloseBtnSize;
+			rColor.left += PADDING;
+			rTab.bottom -= (COLORBAR_WIDTH - PADDING);
+			break;
+
+		case e_tabLeft:
+			rColor.right = (rColor.left + COLORBAR_WIDTH);
+			rColor.top += nCloseBtnSize;
+			rColor.bottom += PADDING;
+			rTab.left += (COLORBAR_WIDTH - PADDING);
+			break;
+
+		case e_tabRight:
+			rColor.left = (rColor.right - COLORBAR_WIDTH);
+			rColor.top += nCloseBtnSize;
+			rColor.bottom -= PADDING;
+			rTab.right -= (COLORBAR_WIDTH - PADDING);
+			break;
+		}
+
+		GraphicsMisc::DrawRect(pDC, rColor, crTab);
+	}
+	else
+	{
+		pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
+
+		if (bHot)
+			crTab = GraphicsMisc::Lighter(crTab, 0.3, TRUE);
+
+		GraphicsMisc::DrawRect(pDC, rColor, crTab, CLR_NONE, 2);
+	}
 }
 
 void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
