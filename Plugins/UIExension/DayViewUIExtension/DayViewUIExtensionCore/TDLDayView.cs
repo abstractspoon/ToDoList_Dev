@@ -1017,6 +1017,45 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		public bool PrepareNewTask(ref Task task)
+		{
+			// Set the start/due dates to match the current selection
+			if (SelectedDates.Start < SelectedDates.End)
+			{
+				task.SetStartDate(SelectedDates.Start);
+
+				DateTime endDate = SelectedDates.End;
+
+				if (TaskItem.IsStartOfDay(endDate))
+					endDate = endDate.AddSeconds(-1);
+
+				task.SetDueDate(endDate);
+			}
+			else if ((SelectedAppointmentId != 0) &&
+					(task.GetParentID() == SelectedAppointmentId))
+			{
+				// Initialise the subtask to begin at the start of the parent
+				// or the start of the current range whichever is later
+				var startDate = SelectedAppointment.StartDate;
+
+				if (startDate < StartDate)
+					startDate = StartDate;
+
+				task.SetStartDate(startDate);
+				task.SetDueDate(startDate.AddDays(1));
+			}
+			else
+			{
+				// Place it in the middle of the current range
+				var startDate = StartDate.AddDays(EndDate.Subtract(StartDate).Days / 2);
+
+				task.SetStartDate(startDate);
+				task.SetDueDate(startDate.AddDays(1));
+			}
+
+			return true;
+		}
+
 		private bool m_StrikeThruDoneTasks;
 
 		public bool StrikeThruDoneTasks

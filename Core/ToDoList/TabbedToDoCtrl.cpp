@@ -3236,7 +3236,7 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 			if (pExtWnd)
 			{
 				CTaskFile task;
-				HTASKITEM hTask = task.NewTask(pTDI->sTitle, NULL, 0, 0);
+				HTASKITEM hTask = task.NewTask(pTDI->sTitle, NULL, 0, (htiParent ? GetTaskID(htiParent) : 0));
 
 				if (pExtWnd->PrepareNewTask(&task))
 				{

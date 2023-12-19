@@ -121,20 +121,7 @@ namespace DayViewUIExtension
 	   
 		public bool PrepareNewTask(ref Task task)
 		{
-            // Set the start/due dates to match the current selection
-            if (m_DayView.SelectedDates.Start < m_DayView.SelectedDates.End)
-			{
-                task.SetStartDate(m_DayView.SelectedDates.Start);
-
-                DateTime endDate = m_DayView.SelectedDates.End;
-
-                if (TaskItem.IsStartOfDay(endDate))
-                    endDate = endDate.AddSeconds(-1);
-
-                task.SetDueDate(endDate);
-            }
-
-			return true;
+			return m_DayView.PrepareNewTask(ref task);
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
