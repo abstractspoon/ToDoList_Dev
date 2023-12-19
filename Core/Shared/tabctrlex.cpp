@@ -295,7 +295,6 @@ void CTabCtrlEx::OnPaint()
 			m_bFirstPaint = FALSE;
 			UpdateTabItemWidths();
 		}
-
 	}
 
 	// draw drop marker
