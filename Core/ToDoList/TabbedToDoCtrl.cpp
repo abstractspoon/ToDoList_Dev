@@ -3241,7 +3241,7 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 				if (pExtWnd->PrepareNewTask(&task))
 				{
 					// Don't overwrite default attributes
-					task.MergeTaskAttributes(hTask, *pTDI, TDLMTA_PRESERVENONEMPTYDESTVALUES);
+					task.MergeTaskAttributes(hTask, *pTDI, TDLMTA_EXCLUDEEMPTYSOURCEVALUES);
 				}
 			}
 		}
