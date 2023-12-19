@@ -5331,18 +5331,35 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 		return false;
 	}
 
-	// Set the start date to today and of duration 1 day
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
 	ASSERT(hNewTask);
 
+	// Default date to 'today'
 	COleDateTime dt = CDateHelper::GetDate(DHD_TODAY);
 	time64_t tDate = 0;
 
-	if (CDateHelper::GetTimeT64(dt, tDate))
+	VERIFY (CDateHelper::GetTimeT64(dt, tDate));
+
+	// But If the task's parent is currently selected that use the 
+	// selected task as context instead
+	DWORD dwSelTaskID = GetSelectedTaskID();
+
+	if ((dwSelTaskID != 0) && (pTasks->GetTaskParentID(hNewTask) == dwSelTaskID))
 	{
-		pTasks->SetTaskStartDate64(hNewTask, tDate);
-		pTasks->SetTaskDueDate64(hNewTask, tDate);
+		const GANTTITEM* pGIParent = NULL;
+		GET_GI_RET(dwSelTaskID, pGIParent, false);
+
+		COleDateTime dtStart, dtUnused;
+
+		if (GetTaskStartEndDates(*pGIParent, dtStart, dtUnused))
+		{
+			VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
+			pTasks->SetTaskStartDate64(hNewTask, tDate);
+		}
 	}
+
+	// Duration 1 day
+	pTasks->SetTaskDueDate64(hNewTask, tDate); // end of same day
 
 	return true;
 }
