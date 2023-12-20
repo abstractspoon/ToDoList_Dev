@@ -228,9 +228,10 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 
 BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
-	// give the task a date that will make it appear in the calendar
-	COleDateTime date = ((GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
+	// Default the start date to the middle of the visible range
+	COleDateTime date = (double)((int)(GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
 
+	// Replace that with the currently selected date
 	int nRow, nCol;
 
 	if (GetLastSelectedGridCell(nRow, nCol))
