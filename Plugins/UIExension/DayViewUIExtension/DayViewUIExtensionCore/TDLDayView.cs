@@ -1035,19 +1035,15 @@ namespace DayViewUIExtension
 					(task.GetParentID() == SelectedAppointmentId))
 			{
 				// Initialise the subtask to begin at the start of the parent
-				// or the start of the current range whichever is later
 				var startDate = SelectedAppointment.StartDate;
-
-				if (startDate < StartDate)
-					startDate = StartDate;
 
 				task.SetStartDate(startDate);
 				task.SetDueDate(startDate.AddDays(1));
 			}
 			else
 			{
-				// Place it in the middle of the current range
-				var startDate = StartDate.AddDays(EndDate.Subtract(StartDate).Days / 2);
+				// Use 'today'
+				var startDate = DateTime.Today.Date;
 
 				task.SetStartDate(startDate);
 				task.SetDueDate(startDate.AddDays(1));
