@@ -228,27 +228,8 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 
 BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
-	// Default the start date to the middle of the visible range
-	COleDateTime date = (double)((int)(GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
-
-	// Replace that with the currently selected date
-	int nRow, nCol;
-
-	if (GetLastSelectedGridCell(nRow, nCol))
-	{
-		const CCalendarCell* pCell = GetCell(nRow, nCol);
-		ASSERT(pCell);
-
-		date = pCell->date;
-	}
-
-	time64_t tDate;
-	
-	if (!CDateHelper::GetTimeT64(date, tDate))
-		return false;
-
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
-	
+
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
@@ -258,8 +239,25 @@ BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
 	ASSERT(hNewTask);
 
+	// Default the start date to today
+	COleDateTime dtStart = CDateHelper::GetDate(DHD_TODAY);
+
+	// Unless there is a currently visible selected cell
+	int nRow, nCol;
+
+	if (GetLastSelectedGridCell(nRow, nCol))
+	{
+		const CCalendarCell* pCell = GetCell(nRow, nCol);
+		ASSERT(pCell);
+
+		dtStart = pCell->date;
+	}
+
+	time64_t tDate;
+	VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
+
 	pTasks->SetTaskStartDate64(hNewTask, tDate);
-	pTasks->SetTaskDueDate64(hNewTask, tDate);
+	pTasks->SetTaskDueDate64(hNewTask, tDate); // end of same day
 
 	return true;
 }

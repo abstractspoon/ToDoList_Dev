@@ -5340,8 +5340,8 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 
 	VERIFY (CDateHelper::GetTimeT64(dt, tDate));
 
-	// But If the task's parent is currently selected that use the 
-	// selected task as context instead
+	// If the task's parent is currently selected that use that 
+	COleDateTime dtStart;
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
 	if ((dwSelTaskID != 0) && (pTasks->GetTaskParentID(hNewTask) == dwSelTaskID))
@@ -5349,16 +5349,19 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 		const GANTTITEM* pGIParent = NULL;
 		GET_GI_RET(dwSelTaskID, pGIParent, false);
 
-		COleDateTime dtStart, dtUnused;
+		COleDateTime dtParentStart, dtUnused;
 
-		if (GetTaskStartEndDates(*pGIParent, dtStart, dtUnused))
-		{
-			VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
-			pTasks->SetTaskStartDate64(hNewTask, tDate);
-		}
+		if (GetTaskStartEndDates(*pGIParent, dtParentStart, dtUnused))
+			dtStart = dtParentStart;
 	}
 
-	// Duration 1 day
+	// Else use today
+	if (!CDateHelper::IsDateSet(dtStart))
+		dtStart = CDateHelper::GetDate(DHD_TODAY);
+
+	VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
+
+	pTasks->SetTaskStartDate64(hNewTask, tDate);
 	pTasks->SetTaskDueDate64(hNewTask, tDate); // end of same day
 
 	return true;
