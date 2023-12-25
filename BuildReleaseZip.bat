@@ -142,7 +142,8 @@ REM - Zip Resources
 REM - Copy the zip file to the download folder
 copy %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
 
-REM - And then move it to ToDoList_Prev\8.3
-move %OUTZIP% %REPO%\..\ToDoList_Prev\8.3\ToDoList_exe.8.3._.zip
+REM - And then move it to ToDoList_Prev\9.0
+MKDIR %REPO%\..\ToDoList_Prev\9.0
+move %OUTZIP% %REPO%\..\ToDoList_Prev\9.0\ToDoList_exe.9.0._.zip
 
 popd

@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,2,999,1
+ FILEVERSION 8,999,997,1
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,15 +47,15 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 2, 999, 1\0"
+            VALUE "FileVersion", "8, 999, 997, 1\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-23\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-24\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Beta Release of ToDoList 8.3\0"
+            VALUE "SpecialBuild", "Development Release of ToDoList 9.0\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1801,7 +1801,7 @@ BEGIN
     ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-23",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-24",IDC_STATIC,213,7,87,8
     ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
