@@ -12,6 +12,8 @@
 #include "..\3rdParty\XNamedColors.h"
 #include "..\3rdParty\ColorDef.h"
 
+#include <math.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
