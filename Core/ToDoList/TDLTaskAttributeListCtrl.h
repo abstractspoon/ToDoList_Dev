@@ -7,7 +7,14 @@
 // TDLTaskAttributeListCtrl.h : header file
 //
 
+#include "ToDoCtrlDataUtils.h"
+
 #include "..\shared\InputListCtrl.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDLTaskCtrlBase;
+class CToDoCtrlData;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl window
@@ -16,17 +23,23 @@ class CTDLTaskAttributeListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CTDLTaskAttributeListCtrl();
+	CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
+							  const CToDoCtrlData& data,
+							  const TDCCOLEDITVISIBILITY& vis);
+
 	virtual ~CTDLTaskAttributeListCtrl();
 
 public:
+	void RefreshSelectedTaskAttributeValues(BOOL bForceClear = FALSE);
+	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTaskAttributeListCtrl)
-	//}}AFX_VIRTUAL
+protected:
+	const CTDLTaskCtrlBase& m_taskCtrl;
+	const CToDoCtrlData& m_data;
 
-	// Generated message map functions
+	CTDCTaskFormatter m_formatter;
+	TDCCOLEDITVISIBILITY m_vis;
+
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -41,7 +54,13 @@ protected:
 protected:
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
+
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+
+protected:
+	void Populate();
+	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 
 };
 

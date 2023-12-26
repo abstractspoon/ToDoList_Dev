@@ -1738,7 +1738,6 @@
 #define IDS_OPENTASKLIST_TIP            50790
 #define IDS_SAMPLETASK                  50790
 #define IDS_BACKUPFILEFOUND             50791
-#define IDS_SAMPLETEXT                  50792
 #define IDS_COLOR_SAMPLETEXT            50793
 #define IDS_COLOR_AUTOMATIC             50794
 #define IDS_COLOR_MORECOLORS            50795

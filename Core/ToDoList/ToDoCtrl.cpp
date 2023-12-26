@@ -227,7 +227,9 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_tldAll, 
 			   m_visColEdit.GetVisibleColumns(), 
 			   m_aCustomAttribDefs,
-			   mgrContent)
+			   mgrContent),
+	// TODO
+	m_lcAttributes(m_taskTree, m_data, visDefault)
 {
 	SetBordersDLU(0);
 	
@@ -1811,6 +1813,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
 	int nSelCount = GetSelectedTaskCount();
+
+	// TODO
+	m_lcAttributes.RefreshSelectedTaskAttributeValues(hti == NULL);
 
 	if (hti)
 	{
@@ -5937,6 +5942,9 @@ void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 
 void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
+	// TODO
+	m_lcAttributes.SetAttributeVisibility(vis);
+
 	BOOL bColumnChange, bEditChange;
 	BOOL bChange = m_visColEdit.HasDifferences(vis, bColumnChange, bEditChange);
 
