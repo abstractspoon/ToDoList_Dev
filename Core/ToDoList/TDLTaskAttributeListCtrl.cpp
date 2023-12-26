@@ -26,6 +26,8 @@ enum
 	VALUE_COL
 };
 
+const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
+
 /////////////////////////////////////////////////////////////////////////////
 
 static CContentMgr s_mgrContent;
@@ -140,7 +142,8 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 			if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
 			{
-				// TODO
+				int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
+				SetItemData(nItem, attribDef.GetAttributeID() + CUSTOMTIMEATTRIBOFFSET); // FUDGE
 			}
 		}
 	}
@@ -278,6 +281,10 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 				}
 			}
 		}
+		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		{
+			return ILCT_DROPLIST;
+		}
 		break;
 	}
 
@@ -291,7 +298,9 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		return FALSE;
 
 	// else
-	switch (GetAttributeID(nRow))
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nAttribID)
 	{
 		// Read-only fields
 		case TDCA_CREATEDBY:
@@ -310,6 +319,10 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		case TDCA_LOCK:
 			return TRUE;
 
+		default:
+			if (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_CALCULATION)
+				return FALSE;
+			break;
 	}
 
 	// All else
@@ -544,19 +557,72 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 			default:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 				{
+					int nCust = m_aCustomAttribDefs.Find(nAttribID);
+					ASSERT(nCust != -1);
+
+					if (nCust != -1)
+					{
+						CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
+						TDCCADATA data;
+
+						if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+						{
+							if (m_aCustomAttribDefs[nCust].IsList())
+							{
+								sValue = data.FormatAsArray();
+							}
+							else
+							{
+								switch (m_aCustomAttribDefs[nCust].GetDataType())
+								{
+								case TDCCA_STRING:
+								case TDCCA_FRACTION:
+								case TDCCA_INTEGER:
+								case TDCCA_DOUBLE:
+								case TDCCA_ICON:
+								case TDCCA_FILELINK:
+									sValue = data.AsString();
+									break;
+
+								case TDCCA_CALCULATION:
+									// TODO
+									break;
+
+								case TDCCA_TIMEPERIOD:
+									sValue = data.FormatAsTimePeriod();
+									break;
+
+								case TDCCA_DATE:
+									sValue = data.FormatAsDate(FALSE, FALSE);
+									break;
+
+								case TDCCA_BOOL:
+									sValue = (data.AsBool() ? _T("+") : _T(""));
+									break;
+								}
+							}
+						}
+					}
+				}
+				else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+				{
+					nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+
 					CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
 					TDCCADATA data;
 
-					if (!sAttribID.IsEmpty() && m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+					if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
 					{
-						// TODO
+						ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
+
+						sValue = CTimeHelper::FormatClockTime(data.AsDate());
 					}
 				}
 				break;
 			}
 
 			if (aValues.GetSize())
-				sValue = Misc::FormatArray(aValues, _T(", "));
+				sValue = Misc::FormatArray(aValues);
 
 			SetItemText(nRow, VALUE_COL, sValue);
 		}

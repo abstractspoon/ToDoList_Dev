@@ -226,6 +226,10 @@ public:
 	DWORD GetAttributeDataType(TDC_COLUMN nCustColID) const;
 	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
 
+	BOOL IsListType(TDC_ATTRIBUTE nCustAttribID) const;
+	BOOL IsListType(TDC_COLUMN nCustColID) const;
+	BOOL IsListType(const CString& sCustAttribID) const;
+
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
 
@@ -235,14 +239,18 @@ public:
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 	// VC6 fixes
-	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return GetData()[nIndex]; }
-	TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) { return GetData()[nIndex]; }
+	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return ElementAt(nIndex); }
+	TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) { return ElementAt(nIndex); }
 
 protected:
 	void RebuildIDs();
 
 	const TDCCUSTOMATTRIBUTEDEFINITION& ElementAt(int nIndex) const { return GetData()[nIndex]; }
 	TDCCUSTOMATTRIBUTEDEFINITION& ElementAt(int nIndex) { return GetData()[nIndex]; }
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& GetDefinition(TDC_ATTRIBUTE nCustAttribID) const;
+	const TDCCUSTOMATTRIBUTEDEFINITION& GetDefinition(TDC_COLUMN nCustColID) const;
+	const TDCCUSTOMATTRIBUTEDEFINITION& GetDefinition(const CString& sCustAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

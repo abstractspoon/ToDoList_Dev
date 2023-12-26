@@ -13,6 +13,10 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+TDCCUSTOMATTRIBUTEDEFINITION FALLBACK;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 TDCCUSTOMATTRIBUTECALCULATIONOPERAND::TDCCUSTOMATTRIBUTECALCULATIONOPERAND()
 {
 	Clear();
@@ -1153,46 +1157,22 @@ BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRI
 
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetAttributeID();
-
-	// all else
-	return TDCA_NONE;
+	return GetDefinition(nCustColID).GetAttributeID();
 }
 
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(const CString& sCustAttribID) const
 {
-	int nAttrib = Find(sCustAttribID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetAttributeID();
-
-	// all else
-	return TDCA_NONE;
+	return GetDefinition(sCustAttribID).GetAttributeID();
 }
 
 CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const
 {
-	int nAttrib = Find(nCustAttribID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).sUniqueID;
-
-	// all else
-	return _T("");
+	return GetDefinition(nCustAttribID).sUniqueID;
 }
 
 CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).sUniqueID;
-
-	// all else
-	return _T("");
+	return GetDefinition(nCustColID).sUniqueID;
 }
 
 int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const
@@ -1214,63 +1194,65 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 	return (mapCols.GetCount() - nColsSize);
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const
+const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(TDC_ATTRIBUTE nCustAttribID) const
 {
 	int nAttrib = Find(nCustAttribID);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
+	return ((nAttrib != -1) ? ElementAt(nAttrib) : FALLBACK);
+}
 
+const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(TDC_COLUMN nCustColID) const
+{
+	int nAttrib = Find(nCustColID);
 
-	// all else
-	return TDCCA_STRING;
+	return ((nAttrib != -1) ? ElementAt(nAttrib) : FALLBACK);
+}
+
+const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(const CString& sCustAttribID) const
+{
+	int nAttrib = Find(sCustAttribID);
+
+	return ((nAttrib != -1) ? ElementAt(nAttrib) : FALLBACK);
+}
+
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const
+{
+	return GetDefinition(nCustAttribID).GetDataType();
 }
 
 DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
-
-
-	// all else
-	return TDCCA_STRING;
+	return GetDefinition(nCustColID).GetDataType();
 }
 
 DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sCustAttribID) const
 {
-	int nAttrib = Find(sCustAttribID);
+	return GetDefinition(sCustAttribID).GetDataType();
+}
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
+BOOL CTDCCustomAttribDefinitionArray::IsListType(TDC_ATTRIBUTE nCustAttribID) const
+{
+	return GetDefinition(nCustAttribID).IsList();
+}
 
-	// all else
-	return TDCCA_STRING;
+BOOL CTDCCustomAttribDefinitionArray::IsListType(TDC_COLUMN nCustColID) const
+{
+	return GetDefinition(nCustColID).IsList();
+}
+
+BOOL CTDCCustomAttribDefinitionArray::IsListType(const CString& sCustAttribID) const
+{
+	return GetDefinition(sCustAttribID).IsList();
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).HasFeature(TDCCAF_SORT);
-
-	// else
-	ASSERT(0);
-	return FALSE;
+	return GetDefinition(nCustColID).HasFeature(TDCCAF_SORT);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsColumnEnabled(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
-
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).bEnabled;
-
-
-	// else
-	return FALSE;
+	return GetDefinition(nCustColID).bEnabled;
 }
 
 void CTDCCustomAttribDefinitionArray::RebuildIDs()
