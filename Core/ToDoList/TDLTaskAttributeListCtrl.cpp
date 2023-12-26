@@ -10,6 +10,7 @@
 #include "tdcstruct.h"
 
 #include "..\shared\GraphicsMisc.h"
+#include "..\shared\HoldRedraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -80,6 +81,15 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CTDLTaskAttributeListCtrl::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	if (Misc::MatchAllT(m_aCustomAttribDefs, aAttribDefs, FALSE))
+		return;
+
+	m_aCustomAttribDefs.Copy(aAttribDefs);
+	Populate();
+}
+
 void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
 	BOOL bColChange = FALSE, bEditChange = FALSE;
@@ -91,10 +101,7 @@ void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILIT
 	m_vis = vis;
 
 	if (bEditChange || (bColChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
-	{
-		DeleteAllItems();
 		Populate();
-	}
 }
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
@@ -109,6 +116,10 @@ void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT 
 
 void CTDLTaskAttributeListCtrl::Populate()
 {
+	CHoldRedraw hr(*this);
+
+	DeleteAllItems();
+
 	for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
 		CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
 
@@ -116,6 +127,23 @@ void CTDLTaskAttributeListCtrl::Populate()
 	CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
 	CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
 	CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
+
+	// Custom attributes
+	for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+		if (attribDef.bEnabled)
+		{
+			int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
+			SetItemData(nItem, attribDef.GetAttributeID());
+
+			if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+			{
+				// TODO
+			}
+		}
+	}
 
 	RefreshSelectedTaskAttributeValues();
 	Sort();
@@ -159,60 +187,98 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		return ILCT_TEXT;
 
 	// else
-	switch (GetItemData(nRow))
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nAttribID)
 	{
 		// Text fields
-		case TDCA_TASKNAME:
-		case TDCA_COST:
-		case TDCA_EXTERNALID:
-		case TDCA_PERCENT:
-		case TDCA_TIMEESTIMATE:
-		case TDCA_TIMESPENT:
-			return ILCT_TEXT;
+	case TDCA_TASKNAME:
+	case TDCA_COST:
+	case TDCA_EXTERNALID:
+	case TDCA_PERCENT:
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		return ILCT_TEXT;
 
 		// Date fields
-		case TDCA_DONEDATE:
-		case TDCA_DUEDATE:
-		case TDCA_STARTDATE:
-			return ILCT_DATE;
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_STARTDATE:
+		return ILCT_DATE;
 
 		// Drop lists
-		case TDCA_PRIORITY:
-		case TDCA_COLOR:
-		case TDCA_ALLOCTO:
-		case TDCA_ALLOCBY:
-		case TDCA_STATUS:
-		case TDCA_CATEGORY:
-		case TDCA_TAGS:
-		case TDCA_FILELINK:
-		case TDCA_RISK:
-		case TDCA_VERSION:
-			return ILCT_DROPLIST;
+	case TDCA_PRIORITY:
+	case TDCA_COLOR:
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+	case TDCA_FILELINK:
+	case TDCA_RISK:
+	case TDCA_VERSION:
+		return ILCT_DROPLIST;
 
 		// Browse-like fields
-		case TDCA_ICON:
-		case TDCA_RECURRENCE:
-		case TDCA_DEPENDENCY:
-			return ILCT_BROWSE;
+	case TDCA_ICON:
+	case TDCA_RECURRENCE:
+	case TDCA_DEPENDENCY:
+		return ILCT_BROWSE;
 
 		// Checkbox fields
-		case TDCA_FLAG:
-		case TDCA_LOCK:
-			return ILCT_CHECK;
+	case TDCA_FLAG:
+	case TDCA_LOCK:
+		return ILCT_CHECK;
 
 		// Read-only fields
-		case TDCA_CREATEDBY:
-		case TDCA_PATH:
-		case TDCA_POSITION:
-		case TDCA_CREATIONDATE:
-		case TDCA_LASTMODDATE:
-		case TDCA_COMMENTSSIZE:
-		case TDCA_COMMENTSFORMAT:
-		case TDCA_SUBTASKDONE:
-		case TDCA_LASTMODBY:
-		case TDCA_ID:
-		case TDCA_PARENTID:
-			return ILCT_TEXT;
+	case TDCA_CREATEDBY:
+	case TDCA_PATH:
+	case TDCA_POSITION:
+	case TDCA_CREATIONDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_COMMENTSSIZE:
+	case TDCA_COMMENTSFORMAT:
+	case TDCA_SUBTASKDONE:
+	case TDCA_LASTMODBY:
+	case TDCA_ID:
+	case TDCA_PARENTID:
+		return ILCT_TEXT;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			int nCust = m_aCustomAttribDefs.Find(nAttribID);
+			ASSERT(nCust != -1);
+
+			if (nCust != -1)
+			{
+				if (m_aCustomAttribDefs[nCust].IsList())
+					return ILCT_DROPLIST;
+
+				// else
+				switch (m_aCustomAttribDefs[nCust].GetDataType())
+				{
+				case TDCCA_STRING:
+				case TDCCA_FRACTION:
+				case TDCCA_INTEGER:
+				case TDCCA_DOUBLE:
+				case TDCCA_CALCULATION:
+				case TDCCA_TIMEPERIOD:
+					return ILCT_TEXT;
+
+				case TDCCA_DATE:
+					return ILCT_DATE;
+
+				case TDCCA_BOOL:
+					return ILCT_CHECK;
+
+				case TDCCA_ICON:
+				case TDCCA_FILELINK:
+					return ILCT_BROWSE;
+				}
+			}
+		}
+		break;
 	}
 
 	// All else
@@ -221,11 +287,11 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	if (nCol == ATTRIB_COL)
+	if ((nCol == ATTRIB_COL) || m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
 	// else
-	switch (GetItemData(nRow))
+	switch (GetAttributeID(nRow))
 	{
 		// Read-only fields
 		case TDCA_CREATEDBY:
@@ -240,10 +306,14 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		case TDCA_ID:
 		case TDCA_PARENTID:
 			return FALSE;
+
+		case TDCA_LOCK:
+			return TRUE;
+
 	}
 
 	// All else
-	return TRUE;
+	return !m_taskCtrl.SelectionHasLocked(); // TODO
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
@@ -253,7 +323,7 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_3DFACE);
 
-		if (GetItemData(nItem) == TDCA_COLOR)
+		if (GetAttributeID(nItem) == TDCA_COLOR)
 		{
 			COLORREF color = m_taskCtrl.GetSelectedTaskColor();
 
@@ -276,7 +346,7 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_GRAYTEXT);
 
-		if (GetItemData(nItem) == TDCA_COLOR)
+		if (GetAttributeID(nItem) == TDCA_COLOR)
 		{
 			COLORREF color = m_taskCtrl.GetSelectedTaskColor();
 
@@ -310,24 +380,21 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 			CStringArray aValues;
 
 			DWORD dwSelTaskID = ((m_taskCtrl.GetSelectedCount() == 1) ? m_taskCtrl.GetSelectedTaskID() : 0);
-			TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)GetItemData(nRow);
+			TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-			switch (nAttrib)
+			switch (nAttribID)
 			{
-				// Simple text
 			case TDCA_EXTERNALID: sValue = m_taskCtrl.GetSelectedTaskExtID(); break;
 			case TDCA_ALLOCBY: sValue = m_taskCtrl.GetSelectedTaskAllocBy(); break;
 			case TDCA_STATUS: sValue = m_taskCtrl.GetSelectedTaskStatus(); break;
 			case TDCA_VERSION: sValue = m_taskCtrl.GetSelectedTaskVersion(); break;
 			case TDCA_ICON: sValue = m_taskCtrl.GetSelectedTaskIcon(); break;
 
-				// Arrays
 			case TDCA_ALLOCTO: m_taskCtrl.GetSelectedTaskAllocTo(aValues); break;
 			case TDCA_CATEGORY: m_taskCtrl.GetSelectedTaskCategories(aValues); break;
 			case TDCA_TAGS: m_taskCtrl.GetSelectedTaskTags(aValues); break;
 			case TDCA_FILELINK: m_taskCtrl.GetSelectedTaskFileLinks(aValues, FALSE); break;
 
-				// Checkboxes
 			case TDCA_FLAG: sValue = m_taskCtrl.IsSelectedTaskFlagged() ? _T("+") : _T(""); break;
 			case TDCA_LOCK: sValue = m_taskCtrl.IsSelectedTaskLocked() ? _T("+") : _T(""); break;
 
@@ -339,7 +406,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 				}
 				break;
 
-				// Simple values
 			case TDCA_PERCENT:
 				{
 					int nValue = m_taskCtrl.GetSelectedTaskPercent();
@@ -383,12 +449,11 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 				}
 				break;
 
-				// Date fields
 			case TDCA_DONEDATE:
 			case TDCA_DUEDATE:
 			case TDCA_STARTDATE:
 				{
-					COleDateTime date = m_taskCtrl.GetSelectedTaskDate(TDC::MapAttributeToDate(nAttrib));
+					COleDateTime date = m_taskCtrl.GetSelectedTaskDate(TDC::MapAttributeToDate(nAttribID));
 					sValue = CDateHelper::FormatDate(date);
 				}
 				break;
@@ -396,17 +461,16 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 			case TDCA_LASTMODDATE:
 			case TDCA_CREATIONDATE:
 				{
-					COleDateTime date = m_taskCtrl.GetSelectedTaskDate(TDC::MapAttributeToDate(nAttrib));
+					COleDateTime date = m_taskCtrl.GetSelectedTaskDate(TDC::MapAttributeToDate(nAttribID));
 					sValue = CDateHelper::FormatDate(date, DHFD_TIME);
 				}
 				break;
 
-				// Time fields
 			case TDCA_DONETIME:
 			case TDCA_DUETIME:
 			case TDCA_STARTTIME:
 				{
-					COleDateTime date = m_taskCtrl.GetSelectedTaskDate(TDC::MapAttributeToDate(nAttrib));
+					COleDateTime date = m_taskCtrl.GetSelectedTaskDate(TDC::MapAttributeToDate(nAttribID));
 
 					if (CDateHelper::DateHasTime(date))
 						sValue = CTimeHelper::FormatClockTime(date);
@@ -476,6 +540,19 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 			case TDCA_COMMENTSFORMAT:	break; // TODO
 			case TDCA_SUBTASKDONE:		break; // TODO
 			case TDCA_LASTMODBY:		break; // TODO
+
+			default:
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+				{
+					CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+					TDCCADATA data;
+
+					if (!sAttribID.IsEmpty() && m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+					{
+						// TODO
+					}
+				}
+				break;
 			}
 
 			if (aValues.GetSize())

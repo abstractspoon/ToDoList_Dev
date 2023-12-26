@@ -32,6 +32,7 @@ public:
 public:
 	void RefreshSelectedTaskAttributeValues(BOOL bForceClear = FALSE);
 	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
+	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 protected:
 	const CTDLTaskCtrlBase& m_taskCtrl;
@@ -39,6 +40,7 @@ protected:
 
 	CTDCTaskFormatter m_formatter;
 	TDCCOLEDITVISIBILITY m_vis;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -61,6 +63,7 @@ protected:
 protected:
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
+	TDC_ATTRIBUTE GetAttributeID(int nRow) const { return (TDC_ATTRIBUTE)GetItemData(nRow); }
 
 };
 

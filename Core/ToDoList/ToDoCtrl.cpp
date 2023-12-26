@@ -6254,6 +6254,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 
 	// Must remove any deleted attribute columns before resizing/redrawing
 	m_taskTree.OnCustomAttributeChange();
+	m_lcAttributes.SetCustomAttributeDefinitions(m_aCustomAttribDefs);
 
 	Resize();
 }
