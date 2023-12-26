@@ -24,6 +24,7 @@
 #include "tdcFindReplace.h"
 #include "tdcdialoghelper.h"
 #include "tdlinfotipctrl.h"
+#include "tdltaskattributelistctrl.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\orderedtreectrl.h"
@@ -492,6 +493,7 @@ protected:
 	CTDLRiskComboBox m_cbRisk;
 	CTDLTaskDependencyEdit m_eDependency;
 	CTDLTaskTreeCtrl m_taskTree;
+	CTDLTaskAttributeListCtrl m_lcAttributes;
 
 	HFONT m_hFontTree, m_hFontComments;
 	CTDCImageList m_ilTaskIcons;

@@ -174,7 +174,7 @@ protected:
 	int InsertRow(CString sRowText, int nItem, int nImage = -1);
 	BOOL CanDeleteCell(int nRow, int nCol) const;
 	void NotifyParentEditCell(const CString& sText, int nRow = -1, int nCol = -1) const;
-	BOOL HasNonTextColumns() const;
+	BOOL HasNonTextCells() const;
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
 
 private:

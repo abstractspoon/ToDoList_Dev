@@ -88,7 +88,8 @@ void CInputListCtrl::InitState()
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
 
-	if (GetSafeHwnd() && CThemed::AreControlsThemed())
+	// Hot tracker might have been initialised in PreSubclassWindow
+	if (GetSafeHwnd() && CThemed::AreControlsThemed() && !m_hotTrack.IsInitialized())
 		m_hotTrack.Initialize(this, FALSE);
 }
 
@@ -1176,7 +1177,7 @@ int CInputListCtrl::InsertRow(CString sRowText, int nRow, int nImage)
 	return nRow;
 }
 
-BOOL CInputListCtrl::HasNonTextColumns() const
+BOOL CInputListCtrl::HasNonTextCells() const
 {
 	int nCol = GetColumnCount();
 
@@ -1184,6 +1185,15 @@ BOOL CInputListCtrl::HasNonTextColumns() const
 	{
 		if (GetColumnType(nCol) != ILCT_TEXT)
 			return TRUE;
+
+		// Test all cells in this column
+		int nRow = GetItemCount();
+
+		while (nRow--)
+		{
+			if (GetCellType(nRow, nCol) != ILCT_TEXT)
+				return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -1878,7 +1888,7 @@ void CInputListCtrl::RecalcHotButtonRects()
 {
 	m_hotTrack.DeleteAllRects();
 
-	if (m_hotTrack.IsInitialized() && HasNonTextColumns())
+	if (m_hotTrack.IsInitialized() && HasNonTextCells())
 	{
 		int nNumRows = GetItemCount();
 		int nNumCols = GetColumnCount();

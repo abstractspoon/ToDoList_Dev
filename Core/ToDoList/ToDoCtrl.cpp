@@ -605,6 +605,9 @@ BOOL CToDoCtrl::OnInitDialog()
 	
 	// comments
 	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
+
+	// TODO
+	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	
 	// disable translation of auto-combos
 	CLocalizer::EnableTranslation(m_cbAllocBy, FALSE);
@@ -847,6 +850,18 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 			}
 
 			ReposProjectName(&dwm, rAvailable);
+
+			// Temporarily place the new attribute listctrl on the RHS
+			// TODO
+			const int ATTRIBS_WIDTH = 250;
+
+			CRect rAttrib(rAvailable);
+			rAttrib.left = rAttrib.right - ATTRIBS_WIDTH;
+
+			dwm.MoveWindow(&m_lcAttributes, rAttrib);
+
+			// Finally tree
+			rAvailable.right -= (ATTRIBS_WIDTH + SPLITSIZE);
 			ReposTaskTree(&dwm, rAvailable);
 		}
 

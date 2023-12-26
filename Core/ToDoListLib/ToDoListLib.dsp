@@ -573,6 +573,10 @@ SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTaskAttributeListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLTaskComboBox.cpp
 # End Source File
 # Begin Source File
@@ -1210,6 +1214,10 @@ SOURCE=..\ToDoList\TDLStatusBar.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeListCtrl.h
 # End Source File
 # Begin Source File
 
