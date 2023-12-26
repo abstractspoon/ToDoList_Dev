@@ -203,6 +203,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadialTree", "3rdParty\RadialTree\RadialTree.csproj", "{1DB9C8CC-031B-49B5-AC6C-23D9C75FDB0C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EvidenceBoardUIExtensionBridge", "UIExension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionBridge\EvidenceBoardUIExtensionBridge.vcxproj", "{13FC13FB-60BE-4735-9681-C3F84B4E3C54}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvidenceBoardUIExtensionCore", "UIExension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionCore\EvidenceBoardUIExtensionCore.csproj", "{D03AA054-9987-44DC-B03F-691D79506DA9}"
 EndProject
