@@ -27,6 +27,16 @@ enum
 	VALUE_COL
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+enum 
+{
+	IDC_SINGLESEL_COMBO = 1000,
+	IDC_MULTISEL_COMBO,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -83,6 +93,10 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Add attributes
 	Populate();
+
+	// Create edit fields
+	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO);
+	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO);
 	
 	return 0;
 }
@@ -720,10 +734,13 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
-	ASSERT(pDispInfo->item.iSubItem == VALUE_COL);
 
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(pDispInfo->item.iItem, TRUE);
-	GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, 0, nAttribID);
+	if ((pDispInfo->item.iSubItem == VALUE_COL) &&
+		(pDispInfo->item.iItem >= 0))
+	{
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(pDispInfo->item.iItem, TRUE);
+		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+	}
 
 	*pResult = 0;
 }
@@ -885,3 +902,406 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
 
+void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
+{
+	ASSERT(nCol == VALUE_COL);
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nAttribID)
+	{
+	case TDCA_EXTERNALID: 
+		break;
+
+	case TDCA_ALLOCBY: 
+		break;
+
+	case TDCA_STATUS: 
+		break;
+
+	case TDCA_VERSION: 
+		break;
+
+	case TDCA_ICON: 
+		break;
+
+	case TDCA_ALLOCTO: 
+		break;
+
+	case TDCA_CATEGORY: 
+		break;
+
+	case TDCA_TAGS: 
+		break;
+
+	case TDCA_FILELINK: 
+		break;
+
+	case TDCA_FLAG: 
+		break;
+
+	case TDCA_LOCK: 
+		break;
+
+	case TDCA_COST:
+		m_editBox.SetMask(_T("-0123456789."), ME_LOCALIZEDECIMAL);
+		break;
+
+	case TDCA_PERCENT:
+		m_editBox.SetMask(_T("-0123456789"));
+		break;
+
+	case TDCA_PRIORITY:
+		break;
+
+	case TDCA_RISK:
+		break;
+
+	case TDCA_TIMEESTIMATE:
+		break;
+
+	case TDCA_TIMESPENT:
+		break;
+
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_STARTDATE:
+		break;
+
+	case TDCA_DONETIME:
+	case TDCA_DUETIME:
+	case TDCA_STARTTIME:
+		break;
+
+	case TDCA_COLOR:
+		break;
+
+	case TDCA_RECURRENCE:
+		break;
+
+	case TDCA_DEPENDENCY:
+		break;
+
+	case TDCA_TASKNAME:			
+		// TODO
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			int nCust = m_aCustomAttribDefs.Find(nAttribID);
+			ASSERT(nCust != -1);
+
+			if (nCust != -1)
+			{
+				CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
+				TDCCADATA data;
+
+				if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+				{
+					if (m_aCustomAttribDefs[nCust].IsList())
+					{
+						// TODO
+					}
+					else
+					{
+						switch (m_aCustomAttribDefs[nCust].GetDataType())
+						{
+						case TDCCA_STRING:
+						case TDCCA_FRACTION:
+						case TDCCA_INTEGER:
+						case TDCCA_DOUBLE:
+						case TDCCA_ICON:
+						case TDCCA_FILELINK:
+							// TODO
+							break;
+
+						case TDCCA_CALCULATION:
+							// TODO
+							break;
+
+						case TDCCA_TIMEPERIOD:
+							// TODO
+							break;
+
+						case TDCCA_DATE:
+							// TODO
+							break;
+
+						case TDCCA_BOOL:
+							// TODO
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		{
+			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+			TDCCADATA data;
+
+			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+			{
+				ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
+
+				// TODO
+			}
+		}
+		break;
+	}
+}
+
+CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
+{
+	// Sanity check
+	if ((nItem < 0) || (nItem > GetItemCount()) || (nCol != VALUE_COL))
+		return NULL;
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+
+	switch (nAttribID)
+	{
+	case TDCA_EXTERNALID:
+		break;
+
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
+		return &m_cbSingleSelection;
+
+		break;
+
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+		return &m_cbMultiSelection;
+
+	case TDCA_FILELINK:
+		break;
+
+	case TDCA_FLAG:
+	case TDCA_ICON:
+	case TDCA_LOCK:
+		return NULL;
+
+	case TDCA_COST:
+	case TDCA_PERCENT:
+		return CInputListCtrl::GetEditControl();
+
+	case TDCA_PRIORITY:
+		break;
+
+	case TDCA_RISK:
+		break;
+
+	case TDCA_TIMEESTIMATE:
+		break;
+
+	case TDCA_TIMESPENT:
+		break;
+
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_STARTDATE:
+		break;
+
+	case TDCA_DONETIME:
+	case TDCA_DUETIME:
+	case TDCA_STARTTIME:
+		break;
+
+	case TDCA_COLOR:
+		break;
+
+	case TDCA_RECURRENCE:
+		break;
+
+	case TDCA_DEPENDENCY:
+		break;
+
+	case TDCA_TASKNAME:
+		// TODO
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			int nCust = m_aCustomAttribDefs.Find(nAttribID);
+			ASSERT(nCust != -1);
+
+			if (nCust != -1)
+			{
+				CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
+				TDCCADATA data;
+
+				if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+				{
+					if (m_aCustomAttribDefs[nCust].IsList())
+					{
+						// TODO
+					}
+					else
+					{
+						switch (m_aCustomAttribDefs[nCust].GetDataType())
+						{
+						case TDCCA_STRING:
+						case TDCCA_FRACTION:
+						case TDCCA_INTEGER:
+						case TDCCA_DOUBLE:
+						case TDCCA_ICON:
+						case TDCCA_FILELINK:
+							// TODO
+							break;
+
+						case TDCCA_CALCULATION:
+							// TODO
+							break;
+
+						case TDCCA_TIMEPERIOD:
+							// TODO
+							break;
+
+						case TDCCA_DATE:
+							// TODO
+							break;
+
+						case TDCCA_BOOL:
+							// TODO
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		{
+			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+			TDCCADATA data;
+
+			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+			{
+				ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
+
+				// TODO
+			}
+		}
+		break;
+	}
+
+	// all else
+	return CInputListCtrl::GetEditControl();
+}
+
+void CTDLTaskAttributeListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
+{
+	if (!CanEditCell(nItem, nCol))
+		return;
+
+	CWnd* pEdit = GetEditControl(nItem, nCol);
+
+	if (pEdit)
+	{
+		ShowControl(*pEdit, nItem, nCol);
+	}
+	else
+	{
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+
+		switch (nAttribID)
+		{
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+			SetItemText(nItem, VALUE_COL, GetItemText(nItem, VALUE_COL).IsEmpty() ? _T("+") : _T(""));
+			GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+			break;
+
+		case TDCA_ICON:
+			break;
+
+		case TDCA_COLOR:
+			break;
+
+		case TDCA_RECURRENCE:
+			break;
+
+		case TDCA_DEPENDENCY:
+			break;
+
+		case TDCA_TASKNAME:
+			// TODO
+			break;
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			{
+				int nCust = m_aCustomAttribDefs.Find(nAttribID);
+				ASSERT(nCust != -1);
+
+				if (nCust != -1)
+				{
+					CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
+					TDCCADATA data;
+
+					if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+					{
+						if (m_aCustomAttribDefs[nCust].IsList())
+						{
+							// TODO
+						}
+						else
+						{
+							switch (m_aCustomAttribDefs[nCust].GetDataType())
+							{
+							case TDCCA_STRING:
+							case TDCCA_FRACTION:
+							case TDCCA_INTEGER:
+							case TDCCA_DOUBLE:
+							case TDCCA_ICON:
+							case TDCCA_FILELINK:
+								// TODO
+								break;
+
+							case TDCCA_CALCULATION:
+								// TODO
+								break;
+
+							case TDCCA_TIMEPERIOD:
+								// TODO
+								break;
+
+							case TDCCA_DATE:
+								// TODO
+								break;
+
+							case TDCCA_BOOL:
+								// TODO
+								break;
+							}
+						}
+					}
+				}
+			}
+			else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+			{
+				nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+
+				CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+				TDCCADATA data;
+
+				if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+				{
+					ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
+
+					// TODO
+				}
+			}
+			break;
+		}
+
+	}
+}

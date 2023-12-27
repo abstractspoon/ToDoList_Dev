@@ -10,16 +10,14 @@
 #include "ToDoCtrlDataUtils.h"
 
 #include "..\shared\InputListCtrl.h"
+#include "..\shared\AutoComboBox.h"
+#include "..\shared\CheckComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDLTaskCtrlBase;
 class CToDoCtrlData;
 class CTDCImageList;
-
-/////////////////////////////////////////////////////////////////////////////
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl window
@@ -77,6 +75,9 @@ protected:
 	TDCCOLEDITVISIBILITY m_vis;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
+	CAutoComboBox m_cbSingleSelection;
+	CCheckComboBox m_cbMultiSelection;
+
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -92,6 +93,8 @@ protected:
 protected:
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
+	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
@@ -102,6 +105,7 @@ protected:
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
 	COleDateTime GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const;
+	CWnd* GetEditControl(int nRow, int nCol);
 
 };
 

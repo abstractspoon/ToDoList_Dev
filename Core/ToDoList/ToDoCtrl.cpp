@@ -309,7 +309,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
 	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
 
-	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost);
+//	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost);
 	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
 
 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeEstimate, m_timeEstimate);
@@ -1901,7 +1901,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		}
 		
 		// Misc
-		GetSelectedTaskCost(m_cost);
+//		GetSelectedTaskCost(m_cost);
 		GetSelectedTaskRecurrence(m_tRecurrence);
 		GetSelectedTaskCustomAttributeData(m_mapCustomCtrlData, FALSE);
 	}
@@ -1911,7 +1911,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_nRisk = 0;
 		m_nPercentDone = 0;
 		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
-		m_cost.dAmount = 0.0;
+//		m_cost.dAmount = 0.0;
 		m_tRecurrence = TDCRECURRENCE();
 		m_crColour = CLR_DEFAULT;
 
@@ -2154,7 +2154,18 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_COST:
-		SetSelectedTaskCost(m_cost);
+		{
+			//SetSelectedTaskCost(m_cost);
+
+			TDCCOST cost;
+			m_lcAttributes.GetCost(cost);
+
+			SetSelectedTaskCost(cost);
+		}
+		break;
+		
+	case TDCA_LOCK:
+		SetSelectedTaskLock(m_lcAttributes.GetLock());
 		break;
 		
 	case TDCA_RECURRENCE:
@@ -4068,13 +4079,13 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 
 	if (aModTaskIDs.GetSize())
 	{
-		TDCCOST costSel;
-		
-		if (GetSelectedTaskCost(costSel) && (m_cost != costSel))
-		{
-			m_cost = costSel;
-			CTDCDialogHelper::UpdateDataEx(this, IDC_COST, m_cost, FALSE);
-		}
+// 		TDCCOST costSel;
+// 		
+// 		if (GetSelectedTaskCost(costSel) && (m_cost != costSel))
+// 		{
+// 			m_cost = costSel;
+// 			CTDCDialogHelper::UpdateDataEx(this, IDC_COST, m_cost, FALSE);
+// 		}
 
 		SetModified(TDCA_COST, aModTaskIDs);
 	}

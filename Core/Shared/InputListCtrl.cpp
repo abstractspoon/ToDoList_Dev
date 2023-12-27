@@ -579,7 +579,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			CRect rButton(0, 0, 0, 0), rBack(rCell);
 			BOOL bHasBtn = GetButtonRect(nItem, nCol, rButton);
 
-			if (bHasBtn && (GetColumnType(nCol) != ILCT_CHECK))
+			if (bHasBtn && (GetCellType(nItem, nCol) != ILCT_CHECK))
 				rBack.right = rButton.left;
 			
 			// fill cell
@@ -686,36 +686,39 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			}
 			
 			// draw text
-			COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
-	
-			if (bSel && IsSelectionThemed(FALSE))
+			if (rText.Height() && rText.Width())
 			{
-				DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
-				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+				COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
+
+				if (bSel && IsSelectionThemed(FALSE))
+				{
+					DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
+					GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+
+					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+				}
+
+				UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
+
+				switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
+				{
+				case LVCFMT_CENTER:
+					nFlags |= DT_CENTER;
+					break;
+
+				case LVCFMT_RIGHT:
+					nFlags |= DT_RIGHT;
+					rText.right -= 4;
+					break;
+
+				case LVCFMT_LEFT:
+					nFlags |= DT_LEFT;
+					rText.left += 4;
+					break;
+				}
+
+				DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
 			}
-
-			UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
-
-			switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
-			{
-			case LVCFMT_CENTER: 
-				nFlags |= DT_CENTER;	
-				break;
-
-			case LVCFMT_RIGHT:	
-				nFlags |= DT_RIGHT;		
-				rText.right -= 4;
-				break;
-
-			case LVCFMT_LEFT:	
-				nFlags |= DT_LEFT;		
-				rText.left += 4;
-				break;
-			}
-
-			DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
 		
 			if (bHasBtn)
 				DrawButton(pDC, nItem, nCol, rButton, !sText.IsEmpty(), bSel);

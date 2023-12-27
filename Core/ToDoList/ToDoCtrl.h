@@ -558,7 +558,7 @@ protected:
 	int m_nPercentDone;
 	CTDCDependencyArray m_aDepends;
 	
-	TDCCOST m_cost;
+	//TDCCOST m_cost;
 	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	TDCRECURRENCE m_tRecurrence;
