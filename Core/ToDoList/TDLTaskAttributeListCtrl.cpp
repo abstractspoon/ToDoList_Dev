@@ -61,6 +61,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_DROPFILES()
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
+	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -111,7 +112,7 @@ void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILIT
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
 {
-	bool bAdd = m_vis.IsEditFieldVisible(nAttribID);
+	BOOL bAdd = m_vis.IsEditFieldVisible(nAttribID);
 
 	if (!bAdd)
 	{
@@ -198,6 +199,17 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 	// TODO: Add your message handler code here and/or call default
 	
 	return CInputListCtrl::OnSetCursor(pWnd, nHitTest, message);
+}
+
+
+TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveCustomTimeFields) const
+{ 
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow); 
+
+	if (bResolveCustomTimeFields && (nAttribID > CUSTOMTIMEATTRIBOFFSET))
+		nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+
+	return nAttribID;
 }
 
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
@@ -351,17 +363,6 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 	{
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_3DFACE);
-
-		if (GetAttributeID(nItem) == TDCA_COLOR)
-		{
-			COLORREF color = m_taskCtrl.GetSelectedTaskColor();
-
-			if (color != CLR_NONE)
-			{
-				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
-					return color;
-			}
-		}
 	}
 
 	// All else
@@ -374,19 +375,6 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 	{
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_GRAYTEXT);
-
-		if (GetAttributeID(nItem) == TDCA_COLOR)
-		{
-			COLORREF color = m_taskCtrl.GetSelectedTaskColor();
-
-			if (color != CLR_NONE)
-			{
-				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
-					return GraphicsMisc::GetBestTextColor(color);
-				else
-					return color;
-			}
-		}
 	}
 
 	// All else
@@ -507,8 +495,12 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 				break;
 
 			case TDCA_COLOR:
-				if (m_taskCtrl.GetSelectedTaskColor() != CLR_NONE)
-					sValue = CEnString(IDS_COLOR_SAMPLETEXT);
+				{
+					COLORREF color = m_taskCtrl.GetSelectedTaskColor();
+
+					if (color != CLR_NONE)
+						sValue = Misc::Format(color);
+				}
 				break;
 
 			case TDCA_RECURRENCE:
@@ -686,6 +678,22 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			}
 			break;
 
+		case TDCA_COLOR:
+			if (!sText.IsEmpty())
+			{
+				crText = _ttoi(sText);
+
+				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
+				{
+					pDC->FillSolidRect(rText, crText);
+					crText = GraphicsMisc::GetBestTextColor(crText);
+				}
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
+				return;
+			}
+			break;
+
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) &&
 				m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_ICON)
@@ -708,3 +716,172 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 }
+
+void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+	ASSERT(pDispInfo->item.iSubItem == VALUE_COL);
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(pDispInfo->item.iItem, TRUE);
+	GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, 0, nAttribID);
+
+	*pResult = 0;
+}
+
+COLORREF CTDLTaskAttributeListCtrl::GetColor() const
+{
+	CString sValue = GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL);
+
+	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
+}
+
+CString CTDLTaskAttributeListCtrl::GetIcon() const
+{
+	return GetItemText(FindItemFromData(TDCA_ICON), VALUE_COL);
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetTimeEstimate(TDCTIMEPERIOD& timeEst) const
+{
+	return timeEst.Parse(GetItemText(FindItemFromData(TDCA_TIMEESTIMATE), VALUE_COL));
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetTimeSpent(TDCTIMEPERIOD& timeSpent) const
+{
+	return timeSpent.Parse(GetItemText(FindItemFromData(TDCA_TIMESPENT), VALUE_COL));
+}
+
+int CTDLTaskAttributeListCtrl::GetAllocTo(CStringArray& aAllocTo) const
+{
+	return Misc::Split(GetItemText(FindItemFromData(TDCA_ALLOCTO), VALUE_COL), aAllocTo);
+}
+
+int CTDLTaskAttributeListCtrl::GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
+{
+	// TODO
+	return 0;
+}
+
+CString CTDLTaskAttributeListCtrl::GetAllocBy() const
+{
+	return GetItemText(FindItemFromData(TDCA_ALLOCBY), VALUE_COL);
+}
+
+CString CTDLTaskAttributeListCtrl::GetStatus() const
+{
+	return GetItemText(FindItemFromData(TDCA_STATUS), VALUE_COL);
+}
+
+int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aCats) const
+{
+	return Misc::Split(GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL), aCats);
+}
+
+int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aMatched, CStringArray& aMixed) const
+{
+	// TODO
+	return 0;
+}
+
+int CTDLTaskAttributeListCtrl::GetDependencies(CTDCDependencyArray& aDepends) const
+{
+	return aDepends.Parse(GetItemText(FindItemFromData(TDCA_DEPENDENCY), VALUE_COL));
+}
+
+int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aTags) const
+{
+	return Misc::Split(GetItemText(FindItemFromData(TDCA_TAGS), VALUE_COL), aTags);
+}
+
+int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMixed) const
+{
+	// TODO
+	return 0;
+}
+
+int CTDLTaskAttributeListCtrl::GetFileLinks(CStringArray& aFiles) const
+{
+	return Misc::Split(GetItemText(FindItemFromData(TDCA_FILELINK), VALUE_COL), aFiles);
+}
+
+CString CTDLTaskAttributeListCtrl::GetExternalID() const
+{
+	return GetItemText(FindItemFromData(TDCA_EXTERNALID), VALUE_COL);
+}
+
+int CTDLTaskAttributeListCtrl::GetPercent() const
+{
+	return _ttoi(GetItemText(FindItemFromData(TDCA_PERCENT), VALUE_COL));
+}
+
+int CTDLTaskAttributeListCtrl::GetPriority() const
+{
+	return _ttoi(GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL));
+}
+
+int CTDLTaskAttributeListCtrl::GetRisk() const
+{
+	return _ttoi(GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL));
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetCost(TDCCOST& cost) const
+{
+	return cost.Parse(GetItemText(FindItemFromData(TDCA_COST), VALUE_COL));
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetFlag() const
+{
+	return !GetItemText(FindItemFromData(TDCA_FLAG), VALUE_COL).IsEmpty();
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetLock() const
+{
+	return !GetItemText(FindItemFromData(TDCA_LOCK), VALUE_COL).IsEmpty();
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetRecurrence(TDCRECURRENCE& tr) const
+{
+	CString sValue = GetItemText(FindItemFromData(TDCA_RECURRENCE), VALUE_COL);
+
+	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
+}
+
+CString CTDLTaskAttributeListCtrl::GetVersion() const
+{
+	return GetItemText(FindItemFromData(TDCA_VERSION), VALUE_COL);
+}
+
+COleDateTime CTDLTaskAttributeListCtrl::GetStartDate() const
+{
+	return GetDate(TDCA_STARTDATE, TDCA_STARTTIME);
+}
+
+COleDateTime CTDLTaskAttributeListCtrl::GetDueDate() const
+{
+	return GetDate(TDCA_DUEDATE, TDCA_DUETIME);
+}
+
+COleDateTime CTDLTaskAttributeListCtrl::GetDoneDate() const
+{
+	return GetDate(TDCA_DONEDATE, TDCA_DONETIME);
+}
+
+COleDateTime CTDLTaskAttributeListCtrl::GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const
+{
+	CString sDate = GetItemText(FindItemFromData(nDate), VALUE_COL);
+	CString sTime = GetItemText(FindItemFromData(nTime), VALUE_COL);
+
+	COleDateTime date;
+	CDateHelper::DecodeDate(sDate + ' ' + sTime, date, !sTime.IsEmpty());
+
+	return date;
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const
+{
+	TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sAttribID);
+
+	CString sValue = GetItemText(FindItemFromData(nAttribID), VALUE_COL);
+
+	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
+}
+

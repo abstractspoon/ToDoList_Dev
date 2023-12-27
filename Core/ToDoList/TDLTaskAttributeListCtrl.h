@@ -18,6 +18,10 @@ class CToDoCtrlData;
 class CTDCImageList;
 
 /////////////////////////////////////////////////////////////////////////////
+
+
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl window
 
 class CTDLTaskAttributeListCtrl : public CInputListCtrl
@@ -36,6 +40,34 @@ public:
 	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
 	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
+	COLORREF GetColor() const;
+	CString GetIcon() const;
+	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
+	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
+	int GetAllocTo(CStringArray& aAllocTo) const;
+	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
+	CString GetAllocBy() const;
+	CString GetStatus() const;
+	int GetCategories(CStringArray& aCats) const;
+	int GetCategories(CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetDependencies(CTDCDependencyArray& aDepends) const;
+	int GetTags(CStringArray& aTags) const;
+	int GetTags(CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetFileLinks(CStringArray& aFiles) const;
+	CString GetExternalID() const;
+	int GetPercent() const;
+	int GetPriority() const;
+	int GetRisk() const;
+	BOOL GetCost(TDCCOST& cost) const;
+	BOOL GetFlag() const;
+	BOOL GetLock() const;
+	BOOL GetRecurrence(TDCRECURRENCE& tr) const;
+	CString GetVersion() const;
+	COleDateTime GetStartDate() const;
+	COleDateTime GetDueDate() const;
+	COleDateTime GetDoneDate() const;
+	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
+
 protected:
 	const CTDLTaskCtrlBase& m_taskCtrl;
 	const CToDoCtrlData& m_data;
@@ -53,6 +85,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
+	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -67,7 +100,8 @@ protected:
 protected:
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
-	TDC_ATTRIBUTE GetAttributeID(int nRow) const { return (TDC_ATTRIBUTE)GetItemData(nRow); }
+	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
+	COleDateTime GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const;
 
 };
 

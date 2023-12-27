@@ -148,6 +148,18 @@ CString TDCTIMEPERIOD::Format(int nDecPlaces) const
 	return CTimeHelper().FormatTime(dAmount, GetTHUnits(), nDecPlaces);
 }
 
+BOOL TDCTIMEPERIOD::Parse(LPCTSTR szPeriod)
+{
+	double dAmount = 0.0;
+	TH_UNITS nTimeUnits = THU_NULL;
+
+	if (!CTimeHelper::DecodeOffset(szPeriod, dAmount, nTimeUnits, FALSE))
+		return FALSE;
+
+	nUnits = TDC::MapTHUnitsToUnits(nTimeUnits);
+	return TRUE;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 TDCCOST::TDCCOST(LPCTSTR szCost) : dAmount(0.0), bIsRate(FALSE)
@@ -514,6 +526,24 @@ int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) 
 		aDepends[nDepend] = GetAt(nDepend).Format(sFolder);
 
 	return nNumDepends;
+}
+
+int CTDCDependencyArray::Parse(LPCTSTR szDepends, LPCTSTR szSep)
+{
+	RemoveAll();
+
+	CStringArray aDepends;
+	int nNumDepends = Misc::Split(szDepends, aDepends, szSep);
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		TDCDEPENDENCY depend;
+
+		if (depend.Parse(aDepends[nDepend]))
+			Add(depend);
+	}
+
+	return GetSize();
 }
 
 BOOL CTDCDependencyArray::MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes) const

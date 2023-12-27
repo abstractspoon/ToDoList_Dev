@@ -37,6 +37,9 @@ const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENG
 const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 
+// CTDLTaskAttributeListCtrl
+const UINT WM_TDCN_ATTRIBUTEEDIT			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDIT"));			// wParam == <TDC_ATTRIBUTE>, lParam = UTF_ flags
+
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 
 

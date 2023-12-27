@@ -391,6 +391,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETATTRIBUTELIST, OnCommentsGetAttributeList)
 
+	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDIT, OnTDCAttributeEdit)
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
@@ -2188,15 +2189,18 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_ALLOCBY:
-		SetSelectedTaskAllocBy(m_sAllocBy);
+		//SetSelectedTaskAllocBy(m_sAllocBy);
+		SetSelectedTaskAllocBy(m_lcAttributes.GetAllocBy());
 		break;
 		
 	case TDCA_STATUS:
-		SetSelectedTaskStatus(m_sStatus);
+//		SetSelectedTaskStatus(m_sStatus);
+		SetSelectedTaskStatus(m_lcAttributes.GetStatus());
 		break;
 		
 	case TDCA_VERSION:
-		SetSelectedTaskVersion(m_sVersion);
+		//SetSelectedTaskVersion(m_sVersion);
+		SetSelectedTaskVersion(m_lcAttributes.GetVersion());
 		break;
 		
 	case TDCA_CATEGORY:
@@ -2208,7 +2212,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_PERCENT:
-		SetSelectedTaskPercentDone(m_nPercentDone);
+		//SetSelectedTaskPercentDone(m_nPercentDone);
+		SetSelectedTaskPercentDone(m_lcAttributes.GetPercent());
 		break;
 		
 	case TDCA_TIMEESTIMATE:
@@ -8583,6 +8588,12 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 
+	return 0L;
+}
+
+LRESULT CToDoCtrl::OnTDCAttributeEdit(WPARAM wParam, LPARAM lParam)
+{
+	UpdateTask((TDC_ATTRIBUTE)wParam, lParam);
 	return 0L;
 }
 
