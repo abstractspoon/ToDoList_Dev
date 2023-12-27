@@ -29,6 +29,7 @@ public:
 	CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
 							  const CToDoCtrlData& data,
 							  const CTDCImageList& ilIcons,
+							  const TDCAUTOLISTDATA& m_tld,
 							  const TDCCOLEDITVISIBILITY& defaultVis);
 
 	virtual ~CTDLTaskAttributeListCtrl();
@@ -42,14 +43,11 @@ public:
 	CString GetIcon() const;
 	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
-	int GetAllocTo(CStringArray& aAllocTo) const;
 	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetAllocBy() const;
 	CString GetStatus() const;
-	int GetCategories(CStringArray& aCats) const;
 	int GetCategories(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
-	int GetTags(CStringArray& aTags) const;
 	int GetTags(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetFileLinks(CStringArray& aFiles) const;
 	CString GetExternalID() const;
@@ -70,6 +68,7 @@ protected:
 	const CTDLTaskCtrlBase& m_taskCtrl;
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
+	const TDCAUTOLISTDATA& m_tld;
 
 	CTDCTaskFormatter m_formatter;
 	TDCCOLEDITVISIBILITY m_vis;
@@ -106,7 +105,10 @@ protected:
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
 	COleDateTime GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const;
 	CWnd* GetEditControl(int nRow, int nCol);
+	void PrepareMultiSelCombo(int nRow, int nCol, const CStringArray& aValues);
+	void PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues);
 
+	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -229,7 +229,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_aCustomAttribDefs,
 			   mgrContent),
 	// TODO
-	m_lcAttributes(m_taskTree, m_data, m_ilTaskIcons, visDefault)
+	m_lcAttributes(m_taskTree, m_data, m_ilTaskIcons, m_tldAll, visDefault)
 {
 	SetBordersDLU(0);
 	
@@ -856,7 +856,7 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 
 			// Temporarily place the new attribute listctrl on the RHS
 			// TODO
-			const int ATTRIBS_WIDTH = 250;
+			const int ATTRIBS_WIDTH = GraphicsMisc::ScaleByDPIFactor(250);
 
 			CRect rAttrib(rAvailable);
 			rAttrib.left = rAttrib.right - ATTRIBS_WIDTH;

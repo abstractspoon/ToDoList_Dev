@@ -49,11 +49,13 @@ static CContentMgr s_mgrContent;
 CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
 													 const CToDoCtrlData& data,
 													 const CTDCImageList& ilIcons,
+													 const TDCAUTOLISTDATA& tld,
 													 const TDCCOLEDITVISIBILITY& defaultVis)
 	:
 	m_taskCtrl(taskCtrl),
 	m_data(data),
 	m_ilIcons(ilIcons),
+	m_tld(tld),
 	m_formatter(data, s_mgrContent),
 	m_vis(defaultVis)
 {
@@ -408,7 +410,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 		else
 		{
 			CString sValue;
-			CStringArray aValues;
+			CStringArray aMatched, aMixed;
 
 			DWORD dwSelTaskID = ((m_taskCtrl.GetSelectedCount() == 1) ? m_taskCtrl.GetSelectedTaskID() : 0);
 			TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
@@ -420,14 +422,13 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 			case TDCA_STATUS: sValue = m_taskCtrl.GetSelectedTaskStatus(); break;
 			case TDCA_VERSION: sValue = m_taskCtrl.GetSelectedTaskVersion(); break;
 			case TDCA_ICON: sValue = m_taskCtrl.GetSelectedTaskIcon(); break;
-
-			case TDCA_ALLOCTO: m_taskCtrl.GetSelectedTaskAllocTo(aValues); break;
-			case TDCA_CATEGORY: m_taskCtrl.GetSelectedTaskCategories(aValues); break;
-			case TDCA_TAGS: m_taskCtrl.GetSelectedTaskTags(aValues); break;
-			case TDCA_FILELINK: m_taskCtrl.GetSelectedTaskFileLinks(aValues, FALSE); break;
-
 			case TDCA_FLAG: sValue = m_taskCtrl.IsSelectedTaskFlagged() ? _T("+") : _T(""); break;
 			case TDCA_LOCK: sValue = m_taskCtrl.IsSelectedTaskLocked() ? _T("+") : _T(""); break;
+
+			case TDCA_ALLOCTO: m_taskCtrl.GetSelectedTaskAllocTo(aMatched, aMixed); break;
+			case TDCA_CATEGORY: m_taskCtrl.GetSelectedTaskCategories(aMatched, aMixed); break;
+			case TDCA_TAGS: m_taskCtrl.GetSelectedTaskTags(aMatched, aMixed); break;
+			case TDCA_FILELINK: m_taskCtrl.GetSelectedTaskFileLinks(aMatched, FALSE); break;
 
 			case TDCA_COST: 
 				{
@@ -643,8 +644,11 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 				break;
 			}
 
-			if (aValues.GetSize())
-				sValue = Misc::FormatArray(aValues);
+			if (aMatched.GetSize())
+				sValue = Misc::FormatArray(aMatched);
+
+			if (aMixed.GetSize())
+				sValue += ('|' + Misc::FormatArray(aMixed));
 
 			SetItemText(nRow, VALUE_COL, sValue);
 		}
@@ -708,6 +712,20 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			}
 			break;
 
+		case TDCA_ALLOCTO:
+		case TDCA_CATEGORY:
+		case TDCA_TAGS:
+			if (!sText.IsEmpty())
+			{
+				// Only draw the matching items
+				CString sMatched(sText), sMixed;
+				Misc::Split(sMatched, sMixed, '|');
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
+				return;
+			}
+			break;
+
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) &&
 				m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_ICON)
@@ -767,15 +785,9 @@ BOOL CTDLTaskAttributeListCtrl::GetTimeSpent(TDCTIMEPERIOD& timeSpent) const
 	return timeSpent.Parse(GetItemText(FindItemFromData(TDCA_TIMESPENT), VALUE_COL));
 }
 
-int CTDLTaskAttributeListCtrl::GetAllocTo(CStringArray& aAllocTo) const
-{
-	return Misc::Split(GetItemText(FindItemFromData(TDCA_ALLOCTO), VALUE_COL), aAllocTo);
-}
-
 int CTDLTaskAttributeListCtrl::GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return 0;
+	return ParseMultiSelValues(GetItemText(FindItemFromData(TDCA_ALLOCTO), VALUE_COL), aMatched, aMixed);
 }
 
 CString CTDLTaskAttributeListCtrl::GetAllocBy() const
@@ -788,15 +800,9 @@ CString CTDLTaskAttributeListCtrl::GetStatus() const
 	return GetItemText(FindItemFromData(TDCA_STATUS), VALUE_COL);
 }
 
-int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aCats) const
-{
-	return Misc::Split(GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL), aCats);
-}
-
 int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return 0;
+	return ParseMultiSelValues(GetItemText(FindItemFromData(TDCA_CATEGORY), VALUE_COL), aMatched, aMixed);
 }
 
 int CTDLTaskAttributeListCtrl::GetDependencies(CTDCDependencyArray& aDepends) const
@@ -804,15 +810,9 @@ int CTDLTaskAttributeListCtrl::GetDependencies(CTDCDependencyArray& aDepends) co
 	return aDepends.Parse(GetItemText(FindItemFromData(TDCA_DEPENDENCY), VALUE_COL));
 }
 
-int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aTags) const
-{
-	return Misc::Split(GetItemText(FindItemFromData(TDCA_TAGS), VALUE_COL), aTags);
-}
-
 int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return 0;
+	return ParseMultiSelValues(GetItemText(FindItemFromData(TDCA_TAGS), VALUE_COL), aMatched, aMixed);
 }
 
 int CTDLTaskAttributeListCtrl::GetFileLinks(CStringArray& aFiles) const
@@ -902,6 +902,32 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
 
+int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed)
+{
+	CString sMatched(sValues), sMixed;
+
+	Misc::Split(sMatched, sMixed, '|');
+	Misc::Split(sMatched, aMatched);
+	Misc::Split(sMixed, aMixed);
+
+	return aMatched.GetSize();
+}
+
+void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, int nCol, const CStringArray& aValues)
+{
+	CStringArray aMatched, aMixed;
+	ParseMultiSelValues(GetItemText(nRow, nCol), aMatched, aMixed);
+
+	m_cbMultiSelection.AddStrings(aValues);
+	m_cbMultiSelection.SetChecked(aMatched, aMixed);
+}
+
+void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues)
+{
+	m_cbSingleSelection.AddStrings(aValues);
+	m_cbSingleSelection.SelectString(-1, GetItemText(nRow, nCol));
+}
+
 void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 {
 	ASSERT(nCol == VALUE_COL);
@@ -910,37 +936,27 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	switch (nAttribID)
 	{
-	case TDCA_EXTERNALID: 
+	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, nCol, m_tld.aAllocBy);	break;
+	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, nCol, m_tld.aStatus);	break;
+	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, nCol, m_tld.aVersion);	break;
 		break;
 
-	case TDCA_ALLOCBY: 
-		break;
-
-	case TDCA_STATUS: 
-		break;
-
-	case TDCA_VERSION: 
-		break;
-
-	case TDCA_ICON: 
-		break;
-
-	case TDCA_ALLOCTO: 
-		break;
-
-	case TDCA_CATEGORY: 
-		break;
-
-	case TDCA_TAGS: 
-		break;
+	case TDCA_ALLOCTO:	PrepareMultiSelCombo(nRow, nCol, m_tld.aAllocTo);	break;
+	case TDCA_CATEGORY: PrepareMultiSelCombo(nRow, nCol, m_tld.aCategory);	break;
+	case TDCA_TAGS:		PrepareMultiSelCombo(nRow, nCol, m_tld.aTags);		break;
 
 	case TDCA_FILELINK: 
 		break;
 
+	case TDCA_ICON: 
 	case TDCA_FLAG: 
-		break;
-
 	case TDCA_LOCK: 
+	case TDCA_COLOR:
+	case TDCA_DEPENDENCY:
+	case TDCA_RECURRENCE:
+	case TDCA_TASKNAME:
+	case TDCA_EXTERNALID: 
+		// Nothing to do
 		break;
 
 	case TDCA_COST:
@@ -971,19 +987,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_DONETIME:
 	case TDCA_DUETIME:
 	case TDCA_STARTTIME:
-		break;
-
-	case TDCA_COLOR:
-		break;
-
-	case TDCA_RECURRENCE:
-		break;
-
-	case TDCA_DEPENDENCY:
-		break;
-
-	case TDCA_TASKNAME:			
-		// TODO
 		break;
 
 	default:
