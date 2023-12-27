@@ -15,6 +15,7 @@
 
 class CTDLTaskCtrlBase;
 class CToDoCtrlData;
+class CTDCImageList;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl window
@@ -25,7 +26,8 @@ class CTDLTaskAttributeListCtrl : public CInputListCtrl
 public:
 	CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
 							  const CToDoCtrlData& data,
-							  const TDCCOLEDITVISIBILITY& vis);
+							  const CTDCImageList& ilIcons,
+							  const TDCCOLEDITVISIBILITY& defaultVis);
 
 	virtual ~CTDLTaskAttributeListCtrl();
 
@@ -37,6 +39,7 @@ public:
 protected:
 	const CTDLTaskCtrlBase& m_taskCtrl;
 	const CToDoCtrlData& m_data;
+	const CTDCImageList& m_ilIcons;
 
 	CTDCTaskFormatter m_formatter;
 	TDCCOLEDITVISIBILITY m_vis;
@@ -59,6 +62,7 @@ protected:
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 protected:
 	void Populate();

@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TDLTaskAttributeListCtrl.h"
 #include "TDLTaskCtrlBase.h"
+#include "TDCImageList.h"
 
 #include "tdcstatic.h"
 #include "tdcstruct.h"
@@ -37,12 +38,14 @@ static CContentMgr s_mgrContent;
 
 CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
 													 const CToDoCtrlData& data,
-													 const TDCCOLEDITVISIBILITY& vis)
+													 const CTDCImageList& ilIcons,
+													 const TDCCOLEDITVISIBILITY& defaultVis)
 	:
 	m_taskCtrl(taskCtrl),
 	m_data(data),
+	m_ilIcons(ilIcons),
 	m_formatter(data, s_mgrContent),
-	m_vis(vis)
+	m_vis(defaultVis)
 {
 }
 
@@ -108,8 +111,21 @@ void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILIT
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
 {
-	if (m_vis.IsEditFieldVisible(nAttribID) ||
-		m_vis.IsColumnVisible(TDC::MapAttributeToColumn(nAttribID)))
+	bool bAdd = m_vis.IsEditFieldVisible(nAttribID);
+
+	if (!bAdd)
+	{
+		bAdd = ((m_vis.GetShowFields() == TDLSA_ASCOLUMN) &&
+				m_vis.IsColumnVisible(TDC::MapAttributeToColumn(nAttribID)));
+
+		if (!bAdd)
+		{
+			bAdd = ((nAttribID == TDCA_ICON) && 
+					m_data.HasStyle(TDCS_ALLOWTREEITEMCHECKBOX));
+		}
+	}
+
+	if (bAdd)
 	{
 		int nItem = AddRow(CEnString(nAttribResID));
 		SetItemData(nItem, nAttribID);
@@ -318,15 +334,15 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 		case TDCA_LOCK:
 			return TRUE;
-
-		default:
-			if (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_CALCULATION)
-				return FALSE;
-			break;
 	}
 
-	// All else
-	return !m_taskCtrl.SelectionHasLocked(); // TODO
+	if (m_taskCtrl.SelectionHasLocked())
+		return FALSE;
+
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		return (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) != TDCCA_CALCULATION);
+
+	return TRUE;
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
@@ -432,7 +448,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 				{
 					int nPriority = m_taskCtrl.GetSelectedTaskPriority(); 
 					
-					if (nPriority != TDC_NOPRIORITYORISK)
+					if (nPriority >= 0)
 						sValue = Misc::Format(nPriority);
 				}
 				break;
@@ -441,7 +457,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 				{
 					int nRisk = m_taskCtrl.GetSelectedTaskRisk();
 
-					if (nRisk != TDC_NOPRIORITYORISK)
+					if (nRisk >= 0)
 						sValue = Misc::Format(nRisk);
 				}
 				break;
@@ -626,8 +642,69 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceCl
 
 			SetItemText(nRow, VALUE_COL, sValue);
 		}
-
 	}
 }
 
+void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	// Only draw what we really need to
+	if (nCol == VALUE_COL)
+	{
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
+		switch (nAttribID)
+		{
+		case TDCA_PRIORITY:
+			if (!sText.IsEmpty())
+			{
+				int nPriority = m_taskCtrl.GetSelectedTaskPriority();
+				ASSERT(nPriority >= 0);
+
+				CRect rBox(rText);
+				rBox.DeflateRect(0, 1, 0, 2);
+				rBox.right = rBox.left + rBox.Height();
+
+				COLORREF crFill = m_taskCtrl.GetPriorityColor(nPriority);
+				COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
+
+				GraphicsMisc::DrawRect(pDC, rBox, crFill, crBorder);
+
+				CRect rLeft(rText);
+				rLeft.left += rText.Height();
+
+				// TODO - Get text from Priority combo
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rLeft, sText, crText, nDrawTextFlags);
+				return;
+			}
+			break;
+
+		case TDCA_ICON:
+			if (!sText.IsEmpty())
+			{
+				m_ilIcons.Draw(pDC, sText, rText.TopLeft(), ILD_TRANSPARENT);
+				return;
+			}
+			break;
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) &&
+				m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_ICON)
+			{
+				CStringArray aIcons;
+				int nNumIcons = Misc::Split(sText, aIcons);
+
+				CRect rIcon(rText);
+
+				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+				{
+					m_ilIcons.Draw(pDC, aIcons[nIcon], rIcon.TopLeft(), ILD_TRANSPARENT);
+					rIcon.left += GraphicsMisc::ScaleByDPIFactor(16);
+				}
+				return;
+			}
+			break;
+		}
+	}
+
+	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+}
