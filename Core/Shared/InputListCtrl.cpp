@@ -1035,7 +1035,7 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	}
 	else
 	{
-		HideAllControls();
+		HideAllControls(pNewWnd);
 	}
 
 	CRect rItem;
