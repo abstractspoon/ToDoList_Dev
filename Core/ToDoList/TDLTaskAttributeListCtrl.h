@@ -105,14 +105,16 @@ protected:
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 protected:
-	void Populate();
-	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
+	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
 	COleDateTime GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const;
-	CWnd* GetEditControl(int nRow, int nCol);
+
+	void Populate();
+	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	void PrepareMultiSelCombo(int nRow, int nCol, const CStringArray& aValues);
 	void PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues);
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
+	CWnd* GetEditControl(int nRow, int nCol);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 };

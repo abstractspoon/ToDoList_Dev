@@ -374,13 +374,13 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 			return TRUE;
 
 		case TDCA_STARTTIME:
-			return !GetItemText(FindItemFromData(TDCA_STARTDATE), VALUE_COL).IsEmpty();
+			return !GetValueText(TDCA_STARTDATE).IsEmpty();
 
 		case TDCA_DUETIME:
-			return !GetItemText(FindItemFromData(TDCA_DUEDATE), VALUE_COL).IsEmpty();
+			return !GetValueText(TDCA_DUEDATE).IsEmpty();
 
 		case TDCA_DONETIME:
-			return !GetItemText(FindItemFromData(TDCA_DONEDATE), VALUE_COL).IsEmpty();
+			return !GetValueText(TDCA_DONEDATE).IsEmpty();
 	}
 
 	if (m_taskCtrl.SelectionHasLocked())
@@ -786,106 +786,106 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 
 COLORREF CTDLTaskAttributeListCtrl::GetColor() const
 {
-	CString sValue = GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL);
+	CString sValue = GetValueText(TDCA_COLOR);
 
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
 
 CString CTDLTaskAttributeListCtrl::GetIcon() const
 {
-	return GetItemText(FindItemFromData(TDCA_ICON), VALUE_COL);
+	return GetValueText(TDCA_ICON);
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetTimeEstimate(TDCTIMEPERIOD& timeEst) const
 {
-	return timeEst.Parse(GetItemText(FindItemFromData(TDCA_TIMEESTIMATE), VALUE_COL));
+	return timeEst.Parse(GetValueText(TDCA_TIMEESTIMATE));
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetTimeSpent(TDCTIMEPERIOD& timeSpent) const
 {
-	return timeSpent.Parse(GetItemText(FindItemFromData(TDCA_TIMESPENT), VALUE_COL));
+	return timeSpent.Parse(GetValueText(TDCA_TIMESPENT));
 }
 
 int CTDLTaskAttributeListCtrl::GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
 {
-	return ParseMultiSelValues(GetItemText(FindItemFromData(TDCA_ALLOCTO), VALUE_COL), aMatched, aMixed);
+	return ParseMultiSelValues(GetValueText(TDCA_ALLOCTO), aMatched, aMixed);
 }
 
 CString CTDLTaskAttributeListCtrl::GetAllocBy() const
 {
-	return GetItemText(FindItemFromData(TDCA_ALLOCBY), VALUE_COL);
+	return GetValueText(TDCA_ALLOCBY);
 }
 
 CString CTDLTaskAttributeListCtrl::GetStatus() const
 {
-	return GetItemText(FindItemFromData(TDCA_STATUS), VALUE_COL);
+	return GetValueText(TDCA_STATUS);
 }
 
 int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aMatched, CStringArray& aMixed) const
 {
-	return ParseMultiSelValues(GetItemText(FindItemFromData(TDCA_CATEGORY), VALUE_COL), aMatched, aMixed);
+	return ParseMultiSelValues(GetValueText(TDCA_CATEGORY), aMatched, aMixed);
 }
 
 int CTDLTaskAttributeListCtrl::GetDependencies(CTDCDependencyArray& aDepends) const
 {
-	return aDepends.Parse(GetItemText(FindItemFromData(TDCA_DEPENDENCY), VALUE_COL));
+	return aDepends.Parse(GetValueText(TDCA_DEPENDENCY));
 }
 
 int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMixed) const
 {
-	return ParseMultiSelValues(GetItemText(FindItemFromData(TDCA_TAGS), VALUE_COL), aMatched, aMixed);
+	return ParseMultiSelValues(GetValueText(TDCA_TAGS), aMatched, aMixed);
 }
 
 int CTDLTaskAttributeListCtrl::GetFileLinks(CStringArray& aFiles) const
 {
-	return Misc::Split(GetItemText(FindItemFromData(TDCA_FILELINK), VALUE_COL), aFiles);
+	return Misc::Split(GetValueText(TDCA_FILELINK), aFiles);
 }
 
 CString CTDLTaskAttributeListCtrl::GetExternalID() const
 {
-	return GetItemText(FindItemFromData(TDCA_EXTERNALID), VALUE_COL);
+	return GetValueText(TDCA_EXTERNALID);
 }
 
 int CTDLTaskAttributeListCtrl::GetPercent() const
 {
-	return _ttoi(GetItemText(FindItemFromData(TDCA_PERCENT), VALUE_COL));
+	return _ttoi(GetValueText(TDCA_PERCENT));
 }
 
 int CTDLTaskAttributeListCtrl::GetPriority() const
 {
-	return _ttoi(GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL));
+	return _ttoi(GetValueText(TDCA_COLOR));
 }
 
 int CTDLTaskAttributeListCtrl::GetRisk() const
 {
-	return _ttoi(GetItemText(FindItemFromData(TDCA_COLOR), VALUE_COL));
+	return _ttoi(GetValueText(TDCA_COLOR));
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetCost(TDCCOST& cost) const
 {
-	return cost.Parse(GetItemText(FindItemFromData(TDCA_COST), VALUE_COL));
+	return cost.Parse(GetValueText(TDCA_COST));
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetFlag() const
 {
-	return !GetItemText(FindItemFromData(TDCA_FLAG), VALUE_COL).IsEmpty();
+	return !GetValueText(TDCA_FLAG).IsEmpty();
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetLock() const
 {
-	return !GetItemText(FindItemFromData(TDCA_LOCK), VALUE_COL).IsEmpty();
+	return !GetValueText(TDCA_LOCK).IsEmpty();
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetRecurrence(TDCRECURRENCE& tr) const
 {
-	CString sValue = GetItemText(FindItemFromData(TDCA_RECURRENCE), VALUE_COL);
+	CString sValue = GetValueText(TDCA_RECURRENCE);
 
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
 
 CString CTDLTaskAttributeListCtrl::GetVersion() const
 {
-	return GetItemText(FindItemFromData(TDCA_VERSION), VALUE_COL);
+	return GetValueText(TDCA_VERSION);
 }
 
 COleDateTime CTDLTaskAttributeListCtrl::GetStartDate() const
@@ -905,8 +905,8 @@ COleDateTime CTDLTaskAttributeListCtrl::GetDoneDate() const
 
 COleDateTime CTDLTaskAttributeListCtrl::GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const
 {
-	CString sDate = GetItemText(FindItemFromData(nDate), VALUE_COL);
-	CString sTime = GetItemText(FindItemFromData(nTime), VALUE_COL);
+	CString sDate = GetValueText(nDate);
+	CString sTime = GetValueText(nTime);
 
 	COleDateTime date;
 	CDateHelper::DecodeDate(sDate + ' ' + sTime, date, !sTime.IsEmpty());
@@ -918,7 +918,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 {
 	TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sAttribID);
 
-	CString sValue = GetItemText(FindItemFromData(nAttribID), VALUE_COL);
+	CString sValue = GetValueText(nAttribID);
 
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
@@ -1077,6 +1077,12 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		break;
 	}
 }
+
+CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const 
+{ 
+	return GetItemText(FindItemFromData(nAttribID), VALUE_COL); 
+}
+
 
 CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 {
