@@ -46,6 +46,7 @@ class CInputListCtrl : public CEnListCtrl
 // Construction
 public:
 	CInputListCtrl();
+	virtual ~CInputListCtrl();
 
 	void DisableColumnEditing(int nCol, BOOL bDisable);
 	BOOL IsColumnEditingDisabled(int nCol) const;
@@ -76,12 +77,6 @@ public:
 	void EndEdit();
 
 protected:
-	CPopupEditCtrl* GetEditControl();
-
-// Attributes
-public:
-
-protected:
 	int m_nItemLastSelected;
 	int m_nColLastSelected;
 	int m_nCurCol;
@@ -103,26 +98,13 @@ private:
 
 	CHotTracker m_hotTrack;
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CInputListCtrl)
-	public:
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-	//}}AFX_VIRTUAL
 protected:
 	virtual void OnEndEdit(UINT uIDCtrl, int* pResult);
 	virtual void OnCancelEdit();
 	virtual void PreSubclassWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
-// Implementation
-public:
-	virtual ~CInputListCtrl();
-
-	// Generated message map functions
 protected:
 	//{{AFX_MSG(CInputListCtrl)
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -160,6 +142,7 @@ protected:
 	virtual void InitState();
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual CPopupEditCtrl* GetEditControl();
 
 	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
 	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);

@@ -1240,107 +1240,104 @@ void CTDLTaskAttributeListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	if (!CanEditCell(nItem, nCol))
 		return;
 
-	CWnd* pEdit = GetEditControl(nItem, nCol);
-
-	if (pEdit)
+	if (GetEditControl(nItem, nCol))
 	{
-		ShowControl(*pEdit, nItem, nCol);
+		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+		return;
 	}
-	else
+
+	// All other attributes not handled by the base class
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+
+	switch (nAttribID)
 	{
-		// Handle all attributes not handled by the base class
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+	case TDCA_FLAG:
+	case TDCA_LOCK:
+		SetItemText(nItem, VALUE_COL, GetItemText(nItem, VALUE_COL).IsEmpty() ? _T("+") : _T(""));
+		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+		break;
 
-		switch (nAttribID)
+	case TDCA_ICON:
+		break;
+
+	case TDCA_COLOR:
+		break;
+
+	case TDCA_RECURRENCE:
+		break;
+
+	case TDCA_DEPENDENCY:
+		break;
+
+	case TDCA_TASKNAME:
+		// TODO
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-		case TDCA_FLAG:
-		case TDCA_LOCK:
-			SetItemText(nItem, VALUE_COL, GetItemText(nItem, VALUE_COL).IsEmpty() ? _T("+") : _T(""));
-			GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
-			break;
+			int nCust = m_aCustomAttribDefs.Find(nAttribID);
+			ASSERT(nCust != -1);
 
-		case TDCA_ICON:
-			break;
-
-		case TDCA_COLOR:
-			break;
-
-		case TDCA_RECURRENCE:
-			break;
-
-		case TDCA_DEPENDENCY:
-			break;
-
-		case TDCA_TASKNAME:
-			// TODO
-			break;
-
-		default:
-			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			if (nCust != -1)
 			{
-				int nCust = m_aCustomAttribDefs.Find(nAttribID);
-				ASSERT(nCust != -1);
-
-				if (nCust != -1)
-				{
-					CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
-					TDCCADATA data;
-
-					if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
-					{
-						if (m_aCustomAttribDefs[nCust].IsList())
-						{
-							// TODO
-						}
-						else
-						{
-							switch (m_aCustomAttribDefs[nCust].GetDataType())
-							{
-							case TDCCA_STRING:
-							case TDCCA_FRACTION:
-							case TDCCA_INTEGER:
-							case TDCCA_DOUBLE:
-							case TDCCA_ICON:
-							case TDCCA_FILELINK:
-								// TODO
-								break;
-
-							case TDCCA_CALCULATION:
-								// TODO
-								break;
-
-							case TDCCA_TIMEPERIOD:
-								// TODO
-								break;
-
-							case TDCCA_DATE:
-								// TODO
-								break;
-
-							case TDCCA_BOOL:
-								// TODO
-								break;
-							}
-						}
-					}
-				}
-			}
-			else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
-			{
-				nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
-
-				CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+				CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
 				TDCCADATA data;
 
 				if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
 				{
-					ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
+					if (m_aCustomAttribDefs[nCust].IsList())
+					{
+						// TODO
+					}
+					else
+					{
+						switch (m_aCustomAttribDefs[nCust].GetDataType())
+						{
+						case TDCCA_STRING:
+						case TDCCA_FRACTION:
+						case TDCCA_INTEGER:
+						case TDCCA_DOUBLE:
+						case TDCCA_ICON:
+						case TDCCA_FILELINK:
+							// TODO
+							break;
 
-					// TODO
+						case TDCCA_CALCULATION:
+							// TODO
+							break;
+
+						case TDCCA_TIMEPERIOD:
+							// TODO
+							break;
+
+						case TDCCA_DATE:
+							// TODO
+							break;
+
+						case TDCCA_BOOL:
+							// TODO
+							break;
+						}
+					}
 				}
 			}
-			break;
 		}
+		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		{
+			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+			TDCCADATA data;
+
+			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+			{
+				ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
+
+				// TODO
+			}
+		}
+		break;
 	}
 }
 

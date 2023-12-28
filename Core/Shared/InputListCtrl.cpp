@@ -101,7 +101,7 @@ const CColumnData2* CInputListCtrl::GetColumnData(int nCol) const
 
 void CInputListCtrl::HideAllControls(const CWnd* pWndIgnore) 
 { 
-	HideControl(m_editBox); 
+	HideControl(m_editBox, pWndIgnore); 
 }
 
 void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
