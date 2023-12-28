@@ -1816,7 +1816,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	int nSelCount = GetSelectedTaskCount();
 
 	// TODO
-	m_lcAttributes.RefreshSelectedTaskAttributeValues(hti == NULL);
+	m_lcAttributes.RefreshSelectedTaskValues(hti == NULL);
 
 	if (hti)
 	{

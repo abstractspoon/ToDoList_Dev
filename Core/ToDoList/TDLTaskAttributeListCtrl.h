@@ -36,9 +36,11 @@ public:
 	virtual ~CTDLTaskAttributeListCtrl();
 
 public:
-	void RefreshSelectedTaskAttributeValues(BOOL bForceClear = FALSE);
 	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
 	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
+
+	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
+	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
 
 	COLORREF GetColor() const;
 	CString GetIcon() const;
@@ -115,6 +117,7 @@ protected:
 	void PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues);
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, int nCol);
+	void RefreshSelectedTaskValue(int nRow);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 };
