@@ -478,7 +478,7 @@ protected:
 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
 	CColourPickerEx m_cpColour;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
-	CEnEdit m_eExternalID;
+	//CEnEdit m_eExternalID;
 	CFileComboBox m_cbFileLink;
 	CMaskEdit m_ePercentDone;//, m_eCost;
 	CPopupEditCtrl m_eTaskName;
@@ -549,7 +549,7 @@ protected:
 	CString m_sAllocBy;
 	CString m_sStatus;
 	CString m_sProjectName;
-	CString m_sExternalID;
+	//CString m_sExternalID;
 	CString m_sOccurrence;
 	CString m_sVersion;
 	double m_dTrackedTimeElapsedHours;

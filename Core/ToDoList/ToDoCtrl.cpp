@@ -290,7 +290,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DONETIME, m_cbTimeDone);
 	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
 	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
-	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
+//	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
 	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
 	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
@@ -305,7 +305,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
 	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
 
-	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
+//	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
 	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
 
@@ -691,7 +691,7 @@ void CToDoCtrl::InitEditPrompts()
 	m_mgrPrompts.SetComboPrompt(m_cbFileLink, IDS_TDC_EDITPROMPT_FILELINK);
 
 	// Generic
-	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
+//	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
 	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_NONE);
 
 	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOBODY);
@@ -1833,7 +1833,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_nRisk = GetSelectedTaskRisk();
 		m_sAllocBy = GetSelectedTaskAllocBy();
 		m_sStatus = GetSelectedTaskStatus();
-		m_sExternalID = GetSelectedTaskExtID();
+//		m_sExternalID = GetSelectedTaskExtID();
 		m_sVersion = GetSelectedTaskVersion();
 		m_crColour = GetSelectedTaskColor();
 
@@ -1917,7 +1917,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		m_sAllocBy.Empty();
 		m_sStatus.Empty();
-		m_sExternalID.Empty();
+//		m_sExternalID.Empty();
 		m_sVersion.Empty();
 
 		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
@@ -2192,7 +2192,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_EXTERNALID:
-		SetSelectedTaskExternalID(m_sExternalID);
+//		SetSelectedTaskExternalID(m_sExternalID);
+		SetSelectedTaskExternalID(m_lcAttributes.GetExternalID());
 		break;
 		
 	case TDCA_ALLOCTO:
@@ -4088,9 +4089,10 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 // 		}
 
 		SetModified(TDCA_COST, aModTaskIDs);
+		return TRUE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
@@ -4820,7 +4822,7 @@ BOOL CToDoCtrl::IsActivelyTimeTracking() const
 	return (dwTrackedTaskID != 0);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sID)
+BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 {
 	if (!CanEditSelectedTask(TDCA_EXTERNALID))
 		return FALSE;
@@ -4836,11 +4838,18 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sID)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.SetTaskExternalID(dwTaskID, sID), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.SetTaskExternalID(dwTaskID, sExtID), aModTaskIDs))
 			return FALSE;
 	}
 	
-	return SetTextChange(TDCA_EXTERNALID, m_sExternalID, sID, IDC_EXTERNALID, aModTaskIDs);
+	if (aModTaskIDs.GetSize())
+	{
+		SetModified(TDCA_EXTERNALID, aModTaskIDs);
+		return TRUE;
+	}
+
+	return FALSE;
+//	return SetTextChange(TDCA_EXTERNALID, m_sExternalID, sID, IDC_EXTERNALID, aModTaskIDs);
 }
 
 BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const 
@@ -7090,6 +7099,8 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTask
 
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
+	ASSERT(aModTaskIDs.GetSize());
+
 	if (IsReadOnly())
 		return;
 	
