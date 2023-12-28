@@ -88,8 +88,9 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnComboCloseUp(UINT /*nCtrlID*/) { HideAllControls(); }
-	afx_msg void OnDateCloseUp(UINT /*nCtrlID*/, NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) { HideAllControls(); }
+	afx_msg void OnComboCloseUp(UINT nCtrlID);
+	afx_msg void OnComboEditCancel(UINT nCtrlID);
+	afx_msg void OnDateCloseUp(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 

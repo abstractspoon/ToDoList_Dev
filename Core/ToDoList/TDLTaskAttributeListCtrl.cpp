@@ -77,6 +77,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_NOTIFY_RANGE(DTN_CLOSEUP, 0, 0xffff, OnDateCloseUp)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
+	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -417,6 +418,8 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskAttributeValues(BOOL bForceClear)
 {
+	CHoldRedraw hr(*this);
+
 	int nRow = GetItemCount();
 
 	while (nRow--)
@@ -1333,4 +1336,19 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	HideControl(m_cbSingleSelection, pWndIgnore);
 
 	CInputListCtrl::HideAllControls(pWndIgnore);
+}
+
+void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
+{ 
+	HideControl(*GetDlgItem(nCtrlID)); 
+}
+
+void CTDLTaskAttributeListCtrl::OnComboEditCancel(UINT nCtrlID)
+{
+	HideControl(*GetDlgItem(nCtrlID));
+}
+
+void CTDLTaskAttributeListCtrl::OnDateCloseUp(UINT /*nCtrlID*/, NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
+{ 
+	HideControl(m_dtc); 
 }
