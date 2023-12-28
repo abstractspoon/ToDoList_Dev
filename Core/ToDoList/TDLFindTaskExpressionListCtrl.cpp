@@ -80,7 +80,6 @@ CTDLFindTaskExpressionListCtrl::~CTDLFindTaskExpressionListCtrl()
 
 BEGIN_MESSAGE_MAP(CTDLFindTaskExpressionListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLFindTaskExpressionListCtrl)
-	ON_WM_KILLFOCUS()
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	ON_WM_CHAR()
@@ -1023,20 +1022,6 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 	}
 }
 
-BOOL CTDLFindTaskExpressionListCtrl::OnSelItemChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
-{
-	// always make sure we hide our non-default controls
-	HideControl(m_dtcDate);
-	HideControl(m_eTime);
-	HideControl(m_cbListValues);
-	HideControl(m_cbPriority);
-	HideControl(m_cbRisk);
-
-	*pResult = 0;
-	
-	return FALSE; // continue routing
-}
-
 void CTDLFindTaskExpressionListCtrl::OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
@@ -1369,40 +1354,17 @@ void CTDLFindTaskExpressionListCtrl::OnDateCloseUp(NMHDR* /*pNMHDR*/, LRESULT* p
 	*pResult = 0;
 }
 
-
-void CTDLFindTaskExpressionListCtrl::OnKillFocus(CWnd* pNewWnd) 
-{
-	CInputListCtrl::OnKillFocus(pNewWnd);
-
-	if (pNewWnd == this)
-		return;
-
-	// else
-	HideAllControls(pNewWnd);
-}
-
 void CTDLFindTaskExpressionListCtrl::HideAllControls(const CWnd* pWndIgnore)
 {
-	if (!pWndIgnore || ((pWndIgnore != &m_dtcDate) && (pWndIgnore != m_dtcDate.GetMonthCalCtrl())))
-		HideControl(m_dtcDate);
+	HideControl(m_dtcDate, pWndIgnore);
+	HideControl(m_eTime, pWndIgnore);
+	HideControl(m_cbListValues, pWndIgnore);
+	HideControl(m_cbPriority, pWndIgnore);
+	HideControl(m_cbRisk, pWndIgnore);
+	HideControl(m_cbCustomIcons, pWndIgnore);
+	HideControl(m_cbRecurrence, pWndIgnore);
 
-	if (!pWndIgnore || (pWndIgnore != &m_eTime))
-		HideControl(m_eTime);
-
-	if (!pWndIgnore || (pWndIgnore != &m_cbListValues))
-		HideControl(m_cbListValues);
-
-	if (!pWndIgnore || (pWndIgnore != &m_cbPriority))
-		HideControl(m_cbPriority);
-
-	if (!pWndIgnore || (pWndIgnore != &m_cbRisk))
-		HideControl(m_cbRisk);
-	
-	if (!pWndIgnore || (pWndIgnore != &m_cbCustomIcons))
-		HideControl(m_cbCustomIcons);
-
-	if (!pWndIgnore || (pWndIgnore != &m_cbRecurrence))
-		HideControl(m_cbRecurrence);
+	CInputListCtrl::HideAllControls(pWndIgnore);
 }
 
 void CTDLFindTaskExpressionListCtrl::OnTimeChange()

@@ -12,6 +12,7 @@
 #include "..\shared\InputListCtrl.h"
 #include "..\shared\AutoComboBox.h"
 #include "..\shared\CheckComboBox.h"
+#include "..\shared\DateTimeCtrlEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -76,6 +77,7 @@ protected:
 
 	CAutoComboBox m_cbSingleSelection;
 	CCheckComboBox m_cbMultiSelection;
+	CDateTimeCtrlEx m_dtc;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -86,6 +88,8 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnComboCloseUp(UINT /*nCtrlID*/) { HideAllControls(); }
+	afx_msg void OnDateCloseUp(UINT /*nCtrlID*/, NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) { HideAllControls(); }
 
 	DECLARE_MESSAGE_MAP()
 
@@ -107,6 +111,7 @@ protected:
 	CWnd* GetEditControl(int nRow, int nCol);
 	void PrepareMultiSelCombo(int nRow, int nCol, const CStringArray& aValues);
 	void PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues);
+	void HideAllControls(const CWnd* pWndIgnore = NULL);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 };

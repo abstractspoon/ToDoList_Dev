@@ -33,6 +33,7 @@ enum
 {
 	IDC_SINGLESEL_COMBO = 1000,
 	IDC_MULTISEL_COMBO,
+	IDC_DATE_CTRL,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -73,6 +74,9 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_DROPFILES()
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
+
+	ON_NOTIFY_RANGE(DTN_CLOSEUP, 0, 0xffff, OnDateCloseUp)
+	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -99,6 +103,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create edit fields
 	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO);
 	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO);
+	CreateControl(m_dtc, IDC_DATE_CTRL);
 	
 	return 0;
 }
@@ -128,7 +133,7 @@ void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILIT
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
 {
-	BOOL bAdd = m_vis.IsEditFieldVisible(nAttribID);
+	BOOL bAdd = (m_vis.IsEditFieldVisible(nAttribID) && (nAttribID != TDCA_PROJECTNAME));
 
 	if (!bAdd)
 	{
@@ -264,6 +269,9 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_FILELINK:
 	case TDCA_RISK:
 	case TDCA_VERSION:
+	case TDCA_DONETIME:
+	case TDCA_DUETIME:
+	case TDCA_STARTTIME:
 		return ILCT_DROPLIST;
 
 		// Browse-like fields
@@ -333,6 +341,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	}
 
 	// All else
+	ASSERT(0);
 	return ILCT_TEXT;
 }
 
@@ -362,6 +371,15 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 		case TDCA_LOCK:
 			return TRUE;
+
+		case TDCA_STARTTIME:
+			return !GetItemText(FindItemFromData(TDCA_STARTDATE), VALUE_COL).IsEmpty();
+
+		case TDCA_DUETIME:
+			return !GetItemText(FindItemFromData(TDCA_DUEDATE), VALUE_COL).IsEmpty();
+
+		case TDCA_DONETIME:
+			return !GetItemText(FindItemFromData(TDCA_DONEDATE), VALUE_COL).IsEmpty();
 	}
 
 	if (m_taskCtrl.SelectionHasLocked())
@@ -1075,8 +1093,6 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 	case TDCA_VERSION:
 		return &m_cbSingleSelection;
 
-		break;
-
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
 	case TDCA_TAGS:
@@ -1088,6 +1104,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 	case TDCA_FLAG:
 	case TDCA_ICON:
 	case TDCA_LOCK:
+		// Not required
 		return NULL;
 
 	case TDCA_COST:
@@ -1109,7 +1126,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
 	case TDCA_STARTDATE:
-		break;
+		return &m_dtc;
 
 	case TDCA_DONETIME:
 	case TDCA_DUETIME:
@@ -1213,6 +1230,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	}
 	else
 	{
+		// Handle all attributes not handled by the base class
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
 
 		switch (nAttribID)
@@ -1305,6 +1323,14 @@ void CTDLTaskAttributeListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 			}
 			break;
 		}
-
 	}
+}
+
+void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
+{
+	HideControl(m_dtc, pWndIgnore);
+	HideControl(m_cbMultiSelection, pWndIgnore);
+	HideControl(m_cbSingleSelection, pWndIgnore);
+
+	CInputListCtrl::HideAllControls(pWndIgnore);
 }

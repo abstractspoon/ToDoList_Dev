@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
+	ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnSelItemChanged)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnEditEnd)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
@@ -96,6 +97,11 @@ void CInputListCtrl::InitState()
 const CColumnData2* CInputListCtrl::GetColumnData(int nCol) const
 {
 	return static_cast<const CColumnData2*>(CEnListCtrl::GetColumnData(nCol)); 
+}
+
+void CInputListCtrl::HideAllControls(const CWnd* pWndIgnore) 
+{ 
+	HideControl(m_editBox); 
 }
 
 void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
@@ -1027,12 +1033,25 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 		m_nItemLastSelected = -1;
 		m_nColLastSelected = -1;
 	}
+	else
+	{
+		HideAllControls();
+	}
 
 	CRect rItem;
 	GetItemRect(GetCurSel(), rItem, LVIR_BOUNDS);
 	InvalidateRect(rItem, FALSE);
 
 	CEnListCtrl::OnKillFocus(pNewWnd);
+}
+
+BOOL CInputListCtrl::OnSelItemChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	HideAllControls();
+
+	*pResult = 0;
+
+	return FALSE; // continue routing
 }
 
 BOOL CInputListCtrl::SetCellText(int nRow, int nCol, const CString& sText)
@@ -1402,13 +1421,28 @@ int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CInputListCtrl::HideControl(CWnd& ctrl)
+void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 {
-	if (ctrl.IsWindowVisible())
+	if (pWndIgnore == this)
+		return;
+
+	if (pWndIgnore == &ctrl)
+		return;
+
+	if (!ctrl.GetSafeHwnd())
+		return;
+	
+	if (!ctrl.IsWindowVisible())
+		return;
+
+	if (pWndIgnore && ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
-		ctrl.ShowWindow(SW_HIDE);
-		ctrl.EnableWindow(FALSE);
+		if (pWndIgnore->GetSafeHwnd() == (HWND)ctrl.SendMessage(DTM_GETMONTHCAL))
+			return;
 	}
+
+	ctrl.ShowWindow(SW_HIDE);
+	ctrl.EnableWindow(FALSE);
 }
 
 void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol)

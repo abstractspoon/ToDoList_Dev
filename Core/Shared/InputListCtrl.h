@@ -140,6 +140,7 @@ protected:
 	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 		
@@ -157,13 +158,14 @@ protected:
 	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected); 
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
+	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
 	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
 	void CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles = DTS_SHORTDATEFORMAT);
 	void PostCreateControl(CWnd& ctrl);
-	void HideControl(CWnd& ctrl);
+	void HideControl(CWnd& ctrl, const CWnd* pWndIgnore = NULL);
 	void ShowControl(CWnd& ctrl, int nRow, int nCol);
 
 	BOOL IsDuplicateRow(CString sRow, int nRowToIgnore) const;
