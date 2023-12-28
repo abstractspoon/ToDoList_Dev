@@ -480,7 +480,7 @@ protected:
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	CEnEdit m_eExternalID;
 	CFileComboBox m_cbFileLink;
-	CMaskEdit m_ePercentDone, m_eCost;
+	CMaskEdit m_ePercentDone;//, m_eCost;
 	CPopupEditCtrl m_eTaskName;
 	CSpinButtonCtrl m_spinPercent;
 	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;

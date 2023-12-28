@@ -252,7 +252,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	
 	// set up number masks
 	m_ePercentDone.SetMask(_T("0123456789"));
-	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
+//	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add 'clock' button to 'time spent'
 	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
@@ -284,7 +284,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ALLOCTO, m_cbAllocTo);
 	DDX_Control(pDX, IDC_CATEGORY, m_cbCategory);
 	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
-	DDX_Control(pDX, IDC_COST, m_eCost);
+//	DDX_Control(pDX, IDC_COST, m_eCost);
 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
 	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
 	DDX_Control(pDX, IDC_DONETIME, m_cbTimeDone);

@@ -981,7 +981,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		break;
 
 	case TDCA_COST:
-		m_editBox.SetMask(_T("-0123456789."), ME_LOCALIZEDECIMAL);
+		m_editBox.SetMask(_T("-0123456789.@"), ME_LOCALIZEDECIMAL);
 		break;
 
 	case TDCA_PERCENT:
