@@ -981,6 +981,7 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues)
 {
+	m_cbMultiSelection.ResetContent();
 	m_cbMultiSelection.AddStrings(aDefValues);
 	m_cbMultiSelection.AddUniqueItems(aUserValues);
 
@@ -992,6 +993,7 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 
 void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues)
 {
+	m_cbSingleSelection.ResetContent();
 	m_cbSingleSelection.AddStrings(aDefValues);
 	m_cbSingleSelection.AddUniqueItems(aUserValues);
 
