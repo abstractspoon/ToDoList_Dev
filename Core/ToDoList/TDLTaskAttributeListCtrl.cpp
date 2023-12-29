@@ -111,7 +111,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create edit fields
 	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
 	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
-	CreateControl(m_dtc, IDC_DATE_CTRL);
+	CreateControl(m_dtc, IDC_DATE_CTRL, DTS_SHOWNONE);
 	
 	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
@@ -1291,7 +1291,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	}
 	else if (pCtrl != NULL)
 	{
-		ShowControl(*pCtrl, nRow, nCol);
+		ShowControl(*pCtrl, nRow, nCol, bBtnClick);
 		return;
 	}
 

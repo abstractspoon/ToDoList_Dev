@@ -788,8 +788,25 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 
 	switch (nType)
 	{
-		case ILCT_DROPLIST:
 		case ILCT_DATE:
+			if (CThemed::AreControlsThemed())
+			{
+				// Draw underlying button
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+
+				// Draw date drop arrow
+				CThemed th;
+				th.Open(this, _T("DATEPICKER"));
+
+				th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, DPSCBR_NORMAL, rButton);
+			}
+			else
+			{
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
+			}
+			break;
+
+		case ILCT_DROPLIST:
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
 			break;
 					
@@ -797,6 +814,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
+				// Draw arrow
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 
 				UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
@@ -808,7 +826,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
-				// Make rect sides even for better centering of ellipsis
+				// Draw ellipsis
 				rButton.left += (rButton.Width() % 2);
 				rButton.top += (rButton.Height() % 2);
 
@@ -844,39 +862,43 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	
 	GetCellRect(nRow, nCol, rButton);
 
-	// tweaks
 	switch (nType)
 	{
-		case ILCT_BROWSE:
-			rButton.left = (rButton.right - BTN_WIDTH);
+	case ILCT_BROWSE:
+	case ILCT_POPUPMENU:
+		rButton.left = (rButton.right - BTN_WIDTH);
+		break;
 
-			// Windows 10 (maybe Windows 8/8.1) shrinks buttons
-			// by a pixel all round which looks inconsistent
-			// with all other controls so we experiment with
-			// enlarging the button appropriately
-			if (COSVersion() >= OSV_WIN8)
-				rButton.InflateRect(1, 1);
-			break;
+	case ILCT_DROPLIST:
+		rButton.left = (rButton.right - BTN_WIDTH);
+		break;
 
-		case ILCT_DROPLIST:
-		case ILCT_DATE:
-			rButton.left = (rButton.right - BTN_WIDTH);
-			break;
+	case ILCT_DATE:
+		rButton.left = (rButton.right - (BTN_WIDTH * 2));
+		break;
 
-		case ILCT_POPUPMENU:
-			rButton.right++;
-			rButton.left = (rButton.right - BTN_WIDTH - 2);
-			rButton.top--;
-			break;
+	case ILCT_CHECK:
+		rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
+		rButton.right = (rButton.left + BTN_WIDTH);
+		break;
 
-		case ILCT_CHECK:
-			rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
-			rButton.right = (rButton.left + BTN_WIDTH);
-			break;
+	default:
+		rButton.SetRectEmpty();
+		return FALSE;
+	}
 
-		default:
-			rButton.SetRectEmpty();
-			return FALSE;
+	// Windows 10 (maybe Windows 8/8.1) shrinks buttons
+	// by a pixel all round which looks inconsistent
+	// with all other controls so we experiment with
+	// enlarging the button appropriately
+	switch (nType)
+	{
+	case ILCT_BROWSE:
+	case ILCT_DATE:
+	case ILCT_POPUPMENU:
+		if (COSVersion() >= OSV_WIN8)
+			rButton.InflateRect(1, 1);
+		break;
 	}
 
 	return TRUE;
@@ -1445,7 +1467,7 @@ void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 	ctrl.EnableWindow(FALSE);
 }
 
-void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol)
+void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 {
 	PrepareControl(ctrl, nRow, nCol);
 	ScrollCellIntoView(nRow, nCol);
@@ -1463,8 +1485,13 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol)
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
 	{
-		CComboBox* pCombo = (CComboBox*)&ctrl;
-		pCombo->ShowDropDown(TRUE);
+		if (bBtnClick || !ctrl.GetDlgItem(1001))
+			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
+	}
+	else if (ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
+	{
+		if (bBtnClick)
+			ctrl.PostMessage(WM_SYSKEYDOWN, VK_DOWN, 0);
 	}
 }
 
@@ -1521,7 +1548,7 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 	CRect rWnd;
 	ctrl.GetClientRect(rWnd);
 
-	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height()));
+	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height() - 2));
 }
 
 CPopupEditCtrl* CInputListCtrl::GetEditControl()

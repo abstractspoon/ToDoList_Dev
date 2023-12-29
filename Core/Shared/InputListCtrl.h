@@ -148,7 +148,7 @@ protected:
 	void CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles = DTS_SHORTDATEFORMAT);
 	void PostCreateControl(CWnd& ctrl);
 	void HideControl(CWnd& ctrl, const CWnd* pWndIgnore = NULL);
-	void ShowControl(CWnd& ctrl, int nRow, int nCol);
+	void ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick = FALSE);
 	CPopupEditCtrl* GetEditControl();
 
 	BOOL IsDuplicateRow(CString sRow, int nRowToIgnore) const;
