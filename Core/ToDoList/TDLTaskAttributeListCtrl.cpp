@@ -1400,7 +1400,8 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
-	HideControl(*GetDlgItem(nCtrlID)); 
+	SetFocus();
+	HideControl(*GetDlgItem(nCtrlID));
 }
 
 void CTDLTaskAttributeListCtrl::OnComboEditCancel(UINT nCtrlID)
