@@ -727,7 +727,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				ASSERT(nPriority >= 0);
 
 				CRect rBox(rText);
-				rBox.DeflateRect(0, 1, 0, 2);
+				rBox.DeflateRect(0, 3);
 				rBox.right = rBox.left + rBox.Height();
 
 				COLORREF crFill = m_taskCtrl.GetPriorityColor(nPriority);
