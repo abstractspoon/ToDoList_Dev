@@ -990,7 +990,7 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 {
 	HideControl(m_cbAttributes);
 
-	// update item text and keep data store synched
+	// update item text and keep data store synced
 	int nRow = GetCurSel();
 
 	if (nRow != CB_ERR)
