@@ -472,10 +472,10 @@ protected:
 	};
 	
 protected:
-	CAutoComboBox m_cbAllocBy;
+//	CAutoComboBox m_cbAllocBy;
 	CAutoComboBox m_cbStatus;
-	CAutoComboBox m_cbVersion;
-	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
+	//CAutoComboBox m_cbVersion;
+// 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
 	CColourPickerEx m_cpColour;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	//CEnEdit m_eExternalID;
@@ -551,7 +551,7 @@ protected:
 	CString m_sProjectName;
 	//CString m_sExternalID;
 	CString m_sOccurrence;
-	CString m_sVersion;
+	//CString m_sVersion;
 	double m_dTrackedTimeElapsedHours;
 	int m_nPriority;
 	int m_nRisk;
@@ -644,22 +644,22 @@ protected:
 	afx_msg void OnSelChangeDueTime();
 	afx_msg void OnSelChangeDoneTime();
 	afx_msg void OnSelChangeStartTime();
-	afx_msg void OnSelChangeAllocTo();
-	afx_msg void OnSelChangeAllocBy();
+// 	afx_msg void OnSelChangeAllocTo();
+// 	afx_msg void OnSelChangeAllocBy();
 	afx_msg void OnSelChangeStatus();
-	afx_msg void OnSelChangeVersion();
-	afx_msg void OnSelChangeCategory();
+// 	afx_msg void OnSelChangeTag();
+// 	afx_msg void OnSelChangeVersion();
+// 	afx_msg void OnSelChangeCategory();
 	afx_msg void OnSelChangeFileLinkPath();
 	afx_msg void OnCancelChangeFileLinkPath();
-	afx_msg void OnSelChangeTag();
-	afx_msg void OnSelCancelAllocTo();
-	afx_msg void OnSelCancelCategory();
-	afx_msg void OnSelCancelTag();
-	afx_msg void OnSelCancelAllocBy();
+// 	afx_msg void OnSelCancelAllocTo();
+// 	afx_msg void OnSelCancelCategory();
+	afx_msg void OnSelCancelStatus();	
+// 	afx_msg void OnSelCancelVersion();
+// 	afx_msg void OnSelCancelTag();
+// 	afx_msg void OnSelCancelAllocBy();
 	afx_msg void OnSelCancelPriority();
 	afx_msg void OnSelCancelRisk();
-	afx_msg void OnSelCancelStatus();	
-	afx_msg void OnSelCancelVersion();
 	afx_msg void OnChangeRisk();
 	afx_msg void OnChangeProjectName();
 	afx_msg void OnChangeCost();
@@ -886,8 +886,8 @@ protected:
 
 	BOOL SetTextChange(TDC_ATTRIBUTE nAttrib, CString& sItem, const CString& sNewItem, UINT nIDC, const CDWordArray& aModTaskIDs, CAutoComboBox* pCombo = NULL);
 	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, CDWordArray& aModTaskIDs);
-	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, CCheckComboBox& combo);
-	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo);
+	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend);
+	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aAll, const CStringArray& aChecked, const CStringArray& aMixed);
 
 	BOOL SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOOL bTitle, BOOL bNotifyNoErrors);
 	BOOL SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker);

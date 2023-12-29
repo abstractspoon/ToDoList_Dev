@@ -69,11 +69,11 @@ protected:
 	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual int GetExtraListboxWidth() const;
+	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;
 	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
-	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
 	
 	BOOL HasItemNone() const { return (GetItemNoneIndex() != CB_ERR); }

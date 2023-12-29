@@ -88,7 +88,7 @@ protected:
 	int m_nAutoColWidth;
 	CString m_sAutoRowPrompt;
 	CString m_sAutoColPrompt;
-	int m_nLastEditRow, m_nLastEditCol, m_nLastEdit;
+	int m_nLastEditRow, m_nLastEditCol, m_nLastEditResult;
 	BOOL m_bAllowDuplication;
 	BOOL m_bNotifyDuplicates;
 	CPoint m_ptPopupPos;
@@ -142,7 +142,6 @@ protected:
 	virtual void InitState();
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
-	virtual CPopupEditCtrl* GetEditControl();
 
 	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
 	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
@@ -150,6 +149,7 @@ protected:
 	void PostCreateControl(CWnd& ctrl);
 	void HideControl(CWnd& ctrl, const CWnd* pWndIgnore = NULL);
 	void ShowControl(CWnd& ctrl, int nRow, int nCol);
+	CPopupEditCtrl* GetEditControl();
 
 	BOOL IsDuplicateRow(CString sRow, int nRowToIgnore) const;
 	BOOL IsDuplicateCol(CString sCol, int nColToIgnore) const;

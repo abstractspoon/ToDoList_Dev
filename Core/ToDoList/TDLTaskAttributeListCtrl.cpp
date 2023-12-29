@@ -12,6 +12,7 @@
 
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\HoldRedraw.h"
+#include "..\shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,15 +51,15 @@ static CContentMgr s_mgrContent;
 CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
 													 const CToDoCtrlData& data,
 													 const CTDCImageList& ilIcons,
-													 const TDCAUTOLISTDATA& tld,
 													 const TDCCOLEDITVISIBILITY& defaultVis)
 	:
 	m_taskCtrl(taskCtrl),
 	m_data(data),
 	m_ilIcons(ilIcons),
-	m_tld(tld),
 	m_formatter(data, s_mgrContent),
-	m_vis(defaultVis)
+	m_vis(defaultVis),
+	m_cbSingleSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+	m_cbMultiSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE)
 {
 }
 
@@ -78,7 +79,13 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_NOTIFY_RANGE(DTN_CLOSEUP, 0, 0xffff, OnDateCloseUp)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
+
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
+
+	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnAutoComboAddDelete)
+	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMDELETED, OnAutoComboAddDelete)
+
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -102,10 +109,13 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	Populate();
 
 	// Create edit fields
-	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO);
-	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO);
+	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
+	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
 	CreateControl(m_dtc, IDC_DATE_CTRL);
 	
+	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
+	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
+
 	return 0;
 }
 
@@ -416,6 +426,24 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
+void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault) 
+{ 
+	m_tldAll.RemoveItems(m_tldDefault, TDCA_ALL);
+	m_tldAll.AppendUnique(tldDefault, TDCA_ALL);
+
+	m_tldDefault.Copy(tldDefault, TDCA_ALL);
+}
+
+void CTDLTaskAttributeListCtrl::SetAutoListData(const TDCAUTOLISTDATA& tldAll)
+{
+	m_tldAll.Copy(tldAll, TDCA_ALL);
+}
+
+void CTDLTaskAttributeListCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const
+{
+	tld.Copy(m_tldAll, nAttribID);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 {
 	CHoldRedraw hr(*this);
@@ -449,18 +477,19 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 
 	switch (nAttribID)
 	{
-	case TDCA_EXTERNALID: sValue = m_taskCtrl.GetSelectedTaskExtID(); break;
-	case TDCA_ALLOCBY: sValue = m_taskCtrl.GetSelectedTaskAllocBy(); break;
-	case TDCA_STATUS: sValue = m_taskCtrl.GetSelectedTaskStatus(); break;
-	case TDCA_VERSION: sValue = m_taskCtrl.GetSelectedTaskVersion(); break;
-	case TDCA_ICON: sValue = m_taskCtrl.GetSelectedTaskIcon(); break;
-	case TDCA_FLAG: sValue = m_taskCtrl.IsSelectedTaskFlagged() ? _T("+") : _T(""); break;
-	case TDCA_LOCK: sValue = m_taskCtrl.IsSelectedTaskLocked() ? _T("+") : _T(""); break;
+	case TDCA_EXTERNALID:	sValue = m_taskCtrl.GetSelectedTaskExtID(); break;
+	case TDCA_ALLOCBY:		sValue = m_taskCtrl.GetSelectedTaskAllocBy(); break;
+	case TDCA_STATUS:		sValue = m_taskCtrl.GetSelectedTaskStatus(); break;
+	case TDCA_VERSION:		sValue = m_taskCtrl.GetSelectedTaskVersion(); break;
+	case TDCA_ICON:			sValue = m_taskCtrl.GetSelectedTaskIcon(); break;
 
-	case TDCA_ALLOCTO: m_taskCtrl.GetSelectedTaskAllocTo(aMatched, aMixed); break;
-	case TDCA_CATEGORY: m_taskCtrl.GetSelectedTaskCategories(aMatched, aMixed); break;
-	case TDCA_TAGS: m_taskCtrl.GetSelectedTaskTags(aMatched, aMixed); break;
-	case TDCA_FILELINK: m_taskCtrl.GetSelectedTaskFileLinks(aMatched, FALSE); break;
+	case TDCA_FLAG:			sValue = m_taskCtrl.IsSelectedTaskFlagged() ? _T("+") : _T(""); break;
+	case TDCA_LOCK:			sValue = m_taskCtrl.IsSelectedTaskLocked() ? _T("+") : _T(""); break;
+
+	case TDCA_ALLOCTO:		m_taskCtrl.GetSelectedTaskAllocTo(aMatched, aMixed); break;
+	case TDCA_CATEGORY:		m_taskCtrl.GetSelectedTaskCategories(aMatched, aMixed); break;
+	case TDCA_TAGS:			m_taskCtrl.GetSelectedTaskTags(aMatched, aMixed); break;
+	case TDCA_FILELINK:		m_taskCtrl.GetSelectedTaskFileLinks(aMatched, FALSE); break;
 
 	case TDCA_COST:
 		{
@@ -676,11 +705,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		break;
 	}
 
-	if (aMatched.GetSize())
-		sValue = Misc::FormatArray(aMatched);
-
-	if (aMixed.GetSize())
-		sValue += ('|' + Misc::FormatArray(aMixed));
+	if (aMatched.GetSize() || aMixed.GetSize())
+		sValue = FormatMultiSelItems(aMatched, aMixed);
 
 	SetItemText(nRow, VALUE_COL, sValue);
 }
@@ -745,14 +771,14 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
 		case TDCA_TAGS:
-			if (!sText.IsEmpty())
 			{
-				// Only draw the matching items
-				CString sMatched(sText), sMixed;
-				Misc::Split(sMatched, sMixed, '|');
+				int nMixed = sText.Find('|');
 
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
-				return;
+				if (nMixed != -1)
+				{
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText.Left(nMixed), crText, nDrawTextFlags);
+					return;
+				}
 			}
 			break;
 
@@ -932,6 +958,16 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
 
+CString CTDLTaskAttributeListCtrl::FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed)
+{
+	CString sValue = Misc::FormatArray(aMatched);
+	
+	if (aMixed.GetSize())
+		sValue += ('|' + Misc::FormatArray(aMixed));
+
+	return sValue;
+}
+
 int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed)
 {
 	CString sMatched(sValues), sMixed;
@@ -943,37 +979,45 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 	return aMatched.GetSize();
 }
 
-void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, int nCol, const CStringArray& aValues)
+void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues)
 {
-	CStringArray aMatched, aMixed;
-	ParseMultiSelValues(GetItemText(nRow, nCol), aMatched, aMixed);
+	m_cbMultiSelection.AddStrings(aDefValues);
+	m_cbMultiSelection.AddUniqueItems(aUserValues);
 
-	m_cbMultiSelection.AddStrings(aValues);
+	CStringArray aMatched, aMixed;
+	ParseMultiSelValues(GetItemText(nRow, VALUE_COL), aMatched, aMixed);
+
 	m_cbMultiSelection.SetChecked(aMatched, aMixed);
 }
 
-void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues)
+void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues)
 {
-	m_cbSingleSelection.AddStrings(aValues);
-	m_cbSingleSelection.SelectString(-1, GetItemText(nRow, nCol));
+	m_cbSingleSelection.AddStrings(aDefValues);
+	m_cbSingleSelection.AddUniqueItems(aUserValues);
+
+	m_cbSingleSelection.SelectString(-1, GetItemText(nRow, VALUE_COL));
 }
 
 void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 {
-	ASSERT(nCol == VALUE_COL);
+	if (nCol != VALUE_COL)
+	{
+		ASSERT(0);
+		return;
+	}
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	switch (nAttribID)
 	{
-	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, nCol, m_tld.aAllocBy);	break;
-	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, nCol, m_tld.aStatus);	break;
-	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, nCol, m_tld.aVersion);	break;
+	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, m_tldDefault.aAllocBy, m_tldAll.aAllocBy);	break;
+	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, m_tldDefault.aStatus, m_tldAll.aStatus);	break;
+	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, m_tldDefault.aVersion, m_tldAll.aVersion);	break;
 		break;
 
-	case TDCA_ALLOCTO:	PrepareMultiSelCombo(nRow, nCol, m_tld.aAllocTo);	break;
-	case TDCA_CATEGORY: PrepareMultiSelCombo(nRow, nCol, m_tld.aCategory);	break;
-	case TDCA_TAGS:		PrepareMultiSelCombo(nRow, nCol, m_tld.aTags);		break;
+	case TDCA_ALLOCTO:	PrepareMultiSelCombo(nRow, m_tldDefault.aAllocTo, m_tldAll.aAllocTo);	break;
+	case TDCA_CATEGORY: PrepareMultiSelCombo(nRow, m_tldDefault.aCategory, m_tldAll.aCategory);	break;
+	case TDCA_TAGS:		PrepareMultiSelCombo(nRow, m_tldDefault.aTags, m_tldAll.aTags);			break;
 
 	case TDCA_FILELINK: 
 		break;
@@ -1093,19 +1137,16 @@ CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const
 }
 
 
-CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
+CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 {
 	// Sanity check
-	if ((nItem < 0) || (nItem > GetItemCount()) || (nCol != VALUE_COL))
+	if ((nRow < 0) || (nRow > GetItemCount()))
 		return NULL;
 
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	switch (nAttribID)
 	{
-	case TDCA_EXTERNALID:
-		break;
-
 	case TDCA_ALLOCBY:
 	case TDCA_STATUS:
 	case TDCA_VERSION:
@@ -1125,9 +1166,12 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 		// Not required
 		return NULL;
 
+	case TDCA_EXTERNALID:
 	case TDCA_COST:
 	case TDCA_PERCENT:
-		return CInputListCtrl::GetEditControl();
+	case TDCA_TASKNAME:
+		// Use base class edit control
+		break;
 
 	case TDCA_PRIORITY:
 		break;
@@ -1158,10 +1202,6 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 		break;
 
 	case TDCA_DEPENDENCY:
-		break;
-
-	case TDCA_TASKNAME:
-		// TODO
 		break;
 
 	default:
@@ -1235,25 +1275,33 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nItem, int nCol)
 	return CInputListCtrl::GetEditControl();
 }
 
-void CTDLTaskAttributeListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
+void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 {
-	if (!CanEditCell(nItem, nCol))
+	if (!CanEditCell(nRow, nCol))
 		return;
 
-	if (GetEditControl(nItem, nCol))
+	CWnd* pCtrl = GetEditControl(nRow);
+
+	if (pCtrl == CInputListCtrl::GetEditControl())
 	{
-		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+		CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
+		return;
+	}
+	else if (pCtrl != NULL)
+	{
+		ShowControl(*pCtrl, nRow, nCol);
 		return;
 	}
 
 	// All other attributes not handled by the base class
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	switch (nAttribID)
 	{
 	case TDCA_FLAG:
 	case TDCA_LOCK:
-		SetItemText(nItem, VALUE_COL, GetItemText(nItem, VALUE_COL).IsEmpty() ? _T("+") : _T(""));
+		// Toggle checkbox
+		SetItemText(nRow, VALUE_COL, GetItemText(nRow, VALUE_COL).IsEmpty() ? _T("+") : _T(""));
 		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
 		break;
 
@@ -1357,10 +1405,76 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 
 void CTDLTaskAttributeListCtrl::OnComboEditCancel(UINT nCtrlID)
 {
+	int nRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	CWnd* pCombo = GetDlgItem(nCtrlID);
+
+	HideControl(*pCombo);
+
+	// Revert any combo changes
+	PrepareControl(*pCombo, nRow, VALUE_COL);
+}
+
+void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
+{
 	HideControl(*GetDlgItem(nCtrlID));
+
+	int nRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	CString sNewItemText;
+
+	switch (nCtrlID)
+	{
+	case IDC_SINGLESEL_COMBO:
+		sNewItemText = CDialogHelper::GetSelectedItem(m_cbSingleSelection);
+		break;
+
+	case IDC_MULTISEL_COMBO:
+		{
+			CStringArray aMatched, aMixed;
+			m_cbMultiSelection.GetChecked(aMatched, aMixed);
+
+			sNewItemText = FormatMultiSelItems(aMatched, aMixed);
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		return;
+	}
+
+	if (sNewItemText != GetItemText(nRow, VALUE_COL))
+	{
+		SetItemText(nRow, VALUE_COL, sNewItemText);
+		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::OnDateCloseUp(UINT /*nCtrlID*/, NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
 { 
 	HideControl(m_dtc); 
+}
+
+LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
+{
+	int nRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nAttribID)
+	{
+	case TDCA_ALLOCBY:	CDialogHelper::GetComboBoxItems(m_cbSingleSelection, m_tldAll.aAllocBy);break;
+	case TDCA_STATUS:	CDialogHelper::GetComboBoxItems(m_cbSingleSelection, m_tldAll.aStatus);	break;
+	case TDCA_VERSION:	CDialogHelper::GetComboBoxItems(m_cbSingleSelection, m_tldAll.aVersion);break;
+
+	case TDCA_ALLOCTO:	CDialogHelper::GetComboBoxItems(m_cbMultiSelection, m_tldAll.aAllocTo);	break;
+	case TDCA_CATEGORY: CDialogHelper::GetComboBoxItems(m_cbMultiSelection, m_tldAll.aCategory);break;
+	case TDCA_TAGS:		CDialogHelper::GetComboBoxItems(m_cbMultiSelection, m_tldAll.aTags);	break;
+
+	case TDCA_FILELINK:
+		return 0L;
+	}
+
+	return GetParent()->SendMessage(WM_TDCN_AUTOITEMADDEDDELETED, nAttribID);
 }

@@ -175,17 +175,17 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_bModified(FALSE), 
 	m_bSplitting(FALSE),
 	m_calculator(m_data),
-	m_cbAllocBy(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+// 	m_cbAllocBy(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+// 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+// 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
 	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+// 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
-	m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+	//m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
 	m_cfDefault(cfDefault),
@@ -229,7 +229,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_aCustomAttribDefs,
 			   mgrContent),
 	// TODO
-	m_lcAttributes(m_taskTree, m_data, m_ilTaskIcons, m_tldAll, visDefault)
+	m_lcAttributes(m_taskTree, m_data, m_ilTaskIcons, visDefault)
 {
 	SetBordersDLU(0);
 	
@@ -280,9 +280,9 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 {
 	CRuntimeDlg::DoDataExchange(pDX);
 	
-	DDX_Control(pDX, IDC_ALLOCBY, m_cbAllocBy);
-	DDX_Control(pDX, IDC_ALLOCTO, m_cbAllocTo);
-	DDX_Control(pDX, IDC_CATEGORY, m_cbCategory);
+// 	DDX_Control(pDX, IDC_ALLOCBY, m_cbAllocBy);
+// 	DDX_Control(pDX, IDC_ALLOCTO, m_cbAllocTo);
+// 	DDX_Control(pDX, IDC_CATEGORY, m_cbCategory);
 	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
 //	DDX_Control(pDX, IDC_COST, m_eCost);
 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
@@ -300,10 +300,10 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STARTDATE, m_dtcStart);
 	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
 	DDX_Control(pDX, IDC_STATUS, m_cbStatus);
-	DDX_Control(pDX, IDC_TAGS, m_cbTags);
+// 	DDX_Control(pDX, IDC_TAGS, m_cbTags);
 	DDX_Control(pDX, IDC_TIMEEST, m_eTimeEstimate);
 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
-	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
+// 	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
 
 //	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
@@ -315,9 +315,9 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeEstimate, m_timeEstimate);
 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeSpent, m_timeSpent);
 
-	m_cbAllocBy.DDX(pDX, m_sAllocBy);
+// 	m_cbAllocBy.DDX(pDX, m_sAllocBy);
 	m_cbStatus.DDX(pDX, m_sStatus);
-	m_cbVersion.DDX(pDX, m_sVersion);
+// 	m_cbVersion.DDX(pDX, m_sVersion);
 	m_cbPriority.DDX(pDX, m_nPriority);
 	m_cbRisk.DDX(pDX, m_nRisk);
 	m_eRecurrence.DDX(pDX, m_tRecurrence);
@@ -396,13 +396,14 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
+	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoComboAddDelete)
 
 	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
 	ON_CBN_EDITCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
-	ON_CBN_SELCHANGE(IDC_ALLOCBY, OnSelChangeAllocBy)
-	ON_CBN_SELCHANGE(IDC_ALLOCTO, OnSelChangeAllocTo)
-	ON_CBN_SELCHANGE(IDC_CATEGORY, OnSelChangeCategory)
+// 	ON_CBN_SELCHANGE(IDC_ALLOCBY, OnSelChangeAllocBy)
+// 	ON_CBN_SELCHANGE(IDC_ALLOCTO, OnSelChangeAllocTo)
+// 	ON_CBN_SELCHANGE(IDC_CATEGORY, OnSelChangeCategory)
 	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
 	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
@@ -410,21 +411,21 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
 	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
-	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
-	ON_CBN_SELCHANGE(IDC_VERSION, OnSelChangeVersion)
+// 	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
+//	ON_CBN_SELCHANGE(IDC_VERSION, OnSelChangeVersion)
 	ON_CBN_SELENDCANCEL(IDC_FILEPATH, OnCancelChangeFileLinkPath)
-	ON_CBN_SELENDCANCEL(IDC_ALLOCTO, OnSelCancelAllocTo)
-	ON_CBN_SELENDCANCEL(IDC_CATEGORY, OnSelCancelCategory)
-	ON_CBN_SELENDCANCEL(IDC_TAGS, OnSelCancelTag)
-	ON_CBN_SELENDCANCEL(IDC_ALLOCBY, OnSelCancelAllocBy)
+// 	ON_CBN_SELENDCANCEL(IDC_ALLOCTO, OnSelCancelAllocTo)
+// 	ON_CBN_SELENDCANCEL(IDC_CATEGORY, OnSelCancelCategory)
+// 	ON_CBN_SELENDCANCEL(IDC_TAGS, OnSelCancelTag)
+// 	ON_CBN_SELENDCANCEL(IDC_ALLOCBY, OnSelCancelAllocBy)
 	ON_CBN_SELENDCANCEL(IDC_PRIORITY, OnSelCancelPriority)
 	ON_CBN_SELENDCANCEL(IDC_RISK, OnSelCancelRisk)
 	ON_CBN_SELENDCANCEL(IDC_STATUS, OnSelCancelStatus)
-	ON_CBN_SELENDCANCEL(IDC_VERSION, OnSelCancelVersion)
+//	ON_CBN_SELENDCANCEL(IDC_VERSION, OnSelCancelVersion)
 	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelChangeCommentsType)
-	ON_EN_CHANGE(IDC_COST, OnChangeCost)
+//	ON_EN_CHANGE(IDC_COST, OnChangeCost)
 	ON_EN_CHANGE(IDC_DEPENDS, OnChangeDependency)
-	ON_EN_CHANGE(IDC_EXTERNALID, OnChangeExternalID)
+//	ON_EN_CHANGE(IDC_EXTERNALID, OnChangeExternalID)
 	ON_EN_CHANGE(IDC_PERCENT, OnChangePercent)
 	ON_EN_CHANGE(IDC_PROJECTNAME, OnChangeProjectName)
 	ON_EN_CHANGE(IDC_RECURRENCE, OnChangeRecurrence)
@@ -438,8 +439,6 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DONEDATE, OnCompletionDatechange)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DUEDATE, OnDueDatechange)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_STARTDATE, OnStartDatechange)
-	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnAutoComboAddDelete)
-	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMDELETED, OnAutoComboAddDelete)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragAbort)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGDROP, OnTreeDragDrop)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
@@ -613,12 +612,12 @@ BOOL CToDoCtrl::OnInitDialog()
 	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	
 	// disable translation of auto-combos
-	CLocalizer::EnableTranslation(m_cbAllocBy, FALSE);
-	CLocalizer::EnableTranslation(m_cbAllocTo, FALSE);
-	CLocalizer::EnableTranslation(m_cbCategory, FALSE);
-	CLocalizer::EnableTranslation(m_cbStatus, FALSE);
-	CLocalizer::EnableTranslation(m_cbVersion, FALSE);
-	CLocalizer::EnableTranslation(m_cbTags, FALSE);
+// 	CLocalizer::EnableTranslation(m_cbAllocBy, FALSE);
+// 	CLocalizer::EnableTranslation(m_cbAllocTo, FALSE);
+// 	CLocalizer::EnableTranslation(m_cbCategory, FALSE);
+// 	CLocalizer::EnableTranslation(m_cbStatus, FALSE);
+// 	CLocalizer::EnableTranslation(m_cbVersion, FALSE);
+// 	CLocalizer::EnableTranslation(m_cbTags, FALSE);
 
 	// percent spin
 	m_spinPercent.SetRange(0, 100);
@@ -694,12 +693,12 @@ void CToDoCtrl::InitEditPrompts()
 //	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
 	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_NONE);
 
-	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOBODY);
-	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_NOBODY);
-	m_mgrPrompts.SetComboPrompt(m_cbCategory, IDS_TDC_NONE);
-	m_mgrPrompts.SetComboPrompt(m_cbTags, IDS_TDC_NONE);
-	m_mgrPrompts.SetComboPrompt(m_cbStatus, IDS_TDC_NONE);
-	m_mgrPrompts.SetComboPrompt(m_cbVersion, IDS_TDC_NONE);
+// 	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOBODY);
+// 	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_NOBODY);
+// 	m_mgrPrompts.SetComboPrompt(m_cbCategory, IDS_TDC_NONE);
+// 	m_mgrPrompts.SetComboPrompt(m_cbTags, IDS_TDC_NONE);
+// 	m_mgrPrompts.SetComboPrompt(m_cbStatus, IDS_TDC_NONE);
+//	m_mgrPrompts.SetComboPrompt(m_cbVersion, IDS_TDC_NONE);
 	
 	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
 	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
@@ -875,7 +874,7 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 int CToDoCtrl::GetDefaultControlHeight() const
 {
 	// To handle DPI scaling better simply use the height of the category combo
-	return GetChildHeight(&m_cbCategory);
+	return GetChildHeight(&m_cbStatus);
 }
 
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
@@ -1282,13 +1281,13 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 		}
 		break;
 		
-	case IDC_ALLOCTO:
-	case IDC_ALLOCBY:
+// 	case IDC_ALLOCTO:
+// 	case IDC_ALLOCBY:
 	case IDC_STATUS:
-	case IDC_CATEGORY:
-	case IDC_TAGS:
+// 	case IDC_CATEGORY:
+// 	case IDC_TAGS:
 	case IDC_PRIORITY:
-	case IDC_VERSION:
+//	case IDC_VERSION:
 	case IDC_RISK:
 	case IDC_FILEPATH:
 		{
@@ -1834,22 +1833,22 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_sAllocBy = GetSelectedTaskAllocBy();
 		m_sStatus = GetSelectedTaskStatus();
 //		m_sExternalID = GetSelectedTaskExtID();
-		m_sVersion = GetSelectedTaskVersion();
+//		m_sVersion = GetSelectedTaskVersion();
 		m_crColour = GetSelectedTaskColor();
 
 		if (m_crColour == 0)
 			m_crColour = CLR_DEFAULT;
 		
-		CStringArray aMatched, aMixed;
-		
-		m_taskTree.GetSelectedTaskAllocTo(aMatched, aMixed);
-		m_cbAllocTo.SetChecked(aMatched, aMixed);
-
-		m_taskTree.GetSelectedTaskCategories(aMatched, aMixed);
-		m_cbCategory.SetChecked(aMatched, aMixed);
-
-		m_taskTree.GetSelectedTaskTags(aMatched, aMixed);
-		m_cbTags.SetChecked(aMatched, aMixed);
+// 		CStringArray aMatched, aMixed;
+// 		
+// 		m_taskTree.GetSelectedTaskAllocTo(aMatched, aMixed);
+// 		m_cbAllocTo.SetChecked(aMatched, aMixed);
+// 
+// 		m_taskTree.GetSelectedTaskCategories(aMatched, aMixed);
+// 		m_cbCategory.SetChecked(aMatched, aMixed);
+// 
+// 		m_taskTree.GetSelectedTaskTags(aMatched, aMixed);
+// 		m_cbTags.SetChecked(aMatched, aMixed);
 
 		// special cases
 		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
@@ -1915,14 +1914,14 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_tRecurrence = TDCRECURRENCE();
 		m_crColour = CLR_DEFAULT;
 
-		m_sAllocBy.Empty();
+// 		m_sAllocBy.Empty();
 		m_sStatus.Empty();
 //		m_sExternalID.Empty();
-		m_sVersion.Empty();
+//		m_sVersion.Empty();
 
-		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
-		m_cbCategory.CheckAll(CCBC_UNCHECKED);
-		m_cbTags.CheckAll(CCBC_UNCHECKED);
+// 		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
+// 		m_cbCategory.CheckAll(CCBC_UNCHECKED);
+// 		m_cbTags.CheckAll(CCBC_UNCHECKED);
 
 		m_aFileLinks.RemoveAll();
 		m_aDepends.RemoveAll();
@@ -2197,7 +2196,12 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_ALLOCTO:
-		SetSelectedTaskArray(TDCA_ALLOCTO, m_cbAllocTo);
+		{
+			CStringArray aMatched, aMixed;
+			m_lcAttributes.GetAllocTo(aMatched, aMixed);
+
+			SetSelectedTaskArray(TDCA_ALLOCTO, m_tldAll.aAllocTo, aMatched, aMixed);
+		}
 		break;
 		
 	case TDCA_ALLOCBY:
@@ -2216,11 +2220,21 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_CATEGORY:
-		SetSelectedTaskArray(TDCA_CATEGORY, m_cbCategory);
+		{
+			CStringArray aMatched, aMixed;
+			m_lcAttributes.GetCategories(aMatched, aMixed);
+
+			SetSelectedTaskArray(TDCA_CATEGORY, m_tldAll.aCategory, aMatched, aMixed);
+		}
 		break;
 		
 	case TDCA_TAGS:
-		SetSelectedTaskArray(TDCA_TAGS, m_cbTags);
+		{
+			CStringArray aMatched, aMixed;
+			m_lcAttributes.GetTags(aMatched, aMixed);
+
+			SetSelectedTaskArray(TDCA_TAGS, m_tldAll.aTags, aMatched, aMixed);
+		}
 		break;
 		
 	case TDCA_PERCENT:
@@ -2509,55 +2523,60 @@ int CToDoCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) co
 	return tld.Copy(m_tldAll, nAttribID);
 }
 
-void CToDoCtrl::UpdateAutoListData(TDC_ATTRIBUTE nAttrib)
+void CToDoCtrl::UpdateAutoListData(TDC_ATTRIBUTE nAttribID)
 {
-	BOOL bWantAll = (nAttrib == TDCA_ALL);
+	m_lcAttributes.GetAutoListData(m_tldAll, nAttribID);
 
-	if (bWantAll || (nAttrib == TDCA_CATEGORY))
+/*
+	BOOL bWantAll = (nAttribID == TDCA_ALL);
+
+	if (bWantAll || (nAttribID == TDCA_CATEGORY))
 		m_cbCategory.GetItems(m_tldAll.aCategory); 
 	
-	if (bWantAll || (nAttrib == TDCA_ALLOCTO))
+	if (bWantAll || (nAttribID == TDCA_ALLOCTO))
 		m_cbAllocTo.GetItems(m_tldAll.aAllocTo);
 
-	if (bWantAll || (nAttrib == TDCA_ALLOCBY))
+	if (bWantAll || (nAttribID == TDCA_ALLOCBY))
 		m_cbAllocBy.GetItems(m_tldAll.aAllocBy);
 
-	if (bWantAll || (nAttrib == TDCA_STATUS))
+	if (bWantAll || (nAttribID == TDCA_STATUS))
 		m_cbStatus.GetItems(m_tldAll.aStatus);
 
-	if (bWantAll || (nAttrib == TDCA_TAGS))
+	if (bWantAll || (nAttribID == TDCA_TAGS))
 		m_cbTags.GetItems(m_tldAll.aTags);
+*/
 
-	if (bWantAll || (nAttrib == TDCA_VERSION))
-		m_cbVersion.GetItems(m_tldAll.aVersion);
+// 	if (bWantAll || (nAttrib == TDCA_VERSION))
+// 		m_cbVersion.GetItems(m_tldAll.aVersion);
 }
 
 void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
 	// update the combos before copying over the current defaults
+	m_lcAttributes.SetDefaultAutoListData(tld);
 
 	// multi-selection
-	SetDefaultListContent(m_cbAllocTo,	tld.aAllocTo,	m_tldDefault.aAllocTo);
-	SetDefaultListContent(m_cbCategory,	tld.aCategory,	m_tldDefault.aCategory);
-	SetDefaultListContent(m_cbTags,		tld.aTags,		m_tldDefault.aTags);
+// 	SetDefaultListContent(m_cbAllocTo,	tld.aAllocTo,	m_tldDefault.aAllocTo);
+// 	SetDefaultListContent(m_cbCategory,	tld.aCategory,	m_tldDefault.aCategory);
+// 	SetDefaultListContent(m_cbTags,		tld.aTags,		m_tldDefault.aTags);
 
 	// single selection
 	SetDefaultListContent(m_cbStatus,	tld.aStatus,	m_tldDefault.aStatus, TRUE);
-	SetDefaultListContent(m_cbVersion,	tld.aVersion,	m_tldDefault.aVersion, TRUE);
-	SetDefaultListContent(m_cbAllocBy,	tld.aAllocBy,	m_tldDefault.aAllocBy, TRUE);
+// 	SetDefaultListContent(m_cbVersion,	tld.aVersion,	m_tldDefault.aVersion, TRUE);
+// 	SetDefaultListContent(m_cbAllocBy,	tld.aAllocBy,	m_tldDefault.aAllocBy, TRUE);
 
 	// save
 	m_tldDefault.Copy(tld, TDCA_ALL);
 	UpdateAutoListData();
 	
 	// restore selection
-	OnSelCancelAllocTo();
-	OnSelCancelCategory();
-	OnSelCancelTag();
+// 	OnSelCancelAllocTo();
+// 	OnSelCancelCategory();
+// 	OnSelCancelTag();
 
-	m_cbAllocBy.SelectString(0, m_sAllocBy);
+// 	m_cbAllocBy.SelectString(0, m_sAllocBy);
 	m_cbStatus.SelectString(0, m_sStatus);
-	m_cbVersion.SelectString(0, m_sVersion);
+//	m_cbVersion.SelectString(0, m_sVersion);
 }
 
 void CToDoCtrl::SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, 
@@ -2602,13 +2621,13 @@ BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bRe
 	switch (nListAttribID)
 	{
 	// multi-selection
-	case TDCA_CATEGORY: return SetAutoComboReadOnly(m_cbCategory,	bReadOnly, m_tldDefault.aCategory, FALSE);
-	case TDCA_ALLOCTO:	return SetAutoComboReadOnly(m_cbAllocTo,	bReadOnly, m_tldDefault.aAllocTo, FALSE);
-	case TDCA_TAGS:		return SetAutoComboReadOnly(m_cbTags,		bReadOnly, m_tldDefault.aTags, FALSE);
+// 	case TDCA_CATEGORY: return SetAutoComboReadOnly(m_cbCategory,	bReadOnly, m_tldDefault.aCategory, FALSE);
+// 	case TDCA_ALLOCTO:	return SetAutoComboReadOnly(m_cbAllocTo,	bReadOnly, m_tldDefault.aAllocTo, FALSE);
+// 	case TDCA_TAGS:		return SetAutoComboReadOnly(m_cbTags,		bReadOnly, m_tldDefault.aTags, FALSE);
 
 	// single selection
-	case TDCA_ALLOCBY:	return SetAutoComboReadOnly(m_cbAllocBy,	bReadOnly, m_tldDefault.aAllocBy, TRUE);
-	case TDCA_VERSION:	return SetAutoComboReadOnly(m_cbVersion,	bReadOnly, m_tldDefault.aVersion, TRUE);
+// 	case TDCA_ALLOCBY:	return SetAutoComboReadOnly(m_cbAllocBy,	bReadOnly, m_tldDefault.aAllocBy, TRUE);
+//	case TDCA_VERSION:	return SetAutoComboReadOnly(m_cbVersion,	bReadOnly, m_tldDefault.aVersion, TRUE);
 	case TDCA_STATUS:	return SetAutoComboReadOnly(m_cbStatus,		bReadOnly, m_tldDefault.aStatus, TRUE);
 	}
 
@@ -4455,7 +4474,7 @@ BOOL CToDoCtrl::SetTextChange(TDC_ATTRIBUTE nAttrib, CString& sItem, const CStri
 
 BOOL CToDoCtrl::SetSelectedTaskAllocTo(const CStringArray& aAllocTo, BOOL bAppend)
 {
-	return SetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo, bAppend, m_cbAllocTo);
+	return SetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo, bAppend/*, m_cbAllocTo*/);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
@@ -4478,7 +4497,14 @@ BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
 			return FALSE;
 	}
 	
-	return SetTextChange(TDCA_ALLOCBY, m_sAllocBy, sAllocBy, IDC_ALLOCBY, aModTaskIDs, &m_cbAllocBy);
+	if (aModTaskIDs.GetSize())
+	{
+		SetModified(TDCA_ALLOCBY, aModTaskIDs);
+		return TRUE;
+	}
+
+	return FALSE;
+//	return SetTextChange(TDCA_ALLOCBY, m_sAllocBy, sAllocBy, IDC_ALLOCBY, aModTaskIDs, &m_cbAllocBy);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
@@ -4501,7 +4527,14 @@ BOOL CToDoCtrl::SetSelectedTaskVersion(const CString& sVersion)
 			return FALSE;
 	}
 	
-	return SetTextChange(TDCA_VERSION, m_sVersion, sVersion, IDC_VERSION, aModTaskIDs, &m_cbVersion);
+	if (aModTaskIDs.GetSize())
+	{
+		SetModified(TDCA_VERSION, aModTaskIDs);
+		return TRUE;
+	}
+
+	return FALSE;
+//	return SetTextChange(TDCA_VERSION, m_sVersion, sVersion, IDC_VERSION, aModTaskIDs, &m_cbVersion);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
@@ -4551,42 +4584,15 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 
-									BOOL bAppend, CCheckComboBox& combo)
+BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend)
 {
 	CDWordArray aModTaskIDs;
 
-	if (SET_FAILED == SetSelectedTaskArray(nAttrib, aItems, bAppend, aModTaskIDs))
+	if (SET_CHANGE != SetSelectedTaskArray(nAttrib, aItems, bAppend, aModTaskIDs))
 		return FALSE;
-	
-	if (aModTaskIDs.GetSize())
-	{
-		// Update combo to show new selection
-		ASSERT(aModTaskIDs.GetSize());
 
-		switch (nAttrib)
-		{
-		case TDCA_CATEGORY:	
-		case TDCA_TAGS:			
-		case TDCA_ALLOCTO:		
-			if (bAppend)
-			{
-				CStringArray aTaskItems;
-				m_data.GetTaskArray(aModTaskIDs[0], nAttrib, aTaskItems);
-
-				combo.SetChecked(aTaskItems);
-			}
-			else
-			{
-				combo.SetChecked(aItems);
-			}
-			break;
-
-		default:
-			ASSERT(0);
-			return FALSE;
-		}
-	}
+	ASSERT(aModTaskIDs.GetSize());
+	m_lcAttributes.RefreshSelectedTaskValue(nAttrib);
 
 	return TRUE;
 }
@@ -4619,16 +4625,18 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 	return SET_CHANGE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox& combo)
+BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aAll, 
+									 const CStringArray& aChecked, const CStringArray& aMixed)
 {
-	CStringArray aChecked, aUnchecked, aTaskItems;
+	CStringArray aUnchecked, aTaskItems;
 	BOOL bMergeItems = FALSE;
 
-	combo.GetChecked(aChecked, CCBC_CHECKED);
-		
-	if (combo.IsAnyChecked(CCBC_MIXED))
+	if (aMixed.GetSize())
 	{
-		combo.GetChecked(aUnchecked, CCBC_UNCHECKED);
+		aUnchecked.Copy(aAll);
+		Misc::RemoveItems(aChecked, aUnchecked);
+		Misc::RemoveItems(aMixed, aUnchecked);
+
 		bMergeItems = TRUE;
 	}
 	
@@ -4665,12 +4673,12 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CCheckComboBox
 
 BOOL CToDoCtrl::SetSelectedTaskCategories(const CStringArray& aCats, BOOL bAppend)
 {
-	return SetSelectedTaskArray(TDCA_CATEGORY, aCats, bAppend, m_cbCategory);
+	return SetSelectedTaskArray(TDCA_CATEGORY, aCats, bAppend/*, m_cbCategory*/);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend)
 {
-	return SetSelectedTaskArray(TDCA_TAGS, aTags, bAppend, m_cbTags);
+	return SetSelectedTaskArray(TDCA_TAGS, aTags, bAppend/*, m_cbTags*/);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend)
@@ -4692,17 +4700,18 @@ BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bA
 
 	CDWordArray aModTaskIDs;
 
-	if (SET_FAILED == SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend, aModTaskIDs))
+	if (SET_CHANGE != SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend, aModTaskIDs))
 		return FALSE;
 	
-	if (aModTaskIDs.GetSize())
-	{
-		m_aFileLinks.Copy(aFileLinks);
+// 	if (aModTaskIDs.GetSize())
+// 	{
+// 		m_aFileLinks.Copy(aFileLinks);
+// 
+// 		if (!bCtrlEdited)
+// 			m_cbFileLink.SetFileList(aFileLinks);
+// 	}
 
-		if (!bCtrlEdited)
-			m_cbFileLink.SetFileList(aFileLinks);
-	}
-
+	m_lcAttributes.RefreshSelectedTaskValue(TDCA_FILELINK);
 	return TRUE;
 }
 
@@ -6199,22 +6208,26 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
-	TDCAUTOLISTDATA tld;
+	if (tasks.GetAutoListData(m_tldAll))
+		m_lcAttributes.SetAutoListData(m_tldAll);
 
-	if (tasks.GetAutoListData(tld))
-	{
-		int nNumAdded = 0;
 
-		nNumAdded += AddUserListContent(m_cbCategory,	tld.aCategory);
-		nNumAdded += AddUserListContent(m_cbTags,		tld.aTags);
-		nNumAdded += AddUserListContent(m_cbStatus,		tld.aStatus);
-		nNumAdded += AddUserListContent(m_cbAllocTo,	tld.aAllocTo);
-		nNumAdded += AddUserListContent(m_cbAllocBy,	tld.aAllocBy);
-		nNumAdded += AddUserListContent(m_cbVersion,	tld.aVersion);
+// 	TDCAUTOLISTDATA tld;
+// 
+// 	if (tasks.GetAutoListData(tld))
+// 	{
+// 		int nNumAdded = 0;
 
-		if (nNumAdded)
-			UpdateAutoListData();
-	}
+// 		nNumAdded += AddUserListContent(m_cbCategory,	tld.aCategory);
+// 		nNumAdded += AddUserListContent(m_cbTags,		tld.aTags);
+// 		nNumAdded += AddUserListContent(m_cbStatus,		tld.aStatus);
+// 		nNumAdded += AddUserListContent(m_cbAllocTo,	tld.aAllocTo);
+// 		nNumAdded += AddUserListContent(m_cbAllocBy,	tld.aAllocBy);
+		//nNumAdded += AddUserListContent(m_cbVersion,	tld.aVersion);
+
+// 		if (nNumAdded)
+// 			UpdateAutoListData();
+// 	}
 }
 
 int CToDoCtrl::AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems)
@@ -6271,7 +6284,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 	CTDCCustomAttributeUIHelper::RebuildEditControls(this,
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,
-													 IDC_VERSION,
+													 IDC_COLOURLABEL,
 													 HasStyle(TDCS_SHOWFILELINKTHUMBNAILS),
 													 m_aCustomControls);
 
@@ -7012,12 +7025,19 @@ HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEI
 	// add unique items to comboboxes
 	if (bAddToCombos)
 	{
-		m_cbAllocTo.AddUniqueItems(pTDI->aAllocTo);
-		m_cbAllocBy.AddUniqueItem(pTDI->sAllocBy);
-		m_cbStatus.AddUniqueItem(pTDI->sStatus);
-		m_cbCategory.AddUniqueItems(pTDI->aCategories);
-		m_cbTags.AddUniqueItems(pTDI->aTags);
-		m_cbVersion.AddUniqueItem(pTDI->sVersion);
+		Misc::AddUniqueItems(pTDI->aAllocTo, m_tldAll.aAllocTo);
+		Misc::AddUniqueItems(pTDI->aCategories, m_tldAll.aCategory);
+		Misc::AddUniqueItems(pTDI->aTags, m_tldAll.aTags);
+
+		Misc::AddUniqueItem(pTDI->sAllocBy, m_tldAll.aAllocBy);
+		Misc::AddUniqueItem(pTDI->sStatus, m_tldAll.aStatus);
+		Misc::AddUniqueItem(pTDI->sVersion, m_tldAll.aVersion);
+// 		m_cbAllocTo.AddUniqueItems();
+// 		m_cbAllocBy.AddUniqueItem(pTDI->);
+// 		m_cbStatus.AddUniqueItem(pTDI->);
+// 		m_cbCategory.AddUniqueItems(pTDI->);
+// 		m_cbTags.AddUniqueItems(pTDI->);
+		//m_cbVersion.AddUniqueItem(pTDI->);
 	}
 
 	return hti;
@@ -8025,22 +8045,22 @@ TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 
 LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 {
-	UINT nCtrlID = LOWORD(wp);
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)LOWORD(wp);
 
-	switch (nCtrlID)
+	switch (nAttribID)
 	{
-	case IDC_FILEPATH:
-		// Note: parent doesn't need to know about this
-		return 0L;
+// 	case TDCA_FILELINK:
+// 		// Note: parent doesn't need to know about this
+// 		return 0L;
 		
-	case IDC_CATEGORY: 
-	case IDC_TAGS:
-	case IDC_STATUS:
-	case IDC_ALLOCTO:
-	case IDC_ALLOCBY:
-	case IDC_VERSION:
+	case TDCA_CATEGORY: 
+	case TDCA_TAGS:
+	case TDCA_STATUS:
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_VERSION:
 		{
-			TDC_ATTRIBUTE nAttribID = TDC::MapCtrlIDToAttribute(nCtrlID);
+			//TDC_ATTRIBUTE nAttribID = TDC::MapCtrlIDToAttribute(nCtrlID);
 
 			UpdateAutoListData(nAttribID);
 			GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, nAttribID);
@@ -8048,9 +8068,10 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 		break;
 
 	default:
-		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID))
+//		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nCtrl = m_aCustomControls.Find(nCtrlID);
+			int nCtrl = m_aCustomControls.Find(nAttribID);
 
 			if (nCtrl != -1)
 			{
@@ -8068,11 +8089,13 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 	}
 
 	// mark ourselves as modified because we now save the lists to the taskfile
-	SetModified(TRUE);
+	if (HasStyle(TDCS_SAVEUIVISINTASKLIST))
+		SetModified(TRUE);
 
 	return 0L;
 }
 
+/*
 void CToDoCtrl::OnSelChangeAllocTo()
 {
 	UpdateTask(TDCA_ALLOCTO);
@@ -8083,19 +8106,25 @@ void CToDoCtrl::OnSelChangeAllocBy()
 	UpdateTask(TDCA_ALLOCBY);
 }
 
-void CToDoCtrl::OnSelChangeStatus()
-{
-	UpdateTask(TDCA_STATUS);
-}
-
 void CToDoCtrl::OnSelChangeVersion()
 {
 	UpdateTask(TDCA_VERSION);
 }
 
+void CToDoCtrl::OnSelChangeTag()
+{
+	UpdateTask(TDCA_TAGS);
+}
+
 void CToDoCtrl::OnSelChangeCategory()
 {
 	UpdateTask(TDCA_CATEGORY);
+}
+*/
+
+void CToDoCtrl::OnSelChangeStatus()
+{
+	UpdateTask(TDCA_STATUS);
 }
 
 void CToDoCtrl::OnSelChangeFileLinkPath()
@@ -8109,11 +8138,7 @@ void CToDoCtrl::OnCancelChangeFileLinkPath()
 	m_cbFileLink.SetFileList(m_aFileLinks);
 }
 
-void CToDoCtrl::OnSelChangeTag()
-{
-	UpdateTask(TDCA_TAGS);
-}
-
+/*
 void CToDoCtrl::OnSelCancelAllocTo()
 {
 	// restore previous combo state
@@ -8146,6 +8171,12 @@ void CToDoCtrl::OnSelCancelAllocBy()
 	m_cbAllocBy.SelectString(0, GetSelectedTaskAllocBy());
 }
 
+void CToDoCtrl::OnSelCancelVersion()
+{
+	m_cbVersion.SelectString(0, GetSelectedTaskVersion());
+}
+*/
+
 void CToDoCtrl::OnSelCancelPriority()
 {
 	m_cbPriority.SetSelectedPriority(GetSelectedTaskPriority());
@@ -8159,11 +8190,6 @@ void CToDoCtrl::OnSelCancelRisk()
 void CToDoCtrl::OnSelCancelStatus()
 {
 	m_cbStatus.SelectString(0, GetSelectedTaskStatus());
-}
-
-void CToDoCtrl::OnSelCancelVersion()
-{
-	m_cbVersion.SelectString(0, GetSelectedTaskVersion());
 }
 
 void CToDoCtrl::OnChangeTimeEstimate()
@@ -10381,26 +10407,30 @@ BOOL CToDoCtrl::Flush()
 		{
 			EndLabelEdit(FALSE);
 		}
-		else if (CDialogHelper::IsChildOrSame(&m_cbCategory, pFocus))
+		else if (CDialogHelper::IsChildOrSame(&m_lcAttributes, pFocus))
 		{
-			m_cbCategory.Flush();
-		}		
-		else if (CDialogHelper::IsChildOrSame(&m_cbTags, pFocus))
-		{
-			m_cbTags.Flush();
-		}		
-		else if (CDialogHelper::IsChildOrSame(&m_cbStatus, pFocus))
-		{
-			m_cbStatus.Flush();
-		}		
-		else if (CDialogHelper::IsChildOrSame(&m_cbAllocBy, pFocus))
-		{
-			m_cbAllocBy.Flush();
-		}		
-		else if (CDialogHelper::IsChildOrSame(&m_cbAllocTo, pFocus))
-		{
-			m_cbAllocTo.Flush();
+			m_lcAttributes.EndEdit();
 		}
+// 		else if (CDialogHelper::IsChildOrSame(&m_cbCategory, pFocus))
+// 		{
+// 			m_cbCategory.Flush();
+// 		}		
+// 		else if (CDialogHelper::IsChildOrSame(&m_cbTags, pFocus))
+// 		{
+// 			m_cbTags.Flush();
+// 		}		
+// 		else if (CDialogHelper::IsChildOrSame(&m_cbStatus, pFocus))
+// 		{
+// 			m_cbStatus.Flush();
+// 		}		
+// 		else if (CDialogHelper::IsChildOrSame(&m_cbAllocBy, pFocus))
+// 		{
+// 			m_cbAllocBy.Flush();
+// 		}		
+// 		else if (CDialogHelper::IsChildOrSame(&m_cbAllocTo, pFocus))
+// 		{
+// 			m_cbAllocTo.Flush();
+// 		}
 		else
 		{
 			CTDCCustomAttributeUIHelper::FlushEditControl(pFocus, this, m_aCustomControls);

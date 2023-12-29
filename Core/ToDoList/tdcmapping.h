@@ -243,16 +243,16 @@ namespace TDC
 		
 		switch (nAttrib)
 		{
-		case TDCA_ALLOCBY:			return IDC_ALLOCBY;
-		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
-		case TDCA_CATEGORY:			return IDC_CATEGORY;
-		case TDCA_COST:				return IDC_COST;
+//		case TDCA_ALLOCBY:			return IDC_ALLOCBY;
+// 		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
+// 		case TDCA_CATEGORY:			return IDC_CATEGORY;
+// 		case TDCA_COST:				return IDC_COST;
 		case TDCA_DEPENDENCY:		return IDC_DEPENDS;
 		case TDCA_DONEDATE:			return IDC_DONEDATE; 
 		case TDCA_DONETIME:			return IDC_DONETIME;
 		case TDCA_DUEDATE:			return IDC_DUEDATE;
 		case TDCA_DUETIME:			return IDC_DUETIME;
-		case TDCA_EXTERNALID:		return IDC_EXTERNALID;
+// 		case TDCA_EXTERNALID:		return IDC_EXTERNALID;
 		case TDCA_FILELINK:			return IDC_FILEPATH;
 		case TDCA_PERCENT:			return IDC_PERCENT;
 		case TDCA_PRIORITY:			return IDC_PRIORITY;
@@ -261,11 +261,11 @@ namespace TDC
 		case TDCA_STARTDATE:		return IDC_STARTDATE;
 		case TDCA_STARTTIME:		return IDC_STARTTIME;
 		case TDCA_STATUS:			return IDC_STATUS;
-		case TDCA_TAGS:				return IDC_TAGS;
+// 		case TDCA_TAGS:				return IDC_TAGS;
 		case TDCA_TASKNAME:			return IDC_TASKTREECTRL;
 		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
 		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
-		case TDCA_VERSION:			return IDC_VERSION;
+// 		case TDCA_VERSION:			return IDC_VERSION;
 		case TDCA_COLOR:			return IDC_COLOUR;
 
 		// don't have controls
@@ -296,16 +296,16 @@ namespace TDC
 	{
 		switch (nCtrlID)
 		{
-		case IDC_ALLOCBY:		return TDCA_ALLOCBY;		
-		case IDC_ALLOCTO:		return TDCA_ALLOCTO;			
-		case IDC_CATEGORY:		return TDCA_CATEGORY;			
-		case IDC_COST:			return TDCA_COST;				
+//		case IDC_ALLOCBY:		return TDCA_ALLOCBY;		
+// 		case IDC_ALLOCTO:		return TDCA_ALLOCTO;			
+// 		case IDC_CATEGORY:		return TDCA_CATEGORY;			
+// 		case IDC_COST:			return TDCA_COST;				
 		case IDC_DEPENDS:		return TDCA_DEPENDENCY;		
 		case IDC_DONEDATE:		return TDCA_DONEDATE;			
 		case IDC_DONETIME:		return TDCA_DONETIME;			
 		case IDC_DUEDATE:		return TDCA_DUEDATE;			
 		case IDC_DUETIME:		return TDCA_DUETIME;			
-		case IDC_EXTERNALID:	return TDCA_EXTERNALID;		
+// 		case IDC_EXTERNALID:	return TDCA_EXTERNALID;		
 		case IDC_FILEPATH:		return TDCA_FILELINK;			
 		case IDC_PERCENT:		return TDCA_PERCENT;			
 		case IDC_PRIORITY:		return TDCA_PRIORITY;			
@@ -314,11 +314,11 @@ namespace TDC
 		case IDC_STARTDATE:		return TDCA_STARTDATE;		
 		case IDC_STARTTIME:		return TDCA_STARTTIME;		
 		case IDC_STATUS:		return TDCA_STATUS;			
-		case IDC_TAGS:			return TDCA_TAGS;				
+// 		case IDC_TAGS:			return TDCA_TAGS;				
 		case IDC_TASKTREECTRL:	return TDCA_TASKNAME;			
 		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			
 		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
-		case IDC_VERSION:		return TDCA_VERSION;			
+// 		case IDC_VERSION:		return TDCA_VERSION;			
 		case IDC_COLOUR:		return TDCA_COLOR;	
 			
 		default:

@@ -1176,7 +1176,7 @@ int CInputListCtrl::GetLastEdit(int* pRow, int* pCol)
 	if (pCol)
 		*pCol = m_nLastEditCol;
 
-	return m_nLastEdit;
+	return m_nLastEditResult;
 }
 
 BOOL CInputListCtrl::GetCurSel(int& nRow, int& nCol) const
@@ -1679,13 +1679,13 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 
 		m_nLastEditRow = m_nEditItem;
 		m_nLastEditCol = m_nEditCol;
-		m_nLastEdit = *pResult;
+		m_nLastEditResult = *pResult;
 	}
 	else
 	{
 		m_nLastEditRow = -1;
 		m_nLastEditCol = -1;
-		m_nLastEdit = NOTVALID;
+		m_nLastEditResult = NOTVALID;
 	}
 
 	m_nEditCol = m_nEditItem = -1;

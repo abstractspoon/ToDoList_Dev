@@ -30,7 +30,6 @@ public:
 	CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
 							  const CToDoCtrlData& data,
 							  const CTDCImageList& ilIcons,
-							  const TDCAUTOLISTDATA& m_tld,
 							  const TDCCOLEDITVISIBILITY& defaultVis);
 
 	virtual ~CTDLTaskAttributeListCtrl();
@@ -38,6 +37,10 @@ public:
 public:
 	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
 	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
+
+	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
+	void SetAutoListData(const TDCAUTOLISTDATA& tldAll);
+	void GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
 
 	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
@@ -71,11 +74,11 @@ protected:
 	const CTDLTaskCtrlBase& m_taskCtrl;
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
-	const TDCAUTOLISTDATA& m_tld;
 
 	CTDCTaskFormatter m_formatter;
 	TDCCOLEDITVISIBILITY m_vis;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
+	TDCAUTOLISTDATA m_tldAll, m_tldDefault;
 
 	CAutoComboBox m_cbSingleSelection;
 	CCheckComboBox m_cbMultiSelection;
@@ -92,7 +95,10 @@ protected:
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
 	afx_msg void OnComboEditCancel(UINT nCtrlID);
+	afx_msg void OnComboEditChange(UINT nCtrlID);
 	afx_msg void OnDateCloseUp(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
+
+	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -113,13 +119,14 @@ protected:
 
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
-	void PrepareMultiSelCombo(int nRow, int nCol, const CStringArray& aValues);
-	void PrepareSingleSelCombo(int nRow, int nCol, const CStringArray& aValues);
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
-	CWnd* GetEditControl(int nRow, int nCol);
+	CWnd* GetEditControl(int nRow);
 	void RefreshSelectedTaskValue(int nRow);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
+	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 };
 
 /////////////////////////////////////////////////////////////////////////////
