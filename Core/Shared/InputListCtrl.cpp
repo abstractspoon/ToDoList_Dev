@@ -581,12 +581,8 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			CRect rCell;
 			GetCellRect(nItem, nCol, rCell);
 
-			// adjust for button
-			CRect rButton(0, 0, 0, 0), rBack(rCell);
+			CRect rButton, rBack(rCell);
 			BOOL bHasBtn = GetButtonRect(nItem, nCol, rButton);
-
-			if (bHasBtn && (GetCellType(nItem, nCol) != ILCT_CHECK))
-				rBack.right = rButton.left;
 			
 			// fill cell
 			if (bSel && IsSelectionThemed(FALSE))
@@ -887,10 +883,9 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 		return FALSE;
 	}
 
-	// Windows 10 (maybe Windows 8/8.1) shrinks buttons
-	// by a pixel all round which looks inconsistent
-	// with all other controls so we experiment with
-	// enlarging the button appropriately
+	// Windows 10/11 (maybe Windows 8/8.1) shrinks buttons by 
+	// a pixel all round which looks inconsistent with all 
+	// other controls so we expand the button to compensate
 	switch (nType)
 	{
 	case ILCT_BROWSE:
@@ -906,35 +901,12 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 
 BOOL CInputListCtrl::CanDeleteSelectedCell() const
 {
-	return CanDeleteCell(GetCurSel(), m_nCurCol);
+	return CanEditSelectedCell();
 }
 
 BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 {
-	// if readonly or disabled then no
-	if (IsReadOnly() || !IsWindowEnabled())
-		return FALSE;
-
-	if (nRow == -1)
-		return FALSE;
-
-	if (IsColumnEditingDisabled(nCol))
-		return FALSE;
-
-	// don't delete it if its the topleft item
-	if (m_bAutoAddCols && (nRow == 0) && m_bAutoAddRows && (nCol == 0))
-		return FALSE;
-
-	// else can delete it if its not the row prompt
-	if (m_bAutoAddRows && (nCol == 0))
-		return (nRow < GetItemCount() - 1);
-
-	// else can delete it if its not the col prompt
-	if (m_bAutoAddCols && (nRow == 0))
-		return (nCol < GetColumnCount() - 1);
-
-	// else can delete
-	return TRUE;
+	return CanEditCell(nRow, nCol);
 }
 
 BOOL CInputListCtrl::DeleteSelectedCell()
@@ -998,8 +970,11 @@ BOOL CInputListCtrl::IsButtonEnabled(int nRow, int nCol) const
 
 BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 {
-
 	if (nRow == -1 || nCol == -1)
+		return FALSE;
+
+	// if readonly or disabled then no
+	if (IsReadOnly() || !IsWindowEnabled())
 		return FALSE;
 
 	// don't edit it:
@@ -1033,12 +1008,18 @@ BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 
 BOOL CInputListCtrl::CanEditSelectedCell() const
 {
-	return CanEditCell(GetCurSel(), m_nCurCol);
+	int nSelRow, nSelCol;
+
+	if (!GetCurSel(nSelRow, nSelCol))
+		return FALSE;
+
+	return CanEditCell(nSelCol, nSelCol);
 }
 
 void CInputListCtrl::EditSelectedCell()
 {
-	EditCell(GetCurSel(), m_nCurCol, FALSE);
+	if (CanEditSelectedCell())
+		EditCell(GetCurSel(), m_nCurCol, FALSE);
 }
 
 void CInputListCtrl::OnKillFocus(CWnd* pNewWnd) 

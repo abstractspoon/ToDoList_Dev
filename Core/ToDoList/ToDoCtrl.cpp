@@ -128,7 +128,7 @@ enum
 enum // flags for UpdateTask
 {
 	UTF_TIMEUNITSONLY	= 0x01,
-	UTF_RECALCTIME		= 0x02,		
+	UTF_RECALCTIME		= 0x02,	
 };
 
 //////////////////////////////////////////////////////////////////////////////
