@@ -350,7 +350,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 	case ATTRIB_COL:
 	case OPERATOR_COL:
 	case ANDOR_COL:
-		ShowControl(*pEdit, nItem, nCol);
+		ShowControl(*pEdit, nItem, nCol, bBtnClick);
 		break;
 
 	case VALUE_COL:
@@ -361,7 +361,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 			case FT_DATE:
 			case FT_TIMEPERIOD:
 			case FT_RECURRENCE:
-				ShowControl(*pEdit, nItem, nCol);
+				ShowControl(*pEdit, nItem, nCol, bBtnClick);
 				break;
 
 			case FT_DATERELATIVE:
@@ -396,7 +396,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					}
 					else // combo
 					{
-						ShowControl(*pEdit, nItem, nCol);
+						ShowControl(*pEdit, nItem, nCol, bBtnClick);
 						break;		
 					}
 				}
@@ -416,7 +416,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					if (pEdit == &m_editBox)
 						CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 					else
-						ShowControl(*pEdit, nItem, nCol);
+						ShowControl(*pEdit, nItem, nCol, bBtnClick);
 					break;
 				}
 			}

@@ -223,7 +223,7 @@ void CTDLImportExportAttributeMappingListCtrl::EditCell(int nItem, int nCol, BOO
 		(!m_bImporting && nCol == EXPORT_COLUMNID))
 	{
 		PrepareEdit(nItem, nCol);
-		ShowControl(m_cbAttributes, nItem, nCol); 
+		ShowControl(m_cbAttributes, nItem, nCol, bBtnClick);
 	}
 	else
 	{

@@ -353,7 +353,7 @@ void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	switch (nCol)
 	{
 	case DEPEND_COL:
-		ShowControl(m_cbTasks, nItem, nCol);
+		ShowControl(m_cbTasks, nItem, nCol, bBtnClick);
 		break;
 
 	default:
