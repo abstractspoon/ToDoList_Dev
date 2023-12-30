@@ -6152,7 +6152,18 @@ CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 
 BOOL CTDLTaskCtrlBase::SelectedTaskHasDate(TDC_DATE nDate) const
 {
-	return CDateHelper::IsDateSet(GetSelectedTaskDate(nDate));
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+		COleDateTime dtTask = m_data.GetTaskDate(dwTaskID, nDate);
+
+		if (CDateHelper::IsDateSet(dtTask))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
@@ -6170,19 +6181,13 @@ COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
-			COleDateTime dateTask = m_data.GetTaskDate(dwTaskID, nDate);
 			
-			// first check if both dates are not set
-			if (!CDateHelper::IsDateSet(date) && !CDateHelper::IsDateSet(dateTask))
-				continue;
-
-			if (!CDateHelper::IsDateSet(date)) // means dateTask.m_dt != 0
-				return dateTask;
-
-			// else 
-			return date;
+			if (date != m_data.GetTaskDate(dwTaskID, nDate))
+			{
+				CDateHelper::ClearDate(date);
+				break;
+			}
 		}
-		// if we get here then no dates were set
 	}
 	
 	return date;

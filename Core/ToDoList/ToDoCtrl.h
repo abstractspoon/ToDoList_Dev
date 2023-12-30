@@ -477,13 +477,13 @@ protected:
 	//CAutoComboBox m_cbVersion;
 // 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
 	CColourPickerEx m_cpColour;
-	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
+	CDateTimeCtrlEx /*m_dtcStart, m_dtcDue,*/ m_dtcDone;
 	//CEnEdit m_eExternalID;
 	CFileComboBox m_cbFileLink;
 	CMaskEdit m_ePercentDone;//, m_eCost;
 	CPopupEditCtrl m_eTaskName;
 	CSpinButtonCtrl m_spinPercent;
-	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
+	CTimeComboBox /*m_cbTimeDue, m_cbTimeStart,*/ m_cbTimeDone;
 	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
 	
 	CTDLCommentsCtrl m_ctrlComments;
@@ -546,7 +546,7 @@ protected:
 	CTDCReminderHelper m_reminders;
 
 	CStringArray m_aFileLinks;
-	CString m_sAllocBy;
+// 	CString m_sAllocBy;
 	CString m_sStatus;
 	CString m_sProjectName;
 	//CString m_sExternalID;
@@ -622,8 +622,8 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnDueDatechange(NMHDR* pNMHDR, LRESULT* pResult);
+//	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
+//	afx_msg void OnDueDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCompletionDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnGotoFileLink();
 
@@ -641,9 +641,9 @@ protected:
 	afx_msg void OnChangePercent();
 	afx_msg void OnChangeTimeEstimate();
 	afx_msg void OnChangeTimeSpent();
-	afx_msg void OnSelChangeDueTime();
+// 	afx_msg void OnSelChangeDueTime();
 	afx_msg void OnSelChangeDoneTime();
-	afx_msg void OnSelChangeStartTime();
+// 	afx_msg void OnSelChangeStartTime();
 // 	afx_msg void OnSelChangeAllocTo();
 // 	afx_msg void OnSelChangeAllocBy();
 	afx_msg void OnSelChangeStatus();

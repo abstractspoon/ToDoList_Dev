@@ -182,9 +182,9 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
-	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
-	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
+// 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
+// 	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
+// 	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	//m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
@@ -288,8 +288,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
 	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
 	DDX_Control(pDX, IDC_DONETIME, m_cbTimeDone);
-	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
-	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
+// 	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
+// 	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
 //	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
 	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
@@ -297,8 +297,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
 	DDX_Control(pDX, IDC_RECURRENCE, m_eRecurrence);
 	DDX_Control(pDX, IDC_RISK, m_cbRisk);
-	DDX_Control(pDX, IDC_STARTDATE, m_dtcStart);
-	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
+// 	DDX_Control(pDX, IDC_STARTDATE, m_dtcStart);
+// 	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
 	DDX_Control(pDX, IDC_STATUS, m_cbStatus);
 // 	DDX_Control(pDX, IDC_TAGS, m_cbTags);
 	DDX_Control(pDX, IDC_TIMEEST, m_eTimeEstimate);
@@ -401,17 +401,17 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoComboAddDelete)
 
 	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
-	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
-	ON_CBN_EDITCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
+// 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
+// 	ON_CBN_EDITCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 // 	ON_CBN_SELCHANGE(IDC_ALLOCBY, OnSelChangeAllocBy)
 // 	ON_CBN_SELCHANGE(IDC_ALLOCTO, OnSelChangeAllocTo)
 // 	ON_CBN_SELCHANGE(IDC_CATEGORY, OnSelChangeCategory)
 	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
-	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
+// 	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
 	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
 	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
 	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
-	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
+// 	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
 // 	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
 //	ON_CBN_SELCHANGE(IDC_VERSION, OnSelChangeVersion)
@@ -439,8 +439,8 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_MESSAGE(WM_TDC_REFRESHPERCENTSPINVISIBILITY, OnRefreshPercentSpinVisibility)
 	ON_MESSAGE(WM_TDC_FIXUPPOSTDROPSELECTION, OnFixupPostDropSelection)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DONEDATE, OnCompletionDatechange)
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DUEDATE, OnDueDatechange)
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_STARTDATE, OnStartDatechange)
+// 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DUEDATE, OnDueDatechange)
+// 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_STARTDATE, OnStartDatechange)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragAbort)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGDROP, OnTreeDragDrop)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
@@ -629,8 +629,8 @@ BOOL CToDoCtrl::OnInitDialog()
 	m_spinPercent.SetAccel(1, &uda);
 	
 	// init dates
-	m_dtcStart.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
-	m_dtcDue.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
+// 	m_dtcStart.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
+// 	m_dtcDue.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	m_dtcDone.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	
 	m_dtTree.Register(&m_taskTree.Tree(), this);
@@ -702,8 +702,8 @@ void CToDoCtrl::InitEditPrompts()
 // 	m_mgrPrompts.SetComboPrompt(m_cbStatus, IDS_TDC_NONE);
 //	m_mgrPrompts.SetComboPrompt(m_cbVersion, IDS_TDC_NONE);
 	
-	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
-	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
+// 	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
+// 	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
 
 	// tree handles their own
 	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
@@ -1660,19 +1660,19 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		}
 		break;
 		
-	case IDC_DUETIME:
-		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DUE))
-			nCtrlState = RTCS_READONLY;
-		break;
-		
-	case IDC_STARTDATE:
-		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTDATE))
-			nCtrlState = RTCS_READONLY;
-		break;
-		
-	case IDC_STARTTIME:
-		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTTIME))
-			nCtrlState = RTCS_READONLY;
+// 	case IDC_DUETIME:
+// 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DUE))
+// 			nCtrlState = RTCS_READONLY;
+// 		break;
+// 		
+// 	case IDC_STARTDATE:
+// 		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTDATE))
+// 			nCtrlState = RTCS_READONLY;
+// 		break;
+// 		
+// 	case IDC_STARTTIME:
+// 		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTTIME))
+// 			nCtrlState = RTCS_READONLY;
 		break;
 
 	case IDC_DONETIME:
@@ -1832,7 +1832,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		m_nPriority = GetSelectedTaskPriority();
 		m_nRisk = GetSelectedTaskRisk();
-		m_sAllocBy = GetSelectedTaskAllocBy();
+//		m_sAllocBy = GetSelectedTaskAllocBy();
 		m_sStatus = GetSelectedTaskStatus();
 //		m_sExternalID = GetSelectedTaskExtID();
 //		m_sVersion = GetSelectedTaskVersion();
@@ -1998,12 +1998,12 @@ void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 	if (bHasSelection)
 	{
 		COleDateTime dateStart = GetSelectedTaskDate(TDCD_START);
-		SetCtrlDate(m_dtcStart, dateStart);
-		m_cbTimeStart.SetOleTime(dateStart.m_dt);
+// 		SetCtrlDate(m_dtcStart, dateStart);
+// 		m_cbTimeStart.SetOleTime(dateStart.m_dt);
 		
 		COleDateTime dateDue = GetSelectedTaskDate(TDCD_DUE);
-		SetCtrlDate(m_dtcDue, dateDue, dateStart);
-		m_cbTimeDue.SetOleTime(dateDue.m_dt);
+// 		SetCtrlDate(m_dtcDue, dateDue, dateStart);
+// 		m_cbTimeDue.SetOleTime(dateDue.m_dt);
 		
 		COleDateTime dateDone = GetSelectedTaskDate(TDCD_DONE);
 		SetCtrlDate(m_dtcDone, dateDone);
@@ -2018,12 +2018,12 @@ void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 	else
 	{
 		COleDateTime date;
-		SetCtrlDate(m_dtcDue, date);
+//		SetCtrlDate(m_dtcDue, date);
 		SetCtrlDate(m_dtcDone, date);
-		SetCtrlDate(m_dtcStart, date);
+//		SetCtrlDate(m_dtcStart, date);
 
-		m_cbTimeStart.SetOleTime(-1);
-		m_cbTimeDue.SetOleTime(-1);
+// 		m_cbTimeStart.SetOleTime(-1);
+// 		m_cbTimeDue.SetOleTime(-1);
 		m_cbTimeDone.SetOleTime(-1);
 	}
 }
@@ -2123,35 +2123,40 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_DONETIME:
-		SetSelectedTaskDate(TDCD_DONETIME, m_cbTimeDone.GetOleTime(), TRUE);
+ 		SetSelectedTaskDate(TDCD_DONETIME, m_lcAttributes.GetDoneTime(), TRUE);
+// 		SetSelectedTaskDate(TDCD_DONETIME, m_cbTimeDone.GetOleTime(), TRUE);
 		break;
 		
 	case TDCA_STARTDATE:
-		{
-			COleDateTime date;
-			m_dtcStart.GetTime(date);
-			
-			SetSelectedTaskDate(TDCD_STARTDATE, date, TRUE);
-			EnableTimeCtrl(m_cbTimeStart, date);
-		}
+		SetSelectedTaskDate(TDCD_STARTDATE, m_lcAttributes.GetStartDate(), TRUE);
+// 		{
+// 			COleDateTime date;
+// 			m_dtcStart.GetTime(date);
+// 			
+// 			SetSelectedTaskDate(TDCD_STARTDATE, date, TRUE);
+// 			EnableTimeCtrl(m_cbTimeStart, date);
+// 		}
 		break;
 		
 	case TDCA_STARTTIME:
-		SetSelectedTaskDate(TDCD_STARTTIME, m_cbTimeStart.GetOleTime(), TRUE);
+		SetSelectedTaskDate(TDCD_STARTTIME, m_lcAttributes.GetStartTime(), TRUE);
+// 		SetSelectedTaskDate(TDCD_STARTTIME, m_cbTimeStart.GetOleTime(), TRUE);
 		break;
 		
 	case TDCA_DUEDATE:
-		{
-			COleDateTime date;
-			m_dtcDue.GetTime(date);
-			
-			SetSelectedTaskDate(TDCD_DUEDATE, date, TRUE);
-			EnableTimeCtrl(m_cbTimeDue, date);
-		}
+		SetSelectedTaskDate(TDCD_DUEDATE, m_lcAttributes.GetDueDate(), TRUE);
+// 		{
+// 			COleDateTime date;
+// 			m_dtcDue.GetTime(date);
+// 			
+// 			SetSelectedTaskDate(TDCD_DUEDATE, date, TRUE);
+// 			EnableTimeCtrl(m_cbTimeDue, date);
+// 		}
 		break;
 		
 	case TDCA_DUETIME:
-		SetSelectedTaskDate(TDCD_DUETIME, m_cbTimeDue.GetOleTime(), TRUE);
+		SetSelectedTaskDate(TDCD_DUETIME, m_lcAttributes.GetDueTime(), TRUE);
+// 		SetSelectedTaskDate(TDCD_DUETIME, m_cbTimeDue.GetOleTime(), TRUE);
 		break;
 		
 	case TDCA_COST:
@@ -2159,9 +2164,9 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			//SetSelectedTaskCost(m_cost);
 
 			TDCCOST cost;
-			m_lcAttributes.GetCost(cost);
-
-			SetSelectedTaskCost(cost);
+			
+			if (m_lcAttributes.GetCost(cost))
+				SetSelectedTaskCost(cost);
 		}
 		break;
 		
@@ -2306,7 +2311,8 @@ void CToDoCtrl::OnChangeRisk()
 	UpdateTask(TDCA_RISK);
 }
 
-void CToDoCtrl::OnStartDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+/*
+void CToDoCtrl::OnStartDatechange(NMHDR* / *pNMHDR* /, LRESULT* pResult)
 {
 	// ignore this if the date selector is dropped down
 	if (!m_dtcStart.IsCalendarVisible())
@@ -2315,7 +2321,7 @@ void CToDoCtrl::OnStartDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CToDoCtrl::OnDueDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CToDoCtrl::OnDueDatechange(NMHDR* / *pNMHDR* /, LRESULT* pResult)
 {
 	// ignore this if the date selector is dropped down
 	if (!m_dtcDue.IsCalendarVisible())
@@ -2323,6 +2329,7 @@ void CToDoCtrl::OnDueDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	*pResult = 0;
 }
+*/
 
 void CToDoCtrl::OnCompletionDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
@@ -2333,6 +2340,7 @@ void CToDoCtrl::OnCompletionDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
+/*
 void CToDoCtrl::OnSelChangeDueTime()
 {
 	UpdateTask(TDCA_DUETIME);
@@ -2342,6 +2350,7 @@ void CToDoCtrl::OnSelChangeStartTime()
 {
 	UpdateTask(TDCA_STARTTIME);
 }
+*/
 
 void CToDoCtrl::OnSelChangeDoneTime()
 {
@@ -3189,13 +3198,13 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		case TDCD_STARTDATE:
 			// update due date ctrl to be start date if 
 			// no due date has been specified
-			if (bDateEdited && CDateHelper::IsDateSet(date))
-			{
-				if (!CDateHelper::IsDateSet(GetSelectedTaskDate(TDCD_DUE)))
-				{
-					SetCtrlDate(m_dtcDue, 0.0, date);
-				}
-			}
+// 			if (bDateEdited && CDateHelper::IsDateSet(date))
+// 			{
+// 				if (!CDateHelper::IsDateSet(GetSelectedTaskDate(TDCD_DUE)))
+// 				{
+// 					SetCtrlDate(m_dtcDue, 0.0, date);
+// 				}
+// 			}
 			// fall thru
 
 		case TDCD_START:
@@ -3208,12 +3217,12 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		case TDCD_DUEDATE:	
 			// update due date ctrl to be start date if 
 			// no due date has been specified
-			if (bDateEdited && !CDateHelper::IsDateSet(date))
-			{
-				COleDateTime dtStart = GetSelectedTaskDate(TDCD_STARTDATE);
-
-				SetCtrlDate(m_dtcDue, 0.0, dtStart);
-			}
+// 			if (bDateEdited && !CDateHelper::IsDateSet(date))
+// 			{
+// 				COleDateTime dtStart = GetSelectedTaskDate(TDCD_STARTDATE);
+// 
+// 				SetCtrlDate(m_dtcDue, 0.0, dtStart);
+// 			}
 			m_eRecurrence.SetDefaultDate(date);
 			// fall thru
 
@@ -4234,11 +4243,13 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 			// update start/due date?
 			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 			{
-				COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-				SetCtrlDate(m_dtcDue, dtDue, dtDue);
-
-				COleDateTime dtStart = GetSelectedTaskDate(TDCD_START);
-				SetCtrlDate(m_dtcStart, dtStart, dtStart);
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_STARTDATE);
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_DUEDATE);
+// 				COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
+// 				SetCtrlDate(m_dtcDue, dtDue, dtDue);
+// 
+// 				COleDateTime dtStart = GetSelectedTaskDate(TDCD_START);
+// 				SetCtrlDate(m_dtcStart, dtStart, dtStart);
 			}
 		}
 
@@ -4364,8 +4375,9 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			// update due date?
 			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 			{
-				COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-				SetCtrlDate(m_dtcDue, dtDue, dtDue);
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_DUEDATE);
+// 				COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
+// 				SetCtrlDate(m_dtcDue, dtDue, dtDue);
 			}
 		}
 			
@@ -5642,12 +5654,13 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 	case TDCS_SHOWDATESINISO:
 		{
-			DWORD dwStyle = m_cbTimeDue.GetStyle();
-			Misc::SetFlag(dwStyle, TCB_ISO, bEnable);
-
-			m_cbTimeStart.SetStyle(dwStyle);
-			m_cbTimeDue.SetStyle(dwStyle);
-			m_cbTimeDone.SetStyle(dwStyle);
+			m_lcAttributes.RefreshDateFormat();
+// 			DWORD dwStyle = m_cbTimeDue.GetStyle();
+// 			Misc::SetFlag(dwStyle, TCB_ISO, bEnable);
+// 
+// 			m_cbTimeStart.SetStyle(dwStyle);
+// 			m_cbTimeDue.SetStyle(dwStyle);
+// 			m_cbTimeDone.SetStyle(dwStyle);
 		}
 		break;
 

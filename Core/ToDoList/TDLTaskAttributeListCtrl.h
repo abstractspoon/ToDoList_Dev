@@ -13,6 +13,7 @@
 #include "..\shared\AutoComboBox.h"
 #include "..\shared\CheckComboBox.h"
 #include "..\shared\DateTimeCtrlEx.h"
+#include "..\shared\TimeComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -44,6 +45,7 @@ public:
 
 	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
+	void RefreshDateFormat();
 
 	COLORREF GetColor() const;
 	CString GetIcon() const;
@@ -68,6 +70,9 @@ public:
 	COleDateTime GetStartDate() const;
 	COleDateTime GetDueDate() const;
 	COleDateTime GetDoneDate() const;
+	COleDateTime GetStartTime() const;
+	COleDateTime GetDueTime() const;
+	COleDateTime GetDoneTime() const;
 	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
 
 protected:
@@ -82,7 +87,8 @@ protected:
 
 	CAutoComboBox m_cbSingleSelection;
 	CCheckComboBox m_cbMultiSelection;
-	CDateTimeCtrlEx m_dtc;
+	CDateTimeCtrlEx m_datePicker;
+	CTimeComboBox m_cbTimeOfDay;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -116,15 +122,17 @@ protected:
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
-	COleDateTime GetDate(TDC_ATTRIBUTE nDate, TDC_ATTRIBUTE nTime) const;
 
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
-	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
-	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow);
 	void RefreshSelectedTaskValue(int nRow);
+
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
+	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
+	void PrepareTimeCombo(int nRow);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);

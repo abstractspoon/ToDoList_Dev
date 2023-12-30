@@ -84,7 +84,7 @@ BEGIN_MESSAGE_MAP(CFilteredToDoCtrl, CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
-	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
+//	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 END_MESSAGE_MAP()
 
@@ -255,6 +255,7 @@ void CFilteredToDoCtrl::OnDestroy()
 	CTabbedToDoCtrl::OnDestroy();
 }
 
+/*
 void CFilteredToDoCtrl::OnEditChangeDueTime()
 {
 	// need some special hackery to prevent a re-filter in the middle
@@ -272,6 +273,7 @@ void CFilteredToDoCtrl::OnEditChangeDueTime()
 	if (bNeedFullTaskUpdate)
 		m_styles[TDCS_REFILTERONMODIFY] = TRUE;
 }
+*/
 
 BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 {
