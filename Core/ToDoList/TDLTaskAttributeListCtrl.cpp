@@ -111,7 +111,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create edit fields
 	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
 	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
-	CreateControl(m_dtc, IDC_DATE_CTRL, DTS_SHOWNONE);
+	CreateControl(m_dtc, IDC_DATE_CTRL);
 	
 	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
@@ -448,6 +448,10 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 {
 	CHoldRedraw hr(*this);
 
+	// Preserve current selection
+	int nSelRow, nSelCol;
+	GetCurSel(nSelRow, nSelCol);
+
 	int nRow = GetItemCount();
 
 	while (nRow--)
@@ -457,6 +461,9 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 		else
 			RefreshSelectedTaskValue(nRow);
 	}
+
+	// Restore previous selection
+	SetCurSel(nSelRow, nSelCol);
 }
 
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID)
@@ -888,12 +895,16 @@ int CTDLTaskAttributeListCtrl::GetPercent() const
 
 int CTDLTaskAttributeListCtrl::GetPriority() const
 {
-	return _ttoi(GetValueText(TDCA_COLOR));
+	CString sValue = GetValueText(TDCA_PRIORITY);
+
+	return (sValue.IsEmpty() ? TDC_NOPRIORITYORISK : _ttoi(sValue));
 }
 
 int CTDLTaskAttributeListCtrl::GetRisk() const
 {
-	return _ttoi(GetValueText(TDCA_COLOR));
+	CString sValue = GetValueText(TDCA_RISK);
+
+	return (sValue.IsEmpty() ? TDC_NOPRIORITYORISK : _ttoi(sValue));
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetCost(TDCCOST& cost) const
@@ -1480,4 +1491,21 @@ LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
 	}
 
 	return GetParent()->SendMessage(WM_TDCN_AUTOITEMADDEDDELETED, nAttribID);
+}
+
+BOOL CTDLTaskAttributeListCtrl::DeleteSelectedCell()
+{
+	if (m_nCurCol == VALUE_COL)
+	{
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel());
+		
+		if (GetParent()->SendMessage(WM_TDCN_ATTRIBUTEDELETE, nAttribID))
+		{
+			SetItemText(GetCurSel(), m_nCurCol, _T(""));
+			return TRUE;
+		}
+	}
+
+	// else
+	return FALSE;
 }

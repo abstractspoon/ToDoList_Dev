@@ -918,25 +918,23 @@ BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 	if (nRow == -1)
 		return FALSE;
 
+	if (IsColumnEditingDisabled(nCol))
+		return FALSE;
+
 	// don't delete it if its the topleft item
-	if (m_bAutoAddCols && nRow == 0 && m_bAutoAddRows && nCol == 0)
+	if (m_bAutoAddCols && (nRow == 0) && m_bAutoAddRows && (nCol == 0))
 		return FALSE;
 
 	// else can delete it if its not the row prompt
-	else if (m_bAutoAddRows && nCol == 0)
-	{
-		if (nRow < GetItemCount() - 1)
-			return TRUE;
-	}
-	// else can delete it if its not the col prompt
-	else if (m_bAutoAddCols && nRow == 0)
-	{
-		if (nCol < GetColumnCount() - 1)
-			return TRUE;
-	}
+	if (m_bAutoAddRows && (nCol == 0))
+		return (nRow < GetItemCount() - 1);
 
-	// else can't delete
-	return FALSE;
+	// else can delete it if its not the col prompt
+	if (m_bAutoAddCols && (nRow == 0))
+		return (nCol < GetColumnCount() - 1);
+
+	// else can delete
+	return TRUE;
 }
 
 BOOL CInputListCtrl::DeleteSelectedCell()

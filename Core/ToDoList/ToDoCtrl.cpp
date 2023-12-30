@@ -391,11 +391,13 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETATTRIBUTELIST, OnCommentsGetAttributeList)
 
-	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDIT, OnTDCAttributeEdit)
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
+
+	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDIT, OnTDCAttributeEdit)
+	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEDELETE, OnTDCAttributeDelete)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoComboAddDelete)
 
 	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
@@ -609,7 +611,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 
 	// TODO
-	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
+	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	
 	// disable translation of auto-combos
 // 	CLocalizer::EnableTranslation(m_cbAllocBy, FALSE);
@@ -8643,6 +8645,11 @@ LRESULT CToDoCtrl::OnTDCAttributeEdit(WPARAM wParam, LPARAM lParam)
 {
 	UpdateTask((TDC_ATTRIBUTE)wParam, lParam);
 	return 0L;
+}
+
+LRESULT CToDoCtrl::OnTDCAttributeDelete(WPARAM wParam, LPARAM lParam)
+{
+	return ClearSelectedTaskAttribute((TDC_ATTRIBUTE)wParam);
 }
 
 int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const

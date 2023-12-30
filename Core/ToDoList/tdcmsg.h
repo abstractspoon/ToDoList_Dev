@@ -39,6 +39,7 @@ const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANI
 
 // CTDLTaskAttributeListCtrl
 const UINT WM_TDCN_ATTRIBUTEEDIT			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDIT"));			// wParam == <TDC_ATTRIBUTE>, lParam = UTF_ flags
+const UINT WM_TDCN_ATTRIBUTEDELETE			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEDELETE"));		// wParam == <TDC_ATTRIBUTE>
 const UINT WM_TDCN_AUTOITEMADDEDDELETED		= ::RegisterWindowMessage(_T("WM_TDCN_AUTOITEMADDEDDELETED"));	// wParam == <TDC_ATTRIBUTE>
 
 // CTDLFilterBar
