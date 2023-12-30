@@ -358,7 +358,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	if ((nCol == ATTRIB_COL) || m_data.HasStyle(TDCS_READONLY))
+	if (!IsWindowEnabled() || (nCol == ATTRIB_COL) || m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
 	// else
