@@ -1740,10 +1740,10 @@ void CInputListCtrl::NotifyParentEditCell(const CString& sText, int nRow, int nC
 
 void CInputListCtrl::OnCancelEdit()
 {
+	HideAllControls();
+
 	if ((m_nEditItem != -1) && (m_nEditCol != -1))
 	{
-		GetEditControl()->ShowWindow(SW_HIDE);
-
 		m_nCurCol = m_nEditCol;
 		SetCurSel(m_nEditItem, m_nEditCol);
 		m_nEditItem = m_nEditCol = -1;

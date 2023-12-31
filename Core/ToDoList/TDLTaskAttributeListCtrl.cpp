@@ -1672,25 +1672,18 @@ void CTDLTaskAttributeListCtrl::OnDependsChange()
 
 void CTDLTaskAttributeListCtrl::OnCancelEdit()
 {
-	int nRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel());
 
-	if (nRow != -1)
+	// Special handling
+	switch (nAttribID)
 	{
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
-		// Special handling
-		switch (nAttribID)
-		{
-		case TDCA_DEPENDENCY:
-			// Revert changes
-			m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
-			HideControl(m_eDepends);
-			break;
-
-		default:
-			CInputListCtrl::OnCancelEdit();
-		}
+	case TDCA_DEPENDENCY:
+		// Revert changes before default handling
+		m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
+		break;
 	}
+
+	CInputListCtrl::OnCancelEdit();
 }
 
 void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult) 
