@@ -12,8 +12,8 @@
 #include "todoctrldatautils.h"
 #include "todoctrlfind.h"
 #include "tdcstruct.h"
-#include "tdlprioritycombobox.h"
-#include "tdlriskcombobox.h"
+// #include "tdlprioritycombobox.h"
+// #include "tdlriskcombobox.h"
 #include "tdlrecurringtaskedit.h"
 #include "tdltaskdependencyedit.h"
 #include "tdcimagelist.h"
@@ -30,7 +30,7 @@
 #include "..\shared\orderedtreectrl.h"
 #include "..\shared\filecombobox.h"
 #include "..\shared\urlricheditctrl.h"
-#include "..\shared\colorcombobox.h"
+//#include "..\shared\colorcombobox.h"
 #include "..\shared\autocombobox.h"
 #include "..\shared\maskedit.h"
 #include "..\shared\timeedit.h"
@@ -286,7 +286,7 @@ public:
 
 	BOOL CanSetSelectedTaskPercentDoneToToday() const;
 
-	BOOL SetSelectedTaskColor(COLORREF color);
+	BOOL EditSelectedTaskColor();
 	BOOL ClearSelectedTaskColor() { return SetSelectedTaskColor(CLR_NONE); }
 	BOOL SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple);
 	BOOL SetSelectedTaskPercentDoneToToday();
@@ -476,7 +476,7 @@ protected:
 //	CAutoComboBox m_cbStatus;
 	//CAutoComboBox m_cbVersion;
 // 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
-	CColourPickerEx m_cpColour;
+// 	CColourPickerEx m_cpColour;
 //	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	//CEnEdit m_eExternalID;
 	CFileComboBox m_cbFileLink;
@@ -562,7 +562,7 @@ protected:
 	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	TDCRECURRENCE m_tRecurrence;
-	COLORREF m_crColour;
+// 	COLORREF m_crColour;
 	CMapStringToString m_mapMetaData;
 
 	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
@@ -675,6 +675,10 @@ protected:
 	afx_msg LRESULT OnTDCFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTDCGetLinkTooltip(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnTDCTaskAttributeEdited(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
@@ -693,9 +697,6 @@ protected:
 	afx_msg LRESULT OnLabelEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCAttributeEdit(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCAttributeDelete(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
@@ -818,6 +819,7 @@ protected:
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
+	BOOL SetSelectedTaskColor(COLORREF color);
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);

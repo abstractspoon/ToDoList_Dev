@@ -3211,21 +3211,7 @@ void CToDoListWnd::OnUpdateSort(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditTaskcolor() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	if (tdc.CanEditSelectedTask(TDCA_COLOR))
-	{
-		CEnColorDialog dialog(tdc.GetSelectedTaskColor());
-
-		CPreferences prefs;
-		dialog.LoadPreferences(prefs);
-		
-		if (dialog.DoModal() == IDOK)
-		{
-			dialog.SavePreferences(prefs);
-			tdc.SetSelectedTaskColor(dialog.GetColor());
-		}
-	}
+	GetToDoCtrl().EditSelectedTaskColor();
 }
 
 void CToDoListWnd::OnEditCleartaskcolor() 

@@ -266,7 +266,7 @@ namespace TDC
 		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
 		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
 // 		case TDCA_VERSION:			return IDC_VERSION;
-		case TDCA_COLOR:			return IDC_COLOUR;
+// 		case TDCA_COLOR:			return IDC_COLOUR;
 
 		// don't have controls
 		case TDCA_SUBTASKDONE:
@@ -319,7 +319,7 @@ namespace TDC
 		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			
 		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
 // 		case IDC_VERSION:		return TDCA_VERSION;			
-		case IDC_COLOUR:		return TDCA_COLOR;	
+// 		case IDC_COLOUR:		return TDCA_COLOR;	
 			
 		default:
 			if (nCtrlID >= IDC_FIRST_CUSTOMEDITFIELD && (nCtrlID <= IDC_LAST_CUSTOMEDITFIELD))

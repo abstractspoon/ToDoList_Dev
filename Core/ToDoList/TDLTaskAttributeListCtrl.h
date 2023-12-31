@@ -48,8 +48,9 @@ public:
 	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateFormat();
-	void RefreshPriorityColors();
 	void RefreshCompletionStatus();
+
+	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 
 	COLORREF GetColor() const;
 	CString GetIcon() const;

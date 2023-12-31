@@ -203,7 +203,6 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 				DoSort();
 		}
 	}
-
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()

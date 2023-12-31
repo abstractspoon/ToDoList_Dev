@@ -31,6 +31,7 @@
 #include "..\shared\dlgunits.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\enbitmap.h"
+#include "..\shared\encolordialog.h"
 #include "..\shared\enfiledialog.h"
 #include "..\shared\enmenu.h"
 #include "..\shared\enstring.h"
@@ -268,7 +269,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_eDependency.AddButton(ID_DEPENDS_LINK, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 
 	// misc
-	m_cpColour.SetSelectionMode(CP_MODE_TEXT);
+//	m_cpColour.SetSelectionMode(CP_MODE_TEXT);
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
 }
 
@@ -283,7 +284,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	DDX_Control(pDX, IDC_ALLOCBY, m_cbAllocBy);
 // 	DDX_Control(pDX, IDC_ALLOCTO, m_cbAllocTo);
 // 	DDX_Control(pDX, IDC_CATEGORY, m_cbCategory);
-	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
+//	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
 //	DDX_Control(pDX, IDC_COST, m_eCost);
 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
 // 	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
@@ -307,7 +308,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 
 //	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
-	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
+//	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
 
 //	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost);
 	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
@@ -329,8 +330,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	// custom
 	if (pDX->m_bSaveAndValidate)
 	{
-		if (m_crColour == CLR_DEFAULT)
-			m_crColour = CLR_NONE; // unset
+// 		if (m_crColour == CLR_DEFAULT)
+// 			m_crColour = CLR_NONE; // unset
 	}
 	else
 	{
@@ -395,9 +396,10 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
+	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnTDCEditTaskAttribute)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnTDCClearTaskAttribute)
 
-	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDIT, OnTDCAttributeEdit)
-	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEDELETE, OnTDCAttributeDelete)
+	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnTDCTaskAttributeEdited)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoComboAddDelete)
 
 //	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
@@ -642,9 +644,9 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	InitEditPrompts();
 
-	m_cpColour.SetWindowText(CEnString(IDS_COLOR_SAMPLETEXT));
-	m_cpColour.SetDefaultText(CEnString(IDS_COLOR_AUTOMATIC));
-	m_cpColour.SetCustomText(CEnString(IDS_COLOR_MORECOLORS));
+// 	m_cpColour.SetWindowText(CEnString(IDS_COLOR_SAMPLETEXT));
+// 	m_cpColour.SetDefaultText(CEnString(IDS_COLOR_AUTOMATIC));
+// 	m_cpColour.SetCustomText(CEnString(IDS_COLOR_MORECOLORS));
 	
 	// tree drag drop
 	m_treeDragDrop.Initialize(this);
@@ -1836,10 +1838,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_sStatus = GetSelectedTaskStatus();
 //		m_sExternalID = GetSelectedTaskExtID();
 //		m_sVersion = GetSelectedTaskVersion();
-		m_crColour = GetSelectedTaskColor();
+//		m_crColour = GetSelectedTaskColor();
 
-		if (m_crColour == 0)
-			m_crColour = CLR_DEFAULT;
+// 		if (m_crColour == 0)
+// 			m_crColour = CLR_DEFAULT;
 		
 // 		CStringArray aMatched, aMixed;
 // 		
@@ -1914,7 +1916,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
 //		m_cost.dAmount = 0.0;
 		m_tRecurrence = TDCRECURRENCE();
-		m_crColour = CLR_DEFAULT;
+//		m_crColour = CLR_DEFAULT;
 
 // 		m_sAllocBy.Empty();
 // 		m_sStatus.Empty();
@@ -2197,7 +2199,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_COLOR:
-		SetSelectedTaskColor(m_crColour);
+		SetSelectedTaskColor(m_lcAttributes.GetColor());
+//		SetSelectedTaskColor(m_crColour);
 		break;
 		
 	case TDCA_EXTERNALID:
@@ -2718,6 +2721,28 @@ void CToDoCtrl::NewList()
 	UpdateComments(CString(), CBinaryData());
 }
 
+BOOL CToDoCtrl::EditSelectedTaskColor()
+{
+	if (!CanEditSelectedTask(TDCA_COLOR))
+		return FALSE;
+
+	CEnColorDialog dialog(GetSelectedTaskColor());
+
+	CPreferences prefs;
+	dialog.LoadPreferences(prefs);
+
+	if (dialog.DoModal() == IDOK)
+	{
+		dialog.SavePreferences(prefs);
+		
+		if (SetSelectedTaskColor(dialog.GetColor()))
+			m_lcAttributes.RefreshSelectedTaskValue(TDCA_COLOR);
+	}
+
+	// else
+	return FALSE;
+}
+
 BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 {
 	if (!CanEditSelectedTask(TDCA_COLOR))
@@ -2740,15 +2765,15 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (color == CLR_NONE)
-		{
-			m_cpColour.SetBkColour(CLR_DEFAULT);
-			m_cpColour.SetTextColour(CLR_DEFAULT);
-		}
-		else
-		{
-			m_cpColour.SetColour(color);
-		}
+// 		if (color == CLR_NONE)
+// 		{
+// 			m_cpColour.SetBkColour(CLR_DEFAULT);
+// 			m_cpColour.SetTextColour(CLR_DEFAULT);
+// 		}
+// 		else
+// 		{
+// 			m_cpColour.SetColour(color);
+// 		}
 
 		SetModified(TDCA_COLOR, aModTaskIDs);
 		return TRUE;
@@ -5768,6 +5793,8 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		break;
 
 	case TDCS_TASKCOLORISBACKGROUND:
+		m_lcAttributes.RedrawValue(TDCA_COLOR);
+/*
 		if (bEnable)
 		{
 			m_cpColour.SetSelectionMode(CP_MODE_BK);
@@ -5780,6 +5807,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 			m_cpColour.SetTextColour(m_cpColour.GetBkColour());
 			m_cpColour.SetBkColour(CLR_DEFAULT);
 		}
+*/
 		break;
 
 	case TDCS_SHOWPROJECTNAME:
@@ -6318,7 +6346,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 	CTDCCustomAttributeUIHelper::RebuildEditControls(this,
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,
-													 IDC_COLOURLABEL,
+													 IDC_PERCENTLABEL,
 													 HasStyle(TDCS_SHOWFILELINKTHUMBNAILS),
 													 m_aCustomControls);
 
@@ -7958,7 +7986,7 @@ void CToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 void CToDoCtrl::SetPriorityColors(const CDWordArray& aColors) 
 { 
 	if (m_taskTree.SetPriorityColors(aColors))
-		m_lcAttributes.RefreshPriorityColors();
+		m_lcAttributes.RedrawValue(TDCA_PRIORITY);
 }
 
 void CToDoCtrl::SetProjectName(const CString& sProjectName)
@@ -8675,13 +8703,35 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-LRESULT CToDoCtrl::OnTDCAttributeEdit(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoCtrl::OnTDCTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 {
 	UpdateTask((TDC_ATTRIBUTE)wParam, lParam);
 	return 0L;
 }
 
-LRESULT CToDoCtrl::OnTDCAttributeDelete(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
+{
+	switch ((TDC_ATTRIBUTE)wParam)
+	{
+	case TDCA_COLOR:
+		return EditSelectedTaskColor();
+
+	case TDCA_DEPENDENCY:
+		return EditSelectedTaskDependency();
+
+	case TDCA_ICON:
+		return EditSelectedTaskIcon();
+
+	case TDCA_RECURRENCE:
+		return EditSelectedTaskRecurrence();
+	}
+
+	// All else
+	ASSERT(0);
+	return 0L;
+}
+
+LRESULT CToDoCtrl::OnTDCClearTaskAttribute(WPARAM wParam, LPARAM lParam)
 {
 	return ClearSelectedTaskAttribute((TDC_ATTRIBUTE)wParam);
 }

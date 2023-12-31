@@ -36,10 +36,11 @@ const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLIN
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display
 const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
+const UINT WM_TDCM_EDITTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_EDITTASKATTRIBUTE"));		// wParam = <TDC_ATTRIBUTE>
+const UINT WM_TDCM_CLEARTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_CLEARTASKATTRIBUTE"));	// wParam == <TDC_ATTRIBUTE>
 
 // CTDLTaskAttributeListCtrl
-const UINT WM_TDCN_ATTRIBUTEEDIT			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDIT"));			// wParam == <TDC_ATTRIBUTE>, lParam = UTF_ flags
-const UINT WM_TDCN_ATTRIBUTEDELETE			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEDELETE"));		// wParam == <TDC_ATTRIBUTE>
+const UINT WM_TDCN_ATTRIBUTEEDITED			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDITED"));		// wParam == <TDC_ATTRIBUTE>, lParam = UTF_ flags
 const UINT WM_TDCN_AUTOITEMADDEDDELETED		= ::RegisterWindowMessage(_T("WM_TDCN_AUTOITEMADDEDDELETED"));	// wParam == <TDC_ATTRIBUTE>
 
 // CTDLFilterBar

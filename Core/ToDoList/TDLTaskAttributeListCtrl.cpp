@@ -13,6 +13,7 @@
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\Localizer.h"
+#include "..\shared\encolordialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -147,9 +148,9 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CTDLTaskAttributeListCtrl::RefreshPriorityColors()
+void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
-	int nRow = FindItemFromData(TDCA_PRIORITY);
+	int nRow = FindItemFromData(nAttribID);
 
 	if (nRow != -1)
 		RedrawCell(nRow, VALUE_COL, FALSE);
@@ -348,7 +349,6 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 		// Drop lists
 	case TDCA_PRIORITY:
-	case TDCA_COLOR:
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
 	case TDCA_STATUS:
@@ -366,6 +366,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_ICON:
 	case TDCA_RECURRENCE:
 	case TDCA_DEPENDENCY:
+	case TDCA_COLOR:
 		return ILCT_BROWSE;
 
 		// Checkbox fields
@@ -638,12 +639,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		break;
 
 	case TDCA_COLOR:
-		{
-			COLORREF color = m_taskCtrl.GetSelectedTaskColor();
-
-			if (color != CLR_NONE)
-				sValue = Misc::Format(color);
-		}
+		sValue = Misc::Format(m_taskCtrl.GetSelectedTaskColor());
 		break;
 
 	case TDCA_RECURRENCE:
@@ -834,20 +830,25 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			break;
 
 		case TDCA_COLOR:
-			if (!sText.IsEmpty())
 			{
 				crText = _ttoi(sText);
 
-				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
+				if (crText != CLR_NONE)
 				{
-					pDC->FillSolidRect(rText, crText);
-					crText = GraphicsMisc::GetBestTextColor(crText);
-				}
+					if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
+					{
+						// Use the entire cell rect for the background colour
+						CRect rCell;
+						GetCellRect(nRow, nCol, rCell);
 
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
-				return;
+						pDC->FillSolidRect(rCell, crText);
+						crText = GraphicsMisc::GetBestTextColor(crText);
+					}
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
+				}
 			}
-			break;
+			return;
 
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
@@ -902,9 +903,7 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 
 COLORREF CTDLTaskAttributeListCtrl::GetColor() const
 {
-	CString sValue = GetValueText(TDCA_COLOR);
-
-	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
+	return _ttoi(GetValueText(TDCA_COLOR));
 }
 
 CString CTDLTaskAttributeListCtrl::GetIcon() const
@@ -1314,6 +1313,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 	case TDCA_FLAG:
 	case TDCA_ICON:
 	case TDCA_LOCK:
+	case TDCA_COLOR:
 		// Not required
 		return NULL;
 
@@ -1346,7 +1346,6 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 	case TDCA_STARTTIME:
 		return &m_cbTimeOfDay;
 
-	case TDCA_COLOR:
 		break;
 
 	case TDCA_RECURRENCE:
@@ -1446,20 +1445,22 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 
 	// All other attributes not handled by the base class
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	CString sValue = GetItemText(nRow, VALUE_COL);
 
 	switch (nAttribID)
 	{
 	case TDCA_FLAG:
 	case TDCA_LOCK:
-		// Toggle checkbox
-		SetItemText(nRow, VALUE_COL, GetItemText(nRow, VALUE_COL).IsEmpty() ? _T("+") : _T(""));
-		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+		SetItemText(nRow, VALUE_COL, (sValue.IsEmpty() ? _T("+") : _T(""))); // Toggle checkbox
+		NotifyParentEdit(nAttribID);
 		break;
 
 	case TDCA_ICON:
 		break;
 
 	case TDCA_COLOR:
+		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
+			RefreshSelectedTaskValue(nRow);
 		break;
 
 	case TDCA_RECURRENCE:
@@ -1614,7 +1615,7 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 LRESULT CTDLTaskAttributeListCtrl::NotifyParentEdit(TDC_ATTRIBUTE nAttribID)
 {
-	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, nAttribID, 0);
 }
 
 void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -1636,7 +1637,6 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// Note: Don't hide the date picker because the user 
 		// may be editing the date components manually
-		//HideControl(m_datePicker);
 
 		int nRow = GetCurSel();
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
@@ -1685,7 +1685,7 @@ BOOL CTDLTaskAttributeListCtrl::DeleteSelectedCell()
 	{
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel());
 		
-		if (GetParent()->SendMessage(WM_TDCN_ATTRIBUTEDELETE, nAttribID))
+		if (GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID))
 		{
 			SetItemText(GetCurSel(), m_nCurCol, _T(""));
 			return TRUE;
