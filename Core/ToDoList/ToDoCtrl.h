@@ -14,7 +14,7 @@
 #include "tdcstruct.h"
 // #include "tdlprioritycombobox.h"
 // #include "tdlriskcombobox.h"
-#include "tdlrecurringtaskedit.h"
+//#include "tdlrecurringtaskedit.h"
 #include "tdltaskdependencyedit.h"
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
@@ -488,7 +488,7 @@ protected:
 	
 	CTDLCommentsCtrl m_ctrlComments;
 	CTDLInfoTipCtrl m_infoTip;
-	CTDLRecurringTaskEdit m_eRecurrence;
+//	CTDLRecurringTaskEdit m_eRecurrence;
 // 	CTDLPriorityComboBox m_cbPriority;
 // 	CTDLRiskComboBox m_cbRisk;
 	CTDLTaskDependencyEdit m_eDependency;
@@ -561,7 +561,7 @@ protected:
 	//TDCCOST m_cost;
 	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
-	TDCRECURRENCE m_tRecurrence;
+//	TDCRECURRENCE m_tRecurrence;
 // 	COLORREF m_crColour;
 	CMapStringToString m_mapMetaData;
 
@@ -664,8 +664,8 @@ protected:
 	afx_msg void OnChangeProjectName();
 // 	afx_msg void OnChangeCost();
 	afx_msg void OnChangeDependency();
-	afx_msg void OnChangeRecurrence();
 // 	afx_msg void OnChangeExternalID();
+// 	afx_msg void OnChangeRecurrence();
 	afx_msg void OnSelChangeCommentsType();
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 

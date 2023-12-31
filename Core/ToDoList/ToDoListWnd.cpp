@@ -757,7 +757,7 @@ void CToDoListWnd::SetupUIStrings()
 	CSoundEdit::SetDefaultFilter(CEnString(IDS_SOUNDFILEFILTER));
 	CSoundEdit::SetDefaultPlayButtonTip(CEnString(IDS_PLAYSOUNDBTNTIP));
 	
-	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
+//	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
 	CSpellCheckDlg::SetItemText(SCD_TITLE, IDS_TDC_SPELLCHECK_TITLE);
 	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);

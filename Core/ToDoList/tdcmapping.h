@@ -256,7 +256,7 @@ namespace TDC
 		case TDCA_FILELINK:			return IDC_FILEPATH;
 		case TDCA_PERCENT:			return IDC_PERCENT;
 // 		case TDCA_PRIORITY:			return IDC_PRIORITY;
-		case TDCA_RECURRENCE:		return IDC_RECURRENCE;
+// 		case TDCA_RECURRENCE:		return IDC_RECURRENCE;
 // 		case TDCA_RISK:				return IDC_RISK;
 // 		case TDCA_STARTDATE:		return IDC_STARTDATE;
 // 		case TDCA_STARTTIME:		return IDC_STARTTIME;
@@ -309,7 +309,7 @@ namespace TDC
 		case IDC_FILEPATH:		return TDCA_FILELINK;			
 		case IDC_PERCENT:		return TDCA_PERCENT;			
 // 		case IDC_PRIORITY:		return TDCA_PRIORITY;			
-		case IDC_RECURRENCE:	return TDCA_RECURRENCE;		
+// 		case IDC_RECURRENCE:	return TDCA_RECURRENCE;		
 // 		case IDC_RISK:			return TDCA_RISK;				
 // 		case IDC_STARTDATE:		return TDCA_STARTDATE;		
 // 		case IDC_STARTTIME:		return TDCA_STARTTIME;		

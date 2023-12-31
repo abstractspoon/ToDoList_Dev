@@ -2042,10 +2042,10 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 		return FALSE;
 
 	// else
-	COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-
-	if (CDateHelper::IsDateSet(dtDue))
-		m_eRecurrence.SetDefaultDate(dtDue);
+// 	COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
+// 
+// 	if (CDateHelper::IsDateSet(dtDue))
+// 		m_eRecurrence.SetDefaultDate(dtDue);
 
 	CDWordArray aModTaskIDs;
 	aModTaskIDs.Add(dwTaskID);

@@ -52,8 +52,8 @@ public:
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 
-	COLORREF GetColor() const;
-	CString GetIcon() const;
+//	COLORREF GetColor() const;
+//	CString GetIcon() const;
 	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
@@ -70,7 +70,7 @@ public:
 	BOOL GetCost(TDCCOST& cost) const;
 	BOOL GetFlag() const;
 	BOOL GetLock() const;
-	BOOL GetRecurrence(TDCRECURRENCE& tr) const;
+//	BOOL GetRecurrence(TDCRECURRENCE& tr) const;
 	CString GetVersion() const;
 	COleDateTime GetStartDate() const;
 	COleDateTime GetDueDate() const;

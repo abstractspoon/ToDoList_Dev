@@ -23,6 +23,7 @@
 #include "TDCDialogHelper.h"
 #include "TDCTaskCompletion.h"
 #include "tdccontentmgr.h"
+#include "TDLRecurringTaskEdit.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -296,7 +297,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
 	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
 // 	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
-	DDX_Control(pDX, IDC_RECURRENCE, m_eRecurrence);
+// 	DDX_Control(pDX, IDC_RECURRENCE, m_eRecurrence);
 // 	DDX_Control(pDX, IDC_RISK, m_cbRisk);
 // 	DDX_Control(pDX, IDC_STARTDATE, m_dtcStart);
 // 	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
@@ -321,7 +322,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	m_cbVersion.DDX(pDX, m_sVersion);
 // 	m_cbPriority.DDX(pDX, m_nPriority);
 // 	m_cbRisk.DDX(pDX, m_nRisk);
-	m_eRecurrence.DDX(pDX, m_tRecurrence);
+// 	m_eRecurrence.DDX(pDX, m_tRecurrence);
 	m_cbFileLink.DDX(pDX, m_aFileLinks);
 	m_eDependency.DDX(pDX, m_aDepends);
 	
@@ -432,7 +433,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 //	ON_EN_CHANGE(IDC_EXTERNALID, OnChangeExternalID)
 	ON_EN_CHANGE(IDC_PERCENT, OnChangePercent)
 	ON_EN_CHANGE(IDC_PROJECTNAME, OnChangeProjectName)
-	ON_EN_CHANGE(IDC_RECURRENCE, OnChangeRecurrence)
+// 	ON_EN_CHANGE(IDC_RECURRENCE, OnChangeRecurrence)
 	ON_EN_CHANGE(IDC_TIMEEST, OnChangeTimeEstimate)
 	ON_EN_CHANGE(IDC_TIMESPENT, OnChangeTimeSpent)
 	ON_MESSAGE(CPN_SELENDOK, OnChangeColour)
@@ -1905,7 +1906,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		
 		// Misc
 //		GetSelectedTaskCost(m_cost);
-		GetSelectedTaskRecurrence(m_tRecurrence);
+// 		GetSelectedTaskRecurrence(m_tRecurrence);
 		GetSelectedTaskCustomAttributeData(m_mapCustomCtrlData, FALSE);
 	}
 	else // clear controls
@@ -1915,7 +1916,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_nPercentDone = 0;
 		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
 //		m_cost.dAmount = 0.0;
-		m_tRecurrence = TDCRECURRENCE();
+// 		m_tRecurrence = TDCRECURRENCE();
 //		m_crColour = CLR_DEFAULT;
 
 // 		m_sAllocBy.Empty();
@@ -2012,10 +2013,10 @@ void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 // 		m_cbTimeDone.SetOleTime(dateDone.m_dt);
 
 		// use due date if present else start date
-		if (CDateHelper::IsDateSet(dateDue))
-			m_eRecurrence.SetDefaultDate(dateDue);
-		else
-			m_eRecurrence.SetDefaultDate(dateStart);
+// 		if (CDateHelper::IsDateSet(dateDue))
+// 			m_eRecurrence.SetDefaultDate(dateDue);
+// 		else
+// 			m_eRecurrence.SetDefaultDate(dateStart);
 	}
 	else
 	{
@@ -2178,7 +2179,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_RECURRENCE:
-		SetSelectedTaskRecurrence(m_tRecurrence);
+		ASSERT(0);
+		//SetSelectedTaskRecurrence(m_tRecurrence);
 		break;
 		
 	case TDCA_DEPENDENCY:
@@ -2199,8 +2201,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_COLOR:
-		SetSelectedTaskColor(m_lcAttributes.GetColor());
-//		SetSelectedTaskColor(m_crColour);
+		ASSERT(0);
+		//		SetSelectedTaskColor(m_crColour);
 		break;
 		
 	case TDCA_EXTERNALID:
@@ -3259,7 +3261,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 // 
 // 				SetCtrlDate(m_dtcDue, 0.0, dtStart);
 // 			}
-			m_eRecurrence.SetDefaultDate(date);
+//			m_eRecurrence.SetDefaultDate(date);
 			// fall thru
 
 		case TDCD_DUE:
@@ -4184,11 +4186,11 @@ BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (m_tRecurrence != tr)
-		{
-			m_tRecurrence = tr;
-			m_eRecurrence.SetRecurrenceOptions(tr);
-		}
+// 		if (m_tRecurrence != tr)
+// 		{
+// 			m_tRecurrence = tr;
+// 			m_eRecurrence.SetRecurrenceOptions(tr);
+// 		}
 
 		// cache the last top-level options
 		if (tr.IsRecurring())
@@ -4198,9 +4200,10 @@ BOOL CToDoCtrl::SetSelectedTaskRecurrence(const TDCRECURRENCE& tr)
 		}
 		
 		SetModified(TDCA_RECURRENCE, aModTaskIDs);
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 void CToDoCtrl::SetPercentDoneIncrement(int nAmount)
@@ -8292,10 +8295,12 @@ void CToDoCtrl::OnChangeDependency()
 	UpdateTask(TDCA_DEPENDENCY); 
 }
 
+/*
 void CToDoCtrl::OnChangeRecurrence()
 {
 	UpdateTask(TDCA_RECURRENCE); 
 }
+*/
 
 void CToDoCtrl::OnChangePercent()
 {
@@ -8689,8 +8694,9 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_RECURRENCE:
-		ASSERT(CanEditSelectedTask(TDCA_RECURRENCE, dwTaskID));
-		m_eRecurrence.DoEdit(TRUE);
+		EditSelectedTaskRecurrence();
+// 		ASSERT(CanEditSelectedTask(TDCA_RECURRENCE, dwTaskID));
+// 		m_eRecurrence.DoEdit(TRUE);
 		break;
 		
 	case TDCC_REMINDER:
@@ -11559,7 +11565,31 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 {
 	if (CanEditSelectedTask(TDCA_RECURRENCE) && !IsSelectedTaskDone())
-		return m_eRecurrence.DoEdit(TRUE); // TRUE forces an edit
+	{
+		TDCRECURRENCE tr;
+		GetSelectedTaskRecurrence(tr);
+
+		// use due date if present else start date
+		COleDateTime dtDefault = GetSelectedTaskDate(TDCD_DUE);
+
+		if (!CDateHelper::IsDateSet(dtDefault))
+			dtDefault = GetSelectedTaskDate(TDCD_START);
+
+		CTDLRecurringTaskOptionDlg dialog(tr, dtDefault);
+
+		if (dialog.DoModal() == IDOK)
+		{
+			TDCRECURRENCE trNew;
+			dialog.GetRecurrenceOptions(trNew);
+
+			if (SetSelectedTaskRecurrence(trNew))
+			{
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_RECURRENCE);
+				return TRUE;
+			}
+		}
+		//return m_eRecurrence.DoEdit(TRUE); // TRUE forces an edit
+	}
 
 	// else
 	return FALSE;

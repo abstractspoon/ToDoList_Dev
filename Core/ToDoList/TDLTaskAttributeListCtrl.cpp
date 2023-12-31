@@ -908,6 +908,7 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
+/*
 COLORREF CTDLTaskAttributeListCtrl::GetColor() const
 {
 	return _ttoi(GetValueText(TDCA_COLOR));
@@ -917,6 +918,7 @@ CString CTDLTaskAttributeListCtrl::GetIcon() const
 {
 	return GetValueText(TDCA_ICON);
 }
+*/
 
 BOOL CTDLTaskAttributeListCtrl::GetTimeEstimate(TDCTIMEPERIOD& timeEst) const
 {
@@ -1002,12 +1004,14 @@ BOOL CTDLTaskAttributeListCtrl::GetLock() const
 	return !GetValueText(TDCA_LOCK).IsEmpty();
 }
 
+/*
 BOOL CTDLTaskAttributeListCtrl::GetRecurrence(TDCRECURRENCE& tr) const
 {
 	CString sValue = GetValueText(TDCA_RECURRENCE);
 
 	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
 }
+*/
 
 CString CTDLTaskAttributeListCtrl::GetVersion() const
 {
@@ -1321,6 +1325,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 	case TDCA_ICON:
 	case TDCA_LOCK:
 	case TDCA_COLOR:
+	case TDCA_RECURRENCE:
 		// Not required
 		return NULL;
 
@@ -1352,11 +1357,6 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 	case TDCA_DUETIME:
 	case TDCA_STARTTIME:
 		return &m_cbTimeOfDay;
-
-		break;
-
-	case TDCA_RECURRENCE:
-		break;
 
 	case TDCA_DEPENDENCY:
 		break;
@@ -1464,11 +1464,9 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 
 	case TDCA_ICON:
 	case TDCA_COLOR:
+	case TDCA_RECURRENCE:
 		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
 			RefreshSelectedTaskValue(nRow);
-		break;
-
-	case TDCA_RECURRENCE:
 		break;
 
 	case TDCA_DEPENDENCY:
