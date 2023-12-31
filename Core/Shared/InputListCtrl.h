@@ -75,6 +75,7 @@ public:
 	void SetEditMask(LPCTSTR szMask, DWORD dwFlags = 0);
 	void SetReadOnly(BOOL bReadOnly);
 	void EndEdit();
+	void RedrawCell(int nRow, int nCol, BOOL bErase = TRUE);
 
 protected:
 	int m_nItemLastSelected;

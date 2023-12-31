@@ -488,9 +488,9 @@ protected:
 	
 	CTDLCommentsCtrl m_ctrlComments;
 	CTDLInfoTipCtrl m_infoTip;
-	CTDLPriorityComboBox m_cbPriority;
 	CTDLRecurringTaskEdit m_eRecurrence;
-	CTDLRiskComboBox m_cbRisk;
+// 	CTDLPriorityComboBox m_cbPriority;
+// 	CTDLRiskComboBox m_cbRisk;
 	CTDLTaskDependencyEdit m_eDependency;
 	CTDLTaskTreeCtrl m_taskTree;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
@@ -553,8 +553,8 @@ protected:
 	CString m_sOccurrence;
 	//CString m_sVersion;
 	double m_dTrackedTimeElapsedHours;
-	int m_nPriority;
-	int m_nRisk;
+// 	int m_nPriority;
+// 	int m_nRisk;
 	int m_nPercentDone;
 	CTDCDependencyArray m_aDepends;
 	
@@ -637,7 +637,7 @@ protected:
 	afx_msg LRESULT OnTreeDragDrop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTreeDragOver(WPARAM wParam, LPARAM lParam);
 
-	afx_msg void OnChangePriority();
+// 	afx_msg void OnChangePriority();
 	afx_msg void OnChangePercent();
 	afx_msg void OnChangeTimeEstimate();
 	afx_msg void OnChangeTimeSpent();
@@ -658,9 +658,9 @@ protected:
 // 	afx_msg void OnSelCancelVersion();
 // 	afx_msg void OnSelCancelTag();
 // 	afx_msg void OnSelCancelAllocBy();
-	afx_msg void OnSelCancelPriority();
-	afx_msg void OnSelCancelRisk();
-	afx_msg void OnChangeRisk();
+// 	afx_msg void OnSelCancelPriority();
+// 	afx_msg void OnSelCancelRisk();
+// 	afx_msg void OnChangeRisk();
 	afx_msg void OnChangeProjectName();
 	afx_msg void OnChangeCost();
 	afx_msg void OnChangeDependency();

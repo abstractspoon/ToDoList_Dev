@@ -186,8 +186,8 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 // 	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 // 	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	//m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbPriority(FALSE),
-	m_cbRisk(FALSE),
+// 	m_cbPriority(FALSE),
+// 	m_cbRisk(FALSE),
 	m_cfDefault(cfDefault),
 	m_dTrackedTimeElapsedHours(0),
 	m_data(m_styles, m_aCustomAttribDefs),
@@ -208,7 +208,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_nFileVersion(0),
 	m_nMaxState(TDCMS_NORMAL),
 	m_nMaxInfotipCommentsLength(-1),
-	m_nPriority(-1),
+// 	m_nPriority(-1),
 	m_treeDragDrop(TSH(), m_taskTree.Tree(), &m_taskTree),
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
@@ -294,9 +294,9 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
 	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
-	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
+// 	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
 	DDX_Control(pDX, IDC_RECURRENCE, m_eRecurrence);
-	DDX_Control(pDX, IDC_RISK, m_cbRisk);
+// 	DDX_Control(pDX, IDC_RISK, m_cbRisk);
 // 	DDX_Control(pDX, IDC_STARTDATE, m_dtcStart);
 // 	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
 	DDX_Control(pDX, IDC_STATUS, m_cbStatus);
@@ -318,8 +318,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	m_cbAllocBy.DDX(pDX, m_sAllocBy);
 	m_cbStatus.DDX(pDX, m_sStatus);
 // 	m_cbVersion.DDX(pDX, m_sVersion);
-	m_cbPriority.DDX(pDX, m_nPriority);
-	m_cbRisk.DDX(pDX, m_nRisk);
+// 	m_cbPriority.DDX(pDX, m_nPriority);
+// 	m_cbRisk.DDX(pDX, m_nRisk);
 	m_eRecurrence.DDX(pDX, m_tRecurrence);
 	m_cbFileLink.DDX(pDX, m_aFileLinks);
 	m_eDependency.DDX(pDX, m_aDepends);
@@ -409,8 +409,8 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
 	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
-	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
-	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
+// 	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
+// 	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
 // 	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
 // 	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
@@ -420,8 +420,8 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 // 	ON_CBN_SELENDCANCEL(IDC_CATEGORY, OnSelCancelCategory)
 // 	ON_CBN_SELENDCANCEL(IDC_TAGS, OnSelCancelTag)
 // 	ON_CBN_SELENDCANCEL(IDC_ALLOCBY, OnSelCancelAllocBy)
-	ON_CBN_SELENDCANCEL(IDC_PRIORITY, OnSelCancelPriority)
-	ON_CBN_SELENDCANCEL(IDC_RISK, OnSelCancelRisk)
+// 	ON_CBN_SELENDCANCEL(IDC_PRIORITY, OnSelCancelPriority)
+// 	ON_CBN_SELENDCANCEL(IDC_RISK, OnSelCancelRisk)
 	ON_CBN_SELENDCANCEL(IDC_STATUS, OnSelCancelStatus)
 //	ON_CBN_SELENDCANCEL(IDC_VERSION, OnSelCancelVersion)
 	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelChangeCommentsType)
@@ -1288,9 +1288,9 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 	case IDC_STATUS:
 // 	case IDC_CATEGORY:
 // 	case IDC_TAGS:
-	case IDC_PRIORITY:
+// 	case IDC_PRIORITY:
 //	case IDC_VERSION:
-	case IDC_RISK:
+// 	case IDC_RISK:
 	case IDC_FILEPATH:
 		{
 			// file path control can take as much space as is left
@@ -1830,8 +1830,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		BOOL bEditTime = !bIsParent || HasStyle(TDCS_ALLOWPARENTTIMETRACKING);
 		BOOL bEditPercent = !HasStyle(TDCS_AUTOCALCPERCENTDONE) && (nSelCount > 1 || !bAveSubTaskCompletion);
 
-		m_nPriority = GetSelectedTaskPriority();
-		m_nRisk = GetSelectedTaskRisk();
+// 		m_nPriority = GetSelectedTaskPriority();
+// 		m_nRisk = GetSelectedTaskRisk();
 //		m_sAllocBy = GetSelectedTaskAllocBy();
 		m_sStatus = GetSelectedTaskStatus();
 //		m_sExternalID = GetSelectedTaskExtID();
@@ -1908,8 +1908,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 	else // clear controls
 	{
-		m_nPriority = 0;
-		m_nRisk = 0;
+// 		m_nPriority = 0;
+// 		m_nRisk = 0;
 		m_nPercentDone = 0;
 		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
 //		m_cost.dAmount = 0.0;
@@ -2186,11 +2186,13 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_PRIORITY:
-		SetSelectedTaskPriority(m_nPriority);
+		SetSelectedTaskPriority(m_lcAttributes.GetPriority());
+//		SetSelectedTaskPriority(m_nPriority);
 		break;
 		
 	case TDCA_RISK:
-		SetSelectedTaskRisk(m_nRisk);
+		SetSelectedTaskRisk(m_lcAttributes.GetRisk());
+//		SetSelectedTaskRisk(m_nRisk);
 		break;
 		
 	case TDCA_COLOR:
@@ -2301,6 +2303,7 @@ void CToDoCtrl::EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) co
 	}
 }
 
+/*
 void CToDoCtrl::OnChangePriority()
 {
 	UpdateTask(TDCA_PRIORITY);
@@ -2310,6 +2313,7 @@ void CToDoCtrl::OnChangeRisk()
 {
 	UpdateTask(TDCA_RISK);
 }
+*/
 
 /*
 void CToDoCtrl::OnStartDatechange(NMHDR* / *pNMHDR* /, LRESULT* pResult)
@@ -3028,18 +3032,21 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 	if (aModTaskIDs.GetSize())
 	{
 		if (bOffset)
-			nPriority = GetSelectedTaskPriority();
-
-		if (m_nPriority != nPriority)
-		{
-			m_nPriority = nPriority;
-			m_cbPriority.SetSelectedPriority(m_nPriority);
-		}
+			m_lcAttributes.RefreshSelectedTaskValue(TDCA_PRIORITY);
+// 		if (bOffset)
+// 			nPriority = GetSelectedTaskPriority();
+// 
+// 		if (m_nPriority != nPriority)
+// 		{
+// 			m_nPriority = nPriority;
+// 			m_cbPriority.SetSelectedPriority(m_nPriority);
+// 		}
 		
 		SetModified(TDCA_PRIORITY, aModTaskIDs);
+		return TRUE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk, BOOL bOffset)
@@ -3075,18 +3082,21 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk, BOOL bOffset)
 	if (aModTaskIDs.GetSize())
 	{
 		if (bOffset)
-			nRisk = GetSelectedTaskRisk();
-
-		if (m_nRisk != nRisk)
-		{
-			m_nRisk = nRisk;
-			m_cbRisk.SetSelectedRisk(m_nRisk);
-		}
+			m_lcAttributes.RefreshSelectedTaskValue(TDCA_RISK);
+// 		if (bOffset)
+// 			nRisk = GetSelectedTaskRisk();
+// 
+// 		if (m_nRisk != nRisk)
+// 		{
+// 			m_nRisk = nRisk;
+// 			m_cbRisk.SetSelectedRisk(m_nRisk);
+// 		}
 		
 		SetModified(TDCA_RISK, aModTaskIDs);
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskFlag(BOOL bFlagged)
@@ -7939,7 +7949,7 @@ void CToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 void CToDoCtrl::SetPriorityColors(const CDWordArray& aColors) 
 { 
 	if (m_taskTree.SetPriorityColors(aColors))
-		m_cbPriority.SetColors(aColors);
+		m_lcAttributes.RefreshPriorityColors();
 }
 
 void CToDoCtrl::SetProjectName(const CString& sProjectName)
@@ -8192,6 +8202,7 @@ void CToDoCtrl::OnSelCancelVersion()
 }
 */
 
+/*
 void CToDoCtrl::OnSelCancelPriority()
 {
 	m_cbPriority.SetSelectedPriority(GetSelectedTaskPriority());
@@ -8202,6 +8213,7 @@ void CToDoCtrl::OnSelCancelRisk()
 	m_cbRisk.SetSelectedRisk(GetSelectedTaskRisk());
 }
 
+*/
 void CToDoCtrl::OnSelCancelStatus()
 {
 	m_cbStatus.SelectString(0, GetSelectedTaskStatus());

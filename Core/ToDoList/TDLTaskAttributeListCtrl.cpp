@@ -36,6 +36,25 @@ enum
 	IDC_MULTISEL_COMBO,
 	IDC_DATE_PICKER,
 	IDC_TIME_PICKER,
+	IDC_PRIORITY_COMBO,
+	IDC_RISK_COMBO,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+const UINT IDS_PRIORITYRISK_SCALE[] = 
+{ 
+	IDS_TDC_SCALE0,
+	IDS_TDC_SCALE1,
+	IDS_TDC_SCALE2,
+	IDS_TDC_SCALE3,
+	IDS_TDC_SCALE4,
+	IDS_TDC_SCALE5,
+	IDS_TDC_SCALE6,
+	IDS_TDC_SCALE7,
+	IDS_TDC_SCALE8,
+	IDS_TDC_SCALE9,
+	IDS_TDC_SCALE10
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -61,7 +80,9 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& tas
 	m_vis(defaultVis),
 	m_cbSingleSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbMultiSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY)
+	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
+	m_cbPriority(FALSE),
+	m_cbRisk(FALSE)
 {
 }
 
@@ -113,13 +134,23 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create edit fields
 	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
 	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
-	CreateControl(m_datePicker, IDC_DATE_PICKER, DTS_SHOWNONE);
+	CreateControl(m_datePicker, IDC_DATE_PICKER/*, DTS_SHOWNONE*/);
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, CBS_DROPDOWN);
-	
+	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
+	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
+
 	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
 
 	return 0;
+}
+
+void CTDLTaskAttributeListCtrl::RefreshPriorityColors()
+{
+	int nRow = FindItemFromData(TDCA_PRIORITY);
+
+	if (nRow != -1)
+		RedrawCell(nRow, VALUE_COL, FALSE);
 }
 
 void CTDLTaskAttributeListCtrl::RefreshDateFormat()
@@ -543,21 +574,11 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		break;
 
 	case TDCA_PRIORITY:
-		{
-			int nPriority = m_taskCtrl.GetSelectedTaskPriority();
-
-			if (nPriority >= 0)
-				sValue = Misc::Format(nPriority);
-		}
+		sValue = Misc::Format(m_taskCtrl.GetSelectedTaskPriority());
 		break;
 
 	case TDCA_RISK:
-		{
-			int nRisk = m_taskCtrl.GetSelectedTaskRisk();
-
-			if (nRisk >= 0)
-				sValue = Misc::Format(nRisk);
-		}
+		sValue = Misc::Format(m_taskCtrl.GetSelectedTaskRisk());
 		break;
 
 	case TDCA_TIMEESTIMATE:
@@ -755,28 +776,42 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		switch (nAttribID)
 		{
 		case TDCA_PRIORITY:
-			if (!sText.IsEmpty())
 			{
-				int nPriority = m_taskCtrl.GetSelectedTaskPriority();
-				ASSERT(nPriority >= 0);
+				int nPriority = _ttoi(sText);
+				
+				if (nPriority >= 0)
+				{
+					// Draw box
+					CRect rBox(rText);
+					rBox.DeflateRect(0, 3);
+					rBox.right = rBox.left + rBox.Height();
 
-				CRect rBox(rText);
-				rBox.DeflateRect(0, 3);
-				rBox.right = rBox.left + rBox.Height();
+					COLORREF crFill = m_taskCtrl.GetPriorityColor(nPriority);
+					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
 
-				COLORREF crFill = m_taskCtrl.GetPriorityColor(nPriority);
-				COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
+					GraphicsMisc::DrawRect(pDC, rBox, crFill, crBorder);
 
-				GraphicsMisc::DrawRect(pDC, rBox, crFill, crBorder);
+					// Draw text
+					CRect rLeft(rText);
+					rLeft.left += rText.Height();
 
-				CRect rLeft(rText);
-				rLeft.left += rText.Height();
-
-				// TODO - Get text from Priority combo
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rLeft, sText, crText, nDrawTextFlags);
-				return;
+					CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nPriority]));
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rLeft, sPriority, crText, nDrawTextFlags);
+				}
 			}
-			break;
+			return;
+
+		case TDCA_RISK:
+			{
+				int nRisk = _ttoi(sText);
+				
+				if (nRisk >= 0)
+				{
+					CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nRisk]));
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPriority, crText, nDrawTextFlags);
+				}
+			}
+			return;
 
 		case TDCA_ICON:
 			if (!sText.IsEmpty())
@@ -1095,9 +1130,18 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		break;
 
 	case TDCA_PRIORITY:
+		{
+			CDWordArray aColors;
+
+			m_taskCtrl.GetPriorityColors(aColors);
+			m_cbPriority.SetColors(aColors);
+
+			m_cbPriority.SetSelectedPriority(_ttoi(GetItemText(nRow, nCol)));
+		}
 		break;
 
 	case TDCA_RISK:
+		m_cbRisk.SetSelectedRisk(_ttoi(GetItemText(nRow, nCol)));
 		break;
 
 	case TDCA_TIMEESTIMATE:
@@ -1265,10 +1309,10 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 		break;
 
 	case TDCA_PRIORITY:
-		break;
+		return &m_cbPriority;
 
 	case TDCA_RISK:
-		break;
+		return &m_cbRisk;
 
 	case TDCA_TIMEESTIMATE:
 		break;
@@ -1530,6 +1574,14 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 	case IDC_TIME_PICKER:
 		sNewItemText = CTimeHelper::FormatClockTime(m_cbTimeOfDay.Get24HourTime() / 24);
+		break;
+
+	case IDC_PRIORITY_COMBO:
+		sNewItemText = Misc::Format(m_cbPriority.GetSelectedPriority());
+		break;
+
+	case IDC_RISK_COMBO:
+		sNewItemText = Misc::Format(m_cbRisk.GetSelectedRisk());
 		break;
 
 	default:

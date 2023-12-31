@@ -1374,19 +1374,11 @@ void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
 	case ILCT_TEXT:
 	case ILCT_BROWSE:
 	case ILCT_DROPLIST:
-		//rCell.right++;
-		
 		// move top edge up one pixel so that it looks right
 		// but not of the first row else it gets clipped 
 		// by the window border
 		if (nRow > 0)
 			rCell.top--;
-		break;
-
-	case ILCT_DATE:
-	case ILCT_CHECK:
-		//rCell.OffsetRect(1, -1);
-		//rCell.left--;
 		break;
 	}
 }
@@ -1472,6 +1464,14 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 		if (bBtnClick)
 			ctrl.PostMessage(WM_SYSKEYDOWN, VK_DOWN, 0);
 	}
+}
+
+void CInputListCtrl::RedrawCell(int nRow, int nCol, BOOL bErase)
+{
+	CRect rCell;
+	GetCellRect(nRow, nCol, rCell);
+
+	InvalidateRect(rCell, bErase);
 }
 
 void CInputListCtrl::EndEdit()

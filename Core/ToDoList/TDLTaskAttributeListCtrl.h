@@ -8,6 +8,8 @@
 //
 
 #include "ToDoCtrlDataUtils.h"
+#include "TDLPriorityComboBox.h"
+#include "TDLRiskComboBox.h"
 
 #include "..\shared\InputListCtrl.h"
 #include "..\shared\AutoComboBox.h"
@@ -46,6 +48,7 @@ public:
 	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateFormat();
+	void RefreshPriorityColors();
 
 	COLORREF GetColor() const;
 	CString GetIcon() const;
@@ -89,6 +92,8 @@ protected:
 	CCheckComboBox m_cbMultiSelection;
 	CDateTimeCtrlEx m_datePicker;
 	CTimeComboBox m_cbTimeOfDay;
+	CTDLPriorityComboBox m_cbPriority;
+	CTDLRiskComboBox m_cbRisk;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
