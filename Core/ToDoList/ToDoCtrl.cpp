@@ -185,7 +185,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 // 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 // 	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 // 	m_cbTimeStart(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
-	//m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+//	m_cbVersion(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbPriority(FALSE),
 // 	m_cbRisk(FALSE),
 	m_cfDefault(cfDefault),
@@ -286,8 +286,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
 //	DDX_Control(pDX, IDC_COST, m_eCost);
 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
-	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
-	DDX_Control(pDX, IDC_DONETIME, m_cbTimeDone);
+// 	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
+// 	DDX_Control(pDX, IDC_DONETIME, m_cbTimeDone);
 // 	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
 // 	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
 //	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
@@ -400,13 +400,13 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEDELETE, OnTDCAttributeDelete)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoComboAddDelete)
 
-	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
+//	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
 // 	ON_CBN_EDITCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 // 	ON_CBN_SELCHANGE(IDC_ALLOCBY, OnSelChangeAllocBy)
 // 	ON_CBN_SELCHANGE(IDC_ALLOCTO, OnSelChangeAllocTo)
 // 	ON_CBN_SELCHANGE(IDC_CATEGORY, OnSelChangeCategory)
-	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
+//	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
 	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
 // 	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
@@ -438,7 +438,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
 	ON_MESSAGE(WM_TDC_REFRESHPERCENTSPINVISIBILITY, OnRefreshPercentSpinVisibility)
 	ON_MESSAGE(WM_TDC_FIXUPPOSTDROPSELECTION, OnFixupPostDropSelection)
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DONEDATE, OnCompletionDatechange)
+//	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DONEDATE, OnCompletionDatechange)
 // 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DUEDATE, OnDueDatechange)
 // 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_STARTDATE, OnStartDatechange)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGABORT, OnTreeDragAbort)
@@ -631,7 +631,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	// init dates
 // 	m_dtcStart.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 // 	m_dtcDue.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
-	m_dtcDone.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
+//	m_dtcDone.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	
 	m_dtTree.Register(&m_taskTree.Tree(), this);
 	m_dtFileLink.Register(&m_cbFileLink, this); 
@@ -1673,12 +1673,12 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 // 	case IDC_STARTTIME:
 // 		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTTIME))
 // 			nCtrlState = RTCS_READONLY;
-		break;
-
-	case IDC_DONETIME:
-		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DONE))
-			nCtrlState = RTCS_READONLY;
-		break;
+// 		break;
+// 
+// 	case IDC_DONETIME:
+// 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DONE))
+// 			nCtrlState = RTCS_READONLY;
+// 		break;
 	}
 	
 	SetCtrlState(*pLabel, nLabelState);
@@ -2005,9 +2005,9 @@ void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 // 		SetCtrlDate(m_dtcDue, dateDue, dateStart);
 // 		m_cbTimeDue.SetOleTime(dateDue.m_dt);
 		
-		COleDateTime dateDone = GetSelectedTaskDate(TDCD_DONE);
-		SetCtrlDate(m_dtcDone, dateDone);
-		m_cbTimeDone.SetOleTime(dateDone.m_dt);
+// 		COleDateTime dateDone = GetSelectedTaskDate(TDCD_DONE);
+// 		SetCtrlDate(m_dtcDone, dateDone);
+// 		m_cbTimeDone.SetOleTime(dateDone.m_dt);
 
 		// use due date if present else start date
 		if (CDateHelper::IsDateSet(dateDue))
@@ -2019,12 +2019,12 @@ void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 	{
 		COleDateTime date;
 //		SetCtrlDate(m_dtcDue, date);
-		SetCtrlDate(m_dtcDone, date);
+// 		SetCtrlDate(m_dtcDone, date);
 //		SetCtrlDate(m_dtcStart, date);
 
 // 		m_cbTimeStart.SetOleTime(-1);
 // 		m_cbTimeDue.SetOleTime(-1);
-		m_cbTimeDone.SetOleTime(-1);
+// 		m_cbTimeDone.SetOleTime(-1);
 	}
 }
 
@@ -2089,8 +2089,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	{
 	case TDCA_DONEDATE:
 		{
-			COleDateTime date;
-			m_dtcDone.GetTime(date);
+			COleDateTime date = m_lcAttributes.GetDoneDate();
+			//m_dtcDone.GetTime(date);
 			
 			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
 			{
@@ -2105,20 +2105,21 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 					SetSelectedTaskPercentDone(nPercentDone);
 					m_nPercentDone = nPercentDone;
 					
-					UpdateData(FALSE);
+					//UpdateData(FALSE);
 				}
 				else if (m_nPercentDone != 100) // make the percent field look right
 				{
 					m_nPercentDone = 100;
-					UpdateData(FALSE);
+					//UpdateData(FALSE);
 				}
 			}
-			else
-			{
-				UpdateControls(FALSE); // don't update comments
-			}
+// 			else
+// 			{
+// 				UpdateControls(FALSE); // don't update comments
+// 			}
 
-			EnableTimeCtrl(m_cbTimeDone, date);
+			m_lcAttributes.RefreshSelectedTaskValues();
+			//EnableTimeCtrl(m_cbTimeDone, date);
 		}
 		break;
 		
@@ -2333,9 +2334,8 @@ void CToDoCtrl::OnDueDatechange(NMHDR* / *pNMHDR* /, LRESULT* pResult)
 	
 	*pResult = 0;
 }
-*/
 
-void CToDoCtrl::OnCompletionDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CToDoCtrl::OnCompletionDatechange(NMHDR* / *pNMHDR* /, LRESULT* pResult)
 {
 	// ignore this if the date selector is dropped down
 	if (!m_dtcDone.IsCalendarVisible())
@@ -2343,6 +2343,7 @@ void CToDoCtrl::OnCompletionDatechange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	*pResult = 0;
 }
+*/
 
 /*
 void CToDoCtrl::OnSelChangeDueTime()
@@ -2354,12 +2355,12 @@ void CToDoCtrl::OnSelChangeStartTime()
 {
 	UpdateTask(TDCA_STARTTIME);
 }
-*/
 
 void CToDoCtrl::OnSelChangeDoneTime()
 {
 	UpdateTask(TDCA_DONETIME);
 }
+*/
 
 void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID, NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
@@ -4597,7 +4598,7 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 			return FALSE;
 
 		// else
-		m_lcAttributes.RefreshSelectedTaskValues();
+		m_lcAttributes.RefreshSelectedTaskValue(TDCA_DONEDATE);
 		// UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
@@ -8735,8 +8736,8 @@ UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 	// pick up any stragglers
 	switch (nColID)
 	{
-	case TDCC_DONE:
-		return IDC_DONEDATE;
+// 	case TDCC_DONE:
+// 		return IDC_DONEDATE;
 
 	case TDCC_TRACKTIME:
 		return IDC_TIMESPENT;

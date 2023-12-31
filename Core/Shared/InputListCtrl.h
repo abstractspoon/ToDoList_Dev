@@ -124,6 +124,7 @@ protected:
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNotifyKillFocus(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 		

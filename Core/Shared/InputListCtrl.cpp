@@ -63,7 +63,10 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
+
 	ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnSelItemChanged)
+	ON_NOTIFY_RANGE(NM_KILLFOCUS, 0, 0xFFFF, OnNotifyKillFocus)
+
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnEditEnd)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
@@ -1055,25 +1058,30 @@ BOOL CInputListCtrl::OnSelItemChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	return FALSE; // continue routing
 }
 
+void CInputListCtrl::OnNotifyKillFocus(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult)
+{
+	CWnd* pCtrl = GetDlgItem(nCtrlID);
+
+	if (pCtrl)
+		HideControl(*pCtrl);
+}
+
 BOOL CInputListCtrl::SetCellText(int nRow, int nCol, const CString& sText)
 {
 	ASSERT (m_hWnd);
-	ASSERT ((m_bAutoAddRows && nRow >=0 && nRow < GetItemCount() - 1) || 
-			(!m_bAutoAddRows && nRow >=0 && nRow < GetItemCount()));
-	ASSERT ((m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount() - 1) ||
-			(!m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount()));
 
 	// only allow text setting if within valid range and if user is
 	// not trying to change prompt string if auto adding
-	if (((m_bAutoAddRows && nRow >=0 && nRow < GetItemCount() - 1) || 
-			(!m_bAutoAddRows && nRow >=0 && nRow < GetItemCount())) &&
-		 ((m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount() - 1) ||
-			(!m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount())))
+	if (((m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount() - 1)) || 
+			(!m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount()))) &&
+		 ((m_bAutoAddCols && (nCol >= 0) && (nCol < GetColumnCount() - 1)) ||
+			(!m_bAutoAddCols && nCol >= 0 && (nCol < GetColumnCount()))))
 	{
 		SetItemText(nRow, nCol, sText);
 		return TRUE;
 	}
 
+	ASSERT(0);
 	return FALSE;
 }
 

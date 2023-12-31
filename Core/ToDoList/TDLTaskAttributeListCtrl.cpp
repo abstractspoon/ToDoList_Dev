@@ -99,7 +99,9 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
 
-	ON_NOTIFY_RANGE(DTN_CLOSEUP, 0, 0xffff, OnDateCloseUp)
+	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
+
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
 	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
@@ -892,7 +894,7 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 		(pDispInfo->item.iItem >= 0))
 	{
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(pDispInfo->item.iItem, TRUE);
-		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+		NotifyParentEdit(nAttribID);
 	}
 
 	*pResult = 0;
@@ -1606,13 +1608,53 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	if (sNewItemText != GetItemText(nRow, VALUE_COL))
 	{
 		SetItemText(nRow, VALUE_COL, sNewItemText);
-		GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+		NotifyParentEdit(nAttribID);
 	}
 }
 
-void CTDLTaskAttributeListCtrl::OnDateCloseUp(UINT /*nCtrlID*/, NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
+LRESULT CTDLTaskAttributeListCtrl::NotifyParentEdit(TDC_ATTRIBUTE nAttribID)
+{
+	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDIT, nAttribID, 0);
+}
+
+void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult) 
 { 
+	UNREFERENCED_PARAMETER(pNMHDR);
+	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
+
 	HideControl(m_datePicker); 
+	*pResult = 0;
+}
+
+void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	UNREFERENCED_PARAMETER(pNMHDR);
+	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
+
+	// Only handle this if the calendar is closed
+	if (!m_datePicker.IsCalendarVisible())
+	{
+		// Note: Don't hide the date picker because the user 
+		// may be editing the date components manually
+		//HideControl(m_datePicker);
+
+		int nRow = GetCurSel();
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+		CString sNewItemText;
+		COleDateTime date;
+
+		if (m_datePicker.GetTime(date))
+			sNewItemText = m_formatter.GetDateOnly(date, TRUE);
+		
+		if (sNewItemText != GetItemText(nRow, VALUE_COL))
+		{
+			SetItemText(nRow, VALUE_COL, sNewItemText);
+			NotifyParentEdit(nAttribID);
+		}
+	}
+
+	*pResult = 0;
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)

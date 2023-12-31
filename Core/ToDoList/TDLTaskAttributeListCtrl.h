@@ -105,10 +105,12 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
+
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
 	afx_msg void OnComboEditCancel(UINT nCtrlID);
 	afx_msg void OnComboEditChange(UINT nCtrlID);
-	afx_msg void OnDateCloseUp(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 
@@ -134,6 +136,7 @@ protected:
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow);
 	void RefreshSelectedTaskValue(int nRow);
+	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);

@@ -202,7 +202,6 @@ protected:
 
 	CTDCTaskCalculator m_calculator;
 	
-
 protected:
 	CString FormatDate(const COleDateTime& date) const;
 };
