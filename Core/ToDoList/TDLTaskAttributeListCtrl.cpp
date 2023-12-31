@@ -822,12 +822,8 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			return;
 
 		case TDCA_ICON:
-			if (!sText.IsEmpty())
-			{
-				m_ilIcons.Draw(pDC, sText, rText.TopLeft(), ILD_TRANSPARENT);
-				return;
-			}
-			break;
+			DrawIcon(pDC, sText, rText);
+			return;
 
 		case TDCA_COLOR:
 			{
@@ -875,8 +871,8 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 				{
-					m_ilIcons.Draw(pDC, aIcons[nIcon], rIcon.TopLeft(), ILD_TRANSPARENT);
-					rIcon.left += GraphicsMisc::ScaleByDPIFactor(16);
+					DrawIcon(pDC, aIcons[nIcon], rIcon);
+					rIcon.left += GraphicsMisc::ScaleByDPIFactor(16) + 2;
 				}
 				return;
 			}
@@ -885,6 +881,17 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	}
 
 	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+}
+
+void CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText)
+{
+	if (!sIcon.IsEmpty())
+	{
+		static int ICON_SIZE = m_ilIcons.GetImageSize();
+
+		CPoint ptTopLeft(rText.left, rText.top + (rText.Height() - ICON_SIZE) / 2);
+		m_ilIcons.Draw(pDC, sIcon, ptTopLeft, ILD_TRANSPARENT);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
@@ -1456,8 +1463,6 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		break;
 
 	case TDCA_ICON:
-		break;
-
 	case TDCA_COLOR:
 		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
 			RefreshSelectedTaskValue(nRow);
