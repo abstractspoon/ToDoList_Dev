@@ -6573,7 +6573,12 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 			Misc::IncrementItemStrT<int>(mapCounts, aTaskItems[nItem]);
 	}
 
-	return SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
+	int nNumMatched = SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
+
+	Misc::SortArray(aMatched);
+	Misc::SortArray(aMixed);
+
+	return nNumMatched;
 }
 
 int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)

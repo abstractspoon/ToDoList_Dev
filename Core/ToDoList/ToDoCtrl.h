@@ -14,8 +14,8 @@
 #include "tdcstruct.h"
 // #include "tdlprioritycombobox.h"
 // #include "tdlriskcombobox.h"
-//#include "tdlrecurringtaskedit.h"
-#include "tdltaskdependencyedit.h"
+// #include "tdlrecurringtaskedit.h"
+// #include "tdltaskdependencyedit.h"
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
 #include "tdlcommentsctrl.h"
@@ -491,7 +491,7 @@ protected:
 //	CTDLRecurringTaskEdit m_eRecurrence;
 // 	CTDLPriorityComboBox m_cbPriority;
 // 	CTDLRiskComboBox m_cbRisk;
-	CTDLTaskDependencyEdit m_eDependency;
+// 	CTDLTaskDependencyEdit m_eDependency;
 	CTDLTaskTreeCtrl m_taskTree;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
 
@@ -499,7 +499,7 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
-	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
+	CIcon m_iconTrackTime, m_iconAddTime/*, m_iconLink*/;
 	CMidnightTimer m_timerMidnight;
 
 	CTDCStyleMap m_styles;
@@ -556,7 +556,7 @@ protected:
 // 	int m_nPriority;
 // 	int m_nRisk;
 	int m_nPercentDone;
-	CTDCDependencyArray m_aDepends;
+// 	CTDCDependencyArray m_aDepends;
 	
 	//TDCCOST m_cost;
 	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
@@ -663,7 +663,7 @@ protected:
 // 	afx_msg void OnChangeRisk();
 	afx_msg void OnChangeProjectName();
 // 	afx_msg void OnChangeCost();
-	afx_msg void OnChangeDependency();
+// 	afx_msg void OnChangeDependency();
 // 	afx_msg void OnChangeExternalID();
 // 	afx_msg void OnChangeRecurrence();
 	afx_msg void OnSelChangeCommentsType();

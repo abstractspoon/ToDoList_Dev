@@ -10,6 +10,7 @@
 #include "ToDoCtrlDataUtils.h"
 #include "TDLPriorityComboBox.h"
 #include "TDLRiskComboBox.h"
+#include "tdltaskdependencyedit.h"
 
 #include "..\shared\InputListCtrl.h"
 #include "..\shared\AutoComboBox.h"
@@ -96,6 +97,7 @@ protected:
 	CTimeComboBox m_cbTimeOfDay;
 	CTDLPriorityComboBox m_cbPriority;
 	CTDLRiskComboBox m_cbRisk;
+	CTDLTaskDependencyEdit m_eDepends;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -108,6 +110,8 @@ protected:
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
+
+	afx_msg void OnDependsChange();
 
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
 	afx_msg void OnComboEditCancel(UINT nCtrlID);
@@ -123,6 +127,7 @@ protected:
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
+	virtual void OnCancelEdit();
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
@@ -135,7 +140,7 @@ protected:
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
-	CWnd* GetEditControl(int nRow);
+	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	void DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText);

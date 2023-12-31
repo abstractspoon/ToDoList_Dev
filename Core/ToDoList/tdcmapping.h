@@ -247,7 +247,7 @@ namespace TDC
 // 		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
 // 		case TDCA_CATEGORY:			return IDC_CATEGORY;
 // 		case TDCA_COST:				return IDC_COST;
-		case TDCA_DEPENDENCY:		return IDC_DEPENDS;
+// 		case TDCA_DEPENDENCY:		return IDC_DEPENDS;
 // 		case TDCA_DONEDATE:			return IDC_DONEDATE; 
 // 		case TDCA_DONETIME:			return IDC_DONETIME;
 // 		case TDCA_DUEDATE:			return IDC_DUEDATE;
@@ -300,7 +300,7 @@ namespace TDC
 // 		case IDC_ALLOCTO:		return TDCA_ALLOCTO;			
 // 		case IDC_CATEGORY:		return TDCA_CATEGORY;			
 // 		case IDC_COST:			return TDCA_COST;				
-		case IDC_DEPENDS:		return TDCA_DEPENDENCY;		
+// 		case IDC_DEPENDS:		return TDCA_DEPENDENCY;		
 // 		case IDC_DONEDATE:		return TDCA_DONEDATE;			
 // 		case IDC_DONETIME:		return TDCA_DONETIME;			
 // 		case IDC_DUEDATE:		return TDCA_DUEDATE;			

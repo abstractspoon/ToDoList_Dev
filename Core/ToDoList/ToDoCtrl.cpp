@@ -265,9 +265,9 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_eTimeSpent.InsertButton(2, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 
 	// add buttons to dependency
-	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
-	m_eDependency.AddButton(ID_DEPENDS_EDIT, _T("..."), CEnString(IDS_OPTIONS));
-	m_eDependency.AddButton(ID_DEPENDS_LINK, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
+// 	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
+// 	m_eDependency.AddButton(ID_DEPENDS_EDIT, _T("..."), CEnString(IDS_OPTIONS));
+// 	m_eDependency.AddButton(ID_DEPENDS_LINK, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 
 	// misc
 //	m_cpColour.SetSelectionMode(CP_MODE_TEXT);
@@ -287,7 +287,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	DDX_Control(pDX, IDC_CATEGORY, m_cbCategory);
 //	DDX_Control(pDX, IDC_COLOUR, m_cpColour);
 //	DDX_Control(pDX, IDC_COST, m_eCost);
-	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
+// 	DDX_Control(pDX, IDC_DEPENDS, m_eDependency);
 // 	DDX_Control(pDX, IDC_DONEDATE, m_dtcDone);
 // 	DDX_Control(pDX, IDC_DONETIME, m_cbTimeDone);
 // 	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
@@ -324,7 +324,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	m_cbRisk.DDX(pDX, m_nRisk);
 // 	m_eRecurrence.DDX(pDX, m_tRecurrence);
 	m_cbFileLink.DDX(pDX, m_aFileLinks);
-	m_eDependency.DDX(pDX, m_aDepends);
+// 	m_eDependency.DDX(pDX, m_aDepends);
 	
 	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 
@@ -429,14 +429,14 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 //	ON_CBN_SELENDCANCEL(IDC_VERSION, OnSelCancelVersion)
 	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelChangeCommentsType)
 //	ON_EN_CHANGE(IDC_COST, OnChangeCost)
-	ON_EN_CHANGE(IDC_DEPENDS, OnChangeDependency)
+//	ON_EN_CHANGE(IDC_DEPENDS, OnChangeDependency)
 //	ON_EN_CHANGE(IDC_EXTERNALID, OnChangeExternalID)
 	ON_EN_CHANGE(IDC_PERCENT, OnChangePercent)
 	ON_EN_CHANGE(IDC_PROJECTNAME, OnChangeProjectName)
 // 	ON_EN_CHANGE(IDC_RECURRENCE, OnChangeRecurrence)
 	ON_EN_CHANGE(IDC_TIMEEST, OnChangeTimeEstimate)
 	ON_EN_CHANGE(IDC_TIMESPENT, OnChangeTimeSpent)
-	ON_MESSAGE(CPN_SELENDOK, OnChangeColour)
+//	ON_MESSAGE(CPN_SELENDOK, OnChangeColour)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
 	ON_MESSAGE(WM_TDC_REFRESHPERCENTSPINVISIBILITY, OnRefreshPercentSpinVisibility)
@@ -696,7 +696,7 @@ void CToDoCtrl::InitEditPrompts()
 
 	// Generic
 //	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
-	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_NONE);
+// 	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_NONE);
 
 // 	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOBODY);
 // 	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_NOBODY);
@@ -1857,7 +1857,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		// special cases
 		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
-		GetSelectedTaskDependencies(m_aDepends);
+// 		GetSelectedTaskDependencies(m_aDepends);
 
 		if (bEditTime)
 		{
@@ -1887,8 +1887,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_eTimeSpent.EnableButton(ID_ADD_TIME, (bCanTimeTrack && !bIsTrackingTask));
 
 		// dependency link button
-		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && m_aDepends.GetSize());
-		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
+// 		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && m_aDepends.GetSize());
+// 		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
 
 		// percent done
 		if (IsSelectedTaskDone())
@@ -1929,11 +1929,11 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_cbTags.CheckAll(CCBC_UNCHECKED);
 
 		m_aFileLinks.RemoveAll();
-		m_aDepends.RemoveAll();
+// 		m_aDepends.RemoveAll();
 
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
 		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
-		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
+// 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
 		m_mapCustomCtrlData.RemoveAll();
 	}
@@ -2185,8 +2185,11 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	case TDCA_DEPENDENCY:
 		{
-			SetSelectedTaskDependencies(m_aDepends, FALSE, TRUE);
-			m_eDependency.EnableButton(ID_DEPENDS_LINK, m_aDepends.GetSize());
+			CTDCDependencyArray aDepends;
+			m_lcAttributes.GetDependencies(aDepends);
+
+			SetSelectedTaskDependencies(aDepends, FALSE, TRUE);
+			//m_eDependency.EnableButton(ID_DEPENDS_LINK, m_aDepends.GetSize());
 		}
 		break;
 		
@@ -4810,20 +4813,21 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 		// Start and due dates might also have changed
 		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
-			UpdateDateTimeControls(TRUE);
+			m_lcAttributes.RefreshSelectedTaskValues();
+//			UpdateDateTimeControls(TRUE);
 		}
 
 		// We only update the control if not editing otherwise
 		// if the user is partially way thru typing a task ID
 		// and the partial ID does not exist then it gets 
 		// removed from the edit field. 
-		if (!bEdit)
-		{
-			m_aDepends.Copy(aDepends);
-			m_eDependency.SetDependencies(m_aDepends);
-		}
-		
-		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
+// 		if (!bEdit)
+// 		{
+// 			m_aDepends.Copy(aDepends);
+// 			m_eDependency.SetDependencies(m_aDepends);
+// 		}
+// 		
+// 		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
 	}
 
 	return TRUE;
@@ -8288,14 +8292,12 @@ void CToDoCtrl::OnChangeCost()
 {
 	UpdateTask(TDCA_COST); 
 }
-*/
 
 void CToDoCtrl::OnChangeDependency()
 {
 	UpdateTask(TDCA_DEPENDENCY); 
 }
 
-/*
 void CToDoCtrl::OnChangeRecurrence()
 {
 	UpdateTask(TDCA_RECURRENCE); 
@@ -11397,6 +11399,7 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 
+/*
 	case IDC_DEPENDS:
 		{
 			switch (lParam)
@@ -11411,6 +11414,7 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
+*/
 	}
 	
 	return 0L;
@@ -11547,14 +11551,35 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 		CTaskFile tasks;
 		GetTasks(tasks, filter);
 
-		if (m_eDependency.DoEdit(tasks, 
-								 m_ilTaskIcons, 
-								 HasStyle(TDCS_SHOWPARENTSASFOLDERS), 
-								 HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES)))
+		CTDCDependencyArray aDepends;
+		GetSelectedTaskDependencies(aDepends);
+
+		CTDLTaskDependencyEditDlg dialog(tasks, 
+										 m_ilTaskIcons, 
+										 aDepends, 
+										 HasStyle(TDCS_SHOWPARENTSASFOLDERS),
+										 HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
+
+		if (dialog.DoModal() == IDOK)
 		{
-			// Check for circular dependencies
-			// TODO
+			CTDCDependencyArray aDepends;
+			dialog.GetDependencies(aDepends);
+
+			if (SetSelectedTaskDependencies(aDepends))
+			{
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_DEPENDENCY);
+				return TRUE;
+			}
 		}
+
+// 		if (m_eDependency.DoEdit(tasks, 
+// 								 m_ilTaskIcons, 
+// 								 HasStyle(TDCS_SHOWPARENTSASFOLDERS), 
+// 								 HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES)))
+// 		{
+// 			// Check for circular dependencies
+// 			// TODO
+// 		}
 	}
 
 	// else

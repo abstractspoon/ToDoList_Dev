@@ -1921,12 +1921,33 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:
-		// Prevent Windows own column resizing
-		if ((pMsg->hwnd == GetSafeHwnd()) &&
-			(pMsg->wParam == VK_ADD) && 
-			Misc::ModKeysArePressed(MKS_CTRL))
+		switch (pMsg->wParam)
 		{
-			return TRUE;
+		case VK_ADD:
+			// Prevent Windows own column resizing
+			{
+				if ((pMsg->hwnd == GetSafeHwnd()) && Misc::ModKeysArePressed(MKS_CTRL))
+					return TRUE;
+			}
+			break;
+
+		case VK_RETURN:
+			{
+				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
+
+				if ((pWnd != &m_editBox) && IsChild(pWnd))
+					HideControl(*pWnd);
+			}
+			break;
+
+		case VK_ESCAPE:
+			{
+				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
+
+				if ((pWnd != &m_editBox) && IsChild(pWnd))
+					OnEditCancel(0, TRUE);
+			}
+			break;
 		}
 		break;
 	}

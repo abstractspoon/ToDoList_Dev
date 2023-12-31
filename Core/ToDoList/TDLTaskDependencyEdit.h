@@ -30,9 +30,10 @@ public:
 	CTDLTaskDependencyEdit();
 	virtual ~CTDLTaskDependencyEdit();
 
-	void GetDependencies(CTDCDependencyArray& aDepends) const;
+	int GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	void SetDependenciesAreCircular(BOOL bCircular = TRUE, COLORREF crCircular = 255);
+	CString FormatDependencies(LPCTSTR szSep = NULL);
 	
 	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
 				BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);
@@ -57,6 +58,7 @@ protected:
 	afx_msg BOOL OnChange();
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg LRESULT OnSetText(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 

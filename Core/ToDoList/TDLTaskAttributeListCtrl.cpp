@@ -6,7 +6,6 @@
 #include "TDLTaskAttributeListCtrl.h"
 #include "TDLTaskCtrlBase.h"
 #include "TDCImageList.h"
-
 #include "tdcstatic.h"
 #include "tdcstruct.h"
 
@@ -14,6 +13,8 @@
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\Localizer.h"
 #include "..\shared\encolordialog.h"
+
+#include "..\3rdParty\ColorDef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,6 +40,7 @@ enum
 	IDC_TIME_PICKER,
 	IDC_PRIORITY_COMBO,
 	IDC_RISK_COMBO,
+	IDC_DEPENDS_EDIT,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -103,6 +105,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
 
+	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
+
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
 	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
@@ -141,6 +145,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, CBS_DROPDOWN);
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
+	CreateControl(m_eDepends, IDC_DEPENDS_EDIT, ES_AUTOHSCROLL);
 
 	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
@@ -498,6 +503,14 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 	{
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_GRAYTEXT);
+
+		switch (GetAttributeID(nItem))
+		{
+		case TDCA_DEPENDENCY:
+			if (m_taskCtrl.SelectionHasCircularDependencies())
+				return colorRed;
+			break;
+		}
 	}
 
 	// All else
@@ -902,7 +915,9 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 		(pDispInfo->item.iItem >= 0))
 	{
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(pDispInfo->item.iItem, TRUE);
+		
 		NotifyParentEdit(nAttribID);
+		RefreshSelectedTaskValue(nAttribID);
 	}
 
 	*pResult = 0;
@@ -952,7 +967,7 @@ int CTDLTaskAttributeListCtrl::GetCategories(CStringArray& aMatched, CStringArra
 
 int CTDLTaskAttributeListCtrl::GetDependencies(CTDCDependencyArray& aDepends) const
 {
-	return aDepends.Parse(GetValueText(TDCA_DEPENDENCY));
+	return m_eDepends.GetDependencies(aDepends);
 }
 
 int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMixed) const
@@ -1136,11 +1151,20 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_FLAG: 
 	case TDCA_LOCK: 
 	case TDCA_COLOR:
-	case TDCA_DEPENDENCY:
 	case TDCA_RECURRENCE:
 	case TDCA_TASKNAME:
 	case TDCA_EXTERNALID: 
 		// Nothing to do
+		break;
+
+	case TDCA_DEPENDENCY:
+		{
+			CTDCDependencyArray aDepends;
+			m_taskCtrl.GetSelectedTaskDependencies(aDepends);
+
+			m_eDepends.SetDependencies(aDepends);
+			//m_editBox.SetMask(_T("0123456789"), ME_LOCALIZESEPARATOR);
+		}
 		break;
 
 	case TDCA_COST:
@@ -1297,8 +1321,7 @@ CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const
 	return GetItemText(FindItemFromData(nAttribID), VALUE_COL); 
 }
 
-
-CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
+CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 {
 	// Sanity check
 	if ((nRow < 0) || (nRow > GetItemCount()))
@@ -1359,7 +1382,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow)
 		return &m_cbTimeOfDay;
 
 	case TDCA_DEPENDENCY:
-		break;
+		return (bBtnClick ? NULL : &m_eDepends);
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -1437,7 +1460,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	if (!CanEditCell(nRow, nCol))
 		return;
 
-	CWnd* pCtrl = GetEditControl(nRow);
+	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
 
 	if (pCtrl == CInputListCtrl::GetEditControl())
 	{
@@ -1470,6 +1493,15 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		break;
 
 	case TDCA_DEPENDENCY:
+		if (bBtnClick)
+		{
+			if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
+				RefreshSelectedTaskValue(nRow);
+		}
+		else
+		{
+			CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
+		}
 		break;
 
 	case TDCA_TASKNAME:
@@ -1549,6 +1581,10 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	HideControl(m_datePicker, pWndIgnore);
 	HideControl(m_cbMultiSelection, pWndIgnore);
 	HideControl(m_cbSingleSelection, pWndIgnore);
+	HideControl(m_cbTimeOfDay, pWndIgnore);
+	HideControl(m_cbPriority, pWndIgnore);
+	HideControl(m_cbRisk, pWndIgnore);
+	HideControl(m_eDepends, pWndIgnore);
 
 	CInputListCtrl::HideAllControls(pWndIgnore);
 }
@@ -1618,7 +1654,43 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 LRESULT CTDLTaskAttributeListCtrl::NotifyParentEdit(TDC_ATTRIBUTE nAttribID)
 {
+	UpdateWindow();
+
 	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, nAttribID, 0);
+}
+
+void CTDLTaskAttributeListCtrl::OnDependsChange()
+{
+	// Received after a manual edit of the task IDs
+	int nRow = GetCurSel();
+	ASSERT(GetAttributeID(nRow) == TDCA_DEPENDENCY);
+
+	HideControl(m_eDepends);
+	SetItemText(nRow, VALUE_COL, m_eDepends.FormatDependencies());
+	NotifyParentEdit(TDCA_DEPENDENCY);
+}
+
+void CTDLTaskAttributeListCtrl::OnCancelEdit()
+{
+	int nRow = GetCurSel();
+
+	if (nRow != -1)
+	{
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+		// Special handling
+		switch (nAttribID)
+		{
+		case TDCA_DEPENDENCY:
+			// Revert changes
+			m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
+			HideControl(m_eDepends);
+			break;
+
+		default:
+			CInputListCtrl::OnCancelEdit();
+		}
+	}
 }
 
 void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult) 
