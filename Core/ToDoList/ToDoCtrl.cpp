@@ -180,7 +180,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 // 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
 	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
-	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
+//	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 // 	m_cbTimeDue(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
@@ -299,7 +299,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	DDX_Control(pDX, IDC_RISK, m_cbRisk);
 // 	DDX_Control(pDX, IDC_STARTDATE, m_dtcStart);
 // 	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
-	DDX_Control(pDX, IDC_STATUS, m_cbStatus);
+// 	DDX_Control(pDX, IDC_STATUS, m_cbStatus);
 // 	DDX_Control(pDX, IDC_TAGS, m_cbTags);
 	DDX_Control(pDX, IDC_TIMEEST, m_eTimeEstimate);
 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
@@ -316,7 +316,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeSpent, m_timeSpent);
 
 // 	m_cbAllocBy.DDX(pDX, m_sAllocBy);
-	m_cbStatus.DDX(pDX, m_sStatus);
+// 	m_cbStatus.DDX(pDX, m_sStatus);
 // 	m_cbVersion.DDX(pDX, m_sVersion);
 // 	m_cbPriority.DDX(pDX, m_nPriority);
 // 	m_cbRisk.DDX(pDX, m_nRisk);
@@ -412,7 +412,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 // 	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
 // 	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
 // 	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
-	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
+//	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
 // 	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
 //	ON_CBN_SELCHANGE(IDC_VERSION, OnSelChangeVersion)
 	ON_CBN_SELENDCANCEL(IDC_FILEPATH, OnCancelChangeFileLinkPath)
@@ -422,7 +422,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 // 	ON_CBN_SELENDCANCEL(IDC_ALLOCBY, OnSelCancelAllocBy)
 // 	ON_CBN_SELENDCANCEL(IDC_PRIORITY, OnSelCancelPriority)
 // 	ON_CBN_SELENDCANCEL(IDC_RISK, OnSelCancelRisk)
-	ON_CBN_SELENDCANCEL(IDC_STATUS, OnSelCancelStatus)
+//	ON_CBN_SELENDCANCEL(IDC_STATUS, OnSelCancelStatus)
 //	ON_CBN_SELENDCANCEL(IDC_VERSION, OnSelCancelVersion)
 	ON_CBN_SELENDOK(IDC_COMMENTS, OnSelChangeCommentsType)
 //	ON_EN_CHANGE(IDC_COST, OnChangeCost)
@@ -876,7 +876,7 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 int CToDoCtrl::GetDefaultControlHeight() const
 {
 	// To handle DPI scaling better simply use the height of the category combo
-	return GetChildHeight(&m_cbStatus);
+	return GetChildHeight(&m_cbFileLink);
 }
 
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
@@ -1285,7 +1285,7 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 		
 // 	case IDC_ALLOCTO:
 // 	case IDC_ALLOCBY:
-	case IDC_STATUS:
+//	case IDC_STATUS:
 // 	case IDC_CATEGORY:
 // 	case IDC_TAGS:
 // 	case IDC_PRIORITY:
@@ -1833,7 +1833,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_nPriority = GetSelectedTaskPriority();
 // 		m_nRisk = GetSelectedTaskRisk();
 //		m_sAllocBy = GetSelectedTaskAllocBy();
-		m_sStatus = GetSelectedTaskStatus();
+// 		m_sStatus = GetSelectedTaskStatus();
 //		m_sExternalID = GetSelectedTaskExtID();
 //		m_sVersion = GetSelectedTaskVersion();
 		m_crColour = GetSelectedTaskColor();
@@ -1917,7 +1917,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_crColour = CLR_DEFAULT;
 
 // 		m_sAllocBy.Empty();
-		m_sStatus.Empty();
+// 		m_sStatus.Empty();
 //		m_sExternalID.Empty();
 //		m_sVersion.Empty();
 
@@ -2204,15 +2204,6 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		SetSelectedTaskExternalID(m_lcAttributes.GetExternalID());
 		break;
 		
-	case TDCA_ALLOCTO:
-		{
-			CStringArray aMatched, aMixed;
-			m_lcAttributes.GetAllocTo(aMatched, aMixed);
-
-			SetSelectedTaskArray(TDCA_ALLOCTO, m_tldAll.aAllocTo, aMatched, aMixed);
-		}
-		break;
-		
 	case TDCA_ALLOCBY:
 		//SetSelectedTaskAllocBy(m_sAllocBy);
 		SetSelectedTaskAllocBy(m_lcAttributes.GetAllocBy());
@@ -2226,6 +2217,15 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	case TDCA_VERSION:
 		//SetSelectedTaskVersion(m_sVersion);
 		SetSelectedTaskVersion(m_lcAttributes.GetVersion());
+		break;
+
+	case TDCA_ALLOCTO:
+		{
+			CStringArray aMatched, aMixed;
+			m_lcAttributes.GetAllocTo(aMatched, aMixed);
+
+			SetSelectedTaskArray(TDCA_ALLOCTO, m_tldAll.aAllocTo, aMatched, aMixed);
+		}
 		break;
 		
 	case TDCA_CATEGORY:
@@ -2576,7 +2576,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 // 	SetDefaultListContent(m_cbTags,		tld.aTags,		m_tldDefault.aTags);
 
 	// single selection
-	SetDefaultListContent(m_cbStatus,	tld.aStatus,	m_tldDefault.aStatus, TRUE);
+// 	SetDefaultListContent(m_cbStatus,	tld.aStatus,	m_tldDefault.aStatus, TRUE);
 // 	SetDefaultListContent(m_cbVersion,	tld.aVersion,	m_tldDefault.aVersion, TRUE);
 // 	SetDefaultListContent(m_cbAllocBy,	tld.aAllocBy,	m_tldDefault.aAllocBy, TRUE);
 
@@ -2590,7 +2590,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 // 	OnSelCancelTag();
 
 // 	m_cbAllocBy.SelectString(0, m_sAllocBy);
-	m_cbStatus.SelectString(0, m_sStatus);
+// 	m_cbStatus.SelectString(0, m_sStatus);
 //	m_cbVersion.SelectString(0, m_sVersion);
 }
 
@@ -2643,7 +2643,7 @@ BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bRe
 	// single selection
 // 	case TDCA_ALLOCBY:	return SetAutoComboReadOnly(m_cbAllocBy,	bReadOnly, m_tldDefault.aAllocBy, TRUE);
 //	case TDCA_VERSION:	return SetAutoComboReadOnly(m_cbVersion,	bReadOnly, m_tldDefault.aVersion, TRUE);
-	case TDCA_STATUS:	return SetAutoComboReadOnly(m_cbStatus,		bReadOnly, m_tldDefault.aStatus, TRUE);
+// 	case TDCA_STATUS:	return SetAutoComboReadOnly(m_cbStatus,		bReadOnly, m_tldDefault.aStatus, TRUE);
 	}
 
 	// all else
@@ -3260,6 +3260,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		}
 		else if (bUpdateTimeEst)
 		{
+			m_lcAttributes.RefreshSelectedTaskValue(TDCA_TIMEESTIMATE);
 			TDCTIMEPERIOD time;
 
 			if (GetSelectedTaskTimeEstimate(time))
@@ -4596,16 +4597,22 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 			return FALSE;
 
 		// else
-		UpdateControls(FALSE);
+		m_lcAttributes.RefreshSelectedTaskValues();
+		// UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
 
 		return TRUE;
 	}
-	
-	// else
-	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
+	else if (aModTaskIDs.GetSize())
+	{
+		SetModified(TDCA_STATUS, aModTaskIDs);
+		return TRUE;
+	}
+
+	return FALSE;
+//	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend)
@@ -5940,10 +5947,11 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 		m_taskTree.SetCompletionStatus(sStatus);
 
 		if (!m_sCompletionStatus.IsEmpty())
-		{
-			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
-			UpdateAutoListData(TDCA_STATUS);
-		}
+			Misc::AddUniqueItem(m_sCompletionStatus, m_tldDefault.aStatus);
+		else
+			Misc::RemoveItem(m_sCompletionStatus, m_tldDefault.aStatus);
+
+		m_lcAttributes.SetDefaultAutoListData(m_tldDefault);
 	}
 }
 
@@ -6234,7 +6242,7 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	if (tasks.GetAutoListData(m_tldAll))
-		m_lcAttributes.SetAutoListData(m_tldAll);
+		m_lcAttributes.SetAutoListData(m_tldAll, TDCA_ALL);
 
 
 // 	TDCAUTOLISTDATA tld;
@@ -8145,12 +8153,12 @@ void CToDoCtrl::OnSelChangeCategory()
 {
 	UpdateTask(TDCA_CATEGORY);
 }
-*/
 
 void CToDoCtrl::OnSelChangeStatus()
 {
 	UpdateTask(TDCA_STATUS);
 }
+*/
 
 void CToDoCtrl::OnSelChangeFileLinkPath()
 {
@@ -8213,11 +8221,11 @@ void CToDoCtrl::OnSelCancelRisk()
 	m_cbRisk.SetSelectedRisk(GetSelectedTaskRisk());
 }
 
-*/
 void CToDoCtrl::OnSelCancelStatus()
 {
 	m_cbStatus.SelectString(0, GetSelectedTaskStatus());
 }
+*/
 
 void CToDoCtrl::OnChangeTimeEstimate()
 {

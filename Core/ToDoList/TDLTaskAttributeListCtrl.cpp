@@ -153,6 +153,16 @@ void CTDLTaskAttributeListCtrl::RefreshPriorityColors()
 		RedrawCell(nRow, VALUE_COL, FALSE);
 }
 
+void CTDLTaskAttributeListCtrl::RefreshCompletionStatus()
+{
+	CString sStatus = m_taskCtrl.GetCompletionStatus();
+
+	if (!sStatus.IsEmpty())
+		Misc::AddUniqueItem(sStatus, m_tldDefault.aStatus);
+	else
+		Misc::RemoveItem(sStatus, m_tldDefault.aStatus);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshDateFormat()
 {
 	int nRow = GetItemCount();
@@ -499,9 +509,9 @@ void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tl
 	m_tldDefault.Copy(tldDefault, TDCA_ALL);
 }
 
-void CTDLTaskAttributeListCtrl::SetAutoListData(const TDCAUTOLISTDATA& tldAll)
+void CTDLTaskAttributeListCtrl::SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID)
 {
-	m_tldAll.Copy(tldAll, TDCA_ALL);
+	m_tldAll.Copy(tld, nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const

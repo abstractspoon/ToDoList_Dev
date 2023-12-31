@@ -42,13 +42,14 @@ public:
 	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
-	void SetAutoListData(const TDCAUTOLISTDATA& tldAll);
+	void SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
 
 	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateFormat();
 	void RefreshPriorityColors();
+	void RefreshCompletionStatus();
 
 	COLORREF GetColor() const;
 	CString GetIcon() const;

@@ -260,7 +260,7 @@ namespace TDC
 // 		case TDCA_RISK:				return IDC_RISK;
 // 		case TDCA_STARTDATE:		return IDC_STARTDATE;
 // 		case TDCA_STARTTIME:		return IDC_STARTTIME;
-		case TDCA_STATUS:			return IDC_STATUS;
+// 		case TDCA_STATUS:			return IDC_STATUS;
 // 		case TDCA_TAGS:				return IDC_TAGS;
 		case TDCA_TASKNAME:			return IDC_TASKTREECTRL;
 		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
@@ -313,7 +313,7 @@ namespace TDC
 // 		case IDC_RISK:			return TDCA_RISK;				
 // 		case IDC_STARTDATE:		return TDCA_STARTDATE;		
 // 		case IDC_STARTTIME:		return TDCA_STARTTIME;		
-		case IDC_STATUS:		return TDCA_STATUS;			
+// 		case IDC_STATUS:		return TDCA_STATUS;			
 // 		case IDC_TAGS:			return TDCA_TAGS;				
 		case IDC_TASKTREECTRL:	return TDCA_TASKNAME;			
 		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			

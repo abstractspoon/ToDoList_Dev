@@ -237,6 +237,7 @@ public:
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void SetNextUniqueTaskID(DWORD dwTaskID);
 	void SetCompletionStatus(const CString& sStatus);
+	CString GetCompletionStatus() const { return m_sCompletionStatus; }
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }

@@ -473,7 +473,7 @@ protected:
 	
 protected:
 //	CAutoComboBox m_cbAllocBy;
-	CAutoComboBox m_cbStatus;
+//	CAutoComboBox m_cbStatus;
 	//CAutoComboBox m_cbVersion;
 // 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
 	CColourPickerEx m_cpColour;
@@ -547,7 +547,7 @@ protected:
 
 	CStringArray m_aFileLinks;
 // 	CString m_sAllocBy;
-	CString m_sStatus;
+//	CString m_sStatus;
 	CString m_sProjectName;
 	//CString m_sExternalID;
 	CString m_sOccurrence;
@@ -646,7 +646,7 @@ protected:
 // 	afx_msg void OnSelChangeStartTime();
 // 	afx_msg void OnSelChangeAllocTo();
 // 	afx_msg void OnSelChangeAllocBy();
-	afx_msg void OnSelChangeStatus();
+//	afx_msg void OnSelChangeStatus();
 // 	afx_msg void OnSelChangeTag();
 // 	afx_msg void OnSelChangeVersion();
 // 	afx_msg void OnSelChangeCategory();
@@ -654,7 +654,7 @@ protected:
 	afx_msg void OnCancelChangeFileLinkPath();
 // 	afx_msg void OnSelCancelAllocTo();
 // 	afx_msg void OnSelCancelCategory();
-	afx_msg void OnSelCancelStatus();	
+//	afx_msg void OnSelCancelStatus();	
 // 	afx_msg void OnSelCancelVersion();
 // 	afx_msg void OnSelCancelTag();
 // 	afx_msg void OnSelCancelAllocBy();
