@@ -1250,8 +1250,12 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
-	if (sValue.IsEmpty() && (TDC::MapAttributeToDate(nFallbackDate) != TDCD_NONE))
+	if (sValue.IsEmpty() && 
+		(nFallbackDate != TDCA_NONE) && 
+		(TDC::MapAttributeToDate(nFallbackDate) != TDCD_NONE))
+	{
 		sValue = GetValueText(nFallbackDate);
+	}
 
 	COleDateTime date;
 
