@@ -8275,6 +8275,7 @@ void CToDoCtrl::OnChangeTimeSpent()
 	UpdateTask(TDCA_TIMESPENT); 
 }
 
+/*
 void CToDoCtrl::OnChangeExternalID()
 {
 	UpdateTask(TDCA_EXTERNALID); 
@@ -8284,6 +8285,7 @@ void CToDoCtrl::OnChangeCost()
 {
 	UpdateTask(TDCA_COST); 
 }
+*/
 
 void CToDoCtrl::OnChangeDependency()
 {

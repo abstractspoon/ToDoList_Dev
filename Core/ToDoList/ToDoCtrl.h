@@ -662,10 +662,10 @@ protected:
 // 	afx_msg void OnSelCancelRisk();
 // 	afx_msg void OnChangeRisk();
 	afx_msg void OnChangeProjectName();
-	afx_msg void OnChangeCost();
+// 	afx_msg void OnChangeCost();
 	afx_msg void OnChangeDependency();
-	afx_msg void OnChangeExternalID();
 	afx_msg void OnChangeRecurrence();
+// 	afx_msg void OnChangeExternalID();
 	afx_msg void OnSelChangeCommentsType();
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 
