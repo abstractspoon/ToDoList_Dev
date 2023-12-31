@@ -149,6 +149,8 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
+	CLocalizer::EnableTranslation(m_cbPriority, FALSE);
+	CLocalizer::EnableTranslation(m_cbRisk, FALSE);
 
 	return 0;
 }
