@@ -31,17 +31,20 @@ class CPopupEditCtrl : public CEnEdit
 // Construction
 public:
 	CPopupEditCtrl(PEC_CLEANUP nCleanup = PEC_AUTOHIDE);
+
 	void Reset() { m_bEditEnded = FALSE; }
 	void Show(CRect rPos = CRect(0, 0, 0, 0)); // screen or client depending on original creation mode
 	void CleanUp();
 	void SetCleanUp(PEC_CLEANUP nCleanUp) { m_nCleanUp = nCleanUp; }
 	void EndEdit(BOOL bCancel);
+	void SetSpinBuddy(CSpinButtonCtrl* pBuddy);
 
 // Attributes
 protected:
 	BOOL m_bEditEnded;
 	UINT m_nID;
 	CWnd* m_pParent;
+	CSpinButtonCtrl* m_pSpinBuddy;
 	PEC_CLEANUP m_nCleanUp;
 
 // Operations
@@ -75,6 +78,7 @@ protected:
 
 	void EndEdit(BOOL bCancel, BOOL bIntentional);
 	void Hide();
+	BOOL ShowSpinBuddy(BOOL bShow);
 };
 
 /////////////////////////////////////////////////////////////////////////////

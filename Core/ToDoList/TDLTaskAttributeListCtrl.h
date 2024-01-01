@@ -41,6 +41,7 @@ public:
 public:
 	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
 	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
+	void SetPercentDoneIncrement(int nAmount);
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
@@ -48,7 +49,7 @@ public:
 
 	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
-	void RefreshDateFormat();
+	void RefreshDateTimeFormatting();
 	void RefreshCompletionStatus();
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
@@ -98,6 +99,7 @@ protected:
 	CTDLPriorityComboBox m_cbPriority;
 	CTDLRiskComboBox m_cbRisk;
 	CTDLTaskDependencyEdit m_eDepends;
+	CSpinButtonCtrl m_spinPercent;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)

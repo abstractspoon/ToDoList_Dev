@@ -41,6 +41,7 @@ enum
 	IDC_PRIORITY_COMBO,
 	IDC_RISK_COMBO,
 	IDC_DEPENDS_EDIT,
+	IDC_PERCENT_SPIN,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -138,14 +139,17 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Add attributes
 	Populate();
 
-	// Create edit fields
+	// Create our edit fields
 	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
 	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT));
-	CreateControl(m_datePicker, IDC_DATE_PICKER/*, DTS_SHOWNONE*/);
+	CreateControl(m_datePicker, IDC_DATE_PICKER);
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, CBS_DROPDOWN);
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_eDepends, IDC_DEPENDS_EDIT, ES_AUTOHSCROLL);
+
+	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
+	m_spinPercent.SetRange(0, 100);
 
 	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
@@ -173,7 +177,7 @@ void CTDLTaskAttributeListCtrl::RefreshCompletionStatus()
 		Misc::RemoveItem(sStatus, m_tldDefault.aStatus);
 }
 
-void CTDLTaskAttributeListCtrl::RefreshDateFormat()
+void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 {
 	int nRow = GetItemCount();
 
@@ -191,6 +195,14 @@ void CTDLTaskAttributeListCtrl::RefreshDateFormat()
 			break;
 		}
 	}
+}
+
+void CTDLTaskAttributeListCtrl::SetPercentDoneIncrement(int nAmount)
+{
+	ASSERT(m_spinPercent.GetSafeHwnd());
+	
+	UDACCEL uda = { 0, (UINT)nAmount };
+	m_spinPercent.SetAccel(1, &uda);
 }
 
 void CTDLTaskAttributeListCtrl::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
@@ -321,6 +333,9 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 
 TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveCustomTimeFields) const
 { 
+	if (nRow == -1)
+		return TDCA_NONE;
+
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow); 
 
 	if (bResolveCustomTimeFields && (nAttribID > CUSTOMTIMEATTRIBOFFSET))
@@ -446,6 +461,9 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	if (!IsWindowEnabled() || (nCol == ATTRIB_COL) || m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
+	if (m_taskCtrl.SelectionHasLocked())
+		return FALSE;
+
 	// else
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
@@ -465,6 +483,9 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		case TDCA_PARENTID:
 			return FALSE;
 
+		case TDCA_PERCENT:
+			return !m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE);
+
 		case TDCA_LOCK:
 			return TRUE;
 
@@ -477,9 +498,6 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		case TDCA_DONETIME:
 			return m_taskCtrl.SelectedTaskHasDate(TDCD_DONEDATE);
 	}
-
-	if (m_taskCtrl.SelectionHasLocked())
-		return FALSE;
 
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		return (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) != TDCCA_CALCULATION);
@@ -593,6 +611,16 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		break;
 
 	case TDCA_PERCENT:
+		if (m_taskCtrl.IsSelectedTaskDone())
+		{
+			sValue = _T("100");
+		}
+		else if ((m_taskCtrl.GetSelectedCount() == 1) &&
+				 m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		{
+			sValue = m_formatter.GetTaskPercentDone(dwSingleSelTaskID);
+		}
+		else
 		{
 			int nValue = m_taskCtrl.GetSelectedTaskPercent();
 
@@ -1159,22 +1187,22 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		// Nothing to do
 		break;
 
+	case TDCA_PERCENT:
+		m_editBox.SetMask(_T("0123456789"));
+		m_editBox.SetSpinBuddy(&m_spinPercent);
+		break;
+
 	case TDCA_DEPENDENCY:
 		{
 			CTDCDependencyArray aDepends;
 			m_taskCtrl.GetSelectedTaskDependencies(aDepends);
 
 			m_eDepends.SetDependencies(aDepends);
-			//m_editBox.SetMask(_T("0123456789"), ME_LOCALIZESEPARATOR);
 		}
 		break;
 
 	case TDCA_COST:
 		m_editBox.SetMask(_T("-0123456789.@"), ME_LOCALIZEDECIMAL);
-		break;
-
-	case TDCA_PERCENT:
-		m_editBox.SetMask(_T("-0123456789"));
 		break;
 
 	case TDCA_PRIORITY:
@@ -1354,9 +1382,9 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 		// Not required
 		return NULL;
 
+	case TDCA_PERCENT:
 	case TDCA_EXTERNALID:
 	case TDCA_COST:
-	case TDCA_PERCENT:
 	case TDCA_TASKNAME:
 		// Use base class edit control
 		break;
@@ -1463,10 +1491,13 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		return;
 
 	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	if (pCtrl == CInputListCtrl::GetEditControl())
 	{
+		PrepareControl(m_editBox, nRow, nCol);
 		CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
+
 		return;
 	}
 	else if (pCtrl != NULL)
@@ -1476,7 +1507,6 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	}
 
 	// All other attributes not handled by the base class
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
 	switch (nAttribID)
@@ -1580,6 +1610,8 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 
 void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 {
+	CInputListCtrl::HideAllControls(pWndIgnore);
+
 	HideControl(m_datePicker, pWndIgnore);
 	HideControl(m_cbMultiSelection, pWndIgnore);
 	HideControl(m_cbSingleSelection, pWndIgnore);
@@ -1587,8 +1619,9 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	HideControl(m_cbPriority, pWndIgnore);
 	HideControl(m_cbRisk, pWndIgnore);
 	HideControl(m_eDepends, pWndIgnore);
-
-	CInputListCtrl::HideAllControls(pWndIgnore);
+	
+	if (pWndIgnore != &m_editBox)
+		m_editBox.SetSpinBuddy(NULL);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 

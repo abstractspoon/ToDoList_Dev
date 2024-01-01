@@ -159,7 +159,7 @@ protected:
 // private CToDoCtrl messages
 
 UINT CToDoCtrl::WM_TDC_FIXUPPOSTDROPSELECTION		= (WM_APP + 1);
-UINT CToDoCtrl::WM_TDC_REFRESHPERCENTSPINVISIBILITY	= (WM_APP + 2);
+//UINT CToDoCtrl::WM_TDC_REFRESHPERCENTSPINVISIBILITY	= (WM_APP + 2);
 UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 
 //////////////////////////////////////////////////////////////////////////////
@@ -253,7 +253,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	}
 	
 	// set up number masks
-	m_ePercentDone.SetMask(_T("0123456789"));
+//	m_ePercentDone.SetMask(_T("0123456789"));
 //	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add 'clock' button to 'time spent'
@@ -294,8 +294,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
 //	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
 	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
-	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
-	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
+// 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
+// 	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
 // 	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
 // 	DDX_Control(pDX, IDC_RECURRENCE, m_eRecurrence);
 // 	DDX_Control(pDX, IDC_RISK, m_cbRisk);
@@ -312,7 +312,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 //	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
 
 //	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost);
-	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
+// 	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
 
 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeEstimate, m_timeEstimate);
 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeSpent, m_timeSpent);
@@ -431,7 +431,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 //	ON_EN_CHANGE(IDC_COST, OnChangeCost)
 //	ON_EN_CHANGE(IDC_DEPENDS, OnChangeDependency)
 //	ON_EN_CHANGE(IDC_EXTERNALID, OnChangeExternalID)
-	ON_EN_CHANGE(IDC_PERCENT, OnChangePercent)
+// 	ON_EN_CHANGE(IDC_PERCENT, OnChangePercent)
 	ON_EN_CHANGE(IDC_PROJECTNAME, OnChangeProjectName)
 // 	ON_EN_CHANGE(IDC_RECURRENCE, OnChangeRecurrence)
 	ON_EN_CHANGE(IDC_TIMEEST, OnChangeTimeEstimate)
@@ -439,7 +439,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 //	ON_MESSAGE(CPN_SELENDOK, OnChangeColour)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
-	ON_MESSAGE(WM_TDC_REFRESHPERCENTSPINVISIBILITY, OnRefreshPercentSpinVisibility)
+//	ON_MESSAGE(WM_TDC_REFRESHPERCENTSPINVISIBILITY, OnRefreshPercentSpinVisibility)
 	ON_MESSAGE(WM_TDC_FIXUPPOSTDROPSELECTION, OnFixupPostDropSelection)
 //	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DONEDATE, OnCompletionDatechange)
 // 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DUEDATE, OnDueDatechange)
@@ -614,8 +614,9 @@ BOOL CToDoCtrl::OnInitDialog()
 	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 
 	// TODO
-	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
-	
+	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
+	m_lcAttributes.SetPercentDoneIncrement(m_nPercentIncrement);
+
 	// disable translation of auto-combos
 // 	CLocalizer::EnableTranslation(m_cbAllocBy, FALSE);
 // 	CLocalizer::EnableTranslation(m_cbAllocTo, FALSE);
@@ -625,11 +626,11 @@ BOOL CToDoCtrl::OnInitDialog()
 // 	CLocalizer::EnableTranslation(m_cbTags, FALSE);
 
 	// percent spin
-	m_spinPercent.SetRange(0, 100);
-	m_spinPercent.SetBuddy(GetDlgItem(IDC_PERCENT));
-	
-	UDACCEL uda = { 0, (UINT)m_nPercentIncrement };
-	m_spinPercent.SetAccel(1, &uda);
+// 	m_spinPercent.SetRange(0, 100);
+// 	m_spinPercent.SetBuddy(GetDlgItem(IDC_PERCENT));
+// 	
+// 	UDACCEL uda = { 0, (UINT)m_nPercentIncrement };
+// 	m_spinPercent.SetAccel(1, &uda);
 	
 	// init dates
 // 	m_dtcStart.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
@@ -1274,17 +1275,17 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 	// some special cases
 	switch (ctrl.nCtrlID)
 	{
-	case IDC_PERCENT:
-		{
-			CRect rSpin = GetCtrlRect(IDC_PERCENTSPIN); // gets current pos
-			rSpin.OffsetRect(rCtrl.right - rSpin.right, 0);
-			rSpin.top = rCtrl.top;
-			rSpin.bottom = rCtrl.bottom;
-			pDWM->MoveWindow(&m_spinPercent, rSpin);
-			
-			rCtrl.right = rSpin.left;
-		}
-		break;
+// 	case IDC_PERCENT:
+// 		{
+// 			CRect rSpin = GetCtrlRect(IDC_PERCENTSPIN); // gets current pos
+// 			rSpin.OffsetRect(rCtrl.right - rSpin.right, 0);
+// 			rSpin.top = rCtrl.top;
+// 			rSpin.bottom = rCtrl.bottom;
+// 			pDWM->MoveWindow(&m_spinPercent, rSpin);
+// 			
+// 			rCtrl.right = rSpin.left;
+// 		}
+// 		break;
 		
 // 	case IDC_ALLOCTO:
 // 	case IDC_ALLOCBY:
@@ -1494,12 +1495,12 @@ void CToDoCtrl::ShowHideControl(const CTRLITEM& ctrl)
 	pLabel->ShowWindow(nShowCtrl);
 	
 	// some additions and modifications
-	switch (ctrl.nCtrlID)
-	{
-	case IDC_PERCENT:
-		m_spinPercent.ShowWindow(nShowCtrl);
-		break;
-	}
+// 	switch (ctrl.nCtrlID)
+// 	{
+// 	case IDC_PERCENT:
+// 		m_spinPercent.ShowWindow(nShowCtrl);
+// 		break;
+// 	}
 }
 
 void CToDoCtrl::ShowHideControls()
@@ -1625,6 +1626,7 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		}
 		return;
 
+/*
 	case IDC_PERCENT:
 		{
 			BOOL bEditPercent = !HasStyle(TDCS_AUTOCALCPERCENTDONE);
@@ -1642,6 +1644,7 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 			SetCtrlState(m_spinPercent, nCtrlState);
 		}
 		break;
+*/
 		
 	case IDC_TIMEEST:
 		if (bEnable)
@@ -1891,18 +1894,18 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
 
 		// percent done
-		if (IsSelectedTaskDone())
-		{
-			m_nPercentDone = 100;
-		}
-		else if (bEditPercent)
-		{
-			m_nPercentDone = GetSelectedTaskPercent();
-		}
-		else
-		{
-			m_nPercentDone = m_calculator.GetTaskPercentDone(dwTaskID);
-		}
+// 		if (IsSelectedTaskDone())
+// 		{
+// 			m_nPercentDone = 100;
+// 		}
+// 		else if (bEditPercent)
+// 		{
+// 			m_nPercentDone = GetSelectedTaskPercent();
+// 		}
+// 		else
+// 		{
+// 			m_nPercentDone = m_calculator.GetTaskPercentDone(dwTaskID);
+// 		}
 		
 		// Misc
 //		GetSelectedTaskCost(m_cost);
@@ -1913,7 +1916,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	{
 // 		m_nPriority = 0;
 // 		m_nRisk = 0;
-		m_nPercentDone = 0;
+//		m_nPercentDone = 0;
 		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
 //		m_cost.dAmount = 0.0;
 // 		m_tRecurrence = TDCRECURRENCE();
@@ -2098,7 +2101,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
 			{
 				// check if we need to modify percent done also
-				if (!IsSelectedTaskDone())
+/*				if (!IsSelectedTaskDone())
 				{
 					int nPercentDone = GetSelectedTaskPercent();
 					
@@ -2115,7 +2118,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 					m_nPercentDone = 100;
 					//UpdateData(FALSE);
 				}
-			}
+*/			}
 // 			else
 // 			{
 // 				UpdateControls(FALSE); // don't update comments
@@ -4092,26 +4095,24 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 			return FALSE;
 
 		// else
-		UpdateControls(FALSE);
+// 		UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
 
 		return TRUE;
 	}
-	
-	// else 
-	if (aModTaskIDs.GetSize())
+	else if (aModTaskIDs.GetSize())
 	{
-		int nPercent = GetSelectedTaskPercent();
-
-		// don't update m_nPercentDone for multiple selection
-		// else they all end up as the same value
-		if ((nPercent != -1) && (m_nPercentDone != nPercent))
-		{
-			m_nPercentDone = nPercent;
-			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
-		}
+// 		int nPercent = GetSelectedTaskPercent();
+// 
+// 		// don't update m_nPercentDone for multiple selection
+// 		// else they all end up as the same value
+// 		if ((nPercent != -1) && (m_nPercentDone != nPercent))
+// 		{
+// 			m_nPercentDone = nPercent;
+// 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
+// 		}
 
 		SetModified(TDCA_PERCENT, aModTaskIDs);
 		return TRUE;
@@ -4214,11 +4215,14 @@ void CToDoCtrl::SetPercentDoneIncrement(int nAmount)
 	m_nPercentIncrement = abs(nAmount);
 	m_nPercentIncrement = max(1, min(50, m_nPercentIncrement));
 
-	if (m_spinPercent.GetSafeHwnd())
-	{
-		UDACCEL uda = { 0, (UINT)m_nPercentIncrement };
-		m_spinPercent.SetAccel(1, &uda);
-	}
+	if (m_lcAttributes.GetSafeHwnd())
+		m_lcAttributes.SetPercentDoneIncrement(m_nPercentIncrement);
+
+// 	if (m_spinPercent.GetSafeHwnd())
+// 	{
+// 		UDACCEL uda = { 0, (UINT)m_nPercentIncrement };
+// 		m_spinPercent.SetAccel(1, &uda);
+// 	}
 }
 
 BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
@@ -4274,13 +4278,14 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 		}
 
 		// Recalc other attributes if only one item selected
-		if (GetSelectedTaskCount() == 1)
+ 		if (GetSelectedTaskCount() == 1)
 		{
 			// update % complete?
 			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			{
-				m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());
-				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_PERCENT);
+// 				m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());
+// 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 
 			// update start/due date?
@@ -4352,8 +4357,9 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 		// update % complete?
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedTaskCount() == 1))
 		{
-			m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());		
-			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
+			m_lcAttributes.RefreshSelectedTaskValue(TDCA_PERCENT);
+// 			m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());
+// 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 		
 		SetModified(TDCA_TIMESPENT, aModTaskIDs);
@@ -4411,8 +4417,9 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			{
-				m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());		
-				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_PERCENT);
+// 				m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());
+// 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 
 			// update due date?
@@ -4480,8 +4487,9 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			{
-				m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());		
-				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
+				m_lcAttributes.RefreshSelectedTaskValue(TDCA_PERCENT);
+// 				m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());
+// 				UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 			}
 		}
 		
@@ -5704,7 +5712,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 	case TDCS_SHOWDATESINISO:
 		{
-			m_lcAttributes.RefreshDateFormat();
+			m_lcAttributes.RefreshDateTimeFormatting();
 // 			DWORD dwStyle = m_cbTimeDue.GetStyle();
 // 			Misc::SetFlag(dwStyle, TCB_ISO, bEnable);
 // 
@@ -6353,7 +6361,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 	CTDCCustomAttributeUIHelper::RebuildEditControls(this,
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,
-													 IDC_PERCENTLABEL,
+													 IDC_TASKTREECTRL,
 													 HasStyle(TDCS_SHOWFILELINKTHUMBNAILS),
 													 m_aCustomControls);
 
@@ -12072,16 +12080,20 @@ void CToDoCtrl::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
     // this is my best current solution other than subclassing the
     // spin button. Simply calling ShowWindow(SW_HIDE) from here
     // does not work.
-    PostMessage(WM_TDC_REFRESHPERCENTSPINVISIBILITY);
+    //PostMessage(WM_TDC_REFRESHPERCENTSPINVISIBILITY);
+
+	m_lcAttributes.RefreshDateTimeFormatting();
 }
 
-LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM /*wp*/, LPARAM /*lp*/)
+/*
+LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM / *wp* /, LPARAM / *lp* /)
 {
     if (!m_ePercentDone.IsWindowVisible())
         m_spinPercent.ShowWindow(SW_HIDE);
 
     return 0L;
 }
+*/
 
 LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 {

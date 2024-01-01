@@ -480,9 +480,9 @@ protected:
 //	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	//CEnEdit m_eExternalID;
 	CFileComboBox m_cbFileLink;
-	CMaskEdit m_ePercentDone;//, m_eCost;
+// 	CMaskEdit m_ePercentDone, m_eCost;
 	CPopupEditCtrl m_eTaskName;
-	CSpinButtonCtrl m_spinPercent;
+// 	CSpinButtonCtrl m_spinPercent;
 // 	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
 	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
 	
@@ -555,7 +555,7 @@ protected:
 	double m_dTrackedTimeElapsedHours;
 // 	int m_nPriority;
 // 	int m_nRisk;
-	int m_nPercentDone;
+//	int m_nPercentDone;
 // 	CTDCDependencyArray m_aDepends;
 	
 	//TDCCOST m_cost;
@@ -603,7 +603,7 @@ protected:
 	
 	// private CToDoCtrl messages
 	static UINT WM_TDC_FIXUPPOSTDROPSELECTION;
-	static UINT WM_TDC_REFRESHPERCENTSPINVISIBILITY;
+//	static UINT WM_TDC_REFRESHPERCENTSPINVISIBILITY;
 	static UINT WM_TDC_RECREATERECURRINGTASK;
 	
 	// Generated message map functions
@@ -692,7 +692,7 @@ protected:
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
+//	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnLabelEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);

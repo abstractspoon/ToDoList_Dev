@@ -1283,12 +1283,14 @@ void CInputListCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 void CInputListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	// if we're editing then quit editing
-	OnCancelEdit();
+	// if we're editing then quit editing unless this came from a spin button
+	if (!pScrollBar)
+		OnCancelEdit();
 
 	CEnListCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
 
-	RecalcHotButtonRects();
+	if (!pScrollBar)
+		RecalcHotButtonRects();
 }
 
 BOOL CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
