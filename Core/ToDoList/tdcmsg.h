@@ -40,7 +40,7 @@ const UINT WM_TDCM_EDITTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_EDIT
 const UINT WM_TDCM_CLEARTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_CLEARTASKATTRIBUTE"));	// wParam == <TDC_ATTRIBUTE>
 
 // CTDLTaskAttributeListCtrl
-const UINT WM_TDCN_ATTRIBUTEEDITED			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDITED"));		// wParam == <TDC_ATTRIBUTE>, lParam = UTF_ flags
+const UINT WM_TDCN_ATTRIBUTEEDITED			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDITED"));		// wParam == <TDC_ATTRIBUTE>, lParam = TRUE for TDCA_TIMEESTIMATE/SPENT if only the time units changed
 const UINT WM_TDCN_AUTOITEMADDEDDELETED		= ::RegisterWindowMessage(_T("WM_TDCN_AUTOITEMADDEDDELETED"));	// wParam == <TDC_ATTRIBUTE>
 
 // CTDLFilterBar

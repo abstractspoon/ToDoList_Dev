@@ -150,13 +150,15 @@ CString TDCTIMEPERIOD::Format(int nDecPlaces) const
 
 BOOL TDCTIMEPERIOD::Parse(LPCTSTR szPeriod)
 {
-	double dAmount = 0.0;
+	double dValue = 0.0;
 	TH_UNITS nTimeUnits = THU_NULL;
 
-	if (!CTimeHelper::DecodeOffset(szPeriod, dAmount, nTimeUnits, FALSE))
+	if (!CTimeHelper::DecodeOffset(szPeriod, dValue, nTimeUnits, FALSE))
 		return FALSE;
 
+	dAmount = dValue;
 	nUnits = TDC::MapTHUnitsToUnits(nTimeUnits);
+
 	return TRUE;
 }
 

@@ -484,7 +484,7 @@ protected:
 	CPopupEditCtrl m_eTaskName;
 // 	CSpinButtonCtrl m_spinPercent;
 // 	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
-	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
+// 	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
 	
 	CTDLCommentsCtrl m_ctrlComments;
 	CTDLInfoTipCtrl m_infoTip;
@@ -559,7 +559,7 @@ protected:
 // 	CTDCDependencyArray m_aDepends;
 	
 	//TDCCOST m_cost;
-	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
+//	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 //	TDCRECURRENCE m_tRecurrence;
 // 	COLORREF m_crColour;
@@ -638,9 +638,9 @@ protected:
 	afx_msg LRESULT OnTreeDragOver(WPARAM wParam, LPARAM lParam);
 
 // 	afx_msg void OnChangePriority();
-	afx_msg void OnChangePercent();
-	afx_msg void OnChangeTimeEstimate();
-	afx_msg void OnChangeTimeSpent();
+// 	afx_msg void OnChangePercent();
+// 	afx_msg void OnChangeTimeEstimate();
+// 	afx_msg void OnChangeTimeSpent();
 // 	afx_msg void OnSelChangeDueTime();
 // 	afx_msg void OnSelChangeDoneTime();
 // 	afx_msg void OnSelChangeStartTime();
@@ -675,25 +675,25 @@ protected:
 	afx_msg LRESULT OnTDCFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTDCGetLinkTooltip(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnTDCTaskAttributeEdited(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCClearTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCNotifyAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);
+// 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);
 //	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
+//	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnLabelEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
@@ -820,6 +820,7 @@ protected:
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
 	BOOL SetSelectedTaskColor(COLORREF color);
+	BOOL GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& tp) const;
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);

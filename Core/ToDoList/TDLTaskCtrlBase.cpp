@@ -5727,7 +5727,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasLocked(BOOL bTreatRefsAsUnlocked) const
 	return FALSE;
 }
 
-BOOL CTDLTaskCtrlBase::SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked) const
+BOOL CTDLTaskCtrlBase::SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked) const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
 
@@ -5744,6 +5744,21 @@ BOOL CTDLTaskCtrlBase::SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked) const
 			continue;
 
 		if (m_calculator.IsTaskLocked(dwParentID))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDLTaskCtrlBase::SelectionHasParents() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (m_data.IsTaskParent(dwTaskID))
 			return TRUE;
 	}
 

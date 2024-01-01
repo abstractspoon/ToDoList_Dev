@@ -574,8 +574,8 @@ CRect CFileEdit::GetIconScreenRect() const
 
 	rButton.right = rButton.left;
 	rButton.left -= (CFileIcons::GetImageSize() + 2);
-	rButton.top -= m_nTopBorder;
-	rButton.bottom += m_nBottomBorder;
+	rButton.top -= m_nBorderWidth;
+	rButton.bottom += m_nBorderWidth;
 
 	ClientToScreen(rButton);
 

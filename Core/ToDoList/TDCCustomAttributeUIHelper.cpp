@@ -1138,7 +1138,7 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 		case TDCCA_TIMEPERIOD:
 			{
 				TH_UNITS nUnits = ((CTimeEdit*)pCtrl)->GetUnits();
-				double dTime = ((CTimeEdit*)pCtrl)->Convert();
+				double dTime = ((CTimeEdit*)pCtrl)->GetTime();
 
 				data.Set(TDCTIMEPERIOD(dTime, nUnits));
 			}

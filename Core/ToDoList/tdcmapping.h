@@ -263,8 +263,8 @@ namespace TDC
 // 		case TDCA_STATUS:			return IDC_STATUS;
 // 		case TDCA_TAGS:				return IDC_TAGS;
 		case TDCA_TASKNAME:			return IDC_TASKTREECTRL;
-		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
-		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
+// 		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
+// 		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
 // 		case TDCA_VERSION:			return IDC_VERSION;
 // 		case TDCA_COLOR:			return IDC_COLOUR;
 
@@ -316,8 +316,8 @@ namespace TDC
 // 		case IDC_STATUS:		return TDCA_STATUS;			
 // 		case IDC_TAGS:			return TDCA_TAGS;				
 		case IDC_TASKTREECTRL:	return TDCA_TASKNAME;			
-		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			
-		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
+// 		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			
+// 		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
 // 		case IDC_VERSION:		return TDCA_VERSION;			
 // 		case IDC_COLOUR:		return TDCA_COLOR;	
 			

@@ -17,6 +17,7 @@
 #include "..\shared\CheckComboBox.h"
 #include "..\shared\DateTimeCtrlEx.h"
 #include "..\shared\TimeComboBox.h"
+#include "..\shared\TimeEdit.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -54,8 +55,7 @@ public:
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 
-//	COLORREF GetColor() const;
-//	CString GetIcon() const;
+	// Note: 'Color', 'Icon' and 'Recurrence' are handled by parent
 	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
@@ -72,7 +72,6 @@ public:
 	BOOL GetCost(TDCCOST& cost) const;
 	BOOL GetFlag() const;
 	BOOL GetLock() const;
-//	BOOL GetRecurrence(TDCRECURRENCE& tr) const;
 	CString GetVersion() const;
 	COleDateTime GetStartDate() const;
 	COleDateTime GetDueDate() const;
@@ -100,6 +99,7 @@ protected:
 	CTDLRiskComboBox m_cbRisk;
 	CTDLTaskDependencyEdit m_eDepends;
 	CSpinButtonCtrl m_spinPercent;
+	CTimeEdit m_eTimePeriod;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -114,6 +114,7 @@ protected:
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg void OnDependsChange();
+	afx_msg void OnTimePeriodChange();
 
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
 	afx_msg void OnComboEditCancel(UINT nCtrlID);
@@ -151,6 +152,7 @@ protected:
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeCombo(int nRow);
+	void PrepareTimePeriodEdit(int nRow);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);

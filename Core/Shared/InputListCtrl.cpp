@@ -206,6 +206,10 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 
 		m_nCurCol = nCol;
 	}
+	else
+	{
+		HideAllControls();
+	}
 }
 
 void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)

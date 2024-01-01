@@ -258,11 +258,11 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	
 	// add 'clock' button to 'time spent'
 	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
-	m_eTimeSpent.InsertButton(1, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
+// 	m_eTimeSpent.InsertButton(1, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
 
 	// add 'Plus' button to 'time spent'
 	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
-	m_eTimeSpent.InsertButton(2, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
+// 	m_eTimeSpent.InsertButton(2, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 
 	// add buttons to dependency
 // 	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
@@ -303,8 +303,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	DDX_Control(pDX, IDC_STARTTIME, m_cbTimeStart);
 // 	DDX_Control(pDX, IDC_STATUS, m_cbStatus);
 // 	DDX_Control(pDX, IDC_TAGS, m_cbTags);
-	DDX_Control(pDX, IDC_TIMEEST, m_eTimeEstimate);
-	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
+// 	DDX_Control(pDX, IDC_TIMEEST, m_eTimeEstimate);
+// 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
 // 	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
 
 //	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
@@ -314,8 +314,8 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 //	CTDCDialogHelper::DDX_Text(pDX, IDC_COST, m_cost);
 // 	CTDCDialogHelper::DDX_Text(pDX, IDC_PERCENT, m_nPercentDone, m_spinPercent);
 
-	CTDCDialogHelper::DDX_Text(pDX, m_eTimeEstimate, m_timeEstimate);
-	CTDCDialogHelper::DDX_Text(pDX, m_eTimeSpent, m_timeSpent);
+// 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeEstimate, m_timeEstimate);
+// 	CTDCDialogHelper::DDX_Text(pDX, m_eTimeSpent, m_timeSpent);
 
 // 	m_cbAllocBy.DDX(pDX, m_sAllocBy);
 // 	m_cbStatus.DDX(pDX, m_sStatus);
@@ -393,15 +393,15 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETATTRIBUTELIST, OnCommentsGetAttributeList)
 
-	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnTDCEditTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnTDCClearTaskAttribute)
 
-	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnTDCTaskAttributeEdited)
-	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoComboAddDelete)
+	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCNotifyColumnEditClick)
+	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnTDCNotifyTaskAttributeEdited)
+	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnTDCNotifyAutoComboAddDelete)
 
 //	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -434,8 +434,8 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 // 	ON_EN_CHANGE(IDC_PERCENT, OnChangePercent)
 	ON_EN_CHANGE(IDC_PROJECTNAME, OnChangeProjectName)
 // 	ON_EN_CHANGE(IDC_RECURRENCE, OnChangeRecurrence)
-	ON_EN_CHANGE(IDC_TIMEEST, OnChangeTimeEstimate)
-	ON_EN_CHANGE(IDC_TIMESPENT, OnChangeTimeSpent)
+// 	ON_EN_CHANGE(IDC_TIMEEST, OnChangeTimeEstimate)
+// 	ON_EN_CHANGE(IDC_TIMESPENT, OnChangeTimeSpent)
 //	ON_MESSAGE(CPN_SELENDOK, OnChangeColour)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
@@ -455,7 +455,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnLabelEditCancel)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnLabelEditEnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_APPLYADDLOGGEDTIME, OnApplyAddLoggedTime)
-	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
+//	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
  	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
@@ -1644,7 +1644,6 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 			SetCtrlState(m_spinPercent, nCtrlState);
 		}
 		break;
-*/
 		
 	case IDC_TIMEEST:
 		if (bEnable)
@@ -1666,25 +1665,26 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		}
 		break;
 		
-// 	case IDC_DUETIME:
-// 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DUE))
-// 			nCtrlState = RTCS_READONLY;
-// 		break;
-// 		
-// 	case IDC_STARTDATE:
-// 		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTDATE))
-// 			nCtrlState = RTCS_READONLY;
-// 		break;
-// 		
-// 	case IDC_STARTTIME:
-// 		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTTIME))
-// 			nCtrlState = RTCS_READONLY;
-// 		break;
-// 
-// 	case IDC_DONETIME:
-// 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DONE))
-// 			nCtrlState = RTCS_READONLY;
-// 		break;
+	case IDC_DUETIME:
+		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DUE))
+			nCtrlState = RTCS_READONLY;
+		break;
+		
+	case IDC_STARTDATE:
+		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTDATE))
+			nCtrlState = RTCS_READONLY;
+		break;
+		
+	case IDC_STARTTIME:
+		if ((nCtrlState == RTCS_ENABLED) && !CanEditSelectedTask(TDCA_STARTTIME))
+			nCtrlState = RTCS_READONLY;
+		break;
+
+	case IDC_DONETIME:
+		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DONE))
+			nCtrlState = RTCS_READONLY;
+		break;
+*/
 	}
 	
 	SetCtrlState(*pLabel, nLabelState);
@@ -1862,6 +1862,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
 // 		GetSelectedTaskDependencies(m_aDepends);
 
+/*
 		if (bEditTime)
 		{
 			GetSelectedTaskTimeEstimate(m_timeEstimate);
@@ -1875,8 +1876,10 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			m_timeSpent.nUnits = m_tdiDefault.timeSpent.nUnits;
 			m_timeSpent.dAmount = m_calculator.GetTaskTimeSpent(dwTaskID, m_timeEstimate.nUnits);
 		}
+*/
 
 		// chess clock for time spent
+/*
 		BOOL bCanTimeTrack = (bEditTime && 
 								bEnable && 
 								!bReadOnly && 
@@ -1884,10 +1887,11 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 								m_timeTracking.CanTrackTask(dwTaskID));
 
 		BOOL bIsTrackingTask = (bCanTimeTrack && m_timeTracking.IsTrackingTask(dwTaskID));
+*/
 
-		m_eTimeSpent.CheckButton(ID_TIME_TRACK, bIsTrackingTask);
-		m_eTimeSpent.EnableButton(ID_TIME_TRACK, bCanTimeTrack);
-		m_eTimeSpent.EnableButton(ID_ADD_TIME, (bCanTimeTrack && !bIsTrackingTask));
+// 		m_eTimeSpent.CheckButton(ID_TIME_TRACK, bIsTrackingTask);
+// 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, bCanTimeTrack);
+// 		m_eTimeSpent.EnableButton(ID_ADD_TIME, (bCanTimeTrack && !bIsTrackingTask));
 
 		// dependency link button
 // 		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && m_aDepends.GetSize());
@@ -1917,7 +1921,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_nPriority = 0;
 // 		m_nRisk = 0;
 //		m_nPercentDone = 0;
-		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
+//		m_timeEstimate.dAmount = m_timeSpent.dAmount = 0;
 //		m_cost.dAmount = 0.0;
 // 		m_tRecurrence = TDCRECURRENCE();
 //		m_crColour = CLR_DEFAULT;
@@ -1934,8 +1938,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_aFileLinks.RemoveAll();
 // 		m_aDepends.RemoveAll();
 
-		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
-		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
+// 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
+// 		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
 // 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
 		m_mapCustomCtrlData.RemoveAll();
@@ -2264,17 +2268,27 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_TIMEESTIMATE:
-		if (dwFlags & UTF_TIMEUNITSONLY)
-			SetSelectedTaskTimeEstimateUnits(m_timeEstimate.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
-		else
-			SetSelectedTaskTimeEstimate(m_timeEstimate);
+		{
+			TDCTIMEPERIOD tp;
+			m_lcAttributes.GetTimeEstimate(tp);
+
+			if (dwFlags & UTF_TIMEUNITSONLY)
+				SetSelectedTaskTimeEstimateUnits(tp/*m_timeEstimate*/.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
+			else
+				SetSelectedTaskTimeEstimate(tp/*m_timeEstimate*/);
+		}
 		break;
 		
 	case TDCA_TIMESPENT:
-		if (dwFlags & UTF_TIMEUNITSONLY)
-			SetSelectedTaskTimeSpentUnits(m_timeSpent.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
-		else
-			SetSelectedTaskTimeSpent(m_timeSpent);
+		{
+			TDCTIMEPERIOD tp;
+			m_lcAttributes.GetTimeSpent(tp);
+
+			if (dwFlags & UTF_TIMEUNITSONLY)
+				SetSelectedTaskTimeSpentUnits(tp/*m_timeSpent*/.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
+			else
+				SetSelectedTaskTimeSpent(tp/*m_timeSpent*/);
+		}
 		break;
 		
 	case TDCA_FILELINK:
@@ -3295,10 +3309,10 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 		else if (bUpdateTimeEst)
 		{
 			m_lcAttributes.RefreshSelectedTaskValue(TDCA_TIMEESTIMATE);
-			TDCTIMEPERIOD time;
-
-			if (GetSelectedTaskTimeEstimate(time))
-				CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, time, FALSE);
+// 			TDCTIMEPERIOD time;
+// 
+// 			if (GetSelectedTaskTimeEstimate(time))
+// 				CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, time, FALSE);
 		}
 	}
 	
@@ -4267,15 +4281,16 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 	if (aModTaskIDs.GetSize())
 	{
 		// Update the time estimate field
-		TDCTIMEPERIOD time;
-
-		if (GetSelectedTaskTimeEstimate(time) && (m_timeEstimate != time))
-		{
-			// note: setting the time field changes m_timeEstimate.nUnits
-			// so we have to do them separately
-			m_timeEstimate = time;
-			CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE);
-		}
+		m_lcAttributes.RefreshSelectedTaskValue(TDCA_TIMEESTIMATE);
+// 		TDCTIMEPERIOD time;
+// 
+// 		if (GetSelectedTaskTimeEstimate(time) && (m_timeEstimate != time))
+// 		{
+// 			// note: setting the time field changes m_timeEstimate.nUnits
+// 			// so we have to do them separately
+// 			m_timeEstimate = time;
+// 			CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE);
+// 		}
 
 		// Recalc other attributes if only one item selected
  		if (GetSelectedTaskCount() == 1)
@@ -4344,6 +4359,8 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 	if (aModTaskIDs.GetSize())
 	{
 		// Update the time spent field
+		m_lcAttributes.RefreshSelectedTaskValue(TDCA_TIMEESTIMATE);
+/*
 		TDCTIMEPERIOD time;
 
 		if (GetSelectedTaskTimeSpent(time) && (m_timeSpent != time))
@@ -4353,6 +4370,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 			m_timeSpent = time;
 			CTDCDialogHelper::UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE);
 		}
+*/
 		
 		// update % complete?
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedTaskCount() == 1))
@@ -4400,19 +4418,20 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 	
 	if (aModTaskIDs.GetSize())
 	{
-		if (m_timeEstimate.nUnits != nUnits)
-		{
-			m_timeEstimate.nUnits = nUnits;
-			m_eTimeEstimate.SetUnits(m_timeEstimate.GetTHUnits());
-		}
+		m_lcAttributes.RefreshSelectedTaskValue(TDCA_TIMEESTIMATE);
+// 		if (m_timeEstimate.nUnits != nUnits)
+// 		{
+// 			m_timeEstimate.nUnits = nUnits;
+// 			m_eTimeEstimate.SetUnits(m_timeEstimate.GetTHUnits());
+// 		}
 
 		// update other controls if only one item selected
 		if (GetSelectedTaskCount() == 1)
 		{
 			if (bRecalcTime)
 			{
-				VERIFY(GetSelectedTaskTimeEstimate(m_timeEstimate));
-				CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE);
+// 				VERIFY(GetSelectedTaskTimeEstimate(m_timeEstimate));
+// 				CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4470,19 +4489,22 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 	// update UI
 	if (aModTaskIDs.GetSize())
 	{
+		m_lcAttributes.RefreshSelectedTaskValue(TDCA_TIMESPENT);
+/*
 		if (m_timeSpent.nUnits != nUnits)
 		{
 			m_timeSpent.nUnits = nUnits;
 			m_eTimeSpent.SetUnits(m_timeSpent.GetTHUnits());
 		}
+*/
 
 		// update controls if only one item selected
 		if (GetSelectedTaskCount() == 1)
 		{
 			if (bRecalcTime)
 			{
-				VERIFY(GetSelectedTaskTimeSpent(m_timeSpent));
-				CTDCDialogHelper::UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE);
+// 				VERIFY(GetSelectedTaskTimeSpent(m_timeSpent));
+// 				CTDCDialogHelper::UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -8120,7 +8142,7 @@ TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 	return m_taskTree.HitTestColumn(ptScreen);
 }
 
-LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
+LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 {
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)LOWORD(wp);
 
@@ -8269,7 +8291,6 @@ void CToDoCtrl::OnSelCancelStatus()
 {
 	m_cbStatus.SelectString(0, GetSelectedTaskStatus());
 }
-*/
 
 void CToDoCtrl::OnChangeTimeEstimate()
 {
@@ -8290,7 +8311,6 @@ void CToDoCtrl::OnChangeTimeSpent()
 	UpdateTask(TDCA_TIMESPENT); 
 }
 
-/*
 void CToDoCtrl::OnChangeExternalID()
 {
 	UpdateTask(TDCA_EXTERNALID); 
@@ -8310,7 +8330,6 @@ void CToDoCtrl::OnChangeRecurrence()
 {
 	UpdateTask(TDCA_RECURRENCE); 
 }
-*/
 
 void CToDoCtrl::OnChangePercent()
 {
@@ -8318,6 +8337,7 @@ void CToDoCtrl::OnChangePercent()
 	if (!HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		UpdateTask(TDCA_PERCENT);
 }
+*/
 
 BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 {
@@ -8646,7 +8666,7 @@ void CToDoCtrl::OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
 	TDC_COLUMN nColID = (TDC_COLUMN)wParam;
 	DWORD dwTaskID = lParam;
@@ -8721,9 +8741,62 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-LRESULT CToDoCtrl::OnTDCTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
+BOOL CToDoCtrl::GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& time) const 
+{ 
+	switch (nAttribID)
+	{
+	case TDCA_TIMESPENT:
+		return m_taskTree.GetSelectedTaskTimeSpent(time);
+
+	case TDCA_TIMEESTIMATE:
+		return m_taskTree.GetSelectedTaskTimeEstimate(time); 
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 {
-	UpdateTask((TDC_ATTRIBUTE)wParam, lParam);
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)wParam;
+
+	// Special handling
+	switch (nAttribID)
+	{
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		if (lParam && (GetSelectedTaskCount() == 1)) // Time units change only
+		{
+			int nRecalcTime = IDNO;
+			TDCTIMEPERIOD time;
+
+			// see if the current time is non-zero and if so we prompt
+			if (GetSelectedTaskTimePeriod(nAttribID, time) && (time.dAmount > 0.0))
+			{
+				switch (CMessageBox::AfxShow(IDS_TDC_RECALCTITLE, IDS_TDC_RECALCPROMPT, MB_ICONQUESTION | MB_YESNOCANCEL))
+				{
+				case IDCANCEL:
+					return 0L;
+
+				case IDYES:
+					UpdateTask(nAttribID, UTF_RECALCTIME);
+					return 1L;
+
+				case IDNO:
+					// Default handling
+					break;
+				}
+			}
+		}
+		break;
+
+	default:
+		// Default handling
+		break;
+	}
+
+	// All else
+	UpdateTask(nAttribID);
 	return 0L;
 }
 
@@ -8802,14 +8875,16 @@ UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 	}
 
 	// pick up any stragglers
+/*
 	switch (nColID)
 	{
-// 	case TDCC_DONE:
-// 		return IDC_DONEDATE;
+	case TDCC_DONE:
+		return IDC_DONEDATE;
 
 	case TDCC_TRACKTIME:
 		return IDC_TIMESPENT;
 	}
+*/
 
 	ASSERT(0);
 	return 0L;
@@ -8976,6 +9051,7 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	m_taskTree.SetTimeTrackTaskID(dwTaskID);
 
 	// Update Time spent control
+/*
 	if (bTaskIsSelected)
 	{
 		m_eTimeSpent.CheckButton(ID_TIME_TRACK, TRUE);
@@ -8984,6 +9060,7 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 
 		SetCtrlState(m_eTimeSpent, RTCS_READONLY);
 	}
+*/
 
 	SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
 
@@ -9037,6 +9114,7 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	m_taskTree.SetTimeTrackTaskID(0);
 
 	// Update Time spent control
+/*
 	BOOL bCanTimeTrack = m_timeTracking.CanTrackTask(dwTaskID);
 
 	m_eTimeSpent.CheckButton(ID_TIME_TRACK, FALSE);
@@ -9044,6 +9122,7 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	m_eTimeSpent.EnableButton(ID_ADD_TIME, bCanTimeTrack);
 
 	SetCtrlState(m_eTimeSpent, RTCS_ENABLED);
+*/
 
 	// notify parent
 	if (bNotify)
@@ -10941,7 +11020,8 @@ void CToDoCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
 	}
 }
 
-LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
+/*
+LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM / *lParam* /)
 {
 	int nRecalcTime = IDNO;
 	BOOL bWantQueryRecalc = (GetSelectedTaskCount() > 1);
@@ -10992,6 +11072,7 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 	
 	return (nRecalcTime == IDCANCEL);
 }
+*/
 
 void CToDoCtrl::SpellcheckSelectedTask(BOOL bTitle) 
 {
@@ -11389,6 +11470,7 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam)
 	{
+/*
 	case IDC_TIMESPENT:
 		if (GetSelectedTaskCount() == 1)
 		{
@@ -11407,7 +11489,6 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 
-/*
 	case IDC_DEPENDS:
 		{
 			switch (lParam)
@@ -12093,6 +12174,13 @@ LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM / *wp* /, LPARAM / *lp*
 
     return 0L;
 }
+
+LRESULT CToDoCtrl::OnChangeColour(WPARAM / *wp* /, LPARAM / *lp* /)
+{
+	UpdateTask(TDCA_COLOR);
+
+	return 0L;
+}
 */
 
 LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
@@ -12101,13 +12189,6 @@ LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 		SelectTask(lp, FALSE);
 
     return 0L;
-}
-
-LRESULT CToDoCtrl::OnChangeColour(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	UpdateTask(TDCA_COLOR);
-
-	return 0L;
 }
 
 BOOL CToDoCtrl::CanUndoLastAction(BOOL bUndo) const 
@@ -12640,7 +12721,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		// Can't delete locked tasks unless they are references
 		// Can't delete subtasks if immediate parent is locked
 		if (m_taskTree.SelectionHasLocked(FALSE, TRUE) || 
-			m_taskTree.SelectionHasLockedParent(TRUE))
+			m_taskTree.SelectionHasLockedParents(TRUE))
 		{
 			return FALSE;
 		}

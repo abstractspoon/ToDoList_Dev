@@ -164,7 +164,8 @@ public:
 	BOOL SelectionHasIcons() const;
 	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
-	BOOL SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL SelectionHasParents() const;
 	BOOL SelectionAreAllDone() const;
 	BOOL SelectionHasTaskColor() const;
 

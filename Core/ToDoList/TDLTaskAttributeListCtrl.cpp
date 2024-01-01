@@ -42,6 +42,7 @@ enum
 	IDC_RISK_COMBO,
 	IDC_DEPENDS_EDIT,
 	IDC_PERCENT_SPIN,
+	IDC_TIMEPERIOD_EDIT,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -107,6 +108,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
 
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
+	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
 
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
@@ -147,6 +149,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_eDepends, IDC_DEPENDS_EDIT, ES_AUTOHSCROLL);
+	CreateControl(m_eTimePeriod, IDC_TIMEPERIOD_EDIT, ES_AUTOHSCROLL);
 
 	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
 	m_spinPercent.SetRange(0, 100);
@@ -354,22 +357,21 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 	switch (nAttribID)
 	{
-		// Text fields
 	case TDCA_TASKNAME:
 	case TDCA_COST:
 	case TDCA_EXTERNALID:
 	case TDCA_PERCENT:
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
 		return ILCT_TEXT;
 
-		// Date fields
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		return ILCT_POPUPMENU;
+
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
 	case TDCA_STARTDATE:
 		return ILCT_DATE;
 
-		// Drop lists
 	case TDCA_PRIORITY:
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
@@ -384,19 +386,16 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_STARTTIME:
 		return ILCT_DROPLIST;
 
-		// Browse-like fields
 	case TDCA_ICON:
 	case TDCA_RECURRENCE:
 	case TDCA_DEPENDENCY:
 	case TDCA_COLOR:
 		return ILCT_BROWSE;
 
-		// Checkbox fields
 	case TDCA_FLAG:
 	case TDCA_LOCK:
 		return ILCT_CHECK;
 
-		// Read-only fields
 	case TDCA_CREATEDBY:
 	case TDCA_PATH:
 	case TDCA_POSITION:
@@ -469,7 +468,6 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	switch (nAttribID)
 	{
-		// Read-only fields
 		case TDCA_CREATEDBY:
 		case TDCA_PATH:
 		case TDCA_POSITION:
@@ -481,6 +479,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		case TDCA_LASTMODBY:
 		case TDCA_ID:
 		case TDCA_PARENTID:
+			// Permanently read-only fields
 			return FALSE;
 
 		case TDCA_PERCENT:
@@ -497,6 +496,10 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 		case TDCA_DONETIME:
 			return m_taskCtrl.SelectedTaskHasDate(TDCD_DONEDATE);
+
+		case TDCA_TIMEESTIMATE:
+		case TDCA_TIMESPENT:
+			return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_taskCtrl.SelectionHasParents());
 	}
 
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -605,6 +608,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 	case TDCA_COST:
 		{
 			TDCCOST cost;
+
 			if (m_taskCtrl.GetSelectedTaskCost(cost))
 				sValue = cost.Format(2);
 		}
@@ -615,8 +619,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		{
 			sValue = _T("100");
 		}
-		else if ((m_taskCtrl.GetSelectedCount() == 1) &&
-				 m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		else if (dwSingleSelTaskID && m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			sValue = m_formatter.GetTaskPercentDone(dwSingleSelTaskID);
 		}
@@ -638,18 +641,30 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		break;
 
 	case TDCA_TIMEESTIMATE:
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_taskCtrl.SelectionHasParents())
 		{
 			TDCTIMEPERIOD tp;
+
 			if (m_taskCtrl.GetSelectedTaskTimeEstimate(tp))
 				sValue = tp.Format(2);
+		}
+		else if (dwSingleSelTaskID)
+		{
+			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
 		}
 		break;
 
 	case TDCA_TIMESPENT:
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_taskCtrl.SelectionHasParents())
 		{
 			TDCTIMEPERIOD tp;
+
 			if (m_taskCtrl.GetSelectedTaskTimeSpent(tp))
 				sValue = tp.Format(2);
+		}
+		else if (dwSingleSelTaskID)
+		{
+			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
 		}
 		break;
 
@@ -953,18 +968,6 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-/*
-COLORREF CTDLTaskAttributeListCtrl::GetColor() const
-{
-	return _ttoi(GetValueText(TDCA_COLOR));
-}
-
-CString CTDLTaskAttributeListCtrl::GetIcon() const
-{
-	return GetValueText(TDCA_ICON);
-}
-*/
-
 BOOL CTDLTaskAttributeListCtrl::GetTimeEstimate(TDCTIMEPERIOD& timeEst) const
 {
 	return timeEst.Parse(GetValueText(TDCA_TIMEESTIMATE));
@@ -1048,15 +1051,6 @@ BOOL CTDLTaskAttributeListCtrl::GetLock() const
 {
 	return !GetValueText(TDCA_LOCK).IsEmpty();
 }
-
-/*
-BOOL CTDLTaskAttributeListCtrl::GetRecurrence(TDCRECURRENCE& tr) const
-{
-	CString sValue = GetValueText(TDCA_RECURRENCE);
-
-	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
-}
-*/
 
 CString CTDLTaskAttributeListCtrl::GetVersion() const
 {
@@ -1221,9 +1215,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		break;
 
 	case TDCA_TIMEESTIMATE:
-		break;
-
 	case TDCA_TIMESPENT:
+		PrepareTimePeriodEdit(nRow);
 		break;
 
 	case TDCA_DONEDATE:
@@ -1346,6 +1339,19 @@ void CTDLTaskAttributeListCtrl::PrepareTimeCombo(int nRow)
 	m_cbTimeOfDay.SetStyle(dwStyle);
 }
 
+void CTDLTaskAttributeListCtrl::PrepareTimePeriodEdit(int nRow)
+{
+	CString sValue = GetItemText(nRow, VALUE_COL);
+	TH_UNITS nUnits = THU_NULL;
+	double dValue = 0.0;
+		
+	if (CTimeHelper::DecodeOffset(sValue, dValue, nUnits, FALSE))
+		m_eTimePeriod.SetTime(dValue, nUnits);
+
+	m_eTimePeriod.SetBorderWidth(0);
+	m_eTimePeriod.SetDefaultButton(0);
+}
+
 CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const 
 { 
 	return GetItemText(FindItemFromData(nAttribID), VALUE_COL); 
@@ -1396,10 +1402,8 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 		return &m_cbRisk;
 
 	case TDCA_TIMEESTIMATE:
-		break;
-
 	case TDCA_TIMESPENT:
-		break;
+		return &m_eTimePeriod;
 
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
@@ -1441,24 +1445,23 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 						case TDCCA_DOUBLE:
 						case TDCCA_ICON:
 						case TDCCA_FILELINK:
-							// TODO
+							// Use base class edit control
 							break;
 
 						case TDCCA_CALCULATION:
-							// TODO
-							break;
+							// Not editable
+							return NULL; 
 
 						case TDCCA_TIMEPERIOD:
-							// TODO
-							break;
+							return &m_eTimePeriod;
 
 						case TDCCA_DATE:
-							// TODO
+							return &m_datePicker;
 							break;
 
 						case TDCCA_BOOL:
-							// TODO
-							break;
+							// Not required
+							return NULL;
 						}
 					}
 				}
@@ -1497,6 +1500,15 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	{
 		PrepareControl(m_editBox, nRow, nCol);
 		CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
+
+		return;
+	}
+	else if (pCtrl == &m_eTimePeriod)
+	{
+		ShowControl(*pCtrl, nRow, nCol, bBtnClick);
+
+		if (bBtnClick)
+			m_eTimePeriod.ShowDropDown();
 
 		return;
 	}
@@ -1619,6 +1631,7 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	HideControl(m_cbPriority, pWndIgnore);
 	HideControl(m_cbRisk, pWndIgnore);
 	HideControl(m_eDepends, pWndIgnore);
+	HideControl(m_eTimePeriod, pWndIgnore);
 	
 	if (pWndIgnore != &m_editBox)
 		m_editBox.SetSpinBuddy(NULL);
@@ -1691,7 +1704,7 @@ LRESULT CTDLTaskAttributeListCtrl::NotifyParentEdit(TDC_ATTRIBUTE nAttribID)
 {
 	UpdateWindow();
 
-	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, nAttribID, 0);
+	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::OnDependsChange()
@@ -1705,16 +1718,34 @@ void CTDLTaskAttributeListCtrl::OnDependsChange()
 	NotifyParentEdit(TDCA_DEPENDENCY);
 }
 
+void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
+{
+	// Received after a manual edit of the task IDs
+	int nRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	TDCTIMEPERIOD tp(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
+
+	HideControl(m_eTimePeriod);
+	SetItemText(nRow, VALUE_COL, tp.Format(2));
+	NotifyParentEdit(nAttribID);
+}
+
 void CTDLTaskAttributeListCtrl::OnCancelEdit()
 {
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel());
+	int nRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	// Special handling
+	// Revert changes before default handling
 	switch (nAttribID)
 	{
 	case TDCA_DEPENDENCY:
-		// Revert changes before default handling
 		m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
+		break;
+
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		PrepareTimePeriodEdit(nRow);
 		break;
 	}
 
