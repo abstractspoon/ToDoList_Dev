@@ -455,7 +455,7 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	nItem = GetFocusedItem();
 	m_nItemLastSelected = nItem;
 	
-	// if its the right or left cursor keys then update column pos
+	// if its the right or left cursor keys then update column position
 	if (nChar == VK_LEFT && nCol > 0)
 	{
 		nCol--;
@@ -473,7 +473,7 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	else if (nChar == VK_DELETE && CanDeleteSelectedCell())
 	{
 		// if the delete key is pressed and we're in col0 or row0 
-		// then delete correseponding row or column
+		// then delete corresponding row or column
 		// unless its the prompt row or column 
 		DeleteSelectedCell();
 	}
@@ -496,7 +496,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	BOOL bRes;
 	CSize sizeText;
 
-	// get and prepare devide context
+	// get and prepare device context
 	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
 	pDC->SetROP2(R2_COPYPEN);
@@ -510,7 +510,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect rItem(lpDrawItemStruct->rcItem), rClient;
 	GetClientRect(&rClient);
 
-	// some problems with drophiliting items during drag and drop
+	// some problems with drop-highlighting items during drag and drop
 	// so we need to make sure drawing is clipped to client area
 	// this fixes it admirably!
 	if (GetHeader())
