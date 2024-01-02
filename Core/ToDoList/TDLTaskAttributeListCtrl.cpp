@@ -1508,7 +1508,10 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		ShowControl(*pCtrl, nRow, nCol, bBtnClick);
 
 		if (bBtnClick)
-			m_eTimePeriod.ShowDropDown();
+		{
+			m_eTimePeriod.ShowUnitsPopupMenu();
+			HideControl(*pCtrl);
+		}
 
 		return;
 	}

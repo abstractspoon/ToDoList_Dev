@@ -46,7 +46,7 @@ public:
 	static void SetDefaultButtonTip(LPCTSTR szUnits);
 
 	void DDX(CDataExchange* pDX, double& value, TH_UNITS& units, int nDecimals = -1);
-	void ShowDropDown();
+	void ShowUnitsPopupMenu();
 
 protected:
 	TH_UNITS m_nUnits;

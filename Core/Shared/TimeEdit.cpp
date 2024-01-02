@@ -310,7 +310,7 @@ UINT CTimeEdit::MapUnitsToMenuID() const
 	return 0;
 }
 
-void CTimeEdit::ShowDropDown() 
+void CTimeEdit::ShowUnitsPopupMenu() 
 { 
 	OnBtnClick(TEBTN_UNITS);
 }
