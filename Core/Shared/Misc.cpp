@@ -934,6 +934,9 @@ BOOL Misc::TrimLastIf(TCHAR cTest, CString& sText)
 
 TCHAR Misc::TrimFirst(CString& sText)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	TCHAR nFirst = First(sText);
 	
 	if (nFirst != 0)
@@ -944,6 +947,9 @@ TCHAR Misc::TrimFirst(CString& sText)
 
 TCHAR Misc::TrimLast(CString& sText)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	TCHAR nLast = Last(sText);
 	
 	if (nLast != 0)

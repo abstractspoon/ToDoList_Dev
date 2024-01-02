@@ -16,6 +16,7 @@
 #include "..\shared\AutoComboBox.h"
 #include "..\shared\CheckComboBox.h"
 #include "..\shared\DateTimeCtrlEx.h"
+#include "..\shared\FileComboBox.h"
 #include "..\shared\TimeComboBox.h"
 #include "..\shared\TimeEdit.h"
 
@@ -100,6 +101,7 @@ protected:
 	CTDLTaskDependencyEdit m_eDepends;
 	CSpinButtonCtrl m_spinPercent;
 	CTimeEdit m_eTimePeriod;
+	CFileComboBox m_cbFileLinks;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -156,6 +158,7 @@ protected:
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
+	static CPoint GetIconPos(const CRect& rText);
 };
 
 /////////////////////////////////////////////////////////////////////////////

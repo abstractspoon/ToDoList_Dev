@@ -10,9 +10,11 @@
 #include "tdcstruct.h"
 
 #include "..\shared\GraphicsMisc.h"
+#include "..\shared\FileMisc.h"
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\Localizer.h"
 #include "..\shared\encolordialog.h"
+#include "..\shared\FileIcons.h"
 
 #include "..\3rdParty\ColorDef.h"
 
@@ -43,6 +45,7 @@ enum
 	IDC_DEPENDS_EDIT,
 	IDC_PERCENT_SPIN,
 	IDC_TIMEPERIOD_EDIT,
+	IDC_FILELINK_COMBO,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,6 +68,7 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 /////////////////////////////////////////////////////////////////////////////
 
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -138,6 +142,8 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	AddCol(_T("Attribute"));
 	AddCol(_T("Value"));
 
+	SetColumnFormat(VALUE_COL, ES_NONE);
+
 	// Add attributes
 	Populate();
 
@@ -150,6 +156,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_eDepends, IDC_DEPENDS_EDIT, ES_AUTOHSCROLL);
 	CreateControl(m_eTimePeriod, IDC_TIMEPERIOD_EDIT, ES_AUTOHSCROLL);
+	CreateControl(m_cbFileLinks, IDC_FILELINK_COMBO, CBS_DROPDOWN);
 
 	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
 	m_spinPercent.SetRange(0, 100);
@@ -591,19 +598,19 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 
 	switch (nAttribID)
 	{
-	case TDCA_EXTERNALID:	sValue = m_taskCtrl.GetSelectedTaskExtID(); break;
-	case TDCA_ALLOCBY:		sValue = m_taskCtrl.GetSelectedTaskAllocBy(); break;
-	case TDCA_STATUS:		sValue = m_taskCtrl.GetSelectedTaskStatus(); break;
-	case TDCA_VERSION:		sValue = m_taskCtrl.GetSelectedTaskVersion(); break;
-	case TDCA_ICON:			sValue = m_taskCtrl.GetSelectedTaskIcon(); break;
+	case TDCA_EXTERNALID:	sValue = m_taskCtrl.GetSelectedTaskExtID();		break;
+	case TDCA_ALLOCBY:		sValue = m_taskCtrl.GetSelectedTaskAllocBy();	break;
+	case TDCA_STATUS:		sValue = m_taskCtrl.GetSelectedTaskStatus();	break;
+	case TDCA_VERSION:		sValue = m_taskCtrl.GetSelectedTaskVersion();	break;
+	case TDCA_ICON:			sValue = m_taskCtrl.GetSelectedTaskIcon();		break;
 
 	case TDCA_FLAG:			sValue = m_taskCtrl.IsSelectedTaskFlagged() ? _T("+") : _T(""); break;
-	case TDCA_LOCK:			sValue = m_taskCtrl.IsSelectedTaskLocked() ? _T("+") : _T(""); break;
+	case TDCA_LOCK:			sValue = m_taskCtrl.IsSelectedTaskLocked() ? _T("+") : _T("");	break;
 
-	case TDCA_ALLOCTO:		m_taskCtrl.GetSelectedTaskAllocTo(aMatched, aMixed); break;
+	case TDCA_ALLOCTO:		m_taskCtrl.GetSelectedTaskAllocTo(aMatched, aMixed);	break;
 	case TDCA_CATEGORY:		m_taskCtrl.GetSelectedTaskCategories(aMatched, aMixed); break;
-	case TDCA_TAGS:			m_taskCtrl.GetSelectedTaskTags(aMatched, aMixed); break;
-	case TDCA_FILELINK:		m_taskCtrl.GetSelectedTaskFileLinks(aMatched, FALSE); break;
+	case TDCA_TAGS:			m_taskCtrl.GetSelectedTaskTags(aMatched, aMixed);		break;
+	case TDCA_FILELINK:		m_taskCtrl.GetSelectedTaskFileLinks(aMatched, TRUE);	break;
 
 	case TDCA_COST:
 		{
@@ -918,6 +925,22 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			}
 			break;
 
+		case TDCA_FILELINK:
+			if (!sText.IsEmpty())
+			{
+				// Just draw the first file without its path
+				CString sFile(sText);
+				Misc::Split(sFile, CString(), Misc::GetListSeparator());
+
+				CRect rRest(rText);
+
+				if (CFileIcons::Draw(pDC, FileMisc::GetExtension(sFile), GetIconPos(rText)))
+					rRest.left += ICON_SIZE + 2;
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sFile), crText, nDrawTextFlags);
+			}
+			return;
+
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) &&
 				m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_ICON)
@@ -941,15 +964,15 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
+CPoint CTDLTaskAttributeListCtrl::GetIconPos(const CRect& rText)
+{
+	return CPoint(rText.left, rText.top + (rText.Height() - ICON_SIZE) / 2);
+}
+
 void CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText)
 {
 	if (!sIcon.IsEmpty())
-	{
-		static int ICON_SIZE = m_ilIcons.GetImageSize();
-
-		CPoint ptTopLeft(rText.left, rText.top + (rText.Height() - ICON_SIZE) / 2);
-		m_ilIcons.Draw(pDC, sIcon, ptTopLeft, ILD_TRANSPARENT);
-	}
+		m_ilIcons.Draw(pDC, sIcon, GetIconPos(rText), ILD_TRANSPARENT);
 }
 
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
@@ -1168,7 +1191,13 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_CATEGORY: PrepareMultiSelCombo(nRow, m_tldDefault.aCategory, m_tldAll.aCategory);	break;
 	case TDCA_TAGS:		PrepareMultiSelCombo(nRow, m_tldDefault.aTags, m_tldAll.aTags);			break;
 
-	case TDCA_FILELINK: 
+	case TDCA_FILELINK:
+		{
+			CStringArray aFiles;
+			m_taskCtrl.GetSelectedTaskFileLinks(aFiles, TRUE);
+
+			m_cbFileLinks.SetFileList(aFiles);
+		}
 		break;
 
 	case TDCA_ICON: 
@@ -1378,7 +1407,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 		return &m_cbMultiSelection;
 
 	case TDCA_FILELINK:
-		break;
+		return &m_cbFileLinks;
 
 	case TDCA_FLAG:
 	case TDCA_ICON:
@@ -1635,6 +1664,7 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	HideControl(m_cbRisk, pWndIgnore);
 	HideControl(m_eDepends, pWndIgnore);
 	HideControl(m_eTimePeriod, pWndIgnore);
+	HideControl(m_cbFileLinks, pWndIgnore);
 	
 	if (pWndIgnore != &m_editBox)
 		m_editBox.SetSpinBuddy(NULL);
@@ -1689,6 +1719,15 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 	case IDC_RISK_COMBO:
 		sNewItemText = Misc::Format(m_cbRisk.GetSelectedRisk());
+		break;
+
+	case IDC_FILELINK_COMBO:
+		{
+			CStringArray aFiles;
+			
+			if (m_cbFileLinks.GetFileList(aFiles))
+				sNewItemText = Misc::FormatArray(aFiles);
+		}
 		break;
 
 	default:

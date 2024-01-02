@@ -238,18 +238,20 @@ int CEnString::GetCharacterCount(LPCTSTR szText, int nLen, TCHAR nChar, BOOL bCa
 
 CSize CEnString::FormatDC(CDC* pDC, int nWidth, int nStyle)
 {
-	CRect rect(0, 0, nWidth, 20);
-	UINT uFlags = (DT_CALCRECT | DT_SINGLELINE | DT_MODIFYSTRING | DT_NOPREFIX);
+	if (nStyle != ES_NONE)
+	{
+		CRect rect(0, 0, nWidth, 20);
+		UINT uFlags = (DT_CALCRECT | DT_SINGLELINE | DT_MODIFYSTRING | DT_NOPREFIX);
 
-	// special case: ES_START
-	if (nStyle == ES_START)
-	{
-		FormatDCEx(pDC, nWidth, nStyle);
-	}
-	else
-	{
-		switch (nStyle)
+		// special case: ES_START
+		if (nStyle == ES_START)
 		{
+			FormatDCEx(pDC, nWidth, nStyle);
+		}
+		else
+		{
+			switch (nStyle)
+			{
 			case ES_END:
 				uFlags |= DT_END_ELLIPSIS;
 				break;
@@ -261,14 +263,15 @@ CSize CEnString::FormatDC(CDC* pDC, int nWidth, int nStyle)
 			case ES_PATH:
 				uFlags |= DT_PATH_ELLIPSIS;
 				break;
+			}
+
+			::DrawText(pDC->GetSafeHdc(), GetBuffer(GetLength() + 4), -1, rect, uFlags);
+			ReleaseBuffer();
+
+			// if its still too big then do our internal version
+			if (rect.Width() > nWidth)
+				FormatDCEx(pDC, nWidth, nStyle);
 		}
-
-		::DrawText(pDC->GetSafeHdc(), GetBuffer(GetLength() + 4), -1, rect, uFlags);
-		ReleaseBuffer();
-
-		// if its still too big then do our internal version
-		if (rect.Width() > nWidth)
-			FormatDCEx(pDC, nWidth, nStyle);
 	}
 
 	return pDC->GetTextExtent(*this);

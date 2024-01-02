@@ -707,7 +707,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
 				}
 
-				UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
+				UINT nFlags = (/*DT_END_ELLIPSIS |*/ DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
 
 				switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
 				{
@@ -813,6 +813,10 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
 			break;
 					
+		case ILCT_CUSTOMBTN:
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+			break;
+					
 		case ILCT_POPUPMENU:
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
@@ -869,6 +873,7 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	{
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
+	case ILCT_CUSTOMBTN:
 		rButton.left = (rButton.right - BTN_WIDTH);
 		break;
 
@@ -898,6 +903,7 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	case ILCT_BROWSE:
 	case ILCT_DATE:
 	case ILCT_POPUPMENU:
+	case ILCT_CUSTOMBTN:
 		if (COSVersion() >= OSV_WIN8)
 			rButton.InflateRect(1, 1);
 		break;
