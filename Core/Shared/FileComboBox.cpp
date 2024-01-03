@@ -93,16 +93,17 @@ BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 
 void CFileComboBox::OnPaint()
 {
-	// If the edit field has an image and its icon rect 
-	// is less than the height of the image, then we draw 
+	// If the edit field has an image and the icon rect 
+	// is less than the height of the edit field, then we draw 
 	// the extra bit that MIGHT have been clipped out
 	CPaintDC dc(this);
 
 	if (m_fileEdit.GetSafeHwnd() && m_fileEdit.GetWindowTextLength())
 	{
-		CRect rIcon = m_fileEdit.GetIconScreenRect();
+		CRect rIcon = m_fileEdit.GetIconScreenRect(), rEdit;
+		m_fileEdit.GetWindowRect(rEdit);
 
-		if (rIcon.Height() < m_imageIcons.GetIconSize())
+		if (rIcon.Height() > rEdit.Height())
 		{
 			ScreenToClient(rIcon);
 

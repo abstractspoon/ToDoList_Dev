@@ -982,7 +982,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 CPoint CTDLTaskAttributeListCtrl::GetIconPos(const CRect& rText)
 {
-	return CPoint(rText.left, rText.top + (rText.Height() - ICON_SIZE) / 2);
+	return CPoint(rText.left - 1, rText.top + ((rText.Height() - ICON_SIZE) / 2));
 }
 
 void CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText)
