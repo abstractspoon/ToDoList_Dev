@@ -126,6 +126,7 @@ protected:
 	afx_msg void OnComboEditChange(UINT nCtrlID);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEnEditButtonClick(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 

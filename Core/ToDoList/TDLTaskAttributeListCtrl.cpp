@@ -54,7 +54,8 @@ enum
 {
 	ID_BTN_TIMETRACK = 10,
 	ID_BTN_ADDLOGGEDTIME,
-	ID_BTN_SELECTDEPENDS
+	ID_BTN_SELECTDEPENDS,
+	ID_BTN_EDITDEPENDS,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -102,13 +103,17 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& tas
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE)
 {
-	// Icon for 'Time Spent'
+	// Icon for dynamic 'Time Spent' buttons
 	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
 	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
 
-	// add buttons to dependency
+	// 'Dependency' buttons
 	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
+
+	m_eDepends.SetBorderWidth(0);
+	m_eDepends.SetDefaultButton(0);
 	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
+	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
 }
 
 CTDLTaskAttributeListCtrl::~CTDLTaskAttributeListCtrl()
@@ -138,6 +143,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnAutoComboAddDelete)
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMDELETED, OnAutoComboAddDelete)
+	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEnEditButtonClick)
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -584,6 +590,7 @@ void CTDLTaskAttributeListCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIB
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 {
 	CHoldRedraw hr(*this);
+	HideAllControls();
 
 	int nRow = GetItemCount();
 
@@ -599,7 +606,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = FindItemFromData(nAttribID);
-	ASSERT(nRow);
+	ASSERT(nRow != -1);
 
 	RefreshSelectedTaskValue(nRow);
 }
@@ -1798,6 +1805,9 @@ void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
 	TDCTIMEPERIOD tp(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
 
 	HideControl(m_eTimePeriod);
+	m_eTimePeriod.DeleteButton(ID_BTN_ADDLOGGEDTIME);
+	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
+
 	SetItemText(nRow, VALUE_COL, tp.Format(2));
 	NotifyParentEdit(nAttribID);
 }
@@ -1899,4 +1909,30 @@ BOOL CTDLTaskAttributeListCtrl::DeleteSelectedCell()
 
 	// else
 	return FALSE;
+}
+
+LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM wParam, LPARAM lParam)
+{
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel());
+
+	switch (lParam)
+	{
+	case ID_BTN_TIMETRACK:
+		ASSERT(nAttribID == TDCA_TIMESPENT);
+		return GetParent()->SendMessage(WM_TDCM_TOGGLETIMETRACKING);
+
+	case ID_BTN_ADDLOGGEDTIME:
+		ASSERT(nAttribID == TDCA_TIMESPENT);
+		return GetParent()->SendMessage(WM_TDCM_ADDTIMETOLOGFILE);
+
+	case ID_BTN_SELECTDEPENDS:
+		ASSERT(nAttribID == TDCA_DEPENDENCY);
+		return GetParent()->SendMessage(WM_TDCM_SELECTDEPENDENCIES);
+
+	case ID_BTN_EDITDEPENDS:
+		ASSERT(nAttribID == TDCA_DEPENDENCY);
+		return GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, TDCA_DEPENDENCY);
+	}
+
+	return 0L;
 }

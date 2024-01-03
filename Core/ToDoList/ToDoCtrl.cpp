@@ -257,11 +257,11 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 //	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add 'clock' button to 'time spent'
-	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
+//	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
 // 	m_eTimeSpent.InsertButton(1, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
 
 	// add 'Plus' button to 'time spent'
-	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
+//	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
 // 	m_eTimeSpent.InsertButton(2, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 
 	// add buttons to dependency
@@ -402,6 +402,9 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCNotifyColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnTDCNotifyTaskAttributeEdited)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnTDCNotifyAutoComboAddDelete)
+	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
+	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
+	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnTDCSelectDependencies)
 
 //	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -458,7 +461,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 //	ON_REGISTERED_MESSAGE(WM_TEN_UNITSCHANGE, OnTimeUnitsChange)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
- 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
+// 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_GETEXCLUSIONRECT, OnFindReplaceGetExclusionRect)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_REPLACESELTASK, OnFindReplaceSelectedTask)
@@ -11466,11 +11469,11 @@ void CToDoCtrl::UpdateDefaultTaskCustomAttributeValues()
 	m_tdiDefault.SetCustomAttributeValues(dataDef);
 }
 
+/*
 LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam)
 	{
-/*
 	case IDC_TIMESPENT:
 		if (GetSelectedTaskCount() == 1)
 		{
@@ -11503,9 +11506,27 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
-*/
 	}
 	
+	return 0L;
+}
+*/
+
+LRESULT CToDoCtrl::OnTDCToggleTimeTracking(WPARAM wParam, LPARAM lParam)
+{
+	ToggleTimeTracking(GetSelectedItem());
+	return 0L;
+}
+
+LRESULT CToDoCtrl::OnTDCAddTimeToLogFile(WPARAM wParam, LPARAM lParam)
+{
+	DoAddTimeToLogFile();
+	return 0L;
+}
+
+LRESULT CToDoCtrl::OnTDCSelectDependencies(WPARAM wParam, LPARAM lParam)
+{
+	GotoSelectedTaskDependency();
 	return 0L;
 }
 

@@ -499,7 +499,7 @@ protected:
 	CTDCImageList m_ilTaskIcons;
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
-	CIcon m_iconTrackTime, m_iconAddTime/*, m_iconLink*/;
+	//CIcon m_iconTrackTime, m_iconAddTime/*, m_iconLink*/;
 	CMidnightTimer m_timerMidnight;
 
 	CTDCStyleMap m_styles;
@@ -680,8 +680,11 @@ protected:
 	afx_msg LRESULT OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCNotifyAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCToggleTimeTracking(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCAddTimeToLogFile(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCSelectDependencies(WPARAM wParam, LPARAM lParam);
 
-	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
+//	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);

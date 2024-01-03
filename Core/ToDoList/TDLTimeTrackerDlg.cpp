@@ -616,7 +616,7 @@ void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
 
 	// Update data struct first
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
-	ASSERT(0);
+	ASSERT(pTTL);
 
 	if (!pTTL)
 		return;

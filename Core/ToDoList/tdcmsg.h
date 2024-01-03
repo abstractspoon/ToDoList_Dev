@@ -36,12 +36,16 @@ const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLIN
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display
 const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
-const UINT WM_TDCM_EDITTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_EDITTASKATTRIBUTE"));		// wParam = <TDC_ATTRIBUTE>
-const UINT WM_TDCM_CLEARTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_CLEARTASKATTRIBUTE"));	// wParam == <TDC_ATTRIBUTE>
 
 // CTDLTaskAttributeListCtrl
 const UINT WM_TDCN_ATTRIBUTEEDITED			= ::RegisterWindowMessage(_T("WM_TDCN_ATTRIBUTEEDITED"));		// wParam == <TDC_ATTRIBUTE>, lParam = TRUE for TDCA_TIMEESTIMATE/SPENT if only the time units changed
 const UINT WM_TDCN_AUTOITEMADDEDDELETED		= ::RegisterWindowMessage(_T("WM_TDCN_AUTOITEMADDEDDELETED"));	// wParam == <TDC_ATTRIBUTE>
+
+const UINT WM_TDCM_EDITTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_EDITTASKATTRIBUTE"));		// wParam = <TDC_ATTRIBUTE>
+const UINT WM_TDCM_CLEARTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_CLEARTASKATTRIBUTE"));	// wParam == <TDC_ATTRIBUTE>
+const UINT WM_TDCM_ADDTIMETOLOGFILE			= ::RegisterWindowMessage(_T("WM_TDCM_ADDTIMETOLOGFILE"));		
+const UINT WM_TDCM_TOGGLETIMETRACKING		= ::RegisterWindowMessage(_T("WM_TDCM_TOGGLETIMETRACKING"));		
+const UINT WM_TDCM_SELECTDEPENDENCIES		= ::RegisterWindowMessage(_T("WM_TDCM_SELECTDEPENDENCIES"));		
 
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 
