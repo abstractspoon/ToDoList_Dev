@@ -330,11 +330,11 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 		
 			lpncsp->rgrc[0].right -= GetButtonsWidth();
 
-			if (!m_bParentIsCombo)
-			{
-				lpncsp->rgrc[0].top += m_nBorderWidth;
-				lpncsp->rgrc[0].bottom -= m_nBorderWidth;
-			}
+// 			if (!m_bParentIsCombo)
+// 			{
+// 				lpncsp->rgrc[0].top += m_nBorderWidth;
+// 				lpncsp->rgrc[0].bottom -= m_nBorderWidth;
+// 			}
 		}
 	}
 	
