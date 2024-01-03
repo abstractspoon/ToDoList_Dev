@@ -915,7 +915,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			return;
 
 		case TDCA_ICON:
-			DrawIcon(pDC, sText, rText);
+			DrawIcon(pDC, sText, rText, FALSE);
 			return;
 
 		case TDCA_COLOR:
@@ -956,30 +956,27 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		case TDCA_FILELINK:
 			if (!sText.IsEmpty())
 			{
-				// Just draw the first file without its path
-				CString sFile(sText);
-				Misc::Split(sFile, CString(), Misc::GetListSeparator());
+				// If there's more than one file, then just render their icons
+				CStringArray aFiles;
+				int nNumFiles = Misc::Split(sText, aFiles);
 
-				HICON hIcon = (HICON)OnFileLinkWantIcon(0, (LPARAM)(LPCTSTR)sFile);
+				CRect rFile(rText);
 
-				CRect rRest(rText);
-				CPoint ptIcon(GetIconPos(rText));
-
-				if (hIcon == NULL)
+				for (int nFile = 0; nFile < nNumFiles; nFile++)
 				{
-					if (CFileIcons::Draw(pDC, FileMisc::GetExtension(sFile), ptIcon))
-						rRest.left += ICON_SIZE + 2;
-				}
-				else
-				{
-					::DrawIconEx(*pDC, ptIcon.x, ptIcon.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
-					rRest.left += ICON_SIZE + 2;
+					if (DrawIcon(pDC, aFiles[nFile], rFile, TRUE))
+						rFile.left += (ICON_SIZE + 2);
 				}
 
-				if (!TDCTASKLINK::IsTaskLink(sFile, TRUE))
-					sFile = FileMisc::GetFileNameFromPath(sFile);
+				if (nNumFiles == 1)
+				{
+					CString sFile(aFiles[0]);
 
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, sFile, crText, nDrawTextFlags);
+					if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
+						sFile = FileMisc::GetFileNameFromPath(sFile);
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rFile, sFile, crText, nDrawTextFlags);
+				}
 			}
 			return;
 
@@ -994,8 +991,8 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 				{
-					DrawIcon(pDC, aIcons[nIcon], rIcon);
-					rIcon.left += GraphicsMisc::ScaleByDPIFactor(16) + 2;
+					if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
+						rIcon.left += (ICON_SIZE + 2);
 				}
 				return;
 			}
@@ -1011,10 +1008,26 @@ CPoint CTDLTaskAttributeListCtrl::GetIconPos(const CRect& rText)
 	return CPoint(rText.left - 1, rText.top + ((rText.Height() - ICON_SIZE) / 2));
 }
 
-void CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText)
+BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile)
 {
-	if (!sIcon.IsEmpty())
-		m_ilIcons.Draw(pDC, sIcon, GetIconPos(rText), ILD_TRANSPARENT);
+	if (sIcon.IsEmpty())
+		return FALSE;
+
+	CPoint ptIcon(GetIconPos(rText));
+
+	if (bIconIsFile)
+	{
+		HICON hIcon = (HICON)OnFileLinkWantIcon(0, (LPARAM)(LPCTSTR)sIcon);
+
+		if (hIcon == NULL)
+			return CFileIcons::Draw(pDC, FileMisc::GetExtension(sIcon), ptIcon);
+
+		// else
+		return ::DrawIconEx(*pDC, ptIcon.x, ptIcon.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+	}
+
+	// else
+	return m_ilIcons.Draw(pDC, sIcon, GetIconPos(rText), ILD_TRANSPARENT);
 }
 
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)

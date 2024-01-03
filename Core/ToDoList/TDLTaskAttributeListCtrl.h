@@ -157,7 +157,7 @@ protected:
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
-	void DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText);
+	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
