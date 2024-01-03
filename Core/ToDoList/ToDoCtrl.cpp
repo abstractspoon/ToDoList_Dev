@@ -181,7 +181,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 // 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
-	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
+//	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
 //	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
@@ -293,7 +293,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
 // 	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
 //	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
-	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
+// 	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
 // 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
 // 	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
 // 	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
@@ -323,7 +323,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	m_cbPriority.DDX(pDX, m_nPriority);
 // 	m_cbRisk.DDX(pDX, m_nRisk);
 // 	m_eRecurrence.DDX(pDX, m_tRecurrence);
-	m_cbFileLink.DDX(pDX, m_aFileLinks);
+// 	m_cbFileLink.DDX(pDX, m_aFileLinks);
 // 	m_eDependency.DDX(pDX, m_aDepends);
 	
 	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
@@ -642,7 +642,7 @@ BOOL CToDoCtrl::OnInitDialog()
 //	m_dtcDone.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	
 	m_dtTree.Register(&m_taskTree.Tree(), this);
-	m_dtFileLink.Register(&m_cbFileLink, this); 
+//	m_dtFileLink.Register(&m_cbFileLink, this); 
 	
 	// custom font
 	if (m_hFontTree)
@@ -697,7 +697,7 @@ void CToDoCtrl::InitEditPrompts()
 {
 	// Specific
 	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
-	m_mgrPrompts.SetComboPrompt(m_cbFileLink, IDS_TDC_EDITPROMPT_FILELINK);
+//	m_mgrPrompts.SetComboPrompt(m_cbFileLink, IDS_TDC_EDITPROMPT_FILELINK);
 
 	// Generic
 //	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
@@ -884,7 +884,7 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 int CToDoCtrl::GetDefaultControlHeight() const
 {
 	// To handle DPI scaling better simply use the height of the category combo
-	return GetChildHeight(&m_cbFileLink);
+	return GetCtrlRect(IDC_PROJECTNAME).Height();//GetChildHeight(&m_cbFileLink);
 }
 
 void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
@@ -1241,13 +1241,13 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 
 	// standard controls, except for file link which is always last
 	int nCtrl;
-	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS - 1; nCtrl++)
-	{
-		CTRLITEM ctrl = CTRLITEMS[nCtrl];
-
-		if (!bVisible || IsCtrlShowing(ctrl))
-			aControls.Add(ctrl);
-	}
+// 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS - 1; nCtrl++)
+// 	{
+// 		CTRLITEM ctrl = CTRLITEMS[nCtrl];
+// 
+// 		if (!bVisible || IsCtrlShowing(ctrl))
+// 			aControls.Add(ctrl);
+// 	}
 	
 	// custom attribs
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
@@ -1263,10 +1263,10 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 	}
 
 	// finally file link
-	CTRLITEM ctrlFileLink = CTRLITEMS[NUM_CTRLITEMS - 1];
-
-	if (IsCtrlShowing(ctrlFileLink))
-		aControls.Add(ctrlFileLink);
+// 	CTRLITEM ctrlFileLink = CTRLITEMS[NUM_CTRLITEMS - 1];
+// 
+// 	if (IsCtrlShowing(ctrlFileLink))
+// 		aControls.Add(ctrlFileLink);
 
 	return aControls.GetSize();
 }
@@ -1299,25 +1299,25 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 // 	case IDC_PRIORITY:
 //	case IDC_VERSION:
 // 	case IDC_RISK:
-	case IDC_FILEPATH:
-		{
-			// file path control can take as much space as is left
-			if (ctrl.nCtrlID == IDC_FILEPATH)
-				rCtrl.right = nClientRight;
-
-			// don't move it if it hasn't actually moved
-			// to prevent flickering. Note we do this 
-			// before we add 200 to the bottom of the rect
-			CRect rPos;
-			GetCtrlRect(ctrl.nCtrlID);
-
-			if (rPos == rCtrl)
-				return; 
-
-			// else
-			rCtrl.bottom += COMBODROPHEIGHT;
-		}
-		break;
+// 	case IDC_FILEPATH:
+// 		{
+// 			// file path control can take as much space as is left
+// 			if (ctrl.nCtrlID == IDC_FILEPATH)
+// 				rCtrl.right = nClientRight;
+// 
+// 			// don't move it if it hasn't actually moved
+// 			// to prevent flickering. Note we do this 
+// 			// before we add 200 to the bottom of the rect
+// 			CRect rPos;
+// 			GetCtrlRect(ctrl.nCtrlID);
+// 
+// 			if (rPos == rCtrl)
+// 				return; 
+// 
+// 			// else
+// 			rCtrl.bottom += COMBODROPHEIGHT;
+// 		}
+// 		break;
 
 	// handle custom attributes
 	default:
@@ -1511,11 +1511,11 @@ void CToDoCtrl::ShowHideControls()
 {
 	// now show/hide appropriate controls
 	int nCtrl;
-	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
-	{
-		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
-		ShowHideControl(ctrl);
-	}
+// 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
+// 	{
+// 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
+// 		ShowHideControl(ctrl);
+// 	}
 
 	// always show custom controls
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
@@ -1617,6 +1617,7 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 	// some additions and modifications
 	switch (ctrl.nCtrlID)
 	{
+/*
 	case IDC_FILEPATH: // special case
 		if (!bEnable)
 		{
@@ -1630,7 +1631,6 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		}
 		return;
 
-/*
 	case IDC_PERCENT:
 		{
 			BOOL bEditPercent = !HasStyle(TDCS_AUTOCALCPERCENTDONE);
@@ -1707,11 +1707,11 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 
 	// now enable/disable appropriate controls
 	int nCtrl;
-	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
-	{
-		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
-		EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls, bIsParent);
-	}
+// 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
+// 	{
+// 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
+// 		EnableDisableControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls, bIsParent);
+// 	}
 
 	// and custom controls
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
@@ -1863,7 +1863,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_cbTags.SetChecked(aMatched, aMixed);
 
 		// special cases
-		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
+//		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
 // 		GetSelectedTaskDependencies(m_aDepends);
 
 /*
@@ -1939,7 +1939,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_cbCategory.CheckAll(CCBC_UNCHECKED);
 // 		m_cbTags.CheckAll(CCBC_UNCHECKED);
 
-		m_aFileLinks.RemoveAll();
+//		m_aFileLinks.RemoveAll();
 // 		m_aDepends.RemoveAll();
 
 // 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
@@ -1949,7 +1949,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_mapCustomCtrlData.RemoveAll();
 	}
 
-	UpdateDateTimeControls(hti != NULL);
+//	UpdateDateTimeControls(hti != NULL);
 
 	// update data controls excluding comments
 	UpdateData(FALSE);
@@ -2007,6 +2007,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 }
 
+/*
 void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 {
 	if (bHasSelection)
@@ -2041,6 +2042,7 @@ void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
 // 		m_cbTimeDone.SetOleTime(-1);
 	}
 }
+*/
 
 void CToDoCtrl::UpdateTasklistVisibility()
 {
@@ -5789,7 +5791,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 
 	case TDCS_SHOWFILELINKTHUMBNAILS:
 		{
-			m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
+			//m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
 			
 			CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
 		}
@@ -8091,7 +8093,7 @@ void CToDoCtrl::SetFilePath(const CString& sPath)
 	
 	CString sFolder(FileMisc::GetFolderFromFilePath(sPath));
 	m_taskTree.SetTasklistFolder(sFolder);
-	m_cbFileLink.SetCurrentFolder(sFolder);
+//	m_cbFileLink.SetCurrentFolder(sFolder);
 }
 
 CString CToDoCtrl::GetStylesheetPath() const
@@ -8868,13 +8870,13 @@ UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 	ASSERT(nAttrib != TDCA_NONE);
 
 	int nCtrl;
-	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
-	{
-		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
-
-		if (ctrl.nAttrib == nAttrib)
-			return ctrl.nCtrlID;
-	}
+// 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
+// 	{
+// 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
+// 
+// 		if (ctrl.nAttrib == nAttrib)
+// 			return ctrl.nCtrlID;
+// 	}
 
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
 	{
@@ -8906,13 +8908,13 @@ TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 		return TDCA_NONE;
 
 	int nCtrl;
-	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
-	{
-		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
-
-		if (ctrl.nCtrlID == nCtrlID)
-			return ctrl.nAttrib;
-	}
+// 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
+// 	{
+// 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
+// 
+// 		if (ctrl.nCtrlID == nCtrlID)
+// 			return ctrl.nAttrib;
+// 	}
 
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
 	{
@@ -10345,10 +10347,10 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 		ASSERT(0);
 		return FALSE;
 	}
-	else if (pTarget == &m_cbFileLink)
-	{
-		return CanEditSelectedTask(TDCA_FILELINK);
-	}
+// 	else if (pTarget == &m_cbFileLink)
+// 	{
+// 		return CanEditSelectedTask(TDCA_FILELINK);
+// 	}
 
 	// else
 	return TRUE;
@@ -10439,11 +10441,11 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		SetFocusToTasks();
 		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->dwTaskID);
 	}
-	else if ((pTarget == &m_cbFileLink) && aFiles.GetSize())
-	{
-		SetSelectedTaskFileLinks(aFiles, TRUE); // append);
-		m_cbFileLink.SetFocus();
-	}
+// 	else if ((pTarget == &m_cbFileLink) && aFiles.GetSize())
+// 	{
+// 		SetSelectedTaskFileLinks(aFiles, TRUE); // append);
+// 		m_cbFileLink.SetFocus();
+// 	}
 
 	// else ignore
 	return 0L;

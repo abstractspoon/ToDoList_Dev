@@ -479,7 +479,7 @@ protected:
 // 	CColourPickerEx m_cpColour;
 //	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	//CEnEdit m_eExternalID;
-	CFileComboBox m_cbFileLink;
+//	CFileComboBox m_cbFileLink;
 // 	CMaskEdit m_ePercentDone, m_eCost;
 	CPopupEditCtrl m_eTaskName;
 // 	CSpinButtonCtrl m_spinPercent;
@@ -545,12 +545,12 @@ protected:
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;
 
-	CStringArray m_aFileLinks;
+//	CStringArray m_aFileLinks;
 // 	CString m_sAllocBy;
 //	CString m_sStatus;
 	CString m_sProjectName;
 	//CString m_sExternalID;
-	CString m_sOccurrence;
+//	CString m_sOccurrence;
 	//CString m_sVersion;
 	double m_dTrackedTimeElapsedHours;
 // 	int m_nPriority;
@@ -800,7 +800,7 @@ protected:
 	
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
-	void UpdateDateTimeControls(BOOL bHasSelection);
+//	void UpdateDateTimeControls(BOOL bHasSelection);
 	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
 	void EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) const;
 	void IncrementTrackedTime(BOOL bEnding);

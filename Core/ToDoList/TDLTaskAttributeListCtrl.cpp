@@ -517,7 +517,17 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 			return FALSE;
 
 		case TDCA_PERCENT:
-			return !m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE);
+			{
+				if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+					return FALSE;
+				
+				if (m_taskCtrl.GetSelectedCount() > 1)
+				{
+					if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_taskCtrl.SelectionHasParents())
+						return FALSE;
+				}
+			}
+			break;
 
 		case TDCA_LOCK:
 			return TRUE;
