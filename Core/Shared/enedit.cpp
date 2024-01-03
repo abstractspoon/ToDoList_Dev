@@ -896,7 +896,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 	if (eb.bDropMenu)
 	{
 		CRect rArrow(rBtn);
-		UINT nFlags = DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP;
+		UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP;
 
 		if (eb.sCaption.IsEmpty())
 		{
@@ -941,11 +941,15 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 		
 		pDC->SetTextAlign((eb.bSymbol ? TA_LEFT : TA_CENTER) | TA_TOP);
 		pDC->SetBkMode(TRANSPARENT);
-		
-		int nCharHeight = pDC->GetTextExtent("A").cy;
-		int nVOffset = ((rBtn.Height() - nCharHeight + 1) / 2) - (bThemed ? 0 : 1);
-		int nHOffset = eb.bSymbol ? -2 : (rBtn.Width() + 1) / 2;
 
+		int nVOffset = 0, nHOffset = (eb.bSymbol ? -2 : (rBtn.Width() + 1) / 2);
+
+		if (eb.sCaption != _T("..."))
+		{
+			int nCharHeight = pDC->GetTextExtent("A").cy;
+			nVOffset = (((rBtn.Height() - nCharHeight + 1) / 2) - (bThemed ? 0 : 1));
+		}
+		
 		// if the button has a drop menu position the text in the 
 		// center of what remains
 		if (eb.bDropMenu)
