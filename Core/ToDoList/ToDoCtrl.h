@@ -625,7 +625,7 @@ protected:
 //	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 //	afx_msg void OnDueDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 //	afx_msg void OnCompletionDatechange(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnGotoFileLink();
+// 	afx_msg void OnGotoFileLink();
 
 	afx_msg void OnTreeSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -683,15 +683,13 @@ protected:
 	afx_msg LRESULT OnTDCToggleTimeTracking(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCAddTimeToLogFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCSelectDependencies(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCDisplayLink(WPARAM wParam, LPARAM lParam);
 
 //	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCWantFileLinkIcon(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCWantFileLinkTooltip(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCDisplayFileLink(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);

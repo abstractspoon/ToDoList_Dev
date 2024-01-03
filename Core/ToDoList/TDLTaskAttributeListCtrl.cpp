@@ -85,6 +85,10 @@ const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 static CContentMgr s_mgrContent;
 
 /////////////////////////////////////////////////////////////////////////////
+
+CIcon CTDLTaskAttributeListCtrl::s_iconApp;
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl
 
 CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
@@ -101,15 +105,12 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& tas
 	m_cbMultiSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbPriority(FALSE),
-	m_cbRisk(FALSE)
+	m_cbRisk(FALSE),
+	m_iconTrackTime(IDI_TIMETRACK, 16, FALSE),
+	m_iconAddTime(IDI_ADD_LOGGED_TIME, 16, FALSE),
+	m_iconLink(IDI_DEPENDS_LINK, 16, FALSE)
 {
-	// Icon for dynamic 'Time Spent' buttons
-	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
-	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
-
 	// 'Dependency' buttons
-	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
-
 	m_eDepends.SetBorderWidth(0);
 	m_eDepends.SetDefaultButton(0);
 	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
@@ -1957,15 +1958,23 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM wParam, LPARAM lPa
 
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam)
 {
-	return GetParent()->SendMessage(WM_TDCM_WANTFILELINKICON, wParam, lParam);
+	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
+	{
+		if (!s_iconApp.IsValid())
+			VERIFY(s_iconApp.SetIcon(GraphicsMisc::GetAppWindowIcon(FALSE)));
+
+		return (LRESULT)(HICON)s_iconApp;
+	}
+
+	return 0L;
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam)
 {
-	return GetParent()->SendMessage(WM_TDCM_WANTFILELINKTOOLTIP, wParam, lParam);
+	return GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, wParam, lParam);
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkDisplay(WPARAM wParam, LPARAM lParam)
 {
-	return GetParent()->SendMessage(WM_TDCM_DISPLAYFILELINK, wParam, lParam);
+	return GetParent()->SendMessage(WM_TDCM_DISPLAYLINK, wParam, lParam);
 }

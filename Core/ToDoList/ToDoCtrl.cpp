@@ -396,18 +396,16 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
+	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnTDCDisplayLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnTDCEditTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnTDCClearTaskAttribute)
+	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
+	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
+	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnTDCSelectDependencies)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCNotifyColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnTDCNotifyTaskAttributeEdited)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnTDCNotifyAutoComboAddDelete)
-	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
-	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
-	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnTDCSelectDependencies)
-	ON_REGISTERED_MESSAGE(WM_TDCM_WANTFILELINKICON, OnTDCWantFileLinkIcon)
-	ON_REGISTERED_MESSAGE(WM_TDCM_WANTFILELINKTOOLTIP, OnTDCWantFileLinkTooltip)
-	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYFILELINK, OnTDCDisplayFileLink)
 
 //	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -2298,10 +2296,14 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		break;
 		
 	case TDCA_FILELINK:
-		if (!m_cbFileLink.GetDroppedState())
+		//if (!m_cbFileLink.GetDroppedState())
 		{
+			CStringArray aFiles;
+			m_lcAttributes.GetFileLinks(aFiles);
+
 			BOOL bAppend = (GetSelectedTaskCount() > 1);
-			SetSelectedTaskFileLinks(m_aFileLinks, bAppend, TRUE);
+
+			SetSelectedTaskFileLinks(aFiles, bAppend, TRUE);
 		}
 		break;
 		
@@ -10190,11 +10192,13 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 	return FALSE;
 }
 
+/*
 void CToDoCtrl::OnGotoFileLink()
 {
 	if (m_aFileLinks.GetSize())
 		GotoFile(m_aFileLinks[0]);
 }
+*/
 
 void CToDoCtrl::SetFocusToTasks()
 {
@@ -11827,18 +11831,7 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 	return TRUE;
 }
 
-LRESULT CToDoCtrl::OnTDCWantFileLinkIcon(WPARAM wParam, LPARAM lParam)
-{
-	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
-		return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
-}
-
-LRESULT CToDoCtrl::OnTDCWantFileLinkTooltip(WPARAM wParam, LPARAM lParam)
-{
-	return OnGetLinkTooltip(wParam, lParam);
-}
-
-LRESULT CToDoCtrl::OnTDCDisplayFileLink(WPARAM wParam, LPARAM lParam)
+LRESULT CToDoCtrl::OnTDCDisplayLink(WPARAM wParam, LPARAM lParam)
 {
 	return GotoFile((LPCTSTR)lParam);
 }

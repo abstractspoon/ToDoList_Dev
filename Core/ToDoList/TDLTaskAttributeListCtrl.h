@@ -105,6 +105,8 @@ protected:
 	CFileComboBox m_cbFileLinks;
 
 	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
+	
+	static CIcon s_iconApp;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)

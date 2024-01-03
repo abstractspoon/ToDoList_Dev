@@ -33,6 +33,7 @@ const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLIN
 const UINT WM_TDCM_SELECTTASK				= ::RegisterWindowMessage(_T("WM_TDCM_SELECTTASK"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_COMPLETETASK				= ::RegisterWindowMessage(_T("WM_TDCM_COMPLETETASK"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK"));			// wParam = hwnd, lParam = url
+const UINT WM_TDCM_DISPLAYLINK				= ::RegisterWindowMessage(_T("WM_TDCM_DISPLAYLINK"));			// wParam = hwnd, lParam = url 
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display
 const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
@@ -46,9 +47,6 @@ const UINT WM_TDCM_CLEARTASKATTRIBUTE		= ::RegisterWindowMessage(_T("WM_TDCM_CLE
 const UINT WM_TDCM_ADDTIMETOLOGFILE			= ::RegisterWindowMessage(_T("WM_TDCM_ADDTIMETOLOGFILE"));		
 const UINT WM_TDCM_TOGGLETIMETRACKING		= ::RegisterWindowMessage(_T("WM_TDCM_TOGGLETIMETRACKING"));		
 const UINT WM_TDCM_SELECTDEPENDENCIES		= ::RegisterWindowMessage(_T("WM_TDCM_SELECTDEPENDENCIES"));		
-const UINT WM_TDCM_WANTFILELINKTOOLTIP		= ::RegisterWindowMessage(_T("WM_TDCM_WANTFILELINKTOOLTIP"));	// lParam = LPCTSTR 
-const UINT WM_TDCM_WANTFILELINKICON			= ::RegisterWindowMessage(_T("WM_TDCM_WANTFILELINKICON"));		// lParam = LPCTSTR 
-const UINT WM_TDCM_DISPLAYFILELINK			= ::RegisterWindowMessage(_T("WM_TDCM_DISPLAYFILELINK"));		// lParam = LPCTSTR 
 
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 
