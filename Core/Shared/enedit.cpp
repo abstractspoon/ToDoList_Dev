@@ -490,10 +490,23 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 
 	if (nBtn < GetButtonCount())
 	{
-		GetWindowRect(rBtn);
-
-		if (!m_bParentIsCombo)
+		if (m_bParentIsCombo)
+		{
+			if (m_nBorderWidth == 0)
+			{
+				GetParent()->GetWindowRect(rBtn);
+				rBtn.right -= DEF_BTNWIDTH;
+			}
+			else
+			{
+				GetWindowRect(rBtn);
+			}
+		}
+		else
+		{
+			GetWindowRect(rBtn);
 			rBtn.DeflateRect(m_nBorderWidth, m_nBorderWidth);
+		}
 
 		// Subtract all the button widths coming after this one
 		for (int nIndex = nBtn + 1; nIndex < m_aButtons.GetSize(); nIndex++)
@@ -521,18 +534,40 @@ void CEnEdit::OnNcPaint()
 	// If the button extends right up to the border
 	// do default rendering first
 	if (m_nBorderWidth == 0)
+	{
 		Default();
 	
-	// our custom drawing
-	CWindowDC dc(this);
-	CRect rWindow;
+		// our custom drawing
+		if (m_bParentIsCombo)
+		{
+			// Draw to parent dc
+			CWindowDC dc(GetParent());
+			CRect rWindow;
 		
-	GetWindowRect(rWindow);
-	NcPaint(&dc, rWindow);
+			GetParent()->GetWindowRect(rWindow);
+			rWindow.right -= DEF_BTNWIDTH;
+		
+			NcPaint(&dc, rWindow);
+		}
+		else
+		{
+			CWindowDC dc(this);
+			CRect rWindow;
 
-	// else do default rendering last
-	if (m_nBorderWidth != 0)
+			GetWindowRect(rWindow);
+			NcPaint(&dc, rWindow);
+		}
+	}
+	else // do default rendering last
+	{
+		CWindowDC dc(this);
+		CRect rWindow;
+		
+		GetWindowRect(rWindow);
+		NcPaint(&dc, rWindow);
+
 		Default();
+	}
 }
 
 void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)

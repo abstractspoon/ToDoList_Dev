@@ -1213,6 +1213,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			m_taskCtrl.GetSelectedTaskFileLinks(aFiles, TRUE);
 
 			m_cbFileLinks.SetFileList(aFiles);
+			m_cbFileLinks.SetButtonBorderWidth(0);
+			m_cbFileLinks.SetDefaultButton(0);
 		}
 		break;
 

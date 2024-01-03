@@ -21,6 +21,8 @@ public:
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
 
 	void SetReadOnly(BOOL bReadOnly = TRUE);
+	void SetDefaultButton(UINT nID) { m_fileEdit.SetDefaultButton(nID); }
+	void SetButtonBorderWidth(int nWidth) { m_fileEdit.SetBorderWidth(nWidth); }
 
 	int GetFileList(CStringArray& aFiles);
 	int SetFileList(const CStringArray& aFiles);

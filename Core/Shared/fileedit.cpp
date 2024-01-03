@@ -35,6 +35,12 @@ CString CFileEdit::s_sBrowseFoldersTitle;
 HICON CFileEdit::s_hBrowseImage = NULL;
 HICON CFileEdit::s_hGoImage = NULL;
 
+/////////////////////////////////////////////////////////////////////////////
+
+const int IMAGE_SIZE = CFileIcons::GetImageSize();
+
+/////////////////////////////////////////////////////////////////////////////
+
 // static members
 void CFileEdit::SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo)
 {
@@ -303,7 +309,6 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	}
 
 	int nImage = -1;
-	int nImageSize = CFileIcons::GetImageSize();
 
 	// try parent for override
 	HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath);
@@ -312,7 +317,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	{
 		ClearImageIcon();
 
-		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL));
+		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, IMAGE_SIZE, IMAGE_SIZE, 0, NULL, DI_NORMAL));
 		return;
 	}
 
@@ -325,11 +330,11 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
 	{
 		if (m_ilImageIcon.GetSafeHandle() == NULL)
-			VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));
+			VERIFY(m_ilImageIcon.Create(IMAGE_SIZE, IMAGE_SIZE, (ILC_COLOR32 | ILC_MASK), 1, 1));
 
 		if (m_ilImageIcon.GetImageCount() == 0)
 		{
-			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), nImageSize, nImageSize));
+			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE));
 
 			if (icon.IsValid())
 				m_ilImageIcon.Add(icon);
@@ -569,17 +574,30 @@ void CFileEdit::OnKillFocus(CWnd* pNewWnd)
 
 CRect CFileEdit::GetIconScreenRect() const
 {
-	CRect rButton;
-	GetClientRect(rButton);
+	CRect rWindow;
+	GetWindowRect(rWindow);
 
-	rButton.right = rButton.left;
-	rButton.left -= (CFileIcons::GetImageSize() + 2);
-	rButton.top -= m_nBorderWidth;
-	rButton.bottom += m_nBorderWidth;
+	if (m_bParentIsCombo)
+	{
+		CRect rParent;
+		GetParent()->GetWindowRect(rParent);
 
-	ClientToScreen(rButton);
+		rWindow.top = rParent.top;
+		rWindow.bottom = rParent.bottom;
+	}
+	else
+	{
+		rWindow.left += 2;
+	}
 
-	return rButton;
+	CRect rIcon(rWindow);
+
+	rIcon.right = (rIcon.left + IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+
+	GraphicsMisc::CentreRect(rIcon, rWindow, FALSE, TRUE);
+
+	return rIcon;
 }
 
 #if _MSC_VER >= 1400
