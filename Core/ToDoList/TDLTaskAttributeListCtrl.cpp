@@ -50,6 +50,15 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum 
+{
+	ID_BTN_TIMETRACK = 10,
+	ID_BTN_ADDLOGGEDTIME,
+	ID_BTN_SELECTDEPENDS
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 const UINT IDS_PRIORITYRISK_SCALE[] = 
 { 
 	IDS_TDC_SCALE0,
@@ -93,6 +102,13 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& tas
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE)
 {
+	// Icon for 'Time Spent'
+	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
+	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
+
+	// add buttons to dependency
+	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
+	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 }
 
 CTDLTaskAttributeListCtrl::~CTDLTaskAttributeListCtrl()
@@ -1244,8 +1260,16 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		break;
 
 	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
 		PrepareTimePeriodEdit(nRow);
+		break;
+
+	case TDCA_TIMESPENT:
+		{
+			PrepareTimePeriodEdit(nRow);
+
+			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
+			m_eTimePeriod.InsertButton(1, ID_BTN_ADDLOGGEDTIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
+		}
 		break;
 
 	case TDCA_DONEDATE:
@@ -1665,6 +1689,9 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	HideControl(m_eDepends, pWndIgnore);
 	HideControl(m_eTimePeriod, pWndIgnore);
 	HideControl(m_cbFileLinks, pWndIgnore);
+
+	m_eTimePeriod.DeleteButton(ID_BTN_ADDLOGGEDTIME);
+	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
 	
 	if (pWndIgnore != &m_editBox)
 		m_editBox.SetSpinBuddy(NULL);

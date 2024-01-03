@@ -19,6 +19,7 @@
 #include "..\shared\FileComboBox.h"
 #include "..\shared\TimeComboBox.h"
 #include "..\shared\TimeEdit.h"
+#include "..\shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -102,6 +103,8 @@ protected:
 	CSpinButtonCtrl m_spinPercent;
 	CTimeEdit m_eTimePeriod;
 	CFileComboBox m_cbFileLinks;
+
+	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
