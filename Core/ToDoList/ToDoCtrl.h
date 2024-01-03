@@ -650,8 +650,8 @@ protected:
 // 	afx_msg void OnSelChangeTag();
 // 	afx_msg void OnSelChangeVersion();
 // 	afx_msg void OnSelChangeCategory();
-	afx_msg void OnSelChangeFileLinkPath();
-	afx_msg void OnCancelChangeFileLinkPath();
+// 	afx_msg void OnSelChangeFileLinkPath();
+// 	afx_msg void OnCancelChangeFileLinkPath();
 // 	afx_msg void OnSelCancelAllocTo();
 // 	afx_msg void OnSelCancelCategory();
 //	afx_msg void OnSelCancelStatus();	
@@ -689,9 +689,12 @@ protected:
 // 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCWantFileLinkIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCWantFileLinkTooltip(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCDisplayFileLink(WPARAM wParam, LPARAM lParam);
+// 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
+// 	afx_msg LRESULT OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam);
+// 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);

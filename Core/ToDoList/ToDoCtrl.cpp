@@ -405,6 +405,9 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnTDCSelectDependencies)
+	ON_REGISTERED_MESSAGE(WM_TDCM_WANTFILELINKICON, OnTDCWantFileLinkIcon)
+	ON_REGISTERED_MESSAGE(WM_TDCM_WANTFILELINKTOOLTIP, OnTDCWantFileLinkTooltip)
+	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYFILELINK, OnTDCDisplayFileLink)
 
 //	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -414,14 +417,14 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 // 	ON_CBN_SELCHANGE(IDC_CATEGORY, OnSelChangeCategory)
 //	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 // 	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
-	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
+// 	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
 // 	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
 // 	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
 // 	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 //	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
 // 	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
 //	ON_CBN_SELCHANGE(IDC_VERSION, OnSelChangeVersion)
-	ON_CBN_SELENDCANCEL(IDC_FILEPATH, OnCancelChangeFileLinkPath)
+// 	ON_CBN_SELENDCANCEL(IDC_FILEPATH, OnCancelChangeFileLinkPath)
 // 	ON_CBN_SELENDCANCEL(IDC_ALLOCTO, OnSelCancelAllocTo)
 // 	ON_CBN_SELENDCANCEL(IDC_CATEGORY, OnSelCancelCategory)
 // 	ON_CBN_SELENDCANCEL(IDC_TAGS, OnSelCancelTag)
@@ -452,9 +455,9 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGOVER, OnTreeDragOver)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreeDragPreMove)
-	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
-	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditWantIcon)
-	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditWantTooltip)
+// 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
+// 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditWantIcon)
+// 	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditWantTooltip)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnLabelEditCancel)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnLabelEditEnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_APPLYADDLOGGEDTIME, OnApplyAddLoggedTime)
@@ -8229,6 +8232,7 @@ void CToDoCtrl::OnSelChangeStatus()
 }
 */
 
+/*
 void CToDoCtrl::OnSelChangeFileLinkPath()
 {
 	UpdateTask(TDCA_FILELINK);
@@ -8239,6 +8243,7 @@ void CToDoCtrl::OnCancelChangeFileLinkPath()
 	// restore combo state
 	m_cbFileLink.SetFileList(m_aFileLinks);
 }
+*/
 
 /*
 void CToDoCtrl::OnSelCancelAllocTo()
@@ -11822,6 +11827,23 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 	return TRUE;
 }
 
+LRESULT CToDoCtrl::OnTDCWantFileLinkIcon(WPARAM wParam, LPARAM lParam)
+{
+	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
+		return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
+}
+
+LRESULT CToDoCtrl::OnTDCWantFileLinkTooltip(WPARAM wParam, LPARAM lParam)
+{
+	return OnGetLinkTooltip(wParam, lParam);
+}
+
+LRESULT CToDoCtrl::OnTDCDisplayFileLink(WPARAM wParam, LPARAM lParam)
+{
+	return GotoFile((LPCTSTR)lParam);
+}
+
+/*
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 {
 	if ((wParam == IDC_FILEPATH) ||
@@ -11850,6 +11872,7 @@ LRESULT CToDoCtrl::OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam)
 	
 	return 0;
 }
+*/
 
 BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 {

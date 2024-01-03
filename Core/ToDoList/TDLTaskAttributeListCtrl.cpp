@@ -143,7 +143,11 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMADDED, OnAutoComboAddDelete)
 	ON_REGISTERED_MESSAGE(WM_ACBN_ITEMDELETED, OnAutoComboAddDelete)
+
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEnEditButtonClick)
+	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileLinkDisplay)
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileLinkWantIcon)
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileLinkWantTooltip)
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -955,12 +959,26 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CString sFile(sText);
 				Misc::Split(sFile, CString(), Misc::GetListSeparator());
 
+				HICON hIcon = (HICON)OnFileLinkWantIcon(0, (LPARAM)(LPCTSTR)sFile);
+
 				CRect rRest(rText);
+				CPoint ptIcon(GetIconPos(rText));
 
-				if (CFileIcons::Draw(pDC, FileMisc::GetExtension(sFile), GetIconPos(rText)))
+				if (hIcon == NULL)
+				{
+					if (CFileIcons::Draw(pDC, FileMisc::GetExtension(sFile), ptIcon))
+						rRest.left += ICON_SIZE + 2;
+				}
+				else
+				{
+					::DrawIconEx(*pDC, ptIcon.x, ptIcon.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
 					rRest.left += ICON_SIZE + 2;
+				}
 
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sFile), crText, nDrawTextFlags);
+				if (!TDCTASKLINK::IsTaskLink(sFile, TRUE))
+					sFile = FileMisc::GetFileNameFromPath(sFile);
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, sFile, crText, nDrawTextFlags);
 			}
 			return;
 
@@ -1935,4 +1953,19 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM wParam, LPARAM lPa
 	}
 
 	return 0L;
+}
+
+LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam)
+{
+	return GetParent()->SendMessage(WM_TDCM_WANTFILELINKICON, wParam, lParam);
+}
+
+LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam)
+{
+	return GetParent()->SendMessage(WM_TDCM_WANTFILELINKTOOLTIP, wParam, lParam);
+}
+
+LRESULT CTDLTaskAttributeListCtrl::OnFileLinkDisplay(WPARAM wParam, LPARAM lParam)
+{
+	return GetParent()->SendMessage(WM_TDCM_DISPLAYFILELINK, wParam, lParam);
 }
