@@ -3,15 +3,24 @@
 #include "GraphicsMisc.h"
 
 
-CIcon::CIcon() : m_hIcon(NULL)
+CIcon::CIcon() 
+	: 
+	m_hIcon(NULL), 
+	m_size(0, 0)
 {
 }
 
-CIcon::CIcon(HICON hIcon) : m_hIcon(hIcon)
+CIcon::CIcon(HICON hIcon) 
+	: 
+	m_hIcon(hIcon), 
+	m_size(GraphicsMisc::GetIconSize(hIcon))
 {
 }
 
-CIcon::CIcon(UINT nIDIcon, int nSize, BOOL bScaleByDPI) : m_hIcon(NULL)
+CIcon::CIcon(UINT nIDIcon, int nSize, BOOL bScaleByDPI) 
+	: 
+	m_hIcon(NULL), 
+	m_size(0, 0)
 {
 	Load(nIDIcon, nSize, bScaleByDPI);
 }
@@ -38,6 +47,8 @@ BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
 		VERIFY(::DestroyIcon(m_hIcon));
 
 	m_hIcon = hIcon;
+	m_size = GraphicsMisc::GetIconSize(m_hIcon);
+
 	return TRUE;
 }
 
@@ -54,7 +65,9 @@ void CIcon::Destroy()
 	if (m_hIcon)
 	{
 		VERIFY(::DestroyIcon(m_hIcon));
+
 		m_hIcon = NULL;
+		m_size.SetSize(0, 0);
 	}
 }
 
@@ -72,8 +85,17 @@ BOOL CIcon::Attach(HICON hIcon)
 HICON CIcon::Detach()
 {
 	HICON hIcon = m_hIcon;
+
 	m_hIcon = NULL;
+	m_size.SetSize(0, 0);
 
 	return hIcon;
 }
 
+BOOL CIcon::Draw(CDC* pDC, const CPoint& ptTopLeft) const
+{
+	if (!m_hIcon)
+		return FALSE;
+
+	return ::DrawIconEx(*pDC, ptTopLeft.x, ptTopLeft.y, m_hIcon, m_size.cx, m_size.cy, 0, NULL, DI_NORMAL);
+}

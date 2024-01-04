@@ -386,12 +386,7 @@ void CEnEdit::OnLButtonUp(UINT nFlags, CPoint point)
 	// process
 	if (nBtnDown == nBtnUp)
 	{
-		// call derived class first
-		OnBtnClick(m_aButtons[nBtnUp].nID);
-
-		// then parent
-		GetParent()->SendMessage(WM_EE_BTNCLICK, GetDlgCtrlID(), m_aButtons[nBtnUp].nID);
-		
+		ClickButton(m_aButtons[nBtnUp].nID);
 		RedrawButtonByIndex(nBtnDown);
 	}
 }
@@ -713,6 +708,22 @@ BOOL CEnEdit::CheckButton(UINT nID, BOOL bChecked)
 		m_aButtons[nBtn].bChecked = bChecked;
 		RedrawButtonByIndex(nBtn);
 	}
+
+	return TRUE;
+}
+
+BOOL CEnEdit::ClickButton(UINT nID)
+{
+	int nBtn = ButtonHitTest(nID);
+
+	if (nBtn < 0)
+		return FALSE;
+
+	// call derived class first
+	OnBtnClick(m_aButtons[nBtn].nID);
+
+	// then parent
+	GetParent()->SendMessage(WM_EE_BTNCLICK, GetDlgCtrlID(), m_aButtons[nBtn].nID);
 
 	return TRUE;
 }

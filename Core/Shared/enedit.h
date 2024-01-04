@@ -55,6 +55,7 @@ public:
 
 	BOOL EnableButton(UINT nID, BOOL bEnable = TRUE);
 	BOOL CheckButton(UINT nID, BOOL bChecked = TRUE);
+	BOOL ClickButton(UINT nID);
 	BOOL SetButtonTip(UINT nID, LPCTSTR szTip);
 	BOOL SetButtonCaption(UINT nID, LPCTSTR szCaption);
 	BOOL SetButtonWidth(UINT nID, int nWidth);

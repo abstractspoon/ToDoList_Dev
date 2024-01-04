@@ -24,11 +24,15 @@ public:
 	BOOL Attach(HICON hIcon);
 	HICON Detach();
 
+	BOOL Draw(CDC* pDC, const CPoint& ptTopLeft) const;
+	CSize GetSize() const { return m_size; }
+
 	operator HICON() const { return m_hIcon; }
 	operator HICON() { return m_hIcon; }
 
 protected:
 	HICON m_hIcon;
+	CSize m_size;
 };
 
 

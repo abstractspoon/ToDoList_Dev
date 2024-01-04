@@ -102,11 +102,10 @@ protected:
 	CTDLTaskDependencyEdit m_eDepends;
 	CSpinButtonCtrl m_spinPercent;
 	CTimeEdit m_eTimePeriod;
-	CFileComboBox m_cbFileLinks;
+	CFileComboBox m_cbMultiFileLink;
+	CFileEdit m_eSingleFileLink;
 
-	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
-	
-	static CIcon s_iconApp;
+	static CIcon s_iconTrackTime, s_iconAddTime, s_iconLink, s_iconBrowse, s_iconApp;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -122,6 +121,7 @@ protected:
 
 	afx_msg void OnDependsChange();
 	afx_msg void OnTimePeriodChange();
+	afx_msg void OnSingleFileLinkChange();
 
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
 	afx_msg void OnComboEditCancel(UINT nCtrlID);
@@ -142,10 +142,12 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
 	virtual void OnCancelEdit();
+	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected);
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;

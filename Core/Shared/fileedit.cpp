@@ -368,6 +368,11 @@ void CFileEdit::ClearImageIcon()
 	}
 }
 
+BOOL CFileEdit::DoBrowse()
+{
+	return CEnEdit::ClickButton(FEBTN_BROWSE);
+}
+
 void CFileEdit::OnBtnClick(UINT nID)
 {
 	switch (nID)
