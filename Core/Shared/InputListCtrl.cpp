@@ -840,7 +840,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 				rButton.top += (rButton.Height() % 2);
 
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-				pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
+				pDC->DrawText(_T("..."), rButton, DT_CENTER | DT_VCENTER);
 			}
 			break;
 			
