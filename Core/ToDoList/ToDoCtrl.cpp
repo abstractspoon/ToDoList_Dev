@@ -2316,7 +2316,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttrib);
 			TDCCADATA data;
 
-			if (m_mapCustomCtrlData.Lookup(sAttribID, data))
+			if (m_lcAttributes.GetCustomAttributeData(sAttribID, data))
+			//if (m_mapCustomCtrlData.Lookup(sAttribID, data))
 				SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
 			else
 				ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);

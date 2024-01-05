@@ -81,6 +81,7 @@ public:
 	COleDateTime GetStartTime() const;
 	COleDateTime GetDueTime() const;
 	COleDateTime GetDoneTime() const;
+
 	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
 
 protected:
@@ -156,6 +157,7 @@ protected:
 
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
+	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTaskValue(int nRow);
@@ -171,6 +173,9 @@ protected:
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
+	static TDC_ATTRIBUTE CustomDateToTime(TDC_ATTRIBUTE nDateAttribID);
+	static TDC_ATTRIBUTE CustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID);
+	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -223,7 +223,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
-	int nRow = FindItemFromData(nAttribID);
+	int nRow = GetRow(nAttribID);
 
 	if (nRow != -1)
 		RedrawCell(nRow, VALUE_COL, FALSE);
@@ -347,7 +347,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 			if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
 			{
 				int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-				SetItemData(nItem, attribDef.GetAttributeID() + CUSTOMTIMEATTRIBOFFSET); // FUDGE
+				SetItemData(nItem, CustomDateToTime(attribDef.GetAttributeID()));
 			}
 		}
 	}
@@ -357,7 +357,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 	// Restore previous selection
 	if (nSelAttribID != TDCA_NONE)
-		SetCurSel(FindItemFromData(nSelAttribID), nSelCol);
+		SetCurSel(GetRow(nSelAttribID), nSelCol);
 }
 
 void CTDLTaskAttributeListCtrl::OnSize(UINT nType, int cx, int cy) 
@@ -400,8 +400,8 @@ TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveC
 
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow); 
 
-	if (bResolveCustomTimeFields && (nAttribID > CUSTOMTIMEATTRIBOFFSET))
-		nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+	if (bResolveCustomTimeFields && IsCustomTime(nAttribID))
+		nAttribID = CustomTimeToDate(nAttribID);
 
 	return nAttribID;
 }
@@ -504,7 +504,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 				}
 			}
 		}
-		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		else if (IsCustomTime(nAttribID))
 		{
 			return ILCT_DROPLIST;
 		}
@@ -574,7 +574,25 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	}
 
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		return (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) != TDCCA_CALCULATION);
+	{
+		int nCust = m_aCustomAttribDefs.Find(nAttribID);
+		ASSERT(nCust != -1);
+
+		if (nCust != -1)
+		{
+			if (m_aCustomAttribDefs[nCust].IsList())
+				return TRUE;
+
+			// else
+			return !m_aCustomAttribDefs[nCust].IsDataType(TDCCA_CALCULATION);
+		}
+	}
+	else if (IsCustomTime(nAttribID))
+	{
+		TDC_ATTRIBUTE nDateAttribID = GetAttributeID(nRow, TRUE);
+
+		return !GetValueText(nDateAttribID).IsEmpty();
+	}
 
 	return TRUE;
 }
@@ -647,7 +665,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID)
 {
-	int nRow = FindItemFromData(nAttribID);
+	int nRow = GetRow(nAttribID);
 	ASSERT(nRow != -1);
 
 	RefreshSelectedTaskValue(nRow);
@@ -870,7 +888,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 							break;
 
 						case TDCCA_DATE:
-							sValue = data.FormatAsDate(FALSE, FALSE);
+							sValue = data.FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), FALSE);
 							break;
 
 						case TDCCA_BOOL:
@@ -881,18 +899,16 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 				}
 			}
 		}
-		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		else if (IsCustomTime(nAttribID))
 		{
-			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
-
-			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(CustomTimeToDate(nAttribID));
 			TDCCADATA data;
 
 			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
 			{
 				ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
 
-				sValue = CTimeHelper::FormatClockTime(data.AsDate());
+				sValue = CTimeHelper::FormatClockTime(data.AsDate(), FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			}
 		}
 		break;
@@ -1268,11 +1284,61 @@ COleDateTime CTDLTaskAttributeListCtrl::GetDoneTime() const
 
 BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const
 {
-	TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sAttribID);
+	int nCust = m_aCustomAttribDefs.Find(sAttribID);
 
-	CString sValue = GetValueText(nAttribID);
+	if (nCust == -1)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
-	return (sValue.IsEmpty() ? CLR_NONE : _ttoi(sValue));
+	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+	// Dates need special handling
+	if (attribDef.IsDataType(TDCCA_DATE))
+	{
+		int nRow = GetRow(attribDef.GetAttributeID());
+
+		if (nRow == -1)
+			return FALSE;
+
+		COleDateTime date;
+		CDateHelper::DecodeDate(GetValueText(attribDef.GetAttributeID()), date, FALSE);
+
+		if (attribDef.HasFeature(TDCCAF_SHOWTIME))
+		{
+			TDC_ATTRIBUTE nTimeAttribID = CustomDateToTime(attribDef.GetAttributeID());
+			date.m_dt += (CTimeHelper::DecodeClockTime(GetValueText(nTimeAttribID)) / 24);
+		}
+	}
+
+	CString sValue = GetValueText(attribDef.GetAttributeID());
+
+	// Extra processing for date with time
+
+	data.Set(sValue);
+
+	return !data.IsEmpty();
+}
+
+TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::CustomDateToTime(TDC_ATTRIBUTE nDateAttribID)
+{
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nDateAttribID));
+
+	return (TDC_ATTRIBUTE)(nDateAttribID + CUSTOMTIMEATTRIBOFFSET);
+}
+
+TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::CustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID)
+{
+	ASSERT(nTimeAttribID > CUSTOMTIMEATTRIBOFFSET);
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute((TDC_ATTRIBUTE)(nTimeAttribID - CUSTOMTIMEATTRIBOFFSET)));
+
+	return (TDC_ATTRIBUTE)(nTimeAttribID - CUSTOMTIMEATTRIBOFFSET);
+}
+
+BOOL CTDLTaskAttributeListCtrl::IsCustomTime(TDC_ATTRIBUTE nAttribID)
+{
+	return (nAttribID > CUSTOMTIMEATTRIBOFFSET);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed)
@@ -1471,19 +1537,9 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				}
 			}
 		}
-		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		else if (IsCustomTime(nAttribID))
 		{
-			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
-
-			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
-			TDCCADATA data;
-
-			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
-			{
-				ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
-
-				// TODO
-			}
+			PrepareTimeCombo(nRow);
 		}
 		break;
 	}
@@ -1535,7 +1591,7 @@ void CTDLTaskAttributeListCtrl::PrepareTimePeriodEdit(int nRow)
 
 CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const 
 { 
-	return GetItemText(FindItemFromData(nAttribID), VALUE_COL); 
+	return GetItemText(GetRow(nAttribID), VALUE_COL); 
 }
 
 CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
@@ -1623,7 +1679,6 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 						case TDCCA_INTEGER:
 						case TDCCA_DOUBLE:
 						case TDCCA_ICON:
-						case TDCCA_FILELINK:
 							// Use base class edit control
 							break;
 
@@ -1631,33 +1686,34 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 							// Not editable
 							return NULL; 
 
+						case TDCCA_BOOL:
+							// Not required
+							return NULL;
+
+						case TDCCA_FILELINK:
+							return &m_eSingleFileLink;
+
 						case TDCCA_TIMEPERIOD:
 							return &m_eTimePeriod;
 
 						case TDCCA_DATE:
 							return &m_datePicker;
-							break;
-
-						case TDCCA_BOOL:
-							// Not required
-							return NULL;
 						}
 					}
 				}
 			}
 		}
-		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		else if (IsCustomTime(nAttribID))
 		{
-			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+			int nCust = m_aCustomAttribDefs.Find(CustomTimeToDate(nAttribID));
 
-			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
-			TDCCADATA data;
-
-			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+			if (nCust == -1)
 			{
-				ASSERT(m_aCustomAttribDefs.GetAttributeDataType(sAttribID) == TDCCA_DATE);
-
-				// TODO
+				ASSERT(0);
+			}
+			else if (m_aCustomAttribDefs[nCust].HasFeature(TDCCAF_SHOWTIME))
+			{
+				return &m_cbTimeOfDay;
 			}
 		}
 		break;
@@ -1811,11 +1867,9 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 				}
 			}
 		}
-		else if (nAttribID > CUSTOMTIMEATTRIBOFFSET)
+		else if (IsCustomTime(nAttribID))
 		{
-			nAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
-
-			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(CustomTimeToDate(nAttribID));
 			TDCCADATA data;
 
 			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
@@ -1927,6 +1981,9 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 LRESULT CTDLTaskAttributeListCtrl::NotifyParentEdit(TDC_ATTRIBUTE nAttribID)
 {
 	UpdateWindow();
+
+	if (CustomTimeToDate(nAttribID))
+		nAttribID = CustomTimeToDate(nAttribID);
 
 	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, nAttribID);
 }
