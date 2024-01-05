@@ -123,8 +123,9 @@ protected:
 	afx_msg void OnTimePeriodChange();
 	afx_msg void OnSingleFileLinkChange();
 
+	afx_msg void OnComboKillFocus(UINT nCtrlID);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
-	afx_msg void OnComboEditCancel(UINT nCtrlID);
+// 	afx_msg void OnComboEditCancel(UINT nCtrlID);
 	afx_msg void OnComboEditChange(UINT nCtrlID);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);

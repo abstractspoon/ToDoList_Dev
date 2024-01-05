@@ -157,8 +157,9 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
 	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkChange)
 
+	ON_CONTROL_RANGE(CBN_KILLFOCUS, 0, 0xffff, OnComboKillFocus)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
-	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
+//	ON_CONTROL_RANGE(CBN_SELENDCANCEL, 0, 0xffff, OnComboEditCancel)
 	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
 
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
@@ -1852,18 +1853,19 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
-	SetFocus();
+	if (GetDlgItem(nCtrlID)->GetDlgItem(1001) == NULL)
+		HideControl(*GetDlgItem(nCtrlID));
+}
+
+void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
+{
 	HideControl(*GetDlgItem(nCtrlID));
 }
 
-void CTDLTaskAttributeListCtrl::OnComboEditCancel(UINT nCtrlID)
-{
-	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
-	CWnd* pCombo = GetDlgItem(nCtrlID);
-	HideControl(*pCombo);
-}
+// void CTDLTaskAttributeListCtrl::OnComboEditCancel(UINT nCtrlID)
+// {
+// 	HideControl(*GetDlgItem(nCtrlID));
+// }
 
 void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 {
