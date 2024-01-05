@@ -592,7 +592,9 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			BOOL bHasBtn = GetButtonRect(nItem, nCol, rButton);
 			
 			// fill cell
-			if (bSel && IsSelectionThemed(FALSE))
+			BOOL bIsEditing = (IsEditing() || IsChild(GetFocus()));
+
+			if (bSel && !bIsEditing && IsSelectionThemed(FALSE))
 			{
 				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
 				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
@@ -604,7 +606,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				if (m_bHorzGrid)
 					rBack.bottom--;
 
-				COLORREF crBack = GetItemBackColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
+				COLORREF crBack = GetItemBackColor(nItem, nCol, (bSel && !bIsEditing), FALSE, bListFocused);
 				pDC->FillSolidRect(rBack, crBack);
 			}
 
@@ -1401,6 +1403,8 @@ void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
 			rCell.top--;
 		break;
 	}
+
+//	rCell.bottom++; // To fully hide the selection rect
 }
 
 void CInputListCtrl::SetView(int nView)
@@ -1547,7 +1551,15 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 	CRect rWnd;
 	ctrl.GetClientRect(rWnd);
 
-	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height() - 2));
+	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)) ||
+		ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
+	{
+		rWnd.bottom -= 2;
+	}
+
+	rWnd.bottom--;
+
+	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height()));
 }
 
 CPopupEditCtrl* CInputListCtrl::GetEditControl()

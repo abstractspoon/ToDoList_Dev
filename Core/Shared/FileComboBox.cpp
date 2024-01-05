@@ -118,8 +118,13 @@ void CFileComboBox::OnPaint()
 		}
 	}
 
-	CRect rEdit = CDialogHelper::GetCtrlRect(this, 1001);
+	// Also clip out the edit field and its buttons
+	CRect rEdit = CDialogHelper::GetChildRect(&m_fileEdit);
 	dc.ExcludeClipRect(rEdit);
+
+	CRect rButtons = m_fileEdit.GetButtonsRect();
+	ScreenToClient(rButtons);
+	dc.ExcludeClipRect(rButtons);
 
 	// default painting
 	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);

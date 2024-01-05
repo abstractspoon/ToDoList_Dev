@@ -328,7 +328,13 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 		{
 			m_bFirstShow = FALSE; // in case we get here before OnNcPaint()
 		
-			lpncsp->rgrc[0].right -= GetButtonsWidth();
+			lpncsp->rgrc[0].right -= (GetButtonsWidth() + 1);
+
+			if (m_bParentIsCombo && (m_nBorderWidth == 0))
+			{
+				// Compensate for the fact that we will be rendering our buttons into the combo DC
+				lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
+			}
 
 // 			if (!m_bParentIsCombo)
 // 			{
@@ -812,8 +818,15 @@ int CEnEdit::GetButtonsWidth() const
 
  	// trim extra final spacing
 	if (m_nBorderWidth)
-	 	nWidth--;
-
+	{
+		nWidth--;
+	}
+	else if (m_bParentIsCombo)
+	{
+		// Compensate for the fact that we will be rendering our buttons into the combo DC
+		nWidth -= GetSystemMetrics(SM_CXEDGE);
+	}
+	
 	return nWidth;
 }
 
