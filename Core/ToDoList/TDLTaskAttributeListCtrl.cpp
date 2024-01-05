@@ -1828,45 +1828,41 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 
 			if (nCust != -1)
 			{
-				CString sAttribID = m_aCustomAttribDefs[nCust].sUniqueID;
-				TDCCADATA data;
-
-				if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+				if (m_aCustomAttribDefs[nCust].IsList())
 				{
-					if (m_aCustomAttribDefs[nCust].IsList())
+					// TODO
+				}
+				else
+				{
+					// Custom attributes not handled by the base class
+					switch (m_aCustomAttribDefs[nCust].GetDataType())
 					{
+					case TDCCA_STRING:
+					case TDCCA_FRACTION:
+					case TDCCA_INTEGER:
+					case TDCCA_DOUBLE:
+					case TDCCA_ICON:
+					case TDCCA_FILELINK:
 						// TODO
-					}
-					else
-					{
-						// Custom attributes not handled by the base class
-						switch (m_aCustomAttribDefs[nCust].GetDataType())
-						{
-						case TDCCA_STRING:
-						case TDCCA_FRACTION:
-						case TDCCA_INTEGER:
-						case TDCCA_DOUBLE:
-						case TDCCA_ICON:
-						case TDCCA_FILELINK:
-							// TODO
-							break;
+						break;
 
-						case TDCCA_CALCULATION:
-							// TODO
-							break;
+					case TDCCA_CALCULATION:
+						// TODO
+						break;
 
-						case TDCCA_TIMEPERIOD:
-							// TODO
-							break;
+					case TDCCA_TIMEPERIOD:
+						// TODO
+						break;
 
-						case TDCCA_DATE:
-							// TODO
-							break;
+					case TDCCA_DATE:
+						// TODO
+						break;
 
-						case TDCCA_BOOL:
-							// TODO
-							break;
-						}
+					case TDCCA_BOOL:
+						// Toggle checkbox
+						SetItemText(nRow, VALUE_COL, (sValue.IsEmpty() ? _T("+") : _T("")));
+						NotifyParentEdit(nAttribID);
+						break;
 					}
 				}
 			}

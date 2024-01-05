@@ -8943,10 +8943,11 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
-
-	
+		
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
+
+	BOOL bHandled = FALSE;
 	
 	switch (pDef->GetDataType())
 	{
@@ -8965,8 +8966,8 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 		
 			data.Set(true, nChar);
 		}
-		SetSelectedTaskCustomAttributeData(pDef->sUniqueID, data.AsString(), FALSE);
-		return TRUE; // handled
+		bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, data.AsString(), FALSE);
+		break;
 		
 	case TDCCA_ICON:
 		switch (pDef->GetListType())
@@ -8979,8 +8980,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 				
 				if (sTag.IsEmpty() || pDef->DecodeImageTag(sTag, sImage, sDummy))
 				{
-					SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sImage, FALSE);
-					return TRUE; // handled
+					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sImage, FALSE);
 				}
 			}
 			break;
@@ -8995,8 +8995,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 				
 				if (dialog.DoModal() == IDOK)
 				{
-					SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName(), FALSE);
-					return TRUE; // handled
+					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName(), FALSE);
 				}
 			}
 			break;
@@ -9010,13 +9009,15 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 			BOOL bNext = (!Misc::IsKeyPressed(VK_SHIFT));
 			CString sItem = pDef->GetNextListItem(data.AsString(), bNext);
 			
-			SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sItem, FALSE);
-			return TRUE; // handled
+			bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sItem, FALSE);
 		}
 		break;
 	}
 
-	return FALSE; // not handled
+	if (bHandled)
+		m_lcAttributes.RefreshSelectedTaskValue(pDef->GetAttributeID());
+
+	return bHandled;
 }
 
 void CToDoCtrl::ToggleTimeTracking(HTREEITEM hti)
