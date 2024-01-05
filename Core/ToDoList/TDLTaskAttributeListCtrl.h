@@ -154,6 +154,8 @@ protected:
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
+	TDC_ATTRIBUTE MapCustomDateToTime(TDC_ATTRIBUTE nDateAttribID) const;
+	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
@@ -163,7 +165,7 @@ protected:
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
-
+	
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
@@ -173,8 +175,6 @@ protected:
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
-	static TDC_ATTRIBUTE CustomDateToTime(TDC_ATTRIBUTE nDateAttribID);
-	static TDC_ATTRIBUTE CustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 };
 
