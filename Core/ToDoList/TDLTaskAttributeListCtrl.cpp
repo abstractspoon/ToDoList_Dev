@@ -1090,40 +1090,48 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 				GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
 
-				if (pDef->IsMultiList())
+				switch (pDef->GetDataType())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, '|');
-
-					switch (pDef->GetDataType())
+				case TDCCA_ICON:
+					if (pDef->IsMultiList())
 					{
-					case TDCCA_ICON:
+						CString sMatched(sText), sUnused;
+						Misc::Split(sMatched, sUnused, '|');
+
+						CStringArray aIcons;
+						int nNumIcons = Misc::Split(sMatched, aIcons);
+
+						CRect rIcon(rText);
+
+						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 						{
-							CStringArray aIcons;
-							int nNumIcons = Misc::Split(sMatched, aIcons);
-
-							CRect rIcon(rText);
-
-							for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
-							{
-								if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
-									rIcon.left += (ICON_SIZE + 2);
-							}
+							if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
+								rIcon.left += (ICON_SIZE + 2);
 						}
-						break;
-
-					default:
-						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
-						break;
 					}
-					
+					else
+					{
+						DrawIcon(pDC, sText, rText, FALSE);
+					}
 					return;
+
+				default:
+					if (pDef->IsMultiList())
+					{
+						CString sMatched(sText), sUnused;
+						Misc::Split(sMatched, sUnused, '|');
+
+						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+						return;
+					}
+					break;
 				}
 			}
 			break;
 		}
 	}
 
+	// All else
 	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
