@@ -20,7 +20,7 @@ class CTDLIconComboBox : public CEnCheckComboBox
 
 // Construction
 public:
-	CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel, BOOL bFilter);
+	CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel = FALSE, BOOL bFilter = FALSE);
 
 	int SelectImage(const CString& sImage);
 	CString GetSelectedImage() const;

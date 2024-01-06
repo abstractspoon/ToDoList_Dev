@@ -11,6 +11,7 @@
 #include "TDLPriorityComboBox.h"
 #include "TDLRiskComboBox.h"
 #include "tdltaskdependencyedit.h"
+#include "TDLIconComboBox.h"
 
 #include "..\shared\InputListCtrl.h"
 #include "..\shared\AutoComboBox.h"
@@ -105,6 +106,7 @@ protected:
 	CTimeEdit m_eTimePeriod;
 	CFileComboBox m_cbMultiFileLink;
 	CFileEdit m_eSingleFileLink;
+	CTDLIconComboBox m_cbCustomIcons;
 
 	static CIcon s_iconTrackTime, s_iconAddTime, s_iconLink, s_iconBrowse, s_iconApp;
 
@@ -169,7 +171,7 @@ protected:
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
-	void PrepareTimeCombo(int nRow);
+	void PrepareTimeOfDayCombo(int nRow);
 	void PrepareTimePeriodEdit(int nRow);
 
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);

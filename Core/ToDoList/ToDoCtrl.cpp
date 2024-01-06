@@ -8815,7 +8815,9 @@ LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 
 LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 {
-	switch ((TDC_ATTRIBUTE)wParam)
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)wParam;
+
+	switch (nAttribID)
 	{
 	case TDCA_COLOR:
 		return EditSelectedTaskColor();
@@ -8828,6 +8830,23 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 
 	case TDCA_RECURRENCE:
 		return EditSelectedTaskRecurrence();
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, 0L);
+
+			if (!pDef->IsList())
+			{
+				switch (pDef->GetDataType())
+				{
+				case TDCCA_ICON:
+					HandleCustomColumnClick(pDef->GetColumnID());
+					return 1L;
+				}
+			}
+		}
 	}
 
 	// All else
