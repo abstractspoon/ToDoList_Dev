@@ -470,7 +470,7 @@ CString CTDLTaskCtrlBase::GetTaskCustomColumnTooltip(const TODOITEM* pTDI, TDC_C
 	CString sTooltip;
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, sTooltip);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, sTooltip);
 
 	ASSERT(pDef->bEnabled);
 
@@ -1126,7 +1126,7 @@ CString CTDLTaskCtrlBase::GetColumnName(TDC_COLUMN nColID) const
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, EMPTY_STR);
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, EMPTY_STR);
 
 		return pDef->sLabel;
 	}
@@ -1602,7 +1602,7 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 	else if (sort.IsSortingByCustom())
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(m_aCustomAttribDefs, sort.nBy, pDef, 0); // this can still fail
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, sort.nBy, pDef, 0); // this can still fail
 
 		return m_comparer.CompareTasks(dwTaskID1, dwTaskID2, *pDef, sort.bAscending);
 	}
@@ -3291,7 +3291,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	}
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
 
 	if (!pDef->bEnabled)
 		return TRUE;
@@ -3983,7 +3983,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 			if (!bDrawing)
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, EMPTY_STR);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, EMPTY_STR);
 
 				switch (pDef->GetDataType())
 				{
@@ -4731,7 +4731,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			if (!bLocked && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
 
 				switch (pDef->GetDataType())
 				{
@@ -4775,7 +4775,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
 
 			switch (pDef->GetDataType())
 			{
@@ -5582,7 +5582,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 	}
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, 0);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, 0);
 	
 	if (!pDef->bEnabled)
 		return 0; // hidden
@@ -6398,7 +6398,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 	if (nSelCount)
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(m_aCustomAttribDefs, sAttribID, pDef, FALSE);
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, sAttribID, pDef, FALSE);
 		
 		// Multi-selection check lists need special handling
 		if (pDef->IsMultiList())

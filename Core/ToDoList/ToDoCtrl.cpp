@@ -1324,7 +1324,7 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_ALT(m_aCustomAttribDefs, ctrl.nAttrib, pDef, break);
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, ctrl.nAttrib, pDef, break);
 
 			if (pDef->IsList())
 			{
@@ -8942,7 +8942,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 		return FALSE;
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
 		
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
@@ -12841,7 +12841,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_AT
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pToDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
 
 	if (!CanCopyAttributeValue(nFromAttrib, *pToDef))
 		return FALSE;
@@ -12875,7 +12875,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pFromDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
 
 	if (!CanCopyAttributeValue(*pFromDef, nToAttrib))
 		return FALSE;

@@ -65,7 +65,7 @@ BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCu
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_ALT(aCustAttribDefs, nColID, pDef, continue);
+			GET_CUSTDEF_ALT(aCustAttribDefs, nColID, pDef, continue);
 
 			if (!IsSupportedColumn(*pDef))
 				continue;

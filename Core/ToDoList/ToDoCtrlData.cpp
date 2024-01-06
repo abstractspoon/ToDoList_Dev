@@ -126,7 +126,7 @@ BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttribID) const
 			m_mapParentAttribs.Has(TDCA_CUSTOMATTRIB))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 			return pDef->HasFeature(TDCCAF_INHERITPARENTCHANGES);
 		}
@@ -1905,7 +1905,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 				if (pDef->HasFeature(TDCCAF_INHERITPARENTCHANGES))
 				{
@@ -2035,7 +2035,7 @@ TDC_SET CToDoCtrlData::SetTaskLock(DWORD dwTaskID, BOOL bLocked)
 TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_DEF_RET(m_aCustomAttribDefs, sAttribID, pDef, SET_FAILED);
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, sAttribID, pDef, SET_FAILED);
 
 
 	TODOITEM* pTDI = NULL;

@@ -589,7 +589,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				ASSERT (!sUniqueID.IsEmpty());
 
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_DEF_ALT(query.aAttribDefs, sUniqueID, pDef, break);
+				GET_CUSTDEF_ALT(query.aAttribDefs, sUniqueID, pDef, break);
 				
 				TDCCADATA data;
 				pTDI->GetCustomAttributeValue(sUniqueID, data);
@@ -1872,7 +1872,7 @@ BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_data.m_aCustomAttribDefs, nAttribID, pDef, FALSE);
+			GET_CUSTDEF_RET(m_data.m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 			return pDef->IsAggregated();
 		}

@@ -301,7 +301,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_DEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
+						GET_CUSTDEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
 
 						if (pDef->IsList())
 						{
@@ -379,7 +379,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					if (!bBrowse)
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_DEF_ALT(m_aAttribDefs, rule.GetAttribute(), pDef, return);
+						GET_CUSTDEF_ALT(m_aAttribDefs, rule.GetAttribute(), pDef, return);
 
 						bBrowse = !pDef->IsList();
 					}
@@ -467,7 +467,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
 				{
 					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_DEF_RET(m_aAttribDefs, nAttribID, pDef, ILCT_BROWSE);
+					GET_CUSTDEF_RET(m_aAttribDefs, nAttribID, pDef, ILCT_BROWSE);
 
 					if (pDef->IsList())
 						return ILCT_DROPLIST;
@@ -502,7 +502,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_DEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
+						GET_CUSTDEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
 
 						if (pDef->IsList())
 							return ILCT_DROPLIST;
@@ -872,7 +872,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		else if (&ctrl == &m_cbCustomIcons)
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_ALT(m_aAttribDefs, rule.GetAttribute(), pDef, return);
+			GET_CUSTDEF_ALT(m_aAttribDefs, rule.GetAttribute(), pDef, return);
 
 			ASSERT(pDef->IsList());
 

@@ -1237,7 +1237,7 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 	if (!pBuddy)
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(aAttribDefs, ctrl.sAttribID, pDef, NULL);
+		GET_CUSTDEF_RET(aAttribDefs, ctrl.sAttribID, pDef, NULL);
 
 		pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent), 
 									 *pDef,
@@ -1626,7 +1626,7 @@ BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTR
 
 	// search attribute defs for unique ID
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_DEF_RET(aAttribDefs, ctrl.sAttribID, pDef, FALSE);
+	GET_CUSTDEF_RET(aAttribDefs, ctrl.sAttribID, pDef, FALSE);
 	
 	dwDataType = pDef->GetDataType();
 	dwListType = pDef->GetListType();

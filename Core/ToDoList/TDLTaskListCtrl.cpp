@@ -479,7 +479,7 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) co
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nGroupBy))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, nGroupBy, pDef, FALSE);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nGroupBy, pDef, FALSE);
 
 			return (pDef->bEnabled && pDef->IsDataType(TDCCA_STRING));
 		}
@@ -622,7 +622,7 @@ BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, FALSE);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, FALSE);
 			
 			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 			CString sData = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
@@ -669,7 +669,7 @@ CString CTDLTaskListCtrl::GetTaskGroupValue(DWORD dwTaskID) const
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, sGroupBy);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, sGroupBy);
 
 				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 				sGroupBy = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
@@ -725,7 +725,7 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, _T(""));
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, _T(""));
 		
 		return pDef->sLabel;
 	}
