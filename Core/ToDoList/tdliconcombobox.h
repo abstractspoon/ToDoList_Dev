@@ -29,6 +29,7 @@ public:
 	int GetItems(CStringArray& aItems) const; 
 
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	BOOL SetChecked(const CStringArray& aItems);
 	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 

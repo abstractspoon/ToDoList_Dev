@@ -7229,7 +7229,7 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTask
 
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
-	ASSERT(aModTaskIDs.GetSize());
+	ASSERT(aModTaskIDs.GetSize() || mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIBDEFS));
 
 	if (IsReadOnly())
 		return;

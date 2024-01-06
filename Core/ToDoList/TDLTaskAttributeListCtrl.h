@@ -168,8 +168,8 @@ protected:
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
 	
-	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
-	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues);
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CCheckComboBox& combo);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CAutoComboBox& combo);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeOfDayCombo(int nRow);
 	void PrepareTimePeriodEdit(int nRow);

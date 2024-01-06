@@ -1028,7 +1028,7 @@ BOOL CInputListCtrl::CanEditSelectedCell() const
 	if (!GetCurSel(nSelRow, nSelCol))
 		return FALSE;
 
-	return CanEditCell(nSelCol, nSelCol);
+	return CanEditCell(nSelRow, nSelCol);
 }
 
 void CInputListCtrl::EditSelectedCell()
@@ -1404,7 +1404,7 @@ void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
 		break;
 	}
 
-//	rCell.bottom++; // To fully hide the selection rect
+	rCell.bottom++; // To fully hide the selection rect
 }
 
 void CInputListCtrl::SetView(int nView)
@@ -1557,6 +1557,8 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 		rWnd.bottom -= 2;
 	}
 
+	// To compensate for later adding '1' in GetCellEditRect
+	// to fully hide the selection rect
 	rWnd.bottom--;
 
 	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height()));
