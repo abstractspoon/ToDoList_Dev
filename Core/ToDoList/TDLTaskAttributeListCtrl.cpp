@@ -1428,8 +1428,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_RECURRENCE:
 	case TDCA_TASKNAME:
 	case TDCA_EXTERNALID: 
-		// Nothing to do
-		break;
+		break; // Nothing to do
 
 	case TDCA_PERCENT:
 		m_editBox.SetMask(_T("0123456789"));
@@ -1501,39 +1500,60 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
 
-			CString sAttribID = pDef->sUniqueID;
 			TDCCADATA data;
+			m_taskCtrl.GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
 
-			if (m_taskCtrl.GetSelectedTaskCustomAttributeData(sAttribID, data))
+			if (pDef->IsList())
 			{
-				if (pDef->IsList())
+				switch (pDef->GetDataType())
 				{
-					// TODO
+				case TDCCA_STRING:
+				case TDCCA_FRACTION:
+				case TDCCA_INTEGER:
+				case TDCCA_DOUBLE:
+					break;
+
+				case TDCCA_ICON:
+					m_cbCustomIcons.EnableMultiSelection(pDef->IsMultiList());
+					break;
+
+				case TDCCA_BOOL:
+				case TDCCA_FILELINK:
+				case TDCCA_CALCULATION:
+					break; // Not supported
+
+				case TDCCA_TIMEPERIOD:
+					PrepareTimePeriodEdit(nRow);
+					break;
+
+				case TDCCA_DATE:
+					PrepareDatePicker(nRow, TDCA_NONE);
+					break;
 				}
-				else
+			}
+			else
+			{
+				switch (pDef->GetDataType())
 				{
-					switch (pDef->GetDataType())
-					{
-					case TDCCA_STRING:
-					case TDCCA_FRACTION:
-					case TDCCA_INTEGER:
-					case TDCCA_DOUBLE:
-					case TDCCA_ICON:
-					case TDCCA_FILELINK:
-					case TDCCA_BOOL:
-						break; // Nothing further to do
+				case TDCCA_STRING:
+				case TDCCA_FRACTION:
+				case TDCCA_INTEGER:
+				case TDCCA_DOUBLE:
+				case TDCCA_ICON:
+				case TDCCA_FILELINK:
+				case TDCCA_BOOL:
+					break; // Nothing further to do
 
-					case TDCCA_CALCULATION:
-						break; // Not editable
+				case TDCCA_CALCULATION:
+					break; // Not editable
 
-					case TDCCA_TIMEPERIOD:
-						PrepareTimePeriodEdit(nRow);
-						break;
+				case TDCCA_TIMEPERIOD:
+					PrepareTimePeriodEdit(nRow);
+					break;
 
-					case TDCCA_DATE:
-						PrepareDatePicker(nRow, TDCA_NONE);
-						break;
-					}
+				case TDCCA_DATE:
+					PrepareDatePicker(nRow, TDCA_NONE);
+					break;
 				}
 			}
 		}

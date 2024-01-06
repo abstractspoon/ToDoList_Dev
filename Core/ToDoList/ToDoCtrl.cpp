@@ -8835,16 +8835,17 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, nAttribID, pDef, 0L);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, 0L);
 
-			if (!pDef->IsList())
+			switch (pDef->GetDataType())
 			{
-				switch (pDef->GetDataType())
+			case TDCCA_ICON:
+				if (!pDef->IsList())
 				{
-				case TDCCA_ICON:
 					HandleCustomColumnClick(pDef->GetColumnID());
 					return 1L;
 				}
+				break;
 			}
 		}
 	}
