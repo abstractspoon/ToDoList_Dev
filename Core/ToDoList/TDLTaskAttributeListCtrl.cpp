@@ -505,12 +505,12 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	if (!IsWindowEnabled() || (nCol == ATTRIB_COL) || m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	if (m_taskCtrl.SelectionHasLocked())
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	if (m_taskCtrl.SelectionHasLocked() && (nAttribID != TDCA_LOCK))
 		return FALSE;
 
 	// else
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
 	switch (nAttribID)
 	{
 	case TDCA_CREATEDBY:

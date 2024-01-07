@@ -746,11 +746,11 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 }
 
-void CInputListCtrl::DrawCellText(CDC* pDC, int /*nRow*/, int /*nCol*/, 
+void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, 
 									const CRect& rText, const CString& sText, 
 									COLORREF crText, UINT nDrawTextFlags)
 {
-	if (!sText.IsEmpty())
+	if (!sText.IsEmpty() && (GetCellType(nRow, nCol) != ILCT_CHECK))
 	{
 		pDC->SetTextColor(crText);
 		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
@@ -780,18 +780,13 @@ DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 
 BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected)
 {
-	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
-
-	if (nType == ILCT_TEXT || !CanEditCell(nRow, nCol))
-		return FALSE;
-
 	if (!GetButtonRect(nRow, nCol, rButton))
 		return FALSE;
 
 	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
 	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
 
-	switch (nType)
+	switch (GetCellType(nRow, nCol))
 	{
 		case ILCT_DATE:
 			if (CThemed::AreControlsThemed())
@@ -803,7 +798,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 				CThemed th;
 				th.Open(this, _T("DATEPICKER"));
 
-				th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, DPSCBR_NORMAL, rButton);
+				th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, (bEnabled ? DPSCBR_NORMAL : DPSCBR_DISABLED), rButton);
 			}
 			else
 			{
@@ -865,10 +860,6 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	rButton.SetRectEmpty();
 
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
-
-	if (nType == ILCT_TEXT || !CanEditCell(nRow, nCol))
-		return FALSE;
-	
 	GetCellRect(nRow, nCol, rButton);
 
 	switch (nType)
@@ -979,8 +970,7 @@ BOOL CInputListCtrl::IsEditing() const
 
 BOOL CInputListCtrl::IsButtonEnabled(int nRow, int nCol) const
 {
-	// NOT if readonly or disabled
-	return (!IsReadOnly() && IsWindowEnabled());
+	return CanEditCell(nRow, nCol);
 }
 
 BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
