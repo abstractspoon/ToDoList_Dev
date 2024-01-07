@@ -126,7 +126,6 @@ protected:
 
 	afx_msg void OnComboKillFocus(UINT nCtrlID);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
-// 	afx_msg void OnComboEditCancel(UINT nCtrlID);
 	afx_msg void OnComboEditChange(UINT nCtrlID);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
@@ -165,6 +164,7 @@ protected:
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
+	CString GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nAttribID) const;
 	
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

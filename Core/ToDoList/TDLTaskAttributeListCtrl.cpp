@@ -835,13 +835,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		}
 		break;
 
-	case TDCA_TASKNAME:			break; // TODO
-	case TDCA_CREATEDBY:		break; // TODO
-	case TDCA_COMMENTSSIZE:		break; // TODO
-	case TDCA_COMMENTSFORMAT:	break; // TODO
-	case TDCA_SUBTASKDONE:		break; // TODO
-	case TDCA_LASTMODBY:		break; // TODO
-
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
@@ -905,6 +898,10 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 				sValue = CTimeHelper::FormatClockTime(data.AsDate(), FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			}
 		}
+		else
+		{
+			sValue = GetSelectedTaskReadOnlyValue(nAttribID);
+		}
 		break;
 	}
 
@@ -912,6 +909,52 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		sValue = FormatMultiSelItems(aMatched, aMixed);
 
 	SetItemText(nRow, VALUE_COL, sValue);
+}
+
+CString CTDLTaskAttributeListCtrl::GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nAttribID) const
+{
+	CDWordArray aSelTaskIDs;
+	int nNumSel = m_taskCtrl.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+	if (!nNumSel)
+		return _T("");
+
+	// Get the first item as the default
+	CString sFirst;
+
+	switch (nAttribID)
+	{
+	case TDCA_TASKNAME:			sFirst = m_data.GetTaskTitle(aSelTaskIDs[0]); break;
+	case TDCA_CREATEDBY:		sFirst = m_data.GetTaskCreatedBy(aSelTaskIDs[0]); break;
+	case TDCA_LASTMODBY:		sFirst = m_data.GetTaskLastModifiedBy(aSelTaskIDs[0]); break;
+
+	case TDCA_COMMENTSSIZE:		sFirst = m_formatter.GetTaskCommentSize(aSelTaskIDs[0]); break;
+	case TDCA_COMMENTSFORMAT:	sFirst = m_formatter.GetTaskCommentFormat(aSelTaskIDs[0]); break;
+	case TDCA_SUBTASKDONE:		sFirst = m_formatter.GetTaskSubtaskCompletion(aSelTaskIDs[0]); break;
+	}
+
+	// Compare that to subsequent values
+	for (int nSel = 1; nSel < nNumSel; nSel++)
+	{
+		DWORD dwTaskID = aSelTaskIDs[nSel];
+		CString sNext;
+
+		switch (nAttribID)
+		{
+		case TDCA_TASKNAME:			sNext = m_data.GetTaskTitle(dwTaskID); break;
+		case TDCA_CREATEDBY:		sNext = m_data.GetTaskCreatedBy(dwTaskID); break;
+		case TDCA_LASTMODBY:		sNext = m_data.GetTaskLastModifiedBy(dwTaskID); break;
+
+		case TDCA_COMMENTSSIZE:		sNext = m_formatter.GetTaskCommentSize(dwTaskID); break;
+		case TDCA_COMMENTSFORMAT:	sNext = m_formatter.GetTaskCommentFormat(dwTaskID); break;
+		case TDCA_SUBTASKDONE:		sNext = m_formatter.GetTaskSubtaskCompletion(dwTaskID); break;
+		}
+
+		if (sNext != sFirst)
+			return _T("");
+	}
+
+	return sFirst;
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
