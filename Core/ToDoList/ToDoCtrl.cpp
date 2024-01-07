@@ -2187,6 +2187,10 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		}
 		break;
 		
+	case TDCA_FLAG:
+		SetSelectedTaskFlag(m_lcAttributes.GetFlag());
+		break;
+
 	case TDCA_LOCK:
 		SetSelectedTaskLock(m_lcAttributes.GetLock());
 		break;
