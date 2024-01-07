@@ -1057,6 +1057,11 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			DrawIcon(pDC, sText, rText, FALSE);
 			return;
 
+		case TDCA_COST:
+			if (!sText.IsEmpty())
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, Misc::FormatCost(_ttof(sText)), crText, nDrawTextFlags);
+			return;
+
 		case TDCA_COLOR:
 			{
 				crText = _ttoi(sText);
