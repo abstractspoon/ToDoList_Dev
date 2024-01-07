@@ -225,7 +225,7 @@ void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	if (nCol != -1 && nItem != -1 && !IsReadOnly())
 	{
 		// dont edit if editing is disabled
-		if (IsColumnEditingDisabled(nCol))
+		if (!IsColumnEditingEnabled(nCol))
 			return;
 
 		// dont edit if both autorowadding and autocoladding are enabled and we're in
@@ -343,25 +343,20 @@ LRESULT CInputListCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 	return 0L;
 }
 
-void CInputListCtrl::DisableColumnEditing(int nCol, BOOL bDisable)
+void CInputListCtrl::EnableColumnEditing(int nCol, BOOL bEnable)
 {
+	// Adds a new item if necessary
 	CColumnData2* pData = (CColumnData2*)CreateColumnData(nCol);
 
-	// add a new item if necessary
 	if (pData)
-		pData->bEditEnabled = !bDisable;
+		pData->bEditEnabled = bEnable;
 }
 
-BOOL CInputListCtrl::IsColumnEditingDisabled(int nCol) const
+BOOL CInputListCtrl::IsColumnEditingEnabled(int nCol) const
 {
 	const CColumnData2* pData = GetColumnData(nCol);
 
-	// add a new item if necessary
-	if (pData)
-		return !pData->bEditEnabled;
-
-	// else
-	return FALSE;
+	return (pData ? pData->bEditEnabled : TRUE);
 }
 
 void CInputListCtrl::AutoAdd(BOOL bRows, BOOL bCols)
@@ -859,6 +854,9 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 {
 	rButton.SetRectEmpty();
 
+	if (!IsColumnEditingEnabled(nCol))
+		return FALSE;
+
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
 	GetCellRect(nRow, nCol, rButton);
 
@@ -883,8 +881,11 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 		rButton.right = (rButton.left + BTN_WIDTH);
 		break;
 
+	case ILCT_TEXT:
+		return FALSE;
+
 	default:
-		rButton.SetRectEmpty();
+		ASSERT(0);
 		return FALSE;
 	}
 
@@ -985,7 +986,7 @@ BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 	// don't edit it:
 	//
 	// if editing is disabled in the current column
-	if (IsColumnEditingDisabled(nCol))
+	if (!IsColumnEditingEnabled(nCol))
 		return FALSE;
 	
 	// or if its the last row and not the first column when autoadding rows
@@ -1839,9 +1840,7 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 
 COLORREF CInputListCtrl::GetItemBackColor(int nItem, int /*nCol*/, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	BOOL bIsPrompt = IsPrompt(nItem, 0);
-
-	if (bIsPrompt)
+	if (IsPrompt(nItem, 0))
 		return CEnListCtrl::GetItemBackColor(0, bSelected, bDropHighlighted, bWndFocus);
 
 	// else

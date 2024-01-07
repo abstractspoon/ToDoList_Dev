@@ -49,12 +49,8 @@ public:
 	CInputListCtrl();
 	virtual ~CInputListCtrl();
 
-	void DisableColumnEditing(int nCol, BOOL bDisable);
-	BOOL IsColumnEditingDisabled(int nCol) const;
 	void AutoAdd(BOOL bRows, BOOL bCols);
-	void SetAutoColumnWidth(int nWidth);
 	void SetAutoRowPrompt(const CString& sPrompt);
-	void SetAutoColPrompt(const CString& sPrompt);
 	BOOL CanEditSelectedCell() const;
 	void EditSelectedCell();
 	virtual BOOL CanDeleteSelectedCell() const;
@@ -71,12 +67,18 @@ public:
 	int AddRow(const CString& sRowText, int nImage = -1);
 	int AddCol(const CString& sColText, int nWidth = -1, IL_COLUMNTYPE nColType = ILCT_TEXT);
 	void SetView(int nView);
-	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
-	IL_COLUMNTYPE GetColumnType(int nCol) const;
 	void SetEditMask(LPCTSTR szMask, DWORD dwFlags = 0);
 	void SetReadOnly(BOOL bReadOnly);
 	void EndEdit();
 	void RedrawCell(int nRow, int nCol, BOOL bErase = TRUE);
+
+	// column methods
+	void EnableColumnEditing(int nCol, BOOL bEnable);
+	BOOL IsColumnEditingEnabled(int nCol) const;
+	void SetAutoColumnWidth(int nWidth);
+	void SetAutoColPrompt(const CString& sPrompt);
+	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
+	IL_COLUMNTYPE GetColumnType(int nCol) const;
 
 protected:
 	int m_nItemLastSelected;

@@ -50,7 +50,7 @@ public:
 	void SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
 
-	void RefreshSelectedTaskValues(BOOL bForceClear = FALSE);
+	void RefreshSelectedTaskValues(BOOL bHasSelection = TRUE);
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 	void RefreshCompletionStatus();

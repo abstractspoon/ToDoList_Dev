@@ -1824,13 +1824,12 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		hti = GetUpdateControlsItem();
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
-	int nSelCount = GetSelectedTaskCount();
 
-	// TODO
-	m_lcAttributes.RefreshSelectedTaskValues(hti == NULL);
+	m_lcAttributes.RefreshSelectedTaskValues(hti != NULL);
 
 	if (hti)
 	{
+		int nSelCount = GetSelectedTaskCount();
 		DWORD dwTaskID = GetTrueTaskID(hti); 
 
 		BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);

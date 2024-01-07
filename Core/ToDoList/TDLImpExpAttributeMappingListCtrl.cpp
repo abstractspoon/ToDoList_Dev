@@ -114,7 +114,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		InsertColumn(IMPORT_COLUMNID, CEnString(IDS_CSV_MAPSTOATTRIBUTE));
 
 		SetColumnType(IMPORT_COLUMNNAME, ILCT_TEXT);
-		DisableColumnEditing(IMPORT_COLUMNNAME, TRUE);
+		EnableColumnEditing(IMPORT_COLUMNNAME, FALSE);
 		SetColumnType(IMPORT_COLUMNID, ILCT_DROPLIST);
 	}
 	else // export
@@ -123,7 +123,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		InsertColumn(EXPORT_COLUMNNAME, CEnString(IDS_CSV_MAPSTOCOLUMNNAME));
 
 		SetColumnType(EXPORT_COLUMNID, ILCT_TEXT);
-		DisableColumnEditing(EXPORT_COLUMNID, TRUE);
+		EnableColumnEditing(EXPORT_COLUMNID, FALSE);
 		SetColumnType(EXPORT_COLUMNNAME, ILCT_TEXT);
 	}
 

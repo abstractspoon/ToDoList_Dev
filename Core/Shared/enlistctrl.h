@@ -84,15 +84,12 @@ public:
 	void SetView(int nView);
 	int GetView() const { return m_nCurView; }
 	int GetFocusedItem() const;
-	void SetLastColumnStretchy(BOOL bStretchy);
-	void SetFirstColumnStretchy(BOOL bStretchy);
 	int FindItemFromData(DWORD dwItemData) const;
 	int FindItemFromLabel(CString sLabel, BOOL bExact = TRUE, int nFromIndex = 0) const;
 	void EnableTooltipCtrl(BOOL bEnable);
 	BOOL SetTooltipCtrlText(CString sText);
 	BOOL SetMinItemHeight(int nHeight);
 	int GetMinItemHeight() const { return m_nMinItemHeight; }
-	void DeleteAllColumns();
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL IsReadOnly() const { return m_bReadOnly; }
 	BOOL SelectDropTarget(int nItem);
@@ -118,6 +115,9 @@ public:
 	void SetColumnFormat(int nCol, int nFormat);
 	int GetColumnFormat(int nCol) const;
 	BOOL SetColumnText(int nCol, LPCTSTR szText);
+	void DeleteAllColumns();
+	void SetLastColumnStretchy(BOOL bStretchy);
+	void SetFirstColumnStretchy(BOOL bStretchy);
 
 	void OverrideSelectionTheming(BOOL bThemed, BOOL bClassic) { m_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
 	static void EnableSelectionTheming(BOOL bThemed, BOOL bClassic) { s_dwSelectionTheming = MAKELONG(bThemed, bClassic); }

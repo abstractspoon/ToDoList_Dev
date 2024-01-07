@@ -503,7 +503,13 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	if (!IsWindowEnabled() || (nCol == ATTRIB_COL) || m_data.HasStyle(TDCS_READONLY))
+	if (nCol != VALUE_COL)
+		return FALSE;
+	
+	if (m_data.HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	if (!CInputListCtrl::CanEditCell(nRow, nCol))
 		return FALSE;
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
@@ -627,7 +633,7 @@ void CTDLTaskAttributeListCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIB
 	tld.Copy(m_tldAll, nAttribID);
 }
 
-void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
+void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bHasSelection)
 {
 	CHoldRedraw hr(*this);
 	HideAllControls();
@@ -636,11 +642,13 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues(BOOL bForceClear)
 
 	while (nRow--)
 	{
-		if (bForceClear)
-			SetItemText(nRow, VALUE_COL, _T(""));
-		else
+		if (bHasSelection)
 			RefreshSelectedTaskValue(nRow);
+		else
+			SetItemText(nRow, VALUE_COL, _T(""));
 	}
+
+	EnableColumnEditing(VALUE_COL, bHasSelection);
 }
 
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID)
