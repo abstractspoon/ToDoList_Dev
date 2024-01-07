@@ -165,6 +165,7 @@ protected:
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
 	CString GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nAttribID) const;
+	CString GetCellPrompt(int nRow) const;
 	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
 	
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

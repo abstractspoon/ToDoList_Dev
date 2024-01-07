@@ -15,6 +15,7 @@
 #include "..\shared\Localizer.h"
 #include "..\shared\encolordialog.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\WndPrompt.h"
 
 #include "..\3rdParty\ColorDef.h"
 
@@ -971,7 +972,6 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton
 		rButton.left -= 2; // To compensate for the inflation when drawing
 
 	return TRUE;
-
 }
 
 BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected)
@@ -1006,11 +1006,48 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& 
 	return TRUE;
 }
 
+CString CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow) const
+{
+	CEnString sPrompt;
+
+	if (CanEditCell(nRow, VALUE_COL))
+	{
+		switch (m_taskCtrl.GetSelectedCount())
+		{
+		case 0:
+			break; // No prompt
+
+		case 1:
+			// TODO
+			sPrompt = _T("<empty>");
+			break;
+
+		case 2:
+			// TODO
+			sPrompt = _T("<varies>");
+			break;
+		}
+	}
+
+	return sPrompt;
+}
+
 void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
 	// Only draw what we really need to
 	if (nCol == VALUE_COL)
 	{
+		if (sText.IsEmpty() && (GetCellType(nRow, nCol) != ILCT_CHECK))
+		{
+			CString sPrompt = GetCellPrompt(nRow);
+
+			if (!sPrompt.IsEmpty())
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags);
+
+			return;
+		}
+
+		// else attributes requiring custom rendering
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 		switch (nAttribID)
@@ -1058,8 +1095,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			return;
 
 		case TDCA_COST:
-			if (!sText.IsEmpty())
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, Misc::FormatCost(_ttof(sText)), crText, nDrawTextFlags);
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, Misc::FormatCost(_ttof(sText)), crText, nDrawTextFlags);
 			return;
 
 		case TDCA_COLOR:
@@ -1094,12 +1130,10 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText.Left(nMixed), crText, nDrawTextFlags);
 					return;
 				}
-				// else do default
 			}
 			break;
 
 		case TDCA_FILELINK:
-			if (!sText.IsEmpty())
 			{
 				CStringArray aFiles;
 				int nNumFiles = Misc::Split(sText, aFiles);
