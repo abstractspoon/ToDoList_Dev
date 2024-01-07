@@ -479,21 +479,13 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 			case TDCCA_FRACTION:
 			case TDCCA_INTEGER:
 			case TDCCA_DOUBLE:
-			case TDCCA_CALCULATION:
-				return ILCT_TEXT;
+			case TDCCA_CALCULATION:	return ILCT_TEXT;
 
-			case TDCCA_TIMEPERIOD:
-				return ILCT_POPUPMENU;
-
-			case TDCCA_DATE:
-				return ILCT_DATE;
-
-			case TDCCA_BOOL:
-				return ILCT_CHECK;
-
-			case TDCCA_ICON:
-			case TDCCA_FILELINK:
-				return ILCT_BROWSE;
+			case TDCCA_TIMEPERIOD:	return ILCT_POPUPMENU;
+			case TDCCA_DATE:		return ILCT_DATE;
+			case TDCCA_BOOL:		return ILCT_CHECK;
+			case TDCCA_ICON:		return ILCT_BROWSE;
+			case TDCCA_FILELINK:	return ILCT_CUSTOMBTN;
 			}
 		}
 		else if (IsCustomTime(nAttribID))
@@ -960,19 +952,23 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton
 
 	// 'File Link' browse icon button
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	BOOL bHasFileIcon = FALSE;
 
 	switch (nAttribID)
 	{
 	case TDCA_FILELINK:
-		if (GetItemText(nRow, nCol).IsEmpty())
-			rButton.left -= 2; // To compensate for the inflation when drawing
+		bHasFileIcon = GetItemText(nRow, nCol).IsEmpty();
+
 		break;
 
 	default:
-		// Custom File Link Attributes
-		// TODO
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			bHasFileIcon = (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_FILELINK);
 		break;
 	}
+
+	if (bHasFileIcon)
+		rButton.left -= 2; // To compensate for the inflation when drawing
 
 	return TRUE;
 
@@ -985,23 +981,26 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& 
 
 	// Draw 'File Link' browse icon
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	BOOL bWantFileIcon = FALSE;
 
 	switch (nAttribID)
 	{
 	case TDCA_FILELINK:
-		if (!bHasText)
-		{
-			CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
-			GraphicsMisc::CentreRect(rIcon, rButton);
-
-			s_iconBrowse.Draw(pDC, rIcon.TopLeft());
-		}
+		bWantFileIcon = !bHasText;
 		break;
 
 	default:
-		// Custom File Link Attributes
-		// TODO
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			bWantFileIcon = (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_FILELINK);
 		break;
+	}
+
+	if (bWantFileIcon)
+	{
+		CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
+		GraphicsMisc::CentreRect(rIcon, rButton);
+
+		s_iconBrowse.Draw(pDC, rIcon.TopLeft());
 	}
 
 	return TRUE;
@@ -1797,10 +1796,8 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 
 				case TDCCA_BOOL:
 				case TDCCA_ICON:
-					return NULL; // Handled in EditCell()
-
 				case TDCCA_FILELINK:
-					return &m_eSingleFileLink;
+					return NULL; // Handled in EditCell()
 
 				case TDCCA_TIMEPERIOD:
 					return &m_eTimePeriod;
@@ -1895,21 +1892,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_FILELINK:
 		if (GetItemText(nRow, nCol).IsEmpty())
 		{
-			if (bBtnClick)
-			{
-				if (m_eSingleFileLink.DoBrowse())
-				{
-					CString sFile;
-					m_eSingleFileLink.GetWindowText(sFile);
-
-					SetItemText(nRow, nCol, sFile);
-					NotifyParentEdit(nAttribID);
-				}
-			}
-			else
-			{
-				ShowControl(m_eSingleFileLink, nRow, nCol, bBtnClick);
-			}
+			HandleSingleFileLinkEdit(nRow, bBtnClick);
 		}
 		else
 		{
@@ -1928,21 +1911,13 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
 
-			if (pDef->IsList())
+			// Custom attributes not handled by default
+			if (!pDef->IsList())
 			{
-				// TODO
-			}
-			else
-			{
-				// Custom attributes not handled by the base class
 				switch (pDef->GetDataType())
 				{
-				case TDCCA_STRING:
-				case TDCCA_FRACTION:
-				case TDCCA_INTEGER:
-				case TDCCA_DOUBLE:
 				case TDCCA_FILELINK:
-					// TODO
+					HandleSingleFileLinkEdit(nRow, bBtnClick);
 					break;
 
 				case TDCCA_ICON:
@@ -1950,27 +1925,33 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 						RefreshSelectedTaskValue(nRow);
 					break;
 
-				case TDCCA_CALCULATION:
-					// TODO
-					break;
-
-				case TDCCA_TIMEPERIOD:
-					// TODO
-					break;
-
-				case TDCCA_DATE:
-					// TODO
-					break;
-
 				case TDCCA_BOOL:
-					// Toggle checkbox
-					SetItemText(nRow, VALUE_COL, (sValue.IsEmpty() ? _T("+") : _T("")));
+					SetItemText(nRow, VALUE_COL, (sValue.IsEmpty() ? _T("+") : _T(""))); // Toggle checkbox
 					NotifyParentEdit(nAttribID);
 					break;
 				}
 			}
 		}
 		break;
+	}
+}
+
+void CTDLTaskAttributeListCtrl::HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick)
+{
+	if (bBtnClick)
+	{
+		if (m_eSingleFileLink.DoBrowse())
+		{
+			CString sFile;
+			m_eSingleFileLink.GetWindowText(sFile);
+
+			SetItemText(nRow, VALUE_COL, sFile);
+			NotifyParentEdit(GetAttributeID(nRow));
+		}
+	}
+	else
+	{
+		ShowControl(m_eSingleFileLink, nRow, VALUE_COL, bBtnClick);
 	}
 }
 
