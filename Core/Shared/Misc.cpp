@@ -2467,6 +2467,9 @@ int StringSortProc(const void* v1, const void* v2)
 
 void Misc::SortArray(CStringArray& aValues, SORTPROC pSortProc)
 {
+	if (aValues.GetSize() < 2)
+		return;
+
 	qsort(aValues.GetData(), aValues.GetSize(), sizeof(CString*), pSortProc ? pSortProc : StringSortProc);
 }
 
@@ -2490,6 +2493,9 @@ int DWordSortProc(const void* v1, const void* v2)
 
 void Misc::SortArray(CDWordArray& aValues, SORTPROC pSortProc)
 {
+	if (aValues.GetSize() < 2)
+		return;
+
 	qsort(aValues.GetData(), aValues.GetSize(), sizeof(DWORD*), pSortProc ? pSortProc : DWordSortProc);
 }
 

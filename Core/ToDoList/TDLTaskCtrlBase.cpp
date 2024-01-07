@@ -6423,6 +6423,9 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 			CStringArray aMatched, aMixed;
 			SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
 
+			Misc::SortArray(aMatched);
+			Misc::SortArray(aMixed);
+
 			data.Set(aMatched, aMixed);
 		}
 		else
