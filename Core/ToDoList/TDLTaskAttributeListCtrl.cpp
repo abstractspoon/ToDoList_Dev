@@ -107,8 +107,6 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& tas
 	m_ilIcons(ilIcons),
 	m_formatter(data, s_mgrContent),
 	m_vis(defaultVis),
-	m_cbSingleSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_cbMultiSelection(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
@@ -200,8 +198,9 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	Populate();
 
 	// Create our edit fields
-	CreateControl(m_cbSingleSelection, IDC_SINGLESEL_COMBO, (CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL));
-	CreateControl(m_cbMultiSelection, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL));
+	CreateControl(m_cbSimpleText, IDC_MULTISEL_COMBO, (CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL));
+	m_cbSimpleText.ModifyFlags(0, ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE);
+
 	CreateControl(m_datePicker, IDC_DATE_PICKER);
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, (CBS_DROPDOWN | CBS_AUTOHSCROLL));
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
@@ -215,8 +214,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
 	m_spinPercent.SetRange(0, 100);
 
-	CLocalizer::EnableTranslation(m_cbSingleSelection, FALSE);
-	CLocalizer::EnableTranslation(m_cbMultiSelection, FALSE);
+	CLocalizer::EnableTranslation(m_cbSimpleText, FALSE);
 	CLocalizer::EnableTranslation(m_cbPriority, FALSE);
 	CLocalizer::EnableTranslation(m_cbRisk, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiFileLink, FALSE);
@@ -1400,8 +1398,9 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 	return aMatched.GetSize();
 }
 
-void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
 {
+	combo.EnableMultiSelection(TRUE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
 	combo.AddUniqueItems(aUserValues);
@@ -1412,13 +1411,17 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 	combo.SetChecked(aMatched, aMixed);
 }
 
-void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CAutoComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
 {
+	combo.EnableMultiSelection(FALSE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
 	combo.AddUniqueItems(aUserValues);
 
-	combo.SelectString(-1, GetItemText(nRow, VALUE_COL));
+	CString sValue = GetItemText(nRow, VALUE_COL);
+	combo.AddUniqueItem(sValue);
+
+	combo.SelectString(-1, sValue);
 }
 
 void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
@@ -1433,14 +1436,14 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	switch (nAttribID)
 	{
-	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, m_tldDefault.aAllocBy, m_tldAll.aAllocBy, m_cbSingleSelection);	break;
-	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, m_tldDefault.aStatus, m_tldAll.aStatus,	m_cbSingleSelection);	break;
-	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, m_tldDefault.aVersion, m_tldAll.aVersion, m_cbSingleSelection);	break;
+	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, m_tldDefault.aAllocBy, m_tldAll.aAllocBy, m_cbSimpleText);	break;
+	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, m_tldDefault.aStatus, m_tldAll.aStatus, m_cbSimpleText);	break;
+	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, m_tldDefault.aVersion, m_tldAll.aVersion, m_cbSimpleText);	break;
 		break;
 
-	case TDCA_ALLOCTO:	PrepareMultiSelCombo(nRow, m_tldDefault.aAllocTo, m_tldAll.aAllocTo, m_cbMultiSelection);	break;
-	case TDCA_CATEGORY: PrepareMultiSelCombo(nRow, m_tldDefault.aCategory, m_tldAll.aCategory, m_cbMultiSelection);	break;
-	case TDCA_TAGS:		PrepareMultiSelCombo(nRow, m_tldDefault.aTags, m_tldAll.aTags, m_cbMultiSelection);			break;
+	case TDCA_ALLOCTO:	PrepareMultiSelCombo(nRow, m_tldDefault.aAllocTo, m_tldAll.aAllocTo, m_cbSimpleText);	break;
+	case TDCA_CATEGORY: PrepareMultiSelCombo(nRow, m_tldDefault.aCategory, m_tldAll.aCategory, m_cbSimpleText);	break;
+	case TDCA_TAGS:		PrepareMultiSelCombo(nRow, m_tldDefault.aTags, m_tldAll.aTags, m_cbSimpleText);			break;
 
 	case TDCA_FILELINK:
 		{
@@ -1533,34 +1536,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			TDCCADATA data;
 			m_taskCtrl.GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
 
-			/*if (pDef->IsMultiList())
-			{
-				CStringArray aDefValues;
-				pDef->GetUniqueListData(aDefValues);
-
-				switch (pDef->GetDataType())
-				{
-				case TDCCA_STRING:
-				case TDCCA_FRACTION:
-				case TDCCA_INTEGER:
-				case TDCCA_DOUBLE:
-					PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbMultiSelection);	
-					break;
-
-				case TDCCA_ICON:
-					m_cbCustomIcons.EnableMultiSelection(TRUE);
-					PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbCustomIcons); 
-					break;
-
-				case TDCCA_BOOL:
-				case TDCCA_FILELINK:
-				case TDCCA_CALCULATION:
-				case TDCCA_TIMEPERIOD:
-				case TDCCA_DATE:
-					break; // Not supported
-				}
-			}
-			else*/ if (pDef->IsList())
+			if (pDef->IsList())
 			{
 				CStringArray aDefValues;
 				pDef->GetUniqueListData(aDefValues);
@@ -1572,14 +1548,12 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_INTEGER:
 				case TDCCA_DOUBLE:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbMultiSelection);
+						PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbSimpleText);
 					else
-						PrepareSingleSelCombo(nRow, aDefValues, CStringArray(), m_cbSingleSelection);
+						PrepareSingleSelCombo(nRow, aDefValues, CStringArray(), m_cbSimpleText);
 					break;
 
 				case TDCCA_ICON:
-					m_cbCustomIcons.EnableMultiSelection(pDef->IsMultiList());
-
 					if (pDef->IsMultiList())
 						PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbCustomIcons);
 					else
@@ -1605,7 +1579,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_ICON:
 				case TDCCA_FILELINK:
 				case TDCCA_BOOL:
-					break; // Nothing further to do
+					break; // Handled by base class
 
 				case TDCCA_CALCULATION:
 					break; // Not editable
@@ -1690,12 +1664,10 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 	case TDCA_ALLOCBY:
 	case TDCA_STATUS:
 	case TDCA_VERSION:
-		return &m_cbSingleSelection;
-
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
 	case TDCA_TAGS:
-		return &m_cbMultiSelection;
+		return &m_cbSimpleText;
 
 	case TDCA_FLAG:
 	case TDCA_ICON:
@@ -1748,7 +1720,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 				case TDCCA_FRACTION:
 				case TDCCA_INTEGER:
 				case TDCCA_DOUBLE:
-					return (pDef->IsMultiList() ? &m_cbMultiSelection : &m_cbSingleSelection);
+					return &m_cbSimpleText;
 
 				case TDCCA_ICON:
 					return &m_cbCustomIcons;
@@ -1958,8 +1930,7 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	CInputListCtrl::HideAllControls(pWndIgnore);
 
 	HideControl(m_datePicker, pWndIgnore);
-	HideControl(m_cbMultiSelection, pWndIgnore);
-	HideControl(m_cbSingleSelection, pWndIgnore);
+	HideControl(m_cbSimpleText, pWndIgnore);
 	HideControl(m_cbTimeOfDay, pWndIgnore);
 	HideControl(m_cbPriority, pWndIgnore);
 	HideControl(m_cbRisk, pWndIgnore);
@@ -2005,13 +1976,13 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	switch (nCtrlID)
 	{
 	case IDC_SINGLESEL_COMBO:
-		sNewItemText = CDialogHelper::GetSelectedItem(m_cbSingleSelection);
+		sNewItemText = CDialogHelper::GetSelectedItem(m_cbSimpleText);
 		break;
 
 	case IDC_MULTISEL_COMBO:
 		{
 			CStringArray aMatched, aMixed;
-			m_cbMultiSelection.GetChecked(aMatched, aMixed);
+			m_cbSimpleText.GetChecked(aMatched, aMixed);
 
 			sNewItemText = FormatMultiSelItems(aMatched, aMixed);
 		}
@@ -2177,13 +2148,12 @@ LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
 
 	switch (nAttribID)
 	{
-	case TDCA_ALLOCBY:	CDialogHelper::GetComboBoxItems(m_cbSingleSelection, m_tldAll.aAllocBy);break;
-	case TDCA_STATUS:	CDialogHelper::GetComboBoxItems(m_cbSingleSelection, m_tldAll.aStatus);	break;
-	case TDCA_VERSION:	CDialogHelper::GetComboBoxItems(m_cbSingleSelection, m_tldAll.aVersion);break;
-
-	case TDCA_ALLOCTO:	CDialogHelper::GetComboBoxItems(m_cbMultiSelection, m_tldAll.aAllocTo);	break;
-	case TDCA_CATEGORY: CDialogHelper::GetComboBoxItems(m_cbMultiSelection, m_tldAll.aCategory);break;
-	case TDCA_TAGS:		CDialogHelper::GetComboBoxItems(m_cbMultiSelection, m_tldAll.aTags);	break;
+	case TDCA_ALLOCBY:	CDialogHelper::GetComboBoxItems(m_cbSimpleText, m_tldAll.aAllocBy);	break;
+	case TDCA_STATUS:	CDialogHelper::GetComboBoxItems(m_cbSimpleText, m_tldAll.aStatus);	break;
+	case TDCA_VERSION:	CDialogHelper::GetComboBoxItems(m_cbSimpleText, m_tldAll.aVersion);	break;
+	case TDCA_ALLOCTO:	CDialogHelper::GetComboBoxItems(m_cbSimpleText, m_tldAll.aAllocTo);	break;
+	case TDCA_CATEGORY: CDialogHelper::GetComboBoxItems(m_cbSimpleText, m_tldAll.aCategory);break;
+	case TDCA_TAGS:		CDialogHelper::GetComboBoxItems(m_cbSimpleText, m_tldAll.aTags);	break;
 
 	case TDCA_FILELINK:
 		return 0L;

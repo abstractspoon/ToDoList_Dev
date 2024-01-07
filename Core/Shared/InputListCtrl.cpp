@@ -1480,6 +1480,9 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
 	{
+		if (ctrl.GetDlgItem(1001))
+			ctrl.GetDlgItem(1001)->ShowWindow(SW_SHOW);
+
 		if (bBtnClick || !ctrl.GetDlgItem(1001))
 			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
 	}

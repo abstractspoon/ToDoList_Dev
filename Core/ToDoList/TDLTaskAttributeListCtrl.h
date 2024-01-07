@@ -14,8 +14,7 @@
 #include "TDLIconComboBox.h"
 
 #include "..\shared\InputListCtrl.h"
-#include "..\shared\AutoComboBox.h"
-#include "..\shared\CheckComboBox.h"
+#include "..\shared\EnCheckComboBox.h"
 #include "..\shared\DateTimeCtrlEx.h"
 #include "..\shared\FileComboBox.h"
 #include "..\shared\TimeComboBox.h"
@@ -95,8 +94,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	TDCAUTOLISTDATA m_tldAll, m_tldDefault;
 
-	CAutoComboBox m_cbSingleSelection;
-	CCheckComboBox m_cbMultiSelection;
+	CEnCheckComboBox m_cbSimpleText;
 	CDateTimeCtrlEx m_datePicker;
 	CTimeComboBox m_cbTimeOfDay;
 	CTDLPriorityComboBox m_cbPriority;
@@ -168,8 +166,8 @@ protected:
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
 	
-	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CCheckComboBox& combo);
-	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CAutoComboBox& combo);
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeOfDayCombo(int nRow);
 	void PrepareTimePeriodEdit(int nRow);

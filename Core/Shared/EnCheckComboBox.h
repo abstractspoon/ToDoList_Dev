@@ -29,6 +29,7 @@ public:
 
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const; // virtual
 	BOOL SetChecked(const CStringArray& aChecked);
 	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
@@ -69,7 +70,6 @@ protected:
 	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual int GetExtraListboxWidth() const;
-	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;
