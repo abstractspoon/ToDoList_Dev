@@ -94,7 +94,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	TDCAUTOLISTDATA m_tldAll, m_tldDefault;
 
-	CEnCheckComboBox m_cbSimpleText;
+	CEnCheckComboBox m_cbTextAndNumbers;
 	CDateTimeCtrlEx m_datePicker;
 	CTimeComboBox m_cbTimeOfDay;
 	CTDLPriorityComboBox m_cbPriority;
