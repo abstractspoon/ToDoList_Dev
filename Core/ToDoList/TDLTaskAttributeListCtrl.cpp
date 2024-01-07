@@ -486,8 +486,10 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 			case TDCCA_INTEGER:
 			case TDCCA_DOUBLE:
 			case TDCCA_CALCULATION:
-			case TDCCA_TIMEPERIOD:
 				return ILCT_TEXT;
+
+			case TDCCA_TIMEPERIOD:
+				return ILCT_POPUPMENU;
 
 			case TDCCA_DATE:
 				return ILCT_DATE;
