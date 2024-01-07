@@ -291,24 +291,18 @@ void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILIT
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
 {
-	BOOL bAdd = (m_vis.IsEditFieldVisible(nAttribID) && (nAttribID != TDCA_PROJECTNAME));
-
-	if (!bAdd)
+	switch (nAttribID)
 	{
-		bAdd = ((m_vis.GetShowFields() == TDLSA_ASCOLUMN) &&
-				m_vis.IsColumnVisible(TDC::MapAttributeToColumn(nAttribID)));
+	case TDCA_PROJECTNAME:
+		return;
 
-		if (!bAdd)
+	default:
+		if (m_vis.IsEditFieldVisible(nAttribID))
 		{
-			bAdd = ((nAttribID == TDCA_ICON) && 
-					m_data.HasStyle(TDCS_ALLOWTREEITEMCHECKBOX));
+			int nItem = AddRow(CEnString(nAttribResID));
+			SetItemData(nItem, nAttribID);
 		}
-	}
-
-	if (bAdd)
-	{
-		int nItem = AddRow(CEnString(nAttribResID));
-		SetItemData(nItem, nAttribID);
+		break;
 	}
 }
 
@@ -931,6 +925,7 @@ CString CTDLTaskAttributeListCtrl::GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nA
 	case TDCA_COMMENTSSIZE:		sFirst = m_formatter.GetTaskCommentSize(aSelTaskIDs[0]); break;
 	case TDCA_COMMENTSFORMAT:	sFirst = m_formatter.GetTaskCommentFormat(aSelTaskIDs[0]); break;
 	case TDCA_SUBTASKDONE:		sFirst = m_formatter.GetTaskSubtaskCompletion(aSelTaskIDs[0]); break;
+	case TDCA_TIMEREMAINING:	sFirst = m_formatter.GetTaskTimeRemaining(aSelTaskIDs[0]); break;
 	}
 
 	// Compare that to subsequent values
@@ -948,6 +943,7 @@ CString CTDLTaskAttributeListCtrl::GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nA
 		case TDCA_COMMENTSSIZE:		sNext = m_formatter.GetTaskCommentSize(dwTaskID); break;
 		case TDCA_COMMENTSFORMAT:	sNext = m_formatter.GetTaskCommentFormat(dwTaskID); break;
 		case TDCA_SUBTASKDONE:		sNext = m_formatter.GetTaskSubtaskCompletion(dwTaskID); break;
+		case TDCA_TIMEREMAINING:	sNext = m_formatter.GetTaskTimeRemaining(dwTaskID); break;
 		}
 
 		if (sNext != sFirst)

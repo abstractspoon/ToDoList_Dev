@@ -2649,6 +2649,7 @@ struct TDCCOLEDITVISIBILITY
 	{
 		switch (nAttrib)
 		{
+		// Editable
 		case TDCA_DONEDATE:
 		case TDCA_DUEDATE:
 		case TDCA_STARTDATE:
@@ -2673,6 +2674,24 @@ struct TDCCOLEDITVISIBILITY
 		case TDCA_DONETIME:
 		case TDCA_TAGS:
 		case TDCA_PROJECTNAME:
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+		case TDCA_ICON:
+			return TRUE;
+
+		// Display only
+		case TDCA_CREATEDBY:
+		case TDCA_PATH:
+		case TDCA_POSITION:
+		case TDCA_CREATIONDATE: // includes time
+		case TDCA_LASTMODDATE:  // includes time
+		case TDCA_COMMENTSSIZE:
+		case TDCA_COMMENTSFORMAT:
+		case TDCA_SUBTASKDONE:
+		case TDCA_LASTMODBY:
+		case TDCA_ID:
+		case TDCA_PARENTID:
+		case TDCA_TIMEREMAINING:
 			return TRUE;
 		}
 
