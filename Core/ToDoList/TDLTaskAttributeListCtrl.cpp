@@ -1785,32 +1785,32 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (pCtrl == CInputListCtrl::GetEditControl())
+	if (pCtrl != NULL)
 	{
-		PrepareControl(m_editBox, nRow, nCol);
-		CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
-
-		return;
-	}
-	else if (pCtrl == &m_eTimePeriod)
-	{
-		ShowControl(*pCtrl, nRow, nCol, bBtnClick);
-
-		if (bBtnClick)
+		if (pCtrl == CInputListCtrl::GetEditControl())
 		{
-			m_eTimePeriod.ShowUnitsPopupMenu();
-			HideControl(*pCtrl);
+			PrepareControl(m_editBox, nRow, nCol);
+			CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
+		}
+		else if (pCtrl == &m_eTimePeriod)
+		{
+			ShowControl(*pCtrl, nRow, nCol, bBtnClick);
+
+			if (bBtnClick)
+			{
+				m_eTimePeriod.ShowUnitsPopupMenu();
+				HideControl(*pCtrl);
+			}
+		}
+		else
+		{
+			ShowControl(*pCtrl, nRow, nCol, bBtnClick);
 		}
 
 		return;
 	}
-	else if (pCtrl != NULL)
-	{
-		ShowControl(*pCtrl, nRow, nCol, bBtnClick);
-		return;
-	}
 
-	// All other attributes not handled by the base class
+	// All other attributes not otherwise handled
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
 	switch (nAttribID)
