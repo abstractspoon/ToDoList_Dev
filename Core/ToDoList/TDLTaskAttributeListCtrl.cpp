@@ -1476,6 +1476,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	}
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	m_editBox.ClearMask();
 
 	switch (nAttribID)
 	{
@@ -1615,10 +1616,19 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			{
 				switch (pDef->GetDataType())
 				{
-				case TDCCA_STRING:
 				case TDCCA_FRACTION:
+					m_editBox.SetMask(_T("0123456789/"));
+					break;
+
 				case TDCCA_INTEGER:
+					m_editBox.SetMask(_T("0123456789"));
+					break;
+
 				case TDCCA_DOUBLE:
+					m_editBox.SetMask(_T("0123456789."), ME_LOCALIZEDECIMAL);
+					break;
+
+				case TDCCA_STRING:
 				case TDCCA_ICON:
 				case TDCCA_FILELINK:
 				case TDCCA_BOOL:
