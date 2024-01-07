@@ -597,11 +597,11 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
+	if (!CanEditCell(nItem, nCol))
+		return GetSysColor(COLOR_GRAYTEXT);
+
 	if (nCol == VALUE_COL)
 	{
-		if (!CanEditCell(nItem, nCol))
-			return GetSysColor(COLOR_GRAYTEXT);
-
 		switch (GetAttributeID(nItem))
 		{
 		case TDCA_DEPENDENCY:
