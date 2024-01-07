@@ -72,6 +72,8 @@ CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl(const CContentMgr
 	m_cbCustomIcons(m_ilIcons, TRUE, FALSE),
 	m_cbRecurrence(FALSE)
 {
+	m_eTimePeriod.SetBorderWidth(0);
+	m_eTimePeriod.SetDefaultButton(0);
 }
 
 CTDLFindTaskExpressionListCtrl::~CTDLFindTaskExpressionListCtrl()
@@ -135,7 +137,7 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 	CreateControl(m_cbOperators, OPERATOR_ID, CBS_DROPDOWNLIST); // no sort
 	CreateControl(m_cbAndOr, ANDOR_ID, FALSE);
 	CreateControl(m_dtcDate, DATE_ID);
-	CreateControl(m_eTime, TIME_ID);
+	CreateControl(m_eTimePeriod, TIME_ID);
 	CreateControl(m_cbListValues, LISTVALUES_ID);
 	CreateControl(m_cbPriority, PRIORITY_ID, CBS_DROPDOWNLIST); // no sort
 	CreateControl(m_cbRisk, RISK_ID, CBS_DROPDOWNLIST); // no sort
@@ -266,7 +268,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 				return &m_dtcDate;
 
 			case FT_TIMEPERIOD:
-				return &m_eTime;
+				return &m_eTimePeriod;
 
 			case FT_BOOL:
 				// do nothing: it's handled by the operator
@@ -359,17 +361,32 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 			switch (rule.GetAttribType())
 			{
 			case FT_DATE:
-			case FT_TIMEPERIOD:
 			case FT_RECURRENCE:
 				ShowControl(*pEdit, nItem, nCol, bBtnClick);
 				break;
 
-			case FT_DATERELATIVE:
-				PrepareEdit(nItem, nCol);
-				CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+			case FT_TIMEPERIOD:
+				{
+					ASSERT(pEdit == &m_eTimePeriod);
+					ShowControl(m_eTimePeriod, nItem, nCol, bBtnClick);
 
-				if (bBtnClick)
-					OnEEBtnClick(m_editBox.GetDlgCtrlID(), RELATIVEDATEPLACEHOLDER_BTNID);
+					if (bBtnClick)
+					{
+						m_eTimePeriod.ShowUnitsPopupMenu();
+						HideControl(m_eTimePeriod);
+					}
+				}
+				break;
+
+
+			case FT_DATERELATIVE:
+				{
+					PrepareEdit(nItem, nCol);
+					CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+
+					if (bBtnClick)
+						OnEEBtnClick(m_editBox.GetDlgCtrlID(), RELATIVEDATEPLACEHOLDER_BTNID);
+				}
 				break;
 
 			case FT_ICON:
@@ -411,12 +428,14 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					break;
 
 				default:
-					PrepareEdit(nItem, nCol);
+					{
+						PrepareEdit(nItem, nCol);
 
-					if (pEdit == &m_editBox)
-						CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
-					else
-						ShowControl(*pEdit, nItem, nCol, bBtnClick);
+						if (pEdit == &m_editBox)
+							CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+						else
+							ShowControl(*pEdit, nItem, nCol, bBtnClick);
+					}
 					break;
 				}
 			}
@@ -461,6 +480,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				return ILCT_DATE;
 
 			case FT_DATERELATIVE:
+			case FT_TIMEPERIOD:
 				return ILCT_POPUPMENU;
 
 			case FT_ICON:
@@ -474,7 +494,6 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				}
 				return ILCT_BROWSE;
 
-			case FT_TIMEPERIOD:
 			case FT_BOOL:
 			case FT_DEPENDENCY:
 			case FT_NONE:
@@ -529,7 +548,7 @@ BOOL CTDLFindTaskExpressionListCtrl::IsEditing() const
 			m_cbAndOr.IsWindowVisible() ||
 			m_cbAttributes.IsWindowVisible() ||
 			m_dtcDate.IsWindowVisible() ||
-			m_eTime.IsWindowVisible() ||
+			m_eTimePeriod.IsWindowVisible() ||
 			m_cbListValues.IsWindowVisible() ||
 			m_cbPriority.IsWindowVisible() ||
 			m_cbRisk.IsWindowVisible() ||
@@ -865,9 +884,9 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				m_dtcDate.SetTime(rule.ValueAsDouble());
 			}
 		}
-		else if (&ctrl == &m_eTime)
+		else if (&ctrl == &m_eTimePeriod)
 		{
-			m_eTime.SetTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()));
+			m_eTimePeriod.SetTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()));
 		}
 		else if (&ctrl == &m_cbCustomIcons)
 		{
@@ -1357,7 +1376,7 @@ void CTDLFindTaskExpressionListCtrl::OnDateCloseUp(NMHDR* /*pNMHDR*/, LRESULT* p
 void CTDLFindTaskExpressionListCtrl::HideAllControls(const CWnd* pWndIgnore)
 {
 	HideControl(m_dtcDate, pWndIgnore);
-	HideControl(m_eTime, pWndIgnore);
+	HideControl(m_eTimePeriod, pWndIgnore);
 	HideControl(m_cbListValues, pWndIgnore);
 	HideControl(m_cbPriority, pWndIgnore);
 	HideControl(m_cbRisk, pWndIgnore);
@@ -1373,8 +1392,8 @@ void CTDLFindTaskExpressionListCtrl::OnTimeChange()
 	int nRow = GetCurSel();
 	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-	rule.SetValue(m_eTime.GetTime());
-	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
+	rule.SetValue(m_eTimePeriod.GetTime());
+	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTimePeriod.GetUnits()));
 
 	UpdateValueColumnText(nRow);
 }
@@ -1385,7 +1404,7 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnTimeUnitsChange(WPARAM /*wp*/, LPARAM 
 	int nRow = GetCurSel();
 	SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTime.GetUnits()));
+	rule.SetTimeUnits(TDC::MapTHUnitsToUnits(m_eTimePeriod.GetUnits()));
 
 	UpdateValueColumnText(nRow);
 

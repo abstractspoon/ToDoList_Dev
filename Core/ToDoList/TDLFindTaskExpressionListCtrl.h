@@ -68,7 +68,7 @@ protected:
 	CComboBox						m_cbAndOr;
 	CTDLRegularityComboBox			m_cbRecurrence;
 	CDateTimeCtrlEx					m_dtcDate;
-	CTimeEdit						m_eTime;
+	CTimeEdit						m_eTimePeriod;
 	CCheckComboBox					m_cbListValues;
 	CTDLPriorityComboBox			m_cbPriority;
 	CTDLRiskComboBox				m_cbRisk;
