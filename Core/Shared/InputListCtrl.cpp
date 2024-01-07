@@ -1403,8 +1403,6 @@ void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
 			rCell.top--;
 		break;
 	}
-
-	rCell.bottom++; // To fully hide the selection rect
 }
 
 void CInputListCtrl::SetView(int nView)
@@ -1557,12 +1555,8 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)) ||
 		ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
-		rWnd.bottom -= 2;
+ 		rWnd.bottom -= 2;
 	}
-
-	// To compensate for later adding '1' in GetCellEditRect
-	// to fully hide the selection rect
-	rWnd.bottom--;
 
 	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height()));
 }
