@@ -1026,8 +1026,112 @@ CString CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow) const
 			break; // No prompt
 
 		case 1:
-			// TODO
-			sPrompt = _T("<empty>");
+			{
+				TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+				switch (nAttribID)
+				{
+				case TDCA_TASKNAME:
+					break;
+
+				case TDCA_COST:
+					sPrompt = Misc::FormatCost(0.0);
+					break;
+
+				case TDCA_TIMEESTIMATE:
+				case TDCA_TIMESPENT:
+					sPrompt = m_formatter.GetTimePeriod(0.0, TDCU_DAYS, FALSE);
+					break;
+
+				case TDCA_DUETIME:
+					sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+					break;
+
+				case TDCA_STARTTIME:
+					sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+					break;
+
+				case TDCA_ALLOCTO:
+				case TDCA_ALLOCBY:
+					sPrompt.LoadString(IDS_TDC_NOONE);
+					break;
+
+				case TDCA_EXTERNALID:
+				case TDCA_PERCENT:
+				case TDCA_DONEDATE:
+				case TDCA_DUEDATE:
+				case TDCA_STARTDATE:
+				case TDCA_PRIORITY:
+				case TDCA_STATUS:
+				case TDCA_CATEGORY:
+				case TDCA_TAGS:
+				case TDCA_RISK:
+				case TDCA_VERSION:
+				case TDCA_FILELINK:
+				case TDCA_RECURRENCE:
+				case TDCA_ICON:
+				case TDCA_DEPENDENCY:
+				case TDCA_COLOR:
+					sPrompt.LoadString(IDS_TDC_NONE);
+
+				case TDCA_FLAG:
+				case TDCA_LOCK:
+					break;
+
+				case TDCA_DONETIME:
+				case TDCA_CREATEDBY:
+				case TDCA_PATH:
+				case TDCA_POSITION:
+				case TDCA_CREATIONDATE:
+				case TDCA_LASTMODDATE:
+				case TDCA_COMMENTSSIZE:
+				case TDCA_COMMENTSFORMAT:
+				case TDCA_SUBTASKDONE:
+				case TDCA_LASTMODBY:
+				case TDCA_ID:
+				case TDCA_PARENTID:
+					break;
+
+				default:
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+					{
+						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+						GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, sPrompt);
+
+						if (pDef->IsList())
+						{
+							sPrompt.LoadString(IDS_TDC_NONE);
+						}
+						else
+						{
+							// else
+							switch (pDef->GetDataType())
+							{
+							case TDCCA_STRING:
+							case TDCCA_FRACTION:
+								break;
+
+							case TDCCA_INTEGER:
+							case TDCCA_DOUBLE:
+							case TDCCA_CALCULATION:	
+								break;
+
+							case TDCCA_TIMEPERIOD:	
+							case TDCCA_DATE:		
+							case TDCCA_BOOL:		
+							case TDCCA_ICON:		
+							case TDCCA_FILELINK:	
+								break;
+							}
+						}
+					}
+					else if (IsCustomTime(nAttribID))
+					{
+						sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+					}
+					break;
+				}
+			}
 			break;
 
 		case 2:
