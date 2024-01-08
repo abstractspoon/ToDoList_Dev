@@ -711,7 +711,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 
 		case TDCA_ALLOCTO:
 		case TDCA_ALLOCBY:
-			sGroupBy.LoadString(IDS_NOBODY);
+			sGroupBy.LoadString(IDS_NOONE);
 			break;
 
 		default:

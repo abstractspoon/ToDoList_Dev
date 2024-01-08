@@ -707,7 +707,7 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 
 		case TDCC_ALLOCTO:
 		case TDCC_ALLOCBY:
-			sGroupBy.LoadString(IDS_TDC_NOBODY);
+			sGroupBy.LoadString(IDS_TDC_NOONE);
 			break;
 
 		default:

@@ -703,8 +703,8 @@ void CToDoCtrl::InitEditPrompts()
 //	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
 // 	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_NONE);
 
-// 	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOBODY);
-// 	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_NOBODY);
+// 	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOONE);
+// 	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_NOONE);
 // 	m_mgrPrompts.SetComboPrompt(m_cbCategory, IDS_TDC_NONE);
 // 	m_mgrPrompts.SetComboPrompt(m_cbTags, IDS_TDC_NONE);
 // 	m_mgrPrompts.SetComboPrompt(m_cbStatus, IDS_TDC_NONE);

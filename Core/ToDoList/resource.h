@@ -2154,7 +2154,7 @@
 #define IDS_OA_TO                       51270
 #define IDS_OUTLOOK_CONFIDENTIAL        51271
 #define IDS_PASTE_ERROR                 51272
-#define IDS_TDC_NOBODY                  51273
+#define IDS_TDC_NOONE                   51273
 #define IDS_CAD_COLATTRIBLABEL          51274
 #define IDS_CAD_COLCOLTITLE             51275
 #define IDS_CAD_COLDATATYPE             51276

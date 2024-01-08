@@ -5538,7 +5538,7 @@ BEGIN
     IDS_OA_TO               "To"
     IDS_OUTLOOK_CONFIDENTIAL "Confidential"
     IDS_PASTE_ERROR         "There was a problem accessing the dragged or copied files.\n\nPlease re-copy the files and perform the operation again."
-    IDS_TDC_NOBODY          "<nobody>"
+    IDS_TDC_NOONE           "<no one>"
     IDS_CAD_COLATTRIBLABEL  "Attribute Label"
     IDS_CAD_COLCOLTITLE     "Column Title"
     IDS_CAD_COLDATATYPE     "Data Type"
