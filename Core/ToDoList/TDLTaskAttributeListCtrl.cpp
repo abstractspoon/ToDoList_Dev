@@ -1308,7 +1308,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						CString sMatched(sText), sUnused;
 						Misc::Split(sMatched, sUnused, '|');
 
-						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
 						return;
 					}
 					break;
