@@ -635,95 +635,95 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 			}
 
-			// Draw images
-			if (nImageWidth > 0)
+			CEnString sText(GetItemText(nItem, nCol));
+
+			if (!bHasBtn || (GetCellType(nItem, nCol) != ILCT_CHECK))
 			{
-				if (pStateList)
+				// Draw images
+				if (nImageWidth > 0)
 				{
-					int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
-					nImage = nState >> 12;
-					pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
+					if (pStateList)
+					{
+						int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
+						nImage = nState >> 12;
+						pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
 
-					if (lvc.cx > sizeState.cx)
-						pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
+						if (lvc.cx > sizeState.cx)
+							pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
 
-					rText.left += sizeState.cx + 2; // 1 pixel border either side
+						rText.left += sizeState.cx + 2; // 1 pixel border either side
+					}
+
+					// draw item image
+					if (pImageList && (nImage != -1))
+					{
+						if (lvc.cx > nImageWidth + sizeImage.cx)
+							pImageList->Draw(pDC, nImage, CPoint(rText.left + 1, rItem.top + 1), ILD_TRANSPARENT);
+
+						rText.left += sizeImage.cx + 2; // 1 pixel border either side
+					}
 				}
 
-				// draw item image
-				if (pImageList && (nImage != -1))
+				// get item text
+				if (bIsPrompt && (IsReadOnly() || !IsWindowEnabled()))
 				{
-					if (lvc.cx > nImageWidth + sizeImage.cx)
-						pImageList->Draw(pDC, nImage, CPoint(rText.left + 1, rItem.top + 1), ILD_TRANSPARENT);
-
-					rText.left += sizeImage.cx + 2; // 1 pixel border either side
+					sText.Empty(); // hides the prompt if readonly
 				}
-			}
-
-			// get item text
-			CEnString sText;
-			
-			if (bIsPrompt && (IsReadOnly() || !IsWindowEnabled()))
-			{
-				sText.Empty(); // hides the prompt if readonly
-			}
-			else
-			{
-				CString sTemp(GetItemText(nItem, nCol));
-				
-				sText = sTemp;
-				sizeText = sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
-			}
-
-			// setup focus rect (only for classic)
-			if (bWantCellFocus && bSel)
-			{
-				if (rText.IsRectEmpty())
+				else if (GetCellType(nItem, nCol) != ILCT_CHECK)
 				{
-					rFocus = rCell;
-				}
-				else
-				{
-					rFocus = rText;
-					
-					if (nCol == 0)
-						rFocus.left += 2;
-				}
-			}
-			
-			// draw text
-			if (rText.Height() && rText.Width())
-			{
-				COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
-
-				if (bSel && IsSelectionThemed(FALSE))
-				{
-					DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
-					GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-
-					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+					sizeText = sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
 				}
 
-				UINT nFlags = (/*DT_END_ELLIPSIS |*/ DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
-
-				switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
+				// setup focus rect (only for classic)
+				if (bWantCellFocus && bSel)
 				{
-				case LVCFMT_CENTER:
-					nFlags |= DT_CENTER;
-					break;
+					if (rText.IsRectEmpty())
+					{
+						rFocus = rCell;
+					}
+					else
+					{
+						rFocus = rText;
 
-				case LVCFMT_RIGHT:
-					nFlags |= DT_RIGHT;
-					rText.right -= 4;
-					break;
-
-				case LVCFMT_LEFT:
-					nFlags |= DT_LEFT;
-					rText.left += 4;
-					break;
+						if (nCol == 0)
+							rFocus.left += 2;
+					}
 				}
 
-				DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
+				// draw text
+				if (rText.Height() && rText.Width())
+				{
+					COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
+
+					if (bSel && IsSelectionThemed(FALSE))
+					{
+						DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
+						GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+
+						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+					}
+
+					UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
+
+					switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
+					{
+					case LVCFMT_CENTER:
+						nFlags |= DT_CENTER;
+						break;
+
+					case LVCFMT_RIGHT:
+						nFlags |= DT_RIGHT;
+						rText.right -= 4;
+						break;
+
+					case LVCFMT_LEFT:
+						nFlags |= DT_LEFT;
+						rText.left += 4;
+						break;
+					}
+
+					DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
+				}
 			}
 		
 			if (bHasBtn)

@@ -2489,6 +2489,7 @@
 #define IDS_FIND_TASKS                  51629
 #define IDS_RECURS_WEEKDAY              51630
 #define IDS_TDLBC_COMMENTSFORMAT        51631
+#define IDS_TDC_EMPTY                   51632
 
 // Next default values for new objects
 // 

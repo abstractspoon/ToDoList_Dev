@@ -1016,306 +1016,346 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& 
 
 CString CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow) const
 {
+	//ASSERT(WantCellPrompt(nRow));
+
 	CEnString sPrompt;
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (CanEditCell(nRow, VALUE_COL))
+	switch (m_taskCtrl.GetSelectedCount())
 	{
-		switch (m_taskCtrl.GetSelectedCount())
-		{
-		case 0:
-			break; // No prompt
+	case 0:
+		break; // No prompt
 
-		case 1:
-			{
-				TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
-				switch (nAttribID)
-				{
-				case TDCA_TASKNAME:
-					break;
-
-				case TDCA_COST:
-					sPrompt = Misc::FormatCost(0.0);
-					break;
-
-				case TDCA_TIMEESTIMATE:
-				case TDCA_TIMESPENT:
-					sPrompt = m_formatter.GetTimePeriod(0.0, TDCU_DAYS, FALSE);
-					break;
-
-				case TDCA_DUETIME:
-					sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
-					break;
-
-				case TDCA_STARTTIME:
-					sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
-					break;
-
-				case TDCA_ALLOCTO:
-				case TDCA_ALLOCBY:
-					sPrompt.LoadString(IDS_TDC_NOONE);
-					break;
-
-				case TDCA_EXTERNALID:
-				case TDCA_PERCENT:
-				case TDCA_DONEDATE:
-				case TDCA_DUEDATE:
-				case TDCA_STARTDATE:
-				case TDCA_PRIORITY:
-				case TDCA_STATUS:
-				case TDCA_CATEGORY:
-				case TDCA_TAGS:
-				case TDCA_RISK:
-				case TDCA_VERSION:
-				case TDCA_FILELINK:
-				case TDCA_RECURRENCE:
-				case TDCA_ICON:
-				case TDCA_DEPENDENCY:
-				case TDCA_COLOR:
-					sPrompt.LoadString(IDS_TDC_NONE);
-
-				case TDCA_FLAG:
-				case TDCA_LOCK:
-					break;
-
-				case TDCA_DONETIME:
-				case TDCA_CREATEDBY:
-				case TDCA_PATH:
-				case TDCA_POSITION:
-				case TDCA_CREATIONDATE:
-				case TDCA_LASTMODDATE:
-				case TDCA_COMMENTSSIZE:
-				case TDCA_COMMENTSFORMAT:
-				case TDCA_SUBTASKDONE:
-				case TDCA_LASTMODBY:
-				case TDCA_ID:
-				case TDCA_PARENTID:
-					break;
-
-				default:
-					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-					{
-						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, sPrompt);
-
-						if (pDef->IsList())
-						{
-							sPrompt.LoadString(IDS_TDC_NONE);
-						}
-						else
-						{
-							// else
-							switch (pDef->GetDataType())
-							{
-							case TDCCA_STRING:
-							case TDCCA_FRACTION:
-								break;
-
-							case TDCCA_INTEGER:
-							case TDCCA_DOUBLE:
-							case TDCCA_CALCULATION:	
-								break;
-
-							case TDCCA_TIMEPERIOD:	
-							case TDCCA_DATE:		
-							case TDCCA_BOOL:		
-							case TDCCA_ICON:		
-							case TDCCA_FILELINK:	
-								break;
-							}
-						}
-					}
-					else if (IsCustomTime(nAttribID))
-					{
-						sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
-					}
-					break;
-				}
-			}
-			break;
-
-		case 2:
-			// TODO
-			sPrompt = _T("<varies>");
-			break;
-		}
-	}
-
-	return sPrompt;
-}
-
-void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
-{
-	// Only draw what we really need to
-	if (nCol == VALUE_COL)
-	{
-		if (sText.IsEmpty() && (GetCellType(nRow, nCol) != ILCT_CHECK))
-		{
-			CString sPrompt = GetCellPrompt(nRow);
-
-			if (!sPrompt.IsEmpty())
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags);
-
-			return;
-		}
-
-		// else attributes requiring custom rendering
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
+	case 1:
 		switch (nAttribID)
 		{
-		case TDCA_PRIORITY:
-			{
-				int nPriority = _ttoi(sText);
-				
-				if (nPriority >= 0)
-				{
-					// Draw box
-					CRect rBox(rText);
-					rBox.DeflateRect(0, 3);
-					rBox.right = rBox.left + rBox.Height();
-
-					COLORREF crFill = m_taskCtrl.GetPriorityColor(nPriority);
-					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
-
-					GraphicsMisc::DrawRect(pDC, rBox, crFill, crBorder);
-
-					// Draw text
-					CRect rLeft(rText);
-					rLeft.left += rText.Height();
-
-					CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nPriority]));
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rLeft, sPriority, crText, nDrawTextFlags);
-				}
-			}
-			return;
-
-		case TDCA_RISK:
-			{
-				int nRisk = _ttoi(sText);
-				
-				if (nRisk >= 0)
-				{
-					CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nRisk]));
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPriority, crText, nDrawTextFlags);
-				}
-			}
-			return;
-
-		case TDCA_ICON:
-			DrawIcon(pDC, sText, rText, FALSE);
-			return;
-
-		case TDCA_COST:
-			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, Misc::FormatCost(_ttof(sText)), crText, nDrawTextFlags);
-			return;
-
-		case TDCA_COLOR:
-			{
-				crText = _ttoi(sText);
-
-				if (crText != CLR_NONE)
-				{
-					if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
-					{
-						// Use the entire cell rect for the background colour
-						CRect rCell;
-						GetCellRect(nRow, nCol, rCell);
-
-						pDC->FillSolidRect(rCell, crText);
-						crText = GraphicsMisc::GetBestTextColor(crText);
-					}
-
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
-				}
-			}
-			return;
-
-		case TDCA_ALLOCTO:
-		case TDCA_CATEGORY:
-		case TDCA_TAGS:
-			{
-				int nMixed = sText.Find('|');
-
-				if (nMixed != -1)
-				{
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText.Left(nMixed), crText, nDrawTextFlags);
-					return;
-				}
-			}
+		case TDCA_TASKNAME:
 			break;
 
+		case TDCA_COST:
+			sPrompt = Misc::FormatCost(0.0);
+			break;
+
+		case TDCA_TIMEESTIMATE:
+		case TDCA_TIMESPENT:
+			sPrompt = m_formatter.GetTimePeriod(0.0, TDCU_DAYS, FALSE);
+			break;
+
+		case TDCA_DUETIME:
+			sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+			break;
+
+		case TDCA_STARTTIME:
+			sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+			break;
+
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+			sPrompt.LoadString(IDS_TDC_NOONE);
+			break;
+
+		case TDCA_CATEGORY:
+		case TDCA_TAGS:
 		case TDCA_FILELINK:
-			{
-				CStringArray aFiles;
-				int nNumFiles = Misc::Split(sText, aFiles);
+		case TDCA_DEPENDENCY:
+			sPrompt.LoadString(IDS_TDC_EMPTY);
+			break;
 
-				CRect rFile(rText);
+		case TDCA_PRIORITY:
+		case TDCA_RISK:
+			sPrompt.LoadString(IDS_TDC_NONE);
+			break;
 
-				for (int nFile = 0; nFile < nNumFiles; nFile++)
-				{
-					if (DrawIcon(pDC, aFiles[nFile], rFile, TRUE))
-						rFile.left += (ICON_SIZE + 2);
-				}
+		case TDCA_EXTERNALID:
+		case TDCA_PERCENT:
+		case TDCA_DONEDATE:
+		case TDCA_DUEDATE:
+		case TDCA_STARTDATE:
+		case TDCA_STATUS:
+		case TDCA_VERSION:
+		case TDCA_RECURRENCE:
+		case TDCA_ICON:
+			sPrompt.LoadString(IDS_TDC_NONE);
+			break;
 
-				// Only render the link text if there is a single link
-				if (nNumFiles == 1)
-				{
-					CString sFile(aFiles[0]);
+		case TDCA_COLOR:
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+			break;
 
-					if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
-						sFile = FileMisc::GetFileNameFromPath(sFile);
-
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rFile, sFile, crText, nDrawTextFlags);
-				}
-			}
-			return;
+		case TDCA_DONETIME:
+		case TDCA_CREATEDBY:
+		case TDCA_PATH:
+		case TDCA_POSITION:
+		case TDCA_CREATIONDATE:
+		case TDCA_LASTMODDATE:
+		case TDCA_COMMENTSSIZE:
+		case TDCA_COMMENTSFORMAT:
+		case TDCA_SUBTASKDONE:
+		case TDCA_LASTMODBY:
+		case TDCA_ID:
+		case TDCA_PARENTID:
+			break;
 
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, sPrompt);
 
-				switch (pDef->GetDataType())
+				if (pDef->IsList())
 				{
-				case TDCCA_ICON:
-					if (pDef->IsMultiList())
-					{
-						CString sMatched(sText), sUnused;
-						Misc::Split(sMatched, sUnused, '|');
-
-						CStringArray aIcons;
-						int nNumIcons = Misc::Split(sMatched, aIcons);
-
-						CRect rIcon(rText);
-
-						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
-						{
-							if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
-								rIcon.left += (ICON_SIZE + 2);
-						}
-					}
-					else
-					{
-						DrawIcon(pDC, sText, rText, FALSE);
-					}
-					return;
-
-				default:
-					if (pDef->IsMultiList())
-					{
-						CString sMatched(sText), sUnused;
-						Misc::Split(sMatched, sUnused, '|');
-
-						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
-						return;
-					}
-					break;
+					sPrompt.LoadString(IDS_TDC_NONE);
 				}
+				else
+				{
+					// else
+					switch (pDef->GetDataType())
+					{
+					case TDCCA_STRING:
+					case TDCCA_FRACTION:
+						break;
+
+					case TDCCA_INTEGER:
+					case TDCCA_DOUBLE:
+					case TDCCA_CALCULATION:
+						break;
+
+					case TDCCA_TIMEPERIOD:
+					case TDCCA_DATE:
+					case TDCCA_BOOL:
+					case TDCCA_ICON:
+					case TDCCA_FILELINK:
+						break;
+					}
+				}
+			}
+			else if (IsCustomTime(nAttribID))
+			{
+				sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			}
 			break;
 		}
+		break;
+
+	default: // > 1
+		sPrompt.LoadString(IDS_TDC_EDITPROMPT_MULTIPLETASKS);
+		break;
+	}
+
+	return sPrompt;
+}
+
+BOOL CTDLTaskAttributeListCtrl::WantCellPrompt(int nRow, const CString& sText) const
+{
+	if (!IsColumnEditingEnabled(VALUE_COL))
+		return FALSE;
+
+	if (sText.IsEmpty())
+		return TRUE;
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nAttribID)
+	{
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+		return (sText[0] == '|'); // Mixed items only
+
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		return (sText[0] == '-'); // -1 or -2
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			if (pDef->IsMultiList())
+				return (sText[0] == '|'); // Mixed items only
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	if ((nCol != VALUE_COL))
+	{
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+		return;
+	}
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	if (WantCellPrompt(nRow, sText))
+	{
+		CString sPrompt = GetCellPrompt(nRow);
+
+		if (!sPrompt.IsEmpty())
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags);
+
+		return;
+	}
+
+	// else attributes requiring custom rendering
+	switch (nAttribID)
+	{
+	case TDCA_PRIORITY:
+		{
+			int nPriority = _ttoi(sText);
+
+			if (nPriority >= 0)
+			{
+				// Draw box
+				CRect rBox(rText);
+				rBox.DeflateRect(0, 3);
+				rBox.right = rBox.left + rBox.Height();
+
+				COLORREF crFill = m_taskCtrl.GetPriorityColor(nPriority);
+				COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
+
+				GraphicsMisc::DrawRect(pDC, rBox, crFill, crBorder);
+
+				// Draw text
+				CRect rLeft(rText);
+				rLeft.left += rText.Height();
+
+				CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nPriority]));
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rLeft, sPriority, crText, nDrawTextFlags);
+			}
+		}
+		return;
+
+	case TDCA_RISK:
+		{
+			int nRisk = _ttoi(sText);
+
+			if (nRisk >= 0)
+			{
+				CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nRisk]));
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPriority, crText, nDrawTextFlags);
+			}
+		}
+		return;
+
+	case TDCA_ICON:
+		DrawIcon(pDC, sText, rText, FALSE);
+		return;
+
+	case TDCA_COST:
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, Misc::FormatCost(_ttof(sText)), crText, nDrawTextFlags);
+		return;
+
+	case TDCA_COLOR:
+		{
+			crText = _ttoi(sText);
+
+			if (crText != CLR_NONE)
+			{
+				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
+				{
+					// Use the entire cell rect for the background colour
+					CRect rCell;
+					GetCellRect(nRow, nCol, rCell);
+
+					pDC->FillSolidRect(rCell, crText);
+					crText = GraphicsMisc::GetBestTextColor(crText);
+				}
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
+			}
+		}
+		return;
+
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+		{
+			int nMixed = sText.Find('|');
+
+			if (nMixed != -1)
+			{
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText.Left(nMixed), crText, nDrawTextFlags);
+				return;
+			}
+		}
+		break;
+
+	case TDCA_FILELINK:
+		{
+			CStringArray aFiles;
+			int nNumFiles = Misc::Split(sText, aFiles);
+
+			CRect rFile(rText);
+
+			for (int nFile = 0; nFile < nNumFiles; nFile++)
+			{
+				if (DrawIcon(pDC, aFiles[nFile], rFile, TRUE))
+					rFile.left += (ICON_SIZE + 2);
+			}
+
+			// Only render the link text if there is a single link
+			if (nNumFiles == 1)
+			{
+				CString sFile(aFiles[0]);
+
+				if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
+					sFile = FileMisc::GetFileNameFromPath(sFile);
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rFile, sFile, crText, nDrawTextFlags);
+			}
+		}
+		return;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			switch (pDef->GetDataType())
+			{
+			case TDCCA_ICON:
+				if (pDef->IsMultiList())
+				{
+					CString sMatched(sText), sUnused;
+					Misc::Split(sMatched, sUnused, '|');
+
+					CStringArray aIcons;
+					int nNumIcons = Misc::Split(sMatched, aIcons);
+
+					CRect rIcon(rText);
+
+					for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+					{
+						if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
+							rIcon.left += (ICON_SIZE + 2);
+					}
+				}
+				else
+				{
+					DrawIcon(pDC, sText, rText, FALSE);
+				}
+				return;
+
+			default:
+				if (pDef->IsMultiList())
+				{
+					CString sMatched(sText), sUnused;
+					Misc::Split(sMatched, sUnused, '|');
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
+					return;
+				}
+				break;
+			}
+		}
+		break;
 	}
 
 	// All else

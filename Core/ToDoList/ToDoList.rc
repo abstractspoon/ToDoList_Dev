@@ -5931,6 +5931,11 @@ BEGIN
     ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
 END
 
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TDC_EMPTY           "<empty>"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
