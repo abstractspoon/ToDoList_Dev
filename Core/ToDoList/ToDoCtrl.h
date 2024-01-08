@@ -255,11 +255,11 @@ public:
 	int GetSelectedTaskFileLinkCount() const { return m_taskTree.GetSelectedTaskFileLinkCount(); }
 	int GetSelectedTaskFileLinks(CStringArray& aFiles) const;
 	BOOL GotoSelectedTaskFileLink(int nFile);
-	CString GetSelectedTaskExtID() const { return m_taskTree.GetSelectedTaskExtID(); }
-	int GetSelectedTaskPercent() const { return m_taskTree.GetSelectedTaskPercent(); }
-	int GetSelectedTaskPriority() const { return m_taskTree.GetSelectedTaskPriority(); }
-	int GetSelectedTaskRisk() const { return m_taskTree.GetSelectedTaskRisk(); }
-	BOOL GetSelectedTaskCost(TDCCOST& cost) const { return m_taskTree.GetSelectedTaskCost(cost); }
+	CString GetSelectedTaskExtID() const { return m_lcAttributes.GetExternalID()/*m_taskTree.GetSelectedTaskExtID()*/; }
+	int GetSelectedTaskPercent() const { return m_lcAttributes.GetPercentCompletion()/*m_taskTree.GetSelectedTaskPercent()*/; }
+	int GetSelectedTaskPriority() const { return m_lcAttributes.GetPriority()/*m_taskTree.GetSelectedTaskPriority()*/; }
+	int GetSelectedTaskRisk() const { return m_lcAttributes.GetRisk()/*m_taskTree.GetSelectedTaskRisk()*/; }
+//	BOOL GetSelectedTaskCost(TDCCOST& cost) const { return m_lcAttributes.GetCost()/*m_taskTree.GetSelectedTaskCost(cost)*/; }
 	BOOL IsSelectedTaskFlagged() const { return m_taskTree.IsSelectedTaskFlagged(); }
 	BOOL IsSelectedTaskLocked() const { return m_taskTree.IsSelectedTaskLocked(); }
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;

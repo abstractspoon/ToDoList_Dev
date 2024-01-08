@@ -1455,7 +1455,7 @@ CString CTDLTaskAttributeListCtrl::GetExternalID() const
 	return GetValueText(TDCA_EXTERNALID);
 }
 
-int CTDLTaskAttributeListCtrl::GetPercent() const
+int CTDLTaskAttributeListCtrl::GetPercentCompletion() const
 {
 	return _ttoi(GetValueText(TDCA_PERCENT));
 }

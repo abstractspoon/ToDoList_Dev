@@ -68,7 +68,7 @@ public:
 	int GetTags(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetFileLinks(CStringArray& aFiles) const;
 	CString GetExternalID() const;
-	int GetPercent() const;
+	int GetPercentCompletion() const;
 	int GetPriority() const;
 	int GetRisk() const;
 	BOOL GetCost(TDCCOST& cost) const;

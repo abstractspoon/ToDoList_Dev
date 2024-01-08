@@ -2273,7 +2273,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	case TDCA_PERCENT:
 		//SetSelectedTaskPercentDone(m_nPercentDone);
-		SetSelectedTaskPercentDone(m_lcAttributes.GetPercent());
+		SetSelectedTaskPercentDone(m_lcAttributes.GetPercentCompletion());
 		break;
 		
 	case TDCA_TIMEESTIMATE:
@@ -12618,7 +12618,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 		{ 
 			// preserve 'IsRate'
 			TDCCOST cost;
-			VERIFY(GetSelectedTaskCost(cost));
+			VERIFY(m_lcAttributes.GetCost(cost));
 
 			cost.dAmount = 0.0;
 			return SetSelectedTaskCost(cost);
