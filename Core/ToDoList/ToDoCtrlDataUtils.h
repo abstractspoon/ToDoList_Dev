@@ -324,5 +324,57 @@ protected:
 	HTASKITEM ExportTaskEx(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hParentTask, HTASKITEM hPrevSiblingTask, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
 };
 
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskCollator
+{
+public:
+	CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr& mgrContent);
+
+	// These functions return FALSE if two or more tasks had differing values
+	BOOL GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
+	BOOL GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
+	BOOL GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
+	BOOL GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
+	BOOL GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
+
+	BOOL GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksAllocatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksVersion(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksExternalID(const CDWordArray& aTaskIDs, CString& sValue) const;
+
+	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
+
+	BOOL GetTasksCommentSizeinKB(const CDWordArray& aTaskIDs, float& fValue) const;
+	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;
+
+	BOOL GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+	BOOL GetTasksTimeSpent(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+	BOOL GetTasksRemainingTime(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+
+	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const;
+
+	BOOL GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const;
+
+	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
+	BOOL GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nSubtasksTotal, int& nSubtasksDone) const;
+	BOOL GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const;
+
+	// These functions return the number of matching values
+	int GetTasksAllocTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+	const CContentMgr& m_mgrContent;
+};
+
 
 #endif // !defined(AFX_TODOCTRLDATAUTILS_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)
