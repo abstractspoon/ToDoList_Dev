@@ -5002,12 +5002,13 @@ COLORREF CTDCTaskExporter::GetPriorityColor(int nPriority) const
 	return m_colors.GetPriorityColor(nPriority); 
 }
 
-//////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskCollator::CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr& mgrContent)
 	:
 	m_data(data),
-	m_mgrContent(mgrContent)
+	m_mgrContent(mgrContent),
+	m_formatter(data, mgrContent)
 {
 }
 
@@ -5041,65 +5042,84 @@ BOOL CTDCTaskCollator::GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDat
 	return FALSE;
 }
 
+// -----------------------------------------------------------------
+
+#define GETTASKSVAL_SIMPLE(FUNCTION, VAR)           \
+                                                    \
+if (!aTaskIDs.GetSize()) return FALSE;              \
+VAR = FUNCTION(aTaskIDs[0]);                        \
+for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)  \
+if (FUNCTION(aTaskIDs[nID]) != VAR) return FALSE;   \
+return TRUE
+
+// -----------------------------------------------------------------
+
 BOOL CTDCTaskCollator::GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskLastModifiedBy, sValue);
 }
 
 BOOL CTDCTaskCollator::GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskCreatedBy, sValue);
 }
 
 BOOL CTDCTaskCollator::GetTasksAllocatedBy(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CString& sValue) const
-{
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskAllocBy, sValue);
 }
 
 BOOL CTDCTaskCollator::GetTasksVersion(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskVersion, sValue);
 }
 
 BOOL CTDCTaskCollator::GetTasksExternalID(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskExtID, sValue);
+}
+
+BOOL CTDCTaskCollator::GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_formatter.GetTaskPosition, sValue);
 }
 
 BOOL CTDCTaskCollator::GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_formatter.GetTaskPath, sValue);
 }
 
-BOOL CTDCTaskCollator::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const
+BOOL CTDCTaskCollator::GetTasksCommentLength(const CDWordArray& aTaskIDs, int& nValue) const
 {
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksCommentSizeinKB(const CDWordArray& aTaskIDs, float& fValue) const
-{
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskCommentsLength, nValue);
 }
 
 BOOL CTDCTaskCollator::GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSVAL_SIMPLE(m_data.GetTaskParentID, dwValue);
 }
+
+BOOL CTDCTaskCollator::GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskPriority, nValue);
+}
+
+BOOL CTDCTaskCollator::GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskRisk, nValue);
+}
+
+BOOL CTDCTaskCollator::GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskPercent, nValue);
+}
+
+BOOL CTDCTaskCollator::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_formatter.GetTaskCommentFormat, sValue);
+}
+
+// -----------------------------------------------------------------
 
 BOOL CTDCTaskCollator::GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const
 {
@@ -5119,24 +5139,6 @@ BOOL CTDCTaskCollator::GetTasksRemainingTime(const CDWordArray& aTaskIDs, TDCTIM
 	return FALSE;
 }
 
-BOOL CTDCTaskCollator::GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const
-{
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const
-{
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const
-{
-	// TODO
-	return FALSE;
-}
-
 BOOL CTDCTaskCollator::GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const
 {
 	// TODO
@@ -5149,17 +5151,23 @@ BOOL CTDCTaskCollator::GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, 
 	return FALSE;
 }
 
+// -----------------------------------------------------------------
+
 BOOL CTDCTaskCollator::GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nSubtasksTotal, int& nSubtasksDone) const
 {
 	// TODO
 	return FALSE;
 }
 
+// -----------------------------------------------------------------
+
 BOOL CTDCTaskCollator::GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const
 {
 	// TODO
 	return FALSE;
 }
+
+// -----------------------------------------------------------------
 
 int CTDCTaskCollator::GetTasksAllocTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
@@ -5185,4 +5193,10 @@ int CTDCTaskCollator::GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArra
 	return 0;
 }
 
+int CTDCTaskCollator::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
+{
+	// TODO
+	return FALSE;
+}
 
+/////////////////////////////////////////////////////////////////////////////////////

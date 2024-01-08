@@ -341,27 +341,24 @@ public:
 	BOOL GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksAllocatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
-	BOOL GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksVersion(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksExternalID(const CDWordArray& aTaskIDs, CString& sValue) const;
-
+	BOOL GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
-
-	BOOL GetTasksCommentSizeinKB(const CDWordArray& aTaskIDs, float& fValue) const;
 	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;
+	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksCommentLength(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
 
 	BOOL GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksTimeSpent(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksRemainingTime(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
-
-	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;
-	BOOL GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const;
-	BOOL GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const;
-
 	BOOL GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const;
+	BOOL GetTasksRecurrence(const CDWordArray& aTaskIDs, TDCRECURRENCE& recurs) const;
 
-	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
 	BOOL GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nSubtasksTotal, int& nSubtasksDone) const;
 	BOOL GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const;
 
@@ -370,10 +367,13 @@ public:
 	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 
 protected:
 	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
+
+	CTDCTaskFormatter m_formatter;
 };
 
 
