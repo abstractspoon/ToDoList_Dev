@@ -279,6 +279,7 @@ protected:
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
+	CTDCTaskCollator m_collator;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;
