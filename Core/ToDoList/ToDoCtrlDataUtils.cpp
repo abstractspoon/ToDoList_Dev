@@ -5012,36 +5012,6 @@ CTDCTaskCollator::CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr&
 {
 }
 
-BOOL CTDCTaskCollator::GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& date) const
-{
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& date) const
-{
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& date) const
-{
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& date) const
-{
-	// TODO
-	return FALSE;
-}
-
-BOOL CTDCTaskCollator::GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& date) const
-{
-	// TODO
-	return FALSE;
-}
-
 // -----------------------------------------------------------------
 
 #define GETTASKSVAL_SIMPLE(FUNCTION, VAR)           \
@@ -5114,9 +5084,46 @@ BOOL CTDCTaskCollator::GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nVa
 	GETTASKSVAL_SIMPLE(m_data.GetTaskPercent, nValue);
 }
 
+// -----------------------------------------------------------------
+
+#define GETTASKSVAL_ARG(FUNCTION, VAR, ARG)            \
+                                                       \
+if (!aTaskIDs.GetSize()) return FALSE;                 \
+VAR = FUNCTION(aTaskIDs[0], ARG);                      \
+for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)     \
+if (FUNCTION(aTaskIDs[nID], ARG) != VAR) return FALSE; \
+return TRUE
+
+// -----------------------------------------------------------------
+
 BOOL CTDCTaskCollator::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	GETTASKSVAL_SIMPLE(m_formatter.GetTaskCommentFormat, sValue);
+	GETTASKSVAL_ARG(m_formatter.GetTaskCommentFormat, sValue, FALSE);
+}
+
+BOOL CTDCTaskCollator::GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
+{
+	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, TDCD_DUE);
+}
+
+BOOL CTDCTaskCollator::GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
+{
+	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, TDCD_START);
+}
+
+BOOL CTDCTaskCollator::GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
+{
+	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, TDCD_LASTMOD);
+}
+
+BOOL CTDCTaskCollator::GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
+{
+	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, TDCD_DONE);
+}
+
+BOOL CTDCTaskCollator::GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
+{
+	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, TDCD_CREATE);
 }
 
 // -----------------------------------------------------------------
