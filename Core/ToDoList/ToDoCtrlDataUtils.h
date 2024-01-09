@@ -61,7 +61,7 @@ public:
 	double GetTaskCost(DWORD dwTaskID) const;
 	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
-	double GetTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
+	double GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnits) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 	BOOL GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
 	double GetTaskSubtaskCompletion(DWORD dwTaskID) const;
@@ -83,7 +83,7 @@ public:
 	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
-	double GetTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
+	double GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
 	TDC_UNITS GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	TDC_UNITS GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -355,7 +355,7 @@ public:
 
 	BOOL GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksTimeSpent(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
-	BOOL GetTasksRemainingTime(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+	BOOL GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const;
 	BOOL GetTasksRecurrence(const CDWordArray& aTaskIDs, TDCRECURRENCE& recurs) const;
 
@@ -378,6 +378,12 @@ protected:
 	const CContentMgr& m_mgrContent;
 
 	CTDCTaskFormatter m_formatter;
+	CTDCTaskCalculator m_calculator;
+
+protected:
+	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks,
+												 CStringArray& aMatched, CStringArray& aMixed);
+
 };
 
 

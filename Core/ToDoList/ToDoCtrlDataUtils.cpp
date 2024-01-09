@@ -1467,8 +1467,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		case TDCC_TIMEREMAINING:
 			{
 				TDC_UNITS nUnits1, nUnits2;
-				double dRemain1 = m_calculator.GetTaskRemainingTime(pTDI1, pTDS1, nUnits1);
-				double dRemain2 = m_calculator.GetTaskRemainingTime(pTDI2, pTDS2, nUnits2);
+				double dRemain1 = m_calculator.GetTaskTimeRemaining(pTDI1, pTDS1, nUnits1);
+				double dRemain2 = m_calculator.GetTaskTimeRemaining(pTDI2, pTDS2, nUnits2);
 
 				if ((nUnits1 != nUnits2) && (dRemain1 != 0.0) && (dRemain2 != 0.0))
 				{
@@ -2419,7 +2419,7 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	return dEstimate;
 }
 
-double CTDCTaskCalculator::GetTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const
+double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -2802,13 +2802,13 @@ double CTDCTaskCalculator::GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) co
 	return GetTaskTimeSpent(pTDI, pTDS, nUnits);
 }
 
-double CTDCTaskCalculator::GetTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const
+double CTDCTaskCalculator::GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnits) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
 
-	return GetTaskRemainingTime(pTDI, pTDS, nUnits);
+	return GetTaskTimeRemaining(pTDI, pTDS, nUnits);
 }
 
 BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const
@@ -4034,7 +4034,7 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 	if (pTDI && pTDS)
 	{
 		TDC_UNITS nUnits = TDCU_NULL;
-		double dRemaining = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+		double dRemaining = m_calculator.GetTaskTimeRemaining(pTDI, pTDS, nUnits);
 
 		if (nUnits == TDCU_NULL)
 		{
@@ -4565,7 +4565,7 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	if (dTime != 0)
 		tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
 
-	dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+	dTime = m_calculator.GetTaskTimeRemaining(pTDI, pTDS, nUnits);
 
 	if (dTime != 0)
 		tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
@@ -4838,7 +4838,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 		if (filter.WantAttribute(TDCA_TIMEREMAINING))
 		{
 			TDC_UNITS nUnits = TDCU_NULL;
-			double dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+			double dTime = m_calculator.GetTaskTimeRemaining(pTDI, pTDS, nUnits);
 
 			if (dTime != 0)
 				tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
@@ -5198,7 +5198,7 @@ BOOL CTDCTaskCollator::GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDep
 
 // -----------------------------------------------------------------
 
-BOOL CTDCTaskCollator::GetTasksRemainingTime(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const
+BOOL CTDCTaskCollator::GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const
 {
 	// TODO
 	return FALSE;
