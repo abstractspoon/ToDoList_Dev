@@ -829,9 +829,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 			sValue = m_formatter.GetTaskPosition(dwSingleSelTaskID);
 		else
 			bValueVaries = TRUE;
-
 		break;
-
 
 	case TDCA_ID:
 		if (dwSingleSelTaskID)
@@ -846,7 +844,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		else
 			bValueVaries = TRUE;
 		break;
-
 
 // 	case TDCA_TASKNAME:			sFirst = m_data.GetTaskTitle(aSelTaskIDs[0]); break;
 // 	case TDCA_CREATEDBY:		sFirst = m_data.GetTaskCreatedBy(aSelTaskIDs[0]); break;
