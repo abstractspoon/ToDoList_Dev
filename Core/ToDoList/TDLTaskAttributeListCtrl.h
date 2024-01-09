@@ -172,7 +172,6 @@ protected:
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
-//	CString GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nAttribID) const;
 	BOOL WantCellPrompt(int nRow, const CString& sText) const;
 	CString GetCellPrompt(int nRow) const;
 	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
