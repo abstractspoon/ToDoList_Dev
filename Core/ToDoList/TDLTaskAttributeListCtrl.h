@@ -175,6 +175,8 @@ protected:
 	BOOL WantCellPrompt(int nRow, const CString& sText) const;
 	CString GetCellPrompt(int nRow) const;
 	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
+	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
+	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

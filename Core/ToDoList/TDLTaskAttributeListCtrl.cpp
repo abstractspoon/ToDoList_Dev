@@ -674,186 +674,152 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID
 	RefreshSelectedTaskValue(nRow);
 }
 
+CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAndTime) const
+{
+	DWORD dwFlags = 0;
+	
+	if (m_data.HasStyle(TDCS_SHOWDATESINISO))
+		dwFlags |= DHFD_ISO;
+	
+	if (bAndTime)
+		dwFlags |= DHFD_TIME;
+
+	return CDateHelper::FormatDate(date,  dwFlags);
+}
+
+CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const
+{
+	if (bNotSetIsEmpty && !CDateHelper::DateHasTime(date))
+		return _T("");
+
+	return CTimeHelper::FormatClockTime(date, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+}
+
+// -----------------------------------------------------------------------------------------
+
+#define GETCOLLATEDVALUE_STR(FUNCTION) { bValueVaries = !m_collator.FUNCTION(m_aSelectedTaskIDs, sValue); }
+
+// -----------------------------------------------------------------------------------------
+
+#define GETCOLLATEDVALUE_FMT(FUNCTION, TYPE, FMT)                 \
+{ TYPE value;                                                     \
+if (m_collator.FUNCTION(m_aSelectedTaskIDs, value)) sValue = FMT; \
+else bValueVaries = TRUE; }
+
+// -----------------------------------------------------------------------------------------
+
+#define GETCOLLATEDVALUE_DATE(DT, ANDTIME)                  \
+{ COleDateTime value;                                       \
+if (m_collator.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
+sValue = FormatDate(value, ANDTIME);           \
+else bValueVaries = TRUE; }
+
+// -----------------------------------------------------------------------------------------
+
+#define GETCOLLATEDVALUE_TIME(DT)                           \
+{ COleDateTime value;                                       \
+if (m_collator.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
+sValue = FormatTime(value, TRUE);                           \
+else bValueVaries = TRUE; }
+
+// -----------------------------------------------------------------------------------------
+
+#define GETCOLLATEDVALUE_LIST(FUNCTION)                        \
+{ CStringArray aMatched, aMixed;                               \
+if (m_collator.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed)) \
+sValue = FormatMultiSelItems(aMatched, aMixed);                \
+else bValueVaries = TRUE; }
+
+// -----------------------------------------------------------------------------------------
+
+#define GETUNIQUEVALUE(FUNCTION)                      \
+{ if (dwSingleSelTaskID) sValue = FUNCTION(dwSingleSelTaskID); \
+else if (nSelCount > 1) bValueVaries = TRUE; }
+
+// -----------------------------------------------------------------------------------------
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 {
 	CString sValue;
 	BOOL bValue;
-	int nValue;
-	DWORD dwValue;
 	COleDateTime dtValue;
-	TDCCOST cost;
-
 	CStringArray aMatched, aMixed;
 
-	DWORD dwSingleSelTaskID = ((m_aSelectedTaskIDs.GetSize() == 1) ? m_aSelectedTaskIDs[0] : 0);
+	int nSelCount = m_aSelectedTaskIDs.GetSize();
+	DWORD dwSingleSelTaskID = ((nSelCount == 1) ? m_aSelectedTaskIDs[0] : 0);
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	BOOL bValueVaries = FALSE;
 
 	switch (nAttribID)
 	{
-	case TDCA_EXTERNALID:	bValueVaries = !m_collator.GetTasksExternalID(m_aSelectedTaskIDs, sValue);	break;
-	case TDCA_ALLOCBY:		bValueVaries = !m_collator.GetTasksAllocatedBy(m_aSelectedTaskIDs, sValue);	break;
-	case TDCA_STATUS:		bValueVaries = !m_collator.GetTasksStatus(m_aSelectedTaskIDs, sValue);		break;
-	case TDCA_VERSION:		bValueVaries = !m_collator.GetTasksVersion(m_aSelectedTaskIDs, sValue);		break;
-	case TDCA_ICON:			bValueVaries = !m_collator.GetTasksIcon(m_aSelectedTaskIDs, sValue);		break;
-	case TDCA_PATH:			bValueVaries = !m_collator.GetTasksPath(m_aSelectedTaskIDs, sValue);		break;
+	case TDCA_EXTERNALID:		GETCOLLATEDVALUE_STR(GetTasksExternalID);		break;
+	case TDCA_ALLOCBY:			GETCOLLATEDVALUE_STR(GetTasksAllocatedBy);		break;
+	case TDCA_STATUS:			GETCOLLATEDVALUE_STR(GetTasksStatus);			break;
+	case TDCA_VERSION:			GETCOLLATEDVALUE_STR(GetTasksVersion);			break;
+	case TDCA_ICON:				GETCOLLATEDVALUE_STR(GetTasksIcon);				break;
+	case TDCA_PATH:				GETCOLLATEDVALUE_STR(GetTasksPath);				break;
+	case TDCA_CREATEDBY:		GETCOLLATEDVALUE_STR(GetTasksCreatedBy);		break;
+	case TDCA_LASTMODBY:		GETCOLLATEDVALUE_STR(GetTasksLastModifiedBy);	break;
+	case TDCA_COMMENTSFORMAT:	GETCOLLATEDVALUE_STR(GetTasksCommentsFormat);	break;
 
-	case TDCA_FLAG:			bValueVaries = !m_collator.GetTasksFlag(m_aSelectedTaskIDs, bValue);		break;
-	case TDCA_LOCK:			bValueVaries = !m_collator.GetTasksFlag(m_aSelectedTaskIDs, bValue);		break;
+	case TDCA_ALLOCTO:			GETCOLLATEDVALUE_LIST(GetTasksAllocatedTo);		break;
+	case TDCA_CATEGORY:			GETCOLLATEDVALUE_LIST(GetTasksCategories);		break;
+	case TDCA_TAGS:				GETCOLLATEDVALUE_LIST(GetTasksTags);			break;
+	case TDCA_FILELINK:			GETCOLLATEDVALUE_LIST(GetTasksFileLinks);		break;
 
-	case TDCA_ALLOCTO:		m_collator.GetTasksAllocatedTo(m_aSelectedTaskIDs, aMatched, aMixed);		break;
-	case TDCA_CATEGORY:		m_collator.GetTasksCategories(m_aSelectedTaskIDs, aMatched, aMixed);		break;
-	case TDCA_TAGS:			m_collator.GetTasksTags(m_aSelectedTaskIDs, aMatched, aMixed);				break;
-	case TDCA_FILELINK:		m_collator.GetTasksFileLinks(m_aSelectedTaskIDs, aMatched, aMixed);			break;
+	case TDCA_FLAG:				bValueVaries = !m_collator.GetTasksFlag(m_aSelectedTaskIDs, bValue);	break;
+	case TDCA_LOCK:				bValueVaries = !m_collator.GetTasksLock(m_aSelectedTaskIDs, bValue);	break;
 
-	case TDCA_COST:
-		if (m_collator.GetTasksCost(m_aSelectedTaskIDs, cost))
-			sValue = cost.Format(2);
-		else
-			bValueVaries = TRUE;
-		break;
+	case TDCA_PERCENT:			GETCOLLATEDVALUE_FMT(GetTasksPercentDone,	int, Misc::Format(value, 2));	break;
+	case TDCA_PRIORITY:			GETCOLLATEDVALUE_FMT(GetTasksPriority,		int, Misc::Format(value));		break;
+	case TDCA_RISK:				GETCOLLATEDVALUE_FMT(GetTasksRisk,			int, Misc::Format(value));		break;
+	case TDCA_COLOR:			GETCOLLATEDVALUE_FMT(GetTasksColor,			COLORREF, Misc::Format(value));	break;
+	case TDCA_PARENTID:			GETCOLLATEDVALUE_FMT(GetTasksParentID,		DWORD, Misc::Format(value));	break;
 
-	case TDCA_PERCENT:
-		if (m_collator.GetTasksPercentDone(m_aSelectedTaskIDs, nValue))
-			sValue = Misc::Format(nValue);
-		else
-			bValueVaries = TRUE;
-		break;
-
-	case TDCA_PRIORITY:
-		if (m_collator.GetTasksPriority(m_aSelectedTaskIDs, nValue))
-			sValue = Misc::Format(nValue);
-		else
-			bValueVaries = TRUE;
-		break;
-
-	case TDCA_RISK:
-		if (m_collator.GetTasksRisk(m_aSelectedTaskIDs, nValue))
-			sValue = Misc::Format(nValue);
-		else
-			bValueVaries = TRUE;
-		break;
+	case TDCA_COST:				GETCOLLATEDVALUE_FMT(GetTasksCost,			TDCCOST, value.Format(2));					break;
+	case TDCA_RECURRENCE:		GETCOLLATEDVALUE_FMT(GetTasksRecurrence,	TDCRECURRENCE, value.GetRegularityText());	break;
+	case TDCA_DEPENDENCY:		GETCOLLATEDVALUE_FMT(GetTasksDependencies,	CTDCDependencyArray, value.Format());		break;
+	case TDCA_TIMEREMAINING:	GETCOLLATEDVALUE_FMT(GetTasksTimeRemaining, TDCTIMEPERIOD, value.Format(2));			break;
 
 	case TDCA_TIMEESTIMATE:
-// 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_taskCtrl.SelectionHasParents())
-// 		{
-// 			TDCTIMEPERIOD tp;
-// 
-// 			if (m_taskCtrl.GetSelectedTaskTimeEstimate(tp))
-// 				sValue = tp.Format(2);
-// 		}
-// 		else if (dwSingleSelTaskID)
-// 		{
-// 			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
-// 		}
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_collator.HasParentTasks(m_aSelectedTaskIDs))
+		{
+			GETCOLLATEDVALUE_FMT(GetTasksTimeEstimate, TDCTIMEPERIOD, value.Format(2));
+		}
+		else if (dwSingleSelTaskID)
+		{
+			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
+		}
 		break;
 
 	case TDCA_TIMESPENT:
-// 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_taskCtrl.SelectionHasParents())
-// 		{
-// 			TDCTIMEPERIOD tp;
-// 
-// 			if (m_taskCtrl.GetSelectedTaskTimeSpent(tp))
-// 				sValue = tp.Format(2);
-// 		}
-// 		else if (dwSingleSelTaskID)
-// 		{
-// 			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
-// 		}
-		break;
-
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_STARTDATE:
-		if (m_collator.GetTasksDate(m_aSelectedTaskIDs, TDC::MapAttributeToDate(nAttribID), dtValue))
-			sValue = CDateHelper::FormatDate(dtValue, (m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0));
-		else
-			bValueVaries = TRUE;
-
-		break;
-
-	case TDCA_DONETIME:
-	case TDCA_DUETIME:
-	case TDCA_STARTTIME:
-		if (m_collator.GetTasksDate(m_aSelectedTaskIDs, TDC::MapAttributeToDate(nAttribID), dtValue))
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_collator.HasParentTasks(m_aSelectedTaskIDs))
 		{
-			if (CDateHelper::DateHasTime(dtValue))
-				sValue = CTimeHelper::FormatClockTime(dtValue, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+			GETCOLLATEDVALUE_FMT(GetTasksTimeSpent, TDCTIMEPERIOD, value.Format(2));
 		}
-		else
+		else if (dwSingleSelTaskID)
 		{
-			bValueVaries = TRUE;
+			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
 		}
 		break;
 
-	case TDCA_LASTMODDATE:
-	case TDCA_CREATIONDATE:
-		if (m_collator.GetTasksDate(m_aSelectedTaskIDs, TDC::MapAttributeToDate(nAttribID), dtValue))
-			sValue = CDateHelper::FormatDate(dtValue, DHFD_TIME);
-		else
-			bValueVaries = TRUE;
-		break;
+	case TDCA_DONEDATE:			GETCOLLATEDVALUE_DATE(TDCD_DONEDATE, FALSE);	break;
+	case TDCA_DUEDATE:			GETCOLLATEDVALUE_DATE(TDCD_DUEDATE, FALSE);		break;
+	case TDCA_STARTDATE:		GETCOLLATEDVALUE_DATE(TDCD_STARTDATE, FALSE);	break;
+	case TDCA_LASTMODDATE:		GETCOLLATEDVALUE_DATE(TDCD_LASTMOD, TRUE);		break;
+	case TDCA_CREATIONDATE:		GETCOLLATEDVALUE_DATE(TDCD_CREATE, TRUE);		break;
 
-	case TDCA_COLOR:
-		if (m_collator.GetTasksColor(m_aSelectedTaskIDs, dwValue))
-			sValue = Misc::Format(dwValue);
-		else
-			bValueVaries = TRUE;
-		break;
+	case TDCA_DONETIME:			GETCOLLATEDVALUE_TIME(TDCD_DONETIME);			break;
+	case TDCA_DUETIME:			GETCOLLATEDVALUE_TIME(TDCD_DUETIME);			break;
+	case TDCA_STARTTIME:		GETCOLLATEDVALUE_TIME(TDCD_STARTTIME);			break;
 
-	case TDCA_RECURRENCE:
-		{
-			TDCRECURRENCE recurs;
-
-			if (m_collator.GetTasksRecurrence(m_aSelectedTaskIDs, recurs))
-				sValue = recurs.GetRegularityText();
-			else
-				bValueVaries = TRUE;
-		}
-		break;
-
-	case TDCA_DEPENDENCY:
-		{
-			CTDCDependencyArray aDepends;
-
-			if (m_collator.GetTasksDependencies(m_aSelectedTaskIDs, aDepends))
-				sValue = aDepends.Format();
-			else
-				bValueVaries = TRUE;
-
-		}
-		break;
-
-	case TDCA_POSITION:
-		if (dwSingleSelTaskID)
-			sValue = m_formatter.GetTaskPosition(dwSingleSelTaskID);
-		else
-			bValueVaries = TRUE;
-		break;
-
-	case TDCA_ID:
-		if (dwSingleSelTaskID)
-			sValue = Misc::Format(dwSingleSelTaskID);
-		else
-			bValueVaries = TRUE;
-		break;
-
-	case TDCA_PARENTID:
-		if (m_collator.GetTasksParentID(m_aSelectedTaskIDs, dwValue))
-			sValue = Misc::Format(dwValue);
-		else
-			bValueVaries = TRUE;
-		break;
+	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
+	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
 
 // 	case TDCA_TASKNAME:			sFirst = m_data.GetTaskTitle(aSelTaskIDs[0]); break;
-// 	case TDCA_CREATEDBY:		sFirst = m_data.GetTaskCreatedBy(aSelTaskIDs[0]); break;
-// 	case TDCA_LASTMODBY:		sFirst = m_data.GetTaskLastModifiedBy(aSelTaskIDs[0]); break;
 // 
 // 	case TDCA_COMMENTSSIZE:		sFirst = m_formatter.GetTaskCommentSize(aSelTaskIDs[0]); break;
-// 	case TDCA_COMMENTSFORMAT:	sFirst = m_formatter.GetTaskCommentFormat(aSelTaskIDs[0]); break;
 // 	case TDCA_SUBTASKDONE:		sFirst = m_formatter.GetTaskSubtaskCompletion(aSelTaskIDs[0]); break;
-// 	case TDCA_TIMEREMAINING:	sFirst = m_formatter.GetTaskTimeRemaining(aSelTaskIDs[0]); break;
-
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -904,6 +870,10 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 						break;
 					}
 				}
+			}
+			else
+			{
+				bValueVaries = TRUE;
 			}
 		}
 		else if (IsCustomTime(nAttribID))
