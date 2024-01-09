@@ -231,7 +231,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_aCustomAttribDefs,
 			   mgrContent),
 	// TODO
-	m_lcAttributes(m_taskTree, m_data, m_ilTaskIcons, visDefault)
+	m_lcAttributes(m_data, m_mgrContent, m_ilTaskIcons, visDefault)
 {
 	SetBordersDLU(0);
 	
@@ -1825,11 +1825,13 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
 
-	m_lcAttributes.RefreshSelectedTaskValues(hti != NULL);
-
 	if (hti)
 	{
-		int nSelCount = GetSelectedTaskCount();
+		CDWordArray aSelTaskIDs;
+		int nSelCount = GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+		m_lcAttributes.SetSelectedTaskIDs(aSelTaskIDs);
+
 		DWORD dwTaskID = GetTrueTaskID(hti); 
 
 		BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
@@ -1921,6 +1923,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 	else // clear controls
 	{
+		m_lcAttributes.SetSelectedTaskIDs(CDWordArray());
+
 // 		m_nPriority = 0;
 // 		m_nRisk = 0;
 //		m_nPercentDone = 0;

@@ -332,11 +332,13 @@ public:
 	CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr& mgrContent);
 
 	// These functions return FALSE if two or more tasks had differing values
-	BOOL GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
-	BOOL GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
-	BOOL GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
-	BOOL GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
-	BOOL GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& date) const;
+	BOOL GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const;
+
+// 	BOOL GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
+// 	BOOL GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
+// 	BOOL GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
+// 	BOOL GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
+// 	BOOL GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
 
 	BOOL GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
@@ -344,13 +346,20 @@ public:
 	BOOL GetTasksVersion(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksExternalID(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksStatus(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksIcon(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
+
 	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;
 	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;
 	BOOL GetTasksCommentLength(const CDWordArray& aTaskIDs, int& nValue) const;
 	BOOL GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const;
 	BOOL GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksFlag(const CDWordArray& aTaskIDs, BOOL& bValue) const;
+	BOOL GetTasksLock(const CDWordArray& aTaskIDs, BOOL& bValue) const;
+	BOOL GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crValue) const;
+
 	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
 
 	BOOL GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
@@ -367,6 +376,10 @@ public:
 	BOOL GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	BOOL GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 
+	BOOL HasParentTasks(const CDWordArray& aTaskIDs) const;
+	BOOL HasLockedTasks(const CDWordArray& aTaskIDs) const;
+	BOOL HasTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+
 	// These functions return the number of matching values
 	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
@@ -375,12 +388,13 @@ public:
 
 protected:
 	const CToDoCtrlData& m_data;
-	const CContentMgr& m_mgrContent;
 
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
 
 protected:
+	double GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDC_UNITS& nUnits) const;
+
 	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks,
 												 CStringArray& aMatched, CStringArray& aMixed);
 

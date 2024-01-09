@@ -5007,7 +5007,6 @@ COLORREF CTDCTaskExporter::GetPriorityColor(int nPriority) const
 CTDCTaskCollator::CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr& mgrContent)
 	:
 	m_data(data),
-	m_mgrContent(mgrContent),
 	m_formatter(data, mgrContent),
 	m_calculator(data)
 {
@@ -5050,6 +5049,16 @@ BOOL CTDCTaskCollator::GetTasksExternalID(const CDWordArray& aTaskIDs, CString& 
 	GETTASKSVAL_SIMPLE(m_data.GetTaskExtID, sValue, CString);
 }
 
+BOOL CTDCTaskCollator::GetTasksStatus(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskStatus, sValue, CString);
+}
+
+BOOL CTDCTaskCollator::GetTasksIcon(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskIcon, sValue, CString);
+}
+
 BOOL CTDCTaskCollator::GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const
 {
 	GETTASKSVAL_SIMPLE(m_formatter.GetTaskPosition, sValue, CString);
@@ -5084,6 +5093,21 @@ BOOL CTDCTaskCollator::GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nVa
 	GETTASKSVAL_SIMPLE(m_data.GetTaskPercent, nValue, int);
 }
 
+BOOL CTDCTaskCollator::GetTasksFlag(const CDWordArray& aTaskIDs, BOOL& bValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.IsTaskFlagged, bValue, BOOL);
+}
+
+BOOL CTDCTaskCollator::GetTasksLock(const CDWordArray& aTaskIDs, BOOL& bValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.IsTaskLocked, bValue, BOOL);
+}
+
+BOOL CTDCTaskCollator::GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskColor, crValue, COLORREF);
+}
+
 // -----------------------------------------------------------------
 
 #define GETTASKSVAL_ARG(FUNCTION, VAR, TYPE, ARG)        \
@@ -5101,6 +5125,7 @@ BOOL CTDCTaskCollator::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CStri
 	GETTASKSVAL_ARG(m_formatter.GetTaskCommentFormat, sValue, CString, FALSE);
 }
 
+/*
 BOOL CTDCTaskCollator::GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
 {
 	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_DUE);
@@ -5124,6 +5149,12 @@ BOOL CTDCTaskCollator::GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTim
 BOOL CTDCTaskCollator::GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
 {
 	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_CREATE);
+}
+*/
+
+BOOL CTDCTaskCollator::GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const
+{
+	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, nDate);
 }
 
 // -----------------------------------------------------------------
@@ -5201,21 +5232,99 @@ BOOL CTDCTaskCollator::GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDep
 
 BOOL CTDCTaskCollator::GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const
 {
-	// TODO
-	return FALSE;
+	if (!aTaskIDs.GetSize()) 
+		return FALSE;
+
+	TDCTIMEPERIOD first;
+	first.dAmount = m_calculator.GetTaskTimeRemaining(aTaskIDs[0], first.nUnits);
+
+	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
+	{
+		TDCTIMEPERIOD next;
+		next.dAmount = m_calculator.GetTaskTimeRemaining(aTaskIDs[nID], next.nUnits);
+		
+		if (next != first) 
+			return FALSE;
+	}
+
+	period = first; 
+	return TRUE;
 }
 
 BOOL CTDCTaskCollator::GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const
 {
-	// TODO
-	return FALSE;
-}
+	if (!aTaskIDs.GetSize()) 
+		return FALSE;
 
-// -----------------------------------------------------------------
+	TDCCADATA first;
+	m_data.GetTaskCustomAttributeData(aTaskIDs[0], attribDef.sUniqueID, first);
+
+	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
+	{
+		TDCCADATA next;
+		m_data.GetTaskCustomAttributeData(aTaskIDs[nID], attribDef.sUniqueID, next);
+		
+		if (next != first) 
+			return FALSE;
+	}
+
+	data = first; 
+	return TRUE;
+}
 
 BOOL CTDCTaskCollator::GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nSubtasksTotal, int& nSubtasksDone) const
 {
-	// TODO
+	if (!aTaskIDs.GetSize())
+		return FALSE;
+
+	int nFirstTotal, nFirstDone;
+	m_calculator.GetTaskSubtaskTotals(aTaskIDs[0], nFirstTotal, nFirstDone);
+
+	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
+	{
+		int nNextTotal, nNextDone;
+		m_calculator.GetTaskSubtaskTotals(aTaskIDs[nID], nNextTotal, nNextDone);
+
+		if ((nNextTotal != nFirstTotal) || (nNextDone != nFirstDone))
+			return FALSE;
+	}
+
+	nSubtasksTotal = nFirstTotal;
+	nSubtasksDone = nFirstDone;
+
+	return TRUE;
+}
+
+BOOL CTDCTaskCollator::HasParentTasks(const CDWordArray& aTaskIDs) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.IsTaskParent(aTaskIDs[nID]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCTaskCollator::HasLockedTasks(const CDWordArray& aTaskIDs) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.IsTaskLocked(aTaskIDs[nID]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCTaskCollator::HasTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.TaskHasDate(aTaskIDs[nID], nDate))
+			return TRUE;
+	}
+
 	return FALSE;
 }
 
@@ -5230,7 +5339,7 @@ for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)                     \
 while (nVal--) Misc::IncrementItemStrT<int>(mapCounts, aVals[nVal]); } \
 int nNumMatched = SplitSelectedTaskArrayMatchCounts(mapCounts, aTaskIDs.GetSize(), aMatched, aMixed); \
 Misc::SortArray(aMatched); Misc::SortArray(aMixed);                    \
-return nNumMatched;
+return nNumMatched
 
 // -----------------------------------------------------------------
 

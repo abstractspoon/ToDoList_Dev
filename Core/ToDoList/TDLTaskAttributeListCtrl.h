@@ -34,8 +34,8 @@ class CTDLTaskAttributeListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CTDLTaskAttributeListCtrl(const CTDLTaskCtrlBase& taskCtrl,
-							  const CToDoCtrlData& data,
+	CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
+							  const CContentMgr& mgrContent,
 							  const CTDCImageList& ilIcons,
 							  const TDCCOLEDITVISIBILITY& defaultVis);
 
@@ -50,10 +50,13 @@ public:
 	void SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
 
-	void RefreshSelectedTaskValues(BOOL bHasSelection = TRUE);
+	void RefreshSelectedTaskValues();
 	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
-	void RefreshCompletionStatus();
+
+	void SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
+	void SetCompletionStatus(const CString& sStatus);
+	void SetPriorityColors(const CDWordArray& aColors);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 
@@ -85,14 +88,19 @@ public:
 	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
 
 protected:
-	const CTDLTaskCtrlBase& m_taskCtrl;
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
 
 	CTDCTaskFormatter m_formatter;
+	CTDCTaskCollator m_collator;
+
 	TDCCOLEDITVISIBILITY m_vis;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	TDCAUTOLISTDATA m_tldAll, m_tldDefault;
+
+	CDWordArray m_aSelectedTaskIDs;
+	CString m_sCompletionStatus;
+	CDWordArray m_aPriorityColors;
 
 	CEnCheckComboBox m_cbTextAndNumbers;
 	CDateTimeCtrlEx m_datePicker;
@@ -164,7 +172,7 @@ protected:
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
-	CString GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nAttribID) const;
+//	CString GetSelectedTaskReadOnlyValue(TDC_ATTRIBUTE nAttribID) const;
 	BOOL WantCellPrompt(int nRow, const CString& sText) const;
 	CString GetCellPrompt(int nRow) const;
 	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
