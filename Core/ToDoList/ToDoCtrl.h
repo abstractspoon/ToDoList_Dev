@@ -472,6 +472,8 @@ protected:
 	};
 	
 protected:
+	CToDoCtrlData m_data;
+
 //	CAutoComboBox m_cbAllocBy;
 //	CAutoComboBox m_cbStatus;
 	//CAutoComboBox m_cbVersion;
@@ -533,8 +535,6 @@ protected:
 		CS_CHANGED,
 	};
 	COMMENTS_STATE m_nCommentsState;
-
-	CToDoCtrlData m_data;
 
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;

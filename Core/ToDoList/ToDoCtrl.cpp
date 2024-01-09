@@ -231,7 +231,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_aCustomAttribDefs,
 			   mgrContent),
 	// TODO
-	m_lcAttributes(m_data, m_mgrContent, m_ilTaskIcons, visDefault)
+	m_lcAttributes(m_data, mgrContent, m_ilTaskIcons, visDefault)
 {
 	SetBordersDLU(0);
 	
