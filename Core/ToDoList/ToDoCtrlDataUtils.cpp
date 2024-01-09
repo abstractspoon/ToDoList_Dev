@@ -5008,7 +5008,8 @@ CTDCTaskCollator::CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr&
 	:
 	m_data(data),
 	m_mgrContent(mgrContent),
-	m_formatter(data, mgrContent)
+	m_formatter(data, mgrContent),
+	m_calculator(data)
 {
 }
 
@@ -5220,28 +5221,67 @@ BOOL CTDCTaskCollator::GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& n
 
 // -----------------------------------------------------------------
 
+#define GETTASKSLIST_SPLIT(FUNCTION)                                   \
+                                                                       \
+if (!aTaskIDs.GetSize()) return FALSE;                                 \
+CMap<CString, LPCTSTR, int, int&> mapCounts;                           \
+for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)                     \
+{ CStringArray aVals; int nVal = FUNCTION(aTaskIDs[nID], aVals);       \
+while (nVal--) Misc::IncrementItemStrT<int>(mapCounts, aVals[nVal]); } \
+int nNumMatched = SplitSelectedTaskArrayMatchCounts(mapCounts, aTaskIDs.GetSize(), aMatched, aMixed); \
+Misc::SortArray(aMatched); Misc::SortArray(aMixed);                    \
+return nNumMatched;
+
+// -----------------------------------------------------------------
+
+int CTDCTaskCollator::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
+{
+	aMatched.RemoveAll();
+	aMixed.RemoveAll();
+
+	POSITION pos = mapCounts.GetStartPosition();
+
+	while (pos)
+	{
+		CString sItem;
+		int nCount = 0;
+
+		mapCounts.GetNextAssoc(pos, sItem, nCount);
+
+		if (nCount == nNumTasks)
+		{
+			aMatched.Add(sItem);
+		}
+		else if (nCount > 0)
+		{
+			aMixed.Add(sItem);
+		}
+	}
+
+	return aMatched.GetSize();
+}
+
+// -----------------------------------------------------------------
+
 int CTDCTaskCollator::GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return 0;
+	GETTASKSLIST_SPLIT(m_data.GetTaskCategories);
 }
 
 int CTDCTaskCollator::GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return 0;
+	GETTASKSLIST_SPLIT(m_data.GetTaskTags);
 }
 
 int CTDCTaskCollator::GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return 0;
+	GETTASKSLIST_SPLIT(m_data.GetTaskFileLinks);
 }
 
 int CTDCTaskCollator::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
-	// TODO
-	return FALSE;
+	GETTASKSLIST_SPLIT(m_data.GetTaskAllocTo);
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////////
