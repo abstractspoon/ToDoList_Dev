@@ -61,23 +61,28 @@ public:
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 
 	// Note: 'Color', 'Icon' and 'Recurrence' are handled by parent
-	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
-	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
-	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetAllocBy() const;
 	CString GetStatus() const;
+	CString GetExternalID() const;
+	CString GetVersion() const;
+
+	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetCategories(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 	int GetTags(CStringArray& aMatched, CStringArray& aMixed) const;
+	
 	int GetFileLinks(CStringArray& aFiles) const;
-	CString GetExternalID() const;
+
 	int GetPercentCompletion() const;
 	int GetPriority() const;
 	int GetRisk() const;
+
+	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
+	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 	BOOL GetCost(TDCCOST& cost) const;
 	BOOL GetFlag() const;
 	BOOL GetLock() const;
-	CString GetVersion() const;
+
 	COleDateTime GetStartDate() const;
 	COleDateTime GetDueDate() const;
 	COleDateTime GetDoneDate() const;
