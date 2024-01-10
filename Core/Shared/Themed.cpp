@@ -718,21 +718,35 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 				
 				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
 				{
-					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					if ((nState & DFCS_MIXED) == DFCS_MIXED)
 					{
-						nThState = CBS_CHECKEDDISABLED;
-					}
-					else if ((nState & DFCS_HOT) == DFCS_HOT)
-					{
-						nThState = CBS_CHECKEDHOT;
-					}
-					else if ((nState & DFCS_MIXED) == DFCS_MIXED)
-					{
-						nThState = CBS_MIXEDNORMAL;
+						if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+						{
+							nThState = CBS_MIXEDDISABLED;
+						}
+						else if ((nState & DFCS_HOT) == DFCS_HOT)
+						{
+							nThState = CBS_MIXEDHOT;
+						}
+						else
+						{
+							nThState = CBS_MIXEDNORMAL;
+						}
 					}
 					else
 					{
-						nThState = CBS_CHECKEDNORMAL;
+						if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+						{
+							nThState = CBS_CHECKEDDISABLED;
+						}
+						else if ((nState & DFCS_HOT) == DFCS_HOT)
+						{
+							nThState = CBS_CHECKEDHOT;
+						}
+						else
+						{
+							nThState = CBS_CHECKEDNORMAL;
+						}
 					}
 				}
 				else
