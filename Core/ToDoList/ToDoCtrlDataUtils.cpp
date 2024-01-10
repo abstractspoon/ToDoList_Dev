@@ -301,7 +301,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		case TDCA_PATH:
 			{
-				CString sPath = m_formatter.GetTaskPath(pTDI, pTDS);
+				CString sPath = m_formatter.GetTaskPath(pTDI, pTDS, FALSE);
 
 				// needs care in the handling of trailing back-slashes 
 				// when testing for equality
@@ -1405,8 +1405,8 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		case TDCC_PATH:
 			if (!pTDS1->HasSameParent(pTDS2))
 			{
-				nCompare = Compare(m_formatter.GetTaskPath(pTDI1, pTDS1), 
-									m_formatter.GetTaskPath(pTDI2, pTDS2));
+				nCompare = Compare(m_formatter.GetTaskPath(pTDI1, pTDS1, FALSE), 
+									m_formatter.GetTaskPath(pTDI2, pTDS2, FALSE));
 			}
 			break;
 
@@ -3577,7 +3577,7 @@ CString CTDCTaskFormatter::GetTaskPosition(const TODOSTRUCTURE* pTDS) const
 	return Misc::FormatArrayT(aPositions, _T("%d"), '.');
 }
 
-CString CTDCTaskFormatter::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+CString CTDCTaskFormatter::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bWithTaskName) const
 {
 	ASSERT (pTDS && pTDI);
 
@@ -3601,10 +3601,13 @@ CString CTDCTaskFormatter::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE
 			return EMPTY_STR;
 		}
 
-		sPath = (pTDIParent->sTitle + "\\" + sPath);
+		sPath = (pTDIParent->sTitle + '\\' + sPath);
 
 		pTDSParent = pTDSParent->GetParentTask();
 	}
+
+	if (bWithTaskName)
+		sPath += ('\\' + pTDI->sTitle);
 
 	return sPath;
 }
@@ -4179,7 +4182,7 @@ CString CTDCTaskFormatter::GetTaskPosition(DWORD dwTaskID) const
 	return GetTaskPosition(pTDS);
 }
 
-CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
+CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, BOOL bWithTaskName, int nMaxLen) const
 { 
 	if (nMaxLen == 0)
 		return EMPTY_STR;
@@ -4188,7 +4191,7 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
 
-	CString sPath = GetTaskPath(pTDI, pTDS);
+	CString sPath = GetTaskPath(pTDI, pTDS, bWithTaskName);
 
 	if (nMaxLen == -1 || sPath.IsEmpty() || sPath.GetLength() <= nMaxLen)
 		return sPath;
@@ -4754,7 +4757,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 
 		if (filter.WantAttribute(TDCA_PATH))
 		{
-			CString sPath = m_formatter.GetTaskPath(pTDI, pTDS);
+			CString sPath = m_formatter.GetTaskPath(pTDI, pTDS, FALSE);
 
 			if (!sPath.IsEmpty())
 				tasks.SetTaskPath(hTask, sPath);
@@ -5064,10 +5067,6 @@ BOOL CTDCTaskCollator::GetTaskPosition(const CDWordArray& aTaskIDs, CString& sVa
 	GETTASKSVAL_SIMPLE(m_formatter.GetTaskPosition, sValue, CString);
 }
 
-BOOL CTDCTaskCollator::GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue) const
-{
-	GETTASKSVAL_SIMPLE(m_formatter.GetTaskPath, sValue, CString);
-}
 BOOL CTDCTaskCollator::GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const
 {
 	GETTASKSVAL_SIMPLE(m_data.GetTaskParentID, dwValue, DWORD);
@@ -5119,6 +5118,11 @@ if (FUNCTION(aTaskIDs[nID], ARG) != first) return FALSE; \
 VAR = first; return TRUE
 
 // -----------------------------------------------------------------
+
+BOOL CTDCTaskCollator::GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue, BOOL bWithTaskName) const
+{
+	GETTASKSVAL_ARG(m_formatter.GetTaskPath, sValue, CString, bWithTaskName);
+}
 
 BOOL CTDCTaskCollator::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const
 {

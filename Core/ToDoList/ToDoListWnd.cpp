@@ -9528,7 +9528,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		
 	args.sTasklist = tdc.GetFilePath();
 	args.sTaskTitle = tdc.FormatSelectedTaskTitles(FALSE);
-	args.sTaskExtID = tdc.GetSelectedTaskExtID();
+	args.sTaskExtID = tdc.GetSelectedTaskExternalID();
 	args.sTaskComments = tdc.GetSelectedTaskComments();
 	args.sTaskFileLink = tdc.GetSelectedTaskFileLink(0);
 	args.sTaskAllocBy = tdc.GetSelectedTaskAllocBy();

@@ -518,7 +518,7 @@ void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 		::GetClientRect(m_hdrTasks, rHeader);
 
 		int nColWidthInChars = (int)(rHeader.Width() / m_fAveHeaderCharWidth);
-		CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), nColWidthInChars);
+		CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), FALSE, nColWidthInChars);
 
 		if (!sPath.IsEmpty())
 		{
@@ -6053,7 +6053,7 @@ CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, i
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
 		if (bFullPath)
-			sSelTasks += m_formatter.GetTaskPath(dwTaskID);
+			sSelTasks += m_formatter.GetTaskPath(dwTaskID, FALSE, -1);
 
 		sSelTasks += m_data.GetTaskTitle(dwTaskID);
 		sSelTasks += (cSep == 0 ? Misc::GetListSeparator() : cSep);
@@ -6089,7 +6089,6 @@ int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
 
 	return nPriority;
 }
-*/
 
 DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 {
@@ -6119,6 +6118,7 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 	
 	return dwParentID;
 }
+*/
 
 /*
 int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
@@ -6143,7 +6143,6 @@ int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
 
 	return nRisk;
 }
-*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 {
@@ -6169,6 +6168,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 	
 	return sIcon;
 }
+*/
 
 BOOL CTDLTaskCtrlBase::SelectedTaskHasDate(TDC_DATE nDate) const
 {
@@ -6284,12 +6284,12 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
 
 	return TRUE;
 }
-*/
 
 COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const
 {
 	return m_data.GetTaskColor(GetSelectedTaskID());
 }
+*/
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 {
@@ -6355,7 +6355,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 		if (bIncludeTaskName && nMaxLen != -1)
 			nMaxLen -= sTaskTitle.GetLength();
 
-		sPath = m_formatter.GetTaskPath(dwTaskID, nMaxLen);
+		sPath = m_formatter.GetTaskPath(dwTaskID, FALSE, nMaxLen);
 	
 		if (bIncludeTaskName)
 			sPath += sTaskTitle;
@@ -6660,6 +6660,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aMatched, CStringArray& 
 }
 */
 
+/*
 int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
@@ -6690,6 +6691,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CTDCDependencyArray& aDepends)
 
 	return aDepends.GetSize();
 }
+*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const
 {

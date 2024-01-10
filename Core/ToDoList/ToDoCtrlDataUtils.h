@@ -140,7 +140,7 @@ public:
 	CString GetTaskCategories(DWORD dwTaskID) const;
 	CString GetTaskTags(DWORD dwTaskID) const;
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
-	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
+	CString GetTaskPath(DWORD dwTaskID, BOOL bWithTaskName = FALSE, int nMaxLen = -1) const;
 	CString GetTaskPosition(DWORD dwTaskID) const; 
 	CString GetTaskTimeEstimate(DWORD dwTaskID) const;
 	CString GetTaskTimeSpent(DWORD dwTaskID) const;
@@ -165,7 +165,7 @@ public:
 	CString GetTaskCategories(const TODOITEM* pTDI) const;
 	CString GetTaskTags(const TODOITEM* pTDI) const;
 	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bWithTaskName = FALSE) const;
 	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -348,7 +348,7 @@ public:
 	BOOL GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksStatus(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksIcon(const CDWordArray& aTaskIDs, CString& sValue) const;
-	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue, BOOL bWithTaskName = FALSE) const;
 	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
 
 	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;

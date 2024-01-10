@@ -113,12 +113,9 @@ public:
 	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 	CString GetColumnName(TDC_COLUMN nColID) const;
 
-	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
-	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
 	CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
-	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
 	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
 	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const;
 	int GetSelectedTaskFileLinkCount() const;
@@ -127,8 +124,11 @@ public:
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
-	DWORD GetSelectedTaskParentID() const;
 
+// 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
+// 	CString GetSelectedTaskIcon() const;
+//	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
+// 	DWORD GetSelectedTaskParentID() const;
 // 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 // 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 // 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;

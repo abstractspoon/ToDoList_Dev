@@ -2828,7 +2828,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 	if (!CanEditSelectedTask(TDCA_ICON))
 		return FALSE;
 
-	CTDLTaskIconDlg dialog(m_ilTaskIcons, m_taskTree.GetSelectedTaskIcon(), TRUE, this);
+	CTDLTaskIconDlg dialog(m_ilTaskIcons, m_lcAttributes.GetIcon()/*m_taskTree.GetSelectedTaskIcon()*/, TRUE, this);
 
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
@@ -4976,7 +4976,8 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 
 BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const 
 { 
-	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
+//	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
+	if (!m_lcAttributes.GetRecurrence(tr))
 	{
 		// initialise some options if regularity == once
 		ASSERT(!tr.IsRecurring());

@@ -60,18 +60,19 @@ public:
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 
-	// Note: 'Color', 'Icon' and 'Recurrence' are handled by parent
 	CString GetAllocBy() const;
 	CString GetStatus() const;
 	CString GetExternalID() const;
 	CString GetVersion() const;
+	CString GetIcon() const;
+	CString GetPath(BOOL bWithTaskName) const;
 
 	int GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetCategories(CStringArray& aMatched, CStringArray& aMixed) const;
-	int GetDependencies(CTDCDependencyArray& aDepends) const;
 	int GetTags(CStringArray& aMatched, CStringArray& aMixed) const;
 	
 	int GetFileLinks(CStringArray& aFiles) const;
+	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 	int GetPercentCompletion() const;
 	int GetPriority() const;
@@ -79,6 +80,7 @@ public:
 
 	BOOL GetTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTimeSpent(TDCTIMEPERIOD& timeSpent) const;
+	BOOL GetRecurrence(TDCRECURRENCE& tr) const;
 	BOOL GetCost(TDCCOST& cost) const;
 	BOOL GetFlag() const;
 	BOOL GetLock() const;
@@ -91,6 +93,9 @@ public:
 	COleDateTime GetDoneTime() const;
 
 	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
+
+	COLORREF GetColor() const; // CLR_NONE on no item selected
+	DWORD GetParentID() const;
 
 protected:
 	const CToDoCtrlData& m_data;
