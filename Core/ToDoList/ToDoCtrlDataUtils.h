@@ -393,8 +393,6 @@ protected:
 	CTDCTaskCalculator m_calculator;
 
 protected:
-	double GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDC_UNITS& nUnits) const;
-
 	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks,
 												 CStringArray& aMatched, CStringArray& aMixed);
 
