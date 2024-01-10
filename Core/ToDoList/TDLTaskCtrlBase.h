@@ -118,35 +118,37 @@ public:
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
 	CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
-	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
-	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
-	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
-	int GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
-	CString GetSelectedTaskAllocBy() const;
-	CString GetSelectedTaskStatus() const;
-	int GetSelectedTaskCategories(CStringArray& aCats) const;
-	int GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
-	int GetSelectedTaskTags(CStringArray& aTags) const;
-	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
 	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const;
 	int GetSelectedTaskFileLinkCount() const;
-	CString GetSelectedTaskExtID() const;
-	int GetSelectedTaskPercent() const;
-	int GetSelectedTaskPriority() const;
-	int GetSelectedTaskRisk() const;
-	BOOL GetSelectedTaskCost(TDCCOST& cost) const;
-	BOOL IsSelectedTaskFlagged() const;
-	BOOL IsSelectedTaskLocked() const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
-	CString GetSelectedTaskVersion() const;
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const;
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
-	BOOL IsSelectedTaskReference() const;
 	DWORD GetSelectedTaskParentID() const;
+
+// 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
+// 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
+// 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
+// 	int GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
+// 	CString GetSelectedTaskAllocBy() const;
+// 	CString GetSelectedTaskStatus() const;
+// 	int GetSelectedTaskCategories(CStringArray& aCats) const;
+// 	int GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const;
+// 	int GetSelectedTaskTags(CStringArray& aTags) const;
+// 	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
+//	CString GetSelectedTaskExtID() const;
+//	int GetSelectedTaskPercent() const;
+//	int GetSelectedTaskPriority() const;
+// 	int GetSelectedTaskRisk() const;
+// 	BOOL GetSelectedTaskCost(TDCCOST& cost) const;
+//	CString GetSelectedTaskVersion() const;
+
+	BOOL IsSelectedTaskFlagged() const;
+	BOOL IsSelectedTaskLocked() const;
+	BOOL IsSelectedTaskReference() const;
 	BOOL IsSelectedTaskDone() const;
 	BOOL IsSelectedTaskDue() const;
 	BOOL CanSplitSelectedTask() const;
@@ -405,8 +407,8 @@ protected:
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
 
-	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
-	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
+// 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
+// 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
 protected:
 	struct TDSORTFLAGS

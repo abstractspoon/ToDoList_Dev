@@ -217,6 +217,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_formatter(m_data, mgrContent),
+	m_collator(m_data, mgrContent),
 	m_infoTip(m_data, m_aCustomAttribDefs, mgrContent),
 	m_sourceControl(*this),
 	m_findReplace(*this),
@@ -2827,7 +2828,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 	if (!CanEditSelectedTask(TDCA_ICON))
 		return FALSE;
 
-	CTDLTaskIconDlg dialog(m_ilTaskIcons, GetSelectedTaskIcon(), TRUE, this);
+	CTDLTaskIconDlg dialog(m_ilTaskIcons, m_taskTree.GetSelectedTaskIcon(), TRUE, this);
 
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
@@ -8766,10 +8767,12 @@ BOOL CToDoCtrl::GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD
 	switch (nAttribID)
 	{
 	case TDCA_TIMESPENT:
-		return m_taskTree.GetSelectedTaskTimeSpent(time);
+		return m_lcAttributes.GetTimeSpent(time);
+		// return m_taskTree.GetSelectedTaskTimeSpent(time);
 
 	case TDCA_TIMEESTIMATE:
-		return m_taskTree.GetSelectedTaskTimeEstimate(time); 
+		return m_lcAttributes.GetTimeEstimate(time);
+		// return m_taskTree.GetSelectedTaskTimeEstimate(time); 
 	}
 
 	ASSERT(0);
@@ -11745,10 +11748,10 @@ BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 		GetSelectedTaskRecurrence(tr);
 
 		// use due date if present else start date
-		COleDateTime dtDefault = GetSelectedTaskDate(TDCD_DUE);
+		COleDateTime dtDefault = m_taskTree.GetSelectedTaskDate(TDCD_DUE);
 
 		if (!CDateHelper::IsDateSet(dtDefault))
-			dtDefault = GetSelectedTaskDate(TDCD_START);
+			dtDefault = m_taskTree.GetSelectedTaskDate(TDCD_START);
 
 		CTDLRecurringTaskOptionDlg dialog(tr, dtDefault);
 
@@ -12779,7 +12782,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 			// are automatically calculated
 			return FALSE;
 		}
-		else if ((nAttrib == TDCA_STARTTIME) && !SelectedTaskHasDate(TDCD_START))
+		else if ((nAttrib == TDCA_STARTTIME) && !m_taskTree.SelectedTaskHasDate(TDCD_START))
 		{
 			// Ignore tasks without a start date set
 			return FALSE;

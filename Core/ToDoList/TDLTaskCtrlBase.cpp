@@ -6066,6 +6066,7 @@ CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, i
 	return sSelTasks;
 }
 
+/*
 int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
 {
 	int nPriority = -1;
@@ -6088,6 +6089,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
 
 	return nPriority;
 }
+*/
 
 DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 {
@@ -6118,6 +6120,7 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 	return dwParentID;
 }
 
+/*
 int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
 {
 	int nRisk = -1;
@@ -6140,6 +6143,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
 
 	return nRisk;
 }
+*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 {
@@ -6224,6 +6228,7 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskReference() const
 	return m_data.IsTaskReference(GetSelectedTaskID());
 }
 
+/*
 BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const
 {
 	if (!GetSelectedCount())
@@ -6279,6 +6284,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
 
 	return TRUE;
 }
+*/
 
 COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const
 {
@@ -6310,6 +6316,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 	return tr.IsRecurring();
 }
 
+/*
 int CTDLTaskCtrlBase::GetSelectedTaskPercent() const
 {
 	int nPercent = 0;
@@ -6334,6 +6341,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskPercent() const
 	
 	return nPercent;
 }
+*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen) const
 {
@@ -6356,6 +6364,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	return sPath;
 }
 
+/*
 BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 {
 	if (GetSelectedCount())
@@ -6389,6 +6398,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
 	
 	return FALSE;
 }
+*/
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const
 {
@@ -6458,7 +6468,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 	
 	return !data.IsEmpty();
 }
-
+/*
 int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aAllocTo) const
 {
 	return GetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo);
@@ -6599,6 +6609,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& 
 
 	return nNumMatched;
 }
+*/
 
 int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
 {
@@ -6627,6 +6638,7 @@ int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCT
 	return aMatched.GetSize();
 }
 
+/*
 int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aCats) const
 {
 	return GetSelectedTaskArray(TDCA_CATEGORY, aCats);
@@ -6646,6 +6658,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aMatched, CStringArray& 
 {
 	return GetSelectedTaskArray(TDCA_TAGS, aMatched, aMixed);
 }
+*/
 
 int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const
 {
@@ -6723,6 +6736,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskFileLinkCount() const
 	return 0;
 }
 
+/*
 CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 {
 	if (GetSelectedCount() == 1)
@@ -6731,6 +6745,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 	// else
 	return EMPTY_STR;
 }
+*/
 
 BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
 {
