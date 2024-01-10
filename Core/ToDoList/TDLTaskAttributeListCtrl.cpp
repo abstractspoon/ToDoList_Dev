@@ -242,7 +242,7 @@ void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 		case TDCA_DONETIME:
 		case TDCA_DUETIME:
 		case TDCA_STARTTIME:
-			RefreshSelectedTaskValue(nRow);
+			RefreshSelectedTasksValue(nRow);
 			break;
 		}
 	}
@@ -357,7 +357,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 		}
 	}
 
-	RefreshSelectedTaskValues();
+	RefreshSelectedTasksValues();
 	Sort();
 
 	// Restore previous selection
@@ -639,17 +639,18 @@ void CTDLTaskAttributeListCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIB
 	tld.Copy(m_tldAll, nAttribID);
 }
 
-void CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
+BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 {
 	if (Misc::MatchAll(aTaskIDs, m_aSelectedTaskIDs))
-		return;
+		return FALSE;
 
 	m_aSelectedTaskIDs.Copy(aTaskIDs);
+	RefreshSelectedTasksValues();
 
-	RefreshSelectedTaskValues();
+	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues()
+void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
 {
 	CHoldRedraw hr(*this);
 	HideAllControls();
@@ -659,7 +660,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues()
 	while (nRow--)
 	{
 		if (m_aSelectedTaskIDs.GetSize())
-			RefreshSelectedTaskValue(nRow);
+			RefreshSelectedTasksValue(nRow);
 		else
 			SetItemText(nRow, VALUE_COL, _T(""));
 	}
@@ -667,12 +668,12 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValues()
 	EnableColumnEditing(VALUE_COL, m_aSelectedTaskIDs.GetSize());
 }
 
-void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID)
+void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = GetRow(nAttribID);
 	ASSERT(nRow != -1);
 
-	RefreshSelectedTaskValue(nRow);
+	RefreshSelectedTasksValue(nRow);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAndTime) const
@@ -748,7 +749,7 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
+void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 {
 	int nSelCount = m_aSelectedTaskIDs.GetSize();
 	DWORD dwSingleSelTaskID = ((nSelCount == 1) ? m_aSelectedTaskIDs[0] : 0);
@@ -1241,10 +1242,7 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 	if ((pDispInfo->item.iSubItem == VALUE_COL) &&
 		(pDispInfo->item.iItem >= 0))
 	{
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(pDispInfo->item.iItem, TRUE);
-		
-		NotifyParentEdit(nAttribID);
-		RefreshSelectedTaskValue(nAttribID);
+		NotifyParentEdit(pDispInfo->item.iItem);
 	}
 
 	*pResult = 0;
@@ -1899,21 +1897,21 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_LOCK:
 		// Toggle checkbox
 		SetItemText(nRow, VALUE_COL, (sValue.IsEmpty() ? _T("+") : _T(""))); 
-		NotifyParentEdit(nAttribID);
+		NotifyParentEdit(nRow);
 		break;
 
 	case TDCA_ICON:
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
 		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
-			RefreshSelectedTaskValue(nRow);
+			RefreshSelectedTasksValue(nRow);
 		break;
 
 	case TDCA_DEPENDENCY:
 		if (bBtnClick)
 		{
 			if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
-				RefreshSelectedTaskValue(nRow);
+				RefreshSelectedTasksValue(nRow);
 		}
 		else
 		{
@@ -1954,12 +1952,12 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 
 				case TDCCA_ICON:
 					if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
-						RefreshSelectedTaskValue(nRow);
+						RefreshSelectedTasksValue(nRow);
 					break;
 
 				case TDCCA_BOOL:
 					SetItemText(nRow, VALUE_COL, (sValue.IsEmpty() ? _T("+") : _T(""))); // Toggle checkbox
-					NotifyParentEdit(nAttribID);
+					NotifyParentEdit(nRow);
 					break;
 				}
 			}
@@ -1978,7 +1976,7 @@ void CTDLTaskAttributeListCtrl::HandleSingleFileLinkEdit(int nRow, BOOL bBtnClic
 			m_eSingleFileLink.GetWindowText(sFile);
 
 			SetItemText(nRow, VALUE_COL, sFile);
-			NotifyParentEdit(GetAttributeID(nRow));
+			NotifyParentEdit(nRow);
 		}
 	}
 	else
@@ -2084,18 +2082,18 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	if (sNewItemText != GetItemText(nRow, VALUE_COL))
 	{
 		SetItemText(nRow, VALUE_COL, sNewItemText);
-		NotifyParentEdit(nAttribID);
+		NotifyParentEdit(nRow);
 	}
 }
 
-LRESULT CTDLTaskAttributeListCtrl::NotifyParentEdit(TDC_ATTRIBUTE nAttribID)
+void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow)
 {
 	UpdateWindow();
 
-	if (IsCustomTime(nAttribID))
-		nAttribID = MapCustomTimeToDate(nAttribID);
+	GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE));
 
-	return GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, nAttribID);
+	// Refresh the cell text if either the edit failed or we are no longer 'value varies'
+	RefreshSelectedTasksValue(nRow);
 }
 
 void CTDLTaskAttributeListCtrl::OnDependsChange()
@@ -2106,7 +2104,7 @@ void CTDLTaskAttributeListCtrl::OnDependsChange()
 
 	HideControl(m_eDepends);
 	SetItemText(nRow, VALUE_COL, m_eDepends.FormatDependencies());
-	NotifyParentEdit(TDCA_DEPENDENCY);
+	NotifyParentEdit(nRow);
 }
 
 void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
@@ -2120,7 +2118,7 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
 
 	HideControl(m_eSingleFileLink);
 	SetItemText(nRow, VALUE_COL, sFile);
-	NotifyParentEdit(nAttribID);
+	NotifyParentEdit(nRow);
 }
 
 void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
@@ -2136,7 +2134,7 @@ void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
 	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
 
 	SetItemText(nRow, VALUE_COL, tp.Format(2));
-	NotifyParentEdit(nAttribID);
+	NotifyParentEdit(nRow);
 }
 
 void CTDLTaskAttributeListCtrl::OnCancelEdit()
@@ -2192,7 +2190,7 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 		if (sNewItemText != GetItemText(nRow, VALUE_COL))
 		{
 			SetItemText(nRow, VALUE_COL, sNewItemText);
-			NotifyParentEdit(nAttribID);
+			NotifyParentEdit(nRow);
 		}
 	}
 

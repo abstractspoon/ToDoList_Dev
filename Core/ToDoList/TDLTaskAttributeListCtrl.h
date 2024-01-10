@@ -50,11 +50,11 @@ public:
 	void SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
 
-	void RefreshSelectedTaskValues();
-	void RefreshSelectedTaskValue(TDC_ATTRIBUTE nAttribID);
+	void RefreshSelectedTasksValues();
+	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 
-	void SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
+	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);
 
@@ -169,8 +169,8 @@ protected:
 	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
-	void RefreshSelectedTaskValue(int nRow);
-	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
+	void RefreshSelectedTasksValue(int nRow);
+	void NotifyParentEdit(int nRow);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
 // 	BOOL WantCellPrompt(int nRow, const CString& sText) const;
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
