@@ -726,11 +726,11 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_LIST(FUNCTION)                        \
-{ CStringArray aMatched, aMixed;                               \
-if (m_collator.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed)) \
-sValue = FormatMultiSelItems(aMatched, aMixed);                \
-else bValueVaries = TRUE; }
+#define GETCOLLATEDVALUE_LIST(FUNCTION)                    \
+{ CStringArray aMatched, aMixed;                           \
+m_collator.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed); \
+sValue = FormatMultiSelItems(aMatched, aMixed);            \
+bValueVaries = aMixed.GetSize(); }
 
 // -----------------------------------------------------------------------------------------
 
