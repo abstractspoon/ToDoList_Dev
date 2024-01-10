@@ -16,6 +16,8 @@
 
 enum { NOTVALID, ADDITEM, EDITITEM };
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum IL_COLUMNTYPE 
 { 
 	ILCT_TEXT, 
@@ -142,7 +144,7 @@ protected:
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell);
 	virtual void PrepareControl(CWnd& /*ctrl*/, int /*nRow*/, int /*nCol*/) {}
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
-	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected); 
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);

@@ -5934,6 +5934,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_TDC_EMPTY           "<empty>"
+    IDS_EDIT_VALUEVARIES    "<value varies>"
 END
 
 #endif    // English (Australia) resources

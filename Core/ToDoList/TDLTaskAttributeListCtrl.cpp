@@ -16,6 +16,7 @@
 #include "..\shared\encolordialog.h"
 #include "..\shared\FileIcons.h"
 #include "..\shared\WndPrompt.h"
+#include "..\shared\Themed.h"
 
 #include "..\3rdParty\ColorDef.h"
 
@@ -82,7 +83,7 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
-const CString VALUE_VARIES(_T("<<VALUE VARIES>>"));
+const int VALUE_VARIES = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -697,7 +698,8 @@ CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNo
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_STR(FUNCTION) { bValueVaries = !m_collator.FUNCTION(m_aSelectedTaskIDs, sValue); }
+#define GETCOLLATEDVALUE_STR(FUNCTION) \
+{ bValueVaries = !m_collator.FUNCTION(m_aSelectedTaskIDs, sValue); }
 
 // -----------------------------------------------------------------------------------------
 
@@ -732,22 +734,27 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETUNIQUEVALUE(FUNCTION)                      \
+#define GETUNIQUEVALUE(FUNCTION)                               \
 { if (dwSingleSelTaskID) sValue = FUNCTION(dwSingleSelTaskID); \
 else if (nSelCount > 1) bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
+#define GETCOLLATEDVALUE_BOOL(FUNCTION)             \
+{ BOOL value;                                       \
+if (m_collator.FUNCTION(m_aSelectedTaskIDs, value)) \
+sValue = (value ? _T("+") : _T(""));                \
+else bValueVaries = TRUE; }
+
+// -----------------------------------------------------------------------------------------
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 {
-	CString sValue;
-	BOOL bValue;
-	COleDateTime dtValue;
-	CStringArray aMatched, aMixed;
-
 	int nSelCount = m_aSelectedTaskIDs.GetSize();
 	DWORD dwSingleSelTaskID = ((nSelCount == 1) ? m_aSelectedTaskIDs[0] : 0);
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	CString sValue;
 	BOOL bValueVaries = FALSE;
 
 	switch (nAttribID)
@@ -767,8 +774,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 	case TDCA_TAGS:				GETCOLLATEDVALUE_LIST(GetTasksTags);			break;
 	case TDCA_FILELINK:			GETCOLLATEDVALUE_LIST(GetTasksFileLinks);		break;
 
-	case TDCA_FLAG:				bValueVaries = !m_collator.GetTasksFlag(m_aSelectedTaskIDs, bValue);	break;
-	case TDCA_LOCK:				bValueVaries = !m_collator.GetTasksLock(m_aSelectedTaskIDs, bValue);	break;
+	case TDCA_FLAG:				GETCOLLATEDVALUE_BOOL(GetTasksFlag);			break;
+	case TDCA_LOCK:				GETCOLLATEDVALUE_BOOL(GetTasksLock);			break;
 
 	case TDCA_PERCENT:			GETCOLLATEDVALUE_FMT(GetTasksPercentDone,	int, Misc::Format(value, 2));	break;
 	case TDCA_PRIORITY:			GETCOLLATEDVALUE_FMT(GetTasksPriority,		int, Misc::Format(value));		break;
@@ -832,11 +839,11 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 
 			if (m_collator.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
 			{
-				if (pDef->IsMultiList())
+				/*if (pDef->IsMultiList())
 				{
 					data.AsArrays(aMatched, aMixed);
 				}
-				else if (pDef->IsList())
+				else*/ if (pDef->IsList())
 				{
 					sValue = data.FormatAsArray();
 				}
@@ -892,15 +899,9 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTaskValue(int nRow)
 		break;
 	}
 
-	if (aMatched.GetSize() || aMixed.GetSize())
-	{
-		sValue = FormatMultiSelItems(aMatched, aMixed);
-	}
-	else if (bValueVaries)
-	{
-		sValue = VALUE_VARIES;
-	}
-
+	// To distinguish between empty values and multiple differing values
+	// we use the item image index
+	SetItemImage(nRow, (bValueVaries ? VALUE_VARIES : -1));
 	SetItemText(nRow, VALUE_COL, sValue);
 }
 
@@ -932,9 +933,17 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton
 	return TRUE;
 }
 
-BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected)
+BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
 {
-	if (!CInputListCtrl::DrawButton(pDC, nRow, nCol, rButton, bHasText, bSelected))
+	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && (GetItemImage(nRow) == VALUE_VARIES))
+	{
+		DWORD dwState = GetButtonState(nRow, nCol, bSelected);
+		dwState |= (DFCS_BUTTONCHECK | DFCS_MIXED);
+
+		return CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, dwState);
+	}
+
+	if (!CInputListCtrl::DrawButton(pDC, nRow, nCol, sText, bSelected, rButton))
 		return FALSE;
 
 	// Draw 'File Link' browse icon
@@ -944,7 +953,7 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& 
 	switch (nAttribID)
 	{
 	case TDCA_FILELINK:
-		bWantFileIcon = !bHasText;
+		bWantFileIcon = sText.IsEmpty();
 		break;
 
 	default:
@@ -964,121 +973,47 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& 
 	return TRUE;
 }
 
-CString CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow) const
+BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const
 {
-	//ASSERT(WantCellPrompt(nRow));
+	int nSelCount = m_aSelectedTaskIDs.GetSize();
 
-	CEnString sPrompt;
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	if (!nSelCount)
+		return FALSE;
 
-	switch (m_aSelectedTaskIDs.GetSize())
+	BOOL bValueVaries = (GetItemImage(nRow) == VALUE_VARIES);
+
+	if (!bValueVaries)
 	{
-	case 0:
-		break; // No prompt
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	case 1:
 		switch (nAttribID)
 		{
-		case TDCA_TASKNAME:
-			break;
-
-		case TDCA_COST:
-			sPrompt = Misc::FormatCost(0.0);
-			break;
-
-		case TDCA_TIMEESTIMATE:
-		case TDCA_TIMESPENT:
-			sPrompt = m_formatter.GetTimePeriod(0.0, TDCU_DAYS, FALSE);
-			break;
-
 		case TDCA_DUETIME:
-			sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+			if (sText.IsEmpty())
+				sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			break;
 
 		case TDCA_STARTTIME:
-			sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
-			break;
-
-		case TDCA_ALLOCTO:
-		case TDCA_ALLOCBY:
-			sPrompt.LoadString(IDS_TDC_NOONE);
+			if (sText.IsEmpty())
+				sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			break;
 
 		case TDCA_CATEGORY:
 		case TDCA_TAGS:
 		case TDCA_FILELINK:
+		case TDCA_ALLOCTO:
 		case TDCA_DEPENDENCY:
-			sPrompt.LoadString(IDS_TDC_EMPTY);
-			break;
-
-		case TDCA_PRIORITY:
-		case TDCA_RISK:
-			sPrompt.LoadString(IDS_TDC_NONE);
-			break;
-
-		case TDCA_EXTERNALID:
-		case TDCA_PERCENT:
-		case TDCA_DONEDATE:
-		case TDCA_DUEDATE:
-		case TDCA_STARTDATE:
-		case TDCA_STATUS:
-		case TDCA_VERSION:
-		case TDCA_RECURRENCE:
-		case TDCA_ICON:
-			sPrompt.LoadString(IDS_TDC_NONE);
-			break;
-
-		case TDCA_COLOR:
-		case TDCA_FLAG:
-		case TDCA_LOCK:
-			break;
-
-		case TDCA_DONETIME:
-		case TDCA_CREATEDBY:
-		case TDCA_PATH:
-		case TDCA_POSITION:
-		case TDCA_CREATIONDATE:
-		case TDCA_LASTMODDATE:
-		case TDCA_COMMENTSSIZE:
-		case TDCA_COMMENTSFORMAT:
-		case TDCA_SUBTASKDONE:
-		case TDCA_LASTMODBY:
-		case TDCA_ID:
-		case TDCA_PARENTID:
+			bValueVaries = (sText.Find('|') != -1);
 			break;
 
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, sPrompt);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 				if (pDef->IsList())
-				{
-					sPrompt.LoadString(IDS_TDC_NONE);
-				}
-				else
-				{
-					// else
-					switch (pDef->GetDataType())
-					{
-					case TDCCA_STRING:
-					case TDCCA_FRACTION:
-						break;
-
-					case TDCCA_INTEGER:
-					case TDCCA_DOUBLE:
-					case TDCCA_CALCULATION:
-						break;
-
-					case TDCCA_TIMEPERIOD:
-					case TDCCA_DATE:
-					case TDCCA_BOOL:
-					case TDCCA_ICON:
-					case TDCCA_FILELINK:
-						break;
-					}
-				}
+					bValueVaries = (sText.Find('|') != -1);
 			}
 			else if (IsCustomTime(nAttribID))
 			{
@@ -1086,50 +1021,12 @@ CString CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow) const
 			}
 			break;
 		}
-		break;
-
-	default: // > 1
-		sPrompt.LoadString(IDS_TDC_EDITPROMPT_MULTIPLETASKS);
-		break;
 	}
 
-	return sPrompt;
-}
+	if (bValueVaries)
+		sPrompt = CEnString(IDS_EDIT_VALUEVARIES);
 
-BOOL CTDLTaskAttributeListCtrl::WantCellPrompt(int nRow, const CString& sText) const
-{
-	if (!IsColumnEditingEnabled(VALUE_COL))
-		return FALSE;
-
-	if (sText.IsEmpty())
-		return TRUE;
-
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
-	switch (nAttribID)
-	{
-	case TDCA_ALLOCTO:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
-		return (sText[0] == '|'); // Mixed items only
-
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-		return (sText[0] == '-'); // -1 or -2
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
-
-			if (pDef->IsMultiList())
-				return (sText[0] == '|'); // Mixed items only
-		}
-		break;
-	}
-
-	return FALSE;
+	return !sPrompt.IsEmpty();
 }
 
 void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
@@ -1140,19 +1037,17 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 	}
 
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	CString sPrompt;
 
-	if (WantCellPrompt(nRow, sText))
+	if (GetCellPrompt(nRow, sText, sPrompt))
 	{
-		CString sPrompt = GetCellPrompt(nRow);
-
-		if (!sPrompt.IsEmpty())
-			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags);
-
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags);
 		return;
 	}
 
 	// else attributes requiring custom rendering
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
 	switch (nAttribID)
 	{
 	case TDCA_PRIORITY:

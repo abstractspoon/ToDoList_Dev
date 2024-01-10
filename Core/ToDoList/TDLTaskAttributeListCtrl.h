@@ -156,7 +156,7 @@ protected:
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
-	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected);
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
@@ -172,8 +172,8 @@ protected:
 	void RefreshSelectedTaskValue(int nRow);
 	LRESULT NotifyParentEdit(TDC_ATTRIBUTE nAttribID);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
-	BOOL WantCellPrompt(int nRow, const CString& sText) const;
-	CString GetCellPrompt(int nRow) const;
+// 	BOOL WantCellPrompt(int nRow, const CString& sText) const;
+ 	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
 	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;

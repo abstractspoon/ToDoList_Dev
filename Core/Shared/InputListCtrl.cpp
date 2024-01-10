@@ -531,7 +531,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if (pImageList)
 	{
-		nImage = GetImageIndex(nItem, 0); 
+		nImage = GetItemImage(nItem); 
 		CEnImageList::GetImageSize(*pImageList, sizeImage);
 	}
 
@@ -727,7 +727,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			}
 		
 			if (bHasBtn)
-				DrawButton(pDC, nItem, nCol, rButton, !sText.IsEmpty(), bSel);
+				DrawButton(pDC, nItem, nCol, sText, bSel, rButton);
 
 			// next column
 			nCol++;
@@ -773,7 +773,7 @@ DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 	return dwState;
 }
 
-BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected)
+BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
 {
 	if (!GetButtonRect(nRow, nCol, rButton))
 		return FALSE;
@@ -836,7 +836,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			
 		case ILCT_CHECK:
 			{
-				if (bHasText)
+				if (!sText.IsEmpty())
 					dwState |= DFCS_CHECKED;
 
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));

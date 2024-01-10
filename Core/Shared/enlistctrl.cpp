@@ -1039,7 +1039,7 @@ void CEnListCtrl::SetView(int nView)
 	PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
 }
 
-int CEnListCtrl::GetImageIndex(int nItem, int nSubItem) const
+int CEnListCtrl::GetItemImage(int nItem, int nSubItem) const
 {
 	LV_ITEM lvi =  { 0 };
 
@@ -1050,6 +1050,22 @@ int CEnListCtrl::GetImageIndex(int nItem, int nSubItem) const
 	GetItem(&lvi);
 
 	return lvi.iImage;
+}
+
+BOOL CEnListCtrl::SetItemImage(int nItem, int nImage)
+{
+	return SetItem(nItem, 0, LVIF_IMAGE, _T(""), nImage, 0, 0, 0L);
+}
+
+BOOL CEnListCtrl::SetItemImage(int nItem, int nSubItem, int nImage)
+{
+	LV_ITEM lvi = { 0 };
+
+	lvi.mask = LVIF_IMAGE;
+	lvi.iItem = nItem;
+	lvi.iSubItem = nSubItem;
+
+	return SetItem(&lvi);
 }
 
 void CEnListCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -1432,14 +1448,6 @@ BOOL CEnListCtrl::SelectDropTarget(int nItem)
 	}
 
 	return TRUE;
-}
-
-void CEnListCtrl::SetItemImage(int nItem, int nImage)
-{
-	if (nItem < 0 || nItem >= GetItemCount())
-		return;
-
-	SetItem(nItem, 0, LVIF_IMAGE, _T(""), nImage, 0, 0, 0L);
 }
 
 BOOL CEnListCtrl::IsItemSelected(int nItem) const

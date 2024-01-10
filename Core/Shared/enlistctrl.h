@@ -93,7 +93,9 @@ public:
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL IsReadOnly() const { return m_bReadOnly; }
 	BOOL SelectDropTarget(int nItem);
-	void SetItemImage(int nItem, int nImage);
+	BOOL SetItemImage(int nItem, int nImage);
+	BOOL SetItemImage(int nItem, int nSubItem, int nImage);
+	int GetItemImage(int nItem, int nSubItem = 0) const;
 	BOOL IsItemSelected(int nItem) const;
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
@@ -208,7 +210,6 @@ protected:
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
 
 	int GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	int GetImageIndex(int nItem, int nSubItem) const;
 	void NotifySelChange();
 	void DeleteAllColumnData();
 	CColumnData* CreateColumnData(int nCol);
