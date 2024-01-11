@@ -245,12 +245,12 @@ public:
 	int GetSelectedTaskFileLinkCount() const { return m_taskTree.GetSelectedTaskFileLinkCount(); }
 	int GetSelectedTaskFileLinks(CStringArray& aFiles) const;
 	BOOL GotoSelectedTaskFileLink(int nFile);
-	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const { return m_lcAttributes.GetPath(bIncludeTaskName); } //m_taskTree.GetSelectedTaskPath(bIncludeTaskName, nMaxLen); }
+	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;// m_taskTree.GetSelectedTaskPath(bIncludeTaskName, nMaxLen); }
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_taskTree.GetSelectedTaskCustomAttributeData(sAttribID, data, bFormatted); }
 	int GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted = FALSE) const;
 	
-	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const { return m_lcAttributes.GetDependencies(aDepends); } // m_taskTree.GetSelectedTaskDependencies(aDepends); }
-	COLORREF GetSelectedTaskColor() const { return m_lcAttributes.GetColor(); } //m_taskTree.GetSelectedTaskColor(); }
+	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const { return m_lcAttributes.GetDependencies(aDepends); } //m_taskTree.GetSelectedTaskDependencies(aDepends); }
+	COLORREF GetSelectedTaskColor() const; //{ return m_taskTree.GetSelectedTaskColor(); }
 	CString GetSelectedTaskExternalID() const { return m_lcAttributes.GetExternalID(); }// m_taskTree.GetSelectedTaskExtID(); }
 	int GetSelectedTaskPriority() const { return m_lcAttributes.GetPriority(); }//m_taskTree.GetSelectedTaskPriority(); }
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { CStringArray aUnused; return m_lcAttributes.GetAllocTo(aAllocTo, aUnused); } // m_taskTree.GetSelectedTaskAllocTo(aAllocTo); }
@@ -258,7 +258,6 @@ public:
 
 //	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
 //	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const { return m_taskTree.GetSelectedTaskDate(nDate); }
-//	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
 //	CString GetSelectedTaskStatus() const { return m_taskTree.GetSelectedTaskStatus(); }
 //	int GetSelectedTaskCategories(CStringArray& aCats) const { return m_taskTree.GetSelectedTaskCategories(aCats); }
 //	int GetSelectedTaskTags(CStringArray& aTags) const { return m_taskTree.GetSelectedTaskTags(aTags); }
@@ -661,11 +660,11 @@ protected:
 // 	afx_msg void OnSelCancelPriority();
 // 	afx_msg void OnSelCancelRisk();
 // 	afx_msg void OnChangeRisk();
-	afx_msg void OnChangeProjectName();
 // 	afx_msg void OnChangeCost();
 // 	afx_msg void OnChangeDependency();
 // 	afx_msg void OnChangeExternalID();
 // 	afx_msg void OnChangeRecurrence();
+	afx_msg void OnChangeProjectName();
 	afx_msg void OnSelChangeCommentsType();
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 
@@ -686,18 +685,18 @@ protected:
 	afx_msg LRESULT OnTDCDisplayLink(WPARAM wParam, LPARAM lParam);
 
 //	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam);
 // 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
+//	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
+//	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsWantSpellCheck(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFixupPostDropSelection(WPARAM wp, LPARAM lp);
-//	afx_msg LRESULT OnRefreshPercentSpinVisibility(WPARAM wp, LPARAM lp);
-//	afx_msg LRESULT OnChangeColour(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnLabelEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
@@ -826,9 +825,10 @@ protected:
 	BOOL SetSelectedTaskColor(COLORREF color);
 	BOOL GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& tp) const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
-	DWORD GetSelectedTaskParentID() const { return m_lcAttributes.GetParentID(); } //return m_taskTree.GetSelectedTaskParentID(); }
+	DWORD GetSelectedTaskParentID() const; // { return m_taskTree.GetSelectedTaskParentID(); }
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_lcAttributes.GetTimeEstimate(timeEst); } // m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_lcAttributes.GetTimeSpent(timeSpent); } // m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
+	CString GetSelectedTaskIcon() const; // { return m_taskTree.GetSelectedTaskIcon(); }
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);

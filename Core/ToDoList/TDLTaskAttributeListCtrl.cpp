@@ -1298,7 +1298,7 @@ CString CTDLTaskAttributeListCtrl::GetExternalID() const
 	return GetValueText(TDCA_EXTERNALID);
 }
 
-int CTDLTaskAttributeListCtrl::GetPercentCompletion() const
+int CTDLTaskAttributeListCtrl::GetPercentDone() const
 {
 	return _ttoi(GetValueText(TDCA_PERCENT));
 }
@@ -1374,35 +1374,6 @@ COleDateTime CTDLTaskAttributeListCtrl::GetDueTime() const
 COleDateTime CTDLTaskAttributeListCtrl::GetDoneTime() const
 {
 	return (CTimeHelper::DecodeClockTime(GetValueText(TDCA_DONETIME)) / 24);
-}
-
-COLORREF CTDLTaskAttributeListCtrl::GetColor() const
-{
-	COLORREF color;
-	return (m_collator.GetTasksColor(m_aSelectedTaskIDs, color) ? color : CLR_NONE);
-}
-
-CString CTDLTaskAttributeListCtrl::GetIcon() const
-{
-	CString sIcon;
-	return (m_collator.GetTasksIcon(m_aSelectedTaskIDs, sIcon) ? sIcon : _T(""));
-}
-
-CString CTDLTaskAttributeListCtrl::GetPath(BOOL bWithTaskName) const
-{
-	CString sPath;
-	return (m_collator.GetTasksPath(m_aSelectedTaskIDs, sPath, bWithTaskName) ? sPath : _T(""));
-}
-
-BOOL CTDLTaskAttributeListCtrl::GetRecurrence(TDCRECURRENCE& tr) const
-{
-	return m_collator.GetTasksRecurrence(m_aSelectedTaskIDs, tr);
-}
-
-DWORD CTDLTaskAttributeListCtrl::GetParentID() const
-{
-	DWORD dwID;
-	return (m_collator.GetTasksParentID(m_aSelectedTaskIDs, dwID) ? dwID : 0);
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const

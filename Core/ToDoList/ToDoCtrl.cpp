@@ -2278,7 +2278,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	case TDCA_PERCENT:
 		//SetSelectedTaskPercentDone(m_nPercentDone);
-		SetSelectedTaskPercentDone(m_lcAttributes.GetPercentCompletion());
+		SetSelectedTaskPercentDone(m_lcAttributes.GetPercentDone());
 		break;
 		
 	case TDCA_TIMEESTIMATE:
@@ -2828,7 +2828,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 	if (!CanEditSelectedTask(TDCA_ICON))
 		return FALSE;
 
-	CTDLTaskIconDlg dialog(m_ilTaskIcons, m_lcAttributes.GetIcon()/*m_taskTree.GetSelectedTaskIcon()*/, TRUE, this);
+	CTDLTaskIconDlg dialog(m_ilTaskIcons, /*m_taskTree.*/GetSelectedTaskIcon(), TRUE, this);
 
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
@@ -4867,7 +4867,7 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 		}
 
 		// We only update the control if not editing otherwise
-		// if the user is partially way thru typing a task ID
+		// if the user is partially way through typing a task ID
 		// and the partial ID does not exist then it gets 
 		// removed from the edit field. 
 // 		if (!bEdit)
@@ -4976,8 +4976,11 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 
 BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const 
 { 
+	CDWordArray aSelTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
 //	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
-	if (!m_lcAttributes.GetRecurrence(tr))
+	if (!m_collator.GetTasksRecurrence(aSelTaskIDs, tr))
 	{
 		// initialise some options if regularity == once
 		ASSERT(!tr.IsRecurring());
@@ -4995,6 +4998,42 @@ int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles) const
 {  
 	// external version always returns full paths
 	return GetSelectedTaskFileLinks(aFiles, TRUE);
+}
+
+COLORREF CToDoCtrl::GetSelectedTaskColor() const
+{
+	CDWordArray aSelTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+	COLORREF color;
+	return (m_collator.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
+}
+
+CString CToDoCtrl::GetSelectedTaskIcon() const
+{
+	CDWordArray aSelTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+	CString sIcon;
+	return (m_collator.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
+}
+
+CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
+{
+	CDWordArray aSelTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+	CString sPath;
+	return (m_collator.GetTasksPath(aSelTaskIDs, sPath, bWithTaskName) ? sPath : _T(""));
+}
+
+DWORD CToDoCtrl::GetSelectedTaskParentID() const
+{
+	CDWordArray aSelTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+	DWORD dwID;
+	return (m_collator.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);
 }
 
 int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const 

@@ -6213,12 +6213,12 @@ COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
 	return date;
 }
 
-int CTDLTaskCtrlBase::IsSelectedTaskFlagged() const
+BOOL CTDLTaskCtrlBase::IsSelectedTaskFlagged() const
 {
 	return m_data.IsTaskFlagged(GetSelectedTaskID());
 }
 
-int CTDLTaskCtrlBase::IsSelectedTaskLocked() const
+BOOL CTDLTaskCtrlBase::IsSelectedTaskLocked() const
 {
 	return m_data.IsTaskLocked(GetSelectedTaskID());
 }

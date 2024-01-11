@@ -334,12 +334,6 @@ public:
 	// These functions return FALSE if two or more tasks had differing values
 	BOOL GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const;
 
-// 	BOOL GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
-// 	BOOL GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
-// 	BOOL GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
-// 	BOOL GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
-// 	BOOL GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const;
-
 	BOOL GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksAllocatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
