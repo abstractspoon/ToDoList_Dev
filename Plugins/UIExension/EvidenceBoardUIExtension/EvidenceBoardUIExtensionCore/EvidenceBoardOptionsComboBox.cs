@@ -1,4 +1,4 @@
-﻿using System;
+ns﻿using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +40,7 @@ namespace EvidenceBoardUIExtension
 #if DEBUG
 			Items.Add(new EvidenceBoardOptionItem("Show root node", EvidenceBoardOption.ShowRootNode));
 #endif
-			Items.Add(new EvidenceBoardOptionItem("Draw links on top", EvidenceBoardOption.DrawLinksOnTop));
+			Items.Add(new EvidenceBoardOptionItem("Draw connections on top", EvidenceBoardOption.DrawLinksOnTop));
 			Items.Add(new EvidenceBoardOptionItem("Draw pins", EvidenceBoardOption.DrawPins));
 			Items.Add(new EvidenceBoardOptionItem("Show 'Visible Date Range' slider", EvidenceBoardOption.ShowDateSlider));
 
