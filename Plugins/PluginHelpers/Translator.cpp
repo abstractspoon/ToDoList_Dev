@@ -84,9 +84,15 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 	}
 }
 
-void Translator::Translate(UserControl^ ctrl)
+void Translator::Translate(Control^ ctrl)
 {
 	Translate(ctrl->Controls);
+}
+
+void Translator::Translate(ITranslatable^ ctrl)
+{
+	if (ctrl != nullptr)
+		ctrl->Translate(this);
 }
 
 void Translator::Translate(ToolStripItemCollection^ items)
@@ -126,7 +132,11 @@ void Translator::Translate(Control::ControlCollection^ items)
 			continue;
 		}
 
-		if (ISTYPE(ctrl, ToolStrip))
+		if (ISTYPE(ctrl, ITranslatable))
+		{
+			Translate(ASTYPE(ctrl, ITranslatable));
+		}
+		else if (ISTYPE(ctrl, ToolStrip))
 		{
 			Translate(ASTYPE(ctrl, ToolStrip)->Items);
 		}
