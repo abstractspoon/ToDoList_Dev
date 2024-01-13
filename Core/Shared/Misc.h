@@ -86,6 +86,7 @@ namespace Misc
 	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
 	BOOL ShortDateFormatHasMonthBeforeDay();
 	CString GetDateSeparator();
+	CString GetLocaleInfo(LCTYPE lcType, int nBufSize = 1024);
 
 	BOOL MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE);
 	BOOL MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);

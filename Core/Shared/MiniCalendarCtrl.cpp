@@ -5,6 +5,7 @@
 #include "MiniCalendarCtrl.h"
 
 #include "datehelper.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -49,8 +50,18 @@ int CMiniCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Otherwise it will make an incorrect adjustment
 	SetFirstDayOfWeek(CDateHelper::GetFirstDayOfWeek());
 
+	// The base class is going to draw only the very first character
+	// of the weekday name which works in 99% of cases but not for 
+	// (Simplified) Chinese whose unique character comes at the end.
+	// So we handle that specific case here:
+	CString sRegion = Misc::GetLocaleInfo(LOCALE_SNAME);
+	BOOL bIsChinese = (sRegion.Find(_T("zh")) != -1);
+
 	for (int nDay = 0; nDay < 7; nDay++)
-		SetDayOfWeekName(nDay + 1, CDateHelper::GetDayOfWeekName(OLE_DAYSOFWEEK[nDay]));
+	{
+		CString sDowName = CDateHelper::GetDayOfWeekName(OLE_DAYSOFWEEK[nDay], TRUE); // short name
+		SetDayOfWeekName(nDay + 1, (bIsChinese ? sDowName.Right(1) : sDowName));
+	}
 
 	return CFPSMiniCalendarCtrl::OnCreate(lpCreateStruct);
 }

@@ -8,7 +8,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace EvidenceBoardUIExtension
 {
-	class EvidenceBoardLinkArrowsComboBox : ComboBox
+	class EvidenceBoardLinkArrowsComboBox : ComboBox, ITranslatable
 	{
 		class EvidenceBoardArrowsItem
 		{

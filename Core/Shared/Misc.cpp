@@ -332,24 +332,6 @@ CString Misc::GetUserName()
 	return sUser;
 }
 
-CString Misc::GetListSeparator()
-{
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLIST, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
-		
-	// Trim extra spaces
-	Trim(sSep);
-		
-	// If none found, use a comma
-	if (!sSep.GetLength())
-		sSep = ',';
-
-	return sSep;
-}
-
 CString Misc::FormatArray(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty)
 {
 	TCHAR szSep[2] = { cSep, 0 };
@@ -1446,35 +1428,42 @@ BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSens
 	return FALSE; // not added
 }
 
+CString Misc::GetLocaleInfo(LCTYPE lcType, int nBufSize)
+{
+	CString sValue;
+	::GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, sValue.GetBuffer(nBufSize + 1), nBufSize);
+	sValue.ReleaseBuffer();
+
+	return sValue;
+}
+
+CString Misc::GetListSeparator()
+{
+	CString sSep = GetLocaleInfo(LOCALE_SLIST, 10);
+
+	// Trim extra spaces
+	Trim(sSep);
+
+	// If none found, use a comma
+	if (sSep.IsEmpty())
+		sSep = ',';
+
+	return sSep;
+}
+
 CString Misc::GetAM()
 {
-	const int BUFLEN = 10;
-
-	CString sAM;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S1159, sAM.GetBuffer(BUFLEN), BUFLEN - 1);
-	sAM.ReleaseBuffer();
-
-	return sAM;
+	return GetLocaleInfo(LOCALE_S1159, 10);
 }
 
 CString Misc::GetPM()
 {
-	const int BUFLEN = 10;
-
-	CString sPM;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S2359, sPM.GetBuffer(BUFLEN), BUFLEN - 1);
-	sPM.ReleaseBuffer();
-
-	return sPM;
+	return GetLocaleInfo(LOCALE_S2359, 10);
 }
 
 CString Misc::GetTimeFormat(BOOL bIncSeconds)
 {
-	const int BUFLEN = 100;
-
-	CString sFormat;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIMEFORMAT, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
-	sFormat.ReleaseBuffer();
+	CString sFormat = GetLocaleInfo(LOCALE_STIMEFORMAT, 100);
 
 	if (!bIncSeconds)
 	{
@@ -1491,17 +1480,13 @@ CString Misc::GetTimeFormat(BOOL bIncSeconds)
 
 CString Misc::GetTimeSeparator()
 {
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIME , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
+	CString sSep = GetLocaleInfo(LOCALE_STIME, 10);
 
 	// Trim extra spaces
 	Trim(sSep);
 		
 	// If none found, use a colon
-	if (!sSep.GetLength())
+	if (sSep.IsEmpty())
 		sSep = ':';
 
 	return sSep;
@@ -1509,17 +1494,13 @@ CString Misc::GetTimeSeparator()
 
 CString Misc::GetDateSeparator()
 {
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDATE , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
+	CString sSep = GetLocaleInfo(LOCALE_SDATE, 10);
 
 	// Trim extra spaces
 	Trim(sSep);
 		
 	// If none found, use a slash
-	if (!sSep.GetLength())
+	if (sSep.IsEmpty())
 		sSep = '/';
 
 	return sSep;
@@ -1527,11 +1508,7 @@ CString Misc::GetDateSeparator()
 
 CString Misc::GetShortDateFormat(BOOL bIncDOW)
 {
-	const int BUFLEN = 100;
-	
-	CString sFormat;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SSHORTDATE, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
-	sFormat.ReleaseBuffer();
+	CString sFormat = GetLocaleInfo(LOCALE_SSHORTDATE, 100);
 
 	if (bIncDOW)
 	{
@@ -1551,17 +1528,13 @@ BOOL Misc::ShortDateFormatHasMonthBeforeDay()
 
 CString Misc::GetDecimalSeparator()
 {
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
+	CString sSep = GetLocaleInfo(LOCALE_SDECIMAL, 10);
 
 	// Trim extra spaces
 	Trim(sSep);
 		
 	// If none found, use a dot
-	if (!sSep.GetLength())
+	if (sSep.IsEmpty())
 		sSep = '.';
 
 	return sSep;
@@ -1569,11 +1542,7 @@ CString Misc::GetDecimalSeparator()
 
 BOOL Misc::IsMetricMeasurementSystem()
 {
-	const int BUFLEN = 2;
-	CString sSystem;
-	
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IMEASURE, sSystem.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSystem.ReleaseBuffer(BUFLEN - 1);
+	CString sSystem = GetLocaleInfo(LOCALE_IMEASURE, 2);
 	
 	return (_ttoi(sSystem) == 0);
 }
@@ -2026,11 +1995,7 @@ LANGID Misc::GetUserKeyboardLanguage()
 
 CString Misc::GetDefCharset()
 {
-	CString sDefCharset;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTANSICODEPAGE, sDefCharset.GetBuffer(7), 6);
-	sDefCharset.ReleaseBuffer();
-
-	return sDefCharset;
+	return GetLocaleInfo(LOCALE_IDEFAULTANSICODEPAGE, 7);
 }
 
 BOOL Misc::LCMapString(CString& sText, DWORD dwMapFlags)
