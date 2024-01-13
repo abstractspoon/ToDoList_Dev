@@ -5263,7 +5263,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 BOOL CToDoCtrl::CanSplitSelectedTask() const 
 { 
-	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.CanSplitSelectedTask()); 
+	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.IsSelectedTaskSplittable()); 
 }
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)

@@ -151,7 +151,7 @@ public:
 	BOOL IsSelectedTaskReference() const;
 	BOOL IsSelectedTaskDone() const;
 	BOOL IsSelectedTaskDue() const;
-	BOOL CanSplitSelectedTask() const;
+	BOOL IsSelectedTaskSplittable() const;
 
 	BOOL SelectionHasDependencies() const;
 	BOOL SelectionHasCircularDependencies() const;

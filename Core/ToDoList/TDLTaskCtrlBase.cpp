@@ -6749,7 +6749,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 }
 */
 
-BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
+BOOL CTDLTaskCtrlBase::IsSelectedTaskSplittable() const
 {
 	if (IsReadOnly())
 		return FALSE;
