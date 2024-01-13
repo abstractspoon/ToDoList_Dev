@@ -1226,8 +1226,11 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 	{
 		const double dOccur = aDates[nOccur];
 
+		// Ideally we stick to the same units configured in the recurrence setup
+		// so that, for instance, months having different numbers of days are
+		// offset correctly
 		DH_UNITS nUnits = TDC::MapUnitsToDHUnits(trRecurrence.GetRegularityUnits());
-		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, bDueDate);
+		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, FALSE); // not inclusive
 
 		int nOffset = 0;
 
@@ -1237,7 +1240,7 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 		}
 		else
 		{
-			nOffset = (int)dh.CalcDuration(dtCur, dOccur, DHU_DAYS, bDueDate);
+			nOffset = dh.CalcDaysFromTo(dtCur, dOccur, FALSE); // not inclusive
 			nUnits = DHU_DAYS;
 		}
 
