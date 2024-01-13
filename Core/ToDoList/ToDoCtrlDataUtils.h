@@ -370,15 +370,31 @@ public:
 	BOOL GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	BOOL GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 
-	BOOL HasParentTasks(const CDWordArray& aTaskIDs) const;
-	BOOL HasLockedTasks(const CDWordArray& aTaskIDs) const;
-	BOOL HasTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
-
 	// These functions return the number of matching values
 	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+
+	// Simple query functions
+	BOOL AnyTaskHasDependencies(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasCircularDependencies(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+	BOOL AnyTaskHasDependents(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasIcon(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskHasColor(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const;
+	BOOL AnyTaskIsReference(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsParent(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+
+	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 
 protected:
 	const CToDoCtrlData& m_data;

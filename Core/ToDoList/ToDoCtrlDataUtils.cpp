@@ -5299,39 +5299,6 @@ BOOL CTDCMultiTasker::GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nS
 	return TRUE;
 }
 
-BOOL CTDCMultiTasker::HasParentTasks(const CDWordArray& aTaskIDs) const
-{
-	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
-	{
-		if (m_data.IsTaskParent(aTaskIDs[nID]))
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL CTDCMultiTasker::HasLockedTasks(const CDWordArray& aTaskIDs) const
-{
-	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
-	{
-		if (m_data.IsTaskLocked(aTaskIDs[nID]))
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL CTDCMultiTasker::HasTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
-{
-	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
-	{
-		if (m_data.TaskHasDate(aTaskIDs[nID], nDate))
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
 // -----------------------------------------------------------------
 
 #define GETTASKSLIST_SPLIT(FUNCTION)                                   \
@@ -5396,5 +5363,119 @@ int CTDCMultiTasker::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArr
 	GETTASKSLIST_SPLIT(m_data.GetTaskAllocTo);
 }
 
+// -----------------------------------------------------------------
+
+BOOL CTDCMultiTasker::AnyTaskHasDependencies(const CDWordArray& aTaskIDs) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.TaskHasDependencies(aTaskIDs[nID]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasCircularDependencies(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.TaskHasDate(aTaskIDs[nID], nDate))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsReference(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasDependents(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasIcon(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasColor(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const
+{
+	return FALSE;
+}
+
+// -----------------------------------------------------------------
+
+BOOL CTDCMultiTasker::AnyTaskIsParent(const CDWordArray& aTaskIDs) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.IsTaskParent(aTaskIDs[nID]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AllTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AnyTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.IsTaskLocked(aTaskIDs[nID]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+// -----------------------------------------------------------------
+
+BOOL CTDCMultiTasker::AllTasksAreDone(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
+{
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+{
+	return FALSE;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////

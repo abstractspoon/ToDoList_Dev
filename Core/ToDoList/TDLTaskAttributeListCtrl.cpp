@@ -525,7 +525,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (m_multitasker.HasLockedTasks(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
+	if (m_multitasker.AnyTasksAreLocked(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
 		return FALSE;
 
 	// else
@@ -552,8 +552,11 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 			if (m_aSelectedTaskIDs.GetSize() > 1)
 			{
-				if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
+				if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
+					m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
+				{
 					return FALSE;
+				}
 			}
 		}
 		break;
@@ -561,13 +564,17 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_LOCK:
 		return TRUE;
 
-	case TDCA_STARTTIME:	return m_multitasker.HasTasksDate(m_aSelectedTaskIDs, TDCD_STARTDATE);
-	case TDCA_DUETIME:		return m_multitasker.HasTasksDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
-	case TDCA_DONETIME:		return m_multitasker.HasTasksDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
+	case TDCA_STARTTIME:	return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE);
+	case TDCA_DUETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
+	case TDCA_DONETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs));
+		{
+			return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) ||
+					!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs));
+		}
+		break;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -790,7 +797,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining,	TDCTIMEPERIOD, value.Format(2));			break;
 
 	case TDCA_TIMEESTIMATE:
-		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || 
+			!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
 		{
 			GETMULTIVALUE_FMT(GetTasksTimeEstimate, TDCTIMEPERIOD, value.Format(2));
 		}
@@ -801,7 +809,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		break;
 
 	case TDCA_TIMESPENT:
-		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || 
+			!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
 		{
 			GETMULTIVALUE_FMT(GetTasksTimeSpent, TDCTIMEPERIOD, value.Format(2));
 		}
