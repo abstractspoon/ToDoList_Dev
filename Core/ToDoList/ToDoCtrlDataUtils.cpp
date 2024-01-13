@@ -5092,12 +5092,12 @@ BOOL CTDCMultiTasker::GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nVal
 	GETTASKSVAL_SIMPLE(m_data.GetTaskPercent, nValue, int);
 }
 
-BOOL CTDCMultiTasker::GetTasksFlag(const CDWordArray& aTaskIDs, BOOL& bValue) const
+BOOL CTDCMultiTasker::GetTasksFlagState(const CDWordArray& aTaskIDs, BOOL& bValue) const
 {
 	GETTASKSVAL_SIMPLE(m_data.IsTaskFlagged, bValue, BOOL);
 }
 
-BOOL CTDCMultiTasker::GetTasksLock(const CDWordArray& aTaskIDs, BOOL& bValue) const
+BOOL CTDCMultiTasker::GetTasksLockState(const CDWordArray& aTaskIDs, BOOL& bValue) const
 {
 	GETTASKSVAL_SIMPLE(m_data.IsTaskLocked, bValue, BOOL);
 }

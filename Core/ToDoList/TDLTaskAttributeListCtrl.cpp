@@ -699,19 +699,19 @@ CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNo
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_STR(FUNCTION) \
+#define GETMULTIVALUE_STR(FUNCTION) \
 { bValueVaries = !m_multitasker.FUNCTION(m_aSelectedTaskIDs, sValue); }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_FMT(FUNCTION, TYPE, FMT)                 \
+#define GETMULTIVALUE_FMT(FUNCTION, TYPE, FMT)                 \
 { TYPE value;                                                     \
 if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) sValue = FMT; \
 else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_DATE(DT, ANDTIME)                  \
+#define GETMULTIVALUE_DATE(DT, ANDTIME)                  \
 { COleDateTime value;                                       \
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
 sValue = FormatDate(value, ANDTIME);           \
@@ -719,7 +719,7 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_TIME(DT)                           \
+#define GETMULTIVALUE_TIME(DT)                           \
 { COleDateTime value;                                       \
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
 sValue = FormatTime(value, TRUE);                           \
@@ -727,7 +727,7 @@ else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_LIST(FUNCTION)                    \
+#define GETMULTIVALUE_LIST(FUNCTION)                    \
 { CStringArray aMatched, aMixed;                           \
 m_multitasker.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed); \
 sValue = FormatMultiSelItems(aMatched, aMixed);            \
@@ -741,7 +741,7 @@ else if (nSelCount > 1) bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETCOLLATEDVALUE_BOOL(FUNCTION)             \
+#define GETMULTIVALUE_BOOL(FUNCTION)             \
 { BOOL value;                                       \
 if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) \
 sValue = (value ? _T("+") : _T(""));                \
@@ -760,39 +760,39 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 	switch (nAttribID)
 	{
-	case TDCA_EXTERNALID:		GETCOLLATEDVALUE_STR(GetTasksExternalID);		break;
-	case TDCA_ALLOCBY:			GETCOLLATEDVALUE_STR(GetTasksAllocatedBy);		break;
-	case TDCA_STATUS:			GETCOLLATEDVALUE_STR(GetTasksStatus);			break;
-	case TDCA_VERSION:			GETCOLLATEDVALUE_STR(GetTasksVersion);			break;
-	case TDCA_ICON:				GETCOLLATEDVALUE_STR(GetTasksIcon);				break;
-	case TDCA_PATH:				GETCOLLATEDVALUE_STR(GetTasksPath);				break;
-	case TDCA_CREATEDBY:		GETCOLLATEDVALUE_STR(GetTasksCreatedBy);		break;
-	case TDCA_LASTMODBY:		GETCOLLATEDVALUE_STR(GetTasksLastModifiedBy);	break;
-	case TDCA_COMMENTSFORMAT:	GETCOLLATEDVALUE_STR(GetTasksCommentsFormat);	break;
+	case TDCA_EXTERNALID:		GETMULTIVALUE_STR(GetTasksExternalID);		break;
+	case TDCA_ALLOCBY:			GETMULTIVALUE_STR(GetTasksAllocatedBy);		break;
+	case TDCA_STATUS:			GETMULTIVALUE_STR(GetTasksStatus);			break;
+	case TDCA_VERSION:			GETMULTIVALUE_STR(GetTasksVersion);			break;
+	case TDCA_ICON:				GETMULTIVALUE_STR(GetTasksIcon);			break;
+	case TDCA_PATH:				GETMULTIVALUE_STR(GetTasksPath);			break;
+	case TDCA_CREATEDBY:		GETMULTIVALUE_STR(GetTasksCreatedBy);		break;
+	case TDCA_LASTMODBY:		GETMULTIVALUE_STR(GetTasksLastModifiedBy);	break;
+	case TDCA_COMMENTSFORMAT:	GETMULTIVALUE_STR(GetTasksCommentsFormat);	break;
 
-	case TDCA_ALLOCTO:			GETCOLLATEDVALUE_LIST(GetTasksAllocatedTo);		break;
-	case TDCA_CATEGORY:			GETCOLLATEDVALUE_LIST(GetTasksCategories);		break;
-	case TDCA_TAGS:				GETCOLLATEDVALUE_LIST(GetTasksTags);			break;
-	case TDCA_FILELINK:			GETCOLLATEDVALUE_LIST(GetTasksFileLinks);		break;
+	case TDCA_ALLOCTO:			GETMULTIVALUE_LIST(GetTasksAllocatedTo);	break;
+	case TDCA_CATEGORY:			GETMULTIVALUE_LIST(GetTasksCategories);		break;
+	case TDCA_TAGS:				GETMULTIVALUE_LIST(GetTasksTags);			break;
+	case TDCA_FILELINK:			GETMULTIVALUE_LIST(GetTasksFileLinks);		break;
 
-	case TDCA_FLAG:				GETCOLLATEDVALUE_BOOL(GetTasksFlag);			break;
-	case TDCA_LOCK:				GETCOLLATEDVALUE_BOOL(GetTasksLock);			break;
+	case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
+	case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
 
-	case TDCA_PERCENT:			GETCOLLATEDVALUE_FMT(GetTasksPercentDone,	int, Misc::Format(value, 2));	break;
-	case TDCA_PRIORITY:			GETCOLLATEDVALUE_FMT(GetTasksPriority,		int, Misc::Format(value));		break;
-	case TDCA_RISK:				GETCOLLATEDVALUE_FMT(GetTasksRisk,			int, Misc::Format(value));		break;
-	case TDCA_COLOR:			GETCOLLATEDVALUE_FMT(GetTasksColor,			COLORREF, Misc::Format(value));	break;
-	case TDCA_PARENTID:			GETCOLLATEDVALUE_FMT(GetTasksParentID,		DWORD, Misc::Format(value));	break;
+	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int, Misc::Format(value, 2));	break;
+	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int, Misc::Format(value));		break;
+	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int, Misc::Format(value));		break;
+	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF, Misc::Format(value));	break;
+	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD, Misc::Format(value));	break;
 
-	case TDCA_COST:				GETCOLLATEDVALUE_FMT(GetTasksCost,			TDCCOST, value.Format(2));					break;
-	case TDCA_RECURRENCE:		GETCOLLATEDVALUE_FMT(GetTasksRecurrence,	TDCRECURRENCE, value.GetRegularityText());	break;
-	case TDCA_DEPENDENCY:		GETCOLLATEDVALUE_FMT(GetTasksDependencies,	CTDCDependencyArray, value.Format());		break;
-	case TDCA_TIMEREMAINING:	GETCOLLATEDVALUE_FMT(GetTasksTimeRemaining, TDCTIMEPERIOD, value.Format(2));			break;
+	case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost,				TDCCOST, value.Format(2));					break;
+	case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence,		TDCRECURRENCE, value.GetRegularityText());	break;
+	case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies,		CTDCDependencyArray, value.Format());		break;
+	case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining,	TDCTIMEPERIOD, value.Format(2));			break;
 
 	case TDCA_TIMEESTIMATE:
 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
 		{
-			GETCOLLATEDVALUE_FMT(GetTasksTimeEstimate, TDCTIMEPERIOD, value.Format(2));
+			GETMULTIVALUE_FMT(GetTasksTimeEstimate, TDCTIMEPERIOD, value.Format(2));
 		}
 		else if (dwSingleSelTaskID)
 		{
@@ -803,7 +803,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_TIMESPENT:
 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
 		{
-			GETCOLLATEDVALUE_FMT(GetTasksTimeSpent, TDCTIMEPERIOD, value.Format(2));
+			GETMULTIVALUE_FMT(GetTasksTimeSpent, TDCTIMEPERIOD, value.Format(2));
 		}
 		else if (dwSingleSelTaskID)
 		{
@@ -811,15 +811,15 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		}
 		break;
 
-	case TDCA_DONEDATE:			GETCOLLATEDVALUE_DATE(TDCD_DONEDATE, FALSE);	break;
-	case TDCA_DUEDATE:			GETCOLLATEDVALUE_DATE(TDCD_DUEDATE, FALSE);		break;
-	case TDCA_STARTDATE:		GETCOLLATEDVALUE_DATE(TDCD_STARTDATE, FALSE);	break;
-	case TDCA_LASTMODDATE:		GETCOLLATEDVALUE_DATE(TDCD_LASTMOD, TRUE);		break;
-	case TDCA_CREATIONDATE:		GETCOLLATEDVALUE_DATE(TDCD_CREATE, TRUE);		break;
+	case TDCA_DONEDATE:			GETMULTIVALUE_DATE(TDCD_DONEDATE, FALSE);		break;
+	case TDCA_DUEDATE:			GETMULTIVALUE_DATE(TDCD_DUEDATE, FALSE);		break;
+	case TDCA_STARTDATE:		GETMULTIVALUE_DATE(TDCD_STARTDATE, FALSE);		break;
+	case TDCA_LASTMODDATE:		GETMULTIVALUE_DATE(TDCD_LASTMOD, TRUE);			break;
+	case TDCA_CREATIONDATE:		GETMULTIVALUE_DATE(TDCD_CREATE, TRUE);			break;
 
-	case TDCA_DONETIME:			GETCOLLATEDVALUE_TIME(TDCD_DONETIME);			break;
-	case TDCA_DUETIME:			GETCOLLATEDVALUE_TIME(TDCD_DUETIME);			break;
-	case TDCA_STARTTIME:		GETCOLLATEDVALUE_TIME(TDCD_STARTTIME);			break;
+	case TDCA_DONETIME:			GETMULTIVALUE_TIME(TDCD_DONETIME);				break;
+	case TDCA_DUETIME:			GETMULTIVALUE_TIME(TDCD_DUETIME);				break;
+	case TDCA_STARTTIME:		GETMULTIVALUE_TIME(TDCD_STARTTIME);				break;
 
 	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;

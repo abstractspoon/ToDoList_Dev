@@ -350,8 +350,8 @@ public:
 	BOOL GetTasksCommentLength(const CDWordArray& aTaskIDs, int& nValue) const;
 	BOOL GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const;
 	BOOL GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const;
-	BOOL GetTasksFlag(const CDWordArray& aTaskIDs, BOOL& bValue) const;
-	BOOL GetTasksLock(const CDWordArray& aTaskIDs, BOOL& bValue) const;
+	BOOL GetTasksFlagState(const CDWordArray& aTaskIDs, BOOL& bValue) const;
+	BOOL GetTasksLockState(const CDWordArray& aTaskIDs, BOOL& bValue) const;
 	BOOL GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crValue) const;
 
 	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
