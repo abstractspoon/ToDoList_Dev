@@ -97,7 +97,7 @@ protected:
 	const CTDCImageList& m_ilIcons;
 
 	CTDCTaskFormatter m_formatter;
-	CTDCTaskCollator m_collator;
+	CTDCMultiTasker m_multitasker;
 
 	TDCCOLEDITVISIBILITY m_vis;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;

@@ -326,10 +326,10 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskCollator
+class CTDCMultiTasker
 {
 public:
-	CTDCTaskCollator(const CToDoCtrlData& data, const CContentMgr& mgrContent);
+	CTDCMultiTasker(const CToDoCtrlData& data, const CContentMgr& mgrContent);
 
 	// These functions return FALSE if two or more tasks had differing values
 	BOOL GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const;

@@ -537,7 +537,7 @@ protected:
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
-	CTDCTaskCollator m_collator;
+	CTDCMultiTasker m_multitasker;
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
 	CTDCSourceControl m_sourceControl;

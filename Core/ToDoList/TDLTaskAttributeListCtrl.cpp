@@ -104,7 +104,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_data(data),
 	m_ilIcons(ilIcons),
 	m_formatter(data, mgrContent),
-	m_collator(data, mgrContent),
+	m_multitasker(data, mgrContent),
 	m_vis(defaultVis),
 	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbPriority(FALSE),
@@ -525,7 +525,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (m_collator.HasLockedTasks(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
+	if (m_multitasker.HasLockedTasks(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
 		return FALSE;
 
 	// else
@@ -552,7 +552,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 			if (m_aSelectedTaskIDs.GetSize() > 1)
 			{
-				if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_collator.HasParentTasks(m_aSelectedTaskIDs))
+				if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
 					return FALSE;
 			}
 		}
@@ -561,13 +561,13 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_LOCK:
 		return TRUE;
 
-	case TDCA_STARTTIME:	return m_collator.HasTasksDate(m_aSelectedTaskIDs, TDCD_STARTDATE);
-	case TDCA_DUETIME:		return m_collator.HasTasksDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
-	case TDCA_DONETIME:		return m_collator.HasTasksDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
+	case TDCA_STARTTIME:	return m_multitasker.HasTasksDate(m_aSelectedTaskIDs, TDCD_STARTDATE);
+	case TDCA_DUETIME:		return m_multitasker.HasTasksDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
+	case TDCA_DONETIME:		return m_multitasker.HasTasksDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_collator.HasParentTasks(m_aSelectedTaskIDs));
+		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs));
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -700,20 +700,20 @@ CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNo
 // -----------------------------------------------------------------------------------------
 
 #define GETCOLLATEDVALUE_STR(FUNCTION) \
-{ bValueVaries = !m_collator.FUNCTION(m_aSelectedTaskIDs, sValue); }
+{ bValueVaries = !m_multitasker.FUNCTION(m_aSelectedTaskIDs, sValue); }
 
 // -----------------------------------------------------------------------------------------
 
 #define GETCOLLATEDVALUE_FMT(FUNCTION, TYPE, FMT)                 \
 { TYPE value;                                                     \
-if (m_collator.FUNCTION(m_aSelectedTaskIDs, value)) sValue = FMT; \
+if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) sValue = FMT; \
 else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
 #define GETCOLLATEDVALUE_DATE(DT, ANDTIME)                  \
 { COleDateTime value;                                       \
-if (m_collator.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
+if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
 sValue = FormatDate(value, ANDTIME);           \
 else bValueVaries = TRUE; }
 
@@ -721,7 +721,7 @@ else bValueVaries = TRUE; }
 
 #define GETCOLLATEDVALUE_TIME(DT)                           \
 { COleDateTime value;                                       \
-if (m_collator.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
+if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
 sValue = FormatTime(value, TRUE);                           \
 else bValueVaries = TRUE; }
 
@@ -729,7 +729,7 @@ else bValueVaries = TRUE; }
 
 #define GETCOLLATEDVALUE_LIST(FUNCTION)                    \
 { CStringArray aMatched, aMixed;                           \
-m_collator.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed); \
+m_multitasker.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed); \
 sValue = FormatMultiSelItems(aMatched, aMixed);            \
 bValueVaries = aMixed.GetSize(); }
 
@@ -743,7 +743,7 @@ else if (nSelCount > 1) bValueVaries = TRUE; }
 
 #define GETCOLLATEDVALUE_BOOL(FUNCTION)             \
 { BOOL value;                                       \
-if (m_collator.FUNCTION(m_aSelectedTaskIDs, value)) \
+if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) \
 sValue = (value ? _T("+") : _T(""));                \
 else bValueVaries = TRUE; }
 
@@ -790,7 +790,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_TIMEREMAINING:	GETCOLLATEDVALUE_FMT(GetTasksTimeRemaining, TDCTIMEPERIOD, value.Format(2));			break;
 
 	case TDCA_TIMEESTIMATE:
-		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_collator.HasParentTasks(m_aSelectedTaskIDs))
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
 		{
 			GETCOLLATEDVALUE_FMT(GetTasksTimeEstimate, TDCTIMEPERIOD, value.Format(2));
 		}
@@ -801,7 +801,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		break;
 
 	case TDCA_TIMESPENT:
-		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_collator.HasParentTasks(m_aSelectedTaskIDs))
+		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.HasParentTasks(m_aSelectedTaskIDs))
 		{
 			GETCOLLATEDVALUE_FMT(GetTasksTimeSpent, TDCTIMEPERIOD, value.Format(2));
 		}
@@ -838,7 +838,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			CString sAttribID = pDef->sUniqueID;
 			TDCCADATA data;
 
-			if (m_collator.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
+			if (m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
 			{
 				/*if (pDef->IsMultiList())
 				{
@@ -892,7 +892,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			ASSERT(pDef->GetDataType() == TDCCA_DATE);
 			TDCCADATA data;
 
-			if (m_collator.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
+			if (m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
 				sValue = CTimeHelper::FormatClockTime(data.AsDate(), FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			else
 				bValueVaries = TRUE;
@@ -1603,7 +1603,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
 
 			TDCCADATA data;
-			m_collator.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data);
+			m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data);
 
 			if (pDef->IsList())
 			{

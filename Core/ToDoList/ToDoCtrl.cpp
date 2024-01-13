@@ -217,7 +217,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_formatter(m_data, mgrContent),
-	m_collator(m_data, mgrContent),
+	m_multitasker(m_data, mgrContent),
 	m_infoTip(m_data, m_aCustomAttribDefs, mgrContent),
 	m_sourceControl(*this),
 	m_findReplace(*this),
@@ -4980,7 +4980,7 @@ BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 //	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
-	if (!m_collator.GetTasksRecurrence(aSelTaskIDs, tr))
+	if (!m_multitasker.GetTasksRecurrence(aSelTaskIDs, tr))
 	{
 		// initialise some options if regularity == once
 		ASSERT(!tr.IsRecurring());
@@ -5006,7 +5006,7 @@ COLORREF CToDoCtrl::GetSelectedTaskColor() const
 	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	COLORREF color;
-	return (m_collator.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
+	return (m_multitasker.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
 }
 
 CString CToDoCtrl::GetSelectedTaskIcon() const
@@ -5015,7 +5015,7 @@ CString CToDoCtrl::GetSelectedTaskIcon() const
 	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	CString sIcon;
-	return (m_collator.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
+	return (m_multitasker.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
 }
 
 CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
@@ -5024,7 +5024,7 @@ CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
 	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	CString sPath;
-	return (m_collator.GetTasksPath(aSelTaskIDs, sPath, bWithTaskName) ? sPath : _T(""));
+	return (m_multitasker.GetTasksPath(aSelTaskIDs, sPath, bWithTaskName) ? sPath : _T(""));
 }
 
 DWORD CToDoCtrl::GetSelectedTaskParentID() const
@@ -5033,7 +5033,7 @@ DWORD CToDoCtrl::GetSelectedTaskParentID() const
 	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	DWORD dwID;
-	return (m_collator.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);
+	return (m_multitasker.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);
 }
 
 int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const 
