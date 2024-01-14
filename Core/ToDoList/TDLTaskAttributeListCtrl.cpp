@@ -2155,20 +2155,13 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 
 	if (nRow != -1)
 	{
-		// Revert changes before default handling
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+		// Reinitialise the edit ctrl with its previous value to revert changes
+		CWnd* pCtrl = GetEditControl(nRow, FALSE);
 
-		switch (nAttribID)
-		{
-		case TDCA_DEPENDENCY:
-			m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
-			break;
-
-		case TDCA_TIMEESTIMATE:
-		case TDCA_TIMESPENT:
-			PrepareTimePeriodEdit(nRow);
-			break;
-		}
+		if (pCtrl)
+			PrepareControl(*pCtrl, nRow, VALUE_COL);
+		else
+			ASSERT(0);
 	}
 
 	CInputListCtrl::OnCancelEdit();
