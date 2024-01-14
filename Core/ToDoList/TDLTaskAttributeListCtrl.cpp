@@ -711,47 +711,47 @@ CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNo
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_FMT(FUNCTION, TYPE, FMT)                 \
-{ TYPE value;                                                     \
-if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) sValue = FMT; \
+#define GETMULTIVALUE_FMT(FUNCTION, TYPE, FMT)						\
+{ TYPE value;														\
+if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) sValue = FMT;\
 else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_DATE(DT, ANDTIME)                  \
-{ COleDateTime value;                                       \
-if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
-sValue = FormatDate(value, ANDTIME);           \
+#define GETMULTIVALUE_DATE(DT, ANDTIME)							\
+{ COleDateTime value;											\
+if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
+sValue = FormatDate(value, ANDTIME);							\
 else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_TIME(DT)                           \
-{ COleDateTime value;                                       \
-if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value)) \
-sValue = FormatTime(value, TRUE);                           \
+#define GETMULTIVALUE_TIME(DT)									\
+{ COleDateTime value;											\
+if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
+sValue = FormatTime(value, TRUE);								\
 else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_LIST(FUNCTION)                    \
-{ CStringArray aMatched, aMixed;                           \
-m_multitasker.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed); \
-sValue = FormatMultiSelItems(aMatched, aMixed);            \
+#define GETMULTIVALUE_LIST(FUNCTION)							\
+{ CStringArray aMatched, aMixed;								\
+m_multitasker.FUNCTION(m_aSelectedTaskIDs, aMatched, aMixed);	\
+sValue = FormatMultiSelItems(aMatched, aMixed);					\
 bValueVaries = aMixed.GetSize(); }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETUNIQUEVALUE(FUNCTION)                               \
-{ if (dwSingleSelTaskID) sValue = FUNCTION(dwSingleSelTaskID); \
+#define GETUNIQUEVALUE(FUNCTION)								\
+{ if (dwSingleSelTaskID) sValue = FUNCTION(dwSingleSelTaskID);	\
 else if (nSelCount > 1) bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
 
-#define GETMULTIVALUE_BOOL(FUNCTION)             \
-{ BOOL value;                                       \
-if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value)) \
-sValue = (value ? _T("+") : _T(""));                \
+#define GETMULTIVALUE_BOOL(FUNCTION)					\
+{ BOOL value;											\
+if (m_multitasker.FUNCTION(m_aSelectedTaskIDs, value))	\
+sValue = (value ? _T("+") : _T(""));					\
 else bValueVaries = TRUE; }
 
 // -----------------------------------------------------------------------------------------
