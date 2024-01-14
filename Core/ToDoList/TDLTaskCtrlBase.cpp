@@ -932,7 +932,7 @@ BOOL CTDLTaskCtrlBase::IsVisible() const
 	return (hwnd && ::IsWindowVisible(::GetParent(hwnd)) && ::IsWindowVisible(hwnd));
 }
 
-void CTDLTaskCtrlBase::OnCustomAttributeChange()
+void CTDLTaskCtrlBase::OnCustomAttributesChange()
 {
 	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
 	{

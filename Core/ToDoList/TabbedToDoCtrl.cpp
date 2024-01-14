@@ -2257,12 +2257,22 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	return bSuccess;
 }
 
+/*
 void CTabbedToDoCtrl::RebuildCustomAttributeUI()
 {
 	// Must remove any deleted attribute columns before resizing/redrawing
-	m_taskList.OnCustomAttributeChange();
+	m_taskList.OnCustomAttributesChange();
 
 	CToDoCtrl::RebuildCustomAttributeUI();
+}
+*/
+
+void CTabbedToDoCtrl::OnCustomAttributesChanged()
+{
+	// Must remove any deleted attribute columns before resizing/redrawing
+	m_taskList.OnCustomAttributesChange();
+
+	CToDoCtrl::OnCustomAttributesChanged();
 }
 
 void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)

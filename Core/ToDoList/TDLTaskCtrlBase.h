@@ -66,7 +66,7 @@ public:
 	void SetTasklistFolder(LPCTSTR szFolder) { m_sTasklistFolder = szFolder; }
 	CString GetTasklistFolder() const { return m_sTasklistFolder; }
 
-	void OnCustomAttributeChange();
+	void OnCustomAttributesChange();
 	void OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges);
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnUndoRedo(BOOL bUndo);

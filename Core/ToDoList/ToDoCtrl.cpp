@@ -327,9 +327,10 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 // 	m_cbFileLink.DDX(pDX, m_aFileLinks);
 // 	m_eDependency.DDX(pDX, m_aDepends);
 	
-	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
+//	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 
 	// custom
+/*
 	if (pDX->m_bSaveAndValidate)
 	{
 // 		if (m_crColour == CLR_DEFAULT)
@@ -338,6 +339,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 	}
+*/
 }
 
 void CToDoCtrl::UpdateComments(const CString& sTextComments, const CBinaryData& customComments)
@@ -472,11 +474,11 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCTI_RELOADICONS, OnTaskIconDlgReloadIcons)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 
-	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(BN_CLICKED, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(EN_CHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
-	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeCancel)
+// 	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+// 	ON_CONTROL_RANGE(BN_CLICKED, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+// 	ON_CONTROL_RANGE(EN_CHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+// 	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
+// 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeCancel)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -851,20 +853,20 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 		{
 			CDeferWndMove dwm(100);
 
-			if (GetStackCommentsAndControls())
-			{
-				ReposControls(&dwm, rAvailable, bSplitting);
+// 			if (GetStackCommentsAndControls())
+// 			{
+// 				ReposControls(&dwm, rAvailable, bSplitting);
 				ReposComments(&dwm, rAvailable);
-			}
-			else
-			{
-				ReposComments(&dwm, rAvailable);
-				ReposControls(&dwm, rAvailable, bSplitting);
-			}
+// 			}
+// 			else
+// 			{
+// 				ReposComments(&dwm, rAvailable);
+// 				ReposControls(&dwm, rAvailable, bSplitting);
+// 			}
 
 			ReposProjectName(&dwm, rAvailable);
 
-			// Temporarily place the new attribute listctrl on the RHS
+			// Temporarily place the new attribute list ctrl on the RHS
 			// TODO
 			const int ATTRIBS_WIDTH = GraphicsMisc::ScaleByDPIFactor(250);
 
@@ -914,6 +916,7 @@ void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 		rAvailable.top = rProject.top;
 }
 
+/*
 BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, 
 										 int& nCols, int& nRows, BOOL bPreserveSplitPos) const
 {
@@ -1078,7 +1081,9 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 
 	return TRUE;
 }
+*/
 
+/*
 void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSplitting)
 {
 	// only required when controls are visible
@@ -1235,7 +1240,9 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 		nXPos += (nCtrlWidth + nHSpacing);
 	}
 }
+*/
 
+/*
 int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 {
 	aControls.RemoveAll();
@@ -1271,7 +1278,9 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 
 	return aControls.GetSize();
 }
+*/
 
+/*
 void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 							 const CRect& rItem, int nClientRight)
 {
@@ -1346,6 +1355,7 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 
 	pDWM->MoveWindow(GetDlgItem(ctrl.nCtrlID), rCtrl);
 }
+*/
 
 void CToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable)
 {
@@ -1397,6 +1407,7 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 			CRect rCtrls;
 			int nCols, nRows;
 			
+/*
 			if (CalcRequiredControlsRect(rAvailable, rCtrls, nCols, nRows, TRUE))
 			{
 				BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
@@ -1447,6 +1458,7 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 					break;
 				}
 			}
+*/
 		}
 		else
 		{
@@ -1519,6 +1531,7 @@ void CToDoCtrl::ShowHideControls()
 // 	}
 
 	// always show custom controls
+/*
 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
@@ -1530,6 +1543,7 @@ void CToDoCtrl::ShowHideControls()
 		if (ctrl.GetBuddy(buddy) && ctrl.IsShowingBuddy())
 			ShowHideControl(buddy);
 	}
+*/
 
 	// Comments as required
 	BOOL bCommentsVis = IsCommentsVisible(TRUE);
@@ -1544,6 +1558,7 @@ void CToDoCtrl::ShowHideControls()
 	ShowCtrls(IDC_PROJECTLABEL, IDC_PROJECTNAME, bShowProjectName);
 }
 
+/*
 void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly)
 {
 	// Main control first
@@ -1599,7 +1614,9 @@ void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWO
 		EnableDisableControl(buddy, dwTaskID, bEnable, bReadOnly, FALSE);
 	}
 }
+*/
 
+/*
 void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent)
 {
 	CWnd* pCtrl = GetDlgItem(ctrl.nCtrlID);
@@ -1618,7 +1635,6 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 	// some additions and modifications
 	switch (ctrl.nCtrlID)
 	{
-/*
 	case IDC_FILEPATH: // special case
 		if (!bEnable)
 		{
@@ -1689,12 +1705,12 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 		if ((nCtrlState == RTCS_ENABLED) && !SelectedTaskHasDate(TDCD_DONE))
 			nCtrlState = RTCS_READONLY;
 		break;
-*/
 	}
 	
 	SetCtrlState(*pLabel, nLabelState);
 	SetCtrlState(*pCtrl, nCtrlState);
 }
+*/
 
 void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 {
@@ -1707,7 +1723,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	BOOL bReadOnlyCtrls = (bReadOnly || m_taskTree.SelectionHasLocked(FALSE));
 
 	// now enable/disable appropriate controls
-	int nCtrl;
+//	int nCtrl;
 // 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 // 	{
 // 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
@@ -1715,11 +1731,11 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 // 	}
 
 	// and custom controls
-	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
-		EnableDisableCustomControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls);
-	}
+// 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
+// 	{
+// 		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
+// 		EnableDisableCustomControl(ctrl, dwTaskID, bEnable, bReadOnlyCtrls);
+// 	}
 
 	// comments
 	EnableDisableComments(hti);
@@ -1922,7 +1938,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// Misc
 //		GetSelectedTaskCost(m_cost);
 // 		GetSelectedTaskRecurrence(m_tRecurrence);
-		GetSelectedTaskCustomAttributeData(m_mapCustomCtrlData, FALSE);
+//		GetSelectedTaskCustomAttributeData(m_mapCustomCtrlData, FALSE);
 	}
 	else // clear controls
 	{
@@ -1950,7 +1966,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 // 		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
 // 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
-		m_mapCustomCtrlData.RemoveAll();
+//		m_mapCustomCtrlData.RemoveAll();
 	}
 
 //	UpdateDateTimeControls(hti != NULL);
@@ -2061,6 +2077,7 @@ void CToDoCtrl::UpdateTasklistVisibility()
 	m_taskTree.Show(bTasksVis);
 }
 
+/*
 void CToDoCtrl::SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin)
 {
 	// Note: clear time component because control will 
@@ -2080,6 +2097,7 @@ void CToDoCtrl::SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const
 		ctrl.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	}
 }
+*/
 
 void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 {
@@ -2333,6 +2351,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	}
 }
 
+/*
 void CToDoCtrl::EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) const
 {
 	// enable time field if the date is valid
@@ -2347,6 +2366,7 @@ void CToDoCtrl::EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) co
 		ctrl.SetCurSel(CB_ERR);
 	}
 }
+*/
 
 /*
 void CToDoCtrl::OnChangePriority()
@@ -2406,7 +2426,8 @@ void CToDoCtrl::OnSelChangeDoneTime()
 }
 */
 
-void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID, NMHDR* /*pNMHDR*/, LRESULT* pResult)
+/*
+void CToDoCtrl::OnCustomAttributeChange(UINT nCtrlID, NMHDR* / *pNMHDR* /, LRESULT* pResult)
 {
 	OnCustomAttributeChange(nCtrlID);
 	*pResult = 0;
@@ -2439,6 +2460,7 @@ void CToDoCtrl::OnCustomAttributeCancel(UINT nCtrlID)
 		CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
 	}
 }
+*/
 
 // external version
 BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data)
@@ -2474,6 +2496,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sAttribID);
  		SetModified(nAttrib, aModTaskIDs);
 
+/*
 		// update UI except if it's already up to date
 		CUSTOMATTRIBCTRLITEM ctrl;
 		
@@ -2485,6 +2508,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 			if (ctrl.IsShowingBuddy())
 				EnableDisableControls(GetSelectedItem());
 		}
+*/
 	}
 	
 	return TRUE;
@@ -5818,7 +5842,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		{
 			//m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
 			
-			CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
+			//CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
 		}
 		break;
 
@@ -6081,8 +6105,9 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
 
-		RebuildCustomAttributeUI();
-		UpdateDefaultTaskCustomAttributeValues();
+		OnCustomAttributesChanged();
+// 		RebuildCustomAttributeUI();
+// 		UpdateDefaultTaskCustomAttributeValues();
 
 		// update interface
 		SetModified(TDCA_CUSTOMATTRIBDEFS);
@@ -6378,7 +6403,7 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 {
 	// save auto combobox contents to definition first
 	// just like we do with standard combos
-	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
+//	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
 
 	if (filter.mapAttribs.HasOnly(TDCA_ALL) ||
 		filter.mapAttribs.Has(TDCA_CUSTOMATTRIB_ALL))
@@ -6409,9 +6434,17 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 	tasks.GetCustomAttributeDefs(m_aCustomAttribDefs);
 
 	// Add Fields and columns to view
-	RebuildCustomAttributeUI();
+	OnCustomAttributesChanged();
+//	RebuildCustomAttributeUI();
 }
 
+void CToDoCtrl::OnCustomAttributesChanged()
+{
+	m_taskTree.OnCustomAttributesChange();
+	m_lcAttributes.SetCustomAttributeDefinitions(m_aCustomAttribDefs);
+}
+
+/*
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// Add fields after the 'version' control
@@ -6430,6 +6463,7 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 
 	Resize();
 }
+*/
 
 BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 {
@@ -7202,7 +7236,7 @@ void CToDoCtrl::OnDestroy()
 	}
 	
 	// clean up custom controls
-	CTDCCustomAttributeUIHelper::CleanupControls(m_aCustomControls, this);
+//	CTDCCustomAttributeUIHelper::CleanupControls(m_aCustomControls, this);
 	
 	CRuntimeDlg::OnDestroy();
 }
@@ -8205,6 +8239,7 @@ LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 //		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID))
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
+/*
 			int nCtrl = m_aCustomControls.Find(nAttribID);
 
 			if (nCtrl != -1)
@@ -8216,6 +8251,7 @@ LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, ctrl.nAttrib);
 				break;
 			}
+*/
 		}
 		// all else
 		ASSERT(0);
@@ -8596,8 +8632,8 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	CTDCCustomAttribDefinitionArray aOrgAttribDefs, aPasteAttribDefs;
 	aOrgAttribDefs.Copy(m_aCustomAttribDefs);
 	
-	BOOL bRebuildCustomUI = (tasks.GetCustomAttributeDefs(aPasteAttribDefs) &&
-								m_aCustomAttribDefs.Append(aPasteAttribDefs));
+	BOOL bCustomAttribDefsChanged = (tasks.GetCustomAttributeDefs(aPasteAttribDefs) &&
+									m_aCustomAttribDefs.Append(aPasteAttribDefs));
 	DWORD dwDestTaskID = GetTaskID(htiDest);
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_PASTE);
@@ -8607,26 +8643,26 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		// no need to re-check IDs as we've already done it
 		if (!PasteTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE))
 		{
-			if (bRebuildCustomUI)
-			{
+			// Revert custom attribute changes
+			if (bCustomAttribDefsChanged)
 				m_aCustomAttribDefs.Copy(aOrgAttribDefs);
-			}
 			
 			return FALSE;
 		}
 	}
 
+	OnCustomAttributesChanged();
 	FixupParentCompletion(dwDestTaskID);
 	
-	if (bRebuildCustomUI)
-	{
-		RebuildCustomAttributeUI();
-		
-		CTDCCustomAttributeDataMap mapData;
-		
-		if (GetSelectedTaskCustomAttributeData(mapData))
-			CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, mapData);
-	}
+// 	if (bRebuildCustomUI)
+// 	{
+// 		RebuildCustomAttributeUI();
+// 		
+// 		CTDCCustomAttributeDataMap mapData;
+// 		
+// 		if (GetSelectedTaskCustomAttributeData(mapData))
+// 			CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, m_aCustomAttribDefs, mapData);
+// 	}
 	
 	return TRUE;
 }
@@ -8689,17 +8725,20 @@ void CToDoCtrl::OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		NMITEMACTIVATE* pNMIA = (NMITEMACTIVATE*)pNMHDR;
 
-		TDC_COLUMN nColID = (TDC_COLUMN)pNMIA->iSubItem;
-		UINT nCtrlID = MapColumnToCtrlID(nColID);
-		
-		if (nCtrlID)
-		{
-			// make sure the edit controls are visible
-			if (m_nMaxState != TDCMS_NORMAL)
-				SetMaximizeState(TDCMS_NORMAL);
-			
-			GetDlgItem(nCtrlID)->SetFocus();
-		}
+		TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute((TDC_COLUMN)pNMIA->iSubItem);
+		m_lcAttributes.SelectValue(nAttribID);
+
+//		TDC_COLUMN nColID = (TDC_COLUMN)pNMIA->iSubItem;
+// 		UINT nCtrlID = MapColumnToCtrlID(nColID);
+// 		
+// 		if (nCtrlID)
+// 		{
+// 			// make sure the edit controls are visible
+// 			if (m_nMaxState != TDCMS_NORMAL)
+// 				SetMaximizeState(TDCMS_NORMAL);
+// 			
+// 			GetDlgItem(nCtrlID)->SetFocus();
+// 		}
 	}
 }
 
@@ -8925,25 +8964,23 @@ UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 // 			return ctrl.nCtrlID;
 // 	}
 
-	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
-	{
-		const CTRLITEM& ctrl = m_aCustomControls[nCtrl];
-
-		if (ctrl.nAttrib == nAttrib)
-			return ctrl.nCtrlID;
-	}
+// 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
+// 	{
+// 		const CTRLITEM& ctrl = m_aCustomControls[nCtrl];
+// 
+// 		if (ctrl.nAttrib == nAttrib)
+// 			return ctrl.nCtrlID;
+// 	}
 
 	// pick up any stragglers
-/*
-	switch (nColID)
-	{
-	case TDCC_DONE:
-		return IDC_DONEDATE;
-
-	case TDCC_TRACKTIME:
-		return IDC_TIMESPENT;
-	}
-*/
+// 	switch (nColID)
+// 	{
+// 	case TDCC_DONE:
+// 		return IDC_DONEDATE;
+// 
+// 	case TDCC_TRACKTIME:
+// 		return IDC_TIMESPENT;
+// 	}
 
 	ASSERT(0);
 	return 0L;
@@ -8954,7 +8991,7 @@ TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 	if (nCtrlID == 0)
 		return TDCA_NONE;
 
-	int nCtrl;
+//	int nCtrl;
 // 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 // 	{
 // 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
@@ -8963,13 +9000,13 @@ TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 // 			return ctrl.nAttrib;
 // 	}
 
-	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
-
-		if ((ctrl.nCtrlID == nCtrlID) || (ctrl.nBuddyCtrlID == nCtrlID))
-			return ctrl.nAttrib;
-	}
+// 	for (nCtrl = 0; nCtrl < m_aCustomControls.GetSize(); nCtrl++)
+// 	{
+// 		const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
+// 
+// 		if ((ctrl.nCtrlID == nCtrlID) || (ctrl.nBuddyCtrlID == nCtrlID))
+// 			return ctrl.nAttrib;
+// 	}
 
 	// pick up any stragglers
 	switch (nCtrlID)
@@ -9495,7 +9532,7 @@ int CToDoCtrl::GetAllTasks(CTaskFile& tasks) const
 {
 	// save auto combobox contents to definition first
 	// just like we do with standard combos
-	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
+//	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
 
 	return m_exporter.ExportAllTasks(tasks);
 }
@@ -9968,7 +10005,8 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	if (tasks.GetCustomAttributeDefs(aAttribDefs))
 	{
 		if (m_aCustomAttribDefs.Append(aAttribDefs))
-			RebuildCustomAttributeUI();
+			OnCustomAttributesChanged();
+			//RebuildCustomAttributeUI();
 	}
 
 	// add the tasks
@@ -10025,7 +10063,8 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	if (tasks.GetCustomAttributeDefs(aImportedDefs))
 	{
 		if (m_aCustomAttribDefs.Append(aImportedDefs))
-			RebuildCustomAttributeUI();
+			OnCustomAttributesChanged();
+		//RebuildCustomAttributeUI();
 	}
 
 	SetModified(TDCA_PASTE, aTaskIDs);
@@ -10681,10 +10720,10 @@ BOOL CToDoCtrl::Flush()
 // 		{
 // 			m_cbAllocTo.Flush();
 // 		}
-		else
-		{
-			CTDCCustomAttributeUIHelper::FlushEditControl(pFocus, this, m_aCustomControls);
-		}
+// 		else
+// 		{
+// 			CTDCCustomAttributeUIHelper::FlushEditControl(pFocus, this, m_aCustomControls);
+// 		}
 	}
 
 	m_treeDragDrop.CancelDrag();
@@ -10953,9 +10992,8 @@ void CToDoCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			// calc minimum control rect and only resize if the 
 			// controls require less space than we have available
-			CRect rCtrls, rClient;
-			int nCols, nRows;
-			GetClientRect(rClient);
+// 			CRect rClient;
+// 			GetClientRect(rClient);
 
 			// NOTE: we need to set the splitter before we 
 			// call CalcRequiredControlsRect since it
@@ -10965,10 +11003,12 @@ void CToDoCtrl::OnMouseMove(UINT nFlags, CPoint point)
 			// the previous split pos
 			m_nCommentsSize = nNewSize;
 
-			CalcRequiredControlsRect(rClient, rCtrls, nCols, nRows, TRUE);
-			CRect rIntersect;
+// 			CRect rCtrls;
+// 			int nCols, nRows;
+			//CalcRequiredControlsRect(rClient, rCtrls, nCols, nRows, TRUE);
+			//CRect rIntersect;
 
-			if (rCtrls.IsRectEmpty() || (rIntersect.IntersectRect(rClient, rCtrls) && (rIntersect == rCtrls)))
+			//if (rCtrls.IsRectEmpty() || (rIntersect.IntersectRect(rClient, rCtrls) && (rIntersect == rCtrls)))
 			{
 				Resize(0, 0, TRUE);
 				Invalidate(TRUE);

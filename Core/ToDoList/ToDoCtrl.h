@@ -563,9 +563,9 @@ protected:
 	CMapStringToString m_mapMetaData;
 	double m_dTrackedTimeElapsedHours;
 
-	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
+//	CTDCCustomAttributeDataMap m_mapCustomCtrlData;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
-	CTDCCustomControlArray m_aCustomControls;
+//	CTDCCustomControlArray m_aCustomControls;
 
 	DWORD m_dwNextUniqueID;
 	DWORD m_nFileFormat;
@@ -592,8 +592,8 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 	virtual BOOL OnInitDialog();
+	//}}AFX_VIRTUAL
 
 	// Implementation
 protected:
@@ -714,9 +714,9 @@ protected:
 	afx_msg LRESULT OnFindReplaceAllTasks(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceGetExclusionRect(WPARAM wParam, LPARAM lParam);
 
-	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnCustomAttributeChange(UINT nCtrlID);
-	afx_msg void OnCustomAttributeCancel(UINT nCtrlID);
+// 	afx_msg void OnCustomAttributeChange(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
+// 	afx_msg void OnCustomAttributeChange(UINT nCtrlID);
+// 	afx_msg void OnCustomAttributeCancel(UINT nCtrlID);
 	DECLARE_MESSAGE_MAP()
 
 	// Pseudo message handler
@@ -770,15 +770,17 @@ protected:
 	
 	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
 	virtual void UpdateTasklistVisibility();
+
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
+	virtual void OnCustomAttributesChanged();
 	
 	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
 
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
 
-	virtual void RebuildCustomAttributeUI();
+//	virtual void RebuildCustomAttributeUI();
 
 	virtual BOOL CopySelectedTasks() const;
 	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable /*in*/);
@@ -799,8 +801,8 @@ protected:
 	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 //	void UpdateDateTimeControls(BOOL bHasSelection);
-	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
-	void EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) const;
+//	void SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin = 0.0);
+//	void EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) const;
 	void IncrementTrackedTime(BOOL bEnding);
 	BOOL FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks);
 
@@ -853,25 +855,25 @@ protected:
 	CString GetClipboardID() const;
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
 
-	int GetControls(CTDCControlArray& aControls, BOOL bVisible) const;
+//	int GetControls(CTDCControlArray& aControls, BOOL bVisible) const;
 	BOOL IsCtrlShowing(const CTRLITEM& ctrl) const;
 	void ShowHideControls();
 	void ShowHideControl(const CTRLITEM& ctrl);
 	void EnableDisableControls(HTREEITEM hti);
 	void EnableDisableComments(HTREEITEM hti);
-	void EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent);
-	void EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly);
+//	void EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent);
+//	void EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly);
 
 	BOOL GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const;
 	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
 	int GetDefaultControlHeight() const;
 
-	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CRect& rItem, int nClientRight);
-	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
+//	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CRect& rItem, int nClientRight);
+//	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
 	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
 	void ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
-	BOOL CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, int& nCols, int& nRows, BOOL bPreserveSplitPos) const;
+//	BOOL CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, int& nCols, int& nRows, BOOL bPreserveSplitPos) const;
 	BOOL GetStackCommentsAndControls() const;
 	int CalcMinCommentSize() const;
 	int CalcMaxCommentSize() const;

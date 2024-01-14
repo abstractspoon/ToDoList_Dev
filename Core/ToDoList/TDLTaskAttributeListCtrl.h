@@ -59,6 +59,7 @@ public:
 	void SetPriorityColors(const CDWordArray& aColors);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
+	void SelectValue(TDC_ATTRIBUTE nAttribID);
 
 	// Only attributes 'edited' by this control have getters
 	CString GetAllocBy() const;

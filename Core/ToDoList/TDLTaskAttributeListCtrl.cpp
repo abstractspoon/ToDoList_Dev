@@ -228,6 +228,14 @@ void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 		RedrawCell(nRow, VALUE_COL, FALSE);
 }
 
+void CTDLTaskAttributeListCtrl::SelectValue(TDC_ATTRIBUTE nAttribID)
+{
+	int nRow = GetRow(nAttribID);
+
+	if (nRow != -1)
+		SetCurSel(nRow, VALUE_COL);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 {
 	int nRow = GetItemCount();

@@ -107,6 +107,8 @@ public:
 
 	virtual HTREEITEM GetUpdateControlsItem() const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual CString GetControlDescription(const CWnd* pCtrl) const;
+	virtual void NotifyEndPreferencesUpdate();
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -142,10 +144,6 @@ public:
 	void EndTimeTracking(BOOL bAllowConfirm) { CToDoCtrl::EndTimeTracking(bAllowConfirm); }
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
 	void EndSelectedTaskEdit();
-
-	virtual CString GetControlDescription(const CWnd* pCtrl) const;
-	virtual void RebuildCustomAttributeUI();
-	virtual void NotifyEndPreferencesUpdate();
 
 	// override these so we can notify extensions of color changes
 	void SetPriorityColors(const CDWordArray& aColors);
@@ -256,11 +254,13 @@ protected:
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
-	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
+	virtual void OnCustomAttributesChanged();
+	//virtual void RebuildCustomAttributeUI();
 
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
 	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
+	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
