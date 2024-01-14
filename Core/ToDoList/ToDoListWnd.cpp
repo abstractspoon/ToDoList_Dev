@@ -5018,7 +5018,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 	// Pass in the selected tasklist's list data
 	TDCAUTOLISTDATA autoListData;
-	GetToDoCtrl().GetAutoListData(autoListData, TDCA_ALL);
+	GetToDoCtrl().GetAutoListData(TDCA_ALL, autoListData);
 	m_pPrefs->SetAutoListData(autoListData);
 
 	// And all the custom attributes definitionsa
@@ -9553,7 +9553,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		args.sTaskAllocTo = Misc::FormatArray(aAllocTo, _T("|"));
 
 	tdc.GetSelectedTaskCustomAttributeData(args.mapTaskCustData, TRUE);
-	tdc.GetAutoListData(args.tdlListData, TDCA_ALL);
+	tdc.GetAutoListData(TDCA_ALL, args.tdlListData);
 }
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)

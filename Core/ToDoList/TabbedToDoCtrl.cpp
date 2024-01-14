@@ -4093,7 +4093,7 @@ void CTabbedToDoCtrl::AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttribute
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-		GetAutoListData(tld, nAttrib);
+		GetAutoListData(nAttrib, tld);
 	}
 	
 	if (tld.GetSize())

@@ -1181,14 +1181,14 @@ void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& 
 
 		if (nTDC == nActive)
 		{
-			tdc.GetAutoListData(tldActive, nAttribID);
+			tdc.GetAutoListData(nAttribID, tldActive);
 			tldAll.AppendUnique(tldActive, nAttribID);
 		}
 		else
 		{
 			TDCAUTOLISTDATA tld;
 
-			tdc.GetAutoListData(tld, nAttribID);
+			tdc.GetAutoListData(nAttribID, tld);
 			tldAll.AppendUnique(tld, nAttribID);
 		}
 	}

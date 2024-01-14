@@ -616,7 +616,7 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
 	TDCAUTOLISTDATA tld;
-	tdc.GetAutoListData(tld, nAttribID);
+	tdc.GetAutoListData(nAttribID, tld);
 
 	BOOL bAllAttrib = (nAttribID == TDCA_ALL);
 

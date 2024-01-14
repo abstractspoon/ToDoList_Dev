@@ -67,7 +67,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	}
 
 	// auto-droplists
-	tdc.GetAutoListData(m_tldListData, TDCA_ALL);
+	tdc.GetAutoListData(TDCA_ALL, m_tldListData);
 
 	m_cbPriorityFilter.SetColors(aPriorityColors);
 }

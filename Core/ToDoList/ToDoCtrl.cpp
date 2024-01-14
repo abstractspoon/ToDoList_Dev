@@ -1404,10 +1404,10 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 	
 		if (bStackCommentsAndControls)
 		{
+/*
 			CRect rCtrls;
 			int nCols, nRows;
 			
-/*
 			if (CalcRequiredControlsRect(rAvailable, rCtrls, nCols, nRows, TRUE))
 			{
 				BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
@@ -2602,7 +2602,7 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
-int CToDoCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const
+int CToDoCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
 	return tld.Copy(m_tldAll, nAttribID);
 }
@@ -2663,6 +2663,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 //	m_cbVersion.SelectString(0, m_sVersion);
 }
 
+/*
 void CToDoCtrl::SetDefaultListContent(CAutoComboBox& combo, const CStringArray& aNewDefs, 
 									 const CStringArray& aOldDefs, BOOL bAddEmpty)
 {
@@ -2699,6 +2700,7 @@ void CToDoCtrl::SetDefaultListContent(CAutoComboBox& combo, const CStringArray& 
 	// and recalc drop-width
 	combo.RefreshDropWidth();
 }
+*/
 
 BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly)
 {
@@ -6389,6 +6391,7 @@ void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 // 	}
 }
 
+/*
 int CToDoCtrl::AddUserListContent(CAutoComboBox& combo, const CStringArray& aItems)
 {
 	// we only bother updating the combos if their content is 'writable'
@@ -6398,6 +6401,7 @@ int CToDoCtrl::AddUserListContent(CAutoComboBox& combo, const CStringArray& aIte
 	// else
 	return 0; // nothing added
 }
+*/
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
