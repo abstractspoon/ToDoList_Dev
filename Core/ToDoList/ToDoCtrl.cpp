@@ -8496,7 +8496,7 @@ BOOL CToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 			return FALSE;
 		}
 		// can only paste non-references on other non-references
-		else if (!bAsRef && IsSelectedTaskReference())
+		else if (!bAsRef && m_data.IsTaskReference(m_taskTree.GetSelectedTaskID()))
 		{
 			return FALSE;
 		}
