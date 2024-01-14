@@ -125,7 +125,7 @@ public:
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
 
-// 	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
+// 	COLORREF GetSelectedTaskColor() const; // -1 or no item selected
 // 	CString GetSelectedTaskIcon() const;
 //	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
 // 	DWORD GetSelectedTaskParentID() const;
@@ -146,30 +146,36 @@ public:
 // 	BOOL GetSelectedTaskCost(TDCCOST& cost) const;
 //	CString GetSelectedTaskVersion() const;
 
-	BOOL IsSelectedTaskFlagged() const;
-	BOOL IsSelectedTaskLocked() const;
-	BOOL IsSelectedTaskReference() const;
+// 	BOOL IsSelectedTaskFlagged() const;
+// 	BOOL IsSelectedTaskLocked() const;
+//	BOOL IsSelectedTaskReference() const;
 	BOOL IsSelectedTaskDone() const;
 	BOOL IsSelectedTaskDue() const;
 	BOOL IsSelectedTaskSplittable() const;
 
 	BOOL SelectionHasDependencies() const;
-	BOOL SelectionHasCircularDependencies() const;
-	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
-	BOOL SelectionHasReferences() const;
+//	BOOL SelectionHasLocalCircularDependencies() const;
+//	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;
 	BOOL SelectionHasSameParent() const;
 	BOOL SelectionHasNonReferences() const;
 	BOOL SelectionHasDependents() const;
 	BOOL SelectionHasRecurring() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
-	BOOL SelectionHasIcons() const;
-	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL SelectionHasIcon() const;
+//	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasParents() const;
 	BOOL SelectionAreAllDone() const;
 	BOOL SelectionHasTaskColor() const;
+ 	BOOL SelectionHasFlagged() const;
+
+protected:
+	BOOL SelectionHasReferences() const;
+
+
+public:
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);

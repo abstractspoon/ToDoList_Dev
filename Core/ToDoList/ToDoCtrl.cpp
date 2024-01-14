@@ -1824,14 +1824,14 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
-	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
-
 	CDWordArray aSelTaskIDs;
 
 	if (hti)
 		GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	m_lcAttributes.SetSelectedTaskIDs(aSelTaskIDs);
+
+	BOOL bReadOnly = (IsReadOnly() || m_multitasker.AnyTaskIsLocked(aSelTaskIDs)/*!m_taskTree.SelectionHasUnlocked()*/);
 
 	if (hti)
 	{
@@ -4036,7 +4036,7 @@ BOOL CToDoCtrl::CanSetSelectedTaskPercentDone(BOOL bToToday) const
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			return FALSE;
 
-		if (SelectedTasksHaveChildren() && // ie. some are parents
+		if (m_taskTree.SelectionHasSubtasks() && // ie. some are parents
 			HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
 		{
 			return FALSE;
@@ -4977,7 +4977,7 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const 
 { 
 	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 //	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
 	if (!m_multitasker.GetTasksRecurrence(aSelTaskIDs, tr))
@@ -5003,7 +5003,7 @@ int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles) const
 COLORREF CToDoCtrl::GetSelectedTaskColor() const
 {
 	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	COLORREF color;
 	return (m_multitasker.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
@@ -5012,7 +5012,7 @@ COLORREF CToDoCtrl::GetSelectedTaskColor() const
 CString CToDoCtrl::GetSelectedTaskIcon() const
 {
 	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	CString sIcon;
 	return (m_multitasker.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
@@ -5021,7 +5021,7 @@ CString CToDoCtrl::GetSelectedTaskIcon() const
 CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
 {
 	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	CString sPath;
 	return (m_multitasker.GetTasksPath(aSelTaskIDs, sPath, bWithTaskName) ? sPath : _T(""));
@@ -5030,7 +5030,7 @@ CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
 DWORD CToDoCtrl::GetSelectedTaskParentID() const
 {
 	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	DWORD dwID;
 	return (m_multitasker.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);

@@ -525,7 +525,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (m_multitasker.AnyTasksAreLocked(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
+	if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
 		return FALSE;
 
 	// else

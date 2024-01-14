@@ -378,7 +378,7 @@ public:
 
 	// Simple query functions
 	BOOL AnyTaskHasDependencies(const CDWordArray& aTaskIDs) const;
-	BOOL AnyTaskHasCircularDependencies(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasLocalCircularDependencies(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskHasDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AnyTaskHasDependents(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskHasIcon(const CDWordArray& aTaskIDs) const;
@@ -388,13 +388,14 @@ public:
 	BOOL AnyTaskIsReference(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsParent(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const;
-	BOOL AnyTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
 
 	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
-	BOOL AllTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+//	BOOL AllTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 
 protected:
 	const CToDoCtrlData& m_data;

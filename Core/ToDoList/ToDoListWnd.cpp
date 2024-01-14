@@ -3225,7 +3225,7 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_COLOR) && 
 					(Prefs().GetTextColorOption() == COLOROPT_DEFAULT) &&
-					tdc.SelectedTasksHaveColors());	
+					tdc.SelectedTasksHaveColor());	
 }
 
 void CToDoListWnd::OnEditToggleTaskDone() 
@@ -11704,7 +11704,7 @@ void CToDoListWnd::OnEditFlagtask()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	tdc.SetSelectedTaskFlag(!tdc.IsSelectedTaskFlagged());
+	tdc.SetSelectedTaskFlag(!tdc.SelectedTasksHaveFlagged());
 }
 
 void CToDoListWnd::OnUpdateEditFlagtask(CCmdUI* pCmdUI) 
@@ -11712,14 +11712,14 @@ void CToDoListWnd::OnUpdateEditFlagtask(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FLAG));	
-	pCmdUI->SetCheck(tdc.IsSelectedTaskFlagged() ? 1 : 0);
+	pCmdUI->SetCheck(tdc.SelectedTasksHaveFlagged() ? 1 : 0);
 }
 
 void CToDoListWnd::OnEditLocktask() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	tdc.SetSelectedTaskLock(!tdc.IsSelectedTaskLocked());
+	tdc.SetSelectedTaskLock(!tdc.SelectedTasksHaveLocked());
 }
 
 void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI) 
@@ -11727,7 +11727,7 @@ void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_LOCK));	
-	pCmdUI->SetCheck(tdc.IsSelectedTaskLocked() ? 1 : 0);
+	pCmdUI->SetCheck(tdc.SelectedTasksHaveLocked() ? 1 : 0);
 }
 
 void CToDoListWnd::OnEditGotoDependency() 
@@ -13337,7 +13337,7 @@ void CToDoListWnd::OnUpdateEditCleartaskicon(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_ICON) && tdc.SelectedTasksHaveIcons());	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_ICON) && tdc.SelectedTasksHaveIcon());	
 }
 
 void CToDoListWnd::OnSortMulti() 

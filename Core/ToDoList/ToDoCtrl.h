@@ -266,9 +266,8 @@ public:
 //	BOOL GetSelectedTaskCost(TDCCOST& cost) const { return m_lcAttributes.GetCost()/*m_taskTree.GetSelectedTaskCost(cost)*/; }
 //	CString GetSelectedTaskVersion() const { return m_taskTree.GetSelectedTaskVersion(); }
 
-	BOOL IsSelectedTaskFlagged() const { return m_taskTree.IsSelectedTaskFlagged(); }
-	BOOL IsSelectedTaskLocked() const { return m_taskTree.IsSelectedTaskLocked(); }
-	BOOL IsSelectedTaskReference() const { return m_taskTree.IsSelectedTaskReference(); }
+// 	BOOL IsSelectedTaskFlagged() const;// { return m_taskTree.IsSelectedTaskFlagged(); }
+// 	BOOL IsSelectedTaskLocked() const;// { return m_taskTree.IsSelectedTaskLocked(); }
 
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, FALSE, nMaxLen); }
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
@@ -407,12 +406,14 @@ public:
 	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 
-	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
-	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
+//	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
+	BOOL SelectedTasksHaveIcon() const { return m_taskTree.SelectionHasIcon(); }
 	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
 	BOOL SelectedTasksHaveDependencies() const { return m_taskTree.SelectionHasDependencies(); }
 	BOOL SelectedTasksHaveDependents() const { return m_taskTree.SelectionHasDependents(); }
-	BOOL SelectedTasksHaveColors() const { return m_taskTree.SelectionHasTaskColor(); }
+	BOOL SelectedTasksHaveFlagged() const { return m_taskTree.SelectionHasFlagged(); }
+	BOOL SelectedTasksHaveLocked() const { return m_taskTree.SelectionHasLocked(FALSE); }
+	BOOL SelectedTasksHaveColor() const { return m_taskTree.SelectionHasTaskColor(); }
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
@@ -829,6 +830,7 @@ protected:
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_lcAttributes.GetTimeEstimate(timeEst); } // m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_lcAttributes.GetTimeSpent(timeSpent); } // m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
 	CString GetSelectedTaskIcon() const; // { return m_taskTree.GetSelectedTaskIcon(); }
+	BOOL IsSelectedTaskReference() const;// { return m_taskTree.IsSelectedTaskReference(); }
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
