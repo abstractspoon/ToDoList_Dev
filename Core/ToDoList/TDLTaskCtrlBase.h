@@ -116,19 +116,20 @@ public:
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
 	CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
-	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
-	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const;
-	int GetSelectedTaskFileLinkCount() const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const;
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
 
-// 	COLORREF GetSelectedTaskColor() const; // -1 or no item selected
-// 	CString GetSelectedTaskIcon() const;
+ 	COLORREF GetSelectedTaskColor() const; // -1 or no item selected
+ 	CString GetSelectedTaskIcon() const;
+	DWORD GetSelectedTaskParentID() const;
+
+//	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
+//	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const;
+//	int GetSelectedTaskFileLinkCount() const;
 //	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
-// 	DWORD GetSelectedTaskParentID() const;
 // 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 // 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 // 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
@@ -149,8 +150,8 @@ public:
 // 	BOOL IsSelectedTaskFlagged() const;
 // 	BOOL IsSelectedTaskLocked() const;
 //	BOOL IsSelectedTaskReference() const;
-	BOOL IsSelectedTaskDone() const;
-	BOOL IsSelectedTaskDue() const;
+// 	BOOL IsSelectedTaskDone() const;
+// 	BOOL IsSelectedTaskDue() const;
 	BOOL IsSelectedTaskSplittable() const;
 
 	BOOL SelectionHasDependencies() const;
@@ -167,15 +168,10 @@ public:
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasParents() const;
+	BOOL SelectionHasDone() const;
 	BOOL SelectionAreAllDone() const;
 	BOOL SelectionHasTaskColor() const;
- 	BOOL SelectionHasFlagged() const;
-
-protected:
-	BOOL SelectionHasReferences() const;
-
-
-public:
+	BOOL SelectionHasFlagged() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);
@@ -502,6 +498,7 @@ protected:
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
 							COLORREF& crBack, BOOL bRef, BOOL bSelected) const;
 	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack) const;
+	BOOL SelectionHasReferences() const;
 
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);

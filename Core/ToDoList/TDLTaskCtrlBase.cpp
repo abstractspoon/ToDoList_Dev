@@ -5891,6 +5891,11 @@ return m_multitasker.FUNCTION(aTaskIDs, ARG)
 
 // -----------------------------------------------------------------
 
+BOOL CTDLTaskCtrlBase::SelectionHasDone() const
+{
+	SELECTIONHAS_1ARG(AnyTaskHasDate, TDCD_DONE);
+}
+
 /*
 BOOL CTDLTaskCtrlBase::SelectionHasDates(TDC_DATE nDate, BOOL bAll) const
 {
@@ -6174,8 +6179,15 @@ int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
 	return nPriority;
 }
 
+*/
 DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 {
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	DWORD dwID;
+	return (m_multitasker.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);
+	/*
 	// If multiple tasks are selected they must all
 	// have the same parent else we return 0
 	POSITION pos = GetFirstSelectedTaskPos();
@@ -6201,8 +6213,8 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 	}
 	
 	return dwParentID;
-}
 */
+}
 
 /*
 int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
@@ -6227,9 +6239,16 @@ int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
 
 	return nRisk;
 }
+*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 {
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	CString sIcon;
+	return (m_multitasker.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
+	/*
 	CString sIcon;
 	
 	if (GetSelectedCount())
@@ -6251,11 +6270,16 @@ CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 	}
 	
 	return sIcon;
-}
 */
+}
 
 BOOL CTDLTaskCtrlBase::SelectedTaskHasDate(TDC_DATE nDate) const
 {
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	return m_multitasker.AnyTaskHasDate(aSelTaskIDs, nDate);
+	/*
 	POSITION pos = GetFirstSelectedTaskPos();
 
 	while (pos)
@@ -6268,6 +6292,7 @@ BOOL CTDLTaskCtrlBase::SelectedTaskHasDate(TDC_DATE nDate) const
 	}
 
 	return FALSE;
+	*/
 }
 
 COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
@@ -6368,12 +6393,18 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
 
 	return TRUE;
 }
+*/
 
 COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const
 {
-	return m_data.GetTaskColor(GetSelectedTaskID());
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	COLORREF color;
+	return (m_multitasker.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
+
+	//	return m_data.GetTaskColor(GetSelectedTaskID());
 }
-*/
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 {
@@ -6777,6 +6808,7 @@ int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CTDCDependencyArray& aDepends)
 }
 */
 
+/*
 CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const
 {
 	if (GetSelectedCount() == 1)
@@ -6822,7 +6854,6 @@ int CTDLTaskCtrlBase::GetSelectedTaskFileLinkCount() const
 	return 0;
 }
 
-/*
 CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
 {
 	if (GetSelectedCount() == 1)
@@ -6845,13 +6876,14 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskSplittable() const
 	
 	if (nSelCount == 1)
 	{
-		if (IsSelectedTaskDone() || SelectionHasSubtasks())
+		if (SelectionHasDone()/*IsSelectedTaskDone()*/ || SelectionHasSubtasks())
 			return FALSE;
 	}
 	
 	return (nSelCount > 0);
 }
 
+/*
 BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const
 {
 	return m_data.IsTaskDone(GetSelectedTaskID());
@@ -6861,6 +6893,7 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
 {
 	return m_calculator.IsTaskOverDue(GetSelectedTaskID());
 }
+*/
 
 BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 {

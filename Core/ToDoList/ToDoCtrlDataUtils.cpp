@@ -5181,7 +5181,7 @@ BOOL CTDCMultiTasker::GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEP
 
 BOOL CTDCMultiTasker::GetTasksTimeSpent(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const
 {
-	GETTASKSVAL_REF(m_data.GetTaskTimeEstimate, period, TDCTIMEPERIOD);
+	GETTASKSVAL_REF(m_data.GetTaskTimeSpent, period, TDCTIMEPERIOD);
 }
 
 BOOL CTDCMultiTasker::GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const
@@ -5535,32 +5535,6 @@ BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
 {
 	GETALLTASKHAS(IsTaskReference);
 }
-
-/*
-BOOL CTDCMultiTasker::AllTasksAreLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
-{
-	// 	POSITION pos = GetFirstSelectedTaskPos();
-	// 
-	// 	while (pos)
-	// 	{
-	// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-	// 		DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
-	// 
-	// 		// Root is always unlocked
-	// 		if (!dwParentID)
-	// 			continue;
-	// 
-	// 		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwParentID))
-	// 			continue;
-	// 
-	// 		if (m_calculator.IsTaskLocked(dwParentID))
-	// 			return TRUE;
-	// 	}
-	// 
-	// 	return FALSE;
-	//	GETALLTASKHAS_ARG(IsTaskLocked, bTreatRefsAsUnlocked);
-}
-*/
 
 BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
 {

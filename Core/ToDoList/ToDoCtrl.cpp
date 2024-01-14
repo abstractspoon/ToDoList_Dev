@@ -217,7 +217,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_formatter(m_data, mgrContent),
-	m_multitasker(m_data, mgrContent),
+// 	m_multitasker(m_data, mgrContent),
 	m_infoTip(m_data, m_aCustomAttribDefs, mgrContent),
 	m_sourceControl(*this),
 	m_findReplace(*this),
@@ -1831,7 +1831,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 	m_lcAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
-	BOOL bReadOnly = (IsReadOnly() || m_multitasker.AnyTaskIsLocked(aSelTaskIDs)/*!m_taskTree.SelectionHasUnlocked()*/);
+	BOOL bReadOnly = (IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE));
 
 	if (hti)
 	{
@@ -4974,13 +4974,10 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 //	return SetTextChange(TDCA_EXTERNALID, m_sExternalID, sID, IDC_EXTERNALID, aModTaskIDs);
 }
 
+/*
 BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const 
 { 
-	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
-
-//	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
-	if (!m_multitasker.GetTasksRecurrence(aSelTaskIDs, tr))
+	if (!m_taskTree.GetSelectedTaskRecurrence(tr))
 	{
 		// initialise some options if regularity == once
 		ASSERT(!tr.IsRecurring());
@@ -4999,25 +4996,9 @@ int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles) const
 	// external version always returns full paths
 	return GetSelectedTaskFileLinks(aFiles, TRUE);
 }
+*/
 
-COLORREF CToDoCtrl::GetSelectedTaskColor() const
-{
-	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
-
-	COLORREF color;
-	return (m_multitasker.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
-}
-
-CString CToDoCtrl::GetSelectedTaskIcon() const
-{
-	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
-
-	CString sIcon;
-	return (m_multitasker.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
-}
-
+/*
 CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
 {
 	CDWordArray aSelTaskIDs;
@@ -5026,26 +5007,20 @@ CString CToDoCtrl::GetSelectedTaskPath(BOOL bWithTaskName, int nMaxLen) const
 	CString sPath;
 	return (m_multitasker.GetTasksPath(aSelTaskIDs, sPath, bWithTaskName) ? sPath : _T(""));
 }
-
-DWORD CToDoCtrl::GetSelectedTaskParentID() const
-{
-	CDWordArray aSelTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
-
-	DWORD dwID;
-	return (m_multitasker.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);
-}
-
-int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const 
-{ 
-	return m_taskTree.GetSelectedTaskFileLinks(aFiles, bFullPath); 
-}
+*/
 
 BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 {
-	return GotoFile(GetSelectedTaskFileLink(nFile, TRUE)); // full path
+	CStringArray aFiles;
+	int nNumFiles = m_lcAttributes.GetFileLinks(aFiles);
+
+	if (nFile < (nNumFiles - 1))
+		return GotoFile(aFiles[nFile]);
+
+	return FALSE;
 }
 
+/*
 CString CToDoCtrl::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const 
 { 
 	return m_taskTree.GetSelectedTaskFileLink(nFile, bFullPath);
@@ -5056,6 +5031,7 @@ CString CToDoCtrl::GetSelectedTaskFileLink(int nFile) const
 	// external version always returns full paths
 	return GetSelectedTaskFileLink(nFile, TRUE);
 }
+*/
 
 BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
 {

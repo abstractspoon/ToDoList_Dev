@@ -9442,18 +9442,21 @@ void CToDoListWnd::OnUpdateSetPriority(CCmdUI* pCmdUI)
 void CToDoListWnd::OnEditAddFileLink() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nNumFiles = tdc.GetSelectedTaskFileLinkCount();
+
+	CStringArray aFiles;
+	int nNumFiles = tdc.GetSelectedTaskFileLinks(aFiles);
+// 	int nNumFiles = tdc.GetSelectedTaskFileLinkCount();
 		
 	CPreferences prefs;
 	CFileOpenDialog dialog(IDS_SETFILELINK_TITLE, 
 							NULL, 
-							((nNumFiles == 1) ? tdc.GetSelectedTaskFileLink(0) : _T("")), 
+							((nNumFiles == 1) ? aFiles[0]/*tdc.GetSelectedTaskFileLink(0)*/ : _T("")), 
 							(EOFN_DEFAULTOPEN | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT), 
 							CEnString(IDS_ALLFILEFILTER));
 	
 	if (dialog.DoModal(prefs) == IDOK)
 	{
-		CStringArray aFiles;
+		//CStringArray aFiles;
 		
 		if (dialog.GetPathNames(aFiles))
 			tdc.SetSelectedTaskFileLinks(aFiles, TRUE); // append
@@ -9530,9 +9533,13 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 	args.sTaskTitle = tdc.FormatSelectedTaskTitles(FALSE);
 	args.sTaskExtID = tdc.GetSelectedTaskExternalID();
 	args.sTaskComments = tdc.GetSelectedTaskComments();
-	args.sTaskFileLink = tdc.GetSelectedTaskFileLink(0);
 	args.sTaskAllocBy = tdc.GetSelectedTaskAllocBy();
 	args.sTaskPath = tdc.GetSelectedTaskPath(FALSE);
+
+	CStringArray aFiles;
+
+	if (tdc.GetSelectedTaskFileLinks(aFiles))
+		args.sTaskFileLink = aFiles[0];
 	
 	CDWordArray aIDs;
 	DWORD dwTemp;

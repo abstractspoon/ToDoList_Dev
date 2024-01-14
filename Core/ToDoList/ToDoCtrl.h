@@ -232,31 +232,29 @@ public:
 	BOOL ClearSelectedTaskIcon(); 
 
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
-	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
-	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
+	BOOL IsSelectedTaskDone() const { return m_taskTree.SelectionHasDone(); }
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE, BOOL bPreserveWeekday = FALSE);
 	BOOL CanOffsetSelectedTaskStartAndDueDates() const;
 	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE, BOOL bPreserveWeekdays = FALSE);
-	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
-	CString GetSelectedTaskFileLink(int nFile) const;
-	int GetSelectedTaskFileLinkCount() const { return m_taskTree.GetSelectedTaskFileLinkCount(); }
-	int GetSelectedTaskFileLinks(CStringArray& aFiles) const;
 	BOOL GotoSelectedTaskFileLink(int nFile);
-	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;// m_taskTree.GetSelectedTaskPath(bIncludeTaskName, nMaxLen); }
+	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const { return m_taskTree.GetSelectedTaskPath(bIncludeTaskName, nMaxLen); }
+	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_taskTree.GetSelectedTaskCustomAttributeData(sAttribID, data, bFormatted); }
 	int GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted = FALSE) const;
 	
 	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const { return m_lcAttributes.GetDependencies(aDepends); } //m_taskTree.GetSelectedTaskDependencies(aDepends); }
-	COLORREF GetSelectedTaskColor() const; //{ return m_taskTree.GetSelectedTaskColor(); }
 	CString GetSelectedTaskExternalID() const { return m_lcAttributes.GetExternalID(); }// m_taskTree.GetSelectedTaskExtID(); }
 	int GetSelectedTaskPriority() const { return m_lcAttributes.GetPriority(); }//m_taskTree.GetSelectedTaskPriority(); }
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { CStringArray aUnused; return m_lcAttributes.GetAllocTo(aAllocTo, aUnused); } // m_taskTree.GetSelectedTaskAllocTo(aAllocTo); }
 	CString GetSelectedTaskAllocBy() const { return m_lcAttributes.GetAllocBy(); } // m_taskTree.GetSelectedTaskAllocBy(); }
+	int GetSelectedTaskFileLinks(CStringArray& aFiles) const { return m_lcAttributes.GetFileLinks(aFiles); } //m_taskTree.GetSelectedTaskFileLinks(aFiles, TRUE); }
 
-//	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
+// 	CString GetSelectedTaskFileLink(int nFile) const { return m_lcAttributes.GetFileLink(nFile); } // { return m_taskTree.GetSelectedTaskFileLink(nFile, TRUE); }
+//	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
+// 	int GetSelectedTaskFileLinkCount() const { return m_taskTree.GetSelectedTaskFileLinkCount(); }
 //	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const { return m_taskTree.GetSelectedTaskDate(nDate); }
 //	CString GetSelectedTaskStatus() const { return m_taskTree.GetSelectedTaskStatus(); }
 //	int GetSelectedTaskCategories(CStringArray& aCats) const { return m_taskTree.GetSelectedTaskCategories(aCats); }
@@ -265,11 +263,10 @@ public:
 //	int GetSelectedTaskRisk() const { return m_taskTree.GetSelectedTaskRisk()*/; }
 //	BOOL GetSelectedTaskCost(TDCCOST& cost) const { return m_lcAttributes.GetCost()/*m_taskTree.GetSelectedTaskCost(cost)*/; }
 //	CString GetSelectedTaskVersion() const { return m_taskTree.GetSelectedTaskVersion(); }
-
 // 	BOOL IsSelectedTaskFlagged() const;// { return m_taskTree.IsSelectedTaskFlagged(); }
 // 	BOOL IsSelectedTaskLocked() const;// { return m_taskTree.IsSelectedTaskLocked(); }
-
 //	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
+
 	BOOL SelectedTasksHaveIcon() const { return m_taskTree.SelectionHasIcon(); }
 	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
 	BOOL SelectedTasksHaveDependencies() const { return m_taskTree.SelectionHasDependencies(); }
@@ -443,6 +440,7 @@ public:
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetFocusToProjectName();
+	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
 	CString FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const;
@@ -538,7 +536,7 @@ protected:
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
-	CTDCMultiTasker m_multitasker;
+//	CTDCMultiTasker m_multitasker;
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
 	CTDCSourceControl m_sourceControl;
@@ -812,25 +810,29 @@ protected:
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited);
 	BOOL ClearSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bCtrlEdited);
-	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const;
-	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday, CDWordSet& mapProcessed);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
-	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
-	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
-	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
 	BOOL SetSelectedTaskColor(COLORREF color);
-	BOOL GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& tp) const;
-	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
-	DWORD GetSelectedTaskParentID() const; // { return m_taskTree.GetSelectedTaskParentID(); }
+
+	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
+//	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const; // { return m_taskTree.GetSelectedTaskFileLinks(aFiles, bFullPath); }
+//	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const { return m_taskTree.GetSelectedTaskFileLink(nFile, bFullPath); }
+//	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const { return m_taskTree.GetSelectedTaskFileLink(nFile, bFullPath); }
+	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const { return m_taskTree.GetSelectedTaskRecurrence(tr); }
+	DWORD GetSelectedTaskParentID() const { return m_taskTree.GetSelectedTaskParentID(); }
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_lcAttributes.GetTimeEstimate(timeEst); } // m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_lcAttributes.GetTimeSpent(timeSpent); } // m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
-	CString GetSelectedTaskIcon() const; // { return m_taskTree.GetSelectedTaskIcon(); }
+	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
+	BOOL GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& tp) const;
 //	BOOL IsSelectedTaskReference() const;// { return m_taskTree.IsSelectedTaskReference(); }
+	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
+
+	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
+	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);

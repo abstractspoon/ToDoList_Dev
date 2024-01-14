@@ -816,7 +816,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		}
 		else if (dwSingleSelTaskID)
 		{
-			sValue = m_formatter.GetTaskTimeEstimate(dwSingleSelTaskID);
+			sValue = m_formatter.GetTaskTimeSpent(dwSingleSelTaskID);
 		}
 		break;
 
