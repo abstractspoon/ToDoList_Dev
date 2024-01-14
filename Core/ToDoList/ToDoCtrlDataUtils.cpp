@@ -5129,33 +5129,6 @@ BOOL CTDCMultiTasker::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CStrin
 	GETTASKSVAL_ARG(m_formatter.GetTaskCommentFormat, sValue, CString, FALSE);
 }
 
-/*
-BOOL CTDCTaskCollator::GetTasksDueDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
-{
-	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_DUE);
-}
-
-BOOL CTDCTaskCollator::GetTasksStartDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
-{
-	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_START);
-}
-
-BOOL CTDCTaskCollator::GetTasksLastModifiedDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
-{
-	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_LASTMOD);
-}
-
-BOOL CTDCTaskCollator::GetTasksDoneDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
-{
-	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_DONE);
-}
-
-BOOL CTDCTaskCollator::GetTasksCreationDate(const CDWordArray& aTaskIDs, COleDateTime& dtValue) const
-{
-	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, TDCD_CREATE);
-}
-*/
-
 BOOL CTDCMultiTasker::GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const
 {
 	GETTASKSVAL_ARG(m_data.GetTaskDate, dtValue, COleDateTime, nDate);
@@ -5260,19 +5233,49 @@ BOOL CTDCMultiTasker::GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, c
 	if (!aTaskIDs.GetSize()) 
 		return FALSE;
 
-	TDCCADATA first;
-	m_data.GetTaskCustomAttributeData(aTaskIDs[0], attribDef.sUniqueID, first);
-
-	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
+	// Multi-selection check lists need special handling
+	if (attribDef.IsMultiList())
 	{
-		TDCCADATA next;
-		m_data.GetTaskCustomAttributeData(aTaskIDs[nID], attribDef.sUniqueID, next);
-		
-		if (next != first) 
-			return FALSE;
+		CMap<CString, LPCTSTR, int, int&> mapCounts;
+		TDCCADATA dataTask;
+
+		for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+		{
+			if (m_data.GetTaskCustomAttributeData(aTaskIDs[nID], attribDef.sUniqueID, dataTask))
+			{
+				CStringArray aTaskItems;
+				int nItem = dataTask.AsArray(aTaskItems);
+
+				while (nItem--)
+					Misc::IncrementItemStrT<int>(mapCounts, aTaskItems[nItem]);
+			}
+		}
+
+		CStringArray aMatched, aMixed;
+		SplitSelectedTaskArrayMatchCounts(mapCounts, aTaskIDs.GetSize(), aMatched, aMixed);
+
+		Misc::SortArray(aMatched);
+		Misc::SortArray(aMixed);
+
+		data.Set(aMatched, aMixed);
+	}
+	else
+	{
+		TDCCADATA first;
+		m_data.GetTaskCustomAttributeData(aTaskIDs[0], attribDef.sUniqueID, first);
+
+		for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
+		{
+			TDCCADATA next;
+			m_data.GetTaskCustomAttributeData(aTaskIDs[nID], attribDef.sUniqueID, next);
+
+			if (next != first)
+				return FALSE;
+		}
+
+		data = first;
 	}
 
-	data = first; 
 	return TRUE;
 }
 
