@@ -2152,19 +2152,23 @@ void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
 void CTDLTaskAttributeListCtrl::OnCancelEdit()
 {
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	// Revert changes before default handling
-	switch (nAttribID)
+	if (nRow != -1)
 	{
-	case TDCA_DEPENDENCY:
-		m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
-		break;
+		// Revert changes before default handling
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		PrepareTimePeriodEdit(nRow);
-		break;
+		switch (nAttribID)
+		{
+		case TDCA_DEPENDENCY:
+			m_eDepends.SetWindowText(m_eDepends.FormatDependencies());
+			break;
+
+		case TDCA_TIMEESTIMATE:
+		case TDCA_TIMESPENT:
+			PrepareTimePeriodEdit(nRow);
+			break;
+		}
 	}
 
 	CInputListCtrl::OnCancelEdit();
