@@ -6299,6 +6299,11 @@ COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
 {
 	COleDateTime date; // == 0
 	
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	m_multitasker.GetTasksDate(aSelTaskIDs, nDate, date);
+/*
 	if (GetSelectedCount())
 	{
 		// get first item's value as initial
@@ -6318,6 +6323,7 @@ COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
 			}
 		}
 	}
+*/
 	
 	return date;
 }
@@ -6408,6 +6414,11 @@ COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 {
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	return m_multitasker.GetTasksRecurrence(aSelTaskIDs, tr);
+/*
 	if (GetSelectedCount())
 	{
 		// get first item's value as initial
@@ -6429,6 +6440,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 	}
 	
 	return tr.IsRecurring();
+*/
 }
 
 /*
