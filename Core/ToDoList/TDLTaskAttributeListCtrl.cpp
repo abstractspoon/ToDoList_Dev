@@ -849,11 +849,14 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 			if (m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
 			{
-				/*if (pDef->IsMultiList())
+				if (pDef->IsMultiList())
 				{
+					CStringArray aMatched, aMixed;
 					data.AsArrays(aMatched, aMixed);
+
+					sValue = FormatMultiSelItems(aMatched, aMixed);
 				}
-				else*/ if (pDef->IsList())
+				else if (pDef->IsList())
 				{
 					sValue = data.FormatAsArray();
 				}
