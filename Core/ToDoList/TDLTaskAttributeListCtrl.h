@@ -47,8 +47,9 @@ public:
 	void SetPercentDoneIncrement(int nAmount);
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
-	void SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
-	void GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const;
+	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
+	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
+	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);
 
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
@@ -108,6 +109,7 @@ protected:
 	CDWordArray m_aSelectedTaskIDs;
 	CString m_sCompletionStatus;
 	CDWordArray m_aPriorityColors;
+	CTDCAttributeMap m_mapReadOnlyListData;
 
 	CEnCheckComboBox m_cbTextAndNumbers;
 	CDateTimeCtrlEx m_datePicker;
@@ -183,6 +185,7 @@ protected:
 	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
+	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
 	
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

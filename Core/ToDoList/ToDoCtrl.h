@@ -181,7 +181,7 @@ public:
 	// these return the full list of items in each droplist
 	int GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tld);
-	BOOL SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly = TRUE);
+	void SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly = TRUE);
 
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;

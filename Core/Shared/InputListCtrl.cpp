@@ -1460,7 +1460,7 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 	GetCellEditRect(nRow, nCol, rCell);
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
-		rCell.bottom += 200;
+		rCell.bottom += GraphicsMisc::ScaleByDPIFactor(200);
 
 	ctrl.MoveWindow(rCell);
 	ctrl.EnableWindow(TRUE);

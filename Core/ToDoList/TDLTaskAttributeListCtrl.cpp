@@ -81,6 +81,8 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 /////////////////////////////////////////////////////////////////////////////
 
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
+
+const int COMBO_DROPHEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 const int VALUE_VARIES = 1;
@@ -197,8 +199,6 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Create our edit fields
 	CreateControl(m_cbTextAndNumbers, IDC_TEXTANDNUM_COMBO, (CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL));
-	m_cbTextAndNumbers.ModifyFlags(0, ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE);
-
 	CreateControl(m_datePicker, IDC_DATE_PICKER);
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, (CBS_DROPDOWN | CBS_AUTOHSCROLL));
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
@@ -644,15 +644,39 @@ void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tl
 	m_tldDefault.Copy(tldDefault, TDCA_ALL);
 }
 
-void CTDLTaskAttributeListCtrl::SetAutoListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID)
+void CTDLTaskAttributeListCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld)
 {
 	m_tldAll.Copy(tld, nAttribID);
 }
 
-void CTDLTaskAttributeListCtrl::GetAutoListData(TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID) const
+void CTDLTaskAttributeListCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
 	tld.Copy(m_tldAll, nAttribID);
 }
+
+void CTDLTaskAttributeListCtrl::SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly)
+{
+	switch (nAttribID)
+	{
+	case TDCA_ALLOCTO:
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+	case TDCA_VERSION:
+		if (bReadOnly)
+			m_mapReadOnlyListData.Add(nAttribID);
+		else
+			m_mapReadOnlyListData.Remove(nAttribID);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+}
+
+
 
 BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 {
@@ -1501,8 +1525,51 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 	return aMatched.GetSize();
 }
 
+BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& combo)
+{
+	BOOL bIsReadOnly = !CDialogHelper::ComboHasEdit(combo), bWantReadOnly(bIsReadOnly);
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nAttribID)
+	{
+	case TDCA_ALLOCBY:
+	case TDCA_STATUS:
+	case TDCA_VERSION:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_TAGS:
+		bWantReadOnly = m_mapReadOnlyListData.Has(nAttribID);
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULL);
+
+			bWantReadOnly = pDef->IsFixedList();
+		}
+		break;
+	}
+
+	if (Misc::StateChanged(bIsReadOnly, bWantReadOnly))
+	{
+		if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bWantReadOnly, COMBO_DROPHEIGHT))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
+
+	combo.ModifyFlags((bWantReadOnly ? (ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE) : 0),
+						(bWantReadOnly ? 0 : (ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE)));
+	return TRUE;
+}
+
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
 {
+	CheckRecreateCombo(nRow, combo);
+
 	combo.EnableMultiSelection(TRUE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -1516,6 +1583,8 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 
 void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
 {
+	CheckRecreateCombo(nRow, combo);
+
 	combo.EnableMultiSelection(FALSE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);

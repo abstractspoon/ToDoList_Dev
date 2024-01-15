@@ -2609,7 +2609,7 @@ int CToDoCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) co
 
 void CToDoCtrl::UpdateAutoListData(TDC_ATTRIBUTE nAttribID)
 {
-	m_lcAttributes.GetAutoListData(m_tldAll, nAttribID);
+	m_lcAttributes.GetAutoListData(nAttribID, m_tldAll);
 
 /*
 	BOOL bWantAll = (nAttribID == TDCA_ALL);
@@ -2702,10 +2702,11 @@ void CToDoCtrl::SetDefaultListContent(CAutoComboBox& combo, const CStringArray& 
 }
 */
 
-BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly)
+void CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly)
 {
-	switch (nListAttribID)
-	{
+	m_lcAttributes.SetAutoListDataReadOnly(nListAttribID, bReadOnly);
+// 	switch (nListAttribID)
+// 	{
 	// multi-selection
 // 	case TDCA_CATEGORY: return SetAutoComboReadOnly(m_cbCategory,	bReadOnly, m_tldDefault.aCategory, FALSE);
 // 	case TDCA_ALLOCTO:	return SetAutoComboReadOnly(m_cbAllocTo,	bReadOnly, m_tldDefault.aAllocTo, FALSE);
@@ -2715,10 +2716,10 @@ BOOL CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bRe
 // 	case TDCA_ALLOCBY:	return SetAutoComboReadOnly(m_cbAllocBy,	bReadOnly, m_tldDefault.aAllocBy, TRUE);
 //	case TDCA_VERSION:	return SetAutoComboReadOnly(m_cbVersion,	bReadOnly, m_tldDefault.aVersion, TRUE);
 // 	case TDCA_STATUS:	return SetAutoComboReadOnly(m_cbStatus,		bReadOnly, m_tldDefault.aStatus, TRUE);
-	}
+// 	}
 
 	// all else
-	return FALSE;
+//	return FALSE;
 }
 
 BOOL CToDoCtrl::RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
@@ -6372,7 +6373,7 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	if (tasks.GetAutoListData(m_tldAll))
-		m_lcAttributes.SetAutoListData(m_tldAll, TDCA_ALL);
+		m_lcAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 
 
 // 	TDCAUTOLISTDATA tld;
