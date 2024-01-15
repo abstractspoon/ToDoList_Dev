@@ -1396,6 +1396,17 @@ COleDateTime CTDLTaskAttributeListCtrl::GetDoneTime() const
 	return (CTimeHelper::DecodeClockTime(GetValueText(TDCA_DONETIME)) / 24);
 }
 
+int CTDLTaskAttributeListCtrl::GetCustomAttributeAutoListData(const CString& sAttribID, CStringArray& aItems) const
+{
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, sAttribID, pDef, 0);
+
+	ASSERT(pDef->IsAutoList());
+
+	aItems.Copy(pDef->aAutoListData);
+	return aItems.GetSize();
+}
+
 BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
@@ -1627,9 +1638,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 			if (pDef->IsList())
 			{
-				CStringArray aDefValues;
-				pDef->GetUniqueListData(aDefValues);
-
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_STRING:
@@ -1637,16 +1645,16 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_INTEGER:
 				case TDCCA_DOUBLE:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbTextAndNumbers);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
 					else
-						PrepareSingleSelCombo(nRow, aDefValues, CStringArray(), m_cbTextAndNumbers);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
 					break;
 
 				case TDCCA_ICON:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, aDefValues, CStringArray(), m_cbCustomIcons);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
 					else
-						PrepareSingleSelCombo(nRow, aDefValues, CStringArray(), m_cbCustomIcons);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
 					break;
 
 				case TDCCA_BOOL:
@@ -2230,6 +2238,19 @@ LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
 
 	case TDCA_FILELINK:
 		return 0L;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			ASSERT(m_aCustomAttribDefs.IsListType(nAttribID));
+
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, 0L);
+
+			// Update the 'non-default' data only
+			CDialogHelper::GetComboBoxItems(m_cbTextAndNumbers, pDef->aAutoListData);
+			Misc::RemoveItems(pDef->aDefaultListData, pDef->aAutoListData);
+		}
 	}
 
 	return GetParent()->SendMessage(WM_TDCN_AUTOITEMADDEDDELETED, nAttribID);

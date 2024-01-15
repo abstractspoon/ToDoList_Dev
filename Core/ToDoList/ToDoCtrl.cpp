@@ -8243,19 +8243,28 @@ LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 //		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(nCtrlID))
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-/*
-			int nCtrl = m_aCustomControls.Find(nAttribID);
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, 0L);
 
-			if (nCtrl != -1)
+			if (pDef->IsAutoList())
 			{
-				// Update stored auto-list data before notifying parent
-				const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls.GetData()[nCtrl];
-				CTDCCustomAttributeUIHelper::SaveAutoListDataToDef(this, ctrl, m_aCustomAttribDefs);
+				m_lcAttributes.GetCustomAttributeAutoListData(pDef->sUniqueID, pDef->aAutoListData);
 
-				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, ctrl.nAttrib);
+				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, nAttribID);
 				break;
 			}
-*/
+
+// 			int nCtrl = m_aCustomControls.Find(nAttribID);
+// 
+// 			if (nCtrl != -1)
+// 			{
+// 				// Update stored auto-list data before notifying parent
+// 				const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls.GetData()[nCtrl];
+// 				CTDCCustomAttributeUIHelper::SaveAutoListDataToDef(this, ctrl, m_aCustomAttribDefs);
+// 
+// 				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, ctrl.nAttrib);
+// 				break;
+// 			}
 		}
 		// all else
 		ASSERT(0);

@@ -92,6 +92,7 @@ public:
 	COleDateTime GetDoneTime() const;
 
 	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
+	int GetCustomAttributeAutoListData(const CString& sAttribID, CStringArray& aItems) const;
 
 protected:
 	const CToDoCtrlData& m_data;
