@@ -1718,9 +1718,9 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	
 	BOOL bMaximized = (m_nMaxState != TDCMS_NORMAL);
 	BOOL bEnable = (hti && !bMaximized);
-	BOOL bIsParent = TSH().ItemsAreAllParents();
+// 	BOOL bIsParent = TSH().ItemsAreAllParents();
 	BOOL bReadOnly = IsReadOnly();
-	BOOL bReadOnlyCtrls = (bReadOnly || m_taskTree.SelectionHasLocked(FALSE));
+// 	BOOL bReadOnlyCtrls = (bReadOnly || m_taskTree.SelectionHasLocked(FALSE));
 
 	// now enable/disable appropriate controls
 //	int nCtrl;
@@ -1847,13 +1847,13 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 	m_lcAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
-	BOOL bReadOnly = (IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE));
+//	BOOL bReadOnly = (IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE));
 
 	if (hti)
 	{
 //		DWORD dwTaskID = GetTrueTaskID(hti); 
 
-		BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
+//		BOOL bMaximize = (m_nMaxState != TDCMS_NORMAL);
 // 		BOOL bEnable = (hti && !bMaximize);
 // 		BOOL bIsParent = TSH().ItemsAreAllParents();
 // 		BOOL bAveSubTaskCompletion = HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && bIsParent;
@@ -2651,7 +2651,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 
 	// save
 	m_tldDefault.Copy(tld, TDCA_ALL);
-	UpdateAutoListData();
+//	UpdateAutoListData();
 	
 	// restore selection
 // 	OnSelCancelAllocTo();
@@ -2726,6 +2726,7 @@ BOOL CToDoCtrl::RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CSt
 	return (m_data.RenameTasksAttributeValue(nListAttribID, sFrom, sTo, bCaseSensitive, bWholeWord) == SET_CHANGE);
 }
 
+/*
 BOOL CToDoCtrl::SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty)
 {
 	BOOL bWasReadOnly = !CDialogHelper::ComboHasEdit(combo);
@@ -2763,6 +2764,7 @@ BOOL CToDoCtrl::SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const
 
 	return TRUE;
 }
+*/
 
 void CToDoCtrl::NewList()
 {

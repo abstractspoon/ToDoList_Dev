@@ -965,7 +965,7 @@ protected:
 	
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks) const;
-	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
+//	BOOL SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const CStringArray& aDefContent, BOOL bAddEmpty);
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
 	void UpdateDefaultTaskCustomAttributeValues();
 	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
