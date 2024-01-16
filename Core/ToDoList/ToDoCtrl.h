@@ -46,6 +46,8 @@
 #include "..\shared\colourpickerEx.h"
 #include "..\shared\midnighttimer.h"
 
+#include "..\3rdParty\SimpleSplitter.h"
+
 #include "..\Interfaces\uithemefile.h"
 #include "..\Interfaces\contentmgr.h"
 
@@ -437,7 +439,7 @@ public:
 	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
 	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
 	void RedrawReminders();
-	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
+	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetFocusToProjectName();
 	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
@@ -493,6 +495,7 @@ protected:
 	CTDLInfoTipCtrl m_infoTip;
 	CTDLTaskTreeCtrl m_taskTree;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
+	CSimpleSplitter m_splitter1, m_splitter2;
 
 	HFONT m_hFontTree, m_hFontComments;
 	CTDCImageList m_ilTaskIcons;
@@ -514,7 +517,7 @@ protected:
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
 	TDC_MAXSTATE m_nMaxState;
-	TDC_UILOCATION m_nControlsPos, m_nCommentsPos;
+	TDC_UILOCATION m_nAttribsPos, m_nCommentsPos;
 	int m_nPercentIncrement;
 	TDCCOLEDITVISIBILITY m_visColEdit;
 	TODOITEM m_tdiDefault;
@@ -576,7 +579,7 @@ protected:
 
 	BOOL m_bModified;
 	BOOL m_bArchive;
-	BOOL m_bSplitting; // dragging comments splitter
+//	BOOL m_bSplitting; // dragging comments splitter
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
@@ -613,11 +616,11 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	afx_msg void OnCaptureChanged(CWnd *pWnd);
+// 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+// 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+// 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+// 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+// 	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnTimer(UINT nIDEvent);
 //	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
@@ -707,6 +710,7 @@ protected:
 	afx_msg LRESULT OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM lParam);
@@ -768,7 +772,7 @@ protected:
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 	
-	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
+	virtual void Resize(int cx = 0, int cy = 0/*, BOOL bSplitting = FALSE*/);
 	virtual void UpdateTasklistVisibility();
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }
@@ -848,7 +852,7 @@ protected:
 	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
 
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
-	UINT MapColumnToCtrlID(TDC_COLUMN nColID) const;
+//	UINT MapColumnToCtrlID(TDC_COLUMN nColID) const;
 	TDC_ATTRIBUTE MapCtrlIDToAttribute(UINT nCtrlID) const;
 
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
@@ -877,9 +881,10 @@ protected:
 	BOOL GetStackCommentsAndControls() const;
 	int CalcMinCommentSize() const;
 	int CalcMaxCommentSize() const;
-	CRect GetSplitterRect() const;
-	BOOL IsSplitterVisible() const;
+// 	CRect GetSplitterRect() const;
+// 	BOOL IsSplitterVisible() const;
 	void ValidateCommentsSize();
+	void RecreateSplitters();
 
 	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;

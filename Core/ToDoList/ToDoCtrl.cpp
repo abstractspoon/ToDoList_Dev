@@ -175,7 +175,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_bDragDropSubtasksAtTop(TRUE),
 	m_bInSelectedTaskEdit(FALSE),
 	m_bModified(FALSE), 
-	m_bSplitting(FALSE),
+//	m_bSplitting(FALSE),
 	m_calculator(m_data),
 // 	m_cbAllocBy(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 // 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
@@ -203,7 +203,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_nCommentsPos(TDCUIL_RIGHT),
 	m_nCommentsSize(DEFCOMMENTSIZE),
 	m_nCommentsState(CS_CLEAN),
-	m_nControlsPos(TDCUIL_BOTTOM),
+	m_nAttribsPos(TDCUIL_BOTTOM),
 	m_nDefRecurFrom(TDIRO_DUEDATE),
 	m_nDefRecurReuse(TDIRO_REUSE),
 	m_nFileFormat(TDL_FILEFORMAT_CURRENT),
@@ -232,7 +232,9 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_aCustomAttribDefs,
 			   mgrContent),
 	// TODO
-	m_lcAttributes(m_data, mgrContent, m_ilTaskIcons, visDefault)
+	m_lcAttributes(m_data, mgrContent, m_ilTaskIcons, visDefault),
+	m_splitter1(0, SSP_HORZ, 30, SPLITSIZE),
+	m_splitter2(0, SSP_HORZ, 30, SPLITSIZE)
 {
 	SetBordersDLU(0);
 	
@@ -372,11 +374,11 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_WM_ERASEBKGND()
 	ON_WM_DESTROY()
 	ON_WM_CONTEXTMENU()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_SETCURSOR()
-	ON_WM_CAPTURECHANGED()
+// 	ON_WM_LBUTTONDOWN()
+// 	ON_WM_LBUTTONUP()
+// 	ON_WM_MOUSEMOVE()
+// 	ON_WM_SETCURSOR()
+// 	ON_WM_CAPTURECHANGED()
 	ON_WM_SHOWWINDOW()
 	ON_WM_TIMER()
 	ON_WM_SETTINGCHANGE()
@@ -467,6 +469,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
 // 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
+	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_GETEXCLUSIONRECT, OnFindReplaceGetExclusionRect)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_REPLACESELTASK, OnFindReplaceSelectedTask)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_REPLACEALLTASKS, OnFindReplaceAllTasks)
@@ -790,8 +793,9 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 		if (GetSafeHwnd())
 		{
+			RecreateSplitters();
 			Invalidate(FALSE);
-			Resize();
+			//Resize();
 			UpdateControls(FALSE); // don't update comments
 			
 			// make sure focus is set correctly
@@ -825,7 +829,7 @@ void CToDoCtrl::OnSize(UINT nType, int cx, int cy)
 	UpdateWindow();
 }
 
-void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
+void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 {
 	if (m_taskTree.GetSafeHwnd())
 	{
@@ -851,12 +855,12 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 
 		CRect rAvailable(0, 0, cx, cy);
 		{
-			CDeferWndMove dwm(100);
+			CDeferWndMove dwm(10);
 
 // 			if (GetStackCommentsAndControls())
 // 			{
 // 				ReposControls(&dwm, rAvailable, bSplitting);
-				ReposComments(&dwm, rAvailable);
+//				ReposComments(&dwm, rAvailable);
 // 			}
 // 			else
 // 			{
@@ -866,18 +870,21 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 
 			ReposProjectName(&dwm, rAvailable);
 
+			if (m_splitter1.GetSafeHwnd())
+				m_splitter1.MoveWindow(rAvailable);
+
 			// Temporarily place the new attribute list ctrl on the RHS
 			// TODO
-			const int ATTRIBS_WIDTH = GraphicsMisc::ScaleByDPIFactor(250);
-
-			CRect rAttrib(rAvailable);
-			rAttrib.left = rAttrib.right - ATTRIBS_WIDTH;
-
-			dwm.MoveWindow(&m_lcAttributes, rAttrib);
-
-			// Finally tree
-			rAvailable.right -= (ATTRIBS_WIDTH + SPLITSIZE);
-			ReposTaskTree(&dwm, rAvailable);
+// 			const int ATTRIBS_WIDTH = GraphicsMisc::ScaleByDPIFactor(250);
+// 
+// 			CRect rAttrib(rAvailable);
+// 			rAttrib.left = rAttrib.right - ATTRIBS_WIDTH;
+// 
+// 			dwm.MoveWindow(&m_lcAttributes, rAttrib);
+// 
+// 			// Finally tree
+// 			rAvailable.right -= (ATTRIBS_WIDTH + SPLITSIZE);
+// 			ReposTaskTree(&dwm, rAvailable);
 		}
 
 		UpdateSelectedTaskPath();
@@ -1362,11 +1369,13 @@ void CToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable)
 	pDWM->MoveWindow(&m_taskTree, rAvailable);
 }
 
+/*
 BOOL CToDoCtrl::IsSplitterVisible() const
 {
 	return ((m_nMaxState == TDCMS_NORMAL) || 
 			((m_nMaxState == TDCMS_MAXTASKLIST) && HasStyle(TDCS_SHOWCOMMENTSALWAYS)));
 }
+*/
 
 BOOL CToDoCtrl::IsCommentsVisible(BOOL bActually) const
 {
@@ -1374,7 +1383,8 @@ BOOL CToDoCtrl::IsCommentsVisible(BOOL bActually) const
 		return TRUE; // always
 
 	// comments are visible if splitter is
-	BOOL bVisible = IsSplitterVisible();
+//	BOOL bVisible = IsSplitterVisible();
+	BOOL bVisible = ((m_nMaxState == TDCMS_NORMAL) || ((m_nMaxState == TDCMS_MAXTASKLIST) && HasStyle(TDCS_SHOWCOMMENTSALWAYS)));
 
 	// check optionally for actual size
 	if (bActually)
@@ -1523,7 +1533,7 @@ void CToDoCtrl::ShowHideControl(const CTRLITEM& ctrl)
 void CToDoCtrl::ShowHideControls()
 {
 	// now show/hide appropriate controls
-	int nCtrl;
+//	int nCtrl;
 // 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 // 	{
 // 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
@@ -2551,6 +2561,7 @@ BOOL CToDoCtrl::SetSelectedTaskMetaData(const CString& sKey, const CString& sMet
 void CToDoCtrl::DrawSplitter(CDC* pDC) 
 {
 	// draw splitter and clip out
+/*
 	if ((m_nMaxState == TDCMS_NORMAL) &&
 		m_ctrlComments.GetSafeHwnd() && 
 		m_theme.IsSet() && 
@@ -2561,6 +2572,7 @@ void CToDoCtrl::DrawSplitter(CDC* pDC)
 
 		pDC->ExcludeClipRect(rSplitter);
 	}
+*/
 }
 
 BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC) 
@@ -6085,15 +6097,171 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 	}
 }
 
-void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize)
+void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nCommentsPos)
 {
-	BOOL bChanged = (nControlsPos != m_nControlsPos || nCommentsPos != m_nCommentsPos);
+	BOOL bChanged = ((nAttribsPos != m_nAttribsPos) || (nCommentsPos != m_nCommentsPos));
 
-	m_nControlsPos = nControlsPos;
+	m_nAttribsPos = nAttribsPos;
 	m_nCommentsPos = nCommentsPos;
 
-	if (bChanged && bResize)
-		Resize();
+//	if (bChanged)
+		RecreateSplitters();
+		//Resize();
+}
+
+LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
+{
+	const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
+	ASSERT(pSS);
+
+	if (pSS)
+	{
+		CRect rPane;
+		pSS->GetPaneRect(lp, rPane, this);
+
+		m_taskTree.MoveWindow(rPane);
+		m_taskTree.UpdateWindow();
+	}
+
+	return 0L;
+}
+
+void CToDoCtrl::RecreateSplitters()
+{
+	CLockUpdates lu(GetSafeHwnd());
+
+	if (m_splitter1.GetSafeHwnd())
+		m_splitter1.DestroyWindow();
+
+	if (m_splitter2.GetSafeHwnd())
+		m_splitter2.DestroyWindow();
+
+	BOOL bStacked = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
+
+	switch (m_nMaxState)
+	{
+	case TDCMS_NORMAL:
+		{
+			switch (m_nCommentsPos)
+			{
+			case TDCUIL_LEFT:
+				{
+					m_splitter1.Create(SSP_HORZ, this, IDC_SPLITTER1);
+
+					switch (m_nAttribsPos)
+					{
+					case TDCUIL_LEFT: // C - A - T
+						m_splitter1.SetPaneCount(3);
+						m_splitter1.SetPane(0, &m_ctrlComments);
+						m_splitter1.SetPane(1, &m_lcAttributes);
+						m_splitter1.SetPane(2, NULL); // Tasks
+						break;
+
+					case TDCUIL_RIGHT: // C - T - A
+					case TDCUIL_BOTTOM:
+						m_splitter1.SetPaneCount(3);
+						m_splitter1.SetPane(0, &m_ctrlComments);
+						m_splitter1.SetPane(1, NULL); // Tasks
+						m_splitter1.SetPane(2, &m_lcAttributes);
+						break;
+
+// 					case TDCUIL_BOTTOM:
+// 						m_splitter1.SetPaneCount(2);
+// 						m_splitter1.SetPane(0, &m_ctrlComments);
+// 						m_splitter1.SetPane(1, NULL); // Tasks
+// 
+// 						m_splitter2.Create(SSP_VERT, this, IDC_SPLITTER2);
+						break;
+					}
+				}
+				break;
+
+			case TDCUIL_RIGHT:
+			case TDCUIL_BOTTOM:
+				{
+					m_splitter1.Create(SSP_HORZ, this, IDC_SPLITTER1);
+
+					switch (m_nAttribsPos)
+					{
+					case TDCUIL_LEFT: // A - T - C
+						m_splitter1.SetPaneCount(3);
+						m_splitter1.SetPane(0, &m_lcAttributes);
+						m_splitter1.SetPane(1, NULL); // Tasks
+						m_splitter1.SetPane(2, &m_ctrlComments);
+						break;
+
+					case TDCUIL_RIGHT: // T - A - C
+					case TDCUIL_BOTTOM:
+						m_splitter1.SetPaneCount(3);
+						m_splitter1.SetPane(0, NULL); // Tasks
+						m_splitter1.SetPane(1, &m_lcAttributes);
+						m_splitter1.SetPane(2, &m_ctrlComments);
+						break;
+
+// 					case TDCUIL_BOTTOM:
+// 						m_splitter1.Create(SSP_HORZ, this, IDC_SPLITTER1);
+// 						m_splitter1.SetPaneCount(2);
+// 						break;
+					}
+				}
+				break;
+
+// 			case TDCUIL_BOTTOM:
+// 				{
+// 					switch (m_nAttribsPos)
+// 					{
+// 					case TDCUIL_LEFT:
+// 						m_splitter1.Create(SSP_VERT, this, IDC_SPLITTER1);
+// 						break;
+// 
+// 					case TDCUIL_RIGHT:
+// 						m_splitter1.Create(SSP_VERT, this, IDC_SPLITTER1);
+// 						break;
+// 
+// 					case TDCUIL_BOTTOM:
+// 						m_splitter1.Create(SSP_HORZ, this, IDC_SPLITTER1);
+// 						m_splitter1.SetPaneCount(2);
+// 						break;
+// 					}
+// 				}
+// 				break;
+			}
+		}
+		break;
+
+	case TDCMS_MAXCOMMENTS:
+		{
+			// No splitter required
+		}
+		break;
+
+	case TDCMS_MAXTASKLIST:
+		if (HasStyle(TDCS_SHOWCOMMENTSALWAYS))
+		{
+			switch (m_nCommentsPos)
+			{
+			case TDCUIL_LEFT:
+			case TDCUIL_RIGHT:
+				m_splitter1.Create(SSP_HORZ, this, IDC_SPLITTER1);
+				break;
+
+			case TDCUIL_BOTTOM:
+				m_splitter1.Create(SSP_VERT, this, IDC_SPLITTER1);
+				break;
+			}
+
+			m_splitter1.SetPaneCount(2);
+			m_splitter1.SetPane(0, NULL); // Tasks
+			m_splitter1.SetPane(1, &m_ctrlComments);
+		}
+		else
+		{
+			// No splitter required
+		}
+		break;
+	}
+
+	Resize();
 }
 
 int CToDoCtrl::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) const
@@ -8966,12 +9134,13 @@ int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStrin
 	return (aLocalDepends.GetSize() + aOtherDepends.GetSize());
 }
 
+/*
 UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 {
 	TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(nColID);
 	ASSERT(nAttrib != TDCA_NONE);
 
-	int nCtrl;
+//	int nCtrl;
 // 	for (nCtrl = 0; nCtrl < NUM_CTRLITEMS; nCtrl++)
 // 	{
 // 		const CTRLITEM& ctrl = CTRLITEMS[nCtrl];
@@ -9001,6 +9170,7 @@ UINT CToDoCtrl::MapColumnToCtrlID(TDC_COLUMN nColID) const
 	ASSERT(0);
 	return 0L;
 }
+*/
 
 TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 {
@@ -10886,6 +11056,7 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect,
 	return SelectTask(GetTaskID(htiMatch), FALSE);
 }
 
+/*
 void CToDoCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	// is it over the comments splitter
@@ -10912,11 +11083,12 @@ void CToDoCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	
 	CRuntimeDlg::OnLButtonUp(nFlags, point);
 }
+*/
 
 BOOL CToDoCtrl::GetStackCommentsAndControls() const
 {
 	return ((m_nMaxState == TDCMS_NORMAL) &&
-			(m_nCommentsPos == m_nControlsPos) && 
+			(m_nCommentsPos == m_nAttribsPos) && 
 			HasStyle(TDCS_AUTOREPOSCTRLS) &&
 			HasStyle(TDCS_ALLOWCOMMENTSSTACKING));
 }
@@ -10975,6 +11147,7 @@ void CToDoCtrl::ValidateCommentsSize()
 	m_nCommentsSize = nValidCommentSize;
 }
 
+/*
 void CToDoCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (m_bSplitting)
@@ -11040,7 +11213,9 @@ void CToDoCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	
 	CRuntimeDlg::OnMouseMove(nFlags, point);
 }
+*/
 
+/*
 CRect CToDoCtrl::GetSplitterRect() const
 {
 	BOOL bStackCommentsAndControls = GetStackCommentsAndControls();
@@ -11085,7 +11260,9 @@ CRect CToDoCtrl::GetSplitterRect() const
 	
 	return rSplitter;
 }
+*/
 
+/*
 BOOL CToDoCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
 	if (IsSplitterVisible())
@@ -11121,6 +11298,7 @@ void CToDoCtrl::OnCaptureChanged(CWnd *pWnd)
 	
 	CRuntimeDlg::OnCaptureChanged(pWnd);
 }
+*/
 
 void CToDoCtrl::OnShowWindow(BOOL bShow, UINT nStatus) 
 {
