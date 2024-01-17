@@ -44,14 +44,15 @@ public:
 	void SetBarColor(COLORREF color);
 
 	void ClearPanes();
-	void ResizePaneWindows();
+	void RecalcLayout();
 	
 	BOOL IsVert() const { return (m_nOrientation == SSP_VERT); }
 	BOOL IsHorz() const { return (m_nOrientation == SSP_HORZ); }
 
 protected:
-	void RecalcLayout();
 	void InitialisePanes(int nNumPanes);
+	void ResizePaneWindow(int nPane);
+	void ResizePaneWindows();
 
 	//{{AFX_MSG(CSimpleSplitter)
 	afx_msg void OnPaint();

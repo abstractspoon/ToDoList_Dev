@@ -128,13 +128,7 @@ void CSimpleSplitter::SetPane(int nIndex, CWnd* pPaneWnd)
 
 	m_aPanes[nIndex] = pPaneWnd;
 	
-	if (pPaneWnd)
-	{
-		CRect rPane;
-		GetPaneRect(nIndex, rPane);
-		
-		pPaneWnd->MoveWindow(rPane, false);
-	}
+	ResizePaneWindow(nIndex);
 }
 
 CWnd* CSimpleSplitter::GetPane(int nIndex) const
@@ -179,7 +173,6 @@ void CSimpleSplitter::SetRelativePaneSizes(const int sizes[])
 	m_aPaneSizes[m_aPanes.GetSize() - 1] = FULL_SIZE - total_in;
 	
 	RecalcLayout();
-	ResizePaneWindows();
 }
 
 void CSimpleSplitter::SetRelativePaneSizes(const CArray<int, int&>& aSizes)
@@ -317,6 +310,8 @@ void CSimpleSplitter::RecalcLayout()
 		m_aOrgPaneSizes[i + 1] = m_aOrgPaneSizes[i] + MulDivRound(m_aPaneSizes[i], size_sum, FULL_SIZE) + m_nBarThickness;
 
 	m_aOrgPaneSizes[m_aPanes.GetSize()] = size_sum + m_nBarThickness * m_aPanes.GetSize();
+
+	ResizePaneWindows();
 }
 
 void CSimpleSplitter::ResizePaneWindows()
@@ -325,22 +320,25 @@ void CSimpleSplitter::ResizePaneWindows()
 	GetClientRect(rClient);
 
 	for (int i = 0; i < m_aPanes.GetSize(); i++)
-	{
-		if (m_aPanes[i])
-		{
-			CRect rPane;
-			GetPaneRect(i, rPane, m_aPanes[i]->GetParent());
-			
-			m_aPanes[i]->MoveWindow(rPane);
-			m_aPanes[i]->UpdateWindow();
-		}
-		else
-		{
-			GetParent()->SendMessage(WM_SS_NOTIFYSPLITCHANGE, (WPARAM)GetSafeHwnd(), i);
-		}
-	}
+		ResizePaneWindow(i);
 
 	Invalidate(TRUE);
+}
+
+void CSimpleSplitter::ResizePaneWindow(int nPane)
+{
+	if (m_aPanes[nPane])
+	{
+		CRect rPane;
+		GetPaneRect(nPane, rPane, m_aPanes[nPane]->GetParent());
+
+		m_aPanes[nPane]->MoveWindow(rPane);
+		m_aPanes[nPane]->UpdateWindow();
+	}
+	else
+	{
+		GetParent()->SendMessage(WM_SS_NOTIFYSPLITCHANGE, (WPARAM)GetSafeHwnd(), nPane);
+	}
 }
 
 // CSimpleSplitter messages
@@ -378,7 +376,6 @@ void CSimpleSplitter::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 
 	RecalcLayout();
-	ResizePaneWindows();
 }
 
 void CSimpleSplitter::OnLButtonDown(UINT nFlags, CPoint point) 

@@ -94,10 +94,12 @@ void CToDoCtrlLayout::Resize(const CRect& rect)
 	if (m_splitterHorz.GetSafeHwnd() && (m_splitterHorz.GetParent() == m_pParent))
 	{
 		m_splitterHorz.MoveWindow(rect);
+		m_splitterHorz.RecalcLayout();
 	}
 	else if (m_splitterVert.GetSafeHwnd() && (m_splitterVert.GetParent() == m_pParent))
 	{
 		m_splitterVert.MoveWindow(rect);
+		m_splitterVert.RecalcLayout();
 	}
 }
 

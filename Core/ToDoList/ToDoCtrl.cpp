@@ -790,12 +790,14 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 	{
 		//m_nMaxState = nState;
 
-		if (GetSafeHwnd())
+//		if (GetSafeHwnd())
 		{
 			//RecreateSplitters();
 			Invalidate(FALSE);
-			Resize();
 			UpdateControls(FALSE); // don't update comments
+			ShowHideControls();
+			Resize();
+
 			
 			// make sure focus is set correctly
 			switch (nState)
@@ -855,8 +857,11 @@ LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
 		CRect rPane;
 		pSS->GetPaneRect(lp, rPane, this);
 
-		ReposProjectName(rPane);
-		ReposTaskTree(rPane);
+		if (!rPane.IsRectEmpty())
+		{
+			ReposProjectName(rPane);
+			ReposTaskTree(rPane);
+		}
 	}
 
 	return 0L;
@@ -884,7 +889,7 @@ void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 		}
 
 // 		ValidateCommentsSize();
-		ShowHideControls();
+//		ShowHideControls();
 
 		CRect rAvailable(0, 0, cx, cy);
 
