@@ -2275,10 +2275,10 @@ void CTabbedToDoCtrl::OnCustomAttributesChanged()
 	CToDoCtrl::OnCustomAttributesChanged();
 }
 
-void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
+void CTabbedToDoCtrl::ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rPos)
 {
 	// Tab control takes care of active view including tree/list
-	m_tabViews.Resize(rPos, pDWM);
+	m_tabViews.Resize(rPos/*, pDWM*/);
 
 	// List-specific combos
 	CRect rCtrl = GetCtrlRect(IDC_LISTVIEWGROUPBYLABEL);
@@ -2286,10 +2286,16 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 	int nXOffset = (rPos.left - rCtrl.left);
 	int nYOffset = (rPos.top - rCtrl.top) + CDlgUnits(this).ToPixelsY(2);
 
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL,	nXOffset, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB,	nXOffset, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL,	nXOffset, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS,			nXOffset, nYOffset);
+// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL,	nXOffset, nYOffset);
+// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB,	nXOffset, nYOffset);
+// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL,	nXOffset, nYOffset);
+// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS,			nXOffset, nYOffset);
+	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL,	nXOffset, nYOffset);
+	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB,	nXOffset, nYOffset);
+	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL,	nXOffset, nYOffset);
+	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWOPTIONS,		nXOffset, nYOffset);
+
+	UpdateWindow();
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
@@ -2337,7 +2343,7 @@ void CTabbedToDoCtrl::UpdateTasklistVisibility()
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	// clip out ctrls
-	if (m_tabViews.GetSafeHwnd())
+	if (m_tabViews.GetSafeHwnd() && InListView())
 	{
 		ExcludeChild(&m_tabViews, pDC);
 		ExcludeChild(&m_cbListGroupBy, pDC);

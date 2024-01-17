@@ -40,6 +40,11 @@ CToDoCtrlLayout::CToDoCtrlLayout(CWnd* pParent, CWnd* pAttributes, CWnd* pCommen
 	ASSERT(m_pParent);
 	ASSERT(m_pAttributes);
 	ASSERT(m_pComments);
+
+#ifdef _DEBUG
+	m_splitterHorz.SetBarColor(255);
+	m_splitterVert.SetBarColor(255);
+#endif
 }
 
 CToDoCtrlLayout::~CToDoCtrlLayout()
@@ -109,7 +114,7 @@ BOOL CToDoCtrlLayout::IsCommentsVisible(BOOL bActually) const
 		CRect rComments;
 		m_pComments->GetWindowRect(rComments);
 
-		bVisible &= ((rComments.Width() > 0) && (rComments.Height() > 0));
+//		bVisible &= ((rComments.Width() > 0) && (rComments.Height() > 0));
 	}
 
 	return bVisible;

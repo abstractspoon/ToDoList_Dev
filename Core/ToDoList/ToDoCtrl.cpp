@@ -828,6 +828,40 @@ void CToDoCtrl::OnSize(UINT nType, int cx, int cy)
 	UpdateWindow();
 }
 
+void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nCommentsPos)
+{
+	// 	BOOL bChanged = ((nAttribsPos != m_nAttribsPos) || (nCommentsPos != m_nCommentsPos));
+	// 
+	// 	m_nAttribsPos = nAttribsPos;
+	// 	m_nCommentsPos = nCommentsPos;
+
+	//	if (bChanged)
+	//		RecreateSplitters();
+	//Resize();
+
+	if (m_layout.ModifyLayout(nAttribsPos, nCommentsPos))
+	{
+// 		Resize();
+	}
+}
+
+LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
+{
+	const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
+	ASSERT(pSS);
+
+	if (pSS)
+	{
+		CRect rPane;
+		pSS->GetPaneRect(lp, rPane, this);
+
+		ReposProjectName(rPane);
+		ReposTaskTree(rPane);
+	}
+
+	return 0L;
+}
+
 void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 {
 	if (m_taskTree.GetSafeHwnd())
@@ -856,7 +890,7 @@ void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 
 
 		{
-			CDeferWndMove dwm(10);
+//			CDeferWndMove dwm(10);
 
 // 			if (GetStackCommentsAndControls())
 // 			{
@@ -869,9 +903,23 @@ void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 // 				ReposControls(&dwm, rAvailable, bSplitting);
 // 			}
 
-			ReposProjectName(&dwm, rAvailable);
+//			ReposProjectName(/*&dwm, */rAvailable);
 
-			m_layout.Resize(rAvailable);
+			switch (m_layout.GetMaximiseState())
+			{
+			case TDCMS_NORMAL:
+				m_layout.Resize(rAvailable);
+				break;
+
+			case TDCMS_MAXTASKLIST:
+				ReposTaskTree(rAvailable);
+				break;
+
+			case TDCMS_MAXCOMMENTS:
+				m_ctrlComments.MoveWindow(rAvailable);
+				break;
+			}
+
 
 			// Temporarily place the new attribute list ctrl on the RHS
 			// TODO
@@ -897,7 +945,7 @@ int CToDoCtrl::GetDefaultControlHeight() const
 	return GetCtrlRect(IDC_PROJECTNAME).Height();//GetChildHeight(&m_cbFileLink);
 }
 
-void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
+void CToDoCtrl::ReposProjectName(/*CDeferWndMove* pDWM, */CRect& rAvailable)
 {
 	// project name
 	CRect rLabel = GetCtrlRect(IDC_PROJECTLABEL); 
@@ -914,8 +962,10 @@ void CToDoCtrl::ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable)
 	rLabel.top = rProject.top;
 	rLabel.bottom = rProject.bottom;
 
-	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
-	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTNAME), rProject);
+// 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTLABEL), rLabel);
+// 	pDWM->MoveWindow(GetDlgItem(IDC_PROJECTNAME), rProject);
+	GetDlgItem(IDC_PROJECTLABEL)->MoveWindow(rLabel);
+	GetDlgItem(IDC_PROJECTNAME)->MoveWindow(rProject);
 
 	if (!m_layout.HasMaximiseState(TDCMS_MAXTASKLIST) && HasStyle(TDCS_SHOWPROJECTNAME))
 		rAvailable.top = rProject.bottom + CDlgUnits(this).ToPixelsY(2);
@@ -1364,9 +1414,10 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 }
 */
 
-void CToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable)
+void CToDoCtrl::ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rAvailable)
 {
-	pDWM->MoveWindow(&m_taskTree, rAvailable);
+//	pDWM->MoveWindow(&m_taskTree, rAvailable);
+	m_taskTree.MoveWindow(rAvailable);
 }
 
 /*
@@ -1559,12 +1610,14 @@ void CToDoCtrl::ShowHideControls()
 	BOOL bCommentsVis = m_layout.IsCommentsVisible(TRUE);
 	m_ctrlComments.ShowWindow(bCommentsVis ? SW_SHOW : SW_HIDE);
 
+	m_lcAttributes.ShowWindow(m_layout.HasMaximiseState(TDCMS_NORMAL) ? SW_SHOW : SW_HIDE);
+
 	// task tree
 	UpdateTasklistVisibility();
 	
 	// project name
-	BOOL bMaximize = !m_layout.HasMaximiseState(TDCMS_NORMAL);
-	BOOL bShowProjectName = !bMaximize && HasStyle(TDCS_SHOWPROJECTNAME);
+//	BOOL bMaximize = !m_layout.HasMaximiseState(TDCMS_NORMAL);
+	BOOL bShowProjectName = (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME));
 	ShowCtrls(IDC_PROJECTLABEL, IDC_PROJECTNAME, bShowProjectName);
 }
 
@@ -6099,40 +6152,6 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 
 		m_lcAttributes.SetDefaultAutoListData(m_tldDefault);
 	}
-}
-
-void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nCommentsPos)
-{
-// 	BOOL bChanged = ((nAttribsPos != m_nAttribsPos) || (nCommentsPos != m_nCommentsPos));
-// 
-// 	m_nAttribsPos = nAttribsPos;
-// 	m_nCommentsPos = nCommentsPos;
-
-//	if (bChanged)
-//		RecreateSplitters();
-		//Resize();
-
-	if (m_layout.ModifyLayout(nAttribsPos, nCommentsPos))
-	{
-		Resize();
-	}
-}
-
-LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
-{
-	const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
-	ASSERT(pSS);
-
-	if (pSS)
-	{
-		CRect rPane;
-		pSS->GetPaneRect(lp, rPane, this);
-
-		m_taskTree.MoveWindow(rPane);
-		m_taskTree.UpdateWindow();
-	}
-
-	return 0L;
 }
 
 int CToDoCtrl::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) const

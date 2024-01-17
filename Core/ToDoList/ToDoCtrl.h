@@ -54,7 +54,7 @@
 
 // predeclarations
 class CTaskFile;
-class CDeferWndMove;
+//class CDeferWndMove;
 class CSpellCheckDlg;
 class CPreferences;
 class CTDCTaskCompletionArray;
@@ -785,7 +785,7 @@ protected:
 //	virtual void RebuildCustomAttributeUI();
 
 	virtual BOOL CopySelectedTasks() const;
-	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rAvailable /*in*/);
+	virtual void ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rAvailable /*in*/);
 
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 	
@@ -874,7 +874,7 @@ protected:
 //	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
 //	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 // 	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
-	void ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
+	void ReposProjectName(/*CDeferWndMove* pDWM, */CRect& rAvailable /*in/out*/);
 //	BOOL CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, int& nCols, int& nRows, BOOL bPreserveSplitPos) const;
 //	BOOL GetStackCommentsAndControls() const;
 // 	int CalcMinCommentSize() const;

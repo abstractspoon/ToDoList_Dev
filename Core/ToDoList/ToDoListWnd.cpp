@@ -2588,9 +2588,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	RefreshTabOrder();
 	Invalidate(TRUE);
 
-	// End progress before updating statusbar
-	m_statusBar.EndProgress();
-
 	UpdateStatusBar();
 
 	// find tasks dialog
@@ -12914,6 +12911,9 @@ void CToDoListWnd::OnSysColorChange()
 
 void CToDoListWnd::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
 {
+	// End progress before updating statusbar
+	m_statusBar.EndProgress();
+
 	if (m_bShowStatusBar && m_statusBar.GetSafeHwnd() && GetTDCCount())
 	{
 		m_statusBar.UpdateTasks(GetToDoCtrl(), mapAttrib);
