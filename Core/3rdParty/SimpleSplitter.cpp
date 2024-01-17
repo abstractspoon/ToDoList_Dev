@@ -84,7 +84,7 @@ BOOL CSimpleSplitter::Create(SS_ORIENTATION nOrientation, CWnd* pParent, UINT nI
 
 	m_nOrientation = nOrientation;
 
-	HCURSOR crsResize = ::LoadCursor(0, MAKEINTRESOURCE(IsHorz() ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR));
+	HCURSOR crsResize = AfxGetApp()->LoadCursor(IsHorz() ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
 
 	if (crsResize == NULL)
 		crsResize = ::LoadCursor(0, IsHorz() ? IDC_SIZEWE : IDC_SIZENS);

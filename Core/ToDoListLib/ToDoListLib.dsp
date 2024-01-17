@@ -689,6 +689,10 @@ SOURCE=..\ToDoList\ToDoCtrlReminders.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\ToDoCtrlLayout.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\ToDoCtrlUndo.cpp
 # End Source File
 # Begin Source File
@@ -1338,6 +1342,10 @@ SOURCE=..\ToDoList\ToDoCtrlMgr.h
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoCtrlReminders.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\ToDoCtrlLayout.h
 # End Source File
 # Begin Source File
 

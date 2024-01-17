@@ -262,6 +262,7 @@
     <ClCompile Include="..\ToDoList\ToDoCtrlFind.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlMgr.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlReminders.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlLayout.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlUndo.cpp" />
     <ClCompile Include="..\ToDoList\ToDoitem.cpp" />
     <ClCompile Include="..\ToDoList\ToDoListWnd.cpp" />
@@ -426,6 +427,7 @@
     <ClInclude Include="..\ToDoList\ToDoCtrlFind.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlMgr.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlReminders.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlLayout.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlUndo.h" />
     <ClInclude Include="..\ToDoList\ToDoitem.h" />
     <ClInclude Include="..\ToDoList\ToDoListWnd.h" />

@@ -11,6 +11,7 @@
 #include "todoctrldata.h"
 #include "todoctrldatautils.h"
 #include "todoctrlfind.h"
+#include "todoctrlLayout.h"
 #include "tdcstruct.h"
 // #include "tdlprioritycombobox.h"
 // #include "tdlriskcombobox.h"
@@ -45,8 +46,6 @@
 #include "..\shared\FindReplace.h"
 #include "..\shared\colourpickerEx.h"
 #include "..\shared\midnighttimer.h"
-
-#include "..\3rdParty\SimpleSplitter.h"
 
 #include "..\Interfaces\uithemefile.h"
 #include "..\Interfaces\contentmgr.h"
@@ -472,6 +471,7 @@ protected:
 	
 protected:
 	CToDoCtrlData m_data;
+	CToDoCtrlLayout m_layout;
 
 //	CAutoComboBox m_cbAllocBy;
 //	CAutoComboBox m_cbStatus;
@@ -495,7 +495,6 @@ protected:
 	CTDLInfoTipCtrl m_infoTip;
 	CTDLTaskTreeCtrl m_taskTree;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
-	CSimpleSplitter m_splitterHorz, m_splitterVert;
 
 	HFONT m_hFontTree, m_hFontComments;
 	CTDCImageList m_ilTaskIcons;
@@ -516,8 +515,8 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
-	TDC_MAXSTATE m_nMaxState;
-	TDC_UILOCATION m_nAttribsPos, m_nCommentsPos;
+// 	TDC_MAXSTATE m_nMaxState;
+// 	TDC_UILOCATION m_nAttribsPos, m_nCommentsPos;
 	int m_nPercentIncrement;
 	TDCCOLEDITVISIBILITY m_visColEdit;
 	TODOITEM m_tdiDefault;
@@ -539,7 +538,6 @@ protected:
 	CTDCTaskMatcher m_matcher;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
-//	CTDCMultiTasker m_multitasker;
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
 	CTDCSourceControl m_sourceControl;
@@ -875,16 +873,16 @@ protected:
 //	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CRect& rItem, int nClientRight);
 //	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
 //	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
-	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
+// 	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
 	void ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 //	BOOL CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, int& nCols, int& nRows, BOOL bPreserveSplitPos) const;
-	BOOL GetStackCommentsAndControls() const;
+//	BOOL GetStackCommentsAndControls() const;
 // 	int CalcMinCommentSize() const;
 // 	int CalcMaxCommentSize() const;
 // 	CRect GetSplitterRect() const;
 // 	BOOL IsSplitterVisible() const;
 // 	void ValidateCommentsSize();
-	void RecreateSplitters();
+//	void RecreateSplitters();
 
 	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
@@ -931,6 +929,7 @@ protected:
 	BOOL ConfirmDeleteAllTasks(BOOL bSelected = FALSE) const;
 
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
+
 	void PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BOOL bResetCreation) const;
 	void BuildTaskIDMapForPaste(CTaskFile& tasks, HTASKITEM hTask, DWORD& dwNextID, 
 								CMapID2ID& mapID, TDC_RESETIDS nResetID, BOOL bAndSiblings) const;
@@ -938,6 +937,7 @@ protected:
 	BOOL PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) const;
 	BOOL PrepareTaskLinkForPaste(TDCDEPENDENCY& depends, const CMapID2ID& mapID) const;
 	void PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const;
+
 	void RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks); // helper to avoid code dupe

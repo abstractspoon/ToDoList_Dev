@@ -2294,7 +2294,7 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
 {
-	BOOL bTasksVis = (m_nMaxState != TDCMS_MAXCOMMENTS);
+	BOOL bTasksVis = !m_layout.HasMaximiseState(TDCMS_MAXCOMMENTS);
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
@@ -2352,7 +2352,7 @@ BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 
 void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 {
-	TDC_MAXSTATE nPrevState = m_nMaxState;
+	TDC_MAXSTATE nPrevState = m_layout.GetMaximiseState();//m_nMaxState;
 
 	CToDoCtrl::SetMaximizeState(nState);
 
