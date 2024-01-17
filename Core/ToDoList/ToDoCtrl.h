@@ -495,7 +495,7 @@ protected:
 	CTDLInfoTipCtrl m_infoTip;
 	CTDLTaskTreeCtrl m_taskTree;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
-	CSimpleSplitter m_splitter1, m_splitter2;
+	CSimpleSplitter m_splitterHorz, m_splitterVert;
 
 	HFONT m_hFontTree, m_hFontComments;
 	CTDCImageList m_ilTaskIcons;
@@ -874,16 +874,16 @@ protected:
 
 //	void ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM, const CRect& rItem, int nClientRight);
 //	void ReposControls(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/, BOOL bSplitting);
-	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
+//	void ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
 	void ReposProjectName(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/);
 //	BOOL CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequired, int& nCols, int& nRows, BOOL bPreserveSplitPos) const;
 	BOOL GetStackCommentsAndControls() const;
-	int CalcMinCommentSize() const;
-	int CalcMaxCommentSize() const;
+// 	int CalcMinCommentSize() const;
+// 	int CalcMaxCommentSize() const;
 // 	CRect GetSplitterRect() const;
 // 	BOOL IsSplitterVisible() const;
-	void ValidateCommentsSize();
+// 	void ValidateCommentsSize();
 	void RecreateSplitters();
 
 	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;

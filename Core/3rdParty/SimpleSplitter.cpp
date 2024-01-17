@@ -67,6 +67,10 @@ void CSimpleSplitter::InitialisePanes(int nNumPanes)
 		}
 		m_aPaneSizes[nNumPanes - 1] = FULL_SIZE - total;
 	}
+	else
+	{
+		m_aOrgPaneSizes[0] = 0;
+	}
 }
 
 BOOL CSimpleSplitter::Create(CWnd* pParent, UINT nID)
