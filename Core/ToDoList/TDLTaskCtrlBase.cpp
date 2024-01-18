@@ -5648,132 +5648,36 @@ return m_multitasker.FUNCTION(aTaskIDs)
 BOOL CTDLTaskCtrlBase::SelectionHasDependencies() const
 {
 	SELECTIONHAS(AnyTaskHasDependencies);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	CString sUnused;
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 		
-// 		if (m_data.TaskHasDependencies(dwTaskID))
-// 			return TRUE;
-// 	}
-// 	
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasIcon() const
 {
 	SELECTIONHAS(AnyTaskHasIcon);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (!m_data.GetTaskIcon(dwTaskID).IsEmpty())
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasParents() const
 {
 	SELECTIONHAS(AnyTaskIsParent);
-	// 	POSITION pos = GetFirstSelectedTaskPos();
-// 
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (m_data.IsTaskParent(dwTaskID))
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
 {
 	SELECTIONHAS(AllTasksAreDone);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (!m_data.IsTaskDone(dwTaskID))
-// 			return FALSE;
-// 	}
-// 
-// 	return TRUE;
 }
-
-/*
-BOOL CTDLTaskCtrlBase::SelectionHasLocalCircularDependencies() const
-{
-	SELECTIONHAS(AnyTaskHasLocalCircularDependencies);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
-}
-*/
 
 BOOL CTDLTaskCtrlBase::SelectionHasDependents() const
 {
 	SELECTIONHAS(AnyTaskHasDependents);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 		
-// 		if (m_data.TaskHasDependents(dwTaskID))
-// 			return TRUE;
-// 	}
-// 	
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasRecurring() const
 {
 	SELECTIONHAS(AnyTaskIsRecurring);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 		
-// 		if (m_data.IsTaskRecurring(dwTaskID))
-// 			return TRUE;
-// 	}
-// 	
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasReferences() const
 {
 	SELECTIONHAS(AnyTaskIsReference);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 		
-// 		if (m_data.IsTaskReference(dwTaskID))
-// 			return TRUE;
-// 	}
-// 	
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasNonReferences() const
@@ -5794,93 +5698,21 @@ BOOL CTDLTaskCtrlBase::SelectionHasNonReferences() const
 BOOL CTDLTaskCtrlBase::SelectionHasSubtasks() const
 {
 	SELECTIONHAS(AnyTaskIsParent);
-	/*
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-	DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-	const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-	ASSERT(pTDS);
-
-	if (pTDS && pTDS->HasSubTasks())
-	return TRUE;
-	}
-
-	return FALSE;
-	*/
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasTaskColor() const
 {
 	SELECTIONHAS(AnyTaskHasColor);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (m_data.GetTaskColor(dwTaskID) != 0)
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasFlagged() const
 {
 	SELECTIONHAS(AnyTaskIsFlagged);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (m_data.GetTaskColor(dwTaskID) != 0)
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasSameParent() const
 {
 	SELECTIONHAS(AllTasksHaveSameParent);
-/*
-	switch (GetSelectedCount())
-	{
-	case 0:
-		ASSERT(0);
-		return FALSE;
-
-	case 1:
-		return TRUE;
-
-	default:
-		{
-			DWORD dwFirstParent = (DWORD)-1;
-			POSITION pos = GetFirstSelectedTaskPos();
-
-			while (pos)
-			{
-				DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-				if (dwFirstParent == -1)
-				{
-					dwFirstParent = m_data.GetTaskParentID(dwTaskID);
-				}
-				else if (dwFirstParent != m_data.GetTaskParentID(dwTaskID))
-				{
-					return FALSE;
-				}
-			}
-		}
-		break;
-	}
-
-	return TRUE;
-*/
 }
 
 // -----------------------------------------------------------------
@@ -5896,109 +5728,14 @@ BOOL CTDLTaskCtrlBase::SelectionHasDone() const
 	SELECTIONHAS_1ARG(AnyTaskHasDate, TDCD_DONE);
 }
 
-/*
-BOOL CTDLTaskCtrlBase::SelectionHasDates(TDC_DATE nDate, BOOL bAll) const
-{
-	if (bAll)
-	{
-		CDWordArray aTaskIDs;
-		GetSelectedTaskIDs(aTaskIDs, FALSE);
-
-		return m_multitasker.AllTasksHaveDate(aTaskIDs, nDate);
-	}
-
-	// else
-	SELECTIONHAS_1ARG(AnyTaskHasDate, nDate);
-
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	// traverse the selected items looking for the first one
-// 	// who has a due date or the first that doesn't
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 		double dDate = m_data.GetTaskDate(dwTaskID, nDate);
-// 
-// 		if (!bAll && dDate > 0)
-// 		{
-// 			return TRUE;
-// 		}
-// 		else if (bAll && dDate == 0)
-// 		{
-// 			return FALSE;
-// 		}
-// 	}
-// 
-// 	return bAll;
-}
-*/
-
-/*
-BOOL CTDLTaskCtrlBase::SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked) const
-{
-	CDWordArray aTaskIDs;
-	GetSelectedTaskIDs(aTaskIDs, FALSE);
-
-	return !m_multitasker.AllTasksAreLocked(aTaskIDs);
-// 
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
-// 			return TRUE;
-// 
-// 		if (!m_calculator.IsTaskLocked(dwTaskID))
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
-}
-*/
-
 BOOL CTDLTaskCtrlBase::SelectionHasLocked(BOOL bTreatRefsAsUnlocked) const
 {
 	SELECTIONHAS_1ARG(AnyTaskIsLocked, bTreatRefsAsUnlocked);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 	
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 
-// 		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
-// 			continue;
-// 
-// 		if (m_calculator.IsTaskLocked(dwTaskID))
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked) const
 {
 	SELECTIONHAS_1ARG(AnyTaskHasLockedParent, bTreatRefsAsUnlocked);
-// 	POSITION pos = GetFirstSelectedTaskPos();
-// 
-// 	while (pos)
-// 	{
-// 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-// 		DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
-// 
-// 		// Root is always unlocked
-// 		if (!dwParentID)
-// 			continue;
-// 
-// 		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwParentID))
-// 			continue;
-// 
-// 		if (m_calculator.IsTaskLocked(dwParentID))
-// 			return TRUE;
-// 	}
-// 
-// 	return FALSE;
 }
 
 // -----------------------------------------------------------------
@@ -6012,25 +5749,6 @@ return m_multitasker.FUNCTION(aTaskIDs, ARG1, ARG2)
 BOOL CTDLTaskCtrlBase::SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const
 {
 	SELECTIONHAS_2ARG(AnyTaskHasID, dwTaskID, bIncludeRefs);
-/*
-	BOOL bSelected = IsTaskSelected(dwTaskID);
-
-	if (bSelected || !bIncludeRefs)
-		return bSelected;
-
-	POSITION pos = GetFirstSelectedTaskPos();
-	dwTaskID = m_data.GetTrueTaskID(dwTaskID);
-
-	while (pos)
-	{
-		DWORD dwSelTaskID = GetNextSelectedTaskID(pos);
-
-		if (m_data.GetTrueTaskID(dwSelTaskID) == dwTaskID)
-			return TRUE;
-	}
-
-	return FALSE;
-*/
 }
 
 // -----------------------------------------------------------------
@@ -6155,31 +5873,6 @@ CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, i
 	return sSelTasks;
 }
 
-/*
-int CTDLTaskCtrlBase::GetSelectedTaskPriority() const
-{
-	int nPriority = -1;
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		int nTaskPriority = m_data.GetTaskPriority(dwTaskID);
-
-		if (nPriority == -1)
-		{
-			nPriority = nTaskPriority;
-		}
-		else if (nPriority != nTaskPriority)
-		{
-			return -1;
-		}
-	}
-
-	return nPriority;
-}
-
-*/
 DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 {
 	CDWordArray aSelTaskIDs;
@@ -6187,59 +5880,7 @@ DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const
 
 	DWORD dwID;
 	return (m_multitasker.GetTasksParentID(aSelTaskIDs, dwID) ? dwID : 0);
-	/*
-	// If multiple tasks are selected they must all
-	// have the same parent else we return 0
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	if (!pos)
-		return 0;
-	
-	DWORD dwParentID = (DWORD)-1;
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		DWORD dwTaskParentID = m_data.GetTaskParentID(dwTaskID);
-		
-		if (dwParentID == (DWORD)-1)
-		{
-			dwParentID = dwTaskParentID;
-		}
-		else if (dwParentID != dwTaskParentID)
-		{
-			return 0;
-		}
-	}
-	
-	return dwParentID;
-*/
 }
-
-/*
-int CTDLTaskCtrlBase::GetSelectedTaskRisk() const
-{
-	int nRisk = -1;
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		int nTaskRisk = m_data.GetTaskRisk(dwTaskID);
-
-		if (nRisk == -1)
-		{
-			nRisk = nTaskRisk;
-		}
-		else if (nRisk != nTaskRisk)
-		{
-			return -1; // == various
-		}
-	}
-
-	return nRisk;
-}
-*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 {
@@ -6248,29 +5889,6 @@ CString CTDLTaskCtrlBase::GetSelectedTaskIcon() const
 
 	CString sIcon;
 	return (m_multitasker.GetTasksIcon(aSelTaskIDs, sIcon) ? sIcon : _T(""));
-	/*
-	CString sIcon;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		sIcon = m_data.GetTaskIcon(dwTaskID);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			CString sTaskIcon = m_data.GetTaskIcon(dwTaskID);
-			
-			if (sIcon != sTaskIcon)
-				return EMPTY_STR;
-		}
-	}
-	
-	return sIcon;
-*/
 }
 
 BOOL CTDLTaskCtrlBase::SelectedTaskHasDate(TDC_DATE nDate) const
@@ -6279,20 +5897,6 @@ BOOL CTDLTaskCtrlBase::SelectedTaskHasDate(TDC_DATE nDate) const
 	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	return m_multitasker.AnyTaskHasDate(aSelTaskIDs, nDate);
-	/*
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		COleDateTime dtTask = m_data.GetTaskDate(dwTaskID, nDate);
-
-		if (CDateHelper::IsDateSet(dtTask))
-			return TRUE;
-	}
-
-	return FALSE;
-	*/
 }
 
 COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
@@ -6303,103 +5907,8 @@ COleDateTime CTDLTaskCtrlBase::GetSelectedTaskDate(TDC_DATE nDate) const
 	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	m_multitasker.GetTasksDate(aSelTaskIDs, nDate, date);
-/*
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		date = m_data.GetTaskDate(dwTaskID, nDate);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			
-			if (date != m_data.GetTaskDate(dwTaskID, nDate))
-			{
-				CDateHelper::ClearDate(date);
-				break;
-			}
-		}
-	}
-*/
-	
 	return date;
 }
-
-// BOOL CTDLTaskCtrlBase::IsSelectedTaskFlagged() const
-// {
-// 	return m_data.IsTaskFlagged(GetSelectedTaskID());
-// }
-// 
-// BOOL CTDLTaskCtrlBase::IsSelectedTaskLocked() const
-// {
-// 	return m_data.IsTaskLocked(GetSelectedTaskID());
-// }
-
-// BOOL CTDLTaskCtrlBase::IsSelectedTaskReference() const
-// {
-// 	return m_data.IsTaskReference(GetSelectedTaskID());
-// }
-
-/*
-BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const
-{
-	if (!GetSelectedCount())
-		return FALSE;
-
-	// get first item's value as initial
-	POSITION pos = GetFirstSelectedTaskPos();
-	DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-	m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
-
-	while (pos)
-	{
-		dwTaskID = GetNextSelectedTaskID(pos);
-
-		TDCTIMEPERIOD time;
-		m_data.GetTaskTimeEstimate(dwTaskID, time);
-
-		if (time != timeEst)
-		{
-			timeEst.dAmount = 0.0;
-			return FALSE;
-		}
-	}
-	
-	return TRUE;
-}
-
-BOOL CTDLTaskCtrlBase::GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const
-{
-	if (!GetSelectedCount())
-		return FALSE;
-
-	// get first item's value as initial
-	POSITION pos = GetFirstSelectedTaskPos();
-	DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-	m_data.GetTaskTimeSpent(dwTaskID, timeSpent);
-
-	while (pos)
-	{
-		dwTaskID = GetNextSelectedTaskID(pos);
-
-		TDCTIMEPERIOD time;
-		m_data.GetTaskTimeSpent(dwTaskID, time);
-
-		if (time != timeSpent)
-		{
-			timeSpent.dAmount = 0.0;
-			return FALSE;
-		}
-	}
-
-	return TRUE;
-}
-*/
 
 COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const
 {
@@ -6408,8 +5917,6 @@ COLORREF CTDLTaskCtrlBase::GetSelectedTaskColor() const
 
 	COLORREF color;
 	return (m_multitasker.GetTasksColor(aSelTaskIDs, color) ? color : CLR_NONE);
-
-	//	return m_data.GetTaskColor(GetSelectedTaskID());
 }
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
@@ -6418,57 +5925,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
 	return m_multitasker.GetTasksRecurrence(aSelTaskIDs, tr);
-/*
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		m_data.GetTaskRecurrence(dwTaskID, tr);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			
-			TDCRECURRENCE trTask;
-			m_data.GetTaskRecurrence(dwTaskID, trTask);
-			
-			if (tr != trTask)
-				tr = TDCRECURRENCE();
-		}
-	}
-	
-	return tr.IsRecurring();
-*/
 }
-
-/*
-int CTDLTaskCtrlBase::GetSelectedTaskPercent() const
-{
-	int nPercent = 0;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		nPercent = m_data.GetTaskPercent(dwTaskID);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			int nTaskPercent = m_data.GetTaskPercent(dwTaskID);
-			
-			if (nPercent != nTaskPercent)
-				return -1;
-		}
-	}
-	
-	return nPercent;
-}
-*/
 
 CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen) const
 {
@@ -6490,42 +5947,6 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 
 	return sPath;
 }
-
-/*
-BOOL CTDLTaskCtrlBase::GetSelectedTaskCost(TDCCOST& cost) const
-{
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-
-		if (pos)
-		{
-			DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-			VERIFY(m_data.GetTaskCost(dwTaskID, cost));
-		
-			while (pos)
-			{
-				dwTaskID = GetNextSelectedTaskID(pos);
-
-				TDCCOST taskCost;
-				VERIFY(m_data.GetTaskCost(dwTaskID, taskCost));
-
-				if (cost != taskCost)
-				{
-					cost.dAmount = 0;
-					return FALSE;
-				}
-			}
-
-			return TRUE;
-		}
-	}
-	
-	return FALSE;
-}
-*/
 
 BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const
 {
@@ -6595,148 +6016,6 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 	
 	return !data.IsEmpty();
 }
-/*
-int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aAllocTo) const
-{
-	return GetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo);
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
-{
-	return GetSelectedTaskArray(TDCA_ALLOCTO, aMatched, aMixed);
-}
-
-CString CTDLTaskCtrlBase::GetSelectedTaskAllocBy() const
-{
-	CString sAllocBy;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		sAllocBy = m_data.GetTaskAllocBy(dwTaskID);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			CString sTaskAllocBy = m_data.GetTaskAllocBy(dwTaskID);
-			
-			if (sAllocBy != sTaskAllocBy)
-				return EMPTY_STR;
-		}
-	}
-	
-	return sAllocBy;
-}
-
-CString CTDLTaskCtrlBase::GetSelectedTaskVersion() const
-{
-	CString sVersion;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		sVersion = m_data.GetTaskVersion(dwTaskID);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			CString sTaskVersion = m_data.GetTaskVersion(dwTaskID);
-			
-			if (sVersion != sTaskVersion)
-				return EMPTY_STR;
-		}
-	}
-	
-	return sVersion;
-}
-
-CString CTDLTaskCtrlBase::GetSelectedTaskStatus() const
-{
-	CString sStatus;
-	
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		sStatus = m_data.GetTaskStatus(dwTaskID);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			CString sTaskStatus = m_data.GetTaskStatus(dwTaskID);
-			
-			if (sStatus != sTaskStatus)
-				return EMPTY_STR;
-		}
-	}
-	
-	return sStatus;
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const
-{
-	aItems.RemoveAll();
-
-	if (GetSelectedCount())
-	{
-		// get first item's value as initial
-		POSITION pos = GetFirstSelectedTaskPos();
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		m_data.GetTaskArray(dwTaskID, nAttrib, aItems);
-		
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-
-			CStringArray aTaskItems;
-			m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
-			
-			if (!Misc::MatchAll(aItems, aTaskItems))
-			{
-				aItems.RemoveAll();
-				break;
-			}
-		}
-	}
-	
-	return aItems.GetSize();
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const
-{
-	int nSelCount = GetSelectedCount();
-	CMap<CString, LPCTSTR, int, int&> mapCounts;
-
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		CStringArray aTaskItems;
-		int nItem = m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems);
-
-		while (nItem--)
-			Misc::IncrementItemStrT<int>(mapCounts, aTaskItems[nItem]);
-	}
-
-	int nNumMatched = SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
-
-	Misc::SortArray(aMatched);
-	Misc::SortArray(aMixed);
-
-	return nNumMatched;
-}
-*/
 
 int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
 {
@@ -6765,116 +6044,6 @@ int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCT
 	return aMatched.GetSize();
 }
 
-/*
-int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aCats) const
-{
-	return GetSelectedTaskArray(TDCA_CATEGORY, aCats);
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const
-{
-	return GetSelectedTaskArray(TDCA_CATEGORY, aMatched, aMixed);
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aTags) const
-{
-	return GetSelectedTaskArray(TDCA_TAGS, aTags);
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const
-{
-	return GetSelectedTaskArray(TDCA_TAGS, aMatched, aMixed);
-}
-*/
-
-/*
-int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const
-{
-	POSITION pos = GetFirstSelectedTaskPos();
-	DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-	if (dwTaskID)
-	{
-		m_data.GetTaskDependencies(dwTaskID, aDepends);
-
-		// Rest of selected tasks
-		while (pos)
-		{
-			dwTaskID = GetNextSelectedTaskID(pos);
-			CTDCDependencyArray aTaskDepends;
-
-			if ((m_data.GetTaskDependencies(dwTaskID, aTaskDepends) != aDepends.GetSize()) ||
-				!aDepends.MatchAll(aTaskDepends))
-			{
-				aDepends.RemoveAll();
-				break;
-			}
-		}
-	}
-	else
-	{
-		aDepends.RemoveAll();
-	}
-
-	return aDepends.GetSize();
-}
-*/
-
-/*
-CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const
-{
-	if (GetSelectedCount() == 1)
-	{
-		CString sFile = m_data.GetTaskFileLink(GetSelectedTaskID(), nFile);
-
-		if (bFullPath)
-			FileMisc::MakeFullPath(sFile, m_sTasklistFolder);
-
-		return sFile;
-	}
-	
-	// else
-	return EMPTY_STR;
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const
-{
-	if (GetSelectedCount() == 1)
-	{
-		int nNumFiles = m_data.GetTaskFileLinks(GetSelectedTaskID(), aFiles);
-
-		if (bFullPaths)
-		{
-			for (int nFile = 0; nFile < nNumFiles; nFile++)
-				FileMisc::MakeFullPath(aFiles[nFile], m_sTasklistFolder);
-		}
-
-		return nNumFiles;
-	}
-	
-	// else
-	aFiles.RemoveAll();
-	return 0;
-}
-
-int CTDLTaskCtrlBase::GetSelectedTaskFileLinkCount() const
-{
-	if (GetSelectedCount() == 1)
-		return m_data.GetTaskFileLinkCount(GetSelectedTaskID());
-	
-	// else
-	return 0;
-}
-
-CString CTDLTaskCtrlBase::GetSelectedTaskExtID() const
-{
-	if (GetSelectedCount() == 1)
-		return m_data.GetTaskExtID(GetSelectedTaskID());
-	
-	// else
-	return EMPTY_STR;
-}
-*/
 
 BOOL CTDLTaskCtrlBase::IsSelectedTaskSplittable() const
 {
@@ -6888,24 +6057,12 @@ BOOL CTDLTaskCtrlBase::IsSelectedTaskSplittable() const
 	
 	if (nSelCount == 1)
 	{
-		if (SelectionHasDone()/*IsSelectedTaskDone()*/ || SelectionHasSubtasks())
+		if (SelectionHasDone() || SelectionHasSubtasks())
 			return FALSE;
 	}
 	
 	return (nSelCount > 0);
 }
-
-/*
-BOOL CTDLTaskCtrlBase::IsSelectedTaskDone() const
-{
-	return m_data.IsTaskDone(GetSelectedTaskID());
-}
-
-BOOL CTDLTaskCtrlBase::IsSelectedTaskDue() const
-{
-	return m_calculator.IsTaskOverDue(GetSelectedTaskID());
-}
-*/
 
 BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 {

@@ -2238,7 +2238,7 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 {
 	int nRow = GetCurSel();
 
-	if (nRow != -1)
+	if ((nRow != -1) && CanEditCell(nRow, VALUE_COL))
 	{
 		// Reinitialise the edit ctrl with its previous value to revert changes
 		CWnd* pCtrl = GetEditControl(nRow, FALSE);

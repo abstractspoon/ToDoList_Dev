@@ -126,37 +126,9 @@ public:
  	CString GetSelectedTaskIcon() const;
 	DWORD GetSelectedTaskParentID() const;
 
-//	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
-//	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const;
-//	int GetSelectedTaskFileLinkCount() const;
-//	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
-// 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
-// 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
-// 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
-// 	int GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
-// 	CString GetSelectedTaskAllocBy() const;
-// 	CString GetSelectedTaskStatus() const;
-// 	int GetSelectedTaskCategories(CStringArray& aCats) const;
-// 	int GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const;
-// 	int GetSelectedTaskTags(CStringArray& aTags) const;
-// 	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
-//	CString GetSelectedTaskExtID() const;
-//	int GetSelectedTaskPercent() const;
-//	int GetSelectedTaskPriority() const;
-// 	int GetSelectedTaskRisk() const;
-// 	BOOL GetSelectedTaskCost(TDCCOST& cost) const;
-//	CString GetSelectedTaskVersion() const;
-
-// 	BOOL IsSelectedTaskFlagged() const;
-// 	BOOL IsSelectedTaskLocked() const;
-//	BOOL IsSelectedTaskReference() const;
-// 	BOOL IsSelectedTaskDone() const;
-// 	BOOL IsSelectedTaskDue() const;
 	BOOL IsSelectedTaskSplittable() const;
 
 	BOOL SelectionHasDependencies() const;
-//	BOOL SelectionHasLocalCircularDependencies() const;
-//	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;
 	BOOL SelectionHasSameParent() const;
 	BOOL SelectionHasNonReferences() const;
@@ -164,7 +136,6 @@ public:
 	BOOL SelectionHasRecurring() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
 	BOOL SelectionHasIcon() const;
-//	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasParents() const;
@@ -408,9 +379,6 @@ protected:
 	void GetColumnWidths(CDWordArray& aWidths) const;
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
-
-// 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
-// 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
 protected:
 	struct TDSORTFLAGS
