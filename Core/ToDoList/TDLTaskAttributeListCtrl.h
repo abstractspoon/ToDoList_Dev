@@ -92,7 +92,7 @@ public:
 	COleDateTime GetDueTime() const;
 	COleDateTime GetDoneTime() const;
 
-	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const;
+	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
 	int GetCustomAttributeAutoListData(const CString& sAttribID, CStringArray& aItems) const;
 
 protected:

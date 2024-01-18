@@ -3583,7 +3583,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 BOOL CToDoCtrl::CanSplitSelectedTask() const 
 { 
-	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.IsSelectedTaskSplittable()); 
+	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.CanSplitSelectedTask()); 
 }
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -4427,7 +4427,6 @@ void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 
 void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
-	// TODO
 	m_lcAttributes.SetAttributeVisibility(vis);
 
 	BOOL bColumnChange, bEditChange;

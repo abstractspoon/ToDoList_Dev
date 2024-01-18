@@ -5948,104 +5948,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	return sPath;
 }
 
-BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const
-{
-	data.Clear();
-
-	int nSelCount = GetSelectedCount();
-
-	if (nSelCount)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_CUSTDEF_RET(m_aCustomAttribDefs, sAttribID, pDef, FALSE);
-		
-		// Multi-selection check lists need special handling
-		if (pDef->IsMultiList())
-		{
-			CMap<CString, LPCTSTR, int, int&> mapCounts;
-			POSITION pos = GetFirstSelectedTaskPos();
-
-			while (pos)
-			{
-				DWORD dwTaskID = GetNextSelectedTaskID(pos);
-				
-				if (m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data))
-				{
-					CStringArray aTaskItems;
-					int nItem = data.AsArray(aTaskItems);
-
-					while (nItem--)
-						Misc::IncrementItemStrT<int>(mapCounts, aTaskItems[nItem]);
-				}
-			}
-
-			CStringArray aMatched, aMixed;
-			SplitSelectedTaskArrayMatchCounts(mapCounts, nSelCount, aMatched, aMixed);
-
-			Misc::SortArray(aMatched);
-			Misc::SortArray(aMixed);
-
-			data.Set(aMatched, aMixed);
-		}
-		else
-		{
-			// get first item's value as initial
-			POSITION pos = GetFirstSelectedTaskPos();
-			DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-			m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, data);
-		
-			while (pos)
-			{
-				dwTaskID = GetNextSelectedTaskID(pos);
-			
-				TDCCADATA dataNext;
-				m_data.GetTaskCustomAttributeData(dwTaskID, sAttribID, dataNext);
-
-				if (data != dataNext)
-				{
-					data.Clear();
-					return FALSE;
-				}
-			}
-		}
-
-		if (bFormatted && !data.IsEmpty())
-			data.Set(pDef->FormatData(data, HasStyle(TDCS_SHOWDATESINISO)));
-	}
-	
-	return !data.IsEmpty();
-}
-
-int CTDLTaskCtrlBase::SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, CStringArray& aMatched, CStringArray& aMixed)
-{
-	aMatched.RemoveAll();
-	aMixed.RemoveAll();
-
-	POSITION pos = mapCounts.GetStartPosition();
-
-	while (pos)
-	{
-		CString sItem;
-		int nCount = 0;
-
-		mapCounts.GetNextAssoc(pos, sItem, nCount);
-
-		if (nCount == nNumTasks)
-		{
-			aMatched.Add(sItem);
-		}
-		else if (nCount > 0)
-		{
-			aMixed.Add(sItem);
-		}
-	}
-
-	return aMatched.GetSize();
-}
-
-
-BOOL CTDLTaskCtrlBase::IsSelectedTaskSplittable() const
+BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
 {
 	if (IsReadOnly())
 		return FALSE;
@@ -6071,7 +5974,7 @@ BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:
-		// Do our custom column resizing because Windows own
+		// Do our custom column resizing because Windows-own
 		// does not understand how we do things!
 		switch (pMsg->wParam)
 		{

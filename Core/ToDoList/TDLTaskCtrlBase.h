@@ -120,13 +120,11 @@ public:
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const;
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
-	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
 
  	COLORREF GetSelectedTaskColor() const; // -1 or no item selected
  	CString GetSelectedTaskIcon() const;
 	DWORD GetSelectedTaskParentID() const;
-
-	BOOL IsSelectedTaskSplittable() const;
+	BOOL CanSplitSelectedTask() const;
 
 	BOOL SelectionHasDependencies() const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;
@@ -475,8 +473,6 @@ protected:
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
 	static int CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPadding = TRUE, int nImageWidth = -1);
-	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, 
-												CStringArray& aMatched, CStringArray& aMixed);
 	static BOOL CheckUpdateDueBrushColor(COLORREF crNew, COLORREF& crCur, CBrush& brCur);
 	static inline BOOL HasColor(COLORREF color) { return (color != CLR_NONE) ? TRUE : FALSE; }
 

@@ -1431,7 +1431,7 @@ int CTDLTaskAttributeListCtrl::GetCustomAttributeAutoListData(const CString& sAt
 	return aItems.GetSize();
 }
 
-BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data) const
+BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 	GET_CUSTDEF_RET(m_aCustomAttribDefs, sAttribID, pDef, FALSE);
@@ -1466,6 +1466,9 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	{
 		data.Set(sValue);
 	}
+
+	if (bFormatted && !data.IsEmpty())
+		data.Set(pDef->FormatData(data, m_data.HasStyle(TDCS_SHOWDATESINISO)));
 
 	return !data.IsEmpty();
 }
