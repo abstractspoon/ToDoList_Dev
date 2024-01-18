@@ -597,11 +597,10 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 	if (m_layout.SetMaximiseState(nState, HasStyle(TDCS_SHOWCOMMENTSALWAYS)) && GetSafeHwnd())
 	{
 		Invalidate(FALSE);
-		UpdateControls(FALSE); // don't update comments
 		ShowHideControls();
+		UpdateControls(FALSE); // don't update comments
 		Resize();
-
-
+		
 		// make sure focus is set correctly
 		switch (nState)
 		{
@@ -983,6 +982,7 @@ void CToDoCtrl::UpdateTasklistVisibility()
 		m_ctrlComments.SetFocus();
 
 	m_taskTree.Show(bTasksVis);
+	m_taskTree.EnableWindow(bTasksVis);
 }
 
 void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
