@@ -709,6 +709,7 @@ protected:
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnDrawSplitBar(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM lParam);
@@ -860,7 +861,7 @@ protected:
 //	int GetControls(CTDCControlArray& aControls, BOOL bVisible) const;
 	BOOL IsCtrlShowing(const CTRLITEM& ctrl) const;
 	void ShowHideControls();
-	void ShowHideControl(const CTRLITEM& ctrl);
+//	void ShowHideControl(const CTRLITEM& ctrl);
 	void EnableDisableControls(HTREEITEM hti);
 	void EnableDisableComments(HTREEITEM hti);
 //	void EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL bEnable, BOOL bReadOnly, BOOL bIsParent);

@@ -4,20 +4,28 @@
 //  Splitter window with CWnd-derived panes
 //  (C) Robert A. T. Káldy <kaldy@matfyz.cz>
 //  last updated on 24.3.2004
-
+//
+///////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(SIMPLE_SPLITTER)
 #define SIMPLE_SPLITTER
 
 #include <afxtempl.h>
 
-const UINT WM_SS_NOTIFYSPLITCHANGE = ::RegisterWindowMessage(_T("WM_SS_NOTIFYSPLITCHANGE")); // wParam = HWND, lParam = Pane index
+///////////////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_SS_NOTIFYSPLITCHANGE	= ::RegisterWindowMessage(_T("WM_SS_NOTIFYSPLITCHANGE"));	// wParam = HWND, lParam = Pane index
+const UINT WM_SS_DRAWSPLITBAR		= ::RegisterWindowMessage(_T("WM_SS_DRAWSPLITBAR"));		// wParam = HDC,  lParam = Pane index
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 enum SS_ORIENTATION
 {
 	SSP_HORZ,
 	SSP_VERT,
 };
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 class CSimpleSplitter : public CWnd
 {
@@ -41,7 +49,7 @@ public:
 	void SetActivePane(int nIndex);
 	void SetRelativePaneSizes(const CArray<int, int&>& aSizes);
 	void SetRelativePaneSizes(const int sizes[]);
-	void SetBarColor(COLORREF color);
+	void SetColors(COLORREF crBkgnd, COLORREF crBar);
 
 	void ClearPanes();
 	void RecalcLayout();
@@ -64,6 +72,8 @@ protected:
 	afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
 	//}}AFX_MSG
 	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnDrawSplitBar(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -71,7 +81,7 @@ protected:
 
 	SS_ORIENTATION m_nOrientation;
 	int m_nTrackIndex, m_nTracker, m_nTrackerLength, m_nTrackerMouseOffset;
-	COLORREF m_crBar;
+	COLORREF m_crBkgnd, m_crBar;
 	
 	CArray<CWnd*, CWnd*&> m_aPanes;
 	CArray<int, int&> m_aPaneSizes, m_aOrgPaneSizes;

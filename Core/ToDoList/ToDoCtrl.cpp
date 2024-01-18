@@ -468,6 +468,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 // 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
+	ON_REGISTERED_MESSAGE(WM_SS_DRAWSPLITBAR, OnDrawSplitBar)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_GETEXCLUSIONRECT, OnFindReplaceGetExclusionRect)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_REPLACESELTASK, OnFindReplaceSelectedTask)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_REPLACEALLTASKS, OnFindReplaceAllTasks)
@@ -847,20 +848,103 @@ void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nC
 	}
 }
 
-LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
+void CToDoCtrl::DrawSplitter(CDC* pDC)
 {
-	const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
+	// draw splitter and clip out
+	/*
+	if ((m_nMaxState == TDCMS_NORMAL) &&
+	m_ctrlComments.GetSafeHwnd() &&
+	m_theme.IsSet() &&
+	IsCommentsVisible())
+	{
+	CRect rSplitter = GetSplitterRect();
+	GraphicsMisc::DrawSplitBar(pDC, rSplitter, m_theme.crAppBackDark, FALSE);
+
+	pDC->ExcludeClipRect(rSplitter);
+	}
+	*/
+}
+
+BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
+{
+	// if the task tree has no size, we can treat this as spurious
+	if (m_layout.HasMaximiseState(TDCMS_NORMAL))
+	{
+		CRect rTree;
+		m_taskTree.GetWindowRect(rTree);
+
+		if ((rTree.Width() == 0) && (rTree.Height() == 0))
+			return TRUE;
+	}
+
+	// clip out all the child controls to reduce flicker
+	if (!(GetStyle() & WS_CLIPCHILDREN) && m_taskTree.GetSafeHwnd())
+	{
+		ExcludeCtrls(this, pDC, IDC_FIRST + 1, IDC_LAST - 1);
+		ExcludeChild(&m_taskTree, pDC);
+	}
+
+	// fill background with theme brush
+	CSaveDC sdc(pDC);
+
+	if (m_brUIBack.GetSafeHandle())
+	{
+		CRect rect;
+		pDC->GetClipBox(rect);
+		pDC->FillSolidRect(rect, m_theme.crAppBackLight);
+	}
+	else // default
+	{
+		CRuntimeDlg::OnEraseBkgnd(pDC);
+	}
+
+	// draw comments splitter
+	//	DrawSplitter(pDC);
+
+	return TRUE;
+}
+
+LRESULT CToDoCtrl::OnDrawSplitBar(WPARAM wp, LPARAM lp)
+{
+	CDC* pDC = CDC::FromHandle((HDC)wp);
+	const CSimpleSplitter* pSS = (const CSimpleSplitter*)pDC->GetWindow();
+
 	ASSERT(pSS);
 
 	if (pSS)
 	{
-		CRect rPane;
-		pSS->GetPaneRect(lp, rPane, this);
+		CRect rBar;
+		pSS->GetBarRect(lp, rBar);
 
-		if (!rPane.IsRectEmpty())
+		if (!rBar.IsRectEmpty())
 		{
-			ReposProjectName(rPane);
-			ReposTaskTree(rPane);
+			GraphicsMisc::DrawSplitBar(pDC, rBar, m_theme.crAppBackDark, FALSE);
+			pDC->ExcludeClipRect(rBar);
+
+			return 1L; // we handled it
+		}
+	}
+
+	return 0L;
+}
+
+LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
+{
+	if (!m_layout.IsRebuildingLayout())
+	{
+		const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
+		ASSERT(pSS);
+
+		if (pSS)
+		{
+			CRect rPane;
+			pSS->GetPaneRect(lp, rPane, this);
+
+			if (!rPane.IsRectEmpty())
+			{
+				ReposProjectName(rPane);
+				ReposTaskTree(rPane);
+			}
 		}
 	}
 
@@ -889,7 +973,7 @@ void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 		}
 
 // 		ValidateCommentsSize();
-//		ShowHideControls();
+		ShowHideControls();
 
 		CRect rAvailable(0, 0, cx, cy);
 
@@ -1563,6 +1647,7 @@ BOOL CToDoCtrl::IsCommentsVisible(BOOL bActually) const
 // 		pDWM->MoveWindow(GetDlgItem(IDC_COMMENTS), rComments);
 // }
 
+/*
 void CToDoCtrl::ShowHideControl(const CTRLITEM& ctrl)
 {
 	CWnd* pCtrl = GetDlgItem(ctrl.nCtrlID);
@@ -1585,6 +1670,7 @@ void CToDoCtrl::ShowHideControl(const CTRLITEM& ctrl)
 // 		break;
 // 	}
 }
+*/
 
 void CToDoCtrl::ShowHideControls()
 {
@@ -2614,62 +2700,6 @@ BOOL CToDoCtrl::SetSelectedTaskMetaData(const CString& sKey, const CString& sMet
 	
 	if (aModTaskIDs.GetSize())
  		SetModified(TDCA_METADATA, aModTaskIDs);
-	
-	return TRUE;
-}
-
-void CToDoCtrl::DrawSplitter(CDC* pDC) 
-{
-	// draw splitter and clip out
-/*
-	if ((m_nMaxState == TDCMS_NORMAL) &&
-		m_ctrlComments.GetSafeHwnd() && 
-		m_theme.IsSet() && 
-		IsCommentsVisible())
-	{
-		CRect rSplitter = GetSplitterRect();
-		GraphicsMisc::DrawSplitBar(pDC, rSplitter, m_theme.crAppBackDark, FALSE);
-
-		pDC->ExcludeClipRect(rSplitter);
-	}
-*/
-}
-
-BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC) 
-{
-	// if the task tree has no size, we can treat this as spurious
-	if (m_layout.HasMaximiseState(TDCMS_NORMAL))
-	{
-		CRect rTree;
-		m_taskTree.GetWindowRect(rTree);
-		
-		if ((rTree.Width() == 0) && (rTree.Height() == 0))
-			return TRUE;
-	}
-
-	// clip out all the child controls to reduce flicker
-	if (!(GetStyle() & WS_CLIPCHILDREN) && m_taskTree.GetSafeHwnd())
-	{
-		ExcludeCtrls(this, pDC, IDC_FIRST + 1, IDC_LAST - 1);
-		ExcludeChild(&m_taskTree, pDC);
-	}
-	
-	// fill background with theme brush
-	CSaveDC sdc(pDC);
-
-	if (m_brUIBack.GetSafeHandle())
-	{
-		CRect rect;
-		pDC->GetClipBox(rect);
-		pDC->FillSolidRect(rect, m_theme.crAppBackLight);
-	}
-	else // default
-	{
-		CRuntimeDlg::OnEraseBkgnd(pDC);
-	}
-
-	// draw comments splitter
-//	DrawSplitter(pDC);
 	
 	return TRUE;
 }
@@ -12622,6 +12652,7 @@ void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 		m_brUIBack.CreateSolidBrush(m_theme.crAppBackLight);
 	
 	m_ctrlComments.SetUITheme(m_theme);
+	m_layout.SetUITheme(m_theme);
 	m_taskTree.SetSplitBarColor(m_theme.crAppBackDark);
 
 	Invalidate();

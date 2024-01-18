@@ -9,6 +9,9 @@
 #include "..\shared\Misc.h"
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\HoldRedraw.h"
+#include "..\shared\AutoFlag.h"
+
+#include "..\interfaces\uitheme.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -33,6 +36,7 @@ CToDoCtrlLayout::CToDoCtrlLayout(CWnd* pParent, CWnd* pAttributes, CWnd* pCommen
 	m_nCommentsPos(TDCUIL_BOTTOM),
 	m_bAllowStacking(FALSE),
 	m_bStackCommentsAbove(FALSE),
+	m_bRebuildingLayout(FALSE),
 	m_nMaxState(TDCMS_NORMAL),
 	m_splitterHorz(0, SSP_HORZ, 30, SPLITSIZE),
 	m_splitterVert(0, SSP_VERT, 30, SPLITSIZE)
@@ -42,8 +46,8 @@ CToDoCtrlLayout::CToDoCtrlLayout(CWnd* pParent, CWnd* pAttributes, CWnd* pCommen
 	ASSERT(m_pComments);
 
 #ifdef _DEBUG
-	m_splitterHorz.SetBarColor(255);
-	m_splitterVert.SetBarColor(255);
+// 	m_splitterHorz.SetColors(RGB(0, 255, 0), RGB(255, 0, 0));
+// 	m_splitterVert.SetColors(RGB(0, 255, 0), RGB(255, 0, 0));
 #endif
 }
 
@@ -63,7 +67,10 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	if ((m_nAttribsPos == nAttribsPos) && (m_nCommentsPos == nAttribsPos))
 		return FALSE;
 
-	RebuildSplitters();
+	m_nAttribsPos = nAttribsPos;
+	m_nCommentsPos = nCommentsPos;
+
+	RebuildLayout();
 	return TRUE;
 }
 
@@ -74,7 +81,7 @@ BOOL CToDoCtrlLayout::ModifyLayout(BOOL bAllowStacking,
 	ASSERT(::IsWindow(*m_pAttributes));
 	ASSERT(::IsWindow(*m_pComments));
 
-	// We may only need to rebuild if both are on the same side
+	// We may only need to rebuild if both attributes and comments are on the same side
 	BOOL bRebuild = ((m_nAttribsPos == m_nCommentsPos) &&
 					(Misc::StateChanged(m_bAllowStacking, bAllowStacking) ||
 					 Misc::StateChanged(m_bStackCommentsAbove, bStackCommentAbove)));
@@ -83,24 +90,38 @@ BOOL CToDoCtrlLayout::ModifyLayout(BOOL bAllowStacking,
 	m_bStackCommentsAbove = bStackCommentAbove;
 
 	if (bRebuild)
-		RebuildSplitters();
+		RebuildLayout();
 
 	return bRebuild;
+}
+
+void CToDoCtrlLayout::SetUITheme(const UITHEME& theme)
+{
+	m_splitterHorz.SetColors(theme.crAppBackLight, theme.crAppLinesDark);
+	m_splitterVert.SetColors(theme.crAppBackLight, theme.crAppLinesDark);
 }
 
 void CToDoCtrlLayout::Resize(const CRect& rect)
 {
 	// Resize the primary splitter only
-	if (m_splitterHorz.GetSafeHwnd() && (m_splitterHorz.GetParent() == m_pParent))
-	{
-		m_splitterHorz.MoveWindow(rect);
-		m_splitterHorz.RecalcLayout();
-	}
-	else if (m_splitterVert.GetSafeHwnd() && (m_splitterVert.GetParent() == m_pParent))
-	{
-		m_splitterVert.MoveWindow(rect);
-		m_splitterVert.RecalcLayout();
-	}
+	if (!ResizeIfRoot(m_splitterHorz, rect))
+		ResizeIfRoot(m_splitterVert, rect);
+}
+
+BOOL CToDoCtrlLayout::ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect) const
+{
+	if (!m_pParent->GetSafeHwnd() || !splitter.GetSafeHwnd() || (splitter.GetParent() != m_pParent))
+		return FALSE;
+
+	CRect rSplitter;
+	splitter.GetClientRect(rSplitter);
+
+	if (rect.Size() != rSplitter.Size())
+		splitter.MoveWindow(rect);
+	else
+		splitter.RecalcLayout();
+
+	return TRUE;
 }
 
 BOOL CToDoCtrlLayout::IsCommentsVisible(BOOL bActually) const
@@ -142,12 +163,12 @@ BOOL CToDoCtrlLayout::SetMaximiseState(TDC_MAXSTATE nState, BOOL bShowCommentsAl
 	m_bShowCommentsAlways = bShowCommentsAlways;
 	m_nMaxState = nState;
 
-	RebuildSplitters();
+	RebuildLayout();
 
 	return TRUE;
 }
 
-void CToDoCtrlLayout::RebuildSplitters()
+void CToDoCtrlLayout::RebuildLayout()
 {
 	CLockUpdates lu(m_pParent->GetSafeHwnd());
 
@@ -163,356 +184,367 @@ void CToDoCtrlLayout::RebuildSplitters()
 		m_splitterVert.ClearPanes();
 	}
 
-	switch (m_nMaxState)
+	// Scoped to exclude the updates right at the end
 	{
-	case TDCMS_NORMAL:
+		CAutoFlag af(m_bRebuildingLayout, TRUE);
+
+		switch (m_nMaxState)
 		{
-			switch (m_nCommentsPos)
+		case TDCMS_NORMAL:
 			{
-			case TDCUIL_LEFT: // Comments
+				switch (m_nCommentsPos)
 				{
-					switch (m_nAttribsPos)
+				case TDCUIL_LEFT: // Comments
 					{
-					case TDCUIL_LEFT: // Attributes
-						if (m_bAllowStacking)
+						switch (m_nAttribsPos)
 						{
-							// .----..----------.      .----..----------.
-							// | C  || T        |      | A  || T        |
-							// |    ||          |      |    ||          |
-							// ·----·|          |  OR  ·----·|          |
-							// .----.|          |      .----.|          |
-							// | A  ||          |      | C  ||          |
-							// |    ||          |      |    ||          |
-							// ·----··----------·      ·----··----------·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-							m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
-
-							m_splitterHorz.SetPaneCount(2);
-							m_splitterHorz.SetPane(0, &m_splitterVert);
-							m_splitterHorz.SetPane(1, NULL); // Tasks
-
-							m_splitterVert.SetPaneCount(2);
-
-							if (m_bStackCommentsAbove)
-							{
-								m_splitterVert.SetPane(0, m_pComments);
-								m_splitterVert.SetPane(1, m_pAttributes);
-							}
-							else
-							{
-								m_splitterVert.SetPane(0, m_pAttributes);
-								m_splitterVert.SetPane(1, m_pComments);
-							}
-						}
-						else
-						{
-							// .----..----..----.
-							// | C  || A  || T  |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// ·----··----··----·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-
-							m_splitterHorz.SetPaneCount(3);
-							m_splitterHorz.SetPane(0, m_pComments);
-							m_splitterHorz.SetPane(1, m_pAttributes);
-							m_splitterHorz.SetPane(2, NULL); // Tasks
-						}
-						break;
-
-					case TDCUIL_RIGHT: // Attributes
-						{
-							// .----..----..----.
-							// | C  || T  || A  |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// ·----··----··----·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-
-							m_splitterHorz.SetPaneCount(3);
-							m_splitterHorz.SetPane(0, m_pComments);
-							m_splitterHorz.SetPane(1, NULL); // Tasks
-							m_splitterHorz.SetPane(2, m_pAttributes);
-						}
-						break;
-
-					case TDCUIL_BOTTOM: // Attributes
-						{
-							// .----. .----.
-							// | C  | | T  |
-							// |    | |    |
-							// ·----· ·----·
-							// .-----------.
-							// |     A     |
-							// |           |
-							// ·-----------·
-							m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-							m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
-
-							m_splitterVert.SetPaneCount(2);
-							m_splitterVert.SetPane(0, &m_splitterHorz);
-							m_splitterVert.SetPane(1, m_pAttributes);
-
-							m_splitterHorz.SetPaneCount(2);
-							m_splitterHorz.SetPane(0, m_pComments);
-							m_splitterHorz.SetPane(1, NULL); // Tasks
-						}
-						break;
-					}
-				}
-				break;
-
-			case TDCUIL_RIGHT: // Comments
-				{
-					switch (m_nAttribsPos)
-					{
-					case TDCUIL_LEFT: // Attributes
-						{
-							// .----..----..----.
-							// | A  || T  || C  |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// ·----··----··----·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-
-							m_splitterHorz.SetPaneCount(3);
-							m_splitterHorz.SetPane(0, m_pAttributes);
-							m_splitterHorz.SetPane(1, NULL); // Tasks
-							m_splitterHorz.SetPane(2, m_pComments);
-						}
-						break;
-
-					case TDCUIL_RIGHT: // Attributes
-						if (m_bAllowStacking)
-						{
-							// .----------..----.      .----------..----.
-							// | T        || C  |      | T        || A  |
-							// |          ||    |      |          ||    |
-							// |          |·----·  OR  |          |·----·
-							// |          |.----.      |          |.----.
-							// |          || A  |      |          || C  |
-							// |          ||    |      |          ||    |
-							// ·----------··----·      ·----------··----·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-							m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
-
-							m_splitterHorz.SetPaneCount(2);
-							m_splitterHorz.SetPane(0, NULL); // Tasks
-							m_splitterHorz.SetPane(1, &m_splitterVert);
-
-							m_splitterVert.SetPaneCount(2);
-
-							if (m_bStackCommentsAbove)
-							{
-								m_splitterVert.SetPane(0, m_pComments);
-								m_splitterVert.SetPane(1, m_pAttributes);
-							}
-							else
-							{
-								m_splitterVert.SetPane(0, m_pAttributes);
-								m_splitterVert.SetPane(1, m_pComments);
-							}
-						}
-						else
-						{
-							// .----..----..----.
-							// | T  || A  || C  |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// |    ||    ||    |
-							// ·----··----··----·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-
-							m_splitterHorz.SetPaneCount(3);
-							m_splitterHorz.SetPane(0, NULL); // Tasks
-							m_splitterHorz.SetPane(1, m_pAttributes);
-							m_splitterHorz.SetPane(2, m_pComments);
-						}
-						break;
-
-					case TDCUIL_BOTTOM: // Attributes
-						{
-							// .-----. .-----.
-							// |  T  | |  C  |
-							// |     | |     |
-							// ·-----· ·-----·
-							// .-------------.
-							// |      A      |
-							// |             |
-							// ·-------------·
-							m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-							m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
-
-							m_splitterVert.SetPaneCount(2);
-							m_splitterVert.SetPane(0, &m_splitterHorz);
-							m_splitterVert.SetPane(1, m_pAttributes);
-
-							m_splitterHorz.SetPaneCount(2);
-							m_splitterHorz.SetPane(0, NULL); // Tasks
-							m_splitterHorz.SetPane(1, m_pComments);
-						}
-						break;
-					}
-				}
-				break;
-
-			case TDCUIL_BOTTOM: // Comments
-				{
-					switch (m_nAttribsPos)
-					{
-					case TDCUIL_LEFT:
-						{
-							// .----..---------.
-							// | A  || T       |
-							// |    ||         |
-							// |    |·---------·
-							// |    |.---------.
-							// |    || C       |
-							// |    ||         |
-							// ·----··---------·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-							m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
-
-							m_splitterHorz.SetPaneCount(2);
-							m_splitterHorz.SetPane(0, m_pAttributes);
-							m_splitterHorz.SetPane(1, &m_splitterVert);
-
-							m_splitterVert.SetPaneCount(2);
-							m_splitterVert.SetPane(0, NULL); // Tasks
-							m_splitterVert.SetPane(1, m_pComments);
-						}
-						break;
-
-					case TDCUIL_RIGHT:
-						{
-							// .---------..----.
-							// | T       || A  |
-							// |         ||    |
-							// ·---------·|    |
-							// .---------.|    |
-							// | C       ||    |
-							// |         ||    |
-							// ·---------··----·
-							m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-							m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
-
-							m_splitterHorz.SetPaneCount(2);
-							m_splitterHorz.SetPane(0, &m_splitterVert);
-							m_splitterHorz.SetPane(1, m_pAttributes);
-
-							m_splitterVert.SetPaneCount(2);
-							m_splitterVert.SetPane(0, NULL); // Tasks
-							m_splitterVert.SetPane(1, m_pComments);
-						}
-						break;
-
-					case TDCUIL_BOTTOM:
-						{
-							// .-------------.      .-------------.
-							// |      T      |      |      T      |
-							// |             |      |             |
-							// ·-------------·  OR  ·-------------·
-							// .-----. .-----.      .-----. .-----.
-							// |  C  | |  A  |      |  A  | |  C  |
-							// |     | |     |      |     | |     |
-							// ·-----· ·-----·      ·-----· ·-----·
+						case TDCUIL_LEFT: // Attributes
 							if (m_bAllowStacking)
 							{
+								// .----..----------.      .----..----------.
+								// | C  || T        |      | A  || T        |
+								// |    ||          |      |    ||          |
+								// ·----·|          |  OR  ·----·|          |
+								// .----.|          |      .----.|          |
+								// | A  ||          |      | C  ||          |
+								// |    ||          |      |    ||          |
+								// ·----··----------·      ·----··----------·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
 
+								m_splitterHorz.SetPaneCount(2);
+								m_splitterHorz.SetPane(0, &m_splitterVert);
+								m_splitterHorz.SetPane(1, NULL); // Tasks
+
+								m_splitterVert.SetPaneCount(2);
+
+								if (m_bStackCommentsAbove)
+								{
+									m_splitterVert.SetPane(0, m_pComments);
+									m_splitterVert.SetPane(1, m_pAttributes);
+								}
+								else
+								{
+									m_splitterVert.SetPane(0, m_pAttributes);
+									m_splitterVert.SetPane(1, m_pComments);
+								}
+							}
+							else
+							{
+								// .----..----..----.
+								// | C  || A  || T  |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// ·----··----··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+
+								m_splitterHorz.SetPaneCount(3);
+								m_splitterHorz.SetPane(0, m_pComments);
+								m_splitterHorz.SetPane(1, m_pAttributes);
+								m_splitterHorz.SetPane(2, NULL); // Tasks
+							}
+							break;
+
+						case TDCUIL_RIGHT: // Attributes
+							{
+								// .----..----..----.
+								// | C  || T  || A  |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// ·----··----··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+
+								m_splitterHorz.SetPaneCount(3);
+								m_splitterHorz.SetPane(0, m_pComments);
+								m_splitterHorz.SetPane(1, NULL); // Tasks
+								m_splitterHorz.SetPane(2, m_pAttributes);
+							}
+							break;
+
+						case TDCUIL_BOTTOM: // Attributes
+							{
+								// .----. .----.
+								// | C  | | T  |
+								// |    | |    |
+								// ·----· ·----·
+								// .-----------.
+								// |     A     |
+								// |           |
+								// ·-----------·
 								m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
 								m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
 
 								m_splitterVert.SetPaneCount(2);
-								m_splitterVert.SetPane(0, NULL); // Tasks
-								m_splitterVert.SetPane(1, &m_splitterHorz);
+								m_splitterVert.SetPane(0, &m_splitterHorz);
+								m_splitterVert.SetPane(1, m_pAttributes);
 
 								m_splitterHorz.SetPaneCount(2);
+								m_splitterHorz.SetPane(0, m_pComments);
+								m_splitterHorz.SetPane(1, NULL); // Tasks
+							}
+							break;
+						}
+					}
+					break;
+
+				case TDCUIL_RIGHT: // Comments
+					{
+						switch (m_nAttribsPos)
+						{
+						case TDCUIL_LEFT: // Attributes
+							{
+								// .----..----..----.
+								// | A  || T  || C  |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// ·----··----··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+
+								m_splitterHorz.SetPaneCount(3);
+								m_splitterHorz.SetPane(0, m_pAttributes);
+								m_splitterHorz.SetPane(1, NULL); // Tasks
+								m_splitterHorz.SetPane(2, m_pComments);
+							}
+							break;
+
+						case TDCUIL_RIGHT: // Attributes
+							if (m_bAllowStacking)
+							{
+								// .----------..----.      .----------..----.
+								// | T        || C  |      | T        || A  |
+								// |          ||    |      |          ||    |
+								// |          |·----·  OR  |          |·----·
+								// |          |.----.      |          |.----.
+								// |          || A  |      |          || C  |
+								// |          ||    |      |          ||    |
+								// ·----------··----·      ·----------··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
+
+								m_splitterHorz.SetPaneCount(2);
+								m_splitterHorz.SetPane(0, NULL); // Tasks
+								m_splitterHorz.SetPane(1, &m_splitterVert);
+
+								m_splitterVert.SetPaneCount(2);
 
 								if (m_bStackCommentsAbove)
 								{
-									m_splitterHorz.SetPane(0, m_pComments);
-									m_splitterHorz.SetPane(1, m_pAttributes);
+									m_splitterVert.SetPane(0, m_pComments);
+									m_splitterVert.SetPane(1, m_pAttributes);
 								}
 								else
 								{
-									m_splitterHorz.SetPane(0, m_pAttributes);
-									m_splitterHorz.SetPane(1, m_pComments);
+									m_splitterVert.SetPane(0, m_pAttributes);
+									m_splitterVert.SetPane(1, m_pComments);
 								}
 							}
 							else
 							{
-								// .-------------.
-								// |      T      |
-								// ·-------------·
+								// .----..----..----.
+								// | T  || A  || C  |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// |    ||    ||    |
+								// ·----··----··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+
+								m_splitterHorz.SetPaneCount(3);
+								m_splitterHorz.SetPane(0, NULL); // Tasks
+								m_splitterHorz.SetPane(1, m_pAttributes);
+								m_splitterHorz.SetPane(2, m_pComments);
+							}
+							break;
+
+						case TDCUIL_BOTTOM: // Attributes
+							{
+								// .-----. .-----.
+								// |  T  | |  C  |
+								// |     | |     |
+								// ·-----· ·-----·
 								// .-------------.
 								// |      A      |
-								// ·-------------·
-								// .-------------.
-								// |      C      |
+								// |             |
 								// ·-------------·
 								m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
+								m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
 
-								m_splitterVert.SetPaneCount(3);
-								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, &m_splitterHorz);
 								m_splitterVert.SetPane(1, m_pAttributes);
-								m_splitterVert.SetPane(2, m_pComments);
+
+								m_splitterHorz.SetPaneCount(2);
+								m_splitterHorz.SetPane(0, NULL); // Tasks
+								m_splitterHorz.SetPane(1, m_pComments);
 							}
+							break;
 						}
-						break;
 					}
+					break;
+
+				case TDCUIL_BOTTOM: // Comments
+					{
+						switch (m_nAttribsPos)
+						{
+						case TDCUIL_LEFT:
+							{
+								// .----..---------.
+								// | A  || T       |
+								// |    ||         |
+								// |    |·---------·
+								// |    |.---------.
+								// |    || C       |
+								// |    ||         |
+								// ·----··---------·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
+
+								m_splitterHorz.SetPaneCount(2);
+								m_splitterHorz.SetPane(0, m_pAttributes);
+								m_splitterHorz.SetPane(1, &m_splitterVert);
+
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPane(1, m_pComments);
+							}
+							break;
+
+						case TDCUIL_RIGHT:
+							{
+								// .---------..----.
+								// | T       || A  |
+								// |         ||    |
+								// ·---------·|    |
+								// .---------.|    |
+								// | C       ||    |
+								// |         ||    |
+								// ·---------··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
+
+								m_splitterHorz.SetPaneCount(2);
+								m_splitterHorz.SetPane(0, &m_splitterVert);
+								m_splitterHorz.SetPane(1, m_pAttributes);
+
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPane(1, m_pComments);
+							}
+							break;
+
+						case TDCUIL_BOTTOM:
+							{
+								// .-------------.      .-------------.
+								// |      T      |      |      T      |
+								// |             |      |             |
+								// ·-------------·  OR  ·-------------·
+								// .-----. .-----.      .-----. .-----.
+								// |  C  | |  A  |      |  A  | |  C  |
+								// |     | |     |      |     | |     |
+								// ·-----· ·-----·      ·-----· ·-----·
+								if (m_bAllowStacking)
+								{
+
+									m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
+									m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
+
+									m_splitterVert.SetPaneCount(2);
+									m_splitterVert.SetPane(0, NULL); // Tasks
+									m_splitterVert.SetPane(1, &m_splitterHorz);
+
+									m_splitterHorz.SetPaneCount(2);
+
+									if (m_bStackCommentsAbove)
+									{
+										m_splitterHorz.SetPane(0, m_pComments);
+										m_splitterHorz.SetPane(1, m_pAttributes);
+									}
+									else
+									{
+										m_splitterHorz.SetPane(0, m_pAttributes);
+										m_splitterHorz.SetPane(1, m_pComments);
+									}
+								}
+								else
+								{
+									// .-------------.
+									// |      T      |
+									// ·-------------·
+									// .-------------.
+									// |      A      |
+									// ·-------------·
+									// .-------------.
+									// |      C      |
+									// ·-------------·
+									m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
+
+									m_splitterVert.SetPaneCount(3);
+									m_splitterVert.SetPane(0, NULL); // Tasks
+									m_splitterVert.SetPane(1, m_pAttributes);
+									m_splitterVert.SetPane(2, m_pComments);
+								}
+							}
+							break;
+						}
+					}
+					break;
 				}
-				break;
 			}
-		}
-		break;
+			break;
 
-	case TDCMS_MAXCOMMENTS:
-		{
-			// No splitter required
-		}
-		break;
-
-	case TDCMS_MAXTASKLIST:
-		if (m_bShowCommentsAlways)
-		{
-			switch (m_nCommentsPos)
+		case TDCMS_MAXCOMMENTS:
 			{
-			case TDCUIL_LEFT:
-			case TDCUIL_RIGHT:
-				{
-					m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
-					m_splitterHorz.SetPaneCount(2);
-					m_splitterHorz.SetPane(0, NULL); // Tasks
-					m_splitterHorz.SetPane(1, m_pComments);
-				}
-				break;
-
-			case TDCUIL_BOTTOM:
-				{
-					m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-					m_splitterVert.SetPaneCount(2);
-					m_splitterVert.SetPane(0, NULL); // Tasks
-					m_splitterVert.SetPane(1, m_pComments);
-				}
-				break;
+				// No splitter required
 			}
+			break;
 
+		case TDCMS_MAXTASKLIST:
+			if (m_bShowCommentsAlways)
+			{
+				switch (m_nCommentsPos)
+				{
+				case TDCUIL_LEFT:
+				case TDCUIL_RIGHT:
+					{
+						m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+						m_splitterHorz.SetPaneCount(2);
+						m_splitterHorz.SetPane(0, NULL); // Tasks
+						m_splitterHorz.SetPane(1, m_pComments);
+					}
+					break;
+
+				case TDCUIL_BOTTOM:
+					{
+						m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
+						m_splitterVert.SetPaneCount(2);
+						m_splitterVert.SetPane(0, NULL); // Tasks
+						m_splitterVert.SetPane(1, m_pComments);
+					}
+					break;
+				}
+
+			}
+			else
+			{
+				// No splitter required
+			}
+			break;
 		}
-		else
-		{
-			// No splitter required
-		}
-		break;
 	}
+
+	if (m_splitterHorz.GetSafeHwnd())
+		m_splitterHorz.RecalcLayout();
+
+	if (m_splitterVert.GetSafeHwnd())
+		m_splitterVert.RecalcLayout();
 }
