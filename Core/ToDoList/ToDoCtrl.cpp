@@ -814,7 +814,7 @@ void CToDoCtrl::ShowHideControls()
 	// project name
 //	BOOL bMaximize = !m_layout.HasMaximiseState(TDCMS_NORMAL);
 	BOOL bShowProjectName = (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME));
-	ShowCtrls(IDC_PROJECTLABEL, IDC_PROJECTNAME, bShowProjectName);
+	ShowCtrls(this, IDC_PROJECTLABEL, IDC_PROJECTNAME, bShowProjectName);
 }
 
 void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
