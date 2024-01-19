@@ -6303,8 +6303,8 @@ void CToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 
 void CToDoCtrl::SetPriorityColors(const CDWordArray& aColors) 
 { 
-	if (m_taskTree.SetPriorityColors(aColors))
-		m_lcAttributes.RedrawValue(TDCA_PRIORITY);
+	m_taskTree.SetPriorityColors(aColors);
+	m_lcAttributes.SetPriorityColors(aColors);
 }
 
 void CToDoCtrl::SetProjectName(const CString& sProjectName)
