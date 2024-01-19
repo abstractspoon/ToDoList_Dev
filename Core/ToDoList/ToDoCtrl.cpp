@@ -222,8 +222,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 		const TDCCONTROL& ctrl = TDCCONTROLS[nCtrl];
 
 		AddRCControl(_T("CONTROL"), ctrl.szClass, CString((LPCTSTR)ctrl.nIDCaption), 
-					(ctrl.dwStyle/* | WS_NOTVISIBLE*/), ctrl.dwExStyle,
-					ctrl.nX, ctrl.nY, ctrl.nCx, ctrl.nCy, ctrl.nID);
+					ctrl.dwStyle, ctrl.dwExStyle, ctrl.nX, ctrl.nY, ctrl.nCx, ctrl.nCy, ctrl.nID);
 	}
 	
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
@@ -571,10 +570,9 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 		// so after a font change we always resend the content
 		CString sTextComments;
 		CBinaryData customComments;
+
 		m_ctrlComments.GetContent(sTextComments, customComments);
-
 		m_ctrlComments.SetContentFont(m_hFontComments);
-
 		m_ctrlComments.SetContent(sTextComments, customComments, FALSE);
 
 		return TRUE;
@@ -598,7 +596,6 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 	{
 		Invalidate(FALSE);
 		ShowHideControls();
-		UpdateControls(FALSE); // don't update comments
 		Resize();
 		
 		// make sure focus is set correctly
@@ -610,9 +607,7 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 		case TDCMS_MAXTASKLIST:
 			if (!HasStyle(TDCS_SHOWCOMMENTSALWAYS) || !m_ctrlComments.HasFocus())
-			{
 				SetFocusToTasks();
-			}
 			break;
 
 		case TDCMS_MAXCOMMENTS:
@@ -801,39 +796,39 @@ void CToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 
 void CToDoCtrl::ShowHideControls()
 {
-	// Comments as required
-	m_ctrlComments.ShowWindow(m_layout.IsCommentsVisible() ? SW_SHOW : SW_HIDE);
+	switch (m_layout.GetMaximiseState())
+	{
+	case TDCMS_NORMAL:
+		ShowCtrls(this, IDC_PROJECTLABEL, IDC_PROJECTNAME, HasStyle(TDCS_SHOWPROJECTNAME));
+		ShowTaskCtrl(TRUE);
+		m_lcAttributes.ShowWindow(SW_SHOW);
+		m_ctrlComments.ShowWindow(SW_SHOW);
+		break;
 
-	m_lcAttributes.ShowWindow(m_layout.HasMaximiseState(TDCMS_NORMAL) ? SW_SHOW : SW_HIDE);
+	case TDCMS_MAXTASKLIST:
+		ShowCtrls(this, IDC_PROJECTLABEL, IDC_PROJECTNAME, FALSE);
+		ShowTaskCtrl(TRUE);
+		m_lcAttributes.ShowWindow(SW_HIDE);
+		m_ctrlComments.ShowWindow(HasStyle(TDCS_SHOWCOMMENTSALWAYS) ? SW_SHOW : SW_HIDE);
+		break;
 
-	// task tree
-	UpdateTasklistVisibility();
-	
-	// project name
-//	BOOL bMaximize = !m_layout.HasMaximiseState(TDCMS_NORMAL);
-	BOOL bShowProjectName = (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME));
-	ShowCtrls(this, IDC_PROJECTLABEL, IDC_PROJECTNAME, bShowProjectName);
+	case TDCMS_MAXCOMMENTS:
+		ShowCtrls(this, IDC_PROJECTLABEL, IDC_PROJECTNAME, FALSE);
+		ShowTaskCtrl(FALSE);
+		m_lcAttributes.ShowWindow(SW_HIDE);
+		m_ctrlComments.ShowWindow(SW_SHOW);
+		break;
+	}
 }
 
 void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 {
-	DWORD dwTaskID = GetTaskID(hti);
-	
-	BOOL bMaximized = !m_layout.HasMaximiseState(TDCMS_NORMAL);
-	BOOL bEnable = (hti && !bMaximized);
-	BOOL bReadOnly = IsReadOnly();
-
-	// comments
 	EnableDisableComments(hti);
 
-	// project name
-	BOOL bShowProjectName = (!bMaximized && HasStyle(TDCS_SHOWPROJECTNAME));
-	RT_CTRLSTATE nCtrlState =  (!bShowProjectName ? RTCS_DISABLED : 
-								(bReadOnly ? RTCS_READONLY : RTCS_ENABLED));
-	SetCtrlState(this, IDC_PROJECTNAME, nCtrlState);
-
-	RT_CTRLSTATE nLabelState = (CThemed::IsAppThemed() ? RTCS_ENABLED : RTCS_DISABLED);
-	SetCtrlState(this, IDC_PROJECTLABEL, nCtrlState);
+	if (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME))
+		SetCtrlState(this, IDC_PROJECTNAME, (IsReadOnly() ? RTCS_READONLY : RTCS_ENABLED));
+	else
+		SetCtrlState(this, IDC_PROJECTNAME, RTCS_DISABLED);
 }
 
 void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
@@ -969,18 +964,16 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 }
 
-void CToDoCtrl::UpdateTasklistVisibility()
+void CToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
-	BOOL bTasksVis = !m_layout.HasMaximiseState(TDCMS_MAXCOMMENTS);
-
 	// if only the comments are visible then set the focus to the comments
 	// before hiding the tasks, else Windows will select all the text
 	// in the comments control
-	if (!bTasksVis)
+	if (!bShow)
 		m_ctrlComments.SetFocus();
 
-	m_taskTree.Show(bTasksVis);
-	m_taskTree.EnableWindow(bTasksVis);
+	m_taskTree.Show(bShow);
+	m_taskTree.EnableWindow(bShow);
 }
 
 void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)

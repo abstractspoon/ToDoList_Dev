@@ -2284,20 +2284,19 @@ void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 	UpdateWindow();
 }
 
-void CTabbedToDoCtrl::UpdateTasklistVisibility()
+void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
-	BOOL bTasksVis = !m_layout.HasMaximiseState(TDCMS_MAXCOMMENTS);
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		CToDoCtrl::UpdateTasklistVisibility();
+		CToDoCtrl::ShowTaskCtrl(bShow);
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.ShowWindow(bTasksVis ? SW_SHOW : SW_HIDE);
+		m_taskList.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2323,7 +2322,7 @@ void CTabbedToDoCtrl::UpdateTasklistVisibility()
 	}
 
 	// handle tab control
-	m_tabViews.ShowWindow(bTasksVis && HasStyle(TDCS_SHOWTREELISTBAR) ? SW_SHOW : SW_HIDE);
+	m_tabViews.ShowWindow(bShow && HasStyle(TDCS_SHOWTREELISTBAR) ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)

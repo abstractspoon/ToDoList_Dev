@@ -667,8 +667,8 @@ protected:
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 	
-	virtual void UpdateTasklistVisibility();
 	virtual void Resize(int cx = 0, int cy = 0);
+	virtual void ShowTaskCtrl(BOOL bShow);
 	virtual void ReposTaskCtrl(const CRect& rect);
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }

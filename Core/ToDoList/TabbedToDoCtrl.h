@@ -239,7 +239,7 @@ protected:
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual void ReposTaskCtrl(const CRect& rTasks);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
-	virtual void UpdateTasklistVisibility();
+	virtual void ShowTaskCtrl(BOOL bShow);
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
