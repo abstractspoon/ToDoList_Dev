@@ -17,6 +17,8 @@
 
 //////////////////////////////////////////////////////////////////////
 
+class CPreferences;
+
 struct UITHEME;
 
 //////////////////////////////////////////////////////////////////////
@@ -29,8 +31,8 @@ public:
 
 	BOOL ModifyLayout(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nCommentsPos);
 	BOOL ModifyLayout(BOOL bAllowStacking, BOOL bStackCommentAbove);
+	BOOL ModifyLayout(TDC_MAXSTATE nState, BOOL bShowCommentsAlways);
 
-	BOOL SetMaximiseState(TDC_MAXSTATE nState, BOOL bShowCommentsAlways);
 	void Resize(const CRect& rect);
 	void SetUITheme(const UITHEME& theme);
 
@@ -39,8 +41,13 @@ public:
 	TDC_UILOCATION GetCommentsPos() const { return m_nCommentsPos; }
 
 	BOOL HasMaximiseState(TDC_MAXSTATE nState) const { return (m_nMaxState == nState); }
-	BOOL IsCommentsVisible(/*BOOL bActually = FALSE*/) const;
+	BOOL HasSplitters() const { return (m_splitterHorz.GetPaneCount() || m_splitterVert.GetPaneCount()); }
+
+	BOOL IsCommentsVisible() const;
 	BOOL IsRebuildingLayout() const { return m_bRebuildingLayout; }
+
+	void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
+	void LoadState(const CPreferences& prefs, LPCTSTR szKey);
 
 protected:
 	CSimpleSplitter m_splitterHorz;
@@ -63,6 +70,10 @@ protected:
 protected:
 	void RebuildLayout();
 	BOOL ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect) const;
+	
+	static void SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter);
+	static void LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter);
+
 };
 
 #endif // !defined(AFX_TODOCTRLSPLITTING_H__806C32DA_659C_4BF3_9C59_C0114FD43C37__INCLUDED_)

@@ -12,6 +12,7 @@
 #include "..\shared\AutoFlag.h"
 
 #include "..\interfaces\uitheme.h"
+#include "..\interfaces\preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,11 +45,6 @@ CToDoCtrlLayout::CToDoCtrlLayout(CWnd* pParent, CWnd* pAttributes, CWnd* pCommen
 	ASSERT(m_pParent);
 	ASSERT(m_pAttributes);
 	ASSERT(m_pComments);
-
-#ifdef _DEBUG
-// 	m_splitterHorz.SetColors(RGB(0, 255, 0), RGB(255, 0, 0));
-// 	m_splitterVert.SetColors(RGB(0, 255, 0), RGB(255, 0, 0));
-#endif
 }
 
 CToDoCtrlLayout::~CToDoCtrlLayout()
@@ -124,7 +120,7 @@ BOOL CToDoCtrlLayout::ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect)
 	return TRUE;
 }
 
-BOOL CToDoCtrlLayout::IsCommentsVisible(/*BOOL bActually*/) const
+BOOL CToDoCtrlLayout::IsCommentsVisible() const
 {
 	switch (m_nMaxState)
 	{
@@ -138,25 +134,9 @@ BOOL CToDoCtrlLayout::IsCommentsVisible(/*BOOL bActually*/) const
 
 	ASSERT(0);
 	return FALSE;
-
-// 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
-// 		return TRUE; // always
-// 
-// 	BOOL bVisible = ((m_nMaxState == TDCMS_NORMAL) || ((m_nMaxState == TDCMS_MAXTASKLIST) && m_bShowCommentsAlways));
-// 
-// 	// check optionally for actual size
-// 	if (bActually)
-// 	{
-// 		CRect rComments;
-// 		m_pComments->GetWindowRect(rComments);
-// 
-// 		bVisible &= ((rComments.Width() > 0) && (rComments.Height() > 0));
-// 	}
-// 
-// 	return bVisible;
 }
 
-BOOL CToDoCtrlLayout::SetMaximiseState(TDC_MAXSTATE nState, BOOL bShowCommentsAlways)
+BOOL CToDoCtrlLayout::ModifyLayout(TDC_MAXSTATE nState, BOOL bShowCommentsAlways)
 {
 	if (m_nMaxState == nState)
 	{
@@ -560,4 +540,93 @@ void CToDoCtrlLayout::RebuildLayout()
 
 	if (m_splitterVert.GetSafeHwnd())
 		m_splitterVert.RecalcLayout();
+}
+
+void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+{
+	if (HasSplitters())
+	{
+		CString sKey = Misc::MakeKey(_T("%s\\SplitState"), szKey);
+
+		switch (m_nMaxState)
+		{
+		case TDCMS_MAXTASKLIST:
+			sKey += _T("\\MaxTasklist");
+			break;
+
+		case TDCMS_NORMAL:
+			sKey += _T("\\Normal");
+			break;
+		}
+
+		SaveState(prefs, sKey, _T("Horz"), m_splitterHorz);
+		SaveState(prefs, sKey, _T("Vert"), m_splitterVert);
+	}
+}
+
+void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+{
+	if (HasSplitters())
+	{
+		CString sKey = Misc::MakeKey(_T("%s\\SplitState"), szKey);
+
+		switch (m_nMaxState)
+		{
+		case TDCMS_MAXTASKLIST:
+			sKey += _T("\\MaxTasklist");
+			break;
+
+		case TDCMS_NORMAL:
+			sKey += _T("\\Normal");
+			break;
+		}
+
+		LoadState(prefs, sKey, _T("Horz"), m_splitterHorz);
+		LoadState(prefs, sKey, _T("Vert"), m_splitterVert);
+	}
+}
+
+void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter)
+{
+	if (!splitter.GetSafeHwnd() || !splitter.GetPaneCount())
+	{
+		prefs.DeleteProfileEntry(szKey, szEntry);
+		return;
+	}
+
+	CArray<int, int&> aSizes;
+	splitter.GetRelativePaneSizes(aSizes);
+
+	CString sState = Misc::FormatArrayT(aSizes, _T("%d"), ':');
+	prefs.WriteProfileString(szKey, szEntry, sState);
+}
+
+void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter)
+{
+	if (!splitter.GetSafeHwnd() || !splitter.GetPaneCount())
+		return;
+
+	CString sState = prefs.GetProfileString(szKey, szEntry);
+	
+	if (sState.IsEmpty())
+		return;
+
+	CStringArray aState;
+	int nState = Misc::Split(sState, aState, ':');
+
+	if (nState != splitter.GetPaneCount())
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CArray<int, int&> aSizes;
+
+	while (nState--)
+	{
+		int nSize = _ttoi(aState[nState]);
+		aSizes.InsertAt(0, nSize);
+	}
+
+	splitter.SetRelativePaneSizes(aSizes);
 }

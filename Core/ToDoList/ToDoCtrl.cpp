@@ -592,12 +592,13 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 	if (!HandleUnsavedComments())
 		return;
 
-	if (m_layout.SetMaximiseState(nState, HasStyle(TDCS_SHOWCOMMENTSALWAYS)) && GetSafeHwnd())
+	CPreferences prefs;
+	SaveSplitPos(prefs);
+
+	if (m_layout.ModifyLayout(nState, HasStyle(TDCS_SHOWCOMMENTSALWAYS)) && GetSafeHwnd())
 	{
-		Invalidate(FALSE);
 		ShowHideControls();
-		Resize();
-		
+
 		// make sure focus is set correctly
 		switch (nState)
 		{
@@ -614,6 +615,10 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 			m_ctrlComments.SetFocus();
 			break;
 		}
+
+		Invalidate(FALSE);
+		LoadSplitPos(prefs);
+		Resize();
 	}
 }
 
@@ -692,7 +697,7 @@ LRESULT CToDoCtrl::OnDrawSplitBar(WPARAM wp, LPARAM lp)
 
 LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
 {
-	if (!m_layout.IsRebuildingLayout())
+// 	if (!m_layout.IsRebuildingLayout())
 	{
 		const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
 		ASSERT(pSS);
@@ -8561,14 +8566,14 @@ void CToDoCtrl::SaveSplitPos(CPreferences& prefs) const
 {
 	ASSERT (GetSafeHwnd());
 	
-	CString sKey = GetPreferencesKey(); // no subkey
-	prefs.WriteProfileInt(sKey, _T("SplitPos"), m_nCommentsSize);
+	m_layout.SaveState(prefs, GetPreferencesKey());
 }
 
 void CToDoCtrl::LoadSplitPos(const CPreferences& prefs)
 {
-	CString sKey = GetPreferencesKey(); // no subkey
-	m_nCommentsSize = prefs.GetProfileInt(sKey, _T("SplitPos"), DEFCOMMENTSIZE);
+	ASSERT(GetSafeHwnd());
+
+	m_layout.LoadState(prefs, GetPreferencesKey());
 }
 
 void CToDoCtrl::SaveAttributeVisibility(CTaskFile& tasks) const

@@ -56,12 +56,12 @@ CSimpleSplitter::~CSimpleSplitter()
 
 void CSimpleSplitter::InitialisePanes(int nNumPanes)
 {
-	m_aPanes.SetSize(nNumPanes);
-	m_aPaneSizes.SetSize(nNumPanes);
-	m_aOrgPaneSizes.SetSize(nNumPanes + 1);
-	
 	if (nNumPanes > 0)
 	{
+		m_aPanes.SetSize(nNumPanes);
+		m_aPaneSizes.SetSize(nNumPanes);
+		m_aOrgPaneSizes.SetSize(nNumPanes + 1);
+
 		int total = 0;
 		for (int i = 0; i < nNumPanes - 1; i++)			// default, set equal size to all panes
 		{
@@ -72,7 +72,7 @@ void CSimpleSplitter::InitialisePanes(int nNumPanes)
 	}
 	else
 	{
-		m_aOrgPaneSizes[0] = 0;
+		ClearPanes();
 	}
 }
 
@@ -121,7 +121,9 @@ void CSimpleSplitter::SetPaneCount(int nCount)
 
 void CSimpleSplitter::ClearPanes()
 {
-	InitialisePanes(0);
+	m_aPanes.RemoveAll();
+	m_aPaneSizes.RemoveAll();
+	m_aOrgPaneSizes.RemoveAll();
 }
 
 void CSimpleSplitter::SetPane(int nIndex, CWnd* pPaneWnd)
@@ -185,6 +187,13 @@ void CSimpleSplitter::SetRelativePaneSizes(const CArray<int, int&>& aSizes)
 	SetRelativePaneSizes(aSizes.GetData());
 }
 
+int CSimpleSplitter::GetRelativePaneSizes(CArray<int, int&>& aSizes) const
+{
+	aSizes.Copy(m_aPaneSizes);
+
+	return aSizes.GetSize();
+}
+
 void CSimpleSplitter::GetPaneRect(int nIndex, CRect& rPane, const CWnd* pWndRelativeTo) const
 {
 	ASSERT(nIndex >= 0 && nIndex < m_aPanes.GetSize());
@@ -241,6 +250,9 @@ void CSimpleSplitter::SetColors(COLORREF crBkgnd, COLORREF crBar)
 
 void CSimpleSplitter::RecalcLayout()
 {
+	if (!GetPaneCount())
+		return;
+
 	int i, size_sum, remain, remain_new = 0;
 	bool bGrow = true;
 	CRect rClient;

@@ -43,6 +43,7 @@ public:
 
 	void GetPaneRect(int nIndex, CRect& rcPane, const CWnd* pWndRelativeTo = NULL) const;
 	void GetBarRect(int nIndex, CRect& rcBar, const CWnd* pWndRelativeTo = NULL) const;
+	int GetRelativePaneSizes(CArray<int, int&>& aSizes) const;
 
 	void SetPaneCount(int nCount);
 	void SetPane(int nIndex, CWnd* pPaneWnd);
