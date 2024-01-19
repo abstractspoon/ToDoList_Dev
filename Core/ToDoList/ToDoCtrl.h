@@ -13,10 +13,6 @@
 #include "todoctrlfind.h"
 #include "todoctrlLayout.h"
 #include "tdcstruct.h"
-// #include "tdlprioritycombobox.h"
-// #include "tdlriskcombobox.h"
-// #include "tdlrecurringtaskedit.h"
-// #include "tdltaskdependencyedit.h"
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
 #include "tdlcommentsctrl.h"
@@ -28,23 +24,22 @@
 #include "tdltaskattributelistctrl.h"
 
 #include "..\shared\runtimedlg.h"
-#include "..\shared\orderedtreectrl.h"
-#include "..\shared\filecombobox.h"
-#include "..\shared\urlricheditctrl.h"
-//#include "..\shared\colorcombobox.h"
-#include "..\shared\autocombobox.h"
-#include "..\shared\maskedit.h"
-#include "..\shared\timeedit.h"
+//#include "..\shared\orderedtreectrl.h"
+//#include "..\shared\filecombobox.h"
+//#include "..\shared\urlricheditctrl.h"
+//#include "..\shared\autocombobox.h"
+//#include "..\shared\maskedit.h"
+//#include "..\shared\timeedit.h"
 #include "..\shared\TreeDragDropHelper.h"
-#include "..\shared\wndPrompt.h"
-#include "..\shared\encheckcombobox.h"
-#include "..\shared\timecombobox.h"
+//#include "..\shared\wndPrompt.h"
+//#include "..\shared\encheckcombobox.h"
+//#include "..\shared\timecombobox.h"
 #include "..\shared\popupeditctrl.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\mapex.h"
 #include "..\shared\icon.h"
 #include "..\shared\FindReplace.h"
-#include "..\shared\colourpickerEx.h"
+//#include "..\shared\colourpickerEx.h"
 #include "..\shared\midnighttimer.h"
 
 #include "..\Interfaces\uithemefile.h"
@@ -745,16 +740,14 @@ protected:
 	CString GetClipboardID() const;
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
 
-	BOOL IsCtrlShowing(const CTRLITEM& ctrl) const;
 	void ShowHideControls();
 	void EnableDisableControls(HTREEITEM hti);
 	void EnableDisableComments(HTREEITEM hti);
+	void ReposProjectName(CRect& rAvailable);
 
 	BOOL GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const;
 	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
 	int GetDefaultControlHeight() const;
-
-	void ReposProjectName(/*CDeferWndMove* pDWM, */CRect& rAvailable /*in/out*/);
 
 	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;

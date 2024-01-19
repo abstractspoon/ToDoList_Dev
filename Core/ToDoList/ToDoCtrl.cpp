@@ -484,7 +484,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	// tree drag drop
 	m_treeDragDrop.Initialize(this);
 	
-	// enabled states
+	// Initial state
 	UpdateControls();
 	SetFocusToTasks();
 
@@ -859,19 +859,6 @@ void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
 	}
 
 	m_ctrlComments.SetCtrlStates(nComboState, nCommentsState);
-}
-
-BOOL CToDoCtrl::IsCtrlShowing(const CTRLITEM& ctrl) const
-{
-	if (!m_layout.HasMaximiseState(TDCMS_NORMAL))
-		return FALSE;
-
-	// is this a custom control?
-	if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
-		return TRUE;
-	
-	// all else
-	return m_visColEdit.IsEditFieldVisible(ctrl.nAttrib);
 }
 
 void CToDoCtrl::UpdateSelectedTaskPath()
