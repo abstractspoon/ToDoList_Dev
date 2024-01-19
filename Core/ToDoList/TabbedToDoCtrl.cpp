@@ -2257,16 +2257,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	return bSuccess;
 }
 
-/*
-void CTabbedToDoCtrl::RebuildCustomAttributeUI()
-{
-	// Must remove any deleted attribute columns before resizing/redrawing
-	m_taskList.OnCustomAttributesChange();
-
-	CToDoCtrl::RebuildCustomAttributeUI();
-}
-*/
-
 void CTabbedToDoCtrl::OnCustomAttributesChanged()
 {
 	// Must remove any deleted attribute columns before resizing/redrawing
@@ -2275,21 +2265,17 @@ void CTabbedToDoCtrl::OnCustomAttributesChanged()
 	CToDoCtrl::OnCustomAttributesChanged();
 }
 
-void CTabbedToDoCtrl::ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rPos)
+void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 {
 	// Tab control takes care of active view including tree/list
-	m_tabViews.Resize(rPos/*, pDWM*/);
+	m_tabViews.Resize(rTasks);
 
 	// List-specific combos
 	CRect rCtrl = GetCtrlRect(IDC_LISTVIEWGROUPBYLABEL);
 
-	int nXOffset = (rPos.left - rCtrl.left);
-	int nYOffset = (rPos.top - rCtrl.top) + CDlgUnits(this).ToPixelsY(2);
+	int nXOffset = (rTasks.left - rCtrl.left);
+	int nYOffset = (rTasks.top - rCtrl.top) + CDlgUnits(this).ToPixelsY(2);
 
-// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL,	nXOffset, nYOffset);
-// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB,	nXOffset, nYOffset);
-// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL,	nXOffset, nYOffset);
-// 	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS,			nXOffset, nYOffset);
 	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL,	nXOffset, nYOffset);
 	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB,	nXOffset, nYOffset);
 	CDialogHelper::OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL,	nXOffset, nYOffset);

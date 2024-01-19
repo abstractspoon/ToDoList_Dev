@@ -124,23 +124,36 @@ BOOL CToDoCtrlLayout::ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect)
 	return TRUE;
 }
 
-BOOL CToDoCtrlLayout::IsCommentsVisible(BOOL bActually) const
+BOOL CToDoCtrlLayout::IsCommentsVisible(/*BOOL bActually*/) const
 {
-	if (m_nMaxState == TDCMS_MAXCOMMENTS)
-		return TRUE; // always
-
-	BOOL bVisible = ((m_nMaxState == TDCMS_NORMAL) || ((m_nMaxState == TDCMS_MAXTASKLIST) && m_bShowCommentsAlways));
-
-	// check optionally for actual size
-	if (bActually)
+	switch (m_nMaxState)
 	{
-		CRect rComments;
-		m_pComments->GetWindowRect(rComments);
+	case TDCMS_MAXTASKLIST:
+		return m_bShowCommentsAlways;
 
-//		bVisible &= ((rComments.Width() > 0) && (rComments.Height() > 0));
+	case TDCMS_NORMAL:
+	case TDCMS_MAXCOMMENTS:
+		return TRUE;
 	}
 
-	return bVisible;
+	ASSERT(0);
+	return FALSE;
+
+// 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+// 		return TRUE; // always
+// 
+// 	BOOL bVisible = ((m_nMaxState == TDCMS_NORMAL) || ((m_nMaxState == TDCMS_MAXTASKLIST) && m_bShowCommentsAlways));
+// 
+// 	// check optionally for actual size
+// 	if (bActually)
+// 	{
+// 		CRect rComments;
+// 		m_pComments->GetWindowRect(rComments);
+// 
+// 		bVisible &= ((rComments.Width() > 0) && (rComments.Height() > 0));
+// 	}
+// 
+// 	return bVisible;
 }
 
 BOOL CToDoCtrlLayout::SetMaximiseState(TDC_MAXSTATE nState, BOOL bShowCommentsAlways)

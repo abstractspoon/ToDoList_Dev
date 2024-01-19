@@ -39,7 +39,7 @@ public:
 	TDC_UILOCATION GetCommentsPos() const { return m_nCommentsPos; }
 
 	BOOL HasMaximiseState(TDC_MAXSTATE nState) const { return (m_nMaxState == nState); }
-	BOOL IsCommentsVisible(BOOL bActually = FALSE) const;
+	BOOL IsCommentsVisible(/*BOOL bActually = FALSE*/) const;
 	BOOL IsRebuildingLayout() const { return m_bRebuildingLayout; }
 
 protected:

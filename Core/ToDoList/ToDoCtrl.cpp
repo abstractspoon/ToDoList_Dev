@@ -710,7 +710,7 @@ LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
 			if (!rPane.IsRectEmpty())
 			{
 				ReposProjectName(rPane);
-				ReposTaskTree(rPane);
+				ReposTaskCtrl(rPane);
 			}
 		}
 	}
@@ -718,7 +718,7 @@ LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
+void CToDoCtrl::Resize(int cx, int cy)
 {
 	if (m_taskTree.GetSafeHwnd())
 	{
@@ -750,7 +750,7 @@ void CToDoCtrl::Resize(int cx, int cy/*, BOOL bSplitting*/)
 			break;
 
 		case TDCMS_MAXTASKLIST:
-			ReposTaskTree(rAvailable);
+			ReposTaskCtrl(rAvailable);
 			break;
 
 		case TDCMS_MAXCOMMENTS:
@@ -768,7 +768,7 @@ int CToDoCtrl::GetDefaultControlHeight() const
 	return GetCtrlRect(IDC_PROJECTNAME).Height();//GetChildHeight(&m_cbFileLink);
 }
 
-void CToDoCtrl::ReposProjectName(/*CDeferWndMove* pDWM, */CRect& rAvailable)
+void CToDoCtrl::ReposProjectName(CRect& rAvailable)
 {
 	// project name
 	CRect rLabel = GetCtrlRect(IDC_PROJECTLABEL); 
@@ -794,17 +794,15 @@ void CToDoCtrl::ReposProjectName(/*CDeferWndMove* pDWM, */CRect& rAvailable)
 		rAvailable.top = rProject.top;
 }
 
-void CToDoCtrl::ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rAvailable)
+void CToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 {
-//	pDWM->MoveWindow(&m_taskTree, rAvailable);
-	m_taskTree.MoveWindow(rAvailable);
+	m_taskTree.MoveWindow(rTasks);
 }
 
 void CToDoCtrl::ShowHideControls()
 {
 	// Comments as required
-	BOOL bCommentsVis = m_layout.IsCommentsVisible(TRUE);
-	m_ctrlComments.ShowWindow(bCommentsVis ? SW_SHOW : SW_HIDE);
+	m_ctrlComments.ShowWindow(m_layout.IsCommentsVisible() ? SW_SHOW : SW_HIDE);
 
 	m_lcAttributes.ShowWindow(m_layout.HasMaximiseState(TDCMS_NORMAL) ? SW_SHOW : SW_HIDE);
 

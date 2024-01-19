@@ -667,8 +667,9 @@ protected:
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 	
-	virtual void Resize(int cx = 0, int cy = 0/*, BOOL bSplitting = FALSE*/);
 	virtual void UpdateTasklistVisibility();
+	virtual void Resize(int cx = 0, int cy = 0);
+	virtual void ReposTaskCtrl(const CRect& rect);
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
@@ -680,7 +681,6 @@ protected:
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
 
 	virtual BOOL CopySelectedTasks() const;
-	virtual void ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rAvailable /*in*/);
 
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 	

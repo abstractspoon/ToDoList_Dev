@@ -237,7 +237,7 @@ protected:
 	const TDSORT& GetSort() const;
 
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual void ReposTaskTree(/*CDeferWndMove* pDWM, */const CRect& rPos);
+	virtual void ReposTaskCtrl(const CRect& rTasks);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
 	virtual void UpdateTasklistVisibility();
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
