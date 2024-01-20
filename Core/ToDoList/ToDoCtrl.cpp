@@ -633,7 +633,13 @@ void CToDoCtrl::OnSize(UINT nType, int cx, int cy)
 
 void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nCommentsPos)
 {
-	m_layout.ModifyLayout(nAttribsPos, nCommentsPos);
+	if (m_layout.ModifyLayout(nAttribsPos,
+							  nCommentsPos,
+							  HasStyle(TDCS_ALLOWCOMMENTSSTACKING),
+							  HasStyle(TDCS_STACKCOMMENTSABOVEEDITS)))
+	{
+		Resize();
+	}
 }
 
 BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
@@ -697,7 +703,7 @@ LRESULT CToDoCtrl::OnDrawSplitBar(WPARAM wp, LPARAM lp)
 
 LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
 {
-// 	if (!m_layout.IsRebuildingLayout())
+ 	if (!m_layout.IsRebuildingLayout())
 	{
 		const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
 		ASSERT(pSS);
@@ -4387,12 +4393,6 @@ void CToDoCtrl::NotifyEndPreferencesUpdate()
 
 	// Update active comments
 	m_ctrlComments.UpdateAppPreferences();
-
-	if (m_layout.ModifyLayout(HasStyle(TDCS_ALLOWCOMMENTSSTACKING),
-							  HasStyle(TDCS_STACKCOMMENTSABOVEEDITS)))
-	{
-		Resize();
-	}
 }
 
 void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)

@@ -53,35 +53,25 @@ CToDoCtrlLayout::~CToDoCtrlLayout()
 }
 
 BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
-								   TDC_UILOCATION nCommentsPos)
-{
-	ASSERT(::IsWindow(*m_pParent));
-	ASSERT(::IsWindow(*m_pAttributes));
-	ASSERT(::IsWindow(*m_pComments));
-
-	// Check for change
-	if ((m_nAttribsPos == nAttribsPos) && (m_nCommentsPos == nAttribsPos))
-		return FALSE;
-
-	m_nAttribsPos = nAttribsPos;
-	m_nCommentsPos = nCommentsPos;
-
-	RebuildLayout();
-	return TRUE;
-}
-
-BOOL CToDoCtrlLayout::ModifyLayout(BOOL bAllowStacking,
+								   TDC_UILOCATION nCommentsPos,
+								   BOOL bAllowStacking,
 								   BOOL bStackCommentAbove)
 {
 	ASSERT(::IsWindow(*m_pParent));
 	ASSERT(::IsWindow(*m_pAttributes));
 	ASSERT(::IsWindow(*m_pComments));
 
-	// We may only need to rebuild if both attributes and comments are on the same side
-	BOOL bRebuild = ((m_nAttribsPos == m_nCommentsPos) &&
-					(Misc::StateChanged(m_bAllowStacking, bAllowStacking) ||
-					 Misc::StateChanged(m_bStackCommentsAbove, bStackCommentAbove)));
+	// Check for change
+	BOOL bRebuild = ((m_nAttribsPos != nAttribsPos) || (m_nCommentsPos != nAttribsPos));
 
+	if (!bRebuild && (m_nAttribsPos == m_nCommentsPos))
+	{
+		bRebuild = (Misc::StateChanged(m_bAllowStacking, bAllowStacking) ||
+					 Misc::StateChanged(m_bStackCommentsAbove, bStackCommentAbove));
+	}
+
+	m_nAttribsPos = nAttribsPos;
+	m_nCommentsPos = nCommentsPos;
 	m_bAllowStacking = bAllowStacking;
 	m_bStackCommentsAbove = bStackCommentAbove;
 

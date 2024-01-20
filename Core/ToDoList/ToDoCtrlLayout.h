@@ -29,9 +29,13 @@ public:
 	CToDoCtrlLayout(CWnd* pParent, CWnd* pAttributes, CWnd* pComments);
 	virtual ~CToDoCtrlLayout();
 
-	BOOL ModifyLayout(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nCommentsPos);
-	BOOL ModifyLayout(BOOL bAllowStacking, BOOL bStackCommentAbove);
-	BOOL ModifyLayout(TDC_MAXSTATE nState, BOOL bShowCommentsAlways);
+	BOOL ModifyLayout(TDC_UILOCATION nAttribsPos, 
+					  TDC_UILOCATION nCommentsPos,
+					  BOOL bAllowStacking, 
+					  BOOL bStackCommentAbove);
+
+	BOOL ModifyLayout(TDC_MAXSTATE nState, 
+					  BOOL bShowCommentsAlways);
 
 	void Resize(const CRect& rect);
 	void SetUITheme(const UITHEME& theme);
