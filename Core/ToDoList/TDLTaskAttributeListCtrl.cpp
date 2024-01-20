@@ -233,7 +233,10 @@ void CTDLTaskAttributeListCtrl::SelectValue(TDC_ATTRIBUTE nAttribID)
 	int nRow = GetRow(nAttribID);
 
 	if (nRow != -1)
+	{
 		SetCurSel(nRow, VALUE_COL);
+		ScrollCellIntoView(nRow, VALUE_COL);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()

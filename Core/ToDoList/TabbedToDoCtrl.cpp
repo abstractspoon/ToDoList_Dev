@@ -4639,18 +4639,6 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 		TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute((TDC_COLUMN)pNMIA->iSubItem);
 		m_lcAttributes.SelectValue(nAttribID);
-
-// 		TDC_COLUMN nColID = (TDC_COLUMN)pNMIA->iSubItem;
-// 		UINT nCtrlID = MapColumnToCtrlID(nColID);
-// 		
-// 		if (nCtrlID)
-// 		{
-// 			// make sure the edit controls are visible
-// 			if (m_nMaxState != TDCMS_NORMAL)
-// 				SetMaximizeState(TDCMS_NORMAL);
-// 			
-// 			GetDlgItem(nCtrlID)->SetFocus();
-// 		}
 		
 		return;
 	}
