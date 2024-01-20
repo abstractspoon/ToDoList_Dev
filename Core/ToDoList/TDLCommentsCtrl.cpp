@@ -229,7 +229,10 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rComments;
 		CalcCommentsCtrlRect(rComments, cx, cy);
 
-		m_ctrlComments.MoveWindow(rComments, TRUE);
+		m_ctrlComments.MoveWindow(rComments, FALSE);
+
+		// Make sure the area above the comments field is redrawn
+		Invalidate(TRUE);
 	}
 }
 
