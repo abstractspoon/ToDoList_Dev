@@ -35,7 +35,7 @@ public:
 	BOOL ModifyLayout(TDC_MAXSTATE nState, 
 					  BOOL bShowCommentsAlways);
 
-	void Resize(const CRect& rect);
+	void Resize(int cx, int cy);
 	void SetSplitBarColor(COLORREF color);
 
 	TDC_MAXSTATE GetMaximiseState() const { return m_nMaxState; }

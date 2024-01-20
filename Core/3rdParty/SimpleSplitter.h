@@ -14,8 +14,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_SS_NOTIFYSPLITCHANGE	= ::RegisterWindowMessage(_T("WM_SS_NOTIFYSPLITCHANGE"));	// wParam = HWND, lParam = Pane index
-const UINT WM_SS_DRAWSPLITBAR		= ::RegisterWindowMessage(_T("WM_SS_DRAWSPLITBAR"));		// wParam = HDC,  lParam = Pane index
+const UINT WM_SS_NOTIFYSPLITCHANGE	= ::RegisterWindowMessage(_T("WM_SS_NOTIFYSPLITCHANGE"));	// wParam = HWND, lParam = LPCRECT relative to parent wnd
+const UINT WM_SS_DRAWSPLITBAR		= ::RegisterWindowMessage(_T("WM_SS_DRAWSPLITBAR"));		// wParam = HDC,  lParam = LPCRECT relative to splitter
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

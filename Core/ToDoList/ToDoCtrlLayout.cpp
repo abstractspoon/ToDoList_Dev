@@ -87,11 +87,32 @@ void CToDoCtrlLayout::SetSplitBarColor(COLORREF color)
 	m_splitterVert.SetBarColor(color);
 }
 
-void CToDoCtrlLayout::Resize(const CRect& rect)
+void CToDoCtrlLayout::Resize(int cx, int cy)
 {
-	// Resize the primary splitter only
-	if (!ResizeIfRoot(m_splitterHorz, rect))
-		ResizeIfRoot(m_splitterVert, rect);
+	CRect rect(0, 0, cx, cy);
+
+	if (HasSplitters())
+	{
+		// Resize the primary splitter only
+		if (!ResizeIfRoot(m_splitterHorz, rect))
+			ResizeIfRoot(m_splitterVert, rect);
+	}
+	else
+	{
+		switch (m_nMaxState)
+		{
+		case TDCMS_MAXTASKLIST:
+			m_pParent->SendMessage(WM_SS_NOTIFYSPLITCHANGE, 0, (LPARAM)(LPCRECT)rect);
+			break;
+
+		case TDCMS_NORMAL:
+			break;
+
+		case TDCMS_MAXCOMMENTS:
+			m_pComments->MoveWindow(rect);
+			break;
+		}
+	}
 }
 
 BOOL CToDoCtrlLayout::ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect) const
@@ -155,17 +176,11 @@ void CToDoCtrlLayout::RebuildLayout()
 {
 	CLockUpdates lu(m_pParent->GetSafeHwnd());
 
-	if (m_splitterHorz.GetSafeHwnd())
-	{
-		m_splitterHorz.DestroyWindow();
-		m_splitterHorz.ClearPanes();
-	}
+	m_splitterHorz.DestroyWindow();
+	m_splitterHorz.ClearPanes();
 
-	if (m_splitterVert.GetSafeHwnd())
-	{
-		m_splitterVert.DestroyWindow();
-		m_splitterVert.ClearPanes();
-	}
+	m_splitterVert.DestroyWindow();
+	m_splitterVert.ClearPanes();
 
 	// Scoped to exclude the updates right at the end
 	{

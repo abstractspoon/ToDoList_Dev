@@ -669,23 +669,17 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 
 LRESULT CToDoCtrl::OnDrawSplitBar(WPARAM wp, LPARAM lp)
 {
+	ASSERT(wp && lp);
+
 	CDC* pDC = CDC::FromHandle((HDC)wp);
-	const CSimpleSplitter* pSS = (const CSimpleSplitter*)pDC->GetWindow();
+	CRect rBar = (LPCRECT)lp;
 
-	ASSERT(pSS);
-
-	if (pSS)
+	if (!rBar.IsRectEmpty())
 	{
-		CRect rBar;
-		pSS->GetBarRect(lp, rBar);
+		GraphicsMisc::DrawSplitBar(pDC, rBar, m_theme.crAppBackDark, FALSE);
+		pDC->ExcludeClipRect(rBar);
 
-		if (!rBar.IsRectEmpty())
-		{
-			GraphicsMisc::DrawSplitBar(pDC, rBar, m_theme.crAppBackDark, FALSE);
-			pDC->ExcludeClipRect(rBar);
-
-			return 1L; // we handled it
-		}
+		return 1L; // we handled it
 	}
 
 	return 0L;
@@ -695,19 +689,12 @@ LRESULT CToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
 {
  	if (!m_layout.IsRebuildingLayout())
 	{
-		const CSimpleSplitter* pSS = (const CSimpleSplitter*)CWnd::FromHandle((HWND)wp);
-		ASSERT(pSS);
+		CRect rPane = (LPCRECT)lp;
 
-		if (pSS)
+		if (!rPane.IsRectEmpty())
 		{
-			CRect rPane;
-			pSS->GetPaneRect(lp, rPane, this);
-
-			if (!rPane.IsRectEmpty())
-			{
-				ReposProjectName(rPane);
-				ReposTaskCtrl(rPane);
-			}
+			ReposProjectName(rPane);
+			ReposTaskCtrl(rPane);
 		}
 	}
 
@@ -735,33 +722,11 @@ void CToDoCtrl::Resize(int cx, int cy)
 			ClearInitialSize();
 		}
 
+		m_layout.Resize(cx, cy);
+
 		ShowHideControls();
-
-		CRect rAvailable(0, 0, cx, cy);
-
-		switch (m_layout.GetMaximiseState())
-		{
-		case TDCMS_NORMAL:
-			m_layout.Resize(rAvailable);
-			break;
-
-		case TDCMS_MAXTASKLIST:
-			ReposTaskCtrl(rAvailable);
-			break;
-
-		case TDCMS_MAXCOMMENTS:
-			m_ctrlComments.MoveWindow(rAvailable);
-			break;
-		}
-
 		UpdateSelectedTaskPath();
 	}
-}
-
-int CToDoCtrl::GetDefaultControlHeight() const
-{
-	// To handle DPI scaling better simply use the height of the category combo
-	return GetCtrlRect(IDC_PROJECTNAME).Height();//GetChildHeight(&m_cbFileLink);
 }
 
 void CToDoCtrl::ReposProjectName(CRect& rAvailable)
@@ -771,11 +736,9 @@ void CToDoCtrl::ReposProjectName(CRect& rAvailable)
 	CRect rProject = GetCtrlRect(IDC_PROJECTNAME); 
 
 	int nOffset = (rAvailable.left - rLabel.left);
-	int nHeight = GetDefaultControlHeight();
 
 	rProject.left += nOffset;
 	rProject.right = rAvailable.right;
-	rProject.bottom = rProject.top + nHeight;
 	
 	rLabel.OffsetRect(nOffset, 0);
 	rLabel.top = rProject.top;

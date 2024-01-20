@@ -361,7 +361,10 @@ void CSimpleSplitter::ResizePaneWindow(int nPane)
 	}
 	else
 	{
-		GetParent()->SendMessage(WM_SS_NOTIFYSPLITCHANGE, (WPARAM)GetSafeHwnd(), nPane);
+		CRect rPane;
+		GetPaneRect(nPane, rPane, GetParent()); // Assume our parent is 'their' parent
+
+		GetParent()->SendMessage(WM_SS_NOTIFYSPLITCHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCRECT)rPane);
 	}
 }
 
@@ -387,10 +390,11 @@ void CSimpleSplitter::OnPaint()
 		// Draw the bars
 		for (int i = 0; i < m_aPanes.GetSize() - 1; i++)
 		{
+			// Get bar rect relative to 'us' because it's 'our' dc
 			CRect rBar;
 			GetBarRect(i, rBar);
 
-			if (GetParent()->SendMessage(WM_SS_DRAWSPLITBAR, (WPARAM)dc.GetSafeHdc(), i) == 0)
+			if (GetParent()->SendMessage(WM_SS_DRAWSPLITBAR, (WPARAM)dc.GetSafeHdc(), (LPARAM)(LPRECT)rBar) == 0)
 			{
 				dc.FillSolidRect(rBar, m_crBar);
 			}
