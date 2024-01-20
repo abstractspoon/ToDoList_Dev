@@ -18,6 +18,10 @@
 #include "..\shared\WndPrompt.h"
 #include "..\shared\Themed.h"
 
+#ifdef _DEBUG
+#	include "..\shared\ScopedTimer.h"
+#endif
+
 #include "..\3rdParty\ColorDef.h"
 
 #ifdef _DEBUG
@@ -151,6 +155,10 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
 
+#ifdef _DEBUG
+	ON_WM_PAINT()
+#endif
+
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
 
@@ -219,6 +227,15 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
+
+#ifdef _DEBUG
+void CTDLTaskAttributeListCtrl::OnPaint()
+{
+	CScopedTraceTimer time(_T("\nCTDLTaskAttributeListCtrl::OnPaint()"));
+
+	Default();
+}
+#endif
 
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {

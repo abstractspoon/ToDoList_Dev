@@ -127,12 +127,17 @@ protected:
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
+	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	//}}AFX_MSG
+
+#ifdef _DEBUG
+	afx_msg void OnPaint();
+#endif
+
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
