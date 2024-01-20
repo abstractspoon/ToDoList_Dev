@@ -1276,7 +1276,6 @@ void CInputListCtrl::OnSetFocus(CWnd* pOldWnd)
 
 void CInputListCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	// if we're editing then quit editing
 	OnCancelEdit();
 
 	CEnListCtrl::OnHScroll(nSBCode, nPos, pScrollBar);
@@ -1286,7 +1285,6 @@ void CInputListCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 void CInputListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	// if we're editing then quit editing unless this came from a spin button
 	if (!pScrollBar)
 		OnCancelEdit();
 
@@ -1309,7 +1307,6 @@ BOOL CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CInputListCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	// if we're editing then quit editing
 	OnCancelEdit();
 
 	CEnListCtrl::OnSize(nType, cx, cy);
