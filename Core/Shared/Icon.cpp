@@ -67,7 +67,7 @@ void CIcon::Destroy()
 		VERIFY(::DestroyIcon(m_hIcon));
 
 		m_hIcon = NULL;
-		m_size.SetSize(0, 0);
+		m_size.cx = m_size.cy = 0;
 	}
 }
 
@@ -87,7 +87,7 @@ HICON CIcon::Detach()
 	HICON hIcon = m_hIcon;
 
 	m_hIcon = NULL;
-	m_size.SetSize(0, 0);
+	m_size.cx = m_size.cy = 0;
 
 	return hIcon;
 }

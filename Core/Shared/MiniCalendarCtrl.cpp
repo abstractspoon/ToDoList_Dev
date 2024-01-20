@@ -15,7 +15,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT DEFTEXTFLAGS = (DT_VCENTER | DT_CENTER | DT_SINGLELINE/* | DT_RTLREADING*/);
+#ifndef LOCALE_SNAME
+#	define LOCALE_SNAME 0x0000005c
+#endif
+
+const UINT DEFTEXTFLAGS = (DT_VCENTER | DT_CENTER | DT_SINGLELINE);
+
 const int WEEKNUMBERPADDING = 8;
 
 /////////////////////////////////////////////////////////////////////////////
