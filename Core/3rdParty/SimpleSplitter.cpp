@@ -253,12 +253,16 @@ void CSimpleSplitter::RecalcLayout()
 	if (!GetPaneCount())
 		return;
 
-	int i, size_sum, remain, remain_new = 0;
+	int i, remain, remain_new = 0;
 	bool bGrow = true;
 	CRect rClient;
 
 	GetClientRect(rClient);
-	size_sum = IsHorz() ? rClient.Width() : rClient.Height();
+	int size_sum = IsHorz() ? rClient.Width() : rClient.Height();
+
+	if (!size_sum)
+		return;
+
 	size_sum -= (m_aPanes.GetSize() - 1) * m_nBarThickness;
 
 	// adjust sizes on the beginning
