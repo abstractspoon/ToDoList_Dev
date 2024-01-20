@@ -19,8 +19,6 @@
 
 class CPreferences;
 
-struct UITHEME;
-
 //////////////////////////////////////////////////////////////////////
 
 class CToDoCtrlLayout  
@@ -38,7 +36,7 @@ public:
 					  BOOL bShowCommentsAlways);
 
 	void Resize(const CRect& rect);
-	void SetUITheme(const UITHEME& theme);
+	void SetSplitBarColor(COLORREF color);
 
 	TDC_MAXSTATE GetMaximiseState() const { return m_nMaxState; }
 	TDC_UILOCATION GetAttributesPosition() const { return m_nAttribsPos; }

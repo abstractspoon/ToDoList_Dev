@@ -50,7 +50,7 @@ public:
 	void SetActivePane(int nIndex);
 	void SetRelativePaneSizes(const CArray<int, int&>& aSizes);
 	void SetRelativePaneSizes(const int sizes[]);
-	void SetColors(COLORREF crBkgnd, COLORREF crBar);
+	void SetBarColor(COLORREF crBar);
 
 	void ClearPanes();
 	void RecalcLayout();
@@ -74,7 +74,6 @@ protected:
 	//}}AFX_MSG
 	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDrawSplitBar(WPARAM wp, LPARAM lp);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -82,7 +81,7 @@ protected:
 
 	SS_ORIENTATION m_nOrientation;
 	int m_nTrackIndex, m_nTracker, m_nTrackerLength, m_nTrackerMouseOffset;
-	COLORREF m_crBkgnd, m_crBar;
+	COLORREF m_crBar;
 	
 	CArray<CWnd*, CWnd*&> m_aPanes;
 	CArray<int, int&> m_aPaneSizes, m_aOrgPaneSizes;

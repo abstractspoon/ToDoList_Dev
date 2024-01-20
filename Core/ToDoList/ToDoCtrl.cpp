@@ -644,22 +644,12 @@ void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nC
 
 BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	// if the task tree has no size, we can treat this as spurious
-	if (m_layout.HasMaximiseState(TDCMS_NORMAL))
-	{
-		CRect rTree;
-		m_taskTree.GetWindowRect(rTree);
+	ExcludeChild(&m_taskTree, pDC);
+	ExcludeChild(&m_lcAttributes, pDC);
+	ExcludeChild(&m_ctrlComments, pDC);
 
-		if ((rTree.Width() == 0) && (rTree.Height() == 0))
-			return TRUE;
-	}
-
-	// clip out all the child controls to reduce flicker
-	if (!(GetStyle() & WS_CLIPCHILDREN) && m_taskTree.GetSafeHwnd())
-	{
-		ExcludeCtrls(this, pDC, IDC_FIRST + 1, IDC_LAST - 1);
-		ExcludeChild(&m_taskTree, pDC);
-	}
+	ExcludeCtrl(this, IDC_PROJECTLABEL, pDC);
+	ExcludeCtrl(this, IDC_PROJECTNAME, pDC);
 
 	// fill background with theme brush
 	CSaveDC sdc(pDC);
@@ -10084,8 +10074,8 @@ void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 		m_brUIBack.CreateSolidBrush(m_theme.crAppBackLight);
 	
 	m_ctrlComments.SetUITheme(m_theme);
-	m_layout.SetUITheme(m_theme);
 	m_taskTree.SetSplitBarColor(m_theme.crAppBackDark);
+	m_layout.SetSplitBarColor(m_theme.crAppBackDark);
 
 	Invalidate();
 }

@@ -2327,15 +2327,19 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	// clip out ctrls
-	if (m_tabViews.GetSafeHwnd() && InListView())
+	if (m_tabViews.GetSafeHwnd())
 	{
-		ExcludeChild(&m_tabViews, pDC);
-		ExcludeChild(&m_cbListGroupBy, pDC);
-		ExcludeChild(&m_cbListOptions, pDC);
+		if (InListView())
+		{
+			ExcludeChild(&m_taskList, pDC);
+			ExcludeChild(&m_cbListGroupBy, pDC);
+			ExcludeChild(&m_cbListOptions, pDC);
 
-		ExcludeCtrl(this, IDC_LISTVIEWGROUPBYLABEL, pDC);
-		ExcludeCtrl(this, IDC_LISTVIEWOPTIONSLABEL, pDC);
+			ExcludeCtrl(this, IDC_LISTVIEWGROUPBYLABEL, pDC);
+			ExcludeCtrl(this, IDC_LISTVIEWOPTIONSLABEL, pDC);
+		}
+
+		ExcludeChild(&m_tabViews, pDC); // Always
 	}
 
 	return CToDoCtrl::OnEraseBkgnd(pDC);
@@ -2343,7 +2347,7 @@ BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 
 void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 {
-	TDC_MAXSTATE nPrevState = m_layout.GetMaximiseState();//m_nMaxState;
+	TDC_MAXSTATE nPrevState = m_layout.GetMaximiseState();
 
 	CToDoCtrl::SetMaximizeState(nState);
 

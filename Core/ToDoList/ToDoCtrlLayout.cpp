@@ -81,10 +81,10 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	return bRebuild;
 }
 
-void CToDoCtrlLayout::SetUITheme(const UITHEME& theme)
+void CToDoCtrlLayout::SetSplitBarColor(COLORREF color)
 {
-	m_splitterHorz.SetColors(theme.crAppBackLight, theme.crAppLinesDark);
-	m_splitterVert.SetColors(theme.crAppBackLight, theme.crAppLinesDark);
+	m_splitterHorz.SetBarColor(color);
+	m_splitterVert.SetBarColor(color);
 }
 
 void CToDoCtrlLayout::Resize(const CRect& rect)
@@ -497,8 +497,32 @@ void CToDoCtrlLayout::RebuildLayout()
 				switch (m_nCommentsPos)
 				{
 				case TDCUIL_LEFT:
+					{
+						// .----..----.
+						// | C  || T  |
+						// |    ||    |
+						// |    ||    |
+						// |    ||    |
+						// |    ||    |
+						// |    ||    |
+						// ·----··----·
+						m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+						m_splitterHorz.SetPaneCount(2);
+						m_splitterHorz.SetPane(0, m_pComments); // Tasks
+						m_splitterHorz.SetPane(1, NULL); // Tasks
+					}
+					break;
+
 				case TDCUIL_RIGHT:
 					{
+						// .----..----.
+						// | T  || C  |
+						// |    ||    |
+						// |    ||    |
+						// |    ||    |
+						// |    ||    |
+						// |    ||    |
+						// ·----··----·
 						m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
 						m_splitterHorz.SetPaneCount(2);
 						m_splitterHorz.SetPane(0, NULL); // Tasks
@@ -508,6 +532,12 @@ void CToDoCtrlLayout::RebuildLayout()
 
 				case TDCUIL_BOTTOM:
 					{
+						// .-------------.
+						// |      T      |
+						// ·-------------·
+						// .-------------.
+						// |      C      |
+						// ·-------------·
 						m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
 						m_splitterVert.SetPaneCount(2);
 						m_splitterVert.SetPane(0, NULL); // Tasks

@@ -8,38 +8,28 @@
 #include "stdafx.h"
 #include "SimpleSplitter.h"
 
+///////////////////////////////////////////////////////////////////////////////////////
 
 #define FULL_SIZE 32768
 
+///////////////////////////////////////////////////////////////////////////////////////
 
 inline int MulDivRound(int x, int mul, int div)
 {
 	return (x * mul + div / 2) / div;
 }
 
-
-BEGIN_MESSAGE_MAP(CSimpleSplitter, CWnd)
-	//{{AFX_MSG_MAP(CSimpleSplitter)
-	ON_WM_PAINT()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_SIZE()
-	ON_WM_NCCREATE()
-	ON_WM_WINDOWPOSCHANGING()
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
-	ON_WM_ERASEBKGND()
-	ON_REGISTERED_MESSAGE(WM_SS_DRAWSPLITBAR, OnDrawSplitBar)
-	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
-END_MESSAGE_MAP()
+///////////////////////////////////////////////////////////////////////////////////////
 
 CSimpleSplitter::CSimpleSplitter(int nNumPanes, SS_ORIENTATION nOrientation, int nMinSize, int nBarThickness)
 	:
 	m_nOrientation(nOrientation),
 	m_nMinSize(nMinSize), 
 	m_nBarThickness(nBarThickness),
-	m_crBkgnd(::GetSysColor(COLOR_BTNFACE)),
+	m_nTrackIndex(0),
+	m_nTracker(0),
+	m_nTrackerLength(0),
+	m_nTrackerMouseOffset(0),
 	m_crBar(::GetSysColor(COLOR_BTNFACE))
 {
 	ASSERT(nNumPanes >= 0);
@@ -53,6 +43,21 @@ CSimpleSplitter::CSimpleSplitter(int nNumPanes, SS_ORIENTATION nOrientation, int
 CSimpleSplitter::~CSimpleSplitter()
 {
 }
+
+BEGIN_MESSAGE_MAP(CSimpleSplitter, CWnd)
+	//{{AFX_MSG_MAP(CSimpleSplitter)
+	ON_WM_PAINT()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_SIZE()
+	ON_WM_NCCREATE()
+	ON_WM_WINDOWPOSCHANGING()
+	ON_WM_CREATE()
+	//}}AFX_MSG_MAP
+	ON_REGISTERED_MESSAGE(WM_SS_DRAWSPLITBAR, OnDrawSplitBar)
+	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
+END_MESSAGE_MAP()
 
 void CSimpleSplitter::InitialisePanes(int nNumPanes)
 {
@@ -234,11 +239,10 @@ void CSimpleSplitter::GetBarRect(int nIndex, CRect& rBar, const CWnd* pWndRelati
 	}
 }
 
-void CSimpleSplitter::SetColors(COLORREF crBkgnd, COLORREF crBar)
+void CSimpleSplitter::SetBarColor(COLORREF crBar)
 {
-	if ((crBkgnd != m_crBkgnd) || (crBar != m_crBar))
+	if (crBar != m_crBar)
 	{
-		m_crBkgnd = crBkgnd;
 		m_crBar = crBar;
 
 		if (GetSafeHwnd())
@@ -374,45 +378,9 @@ LRESULT CSimpleSplitter::OnDrawSplitBar(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_SS_DRAWSPLITBAR, wp, lp);
 }
 
-BOOL CSimpleSplitter::OnEraseBkgnd(CDC* pDC)
-{
-	if (m_crBkgnd != CLR_NONE)
-	{
-		// Clip out all pane rects having an attached CWnd*
-		for (int i = 0; i < m_aPanes.GetSize(); i++)
-		{
-			if (m_aPanes[i])
-			{
-				CRect rPane;
-				GetPaneRect(i, rPane);
-
-				pDC->ExcludeClipRect(rPane);
-			}
-
-			// And any bar rects if the bar colour varies from the background colour
-	// 		if (m_crBar != m_crBkgnd)
-	// 		{
-	// 			CRect rBar;
-	// 			GetBarRect(i, rBar);
-	// 
-	// 			pDC->ExcludeClipRect(rBar);
-	// 		}
-		}
-
-		CRect rClient;
-		GetClientRect(rClient);
-
-		pDC->FillSolidRect(rClient, m_crBkgnd);
-		return TRUE;
-	}
-
-	// else
-	return CWnd::OnEraseBkgnd(pDC);
-}
-
 void CSimpleSplitter::OnPaint() 
 {
-	if (GetPaneCount() && (m_crBar != CLR_NONE) && (m_crBar != m_crBkgnd))
+	if (GetPaneCount() && (m_crBar != CLR_NONE))
 	{
 		CPaintDC dc(this);
 
