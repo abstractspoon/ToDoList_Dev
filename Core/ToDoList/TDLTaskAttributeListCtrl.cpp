@@ -233,7 +233,7 @@ void CTDLTaskAttributeListCtrl::OnPaint()
 {
 //	CScopedTraceTimer time(_T("\nCTDLTaskAttributeListCtrl::OnPaint()"));
 
-	Default();
+	CInputListCtrl::OnPaint();
 }
 #endif
 
@@ -1230,6 +1230,17 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 			switch (pDef->GetDataType())
 			{
+			case TDCCA_FILELINK:
+				if (DrawIcon(pDC, sText, rText, TRUE))
+				{
+					CRect rRest(rText);
+					rRest.left += (ICON_SIZE + 2);
+	
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
+					return;
+				}
+				break;
+
 			case TDCCA_ICON:
 				if (pDef->IsMultiList())
 				{
@@ -1643,10 +1654,10 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	case TDCA_FILELINK:
 		{
-// 			CStringArray aFiles;
-// 			
-// 			if (m_taskCtrl.GetSelectedTaskFileLinks(aFiles, TRUE))
-// 				m_cbMultiFileLink.SetFileList(aFiles);
+			CStringArray aFiles;
+
+			if (Misc::Split(GetItemText(nRow, nCol), aFiles))
+				m_cbMultiFileLink.SetFileList(aFiles);
 		}
 		break;
 
@@ -2040,9 +2051,9 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		break;
 
 	case TDCA_FILELINK:
-		if (GetItemText(nRow, nCol).IsEmpty())
+		if (sValue.IsEmpty())
 		{
-			HandleSingleFileLinkEdit(nRow, bBtnClick);
+			HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
 		}
 		else
 		{
@@ -2067,7 +2078,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_FILELINK:
-					HandleSingleFileLinkEdit(nRow, bBtnClick);
+					HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
 					break;
 
 				case TDCCA_ICON:
@@ -2086,22 +2097,27 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	}
 }
 
-void CTDLTaskAttributeListCtrl::HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick)
+void CTDLTaskAttributeListCtrl::HandleSingleFileLinkEdit(int nRow, const CString& sFile, BOOL bBtnClick)
 {
 	if (bBtnClick)
 	{
+		m_eSingleFileLink.SetWindowText(sFile);
+
 		if (m_eSingleFileLink.DoBrowse())
 		{
-			CString sFile;
-			m_eSingleFileLink.GetWindowText(sFile);
+			CString sNewFile;
+			m_eSingleFileLink.GetWindowText(sNewFile);
 
-			SetItemText(nRow, VALUE_COL, sFile);
-			NotifyParentEdit(nRow);
+			if (sNewFile != sFile)
+			{
+				SetItemText(nRow, VALUE_COL, sFile);
+				NotifyParentEdit(nRow);
+			}
 		}
 	}
 	else
 	{
-		ShowControl(m_eSingleFileLink, nRow, VALUE_COL, bBtnClick);
+		ShowControl(m_eSingleFileLink, nRow, VALUE_COL, FALSE);
 	}
 }
 
@@ -2268,8 +2284,8 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 
 		if (pCtrl)
 			PrepareControl(*pCtrl, nRow, VALUE_COL);
-		else
-			ASSERT(0);
+// 		else
+// 			ASSERT(0);
 	}
 
 	CInputListCtrl::OnCancelEdit();

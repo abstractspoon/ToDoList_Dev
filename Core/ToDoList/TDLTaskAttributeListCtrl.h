@@ -187,7 +187,7 @@ protected:
 	void NotifyParentEdit(int nRow);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
-	void HandleSingleFileLinkEdit(int nRow, BOOL bBtnClick);
+	void HandleSingleFileLinkEdit(int nRow, const CString& sFile, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
