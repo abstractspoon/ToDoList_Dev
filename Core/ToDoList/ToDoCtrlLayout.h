@@ -68,6 +68,7 @@ protected:
 	BOOL m_bStackCommentsAbove;
 	BOOL m_bShowCommentsAlways;
 	BOOL m_bRebuildingLayout;
+	BOOL m_bFirstLayout;
 
 protected:
 	void RebuildLayout();

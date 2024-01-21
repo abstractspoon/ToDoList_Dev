@@ -40,7 +40,8 @@ CToDoCtrlLayout::CToDoCtrlLayout(CWnd* pParent, CWnd* pAttributes, CWnd* pCommen
 	m_bRebuildingLayout(FALSE),
 	m_nMaxState(TDCMS_NORMAL),
 	m_splitterHorz(0, SSP_HORZ, 30, SPLITSIZE),
-	m_splitterVert(0, SSP_VERT, 30, SPLITSIZE)
+	m_splitterVert(0, SSP_VERT, 30, SPLITSIZE),
+	m_bFirstLayout(TRUE)
 {
 	ASSERT(m_pParent);
 	ASSERT(m_pAttributes);
@@ -62,7 +63,7 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	ASSERT(::IsWindow(*m_pComments));
 
 	// Check for change
-	BOOL bRebuild = ((m_nAttribsPos != nAttribsPos) || (m_nCommentsPos != nAttribsPos));
+	BOOL bRebuild = (m_bFirstLayout || (m_nAttribsPos != nAttribsPos) || (m_nCommentsPos != nCommentsPos));
 
 	if (!bRebuild && (m_nAttribsPos == m_nCommentsPos))
 	{
@@ -74,6 +75,7 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	m_nCommentsPos = nCommentsPos;
 	m_bAllowStacking = bAllowStacking;
 	m_bStackCommentsAbove = bStackCommentAbove;
+	m_bFirstLayout = FALSE;
 
 	if (bRebuild)
 		RebuildLayout();
