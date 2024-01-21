@@ -74,6 +74,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDrawSplitBar(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
 
 protected:
