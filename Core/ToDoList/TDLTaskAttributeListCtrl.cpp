@@ -231,7 +231,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #ifdef _DEBUG
 void CTDLTaskAttributeListCtrl::OnPaint()
 {
-	CScopedTraceTimer time(_T("\nCTDLTaskAttributeListCtrl::OnPaint()"));
+//	CScopedTraceTimer time(_T("\nCTDLTaskAttributeListCtrl::OnPaint()"));
 
 	Default();
 }
