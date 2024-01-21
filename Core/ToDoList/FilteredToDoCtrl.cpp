@@ -37,10 +37,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef LVS_EX_DOUBLEBUFFER
-#define LVS_EX_DOUBLEBUFFER 0x00010000
-#endif
-
 #ifndef LVS_EX_LABELTIP
 #define LVS_EX_LABELTIP     0x00004000
 #endif
