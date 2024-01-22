@@ -1111,20 +1111,14 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			TDCCADATA data;
 
 			if (m_lcAttributes.GetCustomAttributeData(sAttribID, data))
-				SetSelectedTaskCustomAttributeData(sAttribID, data, TRUE);
+				SetSelectedTaskCustomAttributeData(sAttribID, data);
 			else
-				ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);
+				SetSelectedTaskCustomAttributeData(sAttribID, TDCCADATA());
 		}
 	}
 }
 
-// external version
 BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data)
-{
-	return SetSelectedTaskCustomAttributeData(sAttribID, data, FALSE);
-}
-
-BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited)
 {
 	if (!CanEditSelectedTask(TDCA_CUSTOMATTRIB))
 		return FALSE;
@@ -1154,11 +1148,6 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	}
 	
 	return TRUE;
-}
-
-BOOL CToDoCtrl::ClearSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bCtrlEdited)
-{
-	return SetSelectedTaskCustomAttributeData(sAttribID, TDCCADATA(), bCtrlEdited);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskMetaData(const CString& sKey, const CString& sMetaData)
@@ -6967,7 +6956,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 		
 			data.Set(true, nChar);
 		}
-		bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, data.AsString(), FALSE);
+		bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, data.AsString());
 		break;
 		
 	case TDCCA_ICON:
@@ -6981,7 +6970,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 				
 				if (sTag.IsEmpty() || pDef->DecodeImageTag(sTag, sImage, sDummy))
 				{
-					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sImage, FALSE);
+					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sImage);
 				}
 			}
 			break;
@@ -6996,7 +6985,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 				
 				if (dialog.DoModal() == IDOK)
 				{
-					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName(), FALSE);
+					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName());
 				}
 			}
 			break;
@@ -7010,7 +6999,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 			BOOL bNext = (!Misc::IsKeyPressed(VK_SHIFT));
 			CString sItem = pDef->GetNextListItem(data.AsString(), bNext);
 			
-			bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sItem, FALSE);
+			bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sItem);
 		}
 		break;
 	}
@@ -8417,7 +8406,6 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 // 		m_cbFileLink.SetFocus();
 // 	}
 
-	// else ignore
 	return 0L;
 }
 
@@ -10230,7 +10218,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttrib);
 
 	if (!sCustomAttribID.IsEmpty())
-		return ClearSelectedTaskCustomAttributeData(sCustomAttribID, FALSE);
+		return SetSelectedTaskCustomAttributeData(sCustomAttribID, TDCCADATA());
 
 	// else something we've missed
 	ASSERT(0);

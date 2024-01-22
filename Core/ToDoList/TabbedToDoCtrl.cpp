@@ -1971,7 +1971,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskCustomAttributeData(dwTaskID, mod.szCustomAttribID, mod.szValue));
 			else
-				bChange = SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue, FALSE);
+				bChange = SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue);
 		}
 		break;
 

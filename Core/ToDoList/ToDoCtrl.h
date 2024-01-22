@@ -699,8 +699,6 @@ protected:
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
 	BOOL SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppends, BOOL bEdit);
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
-	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited);
-	BOOL ClearSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bCtrlEdited);
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
