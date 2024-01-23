@@ -2495,6 +2495,39 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 
 BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const
 {
+	ASSERT(m_pAttributeList->m_aSelectedTaskIDs.GetSize());
+	ASSERT(!m_pAttributeList->m_data.HasStyle(TDCS_READONLY));
+	ASSERT(!m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs));
+
+	switch (nAttribID)
+	{
+	case TDCA_FILELINK:
+		return TRUE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_RET(m_pAttributeList->m_aCustomAttribDefs, nAttribID, pDef, 0L);
+
+			switch (pDef->GetDataType())
+			{
+			case TDCCA_FILELINK:
+				return (aFiles.GetSize() == 1);
+
+			case TDCCA_STRING:
+				return (pDef->IsAutoList() || (!pDef->IsList() && (aFiles.GetSize() == 1)));
+			}
+		}
+		break;
+	}
+
+	// All else
+	return FALSE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const
+{
 	if (m_pAttributeList->m_aSelectedTaskIDs.GetSize() == 0)
 		return FALSE;
 
@@ -2504,42 +2537,6 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(TDC_ATTRIBUTE nAtt
 	if (m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs))
 		return FALSE;
 
-	if (nAttribID == TDCA_FILELINK)
-		return TRUE;
-
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_CUSTDEF_RET(m_pAttributeList->m_aCustomAttribDefs, nAttribID, pDef, 0L);
-
-		switch (pDef->GetDataType())
-		{
-		case TDCCA_FILELINK:
-			if (aFiles.GetSize() == 1)
-			{
-				return TRUE;
-			}
-			break;
-
-		case TDCCA_STRING:
-			if (pDef->IsAutoList())
-			{
-				return TRUE;
-			}
-			else if (!pDef->IsList() && (aFiles.GetSize() == 1))
-			{
-				return TRUE;
-			}
-			break;
-		}
-	}
-
-	// All else
-	return FALSE;
-}
-
-BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const
-{
 	int nNumFiles = FileMisc::GetDropFilePaths(pDataObject, aFiles);
 
 	if (!nNumFiles)
