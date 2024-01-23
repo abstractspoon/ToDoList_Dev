@@ -2449,14 +2449,14 @@ DROPEFFECT CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragOver(CWnd* pWnd, CO
 	if (bValidDrop)
 	{
 		if (nRow != m_nDropHighlightedRow)
-			ListView_SetItemState(*pWnd, m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
+			m_pAttributeList->SetItemState(m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
 
-		ListView_SetItemState(*pWnd, nRow, LVIS_DROPHILITED, LVIS_DROPHILITED);
+		m_pAttributeList->SetItemState(nRow, LVIS_DROPHILITED, LVIS_DROPHILITED);
 		m_nDropHighlightedRow = nRow;
 	}
 	else if (m_nDropHighlightedRow != -1)
 	{
-		ListView_SetItemState(*pWnd, m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
+		m_pAttributeList->SetItemState(m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
 		m_nDropHighlightedRow = -1;
 	}
 	
@@ -2582,7 +2582,7 @@ void CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragLeave(CWnd* pWnd)
 {
 	if (m_nDropHighlightedRow != -1)
 	{
-		ListView_SetItemState(*pWnd, m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
+		m_pAttributeList->SetItemState(m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
 		m_nDropHighlightedRow = -1;
 	}
 }
