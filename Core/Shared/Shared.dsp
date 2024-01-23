@@ -469,6 +469,10 @@ SOURCE=.\odbcvaluecombobox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\OleDropTargetEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\OrderedTreeCtrl.cpp
 # End Source File
 # Begin Source File
@@ -1162,6 +1166,10 @@ SOURCE=.\OdbcTables.h
 # Begin Source File
 
 SOURCE=.\odbcvaluecombobox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OleDropTargetEx.h
 # End Source File
 # Begin Source File
 

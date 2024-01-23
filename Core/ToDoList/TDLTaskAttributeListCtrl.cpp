@@ -2537,7 +2537,7 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& poin
 	if (m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs))
 		return FALSE;
 
-	int nNumFiles = FileMisc::GetDropFilePaths(pDataObject, aFiles);
+	int nNumFiles = GetDropFilePaths(pDataObject, aFiles);
 
 	if (!nNumFiles)
 		return FALSE;

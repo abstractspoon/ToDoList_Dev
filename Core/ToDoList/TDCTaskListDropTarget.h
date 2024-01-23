@@ -9,9 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\OleDropTargetEx.h"
 #include "..\shared\TreeCtrlHelper.h"
-
-#include <afxole.h>
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,7 +46,7 @@ const UINT WM_TLDT_CANDROP	= ::RegisterWindowMessage(_T("WM_TLDT_CANDROP"));	// 
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskListDropTarget : public COleDropTarget  
+class CTDCTaskListDropTarget : public COleDropTargetEx  
 {
 public:
 	CTDCTaskListDropTarget();
@@ -97,7 +96,6 @@ protected:
 	BOOL InitializeOutlook();
 	void ResetDrag(CWnd* pWnd);
 
-	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText);
 	static DROPEFFECT GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFilesFromText);
 };
 

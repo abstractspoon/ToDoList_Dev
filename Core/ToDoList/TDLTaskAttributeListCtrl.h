@@ -20,8 +20,7 @@
 #include "..\shared\TimeComboBox.h"
 #include "..\shared\TimeEdit.h"
 #include "..\shared\Icon.h"
-
-#include <afxole.h>
+#include "..\shared\OleDropTargetEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -127,7 +126,7 @@ protected:
 	CFileEdit m_eSingleFileLink;
 	CTDLIconComboBox m_cbCustomIcons;
 
-	class CFileDropTarget : public COleDropTarget
+	class CFileDropTarget : public COleDropTargetEx
 	{
 	public:
 		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
