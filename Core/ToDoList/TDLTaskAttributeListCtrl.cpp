@@ -115,7 +115,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
-	m_cbCustomIcons(ilIcons)
+	m_cbCustomIcons(ilIcons),
+	m_dropFiles(this)
 {
 	// Fixed 'Dependency' buttons
 	m_eDepends.SetBorderWidth(0);
@@ -151,7 +152,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLTaskAttributeListCtrl)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
-	ON_WM_DROPFILES()
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
 
@@ -224,6 +224,8 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CLocalizer::EnableTranslation(m_cbPriority, FALSE);
 	CLocalizer::EnableTranslation(m_cbRisk, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiFileLink, FALSE);
+
+	m_dropFiles.Register(this);
 
 	return 0;
 }
@@ -402,13 +404,6 @@ void CTDLTaskAttributeListCtrl::OnSize(UINT nType, int cx, int cy)
 		SetColumnWidth(ATTRIB_COL, (cx / 2));
 		SetColumnWidth(VALUE_COL, (cx / 2) - 1);
 	}
-}
-
-void CTDLTaskAttributeListCtrl::OnDropFiles(HDROP hDropInfo) 
-{
-	// TODO: Add your message handler code here and/or call default
-	
-	CInputListCtrl::OnDropFiles(hDropInfo);
 }
 
 BOOL CTDLTaskAttributeListCtrl::OnEraseBkgnd(CDC* pDC) 
@@ -695,8 +690,6 @@ void CTDLTaskAttributeListCtrl::SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID,
 		break;
 	}
 }
-
-
 
 BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 {
@@ -2428,4 +2421,168 @@ LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantTooltip(WPARAM wParam, LPARAM l
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkDisplay(WPARAM wParam, LPARAM lParam)
 {
 	return GetParent()->SendMessage(WM_TDCM_DISPLAYLINK, wParam, lParam);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+CTDLTaskAttributeListCtrl::CFileDropTarget::CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList) 
+	: 
+	m_pAttributeList(pAtributeList),
+	m_nDropHighlightedRow(-1)
+{
+}
+
+DROPEFFECT CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+{
+	m_nDropHighlightedRow = -1;
+
+	return DROPEFFECT_COPY;
+}
+
+DROPEFFECT CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+{
+	CStringArray aUnused;
+	int nRow = -1;
+
+	BOOL bValidDrop = CanDropFiles(point, pDataObject, nRow, aUnused);
+	
+	if (bValidDrop)
+	{
+		if (nRow != m_nDropHighlightedRow)
+			ListView_SetItemState(*pWnd, m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
+
+		ListView_SetItemState(*pWnd, nRow, LVIS_DROPHILITED, LVIS_DROPHILITED);
+		m_nDropHighlightedRow = nRow;
+	}
+	else if (m_nDropHighlightedRow != -1)
+	{
+		ListView_SetItemState(*pWnd, m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
+		m_nDropHighlightedRow = -1;
+	}
+	
+	return (bValidDrop ? DROPEFFECT_COPY : DROPEFFECT_NONE);
+}
+
+BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point)
+{
+	CStringArray aFiles;
+	int nRow = -1;
+
+	if (!CanDropFiles(point, pDataObject, nRow, aFiles))
+		return FALSE;
+
+	if ((aFiles.GetSize() == 1) && (m_pAttributeList->GetAttributeID(nRow, TRUE) != TDCA_FILELINK))
+	{
+		// Set new item
+		m_pAttributeList->SetItemText(nRow, VALUE_COL, aFiles[0]);
+		m_pAttributeList->NotifyParentEdit(nRow);
+	}
+	else
+	{
+		// Append unique file names to list
+		CStringArray aExisting;
+		Misc::Split(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
+
+		if (Misc::AddUniqueItems(aFiles, aExisting))
+		{
+			m_pAttributeList->SetItemText(nRow, VALUE_COL, Misc::FormatArray(aExisting));
+			m_pAttributeList->NotifyParentEdit(nRow);
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const
+{
+	if (m_pAttributeList->m_aSelectedTaskIDs.GetSize() == 0)
+		return FALSE;
+
+	if (m_pAttributeList->m_data.HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	if (m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs))
+		return FALSE;
+
+	if (nAttribID == TDCA_FILELINK)
+		return TRUE;
+
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_CUSTDEF_RET(m_pAttributeList->m_aCustomAttribDefs, nAttribID, pDef, 0L);
+
+		switch (pDef->GetDataType())
+		{
+		case TDCCA_FILELINK:
+			if (aFiles.GetSize() == 1)
+			{
+				return TRUE;
+			}
+			break;
+
+		case TDCCA_STRING:
+			if (pDef->IsAutoList())
+			{
+				return TRUE;
+			}
+			else if (!pDef->IsList() && (aFiles.GetSize() == 1))
+			{
+				return TRUE;
+			}
+			break;
+		}
+	}
+
+	// All else
+	return FALSE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const
+{
+	int nNumFiles = FileMisc::GetDropFilePaths(pDataObject, aFiles);
+
+	if (!nNumFiles)
+		return FALSE;
+
+	nRow = m_pAttributeList->HitTest(point);
+
+	if (CanDropFiles(m_pAttributeList->GetAttributeID(nRow), aFiles))
+		return TRUE;
+	
+	// else look for the closest valid attribute to the hit-test
+	int nClosest = m_pAttributeList->FindItemFromData(TDCA_FILELINK); 
+
+	int nFrom = m_pAttributeList->GetTopIndex();
+	int nTo = (nFrom + m_pAttributeList->GetCountPerPage());
+	nTo = min(nTo, (m_pAttributeList->GetItemCount() - 1));
+	
+	for (int nItem = nFrom; nItem <= nTo; nItem++)
+	{
+		TDC_ATTRIBUTE nAttribID = m_pAttributeList->GetAttributeID(nItem, TRUE);
+
+		if (CanDropFiles(nAttribID, aFiles))
+		{
+			if ((nClosest == -1) || (abs(nItem - nRow) < abs(nClosest - nRow)))
+				nClosest = nItem;
+		}
+	}
+
+	if (nClosest == -1)
+		return FALSE;
+
+	// else
+	nRow = nClosest;
+	m_pAttributeList->EnsureVisible(nRow, FALSE);
+
+	return TRUE;
+}
+
+void CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragLeave(CWnd* pWnd)
+{
+	if (m_nDropHighlightedRow != -1)
+	{
+		ListView_SetItemState(*pWnd, m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
+		m_nDropHighlightedRow = -1;
+	}
 }

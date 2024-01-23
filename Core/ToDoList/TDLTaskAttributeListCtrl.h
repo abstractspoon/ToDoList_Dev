@@ -21,6 +21,8 @@
 #include "..\shared\TimeEdit.h"
 #include "..\shared\Icon.h"
 
+#include <afxole.h>
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CTDLTaskCtrlBase;
@@ -32,6 +34,8 @@ class CTDCImageList;
 
 class CTDLTaskAttributeListCtrl : public CInputListCtrl
 {
+	friend class CFileDropTarget;
+
 // Construction
 public:
 	CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
@@ -123,6 +127,27 @@ protected:
 	CFileEdit m_eSingleFileLink;
 	CTDLIconComboBox m_cbCustomIcons;
 
+	class CFileDropTarget : public COleDropTarget
+	{
+	public:
+		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
+
+	protected:
+		CTDLTaskAttributeListCtrl* m_pAttributeList;
+		int m_nDropHighlightedRow;
+
+	protected:
+		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
+		virtual void OnDragLeave(CWnd* pWnd);
+
+		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
+		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
+
+	};
+	CFileDropTarget m_dropFiles;
+
 	static CIcon s_iconTrackTime, s_iconAddTime, s_iconLink, s_iconBrowse, s_iconApp;
 
 protected:
@@ -130,7 +155,6 @@ protected:
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
@@ -191,7 +215,7 @@ protected:
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
-	
+
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
