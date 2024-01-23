@@ -499,7 +499,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// init helper variables
 	int nItem = lpDrawItemStruct->itemID;
 	UINT uStyle = GetStyle();
-	UINT uState = GetItemState(nItem, LVIS_FOCUSED | LVIS_SELECTED);
+	UINT uState = GetItemState(nItem, LVIS_FOCUSED | LVIS_SELECTED | LVIS_DROPHILITED);
 
 	// init helper variables
 	CRect rItem(lpDrawItemStruct->rcItem), rClient;
@@ -519,6 +519,8 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	BOOL bListFocused = (GetFocus() == this);
 	BOOL bSelAlways = ((uStyle & LVS_SHOWSELALWAYS) == LVS_SHOWSELALWAYS);
 	BOOL bSelected = (IsWindowEnabled() && (nItem == GetCurSel()) && (bListFocused || bSelAlways));
+	BOOL bDropHilited = (uState & LVIS_DROPHILITED);
+
 	BOOL bItemFocused = (bListFocused && bSelected);
 	BOOL bWantCellFocus = (bListFocused && !IsSelectionThemed(TRUE) && !CThemed::AreControlsThemed());
 	
@@ -589,7 +591,12 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			// fill cell
 			BOOL bIsEditing = (IsEditing() || IsChild(GetFocus()));
 
-			if (bSel && !bIsEditing && IsSelectionThemed(FALSE))
+			if (bDropHilited && IsSelectionThemed(FALSE))
+			{
+				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
+				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, GMIS_DROPHILITED, rBack, dwFlags, rBack);
+			}
+			else if (bSel && !bIsEditing && IsSelectionThemed(FALSE))
 			{
 				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
 				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
