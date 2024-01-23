@@ -32,7 +32,6 @@ struct VIEWDATA
 	BOOL WantAnyAttribute(const CTDCAttributeMap& other) const;
 
 	TDSORT sort;
-	CTaskListDropTarget dropTgt;
 	IUIExtension* pExtension;
 	CTDCAttributeMap mapWantedAttrib;
 
@@ -160,7 +159,7 @@ public:
 protected:
 	CTDLTaskListCtrl m_taskList;
 	CTDLViewTabControl m_tabViews;
-	CTaskListDropTarget m_dtList;
+	CTDCTaskListDropTarget m_dtList;
 	CComboBox m_cbListGroupBy;
 	CTDLTaskListCtrlOptionsComboBox m_cbListOptions;
 

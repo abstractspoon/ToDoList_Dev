@@ -7,7 +7,7 @@
 // ToDoCtrl.h : header file
 //
 
-#include "TaskListDropTarget.h"
+#include "TDCTaskListDropTarget.h"
 #include "todoctrldata.h"
 #include "todoctrldatautils.h"
 #include "todoctrlfind.h"
@@ -459,7 +459,7 @@ protected:
 	CString m_sPassword;
 	CString m_sCompletionStatus;
 	CTreeDragDropHelper m_treeDragDrop;
-	CTaskListDropTarget m_treeDropTarget;
+	CTDCTaskListDropTarget m_treeDropTarget;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;

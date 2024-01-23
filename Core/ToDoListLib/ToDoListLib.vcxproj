@@ -135,7 +135,7 @@
     <ClCompile Include="..\ToDoList\TaskFile.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
-    <ClCompile Include="..\ToDoList\TaskListDropTarget.cpp" />
+    <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp" />
     <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
     <ClCompile Include="..\ToDoList\TaskListHtmlExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListOutlookImporter.cpp" />
@@ -292,7 +292,7 @@
     <ClInclude Include="..\ToDoList\TaskFile.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvImporter.h" />
-    <ClInclude Include="..\ToDoList\TaskListDropTarget.h" />
+    <ClInclude Include="..\ToDoList\TDCTaskListDropTarget.h" />
     <ClInclude Include="..\ToDoList\TaskListExporterBase.h" />
     <ClInclude Include="..\ToDoList\TaskListHtmlExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListOutlookImporter.h" />

@@ -1,4 +1,4 @@
-// TaskListDropTarget.h: interface for the CTaskListDropTarget class.
+// TaskListDropTarget.h: interface for the CTDCTaskListDropTarget class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -47,11 +47,11 @@ const UINT WM_TLDT_CANDROP	= ::RegisterWindowMessage(_T("WM_TLDT_CANDROP"));	// 
 
 //////////////////////////////////////////////////////////////////////
 
-class CTaskListDropTarget : public COleDropTarget  
+class CTDCTaskListDropTarget : public COleDropTarget  
 {
 public:
-	CTaskListDropTarget();
-	virtual ~CTaskListDropTarget();
+	CTDCTaskListDropTarget();
+	virtual ~CTDCTaskListDropTarget();
 
 	BOOL Register(CWnd* pTarget, CWnd* pOwner);
 

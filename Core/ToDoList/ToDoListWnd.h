@@ -109,7 +109,7 @@ protected:
 	CTDLFilterBar m_filterBar;
 	CTDLFindTasksDlg m_dlgFindTasks;
 	CTabCtrlEx m_tabCtrl;
-	CTaskListDropTarget m_dropTarget;
+	CTDCTaskListDropTarget m_dropTarget;
 	CToDoCtrlReminders m_dlgReminders;
 	CToolbarHelper m_tbHelperMain;
 	CTrayIcon m_trayIcon;

@@ -181,10 +181,6 @@ SOURCE=..\ToDoList\TaskListCsvImporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TaskListDropTarget.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TaskListExporterBase.cpp
 # End Source File
 # Begin Source File
@@ -306,6 +302,10 @@ SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCTaskCompletion.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTaskListDropTarget.cpp
 # End Source File
 # Begin Source File
 
@@ -681,15 +681,15 @@ SOURCE=..\ToDoList\ToDoCtrlFind.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\ToDoCtrlLayout.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\ToDoCtrlMgr.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoCtrlReminders.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrlLayout.cpp
 # End Source File
 # Begin Source File
 
@@ -802,10 +802,6 @@ SOURCE=..\ToDoList\TaskListCsvExporter.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TaskListCsvImporter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskListDropTarget.h
 # End Source File
 # Begin Source File
 
@@ -954,6 +950,10 @@ SOURCE=..\ToDoList\tdcswitch.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCTaskCompletion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTaskListDropTarget.h
 # End Source File
 # Begin Source File
 
@@ -1337,15 +1337,15 @@ SOURCE=..\ToDoList\ToDoCtrlFind.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\ToDoCtrlLayout.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\ToDoCtrlMgr.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoCtrlReminders.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrlLayout.h
 # End Source File
 # Begin Source File
 
