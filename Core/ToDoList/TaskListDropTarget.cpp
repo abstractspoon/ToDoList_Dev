@@ -193,13 +193,6 @@ BOOL CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) 
 			hitRes.bImport = TRUE;
 		}
 	}
-	else if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
-	{
-		if (pWnd->GetStyle() & CBS_DROPDOWN) // must be editable
-		{
-			hitRes.nResult = TLDTHT_FILEEDIT;
-		}
-	}
 	else if (pWnd->IsKindOf(RUNTIME_CLASS(CDialog)) || pWnd->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
 	{
 		// allow dropping only on titlebar
@@ -261,7 +254,7 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 			lvfi.vkDirection = VK_DOWN;
 
 			int nPrev = ListView_FindItem(*pWnd, -1, &lvfi);
-			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED); 
+			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED);
 		}
 
 		if (hitRes.dwTaskID != 0)
@@ -310,9 +303,6 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		{
 		case TLDTHT_TASKVIEW:
 			return ((drop.dwTaskID && !drop.bImportTasks && !bFilesFromText) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
-
-		case TLDTHT_FILEEDIT:
-			return (bFilesFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 		}
 	}
 	else if ((nHitTest != TLDTHT_NONE) && (drop.HasFiles() || drop.HasText()))
@@ -321,9 +311,6 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		{
 		case TLDTHT_TASKVIEW:
 			return ((drop.dwTaskID && !drop.bImportTasks && !bFilesFromText && !drop.HasText()) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
-
-		case TLDTHT_FILEEDIT:
-			return (bFilesFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 
 		case TLDTHT_CAPTION:
 			{

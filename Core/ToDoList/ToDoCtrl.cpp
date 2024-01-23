@@ -456,24 +456,22 @@ BOOL CToDoCtrl::Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisi
 
 BOOL CToDoCtrl::OnInitDialog() 
 {
+	CRuntimeDlg::OnInitDialog();
+
 	// create the tree-list before anything else
 	CRect rCtrl;
 	GraphicsMisc::GetAvailableScreenSpace(*this, rCtrl);
 
 	VERIFY(m_taskTree.Create(this, rCtrl, IDC_TASKTREECTRL));
 
-	// create rest of controls
-	CRuntimeDlg::OnInitDialog();
-	
+	m_treeDropTarget.Register(&m_taskTree.Tree(), this);
+
 	// comments
 	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 
 	// TODO
 	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	m_lcAttributes.SetPercentDoneIncrement(m_nPercentIncrement);
-
-	m_dtTree.Register(&m_taskTree.Tree(), this);
-//	m_dtFileLink.Register(&m_cbFileLink, this); 
 	
 	// custom font
 	if (m_hFontTree)
@@ -8400,11 +8398,6 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		SetFocusToTasks();
 		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->dwTaskID);
 	}
-// 	else if ((pTarget == &m_cbFileLink) && aFiles.GetSize())
-// 	{
-// 		SetSelectedTaskFileLinks(aFiles, TRUE); // append);
-// 		m_cbFileLink.SetFocus();
-// 	}
 
 	return 0L;
 }

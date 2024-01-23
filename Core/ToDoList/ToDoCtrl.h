@@ -464,13 +464,13 @@ protected:
 
 	CTDCStyleMap m_styles;
 	CString m_sXmlHeader, m_sXslHeader;
-	CTaskListDropTarget m_dtTree, m_dtFileLink;
 	CString m_sLastSavePath;
 	CString m_sAltPrefsKey;
 	int m_nCommentsSize;
 	CString m_sPassword;
 	CString m_sCompletionStatus;
 	CTreeDragDropHelper m_treeDragDrop;
+	CTaskListDropTarget m_treeDropTarget;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;

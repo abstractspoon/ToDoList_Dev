@@ -77,7 +77,6 @@ public:
 	{
 		TLDTHT_NONE = -1,
 		TLDTHT_TASKVIEW,
-		TLDTHT_FILEEDIT,
 		TLDTHT_CAPTION,
 	};
 
