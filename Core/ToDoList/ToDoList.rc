@@ -3230,7 +3230,7 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Paste as &Subtask of Selected Task", ID_EDIT_PASTESUB
-        MENUITEM "&Paste &Below Selected Task", ID_EDIT_PASTEAFTER
+        MENUITEM "Paste &Below Selected Task",  ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
         MENUITEM "Paste Task Attrib&utes",      ID_EDIT_PASTEATTRIBUTES
@@ -3510,7 +3510,7 @@ BEGIN
         MENUITEM "&Go To Task...",              ID_MOVE_GOTOTASK
         MENUITEM SEPARATOR
         MENUITEM "Scr&oll to Selected Task",    ID_SCROLLTOSELTASK
-        MENUITEM "",                            2
+        MENUITEM SEPARATOR
         MENUITEM "Navigate &Back",              ID_VIEW_PREV_SEL
         MENUITEM "Navigate &Forward",           ID_VIEW_NEXT_SEL
         MENUITEM SEPARATOR

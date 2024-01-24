@@ -213,7 +213,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 		}
 	}
 
-	if (nExtra)
+	if (nExtra > 0)
 	{
 		// calculate the size of a space char
 		const LPCTSTR SPACE = _T(" ");
@@ -227,7 +227,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 			nNumSpace++;
 
 		// If the tab has no icon move one of the extra spaces to the front
-		if (GetItemImage(nTab) == -1)
+		if (nNumSpace && (GetItemImage(nTab) == -1))
 		{
 			sReqText = ' ' + sReqText;
 			nNumSpace--;
