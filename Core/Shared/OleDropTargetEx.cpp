@@ -7,12 +7,15 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const WORD TIMER_NOSCROLL		= 0xFFFF;
+enum 
+{
+	ODET_NOSCROLL		= 0xFFFF,
 
-const WORD TIMER_SCROLLLEFT		= MAKEWORD(SB_LINELEFT, 0xFF);
-const WORD TIMER_SCROLLRIGHT	= MAKEWORD(SB_LINERIGHT, 0xFF);
-const WORD TIMER_SCROLLUP		= MAKEWORD(0xFF, SB_LINEUP);
-const WORD TIMER_SCROLLDOWN		= MAKEWORD(0xFF, SB_LINEDOWN);
+	ODET_SCROLLLEFT		= MAKEWORD(SB_LINELEFT, 0xFF),
+	ODET_SCROLLRIGHT	= MAKEWORD(SB_LINERIGHT, 0xFF),
+	ODET_SCROLLUP		= MAKEWORD(0xFF, SB_LINEUP),
+	ODET_SCROLLDOWN		= MAKEWORD(0xFF, SB_LINEDOWN),
+};
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -26,10 +29,6 @@ COleDropTargetEx::COleDropTargetEx()
 COleDropTargetEx::~COleDropTargetEx()
 {
 
-}
-
-void COleDropTargetEx::ResetDrag(CWnd* pWnd)
-{
 }
 
 // Adapted from COleDropTarget::OnDragScroll which only supports CView-derived classes
@@ -50,40 +49,45 @@ BOOL COleDropTargetEx::DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
 	CRect rInset = rClient;
 	rInset.InflateRect(-nScrollInset, -nScrollInset);
 
-	UINT nTimerID = TIMER_NOSCROLL;
+	UINT nTimerID = ODET_NOSCROLL;
 
 	if (rClient.PtInRect(point) && !rInset.PtInRect(point))
 	{
 		// determine which way to scroll along both X & Y axis
 		if (point.x < rInset.left)
 		{
-			nTimerID = TIMER_SCROLLLEFT;
+			nTimerID = ODET_SCROLLLEFT;
 		}
 		else if (point.x >= rInset.right)
 		{
-			nTimerID = TIMER_SCROLLRIGHT;
+			nTimerID = ODET_SCROLLRIGHT;
 		}
 
 		if (point.y < rInset.top)
 		{
-			nTimerID = TIMER_SCROLLUP;
+			nTimerID = ODET_SCROLLUP;
 		}
 		else if (point.y >= rInset.bottom)
 		{
-			nTimerID = TIMER_SCROLLDOWN;
+			nTimerID = ODET_SCROLLDOWN;
 		}
-		ASSERT(nTimerID != TIMER_NOSCROLL);
+		ASSERT(nTimerID != ODET_NOSCROLL);
+
+		// check for valid scroll first
+		if (!CanScroll(pWnd, nTimerID))
+			nTimerID = ODET_NOSCROLL;
 	}
-	else // nTimerID == TIMER_NOSCROLL
+
+	if (nTimerID == ODET_NOSCROLL)
 	{
-		if (m_nTimerID != TIMER_NOSCROLL)
+		if (m_nTimerID != ODET_NOSCROLL)
 		{
 			// send fake OnDragEnter when transition from scroll->normal
 			COleDataObject dataObject;
 			dataObject.Attach(m_lpDataObject, FALSE);
 
 			OnDragEnter(pWnd, &dataObject, dwKeyState, point);
-			m_nTimerID = TIMER_NOSCROLL;
+			m_nTimerID = ODET_NOSCROLL;
 		}
 
 		return FALSE;
@@ -105,8 +109,8 @@ BOOL COleDropTargetEx::DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
 	{
 		switch (nTimerID)
 		{
-		case TIMER_SCROLLLEFT:
-		case TIMER_SCROLLRIGHT:
+		case ODET_SCROLLLEFT:
+		case ODET_SCROLLRIGHT:
 			{
 				int nPos = pWnd->GetScrollPos(SB_HORZ);
 				pWnd->SendMessage(WM_HSCROLL, LOBYTE(nTimerID));
@@ -115,8 +119,8 @@ BOOL COleDropTargetEx::DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
 			}
 			break;
 
-		case TIMER_SCROLLUP:
-		case TIMER_SCROLLDOWN:
+		case ODET_SCROLLUP:
+		case ODET_SCROLLDOWN:
 			{
 				int nPos = pWnd->GetScrollPos(SB_VERT);
 				pWnd->SendMessage(WM_VSCROLL, HIBYTE(nTimerID));
@@ -130,7 +134,7 @@ BOOL COleDropTargetEx::DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
 		m_nScrollDelay = nScrollInterval;
 	}
 
-	if (m_nTimerID == 0xffff)
+	if (m_nTimerID == ODET_NOSCROLL)
 	{
 		// send fake OnDragLeave when transitioning from normal->scroll
 		OnDragLeave(pWnd);
@@ -139,3 +143,40 @@ BOOL COleDropTargetEx::DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
 	m_nTimerID = nTimerID;
 	return bScrolled;
 }
+
+BOOL COleDropTargetEx::CanScroll(const CWnd* pWnd, UINT nTimerID) const
+{
+	switch (nTimerID)
+	{
+	case ODET_SCROLLLEFT:
+		return (pWnd->GetScrollPos(SB_HORZ) > 0);
+
+	case ODET_SCROLLRIGHT:
+		{
+			SCROLLINFO si = { sizeof(si), SIF_RANGE | SIF_PAGE, 0 };
+
+			if (!::GetScrollInfo(*pWnd, SB_HORZ, &si))
+				return FALSE;
+
+			return (pWnd->GetScrollPos(SB_HORZ) <= (si.nMax - (int)si.nPage));
+		}
+		break;
+
+	case ODET_SCROLLUP:
+		return (pWnd->GetScrollPos(SB_VERT) > 0);
+
+	case ODET_SCROLLDOWN:
+		{
+			SCROLLINFO si = { sizeof(si), SIF_RANGE | SIF_PAGE, 0 };
+
+			if (!::GetScrollInfo(*pWnd, SB_VERT, &si))
+				return FALSE;
+
+			return (pWnd->GetScrollPos(SB_VERT) <= (si.nMax - (int)si.nPage));
+		}
+		break;
+	}
+
+	return FALSE;
+}
+

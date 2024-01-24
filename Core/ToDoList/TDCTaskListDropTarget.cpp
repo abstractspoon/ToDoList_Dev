@@ -405,6 +405,15 @@ BOOL CTDCTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFF
 	return TRUE; // because we handle it
 }
 
+DROPEFFECT CTDCTaskListDropTarget::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
+{
+	if (DoDragScroll(pWnd, dwKeyState, point))
+		return DROPEFFECT_SCROLL;
+
+	// else
+	return COleDropTarget::OnDragScroll(pWnd, dwKeyState, point);
+}
+
 BOOL CTDCTaskListDropTarget::InitializeOutlook()
 {
 	if (m_pOutlook == NULL)

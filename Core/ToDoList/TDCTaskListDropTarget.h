@@ -65,6 +65,7 @@ protected:
 	virtual void OnDragLeave(CWnd* pWnd);
 	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point);
 	virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT dropEffect, CPoint point);
+	virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
 
 #if _MSC_VER >= 1400
 protected:

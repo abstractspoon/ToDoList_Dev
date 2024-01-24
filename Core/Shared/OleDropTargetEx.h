@@ -11,9 +11,7 @@
 
 #include <afxole.h>
 
-class IOleDropTarget
-{
-};
+//////////////////////////////////////////////////////////////////////
 
 class COleDropTargetEx : public COleDropTarget  
 {
@@ -21,13 +19,9 @@ public:
 	COleDropTargetEx();
 	virtual ~COleDropTargetEx();
 
-private:
-
 protected:
-	virtual void ResetDrag(CWnd* pWnd);
-
+	BOOL CanScroll(const CWnd* pWnd, UINT nTimerID) const;
 	BOOL DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
-
 };
 
 #endif // !defined(AFX_OLEDROPTARGETEX_H__430ACDA9_05BE_46C3_ADC1_D8AEC5C5EE41__INCLUDED_)
