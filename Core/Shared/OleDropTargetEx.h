@@ -11,6 +11,10 @@
 
 #include <afxole.h>
 
+class IOleDropTarget
+{
+};
+
 class COleDropTargetEx : public COleDropTarget  
 {
 public:
@@ -21,6 +25,8 @@ private:
 
 protected:
 	virtual void ResetDrag(CWnd* pWnd);
+
+	BOOL DoDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
 
 };
 

@@ -2493,6 +2493,15 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 	return TRUE;
 }
 
+DROPEFFECT CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
+{
+	if (DoDragScroll(pWnd, dwKeyState, point))
+		return DROPEFFECT_SCROLL;
+
+	// else
+	return COleDropTarget::OnDragScroll(pWnd, dwKeyState, point);
+}
+
 BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const
 {
 	ASSERT(m_pAttributeList->m_aSelectedTaskIDs.GetSize());
