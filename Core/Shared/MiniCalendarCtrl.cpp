@@ -19,6 +19,12 @@ const UINT DEFTEXTFLAGS = (DT_VCENTER | DT_CENTER | DT_SINGLELINE/* | DT_RTLREAD
 const int WEEKNUMBERPADDING = 8;
 
 /////////////////////////////////////////////////////////////////////////////
+
+#ifndef LOCALE_SNAME
+#	define LOCALE_SNAME 0x0000005c 
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
 // CMiniCalendarCtrl
 
 CMiniCalendarCtrl::CMiniCalendarCtrl() : m_bShowWeekNumbers(FALSE), m_nWeekNumberWidth(0)
