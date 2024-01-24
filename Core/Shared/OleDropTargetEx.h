@@ -17,9 +17,6 @@ public:
 	COleDropTargetEx();
 	virtual ~COleDropTargetEx();
 
-	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles);
-	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText);
-
 private:
 
 protected:

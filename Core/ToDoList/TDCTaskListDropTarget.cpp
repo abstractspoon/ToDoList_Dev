@@ -8,6 +8,7 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\webmisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\fileedit.h"
@@ -327,6 +328,28 @@ DROPEFFECT CTDCTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TL
 
 	// All else
 	return DROPEFFECT_NONE;
+}
+
+int CTDCTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText)
+{
+	ASSERT(pObject);
+
+	aFiles.RemoveAll();
+	bFromText = FALSE;
+
+	if (!FileMisc::GetDropFilePaths(pObject, aFiles) && CClipboard::HasText(pObject))
+	{
+		// look for files and URLs in text
+		CString sText = CClipboard::GetText(pObject);
+
+		if (FileMisc::IsPath(sText) || (WebMisc::IsURL(sText) && (sText.FindOneOf(_T("\t\r\n")) == -1)))
+		{
+			aFiles.Add(sText);
+			bFromText = TRUE;
+		}
+	}
+
+	return aFiles.GetSize();
 }
 
 BOOL CTDCTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT /*dropEffect*/, CPoint point)
