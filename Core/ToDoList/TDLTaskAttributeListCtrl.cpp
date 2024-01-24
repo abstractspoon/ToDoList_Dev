@@ -2548,6 +2548,8 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& poin
 
 	nRow = m_pAttributeList->HitTest(point);
 
+	// This check is essential to prevent the auto-scrolling 
+	// and EnsureVisible from getting into a fight
 	if (nRow == -1)
 		return FALSE;
 
