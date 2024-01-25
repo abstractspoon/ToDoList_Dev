@@ -769,9 +769,7 @@ void CCheckComboBox::EnableTooltip(BOOL bEnable)
 		if (!m_tooltip.GetSafeHwnd())
 		{
 			VERIFY(m_tooltip.Create(this, (WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP)));
-
-			// Set the multiline tooltip text
-			m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 300);
+			m_tooltip.EnableMultilineTips();
 		}
 	}
 	else if (m_tooltip.GetSafeHwnd())

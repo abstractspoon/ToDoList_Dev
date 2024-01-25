@@ -265,10 +265,7 @@ BOOL CTreeListTreeCtrl::InitTooltip()
 		if (!m_tooltip.Create(this))
 			return FALSE;
 
-		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 		m_tooltip.SetFont(m_fonts.GetFont(), FALSE);
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	}
 
 	return TRUE;

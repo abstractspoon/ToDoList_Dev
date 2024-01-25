@@ -281,10 +281,8 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Add some padding to the right of the checkbox for tree/list
 	// so that the checkboxes, icons and labels have consistent positioning
-	if (IsTreeList())
-		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255, CRect(0, 0, 3, 0)));
-	else
-		VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255));
+	CRect rPadding(0, 0, (IsTreeList() ? 3 : 0), 0);
+	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255, rPadding));
 
 	BuildColumns();
 	OnColumnVisibilityChange(CTDCColumnIDMap());
@@ -293,10 +291,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Tooltips for columns
 	if (m_tooltipColumns.Create(this, (TTS_ALWAYSTIP | TTS_NOPREFIX)))
 	{
-		m_tooltipColumns.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-		m_tooltipColumns.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltipColumns.SetDelayTime(TTDT_AUTOPOP, 10000);
-		m_tooltipColumns.SetMaxTipWidth((UINT)(WORD)-1);
+		m_tooltipColumns.EnableMultilineTips();
 
 		// Disable columns own tooltips
 		HWND hwndTooltips = (HWND)m_lcColumns.SendMessage(LVM_GETTOOLTIPS);

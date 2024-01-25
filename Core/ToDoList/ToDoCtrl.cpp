@@ -4088,10 +4088,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 				return FALSE;
 
 			// else
-			m_infoTip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-			m_infoTip.SetDelayTime(TTDT_INITIAL, 50);
-			m_infoTip.SetDelayTime(TTDT_AUTOPOP, 100000);
-			m_infoTip.SetMaxTipWidth(SHRT_MAX); // multiline support
+			m_infoTip.EnableMultilineTips();
 			m_infoTip.EnableTracking(TRUE, INFOTIPOFFSET, INFOTIPOFFSET);
 			m_infoTip.SetFont(CFont::FromHandle(m_hFontTree));
 		}

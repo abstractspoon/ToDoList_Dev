@@ -905,10 +905,8 @@ void CTDLTimeTrackerDlg::OnSelchangeTask()
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 {
-	if (!m_tipCaption.GetSafeHwnd() && m_tipCaption.Create(this))
-	{
-		m_tipCaption.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-	}
+	if (!m_tipCaption.GetSafeHwnd())
+		m_tipCaption.Create(this);
 
 	if (!Misc::IsHighContrastActive())
 	{

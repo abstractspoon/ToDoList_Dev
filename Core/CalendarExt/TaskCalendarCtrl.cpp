@@ -3305,10 +3305,7 @@ BOOL CTaskCalendarCtrl::EnableLabelTips(BOOL bEnable)
 			if (!m_tooltip.Create(this))
 				return FALSE;
 
-			m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 			m_tooltip.SetFont(&m_DefaultFont);
-			m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-			m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 		}
 	}
 	else if (m_tooltip.GetSafeHwnd()) 

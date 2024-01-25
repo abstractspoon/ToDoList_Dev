@@ -55,9 +55,22 @@ CToolTipCtrlEx::~CToolTipCtrlEx()
 BEGIN_MESSAGE_MAP(CToolTipCtrlEx, CToolTipCtrl)
 	ON_WM_PAINT()
 	ON_WM_TIMER()
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
+
+int CToolTipCtrlEx::OnCreate(LPCREATESTRUCT pCreateStruct)
+{
+	if (CToolTipCtrl::OnCreate(pCreateStruct) != 0)
+		return -1;
+
+	ModifyStyleEx(0, WS_EX_TRANSPARENT);
+	SetDelayTime(TTDT_INITIAL, 50);
+	SetDelayTime(TTDT_AUTOPOP, 10000);
+
+	return 0;
+}
 
 void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)
 {
@@ -76,6 +89,8 @@ void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)
 	{
 		m_nFlags &= ~WF_TRACKINGTOOLTIPS;
 	}
+
+	SetDelayTime(TTDT_AUTOPOP, (bTracking ? 100000 : 10000));
 }
 
 BOOL CToolTipCtrlEx::IsTracking() const
