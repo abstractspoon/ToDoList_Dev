@@ -158,10 +158,6 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
-#ifdef _DEBUG
-	afx_msg void OnPaint();
-#endif
-
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);

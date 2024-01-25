@@ -155,10 +155,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
 
-#ifdef _DEBUG
-	ON_WM_PAINT()
-#endif
-
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
 
@@ -229,15 +225,6 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
-
-#ifdef _DEBUG
-void CTDLTaskAttributeListCtrl::OnPaint()
-{
-//	CScopedTraceTimer time(_T("\nCTDLTaskAttributeListCtrl::OnPaint()"));
-
-	CInputListCtrl::OnPaint();
-}
-#endif
 
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
