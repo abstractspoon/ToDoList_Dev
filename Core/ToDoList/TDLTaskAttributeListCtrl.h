@@ -21,6 +21,7 @@
 #include "..\shared\TimeEdit.h"
 #include "..\shared\Icon.h"
 #include "..\shared\OleDropTargetEx.h"
+#include "..\shared\tooltipctrlex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -125,6 +126,7 @@ protected:
 	CFileComboBox m_cbMultiFileLink;
 	CFileEdit m_eSingleFileLink;
 	CTDLIconComboBox m_cbCustomIcons;
+	CToolTipCtrlEx m_tooltip;
 
 	class CFileDropTarget : public COleDropTargetEx
 	{
@@ -177,6 +179,10 @@ protected:
 	afx_msg LRESULT OnFileLinkDisplay(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	BOOL PreTranslateMessage(MSG* pMsg);
+	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;

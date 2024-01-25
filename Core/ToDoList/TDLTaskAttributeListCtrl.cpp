@@ -221,7 +221,8 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CLocalizer::EnableTranslation(m_cbRisk, FALSE);
 	CLocalizer::EnableTranslation(m_cbMultiFileLink, FALSE);
 
-	m_dropFiles.Register(this);
+	VERIFY(m_dropFiles.Register(this));
+	VERIFY(m_tooltip.Create(this));
 
 	return 0;
 }
@@ -2583,4 +2584,18 @@ void CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragLeave(CWnd* pWnd)
 		m_pAttributeList->SetItemState(m_nDropHighlightedRow, 0, LVIS_DROPHILITED);
 		m_nDropHighlightedRow = -1;
 	}
+}
+
+BOOL CTDLTaskAttributeListCtrl::PreTranslateMessage(MSG* pMsg)
+{
+	m_tooltip.FilterToolTipMessage(pMsg);
+
+	return CInputListCtrl::PreTranslateMessage(pMsg);
+}
+
+int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	// TODO
+
+	return -1;  // not found
 }
