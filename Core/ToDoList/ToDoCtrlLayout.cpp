@@ -53,6 +53,28 @@ CToDoCtrlLayout::~CToDoCtrlLayout()
 
 }
 
+void CToDoCtrlLayout::ExcludeSplitBars(CDC* pDC) const
+{
+	ExcludeSplitBar(m_splitterHorz, pDC);
+	ExcludeSplitBar(m_splitterVert, pDC);
+}
+
+void CToDoCtrlLayout::ExcludeSplitBar(const CSimpleSplitter& splitter, CDC* pDC) const
+{
+	if (splitter.GetSafeHwnd() && splitter.GetPaneCount())
+	{
+		int nPane = splitter.GetPaneCount() - 1;
+
+		while (nPane--)
+		{
+			CRect rBar;
+			splitter.GetBarRect(nPane, rBar, m_pParent);
+
+			pDC->ExcludeClipRect(rBar);
+		}
+	}
+}
+
 BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 								   TDC_UILOCATION nCommentsPos,
 								   BOOL bAllowStacking,

@@ -37,6 +37,7 @@ public:
 
 	void Resize(int cx, int cy);
 	void SetSplitBarColor(COLORREF color);
+	void ExcludeSplitBars(CDC* pDC) const;
 
 	TDC_MAXSTATE GetMaximiseState() const { return m_nMaxState; }
 	TDC_UILOCATION GetAttributesPosition() const { return m_nAttribsPos; }
@@ -73,7 +74,8 @@ protected:
 protected:
 	void RebuildLayout();
 	BOOL ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect) const;
-	
+	void ExcludeSplitBar(const CSimpleSplitter& splitter, CDC* pDC) const;
+
 	static void SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter);
 	static void LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter);
 

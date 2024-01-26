@@ -649,6 +649,8 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	ExcludeCtrl(this, IDC_PROJECTLABEL, pDC);
 	ExcludeCtrl(this, IDC_PROJECTNAME, pDC);
 
+	m_layout.ExcludeSplitBars(pDC);
+
 	// fill background with theme brush
 	CSaveDC sdc(pDC);
 

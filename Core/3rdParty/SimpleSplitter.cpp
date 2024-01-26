@@ -54,7 +54,6 @@ BEGIN_MESSAGE_MAP(CSimpleSplitter, CWnd)
 	ON_WM_NCCREATE()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_CREATE()
-	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_SS_DRAWSPLITBAR, OnDrawSplitBar)
 	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
@@ -242,6 +241,10 @@ void CSimpleSplitter::GetBarRect(int nIndex, CRect& rBar, const CWnd* pWndRelati
 
 void CSimpleSplitter::SetBarColor(COLORREF crBar)
 {
+	// Make sure color is always set
+	if (crBar == CLR_NONE)
+		crBar = ::GetSysColor(COLOR_BTNFACE);
+
 	if (crBar != m_crBar)
 	{
 		m_crBar = crBar;
@@ -382,26 +385,9 @@ LRESULT CSimpleSplitter::OnDrawSplitBar(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_SS_DRAWSPLITBAR, wp, lp);
 }
 
-BOOL CSimpleSplitter::OnEraseBkgnd(CDC* pDC)
-{
-	if (GetPaneCount() && (m_crBar != CLR_NONE))
-	{
-		// clip out the bars
-		for (int i = 0; i < m_aPanes.GetSize() - 1; i++)
-		{
-			CRect rBar;
-			GetBarRect(i, rBar);
-
-			pDC->ExcludeClipRect(rBar);
-		}
-	}
-
-	return CWnd::OnEraseBkgnd(pDC);
-}
-
 void CSimpleSplitter::OnPaint() 
 {
-	if (GetPaneCount() && (m_crBar != CLR_NONE))
+	if (GetPaneCount())
 	{
 		CPaintDC dc(this);
 
