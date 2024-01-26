@@ -3799,7 +3799,7 @@ CString CTDCTaskFormatter::GetTaskRecurrence(const TODOITEM* pTDI) const
 CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 {
 	if (fSize >= 1)
-		return Misc::Format(max(1, (int)fSize));
+		return Misc::FormatNumber(max(1, (int)fSize));
 
 	if (fSize > 0)
 		return _T(">0");
@@ -3844,8 +3844,11 @@ CString CTDCTaskFormatter::GetTaskCost(DWORD dwTaskID) const
 
 CString CTDCTaskFormatter::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
+	return GetCost(m_calculator.GetTaskCost(pTDI, pTDS));
+}
 
+CString CTDCTaskFormatter::GetCost(double dCost) const
+{
 	if ((dCost == 0.0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
 		return EMPTY_STR;
 

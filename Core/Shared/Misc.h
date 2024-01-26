@@ -196,7 +196,11 @@ namespace Misc
 	BOOL IsSymbol(const CString& sValue);
 	BOOL StateChanged(BOOL b1, BOOL b2);
 
+	// These use regional settings
+	CString FormatNumber(int nVal, LPCTSTR szTrail = NULL);
+	CString FormatNumber(double dVal, LPCTSTR szTrail = NULL);
 	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
+
 	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
 	CString Format(int nVal, LPCTSTR szTrail = NULL);
 	CString Format(DWORD dwVal, LPCTSTR szTrail = NULL);

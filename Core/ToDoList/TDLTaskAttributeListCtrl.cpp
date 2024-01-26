@@ -1139,7 +1139,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_COST:
-		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, Misc::FormatCost(_ttof(sText)), crText, nDrawTextFlags);
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, m_formatter.GetCost(Misc::Atof(sText)), crText, nDrawTextFlags);
 		return;
 
 	case TDCA_COLOR:
@@ -1243,6 +1243,11 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				{
 					DrawIcon(pDC, sText, rText, FALSE);
 				}
+				return;
+
+			case TDCCA_INTEGER:
+			case TDCCA_DOUBLE:
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, pDef->FormatNumber(Misc::Atof(sText)), crText, nDrawTextFlags);
 				return;
 
 			default:

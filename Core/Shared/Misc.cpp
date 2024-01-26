@@ -2149,7 +2149,7 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 	CString sValue;
 
-	if (nDecPlaces < 0)
+	if (nDecPlaces < 0) // format decimal like an integer
 	{
 		sValue.Format(_T("%f"), dVal);
 		TrimTrailingDecimalZeros(sValue);
@@ -2191,26 +2191,51 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 	return sValue;
 }
 
+// ----------------------------------------------------------------
+
+#define FORMAT_REGION_VALUE(VAL, FUNC)                        \
+                                                              \
+char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
+setlocale(LC_NUMERIC, "");                                    \
+const UINT BUFSIZE = 100; TCHAR szValue[BUFSIZE + 1] = { 0 }; \
+FUNC(NULL, 0, sValue, NULL, szValue, BUFSIZE);                \
+sValue = szValue;                                             \
+setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
+
+// ----------------------------------------------------------------
+
 CString Misc::FormatCost(double dCost, LPCTSTR szTrail)
 {
 	CString sValue;
-	sValue.Format(_T("%.6f"), dCost);
+	sValue.Format(_T("%.f"), dCost);
 
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
-	setlocale(LC_NUMERIC, ""); // local default
-
-	const UINT BUFSIZE = 100;
-	TCHAR szCost[BUFSIZE + 1];
-
-	GetCurrencyFormat(NULL, 0, sValue, NULL, szCost, BUFSIZE);
-	sValue = szCost;
-				
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
+	FORMAT_REGION_VALUE(sValue, GetCurrencyFormat);
 
 	return (sValue + szTrail);
 }
+
+CString Misc::FormatNumber(double dVal, LPCTSTR szTrail)
+{
+	CString sValue;
+	sValue.Format(_T("%.6f"), dVal);
+
+	FORMAT_REGION_VALUE(sValue, GetNumberFormat);
+
+	return (sValue + szTrail);
+}
+
+CString Misc::FormatNumber(int nVal, LPCTSTR szTrail)
+{
+	CString sValue;
+	sValue.Format(_T("%.d"), nVal);
+
+	FORMAT_REGION_VALUE(sValue, GetNumberFormat);
+	TrimTrailingDecimalZeros(sValue);
+
+	return (sValue + szTrail);
+}
+
+// ----------------------------------------------------------------
 
 CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
 {
