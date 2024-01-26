@@ -1127,6 +1127,7 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyStartColor"), m_bSpecifyStartColor);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyStartTodayColor"), m_bSpecifyStartTodayColor);
 	pPrefs->WriteProfileInt(szKey, _T("ColorTaskBackground"), m_bColorTaskBackground);
+	pPrefs->WriteProfileInt(szKey, _T("CommentsUseTreeFont"), m_bCommentsUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("RemindersUseTreeFont"), m_bRemindersUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("FindTasksUseTreeFont"), m_bFindTasksUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("HLSColorGradient"), m_bHLSColorGradient);
