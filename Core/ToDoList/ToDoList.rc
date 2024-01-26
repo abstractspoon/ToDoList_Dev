@@ -4670,7 +4670,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CLEARSEARCH_TIP     "Clear Search"
     IDS_TABTIP_NOTFOUND     "File not found (%s)"
-    IDS_NEWDEPENDENCY_PROMPT "<new dependency>"
+    IDS_NEWDEPENDENCY_PROMPT "<New Dependency>"
     IDS_DEPENDSLEADIN_COL   "Lead In (Days)"
     IDS_TIMETRACKER_RECENTITEMS "Recently Tracked"
     IDS_TIMETRACKER_ALLITEMS "All Tasks"
