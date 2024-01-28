@@ -1087,7 +1087,12 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 	if (GetCellPrompt(nRow, sText, sPrompt))
 	{
-		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, CWndPrompt::GetTextColor(), nDrawTextFlags);
+		int nSelRow, nSelCol;
+
+		if (!GetCurSel(nSelRow, nSelCol) || (nSelRow != nRow) || (nSelCol != nCol))
+			crText = CWndPrompt::GetTextColor();
+
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, crText, nDrawTextFlags);
 		return;
 	}
 
