@@ -1149,22 +1149,32 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 	case TDCA_COLOR:
 		{
-			crText = _ttoi(sText);
+			COLORREF color = _ttoi(sText);
 
-			if (crText != CLR_NONE)
+			switch (color)
 			{
+			case CLR_NONE:
+			case 0:
+				break;
+
+			default:
 				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
 				{
 					// Use the entire cell rect for the background colour
 					CRect rCell;
 					GetCellRect(nRow, nCol, rCell);
 
-					pDC->FillSolidRect(rCell, crText);
-					crText = GraphicsMisc::GetBestTextColor(crText);
+					pDC->FillSolidRect(rCell, color);
+					crText = GraphicsMisc::GetBestTextColor(color);
 				}
-
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
+				else
+				{
+					crText = color;
+				}
+				break;
 			}
+
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
 		}
 		return;
 
