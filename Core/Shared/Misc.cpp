@@ -957,6 +957,19 @@ BOOL Misc::TrimTrailingDecimalZeros(CString& sText)
 	return TRUE;
 }
 
+BOOL Misc::TrimTrailingDecimals(CString& sText)
+{
+	CString sSep = GetDecimalSeparator();
+	int nDecimal = sText.Find(sSep);
+
+	if (nDecimal < 0)
+		return FALSE;
+
+	// To avoid any memory manipulation simply insert a null
+	sText = sText.Left(nDecimal);
+	return TRUE;
+}
+
 int Misc::Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty)
 {
 	TCHAR szSep[2] = { cDelim, 0 };
@@ -2149,15 +2162,10 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 	CString sValue;
 
-	if (nDecPlaces < 0) // format decimal like an integer
-	{
-		sValue.Format(_T("%f"), dVal);
-		TrimTrailingDecimalZeros(sValue);
-	}
+	if (nDecPlaces <= 0) // format decimal like an integer
+		sValue.Format(_T("%.f"), dVal);
 	else
-	{
 		sValue.Format(_T("%.*f"), nDecPlaces, dVal);
-	}
 				
 	// restore locale
 	setlocale(LC_NUMERIC, szLocale);
@@ -2193,7 +2201,7 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 
 // ----------------------------------------------------------------
 
-#define FORMAT_REGION_VALUE(VAL, FUNC)                        \
+#define FORMAT_REGION_VALUE(FUNC)                             \
                                                               \
 char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
 setlocale(LC_NUMERIC, "");                                    \
@@ -2206,31 +2214,38 @@ setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
 
 CString Misc::FormatCost(double dCost, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%.f"), dCost);
-
-	FORMAT_REGION_VALUE(sValue, GetCurrencyFormat);
+	CString sValue(Format(_T("%.6f"), dCost));
+	FORMAT_REGION_VALUE(GetCurrencyFormat);
 
 	return (sValue + szTrail);
 }
 
 CString Misc::FormatNumber(double dVal, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%.6f"), dVal);
-
-	FORMAT_REGION_VALUE(sValue, GetNumberFormat);
+	CString sValue(Format(_T("%.6f"), dVal));
+	FORMAT_REGION_VALUE(GetNumberFormat);
 
 	return (sValue + szTrail);
 }
 
 CString Misc::FormatNumber(int nVal, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%.d"), nVal);
+	CString sValue(Format(_T("%.d"), nVal));
+	FORMAT_REGION_VALUE(GetNumberFormat);
 
-	FORMAT_REGION_VALUE(sValue, GetNumberFormat);
-	TrimTrailingDecimalZeros(sValue);
+	// Because GetNumberFormat adds decimals regardless
+	TrimTrailingDecimals(sValue);
+
+	return (sValue + szTrail);
+}
+
+CString Misc::FormatNumber(LPCTSTR szVal, BOOL bAsInteger, LPCTSTR szTrail)
+{
+	CString sValue(szVal);
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	if (bAsInteger)
+		TrimTrailingDecimals(sValue);
 
 	return (sValue + szTrail);
 }

@@ -103,6 +103,7 @@ FOR %%f IN (%TDLFILELIST%) DO (
 )
 
 REM - All other components which we don't own
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\BouncyCastle.Crypto.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\CustomComboBox.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll

@@ -2324,58 +2324,82 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttr
 		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sTypeID, data);
 
-		SetTaskCustomAttributeData(hTask, sTypeID, data);
+		SetTaskCustomAttributeData(hTask, sTypeID, data, FALSE);
 	}
 
 	return TRUE;
 }
 
-BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data)
+BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data, BOOL bCalc)
 {
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, FALSE);
 
-	return SetTaskCustomAttributeData(pXITask, sCustAttribID, data);
+	return SetTaskCustomAttributeData(pXITask, sCustAttribID, data, bCalc);
 }
 
-BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data)
+BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data, BOOL bCalc)
 {
 	if (sCustAttribID.IsEmpty() || data.IsEmpty())
 		return FALSE;
 
-	if (!HasCustomAttribute(sCustAttribID))
+	const CXmlItem* pXIAttribDef = GetCustomAttributeDef(sCustAttribID);
+
+	if (!pXIAttribDef)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	CXmlItem* pXICustData = pXITask->AddItem(TDL_TASKCUSTOMATTRIBDATA);
+	// Add or get the custom attribute item
+	CXmlItem* pXICustData = GetTaskCustomAttribute(pXITask, sCustAttribID);
+	
+	if (!pXICustData)
+	{
+		pXICustData = pXITask->AddItem(TDL_TASKCUSTOMATTRIBDATA);
+		pXICustData->AddItem(TDL_TASKCUSTOMATTRIBID, Misc::ToUpper(sCustAttribID));
+	}
 	ASSERT(pXICustData);
 
-	pXICustData->AddItem(TDL_TASKCUSTOMATTRIBID, Misc::ToUpper(sCustAttribID));
-	pXICustData->AddItem(TDL_TASKCUSTOMATTRIBVALUE, data.AsString());
+	LPCTSTR szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCVALUE : TDL_TASKCUSTOMATTRIBVALUE);
+	pXICustData->AddItem(szTag, data.AsString());
 
 	// add human readable format
-	DWORD dwAttribType = GetCustomAttributeTypeByID(sCustAttribID);
+	szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING : TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
+
+	DWORD dwAttribType = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE);
 
 	if (dwAttribType & TDCCA_LISTMASK)
 	{
 		if (dwAttribType & (TDCCA_AUTOMULTILIST | TDCCA_FIXEDMULTILIST))
 		{
 			if (data.IsArray())
-				pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsArray());
+				pXICustData->AddItem(szTag, data.FormatAsArray());
 		}
 	}
 	else
 	{
-		switch (dwAttribType & TDCCA_DATAMASK)
+		DWORD dwDataType = (dwAttribType & TDCCA_DATAMASK);
+
+		switch (dwDataType)
 		{
 		case TDCCA_DATE:
-			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsDate(m_bISODates, TRUE));
+			pXICustData->AddItem(szTag, data.FormatAsDate(m_bISODates, TRUE));
 			break;
 
 		case TDCCA_TIMEPERIOD:
-			pXICustData->AddItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING, data.FormatAsTimePeriod());
+			pXICustData->AddItem(szTag, data.FormatAsTimePeriod());
+			break;
+
+		case TDCCA_DOUBLE:
+		case TDCCA_INTEGER:
+		case TDCCA_FRACTION:
+			{
+				DWORD dwFeatures = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBFEATURES);
+				CString sValue = TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(data.AsDouble(), dwDataType, dwFeatures);
+
+				pXICustData->AddItem(szTag, sValue);
+			}
 			break;
 		}
 	}
@@ -2696,6 +2720,11 @@ const CXmlItem* CTaskFile::GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID)
 	CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, NULL);
 
+	return GetTaskCustomAttribute(pXITask, szID);
+}
+
+CXmlItem* CTaskFile::GetTaskCustomAttribute(CXmlItem* pXITask, LPCTSTR szID) const
+{
 	// find the item having name == szID
 	CXmlItem* pXICustData = pXITask->GetItem(TDL_TASKCUSTOMATTRIBDATA);
 
@@ -2741,7 +2770,22 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, boo
 	
 		if (pXICustData)
 		{
-			LPCTSTR szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
+			LPCTSTR szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
+
+			if (Misc::IsEmpty(szValue))
+			{
+				szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
+
+				if (Misc::IsEmpty(szValue))
+				{
+					const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
+
+					if (pXICustData)
+					{
+						szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCVALUE);
+					}
+				}
+			}
 
 			if (!Misc::IsEmpty(szValue))
 				return szValue;

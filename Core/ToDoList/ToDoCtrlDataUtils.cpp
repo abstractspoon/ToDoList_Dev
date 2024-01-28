@@ -4608,6 +4608,9 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	if (pTDS->HasSubTasks())
 		tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 
+	// Calculated Custom attributes
+	ExportAllCalculatedTaskCustomAttributes(pTDI, pTDS, tasks, hTask);
+
 	return TRUE;
 }
 
@@ -4939,27 +4942,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 			tasks.SetTaskMetaData(hTask, pTDI->GetMetaData());
 
 		// custom data 
-		if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))
-		{
-			tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
-		}
-		else
-		{
-			int nIndex = m_data.m_aCustomAttribDefs.GetSize();
-
-			while (nIndex--)
-			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nIndex];
-
-				if (attribDef.bEnabled && filter.WantAttribute(attribDef.GetAttributeID()))
-				{
-					TDCCADATA data;
-
-					if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-						tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data);
-				}
-			}
-		}
+		ExportMatchingTaskCustomAttributes(pTDI, pTDS, tasks, hTask, filter);
 	}
 	else if (bDone)
 	{
@@ -4981,6 +4964,76 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
 
 	return TRUE;
+}
+
+void CTDCTaskExporter::ExportAllCalculatedTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const
+{
+	int nIndex = m_data.m_aCustomAttribDefs.GetSize();
+
+	while (nIndex--)
+		ExportCalculatedTaskCustomAttribute(pTDI, pTDS, m_data.m_aCustomAttribDefs[nIndex], tasks, hTask);
+}
+
+void CTDCTaskExporter::ExportMatchingTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const
+{
+	if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))
+	{
+		// Actual data
+		tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
+
+		// Calculated values
+		ExportAllCalculatedTaskCustomAttributes(pTDI, pTDS, tasks, hTask);
+	}
+	else
+	{
+		int nIndex = m_data.m_aCustomAttribDefs.GetSize();
+
+		while (nIndex--)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nIndex];
+
+			if (attribDef.bEnabled && filter.WantAttribute(attribDef.GetAttributeID()))
+			{
+				TDCCADATA data;
+
+				// Actual data
+				if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+					tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data, FALSE);
+
+				// Calculated value
+				ExportCalculatedTaskCustomAttribute(pTDI, pTDS, attribDef, tasks, hTask);
+			}
+		}
+	}
+}
+
+void CTDCTaskExporter::ExportCalculatedTaskCustomAttribute(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CTaskFile& tasks, HTASKITEM hTask) const
+{
+	if (attribDef.bEnabled && (attribDef.IsAggregated() || attribDef.IsDataType(TDCCA_CALCULATION)))
+	{
+		double dValue;
+		TDC_UNITS nUnits = TDCU_NULL;
+
+		if (attribDef.IsDataType(TDCCA_TIMEPERIOD))
+		{
+			TDCCADATA data;
+			pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
+			nUnits = data.GetTimeUnits();
+		}
+
+		if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
+		{
+			TDCCADATA data;
+
+			if (nUnits != TDCU_NULL)
+				data.Set(TDCTIMEPERIOD(dValue, nUnits));
+			else
+				data.Set(dValue);
+
+			tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data, TRUE);
+		}
+	}
 }
 
 COLORREF CTDCTaskExporter::GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const

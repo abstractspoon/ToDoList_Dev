@@ -1196,11 +1196,11 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 	{
 		// Likewise for certain calculated custom attributes
 		CTDCCustomAttribDefinitionArray aRestAttribDefs(aCustAttribDefs);
-		int nCust = aCustAttribDefs.GetSize();
+		int nCust = aRestAttribDefs.GetSize();
 
 		while (nCust--)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aCustAttribDefs[nCust];
+			TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aRestAttribDefs[nCust];
 
 			if (mapLongest.HasColumn(attribDef.GetColumnID()))
 			{
@@ -1209,7 +1209,7 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 				if (GetLongestAggregatedValue(attribDef, sLongest))
 				{
 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
-					aRestAttribDefs.RemoveAt(nCust);
+					attribDef.bEnabled = FALSE; // Prevent GetLongestValue overwriting 
 				}
 				else if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
 				{

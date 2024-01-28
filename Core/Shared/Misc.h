@@ -163,6 +163,7 @@ namespace Misc
 	TCHAR TrimLast(CString& sText);
 	BOOL TrimFirstIf(TCHAR cTest, CString& sText);
 	BOOL TrimTrailingDecimalZeros(CString& sText);
+	BOOL TrimTrailingDecimals(CString& sText);
 	BOOL TrimLastIf(TCHAR cTest, CString& sText);
 	CString& Trim(CString& sText, TCHAR cChar);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
@@ -199,6 +200,7 @@ namespace Misc
 	// These use regional settings
 	CString FormatNumber(int nVal, LPCTSTR szTrail = NULL);
 	CString FormatNumber(double dVal, LPCTSTR szTrail = NULL);
+	CString FormatNumber(LPCTSTR szVal, BOOL bAsInteger, LPCTSTR szTrail = NULL);
 	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
 
 	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
