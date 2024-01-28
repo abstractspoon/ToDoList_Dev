@@ -818,16 +818,16 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
 	case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
 
-	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int, Misc::Format(value, 2));	break;
-	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int, Misc::Format(value));		break;
-	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int, Misc::Format(value));		break;
-	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF, Misc::Format(value));	break;
-	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD, Misc::Format(value));	break;
+	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int,		Misc::Format(value, 2));	break;
+	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int,		Misc::Format(value));		break;
+	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int,		Misc::Format(value));		break;
+	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF,	Misc::Format(value));		break;
+	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD,		Misc::Format(value));		break;
 
-	case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost,				TDCCOST, value.Format(2));					break;
-	case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence,		TDCRECURRENCE, value.GetRegularityText());	break;
-	case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies,		CTDCDependencyArray, value.Format());		break;
-	case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining,	TDCTIMEPERIOD, value.Format(2));			break;
+	case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost,				TDCCOST,				value.Format(2));			break;
+	case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence,		TDCRECURRENCE,			value.GetRegularityText());	break;
+	case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies,		CTDCDependencyArray,	value.Format());			break;
+	case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining,	TDCTIMEPERIOD,			value.Format(2));			break;
 
 	case TDCA_TIMEESTIMATE:
 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || 
