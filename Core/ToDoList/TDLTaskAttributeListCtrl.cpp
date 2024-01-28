@@ -629,8 +629,8 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 		switch (GetAttributeID(nItem))
 		{
 		case TDCA_DEPENDENCY:
-// 			if (m_taskCtrl.SelectionHasCircularDependencies())
-// 				return colorRed;
+ 			if (m_multitasker.AnyTaskHasLocalCircularDependencies(m_aSelectedTaskIDs))
+ 				return colorRed;
 			break;
 		}
 	}
