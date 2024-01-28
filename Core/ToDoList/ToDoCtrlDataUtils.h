@@ -195,6 +195,7 @@ public:
 
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
+	CString GetCost(double dCost) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -202,7 +203,6 @@ protected:
 
 	CTDCTaskCalculator m_calculator;
 	
-
 protected:
 	CString FormatDate(const COleDateTime& date) const;
 };
@@ -287,7 +287,6 @@ protected:
 	static int Compare(int nNum1, int nNum2);
 	static int Compare(double dNum1, double dNum2);
 	static int Compare(DWORD dwNum1, DWORD dwNum2);
-
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -323,6 +322,10 @@ protected:
 	COLORREF GetPriorityColor(int nPriority) const;
 
 	HTASKITEM ExportTaskEx(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hParentTask, HTASKITEM hPrevSiblingTask, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
+
+	void ExportMatchingTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
+	void ExportAllCalculatedTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const;
+	void ExportCalculatedTaskCustomAttribute(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CTaskFile& tasks, HTASKITEM hTask) const;
 };
 
 

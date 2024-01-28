@@ -916,6 +916,9 @@ BOOL Misc::TrimLastIf(TCHAR cTest, CString& sText)
 
 TCHAR Misc::TrimFirst(CString& sText)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	TCHAR nFirst = First(sText);
 	
 	if (nFirst != 0)
@@ -926,6 +929,9 @@ TCHAR Misc::TrimFirst(CString& sText)
 
 TCHAR Misc::TrimLast(CString& sText)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	TCHAR nLast = Last(sText);
 	
 	if (nLast != 0)
@@ -948,6 +954,19 @@ BOOL Misc::TrimTrailingDecimalZeros(CString& sText)
 	if (nDecimal == (sText.GetLength() - sSep.GetLength()))
 		sText = sText.Left(nDecimal);
 
+	return TRUE;
+}
+
+BOOL Misc::TrimTrailingDecimals(CString& sText)
+{
+	CString sSep = GetDecimalSeparator();
+	int nDecimal = sText.Find(sSep);
+
+	if (nDecimal < 0)
+		return FALSE;
+
+	// To avoid any memory manipulation simply insert a null
+	sText = sText.Left(nDecimal);
 	return TRUE;
 }
 
@@ -2143,15 +2162,10 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 	CString sValue;
 
-	if (nDecPlaces < 0)
-	{
-		sValue.Format(_T("%f"), dVal);
-		TrimTrailingDecimalZeros(sValue);
-	}
+	if (nDecPlaces <= 0) // format decimal like an integer
+		sValue.Format(_T("%.f"), dVal);
 	else
-	{
 		sValue.Format(_T("%.*f"), nDecPlaces, dVal);
-	}
 				
 	// restore locale
 	setlocale(LC_NUMERIC, szLocale);
@@ -2185,26 +2199,58 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 	return sValue;
 }
 
+// ----------------------------------------------------------------
+
+#define FORMAT_REGION_VALUE(FUNC)                             \
+                                                              \
+char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
+setlocale(LC_NUMERIC, "");                                    \
+const UINT BUFSIZE = 100; TCHAR szValue[BUFSIZE + 1] = { 0 }; \
+FUNC(NULL, 0, sValue, NULL, szValue, BUFSIZE);                \
+sValue = szValue;                                             \
+setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
+
+// ----------------------------------------------------------------
+
 CString Misc::FormatCost(double dCost, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%.6f"), dCost);
-
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
-	setlocale(LC_NUMERIC, ""); // local default
-
-	const UINT BUFSIZE = 100;
-	TCHAR szCost[BUFSIZE + 1];
-
-	GetCurrencyFormat(NULL, 0, sValue, NULL, szCost, BUFSIZE);
-	sValue = szCost;
-				
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
+	CString sValue(Format(_T("%.6f"), dCost));
+	FORMAT_REGION_VALUE(GetCurrencyFormat);
 
 	return (sValue + szTrail);
 }
+
+CString Misc::FormatNumber(double dVal, LPCTSTR szTrail)
+{
+	CString sValue(Format(_T("%.6f"), dVal));
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	return (sValue + szTrail);
+}
+
+CString Misc::FormatNumber(int nVal, LPCTSTR szTrail)
+{
+	CString sValue(Format(_T("%.d"), nVal));
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	// Because GetNumberFormat adds decimals regardless
+	TrimTrailingDecimals(sValue);
+
+	return (sValue + szTrail);
+}
+
+CString Misc::FormatNumber(LPCTSTR szVal, BOOL bAsInteger, LPCTSTR szTrail)
+{
+	CString sValue(szVal);
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	if (bAsInteger)
+		TrimTrailingDecimals(sValue);
+
+	return (sValue + szTrail);
+}
+
+// ----------------------------------------------------------------
 
 CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
 {
@@ -2426,6 +2472,9 @@ int StringSortProc(const void* v1, const void* v2)
 
 void Misc::SortArray(CStringArray& aValues, SORTPROC pSortProc)
 {
+	if (aValues.GetSize() < 2)
+		return;
+
 	qsort(aValues.GetData(), aValues.GetSize(), sizeof(CString*), pSortProc ? pSortProc : StringSortProc);
 }
 
@@ -2449,6 +2498,9 @@ int DWordSortProc(const void* v1, const void* v2)
 
 void Misc::SortArray(CDWordArray& aValues, SORTPROC pSortProc)
 {
+	if (aValues.GetSize() < 2)
+		return;
+
 	qsort(aValues.GetData(), aValues.GetSize(), sizeof(DWORD*), pSortProc ? pSortProc : DWordSortProc);
 }
 

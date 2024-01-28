@@ -941,37 +941,39 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures)
 {
-	int nDecimals = 0;
-	LPCTSTR szTrail = NULL;
+	BOOL bOneDecimal = (dwFeatures & TDCCAF_ONEDECIMAL);
 
 	switch (dwDataType)
 	{
 	case TDCCA_FRACTION:
 		if (dwFeatures & TDCCAF_DISPLAYASPERCENT)
 		{
-			dValue *= 100;
-			szTrail = _T("%");
-			nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 0);
+			return Misc::Format((dValue * 100), (bOneDecimal ? 1 : 0), _T("%"));
 		}
-		else
-		{
-			nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2);
-		}
-		break;
+		// else fall thru
 
 	case TDCCA_DOUBLE:
-		nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2);
+		{
+			CString sNumber = Misc::FormatNumber(dValue);
+
+			if (bOneDecimal)
+			{
+				int nDecimal = sNumber.Find(Misc::GetDecimalSeparator());
+
+				if (nDecimal > 0)
+					sNumber = sNumber.Left(nDecimal + 2);
+			}
+
+			return sNumber;
+		}
 		break;
 
 	case TDCCA_INTEGER:
-		break;
-
-	default:
-		ASSERT(0);
-		return _T("");
+		return Misc::FormatNumber((int)dValue);
 	}
 
-	return Misc::Format(dValue, nDecimals, szTrail);
+	ASSERT(0);
+	return _T("");
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const
