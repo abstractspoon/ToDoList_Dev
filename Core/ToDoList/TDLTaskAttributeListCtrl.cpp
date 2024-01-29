@@ -1206,19 +1206,45 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 			for (int nFile = 0; nFile < nNumFiles; nFile++)
 			{
-				if (DrawIcon(pDC, aFiles[nFile], rFile, TRUE))
-					rFile.left += (ICON_SIZE + 2);
-			}
+				CString sFile = aFiles[nFile];
 
-			// Only render the link text if there is a single link
-			if (nNumFiles == 1)
-			{
-				CString sFile(aFiles[0]);
+				if (DrawIcon(pDC, sFile, rFile, TRUE))
+					rFile.left += (ICON_SIZE + 2);
 
 				if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
 					sFile = FileMisc::GetFileNameFromPath(sFile);
 
+				if (nFile < (nNumFiles - 1))
+					sFile += Misc::GetListSeparator() + ' ';
+
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rFile, sFile, crText, nDrawTextFlags);
+				rFile.left += pDC->GetTextExtent(sFile).cx;
+			}
+		}
+		return;
+
+	case TDCA_DEPENDENCY:
+		{
+			CTDCDependencyArray aDepends;
+			int nNumDepends = aDepends.Parse(sText);
+
+			CRect rTitle(rText);
+
+			for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+			{
+				DWORD dwDependsID = aDepends[nDepend].dwTaskID;
+
+				CString sTitle = m_data.GetTaskTitle(dwDependsID);
+				CString sIcon = m_data.GetTaskIcon(dwDependsID);
+	
+				if (DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE))
+					rTitle.left += (ICON_SIZE + 2);
+
+				if (nDepend < (nNumDepends - 1))
+					sTitle += Misc::GetListSeparator() + ' ';
+
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rTitle, sTitle, crText, nDrawTextFlags);
+				rTitle.left += pDC->GetTextExtent(sTitle).cx;
 			}
 		}
 		return;
