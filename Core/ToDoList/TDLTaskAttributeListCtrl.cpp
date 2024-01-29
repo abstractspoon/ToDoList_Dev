@@ -1667,6 +1667,15 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		}
 		break;
 
+	case TDCA_DEPENDENCY:
+		{
+			CTDCDependencyArray aDepends;
+			m_multitasker.GetTasksDependencies(m_aSelectedTaskIDs, aDepends);
+
+			m_eDepends.SetDependencies(aDepends);
+		}
+		break;
+
 	case TDCA_ICON: 
 	case TDCA_FLAG: 
 	case TDCA_LOCK: 
@@ -1679,15 +1688,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_PERCENT:
 		m_editBox.SetMask(_T("0123456789"));
 		m_editBox.SetSpinBuddy(&m_spinPercent);
-		break;
-
-	case TDCA_DEPENDENCY:
-		{
-// 			CTDCDependencyArray aDepends;
-// 			m_taskCtrl.GetSelectedTaskDependencies(aDepends);
-// 
-// 			m_eDepends.SetDependencies(aDepends);
-		}
 		break;
 
 	case TDCA_COST:
@@ -2047,6 +2047,8 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_DEPENDENCY:
 		if (bBtnClick)
 		{
+			PrepareControl(m_eDepends, nRow, nCol);
+
 			if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
 				RefreshSelectedTasksValue(nRow);
 		}
