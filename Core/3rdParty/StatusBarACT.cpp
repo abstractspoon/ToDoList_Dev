@@ -98,7 +98,7 @@ int CStatusBarACT::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	SetBarStyle(GetBarStyle() & ~CBRS_TOOLTIPS);
 	
 	// allow '\n' chars to wrap tips
-	m_tooltip.SetMaxTipWidth(-1);
+	m_tooltip.SetMaxTipWidth(SHRT_MAX);
 	
 	return 0;
 }
