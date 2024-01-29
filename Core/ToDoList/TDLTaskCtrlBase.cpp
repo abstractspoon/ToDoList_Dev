@@ -5843,29 +5843,57 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT
 
 CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const
 {
-	CString sSelTasks;
-	POSITION pos = GetFirstSelectedTaskPos();
-	int nCount = 0;
+	CDWordArray aSelTaskIDs;
+	int nNumIDs = GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
-	while (pos)
+	if ((nMaxTasks > 0) && (nMaxTasks < nNumIDs))
 	{
-		if ((nMaxTasks != -1) && (nCount >= nMaxTasks))
-			break;
-
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		if (bFullPath)
-			sSelTasks += m_formatter.GetTaskPath(dwTaskID, FALSE, -1);
-
-		sSelTasks += m_data.GetTaskTitle(dwTaskID);
-		sSelTasks += (cSep == 0 ? Misc::GetListSeparator() : cSep);
-
-		nCount++;
+		aSelTaskIDs.SetSize(nMaxTasks);
+		nNumIDs = nMaxTasks;
 	}
 
-	Misc::RemoveSuffix(sSelTasks, Misc::GetListSeparator());
+	CStringArray aTitles;
+	aTitles.SetSize(nNumIDs);
+
+	for (int nID = 0; nID < nNumIDs; nID++)
+	{
+		DWORD dwTaskID = aSelTaskIDs[nID];
+
+		if (bFullPath)
+			aTitles[nID] = m_formatter.GetTaskPath(dwTaskID, TRUE);
+		else
+			aTitles[nID] = m_data.GetTaskTitle(dwTaskID);
+	}
+
+	return Misc::FormatArray(aTitles, cSep);
+
+/*
+	{
+		CStringArray sSelTasks;
+		POSITION pos = GetFirstSelectedTaskPos();
+		int nCount = 0;
+
+		while (pos)
+		{
+			if ((nMaxTasks != -1) && (nCount >= nMaxTasks))
+				break;
+
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+			if (bFullPath)
+				sSelTasks += m_formatter.GetTaskPath(dwTaskID, FALSE, -1);
+
+			sSelTasks += m_data.GetTaskTitle(dwTaskID);
+			sSelTasks += (cSep == 0 ? Misc::GetListSeparator() : cSep);
+
+			nCount++;
+		}
+
+		Misc::RemoveSuffix(sSelTasks, Misc::GetListSeparator());
+	}
 
 	return sSelTasks;
+*/
 }
 
 DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const

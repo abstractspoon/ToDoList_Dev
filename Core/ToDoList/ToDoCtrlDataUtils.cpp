@@ -3584,12 +3584,8 @@ CString CTDCTaskFormatter::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (!pTDS || !pTDI)
 		return EMPTY_STR;
 
-	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
-
-	if (!pTDSParent || pTDSParent->IsRoot())
-		return EMPTY_STR;
-
 	CString sPath;
+	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
 
 	while (pTDSParent && !pTDSParent->IsRoot())
 	{
@@ -3607,7 +3603,7 @@ CString CTDCTaskFormatter::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE
 	}
 
 	if (bWithTaskName)
-		sPath += ('\\' + pTDI->sTitle);
+		sPath += pTDI->sTitle;
 
 	return sPath;
 }
@@ -4212,7 +4208,7 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, BOOL bWithTaskName, int n
 		sElm = sElm.Left(sElm.GetLength() - nTrimElm) + "...";
 	}
 
-	return Misc::FormatArray(aElements, _T("\\"));
+	return Misc::FormatArray(aElements, '\\');
 }
 
 CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
