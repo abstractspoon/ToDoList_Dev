@@ -207,6 +207,7 @@ protected:
 	void Populate();
 	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
+	int GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const;
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTasksValue(int nRow);
@@ -217,6 +218,7 @@ protected:
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
+	BOOL RowValueVaries(int nRow) const;
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

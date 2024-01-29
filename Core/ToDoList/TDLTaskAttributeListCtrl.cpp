@@ -979,9 +979,14 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton
 	return TRUE;
 }
 
+BOOL CTDLTaskAttributeListCtrl::RowValueVaries(int nRow) const
+{
+	return (GetItemImage(nRow) == VALUE_VARIES);
+}
+
 BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
 {
-	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && (GetItemImage(nRow) == VALUE_VARIES))
+	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && RowValueVaries(nRow))
 	{
 		DWORD dwState = GetButtonState(nRow, nCol, bSelected);
 		dwState |= (DFCS_BUTTONCHECK | DFCS_MIXED);
@@ -1026,7 +1031,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 	if (!nSelCount)
 		return FALSE;
 
-	BOOL bValueVaries = (GetItemImage(nRow) == VALUE_VARIES);
+	BOOL bValueVaries = RowValueVaries(nRow);
 
 	if (!bValueVaries)
 	{
@@ -2613,9 +2618,133 @@ BOOL CTDLTaskAttributeListCtrl::PreTranslateMessage(MSG* pMsg)
 	return CInputListCtrl::PreTranslateMessage(pMsg);
 }
 
+int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
+{
+	switch (nTimeAttribID)
+	{
+	case TDCA_DONETIME:		return GetRow(TDCA_DONEDATE);
+	case TDCA_DUETIME:		return GetRow(TDCA_DUEDATE);
+	case TDCA_STARTTIME:	return GetRow(TDCA_STARTDATE);
+
+	default:
+		if (IsCustomTime(nTimeAttribID))
+			return GetRow(MapCustomTimeToDate(nTimeAttribID));
+		break;
+	}
+
+	ASSERT(0);
+	return -1;
+}
+
 int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	// TODO
+	LVHITTESTINFO lvHit = { 0 };
+	lvHit.pt = point;
+
+	// Get around const-ness
+	int nRow = (int)::SendMessage(m_hWnd, LVM_SUBITEMHITTEST, 0, (LPARAM)&lvHit);
+	int nCol = lvHit.iSubItem;
+
+	if ((nRow == -1) || (nCol == -1))
+		return 0;
+
+	CRect rBtn;
+	
+	if (GetButtonRect(nRow, nCol, rBtn) && rBtn.PtInRect(point))
+		return 0;
+
+	static CEnString sTooltip;
+	sTooltip.Empty();
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	switch (nCol)
+	{
+	case ATTRIB_COL:
+		if (IsCustomTime(nAttribID))
+			sTooltip = _T("Time of day");// TODO
+		break;
+
+	case VALUE_COL:
+		{
+			switch (nAttribID)
+			{
+			case TDCA_ALLOCTO:
+			case TDCA_CATEGORY:
+			case TDCA_TAGS:
+			case TDCA_FILELINK:
+				// TODO
+				break;
+
+			case TDCA_COLOR:
+				if (!RowValueVaries(nRow))
+				{
+					COLORREF color = _ttoi(GetItemText(nRow, nCol));
+
+					if (!color || (color == CLR_NONE)) // TODO
+					{
+						sTooltip = _T("Default colour");
+					}
+				}
+				break;
+
+			case TDCA_DONETIME:
+			case TDCA_DUETIME:
+			case TDCA_STARTTIME:
+				{
+					int nDateRow = GetDateRow(nAttribID);
+
+					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
+					{
+						sTooltip = _T("Requires date to be set"); // TODO
+					}
+				}
+				break;
+
+			case TDCA_DEPENDENCY:
+				{
+					CString sValue = GetItemText(nRow, nCol);
+
+					if (sValue.IsEmpty())
+					{
+						// TODO
+					}
+				}
+				break;
+
+			default:
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULL);
+
+					if (pDef->IsMultiList())
+					{
+						switch (pDef->GetDataType())
+						{
+						case TDCCA_STRING:
+							// TODO
+							break;
+						}
+					}
+				}
+				else if (IsCustomTime(nAttribID))
+				{
+					int nDateRow = GetDateRow(nAttribID);
+
+					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
+					{
+						sTooltip = _T("Requires date to be set"); // TODO
+					}
+				}
+				break;
+			}
+		}
+		break;
+	}
+
+	if (!sTooltip.IsEmpty())
+		return CToolTipCtrlEx::SetToolInfo(*pTI, *this, sTooltip, MAKELONG(nRow, nCol));
 
 	return -1;  // not found
 }
