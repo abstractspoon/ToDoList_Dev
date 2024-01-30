@@ -78,7 +78,7 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
 		const TRACKITEM& ti = Misc::GetItemT<TRACKITEM>(pTTL->aTasks, nTask);
 		int nImage = m_pTDC->GetTaskIconImageList().GetImageIndex(ti.sImage);
 
-		AddTask(ti.sTaskTitle, ti.dwTaskID, ti.bParent, ti.nLevel, nImage);
+		AddTask(ti.sTask, ti.dwTaskID, ti.bParent, ti.nLevel, nImage);
 	}
 
 	UpdateRecentlyTrackedTasks(pTTL, dwSelID);
@@ -126,7 +126,7 @@ int CTDLTimeTrackerTaskComboBox::Update(const TRACKTASKLIST* pTTL, const CDWordA
 			const TRACKITEM& ti = Misc::GetItemT<TRACKITEM>(pTTL->aTasks, nTTItem);
 			int nNewImage = m_pTDC->GetTaskIconImageList().GetImageIndex(ti.sImage);
 
-			if (ModifyItem(nCBItem, ti.sTaskTitle, nNewImage))
+			if (ModifyItem(nCBItem, ti.sTask, nNewImage))
 				nNumUpdated++;
 		}
 	}
