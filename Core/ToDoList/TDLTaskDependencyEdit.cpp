@@ -304,7 +304,12 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 		if (depend.IsLocal())
 		{
 			HTASKITEM hTask = m_tasks.FindTask(depend.dwTaskID);
-			CString sName = (hTask ? m_tasks.GetTaskTitle(hTask) : Misc::Format(depend.dwTaskID));
+			CString sName;
+
+			if (hTask)
+				sName.Format(_T("%s (%ld)"), m_tasks.GetTaskTitle(hTask), depend.dwTaskID);
+			else
+				sName = Misc::Format(depend.dwTaskID);
 
 			int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
 

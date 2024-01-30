@@ -222,7 +222,9 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CLocalizer::EnableTranslation(m_cbMultiFileLink, FALSE);
 
 	VERIFY(m_dropFiles.Register(this));
+
 	VERIFY(m_tooltip.Create(this));
+	m_tooltip.EnableMultilineTips();
 
 	return 0;
 }
@@ -1234,7 +1236,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			{
 				DWORD dwDependsID = aDepends[nDepend].dwTaskID;
 
-				CString sTitle = m_data.GetTaskTitle(dwDependsID);
+				CString sTitle = m_formatter.GetTaskTitlePath(dwDependsID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
 				CString sIcon = m_data.GetTaskIcon(dwDependsID);
 	
 				if (DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE))
@@ -2731,11 +2733,11 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 			case TDCA_DEPENDENCY:
 				{
-					CString sValue = GetItemText(nRow, nCol);
-
-					if (sValue.IsEmpty())
+					CTDCDependencyArray aDepends;
+					
+					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
 					{
-						// TODO
+						sTooltip = m_formatter.GetDependencies(aDepends, '\n');
 					}
 				}
 				break;

@@ -4200,6 +4200,24 @@ CString CTDCTaskFormatter::GetTaskTags(const TODOITEM* pTDI, TCHAR cSep) const
 	return Misc::FormatArray(pTDI->aTags, cSep);
 }
 
+CString CTDCTaskFormatter::GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep) const
+{
+	// Dependencies
+	CDWordArray aDependIDs;
+	CStringArray aOtherDepends;
+
+	if (!aDepends.GetDependencies(aDependIDs, aOtherDepends))
+		return EMPTY_STR;
+
+	// else
+	CStringArray aDependNames;
+
+	GetTaskTitlePaths(aDependIDs, (TDCTF_TITLEONLY | TDCTF_TRAILINGID), aDependNames);
+	aDependNames.Append(aOtherDepends);
+
+	return Misc::FormatArray(aDependNames, cSep);
+}
+
 CString CTDCTaskFormatter::GetTaskDependencies(const TODOITEM* pTDI, TCHAR cSep) const
 {
 	// sanity check
@@ -4208,20 +4226,7 @@ CString CTDCTaskFormatter::GetTaskDependencies(const TODOITEM* pTDI, TCHAR cSep)
 	if (!pTDI)
 		return EMPTY_STR;
 
-	// Dependencies
-	CDWordArray aDependIDs;
-	CStringArray aOtherDepends;
-
-	if (!pTDI->aDependencies.GetDependencies(aDependIDs, aOtherDepends))
-		return EMPTY_STR;
-
-	// else
-	CStringArray aDepends;
-
-	GetTaskTitlePaths(aDependIDs, (TDCTF_TITLEONLY | TDCTF_TRAILINGID), aDepends);
-	aDepends.Append(aOtherDepends);
-
-	return Misc::FormatArray(aDepends, cSep);
+	return GetDependencies(pTDI->aDependencies);
 }
 
 CString CTDCTaskFormatter::GetTaskFileLinks(const TODOITEM* pTDI, TCHAR cSep) const
