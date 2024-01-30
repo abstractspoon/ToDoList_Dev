@@ -197,6 +197,17 @@ public:
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;
 
+	enum 
+	{
+		TITLEANDPATH	= 0x0,
+		TITLEONLY		= 0x1,
+		PATHONLY		= 0x2,
+		TRAILINGID		= 0x4,
+	};
+
+	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
+	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
+
 protected:
 	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;

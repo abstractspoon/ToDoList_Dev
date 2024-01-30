@@ -5852,48 +5852,8 @@ CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, i
 		nNumIDs = nMaxTasks;
 	}
 
-	CStringArray aTitles;
-	aTitles.SetSize(nNumIDs);
-
-	for (int nID = 0; nID < nNumIDs; nID++)
-	{
-		DWORD dwTaskID = aSelTaskIDs[nID];
-
-		if (bFullPath)
-			aTitles[nID] = m_formatter.GetTaskPath(dwTaskID, TRUE);
-		else
-			aTitles[nID] = m_data.GetTaskTitle(dwTaskID);
-	}
-
-	return Misc::FormatArray(aTitles, cSep);
-
-/*
-	{
-		CStringArray sSelTasks;
-		POSITION pos = GetFirstSelectedTaskPos();
-		int nCount = 0;
-
-		while (pos)
-		{
-			if ((nMaxTasks != -1) && (nCount >= nMaxTasks))
-				break;
-
-			DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-			if (bFullPath)
-				sSelTasks += m_formatter.GetTaskPath(dwTaskID, FALSE, -1);
-
-			sSelTasks += m_data.GetTaskTitle(dwTaskID);
-			sSelTasks += (cSep == 0 ? Misc::GetListSeparator() : cSep);
-
-			nCount++;
-		}
-
-		Misc::RemoveSuffix(sSelTasks, Misc::GetListSeparator());
-	}
-
-	return sSelTasks;
-*/
+	DWORD dwFlags = (bFullPath ? CTDCTaskFormatter::TITLEANDPATH : CTDCTaskFormatter::TITLEONLY);
+	return m_formatter.GetTaskTitlePaths(aSelTaskIDs, dwFlags, cSep);
 }
 
 DWORD CTDLTaskCtrlBase::GetSelectedTaskParentID() const

@@ -4219,6 +4219,46 @@ CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
 	return Misc::Format(_T("(%lu) %lu"), dwRefID, dwTaskID);
 }
 
+void CTDCTaskFormatter::GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const
+{
+	int nNumIDs = aTaskIDs.GetSize();
+	aTitlePaths.SetSize(nNumIDs);
+
+	for (int nID = 0; nID < nNumIDs; nID++)
+	{
+		DWORD dwTaskID = aTaskIDs[nID];
+
+		if (dwFlags & TITLEONLY)
+		{
+			aTitlePaths[nID] = m_data.GetTaskTitle(dwTaskID);
+		}
+		else if (dwFlags & PATHONLY)
+		{
+			aTitlePaths[nID] = GetTaskPath(dwTaskID, FALSE);
+		}
+		else // title and path
+		{
+			aTitlePaths[nID] = GetTaskPath(dwTaskID, TRUE);
+		}
+
+		if (dwFlags & TRAILINGID)
+		{
+			aTitlePaths[nID] += Misc::Format(_T(" (%ld)"), dwTaskID);
+		}
+	}
+}
+
+CString CTDCTaskFormatter::GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep) const
+{
+	ASSERT(aTaskIDs.GetSize());
+
+	CStringArray aTitlePaths;
+	GetTaskTitlePaths(aTaskIDs, dwFlags, aTitlePaths);
+
+	return Misc::FormatArray(aTitlePaths, cSep);
+}
+
+
 CString CTDCTaskFormatter::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
 {
 	if (!attribDef.bEnabled)
