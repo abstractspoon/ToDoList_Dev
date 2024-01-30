@@ -1262,7 +1262,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 			// The longest path string will always be a leaf/collapsed task
 			// so we don't update the 'cache' until then
 			if (!bSearchSubtasks)
-				mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
+				mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDS));
 		}
 
 		if (mapLongest.HasColumn(TDCC_POSITION))

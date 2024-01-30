@@ -363,22 +363,21 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 		if (pTDI->aDependencies.GetSize())
 		{
 			// Build list of Names and IDs
-			for (int nDepend = 0; nDepend < pTDI->aDependencies.GetSize(); nDepend++)
-			{
-				if (nDepend > 0)
-					sTooltip += '\n';
+			int nNumDepends = pTDI->aDependencies.GetSize();
 
+			CStringArray aDepends;
+			aDepends.SetSize(nNumDepends);
+
+			for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+			{
 				const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
-				
-				// Convert to a task link and send to parent
-				CString sLink = depend.Format(_T(""), TRUE);
-				LPCTSTR szTitle = (LPCTSTR)CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sLink);
-				
-				if (!Misc::IsEmpty(szTitle))
-					sTooltip += Misc::Format(_T("%s (%s)"), depend.Format(), szTitle);
+
+				if (depend.IsLocal())
+					aDepends[nDepend] = m_formatter.GetTaskTitlePath(depend.dwTaskID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
 				else
-					sTooltip += depend.Format();
+					aDepends[nDepend] = depend.Format();
 			}		
+			sTooltip = Misc::FormatArray(aDepends, '\n');
 
 			return GetUniqueToolTipID(dwTaskID, nColID);
 		}
@@ -513,7 +512,7 @@ void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 		::GetClientRect(m_hdrTasks, rHeader);
 
 		int nColWidthInChars = (int)(rHeader.Width() / m_fAveHeaderCharWidth);
-		CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), FALSE, nColWidthInChars);
+		CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), nColWidthInChars);
 
 		if (!sPath.IsEmpty())
 		{
@@ -3921,7 +3920,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_TIMEREMAINING:	return m_formatter.GetTaskTimeRemaining(pTDI, pTDS);
 	case TDCC_TIMEESTIMATE:		return m_formatter.GetTaskTimeEstimate(pTDI, pTDS);
 	case TDCC_TIMESPENT:		return m_formatter.GetTaskTimeSpent(pTDI, pTDS);
-	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDI, pTDS);
+	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDS);
 	case TDCC_SUBTASKDONE:		return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
 	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentSize(pTDI);
 	case TDCC_COMMENTSFORMAT:	return m_formatter.GetTaskCommentFormat(pTDI);
@@ -5852,7 +5851,7 @@ CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, i
 		nNumIDs = nMaxTasks;
 	}
 
-	DWORD dwFlags = (bFullPath ? CTDCTaskFormatter::TITLEANDPATH : CTDCTaskFormatter::TITLEONLY);
+	DWORD dwFlags = (bFullPath ? TDCTF_TITLEANDPATH : TDCTF_TITLEONLY);
 	return m_formatter.GetTaskTitlePaths(aSelTaskIDs, dwFlags, cSep);
 }
 
@@ -5922,7 +5921,7 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 		if (bIncludeTaskName && nMaxLen != -1)
 			nMaxLen -= sTaskTitle.GetLength();
 
-		sPath = m_formatter.GetTaskPath(dwTaskID, FALSE, nMaxLen);
+		sPath = m_formatter.GetTaskPath(dwTaskID, nMaxLen);
 	
 		if (bIncludeTaskName)
 			sPath += sTaskTitle;

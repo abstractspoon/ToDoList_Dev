@@ -174,24 +174,23 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 			CMapTaskIndex mapCBItems;
 			BuildItemMap(mapCBItems);
 
+			CMapTaskIndex mapTasks;
+			pTTL->aTasks.BuildTaskMap(mapTasks);
+
 			int nID = pTTL->aRecentlyTrackedIDs.GetSize(), nNumAdded = 0;
 
 			while (nID--)
 			{
 				DWORD dwTaskID = pTTL->aRecentlyTrackedIDs[nID];
-				int nItem = CB_ERR;
+				int nItem = CB_ERR, nTask = CB_ERR;
 
-				if (!mapCBItems.Lookup(dwTaskID, nItem))
+				if (!mapCBItems.Lookup(dwTaskID, nItem) || !mapTasks.Lookup(dwTaskID, nTask))
 					continue;
 
 				nItem += nNumAdded;
 				ASSERT(nItem == CDialogHelper::FindItemByData(*this, dwTaskID));
 
-				CString sItem = CDialogHelper::GetItem(*this, nItem);
-				sItem.TrimLeft();
-				ASSERT(!sItem.IsEmpty());
-
-				VERIFY(InsertTask(0, sItem, dwTaskID, FALSE, 0, GetItemImage(nItem)));
+				VERIFY(InsertTask(0, pTTL->aTasks[nTask].sTask, dwTaskID, FALSE, 0, GetItemImage(nItem)));
 				nNumAdded++;
 			}
 

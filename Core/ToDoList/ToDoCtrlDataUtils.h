@@ -128,6 +128,16 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+enum // GetTaskTitlePaths
+{
+	TDCTF_TITLEANDPATH	= 0x0,
+	TDCTF_TITLEONLY		= 0x1,
+	TDCTF_PATHONLY		= 0x2,
+	TDCTF_TRAILINGID	= 0x4,
+};
+
+// -------------------------------------------------------------------
+
 class CTDCTaskFormatter
 {
 public:
@@ -136,11 +146,12 @@ public:
 	CString GetCommentSize(float fSize) const;
 	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
 
+	CString GetTaskTitlePath(DWORD dwTaskID, DWORD dwFlags) const;
 	CString GetTaskAllocTo(DWORD dwTaskID) const;
 	CString GetTaskCategories(DWORD dwTaskID) const;
 	CString GetTaskTags(DWORD dwTaskID) const;
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
-	CString GetTaskPath(DWORD dwTaskID, BOOL bWithTaskName = FALSE, int nMaxLen = -1) const;
+	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const;
 	CString GetTaskPosition(DWORD dwTaskID) const; 
 	CString GetTaskTimeEstimate(DWORD dwTaskID) const;
 	CString GetTaskTimeSpent(DWORD dwTaskID) const;
@@ -161,11 +172,12 @@ public:
 	CString GetTaskCreationDate(DWORD dwTaskID) const;
 	CString GetTaskLastModDate(DWORD dwTaskID) const;
 
+	CString GetTaskTitlePath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwFlags) const;
 	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
 	CString GetTaskCategories(const TODOITEM* pTDI) const;
 	CString GetTaskTags(const TODOITEM* pTDI) const;
 	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bWithTaskName = FALSE) const;
+	CString GetTaskPath(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -197,13 +209,6 @@ public:
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;
 
-	enum 
-	{
-		TITLEANDPATH	= 0x0,
-		TITLEONLY		= 0x1,
-		PATHONLY		= 0x2,
-		TRAILINGID		= 0x4,
-	};
 
 	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
 	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
