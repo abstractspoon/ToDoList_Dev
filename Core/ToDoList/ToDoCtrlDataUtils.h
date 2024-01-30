@@ -147,9 +147,6 @@ public:
 	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
 
 	CString GetTaskTitlePath(DWORD dwTaskID, DWORD dwFlags) const;
-	CString GetTaskAllocTo(DWORD dwTaskID) const;
-	CString GetTaskCategories(DWORD dwTaskID) const;
-	CString GetTaskTags(DWORD dwTaskID) const;
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const;
 	CString GetTaskPosition(DWORD dwTaskID) const; 
@@ -172,10 +169,14 @@ public:
 	CString GetTaskCreationDate(DWORD dwTaskID) const;
 	CString GetTaskLastModDate(DWORD dwTaskID) const;
 
+	CString GetTaskAllocTo(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskCategories(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskTags(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskDependencies(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskDependents(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskFileLinks(DWORD dwTaskID, TCHAR cSep = 0) const;
+
 	CString GetTaskTitlePath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwFlags) const;
-	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
-	CString GetTaskCategories(const TODOITEM* pTDI) const;
-	CString GetTaskTags(const TODOITEM* pTDI) const;
 	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPath(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
@@ -198,6 +199,12 @@ public:
 	CString GetTaskCreationDate(const TODOITEM* pTDI) const;
 	CString GetTaskLastModDate(const TODOITEM* pTDI) const;
 
+	CString GetTaskAllocTo(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskCategories(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskTags(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskDependencies(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskFileLinks(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+
 	CString GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
@@ -208,7 +215,6 @@ public:
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;
-
 
 	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
 	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;

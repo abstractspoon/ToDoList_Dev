@@ -362,23 +362,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 	case TDCC_DEPENDENCY:
 		if (pTDI->aDependencies.GetSize())
 		{
-			// Build list of Names and IDs
-			int nNumDepends = pTDI->aDependencies.GetSize();
-
-			CStringArray aDepends;
-			aDepends.SetSize(nNumDepends);
-
-			for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
-			{
-				const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
-
-				if (depend.IsLocal())
-					aDepends[nDepend] = m_formatter.GetTaskTitlePath(depend.dwTaskID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
-				else
-					aDepends[nDepend] = depend.Format();
-			}		
-			sTooltip = Misc::FormatArray(aDepends, '\n');
-
+			sTooltip = m_formatter.GetTaskDependencies(pTDI, '\n');
 			return GetUniqueToolTipID(dwTaskID, nColID);
 		}
 		break;
@@ -3948,7 +3932,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 
 	case TDCC_DEPENDENCY:
 		if (!bDrawing)
-			return pTDI->aDependencies.Format(_T("+"));
+			return pTDI->aDependencies.Format('+');
 		break;
 
 	case TDCC_REMINDER:

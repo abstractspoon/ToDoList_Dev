@@ -211,9 +211,9 @@ void CTDLTaskDependencyEdit::SetDependencies(const CTDCDependencyArray& aDepends
 		SetWindowText(FormatDependencies());
 }
 
-CString CTDLTaskDependencyEdit::FormatDependencies(LPCTSTR szSep)
+CString CTDLTaskDependencyEdit::FormatDependencies(TCHAR cSep)
 {
-	return m_aDepends.Format(szSep);
+	return m_aDepends.Format(cSep);
 }
 
 void CTDLTaskDependencyEdit::SetDependenciesAreCircular(BOOL bCircular, COLORREF crCircular)

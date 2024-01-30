@@ -207,7 +207,7 @@ void CTDCDEPENDENCYTest::TestTDCDependencyArray()
 		ExpectTrue(aDepends.Add(7));
 		ExpectTrue(aDepends.HasLocalDependency(7));
 
-		ExpectEQ(aDepends.Format(_T("+")), _T("11+7"));
+		ExpectEQ(aDepends.Format('+'), _T("11+7"));
 
 		CDWordArray aTaskIDs;
 		ExpectEQ(aDepends.GetLocalDependencies(aTaskIDs), 2);
@@ -230,7 +230,7 @@ void CTDCDEPENDENCYTest::TestTDCDependencyArray()
 		ExpectEQ(aDepends.GetLocalDependencies(aTaskIDs), 1);
 		ExpectEQ(aTaskIDs[0], 7UL);
 
-		ExpectEQ(aDepends.Format(_T("+")), _T("7"));
+		ExpectEQ(aDepends.Format('+'), _T("7"));
 
 		ExpectFalse(aDepends.ReplaceLocalDependency(11, 12)); // 11 removed
 		ExpectTrue(aDepends.ReplaceLocalDependency(7, 12));

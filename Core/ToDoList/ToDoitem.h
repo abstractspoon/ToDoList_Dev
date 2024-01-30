@@ -137,7 +137,7 @@ public:
 	BOOL HasDependency(const TDCDEPENDENCY& depend) const;
 
 	int Format(CStringArray& aDepends, const CString& sFolder = _T("")) const;
-	CString Format(LPCTSTR szSep = NULL, const CString& sFolder = _T("")) const;
+	CString Format(TCHAR cSep = 0, const CString& sFolder = _T("")) const;
 	
 	int Parse(LPCTSTR szDepends, LPCTSTR szSep = NULL);
 	BOOL MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes = TRUE) const;

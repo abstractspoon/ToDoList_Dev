@@ -246,7 +246,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_CREATEDBY, IDS_TDLBC_CREATEDBY, pTDI->sCreatedBy);
 	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, m_formatter.GetTaskCreationDate(pTDI));
 	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, m_formatter.GetTaskDoneDate(pTDI));
-	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, Misc::FormatArray(pTDI->aFileLinks, '\n')); // separate lines
+	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, m_formatter.GetTaskFileLinks(pTDI, '\n')); // separate lines
 	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_YES : 0));
 	ADDINFOITEM(TDCA_ID, IDS_TDLBC_ID, Misc::Format(dwTaskID));
 	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
@@ -274,25 +274,8 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 
 	if (mapAttrib.Has(TDCA_DEPENDENCY))
 	{
-		// Dependencies
-		DWORD dwFlags = (TDCTF_TITLEONLY | TDCTF_TRAILINGID);
-		CDWordArray aDependIDs;
-
-		CStringArray aDepends, aOtherDepends;
-
-		if (pTDI->aDependencies.GetDependencies(aDependIDs, aOtherDepends))
-		{
-			m_formatter.GetTaskTitlePaths(aDependIDs, dwFlags, aDepends);
-			aDepends.Append(aOtherDepends);
-
-			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, Misc::FormatArray(aDepends, '\n')); // separate lines
-		}
-
-		// Dependents
-		if (m_data.GetTaskLocalDependents(dwTaskID, aDependIDs, FALSE))
-		{
-			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, m_formatter.GetTaskTitlePaths(aDependIDs, dwFlags, '\n')); // separate lines
-		}
+		ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, m_formatter.GetTaskDependencies(pTDI, '\n')); // separate lines
+		ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, m_formatter.GetTaskDependents(dwTaskID, '\n')); // separate lines
 	}
 
 	// Custom attributes

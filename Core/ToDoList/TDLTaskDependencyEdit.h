@@ -33,7 +33,7 @@ public:
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	void SetDependenciesAreCircular(BOOL bCircular = TRUE, COLORREF crCircular = 255);
-	CString FormatDependencies(LPCTSTR szSep = NULL);
+	CString FormatDependencies(TCHAR cSep = NULL);
 	
 	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
 				BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);

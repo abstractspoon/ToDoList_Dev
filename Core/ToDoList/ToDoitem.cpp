@@ -509,14 +509,14 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 	return -1;
 }
 
-CString CTDCDependencyArray::Format(LPCTSTR szSep, const CString& sFolder) const
+CString CTDCDependencyArray::Format(TCHAR cSep, const CString& sFolder) const
 {
 	CStringArray aDepends;
 
 	if (!Format(aDepends, sFolder))
 		return EMPTY_STR;
 		
-	return Misc::FormatArray(aDepends, szSep);
+	return Misc::FormatArray(aDepends, cSep);
 }
 
 int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) const
