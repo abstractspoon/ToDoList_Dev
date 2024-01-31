@@ -163,7 +163,7 @@ protected:
 	void DrawTabDropMark(CDC* pDC);
 	void DrawTabCloseButton(CDC* pDC, int nTab);
 	void DrawTabTag(CDC* pDC, int nTab, const CRect& rTab);
-	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab);
+	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText);
 
 	// pseudo message handler
 	void InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

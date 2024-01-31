@@ -435,13 +435,17 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 	// DrawTabBackColor may modify the tab rect (to be passed to DrawTabItem)
 	// but we need to preserve the original rect for DrawTabTag
 	CRect rTabOrg(rTab);
+	COLORREF crText(CLR_NONE);
 
 	if (HasFlag(TCE_TABCOLORS))
-		DrawTabBackColor(pDC, nTab, (uiFlags & 4), rTab);
+		DrawTabBackColor(pDC, nTab, (uiFlags & 4), rTab, crText);
 
 	// Then tag
 	if (HasFlag(TCE_TAGCOLORS))
 		DrawTabTag(pDC, nTab, rTabOrg);
+
+	if (crText != CLR_NONE)
+		pDC->SetTextColor(crText);
 
 	CXPTabCtrl::DrawTabItem(pDC, nTab, rTab, uiFlags);
 }
@@ -566,7 +570,7 @@ void CTabCtrlEx::DrawTabTag(CDC* pDC, int nTab, const CRect& rTab)
 	}
 }
 
-void CTabCtrlEx::DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab)
+void CTabCtrlEx::DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText)
 {
 	ASSERT(HasFlag(TCE_TABCOLORS));
 
@@ -582,12 +586,12 @@ void CTabCtrlEx::DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab)
 	// and adjust tab height to make space
 	if (nTab == GetCurSel())
 	{
+		crText = GetSysColor(COLOR_BTNTEXT);
+
 		int nCloseBtnSize = 0;
 
 		if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
 			nCloseBtnSize = (SIZE_CLOSEBTN + PADDING);
-
-		pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
 		switch (m_eTabOrientation)
 		{
@@ -624,7 +628,7 @@ void CTabCtrlEx::DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab)
 	}
 	else
 	{
-		pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
+		crText = GraphicsMisc::GetBestTextColor(crTab);
 
 		if (bHot)
 			crTab = GraphicsMisc::Lighter(crTab, 0.3, TRUE);
@@ -922,7 +926,7 @@ BOOL CTabCtrlEx::GetTabCloseButtonRect(int nTab, CRect& rBtn) const
 		if (bSel)
 			rBtn.OffsetRect(0, 1);
 		else
- 			rBtn.OffsetRect(-2, 3);
+ 			rBtn.OffsetRect(-2, 2);
 		break;
 
 	case e_tabBottom:
