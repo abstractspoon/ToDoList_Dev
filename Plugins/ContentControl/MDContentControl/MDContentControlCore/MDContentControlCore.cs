@@ -44,6 +44,7 @@ namespace MDContentControl
 				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link"));
 			};
 
+			m_Trans.Translate(ContextMenu.Items);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
