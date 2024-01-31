@@ -924,7 +924,7 @@ namespace EvidenceBoardUIExtension
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = s_ImageFilter,
+				Filter = m_Trans.Translate(s_ImageFilter),
 				FilterIndex = 0,
 				RestoreDirectory = true,
 
