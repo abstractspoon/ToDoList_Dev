@@ -55,8 +55,9 @@ namespace unvell.UIControls
 			{
 				tabs = value;
 
-				using (var tabFont = new Font(FontFamily.GenericSansSerif, 8))
 				{
+					var tabFont = Font;
+
 					sizes = new int[tabs.Length];
 					for (int i = 0; i < tabs.Length; i++)
 					{
@@ -157,8 +158,9 @@ namespace unvell.UIControls
 				rect = new Rectangle(0, 0, ClientRectangle.Width, ClientRectangle.Height);
 			}
 
-			using (var tabFont = new Font(FontFamily.GenericSansSerif, 8))
 			{
+				var tabFont = Font;
+
 				for (int i = 0; i < tabs.Length; i++)
 				{
 					rect.Width = sizes[i];

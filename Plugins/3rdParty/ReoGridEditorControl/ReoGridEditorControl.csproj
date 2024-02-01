@@ -207,9 +207,7 @@
     <Compile Include="UIControls\ColorControls\ColorPickerControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="UIControls\ColorControls\ColorPickerPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="UIControls\ColorControls\ColorPickerPanel.cs" />
     <Compile Include="UIControls\ColorControls\ColorPickerToolStripItem.cs">
       <SubType>Component</SubType>
     </Compile>

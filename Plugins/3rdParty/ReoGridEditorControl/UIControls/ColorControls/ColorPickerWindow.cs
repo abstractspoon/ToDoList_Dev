@@ -56,7 +56,7 @@ namespace unvell.UIControls
 
 			Items.Add(controlHost);
 
-			this.Size = new Size(172, 220);
+			this.Size = colorPickerPanel.Size;
 		}
 
 		protected override void OnMouseMove(MouseEventArgs mea)
