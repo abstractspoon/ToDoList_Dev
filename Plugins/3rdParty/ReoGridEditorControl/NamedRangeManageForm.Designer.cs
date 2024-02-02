@@ -119,7 +119,7 @@ namespace unvell.ReoGrid.Editor
 			this.labNamedRange.Name = "labNamedRange";
 			this.labNamedRange.Size = new System.Drawing.Size(322, 24);
 			this.labNamedRange.TabIndex = 1;
-			this.labNamedRange.Text = "Named ranges:";
+			this.labNamedRange.Text = "Named ranges";
 			this.labNamedRange.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// lstRanges

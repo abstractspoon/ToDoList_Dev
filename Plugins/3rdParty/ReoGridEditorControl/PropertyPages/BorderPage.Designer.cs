@@ -93,7 +93,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labStyle.Name = "labStyle";
 			this.labStyle.Size = new System.Drawing.Size(33, 13);
 			this.labStyle.TabIndex = 3;
-			this.labStyle.Text = "Style:";
+			this.labStyle.Text = "Style";
 			// 
 			// labColor
 			// 
@@ -103,7 +103,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labColor.Name = "labColor";
 			this.labColor.Size = new System.Drawing.Size(34, 13);
 			this.labColor.TabIndex = 2;
-			this.labColor.Text = "Color:";
+			this.labColor.Text = "Colour";
 			// 
 			// borderColorSelector
 			// 

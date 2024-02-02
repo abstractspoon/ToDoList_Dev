@@ -66,7 +66,7 @@ namespace unvell.ReoGrid.Editor
 			this.labRows.Name = "labRows";
 			this.labRows.Size = new System.Drawing.Size(37, 13);
 			this.labRows.TabIndex = 0;
-			this.labRows.Text = "Rows:";
+			this.labRows.Text = "Rows";
 			// 
 			// labCols
 			// 
@@ -76,7 +76,7 @@ namespace unvell.ReoGrid.Editor
 			this.labCols.Name = "labCols";
 			this.labCols.Size = new System.Drawing.Size(30, 13);
 			this.labCols.TabIndex = 3;
-			this.labCols.Text = "Cols:";
+			this.labCols.Text = "Columns";
 			// 
 			// numRows
 			// 

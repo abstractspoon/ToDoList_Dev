@@ -68,7 +68,7 @@ namespace unvell.ReoGrid.Editor
 			this.labText.Name = "labText";
 			this.labText.Size = new System.Drawing.Size(31, 13);
 			this.labText.TabIndex = 0;
-			this.labText.Text = "Text:";
+			this.labText.Text = "Text";
 			this.labText.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// txtHeaderText
@@ -86,7 +86,7 @@ namespace unvell.ReoGrid.Editor
 			this.labTextColor.Name = "labTextColor";
 			this.labTextColor.Size = new System.Drawing.Size(58, 13);
 			this.labTextColor.TabIndex = 2;
-			this.labTextColor.Text = "Text Color:";
+			this.labTextColor.Text = "Text Colour";
 			this.labTextColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// btnOK
@@ -118,7 +118,7 @@ namespace unvell.ReoGrid.Editor
 			this.labCellBody.Name = "labCellBody";
 			this.labCellBody.Size = new System.Drawing.Size(91, 13);
 			this.labCellBody.TabIndex = 4;
-			this.labCellBody.Text = "Default Cell Body:";
+			this.labCellBody.Text = "Default Cell Body";
 			this.labCellBody.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// cmbCellBody
@@ -138,7 +138,7 @@ namespace unvell.ReoGrid.Editor
 			this.labRowHeaderWidth.Name = "labRowHeaderWidth";
 			this.labRowHeaderWidth.Size = new System.Drawing.Size(68, 13);
 			this.labRowHeaderWidth.TabIndex = 6;
-			this.labRowHeaderWidth.Text = "Panel Width:";
+			this.labRowHeaderWidth.Text = "Panel Width";
 			this.labRowHeaderWidth.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// numRowHeaderWidth

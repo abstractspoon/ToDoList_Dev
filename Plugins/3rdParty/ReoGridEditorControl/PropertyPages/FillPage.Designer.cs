@@ -88,7 +88,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labPatternColor.Name = "labPatternColor";
 			this.labPatternColor.Size = new System.Drawing.Size(31, 13);
 			this.labPatternColor.TabIndex = 3;
-			this.labPatternColor.Text = "&Color";
+			this.labPatternColor.Text = "&Colour";
 			// 
 			// labPatternStyle
 			// 

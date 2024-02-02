@@ -81,7 +81,7 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			this.labelHorizontal.Name = "labelHorizontal";
 			this.labelHorizontal.Size = new System.Drawing.Size(57, 13);
 			this.labelHorizontal.TabIndex = 2;
-			this.labelHorizontal.Text = "&Horizontal:";
+			this.labelHorizontal.Text = "&Horizontal";
 			// 
 			// labelVertical
 			// 
@@ -91,7 +91,7 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			this.labelVertical.Name = "labelVertical";
 			this.labelVertical.Size = new System.Drawing.Size(45, 13);
 			this.labelVertical.TabIndex = 4;
-			this.labelVertical.Text = "&Vertical:";
+			this.labelVertical.Text = "&Vertical";
 			// 
 			// cmbVerAlign
 			// 
@@ -166,7 +166,7 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			this.labelIndent.Name = "labelIndent";
 			this.labelIndent.Size = new System.Drawing.Size(40, 13);
 			this.labelIndent.TabIndex = 2;
-			this.labelIndent.Text = "&Indent:";
+			this.labelIndent.Text = "&Indent";
 			// 
 			// numIndent
 			// 

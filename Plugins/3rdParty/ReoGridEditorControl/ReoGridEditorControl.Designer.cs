@@ -619,8 +619,8 @@ namespace unvell.ReoGrid.Editor
 			this.borderColorPickToolStripItem.Name = "borderColorPickToolStripItem";
 			this.borderColorPickToolStripItem.Size = new System.Drawing.Size(32, 22);
 			this.borderColorPickToolStripItem.SolidColor = System.Drawing.Color.Black;
-			this.borderColorPickToolStripItem.Text = "Border Color";
-			this.borderColorPickToolStripItem.ToolTipText = "Border Color";
+			this.borderColorPickToolStripItem.Text = "Border Colour";
+			this.borderColorPickToolStripItem.ToolTipText = "Border Colour";
 			// 
 			// outlineSolidToolStripButton
 			// 
@@ -1176,8 +1176,8 @@ namespace unvell.ReoGrid.Editor
 			this.colorPickerToolStripItem1.Name = "colorPickerToolStripItem1";
 			this.colorPickerToolStripItem1.Size = new System.Drawing.Size(32, 22);
 			this.colorPickerToolStripItem1.SolidColor = System.Drawing.Color.Black;
-			this.colorPickerToolStripItem1.Text = "Border Color";
-			this.colorPickerToolStripItem1.ToolTipText = "Border Color";
+			this.colorPickerToolStripItem1.Text = "Border Colour";
+			this.colorPickerToolStripItem1.ToolTipText = "Border Colour";
 			// 
 			// topSolidToolStripButton
 			// 

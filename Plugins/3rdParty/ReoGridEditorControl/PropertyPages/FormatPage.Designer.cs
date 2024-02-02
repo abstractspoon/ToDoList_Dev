@@ -102,7 +102,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labCategory.Name = "labCategory";
 			this.labCategory.Size = new System.Drawing.Size(52, 13);
 			this.labCategory.TabIndex = 2;
-			this.labCategory.Text = "Category:";
+			this.labCategory.Text = "Category";
 			// 
 			// grpSample
 			// 
@@ -131,7 +131,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labType.Name = "labType";
 			this.labType.Size = new System.Drawing.Size(34, 13);
 			this.labType.TabIndex = 2;
-			this.labType.Text = "&Type:";
+			this.labType.Text = "&Type";
 			// 
 			// datetimeFormatList
 			// 
@@ -150,7 +150,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labLocale.Name = "labLocale";
 			this.labLocale.Size = new System.Drawing.Size(88, 13);
 			this.labLocale.TabIndex = 2;
-			this.labLocale.Text = "&Locale (location):";
+			this.labLocale.Text = "&Locale (location)";
 			// 
 			// datetimeLocationList
 			// 
@@ -169,7 +169,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesNum.Name = "labDecimalPlacesNum";
 			this.labDecimalPlacesNum.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesNum.TabIndex = 6;
-			this.labDecimalPlacesNum.Text = "&Decimal Places:";
+			this.labDecimalPlacesNum.Text = "&Decimal Places";
 			// 
 			// numberDecimalPlaces
 			// 
@@ -196,7 +196,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labNegativeNumbersNum.Name = "labNegativeNumbersNum";
 			this.labNegativeNumbersNum.Size = new System.Drawing.Size(96, 13);
 			this.labNegativeNumbersNum.TabIndex = 6;
-			this.labNegativeNumbersNum.Text = "&Negative numbers:";
+			this.labNegativeNumbersNum.Text = "&Negative numbers";
 			// 
 			// numberPanel
 			// 
@@ -262,7 +262,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labSymbol.Name = "labSymbol";
 			this.labSymbol.Size = new System.Drawing.Size(44, 13);
 			this.labSymbol.TabIndex = 10;
-			this.labSymbol.Text = "&Symbol:";
+			this.labSymbol.Text = "&Symbol";
 			// 
 			// labNegativeNumberCurrency
 			// 
@@ -272,7 +272,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labNegativeNumberCurrency.Name = "labNegativeNumberCurrency";
 			this.labNegativeNumberCurrency.Size = new System.Drawing.Size(96, 13);
 			this.labNegativeNumberCurrency.TabIndex = 6;
-			this.labNegativeNumberCurrency.Text = "&Negative numbers:";
+			this.labNegativeNumberCurrency.Text = "&Negative numbers";
 			// 
 			// currencyNegativeStyleList
 			// 
@@ -308,7 +308,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesCurrency.Name = "labDecimalPlacesCurrency";
 			this.labDecimalPlacesCurrency.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesCurrency.TabIndex = 6;
-			this.labDecimalPlacesCurrency.Text = "&Decimal Places:";
+			this.labDecimalPlacesCurrency.Text = "&Decimal Places";
 			// 
 			// datetimePanel
 			// 
@@ -338,7 +338,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDateTimePattern.Name = "labDateTimePattern";
 			this.labDateTimePattern.Size = new System.Drawing.Size(44, 13);
 			this.labDateTimePattern.TabIndex = 6;
-			this.labDateTimePattern.Text = "&Pattern:";
+			this.labDateTimePattern.Text = "&Pattern";
 			// 
 			// percentPanel
 			// 
@@ -369,7 +369,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesPercent.Name = "labDecimalPlacesPercent";
 			this.labDecimalPlacesPercent.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesPercent.TabIndex = 6;
-			this.labDecimalPlacesPercent.Text = "&Decimal Places:";
+			this.labDecimalPlacesPercent.Text = "&Decimal Places";
 			// 
 			// FormatPage
 			// 
