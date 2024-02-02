@@ -10,15 +10,19 @@ using System.IO;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-using Microsoft.Win32;
+using ImageHelper;
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PDFExporter
 {
 	public partial class PDFExporterOptionsForm : Form
 	{
-		public PDFExporterOptionsForm(FontMappings fonts)
+		private Translator m_Trans;
+
+		public PDFExporterOptionsForm(FontMappings fonts, Translator trans)
 		{
+			m_Trans = trans;
+
 			InitializeComponent();
 
 			BuildFontCombo(fonts);
@@ -142,7 +146,7 @@ namespace PDFExporter
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
-				Filter = "True Type Fonts (*.ttf)|*.ttf",
+				Filter = m_Trans.Translate("True Type Fonts (*.ttf)|*.ttf"),
 				FilterIndex = 0,
 			};
 
@@ -179,7 +183,7 @@ namespace PDFExporter
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
-				Filter = MSDN.Html.Editor.EnterImageForm.ImageFilter,
+				Filter = m_Trans.Translate(ImageUtils.ImageFilter),
 				FilterIndex = 0,
 			};
 

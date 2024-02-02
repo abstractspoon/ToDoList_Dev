@@ -7,6 +7,7 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
+using ImageHelper;
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLContentControl
@@ -69,7 +70,7 @@ namespace HTMLContentControl
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = MSDN.Html.Editor.EnterImageForm.ImageFilter,
+				Filter = ImageUtils.ImageFilter,
 				FilterIndex = 0,
 				RestoreDirectory = true,
 
