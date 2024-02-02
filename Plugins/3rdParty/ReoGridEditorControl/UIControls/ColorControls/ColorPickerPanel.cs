@@ -27,15 +27,15 @@ using unvell.Common;
 
 namespace unvell.UIControls
 {
-	internal class Scaler
+	internal class DpiScaler
 	{
-		public Scaler(Control ctrl)
+		public DpiScaler(Control ctrl)
 		{
 			using (var g = ctrl.CreateGraphics())
 				m_DpiFactor = new SizeF(g.DpiX / 96, g.DpiY / 96);
 		}
 
-		public Scaler(Graphics g)
+		public DpiScaler(Graphics g)
 		{
 			m_DpiFactor = new SizeF(g.DpiX / 96, g.DpiY / 96);
 		}
@@ -75,7 +75,7 @@ namespace unvell.UIControls
 		private FlatTabControl tab;
 
 		private AbstractColor currentColor;
-		private Scaler scaler;
+		private DpiScaler scaler;
 
 		public static string NoColor = ReoGrid.Editor.LangRes.LangResource.NoColor;
 		public static string MoreColors = ReoGrid.Editor.LangRes.LangResource.Menu_More;
@@ -124,11 +124,11 @@ namespace unvell.UIControls
 
 		private Panel panel;
 
-		public ColorPickerPanel(Color backColor)
+		public ColorPickerPanel(Color backColor, bool scaleTabHeight = false)
 			: 
 			base()
 		{
-			scaler = new Scaler(this);
+			scaler = new DpiScaler(this);
 
 			this.TabStop = false;
 			this.Margin = this.Padding = new Padding(1);
@@ -144,10 +144,14 @@ namespace unvell.UIControls
 			tab = new FlatTabControl();
 			tab.TabStop = false;
 			tab.Tabs = new string[] { SolidTab };
-			tab.Size = new Size(ClientRectangle.Width, scaler.Y(20));
 			tab.Dock = DockStyle.Top;
 			tab.SelectedBackColor = backColor;
 			tab.SelectedIndexChanged += (s, e) => panels[tab.SelectedIndex].BringToFront();
+
+			if (scaleTabHeight)
+				tab.Size = new Size(ClientRectangle.Width, scaler.Y(20));
+			else
+				tab.Size = new Size(ClientRectangle.Width, 20);
 
 			Controls.Add(tab);
 			Controls.Add(panel);
@@ -189,14 +193,14 @@ namespace unvell.UIControls
 		
 		internal event EventHandler ColorPicked;
 
-		private Scaler scaler;
+		private DpiScaler scaler;
 		Rectangle transparentRect;
 		
 		public SolidColorPickerPanel(Color backColor) : base()
 		{
 			this.BackColor = backColor;
 			this.DoubleBuffered = true;
-			this.scaler = new Scaler(this);
+			this.scaler = new DpiScaler(this);
 
 			transparentRect = scaler.Rect(7, 170, 155, 10);
 		}

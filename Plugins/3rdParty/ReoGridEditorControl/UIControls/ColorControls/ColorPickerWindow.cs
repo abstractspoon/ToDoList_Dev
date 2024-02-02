@@ -43,7 +43,7 @@ namespace unvell.UIControls
 			this.Margin = this.Padding = new Padding(1);
 			this.AutoSize = false;
 
-			colorPickerPanel = new ColorPickerPanel(backColor);
+			colorPickerPanel = new ColorPickerPanel(backColor, true);
 			colorPickerPanel.Dock = DockStyle.Fill;
 			colorPickerPanel.Location = new Point(0, 0);
 			colorPickerPanel.ColorPicked += (s, e) =>

@@ -89,7 +89,7 @@ namespace unvell.UIControls
 
 			// to match toolbar images
 			rectColor.Offset(3, 3);
-			rectColor.Height = rectColor.Width = (new Scaler(g).X(13)); 
+			rectColor.Height = rectColor.Width = (new DpiScaler(g).X(13)); 
 
 			if (currentColor == null || currentColor.IsEmpty)
 			{
