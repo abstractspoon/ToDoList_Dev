@@ -925,13 +925,29 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 		return FormatNumber(data.AsFraction());
 
 	case TDCCA_TIMEPERIOD:
-		if (data.IsTimePeriod())
-			return data.FormatAsTimePeriod();
-		break;
+		return FormatTimePeriod(data, dwFeatures);
 	}
 
 	// all else
 	return data.AsString();
+}
+
+CString TDCCUSTOMATTRIBUTEDEFINITION::FormatTimePeriod(const TDCCADATA& data, DWORD dwFeatures)
+{
+	if (!data.IsTimePeriod())
+	{
+		ASSERT(0);
+		return _T("");
+	}
+
+	TDCTIMEPERIOD time;
+	VERIFY(data.AsTimePeriod(time));
+
+	if ((dwFeatures & TDCCAF_HIDEZERO) && (time.dAmount == 0.0))
+		return _T("");
+
+	// else
+	return time.Format(((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2));
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
@@ -941,6 +957,10 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures)
 {
+	if ((dwFeatures & TDCCAF_HIDEZERO) && (dValue == 0.0))
+		return _T("");
+
+	// else
 	BOOL bOneDecimal = (dwFeatures & TDCCAF_ONEDECIMAL);
 
 	switch (dwDataType)
@@ -1155,46 +1175,34 @@ BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRI
 
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustColID, pDef, TDCA_NONE);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetAttributeID();
-
-	// all else
-	return TDCA_NONE;
+	return pDef->GetAttributeID();
 }
 
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(const CString& sCustAttribID) const
 {
-	int nAttrib = Find(sCustAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, sCustAttribID, pDef, TDCA_NONE);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetAttributeID();
-
-	// all else
-	return TDCA_NONE;
+	return pDef->GetAttributeID();
 }
 
 CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const
 {
-	int nAttrib = Find(nCustAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustAttribID, pDef, _T(""));
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).sUniqueID;
-
-	// all else
-	return _T("");
+	return pDef->sUniqueID;
 }
 
 CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustColID, pDef, _T(""));
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).sUniqueID;
-
-	// all else
-	return _T("");
+	return pDef->sUniqueID;
 }
 
 int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const
@@ -1216,39 +1224,52 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 	return (mapCols.GetCount() - nColsSize);
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType) const
 {
-	int nAttrib = Find(nCustAttribID);
+	if (bResolveCalcType && attribDef.IsDataType(TDCCA_CALCULATION))
+		return GetCalculationResultDataType(attribDef.Calculation());
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
-
-
-	// all else
-	return TDCCA_STRING;
+	// else
+	return attribDef.GetDataType();
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColID) const
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID, BOOL bResolveCalcType) const
 {
-	int nAttrib = Find(nCustColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustAttribID, pDef, TDCCA_STRING);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
-
-
-	// all else
-	return TDCCA_STRING;
+	return GetAttributeDataType(*pDef, bResolveCalcType);
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sCustAttribID) const
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColID, BOOL bResolveCalcType) const
 {
-	int nAttrib = Find(sCustAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustColID, pDef, TDCCA_STRING);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
+	return GetAttributeDataType(*pDef, bResolveCalcType);
+}
 
-	// all else
-	return TDCCA_STRING;
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sCustAttribID, BOOL bResolveCalcType) const
+{
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, sCustAttribID, pDef, TDCCA_STRING);
+
+	return GetAttributeDataType(*pDef, bResolveCalcType);
+}
+
+CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const CString& sCustAttribID, BOOL bISODates) const
+{
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, sCustAttribID, pDef, _T(""));
+
+	if (!pDef->IsDataType(TDCCA_CALCULATION))
+		return pDef->FormatData(data, bISODates);
+
+	// A bit of hackery for calculation types
+	TDCCUSTOMATTRIBUTEDEFINITION temp = *pDef;
+	temp.SetDataType(GetAttributeDataType(*pDef, TRUE));
+
+	return temp.FormatData(data, bISODates);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) const
@@ -1269,7 +1290,6 @@ BOOL CTDCCustomAttribDefinitionArray::IsColumnEnabled(TDC_COLUMN nCustColID) con
 
 	if (nAttrib != -1)
 		return ElementAt(nAttrib).bEnabled;
-
 
 	// else
 	return FALSE;

@@ -144,6 +144,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
 	static BOOL AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature);
 	static CString FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures);
+	static CString FormatTimePeriod(const TDCCADATA& data, DWORD dwFeatures);
 
 	// ----------------------------------------------------------------
 	CString sUniqueID;
@@ -221,10 +222,12 @@ public:
 	CString GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const;
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
+	CString FormatData(const TDCCADATA& data, const CString& sCustAttribID, BOOL bISODates) const;
 
-	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const;
-	DWORD GetAttributeDataType(TDC_COLUMN nCustColID) const;
-	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
+	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID, BOOL bResolveCalcType = TRUE) const;
+	DWORD GetAttributeDataType(TDC_COLUMN nCustColID, BOOL bResolveCalcType = TRUE) const;
+	DWORD GetAttributeDataType(const CString& sCustAttribID, BOOL bResolveCalcType = TRUE) const;
+	DWORD GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType = TRUE) const;
 
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
