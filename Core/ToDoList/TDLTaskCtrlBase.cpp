@@ -1402,7 +1402,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	{
 		// Get the longest task values for the remaining attributes
 		CTDCLongestItemMap mapLongest;
-		m_find.GetLongestValues(mapCols, m_aCustomAttribDefs, mapLongest, bVisibleTasksOnly);
+		m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
 
 		// PERMANENT LOGGING //////////////////////////////////////////////
 		log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(GetLongestValues)"));
@@ -5588,7 +5588,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 		return 0; // hidden
 
 	// else
-	switch (pDef->GetDataType())
+	switch (m_aCustomAttribDefs.GetAttributeDataType(*pDef))
 	{
 	case TDCCA_DATE:
 		return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, pDef->HasFeature(TDCCAF_SHOWTIME));

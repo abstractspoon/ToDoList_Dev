@@ -200,11 +200,13 @@ CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 
 CToDoCtrlFind::CToDoCtrlFind(const CTreeCtrlHelper& tch, 
 							 const CToDoCtrlData& data, 
+							 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 							 const CTDCReminderHelper& reminders,
 							 const CContentMgr& mgrContent)
 	:
 	m_tch(tch), 
 	m_data(data),
+	m_aCustAttribDefs(aCustAttribDefs),
 	m_mgrContent(mgrContent),
 	m_matcher(data, reminders, mgrContent),
 	m_calculator(data),
@@ -517,7 +519,7 @@ BOOL CToDoCtrlFind::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION
 		return FALSE;
 	}
 
-	switch (attribDef.GetDataType())
+	switch (m_aCustAttribDefs.GetAttributeDataType(attribDef))
 	{
 	case TDCCA_DOUBLE:
 	case TDCCA_FRACTION:
@@ -1188,14 +1190,13 @@ CString CToDoCtrlFind::GetLongestCost(HTREEITEM hti, const TODOITEM* pTDI, const
 }
 
 int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, 
-									const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 									CTDCLongestItemMap& mapLongest, 
 									BOOL bVisibleOnly) const
 {
-	if (mapLongest.Initialise(mapCols, aCustAttribDefs))
+	if (mapLongest.Initialise(mapCols, m_aCustAttribDefs))
 	{
 		// Likewise for certain calculated custom attributes
-		CTDCCustomAttribDefinitionArray aRestAttribDefs(aCustAttribDefs);
+		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_aCustAttribDefs);
 		int nCust = aRestAttribDefs.GetSize();
 
 		while (nCust--)
@@ -1214,24 +1215,24 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 				else if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
 				{
 					// initialise zero value once only
-					sLongest = attribDef.FormatData(0.0, FALSE);
+					sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 				}
 			}
 		}
 
 		// All the rest
-		GetLongestValues(aRestAttribDefs, NULL, NULL, NULL, mapLongest, bVisibleOnly);
+		GetLongestValues(NULL, NULL, NULL, aRestAttribDefs, mapLongest, bVisibleOnly);
 	}
 
 	return mapLongest.GetCount();
 }
 
-void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-									 HTREEITEM hti,
+void CToDoCtrlFind::GetLongestValues(HTREEITEM hti,
 									 const TODOITEM* pTDI, 
 									 const TODOSTRUCTURE* pTDS,
-									 CTDCLongestItemMap& mapLongest, 
+									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+									 CTDCLongestItemMap& mapLongest,
 									 BOOL bVisibleOnly) const
 {
 	if (!CheckGetTask(hti, pTDI, pTDS))
@@ -1321,7 +1322,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 
 		while (htiChild)
 		{
-			GetLongestValues(aCustAttribDefs, htiChild, NULL, NULL, mapLongest, bVisibleOnly);
+			GetLongestValues(htiChild, NULL, NULL, aCustAttribDefs, mapLongest, bVisibleOnly); // RECURSIVE CALL
 			htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
