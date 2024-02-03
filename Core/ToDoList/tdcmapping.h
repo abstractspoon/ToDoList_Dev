@@ -787,41 +787,6 @@ namespace TDC
 		return TDIR_ONCE;
 	}
 	
-	static TDC_UNITS MapTDCRegularityToUnits(TDC_REGULARITY nRegularity)
-	{
-		switch (nRegularity)
-		{
-		case TDIR_ONCE:
-			return TDCU_NULL;
-
-		case TDIR_DAY_EVERY_NDAYS:
-			return TDCU_DAYS;
-
-		case TDIR_DAY_EVERY_NWEEKDAYS:
-		case TDIR_DAY_EVERY_WEEKDAY:
-			return TDCU_WEEKDAYS;
-
-		case TDIR_WEEK_SPECIFIC_DOWS_NWEEKS:
-		case TDIR_WEEK_EVERY_NWEEKS:
-			return TDCU_WEEKS;
-
-		case TDIR_MONTH_SPECIFIC_DAY_NMONTHS:
-		case TDIR_MONTH_EVERY_NMONTHS:
-		case TDIR_MONTH_SPECIFIC_DOW_NMONTHS:
-		case TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
-			return TDCU_MONTHS;
-
-		case TDIR_YEAR_EVERY_NYEARS:
-		case TDIR_YEAR_SPECIFIC_DAY_MONTHS:
-		case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
-			return TDCU_YEARS;
-		}
-
-		// all else
-		ASSERT(0);
-		return TDCU_NULL;
-	}
-	
 	// static helper
 	static TDC_FILE MapTaskfileError(int nFileErr)
 	{

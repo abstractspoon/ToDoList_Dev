@@ -4216,34 +4216,52 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	return dateEnd;
 }
 
+int CToDoCtrlData::CalcRecurrenceOffset(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
+{
+	// Sanity check
+	if (COleDateTimeRange::IsValid(dateStart, dateDue))
+	{
+		switch (nUnits)
+		{
+		case TDCU_DAYS:
+		case TDCU_MONTHS:
+		case TDCU_YEARS:
+		case TDCU_WEEKDAYS:
+		case TDCU_WEEKS:
+			return (int)CDateHelper().CalcDuration(dateStart, dateDue, TDC::MapUnitsToDHUnits(nUnits), FALSE);
+		}
+	}
+
+	// All else
+	ASSERT(0);
+	return 0;
+}
+
 double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
 {
 	// Sanity check
-	if (!COleDateTimeRange::IsValid(dateStart, dateDue))
+	if (COleDateTimeRange::IsValid(dateStart, dateDue))
 	{
-		ASSERT(0);
-		return 0.0;
-	}
-
-	switch (nUnits)
-	{
-	case TDCU_DAYS:
-	case TDCU_MONTHS:
-	case TDCU_YEARS:
-	case TDCU_WEEKDAYS:
-	case TDCU_WEEKS:
-		return CDateHelper().CalcDuration(dateStart, dateDue, TDC::MapUnitsToDHUnits(nUnits), TRUE);
-
-	case TDCU_MINS:
-	case TDCU_HOURS:
+		switch (nUnits)
 		{
-			// Handle due date 'end of day'
-			COleDateTime dateEnd(dateDue);
+		case TDCU_DAYS:
+		case TDCU_MONTHS:
+		case TDCU_YEARS:
+		case TDCU_WEEKDAYS:
+		case TDCU_WEEKS:
+			return CDateHelper().CalcDuration(dateStart, dateDue, TDC::MapUnitsToDHUnits(nUnits), TRUE);
 
-			if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
-				dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+		case TDCU_MINS:
+		case TDCU_HOURS:
+			{
+				// Handle due date 'end of day'
+				COleDateTime dateEnd(dateDue);
+
+				if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
+					dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
 	
-			return CWorkingWeek().CalcDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+				return CWorkingWeek().CalcDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
+			}
 		}
 	}
 
@@ -4532,7 +4550,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 		if (!bIsSimple)
 		{
 			nRecurUnits = trPrev.GetRegularityUnits();
-			nRecurAmount = (bHasDue ? (int)CalcDuration(dtDue, dtNext, nRecurUnits) : 0);
+			nRecurAmount = (bHasDue ? CalcRecurrenceOffset(dtDue, dtNext, nRecurUnits) : 0);
 		}
 
 		if (bWantInheritDue)
@@ -4604,7 +4622,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 		if (!bIsSimple)
 		{
 			nRecurUnits = trPrev.GetRegularityUnits();
-			nRecurAmount = (bHasStart ? (int)CalcDuration(dtStart, dtNext, nRecurUnits) : 0);
+			nRecurAmount = (bHasStart ? CalcRecurrenceOffset(dtStart, dtNext, nRecurUnits) : 0);
 		}
 
 		// Move due date first so the Time Estimate recalculation does not assert

@@ -176,7 +176,45 @@ BOOL TDCRECURRENCE::GetSimpleOffsetAmount(int& nAmount, TDC_UNITS& nUnits) const
 
 TDC_UNITS TDCRECURRENCE::GetRegularityUnits() const
 {
-	return TDC::MapTDCRegularityToUnits(GetRegularity());
+	switch (m_nRegularity)
+	{
+	case RECURS_ONCE:
+		return TDCU_NULL;
+
+	case RECURS_DAY_EVERY_NDAYS:
+		return TDCU_DAYS;
+
+	case RECURS_DAY_EVERY_NWEEKDAYS:
+	case RECURS_DAY_EVERY_WEEKDAY:
+		return TDCU_WEEKDAYS;
+
+	case RECURS_WEEK_SPECIFIC_DOWS_NWEEKS:
+		// This a special case because even though it's strictly
+		// operating 'every n weeks' it's REALLY operating on an
+		// daily basis
+		if (m_dwSpecific2 & CWeekend().GetDays())
+			return TDCU_WEEKDAYS;
+		// else
+		return TDCU_DAYS;
+
+	case RECURS_WEEK_EVERY_NWEEKS:
+		return TDCU_WEEKS;
+
+	case RECURS_MONTH_SPECIFIC_DAY_NMONTHS:
+	case RECURS_MONTH_EVERY_NMONTHS:
+	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
+	case RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
+		return TDCU_MONTHS;
+
+	case RECURS_YEAR_EVERY_NYEARS:
+	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
+	case RECURS_YEAR_SPECIFIC_DOW_MONTHS:
+		return TDCU_YEARS;
+	}
+
+	// all else
+	ASSERT(0);
+	return TDCU_NULL;
 }
 
 BOOL TDCRECURRENCE::GetWantPreserveWeekday() const
