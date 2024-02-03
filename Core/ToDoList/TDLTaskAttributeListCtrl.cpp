@@ -2692,7 +2692,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	{
 	case ATTRIB_COL:
 		if (IsCustomTime(nAttribID))
-			sTooltip = _T("Time of day");// TODO
+			sTooltip.LoadString(IDS_ATTRIBTIP_TIMEOFDAY);
 		break;
 
 	case VALUE_COL:
@@ -2711,10 +2711,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				{
 					COLORREF color = _ttoi(GetItemText(nRow, nCol));
 
-					if (!color || (color == CLR_NONE)) // TODO
-					{
-						sTooltip = _T("Default colour");
-					}
+					if (!color || (color == CLR_NONE))
+						sTooltip.LoadString(IDS_ATTRIBTIP_DEFCOLOR);
 				}
 				break;
 
@@ -2725,9 +2723,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					int nDateRow = GetDateRow(nAttribID);
 
 					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
-					{
-						sTooltip = _T("Requires date to be set"); // TODO
-					}
+						sTooltip.LoadString(IDS_ATTRIBTIP_DATEREQUIRED);
 				}
 				break;
 
@@ -2736,9 +2732,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CTDCDependencyArray aDepends;
 					
 					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
-					{
 						sTooltip = m_formatter.GetDependencies(aDepends, '\n');
-					}
 				}
 				break;
 
@@ -2763,9 +2757,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					int nDateRow = GetDateRow(nAttribID);
 
 					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
-					{
-						sTooltip = _T("Requires date to be set"); // TODO
-					}
+						sTooltip.LoadString(IDS_ATTRIBTIP_DATEREQUIRED);
 				}
 				break;
 			}

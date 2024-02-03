@@ -5935,6 +5935,9 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_TDC_EMPTY           "<empty>"
     IDS_EDIT_VALUEVARIES    "<value varies>"
+    IDS_ATTRIBTIP_TIMEOFDAY "Time of day"
+    IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
+    IDS_ATTRIBTIP_DATEREQUIRED "Date must be set"
 END
 
 #endif    // English (Australia) resources
