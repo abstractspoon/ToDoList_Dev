@@ -8663,7 +8663,6 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
-
 	
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
