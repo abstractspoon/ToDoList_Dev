@@ -553,6 +553,9 @@ namespace SpreadsheetContentControl
 				this.StatusBar.Font = m_ControlsFont;
 				this.FontBar.Font = m_ControlsFont;
 
+				// Toolbar drop items
+				Toolbars.SetFont(this.ToolBar.Items, m_ControlsFont);
+
 				this.FontBar.Items["fontToolStripComboBox"].Font = m_ControlsFont;
 				this.FontBar.Items["fontSizeToolStripComboBox"].Font = m_ControlsFont;
 

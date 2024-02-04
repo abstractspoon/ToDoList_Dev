@@ -22,6 +22,7 @@ namespace Abstractspoon
 				static void FixupButtonSizes(Windows::Forms::ToolStrip^ toolbar);
 				static void Sort(Windows::Forms::ToolStripItemCollection^ items);
 				static int GetSelectedItem(Windows::Forms::ToolStripItemCollection^ items);
+				static void SetFont(Windows::Forms::ToolStripItemCollection^ items, Drawing::Font^ font);
 
 				enum class ItemState
 				{
