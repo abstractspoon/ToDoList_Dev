@@ -410,7 +410,6 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 	return CInputListCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
 
-
 TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveCustomTimeFields) const
 { 
 	if (nRow == -1)
@@ -422,6 +421,22 @@ TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveC
 		nAttribID = MapCustomTimeToDate(nAttribID);
 
 	return nAttribID;
+}
+
+TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetSelectedAttributeID() const
+{
+	return GetAttributeID(GetCurSel(), TRUE);
+}
+
+CString CTDLTaskAttributeListCtrl::GetSelectedAttributeLabel() const
+{
+	int nRow = GetCurSel();
+
+	if (nRow == -1)
+		return _T("");
+
+	// else
+	return GetItemText(nRow, ATTRIB_COL);
 }
 
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const

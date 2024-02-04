@@ -55,6 +55,9 @@ public:
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);
 
+	TDC_ATTRIBUTE GetSelectedAttributeID() const;
+	CString GetSelectedAttributeLabel() const;
+
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();

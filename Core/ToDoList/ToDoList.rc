@@ -5938,6 +5938,7 @@ BEGIN
     IDS_ATTRIBTIP_TIMEOFDAY "Time of day"
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
     IDS_ATTRIBTIP_DATEREQUIRED "Date must be set"
+    IDS_ATTRIBUTES          "Attributes"
 END
 
 #endif    // English (Australia) resources

@@ -8211,9 +8211,13 @@ CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 		{
 			sText.LoadString(IDS_TASKTREE);
 		}
-		else
+		else if (IsChildOrSame(m_lcAttributes, *pCtrl))
 		{
-			sText = GetCtrlLabel(pCtrl);
+			sText.LoadString(IDS_ATTRIBUTES);
+		}
+		else if (pCtrl == GetDlgItem(IDC_PROJECTNAME))
+		{
+			sText.LoadString(IDS_TDC_FIELD_PROJECT);
 		}
 
 		sText.Replace(_T("&"), _T(""));

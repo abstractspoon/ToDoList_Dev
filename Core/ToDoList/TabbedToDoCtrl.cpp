@@ -3023,7 +3023,7 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 	HWND hwndView = m_tabViews.GetViewHwnd(nView);
 
 	// Task view tab-bar just returns the active task view
-	if (CDialogHelper::IsChildOrSame(m_tabViews, pCtrl->GetSafeHwnd()))
+	if (CDialogHelper::IsChildOrSame(m_tabViews, *pCtrl))
 	{
 		return GetControlDescription(CWnd::FromHandle(hwndView)); // RECURSIVE CALL
 	}
@@ -3035,7 +3035,7 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 		break; // handled below
 
 	case FTCV_TASKLIST:
-		if (CDialogHelper::IsChildOrSame(m_taskList, pCtrl->GetSafeHwnd()))
+		if (CDialogHelper::IsChildOrSame(m_taskList, *pCtrl))
 			return CEnString(IDS_LISTVIEW);
 		break;
 
@@ -3055,7 +3055,7 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		if (CDialogHelper::IsChildOrSame(hwndView, pCtrl->GetSafeHwnd()))
+		if (CDialogHelper::IsChildOrSame(hwndView, *pCtrl))
 			return m_tabViews.GetViewName(nView);
 		break;
 

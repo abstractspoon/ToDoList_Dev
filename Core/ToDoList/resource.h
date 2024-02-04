@@ -2494,6 +2494,7 @@
 #define IDS_ATTRIBTIP_TIMEOFDAY         51634
 #define IDS_ATTRIBTIP_DEFCOLOR          51635
 #define IDS_ATTRIBTIP_DATEREQUIRED      51636
+#define IDS_ATTRIBUTES                  51637
 
 // Next default values for new objects
 // 
