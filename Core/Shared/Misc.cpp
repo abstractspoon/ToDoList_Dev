@@ -2162,10 +2162,21 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 	CString sValue;
 
-	if (nDecPlaces <= 0) // format decimal like an integer
-		sValue.Format(_T("%.f"), dVal);
-	else
-		sValue.Format(_T("%.*f"), nDecPlaces, dVal);
+	switch (nDecPlaces)
+	{
+	case -1:	
+		sValue.Format(_T("%f"), dVal); 	
+		TrimTrailingDecimalZeros(sValue);
+		break;
+
+	case 0:		
+		sValue.Format(_T("%.f"), dVal); 
+		break;
+
+	default:	
+		sValue.Format(_T("%.*f"), nDecPlaces, dVal); 
+		break;
+	}
 				
 	// restore locale
 	setlocale(LC_NUMERIC, szLocale);
