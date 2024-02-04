@@ -909,6 +909,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 						break;
 
 					case TDCCA_CALCULATION:
+						sValue = m_formatter.GetTaskCustomAttributeData(m_aSelectedTaskIDs[0], *pDef);
 						break;
 
 					case TDCCA_TIMEPERIOD:
