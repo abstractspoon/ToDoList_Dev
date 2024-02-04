@@ -6929,13 +6929,8 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 		return FALSE;
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-<<<<<<< HEAD
 	GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
 		
-=======
-	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
-	
->>>>>>> master
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
 

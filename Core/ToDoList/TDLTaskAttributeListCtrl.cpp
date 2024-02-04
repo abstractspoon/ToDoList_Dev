@@ -909,11 +909,10 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 						break;
 
 					case TDCCA_CALCULATION:
-						// TODO
 						break;
 
 					case TDCCA_TIMEPERIOD:
-						sValue = data.FormatAsTimePeriod();
+						sValue = pDef->FormatTimePeriod(data);
 						break;
 
 					case TDCCA_DATE:

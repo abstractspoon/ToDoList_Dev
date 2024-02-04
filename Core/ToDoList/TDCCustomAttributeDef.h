@@ -132,6 +132,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	CString FormatData(const TDCCADATA& data, BOOL bISODates, TCHAR cListSep = 0) const;
 	CString FormatNumber(double dValue) const;
+	CString FormatTimePeriod(const TDCCADATA& data) const { return FormatTimePeriod(data, dwFeatures); }
 	BOOL GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const;
 
 	int CalcLongestListItem(CDC* pDC) const;
