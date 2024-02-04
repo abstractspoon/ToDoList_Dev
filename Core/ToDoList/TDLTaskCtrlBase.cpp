@@ -3085,9 +3085,12 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				if (nIcon >= 0)
 				{
 					int nImageSize = m_ilTaskIcons.GetImageSize();
-					CPoint pt(CalcColumnIconTopLeft(rSubItem, nImageSize));
 
-					m_ilTaskIcons.Draw(pDC, nIcon, pt, ILD_TRANSPARENT);
+					if (rSubItem.Width() >= nImageSize)
+					{
+						CPoint pt(CalcColumnIconTopLeft(rSubItem, nImageSize));
+						m_ilTaskIcons.Draw(pDC, nIcon, pt, ILD_TRANSPARENT);
+					}
 				}
 			}
 			break;
@@ -3251,8 +3254,7 @@ BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int
 
 	rIcon = CRect(ptTopLeft, CSize(nImageSize, nImageSize));
 
-	// we always draw the first icon
-	if ((nImage == 0) || (rIcon.right <= rSubItem.right))
+	if (rIcon.right <= rSubItem.right)
 		return TRUE;
 
 	// else
@@ -3322,7 +3324,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			{
 			case DT_RIGHT:
 				// We still draw from the left just like text
-				rCol.left = (rCol.right - nReqWidth + LV_COLPADDING);
+				rCol.left = (rCol.right - nReqWidth);
 				break;
 				
 			case DT_CENTER:
@@ -3330,7 +3332,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 				if (sName.IsEmpty())
 				{
 					rCol.right = (rCol.left + nReqWidth);
-					GraphicsMisc::CentreRect(rCol, rSubItem, TRUE, FALSE);
+					GraphicsMisc::CentreRect(rCol, rSubItem, TRUE, FALSE); // centre horizontally
 				}
 				else 
 				{
@@ -3340,12 +3342,11 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 				
 			case DT_LEFT:
 			default:
-				if (nNumImage > 1)
-					rCol.left += LV_COLPADDING;
 				break;
 			}
 
 			BOOL bOverrun = FALSE;
+			rCol.left += LV_COLPADDING;
 
 			for (int nImg = 0; ((nImg < nNumImage) && !bOverrun); nImg++)
 			{
