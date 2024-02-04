@@ -499,13 +499,13 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 	}
 	else if (!GetLongestAggregatedValue(attribDef, sLongest))
 	{
-		sLongest = GetLongestValue(attribDef, NULL, NULL, bVisibleOnly);
+		sLongest = GetLongestValue(attribDef, NULL, NULL, NULL, bVisibleOnly);
 	}
 
 	if (sLongest.IsEmpty())
 	{
 		if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
-			sLongest = attribDef.FormatData(0.0, FALSE);
+			sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
 	}
 	
 	return sLongest;
@@ -727,69 +727,23 @@ BOOL CToDoCtrlFind::WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const
 }
 
 CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-									   HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const
+									   HTREEITEM hti, 
+									   const TODOITEM* pTDI, 
+									   const TODOSTRUCTURE* pTDS,
+									   BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI, TRUE))
+	if (!CheckGetTask(hti, pTDI, pTDS))
 		return EMPTY_STR;
 
 	CString sLongest;
 
-	if (pTDI)
-	{
-		TDCCADATA data;
-
-		if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-		{
-			switch (attribDef.GetDataType())
-			{
-			case TDCCA_FRACTION:
-				sLongest = attribDef.FormatNumber(data.AsFraction());
-				break;
-
-			case TDCCA_DOUBLE:
-			case TDCCA_INTEGER:
-				sLongest = attribDef.FormatNumber(data.AsDouble());
-				break;
-
-			case TDCCA_TIMEPERIOD:
-				{
-					TDCTIMEPERIOD time;
-
-					if (data.AsTimePeriod(time))
-						sLongest = m_formatter.GetTimePeriod(time.dAmount, time.nUnits, TRUE);
-				}
-				break;
-
-			case TDCCA_BOOL:
-			case TDCCA_ICON:
-			case TDCCA_DATE:
-			case TDCCA_FILELINK:
-				// sanity check
-				ASSERT(0);
-				return EMPTY_STR;
-
-			default:
-				sLongest = data.AsString();
-				break;
-			}
-		}
-	}
+	if (hti && pTDI && pTDS)
+		sLongest = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
 
 	// children
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
-		BOOL bAsDouble = attribDef.IsDataType(TDCCA_DOUBLE);
-
-		// check children
-		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
-
-		while (htiChild)
-		{
-			CString sChildLongest = GetLongestValue(attribDef, htiChild, NULL, bVisibleOnly);
-			sLongest = Misc::GetLongest(sLongest, sChildLongest, bAsDouble);
-
-			htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);
-		}
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestValue(attribDef, htiChild, NULL, NULL, bVisibleOnly));
 	}
 
 	return sLongest;
@@ -1255,7 +1209,6 @@ void CToDoCtrlFind::GetLongestValues(HTREEITEM hti,
 		mapLongest.CheckUpdateValue(TDCC_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
 
 		// Attributes dependent on subtask values
-		// Note: Cost handled elsewhere
 		// Note: Don't use CheckUpdateValue() because all the work
 		//       gets done up front and it might be wasted effort
 		if (mapLongest.HasColumn(TDCC_PATH))
@@ -1310,7 +1263,7 @@ void CToDoCtrlFind::GetLongestValues(HTREEITEM hti,
 
 			if (attribDef.bEnabled && mapLongest.HasColumn(attribDef.GetColumnID()))
 			{
-				CString sLongest = GetLongestValue(attribDef, hti, pTDI, bVisibleOnly);
+				CString sLongest = GetLongestValue(attribDef, hti, pTDI, pTDS, bVisibleOnly);
 				mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 			}
 		}

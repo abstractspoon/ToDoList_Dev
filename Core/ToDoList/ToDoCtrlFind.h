@@ -136,9 +136,14 @@ protected:
 						  CTDCLongestItemMap& mapLongest,
 						  BOOL bVisibleOnly) const;
 
+	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+							HTREEITEM hti,
+							const TODOITEM* pTDI,
+							const TODOSTRUCTURE* pTDS,
+							BOOL bVisibleOnly) const;
+
 	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
-	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
 
 	// specific
  	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
