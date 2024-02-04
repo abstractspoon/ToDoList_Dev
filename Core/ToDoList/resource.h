@@ -1304,7 +1304,6 @@
 #define ID_EDIT_RECURRENCE              34332
 #define ID_EDIT_GOTODEPENDENCY          34333
 #define ID_EDIT_CLEARFOCUSEDFIELD       34338
-#define ID_EDIT_CLEARFIELD              34339
 #define ID_CUSTATTRIB_NEW               34344
 #define ID_CUSTATTRIB_DELETE            34345
 #define ID_CUSTATTRIB_MOVEUP            34346

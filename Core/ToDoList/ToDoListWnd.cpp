@@ -287,7 +287,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_COMMENTS_INSERTTIME, OnEditInserttime)
 	ON_COMMAND(ID_DELETEALLTASKS, OnDeleteAllTasks)
 	ON_COMMAND(ID_DELETETASK, OnDeleteTask)
-	ON_COMMAND(ID_EDIT_CLEARFIELD, OnEditClearAttribute)
 	ON_COMMAND(ID_EDIT_CLEARFOCUSEDFIELD, OnEditClearFocusedAttribute)
 	ON_COMMAND(ID_EDIT_CLEARREMINDER, OnEditClearReminder)
 	ON_COMMAND(ID_EDIT_CLEARTASKCOLOR, OnEditCleartaskcolor)
@@ -540,7 +539,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_COMMENTS_INSERTTIME, OnUpdateCommentsInsertDateAndOrTime)
 	ON_UPDATE_COMMAND_UI(ID_DELETEALLTASKS, OnUpdateDeletealltasks)
 	ON_UPDATE_COMMAND_UI(ID_DELETETASK, OnUpdateDeletetask)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARFIELD, OnUpdateEditClearAttribute)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARFOCUSEDFIELD, OnUpdateEditClearFocusedAttribute)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARREMINDER, OnUpdateEditClearReminder)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARTASKCOLOR, OnUpdateEditCleartaskcolor)
@@ -12795,16 +12793,12 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 
 			// Need to preset the icon otherwise the function GetIconWndClass
 			// calling us will overwrite our class.
-			//VERIFY(m_iconClass.Load(IDR_MAINFRAME));
-			//wndcls.hIcon = m_iconClass;
 			wndcls.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 			// Register our class now and check the outcome
 			if (!::RegisterClass(&wndcls))
 			{
 				ASSERT(0);
-
-				//m_iconClass.Destroy();
 				return FALSE;
 			}
 		}
@@ -13478,20 +13472,6 @@ void CToDoListWnd::OnTasklistCustomColumns()
 void CToDoListWnd::OnUpdateTasklistCustomcolumns(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(!GetToDoCtrl().IsReadOnly());
-}
-
-void CToDoListWnd::OnEditClearAttribute() 
-{
-	TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(m_nContextColumnID);
-
-	GetToDoCtrl().ClearSelectedTaskAttribute(nAttrib);
-}
-
-void CToDoListWnd::OnUpdateEditClearAttribute(CCmdUI* pCmdUI) 
-{
-	TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(m_nContextColumnID);
-
-	pCmdUI->Enable(GetToDoCtrl().CanClearSelectedTaskAttribute(nAttrib));
 }
 
 void CToDoListWnd::OnEditClearFocusedAttribute() 
