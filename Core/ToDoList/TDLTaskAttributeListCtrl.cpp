@@ -2448,7 +2448,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lPar
 	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
 	{
 		if (!s_iconApp.IsValid())
-			VERIFY(s_iconApp.SetIcon(GraphicsMisc::GetAppWindowIcon(FALSE)));
+			VERIFY(s_iconApp.SetIcon(GraphicsMisc::GetAppWindowIcon(FALSE), FALSE)); // Not owned
 
 		return (LRESULT)(HICON)s_iconApp;
 	}

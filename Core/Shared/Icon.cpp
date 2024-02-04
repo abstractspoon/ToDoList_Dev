@@ -10,17 +10,19 @@ CIcon::CIcon()
 {
 }
 
-CIcon::CIcon(HICON hIcon) 
+CIcon::CIcon(HICON hIcon, BOOL bOwned)
 	: 
 	m_hIcon(hIcon), 
-	m_size(GraphicsMisc::GetIconSize(hIcon))
+	m_size(GraphicsMisc::GetIconSize(hIcon)),
+	m_bOwned(bOwned)
 {
 }
 
 CIcon::CIcon(UINT nIDIcon, int nSize, BOOL bScaleByDPI) 
 	: 
 	m_hIcon(NULL), 
-	m_size(0, 0)
+	m_size(0, 0),
+	m_bOwned(FALSE)
 {
 	Load(nIDIcon, nSize, bScaleByDPI);
 }
@@ -35,7 +37,19 @@ BOOL CIcon::IsValid() const
 	return (m_hIcon != NULL); 
 }
 
-BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
+void CIcon::Destroy()
+{
+	if (m_hIcon && m_bOwned)
+	{
+		VERIFY(::DestroyIcon(m_hIcon));
+
+		m_hIcon = NULL;
+		m_size.cx = m_size.cy = 0;
+		m_bOwned = FALSE;
+	}
+}
+
+BOOL CIcon::SetIcon(HICON hIcon, BOOL bOwned)
 {
 	if (hIcon == NULL)
 	{
@@ -43,11 +57,11 @@ BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
 		return FALSE;
 	}
 
-	if (bDeletePrev && (m_hIcon != NULL))
-		VERIFY(::DestroyIcon(m_hIcon));
+	Destroy();
 
 	m_hIcon = hIcon;
 	m_size = GraphicsMisc::GetIconSize(m_hIcon);
+	m_bOwned = bOwned;
 
 	return TRUE;
 }
@@ -57,21 +71,10 @@ BOOL CIcon::Load(UINT nIDIcon, int nSize, BOOL bScaleByDPI)
 	if (bScaleByDPI)
 		nSize = GraphicsMisc::ScaleByDPIFactor(nSize);
 
-	return SetIcon(GraphicsMisc::LoadIcon(nIDIcon, nSize));
+	return SetIcon(GraphicsMisc::LoadIcon(nIDIcon, nSize), TRUE); // owned
 }
 
-void CIcon::Destroy()
-{
-	if (m_hIcon)
-	{
-		VERIFY(::DestroyIcon(m_hIcon));
-
-		m_hIcon = NULL;
-		m_size.cx = m_size.cy = 0;
-	}
-}
-
-BOOL CIcon::Attach(HICON hIcon)
+BOOL CIcon::Attach(HICON hIcon, BOOL bOwned)
 {
 	if ((m_hIcon != NULL) || (hIcon == NULL))
 	{
@@ -79,7 +82,7 @@ BOOL CIcon::Attach(HICON hIcon)
 		return FALSE;
 	}
 
-	return SetIcon(hIcon);
+	return SetIcon(hIcon, bOwned);
 }
 
 HICON CIcon::Detach()
@@ -88,6 +91,7 @@ HICON CIcon::Detach()
 
 	m_hIcon = NULL;
 	m_size.cx = m_size.cy = 0;
+	m_bOwned = FALSE;
 
 	return hIcon;
 }
