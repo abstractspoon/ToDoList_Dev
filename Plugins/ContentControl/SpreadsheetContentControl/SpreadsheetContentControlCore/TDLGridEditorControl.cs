@@ -212,17 +212,10 @@ namespace SpreadsheetContentControl
 			m_Trans.Translate(MenuBar.Items);
 			m_Trans.Translate(ToolBar.Items);
 			m_Trans.Translate(FontBar.Items);
-			// m_Trans.Translate(FormulaBar.Items);
-			// m_Trans.Translate(StatusBar.Items);
 			m_Trans.Translate(RowContextMenu.Items);
 			m_Trans.Translate(CellContextMenu.Items);
 			m_Trans.Translate(HeaderContextMenu.Items);
 			m_Trans.Translate(ColumnContextMenu.Items);
-
-			// Handle the 3rd-party components embedded in the toolbar
-			unvell.UIControls.ColorPickerPanel.NoColor = m_Trans.Translate("None");
-			unvell.UIControls.ColorPickerPanel.MoreColors = m_Trans.Translate("More...");
-			unvell.UIControls.ColorPickerPanel.SolidTab = m_Trans.Translate("Solid");
 		}
 
 		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)

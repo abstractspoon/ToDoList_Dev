@@ -109,9 +109,17 @@ void Translator::Translate(ToolStripItemCollection^ items)
 		// children
 		auto dropItem = ASTYPE(item, ToolStripDropDownItem);
 
-		if ((dropItem != nullptr) && dropItem->HasDropDownItems)
+		if (dropItem != nullptr)
 		{
-			Translate(dropItem->DropDownItems); // RECURSIVE CALL
+			if (dropItem->DropDown != nullptr)
+			{
+				Translate(dropItem->DropDown); // RECURSIVE CALL
+			}
+
+			if (dropItem->HasDropDownItems)
+			{
+				Translate(dropItem->DropDownItems); // RECURSIVE CALL
+			}
 		}
 	}
 }
