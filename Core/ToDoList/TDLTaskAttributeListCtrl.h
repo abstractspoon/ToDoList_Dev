@@ -59,6 +59,7 @@ public:
 	CString GetSelectedAttributeLabel() const;
 
 	void RefreshSelectedTasksValues();
+	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 

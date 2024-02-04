@@ -709,17 +709,26 @@ BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
 {
+	RefreshSelectedTasksValues(TDCA_ALL);
+}
+
+void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs)
+{
 	CHoldRedraw hr(*this);
 	HideAllControls();
 
 	int nRow = GetItemCount();
+	BOOL bRefreshAll = mapAttribIDs.Has(TDCA_ALL);
 
 	while (nRow--)
 	{
-		if (m_aSelectedTaskIDs.GetSize())
-			RefreshSelectedTasksValue(nRow);
-		else
-			SetItemText(nRow, VALUE_COL, _T(""));
+		if (bRefreshAll || mapAttribIDs.Has(GetAttributeID(nRow, TRUE)))
+		{
+			if (m_aSelectedTaskIDs.GetSize())
+				RefreshSelectedTasksValue(nRow);
+			else
+				SetItemText(nRow, VALUE_COL, _T(""));
+		}
 	}
 
 	EnableColumnEditing(VALUE_COL, m_aSelectedTaskIDs.GetSize());
@@ -2277,10 +2286,10 @@ void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow)
 {
 	UpdateWindow();
 
-	GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE));
+	// Refresh the cell text only if the edit failed
+	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE)))
+		RefreshSelectedTasksValue(nRow);
 
-	// Refresh the cell text if either the edit failed or we are no longer 'value varies'
-	RefreshSelectedTasksValue(nRow);
 }
 
 void CTDLTaskAttributeListCtrl::OnDependsChange()

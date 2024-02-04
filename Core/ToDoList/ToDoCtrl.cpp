@@ -5456,9 +5456,8 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	// the focus is set back to the name
 	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
-
-	if (mapAttribIDs.Has(TDCA_LOCK))
-		UpdateControls(FALSE);
+	else
+		m_lcAttributes.RefreshSelectedTasksValues(mapAttribIDs);
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -10070,29 +10069,13 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 	if (IsChildOrSame(m_ctrlComments, hFocus))
 		return TDCA_COMMENTS;
 
-	UINT nCtrlID = ::GetDlgCtrlID(hFocus);
+	if (IsChildOrSame(m_lcAttributes, hFocus))
+		return m_lcAttributes.GetSelectedAttributeID();
 
-	if (nCtrlID == 0)
-		return TDCA_NONE;
+	if (hFocus == ::GetDlgItem(*this, IDC_PROJECTNAME))
+		return TDCA_PROJECTNAME;
 
-	TDC_ATTRIBUTE nAttrib = MapCtrlIDToAttribute(nCtrlID);
-
-	if (nAttrib == TDCA_NONE)
-	{
-		// handle edit controls of combos
-		if (CWinClasses::IsEditControl(hFocus))
-		{
-			hFocus = ::GetParent(hFocus);
-
-			if (CWinClasses::IsComboBox(hFocus))
-			{
-				nCtrlID = ::GetDlgCtrlID(hFocus);
-				nAttrib = MapCtrlIDToAttribute(nCtrlID);
-			}
-		}
-	}
-
-	return nAttrib;
+	return TDCA_NONE;
 }
 
 BOOL CToDoCtrl::CanClearSelectedTaskFocusedAttribute() const
@@ -10120,11 +10103,21 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
 	if (!CanEditSelectedTask(nAttrib))
 		return FALSE;
 
-	return ((nAttrib >= TDCA_FIRST_ATTRIBUTE && 
-			 nAttrib <= TDCA_LAST_REALATTRIBUTE &&
-			 nAttrib != TDCA_TASKNAME && 
-			 nAttrib != TDCA_PROJECTNAME) ||
-			TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib));
+	switch (nAttrib)
+	{
+	case TDCA_LOCK:
+		return TRUE;
+
+	case TDCA_TASKNAME:
+	case TDCA_PROJECTNAME:
+		return FALSE;
+	}
+
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		return TRUE;
+
+	// else
+	return ((nAttrib >= TDCA_FIRST_ATTRIBUTE) && (nAttrib <= TDCA_LAST_REALATTRIBUTE));
 }
 
 BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
@@ -10158,6 +10151,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
 	case TDCA_COLOR:		return SetSelectedTaskColor(0);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
+	case TDCA_ICON:			return ClearSelectedTaskIcon();
 		
 	case TDCA_TIMEESTIMATE:		
 		{
@@ -10189,7 +10183,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 			return SetSelectedTaskCost(cost);
 		}
 
-	// these have no field
+	// These cannot be cleared
 	case TDCA_SUBTASKDONE:
 	case TDCA_POSITION:
 	case TDCA_POSITION_SAMEPARENT:
@@ -10198,11 +10192,6 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_CREATIONDATE:
 	case TDCA_LASTMODDATE:
 	case TDCA_LASTMODBY:
-	case TDCA_ICON:
-		ASSERT(0);
-		return FALSE;
-
-	// These cannot be cleared
 	case TDCA_ID:
 	case TDCA_PARENTID:
 	case TDCA_PATH:

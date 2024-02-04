@@ -296,8 +296,6 @@ public:
 
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
 	BOOL ClearSelectedTaskFocusedAttribute();
-	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const;
-	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib);
 
 	BOOL IncrementSelectedTaskPercentDone(BOOL bUp = TRUE); // +ve or -ve
 	BOOL IncrementSelectedTaskPriority(BOOL bUp = TRUE); // +ve or -ve
@@ -708,6 +706,8 @@ protected:
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
+	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const;
+	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib);
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
