@@ -78,7 +78,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE),
 	m_reminders(*this),
-	m_find(m_tch, data, m_reminders, mgrContent)
+	m_find(m_tch, data, aCustAttribDefs, m_reminders, mgrContent)
 {
 	// We handle multiple selection
 	m_dwFlags &= ~TLSF_SYNCSELECTION;

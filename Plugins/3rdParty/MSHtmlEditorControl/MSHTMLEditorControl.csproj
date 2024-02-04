@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
-    <ResolveComReferenceSilent>True</ResolveComReferenceSilent>   
+    <ResolveComReferenceSilent>True</ResolveComReferenceSilent>
     <ProjectType>Local</ProjectType>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -277,6 +277,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ImageHelper\ImageHelper.csproj">
+      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
+      <Name>ImageHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CommandHandling\CommandHandling.csproj">
       <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
       <Name>CommandHandling</Name>

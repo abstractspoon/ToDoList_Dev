@@ -26,6 +26,7 @@ using Command.Handling;
 
 namespace SpreadsheetContentControl
 {
+
 	[System.ComponentModel.DesignerCategory("")]
 	public class TDLGridEditorControl : ReoGridEditorControl
 	{
@@ -72,19 +73,10 @@ namespace SpreadsheetContentControl
 			InitialiseFeatures();
 			InitialiseToolbars();
 			InitialiseChangeCallbacks();
+			TranslateUI();
 
 			Worksheet.DefaultFontName = m_ControlsFont.Name;
 			Worksheet.DefaultFontSize = m_ControlsFont.SizeInPoints;
-
-			m_Trans.Translate(MenuBar.Items);
-			m_Trans.Translate(ToolBar.Items);
-			m_Trans.Translate(FontBar.Items);
-//			m_Trans.Translate(FormulaBar.Items);
-//			m_Trans.Translate(StatusBar.Items);
-			m_Trans.Translate(RowContextMenu.Items);
-			m_Trans.Translate(CellContextMenu.Items);
-			m_Trans.Translate(HeaderContextMenu.Items);
-			m_Trans.Translate(ColumnContextMenu.Items);
 
 			GridControl.WorksheetInserted += (s, e) =>
 			{
@@ -213,6 +205,17 @@ namespace SpreadsheetContentControl
 			m_PrevContent = null;
 
 			return true;
+		}
+
+		private void TranslateUI()
+		{
+			m_Trans.Translate(MenuBar.Items);
+			m_Trans.Translate(ToolBar.Items);
+			m_Trans.Translate(FontBar.Items);
+			m_Trans.Translate(RowContextMenu.Items);
+			m_Trans.Translate(CellContextMenu.Items);
+			m_Trans.Translate(HeaderContextMenu.Items);
+			m_Trans.Translate(ColumnContextMenu.Items);
 		}
 
 		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)
@@ -549,6 +552,9 @@ namespace SpreadsheetContentControl
 				this.ToolBar.Font = m_ControlsFont;
 				this.StatusBar.Font = m_ControlsFont;
 				this.FontBar.Font = m_ControlsFont;
+
+				// Toolbar drop items
+				Toolbars.SetFont(this.ToolBar.Items, m_ControlsFont);
 
 				this.FontBar.Items["fontToolStripComboBox"].Font = m_ControlsFont;
 				this.FontBar.Items["fontSizeToolStripComboBox"].Font = m_ControlsFont;

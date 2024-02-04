@@ -60,7 +60,7 @@ namespace unvell.ReoGrid.Editor
 			this.labFunctions.Name = "labFunctions";
 			this.labFunctions.Size = new System.Drawing.Size(56, 13);
 			this.labFunctions.TabIndex = 0;
-			this.labFunctions.Text = "Functions:";
+			this.labFunctions.Text = "Functions";
 			// 
 			// functionList
 			// 

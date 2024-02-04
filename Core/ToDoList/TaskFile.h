@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "tdcenumContainers.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\xmlfileex.h"
 
@@ -21,7 +22,6 @@
 
 // predecs
 class CBinaryData;
-class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
 class CTDCDependencyArray;
 
@@ -446,7 +446,6 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList2 implementation 
-	
 	LPCTSTR GetTaskCreatedBy(HTASKITEM hTask) const;
 	time_t GetTaskCreationDate(HTASKITEM hTask) const;
 	LPCTSTR GetTaskCreationDateString(HTASKITEM hTask) const;
@@ -456,9 +455,7 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList implementation 
-
 	bool IsArchive() const;
-	
 	LPCTSTR GetProjectName() const;
 
 	bool IsSourceControlled() const;
@@ -551,6 +548,7 @@ protected:
 	BOOL m_bISODates;
 	CString m_sHtmlImgFolder;
 	CTDCAttributeMap m_mapReadableAttrib;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	mutable CMap <DWORD, DWORD, HTASKITEM, HTASKITEM&> m_mapHandles;
 

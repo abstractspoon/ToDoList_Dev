@@ -232,7 +232,7 @@ namespace HTMLReportExporter
 
 		// ----------------------------------------------------
 
-		public static String SubstituteReportDetails(TaskList tasks, String content)
+		public static String ReplaceReportAttributePlaceholders(TaskList tasks, String content)
 		{
 			return content.Replace("$(reportTitle)", tasks.GetReportTitle())
 						  .Replace("$(reportDate)", tasks.GetReportDate());

@@ -1212,6 +1212,9 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		}
 	}
 
+	// Required for helping with custom 'Calculation' attributes
+	m_aCustomAttribDefs.Copy(aAttribs);
+
 	return TRUE;
 }
 
@@ -2317,13 +2320,12 @@ BOOL CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttr
 	pXITask->DeleteItem(TDL_TASKCUSTOMATTRIBDATA);
 
 	POSITION pos = mapData.GetStartPosition();
+	CString sTypeID;
+	TDCCADATA data;
 
 	while (pos)
 	{
-		CString sTypeID;
-		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sTypeID, data);
-
 		SetTaskCustomAttributeData(hTask, sTypeID, data, FALSE);
 	}
 
@@ -2366,43 +2368,7 @@ BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCu
 
 	// add human readable format
 	szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING : TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
-
-	DWORD dwAttribType = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBTYPE);
-
-	if (dwAttribType & TDCCA_LISTMASK)
-	{
-		if (dwAttribType & (TDCCA_AUTOMULTILIST | TDCCA_FIXEDMULTILIST))
-		{
-			if (data.IsArray())
-				pXICustData->AddItem(szTag, data.FormatAsArray());
-		}
-	}
-	else
-	{
-		DWORD dwDataType = (dwAttribType & TDCCA_DATAMASK);
-
-		switch (dwDataType)
-		{
-		case TDCCA_DATE:
-			pXICustData->AddItem(szTag, data.FormatAsDate(m_bISODates, TRUE));
-			break;
-
-		case TDCCA_TIMEPERIOD:
-			pXICustData->AddItem(szTag, data.FormatAsTimePeriod());
-			break;
-
-		case TDCCA_DOUBLE:
-		case TDCCA_INTEGER:
-		case TDCCA_FRACTION:
-			{
-				DWORD dwFeatures = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBFEATURES);
-				CString sValue = TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(data.AsDouble(), dwDataType, dwFeatures);
-
-				pXICustData->AddItem(szTag, sValue);
-			}
-			break;
-		}
-	}
+	pXICustData->AddItem(szTag, m_aCustomAttribDefs.FormatData(data, sCustAttribID, m_bISODates));
 
 	return TRUE;
 }

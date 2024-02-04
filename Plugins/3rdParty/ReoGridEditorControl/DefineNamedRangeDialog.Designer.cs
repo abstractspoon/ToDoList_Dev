@@ -64,7 +64,7 @@ namespace unvell.ReoGrid.Editor
 			this.labName.Name = "labName";
 			this.labName.Size = new System.Drawing.Size(38, 13);
 			this.labName.TabIndex = 0;
-			this.labName.Text = "Name:";
+			this.labName.Text = "Name";
 			// 
 			// txtName
 			// 
@@ -90,7 +90,7 @@ namespace unvell.ReoGrid.Editor
 			this.labComment.Name = "labComment";
 			this.labComment.Size = new System.Drawing.Size(54, 13);
 			this.labComment.TabIndex = 2;
-			this.labComment.Text = "Comment:";
+			this.labComment.Text = "Comment";
 			// 
 			// txtRange
 			// 
@@ -107,7 +107,7 @@ namespace unvell.ReoGrid.Editor
 			this.labRange.Name = "labRange";
 			this.labRange.Size = new System.Drawing.Size(42, 13);
 			this.labRange.TabIndex = 4;
-			this.labRange.Text = "Range:";
+			this.labRange.Text = "Range";
 			// 
 			// btnOK
 			// 

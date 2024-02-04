@@ -83,6 +83,21 @@ int Toolbars::GetSelectedItem(ToolStripItemCollection^ items)
 	return -1;
 }
 
+void Toolbars::SetFont(Windows::Forms::ToolStripItemCollection^ items, Drawing::Font^ font)
+{
+	int nItem = items->Count;
+
+	while (nItem--)
+	{
+		auto dropItem = ASTYPE(items[nItem], ToolStripDropDownItem);
+
+		if ((dropItem != nullptr) && (dropItem->DropDown != nullptr))
+		{
+			dropItem->Font = font;
+		}
+	}
+}
+
 int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Object^ obj2)
 {
 	auto oItem1 = dynamic_cast<ToolStripItem^>(obj1);
@@ -90,6 +105,17 @@ int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Objec
 
 	return String::Compare(oItem1->Text, oItem2->Text, true);
 }
+
+// --------------------------------------------------------------
+
+enum class ItemState
+{
+	Normal,
+	Disabled,
+	Pressed,
+	Checked,
+	Hot,
+};
 
 Toolbars::ItemState Toolbars::GetItemState(ToolStripItem^ item)
 {

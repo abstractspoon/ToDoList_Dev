@@ -122,7 +122,7 @@ namespace PDFExporter
 
 			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
 
-			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings)
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, m_Trans)
 			{
 				InstalledFont = installedFont,
 				OtherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", ""),

@@ -347,7 +347,7 @@ namespace EvidenceBoardUIExtension
         private void InitializeComponent()
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
-            m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+            m_ControlsFont = new Font(FontName, 8.25f);
 
 			m_PrefsDlg = new EvidenceBoardPreferencesDlg(this, m_Trans, m_ControlsFont);
 
@@ -924,7 +924,7 @@ namespace EvidenceBoardUIExtension
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = s_ImageFilter,
+				Filter = m_Trans.Translate(s_ImageFilter),
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

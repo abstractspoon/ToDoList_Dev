@@ -97,7 +97,7 @@ namespace unvell.ReoGrid.Editor
 			this.chkUseSystemHighlight.Name = "chkUseSystemHighlight";
 			this.chkUseSystemHighlight.Size = new System.Drawing.Size(153, 17);
 			this.chkUseSystemHighlight.TabIndex = 9;
-			this.chkUseSystemHighlight.Text = "Use System Highlight Color";
+			this.chkUseSystemHighlight.Text = "Use System Highlight Colour";
 			this.chkUseSystemHighlight.UseVisualStyleBackColor = true;
 			this.chkUseSystemHighlight.CheckedChanged += new System.EventHandler(this.chkUseSystemHighlight_CheckedChanged);
 			// 
@@ -138,7 +138,7 @@ namespace unvell.ReoGrid.Editor
 			this.labSelectionBorderWidth.Name = "labSelectionBorderWidth";
 			this.labSelectionBorderWidth.Size = new System.Drawing.Size(119, 13);
 			this.labSelectionBorderWidth.TabIndex = 12;
-			this.labSelectionBorderWidth.Text = "Selection Border Width:";
+			this.labSelectionBorderWidth.Text = "Selection Border Width";
 			// 
 			// labPixel
 			// 

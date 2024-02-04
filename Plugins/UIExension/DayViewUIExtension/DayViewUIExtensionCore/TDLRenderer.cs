@@ -56,7 +56,7 @@ namespace DayViewUIExtension
         {
 			if (m_BaseFont == null)
 			{
-				m_BaseFont = new Font("Tahoma", 8, FontStyle.Regular);
+				m_BaseFont = new Font("Tahoma", 8.25f);
 				RecalcLongAppointmentHeight();
 			}
 
@@ -67,7 +67,7 @@ namespace DayViewUIExtension
 		{
 			if (m_HourFont == null)
 			{
-				m_HourFont = new Font(BaseFont().FontFamily.Name, 12, FontStyle.Regular);
+				m_HourFont = new Font(BaseFont().FontFamily.Name, 12);
 			}
 
 			return m_HourFont;
@@ -78,7 +78,7 @@ namespace DayViewUIExtension
 		{
 			if (m_MinuteFont == null)
 			{
-				m_MinuteFont = new Font(BaseFont().FontFamily.Name, 8, FontStyle.Regular);
+				m_MinuteFont = new Font(BaseFont().FontFamily.Name, 8.25f);
 			}
 
 			return m_MinuteFont;

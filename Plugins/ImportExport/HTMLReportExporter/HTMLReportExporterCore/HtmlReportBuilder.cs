@@ -312,7 +312,7 @@ namespace HTMLReportExporter
 				html.AddAttribute("class", "page-header");
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
+				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text));
 				html.RenderEndTag(); // Div
 
 				html.WriteLine();
@@ -380,7 +380,7 @@ namespace HTMLReportExporter
 				html.AddAttribute("class", "page-footer");
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
+				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text));
 				html.RenderEndTag(); // Div
 
 				html.WriteLine();
@@ -502,7 +502,7 @@ namespace HTMLReportExporter
 					html.AddAttribute("class", "title-page");
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(HtmlReportUtils.SubstituteReportDetails(tasks, Text));
+				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text));
 				html.RenderEndTag(); // Div
 
 				return true;
@@ -520,7 +520,7 @@ namespace HTMLReportExporter
 				if (SeparatePage)
 					html.AddAttribute("class", "title-page");
 
-				String content = HtmlReportUtils.SubstituteReportDetails(tasks, Text);
+				String content = HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text);
 				var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
 
 				content = HtmlReportUtils.ReplaceTaskAttributePlaceholders(content, custAttribs, task, 1, false);
