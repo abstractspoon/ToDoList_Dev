@@ -512,7 +512,39 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 
 	if (rSplitBar.PtInRect(ptClient))
 		return GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
-	
+
+	LVHITTESTINFO lvHit = { ptClient, 0 };
+
+	int nRow = SubItemHitTest(&lvHit);
+	int nCol = lvHit.iSubItem;
+
+	if (nCol == VALUE_COL)
+	{
+		if (m_data.HasStyle(TDCS_READONLY))
+			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+		switch (nAttribID)
+		{
+		case TDCA_LOCK:
+			ASSERT(CanEditCell(nRow, nCol));
+			break;
+
+		default:
+			if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+			{
+				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+			}
+			else if (!CanEditCell(nRow, nCol))
+			{
+				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+			}
+			break;
+		}
+	}
+
+	// all else
 	return CInputListCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
 
@@ -2798,8 +2830,7 @@ int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
 
 int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	LVHITTESTINFO lvHit = { 0 };
-	lvHit.pt = point;
+	LVHITTESTINFO lvHit = { point, 0 };
 
 	// Get around const-ness
 	int nRow = (int)::SendMessage(m_hWnd, LVM_SUBITEMHITTEST, 0, (LPARAM)&lvHit);
