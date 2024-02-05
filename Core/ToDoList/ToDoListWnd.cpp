@@ -11295,7 +11295,7 @@ BOOL CToDoListWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		if (rSplitter.PtInRect(ptCursor))
 		{
 			UINT nIDCursor = ((m_dlgFindTasks.GetDockPosition() == DMP_BELOW) ? AFX_IDC_VSPLITBAR : AFX_IDC_HSPLITBAR);
-			::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+			GraphicsMisc::SetAfxCursor(nIDCursor);
 
 			return TRUE;
 		}

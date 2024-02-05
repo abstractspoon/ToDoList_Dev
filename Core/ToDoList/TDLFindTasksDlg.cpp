@@ -2006,7 +2006,7 @@ BOOL CTDLFindTasksDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	if (GetSplitterRect().PtInRect(ptCursor))
 	{ 
 		UINT nIDCursor = ((m_nDockPos == DMP_BELOW) ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
-		::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+		GraphicsMisc::SetAfxCursor(nIDCursor);
 
 		return TRUE;
 	}

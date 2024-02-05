@@ -86,8 +86,10 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
-const int COMBO_DROPHEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
-const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
+const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
+const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_COL_WIDTH		= GraphicsMisc::ScaleByDPIFactor(50);
 
 const int VALUE_VARIES = 1;
 
@@ -116,7 +118,9 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
 	m_cbCustomIcons(ilIcons),
-	m_dropFiles(this)
+	m_dropFiles(this),
+	m_bSplitting(FALSE),
+	m_fAttribColProportion(0.5f)
 {
 	// Fixed 'Dependency' buttons
 	m_eDepends.SetBorderWidth(0);
@@ -152,8 +156,11 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLTaskAttributeListCtrl)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
-	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_CAPTURECHANGED()
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
@@ -266,6 +273,16 @@ void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 			break;
 		}
 	}
+}
+
+void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+{
+	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
+}
+
+void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+{
+	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 }
 
 void CTDLTaskAttributeListCtrl::SetCompletionStatus(const CString& sStatus)
@@ -385,27 +402,116 @@ void CTDLTaskAttributeListCtrl::Populate()
 		SetCurSel(GetRow(nSelAttribID), nSelCol);
 }
 
+void CTDLTaskAttributeListCtrl::RecalcColumnWidths(int nAttribColWidth, int cx)
+{
+	if (cx == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		cx = rClient.Width();
+	}
+	
+	if (cx == 0)
+		return;
+
+	if (nAttribColWidth == -1)
+		nAttribColWidth = (int)(m_fAttribColProportion * cx);
+
+	if (nAttribColWidth != GetColumnWidth(ATTRIB_COL))
+	{
+		CHoldRedraw hr(*this);
+
+		SetColumnWidth(ATTRIB_COL, nAttribColWidth);
+		SetColumnWidth(VALUE_COL, (cx - nAttribColWidth - 1));
+	}
+}
+
 void CTDLTaskAttributeListCtrl::OnSize(UINT nType, int cx, int cy) 
 {
 	CInputListCtrl::OnSize(nType, cx, cy);
 	
 	if (GetColumnCount())
-	{
-		SetColumnWidth(ATTRIB_COL, (cx / 2));
-		SetColumnWidth(VALUE_COL, (cx / 2) - 1);
-	}
+		RecalcColumnWidths(-1, cx);
 }
 
-BOOL CTDLTaskAttributeListCtrl::OnEraseBkgnd(CDC* pDC) 
+void CTDLTaskAttributeListCtrl::GetSplitterRect(CRect& rSplitBar) const
 {
-	// TODO: Add your message handler code here and/or call default
-	
-	return CInputListCtrl::OnEraseBkgnd(pDC);
+	GetClientRect(rSplitBar);
+
+	rSplitBar.left += (int)(m_fAttribColProportion * rSplitBar.Width() - (SPLITTER_WIDTH / 2));
+	rSplitBar.right = (rSplitBar.left + SPLITTER_WIDTH);
+}
+
+void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	CRect rSplitBar;
+	GetSplitterRect(rSplitBar);
+
+	if (rSplitBar.PtInRect(point))
+	{
+		m_bSplitting = TRUE;
+		SetCapture();
+
+		return;
+	}
+
+	CInputListCtrl::OnLButtonDown(nFlags, point);
+}
+
+void CTDLTaskAttributeListCtrl::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	if (m_bSplitting)
+	{
+		m_bSplitting = FALSE;
+		ReleaseCapture();
+
+		CRect rClient;
+		GetClientRect(rClient);
+
+		m_fAttribColProportion = ((float)GetColumnWidth(ATTRIB_COL)) / (rClient.Width() - 1);
+	}
+
+	CInputListCtrl::OnLButtonUp(nFlags, point);
+}
+
+void CTDLTaskAttributeListCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (m_bSplitting)
+	{
+		// Prevent columns getting too narrow
+		CRect rClient;
+		GetClientRect(rClient);
+
+		int nAttribColWidth = max(min(point.x, rClient.right - MIN_COL_WIDTH), MIN_COL_WIDTH);
+
+		RecalcColumnWidths(nAttribColWidth, rClient.Width());
+	}
+
+	CInputListCtrl::OnMouseMove(nFlags, point);
+}
+
+void CTDLTaskAttributeListCtrl::OnCaptureChanged(CWnd* pWnd)
+{
+	if (m_bSplitting)
+	{
+		// Revert changes
+		RecalcColumnWidths();
+	}
+
+	CInputListCtrl::OnCaptureChanged(pWnd);
 }
 
 BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
-	// TODO: Add your message handler code here and/or call default
+	CRect rSplitBar;
+	GetSplitterRect(rSplitBar);
+
+	CPoint ptClient(::GetMessagePos());
+	ScreenToClient(&ptClient);
+
+	if (rSplitBar.PtInRect(ptClient))
+		return GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 	
 	return CInputListCtrl::OnSetCursor(pWnd, nHitTest, message);
 }

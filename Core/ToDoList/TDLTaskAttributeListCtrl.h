@@ -103,6 +103,9 @@ public:
 	BOOL GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
 	int GetCustomAttributeAutoListData(const CString& sAttribID, CStringArray& aItems) const;
 
+	void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
+	void LoadState(const CPreferences& prefs, LPCTSTR szKey);
+
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
@@ -118,6 +121,9 @@ protected:
 	CString m_sCompletionStatus;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
+
+	BOOL m_bSplitting;
+	float m_fAttribColProportion;
 
 	CEnCheckComboBox m_cbTextAndNumbers;
 	CDateTimeCtrlEx m_datePicker;
@@ -161,8 +167,11 @@ protected:
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
 
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
@@ -223,6 +232,8 @@ protected:
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
 	BOOL RowValueVaries(int nRow) const;
+	void GetSplitterRect(CRect& rSplitBar) const;
+	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

@@ -1550,7 +1550,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			
 			if (::GetCursorPos(&ptCursor) && PtInSplitter(ptCursor, TRUE))
 			{
-				::SetCursor(AfxGetApp()->LoadCursor(AFX_IDC_HSPLITBAR));
+				GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 				return TRUE;
 			}
 		}

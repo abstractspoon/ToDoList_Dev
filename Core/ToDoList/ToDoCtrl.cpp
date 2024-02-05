@@ -8488,15 +8488,21 @@ void CToDoCtrl::LoadDefaultRecurrence(const CPreferences& prefs)
 void CToDoCtrl::SaveSplitPos(CPreferences& prefs) const
 {
 	ASSERT (GetSafeHwnd());
+
+	CString sPrefsKey(GetPreferencesKey());
 	
-	m_layout.SaveState(prefs, GetPreferencesKey());
+	m_layout.SaveState(prefs, sPrefsKey);
+	m_lcAttributes.SaveState(prefs, sPrefsKey);
 }
 
 void CToDoCtrl::LoadSplitPos(const CPreferences& prefs)
 {
 	ASSERT(GetSafeHwnd());
 
-	m_layout.LoadState(prefs, GetPreferencesKey());
+	CString sPrefsKey(GetPreferencesKey());
+
+	m_layout.LoadState(prefs, sPrefsKey);
+	m_lcAttributes.LoadState(prefs, sPrefsKey);
 }
 
 void CToDoCtrl::SaveAttributeVisibility(CTaskFile& tasks) const
