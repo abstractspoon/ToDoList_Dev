@@ -93,6 +93,8 @@ const int MIN_COL_WIDTH		= GraphicsMisc::ScaleByDPIFactor(50);
 
 const int VALUE_VARIES = 1;
 
+const TCHAR NEWLINE = '\n';
+
 /////////////////////////////////////////////////////////////////////////////
 
 CIcon CTDLTaskAttributeListCtrl::s_iconApp;
@@ -2857,6 +2859,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		break;
 
 	case VALUE_COL:
+		if (!RowValueVaries(nRow))
 		{
 			switch (nAttribID)
 			{
@@ -2864,11 +2867,15 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			case TDCA_CATEGORY:
 			case TDCA_TAGS:
 			case TDCA_FILELINK:
-				// TODO
+				{
+					CStringArray aValues;
+
+					if (Misc::Split(GetItemText(nRow, nCol), aValues) > 1)
+						sTooltip = Misc::FormatArray(aValues, NEWLINE);
+				}
 				break;
 
 			case TDCA_COLOR:
-				if (!RowValueVaries(nRow))
 				{
 					COLORREF color = _ttoi(GetItemText(nRow, nCol));
 
@@ -2893,7 +2900,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CTDCDependencyArray aDepends;
 					
 					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
-						sTooltip = m_formatter.GetDependencies(aDepends, '\n');
+						sTooltip = m_formatter.GetDependencies(aDepends, NEWLINE);
 				}
 				break;
 
@@ -2908,7 +2915,12 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 						switch (pDef->GetDataType())
 						{
 						case TDCCA_STRING:
-							// TODO
+							{
+								CStringArray aValues;
+
+								if (Misc::Split(GetItemText(nRow, nCol), aValues) > 1)
+									sTooltip = Misc::FormatArray(aValues, NEWLINE);
+							}
 							break;
 						}
 					}
