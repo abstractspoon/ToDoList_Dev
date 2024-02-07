@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "TDLFilterDlg.h"
 #include "tdcstatic.h"
-#include "TDCCustomFilterAttributeUIHelper.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
@@ -364,11 +363,7 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		break;
 
 	default:
-		if (!CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID))
-			return FALSE;
-
-		sTooltip = CTDCCustomFilterAttributeUIHelper::GetControlTooltip(this, nCtrlID);
-		break;
+		return FALSE;
 	}
 
 	if (!sTooltip.IsEmpty())
