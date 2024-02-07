@@ -225,7 +225,7 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.cpp
+SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -849,7 +849,7 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.h
+SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.h
 # End Source File
 # Begin Source File
 

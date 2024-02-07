@@ -30,7 +30,7 @@ enum TDCCAUI_UPDATERESULT
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCCustomAttributeUIHelper
+class CTDCCustomFilterAttributeUIHelper
 {
 public:
 	static BOOL RebuildFilterControls(CWnd* pParent, 

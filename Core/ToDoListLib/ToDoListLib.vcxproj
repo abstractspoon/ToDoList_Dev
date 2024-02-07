@@ -146,7 +146,7 @@
     <ClCompile Include="..\ToDoList\TDCAnonymizeTasklist.cpp" />
     <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp" />
     <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp" />
-    <ClCompile Include="..\ToDoList\TDCCustomAttributeUIHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp" />
     <ClCompile Include="..\ToDoList\TDCFilter.cpp" />
@@ -303,7 +303,7 @@
     <ClInclude Include="..\ToDoList\TDCAnonymizeTasklist.h" />
     <ClInclude Include="..\ToDoList\tdccustomattribdata.h" />
     <ClInclude Include="..\ToDoList\TDCCustomAttributeDef.h" />
-    <ClInclude Include="..\ToDoList\TDCCustomAttributeUIHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.h" />
     <ClInclude Include="..\ToDoList\TDCDialogHelper.h" />
     <ClInclude Include="..\ToDoList\tdcenum.h" />
     <ClInclude Include="..\ToDoList\TDCEnumContainers.h" />

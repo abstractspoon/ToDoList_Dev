@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "Resource.h"
-#include "TDCCustomAttributeUIHelper.h"
+#include "TDCCustomFilterAttributeUIHelper.h"
 #include "TDCstruct.h"
 #include "tdliconcombobox.h"
 #include "todoitem.h"
@@ -15,17 +15,17 @@
 #include "..\shared\checkcombobox.h"
 #include "..\shared\autocombobox.h"
 #include "..\shared\wclassdefines.h"
-#include "..\shared\maskedit.h"
-#include "..\shared\orderedtreectrl.h"
+#include "..\shared\enedit.h"
+//#include "..\shared\orderedtreectrl.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
-#include "..\shared\timecombobox.h"
-#include "..\shared\timeedit.h"
-#include "..\shared\fileedit.h"
-#include "..\shared\FileComboBox.h"
+//#include "..\shared\timecombobox.h"
+//#include "..\shared\timeedit.h"
+//#include "..\shared\fileedit.h"
+//#include "..\shared\FileComboBox.h"
 #include "..\shared\HoldRedraw.h"
-#include "..\shared\WndPrompt.h"
+//#include "..\shared\WndPrompt.h"
 #include "..\shared\Icon.h"
 
 #ifdef _DEBUG
@@ -38,7 +38,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 													   const TDCCADATA& data,
 													   const CTDCImageList& ilImages,
 													   UINT nCtrlID, 
@@ -361,7 +361,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 	return pControl;
 }
 
-BOOL CTDCCustomAttributeUIHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/)
+BOOL CTDCCustomFilterAttributeUIHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/)
 {
 	return (attribDef.GetDataType() == TDCCA_DATE);
 
@@ -385,7 +385,7 @@ BOOL CTDCCustomAttributeUIHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDE
 // 	return FALSE;
 }
 
-CString CTDCCustomAttributeUIHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
+CString CTDCCustomFilterAttributeUIHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
 													 BOOL bBuddy/*, BOOL bFilter*/)
 {
 	if (!bBuddy)
@@ -420,7 +420,7 @@ CString CTDCCustomAttributeUIHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEF
 	return _T("");
 }
 
-CWnd* CTDCCustomAttributeUIHelper::CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
+CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
 															const TDCCADATA& /*data*/, UINT nCtrlID, BOOL bBuddy)
 {
 	CStatic* pLabel = new CStatic;
@@ -453,7 +453,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeLabelCtrl(CWnd* pParent, const
 	return pLabel;
 }
 
-BOOL CTDCCustomAttributeUIHelper::GetControl(UINT nCtrlID, const CTDCCustomControlArray& aControls, 
+BOOL CTDCCustomFilterAttributeUIHelper::GetControl(UINT nCtrlID, const CTDCCustomControlArray& aControls, 
 										   CUSTOMATTRIBCTRLITEM& ctrl)
 {
 	// sanity check
@@ -490,13 +490,13 @@ BOOL CTDCCustomAttributeUIHelper::GetControl(UINT nCtrlID, const CTDCCustomContr
 // 	return FALSE;
 // }
 
-void CTDCCustomAttributeUIHelper::CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent)
+void CTDCCustomFilterAttributeUIHelper::CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent)
 {
 	aControls.DeleteCtrls(pParent);
 	aControls.RemoveAll();
 }
 
-BOOL CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
+BOOL CTDCCustomFilterAttributeUIHelper::NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
 														  const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
 															const CTDCCustomControlArray& aOldControls)
 {
@@ -542,7 +542,7 @@ BOOL CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(const CTDCCustomAttr
 	return FALSE;
 }
 
-int CTDCCustomAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+int CTDCCustomFilterAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 														 /*UINT nCtrlIDStart,*/ CTDCCustomControlArray& aControls)
 {
 	aControls.RemoveAll();
@@ -591,7 +591,7 @@ int CTDCCustomAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribD
 	return aControls.GetSize();
 }
 
-BOOL CTDCCustomAttributeUIHelper::RebuildFilterControls(CWnd* pParent, 
+BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent, 
 														const CTDCCustomAttribDefinitionArray& aAttribDefs,
 														const CTDCCustomAttributeDataMap& mapCtrlData,
 														const CTDCImageList& ilImages,
@@ -725,7 +725,7 @@ BOOL CTDCCustomAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 	return TRUE;
 }
 
-BOOL CTDCCustomAttributeUIHelper::WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/)
+BOOL CTDCCustomFilterAttributeUIHelper::WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/)
 {
 	if (attribDef.bEnabled)
 		return (/*!bFilter || */attribDef.HasFeature(TDCCAF_FILTER));
@@ -733,19 +733,19 @@ BOOL CTDCCustomAttributeUIHelper::WantControl(const TDCCUSTOMATTRIBUTEDEFINITION
 	return FALSE;
 }
 
-BOOL CTDCCustomAttributeUIHelper::IsCustomFilterControl(UINT nCtrlID)
+BOOL CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(UINT nCtrlID)
 {
 	return (nCtrlID >= IDC_FIRST_CUSTOMFILTERFIELD && nCtrlID <= IDC_LAST_CUSTOMFILTERFIELD);
 }
 
-CString CTDCCustomAttributeUIHelper::GetFilterControlTooltip(const CWnd* pParent, UINT nCtrlID)
+CString CTDCCustomFilterAttributeUIHelper::GetFilterControlTooltip(const CWnd* pParent, UINT nCtrlID)
 {
 	ASSERT(IsCustomFilterControl(nCtrlID));
 
 	return GetControlTooltip(pParent, nCtrlID);
 }
 
-CString CTDCCustomAttributeUIHelper::GetControlTooltip(const CWnd* pParent, UINT nCtrlID)
+CString CTDCCustomFilterAttributeUIHelper::GetControlTooltip(const CWnd* pParent, UINT nCtrlID)
 {
 	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
 
@@ -756,7 +756,7 @@ CString CTDCCustomAttributeUIHelper::GetControlTooltip(const CWnd* pParent, UINT
 	return _T("");
 }
 
-void CTDCCustomAttributeUIHelper::UpdateControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+void CTDCCustomFilterAttributeUIHelper::UpdateControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs,
 												const CTDCCustomAttributeDataMap& mapData)
 {
@@ -766,7 +766,7 @@ void CTDCCustomAttributeUIHelper::UpdateControls(const CWnd* pParent, CTDCCustom
 		UpdateControl(pParent, aControls.GetData()[nCtrl], aAttribDefs, mapData);
 }
 
-void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
+void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs,
 												const CTDCCustomAttributeDataMap& mapData)
 {
@@ -780,7 +780,7 @@ void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRI
 		ClearControl(pParent, ctrl, aAttribDefs);
 }
 
-void CTDCCustomAttributeUIHelper::ClearControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
+void CTDCCustomFilterAttributeUIHelper::ClearControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
 												const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	int nCtrl = aControls.GetSize();
@@ -792,7 +792,7 @@ void CTDCCustomAttributeUIHelper::ClearControls(const CWnd* pParent, CTDCCustomC
 	}
 }
 
-TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
+TDCCAUI_UPDATERESULT CTDCCustomFilterAttributeUIHelper::GetControlData(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 																 const CTDCCustomAttribDefinitionArray& aAttribDefs,
 																 const TDCCADATA& dataPrev, TDCCADATA& data)
 {
@@ -1005,7 +1005,7 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 	return nRes;
 }
 
-CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter,
+CWnd* CTDCCustomFilterAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter,
 																const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated)
 {
 	ASSERT(IsCustomFilterControl(ctrl.nCtrlID));
@@ -1059,7 +1059,7 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 	return pBuddy;
 }
 
-FILTER_DATE CTDCCustomAttributeUIHelper::GetDateFilter(const TDCCADATA& data, double& dUserVal)
+FILTER_DATE CTDCCustomFilterAttributeUIHelper::GetDateFilter(const TDCCADATA& data, double& dUserVal)
 {
 	if (data.IsEmpty())
 		return FD_ANY;
@@ -1078,7 +1078,7 @@ FILTER_DATE CTDCCustomAttributeUIHelper::GetDateFilter(const TDCCADATA& data, do
 	return nFilter;
 }
 
-double CTDCCustomAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, double dUserVal)
+double CTDCCustomFilterAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, double dUserVal)
 {
 	switch (nFilter)
 	{
@@ -1106,7 +1106,7 @@ double CTDCCustomAttributeUIHelper::ValidateDateFilter(FILTER_DATE nFilter, doub
 	return dUserVal;
 }
 
-void CTDCCustomAttributeUIHelper::SetDateFilter(FILTER_DATE nFilter, double dUserVal, TDCCADATA& data)
+void CTDCCustomFilterAttributeUIHelper::SetDateFilter(FILTER_DATE nFilter, double dUserVal, TDCCADATA& data)
 {
 	dUserVal = ValidateDateFilter(nFilter, dUserVal);
 
@@ -1116,7 +1116,7 @@ void CTDCCustomAttributeUIHelper::SetDateFilter(FILTER_DATE nFilter, double dUse
 		data.Set(nFilter);
 }
 
-void CTDCCustomAttributeUIHelper::SetFilterBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data)
+void CTDCCustomFilterAttributeUIHelper::SetFilterBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data)
 {
 	if (!attribDef.IsList())
 	{
@@ -1151,13 +1151,13 @@ void CTDCCustomAttributeUIHelper::SetFilterBuddyVisibility(const CWnd* pParent, 
 	}
 }
 
-void CTDCCustomAttributeUIHelper::ClearControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
+void CTDCCustomFilterAttributeUIHelper::ClearControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	UpdateControl(pParent, ctrl, aAttribDefs, TDCCADATA());
 }
 
-void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
+void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs,
 											const TDCCADATA& data)
 {
@@ -1369,7 +1369,7 @@ void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRI
 // 	}
 }
 
-void CTDCCustomAttributeUIHelper::UpdateControlAutoListData(const CWnd* pParent, 
+void CTDCCustomFilterAttributeUIHelper::UpdateControlAutoListData(const CWnd* pParent, 
 															const CUSTOMATTRIBCTRLITEM& ctrl,
 															const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
@@ -1400,7 +1400,7 @@ void CTDCCustomAttributeUIHelper::UpdateControlAutoListData(const CWnd* pParent,
 	}
 }
 
-BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTRLITEM& ctrl,
+BOOL CTDCCustomFilterAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTRLITEM& ctrl,
 														 const CTDCCustomAttribDefinitionArray& aAttribDefs,
 														 DWORD& dwDataType, DWORD& dwListType)
 {
@@ -1420,7 +1420,7 @@ BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTR
 	return TRUE;
 }
 
-int CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
+int CTDCCustomFilterAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
 															CWnd* pParent, 
 															BOOL bEnable)
 {
@@ -1441,7 +1441,7 @@ int CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomCont
 	return nNumFound;
 }
 
-void CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent)
+void CTDCCustomFilterAttributeUIHelper::ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent)
 {
 	int nCtrl = aControls.GetSize();
 	
@@ -1449,7 +1449,7 @@ void CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(const CTDCCustomCon
 		ClearFilterCheckboxHistory(aControls[nCtrl], pParent);
 }
 
-void CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent)
+void CTDCCustomFilterAttributeUIHelper::ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent)
 {
 	CWnd* pCtrl = ctrl.GetCtrl(pParent);
 	ASSERT_VALID(pCtrl);

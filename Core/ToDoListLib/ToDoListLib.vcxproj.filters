@@ -113,9 +113,6 @@
     <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCCustomAttributeUIHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -476,6 +473,9 @@
     <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -578,9 +578,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCCustomAttributeDef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDCCustomAttributeUIHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCDialogHelper.h">
@@ -965,6 +962,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCTaskListDropTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
