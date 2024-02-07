@@ -488,10 +488,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	SetFocusToTasks();
 
 	// notify parent that we have been created
-	CWnd* pParent = GetParent();
-
-	if (pParent)
-		pParent->SendMessage(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, GetDlgCtrlID()), (LPARAM)GetSafeHwnd());
+	GetParent()->SendMessage(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, GetDlgCtrlID()), (LPARAM)GetSafeHwnd());
 
 	// Start the timer which checks for midnight (day changeover)
 	// which runs persistently
