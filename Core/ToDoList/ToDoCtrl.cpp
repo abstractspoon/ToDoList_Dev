@@ -468,7 +468,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	// comments
 	VERIFY(m_ctrlComments.Create(this, IDC_COMMENTS));
 
-	// TODO
+	// Attributes
 	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	m_lcAttributes.SetPercentDoneIncrement(m_nPercentIncrement);
 	
@@ -476,7 +476,9 @@ BOOL CToDoCtrl::OnInitDialog()
 	if (m_hFontTree)
 		m_taskTree.SetFont(m_hFontTree);
 
-	InitEditPrompts();
+	// Window prompts
+	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
+	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 
 	// tree drag drop
 	m_treeDragDrop.Initialize(this);
@@ -515,17 +517,6 @@ const CTDCImageList& CToDoCtrl::GetTaskIconImageList() const
 	}
 
 	return m_ilTaskIcons; 
-}
-
-void CToDoCtrl::InitEditPrompts()
-{
-	// Specific
-	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
-
-	// tree handles their own
-	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
-
-	// Comments prompts set in UpdateComments()
 }
 
 BOOL CToDoCtrl::SetTreeFont(HFONT hFont)

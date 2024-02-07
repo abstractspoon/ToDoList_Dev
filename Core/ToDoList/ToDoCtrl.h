@@ -775,7 +775,6 @@ protected:
 	BOOL HandleUnsavedComments();
 	BOOL UndoLastActionItems(const CArrayUndoElements& aElms);
 	void LoadTaskIcons();
-	void InitEditPrompts();
 	BOOL ConfirmDeleteAllTasks(BOOL bSelected = FALSE) const;
 
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
