@@ -494,44 +494,6 @@ void CTDCCustomAttributeUIHelper::CleanupControls(CTDCCustomControlArray& aContr
 	aControls.RemoveAll();
 }
 
-void CTDCCustomAttributeUIHelper::AddWindowPrompts(const CTDCCustomControlArray& aControls, CWnd* pParent, CWndPromptManager& mgrPrompts)
-{
-	int nCtrl = aControls.GetSize();
-	CEnString sDefaultPrompt(IDS_TDC_NONE);
-
-	while (nCtrl--)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
-
-		SetControlPrompt(ctrl.GetCtrl(pParent), (ctrl.sPrompt.IsEmpty() ? sDefaultPrompt : ctrl.sPrompt), mgrPrompts);
-		SetControlPrompt(ctrl.GetBuddy(pParent), (ctrl.sBuddyPrompt.IsEmpty() ? sDefaultPrompt : ctrl.sBuddyPrompt), mgrPrompts);
-	}
-}
-
-void CTDCCustomAttributeUIHelper::SetControlPrompt(const CWnd* pCtrl, LPCTSTR szPrompt, CWndPromptManager& mgrPrompts)
-{
-	if (pCtrl)
-	{
-		ASSERT_VALID(pCtrl);
-
-		if (pCtrl->IsKindOf(RUNTIME_CLASS(CEdit)))
-		{
-			mgrPrompts.SetEditPrompt(*pCtrl, szPrompt);
-		}
-		else if (pCtrl->IsKindOf(RUNTIME_CLASS(CComboBox)))
-		{
-			mgrPrompts.SetComboPrompt(*pCtrl, szPrompt);
-		}
-	}
-}
-
-BOOL CTDCCustomAttributeUIHelper::NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
-														const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
-														const CTDCCustomControlArray& aOldControls)
-{
-	return NeedRebuildControls(aOldAttribDefs, aNewAttribDefs, aOldControls, IDC_FIRST_CUSTOMEDITFIELD);
-}
-
 BOOL CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
 														  const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
 															const CTDCCustomControlArray& aOldControls)
@@ -625,17 +587,6 @@ int CTDCCustomAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribD
 	}
 
 	return aControls.GetSize();
-}
-
-BOOL CTDCCustomAttributeUIHelper::RebuildEditControls(CWnd* pParent, const CTDCCustomAttribDefinitionArray& aAttribDefs,
-													  const CTDCImageList& ilImages,
-													  UINT nCtrlIDPos,
-													  BOOL bFileLinkThumbnails,
-													  CTDCCustomControlArray& aControls)
-{
-	CTDCCustomAttributeDataMap mapUnused;
-
-	return RebuildControls(pParent, aAttribDefs, mapUnused, ilImages, nCtrlIDPos, IDC_FIRST_CUSTOMEDITFIELD, FALSE, FALSE, bFileLinkThumbnails, aControls);
 }
 
 BOOL CTDCCustomAttributeUIHelper::RebuildFilterControls(CWnd* pParent, 
@@ -779,11 +730,6 @@ BOOL CTDCCustomAttributeUIHelper::WantControl(const TDCCUSTOMATTRIBUTEDEFINITION
 	return FALSE;
 }
 
-BOOL CTDCCustomAttributeUIHelper::IsCustomEditControl(UINT nCtrlID)
-{
-	return (nCtrlID >= IDC_FIRST_CUSTOMEDITFIELD && nCtrlID <= IDC_LAST_CUSTOMEDITFIELD);
-}
-
 BOOL CTDCCustomAttributeUIHelper::IsCustomFilterControl(UINT nCtrlID)
 {
 	return (nCtrlID >= IDC_FIRST_CUSTOMFILTERFIELD && nCtrlID <= IDC_LAST_CUSTOMFILTERFIELD);
@@ -796,13 +742,6 @@ CString CTDCCustomAttributeUIHelper::GetFilterControlTooltip(const CWnd* pParent
 	return GetControlTooltip(pParent, nCtrlID);
 }
 
-CString CTDCCustomAttributeUIHelper::GetEditControlTooltip(const CWnd* pParent, UINT nCtrlID)
-{
-	ASSERT(IsCustomEditControl(nCtrlID));
-	
-	return GetControlTooltip(pParent, nCtrlID);
-}
-
 CString CTDCCustomAttributeUIHelper::GetControlTooltip(const CWnd* pParent, UINT nCtrlID)
 {
 	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
@@ -812,106 +751,6 @@ CString CTDCCustomAttributeUIHelper::GetControlTooltip(const CWnd* pParent, UINT
 
 	// else
 	return _T("");
-}
-
-BOOL CTDCCustomAttributeUIHelper::FlushEditControl(CWnd* pCtrl, const CWnd* pParent, const CTDCCustomControlArray& aControls)
-{
-	if (!pCtrl || !pParent)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (aControls.GetSize() == 0)
-		return FALSE;
-
-	int nCtrl = aControls.GetSize();
-
-	while (nCtrl--)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
-
-		CWnd* pCustomCtrl = ctrl.GetCtrl(pParent);
-		ASSERT(pCustomCtrl);
-		
-		if (CDialogHelper::IsChildOrSame(pCustomCtrl, pCtrl))
-		{
-			if (pCustomCtrl->IsKindOf(RUNTIME_CLASS(CAutoComboBox)))
-			{
-				((CAutoComboBox*)pCustomCtrl)->Flush();
-				return TRUE;
-			}
-
-			break;
-		}
-	}
-
-	return FALSE;
-}
-
-void CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(const CWnd* pParent, 
-														const CTDCCustomControlArray& aControls, 
-														const CTDCCustomAttribDefinitionArray& aAttribDefs)
-{
-	int nCtrl = aControls.GetSize();
-	
-	while (nCtrl--)
-	{
-		SaveAutoListDataToDef(pParent, aControls.GetData()[nCtrl], aAttribDefs);
-	}
-}
-
-void CTDCCustomAttributeUIHelper::SaveAutoListDataToDef(const CWnd* pParent, 
-														const CUSTOMATTRIBCTRLITEM& ctrl,
-														const CTDCCustomAttribDefinitionArray& aAttribDefs)
-{
-	int nDef = aAttribDefs.Find(ctrl.nAttrib);
-	
-	if (nDef == -1)
-	{
-		ASSERT(0);
-		return;
-	}
-
-	const TDCCUSTOMATTRIBUTEDEFINITION& def = aAttribDefs.GetData()[nDef];
-
-	if (def.bEnabled && def.IsAutoList() && !def.IsDataType(TDCCA_FILELINK))
-	{
-		const CComboBox* pCombo = (const CComboBox*)ctrl.GetCtrl(pParent);
-		ASSERT(pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)));
-
-		if (pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)))
-		{
-			CDialogHelper::GetComboBoxItems(*pCombo, def.aAutoListData);
-
-			// remove any default data
-			Misc::RemoveItems(def.aDefaultListData, def.aAutoListData);
-		}
-	}
-}
-
-CWnd* CTDCCustomAttributeUIHelper::GetControlFromAttributeDef(const CWnd* pParent, 
-															const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
-															const CTDCCustomControlArray& aControls)
-{
-	ASSERT_VALID(pParent);
-
-	if (!pParent || !pParent->GetSafeHwnd())
-		return FALSE;
-
-	// search for attribute type ID in aControls
-	int nCtrl = aControls.GetSize();
-
-	while (nCtrl--)
-	{
-		const CUSTOMATTRIBCTRLITEM& ctrl = aControls.GetData()[nCtrl];
-
-		if (ctrl.sAttribID.CompareNoCase(attribDef.sUniqueID) == 0)
-			return ctrl.GetCtrl(pParent);
-	}
-
-	// all else
-	return NULL;
 }
 
 void CTDCCustomAttributeUIHelper::UpdateControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
@@ -948,48 +787,6 @@ void CTDCCustomAttributeUIHelper::ClearControls(const CWnd* pParent, CTDCCustomC
 		CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
 		ClearControl(pParent, ctrl, aAttribDefs);
 	}
-}
-
-TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlsData(const CWnd* pParent, CTDCCustomControlArray& aControls,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs,
-												const CTDCCustomAttributeDataMap& mapDataPrev,
-												CTDCCustomAttributeDataMap& mapData)
-{
-	mapData.RemoveAll();
-
-	int nCtrl = aControls.GetSize();
-	TDCCADATA data, dataPrev;
-	
-	TDCCAUI_UPDATERESULT nRes = TDCCAUIRES_FAIL;
-
-	while (nCtrl--)
-	{
-		CUSTOMATTRIBCTRLITEM& ctrl = aControls[nCtrl];
-		mapDataPrev.Lookup(ctrl.sAttribID, dataPrev);
-
-		TDCCAUI_UPDATERESULT nCtrlRes = GetControlData(pParent, ctrl, aAttribDefs, dataPrev, data);
-
-		switch (nCtrlRes)
-		{
-		case TDCCAUIRES_FAIL:
-			mapData.RemoveKey(ctrl.sAttribID);
-			break;
-
-		case TDCCAUIRES_SUCCESS:
-			mapData[ctrl.sAttribID] = data;
-
-			if (nRes != TDCCAUIRES_REPOSCTRLS)
-				nRes = nCtrlRes;
-			break;
-
-		case TDCCAUIRES_REPOSCTRLS:
-			mapData[ctrl.sAttribID] = data;
-			nRes = nCtrlRes;
-			break;
-		}
-	}
-
-	return nRes;
 }
 
 TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
@@ -1349,23 +1146,6 @@ void CTDCCustomAttributeUIHelper::SetBuddyVisibility(const CWnd* pParent, CUSTOM
 	}
 }
 
-void CTDCCustomAttributeUIHelper::DDX(CDataExchange* pDX, CTDCCustomControlArray& aControls,
-									  const CTDCCustomAttribDefinitionArray& aAttribDefs,
-									  CTDCCustomAttributeDataMap& mapData)
-{
-	if (pDX->m_bSaveAndValidate)
-	{
-		GetControlsData(pDX->m_pDlgWnd, aControls, aAttribDefs, mapData, mapData);
-	}
-	else
-	{
-		if (mapData.GetCount() == 0)
-			CTDCCustomAttributeUIHelper::ClearControls(pDX->m_pDlgWnd, aControls, aAttribDefs);
-		else
-			CTDCCustomAttributeUIHelper::UpdateControls(pDX->m_pDlgWnd, aControls, aAttribDefs, mapData);
-	}
-}
-
 void CTDCCustomAttributeUIHelper::ClearControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 											const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
@@ -1619,10 +1399,11 @@ BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTR
 														 const CTDCCustomAttribDefinitionArray& aAttribDefs,
 														 DWORD& dwDataType, DWORD& dwListType)
 {
-	ASSERT(IsCustomEditControl(ctrl.nCtrlID) || IsCustomFilterControl(ctrl.nCtrlID));
-
-	if (!IsCustomEditControl(ctrl.nCtrlID) && !IsCustomFilterControl(ctrl.nCtrlID))
+	if (!IsCustomFilterControl(ctrl.nCtrlID))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// search attribute defs for unique ID
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
@@ -1648,27 +1429,6 @@ int CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomCont
 		if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
 		{
 			((CEnCheckComboBox*)pCtrl)->EnableMultiSelection(bEnable);
-			nNumFound++;
-		}
-	}
-
-	return nNumFound;
-}
-
-int CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(const CTDCCustomControlArray& aControls,
-														   const CWnd* pParent,
-														   BOOL bEnable)
-{
-	int nCtrl = aControls.GetSize(), nNumFound = 0;
-
-	while (nCtrl--)
-	{
-		CWnd* pCtrl = aControls[nCtrl].GetCtrl(pParent);
-		ASSERT_VALID(pCtrl);
-
-		if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CFileEdit)))
-		{
-			((CFileEdit*)pCtrl)->EnableStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
 			nNumFound++;
 		}
 	}

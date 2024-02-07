@@ -4043,11 +4043,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		break;
 
 	case TDCS_SHOWFILELINKTHUMBNAILS:
-		{
-			//m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
-			
-			//CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
-		}
+		m_lcAttributes.Invalidate(FALSE);
 		break;
 
 	case TDCS_SHOWINFOTIPS:

@@ -16,7 +16,6 @@
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomControlArray;
 class CTDCImageList;
-class CWndPromptManager;
 
 struct TDCCUSTOMATTRIBUTEDEFINITION;
 
@@ -34,13 +33,6 @@ enum TDCCAUI_UPDATERESULT
 class CTDCCustomAttributeUIHelper
 {
 public:
-	static BOOL RebuildEditControls(CWnd* pParent, 
-									const CTDCCustomAttribDefinitionArray& aAttribDefs,
-									const CTDCImageList& ilImages,
-									UINT nCtrlIDPos,
-									BOOL bEnableFileLinkThumbnails,
-									CTDCCustomControlArray& aControls);
-
 	static BOOL RebuildFilterControls(CWnd* pParent, 
 									  const CTDCCustomAttribDefinitionArray& aAttribDefs,
 									  const CTDCCustomAttributeDataMap& mapCtrlData,
@@ -49,40 +41,20 @@ public:
 									  BOOL bMultiSelection,
 									  CTDCCustomControlArray& aControls);
 
-	static BOOL NeedRebuildEditControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs,
-										const CTDCCustomAttribDefinitionArray& aNewAttribDefs,
-										const CTDCCustomControlArray& aOldControls);
-
 	static BOOL NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs,
 										  const CTDCCustomAttribDefinitionArray& aNewAttribDefs,
 										  const CTDCCustomControlArray& aOldControls);
 
-	static void CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent);
-	static void AddWindowPrompts(const CTDCCustomControlArray& aControls, CWnd* pParent, CWndPromptManager& mgrPrompts);
-
 	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
 										  CWnd* pParent, 
 										  BOOL bEnable = TRUE);
-	static int EnableFilelinkThumbnails(const CTDCCustomControlArray& aControls,
-										 const CWnd* pParent, 
-										 BOOL bEnable = TRUE);
 
+	static void CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent);
 	static void ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent);
 	static void ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent);
 
-	static BOOL FlushEditControl(CWnd* pCtrl, const CWnd* pParent, const CTDCCustomControlArray& aControls);
-
-	static BOOL IsCustomEditControl(UINT nCtrlID);
 	static BOOL IsCustomFilterControl(UINT nCtrlID);
-
 	static CString GetFilterControlTooltip(const CWnd* pParent, UINT nCtrlID);
-	static CString GetEditControlTooltip(const CWnd* pParent, UINT nCtrlID);
-
-	static void SaveAutoListDataToDefs(const CWnd* pParent, const CTDCCustomControlArray& aControls,
-									   const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
-	static void SaveAutoListDataToDef(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
-									   const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static BOOL GetControl(UINT nCtrlID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
 	static BOOL GetControl(const CString& sUniqueID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
@@ -114,18 +86,9 @@ public:
 										 const CTDCCustomAttribDefinitionArray& aAttribDefs,
 										 DWORD& dwDataType, DWORD& dwListType);
 
-	static TDCCAUI_UPDATERESULT GetControlsData(const CWnd* pParent, CTDCCustomControlArray& aControls,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs,
-												const CTDCCustomAttributeDataMap& mapDataPrev,
-												CTDCCustomAttributeDataMap& mapData);
-
 	static TDCCAUI_UPDATERESULT GetControlData(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 											   const CTDCCustomAttribDefinitionArray& aAttribDefs,
 											   const TDCCADATA& dataPrev, TDCCADATA& data);
-
-	static void DDX(CDataExchange* pDX, CTDCCustomControlArray& aControls,
-					const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-					CTDCCustomAttributeDataMap& value);
 
 protected:
 	static CWnd* CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
@@ -139,9 +102,6 @@ protected:
 
 	static CWnd* CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 										  const TDCCADATA& data, UINT nCtrlID, BOOL bBuddy);
-
-	static CWnd* GetControlFromAttributeDef(const CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
-											const CTDCCustomControlArray& aControls);
 
 	static BOOL AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
 	static CString GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bBuddy, BOOL bFilter);
@@ -173,7 +133,6 @@ protected:
 	static CWnd* CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter, 
 											  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated);
 	static void SetBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data);
-	static void SetControlPrompt(const CWnd* pCtrl, LPCTSTR szPrompt, CWndPromptManager& mgrPrompts);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)
