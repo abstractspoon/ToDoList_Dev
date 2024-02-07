@@ -143,14 +143,15 @@ public:
 	BOOL MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes = TRUE) const;
 
 	// Mfc42 versions return value not reference
-	const TDCDEPENDENCY& GetAt(int nIndex) const;
-	TDCDEPENDENCY& GetAt(int nIndex);
 	const TDCDEPENDENCY& operator[](int nIndex) const;
 	TDCDEPENDENCY& operator[](int nIndex);
 
 private:
 	int FindLocalDependency(DWORD dwDependID) const;
 	int FindDependency(const TDCDEPENDENCY& depend) const;
+
+	const TDCDEPENDENCY& GetAt(int nIndex) const;
+	TDCDEPENDENCY& GetAt(int nIndex);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

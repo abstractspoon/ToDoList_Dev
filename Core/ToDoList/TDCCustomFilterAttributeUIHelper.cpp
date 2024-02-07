@@ -16,16 +16,10 @@
 #include "..\shared\autocombobox.h"
 #include "..\shared\wclassdefines.h"
 #include "..\shared\enedit.h"
-//#include "..\shared\orderedtreectrl.h"
 #include "..\shared\datetimectrlex.h"
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
-//#include "..\shared\timecombobox.h"
-//#include "..\shared\timeedit.h"
-//#include "..\shared\fileedit.h"
-//#include "..\shared\FileComboBox.h"
 #include "..\shared\HoldRedraw.h"
-//#include "..\shared\WndPrompt.h"
 #include "..\shared\Icon.h"
 
 #ifdef _DEBUG
@@ -38,397 +32,142 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
-													   const TDCCADATA& data,
-													   const CTDCImageList& ilImages,
-													   UINT nCtrlID, 
-													   BOOL bBuddy, 
-													   BOOL bMultiSelectionFilter,
-													   BOOL bFileLinkThumbnails,
-													   CString& sPrompt)
+CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, 
+															 const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
+															 const TDCCADATA& data,
+															 const CTDCImageList& ilImages,
+															 UINT nCtrlID,
+															 BOOL bBuddy,
+															 BOOL bMultiSelectionFilter)
 {
-	// Sanity check
-//	BOOL bFilter = IsCustomFilterControl(nCtrlID);
-
-	if (bBuddy && !AttributeWantsBuddy(attribDef/*, bFilter*/))
+	if (bBuddy && !AttributeWantsBuddy(attribDef))
 	{
 		ASSERT(0);
 		return NULL;
 	}
 	
-	DWORD dwDataType = attribDef.GetDataType();
-	DWORD dwListType = attribDef.GetListType();
-
 	CWnd* pControl = NULL;
 	DWORD dwStyle = (WS_CHILD | WS_TABSTOP); // Invisible initially
 	DWORD dwExStyle = WS_EX_CLIENTEDGE;
 	LPCTSTR szClass = NULL;
 
-	sPrompt.Empty();
-
-	if (dwListType == TDCCA_NOTALIST)
-	{
-		switch (dwDataType)
-		{
-// 		case TDCCA_STRING:
-// 			pControl = new CEdit;
-// 			szClass = WC_EDIT;
-// 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-// 			break;
-
-		case TDCCA_DATE:
-//			if (bFilter)
-			{
-				if (bBuddy)
-				{
-					switch (data.AsInteger())
-					{
-					case FD_NEXTNDAYS:
-						{
-							CEnEdit* pEdit = new CEnEdit(TRUE, _T("0123456789"));
-							CIcon iconUpdate(IDI_UPDATE_FILTER, 16);
-
-							pEdit->AddButton(1, iconUpdate, CEnString(IDS_TDC_UPDATEFILTER_TIP));
-
-							pControl = pEdit;
-							szClass = WC_EDIT;
-							dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-						}
-						break;
-
-					case FD_USER:
-					default:
-						pControl = new CDateTimeCtrlEx(0);
-						szClass = WC_DATETIMEPICK;
-						dwStyle |= (DTS_SHORTDATEFORMAT | DTS_RIGHTALIGN);
-						break;
-					}
-				}
-				else
-				{
-					pControl = new CTDLFilterDateComboBox();
-					szClass = WC_COMBOBOX;
-					dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
-				}
-			}
-// 			else
-// 			{
-// 				if (bBuddy)
-// 				{
-// 					// For time of day
-// 					pControl = new CTimeComboBox(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY);
-// 					szClass = WC_COMBOBOX;
-// 					dwStyle |= (CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL);
-// 				}
-// 				else
-// 				{
-// 					pControl = new CDateTimeCtrlEx(0);
-// 					szClass = WC_DATETIMEPICK;
-// 					dwStyle |= (DTS_SHORTDATEFORMAT | DTS_RIGHTALIGN | DTS_SHOWNONE);
-// 				}
-// 			}
-			break;
-
-// 		case TDCCA_INTEGER:
-// 			pControl = new CMaskEdit(_T("-0123456789"));
-// 			szClass = WC_EDIT;
-// 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-// 			sPrompt = _T("0");
-// 			break;
-
-// 		case TDCCA_DOUBLE:
-// 			pControl = new CMaskEdit(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
-// 			szClass = WC_EDIT;
-// 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-// 			sPrompt = _T("0.0");
-// 			break;
-
-// 		case TDCCA_FRACTION:
-// 			pControl = new CMaskEdit(_T("0123456789/"));
-// 			szClass = WC_EDIT;
-// 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-// 			sPrompt = _T("0");
-// 			break;
-// 
-// 		case TDCCA_FILELINK:
-// 			pControl = new CFileEdit(FES_GOBUTTON | (bFileLinkThumbnails ? FES_DISPLAYIMAGETHUMBNAILS : 0));
-// 			szClass = WC_EDIT;
-// 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-// 			break;
-
-// 		case TDCCA_TIMEPERIOD:
-// 			pControl = new CTimeEdit;
-// 			szClass = WC_EDIT;
-// 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
-// 			sPrompt = _T("0.0");
-// 			break;
-
-// 		case TDCCA_BOOL:
-// 			if (attribDef.HasFeature(TDCCAF_SHOWEDITFIELD))
-// 			{
-// 				pControl = new CButton;
-// 				szClass = WC_BUTTON;
-// 				dwStyle |= BS_AUTOCHECKBOX;
-// 				dwExStyle = 0;
-// 			}
-// 			break;
-// 
-// 		case TDCCA_ICON:
-// 		case TDCCA_CALCULATION:
-// 			// these don't have controls
-// 			break;
-
-		default:
-			// Unknown/unhandled data type
-			ASSERT(0);
-			return NULL;
-		}
-	}
-	else //if (bFilter)
+	if (attribDef.IsList())
 	{
 		szClass = WC_COMBOBOX;
 		dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
 
-		switch (dwDataType)
-		{
-		case TDCCA_ICON:
+		if (attribDef.IsDataType(TDCCA_ICON))
 			pControl = new CTDLIconComboBox(ilImages, bMultiSelectionFilter, TRUE);
-			break;
-
-		default:
+		else
 			pControl = new CEnCheckComboBox(bMultiSelectionFilter, IDS_TDC_NONE, IDS_TDC_ANY);
-			break;
+	}
+	else if (attribDef.IsDataType(TDCCA_DATE))
+	{
+		if (bBuddy)
+		{
+			switch (data.AsInteger())
+			{
+			case FD_NEXTNDAYS:
+				{
+					CEnEdit* pEdit = new CEnEdit(TRUE, _T("0123456789"));
+					CIcon iconUpdate(IDI_UPDATE_FILTER, 16);
+
+					pEdit->AddButton(1, iconUpdate, CEnString(IDS_TDC_UPDATEFILTER_TIP));
+
+					pControl = pEdit;
+					szClass = WC_EDIT;
+					dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
+				}
+				break;
+
+			case FD_USER:
+			default:
+				pControl = new CDateTimeCtrlEx(0);
+				szClass = WC_DATETIMEPICK;
+				dwStyle |= (DTS_SHORTDATEFORMAT | DTS_RIGHTALIGN);
+				break;
+			}
+		}
+		else
+		{
+			pControl = new CTDLFilterDateComboBox();
+			szClass = WC_COMBOBOX;
+			dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
 		}
 	}
-// 	else // it's a list
-// 	{
-// 		switch (dwListType)
-// 		{
-// 		case TDCCA_AUTOLIST:
-// 			if (dwDataType == TDCCA_FILELINK)
-// 			{
-// 				pControl = new CFileComboBox(FES_GOBUTTON);
-// 				szClass = WC_COMBOBOX;
-// 				dwStyle |= (CBS_DROPDOWN | WS_VSCROLL | CBS_AUTOHSCROLL);
-// 			}
-// 			else
-// 			{
-// 				pControl = new CAutoComboBox(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE);
-// 				szClass = WC_COMBOBOX;
-// 				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
-// 
-// 				// add number mask as required
-// 				switch (dwDataType)
-// 				{
-// 				case TDCCA_INTEGER:
-// 					((CAutoComboBox*)pControl)->SetEditMask(_T("-0123456789"));
-// 					break;
-// 				
-// 				case TDCCA_DOUBLE:
-// 					((CAutoComboBox*)pControl)->SetEditMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
-// 					break;
-// 				}
-// 			}
-// 			break;
-// 		
-// 		case TDCCA_FIXEDLIST:
-// 			{
-// 				szClass = WC_COMBOBOX;
-// 				dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
-// 
-// 				switch (dwDataType)
-// 				{
-// 				case TDCCA_ICON:
-// 					pControl = new CTDLIconComboBox(ilImages, FALSE, FALSE);
-// 					break;
-// 				
-// 				default:
-// 					pControl = new COwnerdrawComboBoxBase; // so they render the same
-// 					break;
-// 				}
-// 			}
-// 			break;
-// 		
-// 		case TDCCA_AUTOMULTILIST:
-// 			{
-// 				pControl = new CCheckComboBox(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE);
-// 				szClass = WC_COMBOBOX;
-// 				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
-// 
-// 				// Add number mask as required
-// 				// Note: These need to include a space because CCheckComboBox 
-// 				// includes a space when it formats multiple items
-// 				switch (dwDataType)
-// 				{
-// 				case TDCCA_INTEGER:
-// 					((CAutoComboBox*)pControl)->SetEditMask(_T("-0123456789, "), ME_LOCALIZESEPARATOR);
-// 					break;
-// 				
-// 				case TDCCA_DOUBLE:
-// 					((CAutoComboBox*)pControl)->SetEditMask(_T("-.0123456789,"), ME_LOCALIZEDECIMAL | ME_LOCALIZESEPARATOR);
-// 					break;
-// 				}
-// 			}
-// 			break;
-// 		
-// 		case TDCCA_FIXEDMULTILIST:
-// 			{
-// 				szClass = WC_COMBOBOX;
-// 				dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
-// 			
-// 				switch (dwDataType)
-// 				{
-// 				case TDCCA_ICON:
-// 					pControl = new CTDLIconComboBox(ilImages, TRUE, FALSE);
-// 					break;
-// 				
-// 				default:
-// 					pControl = new CCheckComboBox;
-// 					break;
-// 				}
-// 			}
-// 			break;
-// 
-// 		default:
-// 			ASSERT(0); // Sanity check
-// 			break;
-// 		}
-// 	}
 
-	ASSERT (pControl);
-
-	if (pControl)
+	if (pControl == NULL)
 	{
-		if (!pControl->CreateEx(dwExStyle, 
-								szClass, 
-								NULL, 
-								dwStyle, 
-								CRect(0, 0, 0, 0), 
-								pParent, 
-								nCtrlID))
+		// Unknown/unhandled data type
+		ASSERT(0);
+		return NULL;
+	}
+
+	if (!pControl->CreateEx(dwExStyle,
+							szClass,
+							NULL,
+							dwStyle,
+							CRect(0, 0, 0, 0),
+							pParent,
+							nCtrlID))
+	{
+		delete pControl;
+		pControl = NULL;
+	}
+	else
+	{
+		// content is already in user's language
+		CLocalizer::EnableTranslation(*pControl, FALSE);
+
+		// font
+		pControl->SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(pParent));
+
+		// add default data to lists
+		if (attribDef.IsList())
 		{
-			delete pControl;
-			pControl = NULL;
+			ASSERT(pControl->IsKindOf(RUNTIME_CLASS(CComboBox)));
+			CComboBox* pCB = (CComboBox*)pControl;
+
+			CStringArray aListData;
+			attribDef.GetUniqueListData(aListData);
+
+			if (pControl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
+				((CEnCheckComboBox*)pCB)->SetStrings(aListData);
+			else
+				CDialogHelper::SetComboBoxItems(*pCB, aListData);
 		}
-		else 
+		else if (pControl->IsKindOf(RUNTIME_CLASS(CDateTimeCtrlEx)))
 		{
-			// content is already in user's language
-			CLocalizer::EnableTranslation(*pControl, FALSE);
-
-			// font
-			pControl->SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(pParent)); 
-
-			// add default data to non-filelink lists
-			if (attribDef.IsList()/* && !attribDef.IsDataType(TDCCA_FILELINK)*/) 
-			{
-				ASSERT(pControl->IsKindOf(RUNTIME_CLASS(CComboBox)));
-				CComboBox* pCB = (CComboBox*)pControl;
-
-				CStringArray aListData;
-				attribDef.GetUniqueListData(aListData);
-				
-				if (pControl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)))
-				{
-					//ASSERT(bFilter || (dwDataType == TDCCA_ICON));
-
-					((CEnCheckComboBox*)pCB)->SetStrings(aListData);
-				}
-				else
-				{
-					CDialogHelper::SetComboBoxItems(*pCB, aListData);
-				}
-
-// 				if (!bFilter)
-// 				{
-// 					// prepend empty items to single selection lists
-// 					switch (attribDef.GetListType())
-// 					{
-// 					case TDCCA_FIXEDLIST:
-// 					case TDCCA_AUTOLIST:
-// 						if (!attribDef.HasFeature(TDCCAF_EXCLUDEBLANKITEM))
-// 							pCB->InsertString(0, _T(""));
-// 						break;
-// 					}
-// 				}
-			}
-			else if (/*bFilter &&*/ pControl->IsKindOf(RUNTIME_CLASS(CDateTimeCtrlEx)))
-			{
-				((CDateTimeCtrlEx*)pControl)->SetMonthCalStyle(MCS_WEEKNUMBERS);
-			}
+			((CDateTimeCtrlEx*)pControl)->SetMonthCalStyle(MCS_WEEKNUMBERS);
 		}
 	}
 
 	return pControl;
 }
 
-BOOL CTDCCustomFilterAttributeUIHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/)
+BOOL CTDCCustomFilterAttributeUIHelper::AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 {
 	return (attribDef.GetDataType() == TDCCA_DATE);
-
-// 	switch (attribDef.GetDataType())
-// 	{
-// 	case TDCCA_STRING:
-// 	case TDCCA_INTEGER:
-// 	case TDCCA_DOUBLE:
-// 	case TDCCA_FRACTION:
-// 	case TDCCA_BOOL:
-// 	case TDCCA_ICON:
-// 	case TDCCA_FILELINK:
-// 	case TDCCA_TIMEPERIOD:
-// 		return FALSE;
-// 		
-// 	case TDCCA_DATE:
-// 		return TRUE;//(bFilter || attribDef.HasFeature(TDCCAF_SHOWTIME));
-// 	}
-// 
-// 	ASSERT(0);
-// 	return FALSE;
 }
 
-CString CTDCCustomFilterAttributeUIHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-													 BOOL bBuddy/*, BOOL bFilter*/)
+CString CTDCCustomFilterAttributeUIHelper::GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bBuddy)
 {
-	if (!bBuddy)
-	{
-		return (attribDef.sLabel.IsEmpty() ? attribDef.sColumnTitle : attribDef.sLabel);
-	}
-// 	else if (AttributeWantsBuddy(attribDef/*, bFilter*/))
-// 	{
-// 		switch (attribDef.GetDataType())
-// 		{
-// 		case TDCCA_STRING:
-// 		case TDCCA_INTEGER:
-// 		case TDCCA_DOUBLE:
-// 		case TDCCA_FRACTION:
-// 		case TDCCA_BOOL:
-// 		case TDCCA_ICON:
-// 		case TDCCA_FILELINK:
-// 		case TDCCA_TIMEPERIOD:
-// 			break;
-// 			
-// 		case TDCCA_DATE:
-// // 			if (!bFilter)
-// // 				return CEnString(IDS_CUSTOM_TIMEATTRIB, GetControlLabel(attribDef, FALSE/*, bFilter*/));
-// 			break;
-// 
-// 		default:
-// 			ASSERT(0);
-// 			break;
-// 		}
-// 	}
+	if (bBuddy)
+		return _T("");
 
-	return _T("");
+	//else
+	return (attribDef.sLabel.IsEmpty() ? attribDef.sColumnTitle : attribDef.sLabel);
 }
 
 CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, 
-															const TDCCADATA& /*data*/, UINT nCtrlID, BOOL bBuddy)
+																	const TDCCADATA& /*data*/, UINT nCtrlID, BOOL bBuddy)
 {
 	CStatic* pLabel = new CStatic;
 	ASSERT (pLabel);
 
 	if (pLabel)
 	{
-		DWORD dwStyle = (WS_CHILD | SS_CENTERIMAGE); // Invisible
+		DWORD dwStyle = (WS_CHILD | SS_CENTERIMAGE); // Invisible initially
 
 		if (!pLabel->Create(NULL, dwStyle, CRect(0, 0, 0, 0), pParent, nCtrlID))
 		{
@@ -441,9 +180,7 @@ CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeLabelCtrl(CWnd* pParent,
 			CLocalizer::EnableTranslation(*pLabel, FALSE);
 			
 			// THEN set label
-			//BOOL bFilter = IsCustomFilterControl(nCtrlID);
-
-			pLabel->SetWindowText(GetControlLabel(attribDef, bBuddy/*, bFilter*/));
+			pLabel->SetWindowText(GetControlLabel(attribDef, bBuddy));
 
 			// then font			
 			pLabel->SendMessage(WM_SETFONT, (WPARAM)CDialogHelper::GetFont(pParent), 0); 
@@ -454,7 +191,7 @@ CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeLabelCtrl(CWnd* pParent,
 }
 
 BOOL CTDCCustomFilterAttributeUIHelper::GetControl(UINT nCtrlID, const CTDCCustomControlArray& aControls, 
-										   CUSTOMATTRIBCTRLITEM& ctrl)
+													CUSTOMATTRIBCTRLITEM& ctrl)
 {
 	// sanity check
 	if (nCtrlID == 0)
@@ -475,48 +212,24 @@ BOOL CTDCCustomFilterAttributeUIHelper::GetControl(UINT nCtrlID, const CTDCCusto
 	return FALSE;
 }
 
-// BOOL CTDCCustomAttributeUIHelper::GetControl(const CString& sUniqueID, const CTDCCustomControlArray& aControls, 
-// 										   CUSTOMATTRIBCTRLITEM& ctrl)
-// {
-// 	int nCtrl = aControls.Find(sUniqueID);
-// 
-// 	if (nCtrl != -1)
-// 	{
-// 		ctrl = aControls[nCtrl];
-// 		return TRUE;
-// 	}
-// 
-// 	// not found 
-// 	return FALSE;
-// }
-
 void CTDCCustomFilterAttributeUIHelper::CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent)
 {
 	aControls.DeleteCtrls(pParent);
 	aControls.RemoveAll();
 }
 
-BOOL CTDCCustomFilterAttributeUIHelper::NeedRebuildFilterControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
-														  const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
+BOOL CTDCCustomFilterAttributeUIHelper::NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs,
+															const CTDCCustomAttribDefinitionArray& aNewAttribDefs,
 															const CTDCCustomControlArray& aOldControls)
 {
-// 	return NeedRebuildControls(aOldAttribDefs, aNewAttribDefs, aOldControls, IDC_FIRST_CUSTOMFILTERFIELD);
-// }
-// 
-// BOOL CTDCCustomAttributeUIHelper::NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs, 
-// 													  const CTDCCustomAttribDefinitionArray& aNewAttribDefs, 
-// 													  const CTDCCustomControlArray& aOldControls, UINT nCtrlIDStart)
-// {
 	CTDCCustomControlArray aNewControls;
-	int nNumNewCtrls = GetCustomAttributeCtrls(aNewAttribDefs, /*nCtrlIDStart,*/ aNewControls);
+	int nNumNewCtrls = GetCustomAttributeCtrls(aNewAttribDefs, aNewControls);
 
 	if (nNumNewCtrls != aOldControls.GetSize())
 		return TRUE;
 
 	// Compare each new item with the old, also checking list data
 	// Order is important
-// 	BOOL bFilter = IsCustomFilterControl(nCtrlIDStart);
-
 	for (int nCtrl = 0; nCtrl < nNumNewCtrls; nCtrl++)
 	{
 		const CUSTOMATTRIBCTRLITEM& ctrlNew = aNewControls[nCtrl];
@@ -543,55 +256,43 @@ BOOL CTDCCustomFilterAttributeUIHelper::NeedRebuildFilterControls(const CTDCCust
 }
 
 int CTDCCustomFilterAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-														 /*UINT nCtrlIDStart,*/ CTDCCustomControlArray& aControls)
+																CTDCCustomControlArray& aControls)
 {
 	aControls.RemoveAll();
 
-	UINT nID = IDC_FIRST_CUSTOMFILTERFIELD;//nCtrlIDStart;
-//	BOOL bFilter = IsCustomFilterControl(nCtrlIDStart);
+	UINT nID = IDC_FIRST_CUSTOMFILTERFIELD;
 
 	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
 
 		// don't add unwanted controls
-		if (!WantControl(attribDef/*, bFilter*/))
+		if (!WantControl(attribDef))
 			continue;
 
-// 		switch (attribDef.GetDataType())
-// 		{
-// 		case TDCCA_ICON:
-// 			if (!attribDef.IsList())
-// 				break;
-// 			// else fall thru
-// 
-// 		default:
-			{
-				CUSTOMATTRIBCTRLITEM ctrl;
+		CUSTOMATTRIBCTRLITEM ctrl;
 
-				ctrl.nAttrib = attribDef.GetAttributeID();
-				ctrl.sAttribID = attribDef.sUniqueID;
+		ctrl.nAttrib = attribDef.GetAttributeID();
+		ctrl.sAttribID = attribDef.sUniqueID;
 
-				// Main control
-				ctrl.nCtrlID = nID++;
-				ctrl.nLabelID = nID++;
+		// Main control
+		ctrl.nCtrlID = nID++;
+		ctrl.nLabelID = nID++;
 
-				// Buddy control
-				if (AttributeWantsBuddy(attribDef/*, bFilter*/))
-				{
-					ctrl.nBuddyCtrlID = nID++;
-					ctrl.nBuddyLabelID = nID++;
-				}					
+		// Buddy control
+		if (AttributeWantsBuddy(attribDef))
+		{
+			ctrl.nBuddyCtrlID = nID++;
+			ctrl.nBuddyLabelID = nID++;
+		}
 
-				aControls.Add(ctrl);
-			}
-// 		}
+		aControls.Add(ctrl);
 	}
 
 	return aControls.GetSize();
 }
 
-BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent, 
+BOOL CTDCCustomFilterAttributeUIHelper::RebuildControls(CWnd* pParent, 
 														const CTDCCustomAttribDefinitionArray& aAttribDefs,
 														const CTDCCustomAttributeDataMap& mapCtrlData,
 														const CTDCImageList& ilImages,
@@ -599,20 +300,6 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 														BOOL bMultiSelection,
 														CTDCCustomControlArray& aControls)
 {
-// 	return RebuildControls(pParent, aAttribDefs, mapCtrlData, ilImages, nCtrlIDPos, IDC_FIRST_CUSTOMFILTERFIELD, /*TRUE,*/ bMultiSelection, FALSE, aControls);
-// }
-// 
-// BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent, 
-// 												  const CTDCCustomAttribDefinitionArray& aAttribDefs,
-// 												  const CTDCCustomAttributeDataMap& mapCtrlData,
-// 												  const CTDCImageList& ilImages,
-// 												  UINT nCtrlIDPos, 
-// 												  UINT nCtrlIDStart,
-// // 												  BOOL bFilter, 
-// 												  BOOL bMultiSelectionFilter,
-// 												  BOOL bFileLinkThumbnails,
-// 												  CTDCCustomControlArray& aControls)
-// {
 	ASSERT_VALID(pParent);
 
 	CHoldRedraw hr(*pParent);
@@ -621,39 +308,19 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 	CleanupControls(aControls, pParent);
 
 	// recreate controls and columns
-	UINT nID = IDC_FIRST_CUSTOMFILTERFIELD;//nCtrlIDStart;
-	BOOL bFileLinkThumbnails = FALSE;
+	UINT nID = IDC_FIRST_CUSTOMFILTERFIELD;
 
 	const CWnd* pInsertAfter = pParent->GetDlgItem(nCtrlIDPos);
 	ASSERT(pInsertAfter);
 
 	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
 
 		// don't add unwanted controls
-		if (!WantControl(attribDef/*, bFilter*/))
+		if (!WantControl(attribDef))
 			continue;
 		
-// 		switch (attribDef.GetDataType())
-// 		{
-// 		case TDCCA_CALCULATION:
-// 			// Don't have edit fields
-// 			continue;
-// 
-// 		case TDCCA_BOOL:
-// 			if (!attribDef.HasFeature(TDCCAF_SHOWEDITFIELD))
-// 				continue;
-// 			// else fall thru
-// 			break;
-// 
-// 		case TDCCA_ICON:
-// 			if (!attribDef.IsList())
-// 				continue;
-// 			// else fall thru
-// 			break;
-// 		}
-
 		CUSTOMATTRIBCTRLITEM ctrl;
 
 		ctrl.nAttrib = attribDef.GetAttributeID();
@@ -671,20 +338,20 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 		ctrl.nCtrlID = nID++;
 		ctrl.nLabelID = nID++;
 
-		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelection/*Filter*/, bFileLinkThumbnails, ctrl.sPrompt);
+		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelection);
 
 		if (pCtrl)
 			pLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nLabelID, FALSE);
 
 		// Buddy control
-		BOOL bWantsBuddy = (pCtrl && pLabel && AttributeWantsBuddy(attribDef/*, bFilter*/));
+		BOOL bWantsBuddy = (pCtrl && pLabel && AttributeWantsBuddy(attribDef));
 
 		if (bWantsBuddy)
 		{
 			ctrl.nBuddyCtrlID = nID++;
 			ctrl.nBuddyLabelID = nID++;
 
-			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelection/*Filter*/, bFileLinkThumbnails, ctrl.sBuddyPrompt);
+			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelection);
 
 			if (pBuddyCtrl)
 				pBuddyLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nBuddyLabelID, TRUE);
@@ -717,8 +384,7 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 			pInsertAfter = pCtrl; // next insertion point
 		}
 
-		SetFilterBuddyVisibility(pParent, ctrl, attribDef, data);
-
+		SetBuddyVisibility(pParent, ctrl, attribDef, data);
 		aControls.Add(ctrl);
 	}
 
@@ -727,26 +393,19 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(CWnd* pParent,
 
 BOOL CTDCCustomFilterAttributeUIHelper::WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/)
 {
-	if (attribDef.bEnabled)
-		return (/*!bFilter || */attribDef.HasFeature(TDCCAF_FILTER));
-
-	return FALSE;
+	return (attribDef.bEnabled && attribDef.HasFeature(TDCCAF_FILTER));
 }
 
-BOOL CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(UINT nCtrlID)
+BOOL CTDCCustomFilterAttributeUIHelper::IsCustomControl(UINT nCtrlID)
 {
-	return (nCtrlID >= IDC_FIRST_CUSTOMFILTERFIELD && nCtrlID <= IDC_LAST_CUSTOMFILTERFIELD);
-}
-
-CString CTDCCustomFilterAttributeUIHelper::GetFilterControlTooltip(const CWnd* pParent, UINT nCtrlID)
-{
-	ASSERT(IsCustomFilterControl(nCtrlID));
-
-	return GetControlTooltip(pParent, nCtrlID);
+	return ((nCtrlID >= IDC_FIRST_CUSTOMFILTERFIELD) && 
+			(nCtrlID <= IDC_LAST_CUSTOMFILTERFIELD));
 }
 
 CString CTDCCustomFilterAttributeUIHelper::GetControlTooltip(const CWnd* pParent, UINT nCtrlID)
 {
+	ASSERT(IsCustomControl(nCtrlID));
+
 	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
 
 	if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CCheckComboBox)))
@@ -756,9 +415,10 @@ CString CTDCCustomFilterAttributeUIHelper::GetControlTooltip(const CWnd* pParent
 	return _T("");
 }
 
-void CTDCCustomFilterAttributeUIHelper::UpdateControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs,
-												const CTDCCustomAttributeDataMap& mapData)
+void CTDCCustomFilterAttributeUIHelper::UpdateControls(const CWnd* pParent, 
+													   CTDCCustomControlArray& aControls,
+													   const CTDCCustomAttribDefinitionArray& aAttribDefs,
+													   const CTDCCustomAttributeDataMap& mapData)
 {
 	int nCtrl = aControls.GetSize();
 
@@ -766,9 +426,10 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControls(const CWnd* pParent, CTDC
 		UpdateControl(pParent, aControls.GetData()[nCtrl], aAttribDefs, mapData);
 }
 
-void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs,
-												const CTDCCustomAttributeDataMap& mapData)
+void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, 
+													  CUSTOMATTRIBCTRLITEM& ctrl,
+													  const CTDCCustomAttribDefinitionArray& aAttribDefs,
+													  const CTDCCustomAttributeDataMap& mapData)
 {
 	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
 
@@ -780,8 +441,9 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTO
 		ClearControl(pParent, ctrl, aAttribDefs);
 }
 
-void CTDCCustomFilterAttributeUIHelper::ClearControls(const CWnd* pParent, CTDCCustomControlArray& aControls,
-												const CTDCCustomAttribDefinitionArray& aAttribDefs)
+void CTDCCustomFilterAttributeUIHelper::ClearControls(const CWnd* pParent, 
+													  CTDCCustomControlArray& aControls,
+													  const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	int nCtrl = aControls.GetSize();
 
@@ -793,8 +455,8 @@ void CTDCCustomFilterAttributeUIHelper::ClearControls(const CWnd* pParent, CTDCC
 }
 
 TDCCAUI_UPDATERESULT CTDCCustomFilterAttributeUIHelper::GetControlData(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
-																 const CTDCCustomAttribDefinitionArray& aAttribDefs,
-																 const TDCCADATA& dataPrev, TDCCADATA& data)
+																	   const CTDCCustomAttribDefinitionArray& aAttribDefs,
+																	   const TDCCADATA& dataPrev, TDCCADATA& data)
 {
 	ASSERT_VALID(pParent);
 	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
@@ -802,7 +464,6 @@ TDCCAUI_UPDATERESULT CTDCCustomFilterAttributeUIHelper::GetControlData(const CWn
 	DWORD dwDataType = 0, dwListType = 0;
 	VERIFY(GetControlAttributeTypes(ctrl, aAttribDefs, dwDataType, dwListType));
 
-	//BOOL bFilter = IsCustomFilterControl(ctrl.nCtrlID);
 	CWnd* pCtrl = ctrl.GetCtrl(pParent);
 
 	if (pCtrl == NULL)
@@ -819,196 +480,107 @@ TDCCAUI_UPDATERESULT CTDCCustomFilterAttributeUIHelper::GetControlData(const CWn
 
 	if (dwListType == TDCCA_NOTALIST)
 	{
-		switch (dwDataType)
+		if (dwDataType == TDCCA_DATE)
 		{
-// 		case TDCCA_STRING:
-// 		case TDCCA_INTEGER:
-// 		case TDCCA_DOUBLE:
-// 		case TDCCA_FILELINK:
-// 		case TDCCA_FRACTION:
-// 			pCtrl->GetWindowText(sText);
-// 			data.Set(sText);
-// 			break;
+			FILTER_DATE nFilter = ((CTDLFilterDateComboBox*)pCtrl)->GetSelectedFilter();
+			FILTER_DATE nPrevFilter = (FILTER_DATE)dataPrev.AsInteger();
 
-		case TDCCA_DATE:
-//			if (bFilter)
+			BOOL bShowBuddy = FALSE;
+			BOOL bWasShowingBuddy = ((nPrevFilter == FD_USER) || (nPrevFilter == FD_NEXTNDAYS));
+
+			switch (nFilter)
 			{
-				FILTER_DATE nFilter = ((CTDLFilterDateComboBox*)pCtrl)->GetSelectedFilter();
-				FILTER_DATE nPrevFilter = (FILTER_DATE)dataPrev.AsInteger();
+			case FD_ANY:
+				data.Clear();
+				break;
 
-				BOOL bShowBuddy = FALSE;
-				BOOL bWasShowingBuddy = ((nPrevFilter == FD_USER) || (nPrevFilter == FD_NEXTNDAYS));
-
-				switch (nFilter)
+			case FD_USER:
 				{
-				case FD_ANY:
-					data.Clear();
-					break;
+					// Check existing buddy is of the right type
+					BOOL bCreated = FALSE;
+					CWnd* pBuddy = CheckRecreateDateBuddy(pParent, ctrl, nFilter, aAttribDefs, bCreated);
 
-				case FD_USER:
+					if (pBuddy)
 					{
-						// Check existing buddy is of the right type
-						BOOL bCreated = FALSE;
-						CWnd* pBuddy = CheckRecreateDateFilterBuddy(pParent, ctrl, nFilter, aAttribDefs, bCreated);
+						COleDateTime date;
+						VERIFY(((CDateTimeCtrlEx*)pBuddy)->GetTime(date));
 
-						if (pBuddy)
+						SetDateFilter(nFilter, date.m_dt, data);
+
+						if (bCreated)
 						{
-							COleDateTime date;
-							VERIFY(((CDateTimeCtrlEx*)pBuddy)->GetTime(date));
+							// Reset combo text
+							((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays(7);
 
-							SetDateFilter(nFilter, date.m_dt, data);
-							
-							if (bCreated)
-							{
-								// Reset combo text
-								((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays(7);
-
-								nRes = TDCCAUIRES_REPOSCTRLS;
-							}
-
-							bShowBuddy = TRUE;
+							nRes = TDCCAUIRES_REPOSCTRLS;
 						}
+
+						bShowBuddy = TRUE;
 					}
-					break;
-
-				case FD_NEXTNDAYS:
-					{
-						// Check existing buddy is of the right type
-						BOOL bCreated = FALSE;
-						CWnd* pBuddy = CheckRecreateDateFilterBuddy(pParent, ctrl, nFilter, aAttribDefs, bCreated);
-
-						if (pBuddy)
-						{
-							CString sDays;
-							pBuddy->GetWindowText(sDays);
-
-							double dDays = ValidateDateFilter(FD_NEXTNDAYS, _ttoi(sDays));
-							SetDateFilter(nFilter, dDays, data);
-
-							if (sDays.IsEmpty())
-								pBuddy->SetWindowText(Misc::Format((int)dDays));
-
-							// Update combo text
-							((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays((int)dDays);
-
-							bShowBuddy = TRUE;
-
-							if (bCreated)
-								nRes = TDCCAUIRES_REPOSCTRLS;
-						}
-						else
-						{
-							ASSERT(0);
-						}
-					}
-					break;
-
-				default:
-					data.Set(nFilter);
-					break;
 				}
+				break;
 
-				ctrl.ShowBuddy(pParent, bShowBuddy);
+			case FD_NEXTNDAYS:
+				{
+					// Check existing buddy is of the right type
+					BOOL bCreated = FALSE;
+					CWnd* pBuddy = CheckRecreateDateBuddy(pParent, ctrl, nFilter, aAttribDefs, bCreated);
 
-				if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
-					nRes = TDCCAUIRES_REPOSCTRLS;
+					if (pBuddy)
+					{
+						CString sDays;
+						pBuddy->GetWindowText(sDays);
+
+						double dDays = ValidateDateFilter(FD_NEXTNDAYS, _ttoi(sDays));
+						SetDateFilter(nFilter, dDays, data);
+
+						if (sDays.IsEmpty())
+							pBuddy->SetWindowText(Misc::Format((int)dDays));
+
+						// Update combo text
+						((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays((int)dDays);
+
+						bShowBuddy = TRUE;
+
+						if (bCreated)
+							nRes = TDCCAUIRES_REPOSCTRLS;
+					}
+					else
+					{
+						ASSERT(0);
+					}
+				}
+				break;
+
+			default:
+				data.Set(nFilter);
+				break;
 			}
-// 			else
-// 			{
-// 				VERIFY(((CDateTimeCtrlEx*)pCtrl)->GetTime(date));
-// 				date = CDateHelper::GetDateOnly(date);
-// 
-// 				if (CDateHelper::IsDateSet(date) && ctrl.HasBuddy())
-// 				{
-// 					CTimeComboBox* pBuddy = (CTimeComboBox*)ctrl.GetBuddy(pParent);
-// 					ASSERT_VALID(pBuddy);
-// 				
-// 					if (pBuddy == NULL)
-// 						return TDCCAUIRES_FAIL;
-// 
-// 					double dTime = pBuddy->GetOleTime();
-// 
-// 					if (dTime > 0)
-// 						date.m_dt += dTime;
-// 				}
-// 				data.Set(date);
-// 			}
-			break;
-			
-// 		case TDCCA_TIMEPERIOD:
-// 			{
-// 				TH_UNITS nUnits = ((CTimeEdit*)pCtrl)->GetUnits();
-// 				double dTime = ((CTimeEdit*)pCtrl)->GetTime();
-// 
-// 				data.Set(TDCTIMEPERIOD(dTime, nUnits));
-// 			}
-// 			break;
-// 
-// 		case TDCCA_BOOL:
-// 			data.Set(((CButton*)pCtrl)->GetCheck() != 0);
-// 			break;
-// 
-// 		case TDCCA_ICON:
-// 			// these don't have controls
-// 			ASSERT(0);
-// 			return TDCCAUIRES_FAIL;
+
+			ctrl.ShowBuddy(pParent, bShowBuddy);
+
+			if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
+				nRes = TDCCAUIRES_REPOSCTRLS;
 		}
 	}
-	else //if (IsCustomFilterControl(ctrl.nCtrlID))
+	else
 	{
 		ASSERT(pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)));
 
 		((CEnCheckComboBox*)pCtrl)->GetChecked(aItems);
-		data.Set(aItems, TRUE/*bFilter*/);
+		data.Set(aItems, TRUE);
 	}
-// 	else // it's a list
-// 	{
-// 		switch (dwListType)
-// 		{
-// 		case TDCCA_AUTOLIST:
-// 			if (dwDataType == TDCCA_FILELINK)
-// 			{
-// 				((CFileComboBox*)pCtrl)->GetFileList(aItems);
-// 				data.Set(aItems);
-// 			}
-// 			else
-// 			{
-// 				pCtrl->GetWindowText(sText);
-// 				data.Set(sText);
-// 			}
-// 			break;
-// 		
-// 		case TDCCA_FIXEDLIST:
-// 			if (dwDataType == TDCCA_ICON)
-// 				sText = ((CTDLIconComboBox*)pCtrl)->GetSelectedImage();
-// 			else
-// 				pCtrl->GetWindowText(sText);
-// 
-// 			data.Set(sText);
-// 			break;
-// 		
-// 		case TDCCA_AUTOMULTILIST:
-// 		case TDCCA_FIXEDMULTILIST:
-// 			{
-// 				const CCheckComboBox* pCombo = (CCheckComboBox*)pCtrl;
-// 				CStringArray aExtra;
-// 
-// 				pCombo->GetChecked(aItems);
-// 				pCombo->GetChecked(aExtra, CCBC_MIXED);
-// 
-// 				data.Set(aItems, aExtra);
-// 			}
-// 			break;
-// 		}
-// 	}
 
 	return nRes;
 }
 
-CWnd* CTDCCustomFilterAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter,
-																const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated)
+CWnd* CTDCCustomFilterAttributeUIHelper::CheckRecreateDateBuddy(const CWnd* pParent, 
+																const CUSTOMATTRIBCTRLITEM& ctrl, 
+																FILTER_DATE nFilter,
+																const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+																BOOL& bCreated)
 {
-	ASSERT(IsCustomFilterControl(ctrl.nCtrlID));
+	ASSERT(IsCustomControl(ctrl.nCtrlID));
 
 	CWnd* pBuddy = ctrl.GetBuddy(pParent);
 	bCreated = FALSE;
@@ -1047,9 +619,7 @@ CWnd* CTDCCustomFilterAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd
 									 CTDCImageList(),		// not required
 									 ctrl.nBuddyCtrlID, 
 									 TRUE,					// buddy
-									 FALSE,					// multi-selection droplist
-									 FALSE,					// file-links image thumbnails
-									 CString());
+									 FALSE);				// multi-selection droplist
 
 		bCreated = TRUE;
 	}
@@ -1116,14 +686,14 @@ void CTDCCustomFilterAttributeUIHelper::SetDateFilter(FILTER_DATE nFilter, doubl
 		data.Set(nFilter);
 }
 
-void CTDCCustomFilterAttributeUIHelper::SetFilterBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data)
+void CTDCCustomFilterAttributeUIHelper::SetBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data)
 {
 	if (!attribDef.IsList())
 	{
 		switch (attribDef.GetDataType())
 		{
 		case TDCCA_DATE:
-			if (IsCustomFilterControl(ctrl.nCtrlID))
+			if (IsCustomControl(ctrl.nCtrlID))
 			{
 				switch (data.AsInteger())
 				{
@@ -1157,9 +727,10 @@ void CTDCCustomFilterAttributeUIHelper::ClearControl(const CWnd* pParent, CUSTOM
 	UpdateControl(pParent, ctrl, aAttribDefs, TDCCADATA());
 }
 
-void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
-											const CTDCCustomAttribDefinitionArray& aAttribDefs,
-											const TDCCADATA& data)
+void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, 
+													  CUSTOMATTRIBCTRLITEM& ctrl,
+													  const CTDCCustomAttribDefinitionArray& aAttribDefs,
+													  const TDCCADATA& data)
 {
 	ASSERT_VALID(pParent);
 	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
@@ -1167,7 +738,6 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTO
 	DWORD dwDataType = 0, dwListType = 0;
 	VERIFY(GetControlAttributeTypes(ctrl, aAttribDefs, dwDataType, dwListType));
 
-//	BOOL bFilter = IsCustomFilterControl(ctrl.nCtrlID);
 	CWnd* pCtrl = ctrl.GetCtrl(pParent);
 
 	if (pCtrl == NULL)
@@ -1180,223 +750,69 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTO
 
 	if (dwListType == TDCCA_NOTALIST)
 	{
-		switch (dwDataType)
+		if (dwDataType == TDCCA_DATE)
 		{
-// 		case TDCCA_STRING:
-// 		case TDCCA_FILELINK:
-// 			pCtrl->SetWindowText(data.AsString());
-// 			break;
-// 
-// 		case TDCCA_INTEGER:
-// 			if (data.IsEmpty())
-// 				pCtrl->SetWindowText(data.AsString());
-// 			else
-// 				pCtrl->SetWindowText(Misc::Format(data.AsInteger()));
-// 			break;
-// 
-// 		case TDCCA_FRACTION:
-// 			if (data.IsEmpty())
-// 			{
-// 				pCtrl->SetWindowText(data.AsString());
-// 			}
-// 			else if (data.IsFraction())
-// 			{
-// 				CString sValue(data.AsString());
-// 				Misc::TrimTrailingDecimalZeros(sValue);
-// 
-// 				pCtrl->SetWindowText(sValue);
-// 			}
-// 			else
-// 			{
-// 				pCtrl->SetWindowText(Misc::Format(data.AsDouble()));
-// 			}
-// 			break;
-// 
-// 		case TDCCA_DOUBLE:
-// 			if (data.IsEmpty())
-// 				pCtrl->SetWindowText(data.AsString());
-// 			else
-// 				pCtrl->SetWindowText(Misc::Format(data.AsDouble()));
-// 			break;
+			double dUserVal;
+			FILTER_DATE nFilter = GetDateFilter(data, dUserVal);
 
-		case TDCCA_DATE:
-//			if (bFilter)
+			((CTDLFilterDateComboBox*)pCtrl)->SelectFilter(nFilter);
+
+			if (nFilter == FD_USER)
 			{
-				double dUserVal;
-				FILTER_DATE nFilter = GetDateFilter(data, dUserVal);
+				ASSERT(ctrl.HasBuddy());
 
-				((CTDLFilterDateComboBox*)pCtrl)->SelectFilter(nFilter);
+				CDateTimeCtrlEx* pBuddy = (CDateTimeCtrlEx*)ctrl.GetBuddy(pParent);
+				ASSERT_VALID(pBuddy);
 
-				if (nFilter == FD_USER)
-				{
-					ASSERT(ctrl.HasBuddy());
-
-					CDateTimeCtrlEx* pBuddy = (CDateTimeCtrlEx*)ctrl.GetBuddy(pParent);
-					ASSERT_VALID(pBuddy);
-
-					if (pBuddy)
-						pBuddy->SetTime(dUserVal);
-				}
-				else if (nFilter == FD_NEXTNDAYS)
-				{
-					ASSERT(ctrl.HasBuddy());
-
-					CWnd* pBuddy = ctrl.GetBuddy(pParent);
-					ASSERT_VALID(pBuddy);
-
-					if (pBuddy)
-						pBuddy->SetWindowText(Misc::Format((int)dUserVal));
-
-					((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays((int)dUserVal);
-				}
-				else
-				{
-					ctrl.ShowBuddy(pParent, FALSE);
-				}
+				if (pBuddy)
+					pBuddy->SetTime(dUserVal);
 			}
-// 			else
-// 			{
-// 				CDateTimeCtrlEx* pDTC = (CDateTimeCtrlEx*)pCtrl;
-// 				COleDateTime date = data.AsDate();
-// 
-// 				if (!CDateHelper::IsDateSet(date))
-// 				{
-// 					pDTC->SetTime(COleDateTime::GetCurrentTime());
-// 					pDTC->SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
-// 				}
-// 				else
-// 				{
-// 					pDTC->SetTime(date);
-// 				}
-// 
-// 				if (ctrl.HasBuddy() && CDateHelper::DateHasTime(date))
-// 				{
-// 					CTimeComboBox* pBuddy = (CTimeComboBox*)ctrl.GetBuddy(pParent);
-// 					ASSERT_VALID(pBuddy);
-// 
-// 					if (pBuddy)
-// 						pBuddy->SetOleTime(date);
-// 					else
-// 						ASSERT(0);
-// 				}
-// 			}
-			break;
+			else if (nFilter == FD_NEXTNDAYS)
+			{
+				ASSERT(ctrl.HasBuddy());
 
-// 		case TDCCA_TIMEPERIOD:
-// 			{
-// 				TDCTIMEPERIOD time;
-// 
-// 				if (!data.AsTimePeriod(time))
-// 					time.SetTime(0.0, TDCU_HOURS);
-// 
-// 				((CTimeEdit*)pCtrl)->SetTime(time.dAmount, time.GetTHUnits());
-// 			}
-// 			break;
-// 
-// 		case TDCCA_BOOL:
-// 			((CButton*)pCtrl)->SetCheck(data.AsBool() ? 1 : 0);
-// 			break;
-// 
-// 		case TDCCA_ICON:
-// 			// these don't have controls
-// 			ASSERT(0);
-// 			break;
+				CWnd* pBuddy = ctrl.GetBuddy(pParent);
+				ASSERT_VALID(pBuddy);
+
+				if (pBuddy)
+					pBuddy->SetWindowText(Misc::Format((int)dUserVal));
+
+				((CTDLFilterDateComboBox*)pCtrl)->SetNextNDays((int)dUserVal);
+			}
+			else
+			{
+				ctrl.ShowBuddy(pParent, FALSE);
+			}
 		}
 	}
-	else //if (IsCustomFilterControl(ctrl.nCtrlID))
+	else
 	{
 		ASSERT(pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)));
 
 		data.AsArray(aItems);
 		((CEnCheckComboBox*)pCtrl)->SetChecked(aItems);
 	}
-// 	else
-// 	{
-// 		switch (dwListType)
-// 		{
-// 		case TDCCA_AUTOLIST:
-// 			if (dwDataType == TDCCA_FILELINK)
-// 			{
-// 				data.AsArray(aItems);
-// 				((CFileComboBox*)pCtrl)->SetFileList(aItems);
-// 			}
-// 			else
-// 			{
-// 				CAutoComboBox* pACB = (CAutoComboBox*)pCtrl;
-// 
-// 				if (data.IsEmpty())
-// 				{
-// 					pACB->SetCurSel(-1);
-// 				}
-// 				else
-// 				{
-// 					int nItem = pACB->AddString(data.AsString());
-// 					pACB->SetCurSel(nItem);
-// 				}
-// 			}
-// 			break;
-// 
-// 		case TDCCA_FIXEDLIST:
-// 			{
-// 				COwnerdrawComboBoxBase* pCB = (COwnerdrawComboBoxBase*)pCtrl;
-// 
-// 				if (data.IsEmpty())
-// 				{
-// 					pCB->SetCurSel(-1);
-// 				}
-// 				else if (dwDataType == TDCCA_ICON)
-// 				{
-// 					((CTDLIconComboBox*)pCtrl)->SelectImage(data.AsString());
-// 				}
-// 				else
-// 				{
-// 					int nItem = pCB->FindStringExact(-1, data.AsString(), FALSE);
-// 					pCB->SetCurSel(nItem);
-// 				}
-// 			}
-// 			break;
-// 
-// 		case TDCCA_AUTOMULTILIST:
-// 		case TDCCA_FIXEDMULTILIST:
-// 			{
-// 				CStringArray aExtra;
-// 				data.AsArrays(aItems, aExtra);
-// 
-// 				((CCheckComboBox*)pCtrl)->SetChecked(aItems, aExtra);
-// 			}
-// 			break;
-// 		}
-// 	}
 }
 
 void CTDCCustomFilterAttributeUIHelper::UpdateControlAutoListData(const CWnd* pParent, 
 															const CUSTOMATTRIBCTRLITEM& ctrl,
 															const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	int nAttribDef = aAttribDefs.Find(ctrl.sAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_CUSTDEF_ALT(aAttribDefs, ctrl.nAttrib, pDef, return);
 
-	if (nAttribDef == -1)
+	if (pDef->IsList())
 	{
-		ASSERT(0);
-		return;
-	}
+		CWnd* pCtrl = ctrl.GetCtrl(pParent);
+		ASSERT_VALID(pCtrl);
 
-	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttribDef];
+		if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CAutoComboBox)))
+		{
+			CStringArray aItems;
+			pDef->GetUniqueListData(aItems);
 
-	if (!attribDef.IsList()/* || attribDef.IsDataType(TDCCA_FILELINK)*/)
-	{
-		return;
-	}
-	
-	CWnd* pCtrl = ctrl.GetCtrl(pParent);
-	ASSERT_VALID(pCtrl);
-
-	if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CAutoComboBox)))
-	{
-		CStringArray aItems;
-		attribDef.GetUniqueListData(aItems);
-
-		((CAutoComboBox*)pCtrl)->SetStrings(aItems);
+			((CAutoComboBox*)pCtrl)->SetStrings(aItems);
+		}
 	}
 }
 
@@ -1404,13 +820,6 @@ BOOL CTDCCustomFilterAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATT
 														 const CTDCCustomAttribDefinitionArray& aAttribDefs,
 														 DWORD& dwDataType, DWORD& dwListType)
 {
-	if (!IsCustomFilterControl(ctrl.nCtrlID))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	// search attribute defs for unique ID
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 	GET_CUSTDEF_RET(aAttribDefs, ctrl.sAttribID, pDef, FALSE);
 	
@@ -1420,7 +829,7 @@ BOOL CTDCCustomFilterAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATT
 	return TRUE;
 }
 
-int CTDCCustomFilterAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
+int CTDCCustomFilterAttributeUIHelper::EnableMultiSelection(const CTDCCustomControlArray& aControls, 
 															CWnd* pParent, 
 															BOOL bEnable)
 {
@@ -1441,15 +850,15 @@ int CTDCCustomFilterAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCust
 	return nNumFound;
 }
 
-void CTDCCustomFilterAttributeUIHelper::ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent)
+void CTDCCustomFilterAttributeUIHelper::ClearCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent)
 {
 	int nCtrl = aControls.GetSize();
 	
 	while (nCtrl--)
-		ClearFilterCheckboxHistory(aControls[nCtrl], pParent);
+		ClearCheckboxHistory(aControls[nCtrl], pParent);
 }
 
-void CTDCCustomFilterAttributeUIHelper::ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent)
+void CTDCCustomFilterAttributeUIHelper::ClearCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent)
 {
 	CWnd* pCtrl = ctrl.GetCtrl(pParent);
 	ASSERT_VALID(pCtrl);

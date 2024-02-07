@@ -16,7 +16,6 @@
 #include "tdltaskicondlg.h"
 #include "tdlreuserecurringtaskdlg.h"
 #include "tdlimportoutlookobjectsdlg.h"
-#include "tdccustomattributeUIhelper.h"
 #include "tdladdloggedtimedlg.h"
 #include "tdcoutlookimporthelper.h"
 #include "ToDoCtrlDataDefines.h"

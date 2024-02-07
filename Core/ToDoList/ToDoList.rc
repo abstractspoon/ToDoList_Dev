@@ -5911,7 +5911,6 @@ BEGIN
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Image of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
-    IDS_CUSTOM_FEATURE_SHOWEDITFIELD "Show edit field"
     IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
     IDS_FIND_TASKS          "Find Tasks"
     IDS_RECURS_WEEKDAY      "weekday"

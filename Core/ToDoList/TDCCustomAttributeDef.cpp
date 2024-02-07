@@ -1323,7 +1323,7 @@ DWORD CTDCCustomAttribDefinitionArray::GetCalculationOperandDataType(const TDCCU
 
 		if (nAttrib != -1)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
 
 			if (attribDef.IsDataType(TDCCA_CALCULATION))
 			{

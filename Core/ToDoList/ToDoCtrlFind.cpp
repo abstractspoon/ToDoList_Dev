@@ -6,7 +6,6 @@
 #include "ToDoCtrlFind.h"
 #include "ToDoCtrlData.h"
 #include "ToDoitem.h"
-#include "TDCCustomAttributeUIHelper.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"

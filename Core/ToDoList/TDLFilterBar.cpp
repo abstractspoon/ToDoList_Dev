@@ -263,7 +263,7 @@ void CTDLFilterBar::ClearCheckboxHistory()
 		m_cbTagFilter.CheckAll(CCBC_UNCHECKED);
 		m_cbVersionFilter.CheckAll(CCBC_UNCHECKED);
 
-		CTDCCustomFilterAttributeUIHelper::ClearFilterCheckboxHistory(m_aCustomControls, this);
+		CTDCCustomFilterAttributeUIHelper::ClearCheckboxHistory(m_aCustomControls, this);
 	}
 }
 
@@ -682,11 +682,11 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRI
 		CTDCCustomAttribDefinitionArray aNewAttribDefs;
 		tdc.GetCustomAttributeDefs(aNewAttribDefs);
 
-		if (CTDCCustomFilterAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs,
+		if (CTDCCustomFilterAttributeUIHelper::NeedRebuildControls(m_aCustomAttribDefs,
 																   aNewAttribDefs,
 																   m_aCustomControls))
 		{
-			CTDCCustomFilterAttributeUIHelper::RebuildFilterControls(this,
+			CTDCCustomFilterAttributeUIHelper::RebuildControls(this,
 															   aNewAttribDefs,
 															   m_filter.mapCustomAttrib,
 															   tdc.GetTaskIconImageList(),
@@ -802,7 +802,7 @@ void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 
 		RebuildOptionsCombo();
 
-		CTDCCustomFilterAttributeUIHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
+		CTDCCustomFilterAttributeUIHelper::EnableMultiSelection(m_aCustomControls, this, bEnable);
 		
 		UpdateData(); // Pick up any changes
 	}
@@ -1046,10 +1046,10 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		break;
 
 	default:
-		if (!CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(nCtrlID))
+		if (!CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID))
 			return FALSE;
 
-		sTooltip = CTDCCustomFilterAttributeUIHelper::GetFilterControlTooltip(this, nCtrlID);
+		sTooltip = CTDCCustomFilterAttributeUIHelper::GetControlTooltip(this, nCtrlID);
 		break;
 	}
 
@@ -1197,7 +1197,7 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 void CTDLFilterBar::OnCustomAttributeSelchangeFilter(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(nCtrlID));
+	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID));
 
 	int nCtrl = m_aCustomControls.Find(nCtrlID);
 
@@ -1236,7 +1236,7 @@ void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* /*pNM
 void CTDLFilterBar::OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl)
 {
 	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
-	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(ctrl.nCtrlID));
+	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(ctrl.nCtrlID));
 
 	TDCCADATA data, dataPrev;
 	m_filter.mapCustomAttrib.Lookup(ctrl.sAttribID, dataPrev);
@@ -1257,7 +1257,7 @@ void CTDLFilterBar::OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl)
 
 void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(nCtrlID));
+	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID));
 
 	CUSTOMATTRIBCTRLITEM ctrl;
 
@@ -1265,7 +1265,7 @@ void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)
 	{
 		// Restore previous state
 		CTDCCustomFilterAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
-		CTDCCustomFilterAttributeUIHelper::ClearFilterCheckboxHistory(ctrl, this);
+		CTDCCustomFilterAttributeUIHelper::ClearCheckboxHistory(ctrl, this);
 	}
 	else
 	{

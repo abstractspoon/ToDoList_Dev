@@ -364,10 +364,10 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		break;
 
 	default:
-		if (!CTDCCustomFilterAttributeUIHelper::IsCustomFilterControl(nCtrlID))
+		if (!CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID))
 			return FALSE;
 
-		sTooltip = CTDCCustomFilterAttributeUIHelper::GetFilterControlTooltip(this, nCtrlID);
+		sTooltip = CTDCCustomFilterAttributeUIHelper::GetControlTooltip(this, nCtrlID);
 		break;
 	}
 
