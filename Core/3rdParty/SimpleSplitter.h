@@ -80,7 +80,7 @@ protected:
 	const int m_nMinSize, m_nBarThickness;
 
 	SS_ORIENTATION m_nOrientation;
-	int m_nTrackIndex, m_nTracker, m_nTrackerLength, m_nTrackerMouseOffset;
+	int m_nTrackIndex, m_nTracker, m_nTrackerMouseOffset;
 	COLORREF m_crBar;
 	
 	CArray<CWnd*, CWnd*&> m_aPanes;

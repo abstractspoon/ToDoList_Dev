@@ -28,7 +28,6 @@ CSimpleSplitter::CSimpleSplitter(int nNumPanes, SS_ORIENTATION nOrientation, int
 	m_nBarThickness(nBarThickness),
 	m_nTrackIndex(0),
 	m_nTracker(0),
-	m_nTrackerLength(0),
 	m_nTrackerMouseOffset(0),
 	m_crBar(::GetSysColor(COLOR_BTNFACE))
 {
@@ -439,11 +438,6 @@ void CSimpleSplitter::OnLButtonDown(UINT nFlags, CPoint point)
 		
 		m_nTracker = m_aOrgPaneSizes[m_nTrackIndex];
 		m_nTrackerMouseOffset = mouse_pos - m_nTracker;
-		
-		CRect rcClient;
-		GetClientRect(&rcClient);
-		
-		m_nTrackerLength = IsHorz() ? rcClient.Height() : rcClient.Width();
 	}
 }
 
