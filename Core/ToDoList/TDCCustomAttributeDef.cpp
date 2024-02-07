@@ -641,7 +641,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 				(dwFeature == TDCCAF_SHOWTIME));
 
 	case TDCCA_BOOL:
-		return (dwFeature == TDCCAF_SHOWEDITFIELD);
+// 		return (dwFeature == TDCCAF_SHOWEDITFIELD);
 
 	case TDCCA_STRING:
 	case TDCCA_FILELINK:

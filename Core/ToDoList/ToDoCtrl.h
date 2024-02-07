@@ -42,7 +42,7 @@ class CPreferences;
 class CTDCTaskCompletionArray;
 class CTDCContentMgr;
 
-struct CTRLITEM;
+//struct CTRLITEM;
 struct TDCTASKCOMPLETION;
 
 /////////////////////////////////////////////////////////////////////////////

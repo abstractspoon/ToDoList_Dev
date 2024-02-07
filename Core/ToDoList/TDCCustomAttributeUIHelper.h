@@ -57,7 +57,7 @@ public:
 	static CString GetFilterControlTooltip(const CWnd* pParent, UINT nCtrlID);
 
 	static BOOL GetControl(UINT nCtrlID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
-	static BOOL GetControl(const CString& sUniqueID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
+//	static BOOL GetControl(const CString& sUniqueID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
 
 	static void UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 							  const CTDCCustomAttribDefinitionArray& aAttribDefs,
@@ -103,8 +103,8 @@ protected:
 	static CWnd* CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 										  const TDCCADATA& data, UINT nCtrlID, BOOL bBuddy);
 
-	static BOOL AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
-	static CString GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bBuddy, BOOL bFilter);
+	static BOOL AttributeWantsBuddy(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/);
+	static CString GetControlLabel(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bBuddy/*, BOOL bFilter*/);
 
 	static BOOL RebuildControls(CWnd* pParent, 
 								const CTDCCustomAttribDefinitionArray& aAttribDefs,
@@ -112,7 +112,7 @@ protected:
 								const CTDCImageList& ilImages,
 								UINT nCtrlIDPos, 
 								UINT nCtrlIDStart,
-								BOOL bFilter, 
+// 								BOOL bFilter, 
 								BOOL bMultiSelectionFilter,
 								BOOL bFileLinkThumbnails,
 								CTDCCustomControlArray& aControls);
@@ -121,10 +121,10 @@ protected:
 									const CTDCCustomAttribDefinitionArray& aNewAttribDefs,
 									const CTDCCustomControlArray& aOldControls, UINT nCtrlIDStart);
 
-	static int GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, UINT nCtrlIDStart, 
+	static int GetCustomAttributeCtrls(const CTDCCustomAttribDefinitionArray& aAttribDefs, /*UINT nCtrlIDStart,*/ 
 									   CTDCCustomControlArray& aControls);
 
-	static BOOL WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bFilter);
+	static BOOL WantControl(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef/*, BOOL bFilter*/);
 
 	static CString GetControlTooltip(const CWnd* pParent, UINT nCtrlID);
 	static FILTER_DATE GetDateFilter(const TDCCADATA& data, double& dUserVal);
@@ -132,7 +132,7 @@ protected:
 	static double ValidateDateFilter(FILTER_DATE nFilter, double dUserVal);
 	static CWnd* CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter, 
 											  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated);
-	static void SetBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data);
+	static void SetFilterBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)
