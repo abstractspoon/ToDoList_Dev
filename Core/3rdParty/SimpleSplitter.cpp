@@ -430,7 +430,7 @@ void CSimpleSplitter::OnLButtonDown(UINT nFlags, CPoint point)
 			CRect rBar;
 			GetBarRect(m_nTrackIndex - 1, rBar);
 
-			if (rBar.PtInRect(point))
+			if (rBar.PtInRect(point) && ::DragDetect(*this, point))
 			{
 				SetCapture();
 				break;

@@ -450,7 +450,7 @@ void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	CRect rSplitBar;
 	GetSplitterRect(rSplitBar);
 
-	if (rSplitBar.PtInRect(point))
+	if (rSplitBar.PtInRect(point) && ::DragDetect(*this, point))
 	{
 		m_bSplitting = TRUE;
 		SetCapture();
