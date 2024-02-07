@@ -160,6 +160,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_SIZE()
 	ON_WM_SETCURSOR()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
@@ -443,6 +444,24 @@ void CTDLTaskAttributeListCtrl::GetSplitterRect(CRect& rSplitBar) const
 
 	rSplitBar.left += (int)(m_fAttribColProportion * rSplitBar.Width() - (SPLITTER_WIDTH / 2));
 	rSplitBar.right = (rSplitBar.left + SPLITTER_WIDTH);
+}
+
+void CTDLTaskAttributeListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	CRect rSplitBar;
+	GetSplitterRect(rSplitBar);
+
+	if (rSplitBar.PtInRect(point))
+	{
+		ASSERT(!m_bSplitting);
+
+		m_fAttribColProportion = 0.5f;
+		RecalcColumnWidths();
+
+		return;
+	}
+
+	CInputListCtrl::OnLButtonDown(nFlags, point);
 }
 
 void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
