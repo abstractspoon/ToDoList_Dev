@@ -1287,7 +1287,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 	if (!CanEditSelectedTask(TDCA_ICON))
 		return FALSE;
 
-	CTDLTaskIconDlg dialog(m_ilTaskIcons, /*m_taskTree.*/GetSelectedTaskIcon(), TRUE, this);
+	CTDLTaskIconDlg dialog(m_ilTaskIcons, GetSelectedTaskIcon(), TRUE, this);
 
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
@@ -2597,14 +2597,6 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 
 	if (aModTaskIDs.GetSize())
 	{
-// 		TDCCOST costSel;
-// 		
-// 		if (GetSelectedTaskCost(costSel) && (m_cost != costSel))
-// 		{
-// 			m_cost = costSel;
-// 			CTDCDialogHelper::UpdateDataEx(this, IDC_COST, m_cost, FALSE);
-// 		}
-
 		SetModified(TDCA_COST, aModTaskIDs);
 		return TRUE;
 	}
@@ -2896,32 +2888,9 @@ BOOL CToDoCtrl::HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModT
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetTextChange(TDC_ATTRIBUTE nAttrib, CString& sItem, const CString& sNewItem, 
-							  UINT nIDC, const CDWordArray& aModTaskIDs, CAutoComboBox* pCombo)
-{
-	ASSERT(CanEditSelectedTask(nAttrib));
-	
-	if (aModTaskIDs.GetSize())
-	{
-		if (sItem != sNewItem)
-		{
-			// make sure it exists
-			if (pCombo)
-				pCombo->AddUniqueItem(sNewItem);
-
-			sItem = sNewItem;
-			UpdateDataEx(this, nIDC, sItem, FALSE);
-		}
-		
-		SetModified(nAttrib, aModTaskIDs);
-	}
-	
-	return TRUE;
-}
-
 BOOL CToDoCtrl::SetSelectedTaskAllocTo(const CStringArray& aAllocTo, BOOL bAppend)
 {
-	return SetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo, bAppend/*, m_cbAllocTo*/);
+	return SetSelectedTaskArray(TDCA_ALLOCTO, aAllocTo, bAppend);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskAllocBy(const CString& sAllocBy)
@@ -3122,12 +3091,12 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& 
 
 BOOL CToDoCtrl::SetSelectedTaskCategories(const CStringArray& aCats, BOOL bAppend)
 {
-	return SetSelectedTaskArray(TDCA_CATEGORY, aCats, bAppend/*, m_cbCategory*/);
+	return SetSelectedTaskArray(TDCA_CATEGORY, aCats, bAppend);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend)
 {
-	return SetSelectedTaskArray(TDCA_TAGS, aTags, bAppend/*, m_cbTags*/);
+	return SetSelectedTaskArray(TDCA_TAGS, aTags, bAppend);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend)
@@ -8306,10 +8275,6 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 		ASSERT(0);
 		return FALSE;
 	}
-// 	else if (pTarget == &m_cbFileLink)
-// 	{
-// 		return CanEditSelectedTask(TDCA_FILELINK);
-// 	}
 
 	// else
 	return TRUE;
@@ -8733,60 +8698,6 @@ void CToDoCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
 		LoadTaskIcons();
 	}
 }
-
-/*
-LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM / *lParam* /)
-{
-	int nRecalcTime = IDNO;
-	BOOL bWantQueryRecalc = (GetSelectedTaskCount() > 1);
-	
-	if (!bWantQueryRecalc) // one item selected
-	{
-		TDCTIMEPERIOD time;
-
-		// see if the time is non-zero and if so we prompt
-		switch (wParam)
-		{
-		case IDC_TIMEEST:
-			bWantQueryRecalc = (GetSelectedTaskTimeEstimate(time) && (time.dAmount > 0.0));
-			break;
-		
-		case IDC_TIMESPENT:
-			bWantQueryRecalc = (GetSelectedTaskTimeSpent(time) && (time.dAmount > 0.0));
-			break;
-
-		default:
-			ASSERT(CTDCCustomAttributeUIHelper::IsCustomEditControl(wParam));
-			break;
-		}
-	}
-
-	if (bWantQueryRecalc)
-		nRecalcTime = CMessageBox::AfxShow(IDS_TDC_RECALCTITLE, IDS_TDC_RECALCPROMPT, MB_ICONQUESTION | MB_YESNOCANCEL);
-
-	if (nRecalcTime != IDCANCEL)
-	{
-		DWORD dwFlags = (UTF_TIMEUNITSONLY | (nRecalcTime == IDYES ? UTF_RECALCTIME : 0));
-
-		switch (wParam)
-		{
-		case IDC_TIMEEST:
-			UpdateTask(TDCA_TIMEESTIMATE, dwFlags); 
-			break;
-		
-		case IDC_TIMESPENT:
-			UpdateTask(TDCA_TIMESPENT, dwFlags); 
-			break;
-
-		default:
-			OnCustomAttributeChange(wParam);
-			break;
-		}
-	}
-	
-	return (nRecalcTime == IDCANCEL);
-}
-*/
 
 void CToDoCtrl::SpellcheckSelectedTask(BOOL bTitle) 
 {

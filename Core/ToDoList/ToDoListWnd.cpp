@@ -755,7 +755,6 @@ void CToDoListWnd::SetupUIStrings()
 	CSoundEdit::SetDefaultFilter(CEnString(IDS_SOUNDFILEFILTER));
 	CSoundEdit::SetDefaultPlayButtonTip(CEnString(IDS_PLAYSOUNDBTNTIP));
 	
-//	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
 	CSpellCheckDlg::SetItemText(SCD_TITLE, IDS_TDC_SPELLCHECK_TITLE);
 	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
@@ -4037,7 +4036,7 @@ void CToDoListWnd::OnTrayiconShowDueTasks(UINT nCmdID)
 	if (!DoDueTaskNotification(nTDC, PFP_DUETODAY))
 	{
 		CEnString sMessage(IDS_NODUETODAY, m_mgrToDoCtrls.GetFriendlyProjectName(nTDC));
-		CMessageBox::AfxShow(sMessage);//, IDS_DUETASKS_TITLE);
+		CMessageBox::AfxShow(sMessage);
 	}
 }
 
@@ -6501,7 +6500,6 @@ void CToDoListWnd::ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable)
 	rTabs = rAvailable;
 	rTabs.right++;
 	rTabs.bottom = rTabs.top + nTabHeight;
-//	rTabs.OffsetRect(0, rAvailable.y - rTabs.top); // add a pixel between tabbar and toolbar
 
 	BOOL bNeedTabCtrl = WantTasklistTabbarVisible();
 
@@ -9440,22 +9438,16 @@ void CToDoListWnd::OnEditAddFileLink()
 
 	CStringArray aFiles;
 	int nNumFiles = tdc.GetSelectedTaskFileLinks(aFiles);
-// 	int nNumFiles = tdc.GetSelectedTaskFileLinkCount();
 		
 	CPreferences prefs;
 	CFileOpenDialog dialog(IDS_SETFILELINK_TITLE, 
 							NULL, 
-							((nNumFiles == 1) ? aFiles[0]/*tdc.GetSelectedTaskFileLink(0)*/ : _T("")), 
+							((nNumFiles == 1) ? aFiles[0] : _T("")), 
 							(EOFN_DEFAULTOPEN | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT), 
 							CEnString(IDS_ALLFILEFILTER));
 	
-	if (dialog.DoModal(prefs) == IDOK)
-	{
-		//CStringArray aFiles;
-		
-		if (dialog.GetPathNames(aFiles))
-			tdc.SetSelectedTaskFileLinks(aFiles, TRUE); // append
-	}
+	if ((dialog.DoModal(prefs) == IDOK) && dialog.GetPathNames(aFiles))
+		tdc.SetSelectedTaskFileLinks(aFiles, TRUE); // append
 }
 
 void CToDoListWnd::OnUpdateEditAddFileLink(CCmdUI* pCmdUI) 
