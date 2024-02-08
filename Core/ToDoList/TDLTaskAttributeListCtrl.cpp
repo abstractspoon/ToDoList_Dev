@@ -605,6 +605,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 	// else
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	IL_COLUMNTYPE nColType = ILCT_TEXT;
 
 	switch (nAttribID)
 	{
@@ -612,16 +613,29 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_COST:
 	case TDCA_EXTERNALID:
 	case TDCA_PERCENT:
-		return ILCT_TEXT;
+	case TDCA_CREATEDBY:
+	case TDCA_PATH:
+	case TDCA_POSITION:
+	case TDCA_CREATIONDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_COMMENTSSIZE:
+	case TDCA_COMMENTSFORMAT:
+	case TDCA_SUBTASKDONE:
+	case TDCA_LASTMODBY:
+	case TDCA_ID:
+	case TDCA_PARENTID:
+		break; // ILCT_TEXT;
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		return ILCT_POPUPMENU;
+		nColType = ILCT_POPUPMENU;
+		break;
 
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
 	case TDCA_STARTDATE:
-		return ILCT_DATE;
+		nColType = ILCT_DATE;
+		break;
 
 	case TDCA_PRIORITY:
 	case TDCA_ALLOCTO:
@@ -634,33 +648,24 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_DONETIME:
 	case TDCA_DUETIME:
 	case TDCA_STARTTIME:
-		return ILCT_DROPLIST;
+		nColType = ILCT_DROPLIST;
+		break;
 
 	case TDCA_FILELINK:
-		return (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
+		break;
 
 	case TDCA_ICON:
 	case TDCA_RECURRENCE:
 	case TDCA_DEPENDENCY:
 	case TDCA_COLOR:
-		return ILCT_BROWSE;
+		nColType = ILCT_BROWSE;
+		break;
 
 	case TDCA_FLAG:
 	case TDCA_LOCK:
-		return ILCT_CHECK;
-
-	case TDCA_CREATEDBY:
-	case TDCA_PATH:
-	case TDCA_POSITION:
-	case TDCA_CREATIONDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_COMMENTSSIZE:
-	case TDCA_COMMENTSFORMAT:
-	case TDCA_SUBTASKDONE:
-	case TDCA_LASTMODBY:
-	case TDCA_ID:
-	case TDCA_PARENTID:
-		return ILCT_TEXT;
+		nColType = ILCT_CHECK;
+		break;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -669,34 +674,50 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, ILCT_TEXT);
 
 			if (pDef->IsList())
-				return ILCT_DROPLIST;
-
-			// else
-			switch (pDef->GetDataType())
 			{
-			case TDCCA_STRING:
-			case TDCCA_FRACTION:
-			case TDCCA_INTEGER:
-			case TDCCA_DOUBLE:
-			case TDCCA_CALCULATION:	return ILCT_TEXT;
+				nColType = ILCT_DROPLIST;
+			}
+			else
+			{
+				switch (pDef->GetDataType())
+				{
+				case TDCCA_STRING:
+				case TDCCA_FRACTION:
+				case TDCCA_INTEGER:
+				case TDCCA_DOUBLE:
+				case TDCCA_CALCULATION:
+					break; // ILCT_TEXT;
 
-			case TDCCA_TIMEPERIOD:	return ILCT_POPUPMENU;
-			case TDCCA_DATE:		return ILCT_DATE;
-			case TDCCA_BOOL:		return ILCT_CHECK;
-			case TDCCA_ICON:		return ILCT_BROWSE;
-			case TDCCA_FILELINK:	return ILCT_CUSTOMBTN;
+				case TDCCA_TIMEPERIOD:	nColType = ILCT_POPUPMENU;	break;
+				case TDCCA_DATE:		nColType = ILCT_DATE;		break;
+				case TDCCA_BOOL:		nColType = ILCT_CHECK;		break;
+				case TDCCA_ICON:		nColType = ILCT_BROWSE;		break;
+				case TDCCA_FILELINK:	nColType = ILCT_CUSTOMBTN;	break;
+
+				default:
+					ASSERT(0);
+					break;
+				}
 			}
 		}
 		else if (IsCustomTime(nAttribID))
 		{
-			return ILCT_DROPLIST;
+			nColType = ILCT_DROPLIST;
+		}
+		else
+		{
+			ASSERT(0);
 		}
 		break;
 	}
 
-	// All else
-	ASSERT(0);
-	return ILCT_TEXT;
+	// Except checkboxes, hide buttons for non-editable cells
+	if ((nColType != ILCT_CHECK) && !CanEditCell(nRow, nCol))
+	{
+		nColType = ILCT_TEXT;
+	}
+
+	return nColType;
 }
 
 BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
