@@ -34,9 +34,31 @@ class CTDCImageList;
 
 class CTDLTaskAttributeListCtrl : public CInputListCtrl
 {
+	// Private helper
+	class CFileDropTarget : public COleDropTargetEx
+	{
+	public:
+		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
+		
+	protected:
+		CTDLTaskAttributeListCtrl* m_pAttributeList;
+		int m_nDropHighlightedRow;
+		
+	protected:
+		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
+		virtual void OnDragLeave(CWnd* pWnd);
+		virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
+		
+		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
+		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
+		
+	};
+	
 	friend class CFileDropTarget;
 
-// Construction
+// Construction -------------------------------------------------------------
 public:
 	CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 							  const CContentMgr& mgrContent,
@@ -137,27 +159,6 @@ protected:
 	CFileEdit m_eSingleFileLink;
 	CTDLIconComboBox m_cbCustomIcons;
 	CToolTipCtrlEx m_tooltip;
-
-	class CFileDropTarget : public COleDropTargetEx
-	{
-	public:
-		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
-
-	protected:
-		CTDLTaskAttributeListCtrl* m_pAttributeList;
-		int m_nDropHighlightedRow;
-
-	protected:
-		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
-		virtual void OnDragLeave(CWnd* pWnd);
-		virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
-
-		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
-		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
-
-	};
 	CFileDropTarget m_dropFiles;
 
 	static CIcon s_iconTrackTime, s_iconAddTime, s_iconLink, s_iconBrowse, s_iconApp;
@@ -246,6 +247,8 @@ protected:
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
+
+	
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -534,7 +534,7 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 	if (rSplitBar.PtInRect(ptClient))
 		return GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 
-	LVHITTESTINFO lvHit = { ptClient, 0 };
+	LVHITTESTINFO lvHit = { { ptClient.x, ptClient.y }, 0 };
 
 	int nRow = SubItemHitTest(&lvHit);
 	int nCol = lvHit.iSubItem;
@@ -2851,7 +2851,7 @@ int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
 
 int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	LVHITTESTINFO lvHit = { point, 0 };
+	LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
 	// Get around const-ness
 	int nRow = (int)::SendMessage(m_hWnd, LVM_SUBITEMHITTEST, 0, (LPARAM)&lvHit);
