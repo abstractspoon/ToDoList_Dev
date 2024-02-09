@@ -163,7 +163,7 @@ namespace unvell.ReoGrid.Editor
 			this.ShowIcon = false;
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Resize - ReoGrid";
+			this.Text = "Resize Grid";
 			((System.ComponentModel.ISupportInitialize)(this.numRows)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numCols)).EndInit();
 			this.ResumeLayout(false);

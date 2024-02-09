@@ -145,8 +145,9 @@ namespace unvell.ReoGrid.Editor
 			this.Controls.Add(this.labName);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "DefineNamedRangeDialog";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "New Name";
+			this.Text = "New Named Range";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

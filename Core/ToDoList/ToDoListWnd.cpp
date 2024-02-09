@@ -759,11 +759,13 @@ void CToDoListWnd::SetupUIStrings()
 	
 	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
-	CSpellCheckDlg::SetItemText(SCD_TITLE, IDS_TDC_SPELLCHECK_TITLE);
-	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
 	CWinHelpButton::SetDefaultTooltip(CEnString(IDS_ONLINEHELP));
 	CPasswordDialog::SetItemText(PD_TITLE, IDS_PD_TITLE);
 	CServerDlg::SetItemText(SD_TITLE, IDS_SD_TITLE);
+
+	CSpellCheckDlg::SetItemText(SCD_TITLE, IDS_TDC_SPELLCHECK_TITLE);
+	CSpellCheckDlg::SetItemText(DLG_SCD_BROWSETITLE, IDS_SCD_BROWSETITLE);
+	CSpellCheckDlg::SetItemText(DLG_SCD_SETUPMSG, IDS_SCD_SETUPMSG);
 }
 
 BOOL CToDoListWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)

@@ -54,7 +54,7 @@ struct CRecurrence
 	//	RECURS_DAY_EVERY_NWEEKDAYS						every 'n' days				--- (0)
 	//
 	//	RECURS_WEEKLY	(RECURS_WEEK_SPECIFIC_DOWS_NWEEKS)				
-	//	RECURS_WEEK_SPECIFIC_DOWS_NWEEKS				every 'n' weeks				weekdays (OLE_DAYOFWEEK)
+	//	RECURS_WEEK_SPECIFIC_DOWS_NWEEKS				every 'n' weeks				weekdays (DH_DAYOFWEEK)
 	//	RECURS_WEEK_EVERY_NWEEKS						every 'n' weeks				--- (0)
 	//
 	//	RECURS_MONTHLY (RECURS_MONTH_SPECIFIC_DAY_NMONTHS)				

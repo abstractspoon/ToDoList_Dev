@@ -1125,7 +1125,7 @@ namespace unvell.ReoGrid.Editor
 			this.cellMergeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.cellMergeToolStripButton.Name = "cellMergeToolStripButton";
 			this.cellMergeToolStripButton.Size = new System.Drawing.Size(23, 22);
-			this.cellMergeToolStripButton.Text = "Merge";
+			this.cellMergeToolStripButton.Text = "Merge Cells";
 			// 
 			// unmergeRangeToolStripButton
 			// 
@@ -1134,7 +1134,7 @@ namespace unvell.ReoGrid.Editor
 			this.unmergeRangeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.unmergeRangeToolStripButton.Name = "unmergeRangeToolStripButton";
 			this.unmergeRangeToolStripButton.Size = new System.Drawing.Size(23, 22);
-			this.unmergeRangeToolStripButton.Text = "Unmerge";
+			this.unmergeRangeToolStripButton.Text = "Unmerge Cells";
 			// 
 			// toolStripSeparator5
 			// 
