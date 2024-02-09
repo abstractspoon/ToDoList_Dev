@@ -1538,7 +1538,16 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const C
 		HICON hIcon = (HICON)OnFileLinkWantIcon(0, (LPARAM)(LPCTSTR)sIcon);
 
 		if (hIcon == NULL)
-			return CFileIcons::Draw(pDC, FileMisc::GetExtension(sIcon), ptIcon);
+		{
+			if (m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sIcon))
+			{
+				// TODO
+			}
+			else
+			{
+				return CFileIcons::Draw(pDC, FileMisc::GetExtension(sIcon), ptIcon);
+			}
+		}
 
 		// else
 		return ::DrawIconEx(*pDC, ptIcon.x, ptIcon.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
