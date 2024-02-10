@@ -434,22 +434,35 @@ protected:
 	};
 	
 protected:
-	CToDoCtrlData m_data;
-	CToDoCtrlLayout m_layout;
+	// NOTE: SHARED ATTRIBUTES MUST BE INITIALISED IN STRICT ORDER
 
-	CPopupEditCtrl m_eTaskName;
+	// Attributes shared with CToDoCtrlData
+	CTDCStyleMap m_styles;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
+
+	// Further attributes shared with CTDLTaskAttributeListCtrl
+	CToDoCtrlData m_data;
+	TDCCOLEDITVISIBILITY m_visColEdit;
+	CTDCImageList m_ilTaskIcons;
+
+	// Further attributes shared with CToDoCtrlLayout
 	CTDLCommentsCtrl m_ctrlComments;
-	CTDLInfoTipCtrl m_infoTip;
-	CTDLTaskTreeCtrl m_taskTree;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
 
+	// Further attributes shared with CTreeDragDropHelper
+	CTDLTaskTreeCtrl m_taskTree;
+
+	// -----------------------------------------------
+
+	CPopupEditCtrl m_eTaskName;
+	CTDLInfoTipCtrl m_infoTip;
+	CToDoCtrlLayout m_layout;
+
 	HFONT m_hFontTree, m_hFontComments;
-	CTDCImageList m_ilTaskIcons;
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
 	CMidnightTimer m_timerMidnight;
 
-	CTDCStyleMap m_styles;
 	CString m_sXmlHeader, m_sXslHeader;
 	CString m_sLastSavePath;
 	CString m_sAltPrefsKey;
@@ -462,7 +475,6 @@ protected:
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
 	int m_nPercentIncrement;
-	TDCCOLEDITVISIBILITY m_visColEdit;
 	TODOITEM m_tdiDefault;
 	TDC_RECURFROMOPTION m_nDefRecurFrom;
 	TDC_RECURREUSEOPTION m_nDefRecurReuse;
@@ -492,8 +504,6 @@ protected:
 	CONTENTFORMAT m_cfComments, m_cfDefault;
 	CMapStringToString m_mapMetaData;
 	double m_dTrackedTimeElapsedHours;
-
-	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	DWORD m_dwNextUniqueID;
 	DWORD m_nFileFormat;

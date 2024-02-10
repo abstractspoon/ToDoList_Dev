@@ -174,10 +174,8 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_bInSelectedTaskEdit(FALSE),
 	m_bModified(FALSE), 
 	m_calculator(m_data),
-	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
 	m_cfDefault(cfDefault),
 	m_dTrackedTimeElapsedHours(0),
-	m_data(m_styles, m_aCustomAttribDefs),
 	m_dwEditTitleTaskID(0),
 	m_dwLastAddedID(0),
 	m_dwNextUniqueID(1), 
@@ -190,20 +188,41 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_nDefRecurFrom(TDIRO_DUEDATE),
 	m_nDefRecurReuse(TDIRO_REUSE),
 	m_nFileFormat(TDL_FILEFORMAT_CURRENT),
+	m_bPendingUpdateControls(FALSE),
 	m_nFileVersion(0),
 	m_nMaxInfotipCommentsLength(-1),
-	m_treeDragDrop(TSH(), m_taskTree.Tree(), &m_taskTree),
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
-	m_timeTracking(m_data, m_taskTree.TSH()),
-	m_exporter(m_data, m_taskTree, mgrContent),
-	m_formatter(m_data, mgrContent),
-	m_infoTip(m_data, m_aCustomAttribDefs, mgrContent),
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders, mgrContent),
-	m_bPendingUpdateControls(FALSE),
+
+	m_data(m_styles, m_aCustomAttribDefs),
+	m_timeTracking(m_data, m_taskTree.TSH()),
+	m_formatter(m_data, mgrContent),
+
+	m_ctrlComments(TRUE,
+				   TRUE,
+				   85,
+				   &mgrContent,
+				   &mgrShortcuts),
+
+	m_treeDragDrop(m_taskTree.TSH(),
+				   m_taskTree.Tree(),
+				   &m_taskTree),
+
+	m_exporter(m_data,
+			   m_taskTree,
+			   mgrContent),
+
+	m_infoTip(m_data,
+			  m_aCustomAttribDefs,
+			  mgrContent),
+
+	m_matcher(m_data, 
+			  m_reminders, 
+			  mgrContent),
+
 	m_taskTree(m_ilTaskIcons, 
 			   m_data, 
 			   m_styles, 
@@ -211,8 +230,16 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_visColEdit.GetVisibleColumns(), 
 			   m_aCustomAttribDefs,
 			   mgrContent),
-	m_layout(this, &m_lcAttributes, &m_ctrlComments),
-	m_lcAttributes(m_data, mgrContent, m_ilTaskIcons, visDefault)
+
+	m_layout(this, 
+			 &m_lcAttributes, 
+			 &m_ctrlComments),
+
+	m_lcAttributes(m_data, 
+				   mgrContent, 
+				   m_ilTaskIcons, 
+				   m_visColEdit, 
+				   m_aCustomAttribDefs)
 {
 	SetBordersDLU(0);
 	
@@ -4293,8 +4320,6 @@ void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 
 void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
-	m_lcAttributes.SetAttributeVisibility(vis);
-
 	BOOL bColumnChange, bEditChange;
 	BOOL bChange = m_visColEdit.HasDifferences(vis, bColumnChange, bEditChange);
 
@@ -4313,14 +4338,9 @@ void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 
 			UpdateVisibleColumns(mapChanges);
 		}
-		
-		// hide/show controls which may have been affected
-		if (bEditChange || (bColumnChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
-		{		
-			Invalidate();
-			Resize();
-			UpdateControls(FALSE); // don't update comments
-		}
+
+ 		if (bEditChange || (bColumnChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
+			m_lcAttributes.OnAttributeVisibilityChange();
 
 		if (bChange && HasStyle(TDCS_SAVEUIVISINTASKLIST))
 			m_bModified = TRUE;
@@ -4566,7 +4586,7 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 void CToDoCtrl::OnCustomAttributesChanged()
 {
 	m_taskTree.OnCustomAttributesChange();
-	m_lcAttributes.SetCustomAttributeDefinitions(m_aCustomAttribDefs);
+	m_lcAttributes.OnCustomAttributesChange();
 }
 
 BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)

@@ -63,14 +63,12 @@ public:
 	CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 							  const CContentMgr& mgrContent,
 							  const CTDCImageList& ilIcons,
-							  const TDCCOLEDITVISIBILITY& defaultVis);
+							  const TDCCOLEDITVISIBILITY& vis,
+							  const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 	virtual ~CTDLTaskAttributeListCtrl();
 
 public:
-	void SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis);
-	void SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	void SetPercentDoneIncrement(int nAmount);
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -88,6 +86,7 @@ public:
 	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);
+	void SetPercentDoneIncrement(int nAmount);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
@@ -128,15 +127,18 @@ public:
 	void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
 	void LoadState(const CPreferences& prefs, LPCTSTR szKey);
 
+	void OnCustomAttributesChange();
+	void OnAttributeVisibilityChange();
+
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
+	const TDCCOLEDITVISIBILITY& m_vis;
+	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
 	CTDCMultiTasker m_multitasker;
 
-	TDCCOLEDITVISIBILITY m_vis;
-	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 	TDCAUTOLISTDATA m_tldAll, m_tldDefault;
 
 	CDWordArray m_aSelectedTaskIDs;

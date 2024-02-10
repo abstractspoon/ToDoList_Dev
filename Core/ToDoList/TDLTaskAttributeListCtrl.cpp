@@ -109,13 +109,15 @@ CIcon CTDLTaskAttributeListCtrl::s_iconBrowse;
 CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 													 const CContentMgr& mgrContent,
 													 const CTDCImageList& ilIcons,
-													 const TDCCOLEDITVISIBILITY& defaultVis)
+													 const TDCCOLEDITVISIBILITY& vis,
+													 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
 	m_data(data),
 	m_ilIcons(ilIcons),
+	m_vis(vis),
+	m_aCustomAttribDefs(aCustAttribDefs),
 	m_formatter(data, mgrContent),
 	m_multitasker(data, mgrContent),
-	m_vis(defaultVis),
 	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
@@ -318,27 +320,14 @@ void CTDLTaskAttributeListCtrl::SetPercentDoneIncrement(int nAmount)
 	m_spinPercent.SetAccel(1, &uda);
 }
 
-void CTDLTaskAttributeListCtrl::SetCustomAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDefs)
+void CTDLTaskAttributeListCtrl::OnCustomAttributesChange()
 {
-	if (Misc::MatchAllT(m_aCustomAttribDefs, aAttribDefs, FALSE))
-		return;
-
-	m_aCustomAttribDefs.Copy(aAttribDefs);
 	Populate();
 }
 
-void CTDLTaskAttributeListCtrl::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
+void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 {
-	BOOL bColChange = FALSE, bEditChange = FALSE;
-	BOOL bChange = m_vis.HasDifferences(vis, bColChange, bEditChange);
-
-	if (!bChange)
-		return;
-
-	m_vis = vis;
-
-	if (bEditChange || (bColChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
-		Populate();
+	Populate();
 }
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
@@ -360,49 +349,54 @@ void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT 
 
 void CTDLTaskAttributeListCtrl::Populate()
 {
-	CHoldRedraw hr(*this);
-
 	// Preserve current selection
 	int nSelRow, nSelCol;
 	TDC_ATTRIBUTE nSelAttribID = TDCA_NONE;
-	
+
 	if (GetCurSel(nSelRow, nSelCol))
 		nSelAttribID = GetAttributeID(nSelRow);
 
-	DeleteAllItems();
-
-	for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
-		CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
-
-	// Dependent time fields
-	CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
-	CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
-	CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
-
-	// Custom attributes
-	for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+	// Scoped to exclude the call to EnsureVisible at the end
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+		CHoldRedraw hr(*this);
+		DeleteAllItems();
 
-		if (attribDef.bEnabled)
+		for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
+			CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
+
+		// Dependent time fields
+		CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
+		CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
+		CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
+
+		// Custom attributes
+		for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
 		{
-			int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-			SetItemData(nItem, attribDef.GetAttributeID());
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
 
-			if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+			if (attribDef.bEnabled)
 			{
 				int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-				SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+				SetItemData(nItem, attribDef.GetAttributeID());
+
+				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+				{
+					int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
+					SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+				}
 			}
 		}
-	}
 
-	RefreshSelectedTasksValues();
-	Sort();
+		RefreshSelectedTasksValues();
+		Sort();
+	}
 
 	// Restore previous selection
 	if (nSelAttribID != TDCA_NONE)
+	{
 		SetCurSel(GetRow(nSelAttribID), nSelCol);
+		EnsureVisible(nSelRow, FALSE);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::RecalcColumnWidths(int nAttribColWidth, int cx)
