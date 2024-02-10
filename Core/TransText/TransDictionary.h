@@ -144,6 +144,16 @@ protected:
 	void FixupDictionary();
 	BOOL KeyMatches(const CString& sKey, const DICTITEM* pDI) const;
 	BOOL TranslateFileFilter(CString& sFilter);
+
+	struct FILEFILTER
+	{
+		// Image Files(*.BMP, *.JPG, *.GIF)|*.BMP;*.JPG;*.GIF|All files (*.*)|*.*
+
+		CString sName;			// eg. "Image Files",			"All Files"
+		CString sDisplayFilter; // eg. "(*.BMP, *.JPG, *.GIF)", "(*.*)"
+		CString sActualFilter;	// eg. "*.BMP;*.JPG;*.GIF",		"*.*
+	};
+
 	BOOL ParseFileFilter(const CString& sText, ...);
 
 	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
