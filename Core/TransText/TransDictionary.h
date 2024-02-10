@@ -147,7 +147,7 @@ protected:
 
 	struct FILEFILTER
 	{
-		// Image Files(*.BMP, *.JPG, *.GIF)|*.BMP;*.JPG;*.GIF|All files (*.*)|*.*
+		// eg. "Image Files (*.BMP, *.JPG, *.GIF)|*.BMP;*.JPG;*.GIF|All files (*.*)|*.*"
 
 		CString sName;			// eg. "Image Files",			"All Files"
 		CString sDisplayFilter; // eg. "(*.BMP, *.JPG, *.GIF)", "(*.*)"
