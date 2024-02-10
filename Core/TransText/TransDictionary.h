@@ -143,6 +143,8 @@ protected:
 	void IgnoreTranslatedText();
 	void FixupDictionary();
 	BOOL KeyMatches(const CString& sKey, const DICTITEM* pDI) const;
+	BOOL TranslateFileFilter(CString& sFilter);
+	BOOL ParseFileFilter(const CString& sText, ...);
 
 	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
 	BOOL LoadCsvDictionary(LPCTSTR szDictPath);

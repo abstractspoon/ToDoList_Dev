@@ -1335,6 +1335,22 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, BOOL bValidateAcce
 	return FALSE;
 }
 
+BOOL CTransDictionary::TranslateFileFilter(CString& sFilter)
+{
+	if (!ParseFileFilter(sFilter, ...))
+		return FALSE;
+
+	// TODO
+
+	return /* TRUE*/FALSE;
+}
+
+BOOL CTransDictionary::ParseFileFilter(const CString& sText, ...) const
+{
+	// TODO
+	return FALSE;
+}
+
 BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut)
 {
 	if (s_sAppVersion.IsEmpty())
