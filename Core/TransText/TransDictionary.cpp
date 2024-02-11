@@ -1395,6 +1395,16 @@ int CTransDictionary::ParseFileFilters(const CString& sText, CArray<FILEFILTER, 
 	return nNumFilters;
 }
 
+// ----------------------------------------------------------------
+
+BOOL CTransDictionary::FILEFILTER::IsValid() const 
+{ 
+	if (sNamePart.IsEmpty() || sExtensions.IsEmpty())
+		return FALSE;
+
+	return (sExtensions.Find(_T("*.")) == 0);
+}
+
 CString CTransDictionary::FILEFILTER::Build() const
 {
 	CStringArray aExtensions;
@@ -1405,6 +1415,8 @@ CString CTransDictionary::FILEFILTER::Build() const
 						Misc::FormatArray(aExtensions, _T(", ")),
 						sExtensions);
 }
+
+// ----------------------------------------------------------------
 
 BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut)
 {

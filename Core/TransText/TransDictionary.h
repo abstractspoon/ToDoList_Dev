@@ -150,7 +150,7 @@ protected:
 		CString sNamePart;		// "Image Files"
 		CString sExtensions;	// "*.bmp;*.jpeg"
 
-		BOOL IsValid() const { return (!sNamePart.IsEmpty() && !sExtensions.IsEmpty()); }
+		BOOL IsValid() const;
 		CString Build() const;
 	};
 
