@@ -116,10 +116,12 @@ namespace Misc
 	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
 	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
  	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
- 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
+	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResults = TRUE);
-
+	
 	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
+	CString SplitLeft(const CString& sText, TCHAR cDelim, BOOL bTrimResult = TRUE);
+	CString SplitLeft(const CString& sText, LPCTSTR szDelim, BOOL bTrimResult = TRUE);
 	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
 
 	typedef int (*SORTPROC)(const void* pV1, const void* pV2);
@@ -159,6 +161,7 @@ namespace Misc
 	TCHAR Last(const CString& sText);
 	TCHAR First(LPCTSTR szText);
 	TCHAR Last(LPCTSTR szText);
+
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
 	BOOL TrimFirstIf(TCHAR cTest, CString& sText);
@@ -168,6 +171,7 @@ namespace Misc
 	CString& Trim(CString& sText, TCHAR cChar);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	CString& TrimAlpha(CString& sText);
+
 	BOOL RemoveAt(CString& sText, int nPos);
 	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);

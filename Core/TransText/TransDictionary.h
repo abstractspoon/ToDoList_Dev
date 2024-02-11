@@ -143,23 +143,22 @@ protected:
 	void IgnoreTranslatedText();
 	void FixupDictionary();
 	BOOL KeyMatches(const CString& sKey, const DICTITEM* pDI) const;
-	BOOL TranslateFileFilter(CString& sFilter);
+	BOOL TranslateFileFilters(CString& sFilters);
 
 	struct FILEFILTER
 	{
-		// eg. "Image Files (*.BMP, *.JPG, *.GIF)|*.BMP;*.JPG;*.GIF|All files (*.*)|*.*"
+		CString sNamePart;		// "Image Files"
+		CString sExtensions;	// "*.bmp;*.jpeg"
 
-		CString sName;			// eg. "Image Files",			"All Files"
-		CString sDisplayFilter; // eg. "(*.BMP, *.JPG, *.GIF)", "(*.*)"
-		CString sActualFilter;	// eg. "*.BMP;*.JPG;*.GIF",		"*.*
+		BOOL IsValid() const { return (!sNamePart.IsEmpty() && !sExtensions.IsEmpty()); }
+		CString Build() const;
 	};
-
-	BOOL ParseFileFilter(const CString& sText, ...);
 
 	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
 	BOOL LoadCsvDictionary(LPCTSTR szDictPath);
 
 	static int CompareProc(const void* pFirst, const void* pSecond);
+	static BOOL ParseFileFilters(const CString& sText, CArray<FILEFILTER, FILEFILTER&>& aFilters);
 };
 
 //////////////////////////////////////////////////////////////////////
