@@ -24,7 +24,7 @@ static char THIS_FILE[]=__FILE__;
 
 CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() 
 	: 
-	CEnEdit(TRUE, _T("0123456789,"), ME_LOCALIZESEPARATOR),
+	CEnEdit(TRUE, _T("0123456789, "), ME_LOCALIZESEPARATOR),
 	m_bNotifyingParent(FALSE)
 {
 }
