@@ -530,6 +530,27 @@ BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResu
 	return TRUE;
 }
 
+CString Misc::SplitLeft(const CString& sText, TCHAR cDelim, BOOL bTrimResult)
+{
+	TCHAR szDelim[] = { cDelim, 0 };
+
+	return SplitLeft(sText, szDelim, bTrimResult);
+}
+
+CString Misc::SplitLeft(const CString& sText, LPCTSTR szDelim, BOOL bTrimResult)
+{
+	if (!sText.IsEmpty())
+	{
+		int nDelim = sText.Find(szDelim);
+
+		if (nDelim != -1)
+			return (bTrimResult ? Trim(sText.Left(nDelim)) : sText.Left(nDelim));
+	}	
+
+	// else
+	return sText;
+}
+
 CString& Misc::Trim(CString& sText, TCHAR cChar)
 {
 	if (cChar)

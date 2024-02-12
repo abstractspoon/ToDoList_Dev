@@ -1208,6 +1208,9 @@ BOOL CTransDictionary::LoadDictionary(LPCTSTR szDictPath, BOOL bDecodeChars)
 
 BOOL CTransDictionary::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID, BOOL bValidateAccelerator)
 {
+	if (TranslateFileFilters(sText))
+		return TRUE;
+
 	DICTITEM* pDI = GetDictItem(sText, TRUE); 
 
 	if (pDI && pDI->Translate(sText, hWndRef, szClassID, bValidateAccelerator))
@@ -1219,12 +1222,6 @@ BOOL CTransDictionary::Translate(CString& sText, HWND hWndRef, LPCTSTR szClassID
 		IgnoreString(sText, FALSE);
 		return TRUE;
 	}
-#ifdef DEBUG
-	else
-	{
-		//int breakpoint = 0;
-	}
-#endif
 
 	return FALSE;
 }
@@ -1299,14 +1296,7 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, BOOL bValidateAcce
 {
 	// trim off trailing shortcut
 	CString sShortcut;
-	int nTab = sItem.Find('\t');
-				
-	// remove it
-	if (nTab >= 0)
-	{
-		sShortcut = sItem.Mid(nTab+1);
-		sItem = sItem.Left(nTab);
-	}
+	Misc::Split(sItem, sShortcut, '\t');
 
 	DICTITEM* pDI = GetDictItem(sItem, TRUE);
 	
@@ -1322,18 +1312,111 @@ BOOL CTransDictionary::Translate(CString& sItem, HMENU hMenu, BOOL bValidateAcce
 		// mark text out as being not-translatable
 		// else the translated text can itself be translated!
 		IgnoreString(sItem, FALSE);
-		
 		return TRUE;
 	}
-#ifdef DEBUG
-	else
-	{
-		//int breakpoint = 0;
-	}
-#endif
-	
+
 	return FALSE;
 }
+
+BOOL CTransDictionary::TranslateFileFilters(CString& sFilters)
+{
+	if (sFilters.Find(_T("|*.")) == -1)
+		return FALSE;
+
+	CArray<FILEFILTER, FILEFILTER&> aFilters;
+	int nNumFilters = ParseFileFilters(sFilters, aFilters);
+
+	if (nNumFilters == 0)
+		return FALSE;
+
+	BOOL bAnyTranslated = FALSE;
+
+	for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
+	{
+		CString& sText = aFilters[nFilter].sNamePart;
+
+		// Don't recurse
+		DICTITEM* pDI = GetDictItem(sText, TRUE);
+
+		if (pDI && pDI->Translate(sText))
+		{
+			IgnoreString(sText, FALSE);
+			bAnyTranslated = TRUE;
+		}
+	}
+
+	if (!bAnyTranslated)
+		return FALSE;
+
+	sFilters.Empty();
+
+	for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
+	{
+		sFilters += aFilters[nFilter].Build();
+		sFilters += '|';
+	}
+	sFilters += '|'; // End with a double bar
+
+	return TRUE;
+}
+
+int CTransDictionary::ParseFileFilters(const CString& sText, CArray<FILEFILTER, FILEFILTER&>& aFilters)
+{
+	if (sText.Find(_T("|*.")) == -1) // The trailing extension part must exist
+		return 0;
+
+	// There must be an even number of sections (2 per filter)
+	CStringArray aSections;
+	int nNumSections = Misc::Split(sText, aSections, '|');
+
+	if ((nNumSections % 2) != 0)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	int nNumFilters = (nNumSections / 2);
+	aFilters.SetSize(nNumFilters);
+
+	for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
+	{
+		FILEFILTER& ff = aFilters[nFilter];
+
+		ff.sNamePart = Misc::SplitLeft(aSections[nFilter * 2], '(');
+		ff.sExtensions = Misc::ToLower(aSections[(nFilter * 2) + 1]);
+
+		if (!ff.IsValid())
+		{
+			ASSERT(0);
+			return 0;
+		}
+	}
+
+	return nNumFilters;
+}
+
+// ----------------------------------------------------------------
+
+BOOL CTransDictionary::FILEFILTER::IsValid() const 
+{ 
+	if (sNamePart.IsEmpty() || sExtensions.IsEmpty())
+		return FALSE;
+
+	return (sExtensions.Find(_T("*.")) == 0);
+}
+
+CString CTransDictionary::FILEFILTER::Build() const
+{
+	CStringArray aExtensions;
+	VERIFY(Misc::Split(sExtensions, aExtensions, ';'));
+
+	return Misc::Format(_T("%s (%s)|%s"), 
+						sNamePart,
+						Misc::FormatArray(aExtensions, _T(", ")),
+						sExtensions);
+}
+
+// ----------------------------------------------------------------
 
 BOOL CTransDictionary::ModifyItem(const CString& sTextIn, const CString& sClassID, const CString& sTextOut)
 {
