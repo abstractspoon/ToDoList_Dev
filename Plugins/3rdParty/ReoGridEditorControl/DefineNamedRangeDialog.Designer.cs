@@ -60,22 +60,22 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labName.AutoSize = true;
 			this.labName.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labName.Location = new System.Drawing.Point(13, 21);
+			this.labName.Location = new System.Drawing.Point(8, 11);
 			this.labName.Name = "labName";
-			this.labName.Size = new System.Drawing.Size(38, 13);
+			this.labName.Size = new System.Drawing.Size(35, 13);
 			this.labName.TabIndex = 0;
 			this.labName.Text = "Name";
 			// 
 			// txtName
 			// 
-			this.txtName.Location = new System.Drawing.Point(79, 18);
+			this.txtName.Location = new System.Drawing.Point(74, 8);
 			this.txtName.Name = "txtName";
 			this.txtName.Size = new System.Drawing.Size(197, 20);
 			this.txtName.TabIndex = 1;
 			// 
 			// txtComment
 			// 
-			this.txtComment.Location = new System.Drawing.Point(79, 44);
+			this.txtComment.Location = new System.Drawing.Point(74, 34);
 			this.txtComment.Multiline = true;
 			this.txtComment.Name = "txtComment";
 			this.txtComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -86,15 +86,15 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labComment.AutoSize = true;
 			this.labComment.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labComment.Location = new System.Drawing.Point(13, 47);
+			this.labComment.Location = new System.Drawing.Point(8, 37);
 			this.labComment.Name = "labComment";
-			this.labComment.Size = new System.Drawing.Size(54, 13);
+			this.labComment.Size = new System.Drawing.Size(51, 13);
 			this.labComment.TabIndex = 2;
 			this.labComment.Text = "Comment";
 			// 
 			// txtRange
 			// 
-			this.txtRange.Location = new System.Drawing.Point(79, 108);
+			this.txtRange.Location = new System.Drawing.Point(74, 98);
 			this.txtRange.Name = "txtRange";
 			this.txtRange.Size = new System.Drawing.Size(197, 20);
 			this.txtRange.TabIndex = 5;
@@ -103,15 +103,15 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labRange.AutoSize = true;
 			this.labRange.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labRange.Location = new System.Drawing.Point(13, 111);
+			this.labRange.Location = new System.Drawing.Point(8, 101);
 			this.labRange.Name = "labRange";
-			this.labRange.Size = new System.Drawing.Size(42, 13);
+			this.labRange.Size = new System.Drawing.Size(39, 13);
 			this.labRange.TabIndex = 4;
 			this.labRange.Text = "Range";
 			// 
 			// btnOK
 			// 
-			this.btnOK.Location = new System.Drawing.Point(122, 140);
+			this.btnOK.Location = new System.Drawing.Point(117, 130);
 			this.btnOK.Name = "btnOK";
 			this.btnOK.Size = new System.Drawing.Size(74, 24);
 			this.btnOK.TabIndex = 6;
@@ -122,7 +122,7 @@ namespace unvell.ReoGrid.Editor
 			// btnCancel
 			// 
 			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(202, 140);
+			this.btnCancel.Location = new System.Drawing.Point(197, 130);
 			this.btnCancel.Name = "btnCancel";
 			this.btnCancel.Size = new System.Drawing.Size(74, 24);
 			this.btnCancel.TabIndex = 6;
@@ -134,7 +134,7 @@ namespace unvell.ReoGrid.Editor
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.btnCancel;
-			this.ClientSize = new System.Drawing.Size(283, 169);
+			this.ClientSize = new System.Drawing.Size(278, 160);
 			this.Controls.Add(this.btnCancel);
 			this.Controls.Add(this.btnOK);
 			this.Controls.Add(this.txtRange);

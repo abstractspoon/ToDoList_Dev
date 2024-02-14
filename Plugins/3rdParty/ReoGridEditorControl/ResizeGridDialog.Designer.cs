@@ -62,9 +62,9 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labRows.AutoSize = true;
 			this.labRows.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labRows.Location = new System.Drawing.Point(21, 25);
+			this.labRows.Location = new System.Drawing.Point(10, 13);
 			this.labRows.Name = "labRows";
-			this.labRows.Size = new System.Drawing.Size(37, 13);
+			this.labRows.Size = new System.Drawing.Size(34, 13);
 			this.labRows.TabIndex = 0;
 			this.labRows.Text = "Rows";
 			// 
@@ -72,40 +72,60 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labCols.AutoSize = true;
 			this.labCols.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labCols.Location = new System.Drawing.Point(21, 51);
+			this.labCols.Location = new System.Drawing.Point(10, 39);
 			this.labCols.Name = "labCols";
-			this.labCols.Size = new System.Drawing.Size(30, 13);
+			this.labCols.Size = new System.Drawing.Size(47, 13);
 			this.labCols.TabIndex = 3;
 			this.labCols.Text = "Columns";
 			// 
 			// numRows
 			// 
-			this.numRows.Location = new System.Drawing.Point(77, 23);
+			this.numRows.Location = new System.Drawing.Point(66, 11);
 			this.numRows.Maximum = new decimal(new int[] {
             1048576,
+            0,
+            0,
+            0});
+			this.numRows.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
 			this.numRows.Name = "numRows";
 			this.numRows.Size = new System.Drawing.Size(71, 20);
 			this.numRows.TabIndex = 1;
+			this.numRows.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
 			// 
 			// numCols
 			// 
-			this.numCols.Location = new System.Drawing.Point(77, 49);
+			this.numCols.Location = new System.Drawing.Point(66, 37);
 			this.numCols.Maximum = new decimal(new int[] {
             32768,
+            0,
+            0,
+            0});
+			this.numCols.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
 			this.numCols.Name = "numCols";
 			this.numCols.Size = new System.Drawing.Size(71, 20);
 			this.numCols.TabIndex = 4;
+			this.numCols.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
 			// 
 			// btnOK
 			// 
 			this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.btnOK.Location = new System.Drawing.Point(76, 99);
+			this.btnOK.Location = new System.Drawing.Point(57, 75);
 			this.btnOK.Name = "btnOK";
 			this.btnOK.Size = new System.Drawing.Size(75, 23);
 			this.btnOK.TabIndex = 6;
@@ -116,7 +136,7 @@ namespace unvell.ReoGrid.Editor
 			// btnCancel
 			// 
 			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(157, 99);
+			this.btnCancel.Location = new System.Drawing.Point(138, 75);
 			this.btnCancel.Name = "btnCancel";
 			this.btnCancel.Size = new System.Drawing.Size(75, 23);
 			this.btnCancel.TabIndex = 7;
@@ -127,27 +147,27 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labRowsRemark.AutoSize = true;
 			this.labRowsRemark.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labRowsRemark.Location = new System.Drawing.Point(154, 25);
+			this.labRowsRemark.Location = new System.Drawing.Point(143, 13);
 			this.labRowsRemark.Name = "labRowsRemark";
-			this.labRowsRemark.Size = new System.Drawing.Size(80, 13);
+			this.labRowsRemark.Size = new System.Drawing.Size(70, 13);
 			this.labRowsRemark.TabIndex = 2;
-			this.labRowsRemark.Text = "(max: 1048576)";
+			this.labRowsRemark.Text = "(1 - 1048576)";
 			// 
 			// labColsRemark
 			// 
 			this.labColsRemark.AutoSize = true;
 			this.labColsRemark.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labColsRemark.Location = new System.Drawing.Point(154, 51);
+			this.labColsRemark.Location = new System.Drawing.Point(143, 39);
 			this.labColsRemark.Name = "labColsRemark";
-			this.labColsRemark.Size = new System.Drawing.Size(68, 13);
+			this.labColsRemark.Size = new System.Drawing.Size(58, 13);
 			this.labColsRemark.TabIndex = 5;
-			this.labColsRemark.Text = "(max: 32768)";
+			this.labColsRemark.Text = "(1 - 32768)";
 			// 
 			// ResizeGridDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(239, 127);
+			this.ClientSize = new System.Drawing.Size(219, 106);
 			this.Controls.Add(this.btnCancel);
 			this.Controls.Add(this.btnOK);
 			this.Controls.Add(this.numCols);

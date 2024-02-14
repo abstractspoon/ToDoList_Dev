@@ -1036,6 +1036,7 @@ namespace unvell.ReoGrid.Editor
 			this.slashRightSolidToolStripButton.Name = "slashRightSolidToolStripButton";
 			this.slashRightSolidToolStripButton.Size = new System.Drawing.Size(32, 22);
 			this.slashRightSolidToolStripButton.Text = "Forward Diagonal";
+			this.slashRightSolidToolStripButton.Visible = false;
 			this.slashRightSolidToolStripButton.ButtonClick += new System.EventHandler(this.slashRightSolidToolStripButton_ButtonClick);
 			// 
 			// slashRightSolidToolStripMenuItem
@@ -1084,6 +1085,7 @@ namespace unvell.ReoGrid.Editor
 			this.slashLeftSolidToolStripButton.Name = "slashLeftSolidToolStripButton";
 			this.slashLeftSolidToolStripButton.Size = new System.Drawing.Size(32, 22);
 			this.slashLeftSolidToolStripButton.Text = "Backward Diagonal";
+			this.slashLeftSolidToolStripButton.Visible = false;
 			this.slashLeftSolidToolStripButton.ButtonClick += new System.EventHandler(this.slashLeftSolidToolStripButton_ButtonClick);
 			// 
 			// slashLeftSolidToolStripMenuItem
@@ -1148,7 +1150,7 @@ namespace unvell.ReoGrid.Editor
 			this.backColorPickerToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.placeholder;
 			this.backColorPickerToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.backColorPickerToolStripButton.Name = "backColorPickerToolStripButton";
-			this.backColorPickerToolStripButton.Size = new System.Drawing.Size(32, 20);
+			this.backColorPickerToolStripButton.Size = new System.Drawing.Size(32, 22);
 			this.backColorPickerToolStripButton.SolidColor = System.Drawing.Color.Empty;
 			this.backColorPickerToolStripButton.Text = "Background Colour";
 			this.backColorPickerToolStripButton.ToolTipText = "Background Colour";
@@ -1165,7 +1167,7 @@ namespace unvell.ReoGrid.Editor
 			this.showDebugFormToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.RadialChartHS;
 			this.showDebugFormToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.showDebugFormToolStripButton.Name = "showDebugFormToolStripButton";
-			this.showDebugFormToolStripButton.Size = new System.Drawing.Size(23, 20);
+			this.showDebugFormToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.showDebugFormToolStripButton.Text = "Debug Info";
 			// 
 			// columnContextMenuStrip
@@ -1654,7 +1656,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontToolStripComboBox.Name = "fontToolStripComboBox";
 			this.fontToolStripComboBox.Size = new System.Drawing.Size(160, 25);
 			this.fontToolStripComboBox.Text = "Segoe UI";
-			this.fontToolStripComboBox.ToolTipText = "Change font";
+			this.fontToolStripComboBox.ToolTipText = "Font Name";
 			this.fontToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.fontToolStripComboBox_SelectedIndexChanged);
 			// 
 			// fontSizeToolStripComboBox
@@ -1664,7 +1666,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontSizeToolStripComboBox.Name = "fontSizeToolStripComboBox";
 			this.fontSizeToolStripComboBox.Size = new System.Drawing.Size(40, 23);
 			this.fontSizeToolStripComboBox.Text = "8";
-			this.fontSizeToolStripComboBox.ToolTipText = "Change font size";
+			this.fontSizeToolStripComboBox.ToolTipText = "Font Size";
 			this.fontSizeToolStripComboBox.TextChanged += new System.EventHandler(this.fontSizeToolStripComboBox_TextChanged);
 			// 
 			// enlargeFontToolStripButton

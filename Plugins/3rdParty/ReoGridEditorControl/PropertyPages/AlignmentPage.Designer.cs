@@ -205,7 +205,6 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			this.textRotateControl.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.textRotateControl.Location = new System.Drawing.Point(18, 20);
 			this.textRotateControl.Name = "textRotateControl";
-			this.textRotateControl.SampleText = "Text";
 			this.textRotateControl.Size = new System.Drawing.Size(81, 154);
 			this.textRotateControl.SmallChange = 5;
 			this.textRotateControl.TabIndex = 7;

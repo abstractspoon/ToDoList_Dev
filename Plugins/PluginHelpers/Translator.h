@@ -37,6 +37,7 @@ namespace Abstractspoon
 				void Translate(Windows::Forms::ComboBox^ combo);
 				void Translate(Windows::Forms::Control::ControlCollection^ items);
 				void Translate(Windows::Forms::ToolStripItemCollection^ items);
+				void Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items);
 
 				void Translate(ITranslatable^ ctrl);
 

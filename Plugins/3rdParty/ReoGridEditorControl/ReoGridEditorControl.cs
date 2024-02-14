@@ -456,7 +456,7 @@ namespace unvell.ReoGrid.Editor
 					this.nameManagerForm = new NamedRangeManageForm(this.grid);
 				}
 
-				this.nameManagerForm.Show(this);
+				ShowDialog(this.nameManagerForm);
 			};
 
 			tracePrecedentsToolStripMenuItem.Click += (s, e) => this.CurrentWorksheet.TraceCellPrecedents(this.CurrentWorksheet.FocusPos);

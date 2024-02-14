@@ -152,6 +152,10 @@ void Translator::Translate(Control::ControlCollection^ items)
 		{
 			Translate(ASTYPE(ctrl, ComboBox));
 		}
+		else if (ISTYPE(ctrl, ListView))
+		{
+			Translate(ASTYPE(ctrl, ListView)->Columns);
+		}
 		else
 		{
 			ctrl->Text = Translate(ctrl->Text);
@@ -160,6 +164,14 @@ void Translator::Translate(Control::ControlCollection^ items)
 			Translate(ctrl->Controls);
 		}
 	}
+}
+
+void Translator::Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items)
+{
+	int nItem = items->Count;
+
+	while (nItem--)
+		items[nItem]->Text = Translate(items[nItem]->Text);
 }
 
 void Translator::Translate(ComboBox^ combo)
