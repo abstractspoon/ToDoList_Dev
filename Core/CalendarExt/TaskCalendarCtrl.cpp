@@ -310,6 +310,10 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		return FALSE;
 	}
 
+	// Extension items will be rebuilt so make sure
+	// our selected task is a real task
+	m_dwSelectedTaskID = GetRealTaskID(m_dwSelectedTaskID);
+
 	// Make sure the selected task remains visible
 	// after any changes if it was visible to start with
 	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
@@ -2497,7 +2501,6 @@ BOOL CTaskCalendarCtrl::IsExtensionItem(DWORD dwTaskID) const
 		return TRUE;
 	}
 
-	ASSERT(dwTaskID <= m_dwMaximumTaskID);
 	return FALSE;
 }
 

@@ -10,6 +10,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
 #include "..\shared\osversion.h"
+#include "..\shared\enstring.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -180,7 +181,7 @@ CString CImportExportMgr::GetImporterMenuText(int nImporter) const
 {
 	Initialize(); // initialize on demand
 
-	CString sText;
+	CEnString sText; // Auto translation
 
 	if (nImporter >= 0 && nImporter < m_aImporters.GetSize())
 	{
@@ -188,7 +189,7 @@ CString CImportExportMgr::GetImporterMenuText(int nImporter) const
 		sText = m_aImporters[nImporter]->GetMenuText();
 	}
 
-	return Misc::Trim(sText);
+	return sText;
 }
 
 CString CImportExportMgr::GetImporterFileExtension(int nImporter, BOOL bWithDot) const
@@ -215,7 +216,7 @@ CString CImportExportMgr::GetImporterFileFilter(int nImporter) const
 {
 	Initialize(); // initialize on demand
 
-	CString sFilter;
+	CEnString sFilter; // Auto translation
 
 	if (nImporter >= 0 && nImporter < m_aImporters.GetSize())
 	{
@@ -223,7 +224,7 @@ CString CImportExportMgr::GetImporterFileFilter(int nImporter) const
 		sFilter = m_aImporters[nImporter]->GetFileFilter();
 	}
 
-	return Misc::Trim(sFilter);
+	return sFilter;
 }
 
 CString CImportExportMgr::GetImporterTypeID(int nImporter) const
@@ -258,7 +259,7 @@ CString CImportExportMgr::GetExporterMenuText(int nExporter) const
 {
 	Initialize(); // initialize on demand
 
-	CString sText;
+	CEnString sText; // Auto translation
 
 	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
 	{
@@ -266,7 +267,7 @@ CString CImportExportMgr::GetExporterMenuText(int nExporter) const
 		sText = m_aExporters[nExporter]->GetMenuText();
 	}
 
-	return Misc::Trim(sText);
+	return sText;
 }
 
 CString CImportExportMgr::GetExporterFileExtension(int nExporter, BOOL bWithDot) const
@@ -298,7 +299,7 @@ CString CImportExportMgr::GetExporterFileFilter(int nExporter) const
 {
 	Initialize(); // initialize on demand
 
-	CString sFilter;
+	CEnString sFilter; // Auto translation
 
 	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
 	{
@@ -306,7 +307,7 @@ CString CImportExportMgr::GetExporterFileFilter(int nExporter) const
 		sFilter = m_aExporters[nExporter]->GetFileFilter();
 	}
 
-	return Misc::Trim(sFilter);
+	return sFilter;
 }
 
 CString CImportExportMgr::GetExporterTypeID(int nExporter) const

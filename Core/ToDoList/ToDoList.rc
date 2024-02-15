@@ -4849,7 +4849,7 @@ BEGIN
     IDS_FOCUS_TASKS         "Tasks"
     IDS_UNNAMEDFILTER       "- unnamed -"
     IDS_XSLFILEFILTER       "Stylesheet (*.xsl)|*.xsl||"
-    IDS_TRANSFORMFILEFILTER "Web Page (*.htm, *.html)|*.htm;*.html|Text File (*.txt)|*.txt|All Files (*.*)|*.*||"
+    IDS_TRANSFORMFILEFILTER "Web Page (*.htm, *.html)|*.htm;*.html|Plain Text (*.txt)|*.txt|All Files (*.*)|*.*||"
     IDS_ALLFILEFILTER       "All Files (*.*)|*.*||"
     IDS_RECENTFILES         "Recent Tasklists"
     IDS_COPYRIGHT           "ToDoList (c) AbstractSpoon"
@@ -5668,14 +5668,12 @@ BEGIN
                             "The selected tasks include no task references."
     IDS_SELECTIONHASNOREFERENCETASKS "The selected tasks have no references."
     IDS_LOG_COMMENT         "Comment"
-    IDS_ANALYSETXT_FORMAT   "Plain Text (.txt)|Text Files (*.txt)|*.txt||"
-    IDS_ANALYSECSV_FORMAT   "Spreadsheet (.csv)|Spreadsheets (*.csv)|*.csv||"
-    IDS_ANALYSEHTM_FORMAT   "Web Page (.html)|Web Pages (*.html, *.htm)|*.html;*.htm||"
+    IDS_ANALYSECSV_FORMAT   "Spreadsheet (*.csv)|*.csv||"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ANALYSEXML_FORMAT   "XML (.xml)|XML Files (*.xml)|*.xml||"
+    IDS_ANALYSEXML_FORMAT   "XML Files (*.xml)|*.xml||"
     IDS_NO_WEBUPDATE_AVAIL  "There are no updates available at this time."
     IDS_CSV_CUSTOMLISTATTRIB "<New Custom Attribute (List)>"
     IDS_WEBUPDATE_PROMPT    "Would you like to update to this version?"

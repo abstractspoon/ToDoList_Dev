@@ -63,7 +63,7 @@ namespace unvell.UIControls
 			}
 		}
 
-		private string sampleText = "Text";
+		private string sampleText = ReoGrid.LanguageResource.Text;
 
 		/// <summary>
 		/// Get or set the sample text.
@@ -128,8 +128,8 @@ namespace unvell.UIControls
 			{
 				sf.FormatFlags |= StringFormatFlags.NoWrap;
 
-				textSize = g.MeasureString("Text", this.Font, 999999, sf);
-				g.DrawString("Text", this.Font, SystemBrushes.WindowText, 0, -textSize.Height / 2, sf);
+				textSize = g.MeasureString(SampleText, this.Font, 999999, sf);
+				g.DrawString(SampleText, this.Font, SystemBrushes.WindowText, 0, -textSize.Height / 2, sf);
 			}
 
 			g.DrawLine(SystemPens.WindowText, textSize.Width + 5, 0, len - 7, 0);

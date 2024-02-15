@@ -73,6 +73,7 @@ namespace SpreadsheetContentControl
 			InitialiseFeatures();
 			InitialiseToolbars();
 			InitialiseChangeCallbacks();
+
 			TranslateUI();
 
 			Worksheet.DefaultFontName = m_ControlsFont.Name;
@@ -216,6 +217,14 @@ namespace SpreadsheetContentControl
 			m_Trans.Translate(CellContextMenu.Items);
 			m_Trans.Translate(HeaderContextMenu.Items);
 			m_Trans.Translate(ColumnContextMenu.Items);
+
+			LanguageResource.Menu_InsertSheet = m_Trans.Translate(LanguageResource.Menu_InsertSheet);
+			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet);
+			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet);
+
+			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet);
+			LanguageResource.None = m_Trans.Translate(LanguageResource.None);
+			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text);
 		}
 
 		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)

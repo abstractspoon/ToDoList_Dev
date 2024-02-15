@@ -8,6 +8,7 @@
 #include "..\shared\Misc.h"
 #include "..\shared\DialogHelper.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -152,6 +153,8 @@ void CImportExportComboBox::BuildCombo()
 
 		CDialogHelper::AddString(*this, sItem, nImpExp);
 	}
+
+	CLocalizer::EnableTranslation(*this, FALSE);
 }
 
 CString CImportExportComboBox::GetImpExpMenuText(int nImpExp) const

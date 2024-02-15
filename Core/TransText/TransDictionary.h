@@ -143,11 +143,22 @@ protected:
 	void IgnoreTranslatedText();
 	void FixupDictionary();
 	BOOL KeyMatches(const CString& sKey, const DICTITEM* pDI) const;
+	BOOL TranslateFileFilters(CString& sFilters);
+
+	struct FILEFILTER
+	{
+		CString sNamePart;		// "Image Files"
+		CString sExtensions;	// "*.bmp;*.jpeg"
+
+		BOOL IsValid() const;
+		CString Build() const;
+	};
 
 	BOOL SaveCsvDictionary(LPCTSTR szDictPath) const;
 	BOOL LoadCsvDictionary(LPCTSTR szDictPath);
 
 	static int CompareProc(const void* pFirst, const void* pSecond);
+	static BOOL ParseFileFilters(const CString& sText, CArray<FILEFILTER, FILEFILTER&>& aFilters);
 };
 
 //////////////////////////////////////////////////////////////////////

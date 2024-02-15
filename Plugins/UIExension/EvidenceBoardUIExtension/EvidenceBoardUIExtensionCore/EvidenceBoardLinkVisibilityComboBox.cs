@@ -53,6 +53,10 @@ namespace EvidenceBoardUIExtension
 
 		public EvidenceBoardLinkVisibilityComboBox()
 		{
+			Items.Add(new EvidenceBoardLinkVisibilityItem("Untyped", EvidenceBoardLinkType.None));
+			Items.Add(new EvidenceBoardLinkVisibilityItem("Dependency", EvidenceBoardLinkType.Dependency));
+			Items.Add(new EvidenceBoardLinkVisibilityItem("Parent/Child", EvidenceBoardLinkType.ParentChild));
+
 			UserLinkTypes = null;
 			Sorted = true;
 
@@ -68,7 +72,7 @@ namespace EvidenceBoardUIExtension
 				var link = (item as EvidenceBoardLinkVisibilityItem);
 
 				if (link.Type != EvidenceBoardLinkType.User)
-					link.Label = trans.Translate(link.Name);
+					link.Label = trans.Translate(link.Label);
 			}
 		}
 
@@ -87,13 +91,18 @@ namespace EvidenceBoardUIExtension
 				// Cache the current selection
 				var prevVisibility = LinkVisibility;
 
-				// Rebuild the combo
-				Items.Clear();
+				// Remove all user types
+				int iItem = Items.Count;
 
-				Items.Add(new EvidenceBoardLinkVisibilityItem("Untyped", EvidenceBoardLinkType.None));
-				Items.Add(new EvidenceBoardLinkVisibilityItem("Dependency", EvidenceBoardLinkType.Dependency));
-				Items.Add(new EvidenceBoardLinkVisibilityItem("Parent/Child", EvidenceBoardLinkType.ParentChild));
+				while (iItem-- > 0)
+				{
+					var link = (Items[iItem] as EvidenceBoardLinkVisibilityItem);
 
+					if (link.Type == EvidenceBoardLinkType.User)
+						Items.Remove(iItem);
+				}
+
+				// Re-add
 				if (value != null)
 				{
 					foreach (var name in value)

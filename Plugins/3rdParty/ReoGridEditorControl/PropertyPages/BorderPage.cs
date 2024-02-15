@@ -268,7 +268,7 @@ namespace unvell.ReoGrid.PropertyPages
 
 				if (i.Style == BorderLineStyle.None)
 				{
-					g.DrawString(LangResource.None, SystemFonts.DefaultFont, SystemBrushes.WindowText, i.Bounds, sf);
+					g.DrawString(LanguageResource.None, SystemFonts.DefaultFont, i.IsSelected ? SystemBrushes.HighlightText : SystemBrushes.WindowText, i.Bounds, sf);
 				}
 				else
 				{
@@ -505,7 +505,7 @@ namespace unvell.ReoGrid.PropertyPages
 							LineAlignment = StringAlignment.Center
 						})
 						{
-							g.DrawString(LangResource.Text, Font, SystemBrushes.ControlDarkDark, rect, sf);
+							g.DrawString(LanguageResource.Text, Font, SystemBrushes.ControlDarkDark, rect, sf);
 						}
 					}
 

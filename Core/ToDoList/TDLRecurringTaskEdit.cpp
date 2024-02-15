@@ -756,15 +756,15 @@ void CTDLRecurringTaskMonthlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr)
 	switch (m_nMonthlyOption)
 	{
 	case 0:
-		tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 
-						 m_nEveryNumMonths, 
-						 m_bPreserveWeekdays);
+		VERIFY(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS,
+								m_nEveryNumMonths,
+								m_bPreserveWeekdays));
 		break;
-		
-	case 1: 
-		tr.SetRegularity(TDIR_MONTH_SPECIFIC_DAY_NMONTHS, 
-						m_nEveryNumMonthsDay, 
-						m_nEveryDayOfMonth);
+
+	case 1:
+		VERIFY(tr.SetRegularity(TDIR_MONTH_SPECIFIC_DAY_NMONTHS,
+								m_nEveryNumMonthsDay,
+								m_nEveryDayOfMonth));
 		break;
 
 	case 2:
@@ -772,15 +772,15 @@ void CTDLRecurringTaskMonthlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr)
 		{
 			BOOL bFirst = (m_nSpecificNumber == 0);
 
-			tr.SetRegularity(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, 
-							(bFirst ? 0 : 1), 
-							m_nSpecificNumMonths);
+			VERIFY(tr.SetRegularity(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS,
+									(bFirst ? 0 : 1),
+									m_nSpecificNumMonths));
 		}
 		else // regular n'th day of week
 		{
-			tr.SetRegularity(TDIR_MONTH_SPECIFIC_DOW_NMONTHS, 
-							MAKELONG(m_nSpecificNumber + 1, m_nSpecificDayOfWeek + 1), 
-							m_nSpecificNumMonths);
+			VERIFY(tr.SetRegularity(TDIR_MONTH_SPECIFIC_DOW_NMONTHS,
+									MAKELONG(m_nSpecificNumber + 1, m_nSpecificDayOfWeek + 1),
+									m_nSpecificNumMonths));
 		}
 		break;
 	}

@@ -89,7 +89,7 @@ class CWeekend
 {
 public:
 	CWeekend();	// uses static initialisation
-	CWeekend(DWORD dwDays); // eg. WD_SATURDAY | WD_SUNDAY
+	CWeekend(DWORD dwDays); // DH_DAYOFWEEK
 	CWeekend(const CWeekend& weekend);
 
 	BOOL operator==(const CWeekend& other) const;
@@ -106,7 +106,7 @@ public:
 	int GetLengthInDays() const;
 
 protected:
-	DWORD m_dwDays;
+	DWORD m_dwDays; // DH_DAYOFWEEK
 	int m_nLength;
 
 	static int CalcLength(DWORD dwDays);

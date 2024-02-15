@@ -2369,7 +2369,7 @@ namespace unvell.ReoGrid.Editor.LangRes {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Resize worksheet.
+        ///   Looks up a localized string similar to Resize Worksheet.
         /// </summary>
         internal static string Resize_Caption {
             get {
