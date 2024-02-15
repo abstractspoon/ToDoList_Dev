@@ -88,6 +88,16 @@ namespace unvell.ReoGrid
 		/// Text of word sheet (Sheet)
 		/// </summary>
 		public static string Sheet = "Sheet";
+
+		/// <summary>
+		/// None
+		/// </summary>
+		public static string None = "None";
+
+		/// <summary>
+		/// Text
+		/// </summary>
+		public static string Text = "Text";
 		#endregion // Public
 
 	}
