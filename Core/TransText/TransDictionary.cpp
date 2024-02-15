@@ -1324,14 +1324,14 @@ BOOL CTransDictionary::TranslateFileFilters(CString& sFilters)
 		return FALSE;
 
 	CArray<FILEFILTER, FILEFILTER&> aFilters;
-	int nNumFilters = ParseFileFilters(sFilters, aFilters);
+	int nNumFilters = ParseFileFilters(sFilters, aFilters), nFilter;
 
 	if (nNumFilters == 0)
 		return FALSE;
 
 	BOOL bAnyTranslated = FALSE;
 
-	for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
+	for (nFilter = 0; nFilter < nNumFilters; nFilter++)
 	{
 		CString& sText = aFilters[nFilter].sNamePart;
 
@@ -1350,7 +1350,7 @@ BOOL CTransDictionary::TranslateFileFilters(CString& sFilters)
 
 	sFilters.Empty();
 
-	for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
+	for (nFilter = 0; nFilter < nNumFilters; nFilter++)
 	{
 		sFilters += aFilters[nFilter].Build();
 		sFilters += '|';
