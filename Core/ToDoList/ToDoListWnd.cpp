@@ -10898,6 +10898,8 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 
 	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
 
+	CPreferences::Save();
+
 	return 0;
 }
 

@@ -49,6 +49,7 @@ const int DEF_BORDER_DLU	= 2;
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 
 const CString LAST_SEARCH(_T("_last_search_"));
+const LPCTSTR SEARCH_PREFS = _T("FindTasks\\Searches");
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
@@ -1386,12 +1387,12 @@ int CTDLFindTasksDlg::GetSavedSearches(CStringArray& aNames) const
 	if (!aNames.GetSize() && !GetSafeHwnd())
 	{
 		CPreferences prefs;
-		int nNumItems = prefs.GetProfileInt(_T("FindTasks\\Searches"), _T("NumSearches"), 0);
+		int nNumItems = prefs.GetProfileInt(SEARCH_PREFS, _T("NumSearches"), 0);
 
 		for (int nItem = 0; nItem < nNumItems; nItem++)
 		{
 			CString sKey = Misc::MakeKey(_T("Search%d"), nItem);
-			CString sSearch = prefs.GetProfileString(_T("FindTasks\\Searches"), sKey);
+			CString sSearch = prefs.GetProfileString(SEARCH_PREFS, sKey);
 
 			aNames.Add(sSearch);
 		}
@@ -1536,12 +1537,12 @@ int CTDLFindTasksDlg::LoadSearches()
 
 	// Reload last saved searches
 	CPreferences prefs;
-	int nNumItems = prefs.GetProfileInt(_T("FindTasks\\Searches"), _T("NumSearches"), 0);
+	int nNumItems = prefs.GetProfileInt(SEARCH_PREFS, _T("NumSearches"), 0);
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		CString sKey = Misc::MakeKey(_T("Search%d"), nItem);
-		CString sSearch = prefs.GetProfileString(_T("FindTasks\\Searches"), sKey);
+		CString sSearch = prefs.GetProfileString(SEARCH_PREFS, sKey);
 
 		// only add to the list if it can be loaded
 		CSearchParamArray dummy;
@@ -1554,45 +1555,8 @@ int CTDLFindTasksDlg::LoadSearches()
 		}
 	}
 
-	// Delete obsolete searches
-	CStringArray aSearchSectons;
-	int nSection = prefs.GetProfileSectionNames(aSearchSectons, _T("FindTasks\\Searches\\"));
-
-	while (nSection--)
-	{
-		const CString& sSection = aSearchSectons[nSection];
-
-		if (sSection.Find(LAST_SEARCH) >= 0)
-			continue;
-
-		int nSectionLen = sSection.GetLength();
-		int nSaved = m_aSavedSearches.GetSize();
-
-		while (nSaved--)
-		{
-			const CString& sSaved = m_aSavedSearches[nSaved];
-			int nFind = sSection.Find(sSaved);
-
-			if (nFind != -1)
-			{
-				int nSavedLen = sSaved.GetLength();
-
-				// We're interested in sections which either end in the saved name
-				if (nFind == (nSectionLen - nSavedLen))
-					break;
-
-				// or which are followed immediately by a backslash, indicating a rule
-				if (((nFind + nSavedLen + 1) < nSectionLen) && sSection[nFind + nSavedLen] == '\\')
-					break;
-			}
-		}
-
-		if (nSaved == -1)
-			prefs.DeleteProfileSection(sSection);
-	}
-	
 	// restore last named search
-	CString sSearch = prefs.GetProfileString(_T("FindTasks\\Searches"), _T("Current"));
+	CString sSearch = prefs.GetProfileString(SEARCH_PREFS, _T("Current"));
 
 	// backup
 	if (!sSearch.IsEmpty() && m_cbSearches.FindStringExact(-1, sSearch) == CB_ERR)
@@ -1620,20 +1584,20 @@ int CTDLFindTasksDlg::LoadSearches()
 int CTDLFindTasksDlg::SaveSearches()
 {
 	CPreferences prefs;
-	prefs.DeleteProfileSection(_T("FindTasks\\Searches"));
+	prefs.DeleteProfileSection(SEARCH_PREFS);
 
 	int nNumSearches = m_cbSearches.GetCount();
-	prefs.WriteProfileInt(_T("FindTasks\\Searches"), _T("NumSearches"), nNumSearches);
+	prefs.WriteProfileInt(SEARCH_PREFS, _T("NumSearches"), nNumSearches);
 
 	for (int nItem = 0; nItem < nNumSearches; nItem++)
 	{
 		CString sSearch, sKey = Misc::MakeKey(_T("Search%d"), nItem);
 		m_cbSearches.GetLBText(nItem, sSearch);
-		prefs.WriteProfileString(_T("FindTasks\\Searches"), sKey, sSearch);
+		prefs.WriteProfileString(SEARCH_PREFS, sKey, sSearch);
 	}
 
 	// save last active named search
-	prefs.WriteProfileString(_T("FindTasks\\Searches"), _T("Current"), m_sActiveSearch);
+	prefs.WriteProfileString(SEARCH_PREFS, _T("Current"), m_sActiveSearch);
 
 	if (!m_sActiveSearch.IsEmpty())
 		SaveSearch(m_sActiveSearch);
@@ -1693,6 +1657,9 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 		m_cbSearches.DeleteString(nSearch);
 
 	Misc::RemoveItem(sDeletedSearch, m_aSavedSearches);
+
+	CString sSection = Misc::Format(_T("%s\\%s"), SEARCH_PREFS, sDeletedSearch);
+	CPreferences().DeleteProfileSection(sSection, TRUE);
 
 	m_lcFindSetup.ClearSearch();
 
