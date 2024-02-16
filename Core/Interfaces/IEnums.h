@@ -250,6 +250,7 @@ enum // custom attribute features
 	TDCCAF_DISPLAYASPERCENT		= 0x0100, // Numbers only
 	TDCCAF_EXCLUDEBLANKITEM		= 0x0200, // Non-multi lists only
 	TDCCAF_ONEDECIMAL			= 0x0400, // Decimals/Fractions only
+	TDCCAF_DEPRECATED_1			= 0x0800, // DEPRECATED
 };
 
 //////////////////////////////////////////////////////////////////////
