@@ -3339,14 +3339,10 @@ BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTD
 
 	if (calc.IsFirstOperandCustom())
 	{
-		int nAttrib = m_data.m_aCustomAttribDefs.Find(calc.opFirst.sCustAttribID);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(m_data.m_aCustomAttribDefs, calc.opFirst.sCustAttribID, pDef, FALSE);
 
-		if (nAttrib < 0)
-			return FALSE;
-
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
-
-		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated);
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, *pDef, dValue, nUnits, bAggregated);
 	}
 
 	// else built-in attribute
@@ -3364,14 +3360,10 @@ BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pT
 	}
 	else if (calc.IsSecondOperandCustom())
 	{
-		int nAttrib = m_data.m_aCustomAttribDefs.Find(calc.opSecond.sCustAttribID);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(m_data.m_aCustomAttribDefs, calc.opSecond.sCustAttribID, pDef, FALSE);
 
-		if (nAttrib < 0)
-			return FALSE;
-
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
-
-		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated);
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, *pDef, dValue, nUnits, bAggregated);
 	}
 
 	// else built-in attribute
@@ -3511,7 +3503,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
 {
-	if (!pTDI || !attribDef.bEnabled)
+	if (!pTDI || (!attribDef.IsDataType(TDCCA_CALCULATION) && !attribDef.bEnabled))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -3520,25 +3512,21 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	TDCCADATA data;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
-	{
 		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef.Calculation(), dValue, nUnits, bAggregated);
-	}
-	else if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-	{
+
+	// else
+	if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
 		return attribDef.GetDataAsDouble(data, dValue, nUnits);
-	}
-	else
+
+	// else allow strictly numeric types to be empty == 0.0
+	switch (attribDef.GetDataType())
 	{
-		// Allow strictly numeric types to be empty == 0.0
-		switch (attribDef.GetDataType())
-		{
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
-		case TDCCA_TIMEPERIOD:
-		case TDCCA_FRACTION:
-			dValue = 0.0;
-			return TRUE;
-		}
+	case TDCCA_INTEGER:
+	case TDCCA_DOUBLE:
+	case TDCCA_TIMEPERIOD:
+	case TDCCA_FRACTION:
+		dValue = 0.0;
+		return TRUE;
 	}
 
 	// else
