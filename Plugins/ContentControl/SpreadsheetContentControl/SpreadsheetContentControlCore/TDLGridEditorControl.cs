@@ -222,6 +222,13 @@ namespace SpreadsheetContentControl
 			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet);
 			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet);
 
+			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ);
+			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA);
+			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll);
+			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks);
+			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK);
+			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel);
+
 			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet);
 			LanguageResource.None = m_Trans.Translate(LanguageResource.None);
 			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text);

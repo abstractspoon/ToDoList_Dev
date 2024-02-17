@@ -41,7 +41,7 @@ namespace unvell.ReoGrid.WinForm
 		{
 			AutoSize = false;
 			Width = 240;
-			Height = 340;
+			Height = 330;
 
 			this.Items.Add(SortAZItem = new System.Windows.Forms.ToolStripMenuItem(LanguageResource.Filter_SortAtoZ));
 			this.Items.Add(SortZAItem = new System.Windows.Forms.ToolStripMenuItem(LanguageResource.Filter_SortZtoA));
