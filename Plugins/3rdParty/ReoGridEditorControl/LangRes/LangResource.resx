@@ -175,10 +175,10 @@
     <value>CSV File(*.csv)|*.csv|Text file(*.txt)|*.txt|All files(*.*)|*.*</value>
   </data>
   <data name="Filter_Load_File" xml:space="preserve">
-    <value>All Supported Files(*.xlsx;*.csv;*.rgf)|*.xlsx;*.csv;*.rgf|ReoGrid XML Format(*.rgf)|*.rgf|Excel 2007(*.xlsx)|*.xlsx|CSV File(*.csv)|*.csv|All Files(*.*)|*.*</value>
+    <value>All Supported Files (*.xlsx;*.csv;*.rgf)|*.xlsx;*.csv;*.rgf|ReoGrid XML Format (*.rgf)|*.rgf|Excel 2007(*.xlsx)|*.xlsx|CSV (*.csv)|*.csv|All Files (*.*)|*.*</value>
   </data>
   <data name="Filter_Save_File" xml:space="preserve">
-    <value>Excel 2007(*.xlsx)|*.xlsx|ReoGrid XML Format(*.rgf)|*.rgf|CSV File(*.csv)|*.csv|All Files(*.*)|*.*</value>
+    <value>Excel 2007 (*.xlsx)|*.xlsx|ReoGrid XML Format (*.rgf)|*.rgf|CSV (*.csv)|*.csv|All Files (*.*)|*.*</value>
   </data>
   <data name="FormatPage_Category" xml:space="preserve">
     <value>&amp;Category:</value>

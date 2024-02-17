@@ -862,6 +862,11 @@ namespace unvell.ReoGrid.Editor
 			return dialog.ShowDialog();
 		}
 
+		virtual protected DialogResult ShowDialog(CommonDialog dialog)
+		{
+			return dialog.ShowDialog(this);
+		}
+
 		void worksheet_SelectionModeChanged(object sender, EventArgs e)
 		{
 			UpdateSelectionModeAndStyle();
@@ -1571,7 +1576,7 @@ namespace unvell.ReoGrid.Editor
 			{
 				ofd.Filter = LangResource.Filter_Load_File;
 
-				if (ofd.ShowDialog(this) == DialogResult.OK)
+				if (ShowDialog(ofd) == DialogResult.OK)
 				{
 					LoadFile(ofd.FileName);
 					this.SetCurrentDocumentFile(ofd.FileName);
@@ -1631,7 +1636,7 @@ namespace unvell.ReoGrid.Editor
 					}
 				}
 
-				if (sfd.ShowDialog(this) == DialogResult.OK)
+				if (ShowDialog(sfd) == DialogResult.OK)
 				{
 					SaveFile(sfd.FileName);
 					return true;
