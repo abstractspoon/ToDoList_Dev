@@ -945,12 +945,15 @@ namespace SpreadsheetContentControl
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
-			this.BackColor = backColor;
             MenuBar.BackColor = SystemColors.Menu;
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
 			FormulaBar.BackColor = backColor;
+
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalStart, backColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalEnd, backColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadNormal, backColor);
 
 			// Unfocused colours
 			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.SelectedNotFocused);
