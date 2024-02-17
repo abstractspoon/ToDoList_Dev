@@ -620,10 +620,8 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		// Every 'n' months
 		if ((int)dwSpec1 <= 0)
 			return FALSE;
-		
-		// Must be zero
-		if (dwSpec2)
-			return FALSE;
+
+		// dwSpec2 (Preserve Weekday) can be zero or non-zero
 		break;
 		
 	case RECURS_MONTH_SPECIFIC_DOW_NMONTHS:
@@ -650,9 +648,7 @@ BOOL CRecurrence::IsValidRegularity(RECURRENCE_REGULARITY nReg, DWORD dwSpec1, D
 		if ((int)dwSpec1 <= 0)
 			return FALSE;
 		
-		// Must be zero
-		if (dwSpec2)
-			return FALSE;
+		// dwSpec2 (Preserve Weekday) can be zero or non-zero
 		break;
 		
 	case RECURS_YEAR_SPECIFIC_DAY_MONTHS:
