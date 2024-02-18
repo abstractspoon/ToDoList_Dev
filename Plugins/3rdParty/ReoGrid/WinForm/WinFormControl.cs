@@ -58,8 +58,15 @@ namespace unvell.ReoGrid
 //	[Designer(typeof(ReoGridControlDesigner))]
 //	[ToolboxItem(typeof(ReoGridControlToolboxItem))]
 
-	public partial class ReoGridControl : System.Windows.Forms.Control, IVisualWorkbook,
-		IRangePickableControl, IContextMenuControl, IPersistenceWorkbook, IActionControl, IWorkbook,
+	public partial class ReoGridControl 
+		: 
+		System.Windows.Forms.Control, 
+		IVisualWorkbook,
+		IRangePickableControl, 
+		IContextMenuControl, 
+		IPersistenceWorkbook, 
+		IActionControl, 
+		IWorkbook,
 		IScrollableWorksheetContainer
 	{
 		#region Constructor, Init & Dispose

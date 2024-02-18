@@ -151,7 +151,8 @@ namespace unvell.ReoGrid.PropertyPages
 					currencyFormatArgs.PostfixSymbol = null;
 				}
 
-        if (currencyNegativeStyleList.Items.Count > 0) currencyNegativeStyleList.SelectedIndex = 0;
+				if (currencyNegativeStyleList.Items.Count > 0)
+					currencyNegativeStyleList.SelectedIndex = 0;
 
 				UpdateSample();
 			};
@@ -182,14 +183,23 @@ namespace unvell.ReoGrid.PropertyPages
 			}
 
 			// add valid data formatter
-			foreach (var key in Enum.GetValues(typeof(CellDataFormatFlag)))
-			{
-				IDataFormatter formatter;
-				if (DataFormatterManager.Instance.DataFormatters.TryGetValue((CellDataFormatFlag) key, out formatter))
-				{
-					formatList.Items.Add(key);
-				}
-			}
+			formatList.Items.Add(new CellDataFormatItem(CellDataFormatFlag.General, LanguageResource.CellDataFormat_General));
+			formatList.Items.Add(new CellDataFormatItem(CellDataFormatFlag.Number, LanguageResource.CellDataFormat_Number));
+			formatList.Items.Add(new CellDataFormatItem(CellDataFormatFlag.DateTime, LanguageResource.CellDataFormat_DateTime));
+			formatList.Items.Add(new CellDataFormatItem(CellDataFormatFlag.Percent, LanguageResource.CellDataFormat_Percent));
+			formatList.Items.Add(new CellDataFormatItem(CellDataFormatFlag.Currency, LanguageResource.CellDataFormat_Currency));
+			formatList.Items.Add(new CellDataFormatItem(CellDataFormatFlag.Text, LanguageResource.CellDataFormat_Text));
+
+			/*
+						foreach (var key in Enum.GetValues(typeof(CellDataFormatFlag)))
+						{
+							IDataFormatter formatter;
+							if (DataFormatterManager.Instance.DataFormatters.TryGetValue((CellDataFormatFlag) key, out formatter))
+							{
+								formatList.Items.Add(new Tuple<CellDataFormatFlag, string>((CellDataFormatFlag)key, key.ToString()));
+							}
+						}
+			*/
 
 			numberFormatArgs = new NumberDataFormatter.NumberFormatArgs
 			{
@@ -214,7 +224,10 @@ namespace unvell.ReoGrid.PropertyPages
 			{
 				try
 				{
-					currentFormat = (CellDataFormatFlag)Enum.Parse(typeof(CellDataFormatFlag), formatList.Text);
+					var formatType = (formatList.SelectedItem as CellDataFormatItem);
+					currentFormat = formatType.Flag;
+
+					// currentFormat = (CellDataFormatFlag)Enum.Parse(typeof(CellDataFormatFlag), formatList.Text);
 				}
 				catch
 				{
@@ -271,6 +284,23 @@ namespace unvell.ReoGrid.PropertyPages
 			currencyNegativeStyleList.DoubleClick += (s, e) => RaiseDone();
 
 			txtDatetimeFormat.TextChanged += (s, e) => UpdateSample();
+		}
+
+		internal class CellDataFormatItem
+		{
+			public CellDataFormatItem(CellDataFormatFlag flag, string description)
+			{
+				Flag = flag;
+				Description = description;
+			}
+
+			public CellDataFormatFlag Flag;
+			public string Description;
+
+			public override string ToString()
+			{
+				return Description;
+			}
 		}
 
 		public event EventHandler Done;
@@ -474,13 +504,21 @@ namespace unvell.ReoGrid.PropertyPages
 
 				for (int i = 0; i < formatList.Items.Count; i++)
 				{
-					var item = formatList.Items[i].ToString();
+					var item = (formatList.Items[i] as CellDataFormatItem);
 
-					if (string.Equals(item, currentFormat.ToString(), StringComparison.CurrentCultureIgnoreCase))
+					if (item.Flag == currentFormat)
 					{
 						formatList.SelectedIndex = i;
 						break;
 					}
+
+					// var item = formatList.Items[i].ToString();
+					// 
+					// if (string.Equals(item, currentFormat.ToString(), StringComparison.CurrentCultureIgnoreCase))
+					// {
+					// 	formatList.SelectedIndex = i;
+					// 	break;
+					// }
 				}
 			}
 			else

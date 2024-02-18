@@ -232,6 +232,14 @@ namespace SpreadsheetContentControl
 			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet);
 			LanguageResource.None = m_Trans.Translate(LanguageResource.None);
 			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text);
+
+			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General);
+			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number);
+			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime);
+			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent);
+			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency);
+			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text);
+
 		}
 
 		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)
@@ -1073,12 +1081,30 @@ namespace SpreadsheetContentControl
 			dialog.ShowIcon = true;
 
 			// Per dialog customisations
-// 			if (ISTYPE(dialog, ))
+// 			if (dialog is ...))
 // 			{
 // 			}
 // 			else // all others
 			{
 				m_Trans.Translate(dialog);
+			}
+
+			Win32.ActivateApp(Handle);
+
+			return base.ShowDialog(dialog);
+		}
+
+		protected override DialogResult ShowDialog(CommonDialog dialog)
+		{
+			// Per dialog customisations
+			if (dialog is FileDialog)
+			{
+				var fileDlg = (dialog as FileDialog);
+				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter);
+			}
+			else // all others
+			{
+				// TODO
 			}
 
 			Win32.ActivateApp(Handle);
