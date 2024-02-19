@@ -2410,14 +2410,15 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 	if (!HasTask(dwTaskID, FALSE)) // Don't exclude hidden tasks
 		return FALSE;
 
-	DWORD dwSelTaskID = GetSelectedTaskID();
+	DWORD dwSelTaskID = GetSelectedTaskID(); // Can be 'real' or 'extension'
 
 	if (dwTaskID != dwSelTaskID)
 	{
 		m_dwSelectedTaskID = dwTaskID;
+		DWORD dwRealSelTaskID =  GetRealTaskID(dwSelTaskID);
 
-		if (bNotify && (dwTaskID != GetRealTaskID(dwSelTaskID)))
-			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
+		if (bNotify && (dwTaskID != dwRealSelTaskID))
+			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, dwRealSelTaskID);
 
 		if (bEnsureVisible)
 			EnsureSelectionVisible();
@@ -2459,7 +2460,7 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	BOOL bCustomDate = FALSE;
-	DWORD dwSelID = HitTestTask(point, bCustomDate);
+	DWORD dwSelID = HitTestTask(point, FALSE, bCustomDate);
 	
 	if (dwSelID)
 	{
