@@ -917,7 +917,7 @@ namespace PertNetworkUIExtension
 				Point arrow = points[points.Length - 1];
 				arrow.X--;
 
-				UIExtension.ArrowHeads.Draw(graphics, pen, arrow.X, arrow.Y, Font.Height, UIExtension.ArrowHeads.Direction.Right);
+				UIExtension.DependencyArrows.Draw(graphics, arrow.X, arrow.Y, Font, UIExtension.ArrowHeads.Direction.Right);
 			}
 
 			// Draw 3x3 box at 'to' end
