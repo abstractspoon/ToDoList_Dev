@@ -1406,7 +1406,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
 					}
 
-					dir = UIExtension.ArrowHeads.Direction.Right;
+					dir = UIExtension.ArrowHeads.Direction.Left;
 				}
 				else if (fromIsRightOfTo)
 				{
@@ -1437,7 +1437,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
 					}
 
-					dir = UIExtension.ArrowHeads.Direction.Left;
+					dir = UIExtension.ArrowHeads.Direction.Right;
 				}
 				else if (fromIsAboveTo)
 				{
