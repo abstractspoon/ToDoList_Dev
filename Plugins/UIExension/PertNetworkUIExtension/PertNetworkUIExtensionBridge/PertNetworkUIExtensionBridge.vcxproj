@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{13FC13FB-60BE-4735-9681-C3F84B4E3C54}</ProjectGuid>
+    <ProjectGuid>{EF9CD47D-7D2B-439C-95B7-87DD9F390E3D}</ProjectGuid>
     <RootNamespace>PertNetworkUIExtensionBridge</RootNamespace>
     <ProjectName>PertNetworkUIExtensionBridge</ProjectName>
   </PropertyGroup>

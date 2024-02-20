@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D03AA054-9987-44DC-B03F-691D79506DA9}</ProjectGuid>
+    <ProjectGuid>{FDB18CD6-8CF6-46C3-8F46-0C6105485CBB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PertNetworkUIExtension</RootNamespace>

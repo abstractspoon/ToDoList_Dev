@@ -578,7 +578,7 @@ namespace PertNetworkUIExtension
 				bool selected = state.HasFlag(DrawState.Selected);
 
 				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
-					return DrawingColor.GetBestTextColor(taskItem.TextColor);
+					return DrawingColor.GetBestTextColor(taskItem.TextColor, ReadOnly);
 
 				if (selected)
 					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
@@ -908,15 +908,17 @@ namespace PertNetworkUIExtension
 			Point[] points = GetConnectionPoints(fromItem, toItem);
 
 			using (var pen = new Pen(Color.DarkGray, 0f))
+			{
 				graphics.DrawLines(pen, points);
 
-			// Draw Arrow head and box without smoothing to better match core app
-			graphics.SmoothingMode = SmoothingMode.None;
+				// Draw Arrow head and box without smoothing to better match core app
+				graphics.SmoothingMode = SmoothingMode.None;
 
-			Point arrow = points[points.Length - 1];
-			arrow.X--;
+				Point arrow = points[points.Length - 1];
+				arrow.X--;
 
-			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
+				UIExtension.ArrowHeads.Draw(graphics, pen, arrow.X, arrow.Y, Font.Height, UIExtension.ArrowHeads.Direction.Right);
+			}
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);

@@ -144,7 +144,7 @@ LPCWSTR CPertNetworkUIExtensionBridgeWindow::GetTypeID() const
 	return PERTNETWORK_GUID;
 }
 
-bool CPertNetworkUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CPertNetworkUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -163,7 +163,7 @@ void CPertNetworkUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, I
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CPertNetworkUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -199,11 +199,6 @@ bool CPertNetworkUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIA
 	case IUI_EXPANDSELECTED:
 		{
 		}
-		break;
-
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
 		break;
 
 	case IUI_SETFOCUS:
@@ -264,7 +259,7 @@ DWORD CPertNetworkUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWOR
 {
 	UIExtension::GetTask getTask;
 
-	if (!UIExtension::Map(nCmd, getTask))
+	if (!UIExtension::MapGetTaskCmd(nCmd, getTask))
 		return 0;
 
 	UInt32 taskID = dwFromTaskID;
@@ -279,7 +274,7 @@ bool CPertNetworkUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd
 {
 	UIExtension::SelectTask selectWhat;
 
-	if (!UIExtension::Map(nCmd, selectWhat))
+	if (!UIExtension::MapSelectTaskCmd(nCmd, selectWhat))
 		return false;
 
 	String^ sWords = gcnew String(select.szWords);
@@ -299,7 +294,6 @@ bool CPertNetworkUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, c
 		}
 		break;
 
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -340,14 +334,14 @@ bool CPertNetworkUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CPertNetworkUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CPertNetworkUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CPertNetworkUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CPertNetworkUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CPertNetworkUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

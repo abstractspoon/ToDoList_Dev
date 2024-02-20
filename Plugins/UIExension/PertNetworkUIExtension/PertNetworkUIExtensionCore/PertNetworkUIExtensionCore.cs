@@ -57,7 +57,19 @@ namespace PertNetworkUIExtension
             return m_PertNetwork.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
         }
 
-        public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public bool ScrollToSelectedTask()
+		{
+			// TODO
+			return false;
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			// TODO
+			return false;
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 			m_PertNetwork.UpdateTasks(tasks, type);
         }
@@ -99,18 +111,18 @@ namespace PertNetworkUIExtension
             return true;
         }
 
-        public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			UInt32 taskId = m_PertNetwork.HitTest(new Point(xPos, yPos));
 
 			if (taskId != 0)
-				return UIExtension.HitResult.Task;
+				return UIExtension.HitTestResult.Task;
 
 			// else
-            return UIExtension.HitResult.Tasklist;
+            return UIExtension.HitTestResult.Tasklist;
         }
 
-        public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+        public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			return m_PertNetwork.HitTest(new Point(xPos, yPos));
         }
