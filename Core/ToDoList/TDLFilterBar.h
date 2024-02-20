@@ -13,6 +13,7 @@
 #include "tdlfilteroptioncombobox.h"
 #include "tdlfiltercombobox.h"
 #include "tdlfilterdatecombobox.h"
+#include "tdlregularitycombobox.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\encheckcombobox.h"
@@ -47,8 +48,7 @@ public:
 
 	void AddAdvancedFilters(const CStringArray& aFilters);
 	const CStringArray& GetAdvancedFilterNames() const;
-	void RemoveAdvancedFilters();
-	BOOL SetAdvancedFilterFlags(const CString& sCustom, DWORD dwFlags);
+	BOOL SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone);
 
 	void ShowDefaultFilters(BOOL bShow);
 	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID = TDCA_ALL);
@@ -81,6 +81,7 @@ protected:
 	CEnCheckComboBox m_cbTagFilter;
 	CTDLPriorityComboBox m_cbPriorityFilter;
 	CTDLRiskComboBox m_cbRiskFilter;
+	CTDLRegularityComboBox m_cbRecurrence;
 	CTDLFilterOptionComboBox m_cbOptions;
 	CDateTimeCtrlEx m_dtcUserStart, m_dtcUserDue;
 	CEnEdit m_eStartNextNDays, m_eDueNextNDays;
@@ -149,6 +150,7 @@ protected:
 	void OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFilterDateComboBox& combo);
 
 protected:
+	void RemoveAdvancedFilters();
 	int ReposControls(int nWidth = -1, BOOL bCalcOnly = FALSE);
 	BOOL WantShowFilter(TDC_ATTRIBUTE nType) const;
 	void RefreshUIBkgndBrush();

@@ -154,7 +154,7 @@ BOOL CBurndownWnd::OnInitDialog()
 	if (m_toolbar.CreateEx(this))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
@@ -189,7 +189,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 
 	COleDateTimeRange dtActiveRange;
 
-	if (m_sliderDateRange.HasSelectedRange())
+	if (m_sliderDateRange.HasRange())
 	{
 		VERIFY(GetSliderDateRange(dtActiveRange));
 
@@ -309,21 +309,21 @@ bool CBurndownWnd::PrepareNewTask(ITaskList* /*pTask*/) const
 	return false; 
 }
 
-IUI_HITTEST CBurndownWnd::HitTest(POINT /*ptScreen*/) const
+IUI_HITTEST CBurndownWnd::HitTest(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return IUI_NOWHERE;
 }
 
-DWORD CBurndownWnd::HitTestTask(POINT /*ptScreen*/, bool /*bTitleColumnOnly*/) const
+DWORD CBurndownWnd::HitTestTask(POINT /*ptScreen*/, IUI_HITTESTREASON /*nReason*/) const
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	return 0L;
 }
 
-bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/)
+bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/, bool /*bTaskLink*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -545,6 +545,7 @@ bool CBurndownWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
+	case IUI_SCROLLTOSELECTEDTASK:
 		// not handled
 		break;
 	}
@@ -572,7 +573,6 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
-	case IUI_SELECTTASK:
 		// not handled
 		break;
 	}
@@ -587,6 +587,10 @@ BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_cbOptions, pDC);
 	CDialogHelper::ExcludeChild(&m_sliderDateRange, pDC);
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
+
+	CDialogHelper::ExcludeCtrl(this, IDC_DISPLAY_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_OPTIONS_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -636,14 +640,25 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 		m_chart.MoveWindow(rFrame);
 
 		// selected task dates takes available space
-		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-
-		CDialogHelper::ResizeChild(&m_sliderDateRange, (cx - 10 - rSlider.right), 0);
-		CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, (cx - 10 - rSlider.right), 0);
+		ResizeSlider(cx);
 
 		CAutoFlag af(m_bUpdatingSlider, TRUE);
 		UpdateRangeSliderStep();
 	}
+}
+
+void CBurndownWnd::ResizeSlider(int nParentWidth)
+{
+	if (nParentWidth == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nParentWidth = rClient.Width();
+	}
+
+	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+	m_sliderDateRange.ResizeToFit(nParentWidth - 10 - rSlider.left);
 }
 
 void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility)
@@ -789,6 +804,8 @@ void CBurndownWnd::UpdateRangeSlider(const COleDateTimeRange& dtActiveRange)
 
 		m_sliderDateRange.SetRange(nActiveStart, nActiveEnd);
 		m_sliderDateRange.EnableWindow(TRUE);
+
+		ResizeSlider();
 	}
 	else
 	{

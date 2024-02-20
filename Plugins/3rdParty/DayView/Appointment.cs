@@ -7,6 +7,32 @@ using System.Drawing;
 
 namespace Calendar
 {
+	public class AppointmentDates
+	{
+		public DateTime Start;
+		public DateTime End;
+
+		public AppointmentDates()
+		{
+			Start = new System.DateTime(0L);
+			End = new System.DateTime(0L);
+		}
+
+		public AppointmentDates(AppointmentDates other)
+		{
+			Start = other.Start;
+			End = other.End;
+		}
+
+		public AppointmentDates(DateTime start, DateTime end)
+		{
+			Start = start;
+			End = end;
+		}
+
+		public TimeSpan Length { get { return (End - Start); } }
+	}
+
     public class Appointment
     {
         public Appointment(string t = "New Appointment")
@@ -22,8 +48,8 @@ namespace Calendar
                 return;
 
 			title = appt.title;
-			startDate = appt.startDate;
-			endDate = appt.endDate;
+			dates.Start = appt.dates.Start; // copy
+			dates.End = appt.dates.End; // copy
 			locked = appt.locked;
 
 			Id = appt.Id;
@@ -44,24 +70,35 @@ namespace Calendar
 
 		static public DateTime NullDate { get { return DateTime.MinValue; } }
 
-		public bool HasValidDates()
+		virtual public bool HasValidDates()
 		{
 			return ((StartDate != NullDate) &&
 					(EndDate != NullDate) &&
 					(EndDate > StartDate));
 		}
 		
-		private DateTime startDate;
+		private AppointmentDates dates = new AppointmentDates();
 
-        public virtual DateTime StartDate
+		public AppointmentDates Dates { get { return dates; } }
+
+		public bool IntersectsToday
+		{
+			get
+			{
+				var today = DateTime.Now.Date;
+				return ((today >= StartDate) && (today <= EndDate));
+			}
+		}
+
+		public virtual DateTime StartDate
         {
             get
             {
-                return startDate;
+                return dates.Start;
             }
             set
             {
-                startDate = value;
+                dates.Start = value;
                 OnStartDateChanged();
             }
         }
@@ -71,20 +108,25 @@ namespace Calendar
 			// for derived classes
 		}
 
-		private DateTime endDate;
-
         public virtual DateTime EndDate
         {
             get
             {
-                return endDate;
+                return dates.End;
             }
             set
             {
-                endDate = value;
+                dates.End = value;
                 OnEndDateChanged();
             }
         }
+
+		public bool DatesMatch(AppointmentDates other)
+		{
+			return ((other != null) &&
+					(other.Start == StartDate) &&
+					(other.End == EndDate));
+		}
 
         protected virtual void OnEndDateChanged()
         {
@@ -93,7 +135,7 @@ namespace Calendar
 
 		public virtual TimeSpan Length
         {
-            get { return (endDate - startDate); }
+            get { return dates.Length; }
         }
 
         private bool locked;
@@ -135,7 +177,7 @@ namespace Calendar
             }
         }
 
-		private Color fillColor = Color.White;
+		private Color fillColor = SystemColors.Window;
 
 		public Color FillColor
 		{
@@ -158,7 +200,7 @@ namespace Calendar
 			// for derived classes
 		}
 
-		private Color textColor = Color.Black;
+		private Color textColor = SystemColors.WindowText;
 
         public Color TextColor
         {
@@ -187,7 +229,7 @@ namespace Calendar
         {
             get
             {
-                if (textColor.IsEmpty)
+                if (borderColor.IsEmpty)
                     return SystemColors.ControlDark;
 
                 return borderColor;
@@ -227,12 +269,15 @@ namespace Calendar
 
 		public virtual bool IsLongAppt()
         {
-            return IsLongAppt(startDate, endDate);
+            return IsLongAppt(StartDate, EndDate);
         }
 
-		public bool IntersectsWith(Appointment other)
+		public bool Intersects(Appointment other)
 		{
-			if (!HasValidDates())
+			if (!HasValidDates() || !other.HasValidDates())
+				return false;
+
+			if (IsLongAppt() != other.IsLongAppt())
 				return false;
 
 			if (StartDate >= other.EndDate)
@@ -256,16 +301,15 @@ namespace Calendar
 
 	public class AppointmentView
 	{
-		public AppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect)
+		public AppointmentView(Appointment appt)
 		{
 			Appointment = appt;
-			Rectangle = rect;
-			GripRect = gripRect;
 		}
 
 		public Appointment Appointment;
-		public Rectangle Rectangle;
-		public Rectangle GripRect;
+		public Rectangle Rectangle = Rectangle.Empty;
+		public Rectangle GripRect = Rectangle.Empty;
+		public bool IsLong = false;
 	}
 
 	class AppointmentList : List<Appointment>

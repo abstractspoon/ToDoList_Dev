@@ -40,6 +40,7 @@ _T("Abin\tIni class for tools importing\n")
 _T("Alex Cohn\tMenu icon code\n")
 _T("Alex Hazanov\tMSXML wrapper classes\n")
 _T("Alex Sidorsky\tRussian translation\n")
+_T("Alexandre Mutel\tMarkdig engine")
 _T("Armen Hakobyan\tEnhanced folder dialog\n")
 _T("Atlang\tChinese translation\n")
 _T("Carl Nolan\tHtml editor control\n")
@@ -168,7 +169,7 @@ BOOL CTDLAboutDlg::OnInitDialog()
 	if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT, WS_CHILD | CBRS_TOOLTIPS | WS_VISIBLE)))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_SOCIAL_TOOLBAR, IDB_SOCIAL_TOOLBAR, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this, NULL));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 		
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TOOLBAR);
 

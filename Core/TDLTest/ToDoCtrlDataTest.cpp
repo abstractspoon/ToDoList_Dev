@@ -88,9 +88,9 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 	CTaskFileTest tasksTest(m_utils);
 
-	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPopulateAttributes());
+	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPerformanceAttributes());
 
-	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
+	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_PERFTESTLEVELS; nNumLevels++)
 	{
 		CTaskFile tasks;
 		tasksTest.PopulateHierarchy(tasks, nNumLevels);
@@ -120,9 +120,9 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 	CTaskFileTest tasksTest(m_utils);
 	
-	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPopulateAttributes());
+	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPerformanceAttributes());
 
-	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
+	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_PERFTESTLEVELS; nNumLevels++)
 	{
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
@@ -209,7 +209,9 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 
 	DWORD dwTickStart = GetTickCount();
 
-	CTDCTaskFormatter formatter(data);
+	CContentMgr mgrContent;
+	CTDCTaskFormatter formatter(data, mgrContent);
+
 	DWORD dwMaxTaskID = data.GetTaskCount();
 
 	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
@@ -254,7 +256,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 
 	DWORD dwTickStart = GetTickCount();
 
-	CTDCTaskFormatter formatter(data);
+	CContentMgr mgrContent;
+	CTDCTaskFormatter formatter(data, mgrContent);
+
 	DWORD dwMaxTaskID = data.GetTaskCount();
 
 	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
@@ -284,20 +288,21 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 	const CTDCImageList ilIcons;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
+	const CContentMgr mgrContent;
 
 	const CTDLTaskTreeCtrl colors(ilIcons,
 								  data,
 								  m_aStyles,
 								  tld,
 								  mapVisibleCols,
-								  m_aCustomAttribDefs);
-	CContentMgr comments;
+								  m_aCustomAttribDefs,
+								  mgrContent);
 	// ----------------------------------------------
 	
 	DWORD dwTickStart = GetTickCount();
 	CTaskFile tasks;
 	
-	CTDCTaskExporter exporter(data, colors, comments);
+	CTDCTaskExporter exporter(data, colors, mgrContent);
 	exporter.ExportAllTasks(tasks);
 	
 	DWORD dwDuration = (GetTickCount() - dwTickStart);

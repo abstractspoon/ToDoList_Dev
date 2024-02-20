@@ -33,6 +33,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
+#include "..\shared\DarkMode.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -80,7 +81,24 @@ LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=donations%2eabstractspoon%2etodolist%40gmail%2ecom&item_name=ToDoList%20Software"); 
 
 /////////////////////////////////////////////////////////////////////////////
-// CToDoListApp
+// The one and only CToDoListApp object
+
+CToDoListApp theApp;
+
+/////////////////////////////////////////////////////////////////////////////
+// CToDoListApp construction
+
+CToDoListApp::CToDoListApp() : CWinApp()
+{
+	// Perhaps because we are a Win32 app, using a manifest limits our options
+	// so we set our DPI awareness programmatically
+	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
+}
+
+CToDoListApp::~CToDoListApp()
+{
+}
 
 BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	//{{AFX_MSG_MAP(CToDoListApp)
@@ -112,25 +130,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CToDoListApp construction
-
-CToDoListApp::CToDoListApp() : CWinApp()
-{
-	// Perhaps because we are a Win32 app, using a manifest limits our options
-	// so we set our DPI awareness programmatically
-	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-}
-
-CToDoListApp::~CToDoListApp()
-{
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// The one and only CToDoListApp object
-
-CToDoListApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp initialization
@@ -222,6 +221,9 @@ BOOL CToDoListApp::InitInstance()
 
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
+
+	if (cmdInfo.HasOption(SWITCH_DARKMODE))
+		CDarkMode::Enable();
 
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
@@ -408,9 +410,10 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		// 2. A tasklist was opened or imported
 		// 3. A new task name requires editing
 		// 4. A command requiring UI executed
-		BOOL bShow = (startup.IsEmpty(TRUE) || bTaskLink ||
-					(startup.HasFilePath() && bTasklistOpened) ||
-					(startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskTitle()));
+		BOOL bShow = (startup.IsEmpty(TRUE) || 
+					  cmdInfo.HasOption(SWITCH_TASKLINK) ||
+					  (startup.HasFilePath() && bTasklistOpened) ||
+					  (startup.HasFlag(TLD_NEWTASK) && !startup.HasNewTaskTitle()));
 
 		if (!bShow && startup.HasCommandID())
 		{
@@ -1351,7 +1354,7 @@ void CToDoListApp::OnImportPrefs()
 	}
 	else // notify user
 	{
-		CEnString sMessage(CEnString(IDS_INVALIDPREFFILE), sIniPath);
+		CEnString sMessage(IDS_INVALIDPREFFILE, sIniPath);
 		AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
 	}
 }
@@ -1484,11 +1487,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
-		
-	// the helper app path
-	CString sAppFolder = FileMisc::GetAppFolder();
-	CString sAppPath = GetHelperAppPath(sAppName, bTestDownload);
-
+	
 #ifdef _DEBUG // ----------------------------------------------------
 	if (bTestDownload)
 		params.SetOption(SWITCH_TESTDOWNLOAD);
@@ -1507,10 +1506,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	params.SetOption(SWITCH_CMDLINE, Base64Coder::Encode(m_lpCmdLine));
 #endif // -----------------------------------------------------------
 	
-	// and the current language
-	if (CRTLStyleMgr::IsRTL())
-		params.SetOption(SWITCH_RTL);
-
+	// Inherited commandline options
 	if (m_sLanguageFile != CTDLLanguageComboBox::GetDefaultLanguage())
 	{
 		CString sLangFile = FileMisc::GetFullPath(m_sLanguageFile, FileMisc::GetAppFolder());
@@ -1525,15 +1521,22 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		}
 	}
 
-	// and whether this is a pre-prelease
+	if (CDarkMode::IsEnabled())
+		params.SetOption(SWITCH_DARKMODE);
+
+	if (CRTLStyleMgr::IsRTL())
+		params.SetOption(SWITCH_RTL);
+
 	if (bPreRelease)
 		params.SetOption(SWITCH_PRERELEASE);
 
-	// And whether we want to be restarted with admin rights
 	if (FileMisc::IsAdminProcess())
 		params.SetOption(SWITCH_RESTARTELEVATED);
 
 	// Use the "RunAs" verb if the install folder is readonly
+	CString sAppFolder = FileMisc::GetAppFolder();
+	CString sAppPath = GetHelperAppPath(sAppName, bTestDownload);
+
 	LPCTSTR szVerb = (FileMisc::IsFolderWritable(sAppFolder) ? NULL : _T("runas"));
 
 	return RunHelperApp(sAppPath, params, nIDGenErrorMsg, nIDSmartScreenErrorMsg, szVerb);
@@ -1788,10 +1791,13 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	FileMisc::TerminatePath(sAppPath) += _T("TDLUpdate.exe");
 
 	// pass our app id to app 
-	CEnCommandLineInfo cmdLine;
+	CEnCommandLineInfo cmdInfo;
 
-	cmdLine.SetOption(SWITCH_APPID, TDLAPPID);
-	cmdLine.SetOption(SWITCH_SHOWUI);
+	cmdInfo.SetOption(SWITCH_APPID, TDLAPPID);
+	cmdInfo.SetOption(SWITCH_SHOWUI);
+
+	if (CDarkMode::IsEnabled())
+		cmdInfo.SetOption(SWITCH_DARKMODE);
 
 	// Pass the centroid of the main wnd so that the
 	// updater appears in that same location
@@ -1801,10 +1807,10 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 		m_pMainWnd->GetWindowRect(rWindow);
 		CPoint ptPos = rWindow.CenterPoint();
 
-		cmdLine.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
+		cmdInfo.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 
-	DWORD dwRes = FileMisc::Run(NULL, sAppPath, cmdLine.GetCommandLine());
+	DWORD dwRes = FileMisc::Run(NULL, sAppPath, cmdInfo.GetCommandLine());
 }
 
 void CToDoListApp::OnDebugShowScriptDlg() 
@@ -1817,7 +1823,6 @@ void CToDoListApp::OnDebugShowLanguageDlg()
 	CTDLLanguageDlg dialog;
 	dialog.DoModal();
 }
-
 
 void CToDoListApp::OnDebugTestStableReleaseDownload() 
 {
@@ -2091,6 +2096,12 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	{
 		// remove old components
 		FileMisc::DeleteFile(sAppFolder + _T("\\LuminousControls.dll"), TRUE);
+	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("8.1.998.1")) == 0)
+	{
+		// remove old components
+		FileMisc::DeleteFile(sAppFolder + _T("\\MarkdownSharp.dll"), TRUE);
 	}
 }
 

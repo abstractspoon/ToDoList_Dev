@@ -24,9 +24,12 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
 using unvell.Common;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Actions;
+
+using IIControls;
 
 namespace unvell.ReoGrid.Editor
 {
@@ -108,6 +111,7 @@ namespace unvell.ReoGrid.Editor
 				g.DrawLine(SystemPens.ControlLight, this.leftPanel.Right - 1, panel1.Height, this.leftPanel.Right - 1, this.leftPanel.Bottom);
 			};
 
+			ToolStripEx.RemapSysColors(this.pictureBox1.Image as Bitmap);
 		}
 
 		private TextBox FocusedTextBox

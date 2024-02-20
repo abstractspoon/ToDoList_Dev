@@ -122,7 +122,7 @@ namespace PDFExporter
 
 			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
 
-			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings)
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, m_Trans)
 			{
 				InstalledFont = installedFont,
 				OtherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", ""),
@@ -131,6 +131,8 @@ namespace PDFExporter
 				UseWatermarkImage = prefs.GetProfileBool(sKey, "UseWatermarkImage", false),
 				WatermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "")
 			};
+
+			m_Trans.Translate(optionsDlg);
 
 			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;

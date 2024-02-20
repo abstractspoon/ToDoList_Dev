@@ -323,7 +323,7 @@ void CTreeListTreeCtrl::OnDestroy()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -511,8 +511,9 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	// Don't allow any horizontal movement because this 
 	// will break the way we have implemented click-handling
 	{
+		CHoldRedraw hr(*this);
 		CHoldHScroll hs(m_tree);
-		CTLSHoldResync hr(*this); 
+		CTLSHoldResync hr2(*this); 
 
 		SelectTreeItem(hti, FALSE);
 	}

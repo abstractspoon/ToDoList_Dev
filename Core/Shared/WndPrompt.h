@@ -24,7 +24,7 @@ public:
 	CString GetPrompt() const { return m_sPrompt; }
 
 	static void DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc = NULL, BOOL bCentred = FALSE, LPCTSTR szClass = NULL);
-	static COLORREF GetTextColor(HWND hWnd);
+	static COLORREF GetTextColor();
 
 protected:
 	CString m_sPrompt;

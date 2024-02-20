@@ -38,6 +38,7 @@ public:
 									const CTDCCustomAttribDefinitionArray& aAttribDefs,
 									const CTDCImageList& ilImages,
 									UINT nCtrlIDPos,
+									BOOL bEnableFileLinkThumbnails,
 									CTDCCustomControlArray& aControls);
 
 	static BOOL RebuildFilterControls(CWnd* pParent, 
@@ -59,7 +60,13 @@ public:
 	static void CleanupControls(CTDCCustomControlArray& aControls, CWnd* pParent);
 	static void AddWindowPrompts(const CTDCCustomControlArray& aControls, CWnd* pParent, CWndPromptManager& mgrPrompts);
 
-	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, CWnd* pParent, BOOL bEnable = TRUE);
+	static int EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 
+										  CWnd* pParent, 
+										  BOOL bEnable = TRUE);
+	static int EnableFilelinkThumbnails(const CTDCCustomControlArray& aControls,
+										 const CWnd* pParent, 
+										 BOOL bEnable = TRUE);
+
 	static void ClearFilterCheckboxHistory(const CTDCCustomControlArray& aControls, CWnd* pParent);
 	static void ClearFilterCheckboxHistory(const CUSTOMATTRIBCTRLITEM& ctrl, CWnd* pParent);
 
@@ -124,7 +131,11 @@ protected:
 	static CWnd* CreateAttributeCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 									 const TDCCADATA& data,
 									 const CTDCImageList& ilImages,
-									 UINT nCtrlID, BOOL bBuddy, BOOL bMultiSelectionFilter);
+									 UINT nCtrlID, 
+									 BOOL bBuddy, 
+									 BOOL bMultiSelectionFilter,
+									 BOOL bFileLinkThumbnails,
+									 CString& sPrompt);
 
 	static CWnd* CreateAttributeLabelCtrl(CWnd* pParent, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 										  const TDCCADATA& data, UINT nCtrlID, BOOL bBuddy);
@@ -139,8 +150,11 @@ protected:
 								const CTDCCustomAttribDefinitionArray& aAttribDefs,
 								const CTDCCustomAttributeDataMap& mapCtrlData,
 								const CTDCImageList& ilImages,
-								UINT nCtrlIDPos, UINT nCtrlIDStart,
-								BOOL bFilter, BOOL bMultiSelectionFilter,
+								UINT nCtrlIDPos, 
+								UINT nCtrlIDStart,
+								BOOL bFilter, 
+								BOOL bMultiSelectionFilter,
+								BOOL bFileLinkThumbnails,
 								CTDCCustomControlArray& aControls);
 
 	static BOOL NeedRebuildControls(const CTDCCustomAttribDefinitionArray& aOldAttribDefs,
@@ -159,6 +173,7 @@ protected:
 	static CWnd* CheckRecreateDateFilterBuddy(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl, FILTER_DATE nFilter, 
 											  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL& bCreated);
 	static void SetBuddyVisibility(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const TDCCADATA& data);
+	static void SetControlPrompt(const CWnd* pCtrl, LPCTSTR szPrompt, CWndPromptManager& mgrPrompts);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTEHELPER_H__4044B3B7_1EA0_4279_9620_F2035DAE87DF__INCLUDED_)

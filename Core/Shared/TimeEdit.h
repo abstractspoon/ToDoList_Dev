@@ -60,7 +60,6 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTimeEdit)
 	//}}AFX_VIRTUAL
-	virtual void PreSubclassWindow();
 	virtual void OnBtnClick(UINT nID);
 	virtual void OnSetReadOnly(BOOL bReadOnly);
 
@@ -71,6 +70,7 @@ protected:
 	//{{AFX_MSG(CTimeEdit)
 	//}}AFX_MSG
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	DECLARE_MESSAGE_MAP()
 
 	void CheckSetUnits(TH_UNITS nUnits, BOOL bQueryUnits);

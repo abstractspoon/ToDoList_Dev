@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace LinkLabelEx
@@ -26,6 +27,11 @@ namespace LinkLabelEx
 		static readonly Cursor Hand = new Cursor(LoadCursor(IntPtr.Zero, IDC_HAND));
 
 		// -----------------------------------------
+
+		public LinkLabelEx() : base()
+		{
+			base.LinkColor = SystemColors.HotTrack;
+		}
 
 		protected override void WndProc(ref Message msg)
 		{

@@ -19,6 +19,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CBrowserDlg dialog
 
+const UINT CBrowserDlg::BROWSER_CTRLID = 1;
+
+/////////////////////////////////////////////////////////////////////////////
 
 CBrowserDlg::CBrowserDlg(BOOL bBrowser, IPreferences* pPrefs, LPCTSTR szSettingsKey) 
 	: 
@@ -44,7 +47,7 @@ BEGIN_MESSAGE_MAP(CBrowserDlg, CDialog)
 	//{{AFX_MSG_MAP(CBrowserDlg)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
-	ON_EN_SETFOCUS(1, OnEditSetFocus)
+	ON_EN_SETFOCUS(BROWSER_CTRLID, OnEditSetFocus)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -176,9 +179,9 @@ BOOL CBrowserDlg::SetDisplayInBrowser(BOOL bBrowser)
 	{
 		AfxEnableControlContainer();
 		
-		return m_browser.Create(_T(""), WS_CHILD | WS_TABSTOP | WS_VISIBLE, rClient, this, 1);
+		return m_browser.Create(_T(""), WS_CHILD | WS_TABSTOP | WS_VISIBLE, rClient, this, BROWSER_CTRLID);
 	}
-	else if (m_edit.Create(WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_READONLY | ES_MULTILINE | WS_VSCROLL | ES_NOHIDESEL, rClient, this, 1))
+	else if (m_edit.Create(WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_READONLY | ES_MULTILINE | WS_VSCROLL | ES_NOHIDESEL, rClient, this, BROWSER_CTRLID))
 	{
 		m_edit.SetFont(CFont::FromHandle(CDialogHelper::GetFont(this)));
 		m_edit.SetMargins(5, 5);

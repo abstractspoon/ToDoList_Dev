@@ -10,10 +10,13 @@
 #include "osversion.h"
 #include "icon.h"
 #include "EnImageList.h"
+#include "EnBitmapEx.h"
+#include "darkmode.h"
 
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\GdiPlus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include <windef.h>
 #include <afxpriv.h>
@@ -54,11 +57,6 @@ typedef DWORD ARGB;
 static int PointsPerInch() { return 72; }
 
 const static int DEFAULT_DPI = 96;
-
-//////////////////////////////////////////////////////////////////////
-
-const static COLORREF WHITE = RGB(255, 255, 255);
-const static COLORREF BLACK = RGB(0, 0, 0);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -256,9 +254,20 @@ void GraphicsMisc::DrawGlassWithGradient(CDC* pDC, LPCRECT pRect, COLORREF crFro
 void GraphicsMisc::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar, BOOL bEdged)
 {
 	BOOL bVert = (rSplitter.Height() > rSplitter.Width());
-	DWORD dwEdges = (bEdged ? (bVert ? (GMDR_LEFT | GMDR_RIGHT) : (GMDR_TOP | GMDR_BOTTOM)) : 0);
 
-	DrawRect(pDC, rSplitter, crSplitBar, Darker(crSplitBar, 0.2), 0, dwEdges);
+	if (bEdged)
+	{
+		DWORD dwEdges = (bEdged ? (bVert ? (GMDR_LEFT | GMDR_RIGHT) : (GMDR_TOP | GMDR_BOTTOM)) : 0);
+
+		if (Misc::IsHighContrastActive())
+			DrawRect(pDC, rSplitter, crSplitBar, GetBestTextColor(crSplitBar), 0, dwEdges);
+		else
+			DrawRect(pDC, rSplitter, crSplitBar, Darker(crSplitBar, 0.2), 0, dwEdges);
+	}
+	else
+	{
+		DrawRect(pDC, rSplitter, crSplitBar);
+	}
 
 	// draw drag marker (2 x 20)
 	int nSplitWidth = min(rSplitter.Width(), rSplitter.Height());
@@ -327,8 +336,13 @@ HFONT GraphicsMisc::CreateFont(LPCTSTR szFaceName, int nPoint, DWORD dwFlags)
 	LOGFONT lf;
 	::GetObject(hDefFont, sizeof(lf), &lf);
 	
-	// set the charset
-	if (dwFlags & GMFS_SYMBOL)
+	// Fix for regional settings option
+	// "Beta: Use Unicode UTF-8 for worldwide language support"
+	if (::GetACP() != CP_UTF8)
+	{
+		lf.lfCharSet = DEFAULT_CHARSET;
+	}
+	else if (dwFlags & GMFS_SYMBOL)
 	{
 		lf.lfCharSet = SYMBOL_CHARSET;
 	}
@@ -338,12 +352,7 @@ HFONT GraphicsMisc::CreateFont(LPCTSTR szFaceName, int nPoint, DWORD dwFlags)
 	}
 	
 	if (!Misc::IsEmpty(szFaceName))
-	{
 		lstrcpy(lf.lfFaceName, szFaceName);
-		
-		// reset character-set 
-		lf.lfCharSet = DEFAULT_CHARSET;
-	}
 	
 	if (nPoint > 0)
 	{
@@ -807,10 +816,26 @@ CFont* GraphicsMisc::PrepareDCFont(CDC* pDC, HWND hwndRef, CFont* pFont, int nSt
 	return (CFont*)pDC->SelectStockObject(nStockFont);
 }
 
-COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack)
+COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack, BOOL bEnabled)
 {
-	// base text color on luminance
-	return ((RGBX(crBack).Luminance() < 128) ? WHITE : BLACK);
+	BYTE bLum = RGBX(crBack).Luminance();
+
+	if (bLum < 128) // darker
+	{
+		if (bEnabled)
+			bLum = 255; // white
+		else
+			bLum += 96; // lighter
+	}
+	else // lighter
+	{
+		if (bEnabled)
+			bLum = 0; // black
+		else
+			bLum -= 96; // darker
+	}
+	
+	return RGB(bLum, bLum, bLum);
 }
 
 COLORREF GraphicsMisc::Lighter(COLORREF color, double dAmount, BOOL bRGB)
@@ -840,7 +865,7 @@ void GraphicsMisc::CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& 
 	if (crBase == CLR_NONE)
 	{
 		crFill = CLR_NONE;
-		crBorder = GetSysColor(bEnabled ? COLOR_3DDKSHADOW : COLOR_3DSHADOW);
+		crBorder = GetSysColor(bEnabled ? COLOR_3DDKSHADOW : COLOR_GRAYTEXT);
 	}
 	else
 	{
@@ -1100,11 +1125,10 @@ int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UIN
 
 	CFont* pOldFont = pFont ? pDC->SelectObject(pFont) : NULL;
 	pDC->SetBkMode(TRANSPARENT);
-	int nResult = 0;
 
 	// draw as ANSI string
 	char szAnsi[2] = { cSymbol, 0 };
-	nResult = ::DrawTextA(*pDC, szAnsi, 1, (LPRECT)(LPCRECT)rText, nFlags);
+	int nResult = ::DrawTextA(*pDC, szAnsi, 1, (LPRECT)(LPCRECT)rText, nFlags);
 	
 	if (pFont)
 		pDC->SelectObject(pOldFont);
@@ -1277,7 +1301,7 @@ BOOL GraphicsMisc::FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwn
 
 	COLORREF crOldBk = pDC->GetBkColor();
 
-	if (hwnd)
+	if (::IsWindow(hwnd))
 	{
 		CRect rClient;
 		::GetClientRect(hwnd, rClient);
@@ -1326,12 +1350,54 @@ BOOL GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, 
 	return TRUE;
 }
 
+void GraphicsMisc::AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags)
+{
+	CPoint ptOtherRef = CentrePoint(prcOther);
+
+	int nWidth = (pRect->right - pRect->left);
+	int nHeight= (pRect->bottom - pRect->top);
+	
+	// Vertical
+	if (Misc::HasFlag(nDrawTextFlags, DT_BOTTOM))
+	{
+		ptOtherRef.y = (prcOther->bottom - (nHeight / 2));
+	}
+	else if (Misc::HasFlag(nDrawTextFlags, DT_VCENTER))
+	{
+		 // done
+	}
+	else // DT_TOP
+	{
+		ptOtherRef.y = (prcOther->top + (nHeight / 2));
+	}
+	
+	// Horizontal
+	if (Misc::HasFlag(nDrawTextFlags, DT_RIGHT))
+	{
+		ptOtherRef.x = (prcOther->right - (nWidth / 2));
+	}
+	else if (Misc::HasFlag(nDrawTextFlags, DT_CENTER))
+	{
+		 // done
+	}
+	else // DT_LEFT
+	{
+		ptOtherRef.x = (prcOther->left + (nWidth / 2));
+	}
+
+	CPoint ptRef = CentrePoint(pRect);
+	::OffsetRect(pRect, (ptOtherRef.x - ptRef.x), (ptOtherRef.y - ptRef.y));
+}
+
 COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
 {
 	if (nState != GMIS_NONE)
 	{
 		BOOL bHighContrast = Misc::IsHighContrastActive();
-		BOOL bThemed = (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+		BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+
+		if ((crBase == CLR_NONE) || (crBase == GetSysColor(COLOR_WINDOWTEXT)))
+			crBase = 0;
 		
 		if (bHighContrast)
 		{
@@ -1388,16 +1454,28 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 
 BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip)
 {
-	if (hwnd == NULL)
-		hwnd = ::WindowFromDC(*pDC);
-
-	if ((nState == GMIS_NONE) || (hwnd == NULL))
+	if (nState == GMIS_NONE)
 		return FALSE;
 
-	BOOL bHighContrast = Misc::IsHighContrastActive();
-
 	int nOSVer = COSVersion();
+
+	BOOL bHighContrast = Misc::IsHighContrastActive();
 	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA));
+
+	if (hwnd == NULL)
+	{
+		hwnd = ::WindowFromDC(*pDC);
+		
+		// Certain options are not doable without a valid HWND
+		if (hwnd == NULL)
+		{
+			if (!prClip && (dwFlags & (GMIB_EXTENDLEFT | GMIB_EXTENDRIGHT | GMIB_CLIPLEFT | GMIB_CLIPRIGHT)))
+				return FALSE;
+
+			if (bThemed)
+				return FALSE;
+		}
+	}
 
 	// Adjust drawing rect/flags accordingly
 	CRect rDraw(rItem), rClip(prClip);
@@ -1446,8 +1524,8 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	}
 	
 	// Do the draw
-	BOOL bPreDraw = (dwFlags & GMIB_PREDRAW), bPostDraw = (dwFlags & GMIB_POSTDRAW);
-	BOOL bSingleStageDraw = (!bPreDraw && !bPostDraw);
+	BOOL bPreDraw = ((dwFlags & GMIB_PREDRAW)), bPostDraw = ((dwFlags & GMIB_POSTDRAW));
+	BOOL bSingleStageDraw = ((!bPreDraw && !bPostDraw) || CDarkMode::IsEnabled());
 	BOOL bDrawn = FALSE;
 
 	// Fill background with white if single stage draw
@@ -1462,9 +1540,9 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 
 		// Themed Windows 7 and Vista require a round-rect
 		if (bThemed && (nOSVer < OSV_WIN8))
-			GraphicsMisc::DrawRect(pDC, rBkgnd, WHITE, CLR_NONE, 1);
+			GraphicsMisc::DrawRect(pDC, rBkgnd, colorWhite, CLR_NONE, 1);
 		else
-			pDC->FillSolidRect(rBkgnd, WHITE);
+			pDC->FillSolidRect(rBkgnd, colorWhite);
 
 		bDrawn = TRUE;
 	}
@@ -1784,6 +1862,31 @@ CSize GraphicsMisc::GetBitmapSize(HBITMAP hBmp)
 	return CSize(bitmap.bmWidth, bitmap.bmHeight);
 }
 
+HBITMAP GraphicsMisc::MakeWizardImage(HICON hIcon)
+{
+	// The wizard demands an image of size 49x49 which is a bit of a nuisance
+	CClientDC dcDesktop(CWnd::GetDesktopWindow());
+	ASSERT_VALID(&dcDesktop);
+
+	CDC dcMem;
+
+	if (!dcMem.CreateCompatibleDC(&dcDesktop))
+		return NULL;
+
+	CBitmap bmMem;
+
+	if (!bmMem.CreateCompatibleBitmap(&dcDesktop, 49, 49))
+		return NULL;
+
+	CBitmap* pOldBM = dcMem.SelectObject(&bmMem);
+
+	dcMem.FillSolidRect(0, 0, 49, 49, GetSysColor(COLOR_WINDOW));
+	::DrawIconEx(dcMem, 0, 0, hIcon, 48, 48, 0, NULL, DI_NORMAL);
+	dcMem.SelectObject(pOldBM);
+
+	return (HBITMAP)bmMem.Detach();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // private helper for IconToPARGB32Bitmap
 void InitBitmapInfo(BITMAPINFO *pbmi, ULONG cbInfo, LONG cx, LONG cy, WORD bpp)
@@ -2039,8 +2142,11 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 			BITMAP BM;
 			bitmap.GetBitmap(&BM);
 
-			if (ilCheckboxes.Create(BM.bmWidth / nNumStates, BM.bmHeight, ILC_COLOR32 | ILC_MASK, 0, 1))
-				ilCheckboxes.Add(&bitmap, crBkgnd);
+			if (ilCheckboxes.Create(BM.bmWidth / nNumStates, BM.bmHeight, ILC_COLOR32 | ILC_MASK, 0, 1) &&
+				ilCheckboxes.Add(&bitmap, crBkgnd) == 0)
+			{
+				CEnImageList::ScaleByDPIFactor(ilCheckboxes, crBkgnd);
+			}
 		}
 	}
 
@@ -2150,6 +2256,42 @@ COLORREF GraphicsMisc::GetSolidColor(HBRUSH hBrush)
 	VERIFY(::GetObject(hBrush, sizeof(lb), &lb));
 
 	return lb.lbColor;
+}
+
+COLORREF GraphicsMisc::GetGroupHeaderColor() 
+{
+	return GetSysColor(COLOR_HOTLIGHT);
+}
+
+void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CString& sText, COLORREF crText, COLORREF crBack)
+{
+	CSaveDC dc(pDC);
+
+	if (crText == CLR_NONE)
+	{
+		if (crBack == CLR_NONE)
+			crText = GetGroupHeaderColor();
+		else
+			crText = GetBestTextColor(crBack);
+	}
+
+	if (crBack == CLR_NONE)
+		crBack = GetSysColor(COLOR_WINDOW);
+
+	FillItemRect(pDC, rRow, crBack, hWnd);
+	DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
+
+	if (!sText.IsEmpty())
+	{
+		// Force text to always be visible on the LHS
+		CRect rText(rRow);
+		rText.left = ScaleByDPIFactor(20);
+
+		pDC->SetTextColor(crText);
+		pDC->SetBkColor(crBack);
+		pDC->SetBkMode(OPAQUE);
+		pDC->DrawText(sText, rText, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+	}
 }
 
 BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)

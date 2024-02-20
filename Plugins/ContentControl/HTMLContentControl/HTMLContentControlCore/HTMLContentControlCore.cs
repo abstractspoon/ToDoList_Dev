@@ -38,7 +38,7 @@ namespace HTMLContentControl
             m_TypeID = typeId;
             m_HwndParent = hwndParent;
             m_Trans = trans;
-			m_ControlsFont = new Font("Tahoma", 8);
+			m_ControlsFont = new Font("Tahoma", 8.25f);
 			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
 			m_PrefsDlg = new HTMLPreferencesDlg(m_ControlsFont, m_Trans);
 

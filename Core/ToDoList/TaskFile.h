@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "tdcenumContainers.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\xmlfileex.h"
 
@@ -21,7 +22,6 @@
 
 // predecs
 class CBinaryData;
-class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
 class CTDCDependencyArray;
 
@@ -48,11 +48,18 @@ enum
 	TDL_FILEFORMAT_CUSTATTRIB,
 	TDL_FILEFORMAT_RECUR_MOD,
 	TDL_FILEFORMAT_LOCKING,
-	//TDL_FILEFORMAT_COSTISRATE,
 	// insert here when format changes
 
 	TDL_FILEFORMAT_NEXT,
 	TDL_FILEFORMAT_CURRENT = (TDL_FILEFORMAT_NEXT - 1) // ALWAYS LAST
+};
+
+// Flags for use with MergeTaskAttributes
+enum
+{
+	TDLMTA_OVERWRITEALL					= 0x0,
+	TDLMTA_PRESERVENONEMPTYDESTVALUES	= 0x1,
+	TDLMTA_EXCLUDEEMPTYSOURCEVALUES		= 0x2,
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +193,12 @@ public:
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
 	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
-	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
+
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const;
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi,
+							 const CTDCAttributeMap& mapAttribs,
+							 const CTDCCustomAttribDefinitionArray& aCustAttribs,
+							 DWORD dwFlags) const;
 
 	BOOL SetTaskLastModified(HTASKITEM hTask, const COleDateTime& tLastMod, const CString& sModifiedBy);
 	BOOL SetTaskDoneDate(HTASKITEM hTask, const COleDateTime& date);
@@ -201,6 +213,7 @@ public:
 	BOOL SetTaskPriorityColor(HTASKITEM hTask, COLORREF color);
 	BOOL SetTaskCalcTimeEstimate(HTASKITEM hTask, double dTime, TDC_UNITS cUnits);
 	BOOL SetTaskCalcTimeSpent(HTASKITEM hTask, double dTime, TDC_UNITS cUnits);
+	BOOL SetTaskCalcTimeRemaining(HTASKITEM hTask, double dTime, TDC_UNITS cUnits);
 	BOOL SetTaskCalcDueDate(HTASKITEM hTask, const COleDateTime& date);
 	BOOL SetTaskCalcStartDate(HTASKITEM hTask, const COleDateTime& date);
 	BOOL SetTaskCalcCompletion(HTASKITEM hTask, int nPercent);
@@ -237,7 +250,7 @@ public:
 
 	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const;
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttributeDataMap& mapData);
-	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data);
+	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data, BOOL bCalc = FALSE);
 	
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
 	BOOL GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const;
@@ -247,6 +260,14 @@ public:
 	BOOL SelectTask(HTASKITEM hTask, BOOL bSelect = TRUE);
 	BOOL IsTaskSelected(HTASKITEM hTask) const;
 	BOOL IsTaskSelected(DWORD dwTaskID) const;
+
+	//////////////////////////////////////////////////////////////
+	// ITaskList18 implementation 
+	bool AddTaskDependency(HTASKITEM hTask, LPCTSTR szDepends, int nDaysLeadIn);
+	bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeadIn);
+	LPCTSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeadIn) const;
+
+	double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
@@ -267,8 +288,8 @@ public:
 	bool IsTaskFlagged(HTASKITEM hTask, bool bCalc) const;
 	
 	LPCTSTR GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, bool bDisplay) const;
-	LPCWSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
-	bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCWSTR szModifiedBy);
+	LPCTSTR GetTaskLastModifiedBy(HTASKITEM hTask) const;
+	bool SetTaskLastModifiedBy(HTASKITEM hTask, LPCTSTR szModifiedBy);
 
 	unsigned long GetCustomAttributeTypeByID(LPCTSTR szID) const;
 
@@ -312,7 +333,7 @@ public:
 		DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom, TDC_RECURREUSEOPTION nReuse, int nNumOccur);
 
 	LPCTSTR GetTaskSubtaskCompletion(HTASKITEM hTask) const;
-	bool AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCWSTR szColumn, bool bList);
+	bool AddCustomAttribute(LPCTSTR szID, LPCTSTR szLabel, LPCTSTR szColumn, bool bList);
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList12 implementation 
@@ -425,7 +446,6 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList2 implementation 
-	
 	LPCTSTR GetTaskCreatedBy(HTASKITEM hTask) const;
 	time_t GetTaskCreationDate(HTASKITEM hTask) const;
 	LPCTSTR GetTaskCreationDateString(HTASKITEM hTask) const;
@@ -435,9 +455,7 @@ public:
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList implementation 
-
 	bool IsArchive() const;
-	
 	LPCTSTR GetProjectName() const;
 
 	bool IsSourceControlled() const;
@@ -530,6 +548,7 @@ protected:
 	BOOL m_bISODates;
 	CString m_sHtmlImgFolder;
 	CTDCAttributeMap m_mapReadableAttrib;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	mutable CMap <DWORD, DWORD, HTASKITEM, HTASKITEM&> m_mapHandles;
 
@@ -543,6 +562,8 @@ protected:
 	int GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aSelTaskIDs) const;
 	void RemoveNonSelectedTasks(HTASKITEM hTask);
 	void CleanUp(HTASKITEM hTask = NULL);
+	BOOL WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
+							  const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const;
 
 	double GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const;
 	time_t GetTaskDate(HTASKITEM hTask, const CString& sDateItem, BOOL bIncTime) const;
@@ -553,7 +574,6 @@ protected:
 	const CString& GetTaskString(HTASKITEM hTask, const CString& sStringItem) const;
 	double GetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem) const;
 	TDC_UNITS GetTaskTimeUnits(HTASKITEM hTask, const CString& sUnitsItem) const;
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrite) const;
 	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
@@ -561,10 +581,11 @@ protected:
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;
+	CXmlItem* GetTaskCustomAttribute(CXmlItem* pXITask, LPCTSTR szID) const;
 	CXmlItem* GetCustomAttributeDef(const CString& sCustID);
 	const CXmlItem* GetCustomAttributeDef(const CString& sCustID) const;
 	CXmlItem* AddCustomAttributeDef(LPCTSTR szID, LPCTSTR szLabel, LPCTSTR szColumn, BOOL bList);
-	BOOL SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data);
+	BOOL SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data, BOOL bCalc);
 
 	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, time_t tVal);
 	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& tVal, const CString& sDateStringItem = EMPTY_STR);
@@ -579,7 +600,8 @@ protected:
 
 	// for handling arrays at *task* level
 	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty);
-	CString GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
+	CString GetTaskArrayItemValue(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
+	CXmlItem* GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
 	BOOL SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems, BOOL bAllowEmpty);
 	int GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems, BOOL bAllowEmpty) const;
 	bool DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag);
@@ -602,6 +624,7 @@ protected:
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
 	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
 	static LPCTSTR GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay);
+	static BOOL WantMergeCustomAttribute(LPCTSTR szAttribID, TDCCADATA dataSrc, TODOITEM& tdiDest, DWORD dwFlags);
 };
 
 #endif // !defined(AFX_TASKFILE_H__BA5D71E7_2770_45FD_A693_A2344B589DF4__INCLUDED_)

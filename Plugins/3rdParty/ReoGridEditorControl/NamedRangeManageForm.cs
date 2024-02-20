@@ -30,23 +30,7 @@ namespace unvell.ReoGrid.Editor
 		{
 			InitializeComponent();
 
-			SetupUILanguage();
-
 			this.grid = grid;
-		}
-
-		void SetupUILanguage()
-		{
-			this.Text = LangResource.NamedRangeManage_Caption;
-			this.labNamedRange.Text = LangResource.NamedRangeManage_Named_Ranges;
-
-			this.colName.Text = LangResource.Name;
-			this.colAddress.Text = LangResource.Address;
-
-			this.btnNew.Text = LangResource.NamedRangeManage_New;
-			this.btnEdit.Text = LangResource.Btn_Edit;
-			this.btnDelete.Text = LangResource.Btn_Delete;
-			this.btnClose.Text = LangResource.Btn_Close;
 		}
 
 		private void NamedRangeManageForm_Load(object sender, EventArgs _unused)

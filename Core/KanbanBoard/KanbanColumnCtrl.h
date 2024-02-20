@@ -29,6 +29,7 @@ const UINT WM_KLCN_EDITTASKFLAG		= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/F
 const UINT WM_KLCN_EDITTASKPIN		= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_KLCN_EDITTASKLABEL	= (WM_APP+6); // WPARAM = HWND, LPARAM = TaskID
 const UINT WM_KLCN_SHOWFILELINK		= (WM_APP+7); // WPARAM = HWND, LPARAM = LPCTSTR
+const UINT WM_KLCN_EDITTASKLOCK		= (WM_APP+8); // WPARAM = HWND, LPARAM = TRUE/FALSE
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -39,11 +40,12 @@ class CKanbanColumnCtrl : public CTreeCtrl, protected CDragDropData
 
 // Construction
 public:
-	CKanbanColumnCtrl(const CKanbanItemMap& data, 
-					const KANBANCOLUMN& columnDef, 
-					CFontCache& fonts,
-					const CDWordArray& aPriorityColors,
-					const CKanbanAttributeArray& aDisplayAttrib);
+	CKanbanColumnCtrl(const CKanbanItemMap& data,
+					  const KANBANCOLUMN& columnDef,
+					  CFontCache& fonts,
+					  const CDWordArray& aPriorityColors,
+					  const CKanbanAttributeArray& aDisplayAttrib,
+					  const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 	
 	CString GetAttributeID() const;
 	int GetAttributeValues(CStringArray& aValues) const;
@@ -55,6 +57,7 @@ public:
 	BOOL IsBacklog() const;
 	BOOL IsEmpty() const { return (GetCount() == 0); }
 	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
+	UINT GetCount() const { return (CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
 
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	
@@ -64,8 +67,10 @@ public:
 	BOOL DeleteAll();
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
-	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	
+	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
+	void SetGroupHeaderBackgroundColor(COLORREF color);
+
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
 	BOOL CreateDragImage(CImageList& ilDrag, CSize& sizeImage);
@@ -85,6 +90,7 @@ public:
 	int GetSelectedCount() const;
 	HTREEITEM GetFirstSelectedItem() const;
 	HTREEITEM GetLastSelectedItem() const;
+	HTREEITEM GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) const;
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
@@ -100,6 +106,7 @@ public:
 	void SetMaximumTaskCount(int nMaxTasks);
 
 	void SetOptions(DWORD dwOptions);
+	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; Invalidate(); }
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nColWidth = -1) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
@@ -111,20 +118,20 @@ public:
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
-	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis);
-	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
 protected:
 	BOOL m_bSelected;
 	BOOL m_bSavingToImage;
 	BOOL m_bDropTarget;
-	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks;
+	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks, m_bDrawTaskLocks;
+	BOOL m_bReadOnly;
 
-	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
+	const CKanbanItemMap& m_data;
 	const CDWordArray& m_aPriorityColors;
 	const CKanbanAttributeArray& m_aDisplayAttrib;
+	const CKanbanCustomAttributeDefinitionArray& m_aCustAttribDefs;
 
 	// For quick lookup
 	CHTIMap m_mapHTItems;
@@ -138,8 +145,14 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
-	COLORREF m_crItemShadow;
-	
+	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd;
+
+	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
+	BOOL m_bSortAscending;
+
+	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
+	CGroupHeaderMap m_mapGroupHeaders;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CKanbanListCtrlEx)
@@ -168,13 +181,15 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnHitTest(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGetNextItem(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	// Prevent anyone calling these
+	// Prevent anyone calling these directly
 	void DeleteAllItems() { ASSERT(0); }
 	void InsertItem() { ASSERT(0); }
 	void DeleteItem() { ASSERT(0); }
@@ -197,11 +212,26 @@ protected:
 	void NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse);
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL IsOnlySelectedTask(DWORD dwTaskID);
-	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
 	void RecalcItemShadowColor();
+
+	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
+	BOOL IsGroupHeaderItem(HTREEITEM hti) const;
+	int GetGroupValues(CStringSet& aValues) const;
+	void CheckRebuildGroupHeaders();
+	void RebuildGroupHeaders(const CStringSet& aValues);
+	int CompareGrouping(LPARAM lParam1, LPARAM lParam2) const;
+	CString FormatTaskGroupHeaderText(DWORD dwHeaderID) const;
+	BOOL IsGrouping() const { return (m_nGroupBy != TDCA_NONE); }
+
+	void DoSort();
+	int CompareItems(LPARAM lParam1, LPARAM lParam2) const;
+	int CompareParentAndPins(const KANBANITEM*& pKI1, const KANBANITEM*& pKI2) const;
+	int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, TDC_ATTRIBUTE nBy, BOOL bAscending) const;
+	int BuildSortedSelection(CHTIList& lstHTI) const;
+	BOOL IsSorting() const { return (m_nSortBy != TDCA_NONE); }
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
@@ -228,8 +258,6 @@ protected:
 	BOOL DrawTaskIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rIcon) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORT& sort);
-	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
 
 };
 

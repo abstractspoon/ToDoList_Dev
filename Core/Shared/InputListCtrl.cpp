@@ -787,11 +787,10 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
-				if (!bEnabled)
-					pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
+				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 
-				UINT nFlags = DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
-				GraphicsMisc::DrawAnsiSymbol(pDC, '6', rButton, nFlags, &GraphicsMisc::Marlett());
+				UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
+				GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rButton, nFlags, &GraphicsMisc::Marlett());
 			}
 			break;
 
@@ -799,13 +798,11 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
-				if (!bEnabled)
-					pDC->SetTextColor(GetSysColor(COLOR_3DSHADOW));
-
 				// Make rect sides even for better centering of ellipsis
 				rButton.left += (rButton.Width() % 2);
 				rButton.top += (rButton.Height() % 2);
 
+				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 				pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
 			}
 			break;
@@ -1822,7 +1819,7 @@ IL_COLUMNTYPE CInputListCtrl::GetColumnType(int nCol) const
 	return pData ? pData->nType : ILCT_TEXT;
 }
 
-int CInputListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
+int CInputListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	// if one of the items is the prompt then this is always last
 	if (dwItemData1 == PROMPT || dwItemData2 == PROMPT)

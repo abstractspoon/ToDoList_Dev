@@ -69,15 +69,6 @@ namespace unvell.ReoGrid.PropertyPages
 			set { this.grid = value; }
 		}
 
-		public void SetupUILanguage()
-		{
-			labBackgroundColor.Text = LangResource.FillPage_Background_Color;
-			grpSample.Text = LangResource.Sample;
-			grpPattern.Text = LangResource.FillPage_Fill_Pattern;
-			labPatternColor.Text = LangResource.FillPage_Fill_Pattern_Color;
-			labPatternStyle.Text = LangResource.FillPage_Fill_Pattern_Style;
-		}
-
 		private bool backuphasPatternStyle = false;
 		private Color backupBackColor = Color.Empty;
 		private Color backupPatternColor = Color.Empty;
@@ -120,9 +111,9 @@ namespace unvell.ReoGrid.PropertyPages
 
 				// pattern style need a back color
 				// when pattern style setted but back color is not setted, set the backcolor to white
-				if (patternStyleComboBox.HasPatternStyle)
+				if (patternStyleComboBox.HasPatternStyle && colorPanel.SolidColor.IsEmpty)
 				{
-					style.BackColor = Color.White;
+					style.BackColor = new Graphics.SolidColor(1, 255, 255, 255);
 					style.Flag |= PlainStyleFlag.BackColor;
 				}
 

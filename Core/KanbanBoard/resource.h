@@ -9,7 +9,6 @@
 #define IDI_HELP_BUTTON                 293
 #define IDR_KANBAN                      1000
 #define IDC_TREEHEADER                  1004
-#define IDC_KanbanLIST                  1005
 #define IDC_KANBANTREE                  1006
 #define IDC_DISPLAY                     1015
 #define IDC_DISPLAYALLOCTO              1016
@@ -71,6 +70,7 @@
 #define IDC_SORTSUBTASKSBELOWPARENT     16036
 #define IDC_OPTIONS                     16036
 #define IDC_CUSTOMATTRIBID              16037
+#define IDC_GROUPBY                     16037
 #define IDC_ALWAYSSHOWBACKLOG           16038
 #define IDC_INDENTSUBTASKS              16039
 #define IDC_CUSTOMATTRIB                16040
@@ -80,7 +80,11 @@
 #define IDC_COLORBARBYPRIORITY          16044
 #define IDC_OPTIONS_LABEL               16044
 #define IDC_DISPLAYATTRIBUTES           16045
+#define IDC_GROUPBY_LABEL               16045
 #define IDC_HIDEEMPTYATTRIBS            16046
+#define IDC_POPULATECOLUMNS             16048
+#define IDC_MOVECOL_UP                  16049
+#define IDC_MOVECOL_DOWN                16050
 #define ID_KANBAN_GOTOTODAY             32774
 #define ID_KANBAN_PREFS                 32775
 #define ID_PREFS                        32775
@@ -93,7 +97,6 @@
 #define IDS_PICKINGFROMDEPEND_EDIT      32781
 #define IDS_PICKINGFROMDEPEND_DELETE    32782
 #define IDS_PICKINGTOTASKEDIT           32783
-#define ID_POPULATECOLUMNS              32783
 #define IDS_PICKED                      32786
 #define IDS_CREATEDEPEND_TITLE          32787
 #define IDS_EDITDEPEND_TITLE            32788
@@ -165,7 +168,14 @@
 #define IDS_DISPLAY_PARENT_SHORT        57723
 #define IDS_DISPLAY_TASKID_SHORT        57724
 #define IDS_OPTIONS_NONE                57725
+#define IDS_NONE                        57725
 #define IDS_OPTIONS_HIDESUBTASKS        57726
+#define IDS_DISPLAY_TIMEREMAINING       57727
+#define IDS_DISPLAY_TIMEREMAINING_SHORT 57728
+#define IDS_DISPLAY_LOCK                57729
+#define IDS_NOBODY                      57730
+#define IDS_OPTIONS_SORTGROUPSASCENDING 57731
+#define IDS_OPTIONS_HIDENOGROUP         57732
 
 // Next default values for new objects
 // 
@@ -173,7 +183,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16015
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         16047
+#define _APS_NEXT_CONTROL_VALUE         16051
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

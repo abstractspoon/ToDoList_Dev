@@ -8,6 +8,12 @@
 //
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CMonthComboBox;
+
+void DDX_Month(CDataExchange* pDX, CMonthComboBox& combo, int& nMonth);
+
+/////////////////////////////////////////////////////////////////////////////
 // CMonthComboBox window
 
 class CMonthComboBox : public CComboBox
@@ -16,16 +22,13 @@ class CMonthComboBox : public CComboBox
 public:
 	CMonthComboBox();
 
-// Attributes
-public:
-
-// Operations
-public:
+	int GetSelectedMonth() const;
+	int SetSelectedMonth(int nMonth);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMonthComboBox)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 

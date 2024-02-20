@@ -85,6 +85,16 @@ namespace Command.Handling
 			return keyPress;
 		}
 
+		public static bool HasMenuShortcut(UInt32 virtualKeyCode, ToolStripItemCollection items)
+		{
+			Keys keyPress = GetMenuShortcutFromVirtualKey(virtualKeyCode);
+
+			if (keyPress == Keys.None)
+				return false;
+
+			return (GetMenuItem(keyPress, items) != null);
+		}
+
 		public static bool ProcessMenuShortcut(UInt32 virtualKeyCode, ToolStripItemCollection items)
 		{
 			Keys keyPress = GetMenuShortcutFromVirtualKey(virtualKeyCode);
@@ -93,6 +103,17 @@ namespace Command.Handling
 				return false;
 
 			return ProcessMenuShortcut(keyPress, items);
+		}
+
+		public static bool EnableCommand(String commandId, bool enable, ToolStripItemCollection items)
+		{
+			ToolStripMenuItem menu = GetMenuItem(commandId, items);
+
+			if (menu == null)
+				return false;
+
+			menu.Enabled = enable;
+			return true;
 		}
 
 		public static Keys GetMenuShortcut(String commandId, ToolStripItemCollection items)

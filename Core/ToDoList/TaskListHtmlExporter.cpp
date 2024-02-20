@@ -432,8 +432,10 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 
 		if (!PRINTING)
 		{
+			DWORD dwTaskID = pTasks->GetTaskID(hTask);
+
 			CString sTaskLink;
-			sTaskLink.Format(_T(" (<a href=\"%s%ld\">%s</a>)"), TASKLISTLINK, pTasks->GetTaskID(hTask), CLocalizer::TranslateText(_T("link")));
+			sTaskLink.Format(_T(" (<a href=\"%s%ld\">tdl://%ld</a>)"), TASKLISTLINK, dwTaskID, dwTaskID);
 
 			sItem += sTaskLink;
 		}

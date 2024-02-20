@@ -57,8 +57,8 @@ public:
 	inline POSITION GetStart() const { return m_items.GetStart(); }
 	inline DWORD GetNextTaskID(POSITION& pos) const { return m_items.GetNextTaskID(pos); }
 	
-	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
-	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;
+	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentID = 0) const;
+	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIDef = NULL) const;
 
 	BOOL AddTask(DWORD dwTaskID, TODOITEM* pTDI, DWORD dwParentID, DWORD dwPrevSiblingID);
 	BOOL DeleteTask(DWORD dwTaskID, BOOL bWithUndo);
@@ -124,7 +124,7 @@ public:
 	BOOL IsTaskDone(DWORD dwTaskID) const;
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
-	BOOL CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const;
+	int CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
 	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
 	BOOL IsTaskReusableRecurring(DWORD dwTaskID) const;
@@ -134,6 +134,7 @@ public:
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
+	CString GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const;
 
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;
@@ -209,17 +210,18 @@ public:
 	TDC_SET SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend = FALSE);
 
 	TDC_SET ClearTaskColor(DWORD dwTaskID) { SetTaskColor(dwTaskID, CLR_NONE); }
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
-	TDC_SET MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday);
+	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekdays);
+	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 
 	TDC_SET ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren = FALSE);
 	TDC_SET ClearTaskCustomAttribute(DWORD dwTaskID, const CString& sAttribID, BOOL bAndChildren = FALSE);
 
-	TDC_SET CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
-	TDC_SET CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
-	TDC_SET CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
-	TDC_SET CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
+	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
+	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
+	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
+	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
 	TDC_SET RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
 	TDC_SET RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
@@ -227,9 +229,9 @@ public:
 	TDC_SET AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 
 	BOOL InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
-	BOOL ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
-	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
-	BOOL ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
+	BOOL ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
+	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib);
+	BOOL ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTRIBUTE nAttrib);
 	BOOL InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID);
 
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
@@ -293,10 +295,10 @@ protected:
 	TODOITEM* GetTask(DWORD& dwTaskID, BOOL bTrue) const;
 	BOOL GetTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS, BOOL bTrue) const;
 
-	BOOL ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
+	BOOL ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
 	BOOL ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDSParent, int nChildPos, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
 
-	TDC_SET CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, const CTDCAttributeMap& mapAttribs) const;
+	TDC_SET CopyInheritedParentTaskAttributes(TODOITEM* pTDI, DWORD dwParentID) const;
 
 	template <class T>
 	TDC_SET EditTaskAttributeT(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, T& val, const T& newValue)
@@ -341,9 +343,16 @@ protected:
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
 	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 
+	BOOL ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy);
+	BOOL GetWantPreserveWeekday(const TODOITEM* pTDI) const;
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
+	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
+
+	static int CalcRecurrenceOffset(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart);
-	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
+	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, BOOL bPreserveWeekdays, COleDateTime& dtNewStart);
+//	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
 	static BOOL CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset);
 
 };

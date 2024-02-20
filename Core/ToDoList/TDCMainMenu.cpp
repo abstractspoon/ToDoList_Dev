@@ -98,18 +98,32 @@ BOOL CTDCMainMenu::LoadMenu()
 		return FALSE;
 
 	LoadMenuCommon();
-
-	TranslateDynamicMenuItems(ID_FILE_MRU1, ID_FILE_MRU16, _T("Recent Tasklist %d"));
-	TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
-	TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
-	TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
-	TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
-	TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View %d"));
-	TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
-	TranslateDynamicMenuItems(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, _T("Default Filter %d"));
-	TranslateDynamicMenuItems(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, _T("Find Tasks Filter %d"));
+	TranslateDynamicMenuItems();
 
 	return TRUE;
+}
+
+void CTDCMainMenu::TranslateDynamicMenuItems()
+{
+	CEnMenu::TranslateDynamicMenuItems(ID_FILE_MRU1, ID_FILE_MRU16, _T("Recent Tasklist %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, _T("Default Filter %d"));
+	CEnMenu::TranslateDynamicMenuItems(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, _T("Find Tasks Filter %d"));
+
+	HMENU hSubMenu = GetSubMenu(*this, ID_VIEW_SAVETOIMAGE);
+
+	if (hSubMenu)
+	{
+		CEnString sMenuItem(ID_VIEW_SAVETOIMAGE);
+		sMenuItem.Replace(_T("(%s)"), _T(""));
+
+		CEnMenu::SetMenuString(hSubMenu, ID_VIEW_SAVETOIMAGE, sMenuItem, MF_BYCOMMAND);
+	}
 }
 
 BOOL CTDCMainMenu::IsInRange(UINT nItem, UINT nStart, UINT nEnd)
@@ -349,6 +363,48 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CPreferencesDlg& prefs) const
 {
 	PrepareEditMenu(pMenu, tdc, prefs);
+
+	// Remove all 'New Task' options for views not supporting them
+	if (!tdc.CanCreateNewTask(TDC_INSERTATTOP))
+	{
+		// Get the position of the last 'new task' option
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK);
+
+		if (nPos != -1)
+		{
+			nPos++;	// Add 1 for the trailing separator
+			nPos++; // Convert to 'number of items to remove'
+
+			while (nPos--)
+				pMenu->DeleteMenu(0, MF_BYPOSITION);
+		}
+	}
+
+	// Likewise for copying column attributes
+	if (tdc.IsExtensionView(tdc.GetTaskView()))
+	{
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_TASKLIST_COPYCOLUMNVALUES);
+
+		if (nPos != -1)
+		{
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // ID_TASKLIST_COPYCOLUMNVALUES
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // Trailing separator
+		}
+	}
+
+	// Add task expansion
+	if (!tdc.CanExpandTasks(TDCEC_ALL, TRUE) &&
+		!tdc.CanExpandTasks(TDCEC_ALL, FALSE))
+	{
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_VIEW_TOGGLETASKEXPANDED);
+
+		if (nPos != -1)
+		{
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // ID_VIEW_TOGGLETASKEXPANDED
+			pMenu->DeleteMenu(nPos, MF_BYPOSITION); // Trailing separator
+		}
+	}
 }
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
@@ -608,7 +664,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_EDIT_SETTASKICON:
 		case ID_EDIT_CLEARTASKICON:
 			break;
-
+			
 		case ID_SEPARATOR:
 			bIsSeparator = TRUE;
 			bDelete = (nCountLastSep == 0);
@@ -856,5 +912,5 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	CUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
-	CTDCToolsHelper(FALSE, FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
+	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
 }

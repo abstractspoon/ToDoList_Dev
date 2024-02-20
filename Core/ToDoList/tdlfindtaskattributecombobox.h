@@ -17,6 +17,7 @@ class CTDLFindTaskAttributeComboBox : public CTDLAttributeComboBox
 // Construction
 public:
 	CTDLFindTaskAttributeComboBox();
+	virtual ~CTDLFindTaskAttributeComboBox();
 
 // Operations
 public:
@@ -26,18 +27,11 @@ public:
 
 	CString GetAttributeName(const SEARCHPARAM& sp) const;
 
-	// Attributes
 protected:
-	CTDCCustomAttribDefinitionArray m_aAttribDefs;
-
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFindTaskAttributeComboBox)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLFindTaskAttributeComboBox();
 
 	// Generated message map functions
 protected:

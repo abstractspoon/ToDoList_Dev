@@ -42,6 +42,8 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
 
+	bool SupportsTaskSelection() const { return false; }
+
 protected:
 	CIcon m_icon;
 

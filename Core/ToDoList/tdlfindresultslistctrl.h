@@ -43,7 +43,7 @@ public:
 	BOOL SetColumnWidths(const CIntArray& aWidths);
 
 protected:
-	COLORREF m_crDone, m_crRef;
+	COLORREF m_crDone, m_crRef, m_crGroupBkgnd;
 	int m_nCurGroupID;
 	BOOL m_bStrikeThruDone;
 	CFontCache m_fonts;
@@ -65,17 +65,21 @@ protected:
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-  	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
+
+	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
 	CFont* GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot);
 	BOOL IsResultHot(const RECT& rResult) const;
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;
 	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
 
 	static BOOL OsIsXP();
+	static COLORREF GetUserColour(const CPreferences& prefs, LPCTSTR szSpecifiedKey, LPCTSTR szColorKey);
 };
 
 /////////////////////////////////////////////////////////////////////////////

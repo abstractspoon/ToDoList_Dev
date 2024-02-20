@@ -700,6 +700,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		// Always update these
 		pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pWI->bParent = pTasks->IsTaskParent(hTask);
 	}
 
 	// detect update
@@ -1094,7 +1095,7 @@ int CWorkloadCtrl::GetRequiredListColumnCount() const
 void CWorkloadCtrl::BuildTaskTreeColumns()
 {
 	// add columns
-	m_treeHeader.InsertItem(0, 0, _T("Title"), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
+	m_treeHeader.InsertItem(0, 0, CEnString(IDS_COL_TITLE), (HDF_LEFT | HDF_STRING), 0, WLCC_TITLE);
 	m_treeHeader.EnableItemDragging(0, FALSE);
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
@@ -1476,9 +1477,6 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			COLORREF crText = GetTreeTextColor(*pWI, (nState != GMIS_NONE), FALSE);
-			pDC->SetTextColor(crText);
-
 			DrawAllocationListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
@@ -2305,26 +2303,28 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 			rColumn.right--;
 			rColumn.bottom--;
 
-			if (crBack != CLR_NONE)
+			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+
+			if (bSelected)
 			{
-				if (bSelected)
-				{
-					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
-				}
+				if (Misc::IsHighContrastActive())
+					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
 				else
-				{
-					pDC->FillSolidRect(rColumn, crBack);
-					pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
-				}
+					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
+				if (crBack != CLR_NONE)
+					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
 			}
-			else
+			else if (crBack != CLR_NONE)
 			{
-				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+				pDC->FillSolidRect(rColumn, crBack);
+				crText = GraphicsMisc::GetBestTextColor(crBack);
 			}
 
 			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
-			pDC->DrawText(Misc::Format(dDays, 2), (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+			pDC->SetTextColor(crText);
+			pDC->DrawText(Misc::Format(dDays, 2), &rColumn, DT_CENTER);
 		}
 	}
 }
@@ -2373,7 +2373,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			CRect rText(rColumn);
 			rText.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
-			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
+			pDC->DrawText(sValue, &rText, DT_CENTER);
 		}
 			
 		DrawVertItemDivider(pDC, rColumn, bSelected);

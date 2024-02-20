@@ -42,7 +42,7 @@ public:
 
 ISubclassCallback* CSubclassWnd::s_pCallback = NULL;
 
-CSubclassWnd::CSubclassWnd() : m_bPreMFCSubclass(FALSE), m_bTracing(FALSE)
+CSubclassWnd::CSubclassWnd() : m_bTracing(FALSE)
 {
 	m_pNext = NULL;
 	m_pOldWndProc = NULL;	
@@ -81,12 +81,10 @@ BOOL CSubclassWnd::HookWindow(HWND hWnd, CSubclasser* pSubclasser)
 			return FALSE;
 
 		m_hWndHooked = hWnd;
+		m_pSubclasser = pSubclasser;
 
 		theHookMap.Add(m_hWndHooked, this);			// Add to map of hooks
 		theSafeMap.SetAt((void*)this, NULL);
-
-		m_pSubclasser = pSubclasser;
-		m_bPreMFCSubclass = (CWnd::FromHandlePermanent(hWnd) == NULL);
 
 #ifdef _DEBUG
 		m_sClass = CWinClasses::GetClass(hWnd);
@@ -97,22 +95,16 @@ BOOL CSubclassWnd::HookWindow(HWND hWnd, CSubclasser* pSubclasser)
 		// Unhook the window
 		if (m_hWndHooked) 
 		{
-			// if we hooked this window PRIOR to MFC subclassing via DDX_Control,
-			// then MFC will assert when it destructs the attached control because
-			// the HWND does not get correctly detached presumably because the WndProc
-			// has been mucked about by MFC. 
-			// so we unsubclass and then resubclass to keep MFC happy, although
-			// the app using this may need more care in the implementation of
-			// their PreSubclassWindow() overrides
+			// Keep MFC happy by Detaching and then re-Attaching
 			CWnd* pPerm = CWnd::FromHandlePermanent(m_hWndHooked);
 
-			if (m_bPreMFCSubclass && pPerm)
-				pPerm->UnsubclassWindow();
+			if (pPerm)
+				pPerm->Detach();
 
-			theHookMap.Remove(this);				// Remove from map
+			theHookMap.Remove(this);
 
-			if (m_bPreMFCSubclass && pPerm)
-				pPerm->SubclassWindow(m_hWndHooked);
+			if (pPerm)
+				pPerm->Attach(m_hWndHooked);
 		}
 
 		theSafeMap.RemoveKey((void*)this);
@@ -121,7 +113,6 @@ BOOL CSubclassWnd::HookWindow(HWND hWnd, CSubclasser* pSubclasser)
 		m_pSubclasser = NULL;
 		m_hWndHooked = NULL;
 		m_pNext = NULL;
-		m_bPreMFCSubclass = FALSE;
 	}
 
 	return TRUE;

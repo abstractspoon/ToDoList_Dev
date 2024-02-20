@@ -42,7 +42,7 @@ namespace unvell.UIControls
 			}
 		}
 
-		private ColorPickerWindow dropPanel = new ColorPickerWindow();
+		private ColorPickerWindow dropPanel = new ColorPickerWindow(SystemColors.Window);
 
 		public ColorPickerToolStripItem()
 			: base()
@@ -86,8 +86,10 @@ namespace unvell.UIControls
 
 			// draw color
 			Rectangle rectColor = this.ButtonBounds;
-			rectColor.Inflate(-4, -4);
-			rectColor.Height = rectColor.Width;
+
+			// to match toolbar images
+			rectColor.Offset(3, 3);
+			rectColor.Height = rectColor.Width = (new DpiScaler(g).X(13)); 
 
 			if (currentColor == null || currentColor.IsEmpty)
 			{

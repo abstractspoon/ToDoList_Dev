@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
 
+using ImageHelper;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -189,14 +191,15 @@ namespace MindMapUIExtension
 	[Flags]
 	enum MindMapOption
 	{
-		None = 0x00,
-		ShowDependencies = 0x01,
+		None				= 0x00,
+		ShowDependencies	= 0x01,
+		StraightConnections	= 0x02,
 	}
 
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class TdlMindMapControl : MindMapControl, IDragRenderer
+	class TdlMindMapControl : MindMapControl, IDragRenderer, ILabelTipHandler
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
         public event EditTaskIconEventHandler       EditTaskIcon;
@@ -219,6 +222,10 @@ namespace MindMapUIExtension
         private Size m_CheckboxSize;
 		private MindMapOption m_Options;
 		private DragImage m_DragImage;
+		private LabelTip m_LabelTip;
+
+		private List<uint> m_PrevExpandedItems;
+		private int m_PrevZoomLevel = -1;
 
 		// -------------------------------------------------------------------------
 
@@ -229,6 +236,7 @@ namespace MindMapUIExtension
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
 			m_DragImage = new DragImage();
+			m_LabelTip = new LabelTip(this);
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -242,6 +250,8 @@ namespace MindMapUIExtension
 
             using (Graphics graphics = Graphics.FromHwnd(Handle))
                 m_CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
+
+			ZoomChange += (s, e) => { ClearFonts(); };
 		}
         
         public void SetStrikeThruDone(bool strikeThruDone)
@@ -259,31 +269,95 @@ namespace MindMapUIExtension
 
 		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
 		{
-			bool baseFontChange = ((m_BoldLabelFont == null) || (m_BoldLabelFont.Name != fontName) || (m_BoldLabelFont.Size != fontSize));
-            bool doneFontChange = (baseFontChange || (m_BoldDoneLabelFont.Strikeout != strikeThruDone));
+			if (base.SetFont(fontName, fontSize))
+			{
+				if (m_Items.Count > 500)
+					Cursor = Cursors.WaitCursor;
 
-            if (baseFontChange)
-                m_BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
+				if (RefreshNodeFont(RootNode, true))
+					RecalculatePositions();
 
-            if (doneFontChange)
-            {
-                if (strikeThruDone)
-                {
-                    m_BoldDoneLabelFont = new Font(fontName, fontSize, FontStyle.Bold | FontStyle.Strikeout);
-                    m_DoneLabelFont = new Font(fontName, fontSize, FontStyle.Strikeout);
-                }
-                else
-                {
-                    m_BoldDoneLabelFont = m_BoldLabelFont;
-                    m_DoneLabelFont = null;
-                }
-            }
+				Cursor = Cursors.Default;
+			}
+		}
 
-            if ((baseFontChange || doneFontChange) && RefreshNodeFont(RootNode, true))
-                RecalculatePositions();
-            
-            base.SetFont(fontName, fontSize);
-        }
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			prefs.WriteProfileInt(key, "ZoomLevel", ZoomLevel);
+			prefs.WriteProfileInt(key, "RootAlignment", (int)Alignment);
+			prefs.WriteProfileInt(key, "Options", (int)Options);
+
+			prefs.WriteProfileString(key, "ExpandedItems", string.Join("|", ExpandedItems));
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)Alignment);
+			Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)Options);
+
+			// Cache previous session values until our first task update
+			m_PrevZoomLevel = prefs.GetProfileInt(key, "ZoomLevel", -1);
+
+			m_PrevExpandedItems = null;
+			var prevExpanded = prefs.GetProfileString(key, "ExpandedItems", "").Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+			if (prevExpanded?.Length > 0)
+			{
+				m_PrevExpandedItems = new List<uint>();
+
+				foreach (var prev in prevExpanded)
+					m_PrevExpandedItems.Add(uint.Parse(prev));
+			}
+		}
+
+		private void ClearFonts()
+		{
+			m_BoldLabelFont = null;
+			m_BoldDoneLabelFont = null;
+			m_DoneLabelFont = null;
+		}
+
+		// ILabelTipHandler implementation
+		public Control GetOwner()
+		{
+			return this;
+		}
+
+		public LabelTipInfo ToolHitTest(Point ptScreen)
+		{
+			var pt = PointToClient(ptScreen);
+			var hit = HitTestPositions(pt);
+
+			if ((hit == null) || IsRoot(hit))
+				return null;
+
+			var labelRect = GetItemLabelRect(hit);
+
+			if (!labelRect.Contains(pt))
+				return null;
+
+			if (ClientRectangle.Contains(labelRect))
+				return null;
+
+			labelRect.Offset(-1, -1);
+
+			return new LabelTipInfo()
+			{
+				Id = UniqueID(hit),
+				Text = hit.Text,
+				MultiLine = false,
+				Rect = labelRect,
+				Font = GetNodeTooltipFont(hit),
+			};
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			if (m_LabelTip != null)
+				m_LabelTip.ProcessMessage(m);
+
+			base.WndProc(ref m);
+		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
@@ -385,7 +459,7 @@ namespace MindMapUIExtension
 		protected float ImageZoomFactor
 		{
 			// Zoom images only half as much as text
-			get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+			get { return (ZoomFactor/* + ((1.0f - ZoomFactor) / 2)*/); }
 		}
 
         public bool WantTaskUpdate(Task.Attribute attrib)
@@ -424,11 +498,15 @@ namespace MindMapUIExtension
 		public new Rectangle GetSelectedItemLabelRect()
 		{
 			EnsureItemVisible(SelectedItem);
+			return GetItemLabelRect(SelectedNode);
+		}
 
-			var labelRect = base.GetSelectedItemLabelRect();
+		public new Rectangle GetItemLabelRect(TreeNode node)
+		{
+			var labelRect = base.GetItemLabelRect(node);
 
 			labelRect.X -= LabelPadding;
-			labelRect.X += GetExtraWidth(SelectedNode);
+			labelRect.X += GetExtraWidth(node);
 
 			// Make sure the rect is big enough for the unscaled font
 			labelRect.Height = Math.Max(labelRect.Height, (this.Font.Height + (2 * LabelPadding))); 
@@ -622,37 +700,56 @@ namespace MindMapUIExtension
 
         override protected bool RefreshNodeFont(TreeNode node, bool andChildren)
         {
-            var taskItem = RealTaskItem(node);
+			if (node == RootNode)
+				ClearFonts();
+
+			var taskItem = RealTaskItem(node);
 
             if (taskItem == null)
                 return false;
 
-            Font curFont = node.NodeFont, newFont = null;
+            Font newFont = null;
 
-            if (taskItem.IsTask)
+			if (taskItem.IsTask) // else non-task root item
             {
+				bool isDone = taskItem.IsDone(false);
+
                 if (taskItem.ParentID == 0)
                 {
-                    if (taskItem.IsDone(false))
-                        newFont = m_BoldDoneLabelFont;
+                    if (m_StrikeThruDone && isDone)
+					{
+						// Create on demand
+						if (m_BoldDoneLabelFont == null)
+							m_BoldDoneLabelFont = new Font(TreeFont, FontStyle.Bold | FontStyle.Strikeout);
+
+						newFont = m_BoldDoneLabelFont;
+					}
                     else
-                        newFont = m_BoldLabelFont;
-                }
-                else if (taskItem.IsDone(false))
+					{
+						// Create on demand
+						if (m_BoldLabelFont == null)
+							m_BoldLabelFont = new Font(TreeFont, FontStyle.Bold);
+
+						newFont = m_BoldLabelFont;
+					}
+				}
+				else if (isDone)
                 {
-                    newFont = m_DoneLabelFont;
+					// Create on demand
+					if (m_StrikeThruDone && (m_DoneLabelFont == null))
+						m_DoneLabelFont = new Font(TreeFont, FontStyle.Strikeout);
+
+					newFont = m_DoneLabelFont;
                 }
             }
 
-			newFont = ScaledFont(newFont);
-
-            bool fontChange = (newFont != curFont);
+            bool fontChange = (newFont != node.NodeFont);
 
             if (fontChange)
                 node.NodeFont = newFont;
             
             // children
-            if (andChildren)
+            if (andChildren && node.IsExpanded)
             {
                 foreach (TreeNode childNode in node.Nodes)
                     fontChange |= RefreshNodeFont(childNode, true);
@@ -748,6 +845,7 @@ namespace MindMapUIExtension
 			{
 				var parentId = task.GetParentTask().GetID();
 				var parentNode = FindNode(parentId);
+				int pos = -1;
 
 				if ((parentId == 0) && (parentNode == null))
 				{
@@ -771,8 +869,12 @@ namespace MindMapUIExtension
 						parentNode = RootNode;
 					}
 				}
+				else // insert in place
+				{
+					pos = (int)task.GetPosition();
+				}
 
-				AddTaskToTree(task, parentNode, true);
+				AddTaskToTree(task, parentNode, pos, true);
 			}
 			else if (item.ProcessTaskUpdate(task))
 			{
@@ -795,7 +897,8 @@ namespace MindMapUIExtension
 		private void RebuildTreeView(TaskList tasks)
 		{
 			// Snapshot the expanded tasks so we can restore them afterwards
-			var expandedIDs = GetExpandedItems();
+			var expandedIDs = (m_PrevExpandedItems ?? ExpandedItems);
+			m_PrevExpandedItems = null;
 
 			// And the selection
 			var selID = UniqueID(SelectedNode);
@@ -819,7 +922,6 @@ namespace MindMapUIExtension
                 m_Items.Add(taskItem.ID, taskItem);
 				rootNode = AddRootNode(taskItem, taskItem.ID);
 
-
 				// First Child
 				AddTaskToTree(task.GetFirstSubtask(), rootNode);
 			}
@@ -833,14 +935,21 @@ namespace MindMapUIExtension
 			}
 
 			// Restore expanded state
-			if (!SetExpandedItems(expandedIDs))
+			ExpandedItems = expandedIDs;
+
+			if (expandedIDs?.Count == 0)
 				rootNode.Expand();
+
+			// Restore zoom
+			if (m_PrevZoomLevel != -1)
+			{
+				ZoomTo(m_PrevZoomLevel);
+				m_PrevZoomLevel = -1;
+			}
 
 			EndUpdate();
 			SetSelectedNode(selID);
-
-			if (rootNode != null)
-				RefreshNodeFont(rootNode, true);
+			UpdateTreeFont(true);
 		}
 
 		private String GetProjectName(TaskList tasks)
@@ -854,38 +963,34 @@ namespace MindMapUIExtension
 			return m_Trans.Translate("Root");
 		}
 
-		protected List<UInt32> GetExpandedItems()
+		public List<UInt32> ExpandedItems
 		{
-			var nodes = GetExpandedNodes(RootNode);
-
-			if (nodes == null)
-				return null;
-
-			// else
-			var expandedIDs = new List<UInt32>();
-
-			foreach (TreeNode node in nodes)
+			get
 			{
-   				expandedIDs.Add(UniqueID(node));
+				var expanded = new List<TreeNode>();
+				GetExpandedNodes(RootNode, ref expanded);
+
+				var expandedIDs = new List<UInt32>();
+
+				foreach (TreeNode node in expanded)
+					expandedIDs.Add(UniqueID(node));
+
+				return expandedIDs;
 			}
 
-			return expandedIDs;
-		}
-
-		private bool SetExpandedItems(List<UInt32> expandedItems)
-		{
-            if (expandedItems == null)
-                return false;
-
-			foreach (var id in expandedItems)
+			set
 			{
-				var node = FindNode(id);
+				if (value != null)
+				{
+					foreach (var id in value)
+					{
+						var node = FindNode(id);
 
-                if (node != null)
-                    node.Expand();
+						if (node != null)
+							node.Expand();
+					}
+				}
 			}
-
-            return true;
 		}
 
 		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
@@ -962,30 +1067,13 @@ namespace MindMapUIExtension
 			if (m_TaskColorIsBkgnd)
 			{
 				var taskItem = (itemData as MindMapTaskItem);
-				var realItem = GetRealTaskItem(taskItem);
 
-				if (!taskItem.TextColor.IsEmpty && !realItem.IsDone(true))
+				if (!taskItem.TextColor.IsEmpty)
 					return taskItem.TextColor;
 			}
 
 			// all else
 			return base.GetNodeBackgroundColor(itemData);
-		}
-
-		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
-		{
-			Debug.Assert(IsZoomed);
-
-			var gSave = graphics.Save();
-
-			graphics.CompositingMode = CompositingMode.SourceCopy;
-			graphics.CompositingQuality = CompositingQuality.HighQuality;
-			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
-			graphics.Restore(gSave);
 		}
 
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
@@ -1026,8 +1114,7 @@ namespace MindMapUIExtension
 						using (var gTemp = Graphics.FromImage(tempImage))
 						{
 							CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
-
-							DrawZoomedImage(tempImage, graphics, checkRect);
+							ImageUtils.DrawZoomedImage(tempImage, graphics, checkRect, rect);
 						}
 					}
 				}
@@ -1053,7 +1140,7 @@ namespace MindMapUIExtension
 								gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
 								m_TaskIcons.Draw(gTemp, 0, 0);
 
-								DrawZoomedImage(tempImage, graphics, iconRect);
+								ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, rect);
 							}
 						}
 					}
@@ -1071,20 +1158,19 @@ namespace MindMapUIExtension
 			// Text Colour
 			Color textColor = SystemColors.WindowText;
 
-			if (!isDragImage && !taskItem.TextColor.IsEmpty)
+			if (isSelected)
 			{
-				if (m_TaskColorIsBkgnd && !isSelected && !realItem.IsDone(true))
-				{
-					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
-				}
-				else if (isSelected)
-				{
-					textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
-				}
+				if (SystemInformation.HighContrast)
+					textColor = SystemColors.HighlightText;
+				else
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TextColor);
+			}
+			else if (!taskItem.TextColor.IsEmpty)
+			{
+				if (m_TaskColorIsBkgnd)
+					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor, true);
                 else
-                {
                     textColor = taskItem.TextColor;
-                }
             }
 
 			switch (nodeState)
@@ -1160,11 +1246,29 @@ namespace MindMapUIExtension
 		{
 			int midX = ((ptFrom.X + ptTo.X) / 2);
 
-			graphics.DrawBezier(new Pen(base.ConnectionColor), 
-								ptFrom,
-								new Point(midX, ptFrom.Y),
-								new Point(midX, ptTo.Y),
-								ptTo);
+			using (var pen = new Pen(base.ConnectionColor))
+			{
+				if (m_Options.HasFlag(MindMapOption.StraightConnections))
+				{
+					Point[] points = new Point[4]
+					{
+						ptFrom,
+						new Point(midX, ptFrom.Y),
+						new Point(midX, ptTo.Y),
+						ptTo
+					};
+
+					graphics.DrawLines(pen, points);
+				}
+				else
+				{
+					graphics.DrawBezier(new Pen(base.ConnectionColor),
+										ptFrom,
+										new Point(midX, ptFrom.Y),
+										new Point(midX, ptTo.Y),
+										ptTo);
+				}
+			}
 		}
 
 
@@ -1227,9 +1331,11 @@ namespace MindMapUIExtension
 			bool fromIsBelowTo = (rectFrom.Top >= rectTo.Bottom);
 
 			int itemHeight = (rectFrom.Height - ItemVertSeparation);
-			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
-			bool horizontalArrow = false;
+			Point ptFrom = Point.Empty, ptTo = Point.Empty;
+			Point ptControlFrom = Point.Empty, ptControlTo = Point.Empty;
+
+			var dir = UIExtension.ArrowHeads.Direction.None;
 
 			// Leaf tasks on the same side of the root
 			// are a special case
@@ -1246,6 +1352,8 @@ namespace MindMapUIExtension
 					ptTo = RectUtil.MiddleLeft(rectTo);
 
 					controlX = (Math.Min(ptFrom.X, ptTo.X) - DependencyOffset);
+
+					dir = UIExtension.ArrowHeads.Direction.Right;
 				}
 				else // right side
 				{
@@ -1253,12 +1361,12 @@ namespace MindMapUIExtension
 					ptTo = RectUtil.MiddleRight(rectTo);
 
 					controlX = (Math.Max(ptFrom.X, ptTo.X) + DependencyOffset);
+
+					dir = UIExtension.ArrowHeads.Direction.Left;
 				}
 
 				ptControlFrom = new Point(controlX, ptFrom.Y);
 				ptControlTo = new Point(controlX, ptTo.Y);
-
-				horizontalArrow = true;
 			}
 			else // All other arrangements are just variations on a theme
 			{
@@ -1298,7 +1406,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
 					}
 
-					horizontalArrow = true;
+					dir = UIExtension.ArrowHeads.Direction.Right;
 				}
 				else if (fromIsRightOfTo)
 				{
@@ -1329,7 +1437,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
 					}
 
-					horizontalArrow = true;
+					dir = UIExtension.ArrowHeads.Direction.Left;
 				}
 				else if (fromIsAboveTo)
 				{
@@ -1341,7 +1449,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y + diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y - diff / 3);
 
-					horizontalArrow = false;
+					dir = UIExtension.ArrowHeads.Direction.Up;
 				}
 				else if (fromIsBelowTo)
 				{
@@ -1351,16 +1459,16 @@ namespace MindMapUIExtension
 					int diff = PointUtil.Distance(ptFrom, ptTo);
 
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y - diff / 3);
-					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3); ;
+					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3);
 
-					horizontalArrow = false;
+					dir = UIExtension.ArrowHeads.Direction.Down;
 				}
 				else
 				{
 					// Overlaps ??
-					return;
 				}
 			}
+			Debug.Assert(dir != UIExtension.ArrowHeads.Direction.None);
 
 			// Draw curve first
 			graphics.DrawBezier(Pens.DarkGray, ptFrom, ptControlFrom, ptControlTo, ptTo);
@@ -1370,10 +1478,7 @@ namespace MindMapUIExtension
 			var prevSmoothing = graphics.SmoothingMode;
 			graphics.SmoothingMode = SmoothingMode.None;
 			
-			if (horizontalArrow)
-				UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), !itemFrom.IsFlipped);
-			else
-				UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), false);
+			UIExtension.DependencyArrows.Draw(graphics, ptFrom.X, ptFrom.Y, GetNodeTitleFont(nodeFrom), dir);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(ptTo.X - 1, ptTo.Y - 1, 3, 3);
@@ -1419,7 +1524,7 @@ namespace MindMapUIExtension
 			base.Clear();
 		}
 
-		private bool AddTaskToTree(Task task, TreeNode parent, bool select = false)
+		private bool AddTaskToTree(Task task, TreeNode parent, int pos = -1, bool select = false)
 		{
 			if (!task.IsValid())
 				return true; // not an error
@@ -1427,7 +1532,7 @@ namespace MindMapUIExtension
 			var taskID = task.GetID();
 			var taskItem = new MindMapTaskItem(task);
 
-			var node = AddNode(taskItem, parent, taskID);
+			var node = InsertNode(taskItem, parent, pos, taskID);
 
 			if (node == null)
 				return false;
@@ -1529,7 +1634,7 @@ namespace MindMapUIExtension
             if (!m_ShowCompletionCheckboxes)
                 return false;
 
-            return CalcCheckboxRect(GetItemLabelRect(node)).Contains(point);
+            return CalcCheckboxRect(base.GetItemLabelRect(node)).Contains(point);
         }
 
 		private bool HitTestIcon(TreeNode node, Point point)
@@ -1540,7 +1645,7 @@ namespace MindMapUIExtension
 				return false;
 
 			// else
-			return CalcIconRect(GetItemLabelRect(node)).Contains(point);
+			return CalcIconRect(base.GetItemLabelRect(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
@@ -1551,8 +1656,9 @@ namespace MindMapUIExtension
 			{
 				case MouseButtons.Left:
 					{
-						// Cache the previous selected item
-						m_PreviouslySelectedNode = SelectedNode;
+						// Cache the previous selected item for label editing
+						// but only if we are currently focused
+						m_PreviouslySelectedNode = Focused ? SelectedNode : null;
                         m_IgnoreMouseClick = false;
 
 						TreeNode hit = HitTestPositions(e.Location);
@@ -1668,7 +1774,7 @@ namespace MindMapUIExtension
 							new Rectangle(0, 0, width, height),
 							NodeDrawState.Selected,
 							NodeDrawPos.Root,
-							GetNodeFont(node),
+							GetNodeTitleFont(node),
 							true); // drag image
 		}
 

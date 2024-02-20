@@ -82,6 +82,7 @@ class CTDLWebUpdateProgressDlg : public CPropertySheetEx, public IBindStatusCall
 // Construction
 public:
 	CTDLWebUpdateProgressDlg(const CPoint& ptPos);
+	virtual ~CTDLWebUpdateProgressDlg();
 
 	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus);
 	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const;
@@ -115,6 +116,7 @@ protected:
 	BOOL m_bCancelled;
 	CPoint m_ptInitialPos;
 	CWindowIcons m_icons;
+	HBITMAP m_hbmHeader;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

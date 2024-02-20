@@ -9,13 +9,17 @@
 #include "..\3rdParty\Base64Coder.h"
 
 //////////////////////////////////////////////////////////////////////
+
+const int CHARLEN = sizeof(TCHAR);
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 CBinaryData::CBinaryData(LPCTSTR szData) 
 {
     if (szData)
-		Set((const unsigned char*)szData, lstrlen(szData) * sizeof(TCHAR));
+		Set((const unsigned char*)szData, lstrlen(szData) * CHARLEN);
 }
 
 CBinaryData::CBinaryData(const unsigned char* pData, int nByteLength)
@@ -25,7 +29,7 @@ CBinaryData::CBinaryData(const unsigned char* pData, int nByteLength)
 
 CBinaryData::CBinaryData(const CString& sContent)
 {
-    Set((const unsigned char*)(LPCTSTR)sContent, sContent.GetLength() * sizeof(TCHAR));
+    Set((const unsigned char*)(LPCTSTR)sContent, sContent.GetLength() * CHARLEN);
 }
 
 CBinaryData::CBinaryData(const CBinaryData& data)
@@ -33,44 +37,31 @@ CBinaryData::CBinaryData(const CBinaryData& data)
     Set(data, data.GetLength());
 }
 
+void CBinaryData::operator = (const CBinaryData& data)
+{
+	if (this != &data)
+		Set(data, data.GetLength());
+}
+
+int CBinaryData::GetEquivalentStringLength(int nByteLength)
+{
+	int nStrLen = (nByteLength / CHARLEN);
+
+	if (nByteLength % CHARLEN)
+		nStrLen++;
+
+	return nStrLen;
+}
+
 unsigned char* CBinaryData::GetBuffer(int nByteLength)
 {
-#ifdef _UNICODE
-	
-    // need to copy into wide buffer
-    // must make the length multiple of 2
-    int nFixedLen = nByteLength + (nByteLength % 2);
-    LPWSTR pBuf = CString::GetBuffer(nFixedLen / 2);
-	
-    ZeroMemory(pBuf, nFixedLen);
-	
-#else
-	
-    // simple copy
-    LPSTR pBuf = CString::GetBuffer(nByteLength);
-    ZeroMemory(pBuf, nByteLength);
-	
-#endif
-	
-    return (unsigned char*)pBuf;
+    return (unsigned char*)CString::GetBuffer(GetEquivalentStringLength(nByteLength));
 }
 
 void CBinaryData::ReleaseBuffer(int nByteLength)
 {
-#ifdef _UNICODE
-
-    // must make the length multiple of 2
-    int nFixedLen = nByteLength + (nByteLength % 2);
-	CString::ReleaseBuffer(nFixedLen / 2);
-
-#else
-
-    // simple release
-	CString::ReleaseBuffer(nByteLength);
-
-#endif
+	CString::ReleaseBuffer(GetEquivalentStringLength(nByteLength));
 }
-
 
 const unsigned char* CBinaryData::Get(int& nByteLength) const
 {
@@ -93,12 +84,14 @@ BOOL CBinaryData::IsEmpty() const
     return CString::IsEmpty();
 }
 
-int CBinaryData::Get(CString& sContent) const
+CString CBinaryData::AsString() const
 {
-    int nStrLength = GetByteLength() / sizeof(TCHAR);
-    sContent = CString((LPCTSTR)Get(), nStrLength);
+	return AsString(Get(), GetByteLength());
+}
 
-	return GetLength();
+CString CBinaryData::AsString(const unsigned char* pData, int nByteLength)
+{
+	return CString((LPCTSTR)pData, GetEquivalentStringLength(nByteLength));
 }
 
 bool CBinaryData::operator == (const CBinaryData& data) const
@@ -111,19 +104,15 @@ bool CBinaryData::operator != (const CBinaryData& data) const
     return !(*this == data);
 }
 
-int CBinaryData::GetLength() const 
-{ 
-	return GetByteLength(); 
-}
-
 int CBinaryData::GetByteLength() const
 {
-	int nByteLength = CString::GetLength() * sizeof(TCHAR);
-	return nByteLength;
+	return (CString::GetLength() * CHARLEN);
 }
 
 void CBinaryData::Set(const unsigned char* pData, int nByteLength)
 {
+	Empty();
+
 	unsigned char* pBuf = CBinaryData::GetBuffer(nByteLength);
 	CopyMemory(pBuf, pData, nByteLength);
 	CBinaryData::ReleaseBuffer(nByteLength);

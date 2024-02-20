@@ -86,9 +86,14 @@ public:
 		return m_pPrefs->DeleteProfileEntry(lpszSection, lpszEntry);
 	}
 
-	bool DeleteProfileSection(LPCWSTR lpszSection)
+	bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections)
 	{
-		return m_pPrefs->DeleteProfileSection(lpszSection);
+		return m_pPrefs->DeleteProfileSection(lpszSection, bIncSubSections);
+	}
+
+	bool HasProfileSection(LPCWSTR lpszSection) const
+	{
+		return m_pPrefs->HasProfileSection(lpszSection);
 	}
 	
 protected:

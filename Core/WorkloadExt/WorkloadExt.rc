@@ -297,6 +297,7 @@ BEGIN
     BUTTON      ID_MOVEPERIODFORWARDONEMONTH
     SEPARATOR
     BUTTON      ID_WORKLOAD_EDITALLOCATIONS
+    SEPARATOR
     BUTTON      ID_WORKLOAD_PREFS
     SEPARATOR
     BUTTON      ID_HELP
@@ -446,6 +447,11 @@ BEGIN
     ID_MOVEPERIODSTARTFORWARDONEMONTH 
                             "\nMove start of period forward one month"
     ID_MOVEPERIODENDBACKONEMONTH "\nMove end of period back one month"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_COL_TITLE           "Title"
 END
 
 #endif    // English (Australia) resources

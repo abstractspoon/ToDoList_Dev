@@ -41,8 +41,22 @@ namespace Abstractspoon
 				double GetProfileDouble(String^ sSection, String^ sEntry, double dDefault);
 				bool WriteProfileDouble(String^ sSection, String^ sEntry, double dValue);
 
+				generic <typename T>
+				T GetProfileEnum(String^ sSection, String^ sEntry, T nDefault)
+				{
+					return (T)GetProfileInt(sSection, sEntry, (int)nDefault);
+				}
+
+				generic <typename T>
+				bool WriteProfileEnum(String^ sSection, String^ sEntry, T nValue)
+				{
+					return WriteProfileInt(sSection, sEntry, (int)nValue);
+				}
+
 				bool DeleteProfileEntry(String^ sSection, String^ sEntry);
-				bool DeleteProfileSection(String^ sSection);
+				bool DeleteProfileSection(String^ sSection, bool bIncSubSections);
+
+				bool HasProfileSection(String^ sSection);
 
 			private:
 				IPreferences* m_pPrefs;

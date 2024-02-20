@@ -65,6 +65,7 @@ namespace Abstractspoon
 
 				bool HasAppColor(AppColor color);
 				void RecalcToolbarHotColor();
+				bool IsDarkMode();
 
 				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
 
@@ -93,8 +94,11 @@ namespace Abstractspoon
 				virtual void OnRenderOverflowButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSplitButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e) override;
+				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
+				virtual void OnRenderItemText(Windows::Forms::ToolStripItemTextRenderEventArgs^ e) override;
+				virtual void OnRenderItemCheck(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
 
-				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow) override;
+				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar) override;
 				virtual Drawing::Pen^ GetSeperatorLightPen() override;
 				virtual Drawing::Pen^ GetSeperatorDarkPen() override;
 

@@ -18,27 +18,24 @@ namespace Calendar
 
         private Font minuteFont;
 
-        public override Font MinuteFont
+        public override Font MinuteFont()
         {
-            get
-            {
-                if (minuteFont == null)
-                    minuteFont = new Font(BaseFont, FontStyle.Italic);
+			if (minuteFont == null)
+				minuteFont = new Font(BaseFont(), FontStyle.Italic);
 
-                return minuteFont;
-            }
-        }
+			return minuteFont;
+		}
 
-        public override void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
+		public override void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont, SystemBrushes.ControlText, rect);
+            g.DrawString(hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture), HourFont(), SystemBrushes.ControlText, rect);
 
             rect.X += 27;
 
-            g.DrawString("00", MinuteFont, SystemBrushes.ControlText, rect);
+            g.DrawString("00", MinuteFont(), SystemBrushes.ControlText, rect);
         }
 
         public override void DrawMinuteLine(Graphics g, Rectangle rect, int minute)
@@ -70,7 +67,7 @@ namespace Calendar
 
                 g.DrawString(
                     System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek),
-                    BaseFont,
+                    BaseFont(),
                     SystemBrushes.WindowText,
                     rect,
                     format
@@ -83,11 +80,11 @@ namespace Calendar
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            using (Brush m_Brush = new SolidBrush(this.HourColor))
+            using (Brush m_Brush = new SolidBrush(this.HourColor()))
                 g.FillRectangle(m_Brush, rect);
         }
 
-        public override void DrawAppointment(Graphics g, AppointmentView apptView, bool isLong, bool isSelected)
+        public override void DrawAppointment(Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected)
         {
             if (apptView == null)
                 throw new ArgumentNullException("apptView");
@@ -148,7 +145,7 @@ namespace Calendar
                     }
 
                     rect.X += gripRect.Width;
-                    g.DrawString(appt.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
+                    g.DrawString(appt.Title, this.BaseFont(), SystemBrushes.WindowText, rect, format);
                 }
         }
     }

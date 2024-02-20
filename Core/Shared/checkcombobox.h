@@ -37,6 +37,7 @@ class CCheckComboBox : public CAutoComboBox
 // Construction
 public:
 	CCheckComboBox(DWORD dwFlags = 0);
+	virtual ~CCheckComboBox();
 
 	CCB_CHECKSTATE GetCheck(int nIndex) const;
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED);
@@ -69,14 +70,12 @@ protected:
 	CStringArray m_aMixedItems;
 	CToolTipCtrlEx m_tooltip;
 
+	const static int CHECKBOX_SIZE;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CCheckComboBox)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CCheckComboBox();
 
 	// Generated message map functions
 protected:
@@ -101,13 +100,13 @@ protected:
 	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	virtual BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
+	virtual void DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
 
 	virtual BOOL DeleteLBItem(int nItem);
 	virtual int GetExtraListboxWidth() const;
+	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual void HandleReturnKey();
 	virtual CString GetSelectedItemText() const;
-	virtual BOOL HasIcon() const { return TRUE; }
 	virtual int UpdateEditAutoComplete(const CString& sText, int nCaretPos);
 
 	BOOL PreTranslateMessage(MSG* pMsg);

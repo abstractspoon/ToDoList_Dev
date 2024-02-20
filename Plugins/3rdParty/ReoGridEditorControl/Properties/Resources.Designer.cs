@@ -79,9 +79,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AlignLayoutBottom {
+        internal static System.Drawing.Bitmap AlignLayoutBottom1 {
             get {
-                object obj = ResourceManager.GetObject("AlignLayoutBottom", resourceCulture);
+                object obj = ResourceManager.GetObject("AlignLayoutBottom1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -89,9 +89,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AlignLayoutMiddle {
+        internal static System.Drawing.Bitmap AlignLayoutMiddle1 {
             get {
-                object obj = ResourceManager.GetObject("AlignLayoutMiddle", resourceCulture);
+                object obj = ResourceManager.GetObject("AlignLayoutMiddle1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -99,9 +99,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AlignLayoutTop {
+        internal static System.Drawing.Bitmap AlignLayoutTop1 {
             get {
-                object obj = ResourceManager.GetObject("AlignLayoutTop", resourceCulture);
+                object obj = ResourceManager.GetObject("AlignLayoutTop1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -109,9 +109,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AlignTableCellMiddleCenterHS {
+        internal static System.Drawing.Bitmap AlignTableCellMiddleCenterHS1 {
             get {
-                object obj = ResourceManager.GetObject("AlignTableCellMiddleCenterHS", resourceCulture);
+                object obj = ResourceManager.GetObject("AlignTableCellMiddleCenterHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -119,9 +119,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AlignTableCellMiddleLeftJustHS {
+        internal static System.Drawing.Bitmap AlignTableCellMiddleLeftJustHS1 {
             get {
-                object obj = ResourceManager.GetObject("AlignTableCellMiddleLeftJustHS", resourceCulture);
+                object obj = ResourceManager.GetObject("AlignTableCellMiddleLeftJustHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -129,9 +129,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap AlignTableCellMiddleRightHS {
+        internal static System.Drawing.Bitmap AlignTableCellMiddleRightHS1 {
             get {
-                object obj = ResourceManager.GetObject("AlignTableCellMiddleRightHS", resourceCulture);
+                object obj = ResourceManager.GetObject("AlignTableCellMiddleRightHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -202,6 +202,16 @@ namespace unvell.ReoGrid.Editor.Properties {
         internal static System.Drawing.Bitmap bold {
             get {
                 object obj = ResourceManager.GetObject("bold", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap bold1 {
+            get {
+                object obj = ResourceManager.GetObject("bold1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -439,9 +449,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap font_larger {
+        internal static System.Drawing.Bitmap font_larger1 {
             get {
-                object obj = ResourceManager.GetObject("font_larger", resourceCulture);
+                object obj = ResourceManager.GetObject("font_larger1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -449,9 +459,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap font_smaller {
+        internal static System.Drawing.Bitmap font_smaller1 {
             get {
-                object obj = ResourceManager.GetObject("font_smaller", resourceCulture);
+                object obj = ResourceManager.GetObject("font_smaller1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -562,6 +572,16 @@ namespace unvell.ReoGrid.Editor.Properties {
         internal static System.Drawing.Bitmap italic {
             get {
                 object obj = ResourceManager.GetObject("italic", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap italic1 {
+            get {
+                object obj = ResourceManager.GetObject("italic1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -899,9 +919,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap PageWidthHS {
+        internal static System.Drawing.Bitmap PageWidthHS1 {
             get {
-                object obj = ResourceManager.GetObject("PageWidthHS", resourceCulture);
+                object obj = ResourceManager.GetObject("PageWidthHS1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1219,9 +1239,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap strikethrough {
+        internal static System.Drawing.Bitmap strikethrough1 {
             get {
-                object obj = ResourceManager.GetObject("strikethrough", resourceCulture);
+                object obj = ResourceManager.GetObject("strikethrough1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1239,9 +1259,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap textwrap {
+        internal static System.Drawing.Bitmap textwrap1 {
             get {
-                object obj = ResourceManager.GetObject("textwrap", resourceCulture);
+                object obj = ResourceManager.GetObject("textwrap1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -1369,9 +1389,9 @@ namespace unvell.ReoGrid.Editor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap underlinee {
+        internal static System.Drawing.Bitmap underlinee1 {
             get {
-                object obj = ResourceManager.GetObject("underlinee", resourceCulture);
+                object obj = ResourceManager.GetObject("underlinee1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

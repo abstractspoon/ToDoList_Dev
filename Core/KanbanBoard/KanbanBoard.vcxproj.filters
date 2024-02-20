@@ -34,6 +34,9 @@
     <ClCompile Include="KanbanColumnCtrlArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KanbanGroupByComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KanbanAttributeComboBox.h">
@@ -79,6 +82,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KanbanColumnCtrlArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KanbanGroupByComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

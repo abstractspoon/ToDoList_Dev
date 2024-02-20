@@ -5,7 +5,7 @@
 #include <tchar.h>
 #include <msclr\auto_gcroot.h>
 
-#include "stdafx.h"
+#include "stdafx.h" 
 #include "DayViewUIExtensionBridge.h"
 #include "resource.h"
 
@@ -30,9 +30,9 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// REPLACE THIS WITH NEW GUID!
+const LPCWSTR DAYVIEW_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
 
-const LPCWSTR DAYVIEW_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
+const LPCWSTR DAYVIEW_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
 const LPCWSTR DAYVIEW_NAME = L"Week Planner";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ void CDayViewUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCW
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow(ITransText* pTT)
-	: m_pTT(pTT)
+	: m_pTT(pTT), m_hasOldSettings(false)
 {
 
 }
@@ -140,7 +140,7 @@ LPCWSTR CDayViewUIExtensionBridgeWindow::GetTypeID() const
 	return DAYVIEW_GUID;
 }
 
-bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -159,7 +159,7 @@ void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -189,11 +189,6 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 {
 	switch (nCmd)
 	{
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
-		break;
-
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -236,6 +231,9 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->ScrollToSelectedTask();
 	}
 
 	// all else
@@ -246,7 +244,6 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 {
 	switch (nCmd)
 	{
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -272,6 +269,9 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->SelectTask(m_wnd->CanScrollToSelectedTask());
 	}
 
 	// all else
@@ -282,7 +282,7 @@ DWORD CDayViewUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 {
 	UIExtension::GetTask getTask;
 
-	if (!UIExtension::Map(nCmd, getTask))
+	if (!UIExtension::MapGetTaskCmd(nCmd, getTask))
 		return 0;
 
 	UInt32 taskID = dwFromTaskID;
@@ -297,7 +297,7 @@ bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, co
 {
 	UIExtension::SelectTask selectWhat;
 
-	if (!UIExtension::Map(nCmd, selectWhat))
+	if (!UIExtension::MapSelectTaskCmd(nCmd, selectWhat))
 		return false;
 
 	String^ sWords = gcnew String(select.szWords);
@@ -310,14 +310,14 @@ bool CDayViewUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CDayViewUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CDayViewUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CDayViewUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CDayViewUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CDayViewUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
@@ -348,6 +348,13 @@ void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCW
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	m_wnd->SavePreferences(prefs.get(), key.get());
+
+	// Delete old settings
+	if (m_hasOldSettings)
+	{
+		auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+		prefs->DeleteProfileSection(oldKey, true);
+	}
 }
 
 void CDayViewUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
@@ -355,6 +362,15 @@ void CDayViewUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
+	// Backwards compatibility because of TypeID change
+	auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+	
+	if (prefs->HasProfileSection(oldKey))
+	{
+		m_hasOldSettings = true;
+		key = oldKey;
+	}
+	
 	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }
 

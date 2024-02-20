@@ -49,7 +49,7 @@ CTDCImageList::~CTDCImageList()
 
 BOOL CTDCImageList::LoadDefaultImages(BOOL bWantToolbars)
 {
-	return LoadImages(_T(""), TDCIL_MAGENTA, TRUE, bWantToolbars);
+	return LoadImages(_T(""), colorMagenta, TRUE, bWantToolbars);
 }
 
 BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,

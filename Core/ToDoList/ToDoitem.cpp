@@ -772,9 +772,9 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	CDateHelper::ClearDate(dateLastMod);
 }
 
-TODOITEM::TODOITEM(const TODOITEM& tdi)
+TODOITEM::TODOITEM(const TODOITEM& tdiOther)
 { 
-	*this = tdi;
+	*this = tdiOther;
 	
     if (!CDateHelper::IsDateSet(dateCreated))
 		dateCreated = COleDateTime::GetCurrentTime();
@@ -784,93 +784,167 @@ TODOITEM::TODOITEM(const TODOITEM& tdi)
 	dateDue = GetDefaultStartDueDate(dateCreated, dateDue);
 }
 
-TODOITEM& TODOITEM::operator=(const TODOITEM& tdi) 
+TODOITEM& TODOITEM::operator=(const TODOITEM& tdiOther) 
 {
-	sTitle = tdi.sTitle;
-	sComments = tdi.sComments;
-	customComments = tdi.customComments;
-	cfComments = tdi.cfComments;
-	color = tdi.color; 
-	sAllocBy = tdi.sAllocBy;
-	sStatus = tdi.sStatus;
-	nPriority = tdi.nPriority;
-	nPercentDone = tdi.nPercentDone;
-	timeEstimate = tdi.timeEstimate;
-	timeSpent = tdi.timeSpent;
-	cost = tdi.cost;
-	dateStart = tdi.dateStart;
-	dateDue = tdi.dateDue;
-	dateDone = tdi.dateDone;
-	dateCreated = tdi.dateCreated;
-	dateLastMod = tdi.dateLastMod;
-	bFlagged = tdi.bFlagged;
-	bLocked = tdi.bLocked;
-	sCreatedBy = tdi.sCreatedBy;
-	nRisk = tdi.nRisk;
-	sExternalID = tdi.sExternalID;
-	trRecurrence = tdi.trRecurrence;
-	sLastModifiedBy = tdi.sLastModifiedBy;
-	sVersion = tdi.sVersion;
-	sIcon = tdi.sIcon;
-	dwTaskRefID = tdi.dwTaskRefID;
+	sTitle = tdiOther.sTitle;
+	sComments = tdiOther.sComments;
+	customComments = tdiOther.customComments;
+	cfComments = tdiOther.cfComments;
+	color = tdiOther.color; 
+	sAllocBy = tdiOther.sAllocBy;
+	sStatus = tdiOther.sStatus;
+	nPriority = tdiOther.nPriority;
+	nPercentDone = tdiOther.nPercentDone;
+	timeEstimate = tdiOther.timeEstimate;
+	timeSpent = tdiOther.timeSpent;
+	cost = tdiOther.cost;
+	dateStart = tdiOther.dateStart;
+	dateDue = tdiOther.dateDue;
+	dateDone = tdiOther.dateDone;
+	dateCreated = tdiOther.dateCreated;
+	dateLastMod = tdiOther.dateLastMod;
+	bFlagged = tdiOther.bFlagged;
+	bLocked = tdiOther.bLocked;
+	sCreatedBy = tdiOther.sCreatedBy;
+	nRisk = tdiOther.nRisk;
+	sExternalID = tdiOther.sExternalID;
+	trRecurrence = tdiOther.trRecurrence;
+	sLastModifiedBy = tdiOther.sLastModifiedBy;
+	sVersion = tdiOther.sVersion;
+	sIcon = tdiOther.sIcon;
+	dwTaskRefID = tdiOther.dwTaskRefID;
 	
-	aCategories.Copy(tdi.aCategories);
-	aTags.Copy(tdi.aTags);
-	aAllocTo.Copy(tdi.aAllocTo);
-	aDependencies.Copy(tdi.aDependencies);
-	aFileLinks.Copy(tdi.aFileLinks);
+	aCategories.Copy(tdiOther.aCategories);
+	aTags.Copy(tdiOther.aTags);
+	aAllocTo.Copy(tdiOther.aAllocTo);
+	aDependencies.Copy(tdiOther.aDependencies);
+	aFileLinks.Copy(tdiOther.aFileLinks);
 
 	// meta data
-	Misc::Copy(tdi.mapMetaData, mapMetaData);
+	Misc::Copy(tdiOther.mapMetaData, mapMetaData);
 	
 	// custom attributes
-	mapCustomData.Copy(tdi.mapCustomData);
+	mapCustomData.Copy(tdiOther.mapCustomData);
 
 	return *this;
 }
 
-BOOL TODOITEM::operator==(const TODOITEM& tdi) 
+BOOL TODOITEM::operator==(const TODOITEM& tdiOther) const
 {
 	// least expensive checks first
-	return ((dwTaskRefID == tdi.dwTaskRefID) &&
-			(bFlagged == tdi.bFlagged) &&
-			(bLocked == tdi.bLocked) &&
-			(color == tdi.color) && 
-			(nPriority == tdi.nPriority) &&
-			(nRisk == tdi.nRisk) &&
-			(nPercentDone == tdi.nPercentDone) &&
-			(timeEstimate == tdi.timeEstimate) &&
-			(timeSpent == tdi.timeSpent) &&
-			(cost == tdi.cost) &&
-			(dateStart == tdi.dateStart) &&
-			(dateDue == tdi.dateDue) &&
-			(dateDone == tdi.dateDone) &&
-			(dateCreated == tdi.dateCreated) &&
-			(dateLastMod == tdi.dateLastMod) &&
-			(sLastModifiedBy == tdi.sLastModifiedBy) &&
-			(sTitle = tdi.sTitle) &&
-			(sComments == tdi.sComments) &&
-			(customComments == tdi.customComments) &&
-			(cfComments == tdi.cfComments) &&
-			(sAllocBy == tdi.sAllocBy) &&
-			(sStatus == tdi.sStatus) &&
-			(sCreatedBy == tdi.sCreatedBy) &&
-			(sExternalID == tdi.sExternalID) &&
-			(sVersion == tdi.sVersion) &&
-			(sIcon == tdi.sIcon) &&
-			(trRecurrence == tdi.trRecurrence) &&
-			Misc::MatchAll(aCategories, tdi.aCategories) &&
-			Misc::MatchAll(aTags, tdi.aTags) &&
-			Misc::MatchAll(aAllocTo, tdi.aAllocTo) &&
-			Misc::MatchAllT(aDependencies, tdi.aDependencies, FALSE) &&
-			Misc::MatchAll(aFileLinks, tdi.aFileLinks) &&
-			Misc::MatchAll(tdi.mapMetaData, mapMetaData) &&
-			mapCustomData.MatchAll(tdi.mapCustomData));
+	return ((dwTaskRefID == tdiOther.dwTaskRefID) &&
+			(bFlagged == tdiOther.bFlagged) &&
+			(bLocked == tdiOther.bLocked) &&
+			(color == tdiOther.color) && 
+			(nPriority == tdiOther.nPriority) &&
+			(nRisk == tdiOther.nRisk) &&
+			(nPercentDone == tdiOther.nPercentDone) &&
+			(timeEstimate == tdiOther.timeEstimate) &&
+			(timeSpent == tdiOther.timeSpent) &&
+			(cost == tdiOther.cost) &&
+			(dateStart == tdiOther.dateStart) &&
+			(dateDue == tdiOther.dateDue) &&
+			(dateDone == tdiOther.dateDone) &&
+			(dateCreated == tdiOther.dateCreated) &&
+			(dateLastMod == tdiOther.dateLastMod) &&
+			(sLastModifiedBy == tdiOther.sLastModifiedBy) &&
+			(sTitle == tdiOther.sTitle) &&
+			(sComments == tdiOther.sComments) &&
+			(customComments == tdiOther.customComments) &&
+			(cfComments == tdiOther.cfComments) &&
+			(sAllocBy == tdiOther.sAllocBy) &&
+			(sStatus == tdiOther.sStatus) &&
+			(sCreatedBy == tdiOther.sCreatedBy) &&
+			(sExternalID == tdiOther.sExternalID) &&
+			(sVersion == tdiOther.sVersion) &&
+			(sIcon == tdiOther.sIcon) &&
+			(trRecurrence == tdiOther.trRecurrence) &&
+			Misc::MatchAll(aCategories, tdiOther.aCategories) &&
+			Misc::MatchAll(aTags, tdiOther.aTags) &&
+			Misc::MatchAll(aAllocTo, tdiOther.aAllocTo) &&
+			Misc::MatchAllT(aDependencies, tdiOther.aDependencies, FALSE) &&
+			Misc::MatchAll(aFileLinks, tdiOther.aFileLinks) &&
+			Misc::MatchAll(mapMetaData, tdiOther.mapMetaData) &&
+			mapCustomData.MatchAll(tdiOther.mapCustomData));
 }
 
-BOOL TODOITEM::operator!=(const TODOITEM& tdi) 
+BOOL TODOITEM::operator!=(const TODOITEM& tdiOther) const
 {
-	return !(*this == tdi);
+	return !(*this == tdiOther);
+}
+
+BOOL TODOITEM::MatchAll(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const
+{
+	if (!mapAttrib.GetCount() || mapAttrib.Has(TDCA_NONE))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (mapAttrib.Has(TDCA_ALL))
+		return (*this == tdiOther);
+
+#define ATTRIBMATCHES(att, var) case att: if (var == tdiOther.var) bMatches = TRUE; break
+#define ATTRIBARRMATCHES(att, var, fn) case att: if (Misc::fn(var, tdiOther.var, FALSE)) bMatches = TRUE; break
+
+	POSITION pos = mapAttrib.GetStartPosition();
+	BOOL bMatches = TRUE;
+
+	while (pos && bMatches)
+	{
+		switch (mapAttrib.GetNext(pos))
+		{
+		ATTRIBMATCHES(TDCA_TASKNAME, sTitle);
+		ATTRIBMATCHES(TDCA_ALLOCBY, sAllocBy);
+		ATTRIBMATCHES(TDCA_STATUS, sStatus);
+		ATTRIBMATCHES(TDCA_VERSION, sVersion);
+		ATTRIBMATCHES(TDCA_EXTERNALID, sExternalID);
+		ATTRIBMATCHES(TDCA_LASTMODBY, sLastModifiedBy);
+		ATTRIBMATCHES(TDCA_ICON, sLastModifiedBy);
+
+		ATTRIBMATCHES(TDCA_PRIORITY, nPriority);
+		ATTRIBMATCHES(TDCA_RISK, nRisk);
+		ATTRIBMATCHES(TDCA_COLOR, color);
+		ATTRIBMATCHES(TDCA_COST, cost);
+		ATTRIBMATCHES(TDCA_TIMEESTIMATE, timeEstimate);
+		ATTRIBMATCHES(TDCA_TIMESPENT, timeSpent);
+		ATTRIBMATCHES(TDCA_LOCK, bLocked);
+		ATTRIBMATCHES(TDCA_FLAG, bFlagged);
+		ATTRIBMATCHES(TDCA_RECURRENCE, trRecurrence);
+		ATTRIBMATCHES(TDCA_PERCENT, nPercentDone);
+
+		ATTRIBMATCHES(TDCA_CREATIONDATE, dateCreated);
+		ATTRIBMATCHES(TDCA_STARTDATE, dateStart);
+		ATTRIBMATCHES(TDCA_DUEDATE, dateDue);
+		ATTRIBMATCHES(TDCA_DONEDATE, dateDone);
+		ATTRIBMATCHES(TDCA_LASTMODDATE, dateLastMod);
+
+		ATTRIBARRMATCHES(TDCA_CATEGORY, aAllocTo, MatchAll);
+		ATTRIBARRMATCHES(TDCA_ALLOCTO, aCategories, MatchAll);
+		ATTRIBARRMATCHES(TDCA_TAGS, aTags, MatchAll);
+		ATTRIBARRMATCHES(TDCA_FILELINK, aFileLinks, MatchAll);
+		ATTRIBARRMATCHES(TDCA_DEPENDENCY, aDependencies, MatchAllT);
+
+		case TDCA_COMMENTS:
+			bMatches |= (sComments == tdiOther.sComments) &&
+						(customComments == tdiOther.customComments) &&
+						(cfComments == tdiOther.cfComments);
+
+		case TDCA_METADATA:
+			bMatches |= Misc::MatchAll(tdiOther.mapMetaData, mapMetaData);
+			break;
+			
+		case TDCA_CUSTOMATTRIB:
+			bMatches |= mapCustomData.MatchAll(tdiOther.mapCustomData);
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return bMatches;
 }
 
 // only interested in dependencies within this tasklist
@@ -1121,7 +1195,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return TRUE;
 }
 
-BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
+int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	ASSERT(!IsDone());
 
@@ -1129,39 +1203,72 @@ BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<doubl
 		return FALSE;
 
 	if (!HasStart() || !HasDue() || (dateDue < dateStart))
-		return FALSE;
+		return 0;
 
-	switch (trRecurrence.nRecalcFrom)
+	// Expand range by task duration to ensure full coverage
+	COleDateTimeRange dtExtended(dtRange);
+	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
+
+	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
+
+	CArray<double, double&> aDates;
+	int nNumOccur = trRecurrence.CalcNextOccurences(dtCur, dtExtended, aDates);
+
+	if (!nNumOccur)
+		return 0;
+
+	CDateHelper dh;
+
+	aOccur.SetSize(nNumOccur);
+
+	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
-	case TDIRO_DUEDATE:
-	case TDIRO_DONEDATE:
+		const double dOccur = aDates[nOccur];
+
+		// Ideally we stick to the same units configured in the recurrence setup
+		// so that, for instance, months having different numbers of days are
+		// offset correctly
+		DH_UNITS nUnits = TDC::MapUnitsToDHUnits(trRecurrence.GetRegularityUnits());
+		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, FALSE); // not inclusive
+
+		int nOffset = 0;
+
+		if (dOffset == (int)dOffset)
 		{
-			// Extend the range by the duration of the task else 
-			// the start dates will stop short of the original range
-			COleDateTimeRange dtExtended = dtRange;
-			dtExtended.m_dtEnd += (dateDue - dateStart);
-
-			if (trRecurrence.CalcNextOccurences(dateDue, dtExtended, aDates))
-			{
-				bDue = TRUE;
-				return TRUE;
-			}
+			nOffset = (int)dOffset;
 		}
-		break;
-
-	case TDIRO_STARTDATE:
-		if (trRecurrence.CalcNextOccurences(dateStart, dtRange, aDates))
+		else
 		{
-			bDue = FALSE;
-			return TRUE;
+			nOffset = dh.CalcDaysFromTo(dtCur, dOccur, FALSE); // not inclusive
+			nUnits = DHU_DAYS;
 		}
-		break;
 
-	default:
-		ASSERT(0);
+		COleDateTimeRange& dtOccur = aOccur[nOccur];
+
+		if (bDueDate)
+		{
+			COleDateTime dtNewStart(dateStart);
+			VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
+
+			ASSERT((dtNewStart.m_dt <= dOccur) ||
+				(CDateHelper::IsSameDay(dOccur, dtNewStart) && !CDateHelper::DateHasTime(dOccur)));
+
+			dtOccur.Set(dtNewStart, dOccur);
+		}
+		else // start date
+		{
+			COleDateTime dtNewDue(dateDue);
+			VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
+
+			ASSERT((dOccur <= dtNewDue.m_dt) ||
+				(CDateHelper::IsSameDay(dOccur, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
+
+			dtOccur.Set(dOccur, dtNewDue);
+		}
 	}
 
-	return FALSE;
+	return nNumOccur;
 }
 
 BOOL TODOITEM::IsRecentlyModified() const
@@ -1200,6 +1307,7 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 	case TDCD_DONE:			return dateDone;
 	case TDCD_DONEDATE:		return CDateHelper::GetDateOnly(dateDone);
 	case TDCD_DONETIME:		return CDateHelper::GetTimeOnly(dateDone);
+	case TDCD_LASTMOD:		return dateLastMod;
 	}
 	
 	// else
@@ -1308,46 +1416,49 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 	return TRUE;
 }
 
-BOOL TODOITEM::GetAttributeValues(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
+BOOL TODOITEM::GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	data.Clear();
 
 	switch (nAttribID)
 	{
-	case TDCA_VERSION:		data.Set(sVersion);			break;
-	case TDCA_ALLOCBY:		data.Set(sAllocBy);			break;
-	case TDCA_CREATEDBY:	data.Set(sCreatedBy);		break;
-	case TDCA_EXTERNALID:	data.Set(sExternalID);		break;
-	case TDCA_STATUS:		data.Set(sStatus);			break;
-	case TDCA_TASKNAME:		data.Set(sTitle);			break;
-	case TDCA_COMMENTS:		data.Set(sComments);		break;
-	case TDCA_LASTMODBY:	data.Set(sLastModifiedBy);	break;
+	case TDCA_VERSION:		data.Set(sVersion);					break;
+	case TDCA_ALLOCBY:		data.Set(sAllocBy);					break;
+	case TDCA_CREATEDBY:	data.Set(sCreatedBy);				break;
+	case TDCA_EXTERNALID:	data.Set(sExternalID);				break;
+	case TDCA_STATUS:		data.Set(sStatus);					break;
+	case TDCA_TASKNAME:		data.Set(sTitle);					break;
+	case TDCA_COMMENTS:		data.Set(sComments);				break;
+	case TDCA_LASTMODBY:	data.Set(sLastModifiedBy);			break;
 
-	case TDCA_COLOR:		data.Set((int)color);		break;
-	case TDCA_PRIORITY:		data.Set(nPriority);		break;
-	case TDCA_RISK:			data.Set(nRisk);			break;
-	case TDCA_PERCENT:		data.Set(nPercentDone);		break;
-	case TDCA_FLAG:			data.Set(bFlagged);			break;
-	case TDCA_ICON:			data.Set(sIcon);			break;
-	case TDCA_LOCK:			data.Set(bLocked);			break;
+	case TDCA_COLOR:		data.Set((int)color);				break;
+	case TDCA_PRIORITY:		data.Set(nPriority);				break;
+	case TDCA_RISK:			data.Set(nRisk);					break;
+	case TDCA_PERCENT:		data.Set(nPercentDone);				break;
+	case TDCA_FLAG:			data.Set(bFlagged);					break;
+	case TDCA_ICON:			data.Set(sIcon);					break;
+	case TDCA_LOCK:			data.Set(bLocked);					break;
 
-	case TDCA_FILELINK:		data.Set(aFileLinks);		break;
-	case TDCA_ALLOCTO:		data.Set(aAllocTo);			break;
-	case TDCA_CATEGORY:		data.Set(aCategories);		break;
-	case TDCA_TAGS:			data.Set(aTags);			break;
+	case TDCA_FILELINK:		data.Set(aFileLinks);				break;
+	case TDCA_ALLOCTO:		data.Set(aAllocTo);					break;
+	case TDCA_CATEGORY:		data.Set(aCategories);				break;
+	case TDCA_TAGS:			data.Set(aTags);					break;
 
-	case TDCA_TIMEESTIMATE:	data.Set(timeEstimate);		break;
-	case TDCA_TIMESPENT:	data.Set(timeSpent);		break;
-	case TDCA_COST:			data.Set(cost);				break;
+	case TDCA_TIMEESTIMATE:	data.Set(timeEstimate);				break;
+	case TDCA_TIMESPENT:	data.Set(timeSpent);				break;
+	case TDCA_COST:			data.Set(cost);						break;
 
-	case TDCA_CREATIONDATE: 
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_STARTDATE:
-	case TDCA_DONETIME:
-	case TDCA_DUETIME:
-	case TDCA_STARTTIME:	data.Set(GetDate(TDC::MapAttributeToDate(nAttribID)));	break;
+	// Date and Time
+	case TDCA_CREATIONDATE: data.Set(GetDate(TDCD_CREATE));		break;
+	case TDCA_DONEDATE:		data.Set(GetDate(TDCD_DONE));		break;
+	case TDCA_DUEDATE:		data.Set(GetDate(TDCD_DUE));		break;
+	case TDCA_LASTMODDATE:	data.Set(GetDate(TDCD_LASTMOD));	break;
+	case TDCA_STARTDATE:	data.Set(GetDate(TDCD_START));		break;
+
+	// Time only
+	case TDCA_DONETIME:		data.Set(GetDate(TDCD_DONETIME));	break;
+	case TDCA_DUETIME:		data.Set(GetDate(TDCD_DUETIME));	break;
+	case TDCA_STARTTIME:	data.Set(GetDate(TDCD_STARTTIME));	break;
 
 	case TDCA_DEPENDENCY:
 	case TDCA_RECURRENCE:
@@ -1362,19 +1473,19 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
-	case TDCA_VERSION:		return sVersion.IsEmpty();		
-	case TDCA_ALLOCBY:		return sAllocBy.IsEmpty();		
-	case TDCA_CREATEDBY:	return sCreatedBy.IsEmpty();		
-	case TDCA_EXTERNALID:	return sExternalID.IsEmpty();	
-	case TDCA_STATUS:		return sStatus.IsEmpty();		
-	case TDCA_TASKNAME:		return sTitle.IsEmpty();			
-	case TDCA_COMMENTS:		return sComments.IsEmpty();		
-	case TDCA_LASTMODBY:	return sLastModifiedBy.IsEmpty();
-	case TDCA_ICON:			return sIcon.IsEmpty();			
+	case TDCA_VERSION:		return !sVersion.IsEmpty();		
+	case TDCA_ALLOCBY:		return !sAllocBy.IsEmpty();		
+	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();		
+	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();	
+	case TDCA_STATUS:		return !sStatus.IsEmpty();		
+	case TDCA_TASKNAME:		return !sTitle.IsEmpty();			
+	case TDCA_COMMENTS:		return !sComments.IsEmpty() || !customComments.IsEmpty();		
+	case TDCA_LASTMODBY:	return !sLastModifiedBy.IsEmpty();
+	case TDCA_ICON:			return !sIcon.IsEmpty();			
 							 
 	case TDCA_COLOR:		return (color != 0);		
-	case TDCA_PRIORITY:		return (nPriority != FM_NOPRIORITY);		
-	case TDCA_RISK:			return (nRisk != FM_NORISK);			
+	case TDCA_PRIORITY:		return (nPriority != TDC_NOPRIORITYORISK);		
+	case TDCA_RISK:			return (nRisk != TDC_NOPRIORITYORISK);			
 	case TDCA_PERCENT:		return (nPercentDone > 0);	
 	case TDCA_FLAG:			return bFlagged;		
 	case TDCA_LOCK:			return bLocked;		
@@ -1390,14 +1501,22 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_TIMESPENT:	return (timeSpent.dAmount != 0);		
 	case TDCA_COST:			return (cost.dAmount != 0);			
 
-	case TDCA_CREATIONDATE: 
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_STARTDATE:
-	case TDCA_DONETIME:
-	case TDCA_DUETIME:
-	case TDCA_STARTTIME:	return CDateHelper::IsDateSet(GetDate(TDC::MapAttributeToDate(nAttribID)));
+	case TDCA_CREATIONDATE: return CDateHelper::IsDateSet(GetDate(TDCD_CREATE));
+	case TDCA_DONEDATE:		return CDateHelper::IsDateSet(GetDate(TDCD_DONE));
+	case TDCA_DUEDATE:		return CDateHelper::IsDateSet(GetDate(TDCD_DUE));
+	case TDCA_LASTMODDATE:	return CDateHelper::IsDateSet(GetDate(TDCD_LASTMOD));
+	case TDCA_STARTDATE:	return CDateHelper::IsDateSet(GetDate(TDCD_START));
+
+	case TDCA_DONETIME:		return CDateHelper::IsDateSet(GetDate(TDCD_DONETIME));
+	case TDCA_DUETIME:		return CDateHelper::IsDateSet(GetDate(TDCD_DUETIME));
+	case TDCA_STARTTIME:	return CDateHelper::IsDateSet(GetDate(TDCD_STARTTIME));
+
+	case TDCA_METADATA:		return mapMetaData.GetCount();
+	case TDCA_CUSTOMATTRIB:	return mapCustomData.GetCount();
+
+	default:
+		ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
+		break;
 	}
 
 	return FALSE;

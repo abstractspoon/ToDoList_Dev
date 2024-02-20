@@ -139,7 +139,7 @@ LPCWSTR CWordCloudUIExtensionBridgeWindow::GetTypeID() const
 	return WORDCLOUD_GUID;
 }
 
-bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -158,7 +158,7 @@ void CWordCloudUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -190,11 +190,6 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 	{
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
-
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
-		break;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
@@ -235,6 +230,9 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->SelectTask(m_wnd->ScrollToSelectedTask());
 	}
 
 	// all else
@@ -245,7 +243,7 @@ DWORD CWordCloudUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD 
 {
 	UIExtension::GetTask getTask;
 
-	if (!UIExtension::Map(nCmd, getTask))
+	if (!UIExtension::MapGetTaskCmd(nCmd, getTask))
 		return 0;
 
 	UInt32 taskID = dwFromTaskID;
@@ -273,7 +271,6 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 		}
 		break;
 
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -284,6 +281,9 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 
 	case IUI_SETFOCUS:
 		return !m_wnd->Focused;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->CanScrollToSelectedTask();
 	}
 
 	// all else
@@ -294,7 +294,7 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, 
 {
 	UIExtension::SelectTask selectWhat;
 
-	if (!UIExtension::Map(nCmd, selectWhat))
+	if (!UIExtension::MapSelectTaskCmd(nCmd, selectWhat))
 		return false;
 
 	String^ sWords = gcnew String(select.szWords);
@@ -307,14 +307,14 @@ bool CWordCloudUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CWordCloudUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CWordCloudUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CWordCloudUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CWordCloudUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CWordCloudUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

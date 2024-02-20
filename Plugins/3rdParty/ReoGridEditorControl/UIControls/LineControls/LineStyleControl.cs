@@ -63,6 +63,10 @@ namespace unvell.UIControls
 					{
 						p.Color = SystemColors.HighlightText;
 					}
+					else
+					{
+						p.Color = SystemColors.WindowText;
+					}
 
 					p.DashStyle = (DashStyle)Items[e.Index];
 					g.DrawLine(p, x, y, x2, y);

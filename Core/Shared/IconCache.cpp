@@ -7,6 +7,7 @@
 #include "Icon.h"
 #include "enbitmap.h"
 #include "GraphicsMisc.h"
+#include "FileMisc.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -68,7 +69,7 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 	if (IsValidName(sName) && !sImagePath.IsEmpty())
 	{
 		CIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_nIconSize, m_nIconSize));
-		ASSERT(icon.IsValid());
+		ASSERT(icon.IsValid() || !FileMisc::PathExists(sImagePath));
 
 		return Add(sName, icon);
 	}

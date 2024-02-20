@@ -100,6 +100,9 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -155,6 +158,7 @@ copy unicode_debug\TDLUpdate.exe ..\todolist\unicode_debug /y
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -221,9 +225,6 @@ copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\TDLUpdate_wiz_header.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

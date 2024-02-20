@@ -41,7 +41,6 @@ static char THIS_FILE[] = __FILE__;
 #pragma comment(lib, "winmm.lib")
 
 ///////////////////////////////////////////////////////////////////////////
-// CTDLShowReminderDlg dialog
 
 double ONE_DAY_IN_MINS = (24.0 * 60);
 
@@ -54,7 +53,38 @@ enum
 	NUM_COLS,
 };
 
+///////////////////////////////////////////////////////////////////////////
+// CTDLShowReminderListCtrl
+
+CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(const CTDCReminderMap& mapReminders)
+	:
+	m_mapReminders(mapReminders)
+{
+}
+
+int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
+{
+	if (nSortColumn == WHEN_COL)
+	{
+		TDCREMINDER rem1, rem2;
+
+		VERIFY(m_mapReminders.Lookup(dwItemData1, rem1));
+		VERIFY(m_mapReminders.Lookup(dwItemData2, rem2));
+
+		COleDateTime dt1, dt2;
+
+		VERIFY(rem1.GetReminderDate(dt1, FALSE));
+		VERIFY(rem2.GetReminderDate(dt2, FALSE));
+
+		return CDateHelper::Compare(dt1, dt2);
+	}
+
+	// All else
+	return CEnListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
+}
+
 /////////////////////////////////////////////////////////////////////////////
+// CTDLShowReminderDlg dialog
 
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
@@ -62,7 +92,8 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	m_dwNextReminderID(1),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE),
-	m_cbSnoozeTime(TCB_HOURSINDAY)
+	m_cbSnoozeTime(TCB_HOURSINDAY),
+	m_lcReminders(m_mapReminders)
 {
 	//{{AFX_DATA_INIT(CTDLShowReminderDlg)
 	m_bSnoozeUntil = FALSE;
@@ -104,6 +135,7 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
+IMPLEMENT_DYNAMIC(CTDLShowReminderDlg, CTDLDialog)
 
 BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLShowReminderDlg)
@@ -137,6 +169,11 @@ BOOL CTDLShowReminderDlg::Create(CWnd* pParent, BOOL bVisible)
 	return FALSE;
 }
 
+void CTDLShowReminderDlg::SetRemindersFont(HFONT hFont) 
+{ 
+	m_lcReminders.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); 
+}
+
 BOOL CTDLShowReminderDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
@@ -159,15 +196,33 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
 
 	m_lcReminders.SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
+	m_lcReminders.SetSortEmptyValuesBelow(FALSE);
 
 	EnableControls();
 	UpdateColumnWidths();
+
+	// Restore sort state
+	CPreferences prefs;
+
+	int nSortCol = prefs.GetProfileInt(m_sPrefsKey, _T("SortCol"), -1);
+
+	if (nSortCol != -1)
+	{
+		m_lcReminders.SetSortColumn(nSortCol, FALSE);
+		m_lcReminders.SetSortAscending(prefs.GetProfileInt(m_sPrefsKey, _T("SortAscending"), TRUE));
+	}
 
 	return TRUE;
 }
 
 void CTDLShowReminderDlg::OnDestroy()
 {
+	// Save sort state
+	CPreferences prefs;
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SortCol"), m_lcReminders.GetSortColumn());
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SortAscending"), m_lcReminders.GetSortAscending());
+
 	RemoveAllListReminders();
 
 	CTDLDialog::OnDestroy();
@@ -212,6 +267,9 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 	}
 
 	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
+
+	if (bNewReminder && m_lcReminders.IsSorting())
+		m_lcReminders.Sort();
 	
 	return bNewReminder;
 }

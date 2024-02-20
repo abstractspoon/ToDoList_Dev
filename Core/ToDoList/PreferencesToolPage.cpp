@@ -59,7 +59,7 @@ CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
 	CPreferencesPageBase(CPreferencesToolPage::IDD),
 	m_eToolPath(FES_COMBOSTYLEBTN | FES_ALLOWURL),
-	m_eIconPath(FES_COMBOSTYLEBTN | FES_DISPLAYSIMAGES),
+	m_eIconPath(FES_COMBOSTYLEBTN | FES_DISPLAYIMAGETHUMBNAILS),
 	m_nMaxNumTools(nMaxNumTools),
 	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN)
 {
@@ -1079,10 +1079,10 @@ BOOL CPreferencesToolPage::InitializeToolbar()
 	if (!m_toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return FALSE;
 
-	m_toolbar.SetBackgroundColor(m_crback);
+	m_toolbar.SetBackgroundColor(m_crBack);
 	
 	VERIFY(m_toolbar.LoadToolBar(IDR_UDTPREFS_TOOLBAR, IDB_UDTPREFS_TOOLBAR_STD, colorMagenta));
-	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+	VERIFY(m_tbHelper.Initialize(&m_toolbar));
 	
 	// very important - turn OFF all the auto positioning and sizing
 	// by default have no borders

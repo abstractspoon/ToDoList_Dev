@@ -43,6 +43,8 @@ public:
 	virtual void SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const = 0;
 
 	void SetBackgroundColor(COLORREF color);
+	COLORREF GetBackgroundColor() const;
+
 	CWnd* GetDlgItem(UINT nID) const;
 	UINT GetHelpID() const { return m_nHelpID; }
 
@@ -52,7 +54,7 @@ public:
 
 protected:
 	HBRUSH m_brBack;
-	COLORREF m_crback;
+	COLORREF m_crBack;
 	BOOL m_bFirstShow;
 	UINT m_nHelpID;
 
@@ -82,6 +84,8 @@ protected:
 
 class CPreferencesDlgBase : public CDialog, protected CDialogHelper
 {
+	DECLARE_DYNAMIC(CPreferencesDlgBase);
+
 	// Construction
 public:
 	CPreferencesDlgBase(UINT nDlgTemplateID, 
@@ -96,6 +100,8 @@ public:
 
 	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* prefs, LPCTSTR szKey) const;
+
+	void InvalidateActivePage(BOOL bErase = TRUE);
 	
 protected:
 	CScrollingPropertyPageHost m_ppHost;

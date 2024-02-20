@@ -131,6 +131,10 @@ SOURCE=.\KanbanFixedColumnListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanGroupByComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\KanbanOptionComboBox.cpp
 # End Source File
 # Begin Source File
@@ -189,6 +193,10 @@ SOURCE=.\KanbanFixedColumnListCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\KanbanGroupByComboBox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Kanbanmsg.h
 # End Source File
 # Begin Source File
@@ -223,14 +231,6 @@ SOURCE=.\StdAfx.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# Begin Source File
-
-SOURCE=.\res\column_toolbar.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\column_toolbar_std.bmp
-# End Source File
 # Begin Source File
 
 SOURCE=.\res\help_button.ico

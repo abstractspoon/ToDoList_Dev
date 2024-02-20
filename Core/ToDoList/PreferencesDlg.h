@@ -27,7 +27,6 @@
 #include "..\shared\preferencesbase.h"
 #include "..\shared\enstatic.h"
 #include "..\shared\winhelpbutton.h"
-#include "..\shared\SizeGrip.h"
 #include "..\shared\EnEdit.h"
 #include "..\shared\Icon.h"
 
@@ -70,7 +69,7 @@ class CPreferencesDlg : public CPreferencesDlgBase
 // Construction
 public:
 	CPreferencesDlg(CShortcutManager* pShortcutMgr = NULL, 
-					const CTDLContentMgr* pContentMgr = NULL, 
+					const CTDCContentMgr* pContentMgr = NULL, 
 					const CTDCImportExportMgr* pExportMgr = NULL, 
 					const CUIExtensionMgr* pMgrUIExt = NULL,
 					CWnd* pParent = NULL);   // standard constructor
@@ -108,6 +107,7 @@ public:
 	BOOL GetUseStickies(CString& sStickiesPath, BOOL& bShowFullTaskPath) const { return m_pageGen.GetUseStickies(sStickiesPath, bShowFullTaskPath); }
 	BOOL GetReloadTasklists() const { return m_pageGen.GetReloadTasklists(); }
 	BOOL GetEnableRTLInput() const { return m_pageGen.GetEnableRTLInput(); }
+	BOOL GetReduceReminderDialogFlashing() const { return m_pageGen.GetReduceReminderDialogFlashing(); }
 
 	// CPreferencesMultiUserPage
 	RELOAD_OPTION GetReadonlyReloadOption() const { return m_pageMultiUser.GetReadonlyReloadOption(); }
@@ -208,6 +208,7 @@ public:
 	BOOL GetSubtasksInheritLockStatus() const { return m_pageTaskCalc.GetSubtasksInheritLockStatus(); }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_pageTaskCalc.GetTaskInheritsSubtaskFlags(); }
 	BOOL GetUseLatestLastModifiedDate() const { return m_pageTaskCalc.GetUseLatestLastModifiedDate(); }
+	BOOL GetPreserveWeekdays() const { return m_pageTaskCalc.GetPreserveWeekdays(); }
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const { return m_pageTaskCalc.GetRecentlyModifiedPeriod(); }
 
 	PTCP_CALCTIMEREMAINING GetTimeRemainingCalculation() const { return m_pageTaskCalc.GetTimeRemainingCalculation(); }
@@ -282,11 +283,14 @@ public:
 	BOOL GetAllowCheckboxAgainstTreeItem() const { return m_pageUITasklist.GetAllowCheckboxAgainstTreeItem(); }
 	BOOL GetHidePaneSplitBar() const { return m_pageUITasklist.GetHidePaneSplitBar(); }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_pageUITasklist.GetShowRemindersAsDateAndTime(); }
+	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }
 	BOOL GetColorTaskBackground() const { return m_pageUITasklistColors.GetColorTaskBackground(); }
 	BOOL GetCommentsUseTreeFont() const { return m_pageUITasklistColors.GetCommentsUseTreeFont(); }
+	BOOL GetRemindersUseTreeFont() const { return m_pageUITasklistColors.GetRemindersUseTreeFont(); }
+	BOOL GetFindTasksUseTreeFont() const { return m_pageUITasklistColors.GetFindTasksUseTreeFont(); }
 	BOOL GetColorPriority() const { return m_pageUITasklistColors.GetColorPriority(); }
 	int GetPriorityColors(CDWordArray& aColors) const { return m_pageUITasklistColors.GetPriorityColors(aColors); }
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { m_pageUITasklistColors.GetDueTaskColors(crDue, crDueToday); }

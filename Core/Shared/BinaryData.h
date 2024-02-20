@@ -17,14 +17,15 @@ public:
   CBinaryData(const CString& sContent);
   CBinaryData(const CBinaryData& data);
 
-  ~CBinaryData() {}
+  void operator = (const CBinaryData& data);
+
+  ~CBinaryData() { Empty(); }
 
   unsigned char* GetBuffer(int nByteLength);
   void ReleaseBuffer(int nByteLength);
 
   const unsigned char* Get(int& nByteLength) const;
   const unsigned char* Get() const;
-  int Get(CString& sContent) const;
 
   void Empty();
   BOOL IsEmpty() const;
@@ -32,14 +33,19 @@ public:
   bool operator == (const CBinaryData& data) const;
   bool operator != (const CBinaryData& data) const;
 
-  int GetLength() const;
+  int GetLength() const { return GetByteLength(); }
 
   BOOL Base64Encode(CString& sEncoded) const;
   BOOL Base64Decode(const CString& sEncoded);
 
+  CString AsString() const;
+  static CString AsString(const unsigned char* pData, int nByteLength);
+
 protected:
   int GetByteLength() const;
   void Set(const unsigned char* pData, int nByteLength);
+
+  static int GetEquivalentStringLength(int nByteLength);
 
   operator const unsigned char*() const;
 

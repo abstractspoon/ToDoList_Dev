@@ -62,7 +62,7 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	
 	//	TDIR_YEAR_SPECIFIC_DAY_MONTH					month (1-12)			day of month (1-31)
 	//	TDIR_YEAR_EVERY_NYEARS							every 'n' years			--- (0)
-	//  TDIR_YEAR_SPECIFIC_DOW_MONTH					LOWORD = which (1-5)	specific month (1-12)
+	//  TDIR_YEAR_SPECIFIC_DOW_MONTH					LOWORD = which (1-5)	specific months (1-12, or DHM_...)
 	//													HIWORD = DOW (1-7)		
 	TDCRECURRENCE tr;
 
@@ -127,27 +127,29 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	ExpectFalse(tr.SetRegularity(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, 0, -1)); // 'n' Months < 0
 	
 	//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 5)); // 1st Sunday
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(5, 7), 5)); // Last Saturday
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 5)); // 1st Sunday
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(5, 7), 5)); // Last Saturday
 
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), -1)); // 'n' Months < 0
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 0));  // 'n' Months == 0
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), -1)); // 'n' Months < 0
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 0));  // 'n' Months == 0
 
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(0, 1), 5)); // 'which' < 1
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(6, 7), 5)); // 'which' > 5 
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(0, 1), 5)); // 'which' < 1
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(6, 7), 5)); // 'which' > 5 
 	
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 0), 5)); // 'DOW' < 1 
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 8), 5)); // 'DOW' > 7
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 0), 5)); // 'DOW' < 1 
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 8), 5)); // 'DOW' > 7
 	
-	//	TDIR_YEAR_SPECIFIC_DAY_MONTH ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 1));
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 11));
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 31));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 13, 1));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, -1, 1));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 0, 1));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 41));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 0));
+	//	TDIR_YEAR_SPECIFIC_DAY_MONTHS ---------------------------------------
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 1));
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 11));
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 31));
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, DHM_ALL, 31));
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 13, 1)); // 'Month' > 12 and 'Month' < DHM_JANUARY
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, DHM_ALL + 1, 1)); // 'Month' > DHM_ALL
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, -1, 1)); // 'Month' < 1
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 0, 1)); // 'Month' < 1
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 41)); // 'Day' > 31
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 0)); // 'Day' < 1
 
 	//	TDIR_YEAR_EVERY_NYEARS ---------------------------------------
 	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, 0));
@@ -155,18 +157,20 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, -5, 0)); // 'n' years < 0
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 0, 0));  // 'n' years == 0
 
-	//  TDIR_YEAR_SPECIFIC_DOW_MONTH ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 5)); // 1st Sunday of May
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(5, 7), 5)); // Last Saturday of May
+	//  TDIR_YEAR_SPECIFIC_DOW_MONTHS ---------------------------------------
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 5)); // 1st Sunday of May
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(5, 7), 5)); // Last Saturday of May
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(5, 7), DHM_ALL)); // Last Saturday of All months
 
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 13)); // 'Month' > 12
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 0));  // 'Month' < 1
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 13)); // 'Month' > 12 and 'Month' < DHM_JANUARY
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 0));  // 'Month' < 1
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), DHM_ALL + 1)); // 'Month' > DHM_ALL
 
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(0, 1), 5)); // 'which' < 1
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(6, 7), 5)); // 'which' > 5 
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(0, 1), 5)); // 'which' < 1
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(6, 7), 5)); // 'which' > 5 
 	
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 0), 5)); // 'DOW' < 1 
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 8), 5)); // 'DOW' > 7
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 0), 5)); // 'DOW' < 1 
+	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 8), 5)); // 'DOW' > 7
 		
 	//  ---------------------------------------
 
@@ -212,20 +216,20 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 		TDCRECURRENCE(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, 1, 1), // Last weekday
 
 		//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS 
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 1), // 1st Sunday
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(5, 7), 1), // Last Saturday
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 1), // 1st Sunday
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(5, 7), 1), // Last Saturday
 
 		//	TDIR_YEAR_SPECIFIC_DAY_MONTH 
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 1),
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 11),
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 31),
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 1),
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 11),
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 31),
 
 		//	TDIR_YEAR_EVERY_NYEARS 
 		TDCRECURRENCE(TDIR_YEAR_EVERY_NYEARS, 1, 0),
 
 		//  TDIR_YEAR_SPECIFIC_DOW_MONTH 
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 5), // 1st Sunday of May
-		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(5, 7), 5), // Last Saturday of May
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 1), 5), // 1st Sunday of May
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(5, 7), 5), // Last Saturday of May
 	};
 	const int NUM_RECURRENCE = (sizeof(RECURRENCES) / sizeof(RECURRENCES[0]));
 

@@ -41,6 +41,9 @@ BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg,
 	{
 		if (HookWindow(hWnd))
 		{
+#ifdef _DEBUG
+			int nID = ::GetDlgCtrlID(hWnd);
+#endif
 			m_sPrompt = szPrompt;
 			m_nCheckMsg = nCheckMsg;
 			m_lCheckResult = lCheckRes;
@@ -163,7 +166,7 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	rClient.DeflateRect(2, 1, 2, 0);
 
 	UINT nFlags = (DT_TOP | DT_NOPREFIX | (bCentred ? DT_CENTER : DT_LEFT));
-	COLORREF crText = GetTextColor(hWnd);
+	COLORREF crText = GetTextColor();
 
 	if (CWinClasses::IsComboBox(szClass))
 	{
@@ -207,24 +210,9 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	}
 }
 
-COLORREF CWndPrompt::GetTextColor(HWND hWnd)
+COLORREF CWndPrompt::GetTextColor()
 {
-	static COLORREF TEXT_COLOR = CLR_NONE;
-
-	if (TEXT_COLOR == CLR_NONE)
-	{
-		if (CThemed::AreControlsThemed())
-		{
-			// We keep trying until we hit an edit control
-			CThemed(hWnd).GetThemeColor(EP_EDITTEXT, ETS_CUEBANNER, TMT_TEXTCOLOR, TEXT_COLOR);
-		}
-		else
-		{
-			TEXT_COLOR = GetSysColor(COLOR_3DDKSHADOW);
-		}
-	}
-
-	return ((TEXT_COLOR == CLR_NONE) ? GetSysColor(COLOR_3DDKSHADOW) : TEXT_COLOR);
+	return GetSysColor(COLOR_3DDKSHADOW);
 }
 
 //////////////////////////////////////////////////////////////////////

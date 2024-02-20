@@ -26,10 +26,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
-const int COwnerdrawComboBoxBase::IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(18);
-
-/////////////////////////////////////////////////////////////////////////////
-
 COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible) 
 	: 
 	m_nMaxTextWidth(-1),
@@ -156,7 +152,7 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 
 	if (IsHeadingItem(nItem))
 	{
-		crBack = GetSysColor(COLOR_3DLIGHT);
+		crBack = GetSysColor(COLOR_3DFACE);
 		crText = GetSysColor(COLOR_WINDOWTEXT);
 	}
 }
@@ -284,11 +280,8 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 	
 	if (bList)
 	{
-		int nMinDLUHeight = CDlgUnits(GetParent(), TRUE).ToPixelsY(10);
+		int nMinDLUHeight = CDlgUnits(GetParent(), TRUE).ToPixelsY(9);
 		nMinHeight = max((nMinHeight + 4), nMinDLUHeight);
-
-		if (HasIcon())
-			nMinHeight = max(nMinHeight, IMAGESIZE);
 	}
 	else
 	{
@@ -362,12 +355,6 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
 {
 	return ((GetStyle() & 0xf) == nComboType);
-}
-
-int COwnerdrawComboBoxBase::GetExtraListboxWidth() const
-{
-	// space for icon
-	return (HasIcon() ? IMAGESIZE : 0);
 }
 
 int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const

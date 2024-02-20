@@ -99,10 +99,12 @@ void CTreeDragDropRenderer::OnGetDragItemRect(CDC& /*dc*/, HTREEITEM hti, CRect&
 
 void CTreeDragDropRenderer::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
-	GraphicsMisc::DrawExplorerItemSelection(&dc, m_dragTree, GMIS_SELECTED, rItem);
+	GraphicsMisc::DrawExplorerItemSelection(&dc, m_dragTree, GMIS_SELECTED, rItem, GMIB_THEMECLASSIC);
 
 	CRect rText(rItem);
 	rText.DeflateRect(2, 1);
+
+	dc.SetTextColor(GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC));
 	dc.DrawText(m_dragTree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 }
 
@@ -128,11 +130,11 @@ enum
 {
 	DELAY_INTERVAL = 150, 
 	SCROLL_INTERVAL = 100, 
-	SCROLL_MARGIN = 20, 
 	EXPAND_INTERVAL = 500,
 };
 
 const CPoint OUTERSPACE(-10000, -10000);
+const int SCROLL_MARGIN = GraphicsMisc::ScaleByDPIFactor(20);
 
 CTreeDragDropHelper::CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree, CTreeDragDropRenderer* pAltRenderer)
 	: 

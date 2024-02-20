@@ -30,11 +30,15 @@ enum // options
 	TCCO_SHOWPARENTTASKSASFOLDER				= 0x00020000,
 	TCCO_ENABLELABELTIPS						= 0x00040000,
 	TCCO_SHOWFUTUREITEMS						= 0x00080000,
+	TCCO_SHOWDATEINEVERYCELL					= 0x00100000,
+	TCCO_SHOWWEEKNUMINCELLDATE					= 0x00200000,
+	TCCO_DISPLAYACTIVETODAY						= 0x00400000,
 
 	TCCO_DATEDISPLAYOPTIONS						= (TCCO_DISPLAYCONTINUOUS | 
 													TCCO_DISPLAYSTART | 
 													TCCO_DISPLAYDUE | 
 													TCCO_DISPLAYDONE | 
+													TCCO_DISPLAYACTIVETODAY |
 													TCCO_DISPLAYCALCSTART | 
 													TCCO_DISPLAYCALCDUE)
 };
@@ -58,16 +62,6 @@ enum TCC_SNAPMODE
 	TCCSM_NEARESTHALFDAY,
 	TCCSM_NEARESTHOUR,
 	TCCSM_FREE,
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum TCC_MONTHSTYLE
-{
-	TCCMS_NONE,
-	TCCMS_NUMBER,
-	TCCMS_SHORT,
-	TCCMS_LONG
 };
 
 /////////////////////////////////////////////////////////////////////////////

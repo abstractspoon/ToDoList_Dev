@@ -76,20 +76,6 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			set { this.grid = value; }
 		}
 
-		public void SetupUILanguage()
-		{
-			this.formLineTextAlignment.Text = LangResource.AlignmentPage_Text_Alignment;
-			this.labelHorizontal.Text = LangResource.AlignmentPage_Horizontal;
-			this.labelVertical.Text = LangResource.AlignmentPage_Vertical;
-			this.labelIndent.Text = LangResource.AlignmentPage_Indent;
-
-			this.formLineTextControl.Text = LangResource.AlignmentPage_Text_Control;
-			this.chkWrapText.Text = LangResource.AlignmentPage_Wrap_Text;
-
-			this.grpOrientation.Text = LangResource.AlignmentPage_Orientation;
-			this.labelDegrees.Text = LangResource.AlignmentPage_Degrees;
-		}
-
 		private CheckState backupTextWrapState;
 		private ReoGridHorAlign backupHorAlign;
 		private ReoGridVerAlign backupVerAlign;

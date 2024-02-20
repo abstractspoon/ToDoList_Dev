@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // PreferencesTaskDefPage.h : header file
 
-class CTDLContentMgr;
+class CTDCContentMgr;
 class CShortcutManager;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -29,11 +29,16 @@ class CTDLCommentsCtrl : public CRuntimeDlg
 	DECLARE_DYNAMIC(CTDLCommentsCtrl)
 
 public:
-	CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComboLenDLU, 
-					 const CTDLContentMgr* pMgrContent = NULL, const CShortcutManager* pMgrShortcuts = NULL);
+	CTDLCommentsCtrl(BOOL bShowLabel, 
+					 BOOL bShowToolbar, 
+					 int nComboLenDLU, 
+					 const CTDCContentMgr* pMgrContent = NULL, 
+					 const CShortcutManager* pMgrShortcuts = NULL);
+
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
+	BOOL IsCommentsEditable() const;
 
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetContentFont(HFONT hFont);
@@ -63,7 +68,7 @@ public:
 	ISpellCheck* GetSpellCheckInterface() { return m_ctrlComments.GetSpellCheckInterface(); }
 
 protected:
-	const CTDLContentMgr* m_pMgrContent;
+	const CTDCContentMgr* m_pMgrContent;
 	const CShortcutManager* m_pMgrShortcuts;
 
 	CContentTypeComboBox m_cbCommentsFmt;
@@ -78,7 +83,7 @@ protected:
 	CString m_sCommentsPrompt, m_sComboPrompt;
 
 	CString m_sPrefsFilePath;
-	BOOL m_bReadOnly;
+	BOOL m_bReadOnlyComments;
 	BOOL m_bShowLabel, m_bShowToolbar;
 
 	CONTENTFORMAT m_cfLastCustom;

@@ -82,7 +82,13 @@ public:
 		return (FALSE != m_aValues.RemoveKey(MakeKey(lpszSection, lpszEntry)));
 	}
 	
-	bool DeleteProfileSection(LPCWSTR lpszSection)
+	bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	bool HasProfileSection(LPCWSTR lpszSection) const
 	{
 		ASSERT(0);
 		return false;
@@ -116,7 +122,7 @@ CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID)
 	: 
 	CPropertyPage(nDlgTemplateID), 
 	m_brBack(NULL), 
-	m_crback(CLR_NONE), 
+	m_crBack(CLR_NONE), 
 	m_bFirstShow(TRUE), 
 	m_nHelpID(nDlgTemplateID)
 {
@@ -147,8 +153,8 @@ BOOL CPreferencesPageBase::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	
-	if (m_crback != CLR_NONE)
-		SetBackgroundColor(m_crback);
+	if (m_crBack != CLR_NONE)
+		SetBackgroundColor(m_crBack);
 	else
 		SetBackgroundColor(GetSysColor(COLOR_WINDOW));
 
@@ -181,14 +187,13 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 	{
 		CRect rClient;
 		pDC->GetClipBox(rClient);
-		pDC->FillSolidRect(rClient, m_crback);
-	}
-	else
-	{
-		CPropertyPage::OnEraseBkgnd(pDC);
+		pDC->FillSolidRect(rClient, m_crBack);
+		
+		return TRUE;
 	}
 
-	return TRUE;
+	// else
+	return CPropertyPage::OnEraseBkgnd(pDC);
 }
 
 HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -254,10 +259,10 @@ void CPreferencesPageBase::OnControlChange(UINT nID)
 
 void CPreferencesPageBase::SetBackgroundColor(COLORREF color)
 {
-	if (color == m_crback)
+	if (color == m_crBack)
 		return;
 
-	m_crback = color;
+	m_crBack = color;
 
 	GraphicsMisc::VerifyDeleteObject(m_brBack);
 
@@ -268,6 +273,14 @@ void CPreferencesPageBase::SetBackgroundColor(COLORREF color)
 		Invalidate(TRUE);
 }
 
+COLORREF CPreferencesPageBase::GetBackgroundColor() const 
+{ 
+	if (m_crBack != CLR_NONE)
+		return m_crBack; 
+
+	// else
+	return GetSysColor(COLOR_WINDOW);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlgBase dialog
@@ -304,6 +317,8 @@ BEGIN_MESSAGE_MAP(CPreferencesDlgBase, CDialog)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
+
+IMPLEMENT_DYNAMIC(CPreferencesDlgBase, CDialog);
 
 void CPreferencesDlgBase::OnOK()
 {
@@ -632,6 +647,11 @@ void CPreferencesDlgBase::DoHelp()
 		AfxGetApp()->WinHelp(pPage->GetHelpID());
 	else
 		AfxGetApp()->WinHelp(m_nDlgTemplateID);
+}
+
+void CPreferencesDlgBase::InvalidateActivePage(BOOL bErase)
+{
+	m_ppHost.InvalidateActivePage(bErase);
 }
 
 /////////////////////////////////////////////////////////////////////////////

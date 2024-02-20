@@ -11,6 +11,7 @@
 #include "..\shared\osversion.h"
 #include "..\shared\themed.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\darkmode.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -107,7 +108,7 @@ void CPreferencesUIPage::OnFirstShow()
 	GetDlgItem(IDC_STACKCOMMENTSABOVEFIELDS)->EnableWindow(m_bStackEditFieldsAndComments);
 
 	// theming only available if XP themes are active
-	if (CThemed::IsAppThemed())
+	if (CThemed::IsAppThemed() && !CDarkMode::IsEnabled())
 	{
 		m_cbThemes.SetThemePath(m_sUIThemeFile);
 		GetDlgItem(IDC_UITHEMEFILE)->EnableWindow(m_bUseUITheme);
@@ -243,7 +244,7 @@ void CPreferencesUIPage::OnUseuitheme()
 
 CString CPreferencesUIPage::GetUITheme() const 
 { 
-	if (m_bUseUITheme)
+	if (m_bUseUITheme && !CDarkMode::IsEnabled())
 		return FileMisc::GetFullPath(m_sUIThemeFile, FileMisc::GetAppResourceFolder() + "\\Themes");
 	
 	// else

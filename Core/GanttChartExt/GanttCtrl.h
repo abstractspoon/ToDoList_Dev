@@ -53,9 +53,9 @@ public:
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
 
 	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
-// 	BOOL AddSelectedTaskDependency(DWORD dwDependID);
-// 	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
-// 	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
+	BOOL AddSelectedTaskDependency(DWORD dwDependID);
+	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
+	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
 
 	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
@@ -183,8 +183,7 @@ protected:
 	
 	void DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected);
 	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
-	void DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip/*, COLORREF crRow*/);
-	//void DrawListItemRollupText(CDC* pDC, HTREEITEM hti, const CRect& rItem, const CRect& rClip, COLORREF crRow);
+	void DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, BOOL bSelected);
 	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
 	void DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected);
 
@@ -202,15 +201,15 @@ protected:
 							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday, BOOL bDrawHours);
 
 	void DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BOOL bToday, double dFromHour, double dToHour, double dDayWidth, double dHourWidth);
-	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
-	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
-	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
+	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bSelected);
+	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bSelected);
+	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bSelected);
 
 	BOOL WantDrawWeekend(const COleDateTime& dtDay) const;
 	BOOL DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
-							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd);
+							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, BOOL bSelected);
 
 	enum VERT_DIV
 	{
@@ -304,7 +303,7 @@ protected:
 	BOOL CalcMilestoneRect(const GANTTITEM& gi, const CRect& rMonth, CRect& rMilestone) const;
 	int GetBestTextPos(const GANTTITEM& gi, const CRect& rMonth) const;
 	CString GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nColID) const;
-	void GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const;
+	void GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF& crBorder, COLORREF& crFill) const;
 	COLORREF GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter = FALSE) const;
 	BOOL GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const;
 

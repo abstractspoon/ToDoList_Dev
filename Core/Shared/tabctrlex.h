@@ -22,6 +22,7 @@ enum
 	TCE_CLOSEBUTTON		= 0x0010,
 	TCE_BOLDSELTEXT		= 0x0020,
 	TCE_TABCOLORS		= 0x0040,
+	TCE_TAGCOLORS		= 0x0080,
 
 	TCE_ALL				= 0xffff
 };
@@ -46,6 +47,10 @@ enum
 
 #ifndef TCN_POSTDRAW
 #	define TCN_POSTDRAW		(TCN_FIRST-15)
+#endif
+
+#ifndef TCN_GETTAGCOLOR
+#	define TCN_GETTAGCOLOR	(TCN_FIRST-16)
 #endif
 
 struct NMTABCTRLEX
@@ -94,7 +99,6 @@ protected:
 	int m_nMouseInCloseButton; // tab index
 	BOOL m_bDragging;
 	int m_nDragTab, m_nDropTab, m_nDropPos;
-	CSize m_sizeClose;
 	BOOL m_bUpdatingTabWidth;
 	CFont m_fontBold;
 	BOOL m_bFirstPaint;
@@ -147,15 +151,19 @@ protected:
 	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
 	BOOL GetTabCloseButtonRect(int nTab, CRect& rBtn) const;
 	int GetTabDropIndex(CPoint point, int& nDropPos) const;
-	void DrawTabDropMark(CDC* pDC);
 	BOOL HasTabMoved() const;
-	void DrawTabCloseButton(CDC& dc, int nTab);
 	int HitTestCloseButton(const CPoint& point) const;
 	BOOL NeedCustomPaint() const;
 	void UpdateTabItemWidths();
 	CString GetRequiredTabText(int nTab);
 	CString GetRequiredTabText(int nTab, const CString& sCurText);
 	COLORREF GetItemBkColor(int nTab);
+	COLORREF GetItemTagColor(int nTab);
+
+	void DrawTabDropMark(CDC* pDC);
+	void DrawTabCloseButton(CDC* pDC, int nTab);
+	void DrawTabTag(CDC* pDC, int nTab, const CRect& rTab);
+	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText);
 
 	// pseudo message handler
 	void InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

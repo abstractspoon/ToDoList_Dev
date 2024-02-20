@@ -36,6 +36,8 @@ protected:
 	CString m_sUrl;
 	BOOL m_bBrowser, m_bHideOnClose;
 
+	const static UINT BROWSER_CTRLID;
+
 protected:
 // Overrides
 	// ClassWizard generated virtual function overrides

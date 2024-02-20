@@ -97,10 +97,9 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
-	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
-	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
-	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnChangeHoursInDay)
-	ON_CBN_SELCHANGE(IDC_HOURSINONEDAY, OnChangeHoursInDay)
+	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
+	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
+	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnComboChangeHoursInDay)
 	ON_CBN_KILLFOCUS(IDC_HOURSINONEDAY, OnKillFocusHoursInDay)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
@@ -174,9 +173,14 @@ void CPreferencesTaskPage::ValidateWorkingWeek()
 		m_bHasLunchBreak = FALSE;
 
 	m_dStartOfWorkdayInHours = min(m_dStartOfWorkdayInHours, (24 - dHoursInDay));
+
+	double dEndOfWorkdayInHours = (m_dStartOfWorkdayInHours + dHoursInDay);
+
 	m_dStartOfLunchInHours = max(m_dStartOfWorkdayInHours, m_dStartOfLunchInHours);
-	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, (m_dStartOfWorkdayInHours + dHoursInDay));
+	m_dStartOfLunchInHours = min(dEndOfWorkdayInHours, m_dStartOfLunchInHours);
+
 	m_dEndOfLunchInHours = max(m_dEndOfLunchInHours, m_dStartOfLunchInHours);
+	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, dEndOfWorkdayInHours);
 
 	if (GetSafeHwnd())
 		UpdateData(FALSE);
@@ -228,11 +232,14 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 
 	m_nDaysInWeek = pPrefs->GetProfileInt(szKey, _T("DaysInWeek"), 5);
 	m_sHoursInDay = pPrefs->GetProfileString(szKey, _T("HoursInDay"), _T("8.00"));
-	m_bHasLunchBreak = pPrefs->GetProfileInt(szKey, _T("HasLunchBreak"), TRUE);
-	
 	m_dEndOfLunchInHours = pPrefs->GetProfileDouble(szKey, _T("EndOfLunchInHours"), 14.0);
 	m_dStartOfLunchInHours = pPrefs->GetProfileDouble(szKey, _T("StartOfLunchInHours"), 13.0);
 	m_dStartOfWorkdayInHours = pPrefs->GetProfileDouble(szKey, _T("StartOfWorkdayInHours"), 9.0);
+	
+	if (m_dEndOfLunchInHours <= m_dStartOfLunchInHours)
+		m_bHasLunchBreak = FALSE;
+	else
+		m_bHasLunchBreak = pPrefs->GetProfileInt(szKey, _T("HasLunchBreak"), TRUE);
 
 	m_sTrackReminderSoundFile = pPrefs->GetProfileString(_T("Reminders"), _T("SoundFile"), m_sTrackReminderSoundFile);
 
@@ -302,8 +309,24 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 }
 
-void CPreferencesTaskPage::OnChangeHoursInDay() 
+void CPreferencesTaskPage::OnEditChangeHoursInDay() 
 {
+	UpdateData();
+	ValidateWorkingWeek();
+
+	PostMessage(WM_PTP_ENABLEDISABLE);
+}
+
+void CPreferencesTaskPage::OnComboChangeHoursInDay()
+{
+	// We have to get the text via the combo's selected index
+	// because the text is not updated until after the notification
+	CComboBox* pCombo = (CComboBox*)GetDlgItem(IDC_HOURSINONEDAY);
+	ASSERT(pCombo);
+
+	m_sHoursInDay = GetSelectedItem(*pCombo);
+	ValidateWorkingWeek();
+
 	PostMessage(WM_PTP_ENABLEDISABLE);
 }
 

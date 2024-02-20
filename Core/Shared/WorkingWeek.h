@@ -61,7 +61,7 @@ public:
 	// and modifies 'dHours' appropriately
 	void AddDurationInHours(COleDateTime& date, double& dHours) const;
 
-	double CalculateDurationInHours(double fromHour, double toHour) const;
+	double CalcDurationInHours(double fromHour, double toHour) const;
 	double GetLengthInHours(bool bIncludingLunch = false) const;
 	double GetLunchLengthInHours() const;
 
@@ -89,7 +89,7 @@ class CWeekend
 {
 public:
 	CWeekend();	// uses static initialisation
-	CWeekend(DWORD dwDays); // eg. WD_SATURDAY | WD_SUNDAY
+	CWeekend(DWORD dwDays); // DH_DAYOFWEEK
 	CWeekend(const CWeekend& weekend);
 
 	BOOL operator==(const CWeekend& other) const;
@@ -106,7 +106,7 @@ public:
 	int GetLengthInDays() const;
 
 protected:
-	DWORD m_dwDays;
+	DWORD m_dwDays; // DH_DAYOFWEEK
 	int m_nLength;
 
 	static int CalcLength(DWORD dwDays);
@@ -150,11 +150,11 @@ public:
 						   double dStartOfLunchInHours,		// eg. 12
 						   double dEndOfLunchInHours);		// eg. 13
 
-	double CalculateDurationInMinutes(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
-	double CalculateDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const;
+	double CalcDurationInMinutes(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDurationInHours(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDurationInDays(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDurationInWeeks(const COleDateTime& dtFrom, const COleDateTime& dtTo) const;
+	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, WW_UNITS nUnits) const;
 
 	// dtFrom will be modified if it falls on a weekend
 	COleDateTime AddDurationInMinutes(COleDateTime& dtFrom, double dMins) const;
@@ -175,7 +175,7 @@ public:
 	double GetLengthInDaysAsRatio() const; // length in days / 7.0
 	double GetLengthInHoursAsRatio(bool bIncludingLunch = false) const; // length in hours / 7.0 * 24
 
-	const CWorkingDay& WorkDay() const { return m_WorkDay;	}
+	const CWorkingDay& WorkingDay() const { return m_WorkDay;	}
 	const CWeekend& Weekend() const { return m_Weekend; }
 
 protected:

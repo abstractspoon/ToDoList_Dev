@@ -231,13 +231,9 @@ void CFileEdit::OnPaint()
 				rClient.DeflateRect(4, 1, 1, 1);
 				
 				dc.SetBkMode(TRANSPARENT);
-				
-				if (!IsWindowEnabled())
-					dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
-				else
-					dc.SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
-				
+				dc.SetTextColor(::GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
 				dc.DrawText(sText, rClient, DT_PATH_ELLIPSIS);
+
 				m_bTipNeeded = TRUE;
 			}
 
@@ -326,7 +322,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	if (!WebMisc::IsURL(sFilePath))
 		FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
 
-	if (HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
 	{
 		if (m_ilImageIcon.GetSafeHandle() == NULL)
 			VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));

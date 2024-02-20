@@ -21,26 +21,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef DTM_GETDATETIMEPICKERINFO
-#	define DTM_GETDATETIMEPICKERINFO (DTM_FIRST + 14)
-
-struct DATETIMEPICKERINFO
-{
-    DWORD cbSize;
-	
-    RECT rcCheck;
-    DWORD stateCheck;
-	
-    RECT rcButton;
-    DWORD stateButton;
-	
-    HWND hwndEdit;
-    HWND hwndUD;
-    HWND hwndDropDown;
-};
-
-#endif
-
 #ifndef DTM_SETMCSTYLE
 #	define DTM_SETMCSTYLE (DTM_FIRST + 11)
 #	define DTM_GETMCSTYLE (DTM_FIRST + 12)
@@ -449,7 +429,15 @@ void CDateTimeCtrlEx::OnPaint()
 		}
 		else if (bWantDPIScaling)
 		{
-			dc.FillSolidRect(rCheck, GetSysColor(COLOR_WINDOW));
+			BOOL bEnabled = IsWindowEnabled();
+
+			if (bEnabled)
+			{
+				SYSTEMTIME st;
+				bEnabled = (GDT_VALID == SendMessage(DTM_GETSYSTEMTIME, 0, (LPARAM)&st));
+			}
+
+			dc.FillSolidRect(rCheck, GetSysColor(bEnabled ? COLOR_WINDOW : COLOR_3DFACE));
 		}
 
 		// Always draw the checkbox because Windows gets

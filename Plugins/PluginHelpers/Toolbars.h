@@ -22,6 +22,7 @@ namespace Abstractspoon
 				static void FixupButtonSizes(Windows::Forms::ToolStrip^ toolbar);
 				static void Sort(Windows::Forms::ToolStripItemCollection^ items);
 				static int GetSelectedItem(Windows::Forms::ToolStripItemCollection^ items);
+				static void SetFont(Windows::Forms::ToolStripItemCollection^ items, Drawing::Font^ font);
 
 				enum class ItemState
 				{
@@ -60,7 +61,7 @@ namespace Abstractspoon
 				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 				virtual void OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e) override;
 
-				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
+				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar);
 				virtual void DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
 
 				virtual Drawing::Pen^ GetSeperatorLightPen() { return Drawing::SystemPens::ButtonHighlight; }

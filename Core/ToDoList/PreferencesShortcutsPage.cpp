@@ -32,7 +32,6 @@ static char THIS_FILE[] = __FILE__;
 
 #define ID_SUBMENU ((UINT)-1)
 
-const COLORREF SUBMENU_COLOR	= RGB(192, 192, 192);
 const int TEXT_PADDING			= 3;
 const int SHORTCUTCOL_MINWIDTH	= 75;
 
@@ -45,12 +44,11 @@ CPreferencesShortcutsPage::CPreferencesShortcutsPage(CShortcutManager* pMgr)
 	m_tcCommands(NCGS_SHOWHEADER)
 {
 	//{{AFX_DATA_INIT(CPreferencesShortcutsPage)
-	m_sOtherCmdID = _T("");
 	m_bShowCommandIDs = FALSE;
 	//}}AFX_DATA_INIT
 
 	m_tcCommands.AddGutterColumn(PSP_SHORTCUTCOLUMNID, CEnString(IDS_PSP_SHORTCUT));
-	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(_T("ID")), 0, DT_CENTER);
+	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(IDS_TDC_COLUMN_ID), 0, DT_CENTER);
 	m_tcCommands.SetGutterColumnHeaderTitle(NCG_CLIENTCOLUMNID, CEnString(IDS_PSP_MENUITEM));
 	m_tcCommands.ShowGutterPosColumn(FALSE);
 	m_tcCommands.SetGridlineColor(OTC_GRIDCOLOR);
@@ -350,8 +348,9 @@ void CPreferencesShortcutsPage::OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pR
 	m_hkCur.SetHotKey(wVKeyCode, wModifiers);
 	m_hkNew.SetHotKey(wVKeyCode, wModifiers);
 
-	// if it's a misc item then disable keys
-	BOOL bCanHaveShortcut = (nCmdID && !IsMiscCommandID(nCmdID));
+	// if it's a misc item or a sub-menu then disable keys
+	BOOL bSubMenu = (pNMTreeView->itemNew.lParam == ID_SUBMENU);
+	BOOL bCanHaveShortcut = (!bSubMenu && nCmdID && !IsMiscCommandID(nCmdID));
 
 	m_hkNew.EnableWindow(bCanHaveShortcut);
 	GetDlgItem(IDC_CURLABEL)->EnableWindow(bCanHaveShortcut);
@@ -529,6 +528,8 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 
 	if (pNCGDI->nColID != OTC_POSCOLUMNID)
 	{
+		BOOL bFocused = (::GetFocus() == m_tcCommands);
+
 		CRect rItem(pNCGDI->rItem);
 		HTREEITEM hti = (HTREEITEM)pNCGDI->dwItem;
 
@@ -538,7 +539,6 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 
 		if (bThemedSel)
 		{
-			BOOL bFocused = (GetFocus() == &m_tcCommands);
 			DWORD dwFlags = GMIB_CLIPRIGHT;
 
 			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
@@ -549,7 +549,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		else
 		{
 			if (bSubMenu)
-				pNCGDI->pDC->FillSolidRect(rItem, SUBMENU_COLOR);
+				pNCGDI->pDC->FillSolidRect(rItem, GetSysColor(COLOR_3DSHADOW));
 			else
 				GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
 
@@ -560,7 +560,12 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		if (!bSubMenu)
 		{
 			UINT nCmdID = m_tcCommands.GetItemData(hti);
-			pNCGDI->pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+
+			if (bThemedSel)
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), 0);
+
+			pNCGDI->pDC->SetTextColor(crText);
 
 			rItem.left += TEXT_PADDING;
 
@@ -701,11 +706,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			// Note: we set text color to same as back color 
 			// so default text rendering does not show
 			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
-
-			if (bSubMenu)
-				pTVCD->clrText = pTVCD->clrTextBk = SUBMENU_COLOR;
-			else
-				pTVCD->clrText = pTVCD->clrTextBk = GetSysColor(COLOR_WINDOW);
+			pTVCD->clrText = pTVCD->clrTextBk = GetSysColor(bSubMenu ? COLOR_3DSHADOW : COLOR_WINDOW);
 		}
 		break;
 
@@ -720,7 +721,8 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			pDC->FillSolidRect(pNMCD->rc.left, pNMCD->rc.bottom - 1, pNMCD->rc.right - pNMCD->rc.left, 1, m_tcCommands.GetGridlineColor());
 
 			// Draw Text
-			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
+			COLORREF crText = GetSysColor(bSubMenu ? COLOR_3DHILIGHT : COLOR_WINDOWTEXT);
 
 			BOOL bThemedSel = FALSE;
 
@@ -759,12 +761,14 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 				if (bThemedSel)
 					rText.top++;
 
-				pDC->FillSolidRect(rText, m_ctrlHighlighter.GetColor());
+				pDC->FillSolidRect(rText, m_ctrlHighlighter.GetBkColor());
+				crText = m_ctrlHighlighter.GetTextColor();
 			}
 
 			BOOL bBold = (m_tcCommands.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
 			HGDIOBJ hOldFont = pDC->SelectObject(m_fonts.GetHFont(bBold, FALSE, FALSE, FALSE));
 
+			pDC->SetTextColor(crText);
 			pDC->SetBkMode(TRANSPARENT);
 			pDC->DrawText(sItem, rText, (DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX));
 			pDC->SelectObject(hOldFont);
@@ -831,10 +835,10 @@ void CPreferencesShortcutsPage::LoadPreferences(const IPreferences* pPrefs, LPCT
 
 void CPreferencesShortcutsPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey*/) const
 {
-	pPrefs->WriteProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), m_bShowCommandIDs);
-
 	if (m_pShortcutMgr)
 		m_pShortcutMgr->SaveSettings(pPrefs, _T("KeyboardShortcuts"));
+
+	pPrefs->WriteProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), m_bShowCommandIDs);
 }
 
 void CPreferencesShortcutsPage::OnShowCmdIDs() 

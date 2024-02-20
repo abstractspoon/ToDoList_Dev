@@ -126,6 +126,8 @@ public:
 	
 	virtual void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const = 0;
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey) = 0;
+
+	virtual bool SupportsTaskSelection() const = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -152,7 +154,6 @@ enum IUI_APPCOMMAND
 	IUI_SORT,						// IUIAPPCOMMANDDATA::nSortBy		[in]
 	IUI_TOGGLABLESORT_DEPRECATED,	// IUIAPPCOMMANDDATA::nSortBy		[in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,					// IUIAPPCOMMANDDATA::dwTaskID		[in]
 	IUI_RESIZEATTRIBCOLUMNS,		   
 	IUI_GETNEXTVISIBLETASK,			// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_GETNEXTTOPLEVELTASK,		// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
@@ -169,6 +170,7 @@ enum IUI_APPCOMMAND
 	IUI_GETNEXTTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_GETPREVTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_SELECTALL,
+	IUI_SCROLLTOSELECTEDTASK,
 
 	// new values here
 //  IUI_
@@ -182,6 +184,16 @@ enum IUI_HITTEST
 	IUI_TASKLIST,
 	IUI_COLUMNHEADER,
 	IUI_TASK,
+
+	// new values here
+};
+
+enum IUI_HITTESTREASON
+{
+	// NEVER CHANGE THE ORDER OF THIS LIST
+	IUI_NONE		= 0,
+	IUI_INFOTIP,
+	IUI_CONTEXTMENU,
 
 	// new values here
 };
@@ -212,6 +224,7 @@ struct IUITASKMOD
 		TDC_UNITS nTimeUnits;	// TDCA_TIMEEST, TDCA_TIMESPENT, TDCA_CUSTOMATTRIB
 		bool bCostIsRate;		// TDCA_COST
 		DWORD dwPrevDependID;	// TDCA_DEPENDENCY
+		bool bAppend;			// TDCA_CATEGORY, TDCA_TAGS, TDCA_ALLOCTO, TDCA_FILELINKS
 	};
 };
 
@@ -328,6 +341,9 @@ const UINT WM_IUI_GETTASKICON				= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON
 // WPARAM = Task ID, LPARAM = &IUITASKNEXTOCCURRENCES
 const UINT WM_IUI_GETNEXTTASKOCCURRENCES	= ::RegisterWindowMessageW(L"WM_IUI_GETTASKNEXTOCCURRENCES"); 
 
+// wParam = 0, lParam = tasklist metadata (LPCTSTR)
+const UINT WM_IUI_SETTASKLISTMETADATA		= ::RegisterWindowMessageW(L"WM_IUI_SETTASKLISTMETADATA"); 
+
 //////////////////////////////////////////////////////////////////////
 
 class IUIExtensionWindow
@@ -337,7 +353,7 @@ public:
 	virtual LPCWSTR GetMenuText() const = 0; // caller must copy result only
 	virtual LPCWSTR GetTypeID() const = 0; // caller must copy result only
 
-	virtual bool SelectTask(DWORD dwTaskID) = 0;
+	virtual bool SelectTask(DWORD dwTaskID, bool bTaskLink) = 0;
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
 	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate) = 0;
@@ -351,8 +367,8 @@ public:
 	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData = NULL) const = 0;
 
 	virtual bool GetLabelEditRect(LPRECT pEdit) = 0; // screen coordinates
-	virtual IUI_HITTEST HitTest(POINT ptScreen) const = 0;
-	virtual DWORD HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const = 0;
+	virtual IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const = 0;
+	virtual DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const = 0;
 
 	virtual void SetUITheme(const UITHEME* pTheme) = 0;
 	virtual void SetTaskFont(HFONT hFont) = 0;

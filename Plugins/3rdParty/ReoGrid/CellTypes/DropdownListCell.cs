@@ -33,36 +33,36 @@ namespace unvell.ReoGrid.CellTypes
 	public class DropdownListCell : DropdownCell
 	{
 		/// <summary>
-		/// Construct dropdown control with an empty candidates list
+		/// Construct dropdown control with an empty items list
 		/// </summary>
 		public DropdownListCell()
 			: base()
 		{
-			this.candidates = new List<object>(0);
+			this.listData = new List<object>(0);
 		}
 
 		/// <summary>
-		/// Construct dropdown control with specified candidates array
+		/// Construct dropdown control with specified items array
 		/// </summary>
-		/// <param name="candidates">candidate object array to be displayed in the listbox</param>
-		public DropdownListCell(params object[] candidates)
+		/// <param name="items">candidate object array to be displayed in the listbox</param>
+		public DropdownListCell(params object[] items)
 			: this()
 		{
-			this.candidates.AddRange(candidates);
+			this.listData.AddRange(items);
 		}
 
 		/// <summary>
-		/// Construct dropdown control with specified candidates array
+		/// Construct dropdown control with specified items array
 		/// </summary>
-		/// <param name="candidates">candidate object array to be displayed in the listbox</param>
-		public DropdownListCell(IEnumerable<object> candidates)
+		/// <param name="items">candidate object array to be displayed in the listbox</param>
+		public DropdownListCell(IEnumerable<object> items)
 			: this()
 		{
-			this.candidates.AddRange(candidates);
+			this.listData.AddRange(items);
 		}
 
 		/// <summary>
-		/// Get or set the selected index in candidates list
+		/// Get or set the selected index in items list
 		/// </summary>
 		public int SelectedIndex
 		{
@@ -92,7 +92,27 @@ namespace unvell.ReoGrid.CellTypes
 		/// </summary>
 		public event EventHandler SelectedItemChanged;
 
-		private List<object> candidates;
+		private List<object> listData;
+
+		public IEnumerable<object> ListData
+		{
+			get { return listData; }
+			set
+			{
+				if (!value.SequenceEqual(ListData))
+				{
+					listData = new List<object>(value);
+
+					if (listBox != null)
+					{
+						listBox.Items.Clear();
+						listBox.Items.AddRange(this.listData.ToArray());
+					}
+
+					this.Cell.Worksheet.RaiseCellDataChangedEvent(this.Cell);
+				}
+			}
+		}
 
 		/// <summary>
 		/// Push down the dropdown panel.
@@ -104,7 +124,7 @@ namespace unvell.ReoGrid.CellTypes
 				this.listBox = new ListBox()
 				{
 					Dock = DockStyle.Fill,
-					BorderStyle = System.Windows.Forms.BorderStyle.None,
+					BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle,
 				};
 
 				listBox.Click += ListBox_Click;
@@ -115,12 +135,15 @@ namespace unvell.ReoGrid.CellTypes
 					if (index != -1) listBox.SelectedIndex = index;
 				};
 
-				if (this.candidates != null)
+				if (this.listData != null)
 				{
-					listBox.Items.AddRange(this.candidates.ToArray());
+					listBox.Items.AddRange(this.listData.ToArray());
 				}
 
 				base.DropdownControl = listBox;
+
+				if (listBox.Items.Count > 0)
+					base.DropdownPanelHeight = Math.Min(200, (listBox.Items.Count * listBox.GetItemRectangle(0).Height) + 6);
 			}
 
 			listBox.SelectedItem = this.Cell.InnerData;
@@ -201,7 +224,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					this.owner.candidates.Add(item);
+					this.owner.listData.Add(item);
 				}
 			}
 
@@ -217,7 +240,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					this.owner.candidates.AddRange(items);
+					this.owner.listData.AddRange(items);
 				}
 			}
 
@@ -232,7 +255,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					this.owner.candidates.Clear();
+					this.owner.listData.Clear();
 				}
 			}
 
@@ -249,7 +272,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					return this.owner.candidates.Contains(item);
+					return this.owner.listData.Contains(item);
 				}
 			}
 
@@ -266,7 +289,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					this.owner.candidates.CopyTo(array, arrayIndex);
+					this.owner.listData.CopyTo(array, arrayIndex);
 				}
 			}
 
@@ -283,7 +306,7 @@ namespace unvell.ReoGrid.CellTypes
 					}
 					else
 					{
-						return this.owner.candidates.Count;
+						return this.owner.listData.Count;
 					}
 				}
 			}
@@ -320,7 +343,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					return this.owner.candidates.Remove(item);
+					return this.owner.listData.Remove(item);
 				}
 			}
 
@@ -340,7 +363,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					foreach (var item in this.owner.candidates)
+					foreach (var item in this.owner.listData)
 						yield return item;
 				}
 			}
@@ -362,7 +385,7 @@ namespace unvell.ReoGrid.CellTypes
 				}
 				else
 				{
-					foreach (var item in this.owner.candidates)
+					foreach (var item in this.owner.listData)
 					{
 						yield return item;
 					}
@@ -377,7 +400,7 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>New instance of dropdown list.</returns>
 		public override ICellBody Clone()
 		{
-			return new DropdownListCell(this.candidates);
+			return new DropdownListCell(this.listData);
 		}
 	}
 }

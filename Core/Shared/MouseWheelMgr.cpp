@@ -6,6 +6,7 @@
 #include "MouseWheelMgr.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
+#include "Misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -68,44 +69,66 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		// However this is complicated because we may also want to support
 		// Shift+MouseWheel horizontal scrolling and there is no default
 		// handling for this so we must handle this for all Windows.
-		BOOL bShift = (GetKeyState(VK_SHIFT) & 0x8000);
-		BOOL bHorzScroll = (m_bShiftHorzScrollingEnabled && bShift);
+		BOOL bShift = Misc::HasFlag(GetKeyState(VK_SHIFT), 0x8000);
 
-		if (bHorzScroll)
+		if (m_bShiftHorzScrollingEnabled && bShift)
 		{
 			::SendMessage(hwndPt, WM_HSCROLL, (bRight ? SB_PAGERIGHT : SB_PAGELEFT), 0L);
 			return TRUE;
 		}
-		else if (::GetFocus() != hwndPt) // non-focus windows
+
+		// non-focus windows
+		if (::GetFocus() != hwndPt) 
 		{
 			// special handling for spin controls buddied to other controls
 			CString sClass = CWinClasses::GetClass(hwndPt);
+			DWORD dwStyle = ::GetWindowLong(hwndPt, GWL_STYLE);
+
+			BOOL bHasVScroll = Misc::HasFlag(dwStyle, WS_VSCROLL);
+			BOOL bScrollParent = FALSE;
 
 			if (CWinClasses::IsClass(sClass, WC_SPIN))
 			{
-				DWORD dwStyle = ::GetWindowLong(hwndPt, GWL_STYLE);
-
-				if (dwStyle & UDS_SETBUDDYINT)
+				if (Misc::HasFlag(dwStyle, UDS_SETBUDDYINT))
 				{
 					HWND hwndBuddy = (HWND)::SendMessage(hwndPt, UDM_GETBUDDY, 0, 0);
 
-					if (CWinClasses::IsClass(hwndBuddy, WC_EDIT)) 
+					if (CWinClasses::IsEditControl(hwndBuddy, FALSE)) 
 						hwndPt = hwndBuddy;
 				}
 				else
 				{
-					HWND hwndParent = ::GetParent(hwndPt);
-
-					if (CWinClasses::IsClass(hwndParent, WC_TABCONTROL))
-					{
-						hwndPt = hwndParent;
-						sClass = WC_TABCONTROL;
-					}
+					bScrollParent = CWinClasses::IsClass(::GetParent(hwndPt), WC_TABCONTROL);
 				}
+			}
+			else if (CWinClasses::IsClass(sClass, WC_HEADER))
+			{
+				bScrollParent = TRUE;
+			}
+			else if (CWinClasses::IsEditControl(hwndPt) && bHasVScroll)
+			{
+				// Check that the scrollbar is enabled
+				SCROLLINFO si = { 0 };
+				bScrollParent = !::GetScrollInfo(hwndPt, SB_VERT, &si);
+			}
+			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) ||
+					 CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||
+					 CWinClasses::IsClass(sClass, WC_TABCONTROL))
+			{
+				// Controls not requiring a vertical scrollbar
+			}
+			else
+			{
+				bScrollParent = !bHasVScroll;
+			}
+
+			if (bScrollParent)
+			{
+				hwndPt = ::GetParent(hwndPt);
+				sClass = CWinClasses::GetClass(hwndPt);
 			}
 
 			// special handling for tab controls
-			// NOTE: DO NOT 'else' THIS WITH SPIN BTN
 			if (CWinClasses::IsClass(sClass, WC_TABCONTROL))
 			{
 				HWND hwndSpin = ::GetWindow(hwndPt, GW_CHILD);

@@ -73,21 +73,45 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 {
 	// load tools
 	CToolbarButtonArray aButtons;
-	int nBtnCount = pPrefs->GetProfileInt(_T("CustomToolbar"), _T("ButtonCount"), 0);
+	CString sButtons = pPrefs->GetProfileString(_T("CustomToolbar"), _T("Buttons"));
 
-	for (int nBtn = 1; nBtn <= nBtnCount; nBtn++)
+	if (!sButtons.IsEmpty())
 	{
-		CString sKey = Misc::MakeKey(_T("CustomToolbar\\Button%d"), nBtn);
-
+		CStringArray aBtnPairs;
+		int nPair = Misc::Split(sButtons, aBtnPairs, '|');
 		TOOLBARBUTTON tb;
-		tb.nMenuID = pPrefs->GetProfileInt(sKey, _T("MenuID"), 0);
-		tb.sImageID = pPrefs->GetProfileString(sKey, _T("ImageID"), _T(""));
-		
-		aButtons.Add(tb);
+
+		while (nPair--)
+		{
+			CString sMenuID = aBtnPairs[nPair];
+			
+			if (Misc::Split(sMenuID, tb.sImageID, ':'))
+			{
+				ASSERT(!tb.sImageID.IsEmpty() || (sMenuID == _T("0")));
+
+				tb.nMenuID = (UINT)_ttoi(sMenuID);
+				aButtons.InsertAt(0, tb);
+			}
+		}
+	}
+	else // backward compatibility
+	{
+		int nBtn = pPrefs->GetProfileInt(_T("CustomToolbar"), _T("ButtonCount"), 0);
+		TOOLBARBUTTON tb;
+
+		while (nBtn--)
+		{
+			CString sKey = Misc::MakeKey(_T("CustomToolbar\\Button%d"), nBtn + 1);
+
+			tb.nMenuID = pPrefs->GetProfileInt(sKey, _T("MenuID"), 0);
+			tb.sImageID = pPrefs->GetProfileString(sKey, _T("ImageID"), _T(""));
+
+			aButtons.InsertAt(0, tb);
+		}
 	}
 
 	// If no tools and 'first time' then create a toolbar to showcase the feature
-	if (!nBtnCount && pPrefs->GetProfileInt(_T("CustomToolbar"), _T("FirstTime"), TRUE))
+	if (!aButtons.GetSize() && pPrefs->GetProfileInt(_T("CustomToolbar"), _T("FirstTime"), TRUE))
 	{
 		aButtons.Add(TOOLBARBUTTON(ID_NEW,						_T("28")));
 		aButtons.Add(TOOLBARBUTTON(ID_PRINTPREVIEW,				_T("82")));
@@ -95,6 +119,7 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 		aButtons.Add(TOOLBARBUTTON());							// separator
 		aButtons.Add(TOOLBARBUTTON(ID_EDIT_FLAGTASK,			_T("49")));
 		aButtons.Add(TOOLBARBUTTON(ID_EDIT_LOCKTASK,			_T("100")));
+		aButtons.Add(TOOLBARBUTTON(ID_EDIT_PASTEATTRIBUTES,		_T("258")));
 		aButtons.Add(TOOLBARBUTTON());							// separator
 		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,			_T("62")));
 		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,		_T("99")));
@@ -114,17 +139,20 @@ void CPreferencesUICustomToolbarPage::SavePreferences(IPreferences* pPrefs, LPCT
 	CToolbarButtonArray aButtons;
 	int nBtnCount = GetToolbarButtons(aButtons);
 
+	CString sButtons;
+
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
 		const TOOLBARBUTTON& tb = aButtons[nBtn];
-
-        CString sKey = Misc::MakeKey(_T("CustomToolbar\\Button%d"), nBtn + 1);
-		
-		pPrefs->WriteProfileInt(sKey, _T("MenuID"), tb.nMenuID);
-		pPrefs->WriteProfileString(sKey, _T("ImageID"), tb.sImageID);
+ 		sButtons += Misc::Format(_T("%d:%s|"), tb.nMenuID, tb.sImageID);
 	}
+	sButtons.TrimRight('|');
 
-	pPrefs->WriteProfileInt(_T("CustomToolbar"), _T("ButtonCount"), nBtnCount);
+	// Check and delete old preferences once only
+	if (pPrefs->HasProfileSection(_T("CustomToolbar\\Button1")))
+		pPrefs->DeleteProfileSection(_T("CustomToolbar"), true);
+
+	pPrefs->WriteProfileString(_T("CustomToolbar"), _T("Buttons"), sButtons);
 	pPrefs->WriteProfileInt(_T("CustomToolbar"), _T("FirstTime"), FALSE);
 }
 

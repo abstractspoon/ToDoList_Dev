@@ -191,6 +191,14 @@ CPropertyPage* CPropertyPageHost::GetActivePage()
 	return pPage;
 }
 
+void CPropertyPageHost::InvalidateActivePage(BOOL bErase)
+{
+	CPropertyPage* pPage = GetActivePage();
+
+	if (pPage)
+		pPage->Invalidate(bErase);
+}
+
 BOOL CPropertyPageHost::IsPageCreated(int nIndex) const
 {
 	const CPropertyPage* pPage = GetPage(nIndex);

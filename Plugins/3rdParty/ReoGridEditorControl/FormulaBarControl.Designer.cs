@@ -68,7 +68,7 @@ namespace unvell.ReoGrid.Editor
 			this.leftPanel.Dock = System.Windows.Forms.DockStyle.Left;
 			this.leftPanel.Location = new System.Drawing.Point(0, 1);
 			this.leftPanel.Name = "leftPanel";
-			this.leftPanel.Size = new System.Drawing.Size(251, 177);
+			this.leftPanel.Size = new System.Drawing.Size(251, 192);
 			this.leftPanel.TabIndex = 5;
 			// 
 			// panel1
@@ -81,7 +81,7 @@ namespace unvell.ReoGrid.Editor
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
 			this.panel1.Padding = new System.Windows.Forms.Padding(0, 0, 1, 0);
-			this.panel1.Size = new System.Drawing.Size(251, 21);
+			this.panel1.Size = new System.Drawing.Size(251, 20);
 			this.panel1.TabIndex = 5;
 			// 
 			// panel2
@@ -89,7 +89,7 @@ namespace unvell.ReoGrid.Editor
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
 			this.panel2.Location = new System.Drawing.Point(180, 0);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(41, 21);
+			this.panel2.Size = new System.Drawing.Size(41, 20);
 			this.panel2.TabIndex = 10;
 			// 
 			// pictureBox1
@@ -98,7 +98,7 @@ namespace unvell.ReoGrid.Editor
 			this.pictureBox1.Image = global::unvell.ReoGrid.Editor.Properties.Resources.FunctionHS;
 			this.pictureBox1.Location = new System.Drawing.Point(221, 0);
 			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(29, 21);
+			this.pictureBox1.Size = new System.Drawing.Size(29, 20);
 			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
 			this.pictureBox1.TabIndex = 0;
 			this.pictureBox1.TabStop = false;
@@ -106,7 +106,7 @@ namespace unvell.ReoGrid.Editor
 			// splitterDown
 			// 
 			this.splitterDown.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.splitterDown.Location = new System.Drawing.Point(0, 178);
+			this.splitterDown.Location = new System.Drawing.Point(0, 193);
 			this.splitterDown.Name = "splitterDown";
 			this.splitterDown.Size = new System.Drawing.Size(781, 4);
 			this.splitterDown.TabIndex = 9;
@@ -128,34 +128,35 @@ namespace unvell.ReoGrid.Editor
 			this.panel3.Location = new System.Drawing.Point(251, 1);
 			this.panel3.Name = "panel3";
 			this.panel3.Padding = new System.Windows.Forms.Padding(3, 1, 1, 1);
-			this.panel3.Size = new System.Drawing.Size(530, 177);
+			this.panel3.Size = new System.Drawing.Size(530, 192);
 			this.panel3.TabIndex = 11;
 			// 
 			// txtFormula
 			// 
-			this.txtFormula.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.txtFormula.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.txtFormula.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.txtFormula.Location = new System.Drawing.Point(3, 1);
+			this.txtFormula.MinimumSize = new System.Drawing.Size(0, 20);
 			this.txtFormula.Multiline = true;
 			this.txtFormula.Name = "txtFormula";
-			this.txtFormula.Size = new System.Drawing.Size(526, 175);
+			this.txtFormula.Size = new System.Drawing.Size(526, 190);
 			this.txtFormula.TabIndex = 9;
 			// 
 			// addressField
 			// 
 			this.addressField.BackColor = System.Drawing.SystemColors.Window;
 			this.addressField.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.addressField.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.addressField.GridControl = null;
 			this.addressField.Location = new System.Drawing.Point(0, 0);
 			this.addressField.Name = "addressField";
 			this.addressField.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
-			this.addressField.Size = new System.Drawing.Size(180, 21);
+			this.addressField.Size = new System.Drawing.Size(180, 20);
 			this.addressField.TabIndex = 7;
 			// 
 			// FormulaBarControl
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.Controls.Add(this.panel3);
@@ -163,7 +164,7 @@ namespace unvell.ReoGrid.Editor
 			this.Controls.Add(this.splitterDown);
 			this.Controls.Add(this.splitterUp);
 			this.Name = "FormulaBarControl";
-			this.Size = new System.Drawing.Size(781, 182);
+			this.Size = new System.Drawing.Size(781, 197);
 			this.leftPanel.ResumeLayout(false);
 			this.panel1.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

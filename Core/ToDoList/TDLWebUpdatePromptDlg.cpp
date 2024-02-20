@@ -11,6 +11,7 @@
 #include "..\Shared\webmisc.h"
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\GraphicsMisc.h"
+#include "..\Shared\icon.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -42,18 +43,19 @@ CTDLWebUpdatePromptDlg::CTDLWebUpdatePromptDlg(LPCTSTR szExeVer, const CStringAr
 	
 	AddPage(&m_page);
 
-	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID/* | PSH_WATERMARK*/;		
+	m_psh.dwFlags |= PSH_WIZARD97_EX | PSH_HEADER | PSH_USEICONID | PSH_USEHBMHEADER;
 	m_psh.dwFlags &= ~(PSH_HASHELP);
 	
 	m_psh.hInstance = AfxGetInstanceHandle(); 
 	m_psh.pszIcon = MAKEINTRESOURCE(IDI_TDLUPDATE);
-	m_psh.pszbmHeader = MAKEINTRESOURCE(IDB_TDLUPDATE_WIZ_HEADER);
+	m_psh.hbmHeader = m_hbmHeader = GraphicsMisc::MakeWizardImage(CIcon(IDR_MAINFRAME, 48, FALSE));
 
 	SetWizardMode();
 }
 
 CTDLWebUpdatePromptDlg::~CTDLWebUpdatePromptDlg()
 {
+	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdatePromptDlg, CPropertySheetEx)
@@ -138,7 +140,7 @@ BOOL CTDLWebUpdatePromptDlg::OnInitDialog()
 	if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT, WS_CHILD | CBRS_TOOLTIPS | WS_VISIBLE)))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_SOCIAL_TOOLBAR, IDB_SOCIAL_TOOLBAR, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this, NULL));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDCANCEL);
 
@@ -204,7 +206,7 @@ END_MESSAGE_MAP()
 void CTDLWebUpdatePromptPage::SetInfo(LPCTSTR szExeVer, const CStringArray& aChanges)
 {
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROMPTHEADER), Misc::GetUserName(), szExeVer);
-	m_strHeaderSubTitle = CEnString(IDS_WEBUPDATE_PROMPT);
+	m_strHeaderSubTitle = "\n" + CEnString(IDS_WEBUPDATE_PROMPT);
 
 	m_sChanges = Misc::FormatArrayAsNumberedList(aChanges, _T(".\t"));
 

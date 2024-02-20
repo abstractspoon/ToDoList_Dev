@@ -27,12 +27,62 @@ using unvell.Common;
 
 namespace unvell.UIControls
 {
+	internal class DpiScaler
+	{
+		public DpiScaler(Control ctrl)
+		{
+			using (var g = ctrl.CreateGraphics())
+				m_DpiFactor = new SizeF(g.DpiX / 96, g.DpiY / 96);
+		}
+
+		public DpiScaler(Graphics g)
+		{
+			m_DpiFactor = new SizeF(g.DpiX / 96, g.DpiY / 96);
+		}
+
+		public int X(int value)
+		{
+			return (int)(value * m_DpiFactor.Width);
+		}
+
+		public int Y(int value)
+		{
+			return (int)(value * m_DpiFactor.Height);
+		}
+
+		public Point Point(int x, int y)
+		{
+			return new Point(X(x), Y(y));
+		}
+
+		public Size Size(int cx, int cy)
+		{
+			return new Size(X(cx), Y(cy));
+		}
+
+		public Rectangle Rect(int x, int y, int cx, int cy)
+		{
+			return new Rectangle(Point(x, y), Size(cx, cy));
+		}
+
+		private SizeF m_DpiFactor = new SizeF(1.0f, 1.0f);
+	}
+
+
 	#region Panel
 	public class ColorPickerPanel : Control
 	{
 		private FlatTabControl tab;
 
 		private AbstractColor currentColor;
+		private DpiScaler scaler;
+
+		public static string NoColor = ReoGrid.Editor.LangRes.LangResource.NoColor;
+		public static string MoreColors = ReoGrid.Editor.LangRes.LangResource.Menu_More;
+		public static string SolidTab = ReoGrid.Editor.LangRes.LangResource.SolidColor;
+
+
+		// ---------------------------------------------------------------------------------
 
 		public AbstractColor CurrentColor
 		{
@@ -68,18 +118,22 @@ namespace unvell.UIControls
 			set { currentColor = new SolidColor(value); solidPanel.CurrentColor = value; }
 		}
 
-		private SolidColorPickerPanel solidPanel = new SolidColorPickerPanel();
+		private SolidColorPickerPanel solidPanel;
 
 		private List<Control> panels = new List<Control>();
 
 		private Panel panel;
 
-		public ColorPickerPanel()
-			: base()
+		public ColorPickerPanel(Color backColor, bool scaleTabHeight = false)
+			: 
+			base()
 		{
+			scaler = new DpiScaler(this);
+
 			this.TabStop = false;
 			this.Margin = this.Padding = new Padding(1);
 			this.AutoSize = false;
+			this.Size = scaler.Size(172, 220);
 
 			panel = new Panel();
 			panel.TabStop = false;
@@ -89,13 +143,20 @@ namespace unvell.UIControls
 
 			tab = new FlatTabControl();
 			tab.TabStop = false;
-			tab.Tabs = new string[] { unvell.ReoGrid.Editor.LangRes.LangResource.SolidColor };
-			tab.Size = new Size(ClientRectangle.Width, 20);
+			tab.Tabs = new string[] { SolidTab };
 			tab.Dock = DockStyle.Top;
+			tab.SelectedBackColor = backColor;
 			tab.SelectedIndexChanged += (s, e) => panels[tab.SelectedIndex].BringToFront();
+
+			if (scaleTabHeight)
+				tab.Size = new Size(ClientRectangle.Width, scaler.Y(20));
+			else
+				tab.Size = new Size(ClientRectangle.Width, 20);
 
 			Controls.Add(tab);
 			Controls.Add(panel);
+
+			solidPanel = new SolidColorPickerPanel(backColor);
 
 			solidPanel.Dock = DockStyle.Fill;
 			solidPanel.ColorPicked += (s, e) =>
@@ -106,11 +167,8 @@ namespace unvell.UIControls
 			solidPanel.BringToFront();
 			
 			panel.Controls.Add(solidPanel);
-
 			panels.Add(solidPanel);
 
-
-			this.Size = new Size(172, 220);
 			panel.BringToFront();
 		}
 
@@ -121,7 +179,8 @@ namespace unvell.UIControls
 	#region Solid
 	internal class SolidColorPickerPanel : Control
 	{
-		private static readonly Color[] recentColor = new Color[8]{
+		private static readonly Color[] recentColor = new Color[8]
+		{
 			Color.White,
 			Color.White,
 			Color.White,
@@ -133,11 +192,17 @@ namespace unvell.UIControls
 		};
 		
 		internal event EventHandler ColorPicked;
-	
-		public SolidColorPickerPanel()
-			: base()
+
+		private DpiScaler scaler;
+		Rectangle transparentRect;
+		
+		public SolidColorPickerPanel(Color backColor) : base()
 		{
+			this.BackColor = backColor;
 			this.DoubleBuffered = true;
+			this.scaler = new DpiScaler(this);
+
+			transparentRect = scaler.Rect(7, 170, 155, 10);
 		}
 
 		private int hoverColorIndex = -1;
@@ -320,7 +385,7 @@ namespace unvell.UIControls
 														Color.FromArgb(  0,  0,255),
 														Color.FromArgb(  0,  0,153),
 														Color.FromArgb(  0,  0, 70),
-														}, { // maginate
+														}, { // magenta
 														Color.FromArgb(255,238,255),
 														Color.FromArgb(255,210,255),
 														Color.FromArgb(255,  0,255),
@@ -329,8 +394,6 @@ namespace unvell.UIControls
 														},
 												 };
 		#endregion
-
-		Rectangle transparentRect = new Rectangle(7, 170, 155, 10);
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
@@ -347,23 +410,23 @@ namespace unvell.UIControls
 						if (index == hoverColorIndex)
 						{
 							b.Color = SystemColors.Highlight;
-							g.FillRectangle(b, x - 2, y - 2, 18, 18);
-							g.DrawRectangle(SystemPens.WindowFrame, x - 2, y - 2, 18, 18);
+							g.FillRectangle(b, scaler.Rect(x - 2, y - 2, 18, 18));
+							g.DrawRectangle(SystemPens.WindowFrame, scaler.Rect(x - 2, y - 2, 18, 18));
 						}
 
 						if (index == selectedColorIndex)
 						{
-							g.DrawRectangle(SystemPens.Highlight, x - 2, y - 2, 18, 18);
+							g.DrawRectangle(SystemPens.Highlight, scaler.Rect(x - 2, y - 2, 18, 18));
 						}
 
 						b.Color = fixedColor[i, p];
 
-						g.DrawRectangle(Pens.Black, x, y, 14, 14);
-						g.FillRectangle(b, x + 1, y + 1, 13, 13);
+						g.DrawRectangle(Pens.Black, scaler.Rect(x, y, 14, 14));
+						g.FillRectangle(b, scaler.Rect(x + 1, y + 1, 13, 13));
 					}
 				}
 
-				g.DrawLine(SystemPens.ControlDark, 4, 110, ClientRectangle.Width - 4, 110);
+				g.DrawLine(SystemPens.ControlDark, scaler.Point(4, 110), scaler.Point(ClientRectangle.Width - 4, 110));
 
 				// no color
 				index++;
@@ -371,21 +434,23 @@ namespace unvell.UIControls
 				if (index == hoverColorIndex)
 				{
 					b.Color = SystemColors.Highlight;
-					g.FillRectangle(b, 6, 113, 80, 21);
-					g.DrawRectangle(SystemPens.WindowFrame, 6, 113, 80, 21);
+					g.FillRectangle(b, scaler.Rect(6, 113, 80, 21));
+					g.DrawRectangle(SystemPens.WindowFrame, scaler.Rect(6, 113, 80, 21));
 				}
 
 				if (index == selectedColorIndex)
 				{
-					g.DrawRectangle(SystemPens.Highlight, 6, 113, 80, 21);
+					g.DrawRectangle(SystemPens.Highlight, scaler.Rect(6, 113, 80, 21));
 				}
 
-				g.DrawRectangle(Pens.Black, 8, 116, 14, 14);
-				g.DrawLine(Pens.Black, 8, 130, 22, 116);
-				g.DrawString(ReoGrid.Editor.LangRes.LangResource.NoColor, Font,
+				g.DrawRectangle(SystemPens.WindowText, scaler.Rect(8, 116, 14, 14));
+				g.DrawLine(SystemPens.WindowText, scaler.Point(8, 130), scaler.Point(22, 116));
+
+				g.DrawString(ColorPickerPanel.NoColor, Font,
 					index == hoverColorIndex ?
 					SystemBrushes.HighlightText : SystemBrushes.WindowText,
-					new Rectangle(26, 116, 60, 20));
+					scaler.Rect(26, 116, 60, 20),
+					new StringFormat() { FormatFlags = StringFormatFlags.NoClip | StringFormatFlags.NoWrap });
 
 				// more 
 				index++;
@@ -393,27 +458,27 @@ namespace unvell.UIControls
 				if (index == hoverColorIndex)
 				{
 					b.Color = SystemColors.Highlight;
-					g.FillRectangle(b, 95, 113, 68, 21);
-					g.DrawRectangle(SystemPens.WindowFrame, 95, 113, 68, 21);
+					g.FillRectangle(b, scaler.Rect(95, 113, 68, 21));
+					g.DrawRectangle(SystemPens.WindowFrame, scaler.Rect(95, 113, 68, 21));
 				}
 
 				if (index == selectedColorIndex)
 				{
-					g.DrawRectangle(SystemPens.Highlight, 95, 113, 68, 21);
+					g.DrawRectangle(SystemPens.Highlight, scaler.Rect(95, 113, 68, 21));
 				}
 
-				g.DrawLine(SystemPens.ControlDark, 90, 115, 90, 132);
+				g.DrawLine(SystemPens.ControlDark, scaler.Point(90, 115), scaler.Point(90, 132));
 
 				b.Color = currentColor;
-				g.FillRectangle(b, 100, 116, 14, 14);
+				g.FillRectangle(b, scaler.Rect(100, 116, 14, 14));
 
-				g.DrawRectangle(Pens.Black, 100, 116, 14, 14);
-				g.DrawString(ReoGrid.Editor.LangRes.LangResource.Menu_More, Font,
+				g.DrawRectangle(SystemPens.WindowText, scaler.Rect(100, 116, 14, 14));
+				g.DrawString(ColorPickerPanel.MoreColors, Font,
 					index == hoverColorIndex ?
 					SystemBrushes.HighlightText : SystemBrushes.WindowText,
-					new Rectangle(118, 116, 60, 20));
+					scaler.Rect(118, 116, 60, 20));
 
-				g.DrawLine(SystemPens.ControlDark, 4, 138, ClientRectangle.Width - 4, 138);
+				g.DrawLine(SystemPens.ControlDark, scaler.Point(4, 138), scaler.Point(ClientRectangle.Width - 4, 138));
 
 				// recent colors
 				for (int x = 8, k = 0; x < 160; k++, x += 20)
@@ -423,20 +488,20 @@ namespace unvell.UIControls
 					if (index == hoverColorIndex)
 					{
 						b.Color = SystemColors.Highlight;
-						g.FillRectangle(b, x - 2, 142, 18, 18);
-						g.DrawRectangle(SystemPens.WindowFrame, x - 2, 142, 18, 18);
+						g.FillRectangle(b, scaler.Rect(x - 2, 142, 18, 18));
+						g.DrawRectangle(SystemPens.WindowFrame, scaler.Rect(x - 2, 142, 18, 18));
 					}
 
 					if (index == selectedColorIndex)
 					{
-						g.DrawRectangle(SystemPens.Highlight, x - 2, 142, 18, 18);
+						g.DrawRectangle(SystemPens.Highlight, scaler.Rect(x - 2, 142, 18, 18));
 					}
 
 					b.Color = recentColor[k];
 					using (SolidBrush sb = new SolidBrush(b.Color))
 					{
-						g.FillRectangle(sb, x, 144, 14, 14);
-						g.DrawRectangle(Pens.Black, x, 144, 14, 14);
+						g.FillRectangle(sb, scaler.Rect(x, 144, 14, 14));
+						g.DrawRectangle(Pens.Black, scaler.Rect(x, 144, 14, 14));
 					}
 				}
 
@@ -470,26 +535,26 @@ namespace unvell.UIControls
 				for (int y = 8; y < 100; y += 20)
 				{
 					i++;
-					if (GraphicsToolkit.PointInRect(new Rectangle(x - 2, y - 2, 19, 19), p))
+					if (GraphicsToolkit.PointInRect(scaler.Rect(x - 2, y - 2, 19, 19), p))
 						return i;
 				}
 			}
 
 			i++;
 			// no color : 40
-			if (GraphicsToolkit.PointInRect(new Rectangle(8, 112, 88, 20), p))
+			if (GraphicsToolkit.PointInRect(scaler.Rect(8, 112, 88, 20), p))
 				return i;
 
 			i++;
 			// more : 41
-			if (GraphicsToolkit.PointInRect(new Rectangle(96, 112, 70, 20), p))
+			if (GraphicsToolkit.PointInRect(scaler.Rect(96, 112, 70, 20), p))
 				return i;
 
 			// recent : 42 ~ 50
 			for (int x = 8; x < 160; x += 20)
 			{
 				i++;
-				if (GraphicsToolkit.PointInRect(new Rectangle(x - 2, 142, 19, 19), p))
+				if (GraphicsToolkit.PointInRect(scaler.Rect(x - 2, 142, 19, 19), p))
 					return i;
 			}
 
@@ -519,18 +584,21 @@ namespace unvell.UIControls
 		{
 			if (i < 0)
 				return Color.Empty;
-			else if (i < 40)
+
+			if (i < 40)
 				return GetTranparentedColor(fixedColor[(i / 5), i % 5]);
-			else if (i == 40)
+
+			if (i == 40)
 				return Color.Empty;
-			else if (i == 41)
-			{
+
+			if (i == 41)
 				return Color.Empty;
-			}
-			else if (i <= 49)
+
+			if (i <= 49)
 				return recentColor[i - 42];
-			else
-				return Color.Empty;
+
+			// else
+			return Color.Empty;
 		}
 
 		private int GetIndexByColor(Color color)

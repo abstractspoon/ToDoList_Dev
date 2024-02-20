@@ -215,9 +215,6 @@
     <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLContentMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLCsvImportExportDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -458,6 +455,21 @@
     <ClCompile Include="..\ToDoList\TDLTaskComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLBrowserDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCFindFilterHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCContentMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLPasteTaskAttributesDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCShortcutManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -683,9 +695,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLCommentsCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDLContentMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLCsvImportExportDlg.h">
@@ -929,6 +938,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLTaskComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLBrowserDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCFindFilterHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCContentMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLPasteTaskAttributesDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCShortcutManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

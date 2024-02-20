@@ -66,9 +66,10 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
-								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
+								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								   const CContentMgr& mgrContent)
 	: 
-	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs),
+	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs, mgrContent),
 	CTreeDragDropRenderer(m_tsh, m_tcTasks),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
@@ -77,7 +78,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE),
 	m_reminders(*this),
-	m_find(m_tch, data, m_reminders)
+	m_find(m_tch, data, aCustAttribDefs, m_reminders, mgrContent)
 {
 	// We handle multiple selection
 	m_dwFlags &= ~TLSF_SYNCSELECTION;
@@ -2195,6 +2196,11 @@ int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 	return !cache.IsEmpty();
 }
 
+BOOL CTDLTaskTreeCtrl::RestorePreviousSelection(BOOL bRedraw)
+{
+	return TSH().PrevSelection(m_mapTaskIDToHTI, bRedraw);
+}
+
 BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 {
 	if (!cache.IsEmpty())
@@ -2281,7 +2287,7 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 		// focused item
 		HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
 
-		if (htiFocus)
+		if (htiFocus && selection.HasItem(htiFocus))
 		{
 			dwFocusedTaskID = GetTaskID(htiFocus);
 		}
@@ -2559,7 +2565,12 @@ BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& hti
 	// Get selected tasks ordered, and without duplicate subtasks
 	// to ensure we get the correct upper/lowermost items
 	CHTIList selection;
-	TSH().CopySelection(selection, TRUE, TRUE);
+	
+	if (!TSH().CopySelection(selection, TRUE, TRUE))
+	{
+		ASSERT(TSH().IsEmpty());
+		return FALSE;
+	}
 
 	HTREEITEM htiTopSel = selection.GetHead();
 	HTREEITEM htiBotSel = selection.GetTail();

@@ -275,11 +275,20 @@ namespace WordCloudUIExtension
 		{
 			AdjustTextRenderHint(layoutItem);
 
-			Color color = GetPresudoRandomColorFromPalette(layoutItem);
-			Color textColor = DrawingColor.SetLuminance(color, 0.3f);
 			Font font = GetFont(layoutItem.Word);
+			Color textColor;
 
-            using (Brush brush = new SolidBrush(textColor))
+			if (SystemInformation.HighContrast)
+			{
+				textColor = SystemColors.HighlightText;
+			}
+			else
+			{
+				Color color = GetPresudoRandomColorFromPalette(layoutItem);
+				textColor = DrawingColor.SetLuminance(color, 0.3f);
+			}
+
+			using (Brush brush = new SolidBrush(textColor))
             {
                 m_Graphics.DrawString(layoutItem.Word.Text, font, brush, layoutItem.Rectangle.X, layoutItem.Rectangle.Y);
             }

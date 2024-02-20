@@ -69,6 +69,7 @@ public:
 	int GetActiveIndex() const;
 	int FindPage(const CPropertyPage* pPage) const;
 	BOOL IsPage(HWND hWnd) const;
+	void InvalidateActivePage(BOOL bErase = TRUE);
 
 	CPropertyPage* GetActivePage();
 	int GetPageIndex(const CPropertyPage* pPage) const;

@@ -16,7 +16,6 @@
 #include "..\shared\enstring.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
-#include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\savefocus.h"
@@ -63,7 +62,7 @@ const UINT TEN_MINUTES = (ONE_MINUTE * 10);
 //////////////////////////////////////////////////////////////////////
 
 CFilteredToDoCtrl::CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-									 CTDLContentMgr& mgrContent, 
+									 CTDCContentMgr& mgrContent, 
 									 CShortcutManager& mgrShortcuts,
 									 const CONTENTFORMAT& cfDefault, 
 									 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
@@ -329,39 +328,50 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 
 BOOL CFilteredToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged)
 {
-	if (CTabbedToDoCtrl::ArchiveDoneTasks(nFlags, bRemoveFlagged))
-	{
-		if (HasAnyFilter())
-			RefreshFilter(FALSE);
+	// Toggle off any active filter if we are removing tasks, 
+	// to ensure hidden subtasks do not get missed
+	BOOL bToggleFilter = ((nFlags != TDC_REMOVENONE) && HasAnyFilter());
 
-		return TRUE;
-	}
+	// Prevent redraws only if toggling
+	CHoldRedraw hr(bToggleFilter ? GetSafeHwnd() : NULL);
 
-	// else
-	return FALSE;
+	if (bToggleFilter)
+		ToggleFilter();
+
+	BOOL bArchived = CTabbedToDoCtrl::ArchiveDoneTasks(nFlags, bRemoveFlagged);
+
+	if (bToggleFilter)
+		ToggleFilter();
+
+	return bArchived;
 }
 
 BOOL CFilteredToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 {
-	if (CTabbedToDoCtrl::ArchiveSelectedTasks(bRemove))
-	{
-		if (HasAnyFilter())
-			RefreshFilter(FALSE);
+	// Toggle off any active filter if we are removing tasks, 
+	// to ensure hidden subtasks do not get missed
+	BOOL bToggleFilter = (bRemove && HasAnyFilter() && m_taskTree.SelectionHasSubtasks());
 
-		return TRUE;
-	}
+	// Prevent redraws only if toggling
+	CHoldRedraw hr(bToggleFilter ? GetSafeHwnd() : NULL);
 
-	// else
-	return FALSE;
+	// Prevent redraws only if toggling
+	if (bToggleFilter)
+		ToggleFilter();
+
+	BOOL bArchived = CTabbedToDoCtrl::ArchiveSelectedTasks(bRemove);
+
+	if (bToggleFilter)
+		ToggleFilter();
+
+	return bArchived;
 }
 
 int CFilteredToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) const
 {
-	if (bSelectedOnly || !HasAnyFilter())
-		return CTabbedToDoCtrl::GetArchivableTasks(tasks, bSelectedOnly);
+	ASSERT(!HasAnyFilter()); // We should have toggled it
 
-	// else process the entire data hierarchy
-	return m_exporter.ExportCompletedTasks(tasks);
+	return CTabbedToDoCtrl::GetArchivableTasks(tasks, bSelectedOnly);
 }
 
 BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
@@ -520,7 +530,7 @@ void CFilteredToDoCtrl::RefreshFilter()
 }
 
 // Internal version
-void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit) 
+BOOL CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit) 
 {
 	CSaveFocus sf;
 
@@ -528,7 +538,8 @@ void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit)
 	if (bExplicit && m_filter.HasSelectionFilter())
 		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
 
-	RefreshTreeFilter(); // always
+	if (!RefreshTreeFilter())
+		return FALSE;
 
 	FTC_VIEW nView = GetTaskView();
 
@@ -568,13 +579,16 @@ void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit)
 		UpdateSortStates(TDCA_ALL, TRUE);
 		break;
 	}
+
+	return TRUE;
 }
 
-void CFilteredToDoCtrl::RefreshTreeFilter() 
+BOOL CFilteredToDoCtrl::RefreshTreeFilter() 
 {
 	if (m_data.GetTaskCount())
 	{
-		HandleUnsavedComments();
+		if (!HandleUnsavedComments())
+			return FALSE;
 
 		// rebuild the tree
 		RebuildTree();
@@ -596,6 +610,8 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
 	else
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
+
+	return TRUE;
 }
 
 void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)
@@ -690,8 +706,8 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 {
 	BOOL bWantTask = CTabbedToDoCtrl::WantAddTaskToTree(pTDI, pTDS, pContext);
 
-#ifdef _DEBUG
 	DWORD dwTaskID = pTDS->GetTaskID();
+#ifdef _DEBUG
 	DWORD dwParentID = pTDS->GetParentTaskID();
 #endif
 	
@@ -727,12 +743,18 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 		}
 		else // rest of attributes
 		{
+			// Special case: References
+			if (pTDI->IsReference())
+				pTDI = m_data.GetTrueTask(dwTaskID);
+
 			bWantTask = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), result);
 		}
 
 		if (bWantTask && pTDS->HasSubTasks())
 		{
-			// To arrive here means we are a parent task with no matching subtasks.
+			// To arrive here means we are a parent task with no matching subtasks
+			// because otherwise the parent will have been automatically added and
+			// will never have needed explicit matching.
 			//
 			// And because parent tasks are often seen purely as containers
 			// (without having explicitly set attributes), certain types of 
@@ -748,14 +770,14 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 			//       reasoning behind it when I later came back.
 			bWantTask = FALSE;
 
-			int nNumRules = pFilter->aRules.GetSize();
+			int nNumRules = pFilter->aRules.GetSize(), bMultiRule = (nNumRules > 1);
 			
 			for (int nRule = 0; (nRule < nNumRules) && !bWantTask; nRule++)
 			{
 				const SEARCHPARAM& rule = pFilter->aRules[nRule];
 								
 				CString sWhatMatched;
-				result.mapMatched.Lookup(rule.GetAttribute(), sWhatMatched);
+				VERIFY(result.GetWhatMatched(rule.GetAttribute(), m_aCustomAttribDefs, sWhatMatched) && (!sWhatMatched.IsEmpty() || bMultiRule));
 
 				switch (rule.GetOperator())
 				{
@@ -763,7 +785,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 					// eg. "Give me all tasks where the category is not empty"
 					// User is explicitly interested in tasks WITH attribute values
 					// so we always want these tasks
-					ASSERT(rule.AttributeIs(TDCA_SELECTION) || !sWhatMatched.IsEmpty());
+					ASSERT(rule.AttributeIs(TDCA_SELECTION) || !sWhatMatched.IsEmpty() || bMultiRule);
 					bWantTask = TRUE;
 					break;
 
@@ -1227,7 +1249,9 @@ void CFilteredToDoCtrl::OnTimerNow()
 	
 	if (FindNewNowFilterTasks(pTDS, params, m_taskTree.TreeItemMap()))
 	{
-		TDC_ATTRIBUTE nNowAttrib;
+		RefreshFilter(FALSE);
+
+		/*TDC_ATTRIBUTE nNowAttrib;
 
 		if (m_filter.HasNowFilter(nNowAttrib))
 		{
@@ -1263,7 +1287,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 			{
 				SetTimer(TIMER_NOWFILTER, TEN_MINUTES, NULL);
 			}
-		}
+		}*/
 	}
 }
 
@@ -1395,13 +1419,13 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM 
 	// If the parent has been filtered out we just add 
 	// directly to the data model
 	if (dwParentTaskID && !m_taskTree.GetItem(dwParentTaskID))
-		return MergeNewTaskIntoTree(tasks, hTask, dwParentTaskID, 0, bAndSubtasks);
+		return MergeNewTaskIntoDataModel(tasks, hTask, dwParentTaskID, 0, bAndSubtasks);
 
 	// else
 	return CTabbedToDoCtrl::MergeNewTaskIntoTree(tasks, hTask, dwParentTaskID, bAndSubtasks);
 }
 
-DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks)
+DWORD CFilteredToDoCtrl::MergeNewTaskIntoDataModel(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks)
 {
 	TODOITEM* pTDI = m_data.NewTask(tasks, hTask);
 
@@ -1415,7 +1439,7 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM 
 
 		while (hSubtask)
 		{
-			dwSubtaskID = MergeNewTaskIntoTree(tasks, hSubtask, dwTaskID, dwSubtaskID, TRUE);
+			dwSubtaskID = MergeNewTaskIntoDataModel(tasks, hSubtask, dwTaskID, dwSubtaskID, TRUE);
 			hSubtask = tasks.GetNextTask(hSubtask);
 		}
 	}
@@ -1426,30 +1450,18 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM 
 DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate)
 {
 	DWORD dwTaskID = task.GetTaskID(task.GetFirstTask());
+	BOOL bToggleFilter = (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL));
 
-	// If the just completed task no longer exists in the tree
-	// because it has been filtered out as part of its completion
-	// then the default implementation will fail, so we need to
-	// handle this specific case
-	if (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL))
-	{
-		// Merge task into data structure after the existing task
-		DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
-		DWORD dwNewTaskID = MergeNewTaskIntoTree(task, task.GetFirstTask(), dwParentID, dwTaskID, TRUE);
+	CHoldRedraw hr(bToggleFilter ? GetSafeHwnd() : NULL);
 
-		InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, dtNext, bDueDate);
-		RefreshFilter(FALSE);
+	if (bToggleFilter)
+		ToggleFilter();
 
-		// Note: there is no guarantee that this new task will not
-		// also have been filtered out
-		if (m_taskTree.GetItem(dwNewTaskID) == NULL)
-			return 0L;
+	BOOL bRes = CTabbedToDoCtrl::RecreateRecurringTaskInTree(task, dtNext, bDueDate);
 
-		// else
-		return dwNewTaskID;
-	}
+	if (bToggleFilter)
+		ToggleFilter(); // restore filter
 
-	// all else
-	return CTabbedToDoCtrl::RecreateRecurringTaskInTree(task, dtNext, bDueDate);
+	return bRes;
 }
 

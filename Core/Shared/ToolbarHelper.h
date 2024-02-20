@@ -26,7 +26,7 @@ public:
 	CToolbarHelper();
 	virtual ~CToolbarHelper();
 
-	BOOL Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const CShortcutManager* pShortcutMgr = NULL);
+	BOOL Initialize(CToolBar* pToolbar, const CShortcutManager* pShortcutMgr = NULL);
 	BOOL Release(BOOL bClearDropBtns = TRUE);
 	void InitTooltips();
 

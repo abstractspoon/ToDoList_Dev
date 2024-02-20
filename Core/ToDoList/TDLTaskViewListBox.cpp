@@ -26,7 +26,7 @@ static char THIS_FILE[] = __FILE__;
 #define WM_INITLISTBOX (WM_APP+1)
 #define LISTVIEW_INDEX 0xFFFF
 
-const int IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskViewListBox
@@ -88,7 +88,7 @@ void CTDLTaskViewListBox::BuildList()
 
 	if (m_pMgrUIExt)
 	{
-		VERIFY(m_ilTaskViews.Create(IMAGESIZE, IMAGESIZE, (ILC_MASK | ILC_COLOR32), 1, 1));
+		VERIFY(m_ilTaskViews.Create(ICON_SIZE, ICON_SIZE, (ILC_MASK | ILC_COLOR32), 1, 1));
 
 		// 'list view' is special
 		int nItem = AddString(CString(MAKEINTRESOURCE(IDS_LISTVIEW)));
@@ -121,7 +121,7 @@ void CTDLTaskViewListBox::BuildList()
 			m_aHiddenViews.RemoveAll();
 		}
 
-		SetItemHeight(0, max(IMAGESIZE, (m_nCheckHeight + 1)));
+		SetItemHeight(0, max(ICON_SIZE, (m_nCheckHeight + 1)));
 	}
 }
 
@@ -266,11 +266,11 @@ void CTDLTaskViewListBox::PreDrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	 		CDC* pDC = CDC::FromHandle(drawItem.hDC);
 			CRect rItem(drawItem.rcItem);
 
-			rItem.DeflateRect(0, ((rItem.Height() - IMAGESIZE) / 2));
+			rItem.DeflateRect(0, ((rItem.Height() - ICON_SIZE) / 2));
 			m_ilTaskViews.Draw(pDC, GetImageIndex(nItem), rItem.TopLeft(), ILD_TRANSPARENT);
 		}
 		
-		drawItem.rcItem.left += (IMAGESIZE + 2);
+		drawItem.rcItem.left += (ICON_SIZE + 2);
 	}
 
 	DrawItem(&drawItem);

@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLCommentsCtrl.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
@@ -36,13 +36,13 @@ enum
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
 CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComboLenDLU, 
-								   const CTDLContentMgr* pMgrContent, const CShortcutManager* pMsgShortcuts)
+								   const CTDCContentMgr* pMgrContent, const CShortcutManager* pMsgShortcuts)
 	:
 	m_pMgrContent(pMgrContent), 
 	m_pMgrShortcuts(pMsgShortcuts),
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
 	m_hContentFont(NULL),
-	m_bReadOnly(FALSE),
+	m_bReadOnlyComments(FALSE),
 	m_bShowLabel(bShowLabel),
 	m_bShowToolbar(bShowToolbar),
 	m_bUpdatingFormat(FALSE)
@@ -127,10 +127,13 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 			m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
 			m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
-			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
+			VERIFY(m_toolbar.LoadToolBar(IDR_COMMENTS_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
+
+			// HACK TO GET TOOLTIPS TO WORK ON FIRST BUTTON
+			m_toolbar.InsertSeparator(0);
 
 			if (m_pMgrShortcuts)
-				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
+				m_tbHelper.Initialize(&m_toolbar, m_pMgrShortcuts);
 
 			// Need care to ensure toolbar does not encroach on content window 
 			CRect rToolbar = GetChildRect(&m_cbCommentsFmt);
@@ -187,6 +190,7 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 		case RTCS_ENABLED:
 			m_ctrlComments.EnableWindow(TRUE);
 			m_ctrlComments.SetReadOnly(FALSE);
+			m_bReadOnlyComments = FALSE;
 			break;
 
 		case RTCS_DISABLED:
@@ -199,6 +203,7 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 		case RTCS_READONLY:
 			m_ctrlComments.EnableWindow(TRUE);
 			m_ctrlComments.SetReadOnly(TRUE);
+			m_bReadOnlyComments = TRUE;
 			break;
 	}
 }
@@ -255,6 +260,8 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 
 		if (m_bShowLabel)
 			ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
+
+		ExcludeChild(&m_toolbar, pDC);
 
 		CRect rClient;
 		GetClientRect(rClient);
@@ -357,6 +364,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 	
 	if (m_hContentFont)
 		m_ctrlComments.SetContentFont(m_hContentFont);
+
+	m_ctrlComments.SetReadOnly(m_bReadOnlyComments);
 
 	if (CWinClasses::IsEditControl(m_ctrlComments))
 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);
@@ -465,22 +474,36 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 
 	m_ctrlComments.SetUITheme(m_theme);
 
-	m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
-	m_toolbar.SetHotColor(m_theme.crToolbarHot);
+	if (m_bShowToolbar)
+	{
+		ASSERT(m_toolbar.GetSafeHwnd());
 
-	// Rescale images because background colour has changed
-	if (GraphicsMisc::WantDPIScaling())
-		m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, colorMagenta);
+		m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		// Rescale images because we assume background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, colorMagenta);
+	}
 
 	Invalidate();
 }
 
 BOOL CTDLCommentsCtrl::GetContent(CString& sTextContent, CBinaryData& customContent) const
 {
-	BOOL bRes = (m_ctrlComments.GetTextContent(sTextContent) > 0);
-	bRes |= (m_ctrlComments.GetContent(customContent) > 0);
+	int nTextLen = m_ctrlComments.GetTextContent(sTextContent);
+	int nCustLen = m_ctrlComments.GetContent(customContent);
 
-	return bRes;
+	if ((nTextLen < 0) || (nCustLen < 0))
+	{
+		sTextContent.Empty();
+		customContent.Empty();
+
+		return -1;
+	}
+
+	// else
+	return (nTextLen > 0) || (nCustLen > 0);
 }
 
 BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection)
@@ -586,7 +609,7 @@ void CTDLCommentsCtrl::OnEnable(BOOL bEnable)
 	::EnableWindow(m_ctrlComments, bEnable);
 
 	if (bEnable)
-		m_ctrlComments.SetReadOnly(m_bReadOnly);
+		m_ctrlComments.SetReadOnly(m_bReadOnlyComments);
 }
 
 void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath) 
@@ -606,4 +629,9 @@ void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)
 void CTDLCommentsCtrl::UpdateAppPreferences()
 {
 	LoadPreferences(TRUE);
+}
+
+BOOL CTDLCommentsCtrl::IsCommentsEditable() const
+{
+	return (!m_bReadOnlyComments && IsWindowEnabled() && ::IsWindowEnabled(m_ctrlComments));
 }

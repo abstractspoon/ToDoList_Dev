@@ -21,7 +21,18 @@ REM - Detours
 REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
 
 REM - Core app
-"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" 
+set OUTPUT_FILE= "c:\temp\Core_Build_Output.txt"
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
+
+ECHO OFF
+findstr /C:") : error" %OUTPUT_FILE%
+if %errorlevel%==0 (
+echo Build Errors!
+pause
+exit
+)
+
+ECHO ON
 
 REM - Build plugins using MSBuild for reliability
 SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
@@ -39,8 +50,8 @@ pause
 CALL %REPO%\BuildReleaseZip.bat
 CALL %REPO%\BuildCodeZip.bat
 
-REM - Open ToDoList_Prev
-Explorer.exe "%REPO%\..\ToDoList_Prev\8.1"
+REM - Open Downloads folder
+Explorer.exe "%REPO%\..\ToDoList_Downloads\Latest"
 
 popd
 pause

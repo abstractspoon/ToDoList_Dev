@@ -83,6 +83,7 @@ void CCustomButton::OnPaint()
 			DefWindowProc(WM_PAINT, (WPARAM)(HDC)dcTemp, 0);
 			
 			// extra draw
+			dcTemp.SetTextColor(GetSysColor(IsWindowEnabled() ? COLOR_WINDOW : COLOR_GRAYTEXT));
 			DoExtraPaint(&dcTemp, rExtra);
 			
 			// blit to screen

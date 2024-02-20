@@ -11,12 +11,40 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace WordCloudUIExtension
 {
+	[System.ComponentModel.DesignerCategory("")]
+	internal class NoTrackHeaderControl : NativeWindow
+	{
+		public NoTrackHeaderControl(ListView lv)
+		{
+			const uint LVM_GETHEADER = (0x1000 + 31);
+
+			//Get the header control handle
+			IntPtr header = new IntPtr(Win32.SendMessage(lv.Handle, LVM_GETHEADER, UIntPtr.Zero, IntPtr.Zero));
+			this.AssignHandle(header);
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			const int WM_SETCURSOR = 0x0020;
+
+			switch (m.Msg)
+			{
+			case WM_SETCURSOR:
+				Win32.SetArrowCursor();
+				return;
+			}
+
+			base.WndProc(ref m);
+		}
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public delegate Boolean EditTaskLabelEventHandler(object sender, UInt32 taskId);
 	public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
 	public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
 	[System.ComponentModel.DesignerCategory("")]
-
 	class TaskMatchesListView : ListView, ILabelTipHandler
 	{
 		public event EditTaskLabelEventHandler EditTaskLabel;
@@ -25,11 +53,17 @@ namespace WordCloudUIExtension
 
 		// -------------------------------------------------------------
 
+		const int DefaultMaxTaskId = 100;
+
+		// -------------------------------------------------------------
+
 		private UIExtension.TaskIcon m_TaskIcons;
 
 		private ImageList m_ilItemHeight;
 		private Size m_CheckBoxSize = Size.Empty;
 		private LabelTip m_LabelTip;
+		private uint m_MaxTaskId = DefaultMaxTaskId;
+		private NoTrackHeaderControl m_Header;
 
 		private Boolean m_TaskMatchesHaveIcons;
 		private Boolean m_ShowParentAsFolder;
@@ -46,47 +80,52 @@ namespace WordCloudUIExtension
 			m_LabelTip = new LabelTip(this);
 		}
 
-        // ILabelTipHandler implementation
-        public Font GetFont()
-        {
-            return Font;
-        }
+		protected override void OnHandleCreated(EventArgs e)
+		{
+			base.OnHandleCreated(e);
 
+			m_Header = new NoTrackHeaderControl(this);
+		}
+
+		// ILabelTipHandler implementation
         public Control GetOwner()
         {
             return this;
         }
 
-        public UInt32 ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
+        public LabelTipInfo ToolHitTest(Point ptScreen)
         {
             var pt = PointToClient(ptScreen);
             var hit = HitTest(pt);
 
             if ((hit == null) || (hit.Item == null))
-                return 0;
+                return null;
 
             // Only interested in first (label) column
             var labelRect = LabelTextRect(hit.Item.GetBounds(ItemBoundsPortion.Entire));
 
             if (!labelRect.Contains(pt))
-                return 0;
+                return null;
 
             var item = (hit.Item.Tag as CloudTaskItem);
 
             if (item == null)
-                return 0;
+                return null;
 
 			// Check if there's enough room already
-			if (m_LabelTip.CalcTipHeight(item.Title, labelRect.Width) <= labelRect.Height)
-				return 0;
+			if (m_LabelTip.CalcTipHeight(item.Title, Font, labelRect.Width) <= labelRect.Height)
+				return null;
 
-			tipText = item.Title;
-			multiLine = false; // always
+			labelRect.Offset(-1, -1);
 
-			toolRect = labelRect;
-			toolRect.Offset(-1, -1);
-
-			return item.Id;
+			return new LabelTipInfo()
+			{
+				Id = item.Id,
+				Text = item.Title,
+				MultiLine = false,
+				Rect = labelRect,
+				Font = Font,
+			};
         }
 
         public Boolean TaskColorIsBackground
@@ -184,10 +223,39 @@ namespace WordCloudUIExtension
             return true;
         }
 
+		// The other part of NoTrackHeaderControl
 		protected override void OnColumnWidthChanging(ColumnWidthChangingEventArgs e)
 		{
+			// Prevent column resizing to save us having to save/restore the widths
 			e.Cancel = true;
 			e.NewWidth = Columns[e.ColumnIndex].Width;
+		}
+
+		public new void EndUpdate()
+		{
+			base.EndUpdate();
+
+			RefreshIDColumnWidth();
+		}
+
+		private void RefreshIDColumnWidth()
+		{
+			using (var graphics = CreateGraphics())
+			{
+				int headerPadding = (int)(graphics.MeasureString("o", Font).Width); // Fudge
+				int headerWidth   = (int)(graphics.MeasureString(Columns[1].Text, Font).Width + (headerPadding * 2));
+				int maxItemWidth  = (int)(graphics.MeasureString(m_MaxTaskId.ToString(), Font).Width + (2 * DPIScaling.Scale(2)));
+
+				Columns[1].Width = Math.Max(headerWidth, maxItemWidth);
+				Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
+			}
+		}
+
+		protected override void OnFontChanged(EventArgs e)
+		{
+			base.OnFontChanged(e);
+
+			RefreshIDColumnWidth();
 		}
 
 		public bool AddMatch(CloudTaskItem item)
@@ -205,6 +273,8 @@ namespace WordCloudUIExtension
 				m_TaskMatchesHaveIcons = true;
 			}
 
+			m_MaxTaskId = Math.Max(m_MaxTaskId, item.Id);
+
 			if (this.Items.Add(lvItem) == null)
 				return false;
 
@@ -217,6 +287,7 @@ namespace WordCloudUIExtension
 			SelectedItems.Clear();
 
 			m_TaskMatchesHaveIcons = false;
+			m_MaxTaskId = DefaultMaxTaskId;
 		}
 
 		public bool HasMatchId(UInt32 matchId)
@@ -460,6 +531,8 @@ namespace WordCloudUIExtension
 			const int WM_LBUTTONUP     = 0x0202;
 			const int WM_LBUTTONDBLCLK = 0x0203;
 
+			const int LVM_GETTOPINDEX  = 0x1039;
+			
 			switch (m.Msg)
 			{
 				case WM_LBUTTONDOWN:
@@ -480,11 +553,27 @@ namespace WordCloudUIExtension
 					}
 				}
 				break;
+
+			case LVM_GETTOPINDEX:
+				{
+					// There's a very strange bug where the first
+					// mouseover of an item causes it to be redrawn
+					// and it flickers regardless of whether we are
+					// double-buffered or not. The workaround is to
+					// not draw the item under these circumstances.
+					// See also OnDrawItem()
+					m_IgnoreNextItemDraw = true;
+					base.WndProc(ref m);
+					m_IgnoreNextItemDraw = false;
+				}
+				return;
 			}
 
 			// else default handling
 			base.WndProc(ref m);
 		}
+
+		private bool m_IgnoreNextItemDraw = false;
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -604,6 +693,9 @@ namespace WordCloudUIExtension
 			if (e.Item == null)
 				return;
 
+			if (m_IgnoreNextItemDraw && RectangleToScreen(e.Item.Bounds).Contains(MousePosition))
+				return;
+
 			// Draw the background
 			var item = (e.Item.Tag as CloudTaskItem);
 
@@ -612,7 +704,7 @@ namespace WordCloudUIExtension
 
 			Brush textBrush = new SolidBrush(textColor);
 
-			if (m_TaskColorIsBkgnd && !backColor.IsEmpty)
+			if (m_TaskColorIsBkgnd)
 			{
 				using (Brush backBrush = new SolidBrush(backColor))
 					e.Graphics.FillRectangle(backBrush, e.Bounds);
@@ -637,15 +729,12 @@ namespace WordCloudUIExtension
 			}
 
 			// Draw subitems
-			StringFormat stringFormat = new StringFormat();
-			stringFormat.Alignment = StringAlignment.Near;
-			stringFormat.LineAlignment = StringAlignment.Center;
-			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-            
 			Rectangle itemRect = e.Bounds;
 
 			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
 			{
+				var horzAlign = StringAlignment.Near;
+
 				itemRect.X += 2;
 				itemRect.Width = (Columns[colIndex].Width - 2);
 
@@ -679,6 +768,10 @@ namespace WordCloudUIExtension
                         itemRect.Width -= TextIconOffset;
                     }
 				}
+				else
+				{
+					horzAlign = StringAlignment.Far;
+				}
 
 				itemRect.Y++;
 				itemRect.Height--;
@@ -687,7 +780,7 @@ namespace WordCloudUIExtension
 						e.Item.SubItems[colIndex].Text, 
 						itemRect, 
 						textBrush, 
-						StringAlignment.Near,
+						horzAlign,
 						(colIndex == 0));
 
 				// next subitem
@@ -695,7 +788,20 @@ namespace WordCloudUIExtension
 			}
 		}
 
-        private Rectangle CheckboxRect(Rectangle labelRect)
+		protected void DrawText(Graphics graphics, String text, Rectangle rect, Brush brush, StringAlignment horzAlign, bool endEllipsis)
+		{
+			StringFormat format = new StringFormat()
+			{
+				Alignment = horzAlign,
+				LineAlignment = StringAlignment.Center,
+				FormatFlags = StringFormatFlags.NoWrap,
+				Trimming = (endEllipsis ? StringTrimming.EllipsisCharacter : StringTrimming.None)
+			};
+
+			graphics.DrawString(text, this.Font, brush, rect, format);
+		}
+
+		private Rectangle CheckboxRect(Rectangle labelRect)
         {
             if (!m_ShowCompletionCheckboxes)
                 return Rectangle.Empty;
@@ -722,13 +828,7 @@ namespace WordCloudUIExtension
 		protected override void OnDrawColumnHeader(DrawListViewColumnHeaderEventArgs e)
 		{
 			e.DrawBackground();
-
-			DrawText(e.Graphics, 
-					Columns[e.ColumnIndex].Text, 
-					e.Bounds, 
-					SystemBrushes.WindowText, 
-					StringAlignment.Center, 
-					false);
+			e.DrawText(TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter |TextFormatFlags.SingleLine);
 		}
 
 		protected override void OnColumnClick(ColumnClickEventArgs e)
@@ -738,30 +838,17 @@ namespace WordCloudUIExtension
 			Sort();
 		}
 
-		protected void DrawText(Graphics graphics, String text, Rectangle rect, Brush brush, StringAlignment horzAlign, bool endEllipsis)
-		{
-			StringFormat format = new StringFormat();
-
-			format.Alignment = horzAlign;
-			format.LineAlignment = StringAlignment.Center;
-			format.FormatFlags = StringFormatFlags.NoWrap;
-
-			if (endEllipsis)
-				format.Trimming = StringTrimming.EllipsisCharacter;
-
-			graphics.DrawString(text, this.Font, brush, rect, format);
-		}
-
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
 
 			if (ClientRectangle.Width <= MinTaskMatchesWidth)
 				return;
-			
+
 			// Resize first column to fill remaining width
+			base.BeginUpdate();
 			Columns[0].Width = (ClientRectangle.Width - Columns[1].Width - 2);
-			Update();
+			base.EndUpdate();
 		}
 
         CheckBoxState GetItemCheckboxState(CloudTaskItem taskItem)

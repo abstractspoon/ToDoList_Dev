@@ -38,5 +38,25 @@ Drawing::Rectangle DPIScaling::Scale(Drawing::Rectangle rect)
 	return Drawing::Rectangle(Scale(rect.Location), Scale(rect.Size));
 }
 
+int DPIScaling::UnScale(int nValue)
+{
+	return ::MulDiv(nValue, 96, Win32::GetSystemDPI());
+}
+
+Point DPIScaling::UnScale(Point point)
+{
+	return Point(UnScale(point.X), UnScale(point.Y));
+}
+
+Size DPIScaling::UnScale(Size size)
+{
+	return Size(UnScale(size.Width), UnScale(size.Height));
+}
+
+Drawing::Rectangle DPIScaling::UnScale(Drawing::Rectangle rect)
+{
+	return Drawing::Rectangle(UnScale(rect.Location), UnScale(rect.Size));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

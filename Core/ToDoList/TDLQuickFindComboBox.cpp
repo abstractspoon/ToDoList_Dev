@@ -39,12 +39,9 @@ HBRUSH CTDLQuickFindComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if ((nCtlColor == CTLCOLOR_EDIT) && (m_edit.GetSafeHwnd() == NULL))
 	{
 		VERIFY(m_edit.SubclassDlgItem(1001, this));
-		ResizeEdit();
 
 		// CEnEdit disables its tooltips when embedded in a combobox
 		// simply because they don't seem to work
-		//ASSERT(!m_edit.m_tooltip.GetSafeHwnd());
-
 		// So we have to handle it ourselves
 		EnableToolTips(TRUE);
 	}
@@ -81,29 +78,6 @@ int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	// else
 	return CAutoComboBox::OnToolHitTest(point, pTI);
-}
-
-void CTDLQuickFindComboBox::OnSize(UINT nType, int cx, int cy)
-{
-	CAutoComboBox::OnSize(nType, cx, cy);
-
-	ResizeEdit();
-}
-
-void CTDLQuickFindComboBox::ResizeEdit()
-{
-	// resize the edit to better fit the combo
-	if (m_edit.GetSafeHwnd())
-	{
-		CRect rCombo;
-		GetClientRect(rCombo);
-
-		CRect rEdit(rCombo);
-		rEdit.DeflateRect(1, 3, 2, 3);
-		rEdit.right -= GetSystemMetrics(SM_CXVSCROLL);
-
-		m_edit.MoveWindow(rEdit, FALSE);
-	}
 }
 
 LRESULT CTDLQuickFindComboBox::OnEEBtnClick(WPARAM wp, LPARAM lp)

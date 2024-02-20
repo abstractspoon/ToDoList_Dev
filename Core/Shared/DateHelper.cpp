@@ -22,13 +22,14 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const double MINS_IN_DAY = (24 * 60);
+const double SECS_IN_DAY = (24 * 60 * 60);
 const double ONE_HOUR	= (1.0 / 24);
 const double HALF_HOUR	= (ONE_HOUR / 2);
-const double ONE_MINUTE = (1.0 / (24 * 60));
-const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally 'float' for less precision
+const double ONE_MINUTE = (1.0 / MINS_IN_DAY);
+const float  ONE_SECOND	= (float)(1.0f / SECS_IN_DAY); // intentionally 'float' for less precision
 const double END_OF_DAY = (1.0 - ONE_SECOND);
 const double START_OF_DAY = ONE_SECOND;
-const double MINS_IN_DAY = (24 * 60);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -365,6 +366,12 @@ BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
+BOOL COleDateTimeRange::Expand(int nAmount, DH_UNITS nUnits)
+{
+	// Handles expansion and contraction
+	return (OffsetStart(-nAmount, nUnits) && OffsetEnd(nAmount, nUnits));
+}
+
 BOOL COleDateTimeRange::OffsetStart(int nAmount, DH_UNITS nUnits)
 {
 	if (!IsValid())
@@ -489,7 +496,7 @@ int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) con
 	return CalcDaysFromTo(GetDate(nFrom), GetDate(nTo), bInclusive);
 }
 
-BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) const
+BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth) const
 {
 	// sanity checks
 	if (!IsDateSet(date) || (!IsValidUnit(nUnits) && (nUnits != DHU_NULL)))
@@ -538,15 +545,78 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) c
 		break;
 
 	case DHU_MONTHS:
-		IncrementMonth(date, nAmount);
+		IncrementMonth(date, nAmount, bPreserveEndOfMonth);
 		break;
 
 	case DHU_YEARS:
-		IncrementMonth(date, nAmount * 12);
+		IncrementYear(date, nAmount, bPreserveEndOfMonth);
 		break;
 	}
 
 	return IsDateSet(date);
+}
+
+double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay)
+{
+	// Sanity check
+	if (!COleDateTimeRange::IsValid(dtFrom, dtTo))
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	// Handle due date 'end of day'
+	COleDateTime dateEnd(dtTo);
+
+	if (CDateHelper::IsEndOfDay(dateEnd, bNoTimeIsEndOfDay))
+		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+
+	switch (nUnits)
+	{
+	case DHU_DAYS:
+		return (dateEnd.m_dt - dtFrom.m_dt);
+
+	case DHU_MONTHS:
+	case DHU_YEARS:
+		{
+			// Check for exact months
+			double dDuration = (dateEnd.m_dt - dtFrom.m_dt); // in days
+
+			if (dDuration = (int)dDuration)
+			{
+				int nStartDay = dtFrom.GetDay();
+				int nEndDay = dateEnd.GetDay();
+
+				if (nEndDay == nStartDay)
+				{
+					int nNumMonths = (CDateHelper::GetDateInMonths(dateEnd) - CDateHelper::GetDateInMonths(dtFrom));
+
+					if (nUnits == DHU_MONTHS)
+						return nNumMonths;
+
+					// else Years
+					if ((nNumMonths % 12) == 0)
+						return (nNumMonths / 12);
+				}
+			}
+
+			// else
+			CTwentyFourSevenWeek week;
+			CTimeHelper th(week);
+
+			return th.Convert(dDuration, THU_DAYS, ((nUnits == DHU_MONTHS) ? THU_MONTHS : THU_YEARS));
+		}
+		break;
+
+	case DHU_WEEKDAYS:
+		return m_week.CalcDuration(dtFrom, dateEnd, WWD_DAYS);
+
+	case DHU_WEEKS:
+		return m_week.CalcDuration(dtFrom, dateEnd, WWD_WEEKS);
+	}
+
+	ASSERT(0);
+	return 0.0;
 }
 
 // Static helpers ------------------------------------------------------------
@@ -1070,7 +1140,12 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 		dDateTime2 = GetTimeOnly(dDateTime2).m_dt;
 	}
 
-	return ((dDateTime1 < dDateTime2) ? -1 : (dDateTime1 > dDateTime2) ? 1 : 0);
+	double dDiff = (dDateTime1 - dDateTime2);
+
+	if (fabs(dDiff) < ONE_SECOND)
+		return 0;
+
+	return (dDiff < 0) ? -1 : 1;
 }
 
 BOOL CDateHelper::IsDateSet(const COleDateTime& date)
@@ -1241,7 +1316,7 @@ int CDateHelper::GetDayCount(DWORD dwDays)
 	return nCount;
 }
 
-DH_DAYOFWEEK CDateHelper::Map(OLE_DAYOFWEEK nDOW)
+DH_DAYOFWEEK CDateHelper::MapOleDowToDH(OLE_DAYOFWEEK nDOW)
 {
 	switch (nDOW)
 	{
@@ -1258,7 +1333,7 @@ DH_DAYOFWEEK CDateHelper::Map(OLE_DAYOFWEEK nDOW)
 	return DHW_NONE;
 }
 
-OLE_DAYOFWEEK CDateHelper::Map(DH_DAYOFWEEK nDOW)
+OLE_DAYOFWEEK CDateHelper::MapDHDowToOLE(DH_DAYOFWEEK nDOW)
 {
 	switch (nDOW)
 	{
@@ -1273,6 +1348,27 @@ OLE_DAYOFWEEK CDateHelper::Map(DH_DAYOFWEEK nDOW)
 
 	ASSERT(0);
 	return DHO_UNDEF;
+}
+
+DH_MONTH CDateHelper::MapMonthIndexToDHMonth(int nMonth)
+{
+	switch (nMonth)
+	{
+	case 1:		return DHM_JANUARY;
+	case 2:		return DHM_FEBRUARY;
+	case 3:		return DHM_MARCH;
+	case 4:		return DHM_APRIL;
+	case 5:		return DHM_MAY;
+	case 6:		return DHM_JUNE;
+	case 7:		return DHM_JULY;
+	case 8:		return DHM_AUGUST;
+	case 9:		return DHM_SEPTEMBER;
+	case 10:	return DHM_OCTOBER;
+	case 11:	return DHM_NOVEMBER;
+	case 12:	return DHM_DECEMBER;
+	}
+
+	return DHM_NONE;
 }
 
 COleDateTime CDateHelper::GetStartOfWeek(const COleDateTime& date)
@@ -1765,8 +1861,11 @@ COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
 	if (dTime <= 0)
 		return date;
 
-	dTime = (int)(dTime * MINS_IN_DAY);
-	dTime /= MINS_IN_DAY;
+	// Round UP/DOWN to nearest second
+	dTime = (Misc::Round(dTime * SECS_IN_DAY) / SECS_IN_DAY);
+
+	// Round DOWN to nearest minute
+	dTime = (((int)(dTime * MINS_IN_DAY)) / MINS_IN_DAY);
 
 	return MakeDate(date, dTime);
 }
@@ -2190,6 +2289,11 @@ void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndO
 		IncrementMonth(st, nBy, bPreserveEndOfMonth);
 		date = COleDateTime(st);
 	}
+}
+
+void CDateHelper::IncrementYear(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
+{
+	IncrementMonth(date, (nBy * 12), bPreserveEndOfMonth);
 }
 
 void CDateHelper::IncrementMonth(int& nMonth, int& nYear, int nBy)

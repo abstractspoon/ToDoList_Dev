@@ -9,6 +9,11 @@
 #include "autoflag.h"
 #include "osversion.h"
 
+#include "..\3rdParty\XNamedColors.h"
+#include "..\3rdParty\ColorDef.h"
+
+#include <math.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -17,13 +22,9 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR  STR_CLOSEBTN	= _T("r");
-
-const COLORREF RED			= RGB(200, 90, 90);
-const COLORREF WHITE		= RGB(255, 255, 255);
-
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
+const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
 
@@ -40,7 +41,6 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	m_dwFlags(dwFlags), 
 	m_nBtnDown(VK_CANCEL), 
 	m_nMouseInCloseButton(-1),
-	m_sizeClose(0, 0),
 	m_bUpdatingTabWidth(FALSE),
 	m_bFirstPaint(TRUE)
 {
@@ -180,7 +180,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 
 	// add space for close button
 	if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
-		nExtra += (m_sizeClose.cx + 2);
+		nExtra += (SIZE_CLOSEBTN + 2);
 
 	// add space for bold font
 	if ((nTab == GetCurSel()) && HasFlag(TCE_BOLDSELTEXT))
@@ -213,7 +213,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 		}
 	}
 
-	if (nExtra)
+	if (nExtra > 0)
 	{
 		// calculate the size of a space char
 		const LPCTSTR SPACE = _T(" ");
@@ -227,7 +227,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 			nNumSpace++;
 
 		// If the tab has no icon move one of the extra spaces to the front
-		if (GetItemImage(nTab) == -1)
+		if (nNumSpace && (GetItemImage(nTab) == -1))
 		{
 			sReqText = ' ' + sReqText;
 			nNumSpace--;
@@ -297,7 +297,6 @@ void CTabCtrlEx::OnPaint()
 			m_bFirstPaint = FALSE;
 			UpdateTabItemWidths();
 		}
-
 	}
 
 	// draw drop marker
@@ -325,7 +324,7 @@ CRect CTabCtrlEx::GetTabTextRect(int nTab, LPCRECT pRect)
 
 	// handle close button
 	if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
-		rTab.right -= m_sizeClose.cx;
+		rTab.right -= SIZE_CLOSEBTN;
 
 	return rTab;
 }
@@ -337,15 +336,33 @@ COLORREF CTabCtrlEx::GetItemBkColor(int nTab)
 		NMTABCTRLEX nmtce = { 0 };
 		
 		nmtce.iTab = nTab;
+		nmtce.dwExtra = CLR_NONE;
+
 		nmtce.hdr.code = TCN_GETBACKCOLOR;
 		nmtce.hdr.hwndFrom = GetSafeHwnd();
 		nmtce.hdr.idFrom = GetDlgCtrlID();
 		
-		COLORREF crBack = GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr));
-		
-		if (crBack != 0)
-			return crBack;
+		if (GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr)))
+			return nmtce.dwExtra;
 	}
+
+	// all else
+	return CLR_NONE;
+}
+
+COLORREF CTabCtrlEx::GetItemTagColor(int nTab)
+{
+	NMTABCTRLEX nmtce = { 0 };
+		
+	nmtce.iTab = nTab;
+	nmtce.dwExtra = CLR_NONE;
+
+	nmtce.hdr.code = TCN_GETTAGCOLOR;
+	nmtce.hdr.hwndFrom = GetSafeHwnd();
+	nmtce.hdr.idFrom = GetDlgCtrlID();
+		
+	if (GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&(nmtce.hdr)))
+		return nmtce.dwExtra;
 
 	// all else
 	return CLR_NONE;
@@ -412,71 +429,23 @@ void CTabCtrlEx::GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent)
 
 void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags)
 {
-	CRect rTab(rcItem);
+	CRect rTab;
+	GetTabContentRect(rcItem, nTab, rTab);
+
+	// DrawTabBackColor may modify the tab rect (to be passed to DrawTabItem)
+	// but we need to preserve the original rect for DrawTabTag
+	CRect rTabOrg(rTab);
+	COLORREF crText(CLR_NONE);
 
 	if (HasFlag(TCE_TABCOLORS))
-	{
-		COLORREF crBack = GetItemBkColor(nTab);
+		DrawTabBackColor(pDC, nTab, (uiFlags & 4), rTab, crText);
 
-		if (crBack == CLR_NONE)
-		{
-			pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-		}
-		else
-		{
-			CRect rColor;
-			GetTabContentRect(rcItem, nTab, rColor);
+	// Then tag
+	if (HasFlag(TCE_TAGCOLORS))
+		DrawTabTag(pDC, nTab, rTabOrg);
 
-			// Show the selected tab as a thin bar only
-			// and adjust tab height to make space
-			if (nTab == GetCurSel())
-			{
-				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-
-				switch (m_eTabOrientation)
-				{
-				case e_tabTop:
-					rColor.bottom = (rColor.top + COLORBAR_WIDTH);
-					rColor.right -= (m_sizeClose.cx + PADDING);
-					rColor.left += PADDING;
-					rTab.top += (COLORBAR_WIDTH - 1);
-					break;
-
-				case e_tabBottom:
-					rColor.top = (rColor.bottom - COLORBAR_WIDTH);
-					rColor.right -= (m_sizeClose.cx + PADDING);
-					rColor.left += PADDING;
-					rTab.bottom -= (COLORBAR_WIDTH - 1);
-					break;
-
-				case e_tabLeft:
-					rColor.right = (rColor.left + COLORBAR_WIDTH);
-					rColor.top += (m_sizeClose.cx + PADDING);
-					rColor.bottom += PADDING;
-					rTab.left += (COLORBAR_WIDTH - 1);
-					break;
-
-				case e_tabRight:
-					rColor.left = (rColor.right - COLORBAR_WIDTH);
-					rColor.top += (m_sizeClose.cx + PADDING);
-					rColor.bottom -= PADDING;
-					rTab.right -= (COLORBAR_WIDTH - 1);
-					break;
-				}
-				
-				GraphicsMisc::DrawRect(pDC, rColor, crBack);
-			}
-			else
-			{
-				pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
-
-				if (uiFlags & 4) // hot
-					crBack = GraphicsMisc::Lighter(crBack, 0.3, TRUE);
-				
-				GraphicsMisc::DrawRect(pDC, rColor, crBack, CLR_NONE, 2);
-			}
-		}
-	}
+	if (crText != CLR_NONE)
+		pDC->SetTextColor(crText);
 
 	CXPTabCtrl::DrawTabItem(pDC, nTab, rTab, uiFlags);
 }
@@ -524,53 +493,148 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, const CRect& rClip)
 	
 	// then close button
 	if (bCloseBtn)
-		DrawTabCloseButton(dc, nTab);
+		DrawTabCloseButton(&dc, nTab);
 }
 
-void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
+void CTabCtrlEx::DrawTabCloseButton(CDC* pDC, int nTab)
 {
 	ASSERT(HasFlag(TCE_CLOSEBUTTON));
 
-	CSaveDC sdc(dc);
+	CSaveDC sdc(pDC);
 
 	// create font first time
 	if (m_fontClose.GetSafeHandle() == NULL)
-		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6);
+		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6, GMFS_SYMBOL);
 
-	CFont* pOldFont = dc.SelectObject(&m_fontClose);
-	
-	// calc button size first time
-	if (!m_sizeClose.cx || !m_sizeClose.cy)
-	{
-		m_sizeClose = dc.GetTextExtent(STR_CLOSEBTN);
-
-		// make height same as width
-		m_sizeClose.cy = m_sizeClose.cx + 1;
-	}
-
-	// set the color to white-on-red if the cursor is over the 'x' else gray
 	CRect rBtn;
-	VERIFY(GetTabCloseButtonRect(nTab, rBtn));
+	GetTabCloseButtonRect(nTab, rBtn);
 	
+	// set the color to white-on-red if the cursor is over the 'x' else gray
 	if (m_nMouseInCloseButton == nTab)
 	{
-		dc.SetTextColor(WHITE);
-		dc.FillSolidRect(rBtn, RED);
+		pDC->SetTextColor(colorWhite);
+		pDC->FillSolidRect(rBtn, colorIndianRed);
 	}
 	else
 	{
 		COLORREF crTab = GetItemBkColor(nTab);
 
 		if ((crTab != CLR_NONE) && (nTab != GetCurSel()))
-			dc.SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
+			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
 		else
-			dc.SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+			pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 	}
 	
-	dc.SetTextAlign(TA_TOP | TA_LEFT);
-	dc.SetBkMode(TRANSPARENT);
-	dc.TextOut(rBtn.left + 1, rBtn.top + 1, STR_CLOSEBTN);
-	dc.SelectObject(pOldFont);
+	rBtn.OffsetRect(1, 1);
+	GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_CLOSE, rBtn, DT_CENTER | DT_VCENTER, &m_fontClose);
+}
+
+void CTabCtrlEx::DrawTabTag(CDC* pDC, int nTab, const CRect& rTab)
+{
+	ASSERT(HasFlag(TCE_TAGCOLORS));
+
+	COLORREF crTag = GetItemTagColor(nTab);
+
+	if (crTag == CLR_NONE)
+		return;
+
+	CSaveDC sdc(pDC);
+
+	const int TAG_SIZE = GraphicsMisc::ScaleByDPIFactor(6);
+
+	for (int nHPos = 0; nHPos < TAG_SIZE; nHPos++)
+	{
+		for (int nVPos = 0; nVPos < TAG_SIZE - nHPos; nVPos++)
+		{
+			pDC->SetPixelV(rTab.left + nHPos, rTab.top + nVPos, crTag);
+		}
+	}
+
+	// draw a dividing line if the tab has colour and the 
+	// difference in luminance is small(ish)
+	COLORREF crTab = GetItemBkColor(nTab);
+
+	if ((crTab != CLR_NONE) && (crTab != colorWhite))
+	{
+		int nTabLum = RGBX(crTab).Luminance();
+		int nTagLum = RGBX(crTag).Luminance();
+
+		if (fabs(nTagLum - nTabLum) < 128)
+		{
+			int nAveLum = ((nTabLum + nTagLum) / 2);
+
+			pDC->SelectStockObject((nAveLum > 128) ? BLACK_PEN : WHITE_PEN);
+			pDC->MoveTo(rTab.left, rTab.top + TAG_SIZE);
+			pDC->LineTo(rTab.left + TAG_SIZE + 1, rTab.top - 1);
+		}
+	}
+}
+
+void CTabCtrlEx::DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText)
+{
+	ASSERT(HasFlag(TCE_TABCOLORS));
+
+	COLORREF crTab = GetItemBkColor(nTab);
+
+	if (crTab == CLR_NONE)
+		return;
+
+	CSaveDC sdc(pDC);
+	CRect rColor(rTab);
+
+	// Show the selected tab as a thin bar only
+	// and adjust tab height to make space
+	if (nTab == GetCurSel())
+	{
+		crText = GetSysColor(COLOR_BTNTEXT);
+
+		int nCloseBtnSize = 0;
+
+		if (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab))
+			nCloseBtnSize = (SIZE_CLOSEBTN + PADDING);
+
+		switch (m_eTabOrientation)
+		{
+		case e_tabTop:
+			rColor.bottom = (rColor.top + COLORBAR_WIDTH);
+			rColor.right -= nCloseBtnSize;
+			rColor.left += PADDING;
+			rTab.top += (COLORBAR_WIDTH - PADDING);
+			break;
+
+		case e_tabBottom:
+			rColor.top = (rColor.bottom - COLORBAR_WIDTH);
+			rColor.right -= nCloseBtnSize;
+			rColor.left += PADDING;
+			rTab.bottom -= (COLORBAR_WIDTH - PADDING);
+			break;
+
+		case e_tabLeft:
+			rColor.right = (rColor.left + COLORBAR_WIDTH);
+			rColor.top += nCloseBtnSize;
+			rColor.bottom += PADDING;
+			rTab.left += (COLORBAR_WIDTH - PADDING);
+			break;
+
+		case e_tabRight:
+			rColor.left = (rColor.right - COLORBAR_WIDTH);
+			rColor.top += nCloseBtnSize;
+			rColor.bottom -= PADDING;
+			rTab.right -= (COLORBAR_WIDTH - PADDING);
+			break;
+		}
+
+		GraphicsMisc::DrawRect(pDC, rColor, crTab);
+	}
+	else
+	{
+		crText = GraphicsMisc::GetBestTextColor(crTab);
+
+		if (bHot)
+			crTab = GraphicsMisc::Lighter(crTab, 0.3, TRUE);
+
+		GraphicsMisc::DrawRect(pDC, rColor, crTab, CLR_NONE, 2);
+	}
 }
 
 void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
@@ -856,18 +920,18 @@ BOOL CTabCtrlEx::GetTabCloseButtonRect(int nTab, CRect& rBtn) const
 	switch (GetOrientation())
 	{
 	case e_tabTop:
-		rBtn.left = rBtn.right - m_sizeClose.cx;
-		rBtn.bottom = rBtn.top + m_sizeClose.cy;
+		rBtn.left = rBtn.right - SIZE_CLOSEBTN;
+		rBtn.bottom = rBtn.top + SIZE_CLOSEBTN;
 		
 		if (bSel)
 			rBtn.OffsetRect(0, 1);
 		else
- 			rBtn.OffsetRect(-2, 3);
+ 			rBtn.OffsetRect(-2, 2);
 		break;
 
 	case e_tabBottom:
-		rBtn.left = rBtn.right - m_sizeClose.cx;
-		rBtn.top = rBtn.bottom - m_sizeClose.cy;
+		rBtn.left = rBtn.right - SIZE_CLOSEBTN;
+		rBtn.top = rBtn.bottom - SIZE_CLOSEBTN;
 		
 		if (!bSel)
 			rBtn.OffsetRect(-2, -2);

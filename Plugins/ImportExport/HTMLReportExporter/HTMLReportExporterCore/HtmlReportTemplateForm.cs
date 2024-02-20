@@ -3,6 +3,7 @@ using System.IO;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
 using System.Web.UI;
 
@@ -85,8 +86,6 @@ namespace HTMLReportExporter
 
 			foreach (var attrib in custAttrib)
 				m_CustomAttributes.Add(attrib.Id.ToLower(), attrib.Label);
-
-			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
 
 			var prevSize = LoadPreferences();
 
@@ -224,6 +223,9 @@ namespace HTMLReportExporter
 
 			this.tableHeaderRowCombobox.Initialise(m_Trans);
 
+			// Only initialise custom attributes after setting translator
+			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
+			
 			this.tabControl.SelectedIndex = (int)PageType.Tasks;
 			this.htmlReportTasksControl.SetActive();
 
@@ -244,6 +246,14 @@ namespace HTMLReportExporter
 			InitialiseToolbars();
 
 			m_ChangeTimer.Start();
+		}
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			m_ChangeTimer.Stop();
+			m_ChangeTimer = null;
+
+			base.OnHandleDestroyed(e);
 		}
 
 		private void InitialiseToolbars()
@@ -268,15 +278,33 @@ namespace HTMLReportExporter
 			UpdateToolbar();
 
 			// Page toolbars
-			var theme = new UITheme();
-			theme.SetAppDrawingColor(UITheme.AppColor.AppBackLight, headerPage.BackColor);
-			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, headerPage.BackColor);
-			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, headerPage.BackColor);
+			if (VisualStyleRenderer.IsSupported)
+			{
+				var theme = new UITheme();
 
-			this.htmlReportHeaderControl.SetUITheme(theme);
-			this.htmlReportTitleControl.SetUITheme(theme);
-			this.htmlReportTasksControl.SetUITheme(theme);
-			this.htmlReportFooterControl.SetUITheme(theme);
+				var tbBackColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
+				var tbHotColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarHot);
+
+				// Windows doesn't report the actual tab control back colour
+				if (!theme.IsDarkMode())
+				{
+					tbBackColor = SystemColors.Window;
+					tbHotColor = SystemColors.Control;
+				}
+
+				theme.SetAppDrawingColor(UITheme.AppColor.AppBackLight, tbBackColor);
+				theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, tbBackColor);
+				theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, tbBackColor);
+				theme.SetAppDrawingColor(UITheme.AppColor.ToolbarHot, tbHotColor);
+
+				this.htmlReportHeaderControl.SetUITheme(theme);
+				this.htmlReportTitleControl.SetUITheme(theme);
+				this.htmlReportTasksControl.SetUITheme(theme);
+				this.htmlReportFooterControl.SetUITheme(theme);
+			}
+
+			this.Toolbar.RefreshControlTooltip(this.Toolbar.Items["toolStripFileHistory"]);
+
 		}
 
 		private void UpdateControls()

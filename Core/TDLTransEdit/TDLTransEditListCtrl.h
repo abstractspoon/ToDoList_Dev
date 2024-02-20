@@ -46,7 +46,7 @@ protected:
 protected:
 	// Virtual overrides
 	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
-	int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn);
+	int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 	COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 

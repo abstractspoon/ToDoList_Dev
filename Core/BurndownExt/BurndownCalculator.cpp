@@ -69,7 +69,7 @@ int CStatsItemCalculator::GetTotalDays() const
 int CStatsItemCalculator::GetTotalWeekdays() const
 {
 	if (m_nTotalWeekdays == 0)
-		m_nTotalWeekdays = (int)CWorkingWeek().CalculateDurationInDays(m_dStartExtents, m_dEndExtents);
+		m_nTotalWeekdays = (int)CWorkingWeek().CalcDurationInDays(m_dStartExtents, m_dEndExtents);
 
 	return m_nTotalWeekdays;
 }
@@ -218,7 +218,7 @@ double CStatsItemCalculator::GetIntersectionProportion(const STATSITEM& si, BOOL
 		return 1.0;
 
 	double dTotalDays = (bWeekdays ? 
-						 CWorkingWeek().CalculateDurationInDays(si.dtStart, dtEnd) :
+						 CWorkingWeek().CalcDurationInDays(si.dtStart, dtEnd) :
 						 (dtEnd.m_dt - si.dtStart.m_dt));
 
 	if (dTotalDays == 0.0)
@@ -231,7 +231,7 @@ double CStatsItemCalculator::GetIntersectionProportion(const STATSITEM& si, BOOL
 	CDateHelper::Min(dtEnd, m_dEndExtents);
 
 	double dPartDays = (bWeekdays ? 
-						CWorkingWeek().CalculateDurationInDays(dtStart, dtEnd) :
+						CWorkingWeek().CalcDurationInDays(dtStart, dtEnd) :
 						(dtEnd.m_dt - dtStart.m_dt));
 
 	ASSERT(dTotalDays && dPartDays);

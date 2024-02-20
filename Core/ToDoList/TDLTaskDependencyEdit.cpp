@@ -22,7 +22,10 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() : m_bNotifyingParent(FALSE)
+CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() 
+	: 
+	CEnEdit(TRUE, _T("0123456789, "), ME_LOCALIZESEPARATOR),
+	m_bNotifyingParent(FALSE)
 {
 }
 
@@ -36,6 +39,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskDependencyEdit, CEnEdit)
 	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChange)
 	ON_WM_CTLCOLOR_REFLECT()
+	ON_WM_KILLFOCUS()
 END_MESSAGE_MAP()
 //////////////////////////////////////////////////////////////////////
 
@@ -44,6 +48,63 @@ void CTDLTaskDependencyEdit::PreSubclassWindow()
 	CEnEdit::PreSubclassWindow();
 
 	SetWindowText(m_aDepends.Format()); // for display purposes
+}
+
+BOOL CTDLTaskDependencyEdit::UpdateDepends()
+{
+	CTDCDependencyArray aDepends;
+	Parse(aDepends);
+
+	return UpdateDepends(aDepends);
+}
+
+BOOL CTDLTaskDependencyEdit::UpdateDepends(const CTDCDependencyArray& aDepends)
+{
+	if (m_aDepends.MatchAll(aDepends, FALSE))
+		return FALSE;
+
+	// Remove deleted dependencies
+	int nDepend = m_aDepends.GetSize();
+
+	while (nDepend--)
+	{
+		if (!aDepends.HasDependency(m_aDepends[nDepend]))
+			m_aDepends.RemoveAt(nDepend);
+	}
+
+	// Add new dependencies
+	nDepend = aDepends.GetSize();
+
+	while (nDepend--)
+	{
+		if (!m_aDepends.HasDependency(aDepends[nDepend]))
+			m_aDepends.Add(aDepends[nDepend]);
+	}
+
+	CAutoFlag af(m_bNotifyingParent, TRUE);
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), EN_CHANGE), (LPARAM)GetSafeHwnd());
+
+	return TRUE;
+}
+
+void CTDLTaskDependencyEdit::OnKillFocus(CWnd* pNewWnd)
+{
+	CMaskEdit::OnKillFocus(pNewWnd);
+
+	UpdateDepends();
+}
+
+BOOL CTDLTaskDependencyEdit::PreTranslateMessage(MSG* pMsg)
+{
+	if ((pMsg->message == WM_KEYDOWN) &&
+		(pMsg->hwnd == *this) &&
+		(pMsg->wParam == VK_RETURN))
+	{
+		UpdateDepends();
+		return TRUE; // always
+	}
+
+	return CMaskEdit::PreTranslateMessage(pMsg);
 }
 
 int CTDLTaskDependencyEdit::Parse(CTDCDependencyArray& aDepends) const
@@ -57,66 +118,50 @@ int CTDLTaskDependencyEdit::Parse(CTDCDependencyArray& aDepends) const
 	Misc::Split(sDepends, aItems);
 
 	aDepends.Set(aItems);
-
 	return aDepends.GetSize();
 }
 
 BOOL CTDLTaskDependencyEdit::OnChange()
 {
-	if (!m_bNotifyingParent)
+	// If we're in the middle of notifying the parent we return FALSE
+	// to allow the message to continue on
+	if (m_bNotifyingParent)
+		return FALSE;
+
+	// In general we don't notify the parent as changes happen
+	// except if all the dependencies have been deleted
+	// Note: we only want to update m_aDepends if we allowing this
+	// change through to the parent
+	if (m_aDepends.GetSize())
 	{
 		CTDCDependencyArray aDepends;
-		Parse(aDepends);
 
-		if (m_aDepends.MatchAll(aDepends, FALSE))
+		if (!Parse(aDepends))
 		{
-			// No change
-			return TRUE;
-		}
-
-		// Remove deleted dependencies
-		int nDepend = m_aDepends.GetSize();
-
-		while (nDepend--)
-		{
-			if (!aDepends.HasDependency(m_aDepends[nDepend]))
-				m_aDepends.RemoveAt(nDepend);
-		}
-
-		// Add new dependencies
-		nDepend = aDepends.GetSize();
-
-		while (nDepend--)
-		{
-			if (!m_aDepends.HasDependency(aDepends[nDepend]))
-				m_aDepends.Add(aDepends[nDepend]);
+			m_aDepends.RemoveAll();
+			return FALSE;
 		}
 	}
-	
-	// Notify parent
-	return FALSE; 
+
+	// All else -> eat
+	return TRUE;
 }
 
-BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders)
+BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& ilTasks, 
+									BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes)
 {
 	if (IsWindowEnabled())
 	{
-		CTDLTaskDependencyEditDlg dialog(tasks, ilTasks, m_aDepends, bShowParentsAsFolders);
+		CTDLTaskDependencyEditDlg dialog(tasks, ilTasks, m_aDepends, bShowParentsAsFolders, bShowLeadInTimes);
 		
 		if (dialog.DoModal() == IDOK)
 		{
 			CTDCDependencyArray aDepends;
 			dialog.GetDependencies(aDepends);
 			
-			if (!aDepends.MatchAll(m_aDepends))
+			if (UpdateDepends(aDepends))
 			{
-				m_aDepends.Copy(aDepends);
 				SetWindowText(m_aDepends.Format()); // for display purposes
-				
-				// notify parent
-				CAutoFlag af(m_bNotifyingParent, TRUE);
-				GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), EN_CHANGE), (LPARAM)GetSafeHwnd());
-
 				return TRUE;
 			}
 		}
@@ -186,11 +231,12 @@ const UINT COMBO_ID = 1001;
 /////////////////////////////////////////////////////////////////////////////
 
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-													   BOOL bShowParentsAsFolders)
+													   BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes)
 	: 
 	m_tasks(tasks),
 	m_ilTasks(ilTasks),
-	m_bShowParentTasksAsFolders(bShowParentsAsFolders)
+	m_bShowParentTasksAsFolders(bShowParentsAsFolders),
+	m_bShowLeadInTimes(bShowLeadInTimes)
 {
 	m_cbTasks.SetShowParentTasksAsFolders(bShowParentsAsFolders);
 }
@@ -210,9 +256,17 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 
 	CRect rList;
 	GetClientRect(rList);
+	
+	if (m_bShowLeadInTimes)
+	{
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
+		AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
+	}
+	else
+	{
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_DROPLIST);
+	}
 
-	AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
-	AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
@@ -428,10 +482,11 @@ void CTDLTaskDependencyListCtrl::PopulateTaskCombo(const CTaskFile& tasks, HTASK
 /////////////////////////////////////////////////////////////////////////////
 
 CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent /*=NULL*/)
+													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, 
+													 BOOL bShowLeadInTimes, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent),
-	m_lcDependencies(tasks, ilTasks, bShowParentsAsFolders)
+	m_lcDependencies(tasks, ilTasks, bShowParentsAsFolders, bShowLeadInTimes)
 {
 	//{{AFX_DATA_INIT(CRecurringTaskOptionDlg)
 	//}}AFX_DATA_INIT

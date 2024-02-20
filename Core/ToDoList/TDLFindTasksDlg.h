@@ -22,6 +22,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CPreferences;
+class CContentMgr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -33,19 +34,16 @@ enum DM_POS
 	DMP_BELOW,
 };
 
-//////////////////////////////////////////////////////////////////////
-
-// wparam = Old 'DM_POS', lParam = New 'DM_POS'
-const UINT WM_FTD_DOCKCHANGE	= ::RegisterWindowMessage(_T("WM_FTD_DOCKCHANGE"));
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
 class CTDLFindTasksDlg : public CRuntimeDlg
 {
+	DECLARE_DYNAMIC(CTDLFindTasksDlg)
+
 // Construction
 public:
-	CTDLFindTasksDlg();   // standard constructor
+	CTDLFindTasksDlg(const CContentMgr& mgrContent);
 	~CTDLFindTasksDlg();
 
 	BOOL Create();
@@ -53,15 +51,17 @@ public:
 	void RefreshSearch();
 
 	BOOL GetSearchAllTasklists();
+	BOOL GetSearchIncludesCompletedTasks(LPCTSTR szName) const;
+	BOOL SetSearchIncludesCompletedTasks(LPCTSTR szName, BOOL bIncDone);
+
 	int GetSearchParams(SEARCHPARAMS& params);
 	int GetSearchParams(TDCADVANCEDFILTER& filter);
 	int GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const;
 
 	CString GetActiveSearch() const { return m_sActiveSearch; }
-	int GetSavedSearches(CStringArray& aNames);
+	int GetSavedSearches(CStringArray& aNames) const;
 
-	void AddHeaderRow(LPCTSTR szText);
-	void AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly);
+	void AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText = NULL);
 
 	int GetResultCount() const; // all tasklists
 	int GetResultCount(const CFilteredToDoCtrl* pTDC) const;
@@ -72,15 +72,14 @@ public:
 	void DeleteResults(const CFilteredToDoCtrl* pTDC);
 	void DeleteAllResults();
 
-	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
-	BOOL SetSearchFlags(LPCTSTR szName, DWORD dwFlags);
-
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aActiveTasklistAttribDefs,
 							const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	
+	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
 	void SetUITheme(const CUIThemeFile& theme);
+	void SetResultsFont(HFONT hFont) { m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
 
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
 	DM_POS GetDockPosition() const { return m_nDockPos; }

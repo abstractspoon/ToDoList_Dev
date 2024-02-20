@@ -66,36 +66,40 @@ namespace MSDN.Html.Editor
 			// 
 			// checkBold
 			// 
-			this.checkBold.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkBold.AutoSize = true;
+			this.checkBold.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkBold.Location = new System.Drawing.Point(160, 57);
 			this.checkBold.Name = "checkBold";
-			this.checkBold.Size = new System.Drawing.Size(104, 16);
+			this.checkBold.Size = new System.Drawing.Size(47, 17);
 			this.checkBold.TabIndex = 4;
 			this.checkBold.Text = "Bold";
 			this.checkBold.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// checkUnderline
 			// 
-			this.checkUnderline.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkUnderline.AutoSize = true;
+			this.checkUnderline.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkUnderline.Location = new System.Drawing.Point(160, 96);
 			this.checkUnderline.Name = "checkUnderline";
-			this.checkUnderline.Size = new System.Drawing.Size(104, 16);
+			this.checkUnderline.Size = new System.Drawing.Size(71, 17);
 			this.checkUnderline.TabIndex = 6;
 			this.checkUnderline.Text = "Underline";
 			this.checkUnderline.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// checkItalic
 			// 
-			this.checkItalic.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkItalic.AutoSize = true;
+			this.checkItalic.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkItalic.Location = new System.Drawing.Point(160, 77);
 			this.checkItalic.Name = "checkItalic";
-			this.checkItalic.Size = new System.Drawing.Size(104, 16);
+			this.checkItalic.Size = new System.Drawing.Size(48, 17);
 			this.checkItalic.TabIndex = 5;
 			this.checkItalic.Text = "Italic";
 			this.checkItalic.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// labelSize
 			// 
+			this.labelSize.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labelSize.Location = new System.Drawing.Point(160, 8);
 			this.labelSize.Name = "labelSize";
 			this.labelSize.Size = new System.Drawing.Size(120, 16);
@@ -104,29 +108,32 @@ namespace MSDN.Html.Editor
 			// 
 			// checkStrikeout
 			// 
-			this.checkStrikeout.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkStrikeout.AutoSize = true;
+			this.checkStrikeout.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkStrikeout.Location = new System.Drawing.Point(160, 114);
 			this.checkStrikeout.Name = "checkStrikeout";
-			this.checkStrikeout.Size = new System.Drawing.Size(104, 16);
+			this.checkStrikeout.Size = new System.Drawing.Size(89, 17);
 			this.checkStrikeout.TabIndex = 7;
 			this.checkStrikeout.Text = "Strikethrough";
 			this.checkStrikeout.CheckStateChanged += new System.EventHandler(this.FontSelectionChanged);
 			// 
 			// checkSubscript
 			// 
-			this.checkSubscript.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkSubscript.AutoSize = true;
+			this.checkSubscript.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkSubscript.Location = new System.Drawing.Point(160, 141);
 			this.checkSubscript.Name = "checkSubscript";
-			this.checkSubscript.Size = new System.Drawing.Size(104, 16);
+			this.checkSubscript.Size = new System.Drawing.Size(70, 17);
 			this.checkSubscript.TabIndex = 8;
 			this.checkSubscript.Text = "Subscript";
 			// 
 			// checkSuperscript
 			// 
-			this.checkSuperscript.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.checkSuperscript.AutoSize = true;
+			this.checkSuperscript.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkSuperscript.Location = new System.Drawing.Point(160, 160);
 			this.checkSuperscript.Name = "checkSuperscript";
-			this.checkSuperscript.Size = new System.Drawing.Size(104, 16);
+			this.checkSuperscript.Size = new System.Drawing.Size(79, 17);
 			this.checkSuperscript.TabIndex = 9;
 			this.checkSuperscript.Text = "Superscript";
 			// 
@@ -161,6 +168,7 @@ namespace MSDN.Html.Editor
 			// 
 			// labelName
 			// 
+			this.labelName.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labelName.Location = new System.Drawing.Point(16, 8);
 			this.labelName.Name = "labelName";
 			this.labelName.Size = new System.Drawing.Size(120, 16);
@@ -170,12 +178,13 @@ namespace MSDN.Html.Editor
 			// labelSample
 			// 
 			this.labelSample.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.labelSample.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labelSample.Location = new System.Drawing.Point(16, 192);
 			this.labelSample.Name = "labelSample";
 			this.labelSample.Size = new System.Drawing.Size(120, 23);
 			this.labelSample.TabIndex = 12;
 			this.labelSample.Text = "Sample AaZa";
-			this.labelSample.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+			this.labelSample.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// FontAttributeForm
 			// 
@@ -206,6 +215,7 @@ namespace MSDN.Html.Editor
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.Text = "Font Attributes";
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
         }
         #endregion

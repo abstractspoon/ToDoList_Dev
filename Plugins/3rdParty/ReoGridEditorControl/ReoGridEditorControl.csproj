@@ -70,7 +70,6 @@
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -94,6 +93,12 @@
     </Compile>
     <Compile Include="DefineNamedRangeDialog.Designer.cs">
       <DependentUpon>DefineNamedRangeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DropdownListCellItemsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DropdownListCellItemsDialog.Designer.cs">
+      <DependentUpon>DropdownListCellItemsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="FormulaBarControl.cs">
       <SubType>UserControl</SubType>
@@ -202,9 +207,7 @@
     <Compile Include="UIControls\ColorControls\ColorPickerControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="UIControls\ColorControls\ColorPickerPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="UIControls\ColorControls\ColorPickerPanel.cs" />
     <Compile Include="UIControls\ColorControls\ColorPickerToolStripItem.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -252,6 +255,9 @@
     <EmbeddedResource Include="DefineNamedRangeDialog.resx">
       <DependentUpon>DefineNamedRangeDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DropdownListCellItemsDialog.resx">
+      <DependentUpon>DropdownListCellItemsDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormulaBarControl.resx">
       <DependentUpon>FormulaBarControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -271,8 +277,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="PropertyPages\AlignmentPage.resx">
       <DependentUpon>AlignmentPage.cs</DependentUpon>
@@ -324,16 +330,31 @@
     <None Include="Resources\center_line_solid.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\underlinee.bmp" />
     <None Include="Resources\Filter2HS.png" />
     <Content Include="favicon.ico" />
     <None Include="Resources\LandscapeHH.bmp" />
     <None Include="Resources\PortraitHH.bmp" />
+    <None Include="Resources\AlignLayoutBottom.bmp" />
+    <None Include="Resources\AlignLayoutMiddle.bmp" />
+    <None Include="Resources\AlignLayoutTop.bmp" />
+    <None Include="Resources\AlignTableCellMiddleCenterHS.bmp" />
+    <None Include="Resources\AlignTableCellMiddleLeftJustHS.bmp" />
+    <None Include="Resources\AlignTableCellMiddleRightHS.bmp" />
+    <None Include="Resources\bold.bmp" />
+    <None Include="Resources\font_larger.bmp" />
+    <None Include="Resources\font_smaller.bmp" />
+    <None Include="Resources\CutHS.bmp" />
+    <Content Include="Resources\CopyHS.bmp" />
     <Content Include="Resources\grid_select.cur" />
+    <None Include="Resources\italic.bmp" />
+    <None Include="Resources\PageWidthHS.bmp" />
+    <None Include="Resources\PasteHS.bmp" />
     <Content Include="Resources\placeholder.png" />
-    <Content Include="Resources\textwrap.png" />
+    <None Include="Resources\strikethrough.bmp" />
+    <None Include="Resources\textwrap.bmp" />
     <None Include="Resources\trash.cur" />
     <None Include="Resources\VSProject_script.bmp" />
-    <None Include="Resources\underlinee.png" />
     <None Include="Resources\top_line_dot.png" />
     <None Include="Resources\top_line_dash.png" />
     <None Include="Resources\top_line_bold.png" />
@@ -342,7 +363,6 @@
     <None Include="Resources\top_bottom_bold.png" />
     <None Include="Resources\toolbar_get_info.png" />
     <None Include="Resources\style_brush.png" />
-    <None Include="Resources\strikethrough.png" />
     <None Include="Resources\slash_right_dot.png" />
     <None Include="Resources\slash_right_dash.png" />
     <None Include="Resources\slash_right_blod.png" />
@@ -364,8 +384,6 @@
     <None Include="Resources\RadialChartHS.png" />
     <None Include="Resources\PropertiesHS.png" />
     <None Include="Resources\PrintPreviewHS.png" />
-    <None Include="Resources\PasteHS.png" />
-    <None Include="Resources\PageWidthHS.png" />
     <None Include="Resources\outline_solid.png" />
     <None Include="Resources\outline_dot.png" />
     <None Include="Resources\outline_dash.png" />
@@ -397,12 +415,8 @@
     <None Include="Resources\inside_bold.png" />
     <None Include="Resources\FunctionHS.png" />
     <None Include="Resources\FontDialogHS.png" />
-    <None Include="Resources\font_smaller.png" />
-    <None Include="Resources\font_larger.png" />
     <None Include="Resources\Edit_UndoHS.png" />
     <None Include="Resources\Edit_RedoHS.png" />
-    <None Include="Resources\CutHS.png" />
-    <None Include="Resources\CopyHS.png" />
     <None Include="Resources\ColorHS.png" />
     <None Include="Resources\center_line_dot.png" />
     <None Include="Resources\center_line_dash.png" />
@@ -424,12 +438,6 @@
     <None Include="Resources\all_design.png" />
     <None Include="Resources\all_dash.png" />
     <None Include="Resources\all_bold.png" />
-    <None Include="Resources\AlignTableCellMiddleRightHS.png" />
-    <None Include="Resources\AlignTableCellMiddleLeftJustHS.PNG" />
-    <None Include="Resources\AlignTableCellMiddleCenterHS.png" />
-    <None Include="Resources\AlignLayoutTop.png" />
-    <None Include="Resources\AlignLayoutMiddle.png" />
-    <None Include="Resources\AlignLayoutBottom.png" />
     <Content Include="Resources\full_col_select.cur" />
     <Content Include="Resources\full_row_select.cur" />
     <Content Include="Resources\pick_range.cur" />

@@ -520,6 +520,9 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
 	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
 
+	if (filter.nRecurrence != TDIR_NONE)
+		params.aRules.Add(SEARCHPARAM(TDCA_RECURRENCE, FOP_EQUALS, filter.nRecurrence));
+
 	// Custom Attributes
 	bWantCustomAttrib |= CTDCSearchParamHelper::AppendCustomAttributeFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
 
@@ -695,6 +698,7 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 	filter.nTitleOption = prefs.GetProfileEnum(sKey, _T("TitleOption"), FT_FILTERONTITLEONLY);
 	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
 	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
+	filter.nRecurrence = prefs.GetProfileEnum(sKey, _T("Recurrence"), TDIR_NONE);
 	filter.nStartNextNDays = prefs.GetProfileInt(sKey, _T("StartNextNDays"), 7);
 	filter.nDueNextNDays = prefs.GetProfileInt(sKey, _T("DueNextNDays"), 7);
 
@@ -764,6 +768,7 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 	prefs.WriteProfileInt(sKey, _T("Due"), filter.nDueBy);
 	prefs.WriteProfileInt(sKey, _T("Priority"), filter.nPriority);
 	prefs.WriteProfileInt(sKey, _T("Risk"), filter.nRisk);
+	prefs.WriteProfileInt(sKey, _T("Recurrence"), filter.nRecurrence);
 	prefs.WriteProfileInt(sKey, _T("StartNextNDays"), filter.nStartNextNDays);
 	prefs.WriteProfileInt(sKey, _T("DueNextNDays"), filter.nDueNextNDays);
 

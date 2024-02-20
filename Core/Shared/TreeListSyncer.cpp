@@ -2585,6 +2585,9 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		
 	case WM_RESYNC:
 		{
+			if (m_bNeedInitItemHeight)
+				InitItemHeights();
+
 			if (lp)
 				ResyncSelection(OtherWnd(hRealWnd), hRealWnd);
 			

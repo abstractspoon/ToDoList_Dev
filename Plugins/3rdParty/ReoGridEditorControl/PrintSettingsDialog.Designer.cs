@@ -120,7 +120,7 @@ namespace unvell.ReoGrid.Editor
 			this.labOrientation.Name = "labOrientation";
 			this.labOrientation.Size = new System.Drawing.Size(61, 13);
 			this.labOrientation.TabIndex = 0;
-			this.labOrientation.Text = "Orientation:";
+			this.labOrientation.Text = "Orientation";
 			// 
 			// labPaperSize
 			// 
@@ -129,7 +129,7 @@ namespace unvell.ReoGrid.Editor
 			this.labPaperSize.Name = "labPaperSize";
 			this.labPaperSize.Size = new System.Drawing.Size(61, 13);
 			this.labPaperSize.TabIndex = 0;
-			this.labPaperSize.Text = "Paper Size:";
+			this.labPaperSize.Text = "Paper Size";
 			// 
 			// grpScaling
 			// 

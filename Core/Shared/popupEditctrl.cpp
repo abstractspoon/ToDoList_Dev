@@ -30,6 +30,7 @@ CPopupEditCtrl::~CPopupEditCtrl()
 {
 }
 
+IMPLEMENT_DYNAMIC(CPopupEditCtrl, CEnEdit)
 
 BEGIN_MESSAGE_MAP(CPopupEditCtrl, CEnEdit)
 	//{{AFX_MSG_MAP(CPopupEditCtrl)
@@ -151,7 +152,7 @@ LRESULT CPopupEditCtrl::OnPECShow(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// enable and show
 	SetSel(0, -1);
-	SetWindowPos(NULL, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+	ShowWindow(SW_SHOW);
 	EnableWindow(TRUE);
 	SetFocus();
 

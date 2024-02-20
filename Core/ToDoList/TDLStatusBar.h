@@ -38,7 +38,7 @@ public:
 	virtual ~CTDLStatusBar();
 
 	void SetUITheme(const CUIThemeFile& theme);
-	void UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib);
+	void UpdateTasks(const CFilteredToDoCtrl& tdc, const CTDCAttributeMap& mapAttrib);
 	void UpdateFocusedControl(const CString& sFocus);
 
 	BOOL BeginProgress(const CString& sPrompt) { return m_progress.BeginProgress(*this, sPrompt); }
@@ -56,6 +56,7 @@ protected:
 	//{{AFX_MSG(CTDLStatusBar)
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint pt);
 	DECLARE_MESSAGE_MAP()
 
 protected:

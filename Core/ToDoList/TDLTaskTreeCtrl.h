@@ -45,7 +45,8 @@ public:
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
-					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+					 const CContentMgr& mgrContent);
 
 	virtual ~CTDLTaskTreeCtrl();
 	operator HWND() const { return GetSafeHwnd(); }
@@ -76,6 +77,7 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
+	BOOL RestorePreviousSelection(BOOL bRedraw);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);
 	BOOL EnsureSelectionVisible(BOOL bHorzPartialOK);

@@ -6,6 +6,8 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
+using ImageHelper;
+
 #endregion
 
 namespace MSDN.Html.Editor
@@ -17,9 +19,6 @@ namespace MSDN.Html.Editor
 	/// </summary>
 	public partial class EnterImageForm : Form
 	{
-		public static string ImageFilter = "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
-
-
 		/// <summary>
 		/// Public form constructor
 		/// </summary>
@@ -37,7 +36,7 @@ namespace MSDN.Html.Editor
 			this.listAlign.SelectedIndex = (int)ImageAlignOption.Default;
 
 			BrowseTitle = "Select Image File";
-			BrowseFilter = ImageFilter;
+			BrowseFilter = ImageUtils.ImageFilter;
 		} 
 
 		public ToolTip Tooltip
@@ -161,7 +160,7 @@ namespace MSDN.Html.Editor
 
 				string filter = String.Format("*{0};", extension);
 
-				return ImageFilter.Contains(filter);
+				return ImageUtils.ImageFilter.Contains(filter);
 			}
 			catch (Exception /*e*/)
 			{
@@ -207,7 +206,7 @@ namespace MSDN.Html.Editor
 
 		private void OnPixelWidthCheckChange(object sender, EventArgs e)
 		{
-			pixelWidth.Enabled = (enablePixelWidth.Checked && pixelWidth.Enabled);
+			pixelWidth.Enabled = enablePixelWidth.Checked;
 		}
 	}
 }

@@ -59,7 +59,7 @@ public:
 	void LoadSettings(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	UINT GetCommandID(DWORD dwShortcut) const;
-	DWORD GetShortcut(UINT nCmdID) const;
+	virtual DWORD GetShortcut(UINT nCmdID) const;
 	WORD ValidateModifiers(WORD wModifiers, WORD wVirtKeyCode) const;
 
 	static CString GetShortcutText(DWORD dwShortcut);
@@ -82,6 +82,9 @@ protected:
 
 	void PrepareMenuItems(CMenu* pMenu) const;
 	int BuildMapping(const CMenu* pMenu, LPCTSTR szParentName, CStringArray& aMapping, char cDelim) const;
+	
+	UINT ProcessKeyDown(const MSG* pMsg, HWND hwndAllowedParent, UINT nAllowedCmdID, DWORD* pShortcut) const;
+	BOOL WantProcessMessage(const MSG* pMsg) const;
 
 	static BOOL IsEditShortcut(DWORD dwShortcut);
 };

@@ -11,6 +11,7 @@
 #define IDC_CLEARFILTER                 105
 #define IDC_QUICKFIND                   106
 #define IDC_FILENAME                    107
+#define IDC_IMAGE_ICON                  108
 #define IDR_MAINFRAME                   128
 #define IDR_MAINFRAME_STD               128
 #define IDD_RECURRING_TASK_DIALOG_OLD   129
@@ -60,8 +61,8 @@
 #define IDD_LANGUAGE_DIALOG             227
 #define IDD_TDLIMPORTEXPORT_DIALOG      228
 #define IDD_CMDLINEOPTIONS_DIALOG       229
-#define IDR_GB_FLAG                     235
-#define IDR_YOURLANG_FLAG               236
+#define IDB_UK_FLAG                     235
+#define IDB_YOURLANG_FLAG               236
 #define IDD_OUTLOOKMSGIMPORT_DIALOG     238
 #define IDI_TASKTREE_STD                240
 #define IDD_ADDCUSTOMATTRIB_DIALOG      241
@@ -77,11 +78,8 @@
 #define IDB_FIND_TOOLBAR_STD            247
 #define IDD_PASTEIMPORT_DIALOG          247
 #define IDB_SOURCECONTROL_STD           248
-#define IDI_STYLE_WRAP                  248
 #define IDB_TASKICONS_STD               249
-#define IDI_STYLE_TABLE                 249
 #define IDR_APP_TOOLBAR                 250
-#define IDI_STYLE_PARA                  250
 #define IDR_FIND_TOOLBAR                251
 #define IDB_APP_TOOLBAR_METRO           252
 #define IDB_FIND_TOOLBAR_METRO          253
@@ -90,9 +88,10 @@
 #define IDR_CUSTATTRIB_TOOLBAR          257
 #define IDB_CUSTATTRIB_TOOLBAR_METRO    258
 #define IDB_CUSTATTRIB_TOOLBAR_STD      259
-#define IDI_DROPBOX                     263
-#define IDI_GOOGLEDRIVE                 264
-#define IDI_SKYDRIVE                    265
+#define IDB_STYLE_PARA                  260
+#define IDB_STYLE_TABLE                 261
+#define IDB_STYLE_WRAP                  262
+#define IDB_STYLE_IMAGE                 263
 #define IDB_WIZ_HEADER                  267
 #define IDR_TASKVIEWVISIBILITY          268
 #define IDD_ANALYSELOGGEDTIME_DIALOG    269
@@ -126,18 +125,17 @@
 #define IDB_UDTPREFS_TOOLBAR_STD        301
 #define IDI_SIMPLETEXT                  302
 #define IDI_TIMETRACK_STD               304
-#define IDI_STYLE_IMAGE                 305
 #define IDD_GOTOTASK_DIALOG             306
 #define IDD_CLEANUPINIPREFERENCES_DIALOG 307
 #define IDI_ADD_LOGGED_TIME             308
 #define IDB_OUTLOOKTYPES                309
 #define IDR_FINDTASKS                   310
-#define IDB_TDLUPDATE_WIZ_HEADER        310
 #define IDI_SEARCH_PREFS                313
 #define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDI_TRAY_LIGHT                  316
 #define IDI_TRAY_TIMETRACK_LIGHT        317
 #define IDR_DATETIME_TOOLBAR            318
+#define IDR_COMMENTS_DATETIME_TOOLBAR   318
 #define IDB_DATETIME_TOOLBAR_STD        319
 #define IDD_TASKDEPENDENCY_DIALOG       321
 #define IDI_QUICKFIND_NEXT              322
@@ -145,6 +143,7 @@
 #define IDD_CUSTOMATTRIBLIST_PAGE       324
 #define IDD_CUSTOMATTRIBCALC_PAGE       325
 #define IDD_DEBUG_FORMATGETLASTERROR_DIALOG 326
+#define IDD_PASTETASKATTRIB_DIALOG      327
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -462,7 +461,9 @@
 #define IDC_PAGEHOST                    1142
 #define IDC_PASSWORD                    1144
 #define IDC_COMMENTSUSETREEFONT         1145
+#define IDC_REMINDERSUSETREEFONT        1146
 #define IDC_USEISODATEFORMAT            1147
+#define IDC_FINDTASKSUSETREEFONT        1147
 #define IDC_USEHLSGRADIENT              1148
 #define IDC_SHOWWEEKDAYINDATES          1149
 #define IDC_INHERITATTRIBUTES           1149
@@ -544,6 +545,8 @@
 #define IDC_DUEFILTERCOMBO              1201
 #define IDC_STYLESHEET                  1202
 #define IDC_WARNADDDELARCHIVE           1202
+#define IDC_RECURFILTERLABEL            1202
+#define IDC_RECURFILTERCOMBO            1203
 #define IDC_EXCLUSIVETRACKING           1216
 #define IDC_SHOWSUBTASKCOMPLETION       1218
 #define IDC_TRANSFORMTITLE              1219
@@ -590,6 +593,7 @@
 #define IDC_SHOWDEFAULTTASKICONS        1303
 #define IDC_HIDELISTPARENTS             1303
 #define IDSNOOZE                        1304
+#define IDC_FILELINKTHUMBNAILS          1304
 #define IDGOTOTASK                      1305
 #define IDC_LIMITCOLWIDTHS              1306
 #define IDC_SEARCHLABEL                 1307
@@ -847,6 +851,15 @@
 #define IDC_SECONDOPISVALUE             1556
 #define IDC_SECONDOPERANDVALUE          1557
 #define IDC_RESULTTYPE                  1560
+#define IDC_SELECTSPECIFIC              1562
+#define IDC_INCLUDECUSTOMATTRIB         1564
+#define IDC_INCLUDEDATES                1565
+#define IDC_SPECIFICATTRIBS             1566
+#define IDC_ONLYOVERWRITEMPTY           1567
+#define IDC_ONLYOVERWRITEWITHNONEMPTY   1568
+#define IDC_INCLUDETITLE                1569
+#define IDC_REDUCEREMINDERDLGFLASHING   1570
+#define IDC_PRESERVEWEEKDAYS            1571
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -1105,7 +1118,8 @@
 #define ID_SORTBY_REMINDER              33155
 #define ID_SORTBY_LOCK                  33156
 #define ID_SORTBY_COMMENTSSIZE          33157
-#define ID_SORTBY_DEFAULTCOLUMNS_LAST   33157
+#define ID_SORTBY_COMMENTSFORMAT        33158
+#define ID_SORTBY_DEFAULTCOLUMNS_LAST   33158
 #define ID_SORTBY_CUSTOMCOLUMN_FIRST    33201
 #define ID_SORTBY_CUSTOMCOLUMN1         33201
 #define ID_SORTBY_CUSTOMCOLUMN2         33202
@@ -1570,6 +1584,13 @@
 #define ID_UDTPREFS_NEWTODO             34747
 #define ID_UDTPREFS_NEWTDL              34748
 #define ID_EDIT_DEPENDENCY              34749
+#define ID_FIND_CLOSE                   34750
+#define ID_COMMENTS_INSERTDATE          34751
+#define ID_COMMENTS_INSERTTIME          34752
+#define ID_COMMENTS_INSERTDATETIME      34753
+#define ID_RELATIVEDATE_NOW             34754
+#define ID_SCROLLTOSELTASK              34755
+#define ID_EDIT_PASTEATTRIBUTES         34756
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -1582,6 +1603,7 @@
 #define IDS_CMDLINE_STARTEMPTY          50608
 #define IDS_CMDLINE_TASKLINK            50609
 #define IDS_CMDLINE_RESTART             50610
+#define IDS_CMDLINE_MASTERPASSWORD      50610
 #define IDS_CMDLINE_SAVEINTERMEDIATE    50611
 #define IDS_CMDLINE_RANDOMISE           50612
 #define IDS_CMDLINE_SAVEUIVISINTASKLIST 50613
@@ -1788,6 +1810,7 @@
 #define IDS_TDC_COLUMN_CREATEDBY        50875
 #define IDS_TDC_COLUMN_CREATEDATE       50876
 #define IDS_TDC_COLUMN_LASTMODDATE      50877
+#define IDS_TDC_COLUMN_COMMENTSFORMAT   50878
 #define IDS_TDC_COLUMN_EXTID            50879
 #define IDS_TDC_SCALE0                  50880
 #define IDS_TDC_SCALE1                  50881
@@ -1823,6 +1846,7 @@
 #define IDS_TDC_CONFIRMDELETEALL        50928
 #define IDS_TDC_CONFIRMDELETE_TITLE     50929
 #define IDS_TDC_CONFIRMADD_TITLE        50930
+#define IDS_FIND_CONFIRMDELETESEARCH    50931
 #define IDS_TDC_CONFIRMOVERWRITE        50933
 #define IDS_TDC_CONFIRMOVERWRITE_TITLE  50934
 #define IDS_TDC_SPELLCHECK_TITLE        50935
@@ -2462,14 +2486,18 @@
 #define IDS_PRINT_TASKVIEW              51625
 #define IDS_TASKCOMPLETION              51626
 #define IDS_CUSTOM_FEATURE_SHOWEDITFIELD 51627
+#define IDS_COMMENTSMEMORYERROR         51628
+#define IDS_FIND_TASKS                  51629
+#define IDS_RECURS_WEEKDAY              51630
+#define IDS_TDLBC_COMMENTSFORMAT        51631
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        327
-#define _APS_NEXT_COMMAND_VALUE         34750
-#define _APS_NEXT_CONTROL_VALUE         1561
+#define _APS_NEXT_RESOURCE_VALUE        328
+#define _APS_NEXT_COMMAND_VALUE         34757
+#define _APS_NEXT_CONTROL_VALUE         1574
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

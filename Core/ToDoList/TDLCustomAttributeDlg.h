@@ -91,6 +91,7 @@ protected:
 	afx_msg void OnBrowseimages();
 	afx_msg void OnInsertsymbol();
 	//}}AFX_MSG
+	afx_msg void OnEnable(BOOL bEnable);
 	DECLARE_MESSAGE_MAP()
 
 	void BuildListCombo();

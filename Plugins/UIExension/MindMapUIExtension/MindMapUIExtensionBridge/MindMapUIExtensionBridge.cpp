@@ -144,7 +144,7 @@ LPCWSTR CMindMapUIExtensionBridgeWindow::GetTypeID() const
 	return MINDMAP_GUID;
 }
 
-bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -163,7 +163,7 @@ void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
-	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
+	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
 bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -230,11 +230,6 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 		}
 		break;
 
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
-		break;
-
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
 
@@ -284,6 +279,9 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 				return UIExtension::SaveImageToFile(image, sImagePath.get());
 			}
 		}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->ScrollToSelectedTask();
 	}
 
 	return false;
@@ -293,7 +291,7 @@ DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 {
 	UIExtension::GetTask getTask;
 
-	if (!UIExtension::Map(nCmd, getTask))
+	if (!UIExtension::MapGetTaskCmd(nCmd, getTask))
 		return 0;
 
 	UInt32 taskID = dwFromTaskID;
@@ -308,7 +306,7 @@ bool CMindMapUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, co
 {
 	UIExtension::SelectTask selectWhat;
 
-	if (!UIExtension::Map(nCmd, selectWhat))
+	if (!UIExtension::MapSelectTaskCmd(nCmd, selectWhat))
 		return false;
 
 	String^ sWords = gcnew String(select.szWords);
@@ -332,7 +330,6 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 		}
 		break;
 
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -363,7 +360,10 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 
 	case IUI_SAVETOIMAGE:
 		return m_wnd->CanSaveToImage();
- 	}
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return m_wnd->CanScrollToSelectedTask();
+	}
 
 	return false;
 }
@@ -373,14 +373,14 @@ bool CMindMapUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CMindMapUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CMindMapUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
+	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CMindMapUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CMindMapUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
-	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
+	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
 void CMindMapUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)

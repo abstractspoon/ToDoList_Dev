@@ -97,15 +97,17 @@ namespace unvell.ReoGrid.PropertyPages
 			// labCategory
 			// 
 			this.labCategory.AutoSize = true;
+			this.labCategory.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labCategory.Location = new System.Drawing.Point(13, 13);
 			this.labCategory.Name = "labCategory";
 			this.labCategory.Size = new System.Drawing.Size(52, 13);
 			this.labCategory.TabIndex = 2;
-			this.labCategory.Text = "Category:";
+			this.labCategory.Text = "Category";
 			// 
 			// grpSample
 			// 
 			this.grpSample.Controls.Add(this.labSample);
+			this.grpSample.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.grpSample.Location = new System.Drawing.Point(165, 18);
 			this.grpSample.Name = "grpSample";
 			this.grpSample.Size = new System.Drawing.Size(377, 50);
@@ -115,6 +117,7 @@ namespace unvell.ReoGrid.PropertyPages
 			// 
 			// labSample
 			// 
+			this.labSample.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labSample.Location = new System.Drawing.Point(15, 23);
 			this.labSample.Name = "labSample";
 			this.labSample.Size = new System.Drawing.Size(349, 20);
@@ -123,11 +126,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labType
 			// 
 			this.labType.AutoSize = true;
+			this.labType.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labType.Location = new System.Drawing.Point(4, 29);
 			this.labType.Name = "labType";
 			this.labType.Size = new System.Drawing.Size(34, 13);
 			this.labType.TabIndex = 2;
-			this.labType.Text = "&Type:";
+			this.labType.Text = "&Type";
 			// 
 			// datetimeFormatList
 			// 
@@ -141,11 +145,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labLocale
 			// 
 			this.labLocale.AutoSize = true;
+			this.labLocale.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labLocale.Location = new System.Drawing.Point(3, 189);
 			this.labLocale.Name = "labLocale";
 			this.labLocale.Size = new System.Drawing.Size(88, 13);
 			this.labLocale.TabIndex = 2;
-			this.labLocale.Text = "&Locale (location):";
+			this.labLocale.Text = "&Locale (location)";
 			// 
 			// datetimeLocationList
 			// 
@@ -159,11 +164,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labDecimalPlacesNum
 			// 
 			this.labDecimalPlacesNum.AutoSize = true;
+			this.labDecimalPlacesNum.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labDecimalPlacesNum.Location = new System.Drawing.Point(3, 5);
 			this.labDecimalPlacesNum.Name = "labDecimalPlacesNum";
 			this.labDecimalPlacesNum.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesNum.TabIndex = 6;
-			this.labDecimalPlacesNum.Text = "&Decimal Places:";
+			this.labDecimalPlacesNum.Text = "&Decimal places";
 			// 
 			// numberDecimalPlaces
 			// 
@@ -185,11 +191,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labNegativeNumbersNum
 			// 
 			this.labNegativeNumbersNum.AutoSize = true;
+			this.labNegativeNumbersNum.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labNegativeNumbersNum.Location = new System.Drawing.Point(3, 59);
 			this.labNegativeNumbersNum.Name = "labNegativeNumbersNum";
 			this.labNegativeNumbersNum.Size = new System.Drawing.Size(96, 13);
 			this.labNegativeNumbersNum.TabIndex = 6;
-			this.labNegativeNumbersNum.Text = "&Negative numbers:";
+			this.labNegativeNumbersNum.Text = "&Negative numbers";
 			// 
 			// numberPanel
 			// 
@@ -217,11 +224,12 @@ namespace unvell.ReoGrid.PropertyPages
 			this.chkNumberUseSeparator.AutoSize = true;
 			this.chkNumberUseSeparator.Checked = true;
 			this.chkNumberUseSeparator.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkNumberUseSeparator.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.chkNumberUseSeparator.Location = new System.Drawing.Point(6, 33);
 			this.chkNumberUseSeparator.Name = "chkNumberUseSeparator";
 			this.chkNumberUseSeparator.Size = new System.Drawing.Size(133, 17);
 			this.chkNumberUseSeparator.TabIndex = 8;
-			this.chkNumberUseSeparator.Text = "&Use 1000 Separator (,)";
+			this.chkNumberUseSeparator.Text = "&Use 1000s Separator";
 			this.chkNumberUseSeparator.UseVisualStyleBackColor = true;
 			// 
 			// currencyPanel
@@ -249,20 +257,22 @@ namespace unvell.ReoGrid.PropertyPages
 			// labSymbol
 			// 
 			this.labSymbol.AutoSize = true;
+			this.labSymbol.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labSymbol.Location = new System.Drawing.Point(3, 33);
 			this.labSymbol.Name = "labSymbol";
 			this.labSymbol.Size = new System.Drawing.Size(44, 13);
 			this.labSymbol.TabIndex = 10;
-			this.labSymbol.Text = "&Symbol:";
+			this.labSymbol.Text = "&Symbol";
 			// 
 			// labNegativeNumberCurrency
 			// 
 			this.labNegativeNumberCurrency.AutoSize = true;
+			this.labNegativeNumberCurrency.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labNegativeNumberCurrency.Location = new System.Drawing.Point(3, 59);
 			this.labNegativeNumberCurrency.Name = "labNegativeNumberCurrency";
 			this.labNegativeNumberCurrency.Size = new System.Drawing.Size(96, 13);
 			this.labNegativeNumberCurrency.TabIndex = 6;
-			this.labNegativeNumberCurrency.Text = "&Negative numbers:";
+			this.labNegativeNumberCurrency.Text = "&Negative numbers";
 			// 
 			// currencyNegativeStyleList
 			// 
@@ -293,11 +303,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labDecimalPlacesCurrency
 			// 
 			this.labDecimalPlacesCurrency.AutoSize = true;
+			this.labDecimalPlacesCurrency.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labDecimalPlacesCurrency.Location = new System.Drawing.Point(3, 5);
 			this.labDecimalPlacesCurrency.Name = "labDecimalPlacesCurrency";
 			this.labDecimalPlacesCurrency.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesCurrency.TabIndex = 6;
-			this.labDecimalPlacesCurrency.Text = "&Decimal Places:";
+			this.labDecimalPlacesCurrency.Text = "&Decimal places";
 			// 
 			// datetimePanel
 			// 
@@ -322,11 +333,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labDateTimePattern
 			// 
 			this.labDateTimePattern.AutoSize = true;
+			this.labDateTimePattern.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labDateTimePattern.Location = new System.Drawing.Point(4, 5);
 			this.labDateTimePattern.Name = "labDateTimePattern";
 			this.labDateTimePattern.Size = new System.Drawing.Size(44, 13);
 			this.labDateTimePattern.TabIndex = 6;
-			this.labDateTimePattern.Text = "&Pattern:";
+			this.labDateTimePattern.Text = "&Pattern";
 			// 
 			// percentPanel
 			// 
@@ -352,11 +364,12 @@ namespace unvell.ReoGrid.PropertyPages
 			// labDecimalPlacesPercent
 			// 
 			this.labDecimalPlacesPercent.AutoSize = true;
+			this.labDecimalPlacesPercent.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labDecimalPlacesPercent.Location = new System.Drawing.Point(3, 5);
 			this.labDecimalPlacesPercent.Name = "labDecimalPlacesPercent";
 			this.labDecimalPlacesPercent.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesPercent.TabIndex = 6;
-			this.labDecimalPlacesPercent.Text = "&Decimal Places:";
+			this.labDecimalPlacesPercent.Text = "&Decimal places";
 			// 
 			// FormatPage
 			// 

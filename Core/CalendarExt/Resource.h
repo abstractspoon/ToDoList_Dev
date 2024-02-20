@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by CalendarExt.rc
 //
+#define IDR_CUSTOMDATE_POPUP            1
 #define IDB_TOOLBAR_STD                 245
 #define IDI_HELP_BUTTON                 293
 #define IDR_CALENDAR                    1000
@@ -27,9 +28,13 @@
 #define IDC_ENABLEHEATMAP               1043
 #define IDC_HEATMAPATTRIBUTE            1044
 #define IDC_SHOWFUTUREITEMS             1045
+#define IDC_HIDEPARENTTASKSBYTAG        1046
+#define IDC_HIDEPARENTTAG               1047
+#define IDC_SHOWDATEINEVERYCELL         1048
+#define IDC_SHOWWEEKNUMINCELL           1049
 #define IDC_SETWEEKENDCOLOR             1072
 #define IDC_SHOWMINICALENDAR            2001
-#define IDC_SHOWTASKSCONTINUOUS         2002
+#define IDC_SHOWTASKSDISCONTINUOUS      2002
 #define IDC_SHOWSTARTDATES              2003
 #define IDC_SHOWDUEDATES                2004
 #define IDC_USECREATIONFORSTART         2005
@@ -38,6 +43,7 @@
 #define IDC_USESTARTFORDUE              2008
 #define IDC_USESTARTORTODAYFORDUE       2009
 #define IDC_SHOWDONEDATES               2010
+#define IDC_SHOWACTIVETODAY             2011
 #define IDC_WEEKENDCOLOR                16004
 #define IDR_TOOLBAR                     16006
 #define IDC_COLORSGROUP                 16008
@@ -50,6 +56,8 @@
 #define ID_CAL_PREFS                    32775
 #define IDS_SNAP_FREE                   32790
 #define ID_GOTOTODAY                    32795
+#define ID_CAL_CLEARCUSTOMDATE          32799
+#define ID_CANCEL                       32800
 #define IDS_NOHEATMAP                   57671
 #define IDS_MINICAL_TOOLTIP             57672
 #define IDS_HEATMAP_NUMDONE             57673
@@ -61,14 +69,16 @@
 #define IDS_DISPLAYTASKDONEDATES        57679
 #define IDS_CUSTOMDATE_TOOLTIP          57680
 #define IDS_FUTUREOCCURRENCE_TOOLTIP    57681
+#define IDS_LONGWEEK                    57682
+#define IDS_SHORTWEEK                   57683
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        32793
-#define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1046
+#define _APS_NEXT_RESOURCE_VALUE        2
+#define _APS_NEXT_COMMAND_VALUE         32801
+#define _APS_NEXT_CONTROL_VALUE         1048
 #define _APS_NEXT_SYMED_VALUE           32893
 #endif
 #endif

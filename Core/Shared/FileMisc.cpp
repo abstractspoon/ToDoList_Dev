@@ -130,7 +130,7 @@ BOOL CFileBackup::InitialisePaths(const CString& sFile, DWORD dwFlags, const CSt
 
 	CString sBackup = BuildBackupPath(sFile, dwFlags, sFolder, sExt);
 
-	if (!FileMisc::CreateFolderFromFilePath(m_sBackup))
+	if (!FileMisc::CreateFolderFromFilePath(sBackup))
 		return FALSE;
 
 	m_sFile = sFile;
@@ -859,16 +859,22 @@ CString FileMisc::GetFolderFromFilePath(LPCTSTR szFilePath)
 
 BOOL FileMisc::CreateFolderFromFilePath(LPCTSTR szFilePath)
 {
+	ASSERT(!Misc::IsEmpty(szFilePath));
+
 	return CreateFolder(GetFolderFromFilePath(szFilePath));
 }
 
 BOOL FileMisc::PathHasWildcard(LPCTSTR szFilePath)
 {
+	ASSERT(!Misc::IsEmpty(szFilePath));
+
 	return (_tcschr(szFilePath, '?') || _tcschr(szFilePath, '*'));
 }
 
 BOOL FileMisc::IsFileWritable(LPCTSTR szFilePath)
 {
+	ASSERT(!Misc::IsEmpty(szFilePath));
+
 	if (!FileExists(szFilePath))
 		return FALSE;
 
@@ -877,6 +883,8 @@ BOOL FileMisc::IsFileWritable(LPCTSTR szFilePath)
 
 BOOL FileMisc::IsFileReadable(LPCTSTR szFilePath)
 {
+	ASSERT(!Misc::IsEmpty(szFilePath));
+
 	if (!FileExists(szFilePath))
 		return FALSE;
 
@@ -885,6 +893,8 @@ BOOL FileMisc::IsFileReadable(LPCTSTR szFilePath)
 
 BOOL FileMisc::IsFolderWritable(LPCTSTR szFolder)
 {
+	ASSERT(!Misc::IsEmpty(szFolder));
+
 	if (!FolderExists(szFolder))
 		return FALSE;
 
@@ -914,6 +924,8 @@ BOOL FileMisc::IsFolderWritable(LPCTSTR szFolder)
 
 BOOL FileMisc::CreateFolder(LPCTSTR szFolder)
 {
+	ASSERT(!Misc::IsEmpty(szFolder));
+
 	if (FolderExists(szFolder))
 		return TRUE;
 
@@ -974,6 +986,8 @@ BOOL FileMisc::CreateFolder(LPCTSTR szFolder)
 
 BOOL FileMisc::FolderContainsFiles(LPCTSTR szFolder, BOOL bCheckSubFolders, LPCTSTR szFilter)
 {
+	ASSERT(!Misc::IsEmpty(szFolder));
+
 	CFileFind ff;
 	CString sSearchSpec;
 	

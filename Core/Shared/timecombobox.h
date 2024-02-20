@@ -48,7 +48,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTimeComboBox)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 

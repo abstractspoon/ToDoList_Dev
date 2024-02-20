@@ -279,7 +279,9 @@ void CGPImporter::FixupDependencies(const CXmlItem* pXISrcTask, ITASKLISTBASE* p
 			if (hTask)
 			{
 				DWORD dwDestDependID = GetTDLTaskID(pXISrcTask->GetItemValueI(_T("id")));
-				pDestTaskFile->AddTaskDependency(hTask, dwDestDependID);
+				int nDaysLeadIn = pXIDepends->GetItemValueI(_T("difference"));
+
+				pDestTaskFile->AddTaskDependency(hTask, dwDestDependID, nDaysLeadIn);
 			}
 		}
 

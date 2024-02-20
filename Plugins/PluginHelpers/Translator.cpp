@@ -84,6 +84,17 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 	}
 }
 
+void Translator::Translate(Control^ ctrl)
+{
+	Translate(ctrl->Controls);
+}
+
+void Translator::Translate(ITranslatable^ ctrl)
+{
+	if (ctrl != nullptr)
+		ctrl->Translate(this);
+}
+
 void Translator::Translate(ToolStripItemCollection^ items)
 {
 	int nItem = items->Count;
@@ -96,11 +107,19 @@ void Translator::Translate(ToolStripItemCollection^ items)
 		item->ToolTipText = Translate(item->ToolTipText);
 
 		// children
-		auto menu = ASTYPE(item, ToolStripMenuItem);
+		auto dropItem = ASTYPE(item, ToolStripDropDownItem);
 
-		if ((menu != nullptr) && menu->HasDropDownItems)
+		if (dropItem != nullptr)
 		{
-			Translate(menu->DropDownItems); // RECURSIVE CALL
+			if (dropItem->DropDown != nullptr)
+			{
+				Translate(dropItem->DropDown); // RECURSIVE CALL
+			}
+
+			if (dropItem->HasDropDownItems)
+			{
+				Translate(dropItem->DropDownItems); // RECURSIVE CALL
+			}
 		}
 	}
 }
@@ -121,13 +140,21 @@ void Translator::Translate(Control::ControlCollection^ items)
 			continue;
 		}
 
-		if (ISTYPE(ctrl, ToolStrip))
+		if (ISTYPE(ctrl, ITranslatable))
+		{
+			Translate(ASTYPE(ctrl, ITranslatable));
+		}
+		else if (ISTYPE(ctrl, ToolStrip))
 		{
 			Translate(ASTYPE(ctrl, ToolStrip)->Items);
 		}
 		else if (ISTYPE(ctrl, ComboBox))
 		{
 			Translate(ASTYPE(ctrl, ComboBox));
+		}
+		else if (ISTYPE(ctrl, ListView))
+		{
+			Translate(ASTYPE(ctrl, ListView)->Columns);
 		}
 		else
 		{
@@ -137,6 +164,14 @@ void Translator::Translate(Control::ControlCollection^ items)
 			Translate(ctrl->Controls);
 		}
 	}
+}
+
+void Translator::Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items)
+{
+	int nItem = items->Count;
+
+	while (nItem--)
+		items[nItem]->Text = Translate(items[nItem]->Text);
 }
 
 void Translator::Translate(ComboBox^ combo)

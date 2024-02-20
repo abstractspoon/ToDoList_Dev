@@ -7,6 +7,7 @@
 #include "Themed.h"
 #include "Misc.h"
 #include "GraphicsMisc.h"
+#include "DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -108,11 +109,6 @@ void CRangeSliderCtrl::SetParentBackgroundColor(COLORREF crBkgnd)
 		if (GetSafeHwnd())
 			Invalidate(FALSE);
 	}
-}
-
-BOOL CRangeSliderCtrl::HasSelectedRange() const
-{
-	return ((m_Left > m_Min) || (m_Right < m_Max));
 }
 
 void CRangeSliderCtrl::DrawRegion(CDC& dc, RS_DRAWREGION nRegion, const CRect& rRegion)
@@ -222,7 +218,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 				{
 					if (bPressed)
 					{
-						nState = TUS_PRESSED;
+						nState = TUS_HOT;//TUS_PRESSED;
 					}
 					else if (bHot)
 					{
@@ -278,7 +274,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, double dTo)
 {
-	if ((m_nSliderDrawStyles & TBS_NOTICKS) == 0)
+	if ((m_Step > 0) && !(m_nSliderDrawStyles & TBS_NOTICKS))
 	{
 		double dNumTick = ((dTo - dFrom) / m_Step);
 		double dTickSpacing = (rTrack.Width() / dNumTick);
@@ -294,12 +290,31 @@ void CRangeSliderCtrl::DrawTicks(CDC& dc, const CRect& rTrack, double dFrom, dou
 			if ((nTickPos - nLastTickPos) > m_nMinTickSpacing)
 			{
 				CRect rTick(nTickPos, rTrack.bottom, (nTickPos + 1), rTrack.bottom + 4);
-				dc.FillSolidRect(rTick, GetSysColor(COLOR_3DSHADOW));
+				dc.FillSolidRect(rTick, GetSysColor(COLOR_3DDKSHADOW));
 
 				nLastTickPos = nTickPos;
 			}
 		}
 	}
+}
+
+int CRangeSliderCtrl::ResizeToFit(int nMaxWidth, int nMaxTickSpacing)
+{
+	int nTickCount = abs(Misc::Round((m_Max - m_Min) / m_Step));
+
+	if (nMaxTickSpacing == -1)
+		nMaxTickSpacing = GraphicsMisc::ScaleByDPIFactor(100);
+
+	int nNewWidth = min((nTickCount * nMaxTickSpacing), nMaxWidth);
+	CRect rSlider = CDialogHelper::GetChildRect(this);
+
+	if (nNewWidth != rSlider.Width())
+	{
+		rSlider.right = rSlider.left + nNewWidth;
+		MoveWindow(rSlider);
+	}
+
+	return nNewWidth;
 }
 
 void CRangeSliderCtrl::RegionToTrack(CRect& rRegion) const

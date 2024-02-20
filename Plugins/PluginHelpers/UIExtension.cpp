@@ -25,12 +25,13 @@ using namespace System::IO;
 using namespace System::Windows::Forms;
 using namespace System::Windows::Forms::VisualStyles;
 using namespace System::Drawing;
+using namespace System::Drawing::Drawing2D;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
+UIExtension::UpdateType UIExtension::MapUpdateType(IUI_UPDATETYPE type)
 {
 	switch (type)
 	{
@@ -44,20 +45,33 @@ UIExtension::UpdateType UIExtension::Map(IUI_UPDATETYPE type)
 	return UIExtension::UpdateType::Unknown;
 }
 
-IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
+IUI_HITTEST UIExtension::MapHitTestResult(UIExtension::HitTestResult result)
 {
-	switch (test)
+	switch (result)
 	{
-	case UIExtension::HitResult::Nowhere:		return IUI_NOWHERE;
-	case UIExtension::HitResult::Tasklist:		return IUI_TASKLIST;
-	case UIExtension::HitResult::ColumnHeader:	return IUI_COLUMNHEADER;
-	case UIExtension::HitResult::Task:			return IUI_TASK;
+	case UIExtension::HitTestResult::Nowhere:		return IUI_NOWHERE;
+	case UIExtension::HitTestResult::Tasklist:		return IUI_TASKLIST;
+	case UIExtension::HitTestResult::ColumnHeader:	return IUI_COLUMNHEADER;
+	case UIExtension::HitTestResult::Task:			return IUI_TASK;
 	}
 
 	return IUI_NOWHERE;
 }
 
-bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
+UIExtension::HitTestReason UIExtension::MapHitTestReason(IUI_HITTESTREASON reason)
+{
+	switch (reason)
+	{
+	case IUI_NONE:			return UIExtension::HitTestReason::None;
+	case IUI_INFOTIP:		return UIExtension::HitTestReason::InfoTip;
+	case IUI_CONTEXTMENU:	return UIExtension::HitTestReason::ContextMenu;
+	}
+
+	ASSERT(0);
+	return UIExtension::HitTestReason::None;
+}
+
+bool UIExtension::MapGetTaskCmd(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
 {
 	switch (nCmd)
 	{
@@ -90,7 +104,7 @@ bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
 	return false;
 }
 
-bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::SelectTask% selectTask)
+bool UIExtension::MapSelectTaskCmd(IUI_APPCOMMAND nCmd, UIExtension::SelectTask% selectTask)
 {
 	switch (nCmd)
 	{
@@ -171,7 +185,18 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String
 	:
 	nAttrib(attrib),
 	dataType(DataType::Text),
-	szValue(value)
+	szValue(value),
+	bAppend(false)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String^ value, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Text),
+	szValue(value),
+	bAppend(append)
 {
 
 }
@@ -185,8 +210,96 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(String^ customAttribId, String
 {
 }
 
+// ---------------------------------------------------------------------------
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, DateTime value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Date),
+	tValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Double),
+	dValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Time),
+	dValue(time),
+	nTimeUnits(units)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Integer),
+	nValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, bool value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Bool),
+	bValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Text),
+	szValue(value),
+	bAppend(false)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Text),
+	szValue(value),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, String^ customAttribId, String^ value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(Task::Attribute::CustomAttribute),
+	dataType(DataType::Custom),
+	szCustomAttribID(customAttribId),
+	szValue(value)
+{
+}
+
+// ---------------------------------------------------------------------------
+
 bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 {
+	mod.dwSelectedTaskID = dwSelectedTaskID;
 	mod.nAttrib = Task::MapAttribute(nAttrib);
 
 	switch (dataType)
@@ -214,6 +327,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 		{
 			MarshalledString^ msString = gcnew MarshalledString(szValue);
 			mod.szValue = msString;
+			mod.bAppend = bAppend;
 		}
 		break;
 
@@ -249,6 +363,8 @@ UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent)
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 	m_TaskMods = gcnew List<IUITaskMod^>();
 }
+
+// -----------------------------------------------------------------------------------
 
 bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, DateTime date)
 {
@@ -313,6 +429,90 @@ bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value
 	return true;
 }
 
+bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value, bool append)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value, append));
+	return true;
+}
+
+// -----------------------------------------------------------------------------------
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime date)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, date));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, double value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, double time, Task::TimeUnits units)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, time, units));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, int value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, String^ sCustAttribID, String^ value)
+{
+	if (sCustAttribID->IsNullOrEmpty(sCustAttribID))
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, sCustAttribID, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value, bool append)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value, append));
+	return true;
+}
+
+// -----------------------------------------------------------------------------------
 // External
 bool UIExtension::ParentNotify::NotifyMod()
 {
@@ -404,6 +604,14 @@ bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ va
 	return NotifyMod(true);
 }
 
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ value, bool append)
+{
+	ClearMods();
+	AddMod(nAttribute, value, append);
+
+	return NotifyMod(true);
+}
+
 bool UIExtension::ParentNotify::NotifyMove(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID)
 {
 	IUITASKMOVE move = { 0 };
@@ -469,7 +677,7 @@ bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 		return false;
 
 	pin_ptr<UInt32> p = &pdwTaskIDs[0];
-	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, (WPARAM)p, pdwTaskIDs->Length);
 
 	return (bRet != FALSE);
 }
@@ -487,6 +695,11 @@ bool UIExtension::ParentNotify::NotifyEditIcon()
 bool UIExtension::ParentNotify::NotifyDoHelp(String^ helpID)
 {
 	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_DOHELP, 0, (LPARAM)(LPCWSTR)MS(helpID)));
+}
+
+bool UIExtension::ParentNotify::NotifyTasklistMetaData(String^ metaData)
+{
+	return (FALSE != ::SendMessage(m_hwndParent, WM_IUI_SETTASKLISTMETADATA, 0, (LPARAM)(LPCWSTR)MS(metaData)));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -533,6 +746,11 @@ bool UIExtension::TaskIcon::Draw(Graphics^ g, Int32 x, Int32 y)
 	g->SetClip(rClip); // restore clip rect
 
 	return bRes;
+}
+
+int UIExtension::TaskIcon::IconSize::get() 
+{ 
+	return DPIScaling::Scale(16); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -614,6 +832,16 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 	return ColorUtil::DrawingColor::ToColor(color);
 }
 
+Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Color baseColor)
+{
+	GM_ITEMSTATE state = Map(style);
+	COLORREF crBase = (baseColor.IsEmpty ? CLR_NONE : ColorUtil::DrawingColor::ToRgb(baseColor));
+
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionTextColor(crBase, state, GMIB_THEMECLASSIC);
+
+	return ColorUtil::DrawingColor::ToColor(color);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursorType)
@@ -639,6 +867,35 @@ Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursor
 		if (hCursor != NULL)
 	 		return gcnew Cursor(static_cast<IntPtr>(hCursor));
 	}
+
+	return nullptr;
+}
+
+Windows::Forms::Cursor^ UIExtension::OleDragCursor(OleDragCursorType cursorType)
+{
+	HCURSOR hCursor = NULL;
+	
+	switch (cursorType)
+	{
+	case UIExtension::OleDragCursorType::No:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_NO);
+		break;
+
+	case UIExtension::OleDragCursorType::Copy:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_COPY);
+		break;
+
+	case UIExtension::OleDragCursorType::Move:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_MOVE);
+		break;
+
+	case UIExtension::OleDragCursorType::Link:
+		hCursor = GraphicsMisc::LoadDragDropCursor(GMOC_LINK);
+		break;
+	}
+	
+	if (hCursor != NULL)
+		return gcnew Cursor(static_cast<IntPtr>(hCursor));
 
 	return nullptr;
 }
@@ -737,7 +994,7 @@ List<Tuple<DateTime, DateTime>^>^ UIExtension::TaskRecurrences::Get(UInt32 dwTas
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-cli::array<Point>^ UIExtension::TaskDependency::CalcHorizontalArrowHead(int x, int y, Font^ font, bool left)
+cli::array<Point>^ UIExtension::ArrowHeads::Calculate(int x, int y, int size, int offset, Direction dir)
 {
 	auto arrow = gcnew cli::array<Point>(3);
 
@@ -747,80 +1004,118 @@ cli::array<Point>^ UIExtension::TaskDependency::CalcHorizontalArrowHead(int x, i
 		arrow[i].Y = y;
 	}
 
-	// Size to match Gantt Chart
-	const int nSize = ((font->Height / 4) + 1);
+	switch (dir)
+	{
+	case Direction::Left:
+		arrow[0].Offset(size, -size);
+		arrow[2].Offset(size, size);
+		break;
 
-	if (left)
-	{
-		// <----
-		//
-		arrow[0].Offset(nSize, -nSize);
-		arrow[2].Offset(nSize, nSize);
+	case Direction::Up:
+		arrow[0].Offset(-size, size);
+		arrow[2].Offset(size, size);
+		break;
+
+	case Direction::Right:
+		arrow[0].Offset(-size, -size);
+		arrow[2].Offset(-size, size);
+		break;
+
+	case Direction::Down:
+		arrow[0].Offset(-size, -size);
+		arrow[2].Offset(size, -size);
+		break;
+
+	default:
+		arrow = nullptr;
 	}
-	else // right
+
+	return Offset(arrow, offset, dir);
+}
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, Direction dir)
+{
+	Draw(graphics, pen, x, y, size, 0, dir);
+}
+
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, float angleDegrees)
+{
+	Draw(graphics, pen, x, y, size, 0, angleDegrees);
+}
+
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, int offset, Direction dir)
+{
+	auto arrow = Calculate(x, y, size, offset, dir);
+	
+	if (arrow != nullptr)
+		graphics->DrawLines(pen, arrow);
+}
+
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, int offset, float angleDegrees)
+{
+	// Calculate arrow at the origin
+	auto arrow = Calculate(0, 0, size, offset, Direction::Up);
+
+	if (arrow != nullptr)
 	{
-		// --->
-		//
-		arrow[0].Offset(-nSize, -nSize);
-		arrow[2].Offset(-nSize, nSize);
+		// Calculate the rotation matrix
+		auto matrix = gcnew Matrix();
+
+		matrix->Rotate(angleDegrees, MatrixOrder::Append);
+		matrix->Translate((float)x, (float)y, MatrixOrder::Append);
+
+		graphics->Transform = matrix;
+		graphics->DrawLines(pen, arrow);
+		graphics->ResetTransform();
+	}
+}
+
+cli::array<Drawing::Point>^ UIExtension::ArrowHeads::Offset(cli::array<Drawing::Point>^ arrow, int amount, Direction dir)
+{
+	if (amount != 0)
+	{
+		amount = abs(amount);
+
+		for (int i = 0; i < 3; i++)
+		{
+			switch (dir)
+			{
+			case Direction::Left:
+				arrow[i].Offset(-amount, 0);
+				break;
+
+			case Direction::Up:
+				arrow[i].Offset(0, amount);
+				break;
+
+			case Direction::Right:
+				arrow[i].Offset(amount, 0);
+				break;
+
+			case Direction::Down:
+				arrow[i].Offset(0, -amount);
+				break;
+			}
+		}
 	}
 
 	return arrow;
 }
 
-cli::array<Point>^ UIExtension::TaskDependency::CalcVerticalArrowHead(int x, int y, Font^ font, bool up)
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+void UIExtension::DependencyArrows::Draw(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, Direction dir)
 {
-	auto arrow = gcnew cli::array<Point>(3);
+	auto arrow = Calculate(x, y, Size(font), 0, dir);
 
-	for (int i = 0; i < 3; i++)
-	{
-		arrow[i].X = x;
-		arrow[i].Y = y;
-	}
+	graphics->DrawLines(Pens::Black, arrow);
 
+	// Offset and draw again
+	graphics->DrawLines(Pens::Black, Offset(arrow, 1, dir));
+}
+
+int UIExtension::DependencyArrows::Size(Drawing::Font^ font)
+{
 	// Size to match Gantt Chart
-	const int nSize = ((font->Height / 4) + 1);
-
-	if (up)
-	{
-		//  ^
-		//  |
-		//
-		arrow[0].Offset(-nSize, nSize);
-		arrow[2].Offset(nSize, nSize);
-	}
-	else // down
-	{
-		//  |
-		//  V
-		//
-		arrow[0].Offset(-nSize, -nSize);
-		arrow[2].Offset(nSize, -nSize);
-	}
-
-	return arrow;
+	return ((font->Height / 4) + 1);
 }
 
-void UIExtension::TaskDependency::DrawHorizontalArrowHead(Graphics^ graphics, int x, int y, Font^ font, bool left)
-{
-	auto arrow = CalcHorizontalArrowHead(x, y, font, left);
-	graphics->DrawLines(Pens::Black, arrow);
-
-	// Offset and draw again
-	for (int i = 0; i < 3; i++)
-		arrow[i].Offset(left ? 1 : -1, 0);
-
-	graphics->DrawLines(Pens::Black, arrow);
-}
-
-void UIExtension::TaskDependency::DrawVerticalArrowHead(Graphics^ graphics, int x, int y, Font^ font, bool up)
-{
-	auto arrow = CalcHorizontalArrowHead(x, y, font, up);
-	graphics->DrawLines(Pens::Black, arrow);
-
-	// Offset and draw again
-	for (int i = 0; i < 3; i++)
-		arrow[i].Offset(0, up ? 1 : -1);
-
-	graphics->DrawLines(Pens::Black, arrow);
-}

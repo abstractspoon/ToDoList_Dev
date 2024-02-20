@@ -7,8 +7,9 @@
 #include "GraphicsMisc.h"
 #include "enbitmap.h"
 #include "enfiledialog.h"
+#include "DialogHelper.h"
 
-// CMultiFileEdit //////////////////////////////////////////////////////////
+// CFileComboBox::CMultiFileEdit //////////////////////////////////////////////////////////
 
 CFileComboBox::CMultiFileEdit::CMultiFileEdit(int nEditStyle) : CFileEdit(nEditStyle)
 {
@@ -47,6 +48,10 @@ void CFileComboBox::CMultiFileEdit::HandleBrowseForFile(CEnFileDialog& dlg)
 }
 
 // CFileComboBox //////////////////////////////////////////////////////////
+
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+
+///////////////////////////////////////////////////////////////////////////
 
 CFileComboBox::CFileComboBox(int nEditStyle) 
 	: 
@@ -88,41 +93,35 @@ BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 
 void CFileComboBox::OnPaint()
 {
-	CPaintDC dc(this);
-
-	// default painting
-	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
-
 	// If the edit field has an image and its icon rect 
 	// is less than the height of the image, then we draw 
 	// the extra bit that MIGHT have been clipped out
-	if (!m_fileEdit.GetSafeHwnd() || m_fileEdit.GetWindowTextLength() == 0)
-		return;
+	CPaintDC dc(this);
 
-	CRect rIcon = m_fileEdit.GetIconScreenRect();
+	if (m_fileEdit.GetSafeHwnd() && m_fileEdit.GetWindowTextLength())
+	{
+		CRect rIcon = m_fileEdit.GetIconScreenRect();
 
-	if (rIcon.Height() >= m_imageIcons.GetIconSize())
-		return;
+		if (rIcon.Height() < m_imageIcons.GetIconSize())
+		{
+			ScreenToClient(rIcon);
 
-	ScreenToClient(rIcon);
+			// Because CFileEdit messes with its non-client rect
+			// we can end up with a negative rectangle during startup
+			if (rIcon.left >= 0)
+			{
+				CString sIcon;
+				m_fileEdit.GetWindowText(sIcon);
+				m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
+			}
+		}
+	}
 
-	// Because CFileEdit messes with its non-client rect
-	// we can end up with a negative rectangle during startup
-	if (rIcon.left < 0)
-		return;
+	CRect rEdit = CDialogHelper::GetCtrlRect(this, 1001);
+	dc.ExcludeClipRect(rEdit);
 
-	// Check that the bit we need to draw is visible
-	CRect rClip(rIcon);
-
-	rClip.bottom = rClip.top + m_imageIcons.GetIconSize();
-	rClip.top = rIcon.bottom;
-
-	if (!dc.IntersectClipRect(rClip))
-		return;
-
-	CString sIcon;
-	m_fileEdit.GetWindowText(sIcon);
-	m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
+	// default painting
+	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
 }
 
 HBRUSH CFileComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -290,7 +289,7 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 	{
 		BOOL bDrawn = FALSE;
 
-		if (m_fileEdit.HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sItem))
+		if (m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sItem))
 		{
 			CString sFullPath(sItem);
 			FileMisc::MakeFullPath(sFullPath, m_fileEdit.GetCurrentFolder());
@@ -410,4 +409,19 @@ void CFileComboBox::HandleReturnKey()
 		m_bEditChange = FALSE;
 	else
 		CAutoComboBox::HandleReturnKey();
+}
+
+int CFileComboBox::GetExtraListboxWidth() const
+{
+	return (CAutoComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CFileComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = CAutoComboBox::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
+
+	return nMinHeight;
 }

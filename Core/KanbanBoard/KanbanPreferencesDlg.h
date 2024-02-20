@@ -30,6 +30,8 @@ class CKanbanCtrl;
 
 class CKanbanPreferencesPage : public CPreferencesPageBase
 {
+	DECLARE_DYNCREATE(CKanbanPreferencesPage)
+
 // Construction
 public:
 	CKanbanPreferencesPage(CWnd* pParent = NULL);   // standard constructor
@@ -58,8 +60,6 @@ protected:
 	CKanbanAttributeComboBox	m_cbAttributes;
 	CKanbanFixedColumnListCtrl	m_lcFixedColumnDefs;
 	CGroupLineManager m_mgrGroupLines;
-	CEnToolBar m_toolbar;
-	CToolbarHelper m_tbHelper;
 	CCheckListBoxEx	m_lbDisplayAttrib;
 
 	BOOL	m_bShowTaskColorAsBar;
@@ -100,16 +100,16 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnShowColorAsBar();
 	afx_msg void OnPopulateFixedColumns();
-	afx_msg void OnUpdatePopulateColumns(CCmdUI* pCmdUI);
 	afx_msg void OnSortSubtasksBelowParents();
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void EnableDisableControls();
-	void UpdateAttributeValueCombo();
+	void UpdateFixedAttributeValueCombo();
 	CString GetFixedAttributeID() const;
 	void BuildDisplayAttributeListBox();
+	BOOL IsCustomFixedAttribute() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -135,7 +135,8 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	int DoModal(const CKanbanCtrl& ctrlKanban);
+	void SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
+	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:
 	CKanbanPreferencesPage m_page;
@@ -150,7 +151,6 @@ protected:
 	//{{AFX_MSG(CKanbanPreferencesDlg)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
 };
 
 //{{AFX_INSERT_LOCATION}}

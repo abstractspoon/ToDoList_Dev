@@ -50,15 +50,14 @@ CToolbarHelper::~CToolbarHelper()
 
 }
 
-BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, CWnd* pToolbarParent, const CShortcutManager* pShortcutMgr)
+BOOL CToolbarHelper::Initialize(CToolBar* pToolbar, const CShortcutManager* pShortcutMgr)
 {
 	ASSERT_VALID(pToolbar);
-	ASSERT_VALID(pToolbarParent);
 
 	if (!pToolbar || !pToolbar->GetSafeHwnd())
 		return FALSE;
 
-	if (!pToolbarParent || !HookWindow(*pToolbarParent))
+	if (!HookWindow(::GetParent(*pToolbar)))
 		return FALSE;
 
 	m_pToolbar = pToolbar;

@@ -72,6 +72,7 @@ enum FMC_FONT_TYPE
 	FMC_FONT_DAYSOFWEEK,
 	FMC_FONT_SPECIALDAYS,
 	FMC_FONT_DAYS,
+	FMC_FONT_SCROLLBTNS,
 
 	FMC_NUM_FONTS
 };
@@ -102,6 +103,7 @@ public:
 	COLORREF m_crTextColor, m_crBkColor;
 	CFont*	m_pFont;
 	BOOL m_bFontCreated;
+	BOOL m_bSymbol;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -225,7 +227,7 @@ public:
 	void SetSpecialDaysCallback(funcSPECIALDATE pValue, DWORD dwUserData);
 	funcSPECIALDATE GetSpecialDaysCallback() {return m_pfuncCallback;}
 
-	void SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, int iSize, BOOL bBold = FALSE, BOOL bItalic = FALSE, BOOL bUnderline = FALSE, COLORREF crText = GetSysColor(COLOR_WINDOWTEXT), COLORREF crBkgnd = GetSysColor(COLOR_WINDOW));
+	void SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, int iSize, BOOL bBold = FALSE, BOOL bItalic = FALSE, BOOL bUnderline = FALSE, BOOL bSymbol = FALSE, COLORREF crText = GetSysColor(COLOR_WINDOWTEXT), COLORREF crBkgnd = GetSysColor(COLOR_WINDOW));
 	void SetFontInfo(FMC_FONT_TYPE nFont, const CFPSMiniCalendarCtrlFontInfo& font);
 	void GetFontInfo(FMC_FONT_TYPE nFont, CFPSMiniCalendarCtrlFontInfo& font) const;
 

@@ -45,6 +45,7 @@ public:
 	void DeleteImage(UINT nCmdID);
 	void ClearImages();
 	BOOL HasImages() const;
+	BOOL DrawImage(HDC hDC, UINT nCmdID, const CPoint& ptTopLeft, BOOL bNormal = TRUE) const;
 	
 protected:
 	CMapID2HICON m_mapID2Icon, m_mapID2DisabledIcon;

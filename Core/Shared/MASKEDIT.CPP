@@ -49,7 +49,7 @@ void CMaskEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		bSkipMaskCheck = TRUE;
 		break;
 
-	// something wierd going on with edit control accelerators
+	// something weird going on with edit control accelerators
 	case 3:   // c
 	case 22:  // v
 	case 24:  // x

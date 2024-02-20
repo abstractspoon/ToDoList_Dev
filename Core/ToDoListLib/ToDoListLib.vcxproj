@@ -150,6 +150,7 @@
     <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp" />
     <ClCompile Include="..\ToDoList\TDCFilter.cpp" />
+    <ClCompile Include="..\ToDoList\TDCFindFilterHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCFindReplace.cpp" />
     <ClCompile Include="..\ToDoList\TDCImageList.cpp" />
     <ClCompile Include="..\ToDoList\TDCImportExportMgr.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="..\ToDoList\TDCRecurrence.cpp" />
     <ClCompile Include="..\ToDoList\tdcreminder.cpp" />
     <ClCompile Include="..\ToDoList\TDCSearchParamHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCShortcutManager.cpp" />
     <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp" />
     <ClCompile Include="..\ToDoList\tdcsort.cpp" />
     <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
@@ -176,13 +178,14 @@
     <ClCompile Include="..\ToDoList\TDLAnalyseLoggedTimeDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLAttribListBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLAttributeComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLBrowserDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCleanupIniPreferencesDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCmdlineOptionsDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLColumnListBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLColumnSelectionDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\TDLContentMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDCContentMgr.cpp" />
     <ClCompile Include="..\ToDoList\TDLCsvImportExportDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCustomAttribFeatureComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLCustomAttributeDlg.cpp" />
@@ -214,6 +217,7 @@
     <ClCompile Include="..\ToDoList\TDLMultiSortDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLOffsetDatesDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLOleMessageFilter.cpp" />
+    <ClCompile Include="..\ToDoList\TDLPasteTaskAttributesDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLPrefMigrationDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLPrintDialog.cpp" />
     <ClCompile Include="..\ToDoList\TDLPriorityComboBox.cpp" />
@@ -302,6 +306,7 @@
     <ClInclude Include="..\ToDoList\tdcenum.h" />
     <ClInclude Include="..\ToDoList\TDCEnumContainers.h" />
     <ClInclude Include="..\ToDoList\TDCFilter.h" />
+    <ClInclude Include="..\ToDoList\TDCFindFilterHelper.h" />
     <ClInclude Include="..\ToDoList\TDCFindReplace.h" />
     <ClInclude Include="..\ToDoList\TDCImageList.h" />
     <ClInclude Include="..\ToDoList\TDCImportExportMgr.h" />
@@ -313,6 +318,7 @@
     <ClInclude Include="..\ToDoList\TDCRecurrence.h" />
     <ClInclude Include="..\ToDoList\tdcreminder.h" />
     <ClInclude Include="..\ToDoList\TDCSearchParamHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCShortcutManager.h" />
     <ClInclude Include="..\ToDoList\TDCSimpleTextContent.h" />
     <ClInclude Include="..\ToDoList\tdcsort.h" />
     <ClInclude Include="..\ToDoList\TDCSourceControl.h" />
@@ -333,13 +339,14 @@
     <ClInclude Include="..\ToDoList\TDLAnalyseLoggedTimeDlg.h" />
     <ClInclude Include="..\ToDoList\TDLAttribListBox.h" />
     <ClInclude Include="..\ToDoList\TDLAttributeComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLBrowserDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCleanupIniPreferencesDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCmdlineOptionsDlg.h" />
     <ClInclude Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLColumnListBox.h" />
     <ClInclude Include="..\ToDoList\TDLColumnSelectionDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCommentsCtrl.h" />
-    <ClInclude Include="..\ToDoList\TDLContentMgr.h" />
+    <ClInclude Include="..\ToDoList\TDCContentMgr.h" />
     <ClInclude Include="..\ToDoList\TDLCsvImportExportDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCustomAttribFeatureComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLCustomAttributeDlg.h" />
@@ -371,6 +378,7 @@
     <ClInclude Include="..\ToDoList\TDLMultiSortDlg.h" />
     <ClInclude Include="..\ToDoList\TDLOffsetDatesDlg.h" />
     <ClInclude Include="..\ToDoList\TDLOleMessageFilter.h" />
+    <ClInclude Include="..\ToDoList\TDLPasteTaskAttributesDlg.h" />
     <ClInclude Include="..\ToDoList\TDLPrefMigrationDlg.h" />
     <ClInclude Include="..\ToDoList\TDLPrintDialog.h" />
     <ClInclude Include="..\ToDoList\TDLPriorityComboBox.h" />

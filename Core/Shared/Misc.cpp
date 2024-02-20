@@ -332,24 +332,6 @@ CString Misc::GetUserName()
 	return sUser;
 }
 
-CString Misc::GetListSeparator()
-{
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLIST, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
-		
-	// Trim extra spaces
-	Trim(sSep);
-		
-	// If none found, use a comma
-	if (!sSep.GetLength())
-		sSep = ',';
-
-	return sSep;
-}
-
 CString Misc::FormatArray(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty)
 {
 	TCHAR szSep[2] = { cSep, 0 };
@@ -390,11 +372,11 @@ CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncE
 			{
 				if (!bFirstItem)
 				{
-					_tcscpy(szBufPtr, sSep);
+					_tcsncpy(szBufPtr, sSep, sSep.GetLength());
 					szBufPtr += sSep.GetLength();
 				}
 				
-				_tcscpy(szBufPtr, sItem);
+				_tcsncpy(szBufPtr, sItem, sItem.GetLength());
 				szBufPtr += sItem.GetLength();
 
 				bFirstItem = FALSE;
@@ -548,6 +530,27 @@ BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResu
 	return TRUE;
 }
 
+CString Misc::SplitLeft(const CString& sText, TCHAR cDelim, BOOL bTrimResult)
+{
+	TCHAR szDelim[] = { cDelim, 0 };
+
+	return SplitLeft(sText, szDelim, bTrimResult);
+}
+
+CString Misc::SplitLeft(const CString& sText, LPCTSTR szDelim, BOOL bTrimResult)
+{
+	if (!sText.IsEmpty())
+	{
+		int nDelim = sText.Find(szDelim);
+
+		if (nDelim != -1)
+			return (bTrimResult ? Trim(sText.Left(nDelim)) : sText.Left(nDelim));
+	}	
+
+	// else
+	return sText;
+}
+
 CString& Misc::Trim(CString& sText, TCHAR cChar)
 {
 	if (cChar)
@@ -586,7 +589,7 @@ CString& Misc::TrimAlpha(CString& sText)
 
 		while (nEnd--)
 		{
-			if (_istdigit(sText[nStart]))
+			if (_istdigit(sText[nEnd]))
 				break;
 		}
 
@@ -639,6 +642,9 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 
 	if (bWholeWord)
 		Trim(sWord); // because whitespace is a delimiter
+
+	if (sWord.IsEmpty() || sText.IsEmpty())
+		return -1;
 
 	if (!bCaseSensitive)
 	{
@@ -931,6 +937,9 @@ BOOL Misc::TrimLastIf(TCHAR cTest, CString& sText)
 
 TCHAR Misc::TrimFirst(CString& sText)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	TCHAR nFirst = First(sText);
 	
 	if (nFirst != 0)
@@ -941,6 +950,9 @@ TCHAR Misc::TrimFirst(CString& sText)
 
 TCHAR Misc::TrimLast(CString& sText)
 {
+	if (sText.IsEmpty())
+		return 0;
+
 	TCHAR nLast = Last(sText);
 	
 	if (nLast != 0)
@@ -963,6 +975,19 @@ BOOL Misc::TrimTrailingDecimalZeros(CString& sText)
 	if (nDecimal == (sText.GetLength() - sSep.GetLength()))
 		sText = sText.Left(nDecimal);
 
+	return TRUE;
+}
+
+BOOL Misc::TrimTrailingDecimals(CString& sText)
+{
+	CString sSep = GetDecimalSeparator();
+	int nDecimal = sText.Find(sSep);
+
+	if (nDecimal < 0)
+		return FALSE;
+
+	// To avoid any memory manipulation simply insert a null
+	sText = sText.Left(nDecimal);
 	return TRUE;
 }
 
@@ -1437,35 +1462,42 @@ BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSens
 	return FALSE; // not added
 }
 
+CString Misc::GetLocaleInfo(LCTYPE lcType, int nBufSize)
+{
+	CString sValue;
+	::GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, sValue.GetBuffer(nBufSize + 1), nBufSize);
+	sValue.ReleaseBuffer();
+
+	return sValue;
+}
+
+CString Misc::GetListSeparator()
+{
+	CString sSep = GetLocaleInfo(LOCALE_SLIST, 10);
+
+	// Trim extra spaces
+	Trim(sSep);
+
+	// If none found, use a comma
+	if (sSep.IsEmpty())
+		sSep = ',';
+
+	return sSep;
+}
+
 CString Misc::GetAM()
 {
-	const int BUFLEN = 10;
-
-	CString sAM;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S1159, sAM.GetBuffer(BUFLEN), BUFLEN - 1);
-	sAM.ReleaseBuffer();
-
-	return sAM;
+	return GetLocaleInfo(LOCALE_S1159, 10);
 }
 
 CString Misc::GetPM()
 {
-	const int BUFLEN = 10;
-
-	CString sPM;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S2359, sPM.GetBuffer(BUFLEN), BUFLEN - 1);
-	sPM.ReleaseBuffer();
-
-	return sPM;
+	return GetLocaleInfo(LOCALE_S2359, 10);
 }
 
 CString Misc::GetTimeFormat(BOOL bIncSeconds)
 {
-	const int BUFLEN = 100;
-
-	CString sFormat;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIMEFORMAT, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
-	sFormat.ReleaseBuffer();
+	CString sFormat = GetLocaleInfo(LOCALE_STIMEFORMAT, 100);
 
 	if (!bIncSeconds)
 	{
@@ -1482,17 +1514,13 @@ CString Misc::GetTimeFormat(BOOL bIncSeconds)
 
 CString Misc::GetTimeSeparator()
 {
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIME , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
+	CString sSep = GetLocaleInfo(LOCALE_STIME, 10);
 
 	// Trim extra spaces
 	Trim(sSep);
 		
 	// If none found, use a colon
-	if (!sSep.GetLength())
+	if (sSep.IsEmpty())
 		sSep = ':';
 
 	return sSep;
@@ -1500,17 +1528,13 @@ CString Misc::GetTimeSeparator()
 
 CString Misc::GetDateSeparator()
 {
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDATE , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
+	CString sSep = GetLocaleInfo(LOCALE_SDATE, 10);
 
 	// Trim extra spaces
 	Trim(sSep);
 		
 	// If none found, use a slash
-	if (!sSep.GetLength())
+	if (sSep.IsEmpty())
 		sSep = '/';
 
 	return sSep;
@@ -1518,11 +1542,7 @@ CString Misc::GetDateSeparator()
 
 CString Misc::GetShortDateFormat(BOOL bIncDOW)
 {
-	const int BUFLEN = 100;
-	
-	CString sFormat;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SSHORTDATE, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
-	sFormat.ReleaseBuffer();
+	CString sFormat = GetLocaleInfo(LOCALE_SSHORTDATE, 100);
 
 	if (bIncDOW)
 	{
@@ -1533,19 +1553,22 @@ CString Misc::GetShortDateFormat(BOOL bIncDOW)
 	return sFormat;
 }
 
+BOOL Misc::ShortDateFormatHasMonthBeforeDay()
+{
+	CString sFormat = Misc::GetShortDateFormat();
+	
+	return (sFormat.Find('M') < sFormat.Find('d'));
+}
+
 CString Misc::GetDecimalSeparator()
 {
-	const int BUFLEN = 10;
-
-	CString sSep;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSep.ReleaseBuffer();
+	CString sSep = GetLocaleInfo(LOCALE_SDECIMAL, 10);
 
 	// Trim extra spaces
 	Trim(sSep);
 		
 	// If none found, use a dot
-	if (!sSep.GetLength())
+	if (sSep.IsEmpty())
 		sSep = '.';
 
 	return sSep;
@@ -1553,11 +1576,7 @@ CString Misc::GetDecimalSeparator()
 
 BOOL Misc::IsMetricMeasurementSystem()
 {
-	const int BUFLEN = 2;
-	CString sSystem;
-	
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IMEASURE, sSystem.GetBuffer(BUFLEN), BUFLEN - 1);
-	sSystem.ReleaseBuffer(BUFLEN - 1);
+	CString sSystem = GetLocaleInfo(LOCALE_IMEASURE, 2);
 	
 	return (_ttoi(sSystem) == 0);
 }
@@ -1698,10 +1717,18 @@ double Misc::Round(double dValue, int nDecimals)
 	if (dValue == 0)
 		return 0.0;
 
-	if (nDecimals == 0)
+	if (nDecimals <= 0)
 		return Round(dValue);
 
-	return _ttof(Misc::Format(dValue, 2));
+	double dMulDiv = 10;
+	nDecimals--;
+
+	while (nDecimals--)
+		dMulDiv *= 10;
+
+	dValue = Round(dValue * dMulDiv);
+
+	return (dValue / dMulDiv);
 }
 
 int Misc::GetNextValue(int nValue, int nIncrement)
@@ -1953,7 +1980,6 @@ LANGID Misc::GetUserDefaultUILanguage()
 {
 	typedef LANGID (WINAPI *FNGETUSERDEFAULTUILANGUAGE)(VOID);
 
-	// must link dynamically to kernel32 else problem with win95/NT4
 	static HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
 	LANGID nLangID = 0;
 
@@ -1966,7 +1992,34 @@ LANGID Misc::GetUserDefaultUILanguage()
 	}
 
 	return nLangID;
-//	return ::GetUserDefaultUILanguage();
+}
+
+BOOL Misc::IsFullScreenAppActive()
+{
+	typedef HRESULT (*FNSHQUERYUSERNOTIFICATIONSTATE)(int*);
+
+	static HMODULE hLib = LoadLibrary(_T("Shell32.dll"));
+
+	if (hLib)
+	{
+		FNSHQUERYUSERNOTIFICATIONSTATE pFN = (FNSHQUERYUSERNOTIFICATIONSTATE)GetProcAddress(hLib, "SHQueryUserNotificationState");
+		int nState = 0;
+
+		if (pFN && (pFN(&nState) == S_OK))
+		{
+			switch (nState)
+			{
+			case 2: // QUNS_BUSY
+			case 3: // QUNS_RUNNING_D3D_FULL_SCREEN
+			case 4:	// QUNS_PRESENTATION_MODE
+			case 7:	// QUNS_APP
+				return TRUE;
+			}
+		}
+	}
+
+	// All else
+	return FALSE;
 }
 
 LANGID Misc::GetUserKeyboardLanguage()
@@ -1976,11 +2029,7 @@ LANGID Misc::GetUserKeyboardLanguage()
 
 CString Misc::GetDefCharset()
 {
-	CString sDefCharset;
-	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IDEFAULTANSICODEPAGE, sDefCharset.GetBuffer(7), 6);
-	sDefCharset.ReleaseBuffer();
-
-	return sDefCharset;
+	return GetLocaleInfo(LOCALE_IDEFAULTANSICODEPAGE, 7);
 }
 
 BOOL Misc::LCMapString(CString& sText, DWORD dwMapFlags)
@@ -2134,14 +2183,20 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 
 	CString sValue;
 
-	if (nDecPlaces < 0)
+	switch (nDecPlaces)
 	{
-		sValue.Format(_T("%f"), dVal);
+	case -1:	
+		sValue.Format(_T("%f"), dVal); 	
 		TrimTrailingDecimalZeros(sValue);
-	}
-	else
-	{
-		sValue.Format(_T("%.*f"), nDecPlaces, dVal);
+		break;
+
+	case 0:		
+		sValue.Format(_T("%.f"), dVal); 
+		break;
+
+	default:	
+		sValue.Format(_T("%.*f"), nDecPlaces, dVal); 
+		break;
 	}
 				
 	// restore locale
@@ -2176,26 +2231,58 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 	return sValue;
 }
 
+// ----------------------------------------------------------------
+
+#define FORMAT_REGION_VALUE(FUNC)                             \
+                                                              \
+char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
+setlocale(LC_NUMERIC, "");                                    \
+const UINT BUFSIZE = 100; TCHAR szValue[BUFSIZE + 1] = { 0 }; \
+FUNC(NULL, 0, sValue, NULL, szValue, BUFSIZE);                \
+sValue = szValue;                                             \
+setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
+
+// ----------------------------------------------------------------
+
 CString Misc::FormatCost(double dCost, LPCTSTR szTrail)
 {
-	CString sValue;
-	sValue.Format(_T("%.6f"), dCost);
-
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
-	setlocale(LC_NUMERIC, ""); // local default
-
-	const UINT BUFSIZE = 100;
-	TCHAR szCost[BUFSIZE + 1];
-
-	GetCurrencyFormat(NULL, 0, sValue, NULL, szCost, BUFSIZE);
-	sValue = szCost;
-				
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
+	CString sValue(Format(_T("%.6f"), dCost));
+	FORMAT_REGION_VALUE(GetCurrencyFormat);
 
 	return (sValue + szTrail);
 }
+
+CString Misc::FormatNumber(double dVal, LPCTSTR szTrail)
+{
+	CString sValue(Format(_T("%.6f"), dVal));
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	return (sValue + szTrail);
+}
+
+CString Misc::FormatNumber(int nVal, LPCTSTR szTrail)
+{
+	CString sValue(Format(_T("%.d"), nVal));
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	// Because GetNumberFormat adds decimals regardless
+	TrimTrailingDecimals(sValue);
+
+	return (sValue + szTrail);
+}
+
+CString Misc::FormatNumber(LPCTSTR szVal, BOOL bAsInteger, LPCTSTR szTrail)
+{
+	CString sValue(szVal);
+	FORMAT_REGION_VALUE(GetNumberFormat);
+
+	if (bAsInteger)
+		TrimTrailingDecimals(sValue);
+
+	return (sValue + szTrail);
+}
+
+// ----------------------------------------------------------------
 
 CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
 {
@@ -2417,6 +2504,9 @@ int StringSortProc(const void* v1, const void* v2)
 
 void Misc::SortArray(CStringArray& aValues, SORTPROC pSortProc)
 {
+	if (aValues.GetSize() < 2)
+		return;
+
 	qsort(aValues.GetData(), aValues.GetSize(), sizeof(CString*), pSortProc ? pSortProc : StringSortProc);
 }
 
@@ -2440,6 +2530,9 @@ int DWordSortProc(const void* v1, const void* v2)
 
 void Misc::SortArray(CDWordArray& aValues, SORTPROC pSortProc)
 {
+	if (aValues.GetSize() < 2)
+		return;
+
 	qsort(aValues.GetData(), aValues.GetSize(), sizeof(DWORD*), pSortProc ? pSortProc : DWordSortProc);
 }
 
@@ -2561,6 +2654,14 @@ CString Misc::GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith)
 	CString sText(szText);
 	MakeQuoted(sText, cEscapeEmbeddedQuotesWith);
 	
+	return sText;
+}
+
+CString Misc::GetUnquoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith)
+{
+	CString sText(szText);
+	MakeUnquoted(sText, cEscapeEmbeddedQuotesWith);
+
 	return sText;
 }
 

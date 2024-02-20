@@ -31,7 +31,8 @@ CToDoCtrlReminders::CToDoCtrlReminders()
 	: 
 	m_pWndNotify(NULL), 
 	m_bUseStickies(FALSE),
-	m_bShowFullTaskPathInSticky(FALSE)
+	m_bShowFullTaskPathInSticky(FALSE),
+	m_bReduceFlashing(FALSE)
 {
 }
 
@@ -520,6 +521,9 @@ void CToDoCtrlReminders::DoCheckReminders()
 	// Iterate all the reminders looking for matches
 	int nRem = m_aReminders.GetSize();
 
+	// Only flash the taskbar once per check
+	BOOL bFlashTaskBar = FALSE;
+
 	while (nRem--)
 	{
 		TDCREMINDER& rem = m_aReminders[nRem];
@@ -537,7 +541,13 @@ void CToDoCtrlReminders::DoCheckReminders()
 			
 			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
 			{
-				if (!ShowReminder(rem))
+				BOOL bRemWasVisible = (FindListReminder(rem) != -1);
+
+				if (ShowReminder(rem))
+				{
+					bFlashTaskBar = (!m_bReduceFlashing || !bRemWasVisible);
+				}
+				else
 				{
 					// This means that Stickies is handling the reminder
 					// so we can now delete it, except for recurring tasks
@@ -551,6 +561,13 @@ void CToDoCtrlReminders::DoCheckReminders()
 
 		if (bDelete)
 			DeleteReminder(nRem);
+	}
+
+	// Only flash the titlebar if we are visible and 
+	// our owner is not disabled (showing a modal dialog)
+	if (bFlashTaskBar && IsWindowVisible() && m_pWndNotify->IsWindowEnabled())
+	{
+		GraphicsMisc::FlashWindowEx(m_hWnd, FLASHW_ALL, 5, 0);
 	}
 }
 
@@ -604,8 +621,11 @@ BOOL CToDoCtrlReminders::BuildStickiesRTFContent(const TDCREMINDER& rem, CString
 	// Inject a task link inside the brackets after the tak title
 	m_rtfFormatter.SetCaretPos(nTitleLen + 1);
 	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE), CEnString(IDS_STICKIES_LINK));
+	
+	if (!m_rtfFormatter.GetRTF(sContent))
+		return FALSE;
 
-	sContent = CString((LPCSTR)(LPCTSTR)m_rtfFormatter.GetRTF());
+	Misc::EncodeAsUnicode(sContent);
 
 #ifdef _DEBUG
 	FileMisc::SaveFile(_T("StickiesContent.rtf"), sContent, SFEF_UTF8WITHOUTBOM);
@@ -659,11 +679,6 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 	// all else (fallback)
 	if (AddListReminder(rem))
 		ShowWindow();
-
-	// Only flash the titlebar if we are visible and 
-	// our owner is not disabled (showing a modal dialog)
-	if (IsWindowVisible() && m_pWndNotify->IsWindowEnabled()) 
-		GraphicsMisc::FlashWindowEx(m_hWnd, (FLASHW_ALL | FLASHW_TIMERNOFG), 10, 0);
 
 	return TRUE;
 }
@@ -796,15 +811,22 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday)
+int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, 
+									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	int nRem = FindReminder(dwTaskID, pTDC);
 	int nNumOffset = 0;
 
 	if (nRem != -1)
 	{
-		if (OffsetReminder(m_aReminders[nRem], dAmount, nUnits, bFromToday))
+		if (OffsetReminder(m_aReminders[nRem],
+						   dAmount,
+						   nUnits,
+						   bFromToday,
+						   bPreserveWeekday))
+		{
 			nNumOffset++;
+		}
 	}
 
 	if (bAndSubtasks)
@@ -813,13 +835,22 @@ int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS
 		int nSubtask = pTDC->GetSubTaskIDs(dwTaskID, aSubtaskIDs);
 
 		while (nSubtask--)
-			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask], dAmount, nUnits, pTDC, TRUE, bFromToday); // RECURSIVE CALL
+		{
+			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask],
+										 dAmount,
+										 nUnits,
+										 pTDC,
+										 TRUE, // And subtasks
+										 bFromToday,
+										 bPreserveWeekday); // RECURSIVE CALL
+		}
 	}
 
 	return nNumOffset;
 }
 
-BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday)
+BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, 
+										BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	if (rem.bRelative)
 		return FALSE;
@@ -834,7 +865,8 @@ BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UN
 
 	if (dAmount)
 	{
-		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits)))
+		// Preserve end of month
+		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE))
 			return FALSE;
 	}
 

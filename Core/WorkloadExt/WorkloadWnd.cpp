@@ -400,30 +400,30 @@ bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen) const
+IUI_HITTEST CWorkloadWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// try tree header
 	if (m_ctrlWorkload.PointInHeader(ptScreen))
-		return IUI_NOWHERE;//IUI_COLUMNHEADER;
+		return IUI_NOWHERE;
 
 	// then specific task
-	if (m_ctrlWorkload.HitTestTask(ptScreen, false))
+	if (m_ctrlWorkload.HitTestTask(ptScreen, (nReason == IUI_INFOTIP)))
 		return IUI_TASK;
 
 	// else 
 	return IUI_NOWHERE;
 }
 
-DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return m_ctrlWorkload.HitTestTask(ptScreen, bTitleColumnOnly);
+	return m_ctrlWorkload.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CWorkloadWnd::SelectTask(DWORD dwTaskID)
+bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -516,11 +516,6 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlWorkload.ResizeListColumnsToFit(TRUE);
 		return true;
 		
-	case IUI_SELECTTASK:
-		if (pData)
-			return SelectTask(pData->dwTaskID);
-		break;
-		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -563,10 +558,12 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		if (pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlWorkload.GetSelectedTaskID());
-
 			return (m_ctrlWorkload.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlWorkload.SelectTask(m_ctrlWorkload.GetSelectedTaskID()) != FALSE);
 	}
 
 	return false;
@@ -594,7 +591,6 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return (m_ctrlWorkload.CanCollapseAll() != FALSE);
 		
 	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SAVETOIMAGE:
@@ -648,6 +644,9 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		if (pData)
 			return (m_ctrlWorkload.CanMoveSelectedTask(pData->move) != FALSE);
 		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlWorkload.GetSelectedTaskID() != 0);
 	}
 
 	// all else
@@ -682,7 +681,7 @@ BOOL CWorkloadWnd::OnInitDialog()
 	if (m_toolbar.CreateEx(this))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
@@ -707,12 +706,22 @@ void CWorkloadWnd::Resize(int cx, int cy)
 		rWorkload.bottom = cy;
 
 		m_ctrlWorkload.MoveWindow(rWorkload);
-
-		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-		rSlider.right = (cx - 10);
-
-		m_sliderDateRange.MoveWindow(rSlider);
+		ResizeSlider(cx);
 	}
+}
+
+void CWorkloadWnd::ResizeSlider(int nParentWidth)
+{
+	if (nParentWidth == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nParentWidth = rClient.Width();
+	}
+
+	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+	m_sliderDateRange.ResizeToFit(nParentWidth - 10 - rSlider.left);
 }
 
 HBRUSH CWorkloadWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
@@ -1048,6 +1057,7 @@ void CWorkloadWnd::UpdateRangeSlider()
 	}
 
 	m_sliderDateRange.SetStep(1.0); // 1 day
+	ResizeSlider();
 }
 
 void CWorkloadWnd::OnUpdateMovePeriodBackOneMonth(CCmdUI* pCmdUI) 

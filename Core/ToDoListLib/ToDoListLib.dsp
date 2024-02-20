@@ -217,6 +217,10 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCContentMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCCustomAttribData.cpp
 # End Source File
 # Begin Source File
@@ -238,6 +242,10 @@ SOURCE=..\ToDoList\TDCEnumContainers.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCFilter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCFindFilterHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -274,6 +282,10 @@ SOURCE=..\ToDoList\tdcreminder.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCSearchParamHelper.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCShortcutManager.cpp
 # End Source File
 # Begin Source File
 
@@ -345,6 +357,10 @@ SOURCE=..\ToDoList\TDLAttributeComboBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLBrowserDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -366,10 +382,6 @@ SOURCE=..\ToDoList\TDLColumnSelectionDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLCommentsCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLContentMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -494,6 +506,10 @@ SOURCE=..\ToDoList\TDLOffsetDatesDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLOleMessageFilter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLPasteTaskAttributesDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -817,6 +833,10 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCContentMgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\tdccustomattribdata.h
 # End Source File
 # Begin Source File
@@ -842,6 +862,10 @@ SOURCE=..\ToDoList\TDCEnumContainers.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCFilter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCFindFilterHelper.h
 # End Source File
 # Begin Source File
 
@@ -886,6 +910,10 @@ SOURCE=..\ToDoList\tdcreminder.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCSearchParamHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCShortcutManager.h
 # End Source File
 # Begin Source File
 
@@ -969,6 +997,10 @@ SOURCE=..\ToDoList\TDLAttributeComboBox.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLBrowserDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.h
 # End Source File
 # Begin Source File
@@ -990,10 +1022,6 @@ SOURCE=..\ToDoList\TDLColumnSelectionDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLCommentsCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLContentMgr.h
 # End Source File
 # Begin Source File
 
@@ -1118,6 +1146,10 @@ SOURCE=..\ToDoList\TDLOffsetDatesDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLOleMessageFilter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLPasteTaskAttributesDlg.h
 # End Source File
 # Begin Source File
 

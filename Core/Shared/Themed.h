@@ -38,7 +38,6 @@
 #	define ETDT_ENABLETAB      (ETDT_ENABLE  | ETDT_USETABTEXTURE)
 #endif // !ETDT_DISABLE
 
-
 //////////////////////////////////////////////////////////////////////
 
 #if (WINVER < 0x0500)

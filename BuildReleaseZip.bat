@@ -53,14 +53,21 @@ SET TDLFILELIST=%TDLFILELIST%;WorkloadExt.dll
 
 SET TDLFILELIST=%TDLFILELIST%;CommandHandling.dll
 SET TDLFILELIST=%TDLFILELIST%;RichEditExtensions.dll
+SET TDLFILELIST=%TDLFILELIST%;ImageHelper.dll
+SET TDLFILELIST=%TDLFILELIST%;ScrollHelper.dll
+SET TDLFILELIST=%TDLFILELIST%;TreeViewHelper.dll
 SET TDLFILELIST=%TDLFILELIST%;WebBrowserEx.dll
 
 SET TDLFILELIST=%TDLFILELIST%;DayViewUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;DayViewUIExtensionCore.dll
+SET TDLFILELIST=%TDLFILELIST%;EvidenceBoardUIExtensionBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;EvidenceBoardUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterCore.dll
+SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;MDContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterBridge.dll
@@ -95,21 +102,24 @@ FOR %%f IN (%TDLFILELIST%) DO (
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\%%f
 )
 
-REM - All other components
+REM - All other components which we don't own
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\BouncyCastle.Crypto.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\CustomComboBox.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Markdig.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\RadialTree.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
@@ -133,7 +143,8 @@ REM - Zip Resources
 REM - Copy the zip file to the download folder
 copy %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
 
-REM - And then move it to ToDoList_Prev\8.2
-move %OUTZIP% %REPO%\..\ToDoList_Prev\8.2\ToDoList_exe.8.2._.zip
+REM - And then move it to ToDoList_Prev\9.0
+MKDIR %REPO%\..\ToDoList_Prev\9.0
+move %OUTZIP% %REPO%\..\ToDoList_Prev\9.0\ToDoList_exe.9.0._.zip
 
 popd

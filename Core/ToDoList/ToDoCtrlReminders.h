@@ -31,6 +31,7 @@ public:
 
 	BOOL Initialize(CWnd* pNotify);
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
+	void EnableReducedFlashing(BOOL bEnable) { m_bReduceFlashing = bEnable; }
 
 	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
@@ -48,12 +49,13 @@ public:
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	void CheckReminders();
-	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
+	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday);
 
 // Attributes
 protected:
 	CWnd* m_pWndNotify;
 	CArray<TDCREMINDER, TDCREMINDER&> m_aReminders;
+	BOOL m_bReduceFlashing;
 	BOOL m_bUseStickies, m_bShowFullTaskPathInSticky;
 	CString m_sStickiesPath;
 	CStickiesWnd m_stickies;
@@ -107,7 +109,7 @@ protected:
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 
-	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday);
+	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday, BOOL bPreserveWeekday);
 };
 
 /////////////////////////////////////////////////////////////////////////////

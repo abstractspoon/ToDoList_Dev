@@ -43,17 +43,19 @@ public:
 	BOOL CanSaveToImage() const;
 	
 	BOOL CancelDrag();
-	DWORD HitTestTask(const CPoint& ptClient) const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
 	BOOL EnsureSelectionVisible();
+
+	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
 
 	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	BOOL GetSelectedTaskCustomDate(const CString& sCustAttribID, COleDateTime& date) const;
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
+	DWORD GetSelectedTaskID() const;
 
 	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
@@ -61,6 +63,7 @@ public:
 	void SetOptions(DWORD dwOption);
 	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
+	void SetHideParentTasks(BOOL bHide, const CString& sTag);
 
 	void SetAlternateWeekColor(COLORREF crAltWeek);
 	void SetGridLineColor(COLORREF crGrid);
@@ -104,24 +107,13 @@ protected:
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
-	TCC_MONTHSTYLE m_nCellHeaderMonthStyle;
+	CString m_sCellDateFormat, m_sCellDateWeekNumFormat;
 	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
 	TCC_SNAPMODE m_nDefSnapMode;
+	CString m_sHideParentTag;
+	int m_nMaxDayTaskCount;
 
-	struct CONTINUOUSDRAWINFO
-	{
-		CONTINUOUSDRAWINFO(DWORD dwID = 0);
-
-		void Reset();
-
-		DWORD dwTaskID;
-		int nIconOffset;
-		int nTextOffset;
-		int nVertPos;
-	};
-	
-	mutable CArray<CONTINUOUSDRAWINFO, CONTINUOUSDRAWINFO&> m_aContinuousDrawInfo;
-	mutable int m_nMaxDayTaskCount;
+	mutable CCalContinuousDrawInfo m_ContinuousDrawInfo;
 
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
@@ -146,6 +138,8 @@ protected:
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
 	DECLARE_MESSAGE_MAP()
 	
@@ -177,6 +171,8 @@ protected:
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
 	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const;
+	BOOL IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) const;
+
 	TCC_SNAPMODE GetSnapMode() const;
 
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const;
@@ -190,9 +186,10 @@ protected:
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
-	TCC_MONTHSTYLE CalcCellHeaderMonthStyle(CDC* pDC, CFont* pBoldFont) const;
+	void RecalcCellHeaderDateFormats();
+	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const;
 
-	DWORD GetSelectedTaskID() const;
+	DWORD HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;
@@ -213,6 +210,7 @@ protected:
 	BOOL SelectGridCell(int nRow, int nCol);
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
+	BOOL ClearSelectedCustomDate();
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;

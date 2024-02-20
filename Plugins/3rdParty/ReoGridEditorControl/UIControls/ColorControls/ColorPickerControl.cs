@@ -49,7 +49,7 @@ namespace unvell.UIControls
 			set { CurrentColor = new SolidColor(value); }
 		}
 
-		private ColorPickerWindow dropPanel = new ColorPickerWindow();
+		private ColorPickerWindow dropPanel = new ColorPickerWindow(SystemColors.Control);
 
 		private static readonly StringFormat sf = new StringFormat();
 

@@ -49,6 +49,7 @@ void CPreferencesTaskCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_NODUEDATEDUETODAY, m_bNoDueDateDueTodayOrStart);
 	DDX_Check(pDX, IDC_SETSTATUSONDONE, m_bSetCompletionStatus);
 	DDX_Check(pDX, IDC_SYNCCOMPLETIONTOSTATUS, m_bSyncCompletionToStatus);
+	DDX_Check(pDX, IDC_PRESERVEWEEKDAYS, m_bPreserveWeekdays);
 	DDX_Text(pDX, IDC_DONESTATUS, m_sCompletionStatus);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SUBTASKSINHERITLOCK, m_bSubtasksInheritLockStatus);
@@ -72,7 +73,6 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskCalcPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SETSTATUSONDONE, OnSetStatusOnDone)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_AVERAGEPERCENTSUBCOMPLETION, OnAveragepercentChange)
-	ON_EN_CHANGE(IDC_DONESTATUS, OnChangeCompletionStatus)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ void CPreferencesTaskCalcPage::OnFirstShow()
 	GetDlgItem(IDC_INCLUDEDONEINPRIORITYCALC)->EnableWindow(m_bUseHighestPriority);
 	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
 
-	OnChangeCompletionStatus();
+	m_mgrPrompts.SetEditPrompt(IDC_DONESTATUS, *this, CEnString(IDS_TDC_NONE));
 }
 
 void CPreferencesTaskCalcPage::OnAveragepercentChange() 
@@ -161,10 +161,11 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_nCalcStartDate = (PTCP_CALCSTARTDATE)pPrefs->GetProfileInt(szKey, _T("CalcStartDate"), PTCP_NOCALCSTARTDATE);
 	m_bSetCompletionStatus = pPrefs->GetProfileInt(szKey, _T("SetCompletionStatus"), FALSE);
 	m_bSyncCompletionToStatus = pPrefs->GetProfileInt(szKey, _T("SyncCompletionToStatus"), TRUE);
-	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), CEnString(_T("Completed")));
+	m_sCompletionStatus = pPrefs->GetProfileString(szKey, _T("CompletionStatus"), CEnString(IDS_TDC_COLUMN_DONEDATE));
 	m_bSubtasksInheritLockStatus = pPrefs->GetProfileInt(szKey, _T("SubtasksInheritLockStatus"), FALSE);
 	m_bTaskInheritsSubtaskFlags = pPrefs->GetProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), FALSE);
 	m_bUseLatestLastModifiedDate = pPrefs->GetProfileInt(szKey, _T("UseLatestLastModifiedDate"), FALSE);
+	m_bPreserveWeekdays = pPrefs->GetProfileInt(szKey, _T("PreserveWeekdays"), TRUE);
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
@@ -207,6 +208,7 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("SubtasksInheritLockStatus"), m_bSubtasksInheritLockStatus);
 	pPrefs->WriteProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), m_bTaskInheritsSubtaskFlags);
 	pPrefs->WriteProfileInt(szKey, _T("UseLatestLastModifiedDate"), m_bUseLatestLastModifiedDate);
+	pPrefs->WriteProfileInt(szKey, _T("PreserveWeekdays"), m_bPreserveWeekdays);
 
 	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_recentModTime.dAmount);
 	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_recentModTime.GetTHUnits());
@@ -229,30 +231,17 @@ COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const
 void CPreferencesTaskCalcPage::OnSetStatusOnDone() 
 {
 	UpdateData();
-	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
 
-	OnChangeCompletionStatus();
+	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
+	GetDlgItem(IDC_SYNCCOMPLETIONTOSTATUS)->EnableWindow(m_bSetCompletionStatus);
 }
 
 BOOL CPreferencesTaskCalcPage::GetCompletionStatus(CString& sStatus) const
 {
-	if (m_bSetCompletionStatus)
+	if (!m_bSetCompletionStatus)
+		sStatus.Empty();
+	else
 		sStatus = m_sCompletionStatus;
 
-	Misc::Trim(sStatus);
-	return !sStatus.IsEmpty();
-}
-
-void CPreferencesTaskCalcPage::OnChangeCompletionStatus()
-{
-	UpdateData();
-
-	CString sStatus;
-	GetDlgItem(IDC_SYNCCOMPLETIONTOSTATUS)->EnableWindow(GetCompletionStatus(sStatus));
-}
-
-BOOL CPreferencesTaskCalcPage::GetSyncCompletionToStatus() const
-{
-	CString sStatus;
-	return (GetCompletionStatus(sStatus) && m_bSyncCompletionToStatus);
+	return m_bSetCompletionStatus;
 }

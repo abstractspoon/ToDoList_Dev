@@ -53,9 +53,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labColor = new System.Windows.Forms.Label();
 			this.borderColorSelector = new unvell.UIControls.ColorComboBox();
 			this.borderStyleList = new unvell.ReoGrid.PropertyPages.BorderStyleListControl();
-			this.formLineBorder = new unvell.UIControls.FormLine();
 			this.borderSetter = new unvell.ReoGrid.PropertyPages.BorderSetterControl();
-			this.formLinePresets = new unvell.UIControls.FormLine();
 			this.btnBackslash = new System.Windows.Forms.Button();
 			this.btnRight = new System.Windows.Forms.Button();
 			this.btnCenter = new System.Windows.Forms.Button();
@@ -67,7 +65,10 @@ namespace unvell.ReoGrid.PropertyPages
 			this.btnInside = new System.Windows.Forms.Button();
 			this.btnOutline = new System.Windows.Forms.Button();
 			this.btnNone = new System.Windows.Forms.Button();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.grpLine.SuspendLayout();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// grpLine
@@ -76,37 +77,40 @@ namespace unvell.ReoGrid.PropertyPages
 			this.grpLine.Controls.Add(this.labColor);
 			this.grpLine.Controls.Add(this.borderColorSelector);
 			this.grpLine.Controls.Add(this.borderStyleList);
+			this.grpLine.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.grpLine.Location = new System.Drawing.Point(16, 13);
 			this.grpLine.Name = "grpLine";
-			this.grpLine.Size = new System.Drawing.Size(173, 260);
+			this.grpLine.Size = new System.Drawing.Size(173, 274);
 			this.grpLine.TabIndex = 1;
 			this.grpLine.TabStop = false;
-			this.grpLine.Text = "Line:";
+			this.grpLine.Text = "Line Attributes";
 			// 
 			// labStyle
 			// 
 			this.labStyle.AutoSize = true;
+			this.labStyle.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labStyle.Location = new System.Drawing.Point(13, 27);
 			this.labStyle.Name = "labStyle";
 			this.labStyle.Size = new System.Drawing.Size(33, 13);
 			this.labStyle.TabIndex = 3;
-			this.labStyle.Text = "Style:";
+			this.labStyle.Text = "Style";
 			// 
 			// labColor
 			// 
 			this.labColor.AutoSize = true;
-			this.labColor.Location = new System.Drawing.Point(13, 189);
+			this.labColor.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.labColor.Location = new System.Drawing.Point(13, 218);
 			this.labColor.Name = "labColor";
 			this.labColor.Size = new System.Drawing.Size(34, 13);
 			this.labColor.TabIndex = 2;
-			this.labColor.Text = "Color:";
+			this.labColor.Text = "Colour";
 			// 
 			// borderColorSelector
 			// 
 			this.borderColorSelector.BackColor = System.Drawing.SystemColors.Window;
 			this.borderColorSelector.CloseOnClick = true;
 			this.borderColorSelector.dropdown = false;
-			this.borderColorSelector.Location = new System.Drawing.Point(16, 204);
+			this.borderColorSelector.Location = new System.Drawing.Point(16, 233);
 			this.borderColorSelector.Name = "borderColorSelector";
 			this.borderColorSelector.Size = new System.Drawing.Size(137, 23);
 			this.borderColorSelector.SolidColor = System.Drawing.Color.Black;
@@ -116,26 +120,13 @@ namespace unvell.ReoGrid.PropertyPages
 			// borderStyleList
 			// 
 			this.borderStyleList.BackColor = System.Drawing.SystemColors.Window;
-			this.borderStyleList.BorderColor = System.Drawing.Color.Black;
 			this.borderStyleList.BorderLineStyle = unvell.ReoGrid.BorderLineStyle.None;
 			this.borderStyleList.Location = new System.Drawing.Point(16, 47);
 			this.borderStyleList.Name = "borderStyleList";
 			this.borderStyleList.SelectedBorderStyle = unvell.ReoGrid.BorderLineStyle.Solid;
-			this.borderStyleList.Size = new System.Drawing.Size(137, 120);
+			this.borderStyleList.Size = new System.Drawing.Size(137, 152);
 			this.borderStyleList.TabIndex = 0;
 			this.borderStyleList.Text = "borderStyleList1";
-			// 
-			// formLineBorder
-			// 
-			this.formLineBorder.BackColor = System.Drawing.Color.Transparent;
-			this.formLineBorder.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-			this.formLineBorder.Location = new System.Drawing.Point(195, 98);
-			this.formLineBorder.Name = "formLineBorder";
-			this.formLineBorder.Show3DLine = false;
-			this.formLineBorder.Size = new System.Drawing.Size(299, 23);
-			this.formLineBorder.TabIndex = 3;
-			this.formLineBorder.Text = "Border";
-			this.formLineBorder.TextPadding = 8;
 			// 
 			// borderSetter
 			// 
@@ -152,25 +143,15 @@ namespace unvell.ReoGrid.PropertyPages
 			this.borderSetter.TabIndex = 2;
 			this.borderSetter.Text = "borderSetterControl1";
 			// 
-			// formLinePresets
-			// 
-			this.formLinePresets.BackColor = System.Drawing.Color.Transparent;
-			this.formLinePresets.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-			this.formLinePresets.Location = new System.Drawing.Point(195, 13);
-			this.formLinePresets.Name = "formLinePresets";
-			this.formLinePresets.Show3DLine = false;
-			this.formLinePresets.Size = new System.Drawing.Size(299, 23);
-			this.formLinePresets.TabIndex = 3;
-			this.formLinePresets.Text = "Presets";
-			this.formLinePresets.TextPadding = 8;
-			// 
 			// btnBackslash
 			// 
+			this.btnBackslash.Enabled = false;
 			this.btnBackslash.Image = global::unvell.ReoGrid.Editor.Properties.Resources.slash_left_solid;
 			this.btnBackslash.Location = new System.Drawing.Point(441, 249);
 			this.btnBackslash.Name = "btnBackslash";
 			this.btnBackslash.Size = new System.Drawing.Size(26, 24);
 			this.btnBackslash.TabIndex = 14;
+			this.btnBackslash.Visible = false;
 			this.btnBackslash.UseVisualStyleBackColor = true;
 			this.btnBackslash.Click += new System.EventHandler(this.btnBackslash_Click);
 			// 
@@ -206,12 +187,14 @@ namespace unvell.ReoGrid.PropertyPages
 			// 
 			// btnSlash
 			// 
+			this.btnSlash.Enabled = false;
 			this.btnSlash.Image = global::unvell.ReoGrid.Editor.Properties.Resources.slash_right_solid;
 			this.btnSlash.Location = new System.Drawing.Point(212, 249);
 			this.btnSlash.Name = "btnSlash";
 			this.btnSlash.Size = new System.Drawing.Size(26, 24);
 			this.btnSlash.TabIndex = 10;
 			this.btnSlash.UseVisualStyleBackColor = true;
+			this.btnSlash.Visible = false;
 			this.btnSlash.Click += new System.EventHandler(this.btnSlash_Click);
 			// 
 			// btnBottom
@@ -247,7 +230,7 @@ namespace unvell.ReoGrid.PropertyPages
 			// btnInside
 			// 
 			this.btnInside.Image = global::unvell.ReoGrid.Editor.Properties.Resources.inside_solid_32;
-			this.btnInside.Location = new System.Drawing.Point(388, 42);
+			this.btnInside.Location = new System.Drawing.Point(141, 27);
 			this.btnInside.Name = "btnInside";
 			this.btnInside.Size = new System.Drawing.Size(42, 40);
 			this.btnInside.TabIndex = 6;
@@ -257,7 +240,7 @@ namespace unvell.ReoGrid.PropertyPages
 			// btnOutline
 			// 
 			this.btnOutline.Image = global::unvell.ReoGrid.Editor.Properties.Resources.outline_solid_32;
-			this.btnOutline.Location = new System.Drawing.Point(319, 42);
+			this.btnOutline.Location = new System.Drawing.Point(80, 27);
 			this.btnOutline.Name = "btnOutline";
 			this.btnOutline.Size = new System.Drawing.Size(45, 40);
 			this.btnOutline.TabIndex = 5;
@@ -267,12 +250,34 @@ namespace unvell.ReoGrid.PropertyPages
 			// btnNone
 			// 
 			this.btnNone.Image = global::unvell.ReoGrid.Editor.Properties.Resources.none_border_32;
-			this.btnNone.Location = new System.Drawing.Point(250, 42);
+			this.btnNone.Location = new System.Drawing.Point(18, 27);
 			this.btnNone.Name = "btnNone";
 			this.btnNone.Size = new System.Drawing.Size(45, 40);
 			this.btnNone.TabIndex = 4;
 			this.btnNone.UseVisualStyleBackColor = true;
 			this.btnNone.Click += new System.EventHandler(this.btnNone_Click);
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.btnNone);
+			this.groupBox1.Controls.Add(this.btnOutline);
+			this.groupBox1.Controls.Add(this.btnInside);
+			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.groupBox1.Location = new System.Drawing.Point(203, 13);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(282, 87);
+			this.groupBox1.TabIndex = 15;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Preset Styles";
+			// 
+			// groupBox2
+			// 
+			this.groupBox2.Location = new System.Drawing.Point(203, 115);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(282, 172);
+			this.groupBox2.TabIndex = 16;
+			this.groupBox2.TabStop = false;
+			this.groupBox2.Text = "Borders";
 			// 
 			// BorderPropertyPage
 			// 
@@ -286,17 +291,15 @@ namespace unvell.ReoGrid.PropertyPages
 			this.Controls.Add(this.btnBottom);
 			this.Controls.Add(this.btnMiddle);
 			this.Controls.Add(this.btnTop);
-			this.Controls.Add(this.btnInside);
-			this.Controls.Add(this.btnOutline);
-			this.Controls.Add(this.btnNone);
-			this.Controls.Add(this.formLinePresets);
-			this.Controls.Add(this.formLineBorder);
 			this.Controls.Add(this.borderSetter);
 			this.Controls.Add(this.grpLine);
+			this.Controls.Add(this.groupBox1);
+			this.Controls.Add(this.groupBox2);
 			this.Name = "BorderPropertyPage";
 			this.Size = new System.Drawing.Size(569, 366);
 			this.grpLine.ResumeLayout(false);
 			this.grpLine.PerformLayout();
+			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -309,8 +312,6 @@ namespace unvell.ReoGrid.PropertyPages
 		private System.Windows.Forms.Label labColor;
 		private System.Windows.Forms.Label labStyle;
 		private BorderSetterControl borderSetter;
-		private unvell.UIControls.FormLine formLineBorder;
-		private unvell.UIControls.FormLine formLinePresets;
 		private System.Windows.Forms.Button btnNone;
 		private System.Windows.Forms.Button btnOutline;
 		private System.Windows.Forms.Button btnInside;
@@ -322,5 +323,7 @@ namespace unvell.ReoGrid.PropertyPages
 		private System.Windows.Forms.Button btnCenter;
 		private System.Windows.Forms.Button btnRight;
 		private System.Windows.Forms.Button btnBackslash;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.GroupBox groupBox2;
 	}
 }

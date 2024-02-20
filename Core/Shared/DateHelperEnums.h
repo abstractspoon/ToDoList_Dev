@@ -61,7 +61,30 @@ enum DH_DAYOFWEEK // Days of week bit flags
 	DHW_FRIDAY		= 0X20,
 	DHW_SATURDAY	= 0X40,
 
-	DHW_EVERYDAY	= 0x7F
+	DHW_EVERYDAY	= 0x7F,
+	DHW_ALL			= 0x7F
+};
+
+enum DH_MONTH // Months of year bit flags
+			  // Start at 16 to be distinguishable 
+			  // from plain month indices (1-12)
+{
+	DHM_NONE		= 0X0000,
+
+	DHM_JANUARY		= 0X0010, 
+	DHM_FEBRUARY	= 0X0020,
+	DHM_MARCH		= 0X0040,
+	DHM_APRIL		= 0X0080,
+	DHM_MAY			= 0X0100,
+	DHM_JUNE		= 0X0200,
+	DHM_JULY		= 0X0400,
+	DHM_AUGUST		= 0X0800,
+	DHM_SEPTEMBER	= 0X1000,
+	DHM_OCTOBER		= 0X2000,
+	DHM_NOVEMBER	= 0X4000,
+	DHM_DECEMBER	= 0X8000,
+
+	DHM_ALL			= 0xFFF0
 };
 
 static DH_DAYOFWEEK DH_DAYSOFWEEK[7] =

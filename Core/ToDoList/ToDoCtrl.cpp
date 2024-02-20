@@ -22,6 +22,7 @@
 #include "ToDoCtrlDataDefines.h"
 #include "TDCDialogHelper.h"
 #include "TDCTaskCompletion.h"
+#include "tdccontentmgr.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -161,7 +162,7 @@ UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 
 //////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent, 
+CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent, 
 					 const CShortcutManager& mgrShortcuts, 
 					 const CONTENTFORMAT& cfDefault, 
 					 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
@@ -178,7 +179,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
-	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
+	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
@@ -212,25 +213,38 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
-	m_taskTree(m_ilTaskIcons, m_data, m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs),
-	m_exporter(m_data, m_taskTree, m_mgrContent),
-	m_formatter(m_data),
-	m_infoTip(m_data, m_aCustomAttribDefs),
+	m_exporter(m_data, m_taskTree, mgrContent),
+	m_formatter(m_data, mgrContent),
+	m_infoTip(m_data, m_aCustomAttribDefs, mgrContent),
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders),
-	m_bPendingUpdateControls(FALSE)
+	m_matcher(m_data, m_reminders, mgrContent),
+	m_bPendingUpdateControls(FALSE),
+	m_taskTree(m_ilTaskIcons, 
+			   m_data, 
+			   m_styles, 
+			   m_tldAll, 
+			   m_visColEdit.GetVisibleColumns(), 
+			   m_aCustomAttribDefs,
+			   mgrContent)
 {
 	SetBordersDLU(0);
 	
-	// add controls
+	// HACK
+	//
+	// I don't yet understand the mechanism of this, but when Dark Mode
+	// hooks some controls ahead of MFC's subclassing, the subsequent
+	// unsubclassing by MFC causes an assert in WinCore.cpp because the
+	// HWND has not been detached by the time the destructor is called.
+	//
+	// To avoid this we create the controls hidden to delay the Dark Mode hooking.
 	for (int nCtrl = 0; nCtrl < NUM_TDCCTRLS; nCtrl++)
 	{
 		const TDCCONTROL& ctrl = TDCCONTROLS[nCtrl];
 
 		AddRCControl(_T("CONTROL"), ctrl.szClass, CString((LPCTSTR)ctrl.nIDCaption), 
-					ctrl.dwStyle, ctrl.dwExStyle,
+					(ctrl.dwStyle | WS_NOTVISIBLE), ctrl.dwExStyle,
 					ctrl.nX, ctrl.nY, ctrl.nCx, ctrl.nCy, ctrl.nID);
 	}
 	
@@ -321,31 +335,25 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
-void CToDoCtrl::UpdateComments(BOOL bSaveAndValidate)
+void CToDoCtrl::UpdateComments(const CString& sTextComments, const CBinaryData& customComments)
 {
-	if (bSaveAndValidate)
+	int nSelCount = GetSelectedTaskCount();
+
+	if (sTextComments.IsEmpty() && (nSelCount > 1))
 	{
-		m_ctrlComments.GetContent(m_sTextComments, m_customComments);
+		m_ctrlComments.ClearContent();
 	}
 	else
 	{
-		int nSelCount = GetSelectedTaskCount();
-
-		if (m_sTextComments.IsEmpty() && (nSelCount > 1))
-		{
-			m_ctrlComments.ClearContent();
-		}
-		else
-		{
-			BOOL bCommentsFocused = m_ctrlComments.HasFocus();
-			m_ctrlComments.SetContent(m_sTextComments, m_customComments, !bCommentsFocused);
-		}
-
-		CEnString sComboPrompt((nSelCount > 1) ? IDS_TDC_EDITPROMPT_MULTIPLEFORMATS : IDS_TDC_EDITPROMPT_UNKNOWNFORMAT);
-		CEnString sCommentsPrompt((nSelCount > 1) ? IDS_TDC_EDITPROMPT_MULTIPLETASKS : IDS_TDC_EDITPROMPT_COMMENTS);
-
-		m_ctrlComments.SetWindowPrompts(sComboPrompt, sCommentsPrompt);
+		BOOL bCommentsFocused = m_ctrlComments.HasFocus();
+		
+		m_ctrlComments.SetContent(sTextComments, customComments, !bCommentsFocused);
 	}
+
+	CEnString sComboPrompt((nSelCount > 1) ? IDS_TDC_EDITPROMPT_MULTIPLEFORMATS : IDS_TDC_EDITPROMPT_UNKNOWNFORMAT);
+	CEnString sCommentsPrompt((nSelCount > 1) ? IDS_TDC_EDITPROMPT_MULTIPLETASKS : IDS_TDC_EDITPROMPT_COMMENTS);
+
+	m_ctrlComments.SetWindowPrompts(sComboPrompt, sCommentsPrompt);
 }
 
 BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
@@ -731,11 +739,15 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 		ASSERT(nPointSize > 0);
 #endif
 
-		m_ctrlComments.SetContentFont(m_hFontComments);
-
 		// we've had some trouble with plugins using the richedit control 
 		// so after a font change we always resend the content
-		m_ctrlComments.SetContent(m_sTextComments, m_customComments, FALSE);
+		CString sTextComments;
+		CBinaryData customComments;
+		m_ctrlComments.GetContent(sTextComments, customComments);
+
+		m_ctrlComments.SetContentFont(m_hFontComments);
+
+		m_ctrlComments.SetContent(sTextComments, customComments, FALSE);
 
 		return TRUE;
 	}
@@ -751,7 +763,8 @@ void CToDoCtrl::ResizeAttributeColumnsToFit()
 
 void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 {
-	HandleUnsavedComments();
+	if (!HandleUnsavedComments())
+		return;
 
 	if (m_nMaxState != nState)
 	{
@@ -791,6 +804,7 @@ void CToDoCtrl::OnSize(UINT nType, int cx, int cy)
 	
 	EndLabelEdit(TRUE);
 	Resize(cx, cy);
+	UpdateWindow();
 }
 
 void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
@@ -836,7 +850,6 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 			ReposTaskTree(&dwm, rAvailable);
 		}
 
-		UpdateWindow();
 		UpdateSelectedTaskPath();
 	}
 }
@@ -1679,27 +1692,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 	}
 
 	// comments
-	CONTENTFORMAT cfComments;
-	GetSelectedTaskCustomComments(cfComments);
-	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
-	
-	BOOL bCommentsVis = IsCommentsVisible();
-	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
-	
-	if (!bCommentsVis || !hti)
-	{
-		nComboState = nCommentsState = RTCS_DISABLED;
-	}
-	else if (bReadOnlyCtrls)
-	{
-		nComboState = nCommentsState = RTCS_READONLY;
-	}
-	else if (!bEditComments)
-	{
-		nCommentsState = RTCS_READONLY;
-	}
-
-	m_ctrlComments.SetCtrlStates(nComboState, nCommentsState);
+	EnableDisableComments(hti);
 
 	// project name
 	BOOL bShowProjectName = (!bMaximized && HasStyle(TDCS_SHOWPROJECTNAME));
@@ -1709,6 +1702,31 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 
 	RT_CTRLSTATE nLabelState = (CThemed::IsAppThemed() ? RTCS_ENABLED : RTCS_DISABLED);
 	SetCtrlState(this, IDC_PROJECTLABEL, nCtrlState);
+}
+
+void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
+{
+	CONTENTFORMAT cfComments;
+	GetSelectedTaskCustomComments(cfComments);
+	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
+
+	BOOL bCommentsVis = IsCommentsVisible();
+	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
+
+	if (!bCommentsVis || !hti)
+	{
+		nComboState = nCommentsState = RTCS_DISABLED;
+	}
+	else if ((IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE)))
+	{
+		nComboState = nCommentsState = RTCS_READONLY;
+	}
+	else if (!bEditComments)
+	{
+		nCommentsState = RTCS_READONLY;
+	}
+
+	m_ctrlComments.SetCtrlStates(nComboState, nCommentsState);
 }
 
 int CToDoCtrl::CalcMaxCommentSize() const
@@ -1778,8 +1796,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
 	int nSelCount = GetSelectedTaskCount();
-	CONTENTFORMAT cfComments;
-	
+
 	if (hti)
 	{
 		DWORD dwTaskID = GetTrueTaskID(hti); 
@@ -1801,12 +1818,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		if (m_crColour == 0)
 			m_crColour = CLR_DEFAULT;
-
-		if (bIncComments)
-		{
-			m_sTextComments = GetSelectedTaskComments();
-			m_customComments = GetSelectedTaskCustomComments(cfComments);
-		}
 		
 		CStringArray aMatched, aMixed;
 		
@@ -1883,8 +1894,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_tRecurrence = TDCRECURRENCE();
 		m_crColour = CLR_DEFAULT;
 
-		m_sTextComments.Empty();
-		m_customComments.Empty();
 		m_sAllocBy.Empty();
 		m_sStatus.Empty();
 		m_sExternalID.Empty();
@@ -1902,10 +1911,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, FALSE);
 
 		m_mapCustomCtrlData.RemoveAll();
-
-		// Keep whatever the current comments contents type is
-		if (bIncComments)
-			m_ctrlComments.GetSelectedFormat(cfComments);
 	}
 
 	UpdateDateTimeControls(hti != NULL);
@@ -1913,10 +1918,31 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	// update data controls excluding comments
 	UpdateData(FALSE);
 
+	// and task header
+	UpdateSelectedTaskPath();
+	
+	// Do the control enabling before updating the comments
+	// to prevent unwanted intermediate comments states
+	EnableDisableControls(hti);
+
+	// Finally update comments
 	if (bIncComments)
 	{
 		ASSERT(!m_ctrlComments.IsUpdatingFormat());
 
+		// We need to take care to avoid unnecessary copying 
+		// of a task's comments which can be huge
+		static CString sEmptyComments;
+		static CBinaryData emptyComments;
+
+		CONTENTFORMAT cfPrev;
+		m_ctrlComments.GetSelectedFormat(cfPrev);
+
+		CONTENTFORMAT cfComments;
+		const CBinaryData& customComments = (hti ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
+		
+		CString sTextComments = (hti ? m_taskTree.GetSelectedTaskComments() : sEmptyComments);
+		
 		// if more than one comments type is selected then sCommentsType
 		// will be empty which will put the comments type combo in an
 		// indeterminate state which is the desired effect since this requires
@@ -1932,16 +1958,17 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			ASSERT(!m_ctrlComments.IsUpdatingFormat());
 
 			m_bPendingUpdateControls = FALSE;
-			UpdateControls(TRUE);
+			UpdateControls();
 		}
 		
-		UpdateComments(FALSE);
-	}
+		UpdateComments(sTextComments, customComments);
 
-	// and task header
-	UpdateSelectedTaskPath();
-	
-	EnableDisableControls(hti);
+		// Update the enable state again if the comments 
+		// format changed because the new control will have 
+		// been created enabled and we may not want that
+		if (m_cfComments.IsEmpty() && (m_cfComments != cfPrev))
+			EnableDisableComments(hti);
+	}
 }
 
 void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
@@ -2616,7 +2643,7 @@ void CToDoCtrl::NewList()
 	m_sPassword.Empty();
 	
 	UpdateData(FALSE);
-	UpdateComments(FALSE);
+	UpdateComments(CString(), CBinaryData());
 }
 
 BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
@@ -2652,9 +2679,10 @@ BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
 		}
 
 		SetModified(TDCA_COLOR, aModTaskIDs);
+		return TRUE;
 	}
 	
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::EditSelectedTaskIcon()
@@ -2725,7 +2753,7 @@ BOOL CToDoCtrl::CanPasteText() const
 
 	// Special case
 	if (nAttribID == TDCA_COMMENTS)
-		return m_ctrlComments.HasFocus();
+		return CommentsHaveFocus();
 
 	return FALSE;
 }
@@ -2822,10 +2850,8 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 		// note: we don't use SetTextChange because that doesn't handle custom comments
 		if (!bInternal && (TSH().GetCount() == 1))
 		{
-			m_sTextComments = GetSelectedTaskComments();
-			m_customComments = GetSelectedTaskCustomComments(m_cfComments);
-
-			UpdateComments(FALSE);
+			UpdateComments(GetSelectedTaskComments(), 
+						   GetSelectedTaskCustomComments(m_cfComments));
 		}
 
 		TSH().InvalidateAll();
@@ -3167,7 +3193,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
+									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3190,10 +3217,6 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
 
-	DWORD dwFlags = 0;
-	Misc::SetFlag(dwFlags, TDCOTD_OFFSETFROMTODAY, bFromToday);
-	Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKS, bAndSubtasks);
-	
 	while (pos)
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
@@ -3201,7 +3224,15 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		if (!HandleModResult(dwTaskID, m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags), aModTaskIDs))
+		TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID, 
+											 nDate, 
+											 nAmount, 
+											 nUnits, 
+											 bAndSubtasks, 
+											 bFromToday,
+											 bPreserveWeekday);
+
+		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
 			return FALSE;
 
 		mapProcessed.Add(dwTaskID);
@@ -3247,9 +3278,10 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, 
+												   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
 {
-	if (!CanEditSelectedTask(TDCA_STARTDATE))
+	if (!CanOffsetSelectedTaskStartAndDueDates())
 		return FALSE;
 	
 	Flush();
@@ -3271,8 +3303,15 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 	while (pos)
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
+		TDC_SET nRes = OffsetTaskStartAndDueDates(dwTaskID, 
+												  nAmount, 
+												  nUnits, 
+												  bAndSubtasks, 
+												  bFromToday, 
+												  bPreserveWeekday,
+												  mapProcessed);
 
-		if (!HandleModResult(dwTaskID, OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, bAndSubtasks, bFromToday, mapProcessed), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
 			return FALSE;
 	}
 	
@@ -3289,9 +3328,11 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 	return TRUE;
 }
 
-TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
+TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
+											  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekdays, CDWordSet& mapProcessed)
 {
 	ASSERT(CanEditSelectedTask(TDCA_STARTDATE));
+	ASSERT(!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
 
 	if (mapProcessed.Has(dwTaskID))
 		return SET_NOCHANGE;
@@ -3309,27 +3350,41 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	// Handle subtasks at the end
-	DWORD dwFlags = (bFromToday ? TDCOTD_OFFSETFROMTODAY : 0);
-
-	// Fallback if either start or due date is not set
-	if (!pTDI->HasStart())
+	if ((pTDI->HasStart() && pTDI->HasDue()) || bFromToday)
 	{
-		if (pTDI->HasDue())
-			nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
+		// Offset as a block
+		nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, 
+												 nAmount, 
+												 nUnits, 
+												 FALSE, // Handle subtasks at the end
+												 bFromToday,
+												 bPreserveWeekdays);
 	}
-	else if (!pTDI->HasDue())
+	else if (pTDI->HasStart())
 	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
+		nRes = m_data.OffsetTaskDate(dwTaskID, 
+									 TDCD_START, 
+									 nAmount, 
+									 nUnits, 
+									 FALSE, // Handle subtasks at the end
+									 bFromToday,
+									 bPreserveWeekdays);
 	}
-	else // else both are set
+	else if (pTDI->HasDue())
 	{
-		COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
-		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
-
-		nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
+		nRes = m_data.OffsetTaskDate(dwTaskID, 
+									 TDCD_DUE, 
+									 nAmount, 
+									 nUnits, 
+									 FALSE, // Handle subtasks at the end
+									 bFromToday,
+									 bPreserveWeekdays);
 	}
-	ASSERT(nRes != SET_FAILED);
+	else
+	{
+		ASSERT(0);
+	}
+	ASSERT((nRes != SET_FAILED) || !bFromToday);
 
 	mapProcessed.Add(dwTaskID);
 
@@ -3344,8 +3399,15 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 			{
 				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
+				TDC_SET nChildRes = OffsetTaskStartAndDueDates(dwChildID, 
+															   nAmount, 
+															   nUnits, 
+															   TRUE, // Include subtasks
+															   bFromToday, 
+															   bPreserveWeekdays,
+															   mapProcessed); // RECURSIVE CALL
 
-				if (SET_CHANGE == OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, bFromToday, mapProcessed)) // RECURSIVE CALL
+				if (nChildRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}
@@ -3425,7 +3487,9 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		}
 	}
 
-	bAndSubtasks = CheckWantTaskSubtasksCompleted(aToDoIDs);
+	bAndSubtasks = (!m_data.WantUpdateInheritedAttibute(TDCA_DONEDATE) &&
+					CheckWantTaskSubtasksCompleted(aToDoIDs));
+
 	return TRUE;
 }
 
@@ -3807,10 +3871,7 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 
 	if (!m_data.GetTaskRecurrence(dwNewTaskID, tr) || !tr.bPreserveComments)
 	{
-		m_sTextComments.Empty();
-		m_customComments.Empty();
-
-		UpdateComments(FALSE);
+		UpdateComments(CString(), CBinaryData());
 	}
 }
 
@@ -5217,7 +5278,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	if (dwNextID)
 		SelectTask(dwNextID, FALSE);
 	else
-		UpdateControls(FALSE); // don't update comments
+		UpdateControls(); // update comments
 
 	// restore focus
 	if (!focus.RestoreFocus())
@@ -5432,6 +5493,14 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
+		// Revert selection to previous task and if that fails then next task
+		if (!m_taskTree.RestorePreviousSelection(FALSE) &&
+			!GotoNextTask(TDCG_PREV) &&
+			!GotoNextTask(TDCG_NEXT))
+		{
+			TSH().RemoveAll();
+		}
+
 		UndoLastAction(TRUE);
 		m_data.ClearRedoStack(); // Not undoable
 	}
@@ -5561,6 +5630,14 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		// handled solely by tree-list
 		break;
 
+	case TDCS_SHOWFILELINKTHUMBNAILS:
+		{
+			m_cbFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, bEnable);
+			
+			CTDCCustomAttributeUIHelper::EnableFilelinkThumbnails(m_aCustomControls, this, bEnable);
+		}
+		break;
+
 	case TDCS_SHOWINFOTIPS:
 		if (bEnable)
 		{
@@ -5660,6 +5737,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_AUTOADJUSTDEPENDENCYDATES:
 	case TDCS_TRACKSELECTEDTASKONLY:
 	case TDCS_COMMENTSUSETREEFONT:
+	case TDCS_PRESERVEWEEKDAYS:
 		// do nothing
 		break;
 
@@ -5686,7 +5764,7 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 	{
 		CWnd::ClientToScreen(&point);
 
-		DWORD dwTaskID = HitTestTask(point, TRUE);
+		DWORD dwTaskID = HitTestTask(point, TDCHTR_INFOTIP);
 
 		if (dwTaskID)
 		{
@@ -5782,7 +5860,7 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 		m_sCompletionStatus = sStatus; 
 		m_taskTree.SetCompletionStatus(sStatus);
 
-		if (m_sCompletionStatus)
+		if (!m_sCompletionStatus.IsEmpty())
 		{
 			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
 			UpdateAutoListData(TDCA_STATUS);
@@ -5811,7 +5889,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 {
 	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIBDEFS));
 
-	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, FALSE))
+	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, TRUE))
 	{
 		m_aCustomAttribDefs.Copy(aAttrib);
 
@@ -5827,6 +5905,14 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 
 	// else
 	return FALSE;
+}
+
+void CToDoCtrl::NotifyEndPreferencesUpdate() 
+{ 
+	Invalidate(); 
+
+	// Update active comments
+	m_ctrlComments.UpdateAppPreferences();
 }
 
 void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
@@ -6133,11 +6219,12 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
-	// and add fields after the 'version' control
+	// Add fields after the 'version' control
 	CTDCCustomAttributeUIHelper::RebuildEditControls(this,
 													 m_aCustomAttribDefs,
 													 m_ilTaskIcons,
 													 IDC_VERSION,
+													 HasStyle(TDCS_SHOWFILELINKTHUMBNAILS),
 													 m_aCustomControls);
 
 	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
@@ -6251,13 +6338,13 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 }
 
 // thin wrapper
-TDC_FILE CToDoCtrl::Load(const CString& sFilePath)
+TDC_FILE CToDoCtrl::Load(const CString& sFilePath, LPCTSTR szDefaultPassword)
 {
 	CTaskFile file;
-	return Load(sFilePath, file);
+	return Load(sFilePath, file, szDefaultPassword);
 }
 
-TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
+TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCTSTR szDefaultPassword)
 {
 	ASSERT (GetSafeHwnd());
 	
@@ -6299,6 +6386,9 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			// Clear flag if check-out failed
 			bWantCheckout = (m_sourceControl.CheckOut(tasks, CString(), FALSE, sFilePath) == TDCF_SUCCESS);
 		}
+
+		if (m_sPassword.IsEmpty())
+			m_sPassword = szDefaultPassword;
 
 		if (tasks.Decrypt(m_sPassword))
 		{
@@ -7042,7 +7132,15 @@ LRESULT CToDoCtrl::OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam)
 
 LRESULT CToDoCtrl::OnCommentsKillFocus(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	HandleUnsavedComments();
+	TDCSELECTIONCACHE cache;
+	CacheTreeSelection(cache, FALSE);
+
+	if (!HandleUnsavedComments())
+	{
+		m_ctrlComments.SetFocus();
+		RestoreTreeSelection(cache);
+	}
+
 	return 0L;
 }
 
@@ -7859,14 +7957,14 @@ void CToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CRuntimeDlg::OnContextMenu(pWnd, point);
 }
 
-TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen) const
+TDC_HITTEST CToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON /*nReason*/) const
 {
 	return m_taskTree.HitTest(ptScreen);
 }
 
-DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
+DWORD CToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	return m_taskTree.HitTestTask(ptScreen, bTitleColumnOnly);
+	return m_taskTree.HitTestTask(ptScreen, (nReason == TDCHTR_INFOTIP));
 }
 
 TDC_COLUMN CToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
@@ -8565,7 +8663,6 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
-
 	
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
@@ -8902,12 +8999,17 @@ LRESULT CToDoCtrl::OnGetFont(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return (LRESULT)::SendMessage(::GetParent(*this), WM_GETFONT, 0, 0);
 }
 
+void CToDoCtrl::NotifyParentSelectionChange() const
+{
+	GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+}
+
 void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
 	UpdateControls(); 
-	GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+	NotifyParentSelectionChange();
 	
 	// There's a very subtle bug on Windows 8.1 and above:
 	// The auto-spell checking of the comments fields sends
@@ -8965,15 +9067,14 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 			UpdateControls(); // disable controls
 
 		UpdateSelectedTaskPath();
-
-		// notify parent
-		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+		NotifyParentSelectionChange();
 	}
 }
 
 void CToDoCtrl::SelectAll() 
 { 
-	HandleUnsavedComments();
+	if (!HandleUnsavedComments())
+		return;
 
 	if (m_taskTree.SelectAll())
 	{
@@ -9067,19 +9168,34 @@ int CToDoCtrl::GetAllTasks(CTaskFile& tasks) const
 	return m_exporter.ExportAllTasks(tasks);
 }
 
-void CToDoCtrl::HandleUnsavedComments()
+BOOL CToDoCtrl::HandleUnsavedComments()
 {
 	if (m_nCommentsState == CS_PENDING)
 	{
-		UpdateComments(TRUE); // no longer handled by UpdateData
-		SetSelectedTaskComments(m_sTextComments, m_customComments, TRUE); // TRUE == internal call
+		CString sTextComments;
+		CBinaryData customComments;
+		
+		if (m_ctrlComments.GetContent(sTextComments, customComments) == -1)
+		{
+			// Notify user
+			AfxMessageBox(IDS_COMMENTSMEMORYERROR, MB_ICONERROR | MB_OK);
+			return FALSE;
+		}
+
+		// else
+		SetSelectedTaskComments(sTextComments, customComments, TRUE); // TRUE == internal call
 
 		m_nCommentsState = CS_CHANGED;
 
 		// Update sort if required
-		if (m_visColEdit.IsColumnVisible(TDCC_COMMENTSSIZE) && IsSortingBy(TDCC_COMMENTSSIZE))
+		if ((m_visColEdit.IsColumnVisible(TDCC_COMMENTSSIZE) && IsSortingBy(TDCC_COMMENTSSIZE)) ||
+			(m_visColEdit.IsColumnVisible(TDCC_COMMENTSFORMAT) && IsSortingBy(TDCC_COMMENTSFORMAT)))
+		{
 			Resort();
+		}
 	}
+
+	return TRUE;
 }
 
 HTREEITEM CToDoCtrl::SetAllTasks(const CTaskFile& tasks)
@@ -9468,6 +9584,42 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
 }
 
+BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs, DWORD dwFlags)
+{
+	if (!CanEditSelectedTask(mapAttribs))
+		return FALSE;
+
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
+	POSITION pos = TSH().GetFirstItemPos();
+	CDWordArray aModTaskIDs;
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		const TODOITEM* pTDI = GetTask(dwTaskID);
+
+		if (pTDI)
+		{
+			TODOITEM tdiCopy = *pTDI;
+
+			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs, m_aCustomAttribDefs, dwFlags))
+			{
+				if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
+					aModTaskIDs.Add(dwTaskID);
+			}
+		}
+	}
+
+	if (aModTaskIDs.GetSize())
+	{
+		TDC_ATTRIBUTE nAttrib = ((mapAttribs.GetCount() == 1) ? mapAttribs.GetFirst() : TDCA_ALL);
+		SetModified(nAttrib, aModTaskIDs);
+	}
+
+	return aModTaskIDs.GetSize();
+}
+
 BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll)
 {
 	if (!CanEditSelectedTask(TDCA_PASTE))
@@ -9574,7 +9726,7 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD
 		TODOITEM tdi;
 		VERIFY(m_data.GetTaskAttributes(dwTaskID, tdi));
 
-		if (tasks.MergeTaskAttributes(hTask, tdi))
+		if (tasks.MergeTaskAttributes(hTask, tdi, TDLMTA_EXCLUDEEMPTYSOURCEVALUES))
 			m_data.SetTaskAttributes(dwTaskID, tdi);
 	}
 	else 
@@ -10161,7 +10313,7 @@ void CToDoCtrl::EndLabelEdit(BOOL bCancel)
 	m_eTaskName.EndEdit(bCancel);
 }
 
-void CToDoCtrl::Flush() 
+BOOL CToDoCtrl::Flush() 
 {
 	CWnd* pFocus = GetFocus();
 
@@ -10199,7 +10351,7 @@ void CToDoCtrl::Flush()
 
 	m_treeDragDrop.CancelDrag();
 
-	HandleUnsavedComments();
+	return HandleUnsavedComments();
 }
 
 TDC_FILE CToDoCtrl::CheckIn()
@@ -10301,6 +10453,9 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect,
 
 	case TDC_SELECTNEXT:
 		htiStart = TCH().GetNextItem(GetSelectedItem());
+
+		if (htiStart == NULL)
+			htiStart = TCH().GetFirstItem();
 		break;
 
 	case TDC_SELECTNEXTINCLCURRENT:
@@ -10309,6 +10464,10 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect,
 
 	case TDC_SELECTPREV:
 		htiStart = TCH().GetPrevItem(GetSelectedItem());
+
+		if (htiStart == NULL)
+			htiStart = TCH().GetLastItem();
+
 		bForwards = FALSE;
 		break;
 
@@ -10814,7 +10973,7 @@ LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM /*lParam*/)
 
 LRESULT CToDoCtrl::OnFindReplaceSelectedTask(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	return FindReplaceSelectedTaskAttribute();
+	return FindReplaceSelectedTaskAttribute(FALSE);
 }
 
 LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -10834,8 +10993,7 @@ LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM /*wParam*/, LPARAM /*lParam*/)
 		{
 			ASSERT(GetSelectedTaskCount() == 1);
 
-			if (!FindReplaceSelectedTaskAttribute())
-				break;
+			FindReplaceSelectedTaskAttribute(TRUE);
 		} 
 		while (SelectNextTask(m_findReplace.GetSearchFor(), 
 							TDC_SELECTNEXT, 
@@ -10888,16 +11046,22 @@ LRESULT CToDoCtrl::OnFindReplaceMsg(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
+BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks)
 {
 	TDC_ATTRIBUTE nAttrib = m_findReplace.GetAttribute();
 
-	if (!m_findReplace.IsReplacing() ||	!CanEditSelectedTask(nAttrib))
+	// Sanity checks
+	if (!m_findReplace.IsReplacing())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
-
+	else if (!CanEditSelectedTask(nAttrib))
+	{
+		ASSERT(bReplacingAllTasks);
+		return FALSE;
+	}
+	
 	CString sSelAttrib;
 
 	switch (nAttrib)
@@ -10917,8 +11081,6 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 						m_findReplace.WantCaseSensitive(), 
 						m_findReplace.WantWholeWord()))
 	{
-		Misc::Trim(sSelAttrib);
-
 		switch (nAttrib)
 		{
 		case TDCA_TASKNAME:
@@ -10932,10 +11094,18 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 											m_findReplace.WantCaseSensitive(), 
 											m_findReplace.WantWholeWord()))
 			{
-				UpdateComments(TRUE);
-
-				if (SetSelectedTaskComments(m_sTextComments, m_customComments, TRUE))
+				CString sTextComments;
+				CBinaryData customComments;
+				
+				if (m_ctrlComments.GetContent(sTextComments, customComments) == -1)
+				{
+					// TODO
+					m_nCommentsState = CS_PENDING;
+				}
+				else if (SetSelectedTaskComments(sTextComments, customComments, TRUE))
+				{
 					return TRUE;
+				}
 			}
 			break;
 		}
@@ -10943,6 +11113,19 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 
 	MessageBeep(MB_ICONHAND);
 	return FALSE;
+}
+
+const CBinaryData& CToDoCtrl::GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const 
+{ 
+	if (GetSelectedTaskCount() == 0)
+	{
+		static CBinaryData data;
+
+		cfComments.Empty();
+		return data;
+	}
+
+	return m_taskTree.GetSelectedTaskCustomComments(cfComments); 
 }
 
 int CToDoCtrl::GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted) const
@@ -11177,7 +11360,10 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 		CTaskFile tasks;
 		GetTasks(tasks, filter);
 
-		if (m_eDependency.DoEdit(tasks, m_ilTaskIcons, HasStyle(TDCS_SHOWPARENTSASFOLDERS)))
+		if (m_eDependency.DoEdit(tasks, 
+								 m_ilTaskIcons, 
+								 HasStyle(TDCS_SHOWPARENTSASFOLDERS), 
+								 HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES)))
 		{
 			// Check for circular dependencies
 			// TODO
@@ -11220,6 +11406,8 @@ LRESULT CToDoCtrl::OnMidnight(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 {
+	AF_NOREENTRANT;
+
 	// if we are editing the title of the task being tracked then 
 	// leave immediately and wait until the editing has ended
 	if (!bEnding && IsTaskLabelEditing() && m_timeTracking.IsTracking(GetSelectedTaskID()))
@@ -11279,7 +11467,8 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 	if (!CanSelectTasksInHistory(bForward))
 		return FALSE;
 
-	HandleUnsavedComments();
+	if (!HandleUnsavedComments())
+		return FALSE;
 
 	m_taskTree.SelectTasksInHistory(bForward);
 	UpdateControls();
@@ -11289,7 +11478,8 @@ BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward)
 
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == IDC_FILEPATH)
+	if ((wParam == IDC_FILEPATH) ||
+		CTDCCustomAttributeUIHelper::IsCustomEditControl(wParam))
 	{
 		if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
 			return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
@@ -11605,7 +11795,11 @@ BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 
 void CToDoCtrl::OnSelChangeCommentsType()
 {
-	HandleUnsavedComments();
+	if (!HandleUnsavedComments())
+	{
+		m_ctrlComments.SetSelectedFormat(m_cfComments);
+		return;
+	}
 
 	BOOL bMixedSelection = (m_cfComments.IsEmpty());
 	m_ctrlComments.GetSelectedFormat(m_cfComments);
@@ -11695,11 +11889,11 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 		return bUndo ? m_ctrlComments.Undo() : m_ctrlComments.Redo();
 
 	// We pass the undo request to the focused edit if:
-	// 1. There is something to be undone
+	// 1. Tree label editing
 	// OR
-	// 2. Tree label editing
+	// 2. Project description editing
 	// OR
-	// 3. Project description editing
+	// 3. There is something to be undone
 	CWnd* pFocus = GetFocus();
 
 	if (pFocus && CWinClasses::IsClass(*pFocus, WC_EDIT))
@@ -11827,6 +12021,9 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 
 			HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(elm.dwPrevSiblingID); // original previous sibling
 			ASSERT(htiDestPrevSibling || !elm.dwPrevSiblingID);
+
+			if (htiDestPrevSibling == NULL)
+				htiDestPrevSibling = TVI_FIRST;
 			
 			if ((elm.dwParentID && htiDestParent) || (!elm.dwParentID && !htiDestParent))
 			{
@@ -12079,6 +12276,22 @@ CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMax
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
+BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID) const
+{
+	if (mapAttribs.IsEmpty())
+		return FALSE;
+
+	POSITION pos = mapAttribs.GetStartPosition();
+
+	while (pos)
+	{
+		if (!CanEditSelectedTask(mapAttribs.GetNext(pos)), dwTaskID)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
 { 
 	if (IsReadOnly())
@@ -12112,6 +12325,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		}
 		return TRUE;
 
+	case TDCA_ALL:		
 	case TDCA_ALLOCBY:		
 	case TDCA_ALLOCTO:		
 	case TDCA_ANYTEXTATTRIBUTE:		
@@ -12207,9 +12421,9 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
-	if (!CanCopyAttributeData(nFromAttrib, nToAttrib))
+	if (!CanCopyAttributeValue(nFromAttrib, nToAttrib))
 		return FALSE;
 
 	Flush();
@@ -12233,13 +12447,13 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 		{
 			//int breakpoint = 0;
 		}
-		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
+		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
 		{
 			return FALSE;
 		}
 	}
 
-	UpdateControls(FALSE);
+	UpdateControls(FALSE); // Don't update comments
 
 	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
@@ -12254,12 +12468,12 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pToDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
 
-	if (!CanCopyAttributeData(nFromAttrib, *pToDef))
+	if (!CanCopyAttributeValue(nFromAttrib, *pToDef))
 		return FALSE;
 
 	Flush();
@@ -12273,7 +12487,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, sToCustomAttribID), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, nFromAttrib, sToCustomAttribID), aModTaskIDs))
 			return FALSE;
 	}
 
@@ -12282,18 +12496,18 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 		
-		UpdateControls(FALSE);
+		UpdateControls(FALSE); // Don't update comments
 	}
 
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pFromDef = NULL;
 	GET_DEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
 
-	if (!CanCopyAttributeData(*pFromDef, nToAttrib))
+	if (!CanCopyAttributeValue(*pFromDef, nToAttrib))
 		return FALSE;
 
 	Flush();
@@ -12316,13 +12530,13 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		{
 			// int breakpoint = 0;
 		}
-		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, nToAttrib), aModTaskIDs))
+		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, sFromCustomAttribID, nToAttrib), aModTaskIDs))
 		{
 			return FALSE;
 		}
 	}
 
-	UpdateControls(FALSE);
+	UpdateControls(FALSE); // Don't update comments
 
 	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
@@ -12337,7 +12551,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
+BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
 {
 	// Doesn't make sense to copy to self
 	if (sToCustomAttribID == sFromCustomAttribID)
@@ -12363,7 +12577,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, sToCustomAttribID), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, sFromCustomAttribID, sToCustomAttribID), aModTaskIDs))
 			return FALSE;
 	}
 
@@ -12372,13 +12586,13 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 
-		UpdateControls(FALSE);
+		UpdateControls(FALSE); // Don't update comments
 	}
 
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
 	// Doesn't make sense to copy to self
 	if (nFromAttrib == nToAttrib)
@@ -12485,7 +12699,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom)
+BOOL CToDoCtrl::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom)
 {
 	switch (nFromAttrib)
 	{
@@ -12536,7 +12750,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrl::CanCopyAttributeValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib)
 {
 	switch (attribDefFrom.GetDataType())
 	{

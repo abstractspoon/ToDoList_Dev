@@ -331,10 +331,14 @@ COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !bSelected && !IsDone(TRUE))
+		if (bSelected)
+			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
+		if (bColorIsBkgnd)
 			return GraphicsMisc::GetBestTextColor(color);
-		else
-			return color;
+
+		// else
+		return color;
 	}
 	
 	// else
@@ -343,43 +347,25 @@ COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 
 COLORREF GANTTITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
-	if (!bSelected && HasColor())
-	{
-		if (bColorIsBkgnd && !IsDone(TRUE))
-			return color;
-	}
-	
-	// else
-	return CLR_NONE;
-}
-
-COLORREF GANTTITEM::GetFillColor() const
-{
-	if (IsDone(TRUE))
-	{
-		if (!Misc::IsHighContrastActive())
-			return GraphicsMisc::Lighter(color, 0.8);
-	}
-	else if (HasColor())
-	{
+	if (!bSelected && HasColor() && bColorIsBkgnd)
 		return color;
-	}
 	
 	// else
 	return CLR_NONE;
 }
 
-COLORREF GANTTITEM::GetBorderColor() const
+COLORREF GANTTITEM::GetFillColor(BOOL /*bSelected*/) const
 {
-	if (IsDone(TRUE))
-	{
-		if (!Misc::IsHighContrastActive())
-			return color;
-	}
-	else if (HasColor())
-	{
+	return (HasColor() ? color : CLR_NONE);
+}
+
+COLORREF GANTTITEM::GetBorderColor(BOOL bSelected) const
+{
+	if (bSelected && Misc::IsHighContrastActive())
+		return GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+	if (HasColor())
 		return GraphicsMisc::Darker(color, 0.4);
-	}
 	
 	// else
 	return CLR_NONE;
@@ -769,12 +755,20 @@ CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecad
 {
 	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
 
-	CString sStart, sEnd;
+	CString sRange, sStart;
 	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-	sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
 
-	CString sRange;
-	sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+	if (CDateHelper::GetDateInMonths(dtStart) == CDateHelper::GetDateInMonths(dtEnd))
+	{
+		sRange = sStart;
+	}
+	else
+	{
+		CString sEnd;
+		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
+
+		sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+	}
 
 	return sRange;
 }

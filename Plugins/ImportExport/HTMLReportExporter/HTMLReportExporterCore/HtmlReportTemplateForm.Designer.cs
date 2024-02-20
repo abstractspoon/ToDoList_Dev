@@ -282,7 +282,7 @@
 			// toolStripHelp
 			// 
 			this.toolStripHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripHelp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripHelp.Image")));
+			this.toolStripHelp.Image = global::HTMLReportExporter.Properties.Resources.ToolbarHelp;
 			this.toolStripHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripHelp.Name = "toolStripHelp";
 			this.toolStripHelp.Size = new System.Drawing.Size(23, 22);
@@ -344,6 +344,7 @@
             // 
             this.headerHeightUnitsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.headerHeightUnitsLabel.AutoSize = true;
+			this.headerHeightUnitsLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.headerHeightUnitsLabel.Location = new System.Drawing.Point(106, 385);
 			this.headerHeightUnitsLabel.Name = "headerHeightUnitsLabel";
 			this.headerHeightUnitsLabel.Size = new System.Drawing.Size(33, 13);
@@ -354,6 +355,7 @@
 			// 
 			this.headerHeightLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.headerHeightLabel.AutoSize = true;
+			this.headerHeightLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.headerHeightLabel.Location = new System.Drawing.Point(3, 384);
 			this.headerHeightLabel.Name = "headerHeightLabel";
 			this.headerHeightLabel.Size = new System.Drawing.Size(38, 13);
@@ -366,6 +368,7 @@
 			this.headerDividerCheckbox.AutoSize = true;
 			this.headerDividerCheckbox.Checked = true;
 			this.headerDividerCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.headerDividerCheckbox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.headerDividerCheckbox.Location = new System.Drawing.Point(290, 384);
 			this.headerDividerCheckbox.Name = "headerDividerCheckbox";
 			this.headerDividerCheckbox.Size = new System.Drawing.Size(103, 17);
@@ -377,6 +380,7 @@
 			// 
 			this.headerEnabledCheckbox.Checked = true;
 			this.headerEnabledCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.headerEnabledCheckbox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.headerEnabledCheckbox.Location = new System.Drawing.Point(3, 3);
 			this.headerEnabledCheckbox.Name = "headerEnabledCheckbox";
 			this.headerEnabledCheckbox.Size = new System.Drawing.Size(97, 17);
@@ -403,6 +407,7 @@
 			this.titleSeparatePageCheckbox.AutoSize = true;
 			this.titleSeparatePageCheckbox.Checked = true;
 			this.titleSeparatePageCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.titleSeparatePageCheckbox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.titleSeparatePageCheckbox.Location = new System.Drawing.Point(254, 384);
 			this.titleSeparatePageCheckbox.Name = "titleSeparatePageCheckbox";
 			this.titleSeparatePageCheckbox.Size = new System.Drawing.Size(139, 17);
@@ -414,6 +419,7 @@
 			// 
 			this.titleEnabledCheckbox.Checked = true;
 			this.titleEnabledCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.titleEnabledCheckbox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.titleEnabledCheckbox.Location = new System.Drawing.Point(3, 3);
 			this.titleEnabledCheckbox.Name = "titleEnabledCheckbox";
 			this.titleEnabledCheckbox.Size = new System.Drawing.Size(97, 17);
@@ -471,6 +477,7 @@
             // 
             this.footerHeightUnitsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.footerHeightUnitsLabel.AutoSize = true;
+			this.footerHeightUnitsLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.footerHeightUnitsLabel.Location = new System.Drawing.Point(106, 384);
 			this.footerHeightUnitsLabel.Name = "footerHeightUnitsLabel";
 			this.footerHeightUnitsLabel.Size = new System.Drawing.Size(33, 13);
@@ -481,6 +488,7 @@
 			// 
 			this.footerHeightLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.footerHeightLabel.AutoSize = true;
+			this.footerHeightLabel.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.footerHeightLabel.Location = new System.Drawing.Point(3, 384);
 			this.footerHeightLabel.Name = "footerHeightLabel";
 			this.footerHeightLabel.Size = new System.Drawing.Size(38, 13);
@@ -493,6 +501,7 @@
 			this.footerDividerCheckbox.AutoSize = true;
 			this.footerDividerCheckbox.Checked = true;
 			this.footerDividerCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.footerDividerCheckbox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.footerDividerCheckbox.Location = new System.Drawing.Point(290, 384);
 			this.footerDividerCheckbox.Name = "footerDividerCheckbox";
 			this.footerDividerCheckbox.Size = new System.Drawing.Size(103, 17);
@@ -504,6 +513,7 @@
 			// 
 			this.footerEnabledCheckbox.Checked = true;
 			this.footerEnabledCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.footerEnabledCheckbox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.footerEnabledCheckbox.Location = new System.Drawing.Point(3, 3);
 			this.footerEnabledCheckbox.Name = "footerEnabledCheckbox";
 			this.footerEnabledCheckbox.Size = new System.Drawing.Size(97, 17);
@@ -526,6 +536,7 @@
 			// labelPreview
 			// 
 			this.labelPreview.AutoSize = true;
+			this.labelPreview.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.labelPreview.Location = new System.Drawing.Point(1, 5);
 			this.labelPreview.Name = "labelPreview";
 			this.labelPreview.Size = new System.Drawing.Size(45, 13);

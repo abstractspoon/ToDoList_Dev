@@ -702,12 +702,12 @@ BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nReg
 		if (sSpecKey1.CompareNoCase(_T("BYMONTH")) == 0)
 		{
 			// default
-			nRegularity = TDIR_YEAR_SPECIFIC_DAY_MONTH;
+			nRegularity = TDIR_YEAR_SPECIFIC_DAY_MONTHS;
 			dwSpecific1 = _ttoi(sSpecVal1);
 
 			if (sSpecKey2.CompareNoCase(_T("BYDAY")) == 0)
 			{
-				nRegularity = TDIR_YEAR_SPECIFIC_DOW_MONTH;
+				nRegularity = TDIR_YEAR_SPECIFIC_DOW_MONTHS;
 
 				dwSpecific2 = _ttoi(sSpecVal1);
 				dwSpecific1 = DecodeDayOfMonth(sSpecVal2);

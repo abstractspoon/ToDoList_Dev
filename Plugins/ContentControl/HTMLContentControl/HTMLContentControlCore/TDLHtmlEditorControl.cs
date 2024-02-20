@@ -18,9 +18,6 @@ namespace HTMLContentControl
 	[System.ComponentModel.DesignerCategory("")]
     class TDLHtmlEditorControl : HtmlEditorControlEx
     {
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-
 		[DllImport("User32.dll")]
 		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
 
@@ -308,14 +305,41 @@ namespace HTMLContentControl
 
 						if (keyPress == Keys.Return)
 						{
+							// Establish whether the caret is currently located
+							// within a hyperlink
+							var anchor = GetAnchorAtCaret();
+
 							// Handle <enter> manually because the default handling
 							// appears to fail when we are hosted in a win32 modal dialog
-							IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
-							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
-							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
+							IntPtr hwndFind = WebBrowser.GetIEServerWindowHandle();
 
 							if (hwndFind != null)
+							{
 								SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
+
+								// When we insert a newline in the middle of a hyperlink
+								// the caret does not move to the next line so we need to do this
+								if (anchor != null)
+								{
+									var range = GetTextRange();
+
+									if (range != null)
+									{
+	 									range.move("character", 1);
+	 									range.collapse();
+	 									range.select();
+									}
+								}
+							}
+
+							return true;
+						}
+						else if (keyPress == (Keys.Return | Keys.Control))
+						{
+							var anchor = GetAnchorAtCaret();
+
+							if ((anchor != null) && !String.IsNullOrWhiteSpace(anchor.href))
+								HtmlNavigation?.Invoke(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(anchor.href));
 
 							return true;
 						}

@@ -41,17 +41,19 @@ CMapStringToPtr CWinClasses::s_mapCtrlClasses;
 
 CString CWinClasses::GetClass(HWND hWnd)
 {
-	static CString sWndClass;
-	sWndClass.Empty(); // reset each time
-	
-	if (hWnd)
+	if (hWnd == NULL)
 	{
-		int nLen = ::GetClassName(hWnd, sWndClass.GetBuffer(128), 128);
-
-		sWndClass.ReleaseBuffer(nLen);
-		sWndClass.MakeLower();
+		static CString EMPTY_STR;
+		return EMPTY_STR;
 	}
-	
+
+	// else
+	CString sWndClass;
+	int nLen = ::GetClassName(hWnd, sWndClass.GetBuffer(128), 128);
+
+	sWndClass.ReleaseBuffer(nLen);
+	sWndClass.MakeLower();
+
 	return sWndClass;
 }
 
@@ -293,6 +295,42 @@ BOOL CWinClasses::IsDialog(HWND hWnd)
 	return IsClass(hWnd, WC_DIALOGBOX);
 }
 
+BOOL CWinClasses::IsPropertyPage(HWND hWnd)
+{
+	return IsKindOf(hWnd, RUNTIME_CLASS(CPropertyPage));
+}
+
+BOOL CWinClasses::IsKindOf(HWND hWnd, const CRuntimeClass* pClass)
+{
+	CWnd* pWnd = CWnd::FromHandle(hWnd);
+
+	if (!pWnd || !pClass)
+		return FALSE;
+
+	// simple Single inheritance case: copied from CWnd::IsKindOf
+	const CRuntimeClass* pWndClass = pWnd->GetRuntimeClass();
+	ASSERT(pWndClass);
+
+	while (pWndClass != NULL)
+	{
+		if (pWndClass == pClass)
+			return TRUE;
+
+		// This is our extra part to work around problems cause by
+		// multiple hooking of classes
+		if (strcmp(pWndClass->m_lpszClassName, pClass->m_lpszClassName) == 0)
+			return TRUE;
+
+		if (pWndClass->m_pfnGetBaseClass == NULL)
+			break;
+
+		pWndClass = (*pWndClass->m_pfnGetBaseClass)();
+	}
+
+	// walked to the top, no match
+	return FALSE;       
+}
+
 BOOL CWinClasses::IsChild(HWND hWnd)
 {
 	return (::GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD);
@@ -316,7 +354,7 @@ BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 	if (!IsDialog(hWnd))
 		return FALSE;
 
-	// special case
+	// special cases
 	if (nType == WCD_OPENSAVE)
 	{
 		// The open save dialog we are interested in is actually
@@ -324,6 +362,45 @@ BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 		CWnd* pChild = CWnd::FromHandle(hWnd)->GetDlgItem(0);
 		return (pChild && pChild->IsKindOf(RUNTIME_CLASS(CFileDialog)));
 	}
+	/*
+	// For a while the method of getting the runtime class was not working
+	// for unknown reasons. So I used this heuristic to solve the problem.
+	// But I still want to preserve it because I don't know when it might
+	// stop working again.
+	else if (nType == WCD_FONT)
+	{
+		// Can't get method below to work so we try a heuristic
+		const UINT NONCOMBOS[] = { 1088, 1089, 1090, 1072, 1040, 1041, 1094, 1073 };
+		const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
+
+		const UINT OWNERDRAWCOMBOS[] = { 1140, 1136, 1137, 1138, 1139 };
+		const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
+
+		for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
+		{
+			if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
+				return FALSE;
+		}
+
+		for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
+		{
+			HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
+
+			if (hwndCombo == NULL)
+				return FALSE;
+
+			if (!IsClass(hwndCombo, WC_COMBOBOX))
+				return FALSE;
+
+			BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
+
+			if (!bOwnerDraw)
+				return FALSE;
+		}
+
+		return TRUE;
+	}
+	*/
 
 	// get permanent window mapping so we can
 	// lookup runtime class type. 
@@ -358,11 +435,7 @@ BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 	return FALSE;
 }
 
-int CWinClasses::GetButtonType(HWND hWnd)
+int CWinClasses::GetStyleType(HWND hWnd, DWORD dwTypeMask)
 {
-	if (!IsClass(hWnd, WC_BUTTON))
-		return -1;
-
-	UINT BTN_TYPEMASK = 0xf;
-	return (::GetWindowLong(hWnd, GWL_STYLE) & BTN_TYPEMASK);
+	return (::GetWindowLong(hWnd, GWL_STYLE) & dwTypeMask);
 }

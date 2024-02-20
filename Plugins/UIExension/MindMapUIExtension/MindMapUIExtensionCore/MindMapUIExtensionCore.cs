@@ -12,123 +12,6 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
-	// -------------------------------------------------------------------
-
-	class MindMapAlignmentComboBox : ComboBox
-	{
-		class MindMapAlignmentItem
-		{
-			public MindMapAlignmentItem(string label, MindMapControl.RootAlignment align)
-			{
-				Label = label;
-				Alignment = align;
-			}
-
-			public override string ToString()
-			{
-				return Label;
-			}
-
-			public string Label;
-			public MindMapControl.RootAlignment Alignment { get; private set; }
-		}
-
-		// ----------------------------------------------------------------
-
-		public MindMapAlignmentComboBox(Translator trans)
-		{
-			Items.Add(new MindMapAlignmentItem(trans.Translate("Left"), MindMapControl.RootAlignment.Left));
-			Items.Add(new MindMapAlignmentItem(trans.Translate("Right"), MindMapControl.RootAlignment.Right));
-			Items.Add(new MindMapAlignmentItem(trans.Translate("Centre"), MindMapControl.RootAlignment.Centre));
-		}
-
-		public MindMapControl.RootAlignment SelectedAlignment
-		{
-			get
-			{
-				if (SelectedItem != null)
-					return ((MindMapAlignmentItem)SelectedItem).Alignment;
-
-				return MindMapControl.RootAlignment.Centre;
-			}
-
-			set
-			{
-				foreach (var item in Items)
-				{
-					if (((MindMapAlignmentItem)item).Alignment == value)
-					{
-						SelectedItem = item;
-						break;
-					}
-				}
-			}
-		}
-
-		protected override void OnResize(EventArgs e)
-		{
-			FormsUtil.RecalcDropWidth(this);
-		}
-	}
-
-	// -------------------------------------------------------------------
-
-	class MindMapOptionsComboBox : CustomComboBox.CheckedComboBox
-	{
-		class MindMapOptionItem
-		{
-			public MindMapOptionItem(string label, MindMapOption option)
-			{
-				Label = label;
-				Option = option;
-			}
-
-			public override string ToString()
-			{
-				return Label;
-			}
-
-			public string Label;
-			public MindMapOption Option { get; private set; }
-		}
-
-		// ----------------------------------------------------------------
-		
-		public MindMapOptionsComboBox(Translator trans)
-		{
-			None = trans.Translate("<none>");
-			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies"), MindMapOption.ShowDependencies));
-		}
-
-		public MindMapOption SelectedOptions
-		{
-			get
-			{
-				MindMapOption options = MindMapOption.None;
-
-				foreach (var checkItem in CheckedItems)
-				{
-					var item = (MindMapOptionItem)checkItem;
-
-					options |= item.Option;
-				}
-
-				return options;
-			}
-
-			set
-			{
-				for (int index = 0; index < Items.Count; index++)
-				{
-					var item = (MindMapOptionItem)Items[index];
-
-					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
-				}
-			}
-		}
-	}
-
-	// ----------------------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
 	public class MindMapUIExtensionCore : Panel, IUIExtension
@@ -180,7 +63,23 @@ namespace MindMapUIExtension
             return m_MindMap.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
         }
 
-        public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public bool ScrollToSelectedTask()
+		{
+			if (CanScrollToSelectedTask())
+			{
+				m_MindMap.EnsureSelectionVisible();
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			return m_MindMap.HasSelection;
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 			m_MindMap.UpdateTasks(tasks, type);
         }
@@ -222,21 +121,21 @@ namespace MindMapUIExtension
             return true;
         }
 
-        public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			var ptScreen = new Point(xPos, yPos);
 
 			if (m_MindMap.HitTestTask(ptScreen) != 0)
-				return UIExtension.HitResult.Task;
+				return UIExtension.HitTestResult.Task;
 
 			// else
 			if (m_MindMap.RectangleToScreen(m_MindMap.ClientRectangle).Contains(ptScreen))
-				return UIExtension.HitResult.Tasklist;
+				return UIExtension.HitTestResult.Tasklist;
 			
-			return UIExtension.HitResult.Nowhere;
+			return UIExtension.HitTestResult.Nowhere;
         }
 
-        public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
+        public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
         {
 			return m_MindMap.HitTestTask(new Point(xPos, yPos));
         }
@@ -267,8 +166,7 @@ namespace MindMapUIExtension
 
         public void SavePreferences(Preferences prefs, String key)
         {
-			prefs.WriteProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
-			prefs.WriteProfileInt(key, "Options", (int)m_MindMap.Options);
+			m_MindMap.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -276,10 +174,9 @@ namespace MindMapUIExtension
             if (!appOnly)
             {
 				// private settings
-				m_MindMap.Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
-				m_AlignmentCombo.SelectedAlignment = m_MindMap.Alignment;
+				m_MindMap.LoadPreferences(prefs, key);
 
-				m_MindMap.Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)m_MindMap.Options);
+				m_AlignmentCombo.SelectedAlignment = m_MindMap.Alignment;
 				m_OptionsCombo.SelectedOptions = m_MindMap.Options;
 			}
 
@@ -406,6 +303,7 @@ namespace MindMapUIExtension
 			label.Font = m_ControlsFont;
 			label.Text = m_Trans.Translate(untranslatedText);
 			label.AutoSize = true;
+			label.ForeColor = SystemColors.WindowText;
 
 			if (prevControl != null)
 				label.Location = new Point((prevControl.Bounds.Right + 20), 8);

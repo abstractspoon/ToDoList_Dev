@@ -37,6 +37,7 @@ public:
 	CKanbanColumnCtrl* GetBacklog() const;
 
 	void SetOptions(DWORD dwOptions);
+	void SetReadOnly(BOOL bReadOnly);
 	int GetVisibleTaskCount() const;
 	float GetAverageCharWidth();
 	DWORD HitTestTask(const CPoint& ptScreen) const;
@@ -54,10 +55,12 @@ public:
 
 	void Sort();
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
+	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);
 	void SetDropTarget(const CKanbanColumnCtrl* pTarget);
-	void DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore);
+	BOOL DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanColumnCtrl* pIgnore);
 
 	void Exclude(CDC* pDC);
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);

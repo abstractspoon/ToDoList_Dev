@@ -98,6 +98,8 @@
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Debug/iCalImportExport.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>

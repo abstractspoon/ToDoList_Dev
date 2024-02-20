@@ -1142,7 +1142,7 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 	if (bDonut)
 	{
 		rDonut.DeflateRect(1, 1);
-		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
+		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(GetSysColor(COLOR_WINDOW)), rDonut);
 	}
 
 	DrawPieLabels(dc, rPie, aSegments);

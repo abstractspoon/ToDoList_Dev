@@ -112,13 +112,9 @@ Drawing::Color ColorUtil::DrawingColor::ToColor(COLORREF rgbColor, unsigned char
 	return System::Drawing::Color::FromArgb(opacity, red, green, blue);
 }
 
-Drawing::Color ColorUtil::DrawingColor::GetBestTextColor(Drawing::Color backColor)
+Drawing::Color ColorUtil::DrawingColor::GetBestTextColor(Drawing::Color backColor, bool enabled)
 {
-	if (GetLuminance(backColor) > 0.5)
-		return Drawing::Color::Black;
-
-	// else
-	return Drawing::Color::White;
+	return ToColor(GraphicsMisc::GetBestTextColor(ToRgb(backColor), (enabled ? TRUE : FALSE)));
 }
 
 float ColorUtil::DrawingColor::GetLuminance(Drawing::Color color)

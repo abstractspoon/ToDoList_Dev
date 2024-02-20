@@ -74,15 +74,18 @@ STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,110,8
+    LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,104,8
     COMBOBOX        IDC_ATTRIBUTES,0,13,105,116,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Options",IDC_OPTIONS_LABEL,112,2,105,8
-    COMBOBOX        IDC_OPTIONS,112,13,105,116,CBS_DROPDOWNLIST | 
+    LTEXT           "&Options",IDC_OPTIONS_LABEL,218,2,103,8
+    COMBOBOX        IDC_OPTIONS,218,13,105,116,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,223,12,48,15
+                    WS_VISIBLE,329,12,48,15
+    LTEXT           "&Group By",IDC_GROUPBY_LABEL,109,2,104,8
+    COMBOBOX        IDC_GROUPBY,109,13,105,116,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 
@@ -178,15 +181,16 @@ BEGIN
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "List1",IDC_COLUMNDEFS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
-                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,313,94
-    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,278,261,53,16
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,243,94
     GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
                     330,147,0,WS_EX_TRANSPARENT
     GROUPBOX        "Display the following attributes for each task:",
                     IDC_STATIC,7,69,330,124
     CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,175,313,10
+    PUSHBUTTON      "Move &Up",IDC_MOVECOL_UP,268,278,59,14
+    PUSHBUTTON      "Move &Down",IDC_MOVECOL_DOWN,268,297,59,14
+    PUSHBUTTON      "&Populate",IDC_POPULATECOLUMNS,268,358,59,14
 END
 
 
@@ -271,8 +275,6 @@ END
 
 IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
 IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
-IDR_COLUMN_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\column_toolbar.bmp"
-IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
 IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
 IDB_ICONS               BITMAP  DISCARDABLE     "res\\icons.bmp"
 
@@ -288,14 +290,6 @@ BEGIN
     BUTTON      ID_HELP
 END
 
-IDR_COLUMN_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
-BEGIN
-    BUTTON      ID_MOVECOL_UP
-    BUTTON      ID_MOVECOL_DOWN
-    SEPARATOR
-    BUTTON      ID_POPULATECOLUMNS
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -306,7 +300,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_PREFS                "\nKanban Preferences"
     IDS_BACKLOG             "Backlog"
-    ID_POPULATECOLUMNS      "\nPopulate Columns"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -404,8 +397,18 @@ BEGIN
     IDS_DISPLAY_RECURRENCE_SHORT "Recurs"
     IDS_DISPLAY_PARENT_SHORT "Parent"
     IDS_DISPLAY_TASKID_SHORT "ID"
-    IDS_OPTIONS_NONE        "<none>"
+    IDS_NONE                "<none>"
     IDS_OPTIONS_HIDESUBTASKS "Hide subtasks"
+    IDS_DISPLAY_TIMEREMAINING "Remaining Time"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_TIMEREMAINING_SHORT "Rem."
+    IDS_DISPLAY_LOCK        "Lock"
+    IDS_NOBODY              "<nobody>"
+    IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
+    IDS_OPTIONS_HIDENOGROUP "Hide <none> group"
 END
 
 #endif    // English (Australia) resources

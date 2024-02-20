@@ -18,7 +18,7 @@ class CFilteredToDoCtrl : public CTabbedToDoCtrl
 {
 public:
 	CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-					  CTDLContentMgr& mgrContent, 
+					  CTDCContentMgr& mgrContent, 
 					  CShortcutManager& mgrShortcuts,
 					  const CONTENTFORMAT& cfDefault,
 					  const TDCCOLEDITFILTERVISIBILITY& visDefault);
@@ -126,8 +126,8 @@ protected:
 	void SaveState() const;
 	void LoadState();
 
-	void RefreshFilter(BOOL bExplicit);
-	void RefreshTreeFilter();
+	BOOL RefreshFilter(BOOL bExplicit);
+	BOOL RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
 
 	void ResetNowFilterTimer();
@@ -137,7 +137,7 @@ protected:
 	BOOL WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const; 
 	
 	// Helper allowing insert position to be specified
-	DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks);
+	DWORD MergeNewTaskIntoDataModel(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks);
 };
 
 #endif // !defined(AFX_FILTEREDTODOCTRL_H__356A6EB9_C7EC_4395_8716_623AFF4A269B__INCLUDED_)

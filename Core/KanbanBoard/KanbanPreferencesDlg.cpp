@@ -6,7 +6,6 @@
 #include "KanbanPreferencesDlg.h"
 #include "Kanbanenum.h"
 #include "KanbanMsg.h"
-#include "KanbanCtrl.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
@@ -21,6 +20,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanPreferencesPage dialog
+
+IMPLEMENT_DYNCREATE(CKanbanPreferencesPage, CPreferencesPageBase)
 
 CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	: 
@@ -55,21 +56,17 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	m_cbAttributes.DDX(pDX, m_nFixedAttrib, m_sFixedCustomAttribID);
 }
 
-
 BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
-	ON_COMMAND(ID_MOVECOL_DOWN, OnMoveFixedColDown)
-	ON_UPDATE_COMMAND_UI(ID_MOVECOL_DOWN, OnUpdateFixedMoveColDown)
-	ON_COMMAND(ID_MOVECOL_UP, OnMoveFixedColUp)
-	ON_UPDATE_COMMAND_UI(ID_MOVECOL_UP, OnUpdateMoveFixedColUp)
+	ON_BN_CLICKED(ID_MOVECOL_DOWN, OnMoveFixedColDown)
+	ON_BN_CLICKED(ID_MOVECOL_UP, OnMoveFixedColUp)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COLUMNDEFS, OnItemchangedColumndefs)
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnChangeColumnType)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnSortSubtasksBelowParents)
 	ON_BN_CLICKED(IDC_SHOWTASKCOLORASBAR, OnShowColorAsBar)
-	ON_COMMAND(ID_POPULATECOLUMNS, OnPopulateFixedColumns)
-	ON_UPDATE_COMMAND_UI(ID_POPULATECOLUMNS, OnUpdatePopulateColumns)
+	ON_BN_CLICKED(IDC_POPULATECOLUMNS, OnPopulateFixedColumns)
 	ON_COMMAND(IDC_SORTSUBTASKSBELOWPARENT, OnSortSubtasksBelowParents)
 END_MESSAGE_MAP()
 
@@ -79,19 +76,6 @@ END_MESSAGE_MAP()
 BOOL CKanbanPreferencesPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
-	
-	// create toolbar
-	if (m_toolbar.CreateEx(this))
-	{
-		// Set colours first because these affect image scaling
-		m_toolbar.SetBackgroundColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW), FALSE, FALSE);
-
-		VERIFY(m_toolbar.LoadToolBar(IDR_COLUMN_TOOLBAR, IDB_COLUMN_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
-		
-		CRect rToolbar = GetCtrlRect(this, IDC_TB_PLACEHOLDER);
-		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
-	}
 	
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);
 	
@@ -103,7 +87,7 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	m_lcFixedColumnDefs.SetColumnDefinitions(m_aFixedColumnDefs);
 	m_lcFixedColumnDefs.SetCurSel(0);
 
-	UpdateAttributeValueCombo();
+	UpdateFixedAttributeValueCombo();
 	BuildDisplayAttributeListBox();
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -112,14 +96,24 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 
 TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomAttribID) const
 {
+	sCustomAttribID.Empty();
+
 	if (HasFixedColumns())
 	{
-		if (m_nFixedAttrib == TDCA_CUSTOMATTRIB)
+		if (IsCustomFixedAttribute())
+		{
 			sCustomAttribID = m_sFixedCustomAttribID;
+
+			if (m_aCustAttribDefs.GetSize())
+				return m_aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
+
+			// else
+			return TDCA_CUSTOMATTRIB;
+		}
 		else
-			sCustomAttribID.Empty();
-		
-		return m_nFixedAttrib;
+		{
+			return m_nFixedAttrib;
+		}
 	}
 
 	// else
@@ -127,33 +121,44 @@ TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomA
 	return TDCA_NONE;
 }
 
-void CKanbanPreferencesPage::UpdateAttributeValueCombo()
+BOOL CKanbanPreferencesPage::IsCustomFixedAttribute() const 
+{ 
+	if (!KBUtils::IsCustomAttribute(m_nFixedAttrib))
+		return FALSE;
+
+	ASSERT(!m_sFixedCustomAttribID.IsEmpty());
+	return TRUE;
+}
+
+void CKanbanPreferencesPage::UpdateFixedAttributeValueCombo()
 {
-	UpdateData();
-
-	CStringArray aValues;
-
-	CString sAttribID = ((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
-	ASSERT(!sAttribID.IsEmpty());
-
-	const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
-
-	if (pValues)
+	if (HasFixedColumns())
 	{
-		POSITION pos = pValues->GetStartPosition();
-		CString sValueID, sValue;
+		UpdateData();
 
-		while (pos)
+		CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KBUtils::GetAttributeID(m_nFixedAttrib));
+		ASSERT(!sAttribID.IsEmpty());
+
+		CStringArray aValues;
+		const CKanbanValueMap* pValues = m_mapAttribValues.GetMapping(sAttribID);
+
+		if (pValues)
 		{
-			pValues->GetNextAssoc(pos, sValueID, sValue);
+			POSITION pos = pValues->GetStartPosition();
+			CString sValueID, sValue;
 
-			// Omit backlog
-			if (!sValue.IsEmpty())
-				aValues.Add(sValue);
+			while (pos)
+			{
+				pValues->GetNextAssoc(pos, sValueID, sValue);
+
+				// Omit backlog
+				if (!sValue.IsEmpty())
+					aValues.Add(sValue);
+			}
 		}
-	}
 
-	m_lcFixedColumnDefs.SetAttributeValues(aValues);
+		m_lcFixedColumnDefs.SetAttributeValues(aValues);
+	}
 }
 
 void CKanbanPreferencesPage::OnOK()
@@ -198,7 +203,11 @@ int CKanbanPreferencesPage::GetFixedColumnDefinitions(CKanbanColumnArray& aColum
 void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	pPrefs->WriteProfileInt(szKey, _T("FixedAttribute"), m_nFixedAttrib);
-	pPrefs->WriteProfileString(szKey, _T("FixedCustomAttributeID"), m_sFixedCustomAttribID);
+
+	if (IsCustomFixedAttribute())
+		pPrefs->WriteProfileString(szKey, _T("FixedCustomAttributeID"), m_sFixedCustomAttribID);
+	else
+		pPrefs->DeleteProfileEntry(szKey, _T("FixedCustomAttributeID"));
 
 	pPrefs->WriteProfileInt(szKey, _T("AlwaysShowBacklog"), m_bAlwaysShowBacklog);
 	pPrefs->WriteProfileInt(szKey, _T("SortSubtaskBelowParent"), m_bSortSubtaskBelowParent);
@@ -238,7 +247,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 {
 	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_STATUS);
 	m_sFixedCustomAttribID = pPrefs->GetProfileString(szKey, _T("FixedCustomAttributeID"));
-	
+
 	m_bAlwaysShowBacklog = pPrefs->GetProfileInt(szKey, _T("AlwaysShowBacklog"), TRUE);
 	m_bSortSubtaskBelowParent = pPrefs->GetProfileInt(szKey, _T("SortSubtaskBelowParent"), TRUE);
 	m_bShowTaskColorAsBar = pPrefs->GetProfileInt(szKey, _T("ShowTaskColorAsBar"), FALSE);
@@ -315,8 +324,8 @@ void CKanbanPreferencesPage::EnableDisableControls()
 	GetDlgItem(IDC_INDENTSUBTASKS)->EnableWindow(m_bSortSubtaskBelowParent);
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	GetDlgItem(IDC_MOVECOL_DOWN)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
+	GetDlgItem(IDC_MOVECOL_UP)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
 }
 
 void CKanbanPreferencesPage::OnSelchangeAttribute() 
@@ -330,7 +339,7 @@ void CKanbanPreferencesPage::OnSelchangeAttribute()
 	}
 
 	EnableDisableControls();
-	UpdateAttributeValueCombo();
+	UpdateFixedAttributeValueCombo();
 }
 
 void CKanbanPreferencesPage::OnSortSubtasksBelowParents()
@@ -345,26 +354,21 @@ void CKanbanPreferencesPage::OnMoveFixedColDown()
 	VERIFY(m_lcFixedColumnDefs.MoveSelectedColumnRow(FALSE));
 }
 
-void CKanbanPreferencesPage::OnUpdateFixedMoveColDown(CCmdUI* pCmdUI) 
-{
-	int nRow = m_lcFixedColumnDefs.GetCurSel();
-
-	pCmdUI->Enable(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
-}
-
 void CKanbanPreferencesPage::OnMoveFixedColUp() 
 {
 	VERIFY(m_lcFixedColumnDefs.MoveSelectedColumnRow(TRUE));
 }
 
-void CKanbanPreferencesPage::OnUpdateMoveFixedColUp(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
-}
-
 CString CKanbanPreferencesPage::GetFixedAttributeID() const
 {
-	return ((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? m_sFixedCustomAttribID : KANBANITEM::GetAttributeID(m_nFixedAttrib));
+	if (IsCustomFixedAttribute())
+	{
+		ASSERT(!m_sFixedCustomAttribID.IsEmpty());
+		return m_sFixedCustomAttribID;
+	}
+	
+	// else
+	return KBUtils::GetAttributeID(m_nFixedAttrib);
 }
 
 void CKanbanPreferencesPage::OnPopulateFixedColumns()
@@ -405,15 +409,9 @@ void CKanbanPreferencesPage::OnPopulateFixedColumns()
 	m_lcFixedColumnDefs.SetCurSel(0);
 }
 
-void CKanbanPreferencesPage::OnUpdatePopulateColumns(CCmdUI* pCmdUI)
-{
-	pCmdUI->Enable(TRUE);
-}
-
 void CKanbanPreferencesPage::OnItemchangedColumndefs(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	EnableDisableControls();
 	
 	*pResult = 0;
 }
@@ -446,30 +444,32 @@ void CKanbanPreferencesPage::BuildDisplayAttributeListBox()
 {
 	ASSERT(m_lbDisplayAttrib.GetSafeHwnd());
 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCBY,	TDCA_ALLOCBY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCTO,	TDCA_ALLOCTO); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CATEGORY,	TDCA_CATEGORY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_COST,		TDCA_COST); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDATE,	TDCA_CREATIONDATE);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDBY,	TDCA_CREATEDBY);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DONEDATE,	TDCA_DONEDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DUEDATE,	TDCA_DUEDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_EXTERNALID,	TDCA_EXTERNALID); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,		TDCA_FLAG); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILELINK,	TDCA_FILELINK); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,	TDCA_LASTMODDATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,	TDCA_PERCENT); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,	TDCA_PRIORITY); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,	TDCA_RECURRENCE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RISK,		TDCA_RISK); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,	TDCA_STARTDATE);
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,		TDCA_STATUS); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,		TDCA_TAGS); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,		TDCA_ID); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,	TDCA_TIMEESTIMATE); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,	TDCA_TIMESPENT); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,	TDCA_VERSION); 
-	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PARENT,		TDCA_PARENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCBY,		TDCA_ALLOCBY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_ALLOCTO,		TDCA_ALLOCTO); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CATEGORY,		TDCA_CATEGORY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_COST,			TDCA_COST); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDATE,		TDCA_CREATIONDATE);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_CREATEDBY,		TDCA_CREATEDBY);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DONEDATE,		TDCA_DONEDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_DUEDATE,		TDCA_DUEDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_EXTERNALID,		TDCA_EXTERNALID); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FLAG,			TDCA_FLAG); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_FILELINK,		TDCA_FILELINK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LASTMOD,		TDCA_LASTMODDATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_LOCK,			TDCA_LOCK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PERCENT,		TDCA_PERCENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PRIORITY,		TDCA_PRIORITY); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RECURRENCE,		TDCA_RECURRENCE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_RISK,			TDCA_RISK); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STARTDATE,		TDCA_STARTDATE);
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_STATUS,			TDCA_STATUS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TAGS,			TDCA_TAGS); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TASKID,			TDCA_ID); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEEST,		TDCA_TIMEESTIMATE); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMEREMAINING,	TDCA_TIMEREMAINING); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_TIMESPENT,		TDCA_TIMESPENT); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_VERSION,		TDCA_VERSION); 
+	CDialogHelper::AddString(m_lbDisplayAttrib, IDS_DISPLAY_PARENT,			TDCA_PARENT); 
 
 	int nItem = m_aDisplayAttrib.GetSize();
 	
@@ -509,16 +509,14 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CPreferencesDlgBase)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-int CKanbanPreferencesDlg::DoModal(const CKanbanCtrl& ctrlKanban)
+void CKanbanPreferencesDlg::SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs)
 {
-	m_page.SetCustomAttributes(ctrlKanban.GetCustomAttributeDefinitions());
+	m_page.SetCustomAttributes(aCustomAttribDefs);
+}
 
-	CKanbanAttributeValueMap mapValues;
-	ctrlKanban.GetAttributeValues(mapValues);
-
+void CKanbanPreferencesDlg::SetAttributeValues(const CKanbanAttributeValueMap& mapValues)
+{
 	m_page.SetAttributeValues(mapValues);
-	
-	return CPreferencesDlgBase::DoModal();
 }
 
 BOOL CKanbanPreferencesDlg::OnInitDialog() 

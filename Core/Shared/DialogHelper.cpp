@@ -1751,10 +1751,17 @@ void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
 {
 	CWnd* pChild = pParent->GetWindow(GW_CHILD);
 
-	while (pChild)
+	if (pChild)
 	{
-		pChild->Invalidate(bErase);
-		pChild = pChild->GetNextWindow();
+		while (pChild)
+		{
+			InvalidateAllCtrls(pChild);
+			pChild = pChild->GetNextWindow();
+		}
+	}
+	else
+	{
+		::InvalidateRect(*pParent, NULL, bErase);
 	}
 }
 
@@ -1861,6 +1868,13 @@ void CDialogHelper::SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet)
 		pWnd->ModifyStyle(0, dwStyle);
 	else
 		pWnd->ModifyStyle(dwStyle, 0);
+}
+
+BOOL CDialogHelper::HasStyle(HWND hWnd, DWORD dwStyle, BOOL bExStyle)
+{
+	DWORD dwStyles = ::GetWindowLong(hWnd, (bExStyle ? GWL_EXSTYLE : GWL_STYLE));
+
+	return Misc::HasFlag(dwStyles, dwStyle);
 }
 
 void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
@@ -2045,9 +2059,27 @@ HWND CDialogHelper::GetWindowFromPoint(HWND hwndParent, POINT ptScreen)
 		
 		hWnd = hwndChild; // keep going
 	}
-	ASSERT(hWnd && ::IsChild(hwndParent, hWnd));
+	
+	if (hWnd && IsChildOrSame(hwndParent, hWnd))
+		return hWnd;
 
-	return hWnd;
+	ASSERT(hWnd == NULL);
+	return NULL;
+}
+
+HWND CDialogHelper::GetParentOwner(HWND hWnd)
+{
+	CWnd* pFocus = CWnd::FromHandle(hWnd);
+
+	if (!pFocus)
+		return NULL;
+
+	CWnd* pParent = pFocus->GetParentOwner();
+
+	if (!pParent)
+		return NULL;
+
+	return pParent->GetSafeHwnd();
 }
 
 BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)

@@ -126,6 +126,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
     <ClInclude Include="DateUtil.h" />
+    <ClInclude Include="DaysOfWeekCheckListBox.h" />
     <ClInclude Include="DPIScaling.h" />
     <ClInclude Include="DragDropUtil.h" />
     <ClInclude Include="FormsUtil.h" />
@@ -134,11 +135,14 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="OutlookUtil.h" />
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="GeometryUtil.h" />
+    <ClInclude Include="RangeSliderCtrl.h" />
+    <ClInclude Include="RichTextBoxEx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ContentControl.h" />
     <ClInclude Include="Preferences.h" />
     <ClInclude Include="TaskList.h" />
+    <ClInclude Include="TimeComboBox.h" />
     <ClInclude Include="Toolbars.h" />
     <ClInclude Include="Translator.h" />
     <ClInclude Include="TreeCtrl.h" />
@@ -151,6 +155,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />
     <ClCompile Include="DateUtil.cpp" />
+    <ClCompile Include="DaysOfWeekCheckListBox.cpp" />
     <ClCompile Include="DPIScaling.cpp" />
     <ClCompile Include="DragDropUtil.cpp" />
     <ClCompile Include="FormsUtil.cpp" />
@@ -159,6 +164,8 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="OutlookUtil.cpp" />
     <ClCompile Include="PluginHelpers.cpp" />
     <ClCompile Include="GeometryUtil.cpp" />
+    <ClCompile Include="RangeSliderCtrl.cpp" />
+    <ClCompile Include="RichTextBoxEx.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -166,6 +173,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="ContentControl.cpp" />
     <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="TaskList.cpp" />
+    <ClCompile Include="TimeComboBox.cpp" />
     <ClCompile Include="Toolbars.cpp" />
     <ClCompile Include="Translator.cpp" />
     <ClCompile Include="TreeCtrl.cpp" />
@@ -202,6 +210,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </ProjectReference>
     <ProjectReference Include="..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\3rdParty\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

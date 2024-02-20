@@ -82,7 +82,7 @@ public:
 	double GetProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dDefault = 0) const;
 	bool WriteProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dValue);
 	
-	int GetProfileSectionNames(CStringArray& aSections);
+	int GetProfileSectionNames(CStringArray& aSections, LPCTSTR szPrefix = NULL);
 	BOOL HasProfileSection(LPCTSTR lpszSection) const;
 	BOOL DeleteProfileSection(LPCTSTR lpszSection, BOOL bIncSubSections = FALSE);
 	BOOL DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry);
@@ -148,7 +148,9 @@ private:
 		bool WriteProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dValue);
 		
 		bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry);
-		bool DeleteProfileSection(LPCWSTR lpszSection);
+		bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections);
+
+		bool HasProfileSection(LPCWSTR lpszSection) const;
 
 	protected:
 		CPreferences& m_prefs;

@@ -8,12 +8,17 @@
 #include "..\shared\Misc.h"
 #include "..\shared\DialogHelper.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\Localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportExportComboBox
@@ -118,13 +123,6 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
-int CImportExportComboBox::CalcMinItemHeight(BOOL bList) const
-{
-	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
-
-	return (nMinHeight + 2); // icon padding
-}
-
 void CImportExportComboBox::BuildCombo()
 {
 	// once only
@@ -155,6 +153,8 @@ void CImportExportComboBox::BuildCombo()
 
 		CDialogHelper::AddString(*this, sItem, nImpExp);
 	}
+
+	CLocalizer::EnableTranslation(*this, FALSE);
 }
 
 CString CImportExportComboBox::GetImpExpMenuText(int nImpExp) const
@@ -227,3 +227,19 @@ void CImportExportComboBox::DDX(CDataExchange* pDX, CString& value)
 	else
 		SetSelectedTypeID(value);
 }
+
+int CImportExportComboBox::GetExtraListboxWidth() const
+{
+	return (COwnerdrawComboBoxBase::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CImportExportComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
+
+	return nMinHeight;
+}
+

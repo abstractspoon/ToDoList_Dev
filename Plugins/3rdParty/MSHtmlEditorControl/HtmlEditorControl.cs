@@ -2763,6 +2763,26 @@ namespace MSDN.Html.Editor
 			return InsertLinkPrompt("", "");
 		}
 
+		protected mshtmlAnchorElement GetAnchorAtCaret()
+		{
+			mshtmlTextRange range = GetTextRange();
+
+			if (range == null)
+				return null;
+
+			// calculate the items working with
+			mshtmlElement element = (mshtmlElement)range.parentElement();
+
+			while (element != null && !(element is mshtmlAnchorElement))
+				element = (mshtmlElement)element.parentElement;
+
+			// extract the HREF properties
+			if (element is mshtmlAnchorElement)
+				return (mshtmlAnchorElement)element;
+
+			return null;
+		}
+
 		protected bool InsertLinkPrompt(string hrefLink, string hrefText)
 		{
 			// get the text range working with

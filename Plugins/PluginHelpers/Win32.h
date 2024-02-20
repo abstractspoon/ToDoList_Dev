@@ -29,6 +29,7 @@ namespace Abstractspoon
 				static void RemoveClientEdge(IntPtr hWnd);
 				static void AddClientEdge(IntPtr hWnd);
 
+				static bool HasStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 
@@ -42,8 +43,18 @@ namespace Abstractspoon
 				static float PointsToEms(int nPointSize);
 
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
+				static bool SetComboBoxCue(IntPtr hWnd, String^ sCueText);
+				static bool SetEditMargins(IntPtr hWnd, int nAllMargins);
+				static bool SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom);
+
 				static void ActivateApp(IntPtr hWnd);
 				static int GetSystemDPI();
+
+				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
+				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
+
+				static int GetWmNotifyCode(IntPtr lParam);
+				static void SetArrowCursor();
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd);

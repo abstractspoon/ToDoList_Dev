@@ -28,7 +28,7 @@ class CTDLToolsUserInputDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDCAUTOLISTDATA& tdlListData, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bISODates);
+	CTDLToolsUserInputDlg(const CCLArgArray& aArgs, const TDCAUTOLISTDATA& tdlListData, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 	virtual ~CTDLToolsUserInputDlg();
 
 	int DoModal(LPCTSTR szTitle);
@@ -56,7 +56,6 @@ protected:
 	CRect m_rWindowOrg;
 	UINT m_nDividerID, m_nHelpBtnID;
 	CWinHelpButton m_btnHelp;
-	BOOL m_bISODates;
 
 	const TDCAUTOLISTDATA& m_tdlListData;
 	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;

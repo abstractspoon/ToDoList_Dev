@@ -150,7 +150,7 @@ void CTDLFilterDateComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem,
 	if (!(nItemState & ODS_SELECTED) && !bList && (dwItemData == FD_ANY))
 	{
 		// Display <any> in window prompt colour if nothing is checked
-		crText = CWndPrompt::GetTextColor(*this);
+		crText = CWndPrompt::GetTextColor();
 	}
 	
 	CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);

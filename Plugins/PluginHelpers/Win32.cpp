@@ -7,6 +7,7 @@
 #include "PluginHelpers.h"
 
 #include <Shared\MessageBox.h>
+#include <Shared\GraphicsMisc.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -68,36 +69,42 @@ void Win32::DoFrameChange(IntPtr hWnd)
 			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 }
 
-bool Win32::RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
+bool Win32::HasStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 {
 	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
 	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
 
-	if ((nCurStyle & nStyle) == nStyle)
-	{
-		nCurStyle &= ~nStyle;
-		SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+	return ((nStyle & nCurStyle) == nStyle);
+}
 
-		return true;
-	}
+bool Win32::RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
+{
+	if (!HasStyle(hWnd, nStyle, bExStyle))
+		return false;
 
-	return false;
+	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
+	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
+	
+	nCurStyle &= ~nStyle;
+	SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+
+	// Sanity check
+	return !HasStyle(hWnd, nStyle, bExStyle);
 }
 
 bool Win32::AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 {
+	if (HasStyle(hWnd, nStyle, bExStyle))
+		return false;
+
 	int nStyleType = (bExStyle ? GWL_EXSTYLE : GWL_STYLE);
 	int nCurStyle = GetWindowLong(GetHwnd(hWnd), nStyleType);
 
-	if ((nCurStyle & nStyle) == 0)
-	{
-		nCurStyle |= nStyle;
-		SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
+	nCurStyle |= nStyle;
+	SetWindowLong(GetHwnd(hWnd), nStyleType, nCurStyle);
 
-		return true;
-	}
-
-	return false;
+	// Sanity check
+	return HasStyle(hWnd, nStyle, bExStyle);
 }
 
 int Win32::GetVScrollPos(IntPtr hWnd)
@@ -172,11 +179,64 @@ bool Win32::SetEditCue(IntPtr hWnd, String^ sCueText)
 	return (0 != ::SendMessage(GetHwnd(hWnd), EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
 }
 
+bool Win32::SetComboBoxCue(IntPtr hWnd, String^ sCueText)
+{
+	HWND hEdit = ::GetDlgItem(GetHwnd(hWnd), 1001);
+
+	return (0 != ::SendMessage(hEdit, EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
+}
+
+bool Win32::SetEditMargins(IntPtr hWnd, int nAllMargins)
+{
+	return SetEditMargins(hWnd, nAllMargins, nAllMargins, nAllMargins, nAllMargins);
+}
+
+bool Win32::SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom)
+{
+	RECT rect = { 0 };
+	::SendMessage(GetHwnd(hWnd), EM_GETRECT, 0, (LPARAM)&rect);
+
+	if (::IsRectEmpty(&rect))
+		return false;
+
+	rect.left += nLeft;
+	rect.top += nTop;
+	rect.right -= nRight;
+	rect.bottom -= nBottom;
+
+	::SendMessage(GetHwnd(hWnd), EM_SETRECT, 0, (LPARAM)&rect);
+	return true;
+}
+
 void Win32::ActivateApp(IntPtr hWnd)
 {
 	HWND hwndApp = GetTopWindow(GetHwnd(hWnd));
 
 	SetForegroundWindow(hwndApp);
+}
+
+int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
+{
+	return ::SendMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
+}
+
+int Win32::PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
+{
+	return ::PostMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
+}
+
+int Win32::GetWmNotifyCode(IntPtr lParam)
+{
+	if (lParam == IntPtr::Zero)
+		return 0;
+
+	NMHDR* pNMHDR = (NMHDR*)lParam.ToPointer();
+	return (int)pNMHDR->code;
+}
+
+void Win32::SetArrowCursor()
+{
+	GraphicsMisc::SetStandardCursor(IDC_ARROW);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -882,7 +882,7 @@ void CXHTMLStatic::Draw(HDC hDC)
 				strAnchorText = strText.Mid(9, index-10);
 				strText = strText.Mid(index+1);
 				n = strText.GetLength();
-				crText = RGB(0, 0, 255);
+				crText = GetSysColor(COLOR_HOTLIGHT);
 				m_bInAnchor = TRUE;
 				continue;
 			}
@@ -1352,9 +1352,6 @@ void CXHTMLStatic::PreSubclassWindow()
     ::SetWindowLong(GetSafeHwnd(), GWL_STYLE, dwStyle | SS_NOTIFY);
 
 	CStatic::PreSubclassWindow();
-
-	// create the tooltip
-	m_ToolTip.Create(this);
 }
 
 //=============================================================================

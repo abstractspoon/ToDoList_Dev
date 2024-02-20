@@ -136,12 +136,21 @@ LRESULT CCtrlTextHighlighter::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 				ASSERT(pDC);
 
 				pDC->SetBkMode(TRANSPARENT);
+				pDC->SetTextColor(GetTextColor());
 			}
 		}
 		break;
 	}
 
 	return lr;
+}
+
+COLORREF CCtrlTextHighlighter::GetTextColor() const
+{
+	if (m_crHighlight == CLR_NONE)
+		return ::GetSysColor(COLOR_WINDOWTEXT);
+
+	return GraphicsMisc::GetBestTextColor(m_crHighlight);
 }
 
 BOOL CCtrlTextHighlighter::TextContainsOneOf(const CWnd* pWnd, const CStringArray& aSearch)

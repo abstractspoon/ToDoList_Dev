@@ -72,7 +72,6 @@ struct TDCCADATA
 
 	CString FormatAsArray(TCHAR cSep = 0) const;
 	CString FormatAsDate(BOOL bISO, BOOL bWithTime) const;
-	CString FormatAsTimePeriod(int nDecimalPlaces = 2) const;
 
 protected:
 	CString sData, sExtra;

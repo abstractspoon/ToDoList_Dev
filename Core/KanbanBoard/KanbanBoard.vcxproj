@@ -119,7 +119,7 @@ copy unicode_release\KanbanBoard.dll ..\todolist\unicode_release /y
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;_EXPORTING;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_MBCS;_AFXEXT;_EXPORTING;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -151,6 +151,8 @@ copy unicode_release\KanbanBoard.dll ..\todolist\unicode_release /y
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -179,6 +181,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="KanbanColumnCtrlArray.cpp" />
+    <ClCompile Include="KanbanGroupByComboBox.cpp" />
     <ClCompile Include="KanbanOptionComboBox.cpp" />
     <ClCompile Include="KanbanPreferencesDlg.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -223,6 +226,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
     <ClInclude Include="KanbanFixedColumnListCtrl.h" />
     <ClInclude Include="KanbanColumnCtrl.h" />
     <ClInclude Include="KanbanColumnCtrlArray.h" />
+    <ClInclude Include="KanbanGroupByComboBox.h" />
     <ClInclude Include="Kanbanmsg.h" />
     <ClInclude Include="KanbanOptionComboBox.h" />
     <ClInclude Include="KanbanPreferencesDlg.h" />

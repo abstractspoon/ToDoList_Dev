@@ -1,4 +1,4 @@
-// TDImportExportMgr.h: interface for the CTDLImportExportMgr class.
+// TDImportExportMgr.h: interface for the CTDCImportExportMgr class.
 //
 //////////////////////////////////////////////////////////////////////
 

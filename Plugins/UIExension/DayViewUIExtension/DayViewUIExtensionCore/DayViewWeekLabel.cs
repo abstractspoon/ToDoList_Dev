@@ -44,20 +44,20 @@ namespace DayViewUIExtension
 				{
 					if (endDate.Month == m_StartDate.Month)
 					{
-						Text = m_StartDate.ToString("MMMM yyyy ");
+						Text = m_StartDate.ToString("MMM yyyy ");
 					}
 					else
 					{
 						Text = String.Format("{0} - {1} ",
-											m_StartDate.ToString("MMMM"),
-											endDate.ToString("MMMM yyyy"));
+											m_StartDate.ToString("MMM"),
+											endDate.ToString("MMM yyyy"));
 					}
 				}
 				else
 				{
 					Text = String.Format("{0} - {1} ",
-										m_StartDate.ToString("MMMM yyyy"),
-										endDate.ToString("MMMM yyyy"),
+										m_StartDate.ToString("MMM yyyy"),
+										endDate.ToString("MMM yyyy"),
 										m_StartDate.Year);
 				}
 

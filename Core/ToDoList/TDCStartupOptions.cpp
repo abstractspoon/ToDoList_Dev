@@ -414,8 +414,13 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	if (cmdInfo.HasOption(SWITCH_FORCEVISIBLE))
 		m_dwFlags |= TLD_FORCEVISIBLE;
 
-	if (cmdInfo.HasOption(SWITCH_NOPWORDPROMPT))
+	if (cmdInfo.HasOption(SWITCH_NOPASSWORDPROMPT))
+	{
 		m_dwFlags &= ~TLD_PASSWORDPROMPTING;
+
+		if (cmdInfo.HasOption(SWITCH_MASTERPASSWORD))
+			m_dwFlags |= TLD_MASTERPASSWORDENABLED;
+	}
 
 	if (cmdInfo.HasOption(SWITCH_LOGGING))
 	{

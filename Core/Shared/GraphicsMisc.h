@@ -73,6 +73,13 @@ enum GM_OLECURSOR // OLE drag'n'drop cursors
 	GMOC_COUNT
 };
 
+enum GM_ANSISYMBOL // DrawAnsiSymbol
+{
+	MARLETT_MENURIGHT	= 0x34,
+	MARLETT_MENUDOWN	= 0x36,
+	MARLETT_CLOSE		= 0x72,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef DCX_NODELETERGN
@@ -132,6 +139,7 @@ namespace GraphicsMisc
 	CSize GetIconSize(HICON hIcon);
 	CSize GetBitmapSize(HBITMAP hBmp);
 	HICON GetAppWindowIcon(BOOL bLarge);
+	HBITMAP MakeWizardImage(HICON hIcon); // 49x49
 
 	HCURSOR LoadHandCursor();
 	HCURSOR LoadDragDropCursor(GM_OLECURSOR nCursor);
@@ -212,7 +220,7 @@ namespace GraphicsMisc
 	COLORREF Lighter(COLORREF color, double dAmount, BOOL bRGB = TRUE);
 	COLORREF Darker(COLORREF color, double dAmount, BOOL bRGB = TRUE);
 	COLORREF Blend(COLORREF color1, COLORREF color2, double dAmount);
-	COLORREF GetBestTextColor(COLORREF crBack);
+	COLORREF GetBestTextColor(COLORREF crBack, BOOL bEnabled = TRUE);
 	void CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nNumColors, CDWordArray& aColors, BOOL bRGB = TRUE);
 	CString GetWebColor(COLORREF color);
 	COLORREF ParseWebColor(const CString& sHexColor);
@@ -231,11 +239,15 @@ namespace GraphicsMisc
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
 	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
 	CPoint CentrePoint(LPCRECT prcRect);
+	void AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags); // DT_LEFT, etc
 
-	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags = GMIB_NONE, LPCRECT prClip = NULL); 
-	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags = GMIB_NONE);
+	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip = NULL); 
+	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetSolidColor(HBRUSH hBrush);
+
+	COLORREF GetGroupHeaderColor();
+	void DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CString& sText, COLORREF crText = CLR_NONE, COLORREF crBack = CLR_NONE);
 	
 	BOOL ForceIconicRepresentation(HWND hWnd, BOOL bForce = TRUE);
 	BOOL EnableAeroPeek(HWND hWnd, BOOL bEnable = TRUE);

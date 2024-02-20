@@ -16,6 +16,11 @@ namespace DayViewUIExtension
 	{
 		public string CustomAttributeId { get; private set; }
 
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		{
+			CustomAttributeId = "";
+		}
+
 		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
 		{
 			CustomAttributeId = attribId;
@@ -23,124 +28,131 @@ namespace DayViewUIExtension
 	}
 
 	public delegate void TDLAppointmentEventHandler(object sender, TDLMoveAppointmentEventArgs args);
+	public delegate bool TDLContextMenuEventHandler(object sender, MouseEventArgs args);
 
 	// ------------------------------------------------------------------------------
 
-	public class TDLDayView : Calendar.DayView, ILabelTipHandler
-    {
-        private uint m_SelectedTaskID = 0;
+	public partial class TDLDayView : Calendar.DayView, ILabelTipHandler
+	{
+		private uint m_SelectedTaskID = 0;
 		private uint m_VisibleSelectedTaskID = 0;
 		private uint m_MaxTaskID = 0;
 
 		private int m_UserMinSlotHeight = -1;
 
-        private bool m_HideParentTasks = true;
-		private bool m_DisplayTasksContinuous = true;
+		private string m_HideParentTasksTag;
+
+		private bool m_HideParentTasks = true;
 		private bool m_HideTasksWithoutTimes = true;
-        private bool m_HideTasksSpanningWeekends = false;
-        private bool m_HideTasksSpanningDays = false;
+		private bool m_HideTasksSpanningWeekends = false;
+		private bool m_HideTasksSpanningDays = false;
 		private bool m_ShowFutureOcurrences = true;
 
-		private Dictionary<uint, TaskItem> m_Items;
-        private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
+		private TaskItems m_TaskItems;
+		private TimeBlocks m_TimeBlocks;
+
+		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
-		private TDLRenderer m_Renderer;
+		//private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
 		private Translator m_Trans;
+		private UIThemeToolbarRenderer m_ToolbarRenderer;
 
 		private int LabelTipBorder
 		{
 			get { return DPIScaling.Scale(4); }
 		}
 
-        public Color GridlineColor
-        {
-            set
-            {
-                if (value != m_Renderer.GridlineColor)
-                {
-                    m_Renderer.GridlineColor = value;
-                    Invalidate();
-                }
-            }
-        }
-
 		public bool ReadOnly { get; set; }
 
 		// ----------------------------------------------------------------
 
 		public new event TDLAppointmentEventHandler AppointmentMove;
+		public new event TDLContextMenuEventHandler ContextMenu;
 
 		// ----------------------------------------------------------------
 
-        public TDLDayView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
-        {
-            minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
-            hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
-            minDayHeaderHeight = DPIScaling.Scale(minDayHeaderHeight);
-            longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
+		public TDLDayView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
+		{
+			minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
+			hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
+			minDayHeaderHeight = DPIScaling.Scale(minDayHeaderHeight);
+			longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
 			dayGripWidth = 1; // to match app styling
 
 			m_Trans = trans;
-			m_Renderer = new TDLRenderer(Handle, taskIcons);
+			m_TaskIcons = taskIcons;
+			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
-            m_LabelTip = new LabelTip(this);
+			m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
 
-			m_Items = new Dictionary<uint, TaskItem>();
+			m_TaskItems = new TaskItems();
+			m_TimeBlocks = new TimeBlocks();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
 
 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
+			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
 			InitializeComponent();
-        }
+		}
 
-        // ILabelTipHandler implementation
-        public Font GetFont()
-        {
-            return m_Renderer.BaseFont;
-        }
+		public IEnumerable<TaskItem> TaskItems { get { return m_TaskItems.Values; } }
 
-        public Control GetOwner()
-        {
-            return this;
-        }
+		// ILabelTipHandler implementation
+		public Control GetOwner()
+		{
+			return this;
+		}
 
-        public uint ToolHitTest(Point ptScreen, ref String tipText, ref Rectangle toolRect, ref bool multiLine)
-        {
+		public bool ForceShowSelection;
+
+		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
+
+		public LabelTipInfo ToolHitTest(Point ptScreen)
+		{
 			if (IsResizingAppointment())
-				return 0;
+				return null;
 
-            var pt = PointToClient(ptScreen);
-            Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y, out toolRect);
+			var tip = new LabelTipInfo()
+			{
+				Font = BaseFont(),
+			};
 
-            if (appt == null)
-                return 0;
+			var pt = PointToClient(ptScreen);
+			var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out tip.Rect) as TDLAppointmentView);
 
-			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+			if (tdlView == null)
+				return null;
 
-            if ((apptView == null) || !apptView.TextRect.Contains(pt))
-                return 0;
+			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
 
-			toolRect = apptView.TextRect;
-			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, TextOffset);
+			tip.Rect.Inflate(TextPadding, TextPadding);
+
+			var appt = tdlView.Appointment;
+			tip.Id = appt.Id;
 
 			if (appt is TaskExtensionItem)
 			{
 				// NOTE: - Must match 'Calendar' View in 'Core' project
-				if (appt is FutureOccurrence)
+				if (appt is FutureTaskOccurrence)
 				{
-					tipText = m_Trans.Translate("Future Occurrence");
+					tip.Text = m_Trans.Translate("Future Occurrence");
 				}
-				else if (appt is CustomDateAttribute)
+				else if (appt is CustomTaskDateAttribute)
 				{
-					var apptDate = (appt as CustomDateAttribute);
+					var apptDate = (appt as CustomTaskDateAttribute);
 					var custAttrib = m_CustomDateDefs.Find(x => (x.Id == apptDate.AttributeId));
 
-					tipText = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
+					tip.Text = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
+				}
+				else if (appt is TaskTimeBlock)
+				{
+					tip.Text = m_Trans.Translate("Time Block");
 				}
 				else
 				{
@@ -149,48 +161,50 @@ namespace DayViewUIExtension
 
 				var pos = PointToClient(MousePosition);
 				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-				toolRect.Location = pos;
+				tip.Rect.Location = pos;
+
+				tip.InitialDelay = 500;
 			}
 			else // 'Real' task
 			{
+				tip.Text = appt.Title;
+
 				if (IsLongAppt(appt))
 				{
 					// single line tooltips
-					Size tipSize = m_LabelTip.CalcTipSize(appt.Title, toolRect.Width);
+					Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
 
-					if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
-						return 0;
+					if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
+						return null;
 
-					multiLine = false; // always
+					tip.MultiLine = false; // always
 				}
 				else
 				{
 					var availRect = GetTrueRectangle();
 
-					if (apptView.TextRect.Top < availRect.Top)
+					if (tip.Rect.Top < availRect.Top)
 					{
 						// If the top of the text rectangle is hidden we always 
 						// need a label tip so we just clip to the avail space
-						toolRect.Intersect(availRect);
+						tip.Rect.Intersect(availRect);
 					}
 					else
 					{
 						// Determine if text will fit in what's visible of the task
-						toolRect.Intersect(availRect);
+						tip.Rect.Intersect(availRect);
 
-						Size tipSize = m_LabelTip.CalcTipSize(appt.Title, toolRect.Width);
+						Size tipSize = m_LabelTip.CalcTipSize(tip.Text, tip.Font, tip.Rect.Width);
 
-						if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
-							return 0;
+						if ((tipSize.Width <= tip.Rect.Width) && (tipSize.Height <= tip.Rect.Height))
+							return null;
 					}
 
-					multiLine = true; // always
+					tip.MultiLine = true; // always
 				}
-
-				tipText = appt.Title;
 			}
 
-			return appt.Id;
+			return tip;
 		}
 
 		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
@@ -205,80 +219,96 @@ namespace DayViewUIExtension
 					TaskItem taskItem = (GetRealAppointment(move.Appointment) as TaskItem);
 					string custAttribId = String.Empty;
 
-					if (args.Appointment is CustomDateAttribute)
+					if (args.Appointment is CustomTaskDateAttribute)
 					{
-						custAttribId = (args.Appointment as CustomDateAttribute).AttributeId;
+						custAttribId = (args.Appointment as CustomTaskDateAttribute).AttributeId;
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
 					}
-
-					AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
+					else if (args.Appointment is TaskTimeBlock)
+					{
+						(args.Appointment as TaskTimeBlock).UpdateTimeBlock();
+					}
+					else
+					{
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.Finished));
+					}
 				}
 			}
 		}
 
-        public uint IconHitTest(Point ptScreen)
-        {
-            var pt = PointToClient(ptScreen);
-            Calendar.Appointment appt = GetRealAppointmentAt(pt.X, pt.Y);
+		public uint IconHitTest(Point ptScreen)
+		{
+			var pt = PointToClient(ptScreen);
+			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-            if (appt == null)
-                return 0;
+			if (appt == null)
+				return 0;
 
 			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
 
-            if ((apptView == null) || !apptView.IconRect.Contains(pt))
-                return 0;
+			if ((apptView == null) || !apptView.IconRect.Contains(pt))
+				return 0;
 
 			return apptView.Appointment.Id;
-        }
+		}
 
 		protected override void WndProc(ref Message m)
-        {
-            if (m_LabelTip!= null)
-                m_LabelTip.ProcessMessage(m);
+		{
+			if (m_LabelTip != null)
+				m_LabelTip.ProcessMessage(m);
 
-            base.WndProc(ref m);
-        }
+			base.WndProc(ref m);
+		}
 
 		protected override Calendar.SelectionTool NewSelectionTool()
 		{
 			return new TDLSelectionTool();
 		}
 
-		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect)
+		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt)
 		{
-			return new TDLAppointmentView(appt, rect, gripRect);
+			return new TDLAppointmentView(appt);
 		}
 
-        protected void InitializeComponent()
-        {
-            Calendar.DrawTool drawTool = new Calendar.DrawTool();
-            drawTool.DayView = this;
+		protected void InitializeComponent()
+		{
+			Calendar.DrawTool drawTool = new Calendar.DrawTool();
+			drawTool.DayView = this;
 
-            this.ActiveTool = drawTool;
-            this.AllowInplaceEditing = true;
-            this.AllowNew = false;
-            this.AmPmDisplay = true;
-            this.Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
-                                     System.Windows.Forms.AnchorStyles.Left |
-                                     System.Windows.Forms.AnchorStyles.Right);
-            this.AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
-            this.DrawAllAppBorder = false;
-            this.Location = new System.Drawing.Point(0, 0);
-            this.MinHalfHourApp = false;
-            this.Name = "m_dayView";
-            this.Renderer = m_Renderer;
-            this.SelectionEnd = new System.DateTime(((long)(0)));
-            this.SelectionStart = new System.DateTime(((long)(0)));
-            this.Size = new System.Drawing.Size(798, 328);
-            this.SlotsPerHour = 4;
-            this.TabIndex = 0;
-            this.Text = "m_dayView";
-            this.ReadOnly = false;
+			ActiveTool = drawTool;
+			AllowInplaceEditing = true;
+			AllowNew = false;
+			AmPmDisplay = true;
+			Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
+									 System.Windows.Forms.AnchorStyles.Left |
+									 System.Windows.Forms.AnchorStyles.Right);
+			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
+			DrawAllAppBorder = false;
+			Location = new Point(0, 0);
+			MinHalfHourApp = false;
+			Name = "m_dayView";
+			Renderer = this;
+			Size = new Size(798, 328);
+			SlotsPerHour = 4;
+			TabIndex = 0;
+			Text = "m_dayView";
+			ReadOnly = false;
 
-			this.ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(this.OnResolveAppointments);
-            this.SelectionChanged += new Calendar.AppointmentEventHandler(this.OnSelectionChanged);
-            this.WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
+			ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(OnResolveAppointments);
+			SelectionChanged += new Calendar.AppointmentEventHandler(OnSelectionChanged);
+			WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
+			AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
+		}
 
+		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
+		{
+			if ((SelectedAppointment != null) && 
+				(SelectedAppointment is TaskItem) && 
+				SelectedAppointment.IsLongAppt() && 
+				e.Finished)
+			{
+				m_TimeBlocks.SynchroniseDates(SelectedAppointment as TaskItem);
+			}
 		}
 
 		public bool ShowLabelTips
@@ -287,37 +317,30 @@ namespace DayViewUIExtension
 			get { return m_LabelTip.Active; }
 		}
 
-        public bool IsTaskDisplayable(uint dwTaskID)
-        {
-            if (dwTaskID == 0)
-                return false;
+		public bool IsTaskDisplayable(uint dwTaskID)
+		{
+			if (dwTaskID == 0)
+				return false;
 
 			TaskExtensionItem extItem;
 
 			if (m_ExtensionItems.TryGetValue(dwTaskID, out extItem))
 				return IsItemDisplayable(extItem);
 
-			TaskItem item;
+			return IsItemDisplayable(m_TaskItems.GetItem(dwTaskID));
+		}
 
-			if (m_Items.TryGetValue(dwTaskID, out item))
-	            return IsItemDisplayable(item);
+		public void SetHideParentTasks(bool hide, string tag)
+		{
+			m_HideParentTasks = hide;
 
-			// else
-			return false;
-        }
+			if (hide)
+				m_HideParentTasksTag = tag;
+			else
+				m_HideParentTasksTag = string.Empty;
 
-        public bool HideParentTasks
-        {
-            get { return m_HideParentTasks; }
-            set
-            {
-                if (value != m_HideParentTasks)
-                {
-                    m_HideParentTasks = value;
-                    FixupSelection(false, true);
-                }
-            }
-        }
+			FixupSelection(false, true);
+		}
 
 		public bool ShowFutureOccurrences
 		{
@@ -332,93 +355,110 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool AutoCalculateDependencyDates
+		public bool DependencyDatesAreCalculated
 		{
 			get; set;
 		}
 
-		public bool DisplayTasksContinuous
+		private bool m_DisplayLongTasksContinuous = true;
+
+		public bool DisplayLongTasksContinuous
 		{
-			get { return m_DisplayTasksContinuous; }
+			get { return m_DisplayLongTasksContinuous; }
 			set
 			{
-				if (value != m_DisplayTasksContinuous)
+				if (value != m_DisplayLongTasksContinuous)
 				{
-					m_DisplayTasksContinuous = value;
+					m_DisplayLongTasksContinuous = value;
+					FixupSelection(false, true);
+				}
+			}
+		}
+
+		private bool m_DisplayActiveTasksToday = true;
+
+		public bool DisplayActiveTasksToday
+		{
+			get { return m_DisplayActiveTasksToday; }
+			set
+			{
+				if (value != m_DisplayActiveTasksToday)
+				{
+					m_DisplayActiveTasksToday = value;
 					FixupSelection(false, true);
 				}
 			}
 		}
 
 		public bool HideTasksWithoutTimes
-        {
-            get { return m_HideTasksWithoutTimes; }
-            set
-            {
-                if (value != m_HideTasksWithoutTimes)
-                {
-                    m_HideTasksWithoutTimes = value;
-                    FixupSelection(false, true);
-                }
-            }
-        }
+		{
+			get { return m_HideTasksWithoutTimes; }
+			set
+			{
+				if (value != m_HideTasksWithoutTimes)
+				{
+					m_HideTasksWithoutTimes = value;
+					FixupSelection(false, true);
+				}
+			}
+		}
 
-        public bool HideTasksSpanningWeekends
-        {
-            get { return m_HideTasksSpanningWeekends; }
-            set
-            {
-                if (value != m_HideTasksSpanningWeekends)
-                {
-                    m_HideTasksSpanningWeekends = value;
-                    FixupSelection(false, true);
-                }
-            }
-        }
+		public bool HideTasksSpanningWeekends
+		{
+			get { return m_HideTasksSpanningWeekends; }
+			set
+			{
+				if (value != m_HideTasksSpanningWeekends)
+				{
+					m_HideTasksSpanningWeekends = value;
+					FixupSelection(false, true);
+				}
+			}
+		}
 
-        public bool HideTasksSpanningDays
-        {
-            get { return m_HideTasksSpanningDays; }
-            set
-            {
-                if (value != m_HideTasksSpanningDays)
-                {
-                    m_HideTasksSpanningDays = value;
-                    FixupSelection(false, true);
-                }
-            }
-        }
+		public bool HideTasksSpanningDays
+		{
+			get { return m_HideTasksSpanningDays; }
+			set
+			{
+				if (value != m_HideTasksSpanningDays)
+				{
+					m_HideTasksSpanningDays = value;
+					FixupSelection(false, true);
+				}
+			}
+		}
 
-        public uint GetSelectedTaskID()
-        {
-            if (!IsTaskDisplayable(m_SelectedTaskID))
-                return 0;
+		public uint SelectedTaskId
+		{
+			get
+			{
+				if (!IsTaskDisplayable(m_SelectedTaskID))
+					return 0;
 
-			// If an extension item is selected, return the 'real' task Id
-			TaskExtensionItem extItem;
+				// If an extension item is selected, return the 'real' task Id
+				TaskExtensionItem extItem;
 
-			if (m_ExtensionItems.TryGetValue(m_SelectedTaskID, out extItem))
-				return extItem.RealTaskId;
+				if (m_ExtensionItems.TryGetValue(m_SelectedTaskID, out extItem))
+					return extItem.RealTaskId;
 
-			// else
-			return m_SelectedTaskID;
-        }
+				// else
+				return m_SelectedTaskID;
+			}
+		}
 
 		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
 		{
 			from = to = Calendar.Appointment.NullDate;
 
-			uint selTaskID = GetSelectedTaskID();
+			uint selTaskID = SelectedTaskId;
 
 			if (selTaskID == 0)
 				return false;
 
-			TaskItem item;
+			TaskItem item = m_TaskItems.GetItem(selTaskID);
 
-			if (!m_Items.TryGetValue(selTaskID, out item))
-				return false;
-
-			if (!item.HasValidDates())
+			if ((item == null) || !item.HasValidDates())
 				return false;
 
 			from = item.StartDate;
@@ -427,101 +467,101 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-        public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
-        {
-            switch (getTask)
-            {
-            case UIExtension.GetTask.GetNextTask:
-                // TODO
-                break;
+		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
+		{
+			switch (getTask)
+			{
+			case UIExtension.GetTask.GetNextTask:
+				// TODO
+				break;
 
-            case UIExtension.GetTask.GetPrevTask:
-                // TODO
-                break;
+			case UIExtension.GetTask.GetPrevTask:
+				// TODO
+				break;
 
-            case UIExtension.GetTask.GetNextVisibleTask:
-                // TODO
-                break;
+			case UIExtension.GetTask.GetNextVisibleTask:
+				// TODO
+				break;
 
-            case UIExtension.GetTask.GetNextTopLevelTask:
-                // TODO
-                break;
+			case UIExtension.GetTask.GetNextTopLevelTask:
+				// TODO
+				break;
 
-            case UIExtension.GetTask.GetPrevVisibleTask:
-                // TODO
-                break;
+			case UIExtension.GetTask.GetPrevVisibleTask:
+				// TODO
+				break;
 
-            case UIExtension.GetTask.GetPrevTopLevelTask:
-                // TODO
-                break;
-            }
+			case UIExtension.GetTask.GetPrevTopLevelTask:
+				// TODO
+				break;
+			}
 
-            // all else
-            return false;
-        }
+			// all else
+			return false;
+		}
 
-        public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
-        {
-            if (text == String.Empty)
-                return false;
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+		{
+			if (text == String.Empty)
+				return false;
 
-            switch (selectTask)
-            {
-            case UIExtension.SelectTask.SelectFirstTask:
-                // TODO
-                break;
+			switch (selectTask)
+			{
+			case UIExtension.SelectTask.SelectFirstTask:
+				// TODO
+				break;
 
-            case UIExtension.SelectTask.SelectNextTask:
-                // TODO
-                break;
+			case UIExtension.SelectTask.SelectNextTask:
+				// TODO
+				break;
 
-            case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-                // TODO
-                break;
+			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+				// TODO
+				break;
 
-            case UIExtension.SelectTask.SelectPrevTask:
-                // TODO
-                break;
+			case UIExtension.SelectTask.SelectPrevTask:
+				// TODO
+				break;
 
-            case UIExtension.SelectTask.SelectLastTask:
-                // TODO
-                break;
-            }
+			case UIExtension.SelectTask.SelectLastTask:
+				// TODO
+				break;
+			}
 
-            // all else
-            return false;
-        }
+			// all else
+			return false;
+		}
 
-        public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
-        {
+		public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
+		{
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
-            uint prevSelTaskID = m_VisibleSelectedTaskID;
-            uint selTaskID = GetSelectedTaskID();
+			uint prevSelTaskID = m_VisibleSelectedTaskID;
+			uint selTaskID = SelectedTaskId;
 
 			m_VisibleSelectedTaskID = selTaskID;
-			
+
 			if (selTaskID > 0)
-            {
-                TaskItem item;
+			{
+				TaskItem item = m_TaskItems.GetItem(selTaskID);
 
-                if (m_Items.TryGetValue(selTaskID, out item))
-                {
-                    if (scrollToTask)
-                    {
-                        if (item.StartDate != Calendar.Appointment.NullDate)
-                        {
-                            if (!IsItemWithinRange(item, StartDate, EndDate))
-                                StartDate = item.StartDate;
+				if (item != null)
+				{
+					if (scrollToTask)
+					{
+						if (item.StartDate != Calendar.Appointment.NullDate)
+						{
+							if (!IsItemWithinRange(item, StartDate, EndDate))
+								StartDate = item.StartDate;
 
-                            SelectedAppointment = item;
-                        }
-                    }
-                    else if (IsItemWithinRange(item, StartDate, EndDate))
-                    {
-                        SelectedAppointment = item;
-                    }
-                }
+							SelectedAppointment = item;
+						}
+					}
+					else if (IsItemWithinRange(item, StartDate, EndDate))
+					{
+						SelectedAppointment = item;
+					}
+				}
 				else
 				{
 					SelectedAppointment = null;
@@ -531,13 +571,11 @@ namespace DayViewUIExtension
 			{
 				SelectedAppointment = null;
 			}
-			
-			// Notify parent of changes
-			if (allowNotify && (GetSelectedTaskID() != prevSelTaskID))
-			{
-				TaskItem item = null;
-				m_Items.TryGetValue(m_VisibleSelectedTaskID, out item);
 
+			// Notify parent of changes
+			if (allowNotify && (SelectedTaskId != prevSelTaskID))
+			{
+				TaskItem item = m_TaskItems.GetItem(m_VisibleSelectedTaskID);
 				RaiseSelectionChanged(item);
 			}
 
@@ -546,13 +584,62 @@ namespace DayViewUIExtension
 
 		public bool SelectTask(uint dwTaskID)
 		{
-            m_SelectedTaskID = dwTaskID;
-            FixupSelection(true, false);
+			m_SelectedTaskID = dwTaskID;
+			FixupSelection(true, false);
 
-			return (GetSelectedTaskID() != 0);
+			return (SelectedTaskId != 0);
 		}
 
-        public void GoToToday()
+		public bool CanDuplicateSelectedTimeBlock
+		{
+			get { return (SelectedAppointment is TaskTimeBlock); }
+		}
+
+		public bool CanCreateNewTaskBlockSeries
+		{
+			get
+			{
+				return ((SelectedAppointment == null) || 
+						(SelectedAppointment is TaskItem) || 
+						(SelectedAppointment is TaskTimeBlock));
+			}
+		}
+
+		public bool CreateNewTaskBlockSeries(uint taskId, TimeBlockSeriesAttributes attribs)
+		{
+			var seriesList = m_TimeBlocks.GetTaskSeries(taskId, true);
+
+			if (seriesList == null)
+				return false;
+
+			if (!seriesList.AddSeries(attribs))
+				return false;
+
+			SelectedAppointment = null;
+
+			return SelectTask(taskId);
+		}
+
+		public bool DuplicateSelectedTimeBlock()
+		{
+ 			var block = (SelectedAppointment as TaskTimeBlock);
+ 
+ 			if (block == null)
+ 				return false;
+
+			var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, true);
+
+			if (seriesList == null)
+				return false;
+
+			if (!seriesList.DuplicateBlock(block.TimeBlock))
+				return false;
+
+			Invalidate();
+			return true;
+		}
+
+		public void GoToToday()
         {
             StartDate = DateTime.Now;
 
@@ -575,30 +662,41 @@ namespace DayViewUIExtension
 			Invalidate();
         }
 
-		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
+		public bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
 		{
-			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			return ((appt != null) && ((appt is TaskItem) || (appt is FutureTaskOccurrence)));
+		}
+
+		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
+		{
+			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
 			if (appt != null)
 			{
-				return UIExtension.HitResult.Task;
+				if ((reason != UIExtension.HitTestReason.ContextMenu) ||
+					AppointmentSupportsTaskContextMenu(appt))
+				{
+					return UIExtension.HitTestResult.Task;
+				}
 			}
 			else if (GetTrueRectangle().Contains(pt))
 			{
-				return UIExtension.HitResult.Tasklist;
+				return UIExtension.HitTestResult.Tasklist;
 			}
 
 			// else
-			return UIExtension.HitResult.Nowhere;
+			return UIExtension.HitTestResult.Nowhere;
 		}
 
-		public uint HitTestTask(Int32 xScreen, Int32 yScreen)
+		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
+			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (appt != null)
+			if ((appt != null) &&
+				(reason != UIExtension.HitTestReason.ContextMenu) ||
+				AppointmentSupportsTaskContextMenu(appt))
 			{
 				if (appt is TaskExtensionItem)
 					return (appt as TaskExtensionItem).RealTaskId;
@@ -614,6 +712,49 @@ namespace DayViewUIExtension
 			return GetRealAppointment(GetAppointmentAt(x, y));
 		}
 
+		override public Calendar.AppointmentView GetAppointmentViewAt(int x, int y, out Rectangle apptRect)
+		{
+			var view = base.GetAppointmentViewAt(x, y, out apptRect);
+
+			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			{
+				var tdlView = (view as TDLAppointmentView);
+
+				if (x < tdlView.EndOfStart)
+				{
+					apptRect.Width = (tdlView.EndOfStart - apptRect.X);
+				}
+				else
+				{
+					apptRect.Width = (apptRect.Right - tdlView.StartOfEnd);
+					apptRect.X = tdlView.StartOfEnd;
+				}
+			}
+
+			return view;
+		}
+
+		override protected Calendar.AppointmentView GetAppointmentViewAt(int x, int y)
+		{
+			var view = base.GetAppointmentViewAt(x, y);
+
+			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			{
+				var tdlView = (view as TDLAppointmentView);
+
+				if ((x < tdlView.EndOfStart) || (x > tdlView.StartOfEnd))
+					return view;
+
+				if (DisplayActiveTasksToday && IsTodayVisible)
+				{
+					if ((x > tdlView.StartOfToday) && (x < tdlView.EndOfToday))
+						return view;
+				}
+			}
+
+			return view;
+		}
+
 		public Calendar.Appointment GetAppointment(uint taskID)
 		{
 			TaskExtensionItem extItem;
@@ -621,12 +762,7 @@ namespace DayViewUIExtension
 			if (m_ExtensionItems.TryGetValue(taskID, out extItem))
 				return extItem;
 
-			TaskItem item;
-
-			if (m_Items.TryGetValue(taskID, out item))
-				return item;
-
-			return null;
+			return m_TaskItems.GetItem(taskID);
 		}
 
 		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
@@ -648,7 +784,7 @@ namespace DayViewUIExtension
 			if (GetAppointmentRect(appt, ref rect))
 			{
 				TaskItem item = (appt as TaskItem);
-				bool hasIcon = m_Renderer.TaskHasIcon(item);
+				bool hasIcon = TaskHasIcon(item);
 
 				if (IsLongAppt(appt))
 				{
@@ -688,8 +824,25 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		private bool IsTodayVisible
+		{
+			get
+			{
+				return IsTodayInRange(StartDate, EndDate);
+			}
+		}
+
+		private bool IsTodayInRange(DateTime start, DateTime end)
+		{
+			var today = DateTime.Now.Date;
+			return ((today >= start) && (today < end));
+		}
+
 		public bool IsItemDisplayable(Calendar.Appointment appt)
 		{
+			if (appt == null)
+				return false;
+
 			// Always show a task if it is currently being dragged
 			if (IsResizingAppointment())
 			{
@@ -699,8 +852,19 @@ namespace DayViewUIExtension
 
 			var	realAppt = GetRealAppointment(appt);
 
-			if (HideParentTasks && (realAppt as TaskItem).IsParent)
-				return false;
+			if (m_HideParentTasks)
+			{
+				var item = (realAppt as TaskItem);
+				
+				if (item.IsParent)
+				{
+					if (string.IsNullOrWhiteSpace(m_HideParentTasksTag))
+						return false;
+					
+					if (item.HasTag(m_HideParentTasksTag))
+						return false;
+				}
+			}
 
 			if (!appt.HasValidDates())
 				return false;
@@ -736,8 +900,14 @@ namespace DayViewUIExtension
 			if ((appt.StartDate >= endDate) || (appt.EndDate <= startDate))
 				return false;
 
-			if (!DisplayTasksContinuous)
+			if (!DisplayLongTasksContinuous)
 			{
+				if (DisplayActiveTasksToday && IsTodayInRange(startDate, endDate))
+				{
+					if (appt.IntersectsToday)
+						return true;
+				}
+
 				if ((appt.StartDate < startDate) && (appt.EndDate > endDate))
 					return false;
 			}
@@ -745,7 +915,28 @@ namespace DayViewUIExtension
             return true;
 		}
 
-		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			m_TimeBlocks.Save(prefs, key);
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			m_TimeBlocks.Load(prefs, key);
+		}
+
+		protected int FindTimeBlock(TaskTimeBlock block, List<Calendar.AppointmentDates> timeBlocks)
+		{
+			if (timeBlocks == null)
+			{
+				Debug.Assert(timeBlocks != null);
+				return -1;
+			}
+
+			return timeBlocks.FindIndex(x => ((x.Start == block.StartDate) && (x.End == block.EndDate)));
+		}
+
+		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type, string metaDataKey)
 		{
 			// Make sure the selected task remains visible
 			// after any changes if it was visible to start with
@@ -755,15 +946,19 @@ namespace DayViewUIExtension
 									 IsItemDisplayable(selItem) &&
 									 IsItemWithinRange(selItem, StartDate, EndDate);
 
+			bool tasksWasEmpty = (m_TaskItems.Count == 0);
+
             switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
 				case UIExtension.UpdateType.All:
+				{
 					// Rebuild
-					m_Items.Clear();
+					m_TaskItems.Clear();
 					m_MaxTaskID = 0;
 					SelectedAppointment = null;
-					break;
+				}
+				break;
 
 				case UIExtension.UpdateType.New:
 				case UIExtension.UpdateType.Edit:
@@ -778,115 +973,135 @@ namespace DayViewUIExtension
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, metaDataKey, 0))
 				task = task.GetNextTask();
 
 			// Scroll to the selected item if it was modified and was 'visible'
-			if (selTaskWasVisible && tasks.HasTask(m_SelectedTaskID))
+			if ((selTaskWasVisible || tasksWasEmpty) && tasks.HasTask(m_SelectedTaskID))
                 EnsureVisible(SelectedAppointment, true);
 
-			SelectionStart = SelectionEnd;
+			SelectedDates.Start = SelectedDates.End;
 
             AdjustVScrollbar();
             Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth)
 		{
 			if (!task.IsValid())
 				return false;
 
-			TaskItem item;
-			uint taskID = task.GetID();
+			uint taskId = task.GetID();
+			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
 
-			m_MaxTaskID = Math.Max(m_MaxTaskID, taskID); // needed for extension occurrences
+			// Get or create a new task and update it
+			bool newTask = (m_TaskItems.ContainsKey(taskId) == false);
 
-			// Built-in of attributes
-			if (m_Items.TryGetValue(taskID, out item))
+			TaskItem taskItem = m_TaskItems.GetItem(taskId, newTask);
+			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
+
+			// Update Time Blocks
+			if (newTask || 
+				task.HasAttribute(Task.Attribute.StartDate) || 
+				task.HasAttribute(Task.Attribute.DueDate))
 			{
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false);
+				m_TimeBlocks.SynchroniseDates(taskItem);
 			}
-			else
-			{
-				item = new TaskItem();
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true);
-			}
-
-			m_Items[taskID] = item;
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, metaDataKey, depth + 1))
 				subtask = subtask.GetNextTask();
 
 			return true;
 		}
 
+		public bool PrepareNewTask(ref Task task)
+		{
+			// Set the start/due dates to match the current selection
+			if (SelectedDates.Start < SelectedDates.End)
+			{
+				task.SetStartDate(SelectedDates.Start);
+
+				DateTime endDate = SelectedDates.End;
+
+				if (TaskItem.IsStartOfDay(endDate))
+					endDate = endDate.AddSeconds(-1);
+
+				task.SetDueDate(endDate);
+			}
+			else if ((SelectedAppointmentId != 0) &&
+					(task.GetParentID() == SelectedAppointmentId))
+			{
+				// Initialise the subtask to begin at the start of the parent
+				var startDate = SelectedAppointment.StartDate;
+
+				task.SetStartDate(startDate);
+				task.SetDueDate(startDate.AddDays(1));
+			}
+			else
+			{
+				// Use 'today'
+				var startDate = DateTime.Today.Date;
+
+				task.SetStartDate(startDate);
+				task.SetDueDate(startDate.AddDays(1));
+			}
+
+			return true;
+		}
+
+		private bool m_StrikeThruDoneTasks;
+
 		public bool StrikeThruDoneTasks
 		{
-			get { return m_Renderer.StrikeThruDoneTasks; }
+			get { return m_StrikeThruDoneTasks; }
 			set
 			{
-                if (m_Renderer.StrikeThruDoneTasks != value)
+                if (m_StrikeThruDoneTasks != value)
 				{
-                    m_Renderer.StrikeThruDoneTasks = value;
+                    m_StrikeThruDoneTasks = value;
 					Invalidate();
 				}
 			}
 		}
 
-        public bool TaskColorIsBackground
+		private bool m_TaskColorIsBackground;
+
+		public bool TaskColorIsBackground
         {
-            get { return m_Renderer.TaskColorIsBackground; }
+            get { return m_TaskColorIsBackground; }
             set
             {
-                if (m_Renderer.TaskColorIsBackground != value)
+                if (m_TaskColorIsBackground != value)
                 {
-                    m_Renderer.TaskColorIsBackground = value;
+                    m_TaskColorIsBackground = value;
                     Invalidate();
                 }
             }
         }
 
+		private bool m_ShowParentsAsFolder;
+
 		public bool ShowParentsAsFolder
 		{
-			get { return m_Renderer.ShowParentsAsFolder; }
+			get { return m_ShowParentsAsFolder; }
 			set
 			{
-				if (m_Renderer.ShowParentsAsFolder != value)
+				if (m_ShowParentsAsFolder != value)
 				{
-					m_Renderer.ShowParentsAsFolder = value;
+					m_ShowParentsAsFolder = value;
 					Invalidate();
 				}
 			}
 		}
 
-        public void SetFont(String fontName, int fontSize)
-        {
-            m_Renderer.SetFont(fontName, fontSize);
-
-			// Long appt height to match Calendar in core app
-			int fontHeight = 0;
-			
-			if (DPIScaling.WantScaling())
-				fontHeight = m_Renderer.BaseFont.Height;
-			else
-				fontHeight = Win32.GetPixelHeight(m_Renderer.BaseFont.ToHfont());
-
-			int itemHeight = (fontHeight + 6 - longAppointmentSpacing);
-
-            LongAppointmentHeight = Math.Max(itemHeight, 17);
-        }
-        
-        public int GetFontHeight()
-        {
-            return m_Renderer.GetFontHeight();
-        }
-
    		public void SetUITheme(UITheme theme)
 		{
-            m_Renderer.Theme = theme;
+            Theme = theme;
+			m_ToolbarRenderer.SetUITheme(theme);
+
             Invalidate(true);
 		}
 
@@ -942,7 +1157,7 @@ namespace DayViewUIExtension
 
 		private bool WantDrawToday(DateTime time)
 		{
-			if (!m_Renderer.Theme.HasAppColor(UITheme.AppColor.Today))
+			if (!Theme.HasAppColor(UITheme.AppColor.Today))
 				return false;
 			
 			return (time.Date == DateTime.Now.Date);
@@ -953,15 +1168,15 @@ namespace DayViewUIExtension
 			if (!WantDrawToday(time))
 				return;
 
-			using (var brush = new SolidBrush(m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
 				e.Graphics.FillRectangle(brush, rect);
 		}
 
 		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (m_Renderer.Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(time.DayOfWeek))
+			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(time.DayOfWeek))
 			{
-				var weekendColor = m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
+				var weekendColor = Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
@@ -971,9 +1186,9 @@ namespace DayViewUIExtension
 				using (var brush = new SolidBrush(weekendColor))
 					e.Graphics.FillRectangle(brush, rect);
 			}
-			else if (m_Renderer.Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
+			else if (Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
 			{
-				var nonWorkColor = m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
+				var nonWorkColor = Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
@@ -995,10 +1210,10 @@ namespace DayViewUIExtension
 			{
 				Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
 
-				if (hoursRect.Y < this.HeaderHeight)
+				if (hoursRect.Y < HeaderHeight)
 				{
-					hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
-					hoursRect.Y = this.HeaderHeight;
+					hoursRect.Height -= HeaderHeight - hoursRect.Y;
+					hoursRect.Y = HeaderHeight;
 				}
 
 				e.Graphics.FillRectangle(brush, hoursRect);
@@ -1021,7 +1236,7 @@ namespace DayViewUIExtension
 			{
 				TaskItem item;
 
-				if (m_Items.TryGetValue(m_SelectedTaskID, out item))
+				if (m_TaskItems.TryGetValue(m_SelectedTaskID, out item))
 					appt = item;
 			}
 
@@ -1040,74 +1255,18 @@ namespace DayViewUIExtension
 			// is selected and vice versa
 			var selAppt = GetAppointment(m_SelectedTaskID);
 
-			if (!(selAppt is CustomDateAttribute))
+			if ((selAppt is TaskItem) || (selAppt is FutureTaskOccurrence))
 			{
-				var selRealID = GetSelectedTaskID();
+				var selRealID = SelectedTaskId;
 
-				if (appt is FutureOccurrence)
-					return (selRealID == (appt as FutureOccurrence).RealTaskId);
+				if (appt is FutureTaskOccurrence)
+					return (selRealID == (appt as FutureTaskOccurrence).RealTaskId);
 
-				if (selAppt is FutureOccurrence)
+				if (selAppt is FutureTaskOccurrence)
 					return (selRealID == appt.Id);
 			}
 
 			return false;
-		}
-
-		protected override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
-		{
-			var appt = apptView.Appointment;
-			var rect = apptView.Rectangle;
-
-			isSelected = WantDrawAppointmentSelected(appt);
-			
-			// Our custom gripper bar
-			var gripRect = rect;
-			gripRect.Inflate(-2, -2);
-			gripRect.Width = 5;
-
-            // If the start date precedes the start of the week then extend the
-            // draw rect to the left so the edge is clipped and likewise for the right.
-            bool longAppt = IsLongAppt(appt);
-
-            if (longAppt)
-            {
-                if (appt.StartDate < StartDate)
-                {
-                    rect.X -= 4;
-                    rect.Width += 4;
-
-                    gripRect.X = rect.X;
-                    gripRect.Width = 0;
-                }
-                else if (appt.StartDate > StartDate)
-                {
-                    rect.X++;
-                    rect.Width--;
-
-                    gripRect.X++;
-                }
-
-                if (appt.EndDate >= EndDate)
-                {
-                    rect.Width += 5;
-                }
-            }
-            else // day appt
-            {
-                if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
-                {
-                    rect.Y++;
-                    rect.Height--;
-                }
-
-                rect.Width -= 1;
-            }
-
-			apptView.Rectangle = rect;
-			apptView.GripRect = gripRect;
-
-			m_Renderer.DrawAppointment(g, apptView, longAppt, isSelected);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
@@ -1123,7 +1282,7 @@ namespace DayViewUIExtension
 			var appts = new List<Calendar.Appointment>();
 			uint nextExtId = (((m_MaxTaskID / 1000) + 1) * 1000);
 
-			foreach (var pair in m_Items)
+			foreach (var pair in m_TaskItems)
 			{
 				TaskItem item = pair.Value;
 
@@ -1143,7 +1302,7 @@ namespace DayViewUIExtension
 						{
 							foreach (var futureItem in futureItems)
 							{
-								var futureAppt = new FutureOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
+								var futureAppt = new FutureTaskOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
 
 								if (IsItemWithinRange(futureAppt, start, end))
 								{
@@ -1163,12 +1322,31 @@ namespace DayViewUIExtension
 
 						if (item.CustomDates.TryGetValue(attrib.Id, out date))
 						{
-							var customDate = new CustomDateAttribute(item, nextExtId, attrib.Id, date);
+							var customDate = new CustomTaskDateAttribute(item, nextExtId, attrib.Id, date);
 
 							if (IsItemDisplayable(customDate) && IsItemWithinRange(customDate, start, end))
 							{
 								m_ExtensionItems[nextExtId++] = customDate;
 								appts.Add(customDate);
+							}
+						}
+					}
+				}
+
+				var seriesList = m_TimeBlocks.GetTaskSeries(pair.Key, false);
+
+				if (seriesList != null)
+				{
+					foreach (var series in seriesList.Series)
+					{
+						foreach (var block in series.Blocks)
+						{
+							var timeBlock = new TaskTimeBlock(item, nextExtId, block);
+
+							if (IsItemWithinRange(timeBlock, start, end))
+							{
+								m_ExtensionItems[nextExtId++] = timeBlock;
+								appts.Add(timeBlock);
 							}
 						}
 					}
@@ -1230,6 +1408,16 @@ namespace DayViewUIExtension
 			}
 		}
 
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			if ((e.Button == MouseButtons.Right) && (ContextMenu?.Invoke(this, e) == true))
+			{
+				return; // handled
+			}
+						
+			base.OnMouseClick(e);
+		}
+
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)
 		{
 			if (ReadOnly || (appt == null))
@@ -1256,10 +1444,15 @@ namespace DayViewUIExtension
 				{
 					taskItem.RestoreOriginalDates();
 				}
-				else if (SelectedAppointment is CustomDateAttribute)
+				else if (SelectedAppointment is CustomTaskDateAttribute)
 				{
-					var custDate = (SelectedAppointment as CustomDateAttribute);
-					custDate.RealTask.CustomDates[custDate.AttributeId] = custDate.OriginalDate;
+					var custDate = (SelectedAppointment as CustomTaskDateAttribute);
+					custDate.RestoreOriginalDate();
+				}
+				else if (SelectedAppointment is TaskTimeBlock)
+				{
+					var taskBlock = (SelectedAppointment as TaskTimeBlock);
+					taskBlock.RestoreTimeBlock();
 				}
 
 				Invalidate();
@@ -1270,30 +1463,160 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
+		public bool CanDeleteSelectedCustomDate
 		{
-			if (appt.Locked)
-				return false;
-
-			// Disable start date editing for tasks with dependencies that are auto-calculated
-			// Disable resizing for custom date attributes
-			bool isCustomDate = (appt is CustomDateAttribute);
-			bool hasDepends = ((appt is TaskItem) && (appt as TaskItem).HasDependencies);
-
-			switch (mode)
+			get { return (SelectedAppointment is CustomTaskDateAttribute); }
+		}
+		
+		public bool DeleteSelectedCustomDate()
+		{
+			if (CanDeleteSelectedCustomDate)
 			{
-			case Calendar.SelectionTool.Mode.Move:
-				return (!hasDepends || !AutoCalculateDependencyDates);
+				var custDate = (SelectedAppointment as CustomTaskDateAttribute);
+				custDate.ClearDate();
 
-			case Calendar.SelectionTool.Mode.ResizeTop:
-			case Calendar.SelectionTool.Mode.ResizeLeft:
-				return ((!hasDepends || !AutoCalculateDependencyDates) && !isCustomDate);
+				// Notify parent of change
+				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
 
-			case Calendar.SelectionTool.Mode.ResizeBottom:
-			case Calendar.SelectionTool.Mode.ResizeRight:
-				return !isCustomDate;
+				// Move selection to 'real' task
+				SelectTask(custDate.RealTaskId);
+				Invalidate();
+
+				return true;
 			}
 
+			// else
+			return false;
+		}
+
+		public bool CanDeleteSelectedTimeBlock
+		{
+			get { return CanEditSelectedTimeBlockSeries; }
+		}
+
+		public bool DeleteSelectedTimeBlock()
+		{
+			if (CanDeleteSelectedTimeBlock)
+			{
+				var block = (SelectedAppointment as TaskTimeBlock);
+				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+
+				if (seriesList.DeleteBlock(block.TimeBlock))
+				{
+					// Move selection to 'real' task
+					SelectTask(block.RealTaskId);
+					Invalidate();
+
+					return true;
+				}
+			}
+
+			// else
+			return false;
+		}
+
+		public bool CanDeleteSelectedTimeBlockSeries
+		{
+			get { return CanDeleteSelectedTimeBlock; }
+		}
+
+		public bool DeleteSelectedTimeBlockSeries()
+		{
+			if (CanDeleteSelectedTimeBlockSeries)
+			{
+				var block = (SelectedAppointment as TaskTimeBlock);
+				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+
+				if (seriesList.DeleteSeries(block.TimeBlock))
+				{
+					// Move selection to 'real' task
+					SelectTask(block.RealTaskId);
+					Invalidate();
+
+					return true;
+				}
+			}
+
+			// else
+			return false;
+		}
+
+		public TimeBlockSeries SelectedTimeBlockSeries
+		{
+			get
+			{
+				if (SelectedAppointment is TaskTimeBlock)
+				{
+					var block = (SelectedAppointment as TaskTimeBlock);
+					var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
+
+					return seriesList?.GetSeries(block.TimeBlock);
+				}
+
+				// else
+				return null;
+			}
+		}
+
+		public bool CanEditSelectedTimeBlockSeries
+		{
+			get { return (SelectedAppointment is TaskTimeBlock); }
+		}
+
+		public bool EditSelectedTimeBlockSeries(TimeBlockSeriesAttributes attribs, TimeBlockSeriesAttributes.EditMask mask)
+		{
+			if (mask == TimeBlockSeriesAttributes.EditMask.None)
+				return false;
+
+			var series = SelectedTimeBlockSeries;
+
+			if (series == null)
+				return false;
+
+			if (!series.EditAttributes(attribs, mask))
+				return false;
+
+			SelectedAppointment = null;
+			Invalidate();
+
+			return true;
+		}
+
+		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
+		{
+			if ((appt != null) && !appt.Locked)
+			{
+				var taskItem = (appt as TaskItem);
+
+				// Disable modification of parents with calculated dates
+				if ((taskItem != null) && taskItem.IsCalculatedParent)
+					return false;
+
+				// Disable start date editing for tasks with dependencies that are auto-calculated
+				// Disable resizing for custom date attributes
+				bool isCustomDate = (appt is CustomTaskDateAttribute);
+				bool isTimeBlock = (appt is TaskTimeBlock);
+				bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
+				bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
+
+				switch (mode)
+				{
+				case Calendar.SelectionTool.Mode.Move:
+					return (isTimeBlock || (!ReadOnly && !hasLockedDepends));
+
+				case Calendar.SelectionTool.Mode.ResizeTop:
+					return (isTimeBlock || (!ReadOnly && (!isCustomDate && !hasLockedDepends)));
+
+				case Calendar.SelectionTool.Mode.ResizeLeft:
+					return (!isTimeBlock && !isCustomDate && !hasLockedDepends);
+
+				case Calendar.SelectionTool.Mode.ResizeBottom:
+					return (isTimeBlock || !isCustomDate);
+
+				case Calendar.SelectionTool.Mode.ResizeRight:
+					return (!isTimeBlock && !isCustomDate);
+				}
+			}
 			// catch all
 			return false;
 		}
@@ -1306,6 +1629,14 @@ namespace DayViewUIExtension
 			Cursor = GetCursor(e);
 		}
 
+		protected override void OnScroll(ScrollEventArgs se)
+		{
+			base.OnScroll(se);
+
+			if (se.ScrollOrientation == ScrollOrientation.HorizontalScroll)
+				DoHorizontalScroll(se.NewValue > se.OldValue);
+		}
+
 		private Cursor GetCursor(MouseEventArgs e)
         {
 			if (IsResizingAppointment())
@@ -1313,48 +1644,46 @@ namespace DayViewUIExtension
 
 			// Note: base class only shows 'resize' cursors for the currently
 			// selected item but we want them for all tasks
-			if (!ReadOnly)
+			var appt = GetAppointmentAt(e.Location.X, e.Location.Y);
+
+			if (appt != null)
 			{
-				var appt = GetAppointmentAt(e.Location.X, e.Location.Y);
+				var realAppt = GetRealAppointment(appt);
 
-				if (appt != null)
+				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
-					if (appt.Locked)
-					{
-						if (appt is TaskExtensionItem)
-							appt = GetRealAppointment(appt);
+					if (realAppt.Locked)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-						if (appt.Locked)
-							return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+					return UIExtension.HandCursor();
+				}
 
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-					}
+				var mode = GetMode(appt, e.Location);
 
-					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
-
-					if ((apptView != null) && apptView.IconRect.Contains(e.Location))
-						return UIExtension.HandCursor();
-
-					var mode = GetMode(appt, e.Location);
-
-					if (!CanModifyAppointmentDates(appt, mode))
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-
+				if (CanModifyAppointmentDates(appt, mode)) // handles readonly flag
+				{
 					// Same as Calendar.SelectionTool
 					switch (mode)
 					{
-						case Calendar.SelectionTool.Mode.ResizeBottom:
-						case Calendar.SelectionTool.Mode.ResizeTop:
-							return Cursors.SizeNS;
+					case Calendar.SelectionTool.Mode.ResizeBottom:
+					case Calendar.SelectionTool.Mode.ResizeTop:
+						return Cursors.SizeNS;
 
-						case Calendar.SelectionTool.Mode.ResizeLeft:
-						case Calendar.SelectionTool.Mode.ResizeRight:
-							return Cursors.SizeWE;
+					case Calendar.SelectionTool.Mode.ResizeLeft:
+					case Calendar.SelectionTool.Mode.ResizeRight:
+						return Cursors.SizeWE;
 
-						case Calendar.SelectionTool.Mode.Move:
-							// default cursor below
-							break;
+					case Calendar.SelectionTool.Mode.Move:
+						// default cursor below
+						break;
 					}
+				}
+				else
+				{
+					if (realAppt.Locked)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 				}
 			}
 
@@ -1407,9 +1736,9 @@ namespace DayViewUIExtension
 
 		protected void ValidateMinSlotHeight()
 		{
-			using (var g = Graphics.FromHwnd(this.Handle))
+			using (var g = Graphics.FromHwnd(Handle))
 			{
-				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont).Height;
+				int minHourHeight = (int)g.MeasureString("0", Renderer.HourFont()).Height;
 
 				if ((minSlotHeight * SlotsPerHour) < minHourHeight)
 					minSlotHeight = ((minHourHeight / SlotsPerHour) + 1);
@@ -1428,7 +1757,7 @@ namespace DayViewUIExtension
 			int minDayWidth = 0;
 
 			using (Graphics g = Graphics.FromHwnd(Handle))
-				minDayWidth = m_Renderer.CalculateMinimumDayWidthForImage(g);
+				minDayWidth = CalculateMinimumDayWidthForImage(g);
 
 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
 

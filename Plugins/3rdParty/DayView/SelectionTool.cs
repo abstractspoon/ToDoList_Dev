@@ -1,6 +1,7 @@
 
 
 using System;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -48,9 +49,9 @@ namespace Calendar
 			m_delta = TimeSpan.Zero;
 		}
 
-		public bool UpdateCursor(System.Windows.Forms.MouseEventArgs e)
+		public bool UpdateCursor(MouseEventArgs e)
 		{
-			m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
+			m_dayView.Cursor = Cursors.Default;
 
 			if (!CanModifyAppointment(e, false))
 				return false;
@@ -61,16 +62,16 @@ namespace Calendar
 			{
 			case Mode.ResizeBottom:
 			case Mode.ResizeTop:
-				m_dayView.Cursor = System.Windows.Forms.Cursors.SizeNS;
+				m_dayView.Cursor = Cursors.SizeNS;
 				break;
 
 			case Mode.ResizeLeft:
 			case Mode.ResizeRight:
-				DayView.Cursor = System.Windows.Forms.Cursors.SizeWE;
+				DayView.Cursor = Cursors.SizeWE;
 				break;
 
 			case Mode.Move:
-				m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
+				m_dayView.Cursor = Cursors.Default;
 				break;
 
 			default:
@@ -80,12 +81,12 @@ namespace Calendar
 			return true;
 		}
 
-		protected bool CanModifyAppointment(System.Windows.Forms.MouseEventArgs e, bool checkMouseDown)
+		protected bool CanModifyAppointment(MouseEventArgs e, bool checkMouseDown)
 		{
 			if (e == null)
 				return false;
 
-			if (checkMouseDown && (e.Button != System.Windows.Forms.MouseButtons.Left))
+			if (checkMouseDown && (e.Button != MouseButtons.Left))
 				return false;
 
 			Appointment selection = m_dayView.SelectedAppointment;
@@ -96,12 +97,12 @@ namespace Calendar
 			return true;
 		}
 
-		virtual public void MouseMove(System.Windows.Forms.MouseEventArgs e)
+		virtual public void MouseMove(MouseEventArgs e)
 		{
 			if (!UpdateCursor(e))
 				return;
 
-			if (IsEditing && (e.Button != System.Windows.Forms.MouseButtons.Left))
+			if (IsEditing && (e.Button != MouseButtons.Left))
 			{
 				MouseUp(e);
 				return;
@@ -141,7 +142,7 @@ namespace Calendar
 			}
 		}
 
-		virtual protected bool MoveAppointment(System.Windows.Forms.MouseEventArgs e)
+		virtual protected bool MoveAppointment(MouseEventArgs e)
 		{
 			Debug.Assert(CanModifyAppointment(e, true));
 
@@ -235,7 +236,7 @@ namespace Calendar
 			return false;
 		}
 
-		virtual protected bool ResizeLongAppointment(System.Windows.Forms.MouseEventArgs e)
+		virtual protected bool ResizeLongAppointment(MouseEventArgs e)
 		{
 			Debug.Assert(CanModifyAppointment(e, true));
 
@@ -277,7 +278,7 @@ namespace Calendar
 			return false;
 		}
 
-		virtual protected bool ResizeShortAppointment(System.Windows.Forms.MouseEventArgs e)
+		virtual protected bool ResizeShortAppointment(MouseEventArgs e)
 		{
 			Debug.Assert(CanModifyAppointment(e, true));
 
@@ -423,49 +424,55 @@ namespace Calendar
 			return Mode.None;
 		}
 
-		public virtual void MouseUp(System.Windows.Forms.MouseEventArgs e)
+		public virtual void MouseUp(MouseEventArgs e)
 		{
 			if (e == null)
 				throw new ArgumentNullException("e");
 
-			if (e.Button == System.Windows.Forms.MouseButtons.Left)
+			if (e.Button == MouseButtons.Left)
 			{
 				if (Complete != null)
 					Complete(this, EventArgs.Empty);
 			}
 
-			m_dayView.Invalidate();
-			m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
-
-			m_mode = Mode.None;
-			m_delta = TimeSpan.Zero;
-		}
-
-		public virtual void MouseDown(System.Windows.Forms.MouseEventArgs e)
-		{
-			if (m_dayView.SelectedAppointmentIsNew)
-			{
-				m_dayView.RaiseNewAppointment();
-			}
-			else
-			{
-				m_dayView.RaiseSelectionChanged(new AppointmentEventArgs(m_dayView.SelectedAppointment));
-			}
-
-			if (m_dayView.CurrentlyEditing)
-				m_dayView.FinishEditing(false);
-
-			m_mode = GetMode(e.Location);
-
 			if (m_mode != Mode.None)
 			{
-				// Calculate delta time between selection and clicked point
-				DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
-				m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
+				m_dayView.Invalidate();
+				m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
 
-				m_length = TimeSpan.Zero;
-				m_lastMouseMove = e.Location;
-				m_longAppointment = m_dayView.SelectedAppointment.IsLongAppt();
+				m_mode = Mode.None;
+				m_delta = TimeSpan.Zero;
+			}
+		}
+
+		public virtual void MouseDown(MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Left)
+			{
+				if (m_dayView.SelectedAppointmentIsNew)
+				{
+					m_dayView.RaiseNewAppointment();
+				}
+				else
+				{
+					m_dayView.RaiseSelectionChanged(new AppointmentEventArgs(m_dayView.SelectedAppointment));
+				}
+
+				if (m_dayView.CurrentlyEditing)
+					m_dayView.FinishEditing(false);
+
+				m_mode = GetMode(e.Location);
+
+				if (m_mode != Mode.None)
+				{
+					// Calculate delta time between selection and clicked point
+					DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
+					m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
+
+					m_length = TimeSpan.Zero;
+					m_lastMouseMove = e.Location;
+					m_longAppointment = m_dayView.SelectedAppointment.IsLongAppt();
+				}
 			}
 		}
 

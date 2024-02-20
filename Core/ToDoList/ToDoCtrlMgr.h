@@ -10,10 +10,10 @@
 
 #include "filteredtodoctrl.h"
 #include "preferencesdlg.h"
+#include "TDLbrowserdlg.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\driveinfo.h"
-#include "..\shared\browserdlg.h"
 
 #include "..\Interfaces\taskliststoragemgr.h"
 
@@ -182,7 +182,7 @@ protected:
 	CArray<TDCITEM, TDCITEM&> m_aToDoCtrls;
 	CTabCtrlEx& m_tabCtrl;
 	const CPreferencesDlg* m_pPrefs;
-	CMap<CFilteredToDoCtrl*, CFilteredToDoCtrl*, CBrowserDlg*, CBrowserDlg*> m_mapBrowsers;
+	CMap<CFilteredToDoCtrl*, CFilteredToDoCtrl*, CTDLBrowserDlg*, CTDLBrowserDlg*> m_mapBrowsers;
 
 protected:
 	TDCITEM& GetTDCItem(int nIndex);

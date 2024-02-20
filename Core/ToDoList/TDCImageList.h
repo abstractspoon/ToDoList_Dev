@@ -9,24 +9,28 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "..\Shared\enimagelist.h"
+#include "..\3rdParty\XNamedColors.h"
 
 #include <afxtempl.h>
+
+//////////////////////////////////////////////////////////////////////
 
 typedef CMap<CString, LPCTSTR, int, int> CMapStringToInt;
 typedef CMap<int, int, CString, CString&> CMapIntToString;
 
-#define TDCIL_MAGENTA RGB(255, 0, 255)
-#define TDCIL_WHITE   RGB(255, 255, 255)
+//////////////////////////////////////////////////////////////////////
 
 class CTDCImageList : public CEnImageList  
 {
 public:
-	CTDCImageList(COLORREF crBkgnd = TDCIL_WHITE);
+	CTDCImageList(COLORREF crBkgnd = DEFAULT_BKGNDCOLOR);
 	virtual ~CTDCImageList();
 
 	BOOL LoadDefaultImages(BOOL bWantToolbars = FALSE);
-	BOOL LoadImages(const CString& sTaskList, COLORREF crTransparent = TDCIL_MAGENTA, 
+	BOOL LoadImages(const CString& sTaskList, COLORREF crTransparent = colorMagenta, 
 					BOOL bWantDefaultIcons = TRUE, BOOL bWantToolbars = FALSE);
 
 	int GetImageIndex(const CString& sImageName) const;

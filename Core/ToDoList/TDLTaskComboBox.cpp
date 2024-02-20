@@ -7,6 +7,7 @@
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
+#include "..\Shared\GraphicsMisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -20,11 +21,13 @@ const TCHAR TAB = '\t';
 
 const UINT WM_RESELECTTASKID = (CB_MSGMAX + 1);
 
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskComboBox::CTDLTaskComboBox() 
 	: 
-	CTabbedComboBox(IMAGESIZE),
+	CTabbedComboBox(ICON_SIZE + 2),
 	m_bShowParentsAsFolders(FALSE),
 	m_bEnableParents(TRUE)
 {
@@ -206,15 +209,15 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		// Always indent the text to make room for the image, unless we have
 		// headings in which case the base class will do that for us
 		if (m_nNumHeadings == 0)
-			rText.left += IMAGESIZE;
+			rText.left += ICON_SIZE + 2;
 
 		// Draw the actual image
 		if (nImage != -1)
 		{
-			rIcon.left += (IMAGESIZE * GetItemIndent(nItem));
+			rIcon.left += ((ICON_SIZE + 2) * GetItemIndent(nItem));
 
 			if (m_nNumHeadings)
-				rIcon.left -= IMAGESIZE;
+				rIcon.left -= ICON_SIZE + 2;
 		}
 	}
 	else
@@ -222,7 +225,7 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		sText.TrimLeft(TAB);
 
 		if (nImage != -1)
-			rText.left += IMAGESIZE;
+			rText.left += ICON_SIZE + 2;
 
 		rIcon.top--;
 	}
@@ -324,4 +327,19 @@ void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
 		SetWindowText(sText);
 		SetEditSel(LOWORD(dwSel), HIWORD(dwSel));
 	}
+}
+
+int CTDLTaskComboBox::GetExtraListboxWidth() const
+{
+	return (CTabbedComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CTDLTaskComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = CTabbedComboBox::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
+
+	return nMinHeight;
 }

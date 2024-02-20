@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 using System;
+using System.Drawing;
 using unvell.ReoGrid.Utility;
 
 namespace unvell.ReoGrid.Graphics
@@ -161,6 +162,14 @@ namespace unvell.ReoGrid.Graphics
 			SolidColor color;
 			Common.TextFormatHelper.DecodeColor(hex, out color);
 			this = color;
+		}
+
+		public SolidColor(Color rgb)
+		{
+			this.A = rgb.A;
+			this.R = rgb.R;
+			this.G = rgb.G;
+			this.B = rgb.B;
 		}
 
 		/// <summary>

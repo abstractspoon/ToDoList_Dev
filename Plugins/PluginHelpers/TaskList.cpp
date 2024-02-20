@@ -7,6 +7,8 @@
 #include "UIExtension.h"
 #include "ColorUtil.h"
 
+#include <Shared\WebMisc.h>
+
 #include <3rdParty\T64Utils.h>
 
 #include <Interfaces\IEnums.h>
@@ -109,6 +111,11 @@ String^ TaskList::GetReportDate()
 String^ TaskList::GetProjectName()
 {
 	return GETSTR(GetProjectName);
+}
+
+String^ TaskList::GetFilePath()
+{
+	return GETSTR_ARG(GetFileName, true);
 }
 
 String^ TaskList::GetMetaData(String^ sKey)
@@ -430,6 +437,13 @@ bool Task::HasAttribute(Task::Attribute attrib)
 			(m_pTaskList ? m_pTaskList->TaskHasAttribute(m_hTask, nAttrib) : false));
 }
 
+bool Task::HasCalculatedAttribute(Task::Attribute attrib)
+{
+	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+
+	return (m_pConstTaskList ? m_pConstTaskList->TaskHasAttribute(m_hTask, nAttrib, true) : false);
+}
+
 Task^ Task::GetFirstSubtask()
 {
 	if (m_pConstTaskList)
@@ -548,7 +562,7 @@ System::Drawing::Color Task::GetTextDrawingColor()
 {
 	UInt32 color = GETTASKVAL(GetTaskTextColor, 0);
 
-	if (color == 0)
+	if ((color == 0) || (color == ::GetSysColor(COLOR_WINDOWTEXT)))
 		return System::Drawing::Color::Empty;
 
 	// else
@@ -559,7 +573,7 @@ System::Windows::Media::Color Task::GetTextMediaColor()
 {
 	UInt32 color = GETTASKVAL(GetTaskTextColor, 0);
 
-	if (color == 0)
+	if ((color == 0) || (color == ::GetSysColor(COLOR_WINDOWTEXT)))
 		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);
 
 	return ColorUtil::MediaColor::ToColor(color);
@@ -693,13 +707,39 @@ List<UInt32>^ Task::GetLocalDependency()
 	return localDepends;
 }
 
-List<String^>^ Task::GetFileLink()
+List<String^>^ Task::GetFileLink(bool fullPath)
 {
 	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskFileLinkCount, 0);
 
-	for (int nIndex = 0; nIndex < numItems; nIndex++)
-		items->Add(GETTASKSTR_ARG(GetTaskFileLink, nIndex));
+	if (numItems > 0)
+	{
+		String^ pathRoot = String::Empty;
+
+		if (fullPath)
+		{
+			if (m_pConstTaskList)
+				pathRoot = (gcnew TaskList(m_pConstTaskList))->GetFilePath();
+			else
+				pathRoot = (gcnew TaskList(m_pTaskList))->GetFilePath();
+
+			if (!String::IsNullOrEmpty(pathRoot))
+				pathRoot = System::IO::Path::GetDirectoryName(pathRoot);
+		}
+
+		for (int nIndex = 0; nIndex < numItems; nIndex++)
+		{
+			String^ fileLinkPath = GETTASKSTR_ARG(GetTaskFileLink, nIndex);
+
+			if (fullPath && !WebMisc::IsURL(MS(fileLinkPath)))
+			{
+				fileLinkPath = System::IO::Path::Combine(pathRoot, fileLinkPath);
+				fileLinkPath = System::IO::Path::GetFullPath(fileLinkPath); // Canonical
+			}
+
+			items->Add(fileLinkPath);
+		}
+	}
 
 	return items;
 }
@@ -724,9 +764,9 @@ String^ Task::FormatDependency(String^ delimiter)
 	return FormatList(GetDependency(), delimiter);
 }
 
-String^ Task::FormatFileLink(String^ delimiter)
+String^ Task::FormatFileLink(String^ delimiter, bool fullPath)
 {
-	return FormatList(GetFileLink(), delimiter);
+	return FormatList(GetFileLink(fullPath), delimiter);
 }
 
 String^ Task::FormatList(List<String^>^ items, String^ delimiter)
@@ -901,6 +941,11 @@ double Task::GetTimeSpent(TimeUnits% cUnits, bool calculated)
 Boolean Task::IsRecurring()
 {
 	return GETTASKVAL(IsTaskRecurring, false);
+}
+
+Boolean Task::IsReference()
+{
+	return GETTASKVAL(IsTaskReference, false);
 }
 
 String^ Task::GetCustomAttributeValue(String^ sID, bool display)

@@ -141,7 +141,7 @@ namespace unvell.UIControls
 			this.labColor.Name = "labColor";
 			this.labColor.Size = new System.Drawing.Size(57, 21);
 			this.labColor.TabIndex = 6;
-			this.labColor.Text = "Color:";
+			this.labColor.Text = "Colour";
 			this.labColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// sampleGroup

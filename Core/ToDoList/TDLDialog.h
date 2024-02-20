@@ -17,6 +17,8 @@
 
 class CTDLDialog : public CDialog, protected CDialogHelper
 {
+	DECLARE_DYNAMIC(CTDLDialog)
+
 // Construction
 protected:
 	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);   // standard constructor

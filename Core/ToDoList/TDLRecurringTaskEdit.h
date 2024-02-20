@@ -15,7 +15,7 @@
 #include "..\shared\enedit.h"
 #include "..\shared\propertypagehost.h"
 #include "..\shared\DayOfWeekcombobox.h"
-#include "..\shared\monthcombobox.h"
+#include "..\shared\monthcheckcombobox.h"
 #include "..\Shared\DayOfWeekCheckListBox.h"
 
 class CTDLRecurringTaskEdit : public CEnEdit  
@@ -178,16 +178,17 @@ protected:
 	int		m_nSpecificNumMonths;
 	int		m_nEveryNumMonths;
 	int		m_nMonthlyOption;
+	BOOL	m_bFirstLastWeekday;
+	BOOL	m_bPreserveWeekdays;
 	//}}AFX_DATA
-	CDayOfWeekComboBox	m_cbWeekdays;
+	CDayOfWeekComboBox	m_cbDaysOfWeek;
 	CComboBox			m_cbSpecificWeek;
 	CStringArray		m_aSpecificWeek;
-	BOOL				m_bFirstLastWeekday;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CTDLRecurringTaskMonthlyOptionPage)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
@@ -228,13 +229,15 @@ protected:
 	int		m_nEveryDayOfMonth;
 	int		m_nSpecificNumber;
 	int		m_nEveryNumYears;
-	int		m_nSpecificMonth;
+	DWORD	m_dwSpecificMonths;
 	int		m_nSpecificDayOfWeek;
-	int		m_nEveryMonth;
+	DWORD	m_dwEveryMonths;
+	BOOL	m_bPreserveWeekdays;
+
 	//}}AFX_DATA
-	CMonthComboBox	m_cbSpecificMonthList;
+	CMonthCheckComboBox	m_cbSpecificMonthList;
+	CMonthCheckComboBox	m_cbEveryMonthList;
 	CDayOfWeekComboBox	m_cbDaysOfWeek;
-	CMonthComboBox	m_cbEveryMonthList;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
@@ -302,7 +305,5 @@ protected:
 	afx_msg void OnEndAfterNumRecur();
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	BOOL HasValidData();
 };
 

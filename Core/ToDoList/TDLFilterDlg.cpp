@@ -40,6 +40,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	m_cbTagFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbPriorityFilter(TRUE),
 	m_cbRiskFilter(TRUE),
+	m_cbRecurrence(TRUE),
 	m_eStartNextNDays(TRUE, _T("-0123456789")),
 	m_eDueNextNDays(TRUE, _T("-0123456789")),
 	m_nTitleFilter(nTitleFilter)
@@ -93,12 +94,15 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DUEFILTERCOMBO, m_cbDueFilter);
 	DDX_Control(pDX, IDC_USERSTARTDATE, m_dtcUserStart);
 	DDX_Control(pDX, IDC_USERDUEDATE, m_dtcUserDue);
+	DDX_Control(pDX, IDC_RECURFILTERCOMBO, m_cbRecurrence);
 
 	DDX_Text(pDX, IDC_TITLEFILTERTEXT, m_filter.sTitle);
 	DDX_Text(pDX, IDC_STARTNEXTNDAYS, m_filter.nStartNextNDays);
 	DDX_Text(pDX, IDC_DUENEXTNDAYS, m_filter.nDueNextNDays);
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
+
+	CDialogHelper::DDX_CBData(pDX, m_cbRecurrence, m_filter.nRecurrence, TDIR_NONE);
 
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
@@ -173,6 +177,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterDlg, CTDLDialog)
 	ON_CBN_SELCHANGE(IDC_CATEGORYFILTERCOMBO, OnSelchangeFilter)
 	ON_CBN_SELCHANGE(IDC_PRIORITYFILTERCOMBO, OnSelchangeFilter)
 	ON_CBN_SELCHANGE(IDC_RISKFILTERCOMBO, OnSelchangeFilter)
+	ON_CBN_SELCHANGE(IDC_RECURFILTERCOMBO, OnSelchangeFilter)
 	ON_CBN_SELENDCANCEL(IDC_ALLOCTOFILTERCOMBO, OnSelcancelFilter)
 	ON_CBN_SELENDCANCEL(IDC_TAGFILTERCOMBO, OnSelcancelFilter)
 	ON_CBN_SELENDCANCEL(IDC_VERSIONFILTERCOMBO, OnSelcancelFilter)

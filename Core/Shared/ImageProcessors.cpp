@@ -65,13 +65,13 @@ void C32BitImageProcessor::CalcWeightedColor(const RGBX* pPixels, CSize size, do
 	int nXP1 = min(nX + 1, size.cx - 1);
 	int nYP1 = min(nY + 1, size.cy - 1);
 
-	const RGBX& rgb = pPixels[nY * size.cx + nX];		// x, y
+	const RGBX& rgb = pPixels[nY * size.cx + nX];			// x, y
 	const RGBX& rgbXP = pPixels[nY * size.cx + nXP1];		// x + 1, y
 	const RGBX& rgbYP = pPixels[nYP1 * size.cx + nX];		// x, y + 1
 	const RGBX& rgbXYP = pPixels[nYP1 * size.cx + nXP1];	// x + 1, y + 1
 
-															// Avoid calculations and rounding errors when
-															// all 4 pixels have the same colour
+	// Avoid calculations and rounding errors when
+	// all 4 pixels have the same colour
 	if ((rgb == rgbXP) && (rgb == rgbYP) && (rgb == rgbXYP))
 	{
 		rgbResult = rgb;
@@ -976,10 +976,10 @@ struct COLORMAPPING
 
 static COLORMAPPING COLORMAPPINGS[] = 
 {
-   { 0x000000, COLOR_BTNTEXT },       // black
-   { 0x808080, COLOR_BTNSHADOW },     // dark gray
-   { 0xC0C0C0, COLOR_BTNFACE },       // bright gray
-   { 0xFFFFFF, COLOR_BTNHIGHLIGHT }   // white
+   { 0x000000, COLOR_3DDKSHADOW }, // black
+   { 0x808080, COLOR_3DSHADOW },   // dark gray
+   { 0xC0C0C0, COLOR_3DLIGHT },    // light gray
+   { 0xFFFFFF, COLOR_3DHIGHLIGHT } // white
 };
 
 BOOL CImageSysColorMapper::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 

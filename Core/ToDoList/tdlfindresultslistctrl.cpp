@@ -43,7 +43,9 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	: 
 	m_nCurGroupID(-1), 
 	m_bStrikeThruDone(FALSE), 
-	m_lcGrouping(*this)
+	m_crGroupBkgnd(CLR_NONE),
+	m_crRef(CLR_NONE),
+	m_crDone(CLR_NONE)
 {
 }
 
@@ -57,6 +59,7 @@ BEGIN_MESSAGE_MAP(CTDLFindResultsListCtrl, CEnListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,6 +80,16 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
 	RefreshUserPreferences();
+}
+
+LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	if (wp)
+		m_fonts.Initialise((HFONT)wp);
+	else
+		m_fonts.Initialise(GetSafeHwnd());
+
+	return Default();
 }
 
 int CTDLFindResultsListCtrl::GetColumnWidths(CIntArray& aWidths) const
@@ -217,7 +230,12 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
+		{
+			if (m_lcGrouping.DrawGroupHeader(pLVCD, m_crGroupBkgnd))
+				*pResult = CDRF_SKIPDEFAULT;
+			else
+				*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
+		}
 		break;
 
 	case CDDS_ITEMPREPAINT:
@@ -267,6 +285,7 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 					COLORREF crText = GetResultTextColor(pRes, bSelected, bHot);
 					pDC->SetTextColor(crText);
+					pDC->SetBkMode(TRANSPARENT);
 
 					// set the font for each column item
 					CFont* pFont = GetResultFont(pRes, nSubItem, bHot);
@@ -286,11 +305,19 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 					int nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
 
-					pDC->DrawText(sColText, rRow, nFlags);
-
-					// references
-					if ((nSubItem == COL_TASKTITLE) && (pLVCD->nmcd.rc.top > 0) && pRes->IsReference())
-						GraphicsMisc::DrawShortcutOverlay(pDC, &pLVCD->nmcd.rc);
+					if ((nSubItem == COL_TASKTITLE) && pRes->IsReference())
+					{
+						// Offset the task title to avoid the reference icon
+						rRow.left += GraphicsMisc::ScaleByDPIFactor(10);
+						pDC->DrawText(sColText, rRow, nFlags);
+						
+						if (pLVCD->nmcd.rc.top > 0)
+							GraphicsMisc::DrawShortcutOverlay(pDC, &pLVCD->nmcd.rc);
+					}
+					else
+					{
+						pDC->DrawText(sColText, rRow, nFlags);
+					}
 				}
 			}
 
@@ -303,27 +330,23 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-COLORREF CTDLFindResultsListCtrl::GetResultTextColor(const FTDRESULT* pRes, BOOL /*bSelected*/, BOOL bHot) const
+COLORREF CTDLFindResultsListCtrl::GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const
 {
 	ASSERT(pRes);
 
 	COLORREF crText = CLR_NONE;
 
-	if ((m_crDone != CLR_NONE) || (m_crRef != CLR_NONE))
+	if ((m_crDone != CLR_NONE) && (pRes->IsDone() || pRes->IsGoodAsDone()))
 	{
-		if (pRes->IsDone() || pRes->IsGoodAsDone())
-		{
-			crText = m_crDone;
-		}
-		else if (pRes->IsReference())
-		{
-			crText = m_crRef;
-		}
-
-		// darken the colour for hot items
-		if (bHot && (crText != CLR_NONE))
-			crText = GraphicsMisc::Darker(crText, 0.3);
+		crText = m_crDone;
 	}
+	else if ((m_crRef != CLR_NONE) && pRes->IsReference())
+	{
+		crText = m_crRef;
+	}
+
+	if (bSelected || bHot)
+		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 	return ((crText == CLR_NONE) ? GetSysColor(COLOR_WINDOWTEXT) : crText);
 }
@@ -348,21 +371,23 @@ CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, int nCol, B
 	return NULL;
 }
 
+COLORREF CTDLFindResultsListCtrl::GetUserColour(const CPreferences& prefs, LPCTSTR szSpecifiedKey, LPCTSTR szColorKey)
+{
+	if (prefs.GetProfileInt(_T("Preferences"), szSpecifiedKey, FALSE))
+		return (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), szColorKey, CLR_NONE);
+
+	// else
+	return CLR_NONE;
+}
+
 void CTDLFindResultsListCtrl::RefreshUserPreferences()
 {
 	CPreferences prefs;
 	
-	// update user completed tasks colour
-	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyDoneColor"), FALSE))
-		m_crDone = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), CLR_NONE);
-	else
-		m_crDone = CLR_NONE;
-	
-	// update user reference tasks colour
-	if (prefs.GetProfileInt(_T("Preferences"), _T("ReferenceColor"), FALSE))
-		m_crRef = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("Reference"), CLR_NONE);
-	else
-		m_crRef = CLR_NONE;
+	// update user colour
+	m_crDone = GetUserColour(prefs, _T("SpecifyDoneColor"), _T("TaskDone"));
+	m_crRef = GetUserColour(prefs, _T("ReferenceColor"), _T("Reference"));
+	m_crGroupBkgnd = GetUserColour(prefs, _T("SpecifyGroupHeaderBkgndColor"), _T("GroupHeaderBkgnd"));
 
 	// update strike thru font
 	BOOL bWasStrikeThru = m_bStrikeThruDone;
@@ -381,7 +406,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	int nPos = GetItemCount();
 	CString sTitle = pTDC->GetTaskTitle(result.dwTaskID);
 	CString sPath = pTDC->GetTaskPath(result.dwTaskID);
-		
+
 	// add result
 	int nIndex = InsertItem(nPos, sTitle);
 	
@@ -403,7 +428,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
 	if (m_nCurGroupID == -1)
-		m_lcGrouping.EnableGroupView();
+		m_lcGrouping.EnableGroupView(*this);
 
 	return m_lcGrouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }
@@ -480,4 +505,22 @@ CString CTDLFindResultsListCtrl::GetAttributeName(TDC_ATTRIBUTE nAttribID, const
 
 	ASSERT(!sAttrib.IsEmpty());
 	return sAttrib;
+}
+
+int CTDLFindResultsListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
+{
+	// Handle date sorting
+	if (nSortColumn == COL_WHATMATCHED)
+	{
+		COleDateTime date1, date2;
+		
+		BOOL bIsDate1 = CDateHelper::DecodeDate(GetSortString(dwItemData1), date1, TRUE);
+		BOOL bIsDate2 = CDateHelper::DecodeDate(GetSortString(dwItemData2), date2, TRUE);
+
+		if (bIsDate1 || bIsDate2)
+			return CDateHelper::Compare(date1, date2);
+	}
+
+	// all else
+	return CEnListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
 }

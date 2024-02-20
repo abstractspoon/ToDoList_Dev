@@ -124,8 +124,8 @@ struct GANTTITEM
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
-	COLORREF GetFillColor() const;
-	COLORREF GetBorderColor() const;
+	COLORREF GetFillColor(BOOL bSelected) const;
+	COLORREF GetBorderColor(BOOL bSelected) const;
 
 	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
 

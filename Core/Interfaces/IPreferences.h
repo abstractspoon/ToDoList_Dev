@@ -24,7 +24,10 @@ public:
 	virtual bool WriteProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dValue) = 0;
 
 	virtual bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry) = 0;
-	virtual bool DeleteProfileSection(LPCWSTR lpszSection) = 0;
+	virtual bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections = false) = 0;
+
+	virtual bool HasProfileSection(LPCTSTR lpszSection) const = 0;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////

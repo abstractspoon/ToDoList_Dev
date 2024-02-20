@@ -201,7 +201,7 @@ void CUIThemeFile::Reset()
 	crMenuBack			= GetSysColor(COLOR_3DFACE);
 	crToolbarDark		= GetSysColor(COLOR_3DFACE);
 	crToolbarLight		= GetSysColor(COLOR_3DFACE);
-	crToolbarHot		= GetSysColor(COLOR_3DHIGHLIGHT);
+	crToolbarHot		= GetSysColor(COLOR_WINDOW);
 	crStatusBarDark		= GetSysColor(COLOR_3DFACE);
 	crStatusBarLight	= GetSysColor(COLOR_3DFACE);
 	crStatusBarText		= GetSysColor(COLOR_WINDOWTEXT);

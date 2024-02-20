@@ -50,7 +50,10 @@ TASKCALITEMDATES& TASKCALITEMDATES::operator=(const TASKCALITEMDATES& tcid)
 	dtDone = tcid.dtDone;
 	dtStartCalc = tcid.dtStartCalc;
 	dtEndCalc = tcid.dtEndCalc;
+
 	bTreatOverdueAsDueToday = tcid.bTreatOverdueAsDueToday;
+	bCalcedParentStart = tcid.bCalcedParentStart;
+	bCalcedParentDue = tcid.bCalcedParentDue;
 
 	Misc::CopyStrT<COleDateTime>(tcid.mapCustomDates, mapCustomDates);
 	
@@ -65,6 +68,8 @@ BOOL TASKCALITEMDATES::operator==(const TASKCALITEMDATES& tcid) const
 			(dtDone == tcid.dtDone) &&
 			(dtStartCalc == tcid.dtStartCalc) &&
 			(dtEndCalc == tcid.dtEndCalc) &&
+			(bCalcedParentStart == tcid.bCalcedParentStart) &&
+			(bCalcedParentDue == tcid.bCalcedParentDue) &&
 			Misc::MatchAllStrT<COleDateTime>(mapCustomDates, tcid.mapCustomDates));
 }
 
@@ -75,15 +80,6 @@ BOOL TASKCALITEMDATES::IsValid() const
 
 void TASKCALITEMDATES::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
 {
-	// check for quick exit
-	if (!pTasks->IsAttributeAvailable(TDCA_STARTDATE) &&
-		!pTasks->IsAttributeAvailable(TDCA_DUEDATE) &&
-		!pTasks->IsAttributeAvailable(TDCA_DONEDATE) &&
-		!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
-	{
-		return;
-	}
-
 	// get creation date once only
 	time64_t tDate = 0;
 
@@ -91,20 +87,26 @@ void TASKCALITEMDATES::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 		dtCreation = GetDate(tDate);
 
 	// retrieve new dates
+	bool bParent = pTasks->IsTaskParent(hTask);
+
 	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 	{
-		if (pTasks->GetTaskStartDate64(hTask, FALSE, tDate))
+		if (pTasks->GetTaskStartDate64(hTask, bParent, tDate))
 			dtStart = GetDate(tDate);
 		else
 			CDateHelper::ClearDate(dtStart);
+
+		bCalcedParentStart = (bParent && pTasks->TaskHasAttribute(hTask, TDCA_STARTDATE, TRUE));
 	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
-		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
+		if (pTasks->GetTaskDueDate64(hTask, bParent, tDate))
 			dtDue = GetDate(tDate);
 		else
 			CDateHelper::ClearDate(dtDue);
+
+		bCalcedParentDue = (bParent && pTasks->TaskHasAttribute(hTask, TDCA_DUEDATE, TRUE));
 	}
 
 	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
@@ -325,14 +327,12 @@ COleDateTime TASKCALITEMDATES::GetAnyEnd() const
 {
 	// take calculated value in preference
 	if (CDateHelper::IsDateSet(dtEndCalc))
-	{
 		return dtEndCalc;
-	}
-	else if (CDateHelper::IsDateSet(dtDone))
-	{
+
+	// Then completion date 
+	if (CDateHelper::IsDateSet(dtDone))
 		return dtDone;
-	}
-	
+
 	// else
 	return dtDue;
 }
@@ -374,6 +374,7 @@ void TASKCALITEMDATES::MinMax(const COleDateTime& date, COleDateTime& dtMin, COl
 void TASKCALITEMDATES::SetStart(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
+	ASSERT(!bCalcedParentStart);
 
 	dtStart = date;
 	CDateHelper::ClearDate(dtStartCalc);
@@ -382,6 +383,7 @@ void TASKCALITEMDATES::SetStart(const COleDateTime& date)
 void TASKCALITEMDATES::SetDue(const COleDateTime& date)
 {
 	ASSERT(CDateHelper::IsDateSet(date));
+	ASSERT(!bCalcedParentDue);
 
 	dtDue = date;
 	CDateHelper::ClearDate(dtEndCalc);
@@ -400,12 +402,31 @@ void TASKCALITEMDATES::SetCustomDate(const CString& sCustAttribID, const COleDat
 	if (CDateHelper::IsDateSet(date))
 		mapCustomDates[Misc::ToUpper(sCustAttribID)] = date;
 	else
-		mapCustomDates.RemoveKey(Misc::ToUpper(sCustAttribID));
+		ClearCustomDate(sCustAttribID);
+}
+
+void TASKCALITEMDATES::ClearCustomDate(const CString& sCustAttribID)
+{
+	mapCustomDates.RemoveKey(Misc::ToUpper(sCustAttribID));
 }
 
 void TASKCALITEMDATES::SetCustomDates(const CMapCustomDates& dates)
 {
 	Misc::CopyStrT<COleDateTime>(dates, mapCustomDates);
+}
+
+BOOL TASKCALITEMDATES::IsActive(const COleDateTime& date) const
+{
+	if (IsDone() || !HasAnyStart() || !HasAnyEnd())
+		return FALSE;
+
+	if (GetAnyStart() > CDateHelper::GetDateOnly(date))
+		return FALSE;
+
+	if (GetAnyEnd() <= CDateHelper::GetEndOfDay(date))
+		return FALSE;
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -467,6 +488,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	bRecurring = tci.bRecurring;
 
 	dates = tci.dates;
+	aTags.Copy(tci.aTags);
 	
 	return (*this);
 }
@@ -481,7 +503,8 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci) const
 			(bHasIcon == tci.bHasIcon) &&
 			(bIsParent == tci.bIsParent) &&
 			(bRecurring == tci.bRecurring) &&
-			(dates == tci.dates));
+			(dates == tci.dates) &&
+			Misc::MatchAllT(aTags, tci.aTags, FALSE));
 }
 
 BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
@@ -505,6 +528,15 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 
 	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
 		bRecurring = pTasks->IsTaskRecurring(hTask);
+		
+	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
+	{
+		aTags.RemoveAll();
+		int nTag = pTasks->GetTaskTagCount(hTask);
+
+		while (nTag--)
+			aTags.InsertAt(0, pTasks->GetTaskTag(hTask, nTag));
+	}
 
 	dates.Update(pTasks, hTask, mapCustDateAttribIDs, dwCalcDates);
 
@@ -534,9 +566,23 @@ BOOL TASKCALITEM::IsParent() const
 	return bIsParent;
 }
 
+BOOL TASKCALITEM::IsCalculatedParent() const
+{
+	if (!dates.IsCalculatedParent())
+		return FALSE;
+
+	ASSERT(bIsParent);
+	return TRUE;
+}
+
 BOOL TASKCALITEM::HasIcon(BOOL bShowParentsAsFolder) const
 {
 	return (bHasIcon || (bIsParent && bShowParentsAsFolder));
+}
+
+BOOL TASKCALITEM::HasTag(LPCTSTR szTag) const
+{
+	return (Misc::Find(szTag, aTags, FALSE, TRUE) != -1);
 }
 
 BOOL TASKCALITEM::IsDone(BOOL bIncGoodAs) const
@@ -559,14 +605,14 @@ COLORREF TASKCALITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !bSelected && !IsDone(TRUE))
-		{
+		if (bSelected)
+			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
+		if (bColorIsBkgnd)
 			return GraphicsMisc::GetBestTextColor(color);
-		}
-		else if (!Misc::IsHighContrastActive())
-		{
-			return color;
-		}
+
+		// else
+		return color;
 	}
 	
 	// else
@@ -575,16 +621,13 @@ COLORREF TASKCALITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 
 COLORREF TASKCALITEM::GetFillColor(BOOL bColorIsBkgnd) const
 {
-	if (HasColor() && !IsDone(TRUE))
+	if (HasColor())
 	{
 		if (bColorIsBkgnd)
-		{
 			return color;
-		}
-		else if (!Misc::IsHighContrastActive())
-		{
+
+		if (!Misc::IsHighContrastActive())
 			return GraphicsMisc::Lighter(color, 0.9);
-		}
 	}
 	
 	// else
@@ -595,14 +638,11 @@ COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !IsDone(TRUE))
-		{
+		if (bColorIsBkgnd)
 			return GraphicsMisc::Darker(color, 0.4);
-		}
-		else if (!Misc::IsHighContrastActive())
-		{
+
+		if (!Misc::IsHighContrastActive())
 			return color;
-		}
 	}
 	
 	// else
@@ -748,7 +788,6 @@ void CTaskCalItemMap::RemoveKey(DWORD dwTaskID)
 	delete GetTaskItem(dwTaskID);
 
 	CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&>::RemoveKey(dwTaskID);
-
 }
 
 TASKCALITEM* CTaskCalItemMap::GetTaskItem(DWORD dwTaskID) const
@@ -795,6 +834,13 @@ DWORD CTaskCalItemMap::GetNextTaskID(POSITION& pos) const
 BOOL CTaskCalItemMap::HasTask(DWORD dwTaskID) const
 {
 	return (GetTaskItem(dwTaskID) != NULL);
+}
+
+BOOL CTaskCalItemMap::IsParentTask(DWORD dwTaskID) const
+{
+	const TASKCALITEM* pTCI = GetTaskItem(dwTaskID);
+
+	return (pTCI ? pTCI->IsParent() : FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1040,6 +1086,57 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 
 	// else
 	return CLR_NONE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CONTINUOUSDRAWINFO::CONTINUOUSDRAWINFO(DWORD dwID) : dwTaskID(dwID)
+{
+	Reset();
+}
+
+void CONTINUOUSDRAWINFO::Reset()
+{
+	nIconOffset = 0;
+	nTextOffset = 0;
+	nVertPos = -1;
+}
+
+CCalContinuousDrawInfo::~CCalContinuousDrawInfo()
+{
+	RemoveAll();
+}
+
+void CCalContinuousDrawInfo::RemoveAll()
+{
+	CONTINUOUSDRAWINFO* pInfo = NULL;
+	DWORD dwTaskID;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pInfo);
+		delete pInfo;
+	}
+
+	CMap<DWORD, DWORD, CONTINUOUSDRAWINFO*, CONTINUOUSDRAWINFO*&>::RemoveAll();
+}
+
+CONTINUOUSDRAWINFO& CCalContinuousDrawInfo::GetTaskInfo(DWORD dwTaskID)
+{
+	ASSERT(dwTaskID);
+
+	CONTINUOUSDRAWINFO* pInfo = NULL;
+	Lookup(dwTaskID, pInfo);
+
+	if (!pInfo)
+	{
+		pInfo = new CONTINUOUSDRAWINFO(dwTaskID);
+		SetAt(dwTaskID, pInfo);
+	}
+
+	return *pInfo;
 }
 
 /////////////////////////////////////////////////////////////////////////////

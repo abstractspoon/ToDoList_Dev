@@ -6,7 +6,7 @@
 #include "ToDoCtrlMgr.h"
 #include "tdstringres.h"
 #include "TDCTasktimelog.h"
-#include "TDLContentMgr.h"
+#include "TDCContentMgr.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
@@ -245,7 +245,7 @@ CFilteredToDoCtrl& CToDoCtrlMgr::GetFallbackToDoCtrl()
 {
 	// Only instantiated if called
 	static CUIExtensionMgr extm;
-	static CTDLContentMgr cm;
+	static CTDCContentMgr cm;
 	static CShortcutManager sm;
 	static CONTENTFORMAT cf;
 	static TDCCOLEDITFILTERVISIBILITY vis;
@@ -526,8 +526,12 @@ void CToDoCtrlMgr::SetLoaded(int nIndex)
 void CToDoCtrlMgr::RefreshTimeTracking(int nIndex)
 {
 	CHECKVALIDINDEX(nIndex);
-	ASSERT(GetTDCItem(nIndex).bLoaded);
-	
+
+#ifdef _DEBUG
+	const TDCITEM& tdci = GetTDCItem(nIndex);
+	ASSERT(tdci.bLoaded || !tdci.HasFilePath());
+#endif
+
 	UpdateTabItemImage(nIndex);
 }
 
@@ -626,12 +630,12 @@ BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL 
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	CBrowserDlg* pBrowser = NULL;
+	CTDLBrowserDlg* pBrowser = NULL;
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 
 	if (!m_mapBrowsers.Lookup(&tdc, pBrowser))
 	{
-		pBrowser = new CBrowserDlg(bBrowser);
+		pBrowser = new CTDLBrowserDlg(bBrowser);
 		m_mapBrowsers[&tdc] = pBrowser;
 
 		CEnString sTitle(IDS_DUETASKS_TITLE, GetFriendlyProjectName(nIndex));
@@ -893,7 +897,7 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 	}
 
 	// cleanup browser
-	CBrowserDlg* pBrowser = NULL;
+	CTDLBrowserDlg* pBrowser = NULL;
 
 	if (m_mapBrowsers.Lookup(&tdc, pBrowser))
 	{
@@ -1373,6 +1377,7 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 
 	case IM_NONE:
 		sTooltip = tdci.pTDC->GetFilePath();
+		sTooltip.DoNotTranslate();
 		break;
 	}
 

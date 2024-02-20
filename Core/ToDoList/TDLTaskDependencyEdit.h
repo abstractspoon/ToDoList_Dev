@@ -34,7 +34,8 @@ public:
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	void SetDependenciesAreCircular(BOOL bCircular = TRUE, COLORREF crCircular = 255);
 	
-	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
+	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
+				BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);
 	void DDX(CDataExchange* pDX, CTDCDependencyArray& aValues);
 
 protected:
@@ -45,6 +46,7 @@ protected:
 
 protected:
 	virtual void PreSubclassWindow();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 // Implementation
 protected:
@@ -54,10 +56,13 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnChange();
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
 
 	DECLARE_MESSAGE_MAP()
 
 	int Parse(CTDCDependencyArray& aDepends) const;
+	BOOL UpdateDepends();
+	BOOL UpdateDepends(const CTDCDependencyArray& aDepends);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,14 +71,15 @@ protected:
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
 public:
-	CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
+	CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
+							   BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);
 
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 protected:
 	CTDLTaskComboBox m_cbTasks;
-	BOOL m_bShowParentTasksAsFolders;
+	BOOL m_bShowParentTasksAsFolders, m_bShowLeadInTimes;
 
 	const CTaskFile& m_tasks;
 	const CTDCImageList& m_ilTasks;
@@ -106,7 +112,8 @@ class CTDLTaskDependencyEditDlg : public CTDLDialog
 // Construction
 public:
 	CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-							  const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent = NULL);   // standard constructor
+							  const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, 
+							  BOOL bShowLeadInTimes, CWnd* pParent = NULL);   // standard constructor
 
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 

@@ -84,6 +84,18 @@
     <ClInclude Include="GeometryUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RangeSliderCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DaysOfWeekCheckListBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RichTextBoxEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -150,6 +162,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeometryUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RangeSliderCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DaysOfWeekCheckListBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RichTextBoxEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

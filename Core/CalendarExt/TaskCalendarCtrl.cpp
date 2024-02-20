@@ -30,27 +30,13 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int TIP_PADDING = 3;
-const int TEXT_PADDING = GraphicsMisc::ScaleByDPIFactor(2);
-const int HEADER_PADDING = GraphicsMisc::ScaleByDPIFactor(3);
-const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
-const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
-const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
+const int TIP_PADDING		= 3;
+const int TEXT_PADDING		= GraphicsMisc::ScaleByDPIFactor(2);
+const int HEADER_PADDING	= GraphicsMisc::ScaleByDPIFactor(3);
+const int IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+const int DEF_TASK_HEIGHT	= (IMAGE_SIZE + 3); // Effective height is 1 less
+const int MIN_TASK_HEIGHT	= (DEF_TASK_HEIGHT - 6);
 const int OVERFLOWBTN_TIPID = INT_MAX;
-
-/////////////////////////////////////////////////////////////////////////////
-
-CTaskCalendarCtrl::CONTINUOUSDRAWINFO::CONTINUOUSDRAWINFO(DWORD dwID) : dwTaskID(dwID) 
-{ 
-	Reset();
-}
-
-void CTaskCalendarCtrl::CONTINUOUSDRAWINFO::Reset() 
-{ 
-	nIconOffset = 0;
-	nTextOffset = 0;
-	nVertPos = -1; 
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
@@ -75,7 +61,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crToday(255),
 	m_crAltWeek(CLR_NONE),
-	m_nCellHeaderMonthStyle(TCCMS_LONG)
+	m_sCellDateFormat(_T("%#d"))
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -116,10 +102,12 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_CONTEXTMENU()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
+	ON_WM_SIZE()
 
 END_MESSAGE_MAP()
 
@@ -146,6 +134,7 @@ LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
 
 	SetHeaderHeight(m_nTaskHeight + 2);
 	SetDayHeaderHeight(m_nTaskHeight);
+	RecalcCellHeaderDateFormats();
 
 	return 0L;
 }
@@ -160,13 +149,19 @@ BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
 	return ((dwOld & TCCO_DATEDISPLAYOPTIONS) == (dwNew & TCCO_DATEDISPLAYOPTIONS));
 }
 
-void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
+void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 {
-	if (m_dwOptions != dwOptions)
+	// Now handled by 'SetHideParentTasks'
+	dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
+
+	DWORD dwCurOptions = (m_dwOptions & ~TCCO_HIDEPARENTTASKS);
+
+	if (dwCurOptions != dwNewOptions)
 	{
 		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = dwOptions;
+		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
 
+		RecalcCellHeaderDateFormats();
 		RecalcTaskDates();
 		RebuildCellTasks();
 
@@ -184,6 +179,34 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 		{
 			m_timerMidnight.Disable();
 		}
+	}
+}
+
+void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
+{
+	BOOL bIsHidden = HasOption(TCCO_HIDEPARENTTASKS);
+	BOOL bChange = (Misc::StateChanged(bHide, bIsHidden) || 
+					(bHide && (m_sHideParentTag != sTag)));
+
+	if (bChange)
+	{
+		if (bHide)
+		{
+			m_dwOptions |= TCCO_HIDEPARENTTASKS;
+			m_sHideParentTag = sTag;
+		}
+		else
+		{
+			m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
+			m_sHideParentTag.Empty();
+		}
+
+		RecalcTaskDates();
+		RebuildCellTasks();
+
+		// Scroll to task if hidden parent is being reshown
+		BOOL bScrollToTask = (!bHide && m_mapData.IsParentTask(GetSelectedTaskID()));
+		FixupSelection(bScrollToTask);
 	}
 }
 
@@ -205,26 +228,8 @@ void CTaskCalendarCtrl::RecalcTaskDates()
 
 BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 {
-	// give the task a date that will make it appear in the calendar
-	COleDateTime date = ((GetMaxDate().m_dt + GetMinDate().m_dt) / 2);
-
-	int nRow, nCol;
-
-	if (GetLastSelectedGridCell(nRow, nCol))
-	{
-		const CCalendarCell* pCell = GetCell(nRow, nCol);
-		ASSERT(pCell);
-
-		date = pCell->date;
-	}
-
-	time64_t tDate;
-	
-	if (!CDateHelper::GetTimeT64(date, tDate))
-		return false;
-
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE);
-	
+
 	if (pTasks == NULL)
 	{
 		ASSERT(0);
@@ -234,8 +239,25 @@ BOOL CTaskCalendarCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	HTASKITEM hNewTask = pTasks->GetFirstTask();
 	ASSERT(hNewTask);
 
+	// Default the start date to today
+	COleDateTime dtStart = CDateHelper::GetDate(DHD_TODAY);
+
+	// Unless there is a currently visible selected cell
+	int nRow, nCol;
+
+	if (GetLastSelectedGridCell(nRow, nCol))
+	{
+		const CCalendarCell* pCell = GetCell(nRow, nCol);
+		ASSERT(pCell);
+
+		dtStart = pCell->date;
+	}
+
+	time64_t tDate;
+	VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
+
 	pTasks->SetTaskStartDate64(hNewTask, tDate);
-	pTasks->SetTaskDueDate64(hNewTask, tDate);
+	pTasks->SetTaskDueDate64(hNewTask, tDate); // end of same day
 
 	return true;
 }
@@ -252,6 +274,7 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(TDC_ATTRIBUTE nEditAttrib)
 	case TDCA_DEPENDENCY:
 	case TDCA_ICON:
 	case TDCA_RECURRENCE:
+	case TDCA_TAGS:
 	case TDCA_CUSTOMATTRIB:
 		return true;
 	}
@@ -287,10 +310,14 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		return FALSE;
 	}
 
+	// Extension items will be rebuilt so make sure
+	// our selected task is a real task
+	m_dwSelectedTaskID = GetRealTaskID(m_dwSelectedTaskID);
+
 	// Make sure the selected task remains visible
 	// after any changes if it was visible to start with
 	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
-	BOOL bChange = FALSE;
+	BOOL bChange = UpdateCustomDateAttributes(pTasks);
 
 	switch (nUpdate)
 	{
@@ -306,12 +333,12 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		break;
 		
 	case IUI_EDIT:
-		bChange = (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
+		bChange |= (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
 					pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
 		break;
 		
 	case IUI_DELETE:
-		bChange = RemoveDeletedTasks(pTasks);
+		bChange |= RemoveDeletedTasks(pTasks);
 		break;
 		
 	default:
@@ -320,6 +347,13 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	
 	if (bChange)
 	{
+		// clear selection if necessary
+		if (!HasTask(m_dwSelectedTaskID, FALSE))
+		{
+			m_dwSelectedTaskID = 0;
+			bSelTaskWasVisible = FALSE;
+		}
+
 		RecalcDataRange();
 		RebuildCellTasks();
 
@@ -407,11 +441,6 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 		if (!mapIDs.Has(dwTaskID))
 		{
 			m_mapData.RemoveKey(dwTaskID);
-
-			// clear selection if necessary
-			if (m_dwSelectedTaskID == dwTaskID)
-				m_dwSelectedTaskID = 0;
-
 			bChange = TRUE;
 		}
 	}
@@ -561,6 +590,7 @@ BOOL CTaskCalendarCtrl::SetVisibleWeeks(int nWeeks)
 		if (HasOption(TCCO_ADJUSTTASKHEIGHTS))
 			GraphicsMisc::VerifyDeleteObject(m_fontAltText);
 
+		FixupSelection(TRUE);
 		UpdateCellScrollBarVisibility(TRUE); // scroll to selected task
 		return TRUE;
 	}
@@ -664,8 +694,6 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 	UpdateCellScrollBarVisibility(FALSE);
 	RebuildCellTaskDrawInfo();
 
-	m_nCellHeaderMonthStyle = CalcCellHeaderMonthStyle(pDC, m_fonts.GetFont(GMFS_BOLD));
-
 	// create alternate text font as required
 	int nSize = CalcRequiredTaskFontPointSize();
 
@@ -758,93 +786,149 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 	}
 }
 
-TCC_MONTHSTYLE CTaskCalendarCtrl::CalcCellHeaderMonthStyle(CDC* pDC, CFont* pBoldFont) const
+void CTaskCalendarCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CCalendarCtrlEx::OnSize(nType, cx, cy);
+
+	RecalcCellHeaderDateFormats();
+}
+
+void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 {
 	CRect rCells;
 	GetClientRect(rCells);
 
 	int nAvailWidth = ((rCells.Width() / CALENDAR_NUM_COLUMNS) - (2 * HEADER_PADDING));
-	TCC_MONTHSTYLE nMonthStyle = TCCMS_LONG;
 
-	CFont *pOldFont = pDC->SelectObject(pBoldFont);
+	// Note: We use a bold font and the first day of the month 
+	// for our calculations because experience tells that it 
+	// always produces wider text than double digit non-bold text
+	CClientDC dc(this);
+	CFont *pOldFont = dc.SelectObject(m_fonts.GetFont(GMFS_BOLD));
 	
-	int nMaxDayWidth = pDC->GetTextExtent(_T("1 ")).cx;
-	int nMaxLongWidth = CDateHelper::GetMaxMonthNameWidth(pDC, FALSE);
+	BOOL bMonthBeforeDay = Misc::ShortDateFormatHasMonthBeforeDay();
+	int nMaxDayWidth = dc.GetTextExtent(_T("1 ")).cx;
+	int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, FALSE);
+	int nLongYearWidth = dc.GetTextExtent(_T(" 2020")).cx;
 
-	if ((nMaxDayWidth + nMaxLongWidth) > nAvailWidth)
+	int nWeekWidth = 0;
+
+	if (HasOption(TCCO_SHOWWEEKNUMINCELLDATE))
 	{
-		int nMaxShortWidth = CDateHelper::GetMaxMonthNameWidth(pDC, TRUE);
+		m_sCellDateWeekNumFormat = Misc::Format(_T(" %s%%d "), CEnString(IDS_SHORTWEEK));
+		nWeekWidth = dc.GetTextExtent(Misc::Format(m_sCellDateWeekNumFormat, 52)).cx;
+	}
+	else
+	{
+		m_sCellDateWeekNumFormat.Empty();
+	}
 
-		if ((nMaxDayWidth + nMaxShortWidth) <= nAvailWidth)
+	m_sCellDateFormat = _T("%#d"); // Day only
+
+	// Note: we include the week number width in the calculation
+	// but leave it out of the format string because we need to
+	// use our corrected week number not Windows'
+	if ((nMaxDayWidth + nMaxLongMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
+	{
+		m_sCellDateFormat = (bMonthBeforeDay ? _T("%B %#d %Y") : _T("%#d %B %Y"));
+	}
+	else
+	{
+		int nMaxShortMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, TRUE);
+
+		if ((nMaxDayWidth + nMaxShortMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
 		{
-			nMonthStyle = TCCMS_SHORT;
+			m_sCellDateFormat = (bMonthBeforeDay ? _T("%b %#d %Y") : _T("%#d %b %Y"));
 		}
 		else
 		{
-			pDC->SelectObject(pOldFont);
+			CString sDateSep = Misc::GetDateSeparator();
+			CString sDayMonthFormat;
 
-			int nMaxNumWidth = pDC->GetTextExtent(_T("31/12")).cx;
-
-			if (nMaxNumWidth <= nAvailWidth)
-				nMonthStyle = TCCMS_NUMBER;
+			if (bMonthBeforeDay)
+				sDayMonthFormat = _T("%m") + sDateSep + _T("%#d");
 			else
-				nMonthStyle = TCCMS_NONE;
+				sDayMonthFormat = _T("%#d") + sDateSep + _T("%m");
+
+			if ((dc.GetTextExtent(_T("1/12/2020")).cx + nWeekWidth) <= nAvailWidth)
+			{
+				m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%Y");
+			}
+			else if ((dc.GetTextExtent(_T("1/12/20")).cx + nWeekWidth) <= nAvailWidth)
+			{
+				m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%y");
+			}
+			else if ((dc.GetTextExtent(_T("1/12")).cx + nWeekWidth) <= nAvailWidth)
+			{
+				m_sCellDateFormat = sDayMonthFormat;
+			}
+			else if ((nMaxDayWidth + nWeekWidth) <= nAvailWidth)
+			{
+				// Day Only + week
+			}
+			else if (dc.GetTextExtent(_T("1/12")).cx <= nAvailWidth)
+			{
+				m_sCellDateFormat = sDayMonthFormat;
+				m_sCellDateWeekNumFormat.Empty();
+			}
+			else 
+			{
+				// Day only
+				m_sCellDateWeekNumFormat.Empty();
+			}
 		}
 	}
+	dc.SelectObject(pOldFont);
+}
 
-	pDC->SelectObject(pOldFont);
+CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const
+{
+	ASSERT(m_sCellDateFormat);
 
-	return nMonthStyle;
+	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%#d"));
+
+	// Show the week number on the first of the week -> First column
+	sWeekNum.Empty();
+
+	if (!m_sCellDateWeekNumFormat.IsEmpty())
+	{
+		int nUnused = -1, nCol = -1;
+		
+		if (CCalendarCtrl::GetGridCell(date, nUnused, nCol) && (nCol == 0))
+			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+	}
+
+	return sDate;
 }
 
 void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const CRect& rHeader, BOOL bShowMonth)
 {
-	// draw day/month numbers
-	int nDay = pCell->date.GetDay();
+	bShowMonth |= HasOption(TCCO_SHOWDATEINEVERYCELL);
 
-	// Draw the first of any month in bold
-	CFont *pOldFont = NULL;
+	CString sWeekNum, sDate = FormatCellDate(pCell->date, bShowMonth, sWeekNum);
 
-	if (nDay == 1)
-		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
-
-	CRect rText(rHeader);
-	rText.DeflateRect(HEADER_PADDING, 3);
-
-	CString sText;
-
-	if (bShowMonth)
-	{
-		switch (m_nCellHeaderMonthStyle)
-		{
-		case TCCMS_LONG:
-			sText.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, FALSE));
-			break;
-
-		case TCCMS_SHORT:
-			sText.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, TRUE));
-			break;
-
-		case TCCMS_NUMBER:
-			sText.Format(_T("%d/%d"), nDay, pCell->date.GetMonth());
-			break;
-
-		case TCCMS_NONE:
-			// Handled below
-			break;
-		}
-	}
-
-	if (sText.IsEmpty())
-		sText = Misc::Format(nDay);
-	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, DT_LEFT | DT_VCENTER);
 
-	// cleanup
-	if (nDay == 1)
+	CRect rDate(rHeader);
+	rDate.DeflateRect(HEADER_PADDING, 3);
+
+	if (pCell->date.GetDay() == 1)
+	{
+		// Draw the first of any month in bold
+		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
+
+		pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
 		pDC->SelectObject(pOldFont);
+	}
+	else
+	{
+		pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
+	}
+
+	// Draw week always in non-bold font
+	if (!sWeekNum.IsEmpty())
+		pDC->DrawText(sWeekNum, &rDate, DT_RIGHT | DT_VCENTER);
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -1084,7 +1168,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			CRect rOverflow;
 			CalcOverflowBtnRect(rCell, rOverflow);
 
-			CThemed::DrawFrameControl(this, pDC, rOverflow, DFC_SCROLL, DFCS_SCROLLDOWN, rCell);
+			CThemed::DrawFrameControl(this, pDC, rOverflow, DFC_SCROLL, DFCS_SCROLLDOWN, rOverflow);
 		}
 	}
 }
@@ -1177,7 +1261,6 @@ int CTaskCalendarCtrl::CalcEffectiveCellContentItemCount(const CCalendarCell* pC
 		const TASKCALITEM* pTCILast = pTasks->GetAt(nLastTask);
 
 		int nMaxPos = GetTaskVertPos(pTCILast->GetTaskID(), nLastTask, pCell, FALSE);
-
 		nNumItems = (nMaxPos + 1);
 	}
 
@@ -1189,9 +1272,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 	// First determine if we need to show a vertical scrollbar
 	CRect rCell;
 	const CCalendarCell* pCell = NULL;
-	int  nRow = -1, nCol = -1, nNumItems = 0;
+	int  nRow = -1, nCol = -1, nNumItems = 0, nMaxVisItems = 0;
 	BOOL bShowScrollbar = FALSE;
-
+	
 	if (CDialogHelper::IsChildOrSame(this, GetFocus()) && 
 		GetLastSelectedGridCell(nRow, nCol) &&
 		GetGridCellRect(nRow, nCol, rCell, TRUE))
@@ -1199,8 +1282,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 		pCell = GetCell(nRow, nCol);
 		ASSERT(pCell);
 
+		nMaxVisItems = (rCell.Height() / GetTaskHeight());
 		nNumItems = CalcEffectiveCellContentItemCount(pCell);
-		bShowScrollbar = ((nNumItems * GetTaskHeight()) > rCell.Height());
+		bShowScrollbar = (nNumItems > nMaxVisItems);
 
 		// And scroll selected task into view
 		if (bEnsureSelVisible && m_dwSelectedTaskID)
@@ -1212,7 +1296,14 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 				int nFind = pTasks->FindItem(m_dwSelectedTaskID);
 
 				if (nFind != -1)
-					m_nCellVScrollPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
+				{
+					int nPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
+
+					if (bShowScrollbar)
+						m_nCellVScrollPos = min(nPos, (nNumItems - nMaxVisItems));
+					else
+						m_nCellVScrollPos = 0;
+				}
 			}
 		}
 	}
@@ -1266,9 +1357,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 
 			si.nMin = 0;
 			si.nMax = (nNumItems - 1);
-			si.nPage = min((rCell.Height() / GetTaskHeight()), nNumItems);
+			si.nPage = nMaxVisItems;
 
-			m_nCellVScrollPos = min(m_nCellVScrollPos, (nNumItems - (int)si.nPage));
+			m_nCellVScrollPos = min(m_nCellVScrollPos, (nNumItems - nMaxVisItems));
 			si.nPos = m_nCellVScrollPos;
 
 			m_sbCellVScroll.EnableWindow(TRUE);
@@ -1449,7 +1540,7 @@ CTaskCalItemArray* CTaskCalendarCtrl::GetCellTasks(int nRow, int nCol)
 
 int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncExtItems)
 {
-	CScopedTraceTimer timing(_T("CTaskCalendarCtrl::RebuildCellTasks()"));
+//	CScopedTraceTimer timing(_T("CTaskCalendarCtrl::RebuildCellTasks()"));
 
 	// Rebuild extension items first because they are
 	// needed for building the cell tasks
@@ -1589,7 +1680,7 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 {
 	m_nMaxDayTaskCount = 0;
-	m_aContinuousDrawInfo.RemoveAll();
+	m_ContinuousDrawInfo.RemoveAll();
 
 	if (m_mapData.GetCount() == 0)
 		return;
@@ -1601,29 +1692,87 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 			CTaskCalItemArray* pTasks = GetCellTasks(i, u);
 			ASSERT(pTasks);
 
-			if (pTasks)
+			if (pTasks && pTasks->GetSize())
 			{
-				// now go thru the list and set the position of each item 
-				// if not already done
 				if (HasOption(TCCO_DISPLAYCONTINUOUS))
 				{
-					int nMaxPos = 0;
+					// Determine which slots are already used
+					CTaskCalItemArray aUsedSlots;
+					int nTask;
 
-					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					for (nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
-						const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+						TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+						ASSERT(pTCI);
+
+						DWORD dwTaskID = pTCI->GetTaskID();
+						const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
+
+						if (cdi.nVertPos != -1)
+						{
+							if (cdi.nVertPos >= aUsedSlots.GetSize())
+								aUsedSlots.SetSize(cdi.nVertPos + 1);
+
+							aUsedSlots[cdi.nVertPos] = pTCI;
+						}
+					}
+
+					// Now go thru the list and set the position of each item 
+					// (if not already done) keeping track of the next available slot
+					int nNextSlot = Misc::FindT((TASKCALITEM*)NULL, aUsedSlots);
+					BOOL bHadEmptySlots = (nNextSlot != -1);
+
+					if (nNextSlot == -1)
+						nNextSlot = aUsedSlots.GetSize();
+
+					for (nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					{
+						TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 						ASSERT(pTCI);
 
 						DWORD dwTaskID = pTCI->GetTaskID();
 						CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
 
 						if (cdi.nVertPos == -1)
-							cdi.nVertPos = max(nMaxPos, nTask);
+						{
+							cdi.nVertPos = nNextSlot;
 
-						nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
+							if (nNextSlot == aUsedSlots.GetSize())
+							{
+								// We've passed the end of the allocated slots
+								// so just keep adding to the end
+								aUsedSlots.Add(pTCI);
+								nNextSlot++;
+							}
+							else
+							{
+								ASSERT(aUsedSlots[nNextSlot] == NULL);
+
+								aUsedSlots[nNextSlot] = pTCI;
+
+								int nNextAvailSlot = Misc::FindT((TASKCALITEM*)NULL, aUsedSlots, nNextSlot + 1);
+
+								// If no further slots are available we start adding to the end
+								if (nNextAvailSlot == -1)
+									nNextSlot = aUsedSlots.GetSize();
+								else
+									nNextSlot = nNextAvailSlot;
+							}
+						}
 					}
 
-					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
+					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, aUsedSlots.GetSize());
+
+					// Copy the reordered tasks after removing any remaining empty slots
+					if (bHadEmptySlots)
+					{
+						if (aUsedSlots.GetSize() > pTasks->GetSize())
+							Misc::RemoveAllT((TASKCALITEM*)NULL, aUsedSlots);
+						else
+							ASSERT(Misc::FindT((TASKCALITEM*)NULL, aUsedSlots) == -1);
+
+						pTasks->Copy(aUsedSlots);
+					}
 				}
 				else
 				{
@@ -1662,6 +1811,8 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 #endif
 
 	double dCellStart = dtCell, dCellEnd = (dCellStart + 1.0);
+	BOOL bToday = CDateHelper::IsToday(dtCell);
+
 	POSITION pos = mapTasks.GetStartPosition();
 
 	while (pos)
@@ -1669,69 +1820,75 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 		TASKCALITEM* pTCI = mapTasks.GetNextTask(pos);
 		ASSERT(pTCI);
 
-		// ignore tasks with both start and end dates calculated
-		if (!pTCI->IsValid())
-			continue;
-
-		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-			continue;
-
-		// ignore completed tasks as required
-		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+		// Task Visibility
+		if (IsHiddenTask(pTCI, TRUE))
 			continue;
 
 		if (HasOption(TCCO_DISPLAYCONTINUOUS))
 		{
-			if ((pTCI->GetAnyStartDate().m_dt < dCellEnd) && 
-				(pTCI->GetAnyEndDate().m_dt >= dCellStart))
+			if ((pTCI->GetAnyStartDate().m_dt < dCellEnd) && (pTCI->GetAnyEndDate().m_dt >= dCellStart))
 			{
 				pTasks->Add(pTCI);
 			}
 		}
-		else
+		else // discontinuous options
 		{
-			BOOL bAdded = FALSE; // only add once
-
 			if (HasOption(TCCO_DISPLAYCALCSTART) || (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet()))
 			{
 				if (CDateHelper::GetDateOnly(pTCI->GetAnyStartDate()).m_dt == dCellStart)
 				{
 					pTasks->Add(pTCI);
-					bAdded = TRUE;
+					continue;
 				}
 			}
 
-			// only test for due/done if start not added
-			if (!bAdded)
+			if (HasOption(TCCO_DISPLAYCALCDUE) || (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet()))
 			{
-				if (HasOption(TCCO_DISPLAYCALCDUE) || (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet()))
+				if (CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt == dCellStart)
 				{
-					if (CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt == dCellStart)
-					{
-						pTasks->Add(pTCI);
-						bAdded = TRUE;
-					}
-				}
-
-				if (!bAdded && HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
-				{
-					if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()).m_dt == dCellStart)
-						pTasks->Add(pTCI);
+					pTasks->Add(pTCI);
+					continue;
 				}
 			}
-		}
+
+			if (HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
+			{
+				if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()).m_dt == dCellStart)
+				{
+					pTasks->Add(pTCI);
+					continue;
+				}
+			}
+
+			if (HasOption(TCCO_DISPLAYACTIVETODAY))
+			{
+				if (bToday && pTCI->IsActive(dtCell))
+				{
+					pTasks->Add(pTCI);
+					continue;
+				}
+			}		}
 	}
 }
 
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
+// External method
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
+{
+	return HitTestTask(ptClient, TRUE, bCustomDate);
+}
+
+// Internal method
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL bRealTaskID, BOOL& bCustomDate) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
 	if (nHit == TCCHT_NOWHERE)
 		return 0;
-	
-	if (!IsCustomDate(dwTaskID))
+
+	bCustomDate = IsCustomDate(dwTaskID);
+
+	if (bRealTaskID)
 		dwTaskID = GetRealTaskID(dwTaskID);
 
 	return dwTaskID;
@@ -1773,11 +1930,16 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 	}
 	else // exclude 'More Tasks...' button
 	{
-		CRect rOverflow;
-		CalcOverflowBtnRect(rCell, rOverflow);
+		int nNumItems = CalcEffectiveCellContentItemCount(pCell);
 
-		if (rOverflow.PtInRect(ptClient))
-			return 0;
+		if ((nNumItems * GetTaskHeight()) > rCell.Height())
+		{
+			CRect rOverflow;
+			CalcOverflowBtnRect(rCell, rOverflow);
+
+			if (rOverflow.PtInRect(ptClient))
+				return 0;
+		}
 	}
 
 	const CTaskCalItemArray* pTasks = static_cast<CTaskCalItemArray*>(pCell->pUserData);
@@ -1919,7 +2081,7 @@ BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 	// Does the selected cell already have this task?
 	int nRow, nCol;
 
-	if (GetLastSelectedGridCell(nRow, nCol))
+	if (GetLastSelectedGridCell(nRow, nCol) && (nRow < m_nVisibleWeeks))
 	{
 		const CTaskCalItemArray* pTasks = GetCellTasks(nRow, nCol);
 		ASSERT(pTasks);
@@ -2169,11 +2331,11 @@ BOOL CTaskCalendarCtrl::CalcTaskCellRect(int nTask, const CCalendarCell* pCell, 
 	return TRUE;
 }
 
-CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawInfo(DWORD dwTaskID) const
+CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawInfo(DWORD dwTaskID) const
 {
 	ASSERT(dwTaskID);
 
-	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
+	if (!HasOption(TCCO_DISPLAYCONTINUOUS) || !dwTaskID)
 	{
 		static CONTINUOUSDRAWINFO nullDrawInfo;
 		nullDrawInfo.Reset();
@@ -2181,21 +2343,7 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 		return nullDrawInfo;
 	}
 
-	int nItem, nNumItem = m_aContinuousDrawInfo.GetSize();
-
-	for (nItem = 0; nItem < nNumItem; nItem++)
-	{
-		if (m_aContinuousDrawInfo[nItem].dwTaskID == dwTaskID)
-			break;
-	}
-
-	if (nItem == nNumItem) // not found
-	{
-		CONTINUOUSDRAWINFO cdi(dwTaskID);
-		nItem = m_aContinuousDrawInfo.Add(cdi);
-	}
-
-	return m_aContinuousDrawInfo[nItem];
+	return m_ContinuousDrawInfo.GetTaskInfo(dwTaskID);
 }
 
 TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
@@ -2212,6 +2360,23 @@ TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
 	return pTCI;
 }
 
+BOOL CTaskCalendarCtrl::IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) const
+{
+	if (bCheckValid && !pTCI->IsValid())
+		return TRUE;
+
+	if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
+	{
+		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
+			return TRUE;
+	}
+
+	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+		return TRUE;
+
+	return FALSE;
+}
+
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 {
 	if (dwTaskID == 0)
@@ -2225,17 +2390,8 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 		return FALSE;
 	}
 
-	if (bExcludeHidden)
-	{
-		if (!pTCI->IsValid())
-			return FALSE;
-
-		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-			return FALSE;
-
-		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
-			return FALSE;
-	}
+	if (bExcludeHidden && IsHiddenTask(pTCI, TRUE))
+		return FALSE;
 
 	return TRUE;
 }
@@ -2251,16 +2407,16 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible)
 // internal version
 BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify)
 {
-	if (!HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
+	if (!HasTask(dwTaskID, FALSE)) // Don't exclude hidden tasks
 		return FALSE;
 
-	DWORD dwSelTaskID = GetSelectedTaskID();
+	DWORD dwSelTaskID = GetSelectedTaskID(); // Can be 'real' or 'extension'
 
-	if ((dwTaskID != dwSelTaskID) && (dwTaskID != GetRealTaskID(dwSelTaskID)))
+	if (dwTaskID != dwSelTaskID)
 	{
 		m_dwSelectedTaskID = dwTaskID;
 
-		if (bNotify)
+		if (bNotify && (dwTaskID != GetRealTaskID(dwSelTaskID)))
 			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
 
 		if (bEnsureVisible)
@@ -2281,18 +2437,10 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 	// Check visibility
 	const TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 
-	if (!pTCI)
+	if (!pTCI || IsHiddenTask(pTCI, TRUE)) // Exclude hidden tasks
 		return 0;
 
-	if (pTCI->IsParent() && HasOption(TCCO_HIDEPARENTTASKS))
-		return 0;
-
-	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
-		return 0;
-
-	if (!pTCI->HasAnyStartDate() && !pTCI->HasAnyEndDate())
-		return 0;
-
+	// Does it have the necessary dates
 	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
 	{
 		BOOL bHasStart = (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet());
@@ -2310,12 +2458,13 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwSelID = HitTestTask(point);
+	BOOL bCustomDate = FALSE;
+	DWORD dwSelID = HitTestTask(point, FALSE, bCustomDate);
 	
 	if (dwSelID)
 	{
-		if (!IsCustomDate(dwSelID))
-			dwSelID = GetRealTaskID(dwSelID);
+		if (m_tooltip.GetSafeHwnd())
+			m_tooltip.Pop();
 
 		SetFocus();
 		SelectTask(dwSelID, FALSE, TRUE);
@@ -2352,7 +2501,6 @@ BOOL CTaskCalendarCtrl::IsExtensionItem(DWORD dwTaskID) const
 		return TRUE;
 	}
 
-	ASSERT(dwTaskID <= m_dwMaximumTaskID);
 	return FALSE;
 }
 
@@ -2432,6 +2580,8 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 
 	// keep parent informed
 	NotifyParentDragChange();
+
+	TRACE(_T("\nDragStart (date: %f.0, vpos: %d, scrollpos: %d)\n"), m_DateCurrent.m_dt, m_nVscrollPos, GetScrollPos(SB_VERT));
 
 	return TRUE;
 }
@@ -2551,7 +2701,13 @@ TCC_SNAPMODE CTaskCalendarCtrl::GetSnapMode() const
 {
 	if (IsDragging())
 	{
-		// active keys override
+		TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+		ASSERT(pTCI && !IsFutureOccurrence(pTCI));
+
+		if (IsCustomDate(pTCI))
+			return TCCSM_NEARESTDAY;
+		
+		// else active keys override
 		if (Misc::ModKeysArePressed(MKS_CTRL))
 			return TCCSM_NEARESTHOUR;
 
@@ -2753,10 +2909,13 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 	m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
 	ReleaseCapture();
 
+	TRACE(_T("\nDragEnd (date: %f.0, vpos: %d, scrollpos: %d)\n"), m_DateCurrent.m_dt, m_nVscrollPos, GetScrollPos(SB_VERT));
+
 	// keep parent informed
 	if (!NotifyParentDateChange(nDragWhat, sCustAttribID))
 	{
 		*pTCI = m_tcidPreDrag;
+		RebuildCellTasks();
 	}
 	else if (m_mapRecurringTaskIDs.Has(m_dwSelectedTaskID) || bExtItem)
 	{
@@ -2835,6 +2994,9 @@ BOOL CTaskCalendarCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& d
 BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 {
 	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
+
+	if (nHit == TCCHT_NOWHERE)
+		return FALSE;
 	
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
@@ -2851,16 +3013,19 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	if (pTCI->bLocked)
 		return FALSE;
 
+	if (pTCI->IsCalculatedParent())
+		return FALSE;
+
 	if (IsFutureOccurrence(pTCI))
 		return FALSE;
 
 	BOOL bCustomDate = IsCustomDate(pTCI);
-	BOOL bHasDepends = (HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
+	BOOL bHasDepends = (!bCustomDate && HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
 			
 	switch (nHit)
 	{
 	case TCCHT_BEGIN:
-		return !bCustomDate && !bHasDepends;
+		return (!bCustomDate && !bHasDepends);
 
 	case TCCHT_MIDDLE:
 		return !bHasDepends;
@@ -3026,6 +3191,48 @@ void CTaskCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CCalendarCtrlEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
+void CTaskCalendarCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+{
+	if (GetSelectedTaskID() == 0)
+		return ;
+
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+	ASSERT(pTCI);
+
+	if (pTCI && IsCustomDate(pTCI))
+	{
+		CMenu menu;
+
+		if (menu.LoadMenu(IDR_CUSTOMDATE_POPUP))
+		{
+			CMenu* pPopup = menu.GetSubMenu(0);
+
+			if (pPopup)
+			{
+				// check pos
+				if (pos.x == -1 && pos.y == -1)
+				{
+					pos = GetCaretPos();
+					::ClientToScreen(*this, &pos);
+				}
+
+				UINT nCmdID = pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD, pos.x, pos.y, this);
+
+				switch (nCmdID)
+				{
+				case ID_CAL_CLEARCUSTOMDATE:
+					ClearSelectedCustomDate();
+					break;
+				}
+			}
+		}
+
+		return;
+	}
+
+	CCalendarCtrlEx::OnContextMenu(pWnd, pos);
+}
+
 BOOL CTaskCalendarCtrl::IsCellScrollBarActive() const
 {
 	return (m_sbCellVScroll.GetSafeHwnd() && 
@@ -3071,7 +3278,9 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwTaskID = HitTestTask(point);
+	BOOL bUnused;
+	DWORD dwTaskID = HitTestTask(point, FALSE, bUnused);
+
 	SelectTask(dwTaskID, FALSE, TRUE);
 	
 	CCalendarCtrlEx::OnRButtonDown(nFlags, point);
@@ -3113,9 +3322,48 @@ BOOL CTaskCalendarCtrl::EnableLabelTips(BOOL bEnable)
 	return TRUE;
 }
 
-BOOL CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
+BOOL CTaskCalendarCtrl::ProcessMessage(MSG* pMsg) 
 {
+	// Handle 'Delete' on a custom date
+	switch (pMsg->message)
+	{
+	case WM_KEYDOWN:
+		if (pMsg->wParam == VK_DELETE)
+			return ClearSelectedCustomDate();
+		break;
+	}
+	
+	// All else
 	return false;
+}
+
+BOOL CTaskCalendarCtrl::ClearSelectedCustomDate()
+{
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+
+	if (IsCustomDate(pTCI))
+	{
+		const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<TASKCALCUSTOMDATE*>(pTCI);
+		ASSERT(pTCIDate);
+
+		pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
+		ASSERT(pTCI);
+
+		pTCI->ClearCustomDate(pTCIDate->sCustomAttribID);
+		NotifyParentDateChange(TCCHT_MIDDLE, pTCIDate->sCustomAttribID);
+
+		// Move the selection to the real task
+		m_dwSelectedTaskID = 0;
+		SelectTask(pTCI->GetTaskID(), TRUE, TRUE);
+
+		RebuildCellTasks();
+		Invalidate(TRUE);
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg) 

@@ -83,7 +83,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 	GetToolBarCtrl().SetImageList(&m_ilNormal);
 	
 	// tooltips
-	if (!m_tbHelper.Initialize(this, GetParent(), &mgrShortcuts))
+	if (!m_tbHelper.Initialize(this, &mgrShortcuts))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -254,7 +254,7 @@ BOOL CTDLCustomToolbar::AppendTools(const CUserToolArray& aTools, BOOL bGrouped)
 	RemoveTools();
 
 	UINT nLastID = GetItemID(m_nInitBtnCount - 1);
-	CTDCToolsHelper(FALSE, FALSE).AddToolsToToolbar(aTools, *this, nLastID, bGrouped);
+	CTDCToolsHelper(FALSE).AddToolsToToolbar(aTools, *this, nLastID, bGrouped);
 
 	return TRUE;
 }

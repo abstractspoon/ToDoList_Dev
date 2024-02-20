@@ -165,6 +165,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="DarkMode.cpp" />
     <ClCompile Include="DatabaseEx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -369,6 +370,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="MonthCalCtrlEx.cpp" />
+    <ClCompile Include="monthcheckcombobox.cpp" />
     <ClCompile Include="monthcombobox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -664,6 +666,7 @@
     <ClInclude Include="CopyWndContents.h" />
     <ClInclude Include="CtrlTextHighlighter.h" />
     <ClInclude Include="custombutton.h" />
+    <ClInclude Include="DarkMode.h" />
     <ClInclude Include="DatabaseEx.h" />
     <ClInclude Include="DateHelper.h" />
     <ClInclude Include="DateHelperEnums.h" />
@@ -733,6 +736,7 @@
     <ClInclude Include="MiniCalendarListCtrl.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="MonthCalCtrlEx.h" />
+    <ClInclude Include="monthcheckcombobox.h" />
     <ClInclude Include="monthcombobox.h" />
     <ClInclude Include="MouseWheelMgr.h" />
     <ClInclude Include="MSOutlookHelper.h" />

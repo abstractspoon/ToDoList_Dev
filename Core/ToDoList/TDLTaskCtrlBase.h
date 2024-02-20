@@ -30,6 +30,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#include "..\Interfaces\ContentMgr.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTreeCtrlHelper;
 class CToDoCtrlData;
 class CPreferences;
@@ -49,7 +53,8 @@ protected: // base class only
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
-					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+					 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+					 const CContentMgr& mgrContent);
 
 public:
 	virtual ~CTDLTaskCtrlBase();
@@ -144,6 +149,7 @@ public:
 	DWORD GetSelectedTaskParentID() const;
 	BOOL IsSelectedTaskDone() const;
 	BOOL IsSelectedTaskDue() const;
+	BOOL CanSplitSelectedTask() const;
 
 	BOOL SelectionHasDependencies() const;
 	BOOL SelectionHasCircularDependencies() const;
@@ -160,7 +166,7 @@ public:
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionAreAllDone() const;
-	BOOL CanSplitSelectedTask() const;
+	BOOL SelectionHasTaskColor() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);
@@ -251,6 +257,7 @@ protected:
 	const CTDCImageList& m_ilTaskIcons;
 	const CTDCColumnIDMap& m_mapVisibleCols;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+	const CContentMgr& m_mgrContent;
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
@@ -365,6 +372,8 @@ protected:
 	BOOL IsReadOnly() const { return HasStyle(TDCS_READONLY); }
 	BOOL GetAttributeColor(const CString& sAttrib, COLORREF& color) const;
 	int GetTaskColumnTooltip(const CPoint& ptScreen, CString& sTooltip) const;
+	CString GetTaskColumnFileLinkTooltip(LPCTSTR szFileLink) const;
+	CString GetTaskCustomColumnTooltip(const TODOITEM* pTDI, TDC_COLUMN nColID) const;
 	BOOL TaskHasReminder(DWORD dwTaskID) const;
 	BOOL GetTaskReminder(DWORD dwTaskID, COleDateTime& dtRem) const;
 	time_t GetTaskReminder(DWORD dwTaskID) const;
@@ -464,11 +473,12 @@ protected:
 	void DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect);
 	void DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bAlternate = FALSE);
 	void DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected, BOOL bHorz, BOOL bVert);
-	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS);
+	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack);
 	BOOL DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, 
 							  CDC* pDC, const CRect& rSubItem, COLORREF crText);
 	enum TTCB_CHECK { TTCNC_UNCHECKED, TTCBC_CHECKED, TTCBC_MIXED };
 	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck);
+	void DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, const CPoint& ptTopLeft);
 
 	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
 						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);
@@ -480,7 +490,7 @@ protected:
 	// internal version
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
 							COLORREF& crBack, BOOL bRef, BOOL bSelected) const;
-	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack) const;
 
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);

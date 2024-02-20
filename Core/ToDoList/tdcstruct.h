@@ -842,6 +842,7 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 	CString sAttribID;
 	UINT nBuddyCtrlID;
 	UINT nBuddyLabelID;
+	CString sPrompt, sBuddyPrompt;
 
 protected:
 	CRuntimeClass* pBuddyClass;
@@ -952,8 +953,16 @@ struct SEARCHPARAM
 
 		nType = GetAttribType();
 
-		if (nType == FT_DOUBLE || nType == FT_DATE)
+		switch (nType)
+		{
+		case FT_DOUBLE:
+		case FT_DATE:
 			dValue = d;
+			break;
+
+		default:
+			ASSERT(0);
+		}
 	}
 	
 	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, int n, BOOL and = TRUE) : 
@@ -963,8 +972,17 @@ struct SEARCHPARAM
 
 		nType = GetAttribType();
 
-		if (nType == FT_INTEGER || nType == FT_BOOL)
+		switch (nType)
+		{
+		case FT_INTEGER:
+		case FT_BOOL:
+		case FT_RECURRENCE:
 			nValue = n;
+			break;
+
+		default:
+			ASSERT(0);
+		}
 	}
 
 	BOOL operator!=(const SEARCHPARAM& rule) const
@@ -1127,8 +1145,16 @@ struct SEARCHPARAM
 		sCustAttribID = id;
 
 		// handle relative dates
-		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
-			SetRelativeDate(nType == FT_DATERELATIVE);
+		switch (nType)
+		{
+		case FT_DATE:
+			SetRelativeDate(FALSE);
+			break;
+
+		case FT_DATERELATIVE:
+			SetRelativeDate(TRUE);
+			break;
+		}
 
 		ValidateOperator();
 		return TRUE;
@@ -1192,6 +1218,7 @@ struct SEARCHPARAM
 		case TDCA_TAGS: 
 		case TDCA_PATH: 
 		case TDCA_LASTMODBY:
+		case TDCA_COMMENTSFORMAT:
 			return FT_STRING;
 
 		case TDCA_ICON: 
@@ -1391,10 +1418,8 @@ struct SEARCHPARAM
 			
 		case FT_INTEGER:
 		case FT_BOOL:
-			nValue = _ttoi(val);
-			break;
-
 		case FT_RECURRENCE:
+			nValue = _ttoi(val);
 			break;
 
 		default:
@@ -1459,23 +1484,33 @@ struct SEARCHPARAM
 			return Misc::Format(dValue, 3);
 
 		case FT_INTEGER:
-			if (AttributeIs(TDCA_PRIORITY) && (nValue == FM_NOPRIORITY))
+			switch (GetAttribute())
 			{
-				return CEnString(IDS_TDC_NONE);
+			case TDCA_PRIORITY:
+				if (nValue == FM_NOPRIORITY)
+					return CEnString(IDS_TDC_NONE);
+				break;
+
+			case TDCA_RISK:
+				if (nValue == FM_NORISK)
+					return CEnString(IDS_TDC_NONE);
 			}
-			else if (AttributeIs(TDCA_RISK) && (nValue == FM_NORISK))
-			{
-				return CEnString(IDS_TDC_NONE);
-			}
-			// else
-			return Misc::Format(nValue);
+			// else fall thru
 
 		case FT_BOOL:
+		case FT_RECURRENCE:
 			return Misc::Format(nValue);
+
+		case FT_STRING:
+		case FT_DATERELATIVE:
+		case FT_ICON:
+		case FT_DEPENDENCY:
+			return sValue;
 		}
 
 		// all else
-		return sValue;
+		ASSERT(0);
+		return _T("");
 	}
 
 	double ValueAsDouble() const
@@ -1492,6 +1527,7 @@ struct SEARCHPARAM
 
 		case FT_INTEGER:
 		case FT_BOOL:
+		case FT_RECURRENCE:
 			return (double)nValue;
 		}
 
@@ -1525,31 +1561,28 @@ struct SEARCHPARAM
 
 	COleDateTime ValueAsDate() const
 	{
-		COleDateTime date;
-
 		switch (GetAttribType())
 		{
 		case FT_DATE:
-			date = dValue;
-			break;
+			return dValue;
 
 		case FT_DATERELATIVE:
 			{
 				CTwentyFourSevenWeek week;
 				CDateHelper dh(week);
+				COleDateTime date;
 
 				if (!dh.DecodeRelativeDate(sValue, date, FALSE))
 					CDateHelper::ClearDate(date);
-			}
-			break;
 
-		default:
-			// all else
-			ASSERT(0);
+				return date;
+			}
 			break;
 		}
 
-		return date;
+		// all else
+		ASSERT(0);
+		return CDateHelper::NullDate();
 	}
 
 protected:
@@ -1732,6 +1765,50 @@ struct SEARCHRESULT
 		return ((dwFlags & dwFlag) == dwFlag) ? 1 : 0;
 	}
 
+	BOOL GetWhatMatched(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs, CString& sWhatMatched) const
+	{
+		// RECURSIVE CALLS
+		switch (nAttribID)
+		{
+		case TDCA_TASKNAMEORCOMMENTS:
+			return (GetWhatMatched(TDCA_TASKNAME,	aAttribDefs, sWhatMatched) || 
+					GetWhatMatched(TDCA_COMMENTS,	aAttribDefs, sWhatMatched));
+
+		case TDCA_ANYTEXTATTRIBUTE:
+			{
+				if (GetWhatMatched(TDCA_TASKNAME,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_COMMENTS,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_STATUS,		aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_CATEGORY,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_ALLOCBY,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_ALLOCTO,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_VERSION,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_TAGS,		aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_EXTERNALID, aAttribDefs, sWhatMatched))
+				{
+					return TRUE;
+				}
+
+				int nDef = aAttribDefs.GetSize();
+
+				while (nDef--)
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nDef];
+
+					if ((attribDef.GetDataType() == TDCCA_STRING) &&
+						GetWhatMatched(attribDef.GetAttributeID(), aAttribDefs, sWhatMatched))
+					{
+						return TRUE;
+					}
+				}
+			}
+			return FALSE;
+		}
+
+		// All else
+		return mapMatched.Lookup(nAttribID, sWhatMatched);
+	}
+	
 	DWORD dwTaskID;
 	DWORD dwFlags;
 	CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, CString&> mapMatched;
@@ -1778,8 +1855,8 @@ struct TDCFILTER
 		dwFlags(FO_ATTRIBUTES), 
 		nTitleOption(FT_FILTERONTITLEONLY),
 		nStartNextNDays(7), 
-		nDueNextNDays(7)
-
+		nDueNextNDays(7),
+		nRecurrence(TDIR_NONE)
 	{
 		dtUserStart = dtUserDue = COleDateTime::GetCurrentTime();
 	}
@@ -1803,6 +1880,7 @@ struct TDCFILTER
 		dwFlags = filter.dwFlags;
 		nStartNextNDays = filter.nStartNextNDays; 
 		nDueNextNDays = filter.nDueNextNDays;
+		nRecurrence = filter.nRecurrence;
 
 		aAllocTo.Copy(filter.aAllocTo);
 		aStatus.Copy(filter.aStatus);
@@ -1993,6 +2071,7 @@ struct TDCFILTER
 	DWORD dwFlags;
 	COleDateTime dtUserStart, dtUserDue;
 	int nStartNextNDays, nDueNextNDays;
+	TDC_REGULARITY nRecurrence;
 
 	CTDCCustomAttributeDataMap mapCustomAttrib;
 
@@ -2005,6 +2084,7 @@ protected:
 			(filter1.nDueBy != filter2.nDueBy) ||
 			(filter1.nPriority != filter2.nPriority) ||
 			(filter1.nRisk != filter2.nRisk) ||
+			(filter1.nRecurrence != filter2.nRecurrence) ||
 			(filter1.sTitle != filter2.sTitle) ||
 			((filter1.nTitleOption != filter2.nTitleOption) && !filter1.sTitle.IsEmpty()))
 		{
@@ -2666,6 +2746,7 @@ struct TDCCOLEDITVISIBILITY
 		case TDCC_DONETIME:
 		case TDCC_CREATIONTIME:
 		case TDCC_COMMENTSSIZE:
+		case TDCC_COMMENTSFORMAT:
 			return TRUE;
 		}
 
@@ -2906,6 +2987,7 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		case TDCA_RISK:			
 		case TDCA_VERSION:		
 		case TDCA_TAGS:
+		case TDCA_RECURRENCE:
 			return TRUE;
 		}
 

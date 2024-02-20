@@ -40,11 +40,6 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			InitializeComponent();
 		}
 
-		public void SetupUILanguage()
-		{
-			chkLocked.Text = LangResource.ProtectionPage_Locked;
-		}
-
 #pragma warning disable 67 // variable is never used
 		/// <summary>
 		/// Setting dialog will be closed when this event rasied

@@ -96,7 +96,7 @@ void CTDCToolsCmdlineParser::SetCmdLine(LPCTSTR szCmdLine)
 	ParseCmdLine();
 
 	// replace 'todaysdate'
-	ReplaceArgument(CLAT_TODAYSDATE, CDateHelper::FormatCurrentDate(TRUE));
+	ReplaceArgument(CLAT_TODAYSDATE, CDateHelper::FormatCurrentDate(DHFD_ISO));
 
 	// and 'todolist'
 	ReplaceArgument(CLAT_TODOLIST, FileMisc::GetAppFilePath());

@@ -36,16 +36,22 @@ public:
 class CListCtrlItemGrouping
 {
 public:
-	CListCtrlItemGrouping(CWnd& list) : m_list(list) {}
+	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList) {}
 
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
+	BOOL EnableGroupView(HWND hwndList, BOOL bEnable = TRUE);
 	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
-	int GetItemGroupId(int nRow);
 	BOOL SetItemGroupId(int nRow, int nGroupID);
 	void RemoveAllGroups();
 
+	BOOL HasGroups() const;
+	int GetItemGroupId(int nRow) const;
+	CString GetGroupHeaderText(int nGroupID) const;
+	
+	BOOL DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORREF crBkgnd = CLR_NONE);
+
 protected:
-	CWnd& m_list;
+	HWND m_hwndList;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -94,6 +100,7 @@ public:
 	BOOL IsItemSelected(int nItem) const;
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
+	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
 	virtual void Sort();
 	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
@@ -104,6 +111,7 @@ public:
 	// column methods
 	int GetColumnCount() const;
 	int GetSortColumn() const { return m_nSortColumn; }
+	BOOL IsSorting() const { return (m_nSortColumn != -1); }
 	void SetSortColumn(int nColumn, BOOL bResort = TRUE);
 	COLORREF GetColumnTextColor(int nCol) const;
 	void SetColumnTextColor(int nCol, COLORREF color);
@@ -137,6 +145,7 @@ protected:
 	BOOL m_bInitColumns; // up to derived class to set: gets cleared in OnDestroy
 	BOOL m_bAlternateRowColoring;
 	BOOL m_bAllowOffItemClickDeslection;
+	BOOL m_bSortEmptyBelow;
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
@@ -144,6 +153,7 @@ private:
 	
 	int m_nMinItemHeight;
 	DWORD m_dwSelectionTheming;
+
 	static DWORD s_dwSelectionTheming;
 
 // Operations
@@ -188,10 +198,10 @@ protected:
 	virtual void Delete() {} // derived class override provides logic
 	virtual void Cut() {} // derived class override provides logic
 	virtual void Paste() {} // derived class override provides logic
-	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn);
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	virtual CFont* GetItemFont(int /*nItem*/, int /*nSubItem*/) { return NULL; }
+	virtual CFont* GetItemFont(int /*nItem*/, int /*nSubItem*/) const { return NULL; }
 	virtual CString GetNoItemsText() const { return ""; }
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;
@@ -207,12 +217,12 @@ protected:
 	void RefreshItemHeight();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
-	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
+	BOOL BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 	BOOL WantSelChange(int nSel) const;
 
 private:
-	void BuildSortMap(int nCol);
+	BOOL BuildSortMap(int nCol);
 	int CalcItemHeight() const;
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };

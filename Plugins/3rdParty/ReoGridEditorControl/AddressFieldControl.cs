@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.Common;
 using unvell.ReoGrid.Events;
@@ -104,12 +105,14 @@ namespace unvell.ReoGrid.Editor
 			addressBox = new TextBox()
 			{
 				BorderStyle = System.Windows.Forms.BorderStyle.None,
-				//Font = new Font(Font.FontFamily, 9),
 				TextAlign = HorizontalAlignment.Center,
-				Location = new Point(0, 0),
+				Height = ClientSize.Height - 4,
 			};
 
-			arrowControl = new PushdownArrowControl() { Dock = DockStyle.Right, Width = 20 };
+			arrowControl = new PushdownArrowControl()
+			{
+				Dock = DockStyle.Right,
+			};
 
 			Controls.Add(addressBox);
 			Controls.Add(arrowControl);
@@ -127,8 +130,24 @@ namespace unvell.ReoGrid.Editor
 		{
 			base.OnResize(e);
 
-			addressBox.Width = ClientRectangle.Width - arrowControl.Width - ClientRectangle.Left;
-			addressBox.Top = ClientRectangle.Top + (ClientRectangle.Height - addressBox.Height) / 2;
+			arrowControl.Width = SystemInformation.VerticalScrollBarWidth;
+
+			addressBox.Location = new Point(2, 2);
+			addressBox.Width = ClientRectangle.Width - arrowControl.Width - 2;
+			addressBox.Top = (ClientRectangle.Height - addressBox.Height) / 2;
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			Rectangle rect = ClientRectangle;
+
+			if (ComboBoxRenderer.IsSupported)
+			{
+				ComboBoxRenderer.DrawTextBox(e.Graphics, rect, ComboBoxState.Normal);
+				rect.Inflate(-2, -2);
+			}
+
+			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
 		}
 
 		void grid_SelectionRangeChanging(object sender, RangeEventArgs e)
@@ -279,7 +298,10 @@ namespace unvell.ReoGrid.Editor
 
 		void arrowControl_MouseDown(object sender, MouseEventArgs e)
 		{
-			PushDown();
+			if (dropdown == null || !dropdown.Visible)
+				PushDown();
+			else
+				PullUp();
 		}
 
 		public void StartEditAddress()
@@ -368,8 +390,15 @@ namespace unvell.ReoGrid.Editor
 	{
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			GraphicsToolkit.FillTriangle(e.Graphics, 7, new Point(ClientRectangle.Right - 10,
+			if (ComboBoxRenderer.IsSupported)
+			{
+				ComboBoxRenderer.DrawDropDownButton(e.Graphics, ClientRectangle, ComboBoxState.Normal);
+			}
+			else
+			{
+				GraphicsToolkit.FillTriangle(e.Graphics, 7, new Point(ClientRectangle.Right - 10,
 				ClientRectangle.Top + ClientRectangle.Height / 2 - 1));
+			}
 		}
 	}
 

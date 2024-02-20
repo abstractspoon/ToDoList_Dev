@@ -374,17 +374,6 @@ CString TDCCADATA::FormatAsDate(BOOL bISO, BOOL bWithTime) const
 	return CDateHelper::FormatDate(date, dwFlags);
 }
 
-CString TDCCADATA::FormatAsTimePeriod(int nDecimalPlaces) const
-{
-	TDCTIMEPERIOD time;
-	
-	if (!AsTimePeriod(time))
-		return _T("");
-
-	// else
-	return time.Format(nDecimalPlaces);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 BOOL CTDCCustomAttributeDataMap::Lookup(LPCTSTR key, TDCCADATA& rValue) const

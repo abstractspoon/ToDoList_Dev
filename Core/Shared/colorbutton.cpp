@@ -53,8 +53,10 @@ void CColourButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
 	int nCornerRadius = m_bRoundRect ? (rExtra.Width() / 4) : 0;
 
-	COLORREF crFill, crBorder;
-	GraphicsMisc::CalculateBoxColors(m_color, IsWindowEnabled(), crFill, crBorder);
+	COLORREF crFill = CLR_NONE, crBorder = GetSysColor(COLOR_GRAYTEXT);
+
+	if (m_color != CLR_NONE)
+		GraphicsMisc::CalculateBoxColors(m_color, IsWindowEnabled(), crFill, crBorder);
 
 	GraphicsMisc::DrawRect(pDC, rExtra, crFill, crBorder, nCornerRadius);
 }

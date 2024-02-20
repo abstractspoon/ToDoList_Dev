@@ -11,6 +11,8 @@
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\misc.h"
 
+#include "..\3rdParty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -19,17 +21,17 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const CString DEFLANG(_T("English (UK)"));
+const CString DEFAULT_LANG(_T("English (UK)"));
 
 CString CTDLLanguageComboBox::GetDefaultLanguage()
 {
-	return DEFLANG;
+	return DEFAULT_LANG;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageComboBox
 
-CTDLLanguageComboBox::CTDLLanguageComboBox(LPCTSTR szFilter) : m_sSelLanguage(DEFLANG), m_sFilter(szFilter)
+CTDLLanguageComboBox::CTDLLanguageComboBox(LPCTSTR szFilter) : m_sSelLanguage(DEFAULT_LANG), m_sFilter(szFilter)
 {
 }
 
@@ -78,29 +80,46 @@ void CTDLLanguageComboBox::BuildLanguageList()
 		return; // already done
 
 	// build the language list from csv files in the Resources\Translations folder
+	// These will come out sorted by default
 	CString sFolder = GetTranslationFolder();
 	CStringArray aFiles;
 
 	int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, m_sFilter);
+	int bDefaultAdded = FALSE;
 	
-	// add english as a default item
-	HBITMAP hbmFlag = CEnBitmap::LoadImageResource(IDR_GB_FLAG, _T("GIF"));
-	AddString(DEFLANG, hbmFlag, LANG_ENGLISH);
-
-	// add rest of available languages
 	for (int nFile = 0; nFile < nNumFiles; nFile++)
 	{
 		CString sFileName;
 		FileMisc::SplitPath(aFiles[nFile], NULL, NULL, &sFileName, NULL);
 
+		// Because CComboBoxEx does not support sorting, we need
+		// to dynamically determine the default language position
+		if (!bDefaultAdded && (DEFAULT_LANG.CompareNoCase(sFileName) < 0))
+		{
+			CBitmap bm;
+			bm.LoadBitmap(IDB_UK_FLAG);
+
+			AddString(DEFAULT_LANG, (HBITMAP)bm.Detach(), LANG_ENGLISH, colorMagenta);
+
+			bDefaultAdded = TRUE;
+		}
+
 		// load icon file
 		CString sIconPath(aFiles[nFile]);
 		FileMisc::ReplaceExtension(sIconPath, _T("png"));
 
-		hbmFlag = CEnBitmap::LoadImageFile(sIconPath);
+		HBITMAP hbmFlag = CEnBitmap::LoadImageFile(sIconPath);
 
 		LANGID nLangID = GetLanguageID(aFiles[nFile]);
 		AddString(sFileName, hbmFlag, nLangID);
+	}
+
+	if (!bDefaultAdded)
+	{
+		CBitmap bm;
+		bm.LoadBitmap(IDB_UK_FLAG);
+
+		AddString(DEFAULT_LANG, (HBITMAP)bm.Detach(), LANG_ENGLISH, colorMagenta);
 	}
 
 	m_il.ScaleByDPIFactor();
@@ -131,7 +150,7 @@ LANGID CTDLLanguageComboBox::GetLanguageID(const CString& sTransFile)
 	return (LANGID)PRIMARYLANGID(_ttoi(sLangID));
 }
 
-int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID)
+int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID, COLORREF crBack)
 {
 	// create and associate the image list first time around
 	if (m_il.GetSafeHandle() == NULL)
@@ -149,11 +168,17 @@ int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID 
 	cbe.iImage = cbe.iSelectedImage = GetCount();
 
 	if (hbmFlag == NULL)
-		hbmFlag = CEnBitmap::LoadImageResource(IDR_YOURLANG_FLAG, _T("GIF"));
+	{
+		CBitmap bm;
+		bm.LoadBitmap(IDB_YOURLANG_FLAG);
+
+		hbmFlag = (HBITMAP)bm.Detach();
+		crBack = colorMagenta;
+	}
 
 	CBitmap tmp;
 	tmp.Attach(hbmFlag); // will auto cleanup
-	m_il.Add(&tmp, CLR_NONE);
+	m_il.Add(&tmp, crBack);
 
 	return InsertItem(&cbe);
 }
@@ -186,7 +211,7 @@ void CTDLLanguageComboBox::OnDestroy()
 	int nSel = GetCurSel();
 
 	if (nSel == -1)
-		m_sSelLanguage = DEFLANG;
+		m_sSelLanguage = DEFAULT_LANG;
 	else
 		GetLBText(nSel, m_sSelLanguage);
 
@@ -224,7 +249,7 @@ CString CTDLLanguageComboBox::GetSelectedLanguageFile(BOOL bRelative) const
 		int nSel = GetCurSel();
 
 		if (nSel == -1)
-			m_sSelLanguage = DEFLANG;
+			m_sSelLanguage = DEFAULT_LANG;
 		else
 			GetLBText(nSel, m_sSelLanguage);
 	}
@@ -235,13 +260,8 @@ CString CTDLLanguageComboBox::GetSelectedLanguageFile(BOOL bRelative) const
 
 BOOL CTDLLanguageComboBox::IsDefaultLanguageSelected() const
 {
-	return (GetSelectedLanguageFile() == DEFLANG);
+	return (GetSelectedLanguageFile() == DEFAULT_LANG);
 }
-
-// BOOL CTDLLanguageComboBox::HasYourLanguage() const
-// {
-// 	return (FindStringExact(0, _T("YourLanguage")) != -1);
-// }
 
 int CTDLLanguageComboBox::SelectLanguage(LPCTSTR szLanguage)
 {

@@ -167,16 +167,14 @@ BOOL CXmlFileEx::Decrypt(LPCWSTR szPassword)
 		return FALSE;
 	}
 	
-	// use existing password if required
-	if (!szPassword)
-		szPassword = m_sPassword;
-
 	CXmlItem* pXI = GetEncryptedBlock();
     
 	if (pXI && !pXI->GetSibling())
 	{
-		// else keep getting password till success or user cancels
-		CString sPassword(szPassword);
+		// Prompt for password
+		BOOL bHasInitialPassword = !Misc::IsEmpty(szPassword);
+
+		CString sPassword = (bHasInitialPassword ? szPassword : m_sPassword);
 		
 		while (TRUE)
 		{
@@ -240,8 +238,7 @@ BOOL CXmlFileEx::Decrypt(LPCWSTR szPassword)
 				
 				return FALSE;
 			}
-			// RB - Added code to format the error message before calling AfxMessage
-			else
+			else if (!bHasInitialPassword)
 			{
 				CEnString sMessage(s_sDecryptFailed, GetFileName());
 
@@ -250,9 +247,10 @@ BOOL CXmlFileEx::Decrypt(LPCWSTR szPassword)
 					m_nFileError = XFL_CANCELLED;
 					return FALSE;
 				}
-				// else user will try again
-				sPassword.Empty();
 			}
+
+			// Prompt user again
+			sPassword.Empty();
 		}
 	}
     

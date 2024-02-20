@@ -165,6 +165,10 @@ SOURCE=.\custombutton.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DarkMode.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DatabaseEx.cpp
 # End Source File
 # Begin Source File
@@ -410,6 +414,10 @@ SOURCE=.\Misc.cpp
 # Begin Source File
 
 SOURCE=.\MonthCalCtrlEx.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\monthcheckcombobox.cpp
 # End Source File
 # Begin Source File
 
@@ -829,6 +837,10 @@ SOURCE=.\custombutton.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\DarkMode.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\DatabaseEx.h
 # End Source File
 # Begin Source File
@@ -1094,6 +1106,10 @@ SOURCE=.\Misc.h
 # Begin Source File
 
 SOURCE=.\MonthCalCtrlEx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\monthcheckcombobox.h
 # End Source File
 # Begin Source File
 

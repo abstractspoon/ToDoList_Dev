@@ -303,7 +303,7 @@ void CRulerRichEditCtrl::SetSelectedWebLink(const CString& sWebLink)
 
 	if (!sText.IsEmpty())
 	{
-		CEnString sUrl(_T("HYPERLINK\"%s\"%s"), sWebLink, sText);
+		CString sUrl = Misc::Format(_T("HYPERLINK\"%s\"%s"), sWebLink, sText);
 		m_rtf.ReplaceSel(sUrl, TRUE);
 
 		cr.cpMax = cr.cpMin + sUrl.GetLength();

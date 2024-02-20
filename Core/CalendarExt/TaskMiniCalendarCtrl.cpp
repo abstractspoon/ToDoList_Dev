@@ -56,12 +56,7 @@ void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
 	{
 		m_dwOptions = dwOptions;
 
-		if (dwOptions & (TCCO_DISPLAYCONTINUOUS | 
-						TCCO_DISPLAYSTART | 
-						TCCO_DISPLAYDUE | 
-						TCCO_DISPLAYDONE | 
-						TCCO_DISPLAYCALCSTART | 
-						TCCO_DISPLAYCALCDUE))
+		if (dwOptions & TCCO_DATEDISPLAYOPTIONS)
 		{
 			RecalcSpecialDates();
 		}
@@ -233,7 +228,6 @@ int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		if (nHeat > 0)
 		{
 			CEnString sTooltip(IDS_MINICAL_TOOLTIP, nHeat);
-
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (int)pSpot->m_dt, pSpot->m_rect);
 		}
 	}
@@ -253,5 +247,5 @@ void CTaskMiniCalendarCtrl::Draw(CDC& dc, const CRect& rDraw)
 	}
 
 	// Then default
-	CFPSMiniCalendarCtrl::Draw(dc, rDraw);
+	CMiniCalendarCtrl::Draw(dc, rDraw);
 }

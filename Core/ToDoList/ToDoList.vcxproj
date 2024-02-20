@@ -103,6 +103,8 @@
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -212,7 +214,6 @@ unicode_release\TDLTest.exe
   </ItemGroup>
   <ItemGroup>
     <None Include="..\TDLUpdate\RES\TDLUpdate.ico" />
-    <None Include="..\TDLUpdate\res\TDLUpdate_wiz_header.bmp" />
     <None Include="res\abstractspoon.ico" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />
@@ -250,10 +251,6 @@ unicode_release\TDLTest.exe
     <None Include="res\social_toolbar.bmp" />
     <None Include="res\social_toolbar_std.bmp" />
     <None Include="res\src_control_std.bmp" />
-    <None Include="res\style_image.ico" />
-    <None Include="res\style_para.ico" />
-    <None Include="res\style_table.ico" />
-    <None Include="res\style_wrap.ico" />
     <None Include="res\task_icons_std.bmp" />
     <None Include="res\task_tree_std.ico" />
     <None Include="res\timetrac.bmp" />
@@ -263,7 +260,6 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar.bmp" />
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
-    <None Include="res\wiz_header.bmp" />
     <None Include="RES\XPcheckboxes.bmp" />
     <None Include="res\YourLanguage.GIF" />
     <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll" />
@@ -300,6 +296,10 @@ unicode_release\TDLTest.exe
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\reset.ico" />
+    <Image Include="res\style_image.bmp" />
+    <Image Include="res\style_para.bmp" />
+    <Image Include="res\style_table.bmp" />
+    <Image Include="res\style_wrap.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

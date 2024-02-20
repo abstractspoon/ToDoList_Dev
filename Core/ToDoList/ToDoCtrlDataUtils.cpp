@@ -41,11 +41,12 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 
 //////////////////////////////////////////////////////////////////////
 
-CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders)
+CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent)
 	: 
 	m_data(data),
+	m_mgrContent(mgrContent),
 	m_calculator(data),
-	m_formatter(data),
+	m_formatter(data, mgrContent),
 	m_reminders(reminders)
 {
 
@@ -483,6 +484,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
 			break;
 			
+		case TDCA_COMMENTSFORMAT:
+			bMatch = ValueMatches(m_mgrContent.GetContentDescription(pTDI->cfComments), rule, TRUE, sWhatMatched);
+			break;
+
 		case TDCA_FLAG:
 			{
 				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
@@ -545,15 +550,32 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_POSITION:
-			// Position is 1-based in the UI, but 0-based internally
-			bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
+			{
+				// Position is 1-based in the UI, but 0-based internally
+				bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
 
-			if (bMatch)
-				sWhatMatched = m_formatter.GetTaskPosition(pTDS);
+				if (bMatch)
+					sWhatMatched = m_formatter.GetTaskPosition(pTDS);
+			}
 			break;
 			
 		case TDCA_ANYTEXTATTRIBUTE:
 			bMatch = AnyTextAttributeMatches(pTDI, pTDS, rule, query.aAttribDefs, bCaseSensitive, sWhatMatched, nWhatMatched);
+			break;
+
+		case TDCA_SUBTASKDONE:
+			if (rule.OperatorIs(FOP_SET))
+			{
+				bMatch = pTDS->HasSubTasks();
+			}
+			else if (rule.OperatorIs(FOP_NOT_SET))
+			{
+				bMatch = !pTDS->HasSubTasks();
+			}
+			else
+			{
+				bMatch = ValueMatches(m_calculator.GetTaskSubtaskCompletion(pTDI, pTDS), rule, sWhatMatched);
+			}
 			break;
 
 		case TDCA_SELECTION:
@@ -789,9 +811,9 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCRECURRENCE& trRecurrence, const SEAR
 		bMatch = ValueMatches(TDIR_MONTHLY, rule, sWhatMatched);
 		break;
 		
-	case TDIR_YEAR_SPECIFIC_DOW_MONTH:
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:
 	case TDIR_YEAR_EVERY_NYEARS:
-	case TDIR_YEAR_SPECIFIC_DAY_MONTH:  
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
 		bMatch = ValueMatches(TDIR_YEARLY, rule, sWhatMatched);
 		break;
 		
@@ -925,8 +947,10 @@ CString CTDCTaskMatcher::FormatResultDate(const COleDateTime& date) const
 	{
 		DWORD dwFmt = 0;
 		
-		if (m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES))
-			dwFmt |= DHFD_DOW;
+		// Don't include leading weekdays because it makes sorting
+		// results very difficult
+		//if (m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES))
+		//	dwFmt |= DHFD_DOW;
 		
 		if (m_data.HasStyle(TDCS_SHOWDATESINISO))
 			dwFmt |= DHFD_ISO;
@@ -958,7 +982,13 @@ BOOL CTDCTaskMatcher::ValueMatches(const CString& sText, const SEARCHPARAM& rule
 			CStringArray aWords;
 			
 			if (!Misc::ParseSearchString(rule.ValueAsString(), aWords))
-				return FALSE;
+			{
+				// Handle searching for whitespace
+				if (rule.TypeIs(FT_STRING) && !rule.ValueAsString().IsEmpty())
+					aWords.Add(rule.ValueAsString());
+				else
+					return FALSE;
+			}
 			
 			// cycle all the words
 			for (int nWord = 0; nWord < aWords.GetSize() && !bMatch; nWord++)
@@ -1238,11 +1268,11 @@ BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& ru
 
 ///////////////////////////////////////////////////////////////////
 
-CTDCTaskComparer::CTDCTaskComparer(const CToDoCtrlData& data) 
+CTDCTaskComparer::CTDCTaskComparer(const CToDoCtrlData& data, const CContentMgr& mgrContent)
 	: 
 	m_data(data),
 	m_calculator(data),
-	m_formatter(data)
+	m_formatter(data, mgrContent)
 {
 
 }
@@ -1622,6 +1652,10 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 
 		case TDCC_COMMENTSSIZE:
 			nCompare = Compare(pTDI1->GetCommentsSizeInKB(), pTDI2->GetCommentsSizeInKB());
+			break;
+
+		case TDCC_COMMENTSFORMAT:
+			nCompare = Compare(m_formatter.GetTaskCommentFormat(pTDI1), m_formatter.GetTaskCommentFormat(pTDI2));
 			break;
 
 		default:
@@ -3305,14 +3339,10 @@ BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTD
 
 	if (calc.IsFirstOperandCustom())
 	{
-		int nAttrib = m_data.m_aCustomAttribDefs.Find(calc.opFirst.sCustAttribID);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(m_data.m_aCustomAttribDefs, calc.opFirst.sCustAttribID, pDef, FALSE);
 
-		if (nAttrib < 0)
-			return FALSE;
-
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
-
-		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated);
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, *pDef, dValue, nUnits, bAggregated);
 	}
 
 	// else built-in attribute
@@ -3330,14 +3360,10 @@ BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pT
 	}
 	else if (calc.IsSecondOperandCustom())
 	{
-		int nAttrib = m_data.m_aCustomAttribDefs.Find(calc.opSecond.sCustAttribID);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(m_data.m_aCustomAttribDefs, calc.opSecond.sCustAttribID, pDef, FALSE);
 
-		if (nAttrib < 0)
-			return FALSE;
-
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
-
-		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated);
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, *pDef, dValue, nUnits, bAggregated);
 	}
 
 	// else built-in attribute
@@ -3477,7 +3503,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
 {
-	if (!pTDI || !attribDef.bEnabled)
+	if (!pTDI || (!attribDef.IsDataType(TDCCA_CALCULATION) && !attribDef.bEnabled))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -3486,12 +3512,21 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	TDCCADATA data;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
-	{
 		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef.Calculation(), dValue, nUnits, bAggregated);
-	}
-	else if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-	{
+
+	// else
+	if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
 		return attribDef.GetDataAsDouble(data, dValue, nUnits);
+
+	// else allow strictly numeric types to be empty == 0.0
+	switch (attribDef.GetDataType())
+	{
+	case TDCCA_INTEGER:
+	case TDCCA_DOUBLE:
+	case TDCCA_TIMEPERIOD:
+	case TDCCA_FRACTION:
+		dValue = 0.0;
+		return TRUE;
 	}
 
 	// else
@@ -3500,9 +3535,10 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data) 
+CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data, const CContentMgr& mgrContent)
 	: 
 	m_data(data),
+	m_mgrContent(mgrContent),
 	m_calculator(data)
 {
 
@@ -3513,9 +3549,7 @@ CString CTDCTaskFormatter::GetTaskSubtaskCompletion(const TODOITEM* pTDI, const 
 	int nSubtaskCount = 0, nSubtaskDone = 0;
 	CString sSubtasksDone;
 
-	CTDCTaskCalculator calc(m_data);
-
-	if (calc.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
+	if (m_calculator.GetTaskSubtaskTotals(pTDI, pTDS, nSubtaskCount, nSubtaskDone))
 	{
 		sSubtasksDone.Format(_T("%d/%d"), nSubtaskDone, nSubtaskCount);
 	}
@@ -3700,6 +3734,14 @@ CString CTDCTaskFormatter::GetTaskCommentSize(DWORD dwTaskID) const
 	return GetTaskCommentSize(pTDI);
 }
 
+CString CTDCTaskFormatter::GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
+
+	return GetTaskCommentFormat(pTDI, bEmptyIsBlank);
+}
+
 CString CTDCTaskFormatter::GetTaskRecentlyModified(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -3742,7 +3784,7 @@ CString CTDCTaskFormatter::GetTaskRecurrence(const TODOITEM* pTDI) const
 CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 {
 	if (fSize >= 1)
-		return Misc::Format(max(1, (int)fSize));
+		return Misc::FormatNumber(max(1, (int)fSize));
 
 	if (fSize > 0)
 		return _T(">0");
@@ -3753,12 +3795,26 @@ CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 
 CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
 {
-	ASSERT(pTDI);
-
 	if (pTDI)
 		return GetCommentSize(pTDI->GetCommentsSizeInKB());
 
 	// else
+	ASSERT(pTDI);
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
+{
+	if (pTDI)
+	{
+		if (!bEmptyIsBlank || !pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
+			return m_mgrContent.GetContentDescription(pTDI->cfComments);
+
+		return EMPTY_STR;
+	}
+
+	// else
+	ASSERT(pTDI);
 	return EMPTY_STR;
 }
 
@@ -3773,16 +3829,16 @@ CString CTDCTaskFormatter::GetTaskCost(DWORD dwTaskID) const
 
 CString CTDCTaskFormatter::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
+	return GetCost(m_calculator.GetTaskCost(pTDI, pTDS));
+}
 
-	if (dCost != 0.0)
-		return Misc::Format(dCost, 2);
+CString CTDCTaskFormatter::GetCost(double dCost) const
+{
+	if ((dCost == 0.0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+		return EMPTY_STR;
 
-	if (!m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
-		return _T("0.00");
-
-	// else
-	return EMPTY_STR;
+	// We remove any currency symbol for backwards-compatibility
+	return Misc::TrimAlpha(Misc::FormatCost(dCost));
 }
 
 CString CTDCTaskFormatter::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const
@@ -4181,30 +4237,34 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			double dValue = 0.0;
 			TDC_UNITS nUnits = TDCU_DAYS;
 
-			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
-				return EMPTY_STR;
-
+			BOOL bSuccess = m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
 			DWORD dwResultType = m_data.m_aCustomAttribDefs.GetCalculationResultDataType(attribDef.Calculation());
 			
 			switch (dwResultType)
 			{
 			case TDCCA_TIMEPERIOD:
-				return GetTimePeriod(dValue, nUnits, TRUE);
+				if (bSuccess)
+				{
+					return GetTimePeriod(dValue, nUnits, TRUE);
+				}
+				break;
 
 			case TDCCA_DATE:
-				return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), attribDef.HasFeature(TDCCAF_SHOWTIME));
+				if (bSuccess)
+				{
+					return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO),
+														  m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+				}
+				break;
 
 			case TDCCA_DOUBLE:
 			case TDCCA_INTEGER:
 			case TDCCA_FRACTION:
+				if ((dValue != 0.0) || !m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_HIDEZERO))
 				{
-					if ((dValue == 0.0) && attribDef.HasFeature(TDCCAF_HIDEZERO))
-						return EMPTY_STR;
-
 					return TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(dValue, dwResultType, attribDef.dwFeatures);
 				}
 				break;
-
 			}
 
 			return EMPTY_STR;
@@ -4281,13 +4341,13 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 
 								   const CTDLTaskCtrlBase& colors,
-								   const CContentMgr& comments)
+								   const CContentMgr& mgrContent)
 	: 
 	m_data(data),
 	m_colors(colors),
-	m_comments(comments),
+	m_mgrContent(mgrContent),
 	m_calculator(m_data),
-	m_formatter(m_data)
+	m_formatter(m_data, m_mgrContent)
 {
 
 }
@@ -4325,9 +4385,15 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 		if (!pTDS)
 			return FALSE;
 
-		DWORD dwTaskID = pTDS->GetTaskID();
-		const TODOITEM* pTDI = NULL;
-		GET_TDI(dwTaskID, pTDI, FALSE);
+		// DON'T use GET_TDI because that will get the task
+		// pointed to by references and not the reference itself
+		const TODOITEM* pTDI = m_data.GetTask(pTDS->GetTaskID());
+
+		if (!pTDI)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 
 		// Ignore duplicate 
 		if (!bIncDuplicateCompletedRecurringSubtasks)
@@ -4367,7 +4433,12 @@ HTASKITEM CTDCTaskExporter::ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKIT
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, NULL);
+	// DON'T use GET_TDI because that will get the task
+	// pointed to by references and not the reference itself
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+	{
+		return FALSE;
+	}
 
 	return ExportTaskEx(pTDI, pTDS, tasks, hParentTask, NULL, bIncDuplicateCompletedRecurringSubtasks);
 }
@@ -4485,6 +4556,11 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	if (dTime != 0)
 		tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
 
+	dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+
+	if (dTime != 0)
+		tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
+
 	// due date
 	if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE))
 	{
@@ -4516,6 +4592,9 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	// subtask completion
 	if (pTDS->HasSubTasks())
 		tasks.SetTaskSubtaskCompletion(hTask, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+
+	// Calculated Custom attributes
+	ExportAllCalculatedTaskCustomAttributes(pTDI, pTDS, tasks, hTask);
 
 	return TRUE;
 }
@@ -4573,7 +4652,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 
 		if (bHtmlComments && !pTDI->customComments.IsEmpty())
 		{
-			m_comments.ConvertContentToHtml(pTDI->customComments, 
+			m_mgrContent.ConvertContentToHtml(pTDI->customComments, 
 				sHtml, 
 				pTDI->cfComments, 
 				tasks.GetHtmlCharSet(), 
@@ -4591,7 +4670,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 			{
 				tasks.SetTaskHtmlComments(hTask, sHtml, bTransform);
 
-				// add dummy COMMENTS entry as a temprary fix in 6.8.8
+				// add dummy COMMENTS entry as a temporary fix in 6.8.8
 				// because stylesheets currently require its presence
 				tasks.SetTaskComments(hTask, pTDI->sComments);
 			}
@@ -4749,6 +4828,16 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 				tasks.SetTaskCalcTimeSpent(hTask, dTime, nUnits);
 		}
 
+		// time remaining
+		if (filter.WantAttribute(TDCA_TIMEREMAINING))
+		{
+			TDC_UNITS nUnits = TDCU_NULL;
+			double dTime = m_calculator.GetTaskRemainingTime(pTDI, pTDS, nUnits);
+
+			if (dTime != 0)
+				tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
+		}
+
 		// done date
 		if (bDone)
 		{
@@ -4838,27 +4927,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 			tasks.SetTaskMetaData(hTask, pTDI->GetMetaData());
 
 		// custom data 
-		if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))
-		{
-			tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
-		}
-		else
-		{
-			int nIndex = m_data.m_aCustomAttribDefs.GetSize();
-
-			while (nIndex--)
-			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nIndex];
-
-				if (attribDef.bEnabled && filter.WantAttribute(attribDef.GetAttributeID()))
-				{
-					TDCCADATA data;
-
-					if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
-						tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data);
-				}
-			}
-		}
+		ExportMatchingTaskCustomAttributes(pTDI, pTDS, tasks, hTask, filter);
 	}
 	else if (bDone)
 	{
@@ -4880,6 +4949,76 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 	tasks.SetTaskPriorityColor(hTask, GetPriorityColor(nHighestPriority));
 
 	return TRUE;
+}
+
+void CTDCTaskExporter::ExportAllCalculatedTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const
+{
+	int nIndex = m_data.m_aCustomAttribDefs.GetSize();
+
+	while (nIndex--)
+		ExportCalculatedTaskCustomAttribute(pTDI, pTDS, m_data.m_aCustomAttribDefs[nIndex], tasks, hTask);
+}
+
+void CTDCTaskExporter::ExportMatchingTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const
+{
+	if (filter.WantAttribute(TDCA_CUSTOMATTRIB_ALL))
+	{
+		// Actual data
+		tasks.SetTaskCustomAttributeData(hTask, pTDI->GetCustomAttributeValues());
+
+		// Calculated values
+		ExportAllCalculatedTaskCustomAttributes(pTDI, pTDS, tasks, hTask);
+	}
+	else
+	{
+		int nIndex = m_data.m_aCustomAttribDefs.GetSize();
+
+		while (nIndex--)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nIndex];
+
+			if (attribDef.bEnabled && filter.WantAttribute(attribDef.GetAttributeID()))
+			{
+				TDCCADATA data;
+
+				// Actual data
+				if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+					tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data, FALSE);
+
+				// Calculated value
+				ExportCalculatedTaskCustomAttribute(pTDI, pTDS, attribDef, tasks, hTask);
+			}
+		}
+	}
+}
+
+void CTDCTaskExporter::ExportCalculatedTaskCustomAttribute(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CTaskFile& tasks, HTASKITEM hTask) const
+{
+	if (attribDef.bEnabled && (attribDef.IsAggregated() || attribDef.IsDataType(TDCCA_CALCULATION)))
+	{
+		double dValue;
+		TDC_UNITS nUnits = TDCU_NULL;
+
+		if (attribDef.IsDataType(TDCCA_TIMEPERIOD))
+		{
+			TDCCADATA data;
+			pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
+			nUnits = data.GetTimeUnits();
+		}
+
+		if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
+		{
+			TDCCADATA data;
+
+			if (nUnits != TDCU_NULL)
+				data.Set(TDCTIMEPERIOD(dValue, nUnits));
+			else
+				data.Set(dValue);
+
+			tasks.SetTaskCustomAttributeData(hTask, attribDef.sUniqueID, data, TRUE);
+		}
+	}
 }
 
 COLORREF CTDCTaskExporter::GetTaskTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -4907,61 +5046,4 @@ COLORREF CTDCTaskExporter::GetPriorityColor(int nPriority) const
 	return m_colors.GetPriorityColor(nPriority); 
 }
 
-int CTDCTaskExporter::ExportCompletedTasks(CTaskFile& tasks) const
-{
-	ASSERT(tasks.GetTaskCount() == 0);
-
-	ExportCompletedTasks(m_data.GetStructure(), tasks, NULL);
-
-	return tasks.GetTaskCount();
-}
-
-void CTDCTaskExporter::ExportCompletedTasks(const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTaskParent) const
-{
-	const TODOITEM* pTDI = NULL;
-
-	if (!pTDS->IsRoot())
-	{
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		pTDI = m_data.GetTrueTask(dwTaskID);
-		ASSERT(pTDI);
-
-		if (!pTDI)
-			return;
-
-		// we add the task if it is completed or it has children
-		if (pTDI->IsDone() || pTDS->HasSubTasks())
-		{
-			HTASKITEM hTask = tasks.NewTask(_T(""), hTaskParent, dwTaskID, 0);
-			ASSERT(hTask);
-
-			// copy attributes
-			ExportAllTaskAttributes(pTDI, pTDS, tasks, hTask);
-
-			// this task is now the new parent
-			hTaskParent = hTask;
-		}
-	}
-
-	// children
-	if (pTDS->HasSubTasks())
-	{
-		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
-		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-			ExportCompletedTasks(pTDSChild, tasks, hTaskParent); // RECURSIVE call
-		}
-
-		// if no subtasks were added and the parent is not completed 
-		// (and optionally selected) then we remove it
-		if (hTaskParent && tasks.GetFirstTask(hTaskParent) == NULL)
-		{
-			ASSERT(pTDI);
-
-			if (pTDI && !pTDI->IsDone())
-				tasks.DeleteTask(hTaskParent);
-		}
-	}
-}
 

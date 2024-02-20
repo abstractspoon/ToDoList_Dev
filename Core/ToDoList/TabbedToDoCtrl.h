@@ -48,9 +48,9 @@ struct VIEWDATA
 class CTabbedToDoCtrl : public CToDoCtrl 
 {
 public:
-	CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-					CTDLContentMgr& mgrContent, 
-					CShortcutManager& mgrShortcuts,
+	CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
+					const CTDCContentMgr& mgrContent,
+					const CShortcutManager& mgrShortcuts,
 					const CONTENTFORMAT& cfDefault,
 					const TDCCOLEDITFILTERVISIBILITY& visDefault);
 
@@ -65,6 +65,7 @@ public:
 
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTaskCount() const;
+	BOOL ScrollToSelectedTask();
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
@@ -82,13 +83,14 @@ public:
 	void SetVisibleTaskViews(const CStringArray& aTypeIDs);
 	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
 
+	static BOOL IsExtensionView(FTC_VIEW nView);
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
 	
 	BOOL SetTreeFont(HFONT hFont); // caller responsible for deleting
 	BOOL SaveTaskViewToImage(const CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const;
 
-	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
+	TDC_HITTEST HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 	BOOL WantTaskContextMenu() const;
 
@@ -172,11 +174,12 @@ protected:
 	BOOL m_bUpdatingExtensions;
 	BOOL m_bRecreatingRecurringTasks;
 	BOOL m_bTreeNeedResort;
-	DWORD m_dwListOptions;
+	BOOL m_bLoadingTasks;
 	
 	TDC_COLUMN m_nListViewGroupBy;
 	TDC_ATTRIBUTE m_nExtModifyingAttrib;
 	CDWordArray m_aRecreatedRecurringTasks;
+	DWORD m_dwListOptions;
 
 	static CStringArray s_aDefTaskViews;
 	static UINT WM_TDC_RESTORELASTTASKVIEW;	// private message
@@ -225,6 +228,7 @@ protected:
 	afx_msg LRESULT OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtShowFileLink(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUIExtSetTasklistMetaData(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -252,7 +256,7 @@ protected:
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
-	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
+	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
 	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
@@ -355,7 +359,6 @@ protected:
 	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
 
 	static FTC_VIEW GetExtensionView(int nExt) { return (FTC_VIEW)(nExt + FTCV_FIRSTUIEXTENSION); }
-	static BOOL IsExtensionView(FTC_VIEW nView);
 	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);

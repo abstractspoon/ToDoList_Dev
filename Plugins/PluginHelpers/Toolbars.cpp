@@ -83,6 +83,21 @@ int Toolbars::GetSelectedItem(ToolStripItemCollection^ items)
 	return -1;
 }
 
+void Toolbars::SetFont(Windows::Forms::ToolStripItemCollection^ items, Drawing::Font^ font)
+{
+	int nItem = items->Count;
+
+	while (nItem--)
+	{
+		auto dropItem = ASTYPE(items[nItem], ToolStripDropDownItem);
+
+		if ((dropItem != nullptr) && (dropItem->DropDown != nullptr))
+		{
+			dropItem->Font = font;
+		}
+	}
+}
+
 int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Object^ obj2)
 {
 	auto oItem1 = dynamic_cast<ToolStripItem^>(obj1);
@@ -90,6 +105,17 @@ int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Objec
 
 	return String::Compare(oItem1->Text, oItem2->Text, true);
 }
+
+// --------------------------------------------------------------
+
+enum class ItemState
+{
+	Normal,
+	Disabled,
+	Pressed,
+	Checked,
+	Hot,
+};
 
 Toolbars::ItemState Toolbars::GetItemState(ToolStripItem^ item)
 {
@@ -169,7 +195,7 @@ void BaseToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
 	//int breakpoint = 0;
 }
 
-void BaseToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
+void BaseToolbarRenderer::OnRenderSeparator(ToolStripSeparatorRenderEventArgs^ e)
 {
 	auto rect = e->Item->Bounds;
 
@@ -197,13 +223,14 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 		if (numItems > 0)
 		{
 			auto prevItemRect = Drawing::Rectangle::Empty;
-			int rowTop = toolbar->Top, rowBottom = 0;
-			bool firstRow = true;
+
+			int rowTop = 0, rowBottom = 0;
+			bool firstRow = true, isMenuBar = ISTYPE(toolbar, MenuStrip);
 
 			for (int i = 0; i < numItems; i++)
 			{
 				auto item = toolbar->Items[i];
-
+				
 				if (!ISTYPE(item, ToolStripSeparator) && item->Visible)
 				{
 					if (prevItemRect.IsEmpty)
@@ -219,8 +246,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 						{
 							rowBottom = ((itemRect.Top + prevItemRect.Bottom) / 2);
 							
-							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (rowBottom - rowTop));
-							DrawRowBackground(e->Graphics, rowRect, firstRow, false);
+							auto rowRect = gcnew Drawing::Rectangle(0, rowTop, toolbar->Width, (rowBottom - rowTop));
+							DrawRowBackground(e->Graphics, rowRect, firstRow, false, isMenuBar);
 							
 							prevItemRect = itemRect;
 							rowTop = rowBottom + 1;
@@ -231,8 +258,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			}
 
 			// Last row
-			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (toolbar->Bottom - rowTop));
-			DrawRowBackground(e->Graphics, rowRect, firstRow, true);
+			auto rowRect = gcnew Drawing::Rectangle(0, rowTop, toolbar->Width, (toolbar->Height - rowTop));
+			DrawRowBackground(e->Graphics, rowRect, firstRow, true, isMenuBar);
 		}
 	}
 
@@ -261,9 +288,10 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 	}
 }
 
-void BaseToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
+void BaseToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar)
 {
-	DrawRowSeparator(g, rowRect, firstRow, lastRow);
+	if (!isMenuBar)
+		DrawRowSeparator(g, rowRect, firstRow, lastRow);
 }
 
 void BaseToolbarRenderer::DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)

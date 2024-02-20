@@ -481,7 +481,8 @@ void CGPExporter::ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 
 	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
 	{
-		CString sDepends(pSrcTaskFile->GetTaskDependency(hTask, nDepend));
+		int nDaysLeadIn = 0;
+		CString sDepends(pSrcTaskFile->GetTaskDependency(hTask, nDepend, &nDaysLeadIn));
 
 		if (!sDepends.IsEmpty())
 		{
@@ -504,7 +505,11 @@ void CGPExporter::ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 					int nDependeeID = GetGPTaskID(pSrcTaskFile->GetTaskID(hTask));
 					
 					pXIDepends->AddItem(_T("id"), nDependeeID);
-					pXIDepends->AddItem(_T("type"), _T("2"));
+					pXIDepends->AddItem(_T("type"), 2);
+
+					if (nDaysLeadIn != 0)
+						pXIDepends->AddItem(_T("difference"), nDaysLeadIn);
+
 				}
 			}
 		}

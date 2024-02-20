@@ -10,6 +10,7 @@
 #include "KanbanCtrl.h"
 #include "KanbanPreferencesDlg.h"
 #include "KanbanOptionComboBox.h"
+#include "KanbanGroupByComboBox.h"
 
 #include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
@@ -45,8 +46,8 @@ public:
 	void SetTaskFont(HFONT hFont);
 
 	bool GetLabelEditRect(LPRECT pEdit);
-	IUI_HITTEST HitTest(POINT ptScreen) const;
-	DWORD HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const;
+	IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const;
+	DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const;
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
@@ -55,7 +56,7 @@ public:
 	bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 
-	bool SelectTask(DWORD dwTaskID);
+	bool SelectTask(DWORD dwTaskID, bool bTaskLink);
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 
 	bool ProcessMessage(MSG* pMsg);
@@ -71,6 +72,7 @@ protected:
 	CKanbanCtrl m_ctrlKanban;
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
+	CKanbanGroupByComboBox m_cbGroupBy;
 	CKanbanOptionComboBox m_cbOptions;
 
 	CEnToolBar m_toolbar;
@@ -80,8 +82,8 @@ protected:
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
-	CString	m_sTrackedCustomAttribID;
-	TDC_ATTRIBUTE m_nTrackedAttrib;
+	CString	m_sTrackedCustomAttribID, m_sGroupByCustomAttribID;
+	TDC_ATTRIBUTE m_nTrackedAttrib, m_nGroupByAttrib;
 	CDWordArray m_aSelTaskIDs;
 	CWndPromptManager m_mgrPrompts;
 
@@ -101,6 +103,7 @@ protected:
 	//{{AFX_MSG(CKanbanWnd)
 	afx_msg void OnSelchangeTrackedAttribute();
 	afx_msg void OnSelchangeOptions();
+	afx_msg void OnSelchangeGroupBy();
 	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
@@ -121,6 +124,7 @@ protected:
 	afx_msg LRESULT OnKanbanNotifyGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnKanbanNotifyEditTaskLock(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyShowFileLink(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanPrefsHelp(WPARAM wp, LPARAM lp);
@@ -133,6 +137,7 @@ protected:
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
 	void RefreshKanbanCtrlDisplayAttributes();
+	void RefreshGrouping();
 
 };
 

@@ -170,10 +170,12 @@ public:
 	TODOITEM(LPCTSTR szTitle = NULL, LPCTSTR szComments = NULL); 
 	TODOITEM(const TODOITEM& tdi); 
 	
-	TODOITEM& operator=(const TODOITEM& tdi); 
+	TODOITEM& operator=(const TODOITEM& tdiOther); 
 	
-	BOOL operator==(const TODOITEM& tdi); 
-	BOOL operator!=(const TODOITEM& tdi); 
+	BOOL operator==(const TODOITEM& tdiOther) const;
+	BOOL operator!=(const TODOITEM& tdiOther) const;
+
+	BOOL MatchAll(const TODOITEM& tdiOther, const CTDCAttributeMap& mapAttrib) const;
 	
 	// helpers
 	BOOL HasLastMod() const;
@@ -201,7 +203,7 @@ public:
 	CString GetFileLink(int nFile) const;
 
 	BOOL GetNextOccurence(COleDateTime& dtNext, BOOL& bDue);
-	BOOL CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const;
+	int CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
 	BOOL IsRecurring() const;
 	BOOL CanRecur() const;
 	BOOL RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccurrences) const;
@@ -231,7 +233,7 @@ public:
 
 	float GetCommentsSizeInKB() const;
 
-	BOOL GetAttributeValues(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
+	BOOL GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 	BOOL HasAttributeValue(TDC_ATTRIBUTE nAttribID) const;
 		
 	static COleDateTimeSpan GetRemainingTime(const COleDateTime& date); // in days

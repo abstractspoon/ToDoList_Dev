@@ -169,7 +169,7 @@ void CTDLTransEditListCtrl::Sort()
 	CInputListCtrl::Sort();
 }
 
-int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn)
+int CTDLTransEditListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	if (m_bSortUntranslatedAtTop)
 	{

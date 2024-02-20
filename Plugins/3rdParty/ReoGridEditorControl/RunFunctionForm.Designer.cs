@@ -60,7 +60,7 @@ namespace unvell.ReoGrid.Editor
 			this.labFunctions.Name = "labFunctions";
 			this.labFunctions.Size = new System.Drawing.Size(56, 13);
 			this.labFunctions.TabIndex = 0;
-			this.labFunctions.Text = "Functions:";
+			this.labFunctions.Text = "Functions";
 			// 
 			// functionList
 			// 
@@ -119,8 +119,9 @@ namespace unvell.ReoGrid.Editor
 			this.MinimizeBox = false;
 			this.Name = "RunFunctionForm";
 			this.ShowIcon = false;
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Run Function - ReoGrid";
+			this.Text = "Run Function";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

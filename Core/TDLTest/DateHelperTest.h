@@ -26,6 +26,7 @@ protected:
 	void TestGetTimeOnly();
 	void TestMakeDate();
 	void TestCompare();
+	void Test64BitDates();
 };
 
 #endif // !defined(AFX_DATEHELPERTEST_H__6A11464D_D4DA_4ABA_8FDB_310C9A5252E5__INCLUDED_)

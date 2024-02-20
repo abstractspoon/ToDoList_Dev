@@ -26,6 +26,7 @@ using Command.Handling;
 
 namespace SpreadsheetContentControl
 {
+
 	[System.ComponentModel.DesignerCategory("")]
 	public class TDLGridEditorControl : ReoGridEditorControl
 	{
@@ -67,22 +68,16 @@ namespace SpreadsheetContentControl
 			m_ControlsFont = font;
 			m_Trans = trans;
 
+			HyperlinkCell.LinkColor = HyperlinkCell.ActivateColor = HyperlinkCell.VisitedColor = SystemColors.HotTrack;
+
 			InitialiseFeatures();
 			InitialiseToolbars();
 			InitialiseChangeCallbacks();
 
+			TranslateUI();
+
 			Worksheet.DefaultFontName = m_ControlsFont.Name;
 			Worksheet.DefaultFontSize = m_ControlsFont.SizeInPoints;
-
-			m_Trans.Translate(MenuBar.Items);
-			m_Trans.Translate(ToolBar.Items);
-			m_Trans.Translate(FontBar.Items);
-//			m_Trans.Translate(FormulaBar.Items);
-//			m_Trans.Translate(StatusBar.Items);
-			m_Trans.Translate(RowContextMenu.Items);
-			m_Trans.Translate(CellContextMenu.Items);
-			m_Trans.Translate(HeaderContextMenu.Items);
-			m_Trans.Translate(ColumnContextMenu.Items);
 
 			GridControl.WorksheetInserted += (s, e) =>
 			{
@@ -211,6 +206,40 @@ namespace SpreadsheetContentControl
 			m_PrevContent = null;
 
 			return true;
+		}
+
+		private void TranslateUI()
+		{
+			m_Trans.Translate(MenuBar.Items);
+			m_Trans.Translate(ToolBar.Items);
+			m_Trans.Translate(FontBar.Items);
+			m_Trans.Translate(RowContextMenu.Items);
+			m_Trans.Translate(CellContextMenu.Items);
+			m_Trans.Translate(HeaderContextMenu.Items);
+			m_Trans.Translate(ColumnContextMenu.Items);
+
+			LanguageResource.Menu_InsertSheet = m_Trans.Translate(LanguageResource.Menu_InsertSheet);
+			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet);
+			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet);
+
+			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ);
+			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA);
+			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll);
+			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks);
+			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK);
+			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel);
+
+			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet);
+			LanguageResource.None = m_Trans.Translate(LanguageResource.None);
+			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text);
+
+			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General);
+			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number);
+			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime);
+			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent);
+			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency);
+			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text);
+
 		}
 
 		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)
@@ -547,6 +576,9 @@ namespace SpreadsheetContentControl
 				this.ToolBar.Font = m_ControlsFont;
 				this.StatusBar.Font = m_ControlsFont;
 				this.FontBar.Font = m_ControlsFont;
+
+				// Toolbar drop items
+				Toolbars.SetFont(this.ToolBar.Items, m_ControlsFont);
 
 				this.FontBar.Items["fontToolStripComboBox"].Font = m_ControlsFont;
 				this.FontBar.Items["fontSizeToolStripComboBox"].Font = m_ControlsFont;
@@ -910,7 +942,7 @@ namespace SpreadsheetContentControl
 					var link = (sender as HyperlinkCell);
 
 					if (link != null)
-						link.Cell.Style.TextColor = link.VisitedColor;
+						link.Cell.Style.TextColor = HyperlinkCell.VisitedColor;
 				}
 			}
 		}
@@ -921,27 +953,32 @@ namespace SpreadsheetContentControl
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
-			this.BackColor = backColor;
             MenuBar.BackColor = SystemColors.Menu;
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
 			FormulaBar.BackColor = backColor;
 
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalStart, backColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalEnd, backColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadNormal, backColor);
+
 			// Unfocused colours
-			var color = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarHot);
-			var gridColor = new unvell.ReoGrid.Graphics.SolidColor(color.A, color.R, color.G, color.B);
-			
+			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.SelectedNotFocused);
+			var gridColor = new unvell.ReoGrid.Graphics.SolidColor(backColor);
+
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedNotFocusedStart, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedNotFocusedEnd, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedNotFocusedStart, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedNotFocusedEnd, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadSelectedNotFocused, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadFullSelectedNotFocused, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridText, SystemColors.WindowText);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridBackground, SystemColors.Window);
 
 			// Focused colours
-			color = DrawingColor.AdjustLighting(color, -0.15f, false);
-			gridColor = new unvell.ReoGrid.Graphics.SolidColor(color.A, color.R, color.G, color.B);
+			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
+			gridColor = new unvell.ReoGrid.Graphics.SolidColor(backColor);
 
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedStart, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedEnd, gridColor);
@@ -1044,12 +1081,30 @@ namespace SpreadsheetContentControl
 			dialog.ShowIcon = true;
 
 			// Per dialog customisations
-// 			if (ISTYPE(dialog, ))
+// 			if (dialog is ...))
 // 			{
 // 			}
 // 			else // all others
 			{
 				m_Trans.Translate(dialog);
+			}
+
+			Win32.ActivateApp(Handle);
+
+			return base.ShowDialog(dialog);
+		}
+
+		protected override DialogResult ShowDialog(CommonDialog dialog)
+		{
+			// Per dialog customisations
+			if (dialog is FileDialog)
+			{
+				var fileDlg = (dialog as FileDialog);
+				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter);
+			}
+			else // all others
+			{
+				// TODO
 			}
 
 			Win32.ActivateApp(Handle);

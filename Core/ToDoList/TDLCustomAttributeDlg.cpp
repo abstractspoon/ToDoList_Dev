@@ -168,6 +168,7 @@ BEGIN_MESSAGE_MAP(CCustomAttributeListPage, CDialog)
 	ON_EN_CHANGE(IDC_DEFAULTLISTDATA, OnChangeDefaultlistdata)
 	ON_BN_CLICKED(IDC_BROWSEIMAGES, OnBrowseimages)
 	ON_BN_CLICKED(IDC_INSERTSYMBOL, OnInsertsymbol)
+	ON_WM_ENABLE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -355,6 +356,11 @@ void CCustomAttributeListPage::EnableControls()
 	GetDlgItem(IDC_DEFAULTLISTDATA)->EnableWindow(bEnableListData);
 	GetDlgItem(IDC_INSERTSYMBOL)->EnableWindow(bEnableListData);
 	GetDlgItem(IDC_BROWSEIMAGES)->EnableWindow(bEnableIconBtn);
+}
+
+void CCustomAttributeListPage::OnEnable(BOOL bEnable)
+{
+	GetDlgItem(IDC_LISTTYPE)->EnableWindow(bEnable);
 }
 
 void CCustomAttributeListPage::UpdateListDataMask()
@@ -743,14 +749,14 @@ void CCustomAttributeCalcPage::BuildOperatorCombo()
 	m_cbOperators.ResetContent();
 
 	// Add/subtract supported by all
-	CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_ADD), TDCCAC_ADD);
-	CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_SUBTRACT), TDCCAC_SUBTRACT);
+	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (+)"), CEnString(IDS_CAD_CALC_ADD)), TDCCAC_ADD);
+	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (-)"), CEnString(IDS_CAD_CALC_SUBTRACT)), TDCCAC_SUBTRACT);
 
 	// Multiply/divide NOT supported by DATES
 	if (!IsDate(m_calc.opFirst.nAttribID))
 	{
-		CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_MULTIPLY), TDCCAC_MULTIPLY);
-		CDialogHelper::AddString(m_cbOperators, CEnString(IDS_CAD_CALC_DIVIDE), TDCCAC_DIVIDE);
+		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (*)"), CEnString(IDS_CAD_CALC_MULTIPLY)), TDCCAC_MULTIPLY);
+		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (/)"), CEnString(IDS_CAD_CALC_DIVIDE)), TDCCAC_DIVIDE);
 	}
 
 	// restore selection
@@ -1056,7 +1062,7 @@ BOOL CTDLCustomAttributeDlg::InitializeToolbar()
 		return FALSE;
 
 	VERIFY(m_toolbar.LoadToolBar(IDR_CUSTATTRIB_TOOLBAR, IDB_CUSTATTRIB_TOOLBAR_STD, colorMagenta));
-	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+	VERIFY(m_tbHelper.Initialize(&m_toolbar));
 	
 	// very important - turn OFF all the auto positioning and sizing
 	// by default have no borders
@@ -1089,7 +1095,7 @@ int CTDLCustomAttributeDlg::AddAttributeToListCtrl(const TDCCUSTOMATTRIBUTEDEFIN
 
 	m_lcAttributes.SetItemText(nIndex, COL_DATATYPE, sDataType);
 	m_lcAttributes.SetItemText(nIndex, COL_LISTTYPE, sListType);
-	m_lcAttributes.SetItemText(nIndex, COL_ALIGNMENT, CEnString(ALIGNMENT[attrib.nTextAlignment]));
+	m_lcAttributes.SetItemText(nIndex, COL_ALIGNMENT, CEnString(ALIGNMENT[attrib.nHorzAlignment]));
 	m_lcAttributes.SetItemText(nIndex, COL_FEATURES, FormatFeatureList(attrib.dwFeatures));
 	
 	return nIndex;
@@ -1103,6 +1109,7 @@ CString CTDLCustomAttributeDlg::FormatFeatureList(DWORD dwFeatures)
 int CTDLCustomAttributeDlg::GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const
 {
 	aAttribDef.Copy(m_aAttribDef);
+
 	return aAttribDef.GetSize();
 }
 
@@ -1192,7 +1199,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 
 		m_sColumnTitle = attrib.sColumnTitle;
 		m_dwFeatures = attrib.dwFeatures;
-		m_nAlignment = attrib.nTextAlignment;
+		m_nAlignment = attrib.nHorzAlignment;
 		m_dwDataType = attrib.GetDataType();
 
 		// unique ID is special
@@ -1200,6 +1207,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 		m_sUniqueID.MakeLower();
 
 		m_pageList.SetDataType(m_dwDataType);
+		m_pageList.SetListType(attrib.GetListType());
 		m_pageList.SetDefaultListData(attrib.aDefaultListData);
 		m_pageCalc.SetCalculation(attrib.Calculation());
 
@@ -1257,10 +1265,10 @@ void CTDLCustomAttributeDlg::EnableControls()
 		m_eUniqueID.EnableWindow(FALSE);
 	}
 	
-	m_pageList.EnableWindow(!bIsCalculation);
+	m_pageList.EnableWindow(!bIsCalculation && (nSel >= 0));
 	m_pageList.ShowWindow(bIsCalculation ? SW_HIDE : SW_SHOW);
 
-	m_pageCalc.EnableWindow(bIsCalculation);
+	m_pageCalc.EnableWindow(bIsCalculation && (nSel >= 0));
 	m_pageCalc.ShowWindow(bIsCalculation ? SW_SHOW : SW_HIDE);
 }
 
@@ -1303,9 +1311,9 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	}
 	
 	// Update alignment if it changed
-	if (m_nAlignment != (int)attrib.nTextAlignment)
+	if (m_nAlignment != (int)attrib.nHorzAlignment)
 	{
-		m_nAlignment = (int)attrib.nTextAlignment;
+		m_nAlignment = (int)attrib.nHorzAlignment;
 		UpdateData(FALSE);
 
 		m_lcAttributes.SetItemText(nSel, COL_ALIGNMENT, CEnString(ALIGNMENT[m_nAlignment]));
@@ -1324,7 +1332,7 @@ void CTDLCustomAttributeDlg::OnSelchangeAlignment()
 
 	// update attribute
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
-	attrib.nTextAlignment = m_nAlignment;
+	attrib.nHorzAlignment = m_nAlignment;
 
 	// and list
 	m_lcAttributes.SetItemText(nSel, COL_ALIGNMENT, CEnString(ALIGNMENT[m_nAlignment]));

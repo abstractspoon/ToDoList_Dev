@@ -368,7 +368,7 @@ TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel)
 	:
 	sLabel(szLabel),
 	dwAttribType(TDCCA_STRING),
-	nTextAlignment(DT_LEFT),
+	nHorzAlignment(DT_LEFT),
 	dwFeatures(TDCCAF_SORT),
 	nColID(TDCC_NONE),
 	nAttribID(TDCA_NONE),
@@ -388,26 +388,26 @@ TDCCUSTOMATTRIBUTEDEFINITION& TDCCUSTOMATTRIBUTEDEFINITION::operator=(const TDCC
 	sUniqueID = attribDef.sUniqueID;
 	sColumnTitle = attribDef.sColumnTitle;
 	sLabel = attribDef.sLabel;
-	nTextAlignment = attribDef.nTextAlignment;
+	nHorzAlignment = attribDef.nHorzAlignment;
 	dwFeatures = attribDef.dwFeatures;
 	nColID = attribDef.nColID;
 	nAttribID = attribDef.nAttribID;
 	bEnabled = attribDef.bEnabled;
 
-	if (attribDef.IsList())
+	calculation.Clear();
+	aDefaultListData.RemoveAll();
+	aAutoListData.RemoveAll();
+
+	if (IsDataType(TDCCA_CALCULATION))
+	{
+		calculation = attribDef.calculation;
+	}
+	else if (attribDef.IsList())
 	{
 		aDefaultListData.Copy(attribDef.aDefaultListData);
 
 		if (attribDef.IsAutoList())
 			aAutoListData.Copy(attribDef.aAutoListData);
-	}
-	else if (IsDataType(TDCCA_CALCULATION))
-	{
-		calculation = attribDef.calculation;
-	}
-	else
-	{
-		calculation.Clear();
 	}
 
 	return *this;
@@ -419,7 +419,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::Matches(const TDCCUSTOMATTRIBUTEDEFINITION& a
 		(sUniqueID.CompareNoCase(attribDef.sUniqueID) != 0) ||
 		(sColumnTitle != attribDef.sColumnTitle) ||
 		(sLabel != attribDef.sLabel) ||
-		(nTextAlignment != attribDef.nTextAlignment) ||
+		(nHorzAlignment != attribDef.nHorzAlignment) ||
 		(dwFeatures != attribDef.dwFeatures) ||
 		(nColID != attribDef.nColID) ||
 		(nAttribID != attribDef.nAttribID) ||
@@ -469,7 +469,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::GetToolTip() const
 
 UINT TDCCUSTOMATTRIBUTEDEFINITION::GetColumnHeaderAlignment() const
 {
-	switch (nTextAlignment)
+	switch (nHorzAlignment)
 	{
 	case DT_CENTER: return HDF_CENTER;
 	case DT_RIGHT:	return HDF_RIGHT;
@@ -481,7 +481,7 @@ UINT TDCCUSTOMATTRIBUTEDEFINITION::GetColumnHeaderAlignment() const
 	return HDF_LEFT;
 }
 
-UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultTextAlignment(DWORD dwAttribType)
+UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultHorzAlignment(DWORD dwAttribType)
 {
 	switch (dwAttribType & TDCCA_DATAMASK)
 	{
@@ -490,16 +490,21 @@ UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultTextAlignment(DWORD dwAttribType)
 	case TDCCA_DOUBLE:
 	case TDCCA_TIMEPERIOD:
 	case TDCCA_FRACTION:
-		return TA_RIGHT;
+		return DT_RIGHT;
+
+	case TDCCA_ICON:
+	case TDCCA_BOOL:
+	case TDCCA_FILELINK:
+		return DT_CENTER;
 	}
 
 	// All else
-	return TA_LEFT;
+	return DT_LEFT;
 }
 
-BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultTextAlignment() const
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultHorzAlignment() const
 {
-	return (nTextAlignment == GetDefaultTextAlignment(dwAttribType));
+	return (nHorzAlignment == GetDefaultHorzAlignment(dwAttribType));
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetAttributeType(DWORD dwType)
@@ -519,8 +524,8 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetDataType(DWORD dwDataType, BOOL bUpdateDef
 	// Set default alignment if the previous also had the default
 	if (bUpdateDefaultAlignment)
 	{
-		if (nTextAlignment == GetDefaultTextAlignment(dwPrevType))
-			nTextAlignment = GetDefaultTextAlignment(dwAttribType);
+		if (nHorzAlignment == GetDefaultHorzAlignment(dwPrevType))
+			nHorzAlignment = GetDefaultHorzAlignment(dwAttribType);
 	}
 
 	return TRUE;
@@ -831,7 +836,8 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetTypes(DWORD dwDataType, DWORD dwListType)
 	// Update calculation
 	BOOL bIsCalc = IsDataType(TDCCA_CALCULATION);
 
-	if ((bWasCalc && !bIsCalc) || (!bWasCalc && bIsCalc))
+	// Clear calculation if switching to or from
+	if (Misc::StateChanged(bWasCalc, bIsCalc))
 		calculation.Clear();
 
 	return TRUE;
@@ -919,13 +925,29 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 		return FormatNumber(data.AsFraction());
 
 	case TDCCA_TIMEPERIOD:
-		if (data.IsTimePeriod())
-			return data.FormatAsTimePeriod();
-		break;
+		return FormatTimePeriod(data, dwFeatures);
 	}
 
 	// all else
 	return data.AsString();
+}
+
+CString TDCCUSTOMATTRIBUTEDEFINITION::FormatTimePeriod(const TDCCADATA& data, DWORD dwFeatures)
+{
+	if (!data.IsTimePeriod())
+	{
+		ASSERT(0);
+		return _T("");
+	}
+
+	TDCTIMEPERIOD time;
+	VERIFY(data.AsTimePeriod(time));
+
+	if ((dwFeatures & TDCCAF_HIDEZERO) && (time.dAmount == 0.0))
+		return _T("");
+
+	// else
+	return time.Format(((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2));
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
@@ -935,37 +957,43 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures)
 {
-	int nDecimals = 0;
-	LPCTSTR szTrail = NULL;
+	if ((dwFeatures & TDCCAF_HIDEZERO) && (dValue == 0.0))
+		return _T("");
+
+	// else
+	BOOL bOneDecimal = (dwFeatures & TDCCAF_ONEDECIMAL);
 
 	switch (dwDataType)
 	{
 	case TDCCA_FRACTION:
 		if (dwFeatures & TDCCAF_DISPLAYASPERCENT)
 		{
-			dValue *= 100;
-			szTrail = _T("%");
-			nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 0);
+			return Misc::Format((dValue * 100), (bOneDecimal ? 1 : 0), _T("%"));
 		}
-		else
-		{
-			nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2);
-		}
-		break;
+		// else fall thru
 
 	case TDCCA_DOUBLE:
-		nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2);
+		{
+			CString sNumber = Misc::FormatNumber(dValue);
+
+			if (bOneDecimal)
+			{
+				int nDecimal = sNumber.Find(Misc::GetDecimalSeparator());
+
+				if (nDecimal > 0)
+					sNumber = sNumber.Left(nDecimal + 2);
+			}
+
+			return sNumber;
+		}
 		break;
 
 	case TDCCA_INTEGER:
-		break;
-
-	default:
-		ASSERT(0);
-		return _T("");
+		return Misc::FormatNumber((int)dValue);
 	}
 
-	return Misc::Format(dValue, nDecimals, szTrail);
+	ASSERT(0);
+	return _T("");
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const
@@ -1132,48 +1160,49 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 	return FALSE;
 }
 
+BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const
+{
+	if (!attribDef.IsDataType(TDCCA_CALCULATION))
+		return FALSE;
+
+	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
+		return FALSE;
+
+	DWORD dwResultType = GetCalculationResultDataType(attribDef.Calculation());
+
+	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
+}
+
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustColID, pDef, TDCA_NONE);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetAttributeID();
-
-	// all else
-	return TDCA_NONE;
+	return pDef->GetAttributeID();
 }
 
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(const CString& sCustAttribID) const
 {
-	int nAttrib = Find(sCustAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, sCustAttribID, pDef, TDCA_NONE);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetAttributeID();
-
-	// all else
-	return TDCA_NONE;
+	return pDef->GetAttributeID();
 }
 
 CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const
 {
-	int nAttrib = Find(nCustAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustAttribID, pDef, _T(""));
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).sUniqueID;
-
-	// all else
-	return _T("");
+	return pDef->sUniqueID;
 }
 
 CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_COLUMN nCustColID) const
 {
-	int nAttrib = Find(nCustColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustColID, pDef, _T(""));
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).sUniqueID;
-
-	// all else
-	return _T("");
+	return pDef->sUniqueID;
 }
 
 int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const
@@ -1195,39 +1224,52 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 	return (mapCols.GetCount() - nColsSize);
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType) const
 {
-	int nAttrib = Find(nCustAttribID);
+	if (bResolveCalcType && attribDef.IsDataType(TDCCA_CALCULATION))
+		return GetCalculationResultDataType(attribDef.Calculation());
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
-
-
-	// all else
-	return TDCCA_STRING;
+	// else
+	return attribDef.GetDataType();
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColID) const
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID, BOOL bResolveCalcType) const
 {
-	int nAttrib = Find(nCustColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustAttribID, pDef, TDCCA_STRING);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
-
-
-	// all else
-	return TDCCA_STRING;
+	return GetAttributeDataType(*pDef, bResolveCalcType);
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sCustAttribID) const
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColID, BOOL bResolveCalcType) const
 {
-	int nAttrib = Find(sCustAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, nCustColID, pDef, TDCCA_STRING);
 
-	if (nAttrib != -1)
-		return ElementAt(nAttrib).GetDataType();
+	return GetAttributeDataType(*pDef, bResolveCalcType);
+}
 
-	// all else
-	return TDCCA_STRING;
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sCustAttribID, BOOL bResolveCalcType) const
+{
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, sCustAttribID, pDef, TDCCA_STRING);
+
+	return GetAttributeDataType(*pDef, bResolveCalcType);
+}
+
+CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const CString& sCustAttribID, BOOL bISODates) const
+{
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
+	GET_DEF_RET(*this, sCustAttribID, pDef, _T(""));
+
+	if (!pDef->IsDataType(TDCCA_CALCULATION))
+		return pDef->FormatData(data, bISODates);
+
+	// A bit of hackery for calculation types
+	TDCCUSTOMATTRIBUTEDEFINITION temp = *pDef;
+	temp.SetDataType(GetAttributeDataType(*pDef, TRUE));
+
+	return temp.FormatData(data, bISODates);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) const
@@ -1248,7 +1290,6 @@ BOOL CTDCCustomAttribDefinitionArray::IsColumnEnabled(TDC_COLUMN nCustColID) con
 
 	if (nAttrib != -1)
 		return ElementAt(nAttrib).bEnabled;
-
 
 	// else
 	return FALSE;

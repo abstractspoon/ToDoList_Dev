@@ -21,7 +21,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 int MENUSIZE = -1;
-const TCHAR MENU_DROPBTN = '6';
+
+const COLORREF GRAYTEXTCOLOR = RGB(96, 96, 96); 
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -864,8 +865,8 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			rArrow.right -= 2;
 		}
 
-		pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_3DSHADOW));
-		GraphicsMisc::DrawAnsiSymbol(pDC, MENU_DROPBTN, rArrow, nFlags, &GraphicsMisc::Marlett());
+		pDC->SetTextColor(bEnabled ? GetSysColor(COLOR_BTNTEXT) : GRAYTEXTCOLOR);
+		GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rArrow, nFlags, &GraphicsMisc::Marlett());
 	}
 	
 	// draw caption/image
@@ -921,14 +922,9 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 
 						const CRect& rect, BOOL bEnabled, BOOL bSymbol)
 {
-	if (bEnabled)
+	if (bEnabled || CThemed::IsAppThemed())
 	{
-		pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
-		DrawText(pDC, ptTopLeft, sText, rect, bSymbol);
-	}
-	else if (CThemed::IsAppThemed())
-	{
-		pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+		pDC->SetTextColor(bEnabled ? GetSysColor(COLOR_BTNTEXT) : GRAYTEXTCOLOR);
 		DrawText(pDC, ptTopLeft, sText, rect, bSymbol);
 	}
 	else // classic mode

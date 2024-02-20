@@ -92,6 +92,8 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Unicode_Debug\TDLTransEdit.exe</OutputFile>
       <EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <PostBuildEvent>
       <Command>mkdir ..\ToDoList

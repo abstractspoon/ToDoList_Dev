@@ -215,32 +215,36 @@ void CRTFContentControl::OnKillFocus()
 // ICustomControl implementation
 int CRTFContentControl::GetContent(unsigned char* pContent) const
 {
-	int nLen = 0;
+	int nLen = m_rtf.GetRTFLength(); // Will always over-estimate because we compress
 	
 	if (pContent)
 	{
-		CString sContent = m_rtf.GetRTF();
-		nLen = sContent.GetLength();
-		
-		// compress it
-		if (!nLen)
-			return 0;
-		
-		unsigned char* pCompressed = NULL;
-		int nLenCompressed = 0;
-		
-		if (Compression::Compress((unsigned char*)(LPSTR)(LPCTSTR)sContent, nLen, pCompressed, nLenCompressed) && nLenCompressed)
+		nLen = m_rtf.GetRTF(pContent, nLen);
+
+		if (nLen > 0)
 		{
-			CopyMemory(pContent, pCompressed, nLenCompressed);
-			nLen = nLenCompressed;
-			delete [] pCompressed;
+			unsigned char* pCompressed = NULL;
+			int nLenCompressed = 0;
+
+			try
+			{
+				if (Compression::Compress(pContent, nLen, pCompressed, nLenCompressed) && nLenCompressed)
+				{
+					CopyMemory(pContent, pCompressed, nLenCompressed);
+					nLen = nLenCompressed;
+				}
+				else
+				{
+					nLen = 0;
+				}
+			}
+			catch (...)
+			{
+				nLen = -1; // Indicates memory error
+			}
+
+			delete[] pCompressed;
 		}
-		else
-			nLen = 0;
-	}
-	else
-	{
-		nLen = m_rtf.GetRTFLength();
 	}
 	
 	return nLen;
@@ -253,18 +257,24 @@ bool CRTFContentControl::SetContent(const unsigned char* pContent, int nLength, 
 	unsigned char* pDecompressed = NULL;
 
 	// content may need decompressing 
-	// always work in bytes
 	if (nLength && !m_rtf.IsRTF((const char*)pContent))
 	{
 		int nLenDecompressed = 0;
 
-		if (Compression::Decompress(pContent, nLength, pDecompressed, nLenDecompressed))
+		try
 		{
-			pContent = pDecompressed;
-			nLength = nLenDecompressed;
+			if (!Compression::Decompress(pContent, nLength, pDecompressed, nLenDecompressed))
+				return false;
 		}
-		else
+		catch (...)
+		{
+			delete[] pDecompressed;
 			return false;
+		}
+
+		// else
+		pContent = pDecompressed;
+		nLength = nLenDecompressed;
 	}
 
 	// content must begin with rtf tag or be empty
@@ -272,21 +282,11 @@ bool CRTFContentControl::SetContent(const unsigned char* pContent, int nLength, 
 		return false;
 
 	CReSaveCaret resc(bResetSelection ? NULL : m_rtf.GetSafeHwnd());
-	CString sContent;
 
-#ifdef _UNICODE
-	CBinaryData(pContent, nLength).Get(sContent);
-
-#	ifdef _DEBUG
-	LPCSTR szAnsi = (LPCSTR)(LPCTSTR)sContent;
-#	endif
-#else
-	memcpy(sContent.GetBufferSetLength(nLength), pContent, nLength);
-#endif
+	CString sContent = CBinaryData::AsString(pContent, nLength);
+	delete[] pDecompressed;
 
 	SetRTF(sContent);
-
-	delete [] pDecompressed;
 	
 	// reset caret
 	if (bResetSelection)
@@ -353,7 +353,7 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 		CreateToolbar();
 
 		m_tbHelper.Release();
-		m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts);
+		m_tbHelper.Initialize(&m_toolbar, &m_mgrShortcuts);
 
 		CRect rClient;
 		GetClientRect(rClient);
@@ -557,7 +557,6 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	InitMenuIconManager();
 	InitShortcutManager();
 
-#ifndef _DEBUG
 	// if MS word is not installed we remove features that
 	// our backup RTF2HTML converter cannot handle
 	BOOL bRemoveAdvancedFeatures = !CMSWordHelper::IsWordInstalled(12);
@@ -578,12 +577,12 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 		m_toolbar.GetToolBarCtrl().DeleteButton(nBtn);
 	}
-#endif
+
 	m_rtf.EnableInlineSpellChecking(s_bInlineSpellChecking);
 
 	// helper for toolbar tooltips
 	// initialize after hiding table button
-	VERIFY(m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts));
+	VERIFY(m_tbHelper.Initialize(&m_toolbar, &m_mgrShortcuts));
 
 	return 0;
 }

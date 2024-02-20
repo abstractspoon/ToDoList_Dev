@@ -105,12 +105,13 @@ CKanbanCtrl::CKanbanCtrl()
 	m_pSelectedColumn(NULL),
 	m_nTrackAttribute(TDCA_NONE),
 	m_nSortBy(TDCA_NONE),
+	m_nGroupBy(TDCA_NONE),
 	m_bSelectTasks(FALSE),
 	m_bResizingHeader(FALSE),
 	m_bSettingColumnFocus(FALSE),
-	m_bSavingToImage(FALSE)
+	m_bSavingToImage(FALSE),
+	m_crGroupHeaderBkgnd(CLR_NONE)
 {
-
 }
 
 CKanbanCtrl::~CKanbanCtrl()
@@ -140,6 +141,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
 	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
 	ON_MESSAGE(WM_KLCN_EDITTASKPIN, OnColumnEditTaskPin)
+	ON_MESSAGE(WM_KLCN_EDITTASKLOCK, OnColumnEditTaskLock)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKLABEL, OnColumnEditLabel)
@@ -566,6 +568,8 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	}
 
 	RefreshColumnHeaderText();
+	
+	m_aColumns.GroupBy(m_nGroupBy);
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
@@ -667,6 +671,7 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_FLAG:
 	case TDCA_ICON:
 	case TDCA_LASTMODDATE:
+	case TDCA_LOCK:
 	case TDCA_PERCENT:
 	case TDCA_PRIORITY:
 	case TDCA_RECURRENCE:
@@ -677,6 +682,7 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:
 	case TDCA_TASKNAME:
 	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMEREMAINING:
 	case TDCA_TIMESPENT:
 	case TDCA_VERSION:
 		return TRUE;
@@ -714,7 +720,8 @@ void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	// Rebuild data
 	m_data.RemoveAll();
 
-	VERIFY(AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE));
+	if (!AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE))
+		ASSERT(pTasks->GetTaskCount() == 0);
 
 	m_data.SetPinnedItems(m_aPrevPinnedTasks, FALSE);
 	m_aPrevPinnedTasks.RemoveAll();
@@ -1022,6 +1029,9 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true); // calculated
 	
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEREMAINING))
+		pKI->dTimeRemaining = pTasks->GetTaskTimeRemaining(hTask, pKI->nTimeRemainingUnits); // only calculated
+	
 	if (pTasks->IsAttributeAvailable(TDCA_COST))
 	{
 		bool bIsRate = false;
@@ -1115,7 +1125,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
 		{
-			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
+			CString sAttribID(KBUtils::GetAttributeID(nAttribute));
 
 			// create once only
 			if (!m_mapAttributeValues.HasMapping(sAttribID))
@@ -1143,7 +1153,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_TAGS:	
 		{
 			CString sXMLTag(GetXMLTag(nAttribute)); 
-			CString sAttribID(KANBANITEM::GetAttributeID(nAttribute));
+			CString sAttribID(KBUtils::GetAttributeID(nAttribute));
 
 			CStringArray aNewValues;
 			int nValue = pTasks->GetAttributeCount(sXMLTag);
@@ -1162,19 +1172,19 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 		
 	case TDCA_CUSTOMATTRIB:
 		{
-			BOOL bChange = FALSE;
-			int nCustom = pTasks->GetCustomAttributeCount();
+			BOOL bChange = FALSE, bWasEmpty = (m_aCustomAttribDefs.GetSize() == 0);
+			int nNumCust = pTasks->GetCustomAttributeCount();
 
-			while (nCustom--)
+			for (int nCust = 0; nCust < nNumCust; nCust++)
 			{
 				// Save off each attribute ID
-				if (pTasks->IsCustomAttributeEnabled(nCustom))
+				if (pTasks->IsCustomAttributeEnabled(nCust))
 				{
-					CString sAttribID(pTasks->GetCustomAttributeID(nCustom));
-					CString sAttribName(pTasks->GetCustomAttributeLabel(nCustom));
+					CString sAttribID(pTasks->GetCustomAttributeID(nCust));
+					CString sAttribName(pTasks->GetCustomAttributeLabel(nCust));
 
 					// Hack (values from tdcenum.h)
-					DWORD dwListType = (pTasks->GetCustomAttributeType(nCustom) & 0xff00);
+					DWORD dwListType = (pTasks->GetCustomAttributeType(nCust) & 0xff00);
 					BOOL bMultiList = ((dwListType == 0x0300) || (dwListType == 0x0400));
 					
 					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
@@ -1185,7 +1195,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 
 					pDefValues->RemoveAll();
 
-					CString sListData = pTasks->GetCustomAttributeListData(nCustom);
+					CString sListData = pTasks->GetCustomAttributeListData(nCust);
 
 					// 'Auto' list values follow 'default' list values
 					//  separated by a TAB
@@ -1203,6 +1213,9 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 					bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
 				}
 			}
+
+			if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
+				m_nTrackAttribute = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
 
 			return bChange;
 		}
@@ -1261,25 +1274,6 @@ int CKanbanCtrl::GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aVa
 	return aValues.GetSize();
 }
 
-int CKanbanCtrl::GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const
-{
-	CString sAttribID(KANBANITEM::GetAttributeID(nAttrib));
-
-	const CKanbanValueMap* pValues = m_mapAttributeValues.GetMapping(sAttribID);
-	aValues.SetSize(pValues->GetCount());
-
-	if (pValues)
-	{
-		POSITION pos = pValues->GetStartPosition();
-		int nItem = 0;
-
-		while (pos)
-			pValues->GetNextValue(pos, aValues[nItem++]);
-	}
-
-	return aValues.GetSize();
-}
-
 int CKanbanCtrl::GetAttributeValues(CKanbanAttributeValueMap& mapValues) const
 {
 	CString sAttribID;
@@ -1318,16 +1312,24 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 {
 	LoadDefaultAttributeListValues(pPrefs);
 
-	if (!bAppOnly)
-	{
-		CString sPinned = pPrefs->GetProfileString(szKey, _T("PinnedTasks"));
-		Misc::Split(sPinned, m_aPrevPinnedTasks, ',');
-	}
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyGroupHeaderBkgndColor"), FALSE))
+		m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GroupHeaderBkgnd"), CLR_NONE);
+	else
+		m_crGroupHeaderBkgnd = CLR_NONE;
+
+	m_aColumns.SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
 
 	if (m_nTrackAttribute != TDCA_NONE)
 	{
 		// Both column visibility AND contents may have changed
 		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
+	}
+
+	// Private preferences
+	if (!bAppOnly)
+	{
+		CString sPinned = pPrefs->GetProfileString(szKey, _T("PinnedTasks"));
+		Misc::Split(sPinned, m_aPrevPinnedTasks, ',');
 	}
 }
 
@@ -1423,7 +1425,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 		CStringArray aNewValues;
 		aNewValues.Add(sNewValue);
 
-		pKI->SetTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib), aNewValues);
+		pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttrib), aNewValues);
 		return FALSE;
 	}
 
@@ -1481,7 +1483,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 	CStringArray aNewValues;
 	aNewValues.Add(sNewValue);
 
-	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
+	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttrib), aNewValues);
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
@@ -1505,7 +1507,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 		return FALSE;
 	}
 
-	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
+	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttrib), aNewValues);
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
@@ -1971,19 +1973,20 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
+	BOOL bHideNoGroup = (HasOption(KBCF_HIDENOGROUP) && IsGrouping());
 
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 		ASSERT(pCol);
 		
-		RebuildColumnContents(pCol, mapKIArray, bHideParents, bHideSubtasks);
+		RebuildColumnContents(pCol, mapKIArray, bHideParents, bHideSubtasks, bHideNoGroup);
 		
-		// The list can still end up empty if parent tasks are 
+		// The list can still end up empty if specific tasks are 
 		// omitted in Dynamic columns so we recheck and delete if required
 		if (UsingDynamicColumns())
 		{
-			if ((bHideParents || bHideSubtasks) && !WantShowColumn(pCol))
+			if ((bHideParents || bHideSubtasks || bHideNoGroup) && !WantShowColumn(pCol))
 			{
 				DeleteColumn(nCol);
 			}
@@ -1998,7 +2001,10 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	// if the modification that caused this update matches the
 	// current sort, whereas we always need to be maintain some
 	// kind of sorted state even if we are technically 'unsorted'
-	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+	if (IsGrouping())
+		m_aColumns.GroupBy(m_nGroupBy);
+	else
+		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -2044,6 +2050,23 @@ void CKanbanCtrl::FixupColumnFocus()
 	}
 }
 
+BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
+{
+	if (KBUtils::IsCustomAttribute(nAttrib) && !m_aCustomAttribDefs.HasDefinition(nAttrib))
+		return FALSE;
+
+	if (nAttrib == m_nTrackAttribute)
+		return FALSE;
+
+	if (nAttrib != m_nGroupBy)
+	{
+		m_nGroupBy = nAttrib;
+		m_aColumns.GroupBy(nAttrib);
+	}
+	
+	return TRUE;
+}
+
 TDC_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 {
 	if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
@@ -2057,36 +2080,41 @@ TDC_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, 
 								 const CKanbanColumnArray& aColumnDefs)
 {
-	// validate input and check for changes
-	BOOL bChange = (nAttrib != m_nTrackAttribute);
-
-	switch (nAttrib)
+	// Sanity checks
+	if (!sCustomAttribID.IsEmpty())
 	{
-	case TDCA_STATUS:
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_CATEGORY:
-	case TDCA_VERSION:
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-	case TDCA_TAGS:
-		break;
-		
-	case TDCA_CUSTOMATTRIB:
-		if (sCustomAttribID.IsEmpty())
+		if (!KBUtils::IsCustomAttribute(nAttrib))
+		{
+			ASSERT(0);
 			return FALSE;
+		}
+	}
+	else
+	{
+		switch (nAttrib)
+		{
+		case TDCA_STATUS:
+		case TDCA_ALLOCTO:
+		case TDCA_ALLOCBY:
+		case TDCA_CATEGORY:
+		case TDCA_VERSION:
+		case TDCA_PRIORITY:
+		case TDCA_RISK:
+		case TDCA_TAGS:
+			break;
 
-		if (!bChange)
-			bChange = (sCustomAttribID != m_sTrackAttribID);
-		break;
-
-	default:
-		return FALSE;
+		default:
+			ASSERT(0);
+			return FALSE;
+		}
 	}
 
-	// Check if only display attributes have changed
-	if (!bChange)
+	// Has the attribute changed
+	CString sNewAttribID = (!sCustomAttribID.IsEmpty() ? sCustomAttribID : KBUtils::GetAttributeID(nAttrib));
+
+	if (sNewAttribID == m_sTrackAttribID)
 	{
+		// Check if only display attributes have changed
 		if (UsingFixedColumns())
 		{
 			if (m_aColumnDefs.MatchesAll(aColumnDefs))
@@ -2127,24 +2155,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 
 	// update state
 	m_nTrackAttribute = nAttrib;
-
-	switch (nAttrib)
-	{
-	case TDCA_STATUS:
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_CATEGORY:
-	case TDCA_VERSION:
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-	case TDCA_TAGS:
-		m_sTrackAttribID = KANBANITEM::GetAttributeID(nAttrib);
-		break;
-		
-	case TDCA_CUSTOMATTRIB:
-		m_sTrackAttribID = sCustomAttribID;
-		break;
-	}
+	m_sTrackAttribID = sNewAttribID;
 
 	// delete all lists and start over
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
@@ -2161,12 +2172,19 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 
 CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 {
-	CKanbanColumnCtrl* pCol = new CKanbanColumnCtrl(m_data, colDef, m_fonts, m_aPriorityColors, m_aDisplayAttrib);
+	CKanbanColumnCtrl* pCol = new CKanbanColumnCtrl(m_data, 
+													colDef, 
+													m_fonts, 
+													m_aPriorityColors, 
+													m_aDisplayAttrib,
+													m_aCustomAttribDefs);
 	ASSERT(pCol);
 
 	if (pCol)
 	{
 		pCol->SetOptions(m_dwOptions);
+		pCol->SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
+		pCol->GroupBy(m_nGroupBy);
 
 		if (pCol->Create(IDC_COLUMNCTRL, this))
 		{
@@ -2183,7 +2201,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 }
 
 BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, 
-										BOOL bHideParents, BOOL bHideSubtasks)
+										BOOL bHideParents, BOOL bHideSubtasks, BOOL bHideNoGroup)
 {
 	ASSERT(pCol && pCol->GetSafeHwnd());
 
@@ -2201,6 +2219,9 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 
 	for (int nVal = 0; nVal < nNumVals; nVal++)
 	{
+		if (bHideNoGroup && aValueIDs[nVal].IsEmpty())
+			continue;
+
 		const CKanbanItemArray* pKIArr = mapKIArray.GetMapping(aValueIDs[nVal]);
 		
 		if (pKIArr)
@@ -2340,6 +2361,11 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
 		}
+		else if (IsGrouping() && Misc::FlagHasChanged(KBCF_HIDENOGROUP, m_dwOptions, dwPrevOptions))
+		{
+			// Column visibility AND contents may have changed
+			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
+		}
 		else if (Misc::FlagHasChanged(KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwPrevOptions))
 		{
 			// Update column visibility only
@@ -2354,8 +2380,9 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		// Column header sorting
 		CDialogHelper::SetStyle(&m_header, HDS_BUTTONS, Misc::HasFlag(m_dwOptions, KBCF_COLUMNHEADERSORTING));
 
-		// Column preferences
-		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG | KBCF_COLUMNHEADERSORTING);
+		// Column preferences (Excluding irrelevant options)
+		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDENOGROUP | 
+					   KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG | KBCF_COLUMNHEADERSORTING);
 		m_aColumns.SetOptions(dwOptions);
 
 		if (Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
@@ -2572,7 +2599,7 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 			while (nAtt--)
 			{
 				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nAtt];
-				CString sLabel = CKanbanColumnCtrl::FormatAttribute(nAttribID, _T(""), nLabelVis);
+				CString sLabel = KBUtils::FormatAttribute(nAttribID, _T(""), nLabelVis, m_aCustomAttribDefs);
 
 				aLabelLen[nAtt] = sLabel.GetLength();
 
@@ -2598,12 +2625,13 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 
 					// Exclude 'File Link' and 'Parent' because these will 
 					// almost always push things over the limit
-					// Exclude 'flag' because that is rendered as an icon
+					// Exclude 'flag/lock' because that is rendered as an icon
 					switch (nAttribID)
 					{
 					case TDCA_FILELINK:
 					case TDCA_PARENT:
 					case TDCA_FLAG:
+					case TDCA_LOCK:
 						continue;
 					}
 
@@ -2648,8 +2676,11 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 }
 
 // Called externally only
-void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
+BOOL CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
+	if (KBUtils::IsCustomAttribute(nBy) && !m_aCustomAttribDefs.HasDefinition(nBy))
+		return FALSE;
+
 	if (nBy == m_nTrackAttribute)
 	{
 		// if the sort attribute equals the track attribute then
@@ -2658,7 +2689,7 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 		// sort state unless it's currently not set
 		if (nBy != TDCA_NONE)
 		{
-			if (m_nSortBy == TDCA_NONE)
+			if (!IsSorting())
 			{
 				m_nSortBy = nBy;
 				m_bSortAscending = bAscending;
@@ -2676,11 +2707,13 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	}
 
 	m_header.Invalidate(FALSE);
+	return FALSE;
 }
 
 void CKanbanCtrl::SetReadOnly(bool bReadOnly) 
 { 
 	m_bReadOnly = bReadOnly; 
+	m_aColumns.SetReadOnly(bReadOnly);
 }
 
 BOOL CKanbanCtrl::GetLabelEditRect(LPRECT pEdit)
@@ -2844,17 +2877,29 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 		break;
 
 	case IUI_GETNEXTTOPLEVELTASK:
-		pCol = GetNextColumn(pCol, TRUE, TRUE);
-			
-		if (pCol)
-			hti = pCol->TCH().GetFirstItem();
+		while (pCol)
+		{
+			hti = pCol->GetNextTopLevelItem(hti, TRUE);
+
+			if (hti)
+				break;
+
+			// else
+			pCol = GetNextColumn(pCol, TRUE, TRUE);
+		}
 		break;
 
 	case IUI_GETPREVTOPLEVELTASK:
-		pCol = GetNextColumn(pCol, FALSE, TRUE);
-			
-		if (pCol)
-			hti = pCol->TCH().GetFirstItem();
+		while (pCol)
+		{
+			hti = pCol->GetNextTopLevelItem(hti, FALSE);
+
+			if (hti)
+				break;
+
+			// else
+			pCol = GetNextColumn(pCol, FALSE, TRUE);
+		}
 		break;
 
 	default:
@@ -3112,7 +3157,7 @@ void CKanbanCtrl::OnHeaderClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	// If the sort column is not set then set it to 'title'
 	// else flip the sort direction
-	if (m_nSortBy == TDCA_NONE)
+	if (!IsSorting())
 	{
 		m_nSortBy = TDCA_TASKNAME;
 		m_bSortAscending = TRUE;
@@ -3161,7 +3206,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				*pResult = CDRF_NEWFONT;
 			}
 
-			if (m_nSortBy != TDCA_NONE)
+			if (IsSorting())
 				*pResult |= CDRF_NOTIFYPOSTPAINT;
 		}
 		break;
@@ -3197,7 +3242,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				*pResult = CDRF_SKIPDEFAULT;
 			}
 
-			if ((m_nSortBy != TDCA_NONE) && (m_nSortBy != m_nTrackAttribute))
+			if (IsSorting() && (m_nSortBy != m_nTrackAttribute))
 				m_header.DrawItemSortArrow(pDC, (int)pNMCD->dwItemSpec, m_bSortAscending);
 		}
 		break;
@@ -3301,7 +3346,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 						Resize();
 
 						// Resort before fixing up selection
-						if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+						if (IsSorting() || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
 						{	
 							pDestCol->Sort(m_nSortBy, m_bSortAscending);
 							pSrcCol->Sort(m_nSortBy, m_bSortAscending);
@@ -3434,6 +3479,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 	ASSERT(pSrcCol->HasTasks(aTaskIDs));
 
 	int nID = aTaskIDs.GetSize();
+	BOOL bSrcChanged = FALSE, bDestChanged = FALSE, bRestChanged = FALSE; 
 
 	while (nID--)
 	{
@@ -3455,7 +3501,8 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		// Remove from the source list(s) if moving
 		if (bSrcIsBacklog)
 		{
-			VERIFY(pSrcCol->DeleteTask(dwTaskID));
+			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			ASSERT(bSrcChanged);
 		}
 		else if (!bCopy) // move
 		{
@@ -3463,7 +3510,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 			pKI->RemoveAllTrackedAttributeValues(m_sTrackAttribID);
 
 			// Remove from all src lists
-			m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
+			bRestChanged |= m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
 		}
 		else if (bDestIsBacklog) // and 'copy'
 		{
@@ -3474,22 +3521,36 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 			while (nVal--)
 				pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
 
-			VERIFY(pSrcCol->DeleteTask(dwTaskID));
+			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			ASSERT(bSrcChanged);
 		}
 
 		// Append to the destination list
 		if (bDestIsBacklog)
 		{
 			if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-				pDestCol->AddTask(*pKI);
+				bDestChanged |= (pDestCol->AddTask(*pKI) != NULL);
 		}
 		else
 		{
 			pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
 			if (pDestCol->FindItem(dwTaskID) == NULL)
-				pDestCol->AddTask(*pKI);
+				bDestChanged |= (pDestCol->AddTask(*pKI) != NULL);
 		}
+	}
+
+	if (bRestChanged)
+	{
+		m_aColumns.GroupBy(m_nGroupBy);
+	}
+	else
+	{
+		if (bSrcChanged)
+			pSrcCol->GroupBy(m_nGroupBy);
+
+		if (bDestChanged)
+			pDestCol->GroupBy(m_nGroupBy);
 	}
 
 	return TRUE;
@@ -3735,6 +3796,47 @@ LRESULT CKanbanCtrl::OnColumnEditTaskFlag(WPARAM /*wp*/, LPARAM lp)
 			if (m_nSortBy == TDCA_FLAG)
 			{
 				m_pSelectedColumn->Sort(TDCA_FLAG, m_bSortAscending);
+				ScrollToSelectedTask();
+			}
+
+			m_pSelectedColumn->Invalidate(FALSE);
+		}
+
+		return lr;
+	}
+
+	// else
+	ASSERT(0);
+	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnColumnEditTaskLock(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(!m_bReadOnly);
+
+	CDWordArray aTaskIDs;
+	int nID = GetSelectedTaskIDs(aTaskIDs);
+	ASSERT(nID);
+
+	LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKLOCK, 0, lp);
+
+	if (lr)
+	{
+		// Update item lock states
+		while (nID--)
+		{
+			DWORD dwTaskID = aTaskIDs[nID];
+			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+
+			if (pKI)
+				pKI->bLocked = lp;
+		}
+
+		if (m_pSelectedColumn)
+		{
+			if (m_nSortBy == TDCA_LOCK)
+			{
+				m_pSelectedColumn->Sort(TDCA_LOCK, m_bSortAscending);
 				ScrollToSelectedTask();
 			}
 

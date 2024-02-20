@@ -62,7 +62,7 @@ typedef CArray<int, int&> CToolIndexArray;
 class CTDCToolsHelper  
 {
 public:
-	CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates);
+	CTDCToolsHelper(BOOL bTDLEnabled);
 	virtual ~CTDCToolsHelper();
 	
 	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
@@ -80,7 +80,7 @@ public:
 	static BOOL IsToolCmdID(UINT nCmdID);
 
 protected:
-	BOOL m_bTDLEnabled, m_bISODates;
+	BOOL m_bTDLEnabled;
 	
 protected:
    	LPCTSTR GetFileFilter();

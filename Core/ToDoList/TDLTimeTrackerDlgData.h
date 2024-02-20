@@ -61,6 +61,9 @@ struct TRACKTASKLIST
 	CTrackItemArray aTasks;
 	CDWordArray aRecentlyTrackedIDs;
 
+	BOOL bNeedFullTaskUpdate;
+	BOOL bNeedComboRebuild;
+
 protected:
 	DWORD dwTrackedTaskID;
 	BOOL bTrackingPaused;

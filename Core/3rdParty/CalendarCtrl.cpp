@@ -596,7 +596,7 @@ void CCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const C
 	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rText, DT_LEFT|DT_VCENTER);
+	pDC->DrawText(csDay, &rText, DT_LEFT|DT_VCENTER);
 
 	// cleanup
 	if (fontBold.GetSafeHandle())
@@ -807,19 +807,19 @@ BOOL CCalendarCtrl::SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll)
 	}
 	else // just select
 	{
-		m_DateCurrent = WholeDays(dtDate);
+//		m_DateCurrent = WholeDays(dtDate);
 		m_SingleSelection.RemoveAll();
 		
 		m_SelectionRange[2] = 0;
-		m_SelectionRange[1] = DateToSeconds(m_DateCurrent);
+		m_SelectionRange[1] = DateToSeconds(WholeDays(dtDate));
 		m_SelectionRange[0] = m_SelectionRange[1];
 		
 		// Scrolling pos
-		COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
-		m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent-today).GetDays()/7;
-		
-		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-		Invalidate(FALSE);
+// 		COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
+// 		m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent -today).GetDays()/7;
+// 		
+// 		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
+// 		Invalidate(FALSE);
 	}
 
 	return TRUE;

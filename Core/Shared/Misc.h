@@ -84,7 +84,9 @@ namespace Misc
 	CString GetTimeSeparator();
 	CString GetTimeFormat(BOOL bIncSeconds = TRUE);
 	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
+	BOOL ShortDateFormatHasMonthBeforeDay();
 	CString GetDateSeparator();
+	CString GetLocaleInfo(LCTYPE lcType, int nBufSize = 1024);
 
 	BOOL MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE);
 	BOOL MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
@@ -114,10 +116,12 @@ namespace Misc
 	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
 	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
  	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
- 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
+	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResults = TRUE);
-
+	
 	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
+	CString SplitLeft(const CString& sText, TCHAR cDelim, BOOL bTrimResult = TRUE);
+	CString SplitLeft(const CString& sText, LPCTSTR szDelim, BOOL bTrimResult = TRUE);
 	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
 
 	typedef int (*SORTPROC)(const void* pV1, const void* pV2);
@@ -144,9 +148,10 @@ namespace Misc
 	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow = FALSE);
 	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
 
-	CString& MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith);
-	CString& MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith);
-	CString GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith);
+	CString& MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith = '\"');
+	CString GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith = '\"');
+	CString& MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith = '\"');
+	CString GetUnquoted(LPCTSTR szText, TCHAR cUnescapeEmbeddedQuotesWith = '\"');
 	BOOL IsQuoted(LPCTSTR szText);
 
 	int LastIndex(const CString& sText);
@@ -156,14 +161,17 @@ namespace Misc
 	TCHAR Last(const CString& sText);
 	TCHAR First(LPCTSTR szText);
 	TCHAR Last(LPCTSTR szText);
+
 	TCHAR TrimFirst(CString& sText);
 	TCHAR TrimLast(CString& sText);
 	BOOL TrimFirstIf(TCHAR cTest, CString& sText);
 	BOOL TrimTrailingDecimalZeros(CString& sText);
+	BOOL TrimTrailingDecimals(CString& sText);
 	BOOL TrimLastIf(TCHAR cTest, CString& sText);
 	CString& Trim(CString& sText, TCHAR cChar);
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	CString& TrimAlpha(CString& sText);
+
 	BOOL RemoveAt(CString& sText, int nPos);
 	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
@@ -193,7 +201,12 @@ namespace Misc
 	BOOL IsSymbol(const CString& sValue);
 	BOOL StateChanged(BOOL b1, BOOL b2);
 
+	// These use regional settings
+	CString FormatNumber(int nVal, LPCTSTR szTrail = NULL);
+	CString FormatNumber(double dVal, LPCTSTR szTrail = NULL);
+	CString FormatNumber(LPCTSTR szVal, BOOL bAsInteger, LPCTSTR szTrail = NULL);
 	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
+
 	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
 	CString Format(int nVal, LPCTSTR szTrail = NULL);
 	CString Format(DWORD dwVal, LPCTSTR szTrail = NULL);
@@ -213,6 +226,7 @@ namespace Misc
 	LANGID GetUserKeyboardLanguage();
 	BOOL IsMetricMeasurementSystem();
 	BOOL IsHighContrastActive();
+	BOOL IsFullScreenAppActive();
 
 	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
 	BOOL ShutdownBlockReasonDestroy(HWND hWnd);
@@ -346,7 +360,20 @@ namespace Misc
 		aValues.RemoveAt(nFind);
 		return TRUE;
 	}
-	
+
+	template <class T, class S>
+	BOOL RemoveAllT(const S& item, T& aValues)
+	{
+		int nNumItems = aValues.GetSize(), nItem = nNumItems;
+
+		while (nItem--)
+		{
+			if (item == aValues.GetData()[nItem])
+				aValues.RemoveAt(nItem);
+		}
+
+		return (aValues.GetSize() < nNumItems);
+	}
 /*
 	template <class T> 
 	T IncrementItemT(CArray<T, T&>& aValues, int nItem)
@@ -392,12 +419,12 @@ namespace Misc
 	}
 
 	template <class T, class S> 
-	int FindT(const S& toFind, const T& aValues)
+	int FindT(const S& toFind, const T& aValues, int nStart = 0)
 	{
-		int nItem = aValues.GetSize();
+		int nNumItems = aValues.GetSize();
 		const S* pData = aValues.GetData();
 
-		while (nItem--)
+		for (int nItem = nStart; nItem < nNumItems; nItem++)
 		{
 			if (pData[nItem] == toFind)
 				return nItem;

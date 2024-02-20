@@ -26,6 +26,8 @@ enum PEC_CLEANUP
 
 class CPopupEditCtrl : public CEnEdit
 {
+	DECLARE_DYNAMIC(CPopupEditCtrl)
+
 // Construction
 public:
 	CPopupEditCtrl(PEC_CLEANUP nCleanup = PEC_AUTOHIDE);

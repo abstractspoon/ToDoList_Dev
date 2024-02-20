@@ -41,7 +41,17 @@ namespace SampleUIExtension
             return false;
         }
 
-	    public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		public bool ScrollToSelectedTask()
+		{
+			return false;
+		}
+
+		public bool CanScrollToSelectedTask()
+		{
+			return false;
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
             Task task = tasks.GetFirstTask();
             SampleListItem item = new SampleListItem();
@@ -134,7 +144,7 @@ namespace SampleUIExtension
             if (tasks.IsAttributeAvailable(Task.Attribute.FileLink))
             {
                 attrib.Add("File Link");
-                value.Add(task.FormatFileLink(", "));
+                value.Add(task.FormatFileLink(", ", false));
             }
 
             if (tasks.IsAttributeAvailable(Task.Attribute.Comments))
@@ -275,12 +285,12 @@ namespace SampleUIExtension
 			return false;
 	    }
 
-        public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
+        public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 	    {
-            return UIExtension.HitResult.Nowhere;
+            return UIExtension.HitTestResult.Nowhere;
 	    }
 
-		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, bool titleColumnOnly)
+		public UInt32 HitTestTask(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)
 		{
 			return 0;
 		}

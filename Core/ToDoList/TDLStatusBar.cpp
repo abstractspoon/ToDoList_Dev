@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CTDLStatusBar, CStatusBarACTEx)
 	//{{AFX_MSG_MAP(CWelcomeWizard)
 	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -96,6 +97,12 @@ int CTDLStatusBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	return 0;
+}
+
+void CTDLStatusBar::OnLButtonDblClk(UINT nFlags, CPoint pt)
+{
+	if (HitTest(pt) == 0)
+		AfxGetMainWnd()->SendMessage(WM_COMMAND, ID_SCROLLTOSELTASK);
 }
 
 void CTDLStatusBar::SetUITheme(const CUIThemeFile& theme)
@@ -197,7 +204,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 				const int MAXTIPLEN = 255; // CToolInfo
 				int nMaxTasks = max(nSelCount, 10), nNumTasks = nMaxTasks;
 
-				CEnString sFmtMore;
+				CString sFmtMore;
 
 				while (nNumTasks--)
 				{
@@ -212,7 +219,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 					{
 						if (sFmtMore.IsEmpty())
 						{
-							sFmtMore.LoadString(ID_SB_MULTISELTASKMORE_TIP);
+							sFmtMore = CEnString(ID_SB_MULTISELTASKMORE_TIP);
 							sFmtMore = _T("\n+ ") + sFmtMore;
 						}
 

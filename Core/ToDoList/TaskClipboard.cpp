@@ -61,22 +61,32 @@ BOOL CTaskClipboard::ClipIDMatches(const CString& sID)
 	return (!sID.IsEmpty() && (sID.CompareNoCase(GetClipID()) == 0));
 }
 
-BOOL CTaskClipboard::GetTasks(CTaskFile& tasks, const CString& sID)
+int CTaskClipboard::GetTasks(CTaskFile& tasks, const CString& sID)
 {
+	if (IsEmpty())
+		return 0;
+
 	CString sXML = CClipboard().GetText(GetTaskClipFmt()); 
 	
-	if (tasks.LoadContent(sXML))
-	{
-		CString sClipID = (sID.IsEmpty() ? DEF_CLIPID : sID);
+	if (!tasks.LoadContent(sXML))
+		return 0;
 
-		// remove task references if the clip IDs do not match
-		if (sClipID.CompareNoCase(GetClipID()) != 0)
-		{
-			RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE);
-		}
-	}
+	CString sClipID = (sID.IsEmpty() ? DEF_CLIPID : sID);
+
+	// remove task references if the clip IDs do not match
+	if (sClipID.CompareNoCase(GetClipID()) != 0)
+		RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE);
 
 	return tasks.GetTaskCount();
+}
+
+int CTaskClipboard::GetTaskCount(const CString& sID)
+{
+	if (IsEmpty())
+		return 0;
+
+	CTaskFile unused;
+	return GetTasks(unused, sID);
 }
 
 void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings)
@@ -92,10 +102,13 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 		
 		while (hSibling)
 		{
+			// Grab next sibling before we potentially delete this one
+			HTASKITEM hNextSibling = tasks.GetNextTask(hSibling);
+
 			// FALSE == don't recurse on siblings
 			RemoveTaskReferences(tasks, hSibling, FALSE);
 			
-			hSibling = tasks.GetNextTask(hSibling);
+			hSibling = hNextSibling;
 		}
 	}
 

@@ -6,7 +6,31 @@ using System.Drawing;
 
 namespace Calendar
 {
-    public abstract class AbstractRenderer : IDisposable
+    public interface IRenderer
+    {
+		void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
+		void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
+        void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay);
+        void DrawDayBackground(Graphics g, Rectangle rect);
+        void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight);
+        void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth);
+        void DrawAppointment(Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected);
+		void DrawAllDayBackground(Graphics g, Rectangle rect);
+
+		Color AllDayEventsBackColor();
+		Color HourSeperatorColor();
+		Color HalfHourSeperatorColor();
+		Color HourColor();
+		Color WorkingHourColor();
+		Color BackColor();
+		Color SelectionColor();
+
+		Font BaseFont();
+		Font HourFont();
+		Font MinuteFont();
+	}
+
+	public abstract class AbstractRenderer : IRenderer, IDisposable
     {
         ~AbstractRenderer()
         {
@@ -28,136 +52,108 @@ namespace Calendar
                 minuteFont.Dispose();
         }
 
-        public virtual Color AllDayEventsBackColor
+		// Derived classes must implement -------------------------------------------------
+		public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
+		public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
+		public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay);
+		public abstract void DrawDayBackground(Graphics g, Rectangle rect);
+		public abstract void DrawAppointment(Graphics g, Rectangle daysRect, AppointmentView apptView, bool isSelected);
+		// --------------------------------------------------------------------------------
+
+		public virtual Color AllDayEventsBackColor()
         {
-            get
-            {
-                return InterpolateColors(this.BackColor, Color.Black, 0.5f);
-            }
+            return InterpolateColors(BackColor(), Color.Black, 0.5f);
         }
 
-        public virtual Font BaseFont
+        public virtual Font BaseFont()
         {
-            get
-            {
-                return Control.DefaultFont;
-            }
+            return Control.DefaultFont;
         }
 
-        public virtual Color HourSeperatorColor
+        public virtual Color HourSeperatorColor()
         {
-            get
-            {
-                return System.Drawing.Color.FromArgb(234, 208, 152);
-            }
+            return Color.FromArgb(234, 208, 152);
         }
 
-        public virtual Color HalfHourSeperatorColor
+        public virtual Color HalfHourSeperatorColor()
         {
-            get
-            {
-                return System.Drawing.Color.FromArgb(243, 228, 177);
-            }
+            return Color.FromArgb(243, 228, 177);
         }
 
-        public virtual Color HourColor
+        public virtual Color HourColor()
         {
-            get
-            {
-                return System.Drawing.Color.FromArgb(255, 244, 188);
-            }
+            return Color.FromArgb(255, 244, 188);
         }
 
-        public virtual Color WorkingHourColor
+        public virtual Color WorkingHourColor()
         {
-            get
-            {
-                return System.Drawing.Color.FromArgb(255, 255, 213);
-            }
+            return Color.FromArgb(255, 255, 213);
         }
 
-        public virtual Color BackColor
+        public virtual Color BackColor()
         {
-            get
-            {
-                return SystemColors.Control;
-            }
+            return SystemColors.Control;
         }
 
-        public virtual Color SelectionColor
+        public virtual Color SelectionColor()
         {
-            get
-            {
-                return SystemColors.Highlight;
-            }
+            return SystemColors.Highlight;
         }
 
         private Font hourFont;
 
-        public virtual Font HourFont
-        {
-            get
-            {
-                if (hourFont == null)
-                {
-                    hourFont = new Font(BaseFont.FontFamily.Name, 12, FontStyle.Regular);
-                }
+        public virtual Font HourFont()
+		{
+			if (hourFont == null)
+			{
+				hourFont = new Font(BaseFont().FontFamily.Name, 12, FontStyle.Regular);
+			}
 
-                return hourFont;
-            }
-        }
+			return hourFont;
+		}
 
         private Font minuteFont;
 
-        public virtual Font MinuteFont
+        public virtual Font MinuteFont()
         {
-            get
-            {
-                if (minuteFont == null)
-                {
-                    minuteFont = new Font(BaseFont.FontFamily.Name, 8, FontStyle.Regular);
-                }
+			if (minuteFont == null)
+			{
+				minuteFont = new Font(BaseFont().FontFamily.Name, 8, FontStyle.Regular);
+			}
 
-                return minuteFont;
-            }
-        }
-
-		public virtual void SetColumnWidth(Graphics g, int colWidth)
-		{
-			// To allow derived classes to cache calculations
+			return minuteFont;
 		}
 
-		public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
-
-		public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
-
-        public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay);
-
-        public abstract void DrawDayBackground(Graphics g, Rectangle rect);
-
-        public virtual void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
+		public virtual void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
         {
-            if (g == null)
-                throw new ArgumentNullException("g");
-
-            using (SolidBrush brush = new SolidBrush(hilight ? this.SelectionColor : this.WorkingHourColor))
-            {
-                g.FillRectangle(brush, rect);
-            }
-
-            if (drawBorder)
-                g.DrawRectangle(SystemPens.WindowFrame, rect);
+			DrawHourRange(g, rect, drawBorder, (hilight ? SelectionColor() : WorkingHourColor()));
         }
 
         public virtual void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth)
         {
+			DrawDayGripper(g, rect, gripWidth, HourSeperatorColor());
+        }
+
+        public virtual void DrawAllDayBackground(Graphics g, Rectangle rect)
+        {
+            if (g == null)
+                throw new ArgumentNullException("g");
+
+            using (Brush brush = new SolidBrush(InterpolateColors(BackColor(), Color.Black, 0.5f)))
+                g.FillRectangle(brush, rect);
+        }
+
+		// static helpers ------------------------------------------------------------------------
+
+		public static void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth, Color color)
+		{
             if (g == null)
                 throw new ArgumentNullException("g");
 
 			if (gripWidth <= 0)
 				return;
 
-			using (Pen pen = new Pen(HourSeperatorColor))
+			using (Pen pen = new Pen(color))
 			{
 				if (gripWidth > 2)
 				{
@@ -170,17 +166,21 @@ namespace Calendar
 				else 
 					g.DrawRectangle(pen, rect.Left, rect.Top - 1, gripWidth - 1, rect.Height);
 			}
-        }
 
-        public abstract void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isLong, bool isSelected);
+		}
 
-        public void DrawAllDayBackground(Graphics g, Rectangle rect)
+        public static void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, Color color)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            using (Brush brush = new SolidBrush(InterpolateColors(this.BackColor, Color.Black, 0.5f)))
+            using (SolidBrush brush = new SolidBrush(color))
+            {
                 g.FillRectangle(brush, rect);
+            }
+
+            if (drawBorder)
+                g.DrawRectangle(SystemPens.WindowFrame, rect);
         }
 
         public static Color InterpolateColors(Color color1, Color color2, float percentage)

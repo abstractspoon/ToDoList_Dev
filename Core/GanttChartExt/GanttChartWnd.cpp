@@ -469,30 +469,30 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	return false;
 }
 
-IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen) const
+IUI_HITTEST CGanttChartWnd::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	// try tree header
 	if (m_ctrlGantt.PointInHeader(ptScreen))
-		return IUI_NOWHERE;//IUI_COLUMNHEADER;
+		return IUI_NOWHERE;
 
 	// then specific task
-	if (m_ctrlGantt.HitTestTask(ptScreen, false))
+	if (m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP)))
 		return IUI_TASK;
 
 	// else 
 	return IUI_NOWHERE;
 }
 
-DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
+DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	return m_ctrlGantt.HitTestTask(ptScreen, bTitleColumnOnly);
+	return m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CGanttChartWnd::SelectTask(DWORD dwTaskID)
+bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -547,6 +547,8 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 		
 	// Month Display may change for large date ranges
 	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
+	
+	ResizeSlider();
 	UpdateActiveRangeLabel();
 }
 
@@ -609,11 +611,6 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlGantt.ResizeListColumnsToFit(TRUE);
 		return true;
 		
-	case IUI_SELECTTASK:
-		if (pData)
-			return SelectTask(pData->dwTaskID);
-		break;
-		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -660,6 +657,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlGantt.SelectTask(m_ctrlGantt.GetSelectedTaskID()) != FALSE);
 	}
 
 	return false;
@@ -687,7 +687,6 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		return (m_ctrlGantt.CanCollapseAll() != FALSE);
 
 	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SAVETOIMAGE:
@@ -740,7 +739,9 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	case IUI_MOVETASK:
 		if (pData)
 			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
-		break;
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_ctrlGantt.GetSelectedTaskID() != 0);
 	}
 
 	// all else
@@ -765,7 +766,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 	if (m_toolbar.CreateEx(this))
 	{
 		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
@@ -793,13 +794,22 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		rGantt.top = CDlgUnits(this).ToPixelsY(28);
 
 		m_ctrlGantt.MoveWindow(rGantt);
-
-		// selected task dates takes available space
-		CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
-		rSlider.right = (cx - 10);
-
-		m_sliderDateRange.MoveWindow(rSlider);
+		ResizeSlider(cx);
 	}
+}
+
+void CGanttChartWnd::ResizeSlider(int nParentWidth)
+{
+	if (nParentWidth == -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		nParentWidth = rClient.Width();
+	}
+
+	CRect rSlider = CDialogHelper::GetChildRect(&m_sliderDateRange);
+	m_sliderDateRange.ResizeToFit(nParentWidth - 10 - rSlider.left);
 }
 
 HBRUSH CGanttChartWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
@@ -938,6 +948,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 				}
 			}
 
+			ResizeSlider();
 			UpdateActiveRangeLabel();
 		}
 		else
@@ -1021,6 +1032,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 		}
 	}
 
+	ResizeSlider();
 	UpdateActiveRangeLabel();
 
 	return 0L;
@@ -1280,7 +1292,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
 		{
-			SelectTask(dwFromTaskID);
+			SelectTask(dwFromTaskID, false);
 
 			// explicitly update parent because SelectTask will not
 			SendParentSelectionUpdate();
@@ -1313,27 +1325,28 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{
-/*
-			// update gantt ctrl
+			// Update gantt ctrl because the app will only update our tasks 
+			// if other tasks are affected which is hard to predict.
+			// Note: These calls will fail if the app has already updated us
+			// so we don't wrap the calls in VERIFY().
 			switch (wp)
 			{
 			case GCDDM_ADD:
-				VERIFY(m_ctrlGantt.AddSelectedTaskDependency(mod.dwDependID));
+				m_ctrlGantt.AddSelectedTaskDependency(mod.dwDependID);
 				break;
 
 			case GCDDM_EDIT:
-				VERIFY(m_ctrlGantt.EditSelectedTaskDependency(mod.dwPrevDependID, mod.dwDependID));
+				m_ctrlGantt.EditSelectedTaskDependency(mod.dwPrevDependID, mod.dwDependID);
 				break;
 
 			case GCDDM_DELETE:
-				VERIFY(m_ctrlGantt.DeleteSelectedTaskDependency(mod.dwPrevDependID));
+				m_ctrlGantt.DeleteSelectedTaskDependency(mod.dwPrevDependID);
 				break;
 
 			default:
 				ASSERT(0);
 				return 0L;
 			}
-*/
 		}
 	}
 

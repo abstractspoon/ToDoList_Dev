@@ -20,6 +20,7 @@ static char THIS_FILE[] = __FILE__;
 
 #if _MSC_VER >= 1400
 #	define LVGROUPITEM LVITEM
+#	define LVCUSTOMDRAW NMLVCUSTOMDRAW
 #else
 struct LVGROUPITEM
 {
@@ -39,6 +40,28 @@ struct LVGROUPITEM
 	int* piColFmt;
 	int iGroup; // readonly. only valid for owner data.
 };
+
+struct LVCUSTOMDRAW
+{
+	NMCUSTOMDRAW nmcd;
+	COLORREF clrText;
+	COLORREF clrTextBk;
+	int iSubItem;
+	DWORD dwItemType;
+
+	// Item custom draw
+	COLORREF clrFace;
+	int iIconEffect;
+	int iIconPhase;
+	int iPartId;
+	int iStateId;
+
+	// Group Custom Draw
+	RECT rcText;
+	UINT uAlign;      // Alignment. Use LVGA_HEADER_CENTER, LVGA_HEADER_RIGHT, LVGA_HEADER_LEFT
+};
+#	define LVCDI_GROUP 1
+
 #endif
 
 #ifndef LVIF_GROUPID
@@ -84,6 +107,8 @@ struct LVGROUP
 };
 
 #define LVM_INSERTGROUP         (LVM_FIRST + 145)
+#define LVM_GETGROUPINFO        (LVM_FIRST + 149)
+#define LVM_GETGROUPCOUNT       (LVM_FIRST + 152)
 #define LVM_ENABLEGROUPVIEW     (LVM_FIRST + 157)
 #define LVM_REMOVEALLGROUPS     (LVM_FIRST + 160)
 
@@ -98,7 +123,26 @@ DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
-	return (m_list.SendMessage(LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+	if (!m_hwndList)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+}
+
+BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
+{
+	if (!hwndList)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_hwndList = hwndList;
+
+	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
 }
 
 BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/)
@@ -110,28 +154,35 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.state = LVGS_NORMAL;//dwState;
 	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
 	lvg.uAlign = LVGA_HEADER_LEFT;//dwAlign;
-
-								  // Header-title must be unicode (Convert if necessary)
-#ifdef UNICODE
 	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
 	lvg.cchHeader = strHeader.GetLength();
-#else
-	CComBSTR header = strHeader;
-	lvg.pszHeader = header;
-	lvg.cchHeader = header.Length();
-#endif
 
-	return (-1 != m_list.SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
+	return (-1 != ::SendMessage(m_hwndList, LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
 }
 
-int CListCtrlItemGrouping::GetItemGroupId(int nRow)
+CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
+{
+	LVGROUP lvg = { 0 };
+	TCHAR szHeader[256] = { 0 };
+
+	lvg.cbSize = sizeof(lvg);
+	lvg.mask = LVGF_HEADER;
+	lvg.pszHeader = szHeader;
+	lvg.cchHeader = 256;
+
+	VERIFY(-1 != ::SendMessage(m_hwndList, LVM_GETGROUPINFO, nGroupID, (LPARAM)&lvg));
+
+	return szHeader;
+}
+
+int CListCtrlItemGrouping::GetItemGroupId(int nRow) const
 {
 	LVGROUPITEM lvgi = { 0 };
 
 	lvgi.mask = LVIF_GROUPID;
 	lvgi.iItem = nRow;
 
-	VERIFY(m_list.SendMessage(LVM_GETITEM, 0, (LPARAM)&lvgi));
+	VERIFY(::SendMessage(m_hwndList, LVM_GETITEM, 0, (LPARAM)&lvgi));
 
 	return lvgi.iGroupId;
 }
@@ -145,12 +196,33 @@ BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
 	lvgi.iSubItem = 0;
 	lvgi.iGroupId = nGroupID;
 
-	return (BOOL)m_list.SendMessage(LVM_SETITEM, 0, (LPARAM)&lvgi);
+	return (BOOL)::SendMessage(m_hwndList, LVM_SETITEM, 0, (LPARAM)&lvgi);
+}
+
+BOOL CListCtrlItemGrouping::HasGroups() const
+{
+	return (::SendMessage(m_hwndList, LVM_GETGROUPCOUNT, 0, 0) > 0);
 }
 
 void CListCtrlItemGrouping::RemoveAllGroups()
 {
-	m_list.SendMessage(LVM_REMOVEALLGROUPS);
+	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
+}
+
+BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORREF crBkgnd)
+{
+	const LVCUSTOMDRAW* pNMLV = (const LVCUSTOMDRAW*)pLVCD;
+
+	if (pNMLV->dwItemType != LVCDI_GROUP)
+		return FALSE;
+
+	CDC* pDC = CDC::FromHandle(pNMLV->nmcd.hdc);
+	CString sHeader = GetGroupHeaderText(pNMLV->nmcd.dwItemSpec);
+
+	CRect rRow(pNMLV->rcText);
+	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, crBkgnd);
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -163,24 +235,27 @@ IMPLEMENT_DYNAMIC(CEnListCtrl, CListCtrl)
 #define ID_TIMER_HEADERPOS 1
 const int MAX_HEADING_SIZE = 100;
 
-CEnListCtrl::CEnListCtrl() : m_dwSelectionTheming(NOTSET)
+CEnListCtrl::CEnListCtrl() 
+	: 
+	m_dwSelectionTheming(NOTSET),
+	m_bVertGrid(FALSE),
+	m_bHorzGrid(FALSE),
+	m_nCurView(-1),
+	m_bLastColStretchy(FALSE),
+	m_bFirstColStretchy(FALSE),
+	m_nMinItemHeight(-1),
+	m_bReadOnly(FALSE),
+	m_nItemDropHilite(-1),
+	m_bDropHiliteItemSelected(FALSE),
+	m_bContextPopupEnabled(FALSE),
+	m_bUserSelChange(FALSE),
+	m_bSortingEnabled(TRUE),
+	m_nSortColumn(-1),
+	m_bSortAscending(TRUE),
+	m_bInitColumns(FALSE),
+	m_bAlternateRowColoring(FALSE),
+	m_bSortEmptyBelow(TRUE)
 {
-	m_bVertGrid = m_bHorzGrid = FALSE;
-	m_mapColumnData.RemoveAll();
-	m_nCurView = -1;
-	m_bLastColStretchy = FALSE;
-	m_bFirstColStretchy = FALSE;
-	m_nMinItemHeight = -1;
-	m_bReadOnly = FALSE;
-	m_nItemDropHilite = -1;
-	m_bDropHiliteItemSelected = FALSE;
-	m_bContextPopupEnabled = FALSE;
-	m_bUserSelChange = FALSE;
-	m_bSortingEnabled = TRUE;
-	m_nSortColumn = -1;
-	m_bSortAscending = TRUE;
-	m_bInitColumns = FALSE;
-	m_bAlternateRowColoring = FALSE;
 }
 
 CEnListCtrl::~CEnListCtrl()
@@ -1470,27 +1545,21 @@ void CEnListCtrl::SetSortColumn(int nColumn, BOOL bResort)
 
 void CEnListCtrl::Sort()
 {
-	// rebuild sort map
-	BuildSortMap(m_nSortColumn);
+	if (BuildSortMap(m_nSortColumn))
+	{
+		SortItems(CompareProc, (LPARAM)this);
+		EnsureVisible(GetCurSel(), FALSE);
 
-	// do sort
-	SortItems(CompareProc, (LPARAM)this);
-
-	// cleanup
-	m_mapSortStrings.RemoveAll();
-
-	EnsureVisible(GetCurSel(), FALSE);
+		m_mapSortStrings.RemoveAll();
+	}
 }
 
 int CALLBACK CEnListCtrl::CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam)
 {
-	CEnListCtrl* pListCtrl;
-	int nResult;
-
-	pListCtrl = (CEnListCtrl*)lParam;
+	const CEnListCtrl* pListCtrl = (const CEnListCtrl*)lParam;
 	ASSERT (pListCtrl->IsKindOf(RUNTIME_CLASS(CEnListCtrl)));
 
-	nResult = pListCtrl->CompareItems(lParam1, lParam2, pListCtrl->m_nSortColumn);
+	int nResult = pListCtrl->CompareItems(lParam1, lParam2, pListCtrl->m_nSortColumn);
 
 	if (!pListCtrl->m_bSortAscending)
 		nResult = -nResult;
@@ -1498,21 +1567,27 @@ int CALLBACK CEnListCtrl::CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lPa
 	return nResult;
 }
 
-void CEnListCtrl::BuildSortMap(int nCol)
+BOOL CEnListCtrl::BuildSortMap(int nCol)
 {
 	// because we can't reliably get back from the itemdata to the item index
 	// during a sort, we map the itemdata of each item index directly to
 	// the column string
-	BuildSortMap(nCol, m_mapSortStrings);
+	return BuildSortMap(nCol, m_mapSortStrings);
 }
 
-void CEnListCtrl::BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const
+BOOL CEnListCtrl::BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const
 {
-	mapSortStrings.RemoveAll();
 	int nItem = GetItemCount();
+
+	if (nItem < 2)
+		return FALSE;
+
+	mapSortStrings.RemoveAll();
 
 	while (nItem--)
 		mapSortStrings[GetItemData(nItem)] = GetItemText(nItem, nCol);
+
+	return TRUE;
 }
 
 CString CEnListCtrl::GetSortString(DWORD dwItemData) const
@@ -1523,7 +1598,7 @@ CString CEnListCtrl::GetSortString(DWORD dwItemData) const
 	return sItem;
 }
 
-int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/)
+int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/) const
 {
 	// -1 if dwItemData1 should go BEFORE dwItemData2
 	//  1 if dwItemData1 should go AFTER dwItemData2
@@ -1532,15 +1607,17 @@ int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortC
 	// default comparison just compares text
 	CString sItem1, sItem2;
 
-	m_mapSortStrings.Lookup(dwItemData1, sItem1); // this is quicker than helper method
+	m_mapSortStrings.Lookup(dwItemData1, sItem1); 
 	m_mapSortStrings.Lookup(dwItemData2, sItem2);
 
-	// empty items always appear AFTER others
-	if (sItem1.IsEmpty())
-		return m_bSortAscending ? 1 : -1;
+	if (m_bSortEmptyBelow)
+	{
+		if (sItem1.IsEmpty())
+			return m_bSortAscending ? 1 : -1;
 
-	else if (sItem2.IsEmpty())
-		return m_bSortAscending ? -1 : 1;
+		if (sItem2.IsEmpty())
+			return m_bSortAscending ? -1 : 1;
+	}
 
 	// else
 	return sItem1.CompareNoCase(sItem2);

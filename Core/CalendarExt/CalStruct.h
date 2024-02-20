@@ -36,9 +36,11 @@ public:
 
 	BOOL IsValid() const;
 	BOOL IsDone() const;
+	BOOL IsCalculatedParent() const { return (bCalcedParentStart || bCalcedParentDue); }
 
 	BOOL IsStartSet() const;
 	BOOL IsEndSet() const;
+	BOOL IsActive(const COleDateTime& date) const;
 
 	COleDateTime GetAnyStart() const;
 	COleDateTime GetAnyEnd() const;
@@ -53,6 +55,7 @@ public:
 	const CMapCustomDates& Custom() const { return mapCustomDates; }
 	COleDateTime GetCustomDate(const CString& sCustAttribID) const;
 	void SetCustomDate(const CString& sCustAttribID, const COleDateTime& date);
+	void ClearCustomDate(const CString& sCustAttribID);
 	void SetCustomDates(const CMapCustomDates& dates);
 
 	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
@@ -60,6 +63,8 @@ public:
 protected:
 	COleDateTime dtCreation, dtStart, dtDue, dtDone;
 	COleDateTime dtStartCalc, dtEndCalc;
+
+	BOOL bCalcedParentStart, bCalcedParentDue;
 	BOOL bTreatOverdueAsDueToday;
 
 	CMapCustomDates mapCustomDates;
@@ -96,13 +101,17 @@ public:
 	CString GetName(BOOL bFormatted = TRUE) const;
 
 	BOOL IsParent() const;
+	BOOL IsCalculatedParent() const;
+
 	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
 	void DisableIcon() { bHasIcon = FALSE; }
+	BOOL HasTag(LPCTSTR szTag) const;
 
 	// Date wrappers
 	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
 	BOOL IsValid() const { return dates.IsValid(); }
 	BOOL IsDone(BOOL bIncGoodAs) const;
+	BOOL IsActive(const COleDateTime& date) const { return dates.IsActive(date); }
 
 	BOOL IsStartDateSet() const { return dates.IsStartSet(); }
 	void SetStartDate(const COleDateTime& date);
@@ -123,6 +132,7 @@ public:
 
 	COleDateTime GetCustomDate(const CString& sCustAttribID) const { return dates.GetCustomDate(sCustAttribID); }
 	void SetCustomDate(const CString& sCustAttribID, const COleDateTime& date) { dates.SetCustomDate(sCustAttribID, date); }
+	void ClearCustomDate(const CString& sCustAttribID) { dates.ClearCustomDate(sCustAttribID); }
 	void SetCustomDates(const CMapCustomDates& other) { dates.SetCustomDates(other); }
 
 public:
@@ -132,6 +142,7 @@ public:
 
 protected:
 	CString sName, sFormattedName;
+	CStringArray aTags;
 	DWORD dwTaskID;
 	BOOL bHasIcon, bIsParent;
 
@@ -202,7 +213,7 @@ public:
 
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
-
+	BOOL IsParentTask(DWORD dwTaskID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -252,6 +263,30 @@ protected:
 	int m_nMaxHeatCutoff;
 
 	const int m_nMinHeatCutoff;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct CONTINUOUSDRAWINFO
+{
+	CONTINUOUSDRAWINFO(DWORD dwID = 0);
+
+	void Reset();
+
+	DWORD dwTaskID;
+	int nIconOffset;
+	int nTextOffset;
+	int nVertPos;
+};
+
+class CCalContinuousDrawInfo : public CMap<DWORD, DWORD, CONTINUOUSDRAWINFO*, CONTINUOUSDRAWINFO*&>
+{
+public:
+	CCalContinuousDrawInfo() {}
+	virtual ~CCalContinuousDrawInfo();
+
+	void RemoveAll();
+	CONTINUOUSDRAWINFO& GetTaskInfo(DWORD dwTaskID);
 };
 
 /////////////////////////////////////////////////////////////////////////////

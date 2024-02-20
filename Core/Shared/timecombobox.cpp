@@ -34,7 +34,6 @@ CTimeComboBox::~CTimeComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTimeComboBox)
 	ON_WM_CREATE()

@@ -11,7 +11,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DEFAULT_BKGNDCOLOR = RGB(223, 223, 223); // near white
+const COLORREF DEFAULT_BKGNDCOLOR = CLR_NONE; // (::GetSysColor(COLOR_WINDOW) - 1);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -31,6 +31,8 @@ public:
 	int Add(CBitmap* pbmImage, CBitmap* pbmMask) { return CImageList::Add(pbmImage, pbmMask); }
 	int Add(CBitmap* pbmImage, COLORREF crMask) { return CImageList::Add(pbmImage, crMask); }
 	int Add(HICON hIcon, COLORREF crBkgnd = DEFAULT_BKGNDCOLOR);
+	int AddBitmap(UINT nBitmapID, COLORREF crMask);
+	int AddIcon(UINT nIconID, COLORREF crMask);
 	int Replace(int nImage, HICON hIcon, COLORREF crBkgnd = DEFAULT_BKGNDCOLOR);
 
 	BOOL ScaleByDPIFactor(COLORREF crBkgnd = DEFAULT_BKGNDCOLOR);

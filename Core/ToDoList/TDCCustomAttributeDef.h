@@ -101,7 +101,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
-	BOOL HasDefaultTextAlignment() const;
+	BOOL HasDefaultHorzAlignment() const;
 
 	BOOL SetAttributeType(DWORD dwType);
 	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
@@ -138,18 +138,19 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
-	static UINT GetDefaultTextAlignment(DWORD dwAttribType);
+	static UINT GetDefaultHorzAlignment(DWORD dwAttribType);
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
 	static BOOL AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature);
 	static CString FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures);
+	static CString FormatTimePeriod(const TDCCADATA& data, DWORD dwFeatures);
 
 	// ----------------------------------------------------------------
 	CString sUniqueID;
 	CString sColumnTitle;
 	CString sLabel;
-	UINT nTextAlignment;
+	UINT nHorzAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
 	DWORD dwFeatures;
 	CStringArray aDefaultListData;
 	mutable CStringArray aAutoListData;
@@ -210,6 +211,7 @@ public:
 	int Find(TDC_ATTRIBUTE nCustAttribID, int nIgnore = -1) const;
 	int Find(TDC_COLUMN nCustColID, int nIgnore = -1) const;
 
+	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	
@@ -220,14 +222,15 @@ public:
 	CString GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const;
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
+	CString FormatData(const TDCCADATA& data, const CString& sCustAttribID, BOOL bISODates) const;
 
-	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const;
-	DWORD GetAttributeDataType(TDC_COLUMN nCustColID) const;
-	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
+	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID, BOOL bResolveCalcType = TRUE) const;
+	DWORD GetAttributeDataType(TDC_COLUMN nCustColID, BOOL bResolveCalcType = TRUE) const;
+	DWORD GetAttributeDataType(const CString& sCustAttribID, BOOL bResolveCalcType = TRUE) const;
+	DWORD GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType = TRUE) const;
 
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
-	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const;
 
 	// Calculation helpers requiring access to all attribute definitions
 	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;

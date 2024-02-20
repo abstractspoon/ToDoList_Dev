@@ -16,13 +16,15 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox
 
-CContentTypeComboBox::CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID) :
-	m_pContentMgr(pContentMgr), m_iconNull(nNullIconID, 16)
+CContentTypeComboBox::CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID) 
+	:
+	m_pContentMgr(pContentMgr), 
+	m_iconNull(nNullIconID, 16)
 {
 }
 
@@ -124,7 +126,7 @@ void CContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 		if (nContent != -1)
 		{
 			CRect rImage(rect);
-			rImage.bottom = (rImage.top + IMAGESIZE);
+			rImage.bottom = (rImage.top + ICON_SIZE);
 
 			GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
 			
@@ -133,14 +135,28 @@ void CContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 			if (hIcon == NULL)
 				hIcon = m_iconNull;
 
-			::DrawIconEx(dc, rImage.left, rImage.top, hIcon, IMAGESIZE, IMAGESIZE, 0, NULL, DI_NORMAL);
+			::DrawIconEx(dc, rImage.left, rImage.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
 		}
 	}
 
 	CRect rText(rect);
-	rText.left += (IMAGESIZE + 2);
+	rText.left += (ICON_SIZE + 2);
 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
+int CContentTypeComboBox::GetExtraListboxWidth() const
+{
+	return (COwnerdrawComboBoxBase::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CContentTypeComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
+
+	return nMinHeight;
+}
 

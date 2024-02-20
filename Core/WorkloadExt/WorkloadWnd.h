@@ -45,8 +45,8 @@ public:
 	void SetTaskFont(HFONT hFont);
 
 	bool GetLabelEditRect(LPRECT pEdit);
-	IUI_HITTEST HitTest(POINT ptScreen) const;
-	DWORD HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const;
+	IUI_HITTEST HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const;
+	DWORD HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const;
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
@@ -55,7 +55,7 @@ public:
 	bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
 	bool PrepareNewTask(ITaskList* pTask) const;
 
-	bool SelectTask(DWORD dwTaskID);
+	bool SelectTask(DWORD dwTaskID, bool bTaskLink);
 	bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount);
 
 	bool ProcessMessage(MSG* pMsg);
@@ -157,6 +157,7 @@ protected:
 	BOOL CanMovePeriodEndForwards() const;
 	BOOL CanMovePeriodStartBackwards() const;
 	BOOL ValidatePeriod();
+	void ResizeSlider(int nParentWidth = -1);
 
 	static DWORD MapColumn(WLC_COLUMNID nColumn);
 	static WLC_COLUMNID MapColumn(DWORD dwColumn);

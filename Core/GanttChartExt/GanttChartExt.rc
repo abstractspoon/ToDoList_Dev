@@ -314,11 +314,11 @@ IDR_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
     BUTTON      ID_GANTT_GOTOTODAY
     SEPARATOR
-    BUTTON      ID_GANTT_PREFS
-    SEPARATOR
     BUTTON      ID_GANTT_NEWDEPENDS
     BUTTON      ID_GANTT_EDITDEPENDS
     BUTTON      ID_GANTT_DELETEDEPENDS
+    SEPARATOR
+    BUTTON      ID_GANTT_PREFS
     SEPARATOR
     BUTTON      ID_HELP
 END
@@ -419,6 +419,7 @@ BEGIN
     IDS_COL_DONEDATE        "Completed"
     IDS_ACTIVEDATERANGE     "&Visible Date Range (%s)"
     IDS_DISPLAYHINT         "(Reduce visible date range)"
+    IDS_COL_TITLE           "Title"
 END
 
 #endif    // English (Australia) resources

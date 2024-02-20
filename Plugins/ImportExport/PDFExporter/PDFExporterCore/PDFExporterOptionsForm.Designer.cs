@@ -109,12 +109,13 @@
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.BackColor = System.Drawing.Color.White;
+			this.groupBox1.BackColor = System.Drawing.SystemColors.Window;
 			this.groupBox1.Controls.Add(this.radioOtherFont);
 			this.groupBox1.Controls.Add(this.radioInstalledFont);
 			this.groupBox1.Controls.Add(this.btnBrowseOtherFont);
 			this.groupBox1.Controls.Add(this.editOtherFont);
 			this.groupBox1.Controls.Add(this.comboInstalledFont);
+			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox1.Location = new System.Drawing.Point(13, 8);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(418, 125);
@@ -125,6 +126,7 @@
 			// radioOtherFont
 			// 
 			this.radioOtherFont.AutoSize = true;
+			this.radioOtherFont.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.radioOtherFont.Location = new System.Drawing.Point(10, 67);
 			this.radioOtherFont.Name = "radioOtherFont";
 			this.radioOtherFont.Size = new System.Drawing.Size(72, 17);
@@ -137,6 +139,7 @@
 			// 
 			this.radioInstalledFont.AutoSize = true;
 			this.radioInstalledFont.Checked = true;
+			this.radioInstalledFont.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.radioInstalledFont.Location = new System.Drawing.Point(10, 20);
 			this.radioInstalledFont.Name = "radioInstalledFont";
 			this.radioInstalledFont.Size = new System.Drawing.Size(85, 17);
@@ -148,10 +151,11 @@
 			// 
 			// groupBox2
 			// 
-			this.groupBox2.BackColor = System.Drawing.Color.White;
+			this.groupBox2.BackColor = System.Drawing.SystemColors.Window;
 			this.groupBox2.Controls.Add(this.checkWatermarkImage);
 			this.groupBox2.Controls.Add(this.btnBrowseWatermarkImage);
 			this.groupBox2.Controls.Add(this.editWatermarkImage);
+			this.groupBox2.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox2.Location = new System.Drawing.Point(13, 217);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(418, 82);
@@ -162,6 +166,7 @@
 			// checkWatermarkImage
 			// 
 			this.checkWatermarkImage.AutoSize = true;
+			this.checkWatermarkImage.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.checkWatermarkImage.Location = new System.Drawing.Point(10, 25);
 			this.checkWatermarkImage.Name = "checkWatermarkImage";
 			this.checkWatermarkImage.Size = new System.Drawing.Size(212, 17);
@@ -195,9 +200,10 @@
 			// 
 			// groupBox3
 			// 
-			this.groupBox3.BackColor = System.Drawing.Color.White;
+			this.groupBox3.BackColor = System.Drawing.SystemColors.Window;
 			this.groupBox3.Controls.Add(this.radioApplyFontAsReq);
 			this.groupBox3.Controls.Add(this.radioApplyFontToAll);
+			this.groupBox3.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.groupBox3.Location = new System.Drawing.Point(13, 139);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(418, 72);
@@ -208,6 +214,7 @@
 			// radioApplyFontAsReq
 			// 
 			this.radioApplyFontAsReq.AutoSize = true;
+			this.radioApplyFontAsReq.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.radioApplyFontAsReq.Location = new System.Drawing.Point(10, 43);
 			this.radioApplyFontAsReq.Name = "radioApplyFontAsReq";
 			this.radioApplyFontAsReq.Size = new System.Drawing.Size(205, 17);
@@ -219,6 +226,7 @@
 			// 
 			this.radioApplyFontToAll.AutoSize = true;
 			this.radioApplyFontToAll.Checked = true;
+			this.radioApplyFontToAll.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.radioApplyFontToAll.Location = new System.Drawing.Point(10, 20);
 			this.radioApplyFontToAll.Name = "radioApplyFontToAll";
 			this.radioApplyFontToAll.Size = new System.Drawing.Size(136, 17);
@@ -229,7 +237,7 @@
 			// 
 			// panel1
 			// 
-			this.panel1.BackColor = System.Drawing.Color.White;
+			this.panel1.BackColor = System.Drawing.SystemColors.Window;
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.panel1.Controls.Add(this.groupBox3);
 			this.panel1.Controls.Add(this.groupBox1);
@@ -254,7 +262,7 @@
 			this.Name = "PDFExporterOptionsForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "PDF Exporter Options";
+			this.Text = "PDF Tree View Options";
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);

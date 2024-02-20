@@ -49,11 +49,12 @@ namespace unvell.ReoGrid.Editor.PropertyPages
 			this.chkLocked = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
-			// chkReadonly
+			// chkLocked
 			// 
 			this.chkLocked.AutoSize = true;
+			this.chkLocked.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.chkLocked.Location = new System.Drawing.Point(18, 15);
-			this.chkLocked.Name = "chkReadonly";
+			this.chkLocked.Name = "chkLocked";
 			this.chkLocked.Size = new System.Drawing.Size(119, 17);
 			this.chkLocked.TabIndex = 1;
 			this.chkLocked.Text = "Locked (Read-only)";

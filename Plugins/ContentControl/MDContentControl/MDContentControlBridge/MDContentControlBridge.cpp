@@ -35,7 +35,7 @@ const LPCWSTR MARKDOWN_NAME = L"Markdown";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMDContentBridge::CMDContentBridge() : m_hIcon(NULL)
+CMDContentBridge::CMDContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
    HMODULE hMod = LoadLibrary(L"MDContentControlBridge.dll"); // us
 
@@ -52,9 +52,10 @@ void CMDContentBridge::Release()
 	delete this;
 }
 
-void CMDContentBridge::SetLocalizer(ITransText* /*pTT*/)
+void CMDContentBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 LPCWSTR CMDContentBridge::GetTypeDescription() const
@@ -75,7 +76,7 @@ LPCWSTR CMDContentBridge::GetTypeID() const
 IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CMDContentControlBridge* pCtrl = new CMDContentControlBridge();
+	CMDContentControlBridge* pCtrl = new CMDContentControlBridge(m_pTT);
 
 	if (!pCtrl->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -89,7 +90,6 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
 void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	// TODO
-
 }
 
 void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
@@ -101,8 +101,25 @@ void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey
 int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
 {
-	szHtml = nullptr;
-	return 0;
+	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
+
+	for (int i = 0; i < nLength; i++)
+		content[i] = pContent[i];
+
+	String^ html = MDContentControlCore::ConvertToHtml(content, gcnew String(szImageDir));
+
+	if (String::IsNullOrWhiteSpace(html))
+		return 0;
+
+	MarshalledString msHtml(html);
+
+	int nCharLen = (html->Length + 1); // Includes a NULL terminator
+	szHtml = new WCHAR[nCharLen];
+	
+	CopyMemory(szHtml, msHtml, (html->Length * sizeof(WCHAR)));
+	szHtml[html->Length] = 0;
+
+	return nCharLen;
 }
 
 void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
@@ -115,14 +132,16 @@ void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CMDContentControlBridge::CMDContentControlBridge()
+CMDContentControlBridge::CMDContentControlBridge(ITransText* pTT)
+	: m_pTT(pTT)
 {
 }
 
 BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	m_wnd = gcnew MDContentControl::MDContentControlCore(static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
@@ -192,8 +211,9 @@ bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelec
 
 bool CMDContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
-	// TODO
-	return false;
+	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+
+	return m_wnd->InsertTextContent(content.get(), bAtEnd);
 }
 
 bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
@@ -204,7 +224,7 @@ bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, 
 
 void CMDContentControlBridge::SetReadOnly(bool bReadOnly)
 {
-
+	m_wnd->ReadOnly = bReadOnly;
 }
 
 void CMDContentControlBridge::Enable(bool bEnable)
@@ -225,7 +245,7 @@ void CMDContentControlBridge::Release()
 
 bool CMDContentControlBridge::ProcessMessage(MSG* pMsg)
 {
-	return false;
+	return m_wnd->ProcessMessage((IntPtr)pMsg->hwnd, pMsg->message, pMsg->wParam, pMsg->lParam, pMsg->time, pMsg->pt.x, pMsg->pt.y);
 }
 
 ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()
@@ -235,30 +255,30 @@ ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()
 
 bool CMDContentControlBridge::Undo()
 {
-	return false;
+	return m_wnd->Undo();
 }
 
 bool CMDContentControlBridge::Redo()
 {
-	return false;
+	return m_wnd->Redo();
 }
 
 void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
-
+	m_wnd->SetUITheme(gcnew UITheme(pTheme));
 }
 
 void CMDContentControlBridge::SetContentFont(HFONT hFont)
 {
-
+	m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
 void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-
+	m_wnd->SavePreferences(gcnew Preferences(pPrefs), gcnew String(szKey));
 }
 
 void CMDContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-
+	m_wnd->LoadPreferences(gcnew Preferences(pPrefs), gcnew String(szKey), bAppOnly);
 }
