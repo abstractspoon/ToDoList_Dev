@@ -64,10 +64,11 @@
 			// 
 			// label2
 			// 
+			this.label2.AutoSize = true;
 			this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.label2.Location = new System.Drawing.Point(9, 208);
+			this.label2.Location = new System.Drawing.Point(9, 212);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(100, 32);
+			this.label2.Size = new System.Drawing.Size(153, 13);
 			this.label2.TabIndex = 2;
 			this.label2.Text = "Parent/child connection colour";
 			// 
@@ -75,7 +76,7 @@
 			// 
 			this.label1.AutoSize = true;
 			this.label1.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.label1.Location = new System.Drawing.Point(9, 185);
+			this.label1.Location = new System.Drawing.Point(9, 184);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(100, 13);
 			this.label1.TabIndex = 2;
@@ -84,7 +85,8 @@
 			// m_ParentLinkColor
 			// 
 			this.m_ParentLinkColor.Color = System.Drawing.Color.Empty;
-			this.m_ParentLinkColor.Location = new System.Drawing.Point(135, 213);
+			this.m_ParentLinkColor.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.m_ParentLinkColor.Location = new System.Drawing.Point(234, 207);
 			this.m_ParentLinkColor.Name = "m_ParentLinkColor";
 			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_ParentLinkColor.TabIndex = 1;
@@ -95,7 +97,8 @@
 			// m_DependsLinkColor
 			// 
 			this.m_DependsLinkColor.Color = System.Drawing.Color.Empty;
-			this.m_DependsLinkColor.Location = new System.Drawing.Point(135, 180);
+			this.m_DependsLinkColor.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.m_DependsLinkColor.Location = new System.Drawing.Point(234, 179);
 			this.m_DependsLinkColor.Name = "m_DependsLinkColor";
 			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_DependsLinkColor.TabIndex = 1;
