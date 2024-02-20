@@ -2415,10 +2415,9 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 	if (dwTaskID != dwSelTaskID)
 	{
 		m_dwSelectedTaskID = dwTaskID;
-		DWORD dwRealSelTaskID =  GetRealTaskID(dwSelTaskID);
 
-		if (bNotify && (dwTaskID != dwRealSelTaskID))
-			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, dwRealSelTaskID);
+		if (bNotify && (dwTaskID != GetRealTaskID(dwSelTaskID)))
+			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
 
 		if (bEnsureVisible)
 			EnsureSelectionVisible();
