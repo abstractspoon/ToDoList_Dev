@@ -69,7 +69,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		// However this is complicated because we may also want to support
 		// Shift+MouseWheel horizontal scrolling and there is no default
 		// handling for this so we must handle this for all Windows.
-		BOOL bShift = Misc::HasFlag(GetKeyState(VK_SHIFT), 0x8000);
+		BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
 
 		if (m_bShiftHorzScrollingEnabled && bShift)
 		{
@@ -80,36 +80,36 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		// non-focus windows
 		if (::GetFocus() != hwndPt) 
 		{
-			// special handling for spin controls buddied to other controls
 			CString sClass = CWinClasses::GetClass(hwndPt);
 			DWORD dwStyle = ::GetWindowLong(hwndPt, GWL_STYLE);
 
 			BOOL bHasVScroll = Misc::HasFlag(dwStyle, WS_VSCROLL);
-			BOOL bScrollParent = FALSE;
+			BOOL bForwardToParent = FALSE;
 
 			if (CWinClasses::IsClass(sClass, WC_SPIN))
 			{
+				// Spin controls buddied to other controls
 				if (Misc::HasFlag(dwStyle, UDS_SETBUDDYINT))
 				{
 					HWND hwndBuddy = (HWND)::SendMessage(hwndPt, UDM_GETBUDDY, 0, 0);
 
-					if (CWinClasses::IsEditControl(hwndBuddy, FALSE)) 
+					if (CWinClasses::IsEditControl(hwndBuddy, FALSE))
 						hwndPt = hwndBuddy;
 				}
 				else
 				{
-					bScrollParent = CWinClasses::IsClass(::GetParent(hwndPt), WC_TABCONTROL);
+					bForwardToParent = CWinClasses::IsClass(::GetParent(hwndPt), WC_TABCONTROL);
 				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_HEADER))
 			{
-				bScrollParent = TRUE;
+				bForwardToParent = TRUE;
 			}
 			else if (CWinClasses::IsEditControl(hwndPt) && bHasVScroll)
 			{
 				// Check that the scrollbar is enabled
 				SCROLLINFO si = { 0 };
-				bScrollParent = !::GetScrollInfo(hwndPt, SB_VERT, &si);
+				bForwardToParent = !::GetScrollInfo(hwndPt, SB_VERT, &si);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) ||
 					 CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||
@@ -117,12 +117,15 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			{
 				// Controls not requiring a vertical scrollbar
 			}
-			else
+			else if (!bHasVScroll)
 			{
-				bScrollParent = !bHasVScroll;
+				// For all other controls without scrollbars, we forward the mouse wheel 
+				// to the parent, but NOT if the control key is down, because that implies 
+				// some other sort of operation like zooming
+				bForwardToParent = !Misc::IsKeyPressed(VK_CONTROL);
 			}
 
-			if (bScrollParent)
+			if (bForwardToParent)
 			{
 				hwndPt = ::GetParent(hwndPt);
 				sClass = CWinClasses::GetClass(hwndPt);
@@ -163,24 +166,15 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 
 			// modifier keys are not reported in MOUSEHOOKSTRUCTEX
 			// so we have to figure them out
-			WORD wKeys = 0;
+			DWORD wKeys = 0;
+			Misc::SetFlag(wKeys, MK_SHIFT, bShift);
 
-			if (bShift)
-				wKeys |= MK_SHIFT;
-
-			if (GetKeyState(VK_CONTROL) & 0x8000)
-				wKeys |= MK_CONTROL;
-
-			if (GetKeyState(VK_LBUTTON) & 0x8000)
-				wKeys |= MK_LBUTTON;
-
-			if (GetKeyState(VK_RBUTTON) & 0x8000)
-				wKeys |= MK_RBUTTON;
-
-			if (GetKeyState(VK_MBUTTON) & 0x8000)
-				wKeys |= MK_MBUTTON;
+			Misc::SetFlag(wKeys, MK_CONTROL, Misc::IsKeyPressed(VK_CONTROL));
+			Misc::SetFlag(wKeys, MK_LBUTTON, Misc::IsKeyPressed(VK_LBUTTON));
+			Misc::SetFlag(wKeys, MK_RBUTTON, Misc::IsKeyPressed(VK_RBUTTON));
+			Misc::SetFlag(wKeys, MK_MBUTTON, Misc::IsKeyPressed(VK_MBUTTON));
 			
-			::PostMessage(hwndPt, WM_MOUSEWHEEL, MAKEWPARAM(wKeys, zDelta), MAKELPARAM(info.pt.x, info.pt.y));
+			::PostMessage(hwndPt, WM_MOUSEWHEEL, MAKEWPARAM((WORD)wKeys, zDelta), MAKELPARAM(info.pt.x, info.pt.y));
 			return TRUE; // eat
 		}
 		else // focused window classes not natively supporting mouse wheel
