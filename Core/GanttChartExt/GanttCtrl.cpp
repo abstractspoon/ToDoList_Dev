@@ -3586,7 +3586,7 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
 {
-	if (dtFrom > dtTo || dtTo < dtMonthStart || dtFrom > dtMonthEnd)
+	if ((dtFrom > dtTo) || (dtTo < dtMonthStart) || (dtFrom > dtMonthEnd))
 		return FALSE;
 
 	double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
@@ -3598,7 +3598,7 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	if (dtTo < dtMonthEnd)
 		rDate.right = (rMonth.left + (int)((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth));
 
-	return ((rDate.right > 0) && (rDate.Width() > 0));
+	return (rDate.right > 0);
 }
 
 DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
