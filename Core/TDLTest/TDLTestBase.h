@@ -91,7 +91,10 @@ struct TESTRESULT
 		else
 		{
 			if (nNumError)
+			{
 				_tprintf(_T("\n  %2d/%2d tests FAILED\n"), nNumError, GetTotal());
+				DebugBreak();
+			}
 
 			if (nNumSuccess)
 				_tprintf(_T("\n  %2d/%2d tests SUCCEEDED\n"), nNumSuccess, GetTotal());

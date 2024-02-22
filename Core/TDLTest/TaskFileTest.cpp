@@ -197,6 +197,7 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 	TODOITEM tdiSrcFull, tdiDestEmpty, tdiDestFull;
 
 	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiSrcFull, tdiDestFull);
+	tdiDestEmpty.dateCreated = tdiDestFull.dateCreated; // else the comparisons will fail incorrectly
 
 	// Test merging of all attributes -----------------------------------------------------
 	{
@@ -268,6 +269,7 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExclud
 	TODOITEM tdiSrcFull, tdiDestEmpty, tdiDestFull;
 
 	PrepareMergeTestTasks(tasksSrc, hSrcEmpty, hSrcFull, tdiSrcFull, tdiDestFull);
+	tdiDestEmpty.dateCreated = tdiDestFull.dateCreated; // else the comparisons will fail incorrectly
 
 	// Test merging of all attributes -----------------------------------------------------
 	{
@@ -356,7 +358,7 @@ void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEm
 	tdiDestFull.aDependencies.Add(_T("Dest.Dependency"));
 	tdiDestFull.aFileLinks.Add(_T("Dest.FileLink"));
 
-	tdiDestFull.dateCreated = CDateHelper::GetDate(DHD_NOW);
+	tdiDestFull.dateCreated = tdiSrcFull.dateCreated;
 	tdiDestFull.dateStart = CDateHelper::GetDate(DHD_YESTERDAY);
 	tdiDestFull.dateDue = CDateHelper::GetDate(DHD_TOMORROW);
 	tdiDestFull.dateDone = CDateHelper::GetDate(DHD_TODAY);

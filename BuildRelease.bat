@@ -34,6 +34,20 @@ exit
 
 ECHO ON
 
+REM Run units tests
+cd TDLTest\Unicode_Release
+
+TDLTest > %OUTPUT_FILE%
+
+findstr /C:"tests FAILED" %OUTPUT_FILE%
+if %errorlevel%==0 (
+echo Test Errors!
+pause
+exit
+)
+
+ECHO ON
+
 REM - Build plugins using MSBuild for reliability
 SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
 SET BUILDPARAMS=/t:Build /p:Configuration=Release /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762;LNK4221;MSB3026
