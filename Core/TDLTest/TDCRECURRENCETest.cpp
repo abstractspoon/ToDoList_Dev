@@ -102,9 +102,9 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	ExpectFalse(tr.SetRegularity(TDIR_WEEK_EVERY_NWEEKS, 0, 0));  // 'n' weeks == 0
 		
 	//	TDIR_MONTH_EVERY_NMONTHS ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, 0));
+	ExpectTrue(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, FALSE)); // Don't preserve weekdays
+	ExpectTrue(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, TRUE));  // Preserve weekdays
 
-	ExpectFalse(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, 3));  // dwSpecific2 != 0
 	ExpectFalse(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, -5, 0)); // 'n' Months < 0
 	ExpectFalse(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 0, 0));  // 'n' Months == 0
 
@@ -152,8 +152,9 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 0)); // 'Day' < 1
 
 	//	TDIR_YEAR_EVERY_NYEARS ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, 0));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, 3));  // dwSpecific2 != 0
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, FALSE)); // Don't preserve weekdays
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, TRUE));  // Preserve weekdays
+
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, -5, 0)); // 'n' years < 0
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 0, 0));  // 'n' years == 0
 

@@ -71,7 +71,7 @@
             "5"});
 			this.m_ThicknessCombo.Location = new System.Drawing.Point(111, 31);
 			this.m_ThicknessCombo.Name = "m_ThicknessCombo";
-			this.m_ThicknessCombo.Size = new System.Drawing.Size(75, 21);
+			this.m_ThicknessCombo.Size = new System.Drawing.Size(172, 21);
 			this.m_ThicknessCombo.TabIndex = 14;
 			// 
 			// m_ArrowsLabel
@@ -117,7 +117,8 @@
 			// m_ColorButton
 			// 
 			this.m_ColorButton.Color = System.Drawing.Color.Empty;
-			this.m_ColorButton.Location = new System.Drawing.Point(110, 3);
+			this.m_ColorButton.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.m_ColorButton.Location = new System.Drawing.Point(209, 3);
 			this.m_ColorButton.Name = "m_ColorButton";
 			this.m_ColorButton.Size = new System.Drawing.Size(75, 23);
 			this.m_ColorButton.TabIndex = 8;

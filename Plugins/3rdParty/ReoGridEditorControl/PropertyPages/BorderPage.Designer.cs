@@ -145,11 +145,13 @@ namespace unvell.ReoGrid.PropertyPages
 			// 
 			// btnBackslash
 			// 
+			this.btnBackslash.Enabled = false;
 			this.btnBackslash.Image = global::unvell.ReoGrid.Editor.Properties.Resources.slash_left_solid;
 			this.btnBackslash.Location = new System.Drawing.Point(441, 249);
 			this.btnBackslash.Name = "btnBackslash";
 			this.btnBackslash.Size = new System.Drawing.Size(26, 24);
 			this.btnBackslash.TabIndex = 14;
+			this.btnBackslash.Visible = false;
 			this.btnBackslash.UseVisualStyleBackColor = true;
 			this.btnBackslash.Click += new System.EventHandler(this.btnBackslash_Click);
 			// 
@@ -185,12 +187,14 @@ namespace unvell.ReoGrid.PropertyPages
 			// 
 			// btnSlash
 			// 
+			this.btnSlash.Enabled = false;
 			this.btnSlash.Image = global::unvell.ReoGrid.Editor.Properties.Resources.slash_right_solid;
 			this.btnSlash.Location = new System.Drawing.Point(212, 249);
 			this.btnSlash.Name = "btnSlash";
 			this.btnSlash.Size = new System.Drawing.Size(26, 24);
 			this.btnSlash.TabIndex = 10;
 			this.btnSlash.UseVisualStyleBackColor = true;
+			this.btnSlash.Visible = false;
 			this.btnSlash.Click += new System.EventHandler(this.btnSlash_Click);
 			// 
 			// btnBottom

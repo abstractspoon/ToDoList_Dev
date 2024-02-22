@@ -40,7 +40,6 @@ public:
 	
 	static BOOL TranslateText(CString& sText, HWND hWndRef, LPCTSTR szClassID);
 	static BOOL TranslateMenu(HMENU hMenu, HWND hWndRef = NULL, BOOL bRecursive = FALSE);
-	static BOOL TranslateMenu(CString& sText);
 
 	static void SetMenuPostTranslationCallback(HWND hwndCallback);
 
@@ -71,7 +70,6 @@ protected:
 
 	BOOL HandleInitMenuPopup(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 	BOOL HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
-	BOOL HandleSetText(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp);
 
 	BOOL WantTranslation(HWND hWnd, UINT nMsg = 0) const;
 	BOOL WantTranslation(UINT nMenuID) const;

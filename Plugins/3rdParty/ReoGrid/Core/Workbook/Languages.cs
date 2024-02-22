@@ -100,6 +100,12 @@ namespace unvell.ReoGrid
 		public static string Text = "Text";
 		#endregion // Public
 
+		public static string CellDataFormat_General = "General";
+		public static string CellDataFormat_Number = "Number";
+		public static string CellDataFormat_DateTime = "DateTime";
+		public static string CellDataFormat_Percent = "Percent";
+		public static string CellDataFormat_Currency = "Currency";
+		public static string CellDataFormat_Text = "Text";
 	}
 	#endregion // Multi-Languages
 }

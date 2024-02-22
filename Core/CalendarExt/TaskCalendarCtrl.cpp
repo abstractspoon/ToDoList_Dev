@@ -2410,7 +2410,7 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 	if (!HasTask(dwTaskID, FALSE)) // Don't exclude hidden tasks
 		return FALSE;
 
-	DWORD dwSelTaskID = GetSelectedTaskID();
+	DWORD dwSelTaskID = GetSelectedTaskID(); // Can be 'real' or 'extension'
 
 	if (dwTaskID != dwSelTaskID)
 	{
@@ -2459,7 +2459,7 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	BOOL bCustomDate = FALSE;
-	DWORD dwSelID = HitTestTask(point, bCustomDate);
+	DWORD dwSelID = HitTestTask(point, FALSE, bCustomDate);
 	
 	if (dwSelID)
 	{

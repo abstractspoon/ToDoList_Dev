@@ -222,9 +222,24 @@ namespace SpreadsheetContentControl
 			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet);
 			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet);
 
+			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ);
+			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA);
+			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll);
+			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks);
+			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK);
+			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel);
+
 			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet);
 			LanguageResource.None = m_Trans.Translate(LanguageResource.None);
 			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text);
+
+			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General);
+			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number);
+			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime);
+			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent);
+			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency);
+			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text);
+
 		}
 
 		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)
@@ -938,12 +953,15 @@ namespace SpreadsheetContentControl
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
-			this.BackColor = backColor;
             MenuBar.BackColor = SystemColors.Menu;
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
 			FormulaBar.BackColor = backColor;
+
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalStart, backColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalEnd, backColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadNormal, backColor);
 
 			// Unfocused colours
 			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.SelectedNotFocused);
@@ -1063,12 +1081,30 @@ namespace SpreadsheetContentControl
 			dialog.ShowIcon = true;
 
 			// Per dialog customisations
-// 			if (ISTYPE(dialog, ))
+// 			if (dialog is ...))
 // 			{
 // 			}
 // 			else // all others
 			{
 				m_Trans.Translate(dialog);
+			}
+
+			Win32.ActivateApp(Handle);
+
+			return base.ShowDialog(dialog);
+		}
+
+		protected override DialogResult ShowDialog(CommonDialog dialog)
+		{
+			// Per dialog customisations
+			if (dialog is FileDialog)
+			{
+				var fileDlg = (dialog as FileDialog);
+				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter);
+			}
+			else // all others
+			{
+				// TODO
 			}
 
 			Win32.ActivateApp(Handle);

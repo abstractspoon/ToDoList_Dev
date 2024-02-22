@@ -169,7 +169,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesNum.Name = "labDecimalPlacesNum";
 			this.labDecimalPlacesNum.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesNum.TabIndex = 6;
-			this.labDecimalPlacesNum.Text = "&Decimal Places";
+			this.labDecimalPlacesNum.Text = "&Decimal places";
 			// 
 			// numberDecimalPlaces
 			// 
@@ -229,7 +229,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.chkNumberUseSeparator.Name = "chkNumberUseSeparator";
 			this.chkNumberUseSeparator.Size = new System.Drawing.Size(133, 17);
 			this.chkNumberUseSeparator.TabIndex = 8;
-			this.chkNumberUseSeparator.Text = "&Use 1000 Separator (,)";
+			this.chkNumberUseSeparator.Text = "&Use 1000s Separator";
 			this.chkNumberUseSeparator.UseVisualStyleBackColor = true;
 			// 
 			// currencyPanel
@@ -308,7 +308,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesCurrency.Name = "labDecimalPlacesCurrency";
 			this.labDecimalPlacesCurrency.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesCurrency.TabIndex = 6;
-			this.labDecimalPlacesCurrency.Text = "&Decimal Places";
+			this.labDecimalPlacesCurrency.Text = "&Decimal places";
 			// 
 			// datetimePanel
 			// 
@@ -369,7 +369,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesPercent.Name = "labDecimalPlacesPercent";
 			this.labDecimalPlacesPercent.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesPercent.TabIndex = 6;
-			this.labDecimalPlacesPercent.Text = "&Decimal Places";
+			this.labDecimalPlacesPercent.Text = "&Decimal places";
 			// 
 			// FormatPage
 			// 
