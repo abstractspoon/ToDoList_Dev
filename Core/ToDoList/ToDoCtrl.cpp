@@ -6190,9 +6190,9 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 	{
 		tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
 	}
-	else // save all
+	else
 	{
-		// Save only those attributes that exist in the filter 
+		// Disable all BUT those attributes that exist in the filter 
 		CTDCCustomAttribDefinitionArray aAttribDefs;
 		aAttribDefs.Copy(m_aCustomAttribDefs);
 
@@ -6200,12 +6200,11 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 
 		while (nDef--)
 		{
-			if (!filter.WantAttribute(aAttribDefs[nDef].GetAttributeID()))
-				aAttribDefs.RemoveAt(nDef);
+			TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nDef];
+			attribDef.bEnabled &= filter.WantAttribute(attribDef.GetAttributeID());
 		}
 
-		if (aAttribDefs.GetSize() > 0)
-			tasks.SetCustomAttributeDefs(aAttribDefs);
+		tasks.SetCustomAttributeDefs(aAttribDefs);
 	}
 }
 
