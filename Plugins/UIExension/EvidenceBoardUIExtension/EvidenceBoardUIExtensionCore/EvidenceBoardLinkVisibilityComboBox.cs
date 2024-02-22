@@ -99,7 +99,7 @@ namespace EvidenceBoardUIExtension
 					var link = (Items[iItem] as EvidenceBoardLinkVisibilityItem);
 
 					if (link.Type == EvidenceBoardLinkType.User)
-						Items.Remove(iItem);
+						Items.RemoveAt(iItem);
 				}
 
 				// Re-add
