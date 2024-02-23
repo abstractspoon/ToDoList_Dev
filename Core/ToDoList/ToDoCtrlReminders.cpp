@@ -130,17 +130,9 @@ void CToDoCtrlReminders::StartTimer()
 		return;
 
 	if (m_aReminders.GetSize())
-	{
-#ifdef _DEBUG
 		SetTimer(1, 10000, NULL); // every 10 secs
-#else
-		SetTimer(1, 60000, NULL); // every minute
-#endif
-	}
 	else
-	{
 		KillTimer(1);
-	}
 }
 
 BOOL CToDoCtrlReminders::ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC)
