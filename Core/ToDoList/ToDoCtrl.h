@@ -834,7 +834,7 @@ protected:
 	CString GetClipboardID() const;
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
 
-	int GetControls(CTDCControlArray& aControls, BOOL bVisible) const;
+	int GetVisibleControls(CTDCControlArray& aControls) const;
 	BOOL IsCtrlShowing(const CTRLITEM& ctrl) const;
 	void ShowHideControls();
 	void ShowHideControl(const CTRLITEM& ctrl);

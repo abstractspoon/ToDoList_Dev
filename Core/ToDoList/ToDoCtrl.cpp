@@ -898,7 +898,7 @@ BOOL CToDoCtrl::CalcRequiredControlsRect(const CRect& rAvailable, CRect& rRequir
 	// first count up the visible controls
 	// so we can allocate the correct amount of space
 	CTDCControlArray aControls;
-	int nVisibleCtrls = GetControls(aControls, TRUE);
+	int nVisibleCtrls = GetVisibleControls(aControls);
 	
 	if (nVisibleCtrls == 0) // nothing to do
 		return FALSE;
@@ -1164,7 +1164,7 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 
 	// now iterate the visible controls settings their positions dynamically
 	CTDCControlArray aControls;
-	int nVisibleCtrls = GetControls(aControls, TRUE);
+	int nVisibleCtrls = GetVisibleControls(aControls);
 	
 	ASSERT(nVisibleCtrls);
 	
@@ -1208,7 +1208,7 @@ void CToDoCtrl::ReposControls(CDeferWndMove* pDWM, CRect& rAvailable, BOOL bSpli
 	}
 }
 
-int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
+int CToDoCtrl::GetVisibleControls(CTDCControlArray& aControls) const
 {
 	aControls.RemoveAll();
 
@@ -1218,7 +1218,7 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 	{
 		CTRLITEM ctrl = CTRLITEMS[nCtrl];
 
-		if (!bVisible || IsCtrlShowing(ctrl))
+		if (IsCtrlShowing(ctrl))
 			aControls.Add(ctrl);
 	}
 	
@@ -1360,96 +1360,91 @@ void CToDoCtrl::ReposComments(CDeferWndMove* pDWM, CRect& rAvailable /*in/out*/)
 	{
 		rComments.SetRectEmpty();
 	}
-	else
+	else if (GetStackCommentsAndControls())
 	{
-		BOOL bStackCommentsAndControls = (GetStackCommentsAndControls() && !GetVisibleEditFields().IsEmpty());
-	
-		if (bStackCommentsAndControls)
+		CRect rCtrls;
+		int nCols, nRows;
+
+		if (CalcRequiredControlsRect(rAvailable, rCtrls, nCols, nRows, TRUE))
 		{
-			CRect rCtrls;
-			int nCols, nRows;
-			
-			if (CalcRequiredControlsRect(rAvailable, rCtrls, nCols, nRows, TRUE))
-			{
-				BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
+			BOOL bStackCommentsAbove = HasStyle(TDCS_STACKCOMMENTSABOVEEDITS);
 
-				switch (m_nCommentsPos)
-				{
-				case TDCUIL_RIGHT: // vertical
-					{
-						if (bStackCommentsAbove)
-							rComments.bottom = rCtrls.top - SPLITSIZE;
-						else
-							rComments.top = rCtrls.bottom + SPLITSIZE;
-
-						rComments.left = rAvailable.right - m_nCommentsSize;
-						rComments.right = rCtrls.right;
-
-						rAvailable.right = rComments.left - SPLITSIZE;
-					}
-					break;
-
-				case TDCUIL_LEFT: // vertical
-					{
-						if (bStackCommentsAbove)
-							rComments.bottom = rCtrls.top - SPLITSIZE;
-						else
-							rComments.top = rCtrls.bottom + SPLITSIZE;
-
-						rComments.left = rAvailable.left;
-						rComments.right = rAvailable.left + m_nCommentsSize;
-
-						rAvailable.left = rComments.right + SPLITSIZE;
-					}
-					break;
-					
-				case TDCUIL_BOTTOM: // horizontal
-					{
-						if (bStackCommentsAbove)
-							rComments.right = rCtrls.left - SPLITSIZE;
-						else
-							rComments.left = rCtrls.right + SPLITSIZE;
-
-						rComments.top = rCtrls.top;
-						rComments.bottom = rCtrls.top + m_nCommentsSize;
-
-						const int PADDING = (SPLITSIZE / 2);
-						rAvailable.bottom = rComments.top - (SPLITSIZE + PADDING);
-					}
-					break;
-				}
-			}
-		}
-		else
-		{
 			switch (m_nCommentsPos)
 			{
 			case TDCUIL_RIGHT: // vertical
 				{
+					if (bStackCommentsAbove)
+						rComments.bottom = rCtrls.top - SPLITSIZE;
+					else
+						rComments.top = rCtrls.bottom + SPLITSIZE;
+
 					rComments.left = rAvailable.right - m_nCommentsSize;
+					rComments.right = rCtrls.right;
 
 					rAvailable.right = rComments.left - SPLITSIZE;
 				}
 				break;
-				
-			case TDCUIL_LEFT:
+
+			case TDCUIL_LEFT: // vertical
 				{
+					if (bStackCommentsAbove)
+						rComments.bottom = rCtrls.top - SPLITSIZE;
+					else
+						rComments.top = rCtrls.bottom + SPLITSIZE;
+
+					rComments.left = rAvailable.left;
 					rComments.right = rAvailable.left + m_nCommentsSize;
 
 					rAvailable.left = rComments.right + SPLITSIZE;
 				}
 				break;
-				
+
 			case TDCUIL_BOTTOM: // horizontal
 				{
-					rComments.left = rAvailable.left;
-					rComments.top = rAvailable.bottom - m_nCommentsSize;
+					if (bStackCommentsAbove)
+						rComments.right = rCtrls.left - SPLITSIZE;
+					else
+						rComments.left = rCtrls.right + SPLITSIZE;
+
+					rComments.top = rCtrls.top;
+					rComments.bottom = rCtrls.top + m_nCommentsSize;
 
 					const int PADDING = (SPLITSIZE / 2);
 					rAvailable.bottom = rComments.top - (SPLITSIZE + PADDING);
 				}
 				break;
 			}
+		}
+	}
+	else
+	{
+		switch (m_nCommentsPos)
+		{
+		case TDCUIL_RIGHT: // vertical
+			{
+				rComments.left = rAvailable.right - m_nCommentsSize;
+
+				rAvailable.right = rComments.left - SPLITSIZE;
+			}
+			break;
+
+		case TDCUIL_LEFT:
+			{
+				rComments.right = rAvailable.left + m_nCommentsSize;
+
+				rAvailable.left = rComments.right + SPLITSIZE;
+			}
+			break;
+
+		case TDCUIL_BOTTOM: // horizontal
+			{
+				rComments.left = rAvailable.left;
+				rComments.top = rAvailable.bottom - m_nCommentsSize;
+
+				const int PADDING = (SPLITSIZE / 2);
+				rAvailable.bottom = rComments.top - (SPLITSIZE + PADDING);
+			}
+			break;
 		}
 	}
 
