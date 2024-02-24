@@ -24,21 +24,28 @@ REM - Core app
 set OUTPUT_FILE= "c:\temp\Core_Build_Output.txt"
 "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
 
+REM - Check for compile errors
 ECHO OFF
+
 findstr /C:") : error" %OUTPUT_FILE%
+if %errorlevel%==1 (
+REM - Check for link errors
+findstr /C:"Error executing link.exe" %OUTPUT_FILE%
+)
 if %errorlevel%==0 (
 echo Build Errors!
 pause
 exit
 )
 
+REM Run units tests
 ECHO ON
 
-REM Run units tests
 cd TDLTest\Unicode_Release
 
 TDLTest > %OUTPUT_FILE%
 
+ECHO OFF
 findstr /C:"tests FAILED" %OUTPUT_FILE%
 if %errorlevel%==0 (
 echo Test Errors!
@@ -46,9 +53,9 @@ pause
 exit
 )
 
+REM - Build plugins using MSBuild for reliability
 ECHO ON
 
-REM - Build plugins using MSBuild for reliability
 SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
 SET BUILDPARAMS=/t:Build /p:Configuration=Release /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762;LNK4221;MSB3026
 
