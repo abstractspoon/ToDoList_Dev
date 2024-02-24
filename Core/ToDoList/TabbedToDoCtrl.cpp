@@ -2324,14 +2324,52 @@ BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_tabViews.GetSafeHwnd())
 	{
-		if (InListView())
-		{
-			ExcludeChild(&m_taskList, pDC);
-			ExcludeChild(&m_cbListGroupBy, pDC);
-			ExcludeChild(&m_cbListOptions, pDC);
+		FTC_VIEW nView = GetTaskView();
 
-			ExcludeCtrl(this, IDC_LISTVIEWGROUPBYLABEL, pDC);
-			ExcludeCtrl(this, IDC_LISTVIEWOPTIONSLABEL, pDC);
+		switch (nView)
+		{
+		case FTCV_TASKTREE:
+		case FTCV_UNSET:
+			// handled below
+			break;
+
+		case FTCV_TASKLIST:
+			{
+				ExcludeChild(&m_taskList, pDC);
+				ExcludeChild(&m_cbListGroupBy, pDC);
+				ExcludeChild(&m_cbListOptions, pDC);
+
+				ExcludeCtrl(this, IDC_LISTVIEWGROUPBYLABEL, pDC);
+				ExcludeCtrl(this, IDC_LISTVIEWOPTIONSLABEL, pDC);
+			}
+			break;
+
+		case FTCV_UIEXTENSION1:
+		case FTCV_UIEXTENSION2:
+		case FTCV_UIEXTENSION3:
+		case FTCV_UIEXTENSION4:
+		case FTCV_UIEXTENSION5:
+		case FTCV_UIEXTENSION6:
+		case FTCV_UIEXTENSION7:
+		case FTCV_UIEXTENSION8:
+		case FTCV_UIEXTENSION9:
+		case FTCV_UIEXTENSION10:
+		case FTCV_UIEXTENSION11:
+		case FTCV_UIEXTENSION12:
+		case FTCV_UIEXTENSION13:
+		case FTCV_UIEXTENSION14:
+		case FTCV_UIEXTENSION15:
+		case FTCV_UIEXTENSION16:
+			{
+				IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+				ASSERT(pExtWnd && pExtWnd->GetHwnd());
+
+				ExcludeChild(CWnd::FromHandle(pExtWnd->GetHwnd()), pDC);
+			}
+			break;
+
+		default:
+			ASSERT(0);
 		}
 
 		ExcludeChild(&m_tabViews, pDC); // Always
