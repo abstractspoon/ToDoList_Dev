@@ -116,15 +116,15 @@ namespace EvidenceBoardUIExtension
 				for (int index = 0; index < Items.Count; index++)
 				{
 					var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-					var itemVis = prevVisibility.Find(x => ((x.Type == item.Type) && (x.Name == item.Name)));
-
-					ListBox.SetItemChecked(index, ((itemVis == null) ? true : itemVis.Visible));
+					ListBox.SetItemChecked(index, IsTypeVisible(prevVisibility, item.Type, item.Name));
 				}
 
-				m_UserTypes.Clear();
+				m_PrevLinkVisibility = null;
 
 				if (value != null)
 					m_UserTypes = new HashSet<string>(value);
+				else
+					m_UserTypes.Clear();
 			}
 		}
 
