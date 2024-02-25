@@ -386,7 +386,7 @@ protected:
 	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0) const;
  	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
 
-	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const;
+	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bCopying = FALSE) const;
 	CString FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const;
 	CString FormatDate(const COleDateTime& date, TDC_DATE nDate) const;
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;

@@ -1262,12 +1262,17 @@ CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef;
 	GET_DEF_RET(*this, sCustAttribID, pDef, _T(""));
 
-	if (!pDef->IsDataType(TDCCA_CALCULATION))
-		return pDef->FormatData(data, bISODates);
+	return FormatData(data, *pDef, bISODates);
+}
+
+CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates) const
+{
+	if (!attribDef.IsDataType(TDCCA_CALCULATION))
+		return attribDef.FormatData(data, bISODates);
 
 	// A bit of hackery for calculation types
-	TDCCUSTOMATTRIBUTEDEFINITION temp = *pDef;
-	temp.SetDataType(GetAttributeDataType(*pDef, TRUE));
+	TDCCUSTOMATTRIBUTEDEFINITION temp = attribDef;
+	temp.SetDataType(GetAttributeDataType(attribDef, TRUE));
 
 	return temp.FormatData(data, bISODates);
 }

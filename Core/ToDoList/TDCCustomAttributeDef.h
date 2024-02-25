@@ -222,6 +222,8 @@ public:
 	CString GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const;
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
+
+	CString FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates) const;
 	CString FormatData(const TDCCADATA& data, const CString& sCustAttribID, BOOL bISODates) const;
 
 	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID, BOOL bResolveCalcType = TRUE) const;
