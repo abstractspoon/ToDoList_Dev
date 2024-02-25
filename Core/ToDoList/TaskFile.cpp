@@ -2737,7 +2737,7 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, boo
 		if (pXICustData)
 		{
 			// NOTE: It's very important to respect empty values if the XML item
-			// if there because numeric types have the option to hide zero values
+			// exists because numeric types have the option to hide zero values
 
 			// Try for calculation display value first
 			const CXmlItem* pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
