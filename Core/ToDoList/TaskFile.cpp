@@ -2736,25 +2736,24 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, boo
 	
 		if (pXICustData)
 		{
-			LPCTSTR szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
+			// NOTE: It's very important to respect empty values if the XML item
+			// if there because numeric types have the option to hide zero values
 
-			if (Misc::IsEmpty(szValue))
+			// Try for calculation display value first
+			const CXmlItem* pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
+
+			if (!pXIVal)
 			{
-				szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
+				// else try for regular display value
+				pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
 
-				if (Misc::IsEmpty(szValue))
-				{
-					const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
-
-					if (pXICustData)
-					{
-						szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCVALUE);
-					}
-				}
+				// else try for regular calculation value
+				if (!pXIVal)
+					pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCVALUE);
 			}
 
-			if (!Misc::IsEmpty(szValue))
-				return szValue;
+			if (pXIVal)
+				return pXIVal->GetValue();
 		}
 	}
 
