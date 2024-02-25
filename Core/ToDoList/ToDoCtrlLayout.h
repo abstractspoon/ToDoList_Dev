@@ -32,10 +32,12 @@ public:
 					  BOOL bAllowStacking, 
 					  BOOL bStackCommentAbove);
 
-	BOOL ModifyLayout(TDC_MAXSTATE nState, 
-					  BOOL bShowCommentsAlways);
+	BOOL SetMaximised(TDC_MAXSTATE nState, 
+					  BOOL bShowCommentsAlways,
+					  BOOL bRecalcLayout = TRUE);
 
 	void Resize(int cx, int cy);
+	void RecalcLayout();
 	void SetSplitBarColor(COLORREF color);
 	void ExcludeSplitBars(CDC* pDC) const;
 
@@ -50,7 +52,7 @@ public:
 	BOOL IsRebuildingLayout() const { return m_bRebuildingLayout; }
 
 	void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
-	void LoadState(const CPreferences& prefs, LPCTSTR szKey);
+	void LoadState(const CPreferences& prefs, LPCTSTR szKey, BOOL bRecalcLayout = TRUE);
 
 protected:
 	CSimpleSplitter m_splitterHorz;
@@ -72,12 +74,12 @@ protected:
 	BOOL m_bFirstLayout;
 
 protected:
-	void RebuildLayout();
+	void RebuildLayout(BOOL bRecalcLayout);
 	BOOL ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect) const;
 	void ExcludeSplitBar(const CSimpleSplitter& splitter, CDC* pDC) const;
 
 	static void SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter);
-	static void LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter);
+	static void LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter, BOOL bRecalcLayout);
 
 };
 

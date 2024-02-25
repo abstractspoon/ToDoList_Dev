@@ -48,8 +48,8 @@ public:
 	void SetPaneCount(int nCount);
 	void SetPane(int nIndex, CWnd* pPaneWnd);
 	void SetActivePane(int nIndex);
-	void SetRelativePaneSizes(const CArray<int, int&>& aSizes);
-	void SetRelativePaneSizes(const int sizes[]);
+	void SetRelativePaneSizes(const CArray<int, int&>& aSizes, BOOL bRecalcLayout = TRUE);
+	void SetRelativePaneSizes(const int sizes[], BOOL bRecalcLayout = TRUE);
 	void SetBarColor(COLORREF crBar);
 
 	void ClearPanes();

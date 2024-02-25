@@ -165,7 +165,7 @@ CWnd* CSimpleSplitter::GetActivePane(int* pIndex) const
 	return NULL;
 }
 
-void CSimpleSplitter::SetRelativePaneSizes(const int sizes[])
+void CSimpleSplitter::SetRelativePaneSizes(const int sizes[], BOOL bRecalcLayout)
 {
 	int i, total = 0, total_in = 0;
 	
@@ -181,14 +181,15 @@ void CSimpleSplitter::SetRelativePaneSizes(const int sizes[])
 	}
 	m_aPaneSizes[m_aPanes.GetSize() - 1] = FULL_SIZE - total_in;
 	
-	RecalcLayout();
+	if (bRecalcLayout)
+		RecalcLayout();
 }
 
-void CSimpleSplitter::SetRelativePaneSizes(const CArray<int, int&>& aSizes)
+void CSimpleSplitter::SetRelativePaneSizes(const CArray<int, int&>& aSizes, BOOL bRecalcLayout)
 {
 	ASSERT(aSizes.GetSize() == m_aPaneSizes.GetSize());
 
-	SetRelativePaneSizes(aSizes.GetData());
+	SetRelativePaneSizes(aSizes.GetData(), bRecalcLayout);
 }
 
 int CSimpleSplitter::GetRelativePaneSizes(CArray<int, int&>& aSizes) const
@@ -360,7 +361,6 @@ void CSimpleSplitter::ResizePaneWindow(int nPane)
 		GetPaneRect(nPane, rPane, m_aPanes[nPane]->GetParent());
 
 		m_aPanes[nPane]->MoveWindow(rPane);
-		m_aPanes[nPane]->UpdateWindow();
 	}
 	else
 	{

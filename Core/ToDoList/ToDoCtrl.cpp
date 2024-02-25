@@ -601,13 +601,17 @@ void CToDoCtrl::ResizeAttributeColumnsToFit()
 
 void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 {
+	ASSERT(GetSafeHwnd());
+
 	if (!HandleUnsavedComments())
 		return;
 
+	// Save split states
 	CPreferences prefs;
-	SaveSplitPos(prefs);
+	m_layout.SaveState(prefs, GetPreferencesKey());
 
-	if (m_layout.ModifyLayout(nState, HasStyle(TDCS_SHOWCOMMENTSALWAYS)) && GetSafeHwnd())
+	// Change state WITHOUT recalculating layout
+	if (m_layout.SetMaximised(nState, HasStyle(TDCS_SHOWCOMMENTSALWAYS), FALSE))
 	{
 		ShowHideControls();
 
@@ -628,8 +632,10 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 			break;
 		}
 
-		Invalidate(FALSE);
-		LoadSplitPos(prefs);
+		// Restore split states WITHOUT recalculating layout
+		m_layout.LoadState(prefs, GetPreferencesKey(), FALSE);
+ 
+		// Recalculate layout
 		Resize();
 	}
 }

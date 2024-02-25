@@ -8,7 +8,6 @@
 
 #include "..\shared\Misc.h"
 #include "..\shared\GraphicsMisc.h"
-#include "..\shared\HoldRedraw.h"
 #include "..\shared\AutoFlag.h"
 
 #include "..\interfaces\uitheme.h"
@@ -100,7 +99,7 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	m_bFirstLayout = FALSE;
 
 	if (bRebuild)
-		RebuildLayout();
+		RebuildLayout(TRUE);
 
 	return bRebuild;
 }
@@ -171,7 +170,7 @@ BOOL CToDoCtrlLayout::IsCommentsVisible() const
 	return FALSE;
 }
 
-BOOL CToDoCtrlLayout::ModifyLayout(TDC_MAXSTATE nState, BOOL bShowCommentsAlways)
+BOOL CToDoCtrlLayout::SetMaximised(TDC_MAXSTATE nState, BOOL bShowCommentsAlways, BOOL bRecalcLayout)
 {
 	if (m_nMaxState == nState)
 	{
@@ -191,15 +190,22 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_MAXSTATE nState, BOOL bShowCommentsAlways
 	m_bShowCommentsAlways = bShowCommentsAlways;
 	m_nMaxState = nState;
 
-	RebuildLayout();
+	RebuildLayout(bRecalcLayout);
 
 	return TRUE;
 }
 
-void CToDoCtrlLayout::RebuildLayout()
+void CToDoCtrlLayout::RecalcLayout()
 {
-	CLockUpdates lu(m_pParent->GetSafeHwnd());
+	if (m_splitterHorz.GetSafeHwnd())
+		m_splitterHorz.RecalcLayout();
 
+	if (m_splitterVert.GetSafeHwnd())
+		m_splitterVert.RecalcLayout();
+}
+
+void CToDoCtrlLayout::RebuildLayout(BOOL bRecalcLayout)
+{
 	m_splitterHorz.DestroyWindow();
 	m_splitterHorz.ClearPanes();
 
@@ -594,11 +600,8 @@ void CToDoCtrlLayout::RebuildLayout()
 		}
 	}
 
-	if (m_splitterHorz.GetSafeHwnd())
-		m_splitterHorz.RecalcLayout();
-
-	if (m_splitterVert.GetSafeHwnd())
-		m_splitterVert.RecalcLayout();
+	if (bRecalcLayout)
+		RecalcLayout();
 }
 
 void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey) const
@@ -623,7 +626,7 @@ void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 	}
 }
 
-void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, BOOL bRecalcLayout)
 {
 	if (HasSplitters())
 	{
@@ -640,8 +643,8 @@ void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 			break;
 		}
 
-		LoadState(prefs, sKey, _T("Horz"), m_splitterHorz);
-		LoadState(prefs, sKey, _T("Vert"), m_splitterVert);
+		LoadState(prefs, sKey, _T("Horz"), m_splitterHorz, bRecalcLayout);
+		LoadState(prefs, sKey, _T("Vert"), m_splitterVert, bRecalcLayout);
 	}
 }
 
@@ -660,7 +663,7 @@ void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEn
 	prefs.WriteProfileString(szKey, szEntry, sState);
 }
 
-void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter)
+void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter, BOOL bRecalcLayout)
 {
 	if (!splitter.GetSafeHwnd() || !splitter.GetPaneCount())
 		return;
@@ -687,5 +690,5 @@ void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTST
 		aSizes.InsertAt(0, nSize);
 	}
 
-	splitter.SetRelativePaneSizes(aSizes);
+	splitter.SetRelativePaneSizes(aSizes, bRecalcLayout);
 }
