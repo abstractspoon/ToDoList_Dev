@@ -3930,7 +3930,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 			return FormatTaskDate(pTDI, pTDS, TDC::MapColumnToDate(nColID));
 
 		case TDCC_DEPENDENCY:
-			return pTDI->aDependencies.Format(_T("+"));
+			return pTDI->aDependencies.Format('+');
 
 		case TDCC_REMINDER:
 			{
