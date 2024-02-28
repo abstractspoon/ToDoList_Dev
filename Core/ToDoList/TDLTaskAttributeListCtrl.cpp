@@ -1015,7 +1015,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_CREATEDBY:		GETMULTIVALUE_STR(GetTasksCreatedBy);		break;
 	case TDCA_LASTMODBY:		GETMULTIVALUE_STR(GetTasksLastModifiedBy);	break;
 	case TDCA_COMMENTSFORMAT:	GETMULTIVALUE_STR(GetTasksCommentsFormat);	break;
- 	case TDCA_COMMENTSSIZE:		GETMULTIVALUE_STR(GetTasksCommentsSize);	break;
+	case TDCA_COMMENTSSIZE:		GETMULTIVALUE_STR(GetTasksCommentsSize);	break;
+ 	case TDCA_SUBTASKDONE:		GETMULTIVALUE_STR(GetTasksSubtaskCompletion); break;
 
 	case TDCA_ALLOCTO:			GETMULTIVALUE_LIST(GetTasksAllocatedTo);	break;
 	case TDCA_CATEGORY:			GETMULTIVALUE_LIST(GetTasksCategories);		break;
@@ -1072,8 +1073,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
-
-// 	case TDCA_SUBTASKDONE:		sFirst = m_formatter.GetTaskSubtaskCompletion(aSelTaskIDs[0]); break;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))

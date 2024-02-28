@@ -373,6 +373,7 @@ public:
 	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue, BOOL bWithTaskName = FALSE) const;
 	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCommentsSize(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksSubtaskCompletion(const CDWordArray& aTaskIDs, CString& sValue) const;
 
 	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;
 	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;
@@ -383,21 +384,19 @@ public:
 	BOOL GetTasksLockState(const CDWordArray& aTaskIDs, BOOL& bValue) const;
 	BOOL GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crValue) const;
 
-	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
-
 	BOOL GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksTimeSpent(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
 	BOOL GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const;
 	BOOL GetTasksRecurrence(const CDWordArray& aTaskIDs, TDCRECURRENCE& recurs) const;
 
-	BOOL GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nSubtasksTotal, int& nSubtasksDone) const;
-	BOOL GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const;
-
 	BOOL GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	BOOL GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	BOOL GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	BOOL GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
+	BOOL GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const;
+
+	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
 
 	// These functions return the number of matching values
 	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;

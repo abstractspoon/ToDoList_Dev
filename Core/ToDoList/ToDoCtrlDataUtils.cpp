@@ -5244,6 +5244,11 @@ BOOL CTDCMultiTasker::GetTasksCommentsSize(const CDWordArray& aTaskIDs, CString&
 	GETTASKSVAL_SIMPLE(m_formatter.GetTaskCommentsSize, sValue, CString);
 }
 
+BOOL CTDCMultiTasker::GetTasksSubtaskCompletion(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_formatter.GetTaskSubtaskCompletion, sValue, CString);
+}
+
 BOOL CTDCMultiTasker::GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const
 {
 	GETTASKSVAL_SIMPLE(m_data.GetTaskParentID, dwValue, DWORD);
@@ -5452,29 +5457,6 @@ BOOL CTDCMultiTasker::GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, c
 
 		data = first;
 	}
-
-	return TRUE;
-}
-
-BOOL CTDCMultiTasker::GetTasksSubtaskTotals(const CDWordArray& aTaskIDs, int& nSubtasksTotal, int& nSubtasksDone) const
-{
-	if (!aTaskIDs.GetSize())
-		return FALSE;
-
-	int nFirstTotal, nFirstDone;
-	m_calculator.GetTaskSubtaskTotals(aTaskIDs[0], nFirstTotal, nFirstDone);
-
-	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
-	{
-		int nNextTotal, nNextDone;
-		m_calculator.GetTaskSubtaskTotals(aTaskIDs[nID], nNextTotal, nNextDone);
-
-		if ((nNextTotal != nFirstTotal) || (nNextDone != nFirstDone))
-			return FALSE;
-	}
-
-	nSubtasksTotal = nFirstTotal;
-	nSubtasksDone = nFirstDone;
 
 	return TRUE;
 }
