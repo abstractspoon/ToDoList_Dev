@@ -362,6 +362,7 @@ protected:
 	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
+	static void PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& mapAttribIDs);
 
 };
 

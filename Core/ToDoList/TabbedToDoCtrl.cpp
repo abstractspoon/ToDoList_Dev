@@ -3486,6 +3486,11 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 								(aModTaskIDs.GetSize() == 1) &&
 								(dwModTaskID == m_dwLastAddedID));
 
+	// For custom attributes we always update the extensions
+	// with ALL custom attribute values
+	CTDCAttributeMap mapExtAttribIDs(mapAttribIDs);
+	PrepareAttributesForExtensionViewUpdate(mapExtAttribIDs);
+
 	switch (GetTaskView())
 	{
 	case FTCV_TASKTREE:
@@ -3498,7 +3503,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else if (!bNewSingleTask)
 		{
 			UpdateListView(mapAttribIDs, aModTaskIDs, FALSE);
-			UpdateExtensionViews(mapAttribIDs, aModTaskIDs);
+			UpdateExtensionViews(mapExtAttribIDs, aModTaskIDs);
 		}
 		break;
 
@@ -3511,7 +3516,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		}
 		else if (!bNewSingleTask)
 		{
-			UpdateExtensionViews(mapAttribIDs, aModTaskIDs);
+			UpdateExtensionViews(mapExtAttribIDs, aModTaskIDs);
 		}
 		else
 		{
@@ -3536,7 +3541,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		UpdateExtensionViews(mapAttribIDs, aModTaskIDs);
+		UpdateExtensionViews(mapExtAttribIDs, aModTaskIDs);
 
 		if (bNewTaskTitleEdit)
 		{
@@ -3775,11 +3780,43 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 		// TDCA_DEPENDENCY: 
 		// TDCA_RECURRENCE: 
 		// TDCA_VERSION:
-		// TDCA_CUSTOMATTRIBDEFS:
 		// TDCA_ICON:
+		// TDCA_CUSTOMATTRIBDEFS:
+		// TDCA_CUSTOMATTRIB_ALL
+		// TDCA_CUSTOMATTRIB_FIRST -> TDCA_CUSTOMATTRIB_LAST
+
 		UpdateExtensionViewsSelection(mapAttribIDs);
 	}
 }
+
+void CTabbedToDoCtrl::PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& mapAttribIDs)
+{
+	// Replace any individual custom attribute IDs with TDCA_CUSTOMATTRIB_ALL
+	if (!mapAttribIDs.Has(TDCA_CUSTOMATTRIB_ALL))
+	{
+		int nNumRemoved = 0;
+		POSITION pos = mapAttribIDs.GetStartPosition();
+
+		while (pos)
+		{
+			TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
+
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			{
+				// NOTE: I think the only time this can occur is if 
+				// the map ONLY contains a SINGLE custom attribute
+				ASSERT(mapAttribIDs.GetCount() == 1);
+
+				mapAttribIDs.Remove(nAttribID);
+				nNumRemoved++;
+			}
+		}
+
+		if (nNumRemoved)
+			mapAttribIDs.Add(TDCA_CUSTOMATTRIB_ALL);
+	}
+}
+
 
 void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 {
@@ -4107,7 +4144,6 @@ int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttribute
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-		CTDCAttributeMap mapExtAttribsWanted;
 
 		if (ExtensionViewWantsChange(nExt, nAttrib))
 			mapAttribsWanted.Add(nAttrib);
