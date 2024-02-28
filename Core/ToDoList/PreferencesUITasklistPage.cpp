@@ -175,7 +175,7 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bAppendTextToDateTimePaste = pPrefs->GetProfileInt(szKey, _T("AppendTextToDateTimePaste"), FALSE);
 	m_sDateTimeTrailText = pPrefs->GetProfileString(szKey, _T("DateTimeTrail"));
 	m_bAllowCheckboxAgainstTreeItem = pPrefs->GetProfileInt(szKey, _T("AllowCheckboxAgainstTreeItem"), TRUE);
-	m_bHidePaneSplitBar = pPrefs->GetProfileInt(szKey, _T("HidePaneSplitBar"), FALSE);
+	m_bHidePaneSplitBar = pPrefs->GetProfileInt(szKey, _T("HidePaneSplitBar"), TRUE);
 	m_bShowRemindersAsDateAndTime = pPrefs->GetProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), FALSE);
 	m_bShowFileLinkThumbnails = pPrefs->GetProfileInt(szKey, _T("ShowFileLinkThumbnails"), FALSE);
 //	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
