@@ -200,7 +200,7 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bShowMiniCalendar = pPrefs->GetProfileInt(szKey, _T("ShowMiniCalendar"), TRUE);
 	m_bAdjustTaskHeights = pPrefs->GetProfileInt(szKey, _T("AdjustTaskHeights"), FALSE);
 	m_bTreatOverdueAsDueToday = pPrefs->GetProfileInt(szKey, _T("TreatOverdueAsDueToday"), FALSE);
-	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
+	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), FALSE);
 	m_bHideParentTasksByTag = pPrefs->GetProfileInt(szKey, _T("HideParentTasksByTag"), FALSE);
 	m_sHideParentTag = pPrefs->GetProfileString(szKey, _T("HideParentTag"));
 
