@@ -1091,7 +1091,7 @@ int CTDLTaskCtrlBase::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTask
 		DWORD dwTaskID = aTaskIDs[nItem];
 		VERIFY(m_data.GetTrueTask(dwTaskID, pTDI, pTDS));
 
-		aValues[nItem] = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID, FALSE);
+		aValues[nItem] = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID, TRUE); // TRUE = copying
 	}
 
 	return aValues.GetSize();
@@ -2778,7 +2778,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 		// Note: we pass dwTaskID NOT dwTrueID here so that references 
 		// can be handled correctly
-		CString sTaskColText = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID, TRUE);
+		CString sTaskColText = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID);
 		
 		const TDCCOLUMN* pCol = GetColumn(nColID);
 
@@ -3872,7 +3872,7 @@ CString CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate) c
 	return EMPTY_STR;
 }
 
-CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const
+CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bCopying) const
 {
 	if (!pTDS || !pTDI || !dwTaskID || (nColID == TDCC_NONE))
 	{
@@ -3910,54 +3910,48 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:			return m_formatter.GetID(pTDS->GetParentTaskID());
 
-		// items having no text
 	case TDCC_ICON:
 	case TDCC_DONE:
 	case TDCC_FLAG:
 	case TDCC_LOCK:
-	case TDCC_TRACKTIME:
-		return EMPTY_STR;
+	case TDCC_TRACKTIME:		return EMPTY_STR; // Items NEVER having text
+	}
 
-		// items rendered differently
-	case TDCC_STARTDATE:
-	case TDCC_DUEDATE:
-	case TDCC_DONEDATE:
-	case TDCC_CREATIONDATE:
-	case TDCC_LASTMODDATE:
-		if (!bDrawing)
+	// Only provide text if copying column values
+	if (bCopying)
+	{
+		switch (nColID)
+		{
+		case TDCC_STARTDATE:
+		case TDCC_DUEDATE:
+		case TDCC_DONEDATE:
+		case TDCC_CREATIONDATE:
+		case TDCC_LASTMODDATE:
 			return FormatTaskDate(pTDI, pTDS, TDC::MapColumnToDate(nColID));
-		break;
 
-	case TDCC_DEPENDENCY:
-		if (!bDrawing)
-			return pTDI->aDependencies.Format('+');
-		break;
+		case TDCC_DEPENDENCY:
+			return pTDI->aDependencies.Format(_T("+"));
 
-	case TDCC_REMINDER:
-		if (!bDrawing)
-		{
-			time_t tRem = GetTaskReminder(m_data.GetTrueTaskID(dwTaskID));
+		case TDCC_REMINDER:
+			{
+				time_t tRem = GetTaskReminder(m_data.GetTrueTaskID(dwTaskID));
 
-			// Reminder must be set and start/due date must be set
-			if ((tRem != 0) && (tRem != -1))
-				return FormatDate(COleDateTime(tRem), TDCD_REMINDER);
-		}
-		break;
+				// Reminder must be set and start/due date must be set
+				if ((tRem != 0) && (tRem != -1))
+					return FormatDate(COleDateTime(tRem), TDCD_REMINDER);
+			}
+			break;
 
-	case TDCC_FILELINK:
-		if (!bDrawing)
+		case TDCC_FILELINK:
 			return Misc::FormatArray(pTDI->aFileLinks, '+');
-		break;
 
-	case TDCC_PRIORITY:
-		if (!bDrawing || !HasStyle(TDCS_HIDEPRIORITYNUMBER))
-			return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
-		break;
+		case TDCC_PRIORITY:
+			if (!HasStyle(TDCS_HIDEPRIORITYNUMBER))
+				return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
+			break;
 
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
-		{
-			if (!bDrawing)
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 				GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, EMPTY_STR);
@@ -3969,18 +3963,14 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 					return EMPTY_STR;
 				}
 
-				TDCCADATA data;
-
-				if (pTDI->GetCustomAttributeValue(pDef->sUniqueID, data))
-					return pDef->FormatData(data, HasStyle(TDCS_SHOWDATESINISO));
+				return m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
 			}
-			return EMPTY_STR;
+			else
+			{
+				ASSERT(0);
+			}
+			break;
 		}
-		else
-		{
-			ASSERT(0);
-		}
-		break;
 	}
 
 	return EMPTY_STR;

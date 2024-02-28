@@ -78,7 +78,7 @@ LPCTSTR APPDATAINI			= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
 LPCTSTR WIKI_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id="); 
 LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/"); 
 LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
-LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=donations%2eabstractspoon%2etodolist%40gmail%2ecom&item_name=ToDoList%20Software"); 
+LPCTSTR DONATE_URL			= _T("https://www.paypal.com/donate/?hosted_button_id=Z3KT3PNZZGHX2"); 
 
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CToDoListApp object

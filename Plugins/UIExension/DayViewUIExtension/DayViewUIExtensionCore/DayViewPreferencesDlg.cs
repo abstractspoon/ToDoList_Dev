@@ -88,13 +88,13 @@ namespace DayViewUIExtension
         {
             string prefsKey = (key + "\\Preferences");
 
-            m_HideParentTasks.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasks", true);
+            m_HideParentTasks.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasks", false);
 			m_HideParentTasksByTag.Checked = prefs.GetProfileBool(prefsKey, "HideParentTasksByTag", false);
 			m_HideParentTasksTag.Text = prefs.GetProfileString(prefsKey, "HideParentTasksTag", "");
 
 			m_DisplayDiscontinuous.Checked = !prefs.GetProfileBool(prefsKey, "DisplayContinuous", true);
 			m_ShowActiveToday.Checked = prefs.GetProfileBool(prefsKey, "ShowActiveToday", true);
-			m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", true);
+			m_HideTasksWithoutTimes.Checked = prefs.GetProfileBool(prefsKey, "HideTasksWithoutTimes", false);
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
 			m_ShowFutureOccurrences.Checked = prefs.GetProfileBool(prefsKey, "ShowFutureOccurrences", true);

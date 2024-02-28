@@ -1278,7 +1278,11 @@ BOOL CTDCCustomAttribDefinitionArray::IsListType(const CString& sCustAttribID) c
 CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const CString& sCustAttribID, BOOL bISODates) const
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetDefinition(sCustAttribID);
+	return FormatData(data, attribDef, bISODates);
+}
 
+CString CTDCCustomAttribDefinitionArray::FormatData(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bISODates) const
+{
 	if (!attribDef.IsDataType(TDCCA_CALCULATION))
 		return attribDef.FormatData(data, bISODates);
 
