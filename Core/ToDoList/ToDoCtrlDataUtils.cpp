@@ -1654,7 +1654,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			break;
 
 		case TDCC_COMMENTSFORMAT:
-			nCompare = Compare(m_formatter.GetTaskCommentFormat(pTDI1), m_formatter.GetTaskCommentFormat(pTDI2));
+			nCompare = Compare(m_formatter.GetTaskCommentsFormat(pTDI1), m_formatter.GetTaskCommentsFormat(pTDI2));
 			break;
 
 		default:
@@ -3750,20 +3750,20 @@ CString CTDCTaskFormatter::GetTaskPercentDone(const TODOITEM* pTDI, const TODOST
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentSize(DWORD dwTaskID) const
+CString CTDCTaskFormatter::GetTaskCommentsSize(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
 
-	return GetTaskCommentSize(pTDI);
+	return GetTaskCommentsSize(pTDI);
 }
 
-CString CTDCTaskFormatter::GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank) const
+CString CTDCTaskFormatter::GetTaskCommentsFormat(DWORD dwTaskID, BOOL bEmptyIsBlank) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
 
-	return GetTaskCommentFormat(pTDI, bEmptyIsBlank);
+	return GetTaskCommentsFormat(pTDI, bEmptyIsBlank);
 }
 
 CString CTDCTaskFormatter::GetTaskRecentlyModified(DWORD dwTaskID) const
@@ -3817,7 +3817,7 @@ CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
+CString CTDCTaskFormatter::GetTaskCommentsSize(const TODOITEM* pTDI) const
 {
 	if (pTDI)
 		return GetCommentSize(pTDI->GetCommentsSizeInKB());
@@ -3827,7 +3827,7 @@ CString CTDCTaskFormatter::GetTaskCommentSize(const TODOITEM* pTDI) const
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
+CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
 {
 	if (pTDI)
 	{
@@ -5293,7 +5293,7 @@ BOOL CTDCMultiTasker::GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue,
 
 BOOL CTDCMultiTasker::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	GETTASKSVAL_ARG(m_formatter.GetTaskCommentFormat, sValue, CString, FALSE);
+	GETTASKSVAL_ARG(m_formatter.GetTaskCommentsFormat, sValue, CString, FALSE);
 }
 
 BOOL CTDCMultiTasker::GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const
