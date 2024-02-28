@@ -361,6 +361,7 @@ public:
 	// These functions return FALSE if two or more tasks had differing values
 	BOOL GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const;
 
+	BOOL GetTasksTitle(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksAllocatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
@@ -371,6 +372,7 @@ public:
 	BOOL GetTasksIcon(const CDWordArray& aTaskIDs, CString& sValue) const;
 	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue, BOOL bWithTaskName = FALSE) const;
 	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksCommentsSize(const CDWordArray& aTaskIDs, CString& sValue) const;
 
 	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;
 	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;

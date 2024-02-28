@@ -332,19 +332,24 @@ void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 
 void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
 {
+	BOOL bAdd = FALSE;
+
 	switch (nAttribID)
 	{
 	case TDCA_PROJECTNAME:
 		return;
 
+	case TDCA_TASKNAME:
+		bAdd = TRUE;
+		break;
+
 	default:
-		if (m_vis.IsEditFieldVisible(nAttribID))
-		{
-			int nItem = AddRow(CEnString(nAttribResID));
-			SetItemData(nItem, nAttribID);
-		}
+		bAdd = m_vis.IsEditFieldVisible(nAttribID);
 		break;
 	}
+
+	if (bAdd)
+		SetItemData(AddRow(CEnString(nAttribResID)), nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::Populate()
@@ -1000,6 +1005,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 	switch (nAttribID)
 	{
+	case TDCA_TASKNAME:			GETMULTIVALUE_STR(GetTasksTitle);			break;
 	case TDCA_EXTERNALID:		GETMULTIVALUE_STR(GetTasksExternalID);		break;
 	case TDCA_ALLOCBY:			GETMULTIVALUE_STR(GetTasksAllocatedBy);		break;
 	case TDCA_STATUS:			GETMULTIVALUE_STR(GetTasksStatus);			break;
@@ -1009,6 +1015,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_CREATEDBY:		GETMULTIVALUE_STR(GetTasksCreatedBy);		break;
 	case TDCA_LASTMODBY:		GETMULTIVALUE_STR(GetTasksLastModifiedBy);	break;
 	case TDCA_COMMENTSFORMAT:	GETMULTIVALUE_STR(GetTasksCommentsFormat);	break;
+ 	case TDCA_COMMENTSSIZE:		GETMULTIVALUE_STR(GetTasksCommentsSize);	break;
 
 	case TDCA_ALLOCTO:			GETMULTIVALUE_LIST(GetTasksAllocatedTo);	break;
 	case TDCA_CATEGORY:			GETMULTIVALUE_LIST(GetTasksCategories);		break;
@@ -1066,9 +1073,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
 
-// 	case TDCA_TASKNAME:			sFirst = m_data.GetTaskTitle(aSelTaskIDs[0]); break;
-// 
-// 	case TDCA_COMMENTSSIZE:		sFirst = m_formatter.GetTaskCommentSize(aSelTaskIDs[0]); break;
 // 	case TDCA_SUBTASKDONE:		sFirst = m_formatter.GetTaskSubtaskCompletion(aSelTaskIDs[0]); break;
 
 	default:
@@ -1577,6 +1581,11 @@ BOOL CTDLTaskAttributeListCtrl::GetTimeSpent(TDCTIMEPERIOD& timeSpent) const
 int CTDLTaskAttributeListCtrl::GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
 {
 	return ParseMultiSelValues(GetValueText(TDCA_ALLOCTO), aMatched, aMixed);
+}
+
+CString CTDLTaskAttributeListCtrl::GetTaskTitle() const
+{
+	return GetValueText(TDCA_TASKNAME);
 }
 
 CString CTDLTaskAttributeListCtrl::GetAllocBy() const

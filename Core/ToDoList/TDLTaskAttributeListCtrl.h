@@ -92,6 +92,7 @@ public:
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
 
 	// Only attributes 'edited' by this control have getters
+	CString GetTaskTitle() const;
 	CString GetAllocBy() const;
 	CString GetStatus() const;
 	CString GetExternalID() const;

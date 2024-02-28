@@ -973,6 +973,10 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	
 	switch (nAttrib)
 	{
+	case TDCA_TASKNAME:
+		SetSelectedTaskTitle(m_lcAttributes.GetTaskTitle(), TRUE);
+		break;
+
 	case TDCA_DONEDATE:
 		{
 			COleDateTime date = m_lcAttributes.GetDoneDate();

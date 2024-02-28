@@ -5194,6 +5194,11 @@ VAR = first; return TRUE
 
 // -----------------------------------------------------------------
 
+BOOL CTDCMultiTasker::GetTasksTitle(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_data.GetTaskTitle, sValue, CString);
+}
+
 BOOL CTDCMultiTasker::GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const
 {
 	GETTASKSVAL_SIMPLE(m_data.GetTaskLastModifiedBy, sValue, CString);
@@ -5232,6 +5237,11 @@ BOOL CTDCMultiTasker::GetTasksIcon(const CDWordArray& aTaskIDs, CString& sValue)
 BOOL CTDCMultiTasker::GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const
 {
 	GETTASKSVAL_SIMPLE(m_formatter.GetTaskPosition, sValue, CString);
+}
+
+BOOL CTDCMultiTasker::GetTasksCommentsSize(const CDWordArray& aTaskIDs, CString& sValue) const
+{
+	GETTASKSVAL_SIMPLE(m_formatter.GetTaskCommentsSize, sValue, CString);
 }
 
 BOOL CTDCMultiTasker::GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const
