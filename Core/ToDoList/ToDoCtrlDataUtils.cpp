@@ -3587,6 +3587,8 @@ CString CTDCTaskFormatter::GetTaskPath(const TODOSTRUCTURE* pTDS) const
 
 			pTDSParent = pTDSParent->GetParentTask();
 		}
+
+		return sPath;
 	}
 	
 	return EMPTY_STR;
@@ -5303,7 +5305,9 @@ VAR = first; return TRUE
 
 BOOL CTDCMultiTasker::GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue, BOOL bWithTaskName) const
 {
-	GETTASKSVAL_ARG(m_formatter.GetTaskPath, sValue, CString, bWithTaskName);
+	DWORD dwOptions = (bWithTaskName ? TDCTF_TITLEANDPATH : TDCTF_PATHONLY);
+
+	GETTASKSVAL_ARG(m_formatter.GetTaskTitlePath, sValue, CString, dwOptions);
 }
 
 BOOL CTDCMultiTasker::GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const

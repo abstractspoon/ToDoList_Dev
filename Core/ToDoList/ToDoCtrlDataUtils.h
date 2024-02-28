@@ -147,8 +147,8 @@ public:
 	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
 
 	CString GetTaskTitlePath(DWORD dwTaskID, DWORD dwFlags) const;
-	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const;
+	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
 	CString GetTaskPosition(DWORD dwTaskID) const; 
 	CString GetTaskTimeEstimate(DWORD dwTaskID) const;
 	CString GetTaskTimeSpent(DWORD dwTaskID) const;
