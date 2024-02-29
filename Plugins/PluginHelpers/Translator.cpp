@@ -6,6 +6,7 @@
 #include "FormsUtil.h"
 #include "Translator.h"
 
+#include <Shared\wclassdefines.h>
 #include <Interfaces\ITransText.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +30,11 @@ Translator::Translator() : m_pTransText(nullptr)
 
 String^ Translator::Translate(String^ sText)
 {
+	return Translate(sText, nullptr);
+}
+
+String^ Translator::Translate(String^ sText, String^ sClassName)
+{
 	if (String::IsNullOrWhiteSpace(sText))
 		return String::Empty;
 
@@ -47,7 +53,7 @@ String^ Translator::Translate(String^ sText)
 
 	LPWSTR szTemp = NULL;
 
-	if (!m_pTransText->TranslateText(MS(sText), szTemp))
+	if (!m_pTransText->TranslateText(MS(sText), MS(sClassName), szTemp))
 		return sText;
 
 	String^ sTextOut = gcnew String(szTemp);
@@ -59,7 +65,7 @@ String^ Translator::Translate(String^ sText)
 void Translator::Translate(Form^ window)
 {
 	// Window title
-	window->Text = Translate(window->Text);
+	window->Text = Translate(window->Text, gcnew String(WC_DIALOGBOX));
 
 	// children
 	Translate(window->Controls);
@@ -71,6 +77,7 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 
 	if (tooltips != nullptr)
 	{
+		auto tooltipClass = gcnew String(WC_TOOLTIPS);
 		int nItem = window->Controls->Count;
 
 		while (nItem--)
@@ -79,7 +86,7 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 			auto toolText = tooltips->GetToolTip(ctrl);
 
 			if (!String::IsNullOrEmpty(toolText))
-				tooltips->SetToolTip(ctrl, Translate(toolText));
+				tooltips->SetToolTip(ctrl, Translate(toolText, tooltipClass));
 		}
 	}
 }
@@ -97,6 +104,7 @@ void Translator::Translate(ITranslatable^ ctrl)
 
 void Translator::Translate(ToolStripItemCollection^ items)
 {
+	auto tooltipClass = gcnew String(WC_TOOLTIPS);
 	int nItem = items->Count;
 
 	while (nItem--)
@@ -104,7 +112,7 @@ void Translator::Translate(ToolStripItemCollection^ items)
 		auto item = items[nItem];
 
 		item->Text = Translate(item->Text);
-		item->ToolTipText = Translate(item->ToolTipText);
+		item->ToolTipText = Translate(item->ToolTipText, tooltipClass);
 
 		// children
 		auto dropItem = ASTYPE(item, ToolStripDropDownItem);
@@ -168,10 +176,11 @@ void Translator::Translate(Control::ControlCollection^ items)
 
 void Translator::Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items)
 {
+	auto headerClass = gcnew String(WC_HEADER);
 	int nItem = items->Count;
 
 	while (nItem--)
-		items[nItem]->Text = Translate(items[nItem]->Text);
+		items[nItem]->Text = Translate(items[nItem]->Text, headerClass);
 }
 
 void Translator::Translate(ComboBox^ combo)
@@ -180,6 +189,7 @@ void Translator::Translate(ComboBox^ combo)
 	if (combo->DropDownStyle != ComboBoxStyle::DropDownList)
 		return;
 
+	auto comboClass = gcnew String(WC_COMBOBOX);
 	int nItem = combo->Items->Count;
 
 	while (nItem--)
@@ -189,7 +199,7 @@ void Translator::Translate(ComboBox^ combo)
 		if (item == nullptr)
 			return;
 
-		combo->Items[nItem] = Translate(item);
+		combo->Items[nItem] = Translate(item, comboClass);
 	}
 
 	combo->Text = Translate(combo->Text);

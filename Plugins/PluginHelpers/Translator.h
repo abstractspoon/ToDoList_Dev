@@ -50,6 +50,7 @@ namespace Abstractspoon
 			private:
 				Translator();
 
+				String^ Translate(String^ sText, String^ sClassName);
 			};
 		}
 	}
