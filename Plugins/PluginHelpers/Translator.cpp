@@ -127,7 +127,6 @@ void Translator::Translate(Control^ ctrl)
 		// children
 		Translate(ctrl->Controls);
 	}
-//	Translate(ctrl->Controls);
 }
 
 void Translator::Translate(ITranslatable^ ctrl)
@@ -172,41 +171,6 @@ void Translator::Translate(Control::ControlCollection^ items)
 
 	while (nItem--)
 		Translate(items[nItem]);
-// 	{
-// 		auto ctrl = items[nItem];
-// 
-// 		// Special cases
-// 		if (ISTYPE(ctrl, Windows::Forms::WebBrowser) ||
-// 			ISTYPE(ctrl, TextBox) ||
-// 			ISTYPE(ctrl, RichTextBox))
-// 		{
-// 			continue;
-// 		}
-// 
-// 		if (ISTYPE(ctrl, ITranslatable))
-// 		{
-// 			Translate(ASTYPE(ctrl, ITranslatable));
-// 		}
-// 		else if (ISTYPE(ctrl, ToolStrip))
-// 		{
-// 			Translate(ASTYPE(ctrl, ToolStrip)->Items);
-// 		}
-// 		else if (ISTYPE(ctrl, ComboBox))
-// 		{
-// 			Translate(ASTYPE(ctrl, ComboBox));
-// 		}
-// 		else if (ISTYPE(ctrl, ListView))
-// 		{
-// 			Translate(ASTYPE(ctrl, ListView)->Columns);
-// 		}
-// 		else
-// 		{
-// 			ctrl->Text = Translate(ctrl->Text);
-// 
-// 			// children
-// 			Translate(ctrl->Controls);
-// 		}
-// 	}
 }
 
 void Translator::Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items)
