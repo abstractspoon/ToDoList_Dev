@@ -84,6 +84,7 @@
 			// 
 			// label7
 			// 
+			this.label7.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label7.Location = new System.Drawing.Point(235, 74);
 			this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label7.Name = "label7";
@@ -94,6 +95,7 @@
 			// 
 			// label3
 			// 
+			this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label3.Location = new System.Drawing.Point(235, 46);
 			this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label3.Name = "label3";
