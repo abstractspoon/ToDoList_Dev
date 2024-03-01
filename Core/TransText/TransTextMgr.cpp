@@ -437,11 +437,9 @@ BOOL CTransTextMgr::WantHookWnd(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) cons
 				return TRUE; 
 			}
 		}
-
-		// else 
-		return FALSE;
 	}
 
+	// All else
 	return FALSE;
 }
 
