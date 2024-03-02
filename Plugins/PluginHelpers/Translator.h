@@ -68,8 +68,8 @@ namespace Abstractspoon
 			private:
 				Translator();
 
-				String^ Translate(String^ sText, String^ sClassName);
-				String^ GetClassName(CtrlType type);
+				String^ Translate(String^ sText, LPCWSTR sClassName);
+				LPCWSTR GetClassName(CtrlType type);
 			};
 		}
 	}

@@ -55,7 +55,7 @@ namespace EvidenceBoardUIExtension
             m_Trans = trans;
 
 			if (s_ImageFilter == null)
-				s_ImageFilter = m_Trans.Translate("Image Files", Translator.CtrlType.Text) + " (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
+				s_ImageFilter = m_Trans.Translate("Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||", Translator.CtrlType.Text);
 
 			InitializeComponent();
         }
@@ -832,7 +832,8 @@ namespace EvidenceBoardUIExtension
 			case 1:
 				MessageBox.Show(m_Trans.Translate("To create a new connection you need to preselect two tasks", Translator.CtrlType.Text), 
 								m_UiName, 
-								MessageBoxButtons.OK, MessageBoxIcon.Information);
+								MessageBoxButtons.OK, 
+								MessageBoxIcon.Information);
 				break;
 
 			case 2:
@@ -844,7 +845,8 @@ namespace EvidenceBoardUIExtension
 					{
 						MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks", Translator.CtrlType.Text), 
 										m_UiName, 
-										MessageBoxButtons.OK, MessageBoxIcon.Hand);
+										MessageBoxButtons.OK, 
+										MessageBoxIcon.Hand);
 						return;
 					}
 
@@ -930,7 +932,7 @@ namespace EvidenceBoardUIExtension
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = m_Trans.Translate(s_ImageFilter, Translator.CtrlType.Text),
+				Filter = s_ImageFilter,
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

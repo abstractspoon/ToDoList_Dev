@@ -656,7 +656,7 @@ namespace HTMLReportExporter
 
 		private String FileFilter
 		{
-			get { return String.Format("{0} (*.rbt)|*.rbt;", m_Trans.Translate("Report Templates", Translator.CtrlType.Text)); }
+			get { return m_Trans.Translate("Report Templates (*.rbt)|*.rbt;", Translator.CtrlType.Text); }
 		}
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)

@@ -447,7 +447,7 @@ namespace HTMLReportExporter
 				if (ContainsNonTopLevelTaskAttributes(tasks))
 				{
 					// Report an error
-					var message = m_Trans.Translate("Only top-level task attributes are allowable in the Title section.", Translator.CtrlType.Text);
+					var message = m_Trans.Translate("Only top-level task attributes are allowed in the Title section.", Translator.CtrlType.Text);
 
 					html.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
 					html.AddStyleAttribute(HtmlTextWriterStyle.BorderStyle, "solid");

@@ -317,8 +317,9 @@ namespace HTMLReportExporter
 				if (placeHolderToLeft && placeHolderToRight)
 				{
 					MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again.", Translator.CtrlType.Text), 
-									m_Trans.Translate("Report Builder", Translator.CtrlType.Text), 
-									MessageBoxButtons.OK, MessageBoxIcon.Information);
+									m_Trans.Translate("Report Builder", Translator.CtrlType.Dialog), 
+									MessageBoxButtons.OK, 
+									MessageBoxIcon.Information);
 					Focus();
 
 					return;

@@ -28,26 +28,26 @@ Translator::Translator() : m_pTransText(nullptr)
 
 }
 
-String^ Translator::GetClassName(CtrlType type)
+LPCWSTR Translator::GetClassName(CtrlType type)
 {
 	switch (type)
 	{
-		case CtrlType::Button:		return gcnew String(WC_BUTTON);
-		case CtrlType::ComboBox:	return gcnew String(WC_COMBOBOX);
-		case CtrlType::Dialog:		return gcnew String(WC_DIALOGBOX);
-		case CtrlType::Header:		return gcnew String(WC_HEADER);
-		case CtrlType::Label:		return gcnew String(WC_STATIC);
-		case CtrlType::Menu:		return gcnew String(WC_MENU);
-		case CtrlType::Tab:			return gcnew String(WC_TABCONTROL);
-		case CtrlType::ToolTip:		return gcnew String(WC_TOOLTIPS);
+		case CtrlType::Button:		return WC_BUTTON;
+		case CtrlType::ComboBox:	return WC_COMBOBOX;
+		case CtrlType::Dialog:		return WC_DIALOGBOX;
+		case CtrlType::Header:		return WC_HEADER;
+		case CtrlType::Label:		return WC_STATIC;
+		case CtrlType::Menu:		return WC_MENU;
+		case CtrlType::Tab:			return WC_TABCONTROL;
+		case CtrlType::ToolTip:		return WC_TOOLTIPS;
 
-		case CtrlType::CheckBox:	return gcnew String("checkbox");
-		case CtrlType::GroupBox:	return gcnew String("groupbox");
-		case CtrlType::RadioButton:	return gcnew String("radiobutton");
+		case CtrlType::CheckBox:	return L"checkbox";
+		case CtrlType::GroupBox:	return L"groupbox";
+		case CtrlType::RadioButton:	return L"radiobutton";
 	}
 
 	// All else + CtrlType::Text
-	return gcnew String("text");
+	return L"text";
 }
 
 String^ Translator::Translate(String^ sText, CtrlType type)
@@ -58,7 +58,7 @@ String^ Translator::Translate(String^ sText, CtrlType type)
 	return Translate(sText, GetClassName(type));
 }
 
-String^ Translator::Translate(String^ sText, String^ sClassName)
+String^ Translator::Translate(String^ sText, LPCWSTR sClassName)
 {
 	if (String::IsNullOrWhiteSpace(sText))
 		return String::Empty;
@@ -78,7 +78,7 @@ String^ Translator::Translate(String^ sText, String^ sClassName)
 
 	LPWSTR szTemp = NULL;
 
-	if (!m_pTransText->TranslateText(MS(sText), MS(sClassName), szTemp))
+	if (!m_pTransText->TranslateText(MS(sText), sClassName, szTemp))
 		return sText;
 
 	String^ sTextOut = gcnew String(szTemp);
@@ -146,7 +146,7 @@ void Translator::Translate(Control^ ctrl)
 		auto typeArr = ctrl->GetType()->FullName->Split('.');
 		auto className = typeArr[typeArr->Length - 1];
 		
-		ctrl->Text = Translate(ctrl->Text, className);
+		ctrl->Text = Translate(ctrl->Text, MS(className));
 
 		// children
 		Translate(ctrl->Controls);

@@ -2833,7 +2833,7 @@ namespace EvidenceBoardUIExtension
 
 			if (Rectangle.Inflate(GetCreateLinkPinRect(node), 1, 1).Contains(clientPos))
 			{
-				tip.Text = m_Trans.Translate("Create New Link", Translator.CtrlType.ToolTip);
+				tip.Text = m_Trans.Translate("New Connection", Translator.CtrlType.ToolTip);
 				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
 			}
 			else if (taskItem.HasImage)
