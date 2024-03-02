@@ -29,9 +29,9 @@ namespace SpreadsheetContentControl
 			m_ControlsFont = new Font("Tahoma", 8.25f);
 
 			// Handle the 3rd-party components embedded in the toolbar
-			unvell.UIControls.ColorPickerPanel.NoColor = trans.Translate("None", Translator.CtrlType.Button);
-			unvell.UIControls.ColorPickerPanel.MoreColors = trans.Translate("More...", Translator.CtrlType.Button);
-			unvell.UIControls.ColorPickerPanel.SolidTab = trans.Translate("Solid", Translator.CtrlType.Tab);
+			unvell.UIControls.ColorPickerPanel.NoColor = trans.Translate("None", Translator.Type.Button);
+			unvell.UIControls.ColorPickerPanel.MoreColors = trans.Translate("More...", Translator.Type.Button);
+			unvell.UIControls.ColorPickerPanel.SolidTab = trans.Translate("Solid", Translator.Type.Tab);
 
 			InitializeComponent();
 

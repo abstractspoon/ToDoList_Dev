@@ -55,7 +55,7 @@ namespace EvidenceBoardUIExtension
             m_Trans = trans;
 
 			if (s_ImageFilter == null)
-				s_ImageFilter = m_Trans.Translate("Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||", Translator.CtrlType.FileFilter);
+				s_ImageFilter = m_Trans.Translate("Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||", Translator.Type.FileFilter);
 
 			InitializeComponent();
         }
@@ -439,7 +439,7 @@ namespace EvidenceBoardUIExtension
 			else
 				m_Control.ClearSelectedDateRange();
 
-			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Visible Date Range", Translator.CtrlType.Label), m_DateSlider.FormatRange());
+			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Visible Date Range", Translator.Type.Label), m_DateSlider.FormatRange());
 		}
 
 		private int ControlTop
@@ -471,7 +471,7 @@ namespace EvidenceBoardUIExtension
 			var label = new Label();
 
 			label.Font = m_ControlsFont;
-			label.Text = m_Trans.Translate(text, Translator.CtrlType.Label);
+			label.Text = m_Trans.Translate(text, Translator.Type.Label);
 			label.AutoSize = true;
 			label.ForeColor = SystemColors.WindowText;
 
@@ -830,7 +830,7 @@ namespace EvidenceBoardUIExtension
 			{
 			case 0:
 			case 1:
-				MessageBox.Show(m_Trans.Translate("To create a new connection you need to preselect two tasks", Translator.CtrlType.Text), 
+				MessageBox.Show(m_Trans.Translate("To create a new connection you need to preselect two tasks", Translator.Type.Text), 
 								m_UiName, 
 								MessageBoxButtons.OK, 
 								MessageBoxIcon.Information);
@@ -843,7 +843,7 @@ namespace EvidenceBoardUIExtension
 
 					if (m_Control.UserLinkExists(fromId, toId))
 					{
-						MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks", Translator.CtrlType.Text), 
+						MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks", Translator.Type.Text), 
 										m_UiName, 
 										MessageBoxButtons.OK, 
 										MessageBoxIcon.Hand);
@@ -926,7 +926,7 @@ namespace EvidenceBoardUIExtension
 			var dialog = new OpenFileDialog
 			{
 				InitialDirectory = m_LastBrowsedImageFolder,
-				Title = m_Trans.Translate("Select Background Image", Translator.CtrlType.Dialog),
+				Title = m_Trans.Translate("Select Background Image", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,

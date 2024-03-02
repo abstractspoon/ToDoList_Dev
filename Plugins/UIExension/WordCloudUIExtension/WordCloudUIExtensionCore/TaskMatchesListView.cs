@@ -202,8 +202,8 @@ namespace WordCloudUIExtension
         {
 			if (this.Columns.Count == 0) // once only
 			{
-				this.Columns.Add(trans.Translate("Task Matches", Translator.CtrlType.Header));
-				this.Columns.Add(trans.Translate("ID", Translator.CtrlType.Header));
+				this.Columns.Add(trans.Translate("Task Matches", Translator.Type.Header));
+				this.Columns.Add(trans.Translate("ID", Translator.Type.Header));
 
 				Columns[1].Width = -2; // Header width
 

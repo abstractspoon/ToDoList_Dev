@@ -65,14 +65,14 @@ namespace EvidenceBoardUIExtension
 
 		public void Translate(Translator trans)
 		{
-			None = trans.Translate(None, Translator.CtrlType.ComboBox);
+			None = trans.Translate(None, Translator.Type.ComboBox);
 
 			foreach (var item in Items)
 			{
 				var link = (item as EvidenceBoardLinkVisibilityItem);
 
 				if (link.Type != EvidenceBoardLinkType.User)
-					link.Label = trans.Translate(link.Label, Translator.CtrlType.ComboBox);
+					link.Label = trans.Translate(link.Label, Translator.Type.ComboBox);
 			}
 		}
 

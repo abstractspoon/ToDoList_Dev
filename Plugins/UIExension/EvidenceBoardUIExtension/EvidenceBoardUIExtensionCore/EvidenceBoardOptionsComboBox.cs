@@ -49,12 +49,12 @@ namespace EvidenceBoardUIExtension
 
 		public void Translate(Translator trans)
 		{
-			None = trans.Translate(None, Translator.CtrlType.ComboBox);
+			None = trans.Translate(None, Translator.Type.ComboBox);
 
 			foreach (var item in Items)
 			{
 				var option = (item as EvidenceBoardOptionItem);
-				option.Label = trans.Translate(option.Label, Translator.CtrlType.ComboBox);
+				option.Label = trans.Translate(option.Label, Translator.Type.ComboBox);
 			}
 		}
 

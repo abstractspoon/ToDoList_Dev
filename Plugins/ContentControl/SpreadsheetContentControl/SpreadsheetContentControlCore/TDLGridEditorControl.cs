@@ -218,28 +218,28 @@ namespace SpreadsheetContentControl
 			m_Trans.Translate(HeaderContextMenu.Items, true);
 			m_Trans.Translate(ColumnContextMenu.Items, true);
 
-			LanguageResource.Menu_InsertSheet = m_Trans.Translate(LanguageResource.Menu_InsertSheet, Translator.CtrlType.Menu);
-			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet, Translator.CtrlType.Menu);
-			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet, Translator.CtrlType.Menu);
+			LanguageResource.Menu_InsertSheet = m_Trans.Translate(LanguageResource.Menu_InsertSheet, Translator.Type.Menu);
+			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet, Translator.Type.Menu);
+			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet, Translator.Type.Menu);
 
-			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ, Translator.CtrlType.ListBox);
-			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA, Translator.CtrlType.ListBox);
-			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll, Translator.CtrlType.ListBox);
-			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks, Translator.CtrlType.ListBox);
+			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ, Translator.Type.ListBox);
+			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA, Translator.Type.ListBox);
+			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll, Translator.Type.ListBox);
+			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks, Translator.Type.ListBox);
 
-			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK, Translator.CtrlType.Button);
-			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel, Translator.CtrlType.Button);
+			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK, Translator.Type.Button);
+			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel, Translator.Type.Button);
 
-			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet, Translator.CtrlType.Tab);
-			LanguageResource.None = m_Trans.Translate(LanguageResource.None, Translator.CtrlType.Text);
-			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text, Translator.CtrlType.Text);
+			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet, Translator.Type.Tab);
+			LanguageResource.None = m_Trans.Translate(LanguageResource.None, Translator.Type.Text);
+			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text, Translator.Type.Text);
 
-			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General, Translator.CtrlType.ListBox);
-			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number, Translator.CtrlType.ListBox);
-			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime, Translator.CtrlType.ListBox);
-			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent, Translator.CtrlType.ListBox);
-			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency, Translator.CtrlType.ListBox);
-			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text, Translator.CtrlType.ListBox);
+			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text, Translator.Type.ListBox);
 
 		}
 
@@ -874,7 +874,7 @@ namespace SpreadsheetContentControl
 				else
 					tooltip = tooltip + "\n";
 
-				tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.CtrlType.ToolTip);
+				tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip);
 
 				GridControl.ShowTooltip(tooltip);
 			}
@@ -1101,7 +1101,7 @@ namespace SpreadsheetContentControl
 			if (dialog is FileDialog)
 			{
 				var fileDlg = (dialog as FileDialog);
-				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter, Translator.CtrlType.FileFilter);
+				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter, Translator.Type.FileFilter);
 			}
 			else // all others
 			{

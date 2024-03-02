@@ -515,7 +515,7 @@ namespace DayViewUIExtension
 			m_Toolbar.Items.Add(btn1);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
-			string format = m_Trans.Translate("{0} Day View", Translator.CtrlType.ToolTip);
+			string format = m_Trans.Translate("{0} Day View", Translator.Type.ToolTip);
 
 			var btn2 = new ToolStripButton();
 			btn2.Name = "Show1DayView";
@@ -653,7 +653,7 @@ namespace DayViewUIExtension
 			m_DayView.DaysShowing = numDays;
             m_WeekLabel.NumDays = numDays;
 
-			string format = m_Trans.Translate("Next/Previous {0} days", Translator.CtrlType.ToolTip);
+			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
 			m_DayView.HScrollTooltipText = String.Format(format, m_DayView.HScrollStep);
 
 			UpdateToolbarButtonStates();
@@ -979,7 +979,7 @@ namespace DayViewUIExtension
 
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
 			{
-				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.CtrlType.Label));
+				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
 
 				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
 				String dateRange = String.Format("{0} - {1}", from.ToString("g"), toDate);

@@ -29,9 +29,9 @@ namespace HTMLReportExporter
 
 		public void Initialise(Translator trans)
 		{
-			Items.Add(new Item(trans.Translate("Auto-generate header row", Translator.CtrlType.ComboBox),  TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
-			Items.Add(new Item(trans.Translate("First row is header row", Translator.CtrlType.ComboBox),   TaskTemplate.Layout.TableHeaderRowType.FirstRow));
-			Items.Add(new Item(trans.Translate("No header row is required", Translator.CtrlType.ComboBox), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
+			Items.Add(new Item(trans.Translate("Auto-generate header row", Translator.Type.ComboBox),  TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
+			Items.Add(new Item(trans.Translate("First row is header row", Translator.Type.ComboBox),   TaskTemplate.Layout.TableHeaderRowType.FirstRow));
+			Items.Add(new Item(trans.Translate("No header row is required", Translator.Type.ComboBox), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
 
 			SelectedIndex = 0;
 		}
@@ -316,8 +316,8 @@ namespace HTMLReportExporter
 				// the user to insert a space first and then try again
 				if (placeHolderToLeft && placeHolderToRight)
 				{
-					MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again.", Translator.CtrlType.Text), 
-									m_Trans.Translate("Report Builder", Translator.CtrlType.Dialog), 
+					MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again.", Translator.Type.Text), 
+									m_Trans.Translate("Report Builder", Translator.Type.Dialog), 
 									MessageBoxButtons.OK, 
 									MessageBoxIcon.Information);
 					Focus();
@@ -468,11 +468,11 @@ namespace HTMLReportExporter
 			switch (placeHolderText)
 			{
 			case "reportTitle":
-				tooltip = m_Trans.Translate("Report Title", Translator.CtrlType.ToolTip);
+				tooltip = m_Trans.Translate("Report Title", Translator.Type.ToolTip);
 				return true;
 
 			case "reportDate":
-				tooltip = m_Trans.Translate("Report Date", Translator.CtrlType.ToolTip);
+				tooltip = m_Trans.Translate("Report Date", Translator.Type.ToolTip);
 				return true;
 			}
 
@@ -587,11 +587,11 @@ namespace HTMLReportExporter
 			switch (placeHolderText)
 			{
 			case "reportTitle":
-				tooltip = m_Trans.Translate("Report Title", Translator.CtrlType.ToolTip);
+				tooltip = m_Trans.Translate("Report Title", Translator.Type.ToolTip);
 				return true;
 
 			case "reportDate":
-				tooltip = m_Trans.Translate("Report Date", Translator.CtrlType.ToolTip);
+				tooltip = m_Trans.Translate("Report Date", Translator.Type.ToolTip);
 				return true;
 			}
 
@@ -659,13 +659,13 @@ namespace HTMLReportExporter
 
 			string levelLabel;
 
-			if (GetLevelLabel(level, Translator.CtrlType.ToolTip, out levelLabel))
+			if (GetLevelLabel(level, Translator.Type.ToolTip, out levelLabel))
 				tooltip = String.Format("{0}\n{1}", tooltip, levelLabel);
 
 			return true;
 		}
 
-		string GetLevelLabel(int level, Translator.CtrlType type)
+		string GetLevelLabel(int level, Translator.Type type)
 		{
 			string label;
 			GetLevelLabel(level, type, out label);
@@ -673,7 +673,7 @@ namespace HTMLReportExporter
 			return label;
 		}
 		
-		bool GetLevelLabel(int level, Translator.CtrlType type, out string label)
+		bool GetLevelLabel(int level, Translator.Type type, out string label)
 		{
 			label = String.Empty;
 
@@ -703,7 +703,7 @@ namespace HTMLReportExporter
 			{
 				if (basePlaceholder.Equals(attrib.BasePlaceholder))
 				{
-					label = m_Trans.Translate(attrib.Label, Translator.CtrlType.ToolTip);
+					label = m_Trans.Translate(attrib.Label, Translator.Type.ToolTip);
 					return true;
 				}
 			}
@@ -719,17 +719,17 @@ namespace HTMLReportExporter
 			// additional 'level' menu
 			m_ToolStripAttributeLevelMenu = new ToolStripDropDownButton() { ForeColor = SystemColors.WindowText }; 
 
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(1, Translator.CtrlType.Menu)) { Name = "1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(1, Translator.Type.Menu)) { Name = "1" });
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
 
 			for (int level = 2; level <= 9; level++)
-				m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(level, Translator.CtrlType.Menu))	{ Name = level.ToString() });
+				m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(level, Translator.Type.Menu))	{ Name = level.ToString() });
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0, Translator.CtrlType.Menu))	{ Name = "0" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0, Translator.Type.Menu))	{ Name = "0" });
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(-1, Translator.CtrlType.Menu)) { Name = "-1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(-1, Translator.Type.Menu)) { Name = "-1" });
 			
 			m_ToolStripAttributeLevelMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			m_ToolStripAttributeLevelMenu.Text = "Task Depth";
@@ -822,7 +822,7 @@ namespace HTMLReportExporter
 				{
 					var menuItem = new ToolStripMenuItem();
 
-					menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)", Translator.CtrlType.Menu), attrib.Value);
+					menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)", Translator.Type.Menu), attrib.Value);
 					menuItem.Name = attrib.Key.ToLower();
 					menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
 

@@ -55,7 +55,7 @@ namespace WordCloudUIExtension
 
 		private bool AddItem(Translator trans, string name, Task.Attribute attrib)
 		{
-            return (Items.Add(new AttributeItem(trans.Translate(name, Translator.CtrlType.ComboBox), attrib)) != -1);
+            return (Items.Add(new AttributeItem(trans.Translate(name, Translator.Type.ComboBox), attrib)) != -1);
 		}
 
         public Task.Attribute GetSelectedAttribute()

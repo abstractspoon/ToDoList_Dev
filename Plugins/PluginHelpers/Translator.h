@@ -27,7 +27,7 @@ namespace Abstractspoon
 			public ref class Translator
 			{
 			public:
-				enum class CtrlType
+				enum class Type
 				{
 					Button,
 					CheckBox,
@@ -48,7 +48,7 @@ namespace Abstractspoon
 			public:
 				Translator(ITransText* pTransText);
 
-				String^ Translate(String^ sText, CtrlType type);
+				String^ Translate(String^ sText, Type type);
 
 				void Translate(Windows::Forms::Form^ window);
 				void Translate(Windows::Forms::Form^ window, Windows::Forms::ToolTip^ tooltips);
@@ -70,7 +70,7 @@ namespace Abstractspoon
 				Translator();
 
 				String^ Translate(String^ sText, LPCWSTR sClassName);
-				LPCWSTR GetClassName(CtrlType type);
+				LPCWSTR GetClassName(Type type);
 			};
 		}
 	}

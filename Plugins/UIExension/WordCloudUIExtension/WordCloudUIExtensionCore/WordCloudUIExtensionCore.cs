@@ -943,7 +943,7 @@ namespace WordCloudUIExtension
 				}
 				m_TaskMatchesList.EndUpdate();
 
-				string headerText = m_Trans.Translate("Task Matches", Translator.CtrlType.Header);
+				string headerText = m_Trans.Translate("Task Matches", Translator.Type.Header);
 
 				if (m_TaskMatchesList.Items.Count > 0)
 				{
@@ -968,7 +968,7 @@ namespace WordCloudUIExtension
 			{
 				var menu = new ContextMenuStrip();
 
-				string format = m_Trans.Translate("&Ignore '{0}'", Translator.CtrlType.Menu);
+				string format = m_Trans.Translate("&Ignore '{0}'", Translator.Type.Menu);
 				string menuText = string.Format(format, m_WordCloud.SelectedWord);
 				var item = menu.Items.Add(menuText);
 
@@ -977,7 +977,7 @@ namespace WordCloudUIExtension
 				item.Image = m_TBImageList.Images[0];
 				item.Name = "IgnoreWord";
 
-				item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List", Translator.CtrlType.Menu));
+				item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List", Translator.Type.Menu));
 
 				item.Click += OnWordCloudEditIgnoreList;
 				item.Image = m_TBImageList.Images[1];

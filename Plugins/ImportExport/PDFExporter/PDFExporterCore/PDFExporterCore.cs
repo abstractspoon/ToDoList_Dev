@@ -212,7 +212,7 @@ namespace PDFExporter
 					break;
 
 				default:
-					m_AvailAttributes.Add(new TaskAttribute(attrib, m_Trans.Translate(TaskList.GetAttributeName(attrib), Translator.CtrlType.Text)));
+					m_AvailAttributes.Add(new TaskAttribute(attrib, m_Trans.Translate(TaskList.GetAttributeName(attrib), Translator.Type.Text)));
 					break;
 				}
 			}

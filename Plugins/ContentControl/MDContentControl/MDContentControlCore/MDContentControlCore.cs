@@ -41,7 +41,7 @@ namespace MDContentControl
 				if (!string.IsNullOrEmpty(tooltip))
 					tooltip = (tooltip + "\n");
 
-				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.CtrlType.ToolTip));
+				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip));
 			};
 
 			m_Trans.Translate(ContextMenu.Items, true);

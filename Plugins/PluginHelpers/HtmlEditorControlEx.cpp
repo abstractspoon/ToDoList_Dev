@@ -168,20 +168,20 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 	
 		m_Trans->Translate(urlDialog, urlDialog->Tooltip);
 
-		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle, Translator::CtrlType::Dialog);
-		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter, Translator::CtrlType::FileFilter);
+		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle, Translator::Type::Dialog);
+		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter, Translator::Type::FileFilter);
 	}
 	else if (ISTYPE(dialog, EnterImageForm))
 	{
 		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
-		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional"), Translator::CtrlType::Text), false);
+		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional"), Translator::Type::Text), false);
 
 		m_Trans->Translate(imageDialog, imageDialog->Tooltip);
 
-		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle, Translator::CtrlType::Dialog);
-		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter, Translator::CtrlType::FileFilter);
+		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle, Translator::Type::Dialog);
+		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter, Translator::Type::FileFilter);
 	}
 	else if (ISTYPE(dialog, EditHtmlForm))
 	{
@@ -351,7 +351,7 @@ void HtmlEditorControlEx::TextPaste()
 		if (sSourceUrl.IsEmpty() && !CClipboard().GetHTMLSourceLink(sSourceUrl))
 			return;
 
-		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source", Translator::CtrlType::Text));
+		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source", Translator::Type::Text));
 	}
 }
 

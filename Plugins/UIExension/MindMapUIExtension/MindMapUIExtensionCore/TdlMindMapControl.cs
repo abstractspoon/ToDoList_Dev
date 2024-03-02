@@ -860,7 +860,7 @@ namespace MindMapUIExtension
 						var prevRootNode = RootNode;
 						base.Clear();
 
-						parentNode = AddRootNode(new MindMapTaskItem(m_Trans.Translate("Root", Translator.CtrlType.Text)));
+						parentNode = AddRootNode(new MindMapTaskItem(m_Trans.Translate("Root", Translator.Type.Text)));
 						parentNode.Nodes.Add(prevRootNode);
 					}
 					else
@@ -960,7 +960,7 @@ namespace MindMapUIExtension
 				return rootName;
 
 			// else
-			return m_Trans.Translate("Root", Translator.CtrlType.Text);
+			return m_Trans.Translate("Root", Translator.Type.Text);
 		}
 
 		public List<UInt32> ExpandedItems
