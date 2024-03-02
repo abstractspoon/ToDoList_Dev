@@ -28,9 +28,34 @@ Translator::Translator() : m_pTransText(nullptr)
 
 }
 
-String^ Translator::Translate(String^ sText)
+String^ Translator::GetClassName(CtrlType type)
 {
-	return Translate(sText, nullptr);
+	switch (type)
+	{
+		case CtrlType::Button:		return gcnew String(WC_BUTTON);
+		case CtrlType::ComboBox:	return gcnew String(WC_COMBOBOX);
+		case CtrlType::Dialog:		return gcnew String(WC_DIALOGBOX);
+		case CtrlType::Header:		return gcnew String(WC_HEADER);
+		case CtrlType::Label:		return gcnew String(WC_STATIC);
+		case CtrlType::Menu:		return gcnew String(WC_MENU);
+		case CtrlType::Tab:			return gcnew String(WC_TABCONTROL);
+		case CtrlType::ToolTip:		return gcnew String(WC_TOOLTIPS);
+
+		case CtrlType::CheckBox:	return gcnew String("checkbox");
+		case CtrlType::GroupBox:	return gcnew String("groupbox");
+		case CtrlType::RadioButton:	return gcnew String("radiobutton");
+	}
+
+	// All else + CtrlType::Text
+	return gcnew String("text");
+}
+
+String^ Translator::Translate(String^ sText, CtrlType type)
+{
+	if (String::IsNullOrWhiteSpace(sText))
+		return String::Empty;
+
+	return Translate(sText, GetClassName(type));
 }
 
 String^ Translator::Translate(String^ sText, String^ sClassName)
@@ -65,7 +90,7 @@ String^ Translator::Translate(String^ sText, String^ sClassName)
 void Translator::Translate(Form^ window)
 {
 	// Window title
-	window->Text = Translate(window->Text, gcnew String(WC_DIALOGBOX));
+	window->Text = Translate(window->Text, CtrlType::Dialog);
 
 	// children
 	Translate(window->Controls);
@@ -77,7 +102,6 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 
 	if (tooltips != nullptr)
 	{
-		auto tooltipClass = gcnew String(WC_TOOLTIPS);
 		int nItem = window->Controls->Count;
 
 		while (nItem--)
@@ -86,7 +110,7 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 			auto toolText = tooltips->GetToolTip(ctrl);
 
 			if (!String::IsNullOrEmpty(toolText))
-				tooltips->SetToolTip(ctrl, Translate(toolText, tooltipClass));
+				tooltips->SetToolTip(ctrl, Translate(toolText, CtrlType::ToolTip));
 		}
 	}
 }
@@ -107,7 +131,7 @@ void Translator::Translate(Control^ ctrl)
 	}
 	else if (ISTYPE(ctrl, ToolStrip))
 	{
-		Translate(ASTYPE(ctrl, ToolStrip)->Items);
+		Translate(ASTYPE(ctrl, ToolStrip)->Items, false);
 	}
 	else if (ISTYPE(ctrl, ComboBox))
 	{
@@ -120,9 +144,9 @@ void Translator::Translate(Control^ ctrl)
 	else
 	{
 		auto typeArr = ctrl->GetType()->FullName->Split('.');
-		auto typeName = ((typeArr && typeArr->Length) ? typeArr[typeArr->Length - 1] : nullptr);
-
-		ctrl->Text = Translate(ctrl->Text, typeName);
+		auto className = typeArr[typeArr->Length - 1];
+		
+		ctrl->Text = Translate(ctrl->Text, className);
 
 		// children
 		Translate(ctrl->Controls);
@@ -135,17 +159,16 @@ void Translator::Translate(ITranslatable^ ctrl)
 		ctrl->Translate(this);
 }
 
-void Translator::Translate(ToolStripItemCollection^ items)
+void Translator::Translate(ToolStripItemCollection^ items, bool isMenu)
 {
-	auto tooltipClass = gcnew String(WC_TOOLTIPS);
 	int nItem = items->Count;
 
 	while (nItem--)
 	{
 		auto item = items[nItem];
 
-		item->Text = Translate(item->Text);
-		item->ToolTipText = Translate(item->ToolTipText, tooltipClass);
+		item->Text = Translate(item->Text, (isMenu ? CtrlType::Menu : CtrlType::Text));
+		item->ToolTipText = Translate(item->ToolTipText, CtrlType::ToolTip);
 
 		// children
 		auto dropItem = ASTYPE(item, ToolStripDropDownItem);
@@ -159,7 +182,7 @@ void Translator::Translate(ToolStripItemCollection^ items)
 
 			if (dropItem->HasDropDownItems)
 			{
-				Translate(dropItem->DropDownItems); // RECURSIVE CALL
+				Translate(dropItem->DropDownItems, isMenu); // RECURSIVE CALL
 			}
 		}
 	}
@@ -175,11 +198,10 @@ void Translator::Translate(Control::ControlCollection^ items)
 
 void Translator::Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items)
 {
-	auto headerClass = gcnew String(WC_HEADER);
 	int nItem = items->Count;
 
 	while (nItem--)
-		items[nItem]->Text = Translate(items[nItem]->Text, headerClass);
+		items[nItem]->Text = Translate(items[nItem]->Text, CtrlType::Header);
 }
 
 void Translator::Translate(ComboBox^ combo)
@@ -188,7 +210,6 @@ void Translator::Translate(ComboBox^ combo)
 	if (combo->DropDownStyle != ComboBoxStyle::DropDownList)
 		return;
 
-	auto comboClass = gcnew String(WC_COMBOBOX);
 	int nItem = combo->Items->Count;
 
 	while (nItem--)
@@ -198,10 +219,10 @@ void Translator::Translate(ComboBox^ combo)
 		if (item == nullptr)
 			return;
 
-		combo->Items[nItem] = Translate(item, comboClass);
+		combo->Items[nItem] = Translate(item, CtrlType::ComboBox);
 	}
 
-	combo->Text = Translate(combo->Text);
+	combo->Text = Translate(combo->Text, CtrlType::ComboBox);
 	
 	FormsUtil::RecalcDropWidth(combo);
 }

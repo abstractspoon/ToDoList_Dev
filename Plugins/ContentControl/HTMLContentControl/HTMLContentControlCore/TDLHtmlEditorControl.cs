@@ -478,7 +478,7 @@ namespace HTMLContentControl
 					else
 						tooltip = tooltip + "\n";
 
-					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.CtrlType.ToolTip);
 				}
 
 				if (!tooltip.Equals(element.GetAttribute("title")))

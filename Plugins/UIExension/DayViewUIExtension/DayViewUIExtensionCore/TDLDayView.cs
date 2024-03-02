@@ -141,18 +141,18 @@ namespace DayViewUIExtension
 				// NOTE: - Must match 'Calendar' View in 'Core' project
 				if (appt is FutureTaskOccurrence)
 				{
-					tip.Text = m_Trans.Translate("Future Occurrence");
+					tip.Text = m_Trans.Translate("Future Occurrence", Translator.CtrlType.ToolTip);
 				}
 				else if (appt is CustomTaskDateAttribute)
 				{
 					var apptDate = (appt as CustomTaskDateAttribute);
 					var custAttrib = m_CustomDateDefs.Find(x => (x.Id == apptDate.AttributeId));
 
-					tip.Text = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
+					tip.Text = string.Format(m_Trans.Translate("{0} (Custom)", Translator.CtrlType.ToolTip), custAttrib.Label);
 				}
 				else if (appt is TaskTimeBlock)
 				{
-					tip.Text = m_Trans.Translate("Time Block");
+					tip.Text = m_Trans.Translate("Time Block", Translator.CtrlType.ToolTip);
 				}
 				else
 				{

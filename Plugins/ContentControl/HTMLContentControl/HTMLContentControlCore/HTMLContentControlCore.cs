@@ -224,7 +224,7 @@ namespace HTMLContentControl
 			prefsBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			prefsBtn.Name = "toolstripShowPrefs";
 			prefsBtn.Tag = "ShowPrefs";
-			prefsBtn.ToolTipText = m_Trans.Translate("Preferences");
+			prefsBtn.ToolTipText = m_Trans.Translate("Preferences", Translator.CtrlType.ToolTip);
 			prefsBtn.Click += new System.EventHandler(OnShowPreferences);
 			prefsBtn.Size = m_HtmlEditControl.ToolBar.Items[0].Size;
 			prefsBtn.Image = Properties.Resources.prefs.ToBitmap();
@@ -237,7 +237,7 @@ namespace HTMLContentControl
 			helpBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			helpBtn.Name = "toolstripShowHelp";
 			helpBtn.Tag = "ShowHelp";
-			helpBtn.ToolTipText = m_Trans.Translate("Online Help");
+			helpBtn.ToolTipText = m_Trans.Translate("Online Help", Translator.CtrlType.ToolTip);
 			helpBtn.Click += new System.EventHandler(OnShowHelp);
 			helpBtn.Size = prefsBtn.Size;
 			helpBtn.Image = Properties.Resources.help.ToBitmap();

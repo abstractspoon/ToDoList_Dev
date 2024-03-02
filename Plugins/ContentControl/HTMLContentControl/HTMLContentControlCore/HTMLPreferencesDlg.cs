@@ -64,7 +64,7 @@ namespace HTMLContentControl
 			var dialog = new OpenFileDialog
 			{
 				InitialDirectory = LastBrowsedImageFolder,
-				Title = m_Trans.Translate("Select Watermark Image"),
+				Title = m_Trans.Translate("Select Watermark Image", Translator.CtrlType.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,

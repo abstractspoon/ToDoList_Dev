@@ -109,8 +109,8 @@ void HtmlEditorControlEx::Translate()
 		// Prepare pre-translation of enum comboboxes 
 		m_Trans->AddPreTranslation(gcnew String("Center"), gcnew String("Centre"));
 
-		m_Trans->Translate(ToolBar->Items);
-		m_Trans->Translate(ContextMenu->Items);
+		m_Trans->Translate(ToolBar->Items, false);
+		m_Trans->Translate(ContextMenu->Items, true);
 	}
 }
 
@@ -168,20 +168,20 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 	
 		m_Trans->Translate(urlDialog, urlDialog->Tooltip);
 
-		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle);
-		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter);
+		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle, Translator::CtrlType::Dialog);
+		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter, Translator::CtrlType::Dialog);
 	}
 	else if (ISTYPE(dialog, EnterImageForm))
 	{
 		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
-		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
+		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional"), Translator::CtrlType::Text), false);
 
 		m_Trans->Translate(imageDialog, imageDialog->Tooltip);
 
-		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle);
-		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter);
+		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle, Translator::CtrlType::Dialog);
+		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter, Translator::CtrlType::Dialog);
 	}
 	else if (ISTYPE(dialog, EditHtmlForm))
 	{
@@ -351,7 +351,7 @@ void HtmlEditorControlEx::TextPaste()
 		if (sSourceUrl.IsEmpty() && !CClipboard().GetHTMLSourceLink(sSourceUrl))
 			return;
 
-		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source"));
+		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source", Translator::CtrlType::Text));
 	}
 }
 

@@ -384,7 +384,7 @@ namespace DayViewUIExtension
 
 		ToolStripMenuItem AddMenuItem(ContextMenuStrip menu, string text, Keys keys, int imageIndex)
 		{
-			var item = new ToolStripMenuItem(m_Trans.Translate(text));
+			var item = new ToolStripMenuItem(text);
 			item.ShortcutKeys = keys;
 			item.ShowShortcutKeys = (keys != Keys.None);
 
@@ -436,11 +436,13 @@ namespace DayViewUIExtension
 			if (menu.Items.Count > 0)
 			{
 				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add(m_Trans.Translate("Cancel"));
+				menu.Items.Add("Cancel");
 
 				menu.Renderer = m_ToolbarRenderer;
 				menu.Show(m_DayView, e.Location);
 			}
+
+			m_Trans.Translate(menu.Items, true);
 
 			return true; // handled
 		}
@@ -509,11 +511,11 @@ namespace DayViewUIExtension
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
 			btn1.Click += new EventHandler(OnGoToToday);
-			btn1.ToolTipText = m_Trans.Translate("Go To Today");
+			btn1.ToolTipText = "Go To Today";
 			m_Toolbar.Items.Add(btn1);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
-			string format = m_Trans.Translate("{0} Day View");
+			string format = m_Trans.Translate("{0} Day View", Translator.CtrlType.ToolTip);
 
 			var btn2 = new ToolStripButton();
 			btn2.Name = "Show1DayView";
@@ -556,21 +558,21 @@ namespace DayViewUIExtension
 			btn7.Name = "NewTimeBlock";
 			btn7.ImageIndex = 6;
 			btn7.Click += new EventHandler(OnNewTimeBlock);
-			btn7.ToolTipText = m_Trans.Translate("New Time Block");
+			btn7.ToolTipText = "New Time Block";
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
 			btn8.Name = "DeleteTimeBlock";
 			btn8.ImageIndex = 7;
 			btn8.Click += new EventHandler(OnDeleteTimeBlock);
-			btn8.ToolTipText = m_Trans.Translate("Delete Time Block");
+			btn8.ToolTipText = "Delete Time Block";
 			m_Toolbar.Items.Add(btn8);
 
 			var btn9 = new ToolStripButton();
 			btn9.Name = "DuplicateTimeBlock";
 			btn9.ImageIndex = 8;
 			btn9.Click += new EventHandler(OnDuplicateTimeBlock);
-			btn9.ToolTipText = m_Trans.Translate("Duplicate Time Block");
+			btn9.ToolTipText = "Duplicate Time Block";
 			m_Toolbar.Items.Add(btn9);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -579,14 +581,14 @@ namespace DayViewUIExtension
 			btn10.Name = "EditTimeBlockSeries";
 			btn10.ImageIndex = 9;
 			btn10.Click += new EventHandler(OnEditTimeBlockSeries);
-			btn10.ToolTipText = m_Trans.Translate("Edit Time Block Series");
+			btn10.ToolTipText = "Edit Time Block Series";
 			m_Toolbar.Items.Add(btn10);
 
 			var btn11 = new ToolStripButton();
 			btn11.Name = "DeleteTimeBlockSeries";
 			btn11.ImageIndex = 10;
 			btn11.Click += new EventHandler(OnDeleteTimeBlockSeries);
-			btn11.ToolTipText = m_Trans.Translate("Delete Time Block Series");
+			btn11.ToolTipText = "Delete Time Block Series";
 			m_Toolbar.Items.Add(btn11);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -594,7 +596,7 @@ namespace DayViewUIExtension
 			var btn12 = new ToolStripButton();
 			btn12.ImageIndex = 11;
 			btn12.Click += new EventHandler(OnPreferences);
-			btn12.ToolTipText = m_Trans.Translate("Preferences");
+			btn12.ToolTipText = "Preferences";
 			m_Toolbar.Items.Add(btn12);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -602,12 +604,13 @@ namespace DayViewUIExtension
 			var btn13 = new ToolStripButton();
 			btn13.ImageIndex = 12;
 			btn13.Click += new EventHandler(OnHelp);
-			btn13.ToolTipText = m_Trans.Translate("Online Help");
+			btn13.ToolTipText = "Online Help";
 			m_Toolbar.Items.Add(btn13);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			Controls.Add(m_Toolbar);
+			m_Trans.Translate(m_Toolbar.Items, false);
 		}
 
 		private void OnGoToToday(object sender, EventArgs e)
@@ -650,7 +653,7 @@ namespace DayViewUIExtension
 			m_DayView.DaysShowing = numDays;
             m_WeekLabel.NumDays = numDays;
 
-			string format = m_Trans.Translate("Next/Previous {0} days");
+			string format = m_Trans.Translate("Next/Previous {0} days", Translator.CtrlType.ToolTip);
 			m_DayView.HScrollTooltipText = String.Format(format, m_DayView.HScrollStep);
 
 			UpdateToolbarButtonStates();
@@ -976,7 +979,7 @@ namespace DayViewUIExtension
 
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
 			{
-				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range"));
+				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.CtrlType.Label));
 
 				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
 				String dateRange = String.Format("{0} - {1}", from.ToString("g"), toDate);

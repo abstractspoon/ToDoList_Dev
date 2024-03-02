@@ -172,7 +172,7 @@ namespace MarkdeepExporter
 
 			if (!String.IsNullOrEmpty(attribName))
 			{
-				var item = new Tuple<string, Task.Attribute>(m_Trans.Translate(attribName), attrib);
+				var item = new Tuple<string, Task.Attribute>(m_Trans.Translate(attribName, Translator.CtrlType.Text), attrib);
 
 				if (atEnd)
 					attribs.Add(item);

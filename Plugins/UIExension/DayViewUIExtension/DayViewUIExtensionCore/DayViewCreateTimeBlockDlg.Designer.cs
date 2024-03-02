@@ -62,7 +62,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(289, 228);
+			this.Cancel.Location = new System.Drawing.Point(291, 228);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 10;
@@ -74,7 +74,7 @@
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-2, 216);
+			this.label5.Location = new System.Drawing.Point(-2, 218);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(386, 2);
 			this.label5.TabIndex = 11;
@@ -117,7 +117,7 @@
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Create Time Block";
+			this.Text = "New Time Block";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
