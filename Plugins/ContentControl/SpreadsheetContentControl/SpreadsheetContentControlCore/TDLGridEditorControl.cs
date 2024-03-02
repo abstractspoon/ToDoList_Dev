@@ -1101,7 +1101,7 @@ namespace SpreadsheetContentControl
 			if (dialog is FileDialog)
 			{
 				var fileDlg = (dialog as FileDialog);
-				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter, Translator.CtrlType.Text);
+				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter, Translator.CtrlType.FileFilter);
 			}
 			else // all others
 			{

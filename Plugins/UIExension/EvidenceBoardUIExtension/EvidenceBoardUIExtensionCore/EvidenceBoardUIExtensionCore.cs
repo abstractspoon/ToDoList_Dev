@@ -55,7 +55,7 @@ namespace EvidenceBoardUIExtension
             m_Trans = trans;
 
 			if (s_ImageFilter == null)
-				s_ImageFilter = m_Trans.Translate("Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||", Translator.CtrlType.Text);
+				s_ImageFilter = m_Trans.Translate("Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||", Translator.CtrlType.FileFilter);
 
 			InitializeComponent();
         }

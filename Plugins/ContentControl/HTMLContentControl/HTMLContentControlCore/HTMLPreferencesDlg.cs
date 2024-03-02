@@ -70,7 +70,7 @@ namespace HTMLContentControl
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = ImageUtils.ImageFilter,
+				Filter = m_Trans.Translate(ImageUtils.ImageFilter, Translator.CtrlType.FileFilter),
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

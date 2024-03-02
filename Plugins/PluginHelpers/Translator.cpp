@@ -55,6 +55,13 @@ String^ Translator::Translate(String^ sText, CtrlType type)
 	if (String::IsNullOrWhiteSpace(sText))
 		return String::Empty;
 
+	// Special cases
+	switch (type)
+	{
+	case CtrlType::FileFilter:
+		return Translate(sText, GetClassName(CtrlType::Text))->Trim('|');
+	}
+
 	return Translate(sText, GetClassName(type));
 }
 

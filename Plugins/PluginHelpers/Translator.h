@@ -33,6 +33,7 @@ namespace Abstractspoon
 					CheckBox,
 					ComboBox,
 					Dialog,
+					FileFilter,
 					GroupBox,
 					Header,
 					Label,

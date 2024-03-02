@@ -169,7 +169,7 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		m_Trans->Translate(urlDialog, urlDialog->Tooltip);
 
 		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle, Translator::CtrlType::Dialog);
-		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter, Translator::CtrlType::Dialog);
+		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter, Translator::CtrlType::FileFilter);
 	}
 	else if (ISTYPE(dialog, EnterImageForm))
 	{
@@ -181,7 +181,7 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		m_Trans->Translate(imageDialog, imageDialog->Tooltip);
 
 		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle, Translator::CtrlType::Dialog);
-		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter, Translator::CtrlType::Dialog);
+		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter, Translator::CtrlType::FileFilter);
 	}
 	else if (ISTYPE(dialog, EditHtmlForm))
 	{
