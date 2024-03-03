@@ -9,6 +9,7 @@ using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+using ImageHelper;
 
 namespace EvidenceBoardUIExtension
 {
@@ -30,7 +31,6 @@ namespace EvidenceBoardUIExtension
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
 
 		private String m_LastBrowsedImageFolder;
-		static string s_ImageFilter;
 
 		private Label m_OptionsLabel;
 		private EvidenceBoardOptionsComboBox m_OptionsCombo;
@@ -53,9 +53,6 @@ namespace EvidenceBoardUIExtension
 			m_UiName = uiName;
 			m_HwndParent = hwndParent;
             m_Trans = trans;
-
-			if (s_ImageFilter == null)
-				s_ImageFilter = m_Trans.Translate("Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||", Translator.Type.FileFilter);
 
 			InitializeComponent();
         }
@@ -932,7 +929,7 @@ namespace EvidenceBoardUIExtension
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = s_ImageFilter,
+				Filter = m_Trans.Translate(ImageUtils.ImageFilter, Translator.Type.FileFilter),
 				FilterIndex = 0,
 				RestoreDirectory = true,
 
