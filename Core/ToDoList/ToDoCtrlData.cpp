@@ -4531,25 +4531,29 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	COleDateTime dtStart = GetTaskDate(dwPrevTaskID, TDCD_START);
 	COleDateTime dtDue = GetTaskDate(dwPrevTaskID, TDCD_DUE);
 
-	// Work in recurrence units where possible
-	TDCRECURRENCE trPrev;
-	TDC_UNITS nRecurUnits = TDCU_NULL;
-	int nRecurAmount = 0;
-
-	VERIFY(GetTaskRecurrence(dwPrevTaskID, trPrev));
-	BOOL bIsSimple = trPrev.GetSimpleOffsetAmount(nRecurAmount, nRecurUnits);
-
 	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
 
 	BOOL bWantInheritStart = WantUpdateInheritedAttibute(TDCA_STARTDATE);
 	BOOL bWantInheritDue = WantUpdateInheritedAttibute(TDCA_DUEDATE);
 
+	// Work in recurrence units where possible
+	TDCRECURRENCE trPrev;
+	TDC_UNITS nRecurUnits = TDCU_NULL;
+	int nRecurAmount = 0;
+
+	VERIFY(GetTaskRecurrence(dwPrevTaskID, trPrev));
+
+	BOOL bRecalcFromDone = (trPrev.nRecalcFrom == TDIRO_DONEDATE);
+	BOOL bIsSimple = (!bRecalcFromDone && trPrev.GetSimpleOffsetAmount(nRecurAmount, nRecurUnits));
+
 	if (bDueDate) // dtNext is the new due date
 	{
+		ASSERT(bHasDue || !bHasStart);
+
 		if (!bIsSimple)
 		{
-			nRecurUnits = trPrev.GetRegularityUnits();
+			nRecurUnits = (bRecalcFromDone ? TDCU_DAYS : trPrev.GetRegularityUnits());
 			nRecurAmount = (bHasDue ? CalcRecurrenceOffset(dtDue, dtNext, nRecurUnits) : 0);
 		}
 
@@ -4576,6 +4580,8 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 												 nRecurAmount,
 												 nRecurUnits,
 												 dwFlags);
+
+				ASSERT(GetTaskDate(dwNewTaskID, TDCD_DUE) == dtNext);
 				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
@@ -4619,9 +4625,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	}
 	else // dtNext is the new start date
 	{
+		ASSERT(bHasStart);
+
 		if (!bIsSimple)
 		{
-			nRecurUnits = trPrev.GetRegularityUnits();
+			nRecurUnits = (bRecalcFromDone ? TDCU_DAYS : trPrev.GetRegularityUnits());
 			nRecurAmount = (bHasStart ? CalcRecurrenceOffset(dtStart, dtNext, nRecurUnits) : 0);
 		}
 
@@ -4682,6 +4690,8 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 												  nRecurAmount, 
 												  nRecurUnits, 
 												  dwFlags);
+
+				ASSERT(GetTaskDate(dwNewTaskID, TDCD_START) == dtNext);
 				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
