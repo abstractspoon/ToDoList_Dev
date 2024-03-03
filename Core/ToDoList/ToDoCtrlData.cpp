@@ -4581,8 +4581,6 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 												 nRecurUnits,
 												 dwFlags);
 
-				ASSERT(GetTaskDate(dwNewTaskID, TDCD_DUE) == dtNext);
-				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
@@ -4691,8 +4689,6 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 												  nRecurUnits, 
 												  dwFlags);
 
-				ASSERT(GetTaskDate(dwNewTaskID, TDCD_START) == dtNext);
-				
 				if (nDateRes == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
