@@ -699,11 +699,13 @@ namespace WordCloudUIExtension
 				label.Location = new Point(prevLabel.Right + ComboSpacing, LabelTop);
 
 			label.Size = new Size(ComboWidth, LabelHeight);
-			label.Text = m_Trans.Translate(labelText);
+			label.Text = labelText;
 			label.TextAlign = ContentAlignment.MiddleLeft;
 			label.Font = m_ControlsFont;
 
 			this.Controls.Add(label);
+			m_Trans.Translate(label);
+
 			return label;
 		}
 
@@ -751,7 +753,7 @@ namespace WordCloudUIExtension
 			{
 				Name = "IgnoreWord",
 				ImageIndex = 0,
-				ToolTipText = m_Trans.Translate("Ignore Selected Word")
+				ToolTipText = "Ignore Selected Word"
 			};
 
 			btn1.Click += new EventHandler(OnWordCloudIgnoreWord);
@@ -761,7 +763,7 @@ namespace WordCloudUIExtension
 			{
 				Name = "EditIgnoreList",
 				ImageIndex = 1,
-				ToolTipText = m_Trans.Translate("Edit Ignore List")
+				ToolTipText = "Edit Ignore List"
 			};
 		
 			btn2.Click += (s, e) => { OnWordCloudEditIgnoreList(s, e); };
@@ -772,14 +774,15 @@ namespace WordCloudUIExtension
 			var btn10 = new ToolStripButton()
 			{
 				ImageIndex = 2,
-				ToolTipText = m_Trans.Translate("Online Help")
+				ToolTipText = "Online Help"
 			};
 			btn10.Click += (s, e) => { OnHelp(s, e); };
 			m_Toolbar.Items.Add(btn10);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
-
 			Controls.Add(m_Toolbar);
+
+			m_Trans.Translate(m_Toolbar.Items, false);
 		}
 
 		private void UpdateToolbarButtonStates()
@@ -940,7 +943,7 @@ namespace WordCloudUIExtension
 				}
 				m_TaskMatchesList.EndUpdate();
 
-				string headerText = m_Trans.Translate("Task Matches");
+				string headerText = m_Trans.Translate("Task Matches", Translator.Type.Header);
 
 				if (m_TaskMatchesList.Items.Count > 0)
 				{
@@ -965,7 +968,7 @@ namespace WordCloudUIExtension
 			{
 				var menu = new ContextMenuStrip();
 
-				string format = m_Trans.Translate("&Ignore '{0}'");
+				string format = m_Trans.Translate("&Ignore '{0}'", Translator.Type.Menu);
 				string menuText = string.Format(format, m_WordCloud.SelectedWord);
 				var item = menu.Items.Add(menuText);
 
@@ -974,7 +977,7 @@ namespace WordCloudUIExtension
 				item.Image = m_TBImageList.Images[0];
 				item.Name = "IgnoreWord";
 
-				item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List"));
+				item = menu.Items.Add(m_Trans.Translate("&Edit Ignore List", Translator.Type.Menu));
 
 				item.Click += OnWordCloudEditIgnoreList;
 				item.Image = m_TBImageList.Images[1];

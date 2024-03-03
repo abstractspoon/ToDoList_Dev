@@ -65,9 +65,9 @@ namespace DayViewUIExtension
                 int numWeeks = (NumDays / 7);
 
                 if (numWeeks <= 1)
-                    Text = (Text + String.Format(m_Trans.Translate("(Week {0})"), startWeek));
+                    Text = (Text + String.Format(m_Trans.Translate("(Week {0})", Translator.Type.Label), startWeek));
                 else
-                    Text = (Text + String.Format(m_Trans.Translate("(Weeks {0}-{1})"), startWeek, (startWeek + numWeeks - 1)));
+                    Text = (Text + String.Format(m_Trans.Translate("(Weeks {0}-{1})", Translator.Type.Label), startWeek, (startWeek + numWeeks - 1)));
 
 				Invalidate();
 			}

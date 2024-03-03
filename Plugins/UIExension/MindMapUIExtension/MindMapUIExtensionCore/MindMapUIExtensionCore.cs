@@ -296,12 +296,12 @@ namespace MindMapUIExtension
 			this.Controls.Add(m_OptionsCombo);
 		}
 
-		Label CreateLabel(string untranslatedText, Control prevControl)
+		Label CreateLabel(string text, Control prevControl)
 		{
 			var label = new Label();
 
 			label.Font = m_ControlsFont;
-			label.Text = m_Trans.Translate(untranslatedText);
+			label.Text = text;
 			label.AutoSize = true;
 			label.ForeColor = SystemColors.WindowText;
 
@@ -309,6 +309,8 @@ namespace MindMapUIExtension
 				label.Location = new Point((prevControl.Bounds.Right + 20), 8);
 			else
 				label.Location = new Point(-2, 8);
+
+			m_Trans.Translate(label);
 
 			return label;
 		}

@@ -27,16 +27,35 @@ namespace Abstractspoon
 			public ref class Translator
 			{
 			public:
+				enum class Type
+				{
+					Button,
+					CheckBox,
+					ComboBox,
+					Dialog,
+					FileFilter,
+					GroupBox,
+					Header,
+					Label,
+					ListBox,
+					Menu,
+					RadioButton,
+					Tab,
+					Text,
+					ToolTip,
+				};
+
+			public:
 				Translator(ITransText* pTransText);
 
-				String^ Translate(String^ sText);
+				String^ Translate(String^ sText, Type type);
 
 				void Translate(Windows::Forms::Form^ window);
 				void Translate(Windows::Forms::Form^ window, Windows::Forms::ToolTip^ tooltips);
 				void Translate(Windows::Forms::Control^ ctrl);
 				void Translate(Windows::Forms::ComboBox^ combo);
 				void Translate(Windows::Forms::Control::ControlCollection^ items);
-				void Translate(Windows::Forms::ToolStripItemCollection^ items);
+				void Translate(Windows::Forms::ToolStripItemCollection^ items, bool isMenu);
 				void Translate(Windows::Forms::ListView::ColumnHeaderCollection^ items);
 
 				void Translate(ITranslatable^ ctrl);
@@ -50,6 +69,8 @@ namespace Abstractspoon
 			private:
 				Translator();
 
+				String^ Translate(String^ sText, LPCWSTR sClassName);
+				LPCWSTR GetClassName(Type type);
 			};
 		}
 	}

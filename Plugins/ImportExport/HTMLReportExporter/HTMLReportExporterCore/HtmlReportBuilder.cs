@@ -447,7 +447,7 @@ namespace HTMLReportExporter
 				if (ContainsNonTopLevelTaskAttributes(tasks))
 				{
 					// Report an error
-					var message = m_Trans.Translate("Only top-level task attributes are allowable in the Title section.");
+					var message = m_Trans.Translate("Only top-level task attributes are allowed in the Title section.", Translator.Type.Text);
 
 					html.AddStyleAttribute(HtmlTextWriterStyle.Color, "red");
 					html.AddStyleAttribute(HtmlTextWriterStyle.BorderStyle, "solid");
@@ -486,7 +486,7 @@ namespace HTMLReportExporter
 					html.AddStyleAttribute(HtmlTextWriterStyle.BorderStyle, "solid");
 					html.RenderBeginTag(HtmlTextWriterTag.P);
 
-					var message = m_Trans.Translate("Only top-level task attributes are allowed in the Title section.");
+					var message = m_Trans.Translate("Only top-level task attributes are allowed in the Title section.", Translator.Type.Text);
 					html.WriteLine("** {0} **", message);
 
 					html.RenderEndTag(); // P
@@ -627,7 +627,7 @@ namespace HTMLReportExporter
 				if (m_Preview && (m_PreviewTaskCount >= MaxNumPreviewTasks) && (tasks.GetTaskCount() > m_PreviewTaskCount))
 				{
 					html.RenderBeginTag(HtmlTextWriterTag.P);
-					html.WriteLine(m_Trans.Translate("(more tasks not shown...)"));
+					html.WriteLine(m_Trans.Translate("(more tasks not shown...)", Translator.Type.Text));
 					html.RenderEndTag(); // P
 				}
 

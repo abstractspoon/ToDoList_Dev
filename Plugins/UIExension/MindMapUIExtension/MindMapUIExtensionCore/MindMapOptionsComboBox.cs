@@ -32,10 +32,10 @@ namespace MindMapUIExtension
 
 		public MindMapOptionsComboBox(Translator trans)
 		{
-			None = trans.Translate("<none>");
+			None = trans.Translate("<none>", Translator.Type.ComboBox);
 
-			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies"), MindMapOption.ShowDependencies));
-			Items.Add(new MindMapOptionItem(trans.Translate("Straight line connections"), MindMapOption.StraightConnections));
+			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies", Translator.Type.ComboBox), MindMapOption.ShowDependencies));
+			Items.Add(new MindMapOptionItem(trans.Translate("Straight line connections", Translator.Type.ComboBox), MindMapOption.StraightConnections));
 
 			Sorted = true;
 		}
