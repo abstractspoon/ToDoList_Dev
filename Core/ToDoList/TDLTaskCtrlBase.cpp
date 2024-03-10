@@ -3933,6 +3933,11 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());
 	case TDCC_PARENTID:			return m_formatter.GetID(pTDS->GetParentTaskID());
 
+	case TDCC_PRIORITY:
+		if (!HasStyle(TDCS_HIDEPRIORITYNUMBER))
+			return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
+		break;
+
 	case TDCC_ICON:
 	case TDCC_DONE:
 	case TDCC_FLAG:
@@ -3949,11 +3954,11 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 		case TDCC_DUEDATE:
 		case TDCC_DONEDATE:
 		case TDCC_CREATIONDATE:
-		case TDCC_LASTMODDATE:
-			return FormatTaskDate(pTDI, pTDS, TDC::MapColumnToDate(nColID));
+		case TDCC_LASTMODDATE:	return FormatTaskDate(pTDI, pTDS, TDC::MapColumnToDate(nColID));
 
-		case TDCC_DEPENDENCY:
-			return pTDI->aDependencies.Format(_T("+"));
+		case TDCC_DEPENDENCY:	return pTDI->aDependencies.Format(_T("+"));
+		case TDCC_FILELINK:		return Misc::FormatArray(pTDI->aFileLinks, '+');
+		case TDCC_PRIORITY:		return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
 
 		case TDCC_REMINDER:
 			{
@@ -3963,14 +3968,6 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 				if ((tRem != 0) && (tRem != -1))
 					return FormatDate(COleDateTime(tRem), TDCD_REMINDER);
 			}
-			break;
-
-		case TDCC_FILELINK:
-			return Misc::FormatArray(pTDI->aFileLinks, '+');
-
-		case TDCC_PRIORITY:
-			if (!HasStyle(TDCS_HIDEPRIORITYNUMBER))
-				return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
 			break;
 
 		default:
