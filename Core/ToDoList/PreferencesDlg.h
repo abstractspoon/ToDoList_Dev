@@ -208,7 +208,6 @@ public:
 	BOOL GetSubtasksInheritLockStatus() const { return m_pageTaskCalc.GetSubtasksInheritLockStatus(); }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_pageTaskCalc.GetTaskInheritsSubtaskFlags(); }
 	BOOL GetUseLatestLastModifiedDate() const { return m_pageTaskCalc.GetUseLatestLastModifiedDate(); }
-	BOOL GetPreserveWeekdays() const { return m_pageTaskCalc.GetPreserveWeekdays(); }
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const { return m_pageTaskCalc.GetRecentlyModifiedPeriod(); }
 
 	PTCP_CALCTIMEREMAINING GetTimeRemainingCalculation() const { return m_pageTaskCalc.GetTimeRemainingCalculation(); }

@@ -271,8 +271,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			int nMonth = st.wMonth;
 			int nYear = st.wYear;
 
-			// Using a do loop means we test 'this' month and year before moving forward
-			do
+			while (GetNextSpecificMonth(m_dwSpecific1, nMonth, nYear))
 			{
 				st.wDay = (WORD)m_dwSpecific2;
 				st.wMonth = (WORD)nMonth;
@@ -286,7 +285,6 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 				if (CDateHelper::Compare(dtTemp, dtPrev, 0) > 0)
 					break;
 			}
-			while (GetNextSpecificMonth(m_dwSpecific1, nMonth, nYear));
 		}
 		break;
 		
@@ -301,8 +299,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			int nMonth = dtTemp.GetMonth();
 			int nYear = dtTemp.GetYear();
 
-			// Using a do loop means we test 'this' month and year before moving forward
-			do
+			while (GetNextSpecificMonth(m_dwSpecific2, nMonth, nYear))
 			{
 				dtTemp = CDateHelper::CalcDate(nDOW, nWhich, nMonth, nYear);
 				dtTemp.m_dt += dTimeOnly;
@@ -310,7 +307,6 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 				if (CDateHelper::Compare(dtTemp, dtPrev, 0) > 0)
 					break;
 			}
-			while (GetNextSpecificMonth(m_dwSpecific2, nMonth, nYear));
 		}
 		break;
 		

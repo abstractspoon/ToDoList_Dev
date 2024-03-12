@@ -233,9 +233,9 @@ public:
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
-	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE, BOOL bPreserveWeekday = FALSE);
+	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE);
 	BOOL CanOffsetSelectedTaskStartAndDueDates() const;
-	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE, BOOL bPreserveWeekdays = FALSE);
+	BOOL OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks = FALSE, BOOL bFromToday = FALSE);
 	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
@@ -808,7 +808,7 @@ protected:
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
-	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday, CDWordSet& mapProcessed);
+	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);

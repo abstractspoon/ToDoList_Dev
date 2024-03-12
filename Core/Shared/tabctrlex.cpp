@@ -1162,10 +1162,11 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 
 BOOL CTabCtrlEx::HasTabMoved() const
 {
-	ASSERT((m_dwFlags & TCE_POSTDRAW) && m_bDragging);
-	
-	if (!(m_dwFlags & TCE_POSTDRAW) || !m_bDragging)
+	if (!(m_dwFlags & TCE_DRAGDROP) || !m_bDragging)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	// else
 	return ((m_nDropTab >= 0) &&

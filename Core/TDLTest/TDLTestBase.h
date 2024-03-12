@@ -124,6 +124,9 @@ protected:
 	BOOL BeginTest(LPCTSTR szTest);
 	BOOL EndTest();
 
+	BOOL BeginSubTest(LPCTSTR szSubTest);
+	BOOL EndSubTest();
+
 	BOOL ExpectTrue(bool b) const;
 	BOOL ExpectTrue(BOOL b) const;
 	
@@ -201,7 +204,7 @@ private:
 	TESTRESULT m_resTotal;
 
 	mutable UINT m_nCurTest;
-	CString m_sCurrentTest;
+	CString m_sCurTest, m_sCurSubTest;
 
 private:
 	CTDLTestBase();
@@ -225,7 +228,7 @@ private:
 	template <class T> 
 	BOOL ExpectCompareT(T t1, LPCTSTR szFmt1, T t2, LPCTSTR szFmt2, TEST_OP nOp) const
 	{
-		return HandleCompareResult(t1, szFmt1, t2, szFmt2, nOp, m_utils.CompareT(t1, t2));
+		return HandleCompareResultT(t1, szFmt1, t2, szFmt2, nOp, m_utils.CompareT(t1, t2));
 	}
 
 	// specifically for float and double
@@ -239,11 +242,11 @@ private:
 		else
 			sTrail = _T("No tolerance");
 
-		return HandleCompareResult(t1, szFmt1, t2, szFmt2, nOp, m_utils.Compare(t1, t2, tol), sTrail);
+		return HandleCompareResultT(t1, szFmt1, t2, szFmt2, nOp, m_utils.Compare(t1, t2, tol), sTrail);
 	}
 
 	template <class T> 
-	BOOL HandleCompareResult(T t1, LPCTSTR szFmt1, T t2, LPCTSTR szFmt2, TEST_OP nOp, int nCmp, LPCTSTR szTrail = _T("")) const
+	BOOL HandleCompareResultT(T t1, LPCTSTR szFmt1, T t2, LPCTSTR szFmt2, TEST_OP nOp, int nCmp, LPCTSTR szTrail = _T("")) const
 	{
 		m_nCurTest++;
 		BOOL bSuccess = FALSE;
@@ -288,7 +291,12 @@ private:
 			ASSERT(!sOp.IsEmpty());
 
 			CString sOutput;
-			sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
+
+			if (m_sCurSubTest.IsEmpty())
+				sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
+			else
+				sOutput.Format(_T("  Test [%s] failed:    Expected \"%s\" %s \"%s\""), m_sCurSubTest, szFmt1, sOp, szFmt2);
+
 
 			if (!Misc::IsEmpty(szTrail))
 			{

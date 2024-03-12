@@ -16,6 +16,7 @@
 #include "..\shared\treectrlhelper.h"
 
 #include "..\interfaces\contentmgr.h"
+#include "..\interfaces\IEnums.h"
 
 #include <math.h>
 
@@ -57,13 +58,16 @@ TESTRESULT CToDoCtrlDataTest::Run()
 {
 	ClearTotals();
 
+	TestAdjustNewRecurringTasksDates();
+
+	// Performance
 	TestHierarchyDataModelPerformance();
 	TestFlatListDataModelPerformance();
 
 	return GetTotals();
 }
 
-void CToDoCtrlDataTest::BeginTest(LPCTSTR szFunction, BOOL bWithAttributes)
+void CToDoCtrlDataTest::BeginPerformanceTest(LPCTSTR szFunction, BOOL bWithAttributes)
 {
 	CString sTest;
 	
@@ -75,7 +79,7 @@ void CToDoCtrlDataTest::BeginTest(LPCTSTR szFunction, BOOL bWithAttributes)
 	else
 		sTest += _T("(WITHOUT attributes)");
 	
-	CTDLTestBase::BeginTest(sTest);
+	BeginTest(sTest);
 }
 
 void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
@@ -88,7 +92,7 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 	CTaskFileTest tasksTest(m_utils);
 
-	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPerformanceAttributes());
+	BeginPerformanceTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPerformanceAttributes());
 
 	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_PERFTESTLEVELS; nNumLevels++)
 	{
@@ -120,7 +124,7 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 	CTaskFileTest tasksTest(m_utils);
 	
-	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPerformanceAttributes());
+	BeginPerformanceTest(_T("FlatListDataModelPerformance"), tasksTest.WantPerformanceAttributes());
 
 	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_PERFTESTLEVELS; nNumLevels++)
 	{
@@ -334,4 +338,246 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& dat
 			 data.GetTaskCount(),
 			 szTaskType,
 			 (dwDuration * 100.0) / data.GetTaskCount());
+}
+
+void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates()
+{
+	BeginTest(_T("CToDoCtrlDataTest::AdjustNewRecurringTasksDates"));
+
+	TestAdjustNewRecurringTasksDates(TDIRO_STARTDATE);
+	TestAdjustNewRecurringTasksDates(TDIRO_DUEDATE);
+	TestAdjustNewRecurringTasksDates(TDIRO_DONEDATE);
+
+	EndTest();
+}
+
+void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRecalcFrom)
+{
+	DWORD PRIMES[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
+	int NUM_PRIMES = (sizeof(PRIMES) / sizeof(PRIMES[0])), i;
+
+	//  nRegularity								dwSpecific1				dwSpecific2
+	//  ---------------------------------------------------------------------------------
+
+	//	TDIR_DAY_EVERY_NDAYS					every 'n' days			--- (0)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_NDAYS, PRIMES[i], 0, nRecalcFrom);
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_DAY_EVERY_WEEKDAY					--- (0)					--- (0)
+	TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_WEEKDAY, 0, 0, nRecalcFrom);
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_DAY_EVERY_NWEEKDAYS				every 'n' days			--- (0)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_NWEEKDAYS, PRIMES[i], 0, nRecalcFrom);
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS			every 'n' weeks			weekdays (DHW_...)
+	DWORD DOWS[] =
+	{
+		DHW_MONDAY,
+		DHW_TUESDAY | DHW_WEDNESDAY,
+		DHW_MONDAY | DHW_WEDNESDAY | DHW_FRIDAY,
+		DHW_SATURDAY | DHW_SUNDAY,
+		DHW_THURSDAY | DHW_FRIDAY | DHW_SATURDAY,
+		DHW_TUESDAY | DHW_SUNDAY,
+		DHW_EVERYDAY,
+	};
+	int NUM_DOWS = (sizeof(DOWS) / sizeof(DOWS[0]));
+
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		for (int k = 0; k < NUM_DOWS; k++)
+		{
+			TestAdjustNewRecurringTasksDates(TDIR_WEEK_SPECIFIC_DOWS_NWEEKS, PRIMES[i], DOWS[k], nRecalcFrom);
+		}
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_WEEK_EVERY_NWEEKS					every 'n' weeks			--- (0)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		TestAdjustNewRecurringTasksDates(TDIR_WEEK_EVERY_NWEEKS, PRIMES[i], 0, nRecalcFrom);
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_MONTH_EVERY_NMONTHS				every 'n' months		preserve weekday (BOOL)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		// Don't preserve weekday
+		TestAdjustNewRecurringTasksDates(TDIR_MONTH_EVERY_NMONTHS, PRIMES[i], FALSE, nRecalcFrom);
+	}
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		// Preserve weekday
+		TestAdjustNewRecurringTasksDates(TDIR_MONTH_EVERY_NMONTHS, PRIMES[i], TRUE, nRecalcFrom);
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_MONTH_SPECIFIC_DAY_NMONTHS			every 'n' months		day of month (1-31)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		for (int k = 0; k < NUM_PRIMES; k++)
+		{
+			TestAdjustNewRecurringTasksDates(TDIR_MONTH_SPECIFIC_DAY_NMONTHS, PRIMES[i], PRIMES[k], nRecalcFrom);
+		}
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS		first(0), last(!0)		every 'n' months
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		// First weekday
+		TestAdjustNewRecurringTasksDates(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, FALSE, PRIMES[i], nRecalcFrom);
+	}
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		// Last weekday
+		TestAdjustNewRecurringTasksDates(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, TRUE, PRIMES[i], nRecalcFrom);
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS			LOWORD = which (1-5)	every 'n' months
+	//                                          HIWORD = DOW   (1-7)		
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		for (DWORD dwWhich = 1; dwWhich <= 5; dwWhich++)
+		{
+			for (DWORD dwDow = 1; dwDow <= 5; dwDow++)
+			{
+				TestAdjustNewRecurringTasksDates(TDIR_MONTH_SPECIFIC_DOW_NMONTHS, MAKELONG(dwWhich, dwDow), PRIMES[i], nRecalcFrom);
+			}
+		}
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_YEAR_SPECIFIC_DAY_MONTHS			month (1-12)			day of month (1-31)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		for (DWORD dwMonth = 1; dwMonth < 12; dwMonth++)
+		{
+			TestAdjustNewRecurringTasksDates(TDIR_YEAR_SPECIFIC_DAY_MONTHS, dwMonth, PRIMES[i], nRecalcFrom);
+		}
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//	TDIR_YEAR_EVERY_NYEARS					every 'n' years			preserve weekday (BOOL)
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		// Don't preserve weekday
+		TestAdjustNewRecurringTasksDates(TDIR_YEAR_EVERY_NYEARS, PRIMES[i], FALSE, nRecalcFrom);
+	}
+	for (i = 0; i < NUM_PRIMES; i++)
+	{
+		// Preserve weekday
+		TestAdjustNewRecurringTasksDates(TDIR_YEAR_EVERY_NYEARS, PRIMES[i], TRUE, nRecalcFrom);
+	}
+
+	//  ---------------------------------------------------------------------------------
+	//  TDIR_YEAR_SPECIFIC_DOW_MONTHS			LOWORD = which (1-5)	specific month (1-12)
+	//                                          HIWORD = DOW   (1-7)		
+	for (DWORD dwMonth = 1; dwMonth < 12; dwMonth++)
+	{
+		for (DWORD dwWhich = 1; dwWhich <= 5; dwWhich++)
+		{
+			for (DWORD dwDow = 1; dwDow <= 5; dwDow++)
+			{
+				TestAdjustNewRecurringTasksDates(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(dwWhich, dwDow), dwMonth, nRecalcFrom);
+			}
+		}
+	}
+}
+
+void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom)
+{
+	BeginSubTest(GetRegularityText(nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom));
+
+	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE);
+
+	const DWORD dwTaskID = 1;
+	TODOITEM* pTDI = data.NewTask(TODOITEM());
+
+	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
+	ExpectTrue(pTDI->trRecurrence.SetRegularity(nRegularity, dwSpecific1, dwSpecific2));
+
+	pTDI->trRecurrence.nRecalcFrom = nRecalcFrom;
+
+	switch (nRecalcFrom)
+	{
+	case TDIRO_STARTDATE:
+		pTDI->dateStart = COleDateTime(40000.0);
+		break;
+
+	case TDIRO_DUEDATE:
+		pTDI->dateStart = COleDateTime(40000.0);
+		pTDI->dateDue = COleDateTime(40002.0);
+		break;
+
+	case TDIRO_DONEDATE:
+		pTDI->dateDue = COleDateTime(40002.0);
+		break;
+	}
+
+	// A completion date is always required by GetNextTaskOccurrence
+	pTDI->dateDone = COleDateTime(40010.0);
+
+	for (int i = 0; i < 10; i++)
+	{
+		COleDateTime dtNext;
+		BOOL bDueDate = FALSE;
+
+		ExpectTrue(data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate));
+		ExpectTrue(CDateHelper::IsDateSet(dtNext));
+
+		ExpectEQ(SET_CHANGE, data.AdjustNewRecurringTasksDates(dwTaskID, dwTaskID, dtNext, bDueDate));
+		ExpectEQ(data.GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START)), dtNext);
+
+		// Keep bumping the completion date else AdjustNewRecurringTasksDates
+		// will assert because it keeps producing the same outcome and so the 
+		// offset will be zero
+		if (nRecalcFrom == TDIRO_DONEDATE)
+			data.SetTaskDate(dwTaskID, TDCD_DONE, dtNext);
+	}
+
+	EndSubTest();
+}
+
+CString CToDoCtrlDataTest::GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom)
+{
+	LPCTSTR szFrom = NULL;
+
+	switch (nRecalcFrom)
+	{
+	case TDIRO_STARTDATE: szFrom = _T("From Start"); break;
+	case TDIRO_DUEDATE:   szFrom = _T("From Due"); break;
+	case TDIRO_DONEDATE:  szFrom = _T("From Done"); break;
+	}
+	ASSERT(szFrom);
+
+	LPCTSTR szRegularity = NULL;
+
+	switch (nRegularity)
+	{
+	case TDIR_DAY_EVERY_NDAYS:					szRegularity = _T("TDIR_DAY_EVERY_NDAYS");					break;
+	case TDIR_DAY_EVERY_WEEKDAY:				szRegularity = _T("TDIR_DAY_EVERY_WEEKDAY");				break;
+	case TDIR_DAY_EVERY_NWEEKDAYS:				szRegularity = _T("TDIR_DAY_EVERY_NWEEKDAYS");				break;
+	case TDIR_WEEK_SPECIFIC_DOWS_NWEEKS:		szRegularity = _T("TDIR_WEEK_SPECIFIC_DOWS_NWEEKS");		break;
+	case TDIR_WEEK_EVERY_NWEEKS:				szRegularity = _T("TDIR_WEEK_EVERY_NWEEKS");				break;
+	case TDIR_MONTH_EVERY_NMONTHS:				szRegularity = _T("TDIR_MONTH_EVERY_NMONTHS");				break;
+	case TDIR_MONTH_SPECIFIC_DAY_NMONTHS:		szRegularity = _T("TDIR_MONTH_SPECIFIC_DAY_NMONTHS");		break;
+	case TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS:	szRegularity = _T("TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS");	break;
+	case TDIR_MONTH_SPECIFIC_DOW_NMONTHS:		szRegularity = _T("TDIR_MONTH_SPECIFIC_DOW_NMONTHS");		break;
+	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:			szRegularity = _T("TDIR_YEAR_SPECIFIC_DAY_MONTHS");			break;
+	case TDIR_YEAR_EVERY_NYEARS:				szRegularity = _T("TDIR_YEAR_EVERY_NYEARS");				break;
+	case TDIR_YEAR_SPECIFIC_DOW_MONTHS:			szRegularity = _T("TDIR_YEAR_SPECIFIC_DOW_MONTHS");			break;
+	}
+	ASSERT(szRegularity);
+
+	return Misc::Format(_T("%s(%ld, %ld, %s)"), szRegularity, dwSpecific1, dwSpecific2, szFrom);
 }

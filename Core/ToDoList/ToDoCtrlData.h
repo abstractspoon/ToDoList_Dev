@@ -211,8 +211,7 @@ public:
 
 	TDC_SET ClearTaskColor(DWORD dwTaskID) { SetTaskColor(dwTaskID, CLR_NONE); }
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday);
-	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekdays);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 
 	TDC_SET ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren = FALSE);
@@ -344,15 +343,11 @@ protected:
 	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	BOOL ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy);
-	BOOL GetWantPreserveWeekday(const TODOITEM* pTDI) const;
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
-	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
 
-	static int CalcRecurrenceOffset(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart);
-	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, BOOL bPreserveWeekdays, COleDateTime& dtNewStart);
-//	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
+	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
 	static BOOL CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset);
 
 };

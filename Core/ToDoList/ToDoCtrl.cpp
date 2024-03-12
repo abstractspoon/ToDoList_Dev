@@ -3188,8 +3188,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
-									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
 {
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3222,10 +3221,9 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 		TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID, 
 											 nDate, 
 											 nAmount, 
-											 nUnits, 
-											 bAndSubtasks, 
-											 bFromToday,
-											 bPreserveWeekday);
+											 nUnits,
+											 bAndSubtasks,
+											 bFromToday);
 
 		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
 			return FALSE;
@@ -3274,7 +3272,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 }
 
 BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, 
-												   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday)
+													BOOL bAndSubtasks, BOOL bFromToday)
 {
 	if (!CanOffsetSelectedTaskStartAndDueDates())
 		return FALSE;
@@ -3302,8 +3300,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 												  nAmount, 
 												  nUnits, 
 												  bAndSubtasks, 
-												  bFromToday, 
-												  bPreserveWeekday,
+												  bFromToday,
 												  mapProcessed);
 
 		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
@@ -3324,7 +3321,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 }
 
 TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
-											  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekdays, CDWordSet& mapProcessed)
+												BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
 {
 	ASSERT(CanEditSelectedTask(TDCA_STARTDATE));
 	ASSERT(!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
@@ -3345,39 +3342,21 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	if ((pTDI->HasStart() && pTDI->HasDue()) || bFromToday)
+	// Handle subtasks at the end
+	if (pTDI->HasStart() && pTDI->HasDue())
 	{
 		// Offset as a block
-		nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, 
-												 nAmount, 
-												 nUnits, 
-												 FALSE, // Handle subtasks at the end
-												 bFromToday,
-												 bPreserveWeekdays);
-	}
-	else if (pTDI->HasStart())
-	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, 
-									 TDCD_START, 
-									 nAmount, 
-									 nUnits, 
-									 FALSE, // Handle subtasks at the end
-									 bFromToday,
-									 bPreserveWeekdays);
-	}
-	else if (pTDI->HasDue())
-	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, 
-									 TDCD_DUE, 
-									 nAmount, 
-									 nUnits, 
-									 FALSE, // Handle subtasks at the end
-									 bFromToday,
-									 bPreserveWeekdays);
+		COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
+		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
+
+		if (dtStart != pTDI->dateStart)
+			nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, dtStart);
 	}
 	else
 	{
-		ASSERT(0);
+		// Offsetting from today will initialise dates if not currently set
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, bFromToday);
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, bFromToday);
 	}
 	ASSERT((nRes != SET_FAILED) || !bFromToday);
 
@@ -3394,12 +3373,12 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 			{
 				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
+				
 				TDC_SET nChildRes = OffsetTaskStartAndDueDates(dwChildID, 
 															   nAmount, 
 															   nUnits, 
 															   TRUE, // Include subtasks
 															   bFromToday, 
-															   bPreserveWeekdays,
 															   mapProcessed); // RECURSIVE CALL
 
 				if (nChildRes == SET_CHANGE)
@@ -5732,7 +5711,6 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_AUTOADJUSTDEPENDENCYDATES:
 	case TDCS_TRACKSELECTEDTASKONLY:
 	case TDCS_COMMENTSUSETREEFONT:
-	case TDCS_PRESERVEWEEKDAYS:
 		// do nothing
 		break;
 

@@ -1142,21 +1142,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 
 	if (CDateHelper::IsSameDay(dateDone, dtStartDue) || (dateDone < dtStartDue))
 	{
-// 		// If the completion date comes on/before before the 
-// 		// start/due date it's possible that the next start/due 
-// 		// date can be on/before the previous start/due date,
-// 		// which seems an unlikely expectation for the user.
-// 		// So we check it first, and if it is on/before we use
-// 		// the start/due date as our reference date instead.
-// 		COleDateTime dtTemp;
-// 
-// 		if (!trRecurrence.GetNextOccurence(dtFrom, dtTemp))
-// 			return FALSE;
-// 
-// 		if (CDateHelper::IsSameDay(dtTemp, dtStartDue) || (dtTemp < dtStartDue))
-// 		{
-// 			dtFrom = dtStartDue;
-// 		}
+		// Nothing to do
 	}
 	else 
 	{
@@ -1219,52 +1205,32 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 		return 0;
 
 	CDateHelper dh;
-
 	aOccur.SetSize(nNumOccur);
-
+	
 	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
-		const double dOccur = aDates[nOccur];
-
-		// Ideally we stick to the same units configured in the recurrence setup
-		// so that, for instance, months having different numbers of days are
-		// offset correctly
-		DH_UNITS nUnits = TDC::MapUnitsToDHUnits(trRecurrence.GetRegularityUnits());
-		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, FALSE); // not inclusive
-
-		int nOffset = 0;
-
-		if (dOffset == (int)dOffset)
-		{
-			nOffset = (int)dOffset;
-		}
-		else
-		{
-			nOffset = dh.CalcDaysFromTo(dtCur, dOccur, FALSE); // not inclusive
-			nUnits = DHU_DAYS;
-		}
-
-		COleDateTimeRange& dtOccur = aOccur[nOccur];
+		const double dDate = aDates[nOccur];
+		int nOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
 
 		if (bDueDate)
 		{
-			COleDateTime dtNewStart(dateStart);
-			VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
+			COleDateTime dtNewStart = dateStart;
+			VERIFY(CDateHelper().OffsetDate(dtNewStart, nOffset, DHU_DAYS));
 
-			ASSERT((dtNewStart.m_dt <= dOccur) ||
-				(CDateHelper::IsSameDay(dOccur, dtNewStart) && !CDateHelper::DateHasTime(dOccur)));
+			ASSERT((dtNewStart.m_dt <= dDate) ||
+					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
 
-			dtOccur.Set(dtNewStart, dOccur);
+			VERIFY(aOccur[nOccur].Set(dtNewStart, dDate));
 		}
 		else // start date
 		{
-			COleDateTime dtNewDue(dateDue);
-			VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
+			COleDateTime dtNewDue = dateDue;
+			VERIFY(CDateHelper().OffsetDate(dtNewDue, nOffset, DHU_DAYS));
 
-			ASSERT((dOccur <= dtNewDue.m_dt) ||
-				(CDateHelper::IsSameDay(dOccur, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
+			ASSERT((dDate <= dtNewDue.m_dt) ||
+					(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
 
-			dtOccur.Set(dOccur, dtNewDue);
+			VERIFY(aOccur[nOccur].Set(dDate, dtNewDue));
 		}
 	}
 
