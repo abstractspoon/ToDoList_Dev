@@ -2526,16 +2526,31 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart)
 {
-	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
-	ASSERT(dSimpleDuration > 0.0);
+	// If the task is an exact multiple of calendar months (including years)
+	// Just increment the new Start date by the same number of months
+	double dDurationInMonths = CalcDuration(dtCurStart, dtCurDue, TDCU_MONTHS);
 
-	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+	if (dDurationInMonths == (int)dDurationInMonths)
+	{
+		COleDateTime dtNewDue(dtNewStart);
+		CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE);
+
+		if (!CDateHelper::DateHasTime(dtCurDue))
+			dtNewDue.m_dt--;
+
+		return dtNewDue;
+	}
+
+	double dSimpleDurationInDays = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
+	ASSERT(dSimpleDurationInDays > 0.0);
 
 	// If the real duration is zero then it means that the task
 	// falls between the end of one weekday and the start of the next
 	// which means that the user has performed an action to avoid our
 	// checks, so we fall back on the simple duration instead
-	if (dRealDuration == 0.0)
+	double dRealDurationInUnits = CalcDuration(dtCurStart, dtCurDue, nUnits);
+
+	if (dRealDurationInUnits == 0.0)
 	{
 		ASSERT((nUnits == TDCU_MINS) ||
 				(nUnits == TDCU_HOURS) ||
@@ -2548,8 +2563,8 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		// Recalculate the simple duration in weekday-hours because this
 		// seems most likely to produce a coherent outcome ie. Avoiding 
 		// unit-mashing weirdness
-		int nWholeDays = (int)dSimpleDuration;
-		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDuration - nWholeDays) * 24);
+		int nWholeDays = (int)dSimpleDurationInDays;
+		double dRemainingTimeInHours = CTimeHelper::RoundHoursToNearestSecond((dSimpleDurationInDays - nWholeDays) * 24);
 
 		double dDurationInWeekdayHours = ((nWholeDays * CDateHelper().WorkingDay().GetLengthInHours()) + dRemainingTimeInHours);
 
@@ -2559,11 +2574,11 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	// If adding the simple duration to the start date to produce the 
 	// due date would result in no change to the real duration, just do 
 	// that because it's the least confusing outcome for the user
-	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
+	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDurationInDays, TDCU_DAYS, FALSE); // Does not update dtNewStart
 
-	if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDuration)
+	if (CalcDuration(dtNewStart, dtSimpleDue, nUnits) == dRealDurationInUnits)
 	{
-		return AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, TRUE);
+		return AddDuration(dtNewStart, dSimpleDurationInDays, TDCU_DAYS, TRUE);
 	}
 
 	// Tasks whose current and new dates fall wholly within a single day 
@@ -2573,12 +2588,12 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
 			CDateHelper::IsSameDay(dtNewStart, dtSimpleDue))
 		{
-			return AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, TRUE);
+			return AddDuration(dtNewStart, dSimpleDurationInDays, TDCU_DAYS, TRUE);
 		}
 	}
 
 	// else
-	return AddDuration(dtNewStart, dRealDuration, nUnits, TRUE);
+	return AddDuration(dtNewStart, dRealDurationInUnits, nUnits, TRUE);
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -4007,6 +4022,13 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
 		{
+			if (dateEnd.GetDay() == dateStart.GetDay())
+			{
+				int nNumMonths = (CDateHelper::GetDateInMonths(dateEnd) - CDateHelper::GetDateInMonths(dateStart));
+				return ((nUnits == TDCU_MONTHS) ? nNumMonths : (nNumMonths / 12.0));
+			}
+
+			// else calculate in days and convert back
 			CTwentyFourSevenWeek week;
 			double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
 
