@@ -1210,12 +1210,30 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
 		const double dDate = aDates[nOccur];
-		int nOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
+
+#ifdef _DEBUG
+		CString sDate = COleDateTime(dDate).Format();
+		CString sCur = dtCur.Format();
+#endif
+		int nDaysOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
+
+		double dDurationInMonths = CDateHelper().CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
 
 		if (bDueDate)
 		{
+			// Tasks of one or more exact month's duration need special handling
+			if (dDurationInMonths == (int)dDurationInMonths)
+			{
+				COleDateTime dtNewStart = dDate;
+				CDateHelper::IncrementMonth(dtNewStart, -(int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+				CString sNewStart = dtNewStart.Format();
+#endif
+				nDaysOffset = (int)Misc::Round(dtNewStart.m_dt - dateStart.m_dt, 4) + 1;
+			}
+
 			COleDateTime dtNewStart = dateStart;
-			VERIFY(CDateHelper().OffsetDate(dtNewStart, nOffset, DHU_DAYS));
+			VERIFY(CDateHelper().OffsetDate(dtNewStart, nDaysOffset, DHU_DAYS));
 
 			ASSERT((dtNewStart.m_dt <= dDate) ||
 					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
@@ -1224,8 +1242,19 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 		}
 		else // start date
 		{
+			// Task's of one more month's duration need special handling
+			if (dDurationInMonths == (int)dDurationInMonths)
+			{
+				COleDateTime dtNewDue = dDate;
+				CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+				CString sNewDue = dtNewDue.Format();
+#endif 
+				nDaysOffset = (int)Misc::Round(dtNewDue.m_dt - dateDue.m_dt, 4) - 1;
+			}
+
 			COleDateTime dtNewDue = dateDue;
-			VERIFY(CDateHelper().OffsetDate(dtNewDue, nOffset, DHU_DAYS));
+			VERIFY(CDateHelper().OffsetDate(dtNewDue, nDaysOffset, DHU_DAYS));
 
 			ASSERT((dDate <= dtNewDue.m_dt) ||
 					(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));

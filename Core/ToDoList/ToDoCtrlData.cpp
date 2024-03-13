@@ -2517,7 +2517,6 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 	const TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	//BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, OFFSET_FITTORECURRINGSCHEME);
 	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, OFFSET_SUBTASKS);
 	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
 
@@ -4417,15 +4416,13 @@ BOOL CToDoCtrlData::TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib,
 TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID,
 													 const COleDateTime& dtNext, BOOL bDueDate)
 {
-	TDC_SET nRes = SET_NOCHANGE;
-
-	// we need to move both the due date and the start date forward
-	// so we first cache the old dates
 	COleDateTime dtStart = GetTaskDate(dwPrevTaskID, TDCD_START);
 	COleDateTime dtDue = GetTaskDate(dwPrevTaskID, TDCD_DUE);
 
 	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
+
+	TDC_SET nRes = SET_NOCHANGE;
 
 	if (bDueDate) // dtNext is the new due date
 	{
@@ -4449,7 +4446,20 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			// adjust start dates similarly
 			if (bHasStart)
 			{
-				// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
+				// Tasks of one or more exact month's duration need special handling
+				// because the number of offset days depends on which months are encompassed
+				double dDurationInMonths = CalcDuration(dtStart, dtDue, TDCU_MONTHS);
+
+				if (dDurationInMonths == (int)dDurationInMonths)
+				{
+					COleDateTime dtNewStart = dtNext;
+					CDateHelper::IncrementMonth(dtNewStart, -(int)dDurationInMonths, TRUE); // Preserve end of month
+
+					nOffsetDays = ((int)dtNewStart - (int)dtStart);
+					nOffsetDays += 1; // we want the day after
+				}
+
+				// DON'T fit the new date to the recurring scheme
 				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
 												 TDCD_STARTDATE,
 												 nOffsetDays,
@@ -4489,9 +4499,15 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 		// adjust due dates similarly
 		if (bHasDue)
 		{
-			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
-			if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, OFFSET_SUBTASKS) == SET_CHANGE)
+			// DON'T fit the new date to the recurring scheme
+			if (OffsetTaskDate(dwNewTaskID, 
+							   TDCD_DUEDATE, 
+							   nOffsetDays, 
+							   TDCU_DAYS, 
+							   OFFSET_SUBTASKS) == SET_CHANGE)
+			{
 				nRes = SET_CHANGE;
+			}
 		}
 	}
 
