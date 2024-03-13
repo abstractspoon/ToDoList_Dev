@@ -297,6 +297,7 @@ protected:
 
 	BOOL ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
 	BOOL ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDSParent, int nChildPos, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
+	BOOL CheckApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank);
 
 	TDC_SET CopyInheritedParentTaskAttributes(TODOITEM* pTDI, DWORD dwParentID) const;
 

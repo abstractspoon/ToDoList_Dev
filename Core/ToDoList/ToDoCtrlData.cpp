@@ -1736,6 +1736,15 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTR
 	return TRUE;
 }
 
+BOOL CToDoCtrlData::CheckApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
+{
+	if (!WantUpdateInheritedAttibute(nAttrib))
+		return FALSE;
+
+	// else
+	return ApplyLastChangeToSubtasks(dwParentID, nAttrib, bIncludeBlank);
+}
+
 BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
 {
 	// Exclude references
@@ -4020,19 +4029,43 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 	
 	switch (nUnits)
 	{
-	case TDCU_DAYS:
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
+		if (dDuration == (int)dDuration) // whole months/years
 		{
-			// work in days
-			if (nUnits != TDCU_DAYS)
-			{
-				CTwentyFourSevenWeek week;
+			if (nUnits == TDCU_MONTHS)
+				CDateHelper::IncrementMonth(dateEnd, (int)dDuration, TRUE);
+			else
+				CDateHelper::IncrementYear(dateEnd, (int)dDuration, TRUE);
 
-				dDuration = CTimeHelper(week).Convert(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
-				nUnits = TDCU_DAYS;
+			// If date falls on the beginning of a day, move to end of previous day
+			if (dDuration > 0.0)
+			{
+				if (!CDateHelper::DateHasTime(dateEnd))
+					dateEnd.m_dt--;
+			}
+			else
+			{
+				// End date comes before start date, so 'dateStart' is logically the end date
+				ASSERT(dateEnd < dateStart);
+
+				if (!CDateHelper::DateHasTime(dateStart))
+					dateEnd.m_dt++;
 			}
 
+			break;
+		}
+		else // handle in days
+		{
+			CTwentyFourSevenWeek week;
+
+			dDuration = CTimeHelper(week).Convert(dDuration, TDC::MapUnitsToTHUnits(nUnits), THU_DAYS);
+			nUnits = TDCU_DAYS;
+		}
+		// fall thru
+
+	case TDCU_DAYS:
+		{
 			dateEnd.m_dt += dDuration;
 
 			// If date falls on the beginning of a day, move to end of previous day
@@ -4100,45 +4133,29 @@ COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuratio
 double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits)
 {
 	// Sanity check
-	if (!COleDateTimeRange::IsValid(dateStart, dateDue))
+	if (COleDateTimeRange::IsValid(dateStart, dateDue))
 	{
-		ASSERT(0);
-		return 0.0;
-	}
-
-	// Handle due date 'end of day'
-	COleDateTime dateEnd(dateDue);
-
-	if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
-		dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
-	
-	switch (nUnits)
-	{
-	case TDCU_DAYS:
-		return (dateEnd.m_dt - dateStart.m_dt);
-
-	case TDCU_MONTHS:
-	case TDCU_YEARS:
+		switch (nUnits)
 		{
-			if (dateEnd.GetDay() == dateStart.GetDay())
+		case TDCU_DAYS:
+		case TDCU_MONTHS:
+		case TDCU_YEARS:
+		case TDCU_WEEKDAYS:
+		case TDCU_WEEKS:
+			return CDateHelper().CalcDuration(dateStart, dateDue, TDC::MapUnitsToDHUnits(nUnits), TRUE);
+
+		case TDCU_MINS:
+		case TDCU_HOURS:
 			{
-				int nNumMonths = (CDateHelper::GetDateInMonths(dateEnd) - CDateHelper::GetDateInMonths(dateStart));
-				return ((nUnits == TDCU_MONTHS) ? nNumMonths : (nNumMonths / 12.0));
+				// Handle due date 'end of day'
+				COleDateTime dateEnd(dateDue);
+
+				if (CDateHelper::IsEndOfDay(dateEnd, TRUE))
+					dateEnd = CDateHelper::GetStartOfNextDay(dateEnd);
+	
+				return CWorkingWeek().CalcDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
 			}
-
-			// else calculate in days and convert back
-			CTwentyFourSevenWeek week;
-			double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
-
-			return CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
-		break;
-
-	case TDCU_MINS:
-	case TDCU_HOURS:
-	case TDCU_WEEKDAYS:
-	case TDCU_WEEKS:
-		return CWorkingWeek().CalcDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
 	}
 
 	ASSERT(0);
@@ -4410,129 +4427,82 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
 
-	BOOL bWantInheritStart = WantUpdateInheritedAttibute(TDCA_STARTDATE);
-	BOOL bWantInheritDue = WantUpdateInheritedAttibute(TDCA_DUEDATE);
-
 	if (bDueDate) // dtNext is the new due date
 	{
-		int nOffsetDays = (bHasDue ? ((int)dtNext - (int)dtDue) : 0);
+		ASSERT(bHasDue || !bHasStart);
 
-		if (bWantInheritDue)
+		if (bHasDue)
 		{
-			if (SetTaskDate(dwNewTaskID, TDCD_DUE, dtNext) == SET_CHANGE)
+			int nOffsetDays = ((int)dtNext - (int)dtDue);
+
+			// Make sure the new date fits the recurring scheme
+			if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
+											 TDCD_DUEDATE,
+											 nOffsetDays,
+											 TDCU_DAYS,
+											 OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS))
 			{
-				ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
+				ASSERT(GetTaskDate(dwNewTaskID, TDCD_DUE) == dtNext);
 				nRes = SET_CHANGE;
 			}
-		}
-		else // bump dates by required amount
-		{
-			if (bHasDue)
-			{
-				// Make sure the new date fits the recurring scheme
-				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID, 
-												 TDCD_DUEDATE, 
-												 nOffsetDays, 
-												 TDCU_DAYS, 
-												 OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS))
-				{
-					ASSERT(GetTaskDate(dwNewTaskID, TDCD_DUE) == dtNext);
-					nRes = SET_CHANGE;
-				}
-			}
-			else
-			{
-				nRes = InitMissingTaskDate(dwNewTaskID, 
-										   TDCD_DUE, 
-										   dtNext);
-			}
-		}
 
-		// adjust start dates similarly
-		if (bHasStart)
-		{
-			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
-			if (bWantInheritStart)
+			// adjust start dates similarly
+			if (bHasStart)
 			{
-				// don't offset children
-				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID, 
-												 TDCD_STARTDATE, 
-												 nOffsetDays, 
-												 TDCU_DAYS, 
-												 0)) // Not subtasks
-				{
-					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
-					nRes = SET_CHANGE;
-				}
-			}
-			else
-			{
-				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID, 
-												 TDCD_STARTDATE, 
-												 nOffsetDays, 
-												 TDCU_DAYS, 
+				// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
+				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
+												 TDCD_STARTDATE,
+												 nOffsetDays,
+												 TDCU_DAYS,
 												 OFFSET_SUBTASKS))
 				{
 					nRes = SET_CHANGE;
 				}
 			}
 		}
+		else
+		{
+			ASSERT(!bHasStart);
+
+			nRes = InitMissingTaskDate(dwNewTaskID,
+									   TDCD_DUE,
+									   dtNext);
+		}
 	}
 	else // dtNext is the new start date
 	{
-		int nOffsetDays = (bHasStart ? ((int)dtNext - (int)dtStart) : 0);
+		ASSERT(bHasStart);
 
-		if (bWantInheritStart)
+		int nOffsetDays = ((int)dtNext - (int)dtStart);
+
+		// bump dates by required amount
+		// Make sure the new date fits the recurring scheme
+		if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
+										 TDCD_STARTDATE,
+										 nOffsetDays,
+										 TDCU_DAYS,
+										 OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS))
 		{
-			if (SET_CHANGE == SetTaskDate(dwNewTaskID, 
-										  TDCD_START, 
-										  dtNext))
-			{
-				ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
-				nRes = SET_CHANGE;
-			}
-		}
-		else // bump dates by required amount
-		{
-			if (bHasStart)
-			{
-				// Make sure the new date fits the recurring scheme
-				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID, 
-												 TDCD_STARTDATE, 
-												 nOffsetDays, 
-												 TDCU_DAYS, 
-												 OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS))
-				{
-					nRes = SET_CHANGE;
-				}
-			}
-			else
-			{
-				nRes = InitMissingTaskDate(dwNewTaskID, 
-										   TDCD_START, 
-										   dtNext);
-			}
+			nRes = SET_CHANGE;
 		}
 
 		// adjust due dates similarly
 		if (bHasDue)
 		{
 			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
-			if (bWantInheritDue)
-			{
-				// don't update children
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, 0) == SET_CHANGE)
-				{
-					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
-					nRes = SET_CHANGE;
-				}
-			}
-			else // bump
-			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, OFFSET_SUBTASKS) == SET_CHANGE)
-					nRes = SET_CHANGE;
-			}
+			if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, OFFSET_SUBTASKS) == SET_CHANGE)
+				nRes = SET_CHANGE;
 		}
+	}
+
+	// Overwrite subtask changes as required
+	if (nRes == SET_CHANGE)
+	{
+		if (bHasStart)
+			CheckApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE, FALSE);
+
+		if (bHasDue)
+			CheckApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE, FALSE);
 	}
 
 	return nRes;
