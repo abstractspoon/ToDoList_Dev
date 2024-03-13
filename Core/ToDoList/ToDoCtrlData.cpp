@@ -2194,13 +2194,13 @@ TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_RISK, pTDI->nRisk, nRisk);
 }
 
-// external version
+// External
 TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
 {
 	return SetTaskDate(dwTaskID, NULL, nDate, date, TRUE); // Recalc time estimate
 }
 
-// internal version
+// Internal
 TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate)
 {
 	if (!pTDI)
@@ -2416,6 +2416,8 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 // Internal
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
+	ASSERT((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS));
+
 	if (nAmount == 0)
 		return SET_NOCHANGE;
 
@@ -2511,6 +2513,8 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 // Internal
 TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
+	ASSERT((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS));
+
 	if (nAmount == 0)
 		return SET_NOCHANGE;
 
@@ -2530,7 +2534,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
 
 		if (dtStart != pTDI->dateStart)
-			nRes = OffsetTaskStartAndDueDates(dwTaskID, dtStart);
+			nRes = OffsetTaskStartAndDueDates(dwTaskID, dtStart, nUnits);
 	}
 	else
 	{
@@ -2557,7 +2561,20 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 	return nRes;
 }
 
+// External
 TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
+{
+	TDCTIMEPERIOD tp;
+	
+	if (GetTaskTimeEstimate(dwTaskID, tp))
+		return OffsetTaskStartAndDueDates(dwTaskID, dtNewStart, tp.nUnits);
+
+	// else
+	return OffsetTaskStartAndDueDates(dwTaskID, dtNewStart, TDCU_DAYS);
+}
+
+// Internal
+TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart, TDC_UNITS nUnits)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -2585,7 +2602,7 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 	COleDateTime dtStart(dtNewStart); // may get modified
 	COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, 
 										   pTDI->dateDue, 
-										   pTDI->timeEstimate.nUnits, 
+										   nUnits, 
 										   dtStart);
 
 	// FALSE -> don't recalc time estimate until due date is set
@@ -3952,7 +3969,7 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 	{
 		dtNewDue = CalcNewDueDate(pTDI->dateStart, 
 								  pTDI->dateDue, 
-								  pTDI->timeEstimate.nUnits, 
+								  TDCU_DAYS, 
 								  dtStart);
 	}
 	else if ((pTDI->timeEstimate.dAmount > 0.0) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
