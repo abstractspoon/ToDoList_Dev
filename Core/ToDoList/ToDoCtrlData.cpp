@@ -2600,8 +2600,13 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDate
 
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart)
 {
-	// If the task is an exact multiple of calendar months (including years)
-	// Just increment the new Start date by the same number of months
+#ifdef _DEBUG
+	CString sCurStart = dtCurStart.Format();
+	CString sCurDue = dtCurDue.Format();
+	CString sNewStart = dtNewStart.Format();
+#endif 
+
+	// Tasks of one or more exact month's duration need special handling
 	double dDurationInMonths = CalcDuration(dtCurStart, dtCurDue, TDCU_MONTHS);
 
 	if (dDurationInMonths == (int)dDurationInMonths)
@@ -2609,8 +2614,8 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		COleDateTime dtNewDue(dtNewStart);
 		CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE);
 
-		if (!CDateHelper::DateHasTime(dtCurDue))
-			dtNewDue.m_dt--;
+		if (!CDateHelper::DateHasTime(dtNewDue))
+			dtNewDue.m_dt--; // we want the day before
 
 		return dtNewDue;
 	}
@@ -4456,7 +4461,9 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 					CDateHelper::IncrementMonth(dtNewStart, -(int)dDurationInMonths, TRUE); // Preserve end of month
 
 					nOffsetDays = ((int)dtNewStart - (int)dtStart);
-					nOffsetDays += 1; // we want the day after
+
+					if (!CDateHelper::DateHasTime(dtNext))
+						nOffsetDays++; // we want the day after
 				}
 
 				// DON'T fit the new date to the recurring scheme

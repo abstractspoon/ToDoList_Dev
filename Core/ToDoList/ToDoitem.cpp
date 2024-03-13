@@ -1229,7 +1229,10 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 #ifdef _DEBUG
 				CString sNewStart = dtNewStart.Format();
 #endif
-				nDaysOffset = (int)Misc::Round(dtNewStart.m_dt - dateStart.m_dt, 4) + 1;
+				nDaysOffset = (int)Misc::Round(dtNewStart.m_dt - dateStart.m_dt, 4);
+
+				if (!CDateHelper::DateHasTime(dDate))
+					nDaysOffset++; // we want the day after
 			}
 
 			COleDateTime dtNewStart = dateStart;
@@ -1250,7 +1253,10 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 #ifdef _DEBUG
 				CString sNewDue = dtNewDue.Format();
 #endif 
-				nDaysOffset = (int)Misc::Round(dtNewDue.m_dt - dateDue.m_dt, 4) - 1;
+				nDaysOffset = (int)Misc::Round(dtNewDue.m_dt - dateDue.m_dt, 4);
+
+				if (!CDateHelper::DateHasTime(dDate))
+					nDaysOffset--; // we want the day before
 			}
 
 			COleDateTime dtNewDue = dateDue;
