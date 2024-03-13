@@ -103,7 +103,7 @@ public:
 	BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE) const;
 	BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bMustHaveSign = TRUE) const;
 
-	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay);
+	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay) const;
 
 	const CWorkingWeek& WorkingWeek() const { return m_week; }
 	const CWorkingDay& WorkingDay() const { return m_week.WorkingDay(); }

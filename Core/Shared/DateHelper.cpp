@@ -556,7 +556,7 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, B
 	return IsDateSet(date);
 }
 
-double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay)
+double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay) const
 {
 	// Sanity check
 	if (!COleDateTimeRange::IsValid(dtFrom, dtTo))
