@@ -1601,7 +1601,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 
 		// Get the raw date pairs
 		CArray<COleDateTimeRange, COleDateTimeRange&> aOccur;
-		int nNumOccur = m_data.CalcNextTaskOccurences(dwTaskID, dtRange, aOccur);
+		int nNumOccur = m_data.CalcNextTaskOccurrences(dwTaskID, dtRange, aOccur);
 
 		pOccurrences->nNumOccurrences = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
 

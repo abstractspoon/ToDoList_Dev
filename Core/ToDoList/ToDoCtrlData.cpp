@@ -1074,12 +1074,12 @@ BOOL CToDoCtrlData::GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, 
 	return pTDI->GetNextOccurence(dtNext, bDue);
 }
 
-int CToDoCtrlData::CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
+int CToDoCtrlData::CalcNextTaskOccurrences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 
-	return pTDI->CalcNextOccurences(dtRange, aOccur);
+	return pTDI->CalcNextOccurrences(dtRange, aOccur);
 }
 
 COleDateTime CToDoCtrlData::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const

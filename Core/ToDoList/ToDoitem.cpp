@@ -1181,7 +1181,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return TRUE;
 }
 
-int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
+int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	ASSERT(!IsDone());
 
@@ -1199,7 +1199,7 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
 
 	CArray<double, double&> aDates;
-	int nNumOccur = trRecurrence.CalcNextOccurences(dtCur, dtExtended, aDates);
+	int nNumOccur = trRecurrence.CalcNextOccurrences(dtCur, dtExtended, aDates);
 
 	if (!nNumOccur)
 		return 0;

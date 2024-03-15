@@ -124,7 +124,7 @@ public:
 	BOOL IsTaskDone(DWORD dwTaskID) const;
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
-	int CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
+	int CalcNextTaskOccurrences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
 	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
 	BOOL IsTaskReusableRecurring(DWORD dwTaskID) const;
