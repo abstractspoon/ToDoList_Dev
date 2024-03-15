@@ -95,7 +95,8 @@ class CDateHelper
 public:
 	CDateHelper(); // uses statically defined hours and days
 	CDateHelper(const CWorkingWeek& week);
-
+	
+	// These will return weekdays if 'WorkingWeek().HasWeekend()'
 	int CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive) const;
 	int CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const;
 	int CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) const;
