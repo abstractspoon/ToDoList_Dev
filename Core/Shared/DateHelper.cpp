@@ -466,7 +466,24 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime
 	if (bInclusive)
 		dTo.m_dt += 1;
 
-	return (int)(double)(dTo - dFrom);
+	int nDays = (int)(double)(dTo - dFrom);
+
+	if (m_week.HasWeekend() && (nDays > 0))
+	{
+		nDays = 0;
+
+		while (dFrom < dTo)
+		{
+			OLE_DAYOFWEEK nDOW = GetDayOfWeek(dFrom);
+
+			if (!m_week.Weekend().IsWeekend(nDOW))
+				nDays++;
+
+			dFrom += 1;
+		}
+	}
+
+	return nDays;
 }
 
 int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const
