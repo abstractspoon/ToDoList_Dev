@@ -4452,12 +4452,13 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 
 		if (bHasDue)
 		{
-			int nOffsetDays = ((int)dtNext - (int)dtDue);
+			int nDaysOffset = (int)Misc::Round(dtNext - dtDue, 4);
+			//int nDaysOffset = ((int)dtNext - (int)dtDue);
 
 			// Make sure the new date fits the recurring scheme
 			if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
 											 TDCD_DUEDATE,
-											 nOffsetDays,
+											 nDaysOffset,
 											 TDCU_DAYS,
 											 OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS))
 			{
@@ -4477,16 +4478,17 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 					COleDateTime dtNewStart = dtNext;
 					CDateHelper::IncrementMonth(dtNewStart, -(int)dDurationInMonths, TRUE); // Preserve end of month
 
-					nOffsetDays = ((int)dtNewStart - (int)dtStart);
+					nDaysOffset = (int)Misc::Round(dtNewStart - dtStart, 4);
+					//nDaysOffset = ((int)dtNewStart - (int)dtStart);
 
 					if (!CDateHelper::DateHasTime(dtNext))
-						nOffsetDays++; // we want the day after
+						nDaysOffset++; // we want the day after
 				}
 
 				// DON'T fit the new date to the recurring scheme
 				if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
 												 TDCD_STARTDATE,
-												 nOffsetDays,
+												 nDaysOffset,
 												 TDCU_DAYS,
 												 OFFSET_SUBTASKS))
 				{
@@ -4507,13 +4509,14 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	{
 		ASSERT(bHasStart);
 
-		int nOffsetDays = ((int)dtNext - (int)dtStart);
+		int nDaysOffset = (int)Misc::Round(dtNext - dtStart, 4);
+		//int nDaysOffset = ((int)dtNext - (int)dtStart);
 
 		// bump dates by required amount
 		// Make sure the new date fits the recurring scheme
 		if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
 										 TDCD_STARTDATE,
-										 nOffsetDays,
+										 nDaysOffset,
 										 TDCU_DAYS,
 										 OFFSET_FITTORECURRINGSCHEME | OFFSET_SUBTASKS))
 		{
@@ -4532,16 +4535,17 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 				COleDateTime dtNewDue = dtNext;
 				CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE); // Preserve end of month
 
-				nOffsetDays = ((int)dtNewDue - (int)dtDue);
+				nDaysOffset = (int)Misc::Round(dtNewDue - dtDue, 4);
+				//nDaysOffset = ((int)dtNewDue - (int)dtDue);
 
 				if (!CDateHelper::DateHasTime(dtNext))
-					nOffsetDays--; // we want the day before
+					nDaysOffset--; // we want the day before
 			}
 
 			// DON'T fit the new date to the recurring scheme
 			if (OffsetTaskDate(dwNewTaskID, 
 							   TDCD_DUEDATE, 
-							   nOffsetDays, 
+							   nDaysOffset, 
 							   TDCU_DAYS, 
 							   OFFSET_SUBTASKS) == SET_CHANGE)
 			{
