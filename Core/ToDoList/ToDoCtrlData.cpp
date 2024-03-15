@@ -4523,6 +4523,21 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 		// adjust due dates similarly
 		if (bHasDue)
 		{
+			// Tasks of one or more exact month's duration need special handling
+			// because the number of offset days depends on which months are encompassed
+			double dDurationInMonths = CalcDuration(dtStart, dtDue, TDCU_MONTHS);
+
+			if (dDurationInMonths == (int)dDurationInMonths)
+			{
+				COleDateTime dtNewDue = dtNext;
+				CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE); // Preserve end of month
+
+				nOffsetDays = ((int)dtNewDue - (int)dtDue);
+
+				if (!CDateHelper::DateHasTime(dtNext))
+					nOffsetDays--; // we want the day before
+			}
+
 			// DON'T fit the new date to the recurring scheme
 			if (OffsetTaskDate(dwNewTaskID, 
 							   TDCD_DUEDATE, 
