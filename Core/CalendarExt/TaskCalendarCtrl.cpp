@@ -2463,6 +2463,12 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	if (dwSelID)
 	{
+		// Avoid selecting 'Future Occurrences' because it's not
+		// strictly necessary and their ephemeral nature can cause
+		// asserts and other difficulties
+		if (IsFutureOccurrence(dwSelID))
+			dwSelID = GetRealTaskID(dwSelID);
+
 		if (m_tooltip.GetSafeHwnd())
 			m_tooltip.Pop();
 
