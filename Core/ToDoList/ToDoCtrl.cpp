@@ -3332,32 +3332,11 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 	if (m_calculator.IsTaskLocked(dwTaskID))
 		return SET_FAILED;
 
-	const TODOITEM* pTDI = GetTask(dwTaskID);
-
-	if (!pTDI)
-	{
-		ASSERT(0);
-		return SET_FAILED;
-	}
-
-	TDC_SET nRes = SET_NOCHANGE;
-
-	// Handle subtasks at the end
-	if (pTDI->HasStart() && pTDI->HasDue())
-	{
-		// Offset as a block
-		COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
-		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
-
-		if (dtStart != pTDI->dateStart)
-			nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, dtStart);
-	}
-	else
-	{
-		// Offsetting from today will initialise dates if not currently set
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, bFromToday);
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, bFromToday);
-	}
+	TDC_SET nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, 
+													 nAmount, 
+													 nUnits, 
+													 FALSE, // Do subtasks below
+													 bFromToday);
 	ASSERT((nRes != SET_FAILED) || !bFromToday);
 
 	mapProcessed.Add(dwTaskID);

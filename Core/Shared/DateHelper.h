@@ -95,7 +95,8 @@ class CDateHelper
 public:
 	CDateHelper(); // uses statically defined hours and days
 	CDateHelper(const CWorkingWeek& week);
-
+	
+	// These will return weekdays if 'WorkingWeek().HasWeekend()'
 	int CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive) const;
 	int CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const;
 	int CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) const;
@@ -103,7 +104,7 @@ public:
 	BOOL OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE) const;
 	BOOL DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bMustHaveSign = TRUE) const;
 
-	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay);
+	double CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay) const;
 
 	const CWorkingWeek& WorkingWeek() const { return m_week; }
 	const CWorkingDay& WorkingDay() const { return m_week.WorkingDay(); }

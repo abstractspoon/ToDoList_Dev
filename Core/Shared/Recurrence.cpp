@@ -365,7 +365,7 @@ BOOL CRecurrence::GetNextSpecificMonth(DWORD dwMonths, int& nMonth, int& nYear)
 	return TRUE;
 }
 
-int CRecurrence::CalcNextOccurences(const COleDateTime& dtPrev, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
+int CRecurrence::CalcNextOccurrences(const COleDateTime& dtPrev, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
 {
 	if (!dtRange.IsValid())
 	{

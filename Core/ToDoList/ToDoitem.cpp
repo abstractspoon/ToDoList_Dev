@@ -1181,7 +1181,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return TRUE;
 }
 
-int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
+int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
 	ASSERT(!IsDone());
 
@@ -1199,7 +1199,7 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
 
 	CArray<double, double&> aDates;
-	int nNumOccur = trRecurrence.CalcNextOccurences(dtCur, dtExtended, aDates);
+	int nNumOccur = trRecurrence.CalcNextOccurrences(dtCur, dtExtended, aDates);
 
 	if (!nNumOccur)
 		return 0;
@@ -1210,12 +1210,33 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
 		const double dDate = aDates[nOccur];
-		int nOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
+
+#ifdef _DEBUG
+		CString sDate = COleDateTime(dDate).Format();
+		CString sCur = dtCur.Format();
+#endif
+		int nDaysOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
+
+		double dDurationInMonths = CDateHelper().CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
 
 		if (bDueDate)
 		{
+			// Tasks of one or more exact month's duration need special handling
+			if (dDurationInMonths == (int)dDurationInMonths)
+			{
+				COleDateTime dtNewStart = dDate;
+				CDateHelper::IncrementMonth(dtNewStart, -(int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+				CString sNewStart = dtNewStart.Format();
+#endif
+				nDaysOffset = (int)Misc::Round(dtNewStart - dateStart, 4);
+
+				if (!CDateHelper::DateHasTime(dDate))
+					nDaysOffset++; // we want the day after
+			}
+
 			COleDateTime dtNewStart = dateStart;
-			VERIFY(CDateHelper().OffsetDate(dtNewStart, nOffset, DHU_DAYS));
+			VERIFY(CDateHelper().OffsetDate(dtNewStart, nDaysOffset, DHU_DAYS));
 
 			ASSERT((dtNewStart.m_dt <= dDate) ||
 					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
@@ -1224,8 +1245,22 @@ int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDa
 		}
 		else // start date
 		{
+			// Task's of one more month's duration need special handling
+			if (dDurationInMonths == (int)dDurationInMonths)
+			{
+				COleDateTime dtNewDue = dDate;
+				CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+				CString sNewDue = dtNewDue.Format();
+#endif 
+				nDaysOffset = (int)Misc::Round(dtNewDue - dateDue, 4);
+
+				if (!CDateHelper::DateHasTime(dDate))
+					nDaysOffset--; // we want the day before
+			}
+
 			COleDateTime dtNewDue = dateDue;
-			VERIFY(CDateHelper().OffsetDate(dtNewDue, nOffset, DHU_DAYS));
+			VERIFY(CDateHelper().OffsetDate(dtNewDue, nDaysOffset, DHU_DAYS));
 
 			ASSERT((dDate <= dtNewDue.m_dt) ||
 					(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
