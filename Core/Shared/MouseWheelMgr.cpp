@@ -62,6 +62,11 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		// This also means that if the window with the focus is beneath
 		// the mouse then we just let Windows apply its default handling.
 		HWND hwndPt = ::WindowFromPoint(info.pt);
+		CString sClass = CWinClasses::GetClass(hwndPt);
+
+		// Windows explorer is tricky so we leave it well alone
+		if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND))
+			return FALSE;
 
 		int zDelta = GET_WHEEL_DELTA_WPARAM(info.mouseData);
 		BOOL bDown = (zDelta < 0), bRight = bDown;
@@ -80,12 +85,6 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		// non-focus windows
 		if (::GetFocus() != hwndPt) 
 		{
-			CString sClass = CWinClasses::GetClass(hwndPt);
-
-			// Windows explorer is tricky so we don't mess with it
-			if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND))
-				return FALSE;
-
 			DWORD dwStyle = ::GetWindowLong(hwndPt, GWL_STYLE);
 
 			BOOL bHasVScroll = Misc::HasFlag(dwStyle, WS_VSCROLL);
