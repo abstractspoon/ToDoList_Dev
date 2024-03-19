@@ -137,6 +137,10 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	// 3. have we got any occurrences left
 	if (!CanRecur())
 		return FALSE;
+
+#ifdef _DEBUG
+	CString sPrev = dtPrev.Format();
+#endif
 	
 	COleDateTime dtTemp = dtPrev; // starting point
 	CDateHelper dh; // uses static working week
@@ -200,12 +204,21 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		{
 			SYSTEMTIME st;
 			dtTemp.GetAsSystemTime(st); // Preserves time component
+
+			int nNumMonths = (int)m_dwSpecific1;
+			int nDayInMonth = (int)m_dwSpecific2;
+
+			// If the previous day precedes the specified day of the month
+			// then we decrement the month count so as to take the previous
+			// month into account
+			int nNumDaysInPrevMonth = CDateHelper::GetDaysInMonth(st.wMonth, st.wYear);
+
+			if (st.wDay < min(nDayInMonth, nNumDaysInPrevMonth))
+				nNumMonths--;
 			
 			// Set day first and allow IncrementMonth() to clip it as necessary
-			st.wDay = (WORD)m_dwSpecific2;
-
-			// add number of months specified by m_dwSpecific1 
-			dh.IncrementMonth(st, (int)m_dwSpecific1);
+			st.wDay = (WORD)nDayInMonth;
+			dh.IncrementMonth(st, nNumMonths);
 			
 			dtTemp = st;
 		}
@@ -316,6 +329,8 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	}
 		
 #if _DEBUG
+	CString sTemp = dtTemp.Format();
+
 	// Debug check that we are synced with FitDateToScheme
 	switch (m_nRegularity)
 	{
