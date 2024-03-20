@@ -1195,6 +1195,11 @@ int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleD
 	COleDateTimeRange dtExtended(dtRange);
 	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
 
+#ifdef _DEBUG
+	CString sRange = dtRange.Format();
+	CString sExtRange = dtExtended.Format();
+#endif
+
 	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
 	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
 
