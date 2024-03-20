@@ -1582,43 +1582,46 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 {
 	// Note: Queries from extensions are processed even if
 	// an extension view is not active
-	ASSERT(wParam && lParam);
-
-	if (wParam && lParam)
+	if (!wParam || !lParam)
 	{
-		DWORD dwTaskID = wParam;
-		IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
-
-		// Get the range for which we want the future occurrences
-		COleDateTimeRange dtRange;
-
-		if (!dtRange.Set(CDateHelper::GetDate(pOccurrences->tRangeStart),
-						 CDateHelper::GetDate(pOccurrences->tRangeEnd)))
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-
-		// Get the raw date pairs
-		CArray<COleDateTimeRange, COleDateTimeRange&> aOccur;
-		int nNumOccur = m_data.CalcNextTaskOccurrences(dwTaskID, dtRange, aOccur);
-
-		pOccurrences->nNumOccurrences = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
-
-		// Convert to the format required by the caller
-		for (int nOccur = 0; nOccur < pOccurrences->nNumOccurrences; nOccur++)
-		{
-			const COleDateTimeRange& dtOccur = aOccur[nOccur];
-			IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
-
-			VERIFY(CDateHelper::GetTimeT64(dtOccur.GetStart(), occur.tStart));
-			VERIFY(CDateHelper::GetTimeT64(dtOccur.GetEnd(), occur.tEnd));
-		}
-
-		return TRUE;
+		ASSERT(0);
+		return FALSE;
 	}
 
-	return FALSE;
+	DWORD dwTaskID = wParam;
+
+	if (m_calculator.IsTaskLocked(dwTaskID))
+		return FALSE;
+
+	IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
+
+	// Get the range for which we want the future occurrences
+	COleDateTimeRange dtRange;
+
+	if (!dtRange.Set(CDateHelper::GetDate(pOccurrences->tRangeStart),
+					 CDateHelper::GetDate(pOccurrences->tRangeEnd)))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Get the raw date pairs
+	CArray<COleDateTimeRange, COleDateTimeRange&> aOccur;
+	int nNumOccur = m_data.CalcNextTaskOccurrences(dwTaskID, dtRange, aOccur);
+
+	pOccurrences->nNumOccurrences = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
+
+	// Convert to the format required by the caller
+	for (int nOccur = 0; nOccur < pOccurrences->nNumOccurrences; nOccur++)
+	{
+		const COleDateTimeRange& dtOccur = aOccur[nOccur];
+		IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
+
+		VERIFY(CDateHelper::GetTimeT64(dtOccur.GetStart(), occur.tStart));
+		VERIFY(CDateHelper::GetTimeT64(dtOccur.GetEnd(), occur.tEnd));
+	}
+
+	return TRUE;
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskTitle(WPARAM /*wParam*/, LPARAM /*lParam*/)

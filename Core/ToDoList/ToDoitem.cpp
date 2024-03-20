@@ -1183,7 +1183,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 
 int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
-	ASSERT(!IsDone());
+	ASSERT(!IsDone() && !bLocked);
 
 	if (!CanRecur())
 		return FALSE;
