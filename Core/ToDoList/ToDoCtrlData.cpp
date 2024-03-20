@@ -2501,7 +2501,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
 													BOOL bAndSubtasks, BOOL bFromToday)
 {
-	ASSERT(nAmount != 0);
+	ASSERT(nAmount || bFromToday);
 
 	DWORD dwFlags = 0;
 	Misc::SetFlag(dwFlags, OFFSET_FROMTODAY, bFromToday);
@@ -2515,46 +2515,46 @@ TDC_SET CToDoCtrlData::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, T
 {
 	ASSERT((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS));
 
-	if (nAmount == 0)
-		return SET_NOCHANGE;
-
-	const TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
-
 	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, OFFSET_SUBTASKS);
 	BOOL bFromToday = Misc::HasFlag(dwFlags, OFFSET_FROMTODAY);
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	// Handle subtasks at the end
-	if (pTDI->HasStart() && pTDI->HasDue())
+	if (nAmount || bFromToday)
 	{
-		// Offset as a block
-		COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
-		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
+		const TODOITEM* pTDI = NULL;
+		EDIT_GET_TDI(dwTaskID, pTDI);
 
-		if (dtStart != pTDI->dateStart)
-			nRes = OffsetTaskStartAndDueDates(dwTaskID, dtStart, nUnits);
-	}
-	else
-	{
-		// Offsetting from today will initialise dates if not currently set
-		nRes = OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, bFromToday);
-		nRes = OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, bFromToday);
-	}
-
-	// children
-	if (bAndSubtasks)
-	{
-		const TODOSTRUCTURE* pTDS = NULL;
-		GET_TDS(dwTaskID, pTDS, SET_FAILED);
-
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		// Handle subtasks at the end
+		if (pTDI->HasStart() && pTDI->HasDue())
 		{
-			DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
-			
-			if (OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, dwFlags) == SET_CHANGE) // RECURSIVE CALL
-				nRes = SET_CHANGE;
+			// Offset as a block
+			COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
+			CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
+
+			if (dtStart != pTDI->dateStart)
+				nRes = OffsetTaskStartAndDueDates(dwTaskID, dtStart, nUnits);
+		}
+		else
+		{
+			// Offsetting from today will initialise dates if not currently set
+			nRes = OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, bFromToday);
+			nRes = OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, bFromToday);
+		}
+
+		// children
+		if (bAndSubtasks)
+		{
+			const TODOSTRUCTURE* pTDS = NULL;
+			GET_TDS(dwTaskID, pTDS, SET_FAILED);
+
+			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			{
+				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
+
+				if (OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, dwFlags) == SET_CHANGE) // RECURSIVE CALL
+					nRes = SET_CHANGE;
+			}
 		}
 	}
 	
