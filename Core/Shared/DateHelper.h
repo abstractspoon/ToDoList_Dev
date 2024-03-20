@@ -149,6 +149,7 @@ public:
 	static OLE_DAYOFWEEK GetNextDayOfWeek(OLE_DAYOFWEEK nDOW);
 	static int GetDaysInMonth(int nMonth, int nYear); 
 	static int GetDaysInMonth(const COleDateTime& date); 
+	static int GetDaysInMonth(const SYSTEMTIME& st);
 	static int GetWeekofYear(const COleDateTime& date);
 	static COleDateTime GetEndOfPreviousDay(const COleDateTime& date);
 	static COleDateTime GetEndOfDay(const COleDateTime& date);

@@ -1663,6 +1663,11 @@ int CDateHelper::GetDaysInMonth(const COleDateTime& date)
 	return GetDaysInMonth(date.GetMonth(), date.GetYear());
 }
 
+int CDateHelper::GetDaysInMonth(const SYSTEMTIME& st)
+{
+	return GetDaysInMonth(st.wMonth, st.wYear);
+}
+
 int CDateHelper::GetDaysInMonth(int nMonth, int nYear)
 {
 	// Sanity check
@@ -1737,7 +1742,7 @@ BOOL CDateHelper::IsEndOfMonth(const COleDateTime& date)
 
 BOOL CDateHelper::IsEndOfMonth(const SYSTEMTIME& st)
 {
-	return ((int)st.wDay >= GetDaysInMonth((int)st.wMonth, (int)st.wYear));
+	return ((int)st.wDay >= GetDaysInMonth(st));
 }
 
 BOOL CDateHelper::IsSameYear(const COleDateTime& date1, const COleDateTime& date2)
