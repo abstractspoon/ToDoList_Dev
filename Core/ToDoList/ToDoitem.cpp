@@ -1214,67 +1214,84 @@ int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleD
 	
 	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
-		const COleDateTime dtNext(aDates[nOccur]);
-
-#ifdef _DEBUG
-		CString sNext = dtNext.Format();
-		CString sCur = dtCur.Format();
-#endif
-		int nDaysOffset = (int)Misc::Round(dtNext - dtCur, 4);
-
-		double dDurationInMonths = CDateHelper().CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
-
-		if (bDueDate)
-		{
-			// Tasks of one or more exact month's duration need special handling
-			if (dDurationInMonths == (int)dDurationInMonths)
-			{
-				COleDateTime dtNextStart = dtNext;
-				CDateHelper::IncrementMonth(dtNextStart, -(int)dDurationInMonths, TRUE);
-#ifdef _DEBUG
-				CString sNextStart = dtNextStart.Format();
-#endif
-				nDaysOffset = (int)Misc::Round(dtNextStart - dateStart, 4);
-
-				if (!CDateHelper::DateHasTime(dtNext))
-					nDaysOffset++; // we want the day after
-			}
-
-			COleDateTime dtNextStart = dateStart;
-			VERIFY(CDateHelper().OffsetDate(dtNextStart, nDaysOffset, DHU_DAYS));
-
-			ASSERT((dtNextStart <= dtNext) ||
-					(CDateHelper::IsSameDay(dtNext, dtNextStart) && !CDateHelper::DateHasTime(dtNext)));
-
-			VERIFY(aOccur[nOccur].Set(dtNextStart, dtNext));
-		}
-		else // start date
-		{
-			// Task's of one more month's duration need special handling
-			if (dDurationInMonths == (int)dDurationInMonths)
-			{
-				COleDateTime dtNextDue = dtNext;
-				CDateHelper::IncrementMonth(dtNextDue, (int)dDurationInMonths, TRUE);
-#ifdef _DEBUG
-				CString sNextDue = dtNextDue.Format();
-#endif 
-				nDaysOffset = (int)Misc::Round(dtNextDue - dateDue, 4);
-
-				if (!CDateHelper::DateHasTime(dtNext))
-					nDaysOffset--; // we want the day before
-			}
-
-			COleDateTime dtNextDue = dateDue;
-			VERIFY(CDateHelper().OffsetDate(dtNextDue, nDaysOffset, DHU_DAYS));
-
-			ASSERT((dtNext <= dtNextDue) ||
-					(CDateHelper::IsSameDay(dtNext, dtNextDue) && !CDateHelper::DateHasTime(dtNextDue)));
-
-			VERIFY(aOccur[nOccur].Set(dtNext, dtNextDue));
-		}
+		VERIFY(CalcNextOccurrence(aDates[nOccur], aOccur[nOccur]));
 	}
 
 	return nNumOccur;
+}
+
+BOOL TODOITEM::CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const
+{
+	ASSERT(!IsDone() && !bLocked);
+
+	if (!CanRecur())
+		return FALSE;
+
+	if (!HasStart() || !HasDue() || (dateDue < dateStart))
+		return FALSE;
+
+	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
+
+#ifdef _DEBUG
+	CString sNext = dtNext.Format();
+	CString sCur = dtCur.Format();
+#endif
+	int nDaysOffset = (int)Misc::Round(dtNext - dtCur, 4);
+
+	CDateHelper dh;
+	double dDurationInMonths = dh.CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
+
+	if (bDueDate)
+	{
+		// Tasks of one or more exact month's duration need special handling
+		if (dDurationInMonths == (int)dDurationInMonths)
+		{
+			COleDateTime dtNextStart = dtNext;
+			dh.IncrementMonth(dtNextStart, -(int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+			CString sNextStart = dtNextStart.Format();
+#endif
+			nDaysOffset = (int)Misc::Round(dtNextStart - dateStart, 4);
+
+			if (!dh.DateHasTime(dtNext))
+				nDaysOffset++; // we want the day after
+		}
+
+		COleDateTime dtNextStart = dateStart;
+		VERIFY(dh.OffsetDate(dtNextStart, nDaysOffset, DHU_DAYS));
+
+		ASSERT((dtNextStart <= dtNext) ||
+			(dh.IsSameDay(dtNext, dtNextStart) && !dh.DateHasTime(dtNext)));
+
+		VERIFY(dtOccur.Set(dtNextStart, dtNext));
+	}
+	else // start date
+	{
+		// Task's of one more month's duration need special handling
+		if (dDurationInMonths == (int)dDurationInMonths)
+		{
+			COleDateTime dtNextDue = dtNext;
+			dh.IncrementMonth(dtNextDue, (int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+			CString sNextDue = dtNextDue.Format();
+#endif 
+			nDaysOffset = (int)Misc::Round(dtNextDue - dateDue, 4);
+
+			if (!dh.DateHasTime(dtNext))
+				nDaysOffset--; // we want the day before
+		}
+
+		COleDateTime dtNextDue = dateDue;
+		VERIFY(dh.OffsetDate(dtNextDue, nDaysOffset, DHU_DAYS));
+
+		ASSERT((dtNext <= dtNextDue) ||
+			(dh.IsSameDay(dtNext, dtNextDue) && !dh.DateHasTime(dtNextDue)));
+
+		VERIFY(dtOccur.Set(dtNext, dtNextDue));
+	}
+
+	return dtOccur.IsValid();
 }
 
 BOOL TODOITEM::IsRecentlyModified() const

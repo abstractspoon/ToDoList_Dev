@@ -203,6 +203,7 @@ public:
 	CString GetFileLink(int nFile) const;
 
 	BOOL GetNextOccurence(COleDateTime& dtNext, BOOL& bDue);
+	BOOL CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const;
 	int CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
 	BOOL IsRecurring() const;
 	BOOL CanRecur() const;
