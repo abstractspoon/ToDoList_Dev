@@ -178,9 +178,11 @@ void CPlainTextExporter::ExportTask(const ITaskList* pSrcTaskFile, HTASKITEM hTa
 
 	if (!sComments.IsEmpty())
 	{
-		// remove all carriage returns
-		sComments.Replace(_T("\r\n"), _T(""));
-		sComments.Replace(_T("\n"), _T(""));
+		// Remove carriage-returns
+		sComments.Replace(_T("\r"), _T(""));
+
+		// Escape line-feeds for compatibility with the importer
+		sComments.Replace(_T("\n"), _T("\\n"));
 
 		sTask += '|';
 		sTask += sComments;
