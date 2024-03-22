@@ -13,6 +13,7 @@
 
 #include "..\shared\MSOutlookHelper.h"
 #include "..\shared\enstring.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportOutlookObjectsDlg dialog
@@ -42,6 +43,7 @@ protected:
 	CString m_sClass;
 	OutlookAPI::_Item& m_refItem;
 	CString m_sAltTitle;
+	CIcon m_icon;
 
 	// the master mapping always contains all fields
 	// with their last mapped attributes, whilst the mapping

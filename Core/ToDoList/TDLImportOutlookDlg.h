@@ -9,6 +9,7 @@
 
 #include "..\Shared\wndprompt.h"
 #include "..\Shared\enimagelist.h"
+#include "..\Shared\icon.h"
 
 #include "..\Interfaces\ITasklist.h"
 #include "..\Interfaces\IImportExport.h"
@@ -53,6 +54,7 @@ public:
 	CWndPromptManager m_wndPrompt;
 	CEnImageList m_ilItemTypes;
 	CMap<int, int, int, int&> m_mapItemTypes;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
