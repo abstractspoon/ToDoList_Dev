@@ -3188,7 +3188,8 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
+									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth)
 {
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3272,7 +3273,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 }
 
 BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, 
-													BOOL bAndSubtasks, BOOL bFromToday)
+												   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth)
 {
 	if (!CanOffsetSelectedTaskStartAndDueDates())
 		return FALSE;

@@ -12053,6 +12053,7 @@ void CToDoListWnd::OnEditOffsetDates()
 		DWORD dwWhat = dialog.GetOffsetWhat();
 		BOOL bAndSubtasks = dialog.GetOffsetSubtasks();
 		BOOL bFromToday = dialog.GetOffsetFromToday();
+		BOOL bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 
 		TDC_UNITS nUnits = TDCU_NULL;
 		int nAmount = dialog.GetOffsetAmount(nUnits);
@@ -12073,7 +12074,8 @@ void CToDoListWnd::OnEditOffsetDates()
 				tdc.OffsetSelectedTaskStartAndDueDates(nAmount, 
 													   nUnits, 
 													   bAndSubtasks, 
-													   bFromToday);
+													   bFromToday,
+													   bPreserveEndOfMonth);
 			}
 			else
 			{
@@ -12081,7 +12083,8 @@ void CToDoListWnd::OnEditOffsetDates()
 										   nAmount, 
 										   nUnits, 
 										   bAndSubtasks, 
-										   bFromToday);
+										   bFromToday,
+										   bPreserveEndOfMonth);
 			}
 		}
 		else if (dwWhat & ODD_DUEDATE)
@@ -12090,7 +12093,8 @@ void CToDoListWnd::OnEditOffsetDates()
 									   nAmount, 
 									   nUnits, 
 									   bAndSubtasks, 
-									   bFromToday);
+									   bFromToday,
+									   bPreserveEndOfMonth);
 		}
 		
 		if (dwWhat & ODD_DONEDATE)
@@ -12099,7 +12103,8 @@ void CToDoListWnd::OnEditOffsetDates()
 									   nAmount, 
 									   nUnits, 
 									   bAndSubtasks, 
-									   bFromToday);
+									   bFromToday,
+									   bPreserveEndOfMonth);
 		}
 		
 		if (dwWhat & ODD_REMINDER)

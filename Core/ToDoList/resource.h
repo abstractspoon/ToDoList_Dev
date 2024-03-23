@@ -860,6 +860,7 @@
 #define IDC_INCLUDETITLE                1569
 #define IDC_REDUCEREMINDERDLGFLASHING   1570
 #define IDC_PRESERVEWEEKDAYS            1571
+#define IDC_PRESERVEENDOFMONTH          1574
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001

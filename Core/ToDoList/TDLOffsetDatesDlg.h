@@ -33,6 +33,7 @@ public:
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetFromToday() const { return m_bOffsetFromToday; }
+	BOOL GetPreserveEndOfMonth() const;
 
 protected:
 // Dialog Data
@@ -48,6 +49,7 @@ protected:
 	BOOL	m_bOffsetSubtasks;
 	BOOL	m_bOffsetFromToday;
 	//}}AFX_DATA
+	BOOL	m_bPreserveEndOfMonth;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
