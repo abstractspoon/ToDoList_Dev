@@ -443,8 +443,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnNewTask)
 	ON_COMMAND_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnNewTask)
 	ON_COMMAND_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnNewTask)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetStartDueDatesBackwards)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetStartDueDatesForwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetStartDueDates)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetStartDueDates)
 	ON_COMMAND_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnShowTaskView)
 	ON_COMMAND_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnSortBy)
 	ON_COMMAND_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnSplitTask)
@@ -679,8 +679,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnUpdateNewTask)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDatesBackwards)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDatesForwards)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
@@ -5623,7 +5623,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nUnits);
+			tdc.OffsetSelectedTaskDates(TDCD_START, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_START, dItem);
 	}
@@ -5634,7 +5634,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_STARTTIME, (int)dItem, nUnits);
+			tdc.OffsetSelectedTaskDates(TDCD_STARTTIME, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_STARTTIME, dItem);
 	}
@@ -5645,7 +5645,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nUnits);
+			tdc.OffsetSelectedTaskDates(TDCD_DUE, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DUE, dItem);
 	}
@@ -5656,7 +5656,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DUETIME, (int)dItem, nUnits);
+			tdc.OffsetSelectedTaskDates(TDCD_DUETIME, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DUETIME, dItem);
 	}
@@ -5667,7 +5667,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nUnits);
+			tdc.OffsetSelectedTaskDates(TDCD_DONE, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DONE, dItem);
 	}
@@ -5678,7 +5678,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		ASSERT(bOffset || (nUnits == DHU_DAYS));
 
 		if (bOffset)
-			tdc.OffsetSelectedTaskDate(TDCD_DONETIME, (int)dItem, nUnits);
+			tdc.OffsetSelectedTaskDates(TDCD_DONETIME, (int)dItem, nUnits);
 		else
 			tdc.SetSelectedTaskDate(TDCD_DONETIME, dItem);
 	}
@@ -12062,9 +12062,22 @@ void CToDoListWnd::OnEditOffsetDates()
 			return;
 
 		ASSERT(nUnits != TDCU_NULL);
-		
-		// do the offsets
+
+		CTDCDateSet mapDates;
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+		if (dwWhat & ODD_STARTDATE)
+			mapDates.Add(TDCD_START);
+
+		if (dwWhat & ODD_DUEDATE)
+			mapDates.Add(TDCD_DUE);
+
+		if (dwWhat & ODD_DONEDATE)
+			mapDates.Add(TDCD_DONE);
+
+		tdc.OffsetSelectedTaskDates(mapDates, nAmount, nUnits, bAndSubtasks, bFromToday, bPreserveEndOfMonth);
+
+/*
 		
 		if (dwWhat & ODD_STARTDATE)
 		{
@@ -12106,6 +12119,7 @@ void CToDoListWnd::OnEditOffsetDates()
 									   bFromToday,
 									   bPreserveEndOfMonth);
 		}
+*/
 		
 		if (dwWhat & ODD_REMINDER)
 		{
@@ -12127,9 +12141,10 @@ void CToDoListWnd::OnEditOffsetDates()
 	}
 }
 
-void CToDoListWnd::OnEditOffsetStartDueDatesForwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
+	BOOL bForwards = TRUE;
 
 	switch (nCmdID)
 	{
@@ -12139,47 +12154,31 @@ void CToDoListWnd::OnEditOffsetStartDueDatesForwards(UINT nCmdID)
 	case ID_OFFSETDATES_FORWARDSBY_ONEMONTH:	nUnits = TDCU_MONTHS;	break;
 	case ID_OFFSETDATES_FORWARDSBY_ONEYEAR:		nUnits = TDCU_YEARS;	break;
 
-	default:
-		ASSERT(0);
-		return;
-	}
-
-	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits);
-}
-
-void CToDoListWnd::OnEditOffsetStartDueDatesBackwards(UINT nCmdID)
-{
-	TDC_UNITS nUnits = TDCU_NULL;
-
-	switch (nCmdID)
-	{
-	case ID_OFFSETDATES_BACKWARDSBY_ONEDAY:		nUnits = TDCU_DAYS;		break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY:	nUnits = TDCU_WEEKDAYS; break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEK:	nUnits = TDCU_WEEKS;	break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEMONTH:	nUnits = TDCU_MONTHS;	break;
-	case ID_OFFSETDATES_BACKWARDSBY_ONEYEAR:	nUnits = TDCU_YEARS;	break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEDAY:		nUnits = TDCU_DAYS;		bForwards = FALSE; break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEKDAY:	nUnits = TDCU_WEEKDAYS; bForwards = FALSE; break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEWEEK:	nUnits = TDCU_WEEKS;	bForwards = FALSE; break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEMONTH:	nUnits = TDCU_MONTHS;	bForwards = FALSE; break;
+	case ID_OFFSETDATES_BACKWARDSBY_ONEYEAR:	nUnits = TDCU_YEARS;	bForwards = FALSE; break;
 
 	default:
 		ASSERT(0);
 		return;
 	}
 
-	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(-1, nUnits);
+	CTDCDateSet mapDates;
+	mapDates.Add(TDCD_START);
+	mapDates.Add(TDCD_DUE);
+
+	GetToDoCtrl().OffsetSelectedTaskDates(mapDates, (bForwards ? 1 : -1), nUnits);
 }
 
 void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_STARTDATE));	
-}
+	CTDCDateSet mapDates;
+	mapDates.Add(TDCD_START);
+	mapDates.Add(TDCD_DUE);
 
-void CToDoListWnd::OnUpdateEditOffsetDatesForwards(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanOffsetSelectedTaskStartAndDueDates());	
-}
-
-void CToDoListWnd::OnUpdateEditOffsetDatesBackwards(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().CanOffsetSelectedTaskStartAndDueDates());	
+	pCmdUI->Enable(GetToDoCtrl().CanOffsetSelectedTaskDates(mapDates));	
 }
 
 void CToDoListWnd::OnPrintpreview() 
