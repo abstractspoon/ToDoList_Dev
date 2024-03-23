@@ -2461,7 +2461,12 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			{
 				// Modify date AND time
 				if (nAmount)
-					VERIFY(dh.OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE)); // Preserve end of month
+				{
+					VERIFY(dh.OffsetDate(date,
+										 nAmount,
+										 TDC::MapUnitsToDHUnits(nUnits),
+										 bPreserveEndOfMonth));
+				}
 
 				// Special case: Task is recurring and the date was changed -> must fall on a valid date
 				if (bFitToRecurringScheme)
