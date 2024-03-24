@@ -3933,7 +3933,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 		case TDCC_CREATIONDATE:
 		case TDCC_LASTMODDATE:	return FormatTaskDate(pTDI, pTDS, TDC::MapColumnToDate(nColID));
 
-		case TDCC_DEPENDENCY:	return pTDI->aDependencies.Format(_T("+"));
+		case TDCC_DEPENDENCY:	return pTDI->aDependencies.Format('+');
 		case TDCC_FILELINK:		return Misc::FormatArray(pTDI->aFileLinks, '+');
 		case TDCC_PRIORITY:		return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
 
