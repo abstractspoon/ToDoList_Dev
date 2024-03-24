@@ -712,7 +712,7 @@ BOOL CDialogHelper::SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL b
 	if (nDropHeight > 0)
 		rect.bottom += nDropHeight;
 
-	DWORD dwStyle = (combo.GetStyle() | (bVScroll ? WS_VSCROLL : 0));
+	DWORD dwStyle = (combo.GetStyle() | (bVScroll ? WS_VSCROLL : 0) | (bReadOnly ? CBS_AUTOHSCROLL : 0));
 	DWORD dwExStyle = combo.GetExStyle();
 	UINT nCtrlID = combo.GetDlgCtrlID();
 

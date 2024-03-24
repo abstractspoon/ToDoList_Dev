@@ -413,6 +413,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="OleDropTargetEx.cpp" />
     <ClCompile Include="OrderedTreeCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -750,6 +751,7 @@
     <ClInclude Include="odbctablecombobox.h" />
     <ClInclude Include="OdbcTables.h" />
     <ClInclude Include="odbcvaluecombobox.h" />
+    <ClInclude Include="OleDropTargetEx.h" />
     <ClInclude Include="OrderedTreeCtrl.h" />
     <ClInclude Include="OSVersion.h" />
     <ClInclude Include="ownerdrawcomboboxbase.h" />

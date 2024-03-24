@@ -1478,7 +1478,7 @@ BOOL CRichEditBaseCtrl::EnableToolTips(BOOL bEnable)
 		if (!m_tooltip.Create(this, (TTS_NOPREFIX | TTS_ALWAYSTIP)))
 			return FALSE;
 
-		m_tooltip.SetMaxTipWidth(1024); // for '\n' support
+		m_tooltip.EnableMultilineTips();
 		return TRUE;
 	}
 	

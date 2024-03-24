@@ -326,12 +326,12 @@ void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 			if (pDWM)
 			{
 				pDWM->MoveWindow(this, rTabs);
-				pDWM->MoveWindow(pView, rView, FALSE);
+				pDWM->MoveWindow(pView, rView/*, FALSE*/);
 			}
 			else
 			{
 				MoveWindow(rTabs);
-				pView->MoveWindow(rView, FALSE);
+				pView->MoveWindow(rView/*, FALSE*/);
 			}
 		}
 	}

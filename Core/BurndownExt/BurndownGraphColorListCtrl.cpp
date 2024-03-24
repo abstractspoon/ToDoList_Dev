@@ -41,7 +41,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	ShowGrid(TRUE, TRUE);
 
 	AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(200)); // Graph titles
-	DisableColumnEditing(0, TRUE);
+	EnableColumnEditing(0, FALSE);
 
 	// Populate items
 	int nSelRow = -1;

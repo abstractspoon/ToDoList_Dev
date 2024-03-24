@@ -44,7 +44,6 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 
 	//{{AFX_DATA_MAP(CPreferencesUIPage)
 	DDX_Check(pDX, IDC_SHOWCOMMENTSALWAYS, m_bShowCommentsAlways);
-	DDX_Check(pDX, IDC_AUTOREPOSCTRLS, m_bAutoReposCtrls);
 	DDX_Check(pDX, IDC_SHAREDCOMMENTSHEIGHT, m_bShareCommentsSize);
 	DDX_Check(pDX, IDC_AUTOHIDETABBAR, m_bAutoHideTabbar);
 	DDX_Check(pDX, IDC_STACKTABBARITEMS, m_bStackTabbarItems);
@@ -136,7 +135,6 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	// load settings
 	m_bShowEditMenuAsColumns = pPrefs->GetProfileInt(szKey, _T("ShowEditMenuAsColumns"), FALSE);
 	m_bShowCommentsAlways = pPrefs->GetProfileInt(szKey, _T("ShowCommentsAlways"), FALSE);
-	m_bAutoReposCtrls = pPrefs->GetProfileInt(szKey, _T("AutoReposCtrls"), TRUE);
 	m_bSpecifyToolbarImage = pPrefs->GetProfileInt(szKey, _T("SpecifyToolbarImage"), FALSE);
 	m_bShareCommentsSize = pPrefs->GetProfileInt(szKey, _T("SharedCommentsHeight"), TRUE);
 	m_bAutoHideTabbar = pPrefs->GetProfileInt(szKey, _T("AutoHideTabbar"), TRUE);
@@ -189,7 +187,6 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("ShowEditMenuAsColumns"), m_bShowEditMenuAsColumns);
 	pPrefs->WriteProfileInt(szKey, _T("ShowCommentsAlways"), m_bShowCommentsAlways);
-	pPrefs->WriteProfileInt(szKey, _T("AutoReposCtrls"), m_bAutoReposCtrls);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyToolbarImage"), m_bSpecifyToolbarImage);
 	pPrefs->WriteProfileInt(szKey, _T("SharedCommentsHeight"), m_bShareCommentsSize);
 	pPrefs->WriteProfileInt(szKey, _T("AutoHideTabbar"), m_bAutoHideTabbar);

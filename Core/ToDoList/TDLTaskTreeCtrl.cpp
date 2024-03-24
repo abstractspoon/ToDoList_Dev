@@ -1892,7 +1892,7 @@ BOOL CTDLTaskTreeCtrl::IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const
 				return FALSE;
 
 			// Prevent moving subtasks of locked parent unless parent is reference
-			if (SelectionHasLockedParent(TRUE))
+			if (SelectionHasLockedParents(TRUE))
 				return FALSE;
 		}
 		break;

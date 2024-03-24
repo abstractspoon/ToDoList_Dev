@@ -279,17 +279,20 @@ int CEnCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) co
 	return aItems.GetSize();
 }
 
-void CEnCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
+int CEnCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
 {
-	CCheckComboBox::GetChecked(aChecked, CCBC_CHECKED);
-	CCheckComboBox::GetChecked(aMixed, CCBC_MIXED);
+	int nNumItems = CCheckComboBox::GetChecked(aChecked, aMixed);
 
 	// Remove 'Any'
 	if (m_bMultiSel && IsItemAnyChecked())
 	{
 		ASSERT(aChecked.GetSize());
+
 		aChecked.RemoveAt(0);
+		nNumItems--;
 	}
+
+	return nNumItems;
 }
 
 #ifdef _DEBUG

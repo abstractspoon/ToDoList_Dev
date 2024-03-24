@@ -61,7 +61,7 @@ public:
 	double GetTaskCost(DWORD dwTaskID) const;
 	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
-	double GetTaskRemainingTime(DWORD dwTaskID, TDC_UNITS& nUnits) const;
+	double GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnits) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 	BOOL GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
 	double GetTaskSubtaskCompletion(DWORD dwTaskID) const;
@@ -83,7 +83,7 @@ public:
 	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
-	double GetTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
+	double GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
 	TDC_UNITS GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	TDC_UNITS GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -128,6 +128,16 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+enum // GetTaskTitlePaths
+{
+	TDCTF_TITLEANDPATH	= 0x0,
+	TDCTF_TITLEONLY		= 0x1,
+	TDCTF_PATHONLY		= 0x2,
+	TDCTF_TRAILINGID	= 0x4,
+};
+
+// -------------------------------------------------------------------
+
 class CTDCTaskFormatter
 {
 public:
@@ -136,18 +146,16 @@ public:
 	CString GetCommentSize(float fSize) const;
 	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
 
-	CString GetTaskAllocTo(DWORD dwTaskID) const;
-	CString GetTaskCategories(DWORD dwTaskID) const;
-	CString GetTaskTags(DWORD dwTaskID) const;
+	CString GetTaskTitlePath(DWORD dwTaskID, DWORD dwFlags) const;
+	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const;
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
-	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const; 
 	CString GetTaskPosition(DWORD dwTaskID) const; 
 	CString GetTaskTimeEstimate(DWORD dwTaskID) const;
 	CString GetTaskTimeSpent(DWORD dwTaskID) const;
 	CString GetTaskTimeRemaining(DWORD dwTaskID) const;
 	CString GetTaskPercentDone(DWORD dwTaskID) const;
-	CString GetTaskCommentSize(DWORD dwTaskID) const;
-	CString GetTaskCommentFormat(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
+	CString GetTaskCommentsSize(DWORD dwTaskID) const;
+	CString GetTaskCommentsFormat(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(DWORD dwTaskID) const;
 	CString GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(DWORD dwTaskID) const;
@@ -161,18 +169,23 @@ public:
 	CString GetTaskCreationDate(DWORD dwTaskID) const;
 	CString GetTaskLastModDate(DWORD dwTaskID) const;
 
-	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
-	CString GetTaskCategories(const TODOITEM* pTDI) const;
-	CString GetTaskTags(const TODOITEM* pTDI) const;
+	CString GetTaskAllocTo(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskCategories(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskTags(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskDependencies(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskDependents(DWORD dwTaskID, TCHAR cSep = 0) const;
+	CString GetTaskFileLinks(DWORD dwTaskID, TCHAR cSep = 0) const;
+
+	CString GetTaskTitlePath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwFlags) const;
 	CString GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPath(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskCommentSize(const TODOITEM* pTDI) const;
-	CString GetTaskCommentFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
+	CString GetTaskCommentsSize(const TODOITEM* pTDI) const;
+	CString GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -186,6 +199,12 @@ public:
 	CString GetTaskCreationDate(const TODOITEM* pTDI) const;
 	CString GetTaskLastModDate(const TODOITEM* pTDI) const;
 
+	CString GetTaskAllocTo(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskCategories(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskTags(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskDependencies(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+	CString GetTaskFileLinks(const TODOITEM* pTDI, TCHAR cSep = 0) const;
+
 	CString GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
@@ -196,6 +215,10 @@ public:
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;
+	CString GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep = 0) const;
+
+	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
+	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -326,6 +349,91 @@ protected:
 	void ExportMatchingTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	void ExportAllCalculatedTaskCustomAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const;
 	void ExportCalculatedTaskCustomAttribute(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CTaskFile& tasks, HTASKITEM hTask) const;
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCMultiTasker
+{
+public:
+	CTDCMultiTasker(const CToDoCtrlData& data, const CContentMgr& mgrContent);
+
+	// These functions return FALSE if two or more tasks had differing values
+	BOOL GetTasksDate(const CDWordArray& aTaskIDs, TDC_DATE nDate, COleDateTime& dtValue) const;
+
+	BOOL GetTasksTitle(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksLastModifiedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksCreatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksAllocatedBy(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksVersion(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksExternalID(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTaskPosition(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksStatus(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksIcon(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksPath(const CDWordArray& aTaskIDs, CString& sValue, BOOL bWithTaskName = FALSE) const;
+	BOOL GetTasksCommentsFormat(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksCommentsSize(const CDWordArray& aTaskIDs, CString& sValue) const;
+	BOOL GetTasksSubtaskCompletion(const CDWordArray& aTaskIDs, CString& sValue) const;
+
+	BOOL GetTasksParentID(const CDWordArray& aTaskIDs, DWORD& dwValue) const;
+	BOOL GetTasksPriority(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksCommentLength(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksRisk(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksPercentDone(const CDWordArray& aTaskIDs, int& nValue) const;
+	BOOL GetTasksFlagState(const CDWordArray& aTaskIDs, BOOL& bValue) const;
+	BOOL GetTasksLockState(const CDWordArray& aTaskIDs, BOOL& bValue) const;
+	BOOL GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crValue) const;
+
+	BOOL GetTasksTimeEstimate(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+	BOOL GetTasksTimeSpent(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+	BOOL GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIMEPERIOD& period) const;
+	BOOL GetTasksCost(const CDWordArray& aTaskIDs, TDCCOST& cost) const;
+	BOOL GetTasksRecurrence(const CDWordArray& aTaskIDs, TDCRECURRENCE& recurs) const;
+
+	BOOL GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
+	BOOL GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
+	BOOL GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
+	BOOL GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aValues) const;
+	BOOL GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const;
+
+	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
+
+	// These functions return the number of matching values
+	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+	int GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
+
+	// Simple query functions
+	BOOL AnyTaskHasDependencies(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasLocalCircularDependencies(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+	BOOL AnyTaskHasDependents(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasIcon(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskHasColor(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const;
+	BOOL AnyTaskIsReference(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsParent(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
+
+	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+
+	CTDCTaskFormatter m_formatter;
+	CTDCTaskCalculator m_calculator;
+
+protected:
+	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks,
+												 CStringArray& aMatched, CStringArray& aMixed);
+
 };
 
 

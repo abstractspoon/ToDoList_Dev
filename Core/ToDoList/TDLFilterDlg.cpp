@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "TDLFilterDlg.h"
 #include "tdcstatic.h"
-#include "TDCCustomAttributeUIHelper.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
@@ -33,8 +32,8 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	: 
 	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
 	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
-	m_cbAllocToFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
-	m_cbAllocByFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
+	m_cbAllocToFilter(bMultiSelFilters, IDS_TDC_NOONE, IDS_TDC_ANYONE),
+	m_cbAllocByFilter(bMultiSelFilters, IDS_TDC_NOONE, IDS_TDC_ANYONE),
 	m_cbStatusFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbVersionFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbTagFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
@@ -67,7 +66,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	}
 
 	// auto-droplists
-	tdc.GetAutoListData(m_tldListData, TDCA_ALL);
+	tdc.GetAutoListData(TDCA_ALL, m_tldListData);
 
 	m_cbPriorityFilter.SetColors(aPriorityColors);
 }
@@ -364,11 +363,7 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		break;
 
 	default:
-		if (!CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID))
-			return FALSE;
-
-		sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nCtrlID);
-		break;
+		return FALSE;
 	}
 
 	if (!sTooltip.IsEmpty())

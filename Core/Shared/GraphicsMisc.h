@@ -145,10 +145,12 @@ namespace GraphicsMisc
 	HCURSOR LoadDragDropCursor(GM_OLECURSOR nCursor);
 	HCURSOR LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder = NULL);
 	HCURSOR LoadStandardCursor(LPCTSTR szCursorID);
+	HCURSOR LoadAfxCursor(int nCursorID);
 	BOOL SetHandCursor();
 	BOOL SetDragDropCursor(GM_OLECURSOR nCursor);
 	BOOL SetAppCursor(LPCTSTR szName, LPCTSTR szSubFolder = NULL);
 	BOOL SetStandardCursor(LPCTSTR szCursorID);
+	BOOL SetAfxCursor(int nCursorID);
 
 	int PointToPixel(int nPoints);
 	int PixelToPoint(int nPixels);

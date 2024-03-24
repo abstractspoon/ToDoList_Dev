@@ -848,7 +848,7 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
 				{
 					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_DEF_RET(aCustomAttribDefs, nModType, pDef, FALSE);
+					GET_CUSTDEF_RET(aCustomAttribDefs, nModType, pDef, FALSE);
 
 					if (!pDef->IsList())
 					{

@@ -324,24 +324,23 @@ struct TDCAUTOLISTDATA
 	int RemoveItems(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID)
 	{
 		int nNumRemoved = 0;
-		BOOL bAll = (nAttribID == TDCA_ALL);
 
-		if (bAll || (nAttribID == TDCA_CATEGORY))
+		if (WantAttribute(nAttribID, TDCA_CATEGORY))
 			nNumRemoved += Misc::RemoveItems(other.aCategory, aCategory);
 
-		if (bAll || (nAttribID == TDCA_STATUS))
+		if (WantAttribute(nAttribID, TDCA_STATUS))
 			nNumRemoved += Misc::RemoveItems(other.aStatus, aStatus);
 
-		if (bAll || (nAttribID == TDCA_ALLOCTO))
+		if (WantAttribute(nAttribID, TDCA_ALLOCTO))
 			nNumRemoved += Misc::RemoveItems(other.aAllocTo, aAllocTo);
 
-		if (bAll || (nAttribID == TDCA_ALLOCBY))
+		if (WantAttribute(nAttribID, TDCA_ALLOCBY))
 			nNumRemoved += Misc::RemoveItems(other.aAllocBy, aAllocBy);
 
-		if (bAll || (nAttribID == TDCA_TAGS))
+		if (WantAttribute(nAttribID, TDCA_TAGS))
 			nNumRemoved += Misc::RemoveItems(other.aTags, aTags);
 
-		if (bAll || (nAttribID == TDCA_VERSION))
+		if (WantAttribute(nAttribID, TDCA_VERSION))
 			nNumRemoved += Misc::RemoveItems(other.aVersion, aVersion);
 
 		return nNumRemoved;
@@ -359,24 +358,22 @@ struct TDCAUTOLISTDATA
 
 	void RemoveAll(TDC_ATTRIBUTE nAttribID)
 	{
-		BOOL bAll = (nAttribID == TDCA_ALL);
-
-		if (bAll || (nAttribID == TDCA_CATEGORY))
+		if (WantAttribute(nAttribID, TDCA_CATEGORY))
 			aCategory.RemoveAll();
 
-		if (bAll || (nAttribID == TDCA_STATUS))
+		if (WantAttribute(nAttribID, TDCA_STATUS))
 			aStatus.RemoveAll();
 
-		if (bAll || (nAttribID == TDCA_ALLOCTO))
+		if (WantAttribute(nAttribID, TDCA_ALLOCTO))
 			aAllocTo.RemoveAll();
 
-		if (bAll || (nAttribID == TDCA_ALLOCBY))
+		if (WantAttribute(nAttribID, TDCA_ALLOCBY))
 			aAllocBy.RemoveAll();
 
-		if (bAll || (nAttribID == TDCA_TAGS))
+		if (WantAttribute(nAttribID, TDCA_TAGS))
 			aTags.RemoveAll();
 
-		if (bAll || (nAttribID == TDCA_VERSION))
+		if (WantAttribute(nAttribID, TDCA_VERSION))
 			aVersion.RemoveAll();
 	}
 
@@ -399,27 +396,31 @@ struct TDCAUTOLISTDATA
 	CStringArray aCategory, aStatus, aAllocTo, aAllocBy, aTags, aVersion;
 
 protected:
+	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nWantedAttribID) const
+	{
+		return ((nAttribID == TDCA_ALL) || (nAttribID == nWantedAttribID));
+	}
+
 	int Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL bAppend, TDC_ATTRIBUTE nAttribID)
 	{
 		int nNumCopied = 0;
-		BOOL bAll = (nAttribID == TDCA_ALL);
 
-		if (bAll || (nAttribID == TDCA_CATEGORY))
+		if (WantAttribute(nAttribID, TDCA_CATEGORY))
 			nNumCopied += CopyItems(from.aCategory, to.aCategory, bAppend);
 
-		if (bAll || (nAttribID == TDCA_STATUS))
+		if (WantAttribute(nAttribID, TDCA_STATUS))
 			nNumCopied += CopyItems(from.aStatus, to.aStatus, bAppend);
 
-		if (bAll || (nAttribID == TDCA_ALLOCTO))
+		if (WantAttribute(nAttribID, TDCA_ALLOCTO))
 			nNumCopied += CopyItems(from.aAllocTo, to.aAllocTo, bAppend);
 
-		if (bAll || (nAttribID == TDCA_ALLOCBY))
+		if (WantAttribute(nAttribID, TDCA_ALLOCBY))
 			nNumCopied += CopyItems(from.aAllocBy, to.aAllocBy, bAppend);
 
-		if (bAll || (nAttribID == TDCA_TAGS))
+		if (WantAttribute(nAttribID, TDCA_TAGS))
 			nNumCopied += CopyItems(from.aTags, to.aTags, bAppend);
 
-		if (bAll || (nAttribID == TDCA_VERSION))
+		if (WantAttribute(nAttribID, TDCA_VERSION))
 			nNumCopied += CopyItems(from.aVersion, to.aVersion, bAppend);
 
 		return nNumCopied;
@@ -2649,6 +2650,7 @@ struct TDCCOLEDITVISIBILITY
 	{
 		switch (nAttrib)
 		{
+		// Editable
 		case TDCA_DONEDATE:
 		case TDCA_DUEDATE:
 		case TDCA_STARTDATE:
@@ -2673,6 +2675,24 @@ struct TDCCOLEDITVISIBILITY
 		case TDCA_DONETIME:
 		case TDCA_TAGS:
 		case TDCA_PROJECTNAME:
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+		case TDCA_ICON:
+			return TRUE;
+
+		// Display only
+		case TDCA_CREATEDBY:
+		case TDCA_PATH:
+		case TDCA_POSITION:
+		case TDCA_CREATIONDATE: // includes time
+		case TDCA_LASTMODDATE:  // includes time
+		case TDCA_COMMENTSSIZE:
+		case TDCA_COMMENTSFORMAT:
+		case TDCA_SUBTASKDONE:
+		case TDCA_LASTMODBY:
+		case TDCA_ID:
+		case TDCA_PARENTID:
+		case TDCA_TIMEREMAINING:
 			return TRUE;
 		}
 

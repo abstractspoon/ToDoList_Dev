@@ -40,6 +40,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskDependencyEdit, CEnEdit)
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChange)
 	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_KILLFOCUS()
+	ON_MESSAGE(WM_SETTEXT, OnSetText)
+
 END_MESSAGE_MAP()
 //////////////////////////////////////////////////////////////////////
 
@@ -47,7 +49,7 @@ void CTDLTaskDependencyEdit::PreSubclassWindow()
 {
 	CEnEdit::PreSubclassWindow();
 
-	SetWindowText(m_aDepends.Format()); // for display purposes
+	SetWindowText(FormatDependencies());
 }
 
 BOOL CTDLTaskDependencyEdit::UpdateDepends()
@@ -94,16 +96,29 @@ void CTDLTaskDependencyEdit::OnKillFocus(CWnd* pNewWnd)
 	UpdateDepends();
 }
 
+LRESULT CTDLTaskDependencyEdit::OnSetText(WPARAM wp, LPARAM lp)
+{
+//	LPCTSTR szText = (LPCTSTR)lp;
+
+	return Default();
+}
+
 BOOL CTDLTaskDependencyEdit::PreTranslateMessage(MSG* pMsg)
 {
-	if ((pMsg->message == WM_KEYDOWN) &&
-		(pMsg->hwnd == *this) &&
-		(pMsg->wParam == VK_RETURN))
+	if (pMsg->hwnd == *this)
 	{
-		UpdateDepends();
-		return TRUE; // always
+		switch (pMsg->message)
+		{
+		case WM_KEYDOWN:
+			switch (pMsg->wParam)
+			{
+			case VK_RETURN:
+				return UpdateDepends();
+			}
+		}
 	}
 
+	// else
 	return CMaskEdit::PreTranslateMessage(pMsg);
 }
 
@@ -161,7 +176,7 @@ BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& 
 			
 			if (UpdateDepends(aDepends))
 			{
-				SetWindowText(m_aDepends.Format()); // for display purposes
+				SetWindowText(FormatDependencies());
 				return TRUE;
 			}
 		}
@@ -182,9 +197,10 @@ HBRUSH CTDLTaskDependencyEdit::CtlColor(CDC* pDC, UINT /*nCtlColor*/)
 	return (HBRUSH)m_brCircular.GetSafeHandle();
 }
 
-void CTDLTaskDependencyEdit::GetDependencies(CTDCDependencyArray& aDepends) const
+int CTDLTaskDependencyEdit::GetDependencies(CTDCDependencyArray& aDepends) const
 {
 	aDepends.Copy(m_aDepends);
+	return aDepends.GetSize();
 }
 
 void CTDLTaskDependencyEdit::SetDependencies(const CTDCDependencyArray& aDepends)
@@ -192,7 +208,12 @@ void CTDLTaskDependencyEdit::SetDependencies(const CTDCDependencyArray& aDepends
 	m_aDepends.Copy(aDepends);
 
 	if (GetSafeHwnd())
-		SetWindowText(m_aDepends.Format()); // for display purposes
+		SetWindowText(FormatDependencies());
+}
+
+CString CTDLTaskDependencyEdit::FormatDependencies(TCHAR cSep)
+{
+	return m_aDepends.Format(cSep);
 }
 
 void CTDLTaskDependencyEdit::SetDependenciesAreCircular(BOOL bCircular, COLORREF crCircular)
@@ -283,7 +304,12 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 		if (depend.IsLocal())
 		{
 			HTASKITEM hTask = m_tasks.FindTask(depend.dwTaskID);
-			CString sName = (hTask ? m_tasks.GetTaskTitle(hTask) : Misc::Format(depend.dwTaskID));
+			CString sName;
+
+			if (hTask)
+				sName.Format(_T("%s (%ld)"), m_tasks.GetTaskTitle(hTask), depend.dwTaskID);
+			else
+				sName = Misc::Format(depend.dwTaskID);
 
 			int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
 
@@ -353,7 +379,7 @@ void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	switch (nCol)
 	{
 	case DEPEND_COL:
-		ShowControl(m_cbTasks, nItem, nCol);
+		ShowControl(m_cbTasks, nItem, nCol, bBtnClick);
 		break;
 
 	default:

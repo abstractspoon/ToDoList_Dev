@@ -26,10 +26,6 @@ static char THIS_FILE[]=__FILE__;
 #	define CDRF_SKIPPOSTPAINT	(0x00000100)
 #endif
 
-#ifndef LVS_EX_DOUBLEBUFFER
-#define LVS_EX_DOUBLEBUFFER 0x00010000
-#endif
-
 //////////////////////////////////////////////////////////////////////
 
 const int MIN_SPLIT_POS			= GraphicsMisc::ScaleByDPIFactor(200);
@@ -269,10 +265,7 @@ BOOL CTreeListTreeCtrl::InitTooltip()
 		if (!m_tooltip.Create(this))
 			return FALSE;
 
-		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 		m_tooltip.SetFont(m_fonts.GetFont(), FALSE);
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	}
 
 	return TRUE;

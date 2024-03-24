@@ -53,7 +53,6 @@ public:
 	BOOL GetShowEditMenuAsColumns() const { return m_bShowEditMenuAsColumns; }
 	BOOL GetShowSortMenuAsColumns() const { return GetShowEditMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_bShowCommentsAlways; }
-	BOOL GetAutoReposCtrls() const { return m_bAutoReposCtrls; }
 	BOOL GetShareCommentsSize() const { return m_bShareCommentsSize; }
 	BOOL GetAutoHideTabbar() const { return m_bAutoHideTabbar; }
 	BOOL SetAutoHideTabbar(BOOL bAutoHide);
@@ -88,7 +87,6 @@ protected:
 	enum { IDD = IDD_PREFUI_PAGE };
 	CTDLTaskViewListBox	m_lbTaskViews;
 	BOOL	m_bShowCommentsAlways;
-	BOOL	m_bAutoReposCtrls;
 	BOOL	m_bSpecifyToolbarImage;
 	BOOL	m_bShareCommentsSize;
 	BOOL	m_bAutoHideTabbar;

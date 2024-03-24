@@ -102,8 +102,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 
 	// layout
 	tdc.SetLayoutPositions((TDC_UILOCATION)prefs.GetControlsPos(), 
-							(TDC_UILOCATION)prefs.GetCommentsPos(), 
-							TRUE);
+							(TDC_UILOCATION)prefs.GetCommentsPos());
 
 	// info tips
 	tdc.SetMaxInfotipCommentsLength(prefs.GetMaxInfoTipCommentsLength());
@@ -176,7 +175,6 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_ALWAYSHIDELISTPARENTS] = prefs.GetAlwaysHideListParents();
 	styles[TDCS_AUTOADJUSTDEPENDENCYDATES] = prefs.GetAutoAdjustDependentsDates();
 	styles[TDCS_AUTOCALCPERCENTDONE] = prefs.GetAutoCalcPercentDone();
-	styles[TDCS_AUTOREPOSCTRLS] = prefs.GetAutoReposCtrls();
 	styles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = prefs.GetAveragePercentSubCompletion();
 	styles[TDCS_CALCREMAININGTIMEBYDUEDATE] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISDUEDATE);
 	styles[TDCS_CALCREMAININGTIMEBYPERCENT] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISPERCENTAGE);

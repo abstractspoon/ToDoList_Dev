@@ -109,13 +109,12 @@ protected:
 	CTDLFilterBar m_filterBar;
 	CTDLFindTasksDlg m_dlgFindTasks;
 	CTabCtrlEx m_tabCtrl;
-	CTaskListDropTarget m_dropTarget;
+	CTDCTaskListDropTarget m_dropTarget;
 	CToDoCtrlReminders m_dlgReminders;
 	CToolbarHelper m_tbHelperMain;
 	CTrayIcon m_trayIcon;
 	CUIThemeFile m_theme;
 	CWindowIcons m_icons;
-	CIcon m_iconClass;
 	HWND m_hwndLastFocus;
 	CTDCStartupOptions m_startupOptions;
 	TDC_MAXSTATE m_nMaxState, m_nPrevMaxState;
@@ -341,8 +340,6 @@ protected:
 	afx_msg void OnEditDependency();
 	afx_msg void OnUpdateEditDependency(CCmdUI* pCmdUI);
 	afx_msg BOOL OnQueryEndSession();
-	afx_msg void OnEditClearAttribute();
-	afx_msg void OnUpdateEditClearAttribute(CCmdUI* pCmdUI);
 	afx_msg void OnEditClearFocusedAttribute();
 	afx_msg void OnUpdateEditClearFocusedAttribute(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateTasklistCustomcolumns(CCmdUI* pCmdUI);

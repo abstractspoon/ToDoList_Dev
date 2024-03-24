@@ -73,7 +73,12 @@ BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, BOOL bParen
 
 BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage)
 {
-	int nTask = CDialogHelper::InsertString(*this, nPos, (CString(TAB, nIndent) + sTask), dwTaskID);
+	CString sText(TAB, nIndent);
+
+	sText += sTask;
+	sText += Misc::Format(_T(" (%ld)"), dwTaskID);
+	
+	int nTask = CDialogHelper::InsertString(*this, nPos, sText, dwTaskID);
 
 	if (nTask == CB_ERR)
 		return FALSE;

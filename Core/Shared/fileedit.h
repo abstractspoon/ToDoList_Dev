@@ -65,6 +65,7 @@ public:
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
 
 	HICON GetFileIcon(LPCTSTR szPath);
+	BOOL DoBrowse();
 
 	static void SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo);
 	static void SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders);

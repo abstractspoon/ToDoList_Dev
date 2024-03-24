@@ -181,10 +181,6 @@ SOURCE=..\ToDoList\TaskListCsvImporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TaskListDropTarget.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TaskListExporterBase.cpp
 # End Source File
 # Begin Source File
@@ -229,7 +225,7 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.cpp
+SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -306,6 +302,10 @@ SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCTaskCompletion.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTaskListDropTarget.cpp
 # End Source File
 # Begin Source File
 
@@ -573,6 +573,10 @@ SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTaskAttributeListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLTaskComboBox.cpp
 # End Source File
 # Begin Source File
@@ -674,6 +678,10 @@ SOURCE=..\ToDoList\ToDoCtrlDataUtils.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoCtrlFind.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\ToDoCtrlLayout.cpp
 # End Source File
 # Begin Source File
 
@@ -797,10 +805,6 @@ SOURCE=..\ToDoList\TaskListCsvImporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TaskListDropTarget.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TaskListExporterBase.h
 # End Source File
 # Begin Source File
@@ -845,7 +849,7 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.h
+SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.h
 # End Source File
 # Begin Source File
 
@@ -946,6 +950,10 @@ SOURCE=..\ToDoList\tdcswitch.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCTaskCompletion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTaskListDropTarget.h
 # End Source File
 # Begin Source File
 
@@ -1213,6 +1221,10 @@ SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTaskAttributeListCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLTaskComboBox.h
 # End Source File
 # Begin Source File
@@ -1322,6 +1334,10 @@ SOURCE=..\ToDoList\ToDoCtrlDataUtils.h
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoCtrlFind.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\ToDoCtrlLayout.h
 # End Source File
 # Begin Source File
 
