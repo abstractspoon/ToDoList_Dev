@@ -179,7 +179,7 @@ void CTDLTaskCtrlBaseTest::PopulateLongestMap(const CToDoCtrlData& data, CTDCLon
 		mapLongest.CheckUpdateValue(TDCC_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
 
 		// Attributes dependent on subtask values
-		mapLongest.UpdateValue(TDCC_PATH, formatter.GetTaskPath(pTDI, pTDS));
+		mapLongest.UpdateValue(TDCC_PATH, formatter.GetTaskPath(pTDS));
 		mapLongest.UpdateValue(TDCC_POSITION, formatter.GetTaskPosition(pTDS));
 		mapLongest.UpdateValue(TDCC_SUBTASKDONE, formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 		mapLongest.UpdateValue(TDCC_COST, formatter.GetTaskCost(pTDI, pTDS));

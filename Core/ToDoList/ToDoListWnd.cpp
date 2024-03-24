@@ -287,7 +287,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_COMMENTS_INSERTTIME, OnEditInserttime)
 	ON_COMMAND(ID_DELETEALLTASKS, OnDeleteAllTasks)
 	ON_COMMAND(ID_DELETETASK, OnDeleteTask)
-	ON_COMMAND(ID_EDIT_CLEARFIELD, OnEditClearAttribute)
 	ON_COMMAND(ID_EDIT_CLEARFOCUSEDFIELD, OnEditClearFocusedAttribute)
 	ON_COMMAND(ID_EDIT_CLEARREMINDER, OnEditClearReminder)
 	ON_COMMAND(ID_EDIT_CLEARTASKCOLOR, OnEditCleartaskcolor)
@@ -540,7 +539,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_COMMENTS_INSERTTIME, OnUpdateCommentsInsertDateAndOrTime)
 	ON_UPDATE_COMMAND_UI(ID_DELETEALLTASKS, OnUpdateDeletealltasks)
 	ON_UPDATE_COMMAND_UI(ID_DELETETASK, OnUpdateDeletetask)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARFIELD, OnUpdateEditClearAttribute)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARFOCUSEDFIELD, OnUpdateEditClearFocusedAttribute)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARREMINDER, OnUpdateEditClearReminder)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARTASKCOLOR, OnUpdateEditCleartaskcolor)
@@ -757,7 +755,6 @@ void CToDoListWnd::SetupUIStrings()
 	CSoundEdit::SetDefaultFilter(CEnString(IDS_SOUNDFILEFILTER));
 	CSoundEdit::SetDefaultPlayButtonTip(CEnString(IDS_PLAYSOUNDBTNTIP));
 	
-	CTDLRecurringTaskEdit::SetDefaultButtonTip(CEnString(IDS_OPTIONS));
 	CXmlFileEx::SetUIStrings(CEnString(IDS_ENCRYPTEDFILE), CEnString(IDS_DECRYPTFAILED));
 	CWinHelpButton::SetDefaultTooltip(CEnString(IDS_ONLINEHELP));
 	CPasswordDialog::SetItemText(PD_TITLE, IDS_PD_TITLE);
@@ -2590,9 +2587,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	RefreshTabOrder();
 	Invalidate(TRUE);
 
-	// End progress before updating statusbar
-	m_statusBar.EndProgress();
-
 	UpdateStatusBar();
 
 	// find tasks dialog
@@ -3213,21 +3207,7 @@ void CToDoListWnd::OnUpdateSort(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditTaskcolor() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	
-	if (tdc.CanEditSelectedTask(TDCA_COLOR))
-	{
-		CEnColorDialog dialog(tdc.GetSelectedTaskColor());
-
-		CPreferences prefs;
-		dialog.LoadPreferences(prefs);
-		
-		if (dialog.DoModal() == IDOK)
-		{
-			dialog.SavePreferences(prefs);
-			tdc.SetSelectedTaskColor(dialog.GetColor());
-		}
-	}
+	GetToDoCtrl().EditSelectedTaskColor();
 }
 
 void CToDoListWnd::OnEditCleartaskcolor() 
@@ -3241,7 +3221,7 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_COLOR) && 
 					(Prefs().GetTextColorOption() == COLOROPT_DEFAULT) &&
-					tdc.SelectedTasksHaveColors());	
+					tdc.SelectedTasksHaveColor());	
 }
 
 void CToDoListWnd::OnEditToggleTaskDone() 
@@ -4058,7 +4038,7 @@ void CToDoListWnd::OnTrayiconShowDueTasks(UINT nCmdID)
 	if (!DoDueTaskNotification(nTDC, PFP_DUETODAY))
 	{
 		CEnString sMessage(IDS_NODUETODAY, m_mgrToDoCtrls.GetFriendlyProjectName(nTDC));
-		CMessageBox::AfxShow(sMessage);//, IDS_DUETASKS_TITLE);
+		CMessageBox::AfxShow(sMessage);
 	}
 }
 
@@ -5034,7 +5014,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 	// Pass in the selected tasklist's list data
 	TDCAUTOLISTDATA autoListData;
-	GetToDoCtrl().GetAutoListData(autoListData, TDCA_ALL);
+	GetToDoCtrl().GetAutoListData(TDCA_ALL, autoListData);
 	m_pPrefs->SetAutoListData(autoListData);
 
 	// And all the custom attributes definitionsa
@@ -6522,7 +6502,6 @@ void CToDoListWnd::ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable)
 	rTabs = rAvailable;
 	rTabs.right++;
 	rTabs.bottom = rTabs.top + nTabHeight;
-//	rTabs.OffsetRect(0, rAvailable.y - rTabs.top); // add a pixel between tabbar and toolbar
 
 	BOOL bNeedTabCtrl = WantTasklistTabbarVisible();
 
@@ -9458,22 +9437,19 @@ void CToDoListWnd::OnUpdateSetPriority(CCmdUI* pCmdUI)
 void CToDoListWnd::OnEditAddFileLink() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nNumFiles = tdc.GetSelectedTaskFileLinkCount();
+
+	CStringArray aFiles;
+	int nNumFiles = tdc.GetSelectedTaskFileLinks(aFiles);
 		
 	CPreferences prefs;
 	CFileOpenDialog dialog(IDS_SETFILELINK_TITLE, 
 							NULL, 
-							((nNumFiles == 1) ? tdc.GetSelectedTaskFileLink(0) : _T("")), 
+							((nNumFiles == 1) ? aFiles[0] : _T("")), 
 							(EOFN_DEFAULTOPEN | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT), 
 							CEnString(IDS_ALLFILEFILTER));
 	
-	if (dialog.DoModal(prefs) == IDOK)
-	{
-		CStringArray aFiles;
-		
-		if (dialog.GetPathNames(aFiles))
-			tdc.SetSelectedTaskFileLinks(aFiles, TRUE); // append
-	}
+	if ((dialog.DoModal(prefs) == IDOK) && dialog.GetPathNames(aFiles))
+		tdc.SetSelectedTaskFileLinks(aFiles, TRUE); // append
 }
 
 void CToDoListWnd::OnUpdateEditAddFileLink(CCmdUI* pCmdUI) 
@@ -9544,11 +9520,15 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		
 	args.sTasklist = tdc.GetFilePath();
 	args.sTaskTitle = tdc.FormatSelectedTaskTitles(FALSE);
-	args.sTaskExtID = tdc.GetSelectedTaskExtID();
+	args.sTaskExtID = tdc.GetSelectedTaskExternalID();
 	args.sTaskComments = tdc.GetSelectedTaskComments();
-	args.sTaskFileLink = tdc.GetSelectedTaskFileLink(0);
 	args.sTaskAllocBy = tdc.GetSelectedTaskAllocBy();
 	args.sTaskPath = tdc.GetSelectedTaskPath(FALSE);
+
+	CStringArray aFiles;
+
+	if (tdc.GetSelectedTaskFileLinks(aFiles))
+		args.sTaskFileLink = aFiles[0];
 	
 	CDWordArray aIDs;
 	DWORD dwTemp;
@@ -9562,7 +9542,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		args.sTaskAllocTo = Misc::FormatArray(aAllocTo, _T("|"));
 
 	tdc.GetSelectedTaskCustomAttributeData(args.mapTaskCustData, TRUE);
-	tdc.GetAutoListData(args.tdlListData, TDCA_ALL);
+	tdc.GetAutoListData(TDCA_ALL, args.tdlListData);
 }
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
@@ -11311,7 +11291,7 @@ BOOL CToDoListWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		if (rSplitter.PtInRect(ptCursor))
 		{
 			UINT nIDCursor = ((m_dlgFindTasks.GetDockPosition() == DMP_BELOW) ? AFX_IDC_VSPLITBAR : AFX_IDC_HSPLITBAR);
-			::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+			GraphicsMisc::SetAfxCursor(nIDCursor);
 
 			return TRUE;
 		}
@@ -11722,7 +11702,7 @@ void CToDoListWnd::OnEditFlagtask()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	tdc.SetSelectedTaskFlag(!tdc.IsSelectedTaskFlagged());
+	tdc.SetSelectedTaskFlag(!tdc.SelectedTasksHaveFlagged());
 }
 
 void CToDoListWnd::OnUpdateEditFlagtask(CCmdUI* pCmdUI) 
@@ -11730,14 +11710,14 @@ void CToDoListWnd::OnUpdateEditFlagtask(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FLAG));	
-	pCmdUI->SetCheck(tdc.IsSelectedTaskFlagged() ? 1 : 0);
+	pCmdUI->SetCheck(tdc.SelectedTasksHaveFlagged() ? 1 : 0);
 }
 
 void CToDoListWnd::OnEditLocktask() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	tdc.SetSelectedTaskLock(!tdc.IsSelectedTaskLocked());
+	tdc.SetSelectedTaskLock(!tdc.SelectedTasksHaveLocked());
 }
 
 void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI) 
@@ -11745,7 +11725,7 @@ void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_LOCK));	
-	pCmdUI->SetCheck(tdc.IsSelectedTaskLocked() ? 1 : 0);
+	pCmdUI->SetCheck(tdc.SelectedTasksHaveLocked() ? 1 : 0);
 }
 
 void CToDoListWnd::OnEditGotoDependency() 
@@ -12803,16 +12783,12 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 
 			// Need to preset the icon otherwise the function GetIconWndClass
 			// calling us will overwrite our class.
-			//VERIFY(m_iconClass.Load(IDR_MAINFRAME));
-			//wndcls.hIcon = m_iconClass;
 			wndcls.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 			// Register our class now and check the outcome
 			if (!::RegisterClass(&wndcls))
 			{
 				ASSERT(0);
-
-				//m_iconClass.Destroy();
 				return FALSE;
 			}
 		}
@@ -12919,6 +12895,9 @@ void CToDoListWnd::OnSysColorChange()
 
 void CToDoListWnd::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
 {
+	// End progress before updating statusbar
+	m_statusBar.EndProgress();
+
 	if (m_bShowStatusBar && m_statusBar.GetSafeHwnd() && GetTDCCount())
 	{
 		m_statusBar.UpdateTasks(GetToDoCtrl(), mapAttrib);
@@ -13349,7 +13328,7 @@ void CToDoListWnd::OnUpdateEditCleartaskicon(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_ICON) && tdc.SelectedTasksHaveIcons());	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_ICON) && tdc.SelectedTasksHaveIcon());	
 }
 
 void CToDoListWnd::OnSortMulti() 
@@ -13483,20 +13462,6 @@ void CToDoListWnd::OnTasklistCustomColumns()
 void CToDoListWnd::OnUpdateTasklistCustomcolumns(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(!GetToDoCtrl().IsReadOnly());
-}
-
-void CToDoListWnd::OnEditClearAttribute() 
-{
-	TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(m_nContextColumnID);
-
-	GetToDoCtrl().ClearSelectedTaskAttribute(nAttrib);
-}
-
-void CToDoListWnd::OnUpdateEditClearAttribute(CCmdUI* pCmdUI) 
-{
-	TDC_ATTRIBUTE nAttrib = TDC::MapColumnToAttribute(m_nContextColumnID);
-
-	pCmdUI->Enable(GetToDoCtrl().CanClearSelectedTaskAttribute(nAttrib));
 }
 
 void CToDoListWnd::OnEditClearFocusedAttribute() 

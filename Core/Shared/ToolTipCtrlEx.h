@@ -27,6 +27,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage = FALSE);
 	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
 	void Activate(BOOL bActivate);
+	void EnableMultilineTips() { SetMaxTipWidth(SHRT_MAX); }
 	void EnableTracking(BOOL bTracking = TRUE, int nXOffset = 0, int nYOffset = 0);
 	BOOL IsTracking() const;
 
@@ -53,6 +54,7 @@ protected:
 protected:
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
 
 	DECLARE_MESSAGE_MAP()
 

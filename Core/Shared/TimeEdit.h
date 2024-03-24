@@ -24,8 +24,8 @@ public:
 	CTimeEdit(TH_UNITS nUnits = THU_HOURS, int nMaxDecPlaces = 9);
 	virtual ~CTimeEdit();
 
-	double Convert() const;
-	double Convert(TH_UNITS nUnits) const;
+	double GetTime() const;
+	double ConvertTime(TH_UNITS nNewUnits) const;
 
 	void SetTime(double dTime);
 	void SetTime(double dTime, TH_UNITS nUnits);
@@ -46,6 +46,7 @@ public:
 	static void SetDefaultButtonTip(LPCTSTR szUnits);
 
 	void DDX(CDataExchange* pDX, double& value, TH_UNITS& units, int nDecimals = -1);
+	void ShowUnitsPopupMenu();
 
 protected:
 	TH_UNITS m_nUnits;

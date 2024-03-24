@@ -218,7 +218,6 @@ public:
 	BOOL GetShowEditMenuAsColumns() const { return m_pageUI.GetShowEditMenuAsColumns(); }
 	BOOL GetShowSortMenuAsColumns() const { return m_pageUI.GetShowSortMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_pageUI.GetShowCommentsAlways(); }
-	BOOL GetAutoReposCtrls() const { return m_pageUI.GetAutoReposCtrls(); }
 	BOOL GetShareCommentsSize() const { return m_pageUI.GetShareCommentsSize(); }
 	BOOL GetAutoHideTabbar() const { return m_pageUI.GetAutoHideTabbar(); }
 	BOOL SetAutoHideTabbar(BOOL bAutoHide);

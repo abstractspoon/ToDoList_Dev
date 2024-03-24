@@ -205,7 +205,7 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(aAttribDefs, nAttribID, pDef, FT_NONE);
+		GET_CUSTDEF_RET(aAttribDefs, nAttribID, pDef, FT_NONE);
 
 		// treat lists as strings, except for icon lists
 		if (pDef->IsList() && !pDef->IsDataType(TDCCA_ICON))
@@ -248,7 +248,7 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 		mapData.GetNextAssoc(pos, sAttribID, data);
 
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_ALT(aAttribDefs, sAttribID, pDef, continue);
+		GET_CUSTDEF_ALT(aAttribDefs, sAttribID, pDef, continue);
 
 		if (!pDef->IsList())
 		{

@@ -193,7 +193,7 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 		calc.IsTaskRecentlyModified(dwTaskID);
 
 		TDC_UNITS nUnits;
-		calc.GetTaskRemainingTime(dwTaskID, nUnits);
+		calc.GetTaskTimeRemaining(dwTaskID, nUnits);
 
 		int nSubtasksTotal, nSubtasksDone;
 		calc.GetTaskSubtaskTotals(dwTaskID, nSubtasksTotal, nSubtasksDone);

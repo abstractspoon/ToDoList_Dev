@@ -128,7 +128,7 @@ void CTDLToolbarButtonListCtrl::PopulateList()
 	}
 }
 
-void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
+void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	// handle new buttons
 	UINT nMenuID = 0;
@@ -150,7 +150,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/
 	switch (nCol)
 	{
 	case MENUID_COL:
-		ShowControl(m_cbMenuItems, nItem, nCol);
+		ShowControl(m_cbMenuItems, nItem, nCol, bBtnClick);
 		break;
 		
 	case IMAGE_COL:

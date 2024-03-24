@@ -228,6 +228,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="SimpleSplitter.cpp" />
     <ClCompile Include="SizeComboBox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -285,6 +286,7 @@
     <ClInclude Include="Ini.h" />
     <ClInclude Include="Quantize.h" />
     <ClInclude Include="RangeSlider.h" />
+    <ClInclude Include="SimpleSplitter.h" />
     <ClInclude Include="T64Utils.h" />
     <ClInclude Include="Zlib\IOAPI.H" />
     <ClInclude Include="Zlib\IOWIN32.H" />

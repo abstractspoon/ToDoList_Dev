@@ -621,6 +621,14 @@ int CCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) cons
 	return aItems.GetSize();
 }
 
+int CCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
+{
+	GetChecked(aChecked, CCBC_CHECKED);
+	GetChecked(aMixed, CCBC_MIXED);
+
+	return (aChecked.GetSize() + aMixed.GetSize());
+}
+
 CString CCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
 {
 	CStringArray aChecked;
@@ -761,9 +769,7 @@ void CCheckComboBox::EnableTooltip(BOOL bEnable)
 		if (!m_tooltip.GetSafeHwnd())
 		{
 			VERIFY(m_tooltip.Create(this, (WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP)));
-
-			// Set the multiline tooltip text
-			m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 300);
+			m_tooltip.EnableMultilineTips();
 		}
 	}
 	else if (m_tooltip.GetSafeHwnd())

@@ -213,6 +213,10 @@ SOURCE=.\ShellIcons.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SimpleSplitter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\SizeComboBox.cpp
 # End Source File
 # Begin Source File
@@ -414,6 +418,10 @@ SOURCE=.\sha2.h
 # Begin Source File
 
 SOURCE=.\ShellIcons.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SimpleSplitter.h
 # End Source File
 # Begin Source File
 

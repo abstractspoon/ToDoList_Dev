@@ -145,7 +145,6 @@ protected:
 	CRect OffsetCtrl(UINT nCtrlID, int x = 0, int y = 0);
 	CRect ResizeCtrl(UINT nCtrlID, int cx = 0, int cy = 0);
 	CRect MoveCtrl(UINT nCtrlID, int x, int y);
-	void ShowCtrls(UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bShow = TRUE);
 
 	void SavePosition();
 	BOOL HasInitialSize() const { return (m_sizeInitial.cx && m_sizeInitial.cy); }

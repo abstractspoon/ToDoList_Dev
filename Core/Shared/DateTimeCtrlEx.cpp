@@ -224,6 +224,7 @@ BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	// the left mouse button is released if the user re-clicks the
 	// drop button to hide the calendar
 #ifdef _DEBUG
+/*
 	if (!(GetStyle() & DTS_SHOWNONE))
 	{
 		CPoint pt(GetMessagePos());
@@ -245,6 +246,7 @@ BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		ASSERT(!m_bLButtonDown);
 		ASSERT(m_bDropped);
 	}
+*/
 #endif
 
 	// see if we can figure out what key was pressed

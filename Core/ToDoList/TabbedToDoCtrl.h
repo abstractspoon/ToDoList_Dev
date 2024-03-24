@@ -32,7 +32,6 @@ struct VIEWDATA
 	BOOL WantAnyAttribute(const CTDCAttributeMap& other) const;
 
 	TDSORT sort;
-	CTaskListDropTarget dropTgt;
 	IUIExtension* pExtension;
 	CTDCAttributeMap mapWantedAttrib;
 
@@ -107,6 +106,8 @@ public:
 
 	virtual HTREEITEM GetUpdateControlsItem() const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual CString GetControlDescription(const CWnd* pCtrl) const;
+	virtual void NotifyEndPreferencesUpdate();
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -143,10 +144,6 @@ public:
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
 	void EndSelectedTaskEdit();
 
-	virtual CString GetControlDescription(const CWnd* pCtrl) const;
-	virtual void RebuildCustomAttributeUI();
-	virtual void NotifyEndPreferencesUpdate();
-
 	// override these so we can notify extensions of color changes
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetCompletedTaskColor(COLORREF color);
@@ -162,7 +159,7 @@ public:
 protected:
 	CTDLTaskListCtrl m_taskList;
 	CTDLViewTabControl m_tabViews;
-	CTaskListDropTarget m_dtList;
+	CTDCTaskListDropTarget m_dtList;
 	CComboBox m_cbListGroupBy;
 	CTDLTaskListCtrlOptionsComboBox m_cbListOptions;
 
@@ -239,9 +236,9 @@ protected:
 	const TDSORT& GetSort() const;
 
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
+	virtual void ReposTaskCtrl(const CRect& rTasks);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
-	virtual void UpdateTasklistVisibility();
+	virtual void ShowTaskCtrl(BOOL bShow);
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
@@ -256,11 +253,13 @@ protected:
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
-	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
+	virtual void OnCustomAttributesChanged();
+	//virtual void RebuildCustomAttributeUI();
 
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
 	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
+	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
 
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);

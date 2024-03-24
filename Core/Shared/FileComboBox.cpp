@@ -93,32 +93,41 @@ BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 
 void CFileComboBox::OnPaint()
 {
-	// If the edit field has an image and its icon rect 
-	// is less than the height of the image, then we draw 
+	// If the edit field has an image and the icon rect 
+	// is less than the height of the edit field, then we draw 
 	// the extra bit that MIGHT have been clipped out
 	CPaintDC dc(this);
 
-	if (m_fileEdit.GetSafeHwnd() && m_fileEdit.GetWindowTextLength())
+	if (m_fileEdit.GetSafeHwnd())
 	{
-		CRect rIcon = m_fileEdit.GetIconScreenRect();
-
-		if (rIcon.Height() < m_imageIcons.GetIconSize())
+		if (m_fileEdit.GetWindowTextLength())
 		{
-			ScreenToClient(rIcon);
+			CRect rIcon = m_fileEdit.GetIconScreenRect(), rEdit;
+			m_fileEdit.GetWindowRect(rEdit);
 
-			// Because CFileEdit messes with its non-client rect
-			// we can end up with a negative rectangle during startup
-			if (rIcon.left >= 0)
+			if (rIcon.Height() > rEdit.Height())
 			{
-				CString sIcon;
-				m_fileEdit.GetWindowText(sIcon);
-				m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
+				ScreenToClient(rIcon);
+
+				// Because CFileEdit messes with its non-client rect
+				// we can end up with a negative rectangle during startup
+				if (rIcon.left >= 0)
+				{
+					CString sIcon;
+					m_fileEdit.GetWindowText(sIcon);
+					m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
+				}
 			}
 		}
-	}
 
-	CRect rEdit = CDialogHelper::GetCtrlRect(this, 1001);
-	dc.ExcludeClipRect(rEdit);
+		// Also clip out the edit field and its buttons
+		CRect rEdit = CDialogHelper::GetChildRect(&m_fileEdit);
+		dc.ExcludeClipRect(rEdit);
+
+		CRect rButtons = m_fileEdit.GetButtonsRect();
+		ScreenToClient(rButtons);
+		dc.ExcludeClipRect(rButtons);
+	}
 
 	// default painting
 	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);

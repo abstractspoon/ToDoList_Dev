@@ -55,8 +55,8 @@ BOOL CWindowIcons::ModifyIcon(UINT nIconID)
 			nBigIconSize = 16;
 	}
 
-	CIcon iconSmall(GraphicsMisc::LoadIcon(nIconID, 16));
-	CIcon iconBig(GraphicsMisc::LoadIcon(nIconID, nBigIconSize));
+	CIcon iconSmall(nIconID, 16);
+	CIcon iconBig(nIconID, nBigIconSize);
 
 	if (iconBig.IsValid() && iconSmall.IsValid())
 	{

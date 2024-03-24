@@ -164,14 +164,11 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 		return FALSE;
 
 	// else
-	m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
-	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 100000);
 	m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
 	m_tooltip.EnableTracking(TRUE, 16, 16);
 
 	if (bMultiline)
-		m_tooltip.SetMaxTipWidth(SHRT_MAX); // for '\n' support
+		m_tooltip.EnableMultilineTips();
 
 	return TRUE;
 }

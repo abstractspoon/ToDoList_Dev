@@ -9,7 +9,7 @@
 #include "taskfile.h"
 #include "TDCOutlookImportHelper.h"
 #include "TDLImportOutlookObjectsDlg.h"
-#include "TaskListDropTarget.h"
+#include "TDCTaskListDropTarget.h"
 
 #include "..\shared\Misc.h"
 #include "..\shared\datehelper.h"

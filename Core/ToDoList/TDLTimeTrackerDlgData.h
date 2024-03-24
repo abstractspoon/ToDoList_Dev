@@ -19,7 +19,7 @@ struct TRACKITEM
 	BOOL operator==(const TRACKITEM& ti) const;
 	BOOL operator!=(const TRACKITEM& ti) const;
 	
-	CString sTaskTitle;
+	CString sTask;
 	DWORD dwTaskID;
 	BOOL bParent;
 	int nLevel;

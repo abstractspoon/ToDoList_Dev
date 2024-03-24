@@ -72,6 +72,7 @@ IDI_TIME_TRACK          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_NULL                ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_DEPENDS_LINK        ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_FILEEDIT_BROWSE     ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

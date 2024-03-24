@@ -35,6 +35,12 @@ CString CFileEdit::s_sBrowseFoldersTitle;
 HICON CFileEdit::s_hBrowseImage = NULL;
 HICON CFileEdit::s_hGoImage = NULL;
 
+/////////////////////////////////////////////////////////////////////////////
+
+const int IMAGE_SIZE = CFileIcons::GetImageSize();
+
+/////////////////////////////////////////////////////////////////////////////
+
 // static members
 void CFileEdit::SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo)
 {
@@ -196,49 +202,42 @@ void CFileEdit::OnPaint()
 {
 	m_bTipNeeded = FALSE;
 
-	if (GetFocus() != this)
+	if ((GetFocus() != this) && GetWindowTextLength())
 	{
 		CString sText;
 		GetWindowText(sText);
 
-		if (sText.IsEmpty())
+		CPaintDC dc(this); // device context for painting
+
+		CFont* pFont = GetFont();
+		CFont* pFontOld = (CFont*)dc.SelectObject(pFont);
+
+		// see if the text length exceeds the client width
+		CRect rClient;
+		GetClientRect(rClient);
+
+		CSize sizeText = dc.GetTextExtent(sText);
+
+		if (sizeText.cx <= rClient.Width() - 4)
 		{
-			Default();
+			DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0); // == Default
 		}
 		else
 		{
-			CPaintDC dc(this); // device context for painting
-			
-			CFont* pFont = GetFont();
-			CFont* pFontOld = (CFont*)dc.SelectObject(pFont);
-			
-			// see if the text length exceeds the client width
-			CRect rClient;
-			GetClientRect(rClient);
+			// fill bkgnd
+			::FillRect(dc, rClient, GetBackgroundBrush(&dc));
 
-			CSize sizeText = dc.GetTextExtent(sText);
+			// file path
+			rClient.DeflateRect(4, 1, 1, 1);
 
-			if (sizeText.cx <= rClient.Width() - 4)
-			{
-				DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
-			}
-			else
-			{
-				// fill bkgnd
-				::FillRect(dc, rClient, GetBackgroundBrush(&dc));
+			dc.SetBkMode(TRANSPARENT);
+			dc.SetTextColor(::GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
+			dc.DrawText(sText, rClient, DT_PATH_ELLIPSIS);
 
-				// file path
-				rClient.DeflateRect(4, 1, 1, 1);
-				
-				dc.SetBkMode(TRANSPARENT);
-				dc.SetTextColor(::GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
-				dc.DrawText(sText, rClient, DT_PATH_ELLIPSIS);
-
-				m_bTipNeeded = TRUE;
-			}
-
-			dc.SelectObject(pFontOld);
+			m_bTipNeeded = TRUE;
 		}
+
+		dc.SelectObject(pFontOld);
 	}
 	else
 	{
@@ -251,12 +250,6 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	// default
 	CEnEdit::NcPaint(pDC, rWindow);
 
-	// Background color
-	CRect rIcon = GetIconScreenRect();
-	rIcon.OffsetRect(-rWindow.TopLeft());
-
-	::FillRect(*pDC, rIcon, GetBackgroundBrush(pDC));
-	
 	// file icon
 	CString sFilePath;
 	GetWindowText(sFilePath);
@@ -266,14 +259,29 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	sFilePath.TrimLeft();
 	sFilePath.TrimRight();
 
-	// adjust pos if parent is not a combo
-	if (!m_bParentIsCombo)
+	// Background color
+	CRect rIcon = GetIconScreenRect();
+
+	if (m_bParentIsCombo)
 	{
-		rIcon.top++;
-		rIcon.left++;
+		// Draw to parent DC
+		CWindowDC dc(GetParent());
+
+		CRect rParent;
+		GetParent()->GetWindowRect(rParent);
+
+		rIcon.OffsetRect(-rParent.TopLeft());
+		::FillRect(dc, rIcon, GetBackgroundBrush(pDC));
+
+		DrawFileIcon(&dc, sFilePath, rIcon);
 	}
-	
-	DrawFileIcon(pDC, sFilePath, rIcon);
+	else
+	{
+		rIcon.OffsetRect(-rWindow.TopLeft());
+		::FillRect(*pDC, rIcon, GetBackgroundBrush(pDC));
+
+		DrawFileIcon(pDC, sFilePath, rIcon);
+	}
 }
 
 HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
@@ -303,7 +311,6 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	}
 
 	int nImage = -1;
-	int nImageSize = CFileIcons::GetImageSize();
 
 	// try parent for override
 	HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath);
@@ -312,7 +319,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	{
 		ClearImageIcon();
 
-		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL));
+		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, IMAGE_SIZE, IMAGE_SIZE, 0, NULL, DI_NORMAL));
 		return;
 	}
 
@@ -325,11 +332,11 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
 	{
 		if (m_ilImageIcon.GetSafeHandle() == NULL)
-			VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));
+			VERIFY(m_ilImageIcon.Create(IMAGE_SIZE, IMAGE_SIZE, (ILC_COLOR32 | ILC_MASK), 1, 1));
 
 		if (m_ilImageIcon.GetImageCount() == 0)
 		{
-			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), nImageSize, nImageSize));
+			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE));
 
 			if (icon.IsValid())
 				m_ilImageIcon.Add(icon);
@@ -359,6 +366,11 @@ void CFileEdit::ClearImageIcon()
 
 		while (m_ilImageIcon.Remove(0));
 	}
+}
+
+BOOL CFileEdit::DoBrowse()
+{
+	return CEnEdit::ClickButton(FEBTN_BROWSE);
 }
 
 void CFileEdit::OnBtnClick(UINT nID)
@@ -550,14 +562,7 @@ void CFileEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp
 	CEnEdit::OnNcCalcSize(bCalcValidRects, lpncsp);
 
 	if (bCalcValidRects)
-	{
-		lpncsp->rgrc[0].left += CFileIcons::GetImageSize();
-
-		if (m_bParentIsCombo)
-			lpncsp->rgrc[0].left += 3;
-		else
-			lpncsp->rgrc[0].left += 1;
-	}
+		lpncsp->rgrc[0].left += (IMAGE_SIZE + 1);
 }
 
 void CFileEdit::OnKillFocus(CWnd* pNewWnd) 
@@ -569,17 +574,30 @@ void CFileEdit::OnKillFocus(CWnd* pNewWnd)
 
 CRect CFileEdit::GetIconScreenRect() const
 {
-	CRect rButton;
-	GetClientRect(rButton);
+	CRect rWindow;
+	GetWindowRect(rWindow);
 
-	rButton.right = rButton.left;
-	rButton.left -= (CFileIcons::GetImageSize() + 2);
-	rButton.top -= m_nTopBorder;
-	rButton.bottom += m_nBottomBorder;
+	if (m_bParentIsCombo)
+	{
+		CRect rParent;
+		GetParent()->GetWindowRect(rParent);
 
-	ClientToScreen(rButton);
+		rWindow.top = rParent.top;
+		rWindow.bottom = rParent.bottom;
+	}
+	else
+	{
+		rWindow.left += 2;
+	}
 
-	return rButton;
+	CRect rIcon(rWindow);
+
+	rIcon.right = (rIcon.left + IMAGE_SIZE + 1);
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+
+	GraphicsMisc::CentreRect(rIcon, rWindow, FALSE, TRUE);
+
+	return rIcon;
 }
 
 #if _MSC_VER >= 1400

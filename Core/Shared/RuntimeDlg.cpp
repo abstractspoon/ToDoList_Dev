@@ -805,11 +805,6 @@ int CRuntimeDlg::CalcLinesRequired(const CString& sText, int nWidthDLU)
 	return nLines;
 }
 
-void CRuntimeDlg::ShowCtrls(UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bShow)
-{
-	CDialogHelper::ShowCtrls(this, nCtrlIDFrom, nCtrlIDTo, bShow);
-}
-
 CString CRuntimeDlg::GetControlClassName(CWnd* pWnd)
 {
 	ASSERT (pWnd);

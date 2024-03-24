@@ -45,8 +45,8 @@ void CTDLTransEditListCtrl::Initialise()
 	AddCol(_T("Translated Text"), GraphicsMisc::ScaleByDPIFactor(300));
 	AddCol(_T("UI Hint"), GraphicsMisc::ScaleByDPIFactor(100));
 
-	DisableColumnEditing(0, TRUE);
-	DisableColumnEditing(2, TRUE);
+	EnableColumnEditing(0, FALSE);
+	EnableColumnEditing(2, FALSE);
 
 	ShowGrid(TRUE, TRUE);
 	EnableSorting(TRUE);
