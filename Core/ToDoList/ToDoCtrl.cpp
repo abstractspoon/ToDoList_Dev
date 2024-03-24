@@ -1893,8 +1893,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 }
 
 // Internal
-TDC_SET CToDoCtrl::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
-									BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth, CDWordSet& mapProcessed)
+TDC_SET CToDoCtrl::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits,
+								  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth, CDWordSet& mapProcessed)
 {
 	if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
 	{
@@ -1909,7 +1909,7 @@ TDC_SET CToDoCtrl::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, T
 										 nDate,
 										 nAmount,
 										 nUnits,
-										 FALSE, // Do subtasks separately to prevent multiple offsets
+										 FALSE,	// Handle subtasks separately to avoid multiple offsetting
 										 bFromToday,
 										 bPreserveEndOfMonth);
 
@@ -1927,13 +1927,13 @@ TDC_SET CToDoCtrl::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, T
 		{
 			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 			{
-				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
+				DWORD dwChildID = m_data.GetTrueTaskID(pTDS->GetSubTaskID(nSubTask));
 				
 				TDC_SET nChildRes = OffsetTaskDate(dwChildID,
 												   nDate,
 												   nAmount, 
 												   nUnits, 
-												   TRUE, // Include subtasks
+												   bAndSubtasks,
 												   bFromToday, 
 												   bPreserveEndOfMonth,
 												   mapProcessed); // RECURSIVE CALL
@@ -5350,7 +5350,10 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTask
 
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
-	ASSERT(aModTaskIDs.GetSize() || mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB));
+	ASSERT(aModTaskIDs.GetSize() || 
+		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB) ||
+		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
+		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME));
 
 	if (IsReadOnly())
 		return;
