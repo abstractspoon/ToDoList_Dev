@@ -4461,7 +4461,6 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
 
-
 	TDC_SET nRes = SET_NOCHANGE;
 
 	if (bDueDate) // dtNext is the new due date

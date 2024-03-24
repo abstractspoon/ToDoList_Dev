@@ -1783,80 +1783,6 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-/*
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
-									   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth)
-{
-	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
-
-	if (!CanEditSelectedTask(nAttribID))
-		return FALSE;
-
-	Flush();
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-	// remove duplicate subtasks if we're going to be 
-	// processing subtasks anyway
-	CHTIList htiSel;
-	TSH().CopySelection(htiSel, bAndSubtasks);
-
-	CDWordArray aModTaskIDs;
-	POSITION pos = htiSel.GetHeadPosition();
-	
-	// Keep track of what we've processed to avoid offsetting
-	// the same task multiple times via references
-	CDWordSet mapProcessed;
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
-
-		if (mapProcessed.Has(dwTaskID))
-			continue;
-
-		TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID, 
-											 nDate, 
-											 nAmount, 
-											 nUnits,
-											 bAndSubtasks,
-											 bFromToday);
-
-		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
-			return FALSE;
-
-		mapProcessed.Add(dwTaskID);
-	}
-	
-	if (aModTaskIDs.GetSize())
-	{
-		switch (nDate)
-		{
-		case TDCD_CREATE:	
-		case TDCD_START:	
-		case TDCD_DUE:		
-		case TDCD_DONE:
-		case TDCD_STARTDATE:
-		case TDCD_DUEDATE:
-		case TDCD_DONEDATE:
-		case TDCD_STARTTIME:
-		case TDCD_DUETIME:
-		case TDCD_DONETIME:
-			SetModified(nAttribID, aModTaskIDs);
-			break;
-
-		default:
-			ASSERT(0);
-			return FALSE;
-		}
-
-		UpdateControls(FALSE); // don't update comments
-	}
-
-	return TRUE;
-}
-*/
-
 BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 {
 	if (mapDates.IsEmpty())
@@ -1865,15 +1791,17 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 		return FALSE;
 	}
 
-	if (IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE))
-		return FALSE;
-
 	BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() || !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
 	POSITION pos = mapDates.GetStartPosition();
 
 	while (pos)
 	{
-		switch (mapDates.GetNext(pos))
+		TDC_DATE nDate = mapDates.GetNext(pos);
+
+		if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
+			return FALSE;
+
+		switch (nDate)
 		{
 		case TDCD_CREATE:
 		case TDCD_DONE:
@@ -1933,16 +1861,14 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 		{
 			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
 
-			if (mapProcessed.Has(dwTaskID))
-				continue;
-
-			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
-												 nDate,
-												 nAmount,
-												 nUnits,
-												 bAndSubtasks,
-												 bFromToday,
-												 bPreserveEndOfMonth);
+			TDC_SET nRes = OffsetTaskDate(dwTaskID,
+										  nDate,
+										  nAmount,
+										  nUnits,
+										  bAndSubtasks,
+										  bFromToday,
+										  bPreserveEndOfMonth,
+										  mapProcessed);
 
 			if (!HandleModResult(dwTaskID, nRes, aDateModTaskIDs))
 				return FALSE;
@@ -1966,84 +1892,27 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 	return TRUE;
 }
 
-/*
-BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
+// Internal
+TDC_SET CToDoCtrl::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
+									BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth, CDWordSet& mapProcessed)
 {
-	if (!CanEditSelectedTask(TDCA_STARTDATE))
-		return FALSE;
-	
-	if (m_taskTree.SelectionHasDependencies() && HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		return FALSE;
-
-	// else
-	return TRUE;
-}
-
-BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, 
-												   BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth)
-{
-	if (!CanOffsetSelectedTaskStartAndDueDates())
-		return FALSE;
-	
-	Flush();
-	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-	
-	// remove duplicate subtasks if we're going to be 
-	// processing subtasks anyway
-	CHTIList htiSel;
-	TSH().CopySelection(htiSel, bAndSubtasks);
-
-	CDWordArray aModTaskIDs;
-	POSITION pos = htiSel.GetHeadPosition();
-
-	// Keep track of what we've processed to avoid offsetting
-	// the same task multiple times via references
-	CDWordSet mapProcessed;
-	
-	while (pos)
+	if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
 	{
-		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
-		TDC_SET nRes = OffsetTaskStartAndDueDates(dwTaskID, 
-												  nAmount, 
-												  nUnits, 
-												  bAndSubtasks, 
-												  bFromToday,
-												  mapProcessed);
-
-		if (!HandleModResult(dwTaskID, nRes, aModTaskIDs))
-			return FALSE;
+		ASSERT(0);
+		return SET_FAILED;
 	}
-	
-	if (aModTaskIDs.GetSize())
-	{
-		CTDCAttributeMap mapAttribIDs;
-		mapAttribIDs.Add(TDCA_STARTDATE);
-		mapAttribIDs.Add(TDCA_DUEDATE);
-
-		SetModified(mapAttribIDs, aModTaskIDs, TRUE); 
-		UpdateControls(FALSE); // don't update comments
-	}
-	
-	return TRUE;
-}
-TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, 
-												BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
-{
-	ASSERT(CanEditSelectedTask(TDCA_STARTDATE));
-	ASSERT(!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
 
 	if (mapProcessed.Has(dwTaskID))
 		return SET_NOCHANGE;
 
-	if (m_calculator.IsTaskLocked(dwTaskID))
-		return SET_FAILED;
+	TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
+										 nDate,
+										 nAmount,
+										 nUnits,
+										 FALSE, // Do subtasks separately to prevent multiple offsets
+										 bFromToday,
+										 bPreserveEndOfMonth);
 
-	TDC_SET nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, 
-													 nAmount, 
-													 nUnits, 
-													 FALSE, // Do subtasks below
-													 bFromToday);
 	ASSERT((nRes != SET_FAILED) || !bFromToday);
 
 	mapProcessed.Add(dwTaskID);
@@ -2060,12 +1929,14 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 			{
 				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
 				
-				TDC_SET nChildRes = OffsetTaskStartAndDueDates(dwChildID, 
-															   nAmount, 
-															   nUnits, 
-															   TRUE, // Include subtasks
-															   bFromToday, 
-															   mapProcessed); // RECURSIVE CALL
+				TDC_SET nChildRes = OffsetTaskDate(dwChildID,
+												   nDate,
+												   nAmount, 
+												   nUnits, 
+												   TRUE, // Include subtasks
+												   bFromToday, 
+												   bPreserveEndOfMonth,
+												   mapProcessed); // RECURSIVE CALL
 
 				if (nChildRes == SET_CHANGE)
 					nRes = SET_CHANGE;
@@ -2075,7 +1946,7 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 	return nRes;
 }
-*/
+
 void CToDoCtrl::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib)
 {
 	m_data.SetInheritedParentAttributes(mapAttribs, bUpdateAttrib);
