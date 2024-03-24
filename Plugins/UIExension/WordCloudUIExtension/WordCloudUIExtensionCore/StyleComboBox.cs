@@ -54,8 +54,8 @@ namespace WordCloudUIExtension
         {
 			if (Items.Count == 0) // once only
 			{
-				Items.Add(new StyleItem(trans.Translate("Spiral"), LayoutType.Spiral, false));
-				Items.Add(new StyleItem(trans.Translate("Typewriter"), LayoutType.Typewriter, true));
+				Items.Add(new StyleItem(trans.Translate("Spiral", Translator.Type.ComboBox), LayoutType.Spiral, false));
+				Items.Add(new StyleItem(trans.Translate("Typewriter", Translator.Type.ComboBox), LayoutType.Typewriter, true));
 			}
 
             return true;

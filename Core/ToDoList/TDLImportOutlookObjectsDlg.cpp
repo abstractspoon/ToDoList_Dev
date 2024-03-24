@@ -100,6 +100,8 @@ CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refI
 	m_bHideConfidential(TRUE),
 	m_sAltTitle(szAltTitle)
 {
+	m_icon.Load(IDI_OUTLOOK);
+
 	BuildMasterMapping();
 }
 
@@ -132,6 +134,8 @@ BOOL CTDLImportOutlookObjectsDlg::OnInitDialog()
 
 	if (!m_sAltTitle.IsEmpty())
 		SetWindowText(m_sAltTitle);
+
+	SetIcon(m_icon, FALSE);
 
 	// modify first column header
 	m_lcFieldMapping.SetColumnText(0, CEnString(IDS_OUTLOOK_FIELDNAME));

@@ -236,7 +236,7 @@ namespace HTMLReportExporter
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
 
 			// IE version
-			this.labelPreview.Text = String.Format("{0} (Internet Explorer {1})", m_Trans.Translate("Preview"), this.browserPreview.Version.Major);
+			this.labelPreview.Text = String.Format("{0} (Internet Explorer {1})", m_Trans.Translate("Preview", Translator.Type.Label), this.browserPreview.Version.Major);
 
 			m_Trans.Translate(this);
 
@@ -614,7 +614,7 @@ namespace HTMLReportExporter
 			var dlg = new OpenFileDialog
 			{
 				//InitialDirectory = LastBrowsedFolder,
-				Title = m_Trans.Translate("Open Report Template"),
+				Title = m_Trans.Translate("Open Report Template", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
@@ -644,19 +644,19 @@ namespace HTMLReportExporter
 
 		private void UpdateCaption()
 		{
-			String title = m_Trans.Translate("Report Builder"), fileName = "";
+			String title = m_Trans.Translate("Report Builder", Translator.Type.Dialog), fileName = "";
 
 			if (!String.IsNullOrEmpty(m_TemplateFilePath))
 				fileName = Path.GetFileName(m_TemplateFilePath);
 			else
-				fileName = m_Trans.Translate("untitled");
+				fileName = m_Trans.Translate("untitled", Translator.Type.Text);
 
 			this.Text = String.Format("{0} - {1}", fileName, title);
 		}
 
 		private String FileFilter
 		{
-			get { return String.Format("{0} (*.rbt)|*.rbt;", m_Trans.Translate("Report Templates")); }
+			get { return m_Trans.Translate("Report Templates (*.rbt)|*.rbt;", Translator.Type.FileFilter); }
 		}
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)
@@ -686,7 +686,7 @@ namespace HTMLReportExporter
 			var dlg = new SaveFileDialog
 			{
 				//InitialDirectory = LastBrowsedFolder,
-				Title = m_Trans.Translate("Save Report Template"),
+				Title = m_Trans.Translate("Save Report Template", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckPathExists = true,
@@ -734,8 +734,8 @@ namespace HTMLReportExporter
 
 			m_Trans.Translate(dialog, dialog.Tooltip);
 
-			dialog.BrowseTitle = m_Trans.Translate(dialog.BrowseTitle);
-			dialog.BrowseFilter = m_Trans.Translate(dialog.BrowseFilter);
+			dialog.BrowseTitle = m_Trans.Translate(dialog.BrowseTitle, Translator.Type.Dialog);
+			dialog.BrowseFilter = m_Trans.Translate(dialog.BrowseFilter, Translator.Type.Dialog);
 
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{

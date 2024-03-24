@@ -64,7 +64,7 @@ LPCWSTR CMarkdeepExporterBridge::GetMenuText() const
 
 LPCWSTR CMarkdeepExporterBridge::GetFileFilter() const
 {
-	return L"md.html";
+	return _T("Markdeep Files (*.md.html)|*.md.html||");
 }
 
 LPCWSTR CMarkdeepExporterBridge::GetFileExtension() const

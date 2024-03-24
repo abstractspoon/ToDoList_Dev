@@ -65,6 +65,7 @@ CTDLImportOutlookDlg::CTDLImportOutlookDlg(CWnd* pParent /*=NULL*/)
 	//{{AFX_DATA_INIT(COutlookImportDlg)
 	m_sCurFolder = _T("");
 	//}}AFX_DATA_INIT
+	m_icon.Load(IDI_OUTLOOK);
 }
 
 void CTDLImportOutlookDlg::DoDataExchange(CDataExchange* pDX)
@@ -148,6 +149,7 @@ BOOL CTDLImportOutlookDlg::OnInitDialog()
 	}
 
 	CThemed::SetWindowTheme(&m_tcTasks, _T("Explorer"));
+	SetIcon(m_icon, FALSE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

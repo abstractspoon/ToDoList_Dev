@@ -125,6 +125,8 @@ public:
 
 	virtual bool TranslateText(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 	virtual bool TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated) = 0;
+	virtual bool TranslateText(LPCWSTR szText, LPCWSTR szClassName, LPWSTR& szTranslated) = 0;
+
 	virtual bool TranslateMenu(HMENU hMenu, HWND hWndRef, bool bRecursive = true) = 0;
 	virtual bool TranslateMenu(LPCWSTR szText, LPWSTR& szTranslated) = 0;
 

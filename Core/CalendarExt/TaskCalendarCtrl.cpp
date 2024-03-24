@@ -2463,6 +2463,12 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	if (dwSelID)
 	{
+		// Avoid selecting 'Future Occurrences' because it's not
+		// strictly necessary and their ephemeral nature can cause
+		// asserts and other difficulties
+		if (IsFutureOccurrence(dwSelID))
+			dwSelID = GetRealTaskID(dwSelID);
+
 		if (m_tooltip.GetSafeHwnd())
 			m_tooltip.Pop();
 
@@ -2581,7 +2587,7 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	// keep parent informed
 	NotifyParentDragChange();
 
-	TRACE(_T("\nDragStart (date: %f.0, vpos: %d, scrollpos: %d)\n"), m_DateCurrent.m_dt, m_nVscrollPos, GetScrollPos(SB_VERT));
+	//TRACE(_T("\nDragStart (date: %f.0, vpos: %d, scrollpos: %d)\n"), m_DateCurrent.m_dt, m_nVscrollPos, GetScrollPos(SB_VERT));
 
 	return TRUE;
 }
@@ -2909,7 +2915,7 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 	m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
 	ReleaseCapture();
 
-	TRACE(_T("\nDragEnd (date: %f.0, vpos: %d, scrollpos: %d)\n"), m_DateCurrent.m_dt, m_nVscrollPos, GetScrollPos(SB_VERT));
+	//TRACE(_T("\nDragEnd (date: %f.0, vpos: %d, scrollpos: %d)\n"), m_DateCurrent.m_dt, m_nVscrollPos, GetScrollPos(SB_VERT));
 
 	// keep parent informed
 	if (!NotifyParentDateChange(nDragWhat, sCustAttribID))

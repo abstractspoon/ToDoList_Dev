@@ -22,7 +22,7 @@ namespace ImageHelper
 	{
 		public static string ImageFilter
 		{
-			get { return "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||"; }
+			get { return "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif"; }
 		}
 
 		public static bool DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)

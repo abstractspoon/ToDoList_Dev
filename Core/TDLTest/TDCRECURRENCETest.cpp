@@ -249,7 +249,7 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 		DWORD dwTickStart = GetTickCount();
 		const TDCRECURRENCE& tr = RECURRENCES[nRecur];
 
-		int nNumRecur = tr.CalcNextOccurences(date, range, aRecurrences);
+		int nNumRecur = tr.CalcNextOccurrences(date, range, aRecurrences);
 
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
 

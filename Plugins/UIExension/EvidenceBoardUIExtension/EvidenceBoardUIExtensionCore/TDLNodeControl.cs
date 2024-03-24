@@ -2833,7 +2833,7 @@ namespace EvidenceBoardUIExtension
 
 			if (Rectangle.Inflate(GetCreateLinkPinRect(node), 1, 1).Contains(clientPos))
 			{
-				tip.Text = m_Trans.Translate("Create New Link");
+				tip.Text = m_Trans.Translate("New Connection", Translator.Type.ToolTip);
 				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
 			}
 			else if (taskItem.HasImage)
@@ -2845,7 +2845,7 @@ namespace EvidenceBoardUIExtension
 
 				if (tip.Rect.Contains(clientPos))
 				{
-					tip.Text = m_Trans.Translate("Toggle Image Visibility");
+					tip.Text = m_Trans.Translate("Toggle Image Visibility", Translator.Type.ToolTip);
 					tip.Id = TooltipId(taskItem, TipId.ExpansionBtn);
 				}
 				else if (taskItem.ImageCount > 1)
@@ -2856,7 +2856,7 @@ namespace EvidenceBoardUIExtension
 
 					if (tip.Rect.Contains(clientPos))
 					{
-						tip.Text = m_Trans.Translate("Next Image");
+						tip.Text = m_Trans.Translate("Next Image", Translator.Type.ToolTip);
 						tip.Id = TooltipId(taskItem, TipId.SpinForwardBtn);
 					}
 					else // Back button
@@ -2865,7 +2865,7 @@ namespace EvidenceBoardUIExtension
 
 						if (tip.Rect.Contains(clientPos))
 						{
-							tip.Text = m_Trans.Translate("Previous Image");
+							tip.Text = m_Trans.Translate("Previous Image", Translator.Type.ToolTip);
 							tip.Id = TooltipId(taskItem, TipId.SpinBackBtn);
 						}
 					}

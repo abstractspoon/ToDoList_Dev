@@ -231,7 +231,7 @@ BEGIN
     CONTROL         "Incl&uding 'Calculated Due' dates",IDC_SHOWCALCDUEDATES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,30,201,311,10
     CONTROL         "Display task 'Completion' dates",IDC_SHOWDONEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,216,316,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,216,328,10
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,231,334,10

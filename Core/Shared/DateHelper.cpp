@@ -556,7 +556,7 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, B
 	return IsDateSet(date);
 }
 
-double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay)
+double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime& dtTo, DH_UNITS nUnits, BOOL bNoTimeIsEndOfDay) const
 {
 	// Sanity check
 	if (!COleDateTimeRange::IsValid(dtFrom, dtTo))
@@ -582,7 +582,7 @@ double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime&
 			// Check for exact months
 			double dDuration = (dateEnd.m_dt - dtFrom.m_dt); // in days
 
-			if (dDuration = (int)dDuration)
+			if (dDuration = (int)dDuration) // exact days
 			{
 				int nStartDay = dtFrom.GetDay();
 				int nEndDay = dateEnd.GetDay();
@@ -590,13 +590,7 @@ double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime&
 				if (nEndDay == nStartDay)
 				{
 					int nNumMonths = (CDateHelper::GetDateInMonths(dateEnd) - CDateHelper::GetDateInMonths(dtFrom));
-
-					if (nUnits == DHU_MONTHS)
-						return nNumMonths;
-
-					// else Years
-					if ((nNumMonths % 12) == 0)
-						return (nNumMonths / 12);
+					return ((nUnits == DHU_MONTHS) ? nNumMonths : (nNumMonths / 12.0));
 				}
 			}
 
@@ -1669,6 +1663,11 @@ int CDateHelper::GetDaysInMonth(const COleDateTime& date)
 	return GetDaysInMonth(date.GetMonth(), date.GetYear());
 }
 
+int CDateHelper::GetDaysInMonth(const SYSTEMTIME& st)
+{
+	return GetDaysInMonth(st.wMonth, st.wYear);
+}
+
 int CDateHelper::GetDaysInMonth(int nMonth, int nYear)
 {
 	// Sanity check
@@ -1743,7 +1742,7 @@ BOOL CDateHelper::IsEndOfMonth(const COleDateTime& date)
 
 BOOL CDateHelper::IsEndOfMonth(const SYSTEMTIME& st)
 {
-	return ((int)st.wDay >= GetDaysInMonth((int)st.wMonth, (int)st.wYear));
+	return ((int)st.wDay >= GetDaysInMonth(st));
 }
 
 BOOL CDateHelper::IsSameYear(const COleDateTime& date1, const COleDateTime& date2)

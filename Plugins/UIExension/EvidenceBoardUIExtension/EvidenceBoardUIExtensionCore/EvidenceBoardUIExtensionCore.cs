@@ -9,6 +9,7 @@ using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+using ImageHelper;
 
 namespace EvidenceBoardUIExtension
 {
@@ -30,7 +31,6 @@ namespace EvidenceBoardUIExtension
 		private EvidenceBoardPreferencesDlg m_PrefsDlg;
 
 		private String m_LastBrowsedImageFolder;
-		static string s_ImageFilter;
 
 		private Label m_OptionsLabel;
 		private EvidenceBoardOptionsComboBox m_OptionsCombo;
@@ -53,9 +53,6 @@ namespace EvidenceBoardUIExtension
 			m_UiName = uiName;
 			m_HwndParent = hwndParent;
             m_Trans = trans;
-
-			if (s_ImageFilter == null)
-				s_ImageFilter = m_Trans.Translate("Image Files") + " (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
 
 			InitializeComponent();
         }
@@ -439,7 +436,7 @@ namespace EvidenceBoardUIExtension
 			else
 				m_Control.ClearSelectedDateRange();
 
-			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Visible Date Range"), m_DateSlider.FormatRange());
+			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Visible Date Range", Translator.Type.Label), m_DateSlider.FormatRange());
 		}
 
 		private int ControlTop
@@ -466,12 +463,12 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		Label CreateLabel(string untranslatedText, Control prevControl)
+		Label CreateLabel(string text, Control prevControl)
 		{
 			var label = new Label();
 
 			label.Font = m_ControlsFont;
-			label.Text = m_Trans.Translate(untranslatedText);
+			label.Text = m_Trans.Translate(text, Translator.Type.Label);
 			label.AutoSize = true;
 			label.ForeColor = SystemColors.WindowText;
 
@@ -689,14 +686,14 @@ namespace EvidenceBoardUIExtension
 			btn.Name = "ZoomToExtents";
 			btn.ImageIndex = 0;
 			btn.Click += (s, e) => { m_Control.ZoomToExtents(); };
-			btn.ToolTipText = m_Trans.Translate("Zoom to Extents");
+			btn.ToolTipText = "Zoom to Extents";
 			m_Toolbar.Items.Add(btn);
 
 			btn = new ToolStripButton();
 			btn.Name = "ClearZoom";
 			btn.ImageIndex = 1;
 			btn.Click += (s, e) => { m_Control.ClearZoom(); };
-			btn.ToolTipText = m_Trans.Translate("Clear Zoom");
+			btn.ToolTipText = "Clear Zoom";
 			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -705,21 +702,21 @@ namespace EvidenceBoardUIExtension
 			btn.Name = "NewConnection";
 			btn.ImageIndex = 2;
 			btn.Click += new EventHandler(OnNewTaskLink);
-			btn.ToolTipText = m_Trans.Translate("New Connection");
+			btn.ToolTipText = "New Connection";
 			m_Toolbar.Items.Add(btn);
 
 			btn = new ToolStripButton();
 			btn.Name = "EditConnection";
 			btn.ImageIndex = 3;
 			btn.Click += (s, e) => { EditSelectedUserLink(); };
-			btn.ToolTipText = m_Trans.Translate("Edit Connection");
+			btn.ToolTipText = "Edit Connection";
 			m_Toolbar.Items.Add(btn);
 
 			btn = new ToolStripButton();
 			btn.Name = "DeleteConnection";
 			btn.ImageIndex = 4;
 			btn.Click += (s, e) => { m_Control.DeleteSelectedUserLink(); };
-			btn.ToolTipText = m_Trans.Translate("Delete Connection");
+			btn.ToolTipText = "Delete Connection";
 			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -728,14 +725,14 @@ namespace EvidenceBoardUIExtension
 			btn.Name = "ExpandAllImages";
 			btn.ImageIndex = 5;
 			btn.Click += (s, e) => { m_Control.ExpandAllTaskImages(); };
-			btn.ToolTipText = m_Trans.Translate("Expand All Images");
+			btn.ToolTipText = "Expand All Images";
 			m_Toolbar.Items.Add(btn);
 
 			btn = new ToolStripButton();
 			btn.Name = "CollapseAllImages";
 			btn.ImageIndex = 6;
 			btn.Click += (s, e) => { m_Control.CollapseAllTaskImages(); };
-			btn.ToolTipText = m_Trans.Translate("Collapse All Images");
+			btn.ToolTipText = "Collapse All Images";
 			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -744,14 +741,14 @@ namespace EvidenceBoardUIExtension
 			btn.Name = "SetBackgroundImage";
 			btn.ImageIndex = 7;
 			btn.Click += new EventHandler(OnSetBackgroundImage);
-			btn.ToolTipText = m_Trans.Translate("Set Background Image");
+			btn.ToolTipText = "Set Background Image";
 			m_Toolbar.Items.Add(btn);
 
 			btn = new ToolStripButton();
 			btn.Name = "ClearBackgroundImage";
 			btn.ImageIndex = 8;
 			btn.Click += (s, e) => { m_Control.ClearBackgroundImage(); };
-			btn.ToolTipText = m_Trans.Translate("Clear Background Image");
+			btn.ToolTipText = "Clear Background Image";
 			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -759,7 +756,7 @@ namespace EvidenceBoardUIExtension
 			btn = new ToolStripButton();
 			btn.ImageIndex = 9;
 			btn.Click += new EventHandler(OnPreferences);
-			btn.ToolTipText = m_Trans.Translate("Preferences");
+			btn.ToolTipText = "Preferences";
 			m_Toolbar.Items.Add(btn);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -767,11 +764,13 @@ namespace EvidenceBoardUIExtension
 			var btn10 = new ToolStripButton();
 			btn10.ImageIndex = 10;
 			btn10.Click += new EventHandler(OnHelp);
-			btn10.ToolTipText = m_Trans.Translate("Online Help");
+			btn10.ToolTipText = "Online Help";
 			m_Toolbar.Items.Add(btn10);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 			Controls.Add(m_Toolbar);
+
+			m_Trans.Translate(m_Toolbar.Items, false);
 		}
 
 		private void UpdateToolbarButtonStates()
@@ -828,7 +827,10 @@ namespace EvidenceBoardUIExtension
 			{
 			case 0:
 			case 1:
-				MessageBox.Show(m_Trans.Translate("To create a new connection you need to preselect two tasks"), m_UiName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+				MessageBox.Show(m_Trans.Translate("To create a new connection you need to preselect two tasks", Translator.Type.Text), 
+								m_UiName, 
+								MessageBoxButtons.OK, 
+								MessageBoxIcon.Information);
 				break;
 
 			case 2:
@@ -838,7 +840,10 @@ namespace EvidenceBoardUIExtension
 
 					if (m_Control.UserLinkExists(fromId, toId))
 					{
-						MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks"), m_UiName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
+						MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks", Translator.Type.Text), 
+										m_UiName, 
+										MessageBoxButtons.OK, 
+										MessageBoxIcon.Hand);
 						return;
 					}
 
@@ -918,13 +923,13 @@ namespace EvidenceBoardUIExtension
 			var dialog = new OpenFileDialog
 			{
 				InitialDirectory = m_LastBrowsedImageFolder,
-				Title = m_Trans.Translate("Select Background Image"),
+				Title = m_Trans.Translate("Select Background Image", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = m_Trans.Translate(s_ImageFilter),
+				Filter = m_Trans.Translate(ImageUtils.ImageFilter, Translator.Type.FileFilter),
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

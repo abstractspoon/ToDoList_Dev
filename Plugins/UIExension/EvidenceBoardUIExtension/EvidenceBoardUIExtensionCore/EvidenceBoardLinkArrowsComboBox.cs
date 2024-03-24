@@ -42,7 +42,7 @@ namespace EvidenceBoardUIExtension
 			foreach (var item in Items)
 			{
 				var arrows = (item as EvidenceBoardArrowsItem);
-				arrows.Label = trans.Translate(arrows.Label);
+				arrows.Label = trans.Translate(arrows.Label, Translator.Type.ComboBox);
 			}
 		}
 

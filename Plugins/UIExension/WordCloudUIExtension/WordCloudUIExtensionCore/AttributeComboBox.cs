@@ -35,19 +35,19 @@ namespace WordCloudUIExtension
         {
 			if (Items.Count == 0) // once only
 			{
-				AddItem(trans, "Title",			Task.Attribute.Title);
-				AddItem(trans, "Comments",		Task.Attribute.Comments);
-				AddItem(trans, "Status",		Task.Attribute.Status);
-				AddItem(trans, "Category",		Task.Attribute.Category);
-				AddItem(trans, "Completion Date", Task.Attribute.DoneDate);
-				AddItem(trans, "Due Date",		Task.Attribute.DueDate);
-				AddItem(trans, "Start Date",	Task.Attribute.StartDate);
-				AddItem(trans, "Allocated To",	Task.Attribute.AllocatedTo);
-				AddItem(trans, "Allocated By",	Task.Attribute.AllocatedBy);
-				AddItem(trans, "Creation Date", Task.Attribute.CreationDate);
-				AddItem(trans, "Created By",	Task.Attribute.CreatedBy);
-				AddItem(trans, "Version",		Task.Attribute.Version);
-				AddItem(trans, "Tags",			Task.Attribute.Tags);
+				AddItem(trans, "Title",				Task.Attribute.Title);
+				AddItem(trans, "Comments",			Task.Attribute.Comments);
+				AddItem(trans, "Status",			Task.Attribute.Status);
+				AddItem(trans, "Category",			Task.Attribute.Category);
+				AddItem(trans, "Completion Date",	Task.Attribute.DoneDate);
+				AddItem(trans, "Due Date",			Task.Attribute.DueDate);
+				AddItem(trans, "Start Date",		Task.Attribute.StartDate);
+				AddItem(trans, "Allocated To",		Task.Attribute.AllocatedTo);
+				AddItem(trans, "Allocated By",		Task.Attribute.AllocatedBy);
+				AddItem(trans, "Creation Date",		Task.Attribute.CreationDate);
+				AddItem(trans, "Created By",		Task.Attribute.CreatedBy);
+				AddItem(trans, "Version",			Task.Attribute.Version);
+				AddItem(trans, "Tags",				Task.Attribute.Tags);
 			}
 
             return true;
@@ -55,7 +55,7 @@ namespace WordCloudUIExtension
 
 		private bool AddItem(Translator trans, string name, Task.Attribute attrib)
 		{
-            return (Items.Add(new AttributeItem(trans.Translate(name), attrib)) != -1);
+            return (Items.Add(new AttributeItem(trans.Translate(name, Translator.Type.ComboBox), attrib)) != -1);
 		}
 
         public Task.Attribute GetSelectedAttribute()
