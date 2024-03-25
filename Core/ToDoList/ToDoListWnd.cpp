@@ -12906,6 +12906,8 @@ void CToDoListWnd::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
 
 void CToDoListWnd::OnEditSelectall() 
 {
+	CWaitCursor wc;
+
 	GetToDoCtrl().SelectAll();
 }
 

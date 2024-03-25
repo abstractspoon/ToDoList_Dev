@@ -7262,11 +7262,10 @@ void CToDoCtrl::SelectAll()
 	if (!HandleUnsavedComments())
 		return;
 
-	if (m_taskTree.SelectAll())
-	{
-		// load newly selected item
-		UpdateControls();
-	}
+	m_taskTree.SelectAll();
+
+	// Note need to call UpdateControls because that will happen
+	// as a consequence of a selection change notification
 }
 
 BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const

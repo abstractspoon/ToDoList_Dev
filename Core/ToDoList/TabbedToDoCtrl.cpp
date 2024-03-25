@@ -899,8 +899,11 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	// take a note of what task is currently singly selected
 	// so that we can prevent unnecessary calls to UpdateControls
 	DWORD dwSelTaskID = GetSingleSelectedTaskID();
+
 	FTC_VIEW nNewView = (FTC_VIEW)nNewTab;
 	FTC_VIEW nOldView = (FTC_VIEW)nOldTab;
+
+	CWaitCursor cursor;
 	
 	switch (nNewView)
 	{
