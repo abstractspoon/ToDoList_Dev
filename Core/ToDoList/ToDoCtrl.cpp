@@ -1828,7 +1828,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth)
+BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
 	if (!CanOffsetSelectedTaskDates(mapDates))
 		return FALSE;
@@ -1837,10 +1837,9 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	// remove duplicate subtasks if we're going to be 
-	// processing subtasks anyway
+	// remove duplicate subtasks if we're going to be processing subtasks anyway
 	CHTIList htiSel;
-	TSH().CopySelection(htiSel, bAndSubtasks);
+	TSH().CopySelection(htiSel, (dwFlags & TDCOTD_OFFSETSUBTASKS));
 
 	CDWordArray aModTaskIDs;
 	CTDCAttributeMap mapAttribs;
@@ -1852,28 +1851,21 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 		CDWordArray aDateModTaskIDs;
 		TDC_DATE nDate = mapDates.GetNext(posDate);
 
-		// Keep track of what we've processed to avoid offsetting
-		// the same task multiple times via references
-		CDWordSet mapProcessed;
 		POSITION posTask = htiSel.GetHeadPosition();
 
 		while (posTask)
 		{
 			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
 
-			TDC_SET nRes = OffsetTaskDate(dwTaskID,
-										  nDate,
-										  nAmount,
-										  nUnits,
-										  bAndSubtasks,
-										  bFromToday,
-										  bPreserveEndOfMonth,
-										  mapProcessed);
+			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
+												 nDate,
+												 nAmount,
+												 nUnits,
+												 dwFlags,
+												 aDateModTaskIDs);
 
 			if (!HandleModResult(dwTaskID, nRes, aDateModTaskIDs))
 				return FALSE;
-
-			mapProcessed.Add(dwTaskID);
 		}
 
 		if (aDateModTaskIDs.GetSize())
@@ -1890,61 +1882,6 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 	}
 
 	return TRUE;
-}
-
-// Internal
-TDC_SET CToDoCtrl::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits,
-								  BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveEndOfMonth, CDWordSet& mapProcessed)
-{
-	if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
-	{
-		ASSERT(0);
-		return SET_FAILED;
-	}
-
-	if (mapProcessed.Has(dwTaskID))
-		return SET_NOCHANGE;
-
-	TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
-										 nDate,
-										 nAmount,
-										 nUnits,
-										 FALSE,	// Handle subtasks separately to avoid multiple offsetting
-										 bFromToday,
-										 bPreserveEndOfMonth);
-
-	ASSERT((nRes != SET_FAILED) || !bFromToday);
-
-	mapProcessed.Add(dwTaskID);
-
-	// subtasks
-	if (bAndSubtasks)
-	{
-		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-		ASSERT(pTDS);
-
-		if (pTDS)
-		{
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-			{
-				DWORD dwChildID = m_data.GetTrueTaskID(pTDS->GetSubTaskID(nSubTask));
-				
-				TDC_SET nChildRes = OffsetTaskDate(dwChildID,
-												   nDate,
-												   nAmount, 
-												   nUnits, 
-												   bAndSubtasks,
-												   bFromToday, 
-												   bPreserveEndOfMonth,
-												   mapProcessed); // RECURSIVE CALL
-
-				if (nChildRes == SET_CHANGE)
-					nRes = SET_CHANGE;
-			}
-		}
-	}
-
-	return nRes;
 }
 
 void CToDoCtrl::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib)
