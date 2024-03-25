@@ -47,6 +47,7 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	m_bForward = prefs.GetProfileInt(m_sPrefsKey, _T("Forward"), 1);
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
 	m_bOffsetSubtasks = prefs.GetProfileInt(m_sPrefsKey, _T("Subtasks"), TRUE);
+	m_bOffsetSubtaskRefs = prefs.GetProfileInt(m_sPrefsKey, _T("SubtaskRefs"), TRUE);
 	m_nOffsetByUnits = prefs.GetProfileInt(m_sPrefsKey, _T("AmountPeriod"), WEEKDAYS);
 	m_bOffsetFromToday = prefs.GetProfileInt(m_sPrefsKey, _T("FromToday"), FALSE);
 	m_bPreserveEndOfMonth = prefs.GetProfileInt(m_sPrefsKey, _T("PreserveEndOfMonth"), TRUE);
@@ -65,6 +66,7 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_BY, m_nOffsetBy);
 	DDX_CBIndex(pDX, IDC_BYUNITS, m_nOffsetByUnits);
 	DDX_Check(pDX, IDC_OFFSETSUBTASKS, m_bOffsetSubtasks);
+	DDX_Check(pDX, IDC_OFFSETSUBTASKREFS, m_bOffsetSubtaskRefs);
 	DDX_Check(pDX, IDC_OFFSETFROMTODAY, m_bOffsetFromToday);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_PRESERVEENDOFMONTH, m_bPreserveEndOfMonth);
@@ -74,6 +76,7 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLOffsetDatesDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(COffsetDatesDlg)
 	ON_CBN_SELCHANGE(IDC_BYUNITS, OnSelchangeUnits)
+	ON_BN_CLICKED(IDC_OFFSETSUBTASKS, OnClickOffsetSubtasks)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -85,6 +88,8 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 
 	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow(m_nOffsetByUnits == MONTHS);
+	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
+
 	return TRUE;
 }
 
@@ -146,14 +151,21 @@ void CTDLOffsetDatesDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Amount"), m_nOffsetBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Subtasks"), m_bOffsetSubtasks);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SubtaskRefs"), m_bOffsetSubtaskRefs);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("FromToday"), m_bOffsetFromToday);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PreserveEndOfMonth"), m_bPreserveEndOfMonth);
 }
-
 
 void CTDLOffsetDatesDlg::OnSelchangeUnits() 
 {
 	UpdateData();
 
 	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow(m_nOffsetByUnits == MONTHS);
+}
+
+void CTDLOffsetDatesDlg::OnClickOffsetSubtasks()
+{
+	UpdateData();
+
+	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
 }

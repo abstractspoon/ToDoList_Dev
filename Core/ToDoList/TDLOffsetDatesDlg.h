@@ -32,6 +32,7 @@ public:
 	DWORD GetOffsetWhat() const;
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
+	BOOL GetOffsetSubtaskReferences() const { return (m_bOffsetSubtasks && m_bOffsetSubtaskRefs); }
 	BOOL GetOffsetFromToday() const { return m_bOffsetFromToday; }
 	BOOL GetPreserveEndOfMonth() const;
 
@@ -47,6 +48,7 @@ protected:
 	int		m_nOffsetBy;
 	int		m_nOffsetByUnits;
 	BOOL	m_bOffsetSubtasks;
+	BOOL	m_bOffsetSubtaskRefs;
 	BOOL	m_bOffsetFromToday;
 	//}}AFX_DATA
 	BOOL	m_bPreserveEndOfMonth;
@@ -65,6 +67,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(COffsetDatesDlg)
 	afx_msg void OnSelchangeUnits();
+	afx_msg void OnClickOffsetSubtasks();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

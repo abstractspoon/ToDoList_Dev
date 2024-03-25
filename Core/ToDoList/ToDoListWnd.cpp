@@ -12040,6 +12040,7 @@ void CToDoListWnd::OnEditOffsetDates()
 
 		DWORD dwFlags = 0;
 		Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKS,		dialog.GetOffsetSubtasks());
+		Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKREFS,	dialog.GetOffsetSubtaskReferences());
 		Misc::SetFlag(dwFlags, TDCOTD_OFFSETFROMTODAY,		dialog.GetOffsetFromToday());
 		Misc::SetFlag(dwFlags, TDCOTD_PRESERVEENDOFMONTH,	dialog.GetPreserveEndOfMonth());
 
