@@ -228,8 +228,7 @@ BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 	{
 		m_bFirstShow = FALSE;
 
-		m_taskTree.ExpandAll();
-		m_taskTree.SelectAll();
+		m_taskTree.SelectAll(FALSE); // Include collapsed items
 		m_taskTree.SetFocus();
 	}
 	

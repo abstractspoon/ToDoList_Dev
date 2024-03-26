@@ -7257,15 +7257,14 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 	}
 }
 
-void CToDoCtrl::SelectAll() 
+void CToDoCtrl::SelectAll(BOOL bVisibleOnly)
 { 
 	if (!HandleUnsavedComments())
 		return;
 
-	m_taskTree.SelectAll();
-
-	// Note need to call UpdateControls because that will happen
-	// as a consequence of a selection change notification
+	// Note: No need to call UpdateControls because that will happen
+	//       as a consequence of a selection change notification
+	m_taskTree.SelectAll(bVisibleOnly);
 }
 
 BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const

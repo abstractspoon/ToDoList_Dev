@@ -206,8 +206,12 @@ void CTDLTaskTreeCtrl::DeselectAll()
 	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 }
 
-BOOL CTDLTaskTreeCtrl::SelectAll() 
+BOOL CTDLTaskTreeCtrl::SelectAll(BOOL bVisibleOnly)
 { 
+	// All selected tasks must be visible
+	if (!bVisibleOnly)
+		ExpandAll();
+
 	if (TSH().AddAll())
 	{
 		SyncColumnSelectionToTasks();
@@ -445,6 +449,9 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		
 		ExpandItemRaw(hti, bExpand, bAndChildren);
 	}
+
+	if (!bExpand)
+		TSH().RemoveHiddenItems();
 
 	if (htiSel)
 		m_tcTasks.EnsureVisible(htiSel);
