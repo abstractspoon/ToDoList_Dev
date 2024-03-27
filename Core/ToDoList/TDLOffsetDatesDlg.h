@@ -11,6 +11,7 @@
 #include "TDLDialog.h"
 
 #include "..\shared\dialoghelper.h"
+#include "..\shared\CheckListBoxEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
@@ -29,7 +30,7 @@ class CTDLOffsetDatesDlg : public CTDLDialog
 public:
 	CTDLOffsetDatesDlg(CWnd* pParent = NULL);   // standard constructor
 
-	DWORD GetOffsetWhat() const;
+	DWORD GetOffsetWhat() const { return m_dwOffsetWhat; }
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetSubtaskReferences() const { return (m_bOffsetSubtasks && m_bOffsetSubtaskRefs); }
@@ -40,10 +41,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(COffsetDatesDlg)
 	enum { IDD = IDD_OFFSETDATES_DIALOG };
-	BOOL	m_bOffsetStartDate;
-	BOOL	m_bOffsetDueDate;
-	BOOL	m_bOffsetDoneDate;
-	BOOL	m_bOffsetReminder;
+
 	int		m_bForward;
 	int		m_nOffsetBy;
 	int		m_nOffsetByUnits;
@@ -52,6 +50,8 @@ protected:
 	BOOL	m_bOffsetFromToday;
 	//}}AFX_DATA
 	BOOL	m_bPreserveEndOfMonth;
+	CCheckListBoxEx m_lbOffsetWhat;
+	DWORD m_dwOffsetWhat;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

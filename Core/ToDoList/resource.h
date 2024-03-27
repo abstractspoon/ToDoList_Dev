@@ -862,6 +862,7 @@
 #define IDC_PRESERVEWEEKDAYS            1571
 #define IDC_PRESERVEENDOFMONTH          1574
 #define IDC_OFFSETSUBTASKREFS           1575
+#define IDC_WHATLIST                    1576
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2502,7 +2503,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        328
 #define _APS_NEXT_COMMAND_VALUE         34757
-#define _APS_NEXT_CONTROL_VALUE         1576
+#define _APS_NEXT_CONTROL_VALUE         1577
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

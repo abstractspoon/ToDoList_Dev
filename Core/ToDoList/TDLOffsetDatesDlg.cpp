@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum // OFFSET
+enum // OFFSET_BY
 {
 	WEEKDAYS,
 	DAYS,
@@ -32,7 +32,8 @@ enum // OFFSET
 // COffsetDatesDlg dialog
 
 CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
-	: CTDLDialog(CTDLOffsetDatesDlg::IDD, _T("OffsetDates"), pParent)
+	: 
+	CTDLDialog(CTDLOffsetDatesDlg::IDD, _T("OffsetDates"), pParent)
 {
 	//{{AFX_DATA_INIT(COffsetDatesDlg)
 	//}}AFX_DATA_INIT
@@ -40,11 +41,20 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	// restore state
 	CPreferences prefs;
 
-	m_bOffsetStartDate = prefs.GetProfileInt(m_sPrefsKey, _T("StartDate"), FALSE);
-	m_bOffsetDueDate = prefs.GetProfileInt(m_sPrefsKey, _T("DueDate"), FALSE);
-	m_bOffsetDoneDate = prefs.GetProfileInt(m_sPrefsKey, _T("DoneDate"), FALSE);
-	m_bOffsetReminder = prefs.GetProfileInt(m_sPrefsKey, _T("Reminder"), FALSE);
-	m_bForward = prefs.GetProfileInt(m_sPrefsKey, _T("Forward"), 1);
+	m_dwOffsetWhat = prefs.GetProfileInt(m_sPrefsKey, _T("What"), 0xffff);
+
+	// Backwards compatibility
+	if (m_dwOffsetWhat == 0xffff)
+	{
+		m_dwOffsetWhat = 0;
+
+		Misc::SetFlag(m_dwOffsetWhat, ODD_STARTDATE, prefs.GetProfileInt(m_sPrefsKey, _T("StartDate"), FALSE));
+		Misc::SetFlag(m_dwOffsetWhat, ODD_DUEDATE, prefs.GetProfileInt(m_sPrefsKey, _T("DueDate"), FALSE));
+		Misc::SetFlag(m_dwOffsetWhat, ODD_DUEDATE, prefs.GetProfileInt(m_sPrefsKey, _T("DoneDate"), FALSE));
+		Misc::SetFlag(m_dwOffsetWhat, ODD_REMINDER, prefs.GetProfileInt(m_sPrefsKey, _T("Reminder"), FALSE));
+	}
+
+	m_bForward = prefs.GetProfileInt(m_sPrefsKey, _T("Forward"), TRUE);
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
 	m_bOffsetSubtasks = prefs.GetProfileInt(m_sPrefsKey, _T("Subtasks"), TRUE);
 	m_bOffsetSubtaskRefs = prefs.GetProfileInt(m_sPrefsKey, _T("SubtaskRefs"), TRUE);
@@ -53,15 +63,11 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	m_bPreserveEndOfMonth = prefs.GetProfileInt(m_sPrefsKey, _T("PreserveEndOfMonth"), TRUE);
 }
 
-
 void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
+
 	//{{AFX_DATA_MAP(COffsetDatesDlg)
-	DDX_Check(pDX, IDC_OFFSETSTARTDATE, m_bOffsetStartDate);
-	DDX_Check(pDX, IDC_OFFSETDUEDATE, m_bOffsetDueDate);
-	DDX_Check(pDX, IDC_OFFSETDONEDATE, m_bOffsetDoneDate);
-	DDX_Check(pDX, IDC_OFFSETREMINDER, m_bOffsetReminder);
 	DDX_CBIndex(pDX, IDC_DIRECTION, m_bForward);
 	DDX_Text(pDX, IDC_BY, m_nOffsetBy);
 	DDX_CBIndex(pDX, IDC_BYUNITS, m_nOffsetByUnits);
@@ -70,6 +76,7 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_OFFSETFROMTODAY, m_bOffsetFromToday);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_PRESERVEENDOFMONTH, m_bPreserveEndOfMonth);
+	DDX_Control(pDX, IDC_WHATLIST, m_lbOffsetWhat);
 }
 
 
@@ -87,22 +94,18 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
+	// Same order as previous checkboxes
+	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, ODD_STARTDATE);
+	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   ODD_DUEDATE);
+	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  ODD_DONEDATE);
+	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  ODD_REMINDER);
+
+	m_lbOffsetWhat.SetCheckedByItemData(m_dwOffsetWhat);
+
 	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow(m_nOffsetByUnits == MONTHS);
 	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
 
 	return TRUE;
-}
-
-DWORD CTDLOffsetDatesDlg::GetOffsetWhat() const
-{
-	DWORD dwWhat = 0;
-
-	Misc::SetFlag(dwWhat, ODD_STARTDATE, m_bOffsetStartDate);
-	Misc::SetFlag(dwWhat, ODD_DUEDATE, m_bOffsetDueDate);
-	Misc::SetFlag(dwWhat, ODD_DONEDATE, m_bOffsetDoneDate);
-	Misc::SetFlag(dwWhat, ODD_REMINDER, m_bOffsetReminder);
-
-	return dwWhat;
 }
 
 int CTDLOffsetDatesDlg::GetOffsetAmount(TDC_UNITS& nUnits) const
@@ -143,10 +146,9 @@ void CTDLOffsetDatesDlg::OnOK()
 	// save state
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(m_sPrefsKey, _T("StartDate"), m_bOffsetStartDate);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("DueDate"), m_bOffsetDueDate);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("DoneDate"), m_bOffsetDoneDate);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("Reminder"), m_bOffsetReminder);
+	m_dwOffsetWhat = m_lbOffsetWhat.GetCheckedItemData();
+	prefs.WriteProfileInt(m_sPrefsKey, _T("What"), m_dwOffsetWhat);
+
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Forward"), m_bForward);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Amount"), m_nOffsetBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);
@@ -154,6 +156,12 @@ void CTDLOffsetDatesDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SubtaskRefs"), m_bOffsetSubtaskRefs);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("FromToday"), m_bOffsetFromToday);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PreserveEndOfMonth"), m_bPreserveEndOfMonth);
+
+	// Cleanup old prefs
+	prefs.DeleteProfileEntry(m_sPrefsKey, _T("StartDate"));
+	prefs.DeleteProfileEntry(m_sPrefsKey, _T("DueDate"));
+	prefs.DeleteProfileEntry(m_sPrefsKey, _T("DoneDate"));
+	prefs.DeleteProfileEntry(m_sPrefsKey, _T("Reminder"));
 }
 
 void CTDLOffsetDatesDlg::OnSelchangeUnits() 

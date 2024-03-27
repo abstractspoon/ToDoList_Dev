@@ -2404,7 +2404,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 								  nAmount,
 								  nUnits,
 								  dwFlags,
-								  FALSE,	// Don't fir to recurring scheme
+								  FALSE,	// Don't fit to recurring scheme
 								  mapProcessedTasks);
 
 	// Copy modified tasks to output array
@@ -2419,7 +2419,10 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			mapProcessedTasks.GetNextAssoc(pos, dwTaskID, bModified);
 
 			if (bModified)
+			{
+				ASSERT(!IsTaskReference(dwTaskID));
 				aModTaskIDs.Add(dwTaskID);
+			}
 		}
 
 		ASSERT(aModTaskIDs.GetSize());
@@ -2435,7 +2438,9 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 {
 	ASSERT((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS));
 
-	if (Misc::HasKeyT(mapProcessedTasks, dwTaskID))
+	DWORD dwTrueTaskID = GetTrueTaskID(dwTaskID);
+
+	if (Misc::HasKeyT<DWORD, BOOL>(mapProcessedTasks, dwTrueTaskID))
 		return SET_NOCHANGE;
 
 	TDC_SET nRes = SET_NOCHANGE;
@@ -2443,10 +2448,10 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	BOOL bFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
 	BOOL bPreserveEndOfMonth = (dwFlags & TDCOTD_PRESERVEENDOFMONTH);
 
-	if (CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags))
+	if (CanOffsetTaskDate(dwTrueTaskID, nDate, nAmount, nUnits, dwFlags))
 	{
 		TODOITEM* pTDI = NULL;
-		EDIT_GET_TDI(dwTaskID, pTDI);
+		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
 		CDateHelper dh;
 		COleDateTime date = (bFromToday ? dh.GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
@@ -2495,9 +2500,9 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			break;
 		}
 
-		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, FALSE); // DON'T recalc time estimate
+		nRes = SetTaskDate(dwTrueTaskID, pTDI, nDate, date, FALSE); // DON'T recalc time estimate
 
-		mapProcessedTasks[dwTaskID] = (nRes == SET_CHANGE);
+		mapProcessedTasks[dwTrueTaskID] = (nRes == SET_CHANGE);
 	}
 
 	// children
