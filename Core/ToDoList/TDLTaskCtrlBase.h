@@ -100,7 +100,6 @@ public:
 	virtual DWORD GetSelectedTaskID() const = 0;
 	virtual BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const = 0;
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs) = 0;
-	virtual BOOL SelectAll() = 0;
 	virtual void DeleteAll() = 0;
 	virtual BOOL InvalidateSelection(BOOL bUpdate) = 0;
 	virtual BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE) = 0;

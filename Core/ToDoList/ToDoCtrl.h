@@ -337,8 +337,6 @@ public:
 	// selection functions
 	virtual BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
 	virtual BOOL CanMoveSelectedTask(TDC_MOVETASK nDirection) const { return m_taskTree.CanMoveSelection(nDirection); }
-	virtual void SelectAll();
-	virtual BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
 
 	virtual BOOL GotoNextTask(TDC_GOTO nDirection); 
 	virtual BOOL CanGotoNextTask(TDC_GOTO nDirection) const;
@@ -379,6 +377,8 @@ public:
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
+	void SelectAll(BOOL bVisibleOnly = TRUE);
+	BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting

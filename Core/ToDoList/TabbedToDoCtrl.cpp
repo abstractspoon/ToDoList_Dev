@@ -899,8 +899,11 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	// take a note of what task is currently singly selected
 	// so that we can prevent unnecessary calls to UpdateControls
 	DWORD dwSelTaskID = GetSingleSelectedTaskID();
+
 	FTC_VIEW nNewView = (FTC_VIEW)nNewTab;
 	FTC_VIEW nOldView = (FTC_VIEW)nOldTab;
+
+	CWaitCursor cursor;
 	
 	switch (nNewView)
 	{
@@ -2574,7 +2577,7 @@ void CTabbedToDoCtrl::SelectAll()
 			// select items in tree
 			if (bAllTasks)
 			{
-				CToDoCtrl::SelectAll();
+				CToDoCtrl::SelectAll(FALSE); // including collapsed items
 				m_taskList.SelectAll();
 			}
 			else
@@ -2585,8 +2588,8 @@ void CTabbedToDoCtrl::SelectAll()
 				for (int nItem = 0; nItem < nNumItems; nItem++)
 					aTaskIDs.Add(m_taskList.GetTaskID(nItem));
 
-				m_taskList.SelectTasks(aTaskIDs);
 				CToDoCtrl::SelectTasks(aTaskIDs);
+				m_taskList.SelectTasks(aTaskIDs);
 			}
 		}
 		break;
@@ -6693,7 +6696,7 @@ void CTabbedToDoCtrl::OnListSelChanged()
 	if (!cacheTree.SelectionMatches(cacheList, TRUE) && pLVData->bHasSelectedTask)
 	{
 		if (cacheList.aSelTaskIDs.GetSize() == m_taskTree.GetItemCount())
-			m_taskTree.SelectAll();
+			m_taskTree.SelectAll(FALSE); // Include collapsed items
 		else
 			m_taskTree.RestoreSelection(cacheList);
 	}

@@ -1302,7 +1302,6 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 	m_hdrColumns.ClearAllTracked();
 
-	CWaitCursor cursor;
 	RecalcUntrackedColumnWidths();
 }
 
@@ -1321,6 +1320,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	
 	m_aCustomAttribDefs.GetVisibleColumnIDs(mapCols, TRUE); // append
 
+	CWaitCursor cursor;
 	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
 

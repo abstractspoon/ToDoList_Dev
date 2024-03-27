@@ -3292,6 +3292,30 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	return TRUE;
 }
 
+TDC_UNITS CTDCTaskCalculator::GetTaskCustomAttributeUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
+{
+	if (attribDef.IsDataType(TDCCA_TIMEPERIOD))
+	{
+		TDCCADATA data;
+		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
+		return data.GetTimeUnits();
+	}
+	else if (attribDef.IsDataType(TDCCA_CALCULATION))
+	{
+		const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
+
+		if (m_data.m_aCustomAttribDefs.GetCalculationResultDataType(calc) == TDCCA_TIMEPERIOD)
+		{
+			// TODO
+			return TDCU_DAYS;
+		}
+	}
+
+	// all else
+	return TDCU_NULL;
+}
+
 BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const
 {
 	if (!m_data.m_aCustomAttribDefs.IsValidCalculation(calc))
@@ -5124,16 +5148,8 @@ void CTDCTaskExporter::ExportCalculatedTaskCustomAttribute(const TODOITEM* pTDI,
 {
 	if (attribDef.bEnabled && (attribDef.IsAggregated() || attribDef.IsDataType(TDCCA_CALCULATION)))
 	{
-		double dValue;
-		TDC_UNITS nUnits = TDCU_NULL;
-
-		if (attribDef.IsDataType(TDCCA_TIMEPERIOD))
-		{
-			TDCCADATA data;
-			pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
-
-			nUnits = data.GetTimeUnits();
-		}
+		double dValue = 0.0;
+		TDC_UNITS nUnits = m_calculator.GetTaskCustomAttributeUnits(pTDI, pTDS, attribDef);
 
 		if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
 		{
