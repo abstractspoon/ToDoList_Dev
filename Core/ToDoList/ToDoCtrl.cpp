@@ -2218,15 +2218,19 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 			aModTaskIDs.Add(aTasks[nSel].dwID);
 	}
 
-	// If some of the tasks were recurring and need to be created
-	// we do that after this operation ends
-	if (m_aRecreateTaskIDs.GetSize())
-		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
-
 	if (!aModTaskIDs.GetSize())
 	{
 		ASSERT(!m_aRecreateTaskIDs.GetSize());
 		return FALSE;
+	}
+
+	// If some of the tasks were recurring and need to be created
+	// we do that after this operation ends
+	if (m_aRecreateTaskIDs.GetSize())
+	{
+		// Don't recalc column widths until after the new tasks are created
+		m_taskTree.EnableRecalcColumns(FALSE);
+		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
 	}
 
 	SetModified(TDCA_DONEDATE, aModTaskIDs);
@@ -2338,71 +2342,73 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 	if (!nNumTasks || (nNumTasks != m_aRecreateTaskIDs.GetSize()))
 	{
 		ASSERT(0);
-		m_aRecreateTaskIDs.RemoveAll();
-		return 0L;
 	}
-
-	// Always extend the previous undo action which completed
-	// the recurring task(s) we are about to recreate
-	IMPLEMENT_DATA_UNDO_EXTEND(m_data, TDCUAT_ADD, TRUE);
-
-	CDWordArray aTaskIDs, aNewTaskIDs;
-
-	for (int nTask = 0; nTask < nNumTasks; nTask++)
+	else
 	{
-		DWORD dwTaskID = m_aRecreateTaskIDs[nTask];
+		// Always extend the previous undo action which completed
+		// the recurring task(s) we are about to recreate
+		IMPLEMENT_DATA_UNDO_EXTEND(m_data, TDCUAT_ADD, TRUE);
 
-		// next occurrence can fail if we've run out of occurrences
-		COleDateTime dtNext;
-		BOOL bDueDate = TRUE;
+		CDWordArray aTaskIDs, aNewTaskIDs;
 
-		if (!m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate))
-			continue;
-
-		CTaskFile task;
-		PrepareTaskfileForTasks(task, TDCGT_ALL);
-		
-		VERIFY(m_exporter.ExportTask(dwTaskID, task, NULL, FALSE));
-
-		DWORD dwNewTaskID = RecreateRecurringTaskInTree(task, dtNext, bDueDate);
-
-		if (dwNewTaskID)
+		for (int nTask = 0; nTask < nNumTasks; nTask++)
 		{
-			// Save off taskIDs for the end
-			aTaskIDs.Add(dwTaskID);
-			aNewTaskIDs.Add(dwNewTaskID);
+			DWORD dwTaskID = m_aRecreateTaskIDs[nTask];
+
+			// next occurrence can fail if we've run out of occurrences
+			COleDateTime dtNext;
+			BOOL bDueDate = TRUE;
+
+			if (!m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate))
+				continue;
+
+			CTaskFile task;
+			PrepareTaskfileForTasks(task, TDCGT_ALL);
+		
+			VERIFY(m_exporter.ExportTask(dwTaskID, task, NULL, FALSE));
+
+			DWORD dwNewTaskID = RecreateRecurringTaskInTree(task, dtNext, bDueDate);
+
+			if (dwNewTaskID)
+			{
+				// Save off taskIDs for the end
+				aTaskIDs.Add(dwTaskID);
+				aNewTaskIDs.Add(dwNewTaskID);
+			}
 		}
-	}
 
-	// mark as changed
-	if (aNewTaskIDs.GetSize())
-	{
-		SelectTasks(aNewTaskIDs);
-		SetModified(TDCA_NEWTASK, aNewTaskIDs);
+		// mark as changed
+		if (aNewTaskIDs.GetSize())
+		{
+			SelectTasks(aNewTaskIDs);
+			SetModified(TDCA_NEWTASK, aNewTaskIDs);
 
-		// notify parent of all new tasks
-		int nTask = aTaskIDs.GetSize();
+			// notify parent of all new tasks
+			int nTask = aTaskIDs.GetSize();
 
-		while (nTask--)
-			GetParent()->SendMessage(WM_TDCN_RECREATERECURRINGTASK, aTaskIDs[nTask], aNewTaskIDs[nTask]);
+			while (nTask--)
+				GetParent()->SendMessage(WM_TDCN_RECREATERECURRINGTASK, aTaskIDs[nTask], aNewTaskIDs[nTask]);
+		}
 	}
 
 	// always
 	m_aRecreateTaskIDs.RemoveAll();
+	m_taskTree.EnableRecalcColumns();
 
 	return 0L;
 }
 
 DWORD CToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate)
 {
-	DWORD dwTaskID = task.GetTaskID(task.GetFirstTask()); // existing task ID
+	HTASKITEM hTask = task.GetFirstTask();
+	DWORD dwTaskID = task.GetTaskID(hTask); // existing task ID
 
-	// insert below existing
+	// insert below existing item
 	HTREEITEM hti = m_taskTree.GetItem(dwTaskID);
 	ASSERT(hti);
 
 	HTREEITEM htiParent = m_taskTree.GetParentItem(hti);
-	HTREEITEM htiNew = PasteTaskToTree(task, task.GetFirstTask(), htiParent, hti, TDCR_YES, TRUE);
+	HTREEITEM htiNew = PasteTaskToTree(task, hTask, htiParent, hti, TDCR_YES, TRUE);
 
 	DWORD dwNewTaskID = GetTaskID(htiNew);
 	InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, dtNext, bDueDate);
