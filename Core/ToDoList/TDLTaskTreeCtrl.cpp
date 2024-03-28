@@ -344,10 +344,6 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 
 	ExpandList();
 	RecalcUntrackedColumnWidths();
-
-	// Resync horizontal scrollbars because 
-	// RecalcUntrackedColumnWidths doesn't always do it
-//	PostResize();
 }
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible(BOOL bHorzPartialOK)
@@ -450,13 +446,14 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		ExpandItemRaw(hti, bExpand, bAndChildren);
 	}
 
-	if (!bExpand)
+	if (bExpand)
+		RecalcUntrackedColumnWidths();
+	else
 		TSH().RemoveHiddenItems();
 
 	if (htiSel)
 		m_tcTasks.EnsureVisible(htiSel);
 
-	RecalcUntrackedColumnWidths();
 }
 
 void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList)
