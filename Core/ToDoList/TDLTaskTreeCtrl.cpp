@@ -436,6 +436,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
+	CHoldRecalcColumns hr(*this);
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scope redraw holding else EnsureVisible doesn't work
@@ -446,14 +447,11 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		ExpandItemRaw(hti, bExpand, bAndChildren);
 	}
 
-	if (bExpand)
-		RecalcUntrackedColumnWidths();
-	else
+	if (!bExpand)
 		TSH().RemoveHiddenItems();
 
 	if (htiSel)
 		m_tcTasks.EnsureVisible(htiSel);
-
 }
 
 void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList)

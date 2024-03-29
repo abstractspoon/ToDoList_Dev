@@ -122,6 +122,21 @@ BOOL CTDLTaskCtrlBase::TDSORTFLAGS::WantIncludeTime(TDC_COLUMN nColID) const
 	return FALSE;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+CHoldRecalcColumns::CHoldRecalcColumns(CTDLTaskCtrlBase& tcb) 
+	: 
+	m_tcb(tcb),
+	m_bInitialState(tcb.m_bEnableRecalcColumns)
+{
+	m_tcb.EnableRecalcColumns(FALSE);
+}
+
+CHoldRecalcColumns::~CHoldRecalcColumns()
+{
+	m_tcb.EnableRecalcColumns(m_bInitialState);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) 
@@ -1312,6 +1327,9 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
+	if (!m_bEnableRecalcColumns)
+		return;
+
 	// Get a list of all the visible column attributes
 	CTDCColumnIDMap mapCols;
 

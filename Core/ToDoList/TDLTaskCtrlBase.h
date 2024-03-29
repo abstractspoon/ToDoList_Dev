@@ -42,8 +42,23 @@ class CTDCStyleMap;
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CHoldRecalcColumns
+{
+public:
+	CHoldRecalcColumns(CTDLTaskCtrlBase& tcb);
+	~CHoldRecalcColumns();
+
+protected:
+	CTDLTaskCtrlBase& m_tcb;
+	BOOL m_bInitialState; // To handle nested holds
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer   
 {
+	friend class CHoldRecalcColumns;
+
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
 protected: // base class only
