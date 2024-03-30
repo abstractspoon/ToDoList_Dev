@@ -401,10 +401,30 @@ namespace MDContentControl
 
 		public bool ProcessMenuShortcut(UInt32 keypress)
 		{
-			// Return false for deleting to allow default handling
-			if (CommandHandling.GetMenuShortcutFromVirtualKey(keypress) == Keys.Delete)
-				return false;
+			const int WM_KEYDOWN = 0x0100;
 
+			switch (CommandHandling.GetKeyboardShortcutFromVirtualKey(keypress))
+			{
+			case Keys.Delete:
+				return false; // default handling
+
+			case Keys.Tab:
+				InputTextCtrl.Indent();
+				return true; // handled
+
+			case (Keys.Shift | Keys.Tab):
+				InputTextCtrl.Outdent();
+				return true; // handled
+
+			case (Keys.Control | Keys.Left):
+			case (Keys.Control | Keys.Right):
+			case (Keys.Shift | Keys.Left):
+			case (Keys.Shift | Keys.Right):
+				Win32.SendMessage(InputTextCtrl.Handle, WM_KEYDOWN, (UIntPtr)keypress, IntPtr.Zero);
+				return true; // handled
+			}
+
+			// All else
 			return CommandHandling.ProcessMenuShortcut(keypress, contextMenuStrip1.Items);
 		}
 

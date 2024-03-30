@@ -301,7 +301,7 @@ namespace HTMLContentControl
 					case WM_KEYDOWN:
 					case WM_SYSKEYDOWN:
 					{
-						Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
+						Keys keyPress = CommandHandling.GetKeyboardShortcutFromVirtualKey(wParam);
 
 						if (keyPress == Keys.Return)
 						{
