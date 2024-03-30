@@ -130,8 +130,6 @@ namespace MindMapUIExtension
 			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)(m_DpiFactor * 20) };
 
 			InitializeComponent();
-
-			m_TreeView.HoldRedraw = true;
 		}
 
 		public bool SetFont(String fontName, int fontSize)
@@ -985,7 +983,7 @@ namespace MindMapUIExtension
         void OnDebugModeChanged(object sender, EventArgs e)
         {
             m_TreeView.Visible = DebugMode();
-			m_TreeView.HoldRedraw = !m_TreeView.Visible;
+			//m_TreeView.HoldRedraw = !m_TreeView.Visible;
 
             if (!RecalculateDrawOffset())
 				Invalidate();
