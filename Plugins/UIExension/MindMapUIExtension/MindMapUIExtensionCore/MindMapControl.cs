@@ -110,6 +110,7 @@ namespace MindMapUIExtension
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
+		private bool m_RecalcingPositions = false;
 
 		// Public ------------------------------------------------------------------------
 
@@ -465,7 +466,7 @@ namespace MindMapUIExtension
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-            if (m_FirstPaint && (m_TreeView.Nodes.Count != 0) && !IsRoot(SelectedNode))
+			if (m_FirstPaint && (m_TreeView.Nodes.Count != 0) && !IsRoot(SelectedNode))
             {
                 m_FirstPaint = false;
                 EnsureItemVisible(SelectedItem);
@@ -476,12 +477,14 @@ namespace MindMapUIExtension
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-			    DrawPositions(e.Graphics, m_TreeView.Nodes);
+				Rectangle clipRect = Rectangle.Round(e.Graphics.ClipBounds);
 
-                foreach (TreeNode node in m_TreeView.Nodes)
-                    DrawConnections(e.Graphics, node);
+				DrawPositions(e.Graphics, m_TreeView.Nodes, clipRect);
 
-                if (m_DropTarget != null)
+				foreach (TreeNode node in m_TreeView.Nodes)
+					DrawConnections(e.Graphics, node, clipRect);
+
+				if (m_DropTarget != null)
                     DrawInsertionMarker(e.Graphics, m_DropTarget);
 
 				PostDraw(e.Graphics, m_TreeView.Nodes);
@@ -1812,6 +1815,12 @@ namespace MindMapUIExtension
             // There must be a single root task to proceed
             if (IsEmpty())
                 return;
+
+			// Prevent re-entrancy
+			if (m_RecalcingPositions)
+				return;
+
+			m_RecalcingPositions = true;
 #if DEBUG
 			Stopwatch watch = Stopwatch.StartNew();
 #endif
@@ -1902,6 +1911,7 @@ namespace MindMapUIExtension
 #if DEBUG
 			Debug.WriteLine("RecalculatePositions took " + watch.ElapsedMilliseconds + " ms");
 #endif
+			m_RecalcingPositions = false;
 		}
 
 		protected Point CentrePoint(Rectangle rect)
@@ -2129,10 +2139,8 @@ namespace MindMapUIExtension
 			return false; // no change
 		}
 
-		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes)
+		private void DrawPositions(Graphics graphics, TreeNodeCollection nodes, Rectangle clipRect)
 		{
-			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
-
 			foreach (TreeNode node in nodes)
 			{
 				// Don't draw items falling wholly outside the clip rectangle
@@ -2161,7 +2169,7 @@ namespace MindMapUIExtension
 				// Children
 				if (node.IsExpanded)
 				{
-					DrawPositions(graphics, node.Nodes);
+					DrawPositions(graphics, node.Nodes, clipRect);
 
 					if (DebugMode())
 					{
@@ -2464,16 +2472,21 @@ namespace MindMapUIExtension
 			}
 		}
 
-		private void DrawConnections(Graphics graphics, TreeNode node)
+		private void DrawConnections(Graphics graphics, TreeNode node, Rectangle clipRect)
 		{
     		if (node.IsExpanded)
 			{
-                foreach (TreeNode child in node.Nodes)
+				// If the item total bounds are wholly outside the clip rect
+				// we don't need to draw the child connections
+				if (!GetItemDrawRect(Item(node).TotalBounds).IntersectsWith(clipRect))
+					return;
+
+				foreach (TreeNode child in node.Nodes)
                 {
-                    DrawConnection(graphics, node, child);
+                    DrawConnection(graphics, node, child, clipRect);
 
                     // Then children to grandchildren
-                    DrawConnections(graphics, child);
+                    DrawConnections(graphics, child, clipRect); // RECURSIVE CALL
                 }
 			}
 
@@ -2494,7 +2507,7 @@ namespace MindMapUIExtension
 			}
 		}
 		
-		private void DrawConnection(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
+		private void DrawConnection(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo, Rectangle clipRect)
 		{
             if ((nodeFrom == null) || (nodeTo == null))
                 return;
@@ -2513,9 +2526,7 @@ namespace MindMapUIExtension
 			if (AnyChildHasChildren(nodeFrom))
 				ptTo.X += (flipped ? -DefaultExpansionButtonSize : DefaultExpansionButtonSize);
 
-			// Don't draw connections falling wholly outside the client rectangle
-			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
-
+			// Don't draw connections falling wholly outside the clip rectangle
 			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(clipRect))
 				return;
 
