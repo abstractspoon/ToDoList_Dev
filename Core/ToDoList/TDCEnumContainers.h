@@ -91,6 +91,19 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+class CTDCDateSet : public CTDCBaseEnumSet<TDC_DATE>
+{
+public:
+	CTDCDateSet();
+	CTDCDateSet(TDC_DATE nDate);
+	~CTDCDateSet();
+
+protected:
+	TDC_DATE GetDefaultValue() { return TDCD_NONE; }
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDCAttributeMap : public CTDCBaseEnumSet<TDC_ATTRIBUTE>
 {
 public:
