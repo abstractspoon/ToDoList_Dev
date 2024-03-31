@@ -1342,6 +1342,22 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
 
+BOOL CTDLTaskCtrlBase::DoIdleProcessing()
+{
+	AF_NOREENTRANT_RET(FALSE);
+
+	if (!m_aIdleRecalcColIDs.IsEmpty())
+	{
+		RecalcUntrackedColumnWidths(m_aIdleRecalcColIDs);
+		m_aIdleRecalcColIDs.RemoveAll();
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
 	if (!m_bEnableRecalcColumns)
@@ -4975,17 +4991,22 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 	{
 		Resort();
 	}
-
-	RecalcUntrackedColumnWidths(aColIDs);
 	
 	if (bRedrawTasks)
 	{
-		InvalidateAll();
+		InvalidateAll(FALSE, TRUE);
 	}
 	else if (bRedrawCols || !aColIDs.IsEmpty())
 	{
 		m_lcColumns.Invalidate();
+		m_lcColumns.UpdateWindow();
 	}
+
+	// This container will be cleared after idle processing
+	// so if idle processing has not been called since the 
+	// last call to this function we want to accumulate any
+	// additional columns rather than overwrite them
+	m_aIdleRecalcColIDs.Append(aColIDs);
 }
 
 int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const

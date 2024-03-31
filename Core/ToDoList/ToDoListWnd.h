@@ -75,6 +75,7 @@ public:
 	~CToDoListWnd();
 	
 	BOOL Create(const CTDCStartupOptions& startup);
+	void DoIdleProcessing();
 
 	static BOOL EnableLogging(BOOL bEnable = TRUE);
 	static CString GetVersion(BOOL bExtended = TRUE);

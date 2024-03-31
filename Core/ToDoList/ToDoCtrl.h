@@ -374,6 +374,7 @@ public:
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual BOOL DoIdleProcessing();
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);

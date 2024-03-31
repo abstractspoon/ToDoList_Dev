@@ -228,6 +228,7 @@ public:
 	CString GetCompletionStatus() const { return m_sCompletionStatus; }
 
 	BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL DoIdleProcessing();
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
@@ -250,6 +251,8 @@ protected:
 
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
+
+	CTDCColumnIDMap m_aIdleRecalcColIDs;
 
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;
@@ -288,9 +291,6 @@ private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
 	BOOL m_bEnableRecalcColumns;
-
-protected:
-	// Virtual function overrides
 	
 protected:
 	// Message map functions

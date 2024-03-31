@@ -1483,8 +1483,8 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	{
 		CRect rWindow;
 		m_pMainWnd->GetWindowRect(rWindow);
-		CPoint ptPos = rWindow.CenterPoint();
 
+		CPoint ptPos = rWindow.CenterPoint();
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 	
@@ -1805,8 +1805,8 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	{
 		CRect rWindow;
 		m_pMainWnd->GetWindowRect(rWindow);
-		CPoint ptPos = rWindow.CenterPoint();
 
+		CPoint ptPos = rWindow.CenterPoint();
 		cmdInfo.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 
@@ -2142,4 +2142,12 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 			}
 		}
 	}
+}
+
+BOOL CToDoListApp::OnIdle(LONG lCount)
+{
+	if (m_pMainWnd)
+		((CToDoListWnd*)m_pMainWnd)->DoIdleProcessing();
+
+	return CWinApp::OnIdle(lCount);
 }

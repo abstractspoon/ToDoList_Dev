@@ -888,6 +888,15 @@ void CToDoListWnd::UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& 
 	}
 }
 
+void CToDoListWnd::DoIdleProcessing()
+{
+	if (!GetTDCCount() || GetToDoCtrl().DoIdleProcessing())
+		return;
+
+	// else do our own idle processing
+	// TODO
+}
+
 BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 {
 	m_startupOptions = startup;

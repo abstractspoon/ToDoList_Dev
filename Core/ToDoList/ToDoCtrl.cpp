@@ -480,6 +480,16 @@ BOOL CToDoCtrl::Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisi
 	return CRuntimeDlg::Create(_T("ToDoCtrl"), dwStyle | DS_SETFONT, WS_EX_CONTROLPARENT, rect, pParentWnd, nID);
 }
 
+BOOL CToDoCtrl::DoIdleProcessing()
+{
+	if (m_taskTree.DoIdleProcessing())
+		return TRUE;
+
+	// else do out own processing
+	// TODO
+	return FALSE;
+}
+
 BOOL CToDoCtrl::OnInitDialog() 
 {
 	CRuntimeDlg::OnInitDialog();
