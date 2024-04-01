@@ -106,7 +106,7 @@ namespace MindMapUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return false;
+			return m_MindMap.DoIdleProcessing();
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
