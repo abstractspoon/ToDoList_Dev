@@ -77,9 +77,7 @@ public:
 	int GetTaskBreadcrumbs(HTREEITEM hti, CDWordArray& aBreadcrumbs, DWORD dwFlags = TCFBC_PARENTSONLY | TCFBC_UP) const;
 	
 	// generic
-	int GetLongestValues(const CTDCColumnIDMap& mapCols, 
-						 CTDCLongestItemMap& mapLongest, 
-						 BOOL bVisibleOnly) const;
+	int GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
 
 	CString GetLongestValue(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
 	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, BOOL bVisibleOnly) const;
@@ -95,11 +93,6 @@ public:
 	DWORD GetLargestReferenceID(BOOL bVisibleOnly) const;
 	int GetLargestFileLinkCount(BOOL bVisibleOnly) const;
 	int GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
-
-	BOOL FindVisibleTaskWithDueTime() const;
-	BOOL FindVisibleTaskWithStartTime() const;
-	BOOL FindVisibleTaskWithDoneTime() const;
-	BOOL FindVisibleTaskWithTime(TDC_DATE nDate) const;
 
 	// Finds tasks only in the tree
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults, BOOL bCheckDueToday) const;
@@ -124,10 +117,6 @@ protected:
 protected:
 	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults, BOOL bCheckDueToday) const;
 
-	BOOL FindVisibleTaskWithDueTime(HTREEITEM hti) const;
-	BOOL FindVisibleTaskWithStartTime(HTREEITEM hti) const;
-	BOOL FindVisibleTaskWithDoneTime(HTREEITEM hti) const;
-	
 	// generic
 	void GetLongestValues(HTREEITEM hti,
 						  const TODOITEM* pTDI, 
