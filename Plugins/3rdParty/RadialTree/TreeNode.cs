@@ -90,6 +90,24 @@ namespace RadialTree
 			}
 		}
 
+		public TreeNode<T> FirstVisibleParent
+		{
+			get
+			{
+				var parent = Parent;
+
+				while (parent != null)
+				{
+					if (parent.AllParentsExpanded)
+						break;
+
+					parent = parent.Parent;
+				}
+
+				return parent;
+			}
+		}
+
 		public bool Expand(bool expand, bool andChildren = false)
 		{
 			if (IsLeaf)
