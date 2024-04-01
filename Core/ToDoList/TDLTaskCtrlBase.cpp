@@ -1375,6 +1375,18 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	if (!bZeroOthers && !mapCols.GetCount())
 		return;
 
+	// Get a list of IDs from the visible columns
+	int nListItem = m_lcColumns.GetItemCount();
+	CDWordArray aTaskIDs;
+	aTaskIDs.SetSize(nListItem);
+
+	while (nListItem--)
+		aTaskIDs[nListItem] = GetColumnItemTaskID(nListItem);
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(GetColumnTaskIDs)"));
+	///////////////////////////////////////////////////////////////////
+
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
 
@@ -1396,7 +1408,8 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	{
 		// Get the longest task values for the remaining attributes
 		CTDCLongestItemMap mapLongest;
-		m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
+//		m_find.GetLongestValues(mapCols, mapLongest, bVisibleTasksOnly);
+		m_find.GetLongestValues(mapCols, aTaskIDs, mapLongest);
 
 		// PERMANENT LOGGING //////////////////////////////////////////////
 		log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(GetLongestValues)"));

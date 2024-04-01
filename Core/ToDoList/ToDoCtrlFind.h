@@ -77,6 +77,7 @@ public:
 	int GetTaskBreadcrumbs(HTREEITEM hti, CDWordArray& aBreadcrumbs, DWORD dwFlags = TCFBC_PARENTSONLY | TCFBC_UP) const;
 	
 	// generic
+	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
 
 	CString GetLongestValue(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
@@ -124,6 +125,11 @@ protected:
 						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 						  CTDCLongestItemMap& mapLongest,
 						  BOOL bVisibleOnly) const;
+
+	void GetLongestValues(const TODOITEM* pTDI,
+						  const TODOSTRUCTURE* pTDS,
+						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+						  CTDCLongestItemMap& mapLongest) const;
 
 	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
 							HTREEITEM hti,

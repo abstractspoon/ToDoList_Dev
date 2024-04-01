@@ -979,6 +979,55 @@ CString CToDoCtrlFind::GetLongestCost(HTREEITEM hti, const TODOITEM* pTDI, const
 	return sLongest;
 }
 
+int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const
+{
+	if (mapLongest.Initialise(mapCols, m_aCustAttribDefs))
+	{
+		// Likewise for certain calculated custom attributes
+		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_aCustAttribDefs);
+// 		int nCust = aRestAttribDefs.GetSize();
+// 
+// 		while (nCust--)
+// 		{
+// 			TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aRestAttribDefs[nCust];
+// 
+// 			if (mapLongest.HasColumn(attribDef.GetColumnID()))
+// 			{
+// 				CString sLongest;
+// 
+// 				if (GetLongestAggregatedValue(attribDef, sLongest))
+// 				{
+// 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
+// 					attribDef.bEnabled = FALSE; // Prevent GetLongestValue overwriting 
+// 				}
+// 				else if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
+// 				{
+// 					// initialise zero value once only
+// 					sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
+// 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
+// 				}
+// 			}
+// 		}
+
+		// All the rest
+		int nID = aTaskIDs.GetSize();
+
+		while (nID--)
+		{
+			DWORD dwTaskID = aTaskIDs[nID];
+			const TODOITEM* pTDI = NULL;
+			const TODOSTRUCTURE* pTDS = NULL;
+			
+			if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+			{
+				GetLongestValues(pTDI, pTDS, aRestAttribDefs, mapLongest);
+			}
+		}
+	}
+
+	return mapLongest.GetCount();
+}
+
 int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, 
 									CTDCLongestItemMap& mapLongest, 
 									BOOL bVisibleOnly) const
@@ -1030,6 +1079,31 @@ void CToDoCtrlFind::GetLongestValues(HTREEITEM hti,
 	
 	BOOL bSearchSubtasks = WantSearchChildren(hti, bVisibleOnly);
 
+	if (pTDI && pTDS)
+		GetLongestValues(pTDI, pTDS, aCustAttribDefs, mapLongest);
+
+	if (bSearchSubtasks)
+	{
+		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
+
+		while (htiChild)
+		{
+			GetLongestValues(htiChild, NULL, NULL, aCustAttribDefs, mapLongest, bVisibleOnly); // RECURSIVE CALL
+			htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);
+		}
+	}
+}
+void CToDoCtrlFind::GetLongestValues(const TODOITEM* pTDI, 
+									 const TODOSTRUCTURE* pTDS,
+									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+									 CTDCLongestItemMap& mapLongest) const
+{
+	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
+		return;
+	}
+	
 	if (pTDI)
 	{
 		// Attributes not affected by subtasks
@@ -1048,20 +1122,10 @@ void CToDoCtrlFind::GetLongestValues(HTREEITEM hti,
 		// Note: Don't use CheckUpdateValue() because all the work
 		//       gets done up front and it might be wasted effort
 		if (mapLongest.HasColumn(TDCC_PATH))
-		{
-			// The longest path string will always be a leaf/collapsed task
-			// so we don't update the 'cache' until then
-			if (!bSearchSubtasks)
-				mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDS));
-		}
+			mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDS));
 
 		if (mapLongest.HasColumn(TDCC_POSITION))
-		{
-			// The longest position string will always be a leaf/collapsed task
-			// so we don't update the 'cache' until then
-			if (!bSearchSubtasks)
-				mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
-		}
+			mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
 
 		if (mapLongest.HasColumn(TDCC_FILELINK))
 			mapLongest.UpdateValue(TDCC_FILELINK, pTDI->aFileLinks.GetSize());
@@ -1096,20 +1160,9 @@ void CToDoCtrlFind::GetLongestValues(HTREEITEM hti,
 
 			if (attribDef.bEnabled && mapLongest.HasColumn(attribDef.GetColumnID()))
 			{
-				CString sLongest = GetLongestValue(attribDef, hti, pTDI, pTDS, bVisibleOnly);
+				CString sLongest = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
 				mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 			}
-		}
-	}
-
-	if (bSearchSubtasks)
-	{
-		HTREEITEM htiChild = m_tch.TreeCtrl().GetChildItem(hti);
-
-		while (htiChild)
-		{
-			GetLongestValues(htiChild, NULL, NULL, aCustAttribDefs, mapLongest, bVisibleOnly); // RECURSIVE CALL
-			htiChild = m_tch.TreeCtrl().GetNextItem(htiChild, TVGN_NEXT);
 		}
 	}
 }
