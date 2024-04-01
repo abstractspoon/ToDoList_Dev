@@ -287,7 +287,7 @@ namespace DayViewUIExtension
             return Color.FromArgb(255, 255, 255);
         }
 
-        public virtual Color BackColor()
+        public new virtual Color BackColor()
         {
 			return Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
         }

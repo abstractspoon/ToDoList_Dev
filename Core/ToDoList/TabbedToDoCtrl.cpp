@@ -1088,6 +1088,49 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	return 0L;
 }
 
+BOOL CTabbedToDoCtrl::DoIdleProcessing()
+{
+	if (m_ctrlComments.HasFocus() && m_ctrlComments.DoIdleProcessing())
+		return TRUE;
+
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+		return CToDoCtrl::DoIdleProcessing();
+
+	case FTCV_TASKLIST:
+		return m_taskList.DoIdleProcessing();
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd && pExtWnd->GetHwnd());
+
+			return pExtWnd->DoIdleProcessing();
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
 void CTabbedToDoCtrl::ShowListViewSpecificCtrls(BOOL bShow)
 {
 	GetDlgItem(IDC_LISTVIEWGROUPBYLABEL)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
@@ -2043,11 +2086,6 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 		return FALSE;
 
 	// else
-// 	COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-// 
-// 	if (CDateHelper::IsDateSet(dtDue))
-// 		m_eRecurrence.SetDefaultDate(dtDue);
-
 	CDWordArray aModTaskIDs;
 	aModTaskIDs.Add(dwTaskID);
 

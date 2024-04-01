@@ -76,7 +76,7 @@ IUIExtensionWindow* CMindMapUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -98,12 +98,6 @@ void CMindMapUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCW
 CMindMapUIExtensionBridgeWindow::CMindMapUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
 
-}
-
-void CMindMapUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CMindMapUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
@@ -187,6 +181,11 @@ bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->time, 
 										pMsg->pt.x,
 										pMsg->pt.y);
+}
+
+bool CMindMapUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CMindMapUIExtensionBridgeWindow::Map(IUI_APPCOMMAND nCmd, MindMapControl::ExpandNode% expand)

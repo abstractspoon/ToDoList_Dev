@@ -170,6 +170,11 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
             Rectangle rect = new Rectangle();

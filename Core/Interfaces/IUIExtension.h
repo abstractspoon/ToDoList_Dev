@@ -362,6 +362,7 @@ public:
 	
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
 	virtual void FilterToolTipMessage(MSG* pMsg) = 0;
+	virtual bool DoIdleProcessing() = 0;
 
 	virtual bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData = NULL) = 0;
 	virtual bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData = NULL) const = 0;

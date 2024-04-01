@@ -482,6 +482,10 @@ BOOL CToDoCtrl::Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisi
 
 BOOL CToDoCtrl::DoIdleProcessing()
 {
+	if (m_ctrlComments.HasFocus() && m_ctrlComments.DoIdleProcessing())
+		return TRUE;
+
+	// else
 	if (m_taskTree.DoIdleProcessing())
 		return TRUE;
 

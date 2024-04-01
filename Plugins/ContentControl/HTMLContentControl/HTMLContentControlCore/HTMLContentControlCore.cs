@@ -88,7 +88,12 @@ namespace HTMLContentControl
 			return m_HtmlEditControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
 
-        public bool Undo()
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
+		public bool Undo()
         {
             return m_HtmlEditControl.EditUndo();
         }
