@@ -941,7 +941,7 @@ BOOL CToDoCtrlData::FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID, CD
 	return FALSE;
 }
 
-CString CToDoCtrlData::GetTaskExtID(DWORD dwTaskID) const
+CString CToDoCtrlData::GetTaskExternalID(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, EMPTY_STR);

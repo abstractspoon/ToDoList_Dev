@@ -381,9 +381,11 @@ protected:
 	CString FormatDate(const COleDateTime& date, TDC_DATE nDate) const;
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 
-	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
 	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
+	int GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const;
+	int RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;
@@ -435,7 +437,7 @@ protected:
 	
 protected:
 	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime = FALSE) const;
-	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	BOOL WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime = FALSE) const;
 	int CalcSplitterPosToFitListColumns() const;
 	void UpdateAttributePaneVisibility();

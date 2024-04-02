@@ -5239,7 +5239,7 @@ BOOL CTDCMultiTasker::GetTasksVersion(const CDWordArray& aTaskIDs, CString& sVal
 
 BOOL CTDCMultiTasker::GetTasksExternalID(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	GETTASKSVAL_SIMPLE(m_data.GetTaskExtID, sValue, CString);
+	GETTASKSVAL_SIMPLE(m_data.GetTaskExternalID, sValue, CString);
 }
 
 BOOL CTDCMultiTasker::GetTasksStatus(const CDWordArray& aTaskIDs, CString& sValue) const

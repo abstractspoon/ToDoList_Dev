@@ -78,22 +78,21 @@ public:
 	
 	// generic
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
-	int GetLongestValues(const CTDCColumnIDMap& mapCols, CTDCLongestItemMap& mapLongest, BOOL bVisibleOnly) const;
 
-	CString GetLongestValue(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, BOOL bVisibleOnly) const;
-	CString GetLongestTime(TDC_COLUMN nCol, BOOL bVisibleOnly) const;
-	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
+	CString GetLongestValue(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const;
+	CString GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
 
 	// specific
-	CString GetLongestTimeEstimate(BOOL bVisibleOnly) const;
-	CString GetLongestTimeSpent(BOOL bVisibleOnly) const;
-	CString GetLongestTimeRemaining(BOOL bVisibleOnly) const;
-	CString GetLargestCommentsSizeInKB(BOOL bVisibleOnly) const;
+	CString GetLongestTimeEstimate(const CDWordArray& aTaskIDs) const;
+	CString GetLongestTimeSpent(const CDWordArray& aTaskIDs) const;
+	CString GetLongestTimeRemaining(const CDWordArray& aTaskIDs) const;
+	CString GetLargestCommentsSizeInKB(const CDWordArray& aTaskIDs) const;
 
-	DWORD GetLargestReferenceID(BOOL bVisibleOnly) const;
-	int GetLargestFileLinkCount(BOOL bVisibleOnly) const;
-	int GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
+	DWORD GetLargestReferenceID(const CDWordArray& aTaskIDs) const;
+	int GetLargestFileLinkCount(const CDWordArray& aTaskIDs) const;
+	int GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
 
 	// Finds tasks only in the tree
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults, BOOL bCheckDueToday) const;
@@ -119,39 +118,20 @@ protected:
 	void FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResultArray& aResults, BOOL bCheckDueToday) const;
 
 	// generic
-	void GetLongestValues(HTREEITEM hti,
-						  const TODOITEM* pTDI, 
-						  const TODOSTRUCTURE* pTDS, 
-						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-						  CTDCLongestItemMap& mapLongest,
-						  BOOL bVisibleOnly) const;
-
 	void GetLongestValues(const TODOITEM* pTDI,
 						  const TODOSTRUCTURE* pTDS,
 						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 						  CTDCLongestItemMap& mapLongest) const;
 
-	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef,
-							HTREEITEM hti,
-							const TODOITEM* pTDI,
-							const TODOSTRUCTURE* pTDS,
-							BOOL bVisibleOnly) const;
-
-	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	CString GetLongestValue(TDC_COLUMN nCol, HTREEITEM hti, const TODOITEM* pTDI, const CString& sLongestPossible, BOOL bVisibleOnly) const;
+	CString GetLongestValue(TDC_COLUMN nCol, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const;
 
 	// specific
- 	CString GetLongestTime(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nCol, BOOL bVisibleOnly) const;
-	CString GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
-	CString GetLongestPosition(HTREEITEM hti, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
-	CString GetLongestPath(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sParentPath, BOOL bVisibleOnly) const;
-	CString GetLongestCost(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const;
+	CString GetLongestSubtaskDone(const CDWordArray& aTaskIDs) const;
+	CString GetLongestPosition(const CDWordArray& aTaskIDs) const;
+	CString GetLongestPath(const CDWordArray& aTaskIDs) const;
+	CString GetLongestCost(const CDWordArray& aTaskIDs) const;
 
-	DWORD GetLargestReferenceID(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	float GetLargestCommentsSizeInKB(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	int GetLargestFileLinkCount(HTREEITEM hti, const TODOITEM* pTDI, BOOL bVisibleOnly) const;
-	int GetLargestCustomAttributeArraySize(HTREEITEM hti, const TODOITEM* pTDI, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const;
-	BOOL GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const;
+	BOOL GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const;
 
 	BOOL WantSearchChildren(HTREEITEM hti, BOOL bVisibleOnly) const;
 	BOOL CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, BOOL bTrueTask) const;
