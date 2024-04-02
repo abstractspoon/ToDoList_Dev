@@ -265,7 +265,7 @@ protected:
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
 	CTDCMultiTasker m_multitasker;
-	CTDCTaskAttributeSizer m_sizer;
+	CTDCTaskColumnSizer m_sizer;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;

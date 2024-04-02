@@ -455,12 +455,12 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskAttributeSizer
+class CTDCTaskColumnSizer
 {
 public:
-	CTDCTaskAttributeSizer(const CToDoCtrlData& data,
-						   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-						   const CContentMgr& mgrContent);
+	CTDCTaskColumnSizer(const CToDoCtrlData& data,
+						const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+						const CContentMgr& mgrContent);
 	// general
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
 

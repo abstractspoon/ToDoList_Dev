@@ -5874,9 +5874,9 @@ CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCTaskAttributeSizer::CTDCTaskAttributeSizer(const CToDoCtrlData& data,
-											   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-											   const CContentMgr& mgrContent)
+CTDCTaskColumnSizer::CTDCTaskColumnSizer(const CToDoCtrlData& data,
+										 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+										 const CContentMgr& mgrContent)
 	:
 	m_data(data),
 	m_aCustAttribDefs(aCustAttribDefs),
@@ -5886,7 +5886,7 @@ CTDCTaskAttributeSizer::CTDCTaskAttributeSizer(const CToDoCtrlData& data,
 {
 }
 
-CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const
 {
 	// attributes requiring subtask values
 	switch (nColID)
@@ -5921,7 +5921,7 @@ CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CDWordA
 	return GetLongestValue(nColID, aTaskIDs);
 }
 
-CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const
 {
 	CString sLongestPossible;
 
@@ -5948,7 +5948,7 @@ CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CString
 	return GetLongestValue(nColID, sLongestPossible, aTaskIDs);
 }
 
-CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const
 {
 	CString sLongest, sTaskVal;
 
@@ -5995,12 +5995,12 @@ CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CString
 	return sLongest;
 }
 
-BOOL CTDCTaskAttributeSizer::EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible)
+BOOL CTDCTaskColumnSizer::EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible)
 {
 	return (!sLongestPossible.IsEmpty() && (sValue.GetLength() >= sLongestPossible.GetLength()));
 }
 
-CString CTDCTaskAttributeSizer::GetLongestSubtaskDone(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestSubtaskDone(const CDWordArray& aTaskIDs) const
 {
 	CString sLongest;
 
@@ -6013,7 +6013,7 @@ CString CTDCTaskAttributeSizer::GetLongestSubtaskDone(const CDWordArray& aTaskID
 	return sLongest;
 }
 
-CString CTDCTaskAttributeSizer::GetLongestPosition(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestPosition(const CDWordArray& aTaskIDs) const
 {
 	CString sLongest;
 
@@ -6026,7 +6026,7 @@ CString CTDCTaskAttributeSizer::GetLongestPosition(const CDWordArray& aTaskIDs) 
 	return sLongest;
 }
 
-CString CTDCTaskAttributeSizer::GetLongestPath(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestPath(const CDWordArray& aTaskIDs) const
 {
 	CString sLongest;
 
@@ -6039,22 +6039,22 @@ CString CTDCTaskAttributeSizer::GetLongestPath(const CDWordArray& aTaskIDs) cons
 	return sLongest;
 }
 
-CString CTDCTaskAttributeSizer::GetLongestTimeEstimate(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestTimeEstimate(const CDWordArray& aTaskIDs) const
 {
 	return GetLongestTime(TDCC_TIMEESTIMATE, aTaskIDs);
 }
 
-CString CTDCTaskAttributeSizer::GetLongestTimeSpent(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestTimeSpent(const CDWordArray& aTaskIDs) const
 {
 	return GetLongestTime(TDCC_TIMESPENT, aTaskIDs);
 }
 
-CString CTDCTaskAttributeSizer::GetLongestTimeRemaining(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestTimeRemaining(const CDWordArray& aTaskIDs) const
 {
 	return GetLongestTime(TDCC_TIMEREMAINING, aTaskIDs);
 }
 
-CString CTDCTaskAttributeSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const
 {
 	CString sLongest;
 
@@ -6076,7 +6076,7 @@ CString CTDCTaskAttributeSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITI
 	return sLongest;
 }
 
-BOOL CTDCTaskAttributeSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const
+BOOL CTDCTaskColumnSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const
 {
 	if (!CTDCLongestItemMap::IsSupported(attribDef))
 	{
@@ -6117,7 +6117,7 @@ BOOL CTDCTaskAttributeSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTED
 	return FALSE;
 }
 
-DWORD CTDCTaskAttributeSizer::GetLargestReferenceID(const CDWordArray& aTaskIDs) const
+DWORD CTDCTaskColumnSizer::GetLargestReferenceID(const CDWordArray& aTaskIDs) const
 {
 	DWORD dwLargest = 0;
 
@@ -6132,7 +6132,7 @@ DWORD CTDCTaskAttributeSizer::GetLargestReferenceID(const CDWordArray& aTaskIDs)
 	return dwLargest;
 }
 
-CString CTDCTaskAttributeSizer::GetLargestCommentsSizeInKB(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLargestCommentsSizeInKB(const CDWordArray& aTaskIDs) const
 {
 	CString sLargest;
 
@@ -6145,7 +6145,7 @@ CString CTDCTaskAttributeSizer::GetLargestCommentsSizeInKB(const CDWordArray& aT
 	return sLargest;
 }
 
-int CTDCTaskAttributeSizer::GetLargestFileLinkCount(const CDWordArray& aTaskIDs) const
+int CTDCTaskColumnSizer::GetLargestFileLinkCount(const CDWordArray& aTaskIDs) const
 {
 	int nLargest = 0;
 
@@ -6158,7 +6158,7 @@ int CTDCTaskAttributeSizer::GetLargestFileLinkCount(const CDWordArray& aTaskIDs)
 	return nLargest;
 }
 
-int CTDCTaskAttributeSizer::GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const
+int CTDCTaskColumnSizer::GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const
 {
 	int nLargest = 0;
 
@@ -6177,12 +6177,12 @@ int CTDCTaskAttributeSizer::GetLargestCustomAttributeArraySize(const TDCCUSTOMAT
 	return nLargest;
 }
 
-CString CTDCTaskAttributeSizer::GetLongerString(const CString& str1, const CString& str2)
+CString CTDCTaskColumnSizer::GetLongerString(const CString& str1, const CString& str2)
 {
 	return ((str1.GetLength() > str2.GetLength()) ? str1 : str2);
 }
 
-CString CTDCTaskAttributeSizer::GetLongestRecurrenceOption()
+CString CTDCTaskColumnSizer::GetLongestRecurrenceOption()
 {
 	static CString sLongest;
 
@@ -6200,7 +6200,7 @@ CString CTDCTaskAttributeSizer::GetLongestRecurrenceOption()
 	return sLongest;
 }
 
-CString CTDCTaskAttributeSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const
 {
 	// Sanity check
 	switch (nCol)
@@ -6227,7 +6227,7 @@ CString CTDCTaskAttributeSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArra
 	return EMPTY_STR;
 }
 
-CString CTDCTaskAttributeSizer::GetLongestCost(const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestCost(const CDWordArray& aTaskIDs) const
 {
 	CString sLongest;
 
@@ -6242,7 +6242,7 @@ CString CTDCTaskAttributeSizer::GetLongestCost(const CDWordArray& aTaskIDs) cons
 	return sLongest;
 }
 
-int CTDCTaskAttributeSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const
+int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const
 {
 	if (mapLongest.Initialise(mapCols, m_aCustAttribDefs))
 	{
@@ -6291,7 +6291,7 @@ int CTDCTaskAttributeSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, con
 	return mapLongest.GetCount();
 }
 
-void CTDCTaskAttributeSizer::GetLongestValues(const TODOITEM* pTDI,
+void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 									 const TODOSTRUCTURE* pTDS,
 									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 									 CTDCLongestItemMap& mapLongest) const
