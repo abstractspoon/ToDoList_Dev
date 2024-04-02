@@ -1371,7 +1371,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		return;
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(start)"));
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()"));
 	log.LogStart();
 	///////////////////////////////////////////////////////////////////
 	
@@ -5383,10 +5383,6 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 	// handle hidden columns
 	if (!IsColumnShowing(nColID))
  		return 0;
-	
-	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CTDLTaskCtrlBase::CalcColumnWidth(%s)"), GetColumnName(nColID));
-	///////////////////////////////////////////////////////////////////
 	
 	int nColWidth = 0; // equivalent to MINCOLWIDTH
 	
