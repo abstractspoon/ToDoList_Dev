@@ -5725,3 +5725,642 @@ BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
+
+BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+{
+	RemoveAll();
+
+	POSITION pos = mapCols.GetStartPosition();
+
+	while (pos)
+	{
+		TDC_COLUMN nColID = mapCols.GetNext(pos);
+
+		if (!IsSupported(nColID))
+			continue;
+
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(aCustAttribDefs, nColID, pDef, continue);
+
+			if (!IsSupported(*pDef))
+				continue;
+		}
+
+		// Good to go
+		SetAt(nColID, EMPTY_STR);
+	}
+
+	return (GetCount() > 0);
+}
+
+BOOL CTDCLongestItemMap::CheckUpdateValue(TDC_COLUMN nColID, const CString& sValue)
+{
+	if (sValue.IsEmpty() || !HasColumn(nColID))
+		return FALSE;
+
+	// else
+	return UpdateValue(nColID, sValue);
+}
+
+BOOL CTDCLongestItemMap::CheckUpdateValue(TDC_COLUMN nColID, const CStringArray& aValues)
+{
+	if ((aValues.GetSize() == 0) || !HasColumn(nColID))
+		return FALSE;
+
+	// else
+	return UpdateValue(nColID, Misc::FormatArray(aValues));
+}
+
+BOOL CTDCLongestItemMap::UpdateValue(TDC_COLUMN nColID, const CString& sValue)
+{
+	ASSERT(HasColumn(nColID));
+
+	if (sValue.GetLength() > 0)
+	{
+		CString sCurVal;
+
+		if (Lookup(nColID, sCurVal) && (sValue.GetLength() <= sCurVal.GetLength()))
+			return FALSE;
+
+		SetAt(nColID, sValue);
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CTDCLongestItemMap::UpdateValue(TDC_COLUMN nColID, int nValue)
+{
+	ASSERT(HasColumn(nColID));
+
+	if (nValue != 0)
+	{
+		CString sCurVal;
+
+		if (Lookup(nColID, sCurVal) && (nValue <= _ttoi(sCurVal)))
+			return FALSE;
+
+		SetAt(nColID, Misc::Format(nValue));
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CTDCLongestItemMap::IsSupported(TDC_COLUMN nColID)
+{
+	switch (nColID)
+	{
+	case TDCC_ALLOCTO:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_VERSION:
+	case TDCC_EXTERNALID:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODBY:
+	case TDCC_RECURRENCE:
+	case TDCC_COST:
+	case TDCC_SUBTASKDONE:
+	case TDCC_POSITION:
+	case TDCC_PATH:
+	case TDCC_TIMEESTIMATE:
+	case TDCC_TIMESPENT:
+	case TDCC_TIMEREMAINING:
+	case TDCC_FILELINK:
+	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
+		return TRUE;
+	}
+
+	// all else
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID);
+}
+
+BOOL CTDCLongestItemMap::IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+{
+	switch (attribDef.GetDataType())
+	{
+	case TDCCA_DATE:
+	case TDCCA_BOOL:
+	case TDCCA_ICON:
+	case TDCCA_FILELINK:
+		return FALSE;
+	}
+
+	return attribDef.bEnabled;
+}
+
+BOOL CTDCLongestItemMap::HasColumn(TDC_COLUMN nColID) const
+{
+	CString sUnused;
+	return Lookup(nColID, sUnused);
+}
+
+CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
+{
+	CString sValue;
+	Lookup(nColID, sValue);
+
+	return sValue;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+CTDCTaskAttributeSizer::CTDCTaskAttributeSizer(const CToDoCtrlData& data,
+											   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+											   const CContentMgr& mgrContent)
+	:
+	m_data(data),
+	m_aCustAttribDefs(aCustAttribDefs),
+	m_mgrContent(mgrContent),
+	m_formatter(data, mgrContent),
+	m_calculator(data)
+{
+}
+
+CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const
+{
+	// attributes requiring subtask values
+	switch (nColID)
+	{
+	case TDCC_POSITION:			return GetLongestPosition(aTaskIDs);
+	case TDCC_RECURRENCE:		return GetLongestValue(nColID, GetLongestRecurrenceOption(), aTaskIDs);
+	case TDCC_COMMENTSFORMAT:	return GetLongestValue(nColID, m_mgrContent.GetLongestContentDescription(), aTaskIDs);
+	case TDCC_COST:				return GetLongestCost(aTaskIDs);
+	case TDCC_SUBTASKDONE:		return GetLongestSubtaskDone(aTaskIDs);
+
+	case TDCC_ALLOCTO:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_VERSION:
+		// Should use the version taking an array of possible values
+		ASSERT(0);
+		return EMPTY_STR;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			// Should use the version taking an attribute definition
+			ASSERT(0);
+			return EMPTY_STR;
+		}
+		break;
+	}
+
+	// All the rest
+	return GetLongestValue(nColID, aTaskIDs);
+}
+
+CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const
+{
+	CString sLongestPossible;
+
+	switch (nColID)
+	{
+	case TDCC_ALLOCTO:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
+		sLongestPossible = Misc::FormatArray(aPossible);
+		break;
+
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_VERSION:
+		sLongestPossible = Misc::GetLongestItem(aPossible);
+		break;
+
+	default:
+		// All the rest
+		ASSERT(0);
+		return EMPTY_STR;
+	}
+
+	return GetLongestValue(nColID, sLongestPossible, aTaskIDs);
+}
+
+CString CTDCTaskAttributeSizer::GetLongestValue(TDC_COLUMN nColID, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const
+{
+	CString sLongest, sTaskVal;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		DWORD dwTaskID = aTaskIDs[nID];
+
+		switch (nColID)
+		{
+		case TDCC_ALLOCTO:			sTaskVal = m_formatter.GetTaskAllocTo(dwTaskID);		break;
+		case TDCC_CATEGORY:			sTaskVal = m_formatter.GetTaskCategories(dwTaskID);		break;
+		case TDCC_TAGS:				sTaskVal = m_formatter.GetTaskTags(dwTaskID);			break;
+		case TDCC_COMMENTSFORMAT:	sTaskVal = m_formatter.GetTaskCommentsFormat(dwTaskID);	break;
+		case TDCC_COMMENTSSIZE:		sTaskVal = m_formatter.GetTaskCommentsSize(dwTaskID);	break;
+		case TDCC_RECURRENCE:		sTaskVal = m_formatter.GetTaskRecurrence(dwTaskID);		break;
+
+		case TDCC_ALLOCBY:			sTaskVal = m_data.GetTaskAllocBy(dwTaskID);				break;
+		case TDCC_STATUS:			sTaskVal = m_data.GetTaskStatus(dwTaskID);				break;
+		case TDCC_VERSION:			sTaskVal = m_data.GetTaskVersion(dwTaskID);				break;
+		case TDCC_EXTERNALID:		sTaskVal = m_data.GetTaskExternalID(dwTaskID);			break;
+		case TDCC_CREATEDBY:		sTaskVal = m_data.GetTaskCreatedBy(dwTaskID);			break;
+		case TDCC_LASTMODBY:		sTaskVal = m_data.GetTaskLastModifiedBy(dwTaskID);		break;
+
+		case TDCC_COST:
+		case TDCC_SUBTASKDONE:
+		case TDCC_POSITION:
+		case TDCC_PATH:
+			// Should use the version taking pTDI and pTDS
+			ASSERT(0);
+			return EMPTY_STR;
+
+		default:
+			ASSERT(0); // not currently supported
+			return EMPTY_STR;
+		}
+
+		sLongest = GetLongerString(sTaskVal, sLongest);
+
+		// We only need continue if we have not hit the longest possible value
+		if (EqualsLongestPossible(sLongest, sLongestPossible))
+			break;
+	}
+
+	return sLongest;
+}
+
+BOOL CTDCTaskAttributeSizer::EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible)
+{
+	return (!sLongestPossible.IsEmpty() && (sValue.GetLength() >= sLongestPossible.GetLength()));
+}
+
+CString CTDCTaskAttributeSizer::GetLongestSubtaskDone(const CDWordArray& aTaskIDs) const
+{
+	CString sLongest;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		CString sTaskVal = m_formatter.GetTaskSubtaskCompletion(aTaskIDs[nID]);
+		sLongest = GetLongerString(sTaskVal, sLongest);
+	}
+
+	return sLongest;
+}
+
+CString CTDCTaskAttributeSizer::GetLongestPosition(const CDWordArray& aTaskIDs) const
+{
+	CString sLongest;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		CString sTaskVal = m_formatter.GetTaskPosition(aTaskIDs[nID]);
+		sLongest = GetLongerString(sTaskVal, sLongest);
+	}
+
+	return sLongest;
+}
+
+CString CTDCTaskAttributeSizer::GetLongestPath(const CDWordArray& aTaskIDs) const
+{
+	CString sLongest;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		CString sTaskVal = m_formatter.GetTaskPath(aTaskIDs[nID]);
+		sLongest = GetLongerString(sTaskVal, sLongest);
+	}
+
+	return sLongest;
+}
+
+CString CTDCTaskAttributeSizer::GetLongestTimeEstimate(const CDWordArray& aTaskIDs) const
+{
+	return GetLongestTime(TDCC_TIMEESTIMATE, aTaskIDs);
+}
+
+CString CTDCTaskAttributeSizer::GetLongestTimeSpent(const CDWordArray& aTaskIDs) const
+{
+	return GetLongestTime(TDCC_TIMESPENT, aTaskIDs);
+}
+
+CString CTDCTaskAttributeSizer::GetLongestTimeRemaining(const CDWordArray& aTaskIDs) const
+{
+	return GetLongestTime(TDCC_TIMEREMAINING, aTaskIDs);
+}
+
+CString CTDCTaskAttributeSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const
+{
+	CString sLongest;
+
+	if (!CTDCLongestItemMap::IsSupported(attribDef))
+	{
+		ASSERT(0);
+	}
+	else if (!GetLongestAggregatedValue(attribDef, aTaskIDs, sLongest))
+	{
+		sLongest = GetLongestValue(attribDef, aTaskIDs);
+	}
+
+	if (sLongest.IsEmpty())
+	{
+		if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
+			sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
+	}
+
+	return sLongest;
+}
+
+BOOL CTDCTaskAttributeSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const
+{
+	if (!CTDCLongestItemMap::IsSupported(attribDef))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	switch (m_aCustAttribDefs.GetAttributeDataType(attribDef))
+	{
+	case TDCCA_DOUBLE:
+	case TDCCA_FRACTION:
+	case TDCCA_INTEGER:
+		if (attribDef.HasFeature(TDCCAF_ACCUMULATE) || attribDef.HasFeature(TDCCAF_MAXIMIZE))
+		{
+			double dBiggest = 0;
+
+			for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+			{
+				const TODOITEM* pTDI = NULL;
+				const TODOSTRUCTURE* pTDS = NULL;
+
+				if (m_data.GetTask(aTaskIDs[nID], pTDI, pTDS))
+				{
+					double dTaskVal = 0.0;
+
+					if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dTaskVal))
+						dBiggest = max(dBiggest, dTaskVal);
+				}
+			}
+
+			sLongest = attribDef.FormatNumber(dBiggest);
+			return TRUE;
+		}
+		break;
+	}
+
+	// All else
+	return FALSE;
+}
+
+DWORD CTDCTaskAttributeSizer::GetLargestReferenceID(const CDWordArray& aTaskIDs) const
+{
+	DWORD dwLargest = 0;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		const TODOITEM* pTDI = m_data.GetTask(aTaskIDs[nID]);
+
+		if (pTDI->dwTaskRefID > dwLargest)
+			dwLargest = pTDI->dwTaskRefID;
+	}
+
+	return dwLargest;
+}
+
+CString CTDCTaskAttributeSizer::GetLargestCommentsSizeInKB(const CDWordArray& aTaskIDs) const
+{
+	CString sLargest;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		CString sTaskVal = m_formatter.GetTaskCommentsSize(aTaskIDs[nID]);
+		sLargest = GetLongerString(sTaskVal, sLargest);
+	}
+
+	return sLargest;
+}
+
+int CTDCTaskAttributeSizer::GetLargestFileLinkCount(const CDWordArray& aTaskIDs) const
+{
+	int nLargest = 0;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		int nTaskVal = m_data.GetTaskFileLinkCount(aTaskIDs[nID]);
+		nLargest = max(nTaskVal, nLargest);
+	}
+
+	return nLargest;
+}
+
+int CTDCTaskAttributeSizer::GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const
+{
+	int nLargest = 0;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		DWORD dwTaskID = aTaskIDs[nID];
+		TDCCADATA data;
+
+		if (m_data.GetTaskCustomAttributeData(dwTaskID, attribDef.sUniqueID, data))
+		{
+			int nTaskVal = data.GetArraySize();
+			nLargest = max(nTaskVal, nLargest);
+		}
+	}
+
+	return nLargest;
+}
+
+CString CTDCTaskAttributeSizer::GetLongerString(const CString& str1, const CString& str2)
+{
+	return ((str1.GetLength() > str2.GetLength()) ? str1 : str2);
+}
+
+CString CTDCTaskAttributeSizer::GetLongestRecurrenceOption()
+{
+	static CString sLongest;
+
+	if (sLongest.IsEmpty())
+	{
+		CStringArray aRecurs;
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_DAILY, FALSE));
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_WEEKLY, FALSE));
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_MONTHLY, FALSE));
+		aRecurs.Add(TDCRECURRENCE::GetRegularityText(TDIR_YEARLY, FALSE));
+
+		sLongest = Misc::GetLongestItem(aRecurs);
+	}
+
+	return sLongest;
+}
+
+CString CTDCTaskAttributeSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const
+{
+	// Sanity check
+	switch (nCol)
+	{
+	case TDCC_TIMEESTIMATE:
+	case TDCC_TIMESPENT:
+	case TDCC_TIMEREMAINING:
+		{
+			CString sLongest;
+
+			for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+			{
+				CString sTaskVal = m_formatter.GetTaskTimePeriod(aTaskIDs[nID], nCol);
+				sLongest = GetLongerString(sTaskVal, sLongest);
+			}
+
+			return sLongest;
+		}
+		break;
+	}
+
+	// else
+	ASSERT(0);
+	return EMPTY_STR;
+}
+
+CString CTDCTaskAttributeSizer::GetLongestCost(const CDWordArray& aTaskIDs) const
+{
+	CString sLongest;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		CString sTaskVal = m_formatter.GetTaskCost(aTaskIDs[nID]);
+
+		if (sTaskVal.GetLength() > sLongest.GetLength())
+			sLongest = sTaskVal;
+	}
+
+	return sLongest;
+}
+
+int CTDCTaskAttributeSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const
+{
+	if (mapLongest.Initialise(mapCols, m_aCustAttribDefs))
+	{
+		// Likewise for certain calculated custom attributes
+		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_aCustAttribDefs);
+		int nCust = aRestAttribDefs.GetSize();
+
+		while (nCust--)
+		{
+			TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aRestAttribDefs[nCust];
+
+			if (mapLongest.HasColumn(attribDef.GetColumnID()))
+			{
+				CString sLongest;
+
+				if (GetLongestAggregatedValue(attribDef, aTaskIDs, sLongest))
+				{
+					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
+					attribDef.bEnabled = FALSE; // Prevent GetLongestValue overwriting 
+				}
+				else if (attribDef.SupportsFeature(TDCCAF_HIDEZERO) && !attribDef.HasFeature(TDCCAF_HIDEZERO))
+				{
+					// initialise zero value once only
+					sLongest = attribDef.FormatData(TDCCADATA(), FALSE);
+					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
+				}
+			}
+		}
+
+		// All the rest
+		int nID = aTaskIDs.GetSize();
+
+		while (nID--)
+		{
+			DWORD dwTaskID = aTaskIDs[nID];
+			const TODOITEM* pTDI = NULL;
+			const TODOSTRUCTURE* pTDS = NULL;
+
+			if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+			{
+				GetLongestValues(pTDI, pTDS, aRestAttribDefs, mapLongest);
+			}
+		}
+	}
+
+	return mapLongest.GetCount();
+}
+
+void CTDCTaskAttributeSizer::GetLongestValues(const TODOITEM* pTDI,
+									 const TODOSTRUCTURE* pTDS,
+									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+									 CTDCLongestItemMap& mapLongest) const
+{
+	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (pTDI)
+	{
+		// Attributes not affected by subtasks
+		mapLongest.CheckUpdateValue(TDCC_ALLOCTO, pTDI->aAllocTo);
+		mapLongest.CheckUpdateValue(TDCC_CATEGORY, pTDI->aCategories);
+		mapLongest.CheckUpdateValue(TDCC_TAGS, pTDI->aTags);
+		mapLongest.CheckUpdateValue(TDCC_ALLOCBY, pTDI->sAllocBy);
+		mapLongest.CheckUpdateValue(TDCC_STATUS, pTDI->sStatus);
+		mapLongest.CheckUpdateValue(TDCC_VERSION, pTDI->sVersion);
+		mapLongest.CheckUpdateValue(TDCC_EXTERNALID, pTDI->sExternalID);
+		mapLongest.CheckUpdateValue(TDCC_CREATEDBY, pTDI->sCreatedBy);
+		mapLongest.CheckUpdateValue(TDCC_LASTMODBY, pTDI->sLastModifiedBy);
+		mapLongest.CheckUpdateValue(TDCC_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
+
+		// Attributes dependent on subtask values
+		// Note: Don't use CheckUpdateValue() because all the work
+		//       gets done up front and it might be wasted effort
+		if (mapLongest.HasColumn(TDCC_PATH))
+			mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDS));
+
+		if (mapLongest.HasColumn(TDCC_POSITION))
+			mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
+
+		if (mapLongest.HasColumn(TDCC_FILELINK))
+			mapLongest.UpdateValue(TDCC_FILELINK, pTDI->aFileLinks.GetSize());
+
+		if (mapLongest.HasColumn(TDCC_COMMENTSSIZE))
+			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
+
+		if (mapLongest.HasColumn(TDCC_COMMENTSFORMAT))
+			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, m_formatter.GetTaskCommentsFormat(pTDI));
+
+		if (mapLongest.HasColumn(TDCC_SUBTASKDONE))
+			mapLongest.UpdateValue(TDCC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+
+		if (mapLongest.HasColumn(TDCC_COST))
+			mapLongest.UpdateValue(TDCC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
+
+		if (mapLongest.HasColumn(TDCC_TIMEESTIMATE))
+			mapLongest.UpdateValue(TDCC_TIMEESTIMATE, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
+
+		if (mapLongest.HasColumn(TDCC_TIMESPENT))
+			mapLongest.UpdateValue(TDCC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
+
+		if (mapLongest.HasColumn(TDCC_TIMEREMAINING))
+			mapLongest.UpdateValue(TDCC_TIMEREMAINING, m_formatter.GetTaskTimeRemaining(pTDI, pTDS));
+
+		// Rest of Custom columns
+		int nCust = aCustAttribDefs.GetSize();
+
+		while (nCust--)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aCustAttribDefs[nCust];
+
+			if (attribDef.bEnabled && mapLongest.HasColumn(attribDef.GetColumnID()))
+			{
+				CString sLongest = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
+				mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
+			}
+		}
+	}
+}

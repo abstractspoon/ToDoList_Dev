@@ -64,7 +64,6 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
-					 const CToDoCtrlFind& find, 
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
@@ -240,7 +239,6 @@ protected:
 	CToolTipCtrlEx m_tooltipColumns;
 
 	const CToDoCtrlData& m_data;
-	const CToDoCtrlFind& m_find;
 	const CTDCStyleMap& m_styles;
 	const TDCAUTOLISTDATA& m_tld;
 	const CTDCImageList& m_ilTaskIcons;
@@ -267,6 +265,7 @@ protected:
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
 	CTDCMultiTasker m_multitasker;
+	CTDCTaskAttributeSizer m_sizer;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;

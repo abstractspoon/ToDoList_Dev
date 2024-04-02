@@ -69,7 +69,14 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 								   const CContentMgr& mgrContent)
 	: 
-	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs, mgrContent),
+	CTDLTaskCtrlBase(ilIcons, 
+					 data, 
+					 styles, 
+					 tld, 
+					 mapVisibleCols, 
+					 aCustAttribDefs, 
+					 mgrContent),
+
 	CTreeDragDropRenderer(m_tsh, m_tcTasks),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),

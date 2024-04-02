@@ -434,8 +434,82 @@ protected:
 protected:
 	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks,
 												 CStringArray& aMatched, CStringArray& aMixed);
-
 };
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCLongestItemMap : public CMap<TDC_COLUMN, TDC_COLUMN, CString, LPCTSTR>
+{
+public:
+	BOOL Initialise(const CTDCColumnIDMap& mapCols, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+	BOOL CheckUpdateValue(TDC_COLUMN nColID, const CString& sValue);
+	BOOL CheckUpdateValue(TDC_COLUMN nColID, const CStringArray& aValues);
+	BOOL UpdateValue(TDC_COLUMN nColID, const CString& sValue);
+	BOOL UpdateValue(TDC_COLUMN nColID, int nValue);
+	BOOL HasColumn(TDC_COLUMN nColID) const;
+	CString GetLongestValue(TDC_COLUMN nColID) const;
+
+	static BOOL IsSupported(TDC_COLUMN nColID);
+	static BOOL IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskAttributeSizer
+{
+public:
+	CTDCTaskAttributeSizer(const CToDoCtrlData& data,
+						   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+						   const CContentMgr& mgrContent);
+	// general
+	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
+
+	CString GetLongestValue(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const;
+	CString GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
+
+	// specific
+	CString GetLongestTimeEstimate(const CDWordArray& aTaskIDs) const;
+	CString GetLongestTimeSpent(const CDWordArray& aTaskIDs) const;
+	CString GetLongestTimeRemaining(const CDWordArray& aTaskIDs) const;
+	CString GetLargestCommentsSizeInKB(const CDWordArray& aTaskIDs) const;
+
+	DWORD GetLargestReferenceID(const CDWordArray& aTaskIDs) const;
+	int GetLargestFileLinkCount(const CDWordArray& aTaskIDs) const;
+	int GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+	const CContentMgr& m_mgrContent;
+	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
+
+	CTDCTaskFormatter m_formatter;
+	CTDCTaskCalculator m_calculator;
+
+protected:
+	// general
+	void GetLongestValues(const TODOITEM* pTDI,
+						  const TODOSTRUCTURE* pTDS,
+						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+						  CTDCLongestItemMap& mapLongest) const;
+
+	CString GetLongestValue(TDC_COLUMN nCol, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const;
+
+	// specific
+	CString GetLongestSubtaskDone(const CDWordArray& aTaskIDs) const;
+	CString GetLongestPosition(const CDWordArray& aTaskIDs) const;
+	CString GetLongestPath(const CDWordArray& aTaskIDs) const;
+	CString GetLongestCost(const CDWordArray& aTaskIDs) const;
+
+	BOOL GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs, CString& sLongest) const;
+
+	static CString GetLongerString(const CString& str1, const CString& str2);
+	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
+	static CString GetLongestRecurrenceOption();
+};
+
+//////////////////////////////////////////////////////////////////////
 
 
 #endif // !defined(AFX_TODOCTRLDATAUTILS_H__02C3C360_45AB_45DC_B1BF_BCBEA472F0C7__INCLUDED_)
