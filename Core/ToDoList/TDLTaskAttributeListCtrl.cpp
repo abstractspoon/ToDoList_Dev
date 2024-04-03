@@ -533,34 +533,37 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 	if (rSplitBar.PtInRect(ptClient))
 		return GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 
-	LVHITTESTINFO lvHit = { { ptClient.x, ptClient.y }, 0 };
-
-	int nRow = SubItemHitTest(&lvHit);
-	int nCol = lvHit.iSubItem;
-
-	if (nCol == VALUE_COL)
+	if (m_aSelectedTaskIDs.GetSize())
 	{
-		if (m_data.HasStyle(TDCS_READONLY))
-			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+		LVHITTESTINFO lvHit = { { ptClient.x, ptClient.y }, 0 };
 
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+		int nRow = SubItemHitTest(&lvHit);
+		int nCol = lvHit.iSubItem;
 
-		switch (nAttribID)
+		if (nCol == VALUE_COL)
 		{
-		case TDCA_LOCK:
-			ASSERT(CanEditCell(nRow, nCol));
-			break;
-
-		default:
-			if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
-			{
-				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
-			}
-			else if (!CanEditCell(nRow, nCol))
-			{
+			if (m_data.HasStyle(TDCS_READONLY))
 				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+
+			TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+			switch (nAttribID)
+			{
+			case TDCA_LOCK:
+				ASSERT(CanEditCell(nRow, nCol));
+				break;
+
+			default:
+				if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+				{
+					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				}
+				else if (!CanEditCell(nRow, nCol))
+				{
+					return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+				}
+				break;
 			}
-			break;
 		}
 	}
 
