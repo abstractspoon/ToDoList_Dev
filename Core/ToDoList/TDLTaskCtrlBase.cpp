@@ -1373,9 +1373,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	if (!m_bEnableRecalcColumns)
 		return;
 
-	if (!bZeroOthers && !aColIDs.GetCount())
-		return;
-
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()"));
 	///////////////////////////////////////////////////////////////////
