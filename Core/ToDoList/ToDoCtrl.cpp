@@ -867,8 +867,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 	ASSERT(!m_bPendingUpdateControls);
 
-	CScopedLogTimer log(_T("CToDoCtrl::UpdateControls()"));
-	
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
@@ -4382,7 +4380,6 @@ TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CToDoCtrl::SaveTaskfile(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
-	log.LogStart();
 	///////////////////////////////////////////////////////////////////
 
 	CWaitCursor cursor;
@@ -4611,8 +4608,6 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCT
 	
 	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
 	{
-		log.LogTimeElapsed(_T("CToDoCtrl::Load(tasks.Load)"), FileMisc::GetFileNameFromPath(sFilePath));
-
 		m_sourceControl.InitialiseState(tasks);
 
 		BOOL bWantCheckout = (HasStyle(TDCS_CHECKOUTONLOAD) &&
@@ -4657,21 +4652,26 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCT
 				TSH().ClearHistory();
 			}
 
+			// PERMANENT LOGGING //////////////////////////////////////////////
+			log.LogTimeElapsed(_T("   CToDoCtrl::Load(before LoadTasks"));
+			///////////////////////////////////////////////////////////////////
+
 			LoadTasks(tasks);
 					
 			// PERMANENT LOGGING //////////////////////////////////////////////
-			log.LogTimeElapsed(_T("CToDoCtrl::Load(LoadTasks)"));
+			log.LogTimeElapsed(_T("   CToDoCtrl::Load(LoadTasks"));
 			///////////////////////////////////////////////////////////////////
 
 			// Reload only if they've already been initialised
 			if (m_ilTaskIcons.GetSafeHandle())
 				LoadTaskIcons();
+	
+			SetModified(FALSE);
 					
 			// PERMANENT LOGGING //////////////////////////////////////////////
-			log.LogTimeElapsed(_T("CToDoCtrl::Load(LoadTaskIcons)"));
+			log.LogTimeElapsed(_T("   CToDoCtrl::Load(rest)"));
 			///////////////////////////////////////////////////////////////////
-			
-			SetModified(FALSE);
+
 			return TDCF_SUCCESS;
 		} 
 		// user cancelled so revert any check-out
@@ -4737,7 +4737,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		m_findReplace.SaveState(prefs);
 
 		// PERMANENT LOGGING //////////////////////////////////////////////
-		log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Save state)"));
+		log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(Save state)"));
 		///////////////////////////////////////////////////////////////////
 	}	
 	
@@ -4765,12 +4765,32 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_bDelayLoaded = FALSE;
 
 	SetFilePath(tasks.GetFilePath());
-
 	LoadGlobals(tasks);
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(globals)"));
+	///////////////////////////////////////////////////////////////////
+
 	LoadCustomAttributeDefinitions(tasks);
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(custom attrib)"));
+	///////////////////////////////////////////////////////////////////
+
 	LoadSplitPos(prefs);
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(split pos)"));
+	///////////////////////////////////////////////////////////////////
+
 	LoadDefaultRecurrence(prefs);
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(recurrence)"));
+	///////////////////////////////////////////////////////////////////
+
 	LoadAttributeVisibility(tasks, prefs);
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(attrib vis)"));
+	///////////////////////////////////////////////////////////////////
 
 	m_findReplace.LoadState(prefs);
 
@@ -4778,7 +4798,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		m_styles[TDCS_DISABLEPASSWORDPROMPTING] = TRUE;
 	
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Process header)"));
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(Process header)"));
 	///////////////////////////////////////////////////////////////////
 
 	if (tasks.GetTaskCount())
@@ -4790,7 +4810,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		HTREEITEM htiFirst = SetAllTasks(tasks);
 
 		// PERMANENT LOGGING //////////////////////////////////////////////
-		log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Build tree)"));
+		log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(Build tree)"));
 		///////////////////////////////////////////////////////////////////
 
 		if (m_taskTree.GetItemCount())
@@ -4799,7 +4819,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 			htiSel = LoadTasksState(prefs);
 
 			// PERMANENT LOGGING //////////////////////////////////////////////
-			log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Restore state)"));
+			log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(Restore state)"));
 			///////////////////////////////////////////////////////////////////
 			
 			// redo last sort
@@ -4848,7 +4868,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 		ShowWindow(SW_HIDE);
 	
 	// PERMANENT LOGGING //////////////////////////////////////////////
-	log.LogTimeElapsed(_T("CToDoCtrl::LoadTasks(Remaining)"));
+	log.LogTimeElapsed(_T("      CToDoCtrl::LoadTasks(Rest)"));
 	///////////////////////////////////////////////////////////////////
 	
 	return TRUE;
