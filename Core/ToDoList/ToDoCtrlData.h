@@ -113,7 +113,7 @@ public:
 	CString GetTaskCreatedBy(DWORD dwTaskID) const;
 	CString GetTaskStatus(DWORD dwTaskID) const;
 	CString GetTaskFileLink(DWORD dwTaskID, int nFileLink) const;
-	CString GetTaskExtID(DWORD dwTaskID) const;
+	CString GetTaskExternalID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
 	int GetTaskPositions(DWORD dwTaskID, CArray<int, int>& aPositions, BOOL bZeroBased = TRUE) const;
 

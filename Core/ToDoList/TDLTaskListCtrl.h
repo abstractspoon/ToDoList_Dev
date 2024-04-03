@@ -51,7 +51,6 @@ class CTDLTaskListCtrl : public CTDLTaskCtrlBase
 public:
 	CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data,
-					 const CToDoCtrlFind& find,
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,

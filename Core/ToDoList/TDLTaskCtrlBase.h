@@ -64,7 +64,6 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
-					 const CToDoCtrlFind& find, 
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
@@ -240,7 +239,6 @@ protected:
 	CToolTipCtrlEx m_tooltipColumns;
 
 	const CToDoCtrlData& m_data;
-	const CToDoCtrlFind& m_find;
 	const CTDCStyleMap& m_styles;
 	const TDCAUTOLISTDATA& m_tld;
 	const CTDCImageList& m_ilTaskIcons;
@@ -267,6 +265,7 @@ protected:
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
 	CTDCMultiTasker m_multitasker;
+	CTDCTaskColumnSizer m_sizer;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;
@@ -381,9 +380,10 @@ protected:
 	CString FormatDate(const COleDateTime& date, TDC_DATE nDate) const;
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 
-	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
 	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
+	int GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const;
 	int RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
@@ -436,7 +436,7 @@ protected:
 	
 protected:
 	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime = FALSE) const;
-	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	BOOL WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime = FALSE) const;
 	int CalcSplitterPosToFitListColumns() const;
 	void UpdateAttributePaneVisibility();
