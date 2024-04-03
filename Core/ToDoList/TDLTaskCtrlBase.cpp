@@ -1344,10 +1344,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 
 int CTDLTaskCtrlBase::RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const
 {
-	// PERMANENT LOGGING //////////////////////////////////////////////
-	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(Weed out tracked columns)"));
-	///////////////////////////////////////////////////////////////////
-
 	int nNumCols = m_hdrColumns.GetItemCount();
 
 	for (int nItem = 1; nItem < nNumCols; nItem++)
@@ -1372,7 +1368,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()"));
-	log.LogStart();
 	///////////////////////////////////////////////////////////////////
 	
 	// Weed out all the tracked columns

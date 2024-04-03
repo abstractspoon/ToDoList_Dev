@@ -137,8 +137,6 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti)
 // internal version) 
 BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy)
 { 
-	CScopedLogTimer log(_T("CTDLTaskTreeCtrl::SelectItem()"));
-	
 	// Avoid unnecessary selections
 	if (GetSelectedCount() == 1)
 	{
