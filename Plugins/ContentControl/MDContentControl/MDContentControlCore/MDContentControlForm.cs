@@ -139,7 +139,7 @@ namespace MDContentControl
 			return writer.ToString();
 		}
 
-		protected ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
+		protected new ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
 
 		public string OutputHtml
 		{

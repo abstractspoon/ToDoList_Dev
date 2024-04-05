@@ -144,7 +144,7 @@ LPCWSTR CMindMapUIExtensionBridgeWindow::GetTypeID() const
 	return MINDMAP_GUID;
 }
 
-bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }

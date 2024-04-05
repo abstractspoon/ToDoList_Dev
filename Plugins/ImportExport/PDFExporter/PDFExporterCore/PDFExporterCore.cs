@@ -231,7 +231,7 @@ namespace PDFExporter
 			
 				File.WriteAllBytes(destFilePath, pdfContent);
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 				return false;
 			}
