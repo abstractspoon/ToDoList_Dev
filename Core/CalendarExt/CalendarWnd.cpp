@@ -533,7 +533,7 @@ DWORD CCalendarWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 	return dwTaskID;
 }
 
-bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 

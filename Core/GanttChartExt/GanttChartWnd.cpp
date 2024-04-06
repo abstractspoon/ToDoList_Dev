@@ -486,7 +486,7 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) con
 	return m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

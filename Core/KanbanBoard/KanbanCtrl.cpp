@@ -1779,7 +1779,7 @@ void CKanbanCtrl::RebuildDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 	m_aColumns.Sort();
 }
 
-void CKanbanCtrl::RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray)
+void CKanbanCtrl::RebuildFixedColumns()
 {
 	if (!UsingFixedColumns())
 	{
@@ -1848,7 +1848,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelT
 	if (UsingDynamicColumns())
 		RebuildDynamicColumns(mapKIArray);
 	else
-		RebuildFixedColumns(mapKIArray);
+		RebuildFixedColumns();
 
 	// Rebuild column contents
 	if (bRebuildContents)
