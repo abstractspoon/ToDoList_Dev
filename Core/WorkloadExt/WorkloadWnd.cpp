@@ -423,7 +423,7 @@ DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 	return m_ctrlWorkload.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

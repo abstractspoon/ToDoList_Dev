@@ -114,7 +114,7 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Event raised when grid loaded from file.
 		/// </summary>
-		public event EventHandler<FileLoadedEventArgs> FileLoaded;
+		//public event EventHandler<FileLoadedEventArgs> FileLoaded;
 
 		#endregion // Load
 

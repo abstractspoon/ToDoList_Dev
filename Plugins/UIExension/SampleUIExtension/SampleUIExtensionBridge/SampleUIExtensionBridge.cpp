@@ -133,7 +133,7 @@ LPCWSTR CSampleUIExtensionBridgeWindow::GetTypeID() const
 	return SAMPLE_GUID;
 }
 
-bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }

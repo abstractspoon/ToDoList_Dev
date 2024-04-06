@@ -139,7 +139,7 @@ LPCWSTR CWordCloudUIExtensionBridgeWindow::GetTypeID() const
 	return WORDCLOUD_GUID;
 }
 
-bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }

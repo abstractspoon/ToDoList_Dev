@@ -140,7 +140,7 @@ LPCWSTR CDayViewUIExtensionBridgeWindow::GetTypeID() const
 	return DAYVIEW_GUID;
 }
 
-bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
