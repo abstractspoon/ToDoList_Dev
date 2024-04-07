@@ -584,7 +584,7 @@ BOOL CEnListCtrl::IsSelectionThemed(BOOL bClassic) const
 	return bThemed;
 }
 
-void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused) const
+void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
 	if (bDropHighlighted && IsSelectionThemed(FALSE))
 	{
@@ -605,14 +605,20 @@ void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, BO
 		if (m_bHorzGrid)
 			rBack.bottom--;
 
-		COLORREF crBack = GetItemBackColor(nItem, bSelected, FALSE, bFocused);
 		pDC->FillSolidRect(rBack, crBack);
 	}
 }
 
+void CEnListCtrl::DrawCellBackground(CDC* /*pDC*/, int /*nItem*/, int /*nCol*/, 
+									 const CRect& /*rCell*/, BOOL /*bSelected*/, 
+									 BOOL /*bDropHighlighted*/, BOOL /*bFocused*/)
+{
+	// Do nothing by default
+}
+
 void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
-								  const CRect& rText, const CString& sText,
-								  COLORREF crText, UINT nDrawTextFlags) const
+							   const CRect& rText, const CString& sText,
+							   COLORREF crText, UINT nDrawTextFlags)
 {
 	if (!sText.IsEmpty())
 	{
@@ -621,7 +627,9 @@ void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
 	}
 }
 
-void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused) const
+void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, 
+						   const CRect& rCell, const CString& sText, 
+						   BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
 	// get item text and output
 	CFont* pFont = GetItemFont(nItem, nCol);
@@ -635,6 +643,8 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, BO
 
 	if (rText.Height() && rText.Width())
 	{
+		DrawCellBackground(pDC, nItem, nCol, rCell, bSelected, bDropHighlighted, bFocused);
+
 		COLORREF crText = GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bFocused);
 
 		if (bSelected && IsSelectionThemed(FALSE))
@@ -660,17 +670,14 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, BO
 
 		case LVCFMT_RIGHT:
 			nFlags |= DT_RIGHT;
-			rText.right -= 4;
+			rText.right -= 2;
 			break;
 
 		case LVCFMT_LEFT:
 			nFlags |= DT_LEFT;
-			rText.left += 4;
+			rText.left += 2;
 			break;
 		}
-
-		CEnString sText(GetItemText(nItem, nCol));
-		sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
 
 		DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
 	}
@@ -730,7 +737,8 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
 	{
-		DrawItemBackground(pDC, nItem, rItem, bSelected, bDropHighlighted, bItemFocused);
+		COLORREF crBack = GetItemBackColor(nItem, bSelected, FALSE, bItemFocused);
+		DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bItemFocused);
 
 		// cycle thru columns formatting and drawing each subitem
 		int nNumCol = GetColumnCount();
@@ -779,10 +787,11 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				rCell.left += nImageWidth;
 			}
 
-			DrawCell(pDC, nItem, nCol, rCell, bSelected, bDropHighlighted, bListFocused);
+			CEnString sText(GetItemText(nItem, nCol));
+			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
 
 			// draw vert grid if required
-			if (m_bVertGrid && (!(bSelected && IsSelectionThemed(FALSE))))
+			if (m_bVertGrid/* && (!(bSelected && IsSelectionThemed(FALSE)))*/)
 			{
 				// if we're not tight up against the client edge then draw the vertical 
 				if (rCell.right < rClient.right)
@@ -799,7 +808,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 		// focus rect: normal method doesn't work because we are focusing whole line
 		// note: if we're scrolled to the right the image may not be visible
-		if (bItemFocused && bListFocused)
+		if (bItemFocused && bListFocused && bWantCellFocus)
 		{
 			//rItem.left += nImageWidth;
 			pDC->DrawFocusRect(rItem);
@@ -1497,14 +1506,14 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 {
 	// Cast required for VC6
 	const_cast<CEnListCtrl*>(this)->GetSubItemRect(nRow, nCol, LVIR_LABEL, rCell);
+
+	if (nCol == 0)
+		rCell.left = 0;
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
 	GetCellRect(nRow, nCol, rCell);
-
-	if (nCol == 0)
-		rCell.left = 0;
 
 	rCell.OffsetRect(-2, 0);
 }

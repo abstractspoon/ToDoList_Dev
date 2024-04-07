@@ -158,16 +158,12 @@ private:
 
 	static DWORD s_dwSelectionTheming;
 
-// Operations
-public:
-
-// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEnListCtrl)
-	public:
+public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
+protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
@@ -208,9 +204,10 @@ protected:
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
-	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused) const;
-	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags) const;
-	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused) const;
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 
 	int GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	void NotifySelChange();

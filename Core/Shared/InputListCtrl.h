@@ -110,7 +110,7 @@ protected:
 	virtual void OnCancelEdit();
 	virtual void PreSubclassWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	//virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 protected:
 	//{{AFX_MSG(CInputListCtrl)
@@ -138,8 +138,6 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL IsEditing() const;
 	virtual BOOL IsButtonEnabled(int nRow, int nCol) const;
-	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData2; }
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell);
@@ -149,7 +147,13 @@ protected:
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
-	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 
 	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
 	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
@@ -169,6 +173,7 @@ protected:
 	void NotifyParentEditCell(const CString& sText, int nRow = -1, int nCol = -1) const;
 	BOOL HasNonTextCells() const;
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
+	BOOL CellHasButton(int nRow, int nCol) const;
 
 private:
 	void RecalcHotButtonRects();
