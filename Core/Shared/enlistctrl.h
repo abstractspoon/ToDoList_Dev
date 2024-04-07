@@ -60,11 +60,10 @@ class CEnListCtrl : public CListCtrl
 {
 	DECLARE_DYNAMIC(CEnListCtrl)
 
-		// Construction
 public:
 	CEnListCtrl();
+	virtual ~CEnListCtrl();
 
-public:
 	CEnHeaderCtrl* GetHeader();
 	const CEnHeaderCtrl* GetHeader() const;
 	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
@@ -163,14 +162,11 @@ private:
 public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
 protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CEnListCtrl();
 
 	// Generated message map functions
 protected:

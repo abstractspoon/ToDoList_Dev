@@ -6064,7 +6064,11 @@ CString CTDCTaskColumnSizer::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION&
 	}
 	else if (!GetLongestAggregatedValue(attribDef, aTaskIDs, sLongest))
 	{
-		sLongest = GetLongestValue(attribDef, aTaskIDs);
+		for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+		{
+			CString sTaskVal = m_formatter.GetTaskCustomAttributeData(aTaskIDs[nID], attribDef);
+			sLongest = GetLongerString(sTaskVal, sLongest);
+		}
 	}
 
 	if (sLongest.IsEmpty())
