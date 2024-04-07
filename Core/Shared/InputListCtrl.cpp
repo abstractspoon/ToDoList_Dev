@@ -486,16 +486,10 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	// this function differs from the base class in as much as it 
 	// highlights only the currently selected cell, not the whole line
-	CDC* pDC;
-	CRect rHeader, rFocus;
-	BOOL bRes;
-	CSize sizeText;
-
-	// get and prepare device context
-	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
+	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
 	pDC->SetROP2(R2_COPYPEN);
-
+	
 	// init helper variables
 	int nItem = lpDrawItemStruct->itemID;
 	UINT uStyle = GetStyle();
@@ -510,6 +504,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// this fixes it admirably!
 	if (GetHeader())
 	{
+		CRect rHeader;
 		GetHeader()->GetWindowRect(rHeader);
 		ScreenToClient(rHeader);
 		rClient.top = max(0, rHeader.bottom);
@@ -546,12 +541,13 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
 	{
 		int nSaveDC = pDC->SaveDC();
+		CRect rFocus;
 
 		LV_COLUMN lvc = { 0 };
 		lvc.mask = LVCF_WIDTH | LVCF_FMT;
 		int nCol = 0;
 
-		bRes = GetColumn(nCol, &lvc);
+		BOOL bRes = GetColumn(nCol, &lvc);
 
 		// draw horz grid lines if required
 		if (m_bHorzGrid)
@@ -678,7 +674,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				else if (GetCellType(nItem, nCol) != ILCT_CHECK)
 				{
-					sizeText = sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
+					sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
 				}
 
 				// setup focus rect (only for classic)
