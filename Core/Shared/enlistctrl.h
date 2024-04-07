@@ -103,7 +103,7 @@ public:
 	virtual void Sort();
 	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
-	int GetItemIndent(int nItem) const;
+	virtual int GetItemIndent(int nItem) const;
 	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
 	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
 	
@@ -208,6 +208,8 @@ protected:
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused) const;
+	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 	int GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	void NotifySelChange();

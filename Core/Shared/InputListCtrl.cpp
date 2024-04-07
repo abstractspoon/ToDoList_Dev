@@ -553,7 +553,6 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		if (m_bHorzGrid)
 		{
 			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
-
 			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
 		}
 
@@ -571,7 +570,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				if (pStateList)
 					nImageWidth += sizeState.cx + 2; // 1 pixel border either side
 
-				if (pImageList/* && (nImage != -1)*/)
+				if (pImageList)
 					nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
 			}
 			
@@ -612,10 +611,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			{
 				// if we're not tight up against the client edge then draw the vertical 
 				if (rCell.right < rClient.right)
-				{
 					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), GetSysColor(COLOR_3DSHADOW));
-					rBack.right--;
-				}
 			}
 
 			// adjust text rect for button

@@ -73,6 +73,7 @@ public:
 	void SetReadOnly(BOOL bReadOnly);
 	void EndEdit();
 	void RedrawCell(int nRow, int nCol, BOOL bErase = TRUE);
+	virtual int GetItemIndent(int nItem) const { return 0; }
 
 	// column methods
 	void EnableColumnEditing(int nCol, BOOL bEnable);
