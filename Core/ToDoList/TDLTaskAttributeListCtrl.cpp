@@ -821,7 +821,7 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
 	if (!CanEditCell(nItem, VALUE_COL))
-		return GetSysColor(COLOR_3DSHADOW);
+		return GetSysColor(COLOR_3DDKSHADOW);
 
 	if (nCol == VALUE_COL)
 	{
