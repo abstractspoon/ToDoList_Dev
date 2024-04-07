@@ -744,11 +744,11 @@ void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 									const CRect& rText, const CString& sText, 
 									COLORREF crText, UINT nDrawTextFlags)
 {
-	if (!sText.IsEmpty() && (GetCellType(nRow, nCol) != ILCT_CHECK))
-	{
-		pDC->SetTextColor(crText);
-		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
-	}
+	if (GetCellType(nRow, nCol) == ILCT_CHECK)
+		return;
+
+	// else
+	CEnListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
 IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const

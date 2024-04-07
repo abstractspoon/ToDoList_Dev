@@ -610,15 +610,74 @@ void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, BO
 	}
 }
 
-void CEnListCtrl::DrawCellText(CDC* pDC, int /*nRow*/, int /*nCol*/,
+void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
 								  const CRect& rText, const CString& sText,
-								  COLORREF crText, UINT nDrawTextFlags)
+								  COLORREF crText, UINT nDrawTextFlags) const
 {
 	if (!sText.IsEmpty())
 	{
 		pDC->SetTextColor(crText);
 		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
 	}
+}
+
+void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused) const
+{
+	// get item text and output
+	CFont* pFont = GetItemFont(nItem, nCol);
+	CFont* pOldFont = NULL;
+
+	if (pFont)
+		pOldFont = pDC->SelectObject(pFont);
+
+	// draw text
+	CRect rText(rCell);
+
+	if (rText.Height() && rText.Width())
+	{
+		COLORREF crText = GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bFocused);
+
+		if (bSelected && IsSelectionThemed(FALSE))
+		{
+			DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
+			GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+
+			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+		}
+
+		UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
+
+		LV_COLUMN lvc = { 0 };
+		lvc.mask = LVCF_FMT;
+
+		VERIFY(GetColumn(nCol, &lvc));
+
+		switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
+		{
+		case LVCFMT_CENTER:
+			nFlags |= DT_CENTER;
+			break;
+
+		case LVCFMT_RIGHT:
+			nFlags |= DT_RIGHT;
+			rText.right -= 4;
+			break;
+
+		case LVCFMT_LEFT:
+			nFlags |= DT_LEFT;
+			rText.left += 4;
+			break;
+		}
+
+		CEnString sText(GetItemText(nItem, nCol));
+		sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
+
+		DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
+	}
+
+	// reset font
+	if (pFont)
+		pDC->SelectObject(pOldFont);
 }
 
 void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
@@ -720,61 +779,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				rCell.left += nImageWidth;
 			}
 
-			// get item text and output
-			CFont* pFont = GetItemFont(nItem, nCol);
-			CFont* pOldFont = NULL;
-
-			if (pFont)
-				pOldFont = pDC->SelectObject(pFont);
-
-			// draw text
-			CRect rText(rCell);
-
-			if (rText.Height() && rText.Width())
-			{
-				COLORREF crText = GetItemTextColor(nItem, nCol, bSelected, FALSE, bListFocused);
-
-				if (bSelected && IsSelectionThemed(FALSE))
-				{
-					DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
-					GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-
-					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
-				}
-
-				UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
-				
-				LV_COLUMN lvc = { 0 };
-				lvc.mask = LVCF_FMT;
-
-				VERIFY(GetColumn(nCol, &lvc));
-
-				switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
-				{
-				case LVCFMT_CENTER:
-					nFlags |= DT_CENTER;
-					break;
-
-				case LVCFMT_RIGHT:
-					nFlags |= DT_RIGHT;
-					rText.right -= 4;
-					break;
-
-				case LVCFMT_LEFT:
-					nFlags |= DT_LEFT;
-					rText.left += 4;
-					break;
-				}
-
-				CEnString sText(GetItemText(nItem, nCol));
-				sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
-
-				DrawCellText(pDC);
-			}
-
-			// reset font
-			if (pFont)
-				pDC->SelectObject(pOldFont);
+			DrawCell(pDC, nItem, nCol, rCell, bSelected, bDropHighlighted, bListFocused);
 
 			// draw vert grid if required
 			if (m_bVertGrid && (!(bSelected && IsSelectionThemed(FALSE))))
