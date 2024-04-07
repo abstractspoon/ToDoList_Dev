@@ -83,6 +83,16 @@ int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2,
 	return CEnListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
 }
 
+COLORREF CTDLShowReminderListCtrl::GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+{
+	return CEnListCtrl::GetItemTextColor(nItem, nSubItem, bSelected, bDropHighlighted, bWndFocus);
+}
+
+COLORREF CTDLShowReminderListCtrl::GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+{
+	return CEnListCtrl::GetItemBackColor(nItem, bSelected, bDropHighlighted, bWndFocus);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderDlg dialog
 
@@ -193,7 +203,7 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	ListView_SetExtendedListViewStyleEx(m_lcReminders, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcReminders, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
-	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
+//	CThemed::SetWindowTheme(&m_lcReminders, _T("Explorer"));
 
 	m_lcReminders.SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
 	m_lcReminders.SetSortEmptyValuesBelow(FALSE);
