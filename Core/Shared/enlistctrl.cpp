@@ -254,7 +254,8 @@ CEnListCtrl::CEnListCtrl()
 	m_bSortAscending(TRUE),
 	m_bInitColumns(FALSE),
 	m_bAlternateRowColoring(FALSE),
-	m_bSortEmptyBelow(TRUE)
+	m_bSortEmptyBelow(TRUE),
+	m_bAllowOffItemClickDeslection(TRUE)
 {
 }
 
