@@ -66,8 +66,7 @@ public:
 
 	CEnHeaderCtrl* GetHeader();
 	const CEnHeaderCtrl* GetHeader() const;
-	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
-	virtual int GetCurSel() const;
+
 	void SetMulSel(int nIndexStart, int nIndexEnd, BOOL bSelect = TRUE, BOOL bNotifyParent = FALSE); // multiple selection
 	void SetItemFocus(int nIndex, BOOL bFocused); 
 	int GetFirstSel() const;
@@ -99,12 +98,15 @@ public:
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
 	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
-	virtual void Sort();
 	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
-	virtual int GetItemIndent(int nItem) const;
 	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
 	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
+
+	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
+	virtual int GetCurSel() const;
+	virtual void Sort();
+	virtual int GetItemIndent(int nItem) const;
 	
 	// column methods
 	int GetColumnCount() const;

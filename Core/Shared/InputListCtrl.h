@@ -55,8 +55,6 @@ public:
 	void SetAutoRowPrompt(const CString& sPrompt);
 	BOOL CanEditSelectedCell() const;
 	void EditSelectedCell();
-	virtual BOOL CanDeleteSelectedCell() const;
-	virtual BOOL DeleteSelectedCell();
 	BOOL SetCellText(int nRow, int nCol, const CString& sText);
 	BOOL DeleteAllItems(BOOL bIncludeCols = FALSE);
 	BOOL DeleteItem(int nItem);
@@ -73,7 +71,10 @@ public:
 	void SetReadOnly(BOOL bReadOnly);
 	void EndEdit();
 	void RedrawCell(int nRow, int nCol, BOOL bErase = TRUE);
-	virtual int GetItemIndent(int nItem) const { return 0; }
+
+	virtual BOOL CanDeleteSelectedCell() const;
+	virtual BOOL DeleteSelectedCell();
+	virtual int GetItemIndent(int /*nItem*/) const { return 0; }
 
 	// column methods
 	void EnableColumnEditing(int nCol, BOOL bEnable);
@@ -110,7 +111,6 @@ protected:
 	virtual void OnCancelEdit();
 	virtual void PreSubclassWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 protected:
 	//{{AFX_MSG(CInputListCtrl)
