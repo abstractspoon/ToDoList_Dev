@@ -579,6 +579,11 @@ void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rTe
 	CEnListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
+UINT CInputListCtrl::GetTextDrawFlags(int nCol) const
+{
+	return (CEnListCtrl::GetTextDrawFlags(nCol) & ~DT_END_ELLIPSIS);
+}
+
 IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
 {
 	return GetColumnType(nCol);

@@ -16,8 +16,8 @@ typedef CMap<UINT, UINT, CString, CString&> CMapUIntToString;
 /////////////////////////////////////////////////////////////////////////////
 // COrderedTreeCtrl window
 
-#define OTC_GRIDCOLOR ::GetSysColor(COLOR_3DFACE)
-#define OTC_POSCOLUMNID (NCG_CLIENTCOLUMNID - 1)
+const COLORREF OTC_GRIDCOLOR = RGB(192, 192, 192);
+const UINT OTC_POSCOLUMNID = (NCG_CLIENTCOLUMNID - 1);
 
 class COrderedTreeCtrl : public CTreeCtrl
 {

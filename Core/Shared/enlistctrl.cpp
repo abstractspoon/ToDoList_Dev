@@ -16,6 +16,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
+
 /////////////////////////////////////////////////////////////////////////////
 
 #if _MSC_VER >= 1400
@@ -345,7 +347,7 @@ void CEnListCtrl::OnPaint()
 				dc.SelectStockObject( ANSI_VAR_FONT );
 
 				rClient.top += 10;
-				dc.DrawText( sText, rClient, DT_CENTER | DT_WORDBREAK | DT_NOPREFIX/* | DT_NOCLIP */);
+				dc.DrawText( sText, rClient, DT_CENTER | DT_WORDBREAK | DT_NOPREFIX);
 				rClient.top -= 10; // reset
 			}
 		}
@@ -628,6 +630,25 @@ void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
 	}
 }
 
+UINT CEnListCtrl::GetTextDrawFlags(int nCol) const
+{
+	UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | GraphicsMisc::GetRTLDrawTextFlags(*this));
+
+	LV_COLUMN lvc = { 0 };
+	lvc.mask = LVCF_FMT;
+
+	VERIFY(GetColumn(nCol, &lvc));
+
+	switch (lvc.fmt & LVCFMT_JUSTIFYMASK)
+	{
+	case LVCFMT_CENTER:	nFlags |= DT_CENTER;	break;
+	case LVCFMT_RIGHT:	nFlags |= DT_RIGHT;		break;
+	case LVCFMT_LEFT:	nFlags |= DT_LEFT;		break;
+	}
+
+	return nFlags;
+}
+
 void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, 
 						   const CRect& rCell, const CString& sText, 
 						   BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
@@ -641,8 +662,9 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 
 	// draw text
 	CRect rText(rCell);
+	rText.DeflateRect(2, 0);
 
-	if (rText.Height() && rText.Width())
+	if (rText.Height() && (rText.Width() > 0))
 	{
 		DrawCellBackground(pDC, nItem, nCol, rCell, bSelected, bDropHighlighted, bFocused);
 
@@ -656,31 +678,7 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
 		}
 
-		UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
-
-		LV_COLUMN lvc = { 0 };
-		lvc.mask = LVCF_FMT;
-
-		VERIFY(GetColumn(nCol, &lvc));
-
-		switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
-		{
-		case LVCFMT_CENTER:
-			nFlags |= DT_CENTER;
-			break;
-
-		case LVCFMT_RIGHT:
-			nFlags |= DT_RIGHT;
-			rText.right -= 2;
-			break;
-
-		case LVCFMT_LEFT:
-			nFlags |= DT_LEFT;
-			rText.left += 2;
-			break;
-		}
-
-		DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
+		DrawCellText(pDC, nItem, nCol, rText, sText, crText, GetTextDrawFlags(nCol));
 	}
 
 	// reset font
@@ -759,7 +757,6 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			if (nCol == 0)
 			{
 				// draw item images if required
-				int nImageStyle = GetImageStyle(bSelected, bDropHighlighted, bListFocused);
 				int nImageWidth = 0;
 
 				// state
@@ -780,7 +777,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				if (pImageList && (nImage != -1))
 				{
 					if (rCell.Width() > (nImageWidth + sizeImage.cx))
-						pImageList->Draw(pDC, nImage, CPoint(rCell.left + 1 + nImageWidth, rCell.top), nImageStyle);
+						pImageList->Draw(pDC, nImage, CPoint(rCell.left + 1 + nImageWidth, rCell.top), ILD_TRANSPARENT);
 
 					nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
 				}
@@ -796,7 +793,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			{
 				// if we're not tight up against the client edge then draw the vertical 
 				if (rCell.right < rClient.right)
-					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), GetSysColor(COLOR_3DSHADOW));
+					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), ELC_GRIDCOLOR);
 			}
 		}
 
@@ -804,7 +801,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		if (m_bHorzGrid)
 		{
 			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
-			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
+			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, ELC_GRIDCOLOR);
 		}
 
 		// focus rect: normal method doesn't work because we are focusing whole line
@@ -855,13 +852,10 @@ COLORREF CEnListCtrl::GetItemBackColor(int /*nItem*/, BOOL bSelected,
 		if (bSelected)
 		{
 			if (bWndFocus)
-			{
 				return ::GetSysColor(COLOR_HIGHLIGHT);
-			}
-			else if (GetStyle() & LVS_SHOWSELALWAYS)
-			{
+
+			if (GetStyle() & LVS_SHOWSELALWAYS)
 				return ::GetSysColor(COLOR_BTNFACE);
-			}
 		} 
 		else if (bDropHighlighted)
 		{
@@ -874,20 +868,6 @@ COLORREF CEnListCtrl::GetItemBackColor(int /*nItem*/, BOOL bSelected,
 	crBack = (crBack != 0xff000000) ? crBack : ::GetSysColor(COLOR_WINDOW);
 
 	return crBack;
-}
-
-int CEnListCtrl::GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
-{
-	int nStyle = ILD_TRANSPARENT;
-
-	if (bSelected && bWndFocus)
-		nStyle |= ILD_BLEND25;
-
-	else if (bDropHighlighted)
-		nStyle |= ILD_BLEND25;
-	
-	// else
-	return nStyle;
 }
 
 void CEnListCtrl::EnableHeaderTracking(BOOL bAllow)

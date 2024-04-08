@@ -1286,6 +1286,16 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 	return !sPrompt.IsEmpty();
 }
 
+UINT CTDLTaskAttributeListCtrl::GetTextDrawFlags(int nCol) const
+{
+	UINT nFlags = CInputListCtrl::GetTextDrawFlags(nCol);
+
+	if (nCol == ATTRIB_COL)
+		nFlags |= DT_END_ELLIPSIS;
+
+	return nFlags;
+}
+
 void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
 	if ((nCol != VALUE_COL))
