@@ -174,6 +174,7 @@ protected:
 	BOOL HasNonTextCells() const;
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
 	BOOL CellHasButton(int nRow, int nCol) const;
+	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
 
 private:
 	void RecalcHotButtonRects();

@@ -172,7 +172,7 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 
 	// if we're were editing the same cell we've clicked on then
 	// we may be cancelling a listbox edit so don't trigger it again
-	if (bWasEditing && nItem == GetCurSel() && nCol == m_nCurCol)
+	if (bWasEditing && IsCellSelected(nItem, nCol))
 		return;
 	
 	// if this is the second click or the user clicked on the column button
@@ -488,20 +488,25 @@ void CInputListCtrl::DrawItemBackground(CDC* /*pDC*/, int /*nItem*/, const CRect
 	// Do nothing - handled in DrawCellBackground
 }
 
+BOOL CInputListCtrl::IsCellSelected(int nRow, int nCol, BOOL bVisually) const
+{
+	if (nRow != GetCurSel())
+		return FALSE;
+
+	if (nCol != m_nCurCol)
+		return FALSE;
+
+	if (bVisually && (IsEditing() || IsChild(GetFocus())))
+		return FALSE;
+
+	return TRUE;
+}
+
 void CInputListCtrl::DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, 
 										BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
-	if (nCol != m_nCurCol)
-	{
-		bSelected = FALSE;
-	}
-	else if (IsEditing() || IsChild(GetFocus()))
-	{
-		bSelected = FALSE;
-	}
-
-	BOOL bIsEditing = (IsEditing() || IsChild(GetFocus()));
-	COLORREF crBack = GetItemBackColor(nItem, nCol, (bSelected && !bIsEditing), FALSE, bFocused);
+	bSelected &= IsCellSelected(nItem, nCol, TRUE);
+	COLORREF crBack = GetItemBackColor(nItem, nCol, bSelected, FALSE, bFocused);
 	
 	CEnListCtrl::DrawItemBackground(pDC, nItem, rCell, crBack, bSelected, bDropHighlighted, bFocused);
 }
@@ -514,6 +519,8 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 
 	if (CellHasButton(nItem, nCol))
 	{
+		bSelected &= IsCellSelected(nItem, nCol, TRUE);
+
 		IL_COLUMNTYPE nBtnType = GetCellType(nItem, nCol);
 
 		if (nBtnType == ILCT_CHECK) // Special case
@@ -742,7 +749,7 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 	if (GetCurSel() != - 1)
 	{
 		// don't delete it if its the topleft item
-		if (m_bAutoAddCols && GetCurSel() == 0 && m_bAutoAddRows && m_nCurCol == 0)
+		if (m_bAutoAddCols && m_bAutoAddRows && IsCellSelected(0, 0))
 		{
 			return FALSE;
 		}
@@ -986,7 +993,7 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 		return;
 
 	// don't update if nothing's changed
-	if (nCol == m_nCurCol && nRow == CEnListCtrl::GetCurSel())
+	if (IsCellSelected(nRow, nCol))
 		return;
 
 	CRect rItem;
@@ -1637,7 +1644,7 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 	BOOL bThemedSel = (bSelected && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
 
 	// setup colors
-	if (!bThemedSel && (nCol == m_nCurCol) && (nItem == GetCurSel()))
+	if (!bThemedSel && IsCellSelected(nItem, nCol))
 	{
 		// if focused then draw item in focused colors 
 		if (bWndFocus)
