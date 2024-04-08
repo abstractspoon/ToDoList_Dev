@@ -2408,10 +2408,10 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
-	int nCount = GetDlgItem(nCtrlID)->SendMessage(CB_GETCOUNT);
+	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	if (GetDlgItem(nCtrlID)->GetDlgItem(1001) == NULL)
-		HideControl(*GetDlgItem(nCtrlID));
+	if (pCombo->GetDlgItem(1001) == NULL)
+		HideControl(*pCombo);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
