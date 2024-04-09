@@ -2049,7 +2049,7 @@ void CTDLTaskCtrlBase::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF c
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
-BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef) const
+BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef, BOOL bSelected) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
@@ -2063,17 +2063,11 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLOR
 	if (bRef == -1)
 		bRef = (dwTaskID != dwOrgTaskID);
 
-	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
+	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, bSelected);
 }
 
 BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
-										COLORREF& crText, COLORREF& crBack, BOOL bRef) const
-{
-	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
-}
-
-BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
-										COLORREF& crBack, BOOL bRef, BOOL bSelected) const
+										COLORREF& crText, COLORREF& crBack, BOOL bRef, BOOL bSelected) const
 {
 	ASSERT(pTDI && pTDS);
 

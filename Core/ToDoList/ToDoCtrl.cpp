@@ -1547,6 +1547,20 @@ BOOL CToDoCtrl::GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERI
 	return TRUE;
 }
 
+BOOL CToDoCtrl::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bSelected) const 
+{ 
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return m_taskTree.GetTaskTextColors(pTDI, pTDS, crText, crBack, -1, bSelected);
+}
+
 BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 {
 	if (!CanEditSelectedTask(TDCA_PRIORITY))

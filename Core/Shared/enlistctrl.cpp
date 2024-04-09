@@ -147,15 +147,15 @@ BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
 	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
 }
 
-BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/)
+BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader)
 {
 	LVGROUP lvg = { 0 };
 
 	lvg.cbSize = sizeof(lvg);
 	lvg.iGroupId = nGroupID;
-	lvg.state = LVGS_NORMAL;//dwState;
+	lvg.state = LVGS_NORMAL;
 	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
-	lvg.uAlign = LVGA_HEADER_LEFT;//dwAlign;
+	lvg.uAlign = LVGA_HEADER_LEFT;
 	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
 	lvg.cchHeader = strHeader.GetLength();
 
@@ -323,7 +323,8 @@ void CEnListCtrl::OnPaint()
 		// fill with back color
 		COLORREF crBack = GetItemBackColor(0, FALSE, FALSE, FALSE);
 
-		dc.FillSolidRect(rClient, crBack);
+		if (crBack != CLR_NONE)
+			dc.FillSolidRect(rClient, crBack);
 
 		// default drawing
 		CListCtrl::DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
@@ -591,17 +592,17 @@ void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, CO
 {
 	if (bDropHighlighted && IsSelectionThemed(FALSE))
 	{
-		DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0)/* | (bHasBtn ? GMIB_CLIPRIGHT : 0)*/);
+		DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
 		GraphicsMisc::DrawExplorerItemSelection(pDC, *this, GMIS_DROPHILITED, rItem, dwFlags, rItem);
 	}
 	else if (bSelected && IsSelectionThemed(FALSE))
 	{
-		DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0)/* | (bHasBtn ? GMIB_CLIPRIGHT : 0)*/);
+		DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 
 		GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rItem, dwFlags, rItem);
 	}
-	else
+	else if (crBack != CLR_NONE)
 	{
 		CRect rBack(rItem);
 
@@ -789,7 +790,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
 
 			// draw vert grid if required
-			if (m_bVertGrid/* && (!(bSelected && IsSelectionThemed(FALSE)))*/)
+			if (m_bVertGrid)
 			{
 				// if we're not tight up against the client edge then draw the vertical 
 				if (rCell.right < rClient.right)
@@ -1246,7 +1247,7 @@ void CEnListCtrl::ResizeStretchyColumns()
 	// stretch the appropriate columns if in report mode
 	if (m_nCurView == LVS_REPORT)
 	{
-		int nCol, nNumCols, /*nColStart = 0,*/ nColEnd = 0;
+		int nCol, nNumCols, nColEnd = 0;
 
 		// get the start of the last column
 		if (m_bLastColStretchy)

@@ -85,11 +85,29 @@ int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2,
 
 COLORREF CTDLShowReminderListCtrl::GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
+	TDCREMINDER rem;
+	VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+
+	COLORREF crText, crUnused;
+
+	if (rem.pTDC->GetTaskTextColors(rem.dwTaskID, crText, crUnused, (bSelected || bDropHighlighted)))
+		return crText;
+
+	// else
 	return CEnListCtrl::GetItemTextColor(nItem, nSubItem, bSelected, bDropHighlighted, bWndFocus);
 }
 
 COLORREF CTDLShowReminderListCtrl::GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
+	TDCREMINDER rem;
+	VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+
+	COLORREF crUnused, crBack;
+	
+	if (rem.pTDC->GetTaskTextColors(rem.dwTaskID, crUnused, crBack, (bSelected || bDropHighlighted)) && (crBack != CLR_NONE))
+		return crBack;
+
+	// else
 	return CEnListCtrl::GetItemBackColor(nItem, bSelected, bDropHighlighted, bWndFocus);
 }
 
