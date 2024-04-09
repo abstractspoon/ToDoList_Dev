@@ -1412,6 +1412,8 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		CHoldRedraw hr(m_hdrColumns);
 		m_hdrColumns.SetItemWidth(0, 0); // always
 
+		nNumCols = m_hdrColumns.GetItemCount();
+
 		for (int nItem = 1; nItem < nNumCols; nItem++)
 		{
 			TDC_COLUMN nColID = GetColumnID(nItem);
