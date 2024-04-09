@@ -821,7 +821,7 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
 	if (!CanEditCell(nItem, VALUE_COL))
-		return GetSysColor(COLOR_3DSHADOW);
+		return GetSysColor(COLOR_3DDKSHADOW);
 
 	if (nCol == VALUE_COL)
 	{
@@ -1284,6 +1284,16 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 		sPrompt = CEnString(IDS_EDIT_VALUEVARIES);
 
 	return !sPrompt.IsEmpty();
+}
+
+UINT CTDLTaskAttributeListCtrl::GetTextDrawFlags(int nCol) const
+{
+	UINT nFlags = CInputListCtrl::GetTextDrawFlags(nCol);
+
+	if (nCol == ATTRIB_COL)
+		nFlags |= DT_END_ELLIPSIS;
+
+	return nFlags;
 }
 
 void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
@@ -2398,10 +2408,10 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
-	int nCount = GetDlgItem(nCtrlID)->SendMessage(CB_GETCOUNT);
+	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	if (GetDlgItem(nCtrlID)->GetDlgItem(1001) == NULL)
-		HideControl(*GetDlgItem(nCtrlID));
+	if (pCombo->GetDlgItem(1001) == NULL)
+		HideControl(*pCombo);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)

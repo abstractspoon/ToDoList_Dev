@@ -242,6 +242,7 @@ CToDoListWnd::CToDoListWnd()
 		CRTLStyleMgr::Initialize();
 
 	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
+	CEnListCtrl::EnableSelectionTheming(TRUE, TRUE);
 
 	m_bAutoMenuEnable = FALSE;
 	m_nFlags |= WF_STAYACTIVE;

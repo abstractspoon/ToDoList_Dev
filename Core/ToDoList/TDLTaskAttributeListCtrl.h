@@ -53,7 +53,6 @@ class CTDLTaskAttributeListCtrl : public CInputListCtrl
 		
 		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
 		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
-		
 	};
 	
 	friend class CFileDropTarget;
@@ -215,6 +214,7 @@ protected:
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);
+	virtual UINT GetTextDrawFlags(int nCol) const;
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;

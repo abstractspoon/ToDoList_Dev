@@ -432,13 +432,14 @@ void CPreferencesShortcutsPage::OnAssignshortcut()
 
 		DWORD dwShortcut = MAKELONG(wVKeyCode, wModifiers);
 		
-		// handle special case where user is explicitly deleting a 
-		// shortcut
+		// handle special case where user is explicitly deleting a shortcut
 		if (!dwShortcut)
+		{
 			dwShortcut = NO_SHORTCUT;
-		// else if anyone has this shortcut we must remove their mapping first
+		}
 		else
 		{
+			// else if anyone has this shortcut we must remove their mapping first
 			HTREEITEM htiOther = NULL;
 
 			if (m_mapShortcut2HTI.Lookup(dwShortcut, htiOther) && htiOther)
@@ -534,17 +535,18 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		HTREEITEM hti = (HTREEITEM)pNCGDI->dwItem;
 
 		// draw background
-		BOOL bThemedSel = ((hti == m_tcCommands.GetSelectedItem()) && CThemed::AreControlsThemed());
+		BOOL bSelected = (hti == m_tcCommands.GetSelectedItem());
 		BOOL bSubMenu = (m_tcCommands.GetItemData(hti) == ID_SUBMENU);
 
-		if (bThemedSel)
+		if (bSelected)
 		{
-			DWORD dwFlags = GMIB_CLIPRIGHT;
+			DWORD dwFlags = GMIB_CLIPRIGHT | GMIB_THEMECLASSIC;
 
 			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
 				dwFlags |= GMIB_CLIPLEFT;
 
 			GraphicsMisc::DrawExplorerItemSelection(pNCGDI->pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), rItem, dwFlags, &rItem);
+			GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
 		}
 		else
 		{
@@ -562,8 +564,8 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 			UINT nCmdID = m_tcCommands.GetItemData(hti);
 			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
-			if (bThemedSel)
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), 0);
+			if (bSelected)
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), GMIB_THEMECLASSIC);
 
 			pNCGDI->pDC->SetTextColor(crText);
 
@@ -724,22 +726,14 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
 			COLORREF crText = GetSysColor(bSubMenu ? COLOR_3DHILIGHT : COLOR_WINDOWTEXT);
 
-			BOOL bThemedSel = FALSE;
+			BOOL bSelected = (pTVCD->nmcd.uItemState & CDIS_SELECTED);
 
-			if (pTVCD->nmcd.uItemState & CDIS_SELECTED)
+			if (bSelected)
 			{
-				if (CThemed::AreControlsThemed())
-				{
-					GM_ITEMSTATE nState = ((GetFocus() == &m_tcCommands) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED) ;
-					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcCommands, nState, pTVCD->nmcd.rc, GMIB_CLIPLEFT, &pTVCD->nmcd.rc);
+				GM_ITEMSTATE nState = ((GetFocus() == &m_tcCommands) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED) ;
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcCommands, nState, pTVCD->nmcd.rc, GMIB_CLIPLEFT | GMIB_THEMECLASSIC, &pTVCD->nmcd.rc);
 
-					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, 0);
-					bThemedSel = TRUE;
-				}
-				else
-				{
-					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
-				}
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 			}
 
 			DWORD dwShortcut = 0;
@@ -758,7 +752,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 				// don't draw over gridline
 				rText.bottom--;
 
-				if (bThemedSel)
+				if (bSelected)
 					rText.top++;
 
 				pDC->FillSolidRect(rText, m_ctrlHighlighter.GetBkColor());
