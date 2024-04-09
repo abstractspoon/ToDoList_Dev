@@ -161,9 +161,9 @@ public:
 	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
 	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
 
+	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
 							COLORREF& crBack, BOOL bRef = -1) const;
-	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
