@@ -16,6 +16,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
+
 /////////////////////////////////////////////////////////////////////////////
 
 #if _MSC_VER >= 1400
@@ -254,7 +256,8 @@ CEnListCtrl::CEnListCtrl()
 	m_bSortAscending(TRUE),
 	m_bInitColumns(FALSE),
 	m_bAlternateRowColoring(FALSE),
-	m_bSortEmptyBelow(TRUE)
+	m_bSortEmptyBelow(TRUE),
+	m_bAllowOffItemClickDeslection(TRUE)
 {
 }
 
@@ -344,7 +347,7 @@ void CEnListCtrl::OnPaint()
 				dc.SelectStockObject( ANSI_VAR_FONT );
 
 				rClient.top += 10;
-				dc.DrawText( sText, rClient, DT_CENTER | DT_WORDBREAK | DT_NOPREFIX/* | DT_NOCLIP */);
+				dc.DrawText( sText, rClient, DT_CENTER | DT_WORDBREAK | DT_NOPREFIX);
 				rClient.top -= 10; // reset
 			}
 		}
@@ -584,220 +587,256 @@ BOOL CEnListCtrl::IsSelectionThemed(BOOL bClassic) const
 	return bThemed;
 }
 
+void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	if (bDropHighlighted && IsSelectionThemed(FALSE))
+	{
+		DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0)/* | (bHasBtn ? GMIB_CLIPRIGHT : 0)*/);
+		GraphicsMisc::DrawExplorerItemSelection(pDC, *this, GMIS_DROPHILITED, rItem, dwFlags, rItem);
+	}
+	else if (bSelected && IsSelectionThemed(FALSE))
+	{
+		DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0)/* | (bHasBtn ? GMIB_CLIPRIGHT : 0)*/);
+		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+
+		GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rItem, dwFlags, rItem);
+	}
+	else
+	{
+		CRect rBack(rItem);
+
+		if (m_bHorzGrid)
+			rBack.bottom--;
+
+		pDC->FillSolidRect(rBack, crBack);
+	}
+}
+
+void CEnListCtrl::DrawCellBackground(CDC* /*pDC*/, int /*nItem*/, int /*nCol*/, 
+									 const CRect& /*rCell*/, BOOL /*bSelected*/, 
+									 BOOL /*bDropHighlighted*/, BOOL /*bFocused*/)
+{
+	// Do nothing by default
+}
+
+void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
+							   const CRect& rText, const CString& sText,
+							   COLORREF crText, UINT nDrawTextFlags)
+{
+	if (!sText.IsEmpty())
+	{
+		pDC->SetTextColor(crText);
+		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
+	}
+}
+
+UINT CEnListCtrl::GetTextDrawFlags(int nCol) const
+{
+	UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | GraphicsMisc::GetRTLDrawTextFlags(*this));
+
+	LV_COLUMN lvc = { 0 };
+	lvc.mask = LVCF_FMT;
+
+	VERIFY(GetColumn(nCol, &lvc));
+
+	switch (lvc.fmt & LVCFMT_JUSTIFYMASK)
+	{
+	case LVCFMT_CENTER:	nFlags |= DT_CENTER;	break;
+	case LVCFMT_RIGHT:	nFlags |= DT_RIGHT;		break;
+	case LVCFMT_LEFT:	nFlags |= DT_LEFT;		break;
+	}
+
+	return nFlags;
+}
+
+void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, 
+						   const CRect& rCell, const CString& sText, 
+						   BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	// get item text and output
+	CFont* pFont = GetItemFont(nItem, nCol);
+	CFont* pOldFont = NULL;
+
+	if (pFont)
+		pOldFont = pDC->SelectObject(pFont);
+
+	// draw text
+	CRect rText(rCell);
+	rText.DeflateRect(2, 0);
+
+	if (rText.Height() && (rText.Width() > 0))
+	{
+		DrawCellBackground(pDC, nItem, nCol, rCell, bSelected, bDropHighlighted, bFocused);
+
+		COLORREF crText = GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bFocused);
+
+		if (bSelected && IsSelectionThemed(FALSE))
+		{
+			DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
+			GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+
+			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+		}
+
+		DrawCellText(pDC, nItem, nCol, rText, sText, crText, GetTextDrawFlags(nCol));
+	}
+
+	// reset font
+	if (pFont)
+		pDC->SelectObject(pOldFont);
+}
+
 void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
 {
-	CDC* pDC;
-	CRect rText, rItem, rClient, rHeader;
-	COLORREF crOldText, crOldBack;
-	CSize sizeText;
-	LV_COLUMN lvc = { 0 };
-	CImageList* pImageList;
-	CImageList* pStateList;
-	int nImage = -1;
-	BOOL bItemFocused, bListFocused, bSelected, bDropHighlighted, bSelAlways;
-	UINT uStyle, uState;
-	CSize sizeState(0, 0), sizeImage(0, 0);
-	int nIndent = 0;
-
-	// get and prepare device context
-	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
+	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
 	pDC->SetROP2(R2_COPYPEN);
 
 	// init helper variables
 	int nItem = lpDrawItemStruct->itemID;
+	UINT uStyle = GetStyle();
+	UINT uState = GetItemState(nItem, LVIS_FOCUSED | LVIS_SELECTED | LVIS_DROPHILITED);
+
+	// init helper variables
+	CRect rItem, rClient;
 	GetItemRect(nItem, rItem, LVIR_BOUNDS);
 	GetClientRect(&rClient);
 
-	// some problems with drophiliting items during drag and drop
+	// some problems with drop-highlighting items during drag and drop
 	// so we need to make sure drawing is clipped to client area
 	// this fixes it admirably!
 	if (GetHeader())
 	{
+		CRect rHeader;
 		GetHeader()->GetWindowRect(rHeader);
 		ScreenToClient(rHeader);
 		rClient.top = max(0, rHeader.bottom);
 		pDC->IntersectClipRect(rClient);
 	}
 
-	rText = rItem;
+	BOOL bListFocused = (GetFocus() == this);
+	BOOL bSelAlways = ((uStyle & LVS_SHOWSELALWAYS) == LVS_SHOWSELALWAYS);
+	BOOL bSelected = (IsWindowEnabled() && (nItem == GetCurSel()) && (bListFocused || bSelAlways));
+	BOOL bDropHighlighted = (uState & LVIS_DROPHILITED);
 
-	uStyle = GetStyle();
-	uState = GetItemState(nItem, LVIS_DROPHILITED | LVIS_SELECTED);
-	bDropHighlighted = (uState & LVIS_DROPHILITED);
-	bItemFocused = (GetFocusedItem() == nItem);
-	bListFocused = (GetFocus() == this);
-	bSelAlways = ((uStyle & LVS_SHOWSELALWAYS) == LVS_SHOWSELALWAYS);
-	bSelected = (uState & LVIS_SELECTED) && (bListFocused || bSelAlways);
-
-	crOldText = pDC->SetTextColor(COLORREF(0)); // this will be overwritten on a per subitem basis
-	crOldBack = pDC->SetBkColor(GetItemBackColor(nItem, bSelected, bDropHighlighted, bListFocused));
+	BOOL bItemFocused = (bListFocused && bSelected);
+	BOOL bWantCellFocus = (bListFocused && !IsSelectionThemed(TRUE) && !CThemed::AreControlsThemed());
 
 	// images and indentation
-	pImageList = GetImageList(LVSIL_SMALL);
+	CSize sizeState, sizeImage;
+	CImageList* pImageList = GetImageList(LVSIL_SMALL);
 
 	if (pImageList)
-	{
 		CEnImageList::GetImageSize(*pImageList, sizeImage);
-		nIndent = GetItemIndent(nItem) * sizeImage.cx;
 
-		rText.left += nIndent;
-		rItem.left += nIndent;
-	}
-
-	// state
-	pStateList = GetImageList(LVSIL_STATE);
+	CImageList* pStateList = GetImageList(LVSIL_STATE);
 
 	if (pStateList)
 		CEnImageList::GetImageSize(*pStateList, sizeState);
 
 	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
 	{
-		// setup colors and pens
-		int nImageStyle = GetImageStyle(bSelected, bDropHighlighted, bListFocused);
-
-		// draw item images if required
-		int nImageWidth = 0;
-
-		// make sure there is enough space
-		lvc.mask = LVCF_WIDTH | LVCF_FMT;
-		int nCol = 0;
-		BOOL bRes = GetColumn(nCol, &lvc);
-		
-		// must paint the background of column 0 before the icons
-		if (bRes && (pStateList || pImageList))
-			pDC->ExtTextOut(0, rItem.top, ETO_CLIPPED | ETO_OPAQUE, CRect(0, rItem.top, lvc.cx, rItem.bottom), _T(""), NULL);
-
-		// state
-		if (pStateList && bRes)
-		{
-			int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
-			nState = nState >> 12;
-
-			if (lvc.cx > sizeState.cx)
-				pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top), ILD_TRANSPARENT); 
-
-			nImageWidth = sizeState.cx + 2; // 1 pixel border either side
-		}
-
-		// normal
-		if (pImageList && bRes && nImage != -1)
-		{
-			if (lvc.cx > nImageWidth + sizeImage.cx)
-				pImageList->Draw(pDC, nImage, CPoint(rText.left + 1 + nImageWidth, rText.top), nImageStyle); 
-
-			nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
-		}
+		COLORREF crBack = GetItemBackColor(nItem, bSelected, FALSE, bItemFocused);
+		DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bItemFocused);
 
 		// cycle thru columns formatting and drawing each subitem
-		rText.left += nImageWidth;
+		int nNumCol = GetColumnCount();
 
-		while (bRes)
+		for (int nCol = 0; nCol < nNumCol; nCol++)
 		{
-			// save width and format because GetItem overwrites
-			// if first column deduct width of image if exists
-			int nWidth = (nCol == 0) ? lvc.cx - nImageWidth - nIndent : lvc.cx;
-			int nFormat = (lvc.fmt & LVCFMT_JUSTIFYMASK);
+			CRect rCell;
+			GetCellRect(nItem, nCol, rCell);
 
-			// get next item
-			bRes = GetColumn(nCol + 1, &lvc);
+			if (rCell.right <= rClient.left)
+				continue;
 
-			// set pos of text rect
-			if (nWidth < 0)
+			if (rCell.left >= rClient.right)
+				break;
+
+			// Draw images for column zero
+			if (nCol == 0)
 			{
-				rText.left += nWidth;
-				nWidth = 0;
-			}
-			rText.right = max(rText.left, rText.left + nWidth);
+				// draw item images if required
+				int nImageWidth = 0;
 
-			// get item text and output
+				// state
+				if (pStateList)
+				{
+					int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
+					nState = nState >> 12;
+
+					if (rCell.Width() > sizeState.cx)
+						pStateList->Draw(pDC, nState, CPoint(rCell.left + 1, rCell.top), ILD_TRANSPARENT);
+
+					nImageWidth = sizeState.cx + 2; // 1 pixel border either side
+				}
+
+				// normal
+				int nImage = GetItemImage(nItem);
+
+				if (pImageList && (nImage != -1))
+				{
+					if (rCell.Width() > (nImageWidth + sizeImage.cx))
+						pImageList->Draw(pDC, nImage, CPoint(rCell.left + 1 + nImageWidth, rCell.top), ILD_TRANSPARENT);
+
+					nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
+				}
+
+				rCell.left += nImageWidth;
+			}
+
 			CEnString sText(GetItemText(nItem, nCol));
-			sizeText = sText.FormatDC(pDC, nWidth, GetColumnFormat(nCol));
-
-			// set y pos of first char
-			int nYPos = rText.top + (rText.Height() - sizeText.cy) / 2;
-
-			// set x pos of first char
-			int nXPos = 0;
-
-			switch (nFormat)
-			{
-				case LVCFMT_CENTER:
-					nXPos = rText.left + (rText.Width() - sizeText.cx) / 2;
-					break;
-
-				case LVCFMT_RIGHT:
-					nXPos = rText.right - 2 - sizeText.cx;
-					break;
-
-				case LVCFMT_LEFT:
-				default:
-					nXPos = rText.left + 2;
-					break;
-			}
-
-			// setup font
-			CFont* pFont = GetItemFont(nItem, nCol);
-			CFont* pOldFont = NULL;
-
-			if (pFont)
-				pOldFont = pDC->SelectObject(pFont);
-
-			// setup text colour
-			pDC->SetTextColor(GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bListFocused));
-			pDC->ExtTextOut(nXPos, nYPos, ETO_CLIPPED | ETO_OPAQUE, rText, sText, NULL);
-
-			// reset font
-			if (pFont)
-				pDC->SelectObject(pOldFont);
+			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
 
 			// draw vert grid if required
-			if (m_bVertGrid && nCol > 0)
+			if (m_bVertGrid/* && (!(bSelected && IsSelectionThemed(FALSE)))*/)
 			{
-				pDC->MoveTo(rText.left - 1, rItem.top);
-				pDC->LineTo(rText.left - 1, rItem.bottom);
+				// if we're not tight up against the client edge then draw the vertical 
+				if (rCell.right < rClient.right)
+					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), ELC_GRIDCOLOR);
 			}
-
-			rText.left = rText.right;
-
-			// next column
-			nCol++;
 		}
 
 		// draw horz grid lines if required
 		if (m_bHorzGrid)
 		{
-			pDC->MoveTo(rClient.left, rItem.bottom - 1);
-			pDC->LineTo(rClient.right, rItem.bottom - 1);
+			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
+			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, ELC_GRIDCOLOR);
 		}
 
 		// focus rect: normal method doesn't work because we are focusing whole line
 		// note: if we're scrolled to the right the image may not be visible
-		if (bItemFocused && bListFocused)
+		if (bItemFocused && bListFocused && bWantCellFocus)
 		{
-			rItem.left += nImageWidth;
+			//rItem.left += nImageWidth;
 			pDC->DrawFocusRect(rItem);
 		}
-
-		pDC->SetTextColor(crOldText);
-		pDC->SetBkColor(crOldBack);
 	}
 }
 
 COLORREF CEnListCtrl::GetItemTextColor(int /*nItem*/, int nSubItem, 
 									   BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	if (bSelected)
+	BOOL bThemedSel = (bSelected && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
+
+	if (!bThemedSel)
 	{
-		if (bWndFocus)
-			return ::GetSysColor(COLOR_HIGHLIGHTTEXT); 
-		else
-			return ::GetSysColor(COLOR_WINDOWTEXT);
+		if (bSelected)
+		{
+			if (bWndFocus)
+				return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+			else
+				return ::GetSysColor(COLOR_WINDOWTEXT);
+		}
+		else if (bDropHighlighted)
+		{
+			return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+		}
 	}
-	else if (bDropHighlighted)
-	{
-		return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-	}
+
+	// else 
+	if (!IsWindowEnabled())
+		return ::GetSysColor(COLOR_3DDKSHADOW);
 
 	// else
 	return GetColumnTextColor(nSubItem);
@@ -806,42 +845,29 @@ COLORREF CEnListCtrl::GetItemTextColor(int /*nItem*/, int nSubItem,
 COLORREF CEnListCtrl::GetItemBackColor(int /*nItem*/, BOOL bSelected, 
 									   BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	if (bSelected)
+	BOOL bThemedSel = (bSelected && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
+
+	if (!bThemedSel)
 	{
-		if (bWndFocus)
+		if (bSelected)
+		{
+			if (bWndFocus)
+				return ::GetSysColor(COLOR_HIGHLIGHT);
+
+			if (GetStyle() & LVS_SHOWSELALWAYS)
+				return ::GetSysColor(COLOR_BTNFACE);
+		} 
+		else if (bDropHighlighted)
 		{
 			return ::GetSysColor(COLOR_HIGHLIGHT);
 		}
-		else if (GetStyle() & LVS_SHOWSELALWAYS)
-		{
-			return ::GetSysColor(COLOR_BTNFACE);
-		}
-	} 
-	else if (bDropHighlighted)
-	{
-		return ::GetSysColor(COLOR_HIGHLIGHT);
 	}
 
 	// else
 	COLORREF crBack = GetTextBkColor(); 
-
 	crBack = (crBack != 0xff000000) ? crBack : ::GetSysColor(COLOR_WINDOW);
 
 	return crBack;
-}
-
-int CEnListCtrl::GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
-{
-	int nStyle = ILD_TRANSPARENT;
-
-	if (bSelected && bWndFocus)
-		nStyle |= ILD_BLEND25;
-
-	else if (bDropHighlighted)
-		nStyle |= ILD_BLEND25;
-	
-	// else
-	return nStyle;
 }
 
 void CEnListCtrl::EnableHeaderTracking(BOOL bAllow)
@@ -1469,6 +1495,7 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
 	GetCellRect(nRow, nCol, rCell);
+
 	rCell.OffsetRect(-2, 0);
 }
 

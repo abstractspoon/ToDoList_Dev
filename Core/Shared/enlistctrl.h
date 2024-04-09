@@ -60,15 +60,13 @@ class CEnListCtrl : public CListCtrl
 {
 	DECLARE_DYNAMIC(CEnListCtrl)
 
-		// Construction
 public:
 	CEnListCtrl();
+	virtual ~CEnListCtrl();
 
-public:
 	CEnHeaderCtrl* GetHeader();
 	const CEnHeaderCtrl* GetHeader() const;
-	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
-	virtual int GetCurSel() const;
+
 	void SetMulSel(int nIndexStart, int nIndexEnd, BOOL bSelect = TRUE, BOOL bNotifyParent = FALSE); // multiple selection
 	void SetItemFocus(int nIndex, BOOL bFocused); 
 	int GetFirstSel() const;
@@ -100,12 +98,15 @@ public:
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
 	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
-	virtual void Sort();
 	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
-	int GetItemIndent(int nItem) const;
 	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
 	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
+
+	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
+	virtual int GetCurSel() const;
+	virtual void Sort();
+	virtual int GetItemIndent(int nItem) const;
 	
 	// column methods
 	int GetColumnCount() const;
@@ -158,23 +159,16 @@ private:
 
 	static DWORD s_dwSelectionTheming;
 
-// Operations
-public:
-
-// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEnListCtrl)
-	public:
+public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
+
+protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CEnListCtrl();
 
 	// Generated message map functions
 protected:
@@ -208,8 +202,12 @@ protected:
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual UINT GetTextDrawFlags(int nCol) const;
 
-	int GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	void NotifySelChange();
 	void DeleteAllColumnData();
 	CColumnData* CreateColumnData(int nCol);
