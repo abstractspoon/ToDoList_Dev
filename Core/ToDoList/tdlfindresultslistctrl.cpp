@@ -59,6 +59,7 @@ BEGIN_MESSAGE_MAP(CTDLFindResultsListCtrl, CEnListCtrl)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
+	ON_NOTIFY_REFLECT_EX(LVN_ENDSCROLL, OnVScroll)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -211,6 +212,26 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 }
 
 void CTDLFindResultsListCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	UpdateHotItem(point);
+}
+
+BOOL CTDLFindResultsListCtrl::OnVScroll(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMLVSCROLL* pScroll = (NMLVSCROLL*)pNMHDR;
+
+	if (pScroll->dy)
+	{
+		CPoint point(GetMessagePos());
+		ScreenToClient(&point);
+
+		UpdateHotItem(point);
+	}
+
+	return FALSE;
+}
+
+void CTDLFindResultsListCtrl::UpdateHotItem(CPoint point)
 {
 	// Use drop-highlighting to mimic hot-ness
 	int nHit = HitTest(point);
