@@ -899,14 +899,15 @@ BOOL CTreeSelectionHelper::FixupTreeSelection()
 
 int CTreeSelectionHelper::GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const
 {
-	aTitles.RemoveAll();
+	aTitles.SetSize(selection.GetCount());
 
 	POSITION pos = selection.GetHeadPosition();
+	int nItem = 0;
 
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-		aTitles.Add(m_tree.GetItemText(hti));
+		aTitles[nItem++] = m_tree.GetItemText(hti);
 	}
 
 	return aTitles.GetSize();
@@ -914,14 +915,15 @@ int CTreeSelectionHelper::GetItemTitles(const CHTIList& selection, CStringArray&
 
 int CTreeSelectionHelper::GetItemData(const CHTIList& selection, CDWordArray& aData) const
 {
-	aData.RemoveAll();
+	aData.SetSize(selection.GetCount());
 
 	POSITION pos = selection.GetHeadPosition();
+	int nItem = 0;
 
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-		aData.Add(m_tree.GetItemData(hti));
+		aData[nItem++] = m_tree.GetItemData(hti);
 	}
 
 	return aData.GetSize();

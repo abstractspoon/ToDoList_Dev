@@ -11,6 +11,23 @@
 
 //////////////////////////////////////////////////////////////////////
 
+CTDCDateSet::CTDCDateSet()
+	: CTDCBaseEnumSet<TDC_DATE>()
+{
+}
+
+CTDCDateSet::CTDCDateSet(TDC_DATE nDate)
+	: CTDCBaseEnumSet<TDC_DATE>()
+{
+	Add(nDate);
+}
+
+CTDCDateSet::~CTDCDateSet()
+{
+}
+
+//////////////////////////////////////////////////////////////////////
+
 CTDCAttributeMap::CTDCAttributeMap() 
 	: CTDCBaseEnumSet<TDC_ATTRIBUTE>()
 {

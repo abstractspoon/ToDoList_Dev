@@ -861,15 +861,15 @@ namespace unvell.ReoGrid.Views
 			//}
 		}
 
-		private RGIntDouble scrollHorMin;
-		private RGIntDouble scrollHorMax;
-		private RGIntDouble scrollHorLarge;
-		private RGFloat scrollHorValue;
+		private RGIntDouble scrollHorMin = 0;
+		private RGIntDouble scrollHorMax = 0;
+		private RGIntDouble scrollHorLarge = 0;
+		private RGFloat scrollHorValue = 0;
 
-		private RGIntDouble scrollVerMin;
-		private RGIntDouble scrollVerMax;
-		private RGIntDouble scrollVerLarge;
-		private RGFloat scrollVerValue;
+		private RGIntDouble scrollVerMin = 0;
+		private RGIntDouble scrollVerMax = 0;
+		private RGIntDouble scrollVerLarge = 0;
+		private RGFloat scrollVerValue = 0;
 
 		public virtual void ScrollOffsetViews(ScrollDirection dir, RGFloat offsetX, RGFloat offsetY)
 		{

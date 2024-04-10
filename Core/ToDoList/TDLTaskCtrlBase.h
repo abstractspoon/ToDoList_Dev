@@ -42,14 +42,28 @@ class CTDCStyleMap;
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CHoldRecalcColumns
+{
+public:
+	CHoldRecalcColumns(CTDLTaskCtrlBase& tcb);
+	~CHoldRecalcColumns();
+
+protected:
+	CTDLTaskCtrlBase& m_tcb;
+	BOOL m_bInitialState; // To handle nested holds
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer   
 {
+	friend class CHoldRecalcColumns;
+
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
-					 const CToDoCtrlFind& find, 
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
@@ -66,7 +80,7 @@ public:
 	void SetTasklistFolder(LPCTSTR szFolder) { m_sTasklistFolder = szFolder; }
 	CString GetTasklistFolder() const { return m_sTasklistFolder; }
 
-	void OnCustomAttributeChange();
+	void OnCustomAttributesChange();
 	void OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges);
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnUndoRedo(BOOL bUndo);
@@ -100,7 +114,6 @@ public:
 	virtual DWORD GetSelectedTaskID() const = 0;
 	virtual BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const = 0;
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs) = 0;
-	virtual BOOL SelectAll() = 0;
 	virtual void DeleteAll() = 0;
 	virtual BOOL InvalidateSelection(BOOL bUpdate) = 0;
 	virtual BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE) = 0;
@@ -113,60 +126,34 @@ public:
 	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 	CString GetColumnName(TDC_COLUMN nColID) const;
 
-	COLORREF GetSelectedTaskColor() const; // -1 on no item selected
-	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
 	CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
-	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
-	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
-	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
-	int GetSelectedTaskAllocTo(CStringArray& aMatched, CStringArray& aMixed) const;
-	CString GetSelectedTaskAllocBy() const;
-	CString GetSelectedTaskStatus() const;
-	int GetSelectedTaskCategories(CStringArray& aCats) const;
-	int GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const;
-	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
-	int GetSelectedTaskTags(CStringArray& aTags) const;
-	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
-	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
-	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const;
-	int GetSelectedTaskFileLinkCount() const;
-	CString GetSelectedTaskExtID() const;
-	int GetSelectedTaskPercent() const;
-	int GetSelectedTaskPriority() const;
-	int GetSelectedTaskRisk() const;
-	BOOL GetSelectedTaskCost(TDCCOST& cost) const;
-	BOOL IsSelectedTaskFlagged() const;
-	BOOL IsSelectedTaskLocked() const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const;
-	CString GetSelectedTaskVersion() const;
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const;
 	CString GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen = -1) const;
 	COleDateTime GetSelectedTaskDate(TDC_DATE nDate) const;
-	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const;
-	BOOL IsSelectedTaskReference() const;
+
+ 	COLORREF GetSelectedTaskColor() const; // -1 or no item selected
+ 	CString GetSelectedTaskIcon() const;
 	DWORD GetSelectedTaskParentID() const;
-	BOOL IsSelectedTaskDone() const;
-	BOOL IsSelectedTaskDue() const;
 	BOOL CanSplitSelectedTask() const;
 
 	BOOL SelectionHasDependencies() const;
-	BOOL SelectionHasCircularDependencies() const;
-	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
-	BOOL SelectionHasReferences() const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;
 	BOOL SelectionHasSameParent() const;
 	BOOL SelectionHasNonReferences() const;
 	BOOL SelectionHasDependents() const;
 	BOOL SelectionHasRecurring() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
-	BOOL SelectionHasIcons() const;
-	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL SelectionHasIcon() const;
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
-	BOOL SelectionHasLockedParent(BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL SelectionHasParents() const;
+	BOOL SelectionHasDone() const;
 	BOOL SelectionAreAllDone() const;
 	BOOL SelectionHasTaskColor() const;
+	BOOL SelectionHasFlagged() const;
 
 	BOOL InvalidateColumnItem(int nItem, BOOL bUpdate = FALSE);
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);
@@ -174,9 +161,9 @@ public:
 	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
 	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
 
+	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1, BOOL bSelected = FALSE) const;
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
-							COLORREF& crBack, BOOL bRef = -1) const;
-	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
+							COLORREF& crBack, BOOL bRef = -1, BOOL bSelected = FALSE) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
@@ -237,6 +224,7 @@ public:
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void SetNextUniqueTaskID(DWORD dwTaskID);
 	void SetCompletionStatus(const CString& sStatus);
+	CString GetCompletionStatus() const { return m_sCompletionStatus; }
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
@@ -251,7 +239,6 @@ protected:
 	CToolTipCtrlEx m_tooltipColumns;
 
 	const CToDoCtrlData& m_data;
-	const CToDoCtrlFind& m_find;
 	const CTDCStyleMap& m_styles;
 	const TDCAUTOLISTDATA& m_tld;
 	const CTDCImageList& m_ilTaskIcons;
@@ -277,6 +264,8 @@ protected:
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
+	CTDCMultiTasker m_multitasker;
+	CTDCTaskColumnSizer m_sizer;
 
 	// font/color related
 	COLORREF m_crAltLine, m_crGridLine, m_crDone;
@@ -391,9 +380,11 @@ protected:
 	CString FormatDate(const COleDateTime& date, TDC_DATE nDate) const;
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 
-	int CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
 	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
+	int GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const;
+	int RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
 	BOOL GetColumnOrder(CDWordArray& aColumns) const;
@@ -401,9 +392,6 @@ protected:
 	void GetColumnWidths(CDWordArray& aWidths) const;
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
-
-	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
-	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
 protected:
 	struct TDSORTFLAGS
@@ -448,7 +436,7 @@ protected:
 	
 protected:
 	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime = FALSE) const;
-	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, BOOL bVisibleTasksOnly) const;
+	int CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	BOOL WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime = FALSE) const;
 	int CalcSplitterPosToFitListColumns() const;
 	void UpdateAttributePaneVisibility();
@@ -488,9 +476,8 @@ protected:
 	inline BOOL IsTreeList() const { return CTreeListSyncer::IsTree(Tasks()); }
 
 	// internal version
-	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
-							COLORREF& crBack, BOOL bRef, BOOL bSelected) const;
 	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack) const;
+	BOOL SelectionHasReferences() const;
 
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);
@@ -499,8 +486,6 @@ protected:
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
 	static int CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPadding = TRUE, int nImageWidth = -1);
-	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, 
-												CStringArray& aMatched, CStringArray& aMixed);
 	static BOOL CheckUpdateDueBrushColor(COLORREF crNew, COLORREF& crCur, CBrush& brCur);
 	static inline BOOL HasColor(COLORREF color) { return (color != CLR_NONE) ? TRUE : FALSE; }
 

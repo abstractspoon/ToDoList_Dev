@@ -16,6 +16,8 @@
 
 enum { NOTVALID, ADDITEM, EDITITEM };
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum IL_COLUMNTYPE 
 { 
 	ILCT_TEXT, 
@@ -24,6 +26,7 @@ enum IL_COLUMNTYPE
 	ILCT_DATE,
 	ILCT_CHECK,
 	ILCT_POPUPMENU, 
+	ILCT_CUSTOMBTN,
 }; 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -46,17 +49,12 @@ class CInputListCtrl : public CEnListCtrl
 // Construction
 public:
 	CInputListCtrl();
+	virtual ~CInputListCtrl();
 
-	void DisableColumnEditing(int nCol, BOOL bDisable);
-	BOOL IsColumnEditingDisabled(int nCol) const;
 	void AutoAdd(BOOL bRows, BOOL bCols);
-	void SetAutoColumnWidth(int nWidth);
 	void SetAutoRowPrompt(const CString& sPrompt);
-	void SetAutoColPrompt(const CString& sPrompt);
 	BOOL CanEditSelectedCell() const;
 	void EditSelectedCell();
-	virtual BOOL CanDeleteSelectedCell() const;
-	virtual BOOL DeleteSelectedCell();
 	BOOL SetCellText(int nRow, int nCol, const CString& sText);
 	BOOL DeleteAllItems(BOOL bIncludeCols = FALSE);
 	BOOL DeleteItem(int nItem);
@@ -69,17 +67,22 @@ public:
 	int AddRow(const CString& sRowText, int nImage = -1);
 	int AddCol(const CString& sColText, int nWidth = -1, IL_COLUMNTYPE nColType = ILCT_TEXT);
 	void SetView(int nView);
-	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
-	IL_COLUMNTYPE GetColumnType(int nCol) const;
 	void SetEditMask(LPCTSTR szMask, DWORD dwFlags = 0);
 	void SetReadOnly(BOOL bReadOnly);
 	void EndEdit();
+	void RedrawCell(int nRow, int nCol, BOOL bErase = TRUE);
 
-protected:
-	CPopupEditCtrl* GetEditControl();
+	virtual BOOL CanDeleteSelectedCell() const;
+	virtual BOOL DeleteSelectedCell();
+	virtual int GetItemIndent(int /*nItem*/) const { return 0; }
 
-// Attributes
-public:
+	// column methods
+	void EnableColumnEditing(int nCol, BOOL bEnable);
+	BOOL IsColumnEditingEnabled(int nCol) const;
+	void SetAutoColumnWidth(int nWidth);
+	void SetAutoColPrompt(const CString& sPrompt);
+	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
+	IL_COLUMNTYPE GetColumnType(int nCol) const;
 
 protected:
 	int m_nItemLastSelected;
@@ -93,7 +96,7 @@ protected:
 	int m_nAutoColWidth;
 	CString m_sAutoRowPrompt;
 	CString m_sAutoColPrompt;
-	int m_nLastEditRow, m_nLastEditCol, m_nLastEdit;
+	int m_nLastEditRow, m_nLastEditCol, m_nLastEditResult;
 	BOOL m_bAllowDuplication;
 	BOOL m_bNotifyDuplicates;
 	CPoint m_ptPopupPos;
@@ -103,26 +106,12 @@ private:
 
 	CHotTracker m_hotTrack;
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CInputListCtrl)
-	public:
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-	//}}AFX_VIRTUAL
 protected:
 	virtual void OnEndEdit(UINT uIDCtrl, int* pResult);
 	virtual void OnCancelEdit();
 	virtual void PreSubclassWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
-// Implementation
-public:
-	virtual ~CInputListCtrl();
-
-	// Generated message map functions
 protected:
 	//{{AFX_MSG(CInputListCtrl)
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -140,6 +129,8 @@ protected:
 	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnNotifyKillFocus(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 		
@@ -147,24 +138,31 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL IsEditing() const;
 	virtual BOOL IsButtonEnabled(int nRow, int nCol) const;
-	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData2; }
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell);
 	virtual void PrepareControl(CWnd& /*ctrl*/, int /*nRow*/, int /*nCol*/) {}
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
-	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected); 
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
-	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
+
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual UINT GetTextDrawFlags(int nCol) const;
 
 	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
 	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
 	void CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles = DTS_SHORTDATEFORMAT);
 	void PostCreateControl(CWnd& ctrl);
-	void HideControl(CWnd& ctrl);
-	void ShowControl(CWnd& ctrl, int nRow, int nCol);
+	void HideControl(CWnd& ctrl, const CWnd* pWndIgnore = NULL);
+	void ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick = FALSE);
+	CPopupEditCtrl* GetEditControl();
 
 	BOOL IsDuplicateRow(CString sRow, int nRowToIgnore) const;
 	BOOL IsDuplicateCol(CString sCol, int nColToIgnore) const;
@@ -174,8 +172,10 @@ protected:
 	int InsertRow(CString sRowText, int nItem, int nImage = -1);
 	BOOL CanDeleteCell(int nRow, int nCol) const;
 	void NotifyParentEditCell(const CString& sText, int nRow = -1, int nCol = -1) const;
-	BOOL HasNonTextColumns() const;
+	BOOL HasNonTextCells() const;
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
+	BOOL CellHasButton(int nRow, int nCol) const;
+	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
 
 private:
 	void RecalcHotButtonRects();

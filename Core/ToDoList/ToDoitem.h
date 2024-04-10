@@ -43,6 +43,7 @@ struct TDCTIMEPERIOD
 	BOOL operator!=(const TDCTIMEPERIOD& other) const;
 
 	CString Format(int nDecPlaces) const;
+	BOOL Parse(LPCTSTR szPeriod);
 	TH_UNITS GetTHUnits() const;
 
 	double GetTime(TH_UNITS nUnits) const;
@@ -136,19 +137,21 @@ public:
 	BOOL HasDependency(const TDCDEPENDENCY& depend) const;
 
 	int Format(CStringArray& aDepends, const CString& sFolder = _T("")) const;
-	CString Format(LPCTSTR szSep = NULL, const CString& sFolder = _T("")) const;
+	CString Format(TCHAR cSep = 0, const CString& sFolder = _T("")) const;
 	
+	int Parse(LPCTSTR szDepends, LPCTSTR szSep = NULL);
 	BOOL MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes = TRUE) const;
 
 	// Mfc42 versions return value not reference
-	const TDCDEPENDENCY& GetAt(int nIndex) const;
-	TDCDEPENDENCY& GetAt(int nIndex);
 	const TDCDEPENDENCY& operator[](int nIndex) const;
 	TDCDEPENDENCY& operator[](int nIndex);
 
 private:
 	int FindLocalDependency(DWORD dwDependID) const;
 	int FindDependency(const TDCDEPENDENCY& depend) const;
+
+	const TDCDEPENDENCY& GetAt(int nIndex) const;
+	TDCDEPENDENCY& GetAt(int nIndex);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

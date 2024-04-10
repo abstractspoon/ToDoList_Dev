@@ -202,7 +202,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 				sTextValue = CEnString(ID_SB_MULTISELTASK, nSelCount);
 
 				const int MAXTIPLEN = 255; // CToolInfo
-				int nMaxTasks = max(nSelCount, 10), nNumTasks = nMaxTasks;
+				int nMaxTasks = min(nSelCount, 10), nNumTasks = nMaxTasks;
 
 				CString sFmtMore;
 

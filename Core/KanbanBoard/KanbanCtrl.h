@@ -165,7 +165,7 @@ protected:
 	void RebuildColumns(DWORD dwFlags);
 	void RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelTaskIDs);
 	void RebuildDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
-	void RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray);
+	void RebuildFixedColumns();
 	int RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	int AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	BOOL CheckAddBacklogColumn();

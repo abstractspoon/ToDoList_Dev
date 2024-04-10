@@ -148,6 +148,20 @@ CString TDCTIMEPERIOD::Format(int nDecPlaces) const
 	return CTimeHelper().FormatTime(dAmount, GetTHUnits(), nDecPlaces);
 }
 
+BOOL TDCTIMEPERIOD::Parse(LPCTSTR szPeriod)
+{
+	double dValue = 0.0;
+	TH_UNITS nTimeUnits = THU_NULL;
+
+	if (!CTimeHelper::DecodeOffset(szPeriod, dValue, nTimeUnits, FALSE))
+		return FALSE;
+
+	dAmount = dValue;
+	nUnits = TDC::MapTHUnitsToUnits(nTimeUnits);
+
+	return TRUE;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 TDCCOST::TDCCOST(LPCTSTR szCost) : dAmount(0.0), bIsRate(FALSE)
@@ -495,14 +509,14 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 	return -1;
 }
 
-CString CTDCDependencyArray::Format(LPCTSTR szSep, const CString& sFolder) const
+CString CTDCDependencyArray::Format(TCHAR cSep, const CString& sFolder) const
 {
 	CStringArray aDepends;
 
 	if (!Format(aDepends, sFolder))
 		return EMPTY_STR;
 		
-	return Misc::FormatArray(aDepends, szSep);
+	return Misc::FormatArray(aDepends, cSep);
 }
 
 int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) const
@@ -514,6 +528,24 @@ int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) 
 		aDepends[nDepend] = GetAt(nDepend).Format(sFolder);
 
 	return nNumDepends;
+}
+
+int CTDCDependencyArray::Parse(LPCTSTR szDepends, LPCTSTR szSep)
+{
+	RemoveAll();
+
+	CStringArray aDepends;
+	int nNumDepends = Misc::Split(szDepends, aDepends, szSep);
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		TDCDEPENDENCY depend;
+
+		if (depend.Parse(aDepends[nDepend]))
+			Add(depend);
+	}
+
+	return GetSize();
 }
 
 BOOL CTDCDependencyArray::MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes) const

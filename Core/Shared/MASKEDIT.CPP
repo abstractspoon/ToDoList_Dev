@@ -70,9 +70,20 @@ void CMaskEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 			CString sDecimal = Misc::GetDecimalSeparator();
 	
 			if (!sDecimal.IsEmpty())
+			{
 				nChar = sDecimal[0];
+
+				// Prevent the addition of more than one decimal
+				CString sText;
+				GetWindowText(sText);
+
+				if (sText.Find(nChar) != -1)
+					return;
+			}
 			else
+			{
 				bSkipMaskCheck = TRUE;
+			}
 		}
 		break;
 

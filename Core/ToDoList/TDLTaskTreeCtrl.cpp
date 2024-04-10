@@ -69,7 +69,14 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 								   const CContentMgr& mgrContent)
 	: 
-	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs, mgrContent),
+	CTDLTaskCtrlBase(ilIcons, 
+					 data, 
+					 styles, 
+					 tld, 
+					 mapVisibleCols, 
+					 aCustAttribDefs, 
+					 mgrContent),
+
 	CTreeDragDropRenderer(m_tsh, m_tcTasks),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
@@ -137,8 +144,6 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti)
 // internal version) 
 BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy)
 { 
-	CScopedLogTimer log(_T("CTDLTaskTreeCtrl::SelectItem()"));
-	
 	// Avoid unnecessary selections
 	if (GetSelectedCount() == 1)
 	{
@@ -206,8 +211,12 @@ void CTDLTaskTreeCtrl::DeselectAll()
 	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 }
 
-BOOL CTDLTaskTreeCtrl::SelectAll() 
+BOOL CTDLTaskTreeCtrl::SelectAll(BOOL bVisibleOnly)
 { 
+	// All selected tasks must be visible
+	if (!bVisibleOnly)
+		ExpandAll();
+
 	if (TSH().AddAll())
 	{
 		SyncColumnSelectionToTasks();
@@ -340,10 +349,6 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 
 	ExpandList();
 	RecalcUntrackedColumnWidths();
-
-	// Resync horizontal scrollbars because 
-	// RecalcUntrackedColumnWidths doesn't always do it
-//	PostResize();
 }
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible(BOOL bHorzPartialOK)
@@ -436,6 +441,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
+	CHoldRecalcColumns hr(*this);
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scope redraw holding else EnsureVisible doesn't work
@@ -446,10 +452,11 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		ExpandItemRaw(hti, bExpand, bAndChildren);
 	}
 
+	if (!bExpand)
+		TSH().RemoveHiddenItems();
+
 	if (htiSel)
 		m_tcTasks.EnsureVisible(htiSel);
-
-	RecalcUntrackedColumnWidths();
 }
 
 void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList)
@@ -1892,7 +1899,7 @@ BOOL CTDLTaskTreeCtrl::IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const
 				return FALSE;
 
 			// Prevent moving subtasks of locked parent unless parent is reference
-			if (SelectionHasLockedParent(TRUE))
+			if (SelectionHasLockedParents(TRUE))
 				return FALSE;
 		}
 		break;

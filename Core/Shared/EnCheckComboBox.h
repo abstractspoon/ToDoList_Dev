@@ -29,6 +29,7 @@ public:
 
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const; // virtual
 	BOOL SetChecked(const CStringArray& aChecked);
 	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
@@ -73,7 +74,6 @@ protected:
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;
 	BOOL AddEmptyString() { return CCheckComboBox::AddEmptyString(); }
-	void GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
 	
 	BOOL HasItemNone() const { return (GetItemNoneIndex() != CB_ERR); }

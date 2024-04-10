@@ -711,7 +711,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 
 		case TDCA_ALLOCTO:
 		case TDCA_ALLOCBY:
-			sGroupBy.LoadString(IDS_NOBODY);
+			sGroupBy.LoadString(IDS_NOONE);
 			break;
 
 		default:
@@ -2908,10 +2908,7 @@ BOOL CKanbanColumnCtrl::InitTooltip()
 		if (!m_tooltip.Create(this))
 			return FALSE;
 
-		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
-		m_tooltip.SetMaxTipWidth((UINT)(WORD)-1);
+		m_tooltip.EnableMultilineTips();
 
 		HWND hwndTooltips = (HWND)SendMessage(LVM_GETTOOLTIPS);
 		::SendMessage(hwndTooltips, TTM_ACTIVATE, FALSE, 0);

@@ -145,6 +145,7 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 
 	ASSERT(GetItemCount() == NUM_ITEMS);
 
+	GetHeader()->EnableTracking(FALSE);
 	UpdateVisibility();
 }
 

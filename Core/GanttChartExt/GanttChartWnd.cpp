@@ -39,12 +39,6 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef LVS_EX_DOUBLEBUFFER
-#define LVS_EX_DOUBLEBUFFER 0x00010000
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
-
 const int PADDING = 3;
 const UINT IDC_GANTTCTRL = 1001;
 
@@ -492,7 +486,7 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) con
 	return m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

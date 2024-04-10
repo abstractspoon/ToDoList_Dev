@@ -47,7 +47,7 @@ enum
 struct NCGDRAWITEM
 {
 	NCGDRAWITEM() { pDC = NULL; dwItem = dwParentItem = 0; nColID = 0; rItem = NULL; nLevel = 0; 
-					nItemPos = 0; rWindow = NULL; /*bSelected = FALSE;*/ nTextAlign = DT_LEFT; }
+					nItemPos = 0; rWindow = NULL; nTextAlign = DT_LEFT; }
 
 	CDC* pDC;
 	DWORD dwItem;

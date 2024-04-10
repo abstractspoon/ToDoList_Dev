@@ -95,6 +95,12 @@ void CTDLToolbarButtonListCtrl::InitState()
 	OverrideSelectionTheming(TRUE, TRUE);
 	ShowGrid(TRUE, TRUE);
 
+	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350), ILCT_DROPLIST);
+	AddCol(_T("Image"), GraphicsMisc::ScaleByDPIFactor(75), ILCT_BROWSE);
+
+	SetAutoRowPrompt(CEnString(IDS_NEW_TOOLBARBUTTON));
+	AutoAdd(TRUE, FALSE);
+
 	CreateControl(m_cbMenuItems, IDC_MENUID_COMBO, CBS_DROPDOWNLIST); // no sort
 	CLocalizer::EnableTranslation(m_cbMenuItems, FALSE);
 
@@ -102,12 +108,6 @@ void CTDLToolbarButtonListCtrl::InitState()
 	VERIFY(menu.LoadMenu());
 
 	VERIFY(m_cbMenuItems.Initialise(menu, IDS_TOOLBARMENUSEPARATOR));
-
-	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350), ILCT_DROPLIST);
-	AddCol(_T("Image"), GraphicsMisc::ScaleByDPIFactor(75), ILCT_BROWSE);
-
-	SetAutoRowPrompt(CEnString(IDS_NEW_TOOLBARBUTTON));
-	AutoAdd(TRUE, FALSE);
 
 	m_ilImages.LoadDefaultImages(TRUE);
 
@@ -128,7 +128,7 @@ void CTDLToolbarButtonListCtrl::PopulateList()
 	}
 }
 
-void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
+void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
 	// handle new buttons
 	UINT nMenuID = 0;
@@ -150,7 +150,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/
 	switch (nCol)
 	{
 	case MENUID_COL:
-		ShowControl(m_cbMenuItems, nItem, nCol);
+		ShowControl(m_cbMenuItems, nItem, nCol, bBtnClick);
 		break;
 		
 	case IMAGE_COL:

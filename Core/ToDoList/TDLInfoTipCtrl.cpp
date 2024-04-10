@@ -245,15 +245,14 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
 	ADDINFOITEM(TDCA_CREATEDBY, IDS_TDLBC_CREATEDBY, pTDI->sCreatedBy);
 	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, m_formatter.GetTaskCreationDate(pTDI));
-	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, pTDI->aDependencies.Format());
 	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, m_formatter.GetTaskDoneDate(pTDI));
-	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, Misc::FormatArray(pTDI->aFileLinks, '\n')); // separate lines
+	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, m_formatter.GetTaskFileLinks(pTDI, '\n')); // separate lines
 	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_YES : 0));
 	ADDINFOITEM(TDCA_ID, IDS_TDLBC_ID, Misc::Format(dwTaskID));
 	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
 	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, m_formatter.GetTaskLastModDate(pTDI));
 	ADDINFOITEM(TDCA_LOCK, IDS_TDLBC_LOCK, CEnString(pTDI->bLocked ? IDS_YES : 0));
-	ADDINFOITEM(TDCA_PATH, IDS_TDC_COLUMN_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
+	ADDINFOITEM(TDCA_PATH, IDS_TDC_COLUMN_PATH, m_formatter.GetTaskPath(pTDS));
 	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, m_formatter.GetTaskPercentDone(pTDI, pTDS));
 	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, m_formatter.GetTaskPosition(pTDS));
 	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS, FALSE));
@@ -275,10 +274,8 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 
 	if (mapAttrib.Has(TDCA_DEPENDENCY))
 	{
-		CDWordArray aDependents;
-
-		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents, FALSE))
-			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, Misc::FormatArray(aDependents));
+		ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, m_formatter.GetTaskDependencies(pTDI, '\n')); // separate lines
+		ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, m_formatter.GetTaskDependents(dwTaskID, '\n')); // separate lines
 	}
 
 	// Custom attributes

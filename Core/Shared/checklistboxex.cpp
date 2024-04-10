@@ -5,6 +5,7 @@
 #include "checklistboxex.h"
 #include "themed.h"
 #include "dialoghelper.h"
+#include "Misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -112,8 +113,46 @@ int CCheckListBoxEx::SetCheckByData(DWORD dwItemData, BOOL bChecked)
 	if (nIndex == CB_ERR)
 		return FALSE;
 
-	SetCheck(nIndex, (bChecked ? 1 : 0));
+	SetCheck(nIndex, (bChecked ? BST_CHECKED : BST_UNCHECKED));
 	return nIndex;
+}
+
+int CCheckListBoxEx::SetCheckedByItemData(DWORD dwItemData)
+{
+	ASSERT(GetSafeHwnd());
+
+	int nNumChecked = 0;
+
+	for (int nItem = 0; nItem < GetCount(); nItem++)
+	{
+		if (Misc::HasFlag(dwItemData, GetItemData(nItem)))
+		{
+			SetCheck(nItem, BST_CHECKED);
+			nNumChecked++;
+		}
+		else
+		{
+			SetCheck(nItem, BST_UNCHECKED);
+		}
+	}
+
+	ASSERT(nNumChecked || !dwItemData); // sanity check
+
+	return nNumChecked;
+}
+
+DWORD CCheckListBoxEx::GetCheckedItemData() const
+{
+	CCheckListBoxEx* pThis = const_cast<CCheckListBoxEx*>(this);
+	DWORD dwChecked = 0;
+
+	for (int nItem = 0; nItem < GetCount(); nItem++)
+	{
+		if (pThis->GetCheck(nItem) == BST_CHECKED)
+			dwChecked |= pThis->GetItemData(nItem);
+	}
+
+	return dwChecked;
 }
 
 BOOL CCheckListBoxEx::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pLResult) 

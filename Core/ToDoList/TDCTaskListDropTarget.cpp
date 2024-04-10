@@ -1,15 +1,15 @@
-// TaskListDropTarget.cpp: implementation of the CTaskListDropTarget class.
+// TaskListDropTarget.cpp: implementation of the CTDCTaskListDropTarget class.
 //
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "TaskListDropTarget.h"
-#include "TDLTaskCtrlBase.h"
+#include "TDCTaskListDropTarget.h"
 
 #include "..\shared\wclassdefines.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\webmisc.h"
+#include "..\shared\misc.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\holdredraw.h"
@@ -96,7 +96,7 @@ CString TLDT_DATA::GetText() const
 
 #define IS_WND_TYPE(pWnd, cls, type) (pWnd->IsKindOf(RUNTIME_CLASS(cls)) || CWinClasses::IsClass(*pWnd, type))
 
-CTaskListDropTarget::CTaskListDropTarget() 
+CTDCTaskListDropTarget::CTDCTaskListDropTarget() 
 	: 
 	m_pOwner(NULL), 
 	m_dwPrevItem(0), 
@@ -105,32 +105,32 @@ CTaskListDropTarget::CTaskListDropTarget()
 {
 }
 
-CTaskListDropTarget::~CTaskListDropTarget()
+CTDCTaskListDropTarget::~CTDCTaskListDropTarget()
 {
 	delete m_pOutlook;
 	m_pOutlook = NULL;
 }
 
-BOOL CTaskListDropTarget::Register(CWnd* pTarget, CWnd* pOwner)
+BOOL CTDCTaskListDropTarget::Register(CWnd* pTarget, CWnd* pOwner)
 {
 	m_pOwner = pOwner;
 
 	return COleDropTarget::Register(pTarget);
 }
 
-DROPEFFECT CTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point)
+DROPEFFECT CTDCTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point)
 {
 	ResetDrag(pWnd);
 
 	return OnDragOver(pWnd, pObject, dwKeyState, point);
 }
 
-void CTaskListDropTarget::OnDragLeave(CWnd* pWnd)
+void CTDCTaskListDropTarget::OnDragLeave(CWnd* pWnd)
 {
 	ResetDrag(pWnd);
 }
 
-void CTaskListDropTarget::ResetDrag(CWnd* pWnd)
+void CTDCTaskListDropTarget::ResetDrag(CWnd* pWnd)
 {
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
@@ -145,7 +145,7 @@ void CTaskListDropTarget::ResetDrag(CWnd* pWnd)
 	m_dwPrevItem = 0;
 }
 
-BOOL CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) const
+BOOL CTDCTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) const
 {
 	hitRes.Clear();
 	
@@ -193,13 +193,6 @@ BOOL CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) 
 			hitRes.bImport = TRUE;
 		}
 	}
-	else if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
-	{
-		if (pWnd->GetStyle() & CBS_DROPDOWN) // must be editable
-		{
-			hitRes.nResult = TLDTHT_FILEEDIT;
-		}
-	}
 	else if (pWnd->IsKindOf(RUNTIME_CLASS(CDialog)) || pWnd->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
 	{
 		// allow dropping only on titlebar
@@ -212,7 +205,7 @@ BOOL CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) 
 	return (hitRes.nResult != TLDTHT_NONE);
 }
 
-DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD /*dwKeyState*/, CPoint point)
+DROPEFFECT CTDCTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD /*dwKeyState*/, CPoint point)
 {
 	if (!pWnd->IsWindowEnabled())
 		return DROPEFFECT_NONE;
@@ -261,7 +254,7 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 			lvfi.vkDirection = VK_DOWN;
 
 			int nPrev = ListView_FindItem(*pWnd, -1, &lvfi);
-			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED); 
+			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED);
 		}
 
 		if (hitRes.dwTaskID != 0)
@@ -301,7 +294,7 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	return DROPEFFECT_NONE;
 }
 
-DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFilesFromText)
+DROPEFFECT CTDCTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_DATA& drop, BOOL bFilesFromText)
 {
 	// Note: CF_HDROP does not support DROPEFFECT_LINK when the source is text
 	if (CMSOutlookHelper::IsOutlookObject(drop.pObject))
@@ -310,9 +303,6 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		{
 		case TLDTHT_TASKVIEW:
 			return ((drop.dwTaskID && !drop.bImportTasks && !bFilesFromText) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
-
-		case TLDTHT_FILEEDIT:
-			return (bFilesFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 		}
 	}
 	else if ((nHitTest != TLDTHT_NONE) && (drop.HasFiles() || drop.HasText()))
@@ -321,9 +311,6 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 		{
 		case TLDTHT_TASKVIEW:
 			return ((drop.dwTaskID && !drop.bImportTasks && !bFilesFromText && !drop.HasText()) ? DROPEFFECT_LINK : DROPEFFECT_COPY);
-
-		case TLDTHT_FILEEDIT:
-			return (bFilesFromText ? DROPEFFECT_COPY : DROPEFFECT_LINK);
 
 		case TLDTHT_CAPTION:
 			{
@@ -343,7 +330,7 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 	return DROPEFFECT_NONE;
 }
 
-int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText)
+int CTDCTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles, BOOL& bFromText)
 {
 	ASSERT(pObject);
 
@@ -365,7 +352,7 @@ int CTaskListDropTarget::GetDropFilePaths(COleDataObject* pObject, CStringArray&
 	return aFiles.GetSize();
 }
 
-BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT /*dropEffect*/, CPoint point)
+BOOL CTDCTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT /*dropEffect*/, CPoint point)
 {
 	CString sClass = CWinClasses::GetClass(*pWnd);
 	m_pOwner->SetForegroundWindow();
@@ -418,7 +405,16 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 	return TRUE; // because we handle it
 }
 
-BOOL CTaskListDropTarget::InitializeOutlook()
+DROPEFFECT CTDCTaskListDropTarget::OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point)
+{
+	if (DoDragScroll(pWnd, dwKeyState, point))
+		return DROPEFFECT_SCROLL;
+
+	// else
+	return COleDropTarget::OnDragScroll(pWnd, dwKeyState, point);
+}
+
+BOOL CTDCTaskListDropTarget::InitializeOutlook()
 {
 	if (m_pOutlook == NULL)
 		m_pOutlook = new CMSOutlookHelper;

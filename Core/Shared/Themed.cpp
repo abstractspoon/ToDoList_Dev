@@ -243,21 +243,24 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 		// Don't scale check boxes or radio buttons
 		CRect rImage(rect);
 
-		switch (nThPart)
+		if (sThClass == _T("BUTTON"))
 		{
-		case BP_CHECKBOX:
-		case BP_RADIOBUTTON:
+			switch (nThPart)
 			{
-				CSize size;
-				th.GetSize(nThPart, 1, size);
+			case BP_CHECKBOX:
+			case BP_RADIOBUTTON:
+				{
+					CSize size;
+					th.GetSize(nThPart, 1, size);
 
-				rImage.OffsetRect((rImage.Width() - size.cx) / 2,
-					(rImage.Height() - size.cy) / 2);
+					rImage.OffsetRect((rImage.Width() - size.cx) / 2,
+						(rImage.Height() - size.cy) / 2);
 
-				rImage.right = (rImage.left + size.cx);
-				rImage.bottom = (rImage.top + size.cy);
+					rImage.right = (rImage.left + size.cx);
+					rImage.bottom = (rImage.top + size.cy);
+				}
+				break;
 			}
-			break;
 		}
 				
 		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
@@ -715,21 +718,35 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 				
 				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
 				{
-					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					if ((nState & DFCS_MIXED) == DFCS_MIXED)
 					{
-						nThState = CBS_CHECKEDDISABLED;
-					}
-					else if ((nState & DFCS_HOT) == DFCS_HOT)
-					{
-						nThState = CBS_CHECKEDHOT;
-					}
-					else if ((nState & DFCS_MIXED) == DFCS_MIXED)
-					{
-						nThState = CBS_MIXEDNORMAL;
+						if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+						{
+							nThState = CBS_MIXEDDISABLED;
+						}
+						else if ((nState & DFCS_HOT) == DFCS_HOT)
+						{
+							nThState = CBS_MIXEDHOT;
+						}
+						else
+						{
+							nThState = CBS_MIXEDNORMAL;
+						}
 					}
 					else
 					{
-						nThState = CBS_CHECKEDNORMAL;
+						if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+						{
+							nThState = CBS_CHECKEDDISABLED;
+						}
+						else if ((nState & DFCS_HOT) == DFCS_HOT)
+						{
+							nThState = CBS_CHECKEDHOT;
+						}
+						else
+						{
+							nThState = CBS_CHECKEDNORMAL;
+						}
 					}
 				}
 				else
@@ -752,7 +769,7 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 				return FALSE;
 		}
 		break;
-		
+
 	case DFC_CAPTION:
 		break;
 		

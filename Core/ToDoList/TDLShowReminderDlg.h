@@ -35,6 +35,8 @@ protected:
 
 protected:
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
+	virtual COLORREF GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

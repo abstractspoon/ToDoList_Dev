@@ -24,6 +24,9 @@ public:
 	BOOL GetCheckByData(DWORD dwItemData) const;
 	int SetCheckByData(DWORD dwItemData, BOOL bChecked = TRUE);
 
+	DWORD GetCheckedItemData() const;
+	int SetCheckedByItemData(DWORD dwItemData);
+
 // Attributes
 protected:
 	CImageList m_ilCheck;

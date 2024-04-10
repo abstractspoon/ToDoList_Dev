@@ -19,11 +19,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPopupEditCtrl
 
-CPopupEditCtrl::CPopupEditCtrl(PEC_CLEANUP nCleanup) : m_nCleanUp(nCleanup)
+CPopupEditCtrl::CPopupEditCtrl(PEC_CLEANUP nCleanup) 
+	: 
+	m_nCleanUp(nCleanup),
+	m_bEditEnded(FALSE),
+	m_pParent(NULL),
+	m_pSpinBuddy(NULL),
+	m_nID(0)
 {
-	m_bEditEnded = FALSE;
-	m_pParent = NULL;
-	m_nID = 0;
 }
 
 CPopupEditCtrl::~CPopupEditCtrl()
@@ -46,16 +49,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CPopupEditCtrl message handlers
-
-void CPopupEditCtrl::OnKillFocus(CWnd* pNewWnd) 
-{
-	CEnEdit::OnKillFocus(pNewWnd);
-
-	// tell parent edit has been ended only if it hasn't already been
-	// dealt with
-	if (!m_bEditEnded)
-		EndEdit(FALSE, FALSE); // first FALSE means no cancel, second means not intentional
-}
 
 BOOL CPopupEditCtrl::Create(CWnd* pParentWnd, UINT nID, DWORD dwFlags) 
 {
@@ -85,6 +78,11 @@ BOOL CPopupEditCtrl::Create(CWnd* pParentWnd, UINT nID, DWORD dwFlags)
 	return FALSE;
 }
 
+void CPopupEditCtrl::SetSpinBuddy(CSpinButtonCtrl* pBuddy)
+{
+	m_pSpinBuddy = pBuddy;
+}
+
 int CPopupEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (CEnEdit::OnCreate(lpCreateStruct) == -1)
@@ -95,19 +93,30 @@ int CPopupEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CPopupEditCtrl::OnKillFocus(CWnd* pNewWnd) 
+{
+	CEnEdit::OnKillFocus(pNewWnd);
+
+	// tell parent edit has been ended only if it hasn't 
+	// already been dealt with
+	if (!m_bEditEnded && (pNewWnd != m_pSpinBuddy))
+	{
+		EndEdit(FALSE, FALSE); // first FALSE means no cancel, second means not intentional
+	}
+}
+
 void CPopupEditCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
 	// if key is escape then cancel edit and
 	// eat to prevent Windows beeping
-	if (nChar == VK_ESCAPE)
+	switch (nChar)
 	{
+	case VK_ESCAPE:
 		EndEdit(TRUE, TRUE); // first TRUE means cancel, second means intentional
 		return;
-	}
-	else if (nChar == VK_RETURN)
-	{
-		// so there's no beep
-		return;
+
+	case VK_RETURN:
+		return; // Prevent beep
 	}
 
 	CEnEdit::OnChar(nChar, nRepCnt, nFlags);
@@ -147,9 +156,12 @@ LRESULT CPopupEditCtrl::OnPECShow(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	Reset();
 
-	// Prevent underlying window moving during edit
-	CDisableMouseWheel::Initialize();
-
+	if (!ShowSpinBuddy(TRUE))
+	{
+		// Prevent underlying window moving during edit
+		CDisableMouseWheel::Initialize();
+	}
+	
 	// enable and show
 	SetSel(0, -1);
 	ShowWindow(SW_SHOW);
@@ -191,9 +203,35 @@ void CPopupEditCtrl::Hide()
 	if (GetStyle() & WS_POPUP)
 		m_pParent->PostMessage(WM_ACTIVATE, MAKEWPARAM(WA_ACTIVE, FALSE), (LPARAM)m_hWnd);
 
+	ShowSpinBuddy(FALSE);
 	ShowWindow(SW_HIDE);
 	EnableWindow(FALSE);
+
 	GetParent()->UpdateWindow();
+}
+
+BOOL CPopupEditCtrl::ShowSpinBuddy(BOOL bShow)
+{
+	if (m_pSpinBuddy && m_pSpinBuddy->GetSafeHwnd())
+	{
+		if (bShow)
+		{
+			m_pSpinBuddy->SetBuddy(this);
+			m_pSpinBuddy->ShowWindow(SW_SHOW);
+			m_pSpinBuddy->EnableWindow(TRUE);
+
+			return TRUE;
+		}
+		else
+		{
+			m_pSpinBuddy->SetBuddy(NULL);
+			m_pSpinBuddy->ShowWindow(SW_HIDE);
+			m_pSpinBuddy->EnableWindow(FALSE);
+		}
+	}
+
+	// else
+	return FALSE;
 }
 
 void CPopupEditCtrl::EndEdit(BOOL bCancel, BOOL bIntentional)

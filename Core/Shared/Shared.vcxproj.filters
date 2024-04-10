@@ -496,6 +496,9 @@
     <ClCompile Include="DarkMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OleDropTargetEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -1036,6 +1039,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DarkMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OleDropTargetEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -80,14 +80,20 @@ IMPLEMENT_DYNAMIC(CTDLTaskListCtrl, CTDLTaskCtrlBase)
 
 CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CToDoCtrlData& data, 
-								   const CToDoCtrlFind& find,
 								   const CTDCStyleMap& styles,
 								   const TDCAUTOLISTDATA& tld,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 								   const CContentMgr& mgrContent) 
 	: 
-	CTDLTaskCtrlBase(ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs, mgrContent),
+	CTDLTaskCtrlBase(ilIcons, 
+					 data, 
+					 styles, 
+					 tld, 
+					 mapVisibleCols, 
+					 aCustAttribDefs, 
+					 mgrContent),
+
 	m_nGroupBy(TDCC_NONE),
 	m_bSortGroupsAscending(TRUE),
 	m_bDeletingGroupHeaders(FALSE),
@@ -203,7 +209,6 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 				DoSort();
 		}
 	}
-
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()
@@ -480,7 +485,7 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) co
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nGroupBy))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, nGroupBy, pDef, FALSE);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, nGroupBy, pDef, FALSE);
 
 			return (pDef->bEnabled && pDef->IsDataType(TDCCA_STRING));
 		}
@@ -623,7 +628,7 @@ BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, FALSE);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, FALSE);
 			
 			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 			CString sData = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
@@ -670,7 +675,7 @@ CString CTDLTaskListCtrl::GetTaskGroupValue(DWORD dwTaskID) const
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 			{
 				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, sGroupBy);
+				GET_CUSTDEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, sGroupBy);
 
 				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
 				sGroupBy = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
@@ -708,7 +713,7 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 
 		case TDCC_ALLOCTO:
 		case TDCC_ALLOCBY:
-			sGroupBy.LoadString(IDS_TDC_NOBODY);
+			sGroupBy.LoadString(IDS_TDC_NOONE);
 			break;
 
 		default:
@@ -726,7 +731,7 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, _T(""));
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, _T(""));
 		
 		return pDef->sLabel;
 	}

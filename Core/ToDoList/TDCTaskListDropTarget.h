@@ -1,4 +1,4 @@
-// TaskListDropTarget.h: interface for the CTaskListDropTarget class.
+// TaskListDropTarget.h: interface for the CTDCTaskListDropTarget class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -9,9 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\shared\TreeCtrlHelper.h"
-
-#include <afxole.h>
+#include "..\shared\OleDropTargetEx.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,11 +45,11 @@ const UINT WM_TLDT_CANDROP	= ::RegisterWindowMessage(_T("WM_TLDT_CANDROP"));	// 
 
 //////////////////////////////////////////////////////////////////////
 
-class CTaskListDropTarget : public COleDropTarget  
+class CTDCTaskListDropTarget : public COleDropTargetEx
 {
 public:
-	CTaskListDropTarget();
-	virtual ~CTaskListDropTarget();
+	CTDCTaskListDropTarget();
+	virtual ~CTDCTaskListDropTarget();
 
 	BOOL Register(CWnd* pTarget, CWnd* pOwner);
 
@@ -67,6 +65,7 @@ protected:
 	virtual void OnDragLeave(CWnd* pWnd);
 	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point);
 	virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT dropEffect, CPoint point);
+	virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
 
 #if _MSC_VER >= 1400
 protected:
@@ -77,7 +76,6 @@ public:
 	{
 		TLDTHT_NONE = -1,
 		TLDTHT_TASKVIEW,
-		TLDTHT_FILEEDIT,
 		TLDTHT_CAPTION,
 	};
 

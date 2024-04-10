@@ -63,6 +63,10 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
+
+	ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnSelItemChanged)
+	ON_NOTIFY_RANGE(NM_KILLFOCUS, 0, 0xFFFF, OnNotifyKillFocus)
+
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnEditEnd)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnEditCancel)
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
@@ -88,13 +92,19 @@ void CInputListCtrl::InitState()
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
 
-	if (GetSafeHwnd() && CThemed::AreControlsThemed())
+	// Hot tracker might have been initialised in PreSubclassWindow
+	if (GetSafeHwnd() && CThemed::AreControlsThemed() && !m_hotTrack.IsInitialized())
 		m_hotTrack.Initialize(this, FALSE);
 }
 
 const CColumnData2* CInputListCtrl::GetColumnData(int nCol) const
 {
 	return static_cast<const CColumnData2*>(CEnListCtrl::GetColumnData(nCol)); 
+}
+
+void CInputListCtrl::HideAllControls(const CWnd* pWndIgnore) 
+{ 
+	HideControl(m_editBox, pWndIgnore); 
 }
 
 void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
@@ -162,7 +172,7 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 
 	// if we're were editing the same cell we've clicked on then
 	// we may be cancelling a listbox edit so don't trigger it again
-	if (bWasEditing && nItem == GetCurSel() && nCol == m_nCurCol)
+	if (bWasEditing && IsCellSelected(nItem, nCol))
 		return;
 	
 	// if this is the second click or the user clicked on the column button
@@ -196,6 +206,10 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 
 		m_nCurCol = nCol;
 	}
+	else
+	{
+		HideAllControls();
+	}
 }
 
 void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
@@ -211,7 +225,7 @@ void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	if (nCol != -1 && nItem != -1 && !IsReadOnly())
 	{
 		// dont edit if editing is disabled
-		if (IsColumnEditingDisabled(nCol))
+		if (!IsColumnEditingEnabled(nCol))
 			return;
 
 		// dont edit if both autorowadding and autocoladding are enabled and we're in
@@ -329,25 +343,20 @@ LRESULT CInputListCtrl::OnEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 	return 0L;
 }
 
-void CInputListCtrl::DisableColumnEditing(int nCol, BOOL bDisable)
+void CInputListCtrl::EnableColumnEditing(int nCol, BOOL bEnable)
 {
+	// Adds a new item if necessary
 	CColumnData2* pData = (CColumnData2*)CreateColumnData(nCol);
 
-	// add a new item if necessary
 	if (pData)
-		pData->bEditEnabled = !bDisable;
+		pData->bEditEnabled = bEnable;
 }
 
-BOOL CInputListCtrl::IsColumnEditingDisabled(int nCol) const
+BOOL CInputListCtrl::IsColumnEditingEnabled(int nCol) const
 {
 	const CColumnData2* pData = GetColumnData(nCol);
 
-	// add a new item if necessary
-	if (pData)
-		return !pData->bEditEnabled;
-
-	// else
-	return FALSE;
+	return (pData ? pData->bEditEnabled : TRUE);
 }
 
 void CInputListCtrl::AutoAdd(BOOL bRows, BOOL bCols)
@@ -441,7 +450,7 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	nItem = GetFocusedItem();
 	m_nItemLastSelected = nItem;
 	
-	// if its the right or left cursor keys then update column pos
+	// if its the right or left cursor keys then update column position
 	if (nChar == VK_LEFT && nCol > 0)
 	{
 		nCol--;
@@ -459,7 +468,7 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	else if (nChar == VK_DELETE && CanDeleteSelectedCell())
 	{
 		// if the delete key is pressed and we're in col0 or row0 
-		// then delete correseponding row or column
+		// then delete corresponding row or column
 		// unless its the prompt row or column 
 		DeleteSelectedCell();
 	}
@@ -473,273 +482,106 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	SetCurSel(nItem, nCol, TRUE); // notifies parent
 }
 
-void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
+void CInputListCtrl::DrawItemBackground(CDC* /*pDC*/, int /*nItem*/, const CRect& /*rItem*/, COLORREF /*crBack*/, 
+										BOOL /*bSelected*/, BOOL /*bDropHighlighted*/, BOOL /*bFocused*/)
 {
-	// this function differs from the base class in as much as it 
-	// highlights only the currently selected cell, not the whole line
-	CDC* pDC;
-	CRect rHeader, rFocus;
-	BOOL bRes;
-	CSize sizeText;
-
-	// get and prepare devide context
-	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
-	pDC->SelectObject(GetFont());
-	pDC->SetROP2(R2_COPYPEN);
-
-	// init helper variables
-	int nItem = lpDrawItemStruct->itemID;
-	UINT uStyle = GetStyle();
-	UINT uState = GetItemState(nItem, LVIS_FOCUSED | LVIS_SELECTED);
-
-	// init helper variables
-	CRect rItem(lpDrawItemStruct->rcItem), rClient;
-	GetClientRect(&rClient);
-
-	// some problems with drophiliting items during drag and drop
-	// so we need to make sure drawing is clipped to client area
-	// this fixes it admirably!
-	if (GetHeader())
-	{
-		GetHeader()->GetWindowRect(rHeader);
-		ScreenToClient(rHeader);
-		rClient.top = max(0, rHeader.bottom);
-		pDC->IntersectClipRect(rClient);
-	}
-	
-	BOOL bListFocused = (GetFocus() == this);
-	BOOL bSelAlways = ((uStyle & LVS_SHOWSELALWAYS) == LVS_SHOWSELALWAYS);
-	BOOL bSelected = (IsWindowEnabled() && (nItem == GetCurSel()) && (bListFocused || bSelAlways));
-	BOOL bItemFocused = (bListFocused && bSelected);
-	BOOL bWantCellFocus = (bListFocused && !IsSelectionThemed(TRUE) && !CThemed::AreControlsThemed());
-	
-	// images 
-	CSize sizeState, sizeImage;
-
-	// DO NOT SUPPORT INDENTATION
-	CImageList* pImageList = GetImageList(LVSIL_SMALL);
-	int nImage = -1;
-
-	if (pImageList)
-	{
-		nImage = GetImageIndex(nItem, 0); 
-		CEnImageList::GetImageSize(*pImageList, sizeImage);
-	}
-
-	// state
-	CImageList* pStateList = GetImageList(LVSIL_STATE);
-
-	if (pStateList)
-		CEnImageList::GetImageSize(*pStateList, sizeState);
-
-	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
-	{
-		int nSaveDC = pDC->SaveDC();
-
-		LV_COLUMN lvc = { 0 };
-		lvc.mask = LVCF_WIDTH | LVCF_FMT;
-		int nCol = 0;
-
-		bRes = GetColumn(nCol, &lvc);
-
-		// draw horz grid lines if required
-		if (m_bHorzGrid)
-		{
-			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
-
-			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
-		}
-
-		// cycle thru the columns drawing each one
-		while (bRes)
-		{
-			BOOL bIsPrompt = IsPrompt(nItem, nCol);
-			BOOL bSel = (bSelected && (nCol == m_nCurCol));
-
-			// Calculate the space required for images
-			int nImageWidth = 0;
-
-			if (nCol == 0)
-			{
-				if (pStateList)
-					nImageWidth += sizeState.cx + 2; // 1 pixel border either side
-
-				if (pImageList/* && (nImage != -1)*/)
-					nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
-			}
-			
-			// get next item
-			bRes = GetColumn(nCol + 1, &lvc);
-
-			CRect rCell;
-			GetCellRect(nItem, nCol, rCell);
-
-			// adjust for button
-			CRect rButton(0, 0, 0, 0), rBack(rCell);
-			BOOL bHasBtn = GetButtonRect(nItem, nCol, rButton);
-
-			if (bHasBtn && (GetColumnType(nCol) != ILCT_CHECK))
-				rBack.right = rButton.left;
-			
-			// fill cell
-			if (bSel && IsSelectionThemed(FALSE))
-			{
-				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
-				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-
-				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rBack, dwFlags, rBack);
-			}
-			else
-			{
-				if (m_bHorzGrid)
-					rBack.bottom--;
-
-				COLORREF crBack = GetItemBackColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
-				pDC->FillSolidRect(rBack, crBack);
-			}
-
-			if (m_bVertGrid && (bHasBtn || !(bSel && IsSelectionThemed(FALSE))))
-			{
-				// if we're not tight up against the client edge then draw the vertical 
-				if (rCell.right < rClient.right)
-				{
-					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), GetSysColor(COLOR_3DSHADOW));
-					rBack.right--;
-				}
-			}
-
-			// adjust text rect for button
-			CRect rText(rCell);
-
-			if (bHasBtn)
-			{
-				if (rButton.left <= rCell.left)
-				{
-					rText.left = rButton.right;
-				}
-				else if (rButton.right >= rCell.right)
-				{
-					rText.right = rButton.left;
-				}
-				else // button is centred => no text
-				{
-					ASSERT(nImageWidth == 0);
-					rText.right = rText.left = (rText.CenterPoint().x - (BTN_WIDTH / 2));
-				}
-			}
-
-			// Draw images
-			if (nImageWidth > 0)
-			{
-				if (pStateList)
-				{
-					int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
-					nImage = nState >> 12;
-					pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
-
-					if (lvc.cx > sizeState.cx)
-						pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
-
-					rText.left += sizeState.cx + 2; // 1 pixel border either side
-				}
-
-				// draw item image
-				if (pImageList && (nImage != -1))
-				{
-					if (lvc.cx > nImageWidth + sizeImage.cx)
-						pImageList->Draw(pDC, nImage, CPoint(rText.left + 1, rItem.top + 1), ILD_TRANSPARENT);
-
-					rText.left += sizeImage.cx + 2; // 1 pixel border either side
-				}
-			}
-
-			// get item text
-			CEnString sText;
-			
-			if (bIsPrompt && (IsReadOnly() || !IsWindowEnabled()))
-			{
-				sText.Empty(); // hides the prompt if readonly
-			}
-			else
-			{
-				CString sTemp(GetItemText(nItem, nCol));
-				
-				sText = sTemp;
-				sizeText = sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
-			}
-
-			// setup focus rect (only for classic)
-			if (bWantCellFocus && bSel)
-			{
-				if (rText.IsRectEmpty())
-				{
-					rFocus = rCell;
-				}
-				else
-				{
-					rFocus = rText;
-					
-					if (nCol == 0)
-						rFocus.left += 2;
-				}
-			}
-			
-			// draw text
-			COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
-	
-			if (bSel && IsSelectionThemed(FALSE))
-			{
-				DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
-				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
-			}
-
-			UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
-
-			switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
-			{
-			case LVCFMT_CENTER: 
-				nFlags |= DT_CENTER;	
-				break;
-
-			case LVCFMT_RIGHT:	
-				nFlags |= DT_RIGHT;		
-				rText.right -= 4;
-				break;
-
-			case LVCFMT_LEFT:	
-				nFlags |= DT_LEFT;		
-				rText.left += 4;
-				break;
-			}
-
-			DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
-		
-			if (bHasBtn)
-				DrawButton(pDC, nItem, nCol, rButton, !sText.IsEmpty(), bSel);
-
-			// next column
-			nCol++;
-		}
-
-		pDC->RestoreDC(nSaveDC);
-
-		// then draw focus rect
-		if (bWantCellFocus)
-			pDC->DrawFocusRect(rFocus);
-	}
+	// Do nothing - handled in DrawCellBackground
 }
 
-void CInputListCtrl::DrawCellText(CDC* pDC, int /*nRow*/, int /*nCol*/, 
-									const CRect& rText, const CString& sText, 
-									COLORREF crText, UINT nDrawTextFlags)
+BOOL CInputListCtrl::IsCellSelected(int nRow, int nCol, BOOL bVisually) const
 {
-	if (!sText.IsEmpty())
+	if (nRow != GetCurSel())
+		return FALSE;
+
+	if (nCol != m_nCurCol)
+		return FALSE;
+
+	if (bVisually && (IsEditing() || IsChild(GetFocus())))
+		return FALSE;
+
+	return TRUE;
+}
+
+void CInputListCtrl::DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, 
+										BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	bSelected &= IsCellSelected(nItem, nCol, TRUE);
+	COLORREF crBack = GetItemBackColor(nItem, nCol, bSelected, FALSE, bFocused);
+	
+	CEnListCtrl::DrawItemBackground(pDC, nItem, rCell, crBack, bSelected, bDropHighlighted, bFocused);
+}
+
+void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, 
+							  const CRect& rCell, const CString& sText, 
+							  BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	CRect rText(rCell);
+
+	if (CellHasButton(nItem, nCol))
 	{
-		pDC->SetTextColor(crText);
-		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
+		bSelected &= IsCellSelected(nItem, nCol, TRUE);
+
+		IL_COLUMNTYPE nBtnType = GetCellType(nItem, nCol);
+
+		if (nBtnType == ILCT_CHECK) // Special case
+		{
+			// Draw checkbox over background
+			CEnListCtrl::DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bFocused);
+
+			CRect rUnused;
+			VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rUnused));
+
+			return;
+		}
+
+		// all other button types
+		CRect rButton;
+		VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rButton));
+
+		// Exclude button from text rect
+		if (rButton.left <= rCell.left)
+		{
+			rText.left = rButton.right;
+		}
+		else if (rButton.right >= rCell.right)
+		{
+			rText.right = rButton.left;
+		}
+
+		// Buttons drawn as 'button' render 1-pixel less
+		switch (nBtnType)
+		{
+		case ILCT_DATE:
+		case ILCT_POPUPMENU:
+		case ILCT_CUSTOMBTN:
+			if (rButton.left <= rCell.left)
+			{
+				rText.left--;
+			}
+			else if (rButton.right >= rCell.right)
+			{
+				rText.right++;
+			}
+			break;
+		}
 	}
+			
+	CEnListCtrl::DrawCell(pDC, nItem, nCol, rText, sText, bSelected, bDropHighlighted, bFocused);
+}
+
+void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, 
+								  const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	if (GetCellType(nRow, nCol) == ILCT_CHECK)
+		return;
+
+	// else
+	CEnListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+}
+
+UINT CInputListCtrl::GetTextDrawFlags(int nCol) const
+{
+	return (CEnListCtrl::GetTextDrawFlags(nCol) & ~DT_END_ELLIPSIS);
 }
 
 IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
@@ -749,44 +591,56 @@ IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
 
 DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 {
-	DWORD dwState = 0;
-	
 	if (!IsButtonEnabled(nRow, nCol))
-	{
-		dwState = DFCS_INACTIVE;
-	}
-	else if (bSelected || IsButtonHot(nRow, nCol))
-	{
-		dwState = DFCS_HOT;
-	}
+		return DFCS_INACTIVE;
 
-	return dwState;
+	if (bSelected || IsButtonHot(nRow, nCol))
+		return DFCS_HOT;
+
+	return 0;
 }
 
-BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BOOL bHasText, BOOL bSelected)
+BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
 {
-	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
-
-	if (nType == ILCT_TEXT || !CanEditCell(nRow, nCol))
-		return FALSE;
-
 	if (!GetButtonRect(nRow, nCol, rButton))
 		return FALSE;
 
 	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
 	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
 
-	switch (nType)
+	switch (GetCellType(nRow, nCol))
 	{
-		case ILCT_DROPLIST:
 		case ILCT_DATE:
+			if (CThemed::AreControlsThemed())
+			{
+				// Draw underlying button
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+
+				// Draw date drop arrow
+				CThemed th;
+				th.Open(this, _T("DATEPICKER"));
+
+				th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, (bEnabled ? DPSCBR_NORMAL : DPSCBR_DISABLED), rButton);
+			}
+			else
+			{
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
+			}
+			break;
+
+		case ILCT_DROPLIST:
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
+			break;
+					
+		case ILCT_CUSTOMBTN:
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 			break;
 					
 		case ILCT_POPUPMENU:
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
+				// Draw arrow
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 
 				UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
@@ -798,18 +652,18 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 			{
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
 
-				// Make rect sides even for better centering of ellipsis
+				// Draw ellipsis
 				rButton.left += (rButton.Width() % 2);
 				rButton.top += (rButton.Height() % 2);
 
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-				pDC->DrawText("...", rButton, DT_CENTER | DT_VCENTER);
+				pDC->DrawText(_T("..."), rButton, DT_CENTER | DT_VCENTER);
 			}
 			break;
 			
 		case ILCT_CHECK:
 			{
-				if (bHasText)
+				if (!sText.IsEmpty())
 					dwState |= DFCS_CHECKED;
 
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
@@ -823,50 +677,63 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, CRect& rButton, BO
 	return TRUE;
 }
 
+BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
+{
+	CRect rUnused;
+	return GetButtonRect(nRow, nCol, rUnused);
+}
+
 BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 {
 	rButton.SetRectEmpty();
 
-	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
-
-	if (nType == ILCT_TEXT || !CanEditCell(nRow, nCol))
+	if (!CanEditCell(nRow, nCol))
 		return FALSE;
-	
+
+	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
 	GetCellRect(nRow, nCol, rButton);
 
-	// tweaks
 	switch (nType)
 	{
-		case ILCT_BROWSE:
-			rButton.left = (rButton.right - BTN_WIDTH);
+	case ILCT_BROWSE:
+	case ILCT_POPUPMENU:
+	case ILCT_CUSTOMBTN:
+		rButton.left = (rButton.right - BTN_WIDTH);
+		break;
 
-			// Windows 10 (maybe Windows 8/8.1) shrinks buttons
-			// by a pixel all round which looks inconsistent
-			// with all other controls so we experiment with
-			// enlarging the button appropriately
-			if (COSVersion() >= OSV_WIN8)
-				rButton.InflateRect(1, 1);
-			break;
+	case ILCT_DROPLIST:
+		rButton.left = (rButton.right - BTN_WIDTH);
+		break;
 
-		case ILCT_DROPLIST:
-		case ILCT_DATE:
-			rButton.left = (rButton.right - BTN_WIDTH);
-			break;
+	case ILCT_DATE:
+		rButton.left = (rButton.right - (BTN_WIDTH * 2));
+		break;
 
-		case ILCT_POPUPMENU:
-			rButton.right++;
-			rButton.left = (rButton.right - BTN_WIDTH - 2);
-			rButton.top--;
-			break;
+	case ILCT_CHECK:
+		rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
+		rButton.right = (rButton.left + BTN_WIDTH);
+		break;
 
-		case ILCT_CHECK:
-			rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
-			rButton.right = (rButton.left + BTN_WIDTH);
-			break;
+	case ILCT_TEXT:
+		return FALSE;
 
-		default:
-			rButton.SetRectEmpty();
-			return FALSE;
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Windows 10/11 (maybe Windows 8/8.1) shrinks buttons by 
+	// a pixel all round which looks inconsistent with all 
+	// other controls so we expand the button to compensate
+	switch (nType)
+	{
+	case ILCT_BROWSE:
+	case ILCT_DATE:
+	case ILCT_POPUPMENU:
+	case ILCT_CUSTOMBTN:
+		if (COSVersion() >= OSV_WIN8)
+			rButton.InflateRect(1, 1);
+		break;
 	}
 
 	return TRUE;
@@ -874,37 +741,12 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 
 BOOL CInputListCtrl::CanDeleteSelectedCell() const
 {
-	return CanDeleteCell(GetCurSel(), m_nCurCol);
+	return CanEditSelectedCell();
 }
 
 BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 {
-	// if readonly or disabled then no
-	if (IsReadOnly() || !IsWindowEnabled())
-		return FALSE;
-
-	if (nRow == -1)
-		return FALSE;
-
-	// don't delete it if its the topleft item
-	if (m_bAutoAddCols && nRow == 0 && m_bAutoAddRows && nCol == 0)
-		return FALSE;
-
-	// else can delete it if its not the row prompt
-	else if (m_bAutoAddRows && nCol == 0)
-	{
-		if (nRow < GetItemCount() - 1)
-			return TRUE;
-	}
-	// else can delete it if its not the col prompt
-	else if (m_bAutoAddCols && nRow == 0)
-	{
-		if (nCol < GetColumnCount() - 1)
-			return TRUE;
-	}
-
-	// else can't delete
-	return FALSE;
+	return CanEditCell(nRow, nCol);
 }
 
 BOOL CInputListCtrl::DeleteSelectedCell()
@@ -912,7 +754,7 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 	if (GetCurSel() != - 1)
 	{
 		// don't delete it if its the topleft item
-		if (m_bAutoAddCols && GetCurSel() == 0 && m_bAutoAddRows && m_nCurCol == 0)
+		if (m_bAutoAddCols && m_bAutoAddRows && IsCellSelected(0, 0))
 		{
 			return FALSE;
 		}
@@ -962,20 +804,22 @@ BOOL CInputListCtrl::IsEditing() const
 
 BOOL CInputListCtrl::IsButtonEnabled(int nRow, int nCol) const
 {
-	// NOT if readonly or disabled
-	return (!IsReadOnly() && IsWindowEnabled());
+	return CanEditCell(nRow, nCol);
 }
 
 BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 {
-
 	if (nRow == -1 || nCol == -1)
+		return FALSE;
+
+	// if readonly or disabled then no
+	if (IsReadOnly() || !IsWindowEnabled())
 		return FALSE;
 
 	// don't edit it:
 	//
 	// if editing is disabled in the current column
-	if (IsColumnEditingDisabled(nCol))
+	if (!IsColumnEditingEnabled(nCol))
 		return FALSE;
 	
 	// or if its the last row and not the first column when autoadding rows
@@ -1003,12 +847,18 @@ BOOL CInputListCtrl::CanEditCell(int nRow, int nCol) const
 
 BOOL CInputListCtrl::CanEditSelectedCell() const
 {
-	return CanEditCell(GetCurSel(), m_nCurCol);
+	int nSelRow, nSelCol;
+
+	if (!GetCurSel(nSelRow, nSelCol))
+		return FALSE;
+
+	return CanEditCell(nSelRow, nSelCol);
 }
 
 void CInputListCtrl::EditSelectedCell()
 {
-	EditCell(GetCurSel(), m_nCurCol, FALSE);
+	if (CanEditSelectedCell())
+		EditCell(GetCurSel(), m_nCurCol, FALSE);
 }
 
 void CInputListCtrl::OnKillFocus(CWnd* pNewWnd) 
@@ -1023,6 +873,10 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 		m_nItemLastSelected = -1;
 		m_nColLastSelected = -1;
 	}
+	else
+	{
+		HideAllControls(pNewWnd);
+	}
 
 	CRect rItem;
 	GetItemRect(GetCurSel(), rItem, LVIR_BOUNDS);
@@ -1031,25 +885,39 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	CEnListCtrl::OnKillFocus(pNewWnd);
 }
 
+BOOL CInputListCtrl::OnSelItemChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	HideAllControls();
+
+	*pResult = 0;
+
+	return FALSE; // continue routing
+}
+
+void CInputListCtrl::OnNotifyKillFocus(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult)
+{
+	CWnd* pCtrl = GetDlgItem(nCtrlID);
+
+	if (pCtrl)
+		HideControl(*pCtrl);
+}
+
 BOOL CInputListCtrl::SetCellText(int nRow, int nCol, const CString& sText)
 {
 	ASSERT (m_hWnd);
-	ASSERT ((m_bAutoAddRows && nRow >=0 && nRow < GetItemCount() - 1) || 
-			(!m_bAutoAddRows && nRow >=0 && nRow < GetItemCount()));
-	ASSERT ((m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount() - 1) ||
-			(!m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount()));
 
 	// only allow text setting if within valid range and if user is
 	// not trying to change prompt string if auto adding
-	if (((m_bAutoAddRows && nRow >=0 && nRow < GetItemCount() - 1) || 
-			(!m_bAutoAddRows && nRow >=0 && nRow < GetItemCount())) &&
-		 ((m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount() - 1) ||
-			(!m_bAutoAddCols && nCol >=0 && nCol < GetColumnCount())))
+	if (((m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount() - 1)) || 
+			(!m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount()))) &&
+		 ((m_bAutoAddCols && (nCol >= 0) && (nCol < GetColumnCount() - 1)) ||
+			(!m_bAutoAddCols && nCol >= 0 && (nCol < GetColumnCount()))))
 	{
 		SetItemText(nRow, nCol, sText);
 		return TRUE;
 	}
 
+	ASSERT(0);
 	return FALSE;
 }
 
@@ -1130,7 +998,7 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 		return;
 
 	// don't update if nothing's changed
-	if (nCol == m_nCurCol && nRow == CEnListCtrl::GetCurSel())
+	if (IsCellSelected(nRow, nCol))
 		return;
 
 	CRect rItem;
@@ -1153,7 +1021,7 @@ int CInputListCtrl::GetLastEdit(int* pRow, int* pCol)
 	if (pCol)
 		*pCol = m_nLastEditCol;
 
-	return m_nLastEdit;
+	return m_nLastEditResult;
 }
 
 BOOL CInputListCtrl::GetCurSel(int& nRow, int& nCol) const
@@ -1176,7 +1044,7 @@ int CInputListCtrl::InsertRow(CString sRowText, int nRow, int nImage)
 	return nRow;
 }
 
-BOOL CInputListCtrl::HasNonTextColumns() const
+BOOL CInputListCtrl::HasNonTextCells() const
 {
 	int nCol = GetColumnCount();
 
@@ -1184,6 +1052,15 @@ BOOL CInputListCtrl::HasNonTextColumns() const
 	{
 		if (GetColumnType(nCol) != ILCT_TEXT)
 			return TRUE;
+
+		// Test all cells in this column
+		int nRow = GetItemCount();
+
+		while (nRow--)
+		{
+			if (GetCellType(nRow, nCol) != ILCT_TEXT)
+				return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -1232,7 +1109,6 @@ void CInputListCtrl::OnSetFocus(CWnd* pOldWnd)
 
 void CInputListCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	// if we're editing then quit editing
 	OnCancelEdit();
 
 	CEnListCtrl::OnHScroll(nSBCode, nPos, pScrollBar);
@@ -1242,12 +1118,13 @@ void CInputListCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 void CInputListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	// if we're editing then quit editing
-	OnCancelEdit();
+	if (!pScrollBar)
+		OnCancelEdit();
 
 	CEnListCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
 
-	RecalcHotButtonRects();
+	if (!pScrollBar)
+		RecalcHotButtonRects();
 }
 
 BOOL CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
@@ -1263,7 +1140,6 @@ BOOL CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CInputListCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	// if we're editing then quit editing
 	OnCancelEdit();
 
 	CEnListCtrl::OnSize(nType, cx, cy);
@@ -1341,19 +1217,11 @@ void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
 	case ILCT_TEXT:
 	case ILCT_BROWSE:
 	case ILCT_DROPLIST:
-		//rCell.right++;
-		
 		// move top edge up one pixel so that it looks right
 		// but not of the first row else it gets clipped 
 		// by the window border
 		if (nRow > 0)
 			rCell.top--;
-		break;
-
-	case ILCT_DATE:
-	case ILCT_CHECK:
-		//rCell.OffsetRect(1, -1);
-		//rCell.left--;
 		break;
 	}
 }
@@ -1389,16 +1257,31 @@ int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-void CInputListCtrl::HideControl(CWnd& ctrl)
+void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 {
-	if (ctrl.IsWindowVisible())
+	if (pWndIgnore == this)
+		return;
+
+	if (pWndIgnore == &ctrl)
+		return;
+
+	if (!ctrl.GetSafeHwnd())
+		return;
+	
+	if (!ctrl.IsWindowVisible())
+		return;
+
+	if (pWndIgnore && ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
-		ctrl.ShowWindow(SW_HIDE);
-		ctrl.EnableWindow(FALSE);
+		if (pWndIgnore->GetSafeHwnd() == (HWND)ctrl.SendMessage(DTM_GETMONTHCAL))
+			return;
 	}
+
+	ctrl.ShowWindow(SW_HIDE);
+	ctrl.EnableWindow(FALSE);
 }
 
-void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol)
+void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 {
 	PrepareControl(ctrl, nRow, nCol);
 	ScrollCellIntoView(nRow, nCol);
@@ -1407,7 +1290,12 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol)
 	GetCellEditRect(nRow, nCol, rCell);
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
-		rCell.bottom += 200;
+	{
+		if (nRow == 0)
+			rCell.top--;
+
+		rCell.bottom += GraphicsMisc::ScaleByDPIFactor(200);
+	}
 
 	ctrl.MoveWindow(rCell);
 	ctrl.EnableWindow(TRUE);
@@ -1416,9 +1304,25 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol)
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
 	{
-		CComboBox* pCombo = (CComboBox*)&ctrl;
-		pCombo->ShowDropDown(TRUE);
+		if (ctrl.GetDlgItem(1001))
+			ctrl.GetDlgItem(1001)->ShowWindow(SW_SHOW);
+
+		if (bBtnClick || !ctrl.GetDlgItem(1001))
+			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
 	}
+	else if (ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
+	{
+		if (bBtnClick)
+			ctrl.PostMessage(WM_SYSKEYDOWN, VK_DOWN, 0);
+	}
+}
+
+void CInputListCtrl::RedrawCell(int nRow, int nCol, BOOL bErase)
+{
+	CRect rCell;
+	GetCellRect(nRow, nCol, rCell);
+
+	InvalidateRect(rCell, bErase);
 }
 
 void CInputListCtrl::EndEdit()
@@ -1473,6 +1377,12 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 
 	CRect rWnd;
 	ctrl.GetClientRect(rWnd);
+
+	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)) ||
+		ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
+	{
+ 		rWnd.bottom -= 2;
+	}
 
 	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height()));
 }
@@ -1632,13 +1542,13 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 
 		m_nLastEditRow = m_nEditItem;
 		m_nLastEditCol = m_nEditCol;
-		m_nLastEdit = *pResult;
+		m_nLastEditResult = *pResult;
 	}
 	else
 	{
 		m_nLastEditRow = -1;
 		m_nLastEditCol = -1;
-		m_nLastEdit = NOTVALID;
+		m_nLastEditResult = NOTVALID;
 	}
 
 	m_nEditCol = m_nEditItem = -1;
@@ -1679,10 +1589,10 @@ void CInputListCtrl::NotifyParentEditCell(const CString& sText, int nRow, int nC
 
 void CInputListCtrl::OnCancelEdit()
 {
+	HideAllControls();
+
 	if ((m_nEditItem != -1) && (m_nEditCol != -1))
 	{
-		GetEditControl()->ShowWindow(SW_HIDE);
-
 		m_nCurCol = m_nEditCol;
 		SetCurSel(m_nEditItem, m_nEditCol);
 		m_nEditItem = m_nEditCol = -1;
@@ -1739,7 +1649,7 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 	BOOL bThemedSel = (bSelected && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
 
 	// setup colors
-	if (!bThemedSel && (nCol == m_nCurCol) && (nItem == GetCurSel()))
+	if (!bThemedSel && IsCellSelected(nItem, nCol))
 	{
 		// if focused then draw item in focused colors 
 		if (bWndFocus)
@@ -1765,9 +1675,7 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 
 COLORREF CInputListCtrl::GetItemBackColor(int nItem, int /*nCol*/, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	BOOL bIsPrompt = IsPrompt(nItem, 0);
-
-	if (bIsPrompt)
+	if (IsPrompt(nItem, 0))
 		return CEnListCtrl::GetItemBackColor(0, bSelected, bDropHighlighted, bWndFocus);
 
 	// else
@@ -1860,12 +1768,33 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:
-		// Prevent Windows own column resizing
-		if ((pMsg->hwnd == GetSafeHwnd()) &&
-			(pMsg->wParam == VK_ADD) && 
-			Misc::ModKeysArePressed(MKS_CTRL))
+		switch (pMsg->wParam)
 		{
-			return TRUE;
+		case VK_ADD:
+			// Prevent Windows own column resizing
+			{
+				if ((pMsg->hwnd == GetSafeHwnd()) && Misc::ModKeysArePressed(MKS_CTRL))
+					return TRUE;
+			}
+			break;
+
+		case VK_RETURN:
+			{
+				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
+
+				if ((pWnd != &m_editBox) && IsChild(pWnd))
+					HideControl(*pWnd);
+			}
+			break;
+
+		case VK_ESCAPE:
+			{
+				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
+
+				if ((pWnd != &m_editBox) && IsChild(pWnd))
+					OnEditCancel(0, TRUE);
+			}
+			break;
 		}
 		break;
 	}
@@ -1878,7 +1807,7 @@ void CInputListCtrl::RecalcHotButtonRects()
 {
 	m_hotTrack.DeleteAllRects();
 
-	if (m_hotTrack.IsInitialized() && HasNonTextColumns())
+	if (m_hotTrack.IsInitialized() && HasNonTextCells())
 	{
 		int nNumRows = GetItemCount();
 		int nNumCols = GetColumnCount();

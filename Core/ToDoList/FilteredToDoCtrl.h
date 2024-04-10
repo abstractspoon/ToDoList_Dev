@@ -94,7 +94,7 @@ protected:
 		//}}AFX_MSG
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnEditChangeDueTime();
+	//afx_msg void OnEditChangeDueTime();
 	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()

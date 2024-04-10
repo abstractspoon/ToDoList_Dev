@@ -73,7 +73,7 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	AddRCControl(_T("PUSHBUTTON"), _T(""), CEnString(IDS_FIND_APPLYASFILTER), 0, 0, 0, 176, 65, 14, IDC_APPLYASFILTER);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), CEnString(IDS_FIND_SELECTALL), 0, 0, 72, 176, 50, 14, IDC_SELECTALL);
 	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_RESULTS), 0, 0, 133, 179, 240, 8, IDC_RESULTSLABEL);
-	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
 	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_SEARCH), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 31, 120, 125, IDC_TASKLISTOPTIONS);
@@ -1973,7 +1973,7 @@ BOOL CTDLFindTasksDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	if (GetSplitterRect().PtInRect(ptCursor))
 	{ 
 		UINT nIDCursor = ((m_nDockPos == DMP_BELOW) ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
-		::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+		GraphicsMisc::SetAfxCursor(nIDCursor);
 
 		return TRUE;
 	}

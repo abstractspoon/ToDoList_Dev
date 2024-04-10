@@ -85,7 +85,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 {
 	friend class CTDCCustomAttribDefinitionArray;
 
-	TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel = NULL);
+	TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel = NULL, BOOL bEnable = TRUE);
 	TDCCUSTOMATTRIBUTEDEFINITION(const TDCCUSTOMATTRIBUTEDEFINITION& otherDef);
 	TDCCUSTOMATTRIBUTEDEFINITION& operator=(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
@@ -132,6 +132,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	CString FormatData(const TDCCADATA& data, BOOL bISODates, TCHAR cListSep = 0) const;
 	CString FormatNumber(double dValue) const;
+	CString FormatTimePeriod(const TDCCADATA& data) const { return FormatTimePeriod(data, dwFeatures); }
 	BOOL GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const;
 
 	int CalcLongestListItem(CDC* pDC) const;
@@ -170,27 +171,27 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////
 
-#define GET_DEF_RET(defs, key, def, ret) \
-{                                        \
-	int nAttrib = (defs).Find(key);      \
-	if (nAttrib == -1)                   \
-	{                                    \
-		ASSERT(0);                       \
-        return ret;                      \
-	}                                    \
-	def = &((defs)[nAttrib]);            \
+#define GET_CUSTDEF_RET(defs, key, def, ret) \
+{                                            \
+	int nAttrib = (defs).Find(key);          \
+	if (nAttrib == -1)                       \
+	{                                        \
+		ASSERT(0);                           \
+        return ret;                          \
+	}                                        \
+	def = &((defs)[nAttrib]);                \
 }
 
 // alt = break. continue, return
-#define GET_DEF_ALT(defs, key, def, alt) \
-{                                        \
-	int nAttrib = defs.Find(key);        \
-	if (nAttrib == -1)                   \
-	{                                    \
-		ASSERT(0);                       \
-        alt;                             \
-	}                                    \
-	def = &((defs)[nAttrib]);            \
+#define GET_CUSTDEF_ALT(defs, key, def, alt) \
+{                                            \
+	int nAttrib = defs.Find(key);            \
+	if (nAttrib == -1)                       \
+	{                                        \
+		ASSERT(0);                           \
+        alt;                                 \
+	}                                        \
+	def = &((defs)[nAttrib]);                \
 }
 
 // ----------------------------------------------------------------
@@ -231,6 +232,10 @@ public:
 	DWORD GetAttributeDataType(const CString& sCustAttribID, BOOL bResolveCalcType = TRUE) const;
 	DWORD GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType = TRUE) const;
 
+	BOOL IsListType(TDC_ATTRIBUTE nCustAttribID) const;
+	BOOL IsListType(TDC_COLUMN nCustColID) const;
+	BOOL IsListType(const CString& sCustAttribID) const;
+
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
 
@@ -240,14 +245,18 @@ public:
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 	// VC6 fixes
-	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return GetData()[nIndex]; }
-	TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) { return GetData()[nIndex]; }
+	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return ElementAt(nIndex); }
+	TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) { return ElementAt(nIndex); }
 
 protected:
 	void RebuildIDs();
 
 	const TDCCUSTOMATTRIBUTEDEFINITION& ElementAt(int nIndex) const { return GetData()[nIndex]; }
 	TDCCUSTOMATTRIBUTEDEFINITION& ElementAt(int nIndex) { return GetData()[nIndex]; }
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& GetDefinition(TDC_ATTRIBUTE nCustAttribID) const;
+	const TDCCUSTOMATTRIBUTEDEFINITION& GetDefinition(TDC_COLUMN nCustColID) const;
+	const TDCCUSTOMATTRIBUTEDEFINITION& GetDefinition(const CString& sCustAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

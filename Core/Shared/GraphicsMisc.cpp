@@ -536,6 +536,21 @@ BOOL GraphicsMisc::SetStandardCursor(LPCTSTR szCursorID)
 	return (hCursor != NULL);
 }
 
+HCURSOR GraphicsMisc::LoadAfxCursor(int nCursorID)
+{
+	return AfxGetApp()->LoadCursor(nCursorID);
+}
+
+BOOL GraphicsMisc::SetAfxCursor(int nCursorID)
+{
+	HCURSOR hCursor = LoadAfxCursor(nCursorID);
+
+	if (hCursor)
+		::SetCursor(hCursor);
+
+	return (hCursor != NULL);
+}
+
 HCURSOR GraphicsMisc::LoadHandCursor()
 {
 	static HCURSOR cursor = ::LoadCursor(NULL, IDC_HAND);

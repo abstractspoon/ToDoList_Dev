@@ -135,7 +135,7 @@
     <ClCompile Include="..\ToDoList\TaskFile.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
-    <ClCompile Include="..\ToDoList\TaskListDropTarget.cpp" />
+    <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp" />
     <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
     <ClCompile Include="..\ToDoList\TaskListHtmlExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListOutlookImporter.cpp" />
@@ -146,7 +146,7 @@
     <ClCompile Include="..\ToDoList\TDCAnonymizeTasklist.cpp" />
     <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp" />
     <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp" />
-    <ClCompile Include="..\ToDoList\TDCCustomAttributeUIHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp" />
     <ClCompile Include="..\ToDoList\TDCFilter.cpp" />
@@ -233,6 +233,7 @@
     <ClCompile Include="..\ToDoList\TDLSimpleTextContentCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLStatusBar.cpp" />
     <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskAttributeListCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskDependencyEdit.cpp" />
@@ -261,6 +262,7 @@
     <ClCompile Include="..\ToDoList\ToDoCtrlFind.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlMgr.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlReminders.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlLayout.cpp" />
     <ClCompile Include="..\ToDoList\ToDoCtrlUndo.cpp" />
     <ClCompile Include="..\ToDoList\ToDoitem.cpp" />
     <ClCompile Include="..\ToDoList\ToDoListWnd.cpp" />
@@ -290,7 +292,7 @@
     <ClInclude Include="..\ToDoList\TaskFile.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvImporter.h" />
-    <ClInclude Include="..\ToDoList\TaskListDropTarget.h" />
+    <ClInclude Include="..\ToDoList\TDCTaskListDropTarget.h" />
     <ClInclude Include="..\ToDoList\TaskListExporterBase.h" />
     <ClInclude Include="..\ToDoList\TaskListHtmlExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListOutlookImporter.h" />
@@ -301,7 +303,7 @@
     <ClInclude Include="..\ToDoList\TDCAnonymizeTasklist.h" />
     <ClInclude Include="..\ToDoList\tdccustomattribdata.h" />
     <ClInclude Include="..\ToDoList\TDCCustomAttributeDef.h" />
-    <ClInclude Include="..\ToDoList\TDCCustomAttributeUIHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.h" />
     <ClInclude Include="..\ToDoList\TDCDialogHelper.h" />
     <ClInclude Include="..\ToDoList\tdcenum.h" />
     <ClInclude Include="..\ToDoList\TDCEnumContainers.h" />
@@ -394,6 +396,7 @@
     <ClInclude Include="..\ToDoList\TDLSimpleTextContentCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLStatusBar.h" />
     <ClInclude Include="..\ToDoList\TDLStylesheetParamConfigDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskAttributeListCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLTaskComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLTaskCtrlBase.h" />
     <ClInclude Include="..\ToDoList\TDLTaskDependencyEdit.h" />
@@ -424,6 +427,7 @@
     <ClInclude Include="..\ToDoList\ToDoCtrlFind.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlMgr.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlReminders.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlLayout.h" />
     <ClInclude Include="..\ToDoList\ToDoCtrlUndo.h" />
     <ClInclude Include="..\ToDoList\ToDoitem.h" />
     <ClInclude Include="..\ToDoList\ToDoListWnd.h" />

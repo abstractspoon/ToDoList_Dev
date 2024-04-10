@@ -860,6 +860,9 @@
 #define IDC_INCLUDETITLE                1569
 #define IDC_REDUCEREMINDERDLGFLASHING   1570
 #define IDC_PRESERVEWEEKDAYS            1571
+#define IDC_PRESERVEENDOFMONTH          1574
+#define IDC_OFFSETSUBTASKREFS           1575
+#define IDC_WHATLIST                    1576
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -1304,7 +1307,6 @@
 #define ID_EDIT_RECURRENCE              34332
 #define ID_EDIT_GOTODEPENDENCY          34333
 #define ID_EDIT_CLEARFOCUSEDFIELD       34338
-#define ID_EDIT_CLEARFIELD              34339
 #define ID_CUSTATTRIB_NEW               34344
 #define ID_CUSTATTRIB_DELETE            34345
 #define ID_CUSTATTRIB_MOVEUP            34346
@@ -1738,7 +1740,6 @@
 #define IDS_OPENTASKLIST_TIP            50790
 #define IDS_SAMPLETASK                  50790
 #define IDS_BACKUPFILEFOUND             50791
-#define IDS_SAMPLETEXT                  50792
 #define IDS_COLOR_SAMPLETEXT            50793
 #define IDS_COLOR_AUTOMATIC             50794
 #define IDS_COLOR_MORECOLORS            50795
@@ -2155,7 +2156,7 @@
 #define IDS_OA_TO                       51270
 #define IDS_OUTLOOK_CONFIDENTIAL        51271
 #define IDS_PASTE_ERROR                 51272
-#define IDS_TDC_NOBODY                  51273
+#define IDS_TDC_NOONE                   51273
 #define IDS_CAD_COLATTRIBLABEL          51274
 #define IDS_CAD_COLCOLTITLE             51275
 #define IDS_CAD_COLDATATYPE             51276
@@ -2485,11 +2486,16 @@
 #define IDS_CONFIRMSAVEAS_TITLE         51624
 #define IDS_PRINT_TASKVIEW              51625
 #define IDS_TASKCOMPLETION              51626
-#define IDS_CUSTOM_FEATURE_SHOWEDITFIELD 51627
 #define IDS_COMMENTSMEMORYERROR         51628
 #define IDS_FIND_TASKS                  51629
 #define IDS_RECURS_WEEKDAY              51630
 #define IDS_TDLBC_COMMENTSFORMAT        51631
+#define IDS_TDC_EMPTY                   51632
+#define IDS_EDIT_VALUEVARIES            51633
+#define IDS_ATTRIBTIP_TIMEOFDAY         51634
+#define IDS_ATTRIBTIP_DEFCOLOR          51635
+#define IDS_ATTRIBTIP_DATEREQUIRED      51636
+#define IDS_ATTRIBUTES                  51637
 
 // Next default values for new objects
 // 
@@ -2497,7 +2503,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        328
 #define _APS_NEXT_COMMAND_VALUE         34757
-#define _APS_NEXT_CONTROL_VALUE         1574
+#define _APS_NEXT_CONTROL_VALUE         1577
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

@@ -359,33 +359,44 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		// Last 'Tracked' attribute
 		m_nTrackedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), TDCA_STATUS);
 
-		switch (m_nTrackedAttrib)
+		// TDCA_FIXEDCOLUMNS is not a real enum value and the compiler 
+		// will issue a warning if it's used in a switch statement
+		if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
 		{
-		// backwards compatibility
-		case TDCA_NONE:
-			if (m_dlgPrefs.HasFixedColumns())
-				m_nTrackedAttrib = TDCA_FIXEDCOLUMNS;
-			else
-				m_nTrackedAttrib = TDCA_STATUS;
-			break;
-
-		case TDCA_FIXEDCOLUMNS:
 			if (!m_dlgPrefs.HasFixedColumns())
 				m_nTrackedAttrib = TDCA_STATUS;
-			break;
+		}
+		else
+		{
+			switch (m_nTrackedAttrib)
+			{
+				// backwards compatibility
+			case TDCA_NONE:
+				{
+					if (m_dlgPrefs.HasFixedColumns())
+						m_nTrackedAttrib = TDCA_FIXEDCOLUMNS;
+					else
+						m_nTrackedAttrib = TDCA_STATUS;
+				}
+				break;
 
-		case TDCA_CUSTOMATTRIB:
-			m_sTrackedCustomAttribID = pPrefs->GetProfileString(szKey, _T("CustomAttrib"));
+			case TDCA_CUSTOMATTRIB:
+				{
+					m_sTrackedCustomAttribID = pPrefs->GetProfileString(szKey, _T("CustomAttrib"));
 
-			// fallback
-			if (m_sTrackedCustomAttribID.IsEmpty())
-				m_nTrackedAttrib = TDCA_STATUS;
-			break;
+					// fallback
+					if (m_sTrackedCustomAttribID.IsEmpty())
+						m_nTrackedAttrib = TDCA_STATUS;
+				}
+				break;
 
-		default:
-			if (!KBUtils::IsTrackableAttribute(m_nTrackedAttrib))
-				m_nTrackedAttrib = TDCA_STATUS;
-			break;
+			default:
+				{
+					if (!KBUtils::IsTrackableAttribute(m_nTrackedAttrib))
+						m_nTrackedAttrib = TDCA_STATUS;
+				}
+				break;
+			}
 		}
 
 		// Last 'Group By' attribute
@@ -519,7 +530,7 @@ DWORD CKanbanWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON /*nReason*/) con
 	return m_ctrlKanban.HitTestTask(ptScreen);
 }
 
-bool CKanbanWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CKanbanWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

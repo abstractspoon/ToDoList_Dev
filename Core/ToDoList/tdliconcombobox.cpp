@@ -166,6 +166,16 @@ int CTDLIconComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) co
 	return DecodeImageTags(aTemp, aItems);
 }
 
+int CTDLIconComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
+{
+	CStringArray aTemp1, aTemp2;
+	CEnCheckComboBox::GetChecked(aTemp1, aTemp2);
+
+	DecodeImageTags(aTemp2, aMixed);
+
+	return DecodeImageTags(aTemp1, aChecked);
+}
+
 BOOL CTDLIconComboBox::SetChecked(const CStringArray& aItems)
 {
 	CStringArray aEncodedItems;

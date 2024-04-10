@@ -143,7 +143,7 @@ LPCWSTR CEvidenceBoardUIExtensionBridgeWindow::GetTypeID() const
 	return EVIDENCEBOARD_GUID;
 }
 
-bool CEvidenceBoardUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CEvidenceBoardUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }

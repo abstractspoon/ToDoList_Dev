@@ -138,6 +138,7 @@ namespace MindMapUIExtension
 			UpdateTreeFontMs = 0;
 			EndUpdateMs = 0;
 			ZoomToMs = 0;
+			GetLogicalTreeNodePosition = 0;
 
 			m_StartTick = Environment.TickCount;
 			m_Timer.Restart();
@@ -157,13 +158,14 @@ namespace MindMapUIExtension
 
 		public void Draw(Graphics g, int x, int y)
 		{
-			g.DrawString(String.Format("GetExpandedNodes = {0} ms", GetExpandedNodesMs), m_Font, Brushes.Black, x, y);
-			g.DrawString(String.Format("SetExpandedNodes = {0} ms", SetExpandedNodesMs), m_Font, Brushes.Black, x, y + 16);
-			g.DrawString(String.Format("UpdateTreeFont   = {0} ms", UpdateTreeFontMs), m_Font, Brushes.Black, x, y + 32);
-			g.DrawString(String.Format("EndUpdate        = {0} ms", EndUpdateMs), m_Font, Brushes.Black, x, y + 48);
-			g.DrawString(String.Format("SubTotalled      = {0} ms", SubTotalledMs), m_Font, Brushes.Black, x, y + 64);
-			g.DrawString(String.Format("--------------------------"), m_Font, Brushes.Black, x, y + 80);
-			g.DrawString(String.Format("ZoomToMs         = {0} ms", ZoomToMs), m_Font, Brushes.Black, x, y + 96);
+			g.DrawString(String.Format("GetExpandedNodes           = {0} ms", GetExpandedNodesMs), m_Font, Brushes.Black, x, y);
+			g.DrawString(String.Format("SetExpandedNodes           = {0} ms", SetExpandedNodesMs), m_Font, Brushes.Black, x, y + 16);
+			g.DrawString(String.Format("UpdateTreeFont             = {0} ms", UpdateTreeFontMs), m_Font, Brushes.Black, x, y + 32);
+			g.DrawString(String.Format("EndUpdate                  = {0} ms", EndUpdateMs), m_Font, Brushes.Black, x, y + 48);
+			g.DrawString(String.Format("GetLogicalTreeNodePosition = {0} ms", GetLogicalTreeNodePosition), m_Font, Brushes.Black, x, y + 64);
+			g.DrawString(String.Format("SubTotalled                = {0} ms", SubTotalledMs), m_Font, Brushes.Black, x, y + 80);
+			g.DrawString(String.Format("--------------------------"), m_Font, Brushes.Black, x, y + 96);
+			g.DrawString(String.Format("ZoomToMs                   = {0} ms", ZoomToMs), m_Font, Brushes.Black, x, y + 112);
 		}
 
 		public long TotalElapsedMs { get { return (Environment.TickCount - m_StartTick); } }
@@ -175,6 +177,7 @@ namespace MindMapUIExtension
 		public long UpdateTreeFontMs = 0;
 		public long EndUpdateMs = 0;
 		public long ZoomToMs = 0;
+		public long GetLogicalTreeNodePosition = 0;
 
 		private long m_StartTick = 0;
 		private Stopwatch m_Timer = new Stopwatch();
