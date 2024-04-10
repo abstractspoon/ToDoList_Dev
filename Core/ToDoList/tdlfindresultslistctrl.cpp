@@ -26,7 +26,18 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef LVS_EX_LABELTIP
-#define LVS_EX_LABELTIP     0x00004000
+#	define LVS_EX_LABELTIP	0x00004000
+#endif
+
+#ifndef LVN_ENDSCROLL
+#	define LVN_ENDSCROLL	(LVN_FIRST - 81)
+
+struct NMLVSCROLL
+{
+	NMHDR   hdr;
+	int     dx;
+	int     dy;
+};
 #endif
 
 enum
