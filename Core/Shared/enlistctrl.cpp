@@ -143,8 +143,7 @@ BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
 	}
 
 	m_hwndList = hwndList;
-
-	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+	return EnableGroupView(bEnable);
 }
 
 BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader)
@@ -211,7 +210,7 @@ void CListCtrlItemGrouping::RemoveAllGroups()
 	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
-BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORREF crBkgnd)
+BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD)
 {
 	const LVCUSTOMDRAW* pNMLV = (const LVCUSTOMDRAW*)pLVCD;
 
@@ -222,10 +221,20 @@ BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORR
 	CString sHeader = GetGroupHeaderText(pNMLV->nmcd.dwItemSpec);
 
 	CRect rRow(pNMLV->rcText);
-	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, crBkgnd);
+	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, m_crBkgnd);
 
 	return TRUE;
 }
+
+void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
+{
+	if (crBack != m_crBkgnd)
+	{
+		m_crBkgnd = crBack;
+		InvalidateRect(m_hwndList, NULL, FALSE);
+	}
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
@@ -281,11 +290,18 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	//}}AFX_MSG_MAP
 	ON_WM_TIMER()
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY_REFLECT_EX(NM_CUSTOMDRAW, OnListCustomDraw)
 	ON_NOTIFY(NM_CUSTOMDRAW, 0, OnHeaderCustomDraw)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl message handlers
+
+CListCtrlItemGrouping& CEnListCtrl::GetGrouping() 
+{ 
+	VERIFY(m_grouping.EnableGroupView(GetSafeHwnd()));
+	return m_grouping; 
+}
 
 void CEnListCtrl::OnPaint() 
 {
@@ -321,7 +337,7 @@ void CEnListCtrl::OnPaint()
 		}
 
 		// fill with back color
-		COLORREF crBack = GetItemBackColor(0, FALSE, FALSE, FALSE);
+		COLORREF crBack = GetBkColor();
 
 		if (crBack != CLR_NONE)
 			dc.FillSolidRect(rClient, crBack);
@@ -748,6 +764,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			CRect rCell;
 			GetCellRect(nItem, nCol, rCell);
 
+			// Skip cells wholly outside client rect
 			if (rCell.right <= rClient.left)
 				continue;
 
@@ -789,12 +806,10 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			CEnString sText(GetItemText(nItem, nCol));
 			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
 
-			// draw vert grid if required
-			if (m_bVertGrid)
+			// draw vert grid if required and we're not tight up against the client edge
+			if (m_bVertGrid && (rCell.right < rClient.right))
 			{
-				// if we're not tight up against the client edge then draw the vertical 
-				if (rCell.right < rClient.right)
-					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), ELC_GRIDCOLOR);
+				GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), ELC_GRIDCOLOR);
 			}
 		}
 
@@ -818,7 +833,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 COLORREF CEnListCtrl::GetItemTextColor(int /*nItem*/, int nSubItem, 
 									   BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	BOOL bThemedSel = (bSelected && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
+	BOOL bThemedSel = ((bSelected || bDropHighlighted) && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
 
 	if (!bThemedSel)
 	{
@@ -1489,7 +1504,7 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 	// Cast required for VC6
 	const_cast<CEnListCtrl*>(this)->GetSubItemRect(nRow, nCol, LVIR_LABEL, rCell);
 
-	if (nCol == 0)
+	if ((nCol == 0) && (GetScrollPos(SB_HORZ) == 0))
 		rCell.left = 0;
 }
 
@@ -1525,6 +1540,23 @@ BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 		SetSortColumn(pNMLV->iSubItem);
 
 	return FALSE; // continue routing
+}
+
+BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = CDRF_DODEFAULT;
+	LPNMLVCUSTOMDRAW pLVCD = (LPNMLVCUSTOMDRAW)pNMHDR;
+
+	if (pLVCD->nmcd.dwDrawStage == CDDS_PREPAINT)
+	{
+		if (m_grouping.DrawGroupHeader(pLVCD/*, m_crGroupBkgnd*/))
+		{
+			*pResult = CDRF_SKIPDEFAULT;
+			return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
