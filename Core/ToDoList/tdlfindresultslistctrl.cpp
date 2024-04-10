@@ -274,6 +274,30 @@ COLORREF CTDLFindResultsListCtrl::GetItemBackColor(int nItem, BOOL bSelected, BO
 	return CEnListCtrl::GetItemBackColor(nItem, bSelected, bDropHighlighted, bWndFocus);
 }
 
+void CTDLFindResultsListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	if (nCol == COL_TASKTITLE)
+	{
+		FTDRESULT* pRes = GetResult(nItem);
+		ASSERT(pRes);
+
+		if (pRes && pRes->IsReference())
+		{
+			GraphicsMisc::DrawShortcutOverlay(pDC, rText);
+
+			// Offset the task title to avoid the reference icon
+			CRect rTextEx(rText);
+			rTextEx.left += GraphicsMisc::ScaleByDPIFactor(10);
+
+			CEnListCtrl::DrawCellText(pDC, nItem, nCol, rTextEx, sText, crText, nDrawTextFlags);
+			return;
+		}
+	}
+
+	// else
+	CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+}
+
 CFont* CTDLFindResultsListCtrl::GetItemFont(int nItem, int nSubItem) const
 {
 	FTDRESULT* pRes = GetResult(nItem);
