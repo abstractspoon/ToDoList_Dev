@@ -1504,8 +1504,10 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 	// Cast required for VC6
 	const_cast<CEnListCtrl*>(this)->GetSubItemRect(nRow, nCol, LVIR_LABEL, rCell);
 
-	if ((nCol == 0) && (GetScrollPos(SB_HORZ) == 0))
-		rCell.left = 0;
+	// By default adds a 4 pixel offset for the first column
+	// which is weird so we do a bit of trickery
+	if (nCol == 0)
+		rCell.left = -GetScrollPos(SB_HORZ);
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
