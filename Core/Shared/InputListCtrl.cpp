@@ -687,7 +687,7 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 {
 	rButton.SetRectEmpty();
 
-	if (!IsColumnEditingEnabled(nCol))
+	if (!CanEditCell(nRow, nCol))
 		return FALSE;
 
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
