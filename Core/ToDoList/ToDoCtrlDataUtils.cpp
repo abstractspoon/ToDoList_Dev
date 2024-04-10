@@ -661,14 +661,28 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				result.dwFlags |= RF_GOODASDONE;
 		}
 		
-		if (m_data.IsTaskReference(pTDS->GetTaskID()))
+		DWORD dwTaskID = pTDS->GetTaskID();
+
+		if (m_data.IsTaskReference(dwTaskID))
+		{
 			result.dwFlags |= RF_REFERENCE;
 
-		if (pTDS->HasSubTasks())
-			result.dwFlags |= RF_PARENT;
+			dwTaskID = m_data.GetTrueTaskID(dwTaskID);
 
-		if (pTDS->GetParentTaskID() == 0)
-			result.dwFlags |= RF_TOPMOST;
+			if (m_data.IsTaskParent(dwTaskID))
+				result.dwFlags |= RF_PARENT;
+
+			if (m_data.GetTaskParentID(dwTaskID) == 0)
+				result.dwFlags |= RF_TOPMOST;
+		}
+		else
+		{
+			if (pTDS->HasSubTasks())
+				result.dwFlags |= RF_PARENT;
+
+			if (pTDS->GetParentTaskID() == 0)
+				result.dwFlags |= RF_TOPMOST;
+		}
 		
 		result.dwTaskID = pTDS->GetTaskID();
 	}

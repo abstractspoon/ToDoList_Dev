@@ -36,22 +36,24 @@ public:
 class CListCtrlItemGrouping
 {
 public:
-	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList) {}
+	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList), m_crBkgnd(CLR_NONE) {}
 
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	BOOL EnableGroupView(HWND hwndList, BOOL bEnable = TRUE);
-	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
+	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader);
 	BOOL SetItemGroupId(int nRow, int nGroupID);
 	void RemoveAllGroups();
 
 	BOOL HasGroups() const;
 	int GetItemGroupId(int nRow) const;
 	CString GetGroupHeaderText(int nGroupID) const;
-	
-	BOOL DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORREF crBkgnd = CLR_NONE);
+
+	void SetGroupHeaderBackColor(COLORREF crBack);
+	BOOL DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD);
 
 protected:
 	HWND m_hwndList;
+	COLORREF m_crBkgnd;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,6 +68,9 @@ public:
 
 	CEnHeaderCtrl* GetHeader();
 	const CEnHeaderCtrl* GetHeader() const;
+
+	CListCtrlItemGrouping& GetGrouping();
+	const CListCtrlItemGrouping& GetGrouping() const { return m_grouping; }
 
 	void SetMulSel(int nIndexStart, int nIndexEnd, BOOL bSelect = TRUE, BOOL bNotifyParent = FALSE); // multiple selection
 	void SetItemFocus(int nIndex, BOOL bFocused); 
@@ -128,6 +133,8 @@ public:
 // Attributes
 protected:
 	CEnHeaderCtrl m_header;
+	CListCtrlItemGrouping m_grouping;
+
 	BOOL m_bVertGrid, m_bHorzGrid;
 	int m_nCurView;
 	NMHDR m_nmhdr; // for notification
@@ -187,6 +194,7 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
+	afx_msg BOOL OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
 
 	// helpers
