@@ -1137,79 +1137,10 @@ BOOL TODOITEM::RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccu
 
 BOOL TODOITEM::GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue)
 {
-	ASSERT(IsDone());
-
-	if (!trRecurrence.CanRecur() || !IsDone())
+	if (!CalcNextOccurrence(dtNext, bDue))
 		return FALSE;
 
-	BOOL bHasDue = HasDue();
-	BOOL bHasStart = HasStart();
-
-	switch (trRecurrence.nRecalcFrom)
-	{
-	case TDIRO_STARTDATE:
-		if (bHasStart)
-		{
-			bDue = FALSE;
-			return trRecurrence.GetNextOccurence(dateStart, dtNext);
-		}
-		// fall thru
-
-	case TDIRO_DUEDATE:
-		if (bHasDue)
-		{
-			bDue = TRUE;
-			return trRecurrence.GetNextOccurence(dateDue, dtNext);
-		}
-		// fall thru
-
-	case TDIRO_DONEDATE:
-	default:
-		bDue = (bHasDue || !bHasStart);
-		break;
-	}
-
-	COleDateTime dtStartDue = (bDue ? dateDue : dateStart);
-	COleDateTime dtFrom = dateDone;
-
-	if (CDateHelper::IsSameDay(dateDone, dtStartDue) || (dateDone < dtStartDue))
-	{
-		// Nothing to do
-	}
-	else 
-	{
-		// completed date comes after start/due date
-		ASSERT(dateDone > dtStartDue);
-
-		// Special case:
-		//
-		// 1. Weekly occurrence
-		// 2. > 1 week interval
-		// 3. Completion date not in the same week as due date
-		DWORD dwNumWeeks, dwNotUsed;
-		TDC_REGULARITY nReg = trRecurrence.GetRegularity(dwNumWeeks, dwNotUsed);
-
-		if ((nReg == TDIR_WEEK_SPECIFIC_DOWS_NWEEKS) && 
-			(dwNumWeeks > 1) &&
-			!CDateHelper::IsSameWeek(dtStartDue, dateDone))
-		{
-			// Move the date to the end of the week to prevent 
-			// the base class implementation from selecting the
-			// next available day in the current week
-			dtFrom = CDateHelper::GetEndOfWeek(dateDone);
-		}
-	}
-	ASSERT(CDateHelper::IsDateSet(dtFrom));
-
-	if (!trRecurrence.GetNextOccurence(dtFrom, dtNext))
-		return FALSE;
-
-	// Restore the previous due/start time
-	if (bHasDue || bHasStart)
-		dtNext = CDateHelper::MakeDate(dtNext, dtStartDue);
-	else
-		dtNext = CDateHelper::GetDateOnly(dtNext); // End of day
-
+	VERIFY(trRecurrence.DecrementRemainingOccurrenceCount());
 	return TRUE;
 }
 

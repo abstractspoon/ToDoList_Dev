@@ -94,6 +94,7 @@ struct CRecurrence
 	BOOL SetOccurrenceCount(int nNumOccur, int nRemainingOccur);
 	int GetOccurrenceCount() const;	
 	int GetRemainingOccurrenceCount() const;
+	BOOL DecrementRemainingOccurrenceCount();
 
 protected:
 	int m_nNumOccur, m_nRemainingOccur;
