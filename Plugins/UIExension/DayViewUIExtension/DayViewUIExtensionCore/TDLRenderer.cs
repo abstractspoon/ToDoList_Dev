@@ -781,10 +781,17 @@ namespace DayViewUIExtension
 				using (SolidBrush brush = new SolidBrush(textColor))
 				{
 					TaskItem taskItem = GetTaskItem(apptView.Appointment);
+					var fontStyle = FontStyle.Regular;
 
 					if (taskItem.IsDone && StrikeThruDoneTasks)
+						fontStyle |= FontStyle.Strikeout;
+
+					if (taskItem.IsTopLevel && !(apptView.Appointment is FutureTaskOccurrence))
+						fontStyle |= FontStyle.Bold;
+
+					if (fontStyle != FontStyle.Regular)
 					{
-						using (Font font = new Font(BaseFont(), FontStyle.Strikeout))
+						using (Font font = new Font(BaseFont(), fontStyle))
 						{
 							g.DrawString(taskItem.Title, font, brush, rect, format);
 						}
