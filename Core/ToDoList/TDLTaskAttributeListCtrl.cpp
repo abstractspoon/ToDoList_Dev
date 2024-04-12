@@ -1308,9 +1308,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 	if (GetCellPrompt(nRow, sText, sPrompt))
 	{
-		int nSelRow, nSelCol;
-
-		if (!GetCurSel(nSelRow, nSelCol) || (nSelRow != nRow) || (nSelCol != nCol))
+		if (!IsCellSelected(nRow, nCol))
 			crText = CWndPrompt::GetTextColor();
 
 		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, crText, nDrawTextFlags);
@@ -2574,7 +2572,6 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// Note: Don't hide the date picker because the user 
 		// may be editing the date components manually
-
 		int nRow = GetCurSel();
 		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
