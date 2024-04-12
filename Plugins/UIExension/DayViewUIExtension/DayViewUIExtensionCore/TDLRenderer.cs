@@ -557,7 +557,7 @@ namespace DayViewUIExtension
 					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
 
 					if (isFutureItem)
- 						borderColor = (isLong ? AllDayEventsBackColor() : textColor);
+ 						borderColor = textColor;
 					else
 						barColor = (taskItem.HasTaskTextColor ? taskItem.TaskTextColor : textColor);
 				}

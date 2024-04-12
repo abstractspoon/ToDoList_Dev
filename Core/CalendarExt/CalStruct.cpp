@@ -634,7 +634,7 @@ COLORREF TASKCALITEM::GetFillColor(BOOL bColorIsBkgnd) const
 	return GetSysColor(COLOR_WINDOW);
 }
 
-COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
+COLORREF TASKCALITEM::GetBorderColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
@@ -642,7 +642,12 @@ COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
 			return GraphicsMisc::Darker(color, 0.4);
 
 		if (!Misc::IsHighContrastActive())
+		{
+			if (bSelected)
+				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
 			return color;
+		}
 	}
 	
 	// else
@@ -694,9 +699,9 @@ COLORREF TASKCALEXTENSIONITEM::GetFillColor(BOOL /*bTextIsBack*/) const
 	return TASKCALITEM::GetFillColor(FALSE);
 }
 
-COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL /*bTextIsBack*/) const
+COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
 {
-	return TASKCALITEM::GetBorderColor(FALSE);
+	return TASKCALITEM::GetBorderColor(bSelected, FALSE);
 }
 
 COLORREF TASKCALEXTENSIONITEM::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
