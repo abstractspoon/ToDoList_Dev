@@ -1056,9 +1056,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				// For some unknown reason PS_DOT style draws 1 pixel wider
 				nBorderStyle = PS_DOT;
-
-				if (bSelTask)
-					rTask.right--;
+				rTask.right--;
 			}
 
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwBorders, 255, nBorderStyle);
