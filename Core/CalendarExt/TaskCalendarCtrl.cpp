@@ -976,7 +976,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
 		CRect rTask;
-		
+
 		if (!CalcTaskCellRect(nTask, pCell, rAvailCell, rTask))
 			continue;
 
@@ -1032,13 +1032,17 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		{
 			DWORD dwBorders = GMDR_TOP;
 			
-			if (rTask.left > rAvailCell.left)
+			if (rTask.left <= rAvailCell.left)
+			{
+				// Note: This same adjustment will have already been done for selected future tasks above
+				if (bContinuous && !bSelTask)
+				{
+					rTask.left--; // draw over gridline
+				}
+			}
+			else
 			{
 				dwBorders |= GMDR_LEFT;
-			}
-			else if (bContinuous)
-			{
-				rTask.left--; // draw over gridline
 			}
 			
 			if (rTask.right < rAvailCell.right)
