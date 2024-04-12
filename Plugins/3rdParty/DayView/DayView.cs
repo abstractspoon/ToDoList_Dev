@@ -61,7 +61,7 @@ namespace Calendar
         protected int appointmentGripWidth = 5;
         protected int dayGripWidth = 5;
         protected int allDayEventsHeaderHeight = 0;
-        protected int longAppointmentSpacing = 2;
+        protected int longAppointmentSpacing = 1;
         protected int appointmentSpacing = 1;
         protected int groupSpacing = 1;
         protected int daySpacing = 1;

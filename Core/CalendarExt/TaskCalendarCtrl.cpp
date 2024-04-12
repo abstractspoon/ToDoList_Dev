@@ -988,6 +988,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 		// draw selection
 		BOOL bSelTask = WantDrawTaskSelected(pTCI);
+		BOOL bFutureTask = IsFutureOccurrence(pTCI);
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
 		if (bSelTask)
@@ -1016,7 +1017,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				nState = GMIS_SELECTEDNOTFOCUSED;
 			}
-			else if (IsFutureOccurrence(pTCI))
+			else if (bFutureTask)
 			{
 				nState = GMIS_DROPHILITED;
 			}
@@ -1025,7 +1026,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rTask, dwSelFlags, rClip);
 		}
-		else // draw task border/background
+
+		// draw task border/background
+		if (!bSelTask || bFutureTask)
 		{
 			DWORD dwBorders = GMDR_TOP;
 			
@@ -1044,12 +1047,12 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if (rTask.bottom < rAvailCell.bottom)
 				dwBorders |= GMDR_BOTTOM;
 			
-			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
+			COLORREF crFill = (bSelTask ? CLR_NONE : pTCI->GetFillColor(bTextColorIsBkgnd));
 			COLORREF crBorder = pTCI->GetBorderColor(bTextColorIsBkgnd);
 						
 			int nBorderStyle = PS_SOLID;
 			
-			if (IsFutureOccurrence(pTCI))
+			if (bFutureTask)
 			{
 				// For some unknown reason PS_DOT style draws 1 pixel wider
 				nBorderStyle = PS_DOT;

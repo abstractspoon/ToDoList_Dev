@@ -49,7 +49,6 @@ namespace DayViewUIExtension
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
 
-		private Color m_TaskTextColor = Color.Empty;
 		private List<string> m_Tags = null;
 
 		// --------------------
@@ -65,24 +64,12 @@ namespace DayViewUIExtension
 
 		public bool HasTaskTextColor
 		{
-			get { return !m_TaskTextColor.IsEmpty; }
+			get { return !TaskTextColor.IsEmpty; }
 		}
 
 		public override string ToString()
 		{
 			return Title;
-		}
-
-		public Color TaskTextColor
-		{
-			get
-			{
-// 				if (m_TaskTextColor.IsEmpty)
-// 					return base.TextColor;
-
-				return m_TaskTextColor;
-			}
-			set { m_TaskTextColor = value; }
 		}
 
 		private bool IsUsingParentCalcedStartDate;
@@ -124,7 +111,8 @@ namespace DayViewUIExtension
 
 		public string Position { get; private set; }
 		public bool IsParent { get; private set; }
-        public bool HasIcon { get; private set; }
+		public bool IsTopLevel { get; private set; }
+		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
         public bool IsGoodAsDone { get; private set; }
 		public bool HasDependencies { get; private set; }
@@ -132,6 +120,7 @@ namespace DayViewUIExtension
 		public double TimeEstimate { get; private set; }
         public Task.TimeUnits TimeEstUnits { get; private set; }
 		public int Depth { get; private set; }
+		public Color TaskTextColor { get; private set; }
 
 		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 
@@ -288,6 +277,7 @@ namespace DayViewUIExtension
 			TaskTextColor = task.GetTextDrawingColor();
 			Locked = task.IsLocked(true);
 			IsParent = task.IsParent();
+			IsTopLevel = (task.GetParentID() == 0);
 
 			if (newTask)
 			{
