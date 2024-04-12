@@ -67,8 +67,8 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_FILTER_BAR, pParent), 
 	m_cbCategoryFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
-	m_cbAllocToFilter(TRUE, IDS_TDC_NOONE, IDS_TDC_ANYONE),
-	m_cbAllocByFilter(TRUE, IDS_TDC_NOONE, IDS_TDC_ANYONE),
+	m_cbAllocToFilter(TRUE, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
+	m_cbAllocByFilter(TRUE, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
 	m_cbStatusFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbVersionFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),

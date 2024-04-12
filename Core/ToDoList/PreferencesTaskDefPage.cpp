@@ -142,8 +142,8 @@ void CPreferencesTaskDefPage::OnFirstShow()
 	m_btDefIcon.SetIcon((nIcon == -1) ? NULL : m_ilTaskIcons.ExtractIcon(nIcon));
 
 	// init edit prompts()
-	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTALLOCTO, *this, CEnString(IDS_TDC_NOONE));
-	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTALLOCBY, *this, CEnString(IDS_TDC_NOONE));
+	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTALLOCTO, *this, CEnString(IDS_TDC_NOBODY));
+	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTALLOCBY, *this, CEnString(IDS_TDC_NOBODY));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTSTATUS, *this, CEnString(IDS_TDC_NONE));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTTAGS, *this, CEnString(IDS_TDC_NONE));
 	m_mgrPrompts.SetEditPrompt(IDC_DEFAULTCATEGORY, *this, CEnString(IDS_TDC_NONE));
