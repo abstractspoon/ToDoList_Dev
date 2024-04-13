@@ -2252,7 +2252,6 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		return;
 
 	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	if (pCtrl != NULL)
 	{
@@ -2280,6 +2279,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	}
 
 	// All other attributes not otherwise handled
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
 	switch (nAttribID)
@@ -2422,8 +2422,6 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	HideControl(*GetDlgItem(nCtrlID));
 
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
 	CString sNewItemText;
 
 	switch (nCtrlID)
@@ -2498,7 +2496,6 @@ void CTDLTaskAttributeListCtrl::OnDependsChange()
 {
 	// Received after a manual edit of the task IDs
 	int nRow = GetCurSel();
-	ASSERT(GetAttributeID(nRow) == TDCA_DEPENDENCY);
 
 	HideControl(m_eDepends);
 	SetItemText(nRow, VALUE_COL, m_eDepends.FormatDependencies());
@@ -2509,7 +2506,6 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
 {
 	// Received after a manual edit of the task IDs
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	CString sFile;
 	m_eSingleFileLink.GetWindowText(sFile);
@@ -2523,8 +2519,6 @@ void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
 {
 	// Received after a manual edit of the task IDs
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
 	TDCTIMEPERIOD tp(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
 
 	HideControl(m_eTimePeriod);
@@ -2546,8 +2540,6 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 
 		if (pCtrl)
 			PrepareControl(*pCtrl, nRow, VALUE_COL);
-// 		else
-// 			ASSERT(0);
 	}
 
 	CInputListCtrl::OnCancelEdit();
@@ -2573,7 +2565,6 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 		// Note: Don't hide the date picker because the user 
 		// may be editing the date components manually
 		int nRow = GetCurSel();
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 		CString sNewItemText;
 		COleDateTime date;
