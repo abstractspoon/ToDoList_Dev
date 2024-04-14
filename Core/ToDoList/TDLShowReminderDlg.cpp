@@ -58,14 +58,10 @@ enum
 
 CTDLShowReminderListCtrl::CTDLShowReminderListCtrl()
 	:
-	m_bHasTaskIcons(FALSE),
+	m_bTasksHaveIcons(FALSE),
 	m_dwNextReminderID(1)
 {
 }
-
-BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
-	ON_WM_PAINT()
-END_MESSAGE_MAP()
 
 BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 {
@@ -89,6 +85,8 @@ BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 		SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
 		SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
 		SetItemData(nItem, m_dwNextReminderID);
+
+		m_bTasksHaveIcons |= (rem.pTDC->GetTaskIconIndex(m_dwNextReminderID) != -1);
 
 		m_mapReminders[m_dwNextReminderID] = rem;
 		m_dwNextReminderID++;
@@ -160,11 +158,16 @@ BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
 		return FALSE;
 
 	DWORD dwRemID = GetReminderID(nItem);
+	BOOL bUpdateTaskHaveIcons = (rem.pTDC->GetTaskIconIndex(dwRemID) != -1);
 
 	if (!DeleteItem(nItem))
 		return FALSE;
 
 	m_mapReminders.RemoveKey(dwRemID);
+
+	if (bUpdateTaskHaveIcons)
+		UpdateTasksHaveIcons();
+
 	return TRUE;
 }
 
@@ -187,6 +190,9 @@ int CTDLShowReminderListCtrl::RemoveReminders(const CFilteredToDoCtrl& tdc)
 			nNumRemoved++;
 		}
 	}
+
+	if (nNumRemoved)
+		UpdateTasksHaveIcons();
 
 	return nNumRemoved;
 }
@@ -274,6 +280,8 @@ void CTDLShowReminderListCtrl::DeleteAllItems()
 
 	CEnListCtrl::DeleteAllItems();
 	m_mapReminders.RemoveAll();
+
+	m_bTasksHaveIcons = FALSE;
 }
 
 int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
@@ -327,7 +335,7 @@ COLORREF CTDLShowReminderListCtrl::GetItemBackColor(int nItem, BOOL bSelected, B
 
 void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
-	if ((nCol == TASK_COL) && m_bHasTaskIcons)
+	if ((nCol == TASK_COL) && m_bTasksHaveIcons)
 	{
 		TDCREMINDER rem;
 		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
@@ -349,7 +357,7 @@ void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 
 void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
-	if (m_bHasTaskIcons)
+	if (m_bTasksHaveIcons)
 	{
 		TDCREMINDER rem;
 		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
@@ -364,10 +372,10 @@ void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRe
 	CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, bSelected, crBack, bDropHighlighted, bFocused);
 }
 
-void CTDLShowReminderListCtrl::OnPaint()
+void CTDLShowReminderListCtrl::UpdateTasksHaveIcons()
 {
 	// See if any active reminders have task icons
-	m_bHasTaskIcons = FALSE;
+	m_bTasksHaveIcons = FALSE;
 
 	TDCREMINDER rem;
 	int nItem = GetItemCount();
@@ -378,12 +386,10 @@ void CTDLShowReminderListCtrl::OnPaint()
 
 		if (rem.pTDC->GetTaskIconIndex(rem.dwTaskID) != -1)
 		{
-			m_bHasTaskIcons = TRUE;
+			m_bTasksHaveIcons = TRUE;
 			break;
 		}
 	}
-
-	CEnListCtrl::OnPaint();
 }
 
 /////////////////////////////////////////////////////////////////////////////

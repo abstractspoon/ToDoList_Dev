@@ -48,7 +48,7 @@ public:
 	void DeleteAllItems();
 
 protected:
-	BOOL m_bHasTaskIcons;
+	BOOL m_bTasksHaveIcons;
 	DWORD m_dwNextReminderID;
 	CTDCReminderMap m_mapReminders;
 
@@ -60,8 +60,7 @@ protected:
 	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 
 protected:
-	afx_msg void OnPaint();
-	DECLARE_MESSAGE_MAP()
+	void UpdateTasksHaveIcons();
 };
 
 /////////////////////////////////////////////////////////////////////////////
