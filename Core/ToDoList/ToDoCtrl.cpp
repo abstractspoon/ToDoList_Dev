@@ -5330,7 +5330,9 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB) ||
 		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
 		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) || 
-		   mapAttribIDs.HasOnly(TDCA_UNDO));
+		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	if (IsReadOnly())
 		return;
