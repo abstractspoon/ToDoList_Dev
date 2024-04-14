@@ -1029,11 +1029,11 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
 	case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
 
-	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int,		Misc::Format(value, 2));	break;
-	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int,		Misc::Format(value));		break;
-	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int,		Misc::Format(value));		break;
-	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF,	Misc::Format(value));		break;
-	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD,		Misc::Format(value));		break;
+	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int,		Misc::Format(value));	break;
+	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int,		Misc::Format(value));	break;
+	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int,		Misc::Format(value));	break;
+	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF,	Misc::Format(value));	break;
+	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD,		Misc::Format(value));	break;
 
 	case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost,				TDCCOST,				value.Format(2));			break;
 	case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence,		TDCRECURRENCE,			value.GetRegularityText());	break;
@@ -2401,7 +2401,10 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
 	
 	if (pWndIgnore != &m_editBox)
+	{
 		m_editBox.SetSpinBuddy(NULL);
+		HideControl(m_spinPercent, NULL);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
