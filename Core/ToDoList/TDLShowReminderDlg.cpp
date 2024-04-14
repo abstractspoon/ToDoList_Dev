@@ -62,6 +62,10 @@ CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(const CTDCReminderMap& mapRem
 {
 }
 
+BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
+	ON_WM_PAINT()
+END_MESSAGE_MAP()
+
 int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	if (nSortColumn == WHEN_COL)
@@ -109,6 +113,67 @@ COLORREF CTDLShowReminderListCtrl::GetItemBackColor(int nItem, BOOL bSelected, B
 
 	// else
 	return CEnListCtrl::GetItemBackColor(nItem, bSelected, bDropHighlighted, bWndFocus);
+}
+
+void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	if ((nCol == TASK_COL) && m_bHasTaskIcons)
+	{
+		TDCREMINDER rem;
+		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+
+		int nImage = rem.pTDC->GetTaskIconIndex(rem.dwTaskID);
+
+		if (nImage != -1)
+			rem.pTDC->GetTaskIconImageList().Draw(pDC, nImage, rText.TopLeft(), ILD_TRANSPARENT);
+
+		CRect rRest(rText);
+		rRest.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+
+		return CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+	}
+
+	// else
+	return CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+}
+
+void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	if (m_bHasTaskIcons)
+	{
+		TDCREMINDER rem;
+		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+
+		CRect rText(rItem);
+		rText.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+
+		CEnListCtrl::DrawItemBackground(pDC, nItem, rText, crBack, bSelected, bDropHighlighted, bFocused);
+		return;
+	}
+
+	CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, bSelected, crBack, bDropHighlighted, bFocused);
+}
+
+void CTDLShowReminderListCtrl::OnPaint()
+{
+	// See if any active reminders have task icons
+	m_bHasTaskIcons = FALSE;
+
+	TDCREMINDER rem;
+	int nItem = GetItemCount();
+
+	while (nItem--)
+	{
+		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+
+		if (rem.pTDC->GetTaskIconIndex(rem.dwTaskID) != -1)
+		{
+			m_bHasTaskIcons = TRUE;
+			break;
+		}
+	}
+
+	CEnListCtrl::OnPaint();
 }
 
 /////////////////////////////////////////////////////////////////////////////
