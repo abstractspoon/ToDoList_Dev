@@ -733,7 +733,7 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	BOOL bListFocused = (GetFocus() == this);
 	BOOL bSelAlways = ((uStyle & LVS_SHOWSELALWAYS) == LVS_SHOWSELALWAYS);
-	BOOL bSelected = (IsWindowEnabled() && (nItem == GetCurSel()) && (bListFocused || bSelAlways));
+	BOOL bSelected = (IsWindowEnabled() && (uState & LVIS_SELECTED) && (bListFocused || bSelAlways));
 	BOOL bDropHighlighted = (uState & LVIS_DROPHILITED);
 
 	BOOL bItemFocused = (bListFocused && bSelected);
