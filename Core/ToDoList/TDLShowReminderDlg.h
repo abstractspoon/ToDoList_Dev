@@ -28,12 +28,29 @@ class CFilteredToDoCtrl;
 class CTDLShowReminderListCtrl : public CEnListCtrl
 {
 public:
-	CTDLShowReminderListCtrl(const CTDCReminderMap& mapReminders);
+	CTDLShowReminderListCtrl();
+
+	BOOL AddListReminder(const TDCREMINDER& rem);
+	BOOL UpdateListReminder(const TDCREMINDER& rem);
+	BOOL RemoveListReminder(const TDCREMINDER& rem);
+	int RemoveListReminders(const CFilteredToDoCtrl& tdc);
+
+	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
+	int GetListReminders(CTDCReminderArray& aRem) const;
+
+	DWORD GetReminderID(const TDCREMINDER& rem) const;
+	DWORD GetReminderID(int nItem) const { return GetItemData(nItem); }
+
+	int FindListReminder(const TDCREMINDER& rem) const;
+	int GetSelectedReminder(TDCREMINDER& rem) const;
+	int GetSelectedReminders(CTDCReminderArray& aRem) const;
+
+	void DeleteAllItems();
 
 protected:
-	const CTDCReminderMap& m_mapReminders;
-
 	BOOL m_bHasTaskIcons;
+	DWORD m_dwNextReminderID;
+	CTDCReminderMap m_mapReminders;
 
 protected:
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
@@ -63,9 +80,10 @@ public:
 
 	BOOL AddListReminder(const TDCREMINDER& rem);
 	BOOL UpdateListReminder(const TDCREMINDER& rem);
-	void RemoveListReminder(const TDCREMINDER& rem);
-	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
+	BOOL RemoveListReminder(const TDCREMINDER& rem);
 	void RemoveAllListReminders();
+	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
+
 	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
 
 	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
@@ -81,7 +99,6 @@ protected:
 	CString m_sSoundFile;
 	UINT m_nSnoozeMins;
 	int m_bSnoozeUntil;
-	DWORD m_dwNextReminderID;
 	BOOL m_bChangingReminders;
 
 	CTDLReminderPeriodComboBox m_cbSnoozeFor;
@@ -90,8 +107,6 @@ protected:
 	COleDateTime m_dtSnoozeUntil;
 	CTDLShowReminderListCtrl m_lcReminders;
 	CIcon m_icon;
-
-	CTDCReminderMap m_mapReminders;
 
 protected:
 // Overrides
@@ -130,10 +145,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	int FindListReminder(const TDCREMINDER& rem);
-	int GetSelectedReminder(TDCREMINDER& rem) const;
-	int GetSelectedReminders(CTDCReminderArray& aRem) const;
-	int GetListReminders(CTDCReminderArray& aRem) const;
 	void EnableControls();
 	void UpdateControls();
 	void UpdateTitleText();

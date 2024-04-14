@@ -56,15 +56,225 @@ enum
 ///////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderListCtrl
 
-CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(const CTDCReminderMap& mapReminders)
+CTDLShowReminderListCtrl::CTDLShowReminderListCtrl()
 	:
-	m_mapReminders(mapReminders)
+	m_bHasTaskIcons(FALSE),
+	m_dwNextReminderID(1)
 {
 }
 
 BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
+
+BOOL CTDLShowReminderListCtrl::AddListReminder(const TDCREMINDER& rem)
+{
+	ASSERT(GetSafeHwnd());
+
+	if (!GetSafeHwnd())
+		return FALSE;
+
+	int nItem = FindListReminder(rem);
+	BOOL bNewReminder = (nItem == -1);
+
+	if (bNewReminder)
+	{
+		// Insert at end
+		nItem = InsertItem(GetItemCount(), rem.GetTaskTitle());
+		ASSERT(nItem != -1);
+
+		if (nItem == -1)
+			return FALSE;
+
+		SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
+		SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
+		SetItemData(nItem, m_dwNextReminderID);
+
+		m_mapReminders[m_dwNextReminderID] = rem;
+		m_dwNextReminderID++;
+
+		// do we need to play a sound?
+		if (!rem.sSoundFile.IsEmpty())
+			PlaySound(rem.sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
+
+		// Select this item if it's the first or nothing is selected
+		if ((GetItemCount() == 1) || (GetSelectedCount() == 0))
+			SetCurSel(nItem);
+	}
+
+	SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
+
+	if (bNewReminder && IsSorting())
+		Sort();
+
+	return bNewReminder;
+}
+
+int CTDLShowReminderListCtrl::FindListReminder(const TDCREMINDER& rem) const
+{
+	ASSERT(m_mapReminders.GetCount() == GetItemCount());
+
+	int nItem = GetItemCount();
+
+	while (nItem--)
+	{
+		DWORD dwRemID = GetItemData(nItem);
+		TDCREMINDER remItem;
+
+		if (m_mapReminders.Lookup(dwRemID, remItem) && remItem.Matches(rem.pTDC, rem.dwTaskID))
+			return nItem;
+	}
+
+	// not found
+	return -1;
+}
+
+DWORD CTDLShowReminderListCtrl::GetReminderID(const TDCREMINDER& rem) const
+{
+	int nItem = FindListReminder(rem);
+
+	if (nItem == -1)
+		return FALSE;
+
+	return GetReminderID(nItem);
+}
+
+BOOL CTDLShowReminderListCtrl::UpdateListReminder(const TDCREMINDER& rem)
+{
+	int nItem = FindListReminder(rem);
+
+	if (nItem == -1)
+		return FALSE;
+
+	SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
+	SetItemText(nItem, WHEN_COL, rem.FormatWhenString());
+
+	return FALSE;
+}
+
+BOOL CTDLShowReminderListCtrl::RemoveListReminder(const TDCREMINDER& rem)
+{
+	int nItem = FindListReminder(rem);
+
+	if (nItem == -1)
+		return FALSE;
+
+	DWORD dwRemID = GetReminderID(nItem);
+
+	if (!DeleteItem(nItem))
+		return FALSE;
+
+	m_mapReminders.RemoveKey(dwRemID);
+	return TRUE;
+}
+
+int CTDLShowReminderListCtrl::RemoveListReminders(const CFilteredToDoCtrl& tdc)
+{
+	ASSERT(m_mapReminders.GetCount() == GetItemCount());
+
+	int nItem = GetItemCount(), nNumRemoved = 0;
+
+	while (nItem--)
+	{
+		DWORD dwRemID = GetReminderID(nItem);
+		TDCREMINDER rem;
+
+		if (m_mapReminders.Lookup(dwRemID, rem) && (rem.pTDC == &tdc))
+		{
+			m_mapReminders.RemoveKey(dwRemID);
+			DeleteItem(nItem);
+
+			nNumRemoved++;
+		}
+	}
+
+	return nNumRemoved;
+}
+
+int CTDLShowReminderListCtrl::GetListReminders(CTDCReminderArray& aRem) const
+{
+	int nRem = GetItemCount();
+	aRem.SetSize(nRem);
+
+	while (nRem--)
+	{
+		DWORD dwRemID = GetItemData(nRem);
+		ASSERT(dwRemID);
+
+		VERIFY(m_mapReminders.Lookup(dwRemID, aRem[nRem]));
+	}
+
+	return aRem.GetSize();
+}
+
+int CTDLShowReminderListCtrl::GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
+{
+	int nNumRem = GetItemCount(), nItem = 0;
+	aRem.SetSize(nNumRem); // max possible
+
+	for (int nRem = 0; nRem < nNumRem; nRem++)
+	{
+		DWORD dwRemID = GetItemData(nRem);
+		ASSERT(dwRemID);
+
+		if (m_mapReminders.Lookup(dwRemID, aRem[nItem]) && (aRem[nItem].pTDC == &tdc))
+			nItem++;
+	}
+
+	aRem.SetSize(nItem);
+
+	return nItem;
+}
+
+int CTDLShowReminderListCtrl::GetSelectedReminder(TDCREMINDER& rem) const
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	int nSel = GetNextSelectedItem(pos);
+
+	if (nSel != -1)
+	{
+		DWORD dwRemID = GetItemData(nSel);
+		ASSERT(dwRemID);
+
+		if (m_mapReminders.Lookup(dwRemID, rem))
+			return nSel;
+
+		// else
+		ASSERT(0);
+	}
+
+	return -1;
+}
+
+int CTDLShowReminderListCtrl::GetSelectedReminders(CTDCReminderArray& aRem) const
+{
+	aRem.SetSize(GetSelectedCount());
+	int nRem = 0;
+
+	POSITION pos = GetFirstSelectedItemPosition();
+
+	while (pos)
+	{
+		int nSel = GetNextSelectedItem(pos);
+		ASSERT(nSel != -1);
+
+		DWORD dwRemID = GetItemData(nSel);
+		ASSERT(dwRemID);
+
+		if (m_mapReminders.Lookup(dwRemID, aRem[nRem]))
+			nRem++;
+	}
+
+	return aRem.GetSize();
+}
+
+void CTDLShowReminderListCtrl::DeleteAllItems()
+{
+	ASSERT(m_mapReminders.GetCount() == GetItemCount());
+
+	CEnListCtrl::DeleteAllItems();
+	m_mapReminders.RemoveAll();
+}
 
 int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
@@ -182,11 +392,9 @@ void CTDLShowReminderListCtrl::OnPaint()
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
-	m_dwNextReminderID(1),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE),
-	m_cbSnoozeTime(TCB_HOURSINDAY),
-	m_lcReminders(m_mapReminders)
+	m_cbSnoozeTime(TCB_HOURSINDAY)
 {
 	//{{AFX_DATA_INIT(CTDLShowReminderDlg)
 	m_bSnoozeUntil = FALSE;
@@ -319,139 +527,61 @@ void CTDLShowReminderDlg::OnDestroy()
 	CTDLDialog::OnDestroy();
 }
 
-BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
-{
-	ASSERT(GetSafeHwnd());
-
-	if (!GetSafeHwnd())
-		return FALSE;
-	
-	int nItem = FindListReminder(rem);
-	BOOL bNewReminder = (nItem == -1);
-
-	if (bNewReminder)
-	{
-		// Insert at end
-		nItem = m_lcReminders.InsertItem(m_lcReminders.GetItemCount(), rem.GetTaskTitle());
-		ASSERT(nItem != -1);
-
-		if (nItem == -1)
-			return FALSE;
-
-		m_lcReminders.SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
-		m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
-		m_lcReminders.SetItemData(nItem, m_dwNextReminderID);
-
-		m_mapReminders[m_dwNextReminderID] = rem;
-		m_dwNextReminderID++;
-
-		// do we need to play a sound?
-		if (!rem.sSoundFile.IsEmpty())
-			PlaySound(rem.sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
-		
-		// Select this item if it's the first or nothing is selected
-		if ((m_lcReminders.GetItemCount() == 1) || (m_lcReminders.GetSelectedCount() == 0))
-			m_lcReminders.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
-		
-		m_lcReminders.SetFocus();
-		UpdateTitleText();
-	}
-
-	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
-
-	if (bNewReminder && m_lcReminders.IsSorting())
-		m_lcReminders.Sort();
-	
-	return bNewReminder;
-}
-
-BOOL CTDLShowReminderDlg::UpdateListReminder(const TDCREMINDER& rem)
-{
-	int nItem = FindListReminder(rem);
-
-	if (nItem == -1)
-		return FALSE;
-
-	m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
-	m_lcReminders.SetItemText(nItem, WHEN_COL, rem.FormatWhenString());
-
-	return FALSE;
-}
-
 void CTDLShowReminderDlg::UpdateTitleText()
 {
 	SetWindowText(CEnString(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
 }
 
-void CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
+void CTDLShowReminderDlg::RemoveAllListReminders()
 {
-	int nItem = FindListReminder(rem);
-	
-	if (nItem != -1)
-	{
-		DWORD dwRemID = m_lcReminders.GetItemData(nItem);
+	m_lcReminders.DeleteAllItems();
+	HideWindow();
+}
 
-		m_mapReminders.RemoveKey(dwRemID);
-		m_lcReminders.DeleteItem(nItem);
+BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
+{
+	BOOL bNewRem = m_lcReminders.AddListReminder(rem);
 
-		// Hide dialog when it becomes empty
-		if (m_lcReminders.GetItemCount() == 0)
-			HideWindow();
+	m_lcReminders.SetFocus();
+	UpdateTitleText();
+
+	return bNewRem;
+}
+
+BOOL CTDLShowReminderDlg::UpdateListReminder(const TDCREMINDER& rem)
+{
+	return m_lcReminders.UpdateListReminder(rem);
+}
+
+BOOL CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
+{
+	DWORD dwRemID = m_lcReminders.GetReminderID(rem);
+
+	if (!m_lcReminders.RemoveListReminder(rem))
+		return FALSE;
+
+	// Hide dialog when it becomes empty
+	if (m_lcReminders.GetItemCount() == 0)
+		HideWindow();
 		
-		UpdateTitleText();
-	}
+	UpdateTitleText();
+	return TRUE;
+}
+
+int CTDLShowReminderDlg::GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
+{
+	return m_lcReminders.GetListReminders(tdc, aRem);
 }
 
 void CTDLShowReminderDlg::RemoveListReminders(const CFilteredToDoCtrl& tdc)
 {
-	ASSERT(m_mapReminders.GetCount() == m_lcReminders.GetItemCount());
-	
-	int nItem = m_lcReminders.GetItemCount();
-
-	while (nItem--)
-	{
-		DWORD dwRemID = m_lcReminders.GetItemData(nItem);
-		TDCREMINDER rem;
-
-		if (m_mapReminders.Lookup(dwRemID, rem) && (rem.pTDC == &tdc))
-		{
-			m_mapReminders.RemoveKey(dwRemID);
-			m_lcReminders.DeleteItem(nItem);
-		}
-	}
+	m_lcReminders.RemoveListReminders(tdc);
 
 	// Hide dialog when it becomes empty
 	if (m_lcReminders.GetItemCount() == 0)
 		HideWindow();
 	
 	UpdateTitleText();
-}
-
-void CTDLShowReminderDlg::RemoveAllListReminders()
-{
-	ASSERT(m_mapReminders.GetCount() == m_lcReminders.GetItemCount());
-	
-	m_lcReminders.DeleteAllItems();
-	m_mapReminders.RemoveAll();
-}
-
-int CTDLShowReminderDlg::FindListReminder(const TDCREMINDER& rem)
-{
-	ASSERT(m_mapReminders.GetCount() == m_lcReminders.GetItemCount());
-	
-	int nItem = m_lcReminders.GetItemCount();
-
-	while (nItem--)
-	{
-		DWORD dwRemID = m_lcReminders.GetItemData(nItem);
-		TDCREMINDER remItem;
-
-		if (m_mapReminders.Lookup(dwRemID, remItem) && remItem.Matches(rem.pTDC, rem.dwTaskID))
-			return nItem;
-	}
-
-	// not found
-	return -1;
 }
 
 void CTDLShowReminderDlg::OnSnooze() 
@@ -472,8 +602,8 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 	CTDCReminderArray aRem;
 	int nPrevSel = m_lcReminders.GetLastSel();
 
-	if ((bAll && GetListReminders(aRem)) || 
-		(!bAll && GetSelectedReminders(aRem)))
+	if ((bAll && m_lcReminders.GetListReminders(aRem)) ||
+		(!bAll && m_lcReminders.GetSelectedReminders(aRem)))
 	{
 		CAutoFlag af(m_bChangingReminders, TRUE);
 
@@ -513,83 +643,6 @@ void CTDLShowReminderDlg::OnSnoozeAll()
 	SnoozeReminders(TRUE);
 }
 
-int CTDLShowReminderDlg::GetListReminders(CTDCReminderArray& aRem) const
-{
-	int nRem = m_lcReminders.GetItemCount();
-	aRem.SetSize(nRem);
-
-	while (nRem--)
-	{
-		DWORD dwRemID = m_lcReminders.GetItemData(nRem);
-		ASSERT(dwRemID);
-
-		VERIFY(m_mapReminders.Lookup(dwRemID, aRem[nRem]));
-	}
-
-	return aRem.GetSize();
-}
-
-int CTDLShowReminderDlg::GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
-{
-	int nNumRem = m_lcReminders.GetItemCount(), nItem = 0;
-	aRem.SetSize(nNumRem); // max possible
-
-	for (int nRem = 0; nRem < nNumRem; nRem++)
-	{
-		DWORD dwRemID = m_lcReminders.GetItemData(nRem);
-		ASSERT(dwRemID);
-
-		if (m_mapReminders.Lookup(dwRemID, aRem[nItem]) && (aRem[nItem].pTDC == &tdc))
-			nItem++;
-	}
-
-	aRem.SetSize(nItem);
-
-	return nItem;
-}
-
-int CTDLShowReminderDlg::GetSelectedReminder(TDCREMINDER& rem) const
-{
-	POSITION pos = m_lcReminders.GetFirstSelectedItemPosition();
-	int nSel = m_lcReminders.GetNextSelectedItem(pos);
-
-	if (nSel != -1)
-	{
-		DWORD dwRemID = m_lcReminders.GetItemData(nSel);
-		ASSERT(dwRemID);
-
-		if (m_mapReminders.Lookup(dwRemID, rem))
-			return nSel;
-
-		// else
-		ASSERT(0);
-	}
-
-	return -1;
-}
-
-int CTDLShowReminderDlg::GetSelectedReminders(CTDCReminderArray& aRem) const
-{
-	aRem.SetSize(m_lcReminders.GetSelectedCount());
-	int nRem = 0;
-	
-	POSITION pos = m_lcReminders.GetFirstSelectedItemPosition();
-
-	while (pos)
-	{
-		int nSel = m_lcReminders.GetNextSelectedItem(pos);
-		ASSERT(nSel != -1);
-
-		DWORD dwRemID = m_lcReminders.GetItemData(nSel);
-		ASSERT(dwRemID);
-
-		if (m_mapReminders.Lookup(dwRemID, aRem[nRem]))
-			nRem++;
-	}
-
-	return aRem.GetSize();
-}
-
 double CTDLShowReminderDlg::GetSnoozeDays() const
 {
 	return (GetSnoozeMinutes() / ONE_DAY_IN_MINS);
@@ -607,7 +660,7 @@ void CTDLShowReminderDlg::OnGotoTask()
 
 	TDCREMINDER rem;
 
-	if (GetSelectedReminder(rem) != -1)
+	if (m_lcReminders.GetSelectedReminder(rem) != -1)
 		DoGotoTask(rem);	
 
 	UpdateControls();
@@ -620,7 +673,7 @@ void CTDLShowReminderDlg::OnCompleteTask()
 
 	TDCREMINDER rem;
 
-	if (GetSelectedReminder(rem) != -1)
+	if (m_lcReminders.GetSelectedReminder(rem) != -1)
 	{
 		int nPrevSel = m_lcReminders.GetCurSel();
 		DoCompleteTask(rem);
@@ -635,7 +688,7 @@ void CTDLShowReminderDlg::OnDismiss()
 
 	CTDCReminderArray aRem;
 
-	if (GetSelectedReminders(aRem))
+	if (m_lcReminders.GetSelectedReminders(aRem))
 	{
 		int nPrevSel = m_lcReminders.GetLastSel();
 		{
@@ -719,7 +772,7 @@ void CTDLShowReminderDlg::UpdateControls()
 {
 	TDCREMINDER rem;
 
-	if (GetSelectedReminder(rem) != -1)
+	if (m_lcReminders.GetSelectedReminder(rem) != -1)
 	{
 		UINT nSnooze = ((rem.nLastSnoozeMins > 0) ? rem.nLastSnoozeMins : 5);
 		m_cbSnoozeFor.SetSelectedPeriod(nSnooze);
