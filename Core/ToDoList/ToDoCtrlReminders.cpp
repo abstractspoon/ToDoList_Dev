@@ -533,7 +533,7 @@ void CToDoCtrlReminders::DoCheckReminders()
 			
 			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
 			{
-				BOOL bRemWasVisible = (m_lcReminders.FindListReminder(rem) != -1);
+				BOOL bRemWasVisible = (m_lcReminders.FindReminder(rem) != -1);
 
 				if (ShowReminder(rem))
 				{

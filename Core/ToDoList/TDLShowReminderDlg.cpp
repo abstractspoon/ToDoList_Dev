@@ -67,14 +67,14 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
-BOOL CTDLShowReminderListCtrl::AddListReminder(const TDCREMINDER& rem)
+BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 {
 	ASSERT(GetSafeHwnd());
 
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	int nItem = FindListReminder(rem);
+	int nItem = FindReminder(rem);
 	BOOL bNewReminder = (nItem == -1);
 
 	if (bNewReminder)
@@ -110,7 +110,7 @@ BOOL CTDLShowReminderListCtrl::AddListReminder(const TDCREMINDER& rem)
 	return bNewReminder;
 }
 
-int CTDLShowReminderListCtrl::FindListReminder(const TDCREMINDER& rem) const
+int CTDLShowReminderListCtrl::FindReminder(const TDCREMINDER& rem) const
 {
 	ASSERT(m_mapReminders.GetCount() == GetItemCount());
 
@@ -131,7 +131,7 @@ int CTDLShowReminderListCtrl::FindListReminder(const TDCREMINDER& rem) const
 
 DWORD CTDLShowReminderListCtrl::GetReminderID(const TDCREMINDER& rem) const
 {
-	int nItem = FindListReminder(rem);
+	int nItem = FindReminder(rem);
 
 	if (nItem == -1)
 		return FALSE;
@@ -139,9 +139,9 @@ DWORD CTDLShowReminderListCtrl::GetReminderID(const TDCREMINDER& rem) const
 	return GetReminderID(nItem);
 }
 
-BOOL CTDLShowReminderListCtrl::UpdateListReminder(const TDCREMINDER& rem)
+BOOL CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem)
 {
-	int nItem = FindListReminder(rem);
+	int nItem = FindReminder(rem);
 
 	if (nItem == -1)
 		return FALSE;
@@ -152,9 +152,9 @@ BOOL CTDLShowReminderListCtrl::UpdateListReminder(const TDCREMINDER& rem)
 	return FALSE;
 }
 
-BOOL CTDLShowReminderListCtrl::RemoveListReminder(const TDCREMINDER& rem)
+BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
 {
-	int nItem = FindListReminder(rem);
+	int nItem = FindReminder(rem);
 
 	if (nItem == -1)
 		return FALSE;
@@ -168,7 +168,7 @@ BOOL CTDLShowReminderListCtrl::RemoveListReminder(const TDCREMINDER& rem)
 	return TRUE;
 }
 
-int CTDLShowReminderListCtrl::RemoveListReminders(const CFilteredToDoCtrl& tdc)
+int CTDLShowReminderListCtrl::RemoveReminders(const CFilteredToDoCtrl& tdc)
 {
 	ASSERT(m_mapReminders.GetCount() == GetItemCount());
 
@@ -191,7 +191,7 @@ int CTDLShowReminderListCtrl::RemoveListReminders(const CFilteredToDoCtrl& tdc)
 	return nNumRemoved;
 }
 
-int CTDLShowReminderListCtrl::GetListReminders(CTDCReminderArray& aRem) const
+int CTDLShowReminderListCtrl::GetReminders(CTDCReminderArray& aRem) const
 {
 	int nRem = GetItemCount();
 	aRem.SetSize(nRem);
@@ -207,7 +207,7 @@ int CTDLShowReminderListCtrl::GetListReminders(CTDCReminderArray& aRem) const
 	return aRem.GetSize();
 }
 
-int CTDLShowReminderListCtrl::GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
+int CTDLShowReminderListCtrl::GetReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
 {
 	int nNumRem = GetItemCount(), nItem = 0;
 	aRem.SetSize(nNumRem); // max possible
@@ -540,7 +540,7 @@ void CTDLShowReminderDlg::RemoveAllListReminders()
 
 BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 {
-	BOOL bNewRem = m_lcReminders.AddListReminder(rem);
+	BOOL bNewRem = m_lcReminders.AddReminder(rem);
 
 	m_lcReminders.SetFocus();
 	UpdateTitleText();
@@ -550,14 +550,14 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 BOOL CTDLShowReminderDlg::UpdateListReminder(const TDCREMINDER& rem)
 {
-	return m_lcReminders.UpdateListReminder(rem);
+	return m_lcReminders.UpdateReminder(rem);
 }
 
 BOOL CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
 {
 	DWORD dwRemID = m_lcReminders.GetReminderID(rem);
 
-	if (!m_lcReminders.RemoveListReminder(rem))
+	if (!m_lcReminders.RemoveReminder(rem))
 		return FALSE;
 
 	// Hide dialog when it becomes empty
@@ -570,12 +570,12 @@ BOOL CTDLShowReminderDlg::RemoveListReminder(const TDCREMINDER& rem)
 
 int CTDLShowReminderDlg::GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const
 {
-	return m_lcReminders.GetListReminders(tdc, aRem);
+	return m_lcReminders.GetReminders(tdc, aRem);
 }
 
 void CTDLShowReminderDlg::RemoveListReminders(const CFilteredToDoCtrl& tdc)
 {
-	m_lcReminders.RemoveListReminders(tdc);
+	m_lcReminders.RemoveReminders(tdc);
 
 	// Hide dialog when it becomes empty
 	if (m_lcReminders.GetItemCount() == 0)
@@ -602,7 +602,7 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 	CTDCReminderArray aRem;
 	int nPrevSel = m_lcReminders.GetLastSel();
 
-	if ((bAll && m_lcReminders.GetListReminders(aRem)) ||
+	if ((bAll && m_lcReminders.GetReminders(aRem)) ||
 		(!bAll && m_lcReminders.GetSelectedReminders(aRem)))
 	{
 		CAutoFlag af(m_bChangingReminders, TRUE);

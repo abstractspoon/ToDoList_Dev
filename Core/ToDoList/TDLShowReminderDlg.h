@@ -30,18 +30,18 @@ class CTDLShowReminderListCtrl : public CEnListCtrl
 public:
 	CTDLShowReminderListCtrl();
 
-	BOOL AddListReminder(const TDCREMINDER& rem);
-	BOOL UpdateListReminder(const TDCREMINDER& rem);
-	BOOL RemoveListReminder(const TDCREMINDER& rem);
-	int RemoveListReminders(const CFilteredToDoCtrl& tdc);
+	BOOL AddReminder(const TDCREMINDER& rem);
+	BOOL UpdateReminder(const TDCREMINDER& rem);
+	BOOL RemoveReminder(const TDCREMINDER& rem);
+	int RemoveReminders(const CFilteredToDoCtrl& tdc);
 
-	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
-	int GetListReminders(CTDCReminderArray& aRem) const;
+	int GetReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
+	int GetReminders(CTDCReminderArray& aRem) const;
 
 	DWORD GetReminderID(const TDCREMINDER& rem) const;
 	DWORD GetReminderID(int nItem) const { return GetItemData(nItem); }
 
-	int FindListReminder(const TDCREMINDER& rem) const;
+	int FindReminder(const TDCREMINDER& rem) const;
 	int GetSelectedReminder(TDCREMINDER& rem) const;
 	int GetSelectedReminders(CTDCReminderArray& aRem) const;
 
