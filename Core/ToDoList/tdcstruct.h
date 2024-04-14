@@ -26,10 +26,6 @@
 
 #include "..\Interfaces\preferences.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-class CFilteredToDoCtrl;
-
 //////////////////////////////////////////////////////////////////////
 
 struct TDCDROPIMPORT
@@ -1816,31 +1812,6 @@ struct SEARCHRESULT
 };
 
 typedef CArray<SEARCHRESULT, SEARCHRESULT&> CResultArray;
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-struct FTDRESULT
-{
-	FTDRESULT() : dwTaskID(0), pTDC(NULL), dwFlags(0) {}
-	FTDRESULT(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTaskList) 
-		: 
-		dwTaskID(result.dwTaskID), 
-		pTDC(pTaskList), 
-		dwFlags(result.dwFlags) 
-	{
-	}
-
-	BOOL IsReference() const	{ return (dwFlags & RF_REFERENCE); }
-	BOOL IsDone() const			{ return (dwFlags & RF_DONE); }
-	BOOL IsGoodAsDone() const	{ return (dwFlags & RF_GOODASDONE); }
-	BOOL IsParent() const		{ return (dwFlags & RF_PARENT); }
-	BOOL IsTopmost() const		{ return (dwFlags & RF_TOPMOST); }
-	
-	DWORD dwTaskID, dwFlags;
-	const CFilteredToDoCtrl* pTDC;
-};
-
-typedef CArray<FTDRESULT, FTDRESULT&> CFTDResultsArray;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

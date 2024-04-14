@@ -567,7 +567,7 @@ void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem
 	int nImage = GetTaskIconIndex(dwTaskID);
 
 	if (nImage != -1)
-		m_ilTaskIcons.Draw(&dc, nImage, rItem.TopLeft(), ILD_TRANSPARENT);
+		m_ilTaskIcons.Draw(&dc, nImage, rItem.TopLeft());
 
 	CRect rText(rItem);
 	rText.OffsetRect(ICON_SIZE, 0);

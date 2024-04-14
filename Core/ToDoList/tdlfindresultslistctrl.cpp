@@ -25,6 +25,35 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+FTDRESULT::FTDRESULT() 
+	: 
+	dwTaskID(0), 
+	pTDC(NULL), 
+	dwFlags(0) 
+{
+}
+
+FTDRESULT::FTDRESULT(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTaskList)
+	:
+	dwTaskID(result.dwTaskID),
+	pTDC(pTaskList),
+	dwFlags(result.dwFlags)
+{
+}
+
+int FTDRESULT::GetTaskIconIndex() const 
+{ 
+	return pTDC->GetTaskIconIndex(dwTaskID); 
+}
+
+BOOL FTDRESULT::DrawTaskIcon(CDC* pDC, POINT pt) const
+{
+	int nImage = GetTaskIconIndex();
+	return ((nImage != -1) && pTDC->GetTaskIconImageList().Draw(pDC, nImage, pt));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef LVS_EX_LABELTIP
 #	define LVS_EX_LABELTIP	0x00004000
 #endif
@@ -40,6 +69,8 @@ struct NMLVSCROLL
 };
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 enum
 {
 	COL_TASKTITLE,
@@ -54,7 +85,8 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	: 
 	m_nCurGroupID(-1),
 	m_nHotItem(-1),
-	m_bStrikeThruDone(FALSE)
+	m_bStrikeThruDone(FALSE),
+	m_bTasksHaveIcons(FALSE)
 {
 }
 
@@ -90,6 +122,22 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
 	RefreshUserPreferences();
+}
+
+void CTDLFindResultsListCtrl::UpdateTasksHaveIcons()
+{
+	m_bTasksHaveIcons = FALSE;
+
+	int nItem = GetItemCount();
+
+	while (nItem--)
+	{
+		while (nItem-- && !m_bTasksHaveIcons)
+		{
+			FTDRESULT* pRes = GetResult(nItem);
+			m_bTasksHaveIcons = (pRes && (pRes->pTDC->GetTaskIconIndex(pRes->dwTaskID) != -1));
+		}
+	}
 }
 
 LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
@@ -203,6 +251,8 @@ void CTDLFindResultsListCtrl::DeleteResults(const CFilteredToDoCtrl* pTDC)
 			delete pRes;
 		}
 	}
+
+	UpdateTasksHaveIcons();
 }
 
 void CTDLFindResultsListCtrl::DeleteAllResults()
@@ -218,6 +268,7 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 		DeleteItem(nItem);
 	}
 
+	m_bTasksHaveIcons = FALSE;
 	m_nCurGroupID = m_nHotItem = -1;
 	m_grouping.RemoveAllGroups();
 }
@@ -313,15 +364,26 @@ void CTDLFindResultsListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const 
 		FTDRESULT* pRes = GetResult(nItem);
 		ASSERT(pRes);
 
-		if (pRes && pRes->IsReference())
+		if (pRes)
 		{
-			GraphicsMisc::DrawShortcutOverlay(pDC, rText);
+			CRect rRest(rText);
 
-			// Offset the task title to avoid the reference icon
-			CRect rTextEx(rText);
-			rTextEx.left += GraphicsMisc::ScaleByDPIFactor(10);
+			if (m_bTasksHaveIcons)
+			{
+				pRes->DrawTaskIcon(pDC, rText.TopLeft());
+				rRest.left += (pRes->pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+			}
+			
+			if (pRes->IsReference())
+			{
+				GraphicsMisc::DrawShortcutOverlay(pDC, rText);
 
-			CEnListCtrl::DrawCellText(pDC, nItem, nCol, rTextEx, sText, crText, nDrawTextFlags);
+				// Offset the task title to avoid the reference icon
+				if (rRest.left == rText.left)
+					rRest.left += GraphicsMisc::ScaleByDPIFactor(10);
+			}
+
+			CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
 			return;
 		}
 	}
@@ -387,6 +449,8 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	
 	SetItemText(nIndex, COL_WHATMATCHED, FormatWhatMatched(result, pTDC, bShowValueOnly));
 	SetItemText(nIndex, COL_TASKPATH, sPath);
+
+	m_bTasksHaveIcons |= (pTDC->GetTaskIconIndex(result.dwTaskID) != -1);
 
 	if (m_nCurGroupID != -1)
 		m_grouping.SetItemGroupId(nIndex, m_nCurGroupID);

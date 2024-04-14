@@ -377,7 +377,7 @@ void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 		int nImage = rem.pTDC->GetTaskIconIndex(rem.dwTaskID);
 
 		if (nImage != -1)
-			rem.pTDC->GetTaskIconImageList().Draw(pDC, nImage, rText.TopLeft(), ILD_TRANSPARENT);
+			rem.pTDC->GetTaskIconImageList().Draw(pDC, nImage, rText.TopLeft());
 
 		CRect rRest(rText);
 		rRest.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
