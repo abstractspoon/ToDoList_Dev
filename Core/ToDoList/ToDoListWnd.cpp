@@ -8839,6 +8839,7 @@ void CToDoListWnd::OnCloseall()
 	// remove tasklists
 	m_dlgFindTasks.DeleteAllResults();
 	m_dlgTimeTracker.RemoveAllTasklists();
+	m_dlgReminders.RemoveAllListReminders();
 
 	int nCtrl = GetTDCCount();
 	
