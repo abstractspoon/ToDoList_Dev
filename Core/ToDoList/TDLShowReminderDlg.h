@@ -12,6 +12,7 @@
 #include "tdldialog.h"
 #include "tdcreminder.h"
 #include "TDLReminderPeriodComboBox.h"
+#include "TDLShowReminderListCtrl.h"
 
 #include "..\Shared\DateTimeCtrlEx.h"
 #include "..\Shared\timecombobox.h"
@@ -21,47 +22,6 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CFilteredToDoCtrl;
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLShowReminderListCtrl
-
-class CTDLShowReminderListCtrl : public CEnListCtrl
-{
-public:
-	CTDLShowReminderListCtrl();
-
-	BOOL AddReminder(const TDCREMINDER& rem);
-	BOOL UpdateReminder(const TDCREMINDER& rem);
-	BOOL RemoveReminder(const TDCREMINDER& rem);
-	int RemoveReminders(const CFilteredToDoCtrl& tdc);
-
-	int GetReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
-	int GetReminders(CTDCReminderArray& aRem) const;
-
-	DWORD GetReminderID(const TDCREMINDER& rem) const;
-	DWORD GetReminderID(int nItem) const { return GetItemData(nItem); }
-
-	int FindReminder(const TDCREMINDER& rem) const;
-	int GetSelectedReminder(TDCREMINDER& rem) const;
-	int GetSelectedReminders(CTDCReminderArray& aRem) const;
-
-	void DeleteAllItems();
-
-protected:
-	BOOL m_bTasksHaveIcons;
-	DWORD m_dwNextReminderID;
-	CTDCReminderMap m_mapReminders;
-
-protected:
-	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
-	virtual COLORREF GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
-	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
-	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
-
-protected:
-	void UpdateTasksHaveIcons();
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderDlg dialog
@@ -147,7 +107,6 @@ protected:
 	void EnableControls();
 	void UpdateControls();
 	void UpdateTitleText();
-	void UpdateColumnWidths();
 	void SnoozeReminders(BOOL bAll);
 	void RestoreFocusToList(int nPrevSel);
 };
