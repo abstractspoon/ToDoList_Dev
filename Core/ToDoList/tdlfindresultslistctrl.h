@@ -31,8 +31,8 @@ struct FTDRESULT
 	BOOL IsParent() const { return (dwFlags & RF_PARENT); }
 	BOOL IsTopmost() const { return (dwFlags & RF_TOPMOST); }
 
-	int GetTaskIconIndex() const;
-	BOOL DrawTaskIcon(CDC* pDC, POINT pt) const;
+	BOOL HasIcon() const;
+	void DrawIcon(CDC* pDC, const CRect& rIcon) const;
 
 	DWORD dwTaskID, dwFlags;
 	const CFilteredToDoCtrl* pTDC;
@@ -74,7 +74,7 @@ protected:
 	int m_nCurGroupID;
 	int m_nHotItem;
 	BOOL m_bStrikeThruDone;
-	BOOL m_bTasksHaveIcons;
+	BOOL m_bHasIconsOrRefs;
 
 	mutable CFontCache m_fonts;
 
@@ -110,7 +110,7 @@ protected:
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;
 	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
 	void UpdateHotItem(CPoint point);
-	void UpdateTasksHaveIcons();
+	void UpdateIconAndReferenceStatus();
 };
 
 /////////////////////////////////////////////////////////////////////////////

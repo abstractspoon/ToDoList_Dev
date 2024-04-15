@@ -244,23 +244,9 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 
 void CTDLShowReminderDlg::RestoreFocusToList(int nPrevSel)
 {
-	int nNumItems = m_lcReminders.GetItemCount();
+	if (m_lcReminders.RestoreFocusToList(nPrevSel))
+		return;
 
-	if (nNumItems)
-	{
-		m_lcReminders.SetFocus();
-
-		if (m_lcReminders.GetSelectedCount() == 0)
-		{
-			if (nPrevSel >= nNumItems)
-				nPrevSel = (nNumItems - 1);
-
-			m_lcReminders.SetItemState(nPrevSel, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
-			return;
-		}
-	}
-
-	// all else
 	UpdateControls();
 }
 

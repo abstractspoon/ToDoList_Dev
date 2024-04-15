@@ -44,10 +44,10 @@ public:
 
 	void DeleteAllItems();
 	void UpdateColumnWidths();
-	void RestoreFocusToList(int nPrevSel);
+	BOOL RestoreFocusToList(int nPrevSel);
 
 protected:
-	BOOL m_bTasksHaveIcons;
+	BOOL m_bHasIcons;
 	DWORD m_dwNextReminderID;
 	CTDCReminderMap m_mapReminders;
 
@@ -59,7 +59,7 @@ protected:
 	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 
 protected:
-	void UpdateTasksHaveIcons();
+	void UpdateIconStatus();
 };
 
 //{{AFX_INSERT_LOCATION}}
