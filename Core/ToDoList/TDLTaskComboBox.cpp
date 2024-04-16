@@ -66,19 +66,14 @@ int CTDLTaskComboBox::GetSelectedTaskImage() const
 	return GetItemImage(GetCurSel());
 }
 
-BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage)
+BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference)
 {
-	return InsertTask(GetCount(), sTask, dwTaskID, bParent, nIndent, nImage);
+	return InsertTask(GetCount(), sTask, dwTaskID, bParent, nIndent, nImage, bReference);
 }
 
-BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage)
+BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference)
 {
-	CString sText(TAB, nIndent);
-
-	sText += sTask;
-	sText += Misc::Format(_T(" (%ld)"), dwTaskID);
-	
-	int nTask = CDialogHelper::InsertString(*this, nPos, sText, dwTaskID);
+	int nTask = CDialogHelper::InsertString(*this, nPos, (CString(TAB, nIndent) + sTask), dwTaskID);
 
 	if (nTask == CB_ERR)
 		return FALSE;
@@ -95,6 +90,7 @@ BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID
 			pItemData->nIndent = nIndent;
 			pItemData->nImage = nImage;
 			pItemData->bParent = bParent;
+			pItemData->bReference = bReference;
 		}
 	}
 
@@ -125,7 +121,8 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 							pItemData->dwItemData, 
 							pItemData->bParent, 
 							pItemData->nIndent, 
-							nImage))
+							nImage,
+							pItemData->bReference))
 			{
 				return FALSE;
 			}
@@ -194,6 +191,13 @@ int CTDLTaskComboBox::GetItemIndent(int nItem) const
 	return pItemData ? pItemData->nIndent : 0;
 }
 
+BOOL CTDLTaskComboBox::IsItemReference(int nItem) const
+{
+	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+	return pItemData ? pItemData->bReference : FALSE;
+}
+
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
@@ -207,11 +211,13 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	// else
 	CRect rText(rect), rIcon(rect);
 	CString sText(sItem);
+
 	int nImage = GetItemImage(nItem);
+	BOOL bReference = IsItemReference(nItem);
 
 	if (bList)
 	{
-		// Always indent the text to make room for the image, unless we have
+		// ALWAYS indent the text to make room for the image, unless we have
 		// headings in which case the base class will do that for us
 		if (m_nNumHeadings == 0)
 			rText.left += ICON_SIZE + 2;
@@ -222,7 +228,7 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			rIcon.left += ((ICON_SIZE + 2) * GetItemIndent(nItem));
 
 			if (m_nNumHeadings)
-				rIcon.left -= ICON_SIZE + 2;
+				rIcon.left -= (ICON_SIZE + 2);
 		}
 	}
 	else
@@ -230,7 +236,13 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		sText.TrimLeft(TAB);
 
 		if (nImage != -1)
-			rText.left += ICON_SIZE + 2;
+		{
+			rText.left += (ICON_SIZE + 2);
+		}
+		else if (bReference)
+		{
+			rText.left += ((ICON_SIZE / 2) + 2);
+		}
 
 		rIcon.top--;
 	}
@@ -239,6 +251,9 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 	if (nImage != -1)
 		ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+
+	if (bReference)
+		GraphicsMisc::DrawShortcutOverlay(&dc, rIcon);
 }
 
 BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
@@ -278,7 +293,6 @@ void CTDLTaskComboBox::OnDropDown()
 			sText.TrimLeft(TAB);
 
 			SetWindowText(sText);
-
 			PostMessage(WM_RESELECTTASKID, 0, dwSelTaskID);
 		}
 	}
@@ -287,7 +301,6 @@ void CTDLTaskComboBox::OnDropDown()
 LRESULT CTDLTaskComboBox::OnReselectTaskID(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(lp);
-	ASSERT(GetCurSel() == CB_ERR);
 	ASSERT(CDialogHelper::ComboHasEdit(*this));
 	ASSERT(GetDroppedState());
 
