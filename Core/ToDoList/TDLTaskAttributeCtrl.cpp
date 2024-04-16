@@ -31,33 +31,64 @@ CTDLTaskAttributeCtrl::~CTDLTaskAttributeCtrl()
 {
 }
 
-BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CRuntimeDlg)
+BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	//{{AFX_MSG_MAP(CTDLTaskAttributeDlgCtrl)
 	ON_WM_SIZE()
+	ON_WM_CREATE()
+	ON_WM_SETFOCUS()
 
-	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileLinkDisplay)
-	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileLinkWantTooltip)
+	// These we just forward to our parent
+	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
+	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnAttributeEdited)
+	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoItemAddedOrDeleted)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnClearTaskAttribute)
+	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnToggleTimeTracking)
+	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnAddTimeToLogFile)
+	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnSelectDependencies)
+	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnGetLinkTooltip)
+	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnDisplayLink)
+
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+// -----------------------------------------------------------------------
+
+#define MSG_FUNC(name, msg) LRESULT CTDLTaskAttributeCtrl::name(WPARAM wp, LPARAM lp) { return GetParent()->SendMessage(msg, wp, lp); }
+
+// ---------------------------------------------------
+
+MSG_FUNC(OnEditTaskAttribute, WM_TDCM_EDITTASKATTRIBUTE)
+MSG_FUNC(OnAttributeEdited, WM_TDCN_ATTRIBUTEEDITED)
+MSG_FUNC(OnAutoItemAddedOrDeleted, WM_TDCN_AUTOITEMADDEDDELETED)
+MSG_FUNC(OnClearTaskAttribute, WM_TDCM_CLEARTASKATTRIBUTE)
+MSG_FUNC(OnToggleTimeTracking, WM_TDCM_TOGGLETIMETRACKING)
+MSG_FUNC(OnAddTimeToLogFile, WM_TDCM_ADDTIMETOLOGFILE)
+MSG_FUNC(OnSelectDependencies, WM_TDCM_SELECTDEPENDENCIES)
+MSG_FUNC(OnGetLinkTooltip, WM_TDCM_GETLINKTOOLTIP)
+MSG_FUNC(OnDisplayLink, WM_TDCM_DISPLAYLINK)
+
+// ---------------------------------------------------
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeDlgCtrl message handlers
 
 // Message handlers
-BOOL CTDLTaskAttributeCtrl::OnInitDialog()
+int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 {
+	if (CWnd::OnCreate(pCreateStruct) != 0)
+		return -1;
+
 	// Create toolbar
 	// TODO
 
 	// Create List
 	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
-
-	return CDialog::OnInitDialog();
+	return 0;
 }
 
 void CTDLTaskAttributeCtrl::OnSetFocus(CWnd* pOldWnd)
 {
-	CRuntimeDlg::OnSetFocus(pOldWnd);
+	CWnd::OnSetFocus(pOldWnd);
 
 	m_lcAttributes.SetFocus();
 }
@@ -77,96 +108,109 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 	if (m_lcAttributes.GetSafeHwnd())
 		m_lcAttributes.MoveWindow(0, 0, cx, cy);
 
-	CRuntimeDlg::OnSize(nType, cx, cy);
-}
-
-LRESULT CTDLTaskAttributeCtrl::OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam)
-{
-	return GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, wParam, lParam);
-}
-
-LRESULT CTDLTaskAttributeCtrl::OnFileLinkDisplay(WPARAM wParam, LPARAM lParam)
-{
-	return GetParent()->SendMessage(WM_TDCM_DISPLAYLINK, wParam, lParam);
+	CWnd::OnSize(nType, cx, cy);
 }
 
 // Public interface
 BOOL CTDLTaskAttributeCtrl::Create(CWnd* pParent, UINT nID, const CRect& rPos)
 {
-	SetBordersDLU(0);
-
-	return CRuntimeDlg::Create(NULL, (WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT),
-							   WS_EX_CONTROLPARENT, rPos, pParent, nID);
+	return CWnd::CreateEx(WS_EX_CONTROLPARENT,
+						  NULL, 
+						  NULL, 
+						  (WS_CHILD | WS_VISIBLE | WS_TABSTOP), 
+						  rPos, 
+						  pParent, 
+						  nID);
 }
 
-void CTDLTaskAttributeCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
-{
-	m_lcAttributes.RedrawValue(nAttribID);
-}
+// -----------------------------------------------------------------------
 
-void CTDLTaskAttributeCtrl::SelectValue(TDC_ATTRIBUTE nAttribID)
-{
-	m_lcAttributes.SelectValue(nAttribID);
-}
+#define FWD_FUNC_VOID_0ARG(name) void CTDLTaskAttributeCtrl::name() { m_lcAttributes.name(); }
 
-void CTDLTaskAttributeCtrl::RefreshDateTimeFormatting()
-{
-	m_lcAttributes.RefreshDateTimeFormatting();
-}
+// -----------------------------------------------------------------------
 
-void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
-{
-	m_lcAttributes.SaveState(prefs, szKey);
-}
+FWD_FUNC_VOID_0ARG(RefreshDateTimeFormatting)
+FWD_FUNC_VOID_0ARG(RefreshSelectedTasksValues)
 
-void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
-{
-	m_lcAttributes.LoadState(prefs, szKey);
-}
+// -----------------------------------------------------------------------
 
-void CTDLTaskAttributeCtrl::SetCompletionStatus(const CString& sStatus)
-{
-	m_lcAttributes.SetCompletionStatus(sStatus);
-}
+#define CONST_FWD_FUNC_RET_0ARG(ret, name) ret CTDLTaskAttributeCtrl::name() const { return m_lcAttributes.name(); }
 
-void CTDLTaskAttributeCtrl::SetPriorityColors(const CDWordArray& aColors)
-{
-	m_lcAttributes.SetPriorityColors(aColors);
-}
+// -----------------------------------------------------------------------
 
-void CTDLTaskAttributeCtrl::SetPercentDoneIncrement(int nAmount)
-{
-	m_lcAttributes.SetPercentDoneIncrement(nAmount);
-}
+CONST_FWD_FUNC_RET_0ARG(TDC_ATTRIBUTE, GetSelectedAttributeID)
+CONST_FWD_FUNC_RET_0ARG(BOOL, GetFlag)
+CONST_FWD_FUNC_RET_0ARG(BOOL, GetLock)
+CONST_FWD_FUNC_RET_0ARG(CString, GetTaskTitle)
+CONST_FWD_FUNC_RET_0ARG(CString, GetAllocBy)
+CONST_FWD_FUNC_RET_0ARG(CString, GetStatus)
+CONST_FWD_FUNC_RET_0ARG(CString, GetSelectedAttributeLabel)
+CONST_FWD_FUNC_RET_0ARG(CString, GetExternalID)
+CONST_FWD_FUNC_RET_0ARG(CString, GetVersion)
+CONST_FWD_FUNC_RET_0ARG(int, GetPercentDone)
+CONST_FWD_FUNC_RET_0ARG(int, GetPriority)
+CONST_FWD_FUNC_RET_0ARG(int, GetRisk)
+CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetStartDate)
+CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetDueDate)
+CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetDoneDate)
+CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetStartTime)
+CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetDueTime)
+CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetDoneTime)
 
-TDC_ATTRIBUTE CTDLTaskAttributeCtrl::GetSelectedAttributeID() const
-{
-	return m_lcAttributes.GetSelectedAttributeID();
-}
+// -----------------------------------------------------------------------
 
-CString CTDLTaskAttributeCtrl::GetSelectedAttributeLabel() const
-{
-	return m_lcAttributes.GetSelectedAttributeLabel();
-}
+#define FWD_FUNC_VOID_1ARG(name, argType) void CTDLTaskAttributeCtrl::name(argType arg) { m_lcAttributes.name(arg); }
 
-void CTDLTaskAttributeCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault) 
-{ 
-	m_lcAttributes.SetDefaultAutoListData(tldDefault);
-}
+// -----------------------------------------------------------------------
 
-void CTDLTaskAttributeCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld)
-{
-	m_lcAttributes.SetAutoListData(nAttribID, tld);
-}
+FWD_FUNC_VOID_1ARG(RedrawValue,	TDC_ATTRIBUTE)
+FWD_FUNC_VOID_1ARG(SelectValue,	TDC_ATTRIBUTE)
+FWD_FUNC_VOID_1ARG(SetCompletionStatus,	const CString&)
+FWD_FUNC_VOID_1ARG(SetPriorityColors, const CDWordArray&)
+FWD_FUNC_VOID_1ARG(SetPercentDoneIncrement,	int)
+FWD_FUNC_VOID_1ARG(SetDefaultAutoListData, const TDCAUTOLISTDATA&)
+FWD_FUNC_VOID_1ARG(RefreshSelectedTasksValues, const CTDCAttributeMap&)
+FWD_FUNC_VOID_1ARG(RefreshSelectedTasksValue, TDC_ATTRIBUTE)
 
+// -----------------------------------------------------------------------
+
+#define CONST_FWD_FUNC_RET_1ARG(ret, name, argType) ret CTDLTaskAttributeCtrl::name(argType arg) const { return m_lcAttributes.name(arg); }
+
+// -----------------------------------------------------------------------
+
+CONST_FWD_FUNC_RET_1ARG(BOOL, GetTimeEstimate, TDCTIMEPERIOD&)
+CONST_FWD_FUNC_RET_1ARG(BOOL, GetTimeSpent, TDCTIMEPERIOD&)
+CONST_FWD_FUNC_RET_1ARG(int, GetDependencies, CTDCDependencyArray&)
+CONST_FWD_FUNC_RET_1ARG(int, GetFileLinks, CStringArray&)
+CONST_FWD_FUNC_RET_1ARG(BOOL, GetCost, TDCCOST&)
+
+// -----------------------------------------------------------------------
+
+#define CONST_FWD_FUNC_RET_2ARG(ret, name, arg1Type, arg2Type) ret CTDLTaskAttributeCtrl::name(arg1Type arg1, arg2Type arg2) const { return m_lcAttributes.name(arg1, arg2); }
+
+// -----------------------------------------------------------------------
+
+CONST_FWD_FUNC_RET_2ARG(int, GetAllocTo, CStringArray&, CStringArray&)
+CONST_FWD_FUNC_RET_2ARG(int, GetCategories, CStringArray&, CStringArray&)
+CONST_FWD_FUNC_RET_2ARG(int, GetTags, CStringArray&, CStringArray&)
+CONST_FWD_FUNC_RET_2ARG(int, GetCustomAttributeAutoListData, const CString&, CStringArray&)
+
+// -----------------------------------------------------------------------
+
+#define FWD_FUNC_VOID_2ARG(name, arg1Type, arg2Type) void CTDLTaskAttributeCtrl::name(arg1Type arg1, arg2Type arg2) { m_lcAttributes.name(arg1, arg2); }
+
+// -----------------------------------------------------------------------
+
+FWD_FUNC_VOID_2ARG(LoadState, const CPreferences&, LPCTSTR)
+FWD_FUNC_VOID_2ARG(SetAutoListData, TDC_ATTRIBUTE, const TDCAUTOLISTDATA&)
+FWD_FUNC_VOID_2ARG(SetAutoListDataReadOnly, TDC_ATTRIBUTE, BOOL)
+
+// -----------------------------------------------------------------------
+
+// Misc
 void CTDLTaskAttributeCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
 	m_lcAttributes.GetAutoListData(nAttribID, tld);
-}
-
-void CTDLTaskAttributeCtrl::SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly)
-{
-	m_lcAttributes.SetAutoListDataReadOnly(nAttribID, bReadOnly);
 }
 
 BOOL CTDLTaskAttributeCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
@@ -174,144 +218,9 @@ BOOL CTDLTaskAttributeCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 	return m_lcAttributes.SetSelectedTaskIDs(aTaskIDs);
 }
 
-void CTDLTaskAttributeCtrl::RefreshSelectedTasksValues()
+void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 {
-	m_lcAttributes.RefreshSelectedTasksValues();
-}
-
-void CTDLTaskAttributeCtrl::RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs)
-{
-	m_lcAttributes.RefreshSelectedTasksValues(mapAttribIDs);
-}
-
-void CTDLTaskAttributeCtrl::RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID)
-{
-	m_lcAttributes.RefreshSelectedTasksValue(nAttribID);
-}
-
-BOOL CTDLTaskAttributeCtrl::GetTimeEstimate(TDCTIMEPERIOD& timeEst) const
-{
-	return m_lcAttributes.GetTimeEstimate(timeEst);
-}
-
-BOOL CTDLTaskAttributeCtrl::GetTimeSpent(TDCTIMEPERIOD& timeSpent) const
-{
-	return m_lcAttributes.GetTimeSpent(timeSpent);
-}
-
-int CTDLTaskAttributeCtrl::GetAllocTo(CStringArray& aMatched, CStringArray& aMixed) const
-{
-	return m_lcAttributes.GetAllocTo(aMatched, aMixed);
-}
-
-CString CTDLTaskAttributeCtrl::GetTaskTitle() const
-{
-	return m_lcAttributes.GetTaskTitle();
-}
-
-CString CTDLTaskAttributeCtrl::GetAllocBy() const
-{
-	return m_lcAttributes.GetAllocBy();
-}
-
-CString CTDLTaskAttributeCtrl::GetStatus() const
-{
-	return m_lcAttributes.GetStatus();
-}
-
-int CTDLTaskAttributeCtrl::GetCategories(CStringArray& aMatched, CStringArray& aMixed) const
-{
-	return m_lcAttributes.GetCategories(aMatched, aMixed);
-}
-
-int CTDLTaskAttributeCtrl::GetDependencies(CTDCDependencyArray& aDepends) const
-{
-	return m_lcAttributes.GetDependencies(aDepends);
-}
-
-int CTDLTaskAttributeCtrl::GetTags(CStringArray& aMatched, CStringArray& aMixed) const
-{
-	return m_lcAttributes.GetTags(aMatched, aMixed);
-}
-
-int CTDLTaskAttributeCtrl::GetFileLinks(CStringArray& aFiles) const
-{
-	return m_lcAttributes.GetFileLinks(aFiles);
-}
-
-CString CTDLTaskAttributeCtrl::GetExternalID() const
-{
-	return m_lcAttributes.GetExternalID();
-}
-
-int CTDLTaskAttributeCtrl::GetPercentDone() const
-{
-	return m_lcAttributes.GetPercentDone();
-}
-
-int CTDLTaskAttributeCtrl::GetPriority() const
-{
-	return m_lcAttributes.GetPriority();
-}
-
-int CTDLTaskAttributeCtrl::GetRisk() const
-{
-	return m_lcAttributes.GetRisk();
-}
-
-BOOL CTDLTaskAttributeCtrl::GetCost(TDCCOST& cost) const
-{
-	return m_lcAttributes.GetCost(cost);
-}
-
-BOOL CTDLTaskAttributeCtrl::GetFlag() const
-{
-	return m_lcAttributes.GetFlag();
-}
-
-BOOL CTDLTaskAttributeCtrl::GetLock() const
-{
-	return m_lcAttributes.GetLock();
-}
-
-CString CTDLTaskAttributeCtrl::GetVersion() const
-{
-	return m_lcAttributes.GetVersion();
-}
-
-COleDateTime CTDLTaskAttributeCtrl::GetStartDate() const
-{
-	return m_lcAttributes.GetStartDate();
-}
-
-COleDateTime CTDLTaskAttributeCtrl::GetDueDate() const
-{
-	return m_lcAttributes.GetDueDate();
-}
-
-COleDateTime CTDLTaskAttributeCtrl::GetDoneDate() const
-{
-	return m_lcAttributes.GetDoneDate();
-}
-
-COleDateTime CTDLTaskAttributeCtrl::GetStartTime() const
-{
-	return m_lcAttributes.GetStartTime();
-}
-
-COleDateTime CTDLTaskAttributeCtrl::GetDueTime() const
-{
-	return m_lcAttributes.GetDueTime();
-}
-
-COleDateTime CTDLTaskAttributeCtrl::GetDoneTime() const
-{
-	return m_lcAttributes.GetDoneTime();
-}
-
-int CTDLTaskAttributeCtrl::GetCustomAttributeAutoListData(const CString& sAttribID, CStringArray& aItems) const
-{
-	return m_lcAttributes.GetCustomAttributeAutoListData(sAttribID, aItems);
+	m_lcAttributes.SaveState(prefs, szKey);
 }
 
 BOOL CTDLTaskAttributeCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const

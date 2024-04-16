@@ -10,7 +10,6 @@
 #include "TDLTaskAttributeListCtrl.h"
 
 #include "..\shared\EnToolBar.h"
-#include "..\shared\RuntimeDlg.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -22,7 +21,7 @@ class CContentMgr;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeDlgCtrl window
 
-class CTDLTaskAttributeCtrl : public CRuntimeDlg
+class CTDLTaskAttributeCtrl : public CWnd
 {
 public:
 	CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
@@ -104,19 +103,28 @@ protected:
 	CTDLTaskAttributeListCtrl m_lcAttributes;
 
 protected:
-	virtual BOOL OnInitDialog();
 	virtual int DoModal() { return IDCANCEL; }
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
 	//}}AFX_MSG
+	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 
-	afx_msg LRESULT OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFileLinkDisplay(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnAttributeEdited(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnAutoItemAddedOrDeleted(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnClearTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToggleTimeTracking(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnAddTimeToLogFile(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSelectDependencies(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnGetLinkTooltip(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnDisplayLink(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
