@@ -61,14 +61,6 @@ protected:
 	CStickiesWnd m_stickies;
 	CRichEditBaseCtrl m_rtfFormatter; // For 'Stickies'
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CToDoCtrlReminders)
-	//}}AFX_VIRTUAL
-
 // Implementation
 public:
 	virtual ~CToDoCtrlReminders();

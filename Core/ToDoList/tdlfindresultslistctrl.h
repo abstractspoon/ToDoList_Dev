@@ -7,10 +7,38 @@
 // tdlfindresultslistctrl.h : header file
 //
 
-#include "tdcstruct.h"
+#include "tdcenum.h"
 
 #include "..\shared\enlistctrl.h"
 #include "..\shared\fontcache.h"
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct SEARCHRESULT;
+
+class CFilteredToDoCtrl;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct FTDRESULT
+{
+	FTDRESULT();
+	FTDRESULT(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTaskList);
+
+	BOOL IsReference() const { return (dwFlags & RF_REFERENCE); }
+	BOOL IsDone() const { return (dwFlags & RF_DONE); }
+	BOOL IsGoodAsDone() const { return (dwFlags & RF_GOODASDONE); }
+	BOOL IsParent() const { return (dwFlags & RF_PARENT); }
+	BOOL IsTopmost() const { return (dwFlags & RF_TOPMOST); }
+
+	BOOL HasIcon() const;
+	void DrawIcon(CDC* pDC, const CRect& rIcon) const;
+
+	DWORD dwTaskID, dwFlags;
+	const CFilteredToDoCtrl* pTDC;
+};
+
+typedef CArray<FTDRESULT, FTDRESULT&> CFTDResultsArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindResultsListCtrl window
@@ -43,11 +71,12 @@ public:
 	BOOL SetColumnWidths(const CIntArray& aWidths);
 
 protected:
-	COLORREF m_crDone, m_crRef, m_crGroupBkgnd;
 	int m_nCurGroupID;
+	int m_nHotItem;
 	BOOL m_bStrikeThruDone;
-	CFontCache m_fonts;
-	CListCtrlItemGrouping m_lcGrouping;
+	BOOL m_bHasIconsOrRefs;
+
+	mutable CFontCache m_fonts;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -64,22 +93,24 @@ protected:
 	//{{AFX_MSG(CTDLFindResultsListCtrl)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
-	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg BOOL OnVScroll(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
+	virtual COLORREF GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual CFont* GetItemFont(int nItem, int nSubItem) const;
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
-	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
-	CFont* GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot);
-	BOOL IsResultHot(const RECT& rResult) const;
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;
 	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
-
-	static BOOL OsIsXP();
-	static COLORREF GetUserColour(const CPreferences& prefs, LPCTSTR szSpecifiedKey, LPCTSTR szColorKey);
+	void UpdateHotItem(CPoint point);
+	void UpdateIconAndReferenceStatus();
 };
 
 /////////////////////////////////////////////////////////////////////////////

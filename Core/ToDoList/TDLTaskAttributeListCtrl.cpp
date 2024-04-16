@@ -821,7 +821,7 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
 	if (!CanEditCell(nItem, VALUE_COL))
-		return GetSysColor(COLOR_3DSHADOW);
+		return GetSysColor(COLOR_3DDKSHADOW);
 
 	if (nCol == VALUE_COL)
 	{
@@ -1029,11 +1029,11 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
 	case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
 
-	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int,		Misc::Format(value, 2));	break;
-	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int,		Misc::Format(value));		break;
-	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int,		Misc::Format(value));		break;
-	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF,	Misc::Format(value));		break;
-	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD,		Misc::Format(value));		break;
+	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int,		Misc::Format(value));	break;
+	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int,		Misc::Format(value));	break;
+	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int,		Misc::Format(value));	break;
+	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF,	Misc::Format(value));	break;
+	case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID,			DWORD,		Misc::Format(value));	break;
 
 	case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost,				TDCCOST,				value.Format(2));			break;
 	case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence,		TDCRECURRENCE,			value.GetRegularityText());	break;
@@ -1286,6 +1286,16 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 	return !sPrompt.IsEmpty();
 }
 
+UINT CTDLTaskAttributeListCtrl::GetTextDrawFlags(int nCol) const
+{
+	UINT nFlags = CInputListCtrl::GetTextDrawFlags(nCol);
+
+	if (nCol == ATTRIB_COL)
+		nFlags |= DT_END_ELLIPSIS;
+
+	return nFlags;
+}
+
 void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
 	if ((nCol != VALUE_COL))
@@ -1298,9 +1308,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 	if (GetCellPrompt(nRow, sText, sPrompt))
 	{
-		int nSelRow, nSelCol;
-
-		if (!GetCurSel(nSelRow, nSelCol) || (nSelRow != nRow) || (nSelCol != nCol))
+		if (!IsCellSelected(nRow, nCol))
 			crText = CWndPrompt::GetTextColor();
 
 		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPrompt, crText, nDrawTextFlags);
@@ -2244,7 +2252,6 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		return;
 
 	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	if (pCtrl != NULL)
 	{
@@ -2272,6 +2279,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	}
 
 	// All other attributes not otherwise handled
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
 	switch (nAttribID)
@@ -2393,15 +2401,18 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
 	
 	if (pWndIgnore != &m_editBox)
+	{
 		m_editBox.SetSpinBuddy(NULL);
+		HideControl(m_spinPercent, NULL);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
-	int nCount = GetDlgItem(nCtrlID)->SendMessage(CB_GETCOUNT);
+	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	if (GetDlgItem(nCtrlID)->GetDlgItem(1001) == NULL)
-		HideControl(*GetDlgItem(nCtrlID));
+	if (pCombo->GetDlgItem(1001) == NULL)
+		HideControl(*pCombo);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
@@ -2414,8 +2425,6 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	HideControl(*GetDlgItem(nCtrlID));
 
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
 	CString sNewItemText;
 
 	switch (nCtrlID)
@@ -2490,7 +2499,6 @@ void CTDLTaskAttributeListCtrl::OnDependsChange()
 {
 	// Received after a manual edit of the task IDs
 	int nRow = GetCurSel();
-	ASSERT(GetAttributeID(nRow) == TDCA_DEPENDENCY);
 
 	HideControl(m_eDepends);
 	SetItemText(nRow, VALUE_COL, m_eDepends.FormatDependencies());
@@ -2501,7 +2509,6 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
 {
 	// Received after a manual edit of the task IDs
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	CString sFile;
 	m_eSingleFileLink.GetWindowText(sFile);
@@ -2515,8 +2522,6 @@ void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
 {
 	// Received after a manual edit of the task IDs
 	int nRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
 	TDCTIMEPERIOD tp(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
 
 	HideControl(m_eTimePeriod);
@@ -2538,8 +2543,6 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 
 		if (pCtrl)
 			PrepareControl(*pCtrl, nRow, VALUE_COL);
-// 		else
-// 			ASSERT(0);
 	}
 
 	CInputListCtrl::OnCancelEdit();
@@ -2564,9 +2567,7 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// Note: Don't hide the date picker because the user 
 		// may be editing the date components manually
-
 		int nRow = GetCurSel();
-		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 		CString sNewItemText;
 		COleDateTime date;

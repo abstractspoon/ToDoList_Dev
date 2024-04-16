@@ -205,7 +205,8 @@ public:
 	CString GetTag(int nTag) const;
 	CString GetFileLink(int nFile) const;
 
-	BOOL GetNextOccurence(COleDateTime& dtNext, BOOL& bDue);
+	BOOL GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue);
+	BOOL CalcNextOccurrence(COleDateTimeRange& dtOccur) const;
 	int CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
 	BOOL IsRecurring() const;
 	BOOL CanRecur() const;
@@ -295,6 +296,10 @@ protected:
 	
 	// meta-data for 3rd-party applications only
 	CTDCMetaDataMap mapMetaData; 
+
+protected:
+	BOOL CalcNextOccurrence(COleDateTime& dtNext, BOOL& bDue) const;
+	BOOL CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const;
 
 private:
 	static COleDateTime GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue);

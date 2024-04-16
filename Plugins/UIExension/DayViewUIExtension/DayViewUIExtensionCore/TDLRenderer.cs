@@ -20,6 +20,7 @@ namespace DayViewUIExtension
 
 		private int m_DayWidth = -1;
 		private int m_HeaderPadding = DPIScaling.Scale(3);
+		private int m_ImageSize = DPIScaling.Scale(16);
 
 		enum DowNameStyle
 		{
@@ -226,8 +227,7 @@ namespace DayViewUIExtension
 
 			int itemHeight = (fontHeight + 6 - longAppointmentSpacing);
 
-			LongAppointmentHeight = Math.Max(itemHeight, 17);
-
+			LongAppointmentHeight = Math.Max(itemHeight, m_ImageSize + 1);
 		}
 
 		public void SetFont(String fontName, int fontSize)
@@ -557,7 +557,7 @@ namespace DayViewUIExtension
 					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
 
 					if (isFutureItem)
- 						borderColor = (isLong ? AllDayEventsBackColor() : textColor);
+ 						borderColor = textColor;
 					else
 						barColor = (taskItem.HasTaskTextColor ? taskItem.TaskTextColor : textColor);
 				}
@@ -610,7 +610,10 @@ namespace DayViewUIExtension
 			if (isSelected)
 			{
 				if (isLong)
+				{
 					rect.Height++;
+					rect.Width++;
+				}
 
 				var style = (isFutureItem || isTimeBlock) ? UIExtension.SelectionRect.Style.DropHighlighted :
 															UIExtension.SelectionRect.Style.Selected;
@@ -626,6 +629,7 @@ namespace DayViewUIExtension
 				if (isFutureItem && !borderColor.IsEmpty)
 				{
 					rect.Height--; // drawing with pen adds 1 to height
+					rect.Width--;
 
 					using (Pen pen = new Pen(borderColor, 1))
 					{
@@ -640,7 +644,13 @@ namespace DayViewUIExtension
 					fillColor = Color.FromArgb(64, fillColor);
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
-					g.FillRectangle(brush, rect);
+				{
+					var fillRect = rect;
+					fillRect.Width++;
+					fillRect.Height++;
+
+					g.FillRectangle(brush, fillRect);
+				}
 
 				if (borderColor != Color.Empty)
 				{
@@ -678,16 +688,15 @@ namespace DayViewUIExtension
 			if (TaskHasIcon(taskItem))
 			{
 				Rectangle rectIcon;
-				int imageSize = DPIScaling.Scale(16);
 
 				if (apptView.IsLong)
 				{
 					int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
-					rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (imageSize / 2)), imageSize, imageSize);
+					rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (m_ImageSize / 2)), m_ImageSize, m_ImageSize);
 				}
 				else
 				{
-					rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, imageSize, imageSize);
+					rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, m_ImageSize, m_ImageSize);
 				}
 
 				if (g.IsVisible(rectIcon) && m_TaskIcons.Get(realTaskId))
@@ -698,11 +707,11 @@ namespace DayViewUIExtension
 					}
 					else
 					{
-						gripRect.Y += (imageSize + TextPadding);
-						gripRect.Height -= (imageSize + TextPadding);
+						gripRect.Y += (m_ImageSize + TextPadding);
+						gripRect.Height -= (m_ImageSize + TextPadding);
 					}
 
-					if (((rect.Right - rectIcon.Left) < imageSize) || (rect.Height < imageSize))
+					if (((rect.Right - rectIcon.Left) < m_ImageSize) || (rect.Height < m_ImageSize))
 					{
 						var clipRgn = g.Clip;
 						g.Clip = new Region(RectangleF.Intersect(rect, g.ClipBounds));
@@ -772,10 +781,17 @@ namespace DayViewUIExtension
 				using (SolidBrush brush = new SolidBrush(textColor))
 				{
 					TaskItem taskItem = GetTaskItem(apptView.Appointment);
+					var fontStyle = FontStyle.Regular;
 
 					if (taskItem.IsDone && StrikeThruDoneTasks)
+						fontStyle |= FontStyle.Strikeout;
+
+					if (taskItem.IsTopLevel && !(apptView.Appointment is FutureTaskOccurrence))
+						fontStyle |= FontStyle.Bold;
+
+					if (fontStyle != FontStyle.Regular)
 					{
-						using (Font font = new Font(BaseFont(), FontStyle.Strikeout))
+						using (Font font = new Font(BaseFont(), fontStyle))
 						{
 							g.DrawString(taskItem.Title, font, brush, rect, format);
 						}
@@ -803,7 +819,12 @@ namespace DayViewUIExtension
 			// Our custom gripper bar
 			var gripRect = apptRect;
 			gripRect.Inflate(-2, -2);
-			gripRect.Width = 5;
+
+			// Future tasks are not draggable -> no gripper
+			if (apptView.Appointment is FutureTaskOccurrence)
+				gripRect.Width = 0;
+			else
+				gripRect.Width = 5;
 
 			bool longAppt = apptView.IsLong;
 

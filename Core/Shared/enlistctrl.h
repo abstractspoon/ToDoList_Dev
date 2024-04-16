@@ -36,22 +36,24 @@ public:
 class CListCtrlItemGrouping
 {
 public:
-	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList) {}
+	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList), m_crBkgnd(CLR_NONE) {}
 
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	BOOL EnableGroupView(HWND hwndList, BOOL bEnable = TRUE);
-	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
+	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader);
 	BOOL SetItemGroupId(int nRow, int nGroupID);
 	void RemoveAllGroups();
 
 	BOOL HasGroups() const;
 	int GetItemGroupId(int nRow) const;
 	CString GetGroupHeaderText(int nGroupID) const;
-	
-	BOOL DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD, COLORREF crBkgnd = CLR_NONE);
+
+	void SetGroupHeaderBackColor(COLORREF crBack);
+	BOOL DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD);
 
 protected:
 	HWND m_hwndList;
+	COLORREF m_crBkgnd;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,15 +62,16 @@ class CEnListCtrl : public CListCtrl
 {
 	DECLARE_DYNAMIC(CEnListCtrl)
 
-		// Construction
 public:
 	CEnListCtrl();
+	virtual ~CEnListCtrl();
 
-public:
 	CEnHeaderCtrl* GetHeader();
 	const CEnHeaderCtrl* GetHeader() const;
-	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
-	virtual int GetCurSel() const;
+
+	CListCtrlItemGrouping& GetGrouping();
+	const CListCtrlItemGrouping& GetGrouping() const { return m_grouping; }
+
 	void SetMulSel(int nIndexStart, int nIndexEnd, BOOL bSelect = TRUE, BOOL bNotifyParent = FALSE); // multiple selection
 	void SetItemFocus(int nIndex, BOOL bFocused); 
 	int GetFirstSel() const;
@@ -100,12 +103,15 @@ public:
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
 	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
-	virtual void Sort();
 	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
-	int GetItemIndent(int nItem) const;
 	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
 	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
+
+	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
+	virtual int GetCurSel() const;
+	virtual void Sort();
+	virtual int GetItemIndent(int nItem) const;
 	
 	// column methods
 	int GetColumnCount() const;
@@ -127,6 +133,8 @@ public:
 // Attributes
 protected:
 	CEnHeaderCtrl m_header;
+	CListCtrlItemGrouping m_grouping;
+
 	BOOL m_bVertGrid, m_bHorzGrid;
 	int m_nCurView;
 	NMHDR m_nmhdr; // for notification
@@ -158,23 +166,16 @@ private:
 
 	static DWORD s_dwSelectionTheming;
 
-// Operations
-public:
-
-// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEnListCtrl)
-	public:
+public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
+
+protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CEnListCtrl();
 
 	// Generated message map functions
 protected:
@@ -193,6 +194,7 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
+	afx_msg BOOL OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
 
 	// helpers
@@ -208,8 +210,12 @@ protected:
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData; }
 	virtual void GetCellRect(int nRow, int nCol, CRect& rCell) const;
 	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual UINT GetTextDrawFlags(int nCol) const;
 
-	int GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	void NotifySelChange();
 	void DeleteAllColumnData();
 	CColumnData* CreateColumnData(int nCol);

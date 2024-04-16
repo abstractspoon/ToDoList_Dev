@@ -1563,7 +1563,8 @@ FONT 8, "Tahoma"
 BEGIN
     CONTROL         "List1",IDC_ATTRIBUTELIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_EDITLABELS | 
-                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,27,408,152
+                    LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,7,27,408,152
     GROUPBOX        "Attribute Details",IDC_STATIC,7,189,408,103
     LTEXT           "&Unique ID",IDC_STATIC,15,203,59,8
     EDITTEXT        IDC_UNIQUEID,79,201,118,13,ES_LOWERCASE | ES_AUTOHSCROLL
@@ -2158,7 +2159,8 @@ CAPTION "Task Reminders"
 FONT 8, "Tahoma"
 BEGIN
     CONTROL         "List1",IDC_REMINDERS,"SysListView32",LVS_REPORT | 
-                    LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,7,7,324,115
+                    LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | WS_BORDER | 
+                    WS_TABSTOP,7,7,324,115
     CONTROL         "&Remind me again in:",IDC_SNOOZEOPTIONFOR,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,128,109,10
     CONTROL         "&Remind me again at:",IDC_SNOOZEOPTIONUNTIL,"Button",
@@ -4656,7 +4658,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CLEARSEARCH_TIP     "Clear Search"
     IDS_TABTIP_NOTFOUND     "File not found (%s)"
-    IDS_NEWDEPENDENCY_PROMPT "<New Dependency>"
+    IDS_NEWDEPENDENCY_PROMPT "<new dependency>"
     IDS_DEPENDSLEADIN_COL   "Lead In (Days)"
     IDS_TIMETRACKER_RECENTITEMS "Recently Tracked"
     IDS_TIMETRACKER_ALLITEMS "All Tasks"
@@ -5168,8 +5170,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SB_NOSELTASK         "<No task selected>"
-    ID_SB_MULTISELTASK      "<Multiple (%d) tasks selected>"
+    ID_SB_NOSELTASK         "<no task selected>"
+    ID_SB_MULTISELTASK      "<%d tasks selected>"
     ID_SB_SPACER            "                     "
     ID_SB_MULTISELTASKMORE_TIP "%d more tasks"
     ID_EDIT_INSERTTIME      "\nInsert Time"
@@ -5324,7 +5326,7 @@ BEGIN
     IDS_FP_ON_OR_AFTER      "occurs on or after (>=)"
     IDS_FP_SET              "is set"
     IDS_FP_NOT_SET          "is not set"
-    IDS_FP_NEW_RULE         "<New Rule>"
+    IDS_FP_NEW_RULE         "<new rule>"
     IDS_FP_AND              "and"
     IDS_FP_OR               "or"
     IDS_TDC_SELTASKHASCIRCULARDEPENDENCY 
@@ -5524,7 +5526,7 @@ BEGIN
     IDS_OA_TO               "To"
     IDS_OUTLOOK_CONFIDENTIAL "Confidential"
     IDS_PASTE_ERROR         "There was a problem accessing the dragged or copied files.\n\nPlease re-copy the files and perform the operation again."
-    IDS_TDC_NOONE           "<no one>"
+    IDS_TDC_NOBODY          "<nobody>"
     IDS_CAD_COLATTRIBLABEL  "Attribute Label"
     IDS_CAD_COLCOLTITLE     "Column Title"
     IDS_CAD_COLDATATYPE     "Data Type"
@@ -5649,7 +5651,7 @@ BEGIN
                             "ToDoList has detected that some tasks have just become due.\n\nWould you like to refresh the current filter to make those tasks visible?"
     IDS_WIZ_INTRO_HEADER    "Welcome to ToDoList"
     IDS_WIZ_INTRO_SUBHEADER "This brief wizard will help you set up the application for the first time."
-    IDS_CSV_CUSTOMATTRIB    "<New Custom Attribute>"
+    IDS_CSV_CUSTOMATTRIB    "<new custom attribute>"
     IDS_NOREFERENCETASKSINSELECTION 
                             "The selected tasks include no task references."
     IDS_SELECTIONHASNOREFERENCETASKS "The selected tasks have no references."
@@ -5661,7 +5663,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_ANALYSEXML_FORMAT   "XML Files (*.xml)|*.xml||"
     IDS_NO_WEBUPDATE_AVAIL  "There are no updates available at this time."
-    IDS_CSV_CUSTOMLISTATTRIB "<New Custom Attribute (List)>"
+    IDS_CSV_CUSTOMLISTATTRIB "<new custom list attribute>"
     IDS_WEBUPDATE_PROMPT    "Would you like to update to this version?"
     IDS_WEBUPDATE_PROMPTHEADER "Hi %s, version %s is now available."
     IDS_UNINSTALLER_RUNFAILURE 
@@ -5680,7 +5682,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_CSV_EXISTCUSTOMATTRIB "<Existing Custom Attribute>"
+    IDS_CSV_EXISTCUSTOMATTRIB "<existing custom attribute>"
     IDS_REMINDER_TASKCOL    "Task"
     IDS_REMINDER_TASKLISTCOL "Tasklist"
     IDS_REMINDER_WHENCOL    "Notification"
@@ -5780,7 +5782,7 @@ BEGIN
     IDS_QUERYFORCEDCHECKOUT "\n\nDo you want to forcibly checkout the tasklist?\n\nNote: Any unsaved data from '%s' will be lost!"
     IDS_PREF_TOOLBAR        "User Interface>Custom Toolbar"
     IDS_TOOLBARMENUSEPARATOR "<separator>"
-    IDS_NEW_TOOLBARBUTTON   "<New Button>"
+    IDS_NEW_TOOLBARBUTTON   "<new button>"
     IDS_TASKREMINDERDLG_TITLE "Task Reminders (%d)"
     IDS_REMINDER_DATENOTSET "Task date not set"
     IDS_RESET_ELAPSED       "Reset Elapsed Time"

@@ -1561,6 +1561,20 @@ BOOL CToDoCtrl::GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERI
 	return TRUE;
 }
 
+BOOL CToDoCtrl::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bSelected) const 
+{ 
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return m_taskTree.GetTaskTextColors(pTDI, pTDS, crText, crBack, -1, bSelected);
+}
+
 BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 {
 	if (!CanEditSelectedTask(TDCA_PRIORITY))
@@ -5329,7 +5343,10 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	ASSERT(aModTaskIDs.GetSize() || 
 		   mapAttribIDs.HasOnly(TDCA_CUSTOMATTRIB) ||
 		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
-		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME));
+		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) || 
+		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	if (IsReadOnly())
 		return;
@@ -9170,10 +9187,14 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 		CTaskFile tasks;
 		GetTasks(tasks, filter);
 
+		CDWordArray aSelTaskIDs;
+		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
 		CTDCDependencyArray aDepends;
 		GetSelectedTaskDependencies(aDepends);
 
-		CTDLTaskDependencyEditDlg dialog(tasks, 
+		CTDLTaskDependencyEditDlg dialog(aSelTaskIDs,
+										 tasks, 
 										 m_ilTaskIcons, 
 										 aDepends, 
 										 HasStyle(TDCS_SHOWPARENTSASFOLDERS),

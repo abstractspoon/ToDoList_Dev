@@ -634,7 +634,7 @@ COLORREF TASKCALITEM::GetFillColor(BOOL bColorIsBkgnd) const
 	return GetSysColor(COLOR_WINDOW);
 }
 
-COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
+COLORREF TASKCALITEM::GetBorderColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
@@ -642,7 +642,12 @@ COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
 			return GraphicsMisc::Darker(color, 0.4);
 
 		if (!Misc::IsHighContrastActive())
+		{
+			if (bSelected)
+				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
 			return color;
+		}
 	}
 	
 	// else
@@ -689,6 +694,21 @@ TASKCALEXTENSIONITEM::TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwEx
 	dwTaskID = dwExtID;
 }
 
+COLORREF TASKCALEXTENSIONITEM::GetFillColor(BOOL /*bTextIsBack*/) const
+{
+	return TASKCALITEM::GetFillColor(FALSE);
+}
+
+COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
+{
+	return TASKCALITEM::GetBorderColor(bSelected, FALSE);
+}
+
+COLORREF TASKCALEXTENSIONITEM::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
+{
+	return TASKCALITEM::GetTextColor(bSelected, FALSE);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange)
@@ -699,21 +719,6 @@ TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD 
 
 	SetStartDate(dtRange.GetStart());
 	SetDueDate(dtRange.GetEndInclusive());
-}
-
-COLORREF TASKCALFUTUREOCURRENCE::GetFillColor(BOOL /*bTextIsBack*/) const
-{
-	return CLR_NONE;
-}
-
-COLORREF TASKCALFUTUREOCURRENCE::GetBorderColor(BOOL /*bTextIsBack*/) const
-{
-	return 0; // Black
-}
-
-COLORREF TASKCALFUTUREOCURRENCE::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
-{
-	return GetSysColor(COLOR_3DDKSHADOW);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -744,21 +749,6 @@ void TASKCALCUSTOMDATE::SetDate(const COleDateTime& date)
 	{
 		ASSERT(0);
 	}
-}
-
-COLORREF TASKCALCUSTOMDATE::GetFillColor(BOOL /*bTextIsBack*/) const
-{
-	return TASKCALEXTENSIONITEM::GetFillColor(FALSE);
-}
-
-COLORREF TASKCALCUSTOMDATE::GetBorderColor(BOOL /*bTextIsBack*/) const
-{
-	return TASKCALEXTENSIONITEM::GetBorderColor(FALSE);
-}
-
-COLORREF TASKCALCUSTOMDATE::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
-{
-	return TASKCALEXTENSIONITEM::GetTextColor(bSelected, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////

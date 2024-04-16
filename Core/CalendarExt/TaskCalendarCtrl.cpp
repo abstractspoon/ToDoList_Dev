@@ -976,7 +976,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
 		CRect rTask;
-		
+
 		if (!CalcTaskCellRect(nTask, pCell, rAvailCell, rTask))
 			continue;
 
@@ -988,6 +988,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 		// draw selection
 		BOOL bSelTask = WantDrawTaskSelected(pTCI);
+		BOOL bFutureTask = IsFutureOccurrence(pTCI);
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
 		if (bSelTask)
@@ -1016,7 +1017,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				nState = GMIS_SELECTEDNOTFOCUSED;
 			}
-			else if (IsFutureOccurrence(pTCI))
+			else if (bFutureTask)
 			{
 				nState = GMIS_DROPHILITED;
 			}
@@ -1025,17 +1026,23 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rTask, dwSelFlags, rClip);
 		}
-		else // draw task border/background
+
+		// draw task border/background
+		if (!bSelTask || bFutureTask)
 		{
 			DWORD dwBorders = GMDR_TOP;
 			
-			if (rTask.left > rAvailCell.left)
+			if (rTask.left <= rAvailCell.left)
+			{
+				// Note: This same adjustment will have already been done for selected future tasks above
+				if (bContinuous && !bSelTask)
+				{
+					rTask.left--; // draw over gridline
+				}
+			}
+			else
 			{
 				dwBorders |= GMDR_LEFT;
-			}
-			else if (bContinuous)
-			{
-				rTask.left--; // draw over gridline
 			}
 			
 			if (rTask.right < rAvailCell.right)
@@ -1044,16 +1051,18 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if (rTask.bottom < rAvailCell.bottom)
 				dwBorders |= GMDR_BOTTOM;
 			
-			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
-			COLORREF crBorder = pTCI->GetBorderColor(bTextColorIsBkgnd);
+			COLORREF crFill = (bSelTask ? CLR_NONE : pTCI->GetFillColor(bTextColorIsBkgnd));
+			COLORREF crBorder = pTCI->GetBorderColor(bSelTask, bTextColorIsBkgnd);
 						
 			int nBorderStyle = PS_SOLID;
 			
-			if (IsFutureOccurrence(pTCI))
+			if (bFutureTask)
 			{
 				// For some unknown reason PS_DOT style draws 1 pixel wider
 				nBorderStyle = PS_DOT;
-				rTask.right--;
+
+				if (dwBorders & GMDR_RIGHT)
+					rTask.right--;
 			}
 
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwBorders, 255, nBorderStyle);

@@ -94,7 +94,7 @@ public:
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
 	virtual COLORREF GetFillColor(BOOL bTextIsBack) const;
-	virtual COLORREF GetBorderColor(BOOL bTextIsBack) const;
+	virtual COLORREF GetBorderColor(BOOL bSelected, BOOL bTextIsBack) const;
 	virtual COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 	BOOL HasColor() const;
 
@@ -158,6 +158,10 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 {
 	TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwExtID);
 
+	COLORREF GetFillColor(BOOL bTextIsBack) const;
+	COLORREF GetBorderColor(BOOL bSelected, BOOL bTextIsBack) const;
+	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
+
 	const DWORD dwRealTaskID;
 };
 /////////////////////////////////////////////////////////////////////////////
@@ -165,10 +169,6 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
 {
 	TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange);
-
-	COLORREF GetFillColor(BOOL bTextIsBack) const;
-	COLORREF GetBorderColor(BOOL bTextIsBack) const;
-	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -181,10 +181,6 @@ struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
 	COleDateTime GetDate() const { return dates.GetAnyStart(); }
 
 	const CString sCustomAttribID;
-
-	COLORREF GetFillColor(BOOL bTextIsBack) const;
-	COLORREF GetBorderColor(BOOL bTextIsBack) const;
-	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

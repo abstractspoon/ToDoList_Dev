@@ -89,6 +89,19 @@ CString TDCREMINDER::GetTaskComments() const
 	return _T("");
 }
 
+int TDCREMINDER::HasIcon() const
+{
+	return (pTDC->GetTaskIconIndex(dwTaskID) != -1);
+}
+
+void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rIcon) const
+{
+	int nImage = pTDC->GetTaskIconIndex(dwTaskID);
+
+	if (nImage != -1)
+		pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
+}
+
 CString TDCREMINDER::FormatWhenString() const
 {
 	ASSERT(pTDC);

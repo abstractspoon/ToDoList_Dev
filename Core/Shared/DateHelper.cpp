@@ -582,7 +582,7 @@ double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime&
 			// Check for exact months
 			double dDuration = (dateEnd.m_dt - dtFrom.m_dt); // in days
 
-			if (dDuration = (int)dDuration) // exact days
+			if (dDuration == (int)dDuration) // exact days
 			{
 				int nStartDay = dtFrom.GetDay();
 				int nEndDay = dateEnd.GetDay();

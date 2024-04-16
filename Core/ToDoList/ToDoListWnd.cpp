@@ -242,6 +242,7 @@ CToDoListWnd::CToDoListWnd()
 		CRTLStyleMgr::Initialize();
 
 	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
+	CEnListCtrl::EnableSelectionTheming(TRUE, TRUE);
 
 	m_bAutoMenuEnable = FALSE;
 	m_nFlags |= WF_STAYACTIVE;
@@ -3702,6 +3703,12 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		{
 			UpdateFindDialogCustomAttributes(&tdc);
 		}
+	}
+
+	if (pMod->mapAttrib.Has(TDCA_ICON))
+	{
+		m_dlgReminders.Invalidate(FALSE);
+		m_dlgFindTasks.Invalidate(FALSE);
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
@@ -8847,6 +8854,7 @@ void CToDoListWnd::OnCloseall()
 	// remove tasklists
 	m_dlgFindTasks.DeleteAllResults();
 	m_dlgTimeTracker.RemoveAllTasklists();
+	m_dlgReminders.RemoveAllListReminders();
 
 	int nCtrl = GetTDCCount();
 	

@@ -1428,6 +1428,8 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		CHoldRedraw hr(m_hdrColumns);
 		m_hdrColumns.SetItemWidth(0, 0); // always
 
+		nNumCols = m_hdrColumns.GetItemCount();
+
 		for (int nItem = 1; nItem < nNumCols; nItem++)
 		{
 			TDC_COLUMN nColID = GetColumnID(nItem);
@@ -2063,7 +2065,7 @@ void CTDLTaskCtrlBase::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF c
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
-BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef) const
+BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef, BOOL bSelected) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
@@ -2077,17 +2079,11 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLOR
 	if (bRef == -1)
 		bRef = (dwTaskID != dwOrgTaskID);
 
-	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
+	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, bSelected);
 }
 
 BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
-										COLORREF& crText, COLORREF& crBack, BOOL bRef) const
-{
-	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
-}
-
-BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
-										COLORREF& crBack, BOOL bRef, BOOL bSelected) const
+										COLORREF& crText, COLORREF& crBack, BOOL bRef, BOOL bSelected) const
 {
 	ASSERT(pTDI && pTDS);
 
@@ -3123,7 +3119,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					if (rSubItem.Width() >= nImageSize)
 					{
 						CPoint pt(CalcColumnIconTopLeft(rSubItem, nImageSize));
-						m_ilTaskIcons.Draw(pDC, nIcon, pt, ILD_TRANSPARENT);
+						m_ilTaskIcons.Draw(pDC, nIcon, pt);
 					}
 				}
 			}
@@ -3388,7 +3384,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 				if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sDummy))
 				{
-					m_ilTaskIcons.Draw(pDC, sImage, rCol.TopLeft(), ILD_TRANSPARENT);
+					m_ilTaskIcons.Draw(pDC, sImage, rCol.TopLeft());
 					rCol.left += (COL_ICON_SIZE + COL_ICON_SPACING);
 
 					bOverrun = ((rCol.left + COL_ICON_SIZE) > rCol.right);

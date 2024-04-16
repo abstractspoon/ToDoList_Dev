@@ -172,7 +172,7 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 
 	// if we're were editing the same cell we've clicked on then
 	// we may be cancelling a listbox edit so don't trigger it again
-	if (bWasEditing && nItem == GetCurSel() && nCol == m_nCurCol)
+	if (bWasEditing && IsCellSelected(nItem, nCol))
 		return;
 	
 	// if this is the second click or the user clicked on the column button
@@ -482,281 +482,106 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	SetCurSel(nItem, nCol, TRUE); // notifies parent
 }
 
-void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
+void CInputListCtrl::DrawItemBackground(CDC* /*pDC*/, int /*nItem*/, const CRect& /*rItem*/, COLORREF /*crBack*/, 
+										BOOL /*bSelected*/, BOOL /*bDropHighlighted*/, BOOL /*bFocused*/)
 {
-	// this function differs from the base class in as much as it 
-	// highlights only the currently selected cell, not the whole line
-	CDC* pDC;
-	CRect rHeader, rFocus;
-	BOOL bRes;
-	CSize sizeText;
-
-	// get and prepare device context
-	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
-	pDC->SelectObject(GetFont());
-	pDC->SetROP2(R2_COPYPEN);
-
-	// init helper variables
-	int nItem = lpDrawItemStruct->itemID;
-	UINT uStyle = GetStyle();
-	UINT uState = GetItemState(nItem, LVIS_FOCUSED | LVIS_SELECTED | LVIS_DROPHILITED);
-
-	// init helper variables
-	CRect rItem(lpDrawItemStruct->rcItem), rClient;
-	GetClientRect(&rClient);
-
-	// some problems with drop-highlighting items during drag and drop
-	// so we need to make sure drawing is clipped to client area
-	// this fixes it admirably!
-	if (GetHeader())
-	{
-		GetHeader()->GetWindowRect(rHeader);
-		ScreenToClient(rHeader);
-		rClient.top = max(0, rHeader.bottom);
-		pDC->IntersectClipRect(rClient);
-	}
-	
-	BOOL bListFocused = (GetFocus() == this);
-	BOOL bSelAlways = ((uStyle & LVS_SHOWSELALWAYS) == LVS_SHOWSELALWAYS);
-	BOOL bSelected = (IsWindowEnabled() && (nItem == GetCurSel()) && (bListFocused || bSelAlways));
-	BOOL bDropHilited = (uState & LVIS_DROPHILITED);
-
-	BOOL bItemFocused = (bListFocused && bSelected);
-	BOOL bWantCellFocus = (bListFocused && !IsSelectionThemed(TRUE) && !CThemed::AreControlsThemed());
-	
-	// images 
-	CSize sizeState, sizeImage;
-
-	// DO NOT SUPPORT INDENTATION
-	CImageList* pImageList = GetImageList(LVSIL_SMALL);
-	int nImage = -1;
-
-	if (pImageList)
-	{
-		nImage = GetItemImage(nItem); 
-		CEnImageList::GetImageSize(*pImageList, sizeImage);
-	}
-
-	// state
-	CImageList* pStateList = GetImageList(LVSIL_STATE);
-
-	if (pStateList)
-		CEnImageList::GetImageSize(*pStateList, sizeState);
-
-	if (lpDrawItemStruct->itemAction & (ODA_DRAWENTIRE | ODA_SELECT))
-	{
-		int nSaveDC = pDC->SaveDC();
-
-		LV_COLUMN lvc = { 0 };
-		lvc.mask = LVCF_WIDTH | LVCF_FMT;
-		int nCol = 0;
-
-		bRes = GetColumn(nCol, &lvc);
-
-		// draw horz grid lines if required
-		if (m_bHorzGrid)
-		{
-			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
-
-			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
-		}
-
-		// cycle thru the columns drawing each one
-		while (bRes)
-		{
-			BOOL bIsPrompt = IsPrompt(nItem, nCol);
-			BOOL bSel = (bSelected && (nCol == m_nCurCol));
-
-			// Calculate the space required for images
-			int nImageWidth = 0;
-
-			if (nCol == 0)
-			{
-				if (pStateList)
-					nImageWidth += sizeState.cx + 2; // 1 pixel border either side
-
-				if (pImageList/* && (nImage != -1)*/)
-					nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
-			}
-			
-			// get next item
-			bRes = GetColumn(nCol + 1, &lvc);
-
-			CRect rCell;
-			GetCellRect(nItem, nCol, rCell);
-
-			CRect rButton, rBack(rCell);
-			BOOL bHasBtn = GetButtonRect(nItem, nCol, rButton);
-			
-			// fill cell
-			BOOL bIsEditing = (IsEditing() || IsChild(GetFocus()));
-
-			if (bDropHilited && IsSelectionThemed(FALSE))
-			{
-				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
-				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, GMIS_DROPHILITED, rBack, dwFlags, rBack);
-			}
-			else if (bSel && !bIsEditing && IsSelectionThemed(FALSE))
-			{
-				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
-				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-
-				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rBack, dwFlags, rBack);
-			}
-			else
-			{
-				if (m_bHorzGrid)
-					rBack.bottom--;
-
-				COLORREF crBack = GetItemBackColor(nItem, nCol, (bSel && !bIsEditing), FALSE, bListFocused);
-				pDC->FillSolidRect(rBack, crBack);
-			}
-
-			if (m_bVertGrid && (bHasBtn || !(bSel && IsSelectionThemed(FALSE))))
-			{
-				// if we're not tight up against the client edge then draw the vertical 
-				if (rCell.right < rClient.right)
-				{
-					GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), GetSysColor(COLOR_3DSHADOW));
-					rBack.right--;
-				}
-			}
-
-			// adjust text rect for button
-			CRect rText(rCell);
-
-			if (bHasBtn)
-			{
-				if (rButton.left <= rCell.left)
-				{
-					rText.left = rButton.right;
-				}
-				else if (rButton.right >= rCell.right)
-				{
-					rText.right = rButton.left;
-				}
-				else // button is centred => no text
-				{
-					ASSERT(nImageWidth == 0);
-					rText.right = rText.left = (rText.CenterPoint().x - (BTN_WIDTH / 2));
-				}
-			}
-
-			CEnString sText(GetItemText(nItem, nCol));
-
-			if (!bHasBtn || (GetCellType(nItem, nCol) != ILCT_CHECK))
-			{
-				// Draw images
-				if (nImageWidth > 0)
-				{
-					if (pStateList)
-					{
-						int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
-						nImage = nState >> 12;
-						pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
-
-						if (lvc.cx > sizeState.cx)
-							pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
-
-						rText.left += sizeState.cx + 2; // 1 pixel border either side
-					}
-
-					// draw item image
-					if (pImageList && (nImage != -1))
-					{
-						if (lvc.cx > nImageWidth + sizeImage.cx)
-							pImageList->Draw(pDC, nImage, CPoint(rText.left + 1, rItem.top + 1), ILD_TRANSPARENT);
-
-						rText.left += sizeImage.cx + 2; // 1 pixel border either side
-					}
-				}
-
-				// get item text
-				if (bIsPrompt && (IsReadOnly() || !IsWindowEnabled()))
-				{
-					sText.Empty(); // hides the prompt if readonly
-				}
-				else if (GetCellType(nItem, nCol) != ILCT_CHECK)
-				{
-					sizeText = sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
-				}
-
-				// setup focus rect (only for classic)
-				if (bWantCellFocus && bSel)
-				{
-					if (rText.IsRectEmpty())
-					{
-						rFocus = rCell;
-					}
-					else
-					{
-						rFocus = rText;
-
-						if (nCol == 0)
-							rFocus.left += 2;
-					}
-				}
-
-				// draw text
-				if (rText.Height() && rText.Width())
-				{
-					COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
-
-					if (bSel && IsSelectionThemed(FALSE))
-					{
-						DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
-						GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-
-						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
-					}
-
-					UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
-
-					switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))
-					{
-					case LVCFMT_CENTER:
-						nFlags |= DT_CENTER;
-						break;
-
-					case LVCFMT_RIGHT:
-						nFlags |= DT_RIGHT;
-						rText.right -= 4;
-						break;
-
-					case LVCFMT_LEFT:
-						nFlags |= DT_LEFT;
-						rText.left += 4;
-						break;
-					}
-
-					DrawCellText(pDC, nItem, nCol, rText, sText, crText, nFlags);
-				}
-			}
-		
-			if (bHasBtn)
-				DrawButton(pDC, nItem, nCol, sText, bSel, rButton);
-
-			// next column
-			nCol++;
-		}
-
-		pDC->RestoreDC(nSaveDC);
-
-		// then draw focus rect
-		if (bWantCellFocus)
-			pDC->DrawFocusRect(rFocus);
-	}
+	// Do nothing - handled in DrawCellBackground
 }
 
-void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, 
-									const CRect& rText, const CString& sText, 
-									COLORREF crText, UINT nDrawTextFlags)
+BOOL CInputListCtrl::IsCellSelected(int nRow, int nCol, BOOL bVisually) const
 {
-	if (!sText.IsEmpty() && (GetCellType(nRow, nCol) != ILCT_CHECK))
+	if (nRow != GetCurSel())
+		return FALSE;
+
+	if (nCol != m_nCurCol)
+		return FALSE;
+
+	if (bVisually && (IsEditing() || IsChild(GetFocus())))
+		return FALSE;
+
+	return TRUE;
+}
+
+void CInputListCtrl::DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, 
+										BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	bSelected &= IsCellSelected(nItem, nCol, TRUE);
+	COLORREF crBack = GetItemBackColor(nItem, nCol, bSelected, FALSE, bFocused);
+	
+	CEnListCtrl::DrawItemBackground(pDC, nItem, rCell, crBack, bSelected, bDropHighlighted, bFocused);
+}
+
+void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol, 
+							  const CRect& rCell, const CString& sText, 
+							  BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	CRect rText(rCell);
+
+	if (CellHasButton(nItem, nCol))
 	{
-		pDC->SetTextColor(crText);
-		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
+		bSelected &= IsCellSelected(nItem, nCol, TRUE);
+
+		IL_COLUMNTYPE nBtnType = GetCellType(nItem, nCol);
+
+		if (nBtnType == ILCT_CHECK) // Special case
+		{
+			// Draw checkbox over background
+			CEnListCtrl::DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bFocused);
+
+			CRect rUnused;
+			VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rUnused));
+
+			return;
+		}
+
+		// all other button types
+		CRect rButton;
+		VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rButton));
+
+		// Exclude button from text rect
+		if (rButton.left <= rCell.left)
+		{
+			rText.left = rButton.right;
+		}
+		else if (rButton.right >= rCell.right)
+		{
+			rText.right = rButton.left;
+		}
+
+		// Buttons drawn as 'button' render 1-pixel less
+		switch (nBtnType)
+		{
+		case ILCT_DATE:
+		case ILCT_POPUPMENU:
+		case ILCT_CUSTOMBTN:
+			if (rButton.left <= rCell.left)
+			{
+				rText.left--;
+			}
+			else if (rButton.right >= rCell.right)
+			{
+				rText.right++;
+			}
+			break;
+		}
 	}
+			
+	CEnListCtrl::DrawCell(pDC, nItem, nCol, rText, sText, bSelected, bDropHighlighted, bFocused);
+}
+
+void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, 
+								  const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	if (GetCellType(nRow, nCol) == ILCT_CHECK)
+		return;
+
+	// else
+	CEnListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+}
+
+UINT CInputListCtrl::GetTextDrawFlags(int nCol) const
+{
+	return (CEnListCtrl::GetTextDrawFlags(nCol) & ~DT_END_ELLIPSIS);
 }
 
 IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
@@ -766,18 +591,13 @@ IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
 
 DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 {
-	DWORD dwState = 0;
-	
 	if (!IsButtonEnabled(nRow, nCol))
-	{
-		dwState = DFCS_INACTIVE;
-	}
-	else if (bSelected || IsButtonHot(nRow, nCol))
-	{
-		dwState = DFCS_HOT;
-	}
+		return DFCS_INACTIVE;
 
-	return dwState;
+	if (bSelected || IsButtonHot(nRow, nCol))
+		return DFCS_HOT;
+
+	return 0;
 }
 
 BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
@@ -857,11 +677,17 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 	return TRUE;
 }
 
+BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
+{
+	CRect rUnused;
+	return GetButtonRect(nRow, nCol, rUnused);
+}
+
 BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 {
 	rButton.SetRectEmpty();
 
-	if (!IsColumnEditingEnabled(nCol))
+	if (!CanEditCell(nRow, nCol))
 		return FALSE;
 
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
@@ -928,7 +754,7 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 	if (GetCurSel() != - 1)
 	{
 		// don't delete it if its the topleft item
-		if (m_bAutoAddCols && GetCurSel() == 0 && m_bAutoAddRows && m_nCurCol == 0)
+		if (m_bAutoAddCols && m_bAutoAddRows && IsCellSelected(0, 0))
 		{
 			return FALSE;
 		}
@@ -1172,7 +998,7 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 		return;
 
 	// don't update if nothing's changed
-	if (nCol == m_nCurCol && nRow == CEnListCtrl::GetCurSel())
+	if (IsCellSelected(nRow, nCol))
 		return;
 
 	CRect rItem;
@@ -1464,7 +1290,12 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 	GetCellEditRect(nRow, nCol, rCell);
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
+	{
+		if (nRow == 0)
+			rCell.top--;
+
 		rCell.bottom += GraphicsMisc::ScaleByDPIFactor(200);
+	}
 
 	ctrl.MoveWindow(rCell);
 	ctrl.EnableWindow(TRUE);
@@ -1818,7 +1649,7 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 	BOOL bThemedSel = (bSelected && (CThemed::AreControlsThemed() || IsSelectionThemed(TRUE)));
 
 	// setup colors
-	if (!bThemedSel && (nCol == m_nCurCol) && (nItem == GetCurSel()))
+	if (!bThemedSel && IsCellSelected(nItem, nCol))
 	{
 		// if focused then draw item in focused colors 
 		if (bWndFocus)

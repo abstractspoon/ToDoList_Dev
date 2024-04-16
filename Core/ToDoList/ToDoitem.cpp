@@ -1135,7 +1135,37 @@ BOOL TODOITEM::RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccu
 	return trRecurrence.Matches(tdi.trRecurrence, bIncludeRemainingOccurrences);
 }
 
-BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
+BOOL TODOITEM::GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue)
+{
+	if (!CalcNextOccurrence(dtNext, bDue))
+		return FALSE;
+
+	VERIFY(trRecurrence.DecrementRemainingOccurrenceCount());
+	return TRUE;
+}
+
+BOOL TODOITEM::CalcNextOccurrence(COleDateTimeRange& dtOccur) const
+{
+	COleDateTime dtNext;
+	BOOL bDue = FALSE;
+
+	if (!CalcNextOccurrence(dtNext, bDue))
+		return FALSE;
+
+	if (CalcNextOccurrence(dtNext, dtOccur))
+		return TRUE;
+
+	ASSERT(!HasStart() || !HasDue());
+
+	if (bDue)
+		dtOccur.m_dtEnd = dtNext;
+	else
+		dtOccur.m_dtStart = dtNext;
+
+	return TRUE;
+}
+
+BOOL TODOITEM::CalcNextOccurrence(COleDateTime& dtNext, BOOL& bDue) const
 {
 	ASSERT(IsDone());
 
@@ -1151,7 +1181,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 		if (bHasStart)
 		{
 			bDue = FALSE;
-			return trRecurrence.GetNextOccurence(dateStart, dtNext);
+			return trRecurrence.CalcNextOccurence(dateStart, dtNext);
 		}
 		// fall thru
 
@@ -1159,7 +1189,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 		if (bHasDue)
 		{
 			bDue = TRUE;
-			return trRecurrence.GetNextOccurence(dateDue, dtNext);
+			return trRecurrence.CalcNextOccurence(dateDue, dtNext);
 		}
 		// fall thru
 
@@ -1201,7 +1231,7 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	}
 	ASSERT(CDateHelper::IsDateSet(dtFrom));
 
-	if (!trRecurrence.GetNextOccurence(dtFrom, dtNext))
+	if (!trRecurrence.CalcNextOccurence(dtFrom, dtNext))
 		return FALSE;
 
 	// Restore the previous due/start time
@@ -1246,67 +1276,84 @@ int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleD
 	
 	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
-		const double dDate = aDates[nOccur];
-
-#ifdef _DEBUG
-		CString sDate = COleDateTime(dDate).Format();
-		CString sCur = dtCur.Format();
-#endif
-		int nDaysOffset = (int)Misc::Round(dDate - dtCur.m_dt, 4);
-
-		double dDurationInMonths = CDateHelper().CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
-
-		if (bDueDate)
-		{
-			// Tasks of one or more exact month's duration need special handling
-			if (dDurationInMonths == (int)dDurationInMonths)
-			{
-				COleDateTime dtNewStart = dDate;
-				CDateHelper::IncrementMonth(dtNewStart, -(int)dDurationInMonths, TRUE);
-#ifdef _DEBUG
-				CString sNewStart = dtNewStart.Format();
-#endif
-				nDaysOffset = (int)Misc::Round(dtNewStart - dateStart, 4);
-
-				if (!CDateHelper::DateHasTime(dDate))
-					nDaysOffset++; // we want the day after
-			}
-
-			COleDateTime dtNewStart = dateStart;
-			VERIFY(CDateHelper().OffsetDate(dtNewStart, nDaysOffset, DHU_DAYS));
-
-			ASSERT((dtNewStart.m_dt <= dDate) ||
-					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
-
-			VERIFY(aOccur[nOccur].Set(dtNewStart, dDate));
-		}
-		else // start date
-		{
-			// Task's of one more month's duration need special handling
-			if (dDurationInMonths == (int)dDurationInMonths)
-			{
-				COleDateTime dtNewDue = dDate;
-				CDateHelper::IncrementMonth(dtNewDue, (int)dDurationInMonths, TRUE);
-#ifdef _DEBUG
-				CString sNewDue = dtNewDue.Format();
-#endif 
-				nDaysOffset = (int)Misc::Round(dtNewDue - dateDue, 4);
-
-				if (!CDateHelper::DateHasTime(dDate))
-					nDaysOffset--; // we want the day before
-			}
-
-			COleDateTime dtNewDue = dateDue;
-			VERIFY(CDateHelper().OffsetDate(dtNewDue, nDaysOffset, DHU_DAYS));
-
-			ASSERT((dDate <= dtNewDue.m_dt) ||
-					(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
-
-			VERIFY(aOccur[nOccur].Set(dDate, dtNewDue));
-		}
+		VERIFY(CalcNextOccurrence(aDates[nOccur], aOccur[nOccur]));
 	}
 
 	return nNumOccur;
+}
+
+BOOL TODOITEM::CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const
+{
+	ASSERT(!IsDone() && !bLocked);
+
+	if (!CanRecur())
+		return FALSE;
+
+	if (!HasStart() || !HasDue() || (dateDue < dateStart))
+		return FALSE;
+
+	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
+	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
+
+#ifdef _DEBUG
+	CString sNext = dtNext.Format();
+	CString sCur = dtCur.Format();
+#endif
+	int nDaysOffset = (int)Misc::Round(dtNext - dtCur, 4);
+
+	CDateHelper dh;
+	double dDurationInMonths = dh.CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
+
+	if (bDueDate)
+	{
+		// Tasks of one or more exact month's duration need special handling
+		if (dDurationInMonths == (int)dDurationInMonths)
+		{
+			COleDateTime dtNextStart = dtNext;
+			dh.IncrementMonth(dtNextStart, -(int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+			CString sNextStart = dtNextStart.Format();
+#endif
+			nDaysOffset = (int)Misc::Round(dtNextStart - dateStart, 4);
+
+			if (!dh.DateHasTime(dtNext))
+				nDaysOffset++; // we want the day after
+		}
+
+		COleDateTime dtNextStart = dateStart;
+		VERIFY(dh.OffsetDate(dtNextStart, nDaysOffset, DHU_DAYS));
+
+		ASSERT((dtNextStart <= dtNext) ||
+			(dh.IsSameDay(dtNext, dtNextStart) && !dh.DateHasTime(dtNext)));
+
+		VERIFY(dtOccur.Set(dtNextStart, dtNext));
+	}
+	else // start date
+	{
+		// Task's of one more month's duration need special handling
+		if (dDurationInMonths == (int)dDurationInMonths)
+		{
+			COleDateTime dtNextDue = dtNext;
+			dh.IncrementMonth(dtNextDue, (int)dDurationInMonths, TRUE);
+#ifdef _DEBUG
+			CString sNextDue = dtNextDue.Format();
+#endif 
+			nDaysOffset = (int)Misc::Round(dtNextDue - dateDue, 4);
+
+			if (!dh.DateHasTime(dtNext))
+				nDaysOffset--; // we want the day before
+		}
+
+		COleDateTime dtNextDue = dateDue;
+		VERIFY(dh.OffsetDate(dtNextDue, nDaysOffset, DHU_DAYS));
+
+		ASSERT((dtNext <= dtNextDue) ||
+			(dh.IsSameDay(dtNext, dtNextDue) && !dh.DateHasTime(dtNextDue)));
+
+		VERIFY(dtOccur.Set(dtNext, dtNextDue));
+	}
+
+	return dtOccur.IsValid();
 }
 
 BOOL TODOITEM::IsRecentlyModified() const

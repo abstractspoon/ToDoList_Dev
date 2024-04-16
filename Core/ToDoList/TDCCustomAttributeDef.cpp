@@ -13,7 +13,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TDCCUSTOMATTRIBUTEDEFINITION FALLBACK;
+TDCCUSTOMATTRIBUTEDEFINITION FALLBACK(NULL, FALSE);
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -368,7 +368,7 @@ DWORD TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(DWORD dwFirstOpDataType, 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel)
+TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel, BOOL bEnable)
 	:
 	sLabel(szLabel),
 	dwAttribType(TDCCA_STRING),
@@ -376,7 +376,7 @@ TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel)
 	dwFeatures(TDCCAF_SORT),
 	nColID(TDCC_NONE),
 	nAttribID(TDCA_NONE),
-	bEnabled(TRUE)
+	bEnabled(bEnable)
 {
 
 }
@@ -1039,7 +1039,6 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double
 
 CTDCCustomAttribDefinitionArray::CTDCCustomAttribDefinitionArray()
 {
-
 }
 
 CTDCCustomAttribDefinitionArray::CTDCCustomAttribDefinitionArray(const CTDCCustomAttribDefinitionArray& other)

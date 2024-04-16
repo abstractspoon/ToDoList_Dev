@@ -161,9 +161,9 @@ public:
 	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
 	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
 
+	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1, BOOL bSelected = FALSE) const;
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
-							COLORREF& crBack, BOOL bRef = -1) const;
-	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
+							COLORREF& crBack, BOOL bRef = -1, BOOL bSelected = FALSE) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
@@ -476,8 +476,6 @@ protected:
 	inline BOOL IsTreeList() const { return CTreeListSyncer::IsTree(Tasks()); }
 
 	// internal version
-	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 
-							COLORREF& crBack, BOOL bRef, BOOL bSelected) const;
 	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack) const;
 	BOOL SelectionHasReferences() const;
 

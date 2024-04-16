@@ -125,8 +125,8 @@ void CPreferencesTaskDef2Page::OnFirstShow()
 	}
 	UpdateCustomAttributeInfoVisibility();
 
-	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_TDC_NOONE));
-	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_TDC_NOONE));
+	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_TDC_NOBODY));
+	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_TDC_NOBODY));
 	m_mgrPrompts.SetEditPrompt(IDC_STATUSLIST, *this, CEnString(IDS_TDC_NONE));
 	m_mgrPrompts.SetEditPrompt(IDC_CATEGORYLIST, *this, CEnString(IDS_TDC_NONE));
  	m_mgrPrompts.SetEditPrompt(IDC_VERSIONLIST, *this, CEnString(IDS_TDC_NONE));

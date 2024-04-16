@@ -25,9 +25,56 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+FTDRESULT::FTDRESULT() 
+	: 
+	dwTaskID(0), 
+	pTDC(NULL), 
+	dwFlags(0) 
+{
+}
+
+FTDRESULT::FTDRESULT(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTaskList)
+	:
+	dwTaskID(result.dwTaskID),
+	pTDC(pTaskList),
+	dwFlags(result.dwFlags)
+{
+}
+
+int FTDRESULT::HasIcon() const 
+{ 
+	return (pTDC->GetTaskIconIndex(dwTaskID) != -1); 
+}
+
+void FTDRESULT::DrawIcon(CDC* pDC, const CRect& rIcon) const
+{
+	int nImage = pTDC->GetTaskIconIndex(dwTaskID);
+
+	if (nImage != -1)
+		pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
+
+	if (IsReference())
+		GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef LVS_EX_LABELTIP
-#define LVS_EX_LABELTIP     0x00004000
+#	define LVS_EX_LABELTIP	0x00004000
 #endif
+
+#ifndef LVN_ENDSCROLL
+#	define LVN_ENDSCROLL	(LVN_FIRST - 81)
+
+struct NMLVSCROLL
+{
+	NMHDR   hdr;
+	int     dx;
+	int     dy;
+};
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum
 {
@@ -41,11 +88,10 @@ enum
 
 CTDLFindResultsListCtrl::CTDLFindResultsListCtrl() 
 	: 
-	m_nCurGroupID(-1), 
-	m_bStrikeThruDone(FALSE), 
-	m_crGroupBkgnd(CLR_NONE),
-	m_crRef(CLR_NONE),
-	m_crDone(CLR_NONE)
+	m_nCurGroupID(-1),
+	m_nHotItem(-1),
+	m_bStrikeThruDone(FALSE),
+	m_bHasIconsOrRefs(FALSE)
 {
 }
 
@@ -58,8 +104,10 @@ BEGIN_MESSAGE_MAP(CTDLFindResultsListCtrl, CEnListCtrl)
 	//{{AFX_MSG_MAP(CTDLFindResultsListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
-	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_WM_MOUSEMOVE()
+	ON_WM_SETCURSOR()
+	ON_NOTIFY_REFLECT_EX(LVN_ENDSCROLL, OnVScroll)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -75,11 +123,31 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	InsertColumn(COL_TASKPATH, CEnString(IDS_FT_PATH), LVCFMT_LEFT, 100);
 
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_ONECLICKACTIVATE, LVS_EX_ONECLICKACTIVATE);
-	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_UNDERLINEHOT, LVS_EX_UNDERLINEHOT);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
+	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(16));
+
 	RefreshUserPreferences();
+}
+
+void CTDLFindResultsListCtrl::UpdateIconAndReferenceStatus()
+{
+	m_bHasIconsOrRefs = FALSE;
+
+	int nItem = GetItemCount();
+
+	if (nItem)
+	{
+		while (nItem--)
+		{
+			while (nItem-- && !m_bHasIconsOrRefs)
+			{
+				FTDRESULT* pRes = GetResult(nItem);
+				m_bHasIconsOrRefs = (pRes && (pRes->HasIcon() || pRes->IsReference()));
+			}
+		}
+	}
 }
 
 LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
@@ -184,12 +252,17 @@ void CTDLFindResultsListCtrl::DeleteResults(const CFilteredToDoCtrl* pTDC)
 	{
 		FTDRESULT* pRes = GetResult(nItem);
 
-		if (pRes && pRes->pTDC == pTDC)
+		if (pRes && (pRes->pTDC == pTDC))
 		{
+			if (nItem == m_nHotItem)
+				m_nHotItem = -1;
+
 			DeleteItem(nItem);
 			delete pRes;
 		}
 	}
+
+	UpdateIconAndReferenceStatus();
 }
 
 void CTDLFindResultsListCtrl::DeleteAllResults()
@@ -205,154 +278,121 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 		DeleteItem(nItem);
 	}
 
-	m_nCurGroupID = -1;
-	m_lcGrouping.RemoveAllGroups();
+	m_bHasIconsOrRefs = FALSE;
+	m_nCurGroupID = m_nHotItem = -1;
+	m_grouping.RemoveAllGroups();
 }
 
-BOOL CTDLFindResultsListCtrl::IsResultHot(const RECT& rResult) const
+void CTDLFindResultsListCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
-	CPoint ptCursor;
-	GetCursorPos(&ptCursor);
-	ScreenToClient(&ptCursor);
-	ptCursor.x = rResult.left; // we want the whole row
-
-	return ::PtInRect(&rResult, ptCursor);
+	UpdateHotItem(point);
 }
 
-void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+BOOL CTDLFindResultsListCtrl::OnVScroll(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	*pResult = CDRF_DODEFAULT;
-	LPNMLVCUSTOMDRAW pLVCD = (LPNMLVCUSTOMDRAW)pNMHDR;
+	NMLVSCROLL* pScroll = (NMLVSCROLL*)pNMHDR;
 
-	int nItem = (int)pLVCD->nmcd.dwItemSpec;
-	int nSubItem = (int)pLVCD->iSubItem;
-
-	switch (pLVCD->nmcd.dwDrawStage)
+	if (pScroll->dy)
 	{
-	case CDDS_PREPAINT:
-		{
-			if (m_lcGrouping.DrawGroupHeader(pLVCD, m_crGroupBkgnd))
-				*pResult = CDRF_SKIPDEFAULT;
-			else
-				*pResult = (CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT);
-		}
-		break;
+		CPoint point(GetMessagePos());
+		ScreenToClient(&point);
 
-	case CDDS_ITEMPREPAINT:
-		{
-			const FTDRESULT* pRes = (FTDRESULT*)pLVCD->nmcd.lItemlParam;
-			ASSERT(pRes);
+		UpdateHotItem(point);
+	}
 
-			// background
-			BOOL bHot = IsResultHot(pLVCD->nmcd.rc);
-			BOOL bSelected = IsItemSelected(nItem);
-			
-			if (bSelected || bHot)
-			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-				BOOL bFocused = (GetFocus() == this);
+	return FALSE;
+}
 
-				CRect rRow(pLVCD->nmcd.rc);
-				
-				// extra for XP
-				if (OsIsXP())
-					GetItemRect(nItem, rRow, LVIR_BOUNDS);
+void CTDLFindResultsListCtrl::UpdateHotItem(CPoint point)
+{
+	// Use drop-highlighting to mimic hot-ness
+	int nHit = HitTest(point);
 
-				GM_ITEMSTATE nState = ((bFocused && bSelected) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rRow, GMIB_THEMECLASSIC);
-			}
-			
-			// hide text because we will draw it in SUBITEMPREPAINT
-			pLVCD->clrTextBk = pLVCD->clrText = GetSysColor(COLOR_WINDOW);
-		}
-		*pResult |= CDRF_NOTIFYSUBITEMDRAW;
-		break;
-		
-	case (CDDS_ITEMPREPAINT | CDDS_SUBITEM):
-		{
-			const FTDRESULT* pRes = (FTDRESULT*)pLVCD->nmcd.lItemlParam;
-			ASSERT(pRes);
+	if (nHit != m_nHotItem)
+	{
+		if (m_nHotItem != -1)
+			SetItemState(m_nHotItem, 0, LVIS_DROPHILITED);
 
-			if (pRes)
-			{
-				CString sColText = GetItemText(nItem, nSubItem);
+		if (nHit != -1)
+			SetItemState(nHit, LVIS_DROPHILITED, LVIS_DROPHILITED);
 
-				if (!sColText.IsEmpty())
-				{
-					CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-					BOOL bHot = IsResultHot(pLVCD->nmcd.rc);
-					BOOL bSelected = IsItemSelected(nItem);
-
-					COLORREF crText = GetResultTextColor(pRes, bSelected, bHot);
-					pDC->SetTextColor(crText);
-					pDC->SetBkMode(TRANSPARENT);
-
-					// set the font for each column item
-					CFont* pFont = GetResultFont(pRes, nSubItem, bHot);
-					ASSERT(pFont);
-
-					if (pFont)
-					{
-						::SelectObject(pLVCD->nmcd.hdc, pFont->GetSafeHandle());
-						*pResult = CDRF_NEWFONT;
-					}
-
-					CRect rRow(pLVCD->nmcd.rc);
-				
-					// extra for XP
-					if (OsIsXP())
-						GetSubItemRect(nItem, nSubItem, LVIR_LABEL, rRow);
-
-					int nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS);
-
-					if ((nSubItem == COL_TASKTITLE) && pRes->IsReference())
-					{
-						// Offset the task title to avoid the reference icon
-						rRow.left += GraphicsMisc::ScaleByDPIFactor(10);
-						pDC->DrawText(sColText, rRow, nFlags);
-						
-						if (pLVCD->nmcd.rc.top > 0)
-							GraphicsMisc::DrawShortcutOverlay(pDC, &pLVCD->nmcd.rc);
-					}
-					else
-					{
-						pDC->DrawText(sColText, rRow, nFlags);
-					}
-				}
-			}
-
-			*pResult = CDRF_SKIPDEFAULT;
-		}
-		break;
-
-	default:
-		break;
+		m_nHotItem = nHit;
 	}
 }
 
-COLORREF CTDLFindResultsListCtrl::GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const
+BOOL CTDLFindResultsListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
+	if (nHitTest == HTCLIENT)
+	{
+		CPoint point(GetMessagePos());
+		ScreenToClient(&point);
+
+		if (HitTest(point) != -1)
+			return GraphicsMisc::SetHandCursor();
+	}
+
+	// else
+	return CEnListCtrl::OnSetCursor(pWnd, nHitTest, message);
+}
+
+COLORREF CTDLFindResultsListCtrl::GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+{
+	FTDRESULT* pRes = GetResult(nItem);
 	ASSERT(pRes);
 
-	COLORREF crText = CLR_NONE;
-
-	if ((m_crDone != CLR_NONE) && (pRes->IsDone() || pRes->IsGoodAsDone()))
+	if (pRes)
 	{
-		crText = m_crDone;
-	}
-	else if ((m_crRef != CLR_NONE) && pRes->IsReference())
-	{
-		crText = m_crRef;
+		COLORREF crText, crUnused;
+		
+		if (pRes->pTDC->GetTaskTextColors(pRes->dwTaskID, crText, crUnused, (bSelected || bDropHighlighted)))
+			return crText;
 	}
 
-	if (bSelected || bHot)
-		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
-
-	return ((crText == CLR_NONE) ? GetSysColor(COLOR_WINDOWTEXT) : crText);
+	return CEnListCtrl::GetItemTextColor(nItem, nSubItem, bSelected, bDropHighlighted, bWndFocus);
 }
 
-CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot)
+COLORREF CTDLFindResultsListCtrl::GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
+	FTDRESULT* pRes = GetResult(nItem);
+	ASSERT(pRes);
+
+	if (pRes)
+	{
+		COLORREF crUnused, crBack;
+
+		if (pRes->pTDC->GetTaskTextColors(pRes->dwTaskID, crUnused, crBack, (bSelected || bDropHighlighted)))
+			return crBack;
+	}
+
+	return CEnListCtrl::GetItemBackColor(nItem, bSelected, bDropHighlighted, bWndFocus);
+}
+
+void CTDLFindResultsListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
+{
+	if (nCol == COL_TASKTITLE)
+	{
+		FTDRESULT* pRes = GetResult(nItem);
+		ASSERT(pRes);
+
+		if (pRes && m_bHasIconsOrRefs)
+		{
+			pRes->DrawIcon(pDC, rText);
+
+			CRect rRest(rText);
+			rRest.left += (pRes->pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+
+			CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+			return;
+		}
+	}
+
+	// else
+	CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+}
+
+CFont* CTDLFindResultsListCtrl::GetItemFont(int nItem, int nSubItem) const
+{
+	FTDRESULT* pRes = GetResult(nItem);
 	ASSERT(pRes);
 
 	if (pRes)
@@ -360,24 +400,16 @@ CFont* CTDLFindResultsListCtrl::GetResultFont(const FTDRESULT* pRes, int nCol, B
 		if (!m_fonts.GetHwnd() && !m_fonts.Initialise(*this))
 			return NULL;
 
+		BOOL bTitleCol = (nSubItem == COL_TASKTITLE);
+
+		BOOL bUnderline = (bTitleCol ? (nItem == m_nHotItem) : FALSE);
 		BOOL bStrikeThru = (m_bStrikeThruDone && pRes->IsDone());
-		BOOL bUnderline = bHot;
-		BOOL bBold = (nCol == COL_TASKTITLE) ? pRes->IsTopmost() : FALSE;
+		BOOL bBold = (bTitleCol ? pRes->IsTopmost() : FALSE);
 
 		return m_fonts.GetFont(bBold, FALSE, bUnderline, bStrikeThru);
 	}
 
-	ASSERT(0);
-	return NULL;
-}
-
-COLORREF CTDLFindResultsListCtrl::GetUserColour(const CPreferences& prefs, LPCTSTR szSpecifiedKey, LPCTSTR szColorKey)
-{
-	if (prefs.GetProfileInt(_T("Preferences"), szSpecifiedKey, FALSE))
-		return (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), szColorKey, CLR_NONE);
-
-	// else
-	return CLR_NONE;
+	return CEnListCtrl::GetItemFont(nItem, nSubItem);
 }
 
 void CTDLFindResultsListCtrl::RefreshUserPreferences()
@@ -385,15 +417,18 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 	CPreferences prefs;
 	
 	// update user colour
-	m_crDone = GetUserColour(prefs, _T("SpecifyDoneColor"), _T("TaskDone"));
-	m_crRef = GetUserColour(prefs, _T("ReferenceColor"), _T("Reference"));
-	m_crGroupBkgnd = GetUserColour(prefs, _T("SpecifyGroupHeaderBkgndColor"), _T("GroupHeaderBkgnd"));
+	COLORREF crGroupBack = CLR_NONE;
+
+	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyGroupHeaderBkgndColor"), FALSE))
+		crGroupBack = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("GroupHeaderBkgnd"), CLR_NONE);
+
+	m_grouping.SetGroupHeaderBackColor(crGroupBack);
 
 	// update strike thru font
 	BOOL bWasStrikeThru = m_bStrikeThruDone;
 	m_bStrikeThruDone = prefs.GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), FALSE);
 
-	// clear the font cache if 'strike thru' has changed
+	// clear the font cache if 'strike through' has changed
 	if (Misc::StateChanged(m_bStrikeThruDone, bWasStrikeThru))
 		m_fonts.Clear();
 
@@ -412,15 +447,17 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	
 	SetItemText(nIndex, COL_WHATMATCHED, FormatWhatMatched(result, pTDC, bShowValueOnly));
 	SetItemText(nIndex, COL_TASKPATH, sPath);
-
-	if (m_nCurGroupID != -1)
-		m_lcGrouping.SetItemGroupId(nIndex, m_nCurGroupID);
-
-	UpdateWindow();
 		
 	// map identifying data
 	FTDRESULT* pRes = new FTDRESULT(result, pTDC);
 	SetItemData(nIndex, (DWORD)pRes);
+
+	m_bHasIconsOrRefs |= (pRes->HasIcon() || pRes->IsReference());
+
+	if (m_nCurGroupID != -1)
+		m_grouping.SetItemGroupId(nIndex, m_nCurGroupID);
+
+	UpdateWindow();
 
 	return nIndex;
 }
@@ -428,15 +465,9 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
 	if (m_nCurGroupID == -1)
-		m_lcGrouping.EnableGroupView(*this);
+		m_grouping.EnableGroupView(*this);
 
-	return m_lcGrouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
-}
-
-BOOL CTDLFindResultsListCtrl::OsIsXP()
-{
-	static BOOL bXP(COSVersion() < OSV_VISTA);
-	return bXP;
+	return m_grouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }
 
 CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const

@@ -76,7 +76,7 @@ BOOL CRecurrence::CanRecur() const
 		return FALSE;
 	}
 
-	return (IsRecurring() && ((m_nRemainingOccur > 1) || (m_nNumOccur < 0)));
+	return (IsRecurring() && ((m_nRemainingOccur > 1) || (m_nNumOccur == OCCURS_INFINITELY)));
 }
 
 void CRecurrence::ClearOccurrenceCount()
@@ -114,15 +114,27 @@ int CRecurrence::GetRemainingOccurrenceCount() const
 	return m_nRemainingOccur;
 }
 
+BOOL CRecurrence::DecrementRemainingOccurrenceCount()
+{
+	if (m_nNumOccur == OCCURS_INFINITELY)
+		return TRUE;
+
+	// else
+	if (m_nRemainingOccur > 0)
+	{
+		m_nRemainingOccur--;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtPrev, COleDateTime& dtNext)
 {
 	if (!CalcNextOccurence(dtPrev, dtNext))
 		return FALSE;
 
-	// decrement the remaining occurrence count
-	if (m_nRemainingOccur > 0)
-		m_nRemainingOccur--;
-
+	VERIFY(DecrementRemainingOccurrenceCount());
 	return TRUE;
 }
 
