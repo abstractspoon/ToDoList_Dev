@@ -207,7 +207,7 @@ FWD_FUNC_VOID_2ARG(SetAutoListDataReadOnly, TDC_ATTRIBUTE, BOOL)
 
 // -----------------------------------------------------------------------
 
-// Misc
+// Others having unique patterns
 void CTDLTaskAttributeCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
 	m_lcAttributes.GetAutoListData(nAttribID, tld);
