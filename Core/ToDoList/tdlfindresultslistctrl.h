@@ -7,10 +7,38 @@
 // tdlfindresultslistctrl.h : header file
 //
 
-#include "tdcstruct.h"
+#include "tdcenum.h"
 
 #include "..\shared\enlistctrl.h"
 #include "..\shared\fontcache.h"
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct SEARCHRESULT;
+
+class CFilteredToDoCtrl;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct FTDRESULT
+{
+	FTDRESULT();
+	FTDRESULT(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTaskList);
+
+	BOOL IsReference() const { return (dwFlags & RF_REFERENCE); }
+	BOOL IsDone() const { return (dwFlags & RF_DONE); }
+	BOOL IsGoodAsDone() const { return (dwFlags & RF_GOODASDONE); }
+	BOOL IsParent() const { return (dwFlags & RF_PARENT); }
+	BOOL IsTopmost() const { return (dwFlags & RF_TOPMOST); }
+
+	BOOL HasIcon() const;
+	void DrawIcon(CDC* pDC, const CRect& rIcon) const;
+
+	DWORD dwTaskID, dwFlags;
+	const CFilteredToDoCtrl* pTDC;
+};
+
+typedef CArray<FTDRESULT, FTDRESULT&> CFTDResultsArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindResultsListCtrl window
@@ -46,6 +74,7 @@ protected:
 	int m_nCurGroupID;
 	int m_nHotItem;
 	BOOL m_bStrikeThruDone;
+	BOOL m_bHasIconsOrRefs;
 
 	mutable CFontCache m_fonts;
 
@@ -81,6 +110,7 @@ protected:
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;
 	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
 	void UpdateHotItem(CPoint point);
+	void UpdateIconAndReferenceStatus();
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -234,7 +234,7 @@ void CTDLToolbarButtonListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 			GraphicsMisc::CentreRect(rImage, rText);
 
-			m_ilImages.Draw(pDC, nImage, rImage.TopLeft(), ILD_TRANSPARENT);
+			m_ilImages.Draw(pDC, nImage, rImage.TopLeft());
 		}
 	}
 	else

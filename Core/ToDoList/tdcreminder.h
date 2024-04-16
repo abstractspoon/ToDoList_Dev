@@ -39,7 +39,10 @@ struct TDCREMINDER
 
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey);
-	
+
+	BOOL HasIcon() const;
+	void DrawIcon(CDC* pDC, const CRect& rIcon) const;
+
 	const CFilteredToDoCtrl* pTDC;
 	DWORD dwTaskID;
 

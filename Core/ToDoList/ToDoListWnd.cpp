@@ -3696,6 +3696,12 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		}
 	}
 
+	if (pMod->mapAttrib.Has(TDCA_ICON))
+	{
+		m_dlgReminders.Invalidate(FALSE);
+		m_dlgFindTasks.Invalidate(FALSE);
+	}
+
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
 	{
 		UpdateFilterBarListData(TDCA_ALL);

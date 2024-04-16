@@ -36,8 +36,8 @@ public:
 	int GetImageIndex(const CString& sImageName) const;
 	CString GetImageName(int nIndex) const;
 
-	BOOL Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle) const;
-	BOOL Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle) const;
+	BOOL Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle = ILD_TRANSPARENT) const;
+	BOOL Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle = ILD_TRANSPARENT) const;
 
 protected:
 	CMapStringToInt m_mapNameToIndex;
