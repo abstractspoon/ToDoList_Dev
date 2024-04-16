@@ -186,6 +186,16 @@ CONST_FWD_FUNC_RET_1ARG(BOOL, GetCost, TDCCOST&)
 
 // -----------------------------------------------------------------------
 
+#define FWD_FUNC_VOID_2ARG(name, arg1Type, arg2Type) void CTDLTaskAttributeCtrl::name(arg1Type arg1, arg2Type arg2) { m_lcAttributes.name(arg1, arg2); }
+
+// -----------------------------------------------------------------------
+
+FWD_FUNC_VOID_2ARG(LoadState, const CPreferences&, LPCTSTR)
+FWD_FUNC_VOID_2ARG(SetAutoListData, TDC_ATTRIBUTE, const TDCAUTOLISTDATA&)
+FWD_FUNC_VOID_2ARG(SetAutoListDataReadOnly, TDC_ATTRIBUTE, BOOL)
+
+// -----------------------------------------------------------------------
+
 #define CONST_FWD_FUNC_RET_2ARG(ret, name, arg1Type, arg2Type) ret CTDLTaskAttributeCtrl::name(arg1Type arg1, arg2Type arg2) const { return m_lcAttributes.name(arg1, arg2); }
 
 // -----------------------------------------------------------------------
@@ -194,16 +204,6 @@ CONST_FWD_FUNC_RET_2ARG(int, GetAllocTo, CStringArray&, CStringArray&)
 CONST_FWD_FUNC_RET_2ARG(int, GetCategories, CStringArray&, CStringArray&)
 CONST_FWD_FUNC_RET_2ARG(int, GetTags, CStringArray&, CStringArray&)
 CONST_FWD_FUNC_RET_2ARG(int, GetCustomAttributeAutoListData, const CString&, CStringArray&)
-
-// -----------------------------------------------------------------------
-
-#define FWD_FUNC_VOID_2ARG(name, arg1Type, arg2Type) void CTDLTaskAttributeCtrl::name(arg1Type arg1, arg2Type arg2) { m_lcAttributes.name(arg1, arg2); }
-
-// -----------------------------------------------------------------------
-
-FWD_FUNC_VOID_2ARG(LoadState, const CPreferences&, LPCTSTR)
-FWD_FUNC_VOID_2ARG(SetAutoListData, TDC_ATTRIBUTE, const TDCAUTOLISTDATA&)
-FWD_FUNC_VOID_2ARG(SetAutoListDataReadOnly, TDC_ATTRIBUTE, BOOL)
 
 // -----------------------------------------------------------------------
 
