@@ -460,7 +460,7 @@ void CTDLTaskAttributeListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		return;
 	}
 
-	CInputListCtrl::OnLButtonDown(nFlags, point);
+	CInputListCtrl::OnLButtonDblClk(nFlags, point);
 }
 
 void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)

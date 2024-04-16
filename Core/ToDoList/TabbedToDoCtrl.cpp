@@ -4712,7 +4712,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 		LPNMITEMACTIVATE pNMIA = (LPNMITEMACTIVATE)pNMHDR;
 
 		TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute((TDC_COLUMN)pNMIA->iSubItem);
-		m_lcAttributes.SelectValue(nAttribID);
+		m_ctrlAttributes.SelectValue(nAttribID);
 		
 		return;
 	}

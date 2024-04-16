@@ -21,7 +21,8 @@
 #include "tdcFindReplace.h"
 #include "tdcdialoghelper.h"
 #include "tdlinfotipctrl.h"
-#include "tdltaskattributelistctrl.h"
+//#include "tdltaskattributelistctrl.h"
+#include "tdltaskattributectrl.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\TreeDragDropHelper.h"
@@ -227,12 +228,12 @@ public:
 	COLORREF GetSelectedTaskColor() const { return m_taskTree.GetSelectedTaskColor(); }
 	int GetSelectedTaskCustomAttributeData(CTDCCustomAttributeDataMap& mapData, BOOL bFormatted = FALSE) const;
 	
-	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const { return m_lcAttributes.GetDependencies(aDepends); }
-	CString GetSelectedTaskExternalID() const { return m_lcAttributes.GetExternalID(); }
-	int GetSelectedTaskPriority() const { return m_lcAttributes.GetPriority(); }
-	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { CStringArray aUnused; return m_lcAttributes.GetAllocTo(aAllocTo, aUnused); }
-	CString GetSelectedTaskAllocBy() const { return m_lcAttributes.GetAllocBy(); }
-	int GetSelectedTaskFileLinks(CStringArray& aFiles) const { return m_lcAttributes.GetFileLinks(aFiles); }
+	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const { return m_ctrlAttributes.GetDependencies(aDepends); }
+	CString GetSelectedTaskExternalID() const { return m_ctrlAttributes.GetExternalID(); }
+	int GetSelectedTaskPriority() const { return m_ctrlAttributes.GetPriority(); }
+	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { CStringArray aUnused; return m_ctrlAttributes.GetAllocTo(aAllocTo, aUnused); }
+	CString GetSelectedTaskAllocBy() const { return m_ctrlAttributes.GetAllocBy(); }
+	int GetSelectedTaskFileLinks(CStringArray& aFiles) const { return m_ctrlAttributes.GetFileLinks(aFiles); }
 
 	BOOL SelectedTasksHaveIcon() const { return m_taskTree.SelectionHasIcon(); }
 	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
@@ -448,7 +449,7 @@ protected:
 
 	// Further attributes shared with CToDoCtrlLayout
 	CTDLCommentsCtrl m_ctrlComments;
-	CTDLTaskAttributeListCtrl m_lcAttributes;
+	CTDLTaskAttributeCtrl m_ctrlAttributes;
 
 	// Further attributes shared with CTreeDragDropHelper
 	CTDLTaskTreeCtrl m_taskTree;
@@ -707,12 +708,12 @@ protected:
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const { return m_taskTree.GetSelectedTaskRecurrence(tr); }
 	DWORD GetSelectedTaskParentID() const { return m_taskTree.GetSelectedTaskParentID(); }
-	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_lcAttributes.GetTimeEstimate(timeEst); }
-	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_lcAttributes.GetTimeSpent(timeSpent); }
+	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_ctrlAttributes.GetTimeEstimate(timeEst); }
+	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_ctrlAttributes.GetTimeSpent(timeSpent); }
 	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
 	BOOL GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& tp) const;
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
-	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_lcAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
+	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
