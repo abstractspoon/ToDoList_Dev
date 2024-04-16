@@ -22,8 +22,8 @@ public:
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
 	
-	BOOL AddTask(const CString& sTask, DWORD dwTaskID, int nIndent, BOOL bParent, int nImage);
-	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage);
+	BOOL AddTask(const CString& sTask, DWORD dwTaskID, int nIndent, BOOL bParent, int nImage, BOOL bReference = FALSE);
+	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference = FALSE);
 
 	BOOL SetSelectedTaskID(DWORD dwTaskID);
 	void SetImageList(HIMAGELIST hil) { m_hilTasks = hil; }
@@ -51,11 +51,12 @@ protected:
 protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA
 	{
-		TCB_ITEMDATA() : nIndent(0), nImage(-1), bParent(FALSE) {}
+		TCB_ITEMDATA() : nIndent(0), nImage(-1), bParent(FALSE), bReference(FALSE) {}
 
 		int nImage;
 		int nIndent;
 		BOOL bParent;
+		BOOL bReference;
 	};
 
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new TCB_ITEMDATA(); }
@@ -67,6 +68,7 @@ protected:
 
 	int GetItemIndent(int nItem) const;
 	void SelectNextFind(BOOL bForward);
+	BOOL IsItemReference(int nItem) const;
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

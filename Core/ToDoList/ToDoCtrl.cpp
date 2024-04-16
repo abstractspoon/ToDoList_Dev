@@ -9173,10 +9173,14 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 		CTaskFile tasks;
 		GetTasks(tasks, filter);
 
+		CDWordArray aSelTaskIDs;
+		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
 		CTDCDependencyArray aDepends;
 		GetSelectedTaskDependencies(aDepends);
 
-		CTDLTaskDependencyEditDlg dialog(tasks, 
+		CTDLTaskDependencyEditDlg dialog(aSelTaskIDs,
+										 tasks, 
 										 m_ilTaskIcons, 
 										 aDepends, 
 										 HasStyle(TDCS_SHOWPARENTSASFOLDERS),
