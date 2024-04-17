@@ -24,7 +24,6 @@ static char THIS_FILE[] = __FILE__;
 int MENUSIZE = -1;
 
 const COLORREF GRAYTEXTCOLOR = RGB(96, 96, 96); 
-const int BTNPADDING = 2;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -276,7 +275,7 @@ void CEnEdit::EnableButtonPadding(BOOL bEnable)
 {
 	if (Misc::StateChanged(m_nBtnPadding, bEnable))
 	{
-		m_nBtnPadding = (bEnable ? BTNPADDING : 0);
+		m_nBtnPadding = (bEnable ? GetSystemMetrics(SM_CXEDGE) : 0);
 
 		// force WM_NCCALCSIZE
 		if (GetSafeHwnd())
@@ -328,12 +327,21 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 		{
 			m_bFirstShow = FALSE; // in case we get here before OnNcPaint()
 		
-			lpncsp->rgrc[0].right -= (GetButtonsWidth() - (BTNPADDING - m_nBtnPadding));
+			lpncsp->rgrc[0].right -= GetButtonsWidth();
 
-			if (m_bParentIsCombo && (m_nBtnPadding == 0))
+			if (!m_bParentIsCombo)
 			{
-				// Compensate for the fact that we will be rendering our buttons into the combo DC
-				lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
+				lpncsp->rgrc[0].right += (GetSystemMetrics(SM_CXEDGE) - m_nBtnPadding);
+			}
+			else
+			{
+				lpncsp->rgrc[0].right--;
+
+				if (m_nBtnPadding == 0)
+				{
+					// Compensate for the fact that we will be rendering our buttons into the combo DC
+					lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
+				}
 			}
 		}
 	}
@@ -867,7 +875,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 	rBtn.OffsetRect(-rWindow.TopLeft());
 
 	// clip the drawing rect to prevent window getting the parent bkgnd color wrong
-	CRect rClip(rBtn);
+//	CRect rClip(rBtn);
 
 	// nasty business here because the API function DrawThemeEdge() is not theme aware!
 	// and drawing a themed combostyle button will also draw the arrow which we don't want
@@ -895,7 +903,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			rBtn.InflateRect(1, 1);
 		
 		// for now
-		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, nFlags, rClip);
+		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, nFlags/*, rClip*/);
 	}
 	else // unthemed combo style
 	{
@@ -981,7 +989,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			pDC->SelectObject(pOld);
 	}
 
-	pDC->ExcludeClipRect(rClip);
+//	pDC->ExcludeClipRect(rClip);
 }
 
 void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 
