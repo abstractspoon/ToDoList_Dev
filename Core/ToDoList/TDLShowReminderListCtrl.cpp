@@ -400,11 +400,12 @@ void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 		CRect rRest(rText);
 		rRest.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
 
-		return CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+		CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+		return;
 	}
 
 	// else
-	return CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+	CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
 void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)

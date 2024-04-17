@@ -561,6 +561,10 @@ SOURCE=..\ToDoList\TDLShowReminderDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLShowReminderListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.cpp
 # End Source File
 # Begin Source File
@@ -1206,6 +1210,10 @@ SOURCE=..\ToDoList\TDLSetReminderDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLShowReminderDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLShowReminderListCtrl.h
 # End Source File
 # Begin Source File
 
