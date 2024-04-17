@@ -620,7 +620,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 					
 		case ILCT_POPUPMENU:
 			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
 
 				// Draw arrow
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));

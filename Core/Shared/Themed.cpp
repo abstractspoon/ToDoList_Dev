@@ -292,7 +292,11 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 
 				// Initialise each colour once only
 				if (aBackColors[nThState - 1] == CLR_NONE)
-					aBackColors[nThState - 1] = pDC->GetPixel(CPoint(rect.left + 2, rect.bottom - 2));
+				{
+					// Retrieve the colour at mid height as being a best-guess
+					int nMidY = ((rect.top + rect.bottom) / 2);
+					aBackColors[nThState - 1] = pDC->GetPixel(CPoint(rect.left + 3, nMidY));
+				}
 
 				// Below a certain height (guessed) the vertical position
 				// of the arrow is defined by a minimum offset from the top
