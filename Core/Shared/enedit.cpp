@@ -874,11 +874,9 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 
 	rBtn.OffsetRect(-rWindow.TopLeft());
 
-	// nasty business here because the API function DrawThemeEdge() is not theme aware!
-	// and drawing a themed combostyle button will also draw the arrow which we don't want
-	if (!m_bComboStyle || bThemed)	// draw as button type (for now)
+	if (bThemed)
 	{
-		UINT nFlags = DFCS_ADJUSTRECT | DFCS_BUTTONPUSH;
+		UINT nFlags = DFCS_ADJUSTRECT;
 		
 		// note: we do not take account of ES_READONLY as the effect of this
 		// is not deterministic at this level so we assume derived classes or 
@@ -895,12 +893,8 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 		{
 			nFlags |= DFCS_HOT;
 		}
-
-		if (bThemed)
-			rBtn.InflateRect(1, 1);
 		
-		// for now
-		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, nFlags);
+		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, nFlags);
 	}
 	else // unthemed combo style
 	{

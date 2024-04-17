@@ -5,7 +5,6 @@
 #include "InputListCtrl.h"
 #include "themed.h"
 #include "enstring.h"
-#include "osversion.h"
 #include "graphicsmisc.h"
 #include "misc.h"
 #include "enimagelist.h"
@@ -547,23 +546,6 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 		{
 			rText.right = rButton.left;
 		}
-
-		// Buttons drawn as 'button' render 1-pixel less
-		switch (nBtnType)
-		{
-		case ILCT_DATE:
-		case ILCT_POPUPMENU:
-		case ILCT_CUSTOMBTN:
-			if (rButton.left <= rCell.left)
-			{
-				rText.left--;
-			}
-			else if (rButton.right >= rCell.right)
-			{
-				rText.right++;
-			}
-			break;
-		}
 	}
 			
 	CEnListCtrl::DrawCell(pDC, nItem, nCol, rText, sText, bSelected, bDropHighlighted, bFocused);
@@ -614,7 +596,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 			if (CThemed::AreControlsThemed())
 			{
 				// Draw underlying button
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
 
 				// Draw date drop arrow
 				CThemed th;
@@ -624,21 +606,21 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 			}
 			else
 			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
 			}
 			break;
 
 		case ILCT_DROPLIST:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_SCROLL, (DFCS_SCROLLCOMBOBOX | dwState));
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
 			break;
 					
 		case ILCT_CUSTOMBTN:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+			CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
 			break;
 					
 		case ILCT_POPUPMENU:
 			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
 
 				// Draw arrow
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
@@ -650,14 +632,16 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 
 		case ILCT_BROWSE:
 			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONPUSH | dwState));
+				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
 
 				// Draw ellipsis
-				rButton.left += (rButton.Width() % 2);
-				rButton.top += (rButton.Height() % 2);
+				CRect rText(rButton);
+
+				rText.left += (rText.Width() % 2);
+				rText.top += (rText.Height() % 2);
 
 				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-				pDC->DrawText(_T("..."), rButton, DT_CENTER | DT_VCENTER);
+				pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
 			}
 			break;
 			
@@ -698,9 +682,6 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
 	case ILCT_CUSTOMBTN:
-		rButton.left = (rButton.right - BTN_WIDTH);
-		break;
-
 	case ILCT_DROPLIST:
 		rButton.left = (rButton.right - BTN_WIDTH);
 		break;
@@ -720,20 +701,6 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	default:
 		ASSERT(0);
 		return FALSE;
-	}
-
-	// Windows 10/11 (maybe Windows 8/8.1) shrinks buttons by 
-	// a pixel all round which looks inconsistent with all 
-	// other controls so we expand the button to compensate
-	switch (nType)
-	{
-	case ILCT_BROWSE:
-	case ILCT_DATE:
-	case ILCT_POPUPMENU:
-	case ILCT_CUSTOMBTN:
-		if (COSVersion() >= OSV_WIN8)
-			rButton.InflateRect(1, 1);
-		break;
 	}
 
 	return TRUE;
