@@ -72,7 +72,7 @@ CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl(const CContentMgr
 	m_cbCustomIcons(m_ilIcons, TRUE, FALSE),
 	m_cbRecurrence(FALSE)
 {
-	m_eTimePeriod.SetBorderWidth(0);
+	m_eTimePeriod.EnableButtonPadding(FALSE);
 	m_eTimePeriod.SetDefaultButton(0);
 }
 

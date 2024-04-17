@@ -127,18 +127,18 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_fAttribColProportion(0.5f)
 {
 	// Fixed 'Dependency' buttons
-	m_eDepends.SetBorderWidth(0);
+	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
 	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, s_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
 
-	m_eTimePeriod.SetBorderWidth(0);
+	m_eTimePeriod.EnableButtonPadding(FALSE);
 	m_eTimePeriod.SetDefaultButton(0);
 
-	m_eSingleFileLink.SetBorderWidth(0);
+	m_eSingleFileLink.EnableButtonPadding(FALSE);
 	m_eSingleFileLink.SetDefaultButton(0);
 
-	m_cbMultiFileLink.SetButtonBorderWidth(0);
+	m_cbMultiFileLink.EnableButtonPadding(FALSE);
 	m_cbMultiFileLink.SetDefaultButton(0);
 
 	// static icons
@@ -919,9 +919,9 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMa
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = GetRow(nAttribID);
-	ASSERT(nRow != -1);
 
-	RefreshSelectedTasksValue(nRow);
+	if (nRow != -1) // may be hidden
+		RefreshSelectedTasksValue(nRow);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAndTime) const

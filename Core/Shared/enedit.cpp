@@ -5,6 +5,7 @@
 #include "enedit.h"
 #include "themed.h"
 #include "dlgunits.h"
+#include "misc.h"
 #include "graphicsmisc.h"
 #include "enbitmapex.h"
 #include "AcceleratorString.h"
@@ -23,6 +24,7 @@ static char THIS_FILE[] = __FILE__;
 int MENUSIZE = -1;
 
 const COLORREF GRAYTEXTCOLOR = RGB(96, 96, 96); 
+const int BTNPADDING = 2;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -51,16 +53,16 @@ CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) :
 					m_bFirstShow(TRUE), 
 					m_nButtonDown(-1),
 					m_bParentIsCombo(-1),
-					m_nBorderWidth(2),
+					m_nBtnPadding(0),
 					m_nDefaultBtn(0)
 {
+	EnableButtonPadding();
 }
 
 CEnEdit::~CEnEdit()
 {
 	FreeButtonResources();
 }
-
 
 BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 	//{{AFX_MSG_MAP(CEnEdit)
@@ -270,13 +272,11 @@ void CEnEdit::DeleteAllButtons()
 		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
 }
 
-void CEnEdit::SetBorderWidth(int nWidth)
+void CEnEdit::EnableButtonPadding(BOOL bEnable)
 {
-	nWidth = max(nWidth, 0);
-
-	if (m_nBorderWidth != nWidth)
+	if (Misc::StateChanged(m_nBtnPadding, bEnable))
 	{
-		m_nBorderWidth = nWidth;
+		m_nBtnPadding = (bEnable ? BTNPADDING : 0);
 
 		// force WM_NCCALCSIZE
 		if (GetSafeHwnd())
@@ -328,19 +328,13 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 		{
 			m_bFirstShow = FALSE; // in case we get here before OnNcPaint()
 		
-			lpncsp->rgrc[0].right -= (GetButtonsWidth() + 1);
+			lpncsp->rgrc[0].right -= (GetButtonsWidth() - (BTNPADDING - m_nBtnPadding));
 
-			if (m_bParentIsCombo && (m_nBorderWidth == 0))
+			if (m_bParentIsCombo && (m_nBtnPadding == 0))
 			{
 				// Compensate for the fact that we will be rendering our buttons into the combo DC
 				lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
 			}
-
-// 			if (!m_bParentIsCombo)
-// 			{
-// 				lpncsp->rgrc[0].top += m_nBorderWidth;
-// 				lpncsp->rgrc[0].bottom -= m_nBorderWidth;
-// 			}
 		}
 	}
 	
@@ -493,7 +487,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 	{
 		if (m_bParentIsCombo)
 		{
-			if (m_nBorderWidth == 0)
+			if (m_nBtnPadding == 0)
 			{
 				GetParent()->GetWindowRect(rBtn);
 				rBtn.right -= DEF_BTNWIDTH;
@@ -506,7 +500,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 		else
 		{
 			GetWindowRect(rBtn);
-			rBtn.DeflateRect(m_nBorderWidth, m_nBorderWidth);
+			rBtn.DeflateRect(m_nBtnPadding, m_nBtnPadding);
 		}
 
 		// Subtract all the button widths coming after this one
@@ -514,7 +508,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 		{
 			rBtn.right -= GetButtonWidthByIndex(nIndex);
 			
-			if (m_nBorderWidth)
+			if (m_nBtnPadding)
 				rBtn.right--;
 		}
 
@@ -534,7 +528,7 @@ void CEnEdit::OnNcPaint()
 
 	// If the button extends right up to the border
 	// do default rendering first
-	if (m_nBorderWidth == 0)
+	if (m_nBtnPadding == 0)
 	{
 		Default();
 	
@@ -814,10 +808,10 @@ int CEnEdit::GetButtonsWidth() const
 	int nWidth = 0, nNumBtns = GetButtonCount();
 
 	for (int nBtn = 0; nBtn < nNumBtns; nBtn++)
-		nWidth += (GetButtonWidthByIndex(nBtn) + (m_nBorderWidth ? 1 : 0));
+		nWidth += (GetButtonWidthByIndex(nBtn) + (m_nBtnPadding ? 1 : 0));
 
  	// trim extra final spacing
-	if (m_nBorderWidth)
+	if (m_nBtnPadding)
 	{
 		nWidth--;
 	}
@@ -872,6 +866,9 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 
 	rBtn.OffsetRect(-rWindow.TopLeft());
 
+	// clip the drawing rect to prevent window getting the parent bkgnd color wrong
+	CRect rClip(rBtn);
+
 	// nasty business here because the API function DrawThemeEdge() is not theme aware!
 	// and drawing a themed combostyle button will also draw the arrow which we don't want
 	if (!m_bComboStyle || bThemed)	// draw as button type (for now)
@@ -893,9 +890,6 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 		{
 			nFlags |= DFCS_HOT;
 		}
-
-		// clip the drawing rect to prevent window getting the parent bkgnd color wrong
-		CRect rClip(rBtn);
 
 		if (bThemed)
 			rBtn.InflateRect(1, 1);
@@ -987,7 +981,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			pDC->SelectObject(pOld);
 	}
 
-	pDC->ExcludeClipRect(rBtn);
+	pDC->ExcludeClipRect(rClip);
 }
 
 void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 
