@@ -22,7 +22,7 @@ public:
 
 	void SetReadOnly(BOOL bReadOnly = TRUE);
 	void SetDefaultButton(UINT nID) { m_fileEdit.SetDefaultButton(nID); }
-	void SetButtonBorderWidth(int nWidth) { m_fileEdit.SetBorderWidth(nWidth); }
+	void EnableButtonPadding(BOOL bEnable = TRUE) { m_fileEdit.EnableButtonPadding(bEnable); }
 
 	int GetFileList(CStringArray& aFiles);
 	int SetFileList(const CStringArray& aFiles);

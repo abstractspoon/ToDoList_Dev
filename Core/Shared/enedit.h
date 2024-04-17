@@ -70,7 +70,7 @@ public:
 	BOOL SetDropMenuButton(UINT nID, BOOL bDropMenu = TRUE);
 	UINT TrackPopupMenu(UINT nID, CMenu* pMenu, DWORD dwFlags = EETPM_BELOW);
 
-	void SetBorderWidth(int nWidth);
+	void EnableButtonPadding(BOOL bEnable = TRUE);
 	void FilterToolTipMessage(MSG* pMsg);
 
 // Attributes
@@ -94,7 +94,7 @@ protected:
 
 	CArray<EDITBTN, EDITBTN&> m_aButtons;
 	CHotTracker m_hotTrack;
-	int m_nBorderWidth;
+	int m_nBtnPadding;
 	CEnImageList m_ilBtns, m_ilDisabledBtns;
 	CToolTipCtrlEx m_tooltip;
 	int m_nDefaultBtn;
