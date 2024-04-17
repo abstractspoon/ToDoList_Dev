@@ -874,9 +874,6 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 
 	rBtn.OffsetRect(-rWindow.TopLeft());
 
-	// clip the drawing rect to prevent window getting the parent bkgnd color wrong
-//	CRect rClip(rBtn);
-
 	// nasty business here because the API function DrawThemeEdge() is not theme aware!
 	// and drawing a themed combostyle button will also draw the arrow which we don't want
 	if (!m_bComboStyle || bThemed)	// draw as button type (for now)
@@ -903,7 +900,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			rBtn.InflateRect(1, 1);
 		
 		// for now
-		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, nFlags/*, rClip*/);
+		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, nFlags);
 	}
 	else // unthemed combo style
 	{
@@ -988,8 +985,6 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 		if (pOld)
 			pDC->SelectObject(pOld);
 	}
-
-//	pDC->ExcludeClipRect(rClip);
 }
 
 void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 
