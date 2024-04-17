@@ -9,6 +9,7 @@
 #include "misc.h"
 #include "enimagelist.h"
 #include "dlgunits.h"
+#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -593,7 +594,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 	switch (GetCellType(nRow, nCol))
 	{
 		case ILCT_DATE:
-			if (CThemed::AreControlsThemed())
+			if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_WIN7))
 			{
 				// Draw underlying button
 				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
@@ -687,7 +688,11 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 		break;
 
 	case ILCT_DATE:
-		rButton.left = (rButton.right - (BTN_WIDTH * 2));
+		rButton.left = (rButton.right - BTN_WIDTH);
+
+		// XP does not support the fancy new date dropdown
+		if (COSVersion() >= OSV_WIN7)
+			rButton.left -= BTN_WIDTH;
 		break;
 
 	case ILCT_CHECK:
