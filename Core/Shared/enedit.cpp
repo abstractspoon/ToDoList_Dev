@@ -596,10 +596,8 @@ void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 			while (nBtn--)
 				DrawButton(&dcTemp, rButtons, nBtn, ptCursor);
 
-			// blt to screen
+			// blit to screen
 			rButtons.OffsetRect(-rWindow.TopLeft());
-
-			pDC->FillSolidRect(rWindow, 255);
 			pDC->BitBlt(rButtons.left, rButtons.top, rButtons.Width(), rButtons.Height(), &dcTemp, 0, 0, SRCCOPY);
 			
 			// cleanup
