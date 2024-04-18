@@ -38,7 +38,7 @@ CPreferencesGenPage::CPreferencesGenPage() :
    CPreferencesPageBase(CPreferencesGenPage::IDD), 
    m_hkGlobal(TRUE), 
    m_cbLanguages(_T("*.csv")),
-   m_eStickiesPath(FES_COMBOSTYLEBTN, CEnString(IDS_STICKIESEXEFILTER))
+   m_eStickiesPath(0, CEnString(IDS_STICKIESEXEFILTER))
 {
 	//{{AFX_DATA_INIT(CPreferencesGenPage)
 	//}}AFX_DATA_INIT

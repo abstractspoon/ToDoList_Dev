@@ -40,8 +40,8 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	m_cbPriorityFilter(TRUE),
 	m_cbRiskFilter(TRUE),
 	m_cbRecurrence(TRUE),
-	m_eStartNextNDays(TRUE, _T("-0123456789")),
-	m_eDueNextNDays(TRUE, _T("-0123456789")),
+	m_eStartNextNDays(_T("-0123456789")),
+	m_eDueNextNDays(_T("-0123456789")),
 	m_nTitleFilter(nTitleFilter)
 {
 	// main filter

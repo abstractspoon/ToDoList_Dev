@@ -92,7 +92,10 @@ const TIMEUNIT& GetTimeUnit(TH_UNITS nUnits)
 // Construction/Destruction
 /////////////////////////////////////////////////////////////////////////////////////
 
-CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_nMaxDecPlaces(nMaxDecPlaces)
+CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) 
+	: 
+	m_nUnits(nUnits), 
+	m_nMaxDecPlaces(nMaxDecPlaces)
 {
 	// init static units
 	for (int nUnit = 0; nUnit < NUM_UNITS; nUnit++)

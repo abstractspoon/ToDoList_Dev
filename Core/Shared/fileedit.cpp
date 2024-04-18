@@ -80,12 +80,12 @@ const UINT BROWSEBTN = 0x31;
 
 IMPLEMENT_DYNAMIC(CFileEdit, CEnEdit)
 
-CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) : 
-					CEnEdit(nStyle & FES_COMBOSTYLEBTN),
-					m_nStyle(nStyle), 
-					m_bTipNeeded(FALSE),
-					m_sFilter(szFilter),
-					m_sCurFolder(FileMisc::GetCwd())
+CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) 
+	: 
+	m_nStyle(nStyle),
+	m_bTipNeeded(FALSE),
+	m_sFilter(szFilter),
+	m_sCurFolder(FileMisc::GetCwd())
 {
 	if (!(m_nStyle & FES_NOBROWSE))
 	{
