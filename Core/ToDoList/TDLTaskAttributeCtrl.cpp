@@ -53,19 +53,19 @@ END_MESSAGE_MAP()
 
 // -----------------------------------------------------------------------
 
-#define MSG_FUNC(name, msg) LRESULT CTDLTaskAttributeCtrl::name(WPARAM wp, LPARAM lp) { return GetParent()->SendMessage(msg, wp, lp); }
+#define FWD_MSG(msg, name) LRESULT CTDLTaskAttributeCtrl::name(WPARAM wp, LPARAM lp) { return GetParent()->SendMessage(msg, wp, lp); }
 
 // ---------------------------------------------------
 
-MSG_FUNC(OnEditTaskAttribute, WM_TDCM_EDITTASKATTRIBUTE)
-MSG_FUNC(OnAttributeEdited, WM_TDCN_ATTRIBUTEEDITED)
-MSG_FUNC(OnAutoItemAddedOrDeleted, WM_TDCN_AUTOITEMADDEDDELETED)
-MSG_FUNC(OnClearTaskAttribute, WM_TDCM_CLEARTASKATTRIBUTE)
-MSG_FUNC(OnToggleTimeTracking, WM_TDCM_TOGGLETIMETRACKING)
-MSG_FUNC(OnAddTimeToLogFile, WM_TDCM_ADDTIMETOLOGFILE)
-MSG_FUNC(OnSelectDependencies, WM_TDCM_SELECTDEPENDENCIES)
-MSG_FUNC(OnGetLinkTooltip, WM_TDCM_GETLINKTOOLTIP)
-MSG_FUNC(OnDisplayLink, WM_TDCM_DISPLAYLINK)
+FWD_MSG(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
+FWD_MSG(WM_TDCN_ATTRIBUTEEDITED, OnAttributeEdited)
+FWD_MSG(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoItemAddedOrDeleted)
+FWD_MSG(WM_TDCM_CLEARTASKATTRIBUTE, OnClearTaskAttribute)
+FWD_MSG(WM_TDCM_TOGGLETIMETRACKING, OnToggleTimeTracking)
+FWD_MSG(WM_TDCM_ADDTIMETOLOGFILE, OnAddTimeToLogFile)
+FWD_MSG(WM_TDCM_SELECTDEPENDENCIES, OnSelectDependencies)
+FWD_MSG(WM_TDCM_GETLINKTOOLTIP, OnGetLinkTooltip)
+FWD_MSG(WM_TDCM_DISPLAYLINK, OnDisplayLink)
 
 // ---------------------------------------------------
 
