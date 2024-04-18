@@ -23,13 +23,12 @@ enum
 {
 	FES_NOBROWSE				= 0x0001,
 	FES_FOLDERS					= 0x0002,
-//	FES_COMBOSTYLEBTN			= 0x0004, // draws the browse button like a combo box rather than a button
-	FES_GOBUTTON				= 0x0008,
-	FES_ALLOWURL				= 0x0010, // supports ? in the filename
-	FES_SAVEAS					= 0x0020, // else open file dialog
-	FES_RELATIVEPATHS			= 0x0040,
-	FES_DISPLAYIMAGETHUMBNAILS	= 0x0080,
-	FES_NOPROMPTOVERWRITE		= 0x0100, // exclude OFN_OVERWRITEPROMPT
+	FES_GOBUTTON				= 0x0004,
+	FES_ALLOWURL				= 0x0008, // supports ? in the filename
+	FES_SAVEAS					= 0x0010, // else open file dialog
+	FES_RELATIVEPATHS			= 0x0020,
+	FES_DISPLAYIMAGETHUMBNAILS	= 0x0040,
+	FES_NOPROMPTOVERWRITE		= 0x0080, // exclude OFN_OVERWRITEPROMPT
 };
 
 /////////////////////////////////////////////////////////////////////////////
