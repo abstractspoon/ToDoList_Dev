@@ -37,7 +37,7 @@ CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_stURL(_T("http://wiki.services.openoffice.org/wiki/Dictionaries")),
 	m_bMadeChanges(FALSE),
 	m_ptTopLeft(-1, -1),
-	m_cbDictionaries(FES_RELATIVEPATHS | FES_COMBOSTYLEBTN)
+	m_cbDictionaries(FES_RELATIVEPATHS)
 {
 	AfxEnableControlContainer();
 	CRichEditHelper::InitRichEdit();

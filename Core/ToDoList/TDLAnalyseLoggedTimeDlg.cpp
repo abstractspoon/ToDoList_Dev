@@ -64,7 +64,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 	m_aCustomAttribDefs(aCustomAttribDefs),
 	m_dtFrom(COleDateTime::GetCurrentTime()),
 	m_dtTo(COleDateTime::GetCurrentTime()),
-	m_eOutputFile(FES_COMBOSTYLEBTN | FES_SAVEAS)
+	m_eOutputFile(FES_SAVEAS)
 {
 	//{{AFX_DATA_INIT(CTDLAnalyseLoggedTimeDlg)
 	//}}AFX_DATA_INIT

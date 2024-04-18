@@ -69,7 +69,7 @@ CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent,
 			{
 			case FD_NEXTNDAYS:
 				{
-					CEnEdit* pEdit = new CEnEdit(TRUE, _T("0123456789"));
+					CEnEdit* pEdit = new CEnEdit(_T("0123456789"));
 					CIcon iconUpdate(IDI_UPDATE_FILTER, 16);
 
 					pEdit->AddButton(1, iconUpdate, CEnString(IDS_TDC_UPDATEFILTER_TIP));

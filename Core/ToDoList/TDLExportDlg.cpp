@@ -315,7 +315,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
 	m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
 	m_sPrefsKey(szPrefsKey),
-	m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
+	m_eExportPath(FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
 	m_cbFormat(mgr, FALSE, FALSE),
 	m_nHtmlStyle(TDLPDS_WRAP)
 {

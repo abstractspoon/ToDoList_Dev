@@ -33,7 +33,7 @@ CString CSoundEdit::s_sPlayBtnTip = _T("Play");
 
 /////////////////////////////////////////////////////////////////////////////
 
-CSoundEdit::CSoundEdit() : CFileEdit(FES_COMBOSTYLEBTN)
+CSoundEdit::CSoundEdit()
 {
 	SetFilter(s_sFilter);
 	AddButton(ID_PLAYSOUNDBTN, MARLETT_MENURIGHT, s_sPlayBtnTip, CALC_BTNWIDTH, _T("Marlett"));

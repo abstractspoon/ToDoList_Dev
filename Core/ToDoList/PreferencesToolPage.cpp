@@ -58,8 +58,8 @@ IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
 CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
 	CPreferencesPageBase(CPreferencesToolPage::IDD),
-	m_eToolPath(FES_COMBOSTYLEBTN | FES_ALLOWURL),
-	m_eIconPath(FES_COMBOSTYLEBTN | FES_DISPLAYIMAGETHUMBNAILS),
+	m_eToolPath(FES_ALLOWURL),
+	m_eIconPath(FES_DISPLAYIMAGETHUMBNAILS),
 	m_nMaxNumTools(nMaxNumTools),
 	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN)
 {

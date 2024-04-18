@@ -46,14 +46,14 @@ CEnEdit::EDITBTN::EDITBTN()
 
 IMPLEMENT_DYNAMIC(CEnEdit, CMaskEdit)
 
-CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) : 
-					CMaskEdit(szMask, dwFlags),
-					m_bComboStyle(bComboStyle),
-					m_bFirstShow(TRUE), 
-					m_nButtonDown(-1),
-					m_bParentIsCombo(-1),
-					m_nBtnPadding(0),
-					m_nDefaultBtn(0)
+CEnEdit::CEnEdit(LPCTSTR szMask, DWORD dwMaskFlags)
+	:
+	CMaskEdit(szMask, dwMaskFlags),
+	m_bFirstShow(TRUE),
+	m_nButtonDown(-1),
+	m_bParentIsCombo(-1),
+	m_nBtnPadding(0),
+	m_nDefaultBtn(0)
 {
 	EnableButtonPadding();
 }
@@ -203,7 +203,7 @@ BOOL CEnEdit::InitializeImageLists()
 {
 	if (!m_ilBtns.GetSafeHandle() && !m_ilDisabledBtns.GetSafeHandle())
 	{
-		int nImageSize = 16;//GraphicsMisc::ScaleByDPIFactor(16);
+		const int nImageSize = 16;
 
 		for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
 		{
@@ -596,10 +596,8 @@ void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 			while (nBtn--)
 				DrawButton(&dcTemp, rButtons, nBtn, ptCursor);
 
-			// blt to screen
+			// blit to screen
 			rButtons.OffsetRect(-rWindow.TopLeft());
-
-			pDC->FillSolidRect(rWindow, 255);
 			pDC->BitBlt(rButtons.left, rButtons.top, rButtons.Width(), rButtons.Height(), &dcTemp, 0, 0, SRCCOPY);
 			
 			// cleanup
@@ -894,6 +892,8 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			nFlags |= DFCS_HOT;
 		}
 		
+		// Always draw button using Combo-stype theming for consistency
+		// across Windows XP, 7, 10 and 11
 		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, nFlags);
 	}
 	else // unthemed combo style

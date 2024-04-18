@@ -76,8 +76,8 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	m_cbRiskFilter(TRUE),
 	m_cbRecurrence(TRUE),
 	m_crUIBack(CLR_NONE),
-	m_eStartNextNDays(TRUE, _T("-0123456789")),
-	m_eDueNextNDays(TRUE, _T("-0123456789")),
+	m_eStartNextNDays(_T("-0123456789")),
+	m_eDueNextNDays(_T("-0123456789")),
 	m_bMultiSelection(TRUE),
 	m_nTitleFilter(FT_FILTERONTITLEONLY)
 {

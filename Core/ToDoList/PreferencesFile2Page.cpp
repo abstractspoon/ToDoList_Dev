@@ -35,11 +35,11 @@ IMPLEMENT_DYNCREATE(CPreferencesFile2Page, CPreferencesPageBase)
 
 CPreferencesFile2Page::CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr) : 
 		CPreferencesPageBase(CPreferencesFile2Page::IDD),
-		m_eExportFolderPath(FES_FOLDERS | FES_COMBOSTYLEBTN | FES_RELATIVEPATHS),
-		m_eSaveExportStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
+		m_eExportFolderPath(FES_FOLDERS | FES_RELATIVEPATHS),
+		m_eSaveExportStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
 		m_cbOtherExporters(*pExportMgr, FALSE, TRUE),
 		m_pExportMgr(pExportMgr),
-		m_eBackupLocation(FES_FOLDERS | FES_COMBOSTYLEBTN)
+		m_eBackupLocation(FES_FOLDERS)
 {
 	//{{AFX_DATA_INIT(CPreferencesFile2Page)
 	//}}AFX_DATA_INIT

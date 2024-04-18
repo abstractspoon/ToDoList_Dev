@@ -13,7 +13,7 @@ class CFileComboBox : public CAutoComboBox
 	DECLARE_DYNAMIC(CFileComboBox)
 		
 public:
-	CFileComboBox(int nEditStyle = FES_COMBOSTYLEBTN);
+	CFileComboBox(int nEditStyle = 0);
 	virtual ~CFileComboBox();
 
 	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }

@@ -41,7 +41,7 @@ class CEnEdit : public CMaskEdit
 
 // Construction
 public:
-	CEnEdit(BOOL bComboStyle = TRUE, LPCTSTR szMask = NULL, DWORD dwFlags = 0);
+	CEnEdit(LPCTSTR szMask = NULL, DWORD dwMaskFlags = 0);
 
 	BOOL AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
 	BOOL AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
@@ -101,7 +101,6 @@ protected:
 
 	BOOL m_bFirstShow;
 	BOOL m_nButtonDown;
-	BOOL m_bComboStyle;
 	BOOL m_bParentIsCombo;
 
 // Overrides
