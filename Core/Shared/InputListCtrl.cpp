@@ -396,7 +396,6 @@ void CInputListCtrl::AutoAdd(BOOL bRows, BOOL bCols)
 	if (m_bAutoAddCols && !bCols)
 	{
 		m_bAutoAddCols = FALSE;
-		// delete last column
 	}
 	else if (!m_bAutoAddCols && bCols)
 	{
@@ -1182,20 +1181,7 @@ CRect CInputListCtrl::ScrollCellIntoView(int nRow, int nCol)
 
 void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
 {
-	CEnListCtrl::GetCellRect(nRow, nCol, rCell);
-
-	switch (GetCellType(nRow, nCol))
-	{
-	case ILCT_TEXT:
-	case ILCT_BROWSE:
-	case ILCT_DROPLIST:
-		// move top edge up one pixel so that it looks right
-		// but not of the first row else it gets clipped 
-		// by the window border
-		if (nRow > 0)
-			rCell.top--;
-		break;
-	}
+	CEnListCtrl::GetCellEditRect(nRow, nCol, rCell);
 }
 
 void CInputListCtrl::SetView(int nView)

@@ -620,12 +620,7 @@ void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, CO
 	}
 	else if (crBack != CLR_NONE)
 	{
-		CRect rBack(rItem);
-
-		if (m_bHorzGrid)
-			rBack.bottom--;
-
-		pDC->FillSolidRect(rBack, crBack);
+		pDC->FillSolidRect(rItem, crBack);
 	}
 }
 
@@ -756,6 +751,13 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		COLORREF crBack = GetItemBackColor(nItem, bSelected, FALSE, bItemFocused);
 		DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bItemFocused);
 
+		// draw horz grid lines if required
+		if (m_bHorzGrid)
+		{
+			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
+			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, ELC_GRIDCOLOR);
+		}
+
 		// cycle thru columns formatting and drawing each subitem
 		int nNumCol = GetColumnCount();
 
@@ -803,21 +805,18 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				rCell.left += nImageWidth;
 			}
 
-			CEnString sText(GetItemText(nItem, nCol));
-			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
-
 			// draw vert grid if required and we're not tight up against the client edge
 			if (m_bVertGrid && (rCell.right < rClient.right))
 			{
 				GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), ELC_GRIDCOLOR);
+				rCell.right--;
 			}
-		}
 
-		// draw horz grid lines if required
-		if (m_bHorzGrid)
-		{
-			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
-			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, ELC_GRIDCOLOR);
+			if (m_bHorzGrid)
+				rCell.bottom--;
+
+			CEnString sText(GetItemText(nItem, nCol));
+			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
 		}
 
 		// focus rect: normal method doesn't work because we are focusing whole line
@@ -1514,7 +1513,12 @@ void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
 	GetCellRect(nRow, nCol, rCell);
 
-	rCell.OffsetRect(-2, 0);
+	// Overlap the edit rect with the previous cell's grid borders
+	if (m_bVertGrid && (nCol > 0))
+		rCell.left--;
+
+	if (m_bHorzGrid && (nRow > 0))
+		rCell.top--;
 }
 
 void CEnListCtrl::OnRButtonDown(UINT nFlags, CPoint point) 

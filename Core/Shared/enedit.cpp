@@ -827,7 +827,7 @@ int CEnEdit::GetButtonsWidth() const
 		nWidth -= GetSystemMetrics(SM_CXEDGE);
 	}
 	
-	return nWidth;
+	return max(nWidth, 0);
 }
 
 CString CEnEdit::GetButtonTip(UINT nID) const
@@ -892,7 +892,7 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 			nFlags |= DFCS_HOT;
 		}
 		
-		// Always draw button using Combo-stype theming for consistency
+		// Always draw button using Combo-style theming for consistency
 		// across Windows XP, 7, 10 and 11
 		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, nFlags);
 	}
