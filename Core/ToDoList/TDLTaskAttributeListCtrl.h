@@ -227,7 +227,7 @@ protected:
 	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
-	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
+	int CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
 	int GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const;
 	void HideAllControls(const CWnd* pWndIgnore = NULL);

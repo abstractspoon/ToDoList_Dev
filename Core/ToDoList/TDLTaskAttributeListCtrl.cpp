@@ -84,6 +84,23 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum ATTRIB_CATEGORY
+{
+	CATEGORY_CUSTOMATTRIB,
+	CATEGORY_DATETIME,
+	CATEGORY_TEXT,
+	CATEGORY_NUMERIC,
+	CATEGORY_TIMEPERIOD,
+};
+
+struct ATTRIBCAT
+{
+	ATTRIB_CATEGORY nCategory;
+	UINT nStrResID;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
@@ -253,7 +270,12 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 void CTDLTaskAttributeListCtrl::ToggleCategorization()
 {
 	m_bCategorized = !m_bCategorized;
-	//Populate();
+
+	if (GetSafeHwnd())
+	{
+		m_grouping.EnableGroupView(*this, m_bCategorized);
+		Populate();
+	}
 }
 
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
@@ -349,26 +371,26 @@ void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 	Populate();
 }
 
-void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
+int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
 {
-	BOOL bAdd = FALSE;
-
 	switch (nAttribID)
 	{
 	case TDCA_PROJECTNAME:
-		return;
+		return -1;
 
 	case TDCA_TASKNAME:
-		bAdd = TRUE;
 		break;
 
 	default:
-		bAdd = m_vis.IsEditFieldVisible(nAttribID);
+		if (!m_vis.IsEditFieldVisible(nAttribID))
+			return -1;
 		break;
 	}
 
-	if (bAdd)
-		SetItemData(AddRow(CEnString(nAttribResID)), nAttribID);
+	int nRow = AddRow(CEnString(nAttribResID));
+	SetItemData(nRow, nAttribID);
+
+	return nRow;
 }
 
 void CTDLTaskAttributeListCtrl::Populate()
@@ -385,28 +407,35 @@ void CTDLTaskAttributeListCtrl::Populate()
 		CHoldRedraw hr(*this);
 		DeleteAllItems();
 
-		for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
-			CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
-
-		// Dependent time fields
-		CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
-		CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
-		CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
-
-		// Custom attributes
-		for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+		if (m_bCategorized)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+		}
+		else // simple list
+		{
+			// Built-in attributes
+			for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
+				CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
 
-			if (attribDef.bEnabled)
+			// Associated time fields
+			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
+			CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
+			CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
+
+			// Custom attributes
+			for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
 			{
-				int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-				SetItemData(nItem, attribDef.GetAttributeID());
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
 
-				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+				if (attribDef.bEnabled)
 				{
 					int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-					SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+					SetItemData(nItem, attribDef.GetAttributeID());
+
+					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+					{
+						int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
+						SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+					}
 				}
 			}
 		}
