@@ -51,20 +51,20 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 		GetGrouping().InsertGroupHeader(nType, gt.nType, CEnString(gt.nLabelID));
 
 		CGraphArray aGraphs;
-		VERIFY(chart.GetGraphs(gt.nType, aGraphs, FALSE));
+		VERIFY(chart.GetGraphs(gt.nType, aGraphs, TRUE));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
-
 			int nRow = AddRow(chart.GetGraphTitle(nGraph));
+
 			SetItemData(nRow, nGraph);
 			GetGrouping().SetItemGroupId(nRow, gt.nType);
 
 			// build colour columns as we go
-			int nNumColors = m_mapColors.GetColorCount(nGraph);
+			int nColor = m_mapColors.GetColorCount(nGraph);
 
-			while (GetColumnCount() <= nNumColors)
+			while (nColor--)
 				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
 
 			// Set selection to the currently active graph
