@@ -41,6 +41,9 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 
+	ON_COMMAND(ID_CATEGORIZE_ATTRIB, OnCategorizeAttributes)
+	ON_COMMAND(ID_TOGGLE_SORT, OnToggleSorting)
+
 	// These we just forward to our parent
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnAttributeEdited)
@@ -137,6 +140,16 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 	}
 
 	CWnd::OnSize(nType, cx, cy);
+}
+
+void CTDLTaskAttributeCtrl::OnCategorizeAttributes()
+{
+	int breakpoint = 0;
+}
+
+void CTDLTaskAttributeCtrl::OnToggleSorting()
+{
+	int breakpoint = 0;
 }
 
 // Call/message forwarding functions

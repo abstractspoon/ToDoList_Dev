@@ -1597,6 +1597,7 @@
 #define ID_EDIT_PASTEATTRIBUTES         34756
 #define ID_CATEGORIZED                  34759
 #define ID_TOGGLE_SORT                  34761
+#define ID_CATEGORIZE_ATTRIB            34762
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2506,7 +2507,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        332
-#define _APS_NEXT_COMMAND_VALUE         34762
+#define _APS_NEXT_COMMAND_VALUE         34763
 #define _APS_NEXT_CONTROL_VALUE         1577
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
