@@ -92,34 +92,40 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	return FALSE;
 }
 
-int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const
+int CBurndownChart::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const
 {
-	CArray<SORTITEM, SORTITEM&> aSort;
-	SORTITEM st;
-
-	int nItem;
-
-	for (nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
+	for (int nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
 	{
 		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)nItem;
 		ASSERT(IsValidGraph(nGraph));
 
 		if (m_mapGraphs.HasGraph(nGraph) && (GetGraphType(nGraph) == nType))
+			aGraphs.Add(nGraph);
+	}
+
+	if (bSorted)
+	{
+		CArray<SORTITEM, SORTITEM&> aSort;
+		SORTITEM st;
+
+		int nItem = aGraphs.GetSize();
+
+		while (nItem--)
 		{
-			st.nGraph = (BURNDOWN_GRAPH)nItem;
+			st.nGraph = (BURNDOWN_GRAPH)aGraphs[nItem];
 			st.sLabel = GetGraphTitle(st.nGraph);
 
 			aSort.Add(st);
 		}
+
+		Misc::SortArrayT<SORTITEM>(aSort, SortProc);
+
+		nItem = aSort.GetSize();
+		aGraphs.SetSize(nItem);
+
+		while (nItem--)
+			aGraphs[nItem] = aSort[nItem].nGraph;
 	}
-
-	Misc::SortArrayT<SORTITEM>(aSort, SortProc);
-
-	nItem = aSort.GetSize();
-	aGraphs.SetSize(nItem);
-
-	while (nItem--)
-		aGraphs[nItem] = aSort[nItem].nGraph;
 	
 	return aGraphs.GetSize();
 }

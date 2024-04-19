@@ -70,7 +70,7 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 		// For each type, sort all the related graphs by name
 		// before adding to combo
 		CGraphArray aGraphs;
-		VERIFY(chart.BuildSortedGraphList(gt.nType, aGraphs));
+		VERIFY(chart.GetGraphs(gt.nType, aGraphs, TRUE));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{

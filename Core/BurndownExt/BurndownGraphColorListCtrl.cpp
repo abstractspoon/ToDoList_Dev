@@ -33,7 +33,6 @@ CBurndownGraphColorListCtrl::~CBurndownGraphColorListCtrl()
 BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
-	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
 
 	VERIFY(chart.GetGraphColors(m_mapColors));
 
@@ -49,21 +48,18 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
 		const GRAPHTYPE& gt = GRAPHTYPES[nType];
+		GetGrouping().InsertGroupHeader(nType, gt.nType, CEnString(gt.nLabelID));
 
-		int nRow = AddRow(CEnString(gt.nLabelID));
-		SetItemData(nRow, gt.nType);
-
-		// For each type, sort all the related graphs by name
-		// before adding to list
 		CGraphArray aGraphs;
-		VERIFY(chart.BuildSortedGraphList(gt.nType, aGraphs));
+		VERIFY(chart.GetGraphs(gt.nType, aGraphs, FALSE));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
 
-			nRow = AddRow(chart.GetGraphTitle(nGraph));
+			int nRow = AddRow(chart.GetGraphTitle(nGraph));
 			SetItemData(nRow, nGraph);
+			GetGrouping().SetItemGroupId(nRow, gt.nType);
 
 			// build colour columns as we go
 			int nNumColors = m_mapColors.GetColorCount(nGraph);
@@ -90,43 +86,15 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 BOOL CBurndownGraphColorListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	// graph title not editable
-	if (nCol == 0)
+	if (!CInputListCtrl::CanEditCell(nRow, nCol))
 		return FALSE;
 
-	// header row not editable
-	int dwItemData = GetItemData(nRow);
-
-	if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
-		return FALSE;
-
-	return (nCol <= m_mapColors.GetColorCount((BURNDOWN_GRAPH)dwItemData));
-}
-
-COLORREF CBurndownGraphColorListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
-{
-	if (nCol == 0)
-	{
-		int dwItemData = GetItemData(nItem);
-
-		if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
-			return GetSysColor(COLOR_3DLIGHT);
-	}
-
-	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+	return (nCol <= m_mapColors.GetColorCount((BURNDOWN_GRAPH)GetItemData(nRow)));
 }
 
 void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
 {
-	// graph title not editable
-	ASSERT (nCol > 0);
-
-	// header row not editable
-	int dwItemData = GetItemData(nItem);
-
-	ASSERT((dwItemData != BCT_FREQUENCY) && (dwItemData != BCT_TIMESERIES));
-
-	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)dwItemData;
+	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nItem);
 
 	CEnColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)));
 
@@ -140,13 +108,7 @@ void CBurndownGraphColorListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 {
 	if (nCol > 0)
 	{
-		// header row not editable
-		int dwItemData = GetItemData(nRow);
-
-		if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
-			return;
-
-		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)dwItemData;
+		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nRow);
 
 		if (m_mapColors.GetColorCount(nGraph) < nCol)
 			return;
