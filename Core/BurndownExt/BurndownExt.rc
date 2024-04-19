@@ -164,9 +164,8 @@ FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Graph colours",IDC_COLORSLABEL,7,23,344,8
     CONTROL         "List1",IDC_GRAPHCOLORS,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
-                    LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,36,344,157
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
+                    LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,7,36,344,157
     CONTROL         "Include 'empty' values in Frequency Distribution graphs",
                     IDC_SHOWEMPTYINFREQUENCYCHARTS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,6,344,10

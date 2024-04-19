@@ -51,7 +51,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 		GetGrouping().InsertGroupHeader(nType, gt.nType, CEnString(gt.nLabelID));
 
 		CGraphArray aGraphs;
-		VERIFY(chart.GetGraphs(gt.nType, aGraphs, TRUE));
+		VERIFY(chart.GetGraphs(gt.nType, aGraphs, FALSE));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
@@ -73,6 +73,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 		}
 	}
 
+	Sort();
 	RefreshItemHeight();
 
 	if (nSelRow != -1)
