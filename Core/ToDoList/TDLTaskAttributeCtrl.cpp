@@ -8,6 +8,10 @@
 
 #include "..\shared\Localizer.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
+#include "..\interfaces\UIThemeFile.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -70,7 +74,24 @@ FWD_MSG(WM_TDCM_DISPLAYLINK, OnDisplayLink)
 // ---------------------------------------------------
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTaskAttributeDlgCtrl message handlers
+
+// Public interface
+BOOL CTDLTaskAttributeCtrl::Create(CWnd* pParent, UINT nID, const CRect& rPos)
+{
+	return CWnd::CreateEx(WS_EX_CONTROLPARENT,
+						  NULL, 
+						  NULL, 
+						  (WS_CHILD | WS_VISIBLE | WS_TABSTOP), 
+						  rPos, 
+						  pParent, 
+						  nID);
+}
+
+void CTDLTaskAttributeCtrl::SetUITheme(const CUIThemeFile& theme)
+{
+	m_toolbar.SetBackgroundColor(theme.crToolbarLight);
+	m_toolbar.SetHotColor(theme.crToolbarHot);
+}
 
 // Message handlers
 int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
@@ -79,7 +100,11 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 		return -1;
 
 	// Create toolbar
-	// TODO
+	if (!m_toolbar.Create(this) || !m_toolbar.LoadToolBar(IDR_TASK_ATTRIBUTE_TOOLBAR, IDB_TASKATTRIB_TOOLBAR, colorMagenta))
+		return -1;
+
+	if (!m_tbHelper.Initialize(&m_toolbar))
+		return -1;
 
 	// Create List
 	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
@@ -106,23 +131,15 @@ void CTDLTaskAttributeCtrl::OnAttributeVisibilityChange()
 void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	if (m_lcAttributes.GetSafeHwnd())
-		m_lcAttributes.MoveWindow(0, 0, cx, cy);
+	{
+		int nTBHeight = m_toolbar.Resize(cx);
+		m_lcAttributes.MoveWindow(0, nTBHeight, cx, cy - nTBHeight);
+	}
 
 	CWnd::OnSize(nType, cx, cy);
 }
 
-// Public interface
-BOOL CTDLTaskAttributeCtrl::Create(CWnd* pParent, UINT nID, const CRect& rPos)
-{
-	return CWnd::CreateEx(WS_EX_CONTROLPARENT,
-						  NULL, 
-						  NULL, 
-						  (WS_CHILD | WS_VISIBLE | WS_TABSTOP), 
-						  rPos, 
-						  pParent, 
-						  nID);
-}
-
+// Call/message forwarding functions
 // -----------------------------------------------------------------------
 
 #define FWD_FUNC_VOID_0ARG(name) void CTDLTaskAttributeCtrl::name() { m_lcAttributes.name(); }

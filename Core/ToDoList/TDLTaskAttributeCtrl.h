@@ -10,6 +10,7 @@
 #include "TDLTaskAttributeListCtrl.h"
 
 #include "..\shared\EnToolBar.h"
+#include "..\shared\ToolBarHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -17,6 +18,7 @@ class CTDLTaskCtrlBase;
 class CToDoCtrlData;
 class CTDCImageList;
 class CContentMgr;
+class CUIThemeFile;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeDlgCtrl window
@@ -34,6 +36,7 @@ public:
 
 public:
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
+	void SetUITheme(const CUIThemeFile& theme);
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -100,6 +103,7 @@ public:
 
 protected:
 	CEnToolBar m_toolbar;
+	CToolbarHelper m_tbHelper;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
 
 protected:

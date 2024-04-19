@@ -9878,6 +9878,8 @@ void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 		m_brUIBack.CreateSolidBrush(m_theme.crAppBackLight);
 	
 	m_ctrlComments.SetUITheme(m_theme);
+	m_ctrlAttributes.SetUITheme(m_theme);
+
 	m_taskTree.SetSplitBarColor(m_theme.crAppBackDark);
 	m_layout.SetSplitBarColor(m_theme.crAppBackDark);
 

@@ -144,6 +144,8 @@
 #define IDD_CUSTOMATTRIBCALC_PAGE       325
 #define IDD_DEBUG_FORMATGETLASTERROR_DIALOG 326
 #define IDD_PASTETASKATTRIB_DIALOG      327
+#define IDR_TASK_ATTRIBUTE_TOOLBAR      328
+#define IDB_TASKATTRIB_TOOLBAR          331
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -1593,6 +1595,8 @@
 #define ID_RELATIVEDATE_NOW             34754
 #define ID_SCROLLTOSELTASK              34755
 #define ID_EDIT_PASTEATTRIBUTES         34756
+#define ID_CATEGORIZED                  34759
+#define ID_TOGGLE_SORT                  34761
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2501,8 +2505,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        328
-#define _APS_NEXT_COMMAND_VALUE         34757
+#define _APS_NEXT_RESOURCE_VALUE        332
+#define _APS_NEXT_COMMAND_VALUE         34762
 #define _APS_NEXT_CONTROL_VALUE         1577
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
