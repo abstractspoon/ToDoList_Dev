@@ -81,7 +81,7 @@ public:
 	int GetCountPerPage() const;
 	void SelectAll();
 	void ClearAll();
-	void EnableHeaderTracking(BOOL bAllow);
+	void EnableHeaderTracking(BOOL bAllow = TRUE);
 	void ShowGrid(BOOL bVert, BOOL bHorz);
 	void IsShowingGrid(BOOL& bVert, BOOL& bHorz) const { bVert = m_bVertGrid; bHorz = m_bHorzGrid; }
 	void SetView(int nView);
@@ -89,7 +89,7 @@ public:
 	int GetFocusedItem() const;
 	int FindItemFromData(DWORD dwItemData) const;
 	int FindItemFromLabel(CString sLabel, BOOL bExact = TRUE, int nFromIndex = 0) const;
-	void EnableTooltipCtrl(BOOL bEnable);
+	void EnableTooltipCtrl(BOOL bEnable = TRUE);
 	BOOL SetTooltipCtrlText(CString sText);
 	BOOL SetMinItemHeight(int nHeight);
 	int GetMinItemHeight() const { return m_nMinItemHeight; }
@@ -103,7 +103,7 @@ public:
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
 	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
-	void EnableSorting(BOOL bEnable) { m_bSortingEnabled = bEnable; }
+	void EnableSorting(BOOL bEnable = TRUE) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
 	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
 	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }

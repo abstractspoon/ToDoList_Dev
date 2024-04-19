@@ -5924,7 +5924,7 @@ BEGIN
     ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
     ID_CATEGORIZED          "\nCategorise"
     ID_TOGGLE_SORT          "\nToggle Sort Direction"
-    ID_CATEGORIZE_ATTRIB    "\nCategorise"
+    ID_CATEGORIZE_ATTRIB    "\nCategorise Attributes"
 END
 
 STRINGTABLE DISCARDABLE 

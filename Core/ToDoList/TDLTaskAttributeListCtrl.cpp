@@ -124,8 +124,11 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_cbCustomIcons(ilIcons),
 	m_dropFiles(this),
 	m_bSplitting(FALSE),
-	m_fAttribColProportion(0.5f)
+	m_fAttribColProportion(0.5f),
+	m_bCategorized(FALSE)
 {
+	SetSortColumn(0, FALSE);
+
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
@@ -241,6 +244,18 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CTDLTaskAttributeListCtrl::ToggleSortDirection()
+{
+	m_bSortAscending = !m_bSortAscending;
+	Sort();
+}
+
+void CTDLTaskAttributeListCtrl::ToggleCategorization()
+{
+	m_bCategorized = !m_bCategorized;
+	//Populate();
+}
+
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = GetRow(nAttribID);
@@ -283,11 +298,15 @@ void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 {
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
+	prefs.WriteProfileInt(szKey, _T("SortAscending"), m_bSortAscending);
+	prefs.WriteProfileInt(szKey, _T("Categorized"), m_bCategorized);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
+	m_bSortAscending = prefs.GetProfileInt(szKey, _T("SortAscending"), TRUE);
+	m_bCategorized = prefs.GetProfileInt(szKey, _T("Categorized"), FALSE);
 }
 
 void CTDLTaskAttributeListCtrl::SetCompletionStatus(const CString& sStatus)

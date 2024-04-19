@@ -110,7 +110,11 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 		return -1;
 
 	// Create List
-	VERIFY(m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
+	if (!m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES))
+		return -1;
+
+	m_toolbar.GetToolBarCtrl().PressButton(ID_CATEGORIZE_ATTRIB, m_lcAttributes.IsCategorized());
+
 	return 0;
 }
 
@@ -144,12 +148,13 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 
 void CTDLTaskAttributeCtrl::OnCategorizeAttributes()
 {
-	int breakpoint = 0;
+	m_lcAttributes.ToggleCategorization();
+	m_toolbar.GetToolBarCtrl().PressButton(ID_CATEGORIZE_ATTRIB, m_lcAttributes.IsCategorized());
 }
 
 void CTDLTaskAttributeCtrl::OnToggleSorting()
 {
-	int breakpoint = 0;
+	m_lcAttributes.ToggleSortDirection();
 }
 
 // Call/message forwarding functions

@@ -68,6 +68,9 @@ public:
 	virtual ~CTDLTaskAttributeListCtrl();
 
 public:
+	void ToggleSortDirection();
+	void ToggleCategorization();
+	BOOL IsCategorized() const { return m_bCategorized; }
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -146,6 +149,7 @@ protected:
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
 
+	BOOL m_bCategorized;
 	BOOL m_bSplitting;
 	float m_fAttribColProportion;
 
