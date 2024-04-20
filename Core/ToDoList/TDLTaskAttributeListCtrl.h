@@ -68,6 +68,7 @@ public:
 	virtual ~CTDLTaskAttributeListCtrl();
 
 public:
+	BOOL Create(CWnd* pParent, UINT nID);
 	void ToggleSortDirection();
 	void ToggleCategorization();
 	BOOL IsCategorized() const { return m_bCategorized; }

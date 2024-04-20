@@ -110,7 +110,7 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 		return -1;
 
 	// Create List
-	if (!m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES))
+	if (!m_lcAttributes.Create(this, IDC_TASKATTRIBUTES))
 		return -1;
 
 	return 0;

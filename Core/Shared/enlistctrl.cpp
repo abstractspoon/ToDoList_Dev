@@ -1579,19 +1579,28 @@ BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = CDRF_DODEFAULT;
-	LPNMLVCUSTOMDRAW pLVCD = (LPNMLVCUSTOMDRAW)pNMHDR;
+	LVCUSTOMDRAW* pLVCD = (LVCUSTOMDRAW*)pNMHDR;
 
 	if (pLVCD->nmcd.dwDrawStage == CDDS_PREPAINT)
 	{
 		if (pLVCD->dwItemType == LVCDI_GROUP)
 		{
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+			CRect rRow(pLVCD->rcText);
 
 			DrawGroupHeader(pDC, 
-							CRect(pLVCD->rcText),
+							rRow,
 							m_grouping.GetGroupHeaderText(pLVCD->nmcd.dwItemSpec),
 							m_grouping.GetGroupHeaderBackColor());
-			
+
+			if (m_bHorzGrid)
+			{
+				if (m_bVertGrid)
+					rRow.right = pLVCD->nmcd.rc.right;
+
+				GraphicsMisc::DrawHorzLine(pDC, 0, rRow.right, rRow.bottom - 2, ELC_GRIDCOLOR);
+			}
+
 			*pResult = CDRF_SKIPDEFAULT;
 			return TRUE;
 		}

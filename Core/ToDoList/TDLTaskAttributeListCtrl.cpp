@@ -217,6 +217,13 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl message handlers
 
+BOOL CTDLTaskAttributeListCtrl::Create(CWnd* pParent, UINT nID)
+{
+	DWORD dwFlags = (WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS | LVS_SINGLESEL);
+
+	return CEnListCtrl::Create(dwFlags, CRect(0, 0, 0, 0), pParent, nID);
+}
+
 int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
 	if (CInputListCtrl::OnCreate(lpCreateStruct) == -1)
