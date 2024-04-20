@@ -36,7 +36,7 @@ public:
 class CListCtrlItemGrouping
 {
 public:
-	CListCtrlItemGrouping(HWND hwndList = NULL) : m_hwndList(hwndList), m_crBkgnd(CLR_NONE) {}
+	CListCtrlItemGrouping(HWND hwndList = NULL);
 
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	BOOL EnableGroupView(HWND hwndList, BOOL bEnable = TRUE);
@@ -49,7 +49,7 @@ public:
 	CString GetGroupHeaderText(int nGroupID) const;
 
 	void SetGroupHeaderBackColor(COLORREF crBack);
-	BOOL DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD);
+	COLORREF GetGroupHeaderBackColor() const { return m_crBkgnd; }
 
 protected:
 	HWND m_hwndList;
@@ -214,6 +214,7 @@ protected:
 	virtual void DrawCellBackground(CDC* pDC, int nItem, int nCol, const CRect& rCell, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
+	virtual void DrawGroupHeader(CDC* pDC, CRect& rRow, const CString& sText, COLORREF crBack);
 	virtual UINT GetTextDrawFlags(int nCol) const;
 
 	void NotifySelChange();

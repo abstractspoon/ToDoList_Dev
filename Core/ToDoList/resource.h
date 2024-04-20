@@ -2501,6 +2501,12 @@
 #define IDS_ATTRIBTIP_DEFCOLOR          51635
 #define IDS_ATTRIBTIP_DATEREQUIRED      51636
 #define IDS_ATTRIBUTES                  51637
+#define IDS_ATTRIBCAT_OTHER             51638
+#define IDS_ATTRIBCAT_TEXT              51639
+#define IDS_ATTRIBCAT_NUMERIC           51640
+#define IDS_ATTRIBCAT_DATETIME          51641
+#define IDS_ATTRIBCAT_TIMEPERIOD        51642
+#define IDS_ATTRIBCAT_CUSTOM            51643
 
 // Next default values for new objects
 // 

@@ -123,6 +123,13 @@ DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 /////////////////////////////////////////////////////////////////////////////
 
+CListCtrlItemGrouping::CListCtrlItemGrouping(HWND hwndList) 
+	: 
+	m_hwndList(hwndList), 
+	m_crBkgnd(CLR_NONE) 
+{
+}
+
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
 	if (!m_hwndList)
@@ -210,22 +217,6 @@ void CListCtrlItemGrouping::RemoveAllGroups()
 	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
-BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD)
-{
-	const LVCUSTOMDRAW* pNMLV = (const LVCUSTOMDRAW*)pLVCD;
-
-	if (pNMLV->dwItemType != LVCDI_GROUP)
-		return FALSE;
-
-	CDC* pDC = CDC::FromHandle(pNMLV->nmcd.hdc);
-	CString sHeader = GetGroupHeaderText(pNMLV->nmcd.dwItemSpec);
-
-	CRect rRow(pNMLV->rcText);
-	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, m_crBkgnd);
-
-	return TRUE;
-}
-
 void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 {
 	if (crBack != m_crBkgnd)
@@ -234,7 +225,6 @@ void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 		InvalidateRect(m_hwndList, NULL, FALSE);
 	}
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
@@ -1555,14 +1545,26 @@ BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (pLVCD->nmcd.dwDrawStage == CDDS_PREPAINT)
 	{
-		if (m_grouping.DrawGroupHeader(pLVCD/*, m_crGroupBkgnd*/))
+		if (pLVCD->dwItemType == LVCDI_GROUP)
 		{
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
+			DrawGroupHeader(pDC, 
+							CRect(pLVCD->rcText),
+							m_grouping.GetGroupHeaderText(pLVCD->nmcd.dwItemSpec),
+							m_grouping.GetGroupHeaderBackColor());
+			
 			*pResult = CDRF_SKIPDEFAULT;
 			return TRUE;
 		}
 	}
 
 	return FALSE;
+}
+
+void CEnListCtrl::DrawGroupHeader(CDC* pDC, CRect& rRow, const CString& sText, COLORREF crBack)
+{
+	GraphicsMisc::DrawGroupHeaderRow(pDC, *this, rRow, sText, CLR_NONE, crBack);
 }
 
 void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)

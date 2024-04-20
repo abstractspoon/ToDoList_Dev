@@ -113,8 +113,6 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 	if (!m_lcAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES))
 		return -1;
 
-	m_toolbar.GetToolBarCtrl().PressButton(ID_CATEGORIZE_ATTRIB, m_lcAttributes.IsCategorized());
-
 	return 0;
 }
 
@@ -149,12 +147,28 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 void CTDLTaskAttributeCtrl::OnCategorizeAttributes()
 {
 	m_lcAttributes.ToggleCategorization();
-	m_toolbar.GetToolBarCtrl().PressButton(ID_CATEGORIZE_ATTRIB, m_lcAttributes.IsCategorized());
+	UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::OnToggleSorting()
 {
 	m_lcAttributes.ToggleSortDirection();
+}
+
+void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+{
+	m_lcAttributes.LoadState(prefs, szKey);
+	UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+{
+	m_lcAttributes.SaveState(prefs, szKey);
+}
+
+void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
+{
+	m_toolbar.GetToolBarCtrl().PressButton(ID_CATEGORIZE_ATTRIB, m_lcAttributes.IsCategorized());
 }
 
 // Call/message forwarding functions
@@ -225,7 +239,6 @@ CONST_FWD_FUNC_RET_1ARG(BOOL, GetCost, TDCCOST&)
 
 // -----------------------------------------------------------------------
 
-FWD_FUNC_VOID_2ARG(LoadState, const CPreferences&, LPCTSTR)
 FWD_FUNC_VOID_2ARG(SetAutoListData, TDC_ATTRIBUTE, const TDCAUTOLISTDATA&)
 FWD_FUNC_VOID_2ARG(SetAutoListDataReadOnly, TDC_ATTRIBUTE, BOOL)
 
@@ -251,11 +264,6 @@ void CTDLTaskAttributeCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLIST
 BOOL CTDLTaskAttributeCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 {
 	return m_lcAttributes.SetSelectedTaskIDs(aTaskIDs);
-}
-
-void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
-{
-	m_lcAttributes.SaveState(prefs, szKey);
 }
 
 BOOL CTDLTaskAttributeCtrl::GetCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted) const

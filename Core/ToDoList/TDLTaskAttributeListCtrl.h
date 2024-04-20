@@ -227,6 +227,8 @@ protected:
 	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
+	int GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const;
+	BOOL WantAddAttribute(TDC_ATTRIBUTE nAttribID) const;
 	int CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
 	int GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const;

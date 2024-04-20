@@ -5935,6 +5935,12 @@ BEGIN
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
     IDS_ATTRIBTIP_DATEREQUIRED "Date must be set"
     IDS_ATTRIBUTES          "Attributes"
+    IDS_ATTRIBCAT_OTHER     "Other"
+    IDS_ATTRIBCAT_TEXT      "Text"
+    IDS_ATTRIBCAT_NUMERIC   "Numeric"
+    IDS_ATTRIBCAT_DATETIME  "Date/Time"
+    IDS_ATTRIBCAT_TIMEPERIOD "Time Period"
+    IDS_ATTRIBCAT_CUSTOM    "Custom"
 END
 
 #endif    // English (Australia) resources

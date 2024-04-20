@@ -84,20 +84,23 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum ATTRIB_CATEGORY
+struct ATTRIBCATEGORY
 {
-	CATEGORY_CUSTOMATTRIB,
-	CATEGORY_DATETIME,
-	CATEGORY_TEXT,
-	CATEGORY_NUMERIC,
-	CATEGORY_TIMEPERIOD,
-};
-
-struct ATTRIBCAT
-{
-	ATTRIB_CATEGORY nCategory;
+	TDC_ATTRIBUTECATEGORY nCategory;
 	UINT nStrResID;
 };
+
+static ATTRIBCATEGORY ATTRIBCATEGORIES[] = 
+{
+	{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
+	{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
+	{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
+	{ TDCAC_TEXT,			IDS_ATTRIBCAT_TEXT },
+	{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
+	{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
+};
+
+const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / sizeof(ATTRIBCATEGORIES[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -371,26 +374,77 @@ void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 	Populate();
 }
 
-int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
+BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
-	case TDCA_PROJECTNAME:
-		return -1;
+// 	case TDCA_PROJECTNAME:
+// 	case TDCA_COMMENTS:		
+// 		return FALSE; // Never
 
-	case TDCA_TASKNAME:
-		break;
-
-	default:
-		if (!m_vis.IsEditFieldVisible(nAttribID))
-			return -1;
-		break;
+	case TDCA_TASKNAME:		
+		return TRUE; // Always
 	}
+
+	return m_vis.IsEditFieldVisible(nAttribID);
+}
+
+int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
+{
+	if (!WantAddAttribute(nAttribID))
+		return -1;
 
 	int nRow = AddRow(CEnString(nAttribResID));
 	SetItemData(nRow, nAttribID);
 
 	return nRow;
+}
+
+int CTDLTaskAttributeListCtrl::GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const
+{
+	if (nCategory != TDCAC_CUSTOM)
+	{
+		for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
+		{
+			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAttrib];
+
+			if ((attrib.nCategory == nCategory) && WantAddAttribute(attrib.nAttribID))
+				mapAttrib[attrib.nAttribID] = CEnString(attrib.nAttribResID);
+		}
+
+		// Associated time fields
+		if (nCategory == TDCAC_DATETIME)
+		{
+			if (WantAddAttribute(TDCA_STARTTIME))
+				mapAttrib[TDCA_STARTTIME] = CEnString(IDS_TDLBC_STARTTIME);
+
+			if (WantAddAttribute(TDCA_DUETIME))
+				mapAttrib[TDCA_DUETIME] = CEnString(IDS_TDLBC_DUETIME);
+
+			if (WantAddAttribute(TDCA_DONETIME))
+				mapAttrib[TDCA_DONETIME] = CEnString(IDS_TDLBC_DONETIME);
+		}
+	}
+	else
+	{
+		// Custom attributes
+		for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+			if (attribDef.bEnabled)
+			{
+				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
+
+				mapAttrib[nAttribID] = attribDef.sLabel;
+
+				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+					mapAttrib[MapCustomDateToTime(nAttribID)] = attribDef.sLabel;
+			}
+		}
+	}
+
+	return mapAttrib.GetCount();
 }
 
 void CTDLTaskAttributeListCtrl::Populate()
@@ -409,6 +463,28 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 		if (m_bCategorized)
 		{
+			for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
+			{
+				CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> mapAttribs;
+				const ATTRIBCATEGORY& attribCat = ATTRIBCATEGORIES[nCat];
+
+				if (GetCategoryAttributes(attribCat.nCategory, mapAttribs))
+				{
+					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, CEnString(attribCat.nStrResID));
+
+					POSITION pos = mapAttribs.GetStartPosition();
+					TDC_ATTRIBUTE nAttribID;
+					CString sAttribName;
+
+					while (pos)
+					{
+						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
+						int nRow = AddRow(sAttribName);
+						SetItemData(nRow, nAttribID);
+						GetGrouping().SetItemGroupId(nRow, attribCat.nCategory);
+					}
+				}
+			}
 		}
 		else // simple list
 		{
