@@ -383,17 +383,7 @@ void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 
 BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttribID)
-	{
-// 	case TDCA_PROJECTNAME:
-// 	case TDCA_COMMENTS:		
-// 		return FALSE; // Never
-
-	case TDCA_TASKNAME:		
-		return TRUE; // Always
-	}
-
-	return m_vis.IsEditFieldVisible(nAttribID);
+	return ((nAttribID == TDCA_TASKNAME) || m_vis.IsEditFieldVisible(nAttribID));
 }
 
 int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)

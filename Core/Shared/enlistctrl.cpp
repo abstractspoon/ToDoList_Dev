@@ -1586,7 +1586,9 @@ BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		if (pLVCD->dwItemType == LVCDI_GROUP)
 		{
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
 			CRect rRow(pLVCD->rcText);
+			rRow.OffsetRect(0, -2);
 
 			DrawGroupHeader(pDC, 
 							rRow,
@@ -1598,7 +1600,7 @@ BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				if (m_bVertGrid)
 					rRow.right = pLVCD->nmcd.rc.right;
 
-				GraphicsMisc::DrawHorzLine(pDC, 0, rRow.right, rRow.bottom - 2, ELC_GRIDCOLOR);
+				GraphicsMisc::DrawHorzLine(pDC, 0, rRow.right, rRow.bottom, ELC_GRIDCOLOR);
 			}
 
 			*pResult = CDRF_SKIPDEFAULT;
