@@ -137,16 +137,10 @@ void CTDLFindResultsListCtrl::UpdateIconAndReferenceStatus()
 
 	int nItem = GetItemCount();
 
-	if (nItem)
+	while (nItem-- && !m_bHasIconsOrRefs)
 	{
-		while (nItem--)
-		{
-			while (nItem-- && !m_bHasIconsOrRefs)
-			{
-				FTDRESULT* pRes = GetResult(nItem);
-				m_bHasIconsOrRefs = (pRes && (pRes->HasIcon() || pRes->IsReference()));
-			}
-		}
+		FTDRESULT* pRes = GetResult(nItem);
+		m_bHasIconsOrRefs = (pRes && (pRes->HasIcon() || pRes->IsReference()));
 	}
 }
 
@@ -271,16 +265,12 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 	int nItem = GetItemCount();
 
 	while (nItem--)
-	{
-		FTDRESULT* pRes = GetResult(nItem);
-		delete pRes;
-
-		DeleteItem(nItem);
-	}
+		delete GetResult(nItem);
 
 	m_bHasIconsOrRefs = FALSE;
 	m_nCurGroupID = m_nHotItem = -1;
-	m_grouping.RemoveAllGroups();
+
+	DeleteAllItems();
 }
 
 void CTDLFindResultsListCtrl::OnMouseMove(UINT nFlags, CPoint point)
@@ -422,7 +412,7 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyGroupHeaderBkgndColor"), FALSE))
 		crGroupBack = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("GroupHeaderBkgnd"), CLR_NONE);
 
-	m_grouping.SetGroupHeaderBackColor(crGroupBack);
+	GetGrouping().SetGroupHeaderBackColor(crGroupBack);
 
 	// update strike thru font
 	BOOL bWasStrikeThru = m_bStrikeThruDone;
@@ -455,7 +445,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	m_bHasIconsOrRefs |= (pRes->HasIcon() || pRes->IsReference());
 
 	if (m_nCurGroupID != -1)
-		m_grouping.SetItemGroupId(nIndex, m_nCurGroupID);
+		GetGrouping().SetItemGroupId(nIndex, m_nCurGroupID);
 
 	UpdateWindow();
 
@@ -464,10 +454,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
-	if (m_nCurGroupID == -1)
-		m_grouping.EnableGroupView(*this);
-
-	return m_grouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
+	return GetGrouping().InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }
 
 CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const

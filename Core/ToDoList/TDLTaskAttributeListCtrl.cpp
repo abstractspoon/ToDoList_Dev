@@ -276,7 +276,7 @@ void CTDLTaskAttributeListCtrl::ToggleCategorization()
 
 	if (GetSafeHwnd())
 	{
-		m_grouping.EnableGroupView(*this, m_bCategorized);
+		EnableGroupView(m_bCategorized);
 		Populate();
 	}
 }

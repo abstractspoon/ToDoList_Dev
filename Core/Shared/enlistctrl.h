@@ -38,6 +38,7 @@ class CListCtrlItemGrouping
 public:
 	CListCtrlItemGrouping(HWND hwndList = NULL);
 
+	BOOL IsEnabled() const { return m_bEnabled; }
 	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	BOOL EnableGroupView(HWND hwndList, BOOL bEnable = TRUE);
 	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader);
@@ -53,6 +54,7 @@ public:
 
 protected:
 	HWND m_hwndList;
+	BOOL m_bEnabled;
 	COLORREF m_crBkgnd;
 };
 
@@ -81,7 +83,9 @@ public:
 	int GetCountPerPage() const;
 	void SelectAll();
 	void ClearAll();
+	BOOL DeleteAllItems();
 	void EnableHeaderTracking(BOOL bAllow = TRUE);
+	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	void ShowGrid(BOOL bVert, BOOL bHorz);
 	void IsShowingGrid(BOOL& bVert, BOOL& bHorz) const { bVert = m_bVertGrid; bHorz = m_bHorzGrid; }
 	void SetView(int nView);
@@ -133,7 +137,6 @@ public:
 // Attributes
 protected:
 	CEnHeaderCtrl m_header;
-	CListCtrlItemGrouping m_grouping;
 
 	BOOL m_bVertGrid, m_bHorzGrid;
 	int m_nCurView;
@@ -163,6 +166,7 @@ private:
 	
 	int m_nMinItemHeight;
 	DWORD m_dwSelectionTheming;
+	CListCtrlItemGrouping m_grouping;
 
 	static DWORD s_dwSelectionTheming;
 

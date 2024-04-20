@@ -126,6 +126,7 @@ DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 CListCtrlItemGrouping::CListCtrlItemGrouping(HWND hwndList) 
 	: 
 	m_hwndList(hwndList), 
+	m_bEnabled(FALSE),
 	m_crBkgnd(CLR_NONE) 
 {
 }
@@ -138,7 +139,11 @@ BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 		return FALSE;
 	}
 
-	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+	if (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) == -1)
+		return FALSE;
+
+	m_bEnabled = bEnable;
+	return TRUE;
 }
 
 BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
@@ -214,7 +219,8 @@ BOOL CListCtrlItemGrouping::HasGroups() const
 
 void CListCtrlItemGrouping::RemoveAllGroups()
 {
-	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
+	if (m_bEnabled)
+		::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
 void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
@@ -289,8 +295,28 @@ END_MESSAGE_MAP()
 
 CListCtrlItemGrouping& CEnListCtrl::GetGrouping() 
 { 
-	VERIFY(m_grouping.EnableGroupView(GetSafeHwnd()));
+	VERIFY(EnableGroupView());
+
 	return m_grouping; 
+}
+
+BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
+{
+	if (!Misc::StateChanged(bEnable, m_grouping.IsEnabled()))
+		return TRUE;
+	
+	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
+		return FALSE;
+
+	RefreshItemHeight();
+	return TRUE;
+}
+
+BOOL CEnListCtrl::DeleteAllItems()
+{
+	m_grouping.RemoveAllGroups();
+	
+	return CListCtrl::DeleteAllItems();
 }
 
 void CEnListCtrl::OnPaint() 
@@ -702,6 +728,10 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// init helper variables
 	CRect rItem, rClient;
 	GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
+	if (m_grouping.IsEnabled())
+		rItem.top--;
+
 	GetClientRect(&rClient);
 
 	// some problems with drop-highlighting items during drag and drop
@@ -1355,7 +1385,12 @@ int CEnListCtrl::CalcItemHeight() const
 	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
 	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
 
-	return max(nBaseHeight, max(m_nMinItemHeight, nFontHeight));
+	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
+
+	if (m_grouping.IsEnabled())
+		nItemHeight--;
+
+	return nItemHeight;
 }
 
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -1497,6 +1532,9 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 	// which is weird so we do a bit of trickery
 	if (nCol == 0)
 		rCell.left = -GetScrollPos(SB_HORZ);
+
+	if (m_grouping.IsEnabled())
+		rCell.top--;
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
