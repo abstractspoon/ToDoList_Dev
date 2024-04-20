@@ -32,7 +32,6 @@ protected:
 	CGraphColorMap m_mapColors;
 
 protected:
-	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);

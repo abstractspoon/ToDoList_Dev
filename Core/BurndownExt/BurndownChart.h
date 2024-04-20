@@ -35,7 +35,7 @@ public:
 	int GetActiveGraphColors(CColorArray& aColors) const;
 	
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
-	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
+	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
