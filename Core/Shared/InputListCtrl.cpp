@@ -442,9 +442,7 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	// save current selection
 	GetCurSel(nOldItem, nOldCol);
 
-	// DO NOT DO DEFAULT HANDLING 
-	// because it causes flicker in combination with our owner draw
-	CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+	CEnListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 	
 	nItem = GetFocusedItem();
 	m_nItemLastSelected = nItem;

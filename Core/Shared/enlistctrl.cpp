@@ -275,6 +275,7 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CEnListCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_KEYUP()
+	ON_WM_KEYDOWN()
 	ON_WM_SIZE()
 	ON_WM_MEASUREITEM_REFLECT()
 	ON_WM_LBUTTONDBLCLK()
@@ -714,7 +715,7 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 		pDC->SelectObject(pOldFont);
 }
 
-void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
+void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
@@ -1127,6 +1128,52 @@ BOOL CEnListCtrl::SetItemImage(int nItem, int nSubItem, int nImage)
 	lvi.iSubItem = nSubItem;
 
 	return SetItem(&lvi);
+}
+void CEnListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (m_grouping.IsEnabled() && (GetStyle() & LVS_SINGLESEL))
+	{
+		// The default behaviour when grouping is enabled and the 
+		// selection is on the first item of a new group deviates
+		// from what is expected by selecting all the new group's
+		// items instead of moving the selection to the second item 
+		// in the group (or the last item in the previous group).
+		// And because this appears to the unwary as a bug I work 
+		// around it by handling all such keyboard navigation.
+		int nPrevSel = GetCurSel(), nNextSel = -1;
+
+		switch (nChar)
+		{
+		case VK_DOWN:
+			nNextSel = GetNextItem(nPrevSel, LVNI_VISIBLEORDER);
+			break;
+
+		case VK_NEXT: // Page down
+			{
+				// TODO
+				nNextSel = GetNextItem(nPrevSel, LVNI_VISIBLEORDER);
+			}
+			break;
+
+		case VK_UP:
+			nNextSel = GetNextItem(nPrevSel, LVNI_VISIBLEORDER | LVNI_PREVIOUS);
+			break;
+
+		case VK_PRIOR: // Page up
+			{
+				// TODO
+				nNextSel = GetNextItem(nPrevSel, LVNI_VISIBLEORDER);
+			}
+			break;
+		}
+
+		SetCurSel(nNextSel, TRUE);
+		EnsureVisible(nNextSel, FALSE);
+	}
+	else
+	{
+		CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+	}
 }
 
 void CEnListCtrl::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
