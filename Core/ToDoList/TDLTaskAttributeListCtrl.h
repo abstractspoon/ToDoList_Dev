@@ -149,7 +149,6 @@ protected:
 	CString m_sCompletionStatus;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
-	CTDCAttributeArray m_aSortedGroupedItems;
 
 	BOOL m_bCategorized;
 	BOOL m_bSplitting;
@@ -248,7 +247,6 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
-	void BuildSortedGroupedItemArray();
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
@@ -262,13 +260,28 @@ protected:
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 
 private:
-	struct SORTITEM
+	struct SORTEDGROUPEDITEM
 	{
-		TDC_ATTRIBUTE nAttrib;
+		DWORD dwItemData;
 		int nVPos;
 	};
 
-	static int GroupedItemSortProc(const void* item1, const void* item2);
+	class CSortedGroupedItemArray : CArray<SORTEDGROUPEDITEM, SORTEDGROUPEDITEM&>
+	{
+	public:
+		void Clear() { RemoveAll(); }
+		int GetNextItem(const CEnListCtrl& list, int nKeyPress);
+
+	protected:
+		void CheckBuildArray(const CEnListCtrl& list);
+		void OffsetPositions(int nItem);
+		int FindItem(DWORD dwItemData) const;
+
+		static int GroupedItemSortProc(const void* item1, const void* item2);
+	};
+
+	CSortedGroupedItemArray m_aSortedGroupedItems;
+
 
 };
 

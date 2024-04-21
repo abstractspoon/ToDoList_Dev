@@ -278,7 +278,7 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 	Sort();
 
 	if (m_bCategorized)
-		m_aSortedGroupedItems.RemoveAll();
+		m_aSortedGroupedItems.Clear();
 }
 
 void CTDLTaskAttributeListCtrl::ToggleCategorization()
@@ -487,7 +487,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 				}
 			}
 
-			m_aSortedGroupedItems.RemoveAll();
+			m_aSortedGroupedItems.Clear();
 		}
 		else // simple list
 		{
@@ -3137,49 +3137,15 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		// in the group (or the last item in the previous group).
 		// And because this appears to the unwary as a bug I work 
 		// around it by handling all such keyboard navigation.
-		int nCurSel = GetCurSel(), nNextSel = -1;
-		int nTop = GetTopIndex();
-
-		switch (nChar)
-		{
-		case VK_DOWN:
-			nNextSel = GetNextItem(nCurSel, LVNI_VISIBLEORDER);
-			break;
-
-		case VK_NEXT: // Page down
-			{
-				BuildSortedGroupedItemArray();
-
-				int nNext = m_aSortedGroupedItems.Find(GetAttributeID(nCurSel));
-				nNext += GetCountPerPage();
-				nNext = min(nNext, m_aSortedGroupedItems.GetSize() - 1);
-
-				nNextSel = GetRow(m_aSortedGroupedItems[nNext]);
-			}
-			break;
-
-		case VK_UP:
-			nNextSel = GetNextItem(nCurSel, LVNI_VISIBLEORDER | LVNI_PREVIOUS);
-			break;
-
-		case VK_PRIOR: // Page up
-			{
-				BuildSortedGroupedItemArray();
-
-				int nNext = m_aSortedGroupedItems.Find(GetAttributeID(nCurSel));
-				nNext -= GetCountPerPage();
-				nNext = max(nNext, 0);
-
-				nNextSel = GetRow(m_aSortedGroupedItems[nNext]);
-			}
-			break;
-		}
+		int nNextSel = m_aSortedGroupedItems.GetNextItem(*this, nChar);
 
 		if (nNextSel != -1)
 		{
-			CEnListCtrl::SetCurSel(nNextSel, TRUE);
-			EnsureVisible(nNextSel, FALSE);
-
+			if (nNextSel != GetCurSel())
+			{
+				CEnListCtrl::SetCurSel(nNextSel, TRUE);
+				EnsureVisible(nNextSel, FALSE);
+			}
 			return;
 		}
 	}
@@ -3188,38 +3154,134 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-void CTDLTaskAttributeListCtrl::BuildSortedGroupedItemArray()
-{
-	if (!m_aSortedGroupedItems.GetSize())
-	{
-		int nNumItems = GetItemCount(), nItem = nNumItems;
+////////////////////////////////////////////////////////////////////////////////
 
-		CArray<SORTITEM, SORTITEM&> aSort;
-		aSort.SetSize(nItem);
+void CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray(const CEnListCtrl& list)
+{
+	if (!GetSize())
+	{
+		int nNumItems = list.GetItemCount(), nItem = nNumItems;
+		SetSize(nItem);
 
 		while (nItem--)
 		{
 			CRect rItem;
-			GetItemRect(nItem, rItem, LVIR_BOUNDS);
+			list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
-			aSort[nItem].nAttrib = GetAttributeID(nItem);
-			aSort[nItem].nVPos = rItem.top;
+			GetAt(nItem).dwItemData = list.GetItemData(nItem);
+			GetAt(nItem).nVPos = rItem.top;
 		}
 
-		Misc::SortArrayT<SORTITEM>(aSort, GroupedItemSortProc);
-
-		m_aSortedGroupedItems.SetSize(nNumItems);
-		nItem = nNumItems;
-
-		while (nItem--)
-			m_aSortedGroupedItems[nItem] = aSort[nItem].nAttrib;
+		Misc::SortArrayT<SORTEDGROUPEDITEM>(*this, GroupedItemSortProc);
 	}
 }
 
-int CTDLTaskAttributeListCtrl::GroupedItemSortProc(const void* item1, const void* item2)
+void CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::OffsetPositions(int nTopItem)
 {
-	const SORTITEM* pItem1 = (const SORTITEM*)item1;
-	const SORTITEM* pItem2 = (const SORTITEM*)item2;
+	int nOffset = GetAt(nTopItem).nVPos, nItem = GetSize();
+
+	while (nItem--)
+		GetAt(nItem).nVPos -= nOffset;
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(const CEnListCtrl& list, int nKeyPress)
+{
+	CheckBuildArray(list);
+
+	// Find out where we are
+	int nFrom = FindItem(list.GetItemData(list.GetCurSel()));
+	int nNumItems = list.GetItemCount();
+	int nStep = 0;
+
+	switch (nKeyPress)
+	{
+	case VK_DOWN:	
+		nStep = 1;	
+		break;
+	
+	case VK_UP:		
+		nStep = -1;	
+		break;
+
+	case VK_NEXT:	
+		{
+			nStep = list.GetCountPerPage();
+			
+			int nTop = FindItem(list.GetItemData(list.GetTopIndex()));
+
+			if (nFrom > nTop)
+				nFrom = nTop;
+		}
+		break;
+
+	case VK_PRIOR:	
+		{
+			nStep = -list.GetCountPerPage();
+		}
+		break;
+
+	case VK_END:	
+		nStep = nNumItems;	
+		break;
+	
+	case VK_HOME:	
+		nStep = nNumItems;	
+		break;
+	}
+
+	if (nStep == -1)
+		return -1;
+
+// 	DWORD dwTopItemData = list.GetItemData(list.GetTopIndex());
+// 
+// 	OffsetPositions(nFrom);
+// 	
+// 	int nNext = (nFrom + nStep);
+// 
+// 	if (nStep > 0)
+// 	{
+// 		// Work forward from that point until we go off the bottom of the client rect
+// 		CRect rClient;
+// 		list.GetClientRect(rClient);
+// 
+// 		int nTo = min((nFrom + nStep), nNumItems - 1);
+// 
+// 		for (int nNext = nFrom; nNext < nTo; nNext++)
+// 		{
+// 			if ((GetAt(nNext).nVPos - GetAt(nFrom).nVPos) > rClient.Height())
+// 			{
+// 				// return the item before
+// 				nNext--;
+// 				return list.FindItemFromData(GetAt(nNext).dwItemData);
+// 			}
+// 		}
+// 	}
+// 	else
+// 	{
+// 		nNext = max(nNext, 0);
+// 	}
+
+	return -1;
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::FindItem(DWORD dwItemData) const
+{
+	int nItem = GetSize();
+
+	while (nItem--)
+	{
+		if (GetAt(nItem).dwItemData == dwItemData)
+			return nItem;
+	}
+
+	ASSERT(0);
+	return -1;
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GroupedItemSortProc(const void* item1, const void* item2)
+{
+	const SORTEDGROUPEDITEM* pItem1 = (const SORTEDGROUPEDITEM*)item1;
+	const SORTEDGROUPEDITEM* pItem2 = (const SORTEDGROUPEDITEM*)item2;
 
 	return (pItem1->nVPos - pItem2->nVPos);
 }
