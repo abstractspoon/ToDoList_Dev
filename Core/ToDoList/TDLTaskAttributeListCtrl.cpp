@@ -189,6 +189,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
+	ON_WM_KEYDOWN()
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
@@ -275,6 +276,9 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 {
 	m_bSortAscending = !m_bSortAscending;
 	Sort();
+
+	if (m_bCategorized)
+		m_aSortedGroupedItems.RemoveAll();
 }
 
 void CTDLTaskAttributeListCtrl::ToggleCategorization()
@@ -482,6 +486,8 @@ void CTDLTaskAttributeListCtrl::Populate()
 					}
 				}
 			}
+
+			m_aSortedGroupedItems.RemoveAll();
 		}
 		else // simple list
 		{
@@ -3119,3 +3125,102 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	return -1;  // not found
 }
+
+void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (GetGrouping().IsEnabled())
+	{
+		// The default behaviour when grouping is enabled and the 
+		// selection is on the first item of a new group deviates
+		// from what is expected by selecting all the new group's
+		// items instead of moving the selection to the second item 
+		// in the group (or the last item in the previous group).
+		// And because this appears to the unwary as a bug I work 
+		// around it by handling all such keyboard navigation.
+		int nCurSel = GetCurSel(), nNextSel = -1;
+		int nTop = GetTopIndex();
+
+		switch (nChar)
+		{
+		case VK_DOWN:
+			nNextSel = GetNextItem(nCurSel, LVNI_VISIBLEORDER);
+			break;
+
+		case VK_NEXT: // Page down
+			{
+				BuildSortedGroupedItemArray();
+
+				int nNext = m_aSortedGroupedItems.Find(GetAttributeID(nCurSel));
+				nNext += GetCountPerPage();
+				nNext = min(nNext, m_aSortedGroupedItems.GetSize() - 1);
+
+				nNextSel = GetRow(m_aSortedGroupedItems[nNext]);
+			}
+			break;
+
+		case VK_UP:
+			nNextSel = GetNextItem(nCurSel, LVNI_VISIBLEORDER | LVNI_PREVIOUS);
+			break;
+
+		case VK_PRIOR: // Page up
+			{
+				BuildSortedGroupedItemArray();
+
+				int nNext = m_aSortedGroupedItems.Find(GetAttributeID(nCurSel));
+				nNext -= GetCountPerPage();
+				nNext = max(nNext, 0);
+
+				nNextSel = GetRow(m_aSortedGroupedItems[nNext]);
+			}
+			break;
+		}
+
+		if (nNextSel != -1)
+		{
+			CEnListCtrl::SetCurSel(nNextSel, TRUE);
+			EnsureVisible(nNextSel, FALSE);
+
+			return;
+		}
+	}
+
+	// All else
+	CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CTDLTaskAttributeListCtrl::BuildSortedGroupedItemArray()
+{
+	if (!m_aSortedGroupedItems.GetSize())
+	{
+		int nNumItems = GetItemCount(), nItem = nNumItems;
+
+		CArray<SORTITEM, SORTITEM&> aSort;
+		aSort.SetSize(nItem);
+
+		while (nItem--)
+		{
+			CRect rItem;
+			GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
+			aSort[nItem].nAttrib = GetAttributeID(nItem);
+			aSort[nItem].nVPos = rItem.top;
+		}
+
+		Misc::SortArrayT<SORTITEM>(aSort, GroupedItemSortProc);
+
+		m_aSortedGroupedItems.SetSize(nNumItems);
+		nItem = nNumItems;
+
+		while (nItem--)
+			m_aSortedGroupedItems[nItem] = aSort[nItem].nAttrib;
+	}
+}
+
+int CTDLTaskAttributeListCtrl::GroupedItemSortProc(const void* item1, const void* item2)
+{
+	const SORTITEM* pItem1 = (const SORTITEM*)item1;
+	const SORTITEM* pItem2 = (const SORTITEM*)item2;
+
+	return (pItem1->nVPos - pItem2->nVPos);
+}
+

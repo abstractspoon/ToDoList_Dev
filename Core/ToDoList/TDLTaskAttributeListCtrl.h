@@ -149,6 +149,7 @@ protected:
 	CString m_sCompletionStatus;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
+	CTDCAttributeArray m_aSortedGroupedItems;
 
 	BOOL m_bCategorized;
 	BOOL m_bSplitting;
@@ -181,6 +182,7 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
@@ -246,6 +248,7 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
+	void BuildSortedGroupedItemArray();
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
@@ -258,7 +261,15 @@ protected:
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 
-	
+private:
+	struct SORTITEM
+	{
+		TDC_ATTRIBUTE nAttrib;
+		int nVPos;
+	};
+
+	static int GroupedItemSortProc(const void* item1, const void* item2);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
