@@ -95,6 +95,8 @@
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Release/KanbanBoard.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
