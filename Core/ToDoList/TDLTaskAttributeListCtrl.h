@@ -260,19 +260,21 @@ protected:
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 
 private:
-	struct SORTEDGROUPEDITEM
+	// ---------------------------------------------------------------------
+
+	struct CATEGORYITEM
 	{
-		SORTEDGROUPEDITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
+		CATEGORYITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
 
 		DWORD dwItemData;
 		int nGroupID;
 		CRect rItem;
 	};
 
-	class CSortedGroupedItemArray : CArray<SORTEDGROUPEDITEM, SORTEDGROUPEDITEM&>
+	class CSortedCategoryItemArray : CArray<CATEGORYITEM, CATEGORYITEM&>
 	{
 	public:
-		CSortedGroupedItemArray(const CEnListCtrl& list) : m_list(list) {}
+		CSortedCategoryItemArray(const CEnListCtrl& list) : m_list(list) {}
 
 		void Clear() { RemoveAll(); }
 		int GetNextItem(int nKeyPress);
@@ -285,12 +287,28 @@ private:
 		int GetPageSize(int nFrom, BOOL bDown) const;
 		int FindItem(DWORD dwItemData) const;
 
-		static int GroupedItemSortProc(const void* item1, const void* item2);
+		static int SortProc(const void* item1, const void* item2);
 	};
 
-	CSortedGroupedItemArray m_aSortedGroupedItems;
+	CSortedCategoryItemArray m_aSortedGroupedItems;
 
+	// ---------------------------------------------------------------------
 
+	struct ATTRIBCATEGORY
+	{
+		TDC_ATTRIBUTECATEGORY nCategory;
+		CString sName;
+	};
+
+	class CSortedGroupedHeaderArray : public CArray<ATTRIBCATEGORY, ATTRIBCATEGORY&>
+	{
+	public:
+		CSortedGroupedHeaderArray(BOOL bSortAscending);
+
+	protected:
+		static int AscendingSortProc(const void* item1, const void* item2);
+		static int DescendingSortProc(const void* item1, const void* item2);
+	};
 };
 
 /////////////////////////////////////////////////////////////////////////////

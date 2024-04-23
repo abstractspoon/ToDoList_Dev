@@ -84,26 +84,6 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct ATTRIBCATEGORY
-{
-	TDC_ATTRIBUTECATEGORY nCategory;
-	UINT nStrResID;
-};
-
-static ATTRIBCATEGORY ATTRIBCATEGORIES[] = 
-{
-	{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
-	{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
-	{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
-	{ TDCAC_TEXT,			IDS_ATTRIBCAT_TEXT },
-	{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
-	{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
-};
-
-const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / sizeof(ATTRIBCATEGORIES[0]));
-
-/////////////////////////////////////////////////////////////////////////////
-
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
@@ -276,10 +256,11 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 {
 	m_bSortAscending = !m_bSortAscending;
-	Sort();
 
 	if (m_bCategorized)
-		m_aSortedGroupedItems.Clear();
+		Populate();
+	else
+		Sort();
 }
 
 void CTDLTaskAttributeListCtrl::ToggleCategorization()
@@ -482,14 +463,16 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 		if (m_bCategorized)
 		{
-			for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
+			CSortedGroupedHeaderArray aCategories(m_bSortAscending);
+
+			for (int nCat = 0; nCat < aCategories.GetSize(); nCat++)
 			{
 				CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> mapAttribs;
-				const ATTRIBCATEGORY& attribCat = ATTRIBCATEGORIES[nCat];
+				const ATTRIBCATEGORY& attribCat = aCategories[nCat];
 
 				if (GetCategoryAttributes(attribCat.nCategory, mapAttribs))
 				{
-					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, CEnString(attribCat.nStrResID));
+					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, attribCat.sName);
 
 					POSITION pos = mapAttribs.GetStartPosition();
 					TDC_ATTRIBUTE nAttribID;
@@ -3174,7 +3157,7 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray()
+int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 {
 	if (!GetSize())
 	{
@@ -3185,7 +3168,7 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray()
 
 		while (nItem--)
 		{
-			SORTEDGROUPEDITEM& sgi = GetAt(nItem);
+			CATEGORYITEM& sgi = GetAt(nItem);
 
 			sgi.dwItemData = m_list.GetItemData(nItem);
 			sgi.nGroupID = m_list.GetGrouping().GetItemGroupId(nItem);
@@ -3193,13 +3176,13 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray()
 			m_list.GetItemRect(nItem, sgi.rItem, LVIR_BOUNDS);
 		}
 
-		Misc::SortArrayT<SORTEDGROUPEDITEM>(*this, GroupedItemSortProc);
+		Misc::SortArrayT<CATEGORYITEM>(*this, SortProc);
 	}
 
 	return GetSize();
 }
 
-int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(int nKeyPress)
+int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetNextItem(int nKeyPress)
 {
 	if (!CheckBuildArray())
 		return -1;
@@ -3246,7 +3229,7 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(int nKeyPres
 	return m_list.FindItemFromData(GetAt(nNext).dwItemData);
 }
 
-int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetPageSize(int nFrom, BOOL bDown) const
+int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetPageSize(int nFrom, BOOL bDown) const
 {
 	CRect rClient;
 	m_list.GetClientRect(rClient);
@@ -3288,7 +3271,7 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetPageSize(int nFrom, B
 	return (nPageSize - 1);
 }
 
-int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::FindItem(DWORD dwItemData) const
+int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::FindItem(DWORD dwItemData) const
 {
 	int nItem = GetSize();
 
@@ -3302,11 +3285,46 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::FindItem(DWORD dwItemDat
 	return -1;
 }
 
-int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GroupedItemSortProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::SortProc(const void* item1, const void* item2)
 {
-	const SORTEDGROUPEDITEM* pItem1 = (const SORTEDGROUPEDITEM*)item1;
-	const SORTEDGROUPEDITEM* pItem2 = (const SORTEDGROUPEDITEM*)item2;
+	const CATEGORYITEM* pItem1 = (const CATEGORYITEM*)item1;
+	const CATEGORYITEM* pItem2 = (const CATEGORYITEM*)item2;
 
 	return (pItem1->rItem.top - pItem2->rItem.top);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::CSortedGroupedHeaderArray(BOOL bSortAscending)
+{
+	static ATTRIBCATEGORY ATTRIBCATEGORIES[] =
+	{
+		{ TDCAC_OTHER,			CEnString(IDS_ATTRIBCAT_OTHER) },
+		{ TDCAC_CUSTOM,			CEnString(IDS_ATTRIBCAT_CUSTOM) },
+		{ TDCAC_DATETIME,		CEnString(IDS_ATTRIBCAT_DATETIME) },
+		{ TDCAC_TEXT,			CEnString(IDS_ATTRIBCAT_TEXT) },
+		{ TDCAC_NUMERIC,		CEnString(IDS_ATTRIBCAT_NUMERIC) },
+		{ TDCAC_TIMEPERIOD,		CEnString(IDS_ATTRIBCAT_TIMEPERIOD) },
+	};
+
+	const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / sizeof(ATTRIBCATEGORIES[0]));
+
+	for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
+		Add(ATTRIBCATEGORIES[nCat]);
+
+	Misc::SortArrayT(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::AscendingSortProc(const void* item1, const void* item2)
+{
+	const ATTRIBCATEGORY* pItem1 = (const ATTRIBCATEGORY*)item1;
+	const ATTRIBCATEGORY* pItem2 = (const ATTRIBCATEGORY*)item2;
+
+	return Misc::NaturalCompare(pItem1->sName, pItem2->sName);
+
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(const void* item1, const void* item2)
+{
+	return -AscendingSortProc(item1, item2);
+}
