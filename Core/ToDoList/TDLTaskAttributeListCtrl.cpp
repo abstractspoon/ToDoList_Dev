@@ -3161,7 +3161,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 {
 	if (!GetSize())
 	{
-		int nScrollPos = m_list.GetScrollPos(SB_VERT);
+		int nVScrollPos = m_list.GetScrollPos(SB_VERT);
 		int nNumItems = m_list.GetItemCount(), nItem = nNumItems;
 
 		SetSize(nNumItems);
@@ -3174,6 +3174,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 			sgi.nGroupID = m_list.GetGrouping().GetItemGroupId(nItem);
 
 			m_list.GetItemRect(nItem, sgi.rItem, LVIR_BOUNDS);
+			sgi.rItem.OffsetRect(0, nVScrollPos);
 		}
 
 		Misc::SortArrayT<CATEGORYITEM>(*this, SortProc);
