@@ -3152,7 +3152,7 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 
 	// All else
-	CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+	CInputListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
