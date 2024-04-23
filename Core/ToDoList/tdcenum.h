@@ -930,4 +930,17 @@ enum TDC_OFFSETTASKDATES
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TDC_ATTRIBUTECATEGORY
+{
+	TDCAC_NONE = -1,
+	TDCAC_CUSTOM,
+	TDCAC_DATETIME,
+	TDCAC_TEXT,
+	TDCAC_NUMERIC,
+	TDCAC_TIMEPERIOD,
+	TDCAC_OTHER,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // AFX_TDCENUM_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

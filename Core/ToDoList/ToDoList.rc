@@ -2804,6 +2804,8 @@ IDR_COMMENTS_DATETIME_TOOLBAR BITMAP  DISCARDABLE     "res\\datetime_toolbar.bmp
 IDB_DATETIME_TOOLBAR_STD BITMAP  DISCARDABLE     "res\\datetime_toolbar_std.bmp"
 IDB_UK_FLAG             BITMAP  DISCARDABLE     "res\\uk_flag.bmp"
 IDB_YOURLANG_FLAG       BITMAP  DISCARDABLE     "res\\yourlang_flag.bmp"
+IDR_TASK_ATTRIBUTE_TOOLBAR BITMAP  DISCARDABLE     "res\\taskattrib_toolbar.bmp"
+IDB_TASKATTRIB_TOOLBAR  BITMAP  DISCARDABLE     "res\\taskattrib_toolbar_std.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2915,6 +2917,12 @@ BEGIN
     BUTTON      ID_COMMENTS_INSERTDATE
     BUTTON      ID_COMMENTS_INSERTTIME
     BUTTON      ID_COMMENTS_INSERTDATETIME
+END
+
+IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_CATEGORIZE_ATTRIB
+    BUTTON      ID_TOGGLE_SORT
 END
 
 
@@ -5914,6 +5922,9 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_COMMENTS_INSERTTIME  "\nInsert Time"
     ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
+    ID_CATEGORIZED          "\nCategorise"
+    ID_TOGGLE_SORT          "\nToggle Sort Direction"
+    ID_CATEGORIZE_ATTRIB    "\nCategorise Attributes"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5924,6 +5935,12 @@ BEGIN
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
     IDS_ATTRIBTIP_DATEREQUIRED "Date must be set"
     IDS_ATTRIBUTES          "Attributes"
+    IDS_ATTRIBCAT_OTHER     "Other"
+    IDS_ATTRIBCAT_TEXT      "Text"
+    IDS_ATTRIBCAT_NUMERIC   "Numeric"
+    IDS_ATTRIBCAT_DATETIME  "Date/Time"
+    IDS_ATTRIBCAT_TIMEPERIOD "Time Period"
+    IDS_ATTRIBCAT_CUSTOM    "Custom"
 END
 
 #endif    // English (Australia) resources

@@ -208,7 +208,12 @@ CTDCAttributeArray::~CTDCAttributeArray()
 
 BOOL CTDCAttributeArray::Has(TDC_ATTRIBUTE nAttrib) const
 {
-	return Misc::HasT(nAttrib, *this);
+	return (Find(nAttrib) != -1);
+}
+
+BOOL CTDCAttributeArray::Find(TDC_ATTRIBUTE nAttrib) const
+{
+	return Misc::FindT(nAttrib, *this);
 }
 
 BOOL CTDCAttributeArray::AddUnique(TDC_ATTRIBUTE nAttrib)

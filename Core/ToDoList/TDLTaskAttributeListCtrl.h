@@ -68,6 +68,10 @@ public:
 	virtual ~CTDLTaskAttributeListCtrl();
 
 public:
+	BOOL Create(CWnd* pParent, UINT nID);
+	void ToggleSortDirection();
+	void ToggleCategorization();
+	BOOL IsCategorized() const { return m_bCategorized; }
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -146,6 +150,7 @@ protected:
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
 
+	BOOL m_bCategorized;
 	BOOL m_bSplitting;
 	float m_fAttribColProportion;
 
@@ -176,6 +181,7 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
@@ -223,7 +229,9 @@ protected:
 	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
-	void CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
+	int GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const;
+	BOOL WantAddAttribute(TDC_ATTRIBUTE nAttribID) const;
+	int CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
 	int GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const;
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
@@ -251,7 +259,38 @@ protected:
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 
-	
+private:
+	struct SORTEDGROUPEDITEM
+	{
+		SORTEDGROUPEDITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
+
+		DWORD dwItemData;
+		int nGroupID;
+		CRect rItem;
+	};
+
+	class CSortedGroupedItemArray : CArray<SORTEDGROUPEDITEM, SORTEDGROUPEDITEM&>
+	{
+	public:
+		CSortedGroupedItemArray(const CEnListCtrl& list) : m_list(list) {}
+
+		void Clear() { RemoveAll(); }
+		int GetNextItem(int nKeyPress);
+
+	protected:
+		const CEnListCtrl& m_list;
+
+	protected:
+		int CheckBuildArray();
+		int GetPageSize(int nFrom, BOOL bDown) const;
+		int FindItem(DWORD dwItemData) const;
+
+		static int GroupedItemSortProc(const void* item1, const void* item2);
+	};
+
+	CSortedGroupedItemArray m_aSortedGroupedItems;
+
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

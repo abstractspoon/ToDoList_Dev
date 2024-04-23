@@ -2293,20 +2293,25 @@ void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CS
 	if (crBack == CLR_NONE)
 		crBack = GetSysColor(COLOR_WINDOW);
 
-	FillItemRect(pDC, rRow, crBack, hWnd);
-	DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
+	FillItemRect(pDC, rRow, crBack, hWnd); // Modifies rRow
+
+	CRect rLine(rRow);
 
 	if (!sText.IsEmpty())
 	{
 		// Force text to always be visible on the LHS
 		CRect rText(rRow);
-		rText.left = ScaleByDPIFactor(20);
+		rText.left = ScaleByDPIFactor(10);
 
 		pDC->SetTextColor(crText);
 		pDC->SetBkColor(crBack);
 		pDC->SetBkMode(OPAQUE);
 		pDC->DrawText(sText, rText, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+
+		rLine.left = (rText.left + pDC->GetTextExtent(sText).cx + ScaleByDPIFactor(5));
 	}
+
+	DrawHorzLine(pDC, rLine.left, rLine.right, rRow.CenterPoint().y, crText);
 }
 
 BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)

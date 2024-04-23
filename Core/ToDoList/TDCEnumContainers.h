@@ -134,6 +134,7 @@ public:
 	~CTDCAttributeArray();
 	
 	BOOL Has(TDC_ATTRIBUTE nAttrib) const;
+	int Find(TDC_ATTRIBUTE nAttrib) const;
 	BOOL AddUnique(TDC_ATTRIBUTE nAttrib);
 	void Remove(TDC_ATTRIBUTE nAttrib);
 

@@ -147,7 +147,6 @@ CString CTDLAttributeComboBox::GetSelectedAttributeText() const
 		GetLBText(nSel, sItem);
 
 	return sItem;
-
 }
 
 void CTDLAttributeComboBox::BuildCombo()

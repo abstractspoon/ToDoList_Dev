@@ -84,6 +84,26 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct ATTRIBCATEGORY
+{
+	TDC_ATTRIBUTECATEGORY nCategory;
+	UINT nStrResID;
+};
+
+static ATTRIBCATEGORY ATTRIBCATEGORIES[] = 
+{
+	{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
+	{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
+	{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
+	{ TDCAC_TEXT,			IDS_ATTRIBCAT_TEXT },
+	{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
+	{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
+};
+
+const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / sizeof(ATTRIBCATEGORIES[0]));
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
@@ -124,8 +144,12 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_cbCustomIcons(ilIcons),
 	m_dropFiles(this),
 	m_bSplitting(FALSE),
-	m_fAttribColProportion(0.5f)
+	m_fAttribColProportion(0.5f),
+	m_bCategorized(FALSE),
+	m_aSortedGroupedItems(*this)
 {
+	SetSortColumn(0, FALSE);
+
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
@@ -166,6 +190,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
+	ON_WM_KEYDOWN()
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
@@ -193,6 +218,13 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl message handlers
+
+BOOL CTDLTaskAttributeListCtrl::Create(CWnd* pParent, UINT nID)
+{
+	DWORD dwFlags = (WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS | LVS_SINGLESEL);
+
+	return CEnListCtrl::Create(dwFlags, CRect(0, 0, 0, 0), pParent, nID);
+}
 
 int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
@@ -241,6 +273,26 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CTDLTaskAttributeListCtrl::ToggleSortDirection()
+{
+	m_bSortAscending = !m_bSortAscending;
+	Sort();
+
+	if (m_bCategorized)
+		m_aSortedGroupedItems.Clear();
+}
+
+void CTDLTaskAttributeListCtrl::ToggleCategorization()
+{
+	m_bCategorized = !m_bCategorized;
+
+	if (GetSafeHwnd())
+	{
+		EnableGroupView(m_bCategorized);
+		Populate();
+	}
+}
+
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = GetRow(nAttribID);
@@ -283,11 +335,21 @@ void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 {
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
+	prefs.WriteProfileInt(szKey, _T("SortAscending"), m_bSortAscending);
+	prefs.WriteProfileInt(szKey, _T("Categorized"), m_bCategorized);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
+	m_bSortAscending = prefs.GetProfileInt(szKey, _T("SortAscending"), TRUE);
+	m_bCategorized = prefs.GetProfileInt(szKey, _T("Categorized"), FALSE);
+
+	if (GetSafeHwnd())
+	{
+		EnableGroupView(m_bCategorized);
+		Populate();
+	}
 }
 
 void CTDLTaskAttributeListCtrl::SetCompletionStatus(const CString& sStatus)
@@ -330,26 +392,78 @@ void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 	Populate();
 }
 
-void CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
+BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
-	BOOL bAdd = FALSE;
-
 	switch (nAttribID)
 	{
 	case TDCA_PROJECTNAME:
-		return;
+	case TDCA_COMMENTS:
+		return FALSE;
 
 	case TDCA_TASKNAME:
-		bAdd = TRUE;
-		break;
-
-	default:
-		bAdd = m_vis.IsEditFieldVisible(nAttribID);
-		break;
+		return TRUE;
 	}
 
-	if (bAdd)
-		SetItemData(AddRow(CEnString(nAttribResID)), nAttribID);
+	// All else
+	return m_vis.IsEditFieldVisible(nAttribID);
+}
+
+int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
+{
+	if (!WantAddAttribute(nAttribID))
+		return -1;
+
+	int nRow = AddRow(CEnString(nAttribResID));
+	SetItemData(nRow, nAttribID);
+
+	return nRow;
+}
+
+int CTDLTaskAttributeListCtrl::GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const
+{
+	if (nCategory != TDCAC_CUSTOM)
+	{
+		for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
+		{
+			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAttrib];
+
+			if ((attrib.nCategory == nCategory) && WantAddAttribute(attrib.nAttribID))
+				mapAttrib[attrib.nAttribID] = CEnString(attrib.nAttribResID);
+		}
+
+		// Associated time fields
+		if (nCategory == TDCAC_DATETIME)
+		{
+			if (WantAddAttribute(TDCA_STARTTIME))
+				mapAttrib[TDCA_STARTTIME] = CEnString(IDS_TDLBC_STARTTIME);
+
+			if (WantAddAttribute(TDCA_DUETIME))
+				mapAttrib[TDCA_DUETIME] = CEnString(IDS_TDLBC_DUETIME);
+
+			if (WantAddAttribute(TDCA_DONETIME))
+				mapAttrib[TDCA_DONETIME] = CEnString(IDS_TDLBC_DONETIME);
+		}
+	}
+	else
+	{
+		// Custom attributes
+		for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+			if (attribDef.bEnabled)
+			{
+				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
+
+				mapAttrib[nAttribID] = attribDef.sLabel;
+
+				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+					mapAttrib[MapCustomDateToTime(nAttribID)] = attribDef.sLabel;
+			}
+		}
+	}
+
+	return mapAttrib.GetCount();
 }
 
 void CTDLTaskAttributeListCtrl::Populate()
@@ -366,28 +480,59 @@ void CTDLTaskAttributeListCtrl::Populate()
 		CHoldRedraw hr(*this);
 		DeleteAllItems();
 
-		for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
-			CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
-
-		// Dependent time fields
-		CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
-		CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
-		CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
-
-		// Custom attributes
-		for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+		if (m_bCategorized)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
-
-			if (attribDef.bEnabled)
+			for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
 			{
-				int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-				SetItemData(nItem, attribDef.GetAttributeID());
+				CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> mapAttribs;
+				const ATTRIBCATEGORY& attribCat = ATTRIBCATEGORIES[nCat];
 
-				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+				if (GetCategoryAttributes(attribCat.nCategory, mapAttribs))
+				{
+					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, CEnString(attribCat.nStrResID));
+
+					POSITION pos = mapAttribs.GetStartPosition();
+					TDC_ATTRIBUTE nAttribID;
+					CString sAttribName;
+
+					while (pos)
+					{
+						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
+						int nRow = AddRow(sAttribName);
+						SetItemData(nRow, nAttribID);
+						GetGrouping().SetItemGroupId(nRow, attribCat.nCategory);
+					}
+				}
+			}
+
+			m_aSortedGroupedItems.Clear();
+		}
+		else // simple list
+		{
+			// Built-in attributes
+			for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
+				CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
+
+			// Associated time fields
+			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
+			CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
+			CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
+
+			// Custom attributes
+			for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
+
+				if (attribDef.bEnabled)
 				{
 					int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-					SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+					SetItemData(nItem, attribDef.GetAttributeID());
+
+					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
+					{
+						int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
+						SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+					}
 				}
 			}
 		}
@@ -460,7 +605,7 @@ void CTDLTaskAttributeListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		return;
 	}
 
-	CInputListCtrl::OnLButtonDown(nFlags, point);
+	CInputListCtrl::OnLButtonDblClk(nFlags, point);
 }
 
 void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
@@ -2998,3 +3143,186 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	return -1;  // not found
 }
+
+void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (GetGrouping().IsEnabled())
+	{
+		// The default behaviour when grouping is enabled and the 
+		// selection is on the first item of a new group deviates
+		// from what is expected by selecting all the new group's
+		// items instead of moving the selection to the second item 
+		// in the group (or the last item in the previous group).
+		// And because this appears to the unwary as a bug I work 
+		// around it by handling all such keyboard navigation.
+		int nNextSel = m_aSortedGroupedItems.GetNextItem(nChar);
+
+		if (nNextSel != -1)
+		{
+			if (nNextSel != GetCurSel())
+			{
+				CEnListCtrl::SetCurSel(nNextSel, TRUE);
+				EnsureVisible(nNextSel, FALSE);
+			}
+			return;
+		}
+	}
+
+	// All else
+	CListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray()
+{
+	if (!GetSize())
+	{
+		int nScrollPos = m_list.GetScrollPos(SB_VERT);
+		int nNumItems = m_list.GetItemCount(), nItem = nNumItems;
+
+		SetSize(nNumItems);
+
+		while (nItem--)
+		{
+			SORTEDGROUPEDITEM& sgi = GetAt(nItem);
+
+			sgi.dwItemData = m_list.GetItemData(nItem);
+			sgi.nGroupID = m_list.GetGrouping().GetItemGroupId(nItem);
+
+			m_list.GetItemRect(nItem, sgi.rItem, LVIR_BOUNDS);
+		}
+
+		Misc::SortArrayT<SORTEDGROUPEDITEM>(*this, GroupedItemSortProc);
+	}
+
+	return GetSize();
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(int nKeyPress)
+{
+	if (!CheckBuildArray())
+		return -1;
+
+	// Find out where we are
+	int nCurSel = m_list.GetCurSel(), nFrom = FindItem(m_list.GetItemData(nCurSel));
+	int nNumItems = GetSize(), nNext = -1;
+
+	switch (nKeyPress)
+	{
+	case VK_DOWN:	
+		nNext = (nFrom + 1);	
+		break;
+	
+	case VK_UP:		
+		nNext = (nFrom - 1);	
+		break;
+
+	case VK_NEXT:	
+		{
+// 			int nFirst = GetFirstVisibleItem();
+// 			int nLast = GetLastVisibleItem();
+// 
+// 			if ((nFrom > nFirst) && (nFrom < nLast))
+// 				nFrom = nFirst;
+
+			nNext = (nFrom + GetPageSize(nFrom, TRUE));
+		}
+		break;
+
+	case VK_PRIOR:	
+		{
+// 			int nFirst = GetFirstVisibleItem();
+// 			int nLast = GetLastVisibleItem();
+// 
+// 			if ((nFrom > nFirst) && (nFrom < nLast))
+// 				nFrom = nLast;
+
+			nNext = (nFrom - GetPageSize(nFrom, FALSE));
+		}
+		break;
+
+	case VK_END:	
+		nNext = (nNumItems - 1);	
+		break;
+	
+	case VK_HOME:	
+		nNext = 0;	
+		break;
+
+	default:
+		return -1;
+	}
+
+	nNext = min(max(0, nNext), (nNumItems - 1));
+
+	if (nNext == nFrom)
+		return nCurSel;
+
+	return m_list.FindItemFromData(GetAt(nNext).dwItemData);
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetPageSize(int nFrom, BOOL bDown) const
+{
+	CRect rClient;
+	m_list.GetClientRect(rClient);
+
+	int nNumItems = GetSize(), nPageSize = 0;
+
+	if (bDown)
+	{
+		rClient.OffsetRect(0, GetAt(nFrom).rItem.top);
+
+		int nTo = (nFrom + m_list.GetCountPerPage());
+		nTo = min(nTo, nNumItems);
+
+		for (int nItem = nFrom; nItem < nTo; nItem++)
+		{
+			if (GetAt(nItem).rItem.bottom > rClient.bottom)
+				break;
+
+			nPageSize++;
+		}
+	}
+	else // Up
+	{
+		rClient.OffsetRect(0, (GetAt(nFrom).rItem.bottom - rClient.Height()));
+
+		int nTo = (nFrom - m_list.GetCountPerPage());
+		nTo = max(nTo, 0);
+
+		for (int nItem = nFrom; nItem >= nTo; nItem--)
+		{
+			if (GetAt(nItem).rItem.top < rClient.top)
+				break;
+
+			nPageSize++;
+		}
+	}
+	ASSERT(nPageSize > 0);
+
+	return (nPageSize - 1);
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::FindItem(DWORD dwItemData) const
+{
+	int nItem = GetSize();
+
+	while (nItem--)
+	{
+		if (GetAt(nItem).dwItemData == dwItemData)
+			return nItem;
+	}
+
+	ASSERT(0);
+	return -1;
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GroupedItemSortProc(const void* item1, const void* item2)
+{
+	const SORTEDGROUPEDITEM* pItem1 = (const SORTEDGROUPEDITEM*)item1;
+	const SORTEDGROUPEDITEM* pItem2 = (const SORTEDGROUPEDITEM*)item2;
+
+	return (pItem1->rItem.top - pItem2->rItem.top);
+}
+

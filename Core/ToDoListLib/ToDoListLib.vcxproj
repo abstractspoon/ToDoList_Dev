@@ -234,6 +234,7 @@
     <ClCompile Include="..\ToDoList\TDLSimpleTextContentCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLStatusBar.cpp" />
     <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskAttributeCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskAttributeListCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
@@ -398,6 +399,7 @@
     <ClInclude Include="..\ToDoList\TDLSimpleTextContentCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLStatusBar.h" />
     <ClInclude Include="..\ToDoList\TDLStylesheetParamConfigDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskAttributeCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLTaskAttributeListCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLTaskComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLTaskCtrlBase.h" />

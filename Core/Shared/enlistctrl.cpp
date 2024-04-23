@@ -123,6 +123,14 @@ DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 /////////////////////////////////////////////////////////////////////////////
 
+CListCtrlItemGrouping::CListCtrlItemGrouping(HWND hwndList) 
+	: 
+	m_hwndList(hwndList), 
+	m_bEnabled(FALSE),
+	m_crBkgnd(CLR_NONE) 
+{
+}
+
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
 	if (!m_hwndList)
@@ -131,7 +139,11 @@ BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 		return FALSE;
 	}
 
-	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+	if (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) == -1)
+		return FALSE;
+
+	m_bEnabled = bEnable;
+	return TRUE;
 }
 
 BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
@@ -207,23 +219,8 @@ BOOL CListCtrlItemGrouping::HasGroups() const
 
 void CListCtrlItemGrouping::RemoveAllGroups()
 {
-	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
-}
-
-BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD)
-{
-	const LVCUSTOMDRAW* pNMLV = (const LVCUSTOMDRAW*)pLVCD;
-
-	if (pNMLV->dwItemType != LVCDI_GROUP)
-		return FALSE;
-
-	CDC* pDC = CDC::FromHandle(pNMLV->nmcd.hdc);
-	CString sHeader = GetGroupHeaderText(pNMLV->nmcd.dwItemSpec);
-
-	CRect rRow(pNMLV->rcText);
-	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, m_crBkgnd);
-
-	return TRUE;
+	if (m_bEnabled)
+		::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
 void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
@@ -234,7 +231,6 @@ void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 		InvalidateRect(m_hwndList, NULL, FALSE);
 	}
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
@@ -297,10 +293,23 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl message handlers
 
-CListCtrlItemGrouping& CEnListCtrl::GetGrouping() 
-{ 
-	VERIFY(m_grouping.EnableGroupView(GetSafeHwnd()));
-	return m_grouping; 
+BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
+{
+	if (!Misc::StateChanged(bEnable, m_grouping.IsEnabled()))
+		return TRUE;
+	
+	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
+		return FALSE;
+
+	RefreshItemHeight();
+	return TRUE;
+}
+
+BOOL CEnListCtrl::DeleteAllItems()
+{
+	m_grouping.RemoveAllGroups();
+	
+	return CListCtrl::DeleteAllItems();
 }
 
 void CEnListCtrl::OnPaint() 
@@ -698,7 +707,7 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 		pDC->SelectObject(pOldFont);
 }
 
-void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
+void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
@@ -712,6 +721,10 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// init helper variables
 	CRect rItem, rClient;
 	GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
+	if (m_grouping.IsEnabled())
+		rItem.top--;
+
 	GetClientRect(&rClient);
 
 	// some problems with drop-highlighting items during drag and drop
@@ -1365,7 +1378,12 @@ int CEnListCtrl::CalcItemHeight() const
 	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
 	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
 
-	return max(nBaseHeight, max(m_nMinItemHeight, nFontHeight));
+	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
+
+	if (m_grouping.IsEnabled())
+		nItemHeight--;
+
+	return nItemHeight;
 }
 
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -1507,6 +1525,9 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 	// which is weird so we do a bit of trickery
 	if (nCol == 0)
 		rCell.left = -GetScrollPos(SB_HORZ);
+
+	if (m_grouping.IsEnabled())
+		rCell.top--;
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
@@ -1551,18 +1572,41 @@ BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = CDRF_DODEFAULT;
-	LPNMLVCUSTOMDRAW pLVCD = (LPNMLVCUSTOMDRAW)pNMHDR;
+	LVCUSTOMDRAW* pLVCD = (LVCUSTOMDRAW*)pNMHDR;
 
 	if (pLVCD->nmcd.dwDrawStage == CDDS_PREPAINT)
 	{
-		if (m_grouping.DrawGroupHeader(pLVCD/*, m_crGroupBkgnd*/))
+		if (pLVCD->dwItemType == LVCDI_GROUP)
 		{
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
+			CRect rRow(pLVCD->rcText);
+			rRow.OffsetRect(0, -2);
+
+			DrawGroupHeader(pDC, 
+							rRow,
+							m_grouping.GetGroupHeaderText(pLVCD->nmcd.dwItemSpec),
+							m_grouping.GetGroupHeaderBackColor());
+
+			if (m_bHorzGrid)
+			{
+				if (m_bVertGrid)
+					rRow.right = pLVCD->nmcd.rc.right;
+
+				GraphicsMisc::DrawHorzLine(pDC, 0, rRow.right, rRow.bottom, ELC_GRIDCOLOR);
+			}
+
 			*pResult = CDRF_SKIPDEFAULT;
 			return TRUE;
 		}
 	}
 
 	return FALSE;
+}
+
+void CEnListCtrl::DrawGroupHeader(CDC* pDC, CRect& rRow, const CString& sText, COLORREF crBack)
+{
+	GraphicsMisc::DrawGroupHeaderRow(pDC, *this, rRow, sText, CLR_NONE, crBack);
 }
 
 void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
