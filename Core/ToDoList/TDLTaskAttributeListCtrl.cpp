@@ -3219,27 +3219,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(int nKeyPres
 		break;
 
 	case VK_NEXT:	
-		{
-// 			int nFirst = GetFirstVisibleItem();
-// 			int nLast = GetLastVisibleItem();
-// 
-// 			if ((nFrom > nFirst) && (nFrom < nLast))
-// 				nFrom = nFirst;
-
-			nNext = (nFrom + GetPageSize(nFrom, TRUE));
-		}
+		nNext = (nFrom + GetPageSize(nFrom, TRUE));
 		break;
 
 	case VK_PRIOR:	
-		{
-// 			int nFirst = GetFirstVisibleItem();
-// 			int nLast = GetLastVisibleItem();
-// 
-// 			if ((nFrom > nFirst) && (nFrom < nLast))
-// 				nFrom = nLast;
-
-			nNext = (nFrom - GetPageSize(nFrom, FALSE));
-		}
+		nNext = (nFrom - GetPageSize(nFrom, FALSE));
 		break;
 
 	case VK_END:	
