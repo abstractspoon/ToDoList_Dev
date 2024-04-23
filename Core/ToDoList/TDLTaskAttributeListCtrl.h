@@ -262,19 +262,27 @@ protected:
 private:
 	struct SORTEDGROUPEDITEM
 	{
+		SORTEDGROUPEDITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
+
 		DWORD dwItemData;
-		int nVPos;
+		int nGroupID;
+		CRect rItem;
 	};
 
 	class CSortedGroupedItemArray : CArray<SORTEDGROUPEDITEM, SORTEDGROUPEDITEM&>
 	{
 	public:
+		CSortedGroupedItemArray(const CEnListCtrl& list) : m_list(list) {}
+
 		void Clear() { RemoveAll(); }
-		int GetNextItem(const CEnListCtrl& list, int nKeyPress);
+		int GetNextItem(int nKeyPress);
 
 	protected:
-		void CheckBuildArray(const CEnListCtrl& list);
-		void OffsetPositions(int nItem);
+		const CEnListCtrl& m_list;
+
+	protected:
+		int CheckBuildArray();
+		int GetPageSize(int nFrom, BOOL bDown) const;
 		int FindItem(DWORD dwItemData) const;
 
 		static int GroupedItemSortProc(const void* item1, const void* item2);

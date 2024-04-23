@@ -145,7 +145,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_dropFiles(this),
 	m_bSplitting(FALSE),
 	m_fAttribColProportion(0.5f),
-	m_bCategorized(FALSE)
+	m_bCategorized(FALSE),
+	m_aSortedGroupedItems(*this)
 {
 	SetSortColumn(0, FALSE);
 
@@ -343,6 +344,12 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("SortAscending"), TRUE);
 	m_bCategorized = prefs.GetProfileInt(szKey, _T("Categorized"), FALSE);
+
+	if (GetSafeHwnd())
+	{
+		EnableGroupView(m_bCategorized);
+		Populate();
+	}
 }
 
 void CTDLTaskAttributeListCtrl::SetCompletionStatus(const CString& sStatus)
@@ -387,7 +394,18 @@ void CTDLTaskAttributeListCtrl::OnAttributeVisibilityChange()
 
 BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
-	return ((nAttribID == TDCA_TASKNAME) || m_vis.IsEditFieldVisible(nAttribID));
+	switch (nAttribID)
+	{
+	case TDCA_PROJECTNAME:
+	case TDCA_COMMENTS:
+		return FALSE;
+
+	case TDCA_TASKNAME:
+		return TRUE;
+	}
+
+	// All else
+	return m_vis.IsEditFieldVisible(nAttribID);
 }
 
 int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID)
@@ -3137,7 +3155,7 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		// in the group (or the last item in the previous group).
 		// And because this appears to the unwary as a bug I work 
 		// around it by handling all such keyboard navigation.
-		int nNextSel = m_aSortedGroupedItems.GetNextItem(*this, nChar);
+		int nNextSel = m_aSortedGroupedItems.GetNextItem(nChar);
 
 		if (nNextSel != -1)
 		{
@@ -3156,112 +3174,134 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray(const CEnListCtrl& list)
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::CheckBuildArray()
 {
 	if (!GetSize())
 	{
-		int nNumItems = list.GetItemCount(), nItem = nNumItems;
-		SetSize(nItem);
+		int nScrollPos = m_list.GetScrollPos(SB_VERT);
+		int nNumItems = m_list.GetItemCount(), nItem = nNumItems;
+
+		SetSize(nNumItems);
 
 		while (nItem--)
 		{
-			CRect rItem;
-			list.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+			SORTEDGROUPEDITEM& sgi = GetAt(nItem);
 
-			GetAt(nItem).dwItemData = list.GetItemData(nItem);
-			GetAt(nItem).nVPos = rItem.top;
+			sgi.dwItemData = m_list.GetItemData(nItem);
+			sgi.nGroupID = m_list.GetGrouping().GetItemGroupId(nItem);
+
+			m_list.GetItemRect(nItem, sgi.rItem, LVIR_BOUNDS);
 		}
 
 		Misc::SortArrayT<SORTEDGROUPEDITEM>(*this, GroupedItemSortProc);
 	}
+
+	return GetSize();
 }
 
-void CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::OffsetPositions(int nTopItem)
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(int nKeyPress)
 {
-	int nOffset = GetAt(nTopItem).nVPos, nItem = GetSize();
-
-	while (nItem--)
-		GetAt(nItem).nVPos -= nOffset;
-}
-
-int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetNextItem(const CEnListCtrl& list, int nKeyPress)
-{
-	CheckBuildArray(list);
+	if (!CheckBuildArray())
+		return -1;
 
 	// Find out where we are
-	int nFrom = FindItem(list.GetItemData(list.GetCurSel()));
-	int nNumItems = list.GetItemCount();
-	int nStep = 0;
+	int nCurSel = m_list.GetCurSel(), nFrom = FindItem(m_list.GetItemData(nCurSel));
+	int nNumItems = GetSize(), nNext = -1;
 
 	switch (nKeyPress)
 	{
 	case VK_DOWN:	
-		nStep = 1;	
+		nNext = (nFrom + 1);	
 		break;
 	
 	case VK_UP:		
-		nStep = -1;	
+		nNext = (nFrom - 1);	
 		break;
 
 	case VK_NEXT:	
 		{
-			nStep = list.GetCountPerPage();
-			
-			int nTop = FindItem(list.GetItemData(list.GetTopIndex()));
+// 			int nFirst = GetFirstVisibleItem();
+// 			int nLast = GetLastVisibleItem();
+// 
+// 			if ((nFrom > nFirst) && (nFrom < nLast))
+// 				nFrom = nFirst;
 
-			if (nFrom > nTop)
-				nFrom = nTop;
+			nNext = (nFrom + GetPageSize(nFrom, TRUE));
 		}
 		break;
 
 	case VK_PRIOR:	
 		{
-			nStep = -list.GetCountPerPage();
+// 			int nFirst = GetFirstVisibleItem();
+// 			int nLast = GetLastVisibleItem();
+// 
+// 			if ((nFrom > nFirst) && (nFrom < nLast))
+// 				nFrom = nLast;
+
+			nNext = (nFrom - GetPageSize(nFrom, FALSE));
 		}
 		break;
 
 	case VK_END:	
-		nStep = nNumItems;	
+		nNext = (nNumItems - 1);	
 		break;
 	
 	case VK_HOME:	
-		nStep = nNumItems;	
+		nNext = 0;	
 		break;
+
+	default:
+		return -1;
 	}
 
-	if (nStep == -1)
-		return -1;
+	nNext = min(max(0, nNext), (nNumItems - 1));
 
-// 	DWORD dwTopItemData = list.GetItemData(list.GetTopIndex());
-// 
-// 	OffsetPositions(nFrom);
-// 	
-// 	int nNext = (nFrom + nStep);
-// 
-// 	if (nStep > 0)
-// 	{
-// 		// Work forward from that point until we go off the bottom of the client rect
-// 		CRect rClient;
-// 		list.GetClientRect(rClient);
-// 
-// 		int nTo = min((nFrom + nStep), nNumItems - 1);
-// 
-// 		for (int nNext = nFrom; nNext < nTo; nNext++)
-// 		{
-// 			if ((GetAt(nNext).nVPos - GetAt(nFrom).nVPos) > rClient.Height())
-// 			{
-// 				// return the item before
-// 				nNext--;
-// 				return list.FindItemFromData(GetAt(nNext).dwItemData);
-// 			}
-// 		}
-// 	}
-// 	else
-// 	{
-// 		nNext = max(nNext, 0);
-// 	}
+	if (nNext == nFrom)
+		return nCurSel;
 
-	return -1;
+	return m_list.FindItemFromData(GetAt(nNext).dwItemData);
+}
+
+int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GetPageSize(int nFrom, BOOL bDown) const
+{
+	CRect rClient;
+	m_list.GetClientRect(rClient);
+
+	int nNumItems = GetSize(), nPageSize = 0;
+
+	if (bDown)
+	{
+		rClient.OffsetRect(0, GetAt(nFrom).rItem.top);
+
+		int nTo = (nFrom + m_list.GetCountPerPage());
+		nTo = min(nTo, nNumItems);
+
+		for (int nItem = nFrom; nItem < nTo; nItem++)
+		{
+			if (GetAt(nItem).rItem.bottom > rClient.bottom)
+				break;
+
+			nPageSize++;
+		}
+	}
+	else // Up
+	{
+		rClient.OffsetRect(0, (GetAt(nFrom).rItem.bottom - rClient.Height()));
+
+		int nTo = (nFrom - m_list.GetCountPerPage());
+		nTo = max(nTo, 0);
+
+		for (int nItem = nFrom; nItem >= nTo; nItem--)
+		{
+			if (GetAt(nItem).rItem.top < rClient.top)
+				break;
+
+			nPageSize++;
+		}
+	}
+	ASSERT(nPageSize > 0);
+
+	return (nPageSize - 1);
 }
 
 int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::FindItem(DWORD dwItemData) const
@@ -3283,6 +3323,6 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedItemArray::GroupedItemSortProc(cons
 	const SORTEDGROUPEDITEM* pItem1 = (const SORTEDGROUPEDITEM*)item1;
 	const SORTEDGROUPEDITEM* pItem2 = (const SORTEDGROUPEDITEM*)item2;
 
-	return (pItem1->nVPos - pItem2->nVPos);
+	return (pItem1->rItem.top - pItem2->rItem.top);
 }
 

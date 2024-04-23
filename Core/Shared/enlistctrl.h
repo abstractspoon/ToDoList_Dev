@@ -71,8 +71,15 @@ public:
 	CEnHeaderCtrl* GetHeader();
 	const CEnHeaderCtrl* GetHeader() const;
 
-	CListCtrlItemGrouping& GetGrouping();
+	CListCtrlItemGrouping& GetGrouping() { return m_grouping; }
 	const CListCtrlItemGrouping& GetGrouping() const { return m_grouping; }
+
+	void EnableHeaderTracking(BOOL bAllow = TRUE);
+	BOOL EnableGroupView(BOOL bEnable = TRUE);
+	void EnableTooltipCtrl(BOOL bEnable = TRUE);
+	void EnableSorting(BOOL bEnable = TRUE) { m_bSortingEnabled = bEnable; }
+	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
+	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
 
 	void SetMulSel(int nIndexStart, int nIndexEnd, BOOL bSelect = TRUE, BOOL bNotifyParent = FALSE); // multiple selection
 	void SetItemFocus(int nIndex, BOOL bFocused); 
@@ -84,8 +91,6 @@ public:
 	void SelectAll();
 	void ClearAll();
 	BOOL DeleteAllItems();
-	void EnableHeaderTracking(BOOL bAllow = TRUE);
-	BOOL EnableGroupView(BOOL bEnable = TRUE);
 	void ShowGrid(BOOL bVert, BOOL bHorz);
 	void IsShowingGrid(BOOL& bVert, BOOL& bHorz) const { bVert = m_bVertGrid; bHorz = m_bHorzGrid; }
 	void SetView(int nView);
@@ -93,7 +98,6 @@ public:
 	int GetFocusedItem() const;
 	int FindItemFromData(DWORD dwItemData) const;
 	int FindItemFromLabel(CString sLabel, BOOL bExact = TRUE, int nFromIndex = 0) const;
-	void EnableTooltipCtrl(BOOL bEnable = TRUE);
 	BOOL SetTooltipCtrlText(CString sText);
 	BOOL SetMinItemHeight(int nHeight);
 	int GetMinItemHeight() const { return m_nMinItemHeight; }
@@ -107,10 +111,7 @@ public:
 	void SetSortAscending(BOOL bAscending) { m_bSortAscending = bAscending; }
 	BOOL GetSortAscending() const { return m_bSortAscending; }
 	void SetSortEmptyValuesBelow(BOOL bBelow) { m_bSortEmptyBelow = bBelow; }
-	void EnableSorting(BOOL bEnable = TRUE) { m_bSortingEnabled = bEnable; }
 	void SetItemIndent(int nItem, int nIndent);
-	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
-	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
 
 	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
 	virtual int GetCurSel() const;

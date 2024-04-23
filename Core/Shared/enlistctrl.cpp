@@ -293,13 +293,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl message handlers
 
-CListCtrlItemGrouping& CEnListCtrl::GetGrouping() 
-{ 
-	VERIFY(EnableGroupView());
-
-	return m_grouping; 
-}
-
 BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 {
 	if (!Misc::StateChanged(bEnable, m_grouping.IsEnabled()))
