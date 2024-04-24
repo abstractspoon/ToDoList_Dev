@@ -3298,22 +3298,26 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::SortProc(const void* it
 
 CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::CSortedGroupedHeaderArray(BOOL bSortAscending)
 {
-	static ATTRIBCATEGORY ATTRIBCATEGORIES[] =
+	static const UINT ATTRIBCATEGORIES[][2] =
 	{
-		{ TDCAC_OTHER,			CEnString(IDS_ATTRIBCAT_OTHER) },
-		{ TDCAC_CUSTOM,			CEnString(IDS_ATTRIBCAT_CUSTOM) },
-		{ TDCAC_DATETIME,		CEnString(IDS_ATTRIBCAT_DATETIME) },
-		{ TDCAC_TEXT,			CEnString(IDS_ATTRIBCAT_TEXT) },
-		{ TDCAC_NUMERIC,		CEnString(IDS_ATTRIBCAT_NUMERIC) },
-		{ TDCAC_TIMEPERIOD,		CEnString(IDS_ATTRIBCAT_TIMEPERIOD) },
+		{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
+		{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
+		{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
+		{ TDCAC_TEXT,			IDS_ATTRIBCAT_TEXT },
+		{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
+		{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
 	};
 
-	const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / sizeof(ATTRIBCATEGORIES[0]));
+	const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / (2 * sizeof(UINT)));
+	SetSize(NUM_ATTRIBCAT);
 
 	for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
-		Add(ATTRIBCATEGORIES[nCat]);
+	{
+		ElementAt(nCat).nCategory = (TDC_ATTRIBUTECATEGORY)ATTRIBCATEGORIES[nCat][0];
+		ElementAt(nCat).sName = CEnString(ATTRIBCATEGORIES[nCat][1]);
+	}
 
-	Misc::SortArrayT(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
+	Misc::SortArrayT<ATTRIBCATEGORY>(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
 }
 
 int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::AscendingSortProc(const void* item1, const void* item2)
