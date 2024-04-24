@@ -377,8 +377,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_SORT, OnSort)
 	ON_COMMAND(ID_SORTBY_MULTI, OnSortMulti)
 	ON_COMMAND(ID_TABCTRL_PREFERENCES, OnTabctrlPreferences)
-	ON_COMMAND(ID_TASKLIST_COPYCOLUMNVALUES, OnTasklistCopyColumnValues)
+	ON_COMMAND(ID_TASKLIST_COPYCOLUMNVALUES, OnTasklistCopyAllColumnValues)
 	ON_COMMAND(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnTasklistCopySelectedTaskColumnValues)
+	ON_COMMAND(ID_TASKLIST_PASTECOLUMNVALUES, OnTasklistPasteColumnValues)
+	ON_COMMAND(ID_TASKLIST_PASTESELTASKSCOLUMNVALUES, OnTasklistPasteValuesIntoSelectedTaskInColumn)
 	ON_COMMAND(ID_TASKLIST_CUSTOMCOLUMNS, OnTasklistCustomColumns)
 	ON_COMMAND(ID_TASKLIST_SELECTCOLUMNS, OnTasklistSelectColumns)
 	ON_COMMAND(ID_TOOLS_ADDTOSOURCECONTROL, OnToolsAddtoSourceControl)
@@ -621,8 +623,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_SEND_SELTASKS, OnUpdateSendSelectedTasks)
 	ON_UPDATE_COMMAND_UI(ID_SHOWTIMELOGFILE, OnUpdateShowTimelogfile)
 	ON_UPDATE_COMMAND_UI(ID_SORT, OnUpdateSort)
-	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYCOLUMNVALUES, OnUpdateTasklistCopyColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYCOLUMNVALUES, OnUpdateTasklistCopyAllColumnValues)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnUpdateTasklistCopySelectedTaskColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_PASTECOLUMNVALUES, OnUpdateTasklistPasteColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_PASTESELTASKSCOLUMNVALUES, OnUpdateTasklistPasteValuesIntoSelectedTaskColumn)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_CUSTOMCOLUMNS, OnUpdateTasklistCustomcolumns)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ADDTOSOURCECONTROL, OnUpdateToolsAddtoSourceControl)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANALYSELOGGEDTIME, OnUpdateToolsAnalyseLoggedTime)
@@ -13890,45 +13894,70 @@ LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
 	return DoPreferences(PREFPAGE_SHORTCUT);
 }
 
-void CToDoListWnd::OnTasklistCopyColumnValues() 
+void CToDoListWnd::OnTasklistCopyAllColumnValues() 
 {
-	OnTasklistCopyColumnValues(FALSE);
+	OnTasklistCopyPasteColumnValues(TRUE, FALSE);
 }
 
-void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateTasklistCopyAllColumnValues(CCmdUI* pCmdUI) 
 {
-	OnUpdateTasklistCopyColumnValues(pCmdUI, FALSE);
+	OnUpdateTasklistCopyPasteColumnValues(pCmdUI, TRUE, FALSE);
 }
 
 void CToDoListWnd::OnTasklistCopySelectedTaskColumnValues() 
 {
-	OnTasklistCopyColumnValues(TRUE);
+	OnTasklistCopyPasteColumnValues(TRUE, TRUE);
 }
 
 void CToDoListWnd::OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI) 
 {
-	OnUpdateTasklistCopyColumnValues(pCmdUI, TRUE);
+	OnUpdateTasklistCopyPasteColumnValues(pCmdUI, TRUE, TRUE);
 }
 
-void CToDoListWnd::OnTasklistCopyColumnValues(BOOL bSelectedTasks)
+void CToDoListWnd::OnTasklistCopyPasteColumnValues(BOOL bCopy, BOOL bSelectedTasks)
 {
 	ASSERT(m_nContextColumnID != TDCC_NONE);
 
-	VERIFY(GetToDoCtrl().CopyTaskColumnValues(m_nContextColumnID, bSelectedTasks));
+	if (bCopy)
+		VERIFY(GetToDoCtrl().CopyTaskColumnValues(m_nContextColumnID, bSelectedTasks));
+	else
+		VERIFY(GetToDoCtrl().PasteValuesIntoTaskColumn(m_nContextColumnID, bSelectedTasks));
 }
 
-void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
+void CToDoListWnd::OnTasklistPasteColumnValues()
+{
+	OnTasklistCopyPasteColumnValues(FALSE, FALSE);
+}
+
+void CToDoListWnd::OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI)
+{
+	OnUpdateTasklistCopyPasteColumnValues(pCmdUI, FALSE, FALSE);
+}
+
+void CToDoListWnd::OnTasklistPasteValuesIntoSelectedTaskInColumn()
+{
+	OnTasklistCopyPasteColumnValues(FALSE, TRUE);
+}
+
+void CToDoListWnd::OnUpdateTasklistPasteValuesIntoSelectedTaskColumn(CCmdUI* pCmdUI)
+{
+	OnUpdateTasklistCopyPasteColumnValues(pCmdUI, FALSE, TRUE);
+}
+
+void CToDoListWnd::OnUpdateTasklistCopyPasteColumnValues(CCmdUI* pCmdUI, BOOL bCopy, BOOL bSelectedTasks)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	BOOL bEnable = tdc.CanCopyTaskColumnValues(m_nContextColumnID, bSelectedTasks);
+	BOOL bEnable = (bCopy ? tdc.CanCopyTaskColumnValues(m_nContextColumnID, bSelectedTasks) :
+							tdc.CanPasteValuesIntoTaskColumn(m_nContextColumnID, bSelectedTasks));
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)
 	{
-		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES : IDS_TASKLIST_COPYCOLUMNVALUES);
-		CString sColLabel = tdc.GetColumnName(m_nContextColumnID);
+		UINT nMenuStrID = (bCopy ? (bSelectedTasks ? IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES : IDS_TASKLIST_COPYCOLUMNVALUES) :
+								   (bSelectedTasks ? IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES : IDS_TASKLIST_PASTECOLUMNVALUES));
 
+		CString sColLabel = tdc.GetColumnName(m_nContextColumnID);
 		pCmdUI->SetText(CEnString(nMenuStrID, sColLabel));
 	}
 }

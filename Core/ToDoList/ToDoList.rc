@@ -3976,16 +3976,26 @@ BEGIN
             MENUITEM "Task &Path",                  ID_EDIT_COPYAS_PATH
         END
         MENUITEM SEPARATOR
-        MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Values from Column", 
-                                                ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
-
-        MENUITEM SEPARATOR
         MENUITEM "Paste as Subtask",            ID_EDIT_PASTESUB
         MENUITEM "Paste &Below",                ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
         MENUITEM "Paste Task Attrib&utes",      ID_EDIT_PASTEATTRIBUTES
+        MENUITEM SEPARATOR
+        POPUP "Column Operations"
+        BEGIN
+            MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
+
+            MENUITEM "Copy Selected Values from Column", 
+                                                    ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+
+            MENUITEM "",                            1
+            MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
+
+            MENUITEM "Paste Values into Selected Tasks in Column", 
+                                                    ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
+
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Delete Task",                ID_DELETETASK
         MENUITEM SEPARATOR
@@ -4058,14 +4068,21 @@ BEGIN
     END
     POPUP "TasklistHeader"
     BEGIN
-        MENUITEM "Task Attribute Visibility...", ID_TASKLIST_SELECTCOLUMNS
+        MENUITEM "Task &Attribute Visibility...", ID_TASKLIST_SELECTCOLUMNS
         MENUITEM "&Custom Task Attributes...",  ID_TASKLIST_CUSTOMCOLUMNS
         MENUITEM SEPARATOR
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
-        MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Values from Column", 
+        MENUITEM "C&opy All Values from Column", 
+                                                ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy &Selected Values from Column", 
                                                 ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+
+        MENUITEM SEPARATOR
+        MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
+
+        MENUITEM "Paste Values into Selected Tasks in Column", 
+                                                ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
@@ -5857,6 +5874,9 @@ BEGIN
     IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
     IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
                             "Copy Selected Values from '%s' Column"
+    IDS_TASKLIST_PASTECOLUMNVALUES "Paste Values into '%s' Column"
+    IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES 
+                            "Paste Values into Selected Tasks in '%s' Column"
     IDS_TDLBC_TASK          "Task"
 END
 

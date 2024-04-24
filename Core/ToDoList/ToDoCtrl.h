@@ -21,7 +21,6 @@
 #include "tdcFindReplace.h"
 #include "tdcdialoghelper.h"
 #include "tdlinfotipctrl.h"
-//#include "tdltaskattributelistctrl.h"
 #include "tdltaskattributectrl.h"
 
 #include "..\shared\runtimedlg.h"
@@ -292,8 +291,6 @@ public:
 	BOOL CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
 	BOOL CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	CString GetColumnName(TDC_COLUMN nColID) const { return m_taskTree.GetColumnName(nColID); }
 
 	BOOL CanClearSelectedTaskFocusedAttribute() const;
@@ -357,6 +354,10 @@ public:
 	void ClearCopiedItem() const;
 	BOOL PasteTasks(TDC_PASTE nWhere, BOOL bAsRef);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
+	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
 
 	void ResetFileVersion(unsigned int nTo = 0) { m_nFileVersion = max(nTo, 0); }
 	DWORD GetFileVersion() const { return m_nFileVersion == 0 ? 1 : m_nFileVersion; }

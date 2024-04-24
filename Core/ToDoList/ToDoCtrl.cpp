@@ -6334,6 +6334,59 @@ int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, 
 	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
 }
 
+BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	if (IsReadOnly())
+		return TRUE;
+
+	if (!CClipboard::HasText())
+		return FALSE;
+
+	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
+		return FALSE;
+
+	// Weed out non-pastable columns
+	switch (nColID)
+	{
+	case TDCC_POSITION:
+	case TDCC_ID:
+	case TDCC_CREATIONDATE:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODDATE:
+	case TDCC_DEPENDENCY:
+	case TDCC_RECURRENCE:
+	case TDCC_RECENTEDIT:
+	case TDCC_TIMEREMAINING:
+	case TDCC_PARENTID:
+	case TDCC_PATH:
+	case TDCC_SUBTASKDONE:
+	case TDCC_CREATIONTIME:
+	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
+		return FALSE;
+	}
+
+	if (bSelectedTasksOnly)
+		return CanEditSelectedTask(TDC::MapColumnToAttribute(nColID));
+
+	// else check that tasks corresponding to non-empty values are editable
+	CStringArray aValues;
+	int nNumVal = Misc::SplitLines(CClipboard().GetText(), aValues);
+
+
+
+	// TODO
+	return TRUE;
+}
+
+BOOL CToDoCtrl::PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+{
+	// TODO
+
+	return false;
+}
+
 BOOL CToDoCtrl::CopySelectedTasks() const
 {
 	if (!GetSelectedTaskCount())
