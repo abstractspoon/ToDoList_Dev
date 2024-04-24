@@ -304,8 +304,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_MOVECOL_UP           "\nMove Column Up"
-    ID_MOVECOL_DOWN         "\nMove Column Down"
     IDS_STATUSATTRIB        "Status"
     IDS_CUSTOMATTRIB        "%s (Custom)"
     IDS_COLUMNTITLE         "Column Title"
@@ -406,7 +404,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_DISPLAY_TIMEREMAINING_SHORT "Rem."
     IDS_DISPLAY_LOCK        "Lock"
-    IDS_NOONE               "<no one>"
+    IDS_NOBODY              "<nobody>"
     IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
     IDS_OPTIONS_HIDENOGROUP "Hide <none> group"
 END

@@ -101,8 +101,6 @@
 #define IDS_CREATEDEPEND_TITLE          32787
 #define IDS_EDITDEPEND_TITLE            32788
 #define IDS_DELETEDEPEND_TITLE          32789
-#define ID_MOVECOL_UP                   34235
-#define ID_MOVECOL_DOWN                 34236
 #define IDS_STATUSATTRIB                34237
 #define IDS_CUSTOMATTRIB                34238
 #define IDS_COLUMNTITLE                 34239
@@ -173,7 +171,7 @@
 #define IDS_DISPLAY_TIMEREMAINING       57727
 #define IDS_DISPLAY_TIMEREMAINING_SHORT 57728
 #define IDS_DISPLAY_LOCK                57729
-#define IDS_NOONE                       57730
+#define IDS_NOBODY                      57730
 #define IDS_OPTIONS_SORTGROUPSASCENDING 57731
 #define IDS_OPTIONS_HIDENOGROUP         57732
 
