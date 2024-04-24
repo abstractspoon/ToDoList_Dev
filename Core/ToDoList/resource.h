@@ -2511,6 +2511,7 @@
 #define IDS_ATTRIBCAT_DATETIME          51641
 #define IDS_ATTRIBCAT_TIMEPERIOD        51642
 #define IDS_ATTRIBCAT_CUSTOM            51643
+#define IDS_TDLBC_TIMEREMAINING         51644
 
 // Next default values for new objects
 // 

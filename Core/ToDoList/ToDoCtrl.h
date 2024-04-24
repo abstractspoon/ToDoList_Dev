@@ -356,7 +356,7 @@ public:
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
 	BOOL PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
 
 	void ResetFileVersion(unsigned int nTo = 0) { m_nFileVersion = max(nTo, 0); }
@@ -514,6 +514,7 @@ protected:
 	DWORD m_dwEditTitleTaskID;
 
 	mutable DWORD m_nFileVersion;
+	mutable TDCCOLUMNVALUES m_copiedColumnValues;
 
 	BOOL m_bModified;
 	BOOL m_bArchive;
@@ -657,6 +658,7 @@ protected:
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	virtual int GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const;
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
@@ -733,7 +735,7 @@ protected:
 	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
 
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
-	TDC_ATTRIBUTE MapCtrlIDToAttribute(UINT nCtrlID) const;
+	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_COLUMN nColID, BOOL bResolveCustomCols = TRUE) const;
 
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;

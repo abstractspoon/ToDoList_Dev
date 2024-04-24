@@ -3127,6 +3127,28 @@ public:
 	void Trace() const {}
 #endif
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct TDCCOLUMNVALUES
+{
+	TDCCOLUMNVALUES() : nColumnID(TDCC_NONE) {}
+
+	void Clear() 
+	{ 
+		nColumnID = TDCC_NONE;
+		aValues.RemoveAll(); 
+	}
+
+	BOOL IsEmpty() const
+	{
+		return ((nColumnID == TDCC_NONE) || (aValues.GetSize() == 0));
+	}
+
+	TDC_COLUMN nColumnID;
+	CStringArray aValues;
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // AFX_TDCSTRUCT_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

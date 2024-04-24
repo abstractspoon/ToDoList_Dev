@@ -754,6 +754,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_LASTMODBY:
 	case TDCA_ID:
 	case TDCA_PARENTID:
+	case TDCA_TIMEREMAINING:
 		break; // ILCT_TEXT;
 
 	case TDCA_TIMEESTIMATE:

@@ -506,6 +506,37 @@ UINT TDCCUSTOMATTRIBUTEDEFINITION::GetDefaultHorzAlignment(DWORD dwAttribType)
 	return DT_LEFT;
 }
 
+TDC_ATTRIBUTECATEGORY TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(DWORD dwAttribType)
+{
+	switch (dwAttribType & TDCCA_DATAMASK)
+	{
+	case TDCCA_FILELINK:
+	case TDCCA_STRING:
+		return TDCAC_TEXT;
+
+	case TDCCA_DATE:
+		return TDCAC_DATETIME;
+
+	case TDCCA_INTEGER:
+	case TDCCA_DOUBLE:
+	case TDCCA_FRACTION:
+		return TDCAC_NUMERIC;
+
+	case TDCCA_TIMEPERIOD:
+		return TDCAC_TIMEPERIOD;
+
+	case TDCCA_BOOL:
+	case TDCCA_ICON:
+		return TDCAC_OTHER;
+
+	case TDCCA_CALCULATION:
+		break;
+	}
+
+	ASSERT(0);
+	return TDCAC_NONE;
+}
+
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultHorzAlignment() const
 {
 	return (nHorzAlignment == GetDefaultHorzAlignment(dwAttribType));

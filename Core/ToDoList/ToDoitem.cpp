@@ -131,7 +131,7 @@ BOOL TDCTIMEPERIOD::AddTime(const TDCTIMEPERIOD& time)
 
 BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
 {
-	if (!IsValidUnits(nTimeUnits) || (dTime < 0.0))
+	if (!IsValidUnits(nTimeUnits))
 	{
 		ASSERT(0);
 		return FALSE;

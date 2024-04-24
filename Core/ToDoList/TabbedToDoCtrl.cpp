@@ -5836,6 +5836,24 @@ int CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 	return 0;
 }
 
+int CTabbedToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::GetColumnTaskIDs(nFrom, nTo, aTaskIDs);
+
+	case FTCV_TASKLIST:
+		return m_taskList.GetColumnTaskIDs(aTaskIDs, nFrom, nTo);
+	}
+	
+	// all else (for now)
+	return 0;
+}
+
 BOOL CTabbedToDoCtrl::ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd)
 {
 	IUIExtensionWindow* pExt = GetExtensionWnd(nView);

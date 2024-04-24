@@ -1078,6 +1078,7 @@ int CTDLTaskCtrlBase::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTask
 		return 0;
 
 	CDWordArray aTaskIDs;
+	CWaitCursor cursor;
 
 	if (bSelectedTasksOnly)
 	{
@@ -1341,15 +1342,36 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
 
-int CTDLTaskCtrlBase::GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const
+int CTDLTaskCtrlBase::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 {
+	aTaskIDs.RemoveAll();
+
 	int nNumItems = m_lcColumns.GetItemCount();
-	aTaskIDs.SetSize(nNumItems);
+	
+	if (nNumItems == 0)
+		return 0;
 
-	for(int nItem = 0; nItem < nNumItems; nItem++)
-		aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	nFrom = max(0, min(nFrom, (nNumItems - 1)));
 
-	return nNumItems;
+	if (nTo == -1)
+		nTo = (nNumItems - 1);
+	else
+		nTo = max(0, min(nTo, (nNumItems - 1)));
+
+	aTaskIDs.SetSize(abs(nTo - nFrom) + 1);
+
+	if (nFrom <= nTo)
+	{
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	}
+	else
+	{
+		for (int nItem = nFrom; nItem >= nTo; nItem--)
+			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	}
+
+	return aTaskIDs.GetSize();
 }
 
 int CTDLTaskCtrlBase::RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const
@@ -1386,7 +1408,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	// Get a list of IDs from the visible columns
 	CDWordArray aTaskIDs;
-	GetColumnItemsTaskIDs(aTaskIDs);
+	GetColumnTaskIDs(aTaskIDs);
 	
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
@@ -4306,7 +4328,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 
 							CDWordArray aTaskIDs;
-							GetColumnItemsTaskIDs(aTaskIDs);
+							GetColumnTaskIDs(aTaskIDs);
 
 							int nColWidth = CalcColumnWidth(nItem, &dc, aTaskIDs);
 							

@@ -3231,6 +3231,21 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Paste Task Attrib&utes",      ID_EDIT_PASTEATTRIBUTES
         MENUITEM SEPARATOR
+        POPUP "Column Operations"
+        BEGIN
+            MENUITEM "Copy All Values from Column", ID_ACTIVATEVIEW_UIEXTENSION10
+
+            MENUITEM "Copy Selected Values from Column", 
+                                                    ID_ACTIVATEVIEW_UIEXTENSION11
+
+            MENUITEM "",                            1
+            MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
+
+            MENUITEM "Paste Values into Selected Tasks in Column", 
+                                                    ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
+
+        END
+        MENUITEM SEPARATOR
         MENUITEM "&Delete Selected Task",       ID_DELETETASK
         MENUITEM "Delete All Tasks",            ID_DELETEALLTASKS
         MENUITEM SEPARATOR
@@ -5874,9 +5889,10 @@ BEGIN
     IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
     IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
                             "Copy Selected Values from '%s' Column"
-    IDS_TASKLIST_PASTECOLUMNVALUES "Paste Values into '%s' Column"
+    IDS_TASKLIST_PASTECOLUMNVALUES 
+                            "Paste Values from '%s' Column to '%s' Column"
     IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES 
-                            "Paste Values into Selected Tasks in '%s' Column"
+                            "Paste Values from '%s' Column to Selected Tasks in '%s' Column"
     IDS_TDLBC_TASK          "Task"
 END
 
@@ -5961,6 +5977,7 @@ BEGIN
     IDS_ATTRIBCAT_DATETIME  "Date/Time"
     IDS_ATTRIBCAT_TIMEPERIOD "Time Period"
     IDS_ATTRIBCAT_CUSTOM    "Custom"
+    IDS_TDLBC_TIMEREMAINING "Time Remaining"
 END
 
 #endif    // English (Australia) resources

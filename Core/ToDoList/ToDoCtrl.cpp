@@ -6326,6 +6326,9 @@ BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 		return FALSE;
 
 	// else
+	m_copiedColumnValues.nColumnID = nColID;
+	m_copiedColumnValues.aValues.Copy(aValues);
+
 	return CClipboard(GetSafeHwnd()).SetText(Misc::FormatArray(aValues, '\n', TRUE));
 }
 
@@ -6334,12 +6337,12 @@ int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, 
 	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
 }
 
-BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
 {
 	if (IsReadOnly())
-		return TRUE;
+		return FALSE;
 
-	if (!CClipboard::HasText())
+	if (m_copiedColumnValues.IsEmpty())
 		return FALSE;
 
 	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
@@ -6367,17 +6370,39 @@ BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 		return FALSE;
 	}
 
+	// Check column compatibility
+	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(m_copiedColumnValues.nColumnID);
+	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nColID);
+	
+	if ((nToCat != nFromCat) && (nToCat != TDCAC_TEXT) && (nToCat != TDCAC_OTHER))
+		return FALSE;
+
+	CWaitCursor cursor;
+
 	if (bSelectedTasksOnly)
-		return CanEditSelectedTask(TDC::MapColumnToAttribute(nColID));
+	{
+		if (!CanEditSelectedTask(TDC::MapColumnToAttribute(nColID)))
+			return FALSE;
+	}
+	else // Check that as many tasks as there are values are NOT locked
+	{
+		CDWordArray aTaskIDs;
+		int nID = GetColumnTaskIDs(0, m_copiedColumnValues.aValues.GetSize(), aTaskIDs);
 
-	// else check that tasks corresponding to non-empty values are editable
-	CStringArray aValues;
-	int nNumVal = Misc::SplitLines(CClipboard().GetText(), aValues);
+		while (nID--)
+		{
+			if (m_calculator.IsTaskLocked(aTaskIDs[nID]))
+				return FALSE;
+		}
+	}
 
-
-
-	// TODO
+	nFromColID = m_copiedColumnValues.nColumnID;
 	return TRUE;
+}
+
+int CToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const 
+{ 
+	return m_taskTree.GetColumnTaskIDs(aTaskIDs, nFrom, nTo); 
 }
 
 BOOL CToDoCtrl::PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
@@ -6865,20 +6890,31 @@ int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStrin
 	return (aLocalDepends.GetSize() + aOtherDepends.GetSize());
 }
 
-TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
+TDC_ATTRIBUTECATEGORY CToDoCtrl::GetAttributeCategory(TDC_COLUMN nColID, BOOL bResolveCustomCols) const
 {
-	if (nCtrlID == 0)
-		return TDCA_NONE;
-
-	// pick up any stragglers
-	switch (nCtrlID)
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 	{
-	case IDC_PROJECTNAME:
-		return TDCA_PROJECTNAME;
+		if (bResolveCustomCols)
+		{
+			DWORD dwAttribType = m_aCustomAttribDefs.GetAttributeDataType(nColID);
+			return TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(dwAttribType);
+		}
+
+		// else
+		return TDCAC_CUSTOM;
 	}
 
-	// Not everything is an attribute field
-	return TDCA_NONE;
+	// Built-in attributes
+	int nAttribID = TDC::MapColumnToAttribute(nColID);
+
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	{
+		if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
+			return ATTRIBUTES[nAttrib].nCategory;
+	}
+
+	// All else
+	return TDCAC_NONE;
 }
 
 BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)

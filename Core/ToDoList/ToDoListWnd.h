@@ -620,7 +620,8 @@ protected:
 	void OnViewIncrementTaskViewFontSize(BOOL bLarger);
 	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
 	void OnTasklistCopyPasteColumnValues(BOOL bCopy, BOOL bSelectedTasks);
-	void OnUpdateTasklistCopyPasteColumnValues(CCmdUI* pCmdUI, BOOL bCopy, BOOL bSelectedTasks);
+	void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
+	void OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
 	void OnViewSelectedTask(BOOL bNext);
 
 	void OnViewShowHideAllBars(BOOL bShow);
