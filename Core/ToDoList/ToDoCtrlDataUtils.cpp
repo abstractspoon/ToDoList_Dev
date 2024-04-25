@@ -4765,13 +4765,25 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	return TRUE;
 }
 
-BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 
-	HTASKITEM hTask, const TDCGETTASKS& filter) const
+BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const
 {
-	ASSERT(pTDI);
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!pTDI)
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return ExportMatchingTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
+}
+
+BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks,
+													HTASKITEM hTask, const TDCGETTASKS& filter) const
+{
+	// sanity check
+	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	BOOL bDone = pTDI->IsDone();
 	BOOL bParent = pTDS->HasSubTasks();
@@ -4783,7 +4795,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 	BOOL bHtmlComments = filter.WantAttribute(TDCA_HTMLCOMMENTS);
 	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
 
-	if (pTDS->HasSubTasks())
+	if (bParent)
 		tasks.SetTaskIsParent(hTask);
 
 	// For references, export the 'real' task's attributes
