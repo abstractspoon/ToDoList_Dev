@@ -13921,7 +13921,7 @@ void CToDoListWnd::OnTasklistCopyPasteColumnValues(BOOL bCopy, BOOL bSelectedTas
 	if (bCopy)
 		VERIFY(GetToDoCtrl().CopyTaskColumnValues(m_nContextColumnID, bSelectedTasks));
 	else
-		VERIFY(GetToDoCtrl().PasteValuesIntoTaskColumn(m_nContextColumnID, bSelectedTasks));
+		VERIFY(GetToDoCtrl().PasteValuesToColumn(m_nContextColumnID, bSelectedTasks));
 }
 
 void CToDoListWnd::OnTasklistPasteColumnValues()
@@ -13965,7 +13965,7 @@ void CToDoListWnd::OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI, BOOL bSelec
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	TDC_COLUMN nFromColID = TDCC_NONE;
 
-	BOOL bEnable = tdc.CanPasteValuesIntoTaskColumn(m_nContextColumnID, bSelectedTasks, nFromColID);
+	BOOL bEnable = tdc.CanPasteValuesToColumn(m_nContextColumnID, bSelectedTasks, nFromColID);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)

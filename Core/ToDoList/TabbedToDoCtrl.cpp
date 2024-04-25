@@ -5818,7 +5818,7 @@ BOOL CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTask
 	return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly);
 }
 
-int CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+int CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -5826,10 +5826,10 @@ int CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
+		return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly, aTaskIDs, aValues);
 
 	case FTCV_TASKLIST:
-		return m_taskList.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
+		return m_taskList.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aTaskIDs, aValues);
 	}
 	
 	// all else (for now)

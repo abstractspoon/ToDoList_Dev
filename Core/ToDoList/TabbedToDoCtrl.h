@@ -246,7 +246,7 @@ protected:
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
-	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	virtual int GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const;
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);

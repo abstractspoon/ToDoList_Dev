@@ -1072,30 +1072,20 @@ BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelected
 	return (bSelectedTasksOnly ? HasSelection() : m_lcColumns.GetItemCount());
 }
 
-int CTDLTaskCtrlBase::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+int CTDLTaskCtrlBase::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const
 {
 	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
 		return 0;
 
-	CDWordArray aTaskIDs;
 	CWaitCursor cursor;
+	int nItem = 0;
 
 	if (bSelectedTasksOnly)
-	{
-		GetSelectedTaskIDs(aTaskIDs, FALSE);
-	}
+		nItem = GetSelectedTaskIDs(aTaskIDs, FALSE);
 	else
-	{
-		int nItem = m_lcColumns.GetItemCount();
-		aTaskIDs.SetSize(nItem);
+		nItem = GetColumnTaskIDs(aTaskIDs);
 
-		while (nItem--)
-			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
-	}
-
-	int nItem = aTaskIDs.GetSize();
 	ASSERT(nItem);
-	
 	aValues.SetSize(nItem);
 
 	while (nItem--)

@@ -1549,6 +1549,10 @@ BOOL TODOITEM::GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 	case TDCA_RECURRENCE:
 		ASSERT(0);
 		break;
+
+	default:
+		ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
+		break;
 	}
 
 	return !data.IsEmpty();

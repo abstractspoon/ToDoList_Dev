@@ -356,8 +356,8 @@ public:
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
-	BOOL PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
+	BOOL CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
+	BOOL PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
 
 	void ResetFileVersion(unsigned int nTo = 0) { m_nFileVersion = max(nTo, 0); }
 	DWORD GetFileVersion() const { return m_nFileVersion == 0 ? 1 : m_nFileVersion; }
@@ -515,7 +515,7 @@ protected:
 	DWORD m_dwEditTitleTaskID;
 
 	mutable DWORD m_nFileVersion;
-	mutable TDCCOLUMNVALUES m_copiedColumnValues;
+	mutable TDCCOLUMNVALUECOPY m_columnCopy;
 
 	BOOL m_bModified;
 	BOOL m_bArchive;
@@ -658,7 +658,7 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	virtual int GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const;
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);

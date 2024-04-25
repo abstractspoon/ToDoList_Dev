@@ -6322,33 +6322,32 @@ BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 {
 	CStringArray aValues;
 
-	if (!CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues))
+	if (!CopyTaskColumnValues(nColID, bSelectedTasksOnly, m_columnCopy.aTaskIDs, aValues))
 		return FALSE;
 
 	// else
-	m_copiedColumnValues.nColumnID = nColID;
-	m_copiedColumnValues.aValues.Copy(aValues);
+	m_columnCopy.nColumnID = nColID;
 
 	return CClipboard(GetSafeHwnd()).SetText(Misc::FormatArray(aValues, '\n', TRUE));
 }
 
-int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
+int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const
 {
-	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
+	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aTaskIDs, aValues);
 }
 
-BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
+BOOL CToDoCtrl::CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
 {
 	if (IsReadOnly())
 		return FALSE;
 
-	if (m_copiedColumnValues.IsEmpty())
+	if (m_columnCopy.IsEmpty())
 		return FALSE;
 
+	// Weed out invalid columns
 	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
 		return FALSE;
 
-	// Weed out non-pastable columns
 	switch (nColID)
 	{
 	case TDCC_POSITION:
@@ -6371,35 +6370,28 @@ BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 	}
 
 	// Check column compatibility
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(m_copiedColumnValues.nColumnID);
+	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(m_columnCopy.nColumnID);
 	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nColID);
 	
 	if ((nToCat != nFromCat) && (nToCat != TDCAC_TEXT) && (nToCat != TDCAC_OTHER))
 		return FALSE;
 
+	// Check there is at least one unlocked task
 	CWaitCursor cursor;
 
-	if (bSelectedTasksOnly)
-	{
-		if (!CanEditSelectedTask(TDC::MapColumnToAttribute(nColID)))
-			return FALSE;
-	}
-	else 
-	{
-		// Check there is at least one unlocked task
-		CDWordArray aTaskIDs;
-		int nID = GetColumnTaskIDs(0, m_copiedColumnValues.aValues.GetSize(), aTaskIDs);
-		BOOL bHasUnlocked = FALSE;
+	int nID = m_columnCopy.aTaskIDs.GetSize();
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
 
-		while (nID-- && !bHasUnlocked)
-			bHasUnlocked = !m_calculator.IsTaskLocked(aTaskIDs[nID]);
-
-		if (!bHasUnlocked)
-			return FALSE;
+	while (nID--)
+	{
+		if (CanEditTask(m_columnCopy.aTaskIDs[nID], nToAttribID))
+		{
+			nFromColID = m_columnCopy.nColumnID;
+			return TRUE;
+		}
 	}
 
-	nFromColID = m_copiedColumnValues.nColumnID;
-	return TRUE;
+	return FALSE;
 }
 
 int CToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const 
@@ -6407,12 +6399,26 @@ int CToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const
 	return m_taskTree.GetColumnTaskIDs(aTaskIDs, nFrom, nTo); 
 }
 
-BOOL CToDoCtrl::PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+BOOL CToDoCtrl::PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 {
-	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_DELETE);
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
+	CWaitCursor cursor;
 
-	return false;
+	TDC_ATTRIBUTE nFromAttribID = TDC::MapColumnToAttribute(m_columnCopy.nColumnID);
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
+
+	int nID = m_columnCopy.aTaskIDs.GetSize();
+
+	while (nID--)
+	{
+		if (SET_CHANGE != m_data.CopyTaskAttributeValue(m_columnCopy.aTaskIDs[nID], nFromAttribID, nToAttribID))
+			m_columnCopy.aTaskIDs.RemoveAt(nID);
+	}
+	ASSERT(m_columnCopy.aTaskIDs.GetSize());
+
+	SetModified(nToAttribID, m_columnCopy.aTaskIDs);
+	return TRUE;
 }
 
 BOOL CToDoCtrl::CopySelectedTasks() const
