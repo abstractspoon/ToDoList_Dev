@@ -1631,15 +1631,20 @@ LRESULT CTabbedToDoCtrl::OnUIExtEditSelectedTaskIcon(WPARAM /*wParam*/, LPARAM /
 	return EditSelectedTaskIcon();
 }
 
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
+BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const
 {
-	if (!CToDoCtrl::CanEditSelectedTask(nAttrib, dwTaskID))
+	if (!CToDoCtrl::CanEditTask(dwTaskID, nAttrib))
 		return FALSE;
 
 	if (GetUpdateControlsItem() == NULL)
 		return !(CTDCAttributeMap::IsTaskAttribute(nAttrib) || (nAttrib == TDCA_DELETE));
 
 	return TRUE;
+}
+
+BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
+{
+	return CToDoCtrl::CanEditSelectedTask(nAttrib, dwTaskID);
 }
 
 BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
@@ -2028,7 +2033,7 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 	if (GetSelectedTaskCount() > 1)
 		return FALSE;
 
-	if (!CanEditSelectedTask(TDCA_STARTDATE))
+	if (!CToDoCtrl::CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
 
 	Flush();
@@ -2042,11 +2047,6 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 		return FALSE;
 
 	// else
-// 	COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-// 
-// 	if (CDateHelper::IsDateSet(dtDue))
-// 		m_eRecurrence.SetDefaultDate(dtDue);
-
 	CDWordArray aModTaskIDs;
 	aModTaskIDs.Add(dwTaskID);
 

@@ -6384,16 +6384,18 @@ BOOL CToDoCtrl::CanPasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 		if (!CanEditSelectedTask(TDC::MapColumnToAttribute(nColID)))
 			return FALSE;
 	}
-	else // Check that as many tasks as there are values are NOT locked
+	else 
 	{
+		// Check there is at least one unlocked task
 		CDWordArray aTaskIDs;
 		int nID = GetColumnTaskIDs(0, m_copiedColumnValues.aValues.GetSize(), aTaskIDs);
+		BOOL bHasUnlocked = FALSE;
 
-		while (nID--)
-		{
-			if (m_calculator.IsTaskLocked(aTaskIDs[nID]))
-				return FALSE;
-		}
+		while (nID-- && !bHasUnlocked)
+			bHasUnlocked = !m_calculator.IsTaskLocked(aTaskIDs[nID]);
+
+		if (!bHasUnlocked)
+			return FALSE;
 	}
 
 	nFromColID = m_copiedColumnValues.nColumnID;
@@ -6407,7 +6409,8 @@ int CToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const
 
 BOOL CToDoCtrl::PasteValuesIntoTaskColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 {
-	// TODO
+	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_DELETE);
+
 
 	return false;
 }
@@ -10190,8 +10193,27 @@ BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dw
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
 { 
+	if (dwTaskID)
+		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttrib));
+
+	// else
+	POSITION pos = TSH().GetFirstItemPos();
+
+	while (pos)
+	{
+		if (!CanEditTask(TSH().GetNextItemData(pos), nAttrib))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const
+{
 	if (IsReadOnly())
 		return FALSE;
+
+	BOOL bLockedTask = m_calculator.IsTaskLocked(dwTaskID);
 
 	switch (nAttrib)
 	{
@@ -10199,7 +10221,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		return FALSE;
 
 	case TDCA_PERCENT:
-		if (!SelectedTaskIsUnlocked(dwTaskID))
+		if (bLockedTask)
 		{
 			return FALSE;
 		}
@@ -10207,17 +10229,9 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		{
 			return FALSE;
 		}
-		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
+		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
 		{
-			if (dwTaskID)
-			{
-				if (!m_taskTree.IsTaskSelected(dwTaskID) || m_data.IsTaskParent(dwTaskID))
-					return FALSE;
-			}
-			else if (m_taskTree.SelectionHasSubtasks())
-			{
-				return FALSE;
-			}
+			return FALSE;
 		}
 		return TRUE;
 
@@ -10250,34 +10264,33 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_TASKNAME:		
 	case TDCA_TASKNAMEORCOMMENTS:		
 	case TDCA_VERSION:		
-		return SelectedTaskIsUnlocked(dwTaskID);
+		return (bLockedTask == FALSE);
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		if (!SelectedTaskIsUnlocked(dwTaskID))
+		if (bLockedTask)
 		{
 			return FALSE;
 		}
-		else if (dwTaskID)
+		else if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
 		{
-			if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
-				return FALSE;
+			return FALSE;
 		}
 		return TRUE;
 
 	case TDCA_STARTDATE:
 	case TDCA_STARTTIME:
-		if (!SelectedTaskIsUnlocked(dwTaskID))
+		if (bLockedTask)
 		{
 			return FALSE;
 		}
-		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_taskTree.SelectionHasDependencies())
+		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_data.TaskHasDependencies(dwTaskID))
 		{
 			// Ignore tasks with dependencies where their dates 
 			// are automatically calculated
 			return FALSE;
 		}
-		else if ((nAttrib == TDCA_STARTTIME) && !m_taskTree.SelectedTaskHasDate(TDCD_START))
+		else if ((nAttrib == TDCA_STARTTIME) && !m_data.TaskHasDate(dwTaskID, TDCD_START))
 		{
 			// Ignore tasks without a start date set
 			return FALSE;
@@ -10285,11 +10298,14 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		return TRUE;
 
 	case TDCA_DELETE:
-		// Can't delete locked tasks unless they are references
-		// Can't delete subtasks if immediate parent is locked
-		if (m_taskTree.SelectionHasLocked(FALSE, TRUE) || 
-			m_taskTree.SelectionHasLockedParents(TRUE))
+		if (bLockedTask && !m_data.IsTaskReference(dwTaskID))
 		{
+			// Can't delete locked tasks unless they are references
+			return FALSE;
+		}
+		else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+		{
+			// Can't delete subtasks if immediate parent is locked
 			return FALSE;
 		}
 		return TRUE;
@@ -10304,11 +10320,11 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		return TRUE;
 
 	case TDCA_LOCK:
-		return GetSelectedTaskCount();
+		return TRUE;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
-			return SelectedTaskIsUnlocked(dwTaskID);
+			return !bLockedTask;
 		break;
 	}
 

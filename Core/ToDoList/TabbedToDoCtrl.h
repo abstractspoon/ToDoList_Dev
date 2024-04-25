@@ -69,6 +69,7 @@ public:
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 

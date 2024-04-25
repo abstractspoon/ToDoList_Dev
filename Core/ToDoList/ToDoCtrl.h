@@ -375,13 +375,14 @@ public:
 	virtual void SetFocusToComments();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
-	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
 	void SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
