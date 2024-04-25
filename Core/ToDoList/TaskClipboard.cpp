@@ -33,10 +33,10 @@ BOOL CTaskClipboard::IsEmpty()
 	return !CClipboard::HasFormat(GetIDClipFmt());
 }
 
-BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskTitles)
+BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskValues)
 {
 	ASSERT(tasks.GetTaskCount());
-	ASSERT(!sTaskTitles.IsEmpty());
+	ASSERT(!sTaskValues.IsEmpty());
 	
 	CString sXML; 
 	CString sClipID = (sID.IsEmpty() ? DEF_CLIPID : sID);
@@ -49,7 +49,7 @@ BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const 
 
 		return (cb.SetText(sXML, GetTaskClipFmt()) && 
 				cb.SetText(sClipID, GetIDClipFmt()) &&
-				cb.SetText(sTaskTitles));
+				cb.SetText(sTaskValues));
 	}
 	
 	// else

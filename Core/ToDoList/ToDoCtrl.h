@@ -141,9 +141,10 @@ public:
 	BOOL IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttrib) const;
 	void SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis);
 	void GetColumnFieldVisibility(TDCCOLEDITVISIBILITY& vis) const;
+	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
+
 	const CTDCColumnIDMap& GetVisibleColumns() const;
 	const CTDCAttributeMap& GetVisibleEditFields() const;
-	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
@@ -175,12 +176,13 @@ public:
 	BOOL CanSplitSelectedTask() const;
 
 	inline DWORD GetSelectedTaskID() const { return m_taskTree.GetSelectedTaskID(); }
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const;
 
 	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
+	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
+
 	BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect);
 	BOOL ScrollToSelectedTask() { return m_taskTree.EnsureSelectionVisible(FALSE); }
 	
@@ -515,7 +517,7 @@ protected:
 	DWORD m_dwEditTitleTaskID;
 
 	mutable DWORD m_nFileVersion;
-	mutable TDCCOLUMNVALUECOPY m_columnCopy;
+	//mutable TDCCOLUMNVALUES m_copiedColumnValues;
 
 	BOOL m_bModified;
 	BOOL m_bArchive;
@@ -658,7 +660,7 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const;
+//	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 	virtual int GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const;
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);

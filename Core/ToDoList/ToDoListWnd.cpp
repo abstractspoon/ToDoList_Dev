@@ -9543,9 +9543,9 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		args.sTaskFileLink = aFiles[0];
 	
 	CDWordArray aIDs;
-	DWORD dwTemp;
+	DWORD dwUnused;
 	
-	if (tdc.GetSelectedTaskIDs(aIDs, dwTemp, FALSE))
+	if (tdc.GetSelectedTaskIDs(aIDs, dwUnused, FALSE))
 		args.sTaskIDs = Misc::FormatArray(aIDs, _T("|"));
 	
 	CStringArray aAllocTo;
