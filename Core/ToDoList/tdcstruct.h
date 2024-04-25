@@ -3130,26 +3130,24 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-/*
-struct TDCCOLUMNVALUES
+struct TDCCOLUMNVALUECOPY
 {
-	TDCCOLUMNVALUES() : nColumnID(TDCC_NONE) {}
+	TDCCOLUMNVALUECOPY() : nColumnID(TDCC_NONE) {}
 
 	void Clear() 
 	{ 
 		nColumnID = TDCC_NONE;
-		aValues.RemoveAll(); 
+		aTaskIDs.RemoveAll();
 	}
 
 	BOOL IsEmpty() const
 	{
-		return ((nColumnID == TDCC_NONE) || (aValues.GetSize() == 0));
+		return ((nColumnID == TDCC_NONE) || (aTaskIDs.GetSize() == 0));
 	}
 
 	TDC_COLUMN nColumnID;
-	CStringArray aValues;
+	CDWordArray aTaskIDs;
 };
-*/
 
 /////////////////////////////////////////////////////////////////////////////
 

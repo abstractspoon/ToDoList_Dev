@@ -16,7 +16,7 @@ class CTaskClipboard
 public:
 	static void Reset();
 	static BOOL IsEmpty();
-	static BOOL SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskValues);
+	static BOOL SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskTitles);
 	static BOOL ClipIDMatches(const CString& sID);
 
 	static int GetTasks(CTaskFile& tasks, const CString& sID);

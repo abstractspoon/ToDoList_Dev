@@ -109,8 +109,6 @@ public:
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual void NotifyEndPreferencesUpdate();
-	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
-	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -126,8 +124,12 @@ public:
 	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME) const;
 	void SelectAll();
 	BOOL CanSelectAll() const;
+
 	BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
 	void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
+	
+	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 
 	void SetFocusToTasks();
 	BOOL TasksHaveFocus() const;
@@ -244,6 +246,7 @@ protected:
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const;
 	virtual int GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const;
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);

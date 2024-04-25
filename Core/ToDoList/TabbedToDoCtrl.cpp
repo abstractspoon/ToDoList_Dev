@@ -2623,24 +2623,6 @@ void CTabbedToDoCtrl::SelectAll()
 	}
 }
 
-int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
-{
-	if (InListView())
-		return m_taskList,GetSelectedTaskIDs(aTaskIDs, bTrue);
-
-	// else
-	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, bTrue);
-}
-
-int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
-{
-	if (InListView())
-		return m_taskList,GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
-
-	// else
-	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
-}
-
 int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	return GetSelectedTasks(tasks, GetTaskView(), filter);
@@ -3812,6 +3794,40 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	}
 	else // all else
 	{
+		// for a simple attribute change (or addition) update all extensions
+		// at the same time so that they won't need updating when the user switches view
+		// TDCA_TASKNAME:
+		// TDCA_ALL:
+		// TDCA_DONEDATE:
+		// TDCA_DUEDATE:
+		// TDCA_STARTDATE:
+		// TDCA_PRIORITY:
+		// TDCA_COLOR:
+		// TDCA_ALLOCTO:
+		// TDCA_ALLOCBY:
+		// TDCA_STATUS:
+		// TDCA_CATEGORY:
+		// TDCA_TAGS:
+		// TDCA_PERCENT:
+		// TDCA_TIMEESTIMATE:
+		// TDCA_TIMESPENT:
+		// TDCA_FILELINK:
+		// TDCA_COMMENTS:
+		// TDCA_FLAG:
+		// TDCA_LOCK:
+		// TDCA_CREATIONDATE:
+		// TDCA_CREATEDBY:
+		// TDCA_RISK: 
+		// TDCA_EXTERNALID: 
+		// TDCA_COST: 
+		// TDCA_DEPENDENCY: 
+		// TDCA_RECURRENCE: 
+		// TDCA_VERSION:
+		// TDCA_ICON:
+		// TDCA_CUSTOMATTRIBDEFS:
+		// TDCA_CUSTOMATTRIB_ALL
+		// TDCA_CUSTOMATTRIB_FIRST -> TDCA_CUSTOMATTRIB_LAST
+
 		UpdateExtensionViewsSelection(mapAttribIDs);
 	}
 }
@@ -5779,6 +5795,47 @@ BOOL CTabbedToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) con
 	return FALSE; // not supported
 }
 
+BOOL CTabbedToDoCtrl::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::CanCopyTaskColumnValues(nColID, bSelectedTasksOnly);
+
+	case FTCV_TASKLIST:
+		return m_taskList.CanCopyTaskColumnValues(nColID, bSelectedTasksOnly);
+	}
+	
+	// all else (for now)
+	return FALSE;
+}
+
+BOOL CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+{
+	return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly);
+}
+
+int CTabbedToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::CopyTaskColumnValues(nColID, bSelectedTasksOnly, aTaskIDs, aValues);
+
+	case FTCV_TASKLIST:
+		return m_taskList.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aTaskIDs, aValues);
+	}
+	
+	// all else (for now)
+	return 0;
+}
+
 int CTabbedToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const
 {
 	FTC_VIEW nView = GetTaskView();
@@ -6472,6 +6529,13 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 
 		if (!cacheList.SelectionMatches(cacheTree))
 		{
+			// save list scroll pos before restoring
+			////////////////////////////////////////////////////////////////
+			// I'm not clear what case this handles and since it interferes
+			// with selection history I'm disabling it to see what happens
+			//
+			// cacheTree.dwFirstVisibleTaskID = GetTaskID(m_taskList.List().GetTopIndex());
+			////////////////////////////////////////////////////////////////
 			cacheTree.dwFirstVisibleTaskID = 0;
 
 			if (m_taskList.RestoreSelection(cacheTree, bEnsureSelection))

@@ -6320,77 +6320,34 @@ BOOL CToDoCtrl::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOn
 
 BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	// Build a task file with sequential IDs of the values
-	CDWordArray aTaskIDs;
-	int nNumIDs = 0;
-
-	if (bSelectedTasksOnly)
-		nNumIDs = GetSelectedTaskIDs(aTaskIDs, TRUE);
-	else
-		nNumIDs = GetColumnTaskIDs(0, -1, aTaskIDs);
-
-	if (!nNumIDs)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute(nColID);
-
-	TDCGETTASKS filter;
-	filter.mapAttribs.Add(nAttribID);
-
-	CTaskFile tasks;
-	PrepareTaskfileForTasks(tasks, filter);
-
 	CStringArray aValues;
-	aValues.SetSize(nNumIDs);
 
-	for (int nID = 0; nID < nNumIDs; nID++)
-	{
-		HTASKITEM hTask = tasks.NewTask(_T(""), NULL, 0, 0);
-		m_exporter.ExportMatchingTaskAttributes(aTaskIDs[nID], tasks, hTask, filter);
+	if (!CopyTaskColumnValues(nColID, bSelectedTasksOnly, m_columnCopy.aTaskIDs, aValues))
+		return FALSE;
 
-		aValues[nID] = tasks.GetTaskAttribute(hTask, nAttribID, true, true);
-	}
+	// else
+	m_columnCopy.nColumnID = nColID;
 
-	// Add a custom attribute to identify the copied column
-	tasks.SetMetaData(_T("ColumnCopy"), Misc::Format(nColID));
-
-#ifdef _DEBUG
-	tasks.SetProjectName(_T("ColumnCopy Clipboard Contents"));
-	tasks.Save(_T("C:\\Temp\\_ColumnCopy.tdl"), SFEF_UTF16);
-#endif
-
-	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), Misc::FormatArray(aValues, '\n', TRUE));
+	return CClipboard(GetSafeHwnd()).SetText(Misc::FormatArray(aValues, '\n', TRUE));
 }
 
-// int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
-// {
-// 	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
-// }
+int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CDWordArray& aTaskIDs, CStringArray& aValues) const
+{
+	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aTaskIDs, aValues);
+}
 
 BOOL CToDoCtrl::CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
 {
 	if (IsReadOnly())
 		return FALSE;
 
-	CTaskFile tasks;
-
-	if (!CTaskClipboard::GetTasks(tasks, GetClipboardID()))
+	if (m_columnCopy.IsEmpty())
 		return FALSE;
 
-	CString sFromColID = tasks.GetMetaData(_T("ColumnCopy"));
-
-	if (sFromColID.IsEmpty())
-		return FALSE;
-
-	nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
-
+	// Weed out invalid columns
 	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
 		return FALSE;
 
-	// Weed out non-pastable columns
 	switch (nColID)
 	{
 	case TDCC_POSITION:
@@ -6413,33 +6370,27 @@ BOOL CToDoCtrl::CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnl
 	}
 
 	// Check column compatibility
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromColID);
+	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(m_columnCopy.nColumnID);
 	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nColID);
 	
 	if ((nToCat != nFromCat) && (nToCat != TDCAC_TEXT) && (nToCat != TDCAC_OTHER))
 		return FALSE;
 
-	// Check there is at least one editable task
+	// Check there is at least one unlocked task
 	CWaitCursor cursor;
+
+	int nID = m_columnCopy.aTaskIDs.GetSize();
 	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
-
-	CDWordArray aTaskIDs;
-	int nID = 0;
-
-	if (bSelectedTasksOnly)
-		nID = GetSelectedTaskIDs(aTaskIDs, TRUE);
-	else
-		nID = GetColumnTaskIDs(0, tasks.GetTaskCount(), aTaskIDs);
-
-	BOOL bHasEditable = FALSE;
 
 	while (nID--)
 	{
-		if (CanEditTask(aTaskIDs[nID], nToAttribID))
+		if (CanEditTask(m_columnCopy.aTaskIDs[nID], nToAttribID))
+		{
+			nFromColID = m_columnCopy.nColumnID;
 			return TRUE;
+		}
 	}
-	
-	// else
+
 	return FALSE;
 }
 
@@ -6450,52 +6401,23 @@ int CToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const
 
 BOOL CToDoCtrl::PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 {
-	CWaitCursor cursor;
-	CTaskFile tasks;
-
-	if (!CTaskClipboard::GetTasks(tasks, GetClipboardID()))
-		return FALSE;
-
-	CString sFromColID = tasks.GetMetaData(_T("ColumnCopy"));
-
-	if (sFromColID.IsEmpty())
-		return FALSE;
-
-	TDC_COLUMN nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
-	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
-
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromColID);
-	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nColID);
-
-	CDWordArray aTaskIDs;
-
-	if (bSelectedTasksOnly)
-		GetSelectedTaskIDs(aTaskIDs, TRUE);
-	else 
-		GetColumnTaskIDs(0, tasks.GetTaskCount(), aTaskIDs);
-
-	// Do the merge
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	HTASKITEM hTask = tasks.GetFirstTask();
-	TODOITEM tdi;
-	int nID = 0;
-	CDWordArray aModTaskIDs;
+	CWaitCursor cursor;
 
-	while (hTask)
+	TDC_ATTRIBUTE nFromAttribID = TDC::MapColumnToAttribute(m_columnCopy.nColumnID);
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
+
+	int nID = m_columnCopy.aTaskIDs.GetSize();
+
+	while (nID--)
 	{
-		if (m_data.GetTaskAttributes(aTaskIDs[nID], tdi) &&
-			tasks.MergeTaskAttributes(hTask, tdi, nToAttribID, m_aCustomAttribDefs, 0) &&
-			m_data.SetTaskAttributes(aTaskIDs[nID], tdi))
-		{
-			aModTaskIDs.Add(aTaskIDs[nID]);
-		}
-
-		nID++;
-		hTask = tasks.GetNextTask(hTask);
+		if (SET_CHANGE != m_data.CopyTaskAttributeValue(m_columnCopy.aTaskIDs[nID], nFromAttribID, nToAttribID))
+			m_columnCopy.aTaskIDs.RemoveAt(nID);
 	}
+	ASSERT(m_columnCopy.aTaskIDs.GetSize());
 
-	SetModified(nToAttribID, aModTaskIDs, TRUE);
+	SetModified(nToAttribID, m_columnCopy.aTaskIDs);
 	return TRUE;
 }
 
@@ -7906,9 +7828,6 @@ int CToDoCtrl::GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const
 
 int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncCollapsedChildren) const
 {
-	if (bIncParents && bIncCollapsedChildren)
-		return m_taskTree.GetColumnTaskIDs(aTaskIDs);
-
 	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
 }
 
@@ -8023,6 +7942,7 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	{
 		if (m_aCustomAttribDefs.Append(aImportedDefs))
 			OnCustomAttributesChanged();
+		//RebuildCustomAttributeUI();
 	}
 
 	SetModified(TDCA_PASTE, aTaskIDs);
