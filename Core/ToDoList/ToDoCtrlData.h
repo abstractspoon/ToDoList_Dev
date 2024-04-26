@@ -46,6 +46,8 @@ class CToDoCtrlData
 	friend class CTDCTaskCalculator;
 	friend class CTDCTaskFormatter;
 	friend class CTDCTaskExporter;
+	friend class CTDCMultiTasker;
+	friend class CTDCTaskAttributeCopier;
 
 public:
 	CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);

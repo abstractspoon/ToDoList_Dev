@@ -5452,6 +5452,9 @@ BOOL CTDCMultiTasker::GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIME
 			return FALSE;
 	}
 
+	if (!first.HasValidUnits())
+		return FALSE;
+
 	period = first; 
 	return TRUE;
 }
@@ -6407,11 +6410,91 @@ CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
 {
 }
 
-BOOL CTDCTaskAttributeCopier::CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo) const
+BOOL CTDCTaskAttributeCopier::CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo, BOOL bIncEmpty) const
 {
 	if (!m_data.CanCopyAttributeValue(nFromAttribID, nToAttribID))
 		return FALSE;
 
-	// TODO
-	return FALSE;
+	TDCCADATA dataFrom;
+
+	if (m_data.GetTaskAttributeValue(tdiFrom, nFromAttribID, dataFrom) || bIncEmpty)
+	{
+		CStringArray aValues;
+		TDCCOST cost;
+
+		TDC_ATTRIBUTECATEGORY nFromCat = m_data.GetAttributeCategory(nFromAttribID);
+		TDC_ATTRIBUTECATEGORY nToCat = m_data.GetAttributeCategory(nToAttribID);
+
+		if ((nToCat == TDCAC_SINGLETEXT) || (nToCat == TDCAC_MULTITEXT))
+		{
+			switch (nFromCat)
+			{
+			case TDCAC_SINGLETEXT:
+			case TDCAC_NUMERIC:
+			case TDCAC_CUSTOM:
+			case TDCAC_OTHER:
+				break;
+
+			case TDCAC_MULTITEXT:
+				if (nToCat == TDCAC_SINGLETEXT)
+					dataFrom.Set(dataFrom.FormatAsArray());
+				break;
+
+			case TDCAC_DATETIME:
+				dataFrom.Set(dataFrom.FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), TRUE));
+				break;
+
+			case TDCAC_TIMEPERIOD:
+				dataFrom.Set(dataFrom.FormatAsTimePeriod());
+				break;
+			}
+		}
+		
+		switch (nToAttribID)
+		{
+		case TDCA_VERSION:		tdiTo.sVersion		= dataFrom.AsString();	break;
+		case TDCA_ALLOCBY:		tdiTo.sAllocBy		= dataFrom.AsString();	break;
+		case TDCA_EXTERNALID:	tdiTo.sExternalID	= dataFrom.AsString();	break;
+		case TDCA_STATUS:		tdiTo.sStatus		= dataFrom.AsString();	break;
+		case TDCA_TASKNAME:		tdiTo.sTitle		= dataFrom.AsString();	break;
+
+		case TDCA_PRIORITY:		tdiTo.nPriority		= dataFrom.AsInteger();	break;
+		case TDCA_RISK:			tdiTo.nRisk			= dataFrom.AsInteger();	break;
+		case TDCA_PERCENT:		tdiTo.nPercentDone	= dataFrom.AsInteger();	break;
+
+		case TDCA_FLAG:			tdiTo.bFlagged		= dataFrom.AsBool();	break;
+		case TDCA_LOCK:			tdiTo.bLocked		= dataFrom.AsBool();	break;
+
+		case TDCA_DONEDATE:		tdiTo.dateDone		= dataFrom.AsDate();	break;
+		case TDCA_DUEDATE:		tdiTo.dateDue		= dataFrom.AsDate();	break;
+		case TDCA_STARTDATE:	tdiTo.dateStart		= dataFrom.AsDate();	break;
+
+		case TDCA_TIMEESTIMATE:	dataFrom.AsTimePeriod(tdiTo.timeEstimate);	break;
+		case TDCA_TIMESPENT:	dataFrom.AsTimePeriod(tdiTo.timeSpent);		break;
+		case TDCA_COST:			dataFrom.AsCost(tdiTo.cost);				break;
+
+		case TDCA_FILELINK:		dataFrom.AsArray(aValues); tdiTo.aFileLinks.Copy(aValues);	break;
+		case TDCA_ALLOCTO:		dataFrom.AsArray(aValues); tdiTo.aAllocTo.Copy(aValues);	break;
+		case TDCA_CATEGORY:		dataFrom.AsArray(aValues); tdiTo.aCategories.Copy(aValues); break;
+		case TDCA_TAGS:			dataFrom.AsArray(aValues); tdiTo.aTags.Copy(aValues);		break;
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttribID))
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nToAttribID, pDef, FALSE);
+
+				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dataFrom);
+				break;
+			}
+			else
+			{
+				ASSERT(0); // I've missed something
+				return FALSE;
+			}
+			
+		}
+	}
+
+	return TRUE;
 }

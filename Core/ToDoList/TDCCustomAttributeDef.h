@@ -124,6 +124,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL IsAggregated() const;
 
 	BOOL SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+	BOOL IsCalculation() const { return calculation.IsValid(FALSE); }
 	const TDCCUSTOMATTRIBUTECALCULATION& Calculation() const { return calculation; }
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;

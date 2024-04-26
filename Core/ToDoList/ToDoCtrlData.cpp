@@ -506,15 +506,21 @@ BOOL CToDoCtrlData::GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) 
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
 
+	if (!pTDI->timeEstimate.HasValidUnits())
+		return FALSE;
+
 	timeEst = pTDI->timeEstimate;
-	return TRUE;
+	return timeEst.HasValidUnits();
 }
 
 BOOL CToDoCtrlData::GetTaskTimeSpent(DWORD dwTaskID, TDCTIMEPERIOD& timeSpent) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
-	
+
+	if (!pTDI->timeSpent.HasValidUnits())
+		return FALSE;
+
 	timeSpent = pTDI->timeSpent;
 	return TRUE;
 }
@@ -4201,15 +4207,23 @@ BOOL CToDoCtrlData::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBU
 		return FALSE;
 	}
 
+	// Can't copy to calculations
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib) &&
+		(m_aCustomAttribDefs.GetAttributeDataType(nToAttrib) == TDCCA_CALCULATION))
+	{
+		return FALSE;
+	}
+
 	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttrib);
 	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttrib);
 
-	if (nFromCat == TDCAC_NONE || nToCat == TDCAC_NONE)
+	if ((nFromCat == TDCAC_NONE) || (nToCat == TDCAC_NONE))
 		return FALSE;
 
 	switch (nToCat)
 	{
-	case TDCAC_TEXT:
+	case TDCAC_SINGLETEXT:
+	case TDCAC_MULTITEXT:
 		return TRUE;
 
 	case TDCAC_NUMERIC:
@@ -4256,7 +4270,7 @@ BOOL CToDoCtrlData::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBU
 		break;
 
 	case TDCAC_TIMEPERIOD:
-		return (nToAttrib != TDCA_TIMEREMAINING);
+		return ((nFromCat == TDCAC_TIMEPERIOD) && (nToAttrib != TDCA_TIMEREMAINING));
 
 	case TDCAC_OTHER:
 		switch (nFromAttrib)

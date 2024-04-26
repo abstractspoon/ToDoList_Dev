@@ -6533,11 +6533,16 @@ BOOL CToDoCtrl::PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 	{
 		DWORD dwTaskID = aTaskIDs[nID];
 
-		if (tasks.GetTaskAttributes(hTask, tdiFrom) &&
-			m_attribCopier.CopyAttributeValue(nFromAttribID, tdiFrom, nToAttribID, tdiTo) &&
-			m_data.SetTaskAttributes(dwTaskID, tdiTo))
+		if (m_data.GetTaskAttributes(dwTaskID, tdiTo))
 		{
-			aModTaskIDs.Add(dwTaskID);
+			if (tasks.GetTaskAttributes(hTask, tdiFrom))
+			{
+				if (m_attribCopier.CopyAttributeValue(nFromAttribID, tdiFrom, nToAttribID, tdiTo, TRUE))
+				{
+					if (m_data.SetTaskAttributes(dwTaskID, tdiTo))
+						aModTaskIDs.Add(dwTaskID);
+				}
+			}
 		}
 
 		nID++;

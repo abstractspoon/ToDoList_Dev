@@ -517,7 +517,7 @@ public:
 								  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 								  const CContentMgr& mgrContent);
 
-	BOOL CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo) const;
+	BOOL CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo, BOOL bIncEmpty) const;
 
 protected:
 	const CToDoCtrlData& m_data;
