@@ -217,6 +217,7 @@ public:
 	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
 
 	BOOL CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib) const;
+	TDC_SET CopyAttributeValueToTask(const TODOITEM& tdiFrom, DWORD dwToTaskID, TDC_ATTRIBUTE nAttrib);
 	TDC_SET CopyAttributeValueToTask(const TODOITEM& tdiFrom, DWORD dwToTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 

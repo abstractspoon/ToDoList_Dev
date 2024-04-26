@@ -112,19 +112,16 @@ protected:
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
 
-	// Custom attribute calculation helpers ------------------
 	BOOL DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
-	// -------------------------------------------------------
-	
+
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
 	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
-
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -508,6 +505,29 @@ protected:
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
 	static CString GetLongestRecurrenceOption();
+};
+
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskAttributeCopier
+{
+public:
+	CTDCTaskAttributeCopier(const CToDoCtrlData& data,
+								  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								  const CContentMgr& mgrContent);
+
+	BOOL CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+	const CContentMgr& m_mgrContent;
+	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
+
+	CTDCTaskFormatter m_formatter;
+	CTDCTaskCalculator m_calculator;
+
+protected:
 };
 
 //////////////////////////////////////////////////////////////////////

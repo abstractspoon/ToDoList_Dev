@@ -502,6 +502,7 @@ protected:
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
+	CTDCTaskAttributeCopier m_attribCopier;
 	CTDCSourceControl m_sourceControl;
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;

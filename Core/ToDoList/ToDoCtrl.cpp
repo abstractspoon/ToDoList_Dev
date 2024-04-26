@@ -216,6 +216,10 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			   m_taskTree,
 			   mgrContent),
 
+	m_attribCopier(m_data,
+				   m_aCustomAttribDefs,
+				   mgrContent),
+
 	m_infoTip(m_data,
 			  m_aCustomAttribDefs,
 			  mgrContent),
@@ -6519,17 +6523,19 @@ BOOL CToDoCtrl::PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 	// Do the merge
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	HTASKITEM hTask = tasks.GetFirstTask();
-	TODOITEM tdi;
 	int nID = 0;
 	CDWordArray aModTaskIDs;
+
+	HTASKITEM hTask = tasks.GetFirstTask();
+	TODOITEM tdiFrom, tdiTo;
 
 	while (hTask)
 	{
 		DWORD dwTaskID = aTaskIDs[nID];
 
-		if (tasks.GetTaskAttributes(hTask, tdi) &&
-			m_data.CopyAttributeValueToTask(tdi, dwTaskID, nFromAttribID, nToAttribID))
+		if (tasks.GetTaskAttributes(hTask, tdiFrom) &&
+			m_attribCopier.CopyAttributeValue(nFromAttribID, tdiFrom, nToAttribID, tdiTo) &&
+			m_data.SetTaskAttributes(dwTaskID, tdiTo))
 		{
 			aModTaskIDs.Add(dwTaskID);
 		}

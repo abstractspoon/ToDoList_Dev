@@ -5896,9 +5896,7 @@ CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 	return sValue;
 }
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------------
 
 CTDCTaskColumnSizer::CTDCTaskColumnSizer(const CToDoCtrlData& data,
 										 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
@@ -6393,4 +6391,27 @@ void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 			}
 		}
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
+												 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+												 const CContentMgr& mgrContent)
+	:
+	m_data(data),
+	m_aCustAttribDefs(aCustAttribDefs),
+	m_mgrContent(mgrContent),
+	m_formatter(data, mgrContent),
+	m_calculator(data)
+{
+}
+
+BOOL CTDCTaskAttributeCopier::CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo) const
+{
+	if (!m_data.CanCopyAttributeValue(nFromAttribID, nToAttribID))
+		return FALSE;
+
+	// TODO
+	return FALSE;
 }

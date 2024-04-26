@@ -4324,6 +4324,17 @@ TDC_SET CToDoCtrlData::CopyAttributeValueToTask(const TODOITEM& tdiFrom, DWORD d
 	return SetTaskAttributeValue(dwToTaskID, nToAttrib, data);
 }
 
+TDC_SET CToDoCtrlData::CopyAttributeValueToTask(const TODOITEM& tdiFrom, DWORD dwToTaskID, TDC_ATTRIBUTE nAttrib)
+{
+	TDCCADATA data;
+
+	if (!GetTaskAttributeValue(tdiFrom, nAttrib, data))
+		return SET_FAILED;
+
+	// else
+	return SetTaskAttributeValue(dwToTaskID, nAttrib, data);
+}
+
 BOOL CToDoCtrlData::GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	const TODOITEM* pTDI = NULL;
