@@ -6313,13 +6313,84 @@ BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+BOOL CToDoCtrl::CanCopyAttributeColumnValues(TDC_COLUMN nColID) const
 {
-	return m_taskTree.CanCopyTaskColumnValues(nColID, bSelectedTasksOnly);
+	switch (nColID)
+	{
+	case TDCC_NONE:
+	case TDCC_ICON:
+	case TDCC_RECENTEDIT:
+	case TDCC_LOCK:
+	case TDCC_COLOR:
+	case TDCC_DONE:
+	case TDCC_TRACKTIME:
+	case TDCC_FLAG:
+		return FALSE;
+
+	case TDCC_PRIORITY:
+	case TDCC_PERCENT:
+	case TDCC_TIMEESTIMATE:
+	case TDCC_TIMESPENT:
+	case TDCC_STARTDATE:
+	case TDCC_DUEDATE:
+	case TDCC_DONEDATE:
+	case TDCC_ALLOCTO:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_CATEGORY:
+	case TDCC_FILELINK:
+	case TDCC_POSITION:
+	case TDCC_ID:
+	case TDCC_CREATIONDATE:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODDATE:
+	case TDCC_RISK:
+	case TDCC_EXTERNALID:
+	case TDCC_COST:
+	case TDCC_DEPENDENCY:
+	case TDCC_RECURRENCE:
+	case TDCC_VERSION:
+	case TDCC_TIMEREMAINING:
+	case TDCC_REMINDER:
+	case TDCC_PARENTID:
+	case TDCC_PATH:
+	case TDCC_TAGS:
+	case TDCC_SUBTASKDONE:
+	case TDCC_STARTTIME:
+	case TDCC_DUETIME:
+	case TDCC_DONETIME:
+	case TDCC_CREATIONTIME:
+	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
+	case TDCC_CLIENT:
+		return TRUE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			switch (m_aCustomAttribDefs.GetAttributeDataType(nColID))
+			{
+			case TDCCA_BOOL:
+			case TDCCA_ICON:
+				return FALSE;
+			}
+
+			return TRUE;
+		}
+		break;
+	}
+
+	// All else
+	ASSERT(0);
+	return FALSE;
 }
 
-BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
+	if (!CanCopyAttributeColumnValues(nColID))
+		return FALSE;
+
 	// Build a task file with sequential IDs of the values
 	CDWordArray aTaskIDs;
 	int nNumIDs = 0;
@@ -6327,7 +6398,7 @@ BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 	if (bSelectedTasksOnly)
 		nNumIDs = GetSelectedTaskIDs(aTaskIDs, TRUE);
 	else
-		nNumIDs = GetColumnTaskIDs(0, -1, aTaskIDs);
+		nNumIDs = GetColumnTaskIDs(aTaskIDs);
 
 	if (!nNumIDs)
 	{
@@ -6365,16 +6436,13 @@ BOOL CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), Misc::FormatArray(aValues, '\n', TRUE));
 }
 
-// int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
-// {
-// 	return m_taskTree.CopyTaskColumnValues(nColID, bSelectedTasksOnly, aValues);
-// }
-
-BOOL CToDoCtrl::CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
+BOOL CToDoCtrl::CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
 {
 	if (IsReadOnly())
 		return FALSE;
 
+	// Check we have something to copy
+	CWaitCursor cursor;
 	CTaskFile tasks;
 
 	if (!CTaskClipboard::GetTasks(tasks, GetClipboardID()))
@@ -6387,51 +6455,21 @@ BOOL CToDoCtrl::CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnl
 
 	nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
 
-	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
-		return FALSE;
-
-	// Weed out non-pastable columns
-	switch (nColID)
-	{
-	case TDCC_POSITION:
-	case TDCC_ID:
-	case TDCC_CREATIONDATE:
-	case TDCC_CREATEDBY:
-	case TDCC_LASTMODDATE:
-	case TDCC_DEPENDENCY:
-	case TDCC_RECURRENCE:
-	case TDCC_RECENTEDIT:
-	case TDCC_TIMEREMAINING:
-	case TDCC_PARENTID:
-	case TDCC_PATH:
-	case TDCC_SUBTASKDONE:
-	case TDCC_CREATIONTIME:
-	case TDCC_LASTMODBY:
-	case TDCC_COMMENTSSIZE:
-	case TDCC_COMMENTSFORMAT:
-		return FALSE;
-	}
-
 	// Check column compatibility
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromColID);
-	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nColID);
+	TDC_ATTRIBUTE nFromAttribID = TDC::MapColumnToAttribute(nFromColID);
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
 	
-	if ((nToCat != nFromCat) && (nToCat != TDCAC_TEXT) && (nToCat != TDCAC_OTHER))
+	if (!m_data.CanCopyAttributeValue(nFromAttribID, nToAttribID))
 		return FALSE;
 
 	// Check there is at least one editable task
-	CWaitCursor cursor;
-	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
-
 	CDWordArray aTaskIDs;
 	int nID = 0;
 
 	if (bSelectedTasksOnly)
 		nID = GetSelectedTaskIDs(aTaskIDs, TRUE);
 	else
-		nID = GetColumnTaskIDs(0, tasks.GetTaskCount(), aTaskIDs);
-
-	BOOL bHasEditable = FALSE;
+		nID = GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
 
 	while (nID--)
 	{
@@ -6443,12 +6481,17 @@ BOOL CToDoCtrl::CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnl
 	return FALSE;
 }
 
-int CToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const 
+TDC_ATTRIBUTECATEGORY CToDoCtrl::GetAttributeCategory(TDC_COLUMN nColID, BOOL bResolveCustomCols) const
+{
+	return m_data.GetAttributeCategory(TDC::MapColumnToAttribute(nColID));
+}
+
+int CToDoCtrl::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 { 
 	return m_taskTree.GetColumnTaskIDs(aTaskIDs, nFrom, nTo); 
 }
 
-BOOL CToDoCtrl::PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+BOOL CToDoCtrl::PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 {
 	CWaitCursor cursor;
 	CTaskFile tasks;
@@ -6462,17 +6505,16 @@ BOOL CToDoCtrl::PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 		return FALSE;
 
 	TDC_COLUMN nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
-	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
 
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromColID);
-	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nColID);
+	TDC_ATTRIBUTE nFromAttribID = TDC::MapColumnToAttribute(nFromColID);
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
 
 	CDWordArray aTaskIDs;
 
 	if (bSelectedTasksOnly)
 		GetSelectedTaskIDs(aTaskIDs, TRUE);
 	else 
-		GetColumnTaskIDs(0, tasks.GetTaskCount(), aTaskIDs);
+		GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
 
 	// Do the merge
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -6484,11 +6526,12 @@ BOOL CToDoCtrl::PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
 
 	while (hTask)
 	{
-		if (m_data.GetTaskAttributes(aTaskIDs[nID], tdi) &&
-			tasks.MergeTaskAttributes(hTask, tdi, nToAttribID, m_aCustomAttribDefs, 0) &&
-			m_data.SetTaskAttributes(aTaskIDs[nID], tdi))
+		DWORD dwTaskID = aTaskIDs[nID];
+
+		if (tasks.GetTaskAttributes(hTask, tdi) &&
+			m_data.CopyAttributeValueToTask(tdi, dwTaskID, nFromAttribID, nToAttribID))
 		{
-			aModTaskIDs.Add(aTaskIDs[nID]);
+			aModTaskIDs.Add(dwTaskID);
 		}
 
 		nID++;
@@ -6977,33 +7020,6 @@ int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStrin
 	return (aLocalDepends.GetSize() + aOtherDepends.GetSize());
 }
 
-TDC_ATTRIBUTECATEGORY CToDoCtrl::GetAttributeCategory(TDC_COLUMN nColID, BOOL bResolveCustomCols) const
-{
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
-	{
-		if (bResolveCustomCols)
-		{
-			DWORD dwAttribType = m_aCustomAttribDefs.GetAttributeDataType(nColID);
-			return TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(dwAttribType);
-		}
-
-		// else
-		return TDCAC_CUSTOM;
-	}
-
-	// Built-in attributes
-	int nAttribID = TDC::MapColumnToAttribute(nColID);
-
-	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
-	{
-		if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
-			return ATTRIBUTES[nAttrib].nCategory;
-	}
-
-	// All else
-	return TDCAC_NONE;
-}
-
 BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 {
 	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
@@ -7410,27 +7426,6 @@ void CToDoCtrl::SelectAll(BOOL bVisibleOnly)
 	// Note: No need to call UpdateControls because that will happen
 	//       as a consequence of a selection change notification
 	m_taskTree.SelectAll(bVisibleOnly);
-}
-
-BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const
-{
-	nAttrib = TDC::MapColumnToAttribute(nCol);
-	ASSERT(nAttrib != TDCA_NONE);
-
-	pWnd = GetAttributeCtrl(nAttrib);
-	
-	return (pWnd != NULL);
-}
-
-CWnd* CToDoCtrl::GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const
-{
-	UINT nCtrID = TDC::MapAttributeToCtrlID(nAttrib);
-	ASSERT(nCtrID != (UINT)-1);
-	
-	CWnd* pCtrl = GetDlgItem(nCtrID);
-	ASSERT_VALID(pCtrl);
-	
-	return pCtrl;
 }
 
 int CToDoCtrl::GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -10421,7 +10416,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
-	if (!CanCopyAttributeValue(nFromAttrib, nToAttrib))
+	if (!m_data.CanCopyAttributeValue(nFromAttrib, nToAttrib))
 		return FALSE;
 
 	Flush();
@@ -10440,7 +10435,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_AT
 
 		TDCCADATA data;
 
-		if (m_data.GetTaskAttributeValues(dwTaskID, nFromAttrib, data) && 
+		if (m_data.GetTaskAttributeValue(dwTaskID, nFromAttrib, data) && 
 			aTasksForCompletion.Add(dwTaskID, nToAttrib, data))
 		{
 			//int breakpoint = 0;
@@ -10471,33 +10466,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const 
 	const TDCCUSTOMATTRIBUTEDEFINITION* pToDef = NULL;
 	GET_CUSTDEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
 
-	if (!CanCopyAttributeValue(nFromAttrib, *pToDef))
-		return FALSE;
-
-	Flush();
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-	CDWordArray aModTaskIDs;
-	POSITION pos = TSH().GetFirstItemPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, nFromAttrib, sToCustomAttribID), aModTaskIDs))
-			return FALSE;
-	}
-
-	if (aModTaskIDs.GetSize())
-	{
-		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
-		SetModified(nAttrib, aModTaskIDs);
-		
-		UpdateControls(FALSE); // Don't update comments
-	}
-
-	return TRUE;
+	return CopySelectedTaskAttributeValue(nFromAttrib, pToDef->GetAttributeID());
 }
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
@@ -10505,48 +10474,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribI
 	const TDCCUSTOMATTRIBUTEDEFINITION* pFromDef = NULL;
 	GET_CUSTDEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
 
-	if (!CanCopyAttributeValue(*pFromDef, nToAttrib))
-		return FALSE;
-
-	Flush();
-
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-	// Some attribute edits can cause completion changes
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		TDCCADATA data;
-
-		if (m_data.GetTaskCustomAttributeData(dwTaskID, sFromCustomAttribID, data) &&
-			aTasksForCompletion.Add(dwTaskID, nToAttrib, data))
-		{
-			// int breakpoint = 0;
-		}
-		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, sFromCustomAttribID, nToAttrib), aModTaskIDs))
-		{
-			return FALSE;
-		}
-	}
-
-	UpdateControls(FALSE); // Don't update comments
-
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
-	{
-		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
-		SetModified(TDCA_DONEDATE, aModTaskIDs);
-	}
-	else if (aModTaskIDs.GetSize())
-	{
-		SetModified(nToAttrib, aModTaskIDs);
-	}
-
-	return TRUE;
+	return CopySelectedTaskAttributeValue(pFromDef->GetAttributeID(), nToAttrib);
 }
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
@@ -10558,267 +10486,13 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribI
 		return FALSE;
 	}
 
-	DWORD dwFromType = m_aCustomAttribDefs.GetAttributeDataType(sFromCustomAttribID);
-	DWORD dwToType = m_aCustomAttribDefs.GetAttributeDataType(sToCustomAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pFromDef = NULL;
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
 
-	if (dwFromType != dwToType)
-		return FALSE;
+	const TDCCUSTOMATTRIBUTEDEFINITION* pToDef = NULL;
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
 
-	Flush();
-
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, sFromCustomAttribID, sToCustomAttribID), aModTaskIDs))
-			return FALSE;
-	}
-
-	if (aModTaskIDs.GetSize())
-	{
-		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
-		SetModified(nAttrib, aModTaskIDs);
-
-		UpdateControls(FALSE); // Don't update comments
-	}
-
-	return TRUE;
-}
-
-BOOL CToDoCtrl::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
-{
-	// Doesn't make sense to copy to self
-	if (nFromAttrib == nToAttrib)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	switch (nFromAttrib)
-	{
-	case TDCA_ALLOCBY:			
-	case TDCA_ALLOCTO:			
-	case TDCA_CREATEDBY:	
-	case TDCA_LASTMODBY:	
-		switch (nToAttrib)
-		{
-		// Note: TDCA_CREATEDBY cannot be copied to
-		// Note: TDCA_LASTMODBY cannot be copied to
-		case TDCA_ALLOCBY:			
-		case TDCA_ALLOCTO:			
-			return TRUE;
-		}
-		break;
-
-	case TDCA_CATEGORY:			
-	case TDCA_EXTERNALID:		
-	case TDCA_STATUS:			
-	case TDCA_TAGS:				
-	case TDCA_TASKNAME:			
-	case TDCA_VERSION:			
-	case TDCA_ICON:				
-		switch (nToAttrib)
-		{
-		case TDCA_CATEGORY:			
-		case TDCA_EXTERNALID:		
-		case TDCA_STATUS:			
-		case TDCA_TAGS:				
-		case TDCA_TASKNAME:			
-		case TDCA_VERSION:			
-		case TDCA_ICON:				
-			return TRUE;
-		}
-		break;
-
-	case TDCA_PRIORITY:			
-	case TDCA_RISK:				
-		switch (nToAttrib)
-		{
-		case TDCA_PRIORITY:			
-		case TDCA_RISK:				
-			return TRUE;
-		}
-		break;
-
-	case TDCA_CREATIONDATE:		
-	case TDCA_DONEDATE:			
-	case TDCA_DUEDATE:			
-	case TDCA_LASTMODDATE:			
-	case TDCA_STARTDATE:		
-		switch (nToAttrib)
-		{
-		// Note: TDCA_CREATIONDATE cannot be copied to
-		// Note: TDCA_LASTMOD cannot be copied to
-		case TDCA_DONEDATE:			
-		case TDCA_DUEDATE:			
-		case TDCA_STARTDATE:		
-			return TRUE;
-		}
-		break;
-
-	case TDCA_DONETIME:			
-	case TDCA_DUETIME:			
-	case TDCA_STARTTIME:		
-		switch (nToAttrib)
-		{
-		case TDCA_DONETIME:			
-		case TDCA_DUETIME:			
-		case TDCA_STARTTIME:		
-			return TRUE;
-		}
-		break;
-
-	case TDCA_FLAG:				
-	case TDCA_LOCK:				
-		switch (nToAttrib)
-		{
-		case TDCA_FLAG:				
-		case TDCA_LOCK:				
-			return TRUE;
-		}
-		break;
-
-	case TDCA_TIMEESTIMATE:			
-	case TDCA_TIMESPENT:		
-		switch (nToAttrib)
-		{
-		case TDCA_TIMEESTIMATE:			
-		case TDCA_TIMESPENT:		
-			return TRUE;
-		}
-		break;
-	}
-
-	return FALSE;
-}
-
-BOOL CToDoCtrl::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom)
-{
-	switch (nFromAttrib)
-	{
-	case TDCA_VERSION:			
-	case TDCA_ALLOCBY:			
-	case TDCA_CREATEDBY:	
-	case TDCA_EXTERNALID:		
-	case TDCA_STATUS:			
-	case TDCA_TASKNAME:	
-	case TDCA_COMMENTS:			
-	case TDCA_FILELINK:			
-	case TDCA_ICON:				
-	case TDCA_LASTMODBY:
-		return attribDefFrom.IsDataType(TDCCA_STRING);
-
-	case TDCA_ALLOCTO:			
-	case TDCA_CATEGORY:			
-	case TDCA_TAGS:				
-		return (attribDefFrom.IsDataType(TDCCA_STRING) && attribDefFrom.IsMultiList());
-
-	case TDCA_COLOR:			
-	case TDCA_PRIORITY:			
-	case TDCA_RISK:				
-	case TDCA_POSITION:			
-	case TDCA_PERCENT:			
-	case TDCA_COST:	
-		return (attribDefFrom.IsDataType(TDCCA_INTEGER) || attribDefFrom.IsDataType(TDCCA_DOUBLE));
-
-	case TDCA_CREATIONDATE:		
-	case TDCA_DONEDATE:			
-	case TDCA_DUEDATE:			
-	case TDCA_LASTMODDATE:			
-	case TDCA_STARTDATE:		
-	case TDCA_DONETIME:			
-	case TDCA_DUETIME:			
-	case TDCA_STARTTIME:		
-		return attribDefFrom.IsDataType(TDCCA_DATE);
-
-	case TDCA_FLAG:				
-	case TDCA_LOCK:				
-		return attribDefFrom.IsDataType(TDCCA_BOOL);
-
-	case TDCA_TIMEESTIMATE:			
-	case TDCA_TIMESPENT:		
-		return attribDefFrom.IsDataType(TDCCA_TIMEPERIOD);
-	}
-
-	return FALSE;
-}
-
-BOOL CToDoCtrl::CanCopyAttributeValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib)
-{
-	switch (attribDefFrom.GetDataType())
-	{
-	case TDCCA_STRING:
-		switch(nToAttrib)
-		{
-		case TDCA_EXTERNALID:		
-		case TDCA_STATUS:			
-		case TDCA_TASKNAME:			
-		case TDCA_VERSION:			
-		case TDCA_ALLOCBY:			
-		case TDCA_CREATEDBY:	
-		case TDCA_COMMENTS:			
-		case TDCA_DEPENDENCY:		
-		case TDCA_FILELINK:			
-		case TDCA_ALLOCTO:			
-		case TDCA_CATEGORY:			
-		case TDCA_TAGS:				
-		case TDCA_ICON:				
-			return TRUE;
-		}
-		break;
-
-	case TDCCA_INTEGER:
-		switch(nToAttrib)
-		{
-		case TDCA_COLOR:			
-		case TDCA_PRIORITY:			
-		case TDCA_RISK:				
-		case TDCA_PERCENT:			
-			return TRUE;
-		}
-		break;
-
-	case TDCCA_DATE:
-		switch(nToAttrib)
-		{
-		case TDCA_DONEDATE:			
-		case TDCA_DUEDATE:			
-		case TDCA_STARTDATE:		
-		case TDCA_DONETIME:			
-		case TDCA_DUETIME:			
-		case TDCA_STARTTIME:		
-			return TRUE;
-		}
-		break;
-
-	case TDCCA_DOUBLE:
-		return (nToAttrib == TDCA_COST);
-
-	case TDCCA_BOOL:
-		switch(nToAttrib)
-		{
-		case TDCA_FLAG:				
-		case TDCA_LOCK:				
-			return TRUE;
-		}
-		break;
-
-	case TDCCA_TIMEPERIOD:
-		switch(nToAttrib)
-		{
-		case TDCA_TIMEESTIMATE:			
-		case TDCA_TIMESPENT:		
-			return TRUE;
-		}
-		break;
-	}
-
-	return FALSE;
+	return CopySelectedTaskAttributeValue(pFromDef->GetAttributeID(), pToDef->GetAttributeID());
 }
 
 BOOL CToDoCtrl::SaveTaskViewToImage(const CString& sFilePath) 

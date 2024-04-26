@@ -122,8 +122,6 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
 
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-//	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 	int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
 	CString GetColumnName(TDC_COLUMN nColID) const;
 

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataDefines.h"
+#include "TDCStatic.h"
 #include "resource.h"
 
 #include "..\shared\timehelper.h"
@@ -4191,52 +4192,161 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
+BOOL CToDoCtrlData::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib) const
+{
+	// Doesn't make sense to copy to self
+	if (nFromAttrib == nToAttrib)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttrib);
+	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttrib);
+
+	if (nFromCat == TDCAC_NONE || nToCat == TDCAC_NONE)
+		return FALSE;
+
+	switch (nToCat)
+	{
+	case TDCAC_TEXT:
+		return TRUE;
+
+	case TDCAC_NUMERIC:
+		return (nFromCat == TDCAC_NUMERIC);
+
+	case TDCAC_CUSTOM:
+		ASSERT(0); // Should have been resolved
+		break;
+
+	case TDCAC_DATETIME:
+		if (nFromCat == TDCAC_DATETIME)
+		{
+			switch (nFromAttrib)
+			{
+			case TDCA_CREATIONDATE:
+			case TDCA_DONEDATE:
+			case TDCA_DUEDATE:
+			case TDCA_LASTMODDATE:
+			case TDCA_STARTDATE:
+				switch (nToAttrib)
+				{
+				case TDCA_DONEDATE:
+				case TDCA_DUEDATE:
+				case TDCA_STARTDATE:
+					// Note: TDCA_CREATIONDATE cannot be copied to
+					// Note: TDCA_LASTMOD cannot be copied to
+					return TRUE;
+				}
+				break;
+
+			case TDCA_DONETIME:
+			case TDCA_DUETIME:
+			case TDCA_STARTTIME:
+				switch (nToAttrib)
+				{
+				case TDCA_DONETIME:
+				case TDCA_DUETIME:
+				case TDCA_STARTTIME:
+					return TRUE;
+				}
+				break;
+			}
+		}
+		break;
+
+	case TDCAC_TIMEPERIOD:
+		return (nToAttrib != TDCA_TIMEREMAINING);
+
+	case TDCAC_OTHER:
+		switch (nFromAttrib)
+		{
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+			switch (nToAttrib)
+			{
+			case TDCA_FLAG:
+			case TDCA_LOCK:
+				return TRUE;
+			}
+			break;
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+TDC_ATTRIBUTECATEGORY CToDoCtrlData::GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomAttrib) const
+{
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		if (bResolveCustomAttrib)
+		{
+			DWORD dwAttribType = m_aCustomAttribDefs.GetAttributeDataType(nAttribID);
+			return TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(dwAttribType);
+		}
+
+		// else
+		return TDCAC_CUSTOM;
+	}
+
+	// Built-in attributes
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	{
+		if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
+			return ATTRIBUTES[nAttrib].nCategory;
+	}
+
+	// All else
+	return TDCAC_NONE;
+}
+
 TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
-	TDCCADATA data;
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, SET_FAILED);
 
-	if (!GetTaskAttributeValues(dwTaskID, nFromAttrib, data))
-		return SET_FAILED;
-
-	// else
-	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
+	return CopyAttributeValueToTask(*pTDI, dwTaskID, nFromAttrib, nToAttrib);
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
+TDC_SET CToDoCtrlData::CopyAttributeValueToTask(const TODOITEM& tdiFrom, DWORD dwToTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
+	if (!CanCopyAttributeValue(nFromAttrib, nToAttrib))
+		return SET_FAILED;
+
 	TDCCADATA data;
 
-	if (!GetTaskAttributeValues(dwTaskID, nFromAttrib, data))
+	if (!GetTaskAttributeValue(tdiFrom, nFromAttrib, data))
 		return SET_FAILED;
 
 	// else
-	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
+	return SetTaskAttributeValue(dwToTaskID, nToAttrib, data);
 }
 
-BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const
+BOOL CToDoCtrlData::GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
 
-	return pTDI->GetAttributeValue(nAttrib, data);
+	return GetTaskAttributeValue(*pTDI, nAttribID, data);
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrlData::GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		return tdi.GetAttributeValue(nAttribID, data);
 
-	TDCCADATA data;
+	// else
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
-	if (!pTDI->GetCustomAttributeValues().Lookup(sFromCustomAttribID, data))
-		return SET_FAILED;
-
-	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
+	return tdi.GetCustomAttributeValue(pDef->sUniqueID, data);
 }
 
-TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data)
+TDC_SET CToDoCtrlData::SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	// TDCA_CREATEDBY not supported
 	// TDCA_CREATIONDATE not supported
@@ -4267,7 +4377,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 			CStringArray aValues;
 			data.AsArray(aValues);
 
-			return SetTaskArray(dwTaskID, nAttrib, aValues, TRUE);
+			return SetTaskArray(dwTaskID, nAttribID, aValues, TRUE);
 		}
 		break;
 
@@ -4307,22 +4417,19 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 				return SetTaskCost(dwTaskID, cost, FALSE);
 		}
 		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			return SetTaskCustomAttributeData(dwTaskID, pDef->sUniqueID, data);
+		}
+		break;
 	}
 
 	return SET_FAILED;
-}
-
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
-{
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
-
-	TDCCADATA data;
-
-	if (!pTDI->GetCustomAttributeValue(sFromCustomAttribID, data))
-		return SET_FAILED;
-
-	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
 }
 
 TDC_SET CToDoCtrlData::RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)

@@ -356,10 +356,10 @@ public:
 	void ClearCopiedItem() const;
 	BOOL PasteTasks(TDC_PASTE nWhere, BOOL bAsRef);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CanPasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
-	BOOL PasteValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
+	BOOL CanCopyAttributeColumnValues(TDC_COLUMN nColID) const;
+	BOOL CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
+	BOOL CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
+	BOOL PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
 
 	void ResetFileVersion(unsigned int nTo = 0) { m_nFileVersion = max(nTo, 0); }
 	DWORD GetFileVersion() const { return m_nFileVersion == 0 ? 1 : m_nFileVersion; }
@@ -660,8 +660,7 @@ protected:
 	virtual BOOL DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel = FALSE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-//	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
-	virtual int GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const;
+	virtual int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
 
 	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
@@ -748,9 +747,6 @@ protected:
 	void EnableDisableControls(HTREEITEM hti);
 	void EnableDisableComments(HTREEITEM hti);
 	void ReposProjectName(CRect& rAvailable);
-
-	BOOL GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const;
-	CWnd* GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const;
 
 	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
@@ -841,10 +837,6 @@ protected:
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
 	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);
-
-	static BOOL CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
-	static BOOL CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefTo);
-	static BOOL CanCopyAttributeValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib);
 };
 
 //{{AFX_INSERT_LOCATION}}

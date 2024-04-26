@@ -5779,7 +5779,7 @@ BOOL CTabbedToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) con
 	return FALSE; // not supported
 }
 
-int CTabbedToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs) const
+int CTabbedToDoCtrl::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -5787,7 +5787,7 @@ int CTabbedToDoCtrl::GetColumnTaskIDs(int nFrom, int nTo, CDWordArray& aTaskIDs)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::GetColumnTaskIDs(nFrom, nTo, aTaskIDs);
+		return CToDoCtrl::GetColumnTaskIDs(aTaskIDs, nFrom, nTo);
 
 	case FTCV_TASKLIST:
 		return m_taskList.GetColumnTaskIDs(aTaskIDs, nFrom, nTo);
