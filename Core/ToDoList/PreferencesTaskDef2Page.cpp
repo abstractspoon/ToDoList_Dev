@@ -120,7 +120,7 @@ void CPreferencesTaskDef2Page::OnFirstShow()
 	{
 		int nIndex = m_lbInheritAttrib.AddString(m_aAttribPrefs[nItem].sName);
 
-		m_lbInheritAttrib.SetItemData(nIndex, m_aAttribPrefs[nItem].nAttrib);
+		m_lbInheritAttrib.SetItemData(nIndex, m_aAttribPrefs[nItem].nAttribID);
 		m_lbInheritAttrib.SetCheck(nIndex, m_aAttribPrefs[nItem].bUse ? 1 : 0);
 	}
 	UpdateCustomAttributeInfoVisibility();
@@ -156,7 +156,7 @@ BOOL CPreferencesTaskDef2Page::EnableCustomAttributeInheritance()
 
 	while (nCustItem--)
 	{
-		if (m_aAttribPrefs[nCustItem].nAttrib == TDCA_CUSTOMATTRIB)
+		if (m_aAttribPrefs[nCustItem].nAttribID == TDCA_CUSTOMATTRIB)
 			break;
 	}
 	ASSERT(nCustItem != -1);
@@ -316,7 +316,7 @@ void CPreferencesTaskDef2Page::OnAttribUseChange()
 		
 		while (nAttrib--)
 		{
-			if (m_aAttribPrefs[nAttrib].nAttrib == nSelAttrib)
+			if (m_aAttribPrefs[nAttrib].nAttribID == nSelAttrib)
 			{
 				m_aAttribPrefs[nAttrib].bUse = m_lbInheritAttrib.GetCheck(m_nSelAttribUse);
 				break;
@@ -367,7 +367,7 @@ int CPreferencesTaskDef2Page::GetInheritParentAttributes(CTDCAttributeMap& mapAt
 		while (nIndex--)
 		{
 			if (m_aAttribPrefs[nIndex].bUse)
-				mapAttribs.Add(m_aAttribPrefs[nIndex].nAttrib);
+				mapAttribs.Add(m_aAttribPrefs[nIndex].nAttribID);
 		}
 	}
 	else
@@ -394,7 +394,7 @@ void CPreferencesTaskDef2Page::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	
 	while (nIndex--)
 	{
-		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttrib);
+		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttribID);
 		m_aAttribPrefs[nIndex].bUse = pPrefs->GetProfileInt(_T("Preferences\\AttribUse"), sKey, FALSE);
 	}
 
@@ -442,7 +442,7 @@ void CPreferencesTaskDef2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	while (nIndex--)
 	{
-		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttrib);
+		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttribID);
 		pPrefs->WriteProfileInt(_T("Preferences\\AttribUse"), sKey, m_aAttribPrefs[nIndex].bUse);
 	}
 

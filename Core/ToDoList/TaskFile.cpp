@@ -1046,8 +1046,8 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapEdit.GetNext(pos);
-			pXIVis->AddItem(TDL_ATTRIBVISEDIT, nAttrib, XIT_ELEMENT);
+			TDC_ATTRIBUTE nAttribID = mapEdit.GetNext(pos);
+			pXIVis->AddItem(TDL_ATTRIBVISEDIT, nAttribID, XIT_ELEMENT);
 		}
 	}
 
@@ -1110,8 +1110,8 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapFilter.GetNext(pos);
-			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttrib, XIT_ELEMENT);
+			TDC_ATTRIBUTE nAttribID = mapFilter.GetNext(pos);
+			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttribID, XIT_ELEMENT);
 		}
 	}
 
@@ -1736,18 +1736,18 @@ void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 	m_mapReadableAttrib.Copy(mapAttrib);
 }
 
-bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const
+bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
 {
 	if (!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.Has(TDCA_ALL))
-		return (nAttrib != TDCA_NONE);
+		return (nAttribID != TDCA_NONE);
 
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
-		return (nAttrib == TDCA_NONE);
+		return (nAttribID == TDCA_NONE);
 
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib) && m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
 		return true;
 
-	return (m_mapReadableAttrib.Has(nAttrib) != FALSE);
+	return (m_mapReadableAttrib.Has(nAttribID) != FALSE);
 }
 
 bool CTaskFile::SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate)
@@ -3520,12 +3520,12 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 	return false;
 }
 
-bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const
+bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const
 {
-	if (!IsAttributeAvailable(nAttrib))
+	if (!IsAttributeAvailable(nAttribID))
 		return false;
 
-	LPCTSTR szAttrib = GetAttribTag(nAttrib, bCalc, bDisplay);
+	LPCTSTR szAttrib = GetAttribTag(nAttribID, bCalc, bDisplay);
 
 	if (Misc::IsEmpty(szAttrib))
 		return false;
@@ -3537,15 +3537,15 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bC
 		return true;
 
 	// Fallback in special case
-	if ((nAttrib == TDCA_PARENTID) && IsAttributeAvailable(TDCA_ID))
+	if ((nAttribID == TDCA_PARENTID) && IsAttributeAvailable(TDCA_ID))
 		return (GetTaskParent(hTask) != NULL);
 
 	return false;
 }
 
-LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay)
+LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCBY:		return TDL_TASKALLOCBY;
 	case TDCA_ALLOCTO:		return TDL_TASKALLOCTO;
@@ -3594,27 +3594,27 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	return NULLSTRING;
 }
 
-LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const
+LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const
 {
-	if (!IsAttributeAvailable(nAttrib))
+	if (!IsAttributeAvailable(nAttribID))
 		return NULLSTRING;
 
-	if (!TaskHasAttribute(hTask, nAttrib, bCalc, bDisplay))
+	if (!TaskHasAttribute(hTask, nAttribID, bCalc, bDisplay))
 	{
-		if (bCalc && TaskHasAttribute(hTask, nAttrib, !bCalc, bDisplay))
+		if (bCalc && TaskHasAttribute(hTask, nAttribID, !bCalc, bDisplay))
 			bCalc = false;
 		else
 			return NULLSTRING;
 	}
 
-	LPCTSTR szAttrib = GetAttribTag(nAttrib, bCalc, bDisplay);
+	LPCTSTR szAttrib = GetAttribTag(nAttribID, bCalc, bDisplay);
 
 	if (bDisplay)
 	{
 		// Customisations
 		static CString DISPLAYSTRING;
 
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
@@ -3630,7 +3630,7 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 		case TDCA_TIMESPENT:
 			{
 				TDCTIMEPERIOD time;
-				time.dAmount = (nAttrib == TDCA_TIMEESTIMATE) ?
+				time.dAmount = (nAttribID == TDCA_TIMEESTIMATE) ?
 								GetTaskTimeEstimate(hTask, time.nUnits, bCalc) :
 								GetTaskTimeSpent(hTask, time.nUnits, bCalc);
 

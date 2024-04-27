@@ -75,13 +75,13 @@ bool CTaskListTxtExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	return true;
 }
 
-CString CTaskListTxtExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const 
+CString CTaskListTxtExporter::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue) const 
 {
 	CString sFmtAttrib;
 
 	if (!sValue.IsEmpty())
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION:
 		case TDCA_TASKNAME:
@@ -99,13 +99,13 @@ CString CTaskListTxtExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStri
 }
 
 CString CTaskListTxtExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, 
-											  TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
+											  TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	// base processing
-	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttrib, sAttribLabel);
+	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttribID, sAttribLabel);
 
 	// extra processing
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_COMMENTS:
 	case TDCA_FILELINK:

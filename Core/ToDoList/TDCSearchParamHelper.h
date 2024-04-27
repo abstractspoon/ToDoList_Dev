@@ -35,12 +35,12 @@ public:
 								  const CTDCCustomAttribDefinitionArray& aAttribDefs, CSearchParamArray& aRules);
 	
 	static BOOL AppendDateFilter(FILTER_DATE nDate, const COleDateTime& dateUser, int nNextNDays, 
-								 TDC_ATTRIBUTE nDateAttrib, TDC_ATTRIBUTE nTimeAttrib, CSearchParamArray& aRules);
+								 TDC_ATTRIBUTE nDateAttribID, TDC_ATTRIBUTE nTimeAttribID, CSearchParamArray& aRules);
 
-	static void AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
+	static void AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttribID, CSearchParamArray& aRules,
 								DWORD dwFlags = 0, DWORD dwMask = 0);
 
-	static void AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
+	static void AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttribID, CSearchParamArray& aRules,
 									   int nAnyValue, int nNoValue);
 
 protected:
@@ -48,7 +48,7 @@ protected:
 
 	static BOOL DecodeAttribute(const CString& sAttrib, DWORD dwFlags,
 								const CTDCCustomAttribDefinitionArray& aCustAttribDefs, 
-								TDC_ATTRIBUTE& nAttrib, CString& sUniqueID, FIND_ATTRIBTYPE& nFindType);
+								TDC_ATTRIBUTE& nAttribID, CString& sUniqueID, FIND_ATTRIBTYPE& nFindType);
 
 	static BOOL InitFilterDate(FILTER_DATE nDate, const COleDateTime& dateUser, int nNextNDays, COleDateTime& date);
 };

@@ -844,7 +844,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 		
 		// display this control only if the corresponding column
 		// is also showing
-		BOOL bWantCtrl = WantShowFilter(fc.nAttrib);
+		BOOL bWantCtrl = WantShowFilter(fc.nAttributeID);
 		
 		// special case: User Dates
 		switch (fc.nCtrlID)
@@ -1235,7 +1235,7 @@ void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* /*pNM
 
 void CTDLFilterBar::OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl)
 {
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttributeID));
 	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(ctrl.nCtrlID));
 
 	TDCCADATA data, dataPrev;

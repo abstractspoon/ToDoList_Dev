@@ -63,10 +63,10 @@ int CTDCTaskMatcher::Convert(const CResultArray& aResults, CDWordArray& aTaskIDs
 	return aTaskIDs.GetSize();
 }
 
-int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const
 {
 	CResultArray aResults;
-	FindTasks(nAttrib, nOp, sValue, bCheckDueToday, aResults);
+	FindTasks(nAttribID, nOp, sValue, bCheckDueToday, aResults);
 
 	return Convert(aResults, aTaskIDs);
 }
@@ -87,14 +87,14 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	return Convert(aResults, aTaskIDs);
 }
 
-int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const
 {
 	// sanity check
 	if (!m_data.GetTaskCount())
 		return 0;
 	
 	SEARCHPARAMS query;
-	query.aRules.Add(SEARCHPARAM(nAttrib, nOp, sValue));
+	query.aRules.Add(SEARCHPARAM(nAttribID, nOp, sValue));
 
 	return FindTasks(query, bCheckDueToday, aResults);
 }

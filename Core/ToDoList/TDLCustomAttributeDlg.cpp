@@ -634,9 +634,9 @@ void CCustomAttributeCalcPage::GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& cal
 	calc = m_calc;
 }
 
-BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttrib) const
+BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_CREATIONDATE:
 	case TDCA_DONEDATE:
@@ -646,9 +646,9 @@ BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttrib) const
 		return TRUE;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nDef = m_aAttribDef.Find(nAttrib);
+			int nDef = m_aAttribDef.Find(nAttribID);
 			ASSERT(nDef >= 0);
 
 			if (nDef >= 0)
@@ -660,18 +660,18 @@ BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttrib) const
 	return FALSE;
 }
 
-BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttrib) const
+BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		return TRUE;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nDef = m_aAttribDef.Find(nAttrib);
+			int nDef = m_aAttribDef.Find(nAttribID);
 			ASSERT(nDef >= 0);
 
 			if (nDef >= 0)

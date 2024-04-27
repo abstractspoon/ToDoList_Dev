@@ -176,9 +176,9 @@ namespace TDC
 		return 0;
 	}
 
-	static TDC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttrib) 
+	static TDC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttribID) 
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_ALLOCBY:			return TDCC_ALLOCBY;
 		case TDCA_ALLOCTO:			return TDCC_ALLOCTO;
@@ -226,22 +226,22 @@ namespace TDC
 		}
 		
 		// handle custom columns
-		if (nAttrib >= TDCA_CUSTOMATTRIB_FIRST && nAttrib <= TDCA_CUSTOMATTRIB_LAST)
+		if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
 		{
-			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttrib - TDCA_CUSTOMATTRIB_FIRST));
+			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttribID - TDCA_CUSTOMATTRIB_FIRST));
 		}
 		
 		// all else
 		return TDCC_NONE;
 	}
 
-	static UINT MapAttributeToCtrlID(TDC_ATTRIBUTE nAttrib) 
+	static UINT MapAttributeToCtrlID(TDC_ATTRIBUTE nAttribID) 
 	{
 		// custom columns not supported for now
 		// We could have used CTDCCustomAttributeHelper but that's an unwanted dependency
-		ASSERT(nAttrib < TDCA_CUSTOMATTRIB_FIRST || nAttrib > TDCA_CUSTOMATTRIB_LAST);
+		ASSERT((nAttribID < TDCA_CUSTOMATTRIB_FIRST) || (nAttribID > TDCA_CUSTOMATTRIB_LAST));
 		
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 //		case TDCA_ALLOCBY:			return IDC_ALLOCBY;
 // 		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
@@ -534,9 +534,9 @@ namespace TDC
 	}
 	
 
-	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttrib)
+	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_CREATIONDATE:	return TDCD_CREATE;
 		case TDCA_LASTMODDATE:	return TDCD_LASTMOD;
@@ -579,9 +579,9 @@ namespace TDC
 		return TDCD_NONE;
 	}
 
-	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttrib)
+	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION: // == move
 		case TDCA_POSITION_SAMEPARENT:
@@ -634,7 +634,7 @@ namespace TDC
 			return IUI_EDIT;
 
 		default: // handle custom attrib
-			if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib < TDCA_CUSTOMATTRIB_LAST))
+			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID < TDCA_CUSTOMATTRIB_LAST))
 				return IUI_EDIT;
 		}
 

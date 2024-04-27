@@ -947,16 +947,16 @@ void CToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	m_taskTree.EnableWindow(bShow);
 }
 
-void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
+void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 {
 	if (!m_taskTree.GetSafeHwnd())
 		return;
 	
-	if (!CanEditSelectedTask(nAttrib))
+	if (!CanEditSelectedTask(nAttribID))
 		return;
 	
 	// special case to circumvent CSaveFocus else it can mess up IME input
-	if (nAttrib == TDCA_COMMENTS)
+	if (nAttribID == TDCA_COMMENTS)
 	{
 		CDWordArray aModTaskIDs;
 		GetSelectedTaskIDs(aModTaskIDs, FALSE);
@@ -971,7 +971,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	CSaveFocus sf;
 	UpdateData();
 	
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
 		SetSelectedTaskTitle(m_ctrlAttributes.GetTaskTitle(), TRUE);
@@ -1129,9 +1129,9 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	default:
 		// handle custom attributes
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttrib);
+			CString sAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
 			TDCCADATA data;
 
 			if (m_ctrlAttributes.GetCustomAttributeData(sAttribID, data))
@@ -1167,8 +1167,8 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sAttribID);
- 		SetModified(nAttrib, aModTaskIDs);
+		TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sAttribID);
+ 		SetModified(nAttribID, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -2924,23 +2924,23 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 	return FALSE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend)
+BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend)
 {
 	CDWordArray aModTaskIDs;
 
-	if (SET_CHANGE != SetSelectedTaskArray(nAttrib, aItems, bAppend, aModTaskIDs))
+	if (SET_CHANGE != SetSelectedTaskArray(nAttribID, aItems, bAppend, aModTaskIDs))
 		return FALSE;
 
 	ASSERT(aModTaskIDs.GetSize());
-	m_ctrlAttributes.RefreshSelectedTasksValue(nAttrib);
+	m_ctrlAttributes.RefreshSelectedTasksValue(nAttribID);
 
 	return TRUE;
 }
 
-TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 
+TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, 
 										BOOL bAppend, CDWordArray& aModTaskIDs)
 {
-	if (!CanEditSelectedTask(nAttrib))
+	if (!CanEditSelectedTask(nAttribID))
 		return SET_FAILED;
 
 	Flush();
@@ -2954,18 +2954,18 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArra
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 		
-		if (!HandleModResult(dwTaskID, m_data.SetTaskArray(dwTaskID, nAttrib, aItems, bAppend), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.SetTaskArray(dwTaskID, nAttribID, aItems, bAppend), aModTaskIDs))
 			return SET_FAILED;
 	}
 
 	if (!aModTaskIDs.GetSize())
 		return SET_NOCHANGE;
 
-	SetModified(nAttrib, aModTaskIDs);
+	SetModified(nAttribID, aModTaskIDs);
 	return SET_CHANGE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aAll, 
+BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aAll, 
 									 const CStringArray& aChecked, const CStringArray& aMixed)
 {
 	CStringArray aUnchecked, aTaskItems;
@@ -2991,7 +2991,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& 
 
 		// We only need to be careful if the combo has any mixed items
 		// and if the task itself has any current array items
-		if (bMergeItems && m_data.GetTaskArray(dwTaskID, nAttrib, aTaskItems))
+		if (bMergeItems && m_data.GetTaskArray(dwTaskID, nAttribID, aTaskItems))
 		{
 			Misc::AddUniqueItems(aChecked, aTaskItems);
 			Misc::RemoveItems(aUnchecked, aTaskItems);
@@ -3001,12 +3001,12 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& 
 			aTaskItems.Copy(aChecked);
 		}
 		
-		if (!HandleModResult(dwTaskID, m_data.SetTaskArray(dwTaskID, nAttrib, aTaskItems, FALSE), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.SetTaskArray(dwTaskID, nAttribID, aTaskItems, FALSE), aModTaskIDs))
 			return FALSE;
 	}
 
 	if (aModTaskIDs.GetSize())
-		SetModified(nAttrib, aModTaskIDs);
+		SetModified(nAttribID, aModTaskIDs);
 
 	return TRUE;
 }
@@ -4273,9 +4273,9 @@ int CToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 	mapColIDs.Copy(m_visColEdit.GetVisibleColumns());
 	mapColIDs.Add(TDCC_CLIENT); // always
 
-	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
 
 		if (attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT))
 			mapColIDs.Add(attribDef.GetColumnID());
@@ -4292,17 +4292,17 @@ BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
 	return m_visColEdit.IsColumnVisible(nColumn);
 }
 
-BOOL CToDoCtrl::IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const
+BOOL CToDoCtrl::IsEditFieldShowing(TDC_ATTRIBUTE nAttribID) const
 {
-	if ((nAttrib == TDCA_TASKNAME) || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if ((nAttribID == TDCA_TASKNAME) || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		return TRUE; // always visible
 
-	return m_visColEdit.IsEditFieldVisible(nAttrib);
+	return m_visColEdit.IsEditFieldVisible(nAttribID);
 }
 
-BOOL CToDoCtrl::IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttrib) const
+BOOL CToDoCtrl::IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttribID) const
 {
-	return (IsColumnShowing(nColumn) || IsEditFieldShowing(nAttrib));
+	return (IsColumnShowing(nColumn) || IsEditFieldShowing(nAttribID));
 }
 
 TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
@@ -7236,27 +7236,6 @@ void CToDoCtrl::SelectAll(BOOL bVisibleOnly)
 	m_taskTree.SelectAll(bVisibleOnly);
 }
 
-BOOL CToDoCtrl::GetColumnAttribAndCtrl(TDC_COLUMN nCol, TDC_ATTRIBUTE& nAttrib, CWnd*& pWnd) const
-{
-	nAttrib = TDC::MapColumnToAttribute(nCol);
-	ASSERT(nAttrib != TDCA_NONE);
-
-	pWnd = GetAttributeCtrl(nAttrib);
-	
-	return (pWnd != NULL);
-}
-
-CWnd* CToDoCtrl::GetAttributeCtrl(TDC_ATTRIBUTE nAttrib) const
-{
-	UINT nCtrID = TDC::MapAttributeToCtrlID(nAttrib);
-	ASSERT(nCtrID != (UINT)-1);
-	
-	CWnd* pCtrl = GetDlgItem(nCtrID);
-	ASSERT_VALID(pCtrl);
-	
-	return pCtrl;
-}
-
 int CToDoCtrl::GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	PrepareTaskfileForTasks(tasks, filter);
@@ -7762,8 +7741,8 @@ BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask
 
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = ((mapAttribs.GetCount() == 1) ? mapAttribs.GetFirst() : TDCA_ALL);
-		SetModified(nAttrib, aModTaskIDs);
+		TDC_ATTRIBUTE nAttribID = ((mapAttribs.GetCount() == 1) ? mapAttribs.GetFirst() : TDCA_ALL);
+		SetModified(nAttribID, aModTaskIDs);
 	}
 
 	return aModTaskIDs.GetSize();
@@ -8551,16 +8530,16 @@ BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect)
 }
 
 // Internal
-BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL /*bFindReplace*/)
 {
-	if (!SEARCHPARAM::GetAttribType(nAttrib, FALSE) == FT_STRING)
+	if (!SEARCHPARAM::GetAttribType(nAttribID, FALSE) == FT_STRING)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	SEARCHPARAM rule(nAttrib, FOP_INCLUDES, sPart);
+	SEARCHPARAM rule(nAttribID, FOP_INCLUDES, sPart);
 	rule.SetMatchWholeWord(bWholeWord);
 
 	SEARCHPARAMS params;
@@ -8790,14 +8769,14 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::DoFindReplace(TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrl::DoFindReplace(TDC_ATTRIBUTE nAttribID)
 {
-	return m_findReplace.DoFindReplace(nAttrib);
+	return m_findReplace.DoFindReplace(nAttribID);
 }
 
-BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
+BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_findReplace.CanDoFindReplace(nAttrib);
+	return m_findReplace.CanDoFindReplace(nAttribID);
 }
 
 LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM /*lParam*/)
@@ -8886,7 +8865,7 @@ LRESULT CToDoCtrl::OnFindReplaceMsg(WPARAM wParam, LPARAM lParam)
 
 BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks)
 {
-	TDC_ATTRIBUTE nAttrib = m_findReplace.GetAttribute();
+	TDC_ATTRIBUTE nAttribID = m_findReplace.GetAttribute();
 
 	// Sanity checks
 	if (!m_findReplace.IsReplacing())
@@ -8894,7 +8873,7 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks)
 		ASSERT(0);
 		return FALSE;
 	}
-	else if (!CanEditSelectedTask(nAttrib))
+	else if (!CanEditSelectedTask(nAttribID))
 	{
 		ASSERT(bReplacingAllTasks);
 		return FALSE;
@@ -8902,7 +8881,7 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks)
 	
 	CString sSelAttrib;
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
 		sSelAttrib = GetTaskTitle(m_taskTree.GetSelectedTaskID());
@@ -8919,7 +8898,7 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks)
 						m_findReplace.WantCaseSensitive(), 
 						m_findReplace.WantWholeWord()))
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_TASKNAME:
 			if (SetSelectedTaskTitle(sSelAttrib, FALSE))
@@ -9940,12 +9919,12 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 
 BOOL CToDoCtrl::CanClearSelectedTaskFocusedAttribute() const
 {
-	TDC_ATTRIBUTE nAttrib = GetFocusedControlAttribute();
+	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
-	if (!CanEditSelectedTask(nAttrib))
+	if (!CanEditSelectedTask(nAttribID))
 		return FALSE;
 
-	return CanClearSelectedTaskAttribute(nAttrib);
+	return CanClearSelectedTaskAttribute(nAttribID);
 }
 
 BOOL CToDoCtrl::ClearSelectedTaskFocusedAttribute()
@@ -9953,17 +9932,17 @@ BOOL CToDoCtrl::ClearSelectedTaskFocusedAttribute()
 	if (!CanClearSelectedTaskFocusedAttribute())
 		return FALSE;
 
-	TDC_ATTRIBUTE nAttrib = GetFocusedControlAttribute();
+	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
-	return ClearSelectedTaskAttribute(nAttrib);
+	return ClearSelectedTaskAttribute(nAttribID);
 }
 
-BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 {
-	if (!CanEditSelectedTask(nAttrib))
+	if (!CanEditSelectedTask(nAttribID))
 		return FALSE;
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_LOCK:
 		return TRUE;
@@ -9973,16 +9952,16 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
 		return FALSE;
 	}
 
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		return TRUE;
 
 	// else
-	return ((nAttrib >= TDCA_FIRST_ATTRIBUTE) && (nAttrib <= TDCA_LAST_REALATTRIBUTE));
+	return ((nAttribID >= TDCA_FIRST_ATTRIBUTE) && (nAttribID <= TDCA_LAST_REALATTRIBUTE));
 }
 
-BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, 0.0);
 	case TDCA_DUEDATE:		return SetSelectedTaskDate(TDCD_DUE, 0.0);
@@ -10060,7 +10039,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	}
 
 	// fall thru to custom attributes
-	CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttrib);
+	CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
 
 	if (!sCustomAttribID.IsEmpty())
 		return SetSelectedTaskCustomAttributeData(sCustomAttribID, TDCCADATA());
@@ -10099,12 +10078,12 @@ BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dw
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 
+BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const 
 { 
 	if (IsReadOnly())
 		return FALSE;
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_NONE:
 		return FALSE;
@@ -10188,7 +10167,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 			// are automatically calculated
 			return FALSE;
 		}
-		else if ((nAttrib == TDCA_STARTTIME) && !m_taskTree.SelectedTaskHasDate(TDCD_START))
+		else if ((nAttribID == TDCA_STARTTIME) && !m_taskTree.SelectedTaskHasDate(TDCD_START))
 		{
 			// Ignore tasks without a start date set
 			return FALSE;
@@ -10218,7 +10197,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		return GetSelectedTaskCount();
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			return SelectedTaskIsUnlocked(dwTaskID);
 		break;
 	}
@@ -10300,8 +10279,8 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const 
 
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
-		SetModified(nAttrib, aModTaskIDs);
+		TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
+		SetModified(nAttribID, aModTaskIDs);
 		
 		UpdateControls(FALSE); // Don't update comments
 	}
@@ -10390,8 +10369,8 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(const CString& sFromCustomAttribI
 
 	if (aModTaskIDs.GetSize())
 	{
-		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
-		SetModified(nAttrib, aModTaskIDs);
+		TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
+		SetModified(nAttribID, aModTaskIDs);
 
 		UpdateControls(FALSE); // Don't update comments
 	}

@@ -141,17 +141,17 @@ CString CTaskListCsvExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 	return sHeader;
 }
 
-CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
+CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	CString sHeader;
 	
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
 		sHeader = (sAttribLabel + DELIM);
 	}
 	else
 	{
-		int nMap = m_aColumnMapping.Find(nAttrib);
+		int nMap = m_aColumnMapping.Find(nAttribID);
 		ASSERT(nMap != -1);
 
 		if (nMap == -1)
@@ -182,19 +182,19 @@ CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE /*nAttrib*/, const C
 }
 
 CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, 
-											  TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
+											  TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	// base processing
-	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttrib, sAttribLabel);
+	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttribID, sAttribLabel);
 
 	// extra processing
 	if (!sItem.IsEmpty())
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION:
 		case TDCA_TASKNAME:
-			if ((nAttrib == TDCA_POSITION) || !pTasks->IsAttributeAvailable(TDCA_POSITION))
+			if ((nAttribID == TDCA_POSITION) || !pTasks->IsAttributeAvailable(TDCA_POSITION))
 			{
 				CString sIndent;
 
@@ -215,14 +215,14 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 		case TDCA_TIMESPENT:
 			{
 				TDC_UNITS nUnits;
-				double dTime = (nAttrib == TDCA_TIMEESTIMATE) ?
+				double dTime = (nAttribID == TDCA_TIMEESTIMATE) ?
 								pTasks->GetTaskTimeEstimate(hTask, nUnits, TRUE) :
 								pTasks->GetTaskTimeSpent(hTask, nUnits, TRUE);
 				
 				CString sTime = CTimeHelper().FormatTime(dTime, ROUNDTIMEFRACTIONS ? 0 : 2);
 				CString sUnits = CTimeHelper().GetUnits(TDC::MapUnitsToTHUnits(nUnits));
 
-				sItem = FormatAttribute(nAttrib, sAttribLabel, (sTime + sUnits));
+				sItem = FormatAttribute(nAttribID, sAttribLabel, (sTime + sUnits));
 			}
 			break;
 
@@ -234,7 +234,7 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 				time64_t timeT = 0;
 			
 				if (pTasks->GetTaskCreationDate64(hTask, timeT))
-					sItem = FormatAttribute(nAttrib, sAttribLabel, FormatDateWithSeconds(timeT));
+					sItem = FormatAttribute(nAttribID, sAttribLabel, FormatDateWithSeconds(timeT));
 			}
 			break;
 
@@ -243,7 +243,7 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 				time64_t timeT = 0;
 			
 				if (pTasks->GetTaskLastModified64(hTask, timeT))
-					sItem = FormatAttribute(nAttrib, sAttribLabel, FormatDateWithSeconds(timeT));
+					sItem = FormatAttribute(nAttribID, sAttribLabel, FormatDateWithSeconds(timeT));
 			}
 			break;
 
@@ -252,7 +252,7 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 				time64_t timeT = 0;
 			
 				if (pTasks->GetTaskDoneDate64(hTask, timeT))
-					sItem = FormatAttribute(nAttrib, sAttribLabel, FormatDateWithSeconds(timeT));
+					sItem = FormatAttribute(nAttribID, sAttribLabel, FormatDateWithSeconds(timeT));
 			}
 			break;
 		}

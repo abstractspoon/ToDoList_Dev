@@ -625,13 +625,13 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 	}
 }
 
-BOOL CTDLFindTaskExpressionListCtrl::HasRule(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDLFindTaskExpressionListCtrl::HasRule(TDC_ATTRIBUTE nAttribID) const
 {
 	int nRule = m_aSearchParams.GetSize();
 
 	while (nRule--)
 	{
-		if (m_aSearchParams.GetAt(nRule).AttributeIs(nAttrib))
+		if (m_aSearchParams.GetAt(nRule).AttributeIs(nAttribID))
 			return TRUE;
 	}
 

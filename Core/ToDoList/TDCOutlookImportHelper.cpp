@@ -145,10 +145,10 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 		CString sData;
 		CStringArray aData;
 		
-		if (attrib.nTDCAttrib == TDCA_NONE || !mapData.Lookup(oaType, sData) || sData.IsEmpty())
+		if (attrib.nAttributeID == TDCA_NONE || !mapData.Lookup(oaType, sData) || sData.IsEmpty())
 			continue;
 		
-		switch(attrib.nTDCAttrib)
+		switch(attrib.nAttributeID)
 		{
 		case TDCA_TASKNAME:
 			if (!tdi.sTitle.IsEmpty())

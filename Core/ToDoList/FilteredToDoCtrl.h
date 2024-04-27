@@ -104,7 +104,7 @@ protected:
 
 protected:
 	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
-	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const;
+	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs) const;
 	BOOL StyleChangesNeedRefilter(const CTDCStyleMap& styles) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);

@@ -119,14 +119,14 @@ struct TDCINFOTIPITEM
 		Init(TDCA_NONE, _T(""), _T(""));
 	}
 
-	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttrib, CString sLab, const CString& sVal)
+	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttribID, CString sLab, const CString& sVal)
 	{
-		Init(nAttrib, sLab, sVal);
+		Init(nAttribID, sLab, sVal);
 	}
 
-	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttrib, UINT nLabelStrID, const CString& sVal)
+	TDCINFOTIPITEM(TDC_ATTRIBUTE nAttribID, UINT nLabelStrID, const CString& sVal)
 	{
-		Init(nAttrib, CEnString(nLabelStrID), sVal);
+		Init(nAttribID, CEnString(nLabelStrID), sVal);
 	}
 
 	TDC_ATTRIBUTE nAttribID;
@@ -135,9 +135,9 @@ struct TDCINFOTIPITEM
 	int nLabelWidth;
 
 protected:
-	void Init(TDC_ATTRIBUTE nAttrib, CString sLab, const CString& sVal)
+	void Init(TDC_ATTRIBUTE nAttribID, CString sLab, const CString& sVal)
 	{
-		nAttribID = nAttrib;
+		nAttribID = nAttribID;
 		sLabel = sLab;
 		sValue = sVal;
 		nLabelWidth = 0;
@@ -511,19 +511,19 @@ struct TDCGETTASKS
 		return *this;
 	}
 
-	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const
+	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const
 	{
 		if (mapAttribs.Has(TDCA_NONE))
 			return FALSE;
 
 		// Html comments cannot be implicitly specified because of its cost
-		if (nAttrib != TDCA_HTMLCOMMENTS)
+		if (nAttribID != TDCA_HTMLCOMMENTS)
 		{
 			if ((mapAttribs.GetCount() == 0) || mapAttribs.Has(TDCA_ALL))
 				return TRUE;
 		}
 
-		return mapAttribs.Has(nAttrib);
+		return mapAttribs.Has(nAttribID);
 	}
 
 	BOOL IsSet(BOOL bIncAttrib) const
@@ -682,11 +682,19 @@ typedef CMap<TDC_COLUMN, TDC_COLUMN, const TDCCOLUMN*, const TDCCOLUMN*&> CTDCCo
 
 struct CTRLITEM
 {
-	CTRLITEM()	: nCtrlID(0), nLabelID(0), nAttrib(TDCA_NONE)
+	CTRLITEM() 
+		: 
+		nCtrlID(0), 
+		nLabelID(0), 
+		nAttributeID(TDCA_NONE)
 	{
 	}
 	
-	CTRLITEM(UINT ctrlID, UINT labelID, TDC_ATTRIBUTE attribID)	: nCtrlID(ctrlID), nLabelID(labelID), nAttrib(attribID)
+	CTRLITEM(UINT ctrlID, UINT labelID, TDC_ATTRIBUTE nAttribID)	
+		: 
+		nCtrlID(ctrlID), 
+		nLabelID(labelID), 
+		nAttributeID(nAttribID)
 	{
 	}
 
@@ -694,7 +702,7 @@ struct CTRLITEM
 	{
 		return ((nCtrlID == other.nCtrlID) && 
 				(nLabelID == other.nLabelID) && 
-				(nAttrib == other.nAttrib));
+				(nAttributeID == other.nAttributeID));
 	}
 
 	BOOL operator!=(const CTRLITEM& other) const
@@ -720,7 +728,7 @@ struct CTRLITEM
 
 	UINT nCtrlID;
 	UINT nLabelID;
-	TDC_ATTRIBUTE nAttrib;
+	TDC_ATTRIBUTE nAttributeID;
 
 protected:
 	void DeleteCtrl(const CWnd* pParent, UINT& nID)
@@ -737,11 +745,13 @@ protected:
 	}
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 {
 	friend class CTDCCustomControlArray;
 
-	CUSTOMATTRIBCTRLITEM() : CTRLITEM(0, 0, nAttrib)
+	CUSTOMATTRIBCTRLITEM()
 	{
 		nBuddyCtrlID = nBuddyLabelID = 0;
 		pBuddyClass = NULL;
@@ -762,6 +772,7 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 			return FALSE;
 		}
 
+		// Class name is an ANSI string
 		return (strcmp(pBuddyClass->m_lpszClassName, other.pBuddyClass->m_lpszClassName) == 0);
 	}
 		
@@ -812,7 +823,7 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 		if (!HasBuddy())
 			return FALSE;
 
-		ctrl.nAttrib = nAttrib;
+		ctrl.nAttributeID = nAttributeID;
 		ctrl.nCtrlID = nBuddyCtrlID;
 		ctrl.nLabelID = nBuddyLabelID;
 
@@ -854,6 +865,8 @@ protected:
 
 class CTDCControlArray : public CArray<CTRLITEM, CTRLITEM&> {};
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 class CTDCCustomControlArray : public CArray<CUSTOMATTRIBCTRLITEM, CUSTOMATTRIBCTRLITEM&> 
 {
 public:
@@ -893,7 +906,7 @@ public:
 
 		while (nCtrl--)
 		{
-			if (GetAt(nCtrl).nAttrib == nAttribID)
+			if (GetAt(nCtrl).nAttributeID == nAttribID)
 				return nCtrl;
 		}
 
@@ -928,33 +941,54 @@ struct SEARCHPARAM
 {
 	friend struct SEARCHPARAMS;
 
-	SEARCHPARAM(TDC_ATTRIBUTE a = TDCA_NONE, FIND_OPERATOR o = FOP_NONE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(TRUE), nType(FT_NONE)
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID = TDCA_NONE, FIND_OPERATOR nOp = FOP_NONE) 
+		: 
+		nAttributeID(TDCA_NONE), 
+		nOperator(nOp), 
+		dValue(0), 
+		nValue(0), 
+		dwFlags(0), 
+		bAnd(TRUE), 
+		nAttribType(FT_NONE)
 	{
-		SetAttribute(a);
+		SetAttribute(nAttribID);
 	}
 	
-	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, CString s, BOOL and = TRUE, FIND_ATTRIBTYPE ft = FT_NONE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(and), nType(ft)  
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE) 
+		: 
+		nAttributeID(TDCA_NONE), 
+		nOperator(nOp), 
+		dValue(0), 
+		nValue(0), 
+		dwFlags(0), 
+		bAnd(and), 
+		nAttribType(nType)  
 	{
-		SetAttribute(a);
+		SetAttribute(nAttribID);
 
-		if (!s.IsEmpty())
-			SetValue(s);
+		if (!sVal.IsEmpty())
+			SetValue(sVal);
 	}
 	
-	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, double d, BOOL and = TRUE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(and), nType(FT_NONE)  
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, double dVal, BOOL and = TRUE) 
+		: 
+		nAttributeID(TDCA_NONE), 
+		nOperator(nOp), 
+		dValue(0), 
+		nValue(0), 
+		dwFlags(0), 
+		bAnd(and), 
+		nAttribType(FT_NONE)  
 	{
-		SetAttribute(a);
+		SetAttribute(nAttribID);
 
-		nType = GetAttribType();
+		nAttribType = GetAttribType();
 
-		switch (nType)
+		switch (nAttribType)
 		{
 		case FT_DOUBLE:
 		case FT_DATE:
-			dValue = d;
+			dValue = dVal;
 			break;
 
 		default:
@@ -962,19 +996,26 @@ struct SEARCHPARAM
 		}
 	}
 	
-	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, int n, BOOL and = TRUE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(and), nType(FT_NONE)  
+	SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, BOOL and = TRUE) 
+		: 
+		nAttributeID(TDCA_NONE), 
+		nOperator(nOp), 
+		dValue(0), 
+		nValue(0), 
+		dwFlags(0), 
+		bAnd(and), 
+		nAttribType(FT_NONE)  
 	{
-		SetAttribute(a);
+		SetAttribute(nAttribID);
 
-		nType = GetAttribType();
+		nAttribType = GetAttribType();
 
-		switch (nType)
+		switch (nAttribType)
 		{
 		case FT_INTEGER:
 		case FT_BOOL:
 		case FT_RECURRENCE:
-			nValue = n;
+			nValue = nVal;
 			break;
 
 		default:
@@ -1003,13 +1044,13 @@ struct SEARCHPARAM
 				return FALSE;
 			}
 		}
-		else if (attrib != rule.attrib)
+		else if (nAttributeID != rule.nAttributeID)
 		{
 			return FALSE;
 		}
 
 		// test rest of attributes
-		if ((op == rule.op) && (bAnd == rule.bAnd) && (dwFlags == rule.dwFlags))
+		if ((nOperator == rule.nOperator) && (bAnd == rule.bAnd) && (dwFlags == rule.dwFlags))
 		{
 			switch (GetAttribType())
 			{
@@ -1037,64 +1078,51 @@ struct SEARCHPARAM
 		return FALSE;
 	}
 
-	BOOL Set(TDC_ATTRIBUTE a, FIND_OPERATOR o, CString s, BOOL and = TRUE, FIND_ATTRIBTYPE t = FT_NONE)
+	BOOL Set(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sVal, BOOL and = TRUE, FIND_ATTRIBTYPE nType = FT_NONE)
 	{
-		if (!SetAttribute(a, t))
+		if (!SetAttribute(nAttribID, nType))
 			return FALSE;
 
-		SetOperator(o);
+		SetOperator(nOp);
 		SetAnd(and);
-		SetValue(s);
+		SetValue(sVal);
 
 		return TRUE;
 	}
 
-	BOOL Set(TDC_ATTRIBUTE a, const CString& id, FIND_ATTRIBTYPE t, FIND_OPERATOR o, CString s, BOOL and = TRUE)
+	BOOL Set(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp, CString sVal, BOOL and = TRUE)
 	{
-		if (!SetCustomAttribute(a, id, t))
+		if (!SetCustomAttribute(nAttribID, sID, nType))
 			return FALSE;
 
-		SetOperator(o);
+		SetOperator(nOp);
 		SetAnd(and);
-		SetValue(s);
+		SetValue(sVal);
 
 		return TRUE;
 	}
 
-	BOOL SetAttribute(TDC_ATTRIBUTE a, FIND_ATTRIBTYPE t = FT_NONE)
+	BOOL SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nType = FT_NONE)
 	{
 		// custom attributes must have a custom ID
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(a))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			ASSERT(0);
 			return FALSE;
 		}
 
-		// handle deprecated relative date attributes
-		switch (attrib)
-		{
-		case TDCA_STARTDATE_RELATIVE_DEP:
-		case TDCA_DUEDATE_RELATIVE_DEP:
-		case TDCA_DONEDATE_RELATIVE_DEP:
-		case TDCA_CREATIONDATE_RELATIVE_DEP:
-		case TDCA_LASTMOD_RELATIVE_DEP:
-			a = TDC::MapDeprecatedAttribute(attrib);
-			t = FT_DATERELATIVE;
-			break;
-		}
+		FIND_ATTRIBTYPE nPrevType = nAttribType;
 
-		FIND_ATTRIBTYPE nPrevType = nType;
-
-		attrib = a;
-		nType = t;
+		nAttributeID = nAttribID;
+		nAttribType = nType;
 		
 		// update Attrib type
 		GetAttribType();
 
 		// Reset 'extra' information stored in the union
-		if (nType != nPrevType)
+		if (nAttribType != nPrevType)
 		{
-			if (nType == FT_DATERELATIVE)
+			if (nAttribType == FT_DATERELATIVE)
 				bRelativeDate = TRUE;
 			else
 				dwFlags = 0;
@@ -1104,11 +1132,11 @@ struct SEARCHPARAM
 		return TRUE;
 	}
 
-	TDC_ATTRIBUTE GetAttribute() const { return attrib; }
-	FIND_OPERATOR GetOperator() const { return op; }
+	TDC_ATTRIBUTE GetAttribute() const { return nAttributeID; }
+	FIND_OPERATOR GetOperator() const { return nOperator; }
 	BOOL GetAnd() const { return bAnd; }
 	BOOL GetOr() const { return !bAnd; }
-	BOOL IsCustomAttribute() const { return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib); }
+	BOOL IsCustomAttribute() const { return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttributeID); }
 
 	BOOL IsRelativeDate(BOOL bMustHaveValue = TRUE) const
 	{
@@ -1129,20 +1157,22 @@ struct SEARCHPARAM
 		return ((sValue[0] == 'n') || (sValue[0] == 'N'));
 	}
 
-	BOOL SetCustomAttribute(TDC_ATTRIBUTE a, const CString& id, FIND_ATTRIBTYPE t)
+	BOOL SetCustomAttribute(TDC_ATTRIBUTE nAttribID, const CString& sID, FIND_ATTRIBTYPE nType)
 	{
-		if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(a) || id.IsEmpty() || t == FT_NONE)
+		if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) || 
+			sID.IsEmpty() || 
+			(nType == FT_NONE))
 		{
 			ASSERT(0);
 			return FALSE;
 		}
 
-		attrib = a;
-		nType = t;
-		sCustAttribID = id;
+		nAttributeID = nAttribID;
+		nAttribType = nType;
+		sCustAttribID = sID;
 
 		// handle relative dates
-		switch (nType)
+		switch (nAttribType)
 		{
 		case FT_DATE:
 			SetRelativeDate(FALSE);
@@ -1165,11 +1195,11 @@ struct SEARCHPARAM
 		return sCustAttribID;
 	}
 
-	BOOL SetOperator(FIND_OPERATOR o) 
+	BOOL SetOperator(FIND_OPERATOR nOp) 
 	{
-		if (IsValidOperator(GetAttribType(), o))
+		if (IsValidOperator(GetAttribType(), nOp))
 		{
-			op = o;
+			nOperator = nOp;
 			return TRUE;
 		}
 
@@ -1178,14 +1208,14 @@ struct SEARCHPARAM
 
 	FIND_ATTRIBTYPE GetAttribType() const
 	{
-		if (nType == FT_NONE)
-			nType = GetAttribType(attrib, bRelativeDate);
+		if (nAttribType == FT_NONE)
+			nAttribType = GetAttribType(nAttributeID, bRelativeDate);
 
-		ASSERT ((nType != FT_NONE) || 
-				(attrib == TDCA_NONE) || 
-				(attrib == TDCA_SELECTION));
+		ASSERT ((nAttribType != FT_NONE) || 
+				(nAttributeID == TDCA_NONE) || 
+				(nAttributeID == TDCA_SELECTION));
 
-		return nType;
+		return nAttribType;
 	}
 
 	void ClearValue()
@@ -1195,9 +1225,9 @@ struct SEARCHPARAM
 		nValue = 0;
 	}
 
-	static FIND_ATTRIBTYPE GetAttribType(TDC_ATTRIBUTE attrib, BOOL bRelativeDate)
+	static FIND_ATTRIBTYPE GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate)
 	{
-		switch (attrib)
+		switch (nAttribID)
 		{
 		case TDCA_TASKNAME:
 		case TDCA_TASKNAMEORCOMMENTS:
@@ -1265,9 +1295,9 @@ struct SEARCHPARAM
 		return FT_NONE;
 	}
 
-	static BOOL IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR op)
+	static BOOL IsValidOperator(FIND_ATTRIBTYPE nType, FIND_OPERATOR nOp)
 	{
-		switch (op)
+		switch (nOp)
 		{
 		case FOP_NONE:
 			return TRUE;
@@ -1305,23 +1335,23 @@ struct SEARCHPARAM
 
 	BOOL HasValidOperator() const
 	{
-		return IsValidOperator(GetAttribType(), op);
+		return IsValidOperator(GetAttribType(), nOperator);
 	}
 
 	void ValidateOperator()
 	{
 		if (!HasValidOperator())
-			op = FOP_NONE;
+			nOperator = FOP_NONE;
 	}
 
 	BOOL OperatorIs(FIND_OPERATOR o) const
 	{
-		return (op == o);
+		return (nOperator == o);
 	}
 
 	BOOL AttributeIs(TDC_ATTRIBUTE a) const
 	{
-		return (attrib == a);
+		return (nAttributeID == a);
 	}
 
 	BOOL TypeIs(FIND_ATTRIBTYPE t) const
@@ -1583,9 +1613,9 @@ struct SEARCHPARAM
 	}
 
 protected:
-	TDC_ATTRIBUTE attrib;
+	TDC_ATTRIBUTE nAttributeID;
 	CString sCustAttribID;
-	FIND_OPERATOR op;
+	FIND_OPERATOR nOperator;
 	CString sValue;
 	int nValue;
 	double dValue;
@@ -1599,7 +1629,7 @@ protected:
 		DWORD dwFlags; // Backwards compatibility
 	};
 	
-	mutable FIND_ATTRIBTYPE nType;
+	mutable FIND_ATTRIBTYPE nAttribType;
 };
 
 typedef CArray<SEARCHPARAM, SEARCHPARAM&> CSearchParamArray;
@@ -1734,7 +1764,7 @@ protected:
 			int nRule = aRules.GetSize();
 
 			while (nRule--)
-				mapAttrib.Add(aRules[nRule].attrib);
+				mapAttrib.Add(aRules[nRule].nAttributeID);
 		}
 	}
 };
@@ -2400,11 +2430,11 @@ struct TDCCOLEDITVISIBILITY
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
+			TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
 
-			if (IsSupportedEdit(nAttrib))
+			if (IsSupportedEdit(nAttribID))
 			{
-				mapVisibleEdits.Add(nAttrib);
+				mapVisibleEdits.Add(nAttribID);
 				bAnySupported = TRUE;
 			}
 		}
@@ -2412,10 +2442,10 @@ struct TDCCOLEDITVISIBILITY
 		return bAnySupported;
 	}
 
-	BOOL IsEditFieldVisible(TDC_ATTRIBUTE nAttrib) const
+	BOOL IsEditFieldVisible(TDC_ATTRIBUTE nAttribID) const
 	{
 		// weed out unsupported attributes
-		if (!IsSupportedEdit(nAttrib))
+		if (!IsSupportedEdit(nAttribID))
 			return FALSE;
 
 		switch (nShowFields)
@@ -2424,13 +2454,13 @@ struct TDCCOLEDITVISIBILITY
 			return TRUE;
 
 		case TDLSA_ASCOLUMN:
-			if ((nAttrib == TDCA_COLOR) && bShowColorEditIfAsColumns)
+			if ((nAttribID == TDCA_COLOR) && bShowColorEditIfAsColumns)
 				return TRUE;
 			else
-				return IsColumnVisible(TDC::MapAttributeToColumn(nAttrib));
+				return IsColumnVisible(TDC::MapAttributeToColumn(nAttribID));
 
 		case TDLSA_ANY:
-			return mapVisibleEdits.Has(nAttrib);
+			return mapVisibleEdits.Has(nAttribID);
 		}
 
 		// how did we get here?
@@ -2447,7 +2477,7 @@ struct TDCCOLEDITVISIBILITY
 		return mapVisibleColumns.Has(nCol);
 	}
 	
-	BOOL SetEditFieldVisible(TDC_ATTRIBUTE nAttrib, BOOL bVisible = TRUE)
+	BOOL SetEditFieldVisible(TDC_ATTRIBUTE nAttribID, BOOL bVisible = TRUE)
 	{
 		// only supported for 'any' attribute
 		if (nShowFields != TDLSA_ANY)
@@ -2457,7 +2487,7 @@ struct TDCCOLEDITVISIBILITY
 		}
 
 		// validate attribute
-		if (!IsSupportedEdit(nAttrib))
+		if (!IsSupportedEdit(nAttribID))
 		{
 			ASSERT(0);
 			return FALSE;
@@ -2465,7 +2495,7 @@ struct TDCCOLEDITVISIBILITY
 		else if (bVisible)
 		{
 			// Times cannot be shown if corresponding date column is hidden
-			switch (nAttrib)
+			switch (nAttribID)
 			{
 			case TDCA_DUETIME:
 				bVisible &= IsEditFieldVisible(TDCA_DUEDATE);
@@ -2483,7 +2513,7 @@ struct TDCCOLEDITVISIBILITY
 		else // !bVisible
 		{
 			// Times cannot be shown if corresponding date column is hidden
-			switch (nAttrib)
+			switch (nAttribID)
 			{
 			case TDCA_DUEDATE:
 				SetEditFieldVisible(TDCA_DUETIME, FALSE);
@@ -2499,15 +2529,15 @@ struct TDCCOLEDITVISIBILITY
 			}
 		}
 
-		BOOL bFound = mapVisibleEdits.Has(nAttrib);
+		BOOL bFound = mapVisibleEdits.Has(nAttribID);
 		
 		if (bVisible && !bFound)
 		{
-			mapVisibleEdits.Add(nAttrib);
+			mapVisibleEdits.Add(nAttribID);
 		}
 		else if (!bVisible && bFound)
 		{
-			mapVisibleEdits.Remove(nAttrib);
+			mapVisibleEdits.Remove(nAttribID);
 		}
 
 		return TRUE;
@@ -2618,9 +2648,9 @@ struct TDCCOLEDITVISIBILITY
 		return TRUE;
 	}
 
-	static BOOL IsSupportedEdit(TDC_ATTRIBUTE nAttrib)
+	static BOOL IsSupportedEdit(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		// Editable
 		case TDCA_DONEDATE:
@@ -2672,9 +2702,9 @@ struct TDCCOLEDITVISIBILITY
 		return FALSE;
 	}
 
-	static BOOL IsSupportedFilter(TDC_ATTRIBUTE nAttrib)
+	static BOOL IsSupportedFilter(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_DUEDATE:
 		case TDCA_STARTDATE:
@@ -2773,10 +2803,10 @@ protected:
 	{
 		mapAttrib.RemoveAll();
 		
-		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
+		for (int nAttribID = TDCA_FIRST_ATTRIBUTE; nAttribID <= TDCA_LAST_REALATTRIBUTE; nAttribID++)
 		{
-			if (IsSupportedEdit((TDC_ATTRIBUTE)nAttrib))
-				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
+			if (IsSupportedEdit((TDC_ATTRIBUTE)nAttribID))
+				mapAttrib.Add((TDC_ATTRIBUTE)nAttribID);
 		}
 		
 		return mapAttrib.GetCount();
@@ -2874,11 +2904,11 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
+			TDC_ATTRIBUTE nAttribID = mapAttrib.GetNext(pos);
 
-			if (IsSupportedFilter(nAttrib))
+			if (IsSupportedFilter(nAttribID))
 			{
-				mapVisibleFilters.Add(nAttrib);
+				mapVisibleFilters.Add(nAttribID);
 				bAnySupported = TRUE;
 			}
 		}
@@ -2886,10 +2916,10 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		return bAnySupported;
 	}
 
-	BOOL IsFilterFieldVisible(TDC_ATTRIBUTE nAttrib) const
+	BOOL IsFilterFieldVisible(TDC_ATTRIBUTE nAttribID) const
 	{
 		// weed out unsupported attributes
-		if (!IsSupportedFilter(nAttrib))
+		if (!IsSupportedFilter(nAttribID))
 			return FALSE;
 
 		switch (nShowFields)
@@ -2898,10 +2928,10 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 			return TRUE;
 
 		case TDLSA_ASCOLUMN:
-			return IsColumnVisible(TDC::MapAttributeToColumn(nAttrib));
+			return IsColumnVisible(TDC::MapAttributeToColumn(nAttribID));
 
 		case TDLSA_ANY:
-			return mapVisibleFilters.Has(nAttrib);
+			return mapVisibleFilters.Has(nAttribID);
 		}
 
 		// how did we get here?
@@ -2909,7 +2939,7 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		return FALSE;
 	}
 
-	BOOL SetFilterFieldVisible(TDC_ATTRIBUTE nAttrib, BOOL bVisible = TRUE)
+	BOOL SetFilterFieldVisible(TDC_ATTRIBUTE nAttribID, BOOL bVisible = TRUE)
 	{
 		// only supported for 'any' attribute
 		ASSERT(nShowFields == TDLSA_ANY);
@@ -2918,20 +2948,20 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 			return FALSE;
 
 		// validate attribute
-		ASSERT (IsSupportedFilter(nAttrib));
+		ASSERT (IsSupportedFilter(nAttribID));
 
-		if (!IsSupportedFilter(nAttrib))
+		if (!IsSupportedFilter(nAttribID))
 			return FALSE;
 
-		BOOL bFound = mapVisibleFilters.Has(nAttrib);
+		BOOL bFound = mapVisibleFilters.Has(nAttribID);
 
 		if (bVisible && !bFound)
 		{
-			mapVisibleFilters.Add(nAttrib);
+			mapVisibleFilters.Add(nAttribID);
 		}
 		else if (!bVisible && bFound)
 		{
-			mapVisibleFilters.Remove(nAttrib);
+			mapVisibleFilters.Remove(nAttribID);
 		}
 
 		return TRUE;
@@ -2965,9 +2995,9 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		return TRUE;
 	}
 
-	static BOOL IsSupportedFilter(TDC_ATTRIBUTE nAttrib)
+	static BOOL IsSupportedFilter(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_DUEDATE:
 		case TDCA_STARTDATE:
@@ -3025,22 +3055,22 @@ protected:
 
 struct TDCATTRIBUTEMAPPING
 {
-	TDCATTRIBUTEMAPPING() : nTDCAttrib(TDCA_NONE) {}
-	TDCATTRIBUTEMAPPING(const CString& sName, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0) 
+	TDCATTRIBUTEMAPPING() : nAttributeID(TDCA_NONE) {}
+	TDCATTRIBUTEMAPPING(const CString& sName, TDC_ATTRIBUTE nAttribID, DWORD dwData = 0) 
 	{ 
 		sColumnName = sName; 
-		nTDCAttrib = tdcAttrib;
+		nAttributeID = nAttribID;
 		dwItemData = dwData;
 	}
 
 	TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0) 
 	{ 
 		sColumnName.LoadString(nNameID); 
-		nTDCAttrib = tdcAttrib;
+		nAttributeID = tdcAttrib;
 		dwItemData = dwData;
 	}
 
-	TDC_ATTRIBUTE nTDCAttrib;
+	TDC_ATTRIBUTE nAttributeID;
 	CEnString sColumnName;
 	DWORD dwItemData;
 };
@@ -3064,13 +3094,13 @@ public:
 		return -1;
 	}
 
-	int Find(TDC_ATTRIBUTE nAttrib) const
+	int Find(TDC_ATTRIBUTE nAttribID) const
 	{
 		int nMap = GetSize();
 
 		while (nMap--)
 		{
-			if (GetData()[nMap].nTDCAttrib == nAttrib)
+			if (GetData()[nMap].nAttributeID == nAttribID)
 				return nMap;
 		}
 
@@ -3092,7 +3122,7 @@ public:
 		return -1;
 	}
 
-	int FindMappedAttribute(TDC_ATTRIBUTE nAttrib) const
+	int FindMappedAttribute(TDC_ATTRIBUTE nAttribID) const
 	{
 		int nMap = GetSize();
 
@@ -3100,7 +3130,7 @@ public:
 		{
 			const TDCATTRIBUTEMAPPING& col = GetData()[nMap];
 
-			if ((col.nTDCAttrib == nAttrib) && !col.sColumnName.IsEmpty())
+			if ((col.nAttributeID == nAttribID) && !col.sColumnName.IsEmpty())
 				return nMap;
 		}
 
@@ -3108,9 +3138,9 @@ public:
 		return -1;
 	}
 
-	BOOL CTDCAttributeMapping::IsAttributeMapped(TDC_ATTRIBUTE nAttrib) const
+	BOOL CTDCAttributeMapping::IsAttributeMapped(TDC_ATTRIBUTE nAttribID) const
 	{
-		return (FindMappedAttribute(nAttrib) != -1);
+		return (FindMappedAttribute(nAttribID) != -1);
 	}
 
 #ifdef _DEBUG
@@ -3120,13 +3150,14 @@ public:
 		{
 			const TDCATTRIBUTEMAPPING& col = GetData()[nMap];
 
-			TRACE(_T("CTDCAttributeMapping::Trace(%s, %d, %d)\n"), col.sColumnName, col.nTDCAttrib, col.dwItemData);
+			TRACE(_T("CTDCAttributeMapping::Trace(%s, %d, %d)\n"), col.sColumnName, col.nAttributeID, col.dwItemData);
 		}
 	}
 #else
 	void Trace() const {}
 #endif
 };
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // AFX_TDCSTRUCT_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

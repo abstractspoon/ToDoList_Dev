@@ -70,11 +70,11 @@ protected:
 
 	struct ATTRIBPREF
 	{
-		ATTRIBPREF() : nAttrib(TDCA_NONE), bUse(FALSE) {}
-		ATTRIBPREF(UINT nIDName, TDC_ATTRIBUTE attrib, BOOL use) : nAttrib(attrib), bUse(use) { sName.LoadString(nIDName); }
+		ATTRIBPREF() : nAttribID(TDCA_NONE), bUse(FALSE) {}
+		ATTRIBPREF(UINT nIDName, TDC_ATTRIBUTE attrib, BOOL use) : nAttribID(attrib), bUse(use) { sName.LoadString(nIDName); }
 
 		CString sName;
-		TDC_ATTRIBUTE nAttrib;
+		TDC_ATTRIBUTE nAttribID;
 		BOOL bUse;
 	};
 	CArray<ATTRIBPREF, ATTRIBPREF&> m_aAttribPrefs;

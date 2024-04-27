@@ -218,7 +218,7 @@ int CTDLCsvImportExportDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) con
 		{
 			TDCATTRIBUTEMAPPING& mapping = aMapping[nMapping];
 
-			if (mapping.nTDCAttrib == TDCA_EXISTING_CUSTOMATTRIBUTE)
+			if (mapping.nAttributeID == TDCA_EXISTING_CUSTOMATTRIBUTE)
 			{
 				CString sCustID = FindCustomAttributeID(mapping.sColumnName), sCustLabel;
 				ASSERT(!sCustID.IsEmpty());
@@ -417,7 +417,7 @@ void CTDLCsvImportExportDlg::UpdateMasterColumnMappingFromList()
 	{
 		const TDCATTRIBUTEMAPPING& mapping = aListMapping[nRow];
 
-		SetMasterColumnName(mapping.nTDCAttrib, mapping.sColumnName);
+		SetMasterColumnName(mapping.nAttributeID, mapping.sColumnName);
 	}
 }
 
@@ -436,7 +436,7 @@ void CTDLCsvImportExportDlg::SaveMasterColumnMapping() const
 		m_pPrefs->WriteProfileString(m_sPrefsKey, sKey, col.sColumnName);
 		
 		sKey = Misc::MakeKey(_T("ColumnAttrib%d"), nCol);
-		m_pPrefs->WriteProfileInt(m_sPrefsKey, sKey, col.nTDCAttrib);
+		m_pPrefs->WriteProfileInt(m_sPrefsKey, sKey, col.nAttributeID);
 	}
 
 	// save delimiter if different to default
@@ -461,7 +461,7 @@ TDC_ATTRIBUTE CTDLCsvImportExportDlg::GetMasterColumnAttribute(LPCTSTR szColumn)
 	int nCol = FindMasterColumn(szColumn);
 
 	if (nCol != -1)
-		return m_aMasterColumnMapping[nCol].nTDCAttrib;
+		return m_aMasterColumnMapping[nCol].nAttributeID;
 
 	// Try for a custom attribute
 	if (!FindCustomAttributeID(szColumn).IsEmpty())
@@ -507,10 +507,10 @@ void CTDLCsvImportExportDlg::SetMasterColumnAttribute(LPCTSTR szColumn, TDC_ATTR
 
 	// and clear if it is
 	if (nAttribCol != -1 && nAttribCol != nNameCol)
-		m_aMasterColumnMapping[nNameCol].nTDCAttrib = TDCA_NONE;
+		m_aMasterColumnMapping[nNameCol].nAttributeID = TDCA_NONE;
 
 	if (nNameCol != -1)
-		m_aMasterColumnMapping[nNameCol].nTDCAttrib = attrib;
+		m_aMasterColumnMapping[nNameCol].nAttributeID = attrib;
 }
 
 void CTDLCsvImportExportDlg::SetMasterColumnName(TDC_ATTRIBUTE attrib, LPCTSTR szColumn)
@@ -538,7 +538,7 @@ int CTDLCsvImportExportDlg::FindMasterColumn(TDC_ATTRIBUTE attrib) const
 
 	for (int nCol = 0; nCol < nColumns; nCol++)
 	{
-		if (m_aMasterColumnMapping[nCol].nTDCAttrib == attrib)
+		if (m_aMasterColumnMapping[nCol].nAttributeID == attrib)
 			return nCol;
 	}
 
@@ -601,7 +601,7 @@ void CTDLCsvImportExportDlg::OnExportTaskIds()
 
 		while (nCol--)
 		{
-			TDC_ATTRIBUTE attrib = aMapping[nCol].nTDCAttrib;
+			TDC_ATTRIBUTE attrib = aMapping[nCol].nAttributeID;
 
 			if (attrib == TDCA_ID && !bWantTaskID)
 				aMapping.RemoveAt(nCol);
@@ -617,7 +617,7 @@ void CTDLCsvImportExportDlg::OnExportTaskIds()
 
 		for (int nCol = 0; nCol < aMapping.GetSize() && (nTaskID == -1 || nParentTaskID == -1); nCol++)
 		{
-			TDC_ATTRIBUTE attrib = aMapping[nCol].nTDCAttrib;
+			TDC_ATTRIBUTE attrib = aMapping[nCol].nAttributeID;
 
 			if (attrib == TDCA_ID)
 				nTaskID = nCol;
