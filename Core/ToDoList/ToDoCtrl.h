@@ -358,8 +358,8 @@ public:
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 	BOOL CanCopyAttributeColumnValues(TDC_COLUMN nColID) const;
 	BOOL CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
-	BOOL PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly);
+	BOOL CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
+	BOOL PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly);
 
 	void ResetFileVersion(unsigned int nTo = 0) { m_nFileVersion = max(nTo, 0); }
 	DWORD GetFileVersion() const { return m_nFileVersion == 0 ? 1 : m_nFileVersion; }
@@ -518,7 +518,6 @@ protected:
 	DWORD m_dwEditTitleTaskID;
 
 	mutable DWORD m_nFileVersion;
-	//mutable TDCCOLUMNVALUES m_copiedColumnValues;
 
 	BOOL m_bModified;
 	BOOL m_bArchive;
@@ -675,22 +674,18 @@ protected:
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
 	virtual void OnCustomAttributesChanged();
 	
-	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
-
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
-
-	virtual BOOL CopySelectedTasks() const;
-
-	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
-	
-	virtual BOOL LoadTasks(const CTaskFile& tasks);
 
 	virtual int GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly = FALSE) const;
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
 	virtual BOOL WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
+	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 
+	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
+	virtual BOOL CopySelectedTasks() const;
+	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 
 	// -------------------------------------------------------------------------------
@@ -737,9 +732,6 @@ protected:
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
 	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
 
-	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
-	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_COLUMN nColID, BOOL bResolveCustomCols = TRUE) const;
-
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
@@ -748,6 +740,7 @@ protected:
 	void EnableDisableControls(HTREEITEM hti);
 	void EnableDisableComments(HTREEITEM hti);
 	void ReposProjectName(CRect& rAvailable);
+	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 
 	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
@@ -828,7 +821,8 @@ protected:
 
 	void InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
-	
+	BOOL CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, DWORD dwToTaskID, TDC_COLUMN nToColID);
+
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks) const;
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);

@@ -112,8 +112,9 @@ const DWORD IDD_TODOCTRL_DIALOG = (DWORD)(LPCTSTR)_T("IDD_TODOCTRL_DIALOG");
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR ARCHIVE_ID = _T(".done");
-const LPCTSTR DICTIONARY_URL = _T("https://github.com/abstractspoon/ToDoList_Downloads/wiki/Dictionaries");
+const LPCTSTR ARCHIVE_ID		= _T(".done");
+const LPCTSTR DICTIONARY_URL	= _T("https://github.com/abstractspoon/ToDoList_Downloads/wiki/Dictionaries");
+const LPCTSTR COLUMNCOPY_TAG	= _T("ColumnCopy");
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -201,6 +202,9 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_data(m_styles, m_aCustomAttribDefs),
 	m_timeTracking(m_data, m_taskTree.TSH()),
 	m_formatter(m_data, mgrContent),
+	m_attribCopier(m_data, mgrContent),
+	m_exporter(m_data, m_taskTree, mgrContent),
+	m_matcher(m_data, m_reminders, mgrContent),
 
 	m_ctrlComments(TRUE,
 				   TRUE,
@@ -212,20 +216,8 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 				   m_taskTree.Tree(),
 				   &m_taskTree),
 
-	m_exporter(m_data,
-			   m_taskTree,
-			   mgrContent),
-
-	m_attribCopier(m_data,
-				   m_aCustomAttribDefs,
-				   mgrContent),
-
 	m_infoTip(m_data,
 			  m_aCustomAttribDefs,
-			  mgrContent),
-
-	m_matcher(m_data, 
-			  m_reminders, 
 			  mgrContent),
 
 	m_taskTree(m_ilTaskIcons, 
@@ -6429,18 +6421,13 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 		aValues[nID] = tasks.GetTaskAttribute(hTask, nAttribID, true, true);
 	}
 
-	// Add a custom attribute to identify the copied column
-	tasks.SetMetaData(_T("ColumnCopy"), Misc::Format(nColID));
-
-#ifdef _DEBUG
-	tasks.SetProjectName(_T("ColumnCopy Clipboard Contents"));
-	tasks.Save(_T("C:\\Temp\\_ColumnCopy.tdl"), SFEF_UTF16);
-#endif
+	// Add some metadata to embed the copied column
+	tasks.SetMetaData(COLUMNCOPY_TAG, Misc::Format(nColID));
 
 	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), Misc::FormatArray(aValues, '\n', TRUE));
 }
 
-BOOL CToDoCtrl::CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
+BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
 {
 	if (IsReadOnly())
 		return FALSE;
@@ -6449,10 +6436,12 @@ BOOL CToDoCtrl::CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelecte
 	CWaitCursor cursor;
 	CTaskFile tasks;
 
-	if (!CTaskClipboard::GetTasks(tasks, GetClipboardID()))
+	CString sClipID = GetClipboardID();
+
+	if (!CTaskClipboard::ClipIDMatches(sClipID) || !CTaskClipboard::GetTasks(tasks, sClipID))
 		return FALSE;
 
-	CString sFromColID = tasks.GetMetaData(_T("ColumnCopy"));
+	CString sFromColID = tasks.GetMetaData(COLUMNCOPY_TAG);
 
 	if (sFromColID.IsEmpty())
 		return FALSE;
@@ -6460,10 +6449,7 @@ BOOL CToDoCtrl::CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelecte
 	nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
 
 	// Check column compatibility
-	TDC_ATTRIBUTE nFromAttribID = TDC::MapColumnToAttribute(nFromColID);
-	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
-	
-	if (!m_data.CanCopyAttributeValue(nFromAttribID, nToAttribID))
+	if (!m_attribCopier.CanCopyColumnValue(nFromColID, nToColID))
 		return FALSE;
 
 	// Check there is at least one editable task
@@ -6475,6 +6461,8 @@ BOOL CToDoCtrl::CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelecte
 	else
 		nID = GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
 
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nToColID);
+
 	while (nID--)
 	{
 		if (CanEditTask(aTaskIDs[nID], nToAttribID))
@@ -6485,17 +6473,12 @@ BOOL CToDoCtrl::CanPasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelecte
 	return FALSE;
 }
 
-TDC_ATTRIBUTECATEGORY CToDoCtrl::GetAttributeCategory(TDC_COLUMN nColID, BOOL bResolveCustomCols) const
-{
-	return m_data.GetAttributeCategory(TDC::MapColumnToAttribute(nColID));
-}
-
 int CToDoCtrl::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 { 
 	return m_taskTree.GetColumnTaskIDs(aTaskIDs, nFrom, nTo); 
 }
 
-BOOL CToDoCtrl::PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTasksOnly)
+BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly)
 {
 	CWaitCursor cursor;
 	CTaskFile tasks;
@@ -6509,10 +6492,6 @@ BOOL CToDoCtrl::PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 		return FALSE;
 
 	TDC_COLUMN nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
-
-	TDC_ATTRIBUTE nFromAttribID = TDC::MapColumnToAttribute(nFromColID);
-	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nColID);
-
 	CDWordArray aTaskIDs;
 
 	if (bSelectedTasksOnly)
@@ -6531,26 +6510,34 @@ BOOL CToDoCtrl::PasteAttributeValuesToColumn(TDC_COLUMN nColID, BOOL bSelectedTa
 
 	while (hTask)
 	{
-		DWORD dwTaskID = aTaskIDs[nID];
+		DWORD dwToTaskID = aTaskIDs[nID];
 
-		if (m_data.GetTaskAttributes(dwTaskID, tdiTo))
+		if (tasks.GetTaskAttributes(hTask, tdiFrom) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
 		{
-			if (tasks.GetTaskAttributes(hTask, tdiFrom))
-			{
-				if (m_attribCopier.CopyAttributeValue(nFromAttribID, tdiFrom, nToAttribID, tdiTo, TRUE))
-				{
-					if (m_data.SetTaskAttributes(dwTaskID, tdiTo))
-						aModTaskIDs.Add(dwTaskID);
-				}
-			}
+			aModTaskIDs.Add(dwToTaskID);
 		}
 
 		nID++;
 		hTask = tasks.GetNextTask(hTask);
 	}
 
-	SetModified(nToAttribID, aModTaskIDs, TRUE);
+	if (aModTaskIDs.GetSize())
+		SetModified(TDC::MapColumnToAttribute(nToColID), aModTaskIDs, TRUE);
+
 	return TRUE;
+}
+
+BOOL CToDoCtrl::CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, DWORD dwToTaskID, TDC_COLUMN nToColID)
+{
+	TODOITEM tdiTo;
+
+	if (!m_data.GetTaskAttributes(dwToTaskID, tdiTo))
+		return FALSE;
+
+	if (!m_attribCopier.CopyColumnValue(tdiFrom, nFromColID, tdiTo, nToColID))
+		return FALSE;
+
+	return m_data.SetTaskAttributes(dwToTaskID, tdiTo);
 }
 
 BOOL CToDoCtrl::CopySelectedTasks() const
@@ -10427,7 +10414,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
-	if (!m_data.CanCopyAttributeValue(nFromAttrib, nToAttrib))
+	if (!m_attribCopier.CanCopyAttributeValue(nFromAttrib, nToAttrib))
 		return FALSE;
 
 	Flush();
@@ -10442,18 +10429,24 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_AT
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
+		TDCCADATA dataFrom;
 
-		TDCCADATA data;
-
-		if (m_data.GetTaskAttributeValue(dwTaskID, nFromAttrib, data) && 
-			aTasksForCompletion.Add(dwTaskID, nToAttrib, data))
+		if (m_data.GetTaskAttributeValue(dwTaskID, nFromAttrib, dataFrom) && 
+			aTasksForCompletion.Add(dwTaskID, nToAttrib, dataFrom))
 		{
 			//int breakpoint = 0;
 		}
-		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValue(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
+		else if (!dataFrom.IsEmpty())
 		{
-			return FALSE;
+			TODOITEM tdiFromTo;
+			m_data.GetTaskAttributes(dwTaskID, tdiFromTo);
+			
+			if (m_attribCopier.CopyAttributeValue(tdiFromTo, nFromAttrib, tdiFromTo, nToAttrib))
+			{
+				if (!HandleModResult(dwTaskID, m_data.SetTaskAttributes(dwTaskID, tdiFromTo), aModTaskIDs))
+					return FALSE;
+			}
 		}
 	}
 

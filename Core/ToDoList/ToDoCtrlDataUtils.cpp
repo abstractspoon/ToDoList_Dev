@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "tdcstatic.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
 #include "ToDoCtrlDataDefines.h"
@@ -3713,7 +3714,7 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
-CString CTDCTaskFormatter::FormatDate(const COleDateTime& date) const
+CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date) const
 {
 	if (!CDateHelper::IsDateSet(date))
 		return EMPTY_STR;
@@ -4040,23 +4041,23 @@ CString CTDCTaskFormatter::GetTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE
 	{
 	case TDCC_DONEDATE:
 		ASSERT(pTDI);
-		return FormatDate(pTDI->dateDone);
+		return GetDateTime(pTDI->dateDone);
 
 	case TDCC_DUEDATE:
 		ASSERT(pTDI && pTDS);
-		return FormatDate(m_calculator.GetTaskDueDate(pTDI, pTDS));
+		return GetDateTime(m_calculator.GetTaskDueDate(pTDI, pTDS));
 
 	case TDCC_STARTDATE:
 		ASSERT(pTDI && pTDS);
-		return FormatDate(m_calculator.GetTaskStartDate(pTDI, pTDS));
+		return GetDateTime(m_calculator.GetTaskStartDate(pTDI, pTDS));
 
 	case TDCC_CREATIONDATE:
 		ASSERT(pTDI);
-		return FormatDate(pTDI->dateCreated);
+		return GetDateTime(pTDI->dateCreated);
 
 	case TDCC_LASTMODDATE:
 		ASSERT(pTDI);
-		return FormatDate(pTDI->dateLastMod);
+		return GetDateTime(pTDI->dateLastMod);
 	}
 
 	ASSERT(0);
@@ -5902,11 +5903,9 @@ CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 // ----------------------------------------------------------------------------------
 
 CTDCTaskColumnSizer::CTDCTaskColumnSizer(const CToDoCtrlData& data,
-										 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 										 const CContentMgr& mgrContent)
 	:
 	m_data(data),
-	m_aCustAttribDefs(aCustAttribDefs),
 	m_mgrContent(mgrContent),
 	m_formatter(data, mgrContent),
 	m_calculator(data)
@@ -6115,7 +6114,7 @@ BOOL CTDCTaskColumnSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFI
 		return FALSE;
 	}
 
-	switch (m_aCustAttribDefs.GetAttributeDataType(attribDef))
+	switch (m_data.m_aCustomAttribDefs.GetAttributeDataType(attribDef))
 	{
 	case TDCCA_DOUBLE:
 	case TDCCA_FRACTION:
@@ -6275,10 +6274,10 @@ CString CTDCTaskColumnSizer::GetLongestCost(const CDWordArray& aTaskIDs) const
 
 int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const
 {
-	if (mapLongest.Initialise(mapCols, m_aCustAttribDefs))
+	if (mapLongest.Initialise(mapCols, m_data.m_aCustomAttribDefs))
 	{
 		// Likewise for certain calculated custom attributes
-		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_aCustAttribDefs);
+		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_data.m_aCustomAttribDefs);
 		int nCust = aRestAttribDefs.GetSize();
 
 		while (nCust--)
@@ -6323,9 +6322,9 @@ int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const 
 }
 
 void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
-									 const TODOSTRUCTURE* pTDS,
-									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-									 CTDCLongestItemMap& mapLongest) const
+										   const TODOSTRUCTURE* pTDS,
+										   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+										   CTDCLongestItemMap& mapLongest) const
 {
 	if (!pTDI || !pTDS)
 	{
@@ -6399,102 +6398,254 @@ void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
-												 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 												 const CContentMgr& mgrContent)
 	:
 	m_data(data),
-	m_aCustAttribDefs(aCustAttribDefs),
-	m_mgrContent(mgrContent),
-	m_formatter(data, mgrContent),
-	m_calculator(data)
+	m_formatter(data, mgrContent)
 {
 }
 
-BOOL CTDCTaskAttributeCopier::CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo, BOOL bIncEmpty) const
+BOOL CTDCTaskAttributeCopier::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib) const
 {
-	if (!m_data.CanCopyAttributeValue(nFromAttribID, nToAttribID))
+	// Doesn't make sense to copy to self
+	if (nFromAttrib == nToAttrib)
+		return FALSE;
+
+	// Can't copy to calculations
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib) &&
+		(m_data.m_aCustomAttribDefs.GetAttributeDataType(nToAttrib) == TDCCA_CALCULATION))
+	{
+		return FALSE;
+	}
+
+	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttrib);
+	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttrib);
+
+	if ((nFromCat == TDCAC_NONE) || (nToCat == TDCAC_NONE))
+		return FALSE;
+
+	switch (nToCat)
+	{
+	case TDCAC_SINGLETEXT:
+	case TDCAC_MULTITEXT:
+		return TRUE;
+
+	case TDCAC_NUMERIC:
+		return (nFromCat == TDCAC_NUMERIC);
+
+	case TDCAC_CUSTOM:
+		ASSERT(0); // Should have been resolved
+		break;
+
+	case TDCAC_DATETIME:
+		if (nFromCat == TDCAC_DATETIME)
+		{
+			switch (nFromAttrib)
+			{
+			case TDCA_CREATIONDATE:
+			case TDCA_DONEDATE:
+			case TDCA_DUEDATE:
+			case TDCA_LASTMODDATE:
+			case TDCA_STARTDATE:
+				switch (nToAttrib)
+				{
+				case TDCA_DONEDATE:
+				case TDCA_DUEDATE:
+				case TDCA_STARTDATE:
+					// Note: TDCA_CREATIONDATE cannot be copied to
+					// Note: TDCA_LASTMOD cannot be copied to
+					return TRUE;
+				}
+				break;
+
+			case TDCA_DONETIME:
+			case TDCA_DUETIME:
+			case TDCA_STARTTIME:
+				switch (nToAttrib)
+				{
+				case TDCA_DONETIME:
+				case TDCA_DUETIME:
+				case TDCA_STARTTIME:
+					return TRUE;
+				}
+				break;
+			}
+		}
+		break;
+
+	case TDCAC_TIMEPERIOD:
+		return ((nFromCat == TDCAC_TIMEPERIOD) && (nToAttrib != TDCA_TIMEREMAINING));
+
+	case TDCAC_OTHER:
+		switch (nFromAttrib)
+		{
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+			switch (nToAttrib)
+			{
+			case TDCA_FLAG:
+			case TDCA_LOCK:
+				return TRUE;
+			}
+			break;
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+TDC_ATTRIBUTECATEGORY CTDCTaskAttributeCopier::GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomAttrib) const
+{
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		if (bResolveCustomAttrib)
+		{
+			DWORD dwAttribType = m_data.m_aCustomAttribDefs.GetAttributeDataType(nAttribID);
+			return TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(dwAttribType);
+		}
+
+		// else
+		return TDCAC_CUSTOM;
+	}
+
+	// Built-in attributes
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	{
+		if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
+			return ATTRIBUTES[nAttrib].nCategory;
+	}
+
+	// All else
+	return TDCAC_NONE;
+}
+
+BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const
+{
+	if (!CanCopyAttributeValue(nFromAttribID, nToAttribID))
 		return FALSE;
 
 	TDCCADATA dataFrom;
+	m_data.GetTaskAttributeValue(tdiFrom, nFromAttribID, dataFrom);
 
-	if (m_data.GetTaskAttributeValue(tdiFrom, nFromAttribID, dataFrom) || bIncEmpty)
+	CStringArray aValues;
+
+	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttribID);
+	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttribID);
+
+	if ((nToCat == TDCAC_SINGLETEXT) || (nToCat == TDCAC_MULTITEXT))
 	{
-		CStringArray aValues;
-		TDCCOST cost;
-
-		TDC_ATTRIBUTECATEGORY nFromCat = m_data.GetAttributeCategory(nFromAttribID);
-		TDC_ATTRIBUTECATEGORY nToCat = m_data.GetAttributeCategory(nToAttribID);
-
-		if ((nToCat == TDCAC_SINGLETEXT) || (nToCat == TDCAC_MULTITEXT))
+		switch (nFromCat)
 		{
-			switch (nFromCat)
+		case TDCAC_SINGLETEXT:
+		case TDCAC_CUSTOM:
+		case TDCAC_OTHER:
+			break;
+
+		case TDCAC_NUMERIC:
+			switch (nFromAttribID)
 			{
-			case TDCAC_SINGLETEXT:
-			case TDCAC_NUMERIC:
-			case TDCAC_CUSTOM:
-			case TDCAC_OTHER:
+			case TDCA_COST:
+				{
+					TDCCOST cost;
+
+					if (dataFrom.AsCost(cost) && !cost.bIsRate)
+						dataFrom.Set(m_formatter.GetCost(cost.dAmount));
+				}
 				break;
 
-			case TDCAC_MULTITEXT:
-				if (nToCat == TDCAC_SINGLETEXT)
-					dataFrom.Set(dataFrom.FormatAsArray());
-				break;
+			default:
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nFromAttribID))
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nFromAttribID, pDef, FALSE);
 
-			case TDCAC_DATETIME:
-				dataFrom.Set(dataFrom.FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), TRUE));
-				break;
+					DWORD dwDataType = m_data.m_aCustomAttribDefs.GetAttributeDataType(*pDef);
+					double dValue = dataFrom.AsDouble();
 
-			case TDCAC_TIMEPERIOD:
-				dataFrom.Set(dataFrom.FormatAsTimePeriod());
+					if ((dValue != 0.0) || !m_data.m_aCustomAttribDefs.CalculationHasFeature(*pDef, TDCCAF_HIDEZERO))
+					{
+						dataFrom.Set(TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(dValue, dwDataType, pDef->dwFeatures));
+					}
+				}
 				break;
 			}
-		}
-		
-		switch (nToAttribID)
-		{
-		case TDCA_VERSION:		tdiTo.sVersion		= dataFrom.AsString();	break;
-		case TDCA_ALLOCBY:		tdiTo.sAllocBy		= dataFrom.AsString();	break;
-		case TDCA_EXTERNALID:	tdiTo.sExternalID	= dataFrom.AsString();	break;
-		case TDCA_STATUS:		tdiTo.sStatus		= dataFrom.AsString();	break;
-		case TDCA_TASKNAME:		tdiTo.sTitle		= dataFrom.AsString();	break;
+			break;
 
-		case TDCA_PRIORITY:		tdiTo.nPriority		= dataFrom.AsInteger();	break;
-		case TDCA_RISK:			tdiTo.nRisk			= dataFrom.AsInteger();	break;
-		case TDCA_PERCENT:		tdiTo.nPercentDone	= dataFrom.AsInteger();	break;
+		case TDCAC_MULTITEXT:
+			if (nToCat == TDCAC_SINGLETEXT)
+				dataFrom.Set(dataFrom.FormatAsArray());
+			break;
 
-		case TDCA_FLAG:			tdiTo.bFlagged		= dataFrom.AsBool();	break;
-		case TDCA_LOCK:			tdiTo.bLocked		= dataFrom.AsBool();	break;
+		case TDCAC_DATETIME:
+			dataFrom.Set(m_formatter.GetDateTime(dataFrom.AsDate()));
+			break;
 
-		case TDCA_DONEDATE:		tdiTo.dateDone		= dataFrom.AsDate();	break;
-		case TDCA_DUEDATE:		tdiTo.dateDue		= dataFrom.AsDate();	break;
-		case TDCA_STARTDATE:	tdiTo.dateStart		= dataFrom.AsDate();	break;
-
-		case TDCA_TIMEESTIMATE:	dataFrom.AsTimePeriod(tdiTo.timeEstimate);	break;
-		case TDCA_TIMESPENT:	dataFrom.AsTimePeriod(tdiTo.timeSpent);		break;
-		case TDCA_COST:			dataFrom.AsCost(tdiTo.cost);				break;
-
-		case TDCA_FILELINK:		dataFrom.AsArray(aValues); tdiTo.aFileLinks.Copy(aValues);	break;
-		case TDCA_ALLOCTO:		dataFrom.AsArray(aValues); tdiTo.aAllocTo.Copy(aValues);	break;
-		case TDCA_CATEGORY:		dataFrom.AsArray(aValues); tdiTo.aCategories.Copy(aValues); break;
-		case TDCA_TAGS:			dataFrom.AsArray(aValues); tdiTo.aTags.Copy(aValues);		break;
-
-		default:
-			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttribID))
+		case TDCAC_TIMEPERIOD:
 			{
-				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nToAttribID, pDef, FALSE);
+				TDCTIMEPERIOD time;
 
-				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dataFrom);
-				break;
+				if (dataFrom.AsTimePeriod(time))
+					dataFrom.Set(m_formatter.GetTimePeriod(time.dAmount, time.nUnits, TRUE));
 			}
-			else
-			{
-				ASSERT(0); // I've missed something
-				return FALSE;
-			}
-			
+			break;
 		}
 	}
 
+	switch (nToAttribID)
+	{
+	case TDCA_VERSION:		tdiTo.sVersion = dataFrom.AsString();		break;
+	case TDCA_ALLOCBY:		tdiTo.sAllocBy = dataFrom.AsString();		break;
+	case TDCA_EXTERNALID:	tdiTo.sExternalID = dataFrom.AsString();	break;
+	case TDCA_STATUS:		tdiTo.sStatus = dataFrom.AsString();		break;
+	case TDCA_TASKNAME:		tdiTo.sTitle = dataFrom.AsString();			break;
+
+	case TDCA_PRIORITY:		tdiTo.nPriority = dataFrom.AsInteger();		break;
+	case TDCA_RISK:			tdiTo.nRisk = dataFrom.AsInteger();			break;
+	case TDCA_PERCENT:		tdiTo.nPercentDone = dataFrom.AsInteger();	break;
+
+	case TDCA_FLAG:			tdiTo.bFlagged = dataFrom.AsBool();			break;
+	case TDCA_LOCK:			tdiTo.bLocked = dataFrom.AsBool();			break;
+
+	case TDCA_DONEDATE:		tdiTo.dateDone = dataFrom.AsDate();			break;
+	case TDCA_DUEDATE:		tdiTo.dateDue = dataFrom.AsDate();			break;
+	case TDCA_STARTDATE:	tdiTo.dateStart = dataFrom.AsDate();		break;
+
+	case TDCA_TIMEESTIMATE:	dataFrom.AsTimePeriod(tdiTo.timeEstimate);	break;
+	case TDCA_TIMESPENT:	dataFrom.AsTimePeriod(tdiTo.timeSpent);		break;
+	case TDCA_COST:			dataFrom.AsCost(tdiTo.cost);				break;
+
+	case TDCA_FILELINK:		dataFrom.AsArray(aValues); tdiTo.aFileLinks.Copy(aValues);	break;
+	case TDCA_ALLOCTO:		dataFrom.AsArray(aValues); tdiTo.aAllocTo.Copy(aValues);	break;
+	case TDCA_CATEGORY:		dataFrom.AsArray(aValues); tdiTo.aCategories.Copy(aValues); break;
+	case TDCA_TAGS:			dataFrom.AsArray(aValues); tdiTo.aTags.Copy(aValues);		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nToAttribID, pDef, FALSE);
+
+			tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dataFrom);
+			break;
+		}
+		ASSERT(0); // I've missed something
+		return FALSE;
+	}
+
 	return TRUE;
+}
+
+BOOL CTDCTaskAttributeCopier::CanCopyColumnValue(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const
+{
+	return CanCopyAttributeValue(TDC::MapColumnToAttribute(nFromColID), 
+								 TDC::MapColumnToAttribute(nToColID));
+}
+
+BOOL CTDCTaskAttributeCopier::CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const
+{
+	return CopyAttributeValue(tdiFrom, 
+							  TDC::MapColumnToAttribute(nFromColID), 
+							  tdiTo, 
+							  TDC::MapColumnToAttribute(nToColID));
 }

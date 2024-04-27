@@ -3600,6 +3600,14 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 	if (!IsAttributeAvailable(nAttrib))
 		return NULLSTRING;
 
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttrib, pDef, NULLSTRING);
+
+		return GetTaskCustomAttributeData(hTask, pDef->sUniqueID, bDisplay);
+	}
+
 	if (!TaskHasAttribute(hTask, nAttrib, bCalc, bDisplay))
 	{
 		if (bCalc && TaskHasAttribute(hTask, nAttrib, !bCalc, bDisplay))

@@ -205,18 +205,20 @@ public:
 
 	CString GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
-	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 	CString GetTaskDate(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 
+	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
+	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
+
+	// Helpers
+	CString GetDateTime(const COleDateTime& date) const;
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;
 	CString GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep = 0) const;
-
-	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
-	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
+	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -225,7 +227,6 @@ protected:
 	CTDCTaskCalculator m_calculator;
 	
 protected:
-	CString FormatDate(const COleDateTime& date) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -457,7 +458,6 @@ class CTDCTaskColumnSizer
 {
 public:
 	CTDCTaskColumnSizer(const CToDoCtrlData& data,
-						const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 						const CContentMgr& mgrContent);
 	// general
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
@@ -480,7 +480,6 @@ public:
 protected:
 	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
-	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
@@ -514,20 +513,20 @@ class CTDCTaskAttributeCopier
 {
 public:
 	CTDCTaskAttributeCopier(const CToDoCtrlData& data,
-								  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-								  const CContentMgr& mgrContent);
+							const CContentMgr& mgrContent);
 
-	BOOL CopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, const TODOITEM& tdiFrom, TDC_ATTRIBUTE nToAttribID, TODOITEM& tdiTo, BOOL bIncEmpty) const;
+	BOOL CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID) const;
+	BOOL CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const;
+	
+	BOOL CanCopyColumnValue(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const;
+	BOOL CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const;
+
+	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
 
 protected:
 	const CToDoCtrlData& m_data;
-	const CContentMgr& m_mgrContent;
-	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
-	CTDCTaskCalculator m_calculator;
-
-protected:
 };
 
 //////////////////////////////////////////////////////////////////////

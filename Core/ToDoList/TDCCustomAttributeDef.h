@@ -174,25 +174,25 @@ private:
 
 #define GET_CUSTDEF_RET(defs, key, def, ret) \
 {                                            \
-	int nAttrib = (defs).Find(key);          \
-	if (nAttrib == -1)                       \
+	int att = (defs).Find(key);              \
+	if (att == -1)                           \
 	{                                        \
 		ASSERT(0);                           \
         return ret;                          \
 	}                                        \
-	def = &((defs)[nAttrib]);                \
+	def = &((defs)[att]);                    \
 }
 
 // alt = break. continue, return
 #define GET_CUSTDEF_ALT(defs, key, def, alt) \
 {                                            \
-	int nAttrib = defs.Find(key);            \
-	if (nAttrib == -1)                       \
+	int att = defs.Find(key);                \
+	if (att == -1)                           \
 	{                                        \
 		ASSERT(0);                           \
         alt;                                 \
 	}                                        \
-	def = &((defs)[nAttrib]);                \
+	def = &((defs)[att]);                    \
 }
 
 // ----------------------------------------------------------------
