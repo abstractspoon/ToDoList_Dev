@@ -129,7 +129,7 @@ struct TDCINFOTIPITEM
 		Init(nAttribID, CEnString(nLabelStrID), sVal);
 	}
 
-	TDC_ATTRIBUTE nAttribID;
+	TDC_ATTRIBUTE nAttributeID;
 	CString sLabel;
 	CString sValue;
 	int nLabelWidth;
@@ -137,7 +137,7 @@ struct TDCINFOTIPITEM
 protected:
 	void Init(TDC_ATTRIBUTE nAttribID, CString sLab, const CString& sVal)
 	{
-		nAttribID = nAttribID;
+		nAttributeID = nAttribID;
 		sLabel = sLab;
 		sValue = sVal;
 		nLabelWidth = 0;
@@ -1344,19 +1344,19 @@ struct SEARCHPARAM
 			nOperator = FOP_NONE;
 	}
 
-	BOOL OperatorIs(FIND_OPERATOR o) const
+	BOOL OperatorIs(FIND_OPERATOR nOp) const
 	{
-		return (nOperator == o);
+		return (nOperator == nOp);
 	}
 
-	BOOL AttributeIs(TDC_ATTRIBUTE a) const
+	BOOL AttributeIs(TDC_ATTRIBUTE nAttribID) const
 	{
-		return (nAttributeID == a);
+		return (nAttributeID == nAttribID);
 	}
 
-	BOOL TypeIs(FIND_ATTRIBTYPE t) const
+	BOOL TypeIs(FIND_ATTRIBTYPE nType) const
 	{
-		return (GetAttribType() == t);
+		return (GetAttribType() == nType);
 	}
 
 	BOOL HasString() const
@@ -1426,7 +1426,7 @@ struct SEARCHPARAM
 		return bRelativeDate;
 	}
 
-	void SetValue(const CString& val)
+	void SetValue(const CString& sVal)
 	{
 		switch (GetAttribType())
 		{
@@ -1434,19 +1434,19 @@ struct SEARCHPARAM
 		case FT_DATERELATIVE:
 		case FT_ICON:
 		case FT_DEPENDENCY:
-			sValue = val;
+			sValue = sVal;
 			break;
 			
 		case FT_DATE:
 		case FT_DOUBLE:
 		case FT_TIMEPERIOD:
-			dValue = _ttof(val);
+			dValue = _ttof(sVal);
 			break;
 			
 		case FT_INTEGER:
 		case FT_BOOL:
 		case FT_RECURRENCE:
-			nValue = _ttoi(val);
+			nValue = _ttoi(sVal);
 			break;
 
 		default:
@@ -1455,14 +1455,14 @@ struct SEARCHPARAM
 		}
 	}
 
-	void SetValue(double val)
+	void SetValue(double dVal)
 	{
 		switch (GetAttribType())
 		{
 		case FT_DATE:
 		case FT_DOUBLE:
 		case FT_TIMEPERIOD:
-			dValue = val;
+			dValue = dVal;
 			break;
 			
 		default:
@@ -1471,14 +1471,14 @@ struct SEARCHPARAM
 		}
 	}
 
-	void SetValue(int val)
+	void SetValue(int nVal)
 	{
 		switch (GetAttribType())
 		{
 		case FT_INTEGER:
 		case FT_BOOL:
 		case FT_RECURRENCE:
-			nValue = val;
+			nValue = nVal;
 			break;
 
 		default:
@@ -1487,12 +1487,12 @@ struct SEARCHPARAM
 		}
 	}
 
-	void SetValue(const COleDateTime& val)
+	void SetValue(const COleDateTime& dtVal)
 	{
 		switch (GetAttribType())
 		{
 		case FT_DATE:
-			dValue = val;
+			dValue = dtVal;
 			break;
 
 		default:
@@ -1690,15 +1690,15 @@ struct SEARCHPARAMS
 		aAttribDefs.RemoveAll();
 	}
 
-	BOOL HasAttribute(TDC_ATTRIBUTE attrib) const
+	BOOL HasAttribute(TDC_ATTRIBUTE nAttribID) const
 	{
 		InitAttributeMap();
 
-		switch (attrib)
+		switch (nAttribID)
 		{
 		case TDCA_TASKNAME:
 		case TDCA_COMMENTS:
-			return (mapAttrib.Has(attrib) || 
+			return (mapAttrib.Has(nAttribID) || 
 					mapAttrib.Has(TDCA_TASKNAMEORCOMMENTS) ||
 					mapAttrib.Has(TDCA_ANYTEXTATTRIBUTE));
 
@@ -1709,12 +1709,12 @@ struct SEARCHPARAMS
 		case TDCA_VERSION:
 		case TDCA_TAGS:
 		case TDCA_EXTERNALID:
-			return (mapAttrib.Has(attrib) ||
+			return (mapAttrib.Has(nAttribID) ||
 					mapAttrib.Has(TDCA_ANYTEXTATTRIBUTE));
 		}
 
 		// all else
-		return mapAttrib.Has(attrib);
+		return mapAttrib.Has(nAttribID);
 	}
 
 	BOOL HasMultipleAttributes() const
@@ -1723,15 +1723,15 @@ struct SEARCHPARAMS
 
 		if (nNumRules)
 		{
-			TDC_ATTRIBUTE nFirstAttrib = aRules[0].GetAttribute();
+			TDC_ATTRIBUTE nFirstAttribID = aRules[0].GetAttribute();
 
 			// quick check for aggregate attributes
-			if (nFirstAttrib == TDCA_ANYTEXTATTRIBUTE || (nFirstAttrib == TDCA_TASKNAMEORCOMMENTS))
+			if (nFirstAttribID == TDCA_ANYTEXTATTRIBUTE || (nFirstAttribID == TDCA_TASKNAMEORCOMMENTS))
 				return TRUE;
 
 			for (int nRule = 1; nRule < nNumRules; nRule++)
 			{
-				if (aRules[nRule].GetAttribute() != nFirstAttrib)
+				if (aRules[nRule].GetAttribute() != nFirstAttribID)
 					return TRUE;
 			}
 		}
@@ -3063,10 +3063,10 @@ struct TDCATTRIBUTEMAPPING
 		dwItemData = dwData;
 	}
 
-	TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE tdcAttrib, DWORD dwData = 0) 
+	TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE nAttribID, DWORD dwData = 0) 
 	{ 
 		sColumnName.LoadString(nNameID); 
-		nAttributeID = tdcAttrib;
+		nAttributeID = nAttribID;
 		dwItemData = dwData;
 	}
 

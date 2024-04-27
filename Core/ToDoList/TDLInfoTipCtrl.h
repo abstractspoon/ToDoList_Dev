@@ -34,7 +34,7 @@ public:
 
 protected:
 	const CToDoCtrlData& m_data;
-	const CTDCCustomAttribDefinitionArray& m_aCustAttribs;
+	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
