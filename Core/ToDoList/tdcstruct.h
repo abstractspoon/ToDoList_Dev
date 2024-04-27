@@ -1070,19 +1070,6 @@ struct SEARCHPARAM
 			return FALSE;
 		}
 
-		// handle deprecated relative date attributes
-		switch (attrib)
-		{
-		case TDCA_STARTDATE_RELATIVE_DEP:
-		case TDCA_DUEDATE_RELATIVE_DEP:
-		case TDCA_DONEDATE_RELATIVE_DEP:
-		case TDCA_CREATIONDATE_RELATIVE_DEP:
-		case TDCA_LASTMOD_RELATIVE_DEP:
-			a = TDC::MapDeprecatedAttribute(attrib);
-			t = FT_DATERELATIVE;
-			break;
-		}
-
 		FIND_ATTRIBTYPE nPrevType = nType;
 
 		attrib = a;
