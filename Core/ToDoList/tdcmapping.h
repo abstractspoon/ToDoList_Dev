@@ -682,31 +682,6 @@ namespace TDC
 		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
 	}
 
-	static TDC_ATTRIBUTE MapDeprecatedAttribute(TDC_ATTRIBUTE nAttribID)
-	{
-		switch (nAttribID)
-		{
-			case TDCA_DONEDATE_RELATIVE_DEP:		return TDCA_DONEDATE;
-			case TDCA_DUEDATE_RELATIVE_DEP:			return TDCA_DUEDATE;
-			case TDCA_STARTDATE_RELATIVE_DEP:		return TDCA_STARTDATE;
-			case TDCA_CREATIONDATE_RELATIVE_DEP:	return TDCA_CREATIONDATE;
-			case TDCA_LASTMOD_RELATIVE_DEP:			return TDCA_LASTMODDATE;
-		}
-
-		// All else
-		return nAttribID;
-	}
-
-	static TDC_COLUMN MapDeprecatedColumn(TDC_COLUMN nColumnID)
-	{
-// 		switch (nColumnID)
-// 		{
-// 		}
-
-		// All else
-		return nColumnID;
-	}
-
 	static TDC_ATTRIBUTE MapCommandLineSwitchToAttribute(LPCTSTR szSwitch)
 	{
 #define MATCHSWITCH(s, a) if (_tcsicmp(szSwitch, s) == 0) return a
