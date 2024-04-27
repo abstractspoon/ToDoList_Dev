@@ -515,12 +515,13 @@ public:
 	CTDCTaskAttributeCopier(const CToDoCtrlData& data,
 							const CContentMgr& mgrContent);
 
-	BOOL CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID) const;
+	BOOL CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID) const;
 	BOOL CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const;
 	
-	BOOL CanCopyColumnValue(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const;
+	BOOL CanCopyColumnValues(TDC_COLUMN nColID) const;
+	BOOL CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const;
 	BOOL CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const;
-
+	
 	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
 
 protected:

@@ -356,7 +356,7 @@ public:
 	void ClearCopiedItem() const;
 	BOOL PasteTasks(TDC_PASTE nWhere, BOOL bAsRef);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
-	BOOL CanCopyAttributeColumnValues(TDC_COLUMN nColID) const;
+	BOOL CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
 	BOOL PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly);

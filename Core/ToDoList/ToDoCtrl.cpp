@@ -6309,82 +6309,20 @@ BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyAttributeColumnValues(TDC_COLUMN nColID) const
+BOOL CToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	switch (nColID)
-	{
-	case TDCC_NONE:
-	case TDCC_ICON:
-	case TDCC_RECENTEDIT:
-	case TDCC_LOCK:
-	case TDCC_COLOR:
-	case TDCC_DONE:
-	case TDCC_TRACKTIME:
-	case TDCC_FLAG:
+	if (!GetUpdateControlsItem())
 		return FALSE;
 
-	case TDCC_PRIORITY:
-	case TDCC_PERCENT:
-	case TDCC_TIMEESTIMATE:
-	case TDCC_TIMESPENT:
-	case TDCC_STARTDATE:
-	case TDCC_DUEDATE:
-	case TDCC_DONEDATE:
-	case TDCC_ALLOCTO:
-	case TDCC_ALLOCBY:
-	case TDCC_STATUS:
-	case TDCC_CATEGORY:
-	case TDCC_FILELINK:
-	case TDCC_POSITION:
-	case TDCC_ID:
-	case TDCC_CREATIONDATE:
-	case TDCC_CREATEDBY:
-	case TDCC_LASTMODDATE:
-	case TDCC_RISK:
-	case TDCC_EXTERNALID:
-	case TDCC_COST:
-	case TDCC_DEPENDENCY:
-	case TDCC_RECURRENCE:
-	case TDCC_VERSION:
-	case TDCC_TIMEREMAINING:
-	case TDCC_REMINDER:
-	case TDCC_PARENTID:
-	case TDCC_PATH:
-	case TDCC_TAGS:
-	case TDCC_SUBTASKDONE:
-	case TDCC_STARTTIME:
-	case TDCC_DUETIME:
-	case TDCC_DONETIME:
-	case TDCC_CREATIONTIME:
-	case TDCC_LASTMODBY:
-	case TDCC_COMMENTSSIZE:
-	case TDCC_COMMENTSFORMAT:
-	case TDCC_CLIENT:
-		return TRUE;
+	if (bSelectedTasksOnly && !GetSelectedTaskCount())
+		return FALSE;
 
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
-		{
-			switch (m_aCustomAttribDefs.GetAttributeDataType(nColID))
-			{
-			case TDCCA_BOOL:
-			case TDCCA_ICON:
-				return FALSE;
-			}
-
-			return TRUE;
-		}
-		break;
-	}
-
-	// All else
-	ASSERT(0);
-	return FALSE;
+	return m_attribCopier.CanCopyColumnValues(nColID);
 }
 
 BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	if (!CanCopyAttributeColumnValues(nColID))
+	if (!CanCopyColumnValues(nColID, bSelectedTasksOnly))
 		return FALSE;
 
 	// Build a task file with sequential IDs of the values
@@ -6449,7 +6387,7 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
 
 	// Check column compatibility
-	if (!m_attribCopier.CanCopyColumnValue(nFromColID, nToColID))
+	if (!m_attribCopier.CanCopyColumnValues(nFromColID, nToColID))
 		return FALSE;
 
 	// Check there is at least one editable task
@@ -10414,7 +10352,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
-	if (!m_attribCopier.CanCopyAttributeValue(nFromAttrib, nToAttrib))
+	if (!m_attribCopier.CanCopyAttributeValues(nFromAttrib, nToAttrib))
 		return FALSE;
 
 	Flush();

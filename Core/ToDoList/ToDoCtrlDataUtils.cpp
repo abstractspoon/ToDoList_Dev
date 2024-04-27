@@ -6405,7 +6405,7 @@ CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
 {
 }
 
-BOOL CTDCTaskAttributeCopier::CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib) const
+BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib) const
 {
 	// Doesn't make sense to copy to self
 	if (nFromAttrib == nToAttrib)
@@ -6522,7 +6522,7 @@ TDC_ATTRIBUTECATEGORY CTDCTaskAttributeCopier::GetAttributeCategory(TDC_ATTRIBUT
 
 BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const
 {
-	if (!CanCopyAttributeValue(nFromAttribID, nToAttribID))
+	if (!CanCopyAttributeValues(nFromAttribID, nToAttribID))
 		return FALSE;
 
 	TDCCADATA dataFrom;
@@ -6594,22 +6594,22 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 
 	switch (nToAttribID)
 	{
-	case TDCA_VERSION:		tdiTo.sVersion = dataFrom.AsString();		break;
-	case TDCA_ALLOCBY:		tdiTo.sAllocBy = dataFrom.AsString();		break;
-	case TDCA_EXTERNALID:	tdiTo.sExternalID = dataFrom.AsString();	break;
-	case TDCA_STATUS:		tdiTo.sStatus = dataFrom.AsString();		break;
-	case TDCA_TASKNAME:		tdiTo.sTitle = dataFrom.AsString();			break;
+	case TDCA_VERSION:		tdiTo.sVersion		= dataFrom.AsString();	break;
+	case TDCA_ALLOCBY:		tdiTo.sAllocBy		= dataFrom.AsString();	break;
+	case TDCA_EXTERNALID:	tdiTo.sExternalID	= dataFrom.AsString();	break;
+	case TDCA_STATUS:		tdiTo.sStatus		= dataFrom.AsString();	break;
+	case TDCA_TASKNAME:		tdiTo.sTitle		= dataFrom.AsString();	break;
 
-	case TDCA_PRIORITY:		tdiTo.nPriority = dataFrom.AsInteger();		break;
-	case TDCA_RISK:			tdiTo.nRisk = dataFrom.AsInteger();			break;
-	case TDCA_PERCENT:		tdiTo.nPercentDone = dataFrom.AsInteger();	break;
+	case TDCA_PRIORITY:		tdiTo.nPriority		= dataFrom.AsInteger();	break;
+	case TDCA_RISK:			tdiTo.nRisk			= dataFrom.AsInteger();	break;
+	case TDCA_PERCENT:		tdiTo.nPercentDone	= dataFrom.AsInteger();	break;
 
-	case TDCA_FLAG:			tdiTo.bFlagged = dataFrom.AsBool();			break;
-	case TDCA_LOCK:			tdiTo.bLocked = dataFrom.AsBool();			break;
+	case TDCA_FLAG:			tdiTo.bFlagged		= dataFrom.AsBool();	break;
+	case TDCA_LOCK:			tdiTo.bLocked		= dataFrom.AsBool();	break;
 
-	case TDCA_DONEDATE:		tdiTo.dateDone = dataFrom.AsDate();			break;
-	case TDCA_DUEDATE:		tdiTo.dateDue = dataFrom.AsDate();			break;
-	case TDCA_STARTDATE:	tdiTo.dateStart = dataFrom.AsDate();		break;
+	case TDCA_DONEDATE:		tdiTo.dateDone		= dataFrom.AsDate();	break;
+	case TDCA_DUEDATE:		tdiTo.dateDue		= dataFrom.AsDate();	break;
+	case TDCA_STARTDATE:	tdiTo.dateStart		= dataFrom.AsDate();	break;
 
 	case TDCA_TIMEESTIMATE:	dataFrom.AsTimePeriod(tdiTo.timeEstimate);	break;
 	case TDCA_TIMESPENT:	dataFrom.AsTimePeriod(tdiTo.timeSpent);		break;
@@ -6636,9 +6636,9 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 	return TRUE;
 }
 
-BOOL CTDCTaskAttributeCopier::CanCopyColumnValue(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const
+BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const
 {
-	return CanCopyAttributeValue(TDC::MapColumnToAttribute(nFromColID), 
+	return CanCopyAttributeValues(TDC::MapColumnToAttribute(nFromColID), 
 								 TDC::MapColumnToAttribute(nToColID));
 }
 
@@ -6649,3 +6649,77 @@ BOOL CTDCTaskAttributeCopier::CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUM
 							  tdiTo, 
 							  TDC::MapColumnToAttribute(nToColID));
 }
+
+BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nColID) const
+{
+	switch (nColID)
+	{
+	case TDCC_NONE:
+	case TDCC_ICON:
+	case TDCC_RECENTEDIT:
+	case TDCC_LOCK:
+	case TDCC_COLOR:
+	case TDCC_DONE:
+	case TDCC_TRACKTIME:
+	case TDCC_FLAG:
+		return FALSE;
+
+	case TDCC_PRIORITY:
+	case TDCC_PERCENT:
+	case TDCC_TIMEESTIMATE:
+	case TDCC_TIMESPENT:
+	case TDCC_STARTDATE:
+	case TDCC_DUEDATE:
+	case TDCC_DONEDATE:
+	case TDCC_ALLOCTO:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_CATEGORY:
+	case TDCC_FILELINK:
+	case TDCC_POSITION:
+	case TDCC_ID:
+	case TDCC_CREATIONDATE:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODDATE:
+	case TDCC_RISK:
+	case TDCC_EXTERNALID:
+	case TDCC_COST:
+	case TDCC_DEPENDENCY:
+	case TDCC_RECURRENCE:
+	case TDCC_VERSION:
+	case TDCC_TIMEREMAINING:
+	case TDCC_REMINDER:
+	case TDCC_PARENTID:
+	case TDCC_PATH:
+	case TDCC_TAGS:
+	case TDCC_SUBTASKDONE:
+	case TDCC_STARTTIME:
+	case TDCC_DUETIME:
+	case TDCC_DONETIME:
+	case TDCC_CREATIONTIME:
+	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
+	case TDCC_CLIENT:
+		return TRUE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			switch (m_data.m_aCustomAttribDefs.GetAttributeDataType(nColID))
+			{
+			case TDCCA_BOOL:
+			case TDCCA_ICON:
+				return FALSE;
+			}
+
+			return TRUE;
+		}
+		break;
+	}
+
+	// All else
+	ASSERT(0);
+	return FALSE;
+}
+

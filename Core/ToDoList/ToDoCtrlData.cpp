@@ -4351,7 +4351,7 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CS
 	{
 		m_items.GetNext(pos, dwTaskID, pTDI);
 
-		if (TaskHasAttributeValue(pTDI, nAttrib, sFrom, bCaseSensitive, bWholeWord))
+		if (TaskHasAttributeValue(*pTDI, nAttrib, sFrom, bCaseSensitive, bWholeWord))
 		{
 			// save undo data
 			SaveEditUndo(dwTaskID, pTDI, nAttrib);
@@ -4376,18 +4376,18 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CS
 	return nRes;
 }
 
-BOOL CToDoCtrlData::TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL CToDoCtrlData::TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	switch (nAttrib)
 	{
-	case TDCA_VERSION:		return (Misc::Find(sText, pTDI->sVersion, bCaseSensitive, bWholeWord) != -1);
-	case TDCA_ALLOCBY:		return (Misc::Find(sText, pTDI->sAllocBy, bCaseSensitive, bWholeWord) != -1);
-	case TDCA_EXTERNALID:	return (Misc::Find(sText, pTDI->sExternalID, bCaseSensitive, bWholeWord) != -1);
-	case TDCA_STATUS:		return (Misc::Find(sText, pTDI->sStatus, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_VERSION:		return (Misc::Find(sText, tdi.sVersion, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_ALLOCBY:		return (Misc::Find(sText, tdi.sAllocBy, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_EXTERNALID:	return (Misc::Find(sText, tdi.sExternalID, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_STATUS:		return (Misc::Find(sText, tdi.sStatus, bCaseSensitive, bWholeWord) != -1);
 		
-	case TDCA_ALLOCTO:		return Misc::Contains(sText, pTDI->aAllocTo, bCaseSensitive, bWholeWord);
-	case TDCA_CATEGORY:		return Misc::Contains(sText, pTDI->aCategories, bCaseSensitive, bWholeWord);		
-	case TDCA_TAGS:			return Misc::Contains(sText, pTDI->aTags, bCaseSensitive, bWholeWord);
+	case TDCA_ALLOCTO:		return Misc::Contains(sText, tdi.aAllocTo, bCaseSensitive, bWholeWord);
+	case TDCA_CATEGORY:		return Misc::Contains(sText, tdi.aCategories, bCaseSensitive, bWholeWord);		
+	case TDCA_TAGS:			return Misc::Contains(sText, tdi.aTags, bCaseSensitive, bWholeWord);
 		
 	default:
 		ASSERT(0);

@@ -13948,7 +13948,7 @@ void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelect
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	BOOL bEnable = tdc.CanCopyAttributeColumnValues(m_nContextColumnID);
+	BOOL bEnable = tdc.CanCopyColumnValues(m_nContextColumnID, bSelectedTasks);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)

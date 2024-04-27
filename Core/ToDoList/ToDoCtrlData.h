@@ -136,7 +136,6 @@ public:
 	CString GetTaskMetaData(DWORD dwTaskID, const CString& sKey) const;
 
 	BOOL GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
-	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
 	CString GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const;
 
@@ -337,8 +336,10 @@ protected:
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
 	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
-	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
-	
+
+	BOOL TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
+	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
+
 	// Too dangerous to be public because 'data' is untyped
 	TDC_SET SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
 
