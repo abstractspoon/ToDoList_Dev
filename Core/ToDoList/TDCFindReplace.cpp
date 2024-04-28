@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 CTDCFindReplace::CTDCFindReplace(const CToDoCtrl& tdc) 
 	: 
 	m_tdc(tdc), 
-	m_nAttribID(TDCA_NONE),
+	m_nAttributeID(TDCA_NONE),
 	m_bReplacing(FALSE)
 {
 }
@@ -59,7 +59,7 @@ BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttribID)
 
 BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttribID)
 {
-	if (nAttribID != m_nAttribID)
+	if (nAttribID != m_nAttributeID)
 	{
 		DestroyDialog();
 		strFind.Empty();
@@ -89,7 +89,7 @@ BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttribID)
 		return FALSE;
 	}
 
-	m_nAttribID = nAttribID;
+	m_nAttributeID = nAttribID;
 
 	if (!strFind.IsEmpty())
 	{
@@ -161,7 +161,7 @@ BOOL CTDCFindReplace::SelectNextTask(TDC_SELECTNEXTTASK nSelectWhat) const
 void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace, 
 									BOOL bNext, BOOL bCase, BOOL bWord)
 {
-	ASSERT(m_tdc.CanEditSelectedTask(m_nAttribID));
+	ASSERT(m_tdc.CanEditSelectedTask(m_nAttributeID));
 
 	CAutoFlag af(m_bReplacing, TRUE);
 
@@ -176,7 +176,7 @@ void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace
 
 void CTDCFindReplace::OnReplaceAll(const CString& sFind, const CString& sReplace, BOOL bCase, BOOL bWord)
 {
-	ASSERT(m_tdc.CanEditSelectedTask(m_nAttribID));
+	ASSERT(m_tdc.CanEditSelectedTask(m_nAttributeID));
 
 	CAutoFlag af(m_bReplacing, TRUE);
 

@@ -277,9 +277,9 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
 	}
 	
-	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
 
 		if (m_taskList.CanGroupBy(attribDef.GetColumnID(), TRUE))
 		{
@@ -1646,7 +1646,7 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 {
 	dwTaskID = mod.dwSelectedTaskID;
 
-	if (!CanEditSelectedTask(mod.nAttrib, dwTaskID))
+	if (!CanEditSelectedTask(mod.nAttributeID, dwTaskID))
 		return FALSE;
 
 	if (dwTaskID && (GetSelectedTaskCount() == 1))
@@ -1687,9 +1687,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 	BOOL bChange = FALSE;
 	
 	// prevent the active view's change being propagated back to itself
-	m_nExtModifyingAttrib = mod.nAttrib;
+	m_nExtModifyingAttrib = mod.nAttributeID;
 
-	switch (mod.nAttrib)
+	switch (mod.nAttributeID)
 	{
 	case TDCA_TASKNAME:		
 		{
@@ -2017,7 +2017,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 
 		// Note: We only save off the attribute if (dwTaskID != 0)
 		// because 'SetSelectedTask*' will already have handled it
-		m_taskTree.GetAttributesAffectedByMod(mod.nAttrib, mapModAttribs);
+		m_taskTree.GetAttributesAffectedByMod(mod.nAttributeID, mapModAttribs);
 	}
 
 	return bChange;
@@ -2121,7 +2121,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 				else
 				{
 #ifdef _DEBUG
-					switch (mod.nAttrib)
+					switch (mod.nAttributeID)
 					{
 					case TDCA_ICON:
 					case TDCA_OFFSETTASK:
@@ -3693,10 +3693,10 @@ int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* p
 
 	if (pData->mapWantedAttrib.IsEmpty())
 	{
-		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_ATTRIBUTE; nAttrib++)
+		for (int nAtt = TDCA_FIRST_ATTRIBUTE; nAtt <= TDCA_LAST_ATTRIBUTE; nAtt++)
 		{
-			if (pExtWnd->WantTaskUpdate((TDC_ATTRIBUTE)nAttrib))
-				pData->mapWantedAttrib.Add((TDC_ATTRIBUTE)nAttrib);
+			if (pExtWnd->WantTaskUpdate((TDC_ATTRIBUTE)nAtt))
+				pData->mapWantedAttrib.Add((TDC_ATTRIBUTE)nAtt);
 		}
 
 		// Misc
@@ -4847,9 +4847,9 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_ATTRIBUTE; nAttrib++)
+			for (int nAtt = TDCA_FIRST_ATTRIBUTE; nAtt <= TDCA_LAST_ATTRIBUTE; nAtt++)
 			{
-				TDC_ATTRIBUTE nBy = (TDC_ATTRIBUTE)nAttrib;
+				TDC_ATTRIBUTE nBy = (TDC_ATTRIBUTE)nAtt;
 
 				if (ExtensionCanSortBy(nView, nBy))
 				{

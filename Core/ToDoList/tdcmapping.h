@@ -672,13 +672,13 @@ namespace TDC
 
 	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
 	{
-		multiSort.nAttrib1 = MapColumnToAttribute(pSortCols[0].nBy);
+		multiSort.nAttributeID1 = MapColumnToAttribute(pSortCols[0].nBy);
 		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
 
-		multiSort.nAttrib2 = MapColumnToAttribute(pSortCols[1].nBy);
+		multiSort.nAttributeID2 = MapColumnToAttribute(pSortCols[1].nBy);
 		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
 
-		multiSort.nAttrib3 = MapColumnToAttribute(pSortCols[2].nBy);
+		multiSort.nAttributeID3 = MapColumnToAttribute(pSortCols[2].nBy);
 		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
 	}
 

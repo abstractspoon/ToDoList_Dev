@@ -1154,9 +1154,9 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 
 	int nNumAttrib = aAttribs.GetSize();
 
-	for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribs.GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribs.GetData()[nAtt];
 
 		ASSERT(!attribDef.sUniqueID.IsEmpty());
 		ASSERT(!attribDef.sLabel.IsEmpty() || !attribDef.sColumnTitle.IsEmpty());
@@ -1190,8 +1190,8 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 			}
 			else
 			{
-				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opFirst.nAttribID));
-				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND, calc.opFirst.nAttribID);
+				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opFirst.nAttributeID));
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND, calc.opFirst.nAttributeID);
 			}
 
 			pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCOPERATOR, calc.nOperator);
@@ -1200,10 +1200,10 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 			{
 				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.sCustAttribID);
 			}
-			else if (calc.opSecond.nAttribID != TDCA_NONE)
+			else if (calc.opSecond.nAttributeID != TDCA_NONE)
 			{
-				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opSecond.nAttribID));
-				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.nAttribID);
+				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opSecond.nAttributeID));
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.nAttributeID);
 			}
 			else
 			{
@@ -1321,11 +1321,11 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 
 			if (Misc::IsNumber(sFirstOp))
 			{
-				calc.opFirst.nAttribID = (TDC_ATTRIBUTE)_ttoi(sFirstOp);
+				calc.opFirst.nAttributeID = (TDC_ATTRIBUTE)_ttoi(sFirstOp);
 			}
 			else if (!sFirstOp.IsEmpty())
 			{
-				calc.opFirst.nAttribID = TDCA_CUSTOMATTRIB;
+				calc.opFirst.nAttributeID = TDCA_CUSTOMATTRIB;
 				calc.opFirst.sCustAttribID = sFirstOp;
 			}
 
@@ -1336,19 +1336,19 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 
 			if (Misc::IsNumber(sSecondOpAttrib))
 			{
-				calc.opSecond.nAttribID = (TDC_ATTRIBUTE)_ttoi(sSecondOpAttrib);
+				calc.opSecond.nAttributeID = (TDC_ATTRIBUTE)_ttoi(sSecondOpAttrib);
 			}
 			else if (!sSecondOpAttrib.IsEmpty())
 			{
 				ASSERT(sSecondOpValue.IsEmpty());
 
-				calc.opSecond.nAttribID = TDCA_CUSTOMATTRIB;
+				calc.opSecond.nAttributeID = TDCA_CUSTOMATTRIB;
 				calc.opSecond.sCustAttribID = sSecondOpAttrib;
 				calc.dSecondOperandValue = 0.0;
 			}
 			else
 			{
-				calc.opSecond.nAttribID = TDCA_NONE;
+				calc.opSecond.nAttributeID = TDCA_NONE;
 				calc.opSecond.sCustAttribID.Empty();
 				calc.dSecondOperandValue = _ttof(sSecondOpValue); // defaults to 0.0
 			}

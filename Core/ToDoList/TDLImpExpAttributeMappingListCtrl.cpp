@@ -70,12 +70,12 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	// build column combo because that is static
 	CLocalizer::EnableTranslation(m_cbAttributes, FALSE);
 
-	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
+		const TDCATTRIBUTE& att = ATTRIBUTES[nAtt];
 
 		// ignore certain attributes
-		switch (att.nAttribID)
+		switch (att.nAttributeID)
 		{
 		case TDCA_COLOR:
 		case TDCA_PROJECTNAME:
@@ -90,11 +90,11 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		case TDCA_NONE:
 			// Allow mapping to 'none' when importing
 			if (m_bImporting)
-				CDialogHelper::AddString(m_cbAttributes, _T(""), att.nAttribID);
+				CDialogHelper::AddString(m_cbAttributes, _T(""), att.nAttributeID);
 			break;
 
 		default:
-			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.nAttribID);
+			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.nAttributeID);
 			break;
 		}
 	}

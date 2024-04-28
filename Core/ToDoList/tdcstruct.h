@@ -2288,7 +2288,7 @@ struct TDCADVANCEDFILTER
 
 struct TDCATTRIBUTE
 {
-	TDC_ATTRIBUTE nAttribID;
+	TDC_ATTRIBUTE nAttributeID;
 	TDC_ATTRIBUTECATEGORY nCategory;
 	UINT nAttribResID;
 };
@@ -3041,10 +3041,10 @@ protected:
 	{
 		mapAttrib.RemoveAll();
 		
-		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
+		for (int nAttribID = TDCA_FIRST_ATTRIBUTE; nAttribID <= TDCA_LAST_REALATTRIBUTE; nAttribID++)
 		{
-			if (IsSupportedFilter((TDC_ATTRIBUTE)nAttrib))
-				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
+			if (IsSupportedFilter((TDC_ATTRIBUTE)nAttribID))
+				mapAttrib.Add((TDC_ATTRIBUTE)nAttribID);
 		}
 		
 		return mapAttrib.GetCount();

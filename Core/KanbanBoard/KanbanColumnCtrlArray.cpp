@@ -291,10 +291,10 @@ void CKanbanColumnCtrlArray::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	ARRAY_FN(pCol->Sort(nBy, bAscending));
 }
 
-BOOL CKanbanColumnCtrlArray::GroupBy(TDC_ATTRIBUTE nAttrib)
+BOOL CKanbanColumnCtrlArray::GroupBy(TDC_ATTRIBUTE nAttribID)
 {
 	BOOL bSuccess = TRUE;
-	ARRAY_FN(bSuccess &= pCol->GroupBy(nAttrib));
+	ARRAY_FN(bSuccess &= pCol->GroupBy(nAttribID));
 
 	return bSuccess;
 }

@@ -137,9 +137,9 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 	if (CMSOutlookHelper::GetItemData(*pItem, mapData, bWantConfidential) == 0)
 		return NULL;
 
-	for (int nAttrib = 0; nAttrib < aMapping.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < aMapping.GetSize(); nAtt++)
 	{
-		const TDCATTRIBUTEMAPPING& attrib = aMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& attrib = aMapping[nAtt];
 
 		OUTLOOK_FIELDTYPE oaType = (OUTLOOK_FIELDTYPE)attrib.dwItemData;
 		CString sData;

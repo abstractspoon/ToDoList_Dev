@@ -105,10 +105,10 @@ public:
 	BOOL GetMaxDateRange(GANTTDATERANGE& dtRange) const;
 	BOOL HasDateRange() const { return m_dtDataRange.IsValid(); }
 
-	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
-	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttrib);
+	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttribID);
+	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttribID);
 	static TDC_ATTRIBUTE MapColumnToAttribute(GTLC_COLUMN nCol);
-	static GTLC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttrib);
+	static GTLC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttribID);
 
 protected:
 	BOOL m_bReadOnly;

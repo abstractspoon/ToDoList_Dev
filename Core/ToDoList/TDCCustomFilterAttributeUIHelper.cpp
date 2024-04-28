@@ -262,9 +262,9 @@ int CTDCCustomFilterAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomA
 
 	UINT nID = IDC_FIRST_CUSTOMFILTERFIELD;
 
-	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < aAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 
 		// don't add unwanted controls
 		if (!WantControl(attribDef))
@@ -313,9 +313,9 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildControls(CWnd* pParent,
 	const CWnd* pInsertAfter = pParent->GetDlgItem(nCtrlIDPos);
 	ASSERT(pInsertAfter);
 
-	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < aAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 
 		// don't add unwanted controls
 		if (!WantControl(attribDef))

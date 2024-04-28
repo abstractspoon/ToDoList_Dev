@@ -40,15 +40,15 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanGroupByComboBox message handlers
 
-void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttrib)
+void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	ASSERT(nAttrib != TDCA_FIXEDCOLUMNS);
-	ASSERT(!KBUtils::IsCustomAttribute(nAttrib) || m_aCustAttribDefs.GetSize());
+	ASSERT(nAttribID != TDCA_FIXEDCOLUMNS);
+	ASSERT(!KBUtils::IsCustomAttribute(nAttribID) || m_aCustAttribDefs.GetSize());
 
-	if (nAttrib == m_nExcludeAttribID)
+	if (nAttribID == m_nExcludeAttribID)
 		return;
 
-	m_nExcludeAttribID = nAttrib;
+	m_nExcludeAttribID = nAttribID;
 	BuildCombo();
 }
 

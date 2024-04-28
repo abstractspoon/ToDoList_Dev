@@ -24,7 +24,7 @@ public:
 
 	TDC_ATTRIBUTE GetSelectedAttribute() const;
 	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
-	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
+	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID);
 
 	void SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
 	void ShowFixedColumns(BOOL bShow = TRUE);

@@ -508,9 +508,9 @@ double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM
 	return CTimeHelper().Convert(dTimeEst, nTHUnits, THU_WEEKDAYS);
 }
 
-BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_COLOR:
@@ -528,7 +528,7 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	}
 	
 	// all else 
-	return (nAttrib == IUI_ALL);
+	return (nAttribID == IUI_ALL);
 }
 
 TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
@@ -548,9 +548,9 @@ TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
 	return TDCA_NONE;
 }
 
-WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
+WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:		return WLCC_TITLE;		
 	case TDCA_DUEDATE:		return WLCC_DUEDATE;		

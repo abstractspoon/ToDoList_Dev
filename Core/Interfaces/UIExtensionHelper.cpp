@@ -27,7 +27,8 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(LPCWSTR szImagePath)
 
 // IUI_SORT
 // IUI_TOGGLABLESORT
-CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, BOOL bAscending)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, 
+											   BOOL bAscending)
 {
 	ASSERT((nSortCol == TDCA_NONE) || (bAscending != -1));
 
@@ -45,9 +46,9 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD taskID)
 }
 
 // IUI_MOVETASK
-CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD dwSelTaskID, 
-	DWORD dwParentID, 
-	DWORD dwAfterSiblingID)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(DWORD dwSelTaskID,
+											   DWORD dwParentID,
+											   DWORD dwAfterSiblingID)
 {
 	move.dwSelectedTaskID = dwSelTaskID;
 	move.dwParentID = dwParentID;
@@ -66,13 +67,13 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(const IUIMULTISORT& sortCols)
 // IUI_SELECTNEXTTASKINCLCURRENT
 // IUI_SELECTPREVTASK
 // IUI_SELECTLASTTASK
-CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nAttrib, 
-	BOOL bFindReplace, 
-	LPCWSTR szWords, 
-	BOOL bCaseSensitive, 
-	BOOL bWholeWord)
+CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nAttribID,
+											   BOOL bFindReplace,
+											   LPCWSTR szWords,
+											   BOOL bCaseSensitive,
+											   BOOL bWholeWord)
 {
-	select.nAttrib = nAttrib;
+	select.nAttributeID = nAttribID;
 	select.bFindReplace = (bFindReplace != FALSE);
 	select.szWords = szWords;
 	select.bCaseSensitive = (bCaseSensitive != FALSE);

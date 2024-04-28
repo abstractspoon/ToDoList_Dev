@@ -155,11 +155,11 @@ LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CTDLAttributeListBox::SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs)
 {
-	int nAttrib = m_aAttribs.GetSize();
+	int nAtt = m_aAttribs.GetSize();
 	
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		ATTRIBVIS& vis = m_aAttribs[nAttrib];
+		ATTRIBVIS& vis = m_aAttribs[nAtt];
 
 		if (vis.sCustAttribID.IsEmpty())
 		{
@@ -173,7 +173,7 @@ void CTDLAttributeListBox::SetSelectedAttributes(const CTDCAttributeMap& mapAttr
 		}
 		
 		if (GetSafeHwnd())
-			SetCheck(nAttrib, vis.bVisible);
+			SetCheck(nAtt, vis.bVisible);
 	}
 }
 

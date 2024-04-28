@@ -161,18 +161,18 @@ void CTDLAttributeComboBox::BuildCombo()
 	{
 		const TDCATTRIBUTE& ap = ATTRIBUTES[nAtt];
 
-		if (ap.nAttribResID && WantAttribute(ap.nAttribID))
+		if (ap.nAttribResID && WantAttribute(ap.nAttributeID))
 		{
 			CEnString sAttrib(ap.nAttribResID);
-			DWORD dwItemData = EncodeItemData(ap.nAttribID);
+			DWORD dwItemData = EncodeItemData(ap.nAttributeID);
 
 			CDialogHelper::AddString(*this, sAttrib, dwItemData); 
 
 			// relative dates
-			if (m_bIncRelativeDates && AttributeIsDate(ap.nAttribID))
+			if (m_bIncRelativeDates && AttributeIsDate(ap.nAttributeID))
 			{
 				// then add relative version too
-				dwItemData = EncodeItemData(ap.nAttribID, TRUE);
+				dwItemData = EncodeItemData(ap.nAttributeID, TRUE);
 
 				sAttrib += ' ';
 				sAttrib += CEnString(IDS_TDLBC_RELATIVESUFFIX);

@@ -373,15 +373,15 @@ BOOL CTaskCalendarCtrl::UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks)
 
 	m_mapCustomDateAttrib.RemoveAll();
 
-	int nAttrib = pTasks->GetCustomAttributeCount();
+	int nAtt = pTasks->GetCustomAttributeCount();
 
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		if (pTasks->IsCustomAttributeEnabled(nAttrib) && 
-			((pTasks->GetCustomAttributeType(nAttrib) & TDCCA_DATAMASK) == TDCCA_DATE))
+		if (pTasks->IsCustomAttributeEnabled(nAtt) && 
+			((pTasks->GetCustomAttributeType(nAtt) & TDCCA_DATAMASK) == TDCCA_DATE))
 		{
-			CString sAttribID = pTasks->GetCustomAttributeID(nAttrib);
-			m_mapCustomDateAttrib[Misc::ToUpper(sAttribID)] = pTasks->GetCustomAttributeLabel(nAttrib);
+			CString sAttribID = pTasks->GetCustomAttributeID(nAtt);
+			m_mapCustomDateAttrib[Misc::ToUpper(sAttribID)] = pTasks->GetCustomAttributeLabel(nAtt);
 		}
 	}
 

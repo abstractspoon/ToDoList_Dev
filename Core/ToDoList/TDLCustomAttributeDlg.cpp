@@ -538,12 +538,12 @@ void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_SECONDOPISATTRIBUTE, m_bSecondOperandIsValue);
 	DDX_Text(pDX, IDC_RESULTTYPE, m_sResultType);
 
-	DDX_Operand(pDX, m_cbFirstOperand, m_calc.opFirst.nAttribID, m_calc.opFirst.sCustAttribID);
+	DDX_Operand(pDX, m_cbFirstOperand, m_calc.opFirst.nAttributeID, m_calc.opFirst.sCustAttribID);
 
 	if (m_bSecondOperandIsValue)
 		DDX_Text(pDX, IDC_SECONDOPERANDVALUE, m_calc.dSecondOperandValue);
 	else
-		DDX_Operand(pDX, m_cbSecondOperandAttrib, m_calc.opSecond.nAttribID, m_calc.opSecond.sCustAttribID);
+		DDX_Operand(pDX, m_cbSecondOperandAttrib, m_calc.opSecond.nAttributeID, m_calc.opSecond.sCustAttribID);
 
 	// Update calculation arguments
 	if (pDX->m_bSaveAndValidate)
@@ -741,7 +741,7 @@ void CCustomAttributeCalcPage::BuildFirstOperandCombo()
 	if (m_calc.IsFirstOperandCustom())
 		m_cbFirstOperand.SetSelectedAttribute(m_calc.opFirst.sCustAttribID);
 	else
-		m_cbFirstOperand.SetSelectedAttribute(m_calc.opFirst.nAttribID);
+		m_cbFirstOperand.SetSelectedAttribute(m_calc.opFirst.nAttributeID);
 }
 
 void CCustomAttributeCalcPage::BuildOperatorCombo()
@@ -753,7 +753,7 @@ void CCustomAttributeCalcPage::BuildOperatorCombo()
 	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (-)"), CEnString(IDS_CAD_CALC_SUBTRACT)), TDCCAC_SUBTRACT);
 
 	// Multiply/divide NOT supported by DATES
-	if (!IsDate(m_calc.opFirst.nAttribID))
+	if (!IsDate(m_calc.opFirst.nAttributeID))
 	{
 		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (*)"), CEnString(IDS_CAD_CALC_MULTIPLY)), TDCCAC_MULTIPLY);
 		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (/)"), CEnString(IDS_CAD_CALC_DIVIDE)), TDCCAC_DIVIDE);
@@ -798,7 +798,7 @@ void CCustomAttributeCalcPage::BuildSecondOperandCombo()
 	while (pos)
 	{
 		TDC_ATTRIBUTE nSecondAttrib = mapAttrib.GetNext(pos);
-		BOOL bDelete = (nSecondAttrib == m_calc.opFirst.nAttribID);
+		BOOL bDelete = (nSecondAttrib == m_calc.opFirst.nAttributeID);
 
 		if (!bDelete)
 		{
@@ -827,12 +827,12 @@ void CCustomAttributeCalcPage::BuildSecondOperandCombo()
 	if (m_calc.IsSecondOperandCustom())
 		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.opSecond.sCustAttribID);
 	else
-		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.opSecond.nAttribID);
+		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.opSecond.nAttributeID);
 }
 
 void CCustomAttributeCalcPage::EnableControls()
 {
-	BOOL bHasFirstOp = (m_calc.opFirst.nAttribID != TDCA_NONE);
+	BOOL bHasFirstOp = (m_calc.opFirst.nAttributeID != TDCA_NONE);
 
 	GetDlgItem(IDC_SECONDOPISATTRIBUTE)->EnableWindow(bHasFirstOp);
 	GetDlgItem(IDC_SECONDOPISVALUE)->EnableWindow(bHasFirstOp);
@@ -899,7 +899,7 @@ void CCustomAttributeCalcPage::OnChangeSecondOperandType()
 
 	if (m_bSecondOperandIsValue)
 	{
-		m_calc.opSecond.nAttribID = TDCA_NONE;
+		m_calc.opSecond.nAttributeID = TDCA_NONE;
 		m_calc.opSecond.sCustAttribID.Empty();
 	}
 
@@ -1035,9 +1035,9 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
-	for (int nAttrib = 0; nAttrib < m_aAttribDef.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aAttribDef.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAtt];
 		VERIFY (AddAttributeToListCtrl(attrib, FALSE) >= 0);
 	}
 
@@ -1115,11 +1115,11 @@ int CTDLCustomAttributeDlg::GetAttributeDefinitions(CTDCCustomAttribDefinitionAr
 void CTDLCustomAttributeDlg::OnOK()
 {
 	// check for duplicate unique IDs
-	for (int nAttrib = 0; nAttrib < m_aAttribDef.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aAttribDef.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAtt];
 
-		if (UniqueIDExists(attrib.sUniqueID, nAttrib))
+		if (UniqueIDExists(attrib.sUniqueID, nAtt))
 		{
 			CString sID(attrib.sUniqueID);
 			sID.MakeLower();

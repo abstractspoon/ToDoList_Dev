@@ -699,13 +699,13 @@ void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL 
 
 		int nNumAttrib = m_aCustomAttribDefs.GetSize(), nAdded = 0;
 		
-		for (int nAttrib = 0; ((nAttrib < nNumAttrib) && (nAdded < 16)); nAttrib++)
+		for (int nAtt = 0; ((nAtt < nNumAttrib) && (nAdded < 16)); nAtt++)
 		{
-			if (m_aCustomAttribDefs[nAttrib].bEnabled)
+			if (m_aCustomAttribDefs[nAtt].bEnabled)
 			{
-				CEnMenu::SetMenuString(*pPopupMenu, nAdded, m_aCustomAttribDefs[nAttrib].sLabel, MF_BYPOSITION);
+				CEnMenu::SetMenuString(*pPopupMenu, nAdded, m_aCustomAttribDefs[nAtt].sLabel, MF_BYPOSITION);
 
-				m_aMenuCustomAttribIDs.Add(Misc::ToLower(m_aCustomAttribDefs[nAttrib].sUniqueID));
+				m_aMenuCustomAttribIDs.Add(Misc::ToLower(m_aCustomAttribDefs[nAtt].sUniqueID));
 				nAdded++;
 			}
 		}
@@ -738,16 +738,16 @@ void CPreferencesToolPage::OnInsertUserVariable(UINT nCmdID)
 
 void CPreferencesToolPage::OnInsertCustomAttribute(UINT nCmdID)
 {
-	int nAttrib = (nCmdID - ID_TOOLARG_CUSTOMATTRIB1);
+	int nAtt = (nCmdID - ID_TOOLARG_CUSTOMATTRIB1);
 
-	if (nAttrib >= m_aMenuCustomAttribIDs.GetSize())
+	if (nAtt >= m_aMenuCustomAttribIDs.GetSize())
 	{
 		ASSERT(0);
 		return;
 	}
 
 	CString sPlaceholder;
-	sPlaceholder.Format(_T("$(seltcustom, %s)"), m_aMenuCustomAttribIDs[nAttrib]);
+	sPlaceholder.Format(_T("$(seltcustom, %s)"), m_aMenuCustomAttribIDs[nAtt]);
 
 	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
 }

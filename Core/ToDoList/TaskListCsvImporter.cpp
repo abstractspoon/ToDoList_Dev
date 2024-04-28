@@ -44,10 +44,10 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTas
 {
 	// Build custom attribute mapping
 	CMapStringToString mapCustAttrib;
-	int nAttrib = pTasks->GetCustomAttributeCount();
+	int nAtt = pTasks->GetCustomAttributeCount();
 
-	while (nAttrib--)
-		mapCustAttrib[pTasks->GetCustomAttributeID(nAttrib)] = pTasks->GetCustomAttributeLabel(nAttrib);
+	while (nAtt--)
+		mapCustAttrib[pTasks->GetCustomAttributeID(nAtt)] = pTasks->GetCustomAttributeLabel(nAtt);
 
 	// Show mapping dialog
 	CTDLCsvImportExportDlg dialog(szSrcFilePath, mapCustAttrib, pPrefs, szKey);
@@ -277,11 +277,11 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 
 void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) const
 {
-	int nAttrib = m_aColumnMapping.GetSize();
+	int nAtt = m_aColumnMapping.GetSize();
 	
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAtt];
 		CString sCustID, sCustLabel;
 
 		if (GetCustomAttribIDAndLabel(col, sCustID, sCustLabel))
@@ -305,18 +305,18 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) 
 
 void CTaskListCsvImporter::AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringArray& aValues) const
 {
-	int nAttrib = min(aValues.GetSize(), m_aColumnMapping.GetSize());
+	int nAtt = min(aValues.GetSize(), m_aColumnMapping.GetSize());
 	
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAtt];
 		CString sCustID, sDummy;
 		
 		if (GetCustomAttribIDAndLabel(col, sCustID, sDummy))
 		{
 			// The CSV exporter formats multiple items with '+'
 			// so we need to decode this and recode with '\n'
-			const CString& sValue = GetValue(aValues, nAttrib);
+			const CString& sValue = GetValue(aValues, nAtt);
 
 			if (sValue.Find('+') != -1)
 			{

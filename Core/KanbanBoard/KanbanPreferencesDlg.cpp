@@ -175,8 +175,8 @@ void CKanbanPreferencesPage::OnOK()
 	{
 		if (m_lbDisplayAttrib.GetCheck(nItem) != 0)
 		{
-			TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)m_lbDisplayAttrib.GetItemData(nItem);
-			m_aDisplayAttrib.Add(nAttrib);
+			TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)m_lbDisplayAttrib.GetItemData(nItem);
+			m_aDisplayAttrib.Add(nAttribID);
 		}
 	}
 }
@@ -289,10 +289,10 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
 		CString sEntry = Misc::MakeKey(_T("DisplayAttrib%d"), nAtt);
-		TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, TDCA_NONE);
+		TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, sEntry, TDCA_NONE);
 
-		if (nAttrib != TDCA_NONE)
-			m_aDisplayAttrib.Add(nAttrib);
+		if (nAttribID != TDCA_NONE)
+			m_aDisplayAttrib.Add(nAttribID);
 	}	
 
 	// Backwards compatibility

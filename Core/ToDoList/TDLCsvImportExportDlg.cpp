@@ -299,7 +299,7 @@ void CTDLCsvImportExportDlg::BuildDefaultMasterColumnMapping()
 
 	for (int nCol = 0; nCol < ATTRIB_COUNT; nCol++)
 	{
-		TDC_ATTRIBUTE attrib = ATTRIBUTES[nCol].nAttribID;
+		TDC_ATTRIBUTE attrib = ATTRIBUTES[nCol].nAttributeID;
 		CEnString sName(ATTRIBUTES[nCol].nAttribResID);
 
 		m_aMasterColumnMapping.Add(TDCATTRIBUTEMAPPING(sName, attrib));
@@ -363,9 +363,9 @@ int CTDLCsvImportExportDlg::BuildExportColumnMapping(CTDCAttributeMapping& aExpo
 	ASSERT (!m_bImporting);
 
 	// build column mapping from passed in attributes
-	for (int nAttrib = 0; nAttrib < m_aExportAttributes.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aExportAttributes.GetSize(); nAtt++)
 	{
-		TDC_ATTRIBUTE attrib = m_aExportAttributes[nAttrib];
+		TDC_ATTRIBUTE attrib = m_aExportAttributes[nAtt];
 		ASSERT(attrib != TDCA_NONE);
 
 		// try to map text column names to column IDs
@@ -587,13 +587,13 @@ void CTDLCsvImportExportDlg::OnExportTaskIds()
 		// Find if these attributes were originally present
 		BOOL bWantTaskID = FALSE, bWantParentID = FALSE;
 
-		for (int nAttrib = 0; nAttrib < m_aExportAttributes.GetSize(); nAttrib++)
+		for (int nAtt = 0; nAtt < m_aExportAttributes.GetSize(); nAtt++)
 		{
 			if (!bWantTaskID)
-				bWantTaskID = (m_aExportAttributes[nAttrib] == TDCA_ID);
+				bWantTaskID = (m_aExportAttributes[nAtt] == TDCA_ID);
 
 			if (!bWantParentID)
-				bWantParentID = (m_aExportAttributes[nAttrib] == TDCA_PARENTID);
+				bWantParentID = (m_aExportAttributes[nAtt] == TDCA_PARENTID);
 		}
 
 		// if attribute was not present in original attributes then remove

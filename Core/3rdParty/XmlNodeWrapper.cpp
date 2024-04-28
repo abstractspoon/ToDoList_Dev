@@ -1092,9 +1092,9 @@ int CXmlNodeWrapper::GetAttributes(CStringArray& aNames, CStringArray& aValues)
 		{
 			int nNumAttrib = attribs->Getlength();
 
-			for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+			for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 			{
-				MSXML2::IXMLDOMAttributePtr attrib = attribs->Getitem(nAttrib);
+				MSXML2::IXMLDOMAttributePtr attrib = attribs->Getitem(nAtt);
 
 				if (attrib)
 				{

@@ -923,9 +923,9 @@ BOOL CTDLTaskCtrlBase::IsVisible() const
 
 void CTDLTaskCtrlBase::OnCustomAttributesChange()
 {
-	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
 		
 		int nItem = GetColumnIndex(attribDef.GetColumnID());
 		ASSERT(nItem != -1);
@@ -4929,9 +4929,9 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 				AccumulateRecalcColumn(TDCC_TIMEESTIMATE, aColIDs);
 				AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
 
-				for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+				for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
 				{
-					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
 
 					if (attribDef.IsAggregated())
 						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);

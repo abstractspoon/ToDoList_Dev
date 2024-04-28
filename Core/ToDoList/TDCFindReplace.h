@@ -44,7 +44,7 @@ public:
 
 	CString GetSearchFor() const { return strFind; }
 	CString GetReplaceWith() const { return strReplace; }
-	TDC_ATTRIBUTE GetAttribute() const { return m_nAttribID; }
+	TDC_ATTRIBUTE GetAttribute() const { return m_nAttributeID; }
 
 	BOOL WantCaseSensitive() const { return bCaseSensitive; }
 	BOOL WantWholeWord() const { return bWholeWord; }
@@ -54,7 +54,7 @@ protected:
 	const CToDoCtrl& m_tdc;
 
 	BOOL m_bReplacing;
-	TDC_ATTRIBUTE m_nAttribID;
+	TDC_ATTRIBUTE m_nAttributeID;
 
 	// Implementation
 protected:

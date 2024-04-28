@@ -44,7 +44,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
-	m_nTrackedAttrib(TDCA_NONE),
+	m_nTrackedAttribID(TDCA_NONE),
 	m_nGroupByAttrib(TDCA_NONE),
 	m_ctrlKanban(),
 	m_dlgPrefs(this)
@@ -65,7 +65,7 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
 	DDX_Control(pDX, IDC_GROUPBY, m_cbGroupBy);
 
-	m_cbAttributes.DDX(pDX, m_nTrackedAttrib, m_sTrackedCustomAttribID);
+	m_cbAttributes.DDX(pDX, m_nTrackedAttribID, m_sTrackedCustomAttribID);
 	m_cbGroupBy.DDX(pDX, m_nGroupByAttrib, m_sGroupByCustomAttribID);
 }
 
@@ -220,14 +220,14 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	CString sKey(szKey);
 
 	// Last 'Tracked' attribute
-	if (KBUtils::IsCustomAttribute(m_nTrackedAttrib))
+	if (KBUtils::IsCustomAttribute(m_nTrackedAttribID))
 	{
 		pPrefs->WriteProfileInt(szKey, _T("LastTrackedAttribute"), TDCA_CUSTOMATTRIB);
 		pPrefs->WriteProfileString(sKey, _T("CustomAttrib"), m_sTrackedCustomAttribID);
 	}
 	else
 	{
-		pPrefs->WriteProfileInt(szKey, _T("LastTrackedAttribute"), m_nTrackedAttrib);
+		pPrefs->WriteProfileInt(szKey, _T("LastTrackedAttribute"), m_nTrackedAttribID);
 		pPrefs->DeleteProfileEntry(sKey, _T("CustomAttrib"));
 	}
 
@@ -357,26 +357,26 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
 		// Last 'Tracked' attribute
-		m_nTrackedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), TDCA_STATUS);
+		m_nTrackedAttribID = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("LastTrackedAttribute"), TDCA_STATUS);
 
 		// TDCA_FIXEDCOLUMNS is not a real enum value and the compiler 
 		// will issue a warning if it's used in a switch statement
-		if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
+		if (m_nTrackedAttribID == TDCA_FIXEDCOLUMNS)
 		{
 			if (!m_dlgPrefs.HasFixedColumns())
-				m_nTrackedAttrib = TDCA_STATUS;
+				m_nTrackedAttribID = TDCA_STATUS;
 		}
 		else
 		{
-			switch (m_nTrackedAttrib)
+			switch (m_nTrackedAttribID)
 			{
 				// backwards compatibility
 			case TDCA_NONE:
 				{
 					if (m_dlgPrefs.HasFixedColumns())
-						m_nTrackedAttrib = TDCA_FIXEDCOLUMNS;
+						m_nTrackedAttribID = TDCA_FIXEDCOLUMNS;
 					else
-						m_nTrackedAttrib = TDCA_STATUS;
+						m_nTrackedAttribID = TDCA_STATUS;
 				}
 				break;
 
@@ -386,14 +386,14 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 
 					// fallback
 					if (m_sTrackedCustomAttribID.IsEmpty())
-						m_nTrackedAttrib = TDCA_STATUS;
+						m_nTrackedAttribID = TDCA_STATUS;
 				}
 				break;
 
 			default:
 				{
-					if (!KBUtils::IsTrackableAttribute(m_nTrackedAttrib))
-						m_nTrackedAttrib = TDCA_STATUS;
+					if (!KBUtils::IsTrackableAttribute(m_nTrackedAttribID))
+						m_nTrackedAttribID = TDCA_STATUS;
 				}
 				break;
 			}
@@ -412,8 +412,8 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 		
-		if (KBUtils::IsTrackableAttribute(m_nTrackedAttrib)) // Excludes custom attributes
-			m_cbGroupBy.ExcludeAttribute(m_nTrackedAttrib);
+		if (KBUtils::IsTrackableAttribute(m_nTrackedAttribID)) // Excludes custom attributes
+			m_cbGroupBy.ExcludeAttribute(m_nTrackedAttribID);
 
 		UpdateData(FALSE);
 		UpdateKanbanCtrlPreferences(FALSE);
@@ -584,12 +584,12 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	m_dlgPrefs.SetCustomAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
 
 	m_cbAttributes.SetAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
-	m_cbAttributes.SetSelectedAttribute(m_nTrackedAttrib, m_sTrackedCustomAttribID);
+	m_cbAttributes.SetSelectedAttribute(m_nTrackedAttribID, m_sTrackedCustomAttribID);
 
 	m_cbGroupBy.SetAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
 	m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttrib, m_sGroupByCustomAttribID);
 
-	if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
+	if (m_nTrackedAttribID == TDCA_FIXEDCOLUMNS)
 	{
 		CString sCustomID;
 		TDC_ATTRIBUTE nTrackAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustomID);
@@ -602,16 +602,16 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	}
 	else
 	{
-		m_cbGroupBy.ExcludeAttribute(m_nTrackedAttrib);
+		m_cbGroupBy.ExcludeAttribute(m_nTrackedAttribID);
 	}
 
 	// Validate any change in selection
 	UpdateData();
 	RefreshGrouping();
 
-	if (m_nTrackedAttrib == TDCA_NONE)
+	if (m_nTrackedAttribID == TDCA_NONE)
 	{
-		m_nTrackedAttrib = TDCA_STATUS;
+		m_nTrackedAttribID = TDCA_STATUS;
 		UpdateData(FALSE);
 	}
 }
@@ -836,14 +836,14 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	// but has now deleted them then we revert to 'status'
 	if (bFixedColumnsToggled)
 	{
-		if ((m_nTrackedAttrib == TDCA_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
+		if ((m_nTrackedAttribID == TDCA_FIXEDCOLUMNS) && !m_dlgPrefs.HasFixedColumns())
 		{
-			m_nTrackedAttrib = TDCA_STATUS;
+			m_nTrackedAttribID = TDCA_STATUS;
 			UpdateData(FALSE);
 		}
-		else if ((m_nTrackedAttrib != TDCA_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
+		else if ((m_nTrackedAttribID != TDCA_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
 		{
-			m_nTrackedAttrib = (TDC_ATTRIBUTE)TDCA_FIXEDCOLUMNS;
+			m_nTrackedAttribID = (TDC_ATTRIBUTE)TDCA_FIXEDCOLUMNS;
 			m_sTrackedCustomAttribID.Empty();
 			UpdateData(FALSE);
 		}
@@ -858,7 +858,7 @@ void CKanbanWnd::RefreshKanbanCtrlDisplayAttributes()
 {
 	CKanbanAttributeArray aAttrib;
 
-	m_dlgPrefs.GetDisplayAttributes(aAttrib, m_nTrackedAttrib);
+	m_dlgPrefs.GetDisplayAttributes(aAttrib, m_nTrackedAttribID);
 	m_ctrlKanban.SetDisplayAttributes(aAttrib);
 }
 
@@ -867,15 +867,15 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 	ASSERT(wp && lp);
 	
 	CString sCustAttribID;
-	TDC_ATTRIBUTE nAttrib = TDCA_NONE;
+	TDC_ATTRIBUTE nAttribID = TDCA_NONE;
 	
-	if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
+	if (m_nTrackedAttribID == TDCA_FIXEDCOLUMNS)
 	{
-		nAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustAttribID);
+		nAttribID = m_dlgPrefs.GetFixedAttributeToTrack(sCustAttribID);
 	}
 	else
 	{
-		nAttrib = m_nTrackedAttrib;
+		nAttribID = m_nTrackedAttribID;
 		sCustAttribID = m_sTrackedCustomAttribID;
 	}
 
@@ -891,13 +891,13 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 	{
 		IUITASKMOD& mod = aMods[nMod];
 
-		mod.nAttrib = nAttrib;
+		mod.nAttributeID = nAttribID;
 		mod.dwSelectedTaskID = pTaskIDs[nMod];
 
 		CStringArray aTaskValues;
 		int nNumVal = m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
 
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
@@ -915,7 +915,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 			break;
 
 		default:
-			if (KBUtils::IsCustomAttribute(nAttrib))
+			if (KBUtils::IsCustomAttribute(nAttribID))
 			{
 				ASSERT(!sCustAttribID.IsEmpty());
 
@@ -1038,12 +1038,12 @@ void CKanbanWnd::OnSelchangeGroupBy()
 
 void CKanbanWnd::ProcessTrackedAttributeChange() 
 {
-	TDC_ATTRIBUTE nTrackAttrib = m_nTrackedAttrib;
+	TDC_ATTRIBUTE nTrackAttrib = m_nTrackedAttribID;
 	CString sCustomAttrib = m_sTrackedCustomAttribID;
 
 	CKanbanColumnArray aColDefs;
 
-	if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
+	if (m_nTrackedAttribID == TDCA_FIXEDCOLUMNS)
 	{
 		VERIFY(m_dlgPrefs.GetFixedColumnDefinitions(aColDefs));
 

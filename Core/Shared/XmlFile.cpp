@@ -1270,10 +1270,10 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 	
 	int nNumAttrib = pNode->GetAttributes(aNames, aValues);
 	
-	for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
-		const CString& sName = aNames[nAttrib];
-		const CString& sVal = aValues[nAttrib];
+		const CString& sName = aNames[nAtt];
+		const CString& sVal = aValues[nAtt];
 		
 		xi.AddItem(sName, sVal);
 		

@@ -505,9 +505,9 @@ CString CGanttCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	return Misc::FormatArray(aAllocTo);
 }
 
-BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_COLOR:
@@ -526,12 +526,12 @@ BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	}
 	
 	// all else 
-	return (nAttrib == IUI_ALL);
+	return (nAttribID == IUI_ALL);
 }
 
-BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_DUEDATE:
@@ -542,7 +542,7 @@ BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
 	case TDCA_TAGS:
 	case TDCA_DONEDATE:
 	case TDCA_DEPENDENCY:
-		return (MapAttributeToColumn(nAttrib) != GTLCC_NONE);
+		return (MapAttributeToColumn(nAttribID) != GTLCC_NONE);
 
 	case TDCA_NONE:
 		return TRUE;
@@ -571,9 +571,9 @@ TDC_ATTRIBUTE CGanttCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 	return TDCA_NONE;
 }
 
-GTLC_COLUMN CGanttCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
+GTLC_COLUMN CGanttCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:		return GTLCC_TITLE;		
 	case TDCA_DUEDATE:		return GTLCC_DUEDATE;		

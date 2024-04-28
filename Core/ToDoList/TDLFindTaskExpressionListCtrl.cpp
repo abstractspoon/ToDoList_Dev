@@ -909,12 +909,12 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
-				int nAttrib = m_aAttribDefs.Find(nAttribID);
-				ASSERT(nAttrib != -1);
+				int nAtt = m_aAttribDefs.Find(nAttribID);
+				ASSERT(nAtt != -1);
 
-				if (nAttrib != -1)
+				if (nAtt != -1)
 				{
-					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAtt];
 					ASSERT(attribDef.IsList());
 
 					if (attribDef.IsList())
