@@ -274,9 +274,9 @@ public:
 	LPCTSTR GetFileName(bool bFullPath) const;
 
 	bool IsTaskRecurring(HTASKITEM hTask) const;
-	bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const;
-	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const;
-	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const;
+	bool IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const;
+	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const;
+	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const;
 
 	bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate);
 	double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const;
@@ -623,7 +623,7 @@ protected:
 	static BOOL SetMetaData(CXmlItem* pXItem, const CMapStringToString& mapMetaData);
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
 	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
-	static LPCTSTR GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay);
+	static LPCTSTR GetAttribTag(TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay);
 	static BOOL WantMergeCustomAttribute(LPCTSTR szAttribID, TDCCADATA dataSrc, TODOITEM& tdiDest, DWORD dwFlags);
 };
 

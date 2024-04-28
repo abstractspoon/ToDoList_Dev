@@ -1465,11 +1465,11 @@ BOOL CToDoCtrlData::GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const
 	return TRUE;
 }
 
-TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bAndChildren)
+TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, BOOL bAndChildren)
 {
 	TDC_SET nRes = SET_NOCHANGE;
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:		
 		nRes = SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
@@ -1616,7 +1616,7 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		{
 			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 			
-			if (ClearTaskAttribute(dwSubtaskID, nAttrib, TRUE) == SET_CHANGE)
+			if (ClearTaskAttribute(dwSubtaskID, nAttribID, TRUE) == SET_CHANGE)
 				nRes = SET_CHANGE;
 		}
 	}
@@ -1645,67 +1645,67 @@ TDC_SET CToDoCtrlData::ClearTaskCustomAttribute(DWORD dwTaskID, const CString& s
 	return nRes;
 }
 
-BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttribID)
 {
 	// special case: 
-	if (nAttrib == TDCA_ALL)
+	if (nAttribID == TDCA_ALL)
 	{
 		POSITION pos = m_mapParentAttribs.GetStartPosition();
 
 		while (pos)
 		{
 			// FALSE means do not apply if parent is blank
-			TDC_ATTRIBUTE nAttrib = m_mapParentAttribs.GetNext(pos);
+			nAttribID = m_mapParentAttribs.GetNext(pos);
 			
-			if (!ApplyLastChangeToSubtasks(dwParentID, nAttrib, FALSE))
+			if (!ApplyLastChangeToSubtasks(dwParentID, nAttribID, FALSE))
 				return FALSE;
 		}
 	}
-	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib) &&
+	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) &&
 			WantUpdateInheritedAttibute(TDCA_CUSTOMATTRIB))
 	{
-		return ApplyLastChangeToSubtasks(dwParentID, nAttrib);
+		return ApplyLastChangeToSubtasks(dwParentID, nAttribID);
 	}
-	else if (WantUpdateInheritedAttibute(nAttrib))
+	else if (WantUpdateInheritedAttibute(nAttribID))
 	{
-		return ApplyLastChangeToSubtasks(dwParentID, nAttrib);
+		return ApplyLastChangeToSubtasks(dwParentID, nAttribID);
 	}
 
 	return TRUE; // not an error
 }
 
-BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTRIBUTE nAttribID)
 {
 	// Exclude references and undo/redo operations
 	if (m_bUndoRedoing || IsTaskReference(dwChildID))
 		return TRUE; // not an error
 
 	// special case: 
-	if (nAttrib == TDCA_ALL)
+	if (nAttribID == TDCA_ALL)
 	{
 		POSITION pos = m_mapParentAttribs.GetStartPosition();
 
 		while (pos)
 		{
-			nAttrib = m_mapParentAttribs.GetNext(pos);
+			nAttribID = m_mapParentAttribs.GetNext(pos);
 
-			if (nAttrib == TDCA_CUSTOMATTRIB)
+			if (nAttribID == TDCA_CUSTOMATTRIB)
 			{
 				for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
 				{
-					nAttrib = m_aCustomAttribDefs[nCust].GetAttributeID();
+					nAttribID = m_aCustomAttribDefs[nCust].GetAttributeID();
 
-					if (!ApplyLastInheritedChangeFromParent(dwChildID, nAttrib)) // RECURSIVE CALL
+					if (!ApplyLastInheritedChangeFromParent(dwChildID, nAttribID)) // RECURSIVE CALL
 						return FALSE;
 				}
 			}
-			else if (!ApplyLastInheritedChangeFromParent(dwChildID, nAttrib)) // RECURSIVE CALL
+			else if (!ApplyLastInheritedChangeFromParent(dwChildID, nAttribID)) // RECURSIVE CALL
 			{
 				return FALSE;
 			}
 		}
 	}
-	else if (WantUpdateInheritedAttibute(nAttrib))
+	else if (WantUpdateInheritedAttibute(nAttribID))
 	{
 		const TODOSTRUCTURE* pTDS = LocateTask(dwChildID);
 		ASSERT(pTDS);
@@ -1726,7 +1726,7 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTR
 			int nPos = GetTaskPosition(pTDS);
 			ASSERT((nPos != -1) && (pTDSParent->GetSubTaskID(nPos) == dwChildID));
 
-			if (!ApplyLastChangeToSubtask(pTDIParent, pTDSParent, nPos, nAttrib, FALSE))
+			if (!ApplyLastChangeToSubtask(pTDIParent, pTDSParent, nPos, nAttribID, FALSE))
 				return FALSE;
 		}
 	}
@@ -1734,16 +1734,16 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTR
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::CheckApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
+BOOL CToDoCtrlData::CheckApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank)
 {
-	if (!WantUpdateInheritedAttibute(nAttrib))
+	if (!WantUpdateInheritedAttibute(nAttribID))
 		return FALSE;
 
 	// else
-	return ApplyLastChangeToSubtasks(dwParentID, nAttrib, bIncludeBlank);
+	return ApplyLastChangeToSubtasks(dwParentID, nAttribID, bIncludeBlank);
 }
 
-BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
+BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank)
 {
 	// Exclude references
 	if (dwParentID && !IsTaskReference(dwParentID))
@@ -1752,7 +1752,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nA
 		const TODOSTRUCTURE* pTDS = NULL;
 
 		if (GetTask(dwParentID, pTDI, pTDS))
-			return ApplyLastChangeToSubtasks(pTDI, pTDS, nAttrib, bIncludeBlank);
+			return ApplyLastChangeToSubtasks(pTDI, pTDS, nAttribID, bIncludeBlank);
 		else
 			ASSERT(0);
 	}
@@ -1762,7 +1762,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nA
 }
 
 BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDS, 
-											  TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
+											  TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank)
 {
 	ASSERT(m_undo.IsActive());
 
@@ -1775,7 +1775,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const 
 	
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
-		if (!ApplyLastChangeToSubtask(pTDIParent, pTDS, nSubTask, nAttrib, bIncludeBlank))
+		if (!ApplyLastChangeToSubtask(pTDIParent, pTDS, nSubTask, nAttribID, bIncludeBlank))
 			return FALSE;
 	}
 	
@@ -2878,9 +2878,9 @@ BOOL CToDoCtrlData::ResetRecurringSubtaskOccurrences(DWORD dwTaskID)
 	return TRUE;
 }
 
-TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend)
+TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_CATEGORY:		return SetTaskCategories(dwTaskID, aItems, bAppend);
 	case TDCA_TAGS:			return SetTaskTags(dwTaskID, aItems, bAppend);
@@ -2894,9 +2894,9 @@ TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const
 	return SET_FAILED;
 }
 
-int CToDoCtrlData::GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const
+int CToDoCtrlData::GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, CStringArray& aItems) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_CATEGORY:		return GetTaskCategories(dwTaskID, aItems);
 	case TDCA_TAGS:			return GetTaskTags(dwTaskID, aItems);
@@ -3058,28 +3058,28 @@ TDC_SET CToDoCtrlData::SetTaskExternalID(DWORD dwTaskID, const CString& sID)
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_EXTERNALID, pTDI->sExternalID, sID);
 }
 
-BOOL CToDoCtrlData::SaveEditUndo(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib)
+BOOL CToDoCtrlData::SaveEditUndo(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttribID)
 {
 	if (m_undo.IsActive())										
-		return m_undo.SaveElement(TDCUEO_EDIT, dwTaskID, 0, 0, (WORD)nAttrib, pTDI);
+		return m_undo.SaveElement(TDCUEO_EDIT, dwTaskID, 0, 0, (WORD)nAttribID, pTDI);
 
 	// else
 	return FALSE;
 }
 
-TDC_SET CToDoCtrlData::EditTaskArrayAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, CStringArray& aValues, 
+TDC_SET CToDoCtrlData::EditTaskArrayAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttribID, CStringArray& aValues, 
 										 	const CStringArray& aNewValues, BOOL bAppend, BOOL bOrderSensitive)
 {
 	ASSERT(dwTaskID);
 	ASSERT(pTDI);
-	ASSERT(nAttrib != TDCA_NONE);
+	ASSERT(nAttribID != TDCA_NONE);
 	
 	// test for actual change
 	if (Misc::MatchAll(aValues, aNewValues, bOrderSensitive))
 		return SET_NOCHANGE;
 	
 	// save undo data
-	SaveEditUndo(dwTaskID, pTDI, nAttrib);
+	SaveEditUndo(dwTaskID, pTDI, nAttribID);
 	
 	// make the change
 	if (bAppend)
@@ -3090,31 +3090,31 @@ TDC_SET CToDoCtrlData::EditTaskArrayAttribute(DWORD dwTaskID, TODOITEM* pTDI, TD
 	pTDI->SetModified();
 				
 	// Update subtasks
-	ApplyLastInheritedChangeToSubtasks(dwTaskID, nAttrib);
+	ApplyLastInheritedChangeToSubtasks(dwTaskID, nAttribID);
 	
 	return SET_CHANGE;
 }
 
-TDC_SET CToDoCtrlData::EditTaskTimeAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, 
+TDC_SET CToDoCtrlData::EditTaskTimeAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttribID, 
 											 TDCTIMEPERIOD& time, const TDCTIMEPERIOD& newTime)
 {
 	ASSERT(dwTaskID);
 	ASSERT(pTDI);
-	ASSERT((nAttrib == TDCA_TIMEESTIMATE) || (nAttrib == TDCA_TIMESPENT));
+	ASSERT((nAttribID == TDCA_TIMEESTIMATE) || (nAttribID == TDCA_TIMESPENT));
 	
 	// test for actual change
 	if (time == newTime)
 		return SET_NOCHANGE;
 	
 	// save undo data
-	SaveEditUndo(dwTaskID, pTDI, nAttrib);
+	SaveEditUndo(dwTaskID, pTDI, nAttribID);
 	
 	// make the change
 	time = newTime;
 	pTDI->SetModified();
 				
 	// Update subtasks
-	ApplyLastInheritedChangeToSubtasks(dwTaskID, nAttrib);
+	ApplyLastInheritedChangeToSubtasks(dwTaskID, nAttribID);
 	
 	return SET_CHANGE;
 }
@@ -4198,7 +4198,29 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
-BOOL CToDoCtrlData::GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
+TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID)
+{
+	TDCCADATA data;
+
+	if (!GetTaskAttributeValues(dwTaskID, nFromAttribID, data))
+		return SET_FAILED;
+
+	// else
+	return SetTaskAttributeValues(dwTaskID, nToAttribID, data);
+}
+
+TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttribID, const CString& sToCustomAttribID)
+{
+	TDCCADATA data;
+
+	if (!GetTaskAttributeValues(dwTaskID, nFromAttribID, data))
+		return SET_FAILED;
+
+	// else
+	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
+}
+
+BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
@@ -4340,7 +4362,7 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(const CString& sAttribID, const
 	return nRes;
 }
 
-TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
+TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwTaskID = 0;
@@ -4351,12 +4373,12 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CS
 	{
 		m_items.GetNext(pos, dwTaskID, pTDI);
 
-		if (TaskHasAttributeValue(*pTDI, nAttrib, sFrom, bCaseSensitive, bWholeWord))
+		if (TaskHasAttributeValue(*pTDI, nAttribID, sFrom, bCaseSensitive, bWholeWord))
 		{
 			// save undo data
-			SaveEditUndo(dwTaskID, pTDI, nAttrib);
+			SaveEditUndo(dwTaskID, pTDI, nAttribID);
 
-			switch (nAttrib)
+			switch (nAttribID)
 			{
 			case TDCA_VERSION:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->sVersion, bCaseSensitive, bWholeWord));
 			case TDCA_ALLOCBY:		VERIFY(Misc::Replace(sFrom, sTo, pTDI->sAllocBy, bCaseSensitive, bWholeWord));
@@ -4376,9 +4398,9 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CS
 	return nRes;
 }
 
-BOOL CToDoCtrlData::TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL CToDoCtrlData::TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_VERSION:		return (Misc::Find(sText, tdi.sVersion, bCaseSensitive, bWholeWord) != -1);
 	case TDCA_ALLOCBY:		return (Misc::Find(sText, tdi.sAllocBy, bCaseSensitive, bWholeWord) != -1);

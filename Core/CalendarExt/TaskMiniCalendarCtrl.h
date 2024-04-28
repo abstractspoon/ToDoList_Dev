@@ -27,7 +27,7 @@ public:
 	CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData);
 	virtual ~CTaskMiniCalendarCtrl();
 
-	void EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib);
+	void EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttribID);
 	void DisableHeatMap();
 
 	void SetOptions(DWORD dwOptions);

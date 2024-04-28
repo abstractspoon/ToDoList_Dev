@@ -468,7 +468,7 @@ CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, c
 
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttribID;
+		TDC_ATTRIBUTE nAttribID = TDCA_NONE;
 		CString sWhatMatched, sFormatted;
 
 		result.mapMatched.GetNextAssoc(pos, nAttribID, sWhatMatched);

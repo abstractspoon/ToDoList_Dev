@@ -971,11 +971,11 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib, DWORD dwOptions)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions)
 {
 	m_mapHeat.RemoveAll();
 
-	if ((nAttrib == TDCA_NONE) || (mapData.GetCount() == 0))
+	if ((nAttribID == TDCA_NONE) || (mapData.GetCount() == 0))
 		return FALSE;
 
 	POSITION pos = mapData.GetStartPosition();
@@ -989,7 +989,7 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib
 		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
 			continue;
 
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_DONEDATE:
 			if (pTCI->IsDone(FALSE))

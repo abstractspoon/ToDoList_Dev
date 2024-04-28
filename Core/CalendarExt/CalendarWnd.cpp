@@ -761,17 +761,17 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 			{
 			case TCCHT_BEGIN:
 				if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-					mod.nAttrib = TDCA_STARTDATE;
+					mod.nAttributeID = TDCA_STARTDATE;
 				break;
 
 			case TCCHT_MIDDLE:
 				if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-					mod.nAttrib = TDCA_OFFSETTASK;
+					mod.nAttributeID = TDCA_OFFSETTASK;
 				break;
 
 			case TCCHT_END:
 				if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
-					mod.nAttrib = TDCA_DUEDATE;
+					mod.nAttributeID = TDCA_DUEDATE;
 				break;
 			}
 		}
@@ -784,7 +784,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		ASSERT(!bHasDate || (notify->nHit == TCCHT_MIDDLE));
 
 		mod.szCustomAttribID = notify->sCustAttribID;
-		mod.nAttrib = TDCA_CUSTOMATTRIB;
+		mod.nAttributeID = TDCA_CUSTOMATTRIB;
 
 		if (bHasDate)		
 			sCustAttribValue = CDateHelper::FormatDate(date, DHFD_TIME);
@@ -792,7 +792,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		mod.szValue = sCustAttribValue;
 	}
 
-	if (mod.nAttrib != TDCA_NONE)
+	if (mod.nAttributeID != TDCA_NONE)
 	{
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{

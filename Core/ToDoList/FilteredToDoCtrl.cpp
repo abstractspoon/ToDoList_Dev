@@ -950,10 +950,10 @@ BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, c
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const
+BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs) const
 {
 	// sanity checks
-	if ((nAttrib == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
+	if ((nAttribID == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
 		return FALSE;
 
 	if (!m_filter.HasAnyFilter())
@@ -961,12 +961,12 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArra
 
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
-	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nAttrib, m_aCustomAttribDefs);
+	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nAttribID, m_aCustomAttribDefs);
 
 	if (!bNeedRefilter)
 	{
 		// 'Other' attributes
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_NEWTASK: // handled in CreateNewTask
 		case TDCA_DELETE:
@@ -994,7 +994,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArra
 			if (m_taskTree.GetItem(dwModTaskID) == NULL)
 			{
 				ASSERT(HasTask(dwModTaskID));
-				ASSERT(nAttrib == TDCA_TIMESPENT);
+				ASSERT(nAttribID == TDCA_TIMESPENT);
 
 				return FALSE;
 			}
@@ -1017,7 +1017,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArra
 		if (bNeedRefilter && HasAdvancedFilter())
 		{
 			// don't refilter on Time Spent if time tracking
-			bNeedRefilter = !(nAttrib == TDCA_TIMESPENT && IsActivelyTimeTracking());
+			bNeedRefilter = !(nAttribID == TDCA_TIMESPENT && IsActivelyTimeTracking());
 		}
 	}
 

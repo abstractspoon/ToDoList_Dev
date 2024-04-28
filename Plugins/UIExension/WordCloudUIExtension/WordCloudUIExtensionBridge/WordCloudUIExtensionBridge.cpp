@@ -161,9 +161,9 @@ void CWordCloudUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CWordCloudUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

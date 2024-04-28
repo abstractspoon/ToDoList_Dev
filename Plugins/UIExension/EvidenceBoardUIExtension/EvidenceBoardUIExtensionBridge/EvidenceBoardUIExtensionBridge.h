@@ -59,7 +59,7 @@ public:
    bool SupportsTaskSelection() const { return false; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-   bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
+   bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);

@@ -176,9 +176,9 @@ namespace TDC
 		return 0;
 	}
 
-	static TDC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttrib) 
+	static TDC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttribID) 
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_ALLOCBY:			return TDCC_ALLOCBY;
 		case TDCA_ALLOCTO:			return TDCC_ALLOCTO;
@@ -226,22 +226,22 @@ namespace TDC
 		}
 		
 		// handle custom columns
-		if (nAttrib >= TDCA_CUSTOMATTRIB_FIRST && nAttrib <= TDCA_CUSTOMATTRIB_LAST)
+		if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
 		{
-			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttrib - TDCA_CUSTOMATTRIB_FIRST));
+			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttribID - TDCA_CUSTOMATTRIB_FIRST));
 		}
 		
 		// all else
 		return TDCC_NONE;
 	}
 
-	static UINT MapAttributeToCtrlID(TDC_ATTRIBUTE nAttrib) 
+	static UINT MapAttributeToCtrlID(TDC_ATTRIBUTE nAttribID) 
 	{
 		// custom columns not supported for now
 		// We could have used CTDCCustomAttributeHelper but that's an unwanted dependency
-		ASSERT(nAttrib < TDCA_CUSTOMATTRIB_FIRST || nAttrib > TDCA_CUSTOMATTRIB_LAST);
+		ASSERT((nAttribID < TDCA_CUSTOMATTRIB_FIRST) || (nAttribID > TDCA_CUSTOMATTRIB_LAST));
 		
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 //		case TDCA_ALLOCBY:			return IDC_ALLOCBY;
 // 		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
@@ -496,9 +496,9 @@ namespace TDC
 	}
 	
 
-	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttrib)
+	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_CREATIONDATE:	return TDCD_CREATE;
 		case TDCA_LASTMODDATE:	return TDCD_LASTMOD;
@@ -541,9 +541,9 @@ namespace TDC
 		return TDCD_NONE;
 	}
 
-	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttrib)
+	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION: // == move
 		case TDCA_POSITION_SAMEPARENT:
@@ -596,7 +596,7 @@ namespace TDC
 			return IUI_EDIT;
 
 		default: // handle custom attrib
-			if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib < TDCA_CUSTOMATTRIB_LAST))
+			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID < TDCA_CUSTOMATTRIB_LAST))
 				return IUI_EDIT;
 		}
 
@@ -634,39 +634,14 @@ namespace TDC
 
 	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
 	{
-		multiSort.nAttrib1 = MapColumnToAttribute(pSortCols[0].nBy);
+		multiSort.nAttributeID1 = MapColumnToAttribute(pSortCols[0].nBy);
 		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
 
-		multiSort.nAttrib2 = MapColumnToAttribute(pSortCols[1].nBy);
+		multiSort.nAttributeID2 = MapColumnToAttribute(pSortCols[1].nBy);
 		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
 
-		multiSort.nAttrib3 = MapColumnToAttribute(pSortCols[2].nBy);
+		multiSort.nAttributeID3 = MapColumnToAttribute(pSortCols[2].nBy);
 		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
-	}
-
-	static TDC_ATTRIBUTE MapDeprecatedAttribute(TDC_ATTRIBUTE nAttribID)
-	{
-		switch (nAttribID)
-		{
-			case TDCA_DONEDATE_RELATIVE_DEP:		return TDCA_DONEDATE;
-			case TDCA_DUEDATE_RELATIVE_DEP:			return TDCA_DUEDATE;
-			case TDCA_STARTDATE_RELATIVE_DEP:		return TDCA_STARTDATE;
-			case TDCA_CREATIONDATE_RELATIVE_DEP:	return TDCA_CREATIONDATE;
-			case TDCA_LASTMOD_RELATIVE_DEP:			return TDCA_LASTMODDATE;
-		}
-
-		// All else
-		return nAttribID;
-	}
-
-	static TDC_COLUMN MapDeprecatedColumn(TDC_COLUMN nColumnID)
-	{
-// 		switch (nColumnID)
-// 		{
-// 		}
-
-		// All else
-		return nColumnID;
 	}
 
 	static TDC_ATTRIBUTE MapCommandLineSwitchToAttribute(LPCTSTR szSwitch)

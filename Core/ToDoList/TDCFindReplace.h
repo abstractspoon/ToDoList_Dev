@@ -33,8 +33,8 @@ public:
 	CTDCFindReplace(const CToDoCtrl& tdc);
 	virtual ~CTDCFindReplace();
 
-	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib);
-	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const;
+	BOOL DoFindReplace(TDC_ATTRIBUTE nAttribID);
+	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttribID) const;
 
 	void HandleCmd(WPARAM wParam, LPARAM lParam);
 	void DestroyDialog();
@@ -44,7 +44,7 @@ public:
 
 	CString GetSearchFor() const { return strFind; }
 	CString GetReplaceWith() const { return strReplace; }
-	TDC_ATTRIBUTE GetAttribute() const { return m_nAttribute; }
+	TDC_ATTRIBUTE GetAttribute() const { return m_nAttributeID; }
 
 	BOOL WantCaseSensitive() const { return bCaseSensitive; }
 	BOOL WantWholeWord() const { return bWholeWord; }
@@ -54,7 +54,7 @@ protected:
 	const CToDoCtrl& m_tdc;
 
 	BOOL m_bReplacing;
-	TDC_ATTRIBUTE m_nAttribute;
+	TDC_ATTRIBUTE m_nAttributeID;
 
 	// Implementation
 protected:
@@ -64,7 +64,7 @@ protected:
 
 	virtual void AdjustDialogPosition(BOOL bFirstTime);
 
-	BOOL Initialise(TDC_ATTRIBUTE nAttrib);
+	BOOL Initialise(TDC_ATTRIBUTE nAttribID);
 	BOOL SelectNextTask(TDC_SELECTNEXTTASK nSelect) const;
 };
 

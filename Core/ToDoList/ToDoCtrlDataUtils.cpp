@@ -64,10 +64,10 @@ int CTDCTaskMatcher::Convert(const CResultArray& aResults, CDWordArray& aTaskIDs
 	return aTaskIDs.GetSize();
 }
 
-int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const
 {
 	CResultArray aResults;
-	FindTasks(nAttrib, nOp, sValue, bCheckDueToday, aResults);
+	FindTasks(nAttribID, nOp, sValue, bCheckDueToday, aResults);
 
 	return Convert(aResults, aTaskIDs);
 }
@@ -88,14 +88,14 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	return Convert(aResults, aTaskIDs);
 }
 
-int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const
 {
 	// sanity check
 	if (!m_data.GetTaskCount())
 		return 0;
 	
 	SEARCHPARAMS query;
-	query.aRules.Add(SEARCHPARAM(nAttrib, nOp, sValue));
+	query.aRules.Add(SEARCHPARAM(nAttribID, nOp, sValue));
 
 	return FindTasks(query, bCheckDueToday, aResults);
 }
@@ -3384,7 +3384,7 @@ BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTD
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttribID, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttributeID, dValue, nUnits, bAggregated);
 }
 
 BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
@@ -3405,7 +3405,7 @@ BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pT
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttribID, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttributeID, dValue, nUnits, bAggregated);
 }
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const

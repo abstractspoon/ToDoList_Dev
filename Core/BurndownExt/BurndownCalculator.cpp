@@ -511,16 +511,16 @@ void CStatsItemCalculator::AppendFrequencyAttrib(const CString& sAttrib, CMap<CS
 
 void CStatsItemCalculator::AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
 {
-	int nAttrib = aAttrib.GetSize();
+	int nAtt = aAttrib.GetSize();
 
-	if (nAttrib == 0)
+	if (nAtt == 0)
 	{
 		AppendFrequencyAttrib(_T(""), mapFrequencies);
 	}
 	else
 	{
-		while (nAttrib--)
-			AppendFrequencyAttrib(aAttrib[nAttrib], mapFrequencies);
+		while (nAtt--)
+			AppendFrequencyAttrib(aAttrib[nAtt], mapFrequencies);
 	}
 }
 

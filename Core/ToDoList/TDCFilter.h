@@ -24,8 +24,8 @@ public:
 
 	BOOL HasAnyFilter() const;
 	BOOL HasAdvancedFilter() const;
-	BOOL HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttrib) const;
-	BOOL HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const;
+	BOOL HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttribID) const;
+	BOOL HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const;
 	BOOL HasFilterFlag(DWORD dwFlag) const;
 	BOOL HasNowFilter() const;
 	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const;

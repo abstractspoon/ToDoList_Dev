@@ -108,20 +108,20 @@ class CTDCAttributeMap : public CTDCBaseEnumSet<TDC_ATTRIBUTE>
 {
 public:
 	CTDCAttributeMap();
-	CTDCAttributeMap(TDC_ATTRIBUTE nAttrib);
+	CTDCAttributeMap(TDC_ATTRIBUTE nAttribID);
 	CTDCAttributeMap(const CTDCAttributeMap& mapOther);
 	~CTDCAttributeMap();
 
-	BOOL Add(TDC_ATTRIBUTE nAttrib);
+	BOOL Add(TDC_ATTRIBUTE nAttribID);
 	int Append(const CTDCAttributeMap& other);
 	TDC_ATTRIBUTE GetFirst() const;
 
-	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
+	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttribID);
 
 protected:
 	TDC_ATTRIBUTE GetDefaultValue() { return TDCA_NONE; }
 
-	BOOL CanAdd(TDC_ATTRIBUTE nAttrib) const;
+	BOOL CanAdd(TDC_ATTRIBUTE nAttribID) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -133,10 +133,10 @@ public:
 	CTDCAttributeArray(const CTDCAttributeArray& aOther);
 	~CTDCAttributeArray();
 	
-	BOOL Has(TDC_ATTRIBUTE nAttrib) const;
-	int Find(TDC_ATTRIBUTE nAttrib) const;
-	BOOL AddUnique(TDC_ATTRIBUTE nAttrib);
-	void Remove(TDC_ATTRIBUTE nAttrib);
+	BOOL Has(TDC_ATTRIBUTE nAttribID) const;
+	int Find(TDC_ATTRIBUTE nAttribID) const;
+	BOOL AddUnique(TDC_ATTRIBUTE nAttribID);
+	void Remove(TDC_ATTRIBUTE nAttribID);
 
 	BOOL MatchAll(const CTDCAttributeArray& aOther) const;
 };

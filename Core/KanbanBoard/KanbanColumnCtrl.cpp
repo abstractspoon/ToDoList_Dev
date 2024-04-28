@@ -711,7 +711,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 
 		case TDCA_ALLOCTO:
 		case TDCA_ALLOCBY:
-			sGroupBy.LoadString(IDS_NOONE);
+			sGroupBy.LoadString(IDS_NOBODY);
 			break;
 
 		default:
@@ -802,18 +802,18 @@ void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRe
 		pDC->SelectObject(pOldFont);
 }
 
-BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const
+BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttribID, const KANBANITEM* pKI) const
 {
-	ASSERT(Misc::FindT(nAttrib, m_aDisplayAttrib) != -1);
+	ASSERT(Misc::FindT(nAttribID, m_aDisplayAttrib) != -1);
 
-	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES) && !pKI->HasAttributeDisplayValue(nAttrib))
+	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES) && !pKI->HasAttributeDisplayValue(nAttribID))
 		return FALSE;
 
 	// If this attribute matches the tracked attribute then we are
 	// necessarily part of a fixed-column setup, and we need to do 
 	// some extra checks to see if we really do want to display it
-	if (KBUtils::IsTrackableAttribute(nAttrib) &&
-		(KBUtils::GetAttributeID(nAttrib) == GetAttributeID()) &&
+	if (KBUtils::IsTrackableAttribute(nAttribID) &&
+		(KBUtils::GetAttributeID(nAttribID) == GetAttributeID()) &&
 		(m_columnDef.aAttribValues.GetSize() == 1))
 	{
 		return FALSE;
@@ -841,11 +841,11 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
-		TDC_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+		TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
-		if (WantDisplayAttribute(nAttrib, pKI))
+		if (WantDisplayAttribute(nAttribID, pKI))
 		{
-			switch (nAttrib)
+			switch (nAttribID)
 			{
 			case TDCA_PARENT:
 				DrawItemParents(pDC, pKI, rAttrib, crText);
@@ -860,7 +860,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 				break; // handled elsewhere
 
 			default:
-				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags, crText);
+				DrawAttribute(pDC, rAttrib, nAttribID, pKI->GetAttributeDisplayValue(nAttribID), nFlags, crText);
 				break;
 			}
 		}
@@ -1324,10 +1324,10 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip) const
 	return TRUE;
 }
 
-void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
+void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttribID, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sAttrib = KBUtils::FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
+	CString sAttrib = KBUtils::FormatAttribute(nAttribID, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
@@ -1744,14 +1744,14 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 	return nNumDeleted;
 }
 
-BOOL CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
+BOOL CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 {
-	if (!KBUtils::IsGroupableAttribute(nAttrib, m_aCustAttribDefs))
+	if (!KBUtils::IsGroupableAttribute(nAttribID, m_aCustAttribDefs))
 		return FALSE;
 
-	if (nAttrib != m_nGroupBy)
+	if (nAttribID != m_nGroupBy)
 	{
-		m_nGroupBy = nAttrib;
+		m_nGroupBy = nAttribID;
 
 		CStringSet aGroups;
 		GetGroupValues(aGroups);
@@ -2758,9 +2758,9 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
-				TDC_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
-				switch (nAttrib)
+				switch (nAttribID)
 				{
 				case TDCA_FLAG: 
 				case TDCA_LOCK:
@@ -2777,8 +2777,8 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 				default: // Rest
 					{
-						CString sValue = pKI->GetAttributeDisplayValue(nAttrib, m_aCustAttribDefs);
-						CString sAttrib = KBUtils::FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
+						CString sValue = pKI->GetAttributeDisplayValue(nAttribID, m_aCustAttribDefs);
+						CString sAttrib = KBUtils::FormatAttribute(nAttribID, sValue, KBCAL_LONG, m_aCustAttribDefs);
 
 						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
 						nMaxAttribWidth = max(nMaxAttribWidth, nAttribWidth);

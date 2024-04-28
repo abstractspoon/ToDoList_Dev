@@ -28,7 +28,7 @@ struct TDCCUSTOMATTRIBUTECALCULATIONOPERAND
 	BOOL IsValid(BOOL bAllowNone = TRUE) const;
 	BOOL IsCustom() const;
 
-	TDC_ATTRIBUTE nAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
+	TDC_ATTRIBUTE nAttributeID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
 	CString sCustAttribID;
 
 	static BOOL IsValid(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);
@@ -96,7 +96,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString GetToolTip() const;
 
 	inline TDC_COLUMN GetColumnID() const { return nColID; }
-	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttribID; }
+	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttributeID; }
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
@@ -162,7 +162,7 @@ private:
 	// these are managed internally
 	DWORD dwAttribType;
 	TDC_COLUMN nColID;
-	TDC_ATTRIBUTE nAttribID;
+	TDC_ATTRIBUTE nAttributeID;
 	TDCCUSTOMATTRIBUTECALCULATION calculation;
 	// ----------------------------------------------------------------
 

@@ -52,7 +52,7 @@ protected:
 	CString GetTaskTitle(const CStringArray& aValues) const;
 	CString GetValue(const CStringArray& aValues, int nCol) const;
 
-	void AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aValues) const;
+	void AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, const CStringArray& aValues) const;
 	void AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringArray& aValues) const;
 	void AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) const;
 

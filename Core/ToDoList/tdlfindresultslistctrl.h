@@ -108,7 +108,7 @@ protected:
 	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;
-	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
+	CString GetAttributeName(TDC_ATTRIBUTE nAttribID, const CFilteredToDoCtrl* pTDC) const;
 	void UpdateHotItem(CPoint point);
 	void UpdateIconAndReferenceStatus();
 };

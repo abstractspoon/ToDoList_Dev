@@ -158,8 +158,8 @@ protected:
 	void UpdateResultType();
 
 	int BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const;
-	BOOL IsDate(TDC_ATTRIBUTE nAttrib) const;
-	BOOL IsTimePeriod(TDC_ATTRIBUTE nAttrib) const;
+	BOOL IsDate(TDC_ATTRIBUTE nAttribID) const;
+	BOOL IsTimePeriod(TDC_ATTRIBUTE nAttribID) const;
 	BOOL IsDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	BOOL IsTimePeriod(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 

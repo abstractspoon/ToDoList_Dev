@@ -103,7 +103,7 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bReadOnly(FALSE),
 	m_nNextColor(0),
 	m_pSelectedColumn(NULL),
-	m_nTrackAttribute(TDCA_NONE),
+	m_nTrackedAttributeID(TDCA_NONE),
 	m_nSortBy(TDCA_NONE),
 	m_nGroupBy(TDCA_NONE),
 	m_bSelectTasks(FALSE),
@@ -652,9 +652,9 @@ int CKanbanCtrl::GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStri
 }
 
 // External interface
-BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
+BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCBY:
 	case TDCA_ALLOCTO:
@@ -689,20 +689,20 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	}
 	
 	// all else 
-	return (nAttrib == IUI_ALL);
+	return (nAttribID == IUI_ALL);
 }
 
 // External interface
-BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
+BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_NONE:
 	case TDCA_TASKNAME:
 		return TRUE; // always
 	}
 	
-	return (WantEditUpdate(nAttrib) && (Misc::FindT(nAttrib, m_aDisplayAttrib) != -1));
+	return (WantEditUpdate(nAttribID) && (Misc::FindT(nAttribID, m_aDisplayAttrib) != -1));
 }
 
 void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
@@ -856,7 +856,7 @@ void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
 		// If the update contains the tracked attribute
 		// then assume some 'inline' changes were made to
 		// one/some of the columns necessitating a resort
-		if (pTasks->IsAttributeAvailable(m_nTrackAttribute))
+		if (pTasks->IsAttributeAvailable(m_nTrackedAttributeID))
 			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
 }
@@ -1115,9 +1115,9 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks)
 	return bChange;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribID)
 {
-	if (!pTasks->IsAttributeAvailable(nAttribute))
+	if (!pTasks->IsAttributeAvailable(nAttribID))
 		return FALSE;
 
 	switch (nAttribute)
@@ -1125,7 +1125,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
 		{
-			CString sAttribID(KBUtils::GetAttributeID(nAttribute));
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
 
 			// create once only
 			if (!m_mapAttributeValues.HasMapping(sAttribID))
@@ -1152,8 +1152,8 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_VERSION:
 	case TDCA_TAGS:	
 		{
-			CString sXMLTag(GetXMLTag(nAttribute)); 
-			CString sAttribID(KBUtils::GetAttributeID(nAttribute));
+			CString sXMLTag(GetXMLTag(nAttribID));
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
 
 			CStringArray aNewValues;
 			int nValue = pTasks->GetAttributeCount(sXMLTag);
@@ -1214,8 +1214,8 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 				}
 			}
 
-			if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
-				m_nTrackAttribute = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
+			if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
+				m_nTrackedAttributeID = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
 
 			return bChange;
 		}
@@ -1319,7 +1319,7 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 
 	m_aColumns.SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
 
-	if (m_nTrackAttribute != TDCA_NONE)
+	if (m_nTrackedAttributeID != TDCA_NONE)
 	{
 		// Both column visibility AND contents may have changed
 		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
@@ -1378,9 +1378,9 @@ void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPC
 	}
 }
 
-CString CKanbanCtrl::GetXMLTag(TDC_ATTRIBUTE nAttrib)
+CString CKanbanCtrl::GetXMLTag(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:	return TDL_TASKALLOCTO;
 	case TDCA_ALLOCBY:	return TDL_TASKALLOCBY;
@@ -1401,9 +1401,9 @@ CString CKanbanCtrl::GetXMLTag(TDC_ATTRIBUTE nAttrib)
 	return EMPTY_STR;
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, int nNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, int nNewValue)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
@@ -1425,17 +1425,17 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 		CStringArray aNewValues;
 		aNewValues.Add(sNewValue);
 
-		pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttrib), aNewValues);
+		pKI->SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aNewValues);
 		return FALSE;
 	}
 
 	// all else
-	return UpdateTrackableTaskAttribute(pKI, nAttrib, sNewValue);
+	return UpdateTrackableTaskAttribute(pKI, nAttribID, sNewValue);
 }
 
 BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 {
-	switch (m_nTrackAttribute)
+	switch (m_nTrackedAttributeID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
@@ -1464,9 +1464,9 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 	return FALSE;
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CString& sNewValue)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
@@ -1483,12 +1483,12 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 	CStringArray aNewValues;
 	aNewValues.Add(sNewValue);
 
-	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttrib), aNewValues);
+	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
 }
 
-BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CStringArray& aNewValues)
+BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
@@ -1498,7 +1498,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 			CStringArray aTemp;
 			aTemp.Add(_T(""));
 
-			return UpdateTrackableTaskAttribute(pKI, nAttrib, aTemp); // RECURSIVE CALL
+			return UpdateTrackableTaskAttribute(pKI, nAttribID, aTemp); // RECURSIVE CALL
 		}
 		break;
 
@@ -1507,7 +1507,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 		return FALSE;
 	}
 
-	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttrib), aNewValues);
+	return UpdateTrackableTaskAttribute(pKI, KBUtils::GetAttributeID(nAttribID), aNewValues);
 }
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
@@ -1692,7 +1692,7 @@ int CKanbanCtrl::RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 			{
 				bDeleteCol = TRUE;
 			}
-			else if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
+			else if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
 			{
 				// Custom neither have globals in the same sense
 				// as default attributes nor do all the types of
@@ -1754,7 +1754,7 @@ int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 		}
 
 		ASSERT(HasOption(KBCF_HIDEEMPTYCOLUMNS) || 
-				(m_nTrackAttribute == TDCA_CUSTOMATTRIB) ||
+				(m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) ||
 				(m_aColumns.GetSize() == pGlobals->GetCount()));
 	}
 
@@ -1819,7 +1819,7 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags)
 {
 	if (m_sTrackAttribID.IsEmpty())
 	{
-		ASSERT(m_nTrackAttribute == TDCA_NONE);
+		ASSERT(m_nTrackedAttributeID == TDCA_NONE);
 		return;
 	}
 
@@ -1835,7 +1835,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelT
 {
 	if (m_sTrackAttribID.IsEmpty())
 	{
-		ASSERT(m_nTrackAttribute == TDCA_NONE);
+		ASSERT(m_nTrackedAttributeID == TDCA_NONE);
 		return;
 	}
 
@@ -2050,18 +2050,18 @@ void CKanbanCtrl::FixupColumnFocus()
 	}
 }
 
-BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
+BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 {
-	if (KBUtils::IsCustomAttribute(nAttrib) && !m_aCustomAttribDefs.HasDefinition(nAttrib))
+	if (KBUtils::IsCustomAttribute(nAttribID) && !m_aCustomAttribDefs.HasDefinition(nAttribID))
 		return FALSE;
 
-	if (nAttrib == m_nTrackAttribute)
+	if (nAttribID == m_nTrackedAttributeID)
 		return FALSE;
 
-	if (nAttrib != m_nGroupBy)
+	if (nAttribID != m_nGroupBy)
 	{
-		m_nGroupBy = nAttrib;
-		m_aColumns.GroupBy(nAttrib);
+		m_nGroupBy = nAttribID;
+		m_aColumns.GroupBy(nAttribID);
 	}
 	
 	return TRUE;
@@ -2069,21 +2069,21 @@ BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
 
 TDC_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 {
-	if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
+	if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
 		sCustomAttrib = m_sTrackAttribID;
 	else
 		sCustomAttrib.Empty();
 
-	return m_nTrackAttribute;
+	return m_nTrackedAttributeID;
 }
 
-BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, 
+BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID, 
 								 const CKanbanColumnArray& aColumnDefs)
 {
 	// Sanity checks
 	if (!sCustomAttribID.IsEmpty())
 	{
-		if (!KBUtils::IsCustomAttribute(nAttrib))
+		if (!KBUtils::IsCustomAttribute(nAttribID))
 		{
 			ASSERT(0);
 			return FALSE;
@@ -2091,7 +2091,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 	}
 	else
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_STATUS:
 		case TDCA_ALLOCTO:
@@ -2110,7 +2110,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 	}
 
 	// Has the attribute changed
-	CString sNewAttribID = (!sCustomAttribID.IsEmpty() ? sCustomAttribID : KBUtils::GetAttributeID(nAttrib));
+	CString sNewAttribID = (!sCustomAttribID.IsEmpty() ? sCustomAttribID : KBUtils::GetAttributeID(nAttribID));
 
 	if (sNewAttribID == m_sTrackAttribID)
 	{
@@ -2154,7 +2154,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 	m_aColumnDefs.Copy(aColumnDefs);
 
 	// update state
-	m_nTrackAttribute = nAttrib;
+	m_nTrackedAttributeID = nAttribID;
 	m_sTrackAttribID = sNewAttribID;
 
 	// delete all lists and start over
@@ -2371,7 +2371,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 			// Update column visibility only
 			RebuildColumns(KCRC_RESTORESELECTION);
 		}
-		else if (((m_nTrackAttribute == TDCA_PRIORITY) || (m_nTrackAttribute == TDCA_RISK)) && Misc::FlagHasChanged(KBCF_DUEHAVEHIGHESTPRIORITYRISK | KBCF_DONEHAVELOWESTPRIORITYRISK, m_dwOptions, dwPrevOptions))
+		else if (((m_nTrackedAttributeID == TDCA_PRIORITY) || (m_nTrackedAttributeID == TDCA_RISK)) && Misc::FlagHasChanged(KBCF_DUEHAVEHIGHESTPRIORITYRISK | KBCF_DONEHAVELOWESTPRIORITYRISK, m_dwOptions, dwPrevOptions))
 		{
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
@@ -2681,7 +2681,7 @@ BOOL CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	if (KBUtils::IsCustomAttribute(nBy) && !m_aCustomAttribDefs.HasDefinition(nBy))
 		return FALSE;
 
-	if (nBy == m_nTrackAttribute)
+	if (nBy == m_nTrackedAttributeID)
 	{
 		// if the sort attribute equals the track attribute then
 		// tasks are already sorted into separate columns so we sort
@@ -2778,7 +2778,7 @@ bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
 	if (!GetColumnAttributeValue(pCol, rColCtrl.CenterPoint(), sValue))
 		return false;
 
-	switch (m_nTrackAttribute)
+	switch (m_nTrackedAttributeID)
 	{
 	case TDCA_STATUS:
 		pTasks->SetTaskStatus(hNewTask, sValue);
@@ -3242,7 +3242,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				*pResult = CDRF_SKIPDEFAULT;
 			}
 
-			if (IsSorting() && (m_nSortBy != m_nTrackAttribute))
+			if (IsSorting() && (m_nSortBy != m_nTrackedAttributeID))
 				m_header.DrawItemSortArrow(pDC, (int)pNMCD->dwItemSpec, m_bSortAscending);
 		}
 		break;
@@ -3433,7 +3433,7 @@ BOOL CKanbanCtrl::CanDragTask(DWORD dwTaskID) const
 	if (pKI->bLocked)
 		return FALSE;
 
-	if ((m_nTrackAttribute == TDCA_PRIORITY) || (m_nTrackAttribute == TDCA_RISK))
+	if ((m_nTrackedAttributeID == TDCA_PRIORITY) || (m_nTrackedAttributeID == TDCA_RISK))
 	{
 		// Prevent dragging of any calculated values
 		if (HasOption(KBCF_DONEHAVELOWESTPRIORITYRISK) && pKI->IsDone(TRUE))

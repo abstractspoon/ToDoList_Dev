@@ -182,17 +182,17 @@ void CTaskMiniCalendarCtrl::DrawCellBkgnd(CDC& dc, const CRect& rCell, const COl
 		GraphicsMisc::DrawRect(&dc, rCell, m_crSelected, CLR_NONE, 0, GMDR_NONE, (BYTE)(bToday ? 80 : 160));
 }
 
-void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib)
+void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttribID)
 {
 	ASSERT(aPalette.GetSize());
-	ASSERT(nAttrib != TDCA_NONE);
+	ASSERT(nAttribID != TDCA_NONE);
 
 	if (m_mapHeatMap.SetColorPalette(aPalette))
 		Invalidate();
 
-	if (nAttrib != m_nHeatMapAttribute)
+	if (nAttribID != m_nHeatMapAttribute)
 	{
-		m_nHeatMapAttribute = nAttrib;
+		m_nHeatMapAttribute = nAttribID;
 		RecalcHeatMap();
 	}
 

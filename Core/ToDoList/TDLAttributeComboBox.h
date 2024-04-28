@@ -23,7 +23,7 @@ public:
 public:
 	void SetAttributeFilter(const CTDCAttributeMap& mapAttrib);
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, BOOL bRelative = FALSE);
+	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL bRelative = FALSE);
 	BOOL SetSelectedAttribute(const CString& sCustAttribID, BOOL bRelative = FALSE);
 
 	TDC_ATTRIBUTE GetSelectedAttribute() const;
@@ -31,8 +31,8 @@ public:
 	TDC_ATTRIBUTE GetSelectedAttribute(BOOL& bRelative) const;
 	CString GetSelectedAttributeText() const;
 
-	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib);
-	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib, CString& sCustAttribID);
+	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID);
+	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID, CString& sCustAttribID);
 
 	// Attributes
 protected:
@@ -59,11 +59,11 @@ protected:
 
 protected:
 	void BuildCombo();
-	DWORD EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelativeDate = FALSE) const;
-	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttrib, BOOL& bRelativeDate) const;
-	BOOL AttributeIsDate(TDC_ATTRIBUTE nAttrib) const;
-	BOOL AttributeIsTimePeriod(TDC_ATTRIBUTE nAttrib) const;
-	BOOL WantAttribute(TDC_ATTRIBUTE nAttrib) const;
+	DWORD EncodeItemData(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate = FALSE) const;
+	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttribID, BOOL& bRelativeDate) const;
+	BOOL AttributeIsDate(TDC_ATTRIBUTE nAttribID) const;
+	BOOL AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const;
+	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

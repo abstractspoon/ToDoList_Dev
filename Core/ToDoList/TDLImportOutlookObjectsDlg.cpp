@@ -215,7 +215,7 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 		OUTLOOK_FIELDTYPE nFieldType = prefs.GetProfileEnum(sSection, sKey, OA_NONE);
 
 		sKey = Misc::MakeKey(_T("Attrib%d"), nMap);
-		TDC_ATTRIBUTE nAttrib = prefs.GetProfileEnum(sSection, sKey, TDCA_NONE);
+		TDC_ATTRIBUTE nAttribID = prefs.GetProfileEnum(sSection, sKey, TDCA_NONE);
 
 		if (nFieldType != -1)
 		{
@@ -223,7 +223,7 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 			int nMaster = m_aMasterMapping.Find((DWORD)nFieldType);
 
 			if (nMaster != -1)
-				m_aMasterMapping[nMaster].nTDCAttrib = nAttrib;
+				m_aMasterMapping[nMaster].nAttributeID = nAttribID;
 		}
 	}
 }
@@ -238,7 +238,7 @@ void CTDLImportOutlookObjectsDlg::RemoveUnwantedAttributes(CTDCAttributeMapping&
 		{
 			const TDCATTRIBUTEMAPPING& col = aMapping[nField];
 
-			if (m_bHideUnmapped && col.nTDCAttrib == TDCA_NONE)
+			if (m_bHideUnmapped && col.nAttributeID == TDCA_NONE)
 			{
 				aMapping.RemoveAt(nField);
 			}
@@ -267,7 +267,7 @@ void CTDLImportOutlookObjectsDlg::SaveMasterMapping() const
 		prefs.WriteProfileInt(sSection, sKey, m_aMasterMapping[nField].dwItemData);
 		
 		sKey = Misc::MakeKey(_T("Attrib%d"), nField);
-		prefs.WriteProfileInt(sSection, sKey, m_aMasterMapping[nField].nTDCAttrib);
+		prefs.WriteProfileInt(sSection, sKey, m_aMasterMapping[nField].nAttributeID);
 	}
 }
 
@@ -285,7 +285,7 @@ void CTDLImportOutlookObjectsDlg::UpdateMasterMapping()
 		ASSERT(nMaster != -1);
 
 		if (nMaster != -1)
-			m_aMasterMapping[nMaster].nTDCAttrib = col.nTDCAttrib;
+			m_aMasterMapping[nMaster].nAttributeID = col.nAttributeID;
 	}
 }
 
@@ -317,7 +317,7 @@ int CTDLImportOutlookObjectsDlg::GetColumnMapping(CTDCAttributeMapping& aMapping
 	// to be added to the comments get processed first
 	int nBody = aMapping.Find((DWORD)OA_BODY);
 
-	if ((nBody != -1) && (aMapping[nBody].nTDCAttrib == TDCA_COMMENTS))
+	if ((nBody != -1) && (aMapping[nBody].nAttributeID == TDCA_COMMENTS))
 	{
 		TDCATTRIBUTEMAPPING body = aMapping[nBody]; // copy
 		aMapping.RemoveAt(nBody);

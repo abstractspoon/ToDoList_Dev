@@ -208,10 +208,10 @@ namespace TDC
 {
 	static CString GetAttributeName(TDC_ATTRIBUTE nAttribID)
 	{
-		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+		for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
-				return CEnString(ATTRIBUTES[nAttrib].nAttribResID);
+			if (nAttribID == ATTRIBUTES[nAtt].nAttributeID)
+				return CEnString(ATTRIBUTES[nAtt].nAttribResID);
 		}
 
 		return _T("");

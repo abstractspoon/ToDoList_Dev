@@ -76,9 +76,9 @@ public:
 	void EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload);
 	void EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload);
 
-	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
+	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttribID);
 	static TDC_ATTRIBUTE MapColumnToAttribute(WLC_COLUMNID nCol);
-	static WLC_COLUMNID MapAttributeToColumn(TDC_ATTRIBUTE nAttrib);
+	static WLC_COLUMNID MapAttributeToColumn(TDC_ATTRIBUTE nAttribID);
 
 protected:
 	CWorkloadChart m_barChart;

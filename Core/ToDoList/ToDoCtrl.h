@@ -42,7 +42,6 @@ class CPreferences;
 class CTDCTaskCompletionArray;
 class CTDCContentMgr;
 
-//struct CTRLITEM;
 struct TDCTASKCOMPLETION;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -137,8 +136,8 @@ public:
 	BOOL HasStyle(TDC_STYLE nStyle) const;
 	
 	BOOL IsColumnShowing(TDC_COLUMN nColumn) const;
-	BOOL IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const;
-	BOOL IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttrib) const;
+	BOOL IsEditFieldShowing(TDC_ATTRIBUTE nAttribID) const;
+	BOOL IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttribID) const;
 	void SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis);
 	void GetColumnFieldVisibility(TDCCOLEDITVISIBILITY& vis) const;
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
@@ -152,7 +151,7 @@ public:
 	void SetCompletedTaskColor(COLORREF color) { m_taskTree.SetCompletedTaskColor(color); }
 	void SetFlaggedTaskColor(COLORREF color) { m_taskTree.SetFlaggedTaskColor(color); }
 	void SetReferenceTaskColor(COLORREF color) { m_taskTree.SetReferenceTaskColor(color); }
-	void SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors) { m_taskTree.SetAttributeColors(nAttrib, colors); }
+	void SetAttributeColors(TDC_ATTRIBUTE nAttribID, const CTDCColorMap& colors) { m_taskTree.SetAttributeColors(nAttribID, colors); }
 	void SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday) { m_taskTree.SetStartedTaskColors(crStarted, crStartedToday); }
 	void SetAlternateLineColor(COLORREF color) { m_taskTree.SetAlternateLineColor(color); }
 
@@ -199,8 +198,8 @@ public:
 	BOOL EditSelectedTaskTitle(BOOL bTaskIsNew = FALSE); 
 	void SpellcheckSelectedTask(BOOL bTitle); // else comments
 	BOOL CanSpellcheckSelectedTaskComments();
-	BOOL DoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME);
-	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME) const;
+	BOOL DoFindReplace(TDC_ATTRIBUTE nAttribID = TDCA_TASKNAME);
+	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttribID = TDCA_TASKNAME) const;
 	BOOL RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
 	
 	BOOL EditSelectedTaskDependency();
@@ -377,7 +376,8 @@ public:
 	virtual void SetFocusToComments();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
-	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib) const;
+	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
+	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
@@ -686,11 +686,11 @@ protected:
 	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }
 	virtual BOOL CopySelectedTasks() const;
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
-	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 
 	// -------------------------------------------------------------------------------
 	
-	void UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags = 0);
+	void UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags = 0);
 	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
 	void IncrementTrackedTime(BOOL bEnding);
 	BOOL FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks);
@@ -718,8 +718,8 @@ protected:
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
-	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const;
-	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib);
+	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;
+	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID);
 
 	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
@@ -763,9 +763,9 @@ protected:
 	BOOL DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDialog);
 	BOOL AdjustTaskTimeSpent(DWORD dwTaskID, double dHours);
 
-	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend, CDWordArray& aModTaskIDs);
-	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend);
-	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aAll, const CStringArray& aChecked, const CStringArray& aMixed);
+	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend, CDWordArray& aModTaskIDs);
+	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend);
+	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aAll, const CStringArray& aChecked, const CStringArray& aMixed);
 
 	BOOL SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOOL bTitle, BOOL bNotifyNoErrors);
 	BOOL SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker);
@@ -825,7 +825,7 @@ protected:
 
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks) const;
-	void UpdateAutoListData(TDC_ATTRIBUTE nAttrib = TDCA_ALL);
+	void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL);
 	void UpdateDefaultTaskCustomAttributeValues();
 	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
 

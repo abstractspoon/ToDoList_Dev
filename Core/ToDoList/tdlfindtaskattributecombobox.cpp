@@ -100,11 +100,11 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			// try custom attributes
-			int nAttrib = m_aAttribDefs.GetSize();
+			int nAtt = m_aAttribDefs.GetSize();
 
-			while (nAttrib--)
+			while (nAtt--)
 			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAtt];
 
 				if (attribDef.GetAttributeID() == nAttribID)
 				{
