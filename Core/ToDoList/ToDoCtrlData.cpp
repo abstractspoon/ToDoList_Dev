@@ -4198,29 +4198,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID)
-{
-	TDCCADATA data;
-
-	if (!GetTaskAttributeValues(dwTaskID, nFromAttribID, data))
-		return SET_FAILED;
-
-	// else
-	return SetTaskAttributeValues(dwTaskID, nToAttribID, data);
-}
-
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttribID, const CString& sToCustomAttribID)
-{
-	TDCCADATA data;
-
-	if (!GetTaskAttributeValues(dwTaskID, nFromAttribID, data))
-		return SET_FAILED;
-
-	// else
-	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
-}
-
-BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
+BOOL CToDoCtrlData::GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);

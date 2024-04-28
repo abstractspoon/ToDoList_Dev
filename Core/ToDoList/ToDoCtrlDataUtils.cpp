@@ -6512,7 +6512,7 @@ TDC_ATTRIBUTECATEGORY CTDCTaskAttributeCopier::GetAttributeCategory(TDC_ATTRIBUT
 	// Built-in attributes
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
+		if (nAttribID == ATTRIBUTES[nAttrib].nAttributeID)
 			return ATTRIBUTES[nAttrib].nCategory;
 	}
 

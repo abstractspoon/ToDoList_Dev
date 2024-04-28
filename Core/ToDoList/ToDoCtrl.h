@@ -287,9 +287,9 @@ public:
 	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset = FALSE);
 	BOOL SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset = FALSE);
 
-	BOOL CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
-	BOOL CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
-	BOOL CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
+	BOOL CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID);
+	BOOL CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttribID, const CString& sToCustomAttribID);
+	BOOL CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttribID);
 	BOOL CopySelectedTaskAttributeValue(const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
 	CString GetColumnName(TDC_COLUMN nColID) const { return m_taskTree.GetColumnName(nColID); }
@@ -377,14 +377,13 @@ public:
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
-	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
 	void SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
@@ -822,6 +821,7 @@ protected:
 	void InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
 	BOOL CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, DWORD dwToTaskID, TDC_COLUMN nToColID);
+	BOOL CanCopyAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID) const;
 
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks) const;

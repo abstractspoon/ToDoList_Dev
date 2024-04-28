@@ -1120,7 +1120,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	if (!pTasks->IsAttributeAvailable(nAttribID))
 		return FALSE;
 
-	switch (nAttribute)
+	switch (nAttribID)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:

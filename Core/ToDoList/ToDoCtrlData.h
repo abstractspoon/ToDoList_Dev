@@ -341,7 +341,7 @@ protected:
 	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 
 	// Too dangerous to be public because 'data' is untyped
-	TDC_SET SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
+	TDC_SET SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data);
 
 	BOOL ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy);
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, BOOL bFitToRecurringScheme);
