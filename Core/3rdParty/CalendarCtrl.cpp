@@ -331,9 +331,9 @@ BOOL CCalendarCtrl::PtInHeader(const CPoint& ptScreen) const
 	return rHeader.PtInRect(ptHeader);
 }
 
-int CCalendarCtrl::GetDayOfWeek(int nColumn) const
+int CCalendarCtrl::GetDayOfWeek(int nCol) const
 {
-	return ((((m_nFirstWeekDay - 1) + nColumn) % 7) + 1);
+	return ((((m_nFirstWeekDay - 1) + nCol) % 7) + 1);
 }
 
 void CCalendarCtrl::DrawHeader(CDC* pDC)

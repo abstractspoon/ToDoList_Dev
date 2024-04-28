@@ -218,7 +218,7 @@ struct WORKLOADSORTCOLUMN
 	BOOL operator==(const WORKLOADSORTCOLUMN& col) const;
 	BOOL operator!=(const WORKLOADSORTCOLUMN& col) const;
 
-	WLC_COLUMNID nBy;
+	WLC_COLUMNID nColumnID;
 	CString sAllocTo;
 	BOOL bAscending;
 };
@@ -259,7 +259,7 @@ struct WORKLOADSORT
 
 struct WORKLOADCOLUMN
 {
-	WLC_COLUMNID nColID;
+	WLC_COLUMNID nColumnID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;

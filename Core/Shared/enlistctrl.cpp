@@ -1639,14 +1639,14 @@ void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
 	}
 }
 
-void CEnListCtrl::SetSortColumn(int nColumn, BOOL bResort)
+void CEnListCtrl::SetSortColumn(int nCol, BOOL bResort)
 {
 	if (!m_bSortingEnabled)
 		return;
 
-	if (nColumn != m_nSortColumn)
+	if (nCol != m_nSortColumn)
 	{
-		m_nSortColumn = nColumn;
+		m_nSortColumn = nCol;
 		m_bSortAscending = TRUE;
 
 		if (m_header.GetSafeHwnd())

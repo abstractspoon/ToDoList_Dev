@@ -741,7 +741,7 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 
 	while (nCol--)
 	{
-		if (COLUMNS[nCol].nColID == m_nGroupBy)
+		if (COLUMNS[nCol].nColumnID == m_nGroupBy)
 			return CEnString(COLUMNS[nCol].nIDLongName);
 	}
 
@@ -799,7 +799,7 @@ BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 
 	if (IsGrouped())
 	{
-		m_aGroupSortCols[0].nBy = m_nGroupBy;
+		m_aGroupSortCols[0].nColumnID = m_nGroupBy;
 		m_aGroupSortCols[0].bAscending = TRUE;
 
 		int nNumCols = 1;
@@ -808,7 +808,7 @@ BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 		// match the group column
 		for (int nCol = 0; nCol < ss.nNumCols; nCol++)
 		{
-			TDC_COLUMN nSortCol = ss.pCols[nCol].nBy;
+			TDC_COLUMN nSortCol = ss.pCols[nCol].nColumnID;
 
 			if (nSortCol != m_nGroupBy)
 			{
@@ -850,7 +850,7 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 								   const TDSORTCOLUMN& sort,
 								   const TDSORTFLAGS& flags) const
 {
-	if (IsGrouped() && (sort.nBy == m_nGroupBy))
+	if (IsGrouped() && (sort.nColumnID == m_nGroupBy))
 	{
 		CString sTask1Text = GetTaskGroupValue(lParam1);
 		CString sTask2Text = GetTaskGroupValue(lParam2);
@@ -1528,17 +1528,17 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 			ASSERT(IsListItemSelected(m_lcTasks, nItem)); 
 
 			DWORD dwTaskID = GetTaskID(nItem);
-			TDC_COLUMN nClickCol = TDCC_NONE;
+			TDC_COLUMN nColID = TDCC_NONE;
 
 			if (!bDblClk)
 			{
 				if (!IsColumnShowing(TDCC_DONE) && HasHitTestFlag(nFlags, LVHT_ONITEMSTATEICON))
 				{
-					nClickCol = TDCC_DONE;
+					nColID = TDCC_DONE;
 				}
 				else if (!IsColumnShowing(TDCC_ICON) && HasHitTestFlag(nFlags, LVHT_ONITEMICON))
 				{
-					nClickCol = TDCC_ICON;
+					nColID = TDCC_ICON;
 				}
 			}
 			else
@@ -1552,14 +1552,14 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 
 				if (rItem.PtInRect(pt))
 				{
-					nClickCol = TDCC_CLIENT;
+					nColID = TDCC_CLIENT;
 				}
 			}
 
-			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			if ((nColID != TDCC_NONE) && !SelectionHasLocked(FALSE))
 			{
 				// forward the click
-				NotifyParentOfColumnEditClick(nClickCol, dwTaskID);
+				NotifyParentOfColumnEditClick(nColID, dwTaskID);
 
 				return TRUE;
 			}

@@ -273,8 +273,8 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
 	{
-		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID, TRUE))
-			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
+		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColumnID, TRUE))
+			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColumnID);
 	}
 	
 	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
@@ -1495,7 +1495,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSortChange(WPARAM wParam, LPARAM lParam)
 
 			if (pVData)
 			{
-				pVData->sort.single.nBy = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)lParam);
+				pVData->sort.single.nColumnID = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)lParam);
 				pVData->sort.single.bAscending = wParam;
 			}
 		}
@@ -4452,7 +4452,7 @@ const TDSORT& CTabbedToDoCtrl::GetSort() const
 
 TDC_COLUMN CTabbedToDoCtrl::GetSortBy() const
 {
-	return GetSort().single.nBy;
+	return GetSort().single.nColumnID;
 }
 
 void CTabbedToDoCtrl::GetSortBy(TDSORTCOLUMNS& sort) const
@@ -4915,7 +4915,7 @@ void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 			ASSERT(pVData);
 
 			if (pVData)
-				Sort(pVData->sort.single.nBy, bAllowToggle);
+				Sort(pVData->sort.single.nColumnID, bAllowToggle);
 		}
 		break;
 		
@@ -5047,7 +5047,7 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 		}
 		else
 		{
-			TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute(pVData->sort.single.nBy);
+			TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute(pVData->sort.single.nColumnID);
 			CUIExtensionAppCmdData data(nAttribID, pVData->sort.single.bAscending);
 
 			ExtensionDoAppCommand(nView, IUI_SORT, data);
@@ -5158,7 +5158,7 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 
 				if (ExtensionDoAppCommand(nView, IUI_SORT, data))
 				{
-					pVData->sort.single.nBy = nBy;
+					pVData->sort.single.nColumnID = nBy;
 					pVData->sort.single.bAscending = bSortAscending;
 				}
 

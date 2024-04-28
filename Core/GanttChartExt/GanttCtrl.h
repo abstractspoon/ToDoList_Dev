@@ -65,7 +65,7 @@ public:
 
 	void Sort(GTLC_COLUMN nBy, BOOL bAscending);
 	void Sort(const GANTTSORTCOLUMNS& multi);
-	GTLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
+	GTLC_COLUMN GetSortColumn() const { return m_sort.single.nColumnID; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 
 	GTLC_MONTH_DISPLAY GetMonthDisplay() const { return m_nMonthDisplay; }

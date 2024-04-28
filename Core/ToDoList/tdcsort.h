@@ -48,7 +48,7 @@ struct TDSORTCOLUMN
 						const CTDCStyleMap& styles,
 						const CTDCCustomAttribDefinitionArray& aCustAttribs);
 
-	TDC_COLUMN nBy;
+	TDC_COLUMN nColumnID;
 	BOOL bAscending;
 };
 

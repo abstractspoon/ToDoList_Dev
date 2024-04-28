@@ -556,9 +556,9 @@ namespace TDC
 		return TDCD_NONE;
 	}
 	
-	static TDC_DATE MapColumnToDate(TDC_COLUMN nCol)
+	static TDC_DATE MapColumnToDate(TDC_COLUMN nColID)
 	{
-		switch (nCol)
+		switch (nColID)
 		{
 		case TDCC_LASTMODDATE:	return TDCD_LASTMOD;
 		case TDCC_DUEDATE:		return TDCD_DUE;
@@ -567,8 +567,8 @@ namespace TDC
 		case TDCC_DONEDATE:		return TDCD_DONE;
 
 		default:
-			if ((nCol >= TDCC_CUSTOMCOLUMN_FIRST) && 
-				(nCol < TDCC_CUSTOMCOLUMN_LAST))
+			if ((nColID >= TDCC_CUSTOMCOLUMN_FIRST) && 
+				(nColID < TDCC_CUSTOMCOLUMN_LAST))
 			{
 				return TDCD_CUSTOM;
 			}
@@ -672,13 +672,13 @@ namespace TDC
 
 	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
 	{
-		multiSort.nAttributeID1 = MapColumnToAttribute(pSortCols[0].nBy);
+		multiSort.nAttributeID1 = MapColumnToAttribute(pSortCols[0].nColumnID);
 		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
 
-		multiSort.nAttributeID2 = MapColumnToAttribute(pSortCols[1].nBy);
+		multiSort.nAttributeID2 = MapColumnToAttribute(pSortCols[1].nColumnID);
 		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
 
-		multiSort.nAttributeID3 = MapColumnToAttribute(pSortCols[2].nBy);
+		multiSort.nAttributeID3 = MapColumnToAttribute(pSortCols[2].nColumnID);
 		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
 	}
 

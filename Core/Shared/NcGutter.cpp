@@ -183,13 +183,13 @@ BOOL CNcGutter::InsertColumn(int nPos, UINT nColID, LPCTSTR szTitle, UINT nWidth
 
 void CNcGutter::PressHeader(UINT nColID, BOOL bPress)
 {
-	int nColumn = GetColumnIndex(nColID);
+	int nCol = GetColumnIndex(nColID);
 
-	UnpressAllColumnHeaders(nColumn);
+	UnpressAllColumnHeaders(nCol);
 	
-	if (nColumn >= 0 && nColumn < m_aColumns.GetSize())
+	if (nCol >= 0 && nCol < m_aColumns.GetSize())
 	{
-		COLUMNDESC* pCD = m_aColumns[nColumn];
+		COLUMNDESC* pCD = m_aColumns[nCol];
 
 		if (pCD->bPressed != bPress)
 		{
@@ -201,12 +201,12 @@ void CNcGutter::PressHeader(UINT nColID, BOOL bPress)
 
 void CNcGutter::SetHeaderTitle(UINT nColID, LPCTSTR szTitle, LPCTSTR szFont, BOOL bSymbolFont)
 {
-	int nColumn = GetColumnIndex(nColID);
+	int nCol = GetColumnIndex(nColID);
 
-	if (nColumn >= 0 && nColumn < m_aColumns.GetSize())
+	if (nCol >= 0 && nCol < m_aColumns.GetSize())
 	{
 		BOOL bRedraw = FALSE;
-		COLUMNDESC* pCD = m_aColumns[nColumn];
+		COLUMNDESC* pCD = m_aColumns[nCol];
 
 		if (!pCD->hFont && szFont)
 		{
@@ -259,7 +259,7 @@ void CNcGutter::SetHeaderTitle(UINT nColID, LPCTSTR szTitle, LPCTSTR szFont, BOO
 			CWindowDC dc(GetCWnd());
 			CRect rHeader;
 
-			if (IsClientColumn(nColumn))
+			if (IsClientColumn(nCol))
 			{
 				GetHeaderRect(rHeader, GHR_CLIENT, FALSE);
 				NcDrawHeader(&dc, rHeader, CLIENT, NULL);
@@ -365,11 +365,11 @@ void CNcGutter::SetColumnSort(UINT nColID, NCGSORT nSortDir, BOOL bExclusive)
 
 NCGSORT CNcGutter::GetColumnSort(UINT nColID) const
 {
-	int nColumn = GetColumnIndex(nColID);
+	int nCol = GetColumnIndex(nColID);
 
-	if (nColumn >= 0 && nColumn < m_aColumns.GetSize())
+	if (nCol >= 0 && nCol < m_aColumns.GetSize())
 	{
-		return m_aColumns[nColumn]->nSortDir;
+		return m_aColumns[nCol]->nSortDir;
 	}
 
 	// else
@@ -378,10 +378,10 @@ NCGSORT CNcGutter::GetColumnSort(UINT nColID) const
 
 void CNcGutter::EnableHeaderClicking(UINT nColID, BOOL bEnable)
 {
-	int nColumn = GetColumnIndex(nColID);
+	int nCol = GetColumnIndex(nColID);
 
-	if (nColumn >= 0 && nColumn < m_aColumns.GetSize())
-		m_aColumns[nColumn]->bClickable = bEnable;
+	if (nCol >= 0 && nCol < m_aColumns.GetSize())
+		m_aColumns[nCol]->bClickable = bEnable;
 }
 
 int CNcGutter::GetColumnIndex(UINT nColID) const
@@ -1231,9 +1231,9 @@ UINT CNcGutter::ColumnIDHitTest(const CPoint& ptScreen) const
 CNcGutter::NCG_HITTEST CNcGutter::HitTest(const CPoint& ptScreen) const
 {
 	DWORD dwItem;
-	int nColumn;
+	int nCol;
 
-	return HitTest(ptScreen, dwItem, nColumn);
+	return HitTest(ptScreen, dwItem, nCol);
 }
 
 BOOL CNcGutter::PtInHeader(const CPoint& ptScreen) const
@@ -1365,7 +1365,7 @@ void CNcGutter::GetGutterRect(CRect& rGutter, BOOL bScreen) const
 
 }
 
-CNcGutter::NCG_HITTEST CNcGutter::HitTest(const CPoint& ptScreen, DWORD& dwItem, int& nColumn) const
+CNcGutter::NCG_HITTEST CNcGutter::HitTest(const CPoint& ptScreen, DWORD& dwItem, int& nCol) const
 {
 	CRect rClient, rHeader, rWindow, rGutter;
 
@@ -1375,12 +1375,12 @@ CNcGutter::NCG_HITTEST CNcGutter::HitTest(const CPoint& ptScreen, DWORD& dwItem,
 
 	if (rHeader.PtInRect(ptScreen))
 	{
-		nColumn = ColumnHitTest(ptScreen);
+		nCol = ColumnHitTest(ptScreen);
 		return NCGHT_HEADER;
 	}
 	else if (rGutter.PtInRect(ptScreen) || rClient.PtInRect(ptScreen))
 	{
-		nColumn = ColumnHitTest(ptScreen);
+		nCol = ColumnHitTest(ptScreen);
 
 		// get item
 		CPoint point(ptScreen);
@@ -1568,9 +1568,9 @@ void CNcGutter::OnNcPaint()
 	}
 }
 
-void CNcGutter::NcDrawHeaderColumn(CDC* pDC, int nColumn, CRect rColumn, CThemed* pTheme, LPPOINT pCursor)
+void CNcGutter::NcDrawHeaderColumn(CDC* pDC, int nCol, CRect rColumn, CThemed* pTheme, LPPOINT pCursor)
 {
-	COLUMNDESC* pCD = m_aColumns[nColumn];
+	COLUMNDESC* pCD = m_aColumns[nCol];
 	BOOL bSorted = (pCD->nSortDir != NCGSORT_NONE);
 	
 	if (!pTheme)

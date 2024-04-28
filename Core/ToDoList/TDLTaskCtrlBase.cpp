@@ -207,7 +207,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 		while (nCol--)
 		{
 			const TDCCOLUMN& tdcc = COLUMNS[nCol];
-			s_mapColumns[tdcc.nColID] = &tdcc;
+			s_mapColumns[tdcc.nColumnID] = &tdcc;
 		}
 	}
 }
@@ -1248,7 +1248,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	{
 		const TDCCOLUMN& tdcc = COLUMNS[nCol];
 		
-		if (tdcc.nColID != TDCC_CLIENT)
+		if (tdcc.nColumnID != TDCC_CLIENT)
 		{
 			m_lcColumns.InsertColumn((nCol + 1), CEnString(tdcc.nIDName), tdcc.GetColumnHeaderAlignment(), 100);
 		}
@@ -1267,11 +1267,11 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	{
 		const TDCCOLUMN& tdcc = COLUMNS[nCol];
 		
-		if (tdcc.nColID != TDCC_CLIENT)
+		if (tdcc.nColumnID != TDCC_CLIENT)
 		{
 			int nItem = (nCol + 1); // zero'th column ignored
 
-			m_hdrColumns.SetItemData(nItem, tdcc.nColID);
+			m_hdrColumns.SetItemData(nItem, tdcc.nColumnID);
 			m_hdrColumns.SetItemToolTip(nItem, CEnString(tdcc.nIDLongName));
 		}
 	}
@@ -1601,7 +1601,7 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 	else if (sort.IsSortingByCustom())
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_CUSTDEF_RET(m_aCustomAttribDefs, sort.nBy, pDef, 0); // this can still fail
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, sort.nColumnID, pDef, 0); // this can still fail
 
 		return m_comparer.CompareTasks(dwTaskID1, dwTaskID2, *pDef, sort.bAscending);
 	}
@@ -1609,10 +1609,10 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 	// else default attribute
 	return m_comparer.CompareTasks(dwTaskID1, 
 									dwTaskID2, 
-									sort.nBy, 
+									sort.nColumnID, 
 									sort.bAscending, 
 									flags.bSortDueTodayHigh,
-									flags.WantIncludeTime(sort.nBy));
+									flags.WantIncludeTime(sort.nColumnID));
 }
 
 DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
@@ -1989,7 +1989,7 @@ void CTDLTaskCtrlBase::GetSortBy(TDSORTCOLUMNS& sort) const
 
 	// initialise multisort if first time
 	if (!sort.IsSorting())
-		sort.SetSortBy(0, m_sort.single.nBy, (m_sort.single.bAscending ? TRUE : FALSE));
+		sort.SetSortBy(0, m_sort.single.nColumnID, (m_sort.single.bAscending ? TRUE : FALSE));
 }
 
 void CTDLTaskCtrlBase::MultiSort(const TDSORTCOLUMNS& sort)
@@ -4645,7 +4645,7 @@ void CTDLTaskCtrlBase::NotifyParentOfColumnEditClick(TDC_COLUMN nColID, DWORD dw
 
 void CTDLTaskCtrlBase::OnHeaderClick(TDC_COLUMN nColID)
 {
-	TDC_COLUMN nPrev = m_sort.single.nBy;
+	TDC_COLUMN nPrevSortBy = m_sort.single.nColumnID;
 	TDC_COLUMN nSortBy = TDCC_NONE;
 	
 	// check for default attribute
@@ -4667,7 +4667,7 @@ void CTDLTaskCtrlBase::OnHeaderClick(TDC_COLUMN nColID)
 		Sort(nSortBy);
 		
 		// notify parent
-		CWnd::GetParent()->SendMessage(WM_TDCN_SORT, CWnd::GetDlgCtrlID(), MAKELPARAM((WORD)nPrev, (WORD)nSortBy));
+		CWnd::GetParent()->SendMessage(WM_TDCN_SORT, CWnd::GetDlgCtrlID(), MAKELPARAM((WORD)nPrevSortBy, (WORD)nSortBy));
 	}
 }
 

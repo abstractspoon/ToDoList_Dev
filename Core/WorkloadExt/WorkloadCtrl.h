@@ -63,7 +63,7 @@ public:
 	void SetSortByAllocTo(LPCTSTR szAllocTo);
 	void Sort(WLC_COLUMNID nBy, BOOL bAscending);
 	void Sort(const WORKLOADSORTCOLUMNS& multi);
-	WLC_COLUMNID GetSortColumn() const { return m_sort.single.nBy; }
+	WLC_COLUMNID GetSortColumn() const { return m_sort.single.nColumnID; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 	CString GetSortByAllocTo() const { return m_sSortByAllocTo; }
 

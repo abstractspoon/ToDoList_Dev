@@ -6218,10 +6218,10 @@ CString CTDCTaskColumnSizer::GetLongestRecurrenceOption()
 	return sLongest;
 }
 
-CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const
 {
 	// Sanity check
-	switch (nCol)
+	switch (nColID)
 	{
 	case TDCC_TIMEESTIMATE:
 	case TDCC_TIMESPENT:
@@ -6231,7 +6231,7 @@ CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& 
 
 			for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 			{
-				CString sTaskVal = m_formatter.GetTaskTimePeriod(aTaskIDs[nID], nCol);
+				CString sTaskVal = m_formatter.GetTaskTimePeriod(aTaskIDs[nID], nColID);
 				sLongest = GetLongerString(sTaskVal, sLongest);
 			}
 

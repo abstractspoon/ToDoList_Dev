@@ -184,7 +184,7 @@ public:
 	void Unsort();
 	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	void MultiSort(const TDSORTCOLUMNS& sort);
-	TDC_COLUMN GetSortBy() const { return m_sort.single.nBy; }
+	TDC_COLUMN GetSortBy() const { return m_sort.single.nColumnID; }
 	void GetSortBy(TDSORTCOLUMNS& sort) const;
 	BOOL IsSorting() const;
 	BOOL IsMultiSorting() const;
