@@ -162,9 +162,9 @@ void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CDayViewUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

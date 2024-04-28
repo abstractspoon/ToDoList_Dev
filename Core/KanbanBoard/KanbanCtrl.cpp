@@ -1115,9 +1115,9 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks)
 	return bChange;
 }
 
-BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute)
+BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribID)
 {
-	if (!pTasks->IsAttributeAvailable(nAttribute))
+	if (!pTasks->IsAttributeAvailable(nAttribID))
 		return FALSE;
 
 	switch (nAttribute)
@@ -1125,7 +1125,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
 		{
-			CString sAttribID(KBUtils::GetAttributeID(nAttribute));
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
 
 			// create once only
 			if (!m_mapAttributeValues.HasMapping(sAttribID))
@@ -1152,8 +1152,8 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	case TDCA_VERSION:
 	case TDCA_TAGS:	
 		{
-			CString sXMLTag(GetXMLTag(nAttribute)); 
-			CString sAttribID(KBUtils::GetAttributeID(nAttribute));
+			CString sXMLTag(GetXMLTag(nAttribID));
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
 
 			CStringArray aNewValues;
 			int nValue = pTasks->GetAttributeCount(sXMLTag);

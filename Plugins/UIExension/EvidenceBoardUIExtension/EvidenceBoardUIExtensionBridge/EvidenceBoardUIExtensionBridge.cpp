@@ -165,9 +165,9 @@ void CEvidenceBoardUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks,
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CEvidenceBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CEvidenceBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CEvidenceBoardUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
