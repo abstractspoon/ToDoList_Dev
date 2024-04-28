@@ -23,7 +23,8 @@ public:
 
 	// IUI_SORT
 	// IUI_TOGGLABLESORT
-	CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, BOOL bAscending);
+	CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, 
+						   BOOL bAscending);
 
 	// IUI_GETNEXTTASK
 	// IUI_GETNEXTVISIBLETASK
@@ -34,9 +35,9 @@ public:
 	CUIExtensionAppCmdData(DWORD dwTaskID);
 
 	// IUI_MOVETASK
-	CUIExtensionAppCmdData(DWORD dwSelTaskID, 
-								DWORD dwParentID, 
-								DWORD dwAfterSiblingID);
+	CUIExtensionAppCmdData(DWORD dwSelTaskID,
+						   DWORD dwParentID,
+						   DWORD dwAfterSiblingID);
 	// IUI_MULTISORT
 	CUIExtensionAppCmdData(const IUIMULTISORT& sortCols);
 
@@ -45,11 +46,11 @@ public:
 	// IUI_SELECTNEXTTASKINCLCURRENT
 	// IUI_SELECTPREVTASK
 	// IUI_SELECTLASTTASK
-	CUIExtensionAppCmdData(TDC_ATTRIBUTE nAttrib, 
-								BOOL bFindReplace, 
-								LPCWSTR szWords, 
-								BOOL bCaseSensitive, 
-								BOOL bWholeWord);
+	CUIExtensionAppCmdData(TDC_ATTRIBUTE nAttribID,
+						   BOOL bFindReplace,
+						   LPCWSTR szWords,
+						   BOOL bCaseSensitive,
+						   BOOL bWholeWord);
 };
 
 //////////////////////////////////////////////////////////////////////

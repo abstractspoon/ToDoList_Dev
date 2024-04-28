@@ -68,7 +68,7 @@ public:
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
 	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttribID);
 	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
@@ -213,7 +213,7 @@ protected:
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL IsOnlySelectedTask(DWORD dwTaskID);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
-	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
+	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttribID, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
 	void RecalcItemShadowColor();
 
@@ -249,7 +249,7 @@ protected:
 	void DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
 	void DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
-	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
+	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttribID, const CString& sValue, int nFlags, COLORREF crText) const;
 	void DrawItemShadow(CDC* pDC, CRect& rItem) const;
 	void DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);

@@ -223,19 +223,19 @@ BOOL CTDCFilter::HasSelectionFilter() const
 	return ((m_nState == TDCFS_FILTER) && (m_filter.nShow == FS_SELECTED));
 }
 
-BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	if (m_nState == TDCFS_ADVANCED)
-		return m_advFilter.params.HasAttribute(nAttrib);
+		return m_advFilter.params.HasAttribute(nAttribID);
 
 	// else
 	ASSERT(0);
 	return FALSE;
 }
 
-BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
+BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALL:
 		return TRUE; // More detailed check done later
@@ -313,9 +313,9 @@ BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttri
 			(m_filter.nShow != FS_DONE));
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttrib);
+			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttribID);
 
 			return m_filter.mapCustomAttrib.HasKey(sAttribID);
 		}

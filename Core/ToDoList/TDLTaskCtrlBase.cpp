@@ -185,7 +185,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_dwEditTitleTaskID(0),
 	m_dwNextUniqueTaskID(100),
 	m_bSortingColumns(FALSE),
-	m_nColorByAttrib(TDCA_NONE),
+	m_nColorByAttribID(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
 	m_comparer(data, mgrContent),
 	m_multitasker(data, mgrContent),
@@ -923,9 +923,9 @@ BOOL CTDLTaskCtrlBase::IsVisible() const
 
 void CTDLTaskCtrlBase::OnCustomAttributesChange()
 {
-	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
 		
 		int nItem = GetColumnIndex(attribDef.GetColumnID());
 		ASSERT(nItem != -1);
@@ -2177,7 +2177,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			}
 			else if (HasStyle(TDCS_COLORTEXTBYATTRIBUTE))
 			{
-				switch (m_nColorByAttrib)
+				switch (m_nColorByAttribID)
 				{
 				case TDCA_CATEGORY:
 					GetAttributeColor(pTDI->GetCategory(0), crText);
@@ -2368,15 +2368,15 @@ BOOL CTDLTaskCtrlBase::SetReferenceTaskColor(COLORREF color)
 	return FALSE;
 }
 
-BOOL CTDLTaskCtrlBase::SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors)
+BOOL CTDLTaskCtrlBase::SetAttributeColors(TDC_ATTRIBUTE nAttribID, const CTDCColorMap& colors)
 {
 	// see if there is any change
-	if ((m_nColorByAttrib == nAttrib) && m_mapAttribColors.MatchAll(colors))
+	if ((m_nColorByAttribID == nAttribID) && m_mapAttribColors.MatchAll(colors))
 	{
 		return FALSE; // no change
 	}
 
-	m_nColorByAttrib = nAttrib;
+	m_nColorByAttribID = nAttribID;
 	m_mapAttribColors.Copy(colors);
 	
 	if (GetSafeHwnd() && HasStyle(TDCS_COLORTEXTBYATTRIBUTE))
@@ -4929,9 +4929,9 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 				AccumulateRecalcColumn(TDCC_TIMEESTIMATE, aColIDs);
 				AccumulateRecalcColumn(TDCC_TIMESPENT, aColIDs);
 
-				for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+				for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
 				{
-					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
 
 					if (attribDef.IsAggregated())
 						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
@@ -5066,14 +5066,14 @@ BOOL CTDLTaskCtrlBase::ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) cons
 	return FALSE;
 }
 
-void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const
+void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCAttributeMap& mapAttribIDs) const
 {
-	mapAttribIDs.Add(nAttrib);
+	mapAttribIDs.Add(nAttribID);
 
 	// Check for attribute interdependencies
 	BOOL bWantUpdateDependentDates = (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && SelectionHasDependents());
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_DEPENDENCY: // --------------------------------------------------------
 		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))

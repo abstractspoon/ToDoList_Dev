@@ -68,7 +68,7 @@ public:
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
@@ -120,7 +120,7 @@ public:
 	BOOL CanGotoNextTask(TDC_GOTO nDirection) const;
 	BOOL GotoNextTopLevelTask(TDC_GOTO nDirection); 
 	BOOL CanGotoNextTopLevelTask(TDC_GOTO nDirection) const;
-	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME) const;
+	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttribID = TDCA_TASKNAME) const;
 	void SelectAll();
 	BOOL CanSelectAll() const;
 
@@ -149,7 +149,7 @@ public:
 	void SetCompletedTaskColor(COLORREF color);
 	void SetFlaggedTaskColor(COLORREF color);
 	void SetReferenceTaskColor(COLORREF color);
-	void SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors);
+	void SetAttributeColors(TDC_ATTRIBUTE nAttribID, const CTDCColorMap& colors);
 	void SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday);
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
     void SetGridlineColor(COLORREF color);
@@ -243,7 +243,7 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual DWORD GetNextNonSelectedTaskID() const;
-	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 
@@ -263,11 +263,11 @@ protected:
 
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
-	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
+	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttribID, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void LoadState();
 	void SaveState();
-	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const;
+	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
@@ -316,12 +316,12 @@ protected:
 	IUIExtensionWindow* GetExtensionWnd(FTC_VIEW nView) const;
 	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const;
 	BOOL HasAnyExtensionViews() const;
-	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttrib) const;
+	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttribID) const;
 	BOOL AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
 	BOOL ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
-	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const;
+	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttribID) const;
 	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
@@ -341,7 +341,7 @@ protected:
 	void RefreshExtensionViewSort(FTC_VIEW nView);
 	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_ATTRIBUTE nBy) const;
 	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;
-	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
+	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttribID) const;
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
 	

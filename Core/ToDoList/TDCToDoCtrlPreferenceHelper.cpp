@@ -141,9 +141,9 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	tdc.SetDueTaskColors(color, crToday);
 
 	CTDCColorMap colors;
-	TDC_ATTRIBUTE nAttrib = prefs.GetAttributeColors(colors);
+	TDC_ATTRIBUTE nAttribID = prefs.GetAttributeColors(colors);
 
-	tdc.SetAttributeColors(nAttrib, colors);
+	tdc.SetAttributeColors(nAttribID, colors);
 
 	// misc
 	tdc.SetSubtaskDragDropPos(prefs.GetNewSubtaskPos() == PUIP_TOP);

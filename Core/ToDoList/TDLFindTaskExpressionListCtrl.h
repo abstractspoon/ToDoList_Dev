@@ -51,7 +51,7 @@ public:
 	BOOL DeleteSelectedRule();
 	BOOL CanDeleteSelectedRule() const { return CanDeleteSelectedCell(); }
 	BOOL HasRules() const { return m_aSearchParams.GetSize(); }
-	BOOL HasRule(TDC_ATTRIBUTE nAttrib) const;
+	BOOL HasRule(TDC_ATTRIBUTE nAttribID) const;
 
 	void MoveSelectedRuleUp();
 	BOOL CanMoveSelectedRuleUp() const;

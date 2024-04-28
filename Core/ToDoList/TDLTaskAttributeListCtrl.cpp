@@ -404,12 +404,12 @@ int CTDLTaskAttributeListCtrl::GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCate
 {
 	if (nCategory != TDCAC_CUSTOM)
 	{
-		for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
+		for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAttrib];
+			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
 
-			if ((attrib.nCategory == nCategory) && WantAddAttribute(attrib.nAttribID))
-				mapAttrib[attrib.nAttribID] = CEnString(attrib.nAttribResID);
+			if ((attrib.nCategory == nCategory) && WantAddAttribute(attrib.nAttributeID))
+				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
 		}
 
 		// Associated time fields
@@ -475,7 +475,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, attribCat.sName);
 
 					POSITION pos = mapAttribs.GetStartPosition();
-					TDC_ATTRIBUTE nAttribID;
+					TDC_ATTRIBUTE nAttribID = TDCA_NONE;
 					CString sAttribName;
 
 					while (pos)
@@ -493,8 +493,8 @@ void CTDLTaskAttributeListCtrl::Populate()
 		else // simple list
 		{
 			// Built-in attributes
-			for (int nAttrib = 1; nAttrib < ATTRIB_COUNT; nAttrib++)
-				CheckAddAttribute(ATTRIBUTES[nAttrib].nAttribID, ATTRIBUTES[nAttrib].nAttribResID);
+			for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
+				CheckAddAttribute(ATTRIBUTES[nAtt].nAttributeID, ATTRIBUTES[nAtt].nAttribResID);
 
 			// Associated time fields
 			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);

@@ -126,9 +126,9 @@ TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAtt
 	return nSelAttrib;
 }
 
-BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
+BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID)
 {
-	BOOL bCustom = KBUtils::IsCustomAttribute(nAttrib);
+	BOOL bCustom = KBUtils::IsCustomAttribute(nAttribID);
 
 	if ((bCustom && sCustomAttribID.IsEmpty()) || (!bCustom && !sCustomAttribID.IsEmpty()))
 	{
@@ -137,9 +137,9 @@ BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const
 	}
 
 	if (bCustom)
-		nAttrib = m_aCustAttribDefs.GetDefinitionID(sCustomAttribID);
+		nAttribID = m_aCustAttribDefs.GetDefinitionID(sCustomAttribID);
 
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttrib));
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttribID));
 }
 
 void CKanbanAttributeComboBox::SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs)

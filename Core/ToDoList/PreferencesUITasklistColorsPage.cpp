@@ -1046,9 +1046,9 @@ void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
 
 	int nNumAttrib = pDefAttribs->GetSize();
 
-	for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
-		const CString& sDef = pDefAttribs->GetAt(nAttrib);
+		const CString& sDef = pDefAttribs->GetAt(nAtt);
 		
 		if (sDef.IsEmpty())
 			continue;

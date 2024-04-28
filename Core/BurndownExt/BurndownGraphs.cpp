@@ -980,10 +980,10 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 		dataset.ClearData();
 		dataset.SetDatasetSize(nNumAttrib);
 
-		for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+		for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 		{
-			const FREQUENCYITEM& fi = aFrequencies[nAttrib];
-			dataset.SetData(nAttrib, fi.nCount);
+			const FREQUENCYITEM& fi = aFrequencies[nAtt];
+			dataset.SetData(nAtt, fi.nCount);
 
 			if (fi.sLabel.IsEmpty())
 				m_aAttribValues.Add(CEnString(IDS_NONE));

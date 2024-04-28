@@ -206,8 +206,8 @@ public:
 	COLORREF GetCompletedTaskColor() const { return m_crDone; }
 	BOOL SetFlaggedTaskColor(COLORREF color);
 	BOOL SetReferenceTaskColor(COLORREF color);
-	BOOL SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors);
-	TDC_ATTRIBUTE GetColorByAttribute() const  { return m_nColorByAttrib; }
+	BOOL SetAttributeColors(TDC_ATTRIBUTE nAttribID, const CTDCColorMap& colors);
+	TDC_ATTRIBUTE GetColorByAttribute() const  { return m_nColorByAttribID; }
 	BOOL SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday);
 	BOOL SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { crDue = m_crDue; crDueToday = m_crDueToday; }
@@ -216,7 +216,7 @@ public:
 
 	BOOL ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const;
 	BOOL ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapAttribIDs) const;
-	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const;
+	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCAttributeMap& mapAttribIDs) const;
 
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	void Resize(const CRect& rect);
@@ -273,7 +273,7 @@ protected:
 	COLORREF m_crDueToday, m_crFlagged, m_crReference;
 	CDWordArray m_aPriorityColors;
 	CTDCColorMap m_mapAttribColors;
-	TDC_ATTRIBUTE m_nColorByAttrib;
+	TDC_ATTRIBUTE m_nColorByAttribID;
 	CBrush m_brDue, m_brDueToday;
 	CFontCache m_fonts;
 	CEnImageList m_ilCheckboxes, m_ilColSymbols;
