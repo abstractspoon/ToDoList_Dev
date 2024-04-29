@@ -5972,12 +5972,13 @@ BEGIN
     IDS_ATTRIBTIP_DATEREQUIRED "Date must be set"
     IDS_ATTRIBUTES          "Attributes"
     IDS_ATTRIBCAT_OTHER     "Other"
-    IDS_ATTRIBCAT_TEXT      "Text"
+    IDS_ATTRIBCAT_SINGLETEXT "Text (Single)"
     IDS_ATTRIBCAT_NUMERIC   "Numeric"
     IDS_ATTRIBCAT_DATETIME  "Date/Time"
     IDS_ATTRIBCAT_TIMEPERIOD "Time Period"
     IDS_ATTRIBCAT_CUSTOM    "Custom"
     IDS_TDLBC_TIMEREMAINING "Time Remaining"
+    IDS_ATTRIBCAT_MULTITEXT "Text (Multi)"
 END
 
 #endif    // English (Australia) resources
