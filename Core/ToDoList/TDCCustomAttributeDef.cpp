@@ -374,7 +374,7 @@ TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel, BOOL
 	dwAttribType(TDCCA_STRING),
 	nHorzAlignment(DT_LEFT),
 	dwFeatures(TDCCAF_SORT),
-	nColID(TDCC_NONE),
+	nColumnID(TDCC_NONE),
 	nAttributeID(TDCA_NONE),
 	bEnabled(bEnable)
 {
@@ -394,7 +394,7 @@ TDCCUSTOMATTRIBUTEDEFINITION& TDCCUSTOMATTRIBUTEDEFINITION::operator=(const TDCC
 	sLabel = attribDef.sLabel;
 	nHorzAlignment = attribDef.nHorzAlignment;
 	dwFeatures = attribDef.dwFeatures;
-	nColID = attribDef.nColID;
+	nColumnID = attribDef.nColumnID;
 	nAttributeID = attribDef.nAttributeID;
 	bEnabled = attribDef.bEnabled;
 
@@ -425,7 +425,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::Matches(const TDCCUSTOMATTRIBUTEDEFINITION& a
 		(sLabel != attribDef.sLabel) ||
 		(nHorzAlignment != attribDef.nHorzAlignment) ||
 		(dwFeatures != attribDef.dwFeatures) ||
-		(nColID != attribDef.nColID) ||
+		(nColumnID != attribDef.nColumnID) ||
 		(nAttributeID != attribDef.nAttributeID) ||
 		(bEnabled != attribDef.bEnabled))
 	{
@@ -1240,7 +1240,7 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 	if (!bAppend)
 		mapCols.RemoveAll();
 
-	int nColsSize = mapCols.GetCount();
+	int nNumCols = mapCols.GetCount();
 	int nDef = GetSize();
 
 	while (nDef--)
@@ -1251,7 +1251,7 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 			mapCols.Add(def.GetColumnID());
 	}
 
-	return (mapCols.GetCount() - nColsSize);
+	return (mapCols.GetCount() - nNumCols);
 }
 
 const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(TDC_ATTRIBUTE nCustAttribID) const
@@ -1350,7 +1350,7 @@ void CTDCCustomAttribDefinitionArray::RebuildIDs()
 	{
 		TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
 
-		attribDef.nColID = (TDC_COLUMN)nCustColID++;
+		attribDef.nColumnID = (TDC_COLUMN)nCustColID++;
 		attribDef.nAttributeID = (TDC_ATTRIBUTE)nCustAttribID++;
 	}
 }

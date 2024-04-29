@@ -252,7 +252,7 @@ protected:
 	enum HCHDRPART { NONCLIENT, CLIENT }; // private
 
 	void NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, const LPPOINT pCursor);
-	void NcDrawHeaderColumn(CDC* pDC, int nColumn, CRect rColumn, CThemed* pTheme, const LPPOINT pCursor);
+	void NcDrawHeaderColumn(CDC* pDC, int nCol, CRect rColumn, CThemed* pTheme, const LPPOINT pCursor);
 	void UpdateHeaderHotRects();
 	void UnpressAllColumnHeaders(int nExcludeCol = -1);
 	int RecalcGutterWidth();

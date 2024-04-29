@@ -389,10 +389,10 @@ int CTDLCsvImportExportDlg::LoadMasterColumnMapping()
 	BuildDefaultMasterColumnMapping();
 
 	m_bAlwaysExportTaskIDs = m_pPrefs->GetProfileInt(m_sPrefsKey, _T("AlwaysExportTaskIDs"), TRUE);
-	int nColumns = m_pPrefs->GetProfileInt(m_sPrefsKey, _T("ColumnCount"), 0);
+	int nNumCols = m_pPrefs->GetProfileInt(m_sPrefsKey, _T("ColumnCount"), 0);
 
 	// overwrite with translations unless they are empty names
-	for (int nCol = 0; nCol < nColumns; nCol++)
+	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
 		CString sKey = Misc::MakeKey(_T("ColumnAttrib%d"), nCol);
 		TDC_ATTRIBUTE attrib = (TDC_ATTRIBUTE)m_pPrefs->GetProfileInt(m_sPrefsKey, sKey, TDCA_NONE);
@@ -425,10 +425,10 @@ void CTDLCsvImportExportDlg::SaveMasterColumnMapping() const
 {
 	m_pPrefs->WriteProfileInt(m_sPrefsKey, _T("AlwaysExportTaskIDs"), m_bAlwaysExportTaskIDs);
 
-	int nColumns = m_aMasterColumnMapping.GetSize();
-	m_pPrefs->WriteProfileInt(m_sPrefsKey, _T("ColumnCount"), nColumns);
+	int nNumCols = m_aMasterColumnMapping.GetSize();
+	m_pPrefs->WriteProfileInt(m_sPrefsKey, _T("ColumnCount"), nNumCols);
 
-	for (int nCol = 0; nCol < nColumns; nCol++)
+	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
 		const TDCATTRIBUTEMAPPING& col = m_aMasterColumnMapping[nCol];
 
@@ -534,9 +534,9 @@ void CTDLCsvImportExportDlg::SetMasterColumnName(TDC_ATTRIBUTE attrib, LPCTSTR s
 
 int CTDLCsvImportExportDlg::FindMasterColumn(TDC_ATTRIBUTE attrib) const
 {
-	int nColumns = m_aMasterColumnMapping.GetSize();
+	int nNumCols = m_aMasterColumnMapping.GetSize();
 
-	for (int nCol = 0; nCol < nColumns; nCol++)
+	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
 		if (m_aMasterColumnMapping[nCol].nAttributeID == attrib)
 			return nCol;
@@ -548,9 +548,9 @@ int CTDLCsvImportExportDlg::FindMasterColumn(TDC_ATTRIBUTE attrib) const
 
 int CTDLCsvImportExportDlg::FindMasterColumn(LPCTSTR szColumn) const
 {
-	int nColumns = m_aMasterColumnMapping.GetSize();
+	int nNumCols = m_aMasterColumnMapping.GetSize();
 
-	for (int nCol = 0; nCol < nColumns; nCol++)
+	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{
 		if (m_aMasterColumnMapping[nCol].sColumnName.CompareNoCase(szColumn) == 0)
 			return nCol;

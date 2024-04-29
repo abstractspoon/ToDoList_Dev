@@ -1347,7 +1347,7 @@ void CGanttCtrl::BuildTreeColumns()
 								CEnString(GANTTTREECOLUMNS[nCol].nIDColName), 
 								(GANTTTREECOLUMNS[nCol].nColAlign | HDF_STRING),
 								0,
-								GANTTTREECOLUMNS[nCol].nColID);
+								GANTTTREECOLUMNS[nCol].nColumnID);
 	}
 }
 
@@ -1621,7 +1621,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 	m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
+		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CGanttCtrl::Sort(const GANTTSORTCOLUMNS& multi)
@@ -4906,7 +4906,7 @@ int CALLBACK CGanttCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 
 	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		if (sort.cols[nCol].nBy == TDCA_NONE)
+		if (sort.cols[nCol].nColumnID == TDCA_NONE)
 			break;
 
 		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);
@@ -4927,7 +4927,7 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 	int nCompare = 0;
 
 	// Optimise for task ID
-	if (col.nBy == GTLCC_TASKID)
+	if (col.nColumnID == GTLCC_TASKID)
 	{
 		nCompare = (dwTaskID1 - dwTaskID2);
 	}
@@ -4942,7 +4942,7 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 			return 0;
 		}
 
-		switch (col.nBy)
+		switch (col.nColumnID)
 		{
 		case GTLCC_TITLE:
 			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);

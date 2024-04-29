@@ -87,7 +87,7 @@ void CTDLMultiSortDlg::BuildCombos()
 		for (nCol = 0; nCol < NUM_COLUMNS; nCol++)
 		{
 			const TDCCOLUMN& col = COLUMNS[nCol];
-			TDC_COLUMN nColID = col.nColID;
+			TDC_COLUMN nColID = col.nColumnID;
 
 			if (!IsColumnVisible(nColID))
 				continue;
@@ -127,20 +127,17 @@ void CTDLMultiSortDlg::BuildCombos()
 	}
 }
 
-BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN col) const
+BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN nColID) const
 {
 	// special cases:
-	if (col == TDCC_CLIENT)
-	{
+	if (nColID == TDCC_CLIENT)
 		return TRUE;
-	}
-	else if (col == TDCC_NONE)
-	{
+
+	if (nColID == TDCC_NONE)
 		return FALSE;
-	}
 
 	// else test column
-	return m_mapVisibleColumns.Has(col);
+	return m_mapVisibleColumns.Has(nColID);
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby1() 

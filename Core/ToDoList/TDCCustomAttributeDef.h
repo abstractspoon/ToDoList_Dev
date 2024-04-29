@@ -95,7 +95,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString GetColumnTitle() const;
 	CString GetToolTip() const;
 
-	inline TDC_COLUMN GetColumnID() const { return nColID; }
+	inline TDC_COLUMN GetColumnID() const { return nColumnID; }
 	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttributeID; }
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
@@ -161,7 +161,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 private:
 	// these are managed internally
 	DWORD dwAttribType;
-	TDC_COLUMN nColID;
+	TDC_COLUMN nColumnID;
 	TDC_ATTRIBUTE nAttributeID;
 	TDCCUSTOMATTRIBUTECALCULATION calculation;
 	// ----------------------------------------------------------------

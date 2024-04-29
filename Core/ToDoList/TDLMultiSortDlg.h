@@ -62,7 +62,7 @@ protected:
 
 protected:
 	void BuildCombos();
-	BOOL IsColumnVisible(TDC_COLUMN col) const;
+	BOOL IsColumnVisible(TDC_COLUMN nColID) const;
 	void EnableControls();
 
 };

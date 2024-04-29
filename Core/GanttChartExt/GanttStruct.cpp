@@ -1035,19 +1035,19 @@ BOOL GANTTDATERANGE::HasEnd() const
 
 //////////////////////////////////////////////////////////////////////
 
-GANTTSORTCOLUMN::GANTTSORTCOLUMN() : nBy(GTLCC_NONE), bAscending(-1)
+GANTTSORTCOLUMN::GANTTSORTCOLUMN() : nColumnID(GTLCC_NONE), bAscending(-1)
 {
 
 }
 
 BOOL GANTTSORTCOLUMN::Matches(GTLC_COLUMN nSortBy, BOOL bSortAscending) const
 {
-	return ((nBy == nSortBy) && (bAscending == bSortAscending));
+	return ((nColumnID == nSortBy) && (bAscending == bSortAscending));
 }
 
 BOOL GANTTSORTCOLUMN::operator==(const GANTTSORTCOLUMN& other) const
 {
-	return Matches(other.nBy, other.bAscending);
+	return Matches(other.nColumnID, other.bAscending);
 }
 
 BOOL GANTTSORTCOLUMN::operator!=(const GANTTSORTCOLUMN& other) const
@@ -1060,8 +1060,8 @@ BOOL GANTTSORTCOLUMN::Set(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAsce
 	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
 		return FALSE;
 
-	GTLC_COLUMN nOldSort = nBy;
-	nBy = nSortBy;
+	GTLC_COLUMN nOldSort = nColumnID;
+	nColumnID = nSortBy;
 
 	if (nSortBy != GTLCC_NONE)
 	{
@@ -1143,10 +1143,10 @@ GANTTSORT::GANTTSORT() : bMultiSort(FALSE)
 BOOL GANTTSORT::IsSorting() const
 {
 	if (!bMultiSort)
-		return (single.nBy != GTLCC_NONE);
+		return (single.nColumnID != GTLCC_NONE);
 
 	// else
-	return (multi.cols[0].nBy != GTLCC_NONE);
+	return (multi.cols[0].nColumnID != GTLCC_NONE);
 }
 
 BOOL GANTTSORT::IsSortingBy(GTLC_COLUMN nColID) const
@@ -1159,7 +1159,7 @@ BOOL GANTTSORT::IsSortingBy(GTLC_COLUMN nColID) const
 
 BOOL GANTTSORT::IsSingleSortingBy(GTLC_COLUMN nColID) const
 {
-	return (!bMultiSort && (single.nBy == nColID));
+	return (!bMultiSort && (single.nColumnID == nColID));
 }
 
 BOOL GANTTSORT::IsMultiSortingBy(GTLC_COLUMN nColID) const
@@ -1168,7 +1168,7 @@ BOOL GANTTSORT::IsMultiSortingBy(GTLC_COLUMN nColID) const
 	{
 		for (int nCol = 0; nCol < 3; nCol++)
 		{
-			if (multi.cols[nCol].nBy == nColID)
+			if (multi.cols[nCol].nColumnID == nColID)
 				return TRUE;
 		}
 	}

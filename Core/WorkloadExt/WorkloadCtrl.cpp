@@ -1105,7 +1105,7 @@ void CWorkloadCtrl::BuildTaskTreeColumns()
 								CEnString(WORKLOADTREECOLUMNS[nCol].nIDColName), 
 								(WORKLOADTREECOLUMNS[nCol].nColAlign | HDF_STRING),
 								0,
-								WORKLOADTREECOLUMNS[nCol].nColID);
+								WORKLOADTREECOLUMNS[nCol].nColumnID);
 	}
 
 	// Build Task totals once only
@@ -1607,7 +1607,7 @@ void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, B
 		m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nBy);
+		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
@@ -2659,7 +2659,7 @@ int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM
 
 	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		if (sort.cols[nCol].nBy == TDCA_NONE)
+		if (sort.cols[nCol].nColumnID == TDCA_NONE)
 			break;
 
 		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);
@@ -2680,7 +2680,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 	int nCompare = 0;
 
 	// Optimise for task ID
-	if (col.nBy == WLCC_TASKID)
+	if (col.nColumnID == WLCC_TASKID)
 	{
 		nCompare = (dwTaskID1 - dwTaskID2);
 	}
@@ -2695,7 +2695,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			return 0;
 		}
 
-		switch (col.nBy)
+		switch (col.nColumnID)
 		{
 		case WLCC_TITLE:
 			nCompare = Compare(pWI1->sTitle, pWI2->sTitle);

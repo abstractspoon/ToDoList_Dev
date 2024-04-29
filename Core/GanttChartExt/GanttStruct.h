@@ -207,7 +207,7 @@ struct GANTTSORTCOLUMN
 	BOOL operator==(const GANTTSORTCOLUMN& other) const;
 	BOOL operator!=(const GANTTSORTCOLUMN& other) const;
 
-	GTLC_COLUMN nBy;
+	GTLC_COLUMN nColumnID;
 	BOOL bAscending;
 };
 
@@ -282,7 +282,7 @@ struct GTCDISPLAYMODE
 
 struct GANTTCOLUMN
 {
-	GTLC_COLUMN nColID;
+	GTLC_COLUMN nColumnID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;

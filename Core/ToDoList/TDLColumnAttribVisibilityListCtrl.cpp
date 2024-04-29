@@ -28,7 +28,7 @@ enum
 struct TDCCOLATTRIBITEM
 {
 	UINT nIDName;
-	TDC_COLUMN nCol;
+	TDC_COLUMN nColumnID;
 };
 
 const TDCCOLATTRIBITEM ERRITEM = { 0, TDCC_NONE };
@@ -82,13 +82,13 @@ TDCCOLATTRIBITEM ITEMS[] =
 };
 const int NUM_ITEMS = (sizeof(ITEMS) / sizeof(TDCCOLATTRIBITEM));
 
-const TDCCOLATTRIBITEM& GetColAttrib(TDC_COLUMN nCol)
+const TDCCOLATTRIBITEM& GetColAttrib(TDC_COLUMN nColID)
 {
 	int nItem = NUM_ITEMS;
 
 	while (nItem--)
 	{
-		if (ITEMS[nItem].nCol == nCol)
+		if (ITEMS[nItem].nColumnID == nColID)
 			return ITEMS[nItem];
 	}
 
@@ -140,7 +140,7 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 		const TDCCOLATTRIBITEM& caItem = ITEMS[nItem];
 
 		int nIndex = InsertRow(CEnString(caItem.nIDName), nItem);
-		SetItemData(nIndex, caItem.nCol);
+		SetItemData(nIndex, caItem.nColumnID);
 	}
 
 	ASSERT(GetItemCount() == NUM_ITEMS);

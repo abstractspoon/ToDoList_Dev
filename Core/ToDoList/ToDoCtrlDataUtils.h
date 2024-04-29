@@ -462,9 +462,9 @@ public:
 	// general
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
 
-	CString GetLongestValue(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const;
-	CString GetLongestValue(TDC_COLUMN nCol, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const;
-	CString GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const;
+	CString GetLongestTime(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const;
 	CString GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
 
 	// specific
@@ -491,7 +491,7 @@ protected:
 						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 						  CTDCLongestItemMap& mapLongest) const;
 
-	CString GetLongestValue(TDC_COLUMN nCol, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const;
+	CString GetLongestValue(TDC_COLUMN nColID, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const;
 
 	// specific
 	CString GetLongestSubtaskDone(const CDWordArray& aTaskIDs) const;

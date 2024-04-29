@@ -653,7 +653,7 @@ struct TDCCONTROL
 
 struct TDCCOLUMN
 {
-	TDC_COLUMN nColID;
+	TDC_COLUMN nColumnID;
 	UINT nIDName;
 	UINT nIDLongName;
 	UINT nTextAlignment;
@@ -2468,13 +2468,13 @@ struct TDCCOLEDITVISIBILITY
 		return FALSE;
 	}
 	
-	BOOL IsColumnVisible(TDC_COLUMN nCol) const
+	BOOL IsColumnVisible(TDC_COLUMN nColID) const
 	{
-		if (!IsSupportedColumn(nCol))
+		if (!IsSupportedColumn(nColID))
 			return FALSE;
 
 		// else
-		return mapVisibleColumns.Has(nCol);
+		return mapVisibleColumns.Has(nColID);
 	}
 	
 	BOOL SetEditFieldVisible(TDC_ATTRIBUTE nAttribID, BOOL bVisible = TRUE)
@@ -2543,17 +2543,17 @@ struct TDCCOLEDITVISIBILITY
 		return TRUE;
 	}
 	
-	void SetColumnVisible(TDC_COLUMN nCol, BOOL bVisible = TRUE)
+	void SetColumnVisible(TDC_COLUMN nColID, BOOL bVisible = TRUE)
 	{
 		// special cases
-		if (nCol == TDCC_NONE)
+		if (nColID == TDCC_NONE)
 		{
 			return;
 		}
 		else if (bVisible)
 		{
 			// Times cannot be shown if corresponding date column is hidden
-			switch (nCol)
+			switch (nColID)
 			{
 			case TDCC_DUETIME:
 				bVisible &= IsColumnVisible(TDCC_DUEDATE);
@@ -2575,7 +2575,7 @@ struct TDCCOLEDITVISIBILITY
 		else // !bVisible
 		{
 			// Times cannot be shown if corresponding date column is hidden
-			switch (nCol)
+			switch (nColID)
 			{
 			case TDCC_DUEDATE:
 				SetColumnVisible(TDCC_DUETIME, FALSE);
@@ -2595,15 +2595,15 @@ struct TDCCOLEDITVISIBILITY
 			}
 		}
 
-		BOOL bFound = mapVisibleColumns.Has(nCol);
+		BOOL bFound = mapVisibleColumns.Has(nColID);
 		
 		if (bVisible && !bFound) // show
 		{
-			mapVisibleColumns.Add(nCol);
+			mapVisibleColumns.Add(nColID);
 		}
 		else if (!bVisible && bFound) // hide
 		{
-			mapVisibleColumns.Remove(nCol);
+			mapVisibleColumns.Remove(nColID);
 		}
 
 		UpdateEditVisibility();

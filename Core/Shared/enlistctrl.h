@@ -122,7 +122,7 @@ public:
 	int GetColumnCount() const;
 	int GetSortColumn() const { return m_nSortColumn; }
 	BOOL IsSorting() const { return (m_nSortColumn != -1); }
-	void SetSortColumn(int nColumn, BOOL bResort = TRUE);
+	void SetSortColumn(int nCol, BOOL bResort = TRUE);
 	COLORREF GetColumnTextColor(int nCol) const;
 	void SetColumnTextColor(int nCol, COLORREF color);
 	void SetColumnFormat(int nCol, int nFormat);

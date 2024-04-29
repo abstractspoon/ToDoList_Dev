@@ -583,13 +583,13 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			GANTTSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID1);
+			sort.cols[0].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID2);
+			sort.cols[1].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID2);
 			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID3);
+			sort.cols[2].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID3);
 			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlGantt.Sort(sort);

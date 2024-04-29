@@ -494,13 +494,13 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			WORKLOADSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID1);
+			sort.cols[0].nColumnID = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID2);
+			sort.cols[1].nColumnID = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID2);
 			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID3);
+			sort.cols[2].nColumnID = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID3);
 			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlWorkload.Sort(sort);

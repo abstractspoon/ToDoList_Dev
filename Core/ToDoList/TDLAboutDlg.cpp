@@ -138,14 +138,14 @@ BOOL CTDLAboutDlg::OnInitDialog()
 	for (int nRow = 0; nRow < nRows; nRow++)
 	{
 		CStringArray aCols;
-		int nCols = Misc::Split(aRows[nRow], aCols, '\t', TRUE);
+		int nNumCols = Misc::Split(aRows[nRow], aCols, '\t', TRUE);
 		
-		if (!nCols)
+		if (!nNumCols)
 			continue;
 		
 		int nIndex = m_lcContributors.InsertItem(nRow, aCols[0]);
 		
-		if (nCols >= 2)
+		if (nNumCols >= 2)
 			m_lcContributors.SetItemText(nIndex, 1, aCols[1]);
 	}
 	
