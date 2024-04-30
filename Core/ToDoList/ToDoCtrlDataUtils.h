@@ -528,6 +528,9 @@ protected:
 	const CToDoCtrlData& m_data;
 
 	CTDCTaskFormatter m_formatter;
+
+protected:
+	static void CopyDate(const COleDateTime& dtFrom, COleDateTime& dtTo);
 };
 
 //////////////////////////////////////////////////////////////////////

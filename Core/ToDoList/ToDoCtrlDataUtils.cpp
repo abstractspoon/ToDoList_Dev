@@ -6528,10 +6528,10 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 	TDCCADATA dataFrom;
 	m_data.GetTaskAttributeValue(tdiFrom, nFromAttribID, dataFrom);
 
-	CStringArray aValues;
-
 	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttribID);
 	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttribID);
+
+	CStringArray aValues;
 
 	if ((nToCat == TDCAC_SINGLETEXT) || (nToCat == TDCAC_MULTITEXT))
 	{
@@ -6578,7 +6578,14 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 			break;
 
 		case TDCAC_DATETIME:
-			dataFrom.Set(m_formatter.GetDateTime(dataFrom.AsDate()));
+			{
+				COleDateTime date(dataFrom.AsDate());
+
+				if ((int)date.m_dt == 0)
+					dataFrom.Set(m_formatter.GetTimeOnly(date, TDC::MapAttributeToDate(nFromAttribID)));
+				else
+					dataFrom.Set(m_formatter.GetDateTime(date));
+			}
 			break;
 
 		case TDCAC_TIMEPERIOD:
@@ -6607,13 +6614,13 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 	case TDCA_FLAG:			tdiTo.bFlagged		= dataFrom.AsBool();	break;
 	case TDCA_LOCK:			tdiTo.bLocked		= dataFrom.AsBool();	break;
 
-	case TDCA_DONEDATE:		tdiTo.dateDone		= dataFrom.AsDate();	break;
-	case TDCA_DUEDATE:		tdiTo.dateDue		= dataFrom.AsDate();	break;
-	case TDCA_STARTDATE:	tdiTo.dateStart		= dataFrom.AsDate();	break;
-
 	case TDCA_TIMEESTIMATE:	dataFrom.AsTimePeriod(tdiTo.timeEstimate);	break;
 	case TDCA_TIMESPENT:	dataFrom.AsTimePeriod(tdiTo.timeSpent);		break;
 	case TDCA_COST:			dataFrom.AsCost(tdiTo.cost);				break;
+
+	case TDCA_DONEDATE:		CopyDate(dataFrom.AsDate(), tdiTo.dateDone);	break;
+	case TDCA_DUEDATE:		CopyDate(dataFrom.AsDate(), tdiTo.dateDue);		break;
+	case TDCA_STARTDATE:	CopyDate(dataFrom.AsDate(), tdiTo.dateStart);	break;
 
 	case TDCA_FILELINK:		dataFrom.AsArray(aValues); tdiTo.aFileLinks.Copy(aValues);	break;
 	case TDCA_ALLOCTO:		dataFrom.AsArray(aValues); tdiTo.aAllocTo.Copy(aValues);	break;
@@ -6626,7 +6633,20 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nToAttribID, pDef, FALSE);
 
-			tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dataFrom);
+			if (nFromCat == TDCAC_DATETIME)
+			{
+				TDCCADATA dataTo;
+				tdiTo.GetCustomAttributeValue(pDef->sUniqueID, dataTo);
+				
+				COleDateTime dtTo(dataTo.AsDate());
+				CopyDate(dataFrom.AsDate(), dtTo);
+
+				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, TDCCADATA(dataTo));
+			}
+			else
+			{
+				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dataFrom);
+			}
 			break;
 		}
 		ASSERT(0); // I've missed something
@@ -6634,6 +6654,20 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 	}
 
 	return TRUE;
+}
+
+void CTDCTaskAttributeCopier::CopyDate(const COleDateTime& dtFrom, COleDateTime& dtTo)
+{
+	if (CDateHelper::IsDateSet(CDateHelper::GetDateOnly(dtFrom)))
+	{
+		dtTo = dtFrom;
+	}
+	else // 'From' has time only
+	{
+		// 'To' must have date component
+		if (CDateHelper::IsDateSet(CDateHelper::GetDateOnly(dtTo)))
+			dtTo = CDateHelper::MakeDate(dtTo, dtFrom);
+	}
 }
 
 BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const
