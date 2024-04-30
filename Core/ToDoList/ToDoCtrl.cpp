@@ -320,6 +320,10 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnTDCSelectDependencies)
+	ON_REGISTERED_MESSAGE(WM_TDCM_COPYTASKATTRIBUTE, OnTDCCopyAttributeValue)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CANCOPYTASKATTRIBUTE, OnTDCCanCopyAttributeValue)
+	ON_REGISTERED_MESSAGE(WM_TDCM_PASTETASKATTRIBUTE, OnTDCPasteAttributeValue)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CANPASTETASKATTRIBUTE, OnTDCCanPasteAttributeValue)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCNotifyColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnTDCNotifyTaskAttributeEdited)
@@ -6309,7 +6313,48 @@ BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
+LRESULT CToDoCtrl::OnTDCCanCopyAttributeValue(WPARAM wParam, LPARAM lParam)
+{
+	TDC_COLUMN nColID = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)wParam);
+
+	return CanCopyAttributeColumnValues(nColID, TRUE);
+}
+
+LRESULT CToDoCtrl::OnTDCCanPasteAttributeValue(WPARAM wParam, LPARAM lParam)
+{
+	if (!lParam)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TDC_COLUMN nFromColID = TDCC_NONE;
+	TDC_COLUMN nToColID = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)wParam);
+
+	if (!CanPasteAttributeColumnValues(nToColID, TRUE, nFromColID))
+		return 0L;
+
+	TDC_ATTRIBUTE* pFromAttribID = (TDC_ATTRIBUTE*)lParam;
+	*pFromAttribID = TDC::MapColumnToAttribute(nFromColID);
+
+	return TRUE;
+}
+
+LRESULT CToDoCtrl::OnTDCCopyAttributeValue(WPARAM wParam, LPARAM lParam)
+{
+	TDC_COLUMN nFromColID = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)wParam);
+
+	return CopyAttributeColumnValues(nFromColID, TRUE);
+}
+
+LRESULT CToDoCtrl::OnTDCPasteAttributeValue(WPARAM wParam, LPARAM lParam)
+{
+	TDC_COLUMN nToColID = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)wParam);
+
+	return PasteAttributeColumnValues(nToColID, TRUE);
+}
+
+BOOL CToDoCtrl::CanCopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
 	if (!GetUpdateControlsItem())
 		return FALSE;
@@ -6322,7 +6367,7 @@ BOOL CToDoCtrl::CanCopyColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) 
 
 BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
 {
-	if (!CanCopyColumnValues(nColID, bSelectedTasksOnly))
+	if (!CanCopyAttributeColumnValues(nColID, bSelectedTasksOnly))
 		return FALSE;
 
 	// Build a task file with sequential IDs of the values

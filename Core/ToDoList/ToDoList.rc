@@ -4194,6 +4194,13 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "T&oday's Date",               ID_TOOLARG_TODAYSDATE
     END
+    POPUP "AttributetCtrl"
+    BEGIN
+        MENUITEM "Copy Attribute Value",        ID_ATTRIBLIST_COPYATTRIBVALUES
+
+        MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
+
+    END
 END
 
 IDR_TREEDRAGDROP MENU DISCARDABLE 
@@ -5979,6 +5986,14 @@ BEGIN
     IDS_ATTRIBCAT_CUSTOM    "Custom"
     IDS_TDLBC_TIMEREMAINING "Time Remaining"
     IDS_ATTRIBCAT_MULTITEXT "Text (Multi)"
+    IDS_ATTRIBCTRL_COPYATTRIBVALUE "Copy '%s' Value"
+    IDS_ATTRIBCTRL_PASTEATTRIBVALUE "Paste '%s' Value to '%s'"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ATTRIBCTRL_COPYATTRIBVALUES "Copy '%s' Values"
+    IDS_ATTRIBCTRL_PASTEATTRIBVALUES "Paste '%s' Values to '%s'"
 END
 
 #endif    // English (Australia) resources

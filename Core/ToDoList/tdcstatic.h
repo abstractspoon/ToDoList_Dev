@@ -217,6 +217,20 @@ namespace TDC
 		return _T("");
 	}
 
+	static CString GetAttributeName(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+	{
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_RET(aCustAttribDefs, nAttribID, pDef, _T(""));
+
+			return pDef->sLabel;
+		}
+
+		// else
+		return GetAttributeName(nAttribID);
+	}
+
 	static BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
 	{
 		switch (nAttribID)
