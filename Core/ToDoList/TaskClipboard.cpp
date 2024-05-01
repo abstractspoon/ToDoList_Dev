@@ -38,7 +38,7 @@ BOOL CTaskClipboard::IsEmpty()
 BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sValues, TDC_COLUMN nColID)
 {
 	// Sanity checks
-	if (!tasks.GetTaskCount() || sID.IsEmpty() || sValues.IsEmpty())
+	if (!tasks.GetTaskCount() || sID.IsEmpty() || (sValues.IsEmpty() && (nColID == TDCC_NONE)))
 	{
 		ASSERT(0);
 		return FALSE;
