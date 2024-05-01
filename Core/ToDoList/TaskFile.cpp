@@ -451,6 +451,7 @@ void CTaskFile::Reset()
 	ClearHandleMap();
 
 	m_dwNextUniqueID = 1;
+	m_mapReadableAttrib.RemoveAll();
 }
 
 BOOL CTaskFile::CopyTaskFrom(const ITaskList* pSrcTasks, HTASKITEM hSrcTask, HTASKITEM hDestParent, 
@@ -1734,11 +1735,41 @@ BOOL CTaskFile::SetReportDetails(LPCTSTR szTitle, const COleDateTime& date)
 void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 {
 	m_mapReadableAttrib.Copy(mapAttrib);
+
+	POSITION pos = mapAttrib.GetStartPosition();
+
+	while (pos)
+		AddItem(TDL_AVAILABLEATTRIB, (int)mapAttrib.GetNext(pos), XIT_ELEMENT);
+}
+
+void CTaskFile::LoadAvailableAttributes() const
+{
+	if (!m_mapReadableAttrib.GetCount())
+	{
+		const CXmlItem* pXIAttrib = GetItem(TDL_AVAILABLEATTRIB);
+
+		if (!pXIAttrib)
+		{
+			m_mapReadableAttrib.Add(TDCA_ALL);
+		}
+		else
+		{
+			while (pXIAttrib)
+			{
+				m_mapReadableAttrib.Add((TDC_ATTRIBUTE)pXIAttrib->GetValueI());
+				pXIAttrib = pXIAttrib->GetSibling();
+			}
+		}
+	}
 }
 
 bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
 {
-	if (!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.Has(TDCA_ALL))
+	LoadAvailableAttributes();
+
+	ASSERT(m_mapReadableAttrib.GetCount());
+
+	if (m_mapReadableAttrib.Has(TDCA_ALL))
 		return (nAttribID != TDCA_NONE);
 
 	if (m_mapReadableAttrib.Has(TDCA_NONE))

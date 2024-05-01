@@ -547,10 +547,10 @@ protected:
 	DWORD m_dwNextUniqueID;
 	BOOL m_bISODates;
 	CString m_sHtmlImgFolder;
-	CTDCAttributeMap m_mapReadableAttrib;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	mutable CMap <DWORD, DWORD, HTASKITEM, HTASKITEM&> m_mapHandles;
+	mutable CTDCAttributeMap m_mapReadableAttrib;
 
 protected:
 	void BuildHandleMap() const;
@@ -578,6 +578,7 @@ protected:
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 	CString FormatDate(const COleDateTime& date) const;
+	void LoadAvailableAttributes() const;
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;

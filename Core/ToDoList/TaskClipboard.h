@@ -16,16 +16,25 @@ class CTaskClipboard
 public:
 	static void Reset();
 	static BOOL IsEmpty();
-	static BOOL SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskValues);
-	static BOOL ClipIDMatches(const CString& sID);
+	static BOOL TasklistIDMatches(const CString& sRefTasklistID);
 
-	static int GetTasks(CTaskFile& tasks, const CString& sID);
-	static int GetTaskCount(const CString& sID = _T(""));
+	static BOOL SetTasks(const CTaskFile& tasks, const CString& sRefTasklistID, const CString& sValues, TDC_COLUMN nColID = TDCC_NONE);
+
+	static BOOL HasTasks();
+	static BOOL HasColumnTasks();
+	static BOOL HasColumnTasks(TDC_COLUMN& nColID);
+	static BOOL HasAttributeTask();
+
+	static BOOL GetTasks(const CString& sRefTasklistID, CTaskFile& tasks);
+	static TDC_COLUMN GetColumnTasks(CTaskFile& tasks);
+	static HTASKITEM GetAttributeTask(CTaskFile& task);
 
 protected:
-	static CString GetClipID();
-	static UINT GetTaskClipFmt();
-	static UINT GetIDClipFmt();
+	static UINT GetTasksClipFmt();
+	static UINT GetTasklistIDClipFmt();
+	static UINT GetColumnIDClipFmt();
+
+	static CString GetTasklistID();
 	static HWND GetMainWnd();
 	static void RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings);
 };

@@ -114,7 +114,6 @@ const DWORD IDD_TODOCTRL_DIALOG = (DWORD)(LPCTSTR)_T("IDD_TODOCTRL_DIALOG");
 
 const LPCTSTR ARCHIVE_ID		= _T(".done");
 const LPCTSTR DICTIONARY_URL	= _T("https://github.com/abstractspoon/ToDoList_Downloads/wiki/Dictionaries");
-const LPCTSTR COLUMNCOPY_TAG	= _T("ColumnCopy");
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -6306,7 +6305,7 @@ BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 	}
 	else if (bCheckID)
 	{
-		return !CTaskClipboard::ClipIDMatches(GetClipboardID());
+		return !CTaskClipboard::TasklistIDMatches(GetClipboardID());
 	}
 
 	//else
@@ -6404,10 +6403,10 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 		aValues[nID] = tasks.GetTaskAttribute(hTask, nAttribID, true, true);
 	}
 
-	// Add some metadata to embed the copied column
-	tasks.SetMetaData(COLUMNCOPY_TAG, Misc::Format(nColID));
-
-	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), Misc::FormatArray(aValues, '\n', TRUE));
+	return CTaskClipboard::SetTasks(tasks, 
+									GetClipboardID(), 
+									Misc::FormatArray(aValues, '\n', TRUE),
+									nColID);
 }
 
 BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
@@ -6419,32 +6418,24 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	CWaitCursor cursor;
 	CTaskFile tasks;
 
-	CString sClipID = GetClipboardID();
+	nFromColID = CTaskClipboard::GetColumnTasks(tasks);
 
-	if (!CTaskClipboard::ClipIDMatches(sClipID) || !CTaskClipboard::GetTasks(tasks, sClipID))
+	if (nFromColID == TDCC_NONE)
 		return FALSE;
-
-	CString sFromColID = tasks.GetMetaData(COLUMNCOPY_TAG);
-
-	if (sFromColID.IsEmpty())
-		return FALSE;
-
-	nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
 
 	// Check column compatibility
 	if (!m_attribCopier.CanCopyColumnValues(nFromColID, nToColID))
 		return FALSE;
 
-	// Check there is at least one editable task
-	CDWordArray aTaskIDs;
-	int nID = 0;
+	// For 'Selected' check that every task is editable
+	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nToColID);
 
 	if (bSelectedTasksOnly)
-		nID = GetSelectedTaskIDs(aTaskIDs, TRUE);
-	else
-		nID = GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
+		return CanEditSelectedTask(nToAttribID);
 
-	TDC_ATTRIBUTE nToAttribID = TDC::MapColumnToAttribute(nToColID);
+	// For 'All' check there is at least one editable task
+	CDWordArray aTaskIDs;
+	int nID = GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
 
 	while (nID--)
 	{
@@ -6464,17 +6455,16 @@ int CToDoCtrl::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly)
 {
 	CWaitCursor cursor;
+
 	CTaskFile tasks;
+	TDC_COLUMN nFromColID = CTaskClipboard::GetColumnTasks(tasks);
 
-	if (!CTaskClipboard::GetTasks(tasks, GetClipboardID()))
+	if (nFromColID == TDCC_NONE)
+	{
+		ASSERT(0); // should have been caught before this
 		return FALSE;
+	}
 
-	CString sFromColID = tasks.GetMetaData(_T("ColumnCopy"));
-
-	if (sFromColID.IsEmpty())
-		return FALSE;
-
-	TDC_COLUMN nFromColID = (TDC_COLUMN)_ttoi(sFromColID);
 	CDWordArray aTaskIDs;
 
 	if (bSelectedTasksOnly)
@@ -6640,15 +6630,14 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		return FALSE;
 	}
 
-	CString sClipID = GetClipboardID(), sArchiveID;
-	BOOL bCheckArchive = GetClipboardID(sArchiveID, TRUE);
-
+	// Check we've got valid tasks to copy from
 	CTaskFile tasks;
+	CString sClipID = GetClipboardID();
 
-	if (!CTaskClipboard::GetTasks(tasks, sClipID))
+	if (!CTaskClipboard::GetTasks(sClipID, tasks))
 		return FALSE;
 
-	// else
+	// Figure out where to paste to
 	HTREEITEM htiDest = NULL, htiDestAfter = NULL;
 	
 	switch (nWhere)
@@ -6686,10 +6675,16 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	{
 		// pre-process task IDs if the tasks did *not* originate 
 		// from us (or our archive) and we're not empty
+		CString sArchiveID;
+		BOOL bCheckArchive = GetClipboardID(sArchiveID, TRUE);
+
 		TDC_RESETIDS nResetID = TDCR_YES;
-		
-		if (CTaskClipboard::ClipIDMatches(sClipID) ||
-			(bCheckArchive && CTaskClipboard::ClipIDMatches(sArchiveID)))
+
+		if (CTaskClipboard::TasklistIDMatches(sClipID))
+		{
+			nResetID = TDCR_CHECK;
+		}
+		else if (bCheckArchive && CTaskClipboard::TasklistIDMatches(sArchiveID))
 		{
 			nResetID = TDCR_CHECK;
 		}
@@ -9668,10 +9663,8 @@ BOOL CToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const
 
 CString CToDoCtrl::GetClipboardID() const
 {
-	CString sClipID = CPreferences::KeyFromFile(GetFilePath(), FALSE);
-
-	if (sClipID.IsEmpty())
-		sClipID = _T("New_Tasklist");
+	CString sClipID;
+	GetClipboardID(sClipID, FALSE);
 
 	return sClipID;
 }
@@ -9709,7 +9702,7 @@ LRESULT CToDoCtrl::OnTDCGetClipboard(WPARAM wParam, LPARAM lParam)
 	{
 		static CTaskFile tasks;
 
-		if (CTaskClipboard::GetTasks(tasks, GetClipboardID()))
+		if (CTaskClipboard::GetTasks(GetClipboardID(), tasks))
  			return (LRESULT)&tasks;
 	}
 

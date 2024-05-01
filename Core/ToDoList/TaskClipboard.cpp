@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TaskClipboard.h"
+#include "ToDoitem.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\clipboard.h"
@@ -16,9 +17,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR TDL_CLIPFMTTASKS = _T("CF_TODOLIST_TASKS");
-const LPCTSTR TDL_CLIPFMTID = _T("CF_TODOLIST_ID");
-const LPCTSTR DEF_CLIPID = _T("_emptyID_");
+const LPCTSTR TDLCF_TASKS		= _T("CF_TODOLIST_TASKS");
+const LPCTSTR TDLCF_TASKLISTID	= _T("CF_TODOLIST_TASKLISTID");
+const LPCTSTR TDLCF_COLUMNID	= _T("CF_TODOLIST_COLUMNID");
+const LPCTSTR DEF_CLIPID		= _T("_emptyID_");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -30,63 +32,114 @@ void CTaskClipboard::Reset()
 
 BOOL CTaskClipboard::IsEmpty()
 {
-	return !CClipboard::HasFormat(GetIDClipFmt());
+	return !CClipboard::HasFormat(GetTasklistIDClipFmt());
 }
 
-BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sTaskValues)
+BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sValues, TDC_COLUMN nColID)
 {
-	ASSERT(tasks.GetTaskCount());
-	ASSERT(!sTaskValues.IsEmpty());
+	// Sanity checks
+	if (!tasks.GetTaskCount() || sID.IsEmpty() || sValues.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 	
 	CString sXML; 
-	CString sClipID = (sID.IsEmpty() ? DEF_CLIPID : sID);
 	
 	if (tasks.Export(sXML) && !sXML.IsEmpty())
 	{
-		sClipID.MakeUpper();
-
 		CClipboard cb(GetMainWnd());
 
-		return (cb.SetText(sXML, GetTaskClipFmt()) && 
-				cb.SetText(sClipID, GetIDClipFmt()) &&
-				cb.SetText(sTaskValues));
+		if (cb.SetText(sXML, GetTasksClipFmt()) && 
+			cb.SetText(Misc::ToUpper(sID), GetTasklistIDClipFmt()) &&
+			cb.SetText(sValues))
+		{
+			// Optional column identifier
+			if (nColID != TDCC_NONE)
+				return cb.SetText(Misc::Format((int)nColID), GetColumnIDClipFmt());
+
+			return TRUE;
+		}
 	}
 	
 	// else
 	return FALSE;
 }
 
-BOOL CTaskClipboard::ClipIDMatches(const CString& sID)
+BOOL CTaskClipboard::TasklistIDMatches(const CString& sRefTasklistID)
 {
-	return (!sID.IsEmpty() && (sID.CompareNoCase(GetClipID()) == 0));
+	return (!sRefTasklistID.IsEmpty() && (sRefTasklistID.CompareNoCase(GetTasklistID()) == 0));
 }
 
-int CTaskClipboard::GetTasks(CTaskFile& tasks, const CString& sID)
+BOOL CTaskClipboard::HasTasks()
+{
+	return (CClipboard::HasFormat(GetTasksClipFmt()) &&	!HasColumnTasks());
+}
+
+BOOL CTaskClipboard::HasColumnTasks()
+{
+	TDC_COLUMN nUnused;
+	return HasColumnTasks(nUnused);
+}
+
+BOOL CTaskClipboard::HasColumnTasks(TDC_COLUMN& nColID)
 {
 	if (IsEmpty())
-		return 0;
+		return FALSE;
 
-	CString sXML = CClipboard().GetText(GetTaskClipFmt()); 
+	return CClipboard::HasFormat(GetColumnIDClipFmt());
+}
+
+BOOL CTaskClipboard::HasAttributeTask()
+{
+	return GetAttributeTask(CTaskFile()) != NULL;
+}
+
+BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
+{
+	ASSERT(!sRefTasklistID.IsEmpty());
+
+	if (IsEmpty())
+		return FALSE;
+
+	// Exclude 'column tasks'
+	if (CClipboard::HasFormat(GetColumnIDClipFmt()))
+		return FALSE;
+
+	CString sXML = CClipboard().GetText(GetTasksClipFmt()); 
 	
-	if (!tasks.LoadContent(sXML))
-		return 0;
-
-	CString sClipID = (sID.IsEmpty() ? DEF_CLIPID : sID);
+	if (!tasks.LoadContent(sXML) || !tasks.GetTaskCount())
+		return FALSE;
 
 	// remove task references if the clip IDs do not match
-	if (sClipID.CompareNoCase(GetClipID()) != 0)
+	if (!TasklistIDMatches(sRefTasklistID))
 		RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE);
 
-	return tasks.GetTaskCount();
+	return TRUE;
 }
 
-int CTaskClipboard::GetTaskCount(const CString& sID)
+TDC_COLUMN CTaskClipboard::GetColumnTasks(CTaskFile& tasks)
 {
 	if (IsEmpty())
-		return 0;
+		return TDCC_NONE;
 
-	CTaskFile unused;
-	return GetTasks(unused, sID);
+	CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
+
+	if (sColID.IsEmpty() || !GetTasks(DEF_CLIPID, tasks))
+		return TDCC_NONE;
+
+	// else
+	return (TDC_COLUMN)_ttoi(sColID);
+}
+
+HTASKITEM CTaskClipboard::GetAttributeTask(CTaskFile& task)
+{
+	CTaskFile tasks;
+
+	if (!GetTasks(DEF_CLIPID, tasks) || (tasks.GetTaskCount() != 1))
+		return NULL;
+
+	return tasks.GetFirstTask();
 }
 
 void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings)
@@ -123,20 +176,26 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 	}
 }
 
-CString CTaskClipboard::GetClipID()
+CString CTaskClipboard::GetTasklistID()
 {
-	return CClipboard().GetText(GetIDClipFmt()); 
+	return CClipboard().GetText(GetTasklistIDClipFmt()); 
 }
 
-UINT CTaskClipboard::GetTaskClipFmt()
+UINT CTaskClipboard::GetTasksClipFmt()
 {
-	static UINT nClip = ::RegisterClipboardFormat(TDL_CLIPFMTTASKS);
+	static UINT nClip = ::RegisterClipboardFormat(TDLCF_TASKS);
 	return nClip;
 }
 
-UINT CTaskClipboard::GetIDClipFmt()
+UINT CTaskClipboard::GetTasklistIDClipFmt()
 {
-	static UINT nClip = ::RegisterClipboardFormat(TDL_CLIPFMTID);
+	static UINT nClip = ::RegisterClipboardFormat(TDLCF_TASKLISTID);
+	return nClip;
+}
+
+UINT CTaskClipboard::GetColumnIDClipFmt()
+{
+	static UINT nClip = ::RegisterClipboardFormat(TDLCF_COLUMNID);
 	return nClip;
 }
 
