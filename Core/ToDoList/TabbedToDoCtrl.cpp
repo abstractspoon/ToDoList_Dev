@@ -2635,7 +2635,7 @@ int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
 int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
 {
 	if (InListView())
-		return m_taskList.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
+		return m_taskList.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID);
 
 	// else
 	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
