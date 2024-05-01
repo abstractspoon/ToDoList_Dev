@@ -6424,7 +6424,9 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 		return FALSE;
 
 	// Check column compatibility
-	if (!m_attribCopier.CanCopyColumnValues(nFromColID, nToColID))
+	BOOL bSameTasklist = CTaskClipboard::TasklistIDMatches(GetClipboardID());
+
+	if (!m_attribCopier.CanCopyColumnValues(nFromColID, nToColID, bSameTasklist))
 		return FALSE;
 
 	// For 'Selected' check that every task is editable
@@ -10390,7 +10392,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID)
 {
-	if (!m_attribCopier.CanCopyAttributeValues(nFromAttribID, nToAttribID))
+	if (!m_attribCopier.CanCopyAttributeValues(nFromAttribID, nToAttribID, TRUE))
 		return FALSE;
 
 	Flush();

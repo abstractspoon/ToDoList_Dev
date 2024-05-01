@@ -87,7 +87,13 @@ BOOL CTaskClipboard::HasColumnTasks(TDC_COLUMN& nColID)
 	if (IsEmpty())
 		return FALSE;
 
-	return CClipboard::HasFormat(GetColumnIDClipFmt());
+	CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
+
+	if (sColID.IsEmpty())
+		return FALSE;
+	
+	nColID = (TDC_COLUMN)_ttoi(sColID);
+	return TRUE;
 }
 
 BOOL CTaskClipboard::HasAttributeTask()
@@ -120,16 +126,17 @@ BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
 
 TDC_COLUMN CTaskClipboard::GetColumnTasks(CTaskFile& tasks)
 {
-	if (IsEmpty())
-		return TDCC_NONE;
+	TDC_COLUMN nColID = TDCC_NONE;
 
-	CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
+	if (HasColumnTasks(nColID))
+	{
+		CString sXML = CClipboard().GetText(GetTasksClipFmt());
 
-	if (sColID.IsEmpty() || !GetTasks(DEF_CLIPID, tasks))
-		return TDCC_NONE;
+		if (!tasks.LoadContent(sXML) || !tasks.GetTaskCount())
+			nColID = TDCC_NONE;
+	}
 
-	// else
-	return (TDC_COLUMN)_ttoi(sColID);
+	return nColID;
 }
 
 HTASKITEM CTaskClipboard::GetAttributeTask(CTaskFile& task)

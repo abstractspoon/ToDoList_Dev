@@ -6405,10 +6405,10 @@ CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
 {
 }
 
-BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib) const
+BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib, BOOL bSameTasklist) const
 {
-	// Doesn't make sense to copy to self
-	if (nFromAttrib == nToAttrib)
+	// Doesn't make sense to copy to self within the same tasklist
+	if (bSameTasklist && (nFromAttrib == nToAttrib))
 		return FALSE;
 
 	// Can't copy to calculations
@@ -6522,7 +6522,7 @@ TDC_ATTRIBUTECATEGORY CTDCTaskAttributeCopier::GetAttributeCategory(TDC_ATTRIBUT
 
 BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const
 {
-	if (!CanCopyAttributeValues(nFromAttribID, nToAttribID))
+	if (!CanCopyAttributeValues(nFromAttribID, nToAttribID, FALSE))
 		return FALSE;
 
 	TDCCADATA dataFrom;
@@ -6670,10 +6670,11 @@ void CTDCTaskAttributeCopier::CopyDate(const COleDateTime& dtFrom, COleDateTime&
 	}
 }
 
-BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID) const
+BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID, BOOL bSameTasklist) const
 {
 	return CanCopyAttributeValues(TDC::MapColumnToAttribute(nFromColID), 
-								 TDC::MapColumnToAttribute(nToColID));
+								  TDC::MapColumnToAttribute(nToColID), 
+								  bSameTasklist);
 }
 
 BOOL CTDCTaskAttributeCopier::CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const
