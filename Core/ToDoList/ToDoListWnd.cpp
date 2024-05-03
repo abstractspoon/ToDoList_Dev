@@ -1097,6 +1097,14 @@ void CToDoListWnd::InitShortcutManager()
 
 	if (m_mgrShortcuts.Initialize(this, prefs, _T("KeyboardShortcuts")))
 	{
+		// Fixup previous bug with shared 'Date/Time' shortcut
+		DWORD dwShortcut = MAKELONG('D', HOTKEYF_CONTROL);
+
+		if (m_mgrShortcuts.GetCommandID(dwShortcut) == ID_COMMENTS_INSERTDATETIME)
+		{
+			m_mgrShortcuts.SetShortcut(ID_EDIT_INSERTDATETIME, dwShortcut);
+		}
+
 		m_mgrShortcuts.SetRemindersUseTreeFont(Prefs().GetRemindersUseTreeFont());
 		m_mgrShortcuts.SetFindTasksUseTreeFont(Prefs().GetFindTasksUseTreeFont());
 	}
