@@ -100,7 +100,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
-	BOOL HasDefaultHorzAlignment() const;
+	BOOL HasDefaultTextAlignment() const;
 
 	BOOL SetAttributeType(DWORD dwType);
 	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
@@ -152,7 +152,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString sUniqueID;
 	CString sColumnTitle;
 	CString sLabel;
-	UINT nHorzAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
+	UINT nTextAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
 	DWORD dwFeatures;
 	CStringArray aDefaultListData;
 	mutable CStringArray aAutoListData;

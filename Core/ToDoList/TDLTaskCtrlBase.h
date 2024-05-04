@@ -259,6 +259,7 @@ protected:
 	float m_fAveHeaderCharWidth;
 	CString m_sTasklistFolder;
 	TDCDATETIMEWIDTHS m_dateTimeWidths;
+	int m_nHeaderContextMenuItem;
 
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;
@@ -298,6 +299,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
 	DECLARE_MESSAGE_MAP()
 

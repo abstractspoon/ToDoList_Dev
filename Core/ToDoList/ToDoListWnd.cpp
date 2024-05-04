@@ -3982,9 +3982,13 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		}
 	}
 	
-	// show the menu
+	// prevent re-entrancy
 	if (nMenuID && (nMenuID != m_nContextMenuID))
 	{
+		CAutoFlagT<UINT> af(m_nContextMenuID, nMenuID);
+		CAutoFlagT<TDC_COLUMN> af2(m_nContextColumnID, nColID);
+
+		// show the menu
 		CEnMenu menu;
 		
 		if (menu.LoadMenu(IDR_MISC, NULL, TRUE))
@@ -4005,10 +4009,6 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 					break;
 				}
 				
-				// prevent re-entrancy
-				CAutoFlagT<UINT> af(m_nContextMenuID, nMenuID);
-				CAutoFlagT<TDC_COLUMN> af2(m_nContextColumnID, nColID);
-
 				CToolbarHelper::PrepareMenuItems(pPopup, this);
 
 				// Ensure that the command is handled before the

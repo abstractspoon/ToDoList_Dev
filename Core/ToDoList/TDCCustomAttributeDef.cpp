@@ -372,7 +372,7 @@ TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel, BOOL
 	:
 	sLabel(szLabel),
 	dwAttribType(TDCCA_STRING),
-	nHorzAlignment(DT_LEFT),
+	nTextAlignment(DT_LEFT),
 	dwFeatures(TDCCAF_SORT),
 	nColumnID(TDCC_NONE),
 	nAttributeID(TDCA_NONE),
@@ -392,7 +392,7 @@ TDCCUSTOMATTRIBUTEDEFINITION& TDCCUSTOMATTRIBUTEDEFINITION::operator=(const TDCC
 	sUniqueID = attribDef.sUniqueID;
 	sColumnTitle = attribDef.sColumnTitle;
 	sLabel = attribDef.sLabel;
-	nHorzAlignment = attribDef.nHorzAlignment;
+	nTextAlignment = attribDef.nTextAlignment;
 	dwFeatures = attribDef.dwFeatures;
 	nColumnID = attribDef.nColumnID;
 	nAttributeID = attribDef.nAttributeID;
@@ -423,7 +423,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::Matches(const TDCCUSTOMATTRIBUTEDEFINITION& a
 		(sUniqueID.CompareNoCase(attribDef.sUniqueID) != 0) ||
 		(sColumnTitle != attribDef.sColumnTitle) ||
 		(sLabel != attribDef.sLabel) ||
-		(nHorzAlignment != attribDef.nHorzAlignment) ||
+		(nTextAlignment != attribDef.nTextAlignment) ||
 		(dwFeatures != attribDef.dwFeatures) ||
 		(nColumnID != attribDef.nColumnID) ||
 		(nAttributeID != attribDef.nAttributeID) ||
@@ -473,7 +473,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::GetToolTip() const
 
 UINT TDCCUSTOMATTRIBUTEDEFINITION::GetColumnHeaderAlignment() const
 {
-	switch (nHorzAlignment)
+	switch (nTextAlignment)
 	{
 	case DT_CENTER: return HDF_CENTER;
 	case DT_RIGHT:	return HDF_RIGHT;
@@ -545,9 +545,9 @@ TDC_ATTRIBUTECATEGORY TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(DWORD dwAttribTy
 	return TDCAC_NONE;
 }
 
-BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultHorzAlignment() const
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultTextAlignment() const
 {
-	return (nHorzAlignment == GetDefaultHorzAlignment(dwAttribType));
+	return (nTextAlignment == GetDefaultHorzAlignment(dwAttribType));
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetAttributeType(DWORD dwType)
@@ -567,8 +567,8 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetDataType(DWORD dwDataType, BOOL bUpdateDef
 	// Set default alignment if the previous also had the default
 	if (bUpdateDefaultAlignment)
 	{
-		if (nHorzAlignment == GetDefaultHorzAlignment(dwPrevType))
-			nHorzAlignment = GetDefaultHorzAlignment(dwAttribType);
+		if (nTextAlignment == GetDefaultHorzAlignment(dwPrevType))
+			nTextAlignment = GetDefaultHorzAlignment(dwAttribType);
 	}
 
 	return TRUE;
