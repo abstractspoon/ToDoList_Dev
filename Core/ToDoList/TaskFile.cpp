@@ -451,6 +451,7 @@ void CTaskFile::Reset()
 	ClearHandleMap();
 
 	m_dwNextUniqueID = 1;
+	m_mapReadableAttrib.RemoveAll();
 }
 
 BOOL CTaskFile::CopyTaskFrom(const ITaskList* pSrcTasks, HTASKITEM hSrcTask, HTASKITEM hDestParent, 
@@ -1167,7 +1168,7 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBLABEL, attribDef.sLabel);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLTITLE, attribDef.sColumnTitle);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)attribDef.GetAttributeType());
-		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLALIGN, (int)attribDef.nHorzAlignment);
+		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLALIGN, (int)attribDef.nTextAlignment);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBFEATURES, (int)attribDef.dwFeatures);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBENABLED, (int)attribDef.bEnabled);
 		
@@ -1238,7 +1239,7 @@ int CTaskFile::GetCustomAttributeDefs(const ITaskList* pTasks, CTDCCustomAttribD
 			attribDef.sUniqueID = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBID);
 			attribDef.sLabel = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBLABEL);
 			attribDef.sColumnTitle = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLTITLE);
-			attribDef.nHorzAlignment = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLALIGN));
+			attribDef.nTextAlignment = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLALIGN));
 			attribDef.bEnabled = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBENABLED));
 			attribDef.dwFeatures = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBFEATURES));
 
@@ -1297,7 +1298,7 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 		attribDef.sUniqueID = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID);
 		attribDef.sLabel = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBLABEL);
 		attribDef.sColumnTitle = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBCOLTITLE);
-		attribDef.nHorzAlignment = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBCOLALIGN);
+		attribDef.nTextAlignment = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBCOLALIGN);
 		attribDef.bEnabled = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBENABLED);
 		attribDef.dwFeatures = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBFEATURES);
 
@@ -1734,11 +1735,41 @@ BOOL CTaskFile::SetReportDetails(LPCTSTR szTitle, const COleDateTime& date)
 void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 {
 	m_mapReadableAttrib.Copy(mapAttrib);
+
+	POSITION pos = mapAttrib.GetStartPosition();
+
+	while (pos)
+		AddItem(TDL_AVAILABLEATTRIB, (int)mapAttrib.GetNext(pos), XIT_ELEMENT);
+}
+
+void CTaskFile::LoadAvailableAttributes() const
+{
+	if (!m_mapReadableAttrib.GetCount())
+	{
+		const CXmlItem* pXIAttrib = GetItem(TDL_AVAILABLEATTRIB);
+
+		if (!pXIAttrib)
+		{
+			m_mapReadableAttrib.Add(TDCA_ALL);
+		}
+		else
+		{
+			while (pXIAttrib)
+			{
+				m_mapReadableAttrib.Add((TDC_ATTRIBUTE)pXIAttrib->GetValueI());
+				pXIAttrib = pXIAttrib->GetSibling();
+			}
+		}
+	}
 }
 
 bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
 {
-	if (!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.Has(TDCA_ALL))
+	LoadAvailableAttributes();
+
+	ASSERT(m_mapReadableAttrib.GetCount());
+
+	if (m_mapReadableAttrib.Has(TDCA_ALL))
 		return (nAttribID != TDCA_NONE);
 
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
@@ -3579,6 +3610,7 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDispl
 	case TDCA_RISK:			return (bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK);
 	case TDCA_TIMEESTIMATE:	return (bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE);
 	case TDCA_TIMESPENT:	return (bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT);
+	case TDCA_TIMEREMAINING:return (bCalc ? TDL_TASKCALCTIMEREMAINING : TDL_TASKCALCTIMEREMAINING);
 
 	case TDCA_CREATIONDATE:	return (bDisplay ? TDL_TASKCREATIONDATESTRING : TDL_TASKCREATIONDATE);
 	case TDCA_DONEDATE:		return (bDisplay ? TDL_TASKDONEDATESTRING : TDL_TASKDONEDATE);
@@ -3598,6 +3630,14 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bo
 {
 	if (!IsAttributeAvailable(nAttribID))
 		return NULLSTRING;
+
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULLSTRING);
+
+		return GetTaskCustomAttributeData(hTask, pDef->sUniqueID, bDisplay);
+	}
 
 	if (!TaskHasAttribute(hTask, nAttribID, bCalc, bDisplay))
 	{

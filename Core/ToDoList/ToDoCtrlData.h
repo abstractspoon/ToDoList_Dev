@@ -46,6 +46,9 @@ class CToDoCtrlData
 	friend class CTDCTaskCalculator;
 	friend class CTDCTaskFormatter;
 	friend class CTDCTaskExporter;
+	friend class CTDCMultiTasker;
+	friend class CTDCTaskColumnSizer;
+	friend class CTDCTaskAttributeCopier;
 
 public:
 	CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);
@@ -132,7 +135,7 @@ public:
 	CString GetTaskVersion(DWORD dwTaskID) const;
 	CString GetTaskMetaData(DWORD dwTaskID, const CString& sKey) const;
 
-	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
+	BOOL GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
 	CString GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID) const;
 
@@ -212,11 +215,6 @@ public:
 	TDC_SET ClearTaskColor(DWORD dwTaskID) { SetTaskColor(dwTaskID, CLR_NONE); }
 	TDC_SET ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, BOOL bAndChildren = FALSE);
 	TDC_SET ClearTaskCustomAttribute(DWORD dwTaskID, const CString& sAttribID, BOOL bAndChildren = FALSE);
-
-	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
-	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID);
-	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib);
-	TDC_SET CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID);
 
 	TDC_SET RenameTasksAttributeValue(TDC_ATTRIBUTE nAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
 	TDC_SET RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
@@ -338,9 +336,12 @@ protected:
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
 	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
-	
-	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data);
-	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
+
+	BOOL TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
+	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
+
+	// Too dangerous to be public because 'data' is untyped
+	TDC_SET SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data);
 
 	BOOL ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy);
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, BOOL bFitToRecurringScheme);

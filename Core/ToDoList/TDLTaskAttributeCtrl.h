@@ -128,6 +128,10 @@ protected:
 	afx_msg LRESULT OnSelectDependencies(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetLinkTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDisplayLink(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCanCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCanPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 

@@ -829,59 +829,59 @@ int CTDCStartupOptions::GetCommandIDs(CUIntArray& aCmdIDs) const
 	return aCmdIDs.GetSize();
 }
 
-BOOL CTDCStartupOptions::GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttrib, TDC_ATTRIBUTE& nToAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttribID, TDC_ATTRIBUTE& nToAttrib) const
 {
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nFromID = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
-	if (nFrom == TDCA_NONE)
+	if (nFromID == TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nToID = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
-	if (nTo == TDCA_NONE)
+	if (nToID == TDCA_NONE)
 		return FALSE;
 
 	// else
-	nFromAttrib = nFrom;
-	nToAttrib = nTo;
+	nFromAttribID = nFromID;
+	nToAttrib = nToID;
 
 	return TRUE;
 }
 
-BOOL CTDCStartupOptions::GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttrib, CString& sToCustomAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(TDC_ATTRIBUTE& nFromAttribID, CString& sToCustomAttrib) const
 {
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nFromID = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
-	if (nFrom == TDCA_NONE)
+	if (nFromID == TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nToID = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
-	if (nTo != TDCA_NONE)
+	if (nToID != TDCA_NONE)
 		return FALSE;
 
 	// else
-	nFromAttrib = nFrom;
+	nFromAttribID = nFromID;
 	sToCustomAttrib = m_sCopyToTaskAttrib.GetValue();
 
 	return TRUE;
 }
 
-BOOL CTDCStartupOptions::GetCopyTaskAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttrib) const
+BOOL CTDCStartupOptions::GetCopyTaskAttribute(CString& sFromCustomAttrib, TDC_ATTRIBUTE& nToAttribID) const
 {
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nFromID = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
-	if (nFrom != TDCA_NONE)
+	if (nFromID != TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nToID = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
-	if (nTo == TDCA_NONE)
+	if (nToID == TDCA_NONE)
 		return FALSE;
 
 	// else
 	sFromCustomAttrib = m_sCopyFromTaskAttrib.GetValue();
-	nToAttrib = nTo;
+	nToAttribID = nToID;
 
 	return TRUE;
 }
@@ -891,14 +891,14 @@ BOOL CTDCStartupOptions::GetCopyTaskAttribute(CString& sFromCustomAttrib, CStrin
 	if (m_sCopyFromTaskAttrib.IsEmpty() || m_sCopyToTaskAttrib.IsEmpty())
 		return FALSE;
 
-	TDC_ATTRIBUTE nFrom = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nFromID = TDC::MapCommandLineSwitchToAttribute(m_sCopyFromTaskAttrib.GetValue());
 
-	if (nFrom != TDCA_NONE)
+	if (nFromID != TDCA_NONE)
 		return FALSE;
 
-	TDC_ATTRIBUTE nTo = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
+	TDC_ATTRIBUTE nToID = TDC::MapCommandLineSwitchToAttribute(m_sCopyToTaskAttrib.GetValue());
 
-	if (nTo != TDCA_NONE)
+	if (nToID != TDCA_NONE)
 		return FALSE;
 
 	// else

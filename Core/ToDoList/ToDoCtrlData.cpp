@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataDefines.h"
+#include "TDCStatic.h"
 #include "resource.h"
 
 #include "..\shared\timehelper.h"
@@ -505,15 +506,21 @@ BOOL CToDoCtrlData::GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) 
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
 
+	if (!pTDI->timeEstimate.HasValidUnits())
+		return FALSE;
+
 	timeEst = pTDI->timeEstimate;
-	return TRUE;
+	return timeEst.HasValidUnits();
 }
 
 BOOL CToDoCtrlData::GetTaskTimeSpent(DWORD dwTaskID, TDCTIMEPERIOD& timeSpent) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
-	
+
+	if (!pTDI->timeSpent.HasValidUnits())
+		return FALSE;
+
 	timeSpent = pTDI->timeSpent;
 	return TRUE;
 }
@@ -4191,50 +4198,27 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	}
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
-{
-	TDCCADATA data;
-
-	if (!GetTaskAttributeValues(dwTaskID, nFromAttrib, data))
-		return SET_FAILED;
-
-	// else
-	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
-}
-
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
-{
-	TDCCADATA data;
-
-	if (!GetTaskAttributeValues(dwTaskID, nFromAttrib, data))
-		return SET_FAILED;
-
-	// else
-	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
-}
-
-BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
+BOOL CToDoCtrlData::GetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
 
-	return pTDI->GetAttributeValue(nAttribID, data);
+	return GetTaskAttributeValue(*pTDI, nAttribID, data);
 }
 
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
+BOOL CToDoCtrlData::GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 {
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		return tdi.GetAttributeValue(nAttribID, data);
 
-	TDCCADATA data;
+	// else
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
-	if (!pTDI->GetCustomAttributeValues().Lookup(sFromCustomAttribID, data))
-		return SET_FAILED;
-
-	return SetTaskAttributeValues(dwTaskID, nToAttrib, data);
+	return tdi.GetCustomAttributeValue(pDef->sUniqueID, data);
 }
 
-TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data)
+TDC_SET CToDoCtrlData::SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data)
 {
 	switch (nAttribID)
 	{
@@ -4307,22 +4291,19 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 				return SetTaskCost(dwTaskID, cost, FALSE);
 		}
 		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			return SetTaskCustomAttributeData(dwTaskID, pDef->sUniqueID, data);
+		}
+		break;
 	}
 
 	return SET_FAILED;
-}
-
-TDC_SET CToDoCtrlData::CopyTaskAttributeValue(DWORD dwTaskID, const CString& sFromCustomAttribID, const CString& sToCustomAttribID)
-{
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
-
-	TDCCADATA data;
-
-	if (!pTDI->GetCustomAttributeValue(sFromCustomAttribID, data))
-		return SET_FAILED;
-
-	return SetTaskCustomAttributeData(dwTaskID, sToCustomAttribID, data);
 }
 
 TDC_SET CToDoCtrlData::RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
@@ -4370,7 +4351,7 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttribID, const 
 	{
 		m_items.GetNext(pos, dwTaskID, pTDI);
 
-		if (TaskHasAttributeValue(pTDI, nAttribID, sFrom, bCaseSensitive, bWholeWord))
+		if (TaskHasAttributeValue(*pTDI, nAttribID, sFrom, bCaseSensitive, bWholeWord))
 		{
 			// save undo data
 			SaveEditUndo(dwTaskID, pTDI, nAttribID);
@@ -4395,18 +4376,18 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttribID, const 
 	return nRes;
 }
 
-BOOL CToDoCtrlData::TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL CToDoCtrlData::TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	switch (nAttribID)
 	{
-	case TDCA_VERSION:		return (Misc::Find(sText, pTDI->sVersion, bCaseSensitive, bWholeWord) != -1);
-	case TDCA_ALLOCBY:		return (Misc::Find(sText, pTDI->sAllocBy, bCaseSensitive, bWholeWord) != -1);
-	case TDCA_EXTERNALID:	return (Misc::Find(sText, pTDI->sExternalID, bCaseSensitive, bWholeWord) != -1);
-	case TDCA_STATUS:		return (Misc::Find(sText, pTDI->sStatus, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_VERSION:		return (Misc::Find(sText, tdi.sVersion, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_ALLOCBY:		return (Misc::Find(sText, tdi.sAllocBy, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_EXTERNALID:	return (Misc::Find(sText, tdi.sExternalID, bCaseSensitive, bWholeWord) != -1);
+	case TDCA_STATUS:		return (Misc::Find(sText, tdi.sStatus, bCaseSensitive, bWholeWord) != -1);
 		
-	case TDCA_ALLOCTO:		return Misc::Contains(sText, pTDI->aAllocTo, bCaseSensitive, bWholeWord);
-	case TDCA_CATEGORY:		return Misc::Contains(sText, pTDI->aCategories, bCaseSensitive, bWholeWord);		
-	case TDCA_TAGS:			return Misc::Contains(sText, pTDI->aTags, bCaseSensitive, bWholeWord);
+	case TDCA_ALLOCTO:		return Misc::Contains(sText, tdi.aAllocTo, bCaseSensitive, bWholeWord);
+	case TDCA_CATEGORY:		return Misc::Contains(sText, tdi.aCategories, bCaseSensitive, bWholeWord);		
+	case TDCA_TAGS:			return Misc::Contains(sText, tdi.aTags, bCaseSensitive, bWholeWord);
 		
 	default:
 		ASSERT(0);

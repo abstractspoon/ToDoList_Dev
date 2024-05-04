@@ -224,7 +224,6 @@ protected:
 	static BOOL TreeItemHasState(HWND hwnd, HTREEITEM hti, UINT nStateMask);
 	static void SetTreeItemState(HWND hwnd, HTREEITEM hti, UINT nState, UINT nStateMask);
 	static BOOL ListItemHasState(HWND hwnd, int nItem, UINT nStateMask);
-//	static void ForceNcCalcSize(HWND hwnd);
 	static void InvalidateTreeItem(HWND hwnd, HTREEITEM hti);
 	static void InvalidateListItem(HWND hwnd, int nItem);
 	static int InsertListItem(HWND hwndList, int nInsertPos, DWORD dwItemData);
@@ -277,6 +276,7 @@ protected:
 	BOOL ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused);
 	BOOL WantHoldHScroll(HWND hWnd) const;
 	BOOL IsHeaderTracking(HWND hwndHeader, int nCol = -1) const;
+	HWND HitTestHeader(const CPoint& ptScreen, int& nCol) const;
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HWND hwndList, HWND hwndTree, HTREEITEM hti);

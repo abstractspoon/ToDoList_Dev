@@ -69,6 +69,7 @@ public:
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
+	BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
@@ -108,6 +109,8 @@ public:
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual void NotifyEndPreferencesUpdate();
+	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
+	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -123,12 +126,8 @@ public:
 	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttribID = TDCA_TASKNAME) const;
 	void SelectAll();
 	BOOL CanSelectAll() const;
-
 	BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
 	void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
-	
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 
 	void SetFocusToTasks();
 	BOOL TasksHaveFocus() const;
@@ -245,7 +244,7 @@ protected:
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
-	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	virtual int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildTree = FALSE) const; 
@@ -254,7 +253,6 @@ protected:
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
 	virtual void OnCustomAttributesChanged();
-	//virtual void RebuildCustomAttributeUI();
 
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
 	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;

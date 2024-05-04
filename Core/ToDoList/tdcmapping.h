@@ -292,44 +292,6 @@ namespace TDC
 		return (UINT)-1;
 	}
 	
-	static TDC_ATTRIBUTE MapCtrlIDToAttribute(UINT nCtrlID) 
-	{
-		switch (nCtrlID)
-		{
-//		case IDC_ALLOCBY:		return TDCA_ALLOCBY;		
-// 		case IDC_ALLOCTO:		return TDCA_ALLOCTO;			
-// 		case IDC_CATEGORY:		return TDCA_CATEGORY;			
-// 		case IDC_COST:			return TDCA_COST;				
-// 		case IDC_DEPENDS:		return TDCA_DEPENDENCY;		
-// 		case IDC_DONEDATE:		return TDCA_DONEDATE;			
-// 		case IDC_DONETIME:		return TDCA_DONETIME;			
-// 		case IDC_DUEDATE:		return TDCA_DUEDATE;			
-// 		case IDC_DUETIME:		return TDCA_DUETIME;			
-// 		case IDC_EXTERNALID:	return TDCA_EXTERNALID;		
-// 		case IDC_FILEPATH:		return TDCA_FILELINK;			
-// 		case IDC_PERCENT:		return TDCA_PERCENT;			
-// 		case IDC_PRIORITY:		return TDCA_PRIORITY;			
-// 		case IDC_RECURRENCE:	return TDCA_RECURRENCE;		
-// 		case IDC_RISK:			return TDCA_RISK;				
-// 		case IDC_STARTDATE:		return TDCA_STARTDATE;		
-// 		case IDC_STARTTIME:		return TDCA_STARTTIME;		
-// 		case IDC_STATUS:		return TDCA_STATUS;			
-// 		case IDC_TAGS:			return TDCA_TAGS;				
-		case IDC_TASKTREECTRL:	return TDCA_TASKNAME;			
-// 		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			
-// 		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
-// 		case IDC_VERSION:		return TDCA_VERSION;			
-// 		case IDC_COLOUR:		return TDCA_COLOR;	
-			
-		default:
-			if (nCtrlID >= IDC_FIRST_CUSTOMEDITFIELD && (nCtrlID <= IDC_LAST_CUSTOMEDITFIELD))
-				return TDCA_CUSTOMATTRIB;
-			break;
-		}
-		
-		return TDCA_NONE;
-	}
-	
 	static TDC_ATTRIBUTE MapColumnToAttribute(TDC_COLUMN nColumn) 
 	{
 		switch (nColumn)

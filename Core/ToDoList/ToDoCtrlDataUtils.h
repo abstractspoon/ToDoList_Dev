@@ -112,19 +112,16 @@ protected:
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
 
-	// Custom attribute calculation helpers ------------------
 	BOOL DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
-	// -------------------------------------------------------
-	
+
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
 	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
-
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -208,18 +205,20 @@ public:
 
 	CString GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
-	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 	CString GetTaskDate(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 
+	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
+	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
+
+	// Helpers
+	CString GetDateTime(const COleDateTime& date) const;
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
 	CString GetCost(double dCost) const;
 	CString GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep = 0) const;
-
-	void GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, CStringArray& aTitlePaths) const;
-	CString GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD dwFlags, TCHAR cSep = 0) const;
+	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -228,7 +227,6 @@ protected:
 	CTDCTaskCalculator m_calculator;
 	
 protected:
-	CString FormatDate(const COleDateTime& date) const;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -332,6 +330,7 @@ public:
 
 	BOOL ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask) const;
 	BOOL ExportMatchingTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
+	BOOL ExportMatchingTaskAttributes(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -459,7 +458,6 @@ class CTDCTaskColumnSizer
 {
 public:
 	CTDCTaskColumnSizer(const CToDoCtrlData& data,
-						const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 						const CContentMgr& mgrContent);
 	// general
 	int GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const;
@@ -482,7 +480,6 @@ public:
 protected:
 	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
-	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
@@ -507,6 +504,33 @@ protected:
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
 	static CString GetLongestRecurrenceOption();
+};
+
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskAttributeCopier
+{
+public:
+	CTDCTaskAttributeCopier(const CToDoCtrlData& data,
+							const CContentMgr& mgrContent);
+
+	BOOL CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID, BOOL bSameTasklist) const;
+	BOOL CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const;
+	
+	BOOL CanCopyColumnValues(TDC_COLUMN nColID) const;
+	BOOL CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID, BOOL bSameTasklist) const;
+	BOOL CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const;
+	
+	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
+
+protected:
+	const CToDoCtrlData& m_data;
+
+	CTDCTaskFormatter m_formatter;
+
+protected:
+	static void CopyDate(const COleDateTime& dtFrom, COleDateTime& dtTo);
 };
 
 //////////////////////////////////////////////////////////////////////

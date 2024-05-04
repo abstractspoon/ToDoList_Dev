@@ -196,10 +196,14 @@ protected:
 	afx_msg void OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI);
 	afx_msg void OnEditFindReplaceInTaskComments();
 	afx_msg void OnUpdateEditFindReplaceInTaskComments(CCmdUI* pCmdUI);
-	afx_msg void OnTasklistCopyColumnValues();
-	afx_msg void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI);
+	afx_msg void OnTasklistCopyAllColumnValues();
+	afx_msg void OnUpdateTasklistCopyAllColumnValues(CCmdUI* pCmdUI);
 	afx_msg void OnTasklistCopySelectedTaskColumnValues();
 	afx_msg void OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI);
+	afx_msg void OnTasklistPasteColumnValues();
+	afx_msg void OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI);
+	afx_msg void OnTasklistPasteValuesIntoSelectedTaskInColumn();
+	afx_msg void OnUpdateTasklistPasteValuesIntoSelectedTaskColumn(CCmdUI* pCmdUI);
 	afx_msg void OnEditSetPercentToToday();
 	afx_msg void OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI);
 	afx_msg void OnToolsAnonymizeTasklist();
@@ -377,8 +381,6 @@ protected:
 	afx_msg LRESULT OnToDoCtrlNotifyClickReminderCol(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropFile(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnFileOpenFromUserStorage(UINT nCmdID);
-	afx_msg void OnFileSaveToUserStorage(UINT nCmdID);
 	afx_msg LRESULT OnFindApplyAsFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFindAddSearch(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFindSaveSearch(WPARAM wp, LPARAM lp);
@@ -458,6 +460,8 @@ protected:
 	afx_msg void OnImportTasklist();
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 	afx_msg void OnLoad();
+	afx_msg void OnFileOpenFromUserStorage(UINT nCmdID);
+	afx_msg void OnFileSaveToUserStorage(UINT nCmdID);
 	afx_msg void OnMaximizeComments();
 	afx_msg void OnMaximizeTasklist();
 	afx_msg void OnMinimizeToTray();
@@ -615,8 +619,9 @@ protected:
 
 	void OnViewIncrementTaskViewFontSize(BOOL bLarger);
 	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
-	void OnTasklistCopyColumnValues(BOOL bSelectedTasks);
+	void OnTasklistCopyPasteColumnValues(BOOL bCopy, BOOL bSelectedTasks);
 	void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
+	void OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
 	void OnViewSelectedTask(BOOL bNext);
 
 	void OnViewShowHideAllBars(BOOL bShow);

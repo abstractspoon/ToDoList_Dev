@@ -191,12 +191,13 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_multitasker(data, mgrContent),
 	m_calculator(data),
 	m_formatter(data, mgrContent),
-	m_sizer(data, m_aCustomAttribDefs, m_mgrContent),
+	m_sizer(data, m_mgrContent),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(FALSE),
 	m_bEnableRecalcColumns(TRUE),
 	m_mgrContent(mgrContent),
-	m_bReadOnly(FALSE)
+	m_bReadOnly(FALSE),
+	m_nHeaderContextMenuItem(-1)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -220,14 +221,15 @@ CTDLTaskCtrlBase::~CTDLTaskCtrlBase()
 ///////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
-//{{AFX_MSG_MAP(CTDCTaskCtrlBase)
-//}}AFX_MSG_MAP
-ON_WM_DESTROY()
-ON_WM_SIZE()
-ON_WM_CREATE()
-ON_WM_SETCURSOR()
-ON_WM_TIMER()
-ON_WM_HELPINFO()
+	//{{AFX_MSG_MAP(CTDCTaskCtrlBase)
+	//}}AFX_MSG_MAP
+	ON_WM_DESTROY()
+	ON_WM_SIZE()
+	ON_WM_CREATE()
+	ON_WM_SETCURSOR()
+	ON_WM_TIMER()
+	ON_WM_HELPINFO()
+	ON_WM_CONTEXTMENU()
 
 END_MESSAGE_MAP()
 
@@ -995,122 +997,6 @@ int CTDLTaskCtrlBase::GetColumnIndex(TDC_COLUMN nColID) const
 	return nItem;
 }
 
-BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const
-{
-	switch (nColID)
-	{
-	case TDCC_NONE:
-		return FALSE;
-
-	case TDCC_PRIORITY:
-	case TDCC_PERCENT:
-	case TDCC_TIMEESTIMATE:
-	case TDCC_TIMESPENT:
-	case TDCC_STARTDATE:
-	case TDCC_DUEDATE:
-	case TDCC_DONEDATE:
-	case TDCC_ALLOCTO:
-	case TDCC_ALLOCBY:
-	case TDCC_STATUS:
-	case TDCC_CATEGORY:
-	case TDCC_FILELINK:
-	case TDCC_POSITION:
-	case TDCC_ID:
-	case TDCC_CREATIONDATE:
-	case TDCC_CREATEDBY:
-	case TDCC_LASTMODDATE:
-	case TDCC_RISK:
-	case TDCC_EXTERNALID:
-	case TDCC_COST:
-	case TDCC_DEPENDENCY:
-	case TDCC_RECURRENCE:
-	case TDCC_VERSION:
-	case TDCC_TIMEREMAINING:
-	case TDCC_REMINDER:
-	case TDCC_PARENTID:
-	case TDCC_PATH:
-	case TDCC_TAGS:
-	case TDCC_SUBTASKDONE:
-	case TDCC_STARTTIME:
-	case TDCC_DUETIME:
-	case TDCC_DONETIME:
-	case TDCC_CREATIONTIME:
-	case TDCC_LASTMODBY:
-	case TDCC_COMMENTSSIZE:
-	case TDCC_COMMENTSFORMAT:
-	case TDCC_CLIENT:
-		break;
-
-	case TDCC_ICON:
-	case TDCC_RECENTEDIT:
-	case TDCC_LOCK:
-	case TDCC_COLOR:
-	case TDCC_DONE:
-	case TDCC_TRACKTIME:
-	case TDCC_FLAG:
-		return FALSE;
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
-		{
-			switch (m_aCustomAttribDefs.GetAttributeDataType(nColID))
-			{
-			case TDCCA_BOOL:
-			case TDCCA_ICON:
-				return FALSE;
-			}
-		}
-		else
-		{
-			// Missed values
-			ASSERT(0);
-			return FALSE;
-		}
-		break;
-	}
-
-	return (bSelectedTasksOnly ? HasSelection() : m_lcColumns.GetItemCount());
-}
-
-int CTDLTaskCtrlBase::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const
-{
-	if (!CanCopyTaskColumnValues(nColID, bSelectedTasksOnly))
-		return 0;
-
-	CDWordArray aTaskIDs;
-
-	if (bSelectedTasksOnly)
-	{
-		GetSelectedTaskIDs(aTaskIDs, FALSE);
-	}
-	else
-	{
-		int nItem = m_lcColumns.GetItemCount();
-		aTaskIDs.SetSize(nItem);
-
-		while (nItem--)
-			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
-	}
-
-	int nItem = aTaskIDs.GetSize();
-	ASSERT(nItem);
-	
-	aValues.SetSize(nItem);
-
-	while (nItem--)
-	{
-		const TODOITEM* pTDI = NULL;
-		const TODOSTRUCTURE* pTDS = NULL;
-
-		DWORD dwTaskID = aTaskIDs[nItem];
-		VERIFY(m_data.GetTrueTask(dwTaskID, pTDI, pTDS));
-
-		aValues[nItem] = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID, TRUE); // TRUE = copying
-	}
-
-	return aValues.GetSize();
-}
-
 CString CTDLTaskCtrlBase::GetColumnName(TDC_COLUMN nColID) const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
@@ -1341,15 +1227,36 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
 }
 
-int CTDLTaskCtrlBase::GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const
+int CTDLTaskCtrlBase::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 {
+	aTaskIDs.RemoveAll();
+
 	int nNumItems = m_lcColumns.GetItemCount();
-	aTaskIDs.SetSize(nNumItems);
+	
+	if (nNumItems == 0)
+		return 0;
 
-	for(int nItem = 0; nItem < nNumItems; nItem++)
-		aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	nFrom = max(0, min(nFrom, (nNumItems - 1)));
 
-	return nNumItems;
+	if (nTo == -1)
+		nTo = (nNumItems - 1);
+	else
+		nTo = max(0, min(nTo, (nNumItems - 1)));
+
+	aTaskIDs.SetSize(abs(nTo - nFrom) + 1);
+
+	if (nFrom <= nTo)
+	{
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	}
+	else
+	{
+		for (int nItem = nFrom; nItem >= nTo; nItem--)
+			aTaskIDs[nItem] = GetColumnItemTaskID(nItem);
+	}
+
+	return aTaskIDs.GetSize();
 }
 
 int CTDLTaskCtrlBase::RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const
@@ -1386,7 +1293,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 	// Get a list of IDs from the visible columns
 	CDWordArray aTaskIDs;
-	GetColumnItemsTaskIDs(aTaskIDs);
+	GetColumnTaskIDs(aTaskIDs);
 	
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
@@ -3305,7 +3212,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate);
 
 			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, 
-							pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nHorzAlignment);
+							pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nTextAlignment);
 		}
 		break;
 		
@@ -3332,7 +3239,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			rCol.bottom = (rCol.top + COL_ICON_SIZE);
 			GraphicsMisc::CentreRect(rCol, rSubItem, FALSE, TRUE); // centre vertically
 
-			int nTextAlign = pDef->nHorzAlignment;
+			int nTextAlign = pDef->nTextAlignment;
 			
 			switch (nTextAlign)
 			{
@@ -3387,7 +3294,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		{
 			rCol.DeflateRect(LV_COLPADDING, 0);
 			CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
-			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nHorzAlignment | DT_VCENTER);
+			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nTextAlignment | DT_VCENTER);
 
 			DrawColumnCheckBox(pDC, rIcon, (data.AsBool() ? TTCBC_CHECKED : TTCNC_UNCHECKED));
 		}
@@ -3398,7 +3305,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		{
 			rCol.DeflateRect(LV_COLPADDING, 0);
 			CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
-			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nHorzAlignment | DT_VCENTER);
+			GraphicsMisc::AlignRect(rIcon, rCol, pDef->nTextAlignment | DT_VCENTER);
 
 			DrawFileLinkIcon(pDC, data.AsString(), rIcon.TopLeft());
 		}
@@ -3407,7 +3314,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	default:
 		{
 			CString sData = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
-			DrawColumnText(pDC, sData, rCol, pDef->nHorzAlignment, crText);
+			DrawColumnText(pDC, sData, rCol, pDef->nTextAlignment, crText);
 		}
 		break;
 	}
@@ -3731,6 +3638,24 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 	pDC->SetTextColor(crOld);
 }
 
+void CTDLTaskCtrlBase::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	HWND hwndHeader = HitTestHeader(point, m_nHeaderContextMenuItem);
+
+	if (hwndHeader)
+	{
+		CRect rItem;
+		Header_GetItemRect(hwndHeader, m_nHeaderContextMenuItem, &rItem);
+	
+		::InvalidateRect(hwndHeader, rItem, TRUE);
+
+		CWnd::OnContextMenu(pWnd, point);
+
+		m_nHeaderContextMenuItem = -1;
+		::InvalidateRect(hwndHeader, rItem, FALSE);
+	}
+}
+
 LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
 	switch (pNMCD->dwDrawStage)
@@ -3752,13 +3677,28 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		{
 			// don't draw columns having min width
 			CRect rItem(pNMCD->rc);
+			CDC* pDC = CDC::FromHandle(pNMCD->hdc);
+
+			int nCol = (int)pNMCD->dwItemSpec;
+			BOOL bContextItem = (nCol == m_nHeaderContextMenuItem);
+
+			// Custom rendering for context menu item
+			if (bContextItem)
+			{
+				if (CThemed::AreControlsThemed())
+				{
+					CThemed theme(this, _T("HEADER"));
+					theme.DrawBackground(pDC, HP_HEADERITEM, HIS_PRESSED, rItem);
+				}
+				else
+				{
+					pDC->DrawFrameControl(rItem, DFC_BUTTON, (DFCS_BUTTONPUSH | DFCS_PUSHED));
+				}
+			}
 
 			if (rItem.Width() > MIN_COL_WIDTH)
 			{
-				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-
 				// draw sort direction
-				int nCol = (int)pNMCD->dwItemSpec;
 				TDC_COLUMN nColID = (TDC_COLUMN)pNMCD->lItemlParam;
 
 				if (nColID == m_nSortColID)
@@ -3767,12 +3707,13 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 					GetColumnHeaderCtrl(nColID).DrawItemSortArrow(pDC, nCol, bUp);
 				}
 
+				// Draw image
 				const TDCCOLUMN* pTDCC = GetColumn(nColID);
-				int nAlignment = DT_LEFT;
-				
+				int nTextAlign = DT_LEFT;
+
 				if (pTDCC)
 				{
-					nAlignment = pTDCC->GetColumnHeaderAlignment();
+					nTextAlign = pTDCC->nTextAlignment;
 
 					// handle symbol images
 					if (pTDCC->iImage != -1)
@@ -3784,13 +3725,23 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 						return CDRF_SKIPDEFAULT;
 					}
 				}
-
-				// Handle RTL text column headers
-				if (GraphicsMisc::GetRTLDrawTextFlags(pNMCD->hdr.hwndFrom) == DT_RTLREADING)
+				else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 				{
-					CString sColumn(GetColumnHeaderCtrl(nColID).GetItemText(nCol));
-					DrawColumnText(pDC, sColumn, pNMCD->rc, nAlignment, GetSysColor(COLOR_WINDOWTEXT));
-					
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, CDRF_DODEFAULT);
+
+					nTextAlign = pDef->nTextAlignment;
+				}
+
+				// Handle text for RTL or context column headers
+				if (bContextItem || (GraphicsMisc::GetRTLDrawTextFlags(pNMCD->hdr.hwndFrom) == DT_RTLREADING))
+				{
+					CEnString sColumn(GetColumnHeaderCtrl(nColID).GetItemText(nCol));
+		
+					rItem.DeflateRect(3, 0);
+					sColumn.FormatDC(pDC, rItem.Width(), ES_END);
+
+					DrawColumnText(pDC, sColumn, rItem, nTextAlign, GetSysColor(COLOR_WINDOWTEXT));
 					return CDRF_SKIPDEFAULT;
 				}
 			}
@@ -4306,7 +4257,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 
 							CDWordArray aTaskIDs;
-							GetColumnItemsTaskIDs(aTaskIDs);
+							GetColumnTaskIDs(aTaskIDs);
 
 							int nColWidth = CalcColumnWidth(nItem, &dc, aTaskIDs);
 							

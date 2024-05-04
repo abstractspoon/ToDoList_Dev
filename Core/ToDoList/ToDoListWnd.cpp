@@ -377,8 +377,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_SORT, OnSort)
 	ON_COMMAND(ID_SORTBY_MULTI, OnSortMulti)
 	ON_COMMAND(ID_TABCTRL_PREFERENCES, OnTabctrlPreferences)
-	ON_COMMAND(ID_TASKLIST_COPYCOLUMNVALUES, OnTasklistCopyColumnValues)
+	ON_COMMAND(ID_TASKLIST_COPYCOLUMNVALUES, OnTasklistCopyAllColumnValues)
 	ON_COMMAND(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnTasklistCopySelectedTaskColumnValues)
+	ON_COMMAND(ID_TASKLIST_PASTECOLUMNVALUES, OnTasklistPasteColumnValues)
+	ON_COMMAND(ID_TASKLIST_PASTESELTASKSCOLUMNVALUES, OnTasklistPasteValuesIntoSelectedTaskInColumn)
 	ON_COMMAND(ID_TASKLIST_CUSTOMCOLUMNS, OnTasklistCustomColumns)
 	ON_COMMAND(ID_TASKLIST_SELECTCOLUMNS, OnTasklistSelectColumns)
 	ON_COMMAND(ID_TOOLS_ADDTOSOURCECONTROL, OnToolsAddtoSourceControl)
@@ -621,8 +623,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_SEND_SELTASKS, OnUpdateSendSelectedTasks)
 	ON_UPDATE_COMMAND_UI(ID_SHOWTIMELOGFILE, OnUpdateShowTimelogfile)
 	ON_UPDATE_COMMAND_UI(ID_SORT, OnUpdateSort)
-	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYCOLUMNVALUES, OnUpdateTasklistCopyColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYCOLUMNVALUES, OnUpdateTasklistCopyAllColumnValues)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnUpdateTasklistCopySelectedTaskColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_PASTECOLUMNVALUES, OnUpdateTasklistPasteColumnValues)
+	ON_UPDATE_COMMAND_UI(ID_TASKLIST_PASTESELTASKSCOLUMNVALUES, OnUpdateTasklistPasteValuesIntoSelectedTaskColumn)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_CUSTOMCOLUMNS, OnUpdateTasklistCustomcolumns)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ADDTOSOURCECONTROL, OnUpdateToolsAddtoSourceControl)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANALYSELOGGEDTIME, OnUpdateToolsAnalyseLoggedTime)
@@ -3969,9 +3973,13 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		}
 	}
 	
-	// show the menu
+	// prevent re-entrancy
 	if (nMenuID && (nMenuID != m_nContextMenuID))
 	{
+		CAutoFlagT<UINT> af(m_nContextMenuID, nMenuID);
+		CAutoFlagT<TDC_COLUMN> af2(m_nContextColumnID, nColID);
+
+		// show the menu
 		CEnMenu menu;
 		
 		if (menu.LoadMenu(IDR_MISC, NULL, TRUE))
@@ -3992,10 +4000,6 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 					break;
 				}
 				
-				// prevent re-entrancy
-				CAutoFlagT<UINT> af(m_nContextMenuID, nMenuID);
-				CAutoFlagT<TDC_COLUMN> af2(m_nContextColumnID, nColID);
-
 				CToolbarHelper::PrepareMenuItems(pPopup, this);
 
 				// Ensure that the command is handled before the
@@ -5853,9 +5857,10 @@ void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditPasteAttributes()
 {
-	CTaskFile tasks;
-	
-	if (CTaskClipboard::GetTasks(tasks, _T("")) != 1)
+	CTaskFile task;
+	HTASKITEM hTask = CTaskClipboard::GetAttributeTask(task);
+
+	if (!hTask)
 		return;
 
 	// Get attributes to paste from user
@@ -5872,14 +5877,14 @@ void CToDoListWnd::OnEditPasteAttributes()
 			Misc::SetFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES, dlg.GetWantPreserveNonEmptyDestinationValues());
 			Misc::SetFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES, dlg.GetExcludeEmptySourceValues());
 
-			tdc.PasteTaskAttributeValues(tasks, tasks.GetFirstTask(), mapAttribs, dwFlags);
+			tdc.PasteTaskAttributeValues(task, hTask, mapAttribs, dwFlags);
 		}
 	}
 }
 
 void CToDoListWnd::OnUpdateEditPasteAttributes(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CTaskClipboard::GetTaskCount() == 1);
+	pCmdUI->Enable(CTaskClipboard::HasAttributeTask());
 }
 
 void CToDoListWnd::OnEditPasteAfter() 
@@ -9530,9 +9535,9 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 		args.sTaskFileLink = aFiles[0];
 	
 	CDWordArray aIDs;
-	DWORD dwTemp;
+	DWORD dwUnused;
 	
-	if (tdc.GetSelectedTaskIDs(aIDs, dwTemp, FALSE))
+	if (tdc.GetSelectedTaskIDs(aIDs, dwUnused, FALSE))
 		args.sTaskIDs = Misc::FormatArray(aIDs, _T("|"));
 	
 	CStringArray aAllocTo;
@@ -13881,19 +13886,19 @@ LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
 	return DoPreferences(PREFPAGE_SHORTCUT);
 }
 
-void CToDoListWnd::OnTasklistCopyColumnValues() 
+void CToDoListWnd::OnTasklistCopyAllColumnValues() 
 {
-	OnTasklistCopyColumnValues(FALSE);
+	OnTasklistCopyPasteColumnValues(TRUE, FALSE);
 }
 
-void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateTasklistCopyAllColumnValues(CCmdUI* pCmdUI) 
 {
 	OnUpdateTasklistCopyColumnValues(pCmdUI, FALSE);
 }
 
 void CToDoListWnd::OnTasklistCopySelectedTaskColumnValues() 
 {
-	OnTasklistCopyColumnValues(TRUE);
+	OnTasklistCopyPasteColumnValues(TRUE, TRUE);
 }
 
 void CToDoListWnd::OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI) 
@@ -13901,26 +13906,72 @@ void CToDoListWnd::OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI)
 	OnUpdateTasklistCopyColumnValues(pCmdUI, TRUE);
 }
 
-void CToDoListWnd::OnTasklistCopyColumnValues(BOOL bSelectedTasks)
+void CToDoListWnd::OnTasklistCopyPasteColumnValues(BOOL bCopy, BOOL bSelectedTasks)
 {
 	ASSERT(m_nContextColumnID != TDCC_NONE);
 
-	VERIFY(GetToDoCtrl().CopyTaskColumnValues(m_nContextColumnID, bSelectedTasks));
+	if (bCopy)
+		VERIFY(GetToDoCtrl().CopyAttributeColumnValues(m_nContextColumnID, bSelectedTasks));
+	else
+		VERIFY(GetToDoCtrl().PasteAttributeColumnValues(m_nContextColumnID, bSelectedTasks));
+}
+
+void CToDoListWnd::OnTasklistPasteColumnValues()
+{
+	OnTasklistCopyPasteColumnValues(FALSE, FALSE);
+}
+
+void CToDoListWnd::OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI)
+{
+	OnUpdateTasklistPasteColumnValues(pCmdUI, FALSE);
+}
+
+void CToDoListWnd::OnTasklistPasteValuesIntoSelectedTaskInColumn()
+{
+	OnTasklistCopyPasteColumnValues(FALSE, TRUE);
+}
+
+void CToDoListWnd::OnUpdateTasklistPasteValuesIntoSelectedTaskColumn(CCmdUI* pCmdUI)
+{
+	OnUpdateTasklistPasteColumnValues(pCmdUI, TRUE);
 }
 
 void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	TDC_COLUMN nFromColID = m_nContextColumnID;
 
-	BOOL bEnable = tdc.CanCopyTaskColumnValues(m_nContextColumnID, bSelectedTasks);
+	BOOL bEnable = tdc.CanCopyAttributeColumnValues(nFromColID, bSelectedTasks);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)
 	{
 		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES : IDS_TASKLIST_COPYCOLUMNVALUES);
-		CString sColLabel = tdc.GetColumnName(m_nContextColumnID);
+		CString sFromCol = tdc.GetColumnName(nFromColID);
 
-		pCmdUI->SetText(CEnString(nMenuStrID, sColLabel));
+		pCmdUI->SetText(CEnString(nMenuStrID, sFromCol));
+	}
+}
+
+void CToDoListWnd::OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
+{
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	TDC_COLUMN nFromColID = TDCC_NONE, nToCtrlID = m_nContextColumnID;
+
+	BOOL bEnable = tdc.CanPasteAttributeColumnValues(nToCtrlID, bSelectedTasks, nFromColID);
+	pCmdUI->Enable(bEnable);
+
+	if (bEnable)
+	{
+		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES : IDS_TASKLIST_PASTECOLUMNVALUES);
+		
+		CString sFromCol = tdc.GetColumnName(nFromColID);
+		CString sToCol = tdc.GetColumnName(nToCtrlID);
+
+		CEnString sMenuText;
+		sMenuText.Format(nMenuStrID, sFromCol, sToCol);
+
+		pCmdUI->SetText(sMenuText);
 	}
 }
 

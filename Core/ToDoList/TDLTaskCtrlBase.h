@@ -122,8 +122,7 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
 
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
 	CString GetColumnName(TDC_COLUMN nColID) const;
 
 	CString GetSelectedTaskComments() const;
@@ -260,6 +259,7 @@ protected:
 	float m_fAveHeaderCharWidth;
 	CString m_sTasklistFolder;
 	TDCDATETIMEWIDTHS m_dateTimeWidths;
+	int m_nHeaderContextMenuItem;
 
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;
@@ -299,6 +299,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -383,7 +384,6 @@ protected:
 	int CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
 	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
-	int GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const;
 	int RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);

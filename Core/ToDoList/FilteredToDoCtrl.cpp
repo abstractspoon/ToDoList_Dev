@@ -80,7 +80,6 @@ BEGIN_MESSAGE_MAP(CFilteredToDoCtrl, CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
-//	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 END_MESSAGE_MAP()
 
@@ -250,26 +249,6 @@ void CFilteredToDoCtrl::OnDestroy()
 
 	CTabbedToDoCtrl::OnDestroy();
 }
-
-/*
-void CFilteredToDoCtrl::OnEditChangeDueTime()
-{
-	// need some special hackery to prevent a re-filter in the middle
-	// of the user manually typing into the time field
-	CDWordArray aSelTaskIDs;
-	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
-
-	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE, aSelTaskIDs);
-	
-	if (bNeedFullTaskUpdate)
-		m_styles[TDCS_REFILTERONMODIFY] = FALSE;
-	
-	CTabbedToDoCtrl::OnSelChangeDueTime();
-	
-	if (bNeedFullTaskUpdate)
-		m_styles[TDCS_REFILTERONMODIFY] = TRUE;
-}
-*/
 
 BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 {
@@ -900,16 +879,7 @@ void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 
 BOOL CFilteredToDoCtrl::CreateNewTask(LPCTSTR szText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
 {
-	if (CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency))
-	{
-// 		SetViewNeedsTaskUpdate(FTCV_TASKLIST, !InListView());
-// 		SetExtensionsNeedTaskUpdate(TRUE, GetTaskView());
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
+	return CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency);
 }
 
 BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
@@ -1246,47 +1216,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 	ASSERT(pTDS);
 	
 	if (FindNewNowFilterTasks(pTDS, params, m_taskTree.TreeItemMap()))
-	{
 		RefreshFilter(FALSE);
-
-		/*TDC_ATTRIBUTE nNowAttrib;
-
-		if (m_filter.HasNowFilter(nNowAttrib))
-		{
-			BOOL bRefilter = FALSE;
-		
-			switch (nNowAttrib)
-			{
-			case TDCA_DUEDATE:
-				bRefilter = (AfxMessageBox(CEnString(IDS_DUEBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-				break;
-
-			case TDCA_STARTDATE:
-				bRefilter = (AfxMessageBox(CEnString(IDS_STARTBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-				break;
-
-			default:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nNowAttrib))
-				{
-					// TODO
-					//bRefilter = (AfxMessageBox(CEnString(IDS_CUSTOMBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-				}
-				else
-				{
-					ASSERT(0);
-				}
-			}
-		
-			if (bRefilter)
-			{
-				RefreshFilter(FALSE);
-			}
-			else // make the timer 10 minutes so we don't re-prompt them too soon
-			{
-				SetTimer(TIMER_NOWFILTER, TEN_MINUTES, NULL);
-			}
-		}*/
-	}
 }
 
 BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, const CHTIMap& htiMap) const

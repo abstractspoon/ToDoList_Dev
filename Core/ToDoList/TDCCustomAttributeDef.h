@@ -33,7 +33,6 @@ struct TDCCUSTOMATTRIBUTECALCULATIONOPERAND
 
 	static BOOL IsValid(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);
 	static DWORD GetDataType(TDC_ATTRIBUTE nAttribID);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +100,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
-	BOOL HasDefaultHorzAlignment() const;
+	BOOL HasDefaultTextAlignment() const;
 
 	BOOL SetAttributeType(DWORD dwType);
 	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
@@ -125,6 +124,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL IsAggregated() const;
 
 	BOOL SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+	BOOL IsCalculation() const { return calculation.IsValid(FALSE); }
 	const TDCCUSTOMATTRIBUTECALCULATION& Calculation() const { return calculation; }
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
@@ -140,6 +140,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
 	static UINT GetDefaultHorzAlignment(DWORD dwAttribType);
+	static TDC_ATTRIBUTECATEGORY GetCategory(DWORD dwAttribType);
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
@@ -151,7 +152,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString sUniqueID;
 	CString sColumnTitle;
 	CString sLabel;
-	UINT nHorzAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
+	UINT nTextAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
 	DWORD dwFeatures;
 	CStringArray aDefaultListData;
 	mutable CStringArray aAutoListData;

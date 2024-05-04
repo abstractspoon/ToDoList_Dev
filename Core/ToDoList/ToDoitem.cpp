@@ -131,7 +131,7 @@ BOOL TDCTIMEPERIOD::AddTime(const TDCTIMEPERIOD& time)
 
 BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
 {
-	if (!IsValidUnits(nTimeUnits) || (dTime < 0.0))
+	if (!IsValidUnits(nTimeUnits))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -1548,6 +1548,10 @@ BOOL TODOITEM::GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 	case TDCA_DEPENDENCY:
 	case TDCA_RECURRENCE:
 		ASSERT(0);
+		break;
+
+	default:
+		ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
 		break;
 	}
 

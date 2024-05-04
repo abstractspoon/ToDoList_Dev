@@ -9,6 +9,7 @@
 #include "tdcstatic.h"
 #include "tdcstruct.h"
 
+#include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\FileMisc.h"
 #include "..\shared\HoldRedraw.h"
@@ -171,6 +172,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_KEYDOWN()
+	ON_WM_CONTEXTMENU()
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
@@ -754,6 +756,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_LASTMODBY:
 	case TDCA_ID:
 	case TDCA_PARENTID:
+	case TDCA_TIMEREMAINING:
 		break; // ILCT_TEXT;
 
 	case TDCA_TIMEESTIMATE:
@@ -3155,6 +3158,72 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CInputListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
+void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+{
+	LVHITTESTINFO lvHit = { { pos.x, pos.y }, 0 };
+	ScreenToClient(&lvHit.pt);
+
+	int nRow = SubItemHitTest(&lvHit);
+	int nCol = lvHit.iSubItem;
+
+	if (nCol != VALUE_COL)
+		return; // eat
+
+	SetCurSel(nRow, nCol);
+
+	// Decide whether we should show a menu at all
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow, TRUE);
+
+	if (!GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+		return; // eat
+
+	CMenu menu;
+
+	if (menu.LoadMenu(IDR_MISC))
+	{
+		CMenu* pPopup = menu.GetSubMenu(MM_ATTRIBUTECTRL);
+
+		// Prepare menu items
+		BOOL bMultiSel = (m_aSelectedTaskIDs.GetSize() > 1);
+		CEnString sMenuText;
+
+		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+
+		CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+		pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+
+		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
+
+		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
+		{
+			CString sFromAttrib = GetItemText(GetRow(nFromAttribID), ATTRIB_COL);
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
+		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
+									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
+
+		switch (nCmdID)
+		{
+		case ID_ATTRIBLIST_COPYATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
+			break;
+
+		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
+			break;
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
@@ -3303,7 +3372,8 @@ CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::CSortedGroupedHeaderArray(
 		{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
 		{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
 		{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
-		{ TDCAC_TEXT,			IDS_ATTRIBCAT_TEXT },
+		{ TDCAC_SINGLETEXT,		IDS_ATTRIBCAT_SINGLETEXT },
+		{ TDCAC_MULTITEXT,		IDS_ATTRIBCAT_MULTITEXT },
 		{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
 		{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
 	};
@@ -3333,3 +3403,5 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(con
 {
 	return -AscendingSortProc(item1, item2);
 }
+
+////////////////////////////////////////////////////////////////////////////////

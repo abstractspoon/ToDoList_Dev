@@ -182,6 +182,7 @@ protected:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
