@@ -323,7 +323,24 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 		return TRUE;
 	}
 
-	// else
+	// else unthemed
+	switch (nType)
+	{
+	case DFC_COMBO:
+		{
+			nType = DFC_SCROLL;
+			nState |= DFCS_SCROLLDOWN;
+		}
+		break;
+
+	case DFC_COMBONOARROW:
+		{
+			nType = DFC_BUTTON;
+			nState |= DFCS_BUTTONPUSH;
+		}
+		break;
+	}
+
 	return pDC->DrawFrameControl((LPRECT)(LPCRECT)rect, nType, nState);
 }
 

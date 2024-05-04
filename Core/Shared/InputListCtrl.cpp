@@ -688,7 +688,7 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 		rButton.left = (rButton.right - BTN_WIDTH);
 
 		// XP does not support the fancy new date dropdown
-		if (COSVersion() >= OSV_WIN7)
+		if ((COSVersion() >= OSV_WIN7) && CThemed::AreControlsThemed())
 			rButton.left -= BTN_WIDTH;
 		break;
 
