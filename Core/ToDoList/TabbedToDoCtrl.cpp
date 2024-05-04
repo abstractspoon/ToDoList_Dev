@@ -2001,12 +2001,12 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		break;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(mod.nAttrib) && !Misc::IsEmpty(mod.szCustomAttribID))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(mod.nAttributeID) && !Misc::IsEmpty(mod.szCustomAttribID))
 		{
 			if (dwTaskID)
 				bChange = (SET_CHANGE == m_data.SetTaskCustomAttributeData(dwTaskID, mod.szCustomAttribID, mod.szValue));
 			else
-				bChange = SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue, FALSE);
+				bChange = SetSelectedTaskCustomAttributeData(mod.szCustomAttribID, mod.szValue);
 		}
 		else
 		{

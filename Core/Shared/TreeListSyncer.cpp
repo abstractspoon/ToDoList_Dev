@@ -1809,7 +1809,7 @@ BOOL CTreeListSyncer::IsHeaderTracking(HWND hwndHeader, int nCol) const
 
 HWND CTreeListSyncer::HitTestHeader(const CPoint& ptScreen, int& nCol) const
 {
-	HDHITTESTINFO hdhit = { ptScreen, 0 };
+	HDHITTESTINFO hdhit = { ptScreen.x, ptScreen.y, 0 };
 	::ScreenToClient(m_hwndPrimaryHeader, &hdhit.pt);
 
 	int nHit = ::SendMessage(m_hwndPrimaryHeader, HDM_HITTEST, 0, (LPARAM)&hdhit);
