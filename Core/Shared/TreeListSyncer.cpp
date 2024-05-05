@@ -1516,21 +1516,27 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_SETREDRAW:
-		m_scLeft.SetRedraw(wp);
-		m_scRight.SetRedraw(wp);
-		
-		if (m_hwndPrimaryHeader)
-			::SendMessage(m_hwndPrimaryHeader, WM_SETREDRAW, wp, lp);
+		{
+			m_scLeft.SetRedraw(wp);
+			m_scRight.SetRedraw(wp);
+
+			if (m_hwndPrimaryHeader)
+				::SendMessage(m_hwndPrimaryHeader, WM_SETREDRAW, wp, lp);
+		}
 		break;
 		
 	case WM_RESIZE:
-		RefreshSize();
-		m_bResizePending = FALSE;
+		{
+			RefreshSize();
+			m_bResizePending = FALSE;
+		}
 		break;
 
 	case WM_SETFOCUS:
 		if (!HasFocus())
+		{
 			::SetFocus(PrimaryWnd());
+		}
 		break;
 	
 	case WM_SETCURSOR:
@@ -1589,6 +1595,15 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				// derived class callback
 				OnNotifySplitterChange(nNewLeftWidth);
 			}
+		}
+		break;
+
+	case WM_MOUSEWHEEL:
+		// If the right-side window has a vertical scrollbar forward it on
+		if (HasVScrollBar())
+		{
+			m_scRight.PostMessage(WM_MOUSEWHEEL, wp, lp);
+			return 0L;
 		}
 		break;
 
