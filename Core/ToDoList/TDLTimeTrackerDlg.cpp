@@ -616,10 +616,12 @@ void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
 
 	// Update data struct first
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
-	ASSERT(pTTL);
 
 	if (!pTTL)
+	{
+		ASSERT(0);
 		return;
+	}
 
 	BOOL bWasTracking = pTTL->IsTracking();
 	DWORD dwWasTrackingTaskID = (bWasTracking ? pTTL->GetTrackedTaskID() : 0);
