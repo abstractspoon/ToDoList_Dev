@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Themed.h"
-#include "GraphicsMisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -63,11 +62,6 @@ typedef HRESULT (STDAPICALLTYPE *PFNENDBUFFEREDPAINT)(HPAINTBUFFER, BOOL);
 #	define DFCS_HOT                0x1000
 #	define DFC_POPUPMENU           5
 #endif
-
-//////////////////////////////////////////////////////////////////////
-
-const int COMBOARROW_WIDTH = GraphicsMisc::ScaleByDPIFactor(10);
-const int COMBOBTN_MINTOPPADDING = GraphicsMisc::ScaleByDPIFactor(6);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -271,76 +265,10 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 			}
 		}
 				
-		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
-
-		// Post-processing
-		switch (nType)
-		{
-		case DFC_COMBONOARROW:
-			{
-				// Overdraw the arrow with the background colour
-				static CDWordArray aBackColors;
-
-				if (aBackColors.GetSize() == 0)
-				{
-					// Fill with 'NULL' colours
-					aBackColors.SetSize(4);
-
-					for (int nColor = 0; nColor < 4; nColor++)
-						aBackColors[nColor] = CLR_NONE;
-				}
-
-				// Initialise each colour once only
-				if (aBackColors[nThState - 1] == CLR_NONE)
-				{
-					// Retrieve the colour at mid height as being a best-guess
-					int nMidY = ((rect.top + rect.bottom) / 2);
-					aBackColors[nThState - 1] = pDC->GetPixel(CPoint(rect.left + 3, nMidY));
-				}
-
-				// Below a certain height (guessed) the vertical position
-				// of the arrow is defined by a minimum offset from the top
-				// of the box, else it is centred vertically
-				CRect rArrow(0, 0, COMBOARROW_WIDTH, (COMBOARROW_WIDTH / 2));
-				GraphicsMisc::CentreRect(rArrow, rect);
-
-				int nTopPadding = (rArrow.top - rect.top);
-
-				if (nTopPadding < COMBOBTN_MINTOPPADDING)
-				{
-					rArrow.OffsetRect(0, (COMBOBTN_MINTOPPADDING - nTopPadding + 1));
-				}
-				else if ((rect.Height() % 2) == 0)
-				{
-					rArrow.OffsetRect(0, -1);
-				}
-				
-				pDC->FillSolidRect(rArrow, aBackColors[nThState - 1]);
-			}
-			break;
-		}
-		
-		return TRUE;
+		return th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
 	}
 
-	// else unthemed
-	switch (nType)
-	{
-	case DFC_COMBO:
-		{
-			nType = DFC_SCROLL;
-			nState |= DFCS_SCROLLDOWN;
-		}
-		break;
-
-	case DFC_COMBONOARROW:
-		{
-			nType = DFC_BUTTON;
-			nState |= DFCS_BUTTONPUSH;
-		}
-		break;
-	}
-
+	// else
 	return pDC->DrawFrameControl((LPRECT)(LPCRECT)rect, nType, nState);
 }
 
@@ -878,7 +806,7 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 	case DFC_COMBONOARROW:
 		{
 			sThClass = "COMBOBOX";
-			nThPart = CP_DROPDOWNBUTTON;
+			nThPart = (nType == DFC_COMBO ? CP_DROPDOWNBUTTON : CP_READONLY);
 			nThState = CBXS_NORMAL;
 
 			if (nState & (DFCS_CHECKED | DFCS_PUSHED))
