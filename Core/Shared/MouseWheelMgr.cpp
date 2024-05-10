@@ -64,8 +64,9 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		HWND hwndPt = ::WindowFromPoint(info.pt);
 		CString sClass = CWinClasses::GetClass(hwndPt);
 
-		// Windows explorer is tricky so we leave it well alone
-		if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND))
+		// Windows Explorer and Internet Explorer are tricky 
+		// so we leave them well alone
+		if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND) || CWinClasses::IsClass(sClass, WC_IE))
 			return FALSE;
 
 		int zDelta = GET_WHEEL_DELTA_WPARAM(info.mouseData);
