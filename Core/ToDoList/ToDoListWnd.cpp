@@ -812,6 +812,7 @@ void CToDoListWnd::InitUITheme()
 		m_theme.Reset();
 
 	m_pPrefs->SetUITheme(m_theme);
+	m_menubar.SetUITheme(m_theme);
 }
 	
 void CToDoListWnd::UpdateUITheme()
@@ -873,8 +874,6 @@ void CToDoListWnd::UpdateUITheme()
 
 		if (m_dlgFindTasks.GetSafeHwnd())
 			m_dlgFindTasks.SetUITheme(m_theme);
-
-		m_menubar.SetUITheme(m_theme);
 
 		Invalidate();
 	}
@@ -5236,7 +5235,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 	{
 		if (bDefLang || FileMisc::FileExists(sLangFile))
 		{
-			// if the language file exists and has changed then inform the user that they to restart
+			// if the language file exists and has changed then inform the user that they need to restart
 			// Note: restarting will also handle 'bAdd2Dict' and 'bEnableRTL'
 			if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGELANGUAGE, MB_YESNO) == IDYES)
 			{
@@ -5248,8 +5247,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 	// RTL change requires a restart
 	if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
 	{
-		// if the language file exists and has changed then inform the user that they to restart
-		// Note: restarting will also handle 'bAdd2Dict'
+		// if the language file exists and has changed then inform the user that they need to restart
 		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
 		{
 			return TRUE;

@@ -298,8 +298,6 @@ void CTDCMainMenu::UpdateBackgroundColor()
 	{
 		SetBackgroundColor(m_theme.crMenuBack);
 	}
-
-	AfxGetMainWnd()->DrawMenuBar();
 }
 
 // test for top-level menus
