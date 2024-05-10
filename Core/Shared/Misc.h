@@ -32,18 +32,16 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
-static const CLIPFORMAT CB_TEXTFORMAT = 
 #ifdef _UNICODE
-	CF_UNICODETEXT;
+static const CLIPFORMAT CB_TEXTFORMAT =	CF_UNICODETEXT;
 #else
-	CF_TEXT;
+static const CLIPFORMAT CB_TEXTFORMAT =	CF_TEXT;
 #endif
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef _ttof
+#undef _ttof
 #define _ttof(str) Misc::Atof(str)
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
