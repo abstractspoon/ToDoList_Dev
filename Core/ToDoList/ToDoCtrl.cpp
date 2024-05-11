@@ -285,7 +285,6 @@ void CToDoCtrl::UpdateComments(const CString& sTextComments, const CBinaryData& 
 BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 //{{AFX_MSG_MAP(CToDoCtrl)
 	//}}AFX_MSG_MAP
-	ON_WM_SETCURSOR()
 	ON_WM_CTLCOLOR()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()

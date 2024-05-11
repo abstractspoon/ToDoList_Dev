@@ -194,6 +194,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
+	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
 
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
 	ON_MESSAGE(WM_TDC_RESTORELASTTASKVIEW, OnRestoreLastTaskView)
@@ -6659,6 +6660,14 @@ void CTabbedToDoCtrl::OnListSelChanged()
 		UpdateControls();
 		NotifyParentSelectionChange();
 	}
+}
+
+LRESULT CTabbedToDoCtrl::OnSplitChange(WPARAM wp, LPARAM lp)
+{
+	if (!m_layout.IsRebuildingLayout() && InListView())
+		Invalidate();
+
+	return CToDoCtrl::OnSplitChange(wp, lp);
 }
 
 LRESULT CTabbedToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)

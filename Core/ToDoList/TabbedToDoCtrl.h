@@ -213,6 +213,7 @@ protected:
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRestoreLastTaskView(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnUIExtSelectTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam);
