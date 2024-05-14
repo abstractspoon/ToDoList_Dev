@@ -1188,6 +1188,9 @@ void CToDoListWnd::PopulateMenuIconManager()
 	if (m_toolbarCustom.GetSafeHwnd())
 		m_mgrMenuIcons.AddImages(m_toolbarCustom);
 
+	// Displaying logged time
+	m_mgrMenuIcons.AddImage(ID_SHOWTIMELOGFILE, CFileIcons::ExtractIcon(_T(".csv")));
+
 	UpdateMenuIconMgrSourceControlStatus();
 }
 
