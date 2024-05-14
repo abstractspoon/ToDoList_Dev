@@ -318,15 +318,15 @@ void CTDLTaskAttributeListCtrl::RefreshDateTimeFormatting()
 void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 {
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
-	prefs.WriteProfileInt(szKey, _T("SortAscending"), m_bSortAscending);
-	prefs.WriteProfileInt(szKey, _T("Categorized"), m_bCategorized);
+	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
+	prefs.WriteProfileInt(szKey, _T("AttribCategorized"), m_bCategorized);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
-	m_bSortAscending = prefs.GetProfileInt(szKey, _T("SortAscending"), TRUE);
-	m_bCategorized = prefs.GetProfileInt(szKey, _T("Categorized"), FALSE);
+	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
+	m_bCategorized = prefs.GetProfileInt(szKey, _T("AttribCategorized"), FALSE);
 
 	if (GetSafeHwnd())
 	{
