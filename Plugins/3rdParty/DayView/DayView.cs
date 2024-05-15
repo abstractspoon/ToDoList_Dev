@@ -414,36 +414,6 @@ namespace Calendar
 			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
         }
 
-        private int startHour = 8;
-
-        [System.ComponentModel.DefaultValue(8)]
-        public int StartHour
-        {
-            get
-            {
-                return startHour;
-            }
-            set
-            {
-                startHour = value;
-                OnStartHourChanged();
-            }
-        }
-
-        protected virtual void OnStartHourChanged()
-        {
-            if ((startHour * slotsPerHour * slotHeight) > vscroll.Maximum) //maximum is lower on larger forms
-            {
-                vscroll.Value = vscroll.Maximum;
-            }
-            else
-            {
-                vscroll.Value = (startHour * slotsPerHour * slotHeight);
-            }
-
-            Invalidate();
-        }
-
         private Appointment selectedAppointment;
 
         [System.ComponentModel.Browsable(false)]
