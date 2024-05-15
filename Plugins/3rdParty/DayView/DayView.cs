@@ -907,20 +907,20 @@ namespace Calendar
 
 			// Auto-calculate best 'hour' height
 			int availHeight = (Height - HeaderHeight);
-			slotHeight = ((availHeight / (24 * slotsPerHour)) + 1);
+			slotHeight = ((availHeight / (VisibleHours * slotsPerHour)) + 1);
 
 			if (slotHeight < minSlotHeight)
 				slotHeight = minSlotHeight;
 
-			int oneHour = (slotHeight * slotsPerHour);
-			AllowScroll = ((oneHour * 24) > availHeight);
+			int oneHourHeight = (slotHeight * slotsPerHour);
+			AllowScroll = ((oneHourHeight * VisibleHours) > availHeight);
 
 			vscroll.Minimum = 0;
-			vscroll.SmallChange = oneHour;
+			vscroll.SmallChange = oneHourHeight;
 
 			if (AllowScroll)
 			{
-				vscroll.Maximum = (oneHour * 24);
+				vscroll.Maximum = (oneHourHeight * VisibleHours);
 				vscroll.LargeChange = availHeight;
 
 				if (vscroll.Value > (vscroll.Maximum - vscroll.LargeChange))
@@ -1396,15 +1396,14 @@ namespace Calendar
             double numSlots = (y - HeaderHeight + vscroll.Value) / (double)slotHeight;
 
 			// Clip at top and bottom
-			int maxSlots = (24 * slotsPerHour);
+			int maxSlots = (VisibleHours * slotsPerHour);
             numSlots = Math.Max(0, Math.Min(maxSlots, numSlots));
 
             // nearest slot
-            //int minutes = (int)((60 * numSlots) / slotsPerHour);
             int minsPerSlot = (60 / slotsPerHour);
             int minutes = ((int)numSlots * minsPerSlot);
 
-            return new TimeSpan((minutes / 60), (minutes % 60), 0);
+            return new TimeSpan((VisibleStartHour + (minutes / 60)), (minutes % 60), 0);
         }
 
         public Appointment GetAppointmentAt(int x, int y)
@@ -1517,11 +1516,11 @@ namespace Calendar
         {
             e.Graphics.SetClip(rect);
 
-            for (int m_Hour = 0; m_Hour < 24; m_Hour++)
+            for (int hour = 0; hour < VisibleHours; hour++)
             {
                 Rectangle hourRectangle = rect;
 
-                hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * slotHeight) - vscroll.Value;
+                hourRectangle.Y = rect.Y + (hour * slotsPerHour * slotHeight) - vscroll.Value;
                 hourRectangle.X += hourLabelIndent;
 				hourRectangle.Width = HourLabelWidth - 1;
 
@@ -1536,7 +1535,7 @@ namespace Calendar
                     minuteRect.Y += slotHeight;
                 }
 
-                renderer.DrawHourLabel(e.Graphics, hourRectangle, m_Hour, ampmdisplay);
+                renderer.DrawHourLabel(e.Graphics, hourRectangle, (hour + VisibleStartHour), ampmdisplay);
             }
 
             e.Graphics.ResetClip();
@@ -1640,14 +1639,14 @@ namespace Calendar
 
 		protected void DrawDaySlotSeparators(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			for (int hour = 0; hour < 24 * slotsPerHour; hour++)
+			for (int slot = 0; slot < (VisibleHours * slotsPerHour); slot++)
 			{
-				int y = rect.Top + (hour * slotHeight) - vscroll.Value;
+				int y = rect.Top + (slot * slotHeight) - vscroll.Value;
 
 				Color color1 = renderer.HourSeperatorColor();
 				Color color2 = renderer.HalfHourSeperatorColor();
 
-				using (Pen pen = new Pen(((hour % slotsPerHour) == 0 ? color1 : color2)))
+				using (Pen pen = new Pen(((slot % slotsPerHour) == 0 ? color1 : color2)))
 					e.Graphics.DrawLine(pen, rect.Left, y, rect.Right, y);
 
 				if (y > rect.Bottom)
@@ -2093,7 +2092,7 @@ namespace Calendar
 
 			image.Height += DayHeaderHeight;
 			image.Height += ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
-			image.Height += (24 * slotsPerHour * slotHeight);
+			image.Height += (VisibleStartHour * slotsPerHour * slotHeight);
 
 			int dayWidth = ((ClientRectangle.Width - (minHourLabelWidth + hourLabelIndent)) / DaysShowing);
 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * dayWidth));
