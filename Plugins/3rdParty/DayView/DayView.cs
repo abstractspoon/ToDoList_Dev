@@ -1277,7 +1277,9 @@ namespace Calendar
 			if (hour < 0f || hour > 23f)
 				return false;
 
-			vscroll.Value = (int)((hour - VisibleStartHour) * slotsPerHour * slotHeight);
+			int scrollVal = (int)((hour - VisibleStartHour) * slotsPerHour * slotHeight);
+			vscroll.Value = Math.Max(0, scrollVal);
+
 			Invalidate();
 
 			return true;
