@@ -209,17 +209,17 @@ namespace Calendar
 		
 		// ------------------------------------------------------------------
 
-		private bool showWorkHoursOnly = false;
+		private bool showWorkingHoursOnly = false;
 
-		public bool ShowWorkHoursOnly
+		public bool ShowWorkingHoursOnly
 		{
-			get { return showWorkHoursOnly; }
+			get { return showWorkingHoursOnly; }
 
 			set
 			{
-				if (value != showWorkHoursOnly)
+				if (value != showWorkingHoursOnly)
 				{
-					showWorkHoursOnly = value;
+					showWorkingHoursOnly = value;
 					AdjustVScrollbar();
 				}
 			}
@@ -229,7 +229,7 @@ namespace Calendar
 		{
 			get
 			{
-				if (!showWorkHoursOnly)
+				if (!showWorkingHoursOnly)
 					return 0;
 				
 				return workStart.Hour;
@@ -240,7 +240,7 @@ namespace Calendar
 		{
 			get
 			{
-				if (!showWorkHoursOnly)
+				if (!showWorkingHoursOnly)
 					return 24;
 
 				if (workEnd.Min > 0)
@@ -556,8 +556,8 @@ namespace Calendar
 				float scrollEnd = (scrollStart + (vscroll.LargeChange / (float)(slotsPerHour * slotHeight)));
 				float scrollDiff = (scrollEnd - scrollStart);
 
-				float apptStart = GetTime(appt.StartDate.Hour, appt.StartDate.Minute);
-				float apptEnd = GetTime(appt.EndDate.Hour, appt.EndDate.Minute);
+				float apptStart = GetTime(appt.StartDate.Hour, appt.StartDate.Minute) - VisibleStartHour;
+				float apptEnd = GetTime(appt.EndDate.Hour, appt.EndDate.Minute) - VisibleStartHour;
 
 				if (partialOK)
 				{
@@ -710,7 +710,7 @@ namespace Calendar
 				{
 					workStart = value;
 
-					if (showWorkHoursOnly)
+					if (showWorkingHoursOnly)
 						AdjustVScrollbar();
 					else
 						Invalidate();
@@ -729,7 +729,7 @@ namespace Calendar
 				{
 					workEnd = value;
 
-					if (showWorkHoursOnly)
+					if (showWorkingHoursOnly)
 						AdjustVScrollbar();
 					else
 						Invalidate();
