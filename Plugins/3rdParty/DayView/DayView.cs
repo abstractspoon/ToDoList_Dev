@@ -209,38 +209,49 @@ namespace Calendar
 		
 		// ------------------------------------------------------------------
 
-		private int visibleStartHour = 0, visibleEndHour = 24;
+		private bool showWorkHoursOnly = false;
 
-		public int VisibleStartHour
+		public bool ShowWorkHoursOnly
 		{
-			get { return visibleStartHour; }
+			get { return showWorkHoursOnly; }
 
 			set
 			{
-				if ((value >= 0) && (value < 24))
-					visibleStartHour = value;
+				if (value != showWorkHoursOnly)
+				{
+					showWorkHoursOnly = value;
+					AdjustVScrollbar();
+				}
+			}
+		}
 
-				if (visibleEndHour <= visibleStartHour)
-					visibleEndHour = (visibleStartHour + 1);
+		public int VisibleStartHour
+		{
+			get
+			{
+				if (!showWorkHoursOnly)
+					return 0;
+				
+				return workStart.Hour;
 			}
 		}
 
 		public int VisibleEndHour
 		{
-			get { return visibleEndHour; }
-
-			set
+			get
 			{
-				if ((value > 0) && (value <= 24))
-					visibleEndHour = value;
+				if (!showWorkHoursOnly)
+					return 24;
 
-				if (visibleStartHour >= visibleEndHour)
-					visibleStartHour = (visibleEndHour - 1);
+				if (workEnd.Min > 0)
+					return (workEnd.Hour + 1);
+
+				return workEnd.Hour;
 			}
 		}
 
-		public int VisibleHours { get { return (visibleEndHour - VisibleStartHour); } }
-		
+		public int VisibleHours { get { return (VisibleEndHour - VisibleStartHour); } }
+
 		// ------------------------------------------------------------------
 
 		private int slotHeight = minSlotHeight;
@@ -692,17 +703,40 @@ namespace Calendar
         public HourMin WorkStart
         {
             get { return workStart; }
-            set { workStart = value; Invalidate(); }
-        }
+
+			set
+			{
+				if (value != workStart)
+				{
+					workStart = value;
+
+					if (showWorkHoursOnly)
+						AdjustVScrollbar();
+					else
+						Invalidate();
+				}
+			}
+		}
 
 
         public HourMin WorkEnd
         {
             get { return workEnd; }
-            set { workEnd = value; Invalidate(); }
+
+			set
+			{ 
+				if (value != workEnd)
+				{
+					workEnd = value;
+
+					if (showWorkHoursOnly)
+						AdjustVScrollbar();
+					else
+						Invalidate();
+				}
+			}
         }
-
-
+		
         public HourMin LunchStart
         {
             get { return lunchStart; }
@@ -920,7 +954,7 @@ namespace Calendar
 
 			if (AllowScroll)
 			{
-				vscroll.Maximum = (oneHourHeight * VisibleHours);
+				vscroll.Maximum = (oneHourHeight * VisibleHours) + 1;
 				vscroll.LargeChange = availHeight;
 
 				if (vscroll.Value > (vscroll.Maximum - vscroll.LargeChange))
@@ -1243,7 +1277,7 @@ namespace Calendar
 			if (hour < 0f || hour > 23f)
 				return false;
 
-			vscroll.Value = (int)(hour * slotsPerHour * slotHeight);
+			vscroll.Value = (int)((hour - VisibleStartHour) * slotsPerHour * slotHeight);
 			Invalidate();
 
 			return true;
@@ -1588,13 +1622,13 @@ namespace Calendar
 
 			if (start < end)
 			{
-				int startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
+				int startY = ((start.Hour - VisibleStartHour) * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
 
 				// Special case: end time is 'end of day'
 				if (end == start.Date.AddDays(1))
 					end = end.AddSeconds(-1);
 
-				int endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
+				int endY = ((end.Hour - VisibleStartHour) * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
 
 				rect = baseRectangle;
 				rect.Y = startY - vscroll.Value + HeaderHeight;
