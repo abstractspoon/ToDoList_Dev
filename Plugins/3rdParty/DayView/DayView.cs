@@ -193,8 +193,12 @@ namespace Calendar
 			}
 		}
 
+		// ------------------------------------------------------------------
+
 		protected bool SavingToImage { get; set; }
 		
+		// ------------------------------------------------------------------
+
 		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
 
         public AppHeightDrawMode AppHeightMode
@@ -202,6 +206,42 @@ namespace Calendar
             get { return appHeightMode; }
             set { appHeightMode = value; }
         }
+		
+		// ------------------------------------------------------------------
+
+		private int visibleStartHour = 0, visibleEndHour = 24;
+
+		public int VisibleStartHour
+		{
+			get { return visibleStartHour; }
+
+			set
+			{
+				if ((value >= 0) && (value < 24))
+					visibleStartHour = value;
+
+				if (visibleEndHour <= visibleStartHour)
+					visibleEndHour = (visibleStartHour + 1);
+			}
+		}
+
+		public int VisibleEndHour
+		{
+			get { return visibleEndHour; }
+
+			set
+			{
+				if ((value > 0) && (value <= 24))
+					visibleEndHour = value;
+
+				if (visibleStartHour >= visibleEndHour)
+					visibleStartHour = (visibleEndHour - 1);
+			}
+		}
+
+		public int VisibleHours { get { return (visibleEndHour - VisibleStartHour); } }
+		
+		// ------------------------------------------------------------------
 
 		private int slotHeight = minSlotHeight;
 
@@ -223,6 +263,8 @@ namespace Calendar
             AdjustVScrollbar();
             Invalidate();
         }
+		
+		// ------------------------------------------------------------------
 
         private IRenderer renderer;
 
@@ -246,6 +288,8 @@ namespace Calendar
             Font = renderer.BaseFont();
             Invalidate();
         }
+		
+		// ------------------------------------------------------------------
 
         private bool ampmdisplay = false;
 
@@ -266,6 +310,8 @@ namespace Calendar
         {
             Invalidate();
         }
+		
+		// ------------------------------------------------------------------
 
         private bool drawAllAppBorder = false;
 
@@ -286,6 +332,8 @@ namespace Calendar
         {
             Invalidate();
         }
+		
+		// ------------------------------------------------------------------
 
         private bool minHalfHourApp = false;
 
@@ -301,6 +349,8 @@ namespace Calendar
                 Invalidate();
             }
         }
+		
+		// ------------------------------------------------------------------
 
 		private int DayHeaderHeight
 		{
@@ -313,6 +363,8 @@ namespace Calendar
 				return minDayHeaderHeight;
 			}
 		}
+		
+		// ------------------------------------------------------------------
 
         private int daysToShow = 7;
 
@@ -353,6 +405,8 @@ namespace Calendar
 
             Invalidate();
         }
+		
+		// ------------------------------------------------------------------
 
         private SelectionType selectionType;
 
@@ -364,6 +418,8 @@ namespace Calendar
                 return selectionType;
             }
         }
+		
+		// ------------------------------------------------------------------
 
         private DateTime startDate;
 
@@ -413,6 +469,8 @@ namespace Calendar
             Invalidate();
 			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
         }
+		
+		// ------------------------------------------------------------------
 
         private Appointment selectedAppointment;
 
@@ -456,6 +514,8 @@ namespace Calendar
 				Refresh();
 			}
         }
+		
+		// ------------------------------------------------------------------
 
 		static float GetTime(int hours, int mins)
 		{
