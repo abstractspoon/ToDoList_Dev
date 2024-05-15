@@ -175,7 +175,7 @@ namespace DayViewUIExtension
 		public bool DisplayTasksContinuous { get { return !m_DisplayDiscontinuous.Checked; } }
 		public bool DisplayActiveTasksToday { get { return m_ShowActiveToday.Checked; } }
 		public bool ShowFutureOccurrences { get { return m_ShowFutureOccurrences.Checked; } }
-		public bool ShowWorkingHoursOnly { get { return m_ShowFutureOccurrences.Checked; } }
+		public bool ShowWorkingHoursOnly { get { return m_ShowWorkingHoursOnly.Checked; } }
 
 		public int SlotMinutes
 		{
