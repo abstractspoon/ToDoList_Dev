@@ -124,8 +124,9 @@ void Translator::Translate(Form^ window, ToolTip^ tooltips)
 
 void Translator::Translate(Control^ ctrl)
 {
-	// Special cases
+	// Non-translatables
 	if (ISTYPE(ctrl, Windows::Forms::WebBrowser) ||
+		ISTYPE(ctrl, DateTimePicker) ||
 		ISTYPE(ctrl, TextBox) ||
 		ISTYPE(ctrl, RichTextBox))
 	{
