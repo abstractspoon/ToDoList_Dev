@@ -5041,68 +5041,81 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		}
 
 		mapAttribIDs.Add(TDCA_DUEDATE);
+		mapAttribIDs.Add(TDCA_DUETIME);
 		mapAttribIDs.Add(TDCA_STARTDATE);
+		mapAttribIDs.Add(TDCA_STARTTIME);
 		break;
 
 	case TDCA_DUEDATE: // -----------------------------------------------------------
-		if (bWantUpdateDependentDates)
 		{
-			mapAttribIDs.Add(TDCA_STARTDATE);
-			mapAttribIDs.Add(TDCA_DEPENDENCY);
-		}
+			mapAttribIDs.Add(TDCA_DUETIME);
 
-		if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
-			HasStyle(TDCS_USEHIGHESTPRIORITY))
-		{
-			mapAttribIDs.Add(TDCA_PRIORITY);
-		}
+			if (bWantUpdateDependentDates)
+			{
+				mapAttribIDs.Add(TDCA_STARTDATE);
+				mapAttribIDs.Add(TDCA_DEPENDENCY);
+			}
 
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-		{
-			mapAttribIDs.Add(TDCA_STARTDATE);
-			mapAttribIDs.Add(TDCA_TIMEESTIMATE);
+			if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
+				HasStyle(TDCS_USEHIGHESTPRIORITY))
+			{
+				mapAttribIDs.Add(TDCA_PRIORITY);
+			}
+
+			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+			{
+				mapAttribIDs.Add(TDCA_STARTDATE);
+				mapAttribIDs.Add(TDCA_TIMEESTIMATE);
+			}
 		}
 		break;
 
 	case TDCA_STARTDATE: // ----------------------------------------------------------
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
-			mapAttribIDs.Add(TDCA_DUEDATE);
-			mapAttribIDs.Add(TDCA_TIMEESTIMATE);
+			mapAttribIDs.Add(TDCA_STARTTIME);
+
+			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+			{
+				mapAttribIDs.Add(TDCA_DUEDATE);
+				mapAttribIDs.Add(TDCA_TIMEESTIMATE);
+			}
 		}
 		break;
 
 	case TDCA_DONEDATE: // -----------------------------------------------------------
-		mapAttribIDs.Add(TDCA_SUBTASKDONE);
-		mapAttribIDs.Add(TDCA_PERCENT);
-
-		if (bWantUpdateDependentDates)
 		{
-			mapAttribIDs.Add(TDCA_DUEDATE);
-			mapAttribIDs.Add(TDCA_STARTDATE);
-		}
+			mapAttribIDs.Add(TDCA_DONETIME);
+			mapAttribIDs.Add(TDCA_SUBTASKDONE);
+			mapAttribIDs.Add(TDCA_PERCENT);
 
-		if (SelectionHasRecurring())
-		{
-			mapAttribIDs.Add(TDCA_DUEDATE);
-			mapAttribIDs.Add(TDCA_STARTDATE);
-		}
+			if (bWantUpdateDependentDates)
+			{
+				mapAttribIDs.Add(TDCA_DUEDATE);
+				mapAttribIDs.Add(TDCA_STARTDATE);
+			}
 
-		if (HasStyle(TDCS_DONEHAVELOWESTRISK) ||
-			(HasStyle(TDCS_INCLUDEDONEINRISKCALC) && HasStyle(TDCS_USEHIGHESTRISK)))
-		{
-			mapAttribIDs.Add(TDCA_RISK);
-		}
+			if (SelectionHasRecurring())
+			{
+				mapAttribIDs.Add(TDCA_DUEDATE);
+				mapAttribIDs.Add(TDCA_STARTDATE);
+			}
 
-		if (HasStyle(TDCS_DONEHAVELOWESTPRIORITY) ||
-			(HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && HasStyle(TDCS_USEHIGHESTPRIORITY)))
-		{
-			mapAttribIDs.Add(TDCA_PRIORITY);
-		}
+			if (HasStyle(TDCS_DONEHAVELOWESTRISK) ||
+				(HasStyle(TDCS_INCLUDEDONEINRISKCALC) && HasStyle(TDCS_USEHIGHESTRISK)))
+			{
+				mapAttribIDs.Add(TDCA_RISK);
+			}
 
-		if (HasStyle(TDCS_SETCOMPLETIONSTATUS))
-		{
-			mapAttribIDs.Add(TDCA_STATUS);
+			if (HasStyle(TDCS_DONEHAVELOWESTPRIORITY) ||
+				(HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && HasStyle(TDCS_USEHIGHESTPRIORITY)))
+			{
+				mapAttribIDs.Add(TDCA_PRIORITY);
+			}
+
+			if (HasStyle(TDCS_SETCOMPLETIONSTATUS))
+			{
+				mapAttribIDs.Add(TDCA_STATUS);
+			}
 		}
 		break;
 
@@ -5127,7 +5140,9 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_DUETIME);
 			mapAttribIDs.Add(TDCA_STARTDATE);
+			mapAttribIDs.Add(TDCA_STARTTIME);
 		}
 		break;
 
@@ -5135,6 +5150,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		if (HasStyle(TDCS_SETCOMPLETIONSTATUS) && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
 		{
 			mapAttribIDs.Add(TDCA_DONEDATE);
+			mapAttribIDs.Add(TDCA_DONETIME);
 		}
 		break;
 	} // -------------------------------------------------------------------------
