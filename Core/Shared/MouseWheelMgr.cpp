@@ -113,7 +113,8 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			else if (CWinClasses::IsEditControl(hwndPt) && bHasVScroll)
 			{
 				// Check that the scrollbar is enabled
-				SCROLLINFO si = { 0 };
+				SCROLLINFO si = { sizeof(si), SIF_ALL, 0 };
+
 				bForwardToParent = !::GetScrollInfo(hwndPt, SB_VERT, &si);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) ||
