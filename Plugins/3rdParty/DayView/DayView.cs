@@ -552,12 +552,12 @@ namespace Calendar
 			if (!IsLongAppt(appt))
 			{
 				// Ensure at least one hour of the task is in view
-				float scrollStart = (vscroll.Value / (float)(slotsPerHour * slotHeight));
+				float scrollStart = (vscroll.Value / (float)(slotsPerHour * slotHeight)) + VisibleStartHour;
 				float scrollEnd = (scrollStart + (vscroll.LargeChange / (float)(slotsPerHour * slotHeight)));
 				float scrollDiff = (scrollEnd - scrollStart);
 
-				float apptStart = GetTime(appt.StartDate.Hour, appt.StartDate.Minute) - VisibleStartHour;
-				float apptEnd = GetTime(appt.EndDate.Hour, appt.EndDate.Minute) - VisibleStartHour;
+				float apptStart = GetTime(appt.StartDate.Hour, appt.StartDate.Minute);
+				float apptEnd = GetTime(appt.EndDate.Hour, appt.EndDate.Minute);
 
 				if (partialOK)
 				{
