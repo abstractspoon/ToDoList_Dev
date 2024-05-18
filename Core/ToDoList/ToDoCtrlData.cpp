@@ -2636,13 +2636,16 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	if (dRealDurationInUnits == 0.0)
 	{
 #ifdef _DEBUG
+
 		ASSERT((nUnits == TDCU_MINS) ||
 				(nUnits == TDCU_HOURS) ||
 				(nUnits == TDCU_WEEKDAYS) ||
 				(nUnits == TDCU_WEEKS));
-		
+
 		CDateHelper dh;
-		ASSERT(dh.WorkingWeek().HasWeekend() || (dh.WorkingDay().GetLengthInHours(TRUE) < 24));
+
+ 		ASSERT(dh.WorkingWeek().HasWeekend() ||
+ 				(dh.WorkingDay().GetLengthInHours(TRUE) < 24));
 #endif
 
 		// Recalculate the simple duration in weekday-hours because this
