@@ -4684,7 +4684,9 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 					break;
 
 				default: // Allow item cycling for fixed lists
-					return (pDef->GetListType() == TDCCA_FIXEDLIST);
+					if (pDef->GetListType() == TDCCA_FIXEDLIST)
+						return TRUE;
+					break;
 				}
 			}
 			break;
