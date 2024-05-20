@@ -4104,7 +4104,8 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 		}
 	}
 
-	return CWnd::OnToolHitTest(point, pTI);
+	// Don't want default behaviour
+	return 0;
 }
 
 void CToDoCtrl::SetReadonly(BOOL bReadOnly)
