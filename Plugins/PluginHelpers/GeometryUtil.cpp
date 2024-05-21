@@ -22,9 +22,17 @@ int RectUtil::CentreY(Drawing::Rectangle^ rect)
 	return ((rect->Top + rect->Bottom) / 2);
 }
 
-Drawing::Point RectUtil::Centre(Drawing::Rectangle^ rect)
+Drawing::Point RectUtil::CentrePoint(Drawing::Rectangle^ rect)
 {
 	return Point(CentreX(rect), CentreY(rect));
+}
+
+Drawing::Rectangle RectUtil::CentredRect(Drawing::Point^ point, int size)
+{
+	return Rectangle::FromLTRB(point->X - (size / 2),
+							   point->Y - (size / 2),
+							   point->X + (size - (size / 2)),
+							   point->Y + (size - (size / 2)));
 }
 
 Drawing::Point RectUtil::TopLeft(Drawing::Rectangle^ rect)

@@ -1553,22 +1553,28 @@ namespace Calendar
 			return Rectangle.Empty;
 		}
 
+		protected int GetHourScrollPos(DateTime time)
+		{
+			int vPos = (time.Hour * slotHeight * slotsPerHour) + ((time.Minute * slotHeight) / (60 / slotsPerHour));
+
+			return (vPos - vscroll.Value + HeaderHeight);
+		}
+
 		protected Rectangle GetHourRangeRectangle(DateTime start, DateTime end, Rectangle baseRectangle)
         {
 			Rectangle rect = Rectangle.Empty;
 
 			if (start < end)
 			{
-				int startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
-
 				// Special case: end time is 'end of day'
 				if (end == start.Date.AddDays(1))
 					end = end.AddSeconds(-1);
 
-				int endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
+				int startY = GetHourScrollPos(start);
+				int endY = GetHourScrollPos(end);
 
 				rect = baseRectangle;
-				rect.Y = startY - vscroll.Value + HeaderHeight;
+				rect.Y = startY;
 				rect.Height = System.Math.Max(1, endY - startY);
 			}
 
