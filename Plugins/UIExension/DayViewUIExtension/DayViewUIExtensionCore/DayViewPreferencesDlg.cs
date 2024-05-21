@@ -82,6 +82,7 @@ namespace DayViewUIExtension
 
 			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
 			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
+			prefs.WriteProfileBool(prefsKey, "ShowWorkingHoursOnly", m_ShowWorkingHoursOnly.Checked);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
@@ -101,6 +102,7 @@ namespace DayViewUIExtension
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
+			m_ShowWorkingHoursOnly.Checked = prefs.GetProfileBool(prefsKey, "ShowWorkingHoursOnly", true);
 		}
 
 		public new DialogResult ShowDialog()
@@ -123,6 +125,7 @@ namespace DayViewUIExtension
 			var orgShowFuture = ShowFutureOccurrences;
 			var orgSlotMins = SlotMinutes;
 			var orgSlotHeight = MinSlotHeight;
+			var orgWorkingOnly = ShowWorkingHoursOnly;
 
 			// Enable states
 			m_HideParentTasksByTag.Enabled = m_HideParentTasks.Checked;
@@ -144,6 +147,7 @@ namespace DayViewUIExtension
 				m_HideTasksSpanningWeekends.Checked = orgHideSpanWeekends;
 				m_HideTasksSpanningDays.Checked = orgHideSpanDays;
 				m_ShowFutureOccurrences.Checked = orgShowFuture;
+				m_ShowWorkingHoursOnly.Checked = orgWorkingOnly;
 
 				SlotMinutes = orgSlotMins;
 				MinSlotHeight = orgSlotHeight;
@@ -171,6 +175,7 @@ namespace DayViewUIExtension
 		public bool DisplayTasksContinuous { get { return !m_DisplayDiscontinuous.Checked; } }
 		public bool DisplayActiveTasksToday { get { return m_ShowActiveToday.Checked; } }
 		public bool ShowFutureOccurrences { get { return m_ShowFutureOccurrences.Checked; } }
+		public bool ShowWorkingHoursOnly { get { return m_ShowWorkingHoursOnly.Checked; } }
 
 		public int SlotMinutes
 		{
