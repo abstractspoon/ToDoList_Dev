@@ -439,3 +439,13 @@ int CWinClasses::GetStyleType(HWND hWnd, DWORD dwTypeMask)
 {
 	return (::GetWindowLong(hWnd, GWL_STYLE) & dwTypeMask);
 }
+
+BOOL CWinClasses::IsWindowsFormsControl(LPCTSTR szClass)
+{
+	return Misc::HasPrefix(szClass, _T("WindowsForms"), FALSE);
+}
+
+BOOL CWinClasses::IsWindowsFormsControl(HWND hWnd)
+{
+	return IsWindowsFormsControl(GetClass(hWnd));
+}

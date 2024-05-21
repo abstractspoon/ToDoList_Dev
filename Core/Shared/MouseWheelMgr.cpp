@@ -125,10 +125,12 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			}
 			else if (!bHasVScroll)
 			{
-				// For all other controls without scrollbars, we forward the mouse wheel 
-				// to the parent, but NOT if the control key is down, because that implies 
-				// some other sort of operation like zooming
-				bForwardToParent = !Misc::IsKeyPressed(VK_CONTROL);
+				// For all other controls without scrollbars, we forward the 
+				// mouse wheel to the parent but NOT if :
+				// 1) the windows is a .NET control OR
+				// 2) the CTRL key is down, because that implies some other sort of operation like zooming
+				bForwardToParent = !Misc::IsKeyPressed(VK_CONTROL) && 
+									!CWinClasses::IsWindowsFormsControl(sClass);
 			}
 
 			if (bForwardToParent)
