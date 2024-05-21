@@ -97,6 +97,14 @@ namespace DayViewUIExtension
 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
+			// Create a 5 minute timer for updating the line indicating time of day 'today'
+			var timer = new Timer()
+			{
+				Enabled = true,
+				Interval = (1000 * 5 * 60)
+			};
+			timer.Tick += (s, e) => { UpdateTodayTime(); };
+
 			InitializeComponent();
 		}
 
@@ -1127,60 +1135,101 @@ namespace DayViewUIExtension
             return time;
         }
 
-		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime time)
+		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime date)
 		{
 			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
 
 			if (SystemInformation.HighContrast)
 			{
 				// Draw selection first because it's opaque
-				DrawDaySelection(e, rect, time);
+				DrawDaySelection(e, rect, date);
 
-				DrawDaySlotSeparators(e, rect, time);
-				DrawNonWorkHours(e, rect, time);
-				DrawToday(e, rect, time);
-				DrawDayAppointments(e, rect, time);
+				DrawDaySlotSeparators(e, rect, date);
+				DrawNonWorkHours(e, rect, date);
+				DrawTodayBackground(e, rect, date);
+				DrawDayAppointments(e, rect, date);
 			}
 			else
 			{
-				DrawDaySlotSeparators(e, rect, time);
-				DrawNonWorkHours(e, rect, time);
-				DrawToday(e, rect, time);
-				DrawDayAppointments(e, rect, time);
+				DrawDaySlotSeparators(e, rect, date);
+				DrawNonWorkHours(e, rect, date);
+				DrawTodayBackground(e, rect, date);
+				DrawDayAppointments(e, rect, date);
 
 				// Draw selection last because it's translucent
-				DrawDaySelection(e, rect, time);
+				DrawDaySelection(e, rect, date);
 			}
 
+			DrawTodayTime(e, rect, date);
 			DrawDayGripper(e, rect);
 		}
 
-		private bool WantDrawToday(DateTime time)
+		private bool WantDrawToday(DateTime date)
 		{
 			if (!Theme.HasAppColor(UITheme.AppColor.Today))
 				return false;
 			
-			return (time.Date == DateTime.Now.Date);
+			return (date.Date == DateTime.Now.Date);
 		}
 
-		protected void DrawToday(PaintEventArgs e, Rectangle rect, DateTime time)
+		protected void DrawTodayBackground(PaintEventArgs e, Rectangle rect, DateTime date)
 		{
-			if (!WantDrawToday(time))
+			if (!WantDrawToday(date))
 				return;
 
 			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+			{
 				e.Graphics.FillRectangle(brush, rect);
+			}
 		}
 
-		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime time)
+		protected void DrawTodayTime(PaintEventArgs e, Rectangle rect, DateTime date)
 		{
-			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(time.DayOfWeek))
+			if (date.Date != DateTime.Now.Date)
+				return;
+
+			int vPos = GetHourScrollPos(DateTime.Now);
+
+			if ((vPos > rect.Top) && (vPos < rect.Bottom))
+			{
+				Color color = Theme.GetAppDrawingColor(UITheme.AppColor.Today);
+
+				using (var pen = new Pen(color, DPIScaling.Scale(2.0f)))
+				{
+					e.Graphics.DrawLine(pen, rect.Left, vPos, rect.Right, vPos);
+
+					// Draw a blob at the end point to draw attention to the line
+					// Note: we avoid the start because that might conflict with a task's 'bar'
+					using (var brush = new SolidBrush(color))
+					{
+						e.Graphics.FillEllipse(brush, RectUtil.CentredRect(new Point(rect.Right, vPos), DPIScaling.Scale(10)));
+					}
+				}
+			}
+		}
+
+		void UpdateTodayTime()
+		{
+			var today = DateTime.Now.Date;
+
+			if ((today >= StartDate) && (today <= EndDate))
+			{
+				int vPos = GetHourScrollPos(DateTime.Now);
+
+				if ((vPos >= HeaderHeight) && (vPos < ClientRectangle.Bottom))
+					Invalidate();
+			}
+		}
+
+		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(date.DayOfWeek))
 			{
 				var weekendColor = Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
-				if (WantDrawToday(time))
+				if (WantDrawToday(date))
 					weekendColor = DrawingColor.ToGray(weekendColor);
 
 				using (var brush = new SolidBrush(weekendColor))
@@ -1192,7 +1241,7 @@ namespace DayViewUIExtension
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
-				if (WantDrawToday(time))
+				if (WantDrawToday(date))
 					nonWorkColor = DrawingColor.ToGray(nonWorkColor);
 
 				using (SolidBrush brush = new SolidBrush(nonWorkColor))
