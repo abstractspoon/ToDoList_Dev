@@ -14,6 +14,7 @@
 #include "..\shared\icon.h"
 #include "..\shared\enedit.h"
 #include "..\shared\TooltipCtrlex.h"
+#include "..\shared\IconButton.h"
 
 #include "..\Interfaces\uithemefile.h"
 
@@ -81,6 +82,7 @@ protected:
 	CEnEdit m_eElapsedTime;
 	CImageList m_ilBtns;
 	CToolTipCtrlEx m_tipCaption;
+	CIconButton m_btnGoToTasklist, m_btnGoToTask;
 	
 	CTDCTrackTasklistArray m_aTasklists;
 	CUIThemeFile m_theme;

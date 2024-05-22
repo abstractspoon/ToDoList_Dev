@@ -47,6 +47,9 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_dwStartStopShortcut(0)
 {
 	m_sOrgCaption = CEnString(IDS_FOCUS_TIMETRACKER);
+
+	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
+	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
 }
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
@@ -60,6 +63,8 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
 	DDX_Control(pDX, IDC_ELAPSEDTIME, m_eElapsedTime);
+	DDX_Control(pDX, IDC_GOTOTASKLIST, m_btnGoToTasklist);
+	DDX_Control(pDX, IDC_GOTOTASK, m_btnGoToTask);
 	DDX_Text(pDX, IDC_TASKTIME, m_sTaskTimes);
 	DDX_Text(pDX, IDC_ELAPSEDTIME, m_sElapsedTime);
 	DDX_Text(pDX, IDC_QUICKFIND, m_sQuickFind);
@@ -1185,6 +1190,9 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ShowCtrl(this, IDC_TASKLISTS_LABEL, bShowTasklists);
 		ShowCtrl(this, IDC_TASKS, bShowTasks);
 		ShowCtrl(this, IDC_TASKS_LABEL, bShowTasks);
+
+		OffsetCtrl(this, IDC_GOTOTASKLIST, nXOffset, nYOffset);
+		OffsetCtrl(this, IDC_GOTOTASK, nXOffset, nYOffset);
 
 		OffsetCtrl(this, IDC_TASKS, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKS, nXOffset, 0);
