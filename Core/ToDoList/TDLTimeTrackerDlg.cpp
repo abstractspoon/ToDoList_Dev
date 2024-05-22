@@ -47,9 +47,6 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_dwStartStopShortcut(0)
 {
 	m_sOrgCaption = CEnString(IDS_FOCUS_TIMETRACKER);
-
-	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
-	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
 }
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
@@ -230,6 +227,9 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 		
 	m_iconDlg.Load(IDR_MAINFRAME_STD);
 	SetIcon(m_iconDlg, TRUE);
+
+	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
+	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
 
 	EnableToolTips(TRUE);
 	CalcMinMaxSizes();
@@ -999,6 +999,14 @@ BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*
 		sTooltip = GetSelectedItem(m_cbTasks);
 		break;
 
+	case IDC_GOTOTASKLIST:
+		sTooltip = CEnString(IDS_GOTOTASKLIST_TIP);
+		break;
+
+	case IDC_GOTOTASK:
+		sTooltip = CEnString(IDS_GOTOTASK_TIP);
+		break;
+
 	default:
 		return FALSE;
 	}
@@ -1188,8 +1196,10 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ShowCtrl(this, IDC_QUICKFIND, bShowToolbar);
 		ShowCtrl(this, IDC_TASKLISTS, bShowTasklists);
 		ShowCtrl(this, IDC_TASKLISTS_LABEL, bShowTasklists);
+		ShowCtrl(this, IDC_GOTOTASKLIST, bShowTasklists);
 		ShowCtrl(this, IDC_TASKS, bShowTasks);
 		ShowCtrl(this, IDC_TASKS_LABEL, bShowTasks);
+		ShowCtrl(this, IDC_GOTOTASK, bShowTasks);
 
 		OffsetCtrl(this, IDC_GOTOTASKLIST, nXOffset, nYOffset);
 		OffsetCtrl(this, IDC_GOTOTASK, nXOffset, nYOffset);
