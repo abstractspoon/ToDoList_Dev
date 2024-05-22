@@ -76,6 +76,7 @@ const UINT WM_TDLTTN_STARTTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STA
 const UINT WM_TDLTTN_STOPTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STOPTRACKING"));		// wParam = hwnd
 const UINT WM_TDLTTN_RESETELAPSEDTIME		= ::RegisterWindowMessage(_T("WM_TDLTTN_RESETELAPSEDTIME"));	// wParam = hwnd
 const UINT WM_TDLTTN_LOADDELAYEDTASKLIST	= ::RegisterWindowMessage(_T("WM_TDLTTN_LOADDELAYEDTASKLIST")); // wParam = hwnd
+const UINT WM_TDLTTN_GOTOTASKLIST			= ::RegisterWindowMessage(_T("WM_TDLTTN_GOTOTASKLIST"));			// wParam = hwnd, lParam = TaskID
 
 // CTDLThreadedExporterWnd
 const UINT WM_TDLTE_EXPORTTHREADFINISHED	= ::RegisterWindowMessage(_T("WM_TDLTE_EXPORTTHREADFINISHED")); // wParam = success, lParam = TDCDUETASKNOTIFY*

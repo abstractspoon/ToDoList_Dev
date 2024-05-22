@@ -71,6 +71,8 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_BN_CLICKED(IDC_STARTSTOP, OnStartStopTracking)
+	ON_BN_CLICKED(IDC_GOTOTASKLIST, OnGoToSelectedTasklist)
+	ON_BN_CLICKED(IDC_GOTOTASK, OnGoToSelectedTask)
 	ON_WM_CTLCOLOR()
 	ON_WM_NCHITTEST()
 	ON_CBN_SELCHANGE(IDC_TASKLISTS, OnSelchangeTasklist)
@@ -811,6 +813,16 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	// redraw text colour
 	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
 	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
+}
+
+void CTDLTimeTrackerDlg::OnGoToSelectedTasklist()
+{
+	SendNotifyMessage(WM_TDLTTN_GOTOTASKLIST, GetSelectedTasklist(), 0);
+}
+
+void CTDLTimeTrackerDlg::OnGoToSelectedTask()
+{
+	SendNotifyMessage(WM_TDLTTN_GOTOTASKLIST, GetSelectedTasklist(), GetSelectedTaskID());
 }
 
 LRESULT CTDLTimeTrackerDlg::SendNotifyMessage(UINT message, const CToDoCtrl* pTDC, DWORD dwTaskID) const

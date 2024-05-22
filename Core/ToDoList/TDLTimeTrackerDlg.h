@@ -122,6 +122,8 @@ protected:
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnToggleTopMost();
 	afx_msg void OnHelp();
+	afx_msg void OnGoToSelectedTasklist();
+	afx_msg void OnGoToSelectedTask();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
