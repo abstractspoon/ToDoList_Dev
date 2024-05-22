@@ -230,8 +230,8 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	m_iconDlg.Load(IDR_MAINFRAME_STD);
 	SetIcon(m_iconDlg, TRUE);
 
-	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
-	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
+	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_TIMETRACK_GOTO));
+	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_TIMETRACK_GOTO));
 
 	EnableToolTips(TRUE);
 	EnableDisableGoToBtns();
@@ -935,8 +935,8 @@ void CTDLTimeTrackerDlg::OnSelchangeTask()
 
 void CTDLTimeTrackerDlg::EnableDisableGoToBtns()
 {
-	GetDlgItem(IDC_GOTOTASKLIST)->EnableWindow(m_cbTasklists.GetCurSel() != -1);
-	GetDlgItem(IDC_GOTOTASK)->EnableWindow(m_cbTasks.GetCurSel() != -1);
+	m_btnGoToTasklist.EnableWindow(m_cbTasklists.GetCurSel() != -1);
+	m_btnGoToTask.EnableWindow(m_cbTasks.GetCurSel() != -1);
 }
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
