@@ -146,6 +146,7 @@
 #define IDD_PASTETASKATTRIB_DIALOG      327
 #define IDR_TASK_ATTRIBUTE_TOOLBAR      328
 #define IDB_TASKATTRIB_TOOLBAR          331
+#define IDI_TIMETRACK_GOTO              332
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -865,6 +866,7 @@
 #define IDC_PRESERVEENDOFMONTH          1574
 #define IDC_OFFSETSUBTASKREFS           1575
 #define IDC_WHATLIST                    1576
+#define IDC_GOTOTASKLIST                1577
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2520,14 +2522,16 @@
 #define IDS_ATTRIBCTRL_PASTEATTRIBVALUE 51647
 #define IDS_ATTRIBCTRL_COPYATTRIBVALUES 51648
 #define IDS_ATTRIBCTRL_PASTEATTRIBVALUES 51649
+#define IDS_GOTOTASKLIST_TIP            51650
+#define IDS_GOTOTASK_TIP                51651
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        332
+#define _APS_NEXT_RESOURCE_VALUE        333
 #define _APS_NEXT_COMMAND_VALUE         34767
-#define _APS_NEXT_CONTROL_VALUE         1577
+#define _APS_NEXT_CONTROL_VALUE         1578
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

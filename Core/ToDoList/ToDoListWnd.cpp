@@ -524,6 +524,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_RESETELAPSEDTIME, OnTimeTrackerResetElapsedTime)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STARTTRACKING, OnTimeTrackerStartTracking)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STOPTRACKING, OnTimeTrackerStopTracking)
+	ON_REGISTERED_MESSAGE(WM_TDLTTN_GOTOTASKLIST, OnTimeTrackerGoToTasklist)
 	ON_REGISTERED_MESSAGE(WM_TDL_ISCLOSING, OnToDoListIsClosing)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS, OnToDoListRefreshPrefs)
 	ON_REGISTERED_MESSAGE(WM_TDL_PASSWORDRESTORE, OnToDoListPasswordRestore)
@@ -3591,6 +3592,20 @@ LRESULT CToDoListWnd::OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM /*l
 		return VerifyTaskListOpen(nTDC, FALSE);
 
 	// else
+	ASSERT(0);
+	return 0L;
+}
+
+LRESULT CToDoListWnd::OnTimeTrackerGoToTasklist(WPARAM wParam, LPARAM lParam)
+{
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wParam);
+
+	if (SelectToDoCtrl(nTDC, (nTDC != GetSelToDoCtrl()), Prefs().GetNotifyDueByOnSwitch()))
+	{
+		if (!lParam || GetToDoCtrl().SelectTask(lParam, FALSE))
+			return TRUE;
+	}
+
 	ASSERT(0);
 	return 0L;
 }

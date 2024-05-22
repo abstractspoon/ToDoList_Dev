@@ -1815,12 +1815,14 @@ CAPTION "Time Tracker"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Tasklist",IDC_TASKLISTS_LABEL,4,20,126,8
-    COMBOBOX        IDC_TASKLISTS,4,28,126,128,CBS_DROPDOWNLIST | CBS_SORT | 
+    COMBOBOX        IDC_TASKLISTS,4,28,112,128,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_GOTOTASKLIST,116,27,14,14
     LTEXT           "Task",IDC_TASKS_LABEL,4,42,126,8
-    COMBOBOX        IDC_TASKS,4,50,126,114,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_TASKS,4,50,112,114,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
+    PUSHBUTTON      "",IDC_GOTOTASK,116,49,14,14
     LTEXT           "Time Estimate : Spent",IDC_TASKTIME_LABEL,4,64,126,8
     EDITTEXT        IDC_TASKTIME,4,72,83,12,ES_READONLY | NOT WS_BORDER,
                     WS_EX_CLIENTEDGE
@@ -2771,6 +2773,7 @@ IDI_TRAY_DARK           ICON    DISCARDABLE     "res\\app_tray_dark.ico"
 IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.ico"
 IDI_QUICKFIND_NEXT      ICON    DISCARDABLE     "res\\quickfind_next.ico"
 IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
+IDI_TIMETRACK_GOTO      ICON    DISCARDABLE     "res\\timetrack_goto.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -5974,6 +5977,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_ATTRIBCTRL_COPYATTRIBVALUES "Copy '%s' Values"
     IDS_ATTRIBCTRL_PASTEATTRIBVALUES "Paste '%s' Values to '%s'"
+    IDS_GOTOTASKLIST_TIP    "Go To Tasklist"
+    IDS_GOTOTASK_TIP        "Go To Task"
 END
 
 #endif    // English (Australia) resources

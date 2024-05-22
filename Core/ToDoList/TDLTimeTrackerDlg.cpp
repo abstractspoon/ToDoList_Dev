@@ -60,6 +60,8 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
 	DDX_Control(pDX, IDC_ELAPSEDTIME, m_eElapsedTime);
+	DDX_Control(pDX, IDC_GOTOTASKLIST, m_btnGoToTasklist);
+	DDX_Control(pDX, IDC_GOTOTASK, m_btnGoToTask);
 	DDX_Text(pDX, IDC_TASKTIME, m_sTaskTimes);
 	DDX_Text(pDX, IDC_ELAPSEDTIME, m_sElapsedTime);
 	DDX_Text(pDX, IDC_QUICKFIND, m_sQuickFind);
@@ -69,6 +71,8 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_BN_CLICKED(IDC_STARTSTOP, OnStartStopTracking)
+	ON_BN_CLICKED(IDC_GOTOTASKLIST, OnGoToSelectedTasklist)
+	ON_BN_CLICKED(IDC_GOTOTASK, OnGoToSelectedTask)
 	ON_WM_CTLCOLOR()
 	ON_WM_NCHITTEST()
 	ON_CBN_SELCHANGE(IDC_TASKLISTS, OnSelchangeTasklist)
@@ -226,7 +230,11 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	m_iconDlg.Load(IDR_MAINFRAME_STD);
 	SetIcon(m_iconDlg, TRUE);
 
+	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_TIMETRACK_GOTO));
+	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_TIMETRACK_GOTO));
+
 	EnableToolTips(TRUE);
+	EnableDisableGoToBtns();
 	CalcMinMaxSizes();
 	LoadSettings();
 	
@@ -355,7 +363,8 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tas
 	}
 	
 	RefreshMaxDropWidth(m_cbTasklists);
-	
+	EnableDisableGoToBtns();
+
 	return TRUE;
 }
 
@@ -514,7 +523,11 @@ BOOL CTDLTimeTrackerDlg::RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove)
 		return FALSE;
 	}
 
-	return pTTL->RemoveTasks(dwToRemove);
+	if (!pTTL->RemoveTasks(dwToRemove))
+		return FALSE;
+
+	EnableDisableGoToBtns();
+	return TRUE;
 }
 
 BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
@@ -591,6 +604,8 @@ BOOL CTDLTimeTrackerDlg::RemoveTasklist(const CToDoCtrl* pTDC)
 	m_cbTasklists.DeleteString(nCBTasklist);
 	m_aTasklists.DeleteTasklist(pTDC);
 
+	EnableDisableGoToBtns();
+
 	return TRUE;
 }
 
@@ -607,6 +622,7 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 
 	UpdateData(FALSE);
 	UpdatePlayButton();
+	EnableDisableGoToBtns();
 }
 
 void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
@@ -799,6 +815,16 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 }
 
+void CTDLTimeTrackerDlg::OnGoToSelectedTasklist()
+{
+	SendNotifyMessage(WM_TDLTTN_GOTOTASKLIST, GetSelectedTasklist(), 0);
+}
+
+void CTDLTimeTrackerDlg::OnGoToSelectedTask()
+{
+	SendNotifyMessage(WM_TDLTTN_GOTOTASKLIST, GetSelectedTasklist(), GetSelectedTaskID());
+}
+
 LRESULT CTDLTimeTrackerDlg::SendNotifyMessage(UINT message, const CToDoCtrl* pTDC, DWORD dwTaskID) const
 {
 	ASSERT(pTDC && pTDC->GetSafeHwnd());
@@ -896,6 +922,7 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
 	RefreshCaptionText();
+	EnableDisableGoToBtns();
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
@@ -903,6 +930,13 @@ void CTDLTimeTrackerDlg::OnSelchangeTask()
 	UpdatePlayButton();
 	UpdateTaskTime(GetSelectedTasklist());
 	RefreshCaptionText();
+	EnableDisableGoToBtns();
+}
+
+void CTDLTimeTrackerDlg::EnableDisableGoToBtns()
+{
+	m_btnGoToTasklist.EnableWindow(m_cbTasklists.GetCurSel() != -1);
+	m_btnGoToTask.EnableWindow(m_cbTasks.GetCurSel() != -1);
 }
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
@@ -992,6 +1026,14 @@ BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*
 		
 	case IDC_TASKS:
 		sTooltip = GetSelectedItem(m_cbTasks);
+		break;
+
+	case IDC_GOTOTASKLIST:
+		sTooltip = CEnString(IDS_GOTOTASKLIST_TIP);
+		break;
+
+	case IDC_GOTOTASK:
+		sTooltip = CEnString(IDS_GOTOTASK_TIP);
 		break;
 
 	default:
@@ -1183,8 +1225,13 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ShowCtrl(this, IDC_QUICKFIND, bShowToolbar);
 		ShowCtrl(this, IDC_TASKLISTS, bShowTasklists);
 		ShowCtrl(this, IDC_TASKLISTS_LABEL, bShowTasklists);
+		ShowCtrl(this, IDC_GOTOTASKLIST, bShowTasklists);
 		ShowCtrl(this, IDC_TASKS, bShowTasks);
 		ShowCtrl(this, IDC_TASKS_LABEL, bShowTasks);
+		ShowCtrl(this, IDC_GOTOTASK, bShowTasks);
+
+		OffsetCtrl(this, IDC_GOTOTASKLIST, nXOffset, nYOffset);
+		OffsetCtrl(this, IDC_GOTOTASK, nXOffset, nYOffset);
 
 		OffsetCtrl(this, IDC_TASKS, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKS, nXOffset, 0);
