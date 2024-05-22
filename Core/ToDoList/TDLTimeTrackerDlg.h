@@ -149,6 +149,7 @@ protected:
 	void SaveSettings() const;
 	void SetAlwaysOnTop(BOOL bTopMost);
 	void CollapseWindow(BOOL bCollapse);
+	void EnableDisableGoToBtns();
 
 	void Resize(int cx = 0, int cy = 0);
 	int CalcAvailableRows(int nHeight) const;

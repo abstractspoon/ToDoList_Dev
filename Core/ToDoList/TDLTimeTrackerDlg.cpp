@@ -232,6 +232,7 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_QUICKFIND_NEXT));
 
 	EnableToolTips(TRUE);
+	EnableDisableGoToBtns();
 	CalcMinMaxSizes();
 	LoadSettings();
 	
@@ -360,7 +361,8 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tas
 	}
 	
 	RefreshMaxDropWidth(m_cbTasklists);
-	
+	EnableDisableGoToBtns();
+
 	return TRUE;
 }
 
@@ -519,7 +521,11 @@ BOOL CTDLTimeTrackerDlg::RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove)
 		return FALSE;
 	}
 
-	return pTTL->RemoveTasks(dwToRemove);
+	if (!pTTL->RemoveTasks(dwToRemove))
+		return FALSE;
+
+	EnableDisableGoToBtns();
+	return TRUE;
 }
 
 BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
@@ -596,6 +602,8 @@ BOOL CTDLTimeTrackerDlg::RemoveTasklist(const CToDoCtrl* pTDC)
 	m_cbTasklists.DeleteString(nCBTasklist);
 	m_aTasklists.DeleteTasklist(pTDC);
 
+	EnableDisableGoToBtns();
+
 	return TRUE;
 }
 
@@ -612,6 +620,7 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 
 	UpdateData(FALSE);
 	UpdatePlayButton();
+	EnableDisableGoToBtns();
 }
 
 void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
@@ -901,6 +910,7 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
 	RefreshCaptionText();
+	EnableDisableGoToBtns();
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
@@ -908,6 +918,13 @@ void CTDLTimeTrackerDlg::OnSelchangeTask()
 	UpdatePlayButton();
 	UpdateTaskTime(GetSelectedTasklist());
 	RefreshCaptionText();
+	EnableDisableGoToBtns();
+}
+
+void CTDLTimeTrackerDlg::EnableDisableGoToBtns()
+{
+	GetDlgItem(IDC_GOTOTASKLIST)->EnableWindow(m_cbTasklists.GetCurSel() != -1);
+	GetDlgItem(IDC_GOTOTASK)->EnableWindow(m_cbTasks.GetCurSel() != -1);
 }
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
