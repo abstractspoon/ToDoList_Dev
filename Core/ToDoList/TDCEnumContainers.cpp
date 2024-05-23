@@ -93,11 +93,11 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 	// All the rest
 	BOOL bCanAdd = FALSE;
 
-	// TDCA_HTMLCOMMENTS is special because of its cost.
-	// It must be explicitly specified even if TDCA_ALL is set
 	switch (nAttribID)
 	{
 	case TDCA_ALL:
+		// TDCA_HTMLCOMMENTS is special because of its cost.
+		// It must be explicitly specified even if TDCA_ALL is set
 		bCanAdd = HasOnly(TDCA_HTMLCOMMENTS);
 		break;
 
@@ -105,13 +105,16 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttribID));
 		break;
 
+	case TDCA_TODAY:
+		// Can only add if we already contain a task attribute
+		bCanAdd = IsTaskAttribute(GetNext(pos));
+		break;
+
 	default:
 		if (IsTaskAttribute(nAttribID))
 		{
-			// Can only add a task attribute if we already
-			// contain a task attribute
-			TDC_ATTRIBUTE nExistAttrib = GetNext(pos);
-			bCanAdd = IsTaskAttribute(nExistAttrib);
+			// Can only add if we already contain a task attribute
+			bCanAdd = IsTaskAttribute(GetNext(pos));
 		}
 		else
 		{
