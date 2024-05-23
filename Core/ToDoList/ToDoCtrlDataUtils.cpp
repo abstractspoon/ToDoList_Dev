@@ -3419,6 +3419,10 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	// Numeric types only
 	switch (nAttribID)
 	{
+	case TDCA_TODAY:
+		dValue = CDateHelper::GetDate(DHD_TODAY);
+		return TRUE;
+
 	case TDCA_COST:
 		if (bAggregated)
 		{
