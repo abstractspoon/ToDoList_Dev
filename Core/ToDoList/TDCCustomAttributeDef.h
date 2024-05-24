@@ -164,6 +164,7 @@ private:
 	TDC_COLUMN nColumnID;
 	TDC_ATTRIBUTE nAttributeID;
 	TDCCUSTOMATTRIBUTECALCULATION calculation;
+
 	// ----------------------------------------------------------------
 
 	BOOL SetTypes(DWORD dwDataType, DWORD dwListType);
