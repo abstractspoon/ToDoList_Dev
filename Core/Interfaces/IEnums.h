@@ -111,6 +111,10 @@ enum TDC_ATTRIBUTE
 
 	TDCA_TIMEREMAINING, 
 	TDCA_COMMENTSFORMAT,
+
+	// pseudo attribute for Custom Attributes dialog
+	TDCA_TODAY,
+
 	// ADD NEW ATTRIBUTES HERE ONLY!
 	
 	// Hack to capture the value of the very last attribute

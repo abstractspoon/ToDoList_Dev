@@ -2524,6 +2524,7 @@
 #define IDS_ATTRIBCTRL_PASTEATTRIBVALUES 51649
 #define IDS_GOTOTASKLIST_TIP            51650
 #define IDS_GOTOTASK_TIP                51651
+#define IDS_TODAY                       51652
 
 // Next default values for new objects
 // 

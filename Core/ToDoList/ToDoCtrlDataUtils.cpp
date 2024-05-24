@@ -3344,18 +3344,46 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	if (!GetSecondCustomAttributeOperandValue(pTDI, pTDS, calc, dSecondVal, nUnits, bAggregated))
 		return FALSE;
 
+	// Date calculations may need extra post-processing
+	BOOL bFirstIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
+	BOOL bSecondIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE);
+
 	switch (calc.nOperator)
 	{
 	case TDCCAC_ADD:
-		dResult = (dFirstVal + dSecondVal);
+		{
+			dResult = (dFirstVal + dSecondVal);
+
+			if (bFirstIsDate)
+			{
+				ASSERT(!bSecondIsDate);
+
+				// If the date has a time component but the result falls on
+				// a day boundary then the result date needs decrementing
+				if (CDateHelper::DateHasTime(dFirstVal) && CDateHelper::IsEndOfDay(dResult, TRUE))
+					dResult--;
+			}
+		}
 		break;
 
 	case TDCCAC_SUBTRACT:
-		dResult = (dFirstVal - dSecondVal);
+		{
+			dResult = (dFirstVal - dSecondVal);
+
+			if (bFirstIsDate && bSecondIsDate)
+			{
+				// If the first date falls on the end of the day
+				// then the result date needs decrementing
+				if (CDateHelper::IsEndOfDay(dFirstVal, TRUE))
+					dResult++;
+			}
+		}
 		break;
 
 	case TDCCAC_MULTIPLY:
-		dResult = (dFirstVal * dSecondVal);
+		{
+			dResult = (dFirstVal * dSecondVal);
+		}
 		break;
 
 	case TDCCAC_DIVIDE:
@@ -3419,6 +3447,10 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	// Numeric types only
 	switch (nAttribID)
 	{
+	case TDCA_TODAY:
+		dValue = CDateHelper::GetDate(DHD_TODAY);
+		return TRUE;
+
 	case TDCA_COST:
 		if (bAggregated)
 		{

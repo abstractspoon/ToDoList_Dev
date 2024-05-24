@@ -211,6 +211,9 @@ void CTDLAttributeComboBox::BuildCombo()
 	if (WantAttribute(TDCA_REMINDER))
 		CDialogHelper::AddString(*this, IDS_TDLBC_REMINDER, EncodeItemData(TDCA_REMINDER));
 
+	if (WantAttribute(TDCA_TODAY))
+		CDialogHelper::AddString(*this, IDS_TODAY, EncodeItemData(TDCA_TODAY));
+
 	// restore selection
 	SetSelectedAttribute(nSelAttrib);
 

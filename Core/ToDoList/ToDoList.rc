@@ -5979,6 +5979,7 @@ BEGIN
     IDS_ATTRIBCTRL_PASTEATTRIBVALUES "Paste '%s' Values to '%s'"
     IDS_GOTOTASKLIST_TIP    "Go To Tasklist"
     IDS_GOTOTASK_TIP        "Go To Task"
+    IDS_TODAY               "<today>"
 END
 
 #endif    // English (Australia) resources

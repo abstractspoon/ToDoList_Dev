@@ -45,6 +45,8 @@ static TDLCAD_TYPE DATA_TYPES[] =
 };
 const int NUM_DATATYPES = sizeof(DATA_TYPES) / sizeof(TDLCAD_TYPE);
 
+// -------------------------------------------------------------------------
+
 static CString GetDataTypeLabel(DWORD dwDataType)
 {
 	int nType = NUM_DATATYPES;
@@ -59,6 +61,8 @@ static CString GetDataTypeLabel(DWORD dwDataType)
 	return _T("");
 }
 
+// -------------------------------------------------------------------------
+
 static TDLCAD_TYPE LIST_TYPES[] = 
 {
 	{ IDS_CAD_NOTLIST,			TDCCA_NOTALIST },
@@ -70,6 +74,8 @@ static TDLCAD_TYPE LIST_TYPES[] =
 
 const int NUM_LISTTYPES = sizeof(LIST_TYPES) / sizeof(TDLCAD_TYPE);
 
+// -------------------------------------------------------------------------
+
 enum COL_TYPE
 {
 	COL_ATTRIBLABEL, 
@@ -80,12 +86,16 @@ enum COL_TYPE
 	COL_LISTTYPE, 
 };
 
+// -------------------------------------------------------------------------
+
 static UINT ALIGNMENT[3] = 
 {
 	IDS_CAD_LEFTALIGN,
 	IDS_CAD_CENTREALIGN,
 	IDS_CAD_RIGHTALIGN
 };
+
+// -------------------------------------------------------------------------
 
 static TCHAR SYMBOLS[] = 
 {
@@ -636,28 +646,16 @@ void CCustomAttributeCalcPage::GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& cal
 
 BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttribID)
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
-	case TDCA_CREATIONDATE:
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_STARTDATE:
-		return TRUE;
+		int nDef = m_aAttribDef.Find(nAttribID);
+		ASSERT(nDef >= 0);
 
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		{
-			int nDef = m_aAttribDef.Find(nAttribID);
-			ASSERT(nDef >= 0);
-
-			if (nDef >= 0)
-				return (m_aAttribDef[nDef].IsDataType(TDCCA_DATE));
-		}
-		break;
+		return m_aAttribDef[nDef].IsDataType(TDCCA_DATE);
 	}
 
-	return FALSE;
+	// else 
+	return (TDCCUSTOMATTRIBUTECALCULATIONOPERAND::GetDataType(nAttribID) == TDCCA_DATE);
 }
 
 BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttribID) const
@@ -708,6 +706,7 @@ int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttri
 	mapAttrib.Add(TDCA_STARTDATE);
 	mapAttrib.Add(TDCA_TIMEESTIMATE);
 	mapAttrib.Add(TDCA_TIMESPENT);
+	mapAttrib.Add(TDCA_TODAY);
 
 	for (int nDef = 0; nDef < m_aAttribDef.GetSize(); nDef++)
 	{
