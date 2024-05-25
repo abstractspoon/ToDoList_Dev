@@ -3654,6 +3654,10 @@ void CTDLTaskCtrlBase::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_nHeaderContextMenuItem = -1;
 		::InvalidateRect(hwndHeader, rItem, FALSE);
 	}
+	else
+	{
+		CWnd::OnContextMenu(pWnd, point);
+	}
 }
 
 LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
