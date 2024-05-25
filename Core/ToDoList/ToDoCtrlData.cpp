@@ -1366,11 +1366,6 @@ TDC_SET CToDoCtrlData::CopyInheritedParentTaskAttributes(TODOITEM* pTDIChild, DW
 	{
 		switch (m_mapParentAttribs.GetNext(pos))
 		{
-		case TDCA_DUEDATE:
-		case TDCA_DUETIME:		COPYATTRIB(dateDue); break;
-		case TDCA_STARTDATE:
-		case TDCA_STARTTIME:	COPYATTRIB(dateStart); break;
-
 		case TDCA_TASKNAME:		COPYATTRIB(sTitle); break;
 		case TDCA_DONEDATE:		COPYATTRIB(dateDone); break;
 		case TDCA_PRIORITY:		COPYATTRIB(nPriority); break;
@@ -1383,11 +1378,20 @@ TDC_SET CToDoCtrlData::CopyInheritedParentTaskAttributes(TODOITEM* pTDIChild, DW
 		case TDCA_EXTERNALID:	COPYATTRIB(sExternalID); break;
 		case TDCA_FLAG:			COPYATTRIB(bFlagged); break;
 		case TDCA_LOCK:			COPYATTRIB(bLocked); break;
+		case TDCA_ICON:			COPYATTRIB(sIcon); break;
+
+		case TDCA_DUEDATE:
+		case TDCA_DUETIME:		COPYATTRIB(dateDue); break;
+
+		case TDCA_STARTDATE:
+		case TDCA_STARTTIME:	COPYATTRIB(dateStart); break;
 
 		case TDCA_TIMEESTIMATE:	COPYATTRIB(timeEstimate.dAmount);
 								COPYATTRIB(timeEstimate.nUnits); break;
+
 		case TDCA_TIMESPENT:	COPYATTRIB(timeSpent.dAmount);
 								COPYATTRIB(timeSpent.nUnits); break;
+
 		case TDCA_COST:			COPYATTRIB(cost.dAmount);
 								COPYATTRIB(cost.bIsRate); break;
 
@@ -1840,6 +1844,11 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 		case TDCA_COLOR:
 			if (bIncludeBlank || pTDIParent->color != 0)
 				pTDIChild->color = pTDIParent->color;
+			break;
+
+		case TDCA_ICON:
+			if (bIncludeBlank || !pTDIParent->sIcon.IsEmpty())
+				pTDIChild->sIcon = pTDIParent->sIcon;
 			break;
 
 		case TDCA_ALLOCTO:

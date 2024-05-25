@@ -55,6 +55,7 @@ CPreferencesTaskDef2Page::CPreferencesTaskDef2Page()
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_TAGS, TDCA_TAGS, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_CUSTOMATTRIBS, TDCA_CUSTOMATTRIB, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_DONEDATE, TDCA_DONEDATE, -1));
+	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_ICON, TDCA_ICON, -1));
 }
 
 CPreferencesTaskDef2Page::~CPreferencesTaskDef2Page()

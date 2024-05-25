@@ -1315,7 +1315,7 @@ COLORREF CToDoCtrlMgr::GetTabColor(int nIndex) const
 	if (!m_tabCtrl.IsSupportedFlag(TCE_TABCOLORS))
 	{
 		ASSERT(0);
-		return FALSE;
+		return CLR_NONE;
 	}
 	
 	CHECKVALIDINDEXRET(nIndex, CLR_NONE);

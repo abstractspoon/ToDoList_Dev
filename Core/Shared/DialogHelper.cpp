@@ -1765,11 +1765,21 @@ void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
 	}
 }
 
+void CDialogHelper::InvalidateCtrl(const CWnd* pParent, UINT nCtrlID, BOOL bErase, BOOL bUpdate)
+{
+	InvalidateChild(pParent->GetDlgItem(nCtrlID), bErase, bUpdate);
+}
+
+void CDialogHelper::InvalidateChild(const CWnd* pChild, BOOL bErase, BOOL bUpdate)
+{
+	if (::InvalidateRect(*pChild, NULL, bErase) && bUpdate)
+		::UpdateWindow(*pChild);
+}
+
 void CDialogHelper::RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs)
 {
 	Misc::RemoveItemT(nCtrlID, aCtrlIDs);
 }
-
 
 void CDialogHelper::ShowCtrls(const CWnd* pParent, const CUIntArray& aCtrlIDs, BOOL bShow)
 {

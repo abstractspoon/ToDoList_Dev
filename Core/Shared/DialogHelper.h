@@ -265,6 +265,8 @@ public:
 
 	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
 	static void InvalidateAllCtrls(const CWnd* pParent, BOOL bErase = TRUE);
+	static void InvalidateCtrl(const CWnd* pParent, UINT nCtrlID, BOOL bErase = TRUE, BOOL bUpdate = FALSE);
+	static void InvalidateChild(const CWnd* pChild, BOOL bErase = TRUE, BOOL bUpdate = FALSE);
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
 	

@@ -3710,8 +3710,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 
 	if (pMod->mapAttrib.Has(TDCA_ICON))
 	{
-		m_dlgReminders.Invalidate(FALSE);
-		m_dlgFindTasks.Invalidate(FALSE);
+		InvalidateChild(&m_dlgReminders, FALSE);
+		InvalidateChild(&m_dlgFindTasks, FALSE);
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
@@ -11649,10 +11649,8 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 	else
 	{
 		// clear any pressed state
-		m_toolbarMain.Invalidate(FALSE);
-
-		if (m_toolbarCustom.GetSafeHwnd())
-			m_toolbarCustom.Invalidate(FALSE);
+		InvalidateChild(&m_toolbarMain, FALSE);
+		InvalidateChild(&m_toolbarCustom, FALSE);
 
 		UpdateWindow();
 
