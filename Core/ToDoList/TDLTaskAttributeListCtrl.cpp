@@ -240,7 +240,6 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CreateControl(m_cbCustomIcons, IDC_CUSTOMICON_COMBO, CBS_DROPDOWNLIST);
 
 	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
-	m_spinPercent.SetRange(0, 100);
 
 	CLocalizer::EnableTranslation(m_cbTextAndNumbers, FALSE);
 	CLocalizer::EnableTranslation(m_cbPriority, FALSE);
@@ -2073,6 +2072,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_PERCENT:
 		m_editBox.SetMask(_T("0123456789"));
 		m_editBox.SetSpinBuddy(&m_spinPercent);
+		m_spinPercent.SetRange32(0, 100);
 		break;
 
 	case TDCA_COST:
@@ -2168,7 +2168,9 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 					break;
 
 				case TDCCA_INTEGER:
-					m_editBox.SetMask(_T("0123456789"));
+					m_editBox.SetMask(_T("-0123456789"));
+					m_editBox.SetSpinBuddy(&m_spinPercent);
+					m_spinPercent.SetRange32(INT_MIN, INT_MAX);
 					break;
 
 				case TDCCA_DOUBLE:
