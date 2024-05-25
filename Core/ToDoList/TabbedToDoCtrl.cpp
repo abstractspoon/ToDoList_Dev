@@ -327,13 +327,18 @@ void CTabbedToDoCtrl::OnListOptionsCheckChanged()
 
 	DWORD dwNewOptions = m_dwListOptions;
 
-	if (Misc::FlagHasChanged(LVO_SORTGROUPSASCENDING, dwPrevOptions, dwNewOptions))
+	if (m_taskList.SetSortGroupsAscending(HasListOption(LVO_SORTGROUPSASCENDING)))
 	{
-		m_taskList.SetSortGroupsAscending(HasListOption(LVO_SORTGROUPSASCENDING));
-
 		// Remove sort option to simplify build option test
 		Misc::SetFlag(dwPrevOptions, LVO_SORTGROUPSASCENDING, FALSE);
 		Misc::SetFlag(dwNewOptions, LVO_SORTGROUPSASCENDING, FALSE);
+	}
+
+	if (m_taskList.SetSortNoneGroupBelow(HasListOption(LVO_SORTNONEGROUPBELOW)))
+	{
+		// Remove sort option to simplify build option test
+		Misc::SetFlag(dwPrevOptions, LVO_SORTNONEGROUPBELOW, FALSE);
+		Misc::SetFlag(dwNewOptions, LVO_SORTNONEGROUPBELOW, FALSE);
 	}
 
 	// Ignore LVO_HIDEPARENTS if TDCS_ALWAYSHIDELISTPARENTS is enabled
@@ -608,12 +613,12 @@ void CTabbedToDoCtrl::LoadState()
 		SetVisibleTaskViews(s_aDefTaskViews);
 	}
 
-	// Lisview options
+	// Listview options
 	m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(prefs, sKey);
 	m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 
 	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
-	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING));
+	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING), HasListOption(LVO_SORTNONEGROUPBELOW));
 
 	// Last active view
 	FTC_VIEW nCurView = GetTaskView();

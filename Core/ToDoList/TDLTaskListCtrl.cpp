@@ -96,6 +96,7 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 
 	m_nGroupBy(TDCC_NONE),
 	m_bSortGroupsAscending(TRUE),
+	m_bSortNoneGroupBelow(FALSE),
 	m_bDeletingGroupHeaders(FALSE),
 	m_crGroupHeaderBkgnd(CLR_NONE)
 {
@@ -432,23 +433,34 @@ UINT CTDLTaskListCtrl::GetGroupCount() const
 	return (IsGrouped() ? m_mapGroupHeaders.GetCount() : 0);
 }
 
-BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending)
+BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending, BOOL bSortNoneGroupBelow)
 {
 	if (!CanGroupBy(nGroupBy, TRUE))
 		return FALSE;
 
-	BOOL bGroupChange = (nGroupBy != m_nGroupBy);
-	BOOL bSortChange = ((bSortGroupsAscending != -1) && (bSortGroupsAscending != m_bSortGroupsAscending));
+	BOOL bGroupChange = FALSE, bSortChange = FALSE;
 
-	if (!bGroupChange && !bSortChange)
-		return TRUE;
-
-	m_nGroupBy = nGroupBy;
-
-	if (bSortChange)
+	if (nGroupBy != m_nGroupBy)
+	{
+		m_nGroupBy = nGroupBy;
+		bGroupChange = TRUE;
+	}
+	
+	if ((bSortGroupsAscending != -1) && (bSortGroupsAscending != m_bSortGroupsAscending))
+	{
 		m_bSortGroupsAscending = bSortGroupsAscending;
+		bSortChange = TRUE;
+	}
 
-	if (GetSafeHwnd())
+	if ((bSortNoneGroupBelow != -1) && (bSortNoneGroupBelow != m_bSortNoneGroupBelow))
+	{
+		m_bSortNoneGroupBelow = bSortNoneGroupBelow;
+
+		// 'sort <none> below' has no effect without 'sort ascending'
+		bSortChange = m_bSortGroupsAscending;
+	}
+
+	if ((bGroupChange || bSortChange) && GetSafeHwnd())
 	{
 		if (bGroupChange)
 			UpdateGroupHeaders();
@@ -496,16 +508,31 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) co
 	return FALSE;
 }
 
-void CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
+BOOL CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
 {
-	if ((m_bSortGroupsAscending && !bAscending) ||
-		(!m_bSortGroupsAscending && bAscending))
-	{
-		m_bSortGroupsAscending = bAscending;
+	if (!Misc::StateChanged(m_bSortGroupsAscending, bAscending))
+		return FALSE;
 
-		if ((GetGroupCount() > 1) && GetSafeHwnd())
-			Resort(FALSE);
-	}
+	m_bSortGroupsAscending = bAscending;
+
+	if ((GetGroupCount() > 1) && GetSafeHwnd())
+		Resort(FALSE);
+
+	return TRUE;
+}
+
+BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
+{
+	if (!Misc::StateChanged(m_bSortNoneGroupBelow, bBelow))
+		return FALSE;
+
+	m_bSortNoneGroupBelow = bBelow;
+
+	// 'sort <none> below' has no effect without 'sort ascending'
+	if (m_bSortGroupsAscending && HasNoneGroup() && GetSafeHwnd())
+		Resort(FALSE);
+
+	return TRUE;
 }
 
 void CTDLTaskListCtrl::OnBuildComplete()
@@ -726,6 +753,28 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 	return Misc::Format(_T("%s: %s"), GetGroupByColumnName(), sGroupBy);
 }
 
+BOOL CTDLTaskListCtrl::HasNoneGroup() const
+{
+	if (!IsGrouped())
+		return FALSE;
+
+	CString sGroupBy;
+	DWORD dwUnused;
+
+	POSITION pos = m_mapGroupHeaders.GetStartPosition();
+
+	while (pos)
+	{
+		m_mapGroupHeaders.GetNextAssoc(pos, dwUnused, sGroupBy);
+
+		if (sGroupBy.IsEmpty())
+			return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
 CString CTDLTaskListCtrl::GetGroupByColumnName() const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
@@ -857,16 +906,26 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 
 		int nCompare = Misc::NaturalCompare(sTask1Text, sTask2Text);
 
-		// If the items matched then they are part of the 
-		// same group. And if either item is the group item
-		// then always sort that item higher
-		if (nCompare == 0)
+		if (nCompare == 0) // Same group
 		{
+			// Always sort the group header item higher
 			if (IsGroupHeaderTask(lParam1))
 				return -1;
 			
 			if (IsGroupHeaderTask(lParam2))
 				return 1;
+		}
+		else  // different groups
+		{
+			// 'sort <none> below' has no effect without 'sort ascending'
+			if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
+			{
+				if (sTask1Text.IsEmpty())
+					return 1;
+
+				if (sTask2Text.IsEmpty())
+					return -1;
+			}
 		}
 
 		return (m_bSortGroupsAscending ? nCompare : -nCompare);

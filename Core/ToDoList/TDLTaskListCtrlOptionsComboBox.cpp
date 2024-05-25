@@ -65,6 +65,7 @@ void CTDLTaskListCtrlOptionsComboBox::BuildCombo()
 		AddOption(LVO_HIDECOLLAPSED,		IDS_LISTVIEW_HIDECOLLAPSED);
 		AddOption(LVO_HIDENOGROUPVALUE,		IDS_LISTVIEW_HIDENOGROUPVALUE);
 		AddOption(LVO_SORTGROUPSASCENDING,	IDS_LISTVIEW_SORTGROUPSASCENDING);
+		AddOption(LVO_SORTNONEGROUPBELOW,	IDS_LISTVIEW_SORTNONEGROUPBELOW);
 
 		EnableTooltip();
 	}
@@ -99,6 +100,7 @@ DWORD CTDLTaskListCtrlOptionsComboBox::LoadOptions(const IPreferences* pPrefs, L
 	Misc::SetFlag(dwOptions, LVO_HIDEPARENTS,			pPrefs->GetProfileInt(szKey, _T("ListViewHideParents"),			FALSE));
 	Misc::SetFlag(dwOptions, LVO_HIDECOLLAPSED,			pPrefs->GetProfileInt(szKey, _T("ListViewHideCollapsed"),		FALSE));
 	Misc::SetFlag(dwOptions, LVO_SORTGROUPSASCENDING,	pPrefs->GetProfileInt(szKey, _T("ListViewSortGroupsAsecnding"), TRUE));
+	Misc::SetFlag(dwOptions, LVO_SORTNONEGROUPBELOW,	pPrefs->GetProfileInt(szKey, _T("ListViewSortNoneGroupBelow"),	FALSE));
 	Misc::SetFlag(dwOptions, LVO_HIDENOGROUPVALUE,		pPrefs->GetProfileInt(szKey, _T("ListViewHideNoGroupValue"),	FALSE));
 
 	return dwOptions;
@@ -109,5 +111,6 @@ void CTDLTaskListCtrlOptionsComboBox::SaveOptions(DWORD dwOptions, IPreferences*
 	pPrefs->WriteProfileInt(szKey, _T("ListViewHideParents"),			(dwOptions & LVO_HIDEPARENTS));
 	pPrefs->WriteProfileInt(szKey, _T("ListViewHideCollapsed"),			(dwOptions & LVO_HIDECOLLAPSED));
 	pPrefs->WriteProfileInt(szKey, _T("ListViewSortGroupsAsecnding"),	(dwOptions & LVO_SORTGROUPSASCENDING));
+	pPrefs->WriteProfileInt(szKey, _T("ListViewSortNoneGroupBelow"),	(dwOptions & LVO_SORTNONEGROUPBELOW));
 	pPrefs->WriteProfileInt(szKey, _T("ListViewHideNoGroupValue"),		(dwOptions & LVO_HIDENOGROUPVALUE));
 }

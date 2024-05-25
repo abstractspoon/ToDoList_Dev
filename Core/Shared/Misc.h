@@ -372,23 +372,6 @@ namespace Misc
 
 		return (aValues.GetSize() < nNumItems);
 	}
-/*
-	template <class T> 
-	T IncrementItemT(CArray<T, T&>& aValues, int nItem)
-	{
-		ASSERT(nItem >= 0);
-		
-		if (nItem < 0)
-			return;
-
-		if (nItem >= aValues.GetSize())
-			aValues.SetSize(nItem + 1);
-
-		aValues[nItem] += 1;
-
-		return aValues[nItem];
-	}
-*/
 
 	template <class T> 
 	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
