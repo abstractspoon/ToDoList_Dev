@@ -247,7 +247,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	pPrefs->WriteProfileInt(sKey, _T("HideParents"), m_ctrlKanban.HasOption(KBCF_HIDEPARENTTASKS));
 	pPrefs->WriteProfileInt(sKey, _T("HideEmptyColumns"), m_ctrlKanban.HasOption(KBCF_HIDEEMPTYCOLUMNS));
 	pPrefs->WriteProfileInt(sKey, _T("HideSubtasks"), m_ctrlKanban.HasOption(KBCF_HIDESUBTASKS));
-	pPrefs->WriteProfileInt(sKey, _T("HideNoGroup"), m_ctrlKanban.HasOption(KBCF_HIDENOGROUP));
+	pPrefs->WriteProfileInt(sKey, _T("HideNoGroup"), m_ctrlKanban.HasOption(KBCF_HIDENONEGROUP));
 	pPrefs->WriteProfileInt(sKey, _T("SortGroupsAscending"), m_ctrlKanban.HasOption(KBCF_SORTGROUPSASCENDING));
 
 	// Preferences
@@ -348,7 +348,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		Misc::SetFlag(dwComboOptions, KBCF_HIDEPARENTTASKS, bHideParents);
 		Misc::SetFlag(dwComboOptions, KBCF_HIDEEMPTYCOLUMNS, bHideEmptyCols);
 		Misc::SetFlag(dwComboOptions, KBCF_HIDESUBTASKS, pPrefs->GetProfileInt(szKey, _T("HideSubtasks"), FALSE));
-		Misc::SetFlag(dwComboOptions, KBCF_HIDENOGROUP, pPrefs->GetProfileInt(szKey, _T("HideNoGroup"), FALSE));
+		Misc::SetFlag(dwComboOptions, KBCF_HIDENONEGROUP, pPrefs->GetProfileInt(szKey, _T("HideNoGroup"), FALSE));
 		Misc::SetFlag(dwComboOptions, KBCF_SORTGROUPSASCENDING, pPrefs->GetProfileInt(szKey, _T("SortGroupsAscending"), TRUE));
 		
 		m_cbOptions.SetSelectedOptions(dwComboOptions);

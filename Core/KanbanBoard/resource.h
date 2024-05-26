@@ -173,7 +173,7 @@
 #define IDS_DISPLAY_LOCK                57729
 #define IDS_NOBODY                      57730
 #define IDS_OPTIONS_SORTGROUPSASCENDING 57731
-#define IDS_OPTIONS_HIDENOGROUP         57732
+#define IDS_OPTIONS_HIDENONEGROUP       57732
 
 // Next default values for new objects
 // 

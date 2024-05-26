@@ -156,7 +156,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -406,7 +406,7 @@ BEGIN
     IDS_DISPLAY_LOCK        "Lock"
     IDS_NOBODY              "<nobody>"
     IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
-    IDS_OPTIONS_HIDENOGROUP "Hide <none> group"
+    IDS_OPTIONS_HIDENONEGROUP "Hide <none> group"
 END
 
 #endif    // English (Australia) resources

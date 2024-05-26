@@ -1973,7 +1973,7 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
-	BOOL bHideNoGroup = (HasOption(KBCF_HIDENOGROUP) && IsGrouping());
+	BOOL bHideNoGroup = (HasOption(KBCF_HIDENONEGROUP) && IsGrouping());
 
 	while (nCol--)
 	{
@@ -2361,7 +2361,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
 		}
-		else if (IsGrouping() && Misc::FlagHasChanged(KBCF_HIDENOGROUP, m_dwOptions, dwPrevOptions))
+		else if (IsGrouping() && Misc::FlagHasChanged(KBCF_HIDENONEGROUP, m_dwOptions, dwPrevOptions))
 		{
 			// Column visibility AND contents may have changed
 			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
@@ -2381,7 +2381,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		CDialogHelper::SetStyle(&m_header, HDS_BUTTONS, Misc::HasFlag(m_dwOptions, KBCF_COLUMNHEADERSORTING));
 
 		// Column preferences (Excluding irrelevant options)
-		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDENOGROUP | 
+		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDENONEGROUP | 
 					   KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG | KBCF_COLUMNHEADERSORTING);
 		m_aColumns.SetOptions(dwOptions);
 
