@@ -274,7 +274,7 @@ protected:
 	void BuildListGroupByCombo();
 	void BuildListOptionsCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);
-	BOOL HasListOption(DWORD dwOption) const { return ((m_dwListOptions & dwOption) == dwOption); }
+	BOOL HasListOption(DWORD dwOption) const { return Misc::HasFlag(m_dwListOptions, dwOption); }
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree(BOOL bEnsureSelection);

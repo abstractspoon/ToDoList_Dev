@@ -106,10 +106,11 @@ public:
 	void RemoveDeletedItems();
 	void SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
-	BOOL SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending = -1);
+	BOOL SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending = -1, BOOL bSortNoneGroupBelow = -1);
 	BOOL CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) const;
 	UINT GetGroupCount() const;
-	void SetSortGroupsAscending(BOOL bAscending = TRUE);
+	BOOL SetSortGroupsAscending(BOOL bAscending = TRUE);
+	BOOL SetSortNoneGroupBelow(BOOL bBelow = TRUE);
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderItem(int nItem) const;
@@ -124,6 +125,7 @@ protected:
 	CListCtrl m_lcTasks;
 	TDC_COLUMN m_nGroupBy;
 	BOOL m_bSortGroupsAscending;
+	BOOL m_bSortNoneGroupBelow;
 	BOOL m_bDeletingGroupHeaders;
 	COLORREF m_crGroupHeaderBkgnd;
 
@@ -196,6 +198,7 @@ protected:
 	CString GetGroupByColumnName() const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
+	BOOL HasNoneGroup() const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

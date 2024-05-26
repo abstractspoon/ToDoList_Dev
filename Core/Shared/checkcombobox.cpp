@@ -925,5 +925,10 @@ int CCheckComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	if (m_bTextFits)
 		return -1;
 
-	return m_tooltip.SetToolInfo(*pTI, this, GetTooltip(), 1);
+	CString sTooltip = GetTooltip();
+
+	if (sTooltip.IsEmpty())
+		return -1;
+
+	return m_tooltip.SetToolInfo(*pTI, this, sTooltip, 1);
 }

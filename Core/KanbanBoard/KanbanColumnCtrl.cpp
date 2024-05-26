@@ -442,15 +442,23 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 		{
 			if (Misc::FlagHasChanged(KBCF_HIDEEMPTYATTRIBUTES, dwPrevOptions, m_dwOptions))
 				RefreshItemLineHeights();
-			else
-				Invalidate(FALSE);
+// 			else
+// 				Invalidate(FALSE);
 
 			if (IsGrouping())
 			{
 				if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
+				{
 					DoSort();
-				else
-					Invalidate(FALSE);
+				}
+				else if (Misc::FlagHasChanged(KBCF_SORTNONEGROUPBELOW, dwPrevOptions, m_dwOptions))
+				{
+					// 'sort <none> below' has no effect without 'sort ascending'
+					if (HasOption(KBCF_SORTGROUPSASCENDING))
+						DoSort();
+				}
+// 				else
+// 					Invalidate(FALSE);
 			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
@@ -1984,15 +1992,24 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 
 	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
-	if (!(bIsGroupHeader1 && bIsGroupHeader2))
+	if (nCompare == 0) // Same Group
 	{
-		if (nCompare == 0) // Same Group
-		{
-			if (bIsGroupHeader1)
-				return SORT_1ABOVE2;
+		if (bIsGroupHeader1)
+			return SORT_1ABOVE2;
 
-			if (bIsGroupHeader2)
+		if (bIsGroupHeader2)
+			return SORT_2ABOVE1;
+	}
+	else // different groups
+	{
+		// 'sort <none> below' has no effect without 'sort ascending'
+		if (HasOption(KBCF_SORTGROUPSASCENDING) && HasOption(KBCF_SORTNONEGROUPBELOW))
+		{
+			if (sItem1.IsEmpty())
 				return SORT_2ABOVE1;
+
+			if (sItem2.IsEmpty())
+				return SORT_1ABOVE2;
 		}
 	}
 
