@@ -1992,15 +1992,24 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 
 	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
-	if (!(bIsGroupHeader1 && bIsGroupHeader2))
+	if (nCompare == 0) // Same Group
 	{
-		if (nCompare == 0) // Same Group
-		{
-			if (bIsGroupHeader1)
-				return SORT_1ABOVE2;
+		if (bIsGroupHeader1)
+			return SORT_1ABOVE2;
 
-			if (bIsGroupHeader2)
+		if (bIsGroupHeader2)
+			return SORT_2ABOVE1;
+	}
+	else // different groups
+	{
+		// 'sort <none> below' has no effect without 'sort ascending'
+		if (HasOption(KBCF_SORTGROUPSASCENDING) && HasOption(KBCF_SORTNONEGROUPBELOW))
+		{
+			if (sItem1.IsEmpty())
 				return SORT_2ABOVE1;
+
+			if (sItem2.IsEmpty())
+				return SORT_1ABOVE2;
 		}
 	}
 
