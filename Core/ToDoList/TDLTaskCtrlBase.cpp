@@ -58,8 +58,8 @@ const UINT TIMER_BOUNDINGSEL	= 100;
 
 const LPCTSTR APP_ICON			= _T("TDL_APP_ICON");
 
-const float BIGCOMMENTSSIZE		= (5 * 1024); // in KB
-const float VERYBIGCOMMENTSSIZE	= (8 * 1024); // in KB
+const float BIGCOMMENTSSIZE		= (5 * 1024); // 5MB in KB
+const float VERYBIGCOMMENTSSIZE	= (8 * 1024); // 8MB in KB
 
 //////////////////////////////////////////////////////////////////////
 
@@ -5336,9 +5336,13 @@ void CTDLTaskCtrlBase::ClearSortColumn()
 
 void CTDLTaskCtrlBase::SetSortColumn(TDC_COLUMN nColID, TDC_SORTDIR nSortDir)
 {
-	m_nSortDir = nSortDir;
-
-	if (m_nSortColID != nColID)
+	if (nSortDir != m_nSortDir)
+	{
+		m_nSortDir = nSortDir;
+		m_hdrTasks.Invalidate(FALSE);
+	}
+	
+	if (nColID != m_nSortColID)
 	{
 		if ((m_nSortColID == TDCC_CLIENT) || (nColID == TDCC_CLIENT))
 			m_hdrTasks.Invalidate(FALSE);
