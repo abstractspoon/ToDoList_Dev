@@ -56,7 +56,8 @@ DWORD CKanbanOptionComboBox::GetOptionMask() const
 			KBCF_HIDEEMPTYCOLUMNS |
 			KBCF_HIDESUBTASKS |
 			KBCF_HIDENONEGROUP |
-			KBCF_SORTGROUPSASCENDING);
+			KBCF_SORTGROUPSASCENDING |
+			KBCF_SORTNONEGROUPBELOW);
 }
 
 void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
@@ -74,6 +75,7 @@ void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDESUBTASKS, KBCF_HIDESUBTASKS);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDENONEGROUP, KBCF_HIDENONEGROUP);
 		CDialogHelper::AddString(*this, IDS_OPTIONS_SORTGROUPSASCENDING, KBCF_SORTGROUPSASCENDING);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_SORTNONEGROUPBELOW, KBCF_SORTNONEGROUPBELOW);
 
 		EnableTooltip();
 	}

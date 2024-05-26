@@ -442,15 +442,23 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 		{
 			if (Misc::FlagHasChanged(KBCF_HIDEEMPTYATTRIBUTES, dwPrevOptions, m_dwOptions))
 				RefreshItemLineHeights();
-			else
-				Invalidate(FALSE);
+// 			else
+// 				Invalidate(FALSE);
 
 			if (IsGrouping())
 			{
 				if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
+				{
 					DoSort();
-				else
-					Invalidate(FALSE);
+				}
+				else if (Misc::FlagHasChanged(KBCF_SORTNONEGROUPBELOW, dwPrevOptions, m_dwOptions))
+				{
+					// 'sort <none> below' has no effect without 'sort ascending'
+					if (HasOption(KBCF_SORTGROUPSASCENDING))
+						DoSort();
+				}
+// 				else
+// 					Invalidate(FALSE);
 			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())

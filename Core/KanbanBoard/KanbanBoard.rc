@@ -407,6 +407,7 @@ BEGIN
     IDS_NOBODY              "<nobody>"
     IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
     IDS_OPTIONS_HIDENONEGROUP "Hide <none> group"
+    IDS_OPTIONS_SORTNONEGROUPBELOW "Sort <none> group below other groups"
 END
 
 #endif    // English (Australia) resources
