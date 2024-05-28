@@ -6437,7 +6437,14 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 
 	// For 'All' check there is at least one editable task
 	CDWordArray aTaskIDs;
-	int nID = GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
+	int nNumTasks = tasks.GetTaskCount();
+
+	if (nNumTasks == 1)
+		GetColumnTaskIDs(aTaskIDs); // All
+	else
+		GetColumnTaskIDs(aTaskIDs, 0, (nNumTasks - 1));
+
+	int nID = aTaskIDs.GetSize();
 
 	while (nID--)
 	{
@@ -6467,37 +6474,66 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 		return FALSE;
 	}
 
-	// Do the merge
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
+	// If only a single task was copied then we paste that task's value
+	// to ALL target tasks else we copy each task's value to just one
+	// target task
+	HTASKITEM hTask = tasks.GetFirstTask();
+	int nNumTasks = tasks.GetTaskCount();
 
 	CDWordArray aTaskIDs;
 
-	int nNumIDs = 0, nID = 0;
-
 	if (bSelectedTasksOnly)
-		nNumIDs = GetSelectedTaskIDs(aTaskIDs, TRUE);
-	else 
-		nNumIDs = GetColumnTaskIDs(aTaskIDs, 0, tasks.GetTaskCount());
+	{
+		GetSelectedTaskIDs(aTaskIDs, TRUE);
+	}
+	else if (nNumTasks == 1)
+	{
+		// Get all target task IDs
+		GetColumnTaskIDs(aTaskIDs);
+	}
+	else
+	{
+		// Get only as many target task IDs as there are copied task IDs
+		GetColumnTaskIDs(aTaskIDs, 0, (nNumTasks - 1));
+	}
 
-	HTASKITEM hTask = tasks.GetFirstTask();
+	// Do the merge
+	CDWordArray aModTaskIDs;
 	TODOITEM tdiFrom, tdiTo;
 
-	CDWordArray aModTaskIDs;
+	int nNumIDs = aTaskIDs.GetSize(), nID = 0;
 
-	while (hTask && (nID < nNumIDs))
+	if (nNumTasks == 1)
 	{
-#ifdef _DEBUG
-		DWORD dwFromTaskID = tasks.GetTaskID(hTask);
-#endif
-		DWORD dwToTaskID = aTaskIDs[nID];
-
-		if (tasks.GetTaskAttributes(hTask, tdiFrom) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
+		if (tasks.GetTaskAttributes(hTask, tdiFrom))
 		{
-			aModTaskIDs.Add(dwToTaskID);
-		}
+			for (; nID < nNumIDs; nID++)
+			{
+				DWORD dwToTaskID = aTaskIDs[nID];
 
-		hTask = tasks.GetNextTask(hTask);
-		nID++;
+				if (CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
+				{
+					aModTaskIDs.Add(dwToTaskID);
+				}
+			}
+		}
+	}
+	else
+	{
+		while (hTask && (nID < nNumIDs))
+		{
+			DWORD dwToTaskID = aTaskIDs[nID];
+
+			if (tasks.GetTaskAttributes(hTask, tdiFrom) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
+			{
+				aModTaskIDs.Add(dwToTaskID);
+			}
+
+			hTask = tasks.GetNextTask(hTask);
+			nID++;
+		}
 	}
 
 	if (aModTaskIDs.GetSize())
