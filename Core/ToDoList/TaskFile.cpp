@@ -1918,18 +1918,28 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 	return TRUE;
 }
 
-BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
+// External
+BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bCalc) const
 {
-	return MergeTaskAttributes(hTask, tdi, TDLMTA_OVERWRITEALL);
+	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, m_aCustomAttribDefs, TDLMTA_OVERWRITEALL, (bCalc != FALSE));
 }
 
+// External
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const
 {
-	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, CTDCCustomAttribDefinitionArray(), dwFlags);
+	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, m_aCustomAttribDefs, dwFlags, false);
 }
 
+// External
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const CTDCAttributeMap& mapAttribs, 
 									const CTDCCustomAttribDefinitionArray& aCustAttribs, DWORD dwFlags) const
+{
+	return MergeTaskAttributes(hSrcTask, tdiDest, mapAttribs, aCustAttribs, dwFlags, false);
+}
+
+// Internal
+BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const CTDCAttributeMap& mapAttribs, 
+									const CTDCCustomAttribDefinitionArray& aCustAttribs, DWORD dwFlags, bool bCalc) const
 {
 	ASSERT(m_mapReadableAttrib.GetCount() == 0);
 
@@ -1942,38 +1952,38 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 #define GETATTRIB(a, s, expr) if (WANTATTRIB(a, s)) expr
 
 		// Call GetTaskString wherever possible to avoid string copying
-		GETATTRIB(TDCA_TASKNAME,	TDL_TASKTITLE,			tdiDest.sTitle = GetTaskString(hSrcTask, TDL_TASKTITLE));
-		GETATTRIB(TDCA_ALLOCBY,		TDL_TASKALLOCBY,		tdiDest.sAllocBy = GetTaskString(hSrcTask, TDL_TASKALLOCBY));
-		GETATTRIB(TDCA_STATUS,		TDL_TASKSTATUS,			tdiDest.sStatus = GetTaskString(hSrcTask, TDL_TASKSTATUS));
-		GETATTRIB(TDCA_CREATEDBY,	TDL_TASKCREATEDBY,		tdiDest.sCreatedBy = GetTaskString(hSrcTask, TDL_TASKCREATEDBY));
-		GETATTRIB(TDCA_EXTERNALID,	TDL_TASKEXTERNALID,		tdiDest.sExternalID = GetTaskString(hSrcTask, TDL_TASKEXTERNALID));
-		GETATTRIB(TDCA_VERSION,		TDL_TASKVERSION,		tdiDest.sVersion = GetTaskString(hSrcTask, TDL_TASKVERSION));
-		GETATTRIB(TDCA_ICON,		TDL_TASKICON,			tdiDest.sIcon = GetTaskString(hSrcTask, TDL_TASKICON));
-		GETATTRIB(TDCA_LASTMODBY,	TDL_TASKLASTMODBY,		tdiDest.sLastModifiedBy = GetTaskString(hSrcTask, TDL_TASKLASTMODBY));
+		GETATTRIB(TDCA_TASKNAME,		TDL_TASKTITLE,			tdiDest.sTitle = GetTaskString(hSrcTask, TDL_TASKTITLE));
+		GETATTRIB(TDCA_ALLOCBY,			TDL_TASKALLOCBY,		tdiDest.sAllocBy = GetTaskString(hSrcTask, TDL_TASKALLOCBY));
+		GETATTRIB(TDCA_STATUS,			TDL_TASKSTATUS,			tdiDest.sStatus = GetTaskString(hSrcTask, TDL_TASKSTATUS));
+		GETATTRIB(TDCA_CREATEDBY,		TDL_TASKCREATEDBY,		tdiDest.sCreatedBy = GetTaskString(hSrcTask, TDL_TASKCREATEDBY));
+		GETATTRIB(TDCA_EXTERNALID,		TDL_TASKEXTERNALID,		tdiDest.sExternalID = GetTaskString(hSrcTask, TDL_TASKEXTERNALID));
+		GETATTRIB(TDCA_VERSION,			TDL_TASKVERSION,		tdiDest.sVersion = GetTaskString(hSrcTask, TDL_TASKVERSION));
+		GETATTRIB(TDCA_ICON,			TDL_TASKICON,			tdiDest.sIcon = GetTaskString(hSrcTask, TDL_TASKICON));
+		GETATTRIB(TDCA_LASTMODBY,		TDL_TASKLASTMODBY,		tdiDest.sLastModifiedBy = GetTaskString(hSrcTask, TDL_TASKLASTMODBY));
 
-		GETATTRIB(TDCA_FLAG,		TDL_TASKFLAG,			tdiDest.bFlagged = IsTaskFlagged(hSrcTask, false));
-		GETATTRIB(TDCA_LOCK,		TDL_TASKLOCK,			tdiDest.bLocked = IsTaskLocked(hSrcTask, false));
+		GETATTRIB(TDCA_FLAG,			TDL_TASKFLAG,			tdiDest.bFlagged = IsTaskFlagged(hSrcTask, bCalc));
+		GETATTRIB(TDCA_LOCK,			TDL_TASKLOCK,			tdiDest.bLocked = IsTaskLocked(hSrcTask, bCalc));
 
-		GETATTRIB(TDCA_COLOR,		TDL_TASKCOLOR,			tdiDest.color = (COLORREF)GetTaskColor(hSrcTask));
-		GETATTRIB(TDCA_PERCENT,		TDL_TASKPERCENTDONE,	tdiDest.nPercentDone = (int)GetTaskPercentDone(hSrcTask, false));
-		GETATTRIB(TDCA_TIMEESTIMATE, TDL_TASKTIMEESTIMATE,	tdiDest.timeEstimate.dAmount = GetTaskTimeEstimate(hSrcTask, tdiDest.timeEstimate.nUnits, false));
-		GETATTRIB(TDCA_TIMESPENT,	TDL_TASKTIMESPENT,		tdiDest.timeSpent.dAmount = GetTaskTimeSpent(hSrcTask, tdiDest.timeSpent.nUnits, false));
-		GETATTRIB(TDCA_PRIORITY,	TDL_TASKPRIORITY,		tdiDest.nPriority = (int)GetTaskPriority(hSrcTask, false));
-		GETATTRIB(TDCA_RISK,		TDL_TASKRISK,			tdiDest.nRisk = GetTaskRisk(hSrcTask, false));
-		GETATTRIB(TDCA_COST,		TDL_TASKCOST,			tdiDest.cost.Parse(GetTaskString(hSrcTask, TDL_TASKCOST)));
+		GETATTRIB(TDCA_COLOR,			TDL_TASKCOLOR,			tdiDest.color = (COLORREF)GetTaskColor(hSrcTask));
+		GETATTRIB(TDCA_PERCENT,			TDL_TASKPERCENTDONE,	tdiDest.nPercentDone = (int)GetTaskPercentDone(hSrcTask, bCalc));
+		GETATTRIB(TDCA_TIMEESTIMATE,	TDL_TASKTIMEESTIMATE,	tdiDest.timeEstimate.dAmount = GetTaskTimeEstimate(hSrcTask, tdiDest.timeEstimate.nUnits, bCalc));
+		GETATTRIB(TDCA_TIMESPENT,		TDL_TASKTIMESPENT,		tdiDest.timeSpent.dAmount = GetTaskTimeSpent(hSrcTask, tdiDest.timeSpent.nUnits, bCalc));
+		GETATTRIB(TDCA_PRIORITY,		TDL_TASKPRIORITY,		tdiDest.nPriority = (int)GetTaskPriority(hSrcTask, bCalc));
+		GETATTRIB(TDCA_RISK,			TDL_TASKRISK,			tdiDest.nRisk = GetTaskRisk(hSrcTask, bCalc));
+		GETATTRIB(TDCA_COST,			TDL_TASKCOST,			tdiDest.cost.Parse(GetTaskString(hSrcTask, (bCalc ? TDL_TASKCALCCOST : TDL_TASKCOST))));
 
-		GETATTRIB(TDCA_DUEDATE,		TDL_TASKDUEDATE,		tdiDest.dateDue = GetTaskDueDateOle(hSrcTask));
-		GETATTRIB(TDCA_STARTDATE,	TDL_TASKSTARTDATE,		tdiDest.dateStart = GetTaskStartDateOle(hSrcTask));
-		GETATTRIB(TDCA_DONEDATE,	TDL_TASKDONEDATE,		tdiDest.dateDone = GetTaskDoneDateOle(hSrcTask));
-		GETATTRIB(TDCA_CREATIONDATE, TDL_TASKCREATIONDATE,	tdiDest.dateCreated = GetTaskCreationDateOle(hSrcTask));
-		GETATTRIB(TDCA_LASTMODDATE, TDL_TASKLASTMOD,		tdiDest.dateLastMod = GetTaskLastModifiedOle(hSrcTask));
+		GETATTRIB(TDCA_DUEDATE,			TDL_TASKDUEDATE,		tdiDest.dateDue = GetTaskDueDateOle(hSrcTask, bCalc));
+		GETATTRIB(TDCA_STARTDATE,		TDL_TASKSTARTDATE,		tdiDest.dateStart = GetTaskStartDateOle(hSrcTask, bCalc));
+		GETATTRIB(TDCA_DONEDATE,		TDL_TASKDONEDATE,		tdiDest.dateDone = GetTaskDoneDateOle(hSrcTask));
+		GETATTRIB(TDCA_CREATIONDATE,	TDL_TASKCREATIONDATE,	tdiDest.dateCreated = GetTaskCreationDateOle(hSrcTask));
+		GETATTRIB(TDCA_LASTMODDATE,		TDL_TASKLASTMOD,		tdiDest.dateLastMod = GetTaskLastModifiedOle(hSrcTask));
 
-		GETATTRIB(TDCA_CATEGORY,	TDL_TASKCATEGORY,		GetTaskCategories(hSrcTask, tdiDest.aCategories));
-		GETATTRIB(TDCA_TAGS,		TDL_TASKTAG,			GetTaskTags(hSrcTask, tdiDest.aTags));
-		GETATTRIB(TDCA_ALLOCTO,		TDL_TASKALLOCTO,		GetTaskAllocatedTo(hSrcTask, tdiDest.aAllocTo));
-		GETATTRIB(TDCA_RECURRENCE,	TDL_TASKRECURRENCE,		GetTaskRecurrence(hSrcTask, tdiDest.trRecurrence));
-		GETATTRIB(TDCA_DEPENDENCY,	TDL_TASKDEPENDENCY,		GetTaskDependencies(hSrcTask, tdiDest.aDependencies));
-		GETATTRIB(TDCA_FILELINK,	TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
+		GETATTRIB(TDCA_CATEGORY,		TDL_TASKCATEGORY,		GetTaskCategories(hSrcTask, tdiDest.aCategories));
+		GETATTRIB(TDCA_TAGS,			TDL_TASKTAG,			GetTaskTags(hSrcTask, tdiDest.aTags));
+		GETATTRIB(TDCA_ALLOCTO,			TDL_TASKALLOCTO,		GetTaskAllocatedTo(hSrcTask, tdiDest.aAllocTo));
+		GETATTRIB(TDCA_RECURRENCE,		TDL_TASKRECURRENCE,		GetTaskRecurrence(hSrcTask, tdiDest.trRecurrence));
+		GETATTRIB(TDCA_DEPENDENCY,		TDL_TASKDEPENDENCY,		GetTaskDependencies(hSrcTask, tdiDest.aDependencies));
+		GETATTRIB(TDCA_FILELINK,		TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
 
 		// Comments are trickier
 		if (mapAttribs.Has(TDCA_ALL) || mapAttribs.Has(TDCA_COMMENTS))
@@ -2041,7 +2051,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 		if (mapAttribs.Has(TDCA_ALL))
 		{
 			CTDCCustomAttributeDataMap mapSrcData;
-			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
+			GetTaskCustomAttributeData(hSrcTask, mapSrcData, bCalc);
 
 			if (dwFlags == TDLMTA_OVERWRITEALL)
 			{
@@ -2066,7 +2076,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 		else if (aCustAttribs.GetSize())
 		{
 			CTDCCustomAttributeDataMap mapSrcData;
-			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
+			GetTaskCustomAttributeData(hSrcTask, mapSrcData, bCalc);
 
 			int nCust = aCustAttribs.GetSize();
 
@@ -2321,7 +2331,7 @@ int CTaskFile::GetTaskMetaData(HTASKITEM hTask, CMapStringToString& mapMetaData)
 	return GetMetaData(pXITask, mapMetaData);
 }
 
-int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const
+int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData, BOOL bCalc) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, 0);
@@ -2333,7 +2343,13 @@ int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDa
 	while (pXICustData)
 	{
 		CString sTypeID = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBID);
-		CString sData = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBVALUE);
+		CString sData;
+		
+		if (bCalc)
+			sData = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCVALUE);
+
+		if (sData.IsEmpty())
+			sData = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBVALUE);
 
 		if (!sTypeID.IsEmpty() && !sData.IsEmpty())
 		{
@@ -3364,14 +3380,14 @@ COleDateTime CTaskFile::GetTaskDoneDateOle(HTASKITEM hTask) const
 	return GetTaskDateOle(hTask, TDL_TASKDONEDATE, TRUE);
 }
 
-COleDateTime CTaskFile::GetTaskDueDateOle(HTASKITEM hTask) const
+COleDateTime CTaskFile::GetTaskDueDateOle(HTASKITEM hTask, BOOL bCalc) const
 {
-	return GetTaskDateOle(hTask, TDL_TASKDUEDATE, TRUE);
+	return GetTaskDateOle(hTask, (bCalc ? TDL_TASKCALCDUEDATE : TDL_TASKDUEDATE), TRUE);
 }
 
-COleDateTime CTaskFile::GetTaskStartDateOle(HTASKITEM hTask) const
+COleDateTime CTaskFile::GetTaskStartDateOle(HTASKITEM hTask, BOOL bCalc) const
 {
-	return GetTaskDateOle(hTask, TDL_TASKSTARTDATE, TRUE);
+	return GetTaskDateOle(hTask, (bCalc ? TDL_TASKCALCSTARTDATE : TDL_TASKSTARTDATE), TRUE);
 }
 
 COleDateTime CTaskFile::GetTaskCreationDateOle(HTASKITEM hTask) const
@@ -3385,11 +3401,7 @@ COleDateTime CTaskFile::GetEarliestTaskStartDate(HTASKITEM hTask) const
 
 	if (hTask)
 	{
-		//CDateHelper::Min(dtEarliest, GetTaskCreationDateOle(hTask));
 		CDateHelper::Min(dtEarliest, GetTaskStartDateOle(hTask));
-		//CDateHelper::Min(dtEarliest, GetTaskDueDateOle(hTask));
-		//CDateHelper::Min(dtEarliest, GetTaskDoneDateOle(hTask));
-		//CDateHelper::Min(dtEarliest, GetTaskLastModifiedOle(hTask));
 
 		// First child
 		CDateHelper::Min(dtEarliest, GetEarliestTaskStartDate(GetFirstTask(hTask)));

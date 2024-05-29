@@ -183,8 +183,8 @@ public:
 	// Task-related methods -----------
 	COleDateTime GetTaskLastModifiedOle(HTASKITEM hTask) const;
 	COleDateTime GetTaskDoneDateOle(HTASKITEM hTask) const;
-	COleDateTime GetTaskDueDateOle(HTASKITEM hTask) const;
-	COleDateTime GetTaskStartDateOle(HTASKITEM hTask) const;
+	COleDateTime GetTaskDueDateOle(HTASKITEM hTask, BOOL bCalc = FALSE) const;
+	COleDateTime GetTaskStartDateOle(HTASKITEM hTask, BOOL bCalc = FALSE) const;
 	COleDateTime GetTaskCreationDateOle(HTASKITEM hTask) const;
 
 	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID);
@@ -192,7 +192,7 @@ public:
 	int GetTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents = TRUE) const;
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
+	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bCalc = FALSE) const;
 
 	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const;
 	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi,
@@ -248,7 +248,7 @@ public:
 	BOOL GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CString& sType) const;
 	BOOL SetTaskHtmlComments(HTASKITEM hTask, const CString& sContent, BOOL bForTransform);
 
-	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const;
+	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData, BOOL bCalc = FALSE) const;
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttributeDataMap& mapData);
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data, BOOL bCalc = FALSE);
 	
@@ -598,6 +598,12 @@ protected:
 	bool SetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem, double dVal);
 	bool SetTaskTime(HTASKITEM hTask, const CString& sTimeItem, double dTime,
 					 const CString& sUnitsItem, TDC_UNITS cUnits);
+
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi,
+							 const CTDCAttributeMap& mapAttribs,
+							 const CTDCCustomAttribDefinitionArray& aCustAttribs,
+							 DWORD dwFlags,
+							 bool bCalc) const;
 
 	// for handling arrays at *task* level
 	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty);

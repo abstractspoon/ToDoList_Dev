@@ -6507,7 +6507,8 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 
 	if (nNumTasks == 1)
 	{
-		if (tasks.GetTaskAttributes(hTask, tdiFrom))
+		// Paste calculated attributes
+		if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE))
 		{
 			for (; nID < nNumIDs; nID++)
 			{
@@ -6526,7 +6527,8 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 		{
 			DWORD dwToTaskID = aTaskIDs[nID];
 
-			if (tasks.GetTaskAttributes(hTask, tdiFrom) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
+			// Paste calculated attributes
+			if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
 			{
 				aModTaskIDs.Add(dwToTaskID);
 			}
