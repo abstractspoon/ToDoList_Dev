@@ -4623,7 +4623,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCT
 	
 	if (tasks.Load(sFilePath, NULL, FALSE)) // don't decrypt
 	{
-		m_sourceControl.InitialiseState(tasks);
+		m_sourceControl.Initialise(tasks);
 
 		BOOL bWantCheckout = (HasStyle(TDCS_CHECKOUTONLOAD) &&
 								m_sourceControl.IsSourceControlled() && 

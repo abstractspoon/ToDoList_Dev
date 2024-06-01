@@ -29,7 +29,7 @@ CTDCSourceControl::~CTDCSourceControl()
 {
 }
 
-void CTDCSourceControl::InitialiseState(const CTaskFile& tasks)
+void CTDCSourceControl::Initialise(const CTaskFile& tasks)
 {
 	m_bSourceControlled = tasks.IsSourceControlled();
 
