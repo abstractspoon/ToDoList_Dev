@@ -6439,10 +6439,6 @@ CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
 
 BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib, BOOL bSameTasklist) const
 {
-	// Doesn't make sense to copy to self within the same tasklist
-	if (bSameTasklist && (nFromAttrib == nToAttrib))
-		return FALSE;
-
 	// Can't copy to calculations
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib) &&
 		(m_data.m_aCustomAttribDefs.GetAttributeDataType(nToAttrib) == TDCCA_CALCULATION))
@@ -6474,22 +6470,6 @@ BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, 
 		{
 			switch (nFromAttrib)
 			{
-			case TDCA_CREATIONDATE:
-			case TDCA_DONEDATE:
-			case TDCA_DUEDATE:
-			case TDCA_LASTMODDATE:
-			case TDCA_STARTDATE:
-				switch (nToAttrib)
-				{
-				case TDCA_DONEDATE:
-				case TDCA_DUEDATE:
-				case TDCA_STARTDATE:
-					// Note: TDCA_CREATIONDATE cannot be copied to
-					// Note: TDCA_LASTMOD cannot be copied to
-					return TRUE;
-				}
-				break;
-
 			case TDCA_DONETIME:
 			case TDCA_DUETIME:
 			case TDCA_STARTTIME:
@@ -6500,8 +6480,23 @@ BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, 
 				case TDCA_STARTTIME:
 					return TRUE;
 				}
-				break;
+				return FALSE;
 			}
+
+			switch (nToAttrib)
+			{
+			case TDCA_CREATIONDATE:
+			case TDCA_LASTMODDATE:
+				return FALSE;
+	
+			case TDCA_DONEDATE:
+			case TDCA_DUEDATE:
+			case TDCA_STARTDATE:
+				return TRUE;
+			}
+
+			// All else
+			return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib);
 		}
 		break;
 
@@ -6673,7 +6668,7 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 				COleDateTime dtTo(dataTo.AsDate());
 				CopyDate(dataFrom.AsDate(), dtTo);
 
-				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, TDCCADATA(dataTo));
+				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dtTo);
 			}
 			else
 			{

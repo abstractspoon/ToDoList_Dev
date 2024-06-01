@@ -3382,12 +3382,18 @@ COleDateTime CTaskFile::GetTaskDoneDateOle(HTASKITEM hTask) const
 
 COleDateTime CTaskFile::GetTaskDueDateOle(HTASKITEM hTask, BOOL bCalc) const
 {
-	return GetTaskDateOle(hTask, (bCalc ? TDL_TASKCALCDUEDATE : TDL_TASKDUEDATE), TRUE);
+	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCDUEDATE))
+		return GetTaskDateOle(hTask, TDL_TASKCALCDUEDATE, TRUE);
+
+	return GetTaskDateOle(hTask, TDL_TASKDUEDATE, TRUE);
 }
 
 COleDateTime CTaskFile::GetTaskStartDateOle(HTASKITEM hTask, BOOL bCalc) const
 {
-	return GetTaskDateOle(hTask, (bCalc ? TDL_TASKCALCSTARTDATE : TDL_TASKSTARTDATE), TRUE);
+	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCSTARTDATE))
+		return GetTaskDateOle(hTask, TDL_TASKCALCSTARTDATE, TRUE);
+
+	return GetTaskDateOle(hTask, TDL_TASKSTARTDATE, TRUE);
 }
 
 COleDateTime CTaskFile::GetTaskCreationDateOle(HTASKITEM hTask) const
