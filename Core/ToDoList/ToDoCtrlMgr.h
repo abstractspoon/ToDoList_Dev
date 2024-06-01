@@ -69,7 +69,7 @@ public:
 	CString GetFilePath(int nIndex, BOOL bStrict = TRUE) const;
 	CString GetFolderPath(int nIndex) const;
 	void ClearFilePath(int nIndex);
-	BOOL HasFilePath(int nIndex) const;
+	BOOL HasFilePath(int nIndex, BOOL bIncStorage = TRUE) const;
 	TDCM_PATHTYPE GetFilePathType(int nIndex) const;
 	TDCM_PATHTYPE RefreshPathType(int nIndex); 
 	CString GetFriendlyProjectName(int nIndex) const;
@@ -155,7 +155,7 @@ protected:
 		TDCM_PATHTYPE GetPathType() const;
 		CString GetFriendlyProjectName() const;
 		BOOL IsSelectable() const;
-		BOOL HasFilePath() const;
+		BOOL HasFilePath(BOOL bIncStorage = TRUE) const;
 
 		BOOL UsesStorage() const;
 		void RefreshPathType();

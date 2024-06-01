@@ -6207,7 +6207,8 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 
 void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
+	// Exclude tasklists using storage
+	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl(), FALSE));
 }
 
 void CToDoListWnd::OnSize(UINT nType, int cx, int cy) 
@@ -13487,7 +13488,8 @@ void CToDoListWnd::OnToolsSelectinExplorer()
 
 void CToDoListWnd::OnUpdateToolsSelectinExplorer(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
+	// Exclude tasklists using storage
+	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl(), FALSE));
 }
 
 void CToDoListWnd::OnToolsRemovefromsourcecontrol() 
@@ -13663,7 +13665,8 @@ void CToDoListWnd::OnToolsCopyTasklistPath()
 
 void CToDoListWnd::OnUpdateToolsCopyTasklistPath(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
+	// Exclude tasklists using storage
+	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl(), FALSE));
 }
 
 void CToDoListWnd::OnMoveSelectTaskDependencies()
