@@ -3987,9 +3987,10 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "Column Operations"
         BEGIN
-            MENUITEM "Copy All from Column",        ID_TASKLIST_COPYCOLUMNVALUES
+            MENUITEM "Copy All Values From Column", ID_TASKLIST_COPYCOLUMNVALUES
 
-            MENUITEM "Copy Selected from Column",   ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+            MENUITEM "Copy Selected Values From Column", 
+                                                    ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
 
             MENUITEM "",                            1
             MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
@@ -4075,13 +4076,15 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
-        MENUITEM "C&opy All From Column",       ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy &Selected From Column",  ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+        MENUITEM "C&opy All Values From Column", 
+                                                ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy &Selected Values From Column", 
+                                                ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
-        MENUITEM "&Paste Into Column",          ID_TASKLIST_PASTECOLUMNVALUES
+        MENUITEM "&Paste Values Into Column",   ID_TASKLIST_PASTECOLUMNVALUES
 
-        MENUITEM "Paste Into Selected Tasks In Column", 
+        MENUITEM "Paste Values Into Selected Tasks In Column", 
                                                 ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
@@ -5878,11 +5881,13 @@ BEGIN
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
     IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
     IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
-    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All From '%s' Column"
-    IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES "Copy Selected From '%s' Column"
-    IDS_TASKLIST_PASTECOLUMNVALUES "Paste From '%s' Column To '%s' Column"
+    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values From '%s' Column"
+    IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
+                            "Copy Selected Values From '%s' Column"
+    IDS_TASKLIST_PASTECOLUMNVALUES 
+                            "Paste %d Values From '%s' Column To '%s' Column"
     IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES 
-                            "Paste From '%s' Column to Selected Tasks In '%s' Column"
+                            "Paste %d Values From '%s' Column to Selected Tasks In '%s' Column"
     IDS_TDLBC_TASK          "Task"
 END
 
@@ -5911,6 +5916,10 @@ BEGIN
     IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
     IDS_FP_IS_COMPLETE      "is completed (or not set)"
     IDS_TDC_GROUPBY         "Group by"
+    IDS_TASKLIST_PASTEONECOLUMNVALUES 
+                            "Paste 1 Value From '%s' Column To All Tasks In '%s' Column"
+    IDS_TASKLIST_PASTEONESELECTEDCOLUMNVALUES 
+                            "Paste 1 Value From '%s' Column to All Selected Tasks In '%s' Column"
 END
 
 STRINGTABLE DISCARDABLE 

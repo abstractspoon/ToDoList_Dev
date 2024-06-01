@@ -357,7 +357,7 @@ public:
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 	BOOL CanCopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const;
+	BOOL CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID, int& nNumFrom) const;
 	BOOL PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly);
 
 	void ResetFileVersion(unsigned int nTo = 0) { m_nFileVersion = max(nTo, 0); }

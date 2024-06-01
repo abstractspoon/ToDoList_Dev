@@ -6329,8 +6329,9 @@ LRESULT CToDoCtrl::OnTDCCanPasteAttributeValue(WPARAM wParam, LPARAM lParam)
 
 	TDC_COLUMN nFromColID = TDCC_NONE;
 	TDC_COLUMN nToColID = TDC::MapAttributeToColumn((TDC_ATTRIBUTE)wParam);
+	int nUnused;
 
-	if (!CanPasteAttributeColumnValues(nToColID, TRUE, nFromColID))
+	if (!CanPasteAttributeColumnValues(nToColID, TRUE, nFromColID, nUnused))
 		return 0L;
 
 	TDC_ATTRIBUTE* pFromAttribID = (TDC_ATTRIBUTE*)lParam;
@@ -6409,7 +6410,7 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 									nColID);
 }
 
-BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID) const
+BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTasksOnly, TDC_COLUMN& nFromColID, int& nNumFrom) const
 {
 	if (IsReadOnly())
 		return FALSE;
@@ -6422,6 +6423,8 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 
 	if (nFromColID == TDCC_NONE)
 		return FALSE;
+
+	nNumFrom = tasks.GetTaskCount();
 
 	// Check column compatibility
 	BOOL bSameTasklist = CTaskClipboard::TasklistIDMatches(GetClipboardID());
@@ -6437,12 +6440,11 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 
 	// For 'All' check there is at least one editable task
 	CDWordArray aTaskIDs;
-	int nNumTasks = tasks.GetTaskCount();
 
-	if (nNumTasks == 1)
+	if (nNumFrom == 1)
 		GetColumnTaskIDs(aTaskIDs); // All
 	else
-		GetColumnTaskIDs(aTaskIDs, 0, (nNumTasks - 1));
+		GetColumnTaskIDs(aTaskIDs, 0, (nNumFrom - 1));
 
 	int nID = aTaskIDs.GetSize();
 
@@ -6453,6 +6455,7 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	}
 	
 	// else
+	nNumFrom = 0;
 	return FALSE;
 }
 

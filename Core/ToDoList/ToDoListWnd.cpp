@@ -13953,37 +13953,51 @@ void CToDoListWnd::OnUpdateTasklistPasteValuesIntoSelectedTaskColumn(CCmdUI* pCm
 void CToDoListWnd::OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	TDC_COLUMN nFromColID = m_nContextColumnID;
 
-	BOOL bEnable = tdc.CanCopyAttributeColumnValues(nFromColID, bSelectedTasks);
+	BOOL bEnable = tdc.CanCopyAttributeColumnValues(m_nContextColumnID, bSelectedTasks);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)
 	{
-		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES : IDS_TASKLIST_COPYCOLUMNVALUES);
-		CString sFromCol = tdc.GetColumnName(nFromColID);
+		CString sFromCol = tdc.GetColumnName(m_nContextColumnID);
+		CEnString sMenuText;
 
-		pCmdUI->SetText(CEnString(nMenuStrID, sFromCol));
+		if (bSelectedTasks)
+			sMenuText.Format(IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES, sFromCol);
+		else
+			sMenuText.Format(IDS_TASKLIST_COPYCOLUMNVALUES, sFromCol);
+
+		pCmdUI->SetText(sMenuText);
 	}
 }
 
 void CToDoListWnd::OnUpdateTasklistPasteColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	TDC_COLUMN nFromColID = TDCC_NONE, nToCtrlID = m_nContextColumnID;
 
-	BOOL bEnable = tdc.CanPasteAttributeColumnValues(nToCtrlID, bSelectedTasks, nFromColID);
+	TDC_COLUMN nFromColID = TDCC_NONE;
+	int nNumFrom = 0;
+
+	BOOL bEnable = tdc.CanPasteAttributeColumnValues(m_nContextColumnID, bSelectedTasks, nFromColID, nNumFrom);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable)
 	{
-		UINT nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES : IDS_TASKLIST_PASTECOLUMNVALUES);
-		
 		CString sFromCol = tdc.GetColumnName(nFromColID);
-		CString sToCol = tdc.GetColumnName(nToCtrlID);
+		CString sToCol = tdc.GetColumnName(m_nContextColumnID);
 
 		CEnString sMenuText;
-		sMenuText.Format(nMenuStrID, sFromCol, sToCol);
+
+		if (nNumFrom == 1)
+		{
+			int nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_PASTEONESELECTEDCOLUMNVALUES : IDS_TASKLIST_PASTEONECOLUMNVALUES);
+			sMenuText.Format(nMenuStrID, sFromCol, sToCol);
+		}
+		else
+		{
+			int nMenuStrID = (bSelectedTasks ? IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES : IDS_TASKLIST_PASTECOLUMNVALUES);
+			sMenuText.Format(nMenuStrID, nNumFrom, sFromCol, sToCol);
+		}
 
 		pCmdUI->SetText(sMenuText);
 	}
