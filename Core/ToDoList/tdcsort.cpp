@@ -97,6 +97,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	{
 	case TDCA_TASKNAME:
 	case TDCA_STARTDATE:
+	case TDCA_STARTTIME:
 	case TDCA_PRIORITY:
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
@@ -112,6 +113,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	case TDCA_COLOR:
 	case TDCA_FLAG:
 	case TDCA_DUEDATE:
+	case TDCA_DUETIME:
 	case TDCA_PERCENT:
 	case TDCA_TIMESPENT:
 	case TDCA_DEPENDENCY:
@@ -136,6 +138,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 				Matches(TDCA_DUEDATE, nSortBy, styles, aCustAttribs)); 
 
 	case TDCA_DONEDATE:
+	case TDCA_DONETIME:
 		{
 			ASSERT(nAttribCol != TDCC_NONE);
 
