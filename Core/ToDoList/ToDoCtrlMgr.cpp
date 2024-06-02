@@ -757,7 +757,7 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CTaskFile& tasks, CString& sCheckedO
 	CWaitCursor cursor;
 
 	TDCITEM& tdci = GetTDCItem(nIndex);
-	tasks.SetPassword(tdci.pTDC->GetPassword());
+// 	tasks.SetPassword(tdci.pTDC->GetPassword());
 
 	TDC_FILE nCheckout = tdci.sourceControl.CheckOut(tasks, sCheckedOutTo, bForce);
 

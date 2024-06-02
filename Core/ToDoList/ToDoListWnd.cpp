@@ -4691,7 +4691,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 							  m_mgrToDoCtrls.IsSourceControlled(nTDC) &&
 							  !m_mgrToDoCtrls.IsCheckedOut(nTDC));
 		if (bWantCheckout)
-			m_mgrToDoCtrls.CheckOut(nTDC, tasks, CString(), FALSE);
+			m_mgrToDoCtrls.CheckOut(nTDC, CTaskFile()/*tasks*/, CString(), FALSE);
 	}
 	else
 	{
