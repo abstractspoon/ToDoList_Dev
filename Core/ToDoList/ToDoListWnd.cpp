@@ -1674,7 +1674,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 				{
 					// if the window with the target is either a combobox or
 					// the child edit of a combobox and the combo is
-					// dropped down then let it thru else if the target is
+					// dropped down then let it through else if the target is
 					// a child of ours then treat as a cancel
 					BOOL bHandle = TRUE;
 					
@@ -1713,8 +1713,8 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 					// Add the item
 					if (m_cbQuickFind.FindStringExact(0, m_sQuickFind) == CB_ERR)
 					{
-						int nSel = m_cbQuickFind.AddUniqueItem(m_sQuickFind);
-						m_cbQuickFind.SetCurSel(nSel);
+						int nSelTDC = m_cbQuickFind.AddUniqueItem(m_sQuickFind);
+						m_cbQuickFind.SetCurSel(nSelTDC);
 
 						// keep only the last 20 items
 						int nItem = m_cbQuickFind.GetCount();
@@ -2307,7 +2307,7 @@ void CToDoListWnd::SaveSettings()
 	
 	// last open files
 	int nCount = GetTDCCount();
-	int nSel = GetSelToDoCtrl(); // and last active file
+	int nSelTDC = GetSelToDoCtrl(); // and last active file
 	
 	if (nCount) // but don't overwrite files saved in OnQueryEndSession() or OnClose()
 	{
@@ -2337,7 +2337,7 @@ void CToDoListWnd::SaveSettings()
 			CString sKey = Misc::MakeKey(_T("LastFile%d"), nItem);
 			prefs.WriteProfileString(SETTINGS_KEY, sKey, sFilePath);
 			
-			if (nSel == nTDC)
+			if (nSelTDC == nTDC)
 				prefs.WriteProfileString(SETTINGS_KEY, _T("LastActiveFile"), sFilePath);
 
 			nItem++;
@@ -3491,18 +3491,18 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 	}
 
 	// Update Time track widget AND/OR todoctrl depending on who notified
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	
 	// Must update TDC before the time-tracker
 	if (nFrom != FROM_TASKLIST)
 	{
-		if ((nTDC == nSel) || SelectToDoCtrl(nTDC, TRUE))
+		if ((nTDC == nSelTDC) || SelectToDoCtrl(nTDC, TRUE))
 			GetToDoCtrl().BeginTimeTracking(dwTaskID);
 	}
 
 	if (nFrom != FROM_TRACKER)
 	{
-		ASSERT(nTDC == nSel);
+		ASSERT(nTDC == nSelTDC);
 
 		m_dlgTimeTracker.UpdateTracking(&GetToDoCtrl());
 	}
@@ -3511,8 +3511,8 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 	m_mgrToDoCtrls.RefreshTimeTracking(nTDC);
 
 	// And the one potentially being paused
-	if (nTDC != nSel)
-		m_mgrToDoCtrls.RefreshTimeTracking(nSel);
+	if (nTDC != nSelTDC)
+		m_mgrToDoCtrls.RefreshTimeTracking(nSelTDC);
 
 	// update tray icon
 	OnTimerTimeTracking();
@@ -3739,13 +3739,13 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 
 void CToDoListWnd::UpdateCaption()
 {
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	
-	CString sProjectName = m_mgrToDoCtrls.UpdateTabItemText(nSel);
+	CString sProjectName = m_mgrToDoCtrls.UpdateTabItemText(nSelTDC);
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	CString sCaption, sCopyright(MAKEINTRESOURCE(IDS_COPYRIGHT));
-	CString sStatus = m_mgrToDoCtrls.GetTabItemTooltip(nSel);
+	CString sStatus = m_mgrToDoCtrls.GetTabItemTooltip(nSelTDC);
 	
 	// add current focus text as required
 	if (!sStatus.IsEmpty())
@@ -3822,10 +3822,10 @@ void CToDoListWnd::UpdateTrayTooltip()
 
 void CToDoListWnd::OnSaveas() 
 {
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	CString sCurFilePath = m_mgrToDoCtrls.GetFilePath(nSel), sNewFilePath(sCurFilePath);
+	CString sCurFilePath = m_mgrToDoCtrls.GetFilePath(nSelTDC), sNewFilePath(sCurFilePath);
 	CString sCurProjName = tdc.GetProjectName();
 	
 	// If the tasklist has already been saved and has a project name
@@ -3846,7 +3846,7 @@ void CToDoListWnd::OnSaveas()
 	}
 	else // simple file dialog
 	{
-		sNewFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
+		sNewFilePath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
 		// Preserve existing file extension
 		if (FileMisc::HasExtension(tdc.GetFilePath(), XML_EXT))
@@ -3872,9 +3872,9 @@ void CToDoListWnd::OnSaveas()
 	
 	if (!FileMisc::IsSamePath(sCurFilePath, sNewFilePath))
 	{
- 		if (SaveTaskList(nSel, sNewFilePath) == TDCF_SUCCESS)
+ 		if (SaveTaskList(nSelTDC, sNewFilePath) == TDCF_SUCCESS)
 		{
-			m_mgrToDoCtrls.ClearStorageDetails(nSel);
+			m_mgrToDoCtrls.ClearStorageDetails(nSelTDC);
 			tdc.SetAlternatePreferencesKey(_T(""));
 		}
 		else
@@ -4330,10 +4330,10 @@ void CToDoListWnd::RefreshTabOrder()
 	if (Prefs().GetKeepTabsOrdered())
 	{
 		int nSelOrg = GetSelToDoCtrl();
-		int nSel = m_mgrToDoCtrls.SortToDoCtrlsByName();
+		int nSelTDC = m_mgrToDoCtrls.SortToDoCtrlsByName();
 		
-		if (nSel != nSelOrg)
-			SelectToDoCtrl(nSel, FALSE);
+		if (nSelTDC != nSelOrg)
+			SelectToDoCtrl(nSelTDC, FALSE);
 	}
 }
 
@@ -4504,8 +4504,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	else
 		nExist = m_mgrToDoCtrls.FindToDoCtrl(storageInfo);
 	
-	// reload provided there are no existing changes
-	// and the timestamp has changed
+	// reload provided there are no existing changes and the timestamp has changed
 	if (nExist != -1)
 	{
 		if (!m_mgrToDoCtrls.IsModified(nExist) &&
@@ -4530,7 +4529,8 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	
 	if (nOpen == TDCF_SUCCESS)
 	{
-		int nTDC = AddToDoCtrl(pTDC, &storageInfo);
+		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pTDC);
+		ASSERT(nTDC != -1);
 
 		// reload any reminders
 		m_dlgReminders.AddToDoCtrl(pTDC);
@@ -4626,9 +4626,6 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 
 	if (nOpen == TDCF_SUCCESS)
 	{
-		// update readonly status
-		m_mgrToDoCtrls.UpdateToDoCtrlReadOnlyUIState(*pTDC);
-
 		const CPreferencesDlg& userPrefs = Prefs();
 
 		// certain operations cannot be performed on 'storage' tasklists
@@ -4681,6 +4678,20 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 			m_dlgTimeTracker.SetTasks(pTDC, tasks);
 		else
 			m_dlgTimeTracker.AddTasklist(pTDC, tasks);
+
+		// Finally save off the tasklist if new
+		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(pTDC);
+
+		if (nTDC == -1)
+			nTDC = AddToDoCtrl(pTDC, &storageInfo);
+
+		m_mgrToDoCtrls.InitialiseSourceControl(nTDC, tasks);
+
+		BOOL bWantCheckout = (userPrefs.GetAutoCheckOut() &&
+							  m_mgrToDoCtrls.IsSourceControlled(nTDC) &&
+							  !m_mgrToDoCtrls.IsCheckedOut(nTDC));
+		if (bWantCheckout)
+			m_mgrToDoCtrls.CheckOut(nTDC, tasks, CString(), FALSE);
 	}
 	else
 	{
@@ -5320,12 +5331,12 @@ void CToDoListWnd::RefreshPauseTimeTracking()
 	BOOL bTrackActiveOnly = !Prefs().GetTrackNonActiveTasklists();
 	int nCtrl = GetTDCCount();
 
-	int nSel = GetSelToDoCtrl();
-	ASSERT(nSel != -1);
+	int nSelTDC = GetSelToDoCtrl();
+	ASSERT(nSelTDC != -1);
 	
 	while (nCtrl--)
 	{
-		if (nCtrl == nSel)
+		if (nCtrl == nSelTDC)
 			GetToDoCtrl(nCtrl).PauseTimeTracking(bPauseAll);
 		else 
 			GetToDoCtrl(nCtrl).PauseTimeTracking(bPauseAll || bTrackActiveOnly);
@@ -5407,8 +5418,6 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		SelectToDoCtrl(nFirstSel, FALSE);
 	}
 
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
 	// 2. Source control ------------------------------------------
 	// 
 	// A) If WantCheckOut AND WantCheckIn are set then '-ssc' was used 
@@ -5417,18 +5426,19 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	// c) If both are set (no argument used) but the tasklist was
 	//    already checked out then we don't checkin at the end
 	BOOL bWantCheckIn = FALSE;
+	int nSelTDC = GetSelToDoCtrl();
 
-	if (tdc.IsSourceControlled())
+	if (m_mgrToDoCtrls.IsSourceControlled(nSelTDC))
 	{
 		bWantCheckIn = startup.WantCheckIn();
 		
 		if (startup.WantCheckOut())
 		{
-			if (!tdc.IsCheckedOut())
+			if (!m_mgrToDoCtrls.IsCheckedOut(nSelTDC))
 			{
 				OnToolsCheckout();
 
-				if (!tdc.IsCheckedOut())
+				if (!m_mgrToDoCtrls.IsCheckedOut(nSelTDC))
 					return FALSE;
 
 				m_toolbarMain.RefreshButtonStates();
@@ -5441,6 +5451,8 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 	
 	// 3. Select/Create the task ----------------------------------
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
 	if (startup.HasFlag(TLD_TASKLINK))
 	{
 		CStringArray aFiles;
@@ -6146,9 +6158,9 @@ void CToDoListWnd::OnUpdateMaximizeComments(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnReload() 
 {
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	
-	if (m_mgrToDoCtrls.IsModified(nSel))
+	if (m_mgrToDoCtrls.IsModified(nSelTDC))
 	{ 
 		if (IDYES != CMessageBox::AfxShow(IDS_CONFIRMRELOAD_TITLE, IDS_CONFIRMRELOAD, MB_YESNOCANCEL | MB_DEFBUTTON2))
 		{
@@ -6157,7 +6169,7 @@ void CToDoListWnd::OnReload()
 	}
 	
 	// else reload
-	ReloadTaskList(nSel);
+	ReloadTaskList(nSelTDC);
 	RefreshTabOrder();
 }
 
@@ -6766,7 +6778,7 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 {
 	// Add tdc first to ensure tab controls has some
 	// items before we query it for its size
-	int nSel = m_mgrToDoCtrls.AddToDoCtrl(pTDC, pInfo);
+	int nSelTDC = m_mgrToDoCtrls.AddToDoCtrl(pTDC, pInfo);
 
 	// make sure size is right
 	CRect rTDC;
@@ -6774,7 +6786,7 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 	if (CalcToDoCtrlRect(rTDC))
 		pTDC->MoveWindow(rTDC);
 
-	if (!pTDC->IsDelayLoaded() && SelectToDoCtrl(nSel, FALSE))
+	if (!pTDC->IsDelayLoaded() && SelectToDoCtrl(nSelTDC, FALSE))
 	{
 		pTDC->SetFocusToTasks();
 	
@@ -6795,7 +6807,7 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 	if (WantTasklistTabbarVisible() && !m_tabCtrl.IsWindowVisible())
 		Resize();
 
-	return nSel;
+	return nSelTDC;
 }
 
 void CToDoListWnd::KillTimers()
@@ -8235,7 +8247,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		// check for external changes to file
 		OnTimerCheckReloadTasklists(nCurSel, TRUE);
 
-		// notify user of due tasks if req
+		// notify user of due tasks if required
 		DoDueTaskNotification(nCurSel, nDueBy);
 
 		UpdateAeroFeatures();
@@ -8274,12 +8286,12 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 
 	if (GetTDCCount())
 	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		int nSelTDC = GetSelToDoCtrl();
 
-		if (tdc.IsSourceControlled())
+		if (m_mgrToDoCtrls.IsSourceControlled(nSelTDC))
 		{
 			bIsDisabled = FALSE;
-			bIsCheckedOut = tdc.IsCheckedOut();
+			bIsCheckedOut = m_mgrToDoCtrls.IsCheckedOut(nSelTDC);
 		}
 	}
 
@@ -8816,11 +8828,11 @@ void CToDoListWnd::UpdateAeroFeatures()
 void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 {
 	// check if this has already been done since the last userPrefs change
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	
-	if (m_mgrToDoCtrls.GetNeedsPreferenceUpdate(nSel))
+	if (m_mgrToDoCtrls.GetNeedsPreferenceUpdate(nSelTDC))
 	{
-		UpdateToDoCtrlPreferences(&GetToDoCtrl(nSel));
+		UpdateToDoCtrlPreferences(&GetToDoCtrl(nSelTDC));
 
 		// and filter bar relies on this tdc's visible columns
 		RefreshFilterBarControls(TDCA_ALL);
@@ -9854,10 +9866,10 @@ void CToDoListWnd::OnUpdateSplitTask(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnToolsCheckout() 
 {
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	
 	// sanity check
-	if (!m_mgrToDoCtrls.CanCheckOut(nSel))
+	if (!m_mgrToDoCtrls.CanCheckOut(nSelTDC))
 		return;
 	
 	CAutoFlag af(m_bSaving, TRUE);
@@ -9867,7 +9879,7 @@ void CToDoListWnd::OnToolsCheckout()
 	do 
 	{
 		CString sCheckedOutTo;
-		nFileRes = m_mgrToDoCtrls.CheckOut(nSel, sCheckedOutTo, bAllowForcedCheckout);
+		nFileRes = m_mgrToDoCtrls.CheckOut(nSelTDC, sCheckedOutTo, bAllowForcedCheckout);
 
 		if (nFileRes == TDCF_SUCCESS)
 		{
@@ -9877,7 +9889,7 @@ void CToDoListWnd::OnToolsCheckout()
 		}
 
 		// Handle error
-		CString sFilePath(m_mgrToDoCtrls.GetFilePath(nSel));
+		CString sFilePath(m_mgrToDoCtrls.GetFilePath(nSelTDC));
 
 		if (nFileRes != TDCF_SSC_CHECKEDOUTBYOTHER)
 		{
@@ -9921,7 +9933,7 @@ void CToDoListWnd::OnUpdateToolsCheckout(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnToolsToggleCheckin() 
 {
-	if (GetToDoCtrl().IsCheckedOut())
+	if (m_mgrToDoCtrls.IsCheckedOut(GetSelToDoCtrl()))
 		OnToolsCheckin();
 	else
 		OnToolsCheckout();
@@ -9929,22 +9941,23 @@ void CToDoListWnd::OnToolsToggleCheckin()
 
 void CToDoListWnd::OnUpdateToolsToggleCheckin(CCmdUI* pCmdUI) 
 {
-	BOOL bEnable = m_mgrToDoCtrls.CanCheckInOut(GetSelToDoCtrl());
+	int nSelTDC = GetSelToDoCtrl();
+	BOOL bEnable = m_mgrToDoCtrls.CanCheckInOut(nSelTDC);
 	
 	pCmdUI->Enable(bEnable);
-	pCmdUI->SetCheck((bEnable && GetToDoCtrl().IsCheckedOut()) ? 1 : 0);
+	pCmdUI->SetCheck((bEnable && m_mgrToDoCtrls.IsCheckedOut(nSelTDC)) ? 1 : 0);
 }
 
 void CToDoListWnd::OnToolsCheckin() 
 {
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 
 	// sanity check
-	if (!m_mgrToDoCtrls.CanCheckIn(nSel))
+	if (!m_mgrToDoCtrls.CanCheckIn(nSelTDC))
 		return;
 	
 	CAutoFlag af(m_bSaving, TRUE);
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
+	CFilteredToDoCtrl& tdc = GetToDoCtrl(nSelTDC);
 
 	tdc.Flush();
 	
@@ -9955,7 +9968,7 @@ void CToDoListWnd::OnToolsCheckin()
 	{
 		if (Prefs().GetConfirmSaveOnExit())
 		{
-			CString sName = m_mgrToDoCtrls.GetFriendlyProjectName(nSel);
+			CString sName = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 			CEnString sMessage(IDS_SAVEBEFORECHECKIN, sName);
 			
 			int nRet = CMessageBox::AfxShow(IDS_CHECKIN_TITLE, sMessage, MB_YESNOCANCEL);
@@ -9963,11 +9976,11 @@ void CToDoListWnd::OnToolsCheckin()
 			switch (nRet)
 			{
 			case IDYES:
-				nSave = SaveTaskList(nSel);
+				nSave = SaveTaskList(nSelTDC);
 				break;
 				
 			case IDNO:
-				ReloadTaskList(nSel, FALSE, FALSE);
+				ReloadTaskList(nSelTDC, FALSE, FALSE);
 				break;
 				
 			case IDCANCEL:
@@ -9976,13 +9989,13 @@ void CToDoListWnd::OnToolsCheckin()
 		}
 		else
 		{
-			nSave = SaveTaskList(nSel); 
+			nSave = SaveTaskList(nSelTDC); 
 		}
 	}
 	
 	if (nSave == TDCF_SUCCESS)
 	{
-		TDC_FILE nCheckin = m_mgrToDoCtrls.CheckIn(nSel);
+		TDC_FILE nCheckin = m_mgrToDoCtrls.CheckIn(nSelTDC);
 		
 		if (nCheckin == TDCF_SUCCESS)
 		{
@@ -10000,7 +10013,7 @@ void CToDoListWnd::OnToolsCheckin()
 		HandleSaveTasklistError(nSave, tdc.GetFilePath());
 	}
 	
-	m_mgrToDoCtrls.SetLastCheckoutSucceeded(nSel, TRUE); // so we won't try to immediately check it out again
+	m_mgrToDoCtrls.SetLastCheckoutSucceeded(nSelTDC, TRUE); // so we won't try to immediately check it out again
 }
 
 void CToDoListWnd::OnUpdateToolsCheckin(CCmdUI* pCmdUI) 
@@ -10724,10 +10737,10 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	// set up the search
 	BOOL bSearchAll = m_dlgFindTasks.GetSearchAllTasklists();
-	int nSelTaskList = GetSelToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
 	
-	int nFrom = bSearchAll ? 0 : nSelTaskList;
-	int nTo = bSearchAll ? GetTDCCount() - 1 : nSelTaskList;
+	int nFrom = (bSearchAll ? 0 : nSelTDC);
+	int nTo = (bSearchAll ? (GetTDCCount() - 1) : nSelTDC);
 	
 	// search params
 	SEARCHPARAMS params;
@@ -10735,14 +10748,12 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (m_dlgFindTasks.GetSearchParams(params))
 	{
 		CWaitCursor cursor;
-
-		int nSel = GetSelToDoCtrl();
 		BOOL bMultiAttribFind = params.HasMultipleAttributes();
 		
 		for (int nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
 		{
 			// load or verify password unless tasklist is already active
-			if (nCtrl != nSel)
+			if (nCtrl != nSelTDC)
 			{
 				// load if necessary (in which case the password will have been checked)
 				if (!m_mgrToDoCtrls.IsLoaded(nCtrl))
@@ -11487,7 +11498,7 @@ void CToDoListWnd::OnUpdateWindow(CCmdUI* pCmdUI)
 		for (int nWnd = 0; nWnd < MAXWINDOWS; nWnd++)
 			pCmdUI->m_pMenu->DeleteMenu(ID_WINDOW1 + nWnd, MF_BYCOMMAND);
 		
-		int nSel = GetSelToDoCtrl();
+		int nSelTDC = GetSelToDoCtrl();
 		int nPos = 0, nTDCCount = GetTDCCount();
 		ASSERT (nTDCCount);
 
@@ -11498,7 +11509,7 @@ void CToDoListWnd::OnUpdateWindow(CCmdUI* pCmdUI)
 			CString sMenuItem, sName = m_mgrToDoCtrls.FormatProjectNameWithFileName(nTDC);
 			sMenuItem.Format(_T("&%d %s"), (nPos + 1) % 10, sName);
 			
-			UINT nFlags = (MF_BYPOSITION | MF_STRING | (nSel == nTDC ? MF_CHECKED : MF_UNCHECKED));
+			UINT nFlags = (MF_BYPOSITION | MF_STRING | (nSelTDC == nTDC ? MF_CHECKED : MF_UNCHECKED));
 			pCmdUI->m_pMenu->InsertMenu(pCmdUI->m_nIndex++, nFlags, (ID_WINDOW1 + nTDC), sMenuItem);
 			
 			nPos++;
@@ -11668,8 +11679,9 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 
 void CToDoListWnd::OnViewSorttasklisttabs() 
 {
-	int nSel = m_mgrToDoCtrls.SortToDoCtrlsByName();
-	SelectToDoCtrl(nSel, FALSE);
+	int nSelTDC = m_mgrToDoCtrls.SortToDoCtrlsByName();
+
+	SelectToDoCtrl(nSelTDC, FALSE);
 }
 
 void CToDoListWnd::OnUpdateViewSorttasklisttabs(CCmdUI* pCmdUI) 
@@ -11989,7 +12001,7 @@ void CToDoListWnd::OnTabctrlPreferences()
 void CToDoListWnd::OnTasklistSelectColumns() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSel = GetSelToDoCtrl();
+	int nSelTDC= GetSelToDoCtrl();
 
 	TDCCOLEDITFILTERVISIBILITY vis, visDefault;
 

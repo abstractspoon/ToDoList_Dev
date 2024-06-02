@@ -51,7 +51,7 @@ public:
 
 	BOOL IsPristine(int nIndex) const;
 	int DeleteToDoCtrl(int nIndex); // returns new selection
-	int AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL);
+	int AddToDoCtrl(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* pInfo = NULL);
 	BOOL IsLoaded(int nIndex) const;
 	BOOL FileExists(int nIndex) const;
 	void SetLoaded(int nIndex);
@@ -94,7 +94,6 @@ public:
 	BOOL GetReadOnlyStatus(int nIndex) const;
 	BOOL RefreshReadOnlyStatus(int nIndex); // true if changed
 	void UpdateToDoCtrlReadOnlyUIState(int nIndex);
-	void UpdateToDoCtrlReadOnlyUIState(CFilteredToDoCtrl& tdc);
 	void CheckNotifyReadonly(int nIndex) const;
 
 	void SetDueItemStatus(int nIndex, TDCM_DUESTATUS nStatus);
@@ -106,6 +105,7 @@ public:
 	BOOL GetLastCheckoutSucceeded(int nIndex) const;
 	void SetLastCheckoutSucceeded(int nIndex, BOOL bSuccess);
 	void RefreshLastCheckoutStatus(int nIndex);
+	void InitialiseSourceControl(int nIndex, const CTaskFile& tasks);
 	BOOL CanCheckOut(int nIndex) const;
 	BOOL CanCheckIn(int nIndex) const;
 	BOOL CanCheckInOut(int nIndex) const;
@@ -115,6 +115,7 @@ public:
 	BOOL IsCheckedOut(int nIndex) const;
 	TDC_FILE CheckOut(int nIndex);
 	TDC_FILE CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce = FALSE);
+	TDC_FILE CheckOut(int nIndex, CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce = FALSE);
 	TDC_FILE CheckIn(int nIndex);
 	
 	void MoveToDoCtrl(int nIndex, int nNumPlaces);
@@ -148,7 +149,7 @@ protected:
 	struct TDCITEM
 	{
 	public:
-		TDCITEM();
+		TDCITEM(); // For CArray ONLY
 		TDCITEM(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL);
 		virtual ~TDCITEM();
 
@@ -177,6 +178,7 @@ protected:
 		COLORREF crTab;
 
 		TSM_TASKLISTINFO storageinfo;
+		CTDCSourceControl sourceControl;
 	};
 	
 	CArray<TDCITEM, TDCITEM&> m_aToDoCtrls;

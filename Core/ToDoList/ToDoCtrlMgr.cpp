@@ -65,39 +65,41 @@ if (!VALIDINDEX(i))               \
 
 /////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrlMgr::TDCITEM::TDCITEM() 
-{ 
-	pTDC = NULL; 
-	bLastStatusReadOnly = -1; 
-	tLastMod = 0; 
-	bLastCheckoutSuccess = -1;
-	nPathType = TDCM_UNDEF;
-	nDueStatus = TDCM_NONE;
-	bNeedPrefUpdate = TRUE;
-	nUntitledIndex = -1;
-	bLoaded = TRUE;
-	crTab = CLR_NONE;
+CToDoCtrlMgr::TDCITEM::TDCITEM()
+	:
+	pTDC(NULL),
+	bLoaded(FALSE),
+	bLastStatusReadOnly(-1),
+	tLastMod(0),
+	bLastCheckoutSuccess(-1),
+	nDueStatus(TDCM_NONE),
+	bNeedPrefUpdate(TRUE),
+	nUntitledIndex(-1),
+	crTab(CLR_NONE),
+	sourceControl(NULL)
+{
 }
 
-CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo) 
+CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* pInfo) 
+	:
+	pTDC(pTDC), 
+	bLoaded(pTDC->HasFilePath() && !pTDC->IsDelayLoaded()),
+	bLastStatusReadOnly(-1),
+	tLastMod(0),
+	bLastCheckoutSuccess(-1),
+	nDueStatus(TDCM_NONE),
+	bNeedPrefUpdate(TRUE),
+	nUntitledIndex(-1),
+	crTab(CLR_NONE),
+	sourceControl(pTDC)
 { 
-	pTDC = pCtrl; 
-	bLoaded = (pCtrl->HasFilePath() && !pTDC->IsDelayLoaded());
-	bLastStatusReadOnly = -1;
-	tLastMod = 0;
-	bLastCheckoutSuccess = -1;
-	nDueStatus = TDCM_NONE;
-	bNeedPrefUpdate = TRUE;
-	nUntitledIndex = -1;
-	crTab = CLR_NONE;
-
 	if (pInfo && pInfo->HasInfo())
 	{
 		SetStorageDetails(*pInfo);
 	}
 	else
 	{
-		CString sFilePath = pCtrl->GetFilePath();
+		CString sFilePath = pTDC->GetFilePath();
 
 		if (!sFilePath.IsEmpty())
 		{
@@ -112,7 +114,7 @@ CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO*
 			nUntitledIndex = nNextUntitledIndex++;
 		}
 
-		if (pCtrl->IsCheckedOut())
+		if (sourceControl.IsCheckedOut())
 			bLastCheckoutSuccess = TRUE;
 	}
 
@@ -550,8 +552,8 @@ BOOL CToDoCtrlMgr::RefreshFileLastModified(int nIndex)
 	tdci.tLastMod = timeNow;
 
 	// if the tasklist is checked out then always return FALSE because
-	// noone else should be able to modify it (by any means).
-	if (tdci.pTDC->IsCheckedOut())
+	// no one else should be able to modify it (by any means).
+	if (tdci.sourceControl.IsCheckedOut())
 		return FALSE;
 
 	// else
@@ -719,6 +721,14 @@ BOOL CToDoCtrlMgr::CanCheckOut(int nIndex) const
 	return (CanCheckInOut(nIndex) && !IsCheckedOut(nIndex));
 }
 
+void CToDoCtrlMgr::InitialiseSourceControl(int nIndex, const CTaskFile& tasks)
+{
+	CHECKVALIDINDEX(nIndex);
+
+	GetTDCItem(nIndex).sourceControl.Initialise(tasks);
+	UpdateToDoCtrlReadOnlyUIState(nIndex);
+}
+
 BOOL CToDoCtrlMgr::CanCheckIn(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
@@ -736,22 +746,32 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex)
 
 TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce)
 {
+	return CheckOut(nIndex, CTaskFile(), sCheckedOutTo, bForce);
+}
+
+TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce)
+{
 	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	ASSERT(CanCheckOut(nIndex));
-	
-	TDC_FILE nCheckout = GetToDoCtrl(nIndex).CheckOut(sCheckedOutTo, bForce);
-	
+
+	CWaitCursor cursor;
+
+	TDCITEM& tdci = GetTDCItem(nIndex);
+	tasks.SetPassword(tdci.pTDC->GetPassword());
+
+	TDC_FILE nCheckout = tdci.sourceControl.CheckOut(tasks, sCheckedOutTo, bForce);
+
 	if (nCheckout == TDCF_SUCCESS)
 	{
 		// re-sync
-		UpdateToDoCtrlReadOnlyUIState(nIndex);				
+		UpdateToDoCtrlReadOnlyUIState(nIndex);
 		RefreshFileLastModified(nIndex);
 		UpdateTabItemText(nIndex);
 		UpdateTabItemImage(nIndex);
 	}
-	
+
 	SetLastCheckoutSucceeded(nIndex, (nCheckout == TDCF_SUCCESS));
-	
+
 	return nCheckout;
 }
 
@@ -760,7 +780,8 @@ TDC_FILE CToDoCtrlMgr::CheckIn(int nIndex)
 	CHECKVALIDINDEXRET(nIndex, TDCF_UNSET);
 	ASSERT(GetLastCheckoutSucceeded(nIndex));
 	
-	TDC_FILE nCheckin = GetToDoCtrl(nIndex).CheckIn();
+	TDCITEM& tdci = GetTDCItem(nIndex);
+	TDC_FILE nCheckin = tdci.sourceControl.CheckIn();
 	
 	if (nCheckin == TDCF_SUCCESS)
 	{
@@ -778,12 +799,12 @@ BOOL CToDoCtrlMgr::CanCheckInOut(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
+	const TDCITEM& tdci = GetTDCItem(nIndex);
 	
-	if (!tdc.IsSourceControlled())
+	if (!tdci.sourceControl.IsSourceControlled())
 		return FALSE;
 
-	if (tdc.CompareFileFormat() == TDCFF_NEWER)
+	if (tdci.pTDC->CompareFileFormat() == TDCFF_NEWER)
 		return FALSE;
 
 	return !GetReadOnlyStatus(nIndex);
@@ -803,21 +824,22 @@ void CToDoCtrlMgr::UpdateToDoCtrlReadOnlyUIState(int nIndex)
 {
 	CHECKVALIDINDEX(nIndex);
 
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	UpdateToDoCtrlReadOnlyUIState(tdc);
-}
-
-void CToDoCtrlMgr::UpdateToDoCtrlReadOnlyUIState(CFilteredToDoCtrl& tdc)
-{
-	BOOL bReadOnly = (CDriveInfo::IsReadonlyPath(tdc.GetFilePath()) > 0);
+	const TDCITEM& tdci = GetTDCItem(nIndex);
+	
+	BOOL bReadOnly = (CDriveInfo::IsReadonlyPath(tdci.pTDC->GetFilePath()) > 0);
 	
     if (!bReadOnly)
-        bReadOnly = (tdc.CompareFileFormat() == TDCFF_NEWER);
+	{
+		bReadOnly = (tdci.pTDC->CompareFileFormat() == TDCFF_NEWER);
+
+		if (!bReadOnly)
+		{
+			bReadOnly = (tdci.sourceControl.IsSourceControlled() &&
+						 !tdci.sourceControl.IsCheckedOut());
+		}
+	}
 	
-	if (!bReadOnly)
-		bReadOnly = (tdc.IsSourceControlled() && !tdc.IsCheckedOut());
-	
-	tdc.SetReadonly(bReadOnly);
+	tdci.pTDC->SetReadonly(bReadOnly);
 }
 
 void CToDoCtrlMgr::CheckNotifyReadonly(int nIndex) const
@@ -855,17 +877,16 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 	CPreferences prefs;
 	int nSel = GetSelToDoCtrl(), nNewSel = -1;
 
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	TDCITEM& tdci = GetTDCItem(nIndex);
+	TDCITEM tdci = GetTDCItem(nIndex); // Copy
 
 	if (tdci.HasFilePath())
 	{
-		// checkin as our final task
-		if (tdci.bLoaded && tdc.IsCheckedOut() && Prefs().GetCheckinOnClose())
-			tdc.CheckIn();
+		// check-in as our final task
+		if (tdci.bLoaded && tdci.sourceControl.IsCheckedOut() && Prefs().GetCheckinOnClose())
+			tdci.sourceControl.CheckIn();
 
 		// Save tasklist tab colour if any
-		CString sKey = tdc.GetPreferencesKey();
+		CString sKey = tdci.pTDC->GetPreferencesKey();
 
 		if (!sKey.IsEmpty())
 		{
@@ -909,15 +930,15 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 	// cleanup browser
 	CTDLBrowserDlg* pBrowser = NULL;
 
-	if (m_mapBrowsers.Lookup(&tdc, pBrowser))
+	if (m_mapBrowsers.Lookup(tdci.pTDC, pBrowser))
 	{
 		CPreferences prefs;
-		pBrowser->SavePosition(prefs, tdc.GetPreferencesKey(_T("DueTaskViewer")));
+		pBrowser->SavePosition(prefs, tdci.pTDC->GetPreferencesKey(_T("DueTaskViewer")));
 
 		pBrowser->DestroyWindow();
 		delete pBrowser;
 
-		m_mapBrowsers.RemoveKey(&tdc);
+		m_mapBrowsers.RemoveKey(tdci.pTDC);
 
 		// delete any temp due task notification files
 		CString sTempFile;
@@ -927,8 +948,8 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 		FileMisc::DeleteFile(FileMisc::GetTempFilePath(sTempFile, _T("txt")), TRUE);
 	}
 
-	tdc.DestroyWindow();
-	delete &tdc;
+	tdci.pTDC->DestroyWindow();
+	delete tdci.pTDC;
 
 	return nNewSel;
 }
@@ -961,6 +982,7 @@ int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* p
 	RefreshLastCheckoutStatus(nSel);
 	CheckNotifyReadonly(nSel);
 
+	UpdateToDoCtrlReadOnlyUIState(nSel);
 	UpdateTabItemImage(nSel);
 	UpdateTabItemText(nSel);
 
@@ -1240,7 +1262,7 @@ BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	if (!GetToDoCtrl(nIndex).AddToSourceControl(bAdd))
+	if (!GetTDCItem(nIndex).sourceControl.AddToSourceControl(bAdd))
 		return FALSE;
 
 	UpdateToDoCtrlReadOnlyUIState(nIndex);
@@ -1258,7 +1280,7 @@ BOOL CToDoCtrlMgr::CanAddToSourceControl(int nIndex, BOOL bAdd) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	return GetToDoCtrl(nIndex).CanAddToSourceControl(bAdd);
+	return GetTDCItem(nIndex).sourceControl.CanAddToSourceControl(bAdd);
 }
 
 CString CToDoCtrlMgr::GetTabItemText(int nIndex) const
@@ -1310,7 +1332,7 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 	}
 	else if ((tdci.bLastStatusReadOnly == 0) && IsSourceControlled(nIndex))
 	{
-		nImage = (tdci.pTDC->IsCheckedOut() ? IM_CHECKEDOUT : IM_CHECKEDIN);	
+		nImage = (tdci.sourceControl.IsCheckedOut() ? IM_CHECKEDOUT : IM_CHECKEDIN);
 	}
 
 	// update tab array
@@ -1398,14 +1420,14 @@ BOOL CToDoCtrlMgr::IsCheckedOut(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
-	return GetToDoCtrl(nIndex).IsCheckedOut();
+	return GetTDCItem(nIndex).sourceControl.IsCheckedOut();
 }
 
 BOOL CToDoCtrlMgr::IsSourceControlled(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
-	return GetToDoCtrl(nIndex).IsSourceControlled();
+	return GetTDCItem(nIndex).sourceControl.IsSourceControlled();
 }
 
 void CToDoCtrlMgr::SetNeedsPreferenceUpdate(int nIndex, BOOL bNeed)
@@ -1565,7 +1587,7 @@ BOOL CToDoCtrlMgr::AnyIsSourceControlled() const
 
 	while (nCtrl--)
 	{
-		if (GetToDoCtrl(nCtrl).IsSourceControlled())
+		if (GetTDCItem(nCtrl).sourceControl.IsSourceControlled())
 			return TRUE;
 	}
 

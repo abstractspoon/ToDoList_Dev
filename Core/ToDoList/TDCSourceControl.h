@@ -27,7 +27,7 @@ struct TODOITEM;
 class CTDCSourceControl  
 {
 public:
-	CTDCSourceControl(const CToDoCtrl& tdc);
+	CTDCSourceControl(CToDoCtrl* pTDC);
 	virtual ~CTDCSourceControl();
 
 	void Initialise(const CTaskFile& tasks);
@@ -45,7 +45,7 @@ public:
 	BOOL IsCheckedOut() const;
 
 protected:
-	const CToDoCtrl& m_tdc;
+	CToDoCtrl* m_pTDC;
 
 	BOOL m_bCheckedOut;
 	BOOL m_bSourceControlled;

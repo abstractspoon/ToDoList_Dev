@@ -17,9 +17,9 @@ static char THIS_FILE[] = __FILE__;
 //////////////////////////////////////////////////////////////////////
 // CTDCSourceControlHelper
 
-CTDCSourceControl::CTDCSourceControl(const CToDoCtrl& tdc) 
+CTDCSourceControl::CTDCSourceControl(CToDoCtrl* pTDC) 
 	: 
-	m_tdc(tdc),
+	m_pTDC(pTDC),
 	m_bSourceControlled(FALSE),
 	m_bCheckedOut(FALSE)
 {
@@ -56,14 +56,14 @@ void CTDCSourceControl::PrepareTasksForSave(CTaskFile& tasks) const
 
 BOOL CTDCSourceControl::GetTasklistPath(CString& sTasklistPath) const
 {
-	sTasklistPath = m_tdc.GetFilePath();
+	sTasklistPath = m_pTDC->GetFilePath();
 	
 	return !sTasklistPath.IsEmpty();
 }
 
 CString CTDCSourceControl::GetSourceControlID() const
 {
-	if (m_tdc.HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
+	if (m_pTDC->HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
 		return Misc::FormatComputerNameAndUser();
 
 	// else
@@ -81,7 +81,7 @@ BOOL CTDCSourceControl::MatchesOurSourceControlID(const CString& sID) const
 	// Check if the naming option has been switched since our last check
 	CString sReverseID;
 
-	if (m_tdc.HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
+	if (m_pTDC->HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
 		sReverseID = Misc::GetComputerName();
 	else 
 		sReverseID = Misc::FormatComputerNameAndUser();
@@ -108,7 +108,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		return TDCF_SSC_NOTSRCCONTROLLED;
 	}
 
-	if (m_tdc.IsDelayLoaded())
+	if (m_pTDC->IsDelayLoaded())
 	{
 		return TDCF_SSC_DELAYLOADED;
 	}
@@ -181,6 +181,10 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	if (nResult == TDCF_SUCCESS)
 	{
 		FileMisc::SetFileLastModified(sTaskfilePath, ftMod);
+
+		// load tasks
+		tasks.Decrypt();
+		VERIFY(m_pTDC->LoadTasks(tasks));
 	}
 	else
 	{
@@ -214,8 +218,11 @@ TDC_FILE CTDCSourceControl::CheckIn()
 		return TDCF_SUCCESS;
 	}
 
-	CTaskFile tasks(m_tdc.m_sPassword);
-	m_tdc.BuildTasksForSave(tasks);
+	CTaskFile tasks(m_pTDC->m_sPassword);
+
+	m_pTDC->Flush();
+	m_pTDC->EndTimeTracking(TRUE, FALSE);
+	m_pTDC->BuildTasksForSave(tasks);
 
 	return CheckIn(tasks);
 }
@@ -273,7 +280,7 @@ BOOL CTDCSourceControl::IsSourceControlled() const
 
 BOOL CTDCSourceControl::CanAddToSourceControl(BOOL bAdd) const
 {
-	if (m_tdc.m_bArchive)
+	if (m_pTDC->m_bArchive)
 		return FALSE;
 
 	if ((bAdd && m_bSourceControlled) || (!bAdd && !m_bSourceControlled))
@@ -288,7 +295,7 @@ BOOL CTDCSourceControl::CanAddToSourceControl(BOOL bAdd) const
 TDC_FILE CTDCSourceControl::AddToSourceControl(BOOL bAdd)
 {
 	// Sanity checks
-	if (m_tdc.m_bArchive)
+	if (m_pTDC->m_bArchive)
 		return TDCF_SSC_ARCHIVE;
 
 	if ((bAdd && m_bSourceControlled) || (!bAdd && !m_bSourceControlled))
@@ -308,7 +315,7 @@ TDC_FILE CTDCSourceControl::AddToSourceControl(BOOL bAdd)
 		if (bHasFilePath)
 		{
 			CTaskFile tasks;
-			m_tdc.BuildTasksForSave(tasks);
+			m_pTDC->BuildTasksForSave(tasks);
 
 			tasks.SetCheckedOutTo(GetSourceControlID()); // auto-checkout
 
@@ -329,7 +336,7 @@ TDC_FILE CTDCSourceControl::AddToSourceControl(BOOL bAdd)
 		if (bHasFilePath)
 		{
 			CTaskFile tasks;
-			m_tdc.BuildTasksForSave(tasks);
+			m_pTDC->BuildTasksForSave(tasks);
 
 			tasks.RemoveFromSourceControl();
 
@@ -345,6 +352,9 @@ TDC_FILE CTDCSourceControl::AddToSourceControl(BOOL bAdd)
 		m_bSourceControlled = FALSE;
 		m_bCheckedOut = FALSE;
 	}
+
+	m_pTDC->SetSourceControlled(m_bSourceControlled);
+	m_pTDC->SetCheckedOut(m_bCheckedOut);
 
 	return TDCF_SUCCESS;
 }

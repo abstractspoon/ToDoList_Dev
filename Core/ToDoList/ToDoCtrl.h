@@ -91,12 +91,8 @@ public:
 	void SetMaximizeState(TDC_MAXSTATE nState);
 	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
-	TDC_FILE CheckIn();
-	TDC_FILE CheckOut(CString& sCheckedOutTo, BOOL bForce = FALSE);
-	BOOL IsCheckedOut() const;
-	BOOL IsSourceControlled() const;
-	BOOL AddToSourceControl(BOOL bAdd = TRUE);
-	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
+	void SetSourceControlled(BOOL bSourceControlled);
+	void SetCheckedOut(BOOL bCheckedOut);
 
 	BOOL Flush(); // called to end current editing actions
 	BOOL IsModified() const;
@@ -471,20 +467,26 @@ protected:
 	CString m_sXmlHeader, m_sXslHeader;
 	CString m_sLastSavePath;
 	CString m_sAltPrefsKey;
-	int m_nCommentsSize;
 	CString m_sPassword;
 	CString m_sCompletionStatus;
+	CString m_sProjectName;
+
+	int m_nCommentsSize;
+	int m_nPercentIncrement;
+	int m_nMaxInfotipCommentsLength;
+
 	CTreeDragDropHelper m_treeDragDrop;
 	CTDCTaskListDropTarget m_treeDropTarget;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
-	int m_nPercentIncrement;
 	TODOITEM m_tdiDefault;
 	TDC_RECURFROMOPTION m_nDefRecurFrom;
 	TDC_RECURREUSEOPTION m_nDefRecurReuse;
 	CDWordArray m_aRecreateTaskIDs;
-	int m_nMaxInfotipCommentsLength;
+	CONTENTFORMAT m_cfComments, m_cfDefault;
+	CMapStringToString m_mapMetaData;
+	double m_dTrackedTimeElapsedHours;
 
 	const CContentMgr& m_mgrContent;
 
@@ -502,14 +504,8 @@ protected:
 	CTDCTaskExporter m_exporter;
 	CTDCTimeTracking m_timeTracking;
 	CTDCTaskAttributeCopier m_attribCopier;
-	CTDCSourceControl m_sourceControl;
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;
-
-	CString m_sProjectName;
-	CONTENTFORMAT m_cfComments, m_cfDefault;
-	CMapStringToString m_mapMetaData;
-	double m_dTrackedTimeElapsedHours;
 
 	DWORD m_dwNextUniqueID;
 	DWORD m_nFileFormat;
@@ -525,6 +521,8 @@ protected:
 	BOOL m_bDeletingTasks;
 	BOOL m_bInSelectedTaskEdit;
 	BOOL m_bPendingUpdateControls;
+	BOOL m_bSourceControlled;
+	BOOL m_bCheckedOut;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
