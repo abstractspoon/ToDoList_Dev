@@ -4620,13 +4620,15 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 	ASSERT(FileMisc::FileExists(sFilePath));
 
 	BOOL bWasDelayed = pTDC->IsDelayLoaded();
+	BOOL bReloading = pTDC->HasFilePath();
+
 	TDC_FILE nOpen = pTDC->Load(sFilePath, tasks, m_sMasterPassword);
 
 	// cleanup temp storage file
 	if (nType == TDCPP_STORAGE)
 	{
 		ASSERT(FileMisc::IsTempFilePath(sFilePath));
-		FileMisc::DeleteFile(sFilePath, TRUE);
+		//FileMisc::DeleteFile(sFilePath, TRUE);
 	}
 
 	if (nOpen == TDCF_SUCCESS)
@@ -4682,7 +4684,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 		UpdateFindDialogActiveTasklist(pTDC);
 
 		// Update time tracking widget
-		if (bWasDelayed)
+		if (bWasDelayed || bReloading)
 			m_dlgTimeTracker.SetTasks(pTDC, tasks);
 		else
 			m_dlgTimeTracker.AddTasklist(pTDC, tasks);
@@ -6166,16 +6168,27 @@ void CToDoListWnd::OnReload()
 	RefreshTabOrder();
 }
 
+void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
+}
+
 BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotifyError)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	CString sFilePath = tdc.GetFilePath();
 
-	// Remove the tasklist from the time tracker because
-	// OpenTasklist will (correctly) want to re-add it
-	m_dlgTimeTracker.RemoveTasklist(&tdc);
-	
-	TDC_FILE nRes = OpenTaskList(&tdc, sFilePath);
+	TSM_TASKLISTINFO storageInfo;
+
+	if (m_mgrToDoCtrls.GetStorageDetails(nIndex, storageInfo))
+	{
+		sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
+
+		// Clear the local filename so that the tasklist is retrieved again
+		storageInfo.ClearLocalFilePath();
+	}
+
+	TDC_FILE nRes = OpenTaskList(&tdc, sFilePath, &storageInfo);
 	
 	if (nRes == TDCF_SUCCESS)
 	{
@@ -6203,12 +6216,6 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 	}
 
 	return (nRes == TDCF_SUCCESS);
-}
-
-void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI) 
-{
-	// Exclude tasklists using storage
-	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl(), FALSE));
 }
 
 void CToDoListWnd::OnSize(UINT nType, int cx, int cy) 
