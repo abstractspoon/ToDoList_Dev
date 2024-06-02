@@ -8,7 +8,6 @@
 #include "enstring.h"
 #include "misc.h"
 #include "passworddialog.h"
-//#include "filemisc.h"
 
 #include "..\Interfaces\iencryption.h"
 
@@ -58,7 +57,7 @@ BOOL CXmlFileEx::Encrypt(LPCWSTR szPassword, SFE_FORMAT nFormat)
 	if (!szPassword)
 		szPassword = m_sPassword;
 	
-	if (!(*szPassword) || !InitEncryptor())
+	if (Misc::IsEmpty(szPassword) || !InitEncryptor())
 		return FALSE;
 	
 	if (nFormat == SFEF_AUTODETECT)
