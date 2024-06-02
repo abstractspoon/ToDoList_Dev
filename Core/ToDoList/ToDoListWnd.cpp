@@ -4624,13 +4624,6 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 
 	TDC_FILE nOpen = pTDC->Load(sFilePath, tasks, m_sMasterPassword);
 
-	// cleanup temp storage file
-	if (nType == TDCPP_STORAGE)
-	{
-		ASSERT(FileMisc::IsTempFilePath(sFilePath));
-		//FileMisc::DeleteFile(sFilePath, TRUE);
-	}
-
 	if (nOpen == TDCF_SUCCESS)
 	{
 		// update readonly status

@@ -874,6 +874,13 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 			else
 				prefs.WriteProfileInt(sKey, _T("TabColor"), tdci.crTab);
 		}
+
+		// cleanup temp storage file
+		if (tdci.UsesStorage())
+		{
+			ASSERT(FileMisc::IsTempFilePath(tdci.storageinfo.szLocalFileName));
+			FileMisc::DeleteFile(tdci.storageinfo.szLocalFileName, TRUE);
+		}
 	}
 	
 	m_aToDoCtrls.RemoveAt(nIndex);
