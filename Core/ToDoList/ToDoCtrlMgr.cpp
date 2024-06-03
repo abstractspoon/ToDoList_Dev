@@ -721,7 +721,7 @@ BOOL CToDoCtrlMgr::CanCheckOut(int nIndex) const
 	return (CanCheckInOut(nIndex) && !IsCheckedOut(nIndex));
 }
 
-void CToDoCtrlMgr::InitialiseSourceControl(int nIndex, const CTaskFile& tasks)
+void CToDoCtrlMgr::InitialiseSourceControl(int nIndex, CTaskFile& tasks)
 {
 	CHECKVALIDINDEX(nIndex);
 
@@ -755,11 +755,7 @@ TDC_FILE CToDoCtrlMgr::CheckOut(int nIndex, CTaskFile& tasks, CString& sCheckedO
 	ASSERT(CanCheckOut(nIndex));
 
 	CWaitCursor cursor;
-
-	TDCITEM& tdci = GetTDCItem(nIndex);
-// 	tasks.SetPassword(tdci.pTDC->GetPassword());
-
-	TDC_FILE nCheckout = tdci.sourceControl.CheckOut(tasks, sCheckedOutTo, bForce);
+	TDC_FILE nCheckout = GetTDCItem(nIndex).sourceControl.CheckOut(tasks, sCheckedOutTo, bForce);
 
 	if (nCheckout == TDCF_SUCCESS)
 	{

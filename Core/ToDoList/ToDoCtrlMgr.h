@@ -105,7 +105,7 @@ public:
 	BOOL GetLastCheckoutSucceeded(int nIndex) const;
 	void SetLastCheckoutSucceeded(int nIndex, BOOL bSuccess);
 	void RefreshLastCheckoutStatus(int nIndex);
-	void InitialiseSourceControl(int nIndex, const CTaskFile& tasks);
+	void InitialiseSourceControl(int nIndex, CTaskFile& tasks);
 	BOOL CanCheckOut(int nIndex) const;
 	BOOL CanCheckIn(int nIndex) const;
 	BOOL CanCheckInOut(int nIndex) const;

@@ -30,7 +30,7 @@ public:
 	CTDCSourceControl(CToDoCtrl* pTDC);
 	virtual ~CTDCSourceControl();
 
-	void Initialise(const CTaskFile& tasks);
+	void Initialise(CTaskFile& tasks);
 	void PrepareTasksForSave(CTaskFile& tasks) const;
 
 	BOOL IsSourceControlled() const;

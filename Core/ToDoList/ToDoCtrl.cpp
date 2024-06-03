@@ -197,7 +197,6 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_findReplace(*this),
 	m_reminders(*this),
 	m_bSourceControlled(FALSE),
-	m_bCheckedOut(FALSE),
 
 	m_data(m_styles, m_aCustomAttribDefs),
 	m_timeTracking(m_data, m_taskTree.TSH()),
@@ -4331,7 +4330,7 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	
 	// can't save if not checked-out
 	// unless we're saving to another filename or this is our first save
-	if (m_bSourceControlled && !m_bCheckedOut)
+	if (m_bSourceControlled && m_sCheckedOutTo.IsEmpty())
 	{
 		BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
 		
@@ -4444,13 +4443,8 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 	AppendTaskFileHeader(tasks);
 	
 	// checkout status
-	if (m_bSourceControlled && m_bCheckedOut)
-	{
-		if (HasStyle(TDCS_INCLUDEUSERINCHECKOUT))
-			tasks.SetCheckedOutTo(Misc::FormatComputerNameAndUser());
-		else
-			tasks.SetCheckedOutTo(Misc::GetComputerName());
-	}
+	if (m_bSourceControlled)
+		tasks.SetCheckedOutTo(m_sCheckedOutTo);
 }
 
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
@@ -4458,7 +4452,6 @@ void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 	if (tasks.GetAutoListData(m_tldAll))
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 }
-
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
@@ -8666,14 +8659,10 @@ BOOL CToDoCtrl::Flush()
 	return HandleUnsavedComments();
 }
 
-void CToDoCtrl::SetSourceControlled(BOOL bSourceControlled)
+void CToDoCtrl::SetSourceControlStatus(BOOL bSourceControlled, const CString& sCheckedOutTo)
 {
 	m_bSourceControlled = bSourceControlled;
-}
-
-void CToDoCtrl::SetCheckedOut(BOOL bCheckedOut)
-{
-	m_bCheckedOut = bCheckedOut;
+	m_sCheckedOutTo = sCheckedOutTo;
 }
 
 int CToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const

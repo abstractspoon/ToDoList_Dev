@@ -91,8 +91,7 @@ public:
 	void SetMaximizeState(TDC_MAXSTATE nState);
 	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
-	void SetSourceControlled(BOOL bSourceControlled);
-	void SetCheckedOut(BOOL bCheckedOut);
+	void SetSourceControlStatus(BOOL bSourceControlled, const CString& sCheckedOutTo);
 
 	BOOL Flush(); // called to end current editing actions
 	BOOL IsModified() const;
@@ -470,6 +469,7 @@ protected:
 	CString m_sPassword;
 	CString m_sCompletionStatus;
 	CString m_sProjectName;
+	CString m_sCheckedOutTo;
 
 	int m_nCommentsSize;
 	int m_nPercentIncrement;
@@ -522,7 +522,6 @@ protected:
 	BOOL m_bInSelectedTaskEdit;
 	BOOL m_bPendingUpdateControls;
 	BOOL m_bSourceControlled;
-	BOOL m_bCheckedOut;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

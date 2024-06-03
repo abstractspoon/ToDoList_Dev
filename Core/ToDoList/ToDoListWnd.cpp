@@ -4685,13 +4685,9 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 		if (nTDC == -1)
 			nTDC = AddToDoCtrl(pTDC, &storageInfo);
 
+		// This needs to be the very last operation because it
+		// may re-encrypt 'tasks' as part of an auto-checkout
 		m_mgrToDoCtrls.InitialiseSourceControl(nTDC, tasks);
-
-		BOOL bWantCheckout = (userPrefs.GetAutoCheckOut() &&
-							  m_mgrToDoCtrls.IsSourceControlled(nTDC) &&
-							  !m_mgrToDoCtrls.IsCheckedOut(nTDC));
-		if (bWantCheckout)
-			m_mgrToDoCtrls.CheckOut(nTDC, CTaskFile()/*tasks*/, CString(), FALSE);
 	}
 	else
 	{
