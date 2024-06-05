@@ -13059,10 +13059,12 @@ void CToDoListWnd::OnUpdateEditRedo(CCmdUI* pCmdUI)
 void CToDoListWnd::OnEditUndoRedo(BOOL bUndo)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	tdc.UndoLastAction(bUndo);
 	
-	UpdateStatusBar();
-	UpdateTimeTrackerTasks(TRUE);
+	if (tdc.UndoLastAction(bUndo))
+	{
+		UpdateStatusBar();
+		UpdateTimeTrackerTasks(TRUE);
+	}
 }
 
 void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
