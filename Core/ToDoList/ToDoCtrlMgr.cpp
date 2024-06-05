@@ -1258,7 +1258,7 @@ BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	if (!GetTDCItem(nIndex).sourceControl.AddToSourceControl(bAdd))
+	if (TDCF_SUCCESS != GetTDCItem(nIndex).sourceControl.AddToSourceControl(bAdd))
 		return FALSE;
 
 	UpdateToDoCtrlReadOnlyUIState(nIndex);
