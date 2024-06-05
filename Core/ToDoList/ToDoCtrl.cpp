@@ -4749,8 +4749,9 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_nFileVersion = tasks.GetFileVersion();
 	m_sProjectName = tasks.GetProjectName();
 	m_bArchive = tasks.IsArchive();
-	m_dtLastTaskMod = tasks.GetLastModifiedOle();
-	
+	m_dtLastMod = COleDateTime::GetCurrentTime();
+	//m_dtLastMod = tasks.GetLastModifiedOle();
+
 	// next unique ID
 	m_dwNextUniqueID = tasks.GetNextUniqueID();
 	
@@ -4853,9 +4854,6 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	{
 		m_bModified = FALSE;
 	}
-
-	// reset last taskedit
-	m_dtLastTaskMod = COleDateTime::GetCurrentTime();
 
 	Resize();
 
@@ -5270,7 +5268,7 @@ void CToDoCtrl::SetModified(BOOL bMod)
 
 		if (bMod)
 		{
-			m_dtLastTaskMod = COleDateTime::GetCurrentTime();
+			m_dtLastMod = COleDateTime::GetCurrentTime();
 		}
 		else if (m_nCommentsState == CS_PENDING)
 		{
@@ -7478,7 +7476,7 @@ void CToDoCtrl::AppendTaskFileHeader(CTaskFile& tasks) const
 	tasks.SetProjectName(m_sProjectName);
 	tasks.SetArchive(m_bArchive);
 	tasks.SetEarliestTaskDueDate(m_calculator.GetEarliestDueDate());
-	tasks.SetLastModified(m_dtLastTaskMod);
+	tasks.SetLastModified(m_dtLastMod);
 	tasks.SetFilePath(m_sLastSavePath);
 
 	tasks.SetNextUniqueID(m_dwNextUniqueID);

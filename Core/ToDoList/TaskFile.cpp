@@ -355,9 +355,10 @@ void CTaskFile::GetHeader(TASKFILE_HEADER& header) const
 
 BOOL CTaskFile::LoadEx(IXmlParse* pCallback)
 {
-	BOOL bResult = CXmlFileEx::LoadEx(TDL_ROOT, pCallback);
+	if (!CXmlFileEx::LoadEx(TDL_ROOT, pCallback))
+		return FALSE;
 
-	if (bResult && !IsEncrypted())
+	//if (!IsEncrypted())
 	{
 		// initialize 
 		m_dwNextUniqueID = (DWORD)GetItemValueI(TDL_NEXTUNIQUEID);
@@ -369,7 +370,7 @@ BOOL CTaskFile::LoadEx(IXmlParse* pCallback)
 		CleanUp();
 	}
 
-	return bResult;
+	return TRUE;
 }
 
 void CTaskFile::CleanUp(HTASKITEM hTask)

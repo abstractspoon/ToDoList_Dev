@@ -400,7 +400,7 @@ public:
 	// misc
 	void Spellcheck();
 	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
-	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
+	COleDateTime GetLastModified() const { return m_dtLastMod; }
 	void RedrawReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos);
 	void SetCompletionStatus(const CString& sStatus);
@@ -478,7 +478,7 @@ protected:
 	CTreeDragDropHelper m_treeDragDrop;
 	CTDCTaskListDropTarget m_treeDropTarget;
 	CWndPromptManager m_mgrPrompts;
-	COleDateTime m_dtLastTaskMod;
+	COleDateTime m_dtLastMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
 	TODOITEM m_tdiDefault;
 	TDC_RECURFROMOPTION m_nDefRecurFrom;

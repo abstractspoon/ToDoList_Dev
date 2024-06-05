@@ -154,6 +154,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	COleDateTime dtLastMod = tasks.GetLastModifiedOle();
 
 	// Open the tasklist WITHOUT decrypting
+	// And hold it open until we're done to prevent any other access
 	if (tasks.Open(sTaskfilePath, XF_READWRITE, FALSE))
 	{
 		// If the tasks are empty or they have a password but are not encrypted
@@ -183,6 +184,11 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 
 		tasks.Close();
 	}
+	else
+	{
+		// Assume the file is locked by another user
+		nResult = TDCF_SSC_CHECKEDOUTBYOTHER;
+	}
 
 	// Error handling
 	if (nResult == TDCF_SUCCESS)
@@ -190,9 +196,9 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		FileMisc::SetFileLastModified(sTaskfilePath, ftMod);
 
 		// load tasks if they have changed
-		if (tasks.GetLastModifiedOle() == dtLastMod)
+		if (tasks.GetLastModifiedOle() != dtLastMod)
 		{
-			tasks.Decrypt();
+			tasks.Decrypt(m_pTDC->GetPassword());
 			VERIFY(m_pTDC->LoadTasks(tasks));
 		}
 

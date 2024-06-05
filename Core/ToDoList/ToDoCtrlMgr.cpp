@@ -811,7 +811,7 @@ int CToDoCtrlMgr::GetElapsedMinutesSinceLastMod(int nIndex) const
 	CHECKVALIDINDEXRET(nIndex, -1);
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	COleDateTimeSpan dtSpan(COleDateTime::GetCurrentTime() - tdc.GetLastTaskModified());
+	COleDateTimeSpan dtSpan(COleDateTime::GetCurrentTime() - tdc.GetLastModified());
 				
 	return (int)dtSpan.GetTotalMinutes();
 }
