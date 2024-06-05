@@ -362,35 +362,30 @@ time64_t FileMisc::GetFileLastModified(LPCTSTR szPath)
 
 BOOL FileMisc::GetFileLastModified(LPCTSTR szPath, FILETIME& fileTime)
 {
-	// files only
-	if (!FileExists(szPath))
+	HANDLE hFile = CreateFile(szPath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if (hFile == INVALID_HANDLE_VALUE)
 		return FALSE;
-	
-	CFileFind ff;
 
-	if (ff.FindFile(szPath))
-	{
-		ff.FindNextFile();
-		ff.GetLastWriteTime(&fileTime);
+	BOOL bSuccess = ::GetFileTime(hFile, NULL, NULL, &fileTime);
+	::CloseHandle(hFile);
 
-		return TRUE;
-	}
+//	LogText(_T("FileMisc::GetFileLastModified(%s, low=%ld, high=%ld)"), GetFileNameFromPath(szPath), fileTime.dwLowDateTime, fileTime.dwHighDateTime);
 
-	// else
-	return FALSE;
+	return bSuccess;
 }
 
 BOOL FileMisc::SetFileLastModified(LPCTSTR szPath, const FILETIME& fileTime)
 {
-	HANDLE hFile; 
-	
-	hFile = CreateFile(szPath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hFile = CreateFile(szPath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	
 	if (hFile == INVALID_HANDLE_VALUE) 
 		return FALSE;
 
 	BOOL bSuccess = ::SetFileTime(hFile, NULL, NULL, &fileTime);
 	::CloseHandle(hFile);
+
+//	LogText(_T("FileMisc::SetFileLastModified(%s, low=%ld, high=%ld)"), GetFileNameFromPath(szPath), fileTime.dwLowDateTime, fileTime.dwHighDateTime); 
 
 	return bSuccess;
 }
