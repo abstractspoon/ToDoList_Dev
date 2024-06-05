@@ -202,7 +202,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 			VERIFY(m_pTDC->LoadTasks(tasks));
 		}
 
-		m_pTDC->SetSourceControlStatus(TRUE, sCheckedOutTo);
+		m_pTDC->SetSourceControlStatus(TRUE, GetSourceControlID());
 	}
 	else
 	{
