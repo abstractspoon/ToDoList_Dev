@@ -235,8 +235,6 @@ TDC_FILE CTDCSourceControl::CheckIn()
 
 TDC_FILE CTDCSourceControl::CheckIn(CTaskFile& tasks)
 {
-	FileMisc::LogTextRaw(_T("CTDCSourceControl::CheckIn(begin)"));
-
 	if (!m_bSourceControlled)
 	{
 		ASSERT(0);
