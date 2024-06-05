@@ -9873,6 +9873,9 @@ LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 
 BOOL CToDoCtrl::CanUndoLastAction(BOOL bUndo) const 
 { 
+	if (IsReadOnly())
+		return FALSE;
+
 	// handle comments field
 	if (m_ctrlComments.HasFocus())
 		return (m_nCommentsState != CS_CLEAN);
@@ -9893,6 +9896,9 @@ BOOL CToDoCtrl::CanUndoLastAction(BOOL bUndo) const
 
 BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 {
+	if (IsReadOnly())
+		return FALSE;
+
 	// handle comments field
 	if (m_ctrlComments.HasFocus())
 		return bUndo ? m_ctrlComments.Undo() : m_ctrlComments.Redo();
