@@ -36,8 +36,10 @@ public:
 	
 	// allows for selective decrypting
 	BOOL Load(const CString& sFilePath, const CString& sRootItemName = _T(""), IXmlParse* pCallback = NULL, BOOL bDecrypt = TRUE);
-	BOOL Open(const CString& sFilePath, XF_OPEN nOpenFlags, BOOL bDecrypt = TRUE);
 	virtual BOOL LoadEx(const CString& sRootItemName = _T(""), IXmlParse* pCallback = NULL);
+
+	BOOL Open(const CString& sFilePath, XF_OPEN nOpenFlags, BOOL bDecrypt = TRUE);
+	BOOL Open(const CString& sFilePath, XF_OPEN nOpenFlags, SFE_FORMAT nFormat, BOOL bDecrypt = TRUE);
 	
 	// call before standard save
 	virtual BOOL Encrypt(LPCWSTR szPassword = NULL, SFE_FORMAT nFormat = SFEF_AUTODETECT); 

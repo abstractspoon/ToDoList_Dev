@@ -143,19 +143,12 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		}
 	}
 
-	// Always backup before overwriting
-	CTempFileBackup backup(sTaskfilePath);
-
-	// snap shot mod time so we can restore it
-	FILETIME ftMod = { 0 };
-	VERIFY(FileMisc::GetFileLastModified(sTaskfilePath, ftMod));
-
 	TDC_FILE nResult = TDCF_UNSET;
 	COleDateTime dtLastMod = tasks.GetLastModifiedOle();
 
 	// Open the tasklist WITHOUT decrypting
 	// And hold it open until we're done to prevent any other access
-	if (tasks.Open(sTaskfilePath, XF_READWRITE, FALSE))
+	if (tasks.Open(sTaskfilePath, XF_READWRITENOMODDATE, FALSE))
 	{
 		// If the tasks are empty or they have a password but are not encrypted
 		// we (re)load the tasks
@@ -191,10 +184,9 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	}
 
 	// Error handling
-	if (nResult == TDCF_SUCCESS)
+	switch (nResult)
 	{
-		FileMisc::SetFileLastModified(sTaskfilePath, ftMod);
-
+	case TDCF_SUCCESS:
 		// load tasks if they have changed
 		if (tasks.GetLastModifiedOle() != dtLastMod)
 		{
@@ -203,13 +195,11 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		}
 
 		m_pTDC->SetSourceControlStatus(TRUE, GetSourceControlID());
-	}
-	else
-	{
-		if (nResult == TDCF_UNSET)
-			nResult = TDC::MapTaskfileError(tasks.GetLastFileError());
+		break;
 
-		VERIFY(backup.RestoreBackup());
+	case TDCF_UNSET:
+		nResult = TDC::MapTaskfileError(tasks.GetLastFileError());
+		break;
 	}
 
 	return nResult;
@@ -247,6 +237,8 @@ TDC_FILE CTDCSourceControl::CheckIn()
 
 TDC_FILE CTDCSourceControl::CheckIn(CTaskFile& tasks)
 {
+	FileMisc::LogTextRaw(_T("CTDCSourceControl::CheckIn(begin)"));
+
 	if (!m_bSourceControlled)
 	{
 		ASSERT(0);
@@ -269,20 +261,30 @@ TDC_FILE CTDCSourceControl::CheckIn(CTaskFile& tasks)
 	// Must be already encrypted
 	ASSERT(tasks.GetPassword().IsEmpty() || tasks.IsEncrypted());
 
-	tasks.SetCheckedOutTo(_T(""));
+	TDC_FILE nResult = TDCF_UNSET;
 
-	// snap shot mod time so we can restore it
-	FILETIME ftMod = { 0 };
-	VERIFY(FileMisc::GetFileLastModified(sTaskfilePath, ftMod));
-
-	TDC_FILE nResult = CToDoCtrl::SaveTaskfile(tasks, sTaskfilePath);
-
-	if (nResult == TDCF_SUCCESS)
+	if (tasks.Open(sTaskfilePath, XF_READWRITENOMODDATE, SFEF_UTF16, FALSE))
 	{
-		m_bCheckedOut = FALSE;
-		FileMisc::SetFileLastModified(sTaskfilePath, ftMod);
+		tasks.SetCheckedOutTo(_T(""));
 
+		if (tasks.SaveEx())
+		{
+			m_bCheckedOut = FALSE;
+			nResult = TDCF_SUCCESS;
+		}
+
+		tasks.Close();
+	}
+
+	switch (nResult)
+	{
+	case TDCF_SUCCESS:
 		m_pTDC->SetSourceControlStatus(TRUE, _T(""));
+		break;
+
+	case TDCF_UNSET:
+		nResult = TDC::MapTaskfileError(tasks.GetLastFileError());
+		break;
 	}
 
 	return nResult;

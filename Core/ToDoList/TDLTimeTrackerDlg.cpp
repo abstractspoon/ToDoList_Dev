@@ -640,19 +640,11 @@ void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
 	}
 
 	BOOL bWasTracking = pTTL->IsTracking();
-	DWORD dwWasTrackingTaskID = (bWasTracking ? pTTL->GetTrackedTaskID() : 0);
-
 	VERIFY(pTTL->UpdateTracking());
-
-	BOOL bIsTracking = pTTL->IsTracking();
-	DWORD dwIsTrackingTaskID = (bIsTracking ? pTTL->GetTrackedTaskID() : 0);
-
-	ASSERT(Misc::StateChanged(bWasTracking, bIsTracking) ||
-			(bWasTracking && bIsTracking && (dwIsTrackingTaskID != dwWasTrackingTaskID)));
 
 	// If we've just started tracking, switch to that tasklist
 	// and show the dialog if required
-	if (bIsTracking && !bWasTracking)
+	if (pTTL->IsTracking() && !bWasTracking)
 	{
 		SelectTaskList(pTDC);
 

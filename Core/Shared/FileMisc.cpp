@@ -370,8 +370,6 @@ BOOL FileMisc::GetFileLastModified(LPCTSTR szPath, FILETIME& fileTime)
 	BOOL bSuccess = ::GetFileTime(hFile, NULL, NULL, &fileTime);
 	::CloseHandle(hFile);
 
-//	LogText(_T("FileMisc::GetFileLastModified(%s, low=%ld, high=%ld)"), GetFileNameFromPath(szPath), fileTime.dwLowDateTime, fileTime.dwHighDateTime);
-
 	return bSuccess;
 }
 
@@ -384,8 +382,6 @@ BOOL FileMisc::SetFileLastModified(LPCTSTR szPath, const FILETIME& fileTime)
 
 	BOOL bSuccess = ::SetFileTime(hFile, NULL, NULL, &fileTime);
 	::CloseHandle(hFile);
-
-//	LogText(_T("FileMisc::SetFileLastModified(%s, low=%ld, high=%ld)"), GetFileNameFromPath(szPath), fileTime.dwLowDateTime, fileTime.dwHighDateTime); 
 
 	return bSuccess;
 }

@@ -1046,30 +1046,40 @@ BOOL CXmlFile::Open(const CString& sFilePath, XF_OPEN nOpenFlag, SFE_FORMAT nFor
 	
 	switch (nOpenFlag)
 	{
-	case XF_READ:
-		nFileOpenFlags = CStdioFileEx::shareDenyNone | CStdioFileEx::modeRead;
-		break;
-		
 	case XF_WRITE:
-		nFileOpenFlags = CStdioFileEx::shareExclusive | 
-			CStdioFileEx::modeWrite | 
-			CStdioFileEx::modeCreate;
+		nFileOpenFlags = (CStdioFileEx::shareExclusive |
+						  CStdioFileEx::modeWrite |
+						  CStdioFileEx::modeCreate);
 		break;
 		
 	case XF_READWRITE:
-		nFileOpenFlags = CStdioFileEx::shareExclusive | 
-			CStdioFileEx::modeReadWrite | 
-			CStdioFileEx::modeCreate | 
-			CStdioFileEx::modeNoTruncate;
+	case XF_READWRITENOMODDATE:
+		nFileOpenFlags = (CStdioFileEx::shareExclusive |
+						  CStdioFileEx::modeReadWrite |
+						  CStdioFileEx::modeCreate |
+						  CStdioFileEx::modeNoTruncate);
+		break;
+
+	case XF_READ:
+	default:
+		nFileOpenFlags = (CStdioFileEx::shareDenyNone | 
+						  CStdioFileEx::modeRead);
 		break;
 	}
 	
-	BOOL bRes = (nFileOpenFlags && CStdioFileEx::Open(sFilePath, nFileOpenFlags, nFormat));
-	
-	if (!bRes)
+	if (!CStdioFileEx::Open(sFilePath, nFileOpenFlags, nFormat))
+	{
 		m_nFileError = GetLastError();
-	
-	return bRes;
+		return FALSE;
+	}
+
+	if (nOpenFlag == XF_READWRITENOMODDATE)
+	{
+		FILETIME ftNoMod = { 0xFFFFFFFF, 0xFFFFFFFF };
+		VERIFY(::SetFileTime((HANDLE)m_hFile, NULL, NULL, &ftNoMod));
+	}
+		
+	return TRUE;
 }
 
 BOOL CXmlFile::SaveEx()

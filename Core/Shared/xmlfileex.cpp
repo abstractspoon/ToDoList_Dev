@@ -292,9 +292,14 @@ BOOL CXmlFileEx::Load(const CString& sFilePath, const CString& sRootItemName, IX
 
 BOOL CXmlFileEx::Open(const CString& sFilePath, XF_OPEN nOpenFlags, BOOL bDecrypt)
 {
+	return Open(sFilePath, nOpenFlags, SFEF_AUTODETECT, bDecrypt);
+}
+
+BOOL CXmlFileEx::Open(const CString& sFilePath, XF_OPEN nOpenFlags, SFE_FORMAT nFormat, BOOL bDecrypt)
+{
 	m_bDecrypt = bDecrypt;
-	
-	return CXmlFile::Open(sFilePath, nOpenFlags);
+
+	return CXmlFile::Open(sFilePath, nOpenFlags, nFormat);
 }
 
 BOOL CXmlFileEx::LoadEx(const CString& sRootItemName, IXmlParse* pCallback)
