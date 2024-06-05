@@ -153,7 +153,10 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		// If the tasks are empty or they have a password but are not encrypted
 		// we (re)load the tasks
 		if (tasks.IsEmpty() || (!tasks.GetPassword().IsEmpty() && !tasks.IsEncrypted()))
+		{
 			tasks.LoadEx();
+			ASSERT(tasks.GetPassword().IsEmpty() || tasks.IsEncrypted());
+		}
 
 		// Check if someone else already has it checked out
 		sCheckedOutTo = tasks.GetCheckOutTo();
@@ -176,11 +179,6 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		}
 
 		tasks.Close();
-	}
-	else
-	{
-		// Assume the file is locked by another user
-		nResult = TDCF_SSC_CHECKEDOUTBYOTHER;
 	}
 
 	// Error handling
