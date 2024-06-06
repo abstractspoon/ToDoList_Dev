@@ -4482,6 +4482,10 @@ BOOL CToDoListWnd::GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlag
 
 TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CToDoListWnd::OpenTaskList()"));
+	///////////////////////////////////////////////////////////////////
+
 	CString sFilePath(szFilePath);
 
 	TSM_TASKLISTINFO storageInfo;
