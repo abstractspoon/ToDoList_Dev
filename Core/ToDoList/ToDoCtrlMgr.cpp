@@ -1258,6 +1258,10 @@ BOOL CToDoCtrlMgr::CanAddToSourceControl(int nIndex, BOOL bAdd) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
+	// Not supported by storage providers
+	if (UsesStorage(nIndex))
+		return FALSE;
+
 	return GetToDoCtrl(nIndex).CanAddToSourceControl(bAdd);
 }
 

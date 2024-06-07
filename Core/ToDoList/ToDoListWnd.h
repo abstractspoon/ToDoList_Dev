@@ -531,6 +531,7 @@ protected:
 	afx_msg void OnUpdateEditTimeTrackTask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateExport(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateFileEncrypt(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateFileSaveToUserStorage(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateFileResetversion(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateImport(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMaximizeComments(CCmdUI* pCmdUI);

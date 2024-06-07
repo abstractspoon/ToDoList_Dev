@@ -679,6 +679,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnUpdateFileSaveToUserStorage)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
@@ -7585,11 +7586,7 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 		CString sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
 		TDC_FILE nOpen = OpenTaskList(sFilePath, TRUE);
 
-		if (nOpen == TDCF_SUCCESS)
-		{
-			// nothing more to do
-		}
-		else
+		if (nOpen != TDCF_SUCCESS)
 			HandleLoadTasklistError(nOpen, storageInfo.szDisplayName);
 		
 		// refresh UI
@@ -7598,6 +7595,12 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 		Resize();
 		UpdateWindow();
 	}
+}
+
+void CToDoListWnd::OnUpdateFileSaveToUserStorage(CCmdUI* pCmdUI)
+{
+	// Not supported for source-controlled tasklists
+	pCmdUI->Enable(!m_mgrToDoCtrls.IsSourceControlled(GetSelToDoCtrl()));
 }
 
 void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID) 
@@ -7654,7 +7657,6 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 	}
 
 	storageInfo.SetLocalFilePath(sTempPath);
-
 		
 	// prevent this save triggering a reload
 	m_mgrToDoCtrls.RefreshFileLastModified(nTDC);
