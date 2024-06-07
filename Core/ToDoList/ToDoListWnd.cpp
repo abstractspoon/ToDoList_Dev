@@ -4482,6 +4482,11 @@ BOOL CToDoListWnd::GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlag
 
 TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CToDoListWnd::OpenTaskList()"));
+	log.LogStart();
+	///////////////////////////////////////////////////////////////////
+
 	CString sFilePath(szFilePath);
 
 	TSM_TASKLISTINFO storageInfo;
@@ -4523,10 +4528,18 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	const CPreferencesDlg& userPrefs = Prefs();
 	CFilteredToDoCtrl* pTDC = NewToDoCtrl();
 	CHoldRedraw hr(*pTDC);
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("CToDoListWnd::OpenTaskList(pre)"));
+	///////////////////////////////////////////////////////////////////
 	
 	// handles simple and storage tasklists
 	// we use szFilePath because it may be storage Info not a true path
 	TDC_FILE nOpen = OpenTaskList(pTDC, szFilePath, &storageInfo);
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("CToDoListWnd::OpenTaskList()"));
+	///////////////////////////////////////////////////////////////////
 	
 	if (nOpen == TDCF_SUCCESS)
 	{
@@ -4565,6 +4578,10 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 
 	Resize();
 	Invalidate();
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("CToDoListWnd::OpenTaskList(post)"));
+	///////////////////////////////////////////////////////////////////
 	
 	return nOpen;
 }
