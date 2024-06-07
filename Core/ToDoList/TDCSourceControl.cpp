@@ -7,6 +7,7 @@
 #include "ToDoCtrl.h"
 
 #include "..\shared\FileMisc.h"
+#include "..\shared\ScopedTimer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -108,6 +109,10 @@ BOOL CTDCSourceControl::CanCheckOut() const
 
 TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce, LPCTSTR szTasklistPath)
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDCSourceControl::CheckOut"));
+	///////////////////////////////////////////////////////////////////
+
 	if (!m_bSourceControlled)
 	{
 		// caller must think we're source controlled
