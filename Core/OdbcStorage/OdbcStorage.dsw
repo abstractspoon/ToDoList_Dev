@@ -1,0 +1,52 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "OdbcStorage"=.\OdbcStorage.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/OdbcStorage", VOGAAAAA
+    .
+    end source code control
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name ToDoList
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ToDoList"=..\ToDoList\ToDoList.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    "$/ToDoList", OBDAAAAA
+    ..\todolist
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

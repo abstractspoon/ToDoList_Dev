@@ -1,0 +1,369 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "OdbcStorage DLL\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "OdbcStorage\0"
+            VALUE "LegalCopyright", "Copyright (C) 2013\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "OdbcStorage.DLL\0"
+            VALUE "ProductName", "OdbcStorage Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\OdbcStorage.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_ODBCSTORAGE         ICON    DISCARDABLE     "res\\icon1.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DATABASESELECTION_DIALOG DIALOG DISCARDABLE  0, 0, 259, 233
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select ODBC Database"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,148,212,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,202,212,50,14
+    CONTROL         "List1",IDC_DATABASE_LIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
+                    LVS_OWNERDRAWFIXED | WS_BORDER | WS_TABSTOP,7,24,245,109
+    LTEXT           "A&vailable Databases:",IDC_STATIC,7,7,160,14,
+                    SS_CENTERIMAGE
+    PUSHBUTTON      "&Browse...",IDC_NEW_DATABASE,193,7,60,14
+    GROUPBOX        "Optional Modifiers",IDC_STATIC,7,156,245,47
+    LTEXT           "&Tasklist",IDC_STATIC,15,169,105,8
+    LTEXT           "&Allocated to",IDC_STATIC,133,169,105,8
+    COMBOBOX        IDC_TASKLISTS,15,182,110,96,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_ALLOCTOLIST,133,182,110,111,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Delete",IDC_DELETE_DATABASE,202,139,50,14
+END
+
+IDD_DATABASESETUP_DIALOG DIALOG DISCARDABLE  0, 0, 612, 390
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configure ODBC Database"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,501,369,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,555,369,50,14
+    CONTROL         "List1",IDC_TASKATTRIBUTESETUP,"SysListView32",
+                    LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | 
+                    LVS_SORTASCENDING | LVS_OWNERDRAWFIXED | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,62,580,182
+    PUSHBUTTON      "&Validate",IDC_VALIDATE,7,369,50,14
+    LTEXT           "Attribute setup:",IDC_STATIC,16,50,288,8
+    GROUPBOX        "'Tasks' Table Setup",IDC_STATIC,7,7,598,247
+    LTEXT           "Table name:",IDC_STATIC,15,19,118,8
+    COMBOBOX        IDC_TASKS_TABLENAME,16,30,118,353,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Task 'Key' field",IDC_STATIC,144,19,118,8
+    COMBOBOX        IDC_TASKS_KEYFIELD,144,30,118,375,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Parent 'Key' field",IDC_STATIC,271,19,118,8
+    COMBOBOX        IDC_TASKS_PARENTKEYFIELD,272,30,118,353,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "'Tasklists' Table Setup (optional)",IDC_STATIC,7,262,
+                    598,45
+    LTEXT           "Table name:",IDC_STATIC,15,274,40,8
+    COMBOBOX        IDC_TASKLISTS_TABLENAME,16,286,118,161,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Tasklist 'Key' field",IDC_STATIC,144,274,56,8
+    COMBOBOX        IDC_TASKLISTS_KEYFIELD,144,286,118,161,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Tasklist 'Name' field",IDC_STATIC,271,274,63,8
+    COMBOBOX        IDC_TASKLISTS_NAMEFIELD,272,286,118,161,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "'Allocated To' Table Setup (optional)",IDC_STATIC,7,316,
+                    598,45
+    LTEXT           "Table name:",IDC_STATIC,15,328,40,8
+    COMBOBOX        IDC_ALLOCTO_TABLENAME,16,340,118,161,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Person 'Key' field",IDC_STATIC,144,328,54,8
+    COMBOBOX        IDC_ALLOCTO_KEYFIELD,144,340,118,161,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Person 'Name' field",IDC_STATIC,271,328,61,8
+    COMBOBOX        IDC_ALLOCTO_NAMEFIELD,272,340,118,161,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Tasklist 'Key' field (optional)",IDC_STATIC,399,19,118,
+                    8
+    COMBOBOX        IDC_TASKS_TASKLISTKEYFIELD,400,30,118,353,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DATABASESELECTION_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 252
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
+    END
+
+    IDD_DATABASESETUP_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 605
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 383
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TASKATTRIB_COL      "Task Attribute"
+    IDS_TASKFIELD_COL       "'Tasks' Field"
+    IDS_ATTRIBTABLE_COL     "'Attribute' Table"
+    IDS_ATTRIBKEYFIELD_COL  "Attribute 'Key' Field"
+    IDS_LINKTABLE_COL       "'Link' Table"
+    IDS_LINKTASKFIELD_COL   "Link 'Tasks' Field"
+    IDS_LINKATTRIBFIELD_COL "Link 'Attribute' Field"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ATTRIBCONTENTFIELD_COL "Attribute 'Name' Field"
+    IDS_LINKTASKLISTFIELD_COL "Link 'Tasklists' Field"
+    IDS_TA_DONE             "Completed Status"
+    IDS_TA_PRIORITY         "Priority"
+    IDS_TA_ALLOCTO          "Allocated To"
+    IDS_TA_ALLOCBY          "Allocated By"
+    IDS_TA_DONEDATE         "Completed Date"
+    IDS_TA_DUEDATE          "Due Date"
+    IDS_TA_STARTDATE        "Start Date"
+    IDS_TA_TIMEEST          "Time Estimate"
+    IDS_TA_TIMESPENT        "Time Spent"
+    IDS_TA_CATEGORY         "Category"
+    IDS_TA_STATUS           "Status"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TA_CREATEDATE       "Creation Date"
+    IDS_TA_CREATEDBY        "Created By"
+    IDS_TA_ID               "Task ID"
+    IDS_TA_POS              "Position"
+    IDS_TA_PERCENT          "Percent Complete"
+    IDS_TA_FILEREF          "File Link"
+    IDS_TA_FLAG             "Flag"
+    IDS_TA_TRACKTIME        "Track Time"
+    IDS_TA_MODIFYDATE       "Modified Date"
+    IDS_TA_RISK             "Risk"
+    IDS_TA_EXTERNALID       "External ID"
+    IDS_TA_COST             "Cost"
+    IDS_TA_DEPENDS          "Dependency"
+    IDS_TA_TITLE            "Title"
+    IDS_TA_RECURRENCE       "Recurrence"
+    IDS_TA_VERSION          "Version"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TA_TAGS             "Tags"
+    IDS_TA_RECENTEDIT       "Recently Modified"
+    IDS_TA_NAME             "Title"
+    IDS_TA_ICON             "Icon"
+    IDS_TA_COLOR            "Colour"
+    IDS_TA_COMMENTS         "Comments"
+    IDS_TA_PARENTID         "Parent task ID"
+    IDS_DATABASE_COL        "Database"
+    IDS_DBSETUP_COL         "Configure"
+    IDS_DBSETUP_DLGTITLE    "Configure ODBC Database '%s'"
+    IDS_ERR_TABLENAME       "The %s table must be set."
+    IDS_ERR_TABLEKEYFIELD   "The %s key field must be set."
+    IDS_ERR_TABLENAMEFIELD  "The %s name field must be set."
+    IDS_ERR_ATTRIBKEYFIELD  "The 'Attribute' key field for '%s' must be set."
+    IDS_ERR_LINKTASKFIELD   "The Link 'Tasks' field must be set."
+    IDS_ERR_LINKATTRIBFIELD "The Link 'Attribute' field must be set."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ERR_VALIDATION      "The following validation errors were found:"
+    IDS_TABLE_COL           "Table"
+    IDS_TABLENAME_COL       "Name"
+    IDS_KEYFIELD_COL        "Table 'Key' Field"
+    IDS_CONTENTFIELD_COL    "Table 'Name' Field"
+    IDS_TASKSTABLE          "'Tasks'"
+    IDS_TASKLISTSTABLE      "'Tasklists'"
+    IDS_ALLOCTOTABLE        "'Allocated To'"
+    IDS_NOT_APPLICABLE      "- not applicable -"
+    IDS_ERR_TASKKEYFIELD    "The 'Tasks' key field must be set."
+    IDS_ERR_ATTRIBNAMEFIELD "The 'Attribute' name field for '%s' must be set."
+    IDS_ERR_SELECTEDDATABASE 
+                            "Database Setup Error|The selected database setup cannot be run until the following validation errors are fixed:"
+    IDS_CONFIRM_DELETE_DB   "Are you sure you want to delete the selected ODBC database configuration?"
+    IDS_ERR_ONEORMOREATTRIB "At least one task attribute must be defined."
+    IDS_ERR_LINKTASKLISTFIELD "The Link 'Tasklists' field must be set."
+    IDS_ERR_TASKTABLETASKLISTFIELD "The 'Tasks' tasklist field must be set."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ERR_NEEDTASKLISTID  "A tasklist must be selected."
+    IDS_ERR_FAILEDTOCONNECT "A connection to the database could not be established."
+    IDS_ERR_NOMATCHINGDATA  "No data matching the database setup was found."
+    IDS_ERR_NOMATCHINGDATA_TASKLIST 
+                            "No data matching the tasklist '%s' was found."
+    IDS_ERR_NOMATCHINGDATA_PERSON "No data allocated to '%s' was found."
+    IDS_ERR_NOMATCHINGDATA_TASKLISTANDPERSON 
+                            "No data matching the tasklist '%s' and allocated to '%s' was found."
+    IDS_ERR_TASKTABLEPARENTFIELD "The 'Tasks' parent field must be set."
+    IDS_TDLFILEOPENFILTER   "Tasklist (*.tdl, *.xml)|*.tdl;*.xml||"
+    IDS_ERR_DATABASE_EXISTS "Database Already Exists|The chosen database already exists in the list."
+    IDS_ERR_NOCHANGEDDATA   "No data changes were detected"
+END
+
+#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\OdbcStorage.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
