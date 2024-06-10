@@ -51,7 +51,9 @@ void CMenuButton::SetWindowText(LPCTSTR lpszString)
 		CCustomButton::SetWindowText(sText);
 	}
 	else
+	{
 		CCustomButton::SetWindowText(lpszString);
+	}
 }
 
 void CMenuButton::SetWindowText(TCHAR nChar)
@@ -74,6 +76,8 @@ UINT CMenuButton::TrackPopupMenu(CMenu* pMenu, int nSubMenu)
 	if (!pPopup)
 		return FALSE;
 
+	PrepareState(pPopup);
+	
 	UINT nMenuFlags = (TPM_LEFTALIGN | TPM_LEFTBUTTON | ((m_dwStyle & MBS_RETURNCMD) ? TPM_RETURNCMD : 0));
 	
 	CPoint pt;
@@ -91,8 +95,6 @@ UINT CMenuButton::TrackPopupMenu(CMenu* pMenu, int nSubMenu)
 		pt.y = rWindow.bottom;
 	}
 	
-	PrepareState(pPopup);
-
 	TPMPARAMS tpmp;
 	tpmp.cbSize = sizeof(TPMPARAMS);
 
@@ -136,7 +138,9 @@ void CMenuButton::PrepareState(CMenu* pMenu)
 			continue; // menu separator or invalid cmd - ignore it
 		
 		if (state.m_nID == (UINT)-1)
+		{
 			PrepareState(pMenu->GetSubMenu(state.m_nIndex));
+		}
 		else
 		{
 			state.m_pSubMenu = NULL;
