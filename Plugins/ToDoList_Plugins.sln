@@ -213,7 +213,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrollHelper", "3rdParty\Sc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeViewHelper", "3rdParty\TreeViewHelper\TreeViewHelper.csproj", "{86D7F721-7008-4727-B827-E83ED1D34ACA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageHelper", "ImageHelper\ImageHelper.csproj", "{819992E3-FC33-4FCD-8AA5-5BC8329B2C20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageHelper", "3rdParty\ImageHelper\ImageHelper.csproj", "{819992E3-FC33-4FCD-8AA5-5BC8329B2C20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
