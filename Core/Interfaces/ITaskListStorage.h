@@ -110,8 +110,8 @@ const int ITS_PASSWORD_LEN = 32;
 struct ITS_TASKLISTINFO
 {
 	WCHAR szTasklistID[ITS_TASKLISTID_LEN+1];
-	WCHAR szLocalFileName[_MAX_PATH+1];
-	WCHAR szDisplayName[_MAX_PATH+1];
+	WCHAR szLocalFileName[MAX_PATH+1];
+	WCHAR szDisplayName[MAX_PATH+1];
 	WCHAR szPassword[ITS_PASSWORD_LEN+1];
 };
 
@@ -129,8 +129,8 @@ public:
 
 	virtual void SetLocalizer(ITransText* pTT) = 0;
 
-	virtual bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent = FALSE) = 0;
-	virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent = FALSE) = 0;
+	virtual bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent = false) = 0;
+	virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent = false) = 0;
 
 };
 
