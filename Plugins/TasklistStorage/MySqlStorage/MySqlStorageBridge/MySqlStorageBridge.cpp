@@ -67,14 +67,14 @@ LPCWSTR CMySqlStorageBridge::GetTypeID() const
 
 bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
-	// call into out sibling C# module to do the actual work
+	// call into our sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<TaskList^> destTasks = gcnew TaskList(pDestTaskFile);
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<MySqlStorageCore^> expCore = gcnew MySqlStorageCore(trans.get());
+	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 	
-// 	if (expCore->Export(destTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
-// 		return true;
+	if (mysql->RetrieveTasklist(destTasks.get(), bSilent, prefs.get(), gcnew String(szKey)))
+		return true;
 
 	// else
 	return false;
@@ -82,6 +82,15 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 
 bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
-	// TODO
+	// call into our sibling C# module to do the actual work
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
+
+	if (mysql->StoreTasklist(srcTasks.get(), bSilent, prefs.get(), gcnew String(szKey)))
+		return true;
+
+	// else
 	return false;
 }

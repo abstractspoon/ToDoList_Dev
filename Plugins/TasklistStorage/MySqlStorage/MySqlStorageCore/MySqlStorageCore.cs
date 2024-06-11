@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
+
+using MySql.Data.MySqlClient;
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MySqlStorage
@@ -15,49 +17,42 @@ namespace MySqlStorage
             m_trans = trans;
         }
 
-        public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
-        {
-            // Possibly display a dialog to get input on how to 
-            // map ToDoList task attributes to the output format
-            // TODO
+		public bool RetrieveTasklist(TaskList tasklist, bool bSilent, Preferences prefs, string prefKey)
+		{
+			// Possibly display a dialog to get input on how to 
+			// map ToDoList task attributes to the output format
+			// TODO
 
-            // Process the tasks
-            Task task = srcTasks.GetFirstTask();
+			var connectionString = "Server=www.abstractspoon.com;Database=Tasklists;Uid=abstractspoon;Pwd=&F*VQ]3p*z8B;";
 
-            while (task.IsValid())
-            {
-                if (!ExportTask(task /*, probably with some additional parameters*/ ))
-                {
-                    // Decide whether to stop or not
-                    // TODO
-                }
+			var conn = new MySqlConnection(connectionString);
 
-                task = task.GetNextTask();
-            }
+			conn.Open();
 
-            return true;
+
+			return false;
         }
 
-        protected bool ExportTask(Task task /*, probably with some additional parameters*/)
-        {
-            // Process task's own attributes
-            // TODO
+		public bool StoreTasklist(TaskList tasklist, bool bSilent, Preferences prefs, string prefKey)
+		{
+			// Process task's own attributes
+			// TODO
 
-            // Export task's children
-            Task subtask = task.GetFirstSubtask();
+			// Export task's children
+// 			Task subtask = task.GetFirstSubtask();
+// 
+//             while (subtask.IsValid())
+//             {
+//                 if (!ExportTask(subtask /*, probably with some additional parameters*/ ))
+//                 {
+//                     // Decide whether to stop or not
+//                     // TODO
+//                 }
+// 
+//                 subtask = subtask.GetNextTask();
+//             }
 
-            while (subtask.IsValid())
-            {
-                if (!ExportTask(subtask /*, probably with some additional parameters*/ ))
-                {
-                    // Decide whether to stop or not
-                    // TODO
-                }
-
-                subtask = subtask.GetNextTask();
-            }
-
-            return true;
+            return false;
         }
 
         // --------------------------------------------------------------------------------------
