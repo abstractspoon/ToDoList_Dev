@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::IO;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
@@ -67,14 +68,21 @@ LPCWSTR CMySqlStorageBridge::GetTypeID() const
 
 bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
-	// call into our sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<TaskList^> destTasks = gcnew TaskList(pDestTaskFile);
+	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
+	//msclr::auto_gcroot<String^> destPath = gcnew String(pFInfo->szLocalFileName);
+	msclr::auto_gcroot<String^> destPath = Path::GetTempFileName();
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 	
-	if (mysql->RetrieveTasklist(destTasks.get(), bSilent, prefs.get(), gcnew String(szKey)))
+	if (mysql->RetrieveTasklist(tasklistId.get(), destPath.get(), bSilent, prefs.get(), gcnew String(szKey)))
+	{
+		lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath.get()));
+		lstrcpy(pFInfo->szDisplayName, L"MySQL");
+		lstrcpy(pFInfo->szTasklistID, L"MySQL connection string");
+
 		return true;
+	}
 
 	// else
 	return false;
@@ -82,14 +90,16 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 
 bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
-	// call into our sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
-	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
+	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
+	msclr::auto_gcroot<String^> srcPath = gcnew String(pFInfo->szLocalFileName);
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 
-	if (mysql->StoreTasklist(srcTasks.get(), bSilent, prefs.get(), gcnew String(szKey)))
+	if (mysql->StoreTasklist(tasklistId.get(), srcPath.get(), bSilent, prefs.get(), gcnew String(szKey)))
+	{
 		return true;
+	}
 
 	// else
 	return false;

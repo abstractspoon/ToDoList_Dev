@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -17,7 +18,7 @@ namespace MySqlStorage
             m_trans = trans;
         }
 
-		public bool RetrieveTasklist(TaskList tasklist, bool bSilent, Preferences prefs, string prefKey)
+		public bool RetrieveTasklist(string tasklistId, string destPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			// Possibly display a dialog to get input on how to 
 			// map ToDoList task attributes to the output format
@@ -32,13 +33,14 @@ namespace MySqlStorage
 				{
 					connection.Open();
 
-					using (var command = new MySqlCommand("SHOW TABLES", connection))
+					using (var command = new MySqlCommand("SELECT Xml FROM Tasklists WHERE Id=2", connection))
 					{
 						using (var reader = command.ExecuteReader())
 						{
-							while (reader.Read())
+							if (reader.Read())
 							{
-								Tablenames.Add(reader.GetString(0));
+								File.WriteAllText(destPath, reader.GetString(0));
+								return true;
 							}
 						}
 					}
@@ -52,26 +54,34 @@ namespace MySqlStorage
 			return false;
         }
 
-		public bool StoreTasklist(TaskList tasklist, bool bSilent, Preferences prefs, string prefKey)
+		public bool StoreTasklist(string tasklistId, string srcPath, bool bSilent, Preferences prefs, string prefKey)
 		{
-			// Process task's own attributes
-			// TODO
+			try
+			{
+				var connectionString = "Server=www.abstractspoon.com;Database=Tasklists;Uid=abstractspoon;Pwd=&F*VQ]3p*z8B;";
 
-			// Export task's children
-// 			Task subtask = task.GetFirstSubtask();
-// 
-//             while (subtask.IsValid())
-//             {
-//                 if (!ExportTask(subtask /*, probably with some additional parameters*/ ))
-//                 {
-//                     // Decide whether to stop or not
-//                     // TODO
-//                 }
-// 
-//                 subtask = subtask.GetNextTask();
-//             }
+				using (var connection = new MySqlConnection(connectionString))
+				{
+					connection.Open();
 
-            return false;
+					if (string.IsNullOrEmpty(tasklistId))
+					{
+						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", Path.GetFileNameWithoutExtension(srcPath), File.ReadAllText(srcPath));
+
+						using (var command = new MySqlCommand(query, connection))
+						{
+							command.ExecuteNonQuery();
+						}
+					}
+
+				}
+			}
+			catch (Exception e)
+			{
+
+			}
+
+			return false;
         }
 
         // --------------------------------------------------------------------------------------
