@@ -68,39 +68,54 @@ LPCWSTR CMySqlStorageBridge::GetTypeID() const
 
 bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
-	//msclr::auto_gcroot<String^> destPath = gcnew String(pFInfo->szLocalFileName);
+	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
 	msclr::auto_gcroot<String^> destPath = Path::GetTempFileName();
+
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 	
-	if (mysql->RetrieveTasklist(tasklistId.get(), destPath.get(), bSilent, prefs.get(), gcnew String(szKey)))
-	{
-		lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath.get()));
-		lstrcpy(pFInfo->szDisplayName, L"MySQL");
-		lstrcpy(pFInfo->szTasklistID, L"MySQL connection string");
+	MySqlStorageDefinition^ def = mysql->RetrieveTasklist(tasklistId.get(),
+														  password.get(),
+														  destPath.get(),
+														  bSilent,
+														  prefs.get(),
+														  gcnew String(szKey));
+	if (def == nullptr)
+		return false;
 
-		return true;
-	}
+	lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath.get()));
+	lstrcpy(pFInfo->szTasklistID, MarshalledString(def->Encode()));
+	lstrcpy(pFInfo->szPassword, MarshalledString(def->Password));
+	lstrcpy(pFInfo->szDisplayName, MarshalledString(def->DisplayName));
 
-	// else
-	return false;
+	return true;
 }
 
 bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
-	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
+	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
 	msclr::auto_gcroot<String^> srcPath = gcnew String(pFInfo->szLocalFileName);
+
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 
-	if (mysql->StoreTasklist(tasklistId.get(), srcPath.get(), bSilent, prefs.get(), gcnew String(szKey)))
-	{
-		return true;
-	}
+	MySqlStorageDefinition^ def = mysql->StoreTasklist(tasklistId.get(),
+													   password.get(),
+													   srcPath.get(),
+													   bSilent,
+													   prefs.get(),
+													   gcnew String(szKey));
+	if (def == nullptr)
+		return false;
 
-	// else
-	return false;
+	lstrcpy(pFInfo->szLocalFileName, MarshalledString(srcPath.get()));
+	lstrcpy(pFInfo->szTasklistID, MarshalledString(def->Encode()));
+	lstrcpy(pFInfo->szPassword, MarshalledString(def->Password));
+	lstrcpy(pFInfo->szDisplayName, MarshalledString(def->DisplayName));
+
+	return true;
 }
