@@ -99,11 +99,13 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
 	msclr::auto_gcroot<String^> srcPath = gcnew String(pFInfo->szLocalFileName);
 
+	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 
 	MySqlStorageDefinition^ def = mysql->StoreTasklist(tasklistId.get(),
+													   srcTasks->GetProjectName(),
 													   password.get(),
 													   srcPath.get(),
 													   bSilent,

@@ -23,7 +23,7 @@ namespace MySqlStorage
 			{
 				Server = "www.abstractspoon.com";
 				Database = "Tasklists";
-				UserName = "abstractspoon";
+				Username = "abstractspoon";
 				Password = "&F*VQ]3p*z8B";
 
 				TasklistKey = 0;
@@ -34,17 +34,27 @@ namespace MySqlStorage
 
 		public string Server;
 		public string Database;
-		public string UserName;
+		public string Username;
 		public string Password;
 
 		public uint TasklistKey = 0;
 		public string TasklistName;
 
+// 		public bool IsDefined
+// 		{
+// 			get 
+// 		}
+// 
+// 		public bool HasPassword
+// 		{
+// 
+// 		}
+
 		public string DisplayName
 		{
 			get
 			{
-				return string.Format("{0}/{1}({2})", Server, Database, UserName);
+				return string.Format("{0}/{1}({2})", Server, Database, Username);
 			}
 		}
 
@@ -53,14 +63,14 @@ namespace MySqlStorage
 			get
 			{
 				return string.Format("Server={0};Database={1};Uid={2};Pwd={3};", 
-									Server, Database, UserName, Password);
+									Server, Database, Username, Password);
 			}
 		}
 
 		public string Encode()
 		{
 			return string.Format("{0}::{1}::{2}::{3}::{4}",
-								TasklistKey, TasklistName, Server, Database, UserName);
+								TasklistKey, TasklistName, Server, Database, Username);
 		}
 
 		public bool Decode(string encoded)
@@ -79,13 +89,29 @@ namespace MySqlStorage
 			TasklistName = parts[1];
 			Server = parts[2];
 			Database = parts[3];
-			UserName = parts[4];
+			Username = parts[4];
 
 			return true;
 		}
+
+		public MySqlConnection OpenConnection()
+		{
+			var connection = new MySqlConnection(ConnectionString);
+
+			try
+			{
+				connection.Open();
+			}
+			catch (Exception e)
+			{
+
+			}
+
+			return connection;
+		}
 	}
 
-	[System.ComponentModel.DesignerCategory("")]
+[System.ComponentModel.DesignerCategory("")]
     public class MySqlStorageCore
     {
         public MySqlStorageCore(Translator trans)
@@ -95,17 +121,31 @@ namespace MySqlStorage
 
 		public MySqlStorageDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
 		{
-			// Possibly display a dialog to get input on how to 
-			// map ToDoList task attributes to the output format
-			// TODO
 			try
 			{
 				var def = new MySqlStorageDefinition(tasklistId, password);
 
-				using (var connection = new MySqlConnection(def.ConnectionString))
+				if (def.TasklistKey == 0)
 				{
-					connection.Open();
+					var dialog = new ConnectionDetailsForm()
+					{
+						Server = def.Server,
+						Database = def.Database,
+						Username = def.Username,
+						Password = def.Password
+					};
 
+					if (dialog.ShowDialog() != DialogResult.OK)
+						return null;
+
+					def.Server = dialog.Server;
+					def.Database = dialog.Database;
+					def.Username = dialog.Username;
+					def.Password = dialog.Password;
+				}
+
+				using (var connection = def.OpenConnection())
+				{
 					var query = string.Format("SELECT Xml FROM Tasklists WHERE Id={0}", def.TasklistKey);
 
 					using (var command = new MySqlCommand(query, connection))
@@ -129,19 +169,37 @@ namespace MySqlStorage
 			return null;
         }
 
-		public MySqlStorageDefinition StoreTasklist(string tasklistId, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
+		public MySqlStorageDefinition StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
 				var def = new MySqlStorageDefinition(tasklistId, password);
 
-				using (var connection = new MySqlConnection(def.ConnectionString))
+				if (string.IsNullOrEmpty(tasklistName))
+					tasklistName = def.TasklistName;
+
+				// If this is a new tasklist or has no name prompt the user
+				if ((def.TasklistKey == 0) || string.IsNullOrEmpty(tasklistName))
 				{
-					connection.Open();
+					var dialog = new ConnectionDetailsForm()
+					{
+						Server = def.Server,
+						Database = def.Database,
+						Username = def.Username,
+						Password = def.Password
+					};
+
+					if (dialog.ShowDialog() != DialogResult.OK)
+						return null;
+
+					tasklistName = "Untitled";
+				}
 					
+				using (var connection = def.OpenConnection())
+				{
 					if (def.TasklistKey == 0)
 					{
-						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", Path.GetFileNameWithoutExtension(srcPath), File.ReadAllText(srcPath));
+						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", tasklistName, File.ReadAllText(srcPath));
 
 						using (var command = new MySqlCommand(query, connection))
 						{
@@ -159,7 +217,7 @@ namespace MySqlStorage
 					}
 					else
 					{
-						string query = string.Format("UPDATE Tasklists SET Xml='{0}' WHERE Id={1}", File.ReadAllText(srcPath), def.TasklistKey);
+						string query = string.Format("UPDATE Tasklists SET Name='{0}' Xml='{1}' WHERE Id={2}", tasklistName, File.ReadAllText(srcPath), def.TasklistKey);
 
 						using (var command = new MySqlCommand(query, connection))
 						{
@@ -179,6 +237,7 @@ namespace MySqlStorage
         }
 
         // --------------------------------------------------------------------------------------
+
         private Translator m_trans;
     }
 }
