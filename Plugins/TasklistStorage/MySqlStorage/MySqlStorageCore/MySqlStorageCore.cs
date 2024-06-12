@@ -22,13 +22,32 @@ namespace MySqlStorage
 			// Possibly display a dialog to get input on how to 
 			// map ToDoList task attributes to the output format
 			// TODO
+			try
+			{
+				var connectionString = "Server=www.abstractspoon.com;Database=Tasklists;Uid=abstractspoon;Pwd=&F*VQ]3p*z8B;";
 
-			var connectionString = "Server=www.abstractspoon.com;Database=Tasklists;Uid=abstractspoon;Pwd=&F*VQ]3p*z8B;";
+				List<String> Tablenames = new List<String>();
 
-			var conn = new MySqlConnection(connectionString);
+				using (var connection = new MySqlConnection(connectionString))
+				{
+					connection.Open();
 
-			conn.Open();
+					using (var command = new MySqlCommand("SHOW TABLES", connection))
+					{
+						using (var reader = command.ExecuteReader())
+						{
+							while (reader.Read())
+							{
+								Tablenames.Add(reader.GetString(0));
+							}
+						}
+					}
+				}
+			}
+			catch(Exception e)
+			{
 
+			}
 
 			return false;
         }
