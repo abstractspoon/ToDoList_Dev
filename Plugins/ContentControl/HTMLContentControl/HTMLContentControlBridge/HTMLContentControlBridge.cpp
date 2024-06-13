@@ -37,9 +37,7 @@ const LPCWSTR HTML_NAME = L"Html";
 
 CHTMLContentBridge::CHTMLContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
-   HMODULE hMod = LoadLibrary(L"HTMLContentControlBridge.dll"); // us
-
-   m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_HTML), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+   m_hIcon = Win32::LoadHIcon(L"HTMLContentControlBridge.dll", IDI_HTML, 16, true);
 }
 
 CHTMLContentBridge::~CHTMLContentBridge()

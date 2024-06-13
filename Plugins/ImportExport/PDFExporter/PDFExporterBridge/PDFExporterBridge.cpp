@@ -36,9 +36,7 @@ const LPCWSTR PDFEXPORTER_NAME = L"PDF Tree View";
 // see ExporterBridge.h for the class definition
 CPDFExporterBridge::CPDFExporterBridge() : m_pTT(nullptr), m_hIcon(NULL)
 {
-	HMODULE hMod = LoadLibrary(L"PDFExporterBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_PDF), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"PDFExporterBridge.dll", IDI_PDF, 16, true);
 }
 
 void CPDFExporterBridge::Release()

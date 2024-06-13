@@ -56,6 +56,8 @@ namespace Abstractspoon
 				static int GetWmNotifyCode(IntPtr lParam);
 				static void SetArrowCursor();
 
+				static HICON LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI);
+
 			protected:
 				static void DoFrameChange(IntPtr hWnd);
 			};
