@@ -27,7 +27,7 @@ namespace MySqlStorage
 				{
 					Server = m_Server.Text,
 					Database = m_Database.Text,
-					Username = m_UserName.Text,
+					Username = m_Username.Text,
 					Password = m_Password.Text
 				};
 			}
@@ -36,7 +36,7 @@ namespace MySqlStorage
 			{
 				m_Server.Text = value.Server;
 				m_Database.Text = value.Database;
-				m_UserName.Text = value.Username;
+				m_Username.Text = value.Username;
 				m_Password.Text = value.Password;
 			}
 		}

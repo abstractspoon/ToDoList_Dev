@@ -31,7 +31,7 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.m_Password = new System.Windows.Forms.TextBox();
-			this.m_UserName = new System.Windows.Forms.TextBox();
+			this.m_Username = new System.Windows.Forms.TextBox();
 			this.m_Database = new System.Windows.Forms.TextBox();
 			this.m_Server = new System.Windows.Forms.TextBox();
 			this.label4 = new System.Windows.Forms.Label();
@@ -70,10 +70,10 @@
 			// 
 			// m_UserName
 			// 
-			this.m_UserName.Location = new System.Drawing.Point(77, 72);
-			this.m_UserName.Name = "m_UserName";
-			this.m_UserName.Size = new System.Drawing.Size(195, 21);
-			this.m_UserName.TabIndex = 8;
+			this.m_Username.Location = new System.Drawing.Point(77, 72);
+			this.m_Username.Name = "m_UserName";
+			this.m_Username.Size = new System.Drawing.Size(195, 21);
+			this.m_Username.TabIndex = 8;
 			// 
 			// m_Database
 			// 
@@ -133,7 +133,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.m_Password);
-			this.Controls.Add(this.m_UserName);
+			this.Controls.Add(this.m_Username);
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.m_Server);
 			this.Controls.Add(this.label4);
@@ -157,7 +157,7 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.TextBox m_Password;
-		private System.Windows.Forms.TextBox m_UserName;
+		private System.Windows.Forms.TextBox m_Username;
 		private System.Windows.Forms.TextBox m_Database;
 		private System.Windows.Forms.TextBox m_Server;
 		private System.Windows.Forms.Label label4;

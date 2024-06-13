@@ -58,6 +58,12 @@
     <Compile Include="ConnectionDefinitionForm.Designer.cs">
       <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MySqlDatabaseDefinition.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MySqlDatabaseDefinition.Designer.cs">
+      <DependentUpon>MySqlDatabaseDefinition.cs</DependentUpon>
+    </Compile>
     <Compile Include="MySqlStorageCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -70,6 +76,9 @@
   <ItemGroup>
     <EmbeddedResource Include="ConnectionDefinitionForm.resx">
       <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MySqlDatabaseDefinition.resx">
+      <DependentUpon>MySqlDatabaseDefinition.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
