@@ -38,9 +38,7 @@ const LPCWSTR WORDCLOUD_NAME = L"Word Cloud";
 
 CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"WordCloudUIExtensionBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_DAYVIEW), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"WordCloudUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
 }
 
 void CWordCloudUIExtensionBridge::Release()

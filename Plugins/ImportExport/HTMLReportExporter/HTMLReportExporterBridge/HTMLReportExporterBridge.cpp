@@ -36,9 +36,7 @@ const LPCWSTR HTMLREPORTER_NAME = L"Report Builder";
 // see ExporterBridge.h for the class definition
 CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr), m_hIcon(NULL)
 {
-	HMODULE hMod = LoadLibrary(L"HTMLReportExporterBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_HTMLREPORTER), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"HTMLReportExporterBridge.dll", IDI_HTMLREPORTER, 16, true);
 }
 
 void CHTMLReportExporterBridge::Release()

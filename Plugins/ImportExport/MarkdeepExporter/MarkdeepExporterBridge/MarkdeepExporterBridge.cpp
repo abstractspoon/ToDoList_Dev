@@ -36,9 +36,7 @@ const LPCWSTR MARKDEEPEXPORTER_NAME = L"Markdeep";
 // see ExporterBridge.h for the class definition
 CMarkdeepExporterBridge::CMarkdeepExporterBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
-	HMODULE hMod = LoadLibrary(L"MarkdeepExporterBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MARKDEEP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"MarkdeepExporterBridge.dll", IDI_MARKDEEP, 16, true);
 }
 
 void CMarkdeepExporterBridge::Release()

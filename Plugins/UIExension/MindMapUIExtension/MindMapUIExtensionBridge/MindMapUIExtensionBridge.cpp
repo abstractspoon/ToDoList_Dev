@@ -38,9 +38,7 @@ const LPCWSTR MINDMAP_NAME = L"Mind Map";
 
 CMindMapUIExtensionBridge::CMindMapUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"MindMapUIExtensionBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MINDMAP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"MindMapUIExtensionBridge.dll", IDI_MINDMAP, 16, true);
 }
 
 void CMindMapUIExtensionBridge::Release()
