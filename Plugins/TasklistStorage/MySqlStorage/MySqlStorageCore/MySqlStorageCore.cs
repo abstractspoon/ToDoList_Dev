@@ -10,9 +10,13 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MySqlStorage
 {
-	public class MySqlStorageDefinition
+	public class MySqlConnectionDefinition
 	{
-		public MySqlStorageDefinition(string encoded, string password)
+		public MySqlConnectionDefinition()
+		{
+		}
+
+		public MySqlConnectionDefinition(string encoded, string password)
 		{
 			if (Decode(encoded))
 			{
@@ -119,29 +123,20 @@ namespace MySqlStorage
             m_trans = trans;
         }
 
-		public MySqlStorageDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
+		public MySqlConnectionDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
-				var def = new MySqlStorageDefinition(tasklistId, password);
+				var def = new MySqlConnectionDefinition(tasklistId, password);
 
 				if (def.TasklistKey == 0)
 				{
-					var dialog = new ConnectionDetailsForm()
-					{
-						Server = def.Server,
-						Database = def.Database,
-						Username = def.Username,
-						Password = def.Password
-					};
+					var dialog = new ConnectionDefinitionForm(def);
 
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return null;
 
-					def.Server = dialog.Server;
-					def.Database = dialog.Database;
-					def.Username = dialog.Username;
-					def.Password = dialog.Password;
+					def = dialog.Definition;
 				}
 
 				using (var connection = def.OpenConnection())
@@ -169,11 +164,11 @@ namespace MySqlStorage
 			return null;
         }
 
-		public MySqlStorageDefinition StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
+		public MySqlConnectionDefinition StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
-				var def = new MySqlStorageDefinition(tasklistId, password);
+				var def = new MySqlConnectionDefinition(tasklistId, password);
 
 				if (string.IsNullOrEmpty(tasklistName))
 					tasklistName = def.TasklistName;
@@ -181,13 +176,7 @@ namespace MySqlStorage
 				// If this is a new tasklist or has no name prompt the user
 				if ((def.TasklistKey == 0) || string.IsNullOrEmpty(tasklistName))
 				{
-					var dialog = new ConnectionDetailsForm()
-					{
-						Server = def.Server,
-						Database = def.Database,
-						Username = def.Username,
-						Password = def.Password
-					};
+					var dialog = new ConnectionDefinitionForm(def);
 
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return null;

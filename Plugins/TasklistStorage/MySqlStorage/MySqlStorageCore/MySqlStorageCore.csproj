@@ -52,11 +52,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectionDetailsForm.cs">
+    <Compile Include="ConnectionDefinitionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConnectionDetailsForm.Designer.cs">
-      <DependentUpon>ConnectionDetailsForm.cs</DependentUpon>
+    <Compile Include="ConnectionDefinitionForm.Designer.cs">
+      <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MySqlStorageCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,8 +68,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ConnectionDetailsForm.resx">
-      <DependentUpon>ConnectionDetailsForm.cs</DependentUpon>
+    <EmbeddedResource Include="ConnectionDefinitionForm.resx">
+      <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,6 +1,6 @@
 ﻿namespace MySqlStorage
 {
-	partial class ConnectionDetailsForm
+	partial class ConnectionDefinitionForm
 	{
 		/// <summary>
 		/// Required designer variable.
