@@ -33,9 +33,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 // see ExporterBridge.h for the class definition
 CMySqlStorageBridge::CMySqlStorageBridge()
 {
-	HMODULE hMod = LoadLibrary(L"MySqlStorageBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MYSQL), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"MySqlStorageBridge.dll", IDI_MYSQL, 16, true);
 }
 
 void CMySqlStorageBridge::Release()
