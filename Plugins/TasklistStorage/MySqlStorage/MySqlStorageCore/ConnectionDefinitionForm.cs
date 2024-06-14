@@ -12,18 +12,18 @@ namespace MySqlStorage
 {
 	public partial class ConnectionDefinitionForm : Form
 	{
-		public ConnectionDefinitionForm(MySqlConnectionDefinition def)
+		public ConnectionDefinitionForm(ConnectionDefinition def)
 		{
 			InitializeComponent();
 
 			Definition = def;
 		}
 
-		public MySqlConnectionDefinition Definition
+		public ConnectionDefinition Definition
 		{
 			get
 			{
-				return new MySqlConnectionDefinition()
+				return new ConnectionDefinition()
 				{
 					Server = m_Server.Text,
 					Database = m_Database.Text,

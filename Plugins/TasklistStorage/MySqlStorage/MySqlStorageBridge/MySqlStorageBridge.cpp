@@ -74,12 +74,12 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 	
-	MySqlConnectionDefinition^ def = mysql->RetrieveTasklist(tasklistId.get(),
-															  password.get(),
-															  destPath.get(),
-															  bSilent,
-															  prefs.get(),
-															  gcnew String(szKey));
+	ConnectionDefinition^ def = mysql->RetrieveTasklist(tasklistId.get(),
+														password.get(),
+														destPath.get(),
+														bSilent,
+														prefs.get(),
+														gcnew String(szKey));
 	if (def == nullptr)
 		return false;
 
@@ -102,13 +102,13 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 
-	MySqlConnectionDefinition^ def = mysql->StoreTasklist(tasklistId.get(),
-														  srcTasks->GetProjectName(),
-														  password.get(),
-														  srcPath.get(),
-														  bSilent,
-														  prefs.get(),
-														  gcnew String(szKey));
+	ConnectionDefinition^ def = mysql->StoreTasklist(tasklistId.get(),
+													 srcTasks->GetProjectName(),
+													 password.get(),
+													 srcPath.get(),
+													 bSilent,
+													 prefs.get(),
+													 gcnew String(szKey));
 	if (def == nullptr)
 		return false;
 

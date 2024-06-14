@@ -58,14 +58,14 @@
     <Compile Include="ConnectionDefinitionForm.Designer.cs">
       <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MySqlDatabaseDefinition.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MySqlDatabaseDefinition.Designer.cs">
-      <DependentUpon>MySqlDatabaseDefinition.cs</DependentUpon>
-    </Compile>
     <Compile Include="MySqlStorageCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TasklistSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TasklistSelectionForm.Designer.cs">
+      <DependentUpon>TasklistSelectionForm.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
@@ -77,8 +77,8 @@
     <EmbeddedResource Include="ConnectionDefinitionForm.resx">
       <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MySqlDatabaseDefinition.resx">
-      <DependentUpon>MySqlDatabaseDefinition.cs</DependentUpon>
+    <EmbeddedResource Include="TasklistSelectionForm.resx">
+      <DependentUpon>TasklistSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

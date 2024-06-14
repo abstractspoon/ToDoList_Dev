@@ -8,15 +8,17 @@ using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using Abstractspoon.Tdl.PluginHelpers;
 
+////////////////////////////////////////////////////////////////////////
+
 namespace MySqlStorage
 {
-	public class MySqlConnectionDefinition
+	public class ConnectionDefinition
 	{
-		public MySqlConnectionDefinition()
+		public ConnectionDefinition()
 		{
 		}
 
-		public MySqlConnectionDefinition(string encoded, string password)
+		public ConnectionDefinition(string encoded, string password)
 		{
 			if (Decode(encoded))
 			{
@@ -43,16 +45,6 @@ namespace MySqlStorage
 
 		public uint TasklistKey = 0;
 		public string TasklistName;
-
-// 		public bool IsDefined
-// 		{
-// 			get 
-// 		}
-// 
-// 		public bool HasPassword
-// 		{
-// 
-// 		}
 
 		public string DisplayName
 		{
@@ -98,12 +90,11 @@ namespace MySqlStorage
 			return true;
 		}
 
-		public MySqlConnection OpenConnection()
+		public bool OpenConnection(MySqlConnection connection)
 		{
-			var connection = new MySqlConnection(ConnectionString);
-
 			try
 			{
+				connection.ConnectionString = ConnectionString;
 				connection.Open();
 			}
 			catch (Exception e)
@@ -111,39 +102,48 @@ namespace MySqlStorage
 
 			}
 
-			return connection;
+			return (connection.State == System.Data.ConnectionState.Open);
 		}
 	}
 
-[System.ComponentModel.DesignerCategory("")]
+	//////////////////////////////////////////////////////////////////////////
+
     public class MySqlStorageCore
     {
-        public MySqlStorageCore(Translator trans)
+        private Translator m_trans;
+
+		// ------------------------------------------------------------------
+
+		public MySqlStorageCore(Translator trans)
         {
             m_trans = trans;
         }
 
-		public MySqlConnectionDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
+		public ConnectionDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
-				var def = new MySqlConnectionDefinition(tasklistId, password);
+				var def = new ConnectionDefinition(tasklistId, password);
 
-				if (def.TasklistKey == 0)
+				using (var conn = new MySqlConnection())
 				{
-					var dialog = new ConnectionDefinitionForm(def);
-
-					if (dialog.ShowDialog() != DialogResult.OK)
+					if (!OpenConnection(conn, ref def))
 						return null;
 
-					def = dialog.Definition;
-				}
+					if (def.TasklistKey == 0)
+					{
+						// Prompt for tasklist 
+						var dialog = new TasklistSelectionForm(conn, def);
 
-				using (var connection = def.OpenConnection())
-				{
+						if (dialog.ShowDialog() != DialogResult.OK)
+							return null;
+
+						def.TasklistKey = dialog.SelectedTasklistKey;
+					}
+
 					var query = string.Format("SELECT Xml FROM Tasklists WHERE Id={0}", def.TasklistKey);
 
-					using (var command = new MySqlCommand(query, connection))
+					using (var command = new MySqlCommand(query, conn))
 					{
 						using (var reader = command.ExecuteReader())
 						{
@@ -164,38 +164,47 @@ namespace MySqlStorage
 			return null;
         }
 
-		public MySqlConnectionDefinition StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
+		public ConnectionDefinition StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
-				var def = new MySqlConnectionDefinition(tasklistId, password);
+				var def = new ConnectionDefinition(tasklistId, password);
 
 				if (string.IsNullOrEmpty(tasklistName))
 					tasklistName = def.TasklistName;
 
-				// If this is a new tasklist or has no name prompt the user
-				if ((def.TasklistKey == 0) || string.IsNullOrEmpty(tasklistName))
+				// If this is a new tasklist or not silent, prompt for connection details
+				if ((def.TasklistKey == 0) || !bSilent)
 				{
 					var dialog = new ConnectionDefinitionForm(def);
 
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return null;
+				}
+
+				if (string.IsNullOrWhiteSpace(tasklistName))
+				{
+					// Prompt for unique name
+					// TODO
 
 					tasklistName = "Untitled";
 				}
-					
-				using (var connection = def.OpenConnection())
+
+				using (var conn = new MySqlConnection())
 				{
+					if (!OpenConnection(conn, ref def))
+						return null;
+
 					if (def.TasklistKey == 0)
 					{
 						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", tasklistName, File.ReadAllText(srcPath));
 
-						using (var command = new MySqlCommand(query, connection))
+						using (var command = new MySqlCommand(query, conn))
 						{
 							command.ExecuteNonQuery();
 						}
 
-						using (var command = new MySqlCommand("SELECT LAST_INSERT_ID()", connection))
+						using (var command = new MySqlCommand("SELECT LAST_INSERT_ID()", conn))
 						{
 							using (var reader = command.ExecuteReader())
 							{
@@ -206,9 +215,9 @@ namespace MySqlStorage
 					}
 					else
 					{
-						string query = string.Format("UPDATE Tasklists SET Name='{0}' Xml='{1}' WHERE Id={2}", tasklistName, File.ReadAllText(srcPath), def.TasklistKey);
+						string query = string.Format("UPDATE Tasklists SET Name='{0}', Xml='{1}' WHERE Id={2}", tasklistName, File.ReadAllText(srcPath), def.TasklistKey);
 
-						using (var command = new MySqlCommand(query, connection))
+						using (var command = new MySqlCommand(query, conn))
 						{
 							command.ExecuteNonQuery();
 						}
@@ -219,14 +228,30 @@ namespace MySqlStorage
 			}
 			catch (Exception e)
 			{
-
+#if DEBUG
+				MessageBox.Show(e.ToString());
+#endif
 			}
 
 			return null;
         }
 
-        // --------------------------------------------------------------------------------------
+		// ------------------------------------------------------------------
 
-        private Translator m_trans;
-    }
+		bool OpenConnection(MySqlConnection conn, ref ConnectionDefinition def)
+		{
+			while (!def.OpenConnection(conn))
+			{
+				// Prompt for connection details
+				var dialog = new ConnectionDefinitionForm(def);
+
+				if (dialog.ShowDialog() != DialogResult.OK)
+					return false;
+
+				def = dialog.Definition;
+			}
+
+			return true;
+		}
+	}
 }
