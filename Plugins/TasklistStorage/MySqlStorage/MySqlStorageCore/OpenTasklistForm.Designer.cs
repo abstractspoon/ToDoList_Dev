@@ -89,8 +89,9 @@
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
 			this.m_Tasklists.TabIndex = 23;
+			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
-			// TasklistSelectionForm
+			// OpenTasklistForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -103,7 +104,7 @@
 			this.Controls.Add(this.label2);
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "TasklistSelectionForm";
+			this.Name = "OpenTasklistForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "MySQL Open Tasklist";

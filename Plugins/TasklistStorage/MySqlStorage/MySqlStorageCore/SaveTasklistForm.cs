@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Drawing;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,8 +32,8 @@ namespace MySqlStorage
 
 				if (tasklist != null)
 				{
-					if (m_Tasklist.Text.Equals(tasklist.Name, StringComparison.InvariantCultureIgnoreCase))
-						return tasklist;
+					Debug.Assert(m_Tasklist.Text.Equals(tasklist.Name, StringComparison.InvariantCultureIgnoreCase));
+					return tasklist;
 				}
 
 				// else
@@ -58,6 +58,15 @@ namespace MySqlStorage
 			{
 				if (!m_Tasklist.Text.Equals(tasklist.Name, StringComparison.InvariantCultureIgnoreCase))
 					m_Tasklist.Text = tasklist.Name;
+			}
+		}
+
+		private void OnDoubleClickTaskLists(object sender, MouseEventArgs e)
+		{
+			if (m_Tasklists.IndexFromPoint(e.X, e.Y) != -1)
+			{
+				DialogResult = DialogResult.OK;
+				Close();
 			}
 		}
 	}

@@ -46,6 +46,7 @@
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
 			this.m_Tasklists.TabIndex = 29;
 			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
+			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
 			// OK
 			// 

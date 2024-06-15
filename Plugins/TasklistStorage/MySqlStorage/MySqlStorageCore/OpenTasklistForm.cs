@@ -29,6 +29,15 @@ namespace MySqlStorage
 		{
 			get { return (m_Tasklists.SelectedItem as TasklistInfo); }
 		}
+
+		private void OnDoubleClickTaskLists(object sender, MouseEventArgs e)
+		{
+			if (m_Tasklists.IndexFromPoint(e.X, e.Y) != -1)
+			{
+				DialogResult = DialogResult.OK;
+				Close();
+			}
+		}
 	}
 
 	// ------------------------------------------------------------
