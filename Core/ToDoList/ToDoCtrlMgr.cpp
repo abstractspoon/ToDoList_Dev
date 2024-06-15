@@ -179,6 +179,9 @@ void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 		// set filename and alternate pref name to be the display name
 		pTDC->SetFilePath(info.szDisplayName);
 		pTDC->SetAlternatePreferencesKey(info.szDisplayName);
+
+		if (info.HasTasklistName())
+			pTDC->SetProjectName(info.szTasklistName);
 	}
 	else
 	{
@@ -367,6 +370,8 @@ BOOL CToDoCtrlMgr::GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const
 		return FALSE;
 
 	info = GetTDCItem(nIndex).storageinfo;
+	info.SetTasklistName(GetFriendlyProjectName(nIndex));
+
 	return TRUE;
 }
 

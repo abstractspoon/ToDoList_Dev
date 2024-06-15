@@ -36,7 +36,9 @@ TSM_TASKLISTINFO::TSM_TASKLISTINFO(const TSM_TASKLISTINFO& info)
 const TSM_TASKLISTINFO& TSM_TASKLISTINFO::operator=(const TSM_TASKLISTINFO& info)
 {
 	sStorageID = info.sStorageID;
+
 	lstrcpyn(szTasklistID, info.szTasklistID, ITS_TASKLISTID_LEN);
+	lstrcpyn(szTasklistName, info.szTasklistName, _MAX_PATH);
 	lstrcpyn(szLocalFileName, info.szLocalFileName, _MAX_PATH);
 	lstrcpyn(szDisplayName, info.szDisplayName, _MAX_PATH);
 	lstrcpyn(szPassword, info.szPassword, ITS_PASSWORD_LEN);
@@ -48,6 +50,7 @@ void TSM_TASKLISTINFO::Reset()
 {
 	sStorageID.Empty();
 	szTasklistID[0] = 0;
+	szTasklistName[0] = 0;
 	szLocalFileName[0] = 0;
 	szDisplayName[0] = 0;
 	szPassword[0] = 0;
@@ -60,17 +63,20 @@ BOOL TSM_TASKLISTINFO::HasInfo() const
 			szDisplayName[0]);
 }
 
-BOOL TSM_TASKLISTINFO::HasLocalFilePath() const
+BOOL TSM_TASKLISTINFO::HasTasklistName() const
 {
-	return (szLocalFileName[0] != 0);
+	return !Misc::IsEmpty(szTasklistName);
 }
 
-// void TSM_TASKLISTINFO::InitTempLocalFilePath(LPCTSTR szFilename, LPCTSTR szExt)
-// {
-// 	ASSERT(!HasLocalFilePath());
-// 
-// 	lstrcpy(szLocalFileName, FileMisc::GetTempFileName(szFilename, szExt));
-// }
+void TSM_TASKLISTINFO::SetTasklistName(LPCTSTR szName)
+{
+	lstrcpyn(szTasklistName, szName, _MAX_PATH);
+}
+
+BOOL TSM_TASKLISTINFO::HasLocalFilePath() const
+{
+	return !Misc::IsEmpty(szLocalFileName);
+}
 
 void TSM_TASKLISTINFO::SetLocalFilePath(LPCTSTR szFilePath)
 {
@@ -102,37 +108,11 @@ CString TSM_TASKLISTINFO::EncodeInfo(BOOL bIncPassword) const
 CString TSM_TASKLISTINFO::Decode(const CString& sData)
 {
 	return Base64Coder().Decode(sData);
-// 	Base64Coder b64;
-// 
-// 	// first reverse the conversion performed by 
-// 	// Base64Coder::EncodedMessage in the Encode() method below
-// #ifdef _UNICODE
-// 
-// 	DWORD dwLen = sData.GetLength();
-// 	unsigned char* pData = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sData);
-// 	b64.Decode(pData, dwLen);
-// 	delete [] pData;
-// 
-// 	return (LPCTSTR)b64.DecodedMessage(dwLen);
-// 
-// #else
-// 
-// 	return b64.Decode(sData);
-// 
-// #endif
 }
 
 CString TSM_TASKLISTINFO::Encode(const CString& sData)
 {
 	return Base64Coder::Encode(sData);
-// 	Base64Coder b64;
-// 
-// 	// encode as unsigned char
-// 	DWORD dwLen = sData.GetLength() * sizeof(TCHAR);
-// 	b64.Encode((PBYTE)(LPCTSTR)sData, dwLen);
-// 
-// 	// this will convert encoded bytes to wide string as necessary
-// 	return b64.EncodedMessage();
 }
 
 BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)

@@ -46,14 +46,6 @@ namespace MySqlStorage
 		public uint TasklistKey = 0;
 		public string TasklistName;
 
-		public string DisplayName
-		{
-			get
-			{
-				return string.Format("{0}@{1}/{2}", Username, Server, Database);
-			}
-		}
-
 		public string ConnectionString
 		{
 			get

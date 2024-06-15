@@ -26,6 +26,9 @@ public:
 protected:
 	HICON m_hIcon;
 	ITransText* m_pTT;
+
+protected:
+	void CopyInfo(MySqlStorage::ConnectionDefinition^ fromDef, ITS_TASKLISTINFO* pToFInfo);
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

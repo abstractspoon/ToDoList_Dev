@@ -19,9 +19,9 @@ namespace MySqlStorage
 			InitializeComponent();
 
 			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
-			m_Tasklist.Text = def.TasklistName;
 
 			m_Tasklists.Initialise(conn, false);
+			m_Tasklist.Text = def.TasklistName;
 		}
 
 		public TasklistInfo TasklistInfo
