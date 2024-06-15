@@ -40,5 +40,25 @@ namespace MySqlStorage
 				return new TasklistInfo() { Name = m_Tasklist.Text };
 			}
 		}
+
+		private void OnTasklistTextChanged(object sender, EventArgs e)
+		{
+			// If the typed text matches one of the existing tasklists
+			// select the tasklist else null the selection
+			m_Tasklists.SelectedItem = (m_Tasklists.FindItem(m_Tasklist.Text));
+		}
+
+		private void OnTasklistsSelectionChange(object sender, EventArgs e)
+		{
+			// If the new selection does not match the current text
+			// change the text to the selection
+			var tasklist = (m_Tasklists.SelectedItem as TasklistInfo);
+
+			if (tasklist != null)
+			{
+				if (!m_Tasklist.Text.Equals(tasklist.Name, StringComparison.InvariantCultureIgnoreCase))
+					m_Tasklist.Text = tasklist.Name;
+			}
+		}
 	}
 }

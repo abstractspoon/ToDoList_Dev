@@ -67,6 +67,18 @@ namespace MySqlStorage
 			if (selectFirst && (Items.Count > 0))
 				SelectedIndex = 0;
 		}
+
+		public object FindItem(string name)
+		{
+			foreach (var item in Items)
+			{
+				if (name.Equals(item.ToString(), StringComparison.InvariantCultureIgnoreCase))
+					return item;
+			}
+
+			// else
+			return null;
+		}
 	}
 
 }

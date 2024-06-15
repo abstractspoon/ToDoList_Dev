@@ -45,6 +45,7 @@
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
 			this.m_Tasklists.TabIndex = 29;
+			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
 			// 
 			// OK
 			// 
@@ -98,6 +99,7 @@
 			this.m_Tasklist.Name = "m_Tasklist";
 			this.m_Tasklist.Size = new System.Drawing.Size(195, 20);
 			this.m_Tasklist.TabIndex = 30;
+			this.m_Tasklist.TextChanged += new System.EventHandler(this.OnTasklistTextChanged);
 			// 
 			// label1
 			// 
