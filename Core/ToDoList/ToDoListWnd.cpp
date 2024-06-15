@@ -2058,7 +2058,6 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 
 					// else make sure the file is not readonly
 					sFilePath = dialog.GetPathName();
-
 				}
 
 				// do the save

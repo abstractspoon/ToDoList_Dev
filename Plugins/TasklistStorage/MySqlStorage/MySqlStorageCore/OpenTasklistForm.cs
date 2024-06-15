@@ -15,15 +15,38 @@ using MySql.Data.MySqlClient;
 namespace MySqlStorage
 {
 
-	public partial class TasklistSelectionForm : Form
+	public partial class OpenTasklistForm : Form
 	{
-		public TasklistSelectionForm(MySqlConnection conn, ConnectionDefinition def)
+		public OpenTasklistForm(MySqlConnection conn, ConnectionDefinition def)
 		{
 			InitializeComponent();
 
 			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
+			m_Tasklists.Initialise(conn, true);
+		}
 
-			// Populate the combobox
+		public TasklistInfo TasklistInfo
+		{
+			get { return (m_Tasklists.SelectedItem as TasklistInfo); }
+		}
+	}
+
+	// ------------------------------------------------------------
+
+	public class TasklistInfo
+	{
+		public override string ToString() { return Name; }
+
+		public uint Key = 0;
+		public string Name;
+	}
+	
+	// ------------------------------------------------------------
+
+	internal class TasklistsListBox : ListBox
+	{
+		public void Initialise(MySqlConnection conn, bool selectFirst)
+		{
 			using (var command = new MySqlCommand("SELECT Id, Name FROM Tasklists", conn))
 			{
 				using (var reader = command.ExecuteReader())
@@ -36,37 +59,14 @@ namespace MySqlStorage
 							Name = reader.GetString(1)
 						};
 
-						m_Tasklists.Items.Add(tasklist);
+						Items.Add(tasklist);
 					}
 				}
 			}
 
-			// If there is only one tasklist, select it
-			if (m_Tasklists.Items.Count == 1)
-				m_Tasklists.SelectedIndex = 0;
+			if (selectFirst && (Items.Count > 0))
+				SelectedIndex = 0;
 		}
-
-		public uint SelectedTasklistKey
-		{
-			get
-			{
-				if (m_Tasklists.SelectedItem != null)
-					return (m_Tasklists.SelectedItem as TasklistInfo).Key; 
-
-				return 0;
-			}
-
-		}
-	}
-
-	// ------------------------------------------------------------
-
-	class TasklistInfo
-	{
-		public override string ToString() { return Name; }
-
-		public uint Key;
-		public string Name;
 	}
 
 }

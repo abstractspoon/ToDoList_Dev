@@ -24,18 +24,18 @@ namespace MySqlStorage
 			{
 				Password = password;
 			}
-#if DEBUG
 			else
 			{
-				Server = "www.abstractspoon.com";
+#if DEBUG
+				Server = "127.0.0.1";//"www.abstractspoon.com";
 				Database = "Tasklists";
-				Username = "abstractspoon";
-				Password = "&F*VQ]3p*z8B";
+				Username = "root";//"abstractspoon";
+				Password = "password";//"&F*VQ]3p*z8B";
 
 				TasklistKey = 0;
-				TasklistName = "Untitled";
-			}
+				TasklistName = "";
 #endif
+			}
 		}
 
 		public string Server;
@@ -50,7 +50,7 @@ namespace MySqlStorage
 		{
 			get
 			{
-				return string.Format("{0}/{1}({2})", Server, Database, Username);
+				return string.Format("{0}@{1}/{2}", Username, Server, Database);
 			}
 		}
 
@@ -133,12 +133,12 @@ namespace MySqlStorage
 					if (def.TasklistKey == 0)
 					{
 						// Prompt for tasklist 
-						var dialog = new TasklistSelectionForm(conn, def);
+						var dialog = new OpenTasklistForm(conn, def);
 
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
 
-						def.TasklistKey = dialog.SelectedTasklistKey;
+						def.TasklistKey = dialog.TasklistInfo.Key;
 					}
 
 					var query = string.Format("SELECT Xml FROM Tasklists WHERE Id={0}", def.TasklistKey);
@@ -170,34 +170,28 @@ namespace MySqlStorage
 			{
 				var def = new ConnectionDefinition(tasklistId, password);
 
-				if (string.IsNullOrEmpty(tasklistName))
-					tasklistName = def.TasklistName;
-
-				// If this is a new tasklist or not silent, prompt for connection details
-				if ((def.TasklistKey == 0) || !bSilent)
-				{
-					var dialog = new ConnectionDefinitionForm(def);
-
-					if (dialog.ShowDialog() != DialogResult.OK)
-						return null;
-				}
-
-				if (string.IsNullOrWhiteSpace(tasklistName))
-				{
-					// Prompt for unique name
-					// TODO
-
-					tasklistName = "Untitled";
-				}
-
 				using (var conn = new MySqlConnection())
 				{
 					if (!OpenConnection(conn, ref def))
 						return null;
 
+					if (string.IsNullOrEmpty(def.TasklistName))
+						def.TasklistName = tasklistName;
+
+					// Always prompt for tasklist name
+					var dialog = new SaveTasklistForm(conn, def);
+
+					if (dialog.ShowDialog() != DialogResult.OK)
+						return null;
+
+					var tasklist = dialog.TasklistInfo;
+
+					def.TasklistKey = tasklist.Key;
+					def.TasklistName = tasklist.Name;
+
 					if (def.TasklistKey == 0)
 					{
-						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", tasklistName, File.ReadAllText(srcPath));
+						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", def.TasklistName, File.ReadAllText(srcPath));
 
 						using (var command = new MySqlCommand(query, conn))
 						{
@@ -215,7 +209,7 @@ namespace MySqlStorage
 					}
 					else
 					{
-						string query = string.Format("UPDATE Tasklists SET Name='{0}', Xml='{1}' WHERE Id={2}", tasklistName, File.ReadAllText(srcPath), def.TasklistKey);
+						string query = string.Format("UPDATE Tasklists SET Name='{0}', Xml='{1}' WHERE Id={2}", def.TasklistName, File.ReadAllText(srcPath), def.TasklistKey);
 
 						using (var command = new MySqlCommand(query, conn))
 						{
