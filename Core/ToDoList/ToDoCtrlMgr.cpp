@@ -163,6 +163,9 @@ void CToDoCtrlMgr::TDCITEM::RefreshPathType()
 void CToDoCtrlMgr::TDCITEM::ClearStorageDetails()
 {
 	storageinfo.Reset();
+	bLoaded = FALSE;
+
+	pTDC->SetFilePath(_T(""));
 	pTDC->SetAlternatePreferencesKey(_T(""));
 }
 
@@ -171,13 +174,16 @@ void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 	if (info.HasInfo())
 	{
 		storageinfo = info;
+		bLoaded = TRUE;
 
 		// set filename and alternate pref name to be the display name
 		pTDC->SetFilePath(info.szDisplayName);
 		pTDC->SetAlternatePreferencesKey(info.szDisplayName);
 	}
 	else
+	{
 		ClearStorageDetails();
+	}
 }
 
 CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
@@ -876,7 +882,7 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 		}
 
 		// cleanup temp storage file
-		if (tdci.UsesStorage())
+		if (tdci.UsesStorage() && FileMisc::FileExists(tdci.storageinfo.szLocalFileName))
 		{
 			ASSERT(FileMisc::IsTempFilePath(tdci.storageinfo.szLocalFileName));
 			FileMisc::DeleteFile(tdci.storageinfo.szLocalFileName, TRUE);
