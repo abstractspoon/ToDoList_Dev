@@ -65,9 +65,11 @@ namespace MySqlStorage
 				connection.ConnectionString = ConnectionString;
 				connection.Open();
 			}
-			catch (Exception /*e*/)
+			catch (Exception e)
 			{
-
+#if DEBUG
+				MessageBox.Show(e.ToString());
+#endif
 			}
 
 			return (connection.State == System.Data.ConnectionState.Open);
@@ -186,9 +188,11 @@ namespace MySqlStorage
 					}
 				}
 			}
-			catch(Exception /*e*/)
+			catch(Exception e)
 			{
-
+#if DEBUG
+				MessageBox.Show(e.ToString());
+#endif
 			}
 
 			return null;
