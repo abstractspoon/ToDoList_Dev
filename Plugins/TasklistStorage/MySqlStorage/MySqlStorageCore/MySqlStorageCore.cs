@@ -32,6 +32,11 @@ namespace MySqlStorage
 				Username = "root";
 				Password = "password";
 
+				TasklistsTable = "Tasklists";
+				KeyColumn = "Id";
+				NameColumn = "Name";
+				XmlColumn = "Xml";
+
 				TasklistKey = 0;
 				TasklistName = "";
 #endif
@@ -43,31 +48,67 @@ namespace MySqlStorage
 		public string Username;
 		public string Password;
 
+		public string TasklistsTable;
+		public string KeyColumn;
+		public string NameColumn;
+		public string XmlColumn;
+
 		public uint TasklistKey = 0;
 		public string TasklistName;
 
 		public string TasklistId { get { return Encode(); } }
 
-		public string ConnectionString
+		public bool OpenConnection(MySqlConnection connection)
+		{
+			try
+			{
+				connection.ConnectionString = ConnectionString;
+				connection.Open();
+			}
+			catch (Exception /*e*/)
+			{
+
+			}
+
+			return (connection.State == System.Data.ConnectionState.Open);
+		}
+
+		// --------------------------------------------------------
+
+		private string ConnectionString
 		{
 			get
 			{
 				return string.Format("Server={0};Database={1};Uid={2};Pwd={3};", 
-									Server, Database, Username, Password);
+									 Server, 
+									 Database, 
+									 Username, 
+									 Password);
 			}
 		}
 
 		private string Encode()
 		{
-			return string.Format("{0}::{1}::{2}::{3}::{4}",
-								TasklistKey, TasklistName, Server, Database, Username);
+			return string.Join("::", 
+				new object[] 
+				{
+					TasklistKey,
+					TasklistName,
+					Server,
+					Database,
+					Username,
+					TasklistsTable,
+					KeyColumn,
+					NameColumn,
+					XmlColumn
+				});
 		}
 
 		private bool Decode(string encoded)
 		{
 			var parts = encoded.Split(new[] {"::"}, StringSplitOptions.None);
 
-			if (parts.Length != 5)
+			if (parts.Length < 9)
 				return false;
 
 			if (!uint.TryParse(parts[0], out TasklistKey) || (TasklistKey == 0))
@@ -80,23 +121,12 @@ namespace MySqlStorage
 			Server = parts[2];
 			Database = parts[3];
 			Username = parts[4];
+			TasklistsTable = parts[5];
+			KeyColumn = parts[6];
+			NameColumn = parts[7];
+			XmlColumn = parts[8];
 
 			return true;
-		}
-
-		public bool OpenConnection(MySqlConnection connection)
-		{
-			try
-			{
-				connection.ConnectionString = ConnectionString;
-				connection.Open();
-			}
-			catch (Exception e)
-			{
-
-			}
-
-			return (connection.State == System.Data.ConnectionState.Open);
 		}
 	}
 
@@ -138,7 +168,10 @@ namespace MySqlStorage
 						def.TasklistName = tasklist.Name;
 					}
 
-					var query = string.Format("SELECT Xml FROM Tasklists WHERE Id={0}", def.TasklistKey);
+					var query = string.Format("SELECT {0} FROM {1} WHERE Id={2}", 
+											  def.XmlColumn, 
+											  def.TasklistsTable, 
+											  def.TasklistKey);
 
 					using (var command = new MySqlCommand(query, conn))
 					{
@@ -153,7 +186,7 @@ namespace MySqlStorage
 					}
 				}
 			}
-			catch(Exception e)
+			catch(Exception /*e*/)
 			{
 
 			}
@@ -188,7 +221,12 @@ namespace MySqlStorage
 
 					if (def.TasklistKey == 0)
 					{
-						string query = string.Format("INSERT INTO Tasklists (Name, Xml) VALUES('{0}', '{1}')", def.TasklistName, File.ReadAllText(srcPath));
+						string query = string.Format("INSERT INTO {0} ({1}, {2}) VALUES('{3}', '{4}')", 
+													 def.TasklistsTable,
+													 def.NameColumn,
+													 def.XmlColumn,
+							                         def.TasklistName, 
+													 File.ReadAllText(srcPath));
 
 						using (var command = new MySqlCommand(query, conn))
 						{
@@ -206,7 +244,13 @@ namespace MySqlStorage
 					}
 					else
 					{
-						string query = string.Format("UPDATE Tasklists SET Name='{0}', Xml='{1}' WHERE Id={2}", def.TasklistName, File.ReadAllText(srcPath), def.TasklistKey);
+						string query = string.Format("UPDATE {0} SET {1}='{2}', {3}='{4}' WHERE Id={5}", 
+													 def.TasklistsTable,
+													 def.NameColumn,
+													 def.TasklistName, 
+													 def.XmlColumn,
+													 File.ReadAllText(srcPath), 
+													 def.TasklistKey);
 
 						using (var command = new MySqlCommand(query, conn))
 						{
