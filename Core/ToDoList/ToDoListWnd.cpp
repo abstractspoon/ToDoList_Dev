@@ -2015,14 +2015,26 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 	{
 		DOPROGRESS(IDS_SAVINGPROGRESS);
 
+		// Cache storage details
+		TSM_TASKLISTINFO infoPrev = storageInfo;
+
 		// init storage local path to temp path
 		storageInfo.SetLocalFilePath(FileMisc::GetTempFilePath());
 
 		// save to file and then to storage
 		if (tdc.Save(tasks, storageInfo.szLocalFileName, bFlush) == TDCF_SUCCESS)
 		{
-			if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs))
-				nResult = TDCF_OTHER;
+			if (m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs))
+			{
+				m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
+			}
+			else
+			{
+				m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);
+
+				// Assume plugin has handled error reporting
+				return TDCF_OTHER;
+			}
 		}
 	}
 	else // we're file-based
@@ -2058,7 +2070,6 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 
 					// else make sure the file is not readonly
 					sFilePath = dialog.GetPathName();
-
 				}
 
 				// do the save
@@ -4621,7 +4632,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 
 			// must set this up before loading tasklist
 			// so that pTDC can access correct prefs
-			pTDC->SetAlternatePreferencesKey(storageInfo.szDisplayName);
+			pTDC->SetAlternatePreferencesKey(storageInfo.szDisplayPath);
 		}
 		break;
 		
@@ -7587,7 +7598,7 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 		TDC_FILE nOpen = OpenTaskList(sFilePath, TRUE);
 
 		if (nOpen != TDCF_SUCCESS)
-			HandleLoadTasklistError(nOpen, storageInfo.szDisplayName);
+			HandleLoadTasklistError(nOpen, storageInfo.szDisplayPath);
 		
 		// refresh UI
 		UpdateCaption();
@@ -7656,6 +7667,8 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 		return;
 	}
 
+	// Cache storage details
+	TSM_TASKLISTINFO infoPrev = storageInfo;
 	storageInfo.SetLocalFilePath(sTempPath);
 		
 	// prevent this save triggering a reload
@@ -7669,6 +7682,7 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 		if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, nStorage, prefs))
 		{
 			// assume storage plugin has handled error
+			m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);
 			return;
 		}
 	}

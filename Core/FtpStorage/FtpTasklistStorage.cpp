@@ -83,13 +83,7 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
 		// return information to caller 
-		lstrcpyn(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
-		lstrcpyn(pFInfo->szDisplayName, rf.FormatRemotePath(sRemotePath), _MAX_PATH);
-		lstrcpyn(pFInfo->szPassword, rf.GetPassword(), ITS_PASSWORD_LEN);
-
-		CString sTaskID = rf.GetServer() + _T("::") + sRemotePath + _T("::") + rf.GetUsername();
-		lstrcpyn(pFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
-
+		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;
 	}
 
@@ -132,17 +126,24 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
 		// return information to caller 
-		lstrcpyn(pFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
-		lstrcpyn(pFInfo->szDisplayName, rf.FormatRemotePath(sRemotePath), _MAX_PATH);
-		lstrcpyn(pFInfo->szPassword, rf.GetPassword(), ITS_PASSWORD_LEN);
-		
-		CString sTaskID = rf.GetServer() + _T("::") + sRemotePath + _T("::") + rf.GetUsername();
-		lstrcpyn(pFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
-		
+		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;
 	}
 	
 	return false;
+}
+
+void CFtpTasklistStorageApp::CopyInfo(const CString& sLocalPath, const CString& sRemotePath, const CRemoteFile& rmFrom, ITS_TASKLISTINFO* pToFInfo)
+{
+	lstrcpyn(pToFInfo->szLocalFileName, sLocalPath, _MAX_PATH);
+	lstrcpyn(pToFInfo->szPassword, rmFrom.GetPassword(), ITS_PASSWORD_LEN);
+	lstrcpyn(pToFInfo->szTasklistName, FileMisc::GetFileNameFromPath(sRemotePath, FALSE), _MAX_PATH);
+
+	CString sDisplayPath = rmFrom.FormatRemotePath(sRemotePath);
+	lstrcpyn(pToFInfo->szDisplayPath, sDisplayPath, _MAX_PATH);
+
+	CString sTasklistID = rmFrom.GetServer() + _T("::") + sRemotePath + _T("::") + rmFrom.GetUsername();
+	lstrcpyn(pToFInfo->szTasklistID, sTasklistID, ITS_TASKLISTID_LEN);
 }
 
 void CFtpTasklistStorageApp::SetLocalizer(ITransText* pTT)

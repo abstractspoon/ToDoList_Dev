@@ -1539,32 +1539,30 @@ CString FileMisc::GetTempFolder()
 	TCHAR szTempPath[MAX_PATH+1] = { 0 };
 	
 	if (::GetTempPath(MAX_PATH, szTempPath))
-		return CString(szTempPath);
+		::GetLongPathName(szTempPath, szTempPath, MAX_PATH);
+	else
+		lstrcpy(szTempPath, _T("C:\\Temp"));
 
-	// else
-	return _T("C:\\Temp");
+	return szTempPath;
 }
 
 CString FileMisc::GetTempFilePath(LPCTSTR szPrefix, UINT uUnique)
 {
-	TCHAR szTempFile[MAX_PATH+1] = { 0 }, szTempPath[MAX_PATH+1] = { 0 };
+	CString sTempPath = GetTempFolder();
+	TCHAR szTempFile[MAX_PATH+1] = { 0 };
 	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-	{
-		if (::GetTempFileName(szTempPath, szPrefix, uUnique, szTempFile))
-			return szTempFile;
-	}
+	if (::GetTempFileName(sTempPath, szPrefix, uUnique, szTempFile))
+		::GetLongPathName(szTempFile, szTempFile, MAX_PATH);
+	else
+		szTempFile[0] = 0;
 
-	return "";
+	return szTempFile;
 }
 
 CString FileMisc::GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt)
 {
-	CString sTempFile;
-	TCHAR szTempPath[MAX_PATH+1] = { 0 };
-	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-		MakePath(sTempFile, NULL, szTempPath, szFilename, szExt);
+	CString sTempFile, sTempPath = GetTempFolder();
+	MakePath(sTempFile, NULL, sTempPath, szFilename, szExt);
 
 	return sTempFile;
 }

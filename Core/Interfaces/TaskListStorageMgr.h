@@ -23,6 +23,9 @@ struct TSM_TASKLISTINFO : ITS_TASKLISTINFO
 	void Reset();
 	BOOL HasInfo() const;
 
+	BOOL HasTasklistName() const;
+	void SetTasklistName(LPCTSTR szName);
+
 	BOOL HasLocalFilePath() const;
 	void SetLocalFilePath(LPCTSTR szFilePath);
 	void ClearLocalFilePath();
