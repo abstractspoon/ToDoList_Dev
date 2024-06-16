@@ -219,42 +219,43 @@ namespace MySqlStorage
 					def.TasklistKey = tasklist.Key;
 					def.TasklistName = tasklist.Name;
 
-					if (def.TasklistKey == 0)
+					bool newTasklist = (def.TasklistKey == 0);
+					string query;
+
+					if (newTasklist)
 					{
-						string query = string.Format("INSERT INTO {0} ({1}, {2}) VALUES('{3}', '{4}')", 
-													 def.TasklistsTable,
-													 def.NameColumn,
-													 def.XmlColumn,
-							                         def.TasklistName, 
-													 File.ReadAllText(srcPath));
+						query = string.Format("INSERT INTO {0} ({1}, {2}) VALUES(@Name, @Xml)", 
+						 					  def.TasklistsTable,
+											  def.NameColumn,
+											  def.XmlColumn);
+					}
+					else
+					{
+						query = string.Format("UPDATE {0} SET {1}=@Name, {2}=@Xml WHERE Id={3}",
+											  def.TasklistsTable,
+											  def.NameColumn,
+											  def.XmlColumn,
+											  def.TasklistKey);
+					}
 
-						using (var command = new MySqlCommand(query, conn))
-						{
-							command.ExecuteNonQuery();
-						}
+					using (var command = new MySqlCommand(query, conn))
+					{
+						command.Parameters.AddWithValue("@Name", def.TasklistName);
+						command.Parameters.AddWithValue("@Xml", File.ReadAllText(srcPath));
 
-						using (var command = new MySqlCommand("SELECT LAST_INSERT_ID()", conn))
+						command.ExecuteNonQuery();
+
+						if (newTasklist)
 						{
+							// Retrieve the new primary key
+							command.CommandText = "SELECT LAST_INSERT_ID()";
+							command.Parameters.Clear();
+
 							using (var reader = command.ExecuteReader())
 							{
 								if (reader.Read())
 									uint.TryParse(reader.GetString(0), out def.TasklistKey);
 							}
-						}
-					}
-					else
-					{
-						string query = string.Format("UPDATE {0} SET {1}='{2}', {3}='{4}' WHERE Id={5}", 
-													 def.TasklistsTable,
-													 def.NameColumn,
-													 def.TasklistName, 
-													 def.XmlColumn,
-													 File.ReadAllText(srcPath), 
-													 def.TasklistKey);
-
-						using (var command = new MySqlCommand(query, conn))
-						{
-							command.ExecuteNonQuery();
 						}
 					}
 				}
