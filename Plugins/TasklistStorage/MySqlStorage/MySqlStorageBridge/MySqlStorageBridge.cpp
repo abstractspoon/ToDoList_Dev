@@ -119,7 +119,7 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 
 void CMySqlStorageBridge::CopyInfo(ConnectionDefinition^ fromDef, ITS_TASKLISTINFO* pToFInfo)
 {
-	lstrcpy(pToFInfo->szTasklistID, MarshalledString(fromDef->Encode()));
+	lstrcpy(pToFInfo->szTasklistID, MarshalledString(fromDef->TasklistId));
 	lstrcpy(pToFInfo->szTasklistName, MarshalledString(fromDef->TasklistName));
 	lstrcpy(pToFInfo->szPassword, MarshalledString(fromDef->Password));
 

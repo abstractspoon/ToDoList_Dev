@@ -46,6 +46,8 @@ namespace MySqlStorage
 		public uint TasklistKey = 0;
 		public string TasklistName;
 
+		public string TasklistId { get { return Encode(); } }
+
 		public string ConnectionString
 		{
 			get
@@ -55,13 +57,13 @@ namespace MySqlStorage
 			}
 		}
 
-		public string Encode()
+		private string Encode()
 		{
 			return string.Format("{0}::{1}::{2}::{3}::{4}",
 								TasklistKey, TasklistName, Server, Database, Username);
 		}
 
-		public bool Decode(string encoded)
+		private bool Decode(string encoded)
 		{
 			var parts = encoded.Split(new[] {"::"}, StringSplitOptions.None);
 
