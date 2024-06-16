@@ -139,11 +139,11 @@ void CFtpTasklistStorageApp::CopyInfo(const CString& sLocalPath, const CString& 
 	lstrcpyn(pToFInfo->szPassword, rmFrom.GetPassword(), ITS_PASSWORD_LEN);
 	lstrcpyn(pToFInfo->szTasklistName, FileMisc::GetFileNameFromPath(sRemotePath, FALSE), _MAX_PATH);
 
-	CString sDisplayPath = (rmFrom.GetUsername() + '@' + rmFrom.FormatRemotePath(sRemotePath));
+	CString sDisplayPath = rmFrom.FormatRemotePath(sRemotePath);
 	lstrcpyn(pToFInfo->szDisplayPath, sDisplayPath, _MAX_PATH);
 
-	CString sTaskID = rmFrom.GetServer() + _T("::") + sRemotePath + _T("::") + rmFrom.GetUsername();
-	lstrcpyn(pToFInfo->szTasklistID, sTaskID, ITS_TASKLISTID_LEN);
+	CString sTasklistID = rmFrom.GetServer() + _T("::") + sRemotePath + _T("::") + rmFrom.GetUsername();
+	lstrcpyn(pToFInfo->szTasklistID, sTasklistID, ITS_TASKLISTID_LEN);
 }
 
 void CFtpTasklistStorageApp::SetLocalizer(ITransText* pTT)

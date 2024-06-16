@@ -123,6 +123,6 @@ void CMySqlStorageBridge::CopyInfo(ConnectionDefinition^ fromDef, ITS_TASKLISTIN
 	lstrcpy(pToFInfo->szTasklistName, MarshalledString(fromDef->TasklistName));
 	lstrcpy(pToFInfo->szPassword, MarshalledString(fromDef->Password));
 
-	String^ displayPath = String::Format(L"{0}@{1}/{2}", fromDef->TasklistName, fromDef->Server, fromDef->Database);
+	String^ displayPath = String::Format(L"{0}/{1}/{2}", fromDef->Server, fromDef->Database, fromDef->TasklistName);
 	lstrcpy(pToFInfo->szDisplayPath, MarshalledString(displayPath));
 }
