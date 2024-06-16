@@ -28,7 +28,6 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.m_Tasklists = new MySqlStorage.TasklistsListBox();
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.m_Database = new System.Windows.Forms.TextBox();
@@ -36,17 +35,8 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_Tasklist = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
+			this.m_Tasklists = new MySqlStorage.TasklistsListBox();
 			this.SuspendLayout();
-			// 
-			// m_Tasklists
-			// 
-			this.m_Tasklists.FormattingEnabled = true;
-			this.m_Tasklists.Location = new System.Drawing.Point(74, 42);
-			this.m_Tasklists.Name = "m_Tasklists";
-			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
-			this.m_Tasklists.TabIndex = 29;
-			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
-			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
 			// OK
 			// 
@@ -54,7 +44,7 @@
 			this.OK.Location = new System.Drawing.Point(113, 206);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
-			this.OK.TabIndex = 27;
+			this.OK.TabIndex = 1;
 			this.OK.Text = "OK";
 			this.OK.UseVisualStyleBackColor = true;
 			// 
@@ -64,7 +54,7 @@
 			this.Cancel.Location = new System.Drawing.Point(194, 206);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
-			this.Cancel.TabIndex = 28;
+			this.Cancel.TabIndex = 2;
 			this.Cancel.Text = "Cancel";
 			this.Cancel.UseVisualStyleBackColor = true;
 			// 
@@ -74,7 +64,7 @@
 			this.m_Database.Name = "m_Database";
 			this.m_Database.ReadOnly = true;
 			this.m_Database.Size = new System.Drawing.Size(195, 20);
-			this.m_Database.TabIndex = 26;
+			this.m_Database.TabIndex = 3;
 			// 
 			// label3
 			// 
@@ -99,7 +89,7 @@
 			this.m_Tasklist.Location = new System.Drawing.Point(74, 174);
 			this.m_Tasklist.Name = "m_Tasklist";
 			this.m_Tasklist.Size = new System.Drawing.Size(195, 20);
-			this.m_Tasklist.TabIndex = 30;
+			this.m_Tasklist.TabIndex = 0;
 			this.m_Tasklist.TextChanged += new System.EventHandler(this.OnTasklistTextChanged);
 			// 
 			// label1
@@ -110,6 +100,16 @@
 			this.label1.Size = new System.Drawing.Size(43, 13);
 			this.label1.TabIndex = 24;
 			this.label1.Text = "Tasklist";
+			// 
+			// m_Tasklists
+			// 
+			this.m_Tasklists.FormattingEnabled = true;
+			this.m_Tasklists.Location = new System.Drawing.Point(74, 42);
+			this.m_Tasklists.Name = "m_Tasklists";
+			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
+			this.m_Tasklists.TabIndex = 29;
+			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
+			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
 			// SaveTasklistForm
 			// 
@@ -125,6 +125,7 @@
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Name = "SaveTasklistForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "MySQL Save Tasklist";
 			this.ResumeLayout(false);
 			this.PerformLayout();

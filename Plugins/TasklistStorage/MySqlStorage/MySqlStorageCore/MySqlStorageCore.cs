@@ -27,10 +27,10 @@ namespace MySqlStorage
 			else
 			{
 #if DEBUG
-				Server = "127.0.0.1";//"www.abstractspoon.com";
+				Server = "localhost";
 				Database = "Tasklists";
-				Username = "root";//"abstractspoon";
-				Password = "password";//"&F*VQ]3p*z8B";
+				Username = "root";
+				Password = "password";
 
 				TasklistKey = 0;
 				TasklistName = "";

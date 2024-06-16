@@ -42,7 +42,7 @@
 			this.OK.Location = new System.Drawing.Point(111, 178);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
-			this.OK.TabIndex = 21;
+			this.OK.TabIndex = 1;
 			this.OK.Text = "OK";
 			this.OK.UseVisualStyleBackColor = true;
 			// 
@@ -52,7 +52,7 @@
 			this.Cancel.Location = new System.Drawing.Point(192, 178);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
-			this.Cancel.TabIndex = 22;
+			this.Cancel.TabIndex = 2;
 			this.Cancel.Text = "Cancel";
 			this.Cancel.UseVisualStyleBackColor = true;
 			// 
@@ -62,7 +62,7 @@
 			this.m_Database.Name = "m_Database";
 			this.m_Database.ReadOnly = true;
 			this.m_Database.Size = new System.Drawing.Size(195, 20);
-			this.m_Database.TabIndex = 19;
+			this.m_Database.TabIndex = 3;
 			// 
 			// label3
 			// 
@@ -88,7 +88,7 @@
 			this.m_Tasklists.Location = new System.Drawing.Point(72, 45);
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
-			this.m_Tasklists.TabIndex = 23;
+			this.m_Tasklists.TabIndex = 0;
 			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
 			// OpenTasklistForm

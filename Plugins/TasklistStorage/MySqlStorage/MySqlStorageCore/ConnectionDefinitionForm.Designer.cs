@@ -65,7 +65,7 @@
 			this.m_Password.Location = new System.Drawing.Point(72, 102);
 			this.m_Password.Name = "m_Password";
 			this.m_Password.Size = new System.Drawing.Size(195, 21);
-			this.m_Password.TabIndex = 7;
+			this.m_Password.TabIndex = 3;
 			this.m_Password.UseSystemPasswordChar = true;
 			// 
 			// m_Username
@@ -73,21 +73,21 @@
 			this.m_Username.Location = new System.Drawing.Point(72, 72);
 			this.m_Username.Name = "m_Username";
 			this.m_Username.Size = new System.Drawing.Size(195, 21);
-			this.m_Username.TabIndex = 8;
+			this.m_Username.TabIndex = 2;
 			// 
 			// m_Database
 			// 
 			this.m_Database.Location = new System.Drawing.Point(72, 42);
 			this.m_Database.Name = "m_Database";
 			this.m_Database.Size = new System.Drawing.Size(195, 21);
-			this.m_Database.TabIndex = 9;
+			this.m_Database.TabIndex = 1;
 			// 
 			// m_Server
 			// 
 			this.m_Server.Location = new System.Drawing.Point(72, 12);
 			this.m_Server.Name = "m_Server";
 			this.m_Server.Size = new System.Drawing.Size(195, 21);
-			this.m_Server.TabIndex = 10;
+			this.m_Server.TabIndex = 0;
 			// 
 			// label4
 			// 

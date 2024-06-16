@@ -17,6 +17,24 @@ namespace MySqlStorage
 			InitializeComponent();
 
 			Definition = def;
+
+			// Set the focus to the first empty field
+			if (string.IsNullOrEmpty(def.Server))
+			{
+				m_Server.Focus();
+			}
+			else if (string.IsNullOrEmpty(def.Database))
+			{
+				m_Database.Focus();
+			}
+			else if (string.IsNullOrEmpty(def.Username))
+			{
+				m_Username.Focus();
+			}
+			else if (string.IsNullOrEmpty(def.Password))
+			{
+				m_Password.Focus();
+			}
 		}
 
 		public ConnectionDefinition Definition
