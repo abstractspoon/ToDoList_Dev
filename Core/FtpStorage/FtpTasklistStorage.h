@@ -13,6 +13,12 @@
 
 #include "..\Interfaces\ITaskListStorage.h"
 
+/////////////////////////////////////////////////////////////////////////////
+
+class CRemoteFile;
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CFtpTasklistStorageApp : public ITasklistStorage, public CWinApp  
 {
 public:
@@ -36,6 +42,7 @@ protected:
 
 protected:
 	BOOL InitInstance();
+	static void CopyInfo(const CString& sLocalPath, const CString& sRemotePath, const CRemoteFile& rmFrom, ITS_TASKLISTINFO* pToFInfo);
 };
 
 #endif // !defined(AFX_FTPTASKLISTSTORAGE_H__14908CE5_AA9F_4AFC_B72E_3F2BDD0993F0__INCLUDED_)

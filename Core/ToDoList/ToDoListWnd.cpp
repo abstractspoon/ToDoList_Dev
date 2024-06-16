@@ -2021,8 +2021,14 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 		// save to file and then to storage
 		if (tdc.Save(tasks, storageInfo.szLocalFileName, bFlush) == TDCF_SUCCESS)
 		{
-			if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs))
+			if (m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs))
+			{
+				m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
+			}
+			else
+			{
 				nResult = TDCF_OTHER;
+			}
 		}
 	}
 	else // we're file-based
@@ -4620,7 +4626,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 
 			// must set this up before loading tasklist
 			// so that pTDC can access correct prefs
-			pTDC->SetAlternatePreferencesKey(storageInfo.szDisplayName);
+			pTDC->SetAlternatePreferencesKey(storageInfo.szDisplayPath);
 		}
 		break;
 		
@@ -7586,7 +7592,7 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 		TDC_FILE nOpen = OpenTaskList(sFilePath, TRUE);
 
 		if (nOpen != TDCF_SUCCESS)
-			HandleLoadTasklistError(nOpen, storageInfo.szDisplayName);
+			HandleLoadTasklistError(nOpen, storageInfo.szDisplayPath);
 		
 		// refresh UI
 		UpdateCaption();

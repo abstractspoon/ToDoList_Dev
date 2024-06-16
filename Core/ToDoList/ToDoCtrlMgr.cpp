@@ -177,11 +177,8 @@ void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 		bLoaded = TRUE;
 
 		// set filename and alternate pref name to be the display name
-		pTDC->SetFilePath(info.szDisplayName);
-		pTDC->SetAlternatePreferencesKey(info.szDisplayName);
-
-		if (info.HasTasklistName())
-			pTDC->SetProjectName(info.szTasklistName);
+		pTDC->SetFilePath(info.szDisplayPath);
+		pTDC->SetAlternatePreferencesKey(info.szDisplayPath);
 	}
 	else
 	{
@@ -192,7 +189,13 @@ void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
 { 
 	if (UsesStorage() && pTDC->GetProjectName().IsEmpty())
-		return storageinfo.szDisplayName;
+	{
+		if (storageinfo.HasTasklistName())
+			return storageinfo.szTasklistName;
+
+		// else
+		return storageinfo.szDisplayPath;
+	}
 
 	// else
 	return pTDC->GetFriendlyProjectName(nUntitledIndex); 
@@ -349,7 +352,7 @@ CString CToDoCtrlMgr::GetDisplayPath(int nIndex) const
 	TSM_TASKLISTINFO storageInfo;
 
 	if (GetStorageDetails(nIndex, storageInfo))
-		return storageInfo.szDisplayName;
+		return storageInfo.szDisplayPath;
 
 	// else
 	return GetFilePath(nIndex);

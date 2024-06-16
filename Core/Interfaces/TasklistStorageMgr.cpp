@@ -40,7 +40,7 @@ const TSM_TASKLISTINFO& TSM_TASKLISTINFO::operator=(const TSM_TASKLISTINFO& info
 	lstrcpyn(szTasklistID, info.szTasklistID, ITS_TASKLISTID_LEN);
 	lstrcpyn(szTasklistName, info.szTasklistName, _MAX_PATH);
 	lstrcpyn(szLocalFileName, info.szLocalFileName, _MAX_PATH);
-	lstrcpyn(szDisplayName, info.szDisplayName, _MAX_PATH);
+	lstrcpyn(szDisplayPath, info.szDisplayPath, _MAX_PATH);
 	lstrcpyn(szPassword, info.szPassword, ITS_PASSWORD_LEN);
 	
 	return *this;
@@ -52,7 +52,7 @@ void TSM_TASKLISTINFO::Reset()
 	szTasklistID[0] = 0;
 	szTasklistName[0] = 0;
 	szLocalFileName[0] = 0;
-	szDisplayName[0] = 0;
+	szDisplayPath[0] = 0;
 	szPassword[0] = 0;
 }
 
@@ -60,7 +60,7 @@ BOOL TSM_TASKLISTINFO::HasInfo() const
 {
 	return (!sStorageID.IsEmpty() &&
 			szTasklistID[0] &&
-			szDisplayName[0]);
+			szDisplayPath[0]);
 }
 
 BOOL TSM_TASKLISTINFO::HasTasklistName() const
@@ -94,12 +94,13 @@ CString TSM_TASKLISTINFO::EncodeInfo(BOOL bIncPassword) const
 	// encoded for safety
 	CString sInfo, sPassword = (bIncPassword ? szPassword : _T(""));
 
-	sInfo.Format(_T("%s;%s;%s;%s;%s"), 
+	sInfo.Format(_T("%s;%s;%s;%s;%s;%s"), 
 				Encode(sStorageID),
 				Encode(szTasklistID),
 				Encode(szLocalFileName),
-				Encode(szDisplayName),
-				Encode(sPassword));
+				Encode(szDisplayPath),
+				Encode(sPassword),
+				Encode(szTasklistName));
 
 	// then encode that too
 	return Encode(sInfo);
@@ -126,7 +127,7 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 	CStringArray aParts;
 
 	// there must be 5 bits regardless
-	if (Misc::Split(sDecoded, aParts, ';', TRUE) == 5)
+	if (Misc::Split(sDecoded, aParts, ';', TRUE) >= 5)
 	{
 		// decode and assign the bits
 		sStorageID = Decode(aParts[0]);
@@ -144,11 +145,11 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 			{
 				lstrcpy(szLocalFileName, sLocalFileName);
 
-				CString sDisplayName = Decode(aParts[3]);
+				CString sDisplayPath = Decode(aParts[3]);
 
-				if (sDisplayName.GetLength() <= _MAX_PATH)
+				if (sDisplayPath.GetLength() <= _MAX_PATH)
 				{
-					lstrcpy(szDisplayName, sDisplayName);
+					lstrcpy(szDisplayPath, sDisplayPath);
 
 					if (bIncPassword)
 					{
@@ -157,11 +158,22 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 						if (sPassword.GetLength() <= ITS_PASSWORD_LEN)
 						{
 							lstrcpy(szPassword, sPassword);
+
+							if (aParts.GetSize() == 6)
+							{
+								CString sTasklistName = Decode(aParts[5]);
+
+								if (sTasklistName.GetLength() <= _MAX_PATH)
+									lstrcpy(szTasklistName, sTasklistName);
+							}
+
 							return TRUE;
 						}
 					}
 					else
+					{
 						return TRUE;
+					}
 				}
 			}
 		}

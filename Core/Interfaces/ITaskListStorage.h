@@ -112,7 +112,7 @@ struct ITS_TASKLISTINFO
 	WCHAR szTasklistID[ITS_TASKLISTID_LEN+1];
 	WCHAR szTasklistName[MAX_PATH+1];
 	WCHAR szLocalFileName[MAX_PATH+1];
-	WCHAR szDisplayName[MAX_PATH+1];
+	WCHAR szDisplayPath[MAX_PATH+1];
 	WCHAR szPassword[ITS_PASSWORD_LEN+1];
 };
 
