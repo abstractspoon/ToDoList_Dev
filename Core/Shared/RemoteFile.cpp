@@ -1236,7 +1236,9 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 	// open remote file for ouput
 	CWaitCursor cursor;
 	CInternetFile* pFile = NULL;
-	pDlg->Continue();
+
+	if (bProgress)
+		pDlg->Continue();
 
 	try
 	{
@@ -1261,7 +1263,7 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 	DWORD dwBytesRead = 0, dwBytesWritten = 0;
 	DWORD dwFileSize = (DWORD)file.GetLength();
 
-	while (pDlg->Continue())
+	while (!bProgress || pDlg->Continue())
 	{
 		UINT nCount = 0;
 		

@@ -2024,7 +2024,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 		// save to file and then to storage
 		if (tdc.Save(tasks, storageInfo.szLocalFileName, bFlush) == TDCF_SUCCESS)
 		{
-			if (m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs, TRUE)) // silent
+			if (m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs))
 			{
 				m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
 			}
