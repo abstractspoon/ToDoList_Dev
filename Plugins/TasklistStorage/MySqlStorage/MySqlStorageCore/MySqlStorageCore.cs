@@ -130,7 +130,10 @@ namespace MySqlStorage
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
 
-						def.TasklistKey = dialog.TasklistInfo.Key;
+						var tasklist = dialog.TasklistInfo;
+
+						def.TasklistKey = tasklist.Key;
+						def.TasklistName = tasklist.Name;
 					}
 
 					var query = string.Format("SELECT Xml FROM Tasklists WHERE Id={0}", def.TasklistKey);
