@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OpenTasklistForm));
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.m_Database = new System.Windows.Forms.TextBox();
@@ -102,6 +103,7 @@
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "OpenTasklistForm";
