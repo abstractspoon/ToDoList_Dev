@@ -128,7 +128,7 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "SaveTasklistForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "MySQL Save Tasklist";
+			this.Text = "Save Tasklist";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

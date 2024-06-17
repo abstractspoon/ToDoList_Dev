@@ -109,7 +109,7 @@
 			this.Name = "OpenTasklistForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "MySQL Open Tasklist";
+			this.Text = "Open Tasklist";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

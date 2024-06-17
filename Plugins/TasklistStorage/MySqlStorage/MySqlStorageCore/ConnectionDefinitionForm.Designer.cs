@@ -148,7 +148,7 @@
 			this.Name = "ConnectionDefinitionForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "MySql Connection Details";
+			this.Text = "Connection Details";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
