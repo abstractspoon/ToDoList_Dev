@@ -12,9 +12,62 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MySqlStorage
 {
+	public class DatabaseDefinition
+	{
+		public DatabaseDefinition(string encoded = "")
+		{
+			if (!Decode(encoded))
+			{
+#if DEBUG
+				TasklistsTable = "Tasklists";
+				KeyColumn = "Id";
+				NameColumn = "Name";
+				XmlColumn = "Xml";
+#endif
+			}
+		}
+
+		// --------------------------------------------------------
+
+		public string TasklistsTable;
+		public string KeyColumn;
+		public string NameColumn;
+		public string XmlColumn;
+
+		// --------------------------------------------------------
+
+		public string Encode()
+		{
+			return string.Join("||", new object[]
+				{
+					TasklistsTable,
+					KeyColumn,
+					NameColumn,
+					XmlColumn
+				});
+		}
+
+		private bool Decode(string encoded)
+		{
+			var parts = encoded.Split(new[] { "||" }, StringSplitOptions.None);
+
+			if (parts.Length != 4)
+				return false;
+
+			TasklistsTable = parts[0];
+			KeyColumn = parts[1];
+			NameColumn = parts[2];
+			XmlColumn = parts[3];
+
+			return true;
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
 	public class ConnectionDefinition
 	{
-		public ConnectionDefinition()
+		public ConnectionDefinition() : this("", "")
 		{
 		}
 
@@ -26,54 +79,55 @@ namespace MySqlStorage
 			}
 			else
 			{
+				TasklistKey = 0;
+				TasklistName = "";
+
+				DatabaseDefinition = new DatabaseDefinition();
+
 #if DEBUG
 				Server = "localhost";
 				Database = "Tasklists";
 				Username = "root";
 				Password = "password";
-
-				TasklistsTable = "Tasklists";
-				KeyColumn = "Id";
-				NameColumn = "Name";
-				XmlColumn = "Xml";
-
-				TasklistKey = 0;
-				TasklistName = "";
 #endif
 			}
 		}
+
+		public bool OpenConnection(MySqlConnection connection)
+		{
+			connection.Close();
+
+			if (IsDefined)
+			{
+				try
+				{
+					connection.ConnectionString = ConnectionString;
+					connection.Open();
+				}
+				catch (Exception e)
+				{
+#if DEBUG
+					MessageBox.Show(e.ToString());
+#endif
+				}
+			}
+
+			return (connection.State == System.Data.ConnectionState.Open);
+		}
+
+		// --------------------------------------------------------
 
 		public string Server;
 		public string Database;
 		public string Username;
 		public string Password;
 
-		public string TasklistsTable;
-		public string KeyColumn;
-		public string NameColumn;
-		public string XmlColumn;
+		public DatabaseDefinition DatabaseDefinition;
 
 		public uint TasklistKey = 0;
 		public string TasklistName;
 
 		public string TasklistId { get { return Encode(); } }
-
-		public bool OpenConnection(MySqlConnection connection)
-		{
-			try
-			{
-				connection.ConnectionString = ConnectionString;
-				connection.Open();
-			}
-			catch (Exception e)
-			{
-#if DEBUG
-				MessageBox.Show(e.ToString());
-#endif
-			}
-
-			return (connection.State == System.Data.ConnectionState.Open);
-		}
 
 		// --------------------------------------------------------
 
@@ -89,20 +143,27 @@ namespace MySqlStorage
 			}
 		}
 
+		private bool IsDefined
+		{
+			get
+			{
+				return (!string.IsNullOrEmpty(Server) &&
+						!string.IsNullOrEmpty(Database) &&
+						!string.IsNullOrEmpty(Username) &&
+						!string.IsNullOrEmpty(Password));
+			}
+		}
+
 		private string Encode()
 		{
-			return string.Join("::", 
-				new object[] 
+			return string.Join("::", new object[] 
 				{
 					TasklistKey,
 					TasklistName,
 					Server,
 					Database,
 					Username,
-					TasklistsTable,
-					KeyColumn,
-					NameColumn,
-					XmlColumn
+					DatabaseDefinition.Encode()
 				});
 		}
 
@@ -110,7 +171,7 @@ namespace MySqlStorage
 		{
 			var parts = encoded.Split(new[] {"::"}, StringSplitOptions.None);
 
-			if (parts.Length < 9)
+			if (parts.Length != 6)
 				return false;
 
 			if (!uint.TryParse(parts[0], out TasklistKey) || (TasklistKey == 0))
@@ -123,11 +184,8 @@ namespace MySqlStorage
 			Server = parts[2];
 			Database = parts[3];
 			Username = parts[4];
-			TasklistsTable = parts[5];
-			KeyColumn = parts[6];
-			NameColumn = parts[7];
-			XmlColumn = parts[8];
 
+			DatabaseDefinition = new DatabaseDefinition(parts[5]);
 			return true;
 		}
 	}
@@ -171,8 +229,8 @@ namespace MySqlStorage
 					}
 
 					var query = string.Format("SELECT {0} FROM {1} WHERE Id={2}", 
-											  def.XmlColumn, 
-											  def.TasklistsTable, 
+											  def.DatabaseDefinition.XmlColumn, 
+											  def.DatabaseDefinition.TasklistsTable, 
 											  def.TasklistKey);
 
 					using (var command = new MySqlCommand(query, conn))
@@ -229,16 +287,16 @@ namespace MySqlStorage
 					if (newTasklist)
 					{
 						query = string.Format("INSERT INTO {0} ({1}, {2}) VALUES(@Name, @Xml)", 
-						 					  def.TasklistsTable,
-											  def.NameColumn,
-											  def.XmlColumn);
+						 					  def.DatabaseDefinition.TasklistsTable,
+											  def.DatabaseDefinition.NameColumn,
+											  def.DatabaseDefinition.XmlColumn);
 					}
 					else
 					{
 						query = string.Format("UPDATE {0} SET {1}=@Name, {2}=@Xml WHERE Id={3}",
-											  def.TasklistsTable,
-											  def.NameColumn,
-											  def.XmlColumn,
+											  def.DatabaseDefinition.TasklistsTable,
+											  def.DatabaseDefinition.NameColumn,
+											  def.DatabaseDefinition.XmlColumn,
 											  def.TasklistKey);
 					}
 

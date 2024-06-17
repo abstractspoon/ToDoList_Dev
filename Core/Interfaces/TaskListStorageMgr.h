@@ -36,6 +36,7 @@ struct TSM_TASKLISTINFO : ITS_TASKLISTINFO
 	CString sStorageID;
 
 protected:
+	static BOOL DecodeInfo(const CString& sPart, LPTSTR szAttrib, int nMaxLen);
 	static CString Decode(const CString& sData);
 	static CString Encode(const CString& sData);
 };

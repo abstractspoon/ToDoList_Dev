@@ -133,56 +133,42 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 		sStorageID = Decode(aParts[0]);
 
 		// check the lengths in case someone is sending us a dud string
-		CString sTasklistID = Decode(aParts[1]);
-
-		if (sTasklistID.GetLength() <= ITS_TASKLISTID_LEN)
+		while (true) // easy exit
 		{
-			lstrcpy(szTasklistID, sTasklistID);
+			if (!DecodeInfo(aParts[1], szTasklistID, ITS_TASKLISTID_LEN))
+				break;
 
-			CString sLocalFileName = Decode(aParts[2]);
+			if (!DecodeInfo(aParts[2], szLocalFileName, _MAX_PATH))
+				break;
 
-			if (sLocalFileName.GetLength() <= _MAX_PATH)
-			{
-				lstrcpy(szLocalFileName, sLocalFileName);
+			if (!DecodeInfo(aParts[3], szDisplayPath, _MAX_PATH))
+				break;
 
-				CString sDisplayPath = Decode(aParts[3]);
+			if (bIncPassword && !DecodeInfo(aParts[4], szPassword, ITS_PASSWORD_LEN))
+				break;
 
-				if (sDisplayPath.GetLength() <= _MAX_PATH)
-				{
-					lstrcpy(szDisplayPath, sDisplayPath);
+			if ((aParts.GetSize() == 6) && !DecodeInfo(aParts[5], szTasklistName, _MAX_PATH))
+				break;
 
-					if (bIncPassword)
-					{
-						CString sPassword = Decode(aParts[4]);
-
-						if (sPassword.GetLength() <= ITS_PASSWORD_LEN)
-						{
-							lstrcpy(szPassword, sPassword);
-
-							if (aParts.GetSize() == 6)
-							{
-								CString sTasklistName = Decode(aParts[5]);
-
-								if (sTasklistName.GetLength() <= _MAX_PATH)
-									lstrcpy(szTasklistName, sTasklistName);
-							}
-
-							return TRUE;
-						}
-					}
-					else
-					{
-						return TRUE;
-					}
-				}
-			}
+			// else
+			return TRUE;
 		}
 	}
 
-	// else something failed
+	// else
 	Reset();
-
 	return FALSE;
+}
+
+BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sPart, LPTSTR szAttrib, int nMaxLen)
+{
+	CString sTemp = Decode(sPart);
+
+	if (sTemp.GetLength() > nMaxLen)
+		return FALSE;
+
+	lstrcpy(szAttrib, sTemp);
+	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////
