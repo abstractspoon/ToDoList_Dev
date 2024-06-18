@@ -16,47 +16,36 @@ namespace MySqlStorage
 		{
 			InitializeComponent();
 
-			Definition = def;
+			m_Server.Text = def.Server;
+			m_Database.Text = def.Database;
+			m_Username.Text = def.Username;
+			m_Password.Text = def.Password;
 
 			// Set the focus to the first empty field
-			if (string.IsNullOrEmpty(def.Server))
+			Shown += (s, e) =>
 			{
-				m_Server.Focus();
-			}
-			else if (string.IsNullOrEmpty(def.Database))
-			{
-				m_Database.Focus();
-			}
-			else if (string.IsNullOrEmpty(def.Username))
-			{
-				m_Username.Focus();
-			}
-			else if (string.IsNullOrEmpty(def.Password))
-			{
-				m_Password.Focus();
-			}
-		}
-
-		public ConnectionDefinition Definition
-		{
-			get
-			{
-				return new ConnectionDefinition()
+				if (string.IsNullOrEmpty(def.Server))
 				{
-					Server = m_Server.Text,
-					Database = m_Database.Text,
-					Username = m_Username.Text,
-					Password = m_Password.Text
-				};
-			}
-
-			set
-			{
-				m_Server.Text = value.Server;
-				m_Database.Text = value.Database;
-				m_Username.Text = value.Username;
-				m_Password.Text = value.Password;
-			}
+					m_Server.Focus();
+				}
+				else if (string.IsNullOrEmpty(def.Database))
+				{
+					m_Database.Focus();
+				}
+				else if (string.IsNullOrEmpty(def.Username))
+				{
+					m_Username.Focus();
+				}
+				else if (string.IsNullOrEmpty(def.Password))
+				{
+					m_Password.Focus();
+				}
+			};
 		}
+
+		public string Server { get { return m_Server.Text; } }
+		public string Database { get { return m_Database.Text; } }
+		public string Username { get { return m_Username.Text; } }
+		public string Password { get { return m_Password.Text; } }
 	}
 }

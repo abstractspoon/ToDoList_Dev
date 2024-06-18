@@ -31,7 +31,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CMySqlStorageBridge::CMySqlStorageBridge()
+CMySqlStorageBridge::CMySqlStorageBridge() : m_pTT(nullptr)
 {
 	m_hIcon = Win32::LoadHIcon(L"MySqlStorageBridge.dll", IDI_MYSQL, 16, true);
 }

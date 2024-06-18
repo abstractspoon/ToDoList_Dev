@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 
 using MySql.Data.MySqlClient;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -27,14 +28,16 @@ namespace MySqlStorage
 			}
 		}
 
-		// --------------------------------------------------------
-
-		public string TasklistsTable;
-		public string KeyColumn;
-		public string NameColumn;
-		public string XmlColumn;
-
-		// --------------------------------------------------------
+		public bool IsDefined
+		{
+			get
+			{
+				return (!string.IsNullOrEmpty(TasklistsTable) &&
+						!string.IsNullOrEmpty(KeyColumn) &&
+						!string.IsNullOrEmpty(NameColumn) &&
+						!string.IsNullOrEmpty(XmlColumn));
+			}
+		}
 
 		public string Encode()
 		{
@@ -46,6 +49,15 @@ namespace MySqlStorage
 					XmlColumn
 				});
 		}
+
+		// --------------------------------------------------------
+
+		public string TasklistsTable;
+		public string KeyColumn;
+		public string NameColumn;
+		public string XmlColumn;
+
+		// --------------------------------------------------------
 
 		private bool Decode(string encoded)
 		{
@@ -150,7 +162,8 @@ namespace MySqlStorage
 				return (!string.IsNullOrEmpty(Server) &&
 						!string.IsNullOrEmpty(Database) &&
 						!string.IsNullOrEmpty(Username) &&
-						!string.IsNullOrEmpty(Password));
+						!string.IsNullOrEmpty(Password) &&
+						DatabaseDefinition.IsDefined);
 			}
 		}
 
@@ -194,13 +207,17 @@ namespace MySqlStorage
 
     public class MySqlStorageCore
     {
-        private Translator m_trans;
+        private Translator m_Trans;
+        private Font m_ControlsFont;
+
+		private const string FontName = "Tahoma";
 
 		// ------------------------------------------------------------------
 
 		public MySqlStorageCore(Translator trans)
         {
-            m_trans = trans;
+            m_Trans = trans;
+			m_ControlsFont = new Font(FontName, 8.25f);
         }
 
 		public ConnectionDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
@@ -219,6 +236,9 @@ namespace MySqlStorage
 						// Prompt for tasklist 
 						var dialog = new OpenTasklistForm(conn, def);
 
+						FormsUtil.SetFont(dialog, m_ControlsFont);
+						m_Trans.Translate(dialog);
+
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
 
@@ -228,9 +248,10 @@ namespace MySqlStorage
 						def.TasklistName = tasklist.Name;
 					}
 
-					var query = string.Format("SELECT {0} FROM {1} WHERE Id={2}", 
+					var query = string.Format("SELECT {0} FROM {1} WHERE {2}={3}", 
 											  def.DatabaseDefinition.XmlColumn, 
-											  def.DatabaseDefinition.TasklistsTable, 
+											  def.DatabaseDefinition.TasklistsTable,
+											  def.DatabaseDefinition.KeyColumn,
 											  def.TasklistKey);
 
 					using (var command = new MySqlCommand(query, conn))
@@ -273,6 +294,9 @@ namespace MySqlStorage
 					// Always prompt for tasklist name
 					var dialog = new SaveTasklistForm(conn, def);
 
+					FormsUtil.SetFont(dialog, m_ControlsFont);
+					m_Trans.Translate(dialog);
+
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return null;
 
@@ -293,10 +317,11 @@ namespace MySqlStorage
 					}
 					else
 					{
-						query = string.Format("UPDATE {0} SET {1}=@Name, {2}=@Xml WHERE Id={3}",
+						query = string.Format("UPDATE {0} SET {1}=@Name, {2}=@Xml WHERE {3}={4}",
 											  def.DatabaseDefinition.TasklistsTable,
 											  def.DatabaseDefinition.NameColumn,
 											  def.DatabaseDefinition.XmlColumn,
+											  def.DatabaseDefinition.KeyColumn,
 											  def.TasklistKey);
 					}
 
@@ -343,10 +368,16 @@ namespace MySqlStorage
 				// Prompt for connection details
 				var dialog = new ConnectionDefinitionForm(def);
 
+				FormsUtil.SetFont(dialog, m_ControlsFont);
+				m_Trans.Translate(dialog);
+
 				if (dialog.ShowDialog() != DialogResult.OK)
 					return false;
 
-				def = dialog.Definition;
+				def.Server = dialog.Server;
+				def.Database = dialog.Database;
+				def.Username = dialog.Username;
+				def.Password = dialog.Password;
 			}
 
 			return true;
