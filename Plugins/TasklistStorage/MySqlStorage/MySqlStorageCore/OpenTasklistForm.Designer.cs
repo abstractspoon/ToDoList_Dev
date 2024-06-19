@@ -70,7 +70,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(7, 40);
+			this.label3.Location = new System.Drawing.Point(8, 40);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(48, 13);
 			this.label3.TabIndex = 14;
@@ -79,7 +79,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(7, 15);
+			this.label2.Location = new System.Drawing.Point(8, 15);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(53, 13);
 			this.label2.TabIndex = 15;
@@ -105,7 +105,7 @@
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.MySqlStorage;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "OpenTasklistForm";

@@ -50,6 +50,11 @@ namespace MySqlStorage
 				});
 		}
 
+		public bool IsValid(MySqlConnection conn)
+		{
+			return false;
+		}
+
 		// --------------------------------------------------------
 
 		public string TasklistsTable;
@@ -366,19 +371,38 @@ namespace MySqlStorage
 			while (!def.OpenConnection(conn))
 			{
 				// Prompt for connection details
-				var dialog = new ConnectionDefinitionForm(def);
+				using (var dialog = new ConnectionDefinitionForm(def))
+				{
+					FormsUtil.SetFont(dialog, m_ControlsFont);
+					m_Trans.Translate(dialog);
 
-				FormsUtil.SetFont(dialog, m_ControlsFont);
-				m_Trans.Translate(dialog);
+					if (dialog.ShowDialog() != DialogResult.OK)
+						return false;
 
-				if (dialog.ShowDialog() != DialogResult.OK)
-					return false;
-
-				def.Server = dialog.Server;
-				def.Database = dialog.Database;
-				def.Username = dialog.Username;
-				def.Password = dialog.Password;
+					def.Server = dialog.Server;
+					def.Database = dialog.Database;
+					def.Username = dialog.Username;
+					def.Password = dialog.Password;
+				}
 			}
+				// Prompt for database details
+				while (!def.DatabaseDefinition.IsValid(conn))
+				{
+					using (var dialog = new DatabaseDefinitionForm(conn, def))
+					{
+						FormsUtil.SetFont(dialog, m_ControlsFont);
+						m_Trans.Translate(dialog);
+
+						if (dialog.ShowDialog() != DialogResult.OK)
+							return false;
+	// 
+	// 					def.Server = dialog.Server;
+	// 					def.Database = dialog.Database;
+	// 					def.Username = dialog.Username;
+	// 					def.Password = dialog.Password;
+					}
+				}
+// 			}
 
 			return true;
 		}
