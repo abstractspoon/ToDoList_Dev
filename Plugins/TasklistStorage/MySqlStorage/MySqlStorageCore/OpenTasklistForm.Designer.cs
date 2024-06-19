@@ -39,8 +39,9 @@
 			// 
 			// OK
 			// 
+			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(111, 178);
+			this.OK.Location = new System.Drawing.Point(111, 171);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -49,8 +50,9 @@
 			// 
 			// Cancel
 			// 
+			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(192, 178);
+			this.Cancel.Location = new System.Drawing.Point(192, 171);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -68,7 +70,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(7, 45);
+			this.label3.Location = new System.Drawing.Point(7, 40);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(48, 13);
 			this.label3.TabIndex = 14;
@@ -86,7 +88,7 @@
 			// m_Tasklists
 			// 
 			this.m_Tasklists.FormattingEnabled = true;
-			this.m_Tasklists.Location = new System.Drawing.Point(72, 45);
+			this.m_Tasklists.Location = new System.Drawing.Point(72, 38);
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
 			this.m_Tasklists.TabIndex = 0;
@@ -96,7 +98,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(279, 213);
+			this.ClientSize = new System.Drawing.Size(279, 206);
 			this.Controls.Add(this.m_Tasklists);
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);

@@ -41,8 +41,9 @@
 			// 
 			// OK
 			// 
+			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(113, 206);
+			this.OK.Location = new System.Drawing.Point(113, 199);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -51,8 +52,9 @@
 			// 
 			// Cancel
 			// 
+			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(194, 206);
+			this.Cancel.Location = new System.Drawing.Point(194, 199);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -70,7 +72,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(9, 43);
+			this.label3.Location = new System.Drawing.Point(9, 39);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(48, 13);
 			this.label3.TabIndex = 24;
@@ -87,7 +89,7 @@
 			// 
 			// m_Tasklist
 			// 
-			this.m_Tasklist.Location = new System.Drawing.Point(74, 174);
+			this.m_Tasklist.Location = new System.Drawing.Point(74, 165);
 			this.m_Tasklist.Name = "m_Tasklist";
 			this.m_Tasklist.Size = new System.Drawing.Size(195, 20);
 			this.m_Tasklist.TabIndex = 0;
@@ -96,7 +98,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(9, 177);
+			this.label1.Location = new System.Drawing.Point(9, 168);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(43, 13);
 			this.label1.TabIndex = 24;
@@ -105,7 +107,7 @@
 			// m_Tasklists
 			// 
 			this.m_Tasklists.FormattingEnabled = true;
-			this.m_Tasklists.Location = new System.Drawing.Point(74, 42);
+			this.m_Tasklists.Location = new System.Drawing.Point(74, 38);
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
 			this.m_Tasklists.TabIndex = 29;
@@ -116,7 +118,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(279, 241);
+			this.ClientSize = new System.Drawing.Size(279, 234);
 			this.Controls.Add(this.m_Tasklist);
 			this.Controls.Add(this.m_Tasklists);
 			this.Controls.Add(this.OK);
