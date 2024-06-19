@@ -22,7 +22,7 @@ namespace MySqlStorage
 			InitializeComponent();
 
 			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
-			m_Tasklists.Initialise(conn, true);
+			m_Tasklists.Initialise(conn, def, true);
 		}
 
 		public TasklistInfo TasklistInfo
@@ -39,24 +39,16 @@ namespace MySqlStorage
 			}
 		}
 	}
-
-	// ------------------------------------------------------------
-
-	public class TasklistInfo
-	{
-		public override string ToString() { return Name; }
-
-		public uint Key = 0;
-		public string Name;
-	}
 	
 	// ------------------------------------------------------------
 
 	internal class TasklistsListBox : ListBox
 	{
-		public void Initialise(MySqlConnection conn, bool selectFirst)
+		public void Initialise(MySqlConnection conn, ConnectionDefinition def, bool selectFirst)
 		{
-			using (var command = new MySqlCommand("SELECT Id, Name FROM Tasklists", conn))
+			string query = string.Format("SELECT Id, Name FROM {0}", def.DatabaseDefinition.TasklistsTable);
+
+			using (var command = new MySqlCommand(query, conn))
 			{
 				using (var reader = command.ExecuteReader())
 				{

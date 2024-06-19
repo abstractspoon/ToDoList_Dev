@@ -24,21 +24,13 @@ namespace MySqlStorage
 			// Set the focus to the first empty field
 			Shown += (s, e) =>
 			{
-				if (string.IsNullOrEmpty(def.Server))
+				foreach (var field in Fields)
 				{
-					m_Server.Focus();
-				}
-				else if (string.IsNullOrEmpty(def.Database))
-				{
-					m_Database.Focus();
-				}
-				else if (string.IsNullOrEmpty(def.Username))
-				{
-					m_Username.Focus();
-				}
-				else if (string.IsNullOrEmpty(def.Password))
-				{
-					m_Password.Focus();
+					if (string.IsNullOrEmpty(field.Text))
+					{
+						field.Focus();
+						break;
+					}
 				}
 			};
 		}
@@ -47,5 +39,10 @@ namespace MySqlStorage
 		public string Database { get { return m_Database.Text; } }
 		public string Username { get { return m_Username.Text; } }
 		public string Password { get { return m_Password.Text; } }
+
+		private Control[] Fields
+		{
+			get { return new [] { m_Server, m_Database, m_Username, m_Password }; }
+		}
 	}
 }

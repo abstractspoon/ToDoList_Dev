@@ -20,7 +20,7 @@ namespace MySqlStorage
 
 			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
 
-			m_Tasklists.Initialise(conn, false);
+			m_Tasklists.Initialise(conn, def, false);
 			m_Tasklist.Text = def.TasklistName;
 		}
 

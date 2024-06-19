@@ -13,203 +13,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MySqlStorage
 {
-	public class DatabaseDefinition
-	{
-		public DatabaseDefinition(string encoded = "")
-		{
-			if (!Decode(encoded))
-			{
-#if DEBUG
-				TasklistsTable = "Tasklists";
-				KeyColumn = "Id";
-				NameColumn = "Name";
-				XmlColumn = "Xml";
-#endif
-			}
-		}
-
-		public bool IsDefined
-		{
-			get
-			{
-				return (!string.IsNullOrEmpty(TasklistsTable) &&
-						!string.IsNullOrEmpty(KeyColumn) &&
-						!string.IsNullOrEmpty(NameColumn) &&
-						!string.IsNullOrEmpty(XmlColumn));
-			}
-		}
-
-		public string Encode()
-		{
-			return string.Join("||", new object[]
-				{
-					TasklistsTable,
-					KeyColumn,
-					NameColumn,
-					XmlColumn
-				});
-		}
-
-		public bool IsValid(MySqlConnection conn)
-		{
-			return false;
-		}
-
-		// --------------------------------------------------------
-
-		public string TasklistsTable;
-		public string KeyColumn;
-		public string NameColumn;
-		public string XmlColumn;
-
-		// --------------------------------------------------------
-
-		private bool Decode(string encoded)
-		{
-			var parts = encoded.Split(new[] { "||" }, StringSplitOptions.None);
-
-			if (parts.Length != 4)
-				return false;
-
-			TasklistsTable = parts[0];
-			KeyColumn = parts[1];
-			NameColumn = parts[2];
-			XmlColumn = parts[3];
-
-			return true;
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-
-	public class ConnectionDefinition
-	{
-		public ConnectionDefinition() : this("", "")
-		{
-		}
-
-		public ConnectionDefinition(string encoded, string password)
-		{
-			if (Decode(encoded))
-			{
-				Password = password;
-			}
-			else
-			{
-				TasklistKey = 0;
-				TasklistName = "";
-
-				DatabaseDefinition = new DatabaseDefinition();
-
-#if DEBUG
-				Server = "localhost";
-				Database = "Tasklists";
-				Username = "root";
-				Password = "password";
-#endif
-			}
-		}
-
-		public bool OpenConnection(MySqlConnection connection)
-		{
-			connection.Close();
-
-			if (IsDefined)
-			{
-				try
-				{
-					connection.ConnectionString = ConnectionString;
-					connection.Open();
-				}
-				catch (Exception e)
-				{
-#if DEBUG
-					MessageBox.Show(e.ToString());
-#endif
-				}
-			}
-
-			return (connection.State == System.Data.ConnectionState.Open);
-		}
-
-		// --------------------------------------------------------
-
-		public string Server;
-		public string Database;
-		public string Username;
-		public string Password;
-
-		public DatabaseDefinition DatabaseDefinition;
-
-		public uint TasklistKey = 0;
-		public string TasklistName;
-
-		public string TasklistId { get { return Encode(); } }
-
-		// --------------------------------------------------------
-
-		private string ConnectionString
-		{
-			get
-			{
-				return string.Format("Server={0};Database={1};Uid={2};Pwd={3};", 
-									 Server, 
-									 Database, 
-									 Username, 
-									 Password);
-			}
-		}
-
-		private bool IsDefined
-		{
-			get
-			{
-				return (!string.IsNullOrEmpty(Server) &&
-						!string.IsNullOrEmpty(Database) &&
-						!string.IsNullOrEmpty(Username) &&
-						!string.IsNullOrEmpty(Password) &&
-						DatabaseDefinition.IsDefined);
-			}
-		}
-
-		private string Encode()
-		{
-			return string.Join("::", new object[] 
-				{
-					TasklistKey,
-					TasklistName,
-					Server,
-					Database,
-					Username,
-					DatabaseDefinition.Encode()
-				});
-		}
-
-		private bool Decode(string encoded)
-		{
-			var parts = encoded.Split(new[] {"::"}, StringSplitOptions.None);
-
-			if (parts.Length != 6)
-				return false;
-
-			if (!uint.TryParse(parts[0], out TasklistKey) || (TasklistKey == 0))
-			{
-				TasklistKey = 0;
-				return false;
-			}
-
-			TasklistName = parts[1];
-			Server = parts[2];
-			Database = parts[3];
-			Username = parts[4];
-
-			DatabaseDefinition = new DatabaseDefinition(parts[5]);
-			return true;
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-
     public class MySqlStorageCore
     {
         private Translator m_Trans;
@@ -233,7 +36,7 @@ namespace MySqlStorage
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, ref def))
+					if (!OpenConnection(conn, def))
 						return null;
 
 					if (def.TasklistKey == 0)
@@ -290,7 +93,7 @@ namespace MySqlStorage
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, ref def))
+					if (!OpenConnection(conn, def))
 						return null;
 
 					if (string.IsNullOrEmpty(def.TasklistName))
@@ -366,7 +169,7 @@ namespace MySqlStorage
 
 		// ------------------------------------------------------------------
 
-		bool OpenConnection(MySqlConnection conn, ref ConnectionDefinition def)
+		bool OpenConnection(MySqlConnection conn, ConnectionDefinition def)
 		{
 			while (!def.OpenConnection(conn))
 			{
