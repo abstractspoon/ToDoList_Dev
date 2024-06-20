@@ -99,19 +99,21 @@ namespace MySqlStorage
 					if (string.IsNullOrEmpty(def.TasklistName))
 						def.TasklistName = tasklistName;
 
-					// Always prompt for tasklist name
-					var dialog = new SaveTasklistForm(conn, def);
+					if (def.TasklistKey == 0)
+					{
+						var dialog = new SaveTasklistForm(conn, def);
 
-					FormsUtil.SetFont(dialog, m_ControlsFont);
-					m_Trans.Translate(dialog);
+						FormsUtil.SetFont(dialog, m_ControlsFont);
+						m_Trans.Translate(dialog);
 
-					if (dialog.ShowDialog() != DialogResult.OK)
-						return null;
+						if (dialog.ShowDialog() != DialogResult.OK)
+							return null;
 
-					var tasklist = dialog.TasklistInfo;
+						var tasklist = dialog.TasklistInfo;
 
-					def.TasklistKey = tasklist.Key;
-					def.TasklistName = tasklist.Name;
+						def.TasklistKey = tasklist.Key;
+						def.TasklistName = tasklist.Name;
+					}
 
 					bool newTasklist = (def.TasklistKey == 0);
 					string query;
