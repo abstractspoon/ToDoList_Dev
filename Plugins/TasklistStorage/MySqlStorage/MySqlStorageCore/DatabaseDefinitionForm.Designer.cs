@@ -28,7 +28,6 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DatabaseDefinitionForm));
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label4 = new System.Windows.Forms.Label();
@@ -128,12 +127,12 @@
 			this.m_XmlColumn.Size = new System.Drawing.Size(195, 21);
 			this.m_XmlColumn.TabIndex = 25;
 			// 
-			// m_IdColumn
+			// m_KeyColumn
 			// 
 			this.m_KeyColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_KeyColumn.FormattingEnabled = true;
 			this.m_KeyColumn.Location = new System.Drawing.Point(72, 65);
-			this.m_KeyColumn.Name = "m_IdColumn";
+			this.m_KeyColumn.Name = "m_KeyColumn";
 			this.m_KeyColumn.Size = new System.Drawing.Size(195, 21);
 			this.m_KeyColumn.TabIndex = 26;
 			// 
@@ -156,8 +155,10 @@
 			// 
 			// DatabaseDefinitionForm
 			// 
+			this.AcceptButton = this.OK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.CancelButton = this.OK;
 			this.ClientSize = new System.Drawing.Size(279, 187);
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.label5);
@@ -171,7 +172,7 @@
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
-			this.Icon = Properties.Resources.MySqlStorage;
+			this.Icon = global::MySqlStorage.Properties.Resources.MySqlStorage;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DatabaseDefinitionForm";

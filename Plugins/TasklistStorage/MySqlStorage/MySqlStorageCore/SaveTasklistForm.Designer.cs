@@ -28,7 +28,6 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SaveTasklistForm));
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.m_Database = new System.Windows.Forms.TextBox();
@@ -43,7 +42,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(111, 199);
+			this.OK.Location = new System.Drawing.Point(111, 197);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -54,7 +53,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(192, 199);
+			this.Cancel.Location = new System.Drawing.Point(192, 197);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -116,9 +115,11 @@
 			// 
 			// SaveTasklistForm
 			// 
+			this.AcceptButton = this.OK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(279, 234);
+			this.CancelButton = this.Cancel;
+			this.ClientSize = new System.Drawing.Size(279, 232);
 			this.Controls.Add(this.m_Tasklist);
 			this.Controls.Add(this.m_Tasklists);
 			this.Controls.Add(this.OK);
@@ -127,7 +128,7 @@
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
-			this.Icon = Properties.Resources.MySqlStorage;
+			this.Icon = global::MySqlStorage.Properties.Resources.MySqlStorage;
 			this.Name = "SaveTasklistForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Save Tasklist";
