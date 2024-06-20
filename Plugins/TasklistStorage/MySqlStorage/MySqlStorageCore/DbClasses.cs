@@ -52,21 +52,24 @@ namespace MySqlStorage
 			if (!IsDefined)
 				return false;
 
-			if (!DbUtils.HasTable(conn, TasklistsTable))
-				return false;
+			try
+			{
+				var colNames = new List<string>() { KeyColumn, NameColumn, XmlColumn };
 
-			var columns = new List<ColumnInfo>(DbUtils.GetTableColumns(conn, TasklistsTable));
+				foreach (var column in DbUtils.GetTableColumns(conn, TasklistsTable))
+				{
+					colNames.RemoveAll(x => (x == column.Name));
 
-			if (columns.Find(x => (x.Name == KeyColumn)) == null)
-				return false;
+					if (colNames.Count == 0)
+						return true;
+				}
+			}
+			catch (Exception e)
+			{
+				// Bad table name
+			}
 
-			if (columns.Find(x => (x.Name == NameColumn)) == null)
-				return false;
-
-			if (columns.Find(x => (x.Name == XmlColumn)) == null)
-				return false;
-
-			return true;
+			return false;
 		}
 
 		// --------------------------------------------------------
