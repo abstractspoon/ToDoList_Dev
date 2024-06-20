@@ -16,9 +16,9 @@ namespace MySqlStorage
 		{
 		}
 
-		public ConnectionDefinition(string encoded, string password)
+		public ConnectionDefinition(string tasklistId, string password)
 		{
-			if (Decode(encoded))
+			if (Decode(tasklistId))
 			{
 				Password = password;
 			}
@@ -90,6 +90,11 @@ namespace MySqlStorage
 			return false;
 		}
 
+		public string TasklistId
+		{
+			get { return Encode(); }
+		}
+
 		// --------------------------------------------------------
 
 		public string Server = string.Empty;
@@ -104,8 +109,6 @@ namespace MySqlStorage
 
 		public uint TasklistKey = 0;
 		public string TasklistName = string.Empty;
-
-		public string TasklistId { get { return Encode(); } }
 
 		// --------------------------------------------------------
 
