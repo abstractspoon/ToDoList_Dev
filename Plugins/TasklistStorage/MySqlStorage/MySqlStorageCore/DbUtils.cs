@@ -10,50 +10,6 @@ namespace MySqlStorage
 {
 	internal class DbUtils
 	{
-		public static bool HasTable(MySqlConnection conn, string table)
-		{
-			string query = string.Format("SHOW COLUMNS FROM {0}", table);
-
-			try
-			{
-				using (var command = new MySqlCommand(query, conn))
-				{
-					using (var reader = command.ExecuteReader())
-					{
-						return true;
-					}
-				}
-			}
-			catch (Exception e)
-			{
-
-			}
-
-			return false;
-		}
-
-		public static bool HasColumn(MySqlConnection conn, string table, string column)
-		{
-			string query = string.Format("SHOW COLUMNS FROM {0} WHERE field = '{1}';", table, column);
-
-			try
-			{
-				using (var command = new MySqlCommand(query, conn))
-				{
-					using (var reader = command.ExecuteReader())
-					{
-						return true;
-					}
-				}
-			}
-			catch (Exception e)
-			{
-
-			}
-
-			return false;
-		}
-
 		public static IEnumerable<string> GetTableNames(MySqlConnection conn)
 		{
 			using (var command = new MySqlCommand("SHOW TABLES", conn))

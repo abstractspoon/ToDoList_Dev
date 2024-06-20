@@ -64,7 +64,7 @@ namespace MySqlStorage
 						return true;
 				}
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 				// Bad table name
 			}
