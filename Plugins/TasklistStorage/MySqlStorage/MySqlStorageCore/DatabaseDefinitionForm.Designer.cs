@@ -38,7 +38,7 @@
 			this.m_TasklistsTable = new System.Windows.Forms.ComboBox();
 			this.m_NameColumn = new System.Windows.Forms.ComboBox();
 			this.m_XmlColumn = new System.Windows.Forms.ComboBox();
-			this.m_IdColumn = new System.Windows.Forms.ComboBox();
+			this.m_KeyColumn = new System.Windows.Forms.ComboBox();
 			this.m_Database = new System.Windows.Forms.TextBox();
 			this.label5 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
@@ -130,12 +130,12 @@
 			// 
 			// m_IdColumn
 			// 
-			this.m_IdColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_IdColumn.FormattingEnabled = true;
-			this.m_IdColumn.Location = new System.Drawing.Point(72, 65);
-			this.m_IdColumn.Name = "m_IdColumn";
-			this.m_IdColumn.Size = new System.Drawing.Size(195, 21);
-			this.m_IdColumn.TabIndex = 26;
+			this.m_KeyColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_KeyColumn.FormattingEnabled = true;
+			this.m_KeyColumn.Location = new System.Drawing.Point(72, 65);
+			this.m_KeyColumn.Name = "m_IdColumn";
+			this.m_KeyColumn.Size = new System.Drawing.Size(195, 21);
+			this.m_KeyColumn.TabIndex = 26;
 			// 
 			// m_Database
 			// 
@@ -161,7 +161,7 @@
 			this.ClientSize = new System.Drawing.Size(279, 187);
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.label5);
-			this.Controls.Add(this.m_IdColumn);
+			this.Controls.Add(this.m_KeyColumn);
 			this.Controls.Add(this.m_XmlColumn);
 			this.Controls.Add(this.m_NameColumn);
 			this.Controls.Add(this.m_TasklistsTable);
@@ -194,7 +194,7 @@
 		private System.Windows.Forms.ComboBox m_TasklistsTable;
 		private System.Windows.Forms.ComboBox m_NameColumn;
 		private System.Windows.Forms.ComboBox m_XmlColumn;
-		private System.Windows.Forms.ComboBox m_IdColumn;
+		private System.Windows.Forms.ComboBox m_KeyColumn;
 		private System.Windows.Forms.TextBox m_Database;
 		private System.Windows.Forms.Label label5;
 	}

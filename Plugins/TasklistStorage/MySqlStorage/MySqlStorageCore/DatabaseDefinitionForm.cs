@@ -35,7 +35,7 @@ namespace MySqlStorage
 		}
 
 		public string TasklistsTable { get { return m_TasklistsTable.Text; } }
-		public string IdColumn { get { return m_IdColumn.Text; } }
+		public string KeyColumn { get { return m_KeyColumn.Text; } }
 		public string NameColumn { get { return m_NameColumn.Text; } }
 		public string XmlColumn { get { return m_XmlColumn.Text; } }
 
@@ -55,7 +55,7 @@ namespace MySqlStorage
 				return;
 
 			// (Re)populate column names
-			m_IdColumn.Items.Clear();
+			m_KeyColumn.Items.Clear();
 			m_NameColumn.Items.Clear();
 			m_XmlColumn.Items.Clear();
 
@@ -63,7 +63,7 @@ namespace MySqlStorage
 			{
 				if (column.IsPrimaryKey)
 				{
-					m_IdColumn.Items.Add(column);
+					m_KeyColumn.Items.Add(column);
 				}
 				else
 				{
@@ -72,7 +72,7 @@ namespace MySqlStorage
 				}
 			}
 
-			SelectOneOnly(m_IdColumn);
+			SelectOneOnly(m_KeyColumn);
 		}
 	}
 

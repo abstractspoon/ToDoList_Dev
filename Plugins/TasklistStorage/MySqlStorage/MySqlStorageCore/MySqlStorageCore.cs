@@ -57,9 +57,9 @@ namespace MySqlStorage
 					}
 
 					var query = string.Format("SELECT {0} FROM {1} WHERE {2}={3}", 
-											  def.DatabaseDefinition.XmlColumn, 
-											  def.DatabaseDefinition.TasklistsTable,
-											  def.DatabaseDefinition.KeyColumn,
+											  def.XmlColumn, 
+											  def.TasklistsTable,
+											  def.KeyColumn,
 											  def.TasklistKey);
 
 					using (var command = new MySqlCommand(query, conn))
@@ -119,17 +119,17 @@ namespace MySqlStorage
 					if (newTasklist)
 					{
 						query = string.Format("INSERT INTO {0} ({1}, {2}) VALUES(@Name, @Xml)", 
-						 					  def.DatabaseDefinition.TasklistsTable,
-											  def.DatabaseDefinition.NameColumn,
-											  def.DatabaseDefinition.XmlColumn);
+						 					  def.TasklistsTable,
+											  def.NameColumn,
+											  def.XmlColumn);
 					}
 					else
 					{
 						query = string.Format("UPDATE {0} SET {1}=@Name, {2}=@Xml WHERE {3}={4}",
-											  def.DatabaseDefinition.TasklistsTable,
-											  def.DatabaseDefinition.NameColumn,
-											  def.DatabaseDefinition.XmlColumn,
-											  def.DatabaseDefinition.KeyColumn,
+											  def.TasklistsTable,
+											  def.NameColumn,
+											  def.XmlColumn,
+											  def.KeyColumn,
 											  def.TasklistKey);
 					}
 
@@ -187,9 +187,9 @@ namespace MySqlStorage
 					def.Username = dialog.Username;
 					def.Password = dialog.Password;
 				}
-			}
+
 				// Prompt for database details
-				while (!def.DatabaseDefinition.IsValid(conn))
+				while (!def.IsValid(conn))
 				{
 					using (var dialog = new DatabaseDefinitionForm(conn, def))
 					{
@@ -198,14 +198,14 @@ namespace MySqlStorage
 
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return false;
-	// 
-	// 					def.Server = dialog.Server;
-	// 					def.Database = dialog.Database;
-	// 					def.Username = dialog.Username;
-	// 					def.Password = dialog.Password;
+	 
+	 					def.TasklistsTable = dialog.TasklistsTable;
+	 					def.KeyColumn = dialog.KeyColumn;
+	 					def.NameColumn = dialog.NameColumn;
+	 					def.XmlColumn = dialog.XmlColumn;
 					}
 				}
-// 			}
+ 			}
 
 			return true;
 		}

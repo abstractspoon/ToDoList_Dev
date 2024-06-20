@@ -10,13 +10,26 @@ using MySql.Data.MySqlClient;
 namespace MySqlStorage
 {
 
-	public class DatabaseDefinition
+	public class ConnectionDefinition
 	{
-		public DatabaseDefinition(string encoded = "")
+		public ConnectionDefinition() : this("", "")
 		{
-			if (!Decode(encoded))
+		}
+
+		public ConnectionDefinition(string encoded, string password)
+		{
+			if (Decode(encoded))
+			{
+				Password = password;
+			}
+			else
 			{
 #if DEBUG
+				Server = "localhost";
+				Database = "Tasklists";
+				Username = "root";
+				Password = "password";
+
 				TasklistsTable = "Tasklists";
 				KeyColumn = "Id";
 				NameColumn = "Name";
@@ -25,26 +38,26 @@ namespace MySqlStorage
 			}
 		}
 
-		public bool IsDefined
+		public bool OpenConnection(MySqlConnection conn)
 		{
-			get
-			{
-				return (!string.IsNullOrEmpty(TasklistsTable) &&
-						!string.IsNullOrEmpty(KeyColumn) &&
-						!string.IsNullOrEmpty(NameColumn) &&
-						!string.IsNullOrEmpty(XmlColumn));
-			}
-		}
+			conn.Close();
 
-		public string Encode()
-		{
-			return string.Join("||", new object[]
+			if (IsDefined)
+			{
+				try
 				{
-					TasklistsTable,
-					KeyColumn,
-					NameColumn,
-					XmlColumn
-				});
+					conn.ConnectionString = ConnectionString;
+					conn.Open();
+				}
+				catch (Exception e)
+				{
+#if DEBUG
+					MessageBox.Show(e.ToString());
+#endif
+				}
+			}
+
+			return (conn.State == System.Data.ConnectionState.Open);
 		}
 
 		public bool IsValid(MySqlConnection conn)
@@ -52,6 +65,11 @@ namespace MySqlStorage
 			if (!IsDefined)
 				return false;
 
+			// Server/Database details must be correct if the connection is open
+			if (conn.State != System.Data.ConnectionState.Open)
+				return false;
+
+			// Table/column names
 			try
 			{
 				var colNames = new List<string>() { KeyColumn, NameColumn, XmlColumn };
@@ -74,85 +92,15 @@ namespace MySqlStorage
 
 		// --------------------------------------------------------
 
-		public string TasklistsTable = string.Empty;
-		public string KeyColumn = string.Empty;
-		public string NameColumn = string.Empty;
-		public string XmlColumn = string.Empty;
-
-		// --------------------------------------------------------
-
-		private bool Decode(string encoded)
-		{
-			var parts = encoded.Split(new[] { "||" }, StringSplitOptions.None);
-
-			if (parts.Length != 4)
-				return false;
-
-			TasklistsTable = parts[0];
-			KeyColumn = parts[1];
-			NameColumn = parts[2];
-			XmlColumn = parts[3];
-
-			return true;
-		}
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-
-	public class ConnectionDefinition
-	{
-		public ConnectionDefinition() : this("", "")
-		{
-		}
-
-		public ConnectionDefinition(string encoded, string password)
-		{
-			if (Decode(encoded))
-			{
-				Password = password;
-			}
-			else
-			{
-				DatabaseDefinition = new DatabaseDefinition();
-#if DEBUG
-				Server = "localhost";
-				Database = "Tasklists";
-				Username = "root";
-				Password = "password";
-#endif
-			}
-		}
-
-		public bool OpenConnection(MySqlConnection connection)
-		{
-			connection.Close();
-
-			if (IsDefined)
-			{
-				try
-				{
-					connection.ConnectionString = ConnectionString;
-					connection.Open();
-				}
-				catch (Exception e)
-				{
-#if DEBUG
-					MessageBox.Show(e.ToString());
-#endif
-				}
-			}
-
-			return (connection.State == System.Data.ConnectionState.Open);
-		}
-
-		// --------------------------------------------------------
-
 		public string Server = string.Empty;
 		public string Database = string.Empty;
 		public string Username = string.Empty;
 		public string Password = string.Empty;
 
-		public DatabaseDefinition DatabaseDefinition;
+		public string TasklistsTable = string.Empty;
+		public string KeyColumn = string.Empty;
+		public string NameColumn = string.Empty;
+		public string XmlColumn = string.Empty;
 
 		public uint TasklistKey = 0;
 		public string TasklistName = string.Empty;
@@ -181,12 +129,16 @@ namespace MySqlStorage
 						!string.IsNullOrEmpty(Database) &&
 						!string.IsNullOrEmpty(Username) &&
 						!string.IsNullOrEmpty(Password) &&
-						DatabaseDefinition.IsDefined);
+						!string.IsNullOrEmpty(TasklistsTable) &&
+						!string.IsNullOrEmpty(KeyColumn) &&
+						!string.IsNullOrEmpty(NameColumn) &&
+						!string.IsNullOrEmpty(XmlColumn));
 			}
 		}
 
 		private string Encode()
 		{
+			// Excludes password
 			return string.Join("::", new object[]
 				{
 					TasklistKey,
@@ -194,7 +146,10 @@ namespace MySqlStorage
 					Server,
 					Database,
 					Username,
-					DatabaseDefinition.Encode()
+					TasklistsTable,
+					KeyColumn,
+					NameColumn,
+					XmlColumn
 				});
 		}
 
@@ -202,7 +157,7 @@ namespace MySqlStorage
 		{
 			var parts = encoded.Split(new[] { "::" }, StringSplitOptions.None);
 
-			if (parts.Length != 6)
+			if (parts.Length != 9)
 				return false;
 
 			if (!uint.TryParse(parts[0], out TasklistKey) || (TasklistKey == 0))
@@ -211,12 +166,17 @@ namespace MySqlStorage
 				return false;
 			}
 
+			// Excludes password
 			TasklistName = parts[1];
 			Server = parts[2];
 			Database = parts[3];
 			Username = parts[4];
 
-			DatabaseDefinition = new DatabaseDefinition(parts[5]);
+			TasklistsTable = parts[5];
+			KeyColumn = parts[6];
+			NameColumn = parts[7];
+			XmlColumn = parts[8];
+
 			return true;
 		}
 	}
