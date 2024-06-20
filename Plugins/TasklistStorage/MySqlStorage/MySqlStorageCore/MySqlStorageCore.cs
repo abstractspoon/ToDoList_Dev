@@ -187,25 +187,25 @@ namespace MySqlStorage
 					def.Username = dialog.Username;
 					def.Password = dialog.Password;
 				}
+			}
 
+			while (!def.IsValid(conn))
+			{
 				// Prompt for database details
-				while (!def.IsValid(conn))
+				using (var dialog = new DatabaseDefinitionForm(conn, def))
 				{
-					using (var dialog = new DatabaseDefinitionForm(conn, def))
-					{
-						FormsUtil.SetFont(dialog, m_ControlsFont);
-						m_Trans.Translate(dialog);
+					FormsUtil.SetFont(dialog, m_ControlsFont);
+					m_Trans.Translate(dialog);
 
-						if (dialog.ShowDialog() != DialogResult.OK)
-							return false;
-	 
-	 					def.TasklistsTable = dialog.TasklistsTable;
-	 					def.KeyColumn = dialog.KeyColumn;
-	 					def.NameColumn = dialog.NameColumn;
-	 					def.XmlColumn = dialog.XmlColumn;
-					}
+					if (dialog.ShowDialog() != DialogResult.OK)
+						return false;
+
+					def.TasklistsTable = dialog.TasklistsTable;
+					def.KeyColumn = dialog.KeyColumn;
+					def.NameColumn = dialog.NameColumn;
+					def.XmlColumn = dialog.XmlColumn;
 				}
- 			}
+			}
 
 			return true;
 		}
