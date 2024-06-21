@@ -28,7 +28,7 @@ protected:
 	ITransText* m_pTT;
 
 protected:
-	void CopyInfo(MySqlStorage::ConnectionDefinition^ fromDef, ITS_TASKLISTINFO* pToFInfo);
+	void CopyInfo(MySqlStorage::TasklistConnectionInfo^ fromDef, ITS_TASKLISTINFO* toInfo);
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

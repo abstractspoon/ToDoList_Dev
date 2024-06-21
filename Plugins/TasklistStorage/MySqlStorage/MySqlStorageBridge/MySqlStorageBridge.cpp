@@ -74,16 +74,16 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 	
-	msclr::auto_gcroot<ConnectionDefinition^> def = mysql->RetrieveTasklist(tasklistId.get(),
-																			password.get(),
-																			destPath.get(),
-																			bSilent,
-																			prefs.get(),
-																			gcnew String(szKey));
-	if (def.get() == nullptr)
+	msclr::auto_gcroot<TasklistConnectionInfo^> info = mysql->RetrieveTasklist(tasklistId.get(),
+																				 password.get(),
+																				 destPath.get(),
+																				 bSilent,
+																				 prefs.get(),
+																				 gcnew String(szKey));
+	if (info.get() == nullptr)
 		return false;
 
-	CopyInfo(def.get(), pFInfo);
+	CopyInfo(info.get(), pFInfo);
 	lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath.get()));
 
 	return true;
@@ -101,28 +101,32 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 
-	msclr::auto_gcroot<ConnectionDefinition^> def = mysql->StoreTasklist(tasklistId.get(),
-																		 tasklistName.get(),
-																		 password.get(),
-																		 srcPath.get(),
-																		 bSilent,
-																		 prefs.get(),
-																		 gcnew String(szKey));
-	if (def.get() == nullptr)
+	msclr::auto_gcroot<TasklistConnectionInfo^> info = mysql->StoreTasklist(tasklistId.get(),
+																			  tasklistName.get(),
+																			  password.get(),
+																			  srcPath.get(),
+																			  bSilent,
+																			  prefs.get(),
+																			  gcnew String(szKey));
+	if (info.get() == nullptr)
 		return false;
 
-	CopyInfo(def.get(), pFInfo);
+	CopyInfo(info.get(), pFInfo);
 	lstrcpy(pFInfo->szLocalFileName, MarshalledString(srcPath.get()));
 
 	return true;
 }
 
-void CMySqlStorageBridge::CopyInfo(ConnectionDefinition^ fromDef, ITS_TASKLISTINFO* pToFInfo)
+void CMySqlStorageBridge::CopyInfo(TasklistConnectionInfo^ fromInfo, ITS_TASKLISTINFO* toInfo)
 {
-	lstrcpy(pToFInfo->szTasklistID, MarshalledString(fromDef->TasklistId));
-	lstrcpy(pToFInfo->szTasklistName, MarshalledString(fromDef->TasklistName));
-	lstrcpy(pToFInfo->szPassword, MarshalledString(fromDef->Password));
+	lstrcpy(toInfo->szTasklistID, MarshalledString(fromInfo->TasklistId));
+	lstrcpy(toInfo->szTasklistName, MarshalledString(fromInfo->Tasklist->Name));
+	lstrcpy(toInfo->szPassword, MarshalledString(fromInfo->Connection->Password));
 
-	String^ displayPath = String::Format(L"{0}/{1}/{2}", fromDef->Server, fromDef->Database, fromDef->TasklistName);
-	lstrcpy(pToFInfo->szDisplayPath, MarshalledString(displayPath));
+	String^ displayPath = String::Format(L"{0}/{1}/{2}", 
+										 fromInfo->Connection->Server,
+										 fromInfo->Connection->DatabaseName,
+										 fromInfo->Tasklist->Name);
+
+	lstrcpy(toInfo->szDisplayPath, MarshalledString(displayPath));
 }

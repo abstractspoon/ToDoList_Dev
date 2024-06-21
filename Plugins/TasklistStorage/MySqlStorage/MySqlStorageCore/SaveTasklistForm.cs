@@ -14,14 +14,14 @@ namespace MySqlStorage
 {
 	public partial class SaveTasklistForm : Form
 	{
-		public SaveTasklistForm(MySqlConnection conn, ConnectionDefinition def)
+		public SaveTasklistForm(MySqlConnection conn, TasklistConnectionInfo info)
 		{
 			InitializeComponent();
 
-			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
+			m_Database.Text = string.Format("{0}/{1}", info.Connection.Server, info.Connection.DatabaseName);
 
-			m_Tasklists.Initialise(conn, def, false);
-			m_Tasklist.Text = def.TasklistName;
+			m_Tasklists.Initialise(conn, info.Connection, false);
+			m_Tasklist.Text = info.Tasklist.Name;
 		}
 
 		public TasklistInfo TasklistInfo

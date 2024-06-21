@@ -28,21 +28,22 @@ namespace MySqlStorage
 			m_ControlsFont = new Font(FontName, 8.25f);
         }
 
-		public ConnectionDefinition RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
+		public TasklistConnectionInfo RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
-				var def = new ConnectionDefinition(tasklistId, password);
+				var defaultDbInfo = new ConnectionInfo(prefs.GetProfileString(prefKey, "DefaultConnection", ""), "");
+				var details = new TasklistConnectionInfo(tasklistId, password, defaultDbInfo);
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, def))
+					if (!OpenConnection(conn, details.Connection))
 						return null;
 
-					if (def.TasklistKey == 0)
+					if (details.Tasklist.Key == 0)
 					{
 						// Prompt for tasklist 
-						var dialog = new OpenTasklistForm(conn, def);
+						var dialog = new OpenTasklistForm(conn, details.Connection);
 
 						FormsUtil.SetFont(dialog, m_ControlsFont);
 						m_Trans.Translate(dialog);
@@ -52,15 +53,15 @@ namespace MySqlStorage
 
 						var tasklist = dialog.TasklistInfo;
 
-						def.TasklistKey = tasklist.Key;
-						def.TasklistName = tasklist.Name;
+						details.Tasklist.Key = tasklist.Key;
+						details.Tasklist.Name = tasklist.Name;
 					}
 
 					var query = string.Format("SELECT {0} FROM {1} WHERE {2}={3}", 
-											  def.XmlColumn, 
-											  def.TasklistsTable,
-											  def.KeyColumn,
-											  def.TasklistKey);
+											  details.Connection.XmlColumn, 
+											  details.Connection.TasklistsTable,
+											  details.Connection.KeyColumn,
+											  details.Tasklist.Key);
 
 					using (var command = new MySqlCommand(query, conn))
 					{
@@ -69,7 +70,9 @@ namespace MySqlStorage
 							if (reader.Read())
 							{
 								File.WriteAllText(destPath, reader.GetString(0));
-								return def;
+								prefs.WriteProfileString(prefKey, "DefaultConnection", details.Connection.Encode());
+
+								return details;
 							}
 						}
 					}
@@ -85,23 +88,24 @@ namespace MySqlStorage
 			return null;
         }
 
-		public ConnectionDefinition StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
+		public TasklistConnectionInfo StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
 		{
 			try
 			{
-				var def = new ConnectionDefinition(tasklistId, password);
+				var defaultDbInfo = new ConnectionInfo(prefs.GetProfileString(prefKey, "DefaultConnection", ""), "");
+				var details = new TasklistConnectionInfo(tasklistId, password, defaultDbInfo);
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, def))
+					if (!OpenConnection(conn, details.Connection))
 						return null;
 
-					if (string.IsNullOrEmpty(def.TasklistName))
-						def.TasklistName = tasklistName;
+					if (string.IsNullOrEmpty(details.Tasklist.Name))
+						details.Tasklist.Name = tasklistName;
 
-					if (def.TasklistKey == 0)
+					if (details.Tasklist.Key == 0)
 					{
-						var dialog = new SaveTasklistForm(conn, def);
+						var dialog = new SaveTasklistForm(conn, details);
 
 						FormsUtil.SetFont(dialog, m_ControlsFont);
 						m_Trans.Translate(dialog);
@@ -109,35 +113,32 @@ namespace MySqlStorage
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
 
-						var tasklist = dialog.TasklistInfo;
-
-						def.TasklistKey = tasklist.Key;
-						def.TasklistName = tasklist.Name;
+						details.Tasklist = dialog.TasklistInfo;
 					}
 
-					bool newTasklist = (def.TasklistKey == 0);
+					bool newTasklist = (details.Tasklist.Key == 0);
 					string query;
 
 					if (newTasklist)
 					{
 						query = string.Format("INSERT INTO {0} ({1}, {2}) VALUES(@Name, @Xml)", 
-						 					  def.TasklistsTable,
-											  def.NameColumn,
-											  def.XmlColumn);
+						 					  details.Connection.TasklistsTable,
+											  details.Connection.NameColumn,
+											  details.Connection.XmlColumn);
 					}
 					else
 					{
 						query = string.Format("UPDATE {0} SET {1}=@Name, {2}=@Xml WHERE {3}={4}",
-											  def.TasklistsTable,
-											  def.NameColumn,
-											  def.XmlColumn,
-											  def.KeyColumn,
-											  def.TasklistKey);
+											  details.Connection.TasklistsTable,
+											  details.Connection.NameColumn,
+											  details.Connection.XmlColumn,
+											  details.Connection.KeyColumn,
+											  details.Tasklist.Key);
 					}
 
 					using (var command = new MySqlCommand(query, conn))
 					{
-						command.Parameters.AddWithValue("@Name", def.TasklistName);
+						command.Parameters.AddWithValue("@Name", details.Tasklist.Name);
 						command.Parameters.AddWithValue("@Xml", File.ReadAllText(srcPath));
 
 						command.ExecuteNonQuery();
@@ -151,13 +152,14 @@ namespace MySqlStorage
 							using (var reader = command.ExecuteReader())
 							{
 								if (reader.Read())
-									uint.TryParse(reader.GetString(0), out def.TasklistKey);
+									uint.TryParse(reader.GetString(0), out details.Tasklist.Key);
 							}
 						}
 					}
 				}
 
-				return def;
+				prefs.WriteProfileString(prefKey, "DefaultConnection", details.Connection.Encode());
+				return details;
 			}
 			catch (Exception e)
 			{
@@ -171,12 +173,12 @@ namespace MySqlStorage
 
 		// ------------------------------------------------------------------
 
-		bool OpenConnection(MySqlConnection conn, ConnectionDefinition def)
+		bool OpenConnection(MySqlConnection conn, ConnectionInfo dbInfo)
 		{
-			while (!def.OpenConnection(conn))
+			while (!dbInfo.OpenConnection(conn))
 			{
 				// Prompt for connection details
-				using (var dialog = new ConnectionDefinitionForm(def))
+				using (var dialog = new ConnectionDefinitionForm(dbInfo))
 				{
 					FormsUtil.SetFont(dialog, m_ControlsFont);
 					m_Trans.Translate(dialog);
@@ -184,17 +186,17 @@ namespace MySqlStorage
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return false;
 
-					def.Server = dialog.Server;
-					def.Database = dialog.Database;
-					def.Username = dialog.Username;
-					def.Password = dialog.Password;
+					dbInfo.Server = dialog.Server;
+					dbInfo.DatabaseName = dialog.Database;
+					dbInfo.Username = dialog.Username;
+					dbInfo.Password = dialog.Password;
 				}
 			}
 
-			while (!def.IsValid(conn))
+			while (!dbInfo.IsValid(conn))
 			{
 				// Prompt for database details
-				using (var dialog = new DatabaseDefinitionForm(conn, def))
+				using (var dialog = new DatabaseDefinitionForm(conn, dbInfo))
 				{
 					FormsUtil.SetFont(dialog, m_ControlsFont);
 					m_Trans.Translate(dialog);
@@ -202,10 +204,10 @@ namespace MySqlStorage
 					if (dialog.ShowDialog() != DialogResult.OK)
 						return false;
 
-					def.TasklistsTable = dialog.TasklistsTable;
-					def.KeyColumn = dialog.KeyColumn;
-					def.NameColumn = dialog.NameColumn;
-					def.XmlColumn = dialog.XmlColumn;
+					dbInfo.TasklistsTable = dialog.TasklistsTable;
+					dbInfo.KeyColumn = dialog.KeyColumn;
+					dbInfo.NameColumn = dialog.NameColumn;
+					dbInfo.XmlColumn = dialog.XmlColumn;
 				}
 			}
 

@@ -12,12 +12,12 @@ namespace MySqlStorage
 {
 	public partial class ConnectionDefinitionForm : Form
 	{
-		public ConnectionDefinitionForm(ConnectionDefinition def)
+		public ConnectionDefinitionForm(ConnectionInfo def)
 		{
 			InitializeComponent();
 
 			m_Server.Text = def.Server;
-			m_Database.Text = def.Database;
+			m_Database.Text = def.DatabaseName;
 			m_Username.Text = def.Username;
 			m_Password.Text = def.Password;
 

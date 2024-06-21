@@ -10,23 +10,27 @@ using MySql.Data.MySqlClient;
 namespace MySqlStorage
 {
 
-	public class ConnectionDefinition
+	public class ConnectionInfo
 	{
-		public ConnectionDefinition() : this("", "")
+		public ConnectionInfo() : this("")
 		{
 		}
 
-		public ConnectionDefinition(string tasklistId, string password)
+		public ConnectionInfo(string encoded, string password = "", ConnectionInfo defaultInfo = null)
 		{
-			if (Decode(tasklistId))
+			if (Decode(encoded))
 			{
 				Password = password;
+			}
+			else if ((defaultInfo != null) && defaultInfo.IsDefined(false))
+			{
+				SetConnection(defaultInfo);
 			}
 			else
 			{
 #if DEBUG
 				Server = "localhost";
-				Database = "Tasklists";
+				DatabaseName = "Tasklists";
 				Username = "root";
 				Password = "password";
 
@@ -42,7 +46,7 @@ namespace MySqlStorage
 		{
 			conn.Close();
 
-			if (IsDefined)
+			if (IsDefined())
 			{
 				try
 				{
@@ -62,7 +66,7 @@ namespace MySqlStorage
 
 		public bool IsValid(MySqlConnection conn)
 		{
-			if (!IsDefined)
+			if (!IsDefined())
 				return false;
 
 			// Server/Database details must be correct if the connection is open
@@ -90,64 +94,25 @@ namespace MySqlStorage
 			return false;
 		}
 
-		public string TasklistId
+		private void SetConnection(ConnectionInfo dbInfo)
 		{
-			get { return Encode(); }
+			Server = dbInfo.Server;
+			DatabaseName = dbInfo.DatabaseName;
+			Username = dbInfo.Username;
+			Password = dbInfo.Password;
+
+			TasklistsTable = dbInfo.TasklistsTable;
+			KeyColumn = dbInfo.KeyColumn;
+			NameColumn = dbInfo.NameColumn;
+			XmlColumn = dbInfo.XmlColumn;
 		}
 
-		// --------------------------------------------------------
-
-		public string Server = string.Empty;
-		public string Database = string.Empty;
-		public string Username = string.Empty;
-		public string Password = string.Empty;
-
-		public string TasklistsTable = string.Empty;
-		public string KeyColumn = string.Empty;
-		public string NameColumn = string.Empty;
-		public string XmlColumn = string.Empty;
-
-		public uint TasklistKey = 0;
-		public string TasklistName = string.Empty;
-
-		// --------------------------------------------------------
-
-		private string ConnectionString
+		public string Encode() // Excludes password
 		{
-			get
-			{
-				return string.Format("Server={0};Database={1};Uid={2};Pwd={3};",
-									 Server,
-									 Database,
-									 Username,
-									 Password);
-			}
-		}
-
-		private bool IsDefined
-		{
-			get
-			{
-				return (!string.IsNullOrEmpty(Server) &&
-						!string.IsNullOrEmpty(Database) &&
-						!string.IsNullOrEmpty(Username) &&
-						!string.IsNullOrEmpty(Password) &&
-						!string.IsNullOrEmpty(TasklistsTable) &&
-						!string.IsNullOrEmpty(KeyColumn) &&
-						!string.IsNullOrEmpty(NameColumn) &&
-						!string.IsNullOrEmpty(XmlColumn));
-			}
-		}
-
-		private string Encode()
-		{
-			// Excludes password
 			return string.Join("::", new object[]
 				{
-					TasklistKey,
-					TasklistName,
 					Server,
-					Database,
+					DatabaseName,
 					Username,
 					TasklistsTable,
 					KeyColumn,
@@ -156,23 +121,29 @@ namespace MySqlStorage
 				});
 		}
 
+		// --------------------------------------------------------
+
+		public string Server = string.Empty;
+		public string DatabaseName = string.Empty;
+		public string Username = string.Empty;
+		public string Password = string.Empty;
+
+		public string TasklistsTable = string.Empty;
+		public string KeyColumn = string.Empty;
+		public string NameColumn = string.Empty;
+		public string XmlColumn = string.Empty;
+
+		// --------------------------------------------------------
+
 		private bool Decode(string encoded)
 		{
 			var parts = encoded.Split(new[] { "::" }, StringSplitOptions.None);
 
-			if (parts.Length != 9)
+			if (parts.Length != 7)
 				return false;
 
-			if (!uint.TryParse(parts[0], out TasklistKey) || (TasklistKey == 0))
-			{
-				TasklistKey = 0;
-				return false;
-			}
-
-			// Excludes password
-			TasklistName = parts[1];
 			Server = parts[2];
-			Database = parts[3];
+			DatabaseName = parts[3];
 			Username = parts[4];
 
 			TasklistsTable = parts[5];
@@ -182,8 +153,71 @@ namespace MySqlStorage
 
 			return true;
 		}
+
+		private string ConnectionString
+		{
+			get
+			{
+				return string.Format("Server={0};Database={1};Uid={2};Pwd={3};",
+									 Server,
+									 DatabaseName,
+									 Username,
+									 Password);
+			}
+		}
+
+		private bool IsDefined(bool incPassword = true)
+		{
+			if (string.IsNullOrEmpty(Server) ||
+				string.IsNullOrEmpty(DatabaseName) ||
+				string.IsNullOrEmpty(Username) ||
+				string.IsNullOrEmpty(TasklistsTable) ||
+				string.IsNullOrEmpty(KeyColumn) ||
+				string.IsNullOrEmpty(NameColumn) ||
+				string.IsNullOrEmpty(XmlColumn))
+			{
+				return false;
+			}
+
+			if (incPassword && string.IsNullOrEmpty(Password))
+				return false;
+
+			return true;
+		}
 	}
 
+	//////////////////////////////////////////////////////////////////
+
+	public class TasklistConnectionInfo
+	{
+		public TasklistConnectionInfo(string tasklistId, string password, ConnectionInfo defConnection)
+		{
+			var parts = tasklistId.Split(new[] { "||" }, StringSplitOptions.None);
+
+			if (parts.Length == 2)
+			{
+				Connection = new ConnectionInfo(parts[0], password, defConnection);
+				Tasklist = new TasklistInfo(parts[1]);
+			}
+			else
+			{
+				Connection = new ConnectionInfo();
+				Tasklist = new TasklistInfo();
+			}
+		}
+
+		public string TasklistId
+		{
+			get
+			{
+				return string.Format("{0}||{1}", Connection.Encode(), Tasklist.Encode());
+			}
+		}
+
+		public ConnectionInfo Connection;
+		public TasklistInfo Tasklist;
+	}
+	
 	//////////////////////////////////////////////////////////////////
 
 	class ColumnInfo
@@ -209,10 +243,44 @@ namespace MySqlStorage
 
 	public class TasklistInfo
 	{
-		public override string ToString() { return Name; }
-
 		public uint Key = 0;
 		public string Name;
+
+		// --------------------------------------------------------
+
+		public TasklistInfo(string encoded = "")
+		{
+			Decode(encoded);
+		}
+
+		public override string ToString() { return Name; }
+
+		public string Encode() // Excludes password
+		{
+			return string.Join("::", new object[]
+				{
+					Key,
+					Name
+				});
+		}
+
+		private bool Decode(string encoded)
+		{
+			var parts = encoded.Split(new[] { "::" }, StringSplitOptions.None);
+
+			if (parts.Length != 2)
+				return false;
+
+			uint key;
+
+			if (!uint.TryParse(parts[0], out key) || (key == 0))
+				return false;
+
+			Key = key;
+			Name = parts[1];
+
+			return true;
+		}
 	}
 
 }

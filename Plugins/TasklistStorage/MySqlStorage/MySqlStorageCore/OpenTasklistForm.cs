@@ -17,12 +17,12 @@ namespace MySqlStorage
 
 	public partial class OpenTasklistForm : Form
 	{
-		public OpenTasklistForm(MySqlConnection conn, ConnectionDefinition def)
+		public OpenTasklistForm(MySqlConnection conn, ConnectionInfo dbInfo)
 		{
 			InitializeComponent();
 
-			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
-			m_Tasklists.Initialise(conn, def, true);
+			m_Database.Text = string.Format("{0}/{1}", dbInfo.Server, dbInfo.DatabaseName);
+			m_Tasklists.Initialise(conn, dbInfo, true);
 		}
 
 		public TasklistInfo TasklistInfo
@@ -44,9 +44,9 @@ namespace MySqlStorage
 
 	internal class TasklistsListBox : ListBox
 	{
-		public void Initialise(MySqlConnection conn, ConnectionDefinition def, bool selectFirst)
+		public void Initialise(MySqlConnection conn, ConnectionInfo dbInfo, bool selectFirst)
 		{
-			string query = string.Format("SELECT Id, Name FROM {0}", def.TasklistsTable);
+			string query = string.Format("SELECT Id, Name FROM {0}", dbInfo.TasklistsTable);
 
 			using (var command = new MySqlCommand(query, conn))
 			{

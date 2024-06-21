@@ -19,12 +19,12 @@ namespace MySqlStorage
 
 		// ---------------------------------------------------------------
 
-		public DatabaseDefinitionForm(MySqlConnection conn, ConnectionDefinition def)
+		public DatabaseDefinitionForm(MySqlConnection conn, ConnectionInfo dbInfo)
 		{
 			InitializeComponent();
 
 			m_Connection = conn;
-			m_Database.Text = string.Format("{0}/{1}", def.Server, def.Database);
+			m_Database.Text = string.Format("{0}/{1}", dbInfo.Server, dbInfo.DatabaseName);
 			m_TasklistsTable.SelectedIndexChanged += new EventHandler(OnTasklistTableSelChange);
 
 			// Populate table combobox
