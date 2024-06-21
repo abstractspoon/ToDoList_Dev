@@ -34,6 +34,8 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 CMySqlStorageBridge::CMySqlStorageBridge() : m_pTT(nullptr)
 {
 	m_hIcon = Win32::LoadHIcon(L"MySqlStorageBridge.dll", IDI_MYSQL, 16, true);
+	szCachedPassword[0] = 0;
+
 }
 
 void CMySqlStorageBridge::Release()
@@ -66,6 +68,9 @@ LPCWSTR CMySqlStorageBridge::GetTypeID() const
 
 bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
+	if (pFInfo->szPassword[0] == 0)
+		lstrcpy(pFInfo->szPassword, szCachedPassword);
+
 	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
 	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
 	msclr::auto_gcroot<String^> destPath = Path::GetTempFileName();
@@ -86,11 +91,17 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	CopyInfo(info.get(), pFInfo);
 	lstrcpy(pFInfo->szLocalFileName, MarshalledString(destPath.get()));
 
+	// Cache the password for next time
+	lstrcpy(szCachedPassword, pFInfo->szPassword);
+
 	return true;
 }
 
 bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
 {
+	if (pFInfo->szPassword[0] == 0)
+		lstrcpy(pFInfo->szPassword, szCachedPassword);
+
 	msclr::auto_gcroot<String^> tasklistId = gcnew String(pFInfo->szTasklistID);
 	msclr::auto_gcroot<String^> tasklistName = gcnew String(pFInfo->szTasklistName);
 	msclr::auto_gcroot<String^> password = gcnew String(pFInfo->szPassword);
@@ -113,6 +124,9 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 
 	CopyInfo(info.get(), pFInfo);
 	lstrcpy(pFInfo->szLocalFileName, MarshalledString(srcPath.get()));
+
+	// Cache the password for next time
+	lstrcpy(szCachedPassword, pFInfo->szPassword);
 
 	return true;
 }

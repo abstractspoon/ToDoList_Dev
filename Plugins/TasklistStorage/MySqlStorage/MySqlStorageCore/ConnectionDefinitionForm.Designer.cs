@@ -65,6 +65,7 @@
 			// m_Password
 			// 
 			this.m_Password.Location = new System.Drawing.Point(72, 90);
+			this.m_Password.MaxLength = 32;
 			this.m_Password.Name = "m_Password";
 			this.m_Password.Size = new System.Drawing.Size(195, 20);
 			this.m_Password.TabIndex = 3;

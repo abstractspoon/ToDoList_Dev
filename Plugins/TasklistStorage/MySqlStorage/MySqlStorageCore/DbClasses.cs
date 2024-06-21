@@ -142,14 +142,14 @@ namespace MySqlStorage
 			if (parts.Length != 7)
 				return false;
 
-			Server = parts[2];
-			DatabaseName = parts[3];
-			Username = parts[4];
+			Server = parts[0];
+			DatabaseName = parts[1];
+			Username = parts[2];
 
-			TasklistsTable = parts[5];
-			KeyColumn = parts[6];
-			NameColumn = parts[7];
-			XmlColumn = parts[8];
+			TasklistsTable = parts[3];
+			KeyColumn = parts[4];
+			NameColumn = parts[5];
+			XmlColumn = parts[6];
 
 			return true;
 		}
@@ -201,7 +201,11 @@ namespace MySqlStorage
 			}
 			else
 			{
-				Connection = new ConnectionInfo();
+				if (defConnection != null)
+					Connection = defConnection;
+				else
+					Connection = new ConnectionInfo();
+
 				Tasklist = new TasklistInfo();
 			}
 		}
@@ -244,7 +248,7 @@ namespace MySqlStorage
 	public class TasklistInfo
 	{
 		public uint Key = 0;
-		public string Name;
+		public string Name = string.Empty;
 
 		// --------------------------------------------------------
 

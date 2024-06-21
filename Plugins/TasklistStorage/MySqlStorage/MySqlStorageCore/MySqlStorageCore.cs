@@ -32,7 +32,7 @@ namespace MySqlStorage
 		{
 			try
 			{
-				var defaultDbInfo = new ConnectionInfo(prefs.GetProfileString(prefKey, "DefaultConnection", ""), "");
+				var defaultDbInfo = new ConnectionInfo(prefs.GetProfileString(prefKey, "DefaultConnection", ""), password);
 				var details = new TasklistConnectionInfo(tasklistId, password, defaultDbInfo);
 
 				using (var conn = new MySqlConnection())
@@ -92,7 +92,7 @@ namespace MySqlStorage
 		{
 			try
 			{
-				var defaultDbInfo = new ConnectionInfo(prefs.GetProfileString(prefKey, "DefaultConnection", ""), "");
+				var defaultDbInfo = new ConnectionInfo(prefs.GetProfileString(prefKey, "DefaultConnection", ""), password);
 				var details = new TasklistConnectionInfo(tasklistId, password, defaultDbInfo);
 
 				using (var conn = new MySqlConnection())

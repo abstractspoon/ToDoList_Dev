@@ -26,6 +26,7 @@ public:
 protected:
 	HICON m_hIcon;
 	ITransText* m_pTT;
+	WCHAR szCachedPassword[ITS_PASSWORD_LEN + 1];
 
 protected:
 	void CopyInfo(MySqlStorage::TasklistConnectionInfo^ fromDef, ITS_TASKLISTINFO* toInfo);
