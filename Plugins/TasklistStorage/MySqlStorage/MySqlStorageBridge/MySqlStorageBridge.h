@@ -20,13 +20,13 @@ public:
 
    virtual void SetLocalizer(ITransText* pTT);
 
-   virtual bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent = false);
-   virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent = false);
+   virtual bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bPrompt);
+   virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bPrompt);
 
 protected:
 	HICON m_hIcon;
 	ITransText* m_pTT;
-	WCHAR szCachedPassword[ITS_PASSWORD_LEN + 1];
+	WCHAR szCachedPassword[ITS_PASSWORD_LEN + 1]; // for the session only
 
 protected:
 	void CopyInfo(MySqlStorage::TasklistConnectionInfo^ fromDef, ITS_TASKLISTINFO* toInfo);

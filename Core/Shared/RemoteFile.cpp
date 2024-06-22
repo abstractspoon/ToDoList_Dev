@@ -280,7 +280,7 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 	if (!EstablishConnection(nRes, dwOptions))
 		return SaveErrorMsg(nRes);
 
-	// if remote path not specified or is a folder then allow browsing unless bAllowDialog == FALSE
+	// if remote path not specified or is a folder then allow browsing unless bShowDialog == FALSE
 	CFRArray aRemoteFiles;
 
 	if (nRes == RMERR_SUCCESS)
@@ -370,17 +370,20 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 	Misc::Trim(sRemotePath);
 	sRemotePath.Replace('\\', '/');
 
-	if (sRemotePath.IsEmpty())
-	{
-		BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
 
-		if (!bAllowDialog)
+	if (sRemotePath.IsEmpty() || bShowDialog)
+	{
+		if (sRemotePath.IsEmpty() && !bShowDialog)
+		{
+			ASSERT(0);
 			return RMERR_REMOTEPATH;
+		}
 
 		sRemotePath = m_pPrefs->GetProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer);
 
 		// if multiple files are being uploaded then display folder dialog
-		if (nNumLocal > 1)
+		if ((nNumLocal > 1))
 		{
 			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter);
 			
@@ -405,7 +408,9 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 				m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer, sRemotePath);
 			}
 			else
+			{
 				return RMERR_USERCANCELLED;
+			}
 		}
 		else // nNumLocal == 1
 		{
@@ -443,7 +448,9 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 			aRemoteFiles.Add(frRemote);
 		}
 		else
+		{
 			return RMERR_REMOTEPATH;
+		}
 	}
 	
 	return RMERR_SUCCESS;
@@ -478,12 +485,15 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTS
 
 	// if the remote path is empty or a folder then we must display a dialog
 	// to get the actual file of interest
-	if (sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
-	{
-		BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
 
-		if (!bAllowDialog)
+	if (bShowDialog || sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
+	{
+		if (!bShowDialog && sRemotePath.IsEmpty())
+		{
+			ASSERT(0);
 			return RMERR_REMOTEPATH;
+		}
 
 		// get last folder browsed for this server
 		sRemotePath = m_pPrefs->GetProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer);
@@ -506,7 +516,9 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTS
 			m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer, sRemotePath);
 		}
 		else
+		{
 			return RMERR_USERCANCELLED;
+		}
 	}
 	// else we must assume that the remote path is the full filename
 	else
@@ -523,7 +535,7 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 {
 	aLocalFiles.RemoveAll();
 
-	BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
 	bTemp = (dwOptions & RMO_USETEMPFILE);
 
 	if (bTemp)
@@ -541,7 +553,7 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 			}
 		}
 	}
-	else if (bAllowDialog)
+	else if (bShowDialog)
 	{
 		CString sFolder(szLocalDir);
 		BOOL bCreatePath = (dwOptions & RMO_CREATEDOWNLOADDIR);
@@ -569,7 +581,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 				m_pPrefs->WriteProfileString(_T("LocalSettings\\LastDownloadFolder"), m_sServer, sFolder);
 			}
 			else
+			{
 				return RMERR_USERCANCELLED;
+			}
 		}
 		else if (aRemoteFiles.GetSize() == 1)
 		{
@@ -675,9 +689,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 	// case we display a dialog to get the actual filenames
 	else
 	{
-		BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+		BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
 
-		if (!bAllowDialog)
+		if (!bShowDialog)
 			return RMERR_LOCALPATH;
 
 		if (!bFolder)  // bad path
@@ -719,7 +733,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 			m_pPrefs->WriteProfileString(_T("LocalSettings\\LastUploadFolder"), m_sServer, sLocalPath);
 		}
 		else
+		{
 			return RMERR_USERCANCELLED;
+		}
 
 	}
 
@@ -798,11 +814,17 @@ BOOL CRemoteFile::EstablishConnection(RMERR& nRes, DWORD dwOptions)
 	if (!RestartSession())
 		return FALSE;
 
-	BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
 	BOOL bAnonLogin = (dwOptions & RMO_ANONYMOUSLOGIN);
 
 	// try to establish a connection until we succeed or the user cancels
-	// or bAllowDialog == FALSE and we fail
+	// or bShowDialog == FALSE and we fail
+	if (bShowDialog && !DoServerDlg(dwOptions, bAnonLogin))
+	{
+		nRes = RMERR_USERCANCELLED;
+		return FALSE;
+	}
+
 	while (TRUE)
 	{
 		if (!m_sServer.IsEmpty() && (bAnonLogin || (!m_sUsername.IsEmpty() && !m_sPassword.IsEmpty())))
@@ -839,7 +861,7 @@ BOOL CRemoteFile::EstablishConnection(RMERR& nRes, DWORD dwOptions)
 			}
 
 			// must mean failure if we got here
-			if (bAllowDialog)
+			if (bShowDialog)
 			{
 				CEnString sMessage;
 				sMessage.Format(_T("A connection to '%s' could not be established.\n\nWould you like to check your details and try again?"), m_sServer);
@@ -857,9 +879,11 @@ BOOL CRemoteFile::EstablishConnection(RMERR& nRes, DWORD dwOptions)
 				}
 			}
 			else
+			{
 				return FALSE; // can't try again
+			}
 		}
-		else if (bAllowDialog)
+		else if (bShowDialog)
 		{
 			if (!DoServerDlg(dwOptions, bAnonLogin))
 			{

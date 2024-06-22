@@ -16,6 +16,11 @@ namespace MySqlStorage
 		{
 		}
 
+		public ConnectionInfo(ConnectionInfo other) : this("")
+		{
+			SetConnection(other);
+		}
+
 		public ConnectionInfo(string encoded, string password = "", ConnectionInfo defaultInfo = null)
 		{
 			if (Decode(encoded))

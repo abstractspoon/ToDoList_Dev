@@ -760,8 +760,8 @@ protected:
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);
 	TDC_FILE ConfirmSaveTaskList(int nIndex, DWORD dwFlags = 0);
-	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0); // returns FALSE only if the user was prompted to save and cancelled
-	TDC_FILE SaveAll(DWORD dwFlags); // returns FALSE only if the user was prompted to save and cancelled
+	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0);
+	TDC_FILE SaveAll(DWORD dwFlags);
 	
 	void UpdateTrayTooltip();
 	void UpdateCaption();

@@ -304,7 +304,7 @@ HICON CTasklistStorageMgr::GetStorageIcon(int nStorage) const
 }
 
 BOOL CTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, 
-										   int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+										   int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
 	Initialize(); // initialize on demand
 
@@ -326,7 +326,7 @@ BOOL CTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* 
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), PREF_KEY, pStorage->GetTypeID());
 		
-		if (pStorage->RetrieveTasklist(pFInfo, pDestTaskFile, pPrefs, sKey, (bSilent != FALSE)))
+		if (pStorage->RetrieveTasklist(pFInfo, pDestTaskFile, pPrefs, sKey, (bPrompt != FALSE)))
 		{
 			// add storageID
 			pFInfo->sStorageID = pStorage->GetTypeID();
@@ -339,7 +339,7 @@ BOOL CTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* 
 }
 
 BOOL CTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, 
-										int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+										int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
 	Initialize(); // initialize on demand
 
@@ -364,7 +364,7 @@ BOOL CTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskLis
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), PREF_KEY, pStorage->GetTypeID());
 		
-		if (pStorage->StoreTasklist(pFInfo, pSrcTaskFile, pPrefs, sKey, (bSilent != FALSE)))
+		if (pStorage->StoreTasklist(pFInfo, pSrcTaskFile, pPrefs, sKey, (bPrompt != FALSE)))
 		{
 			pFInfo->sStorageID = pStorage->GetTypeID();
 			return TRUE;

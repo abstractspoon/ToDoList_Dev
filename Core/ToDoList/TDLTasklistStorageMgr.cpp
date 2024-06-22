@@ -35,8 +35,8 @@ public:
 	void SetLocalizer(ITransText* pTT) { CLocalizer::Initialize(pTT); }
 
 	virtual BOOL IsInstalled(CString& sUserFolder) const = 0;
-	virtual bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
-	virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
+	virtual bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
+	virtual bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
 
 protected:
 	CIcon m_icon;
@@ -50,7 +50,7 @@ protected:
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-bool CBaseCloudStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* / *pDestTaskFile* /, IPreferences* pPrefs, LPCTSTR / *szKey* /, bool bSilent)
+bool CBaseCloudStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* / *pDestTaskFile* /, IPreferences* pPrefs, LPCTSTR / *szKey* /, bool bPrompt)
 {
 	CString sUserFolder;
 	
@@ -93,7 +93,7 @@ bool CBaseCloudStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* / 
 	return false;
 }
 
-bool CBaseCloudStorage::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* / *pSrcTaskFile* /, IPreferences* pPrefs, LPCTSTR / *szKey* /, bool bSilent)
+bool CBaseCloudStorage::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* / *pSrcTaskFile* /, IPreferences* pPrefs, LPCTSTR / *szKey* /, bool bPrompt)
 {
 	CString sUserFolder;
 	
@@ -172,8 +172,8 @@ public:
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("3ADF91FF-CAB9-44FF-BAA6-F397172149AF"); }
 	
-	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
-	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
+	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
+	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
 	
 protected:
 	BOOL IsInstalled(CString& sUserFolder) const;
@@ -192,8 +192,8 @@ public:
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("0BE9A394-86EC-412C-A88A-496A737E6110"); }
 	
-	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
-	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
+	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
+	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
 	
 protected:
 	BOOL IsInstalled(CString& sUserFolder) const;
@@ -212,8 +212,8 @@ public:
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("9F553544-85AA-4EDD-B0FD-71486246C3E2"); }
 	
-	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
-	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
+	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
+	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
 	
 protected:
 	BOOL IsInstalled(CString& sUserFolder) const;
@@ -233,9 +233,9 @@ CTDLTasklistStorageMgr::~CTDLTasklistStorageMgr()
 
 }
 
-BOOL CTDLTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+BOOL CTDLTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
-	if (CTasklistStorageMgr::RetrieveTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bSilent))
+	if (CTasklistStorageMgr::RetrieveTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bPrompt))
 	{
 		CString sTempPath = FileMisc::GetTempFilePath();
 
@@ -261,7 +261,7 @@ BOOL CTDLTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTa
 	return FALSE;
 }
 
-BOOL CTDLTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO& storageInfo, const CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+BOOL CTDLTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO& storageInfo, const CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
 	// snapshot local file in case it gets modified
 	CString sLocalFile = storageInfo.szLocalFileName;
@@ -272,7 +272,7 @@ BOOL CTDLTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO& storageInfo, const 
 		return FALSE;
 	}
 
-	BOOL bSuccess = CTasklistStorageMgr::StoreTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bSilent);
+	BOOL bSuccess = CTasklistStorageMgr::StoreTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bPrompt);
 
 	// cleanup
 	FileMisc::DeleteFile(sLocalFile, TRUE);

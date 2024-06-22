@@ -51,7 +51,7 @@ CFtpTasklistStorageApp::~CFtpTasklistStorageApp()
 }
 
 bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* /*pDestTaskFile*/, 
-										   IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
+										   IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -77,8 +77,8 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 
 	DWORD dwOptions = RMO_CREATEDOWNLOADDIR | RMO_USETEMPFILE | RMO_KEEPFILENAME;
 	
-	if (!bSilent)
-		dwOptions |= RMO_ALLOWDIALOG;
+	if (bPrompt)
+		dwOptions |= RMO_SHOWDIALOG;
 
 	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
@@ -91,7 +91,7 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 }
 
 bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* /*pSrcTaskFile*/, 
-										IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
+										IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -104,10 +104,10 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 	CRemoteFile rf;
 	DWORD dwOptions = RMO_NOCANCELPROGRESS;
 
-	if (bSilent)
-		dwOptions |= RMO_NOPROGRESS;
+	if (bPrompt)
+		dwOptions |= RMO_SHOWDIALOG;
 	else
-		dwOptions |= RMO_ALLOWDIALOG;
+		dwOptions |= RMO_NOPROGRESS;
 
 	// split the tasklist ID into it constituent parts
 	CStringArray aIDParts;

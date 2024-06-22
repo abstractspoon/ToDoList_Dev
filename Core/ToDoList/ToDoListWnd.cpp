@@ -2024,7 +2024,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 		// save to file and then to storage
 		if (tdc.Save(tasks, storageInfo.szLocalFileName, bFlush) == TDCF_SUCCESS)
 		{
-			if (m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs))
+			if (m_mgrStorage.StoreTasklist(storageInfo, tasks, -1, prefs, FALSE)) // Don't prompt user
 			{
 				m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
 			}
@@ -4619,7 +4619,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 			{
 				CPreferences prefs;
 				
-				if (!m_mgrStorage.RetrieveTasklist(storageInfo, tasks, -1, prefs))
+				if (!m_mgrStorage.RetrieveTasklist(storageInfo, tasks, -1, prefs, FALSE)) // Don't prompt user
 					return TDCF_CANCELLED;
 			}
 			else
@@ -7585,19 +7585,31 @@ void CToDoListWnd::OnUpdateShowTaskView(CCmdUI* pCmdUI)
 void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID) 
 {
 	int nStorage = nCmdID - ID_FILE_OPEN_USERSTORAGE1;
-	
 	ASSERT (nStorage >= 0 && nStorage < 16);
 
-	TSM_TASKLISTINFO storageInfo;
 	CPreferences prefs;
 	CTaskFile tasks;
 
-	if (m_mgrStorage.RetrieveTasklist(storageInfo, tasks, nStorage, prefs))
+	// clear the storage info ID if we are changing the source
+	int nTDC = GetSelToDoCtrl();
+	TSM_TASKLISTINFO storageInfo;
+
+	BOOL bUsesStorage = m_mgrToDoCtrls.GetStorageDetails(nTDC, storageInfo);
+
+	if (bUsesStorage && 
+		(nStorage != m_mgrStorage.FindStorage(storageInfo.sStorageID)))
+	{
+		storageInfo.Reset();
+	}
+
+	if (m_mgrStorage.RetrieveTasklist(storageInfo, tasks, nStorage, prefs, TRUE)) // Prompt user
 	{
 		CString sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
 		TDC_FILE nOpen = OpenTaskList(sFilePath, TRUE);
 
-		if (nOpen != TDCF_SUCCESS)
+		if (nOpen == TDCF_SUCCESS)
+			m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
+		else
 			HandleLoadTasklistError(nOpen, storageInfo.szDisplayPath);
 		
 		// refresh UI
@@ -7619,23 +7631,16 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 	int nStorage = (nCmdID - ID_FILE_SAVE_USERSTORAGE1);
 	ASSERT (nStorage >= 0 && nStorage < 16);
 
-	// retrieve any existing storage info for this tasklist
+	// clear the storage info ID if we are changing the source
 	int nTDC = GetSelToDoCtrl();
 	TSM_TASKLISTINFO storageInfo;
 
 	BOOL bUsesStorage = m_mgrToDoCtrls.GetStorageDetails(nTDC, storageInfo);
 
-	if (bUsesStorage)
+	if (bUsesStorage &&
+		(nStorage != m_mgrStorage.FindStorage(storageInfo.sStorageID)))
 	{
-		// clear the storage info ID if we are changing the destination
-		if (nStorage != m_mgrStorage.FindStorage(storageInfo.sStorageID))
-		{
-			storageInfo.Reset();
-		}
-		else // clear the tasklist ID to force prompting
-		{
-			storageInfo.szTasklistID[0] = 0;
-		}
+		storageInfo.Reset();
 	}
 
 	// save the existing tasklist to temp path
@@ -7679,7 +7684,7 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 		DOPROGRESS(IDS_SAVINGPROGRESS);
 		CPreferences prefs;
 
-		if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, nStorage, prefs)) // Not silent
+		if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, nStorage, prefs, TRUE)) // Prompt user
 		{
 			// assume storage plugin has handled error
 			m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);

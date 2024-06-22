@@ -33,9 +33,9 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 // see ExporterBridge.h for the class definition
 CMySqlStorageBridge::CMySqlStorageBridge() : m_pTT(nullptr)
 {
-	m_hIcon = Win32::LoadHIcon(L"MySqlStorageBridge.dll", IDI_MYSQL, 16, true);
 	szCachedPassword[0] = 0;
 
+	m_hIcon = Win32::LoadHIcon(L"MySqlStorageBridge.dll", IDI_MYSQL, 16, true);
 }
 
 void CMySqlStorageBridge::Release()
@@ -66,7 +66,7 @@ LPCWSTR CMySqlStorageBridge::GetTypeID() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
+bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bPrompt)
 {
 	if (pFInfo->szPassword[0] == 0)
 		lstrcpy(pFInfo->szPassword, szCachedPassword);
@@ -80,11 +80,11 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 	
 	msclr::auto_gcroot<TasklistConnectionInfo^> info = mysql->RetrieveTasklist(tasklistId.get(),
-																				 password.get(),
-																				 destPath.get(),
-																				 bSilent,
-																				 prefs.get(),
-																				 gcnew String(szKey));
+																			   password.get(),
+																			   destPath.get(),
+																			   bPrompt,
+																			   prefs.get(),
+																			   gcnew String(szKey));
 	if (info.get() == nullptr)
 		return false;
 
@@ -97,7 +97,7 @@ bool CMySqlStorageBridge::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* 
 	return true;
 }
 
-bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bSilent)
+bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCWSTR szKey, bool bPrompt)
 {
 	if (pFInfo->szPassword[0] == 0)
 		lstrcpy(pFInfo->szPassword, szCachedPassword);
@@ -113,12 +113,12 @@ bool CMySqlStorageBridge::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskLis
 	msclr::auto_gcroot<MySqlStorageCore^> mysql = gcnew MySqlStorageCore(trans.get());
 
 	msclr::auto_gcroot<TasklistConnectionInfo^> info = mysql->StoreTasklist(tasklistId.get(),
-																			  tasklistName.get(),
-																			  password.get(),
-																			  srcPath.get(),
-																			  bSilent,
-																			  prefs.get(),
-																			  gcnew String(szKey));
+																			tasklistName.get(),
+																			password.get(),
+																			srcPath.get(),
+																			bPrompt,
+																			prefs.get(),
+																			gcnew String(szKey));
 	if (info.get() == nullptr)
 		return false;
 

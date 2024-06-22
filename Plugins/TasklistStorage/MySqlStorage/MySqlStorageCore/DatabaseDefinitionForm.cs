@@ -15,6 +15,7 @@ namespace MySqlStorage
 	public partial class DatabaseDefinitionForm : Form
 	{
 		MySqlConnection m_Connection;
+
 		string m_CurrentTable = string.Empty;
 
 		// ---------------------------------------------------------------
@@ -32,20 +33,18 @@ namespace MySqlStorage
 				m_TasklistsTable.Items.Add(table);
 
 			SelectOneOnly(m_TasklistsTable);
+
+			SelectColumn(m_KeyColumn, dbInfo.KeyColumn);
+			SelectColumn(m_NameColumn, dbInfo.NameColumn);
+			SelectColumn(m_XmlColumn, dbInfo.XmlColumn);
 		}
 
 		public string TasklistsTable { get { return m_TasklistsTable.Text; } }
-		public string KeyColumn { get { return m_KeyColumn.Text; } }
-		public string NameColumn { get { return m_NameColumn.Text; } }
-		public string XmlColumn { get { return m_XmlColumn.Text; } }
+		public string KeyColumn { get { return GetSelectedColumnName(m_KeyColumn); } }
+		public string NameColumn { get { return GetSelectedColumnName(m_NameColumn); } }
+		public string XmlColumn { get { return GetSelectedColumnName(m_XmlColumn); } }
 
 		// ---------------------------------------------------------------
-
-		private void SelectOneOnly(ComboBox combo)
-		{
-			if (combo.Items.Count == 1)
-				combo.SelectedIndex = 0;
-		}
 
 		private void OnTasklistTableSelChange(object sender, EventArgs e)
 		{
@@ -73,6 +72,35 @@ namespace MySqlStorage
 			}
 
 			SelectOneOnly(m_KeyColumn);
+		}
+
+		private static void SelectOneOnly(ComboBox combo)
+		{
+			if (combo.Items.Count == 1)
+				combo.SelectedIndex = 0;
+		}
+
+		private static string GetSelectedColumnName(ComboBox combo)
+		{
+			if (combo.SelectedItem == null)
+				return string.Empty;
+
+			return (combo.SelectedItem as ColumnInfo).Name;
+		}
+
+		private static void SelectColumn(ComboBox combo, string colName)
+		{
+			if (string.IsNullOrWhiteSpace(colName))
+				return;
+
+			foreach (var item in combo.Items)
+			{
+				if ((item as ColumnInfo).Name == colName)
+				{
+					combo.SelectedItem = item;
+					break;
+				}
+			}
 		}
 	}
 

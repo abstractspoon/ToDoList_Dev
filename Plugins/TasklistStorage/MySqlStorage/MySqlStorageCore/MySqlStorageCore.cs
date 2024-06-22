@@ -28,7 +28,7 @@ namespace MySqlStorage
 			m_ControlsFont = new Font(FontName, 8.25f);
         }
 
-		public TasklistConnectionInfo RetrieveTasklist(string tasklistId, string password, string destPath, bool bSilent, Preferences prefs, string prefKey)
+		public TasklistConnectionInfo RetrieveTasklist(string tasklistId, string password, string destPath, bool prompt, Preferences prefs, string prefKey)
 		{
 			try
 			{
@@ -37,10 +37,10 @@ namespace MySqlStorage
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, details.Connection))
+					if (!OpenConnection(conn, details.Connection, prompt))
 						return null;
 
-					if (details.Tasklist.Key == 0)
+					if (prompt || (details.Tasklist.Key == 0))
 					{
 						// Prompt for tasklist 
 						var dialog = new OpenTasklistForm(conn, details.Connection);
@@ -88,7 +88,7 @@ namespace MySqlStorage
 			return null;
         }
 
-		public TasklistConnectionInfo StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool bSilent, Preferences prefs, string prefKey)
+		public TasklistConnectionInfo StoreTasklist(string tasklistId, string tasklistName, string password, string srcPath, bool prompt, Preferences prefs, string prefKey)
 		{
 			try
 			{
@@ -97,13 +97,13 @@ namespace MySqlStorage
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, details.Connection))
+					if (!OpenConnection(conn, details.Connection, prompt))
 						return null;
 
 					if (string.IsNullOrEmpty(details.Tasklist.Name))
 						details.Tasklist.Name = tasklistName;
 
-					if (details.Tasklist.Key == 0)
+					if (prompt || (details.Tasklist.Key == 0))
 					{
 						var dialog = new SaveTasklistForm(conn, details);
 
@@ -173,9 +173,11 @@ namespace MySqlStorage
 
 		// ------------------------------------------------------------------
 
-		bool OpenConnection(MySqlConnection conn, ConnectionInfo dbInfo)
+		bool OpenConnection(MySqlConnection conn, ConnectionInfo dbInfo, bool prompt)
 		{
-			while (!dbInfo.OpenConnection(conn))
+			bool promptConn = prompt;
+
+			while (promptConn || !dbInfo.OpenConnection(conn))
 			{
 				// Prompt for connection details
 				using (var dialog = new ConnectionDefinitionForm(dbInfo))
@@ -190,10 +192,15 @@ namespace MySqlStorage
 					dbInfo.DatabaseName = dialog.Database;
 					dbInfo.Username = dialog.Username;
 					dbInfo.Password = dialog.Password;
+
+					// Force prompt only first time
+					promptConn = false;
 				}
 			}
 
-			while (!dbInfo.IsValid(conn))
+			bool promptDb = prompt;
+
+			while (promptDb || !dbInfo.IsValid(conn))
 			{
 				// Prompt for database details
 				using (var dialog = new DatabaseDefinitionForm(conn, dbInfo))
@@ -208,6 +215,9 @@ namespace MySqlStorage
 					dbInfo.KeyColumn = dialog.KeyColumn;
 					dbInfo.NameColumn = dialog.NameColumn;
 					dbInfo.XmlColumn = dialog.XmlColumn;
+
+					// Force prompt only first time
+					promptDb = false;
 				}
 			}
 

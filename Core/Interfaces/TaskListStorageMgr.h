@@ -55,8 +55,8 @@ public:
 	CString GetStorageTypeID(int nStorage) const;
 	HICON GetStorageIcon(int nStorage) const;
 	
-	BOOL RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bSilent = FALSE);
-	BOOL StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bSilent = FALSE);
+	BOOL RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bPrompt);
+	BOOL StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bPrompt);
 
 	int FindStorage(LPCTSTR szTypeID) const;
 	

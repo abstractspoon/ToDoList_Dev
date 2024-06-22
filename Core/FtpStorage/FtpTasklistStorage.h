@@ -34,8 +34,8 @@ public:
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("14908CE5_AA9F_4AFC_B72E_3F2BDD0993F0"); }
 
-	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
-	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bSilent);
+	bool RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
+	bool StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt);
 
 protected:
 	CIcon m_icon;
