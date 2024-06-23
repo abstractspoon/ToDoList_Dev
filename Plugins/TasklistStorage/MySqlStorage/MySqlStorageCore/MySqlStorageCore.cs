@@ -1,8 +1,6 @@
 ﻿
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 
@@ -60,7 +58,7 @@ namespace MySqlStorage
 					var query = string.Format("SELECT {0} FROM {1} WHERE {2}={3}", 
 											  details.Connection.XmlColumn, 
 											  details.Connection.TasklistsTable,
-											  details.Connection.KeyColumn,
+											  details.Connection.IdColumn,
 											  details.Tasklist.Key);
 
 					using (var command = new MySqlCommand(query, conn))
@@ -78,7 +76,7 @@ namespace MySqlStorage
 					}
 				}
 			}
-			catch(Exception e)
+			catch(MySqlException e)
 			{
 #if DEBUG
 				MessageBox.Show(e.ToString());
@@ -132,7 +130,7 @@ namespace MySqlStorage
 											  details.Connection.TasklistsTable,
 											  details.Connection.NameColumn,
 											  details.Connection.XmlColumn,
-											  details.Connection.KeyColumn,
+											  details.Connection.IdColumn,
 											  details.Tasklist.Key);
 					}
 
@@ -161,7 +159,7 @@ namespace MySqlStorage
 				prefs.WriteProfileString(prefKey, "DefaultConnection", details.Connection.Encode());
 				return details;
 			}
-			catch (Exception e)
+			catch (MySqlException e)
 			{
 #if DEBUG
 				MessageBox.Show(e.ToString());

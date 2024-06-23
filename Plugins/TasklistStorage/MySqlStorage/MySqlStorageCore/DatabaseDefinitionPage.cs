@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 using MySql.Data.MySqlClient;
 
@@ -31,25 +32,28 @@ namespace MySqlStorage
 
 			UIUtils.SelectOneOnly(m_TasklistsTable);
 
-			m_KeyColumn.SelectColumn(connInfo.KeyColumn);
+			m_IdColumn.SelectColumn(connInfo.IdColumn);
 			m_NameColumn.SelectColumn(connInfo.NameColumn);
 			m_XmlColumn.SelectColumn(connInfo.XmlColumn);
 
 			VisibleChanged += (s, e) =>
 			{
 				if (Visible)
-					SetFocusToFirstEmpty();
+					UIUtils.SetFocusToFirstEmpty(Controls);
 			};
 		}
 
 		public string TasklistsTable { get { return m_TasklistsTable.Text; } }
-		public string KeyColumn { get { return m_KeyColumn.SelectedColumnName; } }
+		public string IdColumn { get { return m_IdColumn.SelectedColumnName; } }
 		public string NameColumn { get { return m_NameColumn.SelectedColumnName; } }
 		public string XmlColumn { get { return m_XmlColumn.SelectedColumnName; } }
 
-		public bool SetFocusToFirstEmpty()
+		public void HandleError(DbError error)
 		{
-			return UIUtils.SetFocusToFirstEmpty(Controls);
+			var ctrl = MapErrorToField(error);
+
+			if (ctrl != null)
+				ctrl.Focus();
 		}
 
 		// ---------------------------------------------------------------
@@ -62,7 +66,7 @@ namespace MySqlStorage
 				return;
 
 			// (Re)populate column names
-			m_KeyColumn.Items.Clear();
+			m_IdColumn.Items.Clear();
 			m_NameColumn.Items.Clear();
 			m_XmlColumn.Items.Clear();
 
@@ -70,7 +74,7 @@ namespace MySqlStorage
 			{
 				if (column.IsPrimaryKey)
 				{
-					m_KeyColumn.Items.Add(column);
+					m_IdColumn.Items.Add(column);
 				}
 				else
 				{
@@ -79,11 +83,24 @@ namespace MySqlStorage
 				}
 			}
 
-			m_KeyColumn.SelectOneOnly();
+			m_IdColumn.SelectOneOnly();
 		}
 
+		ComboBox MapErrorToField(DbError error)
+		{
+			switch (error)
+			{
+			case DbError.TasklistsTable:	return m_TasklistsTable;
+			case DbError.IdColumn:			return m_IdColumn;
+			case DbError.NameColumn:		return m_NameColumn;
+			case DbError.XmlColumn:			return m_XmlColumn;
+			}
+
+			Debug.Assert(false);
+			return null;
+
+		}
 	}
 
 	// ------------------------------------------------------------
-
 }

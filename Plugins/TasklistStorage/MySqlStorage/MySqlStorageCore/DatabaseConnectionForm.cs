@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 using MySql.Data.MySqlClient;
 
@@ -56,27 +57,24 @@ namespace MySqlStorage
 			if (m_ConnectionPage.Visible)
 			{
 				// OK button means 'Connect'
-				if (!connInfo.OpenConnection(m_Connection))
-				{
-					if (!connInfo.IsConnectionDefined())
-					{
-						// One of more empty inputs
-						m_ConnectionPage.SetFocusToFirstEmpty();
-					}
-					else
-					{
-						// Show an error message and don't switch pages
-						// TODO
-					}
+				DbError error;
 
+				if (!connInfo.IsConnectionDefined(out error) ||
+					!connInfo.OpenConnection(m_Connection, out error))
+				{
+					// Highlight the faulty input
+					m_ConnectionPage.HandleError(error);
+
+					// and don't switch pages
 					DialogResult = DialogResult.None;
 				}
-				else if (!connInfo.IsValid(m_Connection))
+				else if (!connInfo.IsValid(m_Connection, out error))
 				{ 
 					// Switch to the 'database' page
 					m_DatabasePage.Initialise(m_Connection, connInfo);
-					m_DatabasePage.Visible = true;
+					m_DatabasePage.HandleError(error);
 
+					m_DatabasePage.Visible = true;
 					m_ConnectionPage.Visible = false;
 
 					OK.Text = "OK";
@@ -91,26 +89,19 @@ namespace MySqlStorage
 			else // Database page is active
 			{
 				connInfo.TasklistsTable = m_DatabasePage.TasklistsTable;
-				connInfo.KeyColumn = m_DatabasePage.KeyColumn;
+				connInfo.IdColumn = m_DatabasePage.IdColumn;
 				connInfo.NameColumn = m_DatabasePage.NameColumn;
 				connInfo.XmlColumn = m_DatabasePage.XmlColumn;
 
-				if (!connInfo.IsValid(m_Connection))
-				{
-					if (!connInfo.IsDatabaseDefined())
-					{
-						// One of more empty or duplicate inputs
-						if (!m_DatabasePage.SetFocusToFirstEmpty())
-						{
-							// TODO
-						}
-					}
-					else
-					{
-						// Show an error message and don't quit
-						// TODO
-					}
+				DbError error;
 
+				if (!connInfo.IsDatabaseDefined(out error) ||
+					!connInfo.IsValid(m_Connection, out error))
+				{
+					// Highlight the faulty input
+					m_DatabasePage.HandleError(error);
+
+					// and don't switch pages
 					DialogResult = DialogResult.None;
 				}
 				else // Finished

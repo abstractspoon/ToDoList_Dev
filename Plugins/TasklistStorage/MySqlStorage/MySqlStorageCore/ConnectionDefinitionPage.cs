@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using System.Diagnostics;
+
+////////////////////////////////////////////////////////////////////////////
 
 namespace MySqlStorage
 {
@@ -16,6 +13,11 @@ namespace MySqlStorage
 		{
 			InitializeComponent();
 		}
+
+		public string Server { get { return m_Server.Text; } }
+		public string Database { get { return m_Database.Text; } }
+		public string Username { get { return m_Username.Text; } }
+		public string Password { get { return m_Password.Text; } }
 
 		public void Initialise(ConnectionInfo def)
 		{
@@ -36,14 +38,31 @@ namespace MySqlStorage
 			return UIUtils.SetFocusToFirstEmpty(Controls);
 		}
 
-		public string Server { get { return m_Server.Text; } }
-		public string Database { get { return m_Database.Text; } }
-		public string Username { get { return m_Username.Text; } }
-		public string Password { get { return m_Password.Text; } }
-
-		private Control[] Fields
+		public void HandleError(DbError error)
 		{
-			get { return new [] { m_Server, m_Database, m_Username, m_Password }; }
+			var ctrl = MapErrorToField(error);
+
+			if (ctrl != null)
+			{
+				ctrl.Focus();
+				ctrl.SelectAll();
+			}
+		}
+
+		// ------------------------------------------------
+
+		TextBox MapErrorToField(DbError error)
+		{
+			switch (error)
+			{
+			case DbError.Server:		return m_Server;
+			case DbError.DatabaseName:	return m_Database;
+			case DbError.Username:		return m_Username;
+			case DbError.Password:		return m_Password;
+			}
+
+			Debug.Assert(error == DbError.Unknown);
+			return null;
 		}
 	}
 }

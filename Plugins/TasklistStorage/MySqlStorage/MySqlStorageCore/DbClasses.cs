@@ -43,7 +43,17 @@ namespace MySqlStorage
 
 		public bool OpenConnection(MySqlConnection conn)
 		{
+			DbError unused;
+
+			return OpenConnection(conn, out unused);
+		}
+
+		public bool OpenConnection(MySqlConnection conn, out DbError error)
+		{
 			conn.Close();
+
+			error = DbError.Unknown;
+			string errMsg = string.Empty;
 
 			if (IsConnectionDefined())
 			{
@@ -51,43 +61,107 @@ namespace MySqlStorage
 				{
 					conn.ConnectionString = ConnectionString;
 					conn.Open();
+
+					if (conn.State == System.Data.ConnectionState.Open)
+					{
+						error = DbError.Success;
+					}
+				}
+				catch (MySqlException e)
+				{
+					var innerEx = (e.InnerException as MySqlException);
+
+					if (innerEx != null)
+					{
+						switch (innerEx.Number)
+						{
+						case 1049:
+							error = DbError.DatabaseName;
+							break;
+
+						case 1524:
+							error = DbError.Username;
+							break;
+
+						case 1045:
+							error = DbError.Password;
+							break;
+
+						default:
+							errMsg = innerEx.Message;
+							break;
+						}
+					}
+					else
+					{
+						errMsg = e.InnerException.Message;
+					}
 				}
 				catch (Exception e)
 				{
-#if DEBUG
-					MessageBox.Show(e.ToString());
-#endif
+					switch ((uint)e.InnerException.HResult)
+					{
+					case 0x80004005:
+						error = DbError.Server;
+						break;
+
+					default:
+						errMsg = e.InnerException.Message;
+						break;
+					}
 				}
 			}
-
-			return (conn.State == System.Data.ConnectionState.Open);
+#if DEBUG
+			if (!string.IsNullOrWhiteSpace(errMsg))
+				MessageBox.Show(errMsg);
+#endif
+			return (error == DbError.Success);
 		}
 
-		public bool IsValid(MySqlConnection conn)
+		public bool IsValid(MySqlConnection conn, out DbError error)
 		{
-			if (!IsConnectionDefined() || !IsDatabaseDefined())
+			if (!IsConnectionDefined(out error) || !IsDatabaseDefined(out error))
 				return false;
 
 			// Server/Database details must be correct if the connection is open
 			if (conn.State != System.Data.ConnectionState.Open)
+			{
+				error = DbError.Unknown;
 				return false;
+			}
 
 			// Table/column names
 			try
 			{
-				var colNames = new List<string>() { KeyColumn, NameColumn, XmlColumn };
+				var colNames = new List<string>() { IdColumn, NameColumn, XmlColumn };
 
 				foreach (var column in DbUtils.GetTableColumns(conn, TasklistsTable))
 				{
 					colNames.RemoveAll(x => (x == column.Name));
 
 					if (colNames.Count == 0)
+					{
+						error = DbError.Success;
 						return true;
+					}
+					else if (colNames.Contains(IdColumn))
+					{
+						error = DbError.IdColumn;
+					}
+					else if (colNames.Contains(NameColumn))
+					{
+						error = DbError.NameColumn;
+					}
+					else if (colNames.Contains(XmlColumn))
+					{
+						error = DbError.XmlColumn;
+					}
 				}
 			}
-			catch (Exception /*e*/)
+			catch (MySqlException /*e*/)
 			{
 				// Bad table name
+				error = DbError.TasklistsTable;
 			}
 
 			return false;
@@ -101,7 +175,7 @@ namespace MySqlStorage
 			Password = fromInfo.Password;
 
 			TasklistsTable = fromInfo.TasklistsTable;
-			KeyColumn = fromInfo.KeyColumn;
+			IdColumn = fromInfo.IdColumn;
 			NameColumn = fromInfo.NameColumn;
 			XmlColumn = fromInfo.XmlColumn;
 		}
@@ -114,7 +188,7 @@ namespace MySqlStorage
 					DatabaseName,
 					Username,
 					TasklistsTable,
-					KeyColumn,
+					IdColumn,
 					NameColumn,
 					XmlColumn
 				});
@@ -122,37 +196,89 @@ namespace MySqlStorage
 
 		public bool IsConnectionDefined(bool incPassword = true)
 		{
-			if (string.IsNullOrEmpty(Server) ||
-				string.IsNullOrEmpty(DatabaseName) ||
-				string.IsNullOrEmpty(Username))
+			DbError unused;
+
+			return IsConnectionDefined(out unused, incPassword);
+		}
+
+		public bool IsConnectionDefined(out DbError error, bool incPassword = true)
+		{
+			if (string.IsNullOrEmpty(Server))
 			{
+				error = DbError.Server;
+				return false;
+			}
+
+			if (string.IsNullOrEmpty(DatabaseName))
+			{
+				error = DbError.DatabaseName;
+				return false;
+			}
+
+			if (string.IsNullOrEmpty(Username))
+			{
+				error = DbError.Username;
 				return false;
 			}
 
 			if (incPassword && string.IsNullOrEmpty(Password))
+			{
+				error = DbError.Password;
 				return false;
+			}
 
+			// else
+			error = DbError.Success;
 			return true;
 		}
 
-		public bool IsDatabaseDefined()
+		public bool IsDatabaseDefined(out DbError error)
 		{
-			if (string.IsNullOrEmpty(TasklistsTable) ||
-				string.IsNullOrEmpty(KeyColumn) ||
-				string.IsNullOrEmpty(NameColumn) ||
-				string.IsNullOrEmpty(XmlColumn))
+			if (string.IsNullOrEmpty(TasklistsTable))
 			{
+				error = DbError.TasklistsTable;
+				return false;
+			}
+
+			if (string.IsNullOrEmpty(IdColumn))
+			{
+				error = DbError.IdColumn;
+				return false;
+			}
+
+			if (string.IsNullOrEmpty(NameColumn))
+			{
+				error = DbError.NameColumn;
+				return false;
+			}
+
+			if (string.IsNullOrEmpty(XmlColumn))
+			{
+				error = DbError.XmlColumn;
 				return false;
 			}
 
 			// Columns must be unique
-			if ((KeyColumn == NameColumn) ||
-				(KeyColumn == XmlColumn) ||
-				(XmlColumn == NameColumn))
+			if (NameColumn == IdColumn)
 			{
-				return true;
+				error = DbError.NameColumn;
+				return false;
 			}
 
+			if (XmlColumn == IdColumn)
+			{
+				error = DbError.XmlColumn;
+				return false;
+			}
+
+			if (XmlColumn == NameColumn)
+			{
+				error = DbError.XmlColumn;
+				return false;
+			}
+
+			// else
+			error = DbError.Success;
 			return true;
 		}
 
@@ -164,7 +290,7 @@ namespace MySqlStorage
 		public string Password = string.Empty;
 
 		public string TasklistsTable = string.Empty;
-		public string KeyColumn = string.Empty;
+		public string IdColumn = string.Empty;
 		public string NameColumn = string.Empty;
 		public string XmlColumn = string.Empty;
 
@@ -182,7 +308,7 @@ namespace MySqlStorage
 			Username = parts[2];
 
 			TasklistsTable = parts[3];
-			KeyColumn = parts[4];
+			IdColumn = parts[4];
 			NameColumn = parts[5];
 			XmlColumn = parts[6];
 

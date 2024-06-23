@@ -7,6 +7,20 @@ using MySql.Data.MySqlClient;
 
 namespace MySqlStorage
 {
+	public enum DbError
+	{
+		Unknown = -1,
+		Success = 0,
+		Server,
+		DatabaseName,
+		Username,
+		Password,
+		TasklistsTable,
+		IdColumn,
+		NameColumn,
+		XmlColumn,
+	}
+
 	internal class DbUtils
 	{
 		public static IEnumerable<string> GetTableNames(MySqlConnection conn)

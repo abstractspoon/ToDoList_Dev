@@ -33,9 +33,9 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_TasklistsTable = new System.Windows.Forms.ComboBox();
+			this.m_IdColumn = new MySqlStorage.ColumnComboBox();
 			this.m_NameColumn = new MySqlStorage.ColumnComboBox();
 			this.m_XmlColumn = new MySqlStorage.ColumnComboBox();
-			this.m_KeyColumn = new MySqlStorage.ColumnComboBox();
 			this.SuspendLayout();
 			// 
 			// label4
@@ -83,6 +83,15 @@
 			this.m_TasklistsTable.Size = new System.Drawing.Size(195, 21);
 			this.m_TasklistsTable.TabIndex = 23;
 			// 
+			// m_IdColumn
+			// 
+			this.m_IdColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_IdColumn.FormattingEnabled = true;
+			this.m_IdColumn.Location = new System.Drawing.Point(63, 28);
+			this.m_IdColumn.Name = "m_IdColumn";
+			this.m_IdColumn.Size = new System.Drawing.Size(195, 21);
+			this.m_IdColumn.TabIndex = 26;
+			// 
 			// m_NameColumn
 			// 
 			this.m_NameColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -101,21 +110,12 @@
 			this.m_XmlColumn.Size = new System.Drawing.Size(195, 21);
 			this.m_XmlColumn.TabIndex = 25;
 			// 
-			// m_KeyColumn
-			// 
-			this.m_KeyColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_KeyColumn.FormattingEnabled = true;
-			this.m_KeyColumn.Location = new System.Drawing.Point(63, 28);
-			this.m_KeyColumn.Name = "m_KeyColumn";
-			this.m_KeyColumn.Size = new System.Drawing.Size(195, 21);
-			this.m_KeyColumn.TabIndex = 26;
-			// 
 			// DatabaseDefinitionPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.m_TasklistsTable);
-			this.Controls.Add(this.m_KeyColumn);
+			this.Controls.Add(this.m_IdColumn);
 			this.Controls.Add(this.m_NameColumn);
 			this.Controls.Add(this.m_XmlColumn);
 			this.Controls.Add(this.label4);
@@ -138,6 +138,6 @@
 		private System.Windows.Forms.ComboBox m_TasklistsTable;
 		private ColumnComboBox m_NameColumn;
 		private ColumnComboBox m_XmlColumn;
-		private ColumnComboBox m_KeyColumn;
+		private ColumnComboBox m_IdColumn;
 	}
 }
