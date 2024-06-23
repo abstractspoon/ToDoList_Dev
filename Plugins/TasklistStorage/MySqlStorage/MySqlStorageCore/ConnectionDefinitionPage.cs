@@ -24,21 +24,16 @@ namespace MySqlStorage
 			m_Username.Text = def.Username;
 			m_Password.Text = def.Password;
 
-			SetFocusToFirstEmpty();
+			VisibleChanged += (s, e) =>
+			{
+				if (Visible)
+					SetFocusToFirstEmpty();
+			};
 		}
 
 		public bool SetFocusToFirstEmpty()
 		{
-			foreach (var field in Fields)
-			{
-				if (string.IsNullOrEmpty(field.Text))
-				{
-					field.Focus();
-					return true;
-				}
-			}
-
-			return false;
+			return UIUtils.SetFocusToFirstEmpty(Controls);
 		}
 
 		public string Server { get { return m_Server.Text; } }

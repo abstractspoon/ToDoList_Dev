@@ -91,9 +91,7 @@
     <Compile Include="OpenTasklistForm.Designer.cs">
       <DependentUpon>OpenTasklistForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UIClasses.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="UIClasses.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">

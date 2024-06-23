@@ -33,9 +33,9 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_TasklistsTable = new System.Windows.Forms.ComboBox();
-			this.m_NameColumn = new System.Windows.Forms.ComboBox();
-			this.m_XmlColumn = new System.Windows.Forms.ComboBox();
-			this.m_KeyColumn = new System.Windows.Forms.ComboBox();
+			this.m_NameColumn = new MySqlStorage.ColumnComboBox();
+			this.m_XmlColumn = new MySqlStorage.ColumnComboBox();
+			this.m_KeyColumn = new MySqlStorage.ColumnComboBox();
 			this.SuspendLayout();
 			// 
 			// label4
@@ -114,10 +114,10 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.m_KeyColumn);
-			this.Controls.Add(this.m_XmlColumn);
-			this.Controls.Add(this.m_NameColumn);
 			this.Controls.Add(this.m_TasklistsTable);
+			this.Controls.Add(this.m_KeyColumn);
+			this.Controls.Add(this.m_NameColumn);
+			this.Controls.Add(this.m_XmlColumn);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
@@ -136,8 +136,8 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ComboBox m_TasklistsTable;
-		private System.Windows.Forms.ComboBox m_NameColumn;
-		private System.Windows.Forms.ComboBox m_XmlColumn;
-		private System.Windows.Forms.ComboBox m_KeyColumn;
+		private ColumnComboBox m_NameColumn;
+		private ColumnComboBox m_XmlColumn;
+		private ColumnComboBox m_KeyColumn;
 	}
 }

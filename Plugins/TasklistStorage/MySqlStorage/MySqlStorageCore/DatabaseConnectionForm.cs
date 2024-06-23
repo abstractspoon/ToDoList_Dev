@@ -61,8 +61,7 @@ namespace MySqlStorage
 					if (!connInfo.IsConnectionDefined())
 					{
 						// One of more empty inputs
-						// TODO
-
+						m_ConnectionPage.SetFocusToFirstEmpty();
 					}
 					else
 					{
@@ -83,10 +82,9 @@ namespace MySqlStorage
 					OK.Text = "OK";
 					DialogResult = DialogResult.None;
 				}
-				else
+				else // Finished
 				{
 					m_ConnectionInfo.Copy(connInfo);
-
 					Close();
 				}
 			}
@@ -101,8 +99,11 @@ namespace MySqlStorage
 				{
 					if (!connInfo.IsDatabaseDefined())
 					{
-						// One of more bad inputs
-						// TODO
+						// One of more empty or duplicate inputs
+						if (!m_DatabasePage.SetFocusToFirstEmpty())
+						{
+							// TODO
+						}
 					}
 					else
 					{
@@ -112,10 +113,9 @@ namespace MySqlStorage
 
 					DialogResult = DialogResult.None;
 				}
-				else
+				else // Finished
 				{
 					m_ConnectionInfo.Copy(connInfo);
-
 					Close();
 				}
 			}

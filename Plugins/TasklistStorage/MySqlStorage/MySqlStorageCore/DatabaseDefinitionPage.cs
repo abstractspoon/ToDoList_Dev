@@ -29,17 +29,28 @@ namespace MySqlStorage
 			foreach (var table in DbUtils.GetTableNames(conn))
 				m_TasklistsTable.Items.Add(table);
 
-			SelectOneOnly(m_TasklistsTable);
+			UIUtils.SelectOneOnly(m_TasklistsTable);
 
-			SelectColumn(m_KeyColumn, connInfo.KeyColumn);
-			SelectColumn(m_NameColumn, connInfo.NameColumn);
-			SelectColumn(m_XmlColumn, connInfo.XmlColumn);
+			m_KeyColumn.SelectColumn(connInfo.KeyColumn);
+			m_NameColumn.SelectColumn(connInfo.NameColumn);
+			m_XmlColumn.SelectColumn(connInfo.XmlColumn);
+
+			VisibleChanged += (s, e) =>
+			{
+				if (Visible)
+					SetFocusToFirstEmpty();
+			};
 		}
 
 		public string TasklistsTable { get { return m_TasklistsTable.Text; } }
-		public string KeyColumn { get { return GetSelectedColumnName(m_KeyColumn); } }
-		public string NameColumn { get { return GetSelectedColumnName(m_NameColumn); } }
-		public string XmlColumn { get { return GetSelectedColumnName(m_XmlColumn); } }
+		public string KeyColumn { get { return m_KeyColumn.SelectedColumnName; } }
+		public string NameColumn { get { return m_NameColumn.SelectedColumnName; } }
+		public string XmlColumn { get { return m_XmlColumn.SelectedColumnName; } }
+
+		public bool SetFocusToFirstEmpty()
+		{
+			return UIUtils.SetFocusToFirstEmpty(Controls);
+		}
 
 		// ---------------------------------------------------------------
 
@@ -68,37 +79,9 @@ namespace MySqlStorage
 				}
 			}
 
-			SelectOneOnly(m_KeyColumn);
+			m_KeyColumn.SelectOneOnly();
 		}
 
-		private static void SelectOneOnly(ComboBox combo)
-		{
-			if (combo.Items.Count == 1)
-				combo.SelectedIndex = 0;
-		}
-
-		private static string GetSelectedColumnName(ComboBox combo)
-		{
-			if (combo.SelectedItem == null)
-				return string.Empty;
-
-			return (combo.SelectedItem as ColumnInfo).Name;
-		}
-
-		private static void SelectColumn(ComboBox combo, string colName)
-		{
-			if (string.IsNullOrWhiteSpace(colName))
-				return;
-
-			foreach (var item in combo.Items)
-			{
-				if ((item as ColumnInfo).Name == colName)
-				{
-					combo.SelectedItem = item;
-					break;
-				}
-			}
-		}
 	}
 
 	// ------------------------------------------------------------

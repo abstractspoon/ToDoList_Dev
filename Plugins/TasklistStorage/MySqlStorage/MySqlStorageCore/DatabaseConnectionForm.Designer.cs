@@ -79,10 +79,10 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(277, 162);
-			this.Controls.Add(this.OK);
-			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.m_ConnectionPage);
 			this.Controls.Add(this.m_DatabasePage);
+			this.Controls.Add(this.OK);
+			this.Controls.Add(this.Cancel);
 			this.Icon = global::MySqlStorage.Properties.Resources.MySqlStorage;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
