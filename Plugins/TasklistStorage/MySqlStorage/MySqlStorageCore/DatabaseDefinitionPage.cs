@@ -1,18 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using MySql.Data.MySqlClient;
 
+////////////////////////////////////////////////////////////////////////////
+
 namespace MySqlStorage
 {
-	public partial class DatabaseDefinitionForm : Form
+	public partial class DatabaseDefinitionPage : UserControl
 	{
 		MySqlConnection m_Connection;
 
@@ -20,12 +15,14 @@ namespace MySqlStorage
 
 		// ---------------------------------------------------------------
 
-		public DatabaseDefinitionForm(MySqlConnection conn, ConnectionInfo dbInfo)
+		public DatabaseDefinitionPage()
 		{
 			InitializeComponent();
+		}
 
+		public void Initialise(MySqlConnection conn, ConnectionInfo connInfo)
+		{
 			m_Connection = conn;
-			m_Database.Text = string.Format("{0}/{1}", dbInfo.Server, dbInfo.DatabaseName);
 			m_TasklistsTable.SelectedIndexChanged += new EventHandler(OnTasklistTableSelChange);
 
 			// Populate table combobox
@@ -34,9 +31,9 @@ namespace MySqlStorage
 
 			SelectOneOnly(m_TasklistsTable);
 
-			SelectColumn(m_KeyColumn, dbInfo.KeyColumn);
-			SelectColumn(m_NameColumn, dbInfo.NameColumn);
-			SelectColumn(m_XmlColumn, dbInfo.XmlColumn);
+			SelectColumn(m_KeyColumn, connInfo.KeyColumn);
+			SelectColumn(m_NameColumn, connInfo.NameColumn);
+			SelectColumn(m_XmlColumn, connInfo.XmlColumn);
 		}
 
 		public string TasklistsTable { get { return m_TasklistsTable.Text; } }

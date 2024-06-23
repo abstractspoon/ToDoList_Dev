@@ -10,29 +10,35 @@ using System.Windows.Forms;
 
 namespace MySqlStorage
 {
-	public partial class ConnectionDefinitionForm : Form
+	public partial class ConnectionDefinitionPage : UserControl
 	{
-		public ConnectionDefinitionForm(ConnectionInfo def)
+		public ConnectionDefinitionPage()
 		{
 			InitializeComponent();
+		}
 
+		public void Initialise(ConnectionInfo def)
+		{
 			m_Server.Text = def.Server;
 			m_Database.Text = def.DatabaseName;
 			m_Username.Text = def.Username;
 			m_Password.Text = def.Password;
 
-			// Set the focus to the first empty field
-			Shown += (s, e) =>
+			SetFocusToFirstEmpty();
+		}
+
+		public bool SetFocusToFirstEmpty()
+		{
+			foreach (var field in Fields)
 			{
-				foreach (var field in Fields)
+				if (string.IsNullOrEmpty(field.Text))
 				{
-					if (string.IsNullOrEmpty(field.Text))
-					{
-						field.Focus();
-						break;
-					}
+					field.Focus();
+					return true;
 				}
-			};
+			}
+
+			return false;
 		}
 
 		public string Server { get { return m_Server.Text; } }

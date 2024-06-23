@@ -173,55 +173,16 @@ namespace MySqlStorage
 
 		// ------------------------------------------------------------------
 
-		bool OpenConnection(MySqlConnection conn, ConnectionInfo dbInfo, bool prompt)
+		bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo, bool prompt)
 		{
-			bool promptConn = prompt;
-
-			while (promptConn || !dbInfo.OpenConnection(conn))
+			// Prompt for connection details
+			using (var dialog = new DatabaseConnectionForm())
 			{
-				// Prompt for connection details
-				using (var dialog = new ConnectionDefinitionForm(dbInfo))
-				{
-					FormsUtil.SetFont(dialog, m_ControlsFont);
-					m_Trans.Translate(dialog);
+				FormsUtil.SetFont(dialog, m_ControlsFont);
+				m_Trans.Translate(dialog);
 
-					if (dialog.ShowDialog() != DialogResult.OK)
-						return false;
-
-					dbInfo.Server = dialog.Server;
-					dbInfo.DatabaseName = dialog.Database;
-					dbInfo.Username = dialog.Username;
-					dbInfo.Password = dialog.Password;
-
-					// Force prompt only first time
-					promptConn = false;
-				}
+				return dialog.OpenConnection(conn, connInfo, prompt);
 			}
-
-			bool promptDb = prompt;
-
-			while (promptDb || !dbInfo.IsValid(conn))
-			{
-				// Prompt for database details
-				using (var dialog = new DatabaseDefinitionForm(conn, dbInfo))
-				{
-					FormsUtil.SetFont(dialog, m_ControlsFont);
-					m_Trans.Translate(dialog);
-
-					if (dialog.ShowDialog() != DialogResult.OK)
-						return false;
-
-					dbInfo.TasklistsTable = dialog.TasklistsTable;
-					dbInfo.KeyColumn = dialog.KeyColumn;
-					dbInfo.NameColumn = dialog.NameColumn;
-					dbInfo.XmlColumn = dialog.XmlColumn;
-
-					// Force prompt only first time
-					promptDb = false;
-				}
-			}
-
-			return true;
 		}
 	}
 }

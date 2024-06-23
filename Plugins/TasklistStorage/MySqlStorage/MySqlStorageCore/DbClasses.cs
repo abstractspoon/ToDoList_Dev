@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using MySql.Data.MySqlClient;
+
+////////////////////////////////////////////////////////////////////////////
 
 namespace MySqlStorage
 {
@@ -16,9 +15,9 @@ namespace MySqlStorage
 		{
 		}
 
-		public ConnectionInfo(ConnectionInfo other) : this("")
+		public ConnectionInfo(ConnectionInfo other)
 		{
-			SetConnection(other);
+			Copy(other);
 		}
 
 		public ConnectionInfo(string encoded, string password = "", ConnectionInfo defaultInfo = null)
@@ -27,9 +26,9 @@ namespace MySqlStorage
 			{
 				Password = password;
 			}
-			else if ((defaultInfo != null) && defaultInfo.IsDefined(false))
+			else if ((defaultInfo != null) && defaultInfo.IsConnectionDefined(false))
 			{
-				SetConnection(defaultInfo);
+				Copy(defaultInfo);
 			}
 			else
 			{
@@ -38,11 +37,6 @@ namespace MySqlStorage
 				DatabaseName = "Tasklists";
 				Username = "root";
 				Password = "password";
-
-				TasklistsTable = "Tasklists";
-				KeyColumn = "Id";
-				NameColumn = "Name";
-				XmlColumn = "Xml";
 #endif
 			}
 		}
@@ -51,7 +45,7 @@ namespace MySqlStorage
 		{
 			conn.Close();
 
-			if (IsDefined())
+			if (IsConnectionDefined())
 			{
 				try
 				{
@@ -71,7 +65,7 @@ namespace MySqlStorage
 
 		public bool IsValid(MySqlConnection conn)
 		{
-			if (!IsDefined())
+			if (!IsConnectionDefined() || !IsDatabaseDefined())
 				return false;
 
 			// Server/Database details must be correct if the connection is open
@@ -99,17 +93,17 @@ namespace MySqlStorage
 			return false;
 		}
 
-		private void SetConnection(ConnectionInfo dbInfo)
+		public void Copy(ConnectionInfo fromInfo)
 		{
-			Server = dbInfo.Server;
-			DatabaseName = dbInfo.DatabaseName;
-			Username = dbInfo.Username;
-			Password = dbInfo.Password;
+			Server = fromInfo.Server;
+			DatabaseName = fromInfo.DatabaseName;
+			Username = fromInfo.Username;
+			Password = fromInfo.Password;
 
-			TasklistsTable = dbInfo.TasklistsTable;
-			KeyColumn = dbInfo.KeyColumn;
-			NameColumn = dbInfo.NameColumn;
-			XmlColumn = dbInfo.XmlColumn;
+			TasklistsTable = fromInfo.TasklistsTable;
+			KeyColumn = fromInfo.KeyColumn;
+			NameColumn = fromInfo.NameColumn;
+			XmlColumn = fromInfo.XmlColumn;
 		}
 
 		public string Encode() // Excludes password
@@ -124,6 +118,42 @@ namespace MySqlStorage
 					NameColumn,
 					XmlColumn
 				});
+		}
+
+		public bool IsConnectionDefined(bool incPassword = true)
+		{
+			if (string.IsNullOrEmpty(Server) ||
+				string.IsNullOrEmpty(DatabaseName) ||
+				string.IsNullOrEmpty(Username))
+			{
+				return false;
+			}
+
+			if (incPassword && string.IsNullOrEmpty(Password))
+				return false;
+
+			return true;
+		}
+
+		public bool IsDatabaseDefined()
+		{
+			if (string.IsNullOrEmpty(TasklistsTable) ||
+				string.IsNullOrEmpty(KeyColumn) ||
+				string.IsNullOrEmpty(NameColumn) ||
+				string.IsNullOrEmpty(XmlColumn))
+			{
+				return false;
+			}
+
+			// Columns must be unique
+			if ((KeyColumn == NameColumn) ||
+				(KeyColumn == XmlColumn) ||
+				(XmlColumn == NameColumn))
+			{
+				return true;
+			}
+
+			return true;
 		}
 
 		// --------------------------------------------------------
@@ -169,25 +199,6 @@ namespace MySqlStorage
 									 Username,
 									 Password);
 			}
-		}
-
-		private bool IsDefined(bool incPassword = true)
-		{
-			if (string.IsNullOrEmpty(Server) ||
-				string.IsNullOrEmpty(DatabaseName) ||
-				string.IsNullOrEmpty(Username) ||
-				string.IsNullOrEmpty(TasklistsTable) ||
-				string.IsNullOrEmpty(KeyColumn) ||
-				string.IsNullOrEmpty(NameColumn) ||
-				string.IsNullOrEmpty(XmlColumn))
-			{
-				return false;
-			}
-
-			if (incPassword && string.IsNullOrEmpty(Password))
-				return false;
-
-			return true;
 		}
 	}
 

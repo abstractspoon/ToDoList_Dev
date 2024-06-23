@@ -52,17 +52,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConnectionDefinitionForm.cs">
+    <Compile Include="ConnectionDefinitionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ConnectionDefinitionPage.Designer.cs">
+      <DependentUpon>ConnectionDefinitionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DatabaseConnectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ConnectionDefinitionForm.Designer.cs">
-      <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
+    <Compile Include="DatabaseConnectionForm.Designer.cs">
+      <DependentUpon>DatabaseConnectionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DatabaseDefinitionForm.cs">
-      <SubType>Form</SubType>
+    <Compile Include="DatabaseDefinitionPage.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DatabaseDefinitionForm.Designer.cs">
-      <DependentUpon>DatabaseDefinitionForm.cs</DependentUpon>
+    <Compile Include="DatabaseDefinitionPage.Designer.cs">
+      <DependentUpon>DatabaseDefinitionPage.cs</DependentUpon>
     </Compile>
     <Compile Include="DbClasses.cs" />
     <Compile Include="DbUtils.cs" />
@@ -85,6 +91,9 @@
     <Compile Include="OpenTasklistForm.Designer.cs">
       <DependentUpon>OpenTasklistForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UIClasses.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
@@ -93,11 +102,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ConnectionDefinitionForm.resx">
-      <DependentUpon>ConnectionDefinitionForm.cs</DependentUpon>
+    <EmbeddedResource Include="ConnectionDefinitionPage.resx">
+      <DependentUpon>ConnectionDefinitionPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DatabaseDefinitionForm.resx">
-      <DependentUpon>DatabaseDefinitionForm.cs</DependentUpon>
+    <EmbeddedResource Include="DatabaseConnectionForm.resx">
+      <DependentUpon>DatabaseConnectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DatabaseDefinitionPage.resx">
+      <DependentUpon>DatabaseDefinitionPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="OpenTasklistForm.resx">
       <DependentUpon>OpenTasklistForm.cs</DependentUpon>
