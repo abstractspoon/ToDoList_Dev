@@ -1,6 +1,6 @@
 ﻿namespace MySqlStorage
 {
-	partial class SaveTasklistForm
+	partial class OpenSaveTasklistForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -35,6 +35,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_Tasklist = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
+			this.ModifyDatabase = new System.Windows.Forms.Button();
 			this.m_Tasklists = new MySqlStorage.TasklistsListBox();
 			this.SuspendLayout();
 			// 
@@ -42,7 +43,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(111, 197);
+			this.OK.Location = new System.Drawing.Point(277, 136);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -53,7 +54,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(192, 197);
+			this.Cancel.Location = new System.Drawing.Point(277, 163);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -103,6 +104,16 @@
 			this.label1.TabIndex = 24;
 			this.label1.Text = "Tasklist";
 			// 
+			// ModifyDatabase
+			// 
+			this.ModifyDatabase.Location = new System.Drawing.Point(277, 10);
+			this.ModifyDatabase.Name = "ModifyDatabase";
+			this.ModifyDatabase.Size = new System.Drawing.Size(75, 23);
+			this.ModifyDatabase.TabIndex = 30;
+			this.ModifyDatabase.Text = "Modify...";
+			this.ModifyDatabase.UseVisualStyleBackColor = true;
+			this.ModifyDatabase.Click += new System.EventHandler(this.OnModifyDatabase);
+			// 
 			// m_Tasklists
 			// 
 			this.m_Tasklists.FormattingEnabled = true;
@@ -113,13 +124,14 @@
 			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
 			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
-			// SaveTasklistForm
+			// OpenSaveTasklistForm
 			// 
 			this.AcceptButton = this.OK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(279, 232);
+			this.ClientSize = new System.Drawing.Size(364, 198);
+			this.Controls.Add(this.ModifyDatabase);
 			this.Controls.Add(this.m_Tasklist);
 			this.Controls.Add(this.m_Tasklists);
 			this.Controls.Add(this.OK);
@@ -129,7 +141,7 @@
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Icon = global::MySqlStorage.Properties.Resources.MySqlStorage;
-			this.Name = "SaveTasklistForm";
+			this.Name = "OpenSaveTasklistForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Save Tasklist";
 			this.ResumeLayout(false);
@@ -147,5 +159,6 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.TextBox m_Tasklist;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button ModifyDatabase;
 	}
 }

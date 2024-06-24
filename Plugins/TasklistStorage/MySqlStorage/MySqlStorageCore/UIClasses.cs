@@ -81,6 +81,8 @@ namespace MySqlStorage
 	{
 		public void Initialise(MySqlConnection conn, ConnectionInfo connInfo, bool selectFirst)
 		{
+			Items.Clear();
+
 			string query = string.Format("SELECT Id, Name FROM {0}", connInfo.TasklistsTable);
 
 			using (var command = new MySqlCommand(query, conn))

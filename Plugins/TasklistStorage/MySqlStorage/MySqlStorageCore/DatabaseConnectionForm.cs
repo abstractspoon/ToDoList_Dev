@@ -14,6 +14,8 @@ namespace MySqlStorage
 		private MySqlConnection m_Connection;
 		private ConnectionInfo m_ConnectionInfo;
 
+		bool m_Prompt = true;
+
 		// --------------------------------------------------------
 
 		public DatabaseConnectionForm()
@@ -29,6 +31,7 @@ namespace MySqlStorage
 			{
 				m_Connection = conn;
 				m_ConnectionInfo = connInfo;
+				m_Prompt = prompt;
 
 				if (ShowDialog() != DialogResult.OK)
 					return false;
@@ -68,7 +71,7 @@ namespace MySqlStorage
 					// and don't switch pages
 					DialogResult = DialogResult.None;
 				}
-				else if (!connInfo.IsValid(m_Connection, out error))
+				else if (m_Prompt || !connInfo.IsValid(m_Connection, out error))
 				{ 
 					// Switch to the 'database' page
 					m_DatabasePage.Initialise(m_Connection, connInfo);

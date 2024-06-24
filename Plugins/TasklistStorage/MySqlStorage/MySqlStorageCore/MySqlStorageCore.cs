@@ -35,13 +35,13 @@ namespace MySqlStorage
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, details.Connection, prompt))
+					if (!OpenConnection(conn, details.Connection))
 						return null;
 
 					if (prompt || (details.Tasklist.Key == 0))
 					{
 						// Prompt for tasklist 
-						var dialog = new OpenTasklistForm(conn, details.Connection);
+						var dialog = new OpenSaveTasklistForm(conn, details, true);
 
 						FormsUtil.SetFont(dialog, m_ControlsFont);
 						m_Trans.Translate(dialog);
@@ -95,7 +95,7 @@ namespace MySqlStorage
 
 				using (var conn = new MySqlConnection())
 				{
-					if (!OpenConnection(conn, details.Connection, prompt))
+					if (!OpenConnection(conn, details.Connection))
 						return null;
 
 					if (string.IsNullOrEmpty(details.Tasklist.Name))
@@ -103,7 +103,7 @@ namespace MySqlStorage
 
 					if (prompt || (details.Tasklist.Key == 0))
 					{
-						var dialog = new SaveTasklistForm(conn, details);
+						var dialog = new OpenSaveTasklistForm(conn, details, false);
 
 						FormsUtil.SetFont(dialog, m_ControlsFont);
 						m_Trans.Translate(dialog);
@@ -171,15 +171,14 @@ namespace MySqlStorage
 
 		// ------------------------------------------------------------------
 
-		bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo, bool prompt)
+		bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo)
 		{
-			// Prompt for connection details
 			using (var dialog = new DatabaseConnectionForm())
 			{
 				FormsUtil.SetFont(dialog, m_ControlsFont);
 				m_Trans.Translate(dialog);
 
-				return dialog.OpenConnection(conn, connInfo, prompt);
+				return dialog.OpenConnection(conn, connInfo, false);
 			}
 		}
 	}

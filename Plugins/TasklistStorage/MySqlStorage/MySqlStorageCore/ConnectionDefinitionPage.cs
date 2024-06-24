@@ -26,11 +26,8 @@ namespace MySqlStorage
 			m_Username.Text = def.Username;
 			m_Password.Text = def.Password;
 
-			VisibleChanged += (s, e) =>
-			{
-				if (Visible)
-					SetFocusToFirstEmpty();
-			};
+			if (Visible)
+				UIUtils.SetFocusToFirstEmpty(Controls);
 		}
 
 		public bool SetFocusToFirstEmpty()

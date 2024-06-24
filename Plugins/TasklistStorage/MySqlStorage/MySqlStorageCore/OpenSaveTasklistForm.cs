@@ -3,21 +3,50 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using MySql.Data.MySqlClient;
+using Abstractspoon.Tdl.PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////
 
 namespace MySqlStorage
 {
-	public partial class SaveTasklistForm : Form
+	public partial class OpenSaveTasklistForm : Form
 	{
-		public SaveTasklistForm(MySqlConnection conn, TasklistConnectionInfo info)
+		bool m_OpenTasklist;
+
+		MySqlConnection m_Connection;
+		TasklistConnectionInfo m_TasklistInfo;
+
+		// -----------------------------------------------------------------
+
+		public OpenSaveTasklistForm(MySqlConnection conn, TasklistConnectionInfo tasklistInfo, bool openTasklist)
 		{
 			InitializeComponent();
 
-			m_Database.Text = string.Format("{0}/{1}", info.Connection.Server, info.Connection.DatabaseName);
+			m_OpenTasklist = openTasklist;
+			m_Connection = conn;
+			m_TasklistInfo = tasklistInfo;
 
-			m_Tasklists.Initialise(conn, info.Connection, false);
-			m_Tasklist.Text = info.Tasklist.Name;
+			if (m_OpenTasklist)
+			{
+				m_Tasklist.ReadOnly = true;
+				Text = "Open Tasklist";
+			}
+			else
+			{
+				m_Tasklist.ReadOnly = false;
+				Text = "Save Tasklist";
+			}
+
+
+			UpdateControlData();
+
+			Shown += (s, e) =>
+			{
+				if (m_OpenTasklist)
+					m_Tasklists.Focus();
+				else
+					m_Tasklist.Focus();
+			};
 		}
 
 		public TasklistInfo TasklistInfo
@@ -64,6 +93,28 @@ namespace MySqlStorage
 				DialogResult = DialogResult.OK;
 				Close();
 			}
+		}
+
+		private void OnModifyDatabase(object sender, EventArgs e)
+		{
+			using (var dialog = new DatabaseConnectionForm())
+			{
+// 				FormsUtil.SetFont(dialog, m_ControlsFont);
+// 				m_Trans.Translate(dialog);
+
+				if (dialog.OpenConnection(m_Connection, m_TasklistInfo.Connection, true))
+					UpdateControlData();
+			}
+		}
+
+		private void UpdateControlData()
+		{
+			m_Database.Text = string.Format("{0}/{1}", 
+											m_TasklistInfo.Connection.Server, 
+											m_TasklistInfo.Connection.DatabaseName);
+
+			m_Tasklist.Text = m_TasklistInfo.Tasklist.Name;
+			m_Tasklists.Initialise(m_Connection, m_TasklistInfo.Connection, m_OpenTasklist);
 		}
 	}
 }
