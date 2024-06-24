@@ -34,14 +34,16 @@ LPCTSTR ALLFILES = _T("All Files (*.*)\0*.*\0");
 
 CRemoteFile::CRemoteFile(LPCTSTR szAgent, LPCTSTR szServer, LPCTSTR szUsername, 
 						 LPCTSTR szPassword, LPCTSTR szProxy, CWnd* pParent)
-	 : m_sAgent(szAgent),
-	  m_sProxyAndPort(szProxy),
-	  m_sServer(szServer), 
-	  m_sUsername(szUsername), 
-	  m_sPassword(szPassword),
-	  m_pSession(NULL),
-	  m_pConnection(NULL),
-	  m_pParent(pParent)
+	:
+	m_sAgent(szAgent),
+	m_sProxyAndPort(szProxy),
+	m_sServer(szServer),
+	m_sUsername(szUsername),
+	m_sPassword(szPassword),
+	m_pSession(NULL),
+	m_pConnection(NULL),
+	m_pParent(pParent),
+	m_hIcon(NULL)
 {
 	Misc::Trim(m_sServer);
 	Misc::Trim(m_sUsername);
@@ -385,7 +387,7 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 		// if multiple files are being uploaded then display folder dialog
 		if ((nNumLocal > 1))
 		{
-			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, NULL, m_hIcon);
 			
 			if (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemotePath) == IDOK)
 			{
@@ -414,7 +416,7 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 		}
 		else // nNumLocal == 1
 		{
-			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath, m_hIcon);
 
 			// base remote name on local name
 			CString sFilename, sExt;
@@ -500,7 +502,7 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTS
 
 		// browse for file(s)
 		CWaitCursor cursor;
-		CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath);
+		CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath, m_hIcon);
 		DWORD dwRFDOptions = RFD_DOWNLOAD | RFD_FILEMUSTEXIST;
 		
 		if (dwOptions & RMO_MULTISELECT)
@@ -906,7 +908,7 @@ BOOL CRemoteFile::DoServerDlg(DWORD dwOptions, BOOL& bAnonLogin)
 	AL_TYPE nAnonLogin = (dwOptions & RMO_NOANONYMOUSLOGIN) ? ANONLOGIN_HIDE : 
 						(bAnonLogin ? ANONLOGIN_YES : ANONLOGIN_AUTO);
 
-	CServerDlg dialog(m_sServer, m_sUsername, m_sPassword, nAnonLogin);
+	CServerDlg dialog(m_sServer, m_sUsername, m_sPassword, nAnonLogin, m_hIcon);
 				
 	if (dialog.DoModal(m_pPrefs, m_sPrefKey) == IDOK)
 	{

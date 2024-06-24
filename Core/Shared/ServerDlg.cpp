@@ -21,12 +21,14 @@ CMap<UINT, UINT, CString, CString&> CServerDlg::s_mapText;
 
 const CString INTERNETSETTINGS("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
 
-CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword, AL_TYPE nAnonymousLogin)
-	: m_sServer(szServer), 
-	  m_sUsername(szUsername), 
-	  m_sPassword(szPassword), 
-	  m_nAnonLogin(nAnonymousLogin),
-	  m_pPrefs(NULL)
+CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword, AL_TYPE nAnonymousLogin, HICON hIcon)
+	: 
+	m_sServer(szServer),
+	m_sUsername(szUsername),
+	m_sPassword(szPassword),
+	m_nAnonLogin(nAnonymousLogin),
+	m_pPrefs(NULL),
+	m_hIcon(hIcon)
 {
 	BOOL bShowAnonLogin = (m_nAnonLogin != ANONLOGIN_HIDE);
 	int LOGINOFFSET = 0;
@@ -112,6 +114,8 @@ BOOL CServerDlg::OnInitDialog()
 	CLocalizer::EnableTranslation(m_cbUsernames, FALSE);
 	CLocalizer::EnableTranslation(m_cbServers, FALSE);
 
+	SetIcon(m_hIcon, FALSE);
+
 	// initialize state from prefs
 	if (m_sServer.IsEmpty())
 		m_sServer = m_pPrefs->GetProfileString(m_sPrefKey, _T("LastServer"));
@@ -160,7 +164,7 @@ BOOL CServerDlg::OnInitDialog()
 
 	UpdateData(FALSE);
 
-	// popuplate comboboxes from prefs
+	// populate comboboxes from prefs
 	int nServer = m_pPrefs->GetProfileInt(m_sPrefKey, _T("ServerCount"), 0);
 
 	while (nServer--)

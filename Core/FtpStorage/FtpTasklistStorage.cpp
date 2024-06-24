@@ -61,9 +61,11 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 		sLocalPath = FileMisc::GetTempFolder();
 
 	// split the tasklist ID into it constituent parts
+	CRemoteFile rf(GetMenuText());
+	rf.SetIcon(m_icon);
+
 	CStringArray aIDParts;
 	CString sRemotePath;
-	CRemoteFile rf(GetMenuText());
 	
 	if (Misc::Split(pFInfo->szTasklistID, aIDParts, _T("::"), TRUE) == 3)
 	{
@@ -102,6 +104,8 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		sLocalPath = FileMisc::GetTempFilePath(_T("rmf"));
 
 	CRemoteFile rf;
+	rf.SetIcon(m_icon);
+
 	DWORD dwOptions = RMO_NOCANCELPROGRESS;
 
 	if (bPrompt)

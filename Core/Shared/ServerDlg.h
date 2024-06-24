@@ -44,8 +44,11 @@ class CServerDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CServerDlg(LPCTSTR szServer = NULL, LPCTSTR szUsername = NULL, 
-				LPCTSTR szPassword = NULL, AL_TYPE nAnonymousLogin = ANONLOGIN_AUTO);   // standard constructor
+	CServerDlg(LPCTSTR szServer = NULL, 
+			   LPCTSTR szUsername = NULL, 
+			   LPCTSTR szPassword = NULL, 
+			   AL_TYPE nAnonymousLogin = ANONLOGIN_AUTO,
+			   HICON hIcon = NULL);
 
 	CString GetServer() const { return m_sServer; }
 	CString GetUsername() const { return m_sUsername; }
@@ -70,6 +73,7 @@ protected:
 	CComboBox m_cbServers;
 	CComboBox m_cbUsernames;
 	AL_TYPE m_nAnonLogin;
+	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;

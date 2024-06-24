@@ -49,7 +49,12 @@ class CRemoteFileDialog : public CRuntimeDlg
 {
 // Construction
 public:
-	CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServer, LPCTSTR szFilters = NULL, LPCTSTR szInitialFolder = NULL);   // standard constructor
+	CRemoteFileDialog(CFtpConnection* pConnection, 
+					  LPCTSTR szServer, 
+					  LPCTSTR szFilters = NULL, 
+					  LPCTSTR szInitialFolder = NULL, 
+					  HICON hIcon = NULL);
+
 	virtual ~CRemoteFileDialog();
 
 	int DoModal(IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions = RFD_DOWNLOAD | RFD_FILEMUSTEXIST | RFD_MULTISELECT, LPCTSTR szFilename = NULL);
@@ -80,6 +85,7 @@ protected:
 	DWORD m_dwOptions;
 	BOOL m_bFilling;
 	CSizeGrip m_sbGrip;
+	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;

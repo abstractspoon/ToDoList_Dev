@@ -70,18 +70,20 @@ FILERESULT::FILERESULT(LPCTSTR szFilePath, DWORD size)
 /////////////////////////////////////////////////////////////////////////////
 // CRemoteFileDialog dialog
 
-CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServer, LPCTSTR szFilters, LPCTSTR szInitialFolder)
-	: m_pConnection(pConnection), 
-	  m_sServer(szServer), 
-	  m_sCurFolder(szInitialFolder), 
-	  m_eCurFolder(FES_NOBROWSE | FES_FOLDERS), 
-	  m_eFilename(FES_NOBROWSE), 
-	  m_bRoot(FALSE),
-	  m_dwFileSize(0),
-	  m_bInitReport(FALSE),
-	  m_dwOptions(0),
-	  m_bFilling(FALSE),
-	  m_pPrefs(NULL)
+CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServer, LPCTSTR szFilters, LPCTSTR szInitialFolder, HICON hIcon)
+	: 
+	m_pConnection(pConnection),
+	m_sServer(szServer),
+	m_sCurFolder(szInitialFolder),
+	m_eCurFolder(FES_NOBROWSE | FES_FOLDERS),
+	m_eFilename(FES_NOBROWSE),
+	m_bRoot(FALSE),
+	m_dwFileSize(0),
+	m_bInitReport(FALSE),
+	m_dwOptions(0),
+	m_bFilling(FALSE),
+	m_pPrefs(NULL),
+	m_hIcon(hIcon)
 {
 	//{{AFX_DATA_INIT(CRemoteFileDialog)
 	//}}AFX_DATA_INIT
@@ -165,9 +167,9 @@ BOOL CRemoteFileDialog::OnInitDialog()
 	if (m_pConnection && m_sCurFolder.IsEmpty())
 		m_pConnection->GetCurrentDirectory(m_sCurFolder);
 
-	UpdateData(FALSE);
-
+	SetIcon(m_hIcon, FALSE);
 	ModifyStyle(0, WS_CLIPCHILDREN);
+	UpdateData(FALSE);
 
 	if (!m_pConnection)
 		EndDialog(IDCANCEL);

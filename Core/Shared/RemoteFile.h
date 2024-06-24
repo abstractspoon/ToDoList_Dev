@@ -11,6 +11,7 @@
 
 #include "remotefiledialog.h"
 #include "enstring.h"
+#include "icon.h"
 
 #include <afxinet.h>
 
@@ -94,6 +95,7 @@ public:
 	void SetServer(LPCTSTR szServer) { m_sServer = szServer; }
 	void SetUsername(LPCTSTR szUsername) { m_sUsername = szUsername; }
 	void SetPassword(LPCTSTR szPassword) { m_sPassword = szPassword; }
+	void SetIcon(HICON hIcon) { m_hIcon = hIcon; }
 
 	static void SplitPath(LPCTSTR szFullRemotePath, CString& sServer, CString& sFile);
 
@@ -105,6 +107,7 @@ protected:
 	DWORD m_dwInternetErr;
 	CWnd* m_pParent;
 	CEnString m_sLastError;
+	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
