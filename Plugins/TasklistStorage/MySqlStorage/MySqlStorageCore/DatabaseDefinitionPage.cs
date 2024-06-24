@@ -94,11 +94,16 @@ namespace MySqlStorage
 			case DbError.IdColumn:			return m_IdColumn;
 			case DbError.NameColumn:		return m_NameColumn;
 			case DbError.XmlColumn:			return m_XmlColumn;
+
+			case DbError.Success:
+				break;
+
+			default:
+				Debug.Assert(false);
+				break;
 			}
 
-			Debug.Assert(false);
 			return null;
-
 		}
 	}
 

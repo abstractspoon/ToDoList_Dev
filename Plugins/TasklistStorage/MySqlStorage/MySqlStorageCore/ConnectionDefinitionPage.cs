@@ -59,9 +59,16 @@ namespace MySqlStorage
 			case DbError.DatabaseName:	return m_Database;
 			case DbError.Username:		return m_Username;
 			case DbError.Password:		return m_Password;
+
+			case DbError.Success:
+			case DbError.Unknown:
+				break;
+
+			default:
+				Debug.Assert(false);
+				break;
 			}
 
-			Debug.Assert(error == DbError.Unknown);
 			return null;
 		}
 	}
