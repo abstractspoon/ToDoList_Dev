@@ -54,7 +54,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(277, 163);
+			this.Cancel.Location = new System.Drawing.Point(277, 164);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -63,6 +63,8 @@
 			// 
 			// m_Database
 			// 
+			this.m_Database.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_Database.Location = new System.Drawing.Point(72, 12);
 			this.m_Database.Name = "m_Database";
 			this.m_Database.ReadOnly = true;
@@ -89,6 +91,8 @@
 			// 
 			// m_Tasklist
 			// 
+			this.m_Tasklist.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_Tasklist.Location = new System.Drawing.Point(72, 165);
 			this.m_Tasklist.Name = "m_Tasklist";
 			this.m_Tasklist.Size = new System.Drawing.Size(195, 20);
@@ -97,6 +101,7 @@
 			// 
 			// label1
 			// 
+			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.label1.AutoSize = true;
 			this.label1.Location = new System.Drawing.Point(8, 168);
 			this.label1.Name = "label1";
@@ -106,6 +111,7 @@
 			// 
 			// ModifyDatabase
 			// 
+			this.ModifyDatabase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.ModifyDatabase.Location = new System.Drawing.Point(277, 10);
 			this.ModifyDatabase.Name = "ModifyDatabase";
 			this.ModifyDatabase.Size = new System.Drawing.Size(75, 23);
@@ -116,7 +122,11 @@
 			// 
 			// m_Tasklists
 			// 
+			this.m_Tasklists.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_Tasklists.FormattingEnabled = true;
+			this.m_Tasklists.IntegralHeight = false;
 			this.m_Tasklists.Location = new System.Drawing.Point(72, 38);
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.Size = new System.Drawing.Size(195, 121);
@@ -131,17 +141,21 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(364, 198);
+			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.ModifyDatabase);
-			this.Controls.Add(this.m_Tasklist);
 			this.Controls.Add(this.m_Tasklists);
+			this.Controls.Add(this.m_Tasklist);
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);
-			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Icon = global::MySqlStorage.Properties.Resources.MySqlStorage;
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
+			this.MinimumSize = new System.Drawing.Size(380, 237);
 			this.Name = "OpenSaveTasklistForm";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Save Tasklist";
 			this.ResumeLayout(false);
