@@ -33,6 +33,8 @@ struct TSM_TASKLISTINFO : ITS_TASKLISTINFO
 	CString EncodeInfo(BOOL bIncPassword = TRUE) const;
 	BOOL DecodeInfo(const CString& sInfo, BOOL bIncPassword = TRUE);
 
+	static BOOL IsStorage(const CString& sInfo, BOOL bIncPassword = TRUE);
+
 	CString sStorageID;
 
 protected:

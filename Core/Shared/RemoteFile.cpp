@@ -142,12 +142,17 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 	// Get remote path(s)
 	CFileResultArray aRemoteFiles;
 	RMERR nRes = RMERR_SUCCESS;
+	BOOL bFirstShow = TRUE;
 
 	do 
 	{
-
 		if (!EstablishConnection(dwOptions, nRes))
-			return SaveErrorMsg(nRes);
+		{
+			// If we're showing as a consequence of RMERR_CHANGESERVER
+			// then cancelling should return us to the remote file dialog
+			if (bFirstShow || (nRes != RMERR_USERCANCELLED))
+				return SaveErrorMsg(nRes);
+		}
 
 		Misc::Trim(sRemotePath);
 		nRes = GetRemotePaths(aRemoteFiles, dwOptions, szFilter, sRemotePath);
@@ -157,6 +162,8 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 
 		if (nRes != RMERR_CHANGESERVER)
 			return SaveErrorMsg(nRes);
+
+		bFirstShow = FALSE;
 	} 
 	while (TRUE);
 	
@@ -853,9 +860,6 @@ BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, RMERR& nRes)
 {
 	CWaitCursor cursor;
 	
-	if (!RestartSession())
-		return FALSE;
-
 	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
 	BOOL bAnonLogin = (dwOptions & RMO_ANONYMOUSLOGIN);
 
@@ -867,10 +871,15 @@ BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, RMERR& nRes)
 		return FALSE;
 	}
 
+	if (!RestartSession())
+		return FALSE;
+
 	while (TRUE)
 	{
 		if (!m_sServer.IsEmpty() && (bAnonLogin || (!m_sUsername.IsEmpty() && !m_sPassword.IsEmpty())))
 		{
+			CWaitCursor cursor;
+
 			try
 			{
 				if (bAnonLogin)

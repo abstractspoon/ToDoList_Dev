@@ -2507,8 +2507,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 		CString sLastActiveFile = prefs.GetProfileString(SETTINGS_KEY, _T("LastActiveFile"));
 		CString sOrgLastActiveFile(sLastActiveFile);
 
-		BOOL bCanDelayLoad = userPrefs.GetEnableDelayedLoading();
-
 		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
 		{
 			CString sKey = Misc::MakeKey(_T("LastFile%d"), nTDC);
@@ -2519,8 +2517,17 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 				// delay-open all but the non-active tasklist
 				// unless the tasklist has reminders
 				BOOL bActiveTDC = (sLastFile == sLastActiveFile);
+				BOOL bCanDelayLoad = (userPrefs.GetEnableDelayedLoading() && !bActiveTDC);
 
-				if (bCanDelayLoad && !bActiveTDC && !m_dlgReminders.ToDoCtrlHasReminders(sLastFile))
+				if (bCanDelayLoad)
+				{
+					bCanDelayLoad = !TSM_TASKLISTINFO::IsStorage(sLastFile, userPrefs.GetSaveStoragePasswords());
+
+					if (bCanDelayLoad)
+						bCanDelayLoad = !m_dlgReminders.ToDoCtrlHasReminders(sLastFile);
+				}
+
+				if (bCanDelayLoad)
 				{
 					DelayOpenTaskList(sLastFile);
 				}
@@ -7608,7 +7615,7 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 		TDC_FILE nOpen = OpenTaskList(sFilePath, TRUE);
 
 		if (nOpen == TDCF_SUCCESS)
-			m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
+			m_mgrToDoCtrls.SetStorageDetails(GetSelToDoCtrl(), storageInfo);
 		else
 			HandleLoadTasklistError(nOpen, storageInfo.szDisplayPath);
 		

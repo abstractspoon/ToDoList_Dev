@@ -116,6 +116,11 @@ CString TSM_TASKLISTINFO::Encode(const CString& sData)
 	return Base64Coder::Encode(sData);
 }
 
+BOOL TSM_TASKLISTINFO::IsStorage(const CString& sInfo, BOOL bIncPassword)
+{
+	return TSM_TASKLISTINFO().DecodeInfo(sInfo, bIncPassword);
+}
+
 BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 {
 	Reset();
