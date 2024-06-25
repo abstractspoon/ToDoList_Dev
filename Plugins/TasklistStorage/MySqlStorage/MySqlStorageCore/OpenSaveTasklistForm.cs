@@ -102,8 +102,13 @@ namespace MySqlStorage
 // 				FormsUtil.SetFont(dialog, m_ControlsFont);
 // 				m_Trans.Translate(dialog);
 
+				// Hide ourselves
+				dialog.Shown += (s, e2) => { Visible = false; };
+
 				if (dialog.OpenConnection(m_Connection, m_TasklistInfo.Connection, true))
 					UpdateControlData();
+
+				Visible = true;
 			}
 		}
 
