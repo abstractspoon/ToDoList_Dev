@@ -1079,6 +1079,16 @@ int CDialogHelper::FindItemByValue(const CComboBox& combo, int nValue)
 	return combo.FindString(-1, sNum);
 }
 
+int CDialogHelper::SelectItemExact(CComboBox& combo, LPCTSTR szItem)
+{
+	int nSel = combo.FindStringExact(-1, szItem);
+
+	if (nSel != CB_ERR)
+		combo.SetCurSel(nSel);
+
+	return nSel;
+}
+
 CString CDialogHelper::GetSelectedItem(const CComboBox& combo)
 {
 	return GetItem(combo, combo.GetCurSel());

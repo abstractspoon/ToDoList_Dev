@@ -94,22 +94,22 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	//{{AFX_DATA_INIT(CRemoteFileDialog)
 	//}}AFX_DATA_INIT
 	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 0, 8, 65, 8, IDC_SERVERLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), szServer, ES_AUTOHSCROLL | ES_READONLY, 0, 74, 4, 152, 13, IDC_SERVER);
+	AddRCControl(_T("EDITTEXT"), _T(""), szServer, ES_AUTOHSCROLL | ES_READONLY, 0, 74, 7, 152, 13, IDC_SERVER);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Modify..."), WS_TABSTOP, 0, 230, 3, 50, 14, IDCHANGESERVER);
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Current Folder"), 0, 0, 0, 24, 65, 8, IDC_CURFOLDERLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | ES_READONLY, 0, 74, 22, 152, 13, IDC_CURRENTFOLDER);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Current Folder"), 0, 0, 0, 25, 65, 8, IDC_CURFOLDERLABEL);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | ES_READONLY, 0, 74, 24, 152, 13, IDC_CURRENTFOLDER);
 
-	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_LIST | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 40, 272, 114, IDC_FILELIST);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_LIST | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 41, 272, 115, IDC_FILELIST);
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Remote file &name"), 0, 0, 0, 164, 65, 8, IDC_FILENAMELABEL);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Remote file &name"), 0, 0, 0, 163, 65, 8, IDC_FILENAMELABEL);
 	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | WS_TABSTOP, 0, 74, 162, 152, 13, IDC_FILENAME);
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Files of &type"), 0, 0, 0, 183, 65, 8, IDC_FILETYPESLABEL);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 74, 181, 152, 100, IDC_FILETYPES);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Files of &type"), 0, 0, 0, 181, 65, 8, IDC_FILETYPESLABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 74, 179, 152, 100, IDC_FILETYPES);
 
 	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 230, 161, 50, 14, IDOK);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 230, 180, 50, 14, IDCANCEL);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 230, 178, 50, 14, IDCANCEL);
 
 	InitFilterArray(szFilters);
 
@@ -155,6 +155,7 @@ BEGIN_MESSAGE_MAP(CRemoteFileDialog, CRuntimeDlg)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(TBN_DROPDOWN, AFX_IDW_TOOLBAR, OnToolbarDropDown)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolbarNeedText)
+	ON_COMMAND(IDCHANGESERVER, OnChangeServer)
 	ON_COMMAND(ID_VIEWMENU, OnViewMenu)
 	ON_COMMAND(ID_UPONELEVEL, OnUpOneLevel)
 	ON_COMMAND_RANGE(ID_VIEW_SMALLICON, ID_VIEW_DETAILS, OnChangeView)
@@ -725,9 +726,7 @@ void CRemoteFileDialog::OnOK()
 	m_pPrefs->WriteProfileString(sFolderKey, m_sServer, m_bRoot ? _T("") : m_sCurFolder);
 	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("LastView"), (m_lcFiles.GetStyle() & LVS_TYPEMASK));
 
-	CRect rWindow;
-	GetWindowRect(rWindow);
-	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("LastSize"), MAKELONG(rWindow.Width(), rWindow.Height()));
+	SaveWindowPos();
 
 	// don't end if nothing selected or if RFD_FILEMUSTEXIST is selected
 	// and no match can be found
@@ -736,6 +735,20 @@ void CRemoteFileDialog::OnOK()
 
 	if (bOK)
 		CRuntimeDlg::OnOK();
+}
+
+void CRemoteFileDialog::SaveWindowPos()
+{
+	CRect rWindow;
+	GetWindowRect(rWindow);
+	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("LastSize"), MAKELONG(rWindow.Width(), rWindow.Height()));
+}
+
+void CRemoteFileDialog::OnChangeServer()
+{
+	SaveWindowPos();
+
+	EndDialog(IDCHANGESERVER);
 }
 
 void CRemoteFileDialog::OnSize(UINT nType, int cx, int cy) 

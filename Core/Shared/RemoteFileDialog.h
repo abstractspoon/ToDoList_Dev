@@ -43,7 +43,7 @@ struct FILERESULT
 	CString sFilePath; // relative to root
 	DWORD dwSize;
 };
-typedef CArray<FILERESULT, FILERESULT&> CFRArray;
+typedef CArray<FILERESULT, FILERESULT&> CFileResultArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +70,7 @@ public:
 	CString GetFirstPath();
 
 	int GetPathCount() { return m_aFiles.GetSize(); }
-	void GetPaths(CFRArray& aFiles) { aFiles.Copy(m_aFiles); }
+	void GetPaths(CFileResultArray& aFiles) { aFiles.Copy(m_aFiles); }
 
 protected:
 // Dialog Data
@@ -87,7 +87,7 @@ protected:
 	CFtpConnection* m_pConnection;
 	DWORD m_dwFileSize; // selected file
 	CEnToolBar m_toolbar;
-	CFRArray m_aFiles;
+	CFileResultArray m_aFiles;
 	DWORD m_dwOptions;
 	BOOL m_bFilling;
 	CSizeGrip m_sbGrip;
@@ -149,6 +149,7 @@ protected:
 	afx_msg void OnToolbarDropDown(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnViewMenu();
 	afx_msg void OnUpOneLevel();
+	afx_msg void OnChangeServer();
 	afx_msg void OnChangeView(UINT nCmdID);
 	afx_msg BOOL OnToolbarNeedText(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
@@ -166,6 +167,7 @@ protected:
 	BOOL FolderSelect() { return (m_dwOptions & RFD_UPLOAD) && (m_dwOptions & RFD_FOLDERSELECT); }
 	void UpdateOKButton(BOOL bRefreshResults = TRUE);
 	void UpdateFileResults();
+	void SaveWindowPos();
 
 	static CString FormatSize(DWORD dwSize);
 	static CString FormatDate(double dDate);

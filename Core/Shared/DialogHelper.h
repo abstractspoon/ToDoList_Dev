@@ -209,6 +209,7 @@ public:
 	static int RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef = NULL, int nTabWidth = -1, int nExtra = 0);
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
+	static int SelectItemExact(CComboBox& combo, LPCTSTR szItem);
 	static DWORD GetSelectedItemData(const CComboBox& combo);
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);

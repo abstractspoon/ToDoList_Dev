@@ -17,7 +17,8 @@
 
 enum RMERR
 {
-	RMERR_SUCCESS,
+	RMERR_CHANGESERVER = -1,
+	RMERR_SUCCESS = 0,
 	RMERR_UNKNOWN,
 	RMERR_SERVERDETAILS,
 	RMERR_REMOTEPATH,
@@ -114,7 +115,7 @@ protected:
 	
 protected:
 	BOOL RestartSession();
-	BOOL EstablishConnection(RMERR& nRes, DWORD dwOptions);
+	BOOL EstablishConnection(DWORD dwOptions, RMERR& nRes);
 	BOOL DoServerDlg(DWORD dwOptions, BOOL& bAnonLogin); // returns TRUE for IDOK else FALSE (cancel)
 
 	void CloseConnection();
@@ -127,11 +128,11 @@ protected:
 	RMERR SaveErrorMsg(RMERR nErr, LPCTSTR szRemotePath = NULL, LPCTSTR szLocalPath = NULL); // returns nErr to allow chaining
 	DWORD GetRemoteFileSize(LPCTSTR szRemotePath);
 
-	RMERR GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aLocalFiles, 
+	RMERR GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringArray& aLocalFiles, 
 						DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL, LPCTSTR szLocalRoot = NULL); // for upload
-	RMERR GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL); // for download
+	RMERR GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL); // for download
 
-	RMERR GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFRArray& aRemoteFiles, 
+	RMERR GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, 
 						DWORD dwOptions, LPCTSTR szLocalDir = NULL); // for download
 	RMERR GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalDir = NULL); // for upload
 

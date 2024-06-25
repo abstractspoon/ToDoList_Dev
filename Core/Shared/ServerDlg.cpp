@@ -60,11 +60,8 @@ CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword,
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CRuntimeDlg::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CServerDlg)
-	DDX_CBString(pDX, IDC_SD_SERVER, m_sServer);
-	DDX_CBString(pDX, IDC_SD_USERNAME, m_sUsername);
+
 	DDX_Text(pDX, IDC_SD_PASSWORD, m_sPassword);
-	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_SD_PROXY, m_sProxy);
 	DDX_Text(pDX, IDC_SD_PROXYPORT, m_nProxyPort);
 	DDX_Control(pDX, IDC_SD_SERVER, m_cbServers);
@@ -75,9 +72,18 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
+		DDX_CBString(pDX, IDC_SD_SERVER, m_sServer);
+		DDX_CBString(pDX, IDC_SD_USERNAME, m_sUsername);
+
 		Misc::Trim(m_sServer);
 		Misc::Trim(m_sUsername);
 		Misc::Trim(m_sPassword);
+	}
+	else
+	{
+		// Combos must do exact matches
+		SelectItemExact(m_cbServers, m_sServer);
+		SelectItemExact(m_cbUsernames, m_sUsername);
 	}
 }
 
@@ -165,44 +171,9 @@ BOOL CServerDlg::OnInitDialog()
 	UpdateData(FALSE);
 
 	// populate comboboxes from prefs
-	int nServer = m_pPrefs->GetProfileInt(m_sPrefKey, _T("ServerCount"), 0);
-
-	while (nServer--)
-	{
-		CString sServer, sItem;
-
-		sItem.Format(_T("Server%d"), nServer);
-		sServer = m_pPrefs->GetProfileString(m_sPrefKey, sItem);
-
-		if (!sServer.IsEmpty() && m_cbServers.FindString(-1, sServer) == CB_ERR)
-			m_cbServers.InsertString(0, sServer);
-	}
-
-	// add m_sServer as appropriate and select
-	if (!m_sServer.IsEmpty() && m_cbServers.FindString(-1, m_sServer) == CB_ERR)
-		m_cbServers.InsertString(0, m_sServer);
-
-	m_cbServers.SelectString(-1, m_sServer);
+	PopulateComboHistory(m_cbServers, _T("ServerCount"), _T("Server%d"), m_sServer);
+	PopulateComboHistory(m_cbUsernames, _T("UsernameCount"), _T("Username%d"), m_sUsername);
 	
-	int nName = m_pPrefs->GetProfileInt(m_sPrefKey, _T("UsernameCount"), 0);
-
-	while (nName--)
-	{
-		CString sName, sItem;
-
-		sItem.Format(_T("Username%d"), nName);
-		sName = m_pPrefs->GetProfileString(m_sPrefKey, sItem);
-
-		if (!sName.IsEmpty() && m_cbUsernames.FindString(-1, sName) == CB_ERR)
-			m_cbUsernames.InsertString(0, sName);
-	}
-
-	// add m_sUsername as appropriate and select
-	if (!m_sUsername.IsEmpty() && m_cbUsernames.FindString(-1, m_sUsername) == CB_ERR)
-		m_cbUsernames.InsertString(0, m_sUsername);
-
-	m_cbUsernames.SelectString(-1, m_sUsername);
-
 	OnChangeProxy();
 	OnChangeServer();
 	OnAnonLogin();
@@ -216,6 +187,28 @@ BOOL CServerDlg::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CServerDlg::PopulateComboHistory(CComboBox& combo, LPCTSTR szCountKey, LPCTSTR szItemTemplate, LPCTSTR szCurrentValue) const
+{
+	int nItem = m_pPrefs->GetProfileInt(m_sPrefKey, szCountKey, 0);
+
+	while (nItem--)
+	{
+		CString sKey, sItem;
+
+		sKey.Format(szItemTemplate, nItem);
+		sItem = m_pPrefs->GetProfileString(m_sPrefKey, sKey);
+
+		if (!sItem.IsEmpty() && combo.FindStringExact(-1, sItem) == CB_ERR)
+			combo.InsertString(0, sItem);
+	}
+
+	// add current value as appropriate and select
+	if (!Misc::IsEmpty(szCurrentValue) && (combo.FindStringExact(-1, szCurrentValue) == CB_ERR))
+		combo.InsertString(0, szCurrentValue);
+
+	SelectItemExact(combo, szCurrentValue);
 }
 
 int CServerDlg::DoModal(IPreferences* pPrefs, LPCTSTR szKey) 
