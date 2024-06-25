@@ -39,6 +39,7 @@ public:
 
 protected:
 	CIcon m_icon;
+	CString m_sCachedPassword;
 
 protected:
 	BOOL InitInstance();

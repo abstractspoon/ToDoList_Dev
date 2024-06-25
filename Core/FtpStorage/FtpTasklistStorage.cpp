@@ -73,8 +73,10 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 		sRemotePath = aIDParts[1];
 		rf.SetUsername(aIDParts[2]);
 
-		// only set the password if the other info was okay
-		rf.SetPassword(pFInfo->szPassword);
+		if (Misc::IsEmpty(pFInfo->szPassword))
+			rf.SetPassword(m_sCachedPassword);
+		else
+			rf.SetPassword(pFInfo->szPassword);
 	}
 
 	DWORD dwOptions = RMO_CREATEDOWNLOADDIR | RMO_USETEMPFILE | RMO_KEEPFILENAME;
@@ -84,6 +86,9 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 
 	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
+		// Cache password for the session
+		m_sCachedPassword = rf.GetPassword();
+
 		// return information to caller 
 		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;
@@ -123,12 +128,17 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		sRemotePath = aIDParts[1];
 		rf.SetUsername(aIDParts[2]);
 
-		// only set the password if the other info was okay
-		rf.SetPassword(pFInfo->szPassword);
+		if (Misc::IsEmpty(pFInfo->szPassword))
+			rf.SetPassword(m_sCachedPassword);
+		else
+			rf.SetPassword(pFInfo->szPassword);
 	}
 
 	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
+		// Cache password for the session
+		m_sCachedPassword = rf.GetPassword();
+
 		// return information to caller 
 		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;
