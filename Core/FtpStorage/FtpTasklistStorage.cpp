@@ -51,7 +51,7 @@ CFtpTasklistStorageApp::~CFtpTasklistStorageApp()
 }
 
 bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* /*pDestTaskFile*/, 
-										   IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
+										   IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -61,9 +61,11 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 		sLocalPath = FileMisc::GetTempFolder();
 
 	// split the tasklist ID into it constituent parts
+	CRemoteFile rf(GetMenuText());
+	rf.SetIcon(m_icon);
+
 	CStringArray aIDParts;
 	CString sRemotePath;
-	CRemoteFile rf(GetMenuText());
 	
 	if (Misc::Split(pFInfo->szTasklistID, aIDParts, _T("::"), TRUE) == 3)
 	{
@@ -71,17 +73,22 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 		sRemotePath = aIDParts[1];
 		rf.SetUsername(aIDParts[2]);
 
-		// only set the password if the other info was okay
-		rf.SetPassword(pFInfo->szPassword);
+		if (Misc::IsEmpty(pFInfo->szPassword))
+			rf.SetPassword(m_sCachedPassword);
+		else
+			rf.SetPassword(pFInfo->szPassword);
 	}
 
 	DWORD dwOptions = RMO_CREATEDOWNLOADDIR | RMO_USETEMPFILE | RMO_KEEPFILENAME;
 	
-	if (!bSilent)
-		dwOptions |= RMO_ALLOWDIALOG;
+	if (bPrompt)
+		dwOptions |= RMO_PROMPTFORFILE;
 
 	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
+		// Cache password for the session
+		m_sCachedPassword = rf.GetPassword();
+
 		// return information to caller 
 		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;
@@ -91,7 +98,7 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 }
 
 bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITaskList* /*pSrcTaskFile*/, 
-										IPreferences* pPrefs, LPCTSTR szKey, bool bSilent)
+										IPreferences* pPrefs, LPCTSTR szKey, bool bPrompt)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -102,12 +109,12 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		sLocalPath = FileMisc::GetTempFilePath(_T("rmf"));
 
 	CRemoteFile rf;
+	rf.SetIcon(m_icon);
+
 	DWORD dwOptions = RMO_NOCANCELPROGRESS;
 
-	if (bSilent)
-		dwOptions |= RMO_NOPROGRESS;
-	else
-		dwOptions |= RMO_ALLOWDIALOG;
+	if (bPrompt)
+		dwOptions |= RMO_PROMPTFORFILE;
 
 	// split the tasklist ID into it constituent parts
 	CStringArray aIDParts;
@@ -119,12 +126,17 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		sRemotePath = aIDParts[1];
 		rf.SetUsername(aIDParts[2]);
 
-		// only set the password if the other info was okay
-		rf.SetPassword(pFInfo->szPassword);
+		if (Misc::IsEmpty(pFInfo->szPassword))
+			rf.SetPassword(m_sCachedPassword);
+		else
+			rf.SetPassword(pFInfo->szPassword);
 	}
 
 	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
+		// Cache password for the session
+		m_sCachedPassword = rf.GetPassword();
+
 		// return information to caller 
 		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;

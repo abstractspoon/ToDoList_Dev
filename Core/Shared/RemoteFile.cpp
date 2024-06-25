@@ -34,14 +34,16 @@ LPCTSTR ALLFILES = _T("All Files (*.*)\0*.*\0");
 
 CRemoteFile::CRemoteFile(LPCTSTR szAgent, LPCTSTR szServer, LPCTSTR szUsername, 
 						 LPCTSTR szPassword, LPCTSTR szProxy, CWnd* pParent)
-	 : m_sAgent(szAgent),
+	:
+	m_sAgent(szAgent),
 	  m_sProxyAndPort(szProxy),
 	  m_sServer(szServer), 
 	  m_sUsername(szUsername), 
 	  m_sPassword(szPassword),
 	  m_pSession(NULL),
 	  m_pConnection(NULL),
-	  m_pParent(pParent)
+	m_pParent(pParent),
+	m_hIcon(NULL)
 {
 	Misc::Trim(m_sServer);
 	Misc::Trim(m_sUsername);
@@ -129,7 +131,7 @@ RMERR CRemoteFile::SaveErrorMsg(RMERR nErr, LPCTSTR szLocalPath, LPCTSTR szRemot
 	return nErr;
 }
 
-// download
+// External interface for downloading
 RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions, LPCTSTR szFilter)
 {
 	m_pPrefs = pPrefs;
@@ -137,27 +139,38 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 
 	ValidateOptions(dwOptions, TRUE);
 
+	// Get remote path(s)
+	CFileResultArray aRemoteFiles;
 	RMERR nRes = RMERR_SUCCESS;
+	BOOL bFirstShow = TRUE;
 
-	if (!EstablishConnection(nRes, dwOptions))
+	do 
+	{
+		if (!EstablishConnection(dwOptions, !bFirstShow, nRes))
+		{
+			// If we're showing as a consequence of RMERR_CHANGESERVER
+			// then cancelling should return us to the remote file dialog
+			if (bFirstShow || (nRes != RMERR_USERCANCELLED))
 		return SaveErrorMsg(nRes);
+		}
 
-	// remote path(s)
-	CFRArray aRemoteFiles;
+		Misc::Trim(sRemotePath);
+		nRes = GetRemotePaths(aRemoteFiles, dwOptions, szFilter, sRemotePath);
 
 	if (nRes == RMERR_SUCCESS)
-	{
-		Misc::Trim(sRemotePath);
+			break;
 
-		nRes = GetRemotePaths(aRemoteFiles, dwOptions, szFilter, sRemotePath);
+		if (nRes != RMERR_CHANGESERVER)
+			return SaveErrorMsg(nRes);
+
+		bFirstShow = FALSE;
 	}
+	while (TRUE);
 
 	// local file(s)
 	CStringArray aLocalFiles;
 	BOOL bTemp = FALSE;
 
-	if (nRes == RMERR_SUCCESS)
-	{
 		Misc::Trim(sLocalPath);
 
 		// if we are downloading more than one file
@@ -167,9 +180,9 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 
 		if (bMulti || bLocalPathIsDir || !FileMisc::CreateFolderFromFilePath(sLocalPath))
 		{
-			CString sInitialDir;
+		CString sInitialDir(sLocalPath);
 
-			// try to create/get the initial dir
+		// try to create/get the initial folder
 			if (!bLocalPathIsDir)
 			{
 				if (!sLocalPath.IsEmpty() && FileMisc::CreateFolderFromFilePath(sLocalPath))
@@ -180,17 +193,24 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 					FileMisc::MakePath(sInitialDir, sDrive, sFolder);
 				}
 			}
-			else
-				sInitialDir = sLocalPath;
 
 			nRes = GetLocalPaths(aLocalFiles, bTemp, aRemoteFiles, dwOptions, sInitialDir);
+
+		if (nRes != RMERR_SUCCESS)
+		{
+			ASSERT(nRes != RMERR_CHANGESERVER);
+
+			return SaveErrorMsg(nRes);
+		}
 		}
 		else // single file 
+	{
 			aLocalFiles.Add(sLocalPath);
 	}
 
-	if (nRes == RMERR_SUCCESS && aRemoteFiles.GetSize())
-	{
+	ASSERT(aRemoteFiles.GetSize());
+	ASSERT(aLocalFiles.GetSize());
+
 		CProgressDlg progDlg(!(dwOptions & RMO_NOCANCELPROGRESS));
 		BOOL bProgress = !(dwOptions & RMO_NOPROGRESS);
 
@@ -206,6 +226,7 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 		// clear sRemotePath because we are going to re-use it
 		// to return the downloaded files
 		sRemotePath.Empty();
+	nRes = RMERR_SUCCESS;
 		
 		for (int nFile = 0; nFile < nFileCount; nFile++)
 		{
@@ -231,7 +252,6 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 		
 		if (bProgress && m_pParent)
 			m_pParent->EnableWindow(TRUE);
-	}
 
 	// cleanup
 	if (nRes != RMERR_SUCCESS)
@@ -244,16 +264,18 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 				::DeleteFile(aLocalFiles[nFile]);
 		}
 	}
-	// join downloaded files delimited by ;
 	else 
+	{
+	// join downloaded files delimited by ;
 		sLocalPath = Misc::FormatArray(aLocalFiles, _T(";"));
+	}
 
 	CloseConnection();
 
 	return SaveErrorMsg(nRes, sLocalPath, sRemotePath);
 }
 
-// upload
+// External interface for uploading
 RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions, LPCTSTR szFilter)
 {
 	m_pPrefs = pPrefs;
@@ -261,27 +283,24 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 
 	ValidateOptions(dwOptions, FALSE);
 
-	RMERR nRes = RMERR_SUCCESS;
-
 	// if local file not specified then get browse for it
 	CStringArray aLocalFiles;
+	RMERR nRes = GetLocalPaths(aLocalFiles, dwOptions, sLocalPath);
 
-	nRes = GetLocalPaths(aLocalFiles, dwOptions, sLocalPath);
-
-	// now we support wildcards we must allow for there being no
-	// files matching the upload which is not an error
 	if (nRes != RMERR_SUCCESS)
 		return SaveErrorMsg(nRes);
 
-	else if (!aLocalFiles.GetSize())
+	// Supporting wildcards we must allow for there being no
+	// files matching the upload which is not an error
+	if (!aLocalFiles.GetSize())
 		return RMERR_SUCCESS;
 
 	// now we start the connection
-	if (!EstablishConnection(nRes, dwOptions))
+	if (!EstablishConnection(dwOptions, FALSE, nRes))
 		return SaveErrorMsg(nRes);
 
-	// if remote path not specified or is a folder then allow browsing unless bAllowDialog == FALSE
-	CFRArray aRemoteFiles;
+	// if remote path not specified or is a folder then allow browsing unless bShowDialog == FALSE
+	CFileResultArray aRemoteFiles;
 
 	if (nRes == RMERR_SUCCESS)
 	{
@@ -354,7 +373,7 @@ BOOL CRemoteFile::RemotePathIsFolder(const CString& sPath)
 }
 
 // for upload
-RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aLocalFiles, 
+RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringArray& aLocalFiles, 
 								  DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir, LPCTSTR szLocalRoot)
 {
 	aRemoteFiles.RemoveAll();
@@ -370,21 +389,27 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 	Misc::Trim(sRemotePath);
 	sRemotePath.Replace('\\', '/');
 
-	if (sRemotePath.IsEmpty())
-	{
-		BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-		if (!bAllowDialog)
+	if (sRemotePath.IsEmpty() || bPromptForFile)
+	{
+		// Sanity check
+		if (sRemotePath.IsEmpty() && !bPromptForFile)
+	{
+			ASSERT(0);
 			return RMERR_REMOTEPATH;
+		}
 
 		sRemotePath = m_pPrefs->GetProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer);
 
 		// if multiple files are being uploaded then display folder dialog
-		if (nNumLocal > 1)
+		if ((nNumLocal > 1))
 		{
-			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, NULL, m_hIcon);
 			
-			if (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemotePath) == IDOK)
+			switch (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemotePath))
+			{
+			case IDOK:
 			{
 				if (dialog.GetPathCount())
 				{
@@ -404,12 +429,18 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 				
 				m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer, sRemotePath);
 			}
-			else
+				break;
+
+			case IDCHANGESERVER:
+				return RMERR_CHANGESERVER;
+
+			default:
 				return RMERR_USERCANCELLED;
+		}
 		}
 		else // nNumLocal == 1
 		{
-			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath, m_hIcon);
 
 			// base remote name on local name
 			CString sFilename, sExt;
@@ -417,11 +448,19 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 
 			sFilename += sExt;
 			
-			if (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD, sFilename) == IDOK)
+			switch (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemotePath))
+			{
+			case IDOK:
 				dialog.GetPaths(aRemoteFiles);
-			else
+				break;
+
+			case IDCHANGESERVER:
+				return RMERR_CHANGESERVER;
+
+			default:
 				return RMERR_USERCANCELLED;
 		}
+	}
 	}
 	else 
 	{
@@ -443,7 +482,9 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aL
 			aRemoteFiles.Add(frRemote);
 		}
 		else
+		{
 			return RMERR_REMOTEPATH;
+	}
 	}
 	
 	return RMERR_SUCCESS;
@@ -470,7 +511,7 @@ CString CRemoteFile::MakeRemotePath(const CString& sLocalPath, const CString& sR
 }
 
 // for download
-RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir)
+RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir)
 {
 	CString sRemotePath(szRemoteDir);
 	Misc::Trim(sRemotePath);
@@ -478,19 +519,22 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTS
 
 	// if the remote path is empty or a folder then we must display a dialog
 	// to get the actual file of interest
-	if (sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
-	{
-		BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-		if (!bAllowDialog)
+	if (bPromptForFile || sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
+	{
+		// Sanity check
+		if (!bPromptForFile && sRemotePath.IsEmpty())
+	{
+			ASSERT(0);
 			return RMERR_REMOTEPATH;
+		}
 
 		// get last folder browsed for this server
 		sRemotePath = m_pPrefs->GetProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer);
 
 		// browse for file(s)
-		CWaitCursor cursor;
-		CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath);
+		CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath, m_hIcon);
 		DWORD dwRFDOptions = RFD_DOWNLOAD | RFD_FILEMUSTEXIST;
 		
 		if (dwOptions & RMO_MULTISELECT)
@@ -499,14 +543,27 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTS
 		if (dwOptions & RMO_NONAVIGATE)
 			dwRFDOptions &= RFD_NONAVIGATE;
 		
-		if (dialog.DoModal(m_pPrefs, m_sPrefKey, dwRFDOptions) == IDOK && dialog.GetPathCount())
+		switch (dialog.DoModal(m_pPrefs, m_sPrefKey, dwRFDOptions))
+		{
+		case IDOK:
+			if (!dialog.GetPathCount())
+			{
+				return RMERR_USERCANCELLED;
+			}
+			else
 		{
 			dialog.GetPaths(aRemoteFiles);
 
 			m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer, sRemotePath);
 		}
-		else
+			break;
+
+		case IDCHANGESERVER:
+			return RMERR_CHANGESERVER;
+
+		default:
 			return RMERR_USERCANCELLED;
+	}
 	}
 	// else we must assume that the remote path is the full filename
 	else
@@ -519,11 +576,11 @@ RMERR CRemoteFile::GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTS
 }
 
 // for download
-RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFRArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szLocalDir)
+RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szLocalDir)
 {
 	aLocalFiles.RemoveAll();
 
-	BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 	bTemp = (dwOptions & RMO_USETEMPFILE);
 
 	if (bTemp)
@@ -533,7 +590,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 			CString sLocalPath = GetTempPath(aRemoteFiles[nFile].sFileName, dwOptions);
 
 			if (!sLocalPath.IsEmpty())
+			{
 				aLocalFiles.Add(sLocalPath);
+			}
 			else
 			{
 				aLocalFiles.RemoveAll();
@@ -541,7 +600,7 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 			}
 		}
 	}
-	else if (bAllowDialog)
+	else if (bPromptForFile)
 	{
 		CString sFolder(szLocalDir);
 		BOOL bCreatePath = (dwOptions & RMO_CREATEDOWNLOADDIR);
@@ -569,7 +628,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 				m_pPrefs->WriteProfileString(_T("LocalSettings\\LastDownloadFolder"), m_sServer, sFolder);
 			}
 			else
+			{
 				return RMERR_USERCANCELLED;
+		}
 		}
 		else if (aRemoteFiles.GetSize() == 1)
 		{
@@ -591,7 +652,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 		}
 	}
 	else
+	{
 		return RMERR_LOCALPATH;
+	}
 
 	return RMERR_SUCCESS;
 }
@@ -663,21 +726,21 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 	BOOL bFolder = FileMisc::FolderExists(sLocalPath);
 	BOOL bFile = !bFolder && (GetFileAttributes(sLocalPath) != 0xffffffff);
 
-	// now check for single file
 	if (bFile)
 	{
+		// now check for single file
 		if (dwOptions & RMO_LOWERCASEPATHS)
 			sLocalPath.MakeLower();
 
 		aLocalFiles.Add(sLocalPath);
 	}
-	// finally if must be folder or invalid (eg bad wildcard) in which
-	// case we display a dialog to get the actual filenames
 	else
 	{
-		BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
+	// finally if must be folder or invalid (eg bad wildcard) in which
+	// case we display a dialog to get the actual filenames
+		BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-		if (!bAllowDialog)
+		if (!bPromptForFile)
 			return RMERR_LOCALPATH;
 
 		if (!bFolder)  // bad path
@@ -719,7 +782,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 			m_pPrefs->WriteProfileString(_T("LocalSettings\\LastUploadFolder"), m_sServer, sLocalPath);
 		}
 		else
+		{
 			return RMERR_USERCANCELLED;
+		}
 
 	}
 
@@ -791,22 +856,33 @@ CString CRemoteFile::GetTempPath(const CString& sRemotePath, DWORD dwOptions)
 	return sTempPath;
 }
 
-BOOL CRemoteFile::EstablishConnection(RMERR& nRes, DWORD dwOptions)
+BOOL CRemoteFile::IsConnectionDefined(BOOL bAnonLogin) const
 {
-	CWaitCursor cursor;
+	return (!m_sServer.IsEmpty() && (bAnonLogin || (!m_sUsername.IsEmpty() && !m_sPassword.IsEmpty())));
+}
 	
-	if (!RestartSession())
-		return FALSE;
-
-	BOOL bAllowDialog = (dwOptions & RMO_ALLOWDIALOG);
-	BOOL bAnonLogin = (dwOptions & RMO_ANONYMOUSLOGIN);
-
+BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, BOOL bPrompt, RMERR& nRes)
+{
 	// try to establish a connection until we succeed or the user cancels
 	// or bAllowDialog == FALSE and we fail
+	BOOL bAnonLogin = (dwOptions & RMO_ANONYMOUSLOGIN);
+
 	while (TRUE)
 	{
-		if (!m_sServer.IsEmpty() && (bAnonLogin || (!m_sUsername.IsEmpty() && !m_sPassword.IsEmpty())))
+		if (bPrompt || !IsConnectionDefined(bAnonLogin))
 		{
+			if (!DoServerDlg(dwOptions, bAnonLogin))
+		{
+				nRes = RMERR_USERCANCELLED;
+				return FALSE;
+			}
+		}
+
+		// Need to recheck
+		if (IsConnectionDefined(bAnonLogin) && RestartSession())
+		{
+			CWaitCursor cursor;
+
 			try
 			{
 				if (bAnonLogin)
@@ -839,39 +915,17 @@ BOOL CRemoteFile::EstablishConnection(RMERR& nRes, DWORD dwOptions)
 			}
 
 			// must mean failure if we got here
-			if (bAllowDialog)
-			{
 				CEnString sMessage;
 				sMessage.Format(_T("A connection to '%s' could not be established.\n\nWould you like to check your details and try again?"), m_sServer);
 				
-				if (AfxMessageBox(sMessage, MB_YESNO) == IDNO)
-				{
-					nRes = RMERR_USERCANCELLED;
-					return FALSE;
-				}
+			bPrompt = (AfxMessageBox(sMessage, MB_YESNO) == IDYES);
 
-				if (!DoServerDlg(dwOptions, bAnonLogin))
+			if (!bPrompt)
 				{
 					nRes = RMERR_USERCANCELLED;
 					return FALSE;
 				}
 			}
-			else
-				return FALSE; // can't try again
-		}
-		else if (bAllowDialog)
-		{
-			if (!DoServerDlg(dwOptions, bAnonLogin))
-			{
-				nRes = RMERR_USERCANCELLED;
-				return FALSE;
-			}
-		}
-		else
-		{
-			nRes = RMERR_SERVERDETAILS;
-			return FALSE;
-		}
 	}
 
 	return FALSE;
@@ -882,7 +936,7 @@ BOOL CRemoteFile::DoServerDlg(DWORD dwOptions, BOOL& bAnonLogin)
 	AL_TYPE nAnonLogin = (dwOptions & RMO_NOANONYMOUSLOGIN) ? ANONLOGIN_HIDE : 
 						(bAnonLogin ? ANONLOGIN_YES : ANONLOGIN_AUTO);
 
-	CServerDlg dialog(m_sServer, m_sUsername, m_sPassword, nAnonLogin);
+	CServerDlg dialog(m_sServer, m_sUsername, m_sPassword, nAnonLogin, m_hIcon);
 				
 	if (dialog.DoModal(m_pPrefs, m_sPrefKey) == IDOK)
 	{
