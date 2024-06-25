@@ -146,7 +146,7 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 
 	do 
 	{
-		if (!EstablishConnection(dwOptions, nRes))
+		if (!EstablishConnection(dwOptions, !bFirstShow, nRes))
 		{
 			// If we're showing as a consequence of RMERR_CHANGESERVER
 			// then cancelling should return us to the remote file dialog
@@ -296,7 +296,7 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 		return RMERR_SUCCESS;
 
 	// now we start the connection
-	if (!EstablishConnection(dwOptions, nRes))
+	if (!EstablishConnection(dwOptions, FALSE, nRes))
 		return SaveErrorMsg(nRes);
 
 	// if remote path not specified or is a folder then allow browsing unless bShowDialog == FALSE
@@ -389,12 +389,12 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 	Misc::Trim(sRemotePath);
 	sRemotePath.Replace('\\', '/');
 
-	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
+	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-	if (sRemotePath.IsEmpty() || bShowDialog)
+	if (sRemotePath.IsEmpty() || bPromptForFile)
 	{
 		// Sanity check
-		if (sRemotePath.IsEmpty() && !bShowDialog)
+		if (sRemotePath.IsEmpty() && !bPromptForFile)
 		{
 			ASSERT(0);
 			return RMERR_REMOTEPATH;
@@ -519,12 +519,12 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOption
 
 	// if the remote path is empty or a folder then we must display a dialog
 	// to get the actual file of interest
-	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
+	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-	if (bShowDialog || sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
+	if (bPromptForFile || sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
 	{
 		// Sanity check
-		if (!bShowDialog && sRemotePath.IsEmpty())
+		if (!bPromptForFile && sRemotePath.IsEmpty())
 		{
 			ASSERT(0);
 			return RMERR_REMOTEPATH;
@@ -580,7 +580,7 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 {
 	aLocalFiles.RemoveAll();
 
-	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
+	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 	bTemp = (dwOptions & RMO_USETEMPFILE);
 
 	if (bTemp)
@@ -600,7 +600,7 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 			}
 		}
 	}
-	else if (bShowDialog)
+	else if (bPromptForFile)
 	{
 		CString sFolder(szLocalDir);
 		BOOL bCreatePath = (dwOptions & RMO_CREATEDOWNLOADDIR);
@@ -738,9 +738,9 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPC
 	{
 		// finally if must be folder or invalid (eg bad wildcard) in which
 		// case we display a dialog to get the actual filenames
-		BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
+		BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-		if (!bShowDialog)
+		if (!bPromptForFile)
 			return RMERR_LOCALPATH;
 
 		if (!bFolder)  // bad path
@@ -856,27 +856,30 @@ CString CRemoteFile::GetTempPath(const CString& sRemotePath, DWORD dwOptions)
 	return sTempPath;
 }
 
-BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, RMERR& nRes)
+BOOL CRemoteFile::IsConnectionDefined(BOOL bAnonLogin) const
 {
-	CWaitCursor cursor;
-	
-	BOOL bShowDialog = (dwOptions & RMO_SHOWDIALOG);
-	BOOL bAnonLogin = (dwOptions & RMO_ANONYMOUSLOGIN);
+	return (!m_sServer.IsEmpty() && (bAnonLogin || (!m_sUsername.IsEmpty() && !m_sPassword.IsEmpty())));
+}
 
+BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, BOOL bPrompt, RMERR& nRes)
+{
 	// try to establish a connection until we succeed or the user cancels
-	// or bShowDialog == FALSE and we fail
-	if (bShowDialog && !DoServerDlg(dwOptions, bAnonLogin))
-	{
-		nRes = RMERR_USERCANCELLED;
-		return FALSE;
-	}
-
-	if (!RestartSession())
-		return FALSE;
+	// or bAllowDialog == FALSE and we fail
+	BOOL bAnonLogin = (dwOptions & RMO_ANONYMOUSLOGIN);
 
 	while (TRUE)
 	{
-		if (!m_sServer.IsEmpty() && (bAnonLogin || (!m_sUsername.IsEmpty() && !m_sPassword.IsEmpty())))
+		if (bPrompt || !IsConnectionDefined(bAnonLogin))
+		{
+			if (!DoServerDlg(dwOptions, bAnonLogin))
+			{
+				nRes = RMERR_USERCANCELLED;
+				return FALSE;
+			}
+		}
+
+		// Need to recheck
+		if (IsConnectionDefined(bAnonLogin) && RestartSession())
 		{
 			CWaitCursor cursor;
 
@@ -884,13 +887,13 @@ BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, RMERR& nRes)
 			{
 				if (bAnonLogin)
 				{
-					m_pConnection = m_pSession->GetFtpConnection(m_sServer, NULL, NULL, 
-																INTERNET_INVALID_PORT_NUMBER, TRUE);
+					m_pConnection = m_pSession->GetFtpConnection(m_sServer, NULL, NULL,
+																 INTERNET_INVALID_PORT_NUMBER, TRUE);
 				}
 				else
 				{
-					m_pConnection = m_pSession->GetFtpConnection(m_sServer, m_sUsername, m_sPassword, 
-																INTERNET_INVALID_PORT_NUMBER, TRUE);
+					m_pConnection = m_pSession->GetFtpConnection(m_sServer, m_sUsername, m_sPassword,
+																 INTERNET_INVALID_PORT_NUMBER, TRUE);
 				}
 
 				if (m_pConnection)
@@ -899,7 +902,7 @@ BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, RMERR& nRes)
 					return TRUE;
 				}
 			}
-			catch(CInternetException* e)
+			catch (CInternetException* e)
 			{
 				nRes = RMERR_CONNECTING;
 				m_dwInternetErr = e->m_dwError;
@@ -912,40 +915,16 @@ BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, RMERR& nRes)
 			}
 
 			// must mean failure if we got here
-			if (bShowDialog)
-			{
-				CEnString sMessage;
-				sMessage.Format(_T("A connection to '%s' could not be established.\n\nWould you like to check your details and try again?"), m_sServer);
-				
-				if (AfxMessageBox(sMessage, MB_YESNO) == IDNO)
-				{
-					nRes = RMERR_USERCANCELLED;
-					return FALSE;
-				}
+			CEnString sMessage;
+			sMessage.Format(_T("A connection to '%s' could not be established.\n\nWould you like to check your details and try again?"), m_sServer);
 
-				if (!DoServerDlg(dwOptions, bAnonLogin))
-				{
-					nRes = RMERR_USERCANCELLED;
-					return FALSE;
-				}
-			}
-			else
-			{
-				return FALSE; // can't try again
-			}
-		}
-		else if (bShowDialog)
-		{
-			if (!DoServerDlg(dwOptions, bAnonLogin))
+			bPrompt = (AfxMessageBox(sMessage, MB_YESNO) == IDYES);
+
+			if (!bPrompt)
 			{
 				nRes = RMERR_USERCANCELLED;
 				return FALSE;
 			}
-		}
-		else
-		{
-			nRes = RMERR_SERVERDETAILS;
-			return FALSE;
 		}
 	}
 

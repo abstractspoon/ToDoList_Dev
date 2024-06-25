@@ -82,7 +82,7 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 	DWORD dwOptions = RMO_CREATEDOWNLOADDIR | RMO_USETEMPFILE | RMO_KEEPFILENAME;
 	
 	if (bPrompt)
-		dwOptions |= RMO_SHOWDIALOG;
+		dwOptions |= RMO_PROMPTFORFILE;
 
 	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
 	{
@@ -114,9 +114,7 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 	DWORD dwOptions = RMO_NOCANCELPROGRESS;
 
 	if (bPrompt)
-		dwOptions |= RMO_SHOWDIALOG;
-	else
-		dwOptions |= RMO_NOPROGRESS;
+		dwOptions |= RMO_PROMPTFORFILE;
 
 	// split the tasklist ID into it constituent parts
 	CStringArray aIDParts;

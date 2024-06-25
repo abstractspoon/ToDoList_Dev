@@ -39,7 +39,7 @@ enum RMERR
 
 enum // options
 {
-	RMO_SHOWDIALOG			= 0x00000001,
+	RMO_PROMPTFORFILE		= 0x00000001,
 	RMO_USETEMPFILE			= 0x00000002, // only valid for download
 	RMO_KEEPEXTENSION		= 0x00000004, // only valid if RMO_USETEMPFILE is specified
 	RMO_LOWERCASEPATHS		= 0x00000008,
@@ -57,8 +57,8 @@ enum // options
 	RMO_KEEPFILENAME		= 0x00008000, // only valid if RMO_USETEMPFILE is specified
 //	RMO_ = 0x0001,
 
-	RMO_DEFGETFILE			= RMO_SHOWDIALOG | RMO_CREATEDOWNLOADDIR | RMO_CONFIRMOVERWRITE | RMO_MULTISELECT,
-	RMO_DEFSETFILE			= RMO_SHOWDIALOG | RMO_LOWERCASEPATHS | RMO_DELETEFAILURES | RMO_CONFIRMOVERWRITE,
+	RMO_DEFGETFILE			= (RMO_PROMPTFORFILE | RMO_CREATEDOWNLOADDIR | RMO_CONFIRMOVERWRITE | RMO_MULTISELECT),
+	RMO_DEFSETFILE			= (RMO_PROMPTFORFILE | RMO_LOWERCASEPATHS | RMO_DELETEFAILURES | RMO_CONFIRMOVERWRITE),
 };
 
 // note: if you don't need the browse capabilities then you can #define NO_DIALOGS 
@@ -115,7 +115,8 @@ protected:
 	
 protected:
 	BOOL RestartSession();
-	BOOL EstablishConnection(DWORD dwOptions, RMERR& nRes);
+	BOOL EstablishConnection(DWORD dwOptions, BOOL bPrompt, RMERR& nRes);
+	BOOL IsConnectionDefined(BOOL bAnonLogin) const;
 	BOOL DoServerDlg(DWORD dwOptions, BOOL& bAnonLogin); // returns TRUE for IDOK else FALSE (cancel)
 
 	void CloseConnection();
