@@ -259,29 +259,29 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	sFilePath.TrimLeft();
 	sFilePath.TrimRight();
 
-	// Background color
-	CRect rIcon = GetIconScreenRect();
-
+	BOOL bReleaseDC = FALSE;
+	CRect rRef(rWindow);
+	
 	if (m_bParentIsCombo)
 	{
 		// Draw to parent DC
-		CWindowDC dc(GetParent());
+		pDC = GetParent()->GetWindowDC();
+		bReleaseDC = TRUE;
 
-		CRect rParent;
-		GetParent()->GetWindowRect(rParent);
-
-		rIcon.OffsetRect(-rParent.TopLeft());
-		::FillRect(dc, rIcon, GetBackgroundBrush(pDC));
-
-		DrawFileIcon(&dc, sFilePath, rIcon);
+		GetParent()->GetWindowRect(rRef);
 	}
-	else
-	{
-		rIcon.OffsetRect(-rWindow.TopLeft());
-		::FillRect(*pDC, rIcon, GetBackgroundBrush(pDC));
 
-		DrawFileIcon(pDC, sFilePath, rIcon);
-	}
+	CRect rIcon = GetIconScreenRect();
+	rIcon.OffsetRect(-rRef.TopLeft());
+
+	CRect rBkgnd(rIcon);
+	rBkgnd.InflateRect(1, 1);
+
+	::FillRect(*pDC, rBkgnd, GetBackgroundBrush(pDC));
+	DrawFileIcon(pDC, sFilePath, rIcon);
+
+	if (bReleaseDC)
+		GetParent()->ReleaseDC(pDC);
 }
 
 HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
