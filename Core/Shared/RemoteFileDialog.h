@@ -10,6 +10,7 @@
 #include "fileedit.h"
 #include "runtimedlg.h"
 #include "sizegrip.h"
+#include "entoolbar.h"
 
 #include <afxinet.h>
 #include <afxtempl.h>
@@ -26,6 +27,11 @@ enum // flags
 	RFD_FOLDERSELECT	= 0x0008, // upload only, excludes files
 	RFD_NONAVIGATE		= 0x0010, // use is restricted to initial directory
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+// Return from DoModal
+const int IDCHANGESERVER = 10; // IDTRYAGAIN
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -80,7 +86,7 @@ protected:
 	CFileEdit	m_eFilename;
 	CFtpConnection* m_pConnection;
 	DWORD m_dwFileSize; // selected file
-	CToolBar m_toolbar;
+	CEnToolBar m_toolbar;
 	CFRArray m_aFiles;
 	DWORD m_dwOptions;
 	BOOL m_bFilling;
