@@ -12,6 +12,7 @@
 #include "filemisc.h"
 #include "graphicsmisc.h"
 #include "enstring.h"
+#include "themed.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -204,6 +205,9 @@ BOOL CRemoteFileDialog::OnInitDialog()
 	// init multi selection
 	if (m_dwOptions & RFD_MULTISELECT)
 		m_lcFiles.ModifyStyle(LVS_SINGLESEL, 0);
+
+	CThemed::SetWindowTheme(&m_lcFiles, _T("Explorer"));
+	ListView_SetExtendedListViewStyle(m_lcFiles, LVS_EX_FULLROWSELECT);
 
 	// init m_cbFileTypes
 	int nType = m_aFilters.GetSize();
