@@ -171,25 +171,25 @@ BOOL CRemoteFileDialog::OnInitDialog()
 
 	ASSERT(m_pConnection);
 
+	if (!m_pConnection)
+		EndDialog(IDCANCEL);
+
 	// init state from prefs
 	if (m_sCurFolder.IsEmpty())
 	{
 		CString sFolderKey = m_sPrefKey + _T("LastFolder");
 		m_sCurFolder = m_pPrefs->GetProfileString(sFolderKey, m_sServer);
-	}
 
-	if (m_pConnection && m_sCurFolder.IsEmpty())
-		m_pConnection->GetCurrentDirectory(m_sCurFolder);
+		if (m_sCurFolder.IsEmpty())
+			m_pConnection->GetCurrentDirectory(m_sCurFolder);
+	}
 
 	SetIcon(m_hIcon, FALSE);
 	ModifyStyle(0, WS_CLIPCHILDREN);
 	UpdateData(FALSE);
 
-	if (!m_pConnection)
-		EndDialog(IDCANCEL);
-
 	if (FolderSelect())
-		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name:"));
+		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name"));
 
 	// set up list image lists
 	HIMAGELIST hILLarge = CFileIcons::GetImageList(TRUE);
@@ -211,7 +211,7 @@ BOOL CRemoteFileDialog::OnInitDialog()
 
 	// init m_cbFileTypes
 	int nType = m_aFilters.GetSize();
-	ASSERT (nType); // must be atleast one
+	ASSERT (nType); // must be at least one
 
 	while (nType--)
 		AddString(m_cbFileTypes, m_aFilters[nType].sName, nType);
@@ -277,6 +277,7 @@ void CRemoteFileDialog::PostCreate()
 
 		rWindow.InflateRect((nWidth - rWindow.Width()) / 2, (nHeight - rWindow.Height()) / 2);
 		MoveWindow(rWindow);
+		UpdateWindow();
 	}
 
 	// restore last view
