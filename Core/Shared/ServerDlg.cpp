@@ -29,8 +29,7 @@ CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword,
 	m_sPassword(szPassword),
 	m_nAnonLogin(nAnonymousLogin),
 	m_pPrefs(NULL),
-	m_hIcon(hIcon),
-	m_bEnableProxy(FALSE)
+	m_hIcon(hIcon)
 {
 	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 7, 9, 50, 8, IDC_SD_SERVERLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP | CBS_AUTOHSCROLL, 0, 58, 7, 134, 100, IDC_SD_SERVER);
@@ -50,7 +49,7 @@ CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword,
 		YOFFSET = 20;
 	}
 
-	AddRCControl(_T("CONTROL"), _T("Button"), _T("Proxy"), BS_AUTOCHECKBOX | WS_TABSTOP, 0, 7, 54 + YOFFSET, 50, 8, IDC_SD_PROXYCHECKBOX);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Proxy"), 0, 0, 7, 54 + YOFFSET, 50, 8, IDC_SD_PROXYLABEL);
 	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | WS_TABSTOP, 0, 58, 52 + YOFFSET, 80, 13, IDC_SD_PROXY);
 	AddRCControl(_T("LTEXT"), _T(""), _T("Port"), 0, 0, 142, 54 + YOFFSET, 50, 8, IDC_SD_PROXYPORTLABEL);
 	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_NUMBER | ES_AUTOHSCROLL | WS_TABSTOP, 0, 164, 52 + YOFFSET, 28, 13, IDC_SD_PROXYPORT);
@@ -71,7 +70,6 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_SD_PROXYPORT, m_nProxyPort);
 	DDX_Control(pDX, IDC_SD_SERVER, m_cbServers);
 	DDX_Control(pDX, IDC_SD_USERNAME, m_cbUsernames);
-	DDX_Check(pDX, IDC_SD_PROXYCHECKBOX, m_bEnableProxy);
 
 	if (m_nAnonLogin >= ANONLOGIN_NO)
 		DDX_Check(pDX, IDC_SD_ANONLOGIN, (int&)m_nAnonLogin);
@@ -98,7 +96,6 @@ BEGIN_MESSAGE_MAP(CServerDlg, CRuntimeDlg)
 	ON_CBN_EDITCHANGE(IDC_SD_SERVER, OnChangeServer)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SD_ANONLOGIN, OnAnonLogin)
-	ON_BN_CLICKED(IDC_SD_PROXYCHECKBOX, OnEnableProxy)
 	ON_EN_CHANGE(IDC_SD_PROXY, OnChangeProxy)
 END_MESSAGE_MAP()
 
@@ -108,14 +105,7 @@ END_MESSAGE_MAP()
 void CServerDlg::OnChangeServer() 
 {
 	UpdateData();
-	
 	GetDlgItem(IDOK)->EnableWindow(!m_sServer.IsEmpty());
-}
-
-void CServerDlg::OnEnableProxy() 
-{
-	UpdateData();
-	EnableDisableProxy();
 }
 
 void CServerDlg::OnChangeProxy()
@@ -126,9 +116,8 @@ void CServerDlg::OnChangeProxy()
 
 void CServerDlg::EnableDisableProxy()
 {
-	GetDlgItem(IDC_SD_PROXY)->EnableWindow(m_bEnableProxy);
-	GetDlgItem(IDC_SD_PROXYPORTLABEL)->EnableWindow(m_bEnableProxy && !m_sProxy.IsEmpty());
-	GetDlgItem(IDC_SD_PROXYPORT)->EnableWindow(m_bEnableProxy && !m_sProxy.IsEmpty());
+	GetDlgItem(IDC_SD_PROXYPORTLABEL)->EnableWindow(!m_sProxy.IsEmpty());
+	GetDlgItem(IDC_SD_PROXYPORT)->EnableWindow(!m_sProxy.IsEmpty());
 }
 
 BOOL CServerDlg::OnInitDialog() 
@@ -152,13 +141,12 @@ BOOL CServerDlg::OnInitDialog()
 
 	m_sProxy = m_pPrefs->GetProfileString(m_sPrefKey, _T("Proxy"));
 	m_nProxyPort = m_pPrefs->GetProfileInt(m_sPrefKey, _T("ProxyPort"), 80);
-	m_bEnableProxy = m_pPrefs->GetProfileInt(m_sPrefKey, _T("EnableProxy"), FALSE);
 	
 	// if the proxy settings are blank, try to get them from the registry
 	if (HasProxySettings())
 		WebMisc::GetProxySettings(m_sProxy, m_nProxyPort);
 
-	m_bEnableProxy &= HasProxySettings();
+	m_wpProxy.Initialize(*GetDlgItem(IDC_SD_PROXY), CEnString(_T("<optional>")), WM_GETTEXTLENGTH);
 
 	UpdateData(FALSE);
 
@@ -237,7 +225,6 @@ void CServerDlg::OnOK()
 
 	m_pPrefs->WriteProfileString(m_sPrefKey, _T("LastServer"), m_sServer);
 	m_pPrefs->WriteProfileString(m_sPrefKey, _T("Proxy"), m_sProxy);
-	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("EnableProxy"), (m_bEnableProxy && HasProxySettings()));
 	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("ProxyPort"), m_nProxyPort);
 	
 	// save username list to registry and last selected item

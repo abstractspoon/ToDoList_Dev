@@ -8,6 +8,7 @@
 //
 
 #include "runtimedlg.h"
+#include "WndPrompt.h"
 
 #include "..\Interfaces\Ipreferences.h"
 
@@ -27,7 +28,7 @@ enum
 	IDC_SD_PASSWORDLABEL,
 	IDC_SD_ANONLOGIN,
 	IDC_SD_PROXY,
-	IDC_SD_PROXYCHECKBOX,
+	IDC_SD_PROXYLABEL,
 	IDC_SD_PROXYPORT,
 	IDC_SD_PROXYPORTLABEL,
 };
@@ -68,11 +69,12 @@ protected:
 	CString	m_sPassword;
 	CString m_sProxy;
 	UINT m_nProxyPort;
+	AL_TYPE m_nAnonLogin;
+
 	CComboBox m_cbServers;
 	CComboBox m_cbUsernames;
-	AL_TYPE m_nAnonLogin;
+	CWndPrompt m_wpProxy;
 	HICON m_hIcon;
-	BOOL m_bEnableProxy;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
@@ -89,7 +91,6 @@ protected:
 	afx_msg void OnChangeServer();
 	afx_msg void OnAnonLogin();
 	afx_msg void OnChangeProxy();
-	afx_msg void OnEnableProxy();
 	DECLARE_MESSAGE_MAP()
 
 protected:
