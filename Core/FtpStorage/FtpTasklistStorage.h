@@ -30,7 +30,7 @@ public:
 	void SetLocalizer(ITransText* pTT);
 
 	// caller must copy result only
-	LPCTSTR GetMenuText() const { return _T("FTP"); }
+	LPCTSTR GetMenuText() const { return _T("FTP Storage"); }
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetTypeID() const { return _T("14908CE5_AA9F_4AFC_B72E_3F2BDD0993F0"); }
 

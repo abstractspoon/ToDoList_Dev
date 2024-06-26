@@ -12,6 +12,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
 #include "..\shared\ServerDlg.h"
+#include "..\shared\MessageBox.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -55,6 +56,7 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	CMessageBox::SetAppName(GetMenuText());
 	CString sLocalPath(pFInfo->szLocalFileName);
 
 	if (sLocalPath.IsEmpty())
@@ -94,6 +96,8 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 		return true;
 	}
 
+	CMessageBox::AfxShow(IDS_DOWNLOADERROR_TITLE, rf.GetLastError());
+
 	return false;
 }
 
@@ -102,6 +106,7 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	CMessageBox::SetAppName(GetMenuText());
 	CString sLocalPath = pFInfo->szLocalFileName;
 
 	// if not yet saved then save to temp filepath
@@ -141,7 +146,10 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
 		return true;
 	}
-	
+
+	// else
+	CMessageBox::AfxShow(IDS_UPLOADERROR_TITLE, rf.GetLastError());
+
 	return false;
 }
 

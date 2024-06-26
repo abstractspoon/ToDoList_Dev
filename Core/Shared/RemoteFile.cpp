@@ -295,32 +295,46 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 	if (!aLocalFiles.GetSize())
 		return RMERR_SUCCESS;
 
-	// now we start the connection
-	if (!EstablishConnection(dwOptions, FALSE, nRes))
-		return SaveErrorMsg(nRes);
+	// figure out the local root folder
+	CString sLocalRoot;
 
-	// if remote path not specified or is a folder then allow browsing unless bShowDialog == FALSE
-	CFileResultArray aRemoteFiles;
-
-	if (nRes == RMERR_SUCCESS)
+	if (dwOptions & RMO_PRESERVESTRUCTURE)
 	{
-		Misc::Trim(sRemotePath);
+		sLocalRoot = FileMisc::GetFolderFromFilePath(sLocalPath);
 
-		// figure out the local root folder
-		CString sLocalRoot;
-
-		if (dwOptions & RMO_PRESERVESTRUCTURE)
-		{
-			sLocalRoot = FileMisc::GetFolderFromFilePath(sLocalPath);
-
-			// check all files share this root
-			// TODO
-		}
-
-		nRes = GetRemotePaths(aRemoteFiles, aLocalFiles, dwOptions, szFilter, sRemotePath, sLocalRoot);
+		// check all files share this root
+		// TODO
 	}
 
-	if (nRes == RMERR_SUCCESS && aRemoteFiles.GetSize())
+	CFileResultArray aRemoteFiles;
+	BOOL bFirstShow = TRUE;
+
+	do
+	{
+		if (!EstablishConnection(dwOptions, !bFirstShow, nRes))
+		{
+			// If we're showing as a consequence of RMERR_CHANGESERVER
+			// then cancelling should return us to the remote file dialog
+			if (bFirstShow || (nRes != RMERR_USERCANCELLED))
+				return SaveErrorMsg(nRes);
+		}
+
+		Misc::Trim(sRemotePath);
+		nRes = GetRemotePaths(aRemoteFiles, aLocalFiles, dwOptions, szFilter, sRemotePath, sLocalRoot);
+
+		if (nRes == RMERR_SUCCESS)
+			break;
+
+		if (nRes != RMERR_CHANGESERVER)
+			return SaveErrorMsg(nRes);
+
+		bFirstShow = FALSE;
+	}
+	while (TRUE);
+
+	ASSERT(nRes == RMERR_SUCCESS);
+
+	if (aRemoteFiles.GetSize())
 	{
 		CProgressDlg progDlg(!(dwOptions & RMO_NOCANCELPROGRESS));
 		BOOL bProgress = !(dwOptions & RMO_NOPROGRESS);
@@ -919,7 +933,7 @@ BOOL CRemoteFile::EstablishConnection(DWORD dwOptions, BOOL bPrompt, RMERR& nRes
 			CEnString sMessage;
 			sMessage.Format(_T("A connection to '%s' could not be established.\n\nWould you like to check your details and try again?"), m_sServer);
 
-			bPrompt = (AfxMessageBox(sMessage, MB_YESNO) == IDYES);
+			bPrompt = (CMessageBox::AfxShow(m_pParent, CEnString(_T("Connection Error")), sMessage, MB_YESNO) == IDYES);
 
 			if (!bPrompt)
 			{
@@ -1066,7 +1080,7 @@ RMERR CRemoteFile::DownloadFile(const FILERESULT* pRemoteFile, LPCTSTR szToLocal
 		CEnString sMessage;
 		sMessage.Format(_T("The '%s' already exists.\n\nAre you sure you want to overwrite it?"), szToLocalPath);
 
-		if (CMessageBox::AfxShow(m_pParent, _T("Confirm Overwrite"), sMessage, MB_YESNO) == IDNO)
+		if (CMessageBox::AfxShow(m_pParent, CEnString(_T("Confirm Overwrite")), sMessage, MB_YESNO) == IDNO)
 			return RMERR_USERCANCELLED;
 	}
 
@@ -1186,7 +1200,9 @@ RMERR CRemoteFile::DownloadFile(const FILERESULT* pRemoteFile, LPCTSTR szToLocal
 			::DeleteFile(szToLocalPath);
 	}
 	else
+	{
 		nRes = RMERR_OPENINGLOCALFILETOWRITE;
+	}
 
 	// cleanup
 	if (bProgress)
@@ -1263,7 +1279,7 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 	{
 		CEnString sMessage(_T("The remote file '%s' already exists on the server.\n\nAre you sure you want to overwrite it?"), sRemotePath);
 
-		int nRet = CMessageBox::AfxShow(m_pParent, _T("Confirm Overwrite"), sMessage, MB_YESNO);
+		int nRet = CMessageBox::AfxShow(m_pParent, CEnString(_T("Confirm Overwrite")), sMessage, MB_YESNO);
 
 		if (nRet != IDYES && nRet != IDOK)
 			return RMERR_USERCANCELLED;
@@ -1428,5 +1444,7 @@ void CRemoteFile::ValidateOptions(DWORD& dwOptions, BOOL bDownload)
 			dwOptions &= ~RMO_ANONYMOUSLOGIN;
 	}
 	else // upload
+	{
 		dwOptions &= ~(RMO_USETEMPFILE | RMO_KEEPEXTENSION | RMO_KEEPFILENAME | RMO_CREATEDOWNLOADDIR);
+	}
 }
