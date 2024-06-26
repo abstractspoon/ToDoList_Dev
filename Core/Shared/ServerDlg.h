@@ -27,7 +27,7 @@ enum
 	IDC_SD_PASSWORDLABEL,
 	IDC_SD_ANONLOGIN,
 	IDC_SD_PROXY,
-	IDC_SD_PROXYLABEL,
+	IDC_SD_PROXYCHECKBOX,
 	IDC_SD_PROXYPORT,
 	IDC_SD_PROXYPORTLABEL,
 };
@@ -72,6 +72,7 @@ protected:
 	CComboBox m_cbUsernames;
 	AL_TYPE m_nAnonLogin;
 	HICON m_hIcon;
+	BOOL m_bEnableProxy;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
@@ -88,10 +89,13 @@ protected:
 	afx_msg void OnChangeServer();
 	afx_msg void OnAnonLogin();
 	afx_msg void OnChangeProxy();
+	afx_msg void OnEnableProxy();
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	CString GetItemText(UINT nIDItem, LPCTSTR szDefault);
+	void EnableDisableProxy();
+	BOOL HasProxySettings() const;
 	
 	void PopulateComboHistory(CComboBox& combo, LPCTSTR szCountKey, LPCTSTR szItemTemplate, LPCTSTR szCurrentValue) const;
 };

@@ -7,6 +7,7 @@
 #include "enstring.h"
 #include "localizer.h"
 #include "misc.h"
+#include "webmisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,46 +16,50 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CServerDlg dialog
 
 CMap<UINT, UINT, CString, CString&> CServerDlg::s_mapText;
 
-const CString INTERNETSETTINGS("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+/////////////////////////////////////////////////////////////////////////////
+// CServerDlg dialog
 
 CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword, AL_TYPE nAnonymousLogin, HICON hIcon)
-	: 
+	:
 	m_sServer(szServer),
-	  m_sUsername(szUsername), 
-	  m_sPassword(szPassword), 
-	  m_nAnonLogin(nAnonymousLogin),
+	m_sUsername(szUsername),
+	m_sPassword(szPassword),
+	m_nAnonLogin(nAnonymousLogin),
 	m_pPrefs(NULL),
-	m_hIcon(hIcon)
+	m_hIcon(hIcon),
+	m_bEnableProxy(FALSE)
 {
+	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 7, 9, 50, 8, IDC_SD_SERVERLABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP | CBS_AUTOHSCROLL, 0, 58, 7, 134, 100, IDC_SD_SERVER);
+
+	AddRCControl(_T("LTEXT"), _T(""), _T("Username"), 0, 0, 7, 26, 50, 8, IDC_SD_USERNAMELABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP, 0, 58, 24, 134, 100, IDC_SD_USERNAME);
+
+	AddRCControl(_T("LTEXT"), _T(""), _T("Password"), 0, 0, 7, 43, 50, 8, IDC_SD_PASSWORDLABEL);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_PASSWORD | ES_AUTOHSCROLL | WS_TABSTOP, 0, 58, 41, 134, 13, IDC_SD_PASSWORD);
+
 	BOOL bShowAnonLogin = (m_nAnonLogin != ANONLOGIN_HIDE);
-	int LOGINOFFSET = 0;
-	
-    AddRCControl(_T("LTEXT"), _T(""), _T("Server:"), 0, 0,7,10,50,8, IDC_SD_SERVERLABEL);
-    AddRCControl(_T("COMBOBOX"), _T(""), _T(""),CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP | CBS_AUTOHSCROLL, 0,58,7,134,100, IDC_SD_SERVER);
+	int YOFFSET = 0;
 
 	if (bShowAnonLogin)
 	{
-		AddRCControl(_T("CONTROL"), _T("Button"), _T("Anonymous Login"), BS_AUTOCHECKBOX | WS_TABSTOP, 0, 58,29,134,10, IDC_SD_ANONLOGIN);
-		LOGINOFFSET = 20;
+		AddRCControl(_T("CONTROL"), _T("Button"), _T("Anonymous Login"), BS_AUTOCHECKBOX | WS_TABSTOP, 0, 58, 57, 134, 10, IDC_SD_ANONLOGIN);
+		YOFFSET = 20;
 	}
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Username:"),0, 0, 7,29 + LOGINOFFSET,50,8, IDC_SD_USERNAMELABEL);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""),CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP, 0,58,27 + LOGINOFFSET,134,100, IDC_SD_USERNAME);
-	AddRCControl(_T("LTEXT"), _T(""), _T("Password:"),0, 0, 7,48 + LOGINOFFSET,50,8, IDC_SD_PASSWORDLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""),ES_PASSWORD | ES_AUTOHSCROLL | WS_TABSTOP, 0,58,45 + LOGINOFFSET,134,13, IDC_SD_PASSWORD);
+	AddRCControl(_T("CONTROL"), _T("Button"), _T("Proxy"), BS_AUTOCHECKBOX | WS_TABSTOP, 0, 7, 54 + YOFFSET, 50, 8, IDC_SD_PROXYCHECKBOX);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | WS_TABSTOP, 0, 58, 52 + YOFFSET, 80, 13, IDC_SD_PROXY);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Port"), 0, 0, 142, 54 + YOFFSET, 50, 8, IDC_SD_PROXYPORTLABEL);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_NUMBER | ES_AUTOHSCROLL | WS_TABSTOP, 0, 164, 52 + YOFFSET, 28, 13, IDC_SD_PROXYPORT);
+	
+	// Divider
+	AddRCControl(_T("CONTROL"), _T("Static"), _T(""), SS_ETCHEDHORZ, 0, 7, 72 + YOFFSET, 187, 1, (UINT)IDC_STATIC);
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Proxy:"),0, 0, 7,67 + LOGINOFFSET,50,8, IDC_SD_PROXYLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""),ES_AUTOHSCROLL | WS_TABSTOP, 0,58,65 + LOGINOFFSET,80,13, IDC_SD_PROXY);
-	AddRCControl(_T("LTEXT"), _T(""), _T("Port:"),0, 0, 140,67 + LOGINOFFSET,50,8, IDC_SD_PROXYPORTLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""),ES_NUMBER | ES_AUTOHSCROLL | WS_TABSTOP, 0,162,65 + LOGINOFFSET,30,13, IDC_SD_PROXYPORT);
-
-	AddRCControl(_T("CONTROL"),_T("Static"), _T(""),SS_ETCHEDHORZ, 0,7,85 + LOGINOFFSET,187,1, (UINT)IDC_STATIC);
-	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 86,94 + LOGINOFFSET,50,14,IDOK);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0,143,94 + LOGINOFFSET,50,14,IDCANCEL);
+	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 86, 80 + YOFFSET, 50, 14, IDOK);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 143, 80 + YOFFSET, 50, 14, IDCANCEL);
 }
 
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
@@ -66,6 +71,7 @@ void CServerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_SD_PROXYPORT, m_nProxyPort);
 	DDX_Control(pDX, IDC_SD_SERVER, m_cbServers);
 	DDX_Control(pDX, IDC_SD_USERNAME, m_cbUsernames);
+	DDX_Check(pDX, IDC_SD_PROXYCHECKBOX, m_bEnableProxy);
 
 	if (m_nAnonLogin >= ANONLOGIN_NO)
 		DDX_Check(pDX, IDC_SD_ANONLOGIN, (int&)m_nAnonLogin);
@@ -92,6 +98,7 @@ BEGIN_MESSAGE_MAP(CServerDlg, CRuntimeDlg)
 	ON_CBN_EDITCHANGE(IDC_SD_SERVER, OnChangeServer)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SD_ANONLOGIN, OnAnonLogin)
+	ON_BN_CLICKED(IDC_SD_PROXYCHECKBOX, OnEnableProxy)
 	ON_EN_CHANGE(IDC_SD_PROXY, OnChangeProxy)
 END_MESSAGE_MAP()
 
@@ -105,12 +112,23 @@ void CServerDlg::OnChangeServer()
 	GetDlgItem(IDOK)->EnableWindow(!m_sServer.IsEmpty());
 }
 
-void CServerDlg::OnChangeProxy() 
+void CServerDlg::OnEnableProxy() 
 {
 	UpdateData();
-	
-	GetDlgItem(IDC_SD_PROXYPORTLABEL)->EnableWindow(!m_sProxy.IsEmpty());
-	GetDlgItem(IDC_SD_PROXYPORT)->EnableWindow(!m_sProxy.IsEmpty());
+	EnableDisableProxy();
+}
+
+void CServerDlg::OnChangeProxy()
+{
+	UpdateData();
+	EnableDisableProxy();
+}
+
+void CServerDlg::EnableDisableProxy()
+{
+	GetDlgItem(IDC_SD_PROXY)->EnableWindow(m_bEnableProxy);
+	GetDlgItem(IDC_SD_PROXYPORTLABEL)->EnableWindow(m_bEnableProxy && !m_sProxy.IsEmpty());
+	GetDlgItem(IDC_SD_PROXYPORT)->EnableWindow(m_bEnableProxy && !m_sProxy.IsEmpty());
 }
 
 BOOL CServerDlg::OnInitDialog() 
@@ -134,39 +152,13 @@ BOOL CServerDlg::OnInitDialog()
 
 	m_sProxy = m_pPrefs->GetProfileString(m_sPrefKey, _T("Proxy"));
 	m_nProxyPort = m_pPrefs->GetProfileInt(m_sPrefKey, _T("ProxyPort"), 80);
+	m_bEnableProxy = m_pPrefs->GetProfileInt(m_sPrefKey, _T("EnableProxy"), FALSE);
 	
 	// if the proxy settings are blank, try to get them from the registry
-	if (m_sProxy.IsEmpty())
-	{
-		CRegKey2 reg;
-		
-		if (reg.Open(HKEY_CURRENT_USER, INTERNETSETTINGS, TRUE) == ERROR_SUCCESS)
-		{
-			// is proxy enabled?
-			DWORD dwProxyEnabled = FALSE;
+	if (HasProxySettings())
+		WebMisc::GetProxySettings(m_sProxy, m_nProxyPort);
 
-			if (reg.Read(_T("ProxyEnabled"), dwProxyEnabled) == ERROR_SUCCESS && dwProxyEnabled)
-			{
-				CString sProxy;
-
-				if (reg.Read(_T("ProxyServer"), sProxy) == ERROR_SUCCESS && !sProxy.IsEmpty())
-				{
-					int nColon = sProxy.Find(':', 0);
-
-					if (nColon != -1)
-					{
-						m_sProxy = sProxy.Left(nColon);
-						m_nProxyPort = _ttoi(sProxy.Mid(nColon + 1));
-					}
-					else
-					{
-						m_sProxy = sProxy;
-						m_nProxyPort = 80;
-					}
-				}
-			}
-		}
-	}
+	m_bEnableProxy &= HasProxySettings();
 
 	UpdateData(FALSE);
 
@@ -174,7 +166,7 @@ BOOL CServerDlg::OnInitDialog()
 	PopulateComboHistory(m_cbServers, _T("ServerCount"), _T("Server%d"), m_sServer);
 	PopulateComboHistory(m_cbUsernames, _T("UsernameCount"), _T("Username%d"), m_sUsername);
 
-	OnChangeProxy();
+	EnableDisableProxy();
 	OnChangeServer();
 	OnAnonLogin();
 
@@ -219,6 +211,11 @@ int CServerDlg::DoModal(IPreferences* pPrefs, LPCTSTR szKey)
 	return CRuntimeDlg::DoModal(GetItemText(SD_TITLE, _T("Remote Server Details"))); 
 }
 
+BOOL CServerDlg::HasProxySettings() const
+{
+	return (!m_sProxy.IsEmpty() && (m_nProxyPort > 0));
+}
+
 void CServerDlg::OnOK() 
 {
 	CRuntimeDlg::OnOK();
@@ -240,6 +237,7 @@ void CServerDlg::OnOK()
 
 	m_pPrefs->WriteProfileString(m_sPrefKey, _T("LastServer"), m_sServer);
 	m_pPrefs->WriteProfileString(m_sPrefKey, _T("Proxy"), m_sProxy);
+	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("EnableProxy"), (m_bEnableProxy && HasProxySettings()));
 	m_pPrefs->WriteProfileInt(m_sPrefKey, _T("ProxyPort"), m_nProxyPort);
 	
 	// save username list to registry and last selected item
