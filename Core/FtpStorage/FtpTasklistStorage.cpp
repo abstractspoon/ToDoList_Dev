@@ -56,7 +56,6 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CMessageBox::SetAppName(GetMenuText());
 	CString sLocalPath(pFInfo->szLocalFileName);
 
 	if (sLocalPath.IsEmpty())
@@ -114,7 +113,6 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CMessageBox::SetAppName(GetMenuText());
 	CString sLocalPath = pFInfo->szLocalFileName;
 
 	// if not yet saved then save to temp filepath
@@ -203,12 +201,9 @@ BOOL CFtpTasklistStorageApp::InitInstance()
 	// Set this before anything else
 //	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 
+	CMessageBox::SetAppName(GetMenuText());
+
 	m_icon.Load(IDR_FTPSTORAGE);
-
-	if (m_pszAppName)
-		free((void*)m_pszAppName);
-
-	m_pszAppName = _tcsdup(GetMenuText());
 
 	return CWinApp::InitInstance();
 }

@@ -115,7 +115,7 @@ BOOL CMessageBox::s_bDisableSimpleErrorMessages = FALSE;
 void CMessageBox::SetAppName(const CString& sAppName)
 {
 	if (sAppName.IsEmpty())
-		s_sAppName = AfxGetAppName();
+		s_sAppName = AfxGetApp()->m_pszAppName;
 	else
 		s_sAppName = sAppName;
 }
@@ -123,7 +123,7 @@ void CMessageBox::SetAppName(const CString& sAppName)
 int CMessageBox::AfxShow(const CString& sInstruction, const CString& sText, UINT nFlags)
 {
 	if (s_sAppName.IsEmpty())
-		s_sAppName = AfxGetAppName();
+		s_sAppName = AfxGetApp()->m_pszAppName;
 
 	CWnd* pParent = AfxGetMainWnd();
 
@@ -203,7 +203,6 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 	
 	if (hMod)
 	{
-		//PFNTASKDIALOG pFn = (PFNTASKDIALOG)::GetProcAddress(hMod, "TaskDialog");
 		PFNTASKDIALOGINDIRECT pFn = (PFNTASKDIALOGINDIRECT)::GetProcAddress(hMod, "TaskDialogIndirect");
 		
 		if (pFn)
@@ -309,7 +308,6 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 			if (hwndParent)
 				tdc.dwFlags = TDF_POSITION_RELATIVE_TO_WINDOW;
 
-//			HRESULT hr = pFn(hwndParent, NULL, wszCaption, wszInstruction, wszText, dwButtons, wszIcon, &nResult);
 			HRESULT hr = pFn(&tdc, &nResult, NULL, NULL);
 			
 			// clean up
@@ -335,7 +333,7 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 	}
 	else if (sCaption.IsEmpty())
 	{
-		sTitle = AfxGetAppName();
+		sTitle = AfxGetApp()->m_pszAppName;
 	}
 		
 	return ::MessageBox(hwndParent, sText, sTitle, nFlags);
