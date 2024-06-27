@@ -86,17 +86,25 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 	if (bPrompt)
 		dwOptions |= RMO_PROMPTFORFILE;
 
-	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
+	switch (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)))
 	{
-		// Cache password for the session
-		m_sCachedPassword = rf.GetPassword();
+	case RMERR_SUCCESS:
+		{
+			// Cache password for the session
+			m_sCachedPassword = rf.GetPassword();
 
-		// return information to caller 
-		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+			// return information to caller 
+			CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+		}
 		return true;
-	}
 
-	CMessageBox::AfxShow(IDS_DOWNLOADERROR_TITLE, rf.GetLastError());
+	case RMERR_USERCANCELLED:
+		break;
+
+	default:
+		CMessageBox::AfxShow(IDS_DOWNLOADERROR_TITLE, rf.GetLastError());
+		break;
+	}
 
 	return false;
 }
@@ -137,18 +145,25 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 			rf.SetPassword(pFInfo->szPassword);
 	}
 
-	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
+	switch (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)))
 	{
-		// Cache password for the session
-		m_sCachedPassword = rf.GetPassword();
+	case RMERR_SUCCESS:
+		{
+			// Cache password for the session
+			m_sCachedPassword = rf.GetPassword();
 
-		// return information to caller 
-		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+			// return information to caller 
+			CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+		}
 		return true;
-	}
 
-	// else
-	CMessageBox::AfxShow(IDS_UPLOADERROR_TITLE, rf.GetLastError());
+	case RMERR_USERCANCELLED:
+		break;
+
+	default:
+		CMessageBox::AfxShow(IDS_UPLOADERROR_TITLE, rf.GetLastError());
+		break;
+	}
 
 	return false;
 }
