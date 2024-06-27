@@ -7646,9 +7646,9 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 	if (bUsesStorage &&
 		(nStorage != m_mgrStorage.FindStorage(storageInfo.sStorageID)))
-		{
-			storageInfo.Reset();
-		}
+	{
+		storageInfo.Reset();
+	}
 
 	// save the existing tasklist to temp path
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -7693,8 +7693,11 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 		if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, nStorage, prefs, TRUE)) // Prompt user
 		{
+			// Restore previous settings
+			if (bUsesStorage)
+				m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);
+
 			// assume storage plugin has handled error
-			m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);
 			return;
 		}
 	}
