@@ -9,6 +9,7 @@
 #include "themed.h"
 #include "graphicsmisc.h"
 #include "enimagelist.h"
+#include "enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -233,6 +234,14 @@ void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CEnListCtrl::CColumnData::CColumnData()
+{
+	crText = ::GetSysColor(COLOR_WINDOWTEXT);
+	nFormat = ES_END;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
 
 IMPLEMENT_DYNAMIC(CEnListCtrl, CListCtrl)
@@ -401,7 +410,7 @@ void CEnListCtrl::DeleteAllColumnData()
 	}
 }
 
-CColumnData* CEnListCtrl::CreateColumnData(int nCol)
+CEnListCtrl::CColumnData* CEnListCtrl::CreateColumnData(int nCol)
 {
 	CColumnData* pData = NULL;
 
@@ -426,7 +435,7 @@ CColumnData* CEnListCtrl::CreateColumnData(int nCol)
 	return pData;
 }
 
-const CColumnData* CEnListCtrl::GetColumnData(int nCol) const
+const CEnListCtrl::CColumnData* CEnListCtrl::GetColumnData(int nCol) const
 {
 	CColumnData* pData = NULL;
 	m_mapColumnData.Lookup(nCol, pData);
@@ -1395,12 +1404,11 @@ void CEnListCtrl::RefreshItemHeight()
 {
 	if (GetSafeHwnd())
 	{
-		// I've tried everything I can think of but
-		// this is the only thing that seems to be able
-		// to trigger a WM_MEASUREITEM message
+		// I've tried everything I can think of but the only thing 
+		// that seems to trigger a WM_MEASUREITEM message is a size change
 		CRect rWindow;
-		GetWindowRect(rWindow);
 
+		GetWindowRect(rWindow);
 		GetParent()->ScreenToClient(rWindow);
 
 		rWindow.right--;
@@ -1821,6 +1829,9 @@ void CEnListCtrl::PreSubclassWindow()
 
 	if (m_nCurView == -1)
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
+
+	if (m_nMinItemHeight != -1)
+		RefreshItemHeight();
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 
@@ -1828,8 +1839,8 @@ BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC)
 	if (GetItemCount() && GetView() != LVS_REPORT)
 		return CListCtrl::OnEraseBkgnd(pDC);
 	
-	else // we do all the work in OnPaint
-		return TRUE;
+	// else we do all the work in OnPaint
+	return TRUE;
 }
 
 void CEnListCtrl::EnableAlternateRowColoring(BOOL bEnable)

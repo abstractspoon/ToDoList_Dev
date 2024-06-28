@@ -7,6 +7,7 @@
 
 #include "..\Shared\misc.h"
 #include "..\Shared\graphicsmisc.h"
+#include "..\Shared\enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
