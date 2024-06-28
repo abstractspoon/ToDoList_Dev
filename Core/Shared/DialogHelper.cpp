@@ -645,23 +645,12 @@ void CDialogHelper::SetFont(CWnd* pWnd, HFONT hFont, BOOL bRedraw)
 
 HFONT CDialogHelper::GetFont(const CWnd* pWnd)
 {
-   if (pWnd)
-      return GetFont(pWnd->GetSafeHwnd());
-
-   return (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
+	return GraphicsMisc::GetFont(pWnd ? pWnd->GetSafeHwnd() : NULL);
 }
  
 HFONT CDialogHelper::GetFont(HWND hWnd)
 {
-   if (hWnd)
-   {
-      HFONT hFont = (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
-
-      if (hFont)
-         return hFont;
-   }
-
-   return (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
+	return GraphicsMisc::GetFont(hWnd);
 }
 
 int CDialogHelper::SetComboBoxItems(CComboBox& combo, const CStringArray& aItems) 

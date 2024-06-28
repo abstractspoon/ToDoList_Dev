@@ -142,6 +142,14 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		else
 			rf.SetPassword(pFInfo->szPassword);
 	}
+	else if (!Misc::IsEmpty(pFInfo->szTasklistName))
+	{
+		sRemotePath = pFInfo->szTasklistName;
+	}
+	else
+	{
+		sRemotePath = FileMisc::GetFileNameFromPath(pFInfo->szLocalFileName);
+	}
 
 	switch (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)))
 	{

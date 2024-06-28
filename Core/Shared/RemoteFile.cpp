@@ -155,7 +155,7 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 		}
 
 		Misc::Trim(sRemotePath);
-		nRes = GetRemotePaths(aRemoteFiles, dwOptions, szFilter, sRemotePath);
+		nRes = GetRemoteDownloadPaths(aRemoteFiles, dwOptions, szFilter, sRemotePath);
 
 		if (nRes == RMERR_SUCCESS)
 			break;
@@ -194,7 +194,7 @@ RMERR CRemoteFile::GetFile(CString& sRemotePath, CString& sLocalPath, IPreferenc
 			}
 		}
 
-		nRes = GetLocalPaths(aLocalFiles, bTemp, aRemoteFiles, dwOptions, sInitialDir);
+		nRes = GetLocalDownloadPaths(aLocalFiles, bTemp, aRemoteFiles, dwOptions, sInitialDir);
 
 		if (nRes != RMERR_SUCCESS)
 		{
@@ -285,7 +285,7 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 
 	// if local file not specified then get browse for it
 	CStringArray aLocalFiles;
-	RMERR nRes = GetLocalPaths(aLocalFiles, dwOptions, sLocalPath);
+	RMERR nRes = GetLocalUploadPaths(aLocalFiles, dwOptions, sLocalPath);
 
 	if (nRes != RMERR_SUCCESS)
 		return SaveErrorMsg(nRes);
@@ -320,7 +320,7 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 		}
 
 		Misc::Trim(sRemotePath);
-		nRes = GetRemotePaths(aRemoteFiles, aLocalFiles, dwOptions, szFilter, sRemotePath, sLocalRoot);
+		nRes = GetRemoteUploadPaths(aRemoteFiles, aLocalFiles, dwOptions, szFilter, sRemotePath, sLocalRoot);
 
 		if (nRes == RMERR_SUCCESS)
 			break;
@@ -376,19 +376,12 @@ RMERR CRemoteFile::SetFile(CString& sLocalPath, CString& sRemotePath, IPreferenc
 	return SaveErrorMsg(nRes, sLocalPath, sRemotePath);
 }
 
-BOOL CRemoteFile::RemotePathIsFolder(const CString& sPath)
-{
-	CString sFolder(sPath);
-
-	sFolder.Replace('\\', '/');
-	sFolder.TrimRight();
-
-	return (Misc::Last(sFolder) == '/');
-}
-
-// for upload
-RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringArray& aLocalFiles,
-								  DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir, LPCTSTR szLocalRoot)
+RMERR CRemoteFile::GetRemoteUploadPaths(CFileResultArray& aRemoteFiles, 
+										const CStringArray& aLocalFiles,
+										DWORD dwOptions, 
+										LPCTSTR szFilter, 
+										LPCTSTR szRemotePath, 
+										LPCTSTR szLocalRoot)
 {
 	aRemoteFiles.RemoveAll();
 
@@ -399,36 +392,33 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 		return RMERR_LOCALPATH;
 
 	// if the remote path is empty then we display an appropriate dialog
-	CString sRemotePath(szRemoteDir);
-	Misc::Trim(sRemotePath);
-	sRemotePath.Replace('\\', '/');
-
 	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-	if (sRemotePath.IsEmpty() || bPromptForFile)
+	CString sRemoteDir, sRemoteFilename;
+	InitialiseRemoteDirAndFileName(szRemotePath, _T("LastDownloadFolder"), sRemoteDir, sRemoteFilename);
+
+	if (bPromptForFile || sRemoteFilename.IsEmpty())
 	{
 		// Sanity check
-		if (sRemotePath.IsEmpty() && !bPromptForFile)
+		if (!bPromptForFile && sRemoteFilename.IsEmpty())
 		{
 			ASSERT(0);
 			return RMERR_REMOTEPATH;
 		}
-
-		sRemotePath = m_pPrefs->GetProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer);
 
 		// if multiple files are being uploaded then display folder dialog
 		if (nNumLocal > 1)
 		{
 			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, NULL, m_hIcon);
 
-			switch (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemotePath))
+			switch (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD | RFD_FOLDERSELECT, sRemoteDir))
 			{
 			case IDOK:
 				{
 					if (dialog.GetPathCount())
 					{
-						sRemotePath = dialog.GetFirstPath();
-						ASSERT(!sRemotePath.IsEmpty());
+						sRemoteDir = dialog.GetFirstPath();
+						ASSERT(!sRemoteDir.IsEmpty());
 					}
 					else if (!dialog.IsRootFolder())
 					{
@@ -437,11 +427,11 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 
 					for (int nFile = 0; nFile < aLocalFiles.GetSize(); nFile++)
 					{
-						FILERESULT frRemote(MakeRemotePath(aLocalFiles[nFile], sRemotePath, szLocalRoot));
+						FILERESULT frRemote(MakeRemotePath(aLocalFiles[nFile], sRemoteDir, szLocalRoot));
 						aRemoteFiles.Add(frRemote);
 					}
 
-					m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer, sRemotePath);
+					m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastUploadFolder"), m_sServer, sRemoteDir);
 				}
 				break;
 
@@ -455,7 +445,7 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 		else // nNumLocal == 1
 		{
 			// show file dialog
-			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath, m_hIcon);
+			CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemoteDir, m_hIcon);
 
 			// base remote name on local name
 			CString sFilename, sExt;
@@ -463,7 +453,7 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 
 			sFilename += sExt;
 
-			switch (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD, sRemotePath))
+			switch (dialog.DoModal(m_pPrefs, m_sPrefKey, RFD_UPLOAD, sRemoteFilename))
 			{
 			case IDOK:
 				dialog.GetPaths(aRemoteFiles);
@@ -481,11 +471,11 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 	{
 		// if its a folder then create full remote file paths by simply
 		// appending the local filenames to the remote folder
-		if (RemotePathIsFolder(sRemotePath))
+		if (RemotePathIsFolder(szRemotePath))
 		{
 			for (int nFile = 0; nFile < aLocalFiles.GetSize(); nFile++)
 			{
-				FILERESULT frRemote(MakeRemotePath(aLocalFiles[nFile], sRemotePath, szLocalRoot));
+				FILERESULT frRemote(MakeRemotePath(aLocalFiles[nFile], sRemoteDir, szLocalRoot));
 				aRemoteFiles.Add(frRemote);
 			}
 		}
@@ -493,7 +483,7 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 		// okay for single local files
 		else if (nNumLocal == 1)
 		{
-			FILERESULT frRemote(sRemotePath);
+			FILERESULT frRemote(ValidateRemotePath(szRemotePath));
 			aRemoteFiles.Add(frRemote);
 		}
 		else
@@ -505,51 +495,157 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringA
 	return RMERR_SUCCESS;
 }
 
-CString CRemoteFile::MakeRemotePath(const CString& sLocalPath, const CString& sRemoteDir, LPCTSTR szLocalRoot)
+RMERR CRemoteFile::GetLocalUploadPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalDir)
 {
-	CString sRemotePath;
-	int nRootLen = lstrlen(szLocalRoot);
+	// sLocalPath could either be a full path, a folder or a wildcard-ed path
+	CString sLocalPath(szLocalDir);
+	Misc::Trim(sLocalPath);
 
-	if (nRootLen) // == 'preserve structure'
+	// check for wildcards
+	if (!sLocalPath.IsEmpty() && FileMisc::PathHasWildcard(sLocalPath))
 	{
-		FileMisc::MakePath(sRemotePath, NULL, sRemoteDir, ((LPCTSTR)sLocalPath) + nRootLen, NULL);
+		// check first for a valid parent folder
+		if (!FileMisc::FolderFromFilePathExists(sLocalPath))
+			return RMERR_LOCALPATH;
+
+		// files first
+		CFileFind ff;
+
+		BOOL bContinue = ff.FindFile(sLocalPath);
+
+		while (bContinue)
+		{
+			bContinue = ff.FindNextFile();
+
+			if (!ff.IsDots() && !ff.IsDirectory())
+			{
+				CString sLocalPath = ff.GetFilePath();
+
+				if (dwOptions & RMO_LOWERCASEPATHS)
+					sLocalPath.MakeLower();
+
+				aLocalFiles.Add(sLocalPath);
+			}
+		}
+		ff.Close();
+
+		// then sub folders
+		if ((dwOptions & RMO_SUBDIRECTORIES) && sLocalPath.Find(_T("*.")) != -1)
+		{
+			CString sDrive, sFolder, sExt;
+			FileMisc::SplitPath(sLocalPath, &sDrive, &sFolder, NULL, &sExt);
+
+			FileMisc::MakePath(sLocalPath, sDrive, sFolder, _T("*"), _T("*"));
+
+			BOOL bContinue = ff.FindFile(sLocalPath);
+
+			while (bContinue)
+			{
+				bContinue = ff.FindNextFile();
+
+				if (ff.IsDirectory() && !ff.IsDots())
+				{
+					CString sLocalSubFolder(ff.GetFilePath());
+					sLocalSubFolder += _T("\\*");
+					sLocalSubFolder += sExt;
+
+					GetLocalUploadPaths(aLocalFiles, dwOptions, sLocalSubFolder); // RECURSIVE CALL
+				}
+			}
+			ff.Close();
+		}
+
+		return RMERR_SUCCESS;
+	}
+
+	BOOL bFolder = FileMisc::FolderExists(sLocalPath);
+	BOOL bFile = !bFolder && (GetFileAttributes(sLocalPath) != 0xffffffff);
+
+	if (bFile)
+	{
+		// now check for single file
+		if (dwOptions & RMO_LOWERCASEPATHS)
+			sLocalPath.MakeLower();
+
+		aLocalFiles.Add(sLocalPath);
 	}
 	else
 	{
-		CString sFilename, sExt;
-		FileMisc::SplitPath(sLocalPath, NULL, NULL, &sFilename, &sExt);
+		// finally if must be folder or invalid (eg bad wildcard) in which
+		// case we display a dialog to get the actual filenames
+		BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-		FileMisc::MakePath(sRemotePath, NULL, sRemoteDir, sFilename, sExt);
+		if (!bPromptForFile)
+			return RMERR_LOCALPATH;
+
+		if (!bFolder)  // bad path
+			sLocalPath.Empty();
+
+		// get last folder browsed for this server
+		if (sLocalPath.IsEmpty())
+			sLocalPath = m_pPrefs->GetProfileString(_T("LocalSettings\\LastUploadFolder"), m_sServer);
+
+		// browse for file(s)
+		CFileDialog dialog(TRUE);
+
+		const UINT BUFSIZE = 1024 * 5;
+		static TCHAR FILEBUF[BUFSIZE] = { 0 };
+
+		dialog.m_ofn.lpstrFilter = ALLFILES;
+		dialog.m_ofn.lpstrTitle = _T("Select Files to Upload");
+		dialog.m_ofn.lpstrFile = FILEBUF;
+		dialog.m_ofn.nMaxFile = BUFSIZE;
+		dialog.m_ofn.Flags |= OFN_ALLOWMULTISELECT;
+
+		if (!sLocalPath.IsEmpty())
+			dialog.m_ofn.lpstrInitialDir = sLocalPath;
+
+		if (dialog.DoModal() == IDOK)
+		{
+			POSITION pos = dialog.GetStartPosition();
+
+			while (pos)
+			{
+				CString sLocalPath = dialog.GetNextPathName(pos);
+
+				if (dwOptions & RMO_LOWERCASEPATHS)
+					sLocalPath.MakeLower();
+
+				aLocalFiles.Add(sLocalPath);
+			}
+
+			m_pPrefs->WriteProfileString(_T("LocalSettings\\LastUploadFolder"), m_sServer, sLocalPath);
+		}
+		else
+		{
+			return RMERR_USERCANCELLED;
+		}
+
 	}
 
-	return sRemotePath;
+	return RMERR_SUCCESS;
 }
 
-// for download
-RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir)
+RMERR CRemoteFile::GetRemoteDownloadPaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemotePath)
 {
-	CString sRemotePath(szRemoteDir);
-	Misc::Trim(sRemotePath);
-	sRemotePath.Replace('\\', '/');
-
 	// if the remote path is empty or a folder then we must display a dialog
 	// to get the actual file of interest
 	BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
 
-	if (bPromptForFile || sRemotePath.IsEmpty() || RemotePathIsFolder(sRemotePath))
+	CString sRemoteDir, sRemoteFilename;
+	InitialiseRemoteDirAndFileName(szRemotePath, _T("LastDownloadFolder"), sRemoteDir, sRemoteFilename);
+
+	if (bPromptForFile || sRemoteFilename.IsEmpty())
 	{
 		// Sanity check
-		if (!bPromptForFile && sRemotePath.IsEmpty())
+		if (!bPromptForFile && sRemoteFilename.IsEmpty())
 		{
 			ASSERT(0);
 			return RMERR_REMOTEPATH;
 		}
 
-		// get last folder browsed for this server
-		sRemotePath = m_pPrefs->GetProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer);
-
 		// browse for file(s)
-		CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemotePath, m_hIcon);
+		CRemoteFileDialog dialog(m_pConnection, m_sServer, szFilter, sRemoteDir, m_hIcon);
 		DWORD dwRFDOptions = RFD_DOWNLOAD | RFD_FILEMUSTEXIST;
 
 		if (dwOptions & RMO_MULTISELECT)
@@ -558,7 +654,7 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOption
 		if (dwOptions & RMO_NONAVIGATE)
 			dwRFDOptions &= RFD_NONAVIGATE;
 
-		switch (dialog.DoModal(m_pPrefs, m_sPrefKey, dwRFDOptions))
+		switch (dialog.DoModal(m_pPrefs, m_sPrefKey, dwRFDOptions, sRemoteFilename))
 		{
 		case IDOK:
 			if (!dialog.GetPathCount())
@@ -569,7 +665,7 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOption
 			{
 				dialog.GetPaths(aRemoteFiles);
 
-				m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer, sRemotePath);
+				m_pPrefs->WriteProfileString(_T("RemoteSettings\\LastDownloadFolder"), m_sServer, dialog.GetFolder());
 			}
 			break;
 
@@ -580,18 +676,17 @@ RMERR CRemoteFile::GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOption
 			return RMERR_USERCANCELLED;
 		}
 	}
-	// else we must assume that the remote path is the full filename
 	else
 	{
-		FILERESULT frRemote(sRemotePath);
+		// we assume that the remote path is the full filename
+		FILERESULT frRemote(ValidateRemotePath(szRemotePath));
 		aRemoteFiles.Add(frRemote);
 	}
 
 	return RMERR_SUCCESS;
 }
 
-// for download
-RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szLocalDir)
+RMERR CRemoteFile::GetLocalDownloadPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szLocalDir)
 {
 	aLocalFiles.RemoveAll();
 
@@ -674,136 +769,13 @@ RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const C
 	return RMERR_SUCCESS;
 }
 
-// for upload
-RMERR CRemoteFile::GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalDir)
+CString CRemoteFile::ValidateRemotePath(LPCTSTR szRemotePath)
 {
-	// sLocalPath could either be a full path, a folder or a wildcarded path
-	CString sLocalPath(szLocalDir);
-	Misc::Trim(sLocalPath);
+	CString sRemotePath(szRemotePath);
+	Misc::Trim(sRemotePath);
+	sRemotePath.Replace('\\', '/');
 
-	// check for wildcards
-	if (FileMisc::PathHasWildcard(sLocalPath))
-	{
-		// check first for a valid parent folder
-		if (!FileMisc::FolderFromFilePathExists(sLocalPath))
-			return RMERR_LOCALPATH;
-
-		// files first
-		CFileFind ff;
-
-		BOOL bContinue = ff.FindFile(sLocalPath);
-
-		while (bContinue)
-		{
-			bContinue = ff.FindNextFile();
-
-			if (!ff.IsDots() && !ff.IsDirectory())
-			{
-				CString sLocalPath = ff.GetFilePath();
-
-				if (dwOptions & RMO_LOWERCASEPATHS)
-					sLocalPath.MakeLower();
-
-				aLocalFiles.Add(sLocalPath);
-			}
-		}
-		ff.Close();
-
-		// then sub folders
-		if ((dwOptions & RMO_SUBDIRECTORIES) && sLocalPath.Find(_T("*.")) != -1)
-		{
-			CString sDrive, sFolder, sExt;
-			FileMisc::SplitPath(sLocalPath, &sDrive, &sFolder, NULL, &sExt);
-
-			FileMisc::MakePath(sLocalPath, sDrive, sFolder, _T("*"), _T("*"));
-
-			BOOL bContinue = ff.FindFile(sLocalPath);
-
-			while (bContinue)
-			{
-				bContinue = ff.FindNextFile();
-
-				if (ff.IsDirectory() && !ff.IsDots())
-				{
-					CString sLocalSubFolder(ff.GetFilePath());
-					sLocalSubFolder += _T("\\*");
-					sLocalSubFolder += sExt;
-
-					GetLocalPaths(aLocalFiles, dwOptions, sLocalSubFolder);
-				}
-			}
-			ff.Close();
-		}
-
-		return RMERR_SUCCESS;
-	}
-
-	BOOL bFolder = FileMisc::FolderExists(sLocalPath);
-	BOOL bFile = !bFolder && (GetFileAttributes(sLocalPath) != 0xffffffff);
-
-	if (bFile)
-	{
-		// now check for single file
-		if (dwOptions & RMO_LOWERCASEPATHS)
-			sLocalPath.MakeLower();
-
-		aLocalFiles.Add(sLocalPath);
-	}
-	else
-	{
-		// finally if must be folder or invalid (eg bad wildcard) in which
-		// case we display a dialog to get the actual filenames
-		BOOL bPromptForFile = (dwOptions & RMO_PROMPTFORFILE);
-
-		if (!bPromptForFile)
-			return RMERR_LOCALPATH;
-
-		if (!bFolder)  // bad path
-			sLocalPath.Empty();
-
-		// get last folder browsed for this server
-		if (sLocalPath.IsEmpty())
-			sLocalPath = m_pPrefs->GetProfileString(_T("LocalSettings\\LastUploadFolder"), m_sServer);
-
-		// browse for file(s)
-		CFileDialog dialog(TRUE);
-
-		const UINT BUFSIZE = 1024 * 5;
-		static TCHAR FILEBUF[BUFSIZE] = { 0 };
-
-		dialog.m_ofn.lpstrFilter = ALLFILES;
-		dialog.m_ofn.lpstrTitle = _T("Select Files to Upload");
-		dialog.m_ofn.lpstrFile = FILEBUF;
-		dialog.m_ofn.nMaxFile = BUFSIZE;
-		dialog.m_ofn.Flags |= OFN_ALLOWMULTISELECT;
-
-		if (!sLocalPath.IsEmpty())
-			dialog.m_ofn.lpstrInitialDir = sLocalPath;
-
-		if (dialog.DoModal() == IDOK)
-		{
-			POSITION pos = dialog.GetStartPosition();
-
-			while (pos)
-			{
-				CString sLocalPath = dialog.GetNextPathName(pos);
-
-				if (dwOptions & RMO_LOWERCASEPATHS)
-					sLocalPath.MakeLower();
-
-				aLocalFiles.Add(sLocalPath);
-			}
-
-			m_pPrefs->WriteProfileString(_T("LocalSettings\\LastUploadFolder"), m_sServer, sLocalPath);
-		}
-		else
-		{
-			return RMERR_USERCANCELLED;
-		}
-
-	}
-
-	return RMERR_SUCCESS;
+	return sRemotePath;
 }
 
 BOOL CRemoteFile::ValidateLocalFolder(CString& sFolder, BOOL bAllowCreation)
@@ -837,11 +809,75 @@ BOOL CRemoteFile::ValidateLocalFolder(CString& sFolder, BOOL bAllowCreation)
 
 			return (GetFileAttributes(sFolder) != 0xffffffff);
 		}
+
+		// else
+		return FALSE;
+	}
+
+	// else
+	return (dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+void CRemoteFile::InitialiseRemoteDirAndFileName(LPCTSTR szRemotePath, LPCTSTR szLastFolderKey, CString& sDir, CString& sFilename) const
+{
+	CString sRemotePath = ValidateRemotePath(szRemotePath);
+
+	// if the remote path is empty or a folder then we must display a dialog
+	// to get the actual file of interest
+	BOOL bPathIsDir = RemotePathIsFolder(sRemotePath);
+	sFilename.Empty();
+
+	if (sRemotePath.IsEmpty())
+	{
+		sDir = m_pPrefs->GetProfileString(Misc::Format(_T("RemoteSettings\\%s"), szLastFolderKey), m_sServer);
+	}
+	else if (!bPathIsDir)
+	{
+		int nFileStart = sRemotePath.ReverseFind('/');
+
+		if (nFileStart != -1)
+		{
+			sDir = sRemotePath.Left(nFileStart + 1);
+			sFilename = sRemotePath.Mid(nFileStart + 1);
+		}
 		else
-			return FALSE;
+		{
+			sDir.Empty();
+			sFilename = sRemotePath;
+		}
 	}
 	else
-		return (dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
+	{
+		sDir = sRemotePath;
+	}
+}
+
+BOOL CRemoteFile::RemotePathIsFolder(LPCTSTR szPath)
+{
+	CString sPath = ValidateRemotePath(szPath);
+
+	return (!sPath.IsEmpty() && (Misc::Last(sPath) == '/'));
+}
+
+CString CRemoteFile::MakeRemotePath(const CString& sLocalPath, const CString& sRemoteDir, LPCTSTR szLocalRoot)
+{
+	CString sRemotePath;
+	int nRootLen = lstrlen(szLocalRoot);
+
+	if (nRootLen) // == 'preserve structure'
+	{
+		FileMisc::MakePath(sRemotePath, NULL, sRemoteDir, ((LPCTSTR)sLocalPath) + nRootLen, NULL);
+	}
+	else
+	{
+		CString sFilename, sExt;
+		FileMisc::SplitPath(sLocalPath, NULL, NULL, &sFilename, &sExt);
+
+		FileMisc::MakePath(sRemotePath, NULL, sRemoteDir, sFilename, sExt);
+	}
+	sRemotePath.Replace('\\', '/');
+
+	return sRemotePath;
 }
 
 CString CRemoteFile::GetTempPath(const CString& sRemotePath, DWORD dwOptions)

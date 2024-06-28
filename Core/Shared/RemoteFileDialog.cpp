@@ -92,6 +92,8 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	m_pPrefs(NULL),
 	m_hIcon(hIcon)
 {
+	ASSERT(m_pConnection);
+
 	//{{AFX_DATA_INIT(CRemoteFileDialog)
 	//}}AFX_DATA_INIT
 	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 0, 8, 65, 8, IDC_SERVERLABEL);
@@ -113,8 +115,6 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 230, 178, 50, 14, IDCANCEL);
 
 	InitFilterArray(szFilters);
-
-	ASSERT(m_pConnection);
 }
 
 CRemoteFileDialog::~CRemoteFileDialog()
