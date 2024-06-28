@@ -23,7 +23,7 @@ class CFilteredToDoCtrl;
 class CTDLShowReminderListCtrl : public CEnListCtrl
 {
 public:
-	CTDLShowReminderListCtrl();
+	CTDLShowReminderListCtrl(LPCTSTR szPrefsKey);
 
 	BOOL Initialise();
 
@@ -43,11 +43,11 @@ public:
 	int GetSelectedReminders(CTDCReminderArray& aRem) const;
 
 	void DeleteAllItems();
-	void UpdateColumnWidths();
 	BOOL RestoreFocusToList(int nPrevSel);
 
 protected:
 	BOOL m_bHasIcons;
+	CString m_sPrefsKey;
 	DWORD m_dwNextReminderID;
 	CTDCReminderMap m_mapReminders;
 
@@ -59,7 +59,13 @@ protected:
 	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 
 protected:
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDestroy();
+	DECLARE_MESSAGE_MAP()
+
+protected:
 	void UpdateIconStatus();
+	void RecalcColumnWidths();
 };
 
 //{{AFX_INSERT_LOCATION}}

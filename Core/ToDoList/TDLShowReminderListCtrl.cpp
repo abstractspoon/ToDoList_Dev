@@ -47,11 +47,43 @@ enum
 ///////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderListCtrl
 
-CTDLShowReminderListCtrl::CTDLShowReminderListCtrl()
+CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(LPCTSTR szPrefsKey)
 	:
 	m_bHasIcons(FALSE),
-	m_dwNextReminderID(1)
+	m_dwNextReminderID(1),
+	m_sPrefsKey(szPrefsKey)
 {
+}
+
+BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
+	ON_WM_SIZE()
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
+void CTDLShowReminderListCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CEnListCtrl::OnSize(nType, cx, cy);
+
+	RecalcColumnWidths();
+}
+
+void CTDLShowReminderListCtrl::OnDestroy()
+{
+	// Save state
+	CPreferences prefs;
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SortCol"), GetSortColumn());
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SortAscending"), GetSortAscending());
+
+	CIntArray aColWidths;
+	GetHeader()->GetItemWidths(aColWidths);
+
+	prefs.WriteProfileString(m_sPrefsKey, _T("ColWidths"), Misc::FormatArrayT(aColWidths, _T("%d"), '|'));
+
+	// Cleanup
+	DeleteAllItems();
+
+	CEnListCtrl::OnDestroy();
 }
 
 BOOL CTDLShowReminderListCtrl::Initialise()
@@ -60,18 +92,32 @@ BOOL CTDLShowReminderListCtrl::Initialise()
 		return FALSE;
 
 	// create list columns
-	InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(200));
-	InsertColumn(TASKPARENT_COL, CEnString(IDS_REMINDER_TASKPARENTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(75));
-	InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(75));
-	InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(150));
+	CPreferences prefs;
+	CString sColWidths = prefs.GetProfileString(m_sPrefsKey, _T("ColWidths"), _T("10|5|5|10"));
+
+	CDWordArray aWidths;
+	Misc::Split(sColWidths, aWidths, '|');
+
+	InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, (int)aWidths[0]);
+	InsertColumn(TASKPARENT_COL, CEnString(IDS_REMINDER_TASKPARENTCOL), LVCFMT_LEFT, (int)aWidths[1]);
+	InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, (int)aWidths[2]);
+	InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, (int)aWidths[3]);
+
+	RecalcColumnWidths();
 
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
 	SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
 	SetSortEmptyValuesBelow(FALSE);
+	
+	int nSortCol = prefs.GetProfileInt(m_sPrefsKey, _T("SortCol"), -1);
 
-	UpdateColumnWidths();
+	if (nSortCol != -1)
+	{
+		SetSortColumn(nSortCol, FALSE);
+		SetSortAscending(prefs.GetProfileInt(m_sPrefsKey, _T("SortAscending"), TRUE));
+	}
 
 	return TRUE;
 }
@@ -297,22 +343,13 @@ void CTDLShowReminderListCtrl::DeleteAllItems()
 	m_bHasIcons = FALSE;
 }
 
-void CTDLShowReminderListCtrl::UpdateColumnWidths()
+void CTDLShowReminderListCtrl::RecalcColumnWidths()
 {
 	CRect rAvail;
 	GetClientRect(rAvail);
 
-	int nCol = (NUM_COLS - 1), nTotalColWidth = 0;
-
-	while (nCol--)
-		nTotalColWidth += GetColumnWidth(nCol);
-
-	// The 'when' column is essentially of fixed width so we leave it alone
-	int nAvailWidth = (rAvail.Width() - GetColumnWidth(WHEN_COL));
-
-	double dFactor = (double)nAvailWidth / nTotalColWidth;
-
-	nCol = (NUM_COLS - 1);
+	int nCol = NUM_COLS, nTotalColWidth = GetHeader()->CalcTotalItemWidth();
+	double dFactor = (double)rAvail.Width() / nTotalColWidth;
 
 	while (nCol--)
 		SetColumnWidth(nCol, (int)(GetColumnWidth(nCol) * dFactor));

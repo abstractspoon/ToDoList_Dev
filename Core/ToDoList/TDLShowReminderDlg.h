@@ -100,7 +100,6 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();
-	afx_msg void OnDestroy();
 	DECLARE_MESSAGE_MAP()
 
 protected:
