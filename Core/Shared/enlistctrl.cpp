@@ -1395,12 +1395,11 @@ void CEnListCtrl::RefreshItemHeight()
 {
 	if (GetSafeHwnd())
 	{
-		// I've tried everything I can think of but
-		// this is the only thing that seems to be able
-		// to trigger a WM_MEASUREITEM message
+		// I've tried everything I can think of but the only thing 
+		// that seems to trigger a WM_MEASUREITEM message is a size change
 		CRect rWindow;
-		GetWindowRect(rWindow);
 
+		GetWindowRect(rWindow);
 		GetParent()->ScreenToClient(rWindow);
 
 		rWindow.right--;
@@ -1821,6 +1820,9 @@ void CEnListCtrl::PreSubclassWindow()
 
 	if (m_nCurView == -1)
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
+
+	if (m_nMinItemHeight != -1)
+		RefreshItemHeight();
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 
@@ -1828,8 +1830,8 @@ BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC)
 	if (GetItemCount() && GetView() != LVS_REPORT)
 		return CListCtrl::OnEraseBkgnd(pDC);
 	
-	else // we do all the work in OnPaint
-		return TRUE;
+	// else we do all the work in OnPaint
+	return TRUE;
 }
 
 void CEnListCtrl::EnableAlternateRowColoring(BOOL bEnable)

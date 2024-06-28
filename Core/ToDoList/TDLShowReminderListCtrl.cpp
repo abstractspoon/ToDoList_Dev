@@ -53,6 +53,7 @@ CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(LPCTSTR szPrefsKey)
 	m_dwNextReminderID(1),
 	m_sPrefsKey(szPrefsKey)
 {
+	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
 
 BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
