@@ -30,16 +30,6 @@ enum IL_COLUMNTYPE
 }; 
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CColumnData2 : public CColumnData
-{
-public:
-	CColumnData2() : CColumnData(), bEditEnabled(TRUE), nType(ILCT_TEXT) { }
-	BOOL bEditEnabled;
-	IL_COLUMNTYPE nType;
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CInputListCtrl window
 
 class CInputListCtrl : public CEnListCtrl
@@ -83,6 +73,15 @@ public:
 	void SetAutoColPrompt(const CString& sPrompt);
 	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
 	IL_COLUMNTYPE GetColumnType(int nCol) const;
+	
+protected:
+	class CColumnData2 : public CColumnData
+	{
+	public:
+		CColumnData2();
+		BOOL bEditEnabled;
+		IL_COLUMNTYPE nType;
+	};
 
 protected:
 	int m_nItemLastSelected;

@@ -9,6 +9,7 @@
 #include "themed.h"
 #include "graphicsmisc.h"
 #include "enimagelist.h"
+#include "enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -233,6 +234,14 @@ void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CEnListCtrl::CColumnData::CColumnData()
+{
+	crText = ::GetSysColor(COLOR_WINDOWTEXT);
+	nFormat = ES_END;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
 
 IMPLEMENT_DYNAMIC(CEnListCtrl, CListCtrl)
@@ -401,7 +410,7 @@ void CEnListCtrl::DeleteAllColumnData()
 	}
 }
 
-CColumnData* CEnListCtrl::CreateColumnData(int nCol)
+CEnListCtrl::CColumnData* CEnListCtrl::CreateColumnData(int nCol)
 {
 	CColumnData* pData = NULL;
 
@@ -426,7 +435,7 @@ CColumnData* CEnListCtrl::CreateColumnData(int nCol)
 	return pData;
 }
 
-const CColumnData* CEnListCtrl::GetColumnData(int nCol) const
+const CEnListCtrl::CColumnData* CEnListCtrl::GetColumnData(int nCol) const
 {
 	CColumnData* pData = NULL;
 	m_mapColumnData.Lookup(nCol, pData);
