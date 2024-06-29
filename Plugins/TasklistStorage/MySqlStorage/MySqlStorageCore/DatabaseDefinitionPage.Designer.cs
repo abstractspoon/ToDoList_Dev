@@ -78,36 +78,36 @@
 			// 
 			this.m_TasklistsTable.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_TasklistsTable.FormattingEnabled = true;
-			this.m_TasklistsTable.Location = new System.Drawing.Point(63, 1);
+			this.m_TasklistsTable.Location = new System.Drawing.Point(90, 1);
 			this.m_TasklistsTable.Name = "m_TasklistsTable";
-			this.m_TasklistsTable.Size = new System.Drawing.Size(195, 21);
+			this.m_TasklistsTable.Size = new System.Drawing.Size(202, 21);
 			this.m_TasklistsTable.TabIndex = 23;
 			// 
 			// m_IdColumn
 			// 
 			this.m_IdColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_IdColumn.FormattingEnabled = true;
-			this.m_IdColumn.Location = new System.Drawing.Point(63, 28);
+			this.m_IdColumn.Location = new System.Drawing.Point(90, 28);
 			this.m_IdColumn.Name = "m_IdColumn";
-			this.m_IdColumn.Size = new System.Drawing.Size(195, 21);
+			this.m_IdColumn.Size = new System.Drawing.Size(202, 21);
 			this.m_IdColumn.TabIndex = 26;
 			// 
 			// m_NameColumn
 			// 
 			this.m_NameColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_NameColumn.FormattingEnabled = true;
-			this.m_NameColumn.Location = new System.Drawing.Point(63, 55);
+			this.m_NameColumn.Location = new System.Drawing.Point(90, 55);
 			this.m_NameColumn.Name = "m_NameColumn";
-			this.m_NameColumn.Size = new System.Drawing.Size(195, 21);
+			this.m_NameColumn.Size = new System.Drawing.Size(202, 21);
 			this.m_NameColumn.TabIndex = 24;
 			// 
 			// m_XmlColumn
 			// 
 			this.m_XmlColumn.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_XmlColumn.FormattingEnabled = true;
-			this.m_XmlColumn.Location = new System.Drawing.Point(63, 82);
+			this.m_XmlColumn.Location = new System.Drawing.Point(90, 82);
 			this.m_XmlColumn.Name = "m_XmlColumn";
-			this.m_XmlColumn.Size = new System.Drawing.Size(195, 21);
+			this.m_XmlColumn.Size = new System.Drawing.Size(202, 21);
 			this.m_XmlColumn.TabIndex = 25;
 			// 
 			// DatabaseDefinitionPage
@@ -123,7 +123,7 @@
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Name = "DatabaseDefinitionPage";
-			this.Size = new System.Drawing.Size(260, 104);
+			this.Size = new System.Drawing.Size(296, 104);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

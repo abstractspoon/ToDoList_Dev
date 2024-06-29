@@ -40,32 +40,32 @@
 			// 
 			// m_Password
 			// 
-			this.m_Password.Location = new System.Drawing.Point(63, 82);
+			this.m_Password.Location = new System.Drawing.Point(90, 82);
 			this.m_Password.MaxLength = 32;
 			this.m_Password.Name = "m_Password";
-			this.m_Password.Size = new System.Drawing.Size(195, 20);
+			this.m_Password.Size = new System.Drawing.Size(202, 20);
 			this.m_Password.TabIndex = 3;
 			this.m_Password.UseSystemPasswordChar = true;
 			// 
 			// m_Username
 			// 
-			this.m_Username.Location = new System.Drawing.Point(63, 55);
+			this.m_Username.Location = new System.Drawing.Point(90, 55);
 			this.m_Username.Name = "m_Username";
-			this.m_Username.Size = new System.Drawing.Size(195, 20);
+			this.m_Username.Size = new System.Drawing.Size(202, 20);
 			this.m_Username.TabIndex = 2;
 			// 
 			// m_Database
 			// 
-			this.m_Database.Location = new System.Drawing.Point(63, 28);
+			this.m_Database.Location = new System.Drawing.Point(90, 28);
 			this.m_Database.Name = "m_Database";
-			this.m_Database.Size = new System.Drawing.Size(195, 20);
+			this.m_Database.Size = new System.Drawing.Size(202, 20);
 			this.m_Database.TabIndex = 1;
 			// 
 			// m_Server
 			// 
-			this.m_Server.Location = new System.Drawing.Point(63, 1);
+			this.m_Server.Location = new System.Drawing.Point(90, 1);
 			this.m_Server.Name = "m_Server";
-			this.m_Server.Size = new System.Drawing.Size(195, 20);
+			this.m_Server.Size = new System.Drawing.Size(202, 20);
 			this.m_Server.TabIndex = 0;
 			// 
 			// label4
@@ -82,9 +82,9 @@
 			this.label3.AutoSize = true;
 			this.label3.Location = new System.Drawing.Point(0, 58);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(58, 13);
+			this.label3.Size = new System.Drawing.Size(55, 13);
 			this.label3.TabIndex = 4;
-			this.label3.Text = "User name";
+			this.label3.Text = "Username";
 			// 
 			// label2
 			// 
@@ -117,7 +117,7 @@
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Name = "ConnectionDefinitionPage";
-			this.Size = new System.Drawing.Size(260, 104);
+			this.Size = new System.Drawing.Size(292, 104);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
