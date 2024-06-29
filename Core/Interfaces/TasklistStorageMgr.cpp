@@ -116,6 +116,11 @@ CString TSM_TASKLISTINFO::Encode(const CString& sData)
 	return Base64Coder::Encode(sData);
 }
 
+BOOL TSM_TASKLISTINFO::IsStorage(const CString& sInfo, BOOL bIncPassword)
+{
+	return TSM_TASKLISTINFO().DecodeInfo(sInfo, bIncPassword);
+}
+
 BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 {
 	Reset();
@@ -133,56 +138,42 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 		sStorageID = Decode(aParts[0]);
 
 		// check the lengths in case someone is sending us a dud string
-		CString sTasklistID = Decode(aParts[1]);
-
-		if (sTasklistID.GetLength() <= ITS_TASKLISTID_LEN)
+		while (true) // easy exit
 		{
-			lstrcpy(szTasklistID, sTasklistID);
+			if (!DecodeInfo(aParts[1], szTasklistID, ITS_TASKLISTID_LEN))
+				break;
 
-			CString sLocalFileName = Decode(aParts[2]);
+			if (!DecodeInfo(aParts[2], szLocalFileName, _MAX_PATH))
+				break;
 
-			if (sLocalFileName.GetLength() <= _MAX_PATH)
-			{
-				lstrcpy(szLocalFileName, sLocalFileName);
+			if (!DecodeInfo(aParts[3], szDisplayPath, _MAX_PATH))
+				break;
 
-				CString sDisplayPath = Decode(aParts[3]);
+			if (bIncPassword && !DecodeInfo(aParts[4], szPassword, ITS_PASSWORD_LEN))
+				break;
 
-				if (sDisplayPath.GetLength() <= _MAX_PATH)
-				{
-					lstrcpy(szDisplayPath, sDisplayPath);
+			if ((aParts.GetSize() == 6) && !DecodeInfo(aParts[5], szTasklistName, _MAX_PATH))
+				break;
 
-					if (bIncPassword)
-					{
-						CString sPassword = Decode(aParts[4]);
-
-						if (sPassword.GetLength() <= ITS_PASSWORD_LEN)
-						{
-							lstrcpy(szPassword, sPassword);
-
-							if (aParts.GetSize() == 6)
-							{
-								CString sTasklistName = Decode(aParts[5]);
-
-								if (sTasklistName.GetLength() <= _MAX_PATH)
-									lstrcpy(szTasklistName, sTasklistName);
-							}
-
+			// else
 							return TRUE;
 						}
 					}
-					else
-					{
-						return TRUE;
-					}
-				}
-			}
-		}
+
+	// else
+	Reset();
+	return FALSE;
 	}
 
-	// else something failed
-	Reset();
+BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sPart, LPTSTR szAttrib, int nMaxLen)
+{
+	CString sTemp = Decode(sPart);
 
+	if (sTemp.GetLength() > nMaxLen)
 	return FALSE;
+
+	lstrcpy(szAttrib, sTemp);
+	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -318,7 +309,7 @@ HICON CTasklistStorageMgr::GetStorageIcon(int nStorage) const
 }
 
 BOOL CTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, 
-										   int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+										   int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
 	Initialize(); // initialize on demand
 
@@ -340,7 +331,7 @@ BOOL CTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* 
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), PREF_KEY, pStorage->GetTypeID());
 		
-		if (pStorage->RetrieveTasklist(pFInfo, pDestTaskFile, pPrefs, sKey, (bSilent != FALSE)))
+		if (pStorage->RetrieveTasklist(pFInfo, pDestTaskFile, pPrefs, sKey, (bPrompt != FALSE)))
 		{
 			// add storageID
 			pFInfo->sStorageID = pStorage->GetTypeID();
@@ -353,7 +344,7 @@ BOOL CTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* 
 }
 
 BOOL CTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, 
-										int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+										int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
 	Initialize(); // initialize on demand
 
@@ -378,7 +369,7 @@ BOOL CTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskLis
 		CString sKey;
 		sKey.Format(_T("%s\\%s"), PREF_KEY, pStorage->GetTypeID());
 		
-		if (pStorage->StoreTasklist(pFInfo, pSrcTaskFile, pPrefs, sKey, (bSilent != FALSE)))
+		if (pStorage->StoreTasklist(pFInfo, pSrcTaskFile, pPrefs, sKey, (bPrompt != FALSE)))
 		{
 			pFInfo->sStorageID = pStorage->GetTypeID();
 			return TRUE;

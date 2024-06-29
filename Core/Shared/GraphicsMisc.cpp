@@ -474,11 +474,14 @@ int GraphicsMisc::GetFontPixelSize(HWND hWnd)
 
 HFONT GraphicsMisc::GetFont(HWND hWnd, BOOL bFallback)
 {
-	ASSERT(hWnd);
+	ASSERT(hWnd || bFallback);
 
-	HFONT hFont = (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
+	HFONT hFont = NULL;
+	
+	if (hWnd)
+		hFont = (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
 
-	if ((hFont == NULL) && bFallback)
+	if (!hFont && bFallback)
 		hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
 	return hFont;

@@ -34,9 +34,9 @@ CTDLTasklistStorageMgr::~CTDLTasklistStorageMgr()
 
 }
 
-BOOL CTDLTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+BOOL CTDLTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
-	if (CTasklistStorageMgr::RetrieveTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bSilent))
+	if (CTasklistStorageMgr::RetrieveTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bPrompt))
 	{
 		CString sTempPath = FileMisc::GetTempFilePath();
 
@@ -62,7 +62,7 @@ BOOL CTDLTasklistStorageMgr::RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTa
 	return FALSE;
 }
 
-BOOL CTDLTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO& storageInfo, const CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bSilent)
+BOOL CTDLTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO& storageInfo, const CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bPrompt)
 {
 	// snapshot local file in case it gets modified
 	CString sLocalFile = storageInfo.szLocalFileName;
@@ -73,7 +73,7 @@ BOOL CTDLTasklistStorageMgr::StoreTasklist(TSM_TASKLISTINFO& storageInfo, const 
 		return FALSE;
 	}
 
-	BOOL bSuccess = CTasklistStorageMgr::StoreTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bSilent);
+	BOOL bSuccess = CTasklistStorageMgr::StoreTasklist(&storageInfo, &tasks, nByStorage, pPrefs, bPrompt);
 
 	// cleanup
 	FileMisc::DeleteFile(sLocalFile, TRUE);

@@ -26,7 +26,7 @@ public:
 	virtual bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry) = 0;
 	virtual bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections = false) = 0;
 
-	virtual bool HasProfileSection(LPCTSTR lpszSection) const = 0;
+	virtual bool HasProfileSection(LPCWSTR lpszSection) const = 0;
 
 };
 
