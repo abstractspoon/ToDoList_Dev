@@ -10,6 +10,7 @@
 
 #include "enlistctrl.h"
 #include "popupeditctrl.h"
+
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -75,7 +76,7 @@ public:
 	IL_COLUMNTYPE GetColumnType(int nCol) const;
 	
 protected:
-	class CColumnData2 : public CColumnData
+	class CColumnData2 : public CEnListCtrl::CColumnData
 	{
 	public:
 		CColumnData2();
