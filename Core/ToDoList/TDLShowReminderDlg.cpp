@@ -31,6 +31,7 @@ double ONE_DAY_IN_MINS = (24.0 * 60);
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
+	m_lcReminders(m_sPrefsKey),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE),
 	m_cbSnoozeTime(TCB_HOURSINDAY)
@@ -90,7 +91,6 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
-	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -128,31 +128,7 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 
 	EnableControls();
 
-	// Restore sort state
-	CPreferences prefs;
-
-	int nSortCol = prefs.GetProfileInt(m_sPrefsKey, _T("SortCol"), -1);
-
-	if (nSortCol != -1)
-	{
-		m_lcReminders.SetSortColumn(nSortCol, FALSE);
-		m_lcReminders.SetSortAscending(prefs.GetProfileInt(m_sPrefsKey, _T("SortAscending"), TRUE));
-	}
-
 	return TRUE;
-}
-
-void CTDLShowReminderDlg::OnDestroy()
-{
-	// Save sort state
-	CPreferences prefs;
-
-	prefs.WriteProfileInt(m_sPrefsKey, _T("SortCol"), m_lcReminders.GetSortColumn());
-	prefs.WriteProfileInt(m_sPrefsKey, _T("SortAscending"), m_lcReminders.GetSortAscending());
-
-	RemoveAllListReminders();
-
-	CTDLDialog::OnDestroy();
 }
 
 void CTDLShowReminderDlg::UpdateTitleText()
@@ -441,7 +417,5 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 	OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEUNTILDATE, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEUNTILTIME, 0, dy);
-
-	m_lcReminders.UpdateColumnWidths();
 }
 

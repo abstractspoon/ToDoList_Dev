@@ -12,6 +12,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
 #include "..\shared\ServerDlg.h"
+#include "..\shared\MessageBox.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -84,14 +85,24 @@ bool CFtpTasklistStorageApp::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskLis
 	if (bPrompt)
 		dwOptions |= RMO_PROMPTFORFILE;
 
-	if (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
+	switch (rf.GetFile(sRemotePath, sLocalPath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)))
 	{
-		// Cache password for the session
-		m_sCachedPassword = rf.GetPassword();
+	case RMERR_SUCCESS:
+		{
+			// Cache password for the session
+			m_sCachedPassword = rf.GetPassword();
 
-		// return information to caller 
-		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+			// return information to caller 
+			CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+		}
 		return true;
+
+	case RMERR_USERCANCELLED:
+		break;
+
+	default:
+		CMessageBox::AfxShow(IDS_DOWNLOADERROR_TITLE, rf.GetLastError());
+		break;
 	}
 
 	return false;
@@ -131,17 +142,35 @@ bool CFtpTasklistStorageApp::StoreTasklist(ITS_TASKLISTINFO* pFInfo, const ITask
 		else
 			rf.SetPassword(pFInfo->szPassword);
 	}
-
-	if (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)) == RMERR_SUCCESS)
+	else if (!Misc::IsEmpty(pFInfo->szTasklistName))
 	{
-		// Cache password for the session
-		m_sCachedPassword = rf.GetPassword();
-
-		// return information to caller 
-		CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
-		return true;
+		sRemotePath = pFInfo->szTasklistName;
 	}
-	
+	else
+	{
+		sRemotePath = FileMisc::GetFileNameFromPath(pFInfo->szLocalFileName);
+	}
+
+	switch (rf.SetFile(sLocalPath, sRemotePath, pPrefs, szKey, dwOptions, CEnString(IDS_TDLFILEFILTER)))
+	{
+	case RMERR_SUCCESS:
+		{
+			// Cache password for the session
+			m_sCachedPassword = rf.GetPassword();
+
+			// return information to caller 
+			CopyInfo(sLocalPath, sRemotePath, rf, pFInfo);
+		}
+		return true;
+
+	case RMERR_USERCANCELLED:
+		break;
+
+	default:
+		CMessageBox::AfxShow(IDS_UPLOADERROR_TITLE, rf.GetLastError());
+		break;
+	}
+
 	return false;
 }
 
@@ -180,12 +209,9 @@ BOOL CFtpTasklistStorageApp::InitInstance()
 	// Set this before anything else
 //	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 
+	CMessageBox::SetAppName(GetMenuText());
+
 	m_icon.Load(IDR_FTPSTORAGE);
-
-	if (m_pszAppName)
-		free((void*)m_pszAppName);
-
-	m_pszAppName = _tcsdup(GetMenuText());
 
 	return CWinApp::InitInstance();
 }

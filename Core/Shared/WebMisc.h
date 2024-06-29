@@ -42,6 +42,7 @@ namespace WebMisc
 	CString GetRegisteredProtocolCommand(LPCTSTR szProtocol);
 	CString GetRegisteredProtocolAppPath(LPCTSTR szProtocol, BOOL bFilenameOnly = FALSE);
 
+	BOOL GetProxySettings(CString& sProxy, UINT& nPort);
 }
 
 #endif // _MISCWEB_FUNCTIONS_H_

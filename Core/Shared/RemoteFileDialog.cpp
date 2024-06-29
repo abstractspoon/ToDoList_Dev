@@ -12,6 +12,7 @@
 #include "filemisc.h"
 #include "graphicsmisc.h"
 #include "enstring.h"
+#include "themed.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -91,6 +92,8 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	m_pPrefs(NULL),
 	m_hIcon(hIcon)
 {
+	ASSERT(m_pConnection);
+
 	//{{AFX_DATA_INIT(CRemoteFileDialog)
 	//}}AFX_DATA_INIT
 	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 0, 8, 65, 8, IDC_SERVERLABEL);
@@ -112,8 +115,6 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 230, 178, 50, 14, IDCANCEL);
 
 	InitFilterArray(szFilters);
-
-	ASSERT(m_pConnection);
 }
 
 CRemoteFileDialog::~CRemoteFileDialog()
@@ -170,25 +171,25 @@ BOOL CRemoteFileDialog::OnInitDialog()
 
 	ASSERT(m_pConnection);
 
+	if (!m_pConnection)
+		EndDialog(IDCANCEL);
+
 	// init state from prefs
 	if (m_sCurFolder.IsEmpty())
 	{
 		CString sFolderKey = m_sPrefKey + _T("LastFolder");
 		m_sCurFolder = m_pPrefs->GetProfileString(sFolderKey, m_sServer);
-	}
 
-	if (m_pConnection && m_sCurFolder.IsEmpty())
-		m_pConnection->GetCurrentDirectory(m_sCurFolder);
+		if (m_sCurFolder.IsEmpty())
+			m_pConnection->GetCurrentDirectory(m_sCurFolder);
+	}
 
 	SetIcon(m_hIcon, FALSE);
 	ModifyStyle(0, WS_CLIPCHILDREN);
 	UpdateData(FALSE);
 
-	if (!m_pConnection)
-		EndDialog(IDCANCEL);
-
 	if (FolderSelect())
-		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name:"));
+		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name"));
 
 	// set up list image lists
 	HIMAGELIST hILLarge = CFileIcons::GetImageList(TRUE);
@@ -205,9 +206,12 @@ BOOL CRemoteFileDialog::OnInitDialog()
 	if (m_dwOptions & RFD_MULTISELECT)
 		m_lcFiles.ModifyStyle(LVS_SINGLESEL, 0);
 
+	CThemed::SetWindowTheme(&m_lcFiles, _T("Explorer"));
+	ListView_SetExtendedListViewStyle(m_lcFiles, LVS_EX_FULLROWSELECT);
+
 	// init m_cbFileTypes
 	int nType = m_aFilters.GetSize();
-	ASSERT (nType); // must be atleast one
+	ASSERT (nType); // must be at least one
 
 	while (nType--)
 		AddString(m_cbFileTypes, m_aFilters[nType].sName, nType);
@@ -273,6 +277,7 @@ void CRemoteFileDialog::PostCreate()
 
 		rWindow.InflateRect((nWidth - rWindow.Width()) / 2, (nHeight - rWindow.Height()) / 2);
 		MoveWindow(rWindow);
+		UpdateWindow();
 	}
 
 	// restore last view

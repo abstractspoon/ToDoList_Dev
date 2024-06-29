@@ -8,6 +8,7 @@
 //
 
 #include "runtimedlg.h"
+#include "WndPrompt.h"
 
 #include "..\Interfaces\Ipreferences.h"
 
@@ -68,9 +69,11 @@ protected:
 	CString	m_sPassword;
 	CString m_sProxy;
 	UINT m_nProxyPort;
+	AL_TYPE m_nAnonLogin;
+
 	CComboBox m_cbServers;
 	CComboBox m_cbUsernames;
-	AL_TYPE m_nAnonLogin;
+	CWndPrompt m_wpProxy;
 	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
@@ -78,7 +81,7 @@ protected:
 
 	static CMap<UINT, UINT, CString, CString&> s_mapText;
 
-protected:
+	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
@@ -92,6 +95,8 @@ protected:
 
 protected:
 	CString GetItemText(UINT nIDItem, LPCTSTR szDefault);
+	void EnableDisableProxy();
+	BOOL HasProxySettings() const;
 	
 	void PopulateComboHistory(CComboBox& combo, LPCTSTR szCountKey, LPCTSTR szItemTemplate, LPCTSTR szCurrentValue) const;
 };

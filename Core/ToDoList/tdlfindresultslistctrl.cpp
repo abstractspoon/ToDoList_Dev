@@ -93,6 +93,7 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	m_bStrikeThruDone(FALSE),
 	m_bHasIconsOrRefs(FALSE)
 {
+	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
 
 CTDLFindResultsListCtrl::~CTDLFindResultsListCtrl()
@@ -125,8 +126,6 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_ONECLICKACTIVATE, LVS_EX_ONECLICKACTIVATE);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
-
-	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(16));
 
 	RefreshUserPreferences();
 }

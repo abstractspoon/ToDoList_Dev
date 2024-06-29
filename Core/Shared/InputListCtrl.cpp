@@ -37,6 +37,16 @@ const int BTN_WIDTH  = GetSystemMetrics(SM_CXVSCROLL);
 static DWORD PROMPT = 0xfefefefe;
 
 /////////////////////////////////////////////////////////////////////////////
+
+CInputListCtrl::CColumnData2::CColumnData2() 
+	: 
+	CColumnData(), 
+	bEditEnabled(TRUE), 
+	nType(ILCT_TEXT) 
+{
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CInputListCtrl
 
 CInputListCtrl::CInputListCtrl()
@@ -97,7 +107,7 @@ void CInputListCtrl::InitState()
 		m_hotTrack.Initialize(this, FALSE);
 }
 
-const CColumnData2* CInputListCtrl::GetColumnData(int nCol) const
+const CInputListCtrl::CColumnData2* CInputListCtrl::GetColumnData(int nCol) const
 {
 	return static_cast<const CColumnData2*>(CEnListCtrl::GetColumnData(nCol)); 
 }

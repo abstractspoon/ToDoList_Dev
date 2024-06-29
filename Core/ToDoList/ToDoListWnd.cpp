@@ -7653,6 +7653,9 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 	// save the existing tasklist to temp path
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
+	BOOL bHasFilePath = tdc.HasFilePath();
+	BOOL bWasModified = tdc.IsModified();
+
 	// Use the existing tasklist's file name
 	CString sTDCFile = FileMisc::GetFileNameFromPath(tdc.GetFilePath(), FALSE);
 	CString sTDCExt = FileMisc::GetExtension(tdc.GetFilePath(), FALSE);
@@ -7693,8 +7696,20 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 		if (!m_mgrStorage.StoreTasklist(storageInfo, tasks, nStorage, prefs, TRUE)) // Prompt user
 		{
+			// Restore previous settings
+			if (bUsesStorage)
+				m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);
+
+			if (!bHasFilePath)
+			{
+				m_mruList.Remove(sTempPath);
+				tdc.ClearFilePath();
+
+				if (bWasModified)
+					tdc.SetModified(TRUE);
+			}
+
 			// assume storage plugin has handled error
-			m_mgrToDoCtrls.SetStorageDetails(nTDC, infoPrev);
 			return;
 		}
 	}

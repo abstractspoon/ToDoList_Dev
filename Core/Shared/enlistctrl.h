@@ -4,7 +4,6 @@
 #define ENLISTCTRL_H 
 
 #include "enheaderctrl.h"
-#include "enstring.h"
 
 #include <afxtempl.h>
 
@@ -18,17 +17,6 @@
 #define LVN_DELETE					(LVN_FIRST-25)
 #define LVN_USERSELCHANGEDBLCLK		(LVN_FIRST-26)
 #define LVN_CHECKCHANGE				(LVN_FIRST-40)
-
-/////////////////////////////////////////////////////////////////////////////
-
-// helper class for extending column data
-class CColumnData
-{
-public:
-	CColumnData() { crText = ::GetSysColor(COLOR_WINDOWTEXT); nFormat = ES_END; }
-	COLORREF crText;
-	int nFormat;
-};
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -160,6 +148,16 @@ protected:
 	BOOL m_bAlternateRowColoring;
 	BOOL m_bAllowOffItemClickDeslection;
 	BOOL m_bSortEmptyBelow;
+
+protected:
+	// helper class for extending column data
+	class CColumnData
+	{
+	public:
+		CColumnData();
+		COLORREF crText;
+		int nFormat;
+	};
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 

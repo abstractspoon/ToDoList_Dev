@@ -11,7 +11,6 @@
 
 #include "remotefiledialog.h"
 #include "enstring.h"
-#include "icon.h"
 
 #include <afxinet.h>
 
@@ -129,23 +128,25 @@ protected:
 	RMERR SaveErrorMsg(RMERR nErr, LPCTSTR szRemotePath = NULL, LPCTSTR szLocalPath = NULL); // returns nErr to allow chaining
 	DWORD GetRemoteFileSize(LPCTSTR szRemotePath);
 
-	RMERR GetRemotePaths(CFileResultArray& aRemoteFiles, const CStringArray& aLocalFiles, 
-						DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL, LPCTSTR szLocalRoot = NULL); // for upload
-	RMERR GetRemotePaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL); // for download
+	RMERR GetRemoteDownloadPaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemotePath = NULL);
+	RMERR GetLocalDownloadPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, 
+						DWORD dwOptions, LPCTSTR szLocalPath = NULL);
 
-	RMERR GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, 
-						DWORD dwOptions, LPCTSTR szLocalDir = NULL); // for download
-	RMERR GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalDir = NULL); // for upload
+	RMERR GetRemoteUploadPaths(CFileResultArray& aRemoteFiles, const CStringArray& aLocalFiles, 
+						DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemotePath = NULL, LPCTSTR szLocalRoot = NULL);
+	RMERR GetLocalUploadPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalPath = NULL);
 
+	void InitialiseRemoteDirAndFileName(LPCTSTR szRemotePath, LPCTSTR szLastFolderKey, CString& sDir, CString& sFilename) const;
 	CString GetTempPath(const CString& sRemotePath, DWORD dwOptions = 0);
 	BOOL RemoteFileExists(LPCTSTR szRemotePath);
 
 	BOOL SetProxy(const CString& sProxy, UINT nPort);
 
 	static BOOL ValidateLocalFolder(CString& sFolder, BOOL bAllowCreation);
-	static BOOL RemotePathIsFolder(const CString& sFolder);
+	static BOOL RemotePathIsFolder(LPCTSTR szPath);
 	static void DoProgress(CProgressDlg* pDlg, DWORD dwBytesRead, DWORD dwFileSize, BOOL bUpload);
 	static CString MakeRemotePath(const CString& sLocalPath, const CString& sRemoteDir, LPCTSTR szLocalRoot);
+	static CString ValidateRemotePath(LPCTSTR szRemotePath);
 };
 
 #endif // !defined(AFX_REMOTEFILE_H__04648C98_565F_41B2_A1F7_E10E00800691__INCLUDED_)
