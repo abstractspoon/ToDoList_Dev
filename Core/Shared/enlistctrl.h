@@ -123,6 +123,18 @@ public:
 	void OverrideSelectionTheming(BOOL bThemed, BOOL bClassic) { m_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
 	static void EnableSelectionTheming(BOOL bThemed, BOOL bClassic) { s_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
 
+#if _MSC_VER >= 1300
+protected:
+#endif
+	// helper class for extending column data
+	class CColumnData
+	{
+	public:
+		CColumnData();
+		COLORREF crText;
+		int nFormat;
+	};
+
 // Attributes
 protected:
 	CEnHeaderCtrl m_header;
@@ -148,16 +160,6 @@ protected:
 	BOOL m_bAlternateRowColoring;
 	BOOL m_bAllowOffItemClickDeslection;
 	BOOL m_bSortEmptyBelow;
-
-protected:
-	// helper class for extending column data
-	class CColumnData
-	{
-	public:
-		CColumnData();
-		COLORREF crText;
-		int nFormat;
-	};
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
