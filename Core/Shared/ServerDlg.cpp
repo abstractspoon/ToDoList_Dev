@@ -31,34 +31,34 @@ CServerDlg::CServerDlg(LPCTSTR szServer, LPCTSTR szUsername, LPCTSTR szPassword,
 	m_pPrefs(NULL),
 	m_hIcon(hIcon)
 {
-	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 7, 9, 50, 8, IDC_SD_SERVERLABEL);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP | CBS_AUTOHSCROLL, 0, 58, 7, 134, 100, IDC_SD_SERVER);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Server"), 0, 0, 7, 9, 57, 8, IDC_SD_SERVERLABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP | CBS_AUTOHSCROLL, 0, 65, 7, 134, 100, IDC_SD_SERVER);
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Username"), 0, 0, 7, 26, 50, 8, IDC_SD_USERNAMELABEL);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP, 0, 58, 24, 134, 100, IDC_SD_USERNAME);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Username"), 0, 0, 7, 26, 57, 8, IDC_SD_USERNAMELABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP, 0, 65, 24, 134, 100, IDC_SD_USERNAME);
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Password"), 0, 0, 7, 43, 50, 8, IDC_SD_PASSWORDLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_PASSWORD | ES_AUTOHSCROLL | WS_TABSTOP, 0, 58, 41, 134, 13, IDC_SD_PASSWORD);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Password"), 0, 0, 7, 43, 57, 8, IDC_SD_PASSWORDLABEL);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_PASSWORD | ES_AUTOHSCROLL | WS_TABSTOP, 0, 65, 41, 134, 13, IDC_SD_PASSWORD);
 
 	BOOL bShowAnonLogin = (m_nAnonLogin != ANONLOGIN_HIDE);
 	int YOFFSET = 0;
 
 	if (bShowAnonLogin)
 	{
-		AddRCControl(_T("CONTROL"), _T("Button"), _T("Anonymous Login"), BS_AUTOCHECKBOX | WS_TABSTOP, 0, 58, 57, 134, 10, IDC_SD_ANONLOGIN);
+		AddRCControl(_T("CONTROL"), _T("Button"), _T("Anonymous Login"), BS_AUTOCHECKBOX | WS_TABSTOP, 0, 65, 57, 134, 10, IDC_SD_ANONLOGIN);
 		YOFFSET = 20;
 	}
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Proxy"), 0, 0, 7, 54 + YOFFSET, 50, 8, IDC_SD_PROXYLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | WS_TABSTOP, 0, 58, 52 + YOFFSET, 80, 13, IDC_SD_PROXY);
-	AddRCControl(_T("LTEXT"), _T(""), _T("Port"), 0, 0, 142, 54 + YOFFSET, 50, 8, IDC_SD_PROXYPORTLABEL);
-	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_NUMBER | ES_AUTOHSCROLL | WS_TABSTOP, 0, 164, 52 + YOFFSET, 28, 13, IDC_SD_PROXYPORT);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Proxy"), 0, 0, 7, 54 + YOFFSET, 57, 8, IDC_SD_PROXYLABEL);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_AUTOHSCROLL | WS_TABSTOP, 0, 65, 52 + YOFFSET, 80, 13, IDC_SD_PROXY);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Port"), 0, 0, 149, 54 + YOFFSET, 50, 8, IDC_SD_PROXYPORTLABEL);
+	AddRCControl(_T("EDITTEXT"), _T(""), _T(""), ES_NUMBER | ES_AUTOHSCROLL | WS_TABSTOP, 0, 171, 52 + YOFFSET, 28, 13, IDC_SD_PROXYPORT);
 	
 	// Divider
-	AddRCControl(_T("CONTROL"), _T("Static"), _T(""), SS_ETCHEDHORZ, 0, 7, 72 + YOFFSET, 187, 1, (UINT)IDC_STATIC);
+	AddRCControl(_T("CONTROL"), _T("Static"), _T(""), SS_ETCHEDHORZ, 0, 7, 72 + YOFFSET, 194, 1, (UINT)IDC_STATIC);
 
-	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 86, 80 + YOFFSET, 50, 14, IDOK);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 143, 80 + YOFFSET, 50, 14, IDCANCEL);
+	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 91, 80 + YOFFSET, 50, 14, IDOK);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 150, 80 + YOFFSET, 50, 14, IDCANCEL);
 }
 
 void CServerDlg::DoDataExchange(CDataExchange* pDX)
