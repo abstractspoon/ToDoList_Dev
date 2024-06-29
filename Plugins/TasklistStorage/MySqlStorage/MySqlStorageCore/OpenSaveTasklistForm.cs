@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Diagnostics;
 using System.Windows.Forms;
 
@@ -15,16 +16,24 @@ namespace MySqlStorage
 
 		MySqlConnection m_Connection;
 		TasklistConnectionInfo m_TasklistInfo;
+		Translator m_Trans;
+		Font m_ControlsFont;
 
 		// -----------------------------------------------------------------
 
-		public OpenSaveTasklistForm(MySqlConnection conn, TasklistConnectionInfo tasklistInfo, bool openTasklist)
+		public OpenSaveTasklistForm(MySqlConnection conn, 
+									TasklistConnectionInfo tasklistInfo, 
+									bool openTasklist,
+									Translator trans,
+									Font ctrlsFont)
 		{
 			InitializeComponent();
 
 			m_OpenTasklist = openTasklist;
 			m_Connection = conn;
 			m_TasklistInfo = tasklistInfo;
+			m_Trans = trans;
+			m_ControlsFont = ctrlsFont;
 
 			if (m_OpenTasklist)
 			{
@@ -37,6 +46,8 @@ namespace MySqlStorage
 				Text = "Save Tasklist";
 			}
 
+			FormsUtil.SetFont(this, m_ControlsFont);
+			m_Trans.Translate(this);
 
 			UpdateControlData();
 
@@ -97,11 +108,8 @@ namespace MySqlStorage
 
 		private void OnModifyDatabase(object sender, EventArgs e)
 		{
-			using (var dialog = new DatabaseConnectionForm())
+			using (var dialog = new DatabaseConnectionForm(m_Trans, m_ControlsFont))
 			{
-// 				FormsUtil.SetFont(dialog, m_ControlsFont);
-// 				m_Trans.Translate(dialog);
-
 				// Hide ourselves
 				dialog.Shown += (s, e2) => { Visible = false; };
 

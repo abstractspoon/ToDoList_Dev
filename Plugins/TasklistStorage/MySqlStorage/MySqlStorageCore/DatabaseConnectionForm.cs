@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 
 using MySql.Data.MySqlClient;
+using Abstractspoon.Tdl.PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -18,9 +20,12 @@ namespace MySqlStorage
 
 		// --------------------------------------------------------
 
-		public DatabaseConnectionForm()
+		public DatabaseConnectionForm(Translator trans,	Font ctrlsFont)
 		{
 			InitializeComponent();
+
+			FormsUtil.SetFont(this, ctrlsFont);
+			trans.Translate(this);
 
 			Shown += new EventHandler(OnShown);
 		}

@@ -41,10 +41,7 @@ namespace MySqlStorage
 					if (prompt || (details.Tasklist.Key == 0))
 					{
 						// Prompt for tasklist 
-						var dialog = new OpenSaveTasklistForm(conn, details, true);
-
-						FormsUtil.SetFont(dialog, m_ControlsFont);
-						m_Trans.Translate(dialog);
+						var dialog = new OpenSaveTasklistForm(conn, details, true, m_Trans, m_ControlsFont);
 
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
@@ -103,10 +100,7 @@ namespace MySqlStorage
 
 					if (prompt || (details.Tasklist.Key == 0))
 					{
-						var dialog = new OpenSaveTasklistForm(conn, details, false);
-
-						FormsUtil.SetFont(dialog, m_ControlsFont);
-						m_Trans.Translate(dialog);
+						var dialog = new OpenSaveTasklistForm(conn, details, false, m_Trans, m_ControlsFont);
 
 						if (dialog.ShowDialog() != DialogResult.OK)
 							return null;
@@ -173,11 +167,8 @@ namespace MySqlStorage
 
 		bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo)
 		{
-			using (var dialog = new DatabaseConnectionForm())
+			using (var dialog = new DatabaseConnectionForm(m_Trans, m_ControlsFont))
 			{
-				FormsUtil.SetFont(dialog, m_ControlsFont);
-				m_Trans.Translate(dialog);
-
 				return dialog.OpenConnection(conn, connInfo, false);
 			}
 		}
