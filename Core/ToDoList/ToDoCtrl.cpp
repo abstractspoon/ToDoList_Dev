@@ -496,7 +496,6 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	// Attributes
 	VERIFY(m_ctrlAttributes.Create(this, IDC_ATTRIBUTELIST));
-//	VERIFY(m_ctrlAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	m_ctrlAttributes.SetPercentDoneIncrement(m_nPercentIncrement);
 	
 	// custom font
