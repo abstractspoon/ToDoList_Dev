@@ -2221,6 +2221,8 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 		m_datePicker.SetTime(date);
 	else
 		m_datePicker.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
+
+	m_datePicker.SetMonthCalStyle(MCS_WEEKNUMBERS);
 }
 
 void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
