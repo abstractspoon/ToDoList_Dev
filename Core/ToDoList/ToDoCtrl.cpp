@@ -7925,7 +7925,7 @@ int CToDoCtrl::GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const
 
 int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncCollapsedChildren) const
 {
-	if (bIncParents && bIncCollapsedChildren)
+	if (bIncParents && !bIncCollapsedChildren)
 		return m_taskTree.GetColumnTaskIDs(aTaskIDs);
 
 	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
