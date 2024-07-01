@@ -30,6 +30,8 @@ namespace MDContentControl
 		bool m_RestoreInputFocusAfterUpdate = false;
 		bool m_SettingTextOrFont = false;
 
+		string m_TempFile = Path.GetTempFileName();
+
 		// -----------------------------------------------------------------
 
 		public MDContentControlForm()
@@ -241,9 +243,14 @@ namespace MDContentControl
 			m_RestoreInputFocusAfterUpdate = restoreInputFocus;
 
 			if (PreviewBrowser.Document != null)
-				PreviewBrowser.DocumentText = OutputHtmlAsPage;
+			{
+ 				File.WriteAllText(m_TempFile, OutputHtmlAsPage);
+ 				PreviewBrowser.Navigate(m_TempFile);
+			}
 			else
+			{
 				Debug.Assert(false);
+			}
 		}
 
 		private void HtmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -271,6 +278,14 @@ namespace MDContentControl
 			// We don't restore the focus to the input control
 			// if the origin of the text change was external
 			UpdateOutput(!m_SettingTextOrFont);
+		}
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			base.OnHandleDestroyed(e);
+
+			// Delete the temp file so we don't leave user data lying around
+			File.Delete(m_TempFile);
 		}
 
 		protected override void OnPaintBackground(PaintEventArgs e)

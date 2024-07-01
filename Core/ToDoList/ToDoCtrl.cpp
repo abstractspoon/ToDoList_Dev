@@ -496,7 +496,6 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	// Attributes
 	VERIFY(m_ctrlAttributes.Create(this, IDC_ATTRIBUTELIST));
-//	VERIFY(m_ctrlAttributes.Create(WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, IDC_TASKATTRIBUTES));
 	m_ctrlAttributes.SetPercentDoneIncrement(m_nPercentIncrement);
 	
 	// custom font
@@ -7926,7 +7925,7 @@ int CToDoCtrl::GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const
 
 int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncCollapsedChildren) const
 {
-	if (bIncParents && bIncCollapsedChildren)
+	if (bIncParents && !bIncCollapsedChildren)
 		return m_taskTree.GetColumnTaskIDs(aTaskIDs);
 
 	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
@@ -9570,6 +9569,9 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 
 	CHoldRecalcColumns hr(m_taskTree);
 
+	CHTIList prevSel;
+	TSH().CopySelection(prevSel);
+
 	switch (nWhat)
 	{
 	case TDCEC_ALL:
@@ -9611,18 +9613,30 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 		break;
 	}
 
-	// if collapsing, move the selection to a visible parent item
 	if (!bExpand)
 	{
-		HTREEITEM htiSel = TSH().GetFirstItem(), hti = htiSel;
+		// if any previously selected tasks has a collapsed parent,
+		// move the selection to the first visible parent item
+		// and refresh the edit controls
+		POSITION pos = prevSel.GetHeadPosition();
+		BOOL bContinue = TRUE;
 
-		while (hti && !TCH().IsParentItemExpanded(hti))
-			hti = m_taskTree.GetParentItem(hti);
+		while (pos && bContinue)
+		{
+			HTREEITEM hti = prevSel.GetNext(pos);
+			
+			while (hti && !TCH().IsParentItemExpanded(hti))
+			{
+				hti = m_taskTree.GetParentItem(hti);
+				bContinue = FALSE;
+			}
 
-		if (hti != htiSel)
-			SelectItem(hti);
-		else
-			UpdateSelectedTaskPath();
+			if (!bContinue)
+			{
+				SelectItem(hti);
+				UpdateControls();
+			}
+		}
 	}
 }
 
