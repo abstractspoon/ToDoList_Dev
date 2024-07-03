@@ -1115,7 +1115,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
 	case TDCCA_DATE:
-		ASSERT(Misc::IsNumber(data.AsString()));
+		ASSERT(data.IsEmpty() || Misc::IsNumber(data.AsString()));
 		dValue = data.AsDouble();
 		return TRUE;
 	}

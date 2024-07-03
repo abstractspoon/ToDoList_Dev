@@ -100,7 +100,6 @@ protected:
 	afx_msg void OnChangeWeekends();
 	afx_msg void OnNotifyTimeTracking();
 	afx_msg void OnHasLunchBreak();
-	afx_msg void OnEditChangeHoursInDay();
 	afx_msg void OnComboChangeHoursInDay();
 	afx_msg void OnKillFocusHoursInDay();
 	//}}AFX_MSG
