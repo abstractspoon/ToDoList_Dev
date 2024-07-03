@@ -1111,13 +1111,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double
 		dValue = data.AsFraction();
 		return TRUE;
 
-	case TDCCA_DATE:
-		dValue = data.AsDate().m_dt;
-		return TRUE;
-
 	case TDCCA_CALCULATION:
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
+	case TDCCA_DATE:
+		ASSERT(Misc::IsNumber(data.AsString()));
 		dValue = data.AsDouble();
 		return TRUE;
 	}
