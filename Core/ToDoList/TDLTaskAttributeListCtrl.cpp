@@ -1404,7 +1404,8 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 			}
 			else if (IsCustomTime(nAttribID))
 			{
-				sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+				if (sText.IsEmpty())
+					sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			}
 			break;
 		}
