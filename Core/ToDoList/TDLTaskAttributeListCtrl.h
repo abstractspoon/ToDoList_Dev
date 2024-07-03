@@ -141,6 +141,7 @@ protected:
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
+	CTDCTaskCalculator m_calculator;
 	CTDCMultiTasker m_multitasker;
 
 	TDCAUTOLISTDATA m_tldAll, m_tldDefault;
