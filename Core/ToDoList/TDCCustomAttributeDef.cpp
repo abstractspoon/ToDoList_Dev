@@ -709,6 +709,53 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsAggregated() const
 			HasFeature(TDCCAF_MINIMIZE);
 }
 
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::ValidateData(TDCCADATA& data) const
+{
+	if (!data.IsEmpty())
+	{
+		CString sData = data.AsString();
+
+		switch (GetDataType())
+		{
+		case TDCCA_INTEGER:
+		case TDCCA_DOUBLE:
+		case TDCCA_FRACTION:
+			return Misc::IsNumber(sData);
+
+		case TDCCA_DATE:
+			{
+				if (Misc::IsNumber(sData))
+					return TRUE;
+
+				COleDateTime date;
+
+				if (CDateHelper::DecodeDate(sData, date, TRUE))
+				{
+					data.Set(date);
+					return TRUE;
+				}
+			}
+			return FALSE;
+
+		case TDCCA_TIMEPERIOD:
+			return data.IsTimePeriod();
+
+		case TDCCA_BOOL:
+		case TDCCA_ICON:
+		case TDCCA_STRING:
+		case TDCCA_FILELINK:
+			break;
+
+		default:
+		case TDCCA_CALCULATION:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc)
 {
 	if (!calculation.Set(calc))
@@ -1064,10 +1111,13 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double
 		dValue = data.AsFraction();
 		return TRUE;
 
+	case TDCCA_DATE:
+		dValue = data.AsDate().m_dt;
+		return TRUE;
+
 	case TDCCA_CALCULATION:
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
-	case TDCCA_DATE:
 		dValue = data.AsDouble();
 		return TRUE;
 	}
