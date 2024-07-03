@@ -184,7 +184,7 @@ BEGIN
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,243,94
     GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
                     330,147,0,WS_EX_TRANSPARENT
-    GROUPBOX        "Display the following attributes for each task:",
+    GROUPBOX        "Display the following attributes for each task",
                     IDC_STATIC,7,69,330,124
     CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,175,313,10

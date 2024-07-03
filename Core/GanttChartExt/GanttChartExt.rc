@@ -174,7 +174,7 @@ BEGIN
     CONTROL         "&Auto-scroll to task when selecting",
                     IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,67,333,10
-    CONTROL         "&Treat tasks with the following tag as 'Milestones':",
+    CONTROL         "&Treat tasks with the following tag as 'Milestones'",
                     IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,82,333,10
     EDITTEXT        IDC_MILESTONETAG,18,94,211,13,ES_AUTOHSCROLL

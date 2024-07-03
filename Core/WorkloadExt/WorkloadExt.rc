@@ -190,7 +190,7 @@ BEGIN
     CONTROL         "List1",IDC_ALLOCATIONS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,32,256,103
-    LTEXT           "&Allocations:",IDC_STATIC,7,20,256,8
+    LTEXT           "&Allocations",IDC_STATIC,7,20,256,8
 END
 
 
