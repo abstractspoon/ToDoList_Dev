@@ -136,12 +136,6 @@ void CTDLShowReminderDlg::UpdateTitleText()
 	SetWindowText(CEnString(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
 }
 
-void CTDLShowReminderDlg::RemoveAllListReminders()
-{
-	m_lcReminders.DeleteAllItems();
-	HideWindow();
-}
-
 BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 {
 	BOOL bNewRem = m_lcReminders.AddReminder(rem);

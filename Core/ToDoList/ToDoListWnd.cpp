@@ -8918,12 +8918,14 @@ void CToDoListWnd::OnCloseall()
 	// remove tasklists
 	m_dlgFindTasks.DeleteAllResults();
 	m_dlgTimeTracker.RemoveAllTasklists();
-	m_dlgReminders.RemoveAllListReminders();
 
 	int nCtrl = GetTDCCount();
 	
 	while (nCtrl--)
+	{
+		m_dlgReminders.RemoveToDoCtrl(&GetToDoCtrl(nCtrl));
 		m_mgrToDoCtrls.DeleteToDoCtrl(nCtrl);
+	}
 
 	// if empty then create a new dummy tasklist		
 	if (!GetTDCCount())
