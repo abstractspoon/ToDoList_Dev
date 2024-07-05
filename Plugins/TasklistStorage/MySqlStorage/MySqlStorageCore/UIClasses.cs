@@ -77,7 +77,7 @@ namespace MySqlStorage
 
 	////////////////////////////////////////////////////////////////////////
 
-	internal class TasklistsListBox : ListBox
+	internal class TasklistsListView : ListView
 	{
 		public void Initialise(MySqlConnection conn, ConnectionInfo connInfo, bool selectFirst)
 		{
@@ -97,25 +97,53 @@ namespace MySqlStorage
 							Name = reader.GetString(1)
 						};
 
-						Items.Add(tasklist);
+						var item = new ListViewItem(tasklist.Name);
+						item.Tag = tasklist;
+
+						Items.Add(item); 
 					}
 				}
 			}
 
 			if (selectFirst && (Items.Count > 0))
-				SelectedIndex = 0;
+				SelectedIndices.Add(0);
 		}
 
-		public object FindItem(string name)
+		public TasklistInfo FindItem(string name)
 		{
-			foreach (var item in Items)
+			foreach (ListViewItem item in Items)
 			{
 				if (name.Equals(item.ToString(), StringComparison.InvariantCultureIgnoreCase))
-					return item;
+					return (item.Tag as TasklistInfo);
 			}
 
 			// else
 			return null;
+		}
+
+		public TasklistInfo SelectedItem
+		{
+			get
+			{
+				if (SelectedItems.Count == 0)
+					return null;
+
+				return (SelectedItems[0].Tag as TasklistInfo);
+			}
+
+			set
+			{
+				SelectedIndices.Clear();
+
+				foreach (ListViewItem item in Items)
+				{
+					if (item.Tag == value)
+					{
+						SelectedIndices.Add(item.Index);
+						break;
+					}
+				}
+			}
 		}
 	}
 

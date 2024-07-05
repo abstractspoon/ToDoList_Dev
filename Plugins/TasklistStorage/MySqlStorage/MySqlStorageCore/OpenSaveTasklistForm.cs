@@ -64,7 +64,7 @@ namespace MySqlStorage
 		{
 			get
 			{
-				var tasklist = (m_Tasklists.SelectedItem as TasklistInfo);
+				var tasklist = m_Tasklists.SelectedItem;
 
 				if (tasklist != null)
 				{
@@ -77,11 +77,16 @@ namespace MySqlStorage
 			}
 		}
 
+		private bool m_HandlingSelectionChange = false;
+
 		private void OnTasklistTextChanged(object sender, EventArgs e)
 		{
 			// If the typed text matches one of the existing tasklists
 			// select the tasklist else null the selection
-			m_Tasklists.SelectedItem = (m_Tasklists.FindItem(m_Tasklist.Text));
+			if (!m_HandlingSelectionChange)
+			{
+				m_Tasklists.SelectedItem = (m_Tasklists.FindItem(m_Tasklist.Text));
+			}
 		}
 
 		private void OnTasklistsSelectionChange(object sender, EventArgs e)
@@ -93,13 +98,17 @@ namespace MySqlStorage
 			if (tasklist != null)
 			{
 				if (!m_Tasklist.Text.Equals(tasklist.Name, StringComparison.InvariantCultureIgnoreCase))
+				{
+					m_HandlingSelectionChange = true;
 					m_Tasklist.Text = tasklist.Name;
+					m_HandlingSelectionChange = false;
+				}
 			}
 		}
 
 		private void OnDoubleClickTaskLists(object sender, MouseEventArgs e)
 		{
-			if (m_Tasklists.IndexFromPoint(e.X, e.Y) != -1)
+			if (m_Tasklists.HitTest(e.X, e.Y) != null)
 			{
 				DialogResult = DialogResult.OK;
 				Close();

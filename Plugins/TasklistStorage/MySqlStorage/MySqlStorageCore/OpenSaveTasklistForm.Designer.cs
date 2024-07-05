@@ -36,7 +36,7 @@
 			this.m_Tasklist = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.ModifyDatabase = new System.Windows.Forms.Button();
-			this.m_Tasklists = new MySqlStorage.TasklistsListBox();
+			this.m_Tasklists = new MySqlStorage.TasklistsListView();
 			this.SuspendLayout();
 			// 
 			// OK
@@ -122,17 +122,15 @@
 			// 
 			// m_Tasklists
 			// 
-			this.m_Tasklists.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.m_Tasklists.FormattingEnabled = true;
-			this.m_Tasklists.IntegralHeight = false;
-			this.m_Tasklists.Location = new System.Drawing.Point(97, 39);
+			this.m_Tasklists.Location = new System.Drawing.Point(97, 40);
+			this.m_Tasklists.MultiSelect = false;
 			this.m_Tasklists.Name = "m_Tasklists";
-			this.m_Tasklists.Size = new System.Drawing.Size(215, 118);
-			this.m_Tasklists.TabIndex = 29;
+			this.m_Tasklists.SelectedItem = null;
+			this.m_Tasklists.Size = new System.Drawing.Size(215, 116);
+			this.m_Tasklists.TabIndex = 31;
+			this.m_Tasklists.UseCompatibleStateImageBehavior = false;
+			this.m_Tasklists.View = System.Windows.Forms.View.List;
 			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
-			this.m_Tasklists.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.OnDoubleClickTaskLists);
 			// 
 			// OpenSaveTasklistForm
 			// 
@@ -165,8 +163,6 @@
 		}
 
 		#endregion
-
-		private TasklistsListBox m_Tasklists;
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.TextBox m_Database;
@@ -175,5 +171,6 @@
 		private System.Windows.Forms.TextBox m_Tasklist;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Button ModifyDatabase;
+		private TasklistsListView m_Tasklists;
 	}
 }
