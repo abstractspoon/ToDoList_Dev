@@ -133,7 +133,9 @@ CString TDCREMINDER::FormatWhenString() const
 		else
 		{
 			// Format as HMS
-			CString sHMS = CTimeHelper().FormatTimeHMS(dWhen, THU_DAYS);
+			CTwentyFourSevenWeek week;
+			CString sHMS = CTimeHelper(week).FormatTimeHMS(dWhen, THU_DAYS);
+
 			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERREST : IDS_BEGINWHENREMINDERREST), sHMS, sDateTime);
 		}
 	}

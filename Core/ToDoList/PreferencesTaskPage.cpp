@@ -97,8 +97,6 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
-	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
-	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
 	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnComboChangeHoursInDay)
 	ON_CBN_KILLFOCUS(IDC_HOURSINONEDAY, OnKillFocusHoursInDay)
 	//}}AFX_MSG_MAP
@@ -309,18 +307,10 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 }
 
-void CPreferencesTaskPage::OnEditChangeHoursInDay() 
-{
-	UpdateData();
-	ValidateWorkingWeek();
-
-	PostMessage(WM_PTP_ENABLEDISABLE);
-}
-
 void CPreferencesTaskPage::OnComboChangeHoursInDay()
 {
-	// We have to get the text via the combo's selected index
-	// because the text is not updated until after the notification
+	// UpdateData won't here because the combo text is 
+	// not updated until after this notification
 	CComboBox* pCombo = (CComboBox*)GetDlgItem(IDC_HOURSINONEDAY);
 	ASSERT(pCombo);
 
@@ -332,16 +322,10 @@ void CPreferencesTaskPage::OnComboChangeHoursInDay()
 
 void CPreferencesTaskPage::OnKillFocusHoursInDay()
 {
-	CString sHours = Misc::Format(GetHoursInDay(), 2);
-	Misc::TrimTrailingDecimalZeros(sHours);
+	UpdateData();
+	ValidateWorkingWeek();
 
-	if (sHours != m_sHoursInDay)
-	{
-		m_sHoursInDay = sHours;
-
-		UpdateDataEx(this, IDC_HOURSINONEDAY, m_sHoursInDay, FALSE);
-		EnableDisableControls();
-	}
+	PostMessage(WM_PTP_ENABLEDISABLE);
 }
 
 LRESULT CPreferencesTaskPage::OnEnableDisableCtrls(WPARAM /*wp*/, LPARAM /*lp*/)

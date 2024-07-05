@@ -119,6 +119,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_aCustomAttribDefs(aCustAttribDefs),
 	m_formatter(data, mgrContent),
 	m_multitasker(data, mgrContent),
+	m_calculator(data),
 	m_cbTimeOfDay(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
@@ -886,18 +887,14 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		return FALSE;
 
 	case TDCA_PERCENT:
+		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
-			if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-				return FALSE;
-
-			if (m_aSelectedTaskIDs.GetSize() > 1)
-			{
-				if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
-					m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
-				{
-					return FALSE;
-				}
-			}
+			return FALSE;
+		}
+		else if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
+				 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
+		{
+			return FALSE;
 		}
 		break;
 
@@ -1159,7 +1156,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
 	case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
 
-	case TDCA_PERCENT:			GETMULTIVALUE_FMT(GetTasksPercentDone,		int,		Misc::Format(value));	break;
 	case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority,			int,		Misc::Format(value));	break;
 	case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk,				int,		Misc::Format(value));	break;
 	case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor,			COLORREF,	Misc::Format(value));	break;
@@ -1169,6 +1165,26 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence,		TDCRECURRENCE,			value.GetRegularityText());	break;
 	case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies,		CTDCDependencyArray,	value.Format());			break;
 	case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining,	TDCTIMEPERIOD,			value.Format(2));			break;
+	
+	case TDCA_PERCENT:			
+		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE) ||
+			(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
+		{
+			int nPercent = m_calculator.GetTaskPercentDone(m_aSelectedTaskIDs[0]);
+
+			for (int nID = 1; ((nID < m_aSelectedTaskIDs.GetSize()) && !bValueVaries); nID++)
+			{
+				bValueVaries = (m_calculator.GetTaskPercentDone(m_aSelectedTaskIDs[nID]) != nPercent);
+			}
+
+			if (!bValueVaries)
+				sValue = Misc::Format(nPercent);
+		}
+		else
+		{
+			GETMULTIVALUE_FMT(GetTasksPercentDone, int, Misc::Format(value));
+		}
+		break;
 
 	case TDCA_TIMEESTIMATE:
 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || 
@@ -1404,7 +1420,8 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 			}
 			else if (IsCustomTime(nAttribID))
 			{
-				sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+				if (sText.IsEmpty())
+					sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
 			}
 			break;
 		}

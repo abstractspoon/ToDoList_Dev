@@ -783,35 +783,35 @@ void CTreeListSyncer::InitItemHeights()
 		// so if the list has no contents we bail
 		if (ListView_GetItemCount(hwndOther) > 0)
 		{
-			CRect rOtherItem;
-			VERIFY(ListView_GetItemRect(hwndOther, 0, rOtherItem, LVIR_BOUNDS));
-			
 			int nPrimaryItemHeight = GetItemHeight(hwndPrimary);
-			int nOtherItemHeight = rOtherItem.Height();
+			int nOtherItemHeight = GetItemHeight(hwndOther);
 
-			int nItemHeight = -1;
-
-			// handle primary window
-			if (IsTree(hwndPrimary))
+			if (nPrimaryItemHeight != nOtherItemHeight)
 			{
-				nItemHeight = max(nOtherItemHeight, nPrimaryItemHeight);
-				
-				if (nPrimaryItemHeight < nItemHeight)
-					TreeView_SetItemHeight(hwndPrimary, nItemHeight);
-			}
-			else // primary list always defines height
-			{
-				nItemHeight = nPrimaryItemHeight;
-			}
-			ASSERT(nItemHeight != -1);
+				if (IsTree(hwndPrimary) && (nPrimaryItemHeight < nOtherItemHeight))
+				{
+					TreeView_SetItemHeight(hwndPrimary, nOtherItemHeight);
+				}
+				else
+				{
+					// The item height of lists is controlled entirely
+					// by its assigned image lists
+					int nItemHeight = max(nOtherItemHeight, nPrimaryItemHeight);
 
-			// handle other window
-			if (nItemHeight != nOtherItemHeight)
-			{
-				ImageList_Destroy(m_hilSize);
-				m_hilSize = ImageList_Create(1, (nItemHeight - 1), ILC_COLOR, 1, 1);
+					ImageList_Destroy(m_hilSize);
+					m_hilSize = ImageList_Create(1, (nItemHeight - 1), ILC_COLOR, 1, 1);
 
-				ListView_SetImageList(hwndOther, m_hilSize, LVSIL_STATE);
+					if (nPrimaryItemHeight < nOtherItemHeight)
+					{
+						ASSERT(ListView_GetImageList(hwndPrimary, LVSIL_STATE) == NULL);
+
+						ListView_SetImageList(hwndPrimary, m_hilSize, LVSIL_STATE);
+					}
+					else
+					{
+						ListView_SetImageList(hwndOther, m_hilSize, LVSIL_STATE);
+					}
+				}
 			}
 
 			m_bNeedInitItemHeight = FALSE;

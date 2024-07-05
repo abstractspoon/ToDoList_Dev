@@ -40,7 +40,6 @@ public:
 	BOOL AddListReminder(const TDCREMINDER& rem);
 	BOOL UpdateListReminder(const TDCREMINDER& rem);
 	BOOL RemoveListReminder(const TDCREMINDER& rem);
-	void RemoveAllListReminders();
 	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
 
 	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
