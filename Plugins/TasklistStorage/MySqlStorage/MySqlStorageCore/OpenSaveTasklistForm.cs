@@ -60,6 +60,7 @@ namespace MySqlStorage
 			};
 
 			Win32.EnableExplorerTheming(m_Tasklists.Handle);
+			Win32.SetEditCue(m_Filter.Handle, "<optional>");
 		}
 
 		public TasklistInfo TasklistInfo
@@ -139,6 +140,11 @@ namespace MySqlStorage
 
 			m_Tasklist.Text = m_TasklistInfo.Tasklist.Name;
 			m_Tasklists.Initialise(m_Connection, m_TasklistInfo.Connection, m_OpenTasklist);
+		}
+
+		private void OnFilterTextChanged(object sender, EventArgs e)
+		{
+			m_Tasklists.Filter = m_Filter.Text;
 		}
 	}
 }

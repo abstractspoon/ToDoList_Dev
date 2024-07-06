@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 using MySql.Data.MySqlClient;
@@ -79,6 +80,20 @@ namespace MySqlStorage
 
 	internal class TasklistsListView : ListView
 	{
+		class TasklistItem
+		{
+			public uint Id;
+			public string Name;
+			public string Size;
+			public string LastMod;
+		}
+
+		// -----------------------------------------------------
+
+		private List<TasklistItem> m_Tasklists = new List<TasklistItem>();
+
+		// -----------------------------------------------------
+
 		public void Initialise(MySqlConnection conn, ConnectionInfo connInfo, bool selectFirst)
 		{
 			Items.Clear();
@@ -95,28 +110,48 @@ namespace MySqlStorage
 				{
 					while (reader.Read())
 					{
-						var id = reader.GetUInt32(0);
-						var name = reader.GetString(1);
-						var size = reader.GetUInt32(2);
-						var lastMod = reader.GetString(3);
-
-						var item = new ListViewItem(name);
-						item.SubItems.Add(FormatSize(size));
-						item.SubItems.Add(lastMod);
-
-						item.Tag = new TasklistInfo()
+						m_Tasklists.Add(new TasklistItem()
 						{
-							Key = id,
-							Name = name,
-						};
-
-						Items.Add(item); 
+							Id = reader.GetUInt32(0),
+							Name = reader.GetString(1),
+							Size = FormatSize(reader.GetUInt32(2)),
+							LastMod = reader.GetString(3)
+						});
 					}
 				}
 			}
 
+			Populate();
+
 			if (selectFirst && (Items.Count > 0))
 				SelectedIndices.Add(0);
+		}
+
+		private void Populate(string filter = "")
+		{
+			// Cache selected tasklist
+			var selId = SelectedTasklist?.Key;
+
+			Items.Clear();
+
+			foreach (var tasklist in m_Tasklists)
+			{
+				if (tasklist.Name.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase) != -1)
+				{
+					var item = new ListViewItem(tasklist.Name);
+
+					item.SubItems.Add(tasklist.Size);
+					item.SubItems.Add(tasklist.LastMod);
+					item.Tag = tasklist;
+
+					Items.Add(item);
+				}
+			}
+		}
+
+		public string Filter
+		{
+			set { Populate(value); }
 		}
 
 		private string FormatSize(uint size)
@@ -138,12 +173,37 @@ namespace MySqlStorage
 		{
 			foreach (ListViewItem item in Items)
 			{
-				if (name.Equals(item.Text, StringComparison.InvariantCultureIgnoreCase))
-					return (item.Tag as TasklistInfo);
+				var tasklist = (item.Tag as TasklistItem);
+
+				if (name.Equals(tasklist.Name, StringComparison.InvariantCultureIgnoreCase))
+					return GetTaskListInfo(tasklist);
 			}
 
 			// else
 			return null;
+		}
+
+		ListViewItem FindTasklistItem(uint id)
+		{
+			foreach (ListViewItem item in Items)
+			{
+				var tasklist = (item.Tag as TasklistItem);
+
+				if (tasklist.Id == id)
+					return item;
+			}
+
+			// else
+			return null;
+		}
+
+		TasklistInfo GetTaskListInfo(TasklistItem item)
+		{
+			return new TasklistInfo()
+			{
+				Key = item.Id,
+				Name = item.Name
+			};
 		}
 
 		public TasklistInfo SelectedTasklist
@@ -153,20 +213,21 @@ namespace MySqlStorage
 				if (SelectedItems.Count == 0)
 					return null;
 
-				return (SelectedItems[0].Tag as TasklistInfo);
+				return GetTaskListInfo(SelectedItems[0].Tag as TasklistItem);
 			}
 
 			set
 			{
 				SelectedIndices.Clear();
 
-				foreach (ListViewItem item in Items)
+				if (value != null)
 				{
-					if (item.Tag == value)
+					var item = FindTasklistItem(value.Key);
+
+					if (item != null)
 					{
 						SelectedIndices.Add(item.Index);
 						FocusedItem = item;
-						break;
 					}
 				}
 			}
