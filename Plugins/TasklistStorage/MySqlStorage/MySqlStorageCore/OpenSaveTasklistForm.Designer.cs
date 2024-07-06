@@ -31,19 +31,21 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.m_Database = new System.Windows.Forms.TextBox();
-			this.label3 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_Tasklist = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.ModifyDatabase = new System.Windows.Forms.Button();
 			this.m_Tasklists = new MySqlStorage.TasklistsListView();
+			this.NameCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.SizeCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.LastModCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.SuspendLayout();
 			// 
 			// OK
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(318, 135);
+			this.OK.Location = new System.Drawing.Point(318, 179);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -54,7 +56,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(318, 164);
+			this.Cancel.Location = new System.Drawing.Point(318, 208);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -71,15 +73,6 @@
 			this.m_Database.Size = new System.Drawing.Size(215, 20);
 			this.m_Database.TabIndex = 3;
 			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(8, 39);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(48, 13);
-			this.label3.TabIndex = 24;
-			this.label3.Text = "Tasklists";
-			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
@@ -93,7 +86,7 @@
 			// 
 			this.m_Tasklist.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.m_Tasklist.Location = new System.Drawing.Point(97, 165);
+			this.m_Tasklist.Location = new System.Drawing.Point(97, 181);
 			this.m_Tasklist.Name = "m_Tasklist";
 			this.m_Tasklist.Size = new System.Drawing.Size(215, 20);
 			this.m_Tasklist.TabIndex = 0;
@@ -103,7 +96,7 @@
 			// 
 			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(8, 168);
+			this.label1.Location = new System.Drawing.Point(8, 184);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(43, 13);
 			this.label1.TabIndex = 24;
@@ -122,17 +115,39 @@
 			// 
 			// m_Tasklists
 			// 
+			this.m_Tasklists.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_Tasklists.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.NameCol,
+            this.SizeCol,
+            this.LastModCol});
 			this.m_Tasklists.FullRowSelect = true;
 			this.m_Tasklists.HideSelection = false;
-			this.m_Tasklists.Location = new System.Drawing.Point(97, 40);
+			this.m_Tasklists.Location = new System.Drawing.Point(12, 40);
 			this.m_Tasklists.MultiSelect = false;
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.SelectedTasklist = null;
-			this.m_Tasklists.Size = new System.Drawing.Size(215, 116);
+			this.m_Tasklists.Size = new System.Drawing.Size(381, 132);
 			this.m_Tasklists.TabIndex = 31;
 			this.m_Tasklists.UseCompatibleStateImageBehavior = false;
-			this.m_Tasklists.View = System.Windows.Forms.View.List;
+			this.m_Tasklists.View = System.Windows.Forms.View.Details;
 			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
+			// 
+			// NameCol
+			// 
+			this.NameCol.Text = "Name";
+			this.NameCol.Width = 150;
+			// 
+			// SizeCol
+			// 
+			this.SizeCol.Text = "Size";
+			this.SizeCol.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			// 
+			// LastModCol
+			// 
+			this.LastModCol.Text = "LastModified";
+			this.LastModCol.Width = 150;
 			// 
 			// OpenSaveTasklistForm
 			// 
@@ -140,7 +155,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(405, 198);
+			this.ClientSize = new System.Drawing.Size(405, 242);
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.ModifyDatabase);
 			this.Controls.Add(this.m_Tasklists);
@@ -148,7 +163,6 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.label1);
-			this.Controls.Add(this.label3);
 			this.Controls.Add(this.label2);
 			this.Icon = global::MySqlStorage.Properties.Resources.MySqlStorage;
 			this.MaximizeBox = false;
@@ -168,11 +182,13 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.TextBox m_Database;
-		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.TextBox m_Tasklist;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Button ModifyDatabase;
 		private TasklistsListView m_Tasklists;
+		private System.Windows.Forms.ColumnHeader NameCol;
+		private System.Windows.Forms.ColumnHeader SizeCol;
+		private System.Windows.Forms.ColumnHeader LastModCol;
 	}
 }

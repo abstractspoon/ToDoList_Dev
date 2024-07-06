@@ -83,7 +83,11 @@ namespace MySqlStorage
 		{
 			Items.Clear();
 
-			string query = string.Format("SELECT Id, Name FROM {0}", connInfo.TasklistsTable);
+			string query = string.Format("SELECT {0}, {1}, LENGTH({2}), ExtractValue({2}, '/TODOLIST/attribute::LASTMODSTRING') FROM {3}", 
+										 connInfo.IdColumn,
+										 connInfo.NameColumn, 
+										 connInfo.XmlColumn,
+										 connInfo.TasklistsTable);
 
 			using (var command = new MySqlCommand(query, conn))
 			{
@@ -91,14 +95,20 @@ namespace MySqlStorage
 				{
 					while (reader.Read())
 					{
-						var tasklist = new TasklistInfo()
-						{
-							Key = reader.GetUInt32(0),
-							Name = reader.GetString(1)
-						};
+						var id = reader.GetUInt32(0);
+						var name = reader.GetString(1);
+						var size = reader.GetUInt32(2);
+						var lastMod = reader.GetString(3);
 
-						var item = new ListViewItem(tasklist.Name);
-						item.Tag = tasklist;
+						var item = new ListViewItem(name);
+						item.SubItems.Add(FormatSize(size));
+						item.SubItems.Add(lastMod);
+
+						item.Tag = new TasklistInfo()
+						{
+							Key = id,
+							Name = name,
+						};
 
 						Items.Add(item); 
 					}
@@ -107,6 +117,21 @@ namespace MySqlStorage
 
 			if (selectFirst && (Items.Count > 0))
 				SelectedIndices.Add(0);
+		}
+
+		private string FormatSize(uint size)
+		{
+			if (size == 0)
+				return "0 KB";
+
+			if (size < 1024)
+				return "1 KB";
+
+			if (size < (1024 * 1024))
+				return string.Format("{0} KB", (size / 1024)); // no decimal
+
+			// else
+			return string.Format("{0:0.00} MB", (size / (1024.0 * 1024.0)));
 		}
 
 		public TasklistInfo FindTasklist(string name)
