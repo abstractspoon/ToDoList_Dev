@@ -169,7 +169,7 @@
 			// 
 			// LastModCol
 			// 
-			this.LastModCol.Text = "LastModified";
+			this.LastModCol.Text = "Last Modified";
 			this.LastModCol.Width = 150;
 			// 
 			// OpenSaveTasklistForm
