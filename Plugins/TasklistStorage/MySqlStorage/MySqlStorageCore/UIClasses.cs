@@ -109,11 +109,11 @@ namespace MySqlStorage
 				SelectedIndices.Add(0);
 		}
 
-		public TasklistInfo FindItem(string name)
+		public TasklistInfo FindTasklist(string name)
 		{
 			foreach (ListViewItem item in Items)
 			{
-				if (name.Equals(item.ToString(), StringComparison.InvariantCultureIgnoreCase))
+				if (name.Equals(item.Text, StringComparison.InvariantCultureIgnoreCase))
 					return (item.Tag as TasklistInfo);
 			}
 
@@ -121,7 +121,7 @@ namespace MySqlStorage
 			return null;
 		}
 
-		public TasklistInfo SelectedItem
+		public TasklistInfo SelectedTasklist
 		{
 			get
 			{
@@ -140,6 +140,7 @@ namespace MySqlStorage
 					if (item.Tag == value)
 					{
 						SelectedIndices.Add(item.Index);
+						FocusedItem = item;
 						break;
 					}
 				}

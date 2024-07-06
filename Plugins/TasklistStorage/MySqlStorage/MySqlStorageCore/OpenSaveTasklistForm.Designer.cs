@@ -122,10 +122,12 @@
 			// 
 			// m_Tasklists
 			// 
+			this.m_Tasklists.FullRowSelect = true;
+			this.m_Tasklists.HideSelection = false;
 			this.m_Tasklists.Location = new System.Drawing.Point(97, 40);
 			this.m_Tasklists.MultiSelect = false;
 			this.m_Tasklists.Name = "m_Tasklists";
-			this.m_Tasklists.SelectedItem = null;
+			this.m_Tasklists.SelectedTasklist = null;
 			this.m_Tasklists.Size = new System.Drawing.Size(215, 116);
 			this.m_Tasklists.TabIndex = 31;
 			this.m_Tasklists.UseCompatibleStateImageBehavior = false;

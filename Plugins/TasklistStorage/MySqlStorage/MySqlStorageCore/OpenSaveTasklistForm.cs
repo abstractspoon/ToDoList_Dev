@@ -64,7 +64,7 @@ namespace MySqlStorage
 		{
 			get
 			{
-				var tasklist = m_Tasklists.SelectedItem;
+				var tasklist = m_Tasklists.SelectedTasklist;
 
 				if (tasklist != null)
 				{
@@ -85,7 +85,7 @@ namespace MySqlStorage
 			// select the tasklist else null the selection
 			if (!m_HandlingSelectionChange)
 			{
-				m_Tasklists.SelectedItem = (m_Tasklists.FindItem(m_Tasklist.Text));
+				m_Tasklists.SelectedTasklist = m_Tasklists.FindTasklist(m_Tasklist.Text);
 			}
 		}
 
@@ -93,7 +93,7 @@ namespace MySqlStorage
 		{
 			// If the new selection does not match the current text
 			// change the text to the selection
-			var tasklist = (m_Tasklists.SelectedItem as TasklistInfo);
+			var tasklist = m_Tasklists.SelectedTasklist;
 
 			if (tasklist != null)
 			{
