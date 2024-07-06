@@ -159,7 +159,7 @@
 			// 
 			// NameCol
 			// 
-			this.NameCol.Text = "Name";
+			this.NameCol.Text = "Tasklist";
 			this.NameCol.Width = 150;
 			// 
 			// SizeCol
