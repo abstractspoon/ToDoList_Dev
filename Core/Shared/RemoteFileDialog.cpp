@@ -220,7 +220,7 @@ BOOL CRemoteFileDialog::OnInitDialog()
 	m_sFilterExt = m_aFilters[m_cbFileTypes.GetItemData(0)].sExt;
 
 	// add columns to filelist
-	m_lcFiles.InsertColumn(FILENAME, _T("Name"), LVCFMT_LEFT, 150);
+	m_lcFiles.InsertColumn(FILENAME, _T("Filename"), LVCFMT_LEFT, 150);
 	m_lcFiles.InsertColumn(FILESIZE, _T("Size"), LVCFMT_RIGHT, 60);
 	m_lcFiles.InsertColumn(MODDATE, _T("Last Modified"), LVCFMT_LEFT, 150);
 

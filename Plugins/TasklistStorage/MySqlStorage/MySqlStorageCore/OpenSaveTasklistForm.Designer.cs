@@ -35,12 +35,12 @@
 			this.m_Tasklist = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.ModifyDatabase = new System.Windows.Forms.Button();
+			this.m_Filter = new System.Windows.Forms.TextBox();
+			this.label3 = new System.Windows.Forms.Label();
 			this.m_Tasklists = new MySqlStorage.TasklistsListView();
 			this.NameCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.SizeCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.LastModCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.m_Filter = new System.Windows.Forms.TextBox();
-			this.label3 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// OK
@@ -115,6 +115,26 @@
 			this.ModifyDatabase.UseVisualStyleBackColor = true;
 			this.ModifyDatabase.Click += new System.EventHandler(this.OnModifyDatabase);
 			// 
+			// m_Filter
+			// 
+			this.m_Filter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.m_Filter.Location = new System.Drawing.Point(97, 249);
+			this.m_Filter.Name = "m_Filter";
+			this.m_Filter.Size = new System.Drawing.Size(215, 20);
+			this.m_Filter.TabIndex = 0;
+			this.m_Filter.TextChanged += new System.EventHandler(this.OnFilterTextChanged);
+			// 
+			// label3
+			// 
+			this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(9, 252);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(29, 13);
+			this.label3.TabIndex = 24;
+			this.label3.Text = "Filter";
+			// 
 			// m_Tasklists
 			// 
 			this.m_Tasklists.Activation = System.Windows.Forms.ItemActivation.OneClick;
@@ -152,26 +172,6 @@
 			this.LastModCol.Text = "LastModified";
 			this.LastModCol.Width = 150;
 			// 
-			// m_Filter
-			// 
-			this.m_Filter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.m_Filter.Location = new System.Drawing.Point(97, 249);
-			this.m_Filter.Name = "m_Filter";
-			this.m_Filter.Size = new System.Drawing.Size(215, 20);
-			this.m_Filter.TabIndex = 0;
-			this.m_Filter.TextChanged += new System.EventHandler(this.OnFilterTextChanged);
-			// 
-			// label3
-			// 
-			this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(9, 252);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(29, 13);
-			this.label3.TabIndex = 24;
-			this.label3.Text = "Filter";
-			// 
 			// OpenSaveTasklistForm
 			// 
 			this.AcceptButton = this.OK;
@@ -182,8 +182,8 @@
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.ModifyDatabase);
 			this.Controls.Add(this.m_Tasklists);
-			this.Controls.Add(this.m_Filter);
 			this.Controls.Add(this.m_Tasklist);
+			this.Controls.Add(this.m_Filter);
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.label3);
