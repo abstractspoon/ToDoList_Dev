@@ -43,7 +43,7 @@
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 3;
-			this.OK.Text = "Connect";
+			this.OK.Text = "Connect...";
 			this.OK.UseVisualStyleBackColor = true;
 			this.OK.Click += new System.EventHandler(this.OnOK);
 			// 
