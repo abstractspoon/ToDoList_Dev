@@ -45,7 +45,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(318, 179);
+			this.OK.Location = new System.Drawing.Point(318, 218);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -56,7 +56,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(318, 208);
+			this.Cancel.Location = new System.Drawing.Point(318, 247);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 2;
@@ -86,7 +86,7 @@
 			// 
 			this.m_Tasklist.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.m_Tasklist.Location = new System.Drawing.Point(97, 181);
+			this.m_Tasklist.Location = new System.Drawing.Point(97, 220);
 			this.m_Tasklist.Name = "m_Tasklist";
 			this.m_Tasklist.Size = new System.Drawing.Size(215, 20);
 			this.m_Tasklist.TabIndex = 0;
@@ -96,7 +96,7 @@
 			// 
 			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(8, 184);
+			this.label1.Location = new System.Drawing.Point(8, 223);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(43, 13);
 			this.label1.TabIndex = 24;
@@ -115,6 +115,7 @@
 			// 
 			// m_Tasklists
 			// 
+			this.m_Tasklists.Activation = System.Windows.Forms.ItemActivation.OneClick;
 			this.m_Tasklists.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -128,7 +129,7 @@
 			this.m_Tasklists.MultiSelect = false;
 			this.m_Tasklists.Name = "m_Tasklists";
 			this.m_Tasklists.SelectedTasklist = null;
-			this.m_Tasklists.Size = new System.Drawing.Size(381, 132);
+			this.m_Tasklists.Size = new System.Drawing.Size(381, 171);
 			this.m_Tasklists.TabIndex = 31;
 			this.m_Tasklists.UseCompatibleStateImageBehavior = false;
 			this.m_Tasklists.View = System.Windows.Forms.View.Details;
@@ -155,7 +156,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(405, 242);
+			this.ClientSize = new System.Drawing.Size(405, 281);
 			this.Controls.Add(this.m_Database);
 			this.Controls.Add(this.ModifyDatabase);
 			this.Controls.Add(this.m_Tasklists);

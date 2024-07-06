@@ -58,6 +58,8 @@ namespace MySqlStorage
 				else
 					m_Tasklist.Focus();
 			};
+
+			Win32.EnableExplorerTheming(m_Tasklists.Handle);
 		}
 
 		public TasklistInfo TasklistInfo
