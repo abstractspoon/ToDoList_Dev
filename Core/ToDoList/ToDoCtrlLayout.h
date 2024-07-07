@@ -80,6 +80,7 @@ protected:
 
 	static void SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter);
 	static void LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter, BOOL bRecalcLayout);
+	static int GetDefaultProportions(const CSimpleSplitter& splitter, CArray<int, int&>& aSizes);
 
 };
 

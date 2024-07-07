@@ -38,6 +38,7 @@ public:
 	BOOL CreatePane(int nIndex, CWnd* pPaneWnd, DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszClassName = NULL);
 	
 	int GetPaneCount() const { return m_aPanes.GetSize(); }
+	int FindPane(CWnd* pPaneWnd) const;
 	CWnd* GetPane(int nIndex) const;
 	CWnd* GetActivePane(int* pIndex) const;
 
