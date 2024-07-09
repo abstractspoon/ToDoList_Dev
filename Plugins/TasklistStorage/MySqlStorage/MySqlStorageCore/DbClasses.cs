@@ -36,7 +36,6 @@ namespace MySqlStorage
 				Server = "localhost";
 				DatabaseName = "Tasklists";
 				Username = "root";
-				Password = "password";
 #endif
 			}
 		}
