@@ -233,6 +233,17 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	if (sTipText.IsEmpty())
 		sTipText = GetMenuString(nMenuID, MF_BYCOMMAND);
 
+	// Add parent menu name for context
+	HMENU hParentMenu = NULL;
+	
+	int nPos = FindMenuItem(*this, nMenuID, hParentMenu);
+	ASSERT(hParentMenu);
+
+	nPos = FindMenuItem(*this, hParentMenu, hParentMenu);
+	ASSERT(hParentMenu);
+
+	sTipText = (GetMenuString(hParentMenu, nPos, MF_BYPOSITION) + _T(" > ") + sTipText);
+
 	// removed embedded tabs
 	if (!sTipText.IsEmpty())
 		sTipText.Replace('\t', ' ');

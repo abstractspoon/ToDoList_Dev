@@ -213,21 +213,29 @@ namespace Calendar
 			}
 			else if (longAppt && ptInLongApptsRect)
 			{
-				dateAtCursor = dateAtCursor.Add(m_delta);
-
-				int hoursDiff = dateAtCursor.Subtract(selection.StartDate).Hours;
-				TimeSpan apptLen = selection.Length;
-
-				if (hoursDiff != 0)
+				if (m_length == TimeSpan.Zero)
 				{
-					System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
+					m_startDate = selection.StartDate;
+					m_length = selection.Length;
+				}
+				else
+				{
+					dateAtCursor = dateAtCursor.Add(m_delta);
 
-					if (newStart != selection.StartDate)
+					int hoursDiff = dateAtCursor.Subtract(selection.StartDate).Hours;
+
+					if (hoursDiff != 0)
 					{
-						selection.StartDate = newStart;
-						selection.EndDate = (newStart + apptLen);
+						System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
 
-						return true;
+						// Check for a change
+						if (newStart != selection.StartDate)
+						{
+							selection.StartDate = newStart;
+							selection.EndDate = (newStart + m_length);
+
+							return true;
+						}
 					}
 				}
 			}
@@ -437,8 +445,10 @@ namespace Calendar
 
 			if (m_mode != Mode.None)
 			{
+				if (m_mode != Mode.Move || (m_startDate != m_dayView.SelectedAppointment.StartDate))
+					m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
+
 				m_dayView.Invalidate();
-				m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
 
 				m_mode = Mode.None;
 				m_delta = TimeSpan.Zero;

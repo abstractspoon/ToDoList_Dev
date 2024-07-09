@@ -35,8 +35,8 @@ CPreferencesTaskPage::CPreferencesTaskPage()
 	: 
 	CPreferencesPageBase(CPreferencesTaskPage::IDD),
 	m_cbStartOfWorkday(TCB_HALFHOURS),
-	m_cbStartOfLunch(TCB_HALFHOURS | TCB_HOURSINDAY),
-	m_cbEndOfLunch(TCB_HALFHOURS | TCB_HOURSINDAY)
+	m_cbStartOfLunch(TCB_HALFHOURS),
+	m_cbEndOfLunch(TCB_HALFHOURS)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskPage)
 	//}}AFX_DATA_INIT
@@ -90,7 +90,6 @@ void CPreferencesTaskPage::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_DAYSINONEWEEK, m_nDaysInWeek);
 	}
 }
-
 
 BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesTaskPage)
