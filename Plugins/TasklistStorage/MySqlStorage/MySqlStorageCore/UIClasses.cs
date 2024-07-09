@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 using MySql.Data.MySqlClient;
+using Abstractspoon.Tdl.PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -96,35 +97,44 @@ namespace MySqlStorage
 
 		public void Initialise(MySqlConnection conn, ConnectionInfo connInfo, bool selectFirst)
 		{
+			DPIScaling.ScaleColumnWidths(this);
+
 			Items.Clear();
 
-			string query = string.Format("SELECT {0}, {1}, LENGTH({2}), ExtractValue({2}, '/TODOLIST/attribute::LASTMODSTRING') FROM {3}", 
-										 connInfo.IdColumn,
-										 connInfo.NameColumn, 
-										 connInfo.XmlColumn,
-										 connInfo.TasklistsTable);
-
-			using (var command = new MySqlCommand(query, conn))
+			try
 			{
-				using (var reader = command.ExecuteReader())
+				string query = string.Format("SELECT {0}, {1}, LENGTH({2}), ExtractValue({2}, '/TODOLIST/attribute::LASTMODSTRING') FROM {3}", 
+											 connInfo.IdColumn,
+											 connInfo.NameColumn, 
+											 connInfo.XmlColumn,
+											 connInfo.TasklistsTable);
+
+				using (var command = new MySqlCommand(query, conn))
 				{
-					while (reader.Read())
+					using (var reader = command.ExecuteReader())
 					{
-						m_Tasklists.Add(new TasklistItem()
+						while (reader.Read())
 						{
-							Id = reader.GetUInt32(0),
-							Name = reader.GetString(1),
-							Size = FormatSize(reader.GetUInt32(2)),
-							LastMod = reader.GetString(3)
-						});
+							m_Tasklists.Add(new TasklistItem()
+							{
+								Id = reader.GetUInt32(0),
+								Name = reader.GetString(1),
+								Size = FormatSize(reader.GetUInt32(2)),
+								LastMod = reader.GetString(3)
+							});
+						}
 					}
 				}
+
+				Populate();
+
+				if (selectFirst && (Items.Count > 0))
+					SelectedIndices.Add(0);
 			}
+			catch (Exception /*e*/)
+			{
 
-			Populate();
-
-			if (selectFirst && (Items.Count > 0))
-				SelectedIndices.Add(0);
+			}
 		}
 
 		private void Populate(string filter = "")
