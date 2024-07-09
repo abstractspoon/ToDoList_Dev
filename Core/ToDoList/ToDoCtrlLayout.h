@@ -77,10 +77,11 @@ protected:
 	void RebuildLayout(BOOL bRecalcLayout);
 	BOOL ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect) const;
 	void ExcludeSplitBar(const CSimpleSplitter& splitter, CDC* pDC) const;
+	void SetDefaultPaneSizes();
 
 	static void SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter);
 	static void LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter, BOOL bRecalcLayout);
-	static int GetDefaultProportions(const CSimpleSplitter& splitter, CArray<int, int&>& aSizes);
+	static void SetDefaultPaneSizes(CSimpleSplitter& splitter);
 
 };
 

@@ -96,10 +96,17 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	m_nCommentsPos = nCommentsPos;
 	m_bAllowStacking = bAllowStacking;
 	m_bStackCommentsAbove = bStackCommentAbove;
-	m_bFirstLayout = FALSE;
 
 	if (bRebuild)
+	{
 		RebuildLayout(TRUE);
+
+		if (m_bFirstLayout)
+		{
+			SetDefaultPaneSizes();
+			m_bFirstLayout = FALSE;
+		}
+	}
 
 	return bRebuild;
 }
@@ -670,8 +677,6 @@ void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTST
 
 	CString sState = prefs.GetProfileString(szKey, szEntry);
 	
-	CArray<int, int&> aSizes;
-
 	if (!sState.IsEmpty())
 	{
 		CStringArray aState;
@@ -679,31 +684,35 @@ void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTST
 
 		if (nState == splitter.GetPaneCount())
 		{
+			CArray<int, int&> aSizes;
+
 			while (nState--)
 			{
 				int nSize = _ttoi(aState[nState]);
 				aSizes.InsertAt(0, nSize);
 			}
-		}
-		else
-		{
-			ASSERT(0);
+
+			splitter.SetRelativePaneSizes(aSizes, bRecalcLayout);
 		}
 	}
-
-	if (aSizes.GetSize() == 0)
-		GetDefaultProportions(splitter, aSizes);
-
-	splitter.SetRelativePaneSizes(aSizes, bRecalcLayout);
 }
 
-int CToDoCtrlLayout::GetDefaultProportions(const CSimpleSplitter& splitter, CArray<int, int&>& aSizes)
+void CToDoCtrlLayout::SetDefaultPaneSizes()
 {
-	aSizes.RemoveAll();
+	SetDefaultPaneSizes(m_splitterHorz);
+	SetDefaultPaneSizes(m_splitterVert);
+}
 
-	int nTasksPane = splitter.FindPane(NULL);
+void CToDoCtrlLayout::SetDefaultPaneSizes(CSimpleSplitter& splitter)
+{
 	int nNumPanes = splitter.GetPaneCount();
 
+	if (!nNumPanes)
+		return;
+
+	int nTasksPane = splitter.FindPane(NULL);
+
+	CArray<int, int&> aSizes;
 	aSizes.SetSize(nNumPanes);
 
 	if (nTasksPane == -1)
@@ -731,5 +740,5 @@ int CToDoCtrlLayout::GetDefaultProportions(const CSimpleSplitter& splitter, CArr
 		ASSERT(0);
 	}
 
-	return aSizes.GetSize();
+	splitter.SetRelativePaneSizes(aSizes);
 }
