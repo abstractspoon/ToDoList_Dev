@@ -196,6 +196,8 @@ BOOL CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 	// set filename and alternate pref name to be the display name
 	pTDC->SetFilePath(info.szDisplayPath);
 	pTDC->SetAlternatePreferencesKey(info.szDisplayPath);
+
+	return TRUE;
 }
 
 CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
