@@ -137,7 +137,6 @@
 			// 
 			// m_Tasklists
 			// 
-			this.m_Tasklists.Activation = System.Windows.Forms.ItemActivation.OneClick;
 			this.m_Tasklists.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
