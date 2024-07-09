@@ -96,10 +96,17 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 	m_nCommentsPos = nCommentsPos;
 	m_bAllowStacking = bAllowStacking;
 	m_bStackCommentsAbove = bStackCommentAbove;
-	m_bFirstLayout = FALSE;
 
 	if (bRebuild)
+	{
 		RebuildLayout(TRUE);
+
+		if (m_bFirstLayout)
+		{
+			SetDefaultPaneSizes();
+			m_bFirstLayout = FALSE;
+		}
+	}
 
 	return bRebuild;
 }
@@ -626,6 +633,21 @@ void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 	}
 }
 
+void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter)
+{
+	if (!splitter.GetSafeHwnd() || !splitter.GetPaneCount())
+	{
+		prefs.DeleteProfileEntry(szKey, szEntry);
+		return;
+	}
+
+	CArray<int, int&> aSizes;
+	splitter.GetRelativePaneSizes(aSizes);
+
+	CString sState = Misc::FormatArrayT(aSizes, _T("%d"), ':');
+	prefs.WriteProfileString(szKey, szEntry, sState);
+}
+
 void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, BOOL bRecalcLayout)
 {
 	if (HasSplitters())
@@ -648,21 +670,6 @@ void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, BOOL b
 	}
 }
 
-void CToDoCtrlLayout::SaveState(CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, const CSimpleSplitter& splitter)
-{
-	if (!splitter.GetSafeHwnd() || !splitter.GetPaneCount())
-	{
-		prefs.DeleteProfileEntry(szKey, szEntry);
-		return;
-	}
-
-	CArray<int, int&> aSizes;
-	splitter.GetRelativePaneSizes(aSizes);
-
-	CString sState = Misc::FormatArrayT(aSizes, _T("%d"), ':');
-	prefs.WriteProfileString(szKey, szEntry, sState);
-}
-
 void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTSTR szEntry, CSimpleSplitter& splitter, BOOL bRecalcLayout)
 {
 	if (!splitter.GetSafeHwnd() || !splitter.GetPaneCount())
@@ -670,25 +677,68 @@ void CToDoCtrlLayout::LoadState(const CPreferences& prefs, LPCTSTR szKey, LPCTST
 
 	CString sState = prefs.GetProfileString(szKey, szEntry);
 	
-	if (sState.IsEmpty())
-		return;
-
-	CStringArray aState;
-	int nState = Misc::Split(sState, aState, ':');
-
-	if (nState != splitter.GetPaneCount())
+	if (!sState.IsEmpty())
 	{
-		ASSERT(0);
-		return;
+		CStringArray aState;
+		int nState = Misc::Split(sState, aState, ':');
+
+		if (nState == splitter.GetPaneCount())
+		{
+			CArray<int, int&> aSizes;
+
+			while (nState--)
+			{
+				int nSize = _ttoi(aState[nState]);
+				aSizes.InsertAt(0, nSize);
+			}
+
+			splitter.SetRelativePaneSizes(aSizes, bRecalcLayout);
+		}
 	}
+}
+
+void CToDoCtrlLayout::SetDefaultPaneSizes()
+{
+	SetDefaultPaneSizes(m_splitterHorz);
+	SetDefaultPaneSizes(m_splitterVert);
+}
+
+void CToDoCtrlLayout::SetDefaultPaneSizes(CSimpleSplitter& splitter)
+{
+	int nNumPanes = splitter.GetPaneCount();
+
+	if (!nNumPanes)
+		return;
+
+	int nTasksPane = splitter.FindPane(NULL);
 
 	CArray<int, int&> aSizes;
+	aSizes.SetSize(nNumPanes);
 
-	while (nState--)
+	if (nTasksPane == -1)
+		ASSERT(nNumPanes == 2);
+	else
+		aSizes[nTasksPane] = 3; // Tasks
+
+	// The other panes
+	switch (nTasksPane)
 	{
-		int nSize = _ttoi(aState[nState]);
-		aSizes.InsertAt(0, nSize);
+	case -1:
+	case 2:
+		aSizes[0] = aSizes[1] = 1;
+		break;
+
+	case 0:
+	case 1:
+		aSizes[1 - nTasksPane] = 1; // item 0 or 1
+
+		if (nNumPanes == 3)
+			aSizes[2] = 1;
+		break;
+
+	default:
+		ASSERT(0);
 	}
 
-	splitter.SetRelativePaneSizes(aSizes, bRecalcLayout);
+	splitter.SetRelativePaneSizes(aSizes);
 }

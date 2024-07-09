@@ -164,6 +164,16 @@ CWnd* CSimpleSplitter::GetPane(int nIndex) const
 	return m_aPanes[nIndex];
 }
 
+int CSimpleSplitter::FindPane(CWnd* pPaneWnd) const
+{
+	for (int i = 0; i < m_aPanes.GetSize(); i++)
+	{
+		if (pPaneWnd == m_aPanes[i])
+			return i;
+	}
+	return -1;
+}
+
 void CSimpleSplitter::SetActivePane(int nIndex)
 {
 	ASSERT((nIndex >= 0) && (nIndex < m_aPanes.GetSize()));
