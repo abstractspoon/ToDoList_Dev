@@ -5976,7 +5976,7 @@ CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CDWordArra
 	}
 
 	// All the rest
-	return GetLongestValue(nColID, aTaskIDs);
+	return GetLongestValue(nColID, EMPTY_STR, aTaskIDs);
 }
 
 CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const
