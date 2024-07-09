@@ -2374,6 +2374,14 @@ CString FileMisc::FormatExtension(LPCTSTR szExt, BOOL bWithDot)
 	return sExt;
 }
 
+void FileMisc::EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile)
+{
+	CString sExt = GetExtension(szFromFile, FALSE);
+
+	if (!HasExtension(sToFile, sExt))
+		ReplaceExtension(sToFile, sExt);
+}
+
 void FileMisc::SplitPath(LPCTSTR szPath, CString* pDrive, CString* pDir, CString* pFName, CString* pExt)
 {
 	TCHAR szDrive[_MAX_DRIVE+1] = { 0 }, 

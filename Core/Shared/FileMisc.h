@@ -200,6 +200,7 @@ namespace FileMisc
 	CString FormatExtension(LPCTSTR szExt, BOOL bWithDot = TRUE);
 	CString& ReplaceExtension(CString& sFilePath, LPCTSTR szExt);
 	CString& RemoveExtension(CString& sFilePath);
+	void EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile);
 	
 	CString GetTempFolder();
 	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0);
