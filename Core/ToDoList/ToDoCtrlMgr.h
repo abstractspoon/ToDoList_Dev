@@ -83,7 +83,7 @@ public:
 	BOOL UsesStorage(int nIndex) const;
 	BOOL GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const;
 	BOOL SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info);
-	BOOL ClearStorageDetails(int nIndex);
+	BOOL ClearStorageDetails(int nIndex, BOOL bIncFilePath);
 
 	BOOL RefreshFileLastModified(int nIndex); // true if changed
 	BOOL IsModified(int nIndex) const;
@@ -159,8 +159,8 @@ protected:
 
 		BOOL UsesStorage() const;
 		void RefreshPathType();
-		void ClearStorageDetails();
-		void SetStorageDetails(const TSM_TASKLISTINFO& info);
+		BOOL ClearStorageDetails(BOOL bIncFilePath);
+		BOOL SetStorageDetails(const TSM_TASKLISTINFO& info);
 		
 		static TDCM_PATHTYPE TranslatePathType(int nDriveInfoType);
 	

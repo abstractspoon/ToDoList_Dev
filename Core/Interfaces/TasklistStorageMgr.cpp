@@ -156,14 +156,14 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sInfo, BOOL bIncPassword)
 				break;
 
 			// else
-							return TRUE;
-						}
-					}
+			return TRUE;
+		}
+	}
 
 	// else
 	Reset();
 	return FALSE;
-	}
+}
 
 BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sPart, LPTSTR szAttrib, int nMaxLen)
 {

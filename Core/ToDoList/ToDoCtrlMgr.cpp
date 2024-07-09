@@ -160,30 +160,42 @@ void CToDoCtrlMgr::TDCITEM::RefreshPathType()
 	}
 }
 
-void CToDoCtrlMgr::TDCITEM::ClearStorageDetails()
+BOOL CToDoCtrlMgr::TDCITEM::ClearStorageDetails(BOOL bIncFilePath)
 {
-	storageinfo.Reset();
-	bLoaded = FALSE;
+	if (!UsesStorage())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
-	pTDC->SetFilePath(_T(""));
+	storageinfo.Reset();
+
+	if (bIncFilePath)
+	{
+		pTDC->SetFilePath(_T(""));
+		bLoaded = FALSE;
+	}
+
 	pTDC->SetAlternatePreferencesKey(_T(""));
+	return TRUE;
 }
 
-void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
+BOOL CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 {
-	if (info.HasInfo())
-	{
-		storageinfo = info;
-		bLoaded = TRUE;
+	ASSERT(info.HasInfo());
 
-		// set filename and alternate pref name to be the display name
-		pTDC->SetFilePath(info.szDisplayPath);
-		pTDC->SetAlternatePreferencesKey(info.szDisplayPath);
-	}
-	else
+	if (!info.HasInfo())
 	{
-		ClearStorageDetails();
+		ASSERT(0);
+		return FALSE;
 	}
+
+	storageinfo = info;
+	bLoaded = TRUE;
+
+	// set filename and alternate pref name to be the display name
+	pTDC->SetFilePath(info.szDisplayPath);
+	pTDC->SetAlternatePreferencesKey(info.szDisplayPath);
 }
 
 CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
@@ -382,7 +394,8 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	GetTDCItem(nIndex).SetStorageDetails(info);
+	if (!GetTDCItem(nIndex).SetStorageDetails(info))
+		return FALSE;
 
 	// reset file timestamp info
 	RefreshFileLastModified(nIndex);
@@ -390,15 +403,11 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 	return TRUE;
 }
 
-BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex)
+BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex, BOOL bIncFilePath)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	if (!UsesStorage(nIndex))
-		return FALSE;
-
-	GetTDCItem(nIndex).ClearStorageDetails();
-	return TRUE;
+	return GetTDCItem(nIndex).ClearStorageDetails(bIncFilePath);
 }
 
 CString CToDoCtrlMgr::GetFriendlyProjectName(int nIndex) const

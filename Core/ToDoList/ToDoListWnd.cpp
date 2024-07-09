@@ -2011,7 +2011,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 	BOOL bUsesStorage = m_mgrToDoCtrls.GetStorageDetails(nTDC, storageInfo);
 	BOOL bFlush = !Misc::HasFlag(dwFlags, TDLS_NOFLUSH);
 
-	if (bUsesStorage)
+	if (bUsesStorage && !FileMisc::IsPath(szFilePath))
 	{
 		DOPROGRESS(IDS_SAVINGPROGRESS);
 
@@ -2335,11 +2335,6 @@ void CToDoListWnd::SaveSettings()
 				storageInfo.ClearLocalFilePath();
 
 				sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
-
-#ifdef _DEBUG
-				ASSERT(storageInfo.DecodeInfo(sFilePath));
-				ASSERT(storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords()) == sFilePath);
-#endif
 			}
 			else // make file paths relative
 			{
@@ -3844,12 +3839,15 @@ void CToDoListWnd::OnSaveas()
 	int nSel = GetSelToDoCtrl();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
+	TSM_TASKLISTINFO storageInfo;
+	BOOL bUsesStorage = m_mgrToDoCtrls.GetStorageDetails(nSel, storageInfo);
+
 	CString sCurFilePath = m_mgrToDoCtrls.GetFilePath(nSel), sNewFilePath(sCurFilePath);
 	CString sCurProjName = tdc.GetProjectName();
 	
 	// If the tasklist has already been saved and has a project name
 	// then we show a custom dialog allowing both to be modified
-	if (!sCurFilePath.IsEmpty() && !sCurProjName.IsEmpty())
+	if (!bUsesStorage && !sCurFilePath.IsEmpty() && !sCurProjName.IsEmpty())
 	{
 		CTDLTasklistSaveAsDlg dialog(sCurFilePath, 
 									 sCurProjName,
@@ -3888,18 +3886,16 @@ void CToDoListWnd::OnSaveas()
 
 		sNewFilePath = dialog.GetPathName();
 	}
-	
-	if (!FileMisc::IsSamePath(sCurFilePath, sNewFilePath))
+
+	if (bUsesStorage)
 	{
  		if (SaveTaskList(nSel, sNewFilePath) == TDCF_SUCCESS)
-		{
-			m_mgrToDoCtrls.ClearStorageDetails(nSel);
-			tdc.SetAlternatePreferencesKey(_T(""));
-		}
-		else
-		{
+			m_mgrToDoCtrls.ClearStorageDetails(nSel, FALSE); // Don't clear file path
+	}
+	else if (!FileMisc::IsSamePath(sCurFilePath, sNewFilePath))
+	{
+ 		if (SaveTaskList(nSel, sNewFilePath) != TDCF_SUCCESS)
 			tdc.SetProjectName(sCurProjName); // revert change
-		}
 	}
 }
 
@@ -8732,8 +8728,9 @@ BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks, BOOL
 	CString sFilePath = tdc.GetFilePath();
 
 	TSM_TASKLISTINFO storageInfo;
+	BOOL bUsesStorage = m_mgrToDoCtrls.GetStorageDetails(nIndex, storageInfo);
 
-	if (m_mgrToDoCtrls.GetStorageDetails(nIndex, storageInfo))
+	if (bUsesStorage)
 		sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
 
 	TDC_FILE nRes = OpenTaskList(&tdc, sFilePath, &storageInfo);
@@ -8747,8 +8744,10 @@ BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks, BOOL
 		Resize();
 
 		m_mgrToDoCtrls.CheckNotifyReadonly(nIndex);
-		m_mgrToDoCtrls.SetStorageDetails(nIndex, storageInfo);
 		m_mgrToDoCtrls.SetLoaded(nIndex);
+
+		if (bUsesStorage)
+			m_mgrToDoCtrls.SetStorageDetails(nIndex, storageInfo);
 
 		if (bWantNotifyDueTasks)
 			DoDueTaskNotification(nIndex, Prefs().GetNotifyDueByOnLoad());
