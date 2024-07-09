@@ -32,7 +32,9 @@ namespace MySqlStorage
 
 		public bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo, bool prompt)
 		{
-			if (prompt || !connInfo.OpenConnection(conn))
+			DbError unused;
+
+			if (prompt || !connInfo.OpenConnection(conn) || !connInfo.IsValid(conn, out unused))
 			{
 				m_Connection = conn;
 				m_ConnectionInfo = connInfo;
