@@ -109,9 +109,11 @@ namespace MySqlStorage
 			}
 		}
 
-		private void OnDoubleClickTaskLists(object sender, MouseEventArgs e)
+		private void OnDoubleClickTaskLists(object sender, EventArgs e)
 		{
-			if (m_Tasklists.HitTest(e.X, e.Y) != null)
+			Point pos = m_Tasklists.PointToClient(Cursor.Position);
+
+			if (m_Tasklists.HitTest(pos.X, pos.Y) != null)
 			{
 				DialogResult = DialogResult.OK;
 				Close();
@@ -146,5 +148,6 @@ namespace MySqlStorage
 		{
 			m_Tasklists.Filter = m_Filter.Text;
 		}
+
 	}
 }

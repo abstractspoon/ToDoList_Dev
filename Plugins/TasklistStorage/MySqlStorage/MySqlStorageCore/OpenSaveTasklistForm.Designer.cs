@@ -155,6 +155,7 @@
 			this.m_Tasklists.UseCompatibleStateImageBehavior = false;
 			this.m_Tasklists.View = System.Windows.Forms.View.Details;
 			this.m_Tasklists.SelectedIndexChanged += new System.EventHandler(this.OnTasklistsSelectionChange);
+			this.m_Tasklists.DoubleClick += new System.EventHandler(this.OnDoubleClickTaskLists);
 			// 
 			// NameCol
 			// 
