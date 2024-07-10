@@ -70,6 +70,8 @@ SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MDContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionCore.dll
+SET TDLFILELIST=%TDLFILELIST%;MySQLStorageBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;MySQLStorageCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PluginHelpers.dll
@@ -107,19 +109,26 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\CustomComboBox.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Google.Protobuf.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\K4os.Compression.LZ4.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\K4os.Compression.LZ4.Streams.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\K4os.Hash.xxHash.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Markdig.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\MySql.Data.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\RadialTree.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Ubiety.Dns.Core.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\ZstdNet.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest

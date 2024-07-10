@@ -78,7 +78,7 @@
 			this.m_Attribs.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_Attribs.MultipleLinkEditing = false;
 			this.m_Attribs.Name = "m_Attribs";
-			this.m_Attribs.Size = new System.Drawing.Size(287, 127);
+			this.m_Attribs.Size = new System.Drawing.Size(287, 132);
 			this.m_Attribs.TabIndex = 5;
 			// 
 			// EvidenceBoardAddLinkDlg

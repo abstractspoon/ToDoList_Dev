@@ -9,6 +9,7 @@
 
 #include <Shared\MessageBox.h>
 #include <Shared\GraphicsMisc.h>
+#include <Shared\Themed.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -257,6 +258,13 @@ HICON Win32::LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleBy
 	FreeLibrary(hMod);
 
 	return hIcon;
+}
+
+void Win32::EnableExplorerTheming(IntPtr hWnd)
+{
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+
+	CThemed::SetWindowTheme(pWnd, _T("Explorer"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

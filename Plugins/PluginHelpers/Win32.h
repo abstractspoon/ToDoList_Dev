@@ -47,16 +47,16 @@ namespace Abstractspoon
 				static bool SetEditMargins(IntPtr hWnd, int nAllMargins);
 				static bool SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom);
 
-				static void ActivateApp(IntPtr hWnd);
-				static int GetSystemDPI();
-
 				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 
+				// Misc
+				static void ActivateApp(IntPtr hWnd);
+				static int GetSystemDPI();
 				static int GetWmNotifyCode(IntPtr lParam);
 				static void SetArrowCursor();
-
 				static HICON LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI);
+				static void EnableExplorerTheming(IntPtr hWnd);
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd);

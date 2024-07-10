@@ -126,7 +126,7 @@
 			this.m_DefaultAttribs.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_DefaultAttribs.MultipleLinkEditing = false;
 			this.m_DefaultAttribs.Name = "m_DefaultAttribs";
-			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 125);
+			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 131);
 			this.m_DefaultAttribs.TabIndex = 0;
 			// 
 			// BtnCancel

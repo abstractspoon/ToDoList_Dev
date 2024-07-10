@@ -43,6 +43,14 @@ Drawing::Rectangle DPIScaling::Scale(Drawing::Rectangle rect)
 	return Drawing::Rectangle(Scale(rect.Location), Scale(rect.Size));
 }
 
+void DPIScaling::ScaleColumnWidths(Windows::Forms::ListView^ list)
+{
+	for (int col = 0; col < list->Columns->Count; col++)
+		list->Columns[col]->Width = Scale(list->Columns[col]->Width);
+}
+
+// ---------------------------------------------------------
+
 int DPIScaling::UnScale(int nValue)
 {
 	return ::MulDiv(nValue, 96, Win32::GetSystemDPI());

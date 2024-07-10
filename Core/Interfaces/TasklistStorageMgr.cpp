@@ -170,7 +170,7 @@ BOOL TSM_TASKLISTINFO::DecodeInfo(const CString& sPart, LPTSTR szAttrib, int nMa
 	CString sTemp = Decode(sPart);
 
 	if (sTemp.GetLength() > nMaxLen)
-	return FALSE;
+		return FALSE;
 
 	lstrcpy(szAttrib, sTemp);
 	return TRUE;
