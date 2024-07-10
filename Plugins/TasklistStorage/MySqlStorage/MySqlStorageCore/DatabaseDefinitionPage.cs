@@ -66,24 +66,11 @@ namespace MySqlStorage
 				return;
 
 			// (Re)populate column names
-			m_IdColumn.Items.Clear();
-			m_NameColumn.Items.Clear();
-			m_XmlColumn.Items.Clear();
+			var columns = DbUtils.GetTableColumns(m_Connection, newTable);
 
-			foreach (var column in DbUtils.GetTableColumns(m_Connection, newTable))
-			{
-				if (column.IsPrimaryKey)
-				{
-					m_IdColumn.Items.Add(column);
-				}
-				else
-				{
-					m_NameColumn.Items.Add(column);
-					m_XmlColumn.Items.Add(column);
-				}
-			}
-
-			m_IdColumn.SelectOneOnly();
+			m_IdColumn.Populate(columns, true);
+			m_NameColumn.Populate(columns, false);
+			m_XmlColumn.Populate(columns, false);
 		}
 
 		ComboBox MapErrorToField(DbError error)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Drawing;
 
 using MySql.Data.MySqlClient;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -42,6 +43,17 @@ namespace MySqlStorage
 
 	internal class ColumnComboBox : ComboBox
 	{
+		int m_MaxColNameWidth = -1;
+
+		static string m_Separator = "  -  ";
+
+		// --------------------------------------------------
+
+		public ColumnComboBox()
+		{
+			DrawMode = DrawMode.OwnerDrawFixed;
+		}
+
 		public bool SelectOneOnly()
 		{
 			return UIUtils.SelectOneOnly(this);
@@ -73,6 +85,60 @@ namespace MySqlStorage
 			}
 
 			return false;
+		}
+
+		public int Populate(IEnumerable<ColumnInfo> columns, bool primaryKey)
+		{
+			Items.Clear();
+			m_MaxColNameWidth = -1;
+			int maxColTypeWidth = -1; // only required for drop down width
+
+			using (var graphics = CreateGraphics())
+			{
+				foreach (var column in columns)
+				{
+					if (column.IsPrimaryKey == primaryKey)
+						Items.Add(column);
+
+					m_MaxColNameWidth = Math.Max(m_MaxColNameWidth, (int)graphics.MeasureString(column.Name, Font).Width);
+					maxColTypeWidth = Math.Max(maxColTypeWidth, (int)graphics.MeasureString(column.Name, Font).Width);
+				}
+
+				DropDownWidth = Math.Max(Width, (m_MaxColNameWidth + maxColTypeWidth + (int)graphics.MeasureString(m_Separator, Font).Width));
+			}
+
+			if (primaryKey)
+				SelectOneOnly();
+
+			return Items.Count;
+		}
+
+		protected override void OnDrawItem(DrawItemEventArgs e)
+		{
+			e.DrawBackground();
+
+			if (e.Index >= 0)
+			{
+				var column = (Items[e.Index] as ColumnInfo);
+
+				using (var brush = new SolidBrush(e.ForeColor))
+				{
+					var format = new StringFormat()
+					{
+						LineAlignment = StringAlignment.Center,
+						Trimming = StringTrimming.None
+					};
+
+					e.Graphics.DrawString(column.Name, e.Font, brush, e.Bounds, format);
+
+					var typeRect = e.Bounds;
+					typeRect.Offset(m_MaxColNameWidth, 0);
+
+					e.Graphics.DrawString(m_Separator + column.Type, e.Font, brush, typeRect, format);
+				}
+			}
+
+			e.DrawFocusRectangle();
 		}
 
 	}

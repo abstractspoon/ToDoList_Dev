@@ -24,7 +24,10 @@ namespace MySqlStorage
         {
             m_Trans = trans;
 			m_ControlsFont = new Font(FontName, 8.25f);
-        }
+
+			// Once only translation
+			ColumnInfo.PrimaryKey = trans.Translate(ColumnInfo.PrimaryKey, Translator.Type.Text);
+		}
 
 		public TasklistConnectionInfo RetrieveTasklist(string tasklistId, string password, string destPath, bool prompt, Preferences prefs, string prefKey)
 		{

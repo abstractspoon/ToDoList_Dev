@@ -16,6 +16,7 @@ namespace MySqlStorage
 
 		MySqlConnection m_Connection;
 		TasklistConnectionInfo m_TasklistInfo;
+
 		Translator m_Trans;
 		Font m_ControlsFont;
 

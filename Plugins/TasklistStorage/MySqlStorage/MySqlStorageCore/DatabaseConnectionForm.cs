@@ -13,8 +13,10 @@ namespace MySqlStorage
 {
 	public partial class DatabaseConnectionForm : Form
 	{
-		private MySqlConnection m_Connection;
-		private ConnectionInfo m_ConnectionInfo;
+		MySqlConnection m_Connection;
+		ConnectionInfo m_ConnectionInfo;
+
+		Translator m_Trans;
 
 		bool m_Prompt = true;
 
@@ -26,6 +28,8 @@ namespace MySqlStorage
 
 			FormsUtil.SetFont(this, ctrlsFont);
 			trans.Translate(this);
+
+			m_Trans = trans;
 
 			Shown += new EventHandler(OnShown);
 		}
@@ -87,7 +91,7 @@ namespace MySqlStorage
 					m_DatabasePage.Visible = true;
 					m_ConnectionPage.Visible = false;
 
-					OK.Text = "OK";
+					OK.Text = m_Trans.Translate("OK", Translator.Type.Button);
 					DialogResult = DialogResult.None;
 				}
 				else // Finished
@@ -137,7 +141,7 @@ namespace MySqlStorage
 				m_ConnectionPage.Visible = true;
 
 				DialogResult = DialogResult.None;
-				OK.Text = "Connect";
+				OK.Text = m_Trans.Translate("Connect...", Translator.Type.Button);
 			}
 		}
 	}

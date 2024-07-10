@@ -368,21 +368,34 @@ namespace MySqlStorage
 
 	class ColumnInfo
 	{
-		public override string ToString()
-		{
-			if (IsPrimaryKey)
-				return string.Format("{0} (Primary Key)", Name);
+		public string Name = string.Empty;
+		public List<string> Attribs = new List<string>();
+	
+		// --------------------------------------------------------
+	
+		public static string PrimaryKey = "Primary Key";
 
-			return string.Format("{0} ({1})", Name, Attribs[0]);
-		}
+		// --------------------------------------------------------
 
 		public bool IsPrimaryKey
 		{
 			get { return Attribs.Contains("PRI"); }
 		}
 
-		public string Name = string.Empty;
-		public List<string> Attribs = new List<string>();
+		public string Type
+		{
+			get
+			{
+				if (Attribs.Count == 0)
+					return string.Empty;
+
+				if (IsPrimaryKey)
+					return PrimaryKey;
+
+				// else
+				return Attribs[0];
+			}
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////
