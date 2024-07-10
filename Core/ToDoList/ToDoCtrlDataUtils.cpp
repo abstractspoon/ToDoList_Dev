@@ -520,9 +520,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_DEPENDENCY:
-			if (rule.GetOperator() == FOP_IS_COMPLETE)
+			if (rule.GetOperator() == FOP_DEPENDS_COMPLETE)
 			{
 				bMatch = TRUE;
+				sWhatMatched = CEnString(IDS_FT_MATCHES);
 
 				// look for first incomplete 'local' dependency
 				CDWordArray aDependIDs;
@@ -530,9 +531,12 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				while (nDepend--)
 				{
-					if (!m_data.IsTaskDone(aDependIDs[nDepend]))
+					DWORD dwDependID = aDependIDs[nDepend];
+
+					if (!m_data.IsTaskDone(dwDependID))
 					{
 						bMatch = FALSE;
+						sWhatMatched.Empty();
 						break;
 					}
 				}

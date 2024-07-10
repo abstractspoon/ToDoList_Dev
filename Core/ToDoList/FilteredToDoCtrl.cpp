@@ -802,6 +802,11 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 					bWantTask = !sWhatMatched.IsEmpty();
 					break;
 
+				case FOP_DEPENDS_COMPLETE:
+					ASSERT(rule.AttributeIs(TDCA_DEPENDENCY));
+					bWantTask = FALSE;
+					break;
+
 				default:
 					ASSERT(0);
 					bWantTask = TRUE;
@@ -986,7 +991,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 	{
 		DWORD dwModTaskID = aModTaskIDs[0];
 
-		// VERY SPECIAL CASE
+		// VERY SPECIAL CASES:
 		// The task being time tracked has been filtered out
 		// in which case we don't need to check if it matches
 		if (m_timeTracking.IsTrackingTask(dwModTaskID))
@@ -1018,6 +1023,11 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 		{
 			// don't refilter on Time Spent if time tracking
 			bNeedRefilter = !(nAttribID == TDCA_TIMESPENT && IsActivelyTimeTracking());
+		}
+		else if (!bNeedRefilter && (m_filter.GetFilter() == FS_DONEDEPENDS))
+		{
+			// Check if the completed task is a dependency of a hidden task
+			// TODO
 		}
 	}
 

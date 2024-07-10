@@ -238,7 +238,7 @@ BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAtt
 	switch (nAttribID)
 	{
 	case TDCA_ALL:
-		return TRUE; // More detailed check done later
+		return TRUE; // More detailed check done elsewhere
 
 	case TDCA_TASKNAME:
 		return !m_filter.sTitle.IsEmpty();
@@ -251,6 +251,9 @@ BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAtt
 
 	case TDCA_LOCK:
 		return (m_filter.nShow == FS_LOCKED);
+
+	case TDCA_DEPENDENCY:
+		return (m_filter.nShow == FS_DONEDEPENDS);
 
 	case TDCA_RISK:
 		return (m_filter.nRisk != FM_ANYRISK);
@@ -285,11 +288,13 @@ BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAtt
 			(m_filter.nShow == FS_DONE) ||
 			// 3. OR the user wants only incomplete tasks
 			(m_filter.nShow == FS_NOTDONE) ||
-			// 4. OR a due date filter is active
+			// 4. OR the user wants only tasks with completed dependencies
+			(m_filter.nShow == FS_DONEDEPENDS) ||
+			// 5. OR a due date filter is active
 			(m_filter.nDueBy != FD_ANY) ||
-			// 5. OR a start date filter is active
+			// 6. OR a start date filter is active
 			(m_filter.nStartBy != FD_ANY) ||
-			// 6. OR the user is filtering on priority
+			// 7. OR the user is filtering on priority
 			(m_filter.nPriority > 0));
 
 	case TDCA_DUEDATE:
@@ -476,6 +481,10 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 
 	case FS_LOCKED:
 		params.aRules.Add(SEARCHPARAM(TDCA_LOCK, FOP_SET));
+		break;
+
+	case FS_DONEDEPENDS:
+		params.aRules.Add(SEARCHPARAM(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE));
 		break;
 
 	default:

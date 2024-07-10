@@ -2428,7 +2428,7 @@
 #define IDS_EXPORTDLG_TASKSEL           51518
 #define IDS_MSVCREDIST_MSG              51519
 #define IDS_CUSTOM_FEATURE_ONEDECIMAL   51520
-#define IDS_FP_IS_COMPLETE              51521
+#define IDS_FP_DEPENDS_COMPLETE         51521
 #define IDS_TDC_GROUPBY                 51522
 #define IDS_TASKLIST_PASTEONECOLUMNVALUES 51523
 #define IDS_TASKLIST_PASTEONESELECTEDCOLUMNVALUES 51524
@@ -2528,6 +2528,7 @@
 #define IDS_GOTOTASK_TIP                51651
 #define IDS_TODAY                       51652
 #define IDS_LISTVIEW_SORTNONEGROUPBELOW 51653
+#define IDS_FILTER_DONEDEPENDS          51654
 
 // Next default values for new objects
 // 

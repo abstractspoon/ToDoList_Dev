@@ -1322,7 +1322,7 @@ struct SEARCHPARAM
 		case FOP_LESS:
 			return (nType == FT_INTEGER || nType == FT_DOUBLE || nType == FT_TIMEPERIOD);
 
-		case FOP_IS_COMPLETE:
+		case FOP_DEPENDS_COMPLETE:
 			return (nType == FT_DEPENDENCY);
 
 		case FOP_SET:
@@ -1919,16 +1919,17 @@ struct TDCFILTER
 		switch (nShow)
 		{
 		case FS_DONE:
-			return FALSE; // Definitely
+			return FALSE; // Always
 
 		case FS_NOTDONE:
-			return TRUE; // Definitely
+			return TRUE; // Always
 
 		case FS_ALL:
 		case FS_FLAGGED:
 		case FS_SELECTED:
 		case FS_RECENTMOD:
 		case FS_LOCKED:
+		case FS_DONEDEPENDS:
 			{
 				if (HasFlag(FO_HIDEDONE))
 					return TRUE; // Definitely
