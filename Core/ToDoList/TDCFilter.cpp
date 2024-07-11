@@ -233,101 +233,23 @@ BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
+BOOL CTDCFilter::HasAdvancedFilterRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp) const
+{
+	if (m_nState == TDCFS_ADVANCED)
+		return m_advFilter.params.HasRule(nAttribID, nOp);
+
+	// else
+	ASSERT(0);
+	return FALSE;
+}
+
 BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
 {
-	switch (nAttribID)
-	{
-	case TDCA_ALL:
-		return TRUE; // More detailed check done elsewhere
+	if (m_nState != TDCFS_ADVANCED)
+		return m_filter.HasAttribute(nAttribID, aCustomAttribDefs);
 
-	case TDCA_TASKNAME:
-		return !m_filter.sTitle.IsEmpty();
-
-	case TDCA_PRIORITY:
-		return (m_filter.nPriority != FM_ANYPRIORITY);
-
-	case TDCA_FLAG:
-		return (m_filter.nShow == FS_FLAGGED);
-
-	case TDCA_LOCK:
-		return (m_filter.nShow == FS_LOCKED);
-
-	case TDCA_DEPENDENCY:
-		return (m_filter.nShow == FS_DONEDEPENDS);
-
-	case TDCA_RISK:
-		return (m_filter.nRisk != FM_ANYRISK);
-
-	case TDCA_ALLOCBY:
-		return (m_filter.aAllocBy.GetSize() > 0);
-
-	case TDCA_STATUS:
-		return (m_filter.aStatus.GetSize() > 0);
-
-	case TDCA_VERSION:
-		return (m_filter.aVersions.GetSize() > 0);
-
-	case TDCA_CATEGORY:
-		return (m_filter.aCategories.GetSize() > 0);
-
-	case TDCA_TAGS:
-		return (m_filter.aTags.GetSize() > 0);
-
-	case TDCA_ALLOCTO:
-		return (m_filter.aAllocTo.GetSize() > 0);
-
-	case TDCA_PERCENT:
-		return ((m_filter.nShow == FS_DONE) || (m_filter.nShow == FS_NOTDONE));
-
-	case TDCA_DONEDATE:
-		// changing the DONE date requires refiltering if:
-		return
-			// 1. The user wants to hide completed tasks
-			(m_filter.HasFlag(FO_HIDEDONE) ||
-			 // 2. OR the user wants only completed tasks
-			(m_filter.nShow == FS_DONE) ||
-			// 3. OR the user wants only incomplete tasks
-			(m_filter.nShow == FS_NOTDONE) ||
-			// 4. OR the user wants only tasks with completed dependencies
-			(m_filter.nShow == FS_DONEDEPENDS) ||
-			// 5. OR a due date filter is active
-			(m_filter.nDueBy != FD_ANY) ||
-			// 6. OR a start date filter is active
-			(m_filter.nStartBy != FD_ANY) ||
-			// 7. OR the user is filtering on priority
-			(m_filter.nPriority > 0));
-
-	case TDCA_DUEDATE:
-		// changing the DUE date requires refiltering if:
-		return 
-			// 1. The user wants to hide overdue tasks
-			((m_filter.HasFlag(FO_HIDEOVERDUE) ||
-			// 2. OR the user is filtering on priority
-			(m_filter.nPriority > 0) ||
-			// 3. OR a due date filter is active
-			(m_filter.nDueBy != FD_ANY)) &&
-			// 4. AND the user doesn't want only completed tasks
-			(m_filter.nShow != FS_DONE));
-
-	case TDCA_STARTDATE:
-		// changing the START date requires refiltering if:
-		return 
-			// 1. A start date filter is active
-			((m_filter.nStartBy != FD_ANY) &&
-			// 2. AND the user doesn't want only completed tasks
-			(m_filter.nShow != FS_DONE));
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		{
-			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttribID);
-
-			return m_filter.mapCustomAttrib.HasKey(sAttribID);
-		}
-		break;
-	}
-
-	// all else
+	// else
+	ASSERT(0);
 	return FALSE;
 }
 

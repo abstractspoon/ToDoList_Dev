@@ -1414,7 +1414,7 @@ struct SEARCHPARAM
 
 	BOOL GetMatchWholeWord() const
 	{
-		ASSERT(TypeIs(FT_STRING));
+		ASSERT(TypeIs(FT_STRING) || TypeIs(FT_DEPENDENCY));
 
 		return bMatchWholeWord;
 	}
@@ -1717,6 +1717,21 @@ struct SEARCHPARAMS
 		return mapAttrib.Has(nAttribID);
 	}
 
+	BOOL HasRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp) const
+	{
+		int nRule = aRules.GetSize();
+
+		while (nRule--)
+		{
+			const SEARCHPARAM& rule = aRules[nRule];
+
+			if (rule.AttributeIs(nAttribID) && rule.OperatorIs(nOp))
+				return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	BOOL HasMultipleAttributes() const
 	{
 		int nNumRules = aRules.GetSize();
@@ -1952,6 +1967,104 @@ struct TDCFILTER
 			break;
 		}
 
+		return FALSE;
+	}
+
+	BOOL HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
+	{
+		switch (nAttribID)
+		{
+		case TDCA_ALL:
+			return TRUE; // More detailed check done elsewhere
+
+		case TDCA_TASKNAME:
+			return !sTitle.IsEmpty();
+
+		case TDCA_PRIORITY:
+			return (nPriority != FM_ANYPRIORITY);
+
+		case TDCA_FLAG:
+			return (nShow == FS_FLAGGED);
+
+		case TDCA_LOCK:
+			return (nShow == FS_LOCKED);
+
+		case TDCA_DEPENDENCY:
+			return (nShow == FS_DONEDEPENDS);
+
+		case TDCA_RISK:
+			return (nRisk != FM_ANYRISK);
+
+		case TDCA_ALLOCBY:
+			return (aAllocBy.GetSize() > 0);
+
+		case TDCA_STATUS:
+			return (aStatus.GetSize() > 0);
+
+		case TDCA_VERSION:
+			return (aVersions.GetSize() > 0);
+
+		case TDCA_CATEGORY:
+			return (aCategories.GetSize() > 0);
+
+		case TDCA_TAGS:
+			return (aTags.GetSize() > 0);
+
+		case TDCA_ALLOCTO:
+			return (aAllocTo.GetSize() > 0);
+
+		case TDCA_PERCENT:
+			return ((nShow == FS_DONE) || (nShow == FS_NOTDONE));
+
+		case TDCA_DONEDATE:
+			// changing the DONE date requires refiltering if:
+			return
+				// 1. The user wants to hide completed tasks
+				(HasFlag(FO_HIDEDONE) ||
+				 // 2. OR the user wants only completed tasks
+				(nShow == FS_DONE) ||
+				 // 3. OR the user wants only incomplete tasks
+				 (nShow == FS_NOTDONE) ||
+				 // 4. OR the user wants only tasks with completed dependencies
+				 (nShow == FS_DONEDEPENDS) ||
+				 // 5. OR a due date filter is active
+				 (nDueBy != FD_ANY) ||
+				 // 6. OR a start date filter is active
+				 (nStartBy != FD_ANY) ||
+				 // 7. OR the user is filtering on priority
+				 (nPriority > 0));
+
+		case TDCA_DUEDATE:
+			// changing the DUE date requires refiltering if:
+			return
+				// 1. The user wants to hide overdue tasks
+				((HasFlag(FO_HIDEOVERDUE) ||
+				  // 2. OR the user is filtering on priority
+				(nPriority > 0) ||
+				  // 3. OR a due date filter is active
+				  (nDueBy != FD_ANY)) &&
+				 // 4. AND the user doesn't want only completed tasks
+				  (nShow != FS_DONE));
+
+		case TDCA_STARTDATE:
+			// changing the START date requires refiltering if:
+			return
+				// 1. A start date filter is active
+				((nStartBy != FD_ANY) &&
+				 // 2. AND the user doesn't want only completed tasks
+				(nShow != FS_DONE));
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			{
+				CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+
+				return mapCustomAttrib.HasKey(sAttribID);
+			}
+			break;
+		}
+
+		// all else
 		return FALSE;
 	}
 

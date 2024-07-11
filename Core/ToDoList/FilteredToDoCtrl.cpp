@@ -989,45 +989,44 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 	}
 	else if (aModTaskIDs.GetSize() == 1)
 	{
+		// If this was a simple task edit we can just test to 
+		// see if the modified task still matches the filter.
 		DWORD dwModTaskID = aModTaskIDs[0];
 
-		// VERY SPECIAL CASES:
-		// The task being time tracked has been filtered out
-		// in which case we don't need to check if it matches
-		if (m_timeTracking.IsTrackingTask(dwModTaskID))
-		{
-			if (m_taskTree.GetItem(dwModTaskID) == NULL)
-			{
-				ASSERT(HasTask(dwModTaskID));
-				ASSERT(nAttribID == TDCA_TIMESPENT);
-
-				return FALSE;
-			}
-			// else fall thru
-		}
-
-		// Finally, if this was a simple task edit we can just test to 
-		// see if the modified task still matches the filter.
-		SEARCHPARAMS params;
+		SEARCHPARAMS query;
 		SEARCHRESULT result;
 
-		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
-
-		BOOL bMatchesFilter = m_matcher.TaskMatches(dwModTaskID, params, FALSE, result);
-		BOOL bTreeHasItem = (m_taskTree.GetItem(dwModTaskID) != NULL);
-
-		bNeedRefilter = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
+		m_filter.BuildFilterQuery(query, m_aCustomAttribDefs);
 		
-		// extra handling for 'Find Tasks' filters 
-		if (bNeedRefilter && HasAdvancedFilter())
+		BOOL bWantShowItem = m_matcher.TaskMatches(dwModTaskID, query, FALSE, result);
+		BOOL bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwModTaskID);
+
+		bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
+
+		// DON'T refilter on Time Spent if time tracking
+		if (bNeedRefilter && (nAttribID == TDCA_TIMESPENT))
 		{
-			// don't refilter on Time Spent if time tracking
-			bNeedRefilter = !(nAttribID == TDCA_TIMESPENT && IsActivelyTimeTracking());
+			bNeedRefilter = !IsActivelyTimeTracking();
 		}
-		else if (!bNeedRefilter && (m_filter.GetFilter() == FS_DONEDEPENDS))
+		// DO refilter on Completion if the modified task is a dependency of a hidden task
+		else if (!bNeedRefilter && (nAttribID == TDCA_DONEDATE))
 		{
-			// Check if the completed task is a dependency of a hidden task
-			// TODO
+			if ((m_filter.GetFilter() == FS_DONEDEPENDS) ||
+				(m_filter.HasAdvancedFilter() && m_filter.HasAdvancedFilterRule(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE)))
+			{
+				CDWordArray aDependentIDs;
+				int nID = m_data.GetTaskLocalDependents(dwModTaskID, aDependentIDs, FALSE);
+
+				while (nID-- && !bNeedRefilter)
+				{
+					DWORD dwDependID = aDependentIDs[nID];
+
+					bWantShowItem = m_matcher.TaskMatches(dwDependID, query, FALSE, result);
+					bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwDependID);
+
+					bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
+				}
+			}
 		}
 	}
 
