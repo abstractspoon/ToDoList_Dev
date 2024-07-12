@@ -135,6 +135,7 @@
     <ClCompile Include="..\ToDoList\TaskFile.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
+    <ClCompile Include="..\ToDoList\tdcstruct.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp" />
     <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
     <ClCompile Include="..\ToDoList\TaskListHtmlExporter.cpp" />

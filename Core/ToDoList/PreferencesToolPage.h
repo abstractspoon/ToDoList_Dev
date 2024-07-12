@@ -47,7 +47,6 @@ protected:
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesToolPage)
-	enum { IDD = IDD_PREFTOOLS_PAGE };
 	//}}AFX_DATA
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;

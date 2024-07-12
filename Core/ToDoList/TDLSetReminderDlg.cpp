@@ -11,6 +11,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\Shared\localizer.h"
+#include "..\Shared\DateHelper.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -36,17 +37,15 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
-	m_cbLeadIn(TDLRPC_SHOWZERO)
+	m_cbLeadIn(TDLRPC_SHOWZERO),
+	m_bRelativeFromDueDate(0),
+	m_dRelativeLeadInHours(0.25), // 15 mins
+	m_bRelative(TRUE),
+	m_dtAbsoluteDate(COleDateTime::GetCurrentTime()),
+	m_dAbsoluteTime(CDateHelper::GetTimeOnly(m_dtAbsoluteDate))
 {
 	//{{AFX_DATA_INIT(CTDLSetReminderDlg)
-	m_bRelativeFromDueDate = 0;
-	m_sSoundFile = _T("");
-	m_dRelativeLeadInHours = 0.25; // 15 mins
-	m_bRelative = TRUE;
-	m_dtAbsoluteDate = COleDateTime::GetCurrentTime();
-	m_sTaskTitle = _T("");
 	//}}AFX_DATA_INIT
-	m_dAbsoluteTime = CDateHelper::GetTimeOnly(m_dtAbsoluteDate);
 }
 
 

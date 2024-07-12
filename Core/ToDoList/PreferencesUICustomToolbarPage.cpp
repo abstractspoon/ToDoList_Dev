@@ -20,7 +20,7 @@ IMPLEMENT_DYNCREATE(CPreferencesUICustomToolbarPage, CPreferencesPageBase)
 
 CPreferencesUICustomToolbarPage::CPreferencesUICustomToolbarPage() 
 	: 
-	CPreferencesPageBase(CPreferencesUICustomToolbarPage::IDD)
+	CPreferencesPageBase(IDD_PREFTOOLBAR_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesUICustomToolbarPage)
 	//}}AFX_DATA_INIT

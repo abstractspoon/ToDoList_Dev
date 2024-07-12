@@ -8,6 +8,7 @@
 #include "todoctrldata.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "tdcimagelist.h"
 
 #include "..\shared\treectrlhelper.h"

@@ -3,10 +3,11 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "resource.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataDefines.h"
 #include "TDCStatic.h"
-#include "resource.h"
+#include "tdcmapping.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"

@@ -9,6 +9,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
+#include "..\Shared\DateHelper.h"
 
 #include "..\Interfaces\Preferences.h"
 

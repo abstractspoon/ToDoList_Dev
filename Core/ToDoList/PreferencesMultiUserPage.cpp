@@ -19,8 +19,9 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNCREATE(CPreferencesMultiUserPage, CPreferencesPageBase)
 
-CPreferencesMultiUserPage::CPreferencesMultiUserPage() : 
-   CPreferencesPageBase(CPreferencesMultiUserPage::IDD)
+CPreferencesMultiUserPage::CPreferencesMultiUserPage() 
+	:
+	CPreferencesPageBase(IDD_PREFMULTIUSER_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesMultiUserPage)
 	m_bUse3rdPartySourceControl = FALSE;

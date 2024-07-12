@@ -53,7 +53,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUITasklistPage)
-	enum { IDD = IDD_PREFUITASKLIST_PAGE };
 	//}}AFX_DATA
 	CComboBox	m_cbPercentIncrement;
 	BOOL	m_bShowRemindersAsDateAndTime;

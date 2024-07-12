@@ -8,6 +8,7 @@
 //
 
 #include "tdcenum.h"
+#include "tdcsort.h"
 #include "tdcstruct.h"
 #include "tdldialog.h"
 

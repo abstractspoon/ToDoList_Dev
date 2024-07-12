@@ -77,7 +77,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskCalcPage)
-	enum { IDD = IDD_PREFTASKCALC_PAGE };
 	BOOL	m_bTreatSubCompletedAsDone;
 	BOOL	m_bUseHighestPriority;
 	BOOL	m_bSyncTimeEstAndDates;

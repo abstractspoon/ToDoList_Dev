@@ -84,7 +84,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUIPage)
-	enum { IDD = IDD_PREFUI_PAGE };
 	CTDLTaskViewListBox	m_lbTaskViews;
 	BOOL	m_bShowCommentsAlways;
 	BOOL	m_bSpecifyToolbarImage;

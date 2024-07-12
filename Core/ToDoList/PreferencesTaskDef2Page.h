@@ -48,7 +48,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskDef2Page)
-	enum { IDD = IDD_PREFTASKDEF2_PAGE };
 	//}}AFX_DATA
 
 	BOOL	m_bUpdateInheritAttributes;

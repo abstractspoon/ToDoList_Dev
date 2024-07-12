@@ -14,6 +14,7 @@
 #include "..\todolist\tdltasktreectrl.h"
 
 #include "..\shared\treectrlhelper.h"
+#include "..\shared\datehelper.h"
 
 #include "..\interfaces\contentmgr.h"
 #include "..\interfaces\IEnums.h"

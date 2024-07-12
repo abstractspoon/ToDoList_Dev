@@ -5,6 +5,7 @@
 #include "StdAfx.h"
 #include "TDCSourceControl.h"
 #include "ToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\FileMisc.h"
 #include "..\shared\ScopedTimer.h"

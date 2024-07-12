@@ -50,7 +50,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskPage)
-	enum { IDD = IDD_PREFTASK_PAGE };
 	CTimeComboBox	m_cbEndOfLunch;
 	CTimeComboBox	m_cbStartOfLunch;
 	CTimeComboBox	m_cbStartOfWorkday;

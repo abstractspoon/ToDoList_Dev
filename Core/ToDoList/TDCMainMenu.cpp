@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "TDCMainMenu.h"
 #include "TDCStatic.h"
+#include "TDCMapping.h"
 #include "FilteredToDoCtrl.h"
 #include "ToDoCtrlMgr.h"
 #include "PreferencesDlg.h"

@@ -52,6 +52,8 @@ struct TDSORTCOLUMN
 	BOOL bAscending;
 };
 
+// -------------------------------------------------------------------------
+
 struct TDSORTCOLUMNS
 {
 	TDSORTCOLUMNS();
@@ -79,6 +81,8 @@ struct TDSORTCOLUMNS
 protected:
 	TDSORTCOLUMN cols[3];
 };
+
+// -------------------------------------------------------------------------
 
 struct TDSORT
 {

@@ -33,7 +33,7 @@ IMPLEMENT_DYNCREATE(CPreferencesTaskPage, CPreferencesPageBase)
 
 CPreferencesTaskPage::CPreferencesTaskPage() 
 	: 
-	CPreferencesPageBase(CPreferencesTaskPage::IDD),
+	CPreferencesPageBase(IDD_PREFTASK_PAGE),
 	m_cbStartOfWorkday(TCB_HALFHOURS),
 	m_cbStartOfLunch(TCB_HALFHOURS),
 	m_cbEndOfLunch(TCB_HALFHOURS)

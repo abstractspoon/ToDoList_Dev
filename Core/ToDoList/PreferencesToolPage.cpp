@@ -57,7 +57,7 @@ IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
 
 CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
-	CPreferencesPageBase(CPreferencesToolPage::IDD),
+	CPreferencesPageBase(IDD_PREFTOOLS_PAGE),
 	m_eToolPath(FES_ALLOWURL),
 	m_eIconPath(FES_DISPLAYIMAGETHUMBNAILS),
 	m_nMaxNumTools(nMaxNumTools),

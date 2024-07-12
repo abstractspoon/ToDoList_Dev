@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TDCFindReplace.h"
 #include "ToDoCtrl.h"
 #include "ToDoCtrlDataDefines.h"

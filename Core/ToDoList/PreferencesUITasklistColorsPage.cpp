@@ -54,7 +54,7 @@ enum
 
 CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage() 
 	: 
-	CPreferencesPageBase(CPreferencesUITasklistColorsPage::IDD),
+	CPreferencesPageBase(IDD_PREFUITASKLISTCOLORS_PAGE),
 	m_nTextColorOption(COLOROPT_DEFAULT), 
 	m_cbAttributes(CCBS_DRAWNOCOLOR, ACBS_ALLOWDELETE), 
 	m_nColorAttribute(DEFCOLORATTRIB)

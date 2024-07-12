@@ -5,12 +5,14 @@
 #include "resource.h"
 #include "TDLFindTaskExpressionListCtrl.h"
 #include "tdcstatic.h"
+#include "tdcmapping.h"
 #include "TDLTaskIconDlg.h"
 
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\localizer.h"
 #include "..\shared\GraphicsMisc.h"
+#include "..\Shared\DateHelper.h"
 
 #include "..\Interfaces\ContentMgr.h"
 

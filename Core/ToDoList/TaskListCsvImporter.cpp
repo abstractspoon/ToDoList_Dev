@@ -3,15 +3,17 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "TaskListCsvImporter.h"
 #include "resource.h"
+#include "TaskListCsvImporter.h"
 #include "tdlrecurringtaskedit.h"
 #include "TDLCsvImportExportDlg.h"
+#include "tdcmapping.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\TasklistSchemaDef.h"

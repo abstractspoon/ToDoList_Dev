@@ -20,8 +20,9 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNCREATE(CPreferencesTaskCalcPage, CPreferencesPageBase)
 
-CPreferencesTaskCalcPage::CPreferencesTaskCalcPage() : 
-   CPreferencesPageBase(CPreferencesTaskCalcPage::IDD)
+CPreferencesTaskCalcPage::CPreferencesTaskCalcPage() 
+	: 
+	CPreferencesPageBase(IDD_PREFTASKCALC_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskCalcPage)
 	//}}AFX_DATA_INIT

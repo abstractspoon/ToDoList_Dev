@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "tdcstruct.h"
 #include "TDLRegularityComboBox.h"
 #include "TDCRecurrence.h"

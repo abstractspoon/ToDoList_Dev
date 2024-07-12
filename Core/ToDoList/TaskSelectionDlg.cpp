@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TaskSelectionDlg.h"
 #include "ToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\dialoghelper.h"
