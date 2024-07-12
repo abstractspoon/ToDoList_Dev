@@ -773,53 +773,6 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 		return HasFilterAttribute(nModType, aCustomAttribDefs);
 	}
 
-/*
-	// we only need to refilter if the modified attribute
-	// actually affects the filter
-	if (m_nState == TDCFS_ADVANCED) // 'Find' filter
-	{
-		if (HasAdvancedFilterAttribute(nModType))
-		{
-			// don't refilter on Time Estimate/Spent, Cost or Comments, or 
-			// similar custom attributes because the user typically hasn't 
-			// finished editing when this notification is first received
-			switch (nModType)
-			{
-			case TDCA_TIMESPENT:
-			case TDCA_TIMEESTIMATE:
-			case TDCA_COST:
-			case TDCA_COMMENTS:
-				return FALSE;
-
-			default:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
-				{
-					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_CUSTDEF_RET(aCustomAttribDefs, nModType, pDef, FALSE);
-
-					if (!pDef->IsList())
-					{
-						switch (pDef->GetDataType())
-						{
-						case TDCCA_DOUBLE:
-						case TDCCA_INTEGER:
-						case TDCCA_STRING:
-							return FALSE;
-						}
-					}
-				}
-			}
-
-			// all else
-			return TRUE;
-		}
-	}
-	else if (m_nState == TDCFS_FILTER) // 'Filter Bar' filter
-	{
-		return HasFilterAttribute(nModType, aCustomAttribDefs);
-	}
-
-*/
 	// All else
 	return FALSE;
 }
