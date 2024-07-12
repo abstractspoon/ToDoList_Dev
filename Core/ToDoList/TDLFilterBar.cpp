@@ -36,7 +36,7 @@ const int LABELHEIGHT	= 9;
 
 static CTRLITEM FILTERCTRLS[] = 
 {
-	CTRLITEM(IDC_FILTERCOMBO,			IDC_FILTERLABEL,			TDCA_NONE),
+	CTRLITEM(IDC_SHOWFILTERCOMBO,			IDC_FILTERLABEL,			TDCA_NONE),
 	CTRLITEM(IDC_TITLEFILTERTEXT,		IDC_TITLEFILTERLABEL,		TDCA_TASKNAME),
 	CTRLITEM(IDC_STARTFILTERCOMBO,		IDC_STARTFILTERLABEL,		TDCA_STARTDATE),
 	CTRLITEM(IDC_USERSTARTDATE,			0,							TDCA_STARTDATE),
@@ -103,7 +103,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TAGFILTERCOMBO, m_cbTagFilter);
 	DDX_Control(pDX, IDC_VERSIONFILTERCOMBO, m_cbVersionFilter);
 	DDX_Control(pDX, IDC_OPTIONFILTERCOMBO, m_cbOptions);
-	DDX_Control(pDX, IDC_FILTERCOMBO, m_cbTaskFilter);
+	DDX_Control(pDX, IDC_SHOWFILTERCOMBO, m_cbShowFilter);
 	DDX_Control(pDX, IDC_STARTFILTERCOMBO, m_cbStartFilter);
 	DDX_Control(pDX, IDC_DUEFILTERCOMBO, m_cbDueFilter);
 	DDX_Control(pDX, IDC_ALLOCTOFILTERCOMBO, m_cbAllocToFilter);
@@ -151,9 +151,9 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	{
 		// filter
 		if (m_filter.IsAdvanced())
-			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
+			m_cbShowFilter.SelectAdvancedFilter(m_sAdvancedFilter);
 		else
-			m_cbTaskFilter.SelectFilter(m_filter.nShow);
+			m_cbShowFilter.SelectFilter(m_filter.nShow);
 		
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
@@ -198,7 +198,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELENDOK(IDC_RISKFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELENDOK(IDC_RECURFILTERCOMBO, OnSelchangeFilterAttribute)
 
-	ON_CBN_SELENDOK(IDC_FILTERCOMBO, OnSelchangeFilter) // separate handler
+	ON_CBN_SELENDOK(IDC_SHOWFILTERCOMBO, OnSelchangeFilter) // separate handler
 	ON_CBN_CLOSEUP(IDC_OPTIONFILTERCOMBO, OnCloseUpOptions)
 
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnChangeDateFilter)
@@ -270,7 +270,7 @@ void CTDLFilterBar::ClearCheckboxHistory()
 void CTDLFilterBar::OnSelchangeFilter() 
 {
 	CString sAdvanced;
-	FILTER_SHOW nShow = m_cbTaskFilter.GetSelectedFilter(sAdvanced);
+	FILTER_SHOW nShow = m_cbShowFilter.GetSelectedFilter(sAdvanced);
 
 	// Refresh the labels if switching from custom to not, or vice versa
 	if (sAdvanced.IsEmpty() != m_sAdvancedFilter.IsEmpty())
@@ -470,10 +470,10 @@ BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 
 BOOL CTDLFilterBar::SelectFilter(int nFilter)
 {
-	if (nFilter < 0 || nFilter >= m_cbTaskFilter.GetCount())
+	if (nFilter < 0 || nFilter >= m_cbShowFilter.GetCount())
 		return FALSE;
 
-	m_cbTaskFilter.SetCurSel(nFilter);
+	m_cbShowFilter.SetCurSel(nFilter);
 	OnSelchangeFilter();
 
 	return TRUE;
@@ -481,7 +481,7 @@ BOOL CTDLFilterBar::SelectFilter(int nFilter)
 
 int CTDLFilterBar::GetSelectedFilter() const
 {
-	return m_cbTaskFilter.GetCurSel();
+	return m_cbShowFilter.GetCurSel();
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
@@ -507,7 +507,7 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 
 BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone)
 {
-	if (!m_cbTaskFilter.HasAdvancedFilter(sCustom))
+	if (!m_cbShowFilter.HasAdvancedFilter(sCustom))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -530,32 +530,32 @@ BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, B
 
 FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const
 {
-	return m_cbTaskFilter.GetSelectedFilter(sCustom);
+	return m_cbShowFilter.GetSelectedFilter(sCustom);
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter() const
 {
-	return m_cbTaskFilter.GetSelectedFilter();
+	return m_cbShowFilter.GetSelectedFilter();
 }
 
 void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
 {
-	m_cbTaskFilter.AddAdvancedFilters(aFilters); 
+	m_cbShowFilter.AddAdvancedFilters(aFilters); 
 }
 
 const CStringArray& CTDLFilterBar::GetAdvancedFilterNames() const
 {
-	return m_cbTaskFilter.GetAdvancedFilterNames(); 
+	return m_cbShowFilter.GetAdvancedFilterNames(); 
 }
 
 void CTDLFilterBar::RemoveAdvancedFilters()
 {
-	m_cbTaskFilter.RemoveAdvancedFilters(); 
+	m_cbShowFilter.RemoveAdvancedFilters(); 
 }
 
 void CTDLFilterBar::ShowDefaultFilters(BOOL bShow)
 {
-	m_cbTaskFilter.ShowDefaultFilters(bShow); 
+	m_cbShowFilter.ShowDefaultFilters(bShow); 
 }
 
 void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
@@ -928,7 +928,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 				bEnable &= (m_filter.nDueBy == FD_USER);
 				break;
 
-			case IDC_FILTERCOMBO: 
+			case IDC_SHOWFILTERCOMBO: 
 			case IDC_OPTIONFILTERCOMBO:
 				// always enabled
 				break;
@@ -1017,6 +1017,10 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 
 	switch (nCtrlID)
 	{
+	case IDC_SHOWFILTERCOMBO:
+		Misc::Split(CDialogHelper::GetSelectedItem(m_cbShowFilter), sTooltip, '\t');
+		break;
+
 	case IDC_CATEGORYFILTERCOMBO:
 		sTooltip = m_cbCategoryFilter.GetTooltip();
 		break;

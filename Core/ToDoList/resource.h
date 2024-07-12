@@ -413,7 +413,7 @@
 #define IDC_NOTIFYDUEBYONLOAD           1105
 #define IDC_NEWTASKPOSITION             1105
 #define IDC_HOURSINONEDAY               1105
-#define IDC_FILTERCOMBO                 1105
+#define IDC_SHOWFILTERCOMBO             1105
 #define IDC_CATEGORYLIST                1105
 #define IDC_DIRECTION                   1105
 #define IDC_RECALCFROM                  1105

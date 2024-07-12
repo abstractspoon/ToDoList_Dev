@@ -69,7 +69,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CFilterBar)
 	//}}AFX_DATA
-	CTDLFilterComboBox m_cbTaskFilter;
+	CTDLFilterComboBox m_cbShowFilter;
 	CTDLFilterDateComboBox m_cbStartFilter;
 	CTDLFilterDateComboBox m_cbDueFilter;
 	CEnEdit m_eTitleFilter;
