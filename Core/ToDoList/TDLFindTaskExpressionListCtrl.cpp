@@ -843,7 +843,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				AddOperatorToCombo(FOP_NOT_EQUALS);
 				AddOperatorToCombo(FOP_INCLUDES);
 				AddOperatorToCombo(FOP_NOT_INCLUDES);
-				AddOperatorToCombo(FOP_IS_COMPLETE);
+				AddOperatorToCombo(FOP_DEPENDS_COMPLETE);
 				break;
 				
 			case FT_RECURRENCE:
