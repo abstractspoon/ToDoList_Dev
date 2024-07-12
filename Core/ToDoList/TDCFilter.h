@@ -24,13 +24,12 @@ public:
 
 	BOOL HasAnyFilter() const;
 	BOOL HasAdvancedFilter() const;
-	BOOL HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttribID) const;
-	BOOL HasAdvancedFilterRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp) const;
 	BOOL HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const;
 	BOOL HasFilterFlag(DWORD dwFlag) const;
 	BOOL HasNowFilter() const;
 	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const;
 	BOOL HasSelectionFilter() const;
+	BOOL HasCompletedDependencyFilter() const;
 
 	CString GetAdvancedFilterName() const;
 	DWORD GetFilterFlags() const;

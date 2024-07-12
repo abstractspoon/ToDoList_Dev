@@ -223,33 +223,41 @@ BOOL CTDCFilter::HasSelectionFilter() const
 	return ((m_nState == TDCFS_FILTER) && (m_filter.nShow == FS_SELECTED));
 }
 
-BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttribID) const
+BOOL CTDCFilter::HasCompletedDependencyFilter() const
 {
-	if (m_nState == TDCFS_ADVANCED)
-		return m_advFilter.params.HasAttribute(nAttribID);
+	switch (m_nState)
+	{
+	case TDCFS_FILTER:
+		return (GetFilter() == FS_DONEDEPENDS);
 
-	// else
-	ASSERT(0);
-	return FALSE;
-}
+	case TDCFS_ADVANCED:
+		return m_advFilter.params.HasRule(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE);
 
-BOOL CTDCFilter::HasAdvancedFilterRule(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp) const
-{
-	if (m_nState == TDCFS_ADVANCED)
-		return m_advFilter.params.HasRule(nAttribID, nOp);
+	case TDCFS_NONE:
+	case TDCFS_FILTER_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
+		break;
+	}
 
-	// else
-	ASSERT(0);
 	return FALSE;
 }
 
 BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
 {
-	if (m_nState != TDCFS_ADVANCED)
+	switch (m_nState)
+	{
+	case TDCFS_FILTER:
 		return m_filter.HasAttribute(nAttribID, aCustomAttribDefs);
 
-	// else
-	ASSERT(0);
+	case TDCFS_ADVANCED:
+		return m_advFilter.params.HasAttribute(nAttribID);
+
+	case TDCFS_NONE:
+	case TDCFS_FILTER_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
+		break;
+	}
+
 	return FALSE;
 }
 
@@ -758,6 +766,14 @@ void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sK
 
 BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const 
 {
+	switch (m_nState)
+	{
+	case TDCFS_FILTER:
+	case TDCFS_ADVANCED:
+		return HasFilterAttribute(nModType, aCustomAttribDefs);
+	}
+
+/*
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
 	if (m_nState == TDCFS_ADVANCED) // 'Find' filter
@@ -803,6 +819,8 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 		return HasFilterAttribute(nModType, aCustomAttribDefs);
 	}
 
+*/
+	// All else
 	return FALSE;
 }
 

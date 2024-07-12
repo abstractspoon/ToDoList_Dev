@@ -933,7 +933,7 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	CTabbedToDoCtrl::EndTimeTracking(bAllowConfirm, bNotify);
 	
 	// do we need to refilter?
-	if (bWasTimeTracking && m_filter.HasAdvancedFilter() && m_filter.HasAdvancedFilterAttribute(TDCA_TIMESPENT))
+	if (bWasTimeTracking && m_filter.HasFilterAttribute(TDCA_TIMESPENT, m_aCustomAttribDefs))
 	{
 		RefreshFilter(FALSE);
 	}
@@ -988,11 +988,27 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 		}
 	}
 	else if (aModTaskIDs.GetSize() == 1)
-	{
-		// If this was a simple task edit we can just test to 
-		// see if the modified task still matches the filter.
+	{ 
+		// Task edit on single task
 		DWORD dwModTaskID = aModTaskIDs[0];
 
+		// Optimisations
+		switch (nAttribID)
+		{
+		case TDCA_TIMESPENT:
+			// DON'T refilter if time tracking
+			if (m_timeTracking.IsTrackingTask(dwModTaskID))
+				return FALSE;
+			break;
+
+		case TDCA_COMMENTS:
+			// ONLY refilter on committed changes
+			if (m_nCommentsState != CToDoCtrl::CS_CHANGED)
+				return FALSE;
+			break;
+		}
+		
+		// Test if the modified task still matches the filter.
 		SEARCHPARAMS query;
 		SEARCHRESULT result;
 
@@ -1003,29 +1019,20 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 
 		bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
 
-		// DON'T refilter on Time Spent if time tracking
-		if (bNeedRefilter && (nAttribID == TDCA_TIMESPENT))
+		// Special case: Modified task is a dependency of a hidden task
+		if (!bNeedRefilter && (nAttribID == TDCA_DONEDATE) && m_filter.HasCompletedDependencyFilter())
 		{
-			bNeedRefilter = !IsActivelyTimeTracking();
-		}
-		// DO refilter on Completion if the modified task is a dependency of a hidden task
-		else if (!bNeedRefilter && (nAttribID == TDCA_DONEDATE))
-		{
-			if ((m_filter.GetFilter() == FS_DONEDEPENDS) ||
-				(m_filter.HasAdvancedFilter() && m_filter.HasAdvancedFilterRule(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE)))
+			CDWordArray aDependentIDs;
+			int nID = m_data.GetTaskLocalDependents(dwModTaskID, aDependentIDs, FALSE);
+
+			while (nID-- && !bNeedRefilter)
 			{
-				CDWordArray aDependentIDs;
-				int nID = m_data.GetTaskLocalDependents(dwModTaskID, aDependentIDs, FALSE);
+				DWORD dwDependID = aDependentIDs[nID];
 
-				while (nID-- && !bNeedRefilter)
-				{
-					DWORD dwDependID = aDependentIDs[nID];
+				bWantShowItem = m_matcher.TaskMatches(dwDependID, query, FALSE, result);
+				bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwDependID);
 
-					bWantShowItem = m_matcher.TaskMatches(dwDependID, query, FALSE, result);
-					bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwDependID);
-
-					bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
-				}
+				bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
 			}
 		}
 	}
@@ -1131,19 +1138,8 @@ LRESULT CFilteredToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)
 	// don't re-filter delay-loaded tasklists
 	if (!IsDelayLoaded())
 	{
-		BOOL bRefilter = FALSE;
-		TDCFILTER filter;
-
-		if (m_filter.GetFilter(filter) == FS_ADVANCED)
-		{
-			bRefilter = (m_filter.HasAdvancedFilterAttribute(TDCA_STARTDATE) ||
-						 m_filter.HasAdvancedFilterAttribute(TDCA_DUEDATE));
-		}
-		else
-		{
-			bRefilter = (((filter.nStartBy != FD_NONE) && (filter.nStartBy != FD_ANY)) ||
-						((filter.nDueBy != FD_NONE) && (filter.nDueBy != FD_ANY)));
-		}
+		BOOL bRefilter = (m_filter.HasFilterAttribute(TDCA_STARTDATE, m_aCustomAttribDefs) ||
+ 						 m_filter.HasFilterAttribute(TDCA_DUEDATE, m_aCustomAttribDefs));
 
 		if (bRefilter)
 			RefreshFilter(FALSE);
@@ -1186,28 +1182,28 @@ void CFilteredToDoCtrl::OnTimerNow()
 	
 	// So first thing we do is find reasons not to:
 	
-	// We are hidden
+	// 1. We are hidden
 	if (!IsWindowVisible())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (Window not visible)\n"));
 		return;
 	}
 	
-	// We're already displaying all tasks
+	// 2. We're already displaying all tasks
 	if (m_taskTree.GetItemCount() == m_data.GetTaskCount())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (All tasks showing)\n"));
 		return;
 	}
 	
-	// App is minimized or hidden
+	// 3. App is minimized or hidden
 	if (AfxGetMainWnd()->IsIconic() || !AfxGetMainWnd()->IsWindowVisible())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (App not visible)\n"));
 		return;
 	}
 	
-	// App is not the foreground window
+	// 4. App is not the foreground window
 	if (GetForegroundWindow() != AfxGetMainWnd())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (App not active)\n"));
