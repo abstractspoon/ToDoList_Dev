@@ -2863,7 +2863,7 @@ BEGIN
     BUTTON      ID_EDIT_UNDO
     BUTTON      ID_EDIT_REDO
     SEPARATOR
-    BUTTON      ID_MAXTASKLIST
+    BUTTON      ID_VIEW_MAXTASKLIST
     SEPARATOR
     BUTTON      ID_VIEW_EXPANDTASK
     BUTTON      ID_VIEW_COLLAPSETASK
@@ -3263,8 +3263,10 @@ BEGIN
     BEGIN
         MENUITEM "Show Project Name Fiel&d",    ID_VIEW_PROJECTNAME
         MENUITEM SEPARATOR
-        MENUITEM "&Maximise Task View",         ID_MAXTASKLIST
-        MENUITEM "Ma&ximise Comments",          ID_MAXCOMMENTS
+        MENUITEM "&Maximise Task View",         ID_VIEW_MAXTASKLIST
+        MENUITEM "Ma&ximise Comments",          ID_VIEW_MAXCOMMENTS
+        MENUITEM "&Revert Maximisation",        ID_VIEW_UNMAXTASKLISTANDCOMMENTS
+
         MENUITEM SEPARATOR
         MENUITEM "T&oggle between Task Tree and List View", 
                                                 ID_VIEW_TOGGLETREEANDLIST
@@ -4657,7 +4659,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_MAXTASKLIST          "\nMaximise Task View"
+    ID_VIEW_MAXTASKLIST     "\nMaximise Task View"
 END
 
 STRINGTABLE DISCARDABLE 

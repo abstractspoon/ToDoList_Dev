@@ -349,8 +349,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_FILE_RESETVERSION, OnFileResetversion)
 	ON_COMMAND(ID_HELP_KEYBOARDSHORTCUTS, OnShowKeyboardshortcuts)
 	ON_COMMAND(ID_LOAD_NORMAL, OnLoad)
-	ON_COMMAND(ID_MAXCOMMENTS, OnMaximizeComments)
-	ON_COMMAND(ID_MAXTASKLIST, OnMaximizeTasklist)
 	ON_COMMAND(ID_MINIMIZETOTRAY, OnMinimizeToTray)
 	ON_COMMAND(ID_MOVETASKDOWN, OnMovetaskdown)
 	ON_COMMAND(ID_MOVETASKLEFT, OnMovetaskleft)
@@ -404,6 +402,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_TRAYICON_CREATETASK, OnTrayiconCreatetask)
 	ON_COMMAND(ID_TRAYICON_SHOW, OnTrayiconShow)
 	ON_COMMAND(ID_TRAYICON_SHOWTIMETRACKER, OnViewShowTimeTracker)
+	ON_COMMAND(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUnmaximizeTasklistAndComments)
 	ON_COMMAND(ID_VIEW_CLEARFILTER, OnViewClearfilter)
 	ON_COMMAND(ID_VIEW_CUSTOMTOOLBAR, OnViewCustomToolbar)
 	ON_COMMAND(ID_VIEW_CYCLETASKVIEWS, OnViewCycleTaskViews)
@@ -412,6 +411,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_HIDEALLBARS, OnViewHideAllBars)
 	ON_COMMAND(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnViewIncrementTaskViewFontSize)
 	ON_COMMAND(ID_VIEW_MAINTOOLBAR, OnViewMainToolbar)
+	ON_COMMAND(ID_VIEW_MAXCOMMENTS, OnMaximizeComments)
+	ON_COMMAND(ID_VIEW_MAXTASKLIST, OnMaximizeTasklist)
 	ON_COMMAND(ID_VIEW_MOVETASKLISTLEFT, OnViewMovetasklistleft)
 	ON_COMMAND(ID_VIEW_MOVETASKLISTRIGHT, OnViewMovetasklistright)
 	ON_COMMAND(ID_VIEW_NEXT, OnViewNextTasklist)
@@ -601,8 +602,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_FILE_MRU1, OnUpdateRecentFileMenu)
 	ON_UPDATE_COMMAND_UI(ID_FILE_OPENARCHIVE, OnUpdateFileOpenarchive)
 	ON_UPDATE_COMMAND_UI(ID_FILE_RESETVERSION, OnUpdateFileResetversion)
-	ON_UPDATE_COMMAND_UI(ID_MAXCOMMENTS, OnUpdateMaximizeComments)
-	ON_UPDATE_COMMAND_UI(ID_MAXTASKLIST, OnUpdateMaximizeTasklist)
 	ON_UPDATE_COMMAND_UI(ID_MOVETASKDOWN, OnUpdateMovetaskdown)
 	ON_UPDATE_COMMAND_UI(ID_MOVETASKLEFT, OnUpdateMovetaskleft)
 	ON_UPDATE_COMMAND_UI(ID_MOVETASKRIGHT, OnUpdateMovetaskright)
@@ -654,6 +653,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_HIDEALLBARS, OnUpdateViewHideAllBars)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_INCREMENTTASKVIEWFONTSIZE, OnUpdateViewIncrementTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MAINTOOLBAR, OnUpdateViewMainToolbar)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_MAXCOMMENTS, OnUpdateMaximizeComments)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_MAXTASKLIST, OnUpdateMaximizeTasklist)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVETASKLISTLEFT, OnUpdateViewMovetasklistleft)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVETASKLISTRIGHT, OnUpdateViewMovetasklistright)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_NEXT, OnUpdateViewNext)
@@ -677,6 +678,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKEXPANDED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, OnUpdateViewToggletasksandcomments)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUpdateUnmaximizeTasklistAndComments)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
@@ -1054,8 +1056,6 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EXIT,								VK_F4,			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_HELP_WIKI,						VK_F1,			0);
 	m_mgrShortcuts.AddShortcut(ID_LOAD_NORMAL,						'O',			HOTKEYF_CONTROL); 
-	m_mgrShortcuts.AddShortcut(ID_MAXCOMMENTS,						'M',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
-	m_mgrShortcuts.AddShortcut(ID_MAXTASKLIST,						'M',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_MOVE_GOTOTASK,					'G',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_MOVETASKDOWN,						VK_DOWN,		HOTKEYF_CONTROL | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_MOVETASKLEFT,						VK_LEFT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
@@ -1076,6 +1076,8 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_VIEW_CYCLETASKVIEWS,				VK_F10,			HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_DECREMENTTASKVIEWFONTSIZE,	VK_DOWN,		HOTKEYF_SHIFT | HOTKEYF_ALT | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_INCREMENTTASKVIEWFONTSIZE,	VK_UP,			HOTKEYF_SHIFT | HOTKEYF_ALT | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_MAXCOMMENTS,					'M',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_MAXTASKLIST,					'M',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_NEXT,						VK_TAB,			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_NEXT_SEL,					VK_RIGHT,		HOTKEYF_ALT | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_PREV,						VK_TAB,			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
@@ -1146,7 +1148,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_EDIT_SETREMINDER);
 	aCmdIDs.Add(ID_EDIT_UNDO);
 	aCmdIDs.Add(ID_EDIT_REDO);
-	aCmdIDs.Add(ID_MAXTASKLIST);
+	aCmdIDs.Add(ID_VIEW_MAXTASKLIST);
 	aCmdIDs.Add(ID_VIEW_EXPANDTASK);
 	aCmdIDs.Add(ID_VIEW_COLLAPSETASK);
 	aCmdIDs.Add(ID_VIEW_PREV_SEL);
@@ -6179,6 +6181,26 @@ void CToDoListWnd::OnMaximizeComments()
 void CToDoListWnd::OnUpdateMaximizeComments(CCmdUI* pCmdUI) 
 {
 	pCmdUI->SetCheck((m_nMaxState == TDCMS_MAXCOMMENTS) ? 1 : 0);
+}
+
+void CToDoListWnd::OnUnmaximizeTasklistAndComments()
+{
+	if (m_nMaxState != TDCMS_NORMAL)
+	{
+		m_nMaxState = TDCMS_NORMAL;
+	
+		// update active tasklist
+		GetToDoCtrl().SetMaximizeState(m_nMaxState);
+		Invalidate();
+
+		// and caption
+		UpdateCaption();
+	}
+}
+
+void CToDoListWnd::OnUpdateUnmaximizeTasklistAndComments(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_nMaxState != TDCMS_NORMAL);
 }
 
 void CToDoListWnd::OnReload() 

@@ -463,6 +463,7 @@ protected:
 	afx_msg void OnLoad();
 	afx_msg void OnFileOpenFromUserStorage(UINT nCmdID);
 	afx_msg void OnFileSaveToUserStorage(UINT nCmdID);
+	afx_msg void OnUnMaximizeTasklistAndComments();
 	afx_msg void OnMaximizeComments();
 	afx_msg void OnMaximizeTasklist();
 	afx_msg void OnMinimizeToTray();
@@ -516,6 +517,7 @@ protected:
 	afx_msg void OnTrayiconCreatetask();
 	afx_msg void OnTrayiconShow();
 	afx_msg void OnTrayiconShowDueTasks(UINT nCmdID);
+	afx_msg void OnUnmaximizeTasklistAndComments();
 	afx_msg void OnUpdateArchiveCompletedtasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCloseall(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateDeletealltasks(CCmdUI* pCmdUI);
@@ -576,6 +578,7 @@ protected:
 	afx_msg void OnUpdateViewSaveToImage(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMainToolbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewCustomToolbar(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateUnmaximizeTasklistAndComments(CCmdUI* pCmdUI);
 	afx_msg void OnUserTool(UINT nCmdID);
 	afx_msg void OnViewMovetasklistleft();
 	afx_msg void OnViewMovetasklistright();
