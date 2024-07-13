@@ -7,6 +7,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.IO;
+using System.Text;
 using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
@@ -244,7 +245,7 @@ namespace MDContentControl
 
 			if (PreviewBrowser.Document != null)
 			{
- 				File.WriteAllText(m_TempFile, OutputHtmlAsPage);
+ 				File.WriteAllText(m_TempFile, OutputHtmlAsPage, Encoding.UTF8);
  				PreviewBrowser.Navigate(m_TempFile);
 			}
 			else
