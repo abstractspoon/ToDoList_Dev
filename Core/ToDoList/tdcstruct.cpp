@@ -106,7 +106,8 @@ TDCINFOTIPITEM::TDCINFOTIPITEM(TDC_ATTRIBUTE nAttribID, UINT nLabelStrID, const 
 	:
 	nAttributeID(nAttribID),
 	sLabel(CEnString(nLabelStrID)),
-	sValue(sVal)
+	sValue(sVal),
+	nLabelWidth(0)
 {
 }
 
@@ -225,7 +226,9 @@ TDCNOTIFYMOD::TDCNOTIFYMOD(TDC_ATTRIBUTE nAttribID, const CDWordArray& taskIDs)
 	aTaskIDs.Copy(taskIDs);
 }
 
-TDCNOTIFYMOD::TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) : mapAttrib(attribIDs)
+TDCNOTIFYMOD::TDCNOTIFYMOD(const CTDCAttributeMap& attribIDs, const CDWordArray& taskIDs) 
+	: 
+	mapAttrib(attribIDs)
 {
 	aTaskIDs.Copy(taskIDs);
 }
@@ -455,13 +458,14 @@ BOOL TDCGETTASKS::WantAttribute(TDC_ATTRIBUTE nAttribID) const
 BOOL TDCGETTASKS::IsSet(BOOL bIncAttrib) const
 {
 	if ((nFilter != TDCGT_ALL) ||
-		CDateHelper::IsDateSet(dateDueBy) ||
 		dwFlags ||
-		!sAllocTo.IsEmpty())
+		!sAllocTo.IsEmpty() ||
+		CDateHelper::IsDateSet(dateDueBy))
 	{
 		return TRUE;
 	}
-	else if (bIncAttrib)
+
+	if (bIncAttrib)
 	{
 		return mapAttribs.GetCount();
 	}
@@ -586,7 +590,7 @@ CTRLITEM::CTRLITEM(UINT ctrlID, UINT labelID, TDC_ATTRIBUTE nAttribID)
 BOOL CTRLITEM::operator==(const CTRLITEM& other) const
 {
 	return ((nCtrlID == other.nCtrlID) &&
-		(nLabelID == other.nLabelID) &&
+			(nLabelID == other.nLabelID) &&
 			(nAttributeID == other.nAttributeID));
 }
 
@@ -626,10 +630,13 @@ void CTRLITEM::DeleteCtrl(const CWnd* pParent, UINT& nID)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-CUSTOMATTRIBCTRLITEM::CUSTOMATTRIBCTRLITEM()
+CUSTOMATTRIBCTRLITEM::CUSTOMATTRIBCTRLITEM() 
+	:
+	nBuddyCtrlID(0),
+	nBuddyLabelID(0),
+	pBuddyClass(NULL)
+
 {
-	nBuddyCtrlID = nBuddyLabelID = 0;
-	pBuddyClass = NULL;
 }
 
 BOOL CUSTOMATTRIBCTRLITEM::operator==(const CUSTOMATTRIBCTRLITEM& other) const
@@ -981,11 +988,30 @@ BOOL SEARCHPARAM::SetAttribute(TDC_ATTRIBUTE nAttribID, FIND_ATTRIBTYPE nType)
 	return TRUE;
 }
 
-TDC_ATTRIBUTE SEARCHPARAM::GetAttribute() const { return nAttributeID; }
-FIND_OPERATOR SEARCHPARAM::GetOperator() const { return nOperator; }
-BOOL SEARCHPARAM::GetAnd() const { return bAnd; }
-BOOL SEARCHPARAM::GetOr() const { return !bAnd; }
-BOOL SEARCHPARAM::IsCustomAttribute() const { return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttributeID); }
+TDC_ATTRIBUTE SEARCHPARAM::GetAttribute() const 
+{ 
+	return nAttributeID; 
+}
+
+FIND_OPERATOR SEARCHPARAM::GetOperator() const 
+{ 
+	return nOperator; 
+}
+
+BOOL SEARCHPARAM::GetAnd() const 
+{ 
+	return bAnd; 
+}
+
+BOOL SEARCHPARAM::GetOr() const 
+{ 
+	return !bAnd; 
+}
+
+BOOL SEARCHPARAM::IsCustomAttribute() const 
+{ 
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttributeID); 
+}
 
 BOOL SEARCHPARAM::IsRelativeDate(BOOL bMustHaveValue) const
 {
@@ -1597,7 +1623,12 @@ void SEARCHPARAMS::InitAttributeMap() const
 
 //////////////////////////////////////////////////////////////////////////////////
 
-SEARCHRESULT::SEARCHRESULT() : dwTaskID(0), dwFlags(0) {}
+SEARCHRESULT::SEARCHRESULT() 
+	: 
+	dwTaskID(0), 
+	dwFlags(0) 
+{
+}
 
 SEARCHRESULT::SEARCHRESULT(const SEARCHRESULT& res)
 {
@@ -1860,7 +1891,6 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttribID);
-
 			return mapCustomAttrib.HasKey(sAttribID);
 		}
 		break;
@@ -1887,7 +1917,10 @@ BOOL TDCFILTER::HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
 	return FALSE;
 }
 
-DWORD TDCFILTER::GetFlags() const { return dwFlags; }
+DWORD TDCFILTER::GetFlags() const 
+{ 
+	return dwFlags; 
+}
 
 BOOL TDCFILTER::HasFlag(DWORD dwFlag) const
 {
@@ -2697,7 +2730,7 @@ int TDCCOLEDITVISIBILITY::GetAllEditFields(CTDCAttributeMap& mapAttrib)
 
 ////////////////////////////////////////////////////////////////////////////
 
-TDCCOLEDITFILTERVISIBILITY::TDCCOLEDITFILTERVISIBILITY() : TDCCOLEDITVISIBILITY() 
+TDCCOLEDITFILTERVISIBILITY::TDCCOLEDITFILTERVISIBILITY()
 {
 }
 
@@ -2935,7 +2968,8 @@ int TDCCOLEDITFILTERVISIBILITY::GetAllFilterFields(CTDCAttributeMap& mapAttrib)
 
 TDCATTRIBUTEMAPPING::TDCATTRIBUTEMAPPING() 
 	: 
-	nAttributeID(TDCA_NONE) 
+	nAttributeID(TDCA_NONE),
+	dwItemData(0)
 {
 }
 
