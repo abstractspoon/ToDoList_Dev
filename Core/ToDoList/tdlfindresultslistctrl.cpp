@@ -10,6 +10,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\osversion.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\3rdparty\shellicons.h"
 

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "tdcmapping.h"
 #include "TDLColumnAttribVisibilityListCtrl.h"
 
 #include "..\shared\GraphicsMisc.h"

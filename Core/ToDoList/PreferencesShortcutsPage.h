@@ -30,7 +30,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesShortcutsPage)
-	enum { IDD = IDD_PREFSHORTCUTS_PAGE };
 	CHotKeyCtrlEx	m_hkCur;
 	COrderedTreeCtrl	m_tcCommands;
 	CHotKeyCtrlEx	m_hkNew;

@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "resource.h"
 #include "TDLStatusBar.h"
 #include "ToDoItem.h"
-#include "resource.h"
 #include "FilteredToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\Localizer.h"
 #include "..\shared\Misc.h"

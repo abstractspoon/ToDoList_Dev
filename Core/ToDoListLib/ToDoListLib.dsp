@@ -301,6 +301,10 @@ SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\tdcstruct.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCTaskCompletion.cpp
 # End Source File
 # Begin Source File

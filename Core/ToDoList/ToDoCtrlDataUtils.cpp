@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "tdcstatic.h"
+#include "tdcmapping.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
 #include "ToDoCtrlDataDefines.h"

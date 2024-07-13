@@ -8,6 +8,7 @@
 #include "resource.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "tdltaskicondlg.h"
 #include "TDLTaskViewListBox.h"
 #include "ToDoCtrlDataDefines.h"

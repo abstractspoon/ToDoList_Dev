@@ -7,6 +7,7 @@
 #include "todoctrldata.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "tdcimagelist.h"
 #include "resource.h"
 
@@ -24,6 +25,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\FileIcons.h"
+#include "..\Shared\DateHelper.h"
 
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\XNamedColors.h"

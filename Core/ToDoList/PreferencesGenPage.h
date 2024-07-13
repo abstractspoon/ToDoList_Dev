@@ -67,7 +67,6 @@ public:
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesGenPage)
-	enum { IDD = IDD_PREFGEN_PAGE };
 	CComboBox	m_cbNoEditTime;
 	CTDLLanguageComboBox	m_cbLanguages;
 	CHotKeyCtrlEx	m_hkGlobal;

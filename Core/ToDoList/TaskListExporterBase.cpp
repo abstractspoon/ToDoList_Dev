@@ -6,6 +6,7 @@
 #include "TasklistExporterBase.h"
 #include "tdlrecurringtaskedit.h"
 #include "tdcstatic.h"
+#include "tdcmapping.h"
 
 #include "..\shared\xmlfile.h"
 #include "..\shared\enstring.h"

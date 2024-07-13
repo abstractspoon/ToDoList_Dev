@@ -317,7 +317,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesDlg)
-	enum { IDD = IDD_PREFERENCES };
 	//}}AFX_DATA
 	CPreferencesGenPage m_pageGen;
 	CPreferencesFilePage m_pageFile;

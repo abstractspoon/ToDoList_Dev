@@ -46,7 +46,7 @@ IMPLEMENT_DYNCREATE(CPreferencesTaskDefPage, CPreferencesPageBase)
 
 CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent) 
 	: 
-	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
+	CPreferencesPageBase(IDD_PREFTASKDEF_PAGE),
 	m_pMgrContent(pMgrContent), 
 	m_ctrlComments(FALSE, FALSE, COMMENTS_COMBOLENDLU, pMgrContent, NULL),
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),

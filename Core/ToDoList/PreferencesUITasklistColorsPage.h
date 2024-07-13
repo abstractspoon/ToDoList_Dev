@@ -75,7 +75,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUITasklistColorsPage)
-	enum { IDD = IDD_PREFUITASKLISTCOLORS_PAGE };
 	CComboBox	m_cbColorByAttribute;
 	BOOL	m_bColorTaskBackground;
 	BOOL	m_bHLSColorGradient;

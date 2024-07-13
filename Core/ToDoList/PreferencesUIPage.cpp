@@ -26,7 +26,7 @@ IMPLEMENT_DYNCREATE(CPreferencesUIPage, CPreferencesPageBase)
 
 CPreferencesUIPage::CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt) 
 	: 
-	CPreferencesPageBase(CPreferencesUIPage::IDD), 
+	CPreferencesPageBase(IDD_PREFUI_PAGE),
 	m_pMgrUIExt(pMgrUIExt),
 	m_lbTaskViews(pMgrUIExt)
 {

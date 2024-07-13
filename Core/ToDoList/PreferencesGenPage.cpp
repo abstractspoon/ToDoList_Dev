@@ -34,11 +34,12 @@ const LPCTSTR DEFAULT_STICKIES_PATH = _T("C:\\Program Files (x86)\\Stickies\\sti
 
 IMPLEMENT_DYNCREATE(CPreferencesGenPage, CPreferencesPageBase)
 
-CPreferencesGenPage::CPreferencesGenPage() : 
-   CPreferencesPageBase(CPreferencesGenPage::IDD), 
-   m_hkGlobal(TRUE), 
-   m_cbLanguages(_T("*.csv")),
-   m_eStickiesPath(0, CEnString(IDS_STICKIESEXEFILTER))
+CPreferencesGenPage::CPreferencesGenPage()
+	:
+	CPreferencesPageBase(IDD_PREFGEN_PAGE),
+	m_hkGlobal(TRUE),
+	m_cbLanguages(_T("*.csv")),
+	m_eStickiesPath(0, CEnString(IDS_STICKIESEXEFILTER))
 {
 	//{{AFX_DATA_INIT(CPreferencesGenPage)
 	//}}AFX_DATA_INIT

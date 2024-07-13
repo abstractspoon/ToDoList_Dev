@@ -8,6 +8,7 @@
 #include "TDCImageList.h"
 #include "tdcstatic.h"
 #include "tdcstruct.h"
+#include "tdcmapping.h"
 
 #include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
@@ -18,6 +19,7 @@
 #include "..\shared\FileIcons.h"
 #include "..\shared\WndPrompt.h"
 #include "..\shared\Themed.h"
+#include "..\Shared\DateHelper.h"
 
 #ifdef _DEBUG
 #	include "..\shared\ScopedTimer.h"

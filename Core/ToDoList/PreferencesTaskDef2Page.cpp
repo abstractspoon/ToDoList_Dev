@@ -31,7 +31,7 @@ IMPLEMENT_DYNCREATE(CPreferencesTaskDef2Page, CPreferencesPageBase)
 
 CPreferencesTaskDef2Page::CPreferencesTaskDef2Page() 
 	: 
-	CPreferencesPageBase(CPreferencesTaskDef2Page::IDD)
+	CPreferencesPageBase(IDD_PREFTASKDEF2_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskDef2Page)
 	//}}AFX_DATA_INIT

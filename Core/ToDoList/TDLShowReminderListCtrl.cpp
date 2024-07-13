@@ -7,6 +7,8 @@
 #include "filteredtodoctrl.h"
 #include "todoctrlreminders.h"
 
+#include "..\shared\DateHelper.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma warning(push)

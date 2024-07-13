@@ -12,6 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "tdcmsg.h"
+#include "tdcsort.h"
 #include "tdcstruct.h"
 #include "todoctrlfind.h"
 #include "todoctrldata.h"

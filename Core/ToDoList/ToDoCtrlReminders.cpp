@@ -5,12 +5,14 @@
 #include "resource.h"
 #include "ToDoCtrlReminders.h"
 #include "filteredToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\scopedtimer.h"
 #include "..\shared\richedithelper.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\Interfaces\Preferences.h"
 

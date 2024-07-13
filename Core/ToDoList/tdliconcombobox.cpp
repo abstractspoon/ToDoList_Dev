@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "tdliconcombobox.h"
 #include "tdcimagelist.h"
 #include "tdcstruct.h"

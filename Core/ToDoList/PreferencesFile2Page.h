@@ -48,7 +48,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesFile2Page)
-	enum { IDD = IDD_PREFFILE2_PAGE };
 	CComboBox	m_cbKeepBackups;
 	CFileEdit	m_eBackupLocation;
 	BOOL	m_bBackupOnSave;

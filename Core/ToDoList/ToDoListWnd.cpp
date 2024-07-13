@@ -43,6 +43,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\enbitmap.h"
+#include "..\shared\encommandlineinfo.h"
 #include "..\shared\encolordialog.h"
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"

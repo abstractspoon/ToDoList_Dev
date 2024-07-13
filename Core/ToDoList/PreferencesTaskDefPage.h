@@ -55,7 +55,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskDefPage)
-	enum { IDD = IDD_PREFTASKDEF_PAGE };
 	//}}AFX_DATA
 
 	CTDLReminderPeriodComboBox	m_cbDefReminder;

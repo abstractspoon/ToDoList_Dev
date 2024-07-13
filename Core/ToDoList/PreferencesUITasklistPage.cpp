@@ -18,8 +18,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistPage property page
 
-CPreferencesUITasklistPage::CPreferencesUITasklistPage() : 
-	CPreferencesPageBase(CPreferencesUITasklistPage::IDD)
+CPreferencesUITasklistPage::CPreferencesUITasklistPage() 
+	: 
+	CPreferencesPageBase(IDD_PREFUITASKLIST_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistPage)
 	//}}AFX_DATA_INIT

@@ -3,8 +3,11 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "resource.h"
 #include "tdcreminder.h"
 #include "filteredtodoctrl.h"
+
+#include "..\shared\datehelper.h"
 
 #include "..\Interfaces\ipreferences.h"
 

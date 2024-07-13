@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TDLTasklistImportDlg.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "preferencesdlg.h"
 #include "TDCToDoCtrlPreferenceHelper.h"
 

@@ -6,6 +6,8 @@
 #include "TDCSearchParamHelper.h"
 #include "TDCStruct.h"
 
+#include "..\Shared\DateHelper.h"
+
 #include "..\Interfaces\Preferences.h"
 
 //////////////////////////////////////////////////////////////////////

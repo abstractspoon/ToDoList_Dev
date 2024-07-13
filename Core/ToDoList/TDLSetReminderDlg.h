@@ -59,7 +59,7 @@ protected:
 	int		m_bRelative;
 	COleDateTime	m_dtAbsoluteDate;
 	CString	m_sTaskTitle;
-	double	m_dAbsoluteTime;
+	double	m_dAbsoluteTime; // must come after absolute date
 	CString m_sModifyDlgTitle;
 
 // Overrides

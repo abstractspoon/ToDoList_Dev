@@ -42,7 +42,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesMultiUserPage)
-	enum { IDD = IDD_PREFMULTIUSER_PAGE };
 	CComboBox	m_cbNoEditTime;
 	BOOL	m_bCheckinNoChange;
 	BOOL	m_bUse3rdPartySourceControl;

@@ -5,9 +5,11 @@
 #include "stdafx.h"
 #include "TaskListcsvExporter.h"
 #include "tdlrecurringtaskedit.h"
+#include "tdcmapping.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
+#include "..\Shared\DateHelper.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
