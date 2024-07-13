@@ -20,6 +20,7 @@ class CTDLToolbarButtonListCtrl : public CInputListCtrl
 // Construction
 public:
 	CTDLToolbarButtonListCtrl();
+	virtual ~CTDLToolbarButtonListCtrl();
 
 	BOOL HasButtons() const;
 	int GetButtons(CToolbarButtonArray& aButtons) const;
@@ -36,9 +37,6 @@ public:
 	BOOL DeleteSelectedButton();
 	BOOL DuplicateSelectedButton();
 
-// Operations
-public:
-
 // Attributes
 protected:
 	CMenuComboBox m_cbMenuItems;
@@ -49,10 +47,6 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLToolbarButtonListCtrl)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLToolbarButtonListCtrl();
 
 	// Generated message map functions
 protected:
