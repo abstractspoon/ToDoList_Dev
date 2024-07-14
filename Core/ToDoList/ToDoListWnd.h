@@ -815,7 +815,6 @@ protected:
 	void UpdateFindTasksAndRemindersFonts();
 	int CalcEditFieldInset() const;
 
-	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
 	static void HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const CString& sExportPath, BOOL bToClipboard, BOOL bPreview);
 	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);

@@ -9,7 +9,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "..\shared\menuiconmgr.h"
+
+//////////////////////////////////////////////////////////////////////
+
+class CPreferencesDlg;
+
+//////////////////////////////////////////////////////////////////////
 
 class CTDCMenuIconMgr : public CMenuIconMgr
 {
@@ -17,8 +25,18 @@ public:
 	CTDCMenuIconMgr();
 	virtual ~CTDCMenuIconMgr();
 	
-	BOOL Initialize(CWnd* pWnd/*, TODO */);
 	void Release();
+
+	void Populate(const CPreferencesDlg& prefs);
+	void UpdateSourceControlStatus(BOOL bIsDisabled, BOOL bIsCheckedOut);
+	void UpdateNewTaskIcons(const CPreferencesDlg& prefs);
+
+protected:
+	UINT m_nNewTaskID, m_nNewSubtaskID;
+
+protected:
+	static UINT GetNewTaskCmdID(const CPreferencesDlg& prefs);
+	static UINT GetNewSubtaskCmdID(const CPreferencesDlg& prefs);
 
 };
 

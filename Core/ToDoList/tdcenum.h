@@ -946,5 +946,30 @@ enum TDC_ATTRIBUTECATEGORY
 };
 
 /////////////////////////////////////////////////////////////////////////////
+// PreferencesUIPage
+
+enum PUIP_NEWTASKPOS
+{
+	PUIP_TOP,
+	PUIP_BOTTOM,
+	PUIP_ABOVE,
+	PUIP_BELOW,
+};
+
+enum PUIP_LOCATION
+{
+	PUIP_LOCATEBOTTOM,
+	PUIP_LOCATERIGHT,
+	PUIP_LOCATELEFT,
+};
+
+enum PUIP_MATCHTITLE
+{
+	PUIP_MATCHONTITLE,
+	PUIP_MATCHONTITLECOMMENTS,
+	PUIP_MATCHONANYTEXT,
+};
+
+/////////////////////////////////////////////////////////////////////////////
 
 #endif // AFX_TDCENUM_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

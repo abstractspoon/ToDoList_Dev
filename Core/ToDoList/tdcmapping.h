@@ -64,6 +64,29 @@ namespace TDC
 		return TDC_INSERTATBOTTOM;
 	}
 
+	static UINT MapNewTaskPosToCmdID(PUIP_NEWTASKPOS nPos, BOOL bSubtask)
+	{
+		if (!bSubtask) // task
+		{
+			switch (nPos)
+			{
+			case PUIP_TOP:		return ID_NEWTASK_ATTOP;
+			case PUIP_BOTTOM:	return ID_NEWTASK_ATBOTTOM;
+			case PUIP_BELOW:	return ID_NEWTASK_AFTERSELECTEDTASK;
+			}
+
+			// All else (PUIP_ABOVE)
+			return ID_NEWTASK_BEFORESELECTEDTASK;
+		}
+
+		// subtask
+		if (nPos == PUIP_BOTTOM)
+			return ID_NEWSUBTASK_ATBOTTOM;
+
+		// else
+		return ID_NEWSUBTASK_ATTOP;
+	}
+
 	static TDC_COLUMN MapSortIDToColumn(UINT nSortID) 
 	{
 		switch (nSortID)
