@@ -96,7 +96,7 @@ BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
-	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnComboChangeHoursInDay)
+	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnSelChangeHoursInDay)
 	ON_CBN_KILLFOCUS(IDC_HOURSINONEDAY, OnKillFocusHoursInDay)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
@@ -112,6 +112,27 @@ BOOL CPreferencesTaskPage::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+BOOL CPreferencesTaskPage::PreTranslateMessage(MSG* pMsg)
+{
+	switch (pMsg->message)
+	{
+	case WM_KEYDOWN:
+		switch (pMsg->wParam)
+		{
+		case VK_RETURN:
+			if (CDialogHelper::IsChildOrSame(::GetDlgItem(*this, IDC_HOURSINONEDAY), ::GetFocus()))
+			{
+				OnKillFocusHoursInDay();
+				return TRUE;
+			}
+			break;
+		}
+		break;
+	}
+
+	return CPreferencesPageBase::PreTranslateMessage(pMsg);
 }
 
 void CPreferencesTaskPage::OnFirstShow()
@@ -306,7 +327,7 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 }
 
-void CPreferencesTaskPage::OnComboChangeHoursInDay()
+void CPreferencesTaskPage::OnSelChangeHoursInDay()
 {
 	// UpdateData won't here because the combo text is 
 	// not updated until after this notification
