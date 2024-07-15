@@ -28,6 +28,7 @@
 #include "TDLStatusBar.h"
 #include "TDCFindFilterHelper.h"
 #include "TDCShortcutManager.h"
+#include "TDCMenuIconMgr.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -134,7 +135,7 @@ protected:
 	CToDoCtrlMgr m_mgrToDoCtrls;
 	CTDCContentMgr m_mgrContent;
 	CWndPromptManager m_mgrPrompts;
-	CMenuIconMgr m_mgrMenuIcons;
+	CTDCMenuIconMgr m_mgrMenuIcons;
 	CUIExtensionMgr m_mgrUIExtensions;
 	CTDCFindFilterHelper m_findFilterHelper;
 
@@ -814,7 +815,6 @@ protected:
 	void UpdateFindTasksAndRemindersFonts();
 	int CalcEditFieldInset() const;
 
-	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
 	static void HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const CString& sExportPath, BOOL bToClipboard, BOOL bPreview);
 	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);

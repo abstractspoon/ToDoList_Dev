@@ -1132,69 +1132,8 @@ void CToDoListWnd::PopulateMenuIconManager()
 		return;
 	}
 
-	// Toolbar images
-	CUIntArray aCmdIDs;
-	
-	// Main toolbar
-	aCmdIDs.Add(ID_LOAD_NORMAL);
-	aCmdIDs.Add(ID_SAVE_NORMAL);
-	aCmdIDs.Add(ID_SAVEALL);
-	
-	aCmdIDs.Add(GetNewTaskCmdID());
-	aCmdIDs.Add(GetNewSubtaskCmdID());
-	
-	aCmdIDs.Add(ID_EDIT_TASKTEXT);
-	aCmdIDs.Add(ID_EDIT_SETTASKICON);
-	aCmdIDs.Add(ID_EDIT_SETREMINDER);
-	aCmdIDs.Add(ID_EDIT_UNDO);
-	aCmdIDs.Add(ID_EDIT_REDO);
-	aCmdIDs.Add(ID_VIEW_MAXTASKLIST);
-	aCmdIDs.Add(ID_VIEW_EXPANDTASK);
-	aCmdIDs.Add(ID_VIEW_COLLAPSETASK);
-	aCmdIDs.Add(ID_VIEW_PREV_SEL);
-	aCmdIDs.Add(ID_VIEW_NEXT_SEL);
-	aCmdIDs.Add(ID_EDIT_FINDTASKS);
-	aCmdIDs.Add(ID_SORT);
-	aCmdIDs.Add(ID_DELETETASK);
-	aCmdIDs.Add(ID_TOOLS_TOGGLECHECKIN); // placeholder
-	aCmdIDs.Add(ID_PREFERENCES);
-	aCmdIDs.Add(ID_HELP_WIKI);
-
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_TOOLBAR_STD, colorMagenta);
-
-	// extra
-	aCmdIDs.RemoveAll();
-
-  	aCmdIDs.Add(ID_HELP_DONATE);
-	aCmdIDs.Add(ID_TOOLS_SELECTINEXPLORER);
-	aCmdIDs.Add(ID_TOOLS_ADDTOSOURCECONTROL);
-	aCmdIDs.Add(ID_TOOLS_REMOVEFROMSOURCECONTROL);
-	aCmdIDs.Add(ID_VIEW_INCREMENTTASKVIEWFONTSIZE);
-	aCmdIDs.Add(ID_VIEW_DECREMENTTASKVIEWFONTSIZE);
-	aCmdIDs.Add(ID_EXIT);
-	aCmdIDs.Add(ID_FILE_ENCRYPT);
-	aCmdIDs.Add(ID_EDIT_PASTEATTRIBUTES);
-
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, colorMagenta);
-
-	// social images
-	aCmdIDs.RemoveAll();
-	
-	aCmdIDs.Add(ID_HELP_WIKI);
-	aCmdIDs.Add(ID_HELP_FORUM);
-
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, colorMagenta);
-
-	// Tray icon
-	m_mgrMenuIcons.AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID());
-	m_mgrMenuIcons.AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
-
-	// Custom toolbar
-	if (m_toolbarCustom.GetSafeHwnd())
-		m_mgrMenuIcons.AddImages(m_toolbarCustom);
-
-	// Displaying logged time
-	m_mgrMenuIcons.AddImage(ID_SHOWTIMELOGFILE, CFileIcons::ExtractIcon(_T(".csv")));
+	m_mgrMenuIcons.Populate(Prefs());
+	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
 
 	UpdateMenuIconMgrSourceControlStatus();
 }
@@ -5129,11 +5068,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		newPrefs.GetDefaultTaskAttributes(m_tdiDefault);
 
 		// menu icons
-		UINT nPrevID = MapNewTaskPos(oldPrefs.GetNewTaskPos(), FALSE);
-		m_mgrMenuIcons.ChangeImageID(nPrevID, GetNewTaskCmdID());
-
-		nPrevID = MapNewTaskPos(oldPrefs.GetNewSubtaskPos(), TRUE);
-		m_mgrMenuIcons.ChangeImageID(nPrevID, GetNewSubtaskCmdID());
+		m_mgrMenuIcons.UpdateNewTaskIcons(newPrefs);
 		
 		// reload menu 
 		InitMenubar();
@@ -5221,14 +5156,10 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 		if (bRebuildCustomTB)
 		{
-			if (m_mgrMenuIcons.HasImages())
-				m_mgrMenuIcons.RemoveImages(m_toolbarCustom);
-
 			m_toolbarCustom.DestroyWindow();
 			InitCustomToolbar();
 
-			if (m_mgrMenuIcons.HasImages())
-				m_mgrMenuIcons.AddImages(m_toolbarCustom);
+			m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
 		}
 		
 		if (bResizeDlg)
@@ -8344,13 +8275,6 @@ void CToDoListWnd::OnTimerCheckReloadTasklists(int nCtrl, BOOL bForceCheckRemote
 
 void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 {
-	if (!m_mgrMenuIcons.HasImages())
-		return;
-
-	// figure out current state
-	BOOL bWasDisabled = m_mgrMenuIcons.HasImageID(ID_TOOLS_TOGGLECHECKIN);
-	BOOL bWasCheckedOut = (!bWasDisabled && m_mgrMenuIcons.HasImageID(ID_TOOLS_CHECKIN));
-
 	// figure out new state
 	BOOL bIsDisabled = TRUE;
 	BOOL bIsCheckedOut = FALSE;
@@ -8366,51 +8290,7 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 		}
 	}
 
-	if (bIsDisabled)
-	{
-		if (bWasDisabled)
-		{
-			return;
-		}
-		else if (bWasCheckedOut)
-		{
-			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_TOGGLECHECKIN);
-		}
-		else // checked in
-		{
-			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_TOGGLECHECKIN);
-		}
-	}
-	else if (bIsCheckedOut)
-	{
-		if (bWasDisabled)
-		{
-			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKIN);
-		}
-		else if (bWasCheckedOut)
-		{
-			return;
-		}
-		else // checked in
-		{
-			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_CHECKIN);
-		}
-	}
-	else // new == checked in
-	{
-		if (bWasDisabled)
-		{
-			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKOUT);
-		}
-		else if (bWasCheckedOut)
-		{
-			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_CHECKOUT);
-		}
-		else // checkedin
-		{
-			return;
-		}
-	}
+	m_mgrMenuIcons.UpdateSourceControlStatus(bIsDisabled, bIsCheckedOut);
 }
 
 void CToDoListWnd::UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID)
@@ -8494,16 +8374,12 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 
 	if (m_pPrefs->RemapMenuItemIDs(mapMenuIDs) & PREFS_REMAPPEDTOOLBAR)
 	{
-		// Remove 'old' toolbar icons
-		m_mgrMenuIcons.RemoveImages(m_toolbarCustom);
-		
 		CToolbarButtonArray aTBButtons;
 		VERIFY(Prefs().GetCustomToolbarButtons(aTBButtons));
 
 		VERIFY(m_toolbarCustom.ModifyButtonAttributes(aTBButtons, m_menubar));
 
-		// re-add modified toolbar icons
-		m_mgrMenuIcons.AddImages(m_toolbarCustom);
+		m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
 	}
 }
 
@@ -9773,37 +9649,14 @@ void CToDoListWnd::OnUpdateImport(CCmdUI* pCmdUI)
 	pCmdUI->Enable(TRUE);
 }
 
-UINT CToDoListWnd::MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask)
-{
-	if (!bSubtask) // task
-	{
-		switch (nPos)
-		{
-		case PUIP_TOP:		return ID_NEWTASK_ATTOP;
-		case PUIP_BOTTOM:	return ID_NEWTASK_ATBOTTOM;
-		case PUIP_BELOW:	return ID_NEWTASK_AFTERSELECTEDTASK;
-			
-		case PUIP_ABOVE: 
-		default:			return ID_NEWTASK_BEFORESELECTEDTASK;
-		}
-	}
-	else // subtask
-	{
-		if (nPos == PUIP_BOTTOM)
-			return ID_NEWSUBTASK_ATBOTTOM;
-		else
-			return ID_NEWSUBTASK_ATTOP;
-	}
-}
-
 UINT CToDoListWnd::GetNewTaskCmdID() const
 {
-	return MapNewTaskPos(Prefs().GetNewTaskPos(), FALSE);
+	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewTaskPos(), FALSE);
 }
 
 UINT CToDoListWnd::GetNewSubtaskCmdID() const
 {
-	return MapNewTaskPos(Prefs().GetNewSubtaskPos(), TRUE);
+	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewSubtaskPos(), TRUE);
 }
 
 void CToDoListWnd::OnNewTask(UINT nCmdID) 

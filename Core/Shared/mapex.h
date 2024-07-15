@@ -41,6 +41,11 @@ public:
 		return (GetCount() == 0);
 	}
 
+	int GetSize() const
+	{
+		return GetCount();
+	}
+
 	KEY GetNext(POSITION& pos) const
 	{
 		char val = 0;

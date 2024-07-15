@@ -261,6 +261,10 @@ SOURCE=..\ToDoList\TDCMainMenu.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCMenuIconMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCMergeTasklist.cpp
 # End Source File
 # Begin Source File
@@ -902,6 +906,10 @@ SOURCE=..\ToDoList\TDCMainMenu.h
 # Begin Source File
 
 SOURCE=..\ToDoList\tdcmapping.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCMenuIconMgr.h
 # End Source File
 # Begin Source File
 
