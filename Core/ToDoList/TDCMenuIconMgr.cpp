@@ -6,9 +6,11 @@
 #include "resource.h"
 #include "TDCMapping.h"
 #include "TDCMenuIconMgr.h"
+#include "TDLCustomToolbar.h"
 #include "PreferencesDlg.h"
 
 #include "..\shared\FileIcons.h"
+#include "..\shared\Misc.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -16,8 +18,8 @@
 
 CTDCMenuIconMgr::CTDCMenuIconMgr()
 	:
-	m_nNewTaskID(0), 
-	m_nNewSubtaskID(0)
+	m_nNewTaskCmdID(0), 
+	m_nNewSubtaskCmdID(0)
 {
 }
 
@@ -44,11 +46,11 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	aCmdIDs.Add(ID_SAVE_NORMAL);
 	aCmdIDs.Add(ID_SAVEALL);
 
-	m_nNewTaskID = GetNewTaskCmdID(prefs);
-	m_nNewSubtaskID = GetNewSubtaskCmdID(prefs);
+	m_nNewTaskCmdID = GetNewTaskCmdID(prefs);
+	m_nNewSubtaskCmdID = GetNewSubtaskCmdID(prefs);
 
-	aCmdIDs.Add(m_nNewTaskID);
-	aCmdIDs.Add(m_nNewSubtaskID);
+	aCmdIDs.Add(m_nNewTaskCmdID);
+	aCmdIDs.Add(m_nNewSubtaskCmdID);
 
 	aCmdIDs.Add(ID_EDIT_TASKTEXT);
 	aCmdIDs.Add(ID_EDIT_SETTASKICON);
@@ -100,11 +102,12 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	AddImage(ID_SHOWTIMELOGFILE, CFileIcons::ExtractIcon(_T(".csv")));
 }
 
-void CTDCMenuIconMgr::Release()
+void CTDCMenuIconMgr::ClearImages()
 {
-	CMenuIconMgr::Release();
+	CMenuIconMgr::ClearImages();
 
-	// TODO
+	m_nNewTaskCmdID = m_nNewSubtaskCmdID = 0;
+	m_aCustomToolbarCmdIDs.RemoveAll();
 }
 
 UINT CTDCMenuIconMgr::GetNewTaskCmdID(const CPreferencesDlg& prefs)
@@ -119,69 +122,96 @@ UINT CTDCMenuIconMgr::GetNewSubtaskCmdID(const CPreferencesDlg& prefs)
 
 void CTDCMenuIconMgr::UpdateSourceControlStatus(BOOL bIsDisabled, BOOL bIsCheckedOut)
 {
-	if (!HasImages())
-		return;
+	if (HasImages())
+	{
+		// figure out previous state
+		BOOL bWasDisabled = HasImageID(ID_TOOLS_TOGGLECHECKIN);
+		BOOL bWasCheckedOut = (!bWasDisabled && HasImageID(ID_TOOLS_CHECKIN));
 
-	// figure out current state
-	BOOL bWasDisabled = HasImageID(ID_TOOLS_TOGGLECHECKIN);
-	BOOL bWasCheckedOut = (!bWasDisabled && HasImageID(ID_TOOLS_CHECKIN));
-
-	if (bIsDisabled)
-	{
-		if (bWasDisabled)
+		if (bIsDisabled)
 		{
-			return; // no change
+			if (bWasDisabled)
+			{
+				return; // no change
+			}
+			else if (bWasCheckedOut)
+			{
+				ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_TOGGLECHECKIN);
+			}
+			else // checked in
+			{
+				ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_TOGGLECHECKIN);
+			}
 		}
-		else if (bWasCheckedOut)
+		else if (bIsCheckedOut)
 		{
-			ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_TOGGLECHECKIN);
+			if (bWasDisabled)
+			{
+				ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKIN);
+			}
+			else if (bWasCheckedOut)
+			{
+				return; // no change
+			}
+			else // checked in
+			{
+				ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_CHECKIN);
+			}
 		}
-		else // checked in
+		else // new == checked in
 		{
-			ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_TOGGLECHECKIN);
-		}
-	}
-	else if (bIsCheckedOut)
-	{
-		if (bWasDisabled)
-		{
-			ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKIN);
-		}
-		else if (bWasCheckedOut)
-		{
-			return; // no change
-		}
-		else // checked in
-		{
-			ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_CHECKIN);
-		}
-	}
-	else // new == checked in
-	{
-		if (bWasDisabled)
-		{
-			ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKOUT);
-		}
-		else if (bWasCheckedOut)
-		{
-			ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_CHECKOUT);
-		}
-		else // checked in
-		{
-			return; // no change
+			if (bWasDisabled)
+			{
+				ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKOUT);
+			}
+			else if (bWasCheckedOut)
+			{
+				ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_CHECKOUT);
+			}
+			else // checked in
+			{
+				return; // no change
+			}
 		}
 	}
 }
 
-// menu icons
 void CTDCMenuIconMgr::UpdateNewTaskIcons(const CPreferencesDlg& prefs)
 {
-	UINT nPrevID = m_nNewTaskID;
-	m_nNewTaskID = GetNewTaskCmdID(prefs);
-	ChangeImageID(nPrevID, m_nNewSubtaskID);
+	if (HasImages())
+	{
+		UINT nPrevID = m_nNewTaskCmdID;
+		m_nNewTaskCmdID = GetNewTaskCmdID(prefs);
+		ChangeImageID(nPrevID, m_nNewSubtaskCmdID);
 
-	nPrevID = m_nNewSubtaskID;
-	m_nNewSubtaskID = GetNewSubtaskCmdID(prefs);
-	ChangeImageID(nPrevID, m_nNewSubtaskID);
+		nPrevID = m_nNewSubtaskCmdID;
+		m_nNewSubtaskCmdID = GetNewSubtaskCmdID(prefs);
+		ChangeImageID(nPrevID, m_nNewSubtaskCmdID);
+	}
 }
 
+void CTDCMenuIconMgr::UpdateCustomToolbar(const CToolBar& toolbar)
+{
+	if (HasImages() && toolbar.GetSafeHwnd())
+	{
+		// 1. Remove icons for the previous custom toolbar setup
+		RemoveImages(m_aCustomToolbarCmdIDs);
+		m_aCustomToolbarCmdIDs.RemoveAll();
+
+		// 2. Snapshot the current IDs so we can work out what was added
+		CUIntSet mapExistIDs;
+		Misc::GetKeysT(m_mapID2Icon, mapExistIDs);
+
+		// 3. Do the add - this will skip any command IDs already being managed
+		AddImages(toolbar);
+
+		// 4. Save off only what was actually added
+		CUIntSet mapNewIDs;
+		Misc::GetKeysT(m_mapID2Icon, mapNewIDs);
+
+		CUIntSet mapDiffIDs;
+
+		if (mapNewIDs.GetDifferences(mapExistIDs, mapDiffIDs))
+			mapDiffIDs.CopyTo(m_aCustomToolbarCmdIDs);
+	}
+}

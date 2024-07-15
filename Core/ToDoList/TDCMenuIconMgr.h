@@ -24,15 +24,17 @@ class CTDCMenuIconMgr : public CMenuIconMgr
 public:
 	CTDCMenuIconMgr();
 	virtual ~CTDCMenuIconMgr();
-	
-	void Release();
 
 	void Populate(const CPreferencesDlg& prefs);
+	void ClearImages();
+
 	void UpdateSourceControlStatus(BOOL bIsDisabled, BOOL bIsCheckedOut);
 	void UpdateNewTaskIcons(const CPreferencesDlg& prefs);
+	void UpdateCustomToolbar(const CToolBar& toolbar);
 
 protected:
-	UINT m_nNewTaskID, m_nNewSubtaskID;
+	UINT m_nNewTaskCmdID, m_nNewSubtaskCmdID;
+	CUIntArray m_aCustomToolbarCmdIDs;
 
 protected:
 	static UINT GetNewTaskCmdID(const CPreferencesDlg& prefs);

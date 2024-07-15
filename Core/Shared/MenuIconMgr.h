@@ -13,7 +13,7 @@
 
 #include <afxtempl.h>
 
-typedef CMap<UINT, UINT, HICON, HICON> CMapID2HICON;
+typedef CMap<UINT, UINT, HICON, HICON&> CMapID2HICON;
 
 class CMenuIconMgr : public CSubclassWnd  
 {
@@ -47,7 +47,7 @@ public:
 	BOOL ChangeImageID(UINT nCmdID, UINT nNewCmdID);
 	
 	void DeleteImage(UINT nCmdID);
-	void ClearImages();
+	virtual void ClearImages();
 	BOOL HasImages() const;
 	BOOL DrawImage(HDC hDC, UINT nCmdID, const CPoint& ptTopLeft, BOOL bNormal = TRUE) const;
 	
