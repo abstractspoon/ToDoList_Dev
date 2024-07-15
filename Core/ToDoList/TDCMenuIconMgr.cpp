@@ -200,14 +200,14 @@ void CTDCMenuIconMgr::UpdateCustomToolbar(const CToolBar& toolbar)
 
 		// 2. Snapshot the current IDs so we can work out what was added
 		CUIntSet mapExistIDs;
-		Misc::GetKeysT(m_mapID2Icon, mapExistIDs);
+		Misc::GetKeysT<UINT, HICON, CUIntSet>(m_mapID2Icon, mapExistIDs);
 
 		// 3. Do the add - this will skip any command IDs already being managed
 		AddImages(toolbar);
 
 		// 4. Save off only what was actually added
 		CUIntSet mapNewIDs;
-		Misc::GetKeysT(m_mapID2Icon, mapNewIDs);
+		Misc::GetKeysT<UINT, HICON, CUIntSet>(m_mapID2Icon, mapNewIDs);
 
 		CUIntSet mapDiffIDs;
 
