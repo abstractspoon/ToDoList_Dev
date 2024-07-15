@@ -9,6 +9,7 @@
 
 #include "TDLTaskViewListBox.h"
 #include "tdlthemecombobox.h"
+#include "tdcenum.h"
 
 #include "..\shared\preferencesbase.h"
 
