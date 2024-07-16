@@ -11767,7 +11767,10 @@ void CToDoListWnd::OnViewClearfilter()
 	{
 		tdc.ClearFilter();
 	
-		RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
+		if (m_bShowFilterBar)
+			RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
+		else
+			m_filterBar.RefreshFilterControls(tdc); // so menu updates work
 
 		UpdateStatusBar();
 		UpdateTimeTrackerTasks(TRUE);
@@ -11785,12 +11788,18 @@ void CToDoListWnd::OnViewTogglefilter()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	tdc.ToggleFilter();
+	if (tdc.HasAnyFilter() || tdc.CanToggleFilter())
+	{
+		tdc.ToggleFilter();
 
-	RefreshFilterBarControls(TDCA_ALL);
+		if (m_bShowFilterBar)
+			RefreshFilterBarControls(TDCA_ALL);
+		else
+			m_filterBar.RefreshFilterControls(tdc); // so menu updates work
 
-	UpdateStatusBar();
-	UpdateTimeTrackerTasks(TRUE);
+		UpdateStatusBar();
+		UpdateTimeTrackerTasks(TRUE);
+	}
 }
 
 void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
