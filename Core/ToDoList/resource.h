@@ -2529,6 +2529,7 @@
 #define IDS_GOTOTASK_TIP                51651
 #define IDS_TODAY                       51652
 #define IDS_LISTVIEW_SORTNONEGROUPBELOW 51653
+#define IDS_FILTER_HIDEUNDONEDEPENDS    51654
 
 // Next default values for new objects
 // 

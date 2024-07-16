@@ -521,7 +521,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_DEPENDENCY:
-			if (rule.GetOperator() == FOP_DEPENDS_COMPLETE)
+			if (rule.OperatorIs(FOP_DEPENDS_COMPLETE))
 			{
 				bMatch = TRUE;
 				sWhatMatched = CEnString(IDS_FT_MATCHES);
@@ -557,7 +557,6 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		case TDCA_POSITION:
 			{
-				// Position is 1-based in the UI, but 0-based internally
 				bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
 
 				if (bMatch)

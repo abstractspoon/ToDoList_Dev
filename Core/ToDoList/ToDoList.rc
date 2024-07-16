@@ -5999,6 +5999,7 @@ BEGIN
     IDS_GOTOTASK_TIP        "Go To Task"
     IDS_TODAY               "<today>"
     IDS_LISTVIEW_SORTNONEGROUPBELOW "Sort <none> group below other groups"
+    IDS_FILTER_HIDEUNDONEDEPENDS  "Hide tasks with incomplete Dependencies"
 END
 
 #endif    // English (Australia) resources

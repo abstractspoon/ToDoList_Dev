@@ -715,6 +715,7 @@ BOOL CTDLFindTasksDlg::SetSearchIncludesCompletedTasks(LPCTSTR szName, BOOL bInc
 
 int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const
 {
+	// Note - Can't call method below because it's not const
 	if (GetSearchParams(szName, filter.params))
 	{
 		filter.sName = szName;

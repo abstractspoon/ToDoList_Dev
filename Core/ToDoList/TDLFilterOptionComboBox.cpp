@@ -118,6 +118,7 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, const CTDCAtt
 			break;
 
 		case FO_SHOWALLSUB:
+		case FO_HIDEUNDONEDEPENDS:
 			bAddFlag = TRUE;
 			break;
 

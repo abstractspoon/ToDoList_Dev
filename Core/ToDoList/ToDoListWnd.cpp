@@ -1148,24 +1148,15 @@ void CToDoListWnd::OnShowKeyboardshortcuts()
 
 		if (m_mgrShortcuts.BuildMapping(menu, aMapping, '|'))
 		{
-			// add a few misc items that don't appear in the menus
-			CString sMisc;
-
+			// add a misc items that don't appear in the menus
 			for (int nItem = 0; nItem < NUM_MISCSHORTCUTS; nItem++)
 			{
-				if (MISC_SHORTCUTS[nItem].dwShortcut)
-				{
-					const SHORTCUT& sc = MISC_SHORTCUTS[nItem];
-					CString sShortcut(m_mgrShortcuts.GetShortcutText(sc.dwShortcut));
+				ASSERT(MISC_SHORTCUTS[nItem].dwShortcut);
 
-					sMisc.Format(_T("%s|%s"), sShortcut, CEnString(sc.nIDShortcut));
-				}
-				else
-				{
-					sMisc.Empty();
-				}
+				const SHORTCUT& sc = MISC_SHORTCUTS[nItem];
+				CString sShortcut(m_mgrShortcuts.GetShortcutText(sc.dwShortcut));
 
-				aMapping.Add(sMisc);
+				aMapping.Add(Misc::Format(_T("%s|%s"), sShortcut, CEnString(sc.nIDShortcut)));
 			}
 	
 			CTDLKeyboardShortcutDisplayDlg(aMapping, '|').DoModal();
