@@ -9,6 +9,7 @@
 
 #include "tdcstruct.h"
 #include "TDCToolsHelper.h"
+#include "TDCImageList.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\preferencesbase.h"
@@ -51,17 +52,18 @@ protected:
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CEdit	m_eCmdLine;
-	CFileEdit	m_eToolPath;
-	CListCtrl	m_lcTools;
-	CFileEdit	m_eIconPath;
+	CEdit m_eCmdLine;
+	CFileEdit m_eToolPath;
+	CListCtrl m_lcTools;
+	CFileEdit m_eIconPath;
+	CTDCImageList m_ilTools;
 
 	int m_nMaxNumTools;
 	BOOL m_bDisplayUDTsInToolbar;
 	CString	m_sToolPath;
 	CString	m_sCommandLine;
-	BOOL	m_bRunMinimized;
-	CString		m_sIconPath;
+	BOOL m_bRunMinimized;
+	CString m_sIconPath;
 	
 	CUserToolArray m_aTools;
 	CStringArray m_aMenuCustomAttribIDs;

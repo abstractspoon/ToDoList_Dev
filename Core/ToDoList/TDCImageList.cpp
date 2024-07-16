@@ -148,14 +148,14 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		
 		// then add the user's images
 		DWORD dwResult = 0;
-		nNextNameIndex = 300;
+		m_nNextCustomNameIndex = 300;
 		
 		if (FileMisc::FileExists(sTaskList))
-			dwResult = LoadImagesFromFolder(sTasklistPath, crTransparent, this, nNextNameIndex);
+			dwResult = LoadImagesFromFolder(sTasklistPath, crTransparent, this, m_nNextCustomNameIndex);
 		
 		// else try application location
 		if (!dwResult)
-			dwResult = LoadImagesFromFolder(sAppResPath, crTransparent, this, nNextNameIndex);
+			dwResult = LoadImagesFromFolder(sAppResPath, crTransparent, this, m_nNextCustomNameIndex);
 		
 		ScaleByDPIFactor(m_crBackground);
 		
@@ -217,6 +217,11 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORR
 		return MapLastImage(sImageFile, nStartIndex, pImages, nNextNameIndex);
 
 	return FALSE;
+}
+
+BOOL CTDCImageList::AddImage(const CString& sImageFile, HICON hIcon)
+{
+	return AddImage(sImageFile, hIcon, this, m_nNextCustomNameIndex);
 }
 
 BOOL CTDCImageList::AddImage(const CString& sImageFile, HICON hIcon, CTDCImageList* pImages, int& nNextNameIndex)
