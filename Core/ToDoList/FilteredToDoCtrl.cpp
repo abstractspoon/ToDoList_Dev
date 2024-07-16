@@ -804,7 +804,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 
 				case FOP_DEPENDS_COMPLETE:
 					ASSERT(rule.AttributeIs(TDCA_DEPENDENCY));
-					bWantTask = FALSE;
+					bWantTask = TRUE;
 					break;
 
 				default:

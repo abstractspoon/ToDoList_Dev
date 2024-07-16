@@ -419,7 +419,6 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 		break;
 	}
 
-	// Incomplete dependencies filter
 	// Date filters
 	CTDCSearchParamHelper::AppendDateFilter(filter.nStartBy, filter.dtUserStart, filter.nStartNextNDays, TDCA_STARTDATE, TDCA_STARTTIME, params.aRules);
 	CTDCSearchParamHelper::AppendDateFilter(filter.nDueBy, filter.dtUserDue, filter.nDueNextNDays, TDCA_DUEDATE, TDCA_DUETIME, params.aRules);
@@ -460,6 +459,7 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	if (filter.nRecurrence != TDIR_NONE)
 		params.aRules.Add(SEARCHPARAM(TDCA_RECURRENCE, FOP_EQUALS, filter.nRecurrence));
 
+	// Incomplete dependencies filter
 	if (filter.HasFlag(FO_HIDEUNDONEDEPENDS))
 		params.aRules.Add(SEARCHPARAM(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE));
 
