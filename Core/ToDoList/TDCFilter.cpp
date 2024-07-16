@@ -163,11 +163,12 @@ BOOL CTDCFilter::SetFilter(const TDCFILTER& filter)
 
 BOOL CTDCFilter::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 {
-	// error checking
-	ASSERT(!filter.sName.IsEmpty() && filter.params.GetRuleCount());
-
+	// sanity check
 	if (filter.sName.IsEmpty() || !filter.params.GetRuleCount())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	m_advFilter = filter;
 	m_nState = TDCFS_ADVANCED;
@@ -228,7 +229,7 @@ BOOL CTDCFilter::HasCompletedDependencyFilter() const
 	switch (m_nState)
 	{
 	case TDCFS_FILTER:
-		return (GetFilter() == FS_DONEDEPENDS);
+		return m_filter.HasFlag(FO_HIDEUNDONEDEPENDS);
 
 	case TDCFS_ADVANCED:
 		return m_advFilter.params.HasRule(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE);
@@ -413,15 +414,12 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 		params.aRules.Add(SEARCHPARAM(TDCA_LOCK, FOP_SET));
 		break;
 
-	case FS_DONEDEPENDS:
-		params.aRules.Add(SEARCHPARAM(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE));
-		break;
-
 	default:
 		ASSERT(0); // to catch unimplemented filters
 		break;
 	}
 
+	// Incomplete dependencies filter
 	// Date filters
 	CTDCSearchParamHelper::AppendDateFilter(filter.nStartBy, filter.dtUserStart, filter.nStartNextNDays, TDCA_STARTDATE, TDCA_STARTTIME, params.aRules);
 	CTDCSearchParamHelper::AppendDateFilter(filter.nDueBy, filter.dtUserDue, filter.nDueNextNDays, TDCA_DUEDATE, TDCA_DUETIME, params.aRules);
@@ -462,15 +460,18 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	if (filter.nRecurrence != TDIR_NONE)
 		params.aRules.Add(SEARCHPARAM(TDCA_RECURRENCE, FOP_EQUALS, filter.nRecurrence));
 
-	// Custom Attributes
-	bWantCustomAttrib |= CTDCSearchParamHelper::AppendCustomAttributeFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
+	if (filter.HasFlag(FO_HIDEUNDONEDEPENDS))
+		params.aRules.Add(SEARCHPARAM(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE));
+
+	if (CTDCSearchParamHelper::AppendCustomAttributeFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules))
+		bWantCustomAttrib = TRUE;
+
+	if (bWantCustomAttrib)
+		params.aAttribDefs.Copy(aCustomAttribDefs);
 
 	// special case: no rules + ignore completed
 	if (params.bIgnoreDone && (params.aRules.GetSize() == 0))
 		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
-
-	if (bWantCustomAttrib)
-		params.aAttribDefs.Copy(aCustomAttribDefs);
 }
 
 void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey) const

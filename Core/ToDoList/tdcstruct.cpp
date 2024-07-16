@@ -1760,7 +1760,10 @@ BOOL TDCFILTER::IsSet() const
 	return !FiltersMatch(*this, TDCFILTER());
 }
 
-BOOL TDCFILTER::IsAdvanced() const { return (nShow == FS_ADVANCED); }
+BOOL TDCFILTER::IsAdvanced() const 
+{ 
+	return (nShow == FS_ADVANCED); 
+}
 
 BOOL TDCFILTER::WantHideCompletedTasks() const
 {
@@ -1777,7 +1780,6 @@ BOOL TDCFILTER::WantHideCompletedTasks() const
 	case FS_SELECTED:
 	case FS_RECENTMOD:
 	case FS_LOCKED:
-	case FS_DONEDEPENDS:
 		{
 			if (HasFlag(FO_HIDEDONE))
 				return TRUE; // Definitely
@@ -1823,7 +1825,7 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 		return (nShow == FS_LOCKED);
 
 	case TDCA_DEPENDENCY:
-		return (nShow == FS_DONEDEPENDS);
+		return HasFlag(FO_HIDEUNDONEDEPENDS);
 
 	case TDCA_RISK:
 		return (nRisk != FM_ANYRISK);
@@ -1854,12 +1856,12 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 		return
 			// 1. The user wants to hide completed tasks
 			(HasFlag(FO_HIDEDONE) ||
-			 // 2. OR the user wants only completed tasks
-			(nShow == FS_DONE) ||
-			 // 3. OR the user wants only incomplete tasks
+			 // 2. OR the user wants only tasks with completed dependencies
+			 HasFlag(FO_HIDEUNDONEDEPENDS) ||
+			 // 3. OR the user wants only completed tasks
+			 (nShow == FS_DONE) ||
+			 // 4. OR the user wants only incomplete tasks
 			 (nShow == FS_NOTDONE) ||
-			 // 4. OR the user wants only tasks with completed dependencies
-			 (nShow == FS_DONEDEPENDS) ||
 			 // 5. OR a due date filter is active
 			 (nDueBy != FD_ANY) ||
 			 // 6. OR a start date filter is active
@@ -1873,10 +1875,10 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 			// 1. The user wants to hide overdue tasks
 			((HasFlag(FO_HIDEOVERDUE) ||
 			  // 2. OR the user is filtering on priority
-			(nPriority > 0) ||
+			  (nPriority > 0) ||
 			  // 3. OR a due date filter is active
 			  (nDueBy != FD_ANY)) &&
-			 // 4. AND the user doesn't want only completed tasks
+			  // 4. AND the user doesn't want only completed tasks
 			  (nShow != FS_DONE));
 
 	case TDCA_STARTDATE:
@@ -1885,7 +1887,7 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 			// 1. A start date filter is active
 			((nStartBy != FD_ANY) &&
 			 // 2. AND the user doesn't want only completed tasks
-			(nShow != FS_DONE));
+			 (nShow != FS_DONE));
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -1940,20 +1942,25 @@ BOOL TDCFILTER::HasFlag(DWORD dwFlag) const
 			break; // always allowed
 
 		case FO_HIDEOVERDUE:
-			bHasFlag = (nDueBy == FD_TODAY) ||
-				(nDueBy == FD_YESTERDAY) ||
-				(nDueBy == FD_TOMORROW) ||
-				(nDueBy == FD_NEXTNDAYS) ||
-				(nDueBy == FD_ENDTHISWEEK) ||
-				(nDueBy == FD_ENDNEXTWEEK) ||
-				(nDueBy == FD_ENDTHISMONTH) ||
-				(nDueBy == FD_ENDNEXTMONTH) ||
-				(nDueBy == FD_ENDTHISYEAR) ||
-				(nDueBy == FD_ENDNEXTYEAR);
+			bHasFlag = ((nDueBy == FD_TODAY) ||
+						(nDueBy == FD_YESTERDAY) ||
+						(nDueBy == FD_TOMORROW) ||
+						(nDueBy == FD_NEXTNDAYS) ||
+						(nDueBy == FD_ENDTHISWEEK) ||
+						(nDueBy == FD_ENDNEXTWEEK) ||
+						(nDueBy == FD_ENDTHISMONTH) ||
+						(nDueBy == FD_ENDNEXTMONTH) ||
+						(nDueBy == FD_ENDTHISYEAR) ||
+						(nDueBy == FD_ENDNEXTYEAR));
 			break;
 
 		case FO_HIDEDONE:
-			bHasFlag = (nShow != FS_NOTDONE && nShow != FS_DONE);
+			bHasFlag = ((nShow != FS_NOTDONE) && 
+						(nShow != FS_DONE));
+			break;
+
+		case FO_HIDEUNDONEDEPENDS:
+			// TODO
 			break;
 
 		default:
