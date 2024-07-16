@@ -228,7 +228,7 @@ BOOL CTDCFilter::HasCompletedDependencyFilter() const
 	switch (m_nState)
 	{
 	case TDCFS_FILTER:
-		break;
+		return (GetFilter() == FS_DONEDEPENDS);
 
 	case TDCFS_ADVANCED:
 		return m_advFilter.params.HasRule(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE);
@@ -411,6 +411,10 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 
 	case FS_LOCKED:
 		params.aRules.Add(SEARCHPARAM(TDCA_LOCK, FOP_SET));
+		break;
+
+	case FS_DONEDEPENDS:
+		params.aRules.Add(SEARCHPARAM(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE));
 		break;
 
 	default:
