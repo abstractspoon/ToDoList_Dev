@@ -116,6 +116,7 @@ protected:
 	afx_msg void OnChangeIconPath();
 	afx_msg void OnImportTools();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSelectIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -126,10 +127,11 @@ protected:
 	void EnableControls();
 	int GetCurSel() const;
 	BOOL SetCurSel(int nTool);
-	void RebuildListCtrlImages();
+	void RebuildListImages();
 	BOOL InitializeToolbar();
-	BOOL GetListTool(int nTool, USERTOOL& tool) const;
-	int AddListTool(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	BOOL GetToolFromList(int nTool, USERTOOL& tool) const;
+	int AddToolToList(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	void RebuildToolsFromList(BOOL bSafeQuotes = FALSE);
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;

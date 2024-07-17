@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "PreferencesToolPage.h"
 #include "tdcenum.h"
+#include "TDLTaskIconDlg.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
@@ -51,6 +52,10 @@ enum
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int BTN_SELECTICON = 101;
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage property page
 
 IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
@@ -61,14 +66,10 @@ CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	m_eToolPath(FES_ALLOWURL),
 	m_eIconPath(FES_DISPLAYIMAGETHUMBNAILS),
 	m_nMaxNumTools(nMaxNumTools),
-	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN)
+	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN),
+	m_bRunMinimized(FALSE)
 {
-	//{{AFX_DATA_INIT(CPreferencesToolPage)
-	m_sToolPath = _T("");
-	m_sCommandLine = _T("");
-	m_bRunMinimized = FALSE;
-	m_sIconPath = _T("");
-	//}}AFX_DATA_INIT
+	m_eIconPath.InsertButton(0, BTN_SELECTICON, CIcon(IDI_CUST_ATTRIB_ICONS), CEnString(IDS_CAD_BROWSEIMAGES));
 }
 
 CPreferencesToolPage::~CPreferencesToolPage()
@@ -122,6 +123,7 @@ BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
 	ON_EN_CHANGE(IDC_ICONPATH, OnChangeIconPath)
 	ON_BN_CLICKED(IDC_IMPORT, OnImportTools)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
+	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnSelectIcon)
 
 	ON_COMMAND_RANGE(ID_TOOLARG_CUSTOMATTRIB1, ID_TOOLARG_CUSTOMATTRIB16, OnInsertCustomAttribute)
 	ON_COMMAND_RANGE(ID_TOOLARG_USERVAR1, ID_TOOLARG_USERVAR10, OnInsertUserVariable)
@@ -174,10 +176,10 @@ void CPreferencesToolPage::OnFirstShow()
 	for (int nTool = 0; nTool < m_aTools.GetSize(); nTool++)
 	{
 		const USERTOOL& tool = m_aTools[nTool];
-		VERIFY(AddListTool(tool) != -1);
+		VERIFY(AddToolToList(tool) != -1);
 
 	}
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	m_lcTools.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
 	OnItemchangedToollist(NULL, NULL);
@@ -188,7 +190,24 @@ void CPreferencesToolPage::OnFirstShow()
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
-int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebuildImages)
+void CPreferencesToolPage::OnOK()
+{
+	CPreferencesPageBase::OnOK();
+
+#ifdef _DEBUG
+	// Check we kept things properly synchronised
+	CUserToolArray aTools;
+	aTools.Copy(m_aTools);
+
+	RebuildToolsFromList();
+	ASSERT(Misc::MatchAllT(aTools, m_aTools, TRUE));
+#endif
+	// GetPrivateProfileString strips a leading/trailing quote pairs if 
+	// it finds them so we replace quotes with safe quotes
+	RebuildToolsFromList(TRUE);
+}
+
+int CPreferencesToolPage::AddToolToList(const USERTOOL& tool, int nPos, BOOL bRebuildImages)
 {
 	// special case
 	if (nPos == -1)
@@ -212,7 +231,7 @@ int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebu
 	m_lcTools.SetItemData(nIndex, tool.bRunMinimized);
 
 	if (bRebuildImages)
-		RebuildListCtrlImages();
+		RebuildListImages();
 	
 	return nIndex;
 }
@@ -242,7 +261,7 @@ void CPreferencesToolPage::OnNewTDLTool()
 	m_lcTools.SetItemText(nTool, COL_ARGS, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
 	m_lcTools.EditLabel(nTool);
 
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -284,6 +303,7 @@ void CPreferencesToolPage::OnDeleteTool()
 
 	if (nSel != -1)
 	{
+		m_aTools.RemoveAt(nSel);
 		m_lcTools.DeleteItem(nSel);
 
 		// Select next previous item
@@ -333,10 +353,10 @@ void CPreferencesToolPage::OnCopyTool()
 	
 	if (nSel != -1)
 	{
-		USERTOOL tool;
-		VERIFY(GetListTool(nSel, tool));
-		
-		int nCopy = AddListTool(tool, (nSel + 1), TRUE);
+		USERTOOL tool = m_aTools[nSel];
+		m_aTools.InsertAt(nSel + 1, tool);
+
+		int nCopy = AddToolToList(tool, (nSel + 1), TRUE);
 		SetCurSel(nCopy);
 		
 		m_lcTools.SetFocus();
@@ -359,14 +379,18 @@ void CPreferencesToolPage::OnMoveToolUp()
 	
 	if (nSel > 0)
 	{
-		USERTOOL tool;
-		VERIFY(GetListTool(nSel, tool));
+		USERTOOL tool = m_aTools[nSel]; // copy
+
+		m_aTools.RemoveAt(nSel);
+		m_aTools.InsertAt(nSel - 1, tool);
 
 		m_lcTools.DeleteItem(nSel);
-		nSel = AddListTool(tool, (nSel - 1), TRUE);
-		SetCurSel(nSel);
+		nSel = AddToolToList(tool, (nSel - 1), TRUE);
 
+		SetCurSel(nSel);
 		m_lcTools.SetFocus();
+
+		RebuildToolsFromList();
 
 		CPreferencesPageBase::OnControlChange();
 	}
@@ -383,15 +407,17 @@ void CPreferencesToolPage::OnMoveToolDown()
 	
 	if ((nSel >= 0) && (nSel < (m_lcTools.GetItemCount() - 1)))
 	{
-		USERTOOL tool;
-		VERIFY(GetListTool(nSel, tool));
-		
+		USERTOOL tool = m_aTools[nSel]; // copy
+
+		m_aTools.RemoveAt(nSel);
+		m_aTools.InsertAt(nSel + 1, tool);
+
 		m_lcTools.DeleteItem(nSel);
-		nSel = AddListTool(tool, (nSel + 1), TRUE);
+		nSel = AddToolToList(tool, (nSel + 1), TRUE);
 		SetCurSel(nSel);
 
 		m_lcTools.SetFocus();
-		
+
 		CPreferencesPageBase::OnControlChange();
 	}
 }
@@ -414,8 +440,9 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 		if (nSel >= 0)
 		{
 			m_lcTools.SetItemText(nSel, COL_NAME, pDispInfo->item.pszText);
+			RebuildToolsFromList();
 
-			GetDlgItem(IDC_TOOLPATH)->SetFocus();
+			m_eToolPath.SetFocus();
 		}
 	}
 	
@@ -495,12 +522,12 @@ void CPreferencesToolPage::OnChangeToolpath()
 	m_lcTools.SetItemText(nSel, COL_PATH, m_sToolPath);
 	m_aTools[nSel].sToolPath = m_sToolPath;
 
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesToolPage::RebuildListCtrlImages()
+void CPreferencesToolPage::RebuildListImages()
 {
 	int nTool = m_lcTools.GetItemCount();
 
@@ -531,7 +558,7 @@ void CPreferencesToolPage::OnChangeIconPath()
 	m_lcTools.SetItemText(nSel, 3, m_sIconPath);
 	m_aTools[nSel].sIconPath = m_sIconPath;
 
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -554,28 +581,26 @@ BOOL CPreferencesToolPage::GetUserTool(int nTool, USERTOOL& tool) const
 	return FALSE;
 }
 
-void CPreferencesToolPage::OnOK() 
+void CPreferencesToolPage::RebuildToolsFromList(BOOL bSafeQuotes)
 {
-	CPreferencesPageBase::OnOK();
-	
-	// save tools to m_aTools
 	m_aTools.RemoveAll();
 	int nToolCount = m_lcTools.GetItemCount();
 
 	for (int nTool = 0; nTool < nToolCount; nTool++)
 	{
 		USERTOOL ut;
-		VERIFY(GetListTool(nTool, ut));
+		VERIFY(GetToolFromList(nTool, ut));
 
 		// GetPrivateProfileString strips a leading/trailing quote pairs if 
 		// it finds them so we replace quotes with safe quotes
-		ut.sCmdline.Replace(REALQUOTE, SAFEQUOTE);
+		if (bSafeQuotes)
+			ut.sCmdline.Replace(REALQUOTE, SAFEQUOTE);
 		
 		m_aTools.Add(ut);
 	}
 }
 
-BOOL CPreferencesToolPage::GetListTool(int nTool, USERTOOL& ut) const
+BOOL CPreferencesToolPage::GetToolFromList(int nTool, USERTOOL& ut) const
 {
 	if ((nTool < 0) || (nTool >= m_lcTools.GetItemCount()))
 	{
@@ -625,8 +650,7 @@ void CPreferencesToolPage::OnChangeCmdline()
 
 		m_lcTools.SetItemText(nSel, COL_ARGS, m_sCommandLine);
 		m_aTools[nSel].sCmdline = m_sCommandLine;
-
-		m_eCmdLine.SetFocus();
+//		m_eCmdLine.SetFocus();
 
 		CPreferencesPageBase::OnControlChange();
 	}
@@ -775,9 +799,38 @@ void CPreferencesToolPage::OnRunminimized()
 		UpdateData();
 
 		m_lcTools.SetItemData(nSel, m_bRunMinimized);
+		m_aTools[nSel].bRunMinimized = m_bRunMinimized;
 
 		CPreferencesPageBase::OnControlChange();
 	}
+}
+
+LRESULT CPreferencesToolPage::OnSelectIcon(WPARAM wParam, LPARAM lParam)
+{
+	int nSel = GetCurSel();
+
+	if ((nSel >= 0) && (lParam == BTN_SELECTICON))
+	{
+		CTDLTaskIconDlg dialog(m_ilTools, m_aTools[nSel].sIconPath, FALSE);
+		
+		if (dialog.DoModal() == IDOK)
+		{
+			CString sNewIcon = dialog.GetIconName();
+
+			if (sNewIcon != m_sIconPath)
+			{
+				m_lcTools.SetItemText(nSel, COL_ICON, sNewIcon);
+				m_aTools[nSel].sIconPath = sNewIcon;
+
+				RebuildListImages();
+
+				m_sIconPath = sNewIcon;
+				UpdateData(FALSE);
+			}
+		}
+	}
+
+	return 0L;
 }
 
 LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
@@ -824,12 +877,7 @@ void CPreferencesToolPage::OnTestTool()
 	int nTool = GetCurSel();
 	
 	if (nTool != -1)
-	{
-		USERTOOL ut;
-		VERIFY(GetListTool(nTool, ut));
-		
-		GetParent()->SendMessage(WM_PTP_TESTTOOL, 0, (LPARAM)&ut);
-	}
+		GetParent()->SendMessage(WM_PTP_TESTTOOL, 0, (LPARAM)&(m_aTools[nTool]));
 }
 
 CString CPreferencesToolPage::MapCmdIDToPlaceholder(UINT nCmdID) const
@@ -968,7 +1016,7 @@ void CPreferencesToolPage::OnImportTools()
 					ut.sCmdline.Replace(SAFEQUOTE, REALQUOTE);
 
 					// add tool to list
-					VERIFY(AddListTool(ut) != -1);
+					VERIFY(AddToolToList(ut) != -1);
 				}
 
 				bContinue = FALSE;

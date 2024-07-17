@@ -539,9 +539,9 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,58,222,86,10
     PUSHBUTTON      "&Test Tool",IDC_TESTTOOL,326,222,67,14
     CONTROL         "",IDC_TOOLBAR,"Static",SS_ETCHEDFRAME | NOT WS_VISIBLE | 
-                    WS_DISABLED,7,3,110,16
+                    WS_DISABLED,7,3,129,16
     CONTROL         "Display in toolbar",IDC_DISPLAYUDTSINTOOLBAR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,122,6,199,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,157,6,166,10
     PUSHBUTTON      "I&mport UDTs...",IDC_IMPORT,326,3,67,14
 END
 
@@ -5312,8 +5312,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_FIND_TITLE          "Find in Comments"
     IDS_REPLACE_TITLE       "Replace in Comments"
-    IDS_CAD_BROWSEIMAGES    "Images..."
-    IDS_CAD_INSERTSYMBOL    "Symbols..."
+    IDS_CAD_BROWSEIMAGES    "Select Image..."
+    IDS_CAD_INSERTSYMBOL    "Select Symbol..."
     IDS_TDLBC_CREATETIME    "Creation Time"
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
     IDS_TASKVIEWIMAGEFILTER "Bitmap Images (*.bmp)|*.bmp|GIF Images (*.gif)|*.gif|JPEG Images (*.jpg, *.jpeg)|*.jpg;*.jpeg|PNG Images (*.png)|*.png|TIFF Images (*.tif)|*.tif||"
@@ -5999,7 +5999,7 @@ BEGIN
     IDS_GOTOTASK_TIP        "Go To Task"
     IDS_TODAY               "<today>"
     IDS_LISTVIEW_SORTNONEGROUPBELOW "Sort <none> group below other groups"
-    IDS_FILTER_HIDEUNDONEDEPENDS  "Hide tasks with incomplete Dependencies"
+    IDS_FILTER_HIDEUNDONEDEPENDS "Hide tasks with incomplete Dependencies"
 END
 
 #endif    // English (Australia) resources
