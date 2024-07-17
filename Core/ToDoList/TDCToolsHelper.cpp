@@ -20,6 +20,7 @@
 #include "..\shared\entoolbar.h"
 #include "..\shared\fileicons.h"
 #include "..\shared\enmenu.h"
+#include "..\shared\icon.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -153,70 +154,6 @@ CString CTDCToolsHelper::GetToolPath(const USERTOOL& tool)
 	CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
 
 	return sToolPath;
-}
-
-BOOL CTDCToolsHelper::GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath)
-{
-	sToolPath = GetToolPath(tool);
-	sIconPath = tool.sIconPath;
-
-	if (!tool.sIconPath.IsEmpty())
-		sIconPath = FileMisc::GetFullPath(tool.sIconPath, FileMisc::GetAppFolder());
-	else
-		sIconPath.IsEmpty();
-
-	return !sToolPath.IsEmpty();
-}
-
-HICON CTDCToolsHelper::GetToolIcon(const USERTOOL& tool)
-{
-	HICON hIcon = NULL;
-
-	// Check valid tool path. Note: could also be url
-	CString sToolPath, sIconPath;
-	
-	if (GetToolPaths(tool, sToolPath, sIconPath))
-	{
-		if (tool.sIconPath.IsEmpty())
-		{
-			hIcon = CFileIcons::ExtractIcon(sToolPath);	
-		}
-		else // try for supported image
-		{
-			hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
-
-			// All else/Fallback
-			if (hIcon == NULL)
-				hIcon = CFileIcons::ExtractIcon(sIconPath);
-		}
-	}
-
-	return hIcon;
-}
-
-BOOL CTDCToolsHelper::GetToolIcon(const USERTOOL& tool, CBitmap& bmp, COLORREF crBkgnd)
-{
-	bmp.DeleteObject();
-
-	// Check valid tool path. Note: could also be url
-	CString sToolPath, sIconPath;
-	
-	if (GetToolPaths(tool, sToolPath, sIconPath))
-	{
-		if (tool.sIconPath.IsEmpty())
-			return CFileIcons::GetImage(sToolPath, bmp, crBkgnd);	
-		
-		// else try for supported image
-		int nSize = GraphicsMisc::ScaleByDPIFactor(16);
-		CEnBitmap ebmp;
-
-		if (ebmp.LoadImage(sIconPath, crBkgnd, nSize, nSize))
-			return bmp.Attach(ebmp.Detach());
-
-		return CFileIcons::GetImage(sIconPath, bmp, crBkgnd);
-	}
-
-	return FALSE;
 }
 
 BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
@@ -417,6 +354,9 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 	CSize sizeBtn(toolbar.GetToolBarCtrl().GetButtonSize());
 	sizeBtn -= CSize(7, 7); // btn borders from BarTool.cpp
 
+	CTDCImageList ilTools;
+	ilTools.LoadDefaultImages();
+
 	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 
 	// work out where to start adding
@@ -440,11 +380,12 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 		}
 		else
 		{
-			CBitmap bmp;
+			int nIcon = AddToolToImageList(aTools[nTool], ilTools);
 
-			if (GetToolIcon(aTools[nTool], bmp, 255))
+			if (nIcon != -1)
 			{
-				int nImage = pIL->Add(&bmp, 255);
+				CIcon icon(ilTools.ExtractIcon(nIcon)); // auto cleanup
+				int nImage = pIL->Add(icon);
 
 				TBBUTTON tbb = { nImage, (nTool + (int)FIRST_TOOLID), 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
 
@@ -486,6 +427,9 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 
 	if (nNumItems)
 	{
+		CTDCImageList ilTools;
+		ilTools.LoadDefaultImages();
+
 		for (int nItem = 0; nItem < nNumItems; nItem++)
 		{
 			const int nTool = aIndices[nItem];
@@ -500,12 +444,15 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 				CString sMenuItem(tool.sToolName);
 
 				if (nTool < 9)
-					sMenuItem.Format(_T("&%d %s"), nTool + 1, tool.sToolName); // add accelerator
+					sMenuItem.Format(_T("&%d %s"), nTool + 1, sMenuItem); // add accelerator
 
 				menu.InsertMenu(MENUSTARTPOS + nItem, MF_BYPOSITION | MF_STRING, MENUSTARTID + nTool, sMenuItem);
 
 				// Icon manager will free the icon
-				mgrMenuIcons.SetImage(MENUSTARTID + nTool, CTDCToolsHelper::GetToolIcon(tool));
+				int nIcon = AddToolToImageList(tool, ilTools);
+
+				if (nIcon != -1)
+					mgrMenuIcons.SetImage(MENUSTARTID + nTool, ilTools.ExtractIcon(nIcon));
 			}
 		}
 	}
