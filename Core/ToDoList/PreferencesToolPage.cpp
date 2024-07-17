@@ -502,48 +502,15 @@ void CPreferencesToolPage::OnChangeToolpath()
 
 void CPreferencesToolPage::RebuildListCtrlImages()
 {
-	int nTool = m_aTools.GetSize();
+	int nTool = m_lcTools.GetItemCount();
 
 	while (nTool--)
 	{
-		const USERTOOL& tool = m_aTools[nTool];
-
-		CString sIconPath = tool.sIconPath;
-		HICON hIcon = NULL;
-
-		if (sIconPath.IsEmpty() || !m_ilTools.HasImage(sIconPath))
-		{
-			if (!sIconPath.IsEmpty())
-			{
-				FileMisc::MakeFullPath(sIconPath, FileMisc::GetAppFolder());
-				hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
-			}
-
-			if (hIcon == NULL)
-			{
-				// Try the tool path
-				sIconPath = tool.sToolPath;
-				CTDCToolsCmdlineParser::PrepareToolPath(sIconPath, FALSE);
-			
-				if (!m_ilTools.HasImage(sIconPath))
-					hIcon = CFileIcons::ExtractIcon(sIconPath);
-
-				if (hIcon == NULL)
-					hIcon = GraphicsMisc::LoadIcon(IDI_NULL);
-			}
-
-			if (hIcon != NULL)
-			{
-				m_ilTools.AddImage(sIconPath, hIcon);
-				::DestroyIcon(hIcon);
-			}
-		}
-		
 		LVITEM lvi = { 0 };
 
 		lvi.mask = LVIF_IMAGE;
 		lvi.iItem = nTool;
-		lvi.iImage = m_ilTools.GetImageIndex(sIconPath);
+		lvi.iImage = CTDCToolsHelper::AddToolToImageList(m_aTools[nTool], m_ilTools);
 
 		m_lcTools.SetItem(&lvi);
 	}

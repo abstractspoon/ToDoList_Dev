@@ -51,6 +51,7 @@ struct USERTOOLARGS
 class CPreferencesDlg;
 class CEnToolBar;
 class CMenuIconMgr;
+class CTDCImageList;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -76,6 +77,7 @@ public:
 
 	static CString GetToolPath(const USERTOOL& tool);
 	static BOOL IsToolCmdID(UINT nCmdID);
+	static int AddToolToImageList(const USERTOOL& tool, CTDCImageList& ilTools);
 
 protected:
 	BOOL m_bTDLEnabled;

@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "TDCToolsHelper.h"
 #include "TDLToolsUserInputDlg.h"
+#include "TDCImageList.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\enfiledialog.h"
@@ -627,3 +628,40 @@ int CTDCToolsHelper::IndexArraySortProc(const void* pV1, const void* pV2)
 	// Compare first index
 	return (pIndices1->GetAt(0) - pIndices2->GetAt(0));
 }
+
+int CTDCToolsHelper::AddToolToImageList(const USERTOOL& tool, CTDCImageList& ilTools)
+{
+	CString sIconPath = tool.sIconPath;
+	HICON hIcon = NULL;
+
+	if (sIconPath.IsEmpty() || !ilTools.HasImage(sIconPath))
+	{
+		if (!sIconPath.IsEmpty())
+		{
+			FileMisc::MakeFullPath(sIconPath, FileMisc::GetAppFolder());
+			hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
+		}
+
+		if (hIcon == NULL)
+		{
+			// Try the tool path
+			sIconPath = tool.sToolPath;
+			CTDCToolsCmdlineParser::PrepareToolPath(sIconPath, FALSE);
+
+			if (!ilTools.HasImage(sIconPath))
+				hIcon = CFileIcons::ExtractIcon(sIconPath);
+
+			if (hIcon == NULL)
+				hIcon = GraphicsMisc::LoadIcon(IDI_NULL);
+		}
+
+		if (hIcon != NULL)
+		{
+			ilTools.AddImage(sIconPath, hIcon);
+			::DestroyIcon(hIcon);
+		}
+	}
+
+	return ilTools.GetImageIndex(sIconPath);
+}
+
