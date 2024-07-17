@@ -151,7 +151,8 @@ void CPreferencesToolPage::OnFirstShow()
 
 	VERIFY(InitializeToolbar());
 
-	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)CFileIcons::GetImageList());
+	m_ilTools.LoadDefaultImages(FALSE);
+	m_lcTools.SetImageList(&m_ilTools, LVSIL_SMALL);
 
 	m_eToolPath.SetCurrentFolder(FileMisc::GetAppFolder());
 	m_eIconPath.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -504,38 +505,43 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 
 	while (nTool--)
 	{
-		LVITEM lvi = { 0 };
-		
-		lvi.mask = LVIF_IMAGE;
-		lvi.iItem = nTool;
-		lvi.iImage = -1;
-		
 		CString sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
+		HICON hIcon = NULL;
 
-		if (sIconPath.IsEmpty())
+		if (sIconPath.IsEmpty() || !m_ilTools.HasImage(sIconPath))
 		{
-			CString sToolPath = m_lcTools.GetItemText(nTool, COL_PATH);
-			CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
-
-			lvi.iImage = CFileIcons::GetIndex(sToolPath);	
-		}
-		else
-		{
-			FileMisc::MakeFullPath(sIconPath, FileMisc::GetAppFolder());
-
-			HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
-
-			if (hIcon)
+			if (!sIconPath.IsEmpty())
 			{
-				lvi.iImage = ImageList_AddIcon(CFileIcons::GetImageList(), hIcon);
+				FileMisc::MakeFullPath(sIconPath, FileMisc::GetAppFolder());
+				hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
+			}
+
+			if (hIcon == NULL)
+			{
+				// Try the tool path
+				sIconPath = m_lcTools.GetItemText(nTool, COL_PATH);
+				CTDCToolsCmdlineParser::PrepareToolPath(sIconPath, FALSE);
+			
+				if (!m_ilTools.HasImage(sIconPath))
+					hIcon = CFileIcons::ExtractIcon(sIconPath);
+
+				if (hIcon == NULL)
+					hIcon = GraphicsMisc::LoadIcon(IDI_NULL);
+			}
+
+			if (hIcon != NULL)
+			{
+				m_ilTools.AddImage(sIconPath, hIcon);
 				::DestroyIcon(hIcon);
 			}
-			else
-			{
-				lvi.iImage = CFileIcons::GetIndex(sIconPath);
-			}
 		}
 		
+		LVITEM lvi = { 0 };
+
+		lvi.mask = LVIF_IMAGE;
+		lvi.iItem = nTool;
+		lvi.iImage = m_ilTools.GetImageIndex(sIconPath);
+
 		m_lcTools.SetItem(&lvi);
 	}
 }
@@ -807,14 +813,32 @@ LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
 	{
 	case IDC_TOOLPATH:
 		{
-			CString sToolPath((LPCTSTR)lParam);
-			
-			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, TRUE))
+			CString sFilePath((LPCTSTR)lParam);
+			int nIcon = m_ilTools.GetImageIndex(sFilePath);
+
+			if (nIcon != -1)
 			{
-				// This is the application icon
-				static CIcon icon(IDR_MAINFRAME_STD, 16);
+				static CIcon icon;
+
+				icon.SetIcon(m_ilTools.ExtractIcon(nIcon));
 				return (LRESULT)(HICON)icon;
 			}
+		}
+		break;
+
+	case IDC_ICONPATH:
+		{
+			CString sFilePath((LPCTSTR)lParam);
+			int nIcon = m_ilTools.GetImageIndex(sFilePath);
+
+			static CIcon icon;
+
+			if (nIcon != -1)
+				icon.SetIcon(m_ilTools.ExtractIcon(nIcon));
+			else
+				icon.Load(IDI_NULL); // else CFileEdit will show a folder icon
+
+			return (LRESULT)(HICON)icon;
 		}
 		break;
 	}

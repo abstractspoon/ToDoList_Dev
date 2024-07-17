@@ -148,14 +148,14 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		
 		// then add the user's images
 		DWORD dwResult = 0;
-		m_nNextCustomNameIndex = 300;
+		nNextNameIndex = 300;
 		
 		if (FileMisc::FileExists(sTaskList))
-			dwResult = LoadImagesFromFolder(sTasklistPath, crTransparent, this, m_nNextCustomNameIndex);
+			dwResult = LoadImagesFromFolder(sTasklistPath, crTransparent, this, nNextNameIndex);
 		
 		// else try application location
 		if (!dwResult)
-			dwResult = LoadImagesFromFolder(sAppResPath, crTransparent, this, m_nNextCustomNameIndex);
+			dwResult = LoadImagesFromFolder(sAppResPath, crTransparent, this, nNextNameIndex);
 		
 		ScaleByDPIFactor(m_crBackground);
 		
@@ -176,7 +176,11 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 	int nIndex = -1;
 	
 	if (!sImageName.IsEmpty())
-		m_mapNameToIndex.Lookup(sImageName, nIndex);
+	{
+		CString sName = Misc::ToLower(FileMisc::GetFileNameFromPath(sImageName));
+
+		m_mapNameToIndex.Lookup(Misc::ToLower(sName), nIndex);
+	}
 	
 	return nIndex;
 }
@@ -184,7 +188,6 @@ int CTDCImageList::GetImageIndex(const CString& sImageName) const
 CString CTDCImageList::GetImageName(int nIndex) const
 {
 	CString sName;
-
 	m_mapIndexToName.Lookup(nIndex, sName);
 
 	return sName;
@@ -221,7 +224,16 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORR
 
 BOOL CTDCImageList::AddImage(const CString& sImageFile, HICON hIcon)
 {
-	return AddImage(sImageFile, hIcon, this, m_nNextCustomNameIndex);
+	if (HasImage(sImageFile))
+		return FALSE;
+
+	int nUnused = 0;
+	return AddImage(sImageFile, hIcon, this, nUnused);
+}
+
+BOOL CTDCImageList::HasImage(const CString& sImageFile) const
+{
+	return (GetImageIndex(sImageFile) != -1);
 }
 
 BOOL CTDCImageList::AddImage(const CString& sImageFile, HICON hIcon, CTDCImageList* pImages, int& nNextNameIndex)
@@ -270,7 +282,7 @@ BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTD
 
 void CTDCImageList::MapImage(int nIndex, const CString& sName)
 {
-	m_mapNameToIndex[sName] = nIndex;
+	m_mapNameToIndex[Misc::ToLower(sName)] = nIndex;
 	m_mapIndexToName[nIndex] = sName;
 }
 

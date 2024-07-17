@@ -34,6 +34,7 @@ public:
 					BOOL bWantDefaultIcons = TRUE, BOOL bWantToolbars = FALSE);
 
 	BOOL AddImage(const CString& sImageFile, HICON hIcon);
+	BOOL HasImage(const CString& sImageFile) const;
 	int GetImageIndex(const CString& sImageName) const;
 	CString GetImageName(int nIndex) const;
 
@@ -47,7 +48,6 @@ protected:
 	BOOL m_bWantToolbars, m_bWantDefaultIcons;
 	CString m_sTasklistPath;
 	COLORREF m_crTransparent, m_crBackground;
-	int m_nNextCustomNameIndex;
 
 protected:
 	// Images must be loaded
