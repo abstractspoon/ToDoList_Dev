@@ -493,6 +493,7 @@ void CPreferencesToolPage::OnChangeToolpath()
 	UpdateData();
 
 	m_lcTools.SetItemText(nSel, COL_PATH, m_sToolPath);
+	m_aTools[nSel].sToolPath = m_sToolPath;
 
 	RebuildListCtrlImages();
 
@@ -501,11 +502,13 @@ void CPreferencesToolPage::OnChangeToolpath()
 
 void CPreferencesToolPage::RebuildListCtrlImages()
 {
-	int nTool = m_lcTools.GetItemCount();
+	int nTool = m_aTools.GetSize();
 
 	while (nTool--)
 	{
-		CString sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
+		const USERTOOL& tool = m_aTools[nTool];
+
+		CString sIconPath = tool.sIconPath;
 		HICON hIcon = NULL;
 
 		if (sIconPath.IsEmpty() || !m_ilTools.HasImage(sIconPath))
@@ -519,7 +522,7 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 			if (hIcon == NULL)
 			{
 				// Try the tool path
-				sIconPath = m_lcTools.GetItemText(nTool, COL_PATH);
+				sIconPath = tool.sToolPath;
 				CTDCToolsCmdlineParser::PrepareToolPath(sIconPath, FALSE);
 			
 				if (!m_ilTools.HasImage(sIconPath))
@@ -559,6 +562,7 @@ void CPreferencesToolPage::OnChangeIconPath()
 	UpdateData();
 
 	m_lcTools.SetItemText(nSel, 3, m_sIconPath);
+	m_aTools[nSel].sIconPath = m_sIconPath;
 
 	RebuildListCtrlImages();
 
@@ -653,6 +657,8 @@ void CPreferencesToolPage::OnChangeCmdline()
 		UpdateData();
 
 		m_lcTools.SetItemText(nSel, COL_ARGS, m_sCommandLine);
+		m_aTools[nSel].sCmdline = m_sCommandLine;
+
 		m_eCmdLine.SetFocus();
 
 		CPreferencesPageBase::OnControlChange();
