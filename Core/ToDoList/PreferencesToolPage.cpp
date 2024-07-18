@@ -274,7 +274,14 @@ int CPreferencesToolPage::AddNewTool(BOOL bEditLabel)
 		return -1;
 	}
 
-	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), CEnString(IDS_PTP_NEWTOOL), -1);
+	CEnString sToolName(IDS_PTP_NEWTOOL);
+
+	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), sToolName, -1);
+	ASSERT(nIndex != -1);
+
+	USERTOOL tool;
+	tool.sToolName = sToolName;
+	VERIFY(m_aTools.Add(tool) == nIndex);
 
 	m_lcTools.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
 	m_lcTools.SetFocus();
@@ -440,8 +447,7 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 		if (nSel >= 0)
 		{
 			m_lcTools.SetItemText(nSel, COL_NAME, pDispInfo->item.pszText);
-			RebuildToolsFromList();
-
+			m_aTools[nSel].sToolName = pDispInfo->item.pszText;
 			m_eToolPath.SetFocus();
 		}
 	}

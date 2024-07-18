@@ -43,6 +43,10 @@ const UINT LAST_TOOLID = (ID_TOOLS_USERTOOL1 + MAX_NUM_TOOLS - 1);
 
 //////////////////////////////////////////////////////////////////////
 
+USERTOOL::USERTOOL() : bRunMinimized(FALSE)
+{
+}
+
 BOOL USERTOOL::operator==(const USERTOOL& other) const
 {
 	return ((sToolName == other.sToolName) &&
