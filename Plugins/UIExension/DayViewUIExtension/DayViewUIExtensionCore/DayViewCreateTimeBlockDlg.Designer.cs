@@ -112,7 +112,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.dayview;
 			this.Name = "DayViewCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
