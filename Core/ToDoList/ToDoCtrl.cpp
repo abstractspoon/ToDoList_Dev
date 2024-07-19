@@ -1308,7 +1308,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 	if (!CanEditSelectedTask(TDCA_ICON))
 		return FALSE;
 
-	CTDLTaskIconDlg dialog(m_ilTaskIcons, GetSelectedTaskIcon(), TRUE, this);
+	CTDLTaskIconDlg dialog(m_ilTaskIcons, GetSelectedTaskIcon(), TRUE, -1, this);
 
 	if (dialog.DoModal() != IDOK)
 		return FALSE;
@@ -7099,7 +7099,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 
 		case TDCCA_NOTALIST:
 			{
-				CTDLTaskIconDlg dialog(m_ilTaskIcons, data.AsString(), TRUE, this);
+				CTDLTaskIconDlg dialog(m_ilTaskIcons, data.AsString(), TRUE, -1, this);
 				
 				if (dialog.DoModal() == IDOK)
 				{

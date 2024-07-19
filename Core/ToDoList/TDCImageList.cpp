@@ -47,7 +47,7 @@ CTDCImageList::~CTDCImageList()
 
 }
 
-BOOL CTDCImageList::LoadDefaultImages(BOOL bWantToolbars)
+int CTDCImageList::LoadDefaultImages(BOOL bWantToolbars)
 {
 	return LoadImages(_T(""), colorMagenta, TRUE, bWantToolbars);
 }
@@ -58,28 +58,28 @@ BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTranspar
 	if (GetSafeHandle() == NULL)
 		return TRUE;
 
-	if (!FileMisc::IsSamePath(sTaskList, m_sTasklistPath))
+	if (Misc::StateChanged(bWantToolbars, m_bWantToolbars))
 		return TRUE;
 
-	if ((bWantToolbars && !m_bWantToolbars) || (!bWantToolbars && m_bWantToolbars))
-		return TRUE;
-
-	if ((bWantDefaultIcons && !m_bWantDefaultIcons) || (!bWantDefaultIcons && m_bWantDefaultIcons))
+	if (Misc::StateChanged(bWantDefaultIcons, m_bWantDefaultIcons))
 		return TRUE;
 
 	if ((bWantDefaultIcons || bWantToolbars) && (crTransparent != m_crTransparent))
 		return TRUE;
 
+	if (!FileMisc::IsSamePath(sTaskList, m_sTasklistPath))
+		return TRUE;
+
 	return FALSE;
 }
 
-BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
+int CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 							   BOOL bWantDefaultIcons, BOOL bWantToolbars)
 {
 	if (!NeedLoadImages(sTaskList, crTransparent, bWantDefaultIcons, bWantToolbars))
 	{
 		ASSERT(GetSafeHandle());
-		return TRUE;
+		return GetImageCount();
 	}
 
 	DeleteImageList();
@@ -168,7 +168,7 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		m_bWantToolbars = bWantToolbars;
 	}
 	
-	return (GetSafeHandle() != NULL);
+	return (GetSafeHandle() ? GetImageCount() : 0);
 }
 
 int CTDCImageList::GetImageIndex(const CString& sImageName) const

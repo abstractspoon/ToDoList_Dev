@@ -67,7 +67,8 @@ CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	m_eIconPath(FES_DISPLAYIMAGETHUMBNAILS),
 	m_nMaxNumTools(nMaxNumTools),
 	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN),
-	m_bRunMinimized(FALSE)
+	m_bRunMinimized(FALSE),
+	m_nNumDefaultIcons(-1)
 {
 	m_eIconPath.InsertButton(0, BTN_SELECTICON, CIcon(IDI_CUST_ATTRIB_ICONS), CEnString(IDS_CAD_BROWSEIMAGES));
 }
@@ -153,7 +154,7 @@ void CPreferencesToolPage::OnFirstShow()
 
 	VERIFY(InitializeToolbar());
 
-	m_ilTools.LoadDefaultImages(FALSE);
+	m_nNumDefaultIcons = m_ilTools.LoadDefaultImages(TRUE);
 	m_lcTools.SetImageList(&m_ilTools, LVSIL_SMALL);
 
 	m_eToolPath.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -817,7 +818,9 @@ LRESULT CPreferencesToolPage::OnSelectIcon(WPARAM wParam, LPARAM lParam)
 
 	if ((nSel >= 0) && (lParam == BTN_SELECTICON))
 	{
-		CTDLTaskIconDlg dialog(m_ilTools, m_aTools[nSel].sIconPath, FALSE);
+		// We pass in the number of default icons so that any others
+		// added due to the tool or icon path are not shown to the user
+		CTDLTaskIconDlg dialog(m_ilTools, m_aTools[nSel].sIconPath, FALSE, m_nNumDefaultIcons);
 		
 		if (dialog.DoModal() == IDOK)
 		{

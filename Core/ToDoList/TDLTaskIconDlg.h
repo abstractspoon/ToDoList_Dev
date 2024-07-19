@@ -25,8 +25,8 @@ class CTDLTaskIconDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem = TRUE, CWnd* pParent = NULL);   // standard constructor
-	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent = NULL);   // standard constructor
+	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem = TRUE, int nNumImages = -1, CWnd* pParent = NULL);
+	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages = -1, CWnd* pParent = NULL);
 
 	CString GetIconName() const; 
 	int GetIconNames(CStringArray& aSelNames) const; 
@@ -40,6 +40,7 @@ protected:
 	CListCtrl	m_lcIcons;
 	//}}AFX_DATA
 	const CTDCImageList& m_ilIcons;
+	int m_nNumImages; 
 	CString m_sIconName;
 	CMapStringToString m_mapRenamedItems;
 	BOOL m_bMultiSel;

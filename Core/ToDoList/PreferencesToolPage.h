@@ -59,6 +59,7 @@ protected:
 	CTDCImageList m_ilTools;
 
 	int m_nMaxNumTools;
+	int m_nNumDefaultIcons;
 	BOOL m_bDisplayUDTsInToolbar;
 	CString	m_sToolPath;
 	CString	m_sCommandLine;

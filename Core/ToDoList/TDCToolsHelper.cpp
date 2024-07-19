@@ -359,7 +359,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 	sizeBtn -= CSize(7, 7); // btn borders from BarTool.cpp
 
 	CTDCImageList ilTools;
-	ilTools.LoadDefaultImages();
+	ilTools.LoadDefaultImages(TRUE);
 
 	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 
@@ -432,7 +432,7 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 	if (nNumItems)
 	{
 		CTDCImageList ilTools;
-		ilTools.LoadDefaultImages();
+		ilTools.LoadDefaultImages(TRUE);
 
 		for (int nItem = 0; nItem < nNumItems; nItem++)
 		{

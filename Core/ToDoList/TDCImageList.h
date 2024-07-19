@@ -29,8 +29,8 @@ public:
 	CTDCImageList(COLORREF crBkgnd = DEFAULT_BKGNDCOLOR);
 	virtual ~CTDCImageList();
 
-	BOOL LoadDefaultImages(BOOL bWantToolbars = FALSE);
-	BOOL LoadImages(const CString& sTaskList, COLORREF crTransparent = colorMagenta, 
+	int LoadDefaultImages(BOOL bWantToolbars = FALSE);
+	int LoadImages(const CString& sTaskList, COLORREF crTransparent = colorMagenta, 
 					BOOL bWantDefaultIcons = TRUE, BOOL bWantToolbars = FALSE);
 
 	BOOL AddImage(const CString& sImageFile, HICON hIcon);
