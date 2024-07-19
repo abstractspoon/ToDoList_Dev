@@ -12,6 +12,7 @@
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\EnString.h"
+#include "..\Shared\FileIcons.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -225,7 +226,7 @@ LRESULT CTDLAboutDlg::OnFileEditGetFileIcon(WPARAM wp, LPARAM lp)
 		if (sFilePath.Find(_T("HKEY_")) == 0)
 		{
 			if (!m_iconReg.IsValid())
-				m_iconReg.Attach(m_ePrefsFile.GetFileIcon(GetRegEditPath()));
+				m_iconReg.Attach(CFileIcons::ExtractIcon(GetRegEditPath()));
 
 			return (LRESULT)(HICON)m_iconReg;
 		}

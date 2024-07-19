@@ -353,11 +353,6 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 	CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
 }
 
-HICON CFileEdit::GetFileIcon(LPCTSTR szPath)
-{
-	return CFileIcons::ExtractIcon(szPath);
-}
-
 void CFileEdit::ClearImageIcon()
 {
 	if (m_ilImageIcon.GetSafeHandle())

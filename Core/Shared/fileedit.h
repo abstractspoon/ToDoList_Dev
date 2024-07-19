@@ -63,7 +63,6 @@ public:
 	CString GetCurrentFolder() const { return m_sCurFolder; }
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
 
-	HICON GetFileIcon(LPCTSTR szPath);
 	BOOL DoBrowse();
 
 	static void SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo);

@@ -574,10 +574,14 @@ HWND CRuntimeDlg::CreateControl(LPCTSTR szClass, LPCTSTR szCaption, DWORD dwStyl
 				::SendMessage(hwnd, STM_SETIMAGE, IMAGE_ICON, (LPARAM)hIcon);
 		}
 		else if (!sCaption.IsEmpty())
+		{
 			::SendMessage(hwnd, WM_SETTEXT, 0, (LPARAM)(LPCTSTR)sCaption);
+		}
 	}
 	else
+	{
 		TRACE(_T("CreateWindowEx(%s) failed. GetLastError returned %08X\n"), szClass, GetLastError());
+	}
 	
 	return hwnd;
 }
