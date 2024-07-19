@@ -98,10 +98,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="toolbar_std.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="WordCloud.ico" />
+    <Content Include="Resources\toolbar_std.bmp" />
+    <Content Include="Resources\WordCloud.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
