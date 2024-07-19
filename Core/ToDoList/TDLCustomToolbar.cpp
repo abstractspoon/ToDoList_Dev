@@ -54,12 +54,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 	m_nInitBtnCount = 0;
 
 	CTDCImageList ilButtons(m_crFrom);
-
-	if (!ilButtons.LoadDefaultImages(TRUE))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	VERIFY(ilButtons.LoadDefaultImages(TRUE));
 	
 	SetImageSize(16, 16);
 
@@ -253,8 +248,20 @@ BOOL CTDLCustomToolbar::AppendTools(const CUserToolArray& aTools, BOOL bGrouped)
 
 	RemoveTools();
 
-	UINT nLastID = GetItemID(m_nInitBtnCount - 1);
-	CTDCToolsHelper(FALSE).AddToolsToToolbar(aTools, *this, nLastID, bGrouped);
+	ASSERT(m_nInitBtnCount == GetButtonCount());
+
+	if (aTools.GetSize())
+	{
+		// Get the last button id, removing any trailing separators
+		while (LastItemIsSeparator())
+		{
+			DeleteLastItem();
+			m_nInitBtnCount--;
+		}
+
+		UINT nLastID = GetItemID(m_nInitBtnCount - 1);
+		CTDCToolsHelper(FALSE).AddToolsToToolbar(aTools, *this, nLastID, bGrouped);
+	}
 
 	return TRUE;
 }

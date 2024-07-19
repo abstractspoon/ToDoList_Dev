@@ -409,7 +409,6 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 	if (m_nDlgIconID)
 	{
 		m_icon.Load(m_nDlgIconID);
-
 		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)(HICON)m_icon);
 	}
 

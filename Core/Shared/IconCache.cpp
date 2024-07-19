@@ -122,9 +122,7 @@ BOOL CIconCache::IsValidName(const CString& sName) const
 
 void CIconCache::Clear()
 {
-	if (m_ilImages.GetSafeHandle())
-		while (m_ilImages.Remove(0));
-
+	m_ilImages.DeleteImageList();
 	m_mapIndices.RemoveAll();
 }
 
