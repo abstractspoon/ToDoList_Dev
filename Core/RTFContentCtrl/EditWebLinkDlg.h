@@ -6,6 +6,9 @@
 #endif // _MSC_VER > 1000
 // EditWebLinkDlg.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
+
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CEditWebLinkDlg dialog
@@ -20,17 +23,17 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CEditWebLinkDlg)
 	enum { IDD = IDD_EDITWEBLINK_DIALOG };
-	CString	m_sWebLink;
-	//}}AFX_DATA
 
+	CString	m_sWebLink;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEditWebLinkDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
