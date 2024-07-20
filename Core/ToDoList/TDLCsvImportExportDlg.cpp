@@ -62,6 +62,7 @@ BOOL CTDLCsvImportExportDlg::DoInit(BOOL bImport, const CString& sFilePath, IPre
 	m_sPrefsKey.Format(_T("%s\\CsvColumnMapping"), szKey);
 	m_sDelim = Misc::GetListSeparator();
 	m_bAlwaysExportTaskIDs = TRUE;
+	m_iconDlg.SetIcon(CFileRegister::GetRegisteredIcon(_T("csv")));
 
 	InitialiseDelimiter();
 	LoadMasterColumnMapping();
