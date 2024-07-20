@@ -8,6 +8,7 @@
 //
 
 #include "..\Shared\EnString.h"
+#include "..\Shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // COptionsDlg dialog
@@ -24,19 +25,22 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(COptionsDlg)
-	CComboBox	m_cbIndent;
-	CString	m_sLabel;
-	int		m_nIndent;
-	BOOL	m_bIncludeProject;
 	//}}AFX_DATA
+	BOOL m_bIncludeProject;
 	BOOL m_bImport;
+	int m_nIndent;
+
 	CEnString m_sTitle, m_sProjectLabel;
 	CString m_sIndent;
+	CString	m_sLabel;
+
+	CComboBox m_cbIndent;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COptionsDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
