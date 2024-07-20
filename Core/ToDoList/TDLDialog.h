@@ -27,7 +27,8 @@ protected:
 	CWinHelpButton m_btnHelp;
 	CSizeGrip m_sbGrip;
 
-	static CIcon s_iconTDL;
+	CIcon m_iconDlg;
+	static CIcon s_iconApp;
 
 	CSize m_sizeOrg, m_sizePrev;
 	CString m_sPrefsKey;
@@ -48,11 +49,12 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
-	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnGetAppIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	BOOL IsResizable() const;
+	BOOL SetIcon(UINT nIconID);
 };
 
 //{{AFX_INSERT_LOCATION}}

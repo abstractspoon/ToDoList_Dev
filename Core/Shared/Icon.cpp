@@ -51,17 +51,14 @@ void CIcon::Destroy()
 
 BOOL CIcon::SetIcon(HICON hIcon, BOOL bOwned)
 {
-	if (hIcon == NULL)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	Destroy();
 
-	m_hIcon = hIcon;
-	m_size = GraphicsMisc::GetIconSize(m_hIcon);
-	m_bOwned = bOwned;
+	if (hIcon)
+	{
+		m_hIcon = hIcon;
+		m_bOwned = bOwned;
+		m_size = GraphicsMisc::GetIconSize(m_hIcon);
+	}
 
 	return TRUE;
 }
@@ -71,7 +68,15 @@ BOOL CIcon::Load(UINT nIDIcon, int nSize, BOOL bScaleByDPI)
 	if (bScaleByDPI)
 		nSize = GraphicsMisc::ScaleByDPIFactor(nSize);
 
-	return SetIcon(GraphicsMisc::LoadIcon(nIDIcon, nSize), TRUE); // owned
+	HICON hIcon = GraphicsMisc::LoadIcon(nIDIcon, nSize);
+
+	if (!hIcon)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return SetIcon(hIcon, TRUE); // owned
 }
 
 BOOL CIcon::Attach(HICON hIcon, BOOL bOwned)
