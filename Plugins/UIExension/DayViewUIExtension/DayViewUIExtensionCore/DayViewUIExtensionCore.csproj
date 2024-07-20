@@ -80,13 +80,13 @@
     <Compile Include="DayViewPreferencesDlg.Designer.cs">
       <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="DayViewUIExtensionCore.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="DayViewUIExtensionCore.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskExtensionItems.cs" />
     <Compile Include="TaskItem.cs" />
     <Compile Include="TDLDayView.cs" />
@@ -99,6 +99,7 @@
   <ItemGroup>
     <EmbeddedResource Include="DayViewCreateTimeBlockDlg.resx">
       <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="DayViewEditTimeBlockSeriesDlg.resx">
       <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
@@ -112,6 +113,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -136,7 +138,7 @@
     <EmbeddedResource Include="toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="dayview.ico" />
+    <EmbeddedResource Include="Resources\dayview.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

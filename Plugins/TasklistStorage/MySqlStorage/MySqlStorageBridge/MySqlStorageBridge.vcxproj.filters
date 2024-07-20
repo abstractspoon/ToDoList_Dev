@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\MySqlStorage.ico">
+    <Image Include="..\MySqlStorageCore\Resources\MySqlStorage.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

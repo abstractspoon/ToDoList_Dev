@@ -129,7 +129,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\WordCloud.ico" />
+    <Image Include="..\WordCloudUIExtensionCore\Resources\WordCloud.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

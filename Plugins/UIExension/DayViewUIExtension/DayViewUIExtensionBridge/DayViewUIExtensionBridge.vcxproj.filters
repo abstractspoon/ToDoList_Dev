@@ -42,7 +42,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\dayview.ico">
+    <None Include="..\DayViewUIExtensionCore\Resources\dayview.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
