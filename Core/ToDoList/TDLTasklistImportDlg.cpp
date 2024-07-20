@@ -173,6 +173,8 @@ CTDLTasklistImportDlg::CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pPa
 	//}}AFX_DATA_INIT
 	m_bResetCreationDate = TRUE;
 	m_sFilePath = sFilePath;
+
+	m_iconDlg.Load(IDR_MAINFRAME);
 }
 
 
@@ -221,7 +223,7 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 
 BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 {
-	// Don't know why but exaanding all the tasks prior
+	// Don't know why but expanding all the tasks prior
 	// to the tree actually being visible causes it all
 	// sorts of rendering problems some of which are a
 	// consequence of my choices but which are hard to change.
