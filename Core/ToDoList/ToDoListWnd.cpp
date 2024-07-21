@@ -11000,6 +11000,8 @@ const CPreferencesDlg& CToDoListWnd::Prefs() const
 
 void CToDoListWnd::OnSpellcheckcomments() 
 {
+	CSpellCheckDlg::SetIcon(CMDICON(ID_EDIT_SPELLCHECKCOMMENTS));
+
 	GetToDoCtrl().SpellcheckSelectedTask(FALSE);
 }
 
@@ -11010,12 +11012,26 @@ void CToDoListWnd::OnUpdateSpellcheckcomments(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnSpellchecktitle() 
 {
+	CSpellCheckDlg::SetIcon(CMDICON(ID_EDIT_SPELLCHECKTITLE));
+
 	GetToDoCtrl().SpellcheckSelectedTask(TRUE);
 }
 
 void CToDoListWnd::OnUpdateSpellchecktitle(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount());
+}
+
+void CToDoListWnd::OnSpellcheckTasklist()
+{
+	CSpellCheckDlg::SetIcon(CMDICON(ID_TOOLS_SPELLCHECKTASKLIST));
+
+	GetToDoCtrl().Spellcheck();
+}
+
+void CToDoListWnd::OnUpdateSpellcheckTasklist(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
 void CToDoListWnd::OnFileEncrypt() 
@@ -11079,16 +11095,6 @@ void CToDoListWnd::OnFileResetversion()
 void CToDoListWnd::OnUpdateFileResetversion(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(!GetToDoCtrl().IsReadOnly());
-}
-
-void CToDoListWnd::OnSpellcheckTasklist() 
-{
-	GetToDoCtrl().Spellcheck();
-}
-
-void CToDoListWnd::OnUpdateSpellcheckTasklist(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
 TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
