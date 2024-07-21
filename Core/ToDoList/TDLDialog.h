@@ -19,6 +19,8 @@ class CTDLDialog : public CDialog, protected CDialogHelper
 {
 	DECLARE_DYNAMIC(CTDLDialog)
 
+	int DoModal(HICON hIcon = NULL); // Caller owns icon
+
 // Construction
 protected:
 	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);   // standard constructor

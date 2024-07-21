@@ -653,7 +653,7 @@ protected:
 	BOOL ImportFile(LPCTSTR szFilePath, BOOL bSilent);
 
 	void InitShortcutManager();
-	void PopulateMenuIconManager();
+	void InitMenuIconManager();
 	void InitUIFont();
 	BOOL InitMenubar();
 	BOOL InitTrayIcon();

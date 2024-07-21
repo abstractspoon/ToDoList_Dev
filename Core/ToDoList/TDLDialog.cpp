@@ -97,7 +97,7 @@ BOOL CTDLDialog::OnInitDialog()
 	}
 
 	if (m_iconDlg.IsValid())
-		CDialog::SetIcon(m_iconDlg, FALSE);
+		CDialog::SetIcon(m_iconDlg, FALSE); // Small icon
 	
 	return TRUE;
 }
@@ -193,13 +193,18 @@ LRESULT CTDLDialog::OnGetAppIcon(WPARAM /*wParam*/, LPARAM lParam)
 
 BOOL CTDLDialog::SetIcon(UINT nIconID)
 {
-	if (m_iconDlg.Load(nIconID))
-	{
-		CDialog::SetIcon(m_iconDlg, FALSE);
-		return TRUE;
-	}
+	if (!m_iconDlg.Load(nIconID)) // owned
+		return FALSE;
 
-	// else
-	ASSERT(0);
-	return FALSE;
+	if (GetSafeHwnd())
+		CDialog::SetIcon(m_iconDlg, FALSE); // Small icon
+
+	return TRUE;
+}
+
+int CTDLDialog::DoModal(HICON hIcon)
+{
+	m_iconDlg.SetIcon(hIcon, FALSE); // Not owned
+
+	return CDialog::DoModal();
 }

@@ -33,7 +33,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
-CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
+CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
@@ -44,8 +44,7 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(CWnd* pParent /*=NULL*/)
 	m_dtAbsoluteDate(COleDateTime::GetCurrentTime()),
 	m_dAbsoluteTime(CDateHelper::GetTimeOnly(m_dtAbsoluteDate))
 {
-	//{{AFX_DATA_INIT(CTDLSetReminderDlg)
-	//}}AFX_DATA_INIT
+	m_iconDlg.SetIcon(hIcon, FALSE); // not owned
 }
 
 

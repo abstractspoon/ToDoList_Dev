@@ -23,7 +23,7 @@ const LPCTSTR ID_MASK = _T("0123456789");
 
 CTDLGoToTaskDlg::CTDLGoToTaskDlg(const CFilteredToDoCtrl& tdc, CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_GOTOTASK_DIALOG, pParent), 
+	CTDLDialog(IDD_GOTOTASK_DIALOG, _T(""), pParent), 
 	m_tdc(tdc), 
 	m_eTaskID(ID_MASK),
 	m_dwTaskID(0)
@@ -35,7 +35,7 @@ CTDLGoToTaskDlg::CTDLGoToTaskDlg(const CFilteredToDoCtrl& tdc, CWnd* pParent /*=
 
 void CTDLGoToTaskDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLGoToTaskDlg)
 	DDX_Control(pDX, IDC_TASKID, m_eTaskID);
 	DDX_Control(pDX, IDC_TASKTITLE, m_eTaskTitle);
@@ -45,7 +45,7 @@ void CTDLGoToTaskDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLGoToTaskDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLGoToTaskDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLGoToTaskDlg)
 	ON_EN_SETFOCUS(IDC_TASKID, OnEditSetFocusTaskID)
 	ON_EN_SETFOCUS(IDC_TASKTITLE, OnEditSetFocusTaskTitle)
@@ -61,7 +61,7 @@ END_MESSAGE_MAP()
 
 BOOL CTDLGoToTaskDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	CTDLDialog::OnInitDialog();
 
 	EnableDisableControls();
 	UpdateEditPrompts();
