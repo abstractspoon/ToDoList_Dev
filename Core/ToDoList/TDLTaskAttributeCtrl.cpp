@@ -29,6 +29,7 @@ CTDLTaskAttributeCtrl::CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
 	:
 	m_lcAttributes(data, mgrContent, ilIcons, vis, aCustAttribDefs)
 {
+	m_toolbar.SetBorders(); // zero borders
 }
 
 CTDLTaskAttributeCtrl::~CTDLTaskAttributeCtrl()
