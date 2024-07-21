@@ -8,9 +8,14 @@
 #include "TDCMenuIconMgr.h"
 #include "TDLCustomToolbar.h"
 #include "PreferencesDlg.h"
+#include "ToDoCtrl.h"
 
 #include "..\shared\FileIcons.h"
 #include "..\shared\Misc.h"
+#include "..\shared\GraphicsMisc.h"
+#include "..\shared\PasswordDialog.h"
+
+#include "..\Interfaces\SpellCheckDlg.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -94,11 +99,11 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 
 	AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, colorMagenta);
 
-	// Tray icon
+	// Tray icon -------------------------------------------
 	AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID(prefs));
 	AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
 
-	// Displaying logged time
+	// Displaying logged time ------------------------------
 	AddImage(ID_SHOWTIMELOGFILE, CFileIcons::ExtractIcon(_T(".csv")));
 }
 
@@ -213,5 +218,13 @@ void CTDCMenuIconMgr::UpdateCustomToolbar(const CToolBar& toolbar)
 
 		if (mapNewIDs.GetDifferences(mapExistIDs, mapDiffIDs))
 			mapDiffIDs.CopyTo(m_aCustomToolbarCmdIDs);
+
+		// 5. Update static dialog icons
+		CToDoCtrl::SetDialogIcons(GetIcon(ID_EDIT_SETTASKICON),
+								  GetIcon(ID_EDIT_DEPENDENCY),
+								  GetIcon(ID_EDIT_RECURRENCE),
+								  GetIcon(ID_ADDTIMETOLOGFILE));
+
+		CPasswordDialog::SetIcon(GetIcon(ID_FILE_ENCRYPT));
 	}
 }

@@ -22,14 +22,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAddLoggedTimeDlg dialog
 
-CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, double dHours, CWnd* pParent /*=NULL*/)
+CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bShowAddTimeToTimeSpent, double dHours, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
 	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_loggedTime(dHours, TDCU_HOURS),
 	m_dwTaskID(dwTaskID),
 	m_sTaskTitle(szTaskTitle),
-	m_bShowAddTimeToTimeSpent(FALSE),
+	m_bShowAddTimeToTimeSpent(bShowAddTimeToTimeSpent),
 	m_bTracked(dHours != 0.0)
 {
 	//{{AFX_DATA_INIT(CTDLAddLoggedTimeDlg)
@@ -55,6 +55,9 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 		// Allow negative values only for untracked times
 		m_eLoggedTime.EnableNegativeTimes(TRUE);
 	}
+
+	if (m_bShowAddTimeToTimeSpent)
+		m_bAddTimeToTimeSpent = CPreferences().GetProfileInt(m_sPrefsKey, _T("AddLoggedTimeToTimeSpent"), TRUE);
 }
 
 void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
@@ -102,21 +105,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAddLoggedTimeDlg message handlers
-
-int CTDLAddLoggedTimeDlg::DoModal(BOOL bShowAddTimeToTimeSpent)
-{
-	if (bShowAddTimeToTimeSpent)
-	{
-		m_bShowAddTimeToTimeSpent = TRUE;
-		m_bAddTimeToTimeSpent = CPreferences().GetProfileInt(m_sPrefsKey, _T("AddLoggedTimeToTimeSpent"), TRUE);
-	}
-	else
-	{
-		ASSERT(!m_bShowAddTimeToTimeSpent);
-	}
-
-	return CTDLDialog::DoModal();
-}
 
 double CTDLAddLoggedTimeDlg::GetLoggedHours() const
 { 

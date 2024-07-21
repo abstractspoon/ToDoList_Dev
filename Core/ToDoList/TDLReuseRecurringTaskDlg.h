@@ -7,10 +7,12 @@
 // TDLReuseRecurringTaskDlg.h : header file
 //
 
+#include "TDLDialog.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLReuseRecurringTaskDlg dialog
 
-class CTDLReuseRecurringTaskDlg : public CDialog
+class CTDLReuseRecurringTaskDlg : public CTDLDialog
 {
 // Construction
 public:

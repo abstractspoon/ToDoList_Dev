@@ -37,11 +37,6 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 	return FALSE;
 }
 
-BOOL CIconCache::Add(const CString& sName, CBitmap& bmp, COLORREF crMask)
-{
-	return Add(sName, (HBITMAP)bmp.GetSafeHandle());
-}
-
 BOOL CIconCache::Add(const CString& sName, HICON hIcon)
 {
 	if (IsValidName(sName) && hIcon)

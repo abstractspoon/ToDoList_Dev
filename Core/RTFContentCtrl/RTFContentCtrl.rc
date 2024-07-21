@@ -197,8 +197,8 @@ END
 // Bitmap
 //
 
-TOOLBAR_CONTROL         BITMAP  DISCARDABLE     "toolbar.bmp"
-IDB_TOOLBAR             BITMAP  DISCARDABLE     "toolbar2.bmp"
+TOOLBAR_CONTROL         BITMAP  DISCARDABLE     "res\\toolbar.bmp"
+IDB_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar_std.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

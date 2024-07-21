@@ -14,11 +14,14 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CPasswordDialog dialog
+// statics
 
 CMap<UINT, UINT, CString, CString&> CPasswordDialog::s_mapText;
 
-#define WM_POSTINITDIALOG (WM_APP+1)
+HICON CPasswordDialog::s_hIconDlg = NULL;
+
+/////////////////////////////////////////////////////////////////////////////
+// CPasswordDialog dialog
 
 CPasswordDialog::CPasswordDialog(BOOL bConfirm, LPCTSTR szExplanation, CWnd* /*pParent*/)
 	: CRuntimeDlg(), m_bConfirm(bConfirm)
@@ -92,6 +95,7 @@ BOOL CPasswordDialog::OnInitDialog()
 {
 	CRuntimeDlg::OnInitDialog();
 
+	CDialog::SetIcon(s_hIconDlg, FALSE);
 	GetDlgItem(IDC_PD_PASSWORD)->SetFocus();
 
 	return FALSE;
