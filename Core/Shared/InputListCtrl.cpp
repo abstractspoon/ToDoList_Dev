@@ -522,12 +522,12 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 							  const CRect& rCell, const CString& sText, 
 							  BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
+	bSelected &= IsCellSelected(nItem, nCol, TRUE);
+
 	CRect rText(rCell);
 
 	if (CellHasButton(nItem, nCol))
 	{
-		bSelected &= IsCellSelected(nItem, nCol, TRUE);
-
 		IL_COLUMNTYPE nBtnType = GetCellType(nItem, nCol);
 
 		if (nBtnType == ILCT_CHECK) // Special case
@@ -1617,18 +1617,11 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 	// setup colors
 	if (!bThemedSel && IsCellSelected(nItem, nCol))
 	{
-		// if focused then draw item in focused colors 
 		if (bWndFocus)
-		{
 			return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-		}
-		else if (bSelected)
-		{
-			// else if not focused then draw selection else
-			// draw in column colors as below unless we're the prompt and 
-			// readonly - then draw in back color (ie hide it)
+
+		if (bSelected)
 			return ::GetSysColor(COLOR_WINDOWTEXT);
-		}
 	}
 
 	// else 
