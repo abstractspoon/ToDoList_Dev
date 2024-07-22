@@ -7118,7 +7118,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 			{
 				CTDLTaskIconDlg dialog(m_ilTaskIcons, data.AsString(), TRUE, -1, this);
 				
-				if (dialog.DoModal(s_hIconIconDlg) == IDOK)
+				if (dialog.DoModal(IDS_CUSTATTRIBICONDLG_TITLE) == IDOK)
 				{
 					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName());
 				}

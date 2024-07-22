@@ -5311,8 +5311,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_FIND_TITLE          "Find in Comments"
     IDS_REPLACE_TITLE       "Replace in Comments"
-    IDS_CAD_BROWSEIMAGES    "Select Image..."
-    IDS_CAD_INSERTSYMBOL    "Select Symbol..."
+    IDS_CAD_BROWSEIMAGES    "Icons..."
+    IDS_CAD_INSERTSYMBOL    "Symbols..."
     IDS_TDLBC_CREATETIME    "Creation Time"
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
     IDS_TASKVIEWIMAGEFILTER "Bitmap Images (*.bmp)|*.bmp|GIF Images (*.gif)|*.gif|JPEG Images (*.jpg, *.jpeg)|*.jpg;*.jpeg|PNG Images (*.png)|*.png|TIFF Images (*.tif)|*.tif||"
@@ -5999,6 +5999,10 @@ BEGIN
     IDS_TODAY               "<today>"
     IDS_LISTVIEW_SORTNONEGROUPBELOW "Sort <none> group below other groups"
     IDS_FILTER_HIDEUNDONEDEPENDS "Hide tasks with incomplete Dependencies"
+    IDS_TOOLSICONDLG_TITLE  "Select Tool Icon"
+    IDS_TOOLBARICONDLG_TITLE "Select Toolbar Button Icon"
+    IDS_CUSTATTRIBICONDLG_TITLE "Select Custom Attribute Icon"
+    IDS_FINDTASKICONDLG_TITLE "Select Icon"
 END
 
 #endif    // English (Australia) resources

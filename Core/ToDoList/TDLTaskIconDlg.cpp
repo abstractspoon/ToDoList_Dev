@@ -90,6 +90,12 @@ END_MESSAGE_MAP()
 BOOL CTDLTaskIconDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
+
+	if (!m_sTitle.IsEmpty())
+	{
+		ASSERT(!m_iconDlg.IsValid());
+		SetWindowText(m_sTitle);
+	}
 	
 	ListView_SetImageList(m_lcIcons, m_ilIcons, LVSIL_SMALL);
 	BuildListCtrl();
@@ -108,6 +114,18 @@ BOOL CTDLTaskIconDlg::OnInitDialog()
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+int CTDLTaskIconDlg::DoModal(HICON hIcon)
+{
+	return CTDLDialog::DoModal(hIcon);
+}
+
+int CTDLTaskIconDlg::DoModal(UINT nTitleStrID)
+{
+	VERIFY(m_sTitle.LoadString(nTitleStrID) && !m_sTitle.IsEmpty());
+
+	return CTDLDialog::DoModal();
 }
 
 CString CTDLTaskIconDlg::GetIconName() const 

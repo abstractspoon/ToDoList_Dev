@@ -407,7 +407,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					{
 						CTDLTaskIconDlg dialog(m_ilIcons, rule.ValueAsString());
 
-						if (dialog.DoModal() == IDOK)
+						if (dialog.DoModal(IDS_FINDTASKICONDLG_TITLE) == IDOK)
 						{
 							rule.SetValue(dialog.GetIconName());
 							UpdateValueColumnText(nItem);

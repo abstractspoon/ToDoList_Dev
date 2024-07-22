@@ -158,7 +158,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 			TOOLBARBUTTON& tb = m_aButtons[nItem];
 			CTDLTaskIconDlg dialog(m_ilImages, tb.sImageID, FALSE);
 			
-			if (dialog.DoModal() == IDOK)
+			if (dialog.DoModal(IDS_TOOLBARICONDLG_TITLE) == IDOK)
 			{
 				tb.sImageID = dialog.GetIconName();
 				SetItemText(nItem, nCol, tb.sImageID);

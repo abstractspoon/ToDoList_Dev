@@ -822,7 +822,7 @@ LRESULT CPreferencesToolPage::OnSelectIcon(WPARAM wParam, LPARAM lParam)
 		// added due to the tool or icon path are not shown to the user
 		CTDLTaskIconDlg dialog(m_ilTools, m_aTools[nSel].sIconPath, FALSE, m_nNumDefaultIcons);
 		
-		if (dialog.DoModal() == IDOK)
+		if (dialog.DoModal(IDS_TOOLSICONDLG_TITLE) == IDOK)
 		{
 			CString sNewIcon = dialog.GetIconName();
 
