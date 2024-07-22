@@ -22,10 +22,10 @@ static char THIS_FILE[] = __FILE__;
 // CTDLTaskAttributeDlgCtrl
 
 CTDLTaskAttributeCtrl::CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
-													 const CContentMgr& mgrContent,
-													 const CTDCImageList& ilIcons,
-													 const TDCCOLEDITVISIBILITY& vis,
-													 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+											 const CContentMgr& mgrContent,
+											 const CTDCImageList& ilIcons,
+											 const TDCCOLEDITVISIBILITY& vis,
+											 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
 	m_lcAttributes(data, mgrContent, ilIcons, vis, aCustAttribDefs)
 {
