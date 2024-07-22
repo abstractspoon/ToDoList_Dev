@@ -28,9 +28,7 @@ class CTDLAddLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, double dHours = 0.0, CWnd* pParent = NULL);   // standard constructor
-
-	int DoModal(BOOL bShowAddTimeToTimeSpent);
+	CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bShowAddTimeToTimeSpent, double dHours = 0.0, CWnd* pParent = NULL);   // standard constructor
 
 	double GetLoggedHours() const; // in hours
 	COleDateTime GetWhen() const;

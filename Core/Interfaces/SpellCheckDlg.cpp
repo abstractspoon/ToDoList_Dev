@@ -24,11 +24,14 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CSpellCheckDlg dialog
+// statics
 
 CMap<UINT, UINT, CString, CString&> CSpellCheckDlg::s_mapText;
 
+HICON CSpellCheckDlg::s_hIconDlg = NULL;
+
 /////////////////////////////////////////////////////////////////////////////
+// CSpellCheckDlg dialog
 
 CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_pSpellChecker(NULL), 
@@ -301,6 +304,8 @@ BOOL CSpellCheckDlg::FindNextMisspeltWord(CString& sWord, CHECKFROM nFrom)
 BOOL CSpellCheckDlg::OnInitDialog() 
 {
 	CRuntimeDlg::OnInitDialog();
+
+	CDialog::SetIcon(s_hIconDlg, FALSE);
 
 	// don't localize certain fields
 	CLocalizer::EnableTranslation(m_lbSuggestions, FALSE);

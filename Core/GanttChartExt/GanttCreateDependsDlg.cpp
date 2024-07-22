@@ -26,7 +26,8 @@ CGanttCreateDependsDlg::CGanttCreateDependsDlg(CWnd* pParent /*=NULL*/)
 	m_dwFromTaskID(0),
 	m_dwNewToTaskID(0),
 	m_nStage(GCDDS_PICKINGCANCELLED),
-	m_nMode(GCDDM_NONE)
+	m_nMode(GCDDM_NONE),
+	m_icon(IDR_GANTTCHART)
 {
 	//{{AFX_DATA_INIT(CGanttCreateDependsDlg)
 	m_sCurStage = _T("");
@@ -322,6 +323,7 @@ BOOL CGanttCreateDependsDlg::OnInitDialog()
 	}
 
 	SetWindowText(sTitle);
+	SetIcon(m_icon, FALSE);
 	UpdatePrompt();
 
 	return TRUE;  // return TRUE unless you set the focus to a control

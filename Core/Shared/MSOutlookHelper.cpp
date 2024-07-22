@@ -9,6 +9,7 @@
 #include "misc.h"
 #include "fileregister.h"
 #include "regkey.h"
+#include "fileicons.h"
 
 #include "..\3rdparty\msoutl.h"
 
@@ -185,82 +186,26 @@ CMSOutlookHelper::~CMSOutlookHelper()
 // static
 BOOL CMSOutlookHelper::IsOutlookInstalled()
 {
-	//return CFileRegister::IsRegisteredApp(_T("msg"), _T("OUTLOOK.EXE"), TRUE);
-	return CRegKey2::KeyExists(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\OUTLOOK.EXE"));
+	return !GetExePath().IsEmpty();
 }
 
-/*
-BOOL COutlookHelper::IsUrlHandlerInstalled()
+CString CMSOutlookHelper::GetExePath()
 {
-	if (IsOutlookInstalled())
-	{
-		CRegKey2 reg;
-		CString sEntry;
-
-		if (reg.Open(HKEY_CLASSES_ROOT, _T("outlook\\shell\\open\\command"), TRUE) != ERROR_SUCCESS)
-			return FALSE;
-
-		return (reg.Read(_T(""), sEntry) == ERROR_SUCCESS && !sEntry.IsEmpty());
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL COutlookHelper::InstallUrlHandler()
-{
-	if (!IsOutlookInstalled())
-		return FALSE;
-
-	if (IsUrlHandlerInstalled())
-		return TRUE;
-
-	// cache whether the key already existed so we don't delete it on failure
-	BOOL bKeyExists = CRegKey2::KeyExists(HKEY_CLASSES_ROOT, _T("outlook"));
-
 	CRegKey2 reg;
-	
-	if (reg.Open(HKEY_CLASSES_ROOT, _T("outlook"), FALSE) != ERROR_SUCCESS)
-		return FALSE;
+	CString sExePath;
 
-	BOOL bSuccess = (reg.Write(_T("URL Protocol"), _T("")) == ERROR_SUCCESS &&
-					 reg.Write(_T(""), _T("URL:Outlook Folders")) == ERROR_SUCCESS);
-
-	if (bSuccess)
+	if (reg.Open(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\OUTLOOK.EXE"), TRUE) == ERROR_SUCCESS)
 	{
-		reg.Close();
-
-		if (reg.Open(HKEY_CLASSES_ROOT, _T("outlook\\shell"), FALSE) == ERROR_SUCCESS)
-		{
-			bSuccess = (reg.Write(_T(""), _T("open")) == ERROR_SUCCESS);
-
-			if (bSuccess)
-			{
-				reg.Close();
-
-				if (reg.Open(HKEY_CLASSES_ROOT, _T("outlook\\shell\\open\\command"), FALSE) == ERROR_SUCCESS)
-				{
-					CString sOutlookPath = CFileRegister::GetRegisteredAppPath(_T("msg")); // full path
-					CString sCommand = sOutlookPath + _T(" /select \"%1\"");
-
-					bSuccess = (reg.Write(_T(""), sCommand) == ERROR_SUCCESS);
-				}
-			}
-		}
+		reg.Read(_T(""), sExePath);
 	}
 
-	//[HKEY_CLASSES_ROOT\outlook\DefaultIcon]
-	//@="C:\\PROGRA~1\\MICROS~3\\OFFICE12\\OUTLLIB.DLL,-9403"
-	
-	// delete key on failure
-	reg.Close();
-
-	if (!bSuccess && !bKeyExists)
-		CRegKey2::DeleteKey(HKEY_CLASSES_ROOT, _T("outlook"));
-
-	return bSuccess;
+	return sExePath;
 }
-*/
+
+HICON CMSOutlookHelper::GetOutlookIcon()
+{
+	return CFileIcons::ExtractIcon(GetExePath());
+}
 
 BOOL CMSOutlookHelper::HandleUrl(HWND hWnd, LPCTSTR szURL)
 {
@@ -276,25 +221,6 @@ BOOL CMSOutlookHelper::HandleUrl(HWND hWnd, LPCTSTR szURL)
 
 	return (FileMisc::Run(hWnd, sOutlookPath, sArguments) >= SE_ERR_SUCCESS);
 }
-
-/*
-BOOL COutlookHelper::QueryInstallUrlHandler(UINT nIDQuery, UINT nMBOptions, int nMBSuccess)
-{
-	if (!IsOutlookInstalled())
-		return FALSE;
-
-	if (IsUrlHandlerInstalled())
-		return TRUE;
-
-	if (nIDQuery)
-	{
-		if (AfxMessageBox(CEnString(nIDQuery), nMBOptions) != nMBSuccess)
-			return FALSE;
-	}
-
-	return InstallUrlHandler();
-}
-*/
 
 CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 {
@@ -346,7 +272,6 @@ BOOL CMSOutlookHelper::EscapeText(CString& sText)
 
 	// Other 'dangerous' characters can be replaced by 
 	// their HEX equivalent
-//	const CString sSearch(_T("#:<>-\"Яавйнопрстухщэ"));
 	const CString sSearch(_T("#:<>\"Яавйнопрстухщэ"));
 	CString sReplace;
 
@@ -382,7 +307,6 @@ CString CMSOutlookHelper::GetItemData(OutlookAPI::_Item& obj, OUTLOOK_FIELDTYPE 
 		case OA_BILLINGINFORMATION:		return obj.GetBillingInformation();
 		case OA_CATEGORIES:				return obj.GetCategories();
 		case OA_COMPANIES:				return obj.GetCompanies();
-		//case OA_CONVERSATIONTOPIC:		return obj.GetConversationTopic();
 		case OA_CREATIONTIME:			return MapDate(obj.GetCreationTime());
 		case OA_ENTRYID:				return obj.GetEntryID();
 		case OA_IMPORTANCE:				return Misc::Format(obj.GetImportance());

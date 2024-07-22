@@ -45,6 +45,7 @@ public:
 		
 	BOOL HasImageID(UINT nCmdID) const;
 	BOOL ChangeImageID(UINT nCmdID, UINT nNewCmdID);
+	HICON GetIcon(UINT nCmdID) const { return LoadItemIcon(nCmdID, TRUE); }
 	
 	void DeleteImage(UINT nCmdID);
 	virtual void ClearImages();

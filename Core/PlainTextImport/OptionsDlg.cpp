@@ -7,6 +7,7 @@
 
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\fileregister.h"
 
 #include <math.h>
 
@@ -23,7 +24,11 @@ static char THIS_FILE[] = __FILE__;
 
 
 COptionsDlg::COptionsDlg(BOOL bImport, BOOL bIncludeProject, LPCTSTR szIndent, CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_OPTIONSDIALOG, pParent), m_bIncludeProject(bIncludeProject), m_sIndent(szIndent)
+	: 
+	CDialog(IDD_OPTIONSDIALOG, pParent), 
+	m_bIncludeProject(bIncludeProject),
+	m_sIndent(szIndent),
+	m_icon(CFileRegister::GetRegisteredIcon(_T("txt")))
 {
 	//{{AFX_DATA_INIT(COptionsDlg)
 
@@ -82,6 +87,7 @@ BOOL COptionsDlg::OnInitDialog()
 	
 	SetWindowText(m_sTitle);
 	SetDlgItemText(IDC_PROJECTINCLUDED, m_sProjectLabel);
+	SetIcon(m_icon, FALSE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

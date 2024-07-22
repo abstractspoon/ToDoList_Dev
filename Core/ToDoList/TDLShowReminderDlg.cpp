@@ -34,24 +34,21 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	m_lcReminders(m_sPrefsKey),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE),
-	m_cbSnoozeTime(TCB_HOURSINDAY)
+	m_cbSnoozeTime(TCB_HOURSINDAY),
+	m_bSnoozeUntil(FALSE)
 {
-	//{{AFX_DATA_INIT(CTDLShowReminderDlg)
-	m_bSnoozeUntil = FALSE;
-	//}}AFX_DATA_INIT
-
-	// init snooze value
 	m_nSnoozeMins = CPreferences().GetProfileInt(m_sPrefsKey, _T("Snooze"), 5);
+
+	SetIcon(IDR_MAINFRAME);
 }
 
 
 void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLShowReminderDlg)
+
 	DDX_Control(pDX, IDC_REMINDERS, m_lcReminders);
 	DDX_Radio(pDX, IDC_SNOOZEOPTIONFOR, m_bSnoozeUntil);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_SNOOZEFOR, m_cbSnoozeFor);
 	DDX_Control(pDX, IDC_SNOOZEUNTILDATE, m_dtcSnoozeDate);
 	DDX_Control(pDX, IDC_SNOOZEUNTILTIME, m_cbSnoozeTime);
@@ -118,8 +115,6 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	if (m_icon.Load(IDR_MAINFRAME_STD))
-		SetIcon(m_icon, FALSE);
 
 	m_cbSnoozeTime.SetItemHeight(-1, CDlgUnits(this).ToPixelsY(9));
 	ResizeChild(&m_dtcSnoozeDate, 0, GetChildHeight(&m_cbSnoozeFor) - GetChildHeight(&m_dtcSnoozeDate));

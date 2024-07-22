@@ -242,8 +242,7 @@ copy unicode_release\rtfcontentctrl.dll ..\todolist\unicode_release /y
     <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\RTFContentCtrl.rc2" />
-    <None Include="toolbar.bmp" />
-    <None Include="toolbar2.bmp" />
+    <None Include="res\toolbar.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\3rdParty\Zlib\ZLIBSTAT.LIB" />
@@ -261,6 +260,9 @@ copy unicode_release\rtfcontentctrl.dll ..\todolist\unicode_release /y
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\toolbar_std.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

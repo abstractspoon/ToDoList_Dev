@@ -7,16 +7,16 @@
 // OutlookImportDlg.h : header file
 //
 
+#include "TDLDialog.h"
+
 #include "..\Shared\wndprompt.h"
 #include "..\Shared\enimagelist.h"
-#include "..\Shared\icon.h"
 
 #include "..\Interfaces\ITasklist.h"
 #include "..\Interfaces\IImportExport.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-// predecs
 namespace OutlookAPI
 {
 	class _Application;
@@ -33,7 +33,7 @@ typedef void* HTASKITEM;
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
 
-class CTDLImportOutlookDlg : public CDialog
+class CTDLImportOutlookDlg : public CTDLDialog
 {
 // Construction
 public:
@@ -54,7 +54,6 @@ public:
 	CWndPromptManager m_wndPrompt;
 	CEnImageList m_ilItemTypes;
 	CMap<int, int, int, int&> m_mapItemTypes;
-	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -66,8 +65,6 @@ public:
 
 // Implementation
 protected:
-	int DoModal() { return CDialog::DoModal(); }
-
 	// Generated message map functions
 	//{{AFX_MSG(COutlookImportDlg)
 	virtual BOOL OnInitDialog();

@@ -161,6 +161,14 @@ UINT CToDoCtrl::WM_TDC_FIXUPPOSTDROPSELECTION		= (WM_APP + 1);
 UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 2);
 
 //////////////////////////////////////////////////////////////////////////////
+// Statics
+
+HICON CToDoCtrl::s_hIconIconDlg = NULL;
+HICON CToDoCtrl::s_hIconDependsDlg = NULL; 
+HICON CToDoCtrl::s_hIconRecurDlg = NULL;
+HICON CToDoCtrl::s_hIconAddLogDlg = NULL;
+
+//////////////////////////////////////////////////////////////////////////////
 
 CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent, 
 					 const CShortcutManager& mgrShortcuts, 
@@ -194,6 +202,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_nMaxInfotipCommentsLength(-1),
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
+
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
@@ -397,6 +406,14 @@ BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
 void CToDoCtrl::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
 {
 	CTDLTaskCtrlBase::EnableExtendedSelection(bCtrl, bShift);
+}
+
+void CToDoCtrl::SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecurDlg, HICON hIconAddLogDlg)
+{
+	s_hIconIconDlg = hIconIconDlg;
+	s_hIconDependsDlg = hIconDependsDlg;
+	s_hIconRecurDlg = hIconRecurDlg;
+	s_hIconAddLogDlg = hIconAddLogDlg;
 }
 
 void CToDoCtrl::SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan)
@@ -1310,7 +1327,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 
 	CTDLTaskIconDlg dialog(m_ilTaskIcons, GetSelectedTaskIcon(), TRUE, -1, this);
 
-	if (dialog.DoModal() != IDOK)
+	if (dialog.DoModal(s_hIconIconDlg) != IDOK)
 		return FALSE;
 
 	return SetSelectedTaskIcon(dialog.GetIconName());
@@ -2200,7 +2217,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bA
 				{
 					CTDLReuseRecurringTaskDlg dialog(tr.bPreserveComments);
 
-					if (dialog.DoModal() == IDOK)
+					if (dialog.DoModal(s_hIconRecurDlg) == IDOK)
 					{
 						if (dialog.GetWantReuseTask())
 							bReuse = TRUE;
@@ -7101,7 +7118,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 			{
 				CTDLTaskIconDlg dialog(m_ilTaskIcons, data.AsString(), TRUE, -1, this);
 				
-				if (dialog.DoModal() == IDOK)
+				if (dialog.DoModal(s_hIconIconDlg) == IDOK)
 				{
 					bHandled = SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName());
 				}
@@ -7247,13 +7264,13 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 
 	if (bShowDialog)
 	{
-		CTDLAddLoggedTimeDlg dialog(dwTaskID, sTaskTitle, dHours, this);
-
 		// if we are readonly, we need to prevent
 		// the dialog showing 'Add time to time spent'
-		BOOL bCanEditTimeSpent = CanEditSelectedTask(TDCA_TIMESPENT);
+		BOOL bShowAddToTimeSpent = (CanEditSelectedTask(TDCA_TIMESPENT) && !bTracked);
 
-		if (dialog.DoModal(bCanEditTimeSpent && !bTracked) != IDOK)
+		CTDLAddLoggedTimeDlg dialog(dwTaskID, sTaskTitle, bShowAddToTimeSpent, dHours, this);
+
+		if (dialog.DoModal(s_hIconAddLogDlg) != IDOK)
 			return FALSE;
 
 		// else
@@ -9385,7 +9402,7 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 										 HasStyle(TDCS_SHOWPARENTSASFOLDERS),
 										 HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
 
-		if (dialog.DoModal() == IDOK)
+		if (dialog.DoModal(s_hIconDependsDlg) == IDOK)
 		{
 			CTDCDependencyArray aDepends;
 			dialog.GetDependencies(aDepends);
@@ -9418,7 +9435,7 @@ BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 
 		CTDLRecurringTaskOptionDlg dialog(tr, dtDefault);
 
-		if (dialog.DoModal() == IDOK)
+		if (dialog.DoModal(s_hIconRecurDlg) == IDOK)
 		{
 			TDCRECURRENCE trNew;
 			dialog.GetRecurrenceOptions(trNew);

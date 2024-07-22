@@ -16,7 +16,9 @@ static char THIS_FILE[] = __FILE__;
 
 
 CEditWebLinkDlg::CEditWebLinkDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CEditWebLinkDlg::IDD, pParent)
+	: 
+	CDialog(CEditWebLinkDlg::IDD, pParent),
+	m_icon(IDR_RTFCOMMENTS)
 {
 	//{{AFX_DATA_INIT(CEditWebLinkDlg)
 	m_sWebLink = _T("http://www.");
@@ -41,3 +43,13 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CEditWebLinkDlg message handlers
+
+BOOL CEditWebLinkDlg::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	SetIcon(m_icon, FALSE);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}

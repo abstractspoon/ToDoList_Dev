@@ -430,6 +430,7 @@ public:
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
 	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
 	static void SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan);
+	static void SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecursIcon, HICON hIconAddLogDlg);
 
 protected:
 	enum  // visible for derived classes
@@ -467,6 +468,8 @@ protected:
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
 	CMidnightTimer m_timerMidnight;
+	
+	static HICON s_hIconIconDlg, s_hIconDependsDlg, s_hIconRecurDlg, s_hIconAddLogDlg;
 
 	CString m_sXmlHeader, m_sXslHeader;
 	CString m_sLastSavePath;

@@ -20,7 +20,6 @@ public:
 	virtual ~CIconCache();
 
 	BOOL Add(const CString& sName, HBITMAP hbm, COLORREF crMask = CLR_NONE);
-	BOOL Add(const CString& sName, CBitmap& bmp, COLORREF crMask = CLR_NONE);
 	BOOL Add(const CString& sName, HICON hIcon);
 	BOOL Add(const CString& sName, const CString& sImagePath, COLORREF crMask = CLR_NONE);
 

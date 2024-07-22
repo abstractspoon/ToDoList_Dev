@@ -146,6 +146,8 @@ const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"),
 	CWaitCursor cursor; \
 	CTDLStatusBarProgressProxy prog(m_statusBar, CEnString(stringID))
 
+#define CMDICON(cmdID) m_mgrMenuIcons.GetIcon(cmdID)
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum
@@ -277,7 +279,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_CBN_SELCHANGE(IDC_QUICKFIND, OnSelChangeQuickFind)
 
 	ON_COMMAND(ID_ABOUT, OnAbout)
-	ON_COMMAND(ID_ADDTIMETOLOGFILE, OnAddtimetologfile)
 	ON_COMMAND(ID_ADDTIMETOLOGFILE, OnAddtimetologfile)
 	ON_COMMAND(ID_ARCHIVE_COMPLETEDTASKS, OnArchiveCompletedtasks)
 	ON_COMMAND(ID_ARCHIVE_SELECTEDTASKS, OnArchiveSelectedTasks)
@@ -1120,19 +1121,18 @@ void CToDoListWnd::InitShortcutManager()
 	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
 }
 
-void CToDoListWnd::PopulateMenuIconManager()
+void CToDoListWnd::InitMenuIconManager()
 {
-	if (!m_mgrMenuIcons.IsInitialized())
+	if (!m_mgrMenuIcons.IsInitialized() && 
+		!m_mgrMenuIcons.Initialize(this))
 	{
 		ASSERT(0);
 		return;
 	}
-	else if (m_mgrMenuIcons.HasImages())
-	{
-		return;
-	}
 
-	m_mgrMenuIcons.Populate(Prefs());
+	if (!m_mgrMenuIcons.HasImages())
+		m_mgrMenuIcons.Populate(Prefs());
+
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
 
 	UpdateMenuIconMgrSourceControlStatus();
@@ -1446,6 +1446,8 @@ BOOL CToDoListWnd::InitCustomToolbar()
 		m_toolbarCustom.DestroyWindow();
 		return FALSE;
 	}
+
+	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
 	
 	return TRUE;
 }
@@ -2367,7 +2369,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	CLocalizer::SetMenuPostTranslationCallback(*this);
 
 	InitShortcutManager();
-	m_mgrMenuIcons.Initialize(this); // Populated on demand
+	InitMenuIconManager();
 
 	// reminders
 	m_dlgReminders.Initialize(this);
@@ -4976,7 +4978,6 @@ CString CToDoListWnd::GetVersion(BOOL bExtended)
 void CToDoListWnd::OnAbout() 
 {
 	CTDLAboutDlg dialog(GetTitle());
-	
 	dialog.DoModal();
 }
 
@@ -5837,17 +5838,17 @@ void CToDoListWnd::OnEditPasteAttributes()
 
 	// Get attributes to paste from user
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	CTDLPasteTaskAttributesDlg dlg(tdc.GetCustomAttributeDefs());
+	CTDLPasteTaskAttributesDlg dialog(tdc.GetCustomAttributeDefs());
 
-	if (dlg.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_EDIT_PASTEATTRIBUTES)) == IDOK)
 	{
 		CTDCAttributeMap mapAttribs;
 
-		if (dlg.GetSelectedAttributes(mapAttribs))
+		if (dialog.GetSelectedAttributes(mapAttribs))
 		{
 			DWORD dwFlags = 0;
-			Misc::SetFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES, dlg.GetWantPreserveNonEmptyDestinationValues());
-			Misc::SetFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES, dlg.GetExcludeEmptySourceValues());
+			Misc::SetFlag(dwFlags, TDLMTA_PRESERVENONEMPTYDESTVALUES, dialog.GetWantPreserveNonEmptyDestinationValues());
+			Misc::SetFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES, dialog.GetExcludeEmptySourceValues());
 
 			tdc.PasteTaskAttributeValues(task, hTask, mapAttribs, dwFlags);
 		}
@@ -6592,7 +6593,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 						   tdc.GetCustomAttributeDefs(),
 						   (tdc.CanSaveTaskViewToImage() ? tdc.GetTaskViewName() : _T("")));
 	
-	if (dialog.DoModal() != IDOK)
+	if (dialog.DoModal(CMDICON(bPreview ? ID_PRINTPREVIEW : ID_PRINT)) != IDOK)
 		return;
 
 	RedrawWindow();
@@ -7670,9 +7671,6 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 {
 	if (!bSysMenu)
 	{
-		// On-demand initialisation
-		PopulateMenuIconManager();
-
 		m_menubar.HandleInitMenuPopup(pPopupMenu,
 									  GetToDoCtrl(),
 									  Prefs(),
@@ -9044,7 +9042,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)
 		{
 			dialog.SetUseFile(pData->aFiles[nFile]);
 
-			if (dialog.DoModal() == IDOK)
+			if (dialog.DoModal(CMDICON(ID_TOOLS_IMPORT)) == IDOK)
 			{
 				// check file can be opened
 				TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
@@ -9061,7 +9059,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)
 		dialog.SetUseText(pData->sText);
 		dialog.SetImportTo(pData->dwTaskID ? TDIT_ADDTOSELECTEDTASK : TDIT_ADDTOBOTTOMOFTASKLIST);
 
-		if (dialog.DoModal() == IDOK)
+		if (dialog.DoModal(CMDICON(ID_TOOLS_IMPORT)) == IDOK)
 		{
 			// check file can be opened
 			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
@@ -9110,7 +9108,7 @@ void CToDoListWnd::OnImportTasklist()
 		// to make sure it's reinitialised properly
 		CTDLImportDialog dialog(m_mgrImportExport, tdc.IsReadOnly(), tdc.HasSelection());
 
-		if (dialog.DoModal() == IDOK)
+		if (dialog.DoModal(CMDICON(ID_TOOLS_IMPORT)) == IDOK)
 		{
 			// check file can be opened
 			TDLID_IMPORTTO nImportTo = dialog.GetImportTo();
@@ -10036,7 +10034,7 @@ void CToDoListWnd::OnExport()
 
 	while (!bOverWrite)
 	{
-		if (dialog.DoModal() != IDOK)
+		if (dialog.DoModal(CMDICON(ID_TOOLS_EXPORT)) != IDOK)
 			return;
 
 		if (dialog.GetExportToClipboard())
@@ -10357,7 +10355,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 								tdc.GetStylesheetPath(),
 								tdc.GetCustomAttributeDefs());
 	
-	if (dialog.DoModal() != IDOK)
+	if (dialog.DoModal(CMDICON(ID_TOOLS_TRANSFORM)) != IDOK)
 		return;
 	
 	CString sStylesheet = dialog.GetStylesheet();
@@ -11002,6 +11000,8 @@ const CPreferencesDlg& CToDoListWnd::Prefs() const
 
 void CToDoListWnd::OnSpellcheckcomments() 
 {
+	CSpellCheckDlg::SetIcon(CMDICON(ID_EDIT_SPELLCHECKCOMMENTS));
+
 	GetToDoCtrl().SpellcheckSelectedTask(FALSE);
 }
 
@@ -11012,12 +11012,26 @@ void CToDoListWnd::OnUpdateSpellcheckcomments(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnSpellchecktitle() 
 {
+	CSpellCheckDlg::SetIcon(CMDICON(ID_EDIT_SPELLCHECKTITLE));
+
 	GetToDoCtrl().SpellcheckSelectedTask(TRUE);
 }
 
 void CToDoListWnd::OnUpdateSpellchecktitle(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount());
+}
+
+void CToDoListWnd::OnSpellcheckTasklist()
+{
+	CSpellCheckDlg::SetIcon(CMDICON(ID_TOOLS_SPELLCHECKTASKLIST));
+
+	GetToDoCtrl().Spellcheck();
+}
+
+void CToDoListWnd::OnUpdateSpellcheckTasklist(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
 void CToDoListWnd::OnFileEncrypt() 
@@ -11081,16 +11095,6 @@ void CToDoListWnd::OnFileResetversion()
 void CToDoListWnd::OnUpdateFileResetversion(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(!GetToDoCtrl().IsReadOnly());
-}
-
-void CToDoListWnd::OnSpellcheckTasklist() 
-{
-	GetToDoCtrl().Spellcheck();
-}
-
-void CToDoListWnd::OnUpdateSpellcheckTasklist(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
 TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
@@ -11874,7 +11878,7 @@ void CToDoListWnd::OnViewFilter()
 						 GetToDoCtrl(),
 						 aPriorityColors);
 
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_VIEW_FILTER)) == IDOK)
 	{
 		TDCFILTER filter;
 		CString sCustom;
@@ -11939,7 +11943,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 
 	CTDLColumnSelectionDlg dialog(vis, visDefault);
 
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_TASKLIST_SELECTCOLUMNS)) == IDOK)
 	{
 		dialog.GetColumnEditFilterVisibility(vis);
 
@@ -11988,7 +11992,7 @@ void CToDoListWnd::OnEditOffsetDates()
 {
 	CTDLOffsetDatesDlg dialog;
 	
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_EDIT_OFFSETDATES)) == IDOK)
 	{
 		TDC_UNITS nUnits = TDCU_NULL;
 		int nAmount = dialog.GetOffsetAmount(nUnits);
@@ -12145,7 +12149,7 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 
 	while (bContinue)
 	{
-		bContinue = (dialog.DoModal() == IDOK);
+		bContinue = (dialog.DoModal(CMDICON(ID_TOOLS_ANALYSELOGGEDTIME)) == IDOK);
 
 		if (bContinue)
 		{
@@ -12877,7 +12881,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 							(tdc.GetTaskView() != FTCV_TASKLIST), 
 							tdc.GetCustomAttributeDefs());
 
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_SENDTASKS)) == IDOK)
 	{
 		int nFormat = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 		ASSERT(nFormat != -1);
@@ -13163,9 +13167,9 @@ void CToDoListWnd::OnEditSetReminder()
 		dwFlags |= TDCREM_NEWREMINDER;
 	}
 
-	int nRet = CTDLSetReminderDlg().DoModal(rem, dwFlags);
+	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER));
 
-	switch (nRet)
+	switch (dialog.DoModal(rem, dwFlags))
 	{
 	case IDOK:
 		{
@@ -13272,7 +13276,7 @@ void CToDoListWnd::OnSortMulti()
 
 	CTDLMultiSortDlg dialog(sort, mapColIDs, aAttribDefs);
 
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_SORT)) == IDOK)
 	{
 		dialog.GetSortBy(sort);
 		tdc.MultiSort(sort);
@@ -13350,7 +13354,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 									  tdc.GetTaskIconImageList(),
 									  tdc.GetCheckImageList());
 
-		if (dialog.DoModal() == IDOK)
+		if (dialog.DoModal(CMDICON(ID_TASKLIST_CUSTOMCOLUMNS)) == IDOK)
 		{
 			BOOL bAnyHasInheritance = tdc.GetCustomAttributeDefs().AnyHasFeature(TDCCAF_INHERITPARENTCHANGES);
 
@@ -13746,7 +13750,7 @@ void CToDoListWnd::OnMoveGoToTask()
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	CTDLGoToTaskDlg dialog(tdc);
 
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_MOVE_GOTOTASK)) == IDOK)
 		tdc.SelectTask(dialog.GetTaskID(), TRUE);
 }
 
@@ -13770,7 +13774,7 @@ void CToDoListWnd::OnToolsCleanupIniPreferences()
 
 	CTDLCleanupIniPreferencesDlg dialog(aExclusions);
 		
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CMDICON(ID_TOOLS_CLEANUPINIPREFERENCES)) == IDOK)
 	{
 		m_mruList.ReadList(CPreferences());
 		ResetPrefs();

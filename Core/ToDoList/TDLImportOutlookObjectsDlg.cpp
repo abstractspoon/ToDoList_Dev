@@ -71,7 +71,6 @@ static OUTLOOK_FIELD FIELDS[] =
  	OUTLOOK_FIELD(OA_DATECOMPLETED,			OOC_TASK,			IDS_OA_DATECOMPLETED,		TDCA_DONEDATE),
  	OUTLOOK_FIELD(OA_DELEGATOR,				OOC_TASK,			IDS_OA_DELEGATOR,			TDCA_ALLOCTO),
  	OUTLOOK_FIELD(OA_DUEDATE,				OOC_TASK,			IDS_OA_DUEDATE,				TDCA_DUEDATE),
-// 	OUTLOOK_FIELD(OA_ISRECURRING,			OOC_TASK,			IDS_OA_ISRECURRING,			TDCA_RECURRENCE),
  	OUTLOOK_FIELD(OA_OWNER,					OOC_TASK,			IDS_OA_OWNER,				TDCA_CREATEDBY),
  	OUTLOOK_FIELD(OA_PERCENTCOMPLETE,		OOC_TASK,			IDS_OA_PERCENTCOMPLETE,		TDCA_PERCENT),
  	OUTLOOK_FIELD(OA_SCHEDULEPLUSPRIORITY,	OOC_TASK,			IDS_OA_SCHEDULEPLUSPRIORITY, TDCA_PRIORITY),
@@ -100,9 +99,9 @@ CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refI
 	m_bHideConfidential(TRUE),
 	m_sAltTitle(szAltTitle)
 {
-	m_icon.Load(IDI_OUTLOOK);
-
 	BuildMasterMapping();
+
+	m_iconDlg.SetIcon(CMSOutlookHelper::GetOutlookIcon());
 }
 
 void CTDLImportOutlookObjectsDlg::DoDataExchange(CDataExchange* pDX)
@@ -134,8 +133,6 @@ BOOL CTDLImportOutlookObjectsDlg::OnInitDialog()
 
 	if (!m_sAltTitle.IsEmpty())
 		SetWindowText(m_sAltTitle);
-
-	SetIcon(m_icon, FALSE);
 
 	// modify first column header
 	m_lcFieldMapping.SetColumnText(0, CEnString(IDS_OUTLOOK_FIELDNAME));
