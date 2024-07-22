@@ -494,7 +494,7 @@ void CCustomAttributeListPage::OnBrowseimages()
 	// show dialog and rebuild list
 	CTDLTaskIconDlg dialog(m_ilTaskIcons, aImages);
 
-	if (dialog.DoModal(IDS_CUSTATTRIBICONDLG_TITLE) == IDOK)
+	if (dialog.DoModal(IDS_CUSTICONSETUPDLG_TITLE) == IDOK)
 	{
 		if (dialog.GetIconNames(aImages))
 		{

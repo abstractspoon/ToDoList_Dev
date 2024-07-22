@@ -2533,6 +2533,7 @@
 #define IDS_TOOLBARICONDLG_TITLE        51656
 #define IDS_CUSTATTRIBICONDLG_TITLE     51657
 #define IDS_FINDTASKICONDLG_TITLE       51658
+#define IDS_CUSTICONSETUPDLG_TITLE      51659
 
 // Next default values for new objects
 // 

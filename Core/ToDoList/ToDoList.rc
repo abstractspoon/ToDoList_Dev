@@ -6000,9 +6000,10 @@ BEGIN
     IDS_LISTVIEW_SORTNONEGROUPBELOW "Sort <none> group below other groups"
     IDS_FILTER_HIDEUNDONEDEPENDS "Hide tasks with incomplete Dependencies"
     IDS_TOOLSICONDLG_TITLE  "Select Tool Icon"
-    IDS_TOOLBARICONDLG_TITLE "Select Toolbar Button Icon"
-    IDS_CUSTATTRIBICONDLG_TITLE "Select Custom Attribute Icon"
-    IDS_FINDTASKICONDLG_TITLE "Select Icon"
+    IDS_TOOLBARICONDLG_TITLE "Select Toolbar Icon"
+    IDS_CUSTATTRIBICONDLG_TITLE "Select Custom Icon"
+    IDS_FINDTASKICONDLG_TITLE "Select Search Icon"
+    IDS_CUSTICONSETUPDLG_TITLE "Select Custom Icons"
 END
 
 #endif    // English (Australia) resources
