@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_DRAGCHANGE, OnBigCalendarNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_VISIBLEWEEKCHANGE, OnBigCalendarNotifyVisibleWeekChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_PREFSHELP, OnBigCalendarPrefsHelp)
+	ON_REGISTERED_MESSAGE(WM_CALENDAR_EDITTASKICON, OnBigCalendarEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKICON, OnBigCalendarGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKFUTUREDATES, OnBigCalendarGetTaskFutureDates)
 	ON_WM_NCDESTROY()
@@ -773,6 +774,10 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 				if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
 					mod.nAttributeID = TDCA_DUEDATE;
 				break;
+
+			case TCCHT_ICON:
+				ASSERT(0);
+				break;
 			}
 		}
 	}
@@ -896,6 +901,10 @@ LRESULT CCalendarWnd::OnBigCalendarGetTaskIcon(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
 }
 
+LRESULT CCalendarWnd::OnBigCalendarEditTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
+}
 
 LRESULT CCalendarWnd::OnBigCalendarGetTaskFutureDates(WPARAM wp, LPARAM lp)
 {
