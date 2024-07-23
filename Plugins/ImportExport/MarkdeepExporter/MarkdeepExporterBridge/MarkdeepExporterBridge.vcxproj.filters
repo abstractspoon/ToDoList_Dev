@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\markdeep.ico">
+    <Image Include="..\MarkdeepExporterCore\Resources\markdeep.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\HTMLReportExporterCore\HTMLReporter.ico">
+    <Image Include="..\HTMLReportExporterCore\Resource\HTMLReporter.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
