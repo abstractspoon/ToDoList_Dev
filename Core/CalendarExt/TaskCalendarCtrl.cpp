@@ -1967,29 +1967,38 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 
 		if (rTask.PtInRect(ptClient))
 		{
-			// now check for closeness to ends
-			COleDateTime dtHit;
-			VERIFY(GetDateFromPoint(ptClient, dtHit));
-
-			double dDateTol = CalcDateDragTolerance();
 			const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 
-			if (fabs(dtHit.m_dt - pTCI->GetAnyStartDate().m_dt) < dDateTol)
+			// Check for the icon
+			CRect rIcon;
+
+			if (CalcIconRect(pTCI, rTask, rIcon) && rIcon.PtInRect(ptClient))
 			{
-				nHit = TCCHT_BEGIN;
+				nHit = TCCHT_ICON;
 			}
-			else if (fabs(dtHit.m_dt - pTCI->GetAnyEndDate().m_dt) < dDateTol)
+			else // check for closeness to ends
 			{
-				nHit = TCCHT_END;
-			}
-			else if (dtHit > pTCI->GetAnyStartDate() && dtHit < pTCI->GetAnyEndDate())
-			{
-				nHit = TCCHT_MIDDLE;
-			}
-			else
-			{
-				ASSERT(0);
-				break;
+				COleDateTime dtHit;
+				VERIFY(GetDateFromPoint(ptClient, dtHit));
+
+				double dDateTol = CalcDateDragTolerance();
+				if (fabs(dtHit.m_dt - pTCI->GetAnyStartDate().m_dt) < dDateTol)
+				{
+					nHit = TCCHT_BEGIN;
+				}
+				else if (fabs(dtHit.m_dt - pTCI->GetAnyEndDate().m_dt) < dDateTol)
+				{
+					nHit = TCCHT_END;
+				}
+				else if (dtHit > pTCI->GetAnyStartDate() && dtHit < pTCI->GetAnyEndDate())
+				{
+					nHit = TCCHT_MIDDLE;
+				}
+				else
+				{
+					ASSERT(0);
+					break;
+				}
 			}
 
 			if (pRect)
@@ -2001,6 +2010,20 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 
 	// nothing hit
 	return 0;
+}
+
+BOOL CTaskCalendarCtrl::CalcIconRect(const TASKCALITEM* pTCI, const CRect& rTask, CRect& rIcon) const
+{
+	if (!pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
+		return FALSE;
+
+	rIcon = rTask;
+	const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(pTCI->GetTaskID());
+
+	rIcon.OffsetRect(-cdi.nIconOffset, 0);
+	rIcon.IntersectRect(rIcon, rTask);
+
+	return TRUE;
 }
 
 BOOL CTaskCalendarCtrl::HitTestCellOverflowBtn(const CPoint& ptClient) const
@@ -2490,8 +2513,25 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		if (pCell)
 			SelectDate(pCell->date, FALSE);
 		
-		if (!m_bReadOnly && StartDragging(point))
-			return;
+		if (!m_bReadOnly)
+		{
+			if (StartDragging(point))
+				return;
+
+			// Check for an icon edit
+			TCC_HITTEST nHit = TCCHT_NOWHERE;
+
+			if ((HitTestTask(point, nHit) == dwSelID) && (nHit == TCCHT_ICON))
+			{
+				const TASKCALITEM* pTCI = GetTaskCalItem(dwSelID);
+
+				if (!pTCI->bLocked)
+				{
+					GetParent()->SendMessage(WM_CALENDAR_EDITTASKICON);
+					return;
+				}
+			}
+		}
 	}
 
 	// else
@@ -2582,7 +2622,8 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	case TCCHT_BEGIN:	m_bDraggingStart = TRUE;	break;
 	case TCCHT_END:		m_bDraggingEnd = TRUE;		break;
 	case TCCHT_MIDDLE:	m_bDragging = TRUE;			break;
-		
+
+	case TCCHT_ICON:
 	default:			
 		ASSERT(0);
 		return FALSE;
@@ -3010,8 +3051,11 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 {
 	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
 
-	if (nHit == TCCHT_NOWHERE)
+	if ((nHit == TCCHT_NOWHERE) ||
+		(nHit == TCCHT_ICON))
+	{
 		return FALSE;
+	}
 	
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
@@ -3085,11 +3129,18 @@ BOOL CTaskCalendarCtrl::SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const
 	{
 		if (!CanDragTask(dwTaskID, nHit))
 		{
-			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID); 
+			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 			ASSERT(pTCI);
 
-			if (pTCI && pTCI->bLocked)
-				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+			if (pTCI)
+			{
+				if (pTCI->bLocked)
+					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+
+				// else
+				if (nHit == TCCHT_ICON)
+					return GraphicsMisc::SetHandCursor();
+			}
 
 			// else
 			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
