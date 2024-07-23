@@ -2017,10 +2017,8 @@ BOOL CTaskCalendarCtrl::CalcIconRect(const TASKCALITEM* pTCI, const CRect& rTask
 	if (!pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		return FALSE;
 
-	DWORD dwTaskID = pTCI->GetTaskID();
-	const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
-
 	rIcon = rTask;
+	const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(pTCI->GetTaskID());
 
 	rIcon.OffsetRect(-cdi.nIconOffset, 0);
 	rIcon.IntersectRect(rIcon, rTask);
