@@ -387,6 +387,10 @@ BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	case TDCA_TASKNAME:
 		return TRUE;
+
+	case TDCA_ICON:
+		// Always show the icon field unless explicitly hidden
+		return (m_vis.IsEditFieldVisible(TDCA_ICON) || (m_vis.GetShowFields() != TDLSA_ANY));
 	}
 
 	// All else
