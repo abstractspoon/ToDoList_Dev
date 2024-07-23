@@ -169,7 +169,12 @@ protected:
 	CToolTipCtrlEx m_tooltip;
 	CFileDropTarget m_dropFiles;
 
-	static CIcon s_iconTrackTime, s_iconAddTime, s_iconLink, s_iconBrowse, s_iconApp;
+	static CIcon s_iconTrackTime;
+	static CIcon s_iconAddTime;
+	static CIcon s_iconLink;
+	static CIcon s_iconBrowseFile;
+	static CIcon s_iconApp;
+	static CIcon s_iconSelectIcon;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)

@@ -179,6 +179,10 @@ SOURCE=.\res\app_tray_timetrack_light.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\select_icon.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\clock.ico
 # End Source File
 # Begin Source File
@@ -192,10 +196,6 @@ SOURCE=.\res\custattrib_toolbar.bmp
 # Begin Source File
 
 SOURCE=.\res\custattrib_toolbar_std.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\custom_attrib_icons.ico
 # End Source File
 # Begin Source File
 

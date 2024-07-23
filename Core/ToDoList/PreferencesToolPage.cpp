@@ -70,7 +70,7 @@ CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	m_bRunMinimized(FALSE),
 	m_nNumDefaultIcons(-1)
 {
-	m_eIconPath.InsertButton(0, BTN_SELECTICON, CIcon(IDI_CUST_ATTRIB_ICONS), CEnString(IDS_CAD_BROWSEIMAGES));
+	m_eIconPath.InsertButton(0, BTN_SELECTICON, CIcon(IDI_ICON_SELECT), CEnString(IDS_CAD_BROWSEIMAGES));
 }
 
 CPreferencesToolPage::~CPreferencesToolPage()

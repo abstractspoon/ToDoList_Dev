@@ -111,7 +111,7 @@
 #define IDB_COLUMN_SYMBOLS              285
 #define IDI_TIMETRACK                   286
 #define IDI_UPDATE_FILTER               287
-#define IDI_CUST_ATTRIB_ICONS           288
+#define IDI_ICON_SELECT                 288
 #define IDI_DEPENDS_LINK                289
 #define IDI_NULL                        290
 #define IDI_HELPBUTTON                  293

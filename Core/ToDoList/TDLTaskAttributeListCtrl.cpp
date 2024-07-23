@@ -104,7 +104,8 @@ CIcon CTDLTaskAttributeListCtrl::s_iconApp;
 CIcon CTDLTaskAttributeListCtrl::s_iconTrackTime;
 CIcon CTDLTaskAttributeListCtrl::s_iconAddTime;
 CIcon CTDLTaskAttributeListCtrl::s_iconLink;
-CIcon CTDLTaskAttributeListCtrl::s_iconBrowse;
+CIcon CTDLTaskAttributeListCtrl::s_iconBrowseFile;
+CIcon CTDLTaskAttributeListCtrl::s_iconSelectIcon;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl
@@ -152,10 +153,12 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	// static icons
 	if (!s_iconTrackTime.IsValid())
 	{
-		s_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
-		s_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
-		s_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
-		s_iconBrowse.Load(IDI_FILEEDIT_BROWSE, 16, TRUE);
+		s_iconTrackTime.Load(IDI_TIMETRACK);
+		s_iconAddTime.Load(IDI_ADD_LOGGED_TIME);
+		s_iconLink.Load(IDI_DEPENDS_LINK);
+		s_iconBrowseFile.Load(IDI_FILEEDIT_BROWSE);
+		s_iconApp.Load(IDR_MAINFRAME_STD);
+		s_iconSelectIcon.Load(IDI_ICON_SELECT);
 	}
 }
 
@@ -795,6 +798,9 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		break;
 
 	case TDCA_ICON:
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_BROWSE);
+		break;
+
 	case TDCA_RECURRENCE:
 	case TDCA_DEPENDENCY:
 	case TDCA_COLOR:
@@ -1355,28 +1361,45 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 	if (!CInputListCtrl::DrawButton(pDC, nRow, nCol, sText, bSelected, rButton))
 		return FALSE;
 
-	// Draw 'File Link' browse icon
+	// Draw custom browse icon
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-	BOOL bWantFileIcon = FALSE;
+	CIcon* pIcon = NULL;
 
 	switch (nAttribID)
 	{
 	case TDCA_FILELINK:
-		bWantFileIcon = sText.IsEmpty();
+		if (sText.IsEmpty())
+			pIcon = &s_iconBrowseFile;
+		break;
+
+	case TDCA_ICON:
+		pIcon = &s_iconSelectIcon;
 		break;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			bWantFileIcon = (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_FILELINK);
+		{
+			switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
+			{
+			case TDCCA_FILELINK:
+				pIcon = &s_iconBrowseFile;
+				break;
+
+			case TDCCA_ICON:
+				if (!m_aCustomAttribDefs.IsListType(nAttribID))
+					pIcon = &s_iconSelectIcon;
+				break;
+			}
+		}
 		break;
 	}
 
-	if (bWantFileIcon)
+	if (pIcon)
 	{
 		CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
 		GraphicsMisc::CentreRect(rIcon, rButton);
 
-		s_iconBrowse.Draw(pDC, rIcon.TopLeft());
+		pIcon->Draw(pDC, rIcon.TopLeft());
 	}
 
 	return TRUE;
@@ -2823,12 +2846,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM wParam, LPARAM lPa
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam)
 {
 	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
-	{
-		if (!s_iconApp.IsValid())
-			VERIFY(s_iconApp.SetIcon(GraphicsMisc::GetAppWindowIcon(FALSE), FALSE)); // Not owned
-
 		return (LRESULT)(HICON)s_iconApp;
-	}
 
 	return 0L;
 }

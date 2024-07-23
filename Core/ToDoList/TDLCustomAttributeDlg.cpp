@@ -202,7 +202,7 @@ BOOL CCustomAttributeListPage::OnInitDialog()
 	EnableControls();
 
 	// initialize buttons
-	m_btBrowseImages.SetIcon(AfxGetApp()->LoadIcon(IDI_CUST_ATTRIB_ICONS));
+	m_btBrowseImages.SetIcon(AfxGetApp()->LoadIcon(IDI_ICON_SELECT));
 	m_btBrowseImages.SetTooltip(CEnString(IDS_CAD_BROWSEIMAGES));
 
 	m_btInsertSymbol.SetWindowText(0x2211);
