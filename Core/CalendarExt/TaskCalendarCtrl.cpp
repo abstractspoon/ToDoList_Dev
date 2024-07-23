@@ -2491,15 +2491,17 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	BOOL bCustomDate = FALSE;
-	DWORD dwSelID = HitTestTask(point, FALSE, bCustomDate);
+	DWORD dwHitID = HitTestTask(point, FALSE, bCustomDate);
 	
-	if (dwSelID)
+	if (dwHitID)
 	{
 		// Avoid selecting 'Future Occurrences' because it's not
 		// strictly necessary and their ephemeral nature can cause
 		// asserts and other difficulties
-		if (IsFutureOccurrence(dwSelID))
-			dwSelID = GetRealTaskID(dwSelID);
+		DWORD dwSelID = dwHitID;
+
+		if (IsFutureOccurrence(dwHitID))
+			dwSelID = GetRealTaskID(dwHitID);
 
 		if (m_tooltip.GetSafeHwnd())
 			m_tooltip.Pop();
@@ -2520,8 +2522,9 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			// Check for an icon edit
 			TCC_HITTEST nHit = TCCHT_NOWHERE;
-
-			if ((HitTestTask(point, nHit) == dwSelID) && (nHit == TCCHT_ICON))
+			VERIFY(HitTestTask(point, nHit) == dwHitID);
+			
+			if (nHit == TCCHT_ICON)
 			{
 				const TASKCALITEM* pTCI = GetTaskCalItem(dwSelID);
 
