@@ -109,6 +109,7 @@ enum TDC_ATTRIBUTE
 	// pseudo attribute for Find Tasks dialog
 	TDCA_REMINDER,
 
+	// pseudo attributes for Attribute Editor
 	TDCA_TIMEREMAINING, 
 	TDCA_COMMENTSFORMAT,
 
