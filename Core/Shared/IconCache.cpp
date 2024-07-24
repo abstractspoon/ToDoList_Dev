@@ -13,9 +13,8 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CIconCache::CIconCache(BOOL bLargeIcons) : m_nIconSize(0)
+CIconCache::CIconCache(BOOL bLargeIcons) : m_bLargeIcons(bLargeIcons)
 {
-	m_nIconSize = GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16);
 }
 
 CIconCache::~CIconCache()
@@ -23,14 +22,26 @@ CIconCache::~CIconCache()
 	Clear();
 }
 
+int CIconCache::GetIconSize(BOOL bScaledByDPI) const
+{
+	int nSize = (m_bLargeIcons ? 32 : 16);
+
+	if (bScaledByDPI)
+		nSize = GraphicsMisc::ScaleByDPIFactor(nSize);
+
+	return nSize;
+}
+
 BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 {
 	if (IsValidName(sName) && hbm)
 	{
-		CIcon icon(CEnBitmap::ExtractIcon(hbm, crMask, m_nIconSize, m_nIconSize));
-		ASSERT(icon.IsValid());
+		int nReqSize = GetIconSize();
 
-		return Add(sName, icon);
+		HICON hIcon = CEnBitmap::ExtractIcon(hbm, crMask, nReqSize, nReqSize);
+		ASSERT(hIcon);
+
+		return Add(sName, hIcon, FALSE);
 	}
 	
 	ASSERT(0);
@@ -41,10 +52,10 @@ BOOL CIconCache::Add(const CString& sName, UINT nIconID)
 {
 	if (IsValidName(sName) && nIconID)
 	{
-		CIcon icon(nIconID);
-		ASSERT(icon.IsValid());
+		HICON hIcon = GraphicsMisc::LoadIcon(nIconID, GetIconSize(FALSE));
+		ASSERT(hIcon);
 
-		return Add(sName, icon);
+		return Add(sName, hIcon, FALSE);
 	}
 
 	ASSERT(0);
@@ -53,20 +64,20 @@ BOOL CIconCache::Add(const CString& sName, UINT nIconID)
 
 BOOL CIconCache::Add(const CString& sName, HICON hIcon)
 {
+	return Add(sName, hIcon, TRUE);
+}
+
+BOOL CIconCache::Add(const CString& sName, HICON hIcon, BOOL bCopy)
+{
 	if (IsValidName(sName) && hIcon)
 	{
-		// create image list first time only
-		if (m_ilImages.GetSafeHandle() ||
-			m_ilImages.Create(m_nIconSize, m_nIconSize, ILC_COLOR32 | ILC_MASK, 0, 1))
-		{
-			int nImage = m_ilImages.Add(hIcon);
+		if (bCopy)
+			hIcon = ::CopyIcon(hIcon);
 
-			if (nImage >= 0)
-			{
-				m_mapIndices[sName] = nImage;
-				return TRUE;
-			}
-		}
+		Remove(sName);
+		m_mapIcons[sName] = hIcon;
+
+		return TRUE;
 	}
 
 	ASSERT(0);
@@ -77,10 +88,12 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 {
 	if (IsValidName(sName) && !sImagePath.IsEmpty())
 	{
-		CIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_nIconSize, m_nIconSize));
-		ASSERT(icon.IsValid() || !FileMisc::PathExists(sImagePath));
+		int nReqSize = GetIconSize();
 
-		return Add(sName, icon);
+		HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, nReqSize, nReqSize);
+		ASSERT(hIcon || !FileMisc::PathExists(sImagePath));
+
+		return Add(sName, hIcon, FALSE);
 	}
 	
 	ASSERT(0);
@@ -89,39 +102,24 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 
 BOOL CIconCache::Remove(const CString& sName)
 {
-	int nImage = -1;
+	HICON hIcon = NULL;
 	
-	if (m_mapIndices.Lookup(sName, nImage))
+	if (m_mapIcons.Lookup(sName, hIcon))
 	{
-		VERIFY(m_ilImages.Remove(nImage));
-		VERIFY(m_mapIndices.RemoveKey(sName));
-
-		// Decrement the indices of all images coming after 'nImage'
-		POSITION pos = m_mapIndices.GetStartPosition();
-		
-		while (pos)
-		{
-			CString sName;
-			int nOther = -1;
-			
-			m_mapIndices.GetNextAssoc(pos, sName, nOther);
-
-			if (nOther > nImage)
-				m_mapIndices[sName] = --nOther;
-		}
+		VERIFY(m_mapIcons.RemoveKey(sName));
+		::DestroyIcon(hIcon);
 
 		return TRUE;
 	}
 	
-	ASSERT(0);
 	return FALSE;
 }
 
 BOOL CIconCache::HasIcon(const CString& sName) const
 {
-	int nImage = -1;
+	HICON hUnused = NULL;
 	
-	return m_mapIndices.Lookup(sName, nImage);
+	return m_mapIcons.Lookup(sName, hUnused);
 }
 
 BOOL CIconCache::IsValidName(const CString& sName) const
@@ -131,19 +129,29 @@ BOOL CIconCache::IsValidName(const CString& sName) const
 
 void CIconCache::Clear()
 {
-	m_ilImages.DeleteImageList();
-	m_mapIndices.RemoveAll();
+	POSITION pos = m_mapIcons.GetStartPosition();
+	CString sName;
+	HICON hIcon = NULL;
+
+	while (pos)
+	{
+		m_mapIcons.GetNextAssoc(pos, sName, hIcon);
+		::DestroyIcon(hIcon);
+	}
+
+	m_mapIcons.RemoveAll();
 }
 
 BOOL CIconCache::Draw(CDC* pDC, const CString& sName, POINT pt, UINT nStyle)
 {
-	int nImage = -1;
+	HICON hIcon = NULL;
 
-	if (m_mapIndices.Lookup(sName, nImage) && (nImage != -1))
+	if (m_mapIcons.Lookup(sName, hIcon))
 	{
-		return m_ilImages.Draw(pDC, nImage, pt, nStyle);
+		int nReqSize = GetIconSize();
+		return ::DrawIconEx(*pDC, pt.x, pt.y, hIcon, nReqSize, nReqSize, 0, NULL, DI_NORMAL);
 	}
-	
+
 	return FALSE;
 }
 
