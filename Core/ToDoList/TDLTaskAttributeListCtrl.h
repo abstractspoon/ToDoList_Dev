@@ -171,12 +171,7 @@ protected:
 	CToolTipCtrlEx m_tooltip;
 	CFileDropTarget m_dropFiles;
 
-	static CIcon s_iconTrackTime;
-	static CIcon s_iconAddTime;
-	static CIcon s_iconShowDepends;
-	static CIcon s_iconBrowseFile;
-	static CIcon s_iconReminder;
-	static CIcon s_iconSelectIcon;
+	static CIconCache s_iconCache;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -267,6 +262,7 @@ protected:
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
+	static HICON GetIcon(int nIcon);
 
 private:
 	// ---------------------------------------------------------------------

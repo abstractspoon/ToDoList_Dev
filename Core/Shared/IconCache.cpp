@@ -102,9 +102,9 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 
 BOOL CIconCache::Remove(const CString& sName)
 {
-	HICON hIcon = NULL;
+	HICON hIcon = GetIcon(sName);
 	
-	if (m_mapIcons.Lookup(sName, hIcon))
+	if (hIcon)
 	{
 		VERIFY(m_mapIcons.RemoveKey(sName));
 		::DestroyIcon(hIcon);
@@ -117,9 +117,15 @@ BOOL CIconCache::Remove(const CString& sName)
 
 BOOL CIconCache::HasIcon(const CString& sName) const
 {
-	HICON hUnused = NULL;
-	
-	return m_mapIcons.Lookup(sName, hUnused);
+	return (GetIcon(sName) != NULL);
+}
+
+HICON CIconCache::GetIcon(const CString& sName) const
+{
+	HICON hIcon = NULL;
+	m_mapIcons.Lookup(sName, hIcon);
+
+	return hIcon;
 }
 
 BOOL CIconCache::IsValidName(const CString& sName) const

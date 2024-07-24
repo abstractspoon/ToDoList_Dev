@@ -100,12 +100,17 @@ const TCHAR NEWLINE = '\n';
 
 /////////////////////////////////////////////////////////////////////////////
 
-CIcon CTDLTaskAttributeListCtrl::s_iconReminder;
-CIcon CTDLTaskAttributeListCtrl::s_iconTrackTime;
-CIcon CTDLTaskAttributeListCtrl::s_iconAddTime;
-CIcon CTDLTaskAttributeListCtrl::s_iconShowDepends;
-CIcon CTDLTaskAttributeListCtrl::s_iconBrowseFile;
-CIcon CTDLTaskAttributeListCtrl::s_iconSelectIcon;
+CIconCache CTDLTaskAttributeListCtrl::s_iconCache(FALSE); // small icons
+
+enum 
+{
+	ICON_REMINDER		= IDI_REMINDER,
+	ICON_TRACKTIME		= IDI_TIMETRACK,
+	ICON_ADDTIME		= IDI_ADD_LOGGED_TIME,
+	ICON_SHOWDEPENDS	= IDI_DEPENDS_LINK,
+	ICON_BROWSEFILE		= IDI_FILEEDIT_BROWSE,
+	ICON_SELECTICON		= IDI_ICON_SELECT,
+}; 
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl
@@ -140,7 +145,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
-	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, s_iconShowDepends, CEnString(IDS_TDC_DEPENDSLINK_TIP));
+	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_TDC_DEPENDSLINK_TIP));
 	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
 
 	m_eTimePeriod.EnableButtonPadding(FALSE);
@@ -151,17 +156,6 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 
 	m_cbMultiFileLink.EnableButtonPadding(FALSE);
 	m_cbMultiFileLink.SetDefaultButton(0);
-
-	// static icons
-	if (!s_iconTrackTime.IsValid())
-	{
-		s_iconTrackTime.Load(IDI_TIMETRACK);
-		s_iconAddTime.Load(IDI_ADD_LOGGED_TIME);
-		s_iconShowDepends.Load(IDI_DEPENDS_LINK);
-		s_iconBrowseFile.Load(IDI_FILEEDIT_BROWSE);
-		s_iconReminder.Load(IDI_REMINDER);
-		s_iconSelectIcon.Load(IDI_ICON_SELECT);
-	}
 }
 
 CTDLTaskAttributeListCtrl::~CTDLTaskAttributeListCtrl()
@@ -260,6 +254,16 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_tooltip.EnableMultilineTips();
 
 	return 0;
+}
+
+HICON CTDLTaskAttributeListCtrl::GetIcon(int nIcon)
+{
+	CString sIcon = Misc::Format(nIcon);
+
+	if (!s_iconCache.HasIcon(sIcon))
+		s_iconCache.Add(sIcon, (UINT)nIcon);
+
+	return s_iconCache.GetIcon(sIcon);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleSortDirection()
@@ -1385,21 +1389,21 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 	// Draw custom browse icon
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-	CIcon* pIcon = NULL;
+	int nIcon = 0;
 
 	switch (nAttribID)
 	{
 	case TDCA_FILELINK:
 		if (sText.IsEmpty())
-			pIcon = &s_iconBrowseFile;
+			nIcon = ICON_BROWSEFILE;
 		break;
 
 	case TDCA_ICON:
-		pIcon = &s_iconSelectIcon;
+		nIcon = ICON_SELECTICON;
 		break;
 
 	case TDCA_REMINDER:
-		pIcon = &s_iconReminder;
+		nIcon = ICON_REMINDER;
 		break;
 
 	default:
@@ -1408,24 +1412,24 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 			switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
 			{
 			case TDCCA_FILELINK:
-				pIcon = &s_iconBrowseFile;
+				nIcon = ICON_BROWSEFILE;
 				break;
 
 			case TDCCA_ICON:
 				if (!m_aCustomAttribDefs.IsListType(nAttribID))
-					pIcon = &s_iconSelectIcon;
+					nIcon = ICON_BROWSEFILE;
 				break;
 			}
 		}
 		break;
 	}
 
-	if (pIcon)
+	if (nIcon)
 	{
 		CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
 		GraphicsMisc::CentreRect(rIcon, rButton);
 
-		pIcon->Draw(pDC, rIcon.TopLeft());
+		CIcon(GetIcon(nIcon), FALSE).Draw(pDC, rIcon.TopLeft());
 	}
 
 	return TRUE;
@@ -2170,8 +2174,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			PrepareTimePeriodEdit(nRow);
 
-			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, s_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
-			m_eTimePeriod.InsertButton(1, ID_BTN_ADDLOGGEDTIME, s_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
+			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
+			m_eTimePeriod.InsertButton(1, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 		}
 		break;
 

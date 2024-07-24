@@ -26,6 +26,7 @@ public:
 
 	BOOL Remove(const CString& sName);
 	BOOL HasIcon(const CString& sName) const;
+	HICON GetIcon(const CString& sName) const;
 	
 	void Clear();
 	BOOL Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle = ILD_TRANSPARENT);
