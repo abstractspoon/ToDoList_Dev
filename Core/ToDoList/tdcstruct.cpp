@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "tdcstruct.h"
 #include "tdcmapping.h"
+#include "tdcstatic.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\timehelper.h"
@@ -2712,10 +2713,10 @@ int TDCCOLEDITVISIBILITY::UpdateEditVisibility()
 	{
 		mapVisibleEdits.RemoveAll();
 
-		for (int nEdit = TDCA_FIRST_ATTRIBUTE; nEdit <= TDCA_LAST_REALATTRIBUTE; nEdit++)
+		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsEditFieldVisible((TDC_ATTRIBUTE)nEdit))
-				mapVisibleEdits.Add((TDC_ATTRIBUTE)nEdit);
+			if (IsEditFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleEdits.Add(ATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2726,10 +2727,10 @@ int TDCCOLEDITVISIBILITY::GetAllEditFields(CTDCAttributeMap& mapAttrib)
 {
 	mapAttrib.RemoveAll();
 
-	for (int nAttribID = TDCA_FIRST_ATTRIBUTE; nAttribID <= TDCA_LAST_REALATTRIBUTE; nAttribID++)
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedEdit((TDC_ATTRIBUTE)nAttribID))
-			mapAttrib.Add((TDC_ATTRIBUTE)nAttribID);
+		if (IsSupportedEdit(ATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();
@@ -2948,10 +2949,10 @@ int TDCCOLEDITFILTERVISIBILITY::UpdateFilterVisibility()
 	{
 		mapVisibleFilters.RemoveAll();
 
-		for (int nFilter = TDCA_FIRST_ATTRIBUTE; nFilter <= TDCA_LAST_REALATTRIBUTE; nFilter++)
+		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsFilterFieldVisible((TDC_ATTRIBUTE)nFilter))
-				mapVisibleFilters.Add((TDC_ATTRIBUTE)nFilter);
+			if (IsFilterFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleFilters.Add(ATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2962,10 +2963,10 @@ int TDCCOLEDITFILTERVISIBILITY::GetAllFilterFields(CTDCAttributeMap& mapAttrib)
 {
 	mapAttrib.RemoveAll();
 
-	for (int nAttribID = TDCA_FIRST_ATTRIBUTE; nAttribID <= TDCA_LAST_REALATTRIBUTE; nAttribID++)
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedFilter((TDC_ATTRIBUTE)nAttribID))
-			mapAttrib.Add((TDC_ATTRIBUTE)nAttribID);
+		if (IsSupportedFilter(ATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();

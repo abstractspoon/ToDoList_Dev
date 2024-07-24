@@ -226,6 +226,7 @@ namespace TDC
 		case TDCA_LASTMODBY:		return TDCC_LASTMODBY;
 		case TDCA_LOCK:				return TDCC_LOCK;
 		case TDCA_NONE:				return TDCC_NONE;
+		case TDCA_PARENTID:			return TDCC_PARENTID;
 		case TDCA_PATH:				return TDCC_PATH;
 		case TDCA_PERCENT:			return TDCC_PERCENT;
 		case TDCA_PRIORITY:			return TDCC_PRIORITY;
