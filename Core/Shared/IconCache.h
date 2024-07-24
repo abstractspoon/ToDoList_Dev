@@ -21,6 +21,7 @@ public:
 
 	BOOL Add(const CString& sName, HBITMAP hbm, COLORREF crMask = CLR_NONE);
 	BOOL Add(const CString& sName, HICON hIcon);
+	BOOL Add(const CString& sName, UINT nIconID);
 	BOOL Add(const CString& sName, const CString& sImagePath, COLORREF crMask = CLR_NONE);
 
 	BOOL Remove(const CString& sName);

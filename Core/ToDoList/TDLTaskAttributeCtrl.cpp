@@ -25,9 +25,10 @@ CTDLTaskAttributeCtrl::CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
 											 const CContentMgr& mgrContent,
 											 const CTDCImageList& ilIcons,
 											 const TDCCOLEDITVISIBILITY& vis,
+											 const CTDCReminderHelper& rems,
 											 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
-	m_lcAttributes(data, mgrContent, ilIcons, vis, aCustAttribDefs)
+	m_lcAttributes(data, mgrContent, ilIcons, vis, rems, aCustAttribDefs)
 {
 	m_toolbar.SetBorders(); // zero borders
 }

@@ -36,7 +36,7 @@ public:
 	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 
-	void AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
+	int AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
 	BOOL ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
@@ -81,7 +81,7 @@ protected:
 
 protected:
 	void SaveAndRemoveReminders(const CFilteredToDoCtrl* pTDC);
-	void LoadReminders(const CFilteredToDoCtrl* pTDC);
+	int LoadReminders(const CFilteredToDoCtrl* pTDC);
 	void StartTimer();
 	BOOL ShowReminder(const TDCREMINDER& rem);
 	BOOL DeleteReminder(int nRem);

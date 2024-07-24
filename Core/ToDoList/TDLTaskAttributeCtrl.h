@@ -27,10 +27,11 @@ class CTDLTaskAttributeCtrl : public CWnd
 {
 public:
 	CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
-							 const CContentMgr& mgrContent,
-							 const CTDCImageList& ilIcons,
-							 const TDCCOLEDITVISIBILITY& vis,
-							 const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+						  const CContentMgr& mgrContent,
+						  const CTDCImageList& ilIcons,
+						  const TDCCOLEDITVISIBILITY& vis,
+						  const CTDCReminderHelper& rems,
+						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 	virtual ~CTDLTaskAttributeCtrl();
 

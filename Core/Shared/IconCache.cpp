@@ -37,6 +37,20 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 	return FALSE;
 }
 
+BOOL CIconCache::Add(const CString& sName, UINT nIconID)
+{
+	if (IsValidName(sName) && nIconID)
+	{
+		CIcon icon(nIconID);
+		ASSERT(icon.IsValid());
+
+		return Add(sName, icon);
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
 BOOL CIconCache::Add(const CString& sName, HICON hIcon)
 {
 	if (IsValidName(sName) && hIcon)

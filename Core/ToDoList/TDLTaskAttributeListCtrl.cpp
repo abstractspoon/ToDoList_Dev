@@ -100,10 +100,10 @@ const TCHAR NEWLINE = '\n';
 
 /////////////////////////////////////////////////////////////////////////////
 
-CIcon CTDLTaskAttributeListCtrl::s_iconApp;
+CIcon CTDLTaskAttributeListCtrl::s_iconReminder;
 CIcon CTDLTaskAttributeListCtrl::s_iconTrackTime;
 CIcon CTDLTaskAttributeListCtrl::s_iconAddTime;
-CIcon CTDLTaskAttributeListCtrl::s_iconLink;
+CIcon CTDLTaskAttributeListCtrl::s_iconShowDepends;
 CIcon CTDLTaskAttributeListCtrl::s_iconBrowseFile;
 CIcon CTDLTaskAttributeListCtrl::s_iconSelectIcon;
 
@@ -114,6 +114,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 													 const CContentMgr& mgrContent,
 													 const CTDCImageList& ilIcons,
 													 const TDCCOLEDITVISIBILITY& vis,
+													 const CTDCReminderHelper& rems,
 													 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
 	m_data(data),
@@ -131,14 +132,15 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_bSplitting(FALSE),
 	m_fAttribColProportion(0.5f),
 	m_bCategorized(FALSE),
-	m_aSortedGroupedItems(*this)
+	m_aSortedGroupedItems(*this),
+	m_reminders(rems)
 {
 	SetSortColumn(0, FALSE);
 
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
-	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, s_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
+	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, s_iconShowDepends, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
 
 	m_eTimePeriod.EnableButtonPadding(FALSE);
@@ -155,9 +157,9 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	{
 		s_iconTrackTime.Load(IDI_TIMETRACK);
 		s_iconAddTime.Load(IDI_ADD_LOGGED_TIME);
-		s_iconLink.Load(IDI_DEPENDS_LINK);
+		s_iconShowDepends.Load(IDI_DEPENDS_LINK);
 		s_iconBrowseFile.Load(IDI_FILEEDIT_BROWSE);
-		s_iconApp.Load(IDR_MAINFRAME_STD);
+		s_iconReminder.Load(IDI_REMINDER);
 		s_iconSelectIcon.Load(IDI_ICON_SELECT);
 	}
 }
@@ -796,24 +798,24 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		nColType = ILCT_DROPLIST;
 		break;
 
-	case TDCA_FILELINK:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
-		break;
-
 	case TDCA_ICON:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_BROWSE);
+	case TDCA_REMINDER:
+		nColType = ILCT_CUSTOMBTN;
 		break;
 
 	case TDCA_RECURRENCE:
 	case TDCA_DEPENDENCY:
 	case TDCA_COLOR:
-	case TDCA_REMINDER:
 		nColType = ILCT_BROWSE;
 		break;
 
 	case TDCA_FLAG:
 	case TDCA_LOCK:
 		nColType = ILCT_CHECK;
+		break;
+
+	case TDCA_FILELINK:
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
 		break;
 
 	default:
@@ -1075,7 +1077,7 @@ CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAn
 		dwFlags |= DHFD_ISO;
 	
 	if (bAndTime)
-		dwFlags |= DHFD_TIME;
+		dwFlags |= DHFD_TIME | DHFD_NOSEC;
 
 	return CDateHelper::FormatDate(date,  dwFlags);
 }
@@ -1239,6 +1241,22 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
 
+	case TDCA_REMINDER:
+		{
+			time_t tValue = 0;
+			
+			if (m_multitasker.GetTasksReminder(m_aSelectedTaskIDs, m_reminders, tValue))
+			{
+				if (tValue != 0)
+					sValue = FormatDate(tValue, TRUE);
+			}
+			else
+			{
+				bValueVaries = TRUE;
+			}
+		}
+		break;
+
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
@@ -1378,6 +1396,10 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 	case TDCA_ICON:
 		pIcon = &s_iconSelectIcon;
+		break;
+
+	case TDCA_REMINDER:
+		pIcon = &s_iconReminder;
 		break;
 
 	default:
@@ -2480,6 +2502,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_ICON:
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
+	case TDCA_REMINDER:
 		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
 			RefreshSelectedTasksValue(nRow);
 		break;
@@ -2508,10 +2531,6 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			PrepareControl(m_cbMultiFileLink, nRow, nCol);
 			ShowControl(m_cbMultiFileLink, nRow, nCol, bBtnClick);
 		}
-		break;
-
-	case TDCA_TASKNAME:
-		// TODO
 		break;
 
 	default:
@@ -2851,7 +2870,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM wParam, LPARAM lPa
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam)
 {
 	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
-		return (LRESULT)(HICON)s_iconApp;
+		return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
 
 	return 0L;
 }

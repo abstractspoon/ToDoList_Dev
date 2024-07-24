@@ -5370,6 +5370,11 @@ BOOL CTDCMultiTasker::GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crVal
 	GETTASKSVAL_SIMPLE(m_data.GetTaskColor, crValue, COLORREF);
 }
 
+BOOL CTDCMultiTasker::GetTasksReminder(const CDWordArray& aTaskIDs, const CTDCReminderHelper& reminders, time_t& tValue) const
+{
+	GETTASKSVAL_SIMPLE(reminders.GetTaskReminder, tValue, time_t);
+}
+
 // -----------------------------------------------------------------
 
 #define GETTASKSVAL_ARG(FUNCTION, VAR, TYPE, ARG)        \

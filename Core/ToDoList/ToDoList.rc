@@ -2780,6 +2780,7 @@ IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.i
 IDI_QUICKFIND_NEXT      ICON    DISCARDABLE     "res\\quickfind_next.ico"
 IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
 IDI_TIMETRACK_GOTO      ICON    DISCARDABLE     "res\\timetrack_goto.ico"
+IDI_REMINDER            ICON    DISCARDABLE     "res\\reminder.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

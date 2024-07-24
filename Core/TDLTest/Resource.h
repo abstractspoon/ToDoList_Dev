@@ -10,6 +10,7 @@
 #define IDI_NULL                        290
 #define IDI_SIMPLETEXT                  302
 #define IDI_ADD_LOGGED_TIME             308
+#define IDI_REMINDER                    333
 #define IDS_ONCEONLY                    51018
 #define IDS_DAILY                       51019
 #define IDS_WEEKLY                      51020

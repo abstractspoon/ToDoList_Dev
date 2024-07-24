@@ -63,6 +63,7 @@ public:
 							  const CContentMgr& mgrContent,
 							  const CTDCImageList& ilIcons,
 							  const TDCCOLEDITVISIBILITY& vis,
+							  const CTDCReminderHelper& rems,
 							  const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 	virtual ~CTDLTaskAttributeListCtrl();
@@ -138,6 +139,7 @@ protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
 	const TDCCOLEDITVISIBILITY& m_vis;
+	const CTDCReminderHelper& m_reminders;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CTDCTaskFormatter m_formatter;
@@ -171,9 +173,9 @@ protected:
 
 	static CIcon s_iconTrackTime;
 	static CIcon s_iconAddTime;
-	static CIcon s_iconLink;
+	static CIcon s_iconShowDepends;
 	static CIcon s_iconBrowseFile;
-	static CIcon s_iconApp;
+	static CIcon s_iconReminder;
 	static CIcon s_iconSelectIcon;
 
 protected:

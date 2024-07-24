@@ -397,6 +397,7 @@ public:
 	BOOL GetTasksDependencies(const CDWordArray& aTaskIDs, CTDCDependencyArray& aDepends) const;
 
 	BOOL GetTasksCustomAttributeData(const CDWordArray& aTaskIDs, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, TDCCADATA& data) const;
+	BOOL GetTasksReminder(const CDWordArray& aTaskIDs, const CTDCReminderHelper& rems, time_t& tValue) const;
 
 	// These functions return the number of matching values
 	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
