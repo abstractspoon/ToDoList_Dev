@@ -512,6 +512,9 @@ void CTDLTaskAttributeListCtrl::Populate()
 			CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
 			CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
 
+			// Reminder
+			CheckAddAttribute(TDCA_REMINDER, IDS_TDLBC_REMINDER);
+
 			// Custom attributes
 			for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
 			{
@@ -804,6 +807,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_RECURRENCE:
 	case TDCA_DEPENDENCY:
 	case TDCA_COLOR:
+	case TDCA_REMINDER:
 		nColType = ILCT_BROWSE;
 		break;
 
@@ -2325,6 +2329,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
 	case TDCA_FILELINK:
+	case TDCA_REMINDER:
 		return NULL; // Handled in EditCell()
 
 	case TDCA_PERCENT:
