@@ -240,11 +240,12 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 			 &m_ctrlAttributes, 
 			 &m_ctrlComments),
 
-	m_ctrlAttributes(m_data, 
-				   mgrContent, 
-				   m_ilTaskIcons, 
-				   m_visColEdit, 
-				   m_aCustomAttribDefs)
+	m_ctrlAttributes(m_data,
+					 mgrContent,
+					 m_ilTaskIcons,
+					 m_visColEdit,
+					 m_reminders,
+					 m_aCustomAttribDefs)
 {
 	SetBordersDLU(0);
 	
@@ -6414,9 +6415,10 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 
 	for (int nID = 0; nID < nNumIDs; nID++)
 	{
-		HTASKITEM hTask = tasks.NewTask(_T(""), NULL, 0, 0);
-		m_exporter.ExportMatchingTaskAttributes(aTaskIDs[nID], tasks, hTask, filter);
+		DWORD dwTaskID = aTaskIDs[nID], dwParentID = m_data.GetTaskParentID(dwTaskID);
+		HTASKITEM hTask = tasks.NewTask(_T(""), NULL, dwTaskID, dwParentID);
 
+		m_exporter.ExportMatchingTaskAttributes(dwTaskID, tasks, hTask, filter);
 		aValues[nID] = tasks.GetTaskAttribute(hTask, nAttribID, true, true);
 	}
 
@@ -7006,6 +7008,9 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 
 	case TDCA_RECURRENCE:
 		return EditSelectedTaskRecurrence();
+
+	case TDCA_REMINDER:
+		return AfxGetMainWnd()->SendMessage(WM_TDCN_CLICKREMINDERCOL);
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -10094,7 +10099,9 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 LRESULT CToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 {
 	UNREFERENCED_PARAMETER(wp);
-	ASSERT(lp && ((HWND)wp == m_taskTree.GetSafeHwnd()));
+	ASSERT(lp);
+	ASSERT(((HWND)wp == m_taskTree.GetSafeHwnd()) ||
+		   ((HWND)wp == m_ctrlAttributes.GetSafeHwnd()));
 
 	return (LRESULT)m_reminders.GetTaskReminder(lp);
 }
@@ -10143,10 +10150,11 @@ HBRUSH CToDoCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-void CToDoCtrl::RedrawReminders()
+void CToDoCtrl::RefreshReminders()
 { 
 	// Called after the app has made a change to a task's reminder
 	m_taskTree.OnReminderChange();
+	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_REMINDER);
 }
 
 TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
@@ -10470,7 +10478,6 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	}
 
 	// all else
-	ASSERT(0);
 	return FALSE;
 }
 

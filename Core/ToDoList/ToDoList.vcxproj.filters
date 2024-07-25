@@ -250,5 +250,8 @@
     <Image Include="res\select_icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\reminder.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

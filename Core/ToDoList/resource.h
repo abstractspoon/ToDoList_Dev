@@ -147,6 +147,7 @@
 #define IDR_TASK_ATTRIBUTE_TOOLBAR      328
 #define IDB_TASKATTRIB_TOOLBAR          331
 #define IDI_TIMETRACK_GOTO              332
+#define IDI_REMINDER                    333
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -1596,9 +1597,8 @@
 #define ID_RELATIVEDATE_NOW             34754
 #define ID_SCROLLTOSELTASK              34755
 #define ID_EDIT_PASTEATTRIBUTES         34756
-#define ID_CATEGORIZED                  34759
 #define ID_TOGGLE_SORT                  34761
-#define ID_CATEGORIZE_ATTRIB            34762
+#define ID_GROUP_ATTRIBUTES             34762
 #define ID_TASKLIST_PASTECOLUMNVALUES   34763
 #define ID_TASKLIST_PASTESELTASKSCOLUMNVALUES 34764
 #define ID_ATTRIBLIST_COPYATTRIBVALUES  34765
@@ -2539,7 +2539,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        333
+#define _APS_NEXT_RESOURCE_VALUE        334
 #define _APS_NEXT_COMMAND_VALUE         34768
 #define _APS_NEXT_CONTROL_VALUE         1578
 #define _APS_NEXT_SYMED_VALUE           108

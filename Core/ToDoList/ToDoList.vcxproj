@@ -294,6 +294,7 @@ unicode_release\TDLTest.exe
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\reminder.ico" />
     <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
     <Image Include="res\style_image.bmp" />

@@ -4344,6 +4344,12 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
 
 CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
 {
+	if (dwTaskID == 0)
+	{
+		ASSERT(dwRefID == 0);
+		return EMPTY_STR;
+	}
+
 	if ((dwRefID == 0) || (dwRefID == dwTaskID))
 		return Misc::Format(dwTaskID);
 
@@ -5368,6 +5374,11 @@ BOOL CTDCMultiTasker::GetTasksLockState(const CDWordArray& aTaskIDs, BOOL& bValu
 BOOL CTDCMultiTasker::GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crValue) const
 {
 	GETTASKSVAL_SIMPLE(m_data.GetTaskColor, crValue, COLORREF);
+}
+
+BOOL CTDCMultiTasker::GetTasksReminder(const CDWordArray& aTaskIDs, const CTDCReminderHelper& reminders, time_t& tValue) const
+{
+	GETTASKSVAL_SIMPLE(reminders.GetTaskReminder, tValue, time_t);
 }
 
 // -----------------------------------------------------------------
@@ -6450,27 +6461,27 @@ BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, 
 		return FALSE;
 	}
 
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttrib);
-	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttrib);
+	TDC_ATTRIBUTEGROUP nFromGroup = GetAttributeGroup(nFromAttrib);
+	TDC_ATTRIBUTEGROUP nToGroup = GetAttributeGroup(nToAttrib);
 
-	if ((nFromCat == TDCAC_NONE) || (nToCat == TDCAC_NONE))
+	if ((nFromGroup == TDCAG_NONE) || (nToGroup == TDCAG_NONE))
 		return FALSE;
 
-	switch (nToCat)
+	switch (nToGroup)
 	{
-	case TDCAC_SINGLETEXT:
-	case TDCAC_MULTITEXT:
+	case TDCAG_SINGLETEXT:
+	case TDCAG_MULTITEXT:
 		return TRUE;
 
-	case TDCAC_NUMERIC:
-		return (nFromCat == TDCAC_NUMERIC);
+	case TDCAG_NUMERIC:
+		return (nFromGroup == TDCAG_NUMERIC);
 
-	case TDCAC_CUSTOM:
+	case TDCAG_CUSTOM:
 		ASSERT(0); // Should have been resolved
 		break;
 
-	case TDCAC_DATETIME:
-		if (nFromCat == TDCAC_DATETIME)
+	case TDCAG_DATETIME:
+		if (nFromGroup == TDCAG_DATETIME)
 		{
 			switch (nFromAttrib)
 			{
@@ -6504,10 +6515,10 @@ BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, 
 		}
 		break;
 
-	case TDCAC_TIMEPERIOD:
-		return ((nFromCat == TDCAC_TIMEPERIOD) && (nToAttrib != TDCA_TIMEREMAINING));
+	case TDCAG_TIMEPERIOD:
+		return ((nFromGroup == TDCAG_TIMEPERIOD) && (nToAttrib != TDCA_TIMEREMAINING));
 
-	case TDCAC_OTHER:
+	case TDCAG_OTHER:
 		switch (nFromAttrib)
 		{
 		case TDCA_FLAG:
@@ -6526,29 +6537,29 @@ BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, 
 	return FALSE;
 }
 
-TDC_ATTRIBUTECATEGORY CTDCTaskAttributeCopier::GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomAttrib) const
+TDC_ATTRIBUTEGROUP CTDCTaskAttributeCopier::GetAttributeGroup(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomAttrib) const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
 		if (bResolveCustomAttrib)
 		{
 			DWORD dwAttribType = m_data.m_aCustomAttribDefs.GetAttributeDataType(nAttribID);
-			return TDCCUSTOMATTRIBUTEDEFINITION::GetCategory(dwAttribType);
+			return TDCCUSTOMATTRIBUTEDEFINITION::GetAttributeGroup(dwAttribType);
 		}
 
 		// else
-		return TDCAC_CUSTOM;
+		return TDCAG_CUSTOM;
 	}
 
 	// Built-in attributes
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
 		if (nAttribID == ATTRIBUTES[nAttrib].nAttributeID)
-			return ATTRIBUTES[nAttrib].nCategory;
+			return ATTRIBUTES[nAttrib].nGroup;
 	}
 
 	// All else
-	return TDCAC_NONE;
+	return TDCAG_NONE;
 }
 
 BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const
@@ -6559,21 +6570,21 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 	TDCCADATA dataFrom;
 	m_data.GetTaskAttributeValue(tdiFrom, nFromAttribID, dataFrom);
 
-	TDC_ATTRIBUTECATEGORY nFromCat = GetAttributeCategory(nFromAttribID);
-	TDC_ATTRIBUTECATEGORY nToCat = GetAttributeCategory(nToAttribID);
+	TDC_ATTRIBUTEGROUP nFromGroup = GetAttributeGroup(nFromAttribID);
+	TDC_ATTRIBUTEGROUP nToGroup = GetAttributeGroup(nToAttribID);
 
 	CStringArray aValues;
 
-	if ((nToCat == TDCAC_SINGLETEXT) || (nToCat == TDCAC_MULTITEXT))
+	if ((nToGroup == TDCAG_SINGLETEXT) || (nToGroup == TDCAG_MULTITEXT))
 	{
-		switch (nFromCat)
+		switch (nFromGroup)
 		{
-		case TDCAC_SINGLETEXT:
-		case TDCAC_CUSTOM:
-		case TDCAC_OTHER:
+		case TDCAG_SINGLETEXT:
+		case TDCAG_CUSTOM:
+		case TDCAG_OTHER:
 			break;
 
-		case TDCAC_NUMERIC:
+		case TDCAG_NUMERIC:
 			switch (nFromAttribID)
 			{
 			case TDCA_COST:
@@ -6603,12 +6614,12 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 			}
 			break;
 
-		case TDCAC_MULTITEXT:
-			if (nToCat == TDCAC_SINGLETEXT)
+		case TDCAG_MULTITEXT:
+			if (nToGroup == TDCAG_SINGLETEXT)
 				dataFrom.Set(dataFrom.FormatAsArray());
 			break;
 
-		case TDCAC_DATETIME:
+		case TDCAG_DATETIME:
 			{
 				COleDateTime date(dataFrom.AsDate());
 
@@ -6619,7 +6630,7 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 			}
 			break;
 
-		case TDCAC_TIMEPERIOD:
+		case TDCAG_TIMEPERIOD:
 			{
 				TDCTIMEPERIOD time;
 
@@ -6664,7 +6675,7 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nToAttribID, pDef, FALSE);
 
-			if (nFromCat == TDCAC_DATETIME)
+			if (nFromGroup == TDCAG_DATETIME)
 			{
 				TDCCADATA dataTo;
 				tdiTo.GetCustomAttributeValue(pDef->sUniqueID, dataTo);
@@ -6728,6 +6739,7 @@ BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nColID) const
 	case TDCC_DONE:
 	case TDCC_TRACKTIME:
 	case TDCC_FLAG:
+	case TDCC_REMINDER:
 		return FALSE;
 
 	case TDCC_PRIORITY:
@@ -6754,7 +6766,6 @@ BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nColID) const
 	case TDCC_RECURRENCE:
 	case TDCC_VERSION:
 	case TDCC_TIMEREMAINING:
-	case TDCC_REMINDER:
 	case TDCC_PARENTID:
 	case TDCC_PATH:
 	case TDCC_TAGS:

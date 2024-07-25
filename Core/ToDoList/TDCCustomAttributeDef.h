@@ -141,7 +141,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
 	static UINT GetDefaultHorzAlignment(DWORD dwAttribType);
-	static TDC_ATTRIBUTECATEGORY GetCategory(DWORD dwAttribType);
+	static TDC_ATTRIBUTEGROUP GetAttributeGroup(DWORD dwAttribType);
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);

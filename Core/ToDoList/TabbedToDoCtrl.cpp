@@ -2736,9 +2736,9 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 	return 0;
 }
 
-void CTabbedToDoCtrl::RedrawReminders()
+void CTabbedToDoCtrl::RefreshReminders()
 { 
- 	CToDoCtrl::RedrawReminders();
+ 	CToDoCtrl::RefreshReminders();
 
 	if (InListView())
 	{

@@ -933,16 +933,16 @@ enum TDC_OFFSETTASKDATES
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum TDC_ATTRIBUTECATEGORY
+enum TDC_ATTRIBUTEGROUP
 {
-	TDCAC_NONE = -1,
-	TDCAC_SINGLETEXT,
-	TDCAC_MULTITEXT,
-	TDCAC_NUMERIC,		// include cost
-	TDCAC_DATETIME,
-	TDCAC_TIMEPERIOD,
-	TDCAC_CUSTOM,
-	TDCAC_OTHER,
+	TDCAG_NONE = -1,
+	TDCAG_SINGLETEXT,
+	TDCAG_MULTITEXT,
+	TDCAG_NUMERIC,		// includes cost
+	TDCAG_DATETIME,		// includes reminder
+	TDCAG_TIMEPERIOD,
+	TDCAG_CUSTOM,
+	TDCAG_OTHER,		// includes icon, recurrence, dependency
 };
 
 /////////////////////////////////////////////////////////////////////////////

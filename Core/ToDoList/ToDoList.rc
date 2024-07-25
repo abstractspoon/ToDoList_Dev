@@ -2780,6 +2780,7 @@ IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.i
 IDI_QUICKFIND_NEXT      ICON    DISCARDABLE     "res\\quickfind_next.ico"
 IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
 IDI_TIMETRACK_GOTO      ICON    DISCARDABLE     "res\\timetrack_goto.ico"
+IDI_REMINDER            ICON    DISCARDABLE     "res\\reminder.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2930,7 +2931,7 @@ END
 
 IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR DISCARDABLE  16, 15
 BEGIN
-    BUTTON      ID_CATEGORIZE_ATTRIB
+    BUTTON      ID_GROUP_ATTRIBUTES
     BUTTON      ID_TOGGLE_SORT
 END
 
@@ -5965,9 +5966,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_COMMENTS_INSERTTIME  "\nInsert Time"
     ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
-    ID_CATEGORIZED          "\nCategorise"
     ID_TOGGLE_SORT          "\nToggle Sort Direction"
-    ID_CATEGORIZE_ATTRIB    "\nCategorise Attributes"
+    ID_GROUP_ATTRIBUTES     "\nGroup Attributes"
 END
 
 STRINGTABLE DISCARDABLE 

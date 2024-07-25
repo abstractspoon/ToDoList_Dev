@@ -92,9 +92,9 @@ BOOL CToDoCtrlReminders::UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL 
 	return FALSE;
 }
 
-void CToDoCtrlReminders::AddToDoCtrl(const CFilteredToDoCtrl* pTDC)
+int CToDoCtrlReminders::AddToDoCtrl(const CFilteredToDoCtrl* pTDC)
 {
-	LoadReminders(pTDC);
+	return LoadReminders(pTDC);
 }
 
 void CToDoCtrlReminders::RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC)
@@ -463,7 +463,7 @@ BOOL CToDoCtrlReminders::ToDoCtrlHasReminders(const CString& sFilePath)
 	return (!sFileKey.IsEmpty() && prefs.GetProfileInt(sFileKey, _T("NumReminders")) > 0);
 }
 
-void CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl* pTDC)
+int CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl* pTDC)
 {
 	CPreferences prefs;
 	CString sFileKey = pTDC->GetPreferencesKey(_T("Reminders"));
@@ -487,6 +487,8 @@ void CToDoCtrlReminders::LoadReminders(const CFilteredToDoCtrl* pTDC)
 	// start timer if some reminders and not using Stickies
 	if (!m_stickies.IsValid())
 		StartTimer();
+
+	return nRemCount;
 }
 
 void CToDoCtrlReminders::OnTimer(UINT nIDEvent) 

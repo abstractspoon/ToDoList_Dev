@@ -406,7 +406,7 @@ public:
 	void Spellcheck();
 	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
 	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
-	void RedrawReminders();
+	void RefreshReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetFocusToProjectName();

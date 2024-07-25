@@ -100,12 +100,17 @@ const TCHAR NEWLINE = '\n';
 
 /////////////////////////////////////////////////////////////////////////////
 
-CIcon CTDLTaskAttributeListCtrl::s_iconApp;
-CIcon CTDLTaskAttributeListCtrl::s_iconTrackTime;
-CIcon CTDLTaskAttributeListCtrl::s_iconAddTime;
-CIcon CTDLTaskAttributeListCtrl::s_iconLink;
-CIcon CTDLTaskAttributeListCtrl::s_iconBrowseFile;
-CIcon CTDLTaskAttributeListCtrl::s_iconSelectIcon;
+CIconCache CTDLTaskAttributeListCtrl::s_iconCache(FALSE); // small icons
+
+enum 
+{
+	ICON_REMINDER		= IDI_REMINDER,
+	ICON_TRACKTIME		= IDI_TIMETRACK,
+	ICON_ADDTIME		= IDI_ADD_LOGGED_TIME,
+	ICON_SHOWDEPENDS	= IDI_DEPENDS_LINK,
+	ICON_BROWSEFILE		= IDI_FILEEDIT_BROWSE,
+	ICON_SELECTICON		= IDI_ICON_SELECT,
+}; 
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeListCtrl
@@ -114,6 +119,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 													 const CContentMgr& mgrContent,
 													 const CTDCImageList& ilIcons,
 													 const TDCCOLEDITVISIBILITY& vis,
+													 const CTDCReminderHelper& rems,
 													 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
 	m_data(data),
@@ -130,15 +136,16 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_dropFiles(this),
 	m_bSplitting(FALSE),
 	m_fAttribColProportion(0.5f),
-	m_bCategorized(FALSE),
-	m_aSortedGroupedItems(*this)
+	m_bGrouped(FALSE),
+	m_aSortedGroupedItems(*this),
+	m_reminders(rems)
 {
 	SetSortColumn(0, FALSE);
 
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
-	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, s_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
+	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_TDC_DEPENDSLINK_TIP));
 	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
 
 	m_eTimePeriod.EnableButtonPadding(FALSE);
@@ -149,17 +156,6 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 
 	m_cbMultiFileLink.EnableButtonPadding(FALSE);
 	m_cbMultiFileLink.SetDefaultButton(0);
-
-	// static icons
-	if (!s_iconTrackTime.IsValid())
-	{
-		s_iconTrackTime.Load(IDI_TIMETRACK);
-		s_iconAddTime.Load(IDI_ADD_LOGGED_TIME);
-		s_iconLink.Load(IDI_DEPENDS_LINK);
-		s_iconBrowseFile.Load(IDI_FILEEDIT_BROWSE);
-		s_iconApp.Load(IDR_MAINFRAME_STD);
-		s_iconSelectIcon.Load(IDI_ICON_SELECT);
-	}
 }
 
 CTDLTaskAttributeListCtrl::~CTDLTaskAttributeListCtrl()
@@ -260,23 +256,33 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+HICON CTDLTaskAttributeListCtrl::GetIcon(int nIcon)
+{
+	CString sIcon = Misc::Format(nIcon);
+
+	if (!s_iconCache.HasIcon(sIcon))
+		s_iconCache.Add(sIcon, (UINT)nIcon);
+
+	return s_iconCache.GetIcon(sIcon);
+}
+
 void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 {
 	m_bSortAscending = !m_bSortAscending;
 
-	if (m_bCategorized)
+	if (m_bGrouped)
 		Populate();
 	else
 		Sort();
 }
 
-void CTDLTaskAttributeListCtrl::ToggleCategorization()
+void CTDLTaskAttributeListCtrl::ToggleGrouping()
 {
-	m_bCategorized = !m_bCategorized;
+	m_bGrouped = !m_bGrouped;
 
 	if (GetSafeHwnd())
 	{
-		EnableGroupView(m_bCategorized);
+		EnableGroupView(m_bGrouped);
 		Populate();
 	}
 }
@@ -324,18 +330,18 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 {
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
-	prefs.WriteProfileInt(szKey, _T("AttribCategorized"), m_bCategorized);
+	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
-	m_bCategorized = prefs.GetProfileInt(szKey, _T("AttribCategorized"), FALSE);
+	m_bGrouped = prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE);
 
 	if (GetSafeHwnd())
 	{
-		EnableGroupView(m_bCategorized);
+		EnableGroupView(m_bGrouped);
 		Populate();
 	}
 }
@@ -411,29 +417,43 @@ int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT n
 	return nRow;
 }
 
-int CTDLTaskAttributeListCtrl::GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const
+int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const
 {
-	if (nCategory != TDCAC_CUSTOM)
+	if (nGroup != TDCAG_CUSTOM)
 	{
 		for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 		{
 			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
 
-			if ((attrib.nCategory == nCategory) && WantAddAttribute(attrib.nAttributeID))
+			if ((attrib.nGroup == nGroup) && WantAddAttribute(attrib.nAttributeID))
 				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
 		}
 
-		// Associated time fields
-		if (nCategory == TDCAC_DATETIME)
+		// Unhandled fields
+		switch (nGroup)
 		{
-			if (WantAddAttribute(TDCA_STARTTIME))
-				mapAttrib[TDCA_STARTTIME] = CEnString(IDS_TDLBC_STARTTIME);
+		case TDCAG_NUMERIC:
+			{
+				if (WantAddAttribute(TDCA_PARENTID))
+					mapAttrib[TDCA_PARENTID] = CEnString(IDS_TDLBC_PARENTID);
+			}
+			break;
 
-			if (WantAddAttribute(TDCA_DUETIME))
-				mapAttrib[TDCA_DUETIME] = CEnString(IDS_TDLBC_DUETIME);
+		case TDCAG_DATETIME:
+			{
+				if (WantAddAttribute(TDCA_STARTTIME))
+					mapAttrib[TDCA_STARTTIME] = CEnString(IDS_TDLBC_STARTTIME);
 
-			if (WantAddAttribute(TDCA_DONETIME))
-				mapAttrib[TDCA_DONETIME] = CEnString(IDS_TDLBC_DONETIME);
+				if (WantAddAttribute(TDCA_DUETIME))
+					mapAttrib[TDCA_DUETIME] = CEnString(IDS_TDLBC_DUETIME);
+
+				if (WantAddAttribute(TDCA_DONETIME))
+					mapAttrib[TDCA_DONETIME] = CEnString(IDS_TDLBC_DONETIME);
+
+				if (WantAddAttribute(TDCA_REMINDER))
+					mapAttrib[TDCA_REMINDER] = CEnString(IDS_TDLBC_REMINDER);
+			}
+			break;
 		}
 	}
 	else
@@ -472,18 +492,18 @@ void CTDLTaskAttributeListCtrl::Populate()
 		CHoldRedraw hr(*this);
 		DeleteAllItems();
 
-		if (m_bCategorized)
+		if (m_bGrouped)
 		{
 			CSortedGroupedHeaderArray aCategories(m_bSortAscending);
 
 			for (int nCat = 0; nCat < aCategories.GetSize(); nCat++)
 			{
 				CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> mapAttribs;
-				const ATTRIBCATEGORY& attribCat = aCategories[nCat];
+				const ATTRIBGROUP& attribCat = aCategories[nCat];
 
-				if (GetCategoryAttributes(attribCat.nCategory, mapAttribs))
+				if (GetGroupAttributes(attribCat.nGroup, mapAttribs))
 				{
-					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, attribCat.sName);
+					GetGrouping().InsertGroupHeader(nCat, attribCat.nGroup, attribCat.sName);
 
 					POSITION pos = mapAttribs.GetStartPosition();
 					TDC_ATTRIBUTE nAttribID = TDCA_NONE;
@@ -494,7 +514,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
 						int nRow = AddRow(sAttribName);
 						SetItemData(nRow, nAttribID);
-						GetGrouping().SetItemGroupId(nRow, attribCat.nCategory);
+						GetGrouping().SetItemGroupId(nRow, attribCat.nGroup);
 					}
 				}
 			}
@@ -511,6 +531,9 @@ void CTDLTaskAttributeListCtrl::Populate()
 			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
 			CheckAddAttribute(TDCA_DUETIME, IDS_TDLBC_DUETIME);
 			CheckAddAttribute(TDCA_DONETIME, IDS_TDLBC_DONETIME);
+
+			// Reminder
+			CheckAddAttribute(TDCA_REMINDER, IDS_TDLBC_REMINDER);
 
 			// Custom attributes
 			for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
@@ -793,12 +816,9 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		nColType = ILCT_DROPLIST;
 		break;
 
-	case TDCA_FILELINK:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
-		break;
-
 	case TDCA_ICON:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_BROWSE);
+	case TDCA_REMINDER:
+		nColType = ILCT_CUSTOMBTN;
 		break;
 
 	case TDCA_RECURRENCE:
@@ -810,6 +830,10 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_FLAG:
 	case TDCA_LOCK:
 		nColType = ILCT_CHECK;
+		break;
+
+	case TDCA_FILELINK:
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
 		break;
 
 	default:
@@ -1071,7 +1095,7 @@ CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAn
 		dwFlags |= DHFD_ISO;
 	
 	if (bAndTime)
-		dwFlags |= DHFD_TIME;
+		dwFlags |= DHFD_TIME | DHFD_NOSEC;
 
 	return CDateHelper::FormatDate(date,  dwFlags);
 }
@@ -1235,6 +1259,22 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_POSITION:			GETUNIQUEVALUE(m_formatter.GetTaskPosition);	break;
 	case TDCA_ID:				GETUNIQUEVALUE(Misc::Format);					break;
 
+	case TDCA_REMINDER:
+		{
+			time_t tValue = 0;
+			
+			if (m_multitasker.GetTasksReminder(m_aSelectedTaskIDs, m_reminders, tValue))
+			{
+				if (tValue != 0)
+					sValue = FormatDate(tValue, TRUE);
+			}
+			else
+			{
+				bValueVaries = TRUE;
+			}
+		}
+		break;
+
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
@@ -1363,17 +1403,21 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 	// Draw custom browse icon
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-	CIcon* pIcon = NULL;
+	int nIcon = 0;
 
 	switch (nAttribID)
 	{
 	case TDCA_FILELINK:
 		if (sText.IsEmpty())
-			pIcon = &s_iconBrowseFile;
+			nIcon = ICON_BROWSEFILE;
 		break;
 
 	case TDCA_ICON:
-		pIcon = &s_iconSelectIcon;
+		nIcon = ICON_SELECTICON;
+		break;
+
+	case TDCA_REMINDER:
+		nIcon = ICON_REMINDER;
 		break;
 
 	default:
@@ -1382,24 +1426,24 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 			switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
 			{
 			case TDCCA_FILELINK:
-				pIcon = &s_iconBrowseFile;
+				nIcon = ICON_BROWSEFILE;
 				break;
 
 			case TDCCA_ICON:
 				if (!m_aCustomAttribDefs.IsListType(nAttribID))
-					pIcon = &s_iconSelectIcon;
+					nIcon = ICON_BROWSEFILE;
 				break;
 			}
 		}
 		break;
 	}
 
-	if (pIcon)
+	if (nIcon)
 	{
 		CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
 		GraphicsMisc::CentreRect(rIcon, rButton);
 
-		pIcon->Draw(pDC, rIcon.TopLeft());
+		CIcon(GetIcon(nIcon), FALSE).Draw(pDC, rIcon.TopLeft());
 	}
 
 	return TRUE;
@@ -2144,8 +2188,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			PrepareTimePeriodEdit(nRow);
 
-			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, s_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
-			m_eTimePeriod.InsertButton(1, ID_BTN_ADDLOGGEDTIME, s_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
+			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
+			m_eTimePeriod.InsertButton(1, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 		}
 		break;
 
@@ -2325,6 +2369,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
 	case TDCA_FILELINK:
+	case TDCA_REMINDER:
 		return NULL; // Handled in EditCell()
 
 	case TDCA_PERCENT:
@@ -2475,6 +2520,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_ICON:
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
+	case TDCA_REMINDER:
 		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
 			RefreshSelectedTasksValue(nRow);
 		break;
@@ -2503,10 +2549,6 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			PrepareControl(m_cbMultiFileLink, nRow, nCol);
 			ShowControl(m_cbMultiFileLink, nRow, nCol, bBtnClick);
 		}
-		break;
-
-	case TDCA_TASKNAME:
-		// TODO
 		break;
 
 	default:
@@ -2846,7 +2888,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM wParam, LPARAM lPa
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam)
 {
 	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
-		return (LRESULT)(HICON)s_iconApp;
+		return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
 
 	return 0L;
 }
@@ -3271,7 +3313,7 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::CheckBuildArray()
 {
 	if (!GetSize())
 	{
@@ -3282,7 +3324,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 
 		while (nItem--)
 		{
-			CATEGORYITEM& sgi = GetAt(nItem);
+			GROUPITEM& sgi = GetAt(nItem);
 
 			sgi.dwItemData = m_list.GetItemData(nItem);
 			sgi.nGroupID = m_list.GetGrouping().GetItemGroupId(nItem);
@@ -3291,13 +3333,13 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 			sgi.rItem.OffsetRect(0, nVScrollPos);
 		}
 
-		Misc::SortArrayT<CATEGORYITEM>(*this, SortProc);
+		Misc::SortArrayT<GROUPITEM>(*this, SortProc);
 	}
 
 	return GetSize();
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetNextItem(int nKeyPress)
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 {
 	if (!CheckBuildArray())
 		return -1;
@@ -3344,7 +3386,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetNextItem(int nKeyPre
 	return m_list.FindItemFromData(GetAt(nNext).dwItemData);
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetPageSize(int nFrom, BOOL bDown) const
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetPageSize(int nFrom, BOOL bDown) const
 {
 	CRect rClient;
 	m_list.GetClientRect(rClient);
@@ -3386,7 +3428,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetPageSize(int nFrom, 
 	return (nPageSize - 1);
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::FindItem(DWORD dwItemData) const
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::FindItem(DWORD dwItemData) const
 {
 	int nItem = GetSize();
 
@@ -3400,10 +3442,10 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::FindItem(DWORD dwItemDa
 	return -1;
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::SortProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::SortProc(const void* item1, const void* item2)
 {
-	const CATEGORYITEM* pItem1 = (const CATEGORYITEM*)item1;
-	const CATEGORYITEM* pItem2 = (const CATEGORYITEM*)item2;
+	const GROUPITEM* pItem1 = (const GROUPITEM*)item1;
+	const GROUPITEM* pItem2 = (const GROUPITEM*)item2;
 
 	return (pItem1->rItem.top - pItem2->rItem.top);
 }
@@ -3412,33 +3454,33 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::SortProc(const void* it
 
 CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::CSortedGroupedHeaderArray(BOOL bSortAscending)
 {
-	static const UINT ATTRIBCATEGORIES[][2] =
+	static const UINT ATTRIBGROUPS[][2] =
 	{
-		{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
-		{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
-		{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
-		{ TDCAC_SINGLETEXT,		IDS_ATTRIBCAT_SINGLETEXT },
-		{ TDCAC_MULTITEXT,		IDS_ATTRIBCAT_MULTITEXT },
-		{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
-		{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
+		{ TDCAG_OTHER,			IDS_ATTRIBCAT_OTHER },
+		{ TDCAG_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
+		{ TDCAG_DATETIME,		IDS_ATTRIBCAT_DATETIME },
+		{ TDCAG_SINGLETEXT,		IDS_ATTRIBCAT_SINGLETEXT },
+		{ TDCAG_MULTITEXT,		IDS_ATTRIBCAT_MULTITEXT },
+		{ TDCAG_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
+		{ TDCAG_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
 	};
 
-	const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / (2 * sizeof(UINT)));
-	SetSize(NUM_ATTRIBCAT);
+	const int NUM_ATTRIBGROUPS = (sizeof(ATTRIBGROUPS) / (2 * sizeof(UINT)));
+	SetSize(NUM_ATTRIBGROUPS);
 
-	for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
+	for (int nGroup = 0; nGroup < NUM_ATTRIBGROUPS; nGroup++)
 	{
-		ElementAt(nCat).nCategory = (TDC_ATTRIBUTECATEGORY)ATTRIBCATEGORIES[nCat][0];
-		ElementAt(nCat).sName = CEnString(ATTRIBCATEGORIES[nCat][1]);
+		ElementAt(nGroup).nGroup = (TDC_ATTRIBUTEGROUP)ATTRIBGROUPS[nGroup][0];
+		ElementAt(nGroup).sName = CEnString(ATTRIBGROUPS[nGroup][1]);
 	}
 
-	Misc::SortArrayT<ATTRIBCATEGORY>(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
+	Misc::SortArrayT<ATTRIBGROUP>(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
 }
 
 int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::AscendingSortProc(const void* item1, const void* item2)
 {
-	const ATTRIBCATEGORY* pItem1 = (const ATTRIBCATEGORY*)item1;
-	const ATTRIBCATEGORY* pItem2 = (const ATTRIBCATEGORY*)item2;
+	const ATTRIBGROUP* pItem1 = (const ATTRIBGROUP*)item1;
+	const ATTRIBGROUP* pItem2 = (const ATTRIBGROUP*)item2;
 
 	return Misc::NaturalCompare(pItem1->sName, pItem2->sName);
 

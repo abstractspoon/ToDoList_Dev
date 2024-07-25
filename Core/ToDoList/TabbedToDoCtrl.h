@@ -138,7 +138,7 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	void ResizeAttributeColumnsToFit();
 	BOOL CanResizeAttributeColumnsToFit() const;
-	void RedrawReminders();
+	void RefreshReminders();
 	void EndTimeTracking(BOOL bAllowConfirm) { CToDoCtrl::EndTimeTracking(bAllowConfirm); }
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
 	void EndSelectedTaskEdit();

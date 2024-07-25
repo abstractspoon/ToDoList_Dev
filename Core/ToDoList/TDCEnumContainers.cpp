@@ -50,7 +50,7 @@ CTDCAttributeMap::~CTDCAttributeMap()
 
 BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttribID)
 {
-	// Special cases
+	// Composite attributes
 	switch (nAttribID)
 	{
 	case TDCA_OFFSETTASK:
@@ -106,6 +106,7 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 		break;
 
 	case TDCA_TODAY:
+	case TDCA_REMINDER:
 		// Can only add if we already contain a task attribute
 		bCanAdd = IsTaskAttribute(GetNext(pos));
 		break;

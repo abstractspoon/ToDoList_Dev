@@ -226,6 +226,7 @@ namespace TDC
 		case TDCA_LASTMODBY:		return TDCC_LASTMODBY;
 		case TDCA_LOCK:				return TDCC_LOCK;
 		case TDCA_NONE:				return TDCC_NONE;
+		case TDCA_PARENTID:			return TDCC_PARENTID;
 		case TDCA_PATH:				return TDCC_PATH;
 		case TDCA_PERCENT:			return TDCC_PERCENT;
 		case TDCA_PRIORITY:			return TDCC_PRIORITY;
@@ -258,63 +259,6 @@ namespace TDC
 		return TDCC_NONE;
 	}
 
-	static UINT MapAttributeToCtrlID(TDC_ATTRIBUTE nAttribID) 
-	{
-		// custom columns not supported for now
-		// We could have used CTDCCustomAttributeHelper but that's an unwanted dependency
-		ASSERT((nAttribID < TDCA_CUSTOMATTRIB_FIRST) || (nAttribID > TDCA_CUSTOMATTRIB_LAST));
-		
-		switch (nAttribID)
-		{
-//		case TDCA_ALLOCBY:			return IDC_ALLOCBY;
-// 		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
-// 		case TDCA_CATEGORY:			return IDC_CATEGORY;
-// 		case TDCA_COST:				return IDC_COST;
-// 		case TDCA_DEPENDENCY:		return IDC_DEPENDS;
-// 		case TDCA_DONEDATE:			return IDC_DONEDATE; 
-// 		case TDCA_DONETIME:			return IDC_DONETIME;
-// 		case TDCA_DUEDATE:			return IDC_DUEDATE;
-// 		case TDCA_DUETIME:			return IDC_DUETIME;
-// 		case TDCA_EXTERNALID:		return IDC_EXTERNALID;
-// 		case TDCA_FILELINK:			return IDC_FILEPATH;
-// 		case TDCA_PERCENT:			return IDC_PERCENT;
-// 		case TDCA_PRIORITY:			return IDC_PRIORITY;
-// 		case TDCA_RECURRENCE:		return IDC_RECURRENCE;
-// 		case TDCA_RISK:				return IDC_RISK;
-// 		case TDCA_STARTDATE:		return IDC_STARTDATE;
-// 		case TDCA_STARTTIME:		return IDC_STARTTIME;
-// 		case TDCA_STATUS:			return IDC_STATUS;
-// 		case TDCA_TAGS:				return IDC_TAGS;
-		case TDCA_TASKNAME:			return IDC_TASKTREECTRL;
-// 		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
-// 		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
-// 		case TDCA_VERSION:			return IDC_VERSION;
-// 		case TDCA_COLOR:			return IDC_COLOUR;
-
-		// don't have controls
-		case TDCA_SUBTASKDONE:
-		case TDCA_POSITION:
-		case TDCA_POSITION_SAMEPARENT:
-		case TDCA_POSITION_DIFFERENTPARENT:
-		case TDCA_PATH:
-		case TDCA_NONE:
-		case TDCA_FLAG:
-		case TDCA_ID:
-		case TDCA_LASTMODDATE:
-		case TDCA_LASTMODBY:
-		case TDCA_CREATEDBY:
-		case TDCA_CREATIONDATE:
-		case TDCA_ICON:
-		case TDCA_LOCK:
-		case TDCA_COMMENTSFORMAT:
-		case TDCA_COMMENTSSIZE:
-		case TDCA_REMINDER:
-			break;
-		}
-		
-		return (UINT)-1;
-	}
-	
 	static TDC_ATTRIBUTE MapColumnToAttribute(TDC_COLUMN nColumn) 
 	{
 		switch (nColumn)

@@ -3575,7 +3575,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wp, LPARAM lp
 		if (dwNewTaskID != dwTaskID)		
 		{
 			if (m_dlgReminders.TransferReminder(dwTaskID, dwNewTaskID, &tdc))
-				tdc.RedrawReminders();
+				tdc.RefreshReminders();
 		}
 		else // Update the existing reminder
 		{
@@ -3673,7 +3673,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	UpdateStatusBar(pMod->mapAttrib);
 
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
-		tdc.RedrawReminders();
+		tdc.RefreshReminders();
 
 	if (nTDC == GetSelToDoCtrl())
 		UpdateCaption();
@@ -4500,7 +4500,8 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		int nTDC = AddToDoCtrl(pTDC, &storageInfo);
 
 		// reload any reminders
-		m_dlgReminders.AddToDoCtrl(pTDC);
+		if (m_dlgReminders.AddToDoCtrl(pTDC))
+			pTDC->RefreshReminders();
 
 		// And notify the tasklist if it's sorting by reminder
 		if (pTDC->IsSortingBy(TDCC_REMINDER))
@@ -13197,7 +13198,7 @@ void CToDoListWnd::OnEditSetReminder()
 		return;
 	}
 	
-	tdc.RedrawReminders();
+	tdc.RefreshReminders();
 	CPreferences::Save();
 }
 
@@ -13234,7 +13235,7 @@ void CToDoListWnd::OnEditClearReminder()
 		m_dlgReminders.ClearReminder(dwTaskID, &tdc);
 	}
 	
-	tdc.RedrawReminders();
+	tdc.RefreshReminders();
 }
 
 void CToDoListWnd::OnUpdateEditClearReminder(CCmdUI* pCmdUI) 
@@ -13484,7 +13485,7 @@ LRESULT CToDoListWnd::OnNotifyReminderModified(WPARAM wp, LPARAM lp)
 	UNREFERENCED_PARAMETER(lp);
 
 	if ((nTDC != -1) && (nTDC == GetSelToDoCtrl()) && IsWindowVisible() && !IsIconic())
-		GetToDoCtrl().RedrawReminders();
+		GetToDoCtrl().RefreshReminders();
 
 	return 0L;
 }
