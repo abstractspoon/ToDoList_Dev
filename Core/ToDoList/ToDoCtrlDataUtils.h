@@ -523,7 +523,7 @@ public:
 	BOOL CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID, BOOL bSameTasklist) const;
 	BOOL CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const;
 	
-	TDC_ATTRIBUTECATEGORY GetAttributeCategory(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
+	TDC_ATTRIBUTEGROUP GetAttributeGroup(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
 
 protected:
 	const CToDoCtrlData& m_data;

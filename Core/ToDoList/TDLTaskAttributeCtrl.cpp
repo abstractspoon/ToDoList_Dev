@@ -30,7 +30,7 @@ CTDLTaskAttributeCtrl::CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
 	:
 	m_lcAttributes(data, mgrContent, ilIcons, vis, rems, aCustAttribDefs)
 {
-	m_toolbar.SetBorders(); // zero borders
+	m_toolbar.SetBorders(0, 0, 0, 1);
 }
 
 CTDLTaskAttributeCtrl::~CTDLTaskAttributeCtrl()
@@ -43,7 +43,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 
-	ON_COMMAND(ID_CATEGORIZE_ATTRIB, OnCategorizeAttributes)
+	ON_COMMAND(ID_GROUP_ATTRIBUTES, OnGroupAttributes)
 	ON_COMMAND(ID_TOGGLE_SORT, OnToggleSorting)
 
 	// These we just forward to our parent
@@ -151,9 +151,9 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 }
 
-void CTDLTaskAttributeCtrl::OnCategorizeAttributes()
+void CTDLTaskAttributeCtrl::OnGroupAttributes()
 {
-	m_lcAttributes.ToggleCategorization();
+	m_lcAttributes.ToggleGrouping();
 	UpdateToolbarButtons();
 }
 
@@ -175,7 +175,7 @@ void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 
 void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
-	m_toolbar.GetToolBarCtrl().PressButton(ID_CATEGORIZE_ATTRIB, m_lcAttributes.IsCategorized());
+	m_toolbar.GetToolBarCtrl().PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
 }
 
 // -----------------------------------------------------------------------

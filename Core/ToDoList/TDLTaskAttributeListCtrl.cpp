@@ -136,7 +136,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_dropFiles(this),
 	m_bSplitting(FALSE),
 	m_fAttribColProportion(0.5f),
-	m_bCategorized(FALSE),
+	m_bGrouped(FALSE),
 	m_aSortedGroupedItems(*this),
 	m_reminders(rems)
 {
@@ -270,19 +270,19 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 {
 	m_bSortAscending = !m_bSortAscending;
 
-	if (m_bCategorized)
+	if (m_bGrouped)
 		Populate();
 	else
 		Sort();
 }
 
-void CTDLTaskAttributeListCtrl::ToggleCategorization()
+void CTDLTaskAttributeListCtrl::ToggleGrouping()
 {
-	m_bCategorized = !m_bCategorized;
+	m_bGrouped = !m_bGrouped;
 
 	if (GetSafeHwnd())
 	{
-		EnableGroupView(m_bCategorized);
+		EnableGroupView(m_bGrouped);
 		Populate();
 	}
 }
@@ -330,18 +330,18 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 {
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
-	prefs.WriteProfileInt(szKey, _T("AttribCategorized"), m_bCategorized);
+	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
-	m_bCategorized = prefs.GetProfileInt(szKey, _T("AttribCategorized"), FALSE);
+	m_bGrouped = prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE);
 
 	if (GetSafeHwnd())
 	{
-		EnableGroupView(m_bCategorized);
+		EnableGroupView(m_bGrouped);
 		Populate();
 	}
 }
@@ -417,29 +417,43 @@ int CTDLTaskAttributeListCtrl::CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT n
 	return nRow;
 }
 
-int CTDLTaskAttributeListCtrl::GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const
+int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const
 {
-	if (nCategory != TDCAC_CUSTOM)
+	if (nGroup != TDCAG_CUSTOM)
 	{
 		for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 		{
 			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
 
-			if ((attrib.nCategory == nCategory) && WantAddAttribute(attrib.nAttributeID))
+			if ((attrib.nGroup == nGroup) && WantAddAttribute(attrib.nAttributeID))
 				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
 		}
 
-		// Associated time fields
-		if (nCategory == TDCAC_DATETIME)
+		// Unhandled fields
+		switch (nGroup)
 		{
-			if (WantAddAttribute(TDCA_STARTTIME))
-				mapAttrib[TDCA_STARTTIME] = CEnString(IDS_TDLBC_STARTTIME);
+		case TDCAG_NUMERIC:
+			{
+				if (WantAddAttribute(TDCA_PARENTID))
+					mapAttrib[TDCA_PARENTID] = CEnString(IDS_TDLBC_PARENTID);
+			}
+			break;
 
-			if (WantAddAttribute(TDCA_DUETIME))
-				mapAttrib[TDCA_DUETIME] = CEnString(IDS_TDLBC_DUETIME);
+		case TDCAG_DATETIME:
+			{
+				if (WantAddAttribute(TDCA_STARTTIME))
+					mapAttrib[TDCA_STARTTIME] = CEnString(IDS_TDLBC_STARTTIME);
 
-			if (WantAddAttribute(TDCA_DONETIME))
-				mapAttrib[TDCA_DONETIME] = CEnString(IDS_TDLBC_DONETIME);
+				if (WantAddAttribute(TDCA_DUETIME))
+					mapAttrib[TDCA_DUETIME] = CEnString(IDS_TDLBC_DUETIME);
+
+				if (WantAddAttribute(TDCA_DONETIME))
+					mapAttrib[TDCA_DONETIME] = CEnString(IDS_TDLBC_DONETIME);
+
+				if (WantAddAttribute(TDCA_REMINDER))
+					mapAttrib[TDCA_REMINDER] = CEnString(IDS_TDLBC_REMINDER);
+			}
+			break;
 		}
 	}
 	else
@@ -478,18 +492,18 @@ void CTDLTaskAttributeListCtrl::Populate()
 		CHoldRedraw hr(*this);
 		DeleteAllItems();
 
-		if (m_bCategorized)
+		if (m_bGrouped)
 		{
 			CSortedGroupedHeaderArray aCategories(m_bSortAscending);
 
 			for (int nCat = 0; nCat < aCategories.GetSize(); nCat++)
 			{
 				CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR> mapAttribs;
-				const ATTRIBCATEGORY& attribCat = aCategories[nCat];
+				const ATTRIBGROUP& attribCat = aCategories[nCat];
 
-				if (GetCategoryAttributes(attribCat.nCategory, mapAttribs))
+				if (GetGroupAttributes(attribCat.nGroup, mapAttribs))
 				{
-					GetGrouping().InsertGroupHeader(nCat, attribCat.nCategory, attribCat.sName);
+					GetGrouping().InsertGroupHeader(nCat, attribCat.nGroup, attribCat.sName);
 
 					POSITION pos = mapAttribs.GetStartPosition();
 					TDC_ATTRIBUTE nAttribID = TDCA_NONE;
@@ -500,7 +514,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
 						int nRow = AddRow(sAttribName);
 						SetItemData(nRow, nAttribID);
-						GetGrouping().SetItemGroupId(nRow, attribCat.nCategory);
+						GetGrouping().SetItemGroupId(nRow, attribCat.nGroup);
 					}
 				}
 			}
@@ -3299,7 +3313,7 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::CheckBuildArray()
 {
 	if (!GetSize())
 	{
@@ -3310,7 +3324,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 
 		while (nItem--)
 		{
-			CATEGORYITEM& sgi = GetAt(nItem);
+			GROUPITEM& sgi = GetAt(nItem);
 
 			sgi.dwItemData = m_list.GetItemData(nItem);
 			sgi.nGroupID = m_list.GetGrouping().GetItemGroupId(nItem);
@@ -3319,13 +3333,13 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::CheckBuildArray()
 			sgi.rItem.OffsetRect(0, nVScrollPos);
 		}
 
-		Misc::SortArrayT<CATEGORYITEM>(*this, SortProc);
+		Misc::SortArrayT<GROUPITEM>(*this, SortProc);
 	}
 
 	return GetSize();
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetNextItem(int nKeyPress)
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 {
 	if (!CheckBuildArray())
 		return -1;
@@ -3372,7 +3386,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetNextItem(int nKeyPre
 	return m_list.FindItemFromData(GetAt(nNext).dwItemData);
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetPageSize(int nFrom, BOOL bDown) const
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetPageSize(int nFrom, BOOL bDown) const
 {
 	CRect rClient;
 	m_list.GetClientRect(rClient);
@@ -3414,7 +3428,7 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::GetPageSize(int nFrom, 
 	return (nPageSize - 1);
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::FindItem(DWORD dwItemData) const
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::FindItem(DWORD dwItemData) const
 {
 	int nItem = GetSize();
 
@@ -3428,10 +3442,10 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::FindItem(DWORD dwItemDa
 	return -1;
 }
 
-int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::SortProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::SortProc(const void* item1, const void* item2)
 {
-	const CATEGORYITEM* pItem1 = (const CATEGORYITEM*)item1;
-	const CATEGORYITEM* pItem2 = (const CATEGORYITEM*)item2;
+	const GROUPITEM* pItem1 = (const GROUPITEM*)item1;
+	const GROUPITEM* pItem2 = (const GROUPITEM*)item2;
 
 	return (pItem1->rItem.top - pItem2->rItem.top);
 }
@@ -3440,33 +3454,33 @@ int CTDLTaskAttributeListCtrl::CSortedCategoryItemArray::SortProc(const void* it
 
 CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::CSortedGroupedHeaderArray(BOOL bSortAscending)
 {
-	static const UINT ATTRIBCATEGORIES[][2] =
+	static const UINT ATTRIBGROUPS[][2] =
 	{
-		{ TDCAC_OTHER,			IDS_ATTRIBCAT_OTHER },
-		{ TDCAC_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
-		{ TDCAC_DATETIME,		IDS_ATTRIBCAT_DATETIME },
-		{ TDCAC_SINGLETEXT,		IDS_ATTRIBCAT_SINGLETEXT },
-		{ TDCAC_MULTITEXT,		IDS_ATTRIBCAT_MULTITEXT },
-		{ TDCAC_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
-		{ TDCAC_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
+		{ TDCAG_OTHER,			IDS_ATTRIBCAT_OTHER },
+		{ TDCAG_CUSTOM,			IDS_ATTRIBCAT_CUSTOM },
+		{ TDCAG_DATETIME,		IDS_ATTRIBCAT_DATETIME },
+		{ TDCAG_SINGLETEXT,		IDS_ATTRIBCAT_SINGLETEXT },
+		{ TDCAG_MULTITEXT,		IDS_ATTRIBCAT_MULTITEXT },
+		{ TDCAG_NUMERIC,		IDS_ATTRIBCAT_NUMERIC },
+		{ TDCAG_TIMEPERIOD,		IDS_ATTRIBCAT_TIMEPERIOD },
 	};
 
-	const int NUM_ATTRIBCAT = (sizeof(ATTRIBCATEGORIES) / (2 * sizeof(UINT)));
-	SetSize(NUM_ATTRIBCAT);
+	const int NUM_ATTRIBGROUPS = (sizeof(ATTRIBGROUPS) / (2 * sizeof(UINT)));
+	SetSize(NUM_ATTRIBGROUPS);
 
-	for (int nCat = 0; nCat < NUM_ATTRIBCAT; nCat++)
+	for (int nGroup = 0; nGroup < NUM_ATTRIBGROUPS; nGroup++)
 	{
-		ElementAt(nCat).nCategory = (TDC_ATTRIBUTECATEGORY)ATTRIBCATEGORIES[nCat][0];
-		ElementAt(nCat).sName = CEnString(ATTRIBCATEGORIES[nCat][1]);
+		ElementAt(nGroup).nGroup = (TDC_ATTRIBUTEGROUP)ATTRIBGROUPS[nGroup][0];
+		ElementAt(nGroup).sName = CEnString(ATTRIBGROUPS[nGroup][1]);
 	}
 
-	Misc::SortArrayT<ATTRIBCATEGORY>(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
+	Misc::SortArrayT<ATTRIBGROUP>(*this, (bSortAscending ? AscendingSortProc : DescendingSortProc));
 }
 
 int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::AscendingSortProc(const void* item1, const void* item2)
 {
-	const ATTRIBCATEGORY* pItem1 = (const ATTRIBCATEGORY*)item1;
-	const ATTRIBCATEGORY* pItem2 = (const ATTRIBCATEGORY*)item2;
+	const ATTRIBGROUP* pItem1 = (const ATTRIBGROUP*)item1;
+	const ATTRIBGROUP* pItem2 = (const ATTRIBGROUP*)item2;
 
 	return Misc::NaturalCompare(pItem1->sName, pItem2->sName);
 

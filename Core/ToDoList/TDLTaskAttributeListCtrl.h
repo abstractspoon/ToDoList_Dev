@@ -71,8 +71,8 @@ public:
 public:
 	BOOL Create(CWnd* pParent, UINT nID);
 	void ToggleSortDirection();
-	void ToggleCategorization();
-	BOOL IsCategorized() const { return m_bCategorized; }
+	void ToggleGrouping();
+	BOOL IsGrouped() const { return m_bGrouped; }
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -153,7 +153,7 @@ protected:
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
 
-	BOOL m_bCategorized;
+	BOOL m_bGrouped;
 	BOOL m_bSplitting;
 	float m_fAttribColProportion;
 
@@ -233,7 +233,7 @@ protected:
 	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
-	int GetCategoryAttributes(TDC_ATTRIBUTECATEGORY nCategory, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const;
+	int GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const;
 	BOOL WantAddAttribute(TDC_ATTRIBUTE nAttribID) const;
 	int CheckAddAttribute(TDC_ATTRIBUTE nAttribID, UINT nAttribResID);
 	int GetRow(TDC_ATTRIBUTE nAttribID) const { return FindItemFromData(nAttribID); }
@@ -267,19 +267,19 @@ protected:
 private:
 	// ---------------------------------------------------------------------
 
-	struct CATEGORYITEM
+	struct GROUPITEM
 	{
-		CATEGORYITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
+		GROUPITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
 
 		DWORD dwItemData;
 		int nGroupID;
 		CRect rItem;
 	};
 
-	class CSortedCategoryItemArray : CArray<CATEGORYITEM, CATEGORYITEM&>
+	class CSortedGroupItemArray : CArray<GROUPITEM, GROUPITEM&>
 	{
 	public:
-		CSortedCategoryItemArray(const CEnListCtrl& list) : m_list(list) {}
+		CSortedGroupItemArray(const CEnListCtrl& list) : m_list(list) {}
 
 		void Clear() { RemoveAll(); }
 		int GetNextItem(int nKeyPress);
@@ -295,17 +295,17 @@ private:
 		static int SortProc(const void* item1, const void* item2);
 	};
 
-	CSortedCategoryItemArray m_aSortedGroupedItems;
+	CSortedGroupItemArray m_aSortedGroupedItems;
 
 	// ---------------------------------------------------------------------
 
-	struct ATTRIBCATEGORY
+	struct ATTRIBGROUP
 	{
-		TDC_ATTRIBUTECATEGORY nCategory;
+		TDC_ATTRIBUTEGROUP nGroup;
 		CString sName;
 	};
 
-	class CSortedGroupedHeaderArray : public CArray<ATTRIBCATEGORY, ATTRIBCATEGORY&>
+	class CSortedGroupedHeaderArray : public CArray<ATTRIBGROUP, ATTRIBGROUP&>
 	{
 	public:
 		CSortedGroupedHeaderArray(BOOL bSortAscending);
