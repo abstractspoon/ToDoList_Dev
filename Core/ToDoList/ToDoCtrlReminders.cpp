@@ -764,6 +764,13 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)
 		DismissReminder(nRem);
 }
 
+void CToDoCtrlReminders::DoModifyReminder(const TDCREMINDER& rem)
+{
+	ASSERT(FindReminder(rem) != -1);
+
+	m_pWndNotify->SendMessage(WM_TDCM_EDITTASKREMINDER, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
+}
+
 void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
 {
 	ASSERT(FindReminder(rem) != -1);
@@ -866,5 +873,25 @@ BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UN
 
 	rem.dtAbsolute = date;
 	return TRUE;
+}
+
+BOOL CToDoCtrlReminders::GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const
+{
+	int nNumSel = aTaskIDs.GetSize();
+
+	for (int nTask = 0; nTask < nNumSel; nTask++)
+	{
+		DWORD dwTaskID = aTaskIDs[nTask];
+		int nRem = FindReminder(dwTaskID, pTDC);
+
+		if (nRem != -1)
+		{
+			GetReminder(nRem, rem);
+			return TRUE;
+		}
+	}
+
+	// no task has a reminder
+	return FALSE;
 }
 

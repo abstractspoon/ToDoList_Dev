@@ -2520,9 +2520,12 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_ICON:
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
-	case TDCA_REMINDER:
 		if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
 			RefreshSelectedTasksValue(nRow);
+		break;
+
+	case TDCA_REMINDER:
+		GetParent()->SendMessage(WM_TDCM_EDITTASKREMINDER);
 		break;
 
 	case TDCA_DEPENDENCY:

@@ -51,7 +51,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLShowReminderDlg)
-	enum { IDD = IDD_SHOWREMINDER_DIALOG };
 	//}}AFX_DATA
 	CString m_sSoundFile;
 	UINT m_nSnoozeMins;
@@ -78,6 +77,7 @@ protected:
 	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoModifyReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoCompleteTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void HideWindow();
 	virtual void OnRepositionControls(int dx, int dy);
@@ -87,6 +87,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLShowReminderDlg)
 	afx_msg void OnSnooze();
+	afx_msg void OnModify();
 	afx_msg void OnDismiss();
 	afx_msg void OnGotoTask();
 	afx_msg void OnCompleteTask();

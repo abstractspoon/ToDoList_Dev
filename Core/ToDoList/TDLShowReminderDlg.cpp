@@ -30,7 +30,7 @@ double ONE_DAY_IN_MINS = (24.0 * 60);
 
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
+	CTDLDialog(IDD_SHOWREMINDER_DIALOG, _T("ShowReminders"), pParent),
 	m_lcReminders(m_sPrefsKey),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
 	m_bChangingReminders(FALSE),
@@ -78,6 +78,7 @@ IMPLEMENT_DYNAMIC(CTDLShowReminderDlg, CTDLDialog)
 BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLShowReminderDlg)
 	ON_BN_CLICKED(IDC_SNOOZE, OnSnooze)
+	ON_BN_CLICKED(IDC_MODIFY, OnModify)
 	ON_BN_CLICKED(IDC_DISMISS, OnDismiss)
 	ON_BN_CLICKED(IDC_GOTOTASK, OnGotoTask)
 	ON_BN_CLICKED(IDC_COMPLETETASK, OnCompleteTask)
@@ -182,6 +183,14 @@ void CTDLShowReminderDlg::OnSnooze()
 	ASSERT(m_lcReminders.GetSelectedCount());
 
 	SnoozeReminders(FALSE);
+}
+
+void CTDLShowReminderDlg::OnModify()
+{
+	TDCREMINDER rem;
+
+	if (m_lcReminders.GetSelectedReminder(rem) != -1)
+		DoModifyReminder(rem);
 }
 
 void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
@@ -343,6 +352,8 @@ void CTDLShowReminderDlg::EnableControls()
 
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
+
+	GetDlgItem(IDC_MODIFY)->EnableWindow(nNumSel == 1);
 	GetDlgItem(IDC_GOTOTASK)->EnableWindow(nNumSel == 1);
 	GetDlgItem(IDC_COMPLETETASK)->EnableWindow(nNumSel == 1);
 }
@@ -398,9 +409,10 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 	OffsetCtrl(this, IDC_SNOOZE, dx, dy);
 	OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
 	OffsetCtrl(this, IDC_DISMISS, dx, dy);
-	OffsetCtrl(this, IDC_GOTOTASK, dx, dy);
-	OffsetCtrl(this, IDC_COMPLETETASK, dx, dy);
+	OffsetCtrl(this, IDC_MODIFY, dx, dy);
 
+	OffsetCtrl(this, IDC_GOTOTASK, 0, dy);
+	OffsetCtrl(this, IDC_COMPLETETASK, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);

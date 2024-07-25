@@ -50,6 +50,7 @@ public:
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	void CheckReminders();
 	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
+	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 
 // Attributes
 protected:
@@ -66,6 +67,7 @@ public:
 	virtual ~CToDoCtrlReminders();
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
+	virtual void DoModifyReminder(const TDCREMINDER& rem);
 	virtual void DoDismissReminder(const TDCREMINDER& rem);
 	virtual void DoGotoTask(const TDCREMINDER& rem);
 	virtual void DoCompleteTask(const TDCREMINDER& rem);

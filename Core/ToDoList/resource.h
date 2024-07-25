@@ -868,6 +868,7 @@
 #define IDC_OFFSETSUBTASKREFS           1575
 #define IDC_WHATLIST                    1576
 #define IDC_GOTOTASKLIST                1577
+#define IDC_MODIFY                      1579
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2539,9 +2540,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        334
+#define _APS_NEXT_RESOURCE_VALUE        335
 #define _APS_NEXT_COMMAND_VALUE         34768
-#define _APS_NEXT_CONTROL_VALUE         1578
+#define _APS_NEXT_CONTROL_VALUE         1581
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
