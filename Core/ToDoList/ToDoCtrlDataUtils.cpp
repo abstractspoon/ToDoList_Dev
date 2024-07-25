@@ -4344,6 +4344,12 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
 
 CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
 {
+	if (dwTaskID == 0)
+	{
+		ASSERT(dwRefID == 0);
+		return EMPTY_STR;
+	}
+
 	if ((dwRefID == 0) || (dwRefID == dwTaskID))
 		return Misc::Format(dwTaskID);
 
