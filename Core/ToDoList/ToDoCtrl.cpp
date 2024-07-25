@@ -6415,9 +6415,10 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 
 	for (int nID = 0; nID < nNumIDs; nID++)
 	{
-		HTASKITEM hTask = tasks.NewTask(_T(""), NULL, 0, 0);
-		m_exporter.ExportMatchingTaskAttributes(aTaskIDs[nID], tasks, hTask, filter);
+		DWORD dwTaskID = aTaskIDs[nID], dwParentID = m_data.GetTaskParentID(dwTaskID);
+		HTASKITEM hTask = tasks.NewTask(_T(""), NULL, dwTaskID, dwParentID);
 
+		m_exporter.ExportMatchingTaskAttributes(dwTaskID, tasks, hTask, filter);
 		aValues[nID] = tasks.GetTaskAttribute(hTask, nAttribID, true, true);
 	}
 
@@ -10477,7 +10478,6 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	}
 
 	// all else
-	ASSERT(0);
 	return FALSE;
 }
 

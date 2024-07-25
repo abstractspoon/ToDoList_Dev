@@ -50,7 +50,7 @@ CTDCAttributeMap::~CTDCAttributeMap()
 
 BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttribID)
 {
-	// Special cases
+	// Composite attributes
 	switch (nAttribID)
 	{
 	case TDCA_OFFSETTASK:
