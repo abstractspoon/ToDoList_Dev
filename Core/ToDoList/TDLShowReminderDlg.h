@@ -36,17 +36,8 @@ public:
 	BOOL Create(CWnd* pParent, BOOL bVisible = TRUE);
 	void SetRemindersFont(HFONT hFont);
 
-	BOOL AddListReminder(const TDCREMINDER& rem);
-	BOOL UpdateListReminder(const TDCREMINDER& rem);
-	BOOL RemoveListReminder(const TDCREMINDER& rem);
-	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
-
-	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
-
-	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
-	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
-	double GetSnoozeDays() const;
-	COleDateTime GetSnoozeUntil() const;
+	void ShowWindow();
+	BOOL IsForegroundWindow() const;
 
 protected:
 // Dialog Data
@@ -55,7 +46,8 @@ protected:
 	CString m_sSoundFile;
 	UINT m_nSnoozeMins;
 	int m_bSnoozeUntil;
-	BOOL m_bChangingReminders;
+	BOOL m_bModifyingList;
+	BOOL m_bModifyingReminder;
 
 	CTDLReminderPeriodComboBox m_cbSnoozeFor;
 	CDateTimeCtrlEx m_dtcSnoozeDate;
@@ -101,7 +93,19 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void EnableControls();
+	BOOL AddListReminder(const TDCREMINDER& rem);
+	BOOL UpdateListReminder(const TDCREMINDER& rem);
+	BOOL RemoveListReminder(const TDCREMINDER& rem);
+	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
+
+	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
+
+	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
+	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
+	double GetSnoozeDays() const;
+	COleDateTime GetSnoozeUntil() const;
+
+	void EnableDisableControls();
 	void UpdateControls();
 	void UpdateTitleText();
 	void SnoozeReminders(BOOL bAll);

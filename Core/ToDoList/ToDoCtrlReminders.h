@@ -33,9 +33,6 @@ public:
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
 	void EnableReducedFlashing(BOOL bEnable) { m_bReduceFlashing = bEnable; }
 
-	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
-	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
-
 	int AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);

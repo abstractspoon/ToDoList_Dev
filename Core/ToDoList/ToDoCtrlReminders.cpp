@@ -674,9 +674,9 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 		
 	// all else (fallback)
 	if (AddListReminder(rem))
-		ShowWindow();
+		return TRUE;
 
-	return TRUE;
+	return (FindReminder(rem) != -1);
 }
 
 BOOL CToDoCtrlReminders::GetReminderDate(int nRem, COleDateTime& dtRem) const
@@ -749,10 +749,6 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 
 	RemoveListReminder(rem);
 	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZE);
-
-	// hide dialog if this is the last
-	if (m_lcReminders.GetItemCount() == 0)
-		HideWindow();
 }
 
 void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)
