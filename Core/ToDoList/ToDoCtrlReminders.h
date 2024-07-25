@@ -33,9 +33,6 @@ public:
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
 	void EnableReducedFlashing(BOOL bEnable) { m_bReduceFlashing = bEnable; }
 
-	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
-	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
-
 	int AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
@@ -50,6 +47,7 @@ public:
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	void CheckReminders();
 	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
+	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 
 // Attributes
 protected:
@@ -66,6 +64,7 @@ public:
 	virtual ~CToDoCtrlReminders();
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
+	virtual void DoModifyReminder(const TDCREMINDER& rem);
 	virtual void DoDismissReminder(const TDCREMINDER& rem);
 	virtual void DoGotoTask(const TDCREMINDER& rem);
 	virtual void DoCompleteTask(const TDCREMINDER& rem);

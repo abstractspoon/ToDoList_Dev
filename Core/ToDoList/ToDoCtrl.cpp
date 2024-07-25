@@ -324,6 +324,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnTDCDisplayLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnTDCEditTaskAttribute)
+	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnTDCEditTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnTDCClearTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
@@ -6921,7 +6922,7 @@ LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_REMINDER:
-		AfxGetMainWnd()->SendMessage(WM_TDCN_CLICKREMINDERCOL);
+		GetParent()->SendMessage(WM_TDCM_EDITTASKREMINDER);
 		break;
 		
 	default: // try custom columns
@@ -6991,6 +6992,11 @@ LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
+LRESULT CToDoCtrl::OnTDCEditTaskReminder(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return GetParent()->SendMessage(WM_TDCM_EDITTASKREMINDER);
+}
+
 LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 {
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)wParam;
@@ -7008,9 +7014,6 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 
 	case TDCA_RECURRENCE:
 		return EditSelectedTaskRecurrence();
-
-	case TDCA_REMINDER:
-		return AfxGetMainWnd()->SendMessage(WM_TDCN_CLICKREMINDERCOL);
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))

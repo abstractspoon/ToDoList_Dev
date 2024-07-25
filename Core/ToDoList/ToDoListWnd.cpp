@@ -509,7 +509,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
-	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
+	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnToDoCtrlEditTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
 	ON_REGISTERED_MESSAGE(WM_TDCN_FILTERCHANGE, OnToDoCtrlNotifyFilterChange)
@@ -13115,53 +13115,64 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 	return (LRESULT)tRem;
 }
 
-LRESULT CToDoListWnd::OnToDoCtrlNotifyClickReminderCol(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 {
-	OnEditSetReminder();
+	if (wp && lp)
+	{
+		DWORD dwTaskID = wp;
+		CString sPath((LPCTSTR)lp);
+
+		// We should only receive this from CToDoCtrlReminders 
+		// so there should be a full path and we should have it loaded
+		ASSERT(dwTaskID);
+		ASSERT(!PathIsRelative(sPath));
+
+		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
+		ASSERT(nTDC != -1);
+
+		OnEditSetReminder(nTDC, dwTaskID);
+	}
+	else if (!wp && !lp) // active tasklist and its selection
+	{
+		OnEditSetReminder(GetSelToDoCtrl(), 0);
+	}
+	else
+	{
+		ASSERT(0);
+	}
+
 	return 0L;
 }
 
-BOOL CToDoListWnd::GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const
+void CToDoListWnd::OnEditSetReminder(int nTDC, DWORD dwTaskID)
 {
-	int nNumSel = aTaskIDs.GetSize();
+	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 
-	for (int nTask = 0; nTask < nNumSel; nTask++)
+	CDWordArray aTaskIDs;
+	int nNumSel = 1;
+
+	if (dwTaskID)
 	{
-		DWORD dwTaskID = aTaskIDs[nTask];
-		int nRem = m_dlgReminders.FindReminder(dwTaskID, &tdc);
-
-		if (nRem != -1)
-		{
-			m_dlgReminders.GetReminder(nRem, rem);
-			return TRUE;
-		}
+		aTaskIDs.Add(dwTaskID);
 	}
-
-	// no task has a reminder
-	return FALSE;
-}
-
-void CToDoListWnd::OnEditSetReminder() 
-{
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	if (!tdc.HasSelection())
+	else if (tdc.HasSelection())
+	{
+		nNumSel = tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
+	}
+	else
 	{
 		ASSERT(0);
 		return;
 	}
-	
-	CDWordArray aTaskIDs;
-	int nNumSel = tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
 
 	DWORD dwFlags = (nNumSel == 1) ? 0 : TDCREM_MULTIPLETASKS;
 	
 	// get the first reminder as a reference
 	TDCREMINDER rem;
 	
-	if (!GetFirstTaskReminder(tdc, aTaskIDs, rem))
+	// handle new reminder
+	if (!m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem))
 	{
-		// handle new reminder
 		rem.dwTaskID = aTaskIDs[0];
 		rem.pTDC = &tdc;
 
@@ -13202,6 +13213,12 @@ void CToDoListWnd::OnEditSetReminder()
 	CPreferences::Save();
 }
 
+void CToDoListWnd::OnEditSetReminder() 
+{
+	// active tasklist and its selection
+	OnEditSetReminder(GetSelToDoCtrl(), 0);
+}
+
 void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -13215,8 +13232,8 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 		VERIFY(tdc.GetSelectedTaskIDs(aTaskIDs, TRUE));
 	
 		// get the first reminder as a reference
-		TDCREMINDER rem;
-		BOOL bNewReminder = !GetFirstTaskReminder(tdc, aTaskIDs, rem);
+		TDCREMINDER unused;
+		BOOL bNewReminder = !m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, unused);
 
 		pCmdUI->SetText(CEnString(bNewReminder ? IDS_SETREMINDER : IDS_MODIFYREMINDER));
 	}
@@ -13246,8 +13263,8 @@ void CToDoListWnd::OnUpdateEditClearReminder(CCmdUI* pCmdUI)
 	CDWordArray aTaskIDs;
 	tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
 	
-	TDCREMINDER rem;
-	pCmdUI->Enable(GetFirstTaskReminder(tdc, aTaskIDs, rem));
+	TDCREMINDER unused;
+	pCmdUI->Enable(m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, unused));
 }
 
 void CToDoListWnd::OnEditCleartaskicon() 

@@ -379,7 +379,7 @@ protected:
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnExportThreadFinished(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnToDoCtrlNotifyClickReminderCol(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindApplyAsFilter(WPARAM wp, LPARAM lp);
@@ -622,6 +622,7 @@ protected:
 	void OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls);
 	void OnEditUndoRedo(BOOL bUndo);
 	void OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo);
+	void OnEditSetReminder(int nTDC, DWORD dwTaskID);
 
 	void OnViewIncrementTaskViewFontSize(BOOL bLarger);
 	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
@@ -690,7 +691,6 @@ protected:
 	void UpdateUITheme();
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
-	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 	BOOL GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlagged) const;
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
 	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;

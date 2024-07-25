@@ -17,7 +17,6 @@ const UINT WM_TDCN_VIEWPOSTCHANGE			= ::RegisterWindowMessage(_T("WM_TDCN_VIEWPO
 const UINT WM_TDCN_SELECTIONCHANGE			= ::RegisterWindowMessage(_T("WM_TDCN_SELECTIONCHANGE"));
 const UINT WM_TDCN_SCROLLCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_SCROLLCHANGE"));
 const UINT WM_TDCN_RECREATERECURRINGTASK	= ::RegisterWindowMessage(_T("WM_TDCN_RECREATERECURRINGTASK"));
-const UINT WM_TDCN_CLICKREMINDERCOL			= ::RegisterWindowMessage(_T("WM_TDCN_CLICKREMINDERCOL"));
 const UINT WM_TDCN_COLUMNEDITCLICK			= ::RegisterWindowMessage(_T("WM_TDCN_COLUMNEDITCLICK"));		// lParam == <TDC_COLUMN>
 const UINT WM_TDCN_TIMETRACKREMINDER		= ::RegisterWindowMessage(_T("WM_TDCN_TIMETRACKREMINDER"));		// wParam = hwnd, lParam = TaskID
 const UINT WM_TDCN_LISTCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_LISTCHANGE"));			// lParam == <TDC_ATTRIBUTE>
@@ -51,6 +50,7 @@ const UINT WM_TDCM_CANPASTETASKATTRIBUTE	= ::RegisterWindowMessage(_T("WM_TDCM_C
 const UINT WM_TDCM_ADDTIMETOLOGFILE			= ::RegisterWindowMessage(_T("WM_TDCM_ADDTIMETOLOGFILE"));		
 const UINT WM_TDCM_TOGGLETIMETRACKING		= ::RegisterWindowMessage(_T("WM_TDCM_TOGGLETIMETRACKING"));		
 const UINT WM_TDCM_SELECTDEPENDENCIES		= ::RegisterWindowMessage(_T("WM_TDCM_SELECTDEPENDENCIES"));		
+const UINT WM_TDCM_EDITTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_EDITTASKREMINDER"));		// wParam = taskID OR zero for 'selected tasks', lParam = taskfile path or empty for selected tasklist
 
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 

@@ -674,9 +674,9 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 		
 	// all else (fallback)
 	if (AddListReminder(rem))
-		ShowWindow();
+		return TRUE;
 
-	return TRUE;
+	return (FindReminder(rem) != -1);
 }
 
 BOOL CToDoCtrlReminders::GetReminderDate(int nRem, COleDateTime& dtRem) const
@@ -749,10 +749,6 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 
 	RemoveListReminder(rem);
 	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZE);
-
-	// hide dialog if this is the last
-	if (m_lcReminders.GetItemCount() == 0)
-		HideWindow();
 }
 
 void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)
@@ -762,6 +758,13 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)
 	
 	if (nRem != -1)
 		DismissReminder(nRem);
+}
+
+void CToDoCtrlReminders::DoModifyReminder(const TDCREMINDER& rem)
+{
+	ASSERT(FindReminder(rem) != -1);
+
+	m_pWndNotify->SendMessage(WM_TDCM_EDITTASKREMINDER, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
 }
 
 void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
@@ -866,5 +869,25 @@ BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UN
 
 	rem.dtAbsolute = date;
 	return TRUE;
+}
+
+BOOL CToDoCtrlReminders::GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const
+{
+	int nNumSel = aTaskIDs.GetSize();
+
+	for (int nTask = 0; nTask < nNumSel; nTask++)
+	{
+		DWORD dwTaskID = aTaskIDs[nTask];
+		int nRem = FindReminder(dwTaskID, pTDC);
+
+		if (nRem != -1)
+		{
+			GetReminder(nRem, rem);
+			return TRUE;
+		}
+	}
+
+	// no task has a reminder
+	return FALSE;
 }
 
