@@ -107,7 +107,7 @@ void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 	ASSERT (m_pWndNotify);
 
 	int nExist = FindReminder(rem, TRUE);
-	TDCREMINDER temp = rem; // to get around constness
+	TDCREMINDER temp = rem; // can't add a const reminder to list
 
 	if (nExist != -1) // already exists
 	{
@@ -758,6 +758,13 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)
 	
 	if (nRem != -1)
 		DismissReminder(nRem);
+}
+
+BOOL CToDoCtrlReminders::CanModifyReminders() const
+{
+	// Not if a modal window is active
+	return (CTDLShowReminderDlg::CanModifyReminders() && 
+			m_pWndNotify->IsWindowEnabled());
 }
 
 void CToDoCtrlReminders::DoModifyReminder(const TDCREMINDER& rem)

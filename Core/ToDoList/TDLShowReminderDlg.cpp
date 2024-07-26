@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
+	ON_WM_ACTIVATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -194,16 +195,16 @@ void CTDLShowReminderDlg::OnModify()
 {
 	TDCREMINDER rem;
 
-	if (m_lcReminders.GetSelectedReminder(rem) != -1)
+	if (CanModifyReminders() && m_lcReminders.GetSelectedReminder(rem) != -1)
 	{
-		HideWindow();
 		{
 			CAutoFlag af(m_bModifyingReminder, TRUE);
+
+			EnableDisableModify();
 			DoModifyReminder(rem);
 		}
 
-		if (m_lcReminders.GetItemCount())
-			ShowWindow();
+		EnableDisableModify();
 	}
 }
 
@@ -352,7 +353,7 @@ void CTDLShowReminderDlg::OnSnoozeUntil()
 void CTDLShowReminderDlg::EnableDisableControls()
 {
 	UpdateData();
-	
+
 	int nNumRem = m_lcReminders.GetItemCount();
 	int nNumSel = m_lcReminders.GetSelectedCount();
 
@@ -367,9 +368,20 @@ void CTDLShowReminderDlg::EnableDisableControls()
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
 
-	GetDlgItem(IDC_MODIFY)->EnableWindow(nNumSel == 1);
 	GetDlgItem(IDC_GOTOTASK)->EnableWindow(nNumSel == 1);
 	GetDlgItem(IDC_COMPLETETASK)->EnableWindow(nNumSel == 1);
+
+	EnableDisableModify();
+}
+
+void CTDLShowReminderDlg::EnableDisableModify()
+{
+	GetDlgItem(IDC_MODIFY)->EnableWindow(CanModifyReminders());
+}
+
+BOOL CTDLShowReminderDlg::CanModifyReminders() const 
+{ 
+	return (!m_bModifyingReminder && (m_lcReminders.GetSelectedCount() == 1));
 }
 
 void CTDLShowReminderDlg::UpdateControls()
@@ -406,10 +418,26 @@ void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
+// Note: We never call this internally so as not to
+// interfere with what the app might be doing
 void CTDLShowReminderDlg::ShowWindow() 
 { 
-	if (!m_bModifyingReminder)
-		CTDLDialog::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW);
+	if (IsIconic())
+	{
+		CTDLDialog::ShowWindow(SW_RESTORE);
+	}
+	else if (!IsWindowVisible())
+	{
+		CTDLDialog::ShowWindow(SW_SHOW);
+	}
+}
+
+void CTDLShowReminderDlg::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
+{
+	CTDLDialog::OnActivate(nState, pWndOther, bMinimized);
+
+	if (!bMinimized)
+		EnableDisableModify();
 }
 
 BOOL CTDLShowReminderDlg::IsForegroundWindow() const 

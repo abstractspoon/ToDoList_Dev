@@ -73,6 +73,7 @@ protected:
 	virtual void DoCompleteTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void HideWindow();
 	virtual void OnRepositionControls(int dx, int dy);
+	virtual BOOL CanModifyReminders() const;
 
 // Implementation
 protected:
@@ -90,6 +91,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -106,6 +108,7 @@ protected:
 	COleDateTime GetSnoozeUntil() const;
 
 	void EnableDisableControls();
+	void EnableDisableModify();
 	void UpdateControls();
 	void UpdateTitleText();
 	void SnoozeReminders(BOOL bAll);

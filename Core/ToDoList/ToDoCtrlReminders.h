@@ -69,12 +69,13 @@ public:
 	virtual void DoGotoTask(const TDCREMINDER& rem);
 	virtual void DoCompleteTask(const TDCREMINDER& rem);
 	virtual void HideWindow();
+	virtual BOOL CanModifyReminders() const;
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CToDoCtrlReminders)
-	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
+	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
