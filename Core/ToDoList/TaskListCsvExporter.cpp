@@ -221,8 +221,8 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 								pTasks->GetTaskTimeEstimate(hTask, nUnits, TRUE) :
 								pTasks->GetTaskTimeSpent(hTask, nUnits, TRUE);
 				
-				CString sTime = CTimeHelper().FormatTime(dTime, ROUNDTIMEFRACTIONS ? 0 : 2);
-				CString sUnits = CTimeHelper().GetUnits(TDC::MapUnitsToTHUnits(nUnits));
+				CString sTime = CTimeHelper::FormatTime(dTime, ROUNDTIMEFRACTIONS ? 0 : 2);
+				CString sUnits = CTimeHelper::GetUnits(TDC::MapUnitsToTHUnits(nUnits));
 
 				sItem = FormatAttribute(nAttribID, sAttribLabel, (sTime + sUnits));
 			}

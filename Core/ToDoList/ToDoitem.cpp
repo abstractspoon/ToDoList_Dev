@@ -145,7 +145,7 @@ BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
 
 CString TDCTIMEPERIOD::Format(int nDecPlaces) const
 {
-	return CTimeHelper().FormatTime(dAmount, GetTHUnits(), nDecPlaces);
+	return CTimeHelper::FormatTime(dAmount, GetTHUnits(), nDecPlaces);
 }
 
 BOOL TDCTIMEPERIOD::Parse(LPCTSTR szPeriod)

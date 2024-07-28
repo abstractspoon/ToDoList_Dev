@@ -291,12 +291,12 @@ BOOL CTimeHelper::RemoveAM(CString& sTime)
 			Misc::RemoveSuffix(sTime, Misc::GetAM()));
 }
 
-CString CTimeHelper::FormatTime(double dTime, int nDecPlaces) const
+CString CTimeHelper::FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer)
 {
-	return FormatTime(dTime, THU_NULL, nDecPlaces);
+	return FormatTime(dTime, THU_NULL, nDecPlaces, cSpacer);
 }
 
-CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const
+CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, TCHAR cSpacer)
 {
 	// sanity check
 	if (nUnits && !IsValidUnit(nUnits))
@@ -310,7 +310,9 @@ CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) c
 	
 	if (nUnits && MAPUNIT2CH.Lookup(nUnits, cUnits))
 	{
-		sTime += ' ';
+		if (cSpacer)
+			sTime += cSpacer;
+
 		sTime += cUnits;
 	}
 	
@@ -461,7 +463,10 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 		return _T("");
 	}
 
-	CString sTime = FormatTimeHMS((int)dTime, nUnits);
+	CString sTime = FormatTime(dTime, nUnits, 0, '\0');
+#ifdef _DEBUG
+	ASSERT(sTime == FormatTimeHMS((int)dTime, nUnits));
+#endif
 	
 	if (bDecPlaces && (nLeftOverUnits != THU_NULL))
 	{

@@ -469,7 +469,7 @@ CString CTaskListExporterBase::FormatTime(double dTime, TDC_UNITS nUnits) const
 {
 	TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
 
-	return CTimeHelper().FormatTime(dTime, nTHUnits, (ROUNDTIMEFRACTIONS ? 0 : 2));
+	return CTimeHelper::FormatTime(dTime, nTHUnits, (ROUNDTIMEFRACTIONS ? 0 : 2));
 }
 
 CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, 

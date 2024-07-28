@@ -4229,7 +4229,7 @@ CString CTDCTaskFormatter::GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bA
 		return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
 
 	// else
-	return CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
+	return CTimeHelper::FormatTime(dTime, nTHUnits, nDecPlaces);
 }
 
 CString CTDCTaskFormatter::GetTaskAllocTo(const TODOITEM* pTDI, TCHAR cSep) const

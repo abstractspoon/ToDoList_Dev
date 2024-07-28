@@ -50,8 +50,6 @@ public:
 	
 	double Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
 	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
-	CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const;
-	CString FormatTime(double dTime, int nDecPlaces) const;
 
 	int Compare(double dTime1, TH_UNITS nUnits1, double dTime2, TH_UNITS nUnits2) const;
 
@@ -66,6 +64,8 @@ public:
 	static TH_UNITS DecodeUnits(TCHAR cUnits, TH_UNITS nDefault = THU_HOURS);
 	static TH_UNITS DecodeUnits(LPCTSTR szValueWithUnits, TH_UNITS nDefault = THU_HOURS);
 
+	static CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, TCHAR cSpacer = ' ');
+	static CString FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer = ' ');
 	static CString FormatClockTime(const COleDateTime& dtTime, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static CString FormatClockTime(int nHour, int nMin, int nSec = 0, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static double DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds = FALSE); // returns 0-24

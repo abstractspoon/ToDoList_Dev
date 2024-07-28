@@ -1313,7 +1313,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 				break;
 
 			case FT_TIMEPERIOD:
-				sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
+				sValue = CTimeHelper::FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
 				break;
 
 			case FT_BOOL:

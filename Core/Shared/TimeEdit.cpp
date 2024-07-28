@@ -352,7 +352,7 @@ double CTimeEdit::ConvertTime(TH_UNITS nUnits) const
 
 CString CTimeEdit::FormatTime(BOOL bUnits) const
 {
-	return CTimeHelper().FormatTime(GetTime(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
+	return CTimeHelper::FormatTime(GetTime(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
 }
 
 CString CTimeEdit::FormatTimeHMS() const
