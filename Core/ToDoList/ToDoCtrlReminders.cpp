@@ -537,11 +537,11 @@ void CToDoCtrlReminders::DoCheckReminders()
 			
 			if (rem.GetReminderDate(dateRem) && (dateNow > dateRem))
 			{
-				BOOL bRemWasVisible = (m_lcReminders.FindReminder(rem) != -1);
+				BOOL bNewReminder = (m_lcReminders.FindReminder(rem) == -1);
 
 				if (ShowReminder(rem))
 				{
-					bFlashTaskBar = (!m_bReduceFlashing || !bRemWasVisible);
+					bFlashTaskBar = (!m_bReduceFlashing || bNewReminder);
 				}
 				else
 				{

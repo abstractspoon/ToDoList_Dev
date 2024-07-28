@@ -139,7 +139,7 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 	UpdateTitleText();
 
-	if (!m_bModifyingReminder)
+	if (bNewRem && !m_bModifyingReminder)
 	{
 		m_lcReminders.SetFocus();
 		ShowWindow();
