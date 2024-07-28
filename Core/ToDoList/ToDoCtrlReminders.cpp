@@ -599,7 +599,7 @@ BOOL CToDoCtrlReminders::BuildStickiesRTFContent(const TDCREMINDER& rem, CString
 	}
 
 	sText += _T("\n\n");
-	sText += rem.FormatWhenString();
+	sText += rem.FormatNotification();
 	sText += _T("\n\n");
 	sText += rem.GetTaskComments();
 
@@ -643,7 +643,8 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 
 			if (!bUseRTF)
 			{
-				CString sWhen(rem.FormatWhenString()), sComments(rem.GetTaskComments());
+				CString sNotify(rem.FormatNotification()), 
+						sComments(rem.GetTaskComments());
 				
 				sContent = rem.GetTaskTitle();
 		
@@ -653,10 +654,10 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 					sContent += sComments;
 				}
 
-				if (!sWhen.IsEmpty())
+				if (!sNotify.IsEmpty())
 				{
 					sContent += _T("\n\n");
-					sContent += sWhen;
+					sContent += sNotify;
 				}
 			}
 
@@ -698,7 +699,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 
 	if (nRem != -1)
 	{
-		TDCREMINDER& reminder = m_aReminders[nRem];
+		TDCREMINDER& remExist = m_aReminders[nRem];
 
 		double dNow = COleDateTime::GetCurrentTime();
 
@@ -706,44 +707,32 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 		{
 			// Whether the original snooze was relative or absolute
 			// it is now forced to be absolute
-			reminder.bRelative = FALSE;
-			reminder.dDaysSnooze = 0.0;
-			reminder.dRelativeDaysLeadIn = 0.0;
-			reminder.nLastSnoozeMins = 0;
+			remExist.bRelative = FALSE;
+			remExist.dDaysSnooze = 0.0;
+			remExist.dRelativeDaysLeadIn = 0.0;
+			remExist.nLastSnoozeMins = 0;
 
-			reminder.dtAbsolute = GetSnoozeUntil();
+			remExist.dtAbsolute = GetSnoozeUntil();
 		}
 		else
 		{
-			if (reminder.bRelative)
+			// in case the user didn't handle the notification immediately we need
+			// to soak up any additional elapsed time in the snooze
+			if (remExist.bRelative)
 			{
-				if (reminder.nRelativeFromWhen == TDCR_DUEDATE)
-				{
-					// in case the user didn't handle the notification immediately we need
-					// to soak up any additional elapsed time in the snooze
-					COleDateTime dDue = reminder.pTDC->GetTaskDate(reminder.dwTaskID, TDCD_DUE);
-					
-					reminder.dDaysSnooze = (dNow - dDue + reminder.dRelativeDaysLeadIn);
-				}
-				else // from start
-				{
-					// in case the user didn't handle the notification immediately we need
-					// to soak up any additional elapsed time in the snooze
-					COleDateTime dStart = reminder.pTDC->GetTaskDate(reminder.dwTaskID, TDCD_START);
-					
-					reminder.dDaysSnooze = (dNow - dStart + reminder.dRelativeDaysLeadIn);
-				}
+				COleDateTime date;
+				VERIFY(remExist.GetRelativeToDate(date));
+
+				remExist.dDaysSnooze = (dNow - date + remExist.dRelativeDaysLeadIn);
 			}
 			else // absolute
 			{
-				// in case the user didn't handle the notification immediately we need
-				// to soak up any additional elapsed time in the snooze
-				reminder.dDaysSnooze = (dNow - reminder.dtAbsolute);
+				remExist.dDaysSnooze = (dNow - remExist.dtAbsolute);
 			}
 						
 			// then we add the user's snooze
-			reminder.dDaysSnooze += GetSnoozeDays();
-			reminder.nLastSnoozeMins = GetSnoozeMinutes();
+			remExist.dDaysSnooze += GetSnoozeDays();
+			remExist.nLastSnoozeMins = GetSnoozeMinutes();
 		}
 	}
 

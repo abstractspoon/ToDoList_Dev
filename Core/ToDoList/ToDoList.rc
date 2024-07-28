@@ -5456,10 +5456,6 @@ BEGIN
     IDS_IMPORTFROMCB_NOTASKS 
                             "The clipboard text contained no tasks which could be imported."
     IDS_FILTER_FLAGGED      "Flagged Tasks"
-    IDS_BEGINWHENREMINDERREST "begins in %s at %s"
-    IDS_DUEWHENREMINDERREST "is due in %s at %s"
-    IDS_BEGINWHENREMINDERMINS "begins in %.0f minutes at %s"
-    IDS_DUEWHENREMINDERMINS "is due in %.0f minutes at %s"
     IDS_TDC_FIELD_STARTTIME "St&art Time"
     IDS_UITHEMEFILEFILTER   "Theme Files (*.xml)|*.xml||"
     IDS_NEEDRESTARTTODOLISTLIGHTBOXCHANGE 
@@ -5518,8 +5514,6 @@ BEGIN
     IDS_TDC_UPDATEFILTER_TIP "Update Filter"
     IDS_ADVANCEDFILTER      "Find Tasks Filter"
     IDS_LOGFILELOCKED       "The log file could not be updated.\n\nPlease ensure that the file is not already open for editing and \nthat you have the correct permissions and then try again."
-    IDS_DUEWHENREMINDERNOW  "is due now (%s)"
-    IDS_BEGINWHENREMINDERNOW "begins now (%s)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -6005,6 +5999,18 @@ BEGIN
     IDS_CUSTATTRIBICONDLG_TITLE "Select Custom Icon"
     IDS_FINDTASKICONDLG_TITLE "Select Search Icon"
     IDS_CUSTICONSETUPDLG_TITLE "Select Custom Icons"
+    IDS_REMINDER_STARTSIN   "Starts in %s"
+    IDS_REMINDER_STARTEDAGO "Started %s ago"
+    IDS_REMINDER_OVERDUEBY  "Overdue by %s"
+    IDS_REMINDER_DUEIN      "Due in %s"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_REMINDER_ABSOLUTENOW "Now"
+    IDS_REMINDER_ABSOLUTEAGO "%s ago"
+    IDS_REMINDER_STARTSNOW  "Starts Now"
+    IDS_REMINDER_DUENOW     "Due Now"
 END
 
 #endif    // English (Australia) resources

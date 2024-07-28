@@ -105,49 +105,75 @@ void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rIcon) const
 		pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
 }
 
-CString TDCREMINDER::FormatWhenString() const
+CString TDCREMINDER::FormatNotification() const
 {
 	ASSERT(pTDC);
 
-	CEnString sWhen;
+	COleDateTime date;
 
-	if (pTDC && bRelative)
+	if ((bRelative && !GetRelativeToDate(date)) ||
+		(!bRelative && !GetReminderDate(date)))
 	{
-		const double ONE_MINUTE = (1.0 / MINS_IN_DAY);
-		const double ONE_HOUR = (1.0 / HOURS_IN_DAY);
+		return _T("");
+	}
+	
+	double dDiff = (date - COleDateTime::GetCurrentTime()), dAbsDiff = fabs(dDiff);
 
-		BOOL bRelativeFromDue = (nRelativeFromWhen == TDCR_DUEDATE);
+	const double FIVE_MINS = (5.0 / MINS_IN_DAY);
+	const double ONE_HOUR = (1.0 / HOURS_IN_DAY);
+	const double ONE_DAY = 1.0;
 
-		COleDateTime date = pTDC->GetTaskDate(dwTaskID, (bRelativeFromDue ? TDCD_DUE : TDCD_START));
-		CString sDateTime = CDateHelper::FormatDate(date, DHFD_DOW | DHFD_NOSEC | DHFD_TIME);
+	CString sDiff;
 
-		double dWhen = (date - COleDateTime::GetCurrentTime()); // days
+	if (dAbsDiff >= FIVE_MINS)
+	{
+		TH_UNITS nUnits = THU_DAYS;
 
-		if (dWhen < ONE_MINUTE) // including negatives
+		if (dAbsDiff <= ONE_HOUR)
 		{
-			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERNOW : IDS_BEGINWHENREMINDERNOW), sDateTime);
+			dAbsDiff *= MINS_IN_DAY;
+			nUnits = THU_MINS;
 		}
-		else if (dWhen < ONE_HOUR)
+		else if (dAbsDiff <= ONE_DAY)
 		{
-			// convert to minutes
-			dWhen *= MINS_IN_DAY;
-			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERMINS : IDS_BEGINWHENREMINDERMINS), dWhen, sDateTime);
+			dAbsDiff *= HOURS_IN_DAY;
+			nUnits = THU_HOURS;
+		}
+
+		sDiff = CTimeHelper::FormatTime(dAbsDiff, nUnits, 0, '\0');
+	}
+
+	CEnString sNotify;
+
+	if (bRelative)
+	{
+		BOOL bFromDue = (nRelativeFromWhen == TDCR_DUEDATE);
+
+		if (sDiff.IsEmpty())
+		{
+			sNotify.LoadString(bFromDue ? IDS_REMINDER_DUENOW : IDS_REMINDER_STARTSNOW);
+		}
+		else if (dDiff < 0)
+		{
+			sNotify.Format(bFromDue ? IDS_REMINDER_OVERDUEBY : IDS_REMINDER_STARTEDAGO, sDiff);
 		}
 		else
 		{
-			// Format as HMS
-			CTwentyFourSevenWeek week;
-			CString sHMS = CTimeHelper(week).FormatTimeHMS(dWhen, THU_DAYS);
-
-			sWhen.Format((bRelativeFromDue ? IDS_DUEWHENREMINDERREST : IDS_BEGINWHENREMINDERREST), sHMS, sDateTime);
+			sNotify.Format(bFromDue ? IDS_REMINDER_DUEIN : IDS_REMINDER_STARTSIN, sDiff);
 		}
 	}
-	else
+	else // Absolute
 	{
-		sWhen = CDateHelper::FormatDate(dtAbsolute, DHFD_DOW | DHFD_NOSEC | DHFD_TIME);
+		if (sDiff.IsEmpty())
+			sNotify.LoadString(IDS_REMINDER_ABSOLUTENOW);
+		else
+			sNotify.Format(IDS_REMINDER_ABSOLUTEAGO, sDiff);
 	}
 
-	return sWhen;
+	// Append date
+	sNotify += (_T(" (") + CDateHelper::FormatDate(date, (DHFD_DOW | DHFD_HASTIME | DHFD_TIME | DHFD_NOSEC)) + ')');
+
+	return sNotify;
 }
 
 BOOL TDCREMINDER::IsTaskRecurring() const
@@ -210,29 +236,24 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	sStickiesID = pPrefs->GetProfileString(szKey, _T("StickiesID"));
 }
 
+BOOL TDCREMINDER::GetRelativeToDate(COleDateTime& date) const
+{
+	ASSERT(pTDC);
+	ASSERT(dwTaskID);
+
+	if (!bRelative)
+		return FALSE;
+
+	date = pTDC->GetTaskDate(dwTaskID, (nRelativeFromWhen == TDCR_DUEDATE) ? TDCD_DUE : TDCD_START);
+	return CDateHelper::IsDateSet(date);
+}
+
 BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 {
 	date = dtAbsolute;
 	
-	if (bRelative)
-	{
-		ASSERT(pTDC);
-		ASSERT(dwTaskID);
-		
-		if (nRelativeFromWhen == TDCR_DUEDATE)
-		{
-			date = pTDC->GetTaskDate(dwTaskID, TDCD_DUE);
-		}
-		else // start date
-		{
-			date = pTDC->GetTaskDate(dwTaskID, TDCD_START);
-		}
-		
-		if (CDateHelper::IsDateSet(date))
-		{
-			date -= dRelativeDaysLeadIn;
-		}
-	}
+	if (bRelative && GetRelativeToDate(date))
+		date -= dRelativeDaysLeadIn;
 	
 	if (CDateHelper::IsDateSet(date))
 	{

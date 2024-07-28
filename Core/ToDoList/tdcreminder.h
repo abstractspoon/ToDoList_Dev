@@ -25,16 +25,19 @@ struct TDCREMINDER
 {
 	TDCREMINDER();
 	
-	CString FormatWhenString() const;
 	CString GetTaskTitle() const;
 	CString GetParentTitle() const;
 	CString GetTaskListName() const;
 	CString GetTaskComments() const;
 	CString GetTaskPath() const;
+
+	CString FormatNotification() const;
+
 	BOOL IsTaskRecurring() const;
 	BOOL IsTaskDone() const;
 	BOOL TaskExists() const;
 	BOOL GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze = TRUE) const;
+	BOOL GetRelativeToDate(COleDateTime& date) const;
 	BOOL Matches(const CFilteredToDoCtrl* pTDC, DWORD dwTaskID) const;
 
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;

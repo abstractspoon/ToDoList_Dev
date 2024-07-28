@@ -66,6 +66,8 @@ protected:
 protected:
 	void UpdateIconStatus();
 	void RecalcColumnWidths();
+	void UpdateReminder(const TDCREMINDER& rem, int nItem);
+
 };
 
 //{{AFX_INSERT_LOCATION}}
