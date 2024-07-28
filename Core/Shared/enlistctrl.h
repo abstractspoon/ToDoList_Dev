@@ -231,6 +231,7 @@ protected:
 	BOOL BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 	BOOL WantSelChange(int nSel) const;
+	int CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const;
 
 private:
 	BOOL BuildSortMap(int nCol);

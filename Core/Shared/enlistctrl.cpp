@@ -1736,17 +1736,31 @@ int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortC
 	m_mapSortStrings.Lookup(dwItemData1, sItem1); 
 	m_mapSortStrings.Lookup(dwItemData2, sItem2);
 
-	if (m_bSortEmptyBelow)
-	{
-		if (sItem1.IsEmpty())
-			return m_bSortAscending ? 1 : -1;
+	int nCompare = CompareEmptiness(sItem1.IsEmpty(), sItem2.IsEmpty());
 
-		if (sItem2.IsEmpty())
-			return m_bSortAscending ? -1 : 1;
-	}
+	if (nCompare != 0)
+		return nCompare;
 
 	// else
 	return sItem1.CompareNoCase(sItem2);
+}
+
+int CEnListCtrl::CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const
+{
+	if (m_bSortEmptyBelow)
+	{
+		if (bItem1Empty && bItem2Empty)
+			return 0;
+
+		if (bItem1Empty)
+			return m_bSortAscending ? 1 : -1;
+
+		if (bItem2Empty)
+			return m_bSortAscending ? -1 : 1;
+	}
+
+	return 0;
+
 }
 
 CString CEnListCtrl::GetSortText(DWORD dwItemData) const // this is for derived classes
