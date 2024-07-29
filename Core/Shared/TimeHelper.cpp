@@ -263,8 +263,14 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 	}
 
 	// Modify for PM signifier
-	if (bPM && dTime < 12)
+	if (bPM && (dTime < 12))
+	{
 		dTime += 12;
+	}
+	else if (bAM && (dTime >= 12))
+	{
+		dTime -= 12;
+	}
 
 	// truncate to 0-24
 	return min(max(dTime, 0.0), 24.0);
