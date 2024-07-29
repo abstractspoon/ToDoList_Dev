@@ -1760,7 +1760,6 @@ int CEnListCtrl::CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const
 	}
 
 	return 0;
-
 }
 
 CString CEnListCtrl::GetSortText(DWORD dwItemData) const // this is for derived classes

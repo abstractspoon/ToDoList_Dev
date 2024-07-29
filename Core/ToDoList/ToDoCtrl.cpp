@@ -6318,13 +6318,10 @@ LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 BOOL CToDoCtrl::IsClipboardEmpty(BOOL bCheckID) const
 {
 	if (CTaskClipboard::IsEmpty())
-	{
 		return TRUE;
-	}
-	else if (bCheckID)
-	{
+
+	if (bCheckID)
 		return !CTaskClipboard::TasklistIDMatches(GetClipboardID());
-	}
 
 	//else
 	return FALSE;
@@ -9762,13 +9759,10 @@ BOOL CToDoCtrl::GetClipboardID(CString& sClipID, BOOL bArchive) const
 	CString sFilePath;
 
 	if (bArchive && !GetArchivePath(sFilePath))
-	{
 		return FALSE;
-	}
-	else if (sFilePath.IsEmpty())
-	{
+
+	if (sFilePath.IsEmpty())
 		sFilePath = GetFilePath();
-	}
 
 	if (sFilePath.IsEmpty())
 		sClipID = _T("New_Tasklist");

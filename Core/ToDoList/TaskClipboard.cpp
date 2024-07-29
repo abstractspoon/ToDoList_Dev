@@ -7,6 +7,7 @@
 #include "ToDoitem.h"
 
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 #include "..\shared\clipboard.h"
 
 #ifdef _DEBUG
@@ -68,7 +69,18 @@ BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const 
 
 BOOL CTaskClipboard::TasklistIDMatches(const CString& sRefTasklistID)
 {
-	return (!sRefTasklistID.IsEmpty() && (sRefTasklistID.CompareNoCase(GetTasklistID()) == 0));
+	if (sRefTasklistID.IsEmpty())
+		return FALSE;
+	
+	CString sClipID = GetTasklistID();
+	BOOL bMatches = (sRefTasklistID.CompareNoCase(sClipID) == 0);
+
+	// TEMPORARY LOGGING
+	if (sRefTasklistID != DEF_CLIPID)
+		FileMisc::LogText(_T("CTaskClipboard::ClipIDMatches(%s, %s) = %d"), sClipID, sRefTasklistID, bMatches);
+	
+	return bMatches;
+//	return (!sRefTasklistID.IsEmpty() && (sRefTasklistID.CompareNoCase(GetTasklistID()) == 0));
 }
 
 BOOL CTaskClipboard::HasTasks()
