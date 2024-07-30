@@ -1742,10 +1742,7 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
 
 				if ((pWnd != &m_editBox) && IsChild(pWnd))
-				{
 					HideControl(*pWnd);
-					HandleReturnKey(CWnd::FromHandle(pMsg->hwnd));
-				}
 			}
 			break;
 

@@ -3088,12 +3088,6 @@ BOOL CTDLTaskAttributeListCtrl::PreTranslateMessage(MSG* pMsg)
 	return CInputListCtrl::PreTranslateMessage(pMsg);
 }
 
-void CTDLTaskAttributeListCtrl::HandleReturnKey(CWnd* pCtrl)
-{
-	if (CDialogHelper::IsChildOrSame(&m_cbTimeOfDay, pCtrl) && !m_cbTimeOfDay.GetDroppedState())
-		OnComboEditChange(IDC_TIME_PICKER);
-}
-
 int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
 {
 	switch (nTimeAttribID)
