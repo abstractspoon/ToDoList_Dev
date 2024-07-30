@@ -321,7 +321,7 @@ BOOL CTrayIcon::ModifyTip(LPCTSTR sNewTip)
 
 BOOL CTrayIcon::SetIcon(UINT uIDNewIcon)
 {
-	HICON hIcon = GraphicsMisc::LoadIcon(uIDNewIcon, 16);
+	HICON hIcon = GraphicsMisc::LoadIcon(uIDNewIcon);
 
 	if (!hIcon)
 		return FALSE;

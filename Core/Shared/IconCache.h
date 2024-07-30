@@ -30,11 +30,11 @@ public:
 	
 	void Clear();
 	BOOL Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle = ILD_TRANSPARENT);
-	int GetIconSize(BOOL bScaledByDPI = TRUE) const;
+	int GetIconSize() const { return m_nIconSize; }
 	
 protected:
 	CMap<CString, LPCTSTR, HICON, HICON&> m_mapIcons;
-	BOOL m_bLargeIcons;
+	int m_nIconSize;
 
 protected:
 	BOOL IsValidName(const CString& sName) const;

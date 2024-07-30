@@ -13,7 +13,9 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CIconCache::CIconCache(BOOL bLargeIcons) : m_bLargeIcons(bLargeIcons)
+CIconCache::CIconCache(BOOL bLargeIcons) 
+	: 
+	m_nIconSize(GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16))
 {
 }
 
@@ -22,23 +24,11 @@ CIconCache::~CIconCache()
 	Clear();
 }
 
-int CIconCache::GetIconSize(BOOL bScaledByDPI) const
-{
-	int nSize = (m_bLargeIcons ? 32 : 16);
-
-	if (bScaledByDPI)
-		nSize = GraphicsMisc::ScaleByDPIFactor(nSize);
-
-	return nSize;
-}
-
 BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 {
 	if (IsValidName(sName) && hbm)
 	{
-		int nReqSize = GetIconSize();
-
-		HICON hIcon = CEnBitmap::ExtractIcon(hbm, crMask, nReqSize, nReqSize);
+		HICON hIcon = CEnBitmap::ExtractIcon(hbm, crMask, m_nIconSize, m_nIconSize);
 		ASSERT(hIcon);
 
 		return Add(sName, hIcon, FALSE);
@@ -52,7 +42,7 @@ BOOL CIconCache::Add(const CString& sName, UINT nIconID)
 {
 	if (IsValidName(sName) && nIconID)
 	{
-		HICON hIcon = GraphicsMisc::LoadIcon(nIconID, GetIconSize(FALSE));
+		HICON hIcon = GraphicsMisc::LoadIcon(nIconID, m_nIconSize);
 		ASSERT(hIcon);
 
 		return Add(sName, hIcon, FALSE);
@@ -88,9 +78,7 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 {
 	if (IsValidName(sName) && !sImagePath.IsEmpty())
 	{
-		int nReqSize = GetIconSize();
-
-		HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, nReqSize, nReqSize);
+		HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_nIconSize, m_nIconSize);
 		ASSERT(hIcon || !FileMisc::PathExists(sImagePath));
 
 		return Add(sName, hIcon, FALSE);
@@ -153,10 +141,7 @@ BOOL CIconCache::Draw(CDC* pDC, const CString& sName, POINT pt, UINT nStyle)
 	HICON hIcon = NULL;
 
 	if (m_mapIcons.Lookup(sName, hIcon))
-	{
-		int nReqSize = GetIconSize();
-		return ::DrawIconEx(*pDC, pt.x, pt.y, hIcon, nReqSize, nReqSize, 0, NULL, DI_NORMAL);
-	}
+		return ::DrawIconEx(*pDC, pt.x, pt.y, hIcon, m_nIconSize, m_nIconSize, 0, NULL, DI_NORMAL);
 
 	return FALSE;
 }
