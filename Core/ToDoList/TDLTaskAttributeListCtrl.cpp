@@ -2643,11 +2643,11 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
 {
-	HideControl(*GetDlgItem(nCtrlID));
-
 	// Special case
 	if (nCtrlID == IDC_TIME_PICKER)
 		OnComboEditChange(IDC_TIME_PICKER);
+	else
+		HideControl(*GetDlgItem(nCtrlID));
 }
 
 void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)

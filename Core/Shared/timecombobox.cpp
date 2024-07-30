@@ -330,7 +330,7 @@ void CTimeComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 			((dTime < wd.GetStartOfDayInHours()) ||	(dTime > wd.GetEndOfDayInHours())))
 		{
 			crBack = GetSysColor(COLOR_3DFACE);
-			crText = GetSysColor(COLOR_3DSHADOW);
+			// leave text colour as-is
 		}
 	}
 }
