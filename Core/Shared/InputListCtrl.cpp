@@ -1234,9 +1234,6 @@ void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 	if (!ctrl.GetSafeHwnd())
 		return;
 	
-	if (!ctrl.IsWindowVisible())
-		return;
-
 	if (pWndIgnore && ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
 		if (pWndIgnore->GetSafeHwnd() == (HWND)ctrl.SendMessage(DTM_GETMONTHCAL))

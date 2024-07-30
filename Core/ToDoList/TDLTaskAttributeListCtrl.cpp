@@ -2637,19 +2637,21 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 { 
 	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	if (pCombo->GetDlgItem(1001) == NULL)
+	if (pCombo->GetDlgItem(1001) == NULL) // no edit control
 		HideControl(*pCombo);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
 {
 	HideControl(*GetDlgItem(nCtrlID));
+
+	// Special case
+	if (nCtrlID == IDC_TIME_PICKER)
+		OnComboEditChange(IDC_TIME_PICKER);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 {
-	HideControl(*GetDlgItem(nCtrlID));
-
 	int nRow = GetCurSel();
 	CString sNewItemText;
 
@@ -2670,7 +2672,13 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 		break;
 
 	case IDC_TIME_PICKER:
-		sNewItemText = CTimeHelper::FormatClockTime(m_cbTimeOfDay.Get24HourTime() / 24);
+		{
+			// Don't hide if dropped-down
+			if (m_cbTimeOfDay.GetDroppedState())
+				return;
+
+			sNewItemText = CTimeHelper::FormatClockTime(m_cbTimeOfDay.Get24HourTime() / 24);
+		}
 		break;
 
 	case IDC_PRIORITY_COMBO:
@@ -2703,6 +2711,8 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 		ASSERT(0);
 		return;
 	}
+
+	HideControl(*GetDlgItem(nCtrlID));
 
 	if (sNewItemText != GetItemText(nRow, VALUE_COL))
 	{
