@@ -243,8 +243,10 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 			if (bIncSeconds)
 				dTime += (_ttof(aBits[2]) / 3600);	// seconds
 			// fall thru
+
 		case 2: dTime += (_ttof(aBits[1]) / 60);	// minutes
 			// fall thru
+
 		case 1: dTime += (_ttof(aBits[0]));			// hours
 		}
 	}
@@ -262,12 +264,12 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 		dTime = _ttof(sTime);
 	}
 
-	// Modify for PM signifier
-	if (bPM && (dTime < 12))
+	// Modify for AM/PM signifier
+	if (bPM && (dTime < 12.0))
 	{
 		dTime += 12;
 	}
-	else if (bAM && (dTime >= 12))
+	else if (bAM && ((int)dTime == 12))
 	{
 		dTime -= 12;
 	}
