@@ -39,8 +39,8 @@ public:
 
 	BOOL HasOverdueTasks() const;
 	BOOL HasDueTodayTasks() const;
-	double GetEarliestDueDate() const;
 	BOOL HasLockedTasks() const;
+	double GetEarliestDueDate() const;
 
 	BOOL IsTaskRecentlyModified(DWORD dwTaskID) const;
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
@@ -54,17 +54,17 @@ public:
 	double GetTaskDueDate(DWORD dwTaskID) const;
 	double GetTaskStartDate(DWORD dwTaskID) const;
 	double GetTaskLastModifiedDate(DWORD dwTaskID) const;
-	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
-	int GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
-	int GetTaskRisk(DWORD dwTaskID) const;
-	int GetTaskPercentDone(DWORD dwTaskID) const;
 	double GetTaskCost(DWORD dwTaskID) const;
 	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnits) const;
+	double GetTaskSubtaskCompletion(DWORD dwTaskID) const;
+	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
+	int GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
+	int GetTaskRisk(DWORD dwTaskID) const;
+	int GetTaskPercentDone(DWORD dwTaskID) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 	BOOL GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const;
-	double GetTaskSubtaskCompletion(DWORD dwTaskID) const;
 
 	BOOL IsParentTaskDone(DWORD dwTaskID) const;
 	BOOL IsTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
@@ -78,20 +78,20 @@ public:
 	double GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskLastModifiedBy(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
-	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	double GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
-	TDC_UNITS GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
-	TDC_UNITS GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskLastModifiedBy(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
+	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	int GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	int GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const; // spent / estimate
 	BOOL GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, int& nSubtasksTotal, int& nSubtasksDone) const;
-	double GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
+	TDC_UNITS GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	TDC_UNITS GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	TDC_UNITS GetTaskCustomAttributeUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 
 	BOOL IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const;
