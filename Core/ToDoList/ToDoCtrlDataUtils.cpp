@@ -1936,7 +1936,7 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 
 		if (pTDSChild && pTDIChild)
 		{
-			if (IsTaskRecentlyModified(pTDIChild, pTDSChild))
+			if (IsTaskRecentlyModified(pTDIChild, pTDSChild)) // RECURSIVE CALL
 				return TRUE;
 		}
 	}
@@ -1980,7 +1980,7 @@ BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 		if (pTDIChild && pTDSChild)
 		{
-			if (IsTaskFlagged(pTDIChild, pTDSChild))
+			if (IsTaskFlagged(pTDIChild, pTDSChild)) // RECURSIVE CALL
 				return TRUE;
 		}
 	}
@@ -2000,7 +2000,7 @@ BOOL CTDCTaskCalculator::IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE*
 	if (pTDI->bLocked || !m_data.HasStyle(TDCS_SUBTASKSINHERITLOCK))
 		return pTDI->bLocked;
 
-	return IsTaskLocked(pTDS->GetParentTaskID());
+	return IsTaskLocked(pTDS->GetParentTaskID()); // RECURSIVE CALL
 }
 
 BOOL CTDCTaskCalculator::IsTaskRecurring(DWORD dwTaskID) const
@@ -2226,7 +2226,7 @@ int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTU
 		ASSERT(pTDIChild && pTDSChild);
 
 		if (pTDSChild && pTDIChild)
-			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone);
+			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone); // RECURSIVE CALL
 	}
 
 	ASSERT(nLeafCount);
@@ -2541,7 +2541,7 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 			ASSERT(pTDIChild && pTDSChild);
 
 			if (pTDSChild && pTDIChild)
-				dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS);
+				dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS); // RECURSIVE CALL
 		}
 	}
 
@@ -2680,7 +2680,7 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 
-		if (HasDueTodayTasks(pTDSChild))
+		if (HasDueTodayTasks(pTDSChild)) // RECURSIVE CALL
 			return TRUE;
 	}
 
@@ -2704,7 +2704,7 @@ BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 
-		if (HasLockedTasks(pTDSChild))
+		if (HasLockedTasks(pTDSChild)) // RECURSIVE CALL
 			return TRUE;
 	}
 
@@ -3080,7 +3080,7 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 				{
 					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 					{
-						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue);
+						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue); // RECURSIVE CALL
 
 						// optimization
 						if (nChildHighest == MAX_TDPRIORITY)
@@ -3133,7 +3133,7 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 				{
 					if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 					{
-						int nChildHighest = GetTaskRisk(pTDIChild, pTDSChild);
+						int nChildHighest = GetTaskRisk(pTDIChild, pTDSChild); // RECURSIVE CALL
 
 						// optimization
 						if (nChildHighest == MAX_TDRISK)
@@ -3265,7 +3265,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			// ignore references else risk of infinite loop
 			if (!m_data.IsTaskReference(dwSubtaskID))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits)) // RECURSIVE CALL
 					dCalcValue += dSubtaskVal;
 			}
 		}
@@ -3289,7 +3289,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			// ignore references else risk of infinite loop
 			if (!m_data.IsTaskReference(dwSubtaskID))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits)) // RECURSIVE CALL
 					dCalcValue = max(dSubtaskVal, dCalcValue);
 			}
 		}
@@ -3316,7 +3316,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			// ignore references else risk of infinite loop
 			if (!m_data.IsTaskReference(dwSubtaskID))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits)) // RECURSIVE CALL
 					dCalcValue = min(dSubtaskVal, dCalcValue);
 			}
 		}
