@@ -109,9 +109,9 @@ int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, C
 	if (!m_data.GetTaskCount())
 		return 0;
 	
-	for (int nSubTask = 0; nSubTask < m_data.m_struct.GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < m_data.m_struct.GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -146,9 +146,9 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	}
 	
 	// process children
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 		
 		ASSERT(pTDIChild && pTDSChild);
@@ -1927,9 +1927,9 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 		return bRecentMod;
 
 	// Children
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2030,11 +2030,11 @@ BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOST
 
 	nSubtasksDone = nSubtasksCount = 0;
 
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
 		nSubtasksCount++;
 
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2175,9 +2175,9 @@ double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TOD
 	double dSplitDoneValue = (1.0 / (nNumSubtasks - nNumDoneSubtasks)); 
 	double dTotalPercentDone = 0;
 
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2220,9 +2220,9 @@ int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTU
 	// else traverse sub items
 	int nLeafCount = 0;
 
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild); 
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2269,9 +2269,9 @@ double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, c
 
 	// process the children multiplying the split percent by the 
 	// proportion of this subtask's subtasks to the whole
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2313,12 +2313,12 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (pTDI->cost.bIsRate)
 		dCost *= pTDI->timeSpent.dAmount;
 	
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
 		const TODOSTRUCTURE* pTDSChild = NULL;
 		const TODOITEM* pTDIChild = NULL;
 
-		if (GetSubtask(pTDS, nSubTask, pTDIChild, pTDSChild))
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 			dCost += GetTaskCost(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 	}
 
@@ -2436,9 +2436,9 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	}
 
 	// Subtask time
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2532,9 +2532,9 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 
 	if (bIsParent) // children's time
 	{
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 			ASSERT(pTDIChild && pTDSChild);
@@ -2675,9 +2675,9 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
 	}
 
 	// subtasks
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 
 		if (HasDueTodayTasks(pTDSChild)) // RECURSIVE CALL
 			return TRUE;
@@ -2699,9 +2699,9 @@ BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
 		return TRUE;
 
 	// subtasks
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 
 		if (HasLockedTasks(pTDSChild)) // RECURSIVE CALL
 			return TRUE;
@@ -2717,9 +2717,9 @@ double CTDCTaskCalculator::GetEarliestDueDate() const
 	double dEarliest = DBL_MAX;
 
 	// traverse top level items
-	for (int nSubTask = 0; nSubTask < m_data.m_struct.GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < m_data.m_struct.GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -2937,9 +2937,9 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 				dBest = (bEarliest ? INT_MAX : -INT_MAX);
 
 			// check children
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 				ASSERT(pTDIChild && pTDSChild);
@@ -3005,9 +3005,9 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 	{
 		double dLatest = pTDI->dateLastMod;
 
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 			ASSERT(pTDIChild && pTDSChild);
@@ -3068,9 +3068,9 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 		else if (m_data.HasStyle(TDCS_USEHIGHESTPRIORITY) && pTDS->HasSubTasks())
 		{
 			// check children
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 				ASSERT(pTDIChild && pTDSChild);
@@ -3121,9 +3121,9 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 			// check children
 			nHighest = max(nHighest, FM_NORISK);//MIN_TDRISK;
 
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 				ASSERT(pTDIChild && pTDSChild);
@@ -3257,9 +3257,9 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 
 		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 
 			// ignore references else risk of infinite loop
 			if (!m_data.IsTaskReference(dwSubtaskID))
@@ -3281,9 +3281,9 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 
 		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 
 			// ignore references else risk of infinite loop
 			if (!m_data.IsTaskReference(dwSubtaskID))
@@ -3308,9 +3308,9 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 
 		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 
 			// ignore references else risk of infinite loop
 			if (!m_data.IsTaskReference(dwSubtaskID))
@@ -4610,9 +4610,9 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 	const TODOITEM* pTDILastRecurringSubtask = NULL;
 	HTASKITEM hPrevSiblingTask = NULL;
 
-	for (int nSubTask = 0; nSubTask < pTDSParent->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDSParent->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nSubtask);
 		ASSERT(pTDS);
 
 		if (!pTDS)
