@@ -3349,6 +3349,13 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUS
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
+	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, CDWordSet& mapProcessedIDs) const
+{
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
+
 	double dCalcValue = DBL_NULL, dSubtaskVal;
 	TDCCADATA data;
 
@@ -3375,12 +3382,12 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		// our children's values
 		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
+			const TODOITEM* pTDIChild = NULL;
+			const TODOSTRUCTURE* pTDSChild = NULL;
 
-			// ignore references else risk of infinite loop
-			if (!m_data.IsTaskReference(dwSubtaskID))
+			if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits)) // RECURSIVE CALL
+				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue += dSubtaskVal;
 			}
 		}
@@ -3398,12 +3405,12 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		// our children's values
 		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
+			const TODOITEM* pTDIChild = NULL;
+			const TODOSTRUCTURE* pTDSChild = NULL;
 
-			// ignore references else risk of infinite loop
-			if (!m_data.IsTaskReference(dwSubtaskID))
+			if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits)) // RECURSIVE CALL
+				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = max(dSubtaskVal, dCalcValue);
 			}
 		}
@@ -3424,12 +3431,12 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		// our children's values
 		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
+			const TODOITEM* pTDIChild = NULL;
+			const TODOSTRUCTURE* pTDSChild = NULL;
 
-			// ignore references else risk of infinite loop
-			if (!m_data.IsTaskReference(dwSubtaskID))
+			if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits)) // RECURSIVE CALL
+				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = min(dSubtaskVal, dCalcValue);
 			}
 		}
