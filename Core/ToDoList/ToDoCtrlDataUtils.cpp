@@ -3052,12 +3052,19 @@ double CTDCTaskCalculator::GetEarliestDate(double dDate1, double dDate2, BOOL bN
 
 int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const
 {
+	return GetTaskPriority(pTDI, pTDS, bCheckOverdue, CDWordSet());
+}
+
+int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
 	if (!pTDS || !pTDI)
 	{
 		ASSERT(0);
-		return -1;
+		return FM_NOPRIORITY;
 	}
+
+	CHECKSET_ALREADY_PROCESSED(pTDS, FM_NOPRIORITY);
 
 	int nHighest = pTDI->nPriority;
 
@@ -3076,16 +3083,14 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 			// check children
 			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+				const TODOSTRUCTURE* pTDSChild = NULL;
+				const TODOITEM* pTDIChild = NULL;
 
-				ASSERT(pTDIChild && pTDSChild);
-
-				if (pTDSChild && pTDIChild)
+				if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
 					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 					{
-						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue); // RECURSIVE CALL
+						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue, mapProcessedIDs); // RECURSIVE CALL
 
 						// optimization
 						if (nChildHighest == MAX_TDPRIORITY)
