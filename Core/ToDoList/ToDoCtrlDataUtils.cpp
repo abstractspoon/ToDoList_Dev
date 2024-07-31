@@ -2117,7 +2117,7 @@ int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUC
 	ASSERT (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE)); // sanity check
 
 	double dSpent = GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
-	double dUnused, dEstimate = GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused);
+	double dUnused, dEstimate = GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused, CDWordSet());
 
 	if ((dSpent > 0) && (dEstimate > 0))
 		return (int)(100 * dSpent / dEstimate);
@@ -2399,20 +2399,23 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	BOOL bReturnWeighted = m_data.HasStyle(TDCS_USEPERCENTDONEINTIMEEST);
 
 	double dWeightedEstimate;
-	double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate);
+	double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate, CDWordSet());
 
 	return (bReturnWeighted ? dWeightedEstimate : dEstimate);
 }
 
 // internal version
 double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
-	TDC_UNITS nUnits, double& dWeightedEstimate) const
+											   TDC_UNITS nUnits, double& dWeightedEstimate, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0.0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
 
 	double dEstimate = 0.0;
 	dWeightedEstimate = 0.0;
@@ -2438,16 +2441,14 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	// Subtask time
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
 			double dChildWeightedEstimate = 0.0;
 
-			dEstimate += GetTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate); // RECURSIVE CALL
+			dEstimate += GetTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate, mapProcessedIDs); // RECURSIVE CALL
 			dWeightedEstimate += dChildWeightedEstimate;
 		}
 	}
@@ -2484,7 +2485,7 @@ double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, pTDI->timeEstimate.nUnits, dWeightedEstimate);
+		double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, pTDI->timeEstimate.nUnits, dWeightedEstimate, CDWordSet());
 
 		if (m_data.HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT))
 		{
