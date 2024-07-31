@@ -2515,10 +2515,11 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return m_data.m_nDefTimeEstUnits;
+	}
 
 	TDC_UNITS nUnits = m_data.m_nDefTimeEstUnits;
 
@@ -2591,10 +2592,11 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 TDC_UNITS CTDCTaskCalculator::GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return m_data.m_nDefTimeSpentUnits;
+	}
 
 	TDC_UNITS nUnits = m_data.m_nDefTimeSpentUnits;
 
@@ -2629,10 +2631,11 @@ double CTDCTaskCalculator::GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnit
 double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0.0;
+	}
 
 	double dRemain = 0.0, dWeightedEstimate;
 	nUnits = TDCU_NULL;
@@ -2694,10 +2697,11 @@ BOOL CTDCTaskCalculator::IsTaskStarted(DWORD dwTaskID, BOOL bToday) const
 BOOL CTDCTaskCalculator::IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	double dStarted = GetTaskStartDate(pTDI, pTDS);
 
@@ -2722,10 +2726,11 @@ BOOL CTDCTaskCalculator::IsTaskDue(DWORD dwTaskID, BOOL bToday) const
 BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-	
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	double dDue = GetTaskDueDate(pTDI, pTDS);
 	
@@ -3309,9 +3314,14 @@ BOOL CTDCTaskCalculator::IsParentTaskDone(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 {
-	ASSERT (pTDS);
+	// Sanity check
+	if (!pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
-	if (!pTDS || pTDS->ParentIsRoot())
+	if (pTDS->ParentIsRoot())
 		return FALSE;
 
 	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
