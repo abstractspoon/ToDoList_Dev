@@ -1929,12 +1929,12 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 		return FALSE;
 	}
 
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
+
 	BOOL bRecentMod = pTDI->IsRecentlyModified();
 
 	if (bRecentMod || !m_data.HasStyle(TDCS_USELATESTLASTMODIFIED))
 		return bRecentMod;
-
-	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	// Children
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
@@ -2531,7 +2531,9 @@ TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TO
 		DWORD dwID = pTDS->GetSubTaskID(0);
 
 		if (m_data.GetTask(dwID, pTDI, pTDS))
+		{
 			nUnits = GetBestTimeEstUnits(pTDI, pTDS); // RECURSIVE CALL
+		}
 	}
 
 	return nUnits;
@@ -2605,7 +2607,9 @@ TDC_UNITS CTDCTaskCalculator::GetBestTimeSpentUnits(const TODOITEM* pTDI, const 
 		DWORD dwID = pTDS->GetSubTaskID(0);
 
 		if (m_data.GetTask(dwID, pTDI, pTDS))
+		{
 			nUnits = GetBestTimeSpentUnits(pTDI, pTDS); // RECURSIVE CALL
+		}
 	}
 
 	return nUnits;
@@ -2788,11 +2792,19 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks() const
 
 BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
 {
-	// sanity check
-	ASSERT(pTDS);
+	return HasDueTodayTasks(pTDS, CDWordSet());
+}
 
+BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
+	// sanity check
 	if (!pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	if (pTDS->GetTaskID())
 	{
@@ -2810,7 +2822,7 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 
-		if (HasDueTodayTasks(pTDSChild)) // RECURSIVE CALL
+		if (HasDueTodayTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
 			return TRUE;
 	}
 
@@ -2831,11 +2843,19 @@ BOOL CTDCTaskCalculator::HasLockedTasks() const
 
 BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
 {
-	// sanity check
-	ASSERT(pTDS);
+	return HasLockedTasks(pTDS, CDWordSet());
+}
 
+BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
+	// sanity check
 	if (!pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	if (IsTaskLocked(pTDS->GetTaskID()))
 		return TRUE;
@@ -2845,7 +2865,7 @@ BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 
-		if (HasLockedTasks(pTDSChild)) // RECURSIVE CALL
+		if (HasLockedTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
 			return TRUE;
 	}
 
