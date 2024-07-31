@@ -41,6 +41,8 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 #define GET_TDS(id, tds, ret) GET_DATA_TDS(m_data, id, tds, ret)
 #define GET_TDI_TDS(id, tdi, tds, ret) GET_DATA_TDI_TDS(m_data, id, tdi, tds, ret)
 
+#define CHECK_ALREADY_PROCESSED(id, ret) if (mapProcessedIDs.Has(id)) return ret; mapProcessedIDs.Add(id)
+
 //////////////////////////////////////////////////////////////////////
 
 CTDCTaskMatcher::CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent)
@@ -2290,11 +2292,21 @@ double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, c
 
 double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
+	return GetTaskCost(pTDI, pTDS, CDWordSet());
+}
+
+double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
 	ASSERT (pTDS && pTDI);
 
 	if (!pTDS || !pTDI)
 		return 0.0;
+
+	CHECK_ALREADY_PROCESSED(pTDS->GetTaskID(), 0.0);
+
+	// else
+	mapProcessedIDs.Add(pTDS->GetTaskID());
 
 	// own cost
 	double dCost = pTDI->cost.dAmount;
@@ -2302,21 +2314,34 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (pTDI->cost.bIsRate)
 		dCost *= pTDI->timeSpent.dAmount;
 	
-	if (pTDS->HasSubTasks())
+	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDSChild && pTDIChild)
-				dCost += GetTaskCost(pTDIChild, pTDSChild);
-		}
+		if (GetSubtask(pTDS, nSubTask, pTDIChild, pTDSChild))
+			dCost += GetTaskCost(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 	}
 
 	return dCost;
+}
+
+BOOL CTDCTaskCalculator::GetSubtask(const TODOSTRUCTURE* pTDSParent, int nSubtask, const TODOITEM*& pTDIChild, const TODOSTRUCTURE*& pTDSChild) const
+{
+	pTDSChild = pTDSParent->GetSubTask(nSubtask);
+	pTDIChild = m_data.GetTask(pTDSChild);
+
+	ASSERT(pTDIChild && pTDSChild);
+
+	if (pTDIChild->IsReference())
+	{
+		pTDSChild = m_data.LocateTask(pTDIChild->dwTaskRefID);
+		pTDIChild = m_data.GetTask(pTDIChild->dwTaskRefID);
+
+		ASSERT(pTDIChild && pTDSChild);
+	}
+
+	return (pTDIChild && pTDSChild);
 }
 
 TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
