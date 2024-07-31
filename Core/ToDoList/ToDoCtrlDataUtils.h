@@ -101,7 +101,6 @@ protected:
 	const CToDoCtrlData& m_data;
 
 protected:
-	double GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const;
 	BOOL HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL HasLockedTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
@@ -127,6 +126,9 @@ protected:
 	double GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	double GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const;
+
+	double GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+						   BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const;
 
 	BOOL GetSubtask(const TODOSTRUCTURE* pTDSParent, int nSubtask, const TODOITEM*& pTDIChild, const TODOSTRUCTURE*& pTDSChild) const;
 

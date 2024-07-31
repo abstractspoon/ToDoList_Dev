@@ -41,7 +41,7 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 #define GET_TDS(id, tds, ret) GET_DATA_TDS(m_data, id, tds, ret)
 #define GET_TDI_TDS(id, tdi, tds, ret) GET_DATA_TDI_TDS(m_data, id, tdi, tds, ret)
 
-#define CHECKSET_ALREADY_PROCESSED(tds, ret) if (mapProcessedIDs.Has(tds->GetTaskID())) return ret; mapProcessedIDs.Add(tds->GetTaskID())
+#define CHECKSET_ALREADY_PROCESSED(map, tds, ret) if (map.Has(tds->GetTaskID())) return ret; map.Add(tds->GetTaskID())
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1969,7 +1969,7 @@ BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE
 		return FALSE;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, FALSE);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	if (pTDI->bFlagged || !m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS))
 		return pTDI->bFlagged;
@@ -2137,7 +2137,7 @@ double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TOD
 		return 0;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
@@ -2206,7 +2206,7 @@ int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTU
 		return 0;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, 1);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 1);
 
 	if (bIncludeDone)
 		return pTDS->GetLeafCount();
@@ -2244,7 +2244,7 @@ double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, c
 		return 0;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, 0);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0);
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
@@ -2307,7 +2307,7 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (!pTDS || !pTDI)
 		return 0.0;
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	// own cost
 	double dCost = pTDI->cost.dAmount;
@@ -2417,7 +2417,7 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 		return 0.0;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	double dEstimate = 0.0;
 	dWeightedEstimate = 0.0;
@@ -2532,7 +2532,7 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 		return 0.0;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	double dSpent = 0;
 
@@ -2721,18 +2721,17 @@ BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
 double CTDCTaskCalculator::GetEarliestDueDate() const
 {
 	double dEarliest = DBL_MAX;
+	CDWordSet mapProcessedIDs;
 
 	// traverse top level items
 	for (int nSubtask = 0; nSubtask < m_data.m_struct.GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
+		if (GetSubtask(&m_data.m_struct, nSubtask, pTDIChild, pTDSChild))
 		{
-			double dTaskEarliest = GetStartDueDate(pTDIChild, pTDSChild, TRUE, TRUE, TRUE);
+			double dTaskEarliest = GetStartDueDate(pTDIChild, pTDSChild, TRUE, TRUE, TRUE, mapProcessedIDs);
 
 			if (dTaskEarliest > 0.0)
 			{
@@ -2889,34 +2888,29 @@ BOOL CTDCTaskCalculator::IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck) const
 double CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE);
-	}
-	else if (m_data.HasStyle(TDCS_USELATESTDUEDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, FALSE);
-	}
+		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE, CDWordSet());
+
+	if (m_data.HasStyle(TDCS_USELATESTDUEDATE))
+		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, FALSE, CDWordSet());
 
 	// else
-	return GetStartDueDate(pTDI, pTDS, FALSE, TRUE, FALSE);
+	return GetStartDueDate(pTDI, pTDS, FALSE, TRUE, FALSE, CDWordSet());
 }
 
 double CTDCTaskCalculator::GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, TRUE);
-	}
-	else if (m_data.HasStyle(TDCS_USELATESTSTARTDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, FALSE);
-	}
+		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, TRUE, CDWordSet());
+
+	if (m_data.HasStyle(TDCS_USELATESTSTARTDATE))
+		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, FALSE, CDWordSet());
 
 	// else
-	return GetStartDueDate(pTDI, pTDS, FALSE, FALSE, FALSE);
+	return GetStartDueDate(pTDI, pTDS, FALSE, FALSE, FALSE, CDWordSet());
 }
 
-double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const
+double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+										   BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
 	if (!pTDS || !pTDI)
@@ -2925,8 +2919,10 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 		return 0.0;
 	}
 
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
+
 	BOOL bDone = IsTaskDone(pTDI, pTDS, TDCCHECKCHILDREN);
-	double dBest = 0;
+	double dBest = 0.0;
 
 	if (bDone)
 	{
@@ -2946,14 +2942,12 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 			// check children
 			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+				const TODOSTRUCTURE* pTDSChild = NULL;
+				const TODOITEM* pTDIChild = NULL;
 
-				ASSERT(pTDIChild && pTDSChild);
-
-				if (pTDSChild && pTDIChild)
+				if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					double dChildDate = GetStartDueDate(pTDIChild, pTDSChild, TRUE, bDue, bEarliest); // RECURSIVE CALL
+					double dChildDate = GetStartDueDate(pTDIChild, pTDSChild, TRUE, bDue, bEarliest, mapProcessedIDs); // RECURSIVE CALL
 					dBest = (bEarliest ? GetEarliestDate(dBest, dChildDate, bDue) : GetLatestDate(dBest, dChildDate, bDue));
 				}
 			}
@@ -3067,7 +3061,7 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 		return FM_NOPRIORITY;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, FM_NOPRIORITY);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITY);
 
 	int nHighest = pTDI->nPriority;
 
@@ -3127,7 +3121,7 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 		return FM_NORISK;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(pTDS, FM_NORISK);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NORISK);
 
 	// some optimizations
 	int nHighest = pTDI->nRisk;
