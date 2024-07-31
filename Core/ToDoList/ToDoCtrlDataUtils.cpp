@@ -3085,6 +3085,7 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 
 	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITY);
 
+	// some optimizations
 	int nHighest = pTDI->nPriority;
 
 	if (pTDI->IsDone() && !m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY))
