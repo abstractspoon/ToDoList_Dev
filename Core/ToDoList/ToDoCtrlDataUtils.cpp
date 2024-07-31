@@ -2787,12 +2787,7 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks() const
 		return FALSE;
 
 	// search all tasks for first due today
-	return HasDueTodayTasks(m_data.GetStructure());
-}
-
-BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
-{
-	return HasDueTodayTasks(pTDS, CDWordSet());
+	return HasDueTodayTasks(m_data.GetStructure(), CDWordSet());
 }
 
 BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
@@ -2820,10 +2815,14 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS, CDWordSet& 
 	// subtasks
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
+		const TODOITEM* pTDIUnused = NULL;
+		const TODOSTRUCTURE* pTDSChild = NULL;
 
-		if (HasDueTodayTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
-			return TRUE;
+		if (GetSubtask(pTDS, nSubtask, pTDIUnused, pTDSChild))
+		{
+			if (HasDueTodayTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
+				return TRUE;
+		}
 	}
 
 	// no due todays found
@@ -2838,12 +2837,7 @@ BOOL CTDCTaskCalculator::HasLockedTasks() const
 		return FALSE;
 
 	// search all tasks for first locked one
-	return HasLockedTasks(m_data.GetStructure());
-}
-
-BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
-{
-	return HasLockedTasks(pTDS, CDWordSet());
+	return HasLockedTasks(m_data.GetStructure(), CDWordSet());
 }
 
 BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
@@ -2863,10 +2857,14 @@ BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS, CDWordSet& ma
 	// subtasks
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
+		const TODOITEM* pTDIUnused = NULL;
+		const TODOSTRUCTURE* pTDSChild = NULL;
 
-		if (HasLockedTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
-			return TRUE;
+		if (GetSubtask(pTDS, nSubtask, pTDIUnused, pTDSChild))
+		{
+			if (HasLockedTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
+				return TRUE;
+		}
 	}
 
 	// no locked tasks found
