@@ -2517,31 +2517,34 @@ double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 
 double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
 {
-	// sanity check
-	ASSERT (pTDS && pTDI);
+	return GetTaskTimeSpent(pTDI, pTDS, nUnits, CDWordSet());
+}
 
+double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, CDWordSet& mapProcessedIDs) const
+{
+	// sanity check
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0.0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
 
 	double dSpent = 0;
-	BOOL bIsParent = pTDS->HasSubTasks();
 
 	// task's own time
-	if (!bIsParent || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+	if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 		dSpent = pTDI->timeSpent.GetTime(THU_HOURS);
 
-	if (bIsParent) // children's time
+	// subtasks'
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
-		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDSChild && pTDIChild)
-				dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS); // RECURSIVE CALL
-		}
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
+			dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS, mapProcessedIDs); // RECURSIVE CALL
 	}
 
 	// convert it back from hours to nUnits
