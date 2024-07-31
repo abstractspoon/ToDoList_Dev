@@ -2096,11 +2096,11 @@ int CTDCTaskCalculator::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUC
 		// just to keep the logic for each as clear as possible
 		if (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB))
 		{
-			nPercent = Misc::Round(GetWeightedAveragePercentDone(pTDI, pTDS));
+			nPercent = Misc::Round(GetWeightedAveragePercentDone(pTDI, pTDS, CDWordSet()));
 		}
 		else
 		{
-			nPercent = Misc::Round(GetAveragePercentDone(pTDI, pTDS));
+			nPercent = Misc::Round(GetAveragePercentDone(pTDI, pTDS, CDWordSet()));
 		}
 	}
 
@@ -2116,7 +2116,7 @@ int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUC
 
 	ASSERT (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE)); // sanity check
 
-	double dSpent = GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
+	double dSpent = GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS, CDWordSet());
 	double dUnused, dEstimate = GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused, CDWordSet());
 
 	if ((dSpent > 0) && (dEstimate > 0))
@@ -2126,15 +2126,18 @@ int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUC
 	return 0;
 }
 
-double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 { 
 	// sanity checks
-	ASSERT(pTDS && pTDI);
+	ASSERT (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)); // sanity check
 
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0;
+	}
 
-	ASSERT (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)); // sanity check
+	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
@@ -2177,18 +2180,16 @@ double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TOD
 
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
 			if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC) || !IsTaskDone(pTDIChild, pTDSChild))
 			{
 				// add percent per child(eg. 2 child = 50 each if 1st child 
 				// has 75% completed then will add 50*75/100 = 37.5)
-				dTotalPercentDone += dSplitDoneValue * GetAveragePercentDone(pTDIChild, pTDSChild); // RECURSIVE CALL
+				dTotalPercentDone += dSplitDoneValue * GetAveragePercentDone(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 			}
 		}
 	}
@@ -2196,95 +2197,96 @@ double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TOD
 	return dTotalPercentDone;
 }
 
-int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const
+int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT(pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(pTDS, 1);
 
 	if (bIncludeDone)
-	{
 		return pTDS->GetLeafCount();
-	}
-	else if (pTDI->IsDone())
-	{
-		return 0;
-	}
-	else if (!pTDS->HasSubTasks())
-	{
-		return 1;
-	}
+
+	if (pTDI->IsDone())
+		return 0; // All subtasks are treated as done
+
+	if (!pTDS->HasSubTasks())
+		return 1; // ourselves
 
 	// else traverse sub items
 	int nLeafCount = 0;
 
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild); 
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL; 
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
-			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone); // RECURSIVE CALL
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
+			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone, mapProcessedIDs); // RECURSIVE CALL
 	}
 
-	ASSERT(nLeafCount);
 	return nLeafCount;
 }
 
-double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity checks
-	ASSERT(pTDS && pTDI);
-
-	if (!pTDS || !pTDI)
-		return 0;
-
 	ASSERT (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)); // sanity check
 	ASSERT (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB)); // sanity check
+
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(pTDS, 0);
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
 			return GetPercentFromTime(pTDI, pTDS);
-		}
-		else if (pTDI->IsDone())
-		{
+
+		if (pTDI->IsDone())
 			return 100;
-		}
-		else
-		{
-			return pTDI->nPercentDone;
-		}
+
+		// else
+		return pTDI->nPercentDone;
 	}
 
 	// calculate the total number of task leaves for this task
 	// we will proportion our children percentages against these values
-	int nTotalNumSubtasks = GetTaskLeafCount(pTDI, pTDS, m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
-	double dTotalPercentDone = 0;
+	BOOL bIncludeDone = m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC);
+	int nTotalNumSubtasks = GetTaskLeafCount(pTDI, pTDS, bIncludeDone, CDWordSet());
+
+	if (nTotalNumSubtasks == 0)
+	{
+		// Must mean all our subtasks are complete
+		ASSERT(!bIncludeDone);
+		return 0.0;
+	}
 
 	// process the children multiplying the split percent by the 
 	// proportion of this subtask's subtasks to the whole
+	double dTotalPercentDone = 0;
+
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
-			int nChildNumSubtasks = GetTaskLeafCount(pTDIChild, pTDSChild, m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
-
-			if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
+			if (bIncludeDone || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
 			{
-				double dChildPercent = GetWeightedAveragePercentDone(pTDIChild, pTDSChild); // RECURSIVE CALL
+				int nChildNumSubtasks = GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone, CDWordSet());
+				double dChildPercent = GetWeightedAveragePercentDone(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 
-				dTotalPercentDone += dChildPercent * ((double)nChildNumSubtasks / (double)nTotalNumSubtasks);
+				dTotalPercentDone += (dChildPercent * ((double)nChildNumSubtasks / (double)nTotalNumSubtasks));
 			}
 		}
 	}
