@@ -1940,10 +1940,10 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 		const TODOSTRUCTURE* pTDSChild = NULL;
 		const TODOITEM* pTDIChild = NULL;
 
-		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild) && 
-			IsTaskRecentlyModified(pTDIChild, pTDSChild)) // RECURSIVE CALL
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
-			return TRUE;
+			if (IsTaskRecentlyModified(pTDIChild, pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
+				return TRUE;
 		}
 	}
 
@@ -2027,12 +2027,24 @@ BOOL CTDCTaskCalculator::IsTaskRecurring(DWORD dwTaskID) const
 }
 
 BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
-	int& nSubtasksCount, int& nSubtasksDone) const
+											  int& nSubtasksCount, int& nSubtasksDone) const
 {
-	ASSERT (pTDS && pTDI);
+	return GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone, CDWordSet());
+}
 
-	if (!pTDS || !pTDS->HasSubTasks() || !pTDI)
+BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+											  int& nSubtasksCount, int& nSubtasksDone, CDWordSet& mapProcessedIDs) const
+{
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	if (!pTDS->HasSubTasks())
+		return FALSE;
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	nSubtasksDone = nSubtasksCount = 0;
 
@@ -2040,12 +2052,10 @@ BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOST
 	{
 		nSubtasksCount++;
 
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
 			if (IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
 				nSubtasksDone++;
@@ -2232,7 +2242,9 @@ int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTU
 		const TODOITEM* pTDIChild = NULL; 
 
 		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
+		{
 			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone, mapProcessedIDs); // RECURSIVE CALL
+		}
 	}
 
 	return nLeafCount;
@@ -2327,7 +2339,9 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 		const TODOITEM* pTDIChild = NULL;
 
 		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
+		{
 			dCost += GetTaskCost(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
+		}
 	}
 
 	return dCost;
@@ -2553,7 +2567,9 @@ double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRU
 		const TODOITEM* pTDIChild = NULL;
 
 		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
+		{
 			dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS, mapProcessedIDs); // RECURSIVE CALL
+		}
 	}
 
 	// convert it back from hours to nUnits
