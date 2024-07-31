@@ -2974,7 +2974,7 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 
 double CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS);
+	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS, CDWordSet());
 
 	if (!pLatest || !CDateHelper::IsDateSet(pTDI->dateLastMod))
 		return 0.0;
@@ -2984,7 +2984,7 @@ double CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const T
 
 CString CTDCTaskCalculator::GetTaskLastModifiedBy(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS);
+	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS, CDWordSet());
 
 	if (!pLatest)
 		return EMPTY_STR;
@@ -2992,7 +2992,7 @@ CString CTDCTaskCalculator::GetTaskLastModifiedBy(const TODOITEM* pTDI, const TO
 	return pLatest->sLastModifiedBy;
 }
 
-const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
 	if (!pTDS || !pTDI)
@@ -3000,6 +3000,8 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 		ASSERT(0);
 		return NULL;
 	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, pTDI);
 
 	const TODOITEM* pLatest = pTDI;
 
@@ -3009,14 +3011,12 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 
 		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+			const TODOSTRUCTURE* pTDSChild = NULL;
+			const TODOITEM* pTDIChild = NULL;
 
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDSChild && pTDIChild)
+			if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				const TODOITEM* pLatestChild = GetLastModifiedTask(pTDIChild, pTDSChild); // RECURSIVE CALL
+				const TODOITEM* pLatestChild = GetLastModifiedTask(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 				double dLatestChildDate = pLatestChild->dateLastMod;
 
 				if (GetLatestDate(dLatest, dLatestChildDate, FALSE) == dLatestChildDate)
