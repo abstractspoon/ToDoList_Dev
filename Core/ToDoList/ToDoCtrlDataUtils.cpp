@@ -126,10 +126,11 @@ int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, C
 int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const
 {
 	// sanity check
-	ASSERT(pTDI && pTDS);
-
 	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
 		return 0;
+	}
 	
 	SEARCHRESULT result;
 	int nResults = aResults.GetSize();
@@ -1914,6 +1915,11 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
+	return IsTaskRecentlyModified(pTDI, pTDS, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
 	if (!pTDI || !pTDS)
 	{
@@ -1926,18 +1932,18 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 	if (bRecentMod || !m_data.HasStyle(TDCS_USELATESTLASTMODIFIED))
 		return bRecentMod;
 
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
+
 	// Children
 	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
+		if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild) && 
+			IsTaskRecentlyModified(pTDIChild, pTDSChild)) // RECURSIVE CALL
 		{
-			if (IsTaskRecentlyModified(pTDIChild, pTDSChild)) // RECURSIVE CALL
-				return TRUE;
+			return TRUE;
 		}
 	}
 
@@ -3932,16 +3938,19 @@ CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 
 CString CTDCTaskFormatter::GetTaskCommentsSize(const TODOITEM* pTDI) const
 {
+	ASSERT(pTDI);
+
 	if (pTDI)
 		return GetCommentSize(pTDI->GetCommentsSizeInKB());
 
 	// else
-	ASSERT(pTDI);
 	return EMPTY_STR;
 }
 
 CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
 {
+	ASSERT(pTDI);
+
 	if (pTDI)
 	{
 		if (!bEmptyIsBlank || !pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
@@ -3951,7 +3960,6 @@ CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmp
 	}
 
 	// else
-	ASSERT(pTDI);
 	return EMPTY_STR;
 }
 
@@ -4625,10 +4633,12 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 	for (int nSubtask = 0; nSubtask < pTDSParent->GetSubTaskCount(); nSubtask++)
 	{
 		const TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nSubtask);
-		ASSERT(pTDS);
 
 		if (!pTDS)
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		// DON'T use GET_TDI because that will get the task
 		// pointed to by references and not the reference itself
