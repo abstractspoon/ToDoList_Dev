@@ -41,7 +41,7 @@ static const double  DBL_NULL = (double)0xFFFFFFFFFFFFFFFF;
 #define GET_TDS(id, tds, ret) GET_DATA_TDS(m_data, id, tds, ret)
 #define GET_TDI_TDS(id, tdi, tds, ret) GET_DATA_TDI_TDS(m_data, id, tdi, tds, ret)
 
-#define CHECK_ALREADY_PROCESSED(id, ret) if (mapProcessedIDs.Has(id)) return ret; mapProcessedIDs.Add(id)
+#define CHECKSET_ALREADY_PROCESSED(tds, ret) if (mapProcessedIDs.Has(tds->GetTaskID())) return ret; mapProcessedIDs.Add(tds->GetTaskID())
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1947,9 +1947,6 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 
 BOOL CTDCTaskCalculator::IsTaskFlagged(DWORD dwTaskID) const
 {
-	if (!m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS))
-		return IsTaskFlagged(dwTaskID);
-
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
@@ -1960,6 +1957,11 @@ BOOL CTDCTaskCalculator::IsTaskFlagged(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
+	return IsTaskFlagged(pTDI, pTDS, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
 	if (!pTDI || !pTDS)
 	{
@@ -1967,20 +1969,20 @@ BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE
 		return FALSE;
 	}
 
+	CHECKSET_ALREADY_PROCESSED(pTDS, FALSE);
+
 	if (pTDI->bFlagged || !m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS))
 		return pTDI->bFlagged;
 
 	// check subtasks
-	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+	for (int sSubtask = 0; sSubtask < pTDS->GetSubTaskCount(); sSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GetSubtask(pTDS, sSubtask, pTDIChild, pTDSChild))
 		{
-			if (IsTaskFlagged(pTDIChild, pTDSChild)) // RECURSIVE CALL
+			if (IsTaskFlagged(pTDIChild, pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
 				return TRUE;
 		}
 	}
@@ -2303,10 +2305,7 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (!pTDS || !pTDI)
 		return 0.0;
 
-	CHECK_ALREADY_PROCESSED(pTDS->GetTaskID(), 0.0);
-
-	// else
-	mapProcessedIDs.Add(pTDS->GetTaskID());
+	CHECKSET_ALREADY_PROCESSED(pTDS, 0.0);
 
 	// own cost
 	double dCost = pTDI->cost.dAmount;
@@ -2326,9 +2325,9 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return dCost;
 }
 
-BOOL CTDCTaskCalculator::GetSubtask(const TODOSTRUCTURE* pTDSParent, int nSubtask, const TODOITEM*& pTDIChild, const TODOSTRUCTURE*& pTDSChild) const
+BOOL CTDCTaskCalculator::GetSubtask(const TODOSTRUCTURE* pTDSParent, int sSubtask, const TODOITEM*& pTDIChild, const TODOSTRUCTURE*& pTDSChild) const
 {
-	pTDSChild = pTDSParent->GetSubTask(nSubtask);
+	pTDSChild = pTDSParent->GetSubTask(sSubtask);
 	pTDIChild = m_data.GetTask(pTDSChild);
 
 	ASSERT(pTDIChild && pTDSChild);
