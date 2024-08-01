@@ -82,25 +82,18 @@ protected:
 
 protected:
 	void SaveAndRemoveReminders(const CFilteredToDoCtrl* pTDC);
-	int LoadReminders(const CFilteredToDoCtrl* pTDC);
-	void StartTimer();
-	BOOL ShowReminder(const TDCREMINDER& rem);
-	BOOL DeleteReminder(int nRem);
-	BOOL DismissReminder(int nRem);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
 	void ActivateNotificationWindow();
 	void DoCheckReminders();
-
-	enum 
-	{
-		TCR_REMOVEDELETED	= 0x01,
-		TCR_REMOVEDONE		= 0x02,
-	};
-
-	BOOL InitialiseRTFFormatter();
-	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
+	void StartTimer();
+	int LoadReminders(const CFilteredToDoCtrl* pTDC);
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+	BOOL ShowReminder(const TDCREMINDER& rem);
+	BOOL DeleteReminder(int nRem);
+	BOOL DismissReminder(int nRem);
+	BOOL InitialiseRTFFormatter();
+	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
 	BOOL NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const;
 	BOOL IsRecurringReminder(const TDCREMINDER& rem, BOOL bIncludeParent = TRUE) const;
 
