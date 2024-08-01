@@ -48,6 +48,7 @@ public:
 	void CheckReminders();
 	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
 	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
+	BOOL UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 
 // Attributes
 protected:
@@ -100,6 +101,8 @@ protected:
 	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+	BOOL NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const;
+	BOOL IsRecurringReminder(const TDCREMINDER& rem, BOOL bIncludeParent = TRUE) const;
 
 	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday);
 };

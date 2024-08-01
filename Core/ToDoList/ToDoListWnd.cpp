@@ -3561,35 +3561,10 @@ LRESULT CToDoListWnd::OnTimeTrackerGoToTasklist(WPARAM wParam, LPARAM lParam)
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wp, LPARAM lp)
 {
-	DWORD dwTaskID = wp, dwNewTaskID = lp;
-
-	// is there a reminder that we need to copy for the new task
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	TDCREMINDER rem;
 
-	int nRem = m_dlgReminders.FindReminder(dwTaskID, &tdc);
-
-	if (nRem != -1)
-	{
-		// Transfer the original if the task id has changed
-		if (dwNewTaskID != dwTaskID)		
-		{
-			if (m_dlgReminders.TransferReminder(dwTaskID, dwNewTaskID, &tdc))
-				tdc.RefreshReminders();
-		}
-		else // Update the existing reminder
-		{
-			// get the existing reminder
-			m_dlgReminders.GetReminder(nRem, rem);
-
-			// init for new task
-			rem.bEnabled = TRUE;
-			rem.dDaysSnooze = 0.0;
-
-			// Add
-			m_dlgReminders.SetReminder(rem);
-		}
-	}
+	if (m_dlgReminders.UpdateRecurringTaskReminders(wp, lp, &tdc))
+		tdc.RefreshReminders();
 
 	return 0L;
 }
