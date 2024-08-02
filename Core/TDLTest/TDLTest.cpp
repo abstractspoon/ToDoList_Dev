@@ -14,6 +14,7 @@
 #include "TDCCustomAttributeCalculationTest.h"
 #include "TDCDependencyTest.h"
 #include "TDCRecurrenceTest.h"
+#include "TDCTaskCalculatorTest.h"
 #include "TDLTaskCtrlBaseTest.h"
 #include "TimeHelperTest.h"
 #include "ToDoCtrlDataTest.h"
@@ -89,6 +90,7 @@ void DoTests(const CTestUtils& utils)
 	res += CTDCCUSTOMATTRIBUTECALCULATIONTest(utils).Run();
 	res += CTDCDEPENDENCYTest(utils).Run();
 	res += CTDCRECURRENCETest(utils).Run();
+	res += CTDCTaskCalculatorTest(utils).Run();
 	res += CTDLTaskCtrlBaseTest(utils).Run();
 	res += CTimeHelperTest(utils).Run();
 	res += CToDoCtrlDataTest(utils).Run();
