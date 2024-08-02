@@ -290,54 +290,143 @@ void CTDCTaskCalculatorTest::Test()
 	{
 		// Assigned
 		{
-			m_aStyles.RemoveAll();
+			// Pure assigned
+			{
+				m_aStyles.RemoveAll();
 
-			ExpectEQ(calc.GetTaskRisk(1), 6);
-			ExpectEQ(calc.GetTaskRisk(2), 7);
-			ExpectEQ(calc.GetTaskRisk(3), 8);
-			ExpectEQ(calc.GetTaskRisk(4), 9);
+				ExpectEQ(calc.GetTaskRisk(1), 6);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 9);
+			}
+
+			// Done have lowest risk
+			{
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+				// DON'T treat tasks with completed subtasks as completed
+				{
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 6);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 8);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+				}
+
+				// DO treat tasks with completed subtasks as completed
+				{
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 6);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+				}
+			}
 		}
 
 		// Highest
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-			m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
-			// Done included but not as lowest
+			// DON'T treat tasks with completed subtasks as completed
 			{
-				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-				m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
-				ExpectEQ(calc.GetTaskRisk(1), 9);
-				ExpectEQ(calc.GetTaskRisk(2), 7);
-				ExpectEQ(calc.GetTaskRisk(3), 9);
-				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+				// Done included and lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 8);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 8);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+				}
+
+				// Done included but NOT lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 9);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 9);
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+				}
+
+				// Done NOT included
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 8);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 8);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+				}
+
+				// Done NOT included and NOT lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 8);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 8);
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+				}
 			}
 
-			// Done included and lowest
+			// DO treat tasks with completed subtasks as completed
 			{
-				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
-/*
-				ExpectEQ(calc.GetTaskRisk(1), 8);
-				ExpectEQ(calc.GetTaskRisk(2), 7);
-				ExpectEQ(calc.GetTaskRisk(3), 8);
-				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-*/
-			}
+				// Done included and lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 
-			// Done not included
-			{
-				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+					ExpectEQ(calc.GetTaskRisk(1), 7);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+				}
 
-/*
-				ExpectEQ(calc.GetTaskRisk(1), 8);
-				ExpectEQ(calc.GetTaskRisk(2), 7);
-				ExpectEQ(calc.GetTaskRisk(3), 8);
-				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-*/
+				// Done included but NOT lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 9);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 9); // implicitly completed
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+				}
+
+				// Done NOT included and lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 7);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+				}
+
+				// Done NOT included and NOT lowest
+				{
+					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+					ExpectEQ(calc.GetTaskRisk(1), 7);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 8); // implicitly completed
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+				}
 			}
 		}
 	}
