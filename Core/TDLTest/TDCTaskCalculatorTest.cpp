@@ -59,87 +59,9 @@ void CTDCTaskCalculatorTest::Test()
 	//   |_ Task3
 	//        |
 	//        |_ Task4
-
-	HTASKITEM hTask1 = tasks.NewTask(_T("Task1"), NULL, 1, 0);
-	HTASKITEM hTask2 = tasks.NewTask(_T("Task2"), hTask1, 2, 1);
-	HTASKITEM hTask3 = tasks.NewTask(_T("Task3"), hTask1, 3, 1);
-	HTASKITEM hTask4 = tasks.NewTask(_T("Task4"), hTask3, 4, 3);
-
-	// Task1
-	{
-		tasks.SetTaskStartDate(hTask1, COleDateTime(45000.0));
-		tasks.SetTaskDueDate(hTask1, COleDateTime(45001.0));
-		tasks.SetTaskLastModified(hTask1, COleDateTime(45002.0), _T("User1"));
-
-		tasks.SetTaskPriority(hTask1, 5);
-		tasks.SetTaskRisk(hTask1, 6);
-		tasks.SetTaskPercentDone(hTask1, 10);
-
-		tasks.SetTaskCost(hTask1, 20);
-		tasks.SetTaskTimeEstimate(hTask1, 30, TDCU_DAYS);
-		tasks.SetTaskTimeSpent(hTask1, 40, TDCU_DAYS);
-
-		tasks.SetTaskFlag(hTask1, FALSE);
-		tasks.SetTaskLock(hTask1, TRUE); // The only locked task
-	}
-
-	// Task2
-	{
-		tasks.SetTaskStartDate(hTask2, COleDateTime(45001.0));
-		tasks.SetTaskDueDate(hTask2, COleDateTime(45002.0));
-		tasks.SetTaskLastModified(hTask2, COleDateTime(45003.0), _T("User2"));
-
-		tasks.SetTaskPriority(hTask2, 6);
-		tasks.SetTaskRisk(hTask2, 7);
-		tasks.SetTaskPercentDone(hTask2, 20);
-
-		tasks.SetTaskCost(hTask2, 30);
-		tasks.SetTaskTimeEstimate(hTask2, 40, TDCU_DAYS);
-		tasks.SetTaskTimeSpent(hTask2, 50, TDCU_DAYS);
-
-		tasks.SetTaskFlag(hTask2, FALSE);
-		tasks.SetTaskLock(hTask2, FALSE);
-	}
-
-	// Task3
-	{
-		tasks.SetTaskStartDate(hTask3, COleDateTime(45002.0));
-		tasks.SetTaskDueDate(hTask3, COleDateTime(45003.0));
-		tasks.SetTaskLastModified(hTask3, COleDateTime(45004.0), _T("User3"));
-
-		tasks.SetTaskPriority(hTask3, 7);
-		tasks.SetTaskRisk(hTask3, 8);
-		tasks.SetTaskPercentDone(hTask3, 30);
-
-		tasks.SetTaskCost(hTask3, 40);
-		tasks.SetTaskTimeEstimate(hTask3, 50, TDCU_DAYS);
-		tasks.SetTaskTimeSpent(hTask3, 60, TDCU_DAYS);
-
-		tasks.SetTaskFlag(hTask3, FALSE);
-		tasks.SetTaskLock(hTask3, FALSE);
-	}
-
-	// Task4
-	{
-		tasks.SetTaskStartDate(hTask4, COleDateTime(45003.0));
-		tasks.SetTaskDueDate(hTask4, COleDateTime(45004.0));
-		tasks.SetTaskDoneDate(hTask4, COleDateTime(45010.0)); // The only completed task
-		tasks.SetTaskLastModified(hTask4, COleDateTime(45005.0), _T("User4"));
-
-		tasks.SetTaskPriority(hTask4, 8);
-		tasks.SetTaskRisk(hTask4, 9);
-		tasks.SetTaskPercentDone(hTask4, 40);
-
-		tasks.SetTaskCost(hTask4, 50);
-		tasks.SetTaskTimeEstimate(hTask4, 60, TDCU_DAYS);
-		tasks.SetTaskTimeSpent(hTask4, 70, TDCU_DAYS);
-
-		tasks.SetTaskFlag(hTask4, TRUE); // The only flagged task
-		tasks.SetTaskLock(hTask4, FALSE);
-	}
 	
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
-	data.BuildDataModel(tasks);
+	PopulateData(data);
 
 	CTDCTaskCalculator calc(data);
 
@@ -597,3 +519,95 @@ void CTDCTaskCalculatorTest::Test()
 }
 
 
+void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
+{
+	// Task1
+	//   |
+	//   |_ Task2
+	//   |
+	//   |_ Task3
+	//        |
+	//        |_ Task4
+
+	CTaskFile tasks;
+
+	HTASKITEM hTask1 = tasks.NewTask(_T("Task1"), NULL, 1, 0);
+	HTASKITEM hTask2 = tasks.NewTask(_T("Task2"), hTask1, 2, 1);
+	HTASKITEM hTask3 = tasks.NewTask(_T("Task3"), hTask1, 3, 1);
+	HTASKITEM hTask4 = tasks.NewTask(_T("Task4"), hTask3, 4, 3);
+
+	// Task1
+	{
+		tasks.SetTaskStartDate(hTask1, COleDateTime(45000.0));
+		tasks.SetTaskDueDate(hTask1, COleDateTime(45001.0));
+		tasks.SetTaskLastModified(hTask1, COleDateTime(45002.0), _T("User1"));
+
+		tasks.SetTaskPriority(hTask1, 5);
+		tasks.SetTaskRisk(hTask1, 6);
+		tasks.SetTaskPercentDone(hTask1, 10);
+
+		tasks.SetTaskCost(hTask1, 20);
+		tasks.SetTaskTimeEstimate(hTask1, 30, TDCU_DAYS);
+		tasks.SetTaskTimeSpent(hTask1, 40, TDCU_DAYS);
+
+		tasks.SetTaskFlag(hTask1, FALSE);
+		tasks.SetTaskLock(hTask1, TRUE); // The only locked task
+	}
+
+	// Task2
+	{
+		tasks.SetTaskStartDate(hTask2, COleDateTime(45001.0));
+		tasks.SetTaskDueDate(hTask2, COleDateTime(45002.0));
+		tasks.SetTaskLastModified(hTask2, COleDateTime(45003.0), _T("User2"));
+
+		tasks.SetTaskPriority(hTask2, 6);
+		tasks.SetTaskRisk(hTask2, 7);
+		tasks.SetTaskPercentDone(hTask2, 20);
+
+		tasks.SetTaskCost(hTask2, 30);
+		tasks.SetTaskTimeEstimate(hTask2, 40, TDCU_DAYS);
+		tasks.SetTaskTimeSpent(hTask2, 50, TDCU_DAYS);
+
+		tasks.SetTaskFlag(hTask2, FALSE);
+		tasks.SetTaskLock(hTask2, FALSE);
+	}
+
+	// Task3
+	{
+		tasks.SetTaskStartDate(hTask3, COleDateTime(45002.0));
+		tasks.SetTaskDueDate(hTask3, COleDateTime(45003.0));
+		tasks.SetTaskLastModified(hTask3, COleDateTime(45004.0), _T("User3"));
+
+		tasks.SetTaskPriority(hTask3, 7);
+		tasks.SetTaskRisk(hTask3, 8);
+		tasks.SetTaskPercentDone(hTask3, 30);
+
+		tasks.SetTaskCost(hTask3, 40);
+		tasks.SetTaskTimeEstimate(hTask3, 50, TDCU_DAYS);
+		tasks.SetTaskTimeSpent(hTask3, 60, TDCU_DAYS);
+
+		tasks.SetTaskFlag(hTask3, FALSE);
+		tasks.SetTaskLock(hTask3, FALSE);
+	}
+
+	// Task4
+	{
+		tasks.SetTaskStartDate(hTask4, COleDateTime(45003.0));
+		tasks.SetTaskDueDate(hTask4, COleDateTime(45004.0));
+		tasks.SetTaskDoneDate(hTask4, COleDateTime(45010.0)); // The only completed task
+		tasks.SetTaskLastModified(hTask4, COleDateTime(45005.0), _T("User4"));
+
+		tasks.SetTaskPriority(hTask4, 8);
+		tasks.SetTaskRisk(hTask4, 9);
+		tasks.SetTaskPercentDone(hTask4, 40);
+
+		tasks.SetTaskCost(hTask4, 50);
+		tasks.SetTaskTimeEstimate(hTask4, 60, TDCU_DAYS);
+		tasks.SetTaskTimeSpent(hTask4, 70, TDCU_DAYS);
+
+		tasks.SetTaskFlag(hTask4, TRUE); // The only flagged task
+		tasks.SetTaskLock(hTask4, FALSE);
+	}
+
+	data.BuildDataModel(tasks);
+}

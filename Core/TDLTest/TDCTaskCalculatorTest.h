@@ -9,9 +9,17 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "TDLTestBase.h"
 
 #include "..\todolist\tdcstruct.h"
+
+//////////////////////////////////////////////////////////////////////
+
+class CToDoCtrlData;
+
+//////////////////////////////////////////////////////////////////////
 
 class CTDCTaskCalculatorTest : public CTDLTestBase
 {
@@ -28,6 +36,7 @@ protected:
 protected:
 	void Test();
 
+	void PopulateData(CToDoCtrlData& data) const;
 };
 
 #endif // !defined(AFX_TDCTASKCALCULATORTEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
