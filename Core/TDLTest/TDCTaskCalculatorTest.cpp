@@ -143,171 +143,233 @@ void CTDCTaskCalculatorTest::Test()
 
 	CTDCTaskCalculator calc(data);
 
-	// Assigned Start Date
+	// Start Date ------------------------------------------------
 	{
-		m_aStyles.RemoveAll();
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
 
-		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-		ExpectEQ(calc.GetTaskStartDate(4), 45003.0);
-	}
+			ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
+			ExpectEQ(calc.GetTaskStartDate(2), 0.0); // completed task
+			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
+			ExpectEQ(calc.GetTaskStartDate(4), 45003.0);
+		}
 
-	// Earliest Start Date
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
-	}
+		// Earliest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
 
-	// Latest Start Date
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
-	}
+			// TODO
+		}
 
+		// Latest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
 
-	// Assigned Due Date
-	{
-		m_aStyles.RemoveAll();
-
-		ExpectEQ(calc.GetTaskStartDate(1), 45001.0);
-		ExpectEQ(calc.GetTaskStartDate(2), 45002.0);
-		ExpectEQ(calc.GetTaskStartDate(3), 45003.0);
-		ExpectEQ(calc.GetTaskStartDate(4), 45004.0);
-	}
-
-	// Earliest Due Date
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
-	}
-
-	// Latest Due Date
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
+			// TODO
+		}
 	}
 
 
-	// Assigned Last Modified Date/User
+	// Due Date -------------------------------------------------
 	{
-		m_aStyles.RemoveAll();
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
 
-		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-	}
+			ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
+			ExpectEQ(calc.GetTaskDueDate(2), 0.0); // completed task
+			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
+			ExpectEQ(calc.GetTaskDueDate(4), 45004.0);
+		}
 
-	// Latest Last Modified Date/User
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
-	}
+		// Earliest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 
-	// Assigned Priority
-	{
-		m_aStyles.RemoveAll();
-	}
+			// TODO
+		}
 
-	// Highest Priority
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+		// Latest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
 
-
-
-
-
-		m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
-		m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
-		m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
+			// TODO
+		}
 	}
 
 
-	// Assigned Risk
+	// Last Modified Date/User ---------------------------------
+	{
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
+
+			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
+
+			// TODO
+		}
+
+		// Latest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
+
+			// TODO
+		}
+	}
+
+	// Priority ------------------------------------------------
+	{
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
+
+			// TODO
+		}
+
+		// Highest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+
+
+			// TODO
+
+
+
+
+			m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+			m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+			m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
+
+			// TODO
+		}
+	}
+
+
+	// Risk ---------------------------------------------------
+	{
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
+
+			// TODO
+
+		}
+
+		// Highest
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+
+			// TODO
+
+
+
+
+			m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+			m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+
+			// TODO
+		}
+	}
+
+	// Percent Done -------------------------------------------
+	{
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
+
+			// TODO
+		}
+
+		// Average
+		{
+			m_aStyles.RemoveAll();
+
+			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
+			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = TRUE;
+
+			// TODO
+		}
+	}
+
+	// Cost ----------------------------------------------------
 	{
 		m_aStyles.RemoveAll();
 
+		// TODO
 	}
-
-	// Highest Risk
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-
-
-
-
-		m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-		m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-	}
-
-
-	// Assigned Percent Done
+	
+	// TimeEstimate --------------------------------------------
 	{
 		m_aStyles.RemoveAll();
 
+		// TODO
 	}
-
-	// Average Percent Done
+	
+	// TimeSpent -----------------------------------------------
 	{
 		m_aStyles.RemoveAll();
 
-		m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
-		m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = TRUE;
+		// TODO
 	}
-
-
-	// Cost
-
-
-	// TimeEstimate
-
-
-	// TimeSpent
 	
 	
-	// Assigned Flagging
+	// Flagging ------------------------------------------------
 	{
-		m_aStyles.RemoveAll();
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
 
-		ExpectFalse(calc.IsTaskFlagged(1));
-		ExpectFalse(calc.IsTaskFlagged(2));
-		ExpectFalse(calc.IsTaskFlagged(3));
-		ExpectTrue(calc.IsTaskFlagged(4));
+			ExpectFalse(calc.IsTaskFlagged(1));
+			ExpectFalse(calc.IsTaskFlagged(2));
+			ExpectFalse(calc.IsTaskFlagged(3));
+			ExpectTrue(calc.IsTaskFlagged(4));
+		}
+
+		// Inherited
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_TASKINHERITSSUBTASKFLAGS] = TRUE;
+
+			ExpectTrue(calc.IsTaskFlagged(1));
+			ExpectFalse(calc.IsTaskFlagged(2));
+			ExpectTrue(calc.IsTaskFlagged(3));
+			ExpectTrue(calc.IsTaskFlagged(4));
+		}
 	}
 
-	// Inherited Flagging
+	// Locking --------------------------------------------------
 	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_TASKINHERITSSUBTASKFLAGS] = TRUE;
+		// Assigned
+		{
+			m_aStyles.RemoveAll();
 
-		ExpectTrue(calc.IsTaskFlagged(1));
-		ExpectFalse(calc.IsTaskFlagged(2));
-		ExpectTrue(calc.IsTaskFlagged(3));
-		ExpectTrue(calc.IsTaskFlagged(4));
-	}
+			ExpectTrue(calc.IsTaskLocked(1));
+			ExpectFalse(calc.IsTaskLocked(2));
+			ExpectFalse(calc.IsTaskLocked(3));
+			ExpectFalse(calc.IsTaskLocked(4));
+		}
 
-	// Assigned Locking
-	{
-		m_aStyles.RemoveAll();
+		// Inherited
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_SUBTASKSINHERITLOCK] = TRUE;
 
-		ExpectTrue(calc.IsTaskLocked(1));
-		ExpectFalse(calc.IsTaskLocked(2));
-		ExpectFalse(calc.IsTaskLocked(3));
-		ExpectFalse(calc.IsTaskLocked(4));
-	}
-
-	// Inherited Locking
-	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_SUBTASKSINHERITLOCK] = TRUE;
-
-		ExpectTrue(calc.IsTaskLocked(1));
-		ExpectTrue(calc.IsTaskLocked(2));
-		ExpectTrue(calc.IsTaskLocked(3));
-		ExpectTrue(calc.IsTaskLocked(4));
+			ExpectTrue(calc.IsTaskLocked(1));
+			ExpectTrue(calc.IsTaskLocked(2));
+			ExpectTrue(calc.IsTaskLocked(3));
+			ExpectTrue(calc.IsTaskLocked(4));
+		}
 	}
 
 	EndTest();
