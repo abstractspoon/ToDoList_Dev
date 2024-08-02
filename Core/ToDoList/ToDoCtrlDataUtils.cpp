@@ -2143,38 +2143,28 @@ int CTDCTaskCalculator::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUC
 	if (!pTDS || !pTDI)
 		return 0;
 
-	int nPercent = 0;
 
 	if (!m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) || !pTDS->HasSubTasks())
 	{
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			nPercent = GetPercentFromTime(pTDI, pTDS);
-		}
-		else if (pTDI->IsDone())
-		{
-			nPercent = 100;
-		}
-		else
-		{
-			nPercent = pTDI->nPercentDone;
-		}
-	}
-	else if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)) // has subtasks and we must average their completion
-	{
-		// note: we have separate functions for weighted/unweighted
-		// just to keep the logic for each as clear as possible
-		if (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB))
-		{
-			nPercent = Misc::Round(GetWeightedAveragePercentDone(pTDI, pTDS, CDWordSet()));
-		}
-		else
-		{
-			nPercent = Misc::Round(GetAveragePercentDone(pTDI, pTDS, CDWordSet()));
-		}
+			return GetPercentFromTime(pTDI, pTDS);
+
+		if (pTDI->IsDone())
+			return 100;
+
+		// all else
+		return pTDI->nPercentDone;
 	}
 
-	return nPercent;
+	// else has subtasks and we must average their completion
+	double dPercent = 0;
+
+	if (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB))
+		dPercent = GetWeightedAveragePercentDone(pTDI, pTDS, CDWordSet());
+	else
+		dPercent = GetAveragePercentDone(pTDI, pTDS, CDWordSet());
+
+	return Misc::Round(dPercent);
 }
 
 int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const

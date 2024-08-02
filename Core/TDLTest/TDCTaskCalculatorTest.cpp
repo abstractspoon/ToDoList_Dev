@@ -369,9 +369,10 @@ void CTDCTaskCalculatorTest::Test()
 		{
 			m_aStyles.RemoveAll();
 
-			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
-			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = TRUE;
-
+			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = FALSE;
+			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
+			m_aStyles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = FALSE;
+			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = FALSE;
 			// TODO
 		}
 	}
@@ -386,7 +387,17 @@ void CTDCTaskCalculatorTest::Test()
 		ExpectEQ(calc.GetTaskCost(4), 50.0); // completed task
 	}
 	
-	// TimeEstimate --------------------------------------------
+	// Time Remaining --------------------------------------------
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = FALSE;
+		m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = FALSE;
+		m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = FALSE;
+
+		// TODO
+	}
+
+	// Time Estimate --------------------------------------------
 	{
 		m_aStyles.RemoveAll();
 
@@ -442,7 +453,7 @@ void CTDCTaskCalculatorTest::Test()
 
 	}
 	
-	// TimeSpent -----------------------------------------------
+	// Time Spent -----------------------------------------------
 	{
 		m_aStyles.RemoveAll();
 
