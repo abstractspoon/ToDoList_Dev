@@ -476,7 +476,25 @@ void CTDCTaskCalculatorTest::Test()
 	{
 		m_aStyles.RemoveAll();
 
-		// TODO
+		// Parent time-tracking
+		{
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), 220.0);
+			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), 50.0);
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), 130.0);
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), 70.0); // completed task
+		}
+
+		// NO parent time-tracking
+		{
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), 120.0);
+			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), 50.0);
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), 70.0);
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), 70.0); // completed task
+		}
 	}
 	
 	
