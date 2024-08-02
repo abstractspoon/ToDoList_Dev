@@ -214,7 +214,10 @@ void CTDCTaskCalculatorTest::Test()
 			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
 			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
 
-			// TODO
+			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User1"));
+			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
+			ExpectEQ(calc.GetTaskLastModifiedBy(3), _T("User3"));
+			ExpectEQ(calc.GetTaskLastModifiedBy(4), _T("User4"));
 		}
 
 		// Latest
@@ -222,7 +225,15 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
 
-			// TODO
+			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45005.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45005.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
+
+			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User4"));
+			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
+			ExpectEQ(calc.GetTaskLastModifiedBy(3), _T("User4"));
+			ExpectEQ(calc.GetTaskLastModifiedBy(4), _T("User4"));
 		}
 	}
 
@@ -232,7 +243,15 @@ void CTDCTaskCalculatorTest::Test()
 		{
 			m_aStyles.RemoveAll();
 
-			// TODO
+			ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
+			ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+			ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
+			ExpectEQ(calc.GetTaskPriority(4, FALSE), 8);
+
+			ExpectEQ(calc.GetTaskPriority(1, TRUE), 5);
+			ExpectEQ(calc.GetTaskPriority(2, TRUE), 6);
+			ExpectEQ(calc.GetTaskPriority(3, TRUE), 7);
+			ExpectEQ(calc.GetTaskPriority(4, TRUE), 8);
 		}
 
 		// Highest
@@ -261,8 +280,10 @@ void CTDCTaskCalculatorTest::Test()
 		{
 			m_aStyles.RemoveAll();
 
-			// TODO
-
+			ExpectEQ(calc.GetTaskRisk(1), 6);
+			ExpectEQ(calc.GetTaskRisk(2), 7);
+			ExpectEQ(calc.GetTaskRisk(3), 8);
+			ExpectEQ(calc.GetTaskRisk(4), 9);
 		}
 
 		// Highest
@@ -288,7 +309,10 @@ void CTDCTaskCalculatorTest::Test()
 		{
 			m_aStyles.RemoveAll();
 
-			// TODO
+			ExpectEQ(calc.GetTaskPercentDone(1), 10);
+			ExpectEQ(calc.GetTaskPercentDone(2), 100); // completed task
+			ExpectEQ(calc.GetTaskPercentDone(3), 30);
+			ExpectEQ(calc.GetTaskPercentDone(4), 40);
 		}
 
 		// Average
