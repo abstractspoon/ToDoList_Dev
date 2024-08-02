@@ -160,7 +160,10 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
 
-			// TODO
+			ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
+			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
+			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
+			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
 		}
 
 		// Latest
@@ -168,7 +171,10 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
 
-			// TODO
+			ExpectEQ(calc.GetTaskStartDate(1), 45002.0);
+			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
+			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
+			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
 		}
 	}
 
@@ -190,7 +196,10 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 
-			// TODO
+			ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
+			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
+			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
+			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
 		}
 
 		// Latest
@@ -198,7 +207,10 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
 
-			// TODO
+			ExpectEQ(calc.GetTaskDueDate(1), 45003.0);
+			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
+			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
+			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
 		}
 	}
 
