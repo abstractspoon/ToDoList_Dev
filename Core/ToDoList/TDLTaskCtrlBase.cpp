@@ -2766,7 +2766,6 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_PRIORITY:
-			// priority color
 			if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
 			{
 				rSubItem.DeflateRect(2, 1, 3, 2);

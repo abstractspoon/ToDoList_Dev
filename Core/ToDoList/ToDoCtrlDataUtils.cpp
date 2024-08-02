@@ -3145,10 +3145,10 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 
 	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITY);
 
-	// some optimizations
+	// Do as little work as possible
 	int nHighest = pTDI->nPriority;
 
-	if (pTDI->IsDone() && !m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY))
+	if (m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) && IsTaskDone(pTDI, pTDS))
 	{
 		nHighest = min(nHighest, MIN_TDPRIORITY);
 	}
@@ -3158,28 +3158,21 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 		{
 			nHighest = MAX_TDPRIORITY;
 		}
-		else if (m_data.HasStyle(TDCS_USEHIGHESTPRIORITY) && pTDS->HasSubTasks())
+		else if (m_data.HasStyle(TDCS_USEHIGHESTPRIORITY))
 		{
 			// check children
-			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+			int nSubtask = pTDS->GetSubTaskCount();
+
+			while (nSubtask-- && (nHighest < MAX_TDPRIORITY))
 			{
 				const TODOSTRUCTURE* pTDSChild = NULL;
 				const TODOITEM* pTDIChild = NULL;
 
 				if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
+					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild))
 					{
 						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue, mapProcessedIDs); // RECURSIVE CALL
-
-						// optimization
-						if (nChildHighest == MAX_TDPRIORITY)
-						{
-							nHighest = MAX_TDPRIORITY;
-							break;
-						}
-						
-						// else
 						nHighest = max(nChildHighest, nHighest);
 					}
 				}
@@ -3217,37 +3210,30 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 
 	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NORISK);
 
-	// some optimizations
+	// Do as little work as possible
 	int nHighest = pTDI->nRisk;
 
-	if (pTDI->IsDone() && !m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) && m_data.HasStyle(TDCS_DONEHAVELOWESTRISK))
+	if (m_data.HasStyle(TDCS_DONEHAVELOWESTRISK) && IsTaskDone(pTDI, pTDS))
 	{
 		nHighest = min(nHighest, MIN_TDRISK);
 	}
 	else if (nHighest < MAX_TDRISK)
 	{
-		if (m_data.HasStyle(TDCS_USEHIGHESTRISK) && pTDS->HasSubTasks())
+		if (m_data.HasStyle(TDCS_USEHIGHESTRISK))
 		{
 			// check children
-			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+			int nSubtask = pTDS->GetSubTaskCount();
+
+			while (nSubtask-- && (nHighest < MAX_TDRISK))
 			{
 				const TODOSTRUCTURE* pTDSChild = NULL;
 				const TODOITEM* pTDIChild = NULL;
 
 				if (GetSubtask(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
+					if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild))
 					{
 						int nChildHighest = GetTaskRisk(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
-
-						// optimization
-						if (nChildHighest == MAX_TDRISK)
-						{
-							nHighest = MAX_TDRISK;
-							break;
-						}
-						
-						// else
 						nHighest = max(nChildHighest, nHighest);
 					}
 				}
