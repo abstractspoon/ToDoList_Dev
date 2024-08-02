@@ -87,7 +87,6 @@ void CTDCTaskCalculatorTest::Test()
 	{
 		tasks.SetTaskStartDate(hTask2, COleDateTime(45001.0));
 		tasks.SetTaskDueDate(hTask2, COleDateTime(45002.0));
-		tasks.SetTaskDoneDate(hTask2, COleDateTime(45010.0)); // The only completed task
 		tasks.SetTaskLastModified(hTask2, COleDateTime(45003.0), _T("User2"));
 
 		tasks.SetTaskPriority(hTask2, 6);
@@ -124,6 +123,7 @@ void CTDCTaskCalculatorTest::Test()
 	{
 		tasks.SetTaskStartDate(hTask4, COleDateTime(45003.0));
 		tasks.SetTaskDueDate(hTask4, COleDateTime(45004.0));
+		tasks.SetTaskDoneDate(hTask4, COleDateTime(45010.0)); // The only completed task
 		tasks.SetTaskLastModified(hTask4, COleDateTime(45005.0), _T("User4"));
 
 		tasks.SetTaskPriority(hTask4, 8);
@@ -150,9 +150,9 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 
 			ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 0.0); // completed task
+			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
 			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 45003.0);
+			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
 		}
 
 		// Earliest
@@ -180,9 +180,9 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 
 			ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 0.0); // completed task
+			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
 			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 45004.0);
+			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
 		}
 
 		// Earliest
@@ -290,16 +290,43 @@ void CTDCTaskCalculatorTest::Test()
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+			m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
-			// TODO
+			// Done included but not as lowest
+			{
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
 
+				ExpectEQ(calc.GetTaskRisk(1), 9);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 9);
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+			}
 
+			// Done included and lowest
+			{
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 
+/*
+				ExpectEQ(calc.GetTaskRisk(1), 8);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+*/
+			}
 
-			m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-			m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+			// Done not included
+			{
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
 
-			// TODO
+/*
+				ExpectEQ(calc.GetTaskRisk(1), 8);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+*/
+			}
 		}
 	}
 
@@ -310,9 +337,9 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles.RemoveAll();
 
 			ExpectEQ(calc.GetTaskPercentDone(1), 10);
-			ExpectEQ(calc.GetTaskPercentDone(2), 100); // completed task
+			ExpectEQ(calc.GetTaskPercentDone(2), 20);
 			ExpectEQ(calc.GetTaskPercentDone(3), 30);
-			ExpectEQ(calc.GetTaskPercentDone(4), 40);
+			ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
 		}
 
 		// Average
