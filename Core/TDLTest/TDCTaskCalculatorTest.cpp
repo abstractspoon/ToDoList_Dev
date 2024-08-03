@@ -365,6 +365,32 @@ void CTDCTaskCalculatorTest::Test()
 			ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
 		}
 
+		// Time Spent/Estimate
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
+
+			// NO parent time-tracking
+			{
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0)) / (0.0 + 40.0 + (0.0 + 60.0))));	// parent
+				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
+				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (0.0 + 70.0) / (0.0 + 60.0)));									// parent
+				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0)));												// completed task
+			}
+
+			// Allow parent time tracking
+			{
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+
+				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (40.0 + 50.0 + (60.0 + 70.0)) / (30.0 + 40.0 + (50.0 + 60.0))));
+				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
+				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (60.0 + 70.0) / (50.0 + 60.0)));
+				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
+			}
+		}
+
 		// Average
 		{
 			m_aStyles.RemoveAll();
@@ -372,7 +398,6 @@ void CTDCTaskCalculatorTest::Test()
 			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = FALSE;
 			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
 			m_aStyles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = FALSE;
-			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = FALSE;
 			// TODO
 		}
 	}
@@ -416,13 +441,17 @@ void CTDCTaskCalculatorTest::Test()
 			}
 
 			// Adjusting by % completion
+			//
+			// Note: The number of options affecting the % calculation (see above)
+			//       means that this can potentially get very complicated.
+			//       Therefore we only test 'assigned' % values and not calculations.
 			{
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + 0.0 + (60.0 * 0.0)));// parent
+				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0))));	// parent
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0));									// parent
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0));								// completed task
+				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0));										// parent
+				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0));									// completed task
 			}
 		}
 
@@ -434,17 +463,21 @@ void CTDCTaskCalculatorTest::Test()
 			{
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 + 40.0 + 50.0 + 60.0));
+				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 + 40.0 + (50.0 + 60.0)));
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 + 60.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
 			}
 
 			// Adjusting by % completion
+			//
+			// Note: The number of options affecting the % calculation (see above)
+			//       means that this can potentially get very complicated.
+			//       Therefore we only test 'assigned' % values and not calculations.
 			{
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 * 0.9) + (40.0 * 0.8) + (50.0 * 0.7) + (60.0 * 0.0));
+				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + (60.0 * 0.0)));
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
 				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 * 0.7) + (60.0 * 0.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
@@ -461,20 +494,20 @@ void CTDCTaskCalculatorTest::Test()
 		{
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
-			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), 120.0);
-			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), 50.0);
-			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), 70.0);
-			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), 70.0); // completed task
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0)));	// parent task
+			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + 70.0));				// parent task
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0));						// completed task
 		}
 
 		// Allow parent time-tracking
 		{
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
-			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), 220.0);
-			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), 50.0);
-			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), 130.0);
-			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), 70.0); // completed task
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (40.0 + 50.0 + (60.0 + 70.0)));
+			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (60.0 + 70.0));
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
 		}
 	}
 		
