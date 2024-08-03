@@ -386,6 +386,9 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Time Spent/Estimate
 		{
+			// Note: To keep the manual checks comprehensible we use only 
+			//       the Time Estimate values assigned in PopulateData
+
 			// No parental contribution
 			{
 				m_aStyles.RemoveAll();
@@ -454,6 +457,9 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Using Time Spent (Time Estimate - Time Spent)
 		{
+			// Note: To keep the manual checks comprehensible we use only 
+			//       the Time Estimate values assigned in PopulateData
+
 			// No parental contributions
 			{
 				m_aStyles.RemoveAll();
@@ -489,9 +495,8 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Using % Completion (Time Estimate * (100 - %) / 100)
 		{
-			// Note: The number of options affecting the % calculation (see above)
-			//       means that this can potentially get very complicated.
-			//       Therefore we only test 'assigned' % values and not calculations.
+			// Note: To keep the manual checks comprehensible we 
+			//       use only the % values assigned in PopulateData
 
 			// No parental contributions
 			{
@@ -547,9 +552,8 @@ void CTDCTaskCalculatorTest::Test()
 
 			// Adjusting by % completion
 			//
-			// Note: The number of options affecting the % calculation (see above)
-			//       means that this can potentially get very complicated.
-			//       Therefore we only test 'assigned' % values and not calculations.
+			// Note: To keep the manual checks comprehensible we 
+			//       use only the % values assigned in PopulateData
 			{
 				m_aStyles.RemoveAll();
 				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
@@ -578,9 +582,8 @@ void CTDCTaskCalculatorTest::Test()
 
 			// Adjusting by % completion
 			//
-			// Note: The number of options affecting the % calculation (see above)
-			//       means that this can potentially get very complicated.
-			//       Therefore we only test 'assigned' % values and not calculations.
+			// Note: To keep the manual checks comprehensible we 
+			//       use only the % values assigned in PopulateData
 			{
 				m_aStyles.RemoveAll();
 				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
