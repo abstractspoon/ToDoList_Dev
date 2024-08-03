@@ -173,25 +173,63 @@ void CTDCTaskCalculatorTest::Test()
 
 	// Priority ------------------------------------------------
 	{
+		// Because all our assigned dates are much earlier than 'now' none
+		// of out tasks are overdue so we don't both with that extra check,
+		// except for the 'no modifiers' check just to prove the point
+		const BOOL NO_OVERDUE_CHECK = FALSE;
+
 		// Assigned
 		{
-			m_aStyles.RemoveAll();
+			// No modifiers
+			{
+				m_aStyles.RemoveAll();
 
-			ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
-			ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
-			ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
-			ExpectEQ(calc.GetTaskPriority(4, FALSE), 8);
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8);
 
-			ExpectEQ(calc.GetTaskPriority(1, TRUE), 5);
-			ExpectEQ(calc.GetTaskPriority(2, TRUE), 6);
-			ExpectEQ(calc.GetTaskPriority(3, TRUE), 7);
-			ExpectEQ(calc.GetTaskPriority(4, TRUE), 8);
+				ExpectEQ(calc.GetTaskPriority(1, TRUE), 5);
+				ExpectEQ(calc.GetTaskPriority(2, TRUE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, TRUE), 7);
+				ExpectEQ(calc.GetTaskPriority(4, TRUE), 8);
+			}
+
+			// Done have lowest priority
+			{
+				// DON'T treat tasks with completed subtasks as completed
+				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+
+					ExpectEQ(calc.GetTaskPriority(1, NO_OVERDUE_CHECK), 5);
+					ExpectEQ(calc.GetTaskPriority(2, NO_OVERDUE_CHECK), 6);
+					ExpectEQ(calc.GetTaskPriority(3, NO_OVERDUE_CHECK), 7);
+					ExpectEQ(calc.GetTaskPriority(4, NO_OVERDUE_CHECK), 0); // completed task
+				}
+
+				// DO treat tasks with completed subtasks as completed
+				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+
+					ExpectEQ(calc.GetTaskPriority(1, NO_OVERDUE_CHECK), 5);
+					ExpectEQ(calc.GetTaskPriority(2, NO_OVERDUE_CHECK), 6);
+					ExpectEQ(calc.GetTaskPriority(3, NO_OVERDUE_CHECK), 0); // implicitly completed
+					ExpectEQ(calc.GetTaskPriority(4, NO_OVERDUE_CHECK), 0); // completed task
+				}
+			}
+
 		}
 
 		// Highest
 		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+			}
 
 
 			// TODO
