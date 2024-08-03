@@ -40,676 +40,695 @@ TESTRESULT CTDCTaskCalculatorTest::Run()
 {
 	ClearTotals();
 
-	Test();
+	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
+	PopulateData(data);
+
+	TestGetTaskStartDate(data);
+	TestGetTaskDueDate(data);
+	TestGetTaskLastModifiedDateAndUser(data);
+	TestGetTaskPriority(data);
+	TestGetTaskRisk(data);
+	TestGetTaskPercentDone(data);
+	TestGetTaskCost(data);
+	TestGetTaskTimeEstimate(data);
+	TestGetTaskTimeSpent(data);
+	TestGetTaskTimeRemaining(data);
+	TestGetTaskFlag(data);
+	TestGetTaskLock(data);
 
 	return GetTotals();
 }
 
-void CTDCTaskCalculatorTest::Test()
+void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data)
 {
-	BeginTest(_T("Test"));
-
-	// Populate data model
-	CTaskFile tasks;
-
-	// Task1
-	//   |
-	//   |_ Task2
-	//   |
-	//   |_ Task3
-	//        |
-	//        |_ Task4
-	
-	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
-	PopulateData(data);
-
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskStartDate"));
 	CTDCTaskCalculator calc(data);
 
-	// Start Date ------------------------------------------------
+	// Assigned
 	{
-		// Assigned
-		{
-			m_aStyles.RemoveAll();
+		m_aStyles.RemoveAll();
 
-			ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		}
-
-		// Earliest
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
-
-			ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		}
-
-		// Latest
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
-
-			ExpectEQ(calc.GetTaskStartDate(1), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		}
+		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
+		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
+		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
+		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
 	}
 
-
-	// Due Date -------------------------------------------------
+	// Earliest
 	{
-		// Assigned
-		{
-			m_aStyles.RemoveAll();
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
 
-			ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		}
-
-		// Earliest
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
-
-			ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		}
-
-		// Latest
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
-
-			ExpectEQ(calc.GetTaskDueDate(1), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		}
+		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
+		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
+		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
+		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
 	}
 
-
-	// Last Modified Date/User ---------------------------------
+	// Latest
 	{
-		// Assigned
-		{
-			m_aStyles.RemoveAll();
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
 
-			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
+		ExpectEQ(calc.GetTaskStartDate(1), 45002.0);
+		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
+		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
+		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
+	}
+}
 
-			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User1"));
-			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
-			ExpectEQ(calc.GetTaskLastModifiedBy(3), _T("User3"));
-			ExpectEQ(calc.GetTaskLastModifiedBy(4), _T("User4"));
-		}
+void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskDueDate"));
+	CTDCTaskCalculator calc(data);
 
-		// Latest
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
+	// Assigned
+	{
+		m_aStyles.RemoveAll();
 
-			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-
-			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User4"));
-			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
-			ExpectEQ(calc.GetTaskLastModifiedBy(3), _T("User4"));
-			ExpectEQ(calc.GetTaskLastModifiedBy(4), _T("User4"));
-		}
+		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
+		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
+		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
+		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
 	}
 
-	// Priority ------------------------------------------------
+	// Earliest
 	{
-		// Because all our assigned dates are much earlier than 'now' none
-		// of out tasks are overdue so we don't both with that extra check,
-		// except for the 'no modifiers' check just to prove the point
-		const BOOL NO_OVERDUE_CHECK = FALSE;
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 
-		// Assigned
+		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
+		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
+		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
+		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
+	}
+
+	// Latest
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
+
+		ExpectEQ(calc.GetTaskDueDate(1), 45003.0);
+		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
+		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
+		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetLastModifiedDateAndUser"));
+	CTDCTaskCalculator calc(data);
+
+	// Assigned
+	{
+		m_aStyles.RemoveAll();
+
+		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
+
+		ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User1"));
+		ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
+		ExpectEQ(calc.GetTaskLastModifiedBy(3), _T("User3"));
+		ExpectEQ(calc.GetTaskLastModifiedBy(4), _T("User4"));
+	}
+
+	// Latest
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
+
+		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45005.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(3), 45005.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
+
+		ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User4"));
+		ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
+		ExpectEQ(calc.GetTaskLastModifiedBy(3), _T("User4"));
+		ExpectEQ(calc.GetTaskLastModifiedBy(4), _T("User4"));
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPriority"));
+	CTDCTaskCalculator calc(data);
+
+	// Assigned
+	{
+		// No modifiers
 		{
-			// No modifiers
+			// Note: The 'bCheckOverdue' argument in GetTaskPriority is only 
+			//       relevant in the presence of the TDCS_DUEHAVEHIGHESTPRIORITY
+			//       modifier, so if that's not present we ignore it
+			m_aStyles.RemoveAll();
+
+			ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
+			ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+			ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
+			ExpectEQ(calc.GetTaskPriority(4, FALSE), 8);
+
+			ExpectEQ(calc.GetTaskPriority(1, TRUE), calc.GetTaskPriority(1, FALSE));
+			ExpectEQ(calc.GetTaskPriority(2, TRUE), calc.GetTaskPriority(2, FALSE));
+			ExpectEQ(calc.GetTaskPriority(3, TRUE), calc.GetTaskPriority(3, FALSE));
+			ExpectEQ(calc.GetTaskPriority(4, TRUE), calc.GetTaskPriority(4, FALSE));
+		}
+
+		// Done have lowest priority
+		{
+			// DON'T treat tasks with completed subtasks as completed
 			{
 				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
 				ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
 				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
 				ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
-				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8);
-
-				ExpectEQ(calc.GetTaskPriority(1, TRUE), 5);
-				ExpectEQ(calc.GetTaskPriority(2, TRUE), 6);
-				ExpectEQ(calc.GetTaskPriority(3, TRUE), 7);
-				ExpectEQ(calc.GetTaskPriority(4, TRUE), 8);
-			}
-
-			// Done have lowest priority
-			{
-				// DON'T treat tasks with completed subtasks as completed
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-
-					ExpectEQ(calc.GetTaskPriority(1, NO_OVERDUE_CHECK), 5);
-					ExpectEQ(calc.GetTaskPriority(2, NO_OVERDUE_CHECK), 6);
-					ExpectEQ(calc.GetTaskPriority(3, NO_OVERDUE_CHECK), 7);
-					ExpectEQ(calc.GetTaskPriority(4, NO_OVERDUE_CHECK), 0); // completed task
-				}
-
-				// DO treat tasks with completed subtasks as completed
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-
-					ExpectEQ(calc.GetTaskPriority(1, NO_OVERDUE_CHECK), 5);
-					ExpectEQ(calc.GetTaskPriority(2, NO_OVERDUE_CHECK), 6);
-					ExpectEQ(calc.GetTaskPriority(3, NO_OVERDUE_CHECK), 0); // implicitly completed
-					ExpectEQ(calc.GetTaskPriority(4, NO_OVERDUE_CHECK), 0); // completed task
-				}
-			}
-
-		}
-
-		// Highest
-		{
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
-			}
-
-
-			// TODO
-
-
-
-
-			m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
-			m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
-			m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
-
-			// TODO
-		}
-	}
-
-
-	// Risk ---------------------------------------------------
-	{
-		// Assigned
-		{
-			// No modifiers
-			{
-				m_aStyles.RemoveAll();
-
-				ExpectEQ(calc.GetTaskRisk(1), 6);
-				ExpectEQ(calc.GetTaskRisk(2), 7);
-				ExpectEQ(calc.GetTaskRisk(3), 8);
-				ExpectEQ(calc.GetTaskRisk(4), 9);
-			}
-
-			// Done have lowest risk
-			{
-				// DON'T treat tasks with completed subtasks as completed
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 6);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 8);
-					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				}
-
-				// DO treat tasks with completed subtasks as completed
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 6);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
-					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				}
-			}
-		}
-
-		// Highest
-		{
-			// DON'T treat tasks with completed subtasks as completed
-			{
-				// Done included and lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 8);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 8);
-					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				}
-
-				// Done included but NOT lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 9);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 9);
-					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-				}
-
-				// Done NOT included
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 8);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 8);
-					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				}
-
-				// Done NOT included and NOT lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 8);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 8);
-					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-				}
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
 			}
 
 			// DO treat tasks with completed subtasks as completed
 			{
-				// Done included and lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
-					ExpectEQ(calc.GetTaskRisk(1), 7);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
-					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				}
-
-				// Done included but NOT lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 9);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 9); // implicitly completed
-					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-				}
-
-				// Done NOT included and lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 7);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
-					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				}
-
-				// Done NOT included and NOT lowest
-				{
-					m_aStyles.RemoveAll();
-					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
-					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
-
-					ExpectEQ(calc.GetTaskRisk(1), 7);
-					ExpectEQ(calc.GetTaskRisk(2), 7);
-					ExpectEQ(calc.GetTaskRisk(3), 8); // implicitly completed
-					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-				}
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 0); // implicitly completed
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
 			}
 		}
+
 	}
 
-	// Percent Done -------------------------------------------
+	// Highest
 	{
-		// Assigned
 		{
 			m_aStyles.RemoveAll();
-
-			ExpectEQ(calc.GetTaskPercentDone(1), 10);
-			ExpectEQ(calc.GetTaskPercentDone(2), 20);
-			ExpectEQ(calc.GetTaskPercentDone(3), 30);
-			ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
+			m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 		}
 
-		// Time Spent/Estimate
-		{
-			// Note: To keep the manual checks comprehensible we use only 
-			//       the Time Estimate values assigned in PopulateData
 
-			// No parental contribution
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+		// TODO
 
-				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0)) / (0.0 + 40.0 + (0.0 + 60.0))));	// parent
-				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
-				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (0.0 + 70.0) / (0.0 + 60.0)));									// parent
-				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0)));												// completed task
-			}
 
-			// Allow parent time tracking
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
-				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (40.0 + 50.0 + (60.0 + 70.0)) / (30.0 + 40.0 + (50.0 + 60.0))));
-				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
-				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (60.0 + 70.0) / (50.0 + 60.0)));
-				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
-			}
-		}
 
-		// Average
-		{
-			m_aStyles.RemoveAll();
-
-			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = FALSE;
-			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
-			m_aStyles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = FALSE;
-			// TODO
-		}
-	}
-
-	// Cost ----------------------------------------------------
-	{
-		m_aStyles.RemoveAll();
-
-		ExpectEQ(calc.GetTaskCost(1), 140.0);
-		ExpectEQ(calc.GetTaskCost(2), 30.0);
-		ExpectEQ(calc.GetTaskCost(3), 90.0);
-		ExpectEQ(calc.GetTaskCost(4), 50.0); // completed task
-	}
-	
-	// Time Remaining --------------------------------------------
-	{
-		TDC_UNITS nUnits = TDCU_NULL;
-
-		// Using Due Date (Now - Due Date)
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
-
-			// Note: +1 because due date has no time component -> end of day
-			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45001.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
-			ExpectEQ(nUnits, TDCU_DAYS);
-			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
-			ExpectEQ(nUnits, TDCU_DAYS);
-			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
-			ExpectEQ(nUnits, TDCU_DAYS);
-			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
-			ExpectEQ(nUnits, TDCU_NULL);
-		}
-
-		// Using Time Spent (Time Estimate - Time Spent)
-		{
-			// Note: To keep the manual checks comprehensible we use only 
-			//       the Time Estimate values assigned in PopulateData
-
-			// No parental contributions
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
-
-				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + 40.0 + (0.0 + 60.0)) - (0.0 + 50.0 + (0.0 + 70.0))); // parent
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + 60.0) - (0.0 + 70.0)); // parent
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
-				ExpectEQ(nUnits, TDCU_DAYS);
-			}
-
-			// Parental contributions
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
-
-				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (30.0 + 40.0 + (50.0 + 60.0)) - (40.0 + 50.0 + (60.0 + 70.0)));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (50.0 + 60.0) - (60.0 + 70.0));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
-				ExpectEQ(nUnits, TDCU_DAYS);
-			}
-		}
-
-		// Using % Completion (Time Estimate * (100 - %) / 100)
-		{
-			// Note: To keep the manual checks comprehensible we 
-			//       use only the % values assigned in PopulateData
-
-			// No parental contributions
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
-
-				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + (40.0 * 0.8) + (0.0 + 0.0))); // parent
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + 0.0)); // parent
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
-				ExpectEQ(nUnits, TDCU_DAYS);
-			}
-
-			// Parental contributions
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
-
-				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + 0.0)));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((50.0 * 0.7) + 0.0));
-				ExpectEQ(nUnits, TDCU_DAYS);
-				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
-				ExpectEQ(nUnits, TDCU_DAYS);
-			}
-		}
+		m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+		m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+		m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
 
 		// TODO
 	}
+}
 
-	// Time Estimate --------------------------------------------
+void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskRisk"));
+	CTDCTaskCalculator calc(data);
+
+	// Assigned
 	{
-		// No parental contributions
+		// No modifiers
 		{
-			// NOT adjusting by % completion
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
-				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
+			m_aStyles.RemoveAll();
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + 40.0 + 0.0 + 60.0)); // parent
-				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0 + 60.0)); // parent
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
-			}
-
-			// Adjusting by % completion
-			//
-			// Note: To keep the manual checks comprehensible we 
-			//       use only the % values assigned in PopulateData
-			{
-				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
-				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
-
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0)))); // parent
-				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0)); // parent
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
-			}
+			ExpectEQ(calc.GetTaskRisk(1), 6);
+			ExpectEQ(calc.GetTaskRisk(2), 7);
+			ExpectEQ(calc.GetTaskRisk(3), 8);
+			ExpectEQ(calc.GetTaskRisk(4), 9);
 		}
 
-		// Parental contributions
+		// Done have lowest risk
 		{
-			// NOT adjusting by % completion
+			// DON'T treat tasks with completed subtasks as completed
 			{
 				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
-				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 + 40.0 + (50.0 + 60.0)));
-				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 + 60.0));
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
+				ExpectEQ(calc.GetTaskRisk(1), 6);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
 			}
 
-			// Adjusting by % completion
-			//
-			// Note: To keep the manual checks comprehensible we 
-			//       use only the % values assigned in PopulateData
+			// DO treat tasks with completed subtasks as completed
 			{
 				m_aStyles.RemoveAll();
-				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
-				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + (60.0 * 0.0)));
-				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 * 0.7) + (60.0 * 0.0));
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
+				ExpectEQ(calc.GetTaskRisk(1), 6);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
+				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
 			}
 		}
-
 	}
-	
-	// Time Spent -----------------------------------------------
+
+	// Highest
 	{
-		// No parental contributions
+		// DON'T treat tasks with completed subtasks as completed
+		{
+			// Done included and lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 8);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+			}
+
+			// Done included but NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 9);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 9);
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+			}
+
+			// Done NOT included
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 8);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+			}
+
+			// Done NOT included and NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 8);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8);
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+			}
+		}
+
+		// DO treat tasks with completed subtasks as completed
+		{
+			// Done included and lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 7);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
+				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+			}
+
+			// Done included but NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 9);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 9); // implicitly completed
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+			}
+
+			// Done NOT included and lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 7);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
+				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+			}
+
+			// Done NOT included and NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
+
+				ExpectEQ(calc.GetTaskRisk(1), 7);
+				ExpectEQ(calc.GetTaskRisk(2), 7);
+				ExpectEQ(calc.GetTaskRisk(3), 8); // implicitly completed
+				ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+			}
+		}
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPercentDone"));
+	CTDCTaskCalculator calc(data);
+
+	// Assigned
+	{
+		m_aStyles.RemoveAll();
+
+		ExpectEQ(calc.GetTaskPercentDone(1), 10);
+		ExpectEQ(calc.GetTaskPercentDone(2), 20);
+		ExpectEQ(calc.GetTaskPercentDone(3), 30);
+		ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
+	}
+
+	// Time Spent/Estimate
+	{
+		// Note: To keep the manual checks comprehensible we use only 
+		//       the Time Estimate values assigned in PopulateData
+
+		// No parental contribution
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+			ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0)) / (0.0 + 40.0 + (0.0 + 60.0))));	// parent
+			ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
+			ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (0.0 + 70.0) / (0.0 + 60.0)));									// parent
+			ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0)));												// completed task
+		}
+
+		// Allow parent time tracking
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+
+			ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (40.0 + 50.0 + (60.0 + 70.0)) / (30.0 + 40.0 + (50.0 + 60.0))));
+			ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
+			ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (60.0 + 70.0) / (50.0 + 60.0)));
+			ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
+		}
+	}
+
+	// Average
+	{
+		m_aStyles.RemoveAll();
+
+		m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = FALSE;
+		m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
+		m_aStyles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = FALSE;
+		// TODO
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskCost"));
+	CTDCTaskCalculator calc(data);
+
+	m_aStyles.RemoveAll();
+
+	ExpectEQ(calc.GetTaskCost(1), 140.0);
+	ExpectEQ(calc.GetTaskCost(2), 30.0);
+	ExpectEQ(calc.GetTaskCost(3), 90.0);
+	ExpectEQ(calc.GetTaskCost(4), 50.0); // completed task
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeEstimate"));
+	CTDCTaskCalculator calc(data);
+
+	// No parental contributions
+	{
+		// NOT adjusting by % completion
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
-			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0))); // parent task
-			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
-			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + 70.0)); // parent task
-			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
+			ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + 40.0 + 0.0 + 60.0)); // parent
+			ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
+			ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0 + 60.0)); // parent
+			ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
+		}
+
+		// Adjusting by % completion
+		//
+		// Note: To keep the manual checks comprehensible we 
+		//       use only the % values assigned in PopulateData
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
+
+			ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0)))); // parent
+			ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
+			ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0)); // parent
+			ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
+		}
+	}
+
+	// Parental contributions
+	{
+		// NOT adjusting by % completion
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
+
+			ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 + 40.0 + (50.0 + 60.0)));
+			ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
+			ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 + 60.0));
+			ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
+		}
+
+		// Adjusting by % completion
+		//
+		// Note: To keep the manual checks comprehensible we 
+		//       use only the % values assigned in PopulateData
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
+
+			ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + (60.0 * 0.0)));
+			ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
+			ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 * 0.7) + (60.0 * 0.0));
+			ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
+		}
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeSpent"));
+	CTDCTaskCalculator calc(data);
+
+	// No parental contributions
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+		ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0))); // parent task
+		ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
+		ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + 70.0)); // parent task
+		ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
+	}
+
+	// Parental contributions
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+
+		ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (40.0 + 50.0 + (60.0 + 70.0)));
+		ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
+		ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (60.0 + 70.0));
+		ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeRemaining"));
+	CTDCTaskCalculator calc(data);
+
+	TDC_UNITS nUnits = TDCU_NULL;
+
+	// Using Due Date (Now - Due Date)
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+
+		// Note: +1 because due date has no time component -> end of day
+		ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45001.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+		ExpectEQ(nUnits, TDCU_DAYS);
+		ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+		ExpectEQ(nUnits, TDCU_DAYS);
+		ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+		ExpectEQ(nUnits, TDCU_DAYS);
+		ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
+		ExpectEQ(nUnits, TDCU_NULL);
+	}
+
+	// Using Time Spent (Time Estimate - Time Spent)
+	{
+		// Note: To keep the manual checks comprehensible we use only 
+		//       the Time Estimate values assigned in PopulateData
+
+		// No parental contributions
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + 40.0 + (0.0 + 60.0)) - (0.0 + 50.0 + (0.0 + 70.0))); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + 60.0) - (0.0 + 70.0)); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
+			ExpectEQ(nUnits, TDCU_DAYS);
 		}
 
 		// Parental contributions
 		{
 			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
-			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (40.0 + 50.0 + (60.0 + 70.0)));
-			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
-			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (60.0 + 70.0));
-			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (30.0 + 40.0 + (50.0 + 60.0)) - (40.0 + 50.0 + (60.0 + 70.0)));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (50.0 + 60.0) - (60.0 + 70.0));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
+			ExpectEQ(nUnits, TDCU_DAYS);
 		}
 	}
-		
-	// Flagging ------------------------------------------------
+
+	// Using % Completion (Time Estimate * (100 - %) / 100)
 	{
-		// Assigned
+		// Note: To keep the manual checks comprehensible we 
+		//       use only the % values assigned in PopulateData
+
+		// No parental contributions
 		{
 			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
-			ExpectFalse(calc.IsTaskFlagged(1));
-			ExpectFalse(calc.IsTaskFlagged(2));
-			ExpectFalse(calc.IsTaskFlagged(3));
-			ExpectTrue(calc.IsTaskFlagged(4));
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + (40.0 * 0.8) + (0.0 + 0.0))); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + 0.0)); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
+			ExpectEQ(nUnits, TDCU_DAYS);
 		}
 
-		// Inherited
+		// Parental contributions
 		{
 			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_TASKINHERITSSUBTASKFLAGS] = TRUE;
+			m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
+			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
-			ExpectTrue(calc.IsTaskFlagged(1));
-			ExpectFalse(calc.IsTaskFlagged(2));
-			ExpectTrue(calc.IsTaskFlagged(3));
-			ExpectTrue(calc.IsTaskFlagged(4));
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + 0.0)));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((50.0 * 0.7) + 0.0));
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
+			ExpectEQ(nUnits, TDCU_DAYS);
 		}
 	}
+}
 
-	// Locking --------------------------------------------------
+void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskFlag"));
+	CTDCTaskCalculator calc(data);
+
+	// Assigned
 	{
-		// Assigned
-		{
-			m_aStyles.RemoveAll();
+		m_aStyles.RemoveAll();
 
-			ExpectTrue(calc.IsTaskLocked(1));
-			ExpectFalse(calc.IsTaskLocked(2));
-			ExpectFalse(calc.IsTaskLocked(3));
-			ExpectFalse(calc.IsTaskLocked(4));
-		}
-
-		// Inherited
-		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_SUBTASKSINHERITLOCK] = TRUE;
-
-			ExpectTrue(calc.IsTaskLocked(1));
-			ExpectTrue(calc.IsTaskLocked(2));
-			ExpectTrue(calc.IsTaskLocked(3));
-			ExpectTrue(calc.IsTaskLocked(4));
-		}
+		ExpectFalse(calc.IsTaskFlagged(1));
+		ExpectFalse(calc.IsTaskFlagged(2));
+		ExpectFalse(calc.IsTaskFlagged(3));
+		ExpectTrue(calc.IsTaskFlagged(4));
 	}
 
-	EndTest();
+	// Inherited
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_TASKINHERITSSUBTASKFLAGS] = TRUE;
+
+		ExpectTrue(calc.IsTaskFlagged(1));
+		ExpectFalse(calc.IsTaskFlagged(2));
+		ExpectTrue(calc.IsTaskFlagged(3));
+		ExpectTrue(calc.IsTaskFlagged(4));
+	}
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskLock"));
+	CTDCTaskCalculator calc(data);
+
+	// Assigned
+	{
+		m_aStyles.RemoveAll();
+
+		ExpectTrue(calc.IsTaskLocked(1));
+		ExpectFalse(calc.IsTaskLocked(2));
+		ExpectFalse(calc.IsTaskLocked(3));
+		ExpectFalse(calc.IsTaskLocked(4));
+	}
+
+	// Inherited
+	{
+		m_aStyles.RemoveAll();
+		m_aStyles[TDCS_SUBTASKSINHERITLOCK] = TRUE;
+
+		ExpectTrue(calc.IsTaskLocked(1));
+		ExpectTrue(calc.IsTaskLocked(2));
+		ExpectTrue(calc.IsTaskLocked(3));
+		ExpectTrue(calc.IsTaskLocked(4));
+	}
 }
 
 
