@@ -224,10 +224,10 @@ void CTDCTaskCalculatorTest::Test()
 
 			// Done have lowest risk
 			{
-				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
-
 				// DON'T treat tasks with completed subtasks as completed
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
 					ExpectEQ(calc.GetTaskRisk(1), 6);
@@ -238,6 +238,8 @@ void CTDCTaskCalculatorTest::Test()
 
 				// DO treat tasks with completed subtasks as completed
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
 					ExpectEQ(calc.GetTaskRisk(1), 6);
@@ -250,15 +252,13 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Highest
 		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
-
 			// DON'T treat tasks with completed subtasks as completed
 			{
-				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
-
 				// Done included and lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 
@@ -270,6 +270,9 @@ void CTDCTaskCalculatorTest::Test()
 
 				// Done included but NOT lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
 
@@ -281,6 +284,9 @@ void CTDCTaskCalculatorTest::Test()
 
 				// Done NOT included
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 
@@ -292,6 +298,9 @@ void CTDCTaskCalculatorTest::Test()
 
 				// Done NOT included and NOT lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
 
@@ -304,10 +313,11 @@ void CTDCTaskCalculatorTest::Test()
 
 			// DO treat tasks with completed subtasks as completed
 			{
-				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
-
 				// Done included and lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 
@@ -319,6 +329,9 @@ void CTDCTaskCalculatorTest::Test()
 
 				// Done included but NOT lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
 
@@ -330,6 +343,9 @@ void CTDCTaskCalculatorTest::Test()
 
 				// Done NOT included and lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 
@@ -341,6 +357,9 @@ void CTDCTaskCalculatorTest::Test()
 
 				// Done NOT included and NOT lowest
 				{
+					m_aStyles.RemoveAll();
+					m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+					m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 					m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
 					m_aStyles[TDCS_DONEHAVELOWESTRISK] = FALSE;
 
@@ -367,11 +386,10 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Time Spent/Estimate
 		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
-
 			// NO parent time-tracking
 			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
 				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
 				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0)) / (0.0 + 40.0 + (0.0 + 60.0))));	// parent
@@ -382,6 +400,8 @@ void CTDCTaskCalculatorTest::Test()
 
 			// Allow parent time tracking
 			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
 				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
 				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (40.0 + 50.0 + (60.0 + 70.0)) / (30.0 + 40.0 + (50.0 + 60.0))));
@@ -414,24 +434,33 @@ void CTDCTaskCalculatorTest::Test()
 	
 	// Time Remaining --------------------------------------------
 	{
-		m_aStyles.RemoveAll();
-		m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = FALSE;
-		m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = FALSE;
-		m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = FALSE;
+
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+		}
+
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
+		}
+
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = FALSE;
+		}
 
 		// TODO
 	}
 
 	// Time Estimate --------------------------------------------
 	{
-		m_aStyles.RemoveAll();
-
 		// NO parent time-tracking
 		{
-			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
-
 			// NOT adjusting by % completion
 			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
 				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + 40.0 + 0.0 + 60.0));// parent
@@ -446,6 +475,8 @@ void CTDCTaskCalculatorTest::Test()
 			//       means that this can potentially get very complicated.
 			//       Therefore we only test 'assigned' % values and not calculations.
 			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
 				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0))));	// parent
@@ -457,10 +488,10 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Allow parent time-tracking
 		{
-			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
-
 			// NOT adjusting by % completion
 			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
 				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 + 40.0 + (50.0 + 60.0)));
@@ -475,6 +506,8 @@ void CTDCTaskCalculatorTest::Test()
 			//       means that this can potentially get very complicated.
 			//       Therefore we only test 'assigned' % values and not calculations.
 			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
 				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + (60.0 * 0.0)));
@@ -488,10 +521,9 @@ void CTDCTaskCalculatorTest::Test()
 	
 	// Time Spent -----------------------------------------------
 	{
-		m_aStyles.RemoveAll();
-
 		// NO parent time-tracking
 		{
+			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
 			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0)));	// parent task
@@ -502,6 +534,7 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Allow parent time-tracking
 		{
+			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
 			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (40.0 + 50.0 + (60.0 + 70.0)));
