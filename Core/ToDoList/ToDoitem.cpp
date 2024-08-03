@@ -1431,7 +1431,7 @@ BOOL TODOITEM::HasCustomAttributeValue(const CString& sAttribID) const
 
 COleDateTimeSpan TODOITEM::GetRemainingTime(const COleDateTime& date)
 {
-	COleDateTimeSpan dtsRemaining = date - COleDateTime::GetCurrentTime();
+	COleDateTimeSpan dtsRemaining = (date - COleDateTime::GetCurrentTime());
 	
 	if (!HasTime(date))
 		dtsRemaining += 1; // midnight on the day

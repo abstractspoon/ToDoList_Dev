@@ -386,7 +386,7 @@ void CTDCTaskCalculatorTest::Test()
 
 		// Time Spent/Estimate
 		{
-			// NO parent time-tracking
+			// No parental contribution
 			{
 				m_aStyles.RemoveAll();
 				m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
@@ -434,20 +434,96 @@ void CTDCTaskCalculatorTest::Test()
 	
 	// Time Remaining --------------------------------------------
 	{
+		TDC_UNITS nUnits = TDCU_NULL;
 
+		// Using Due Date (Now - Due Date)
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+
+			// Note: +1 because due date has no time component -> end of day
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45001.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
+			ExpectEQ(nUnits, TDCU_NULL);
 		}
 
+		// Using Time Spent (Time Estimate - Time Spent)
 		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
+			// No parental contributions
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + 40.0 + (0.0 + 60.0)) - (0.0 + 50.0 + (0.0 + 70.0))); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + 60.0) - (0.0 + 70.0)); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+			}
+
+			// Parental contributions
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (30.0 + 40.0 + (50.0 + 60.0)) - (40.0 + 50.0 + (60.0 + 70.0)));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (50.0 + 60.0) - (60.0 + 70.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+			}
 		}
 
+		// Using % Completion (Time Estimate * (100 - %) / 100)
 		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = FALSE;
+			// Note: The number of options affecting the % calculation (see above)
+			//       means that this can potentially get very complicated.
+			//       Therefore we only test 'assigned' % values and not calculations.
+
+			// No parental contributions
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
+
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + (40.0 * 0.8) + (0.0 + 0.0))); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + 0.0)); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+			}
+
+			// Parental contributions
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
+				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
+
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + 0.0)));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((50.0 * 0.7) + 0.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+			}
 		}
 
 		// TODO
@@ -455,7 +531,7 @@ void CTDCTaskCalculatorTest::Test()
 
 	// Time Estimate --------------------------------------------
 	{
-		// NO parent time-tracking
+		// No parental contributions
 		{
 			// NOT adjusting by % completion
 			{
@@ -463,10 +539,10 @@ void CTDCTaskCalculatorTest::Test()
 				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + 40.0 + 0.0 + 60.0));// parent
+				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + 40.0 + 0.0 + 60.0)); // parent
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0 + 60.0));				// parent
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0));					// completed task
+				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0 + 60.0)); // parent
+				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
 			}
 
 			// Adjusting by % completion
@@ -479,14 +555,14 @@ void CTDCTaskCalculatorTest::Test()
 				m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 				m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
-				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0))));	// parent
+				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0)))); // parent
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0));										// parent
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0));									// completed task
+				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0)); // parent
+				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
 			}
 		}
 
-		// Allow parent time-tracking
+		// Parental contributions
 		{
 			// NOT adjusting by % completion
 			{
@@ -521,18 +597,18 @@ void CTDCTaskCalculatorTest::Test()
 	
 	// Time Spent -----------------------------------------------
 	{
-		// NO parent time-tracking
+		// No parental contributions
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
-			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0)));	// parent task
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0))); // parent task
 			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
-			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + 70.0));				// parent task
-			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0));						// completed task
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + 70.0)); // parent task
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
 		}
 
-		// Allow parent time-tracking
+		// Parental contributions
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;

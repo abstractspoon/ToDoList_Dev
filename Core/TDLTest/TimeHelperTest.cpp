@@ -44,11 +44,10 @@ void CTimeHelperTest::TestGetTime()
 	// -----------------------------------------------------------------------
 
 	{
-		// Use default statically defined internal values
-		const CTimeHelper th;
-
 		const double DAYSINWEEK = 5.0;
 		const double HOURSINDAY = 8.0;
+
+		const CTimeHelper th(CWorkingWeek(DHW_SATURDAY | DHW_SUNDAY, HOURSINDAY));
 
 		// -----------------------------------------------------------------------
 
