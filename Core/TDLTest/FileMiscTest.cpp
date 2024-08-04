@@ -41,7 +41,7 @@ TESTRESULT CFileMiscTest::Run()
 
 void CFileMiscTest::TestGetVirtualStorePath()
 {
-	BeginTest(_T("FileMisc::GetVirtualStorePath"));
+	CTDCScopedTest test(*this, _T("FileMisc::GetVirtualStorePath"));
 
 	LPCTSTR szTestPath1 = _T("C:\\Program Files\\Abstractspoon\\ToDoList\\ToDoList.ini"); // 64-bit app
 	LPCTSTR szTestPath2 = _T("C:\\Program Files (x86)\\Abstractspoon\\ToDoList\\ToDoList.ini"); // 32-bit app
@@ -87,13 +87,11 @@ void CFileMiscTest::TestGetVirtualStorePath()
 	ExpectEmpty(sVirtualPath3);
 	ExpectFalse(FileMisc::GetVirtualStorePath(szTestPath4, sVirtualPath4));
 	ExpectEmpty(sVirtualPath4);
-	
-	EndTest();
 }
 
 void CFileMiscTest::TestGetExtension()
 {
-	BeginTest(_T("FileMisc::GetExtension"));
+	CTDCScopedTest test(*this, _T("FileMisc::GetExtension"));
 
 	CString FILEPATHS[] = 
 	{
@@ -127,13 +125,11 @@ void CFileMiscTest::TestGetExtension()
 		ExpectEQ(_T(".ext2"), FileMisc::GetExtension(sPath, TRUE));
 		ExpectEQ(_T("ext2"), FileMisc::GetExtension(sPath, FALSE));
 	}
-
-	EndTest();
 }
 
 void CFileMiscTest::TestSplitPath()
 {
-	BeginTest(_T("FileMisc::SplitPath"));
+	CTDCScopedTest test(*this, _T("FileMisc::SplitPath"));
 
 	CString sDrive, sFolder, sFileName, sExt;
 
@@ -244,6 +240,4 @@ void CFileMiscTest::TestSplitPath()
 		ExpectEQ(_T("File.ext1"), sFileName);
 		ExpectEQ(_T(".ext2"), sExt);
 	}
-	
-	EndTest();
 }

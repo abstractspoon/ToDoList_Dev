@@ -140,7 +140,7 @@ public:
 
 	TESTRESULT Run()
 	{
-		BeginTest(_T("CTDLTestBase::SelfTest"));
+		CTDCScopedTest test(*this, _T("CTDLTestBase::SelfTest"));
 
 		// -------------------------------------------------
 		

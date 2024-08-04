@@ -54,7 +54,7 @@ TESTRESULT CTDCDEPENDENCYTest::Run()
 
 void CTDCDEPENDENCYTest::TestTDCDEPENDENCY()
 {
-	BeginTest(_T("TDCDEPENDENCY"));
+	CTDCScopedTest test(*this, _T("TDCDEPENDENCY"));
 
 	{
 		TDCDEPENDENCY depend;
@@ -182,14 +182,11 @@ void CTDCDEPENDENCYTest::TestTDCDEPENDENCY()
 		depend2 = depend1;
 		ExpectTrue(depend1 == depend2);
 	}
-
-	EndTest();
 }
 
 void CTDCDEPENDENCYTest::TestTDCDependencyArray()
 {
-	BeginTest(_T("CTDCDependencyArray"));
-
+	CTDCScopedTest test(*this, _T("CTDCDependencyArray"));
 
 	{
 		// local dependencies
@@ -301,7 +298,5 @@ void CTDCDEPENDENCYTest::TestTDCDependencyArray()
 		ExpectEQ(aDepends[1].dwTaskID, 7UL);
 		ExpectEQ(aDepends[1].sTasklist, XMLFULLPATH);
 	}
-		
-	EndTest();
 }
 

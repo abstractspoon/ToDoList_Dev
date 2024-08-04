@@ -45,7 +45,7 @@ TESTRESULT CRemapMenuIDsTest::Run()
 
 void CRemapMenuIDsTest::TestTDLCustomToolbar()
 {
-	BeginTest(_T("CTDLCustomToolbar::RemapMenuItemIDs"));
+	CTDCScopedTest test(*this, _T("CTDLCustomToolbar::RemapMenuItemIDs"));
 	
 	CMap<UINT, UINT, UINT, UINT&> mapCmdIDs;
 	CToolbarButtonArray aButtons;
@@ -120,13 +120,11 @@ void CRemapMenuIDsTest::TestTDLCustomToolbar()
 		ExpectEQ(_T("3"), aButtons[3].sImageID);
 		ExpectEQ(_T("4"), aButtons[4].sImageID);
 	}
-
-	EndTest();
 }
 
 void CRemapMenuIDsTest::TestShortcutsMgr()
 {
-	BeginTest(_T("CShortcutManager::RemapMenuItemIDs"));
+	CTDCScopedTest test(*this, _T("CShortcutManager::RemapMenuItemIDs"));
 
 	const DWORD SHORTCUT1 = 0x12345678;
 	const DWORD SHORTCUT2 = 0x23456789;
@@ -170,13 +168,11 @@ void CRemapMenuIDsTest::TestShortcutsMgr()
 		ExpectTrue(mgrShortcuts.GetShortcut(ID_VIEW_ACTIVATEFILTER1) == SHORTCUT3);
 		ExpectTrue(mgrShortcuts.GetShortcut(ID_VIEW_ACTIVATEFILTER3) == SHORTCUT1);
 	}
-	
-	EndTest();
 }
 
 void CRemapMenuIDsTest::TestTDCFilter()
 {
-	BeginTest(_T("CTDCFilter::BuildAdvancedFilterMenuItemMapping"));
+	CTDCScopedTest test(*this, _T("CTDCFilter::BuildAdvancedFilterMenuItemMapping"));
 
 	CStringArray aOldFilterNames;
 	aOldFilterNames.Add(_T("Filter1"));
@@ -287,8 +283,6 @@ void CRemapMenuIDsTest::TestTDCFilter()
 			}
 		}
 	}
-
-	EndTest();
 }
 
 void CRemapMenuIDsTest::InitButtonArray(CToolbarButtonArray& aButtons, UINT nIDFrom, UINT nIDTo)

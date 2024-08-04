@@ -91,12 +91,10 @@ void CTDLTaskCtrlBaseTest::TestColumnRecalculationPerformance()
 		return;
 	}
 
-	BeginTest(_T("CTDLTaskCtrlBaseTest::ColumnRecalculationPerformance"));
+	CTDCScopedTest test(*this, _T("CTDLTaskCtrlBaseTest::ColumnRecalculationPerformance"));
 	
 	TestTreeColumnRecalculationPerformance();
 	TestListColumnRecalculationPerformance();
-
-	EndTest();
 }
 
 void CTDLTaskCtrlBaseTest::TestTreeColumnRecalculationPerformance()

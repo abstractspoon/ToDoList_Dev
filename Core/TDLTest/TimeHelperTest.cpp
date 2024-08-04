@@ -39,7 +39,7 @@ TESTRESULT CTimeHelperTest::Run()
 
 void CTimeHelperTest::TestGetTime()
 {
-	BeginTest(_T("CTimeHelperTest::GetTime"));
+	CTDCScopedTest test(*this, _T("CTimeHelperTest::GetTime"));
 
 	// -----------------------------------------------------------------------
 
@@ -132,8 +132,4 @@ void CTimeHelperTest::TestGetTime()
 		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKDAYS),	(1 / (60.0 * HOURSINDAY)));
 		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKS)	,	(1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
 	}
-		
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
