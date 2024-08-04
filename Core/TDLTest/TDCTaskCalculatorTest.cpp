@@ -183,7 +183,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 		{
 			// Note: The 'bCheckOverdue' argument in GetTaskPriority is only 
 			//       relevant in the presence of the TDCS_DUEHAVEHIGHESTPRIORITY
-			//       modifier, so if that's not present we ignore it
+			//       modifier, so if that's not present we can ignore it
 			m_aStyles.RemoveAll();
 
 			ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
@@ -191,6 +191,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 			ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
 			ExpectEQ(calc.GetTaskPriority(4, FALSE), 8);
 
+			// Prove its irrelevance
 			ExpectEQ(calc.GetTaskPriority(1, TRUE), calc.GetTaskPriority(1, FALSE));
 			ExpectEQ(calc.GetTaskPriority(2, TRUE), calc.GetTaskPriority(2, FALSE));
 			ExpectEQ(calc.GetTaskPriority(3, TRUE), calc.GetTaskPriority(3, FALSE));
@@ -224,24 +225,157 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 			}
 		}
 
+		// Due have highest priority
+		{
+			// DON'T treat tasks with completed subtasks as completed
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+
+				ExpectEQ(calc.GetTaskPriority(1, TRUE), 10);
+				ExpectEQ(calc.GetTaskPriority(2, TRUE), 10);
+				ExpectEQ(calc.GetTaskPriority(3, TRUE), 10);
+				ExpectEQ(calc.GetTaskPriority(4, TRUE), 8); // completed task
+			}
+
+			// DO treat tasks with completed subtasks as completed
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+
+				ExpectEQ(calc.GetTaskPriority(1, TRUE), 10);
+				ExpectEQ(calc.GetTaskPriority(2, TRUE), 10);
+				ExpectEQ(calc.GetTaskPriority(3, TRUE), 7); // implicitly completed
+				ExpectEQ(calc.GetTaskPriority(4, TRUE), 8); // completed task
+			}
+		}
 	}
 
 	// Highest
 	{
+		// DON'T treat tasks with completed subtasks as completed
 		{
-			m_aStyles.RemoveAll();
-			m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+			// Done included and lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+			}
+
+			// Done included but NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = FALSE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 8);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 8);
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+			}
+
+			// Done NOT included
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+			}
+
+			// Done NOT included and NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = FALSE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 7);
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+			}
 		}
 
+		// DO treat tasks with completed subtasks as completed
+		{
+			// Done included and lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
 
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 0); // implicitly completed
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+			}
+
+			// Done included but NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = FALSE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 8);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 8); // implicitly completed
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+			}
+
+			// Done NOT included and lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 0); // implicitly completed
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+			}
+
+			// Done NOT included and NOT lowest
+			{
+				m_aStyles.RemoveAll();
+				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
+				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = FALSE;
+
+				ExpectEQ(calc.GetTaskPriority(1, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+				ExpectEQ(calc.GetTaskPriority(3, FALSE), 7); // implicitly completed
+				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+			}
+		}
 		// TODO
 
 
 
-
-		m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
-		m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
-		m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
 
 		// TODO
 	}
