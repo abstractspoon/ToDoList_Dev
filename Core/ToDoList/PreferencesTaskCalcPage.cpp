@@ -50,6 +50,7 @@ void CPreferencesTaskCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_NODUEDATEDUETODAY, m_bNoDueDateDueTodayOrStart);
 	DDX_Check(pDX, IDC_SETSTATUSONDONE, m_bSetCompletionStatus);
 	DDX_Check(pDX, IDC_SYNCCOMPLETIONTOSTATUS, m_bSyncCompletionToStatus);
+	DDX_Check(pDX, IDC_INCLUDEREFSINCALC, m_bIncludeReferencesInCalcs);
 	DDX_Text(pDX, IDC_DONESTATUS, m_sCompletionStatus);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SUBTASKSINHERITLOCK, m_bSubtasksInheritLockStatus);
@@ -165,6 +166,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bSubtasksInheritLockStatus = pPrefs->GetProfileInt(szKey, _T("SubtasksInheritLockStatus"), FALSE);
 	m_bTaskInheritsSubtaskFlags = pPrefs->GetProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), FALSE);
 	m_bUseLatestLastModifiedDate = pPrefs->GetProfileInt(szKey, _T("UseLatestLastModifiedDate"), FALSE);
+	m_bIncludeReferencesInCalcs = pPrefs->GetProfileInt(szKey, _T("IncludeReferencesInCalcs"), FALSE);
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
@@ -207,6 +209,7 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("SubtasksInheritLockStatus"), m_bSubtasksInheritLockStatus);
 	pPrefs->WriteProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), m_bTaskInheritsSubtaskFlags);
 	pPrefs->WriteProfileInt(szKey, _T("UseLatestLastModifiedDate"), m_bUseLatestLastModifiedDate);
+	pPrefs->WriteProfileInt(szKey, _T("IncludeReferencesInCalcs"), m_bIncludeReferencesInCalcs);
 
 	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_recentModTime.dAmount);
 	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_recentModTime.GetTHUnits());

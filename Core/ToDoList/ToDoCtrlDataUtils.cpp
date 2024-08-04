@@ -2412,7 +2412,7 @@ BOOL CTDCTaskCalculator::GetSubtask(const TODOSTRUCTURE* pTDSParent, int sSubtas
 
 	ASSERT(pTDIChild && pTDSChild);
 
-	if (pTDIChild->IsReference())
+	if (pTDIChild->IsReference() && m_data.HasStyle(TDCS_INCLUDEREFERENCESINCALCS))
 	{
 		pTDSChild = m_data.LocateTask(pTDIChild->dwTaskRefID);
 		pTDIChild = m_data.GetTask(pTDIChild->dwTaskRefID);

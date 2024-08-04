@@ -631,6 +631,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		case TDCS_CALCREMAININGTIMEBYSPENT:
 		case TDCS_CALCREMAININGTIMEBYPERCENT:
 		case TDCS_COLORTEXTBYATTRIBUTE:
+		case TDCS_INCLUDEREFERENCESINCALCS:
 			bInvalidateAll = TRUE;
 			break;
 

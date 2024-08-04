@@ -53,6 +53,7 @@ public:
 	BOOL GetUseHighestRisk() const { return m_bUseHighestPriority; } // Note: this uses same flag as priority
 	BOOL GetSyncTimeEstimatesAndDates() const { return m_bSyncTimeEstAndDates; }
 	BOOL GetIncludeDoneInPriorityRiskCalc() const { return m_bIncludeDoneInPriorityRiskCalc; }
+	BOOL GetIncludeReferencesInCalcs() const { return m_bIncludeReferencesInCalcs; }
 	BOOL GetWeightPercentCompletionByNumSubtasks() const { return m_bWeightPercentCompletionByNumSubtasks; }
 	BOOL GetAutoCalcPercentDone() const { return m_bAutoCalcPercentDone; }
 	BOOL GetAutoAdjustDependentsDates() const { return m_bAutoAdjustDependents; }
@@ -86,6 +87,7 @@ protected:
 	BOOL	m_bWeightPercentCompletionByNumSubtasks;
 	BOOL	m_bDueTasksHaveHighestPriority;
 	BOOL	m_bDoneTasksHaveLowestPriority;
+	BOOL	m_bIncludeReferencesInCalcs;
 	BOOL	m_bNoDueDateDueTodayOrStart;
 	BOOL	m_bSetCompletionStatus;
 	BOOL	m_bSyncCompletionToStatus;

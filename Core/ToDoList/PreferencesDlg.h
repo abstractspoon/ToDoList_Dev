@@ -199,6 +199,7 @@ public:
 	BOOL GetDoneTasksHaveLowestRisk() const { return m_pageTaskCalc.GetDoneTasksHaveLowestRisk(); } 
 	BOOL GetSyncTimeEstimatesAndDates() const { return m_pageTaskCalc.GetSyncTimeEstimatesAndDates(); }
 	BOOL GetIncludeDoneInPriorityRiskCalc() const { return m_pageTaskCalc.GetIncludeDoneInPriorityRiskCalc(); }
+	BOOL GetIncludeReferencesInCalcs() const { return m_pageTaskCalc.GetIncludeReferencesInCalcs(); }
 	BOOL GetWeightPercentCompletionByNumSubtasks() const { return m_pageTaskCalc.GetWeightPercentCompletionByNumSubtasks(); }
 	BOOL GetAutoCalcPercentDone() const { return m_pageTaskCalc.GetAutoCalcPercentDone(); }
 	BOOL GetAutoAdjustDependentsDates() const { return m_pageTaskCalc.GetAutoAdjustDependentsDates(); }
