@@ -34,24 +34,24 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 protected:
-	void TestCalcs(const CToDoCtrlData& data, BOOL bEnableRefs);
+	void TestCalcs(const CToDoCtrlData& data, BOOL bIncludeRefs);
 
-	void TestGetTaskStartDate(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskDueDate(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskPriority(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskRisk(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskPercentDone(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskCost(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskTimeEstimate(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskTimeSpent(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskTimeRemaining(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskFlag(const CToDoCtrlData& data, BOOL bEnableRefs);
-	void TestGetTaskLock(const CToDoCtrlData& data, BOOL bEnableRefs);
-	//void Test(const CToDoCtrlData& data, BOOL bEnableRefs);
+	void TestGetTaskStartDate(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskDueDate(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskPriority(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskPercentDone(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskCost(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskTimeEstimate(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskTimeSpent(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskTimeRemaining(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskLock(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	//void Test(const CToDoCtrlData& data, BOOL bIncludeRefs);
 
 	void PopulateData(CToDoCtrlData& data) const;
-	void InitialiseStyles(BOOL bEnableRefs);
+	void InitialiseStyles(BOOL bIncludeRefs);
 };
 
 #endif // !defined(AFX_TDCTASKCALCULATORTEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
