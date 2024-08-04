@@ -3665,12 +3665,20 @@ BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bE
 	while (nPos--)
 	{
 		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nPos);
-		const TODOITEM* pTDIChild = GetTrueTask(pTDSChild);
+		const TODOITEM* pTDIChild = GetTask(pTDSChild);
 
 		if (!pTDIChild || !pTDSChild)
 		{
 			ASSERT(0);
 			return FALSE;
+		}
+
+		if (pTDIChild->IsReference())
+		{
+			if (HasStyle(TDCS_INCLUDEREFERENCESINCALCS))
+				pTDIChild = GetTrueTask(pTDSChild);
+			else
+				continue;
 		}
 		
 		// ignore recurring tasks and their children

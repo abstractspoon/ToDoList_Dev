@@ -43,30 +43,42 @@ TESTRESULT CTDCTaskCalculatorTest::Run()
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 	PopulateData(data);
 
-	TestGetTaskStartDate(data);
-	TestGetTaskDueDate(data);
-	TestGetTaskLastModifiedDateAndUser(data);
-	TestGetTaskPriority(data);
-	TestGetTaskRisk(data);
-	TestGetTaskPercentDone(data);
-	TestGetTaskCost(data);
-	TestGetTaskTimeEstimate(data);
-	TestGetTaskTimeSpent(data);
-	TestGetTaskTimeRemaining(data);
-	TestGetTaskFlag(data);
-	TestGetTaskLock(data);
+	TestCalcs(data, FALSE); // References NOT included
+//	TestCalcs(data, TRUE);  // References included
 
 	return GetTotals();
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestCalcs(const CToDoCtrlData& data, BOOL bEnableRefs)
+{
+	TestGetTaskStartDate(data, bEnableRefs);
+	TestGetTaskDueDate(data, bEnableRefs);
+	TestGetTaskLastModifiedDateAndUser(data, bEnableRefs);
+	TestGetTaskPriority(data, bEnableRefs);
+	TestGetTaskRisk(data, bEnableRefs);
+	TestGetTaskPercentDone(data, bEnableRefs);
+	TestGetTaskCost(data, bEnableRefs);
+	TestGetTaskTimeEstimate(data, bEnableRefs);
+	TestGetTaskTimeSpent(data, bEnableRefs);
+	TestGetTaskTimeRemaining(data, bEnableRefs);
+	TestGetTaskFlag(data, bEnableRefs);
+	TestGetTaskLock(data, bEnableRefs);
+}
+
+void CTDCTaskCalculatorTest::InitialiseStyles(BOOL bEnableRefs)
+{
+	m_aStyles.RemoveAll();
+	m_aStyles[TDCS_INCLUDEREFERENCESINCALCS] = bEnableRefs;
+}
+
+void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskStartDate"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 
 		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
 		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
@@ -76,7 +88,7 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data)
 
 	// Earliest
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
 
 		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
@@ -87,7 +99,7 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data)
 
 	// Latest
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
 
 		ExpectEQ(calc.GetTaskStartDate(1), 45002.0);
@@ -97,14 +109,14 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskDueDate"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 
 		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
 		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
@@ -114,7 +126,7 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data)
 
 	// Earliest
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 
 		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
@@ -125,7 +137,7 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data)
 
 	// Latest
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
 
 		ExpectEQ(calc.GetTaskDueDate(1), 45003.0);
@@ -135,14 +147,14 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetLastModifiedDateAndUser"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 
 		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
 		ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
@@ -157,7 +169,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 
 	// Latest
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
 
 		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45005.0);
@@ -172,7 +184,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPriority"));
 	CTDCTaskCalculator calc(data);
@@ -184,7 +196,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 			// Note: The 'bCheckOverdue' argument in GetTaskPriority is only 
 			//       relevant in the presence of the TDCS_DUEHAVEHIGHESTPRIORITY
 			//       modifier, so if that's not present we can ignore it
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 
 			ExpectEQ(calc.GetTaskPriority(1, FALSE), 5);
 			ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
@@ -202,7 +214,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 		{
 			// DON'T treat tasks with completed subtasks as completed
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
@@ -214,7 +226,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// DO treat tasks with completed subtasks as completed
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
@@ -229,7 +241,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 		{
 			// DON'T treat tasks with completed subtasks as completed
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
@@ -241,7 +253,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// DO treat tasks with completed subtasks as completed
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
@@ -259,7 +271,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 		{
 			// Done included and lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
@@ -273,7 +285,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// Done included but NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
@@ -287,7 +299,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// Done NOT included
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
@@ -301,7 +313,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// Done NOT included and NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
@@ -318,7 +330,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 		{
 			// Done included and lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
@@ -332,7 +344,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// Done included but NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
@@ -346,7 +358,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// Done NOT included and lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
@@ -360,7 +372,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 
 			// Done NOT included and NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = FALSE;
@@ -375,7 +387,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskRisk"));
 	CTDCTaskCalculator calc(data);
@@ -384,7 +396,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 	{
 		// No modifiers
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 
 			ExpectEQ(calc.GetTaskRisk(1), 6);
 			ExpectEQ(calc.GetTaskRisk(2), 7);
@@ -396,7 +408,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 		{
 			// DON'T treat tasks with completed subtasks as completed
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 
@@ -408,7 +420,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// DO treat tasks with completed subtasks as completed
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 
@@ -426,7 +438,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 		{
 			// Done included and lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
@@ -440,7 +452,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// Done included but NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
@@ -454,7 +466,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// Done NOT included
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
@@ -468,7 +480,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// Done NOT included and NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = FALSE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
@@ -485,7 +497,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 		{
 			// Done included and lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
@@ -499,7 +511,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// Done included but NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
@@ -513,7 +525,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// Done NOT included and lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
@@ -527,7 +539,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 
 			// Done NOT included and NOT lowest
 			{
-				m_aStyles.RemoveAll();
+				InitialiseStyles(bEnableRefs);
 				m_aStyles[TDCS_USEHIGHESTRISK] = TRUE;
 				m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 				m_aStyles[TDCS_INCLUDEDONEINRISKCALC] = FALSE;
@@ -542,14 +554,14 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPercentDone"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 
 		ExpectEQ(calc.GetTaskPercentDone(1), 10);
 		ExpectEQ(calc.GetTaskPercentDone(2), 20);
@@ -564,7 +576,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 
 		// No parental contributions
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
@@ -576,7 +588,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 
 		// Parental contributions
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
@@ -595,7 +607,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 
 		// NOT include completed tasks 
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
 			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
 
@@ -607,7 +619,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 
 		// Include completed tasks 
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
 			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = TRUE;
 
@@ -619,12 +631,12 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskCost"));
 	CTDCTaskCalculator calc(data);
 
-	m_aStyles.RemoveAll();
+	InitialiseStyles(bEnableRefs);
 
 	ExpectEQ(calc.GetTaskCost(1), 140.0);
 	ExpectEQ(calc.GetTaskCost(2), 30.0);
@@ -632,7 +644,7 @@ void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data)
 	ExpectEQ(calc.GetTaskCost(4), 50.0); // completed task
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeEstimate"));
 	CTDCTaskCalculator calc(data);
@@ -641,7 +653,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
 	{
 		// NOT adjusting by % completion
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
@@ -656,7 +668,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
 		// Note: To keep the manual checks comprehensible we 
 		//       use only the % values assigned in PopulateData
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
@@ -671,7 +683,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
 	{
 		// NOT adjusting by % completion
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = FALSE;
 
@@ -686,7 +698,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
 		// Note: To keep the manual checks comprehensible we 
 		//       use only the % values assigned in PopulateData
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 			m_aStyles[TDCS_USEPERCENTDONEINTIMEEST] = TRUE;
 
@@ -698,14 +710,14 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeSpent"));
 	CTDCTaskCalculator calc(data);
 
 	// No parental contributions
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
 		ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0))); // parent task
@@ -716,7 +728,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data)
 
 	// Parental contributions
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
 		ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (40.0 + 50.0 + (60.0 + 70.0)));
@@ -726,7 +738,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeRemaining"));
 	CTDCTaskCalculator calc(data);
@@ -735,7 +747,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
 
 	// Using Due Date (Now - Due Date)
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
 
 		// Note: +1 because due date has no time component -> end of day
@@ -756,7 +768,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
 
 		// No parental contributions
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
@@ -772,7 +784,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
 
 		// Parental contributions
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_CALCREMAININGTIMEBYSPENT] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
@@ -794,7 +806,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
 
 		// No parental contributions
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = FALSE;
 
@@ -810,7 +822,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
 
 		// Parental contributions
 		{
-			m_aStyles.RemoveAll();
+			InitialiseStyles(bEnableRefs);
 			m_aStyles[TDCS_CALCREMAININGTIMEBYPERCENT] = TRUE;
 			m_aStyles[TDCS_ALLOWPARENTTIMETRACKING] = TRUE;
 
@@ -826,14 +838,14 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskFlag"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 
 		ExpectFalse(calc.IsTaskFlagged(1));
 		ExpectFalse(calc.IsTaskFlagged(2));
@@ -843,7 +855,7 @@ void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data)
 
 	// Inherited
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_TASKINHERITSSUBTASKFLAGS] = TRUE;
 
 		ExpectTrue(calc.IsTaskFlagged(1));
@@ -853,14 +865,14 @@ void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data)
 	}
 }
 
-void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data)
+void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bEnableRefs)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskLock"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 
 		ExpectTrue(calc.IsTaskLocked(1));
 		ExpectFalse(calc.IsTaskLocked(2));
@@ -870,7 +882,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data)
 
 	// Inherited
 	{
-		m_aStyles.RemoveAll();
+		InitialiseStyles(bEnableRefs);
 		m_aStyles[TDCS_SUBTASKSINHERITLOCK] = TRUE;
 
 		ExpectTrue(calc.IsTaskLocked(1));
@@ -889,14 +901,20 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 	//   |
 	//   |_ Task3
 	//        |
-	//        |_ Task4
+	//        |_ Task4 - Completed
+	//        |
+	//        |_ Task6 - Reference to 'Task5'
+	//
+	// Task5
 
 	CTaskFile tasks;
 
 	HTASKITEM hTask1 = tasks.NewTask(_T("Task1"), NULL, 1, 0);
 	HTASKITEM hTask2 = tasks.NewTask(_T("Task2"), hTask1, 2, 1);
 	HTASKITEM hTask3 = tasks.NewTask(_T("Task3"), hTask1, 3, 1);
-	HTASKITEM hTask4 = tasks.NewTask(_T("Task4"), hTask3, 4, 3);
+	HTASKITEM hTask4 = tasks.NewTask(_T("Task4"), hTask3, 4, 3); // - The only completed task 
+	HTASKITEM hTask5 = tasks.NewTask(_T("Task5"), NULL, 5, 0);
+	HTASKITEM hTask6 = tasks.NewTask(_T("Task6"), hTask3, 6, 3); // - The only reference task
 
 	// Task1
 	{
@@ -952,11 +970,11 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 		tasks.SetTaskLock(hTask3, FALSE);
 	}
 
-	// Task4
+	// Task4 - The only completed task
 	{
 		tasks.SetTaskStartDate(hTask4, COleDateTime(45003.0));
 		tasks.SetTaskDueDate(hTask4, COleDateTime(45004.0));
-		tasks.SetTaskDoneDate(hTask4, COleDateTime(45010.0)); // The only completed task
+		tasks.SetTaskDoneDate(hTask4, COleDateTime(45010.0)); 
 		tasks.SetTaskLastModified(hTask4, COleDateTime(45005.0), _T("User4"));
 
 		tasks.SetTaskPriority(hTask4, 8);
@@ -969,6 +987,29 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 
 		tasks.SetTaskFlag(hTask4, TRUE); // The only flagged task
 		tasks.SetTaskLock(hTask4, FALSE);
+	}
+
+	// Task5
+	{
+		tasks.SetTaskStartDate(hTask5, COleDateTime(45004.0));
+		tasks.SetTaskDueDate(hTask5, COleDateTime(45005.0));
+		tasks.SetTaskLastModified(hTask5, COleDateTime(45006.0), _T("User5"));
+
+		tasks.SetTaskPriority(hTask5, 8);
+		tasks.SetTaskRisk(hTask5, 9);
+		tasks.SetTaskPercentDone(hTask5, 40);
+
+		tasks.SetTaskCost(hTask5, 50);
+		tasks.SetTaskTimeEstimate(hTask5, 60, TDCU_DAYS);
+		tasks.SetTaskTimeSpent(hTask5, 70, TDCU_DAYS);
+
+		tasks.SetTaskFlag(hTask5, TRUE);
+		tasks.SetTaskLock(hTask5, FALSE);
+	}
+
+	// Task6
+	{
+		tasks.SetTaskReferenceID(hTask6, 5);
 	}
 
 	data.BuildDataModel(tasks);
