@@ -562,7 +562,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 		// Note: To keep the manual checks comprehensible we use only 
 		//       the Time Estimate values assigned in PopulateData
 
-		// No parental contribution
+		// No parental contributions
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
@@ -574,7 +574,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 			ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0)));												// completed task
 		}
 
-		// Allow parent time tracking
+		// Parental contributions
 		{
 			m_aStyles.RemoveAll();
 			m_aStyles[TDCS_AUTOCALCPERCENTDONE] = TRUE;
@@ -587,14 +587,35 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data)
 		}
 	}
 
-	// Average
+	// Average subtask percentages
 	{
-		m_aStyles.RemoveAll();
+		// Note: To keep the manual checks comprehensible I am not
+		//       going to attempt to test TDCS_WEIGHTPERCENTCALCBYNUMSUB
+		//       because it is too complex to express in simple terms
 
-		m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = FALSE;
-		m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
-		m_aStyles[TDCS_WEIGHTPERCENTCALCBYNUMSUB] = FALSE;
-		// TODO
+		// NOT include completed tasks 
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
+			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = FALSE;
+
+			ExpectEQ(calc.GetTaskPercentDone(1), 10); // parent
+			ExpectEQ(calc.GetTaskPercentDone(2), 20); // no subtasks
+			ExpectEQ(calc.GetTaskPercentDone(3), 0); // parent
+			ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
+		}
+
+		// Include completed tasks 
+		{
+			m_aStyles.RemoveAll();
+			m_aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
+			m_aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = TRUE;
+
+			ExpectEQ(calc.GetTaskPercentDone(1), (20 + 100) / 2); // parent
+			ExpectEQ(calc.GetTaskPercentDone(2), 20); // no subtasks
+			ExpectEQ(calc.GetTaskPercentDone(3), 100); // parent
+			ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
+		}
 	}
 }
 
