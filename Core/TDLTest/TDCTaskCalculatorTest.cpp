@@ -372,12 +372,6 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data)
 				ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
 			}
 		}
-		// TODO
-
-
-
-
-		// TODO
 	}
 }
 
