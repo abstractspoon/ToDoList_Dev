@@ -841,7 +841,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0 + 80.0)) / (0.0 + 40.0 + (0.0 + 60.0 + 70.0)))); // parent
+				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
+				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (0.0 + 70.0 + 80.0) / (0.0 + 60.0 + 70.0))); // parent
+				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
+				ExpectEQ(calc.GetTaskPercentDone(5), (int)(100 * (80.0 / 70.0)));
 			}
 			else
 			{
@@ -861,7 +865,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (40.0 + 50.0 + (60.0 + 70.0 + 80.0)) / (30.0 + 40.0 + (50.0 + 60.0 + 70.0))));
+				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
+				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (60.0 + 70.0 + 80.0) / (50.0 + 60.0 + 70.0)));
+				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
+				ExpectEQ(calc.GetTaskPercentDone(5), (int)(100 * (80.0 / 70.0)));
 			}
 			else
 			{
@@ -888,7 +896,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(1), 35);  // parent
+				ExpectEQ(calc.GetTaskPercentDone(2), 20); 
+				ExpectEQ(calc.GetTaskPercentDone(3), 50);  // parent
+				ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
+				ExpectEQ(calc.GetTaskPercentDone(5), 50);
 			}
 			else
 			{
@@ -908,7 +920,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(1), Misc::Round((20 + ((100 + 50) / 2)) / 2.0)); // parent
+				ExpectEQ(calc.GetTaskPercentDone(2), 20);
+				ExpectEQ(calc.GetTaskPercentDone(3), (100 + 50) / 2); // parent
+				ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
+				ExpectEQ(calc.GetTaskPercentDone(5), 50);
 			}
 			else
 			{

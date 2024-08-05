@@ -2231,6 +2231,9 @@ double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TOD
 	}
 
 	// Get default done value for each child (ex.4 child = 25, 3 child = 33.33, etc.)
+	if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
+		nNumDoneSubtasks = 0;
+
 	double dSplitDoneValue = (1.0 / (nNumSubtasks - nNumDoneSubtasks)); 
 	double dTotalPercentDone = 0;
 
