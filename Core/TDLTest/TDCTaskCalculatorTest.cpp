@@ -1089,7 +1089,11 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOO
 
 		if (bIncludeRefs)
 		{
-			// TODO
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + (70.0 + 80.0)))); // parent task
+			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + (70.0 + 80.0))); // parent task
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0));       // completed task
+			ExpectEQ(calc.GetTaskTimeSpent(5, TDCU_DAYS), (80.0));
 		}
 		else
 		{
@@ -1108,7 +1112,11 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOO
 
 		if (bIncludeRefs)
 		{
-			// TODO
+			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (40.0 + 50.0 + (60.0 + (70.0 + 80.0))));
+			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
+			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (60.0 + (70.0 + 80.0)));
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
+			ExpectEQ(calc.GetTaskTimeSpent(5, TDCU_DAYS), (80.0));
 		}
 		else
 		{
