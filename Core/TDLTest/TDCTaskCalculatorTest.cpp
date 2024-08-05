@@ -576,7 +576,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 6);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 8); 
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -604,7 +608,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -626,7 +634,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -648,7 +660,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -670,7 +686,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -695,7 +715,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -717,7 +741,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -739,7 +767,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
@@ -761,7 +793,11 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(1), 10);
+					ExpectEQ(calc.GetTaskRisk(2), 7);
+					ExpectEQ(calc.GetTaskRisk(3), 10);
+					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 				else
 				{
