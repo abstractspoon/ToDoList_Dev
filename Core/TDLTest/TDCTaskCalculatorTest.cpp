@@ -549,6 +549,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 			ExpectEQ(calc.GetTaskRisk(2), 7);
 			ExpectEQ(calc.GetTaskRisk(3), 8);
 			ExpectEQ(calc.GetTaskRisk(4), 9);
+			ExpectEQ(calc.GetTaskRisk(5), 10);
 			// TODO
 		}
 
@@ -564,7 +565,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 				ExpectEQ(calc.GetTaskRisk(2), 7);
 				ExpectEQ(calc.GetTaskRisk(3), 8);
 				ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskRisk(5), 10);
 			}
 
 			// DO treat tasks with completed subtasks as completed
@@ -583,7 +584,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
 					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 		}
@@ -611,7 +612,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 8);
 					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 
@@ -633,7 +634,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 9);
 					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 
@@ -655,7 +656,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 8);
 					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 
@@ -677,7 +678,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 8);
 					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 		}
@@ -702,7 +703,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
 					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 
@@ -724,7 +725,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 9); // implicitly completed
 					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 
@@ -746,7 +747,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 0); // implicitly completed
 					ExpectEQ(calc.GetTaskRisk(4), 0); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 
@@ -768,7 +769,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 					ExpectEQ(calc.GetTaskRisk(2), 7);
 					ExpectEQ(calc.GetTaskRisk(3), 8); // implicitly completed
 					ExpectEQ(calc.GetTaskRisk(4), 9); // completed task
-					// TODO
+					ExpectEQ(calc.GetTaskRisk(5), 10);
 				}
 			}
 		}
@@ -788,7 +789,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 		ExpectEQ(calc.GetTaskPercentDone(2), 20);
 		ExpectEQ(calc.GetTaskPercentDone(3), 30);
 		ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
-		// TODO
+		ExpectEQ(calc.GetTaskPercentDone(5), 50);
 	}
 
 	// Time Spent/Estimate
@@ -808,11 +809,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 			}
 			else
 			{
-				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0)) / (0.0 + 40.0 + (0.0 + 60.0))));	// parent
+				ExpectEQ(calc.GetTaskPercentDone(1), (int)(100 * (0.0 + 50.0 + (0.0 + 70.0)) / (0.0 + 40.0 + (0.0 + 60.0)))); // parent
 				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
-				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (0.0 + 70.0) / (0.0 + 60.0)));									// parent
-				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0)));												// completed task
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (0.0 + 70.0) / (0.0 + 60.0))); // parent
+				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
+				ExpectEQ(calc.GetTaskPercentDone(5), (int)(100 * (80.0 / 70.0)));
 			}
 		}
 
@@ -832,7 +833,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 				ExpectEQ(calc.GetTaskPercentDone(2), (int)(100 * (50.0 / 40.0)));
 				ExpectEQ(calc.GetTaskPercentDone(3), (int)(100 * (60.0 + 70.0) / (50.0 + 60.0)));
 				ExpectEQ(calc.GetTaskPercentDone(4), (int)(100 * (70.0 / 60.0))); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(5), (int)(100 * (80.0 / 70.0)));
 			}
 		}
 	}
@@ -855,11 +856,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 			}
 			else
 			{
-				ExpectEQ(calc.GetTaskPercentDone(1), 10); // parent
-				ExpectEQ(calc.GetTaskPercentDone(2), 20); // no subtasks
-				ExpectEQ(calc.GetTaskPercentDone(3), 0); // parent
+				ExpectEQ(calc.GetTaskPercentDone(1), 10);  // parent
+				ExpectEQ(calc.GetTaskPercentDone(2), 20); 
+				ExpectEQ(calc.GetTaskPercentDone(3), 0);   // parent
 				ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(5), 50);
 			}
 		}
 
@@ -876,10 +877,10 @@ void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, B
 			else
 			{
 				ExpectEQ(calc.GetTaskPercentDone(1), (20 + 100) / 2); // parent
-				ExpectEQ(calc.GetTaskPercentDone(2), 20); // no subtasks
+				ExpectEQ(calc.GetTaskPercentDone(2), 20); 
 				ExpectEQ(calc.GetTaskPercentDone(3), 100); // parent
 				ExpectEQ(calc.GetTaskPercentDone(4), 100); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskPercentDone(5), 50);
 			}
 		}
 	}
@@ -902,7 +903,7 @@ void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data, BOOL bIn
 		ExpectEQ(calc.GetTaskCost(2), 30.0);
 		ExpectEQ(calc.GetTaskCost(3), 90.0);
 		ExpectEQ(calc.GetTaskCost(4), 50.0);
-		// TODO
+		ExpectEQ(calc.GetTaskCost(5), 60.0);
 	}
 }
 
@@ -928,8 +929,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, 
 				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + 40.0 + 0.0 + 60.0)); // parent
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0 + 60.0)); // parent
-				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0));       // completed task
+				ExpectEQ(calc.GetTaskTimeEstimate(5, TDCU_DAYS), (70.0));
 			}
 		}
 
@@ -950,8 +951,9 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, 
 			{
 				ExpectEQ(calc.GetTaskTimeEstimate(1, TDCU_DAYS), (0.0 + (40.0 * 0.8) + (0.0 + (60.0 * 0.0)))); // parent
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
-				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0)); // parent
+				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (0.0));        // parent
 				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
+				ExpectEQ(calc.GetTaskTimeEstimate(5, TDCU_DAYS), (70.0 * 0.5));
 				// TODO
 			}
 		}
@@ -975,7 +977,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, 
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 + 60.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0)); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskTimeEstimate(5, TDCU_DAYS), (70.0));
 			}
 		}
 
@@ -998,7 +1000,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, 
 				ExpectEQ(calc.GetTaskTimeEstimate(2, TDCU_DAYS), (40.0 * 0.8));
 				ExpectEQ(calc.GetTaskTimeEstimate(3, TDCU_DAYS), (50.0 * 0.7) + (60.0 * 0.0));
 				ExpectEQ(calc.GetTaskTimeEstimate(4, TDCU_DAYS), (60.0 * 0.0)); // completed task
-				// TODO
+				ExpectEQ(calc.GetTaskTimeEstimate(5, TDCU_DAYS), (70.0 * 0.5));
 			}
 		}
 	}
@@ -1023,8 +1025,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOO
 			ExpectEQ(calc.GetTaskTimeSpent(1, TDCU_DAYS), (0.0 + 50.0 + (0.0 + 70.0))); // parent task
 			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
 			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (0.0 + 70.0)); // parent task
-			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
-			// TODO
+			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0));       // completed task
+			ExpectEQ(calc.GetTaskTimeSpent(5, TDCU_DAYS), (80.0));
 		}
 	}
 
@@ -1043,7 +1045,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOO
 			ExpectEQ(calc.GetTaskTimeSpent(2, TDCU_DAYS), (50.0));
 			ExpectEQ(calc.GetTaskTimeSpent(3, TDCU_DAYS), (60.0 + 70.0));
 			ExpectEQ(calc.GetTaskTimeSpent(4, TDCU_DAYS), (70.0)); // completed task
-			// TODO
+			ExpectEQ(calc.GetTaskTimeSpent(5, TDCU_DAYS), (80.0));
 		}
 	}
 }
@@ -1075,7 +1077,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 			ExpectEQ(nUnits, TDCU_DAYS);
 			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
 			ExpectEQ(nUnits, TDCU_NULL);
-			// TODO
+			ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), ((45005.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
 		}
 	}
 
@@ -1104,7 +1107,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 				ExpectEQ(nUnits, TDCU_DAYS);
 				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
 				ExpectEQ(nUnits, TDCU_DAYS);
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 - 80.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 		}
 
@@ -1128,7 +1132,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 				ExpectEQ(nUnits, TDCU_DAYS);
 				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
 				ExpectEQ(nUnits, TDCU_DAYS);
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 - 80.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 		}
 	}
@@ -1158,7 +1163,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 				ExpectEQ(nUnits, TDCU_DAYS);
 				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
 				ExpectEQ(nUnits, TDCU_DAYS);
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 * 0.5));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 		}
 
@@ -1182,7 +1188,8 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 				ExpectEQ(nUnits, TDCU_DAYS);
 				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
 				ExpectEQ(nUnits, TDCU_DAYS);
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 * 0.5));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 		}
 	}
@@ -1200,8 +1207,8 @@ void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIn
 		ExpectFalse(calc.IsTaskFlagged(1));
 		ExpectFalse(calc.IsTaskFlagged(2));
 		ExpectFalse(calc.IsTaskFlagged(3));
-		ExpectTrue(calc.IsTaskFlagged(4));
-		// TODO
+		ExpectTrue(calc.IsTaskFlagged(4)); // flagged
+		ExpectFalse(calc.IsTaskFlagged(5));
 	}
 
 	// Inherited
@@ -1209,11 +1216,11 @@ void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIn
 		InitialiseStyles(bIncludeRefs);
 		m_aStyles[TDCS_TASKINHERITSSUBTASKFLAGS] = TRUE;
 
-		ExpectTrue(calc.IsTaskFlagged(1));
+		ExpectTrue(calc.IsTaskFlagged(1)); // parent
 		ExpectFalse(calc.IsTaskFlagged(2));
-		ExpectTrue(calc.IsTaskFlagged(3));
-		ExpectTrue(calc.IsTaskFlagged(4));
-		// TODO
+		ExpectTrue(calc.IsTaskFlagged(3)); // parent
+		ExpectTrue(calc.IsTaskFlagged(4)); // flagged
+		ExpectFalse(calc.IsTaskFlagged(5));
 	}
 }
 
@@ -1226,11 +1233,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIn
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectTrue(calc.IsTaskLocked(1));
+		ExpectTrue(calc.IsTaskLocked(1)); // locked
 		ExpectFalse(calc.IsTaskLocked(2));
 		ExpectFalse(calc.IsTaskLocked(3));
 		ExpectFalse(calc.IsTaskLocked(4));
-		// TODO
+		ExpectFalse(calc.IsTaskLocked(5));
 	}
 
 	// Inherited
@@ -1238,11 +1245,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIn
 		InitialiseStyles(bIncludeRefs);
 		m_aStyles[TDCS_SUBTASKSINHERITLOCK] = TRUE;
 
-		ExpectTrue(calc.IsTaskLocked(1));
+		ExpectTrue(calc.IsTaskLocked(1)); // locked
 		ExpectTrue(calc.IsTaskLocked(2));
 		ExpectTrue(calc.IsTaskLocked(3));
 		ExpectTrue(calc.IsTaskLocked(4));
-		// TODO
+		ExpectFalse(calc.IsTaskLocked(5));
 	}
 }
 
@@ -1358,7 +1365,7 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 		tasks.SetTaskTimeEstimate(hTask5, 70, TDCU_DAYS);
 		tasks.SetTaskTimeSpent(hTask5, 80, TDCU_DAYS);
 
-		tasks.SetTaskFlag(hTask5, TRUE);
+		tasks.SetTaskFlag(hTask5, FALSE);
 		tasks.SetTaskLock(hTask5, FALSE);
 	}
 
