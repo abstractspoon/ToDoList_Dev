@@ -947,15 +947,19 @@ void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data, BOOL bIn
 
 	if (bIncludeRefs)
 	{
-		// TODO
+		ExpectEQ(calc.GetTaskCost(1), (20.0 + 30.0 + (40.0 + (50.0 + 60.0))));
+		ExpectEQ(calc.GetTaskCost(2), (30.0));
+		ExpectEQ(calc.GetTaskCost(3), (40.0 + (50.0 + 60.0)));
+		ExpectEQ(calc.GetTaskCost(4), (50.0));
+		ExpectEQ(calc.GetTaskCost(5), (60.0));
 	}
 	else
 	{
-		ExpectEQ(calc.GetTaskCost(1), 140.0);
-		ExpectEQ(calc.GetTaskCost(2), 30.0);
-		ExpectEQ(calc.GetTaskCost(3), 90.0);
-		ExpectEQ(calc.GetTaskCost(4), 50.0);
-		ExpectEQ(calc.GetTaskCost(5), 60.0);
+		ExpectEQ(calc.GetTaskCost(1), (20.0 + 30.0 + (40.0 + 50.0)));
+		ExpectEQ(calc.GetTaskCost(2), (30.0));
+		ExpectEQ(calc.GetTaskCost(3), (40.0 + 50.0));
+		ExpectEQ(calc.GetTaskCost(4), (50.0));
+		ExpectEQ(calc.GetTaskCost(5), (60.0));
 	}
 }
 
