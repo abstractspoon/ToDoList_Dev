@@ -574,7 +574,6 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 			ExpectEQ(calc.GetTaskRisk(3), 8);
 			ExpectEQ(calc.GetTaskRisk(4), 9);
 			ExpectEQ(calc.GetTaskRisk(5), 10);
-			// TODO
 		}
 
 		// Done have lowest risk
@@ -1162,21 +1161,74 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 	// Using Due Date (Now - Due Date)
 	{
-		InitialiseStyles(bIncludeRefs);
-		m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+		// Assigned (unaffected by reference tasks)
+		{
+			InitialiseStyles(bIncludeRefs);
+			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
 
-		// Note: +1 because due date has no time component -> end of day
-		if (bIncludeRefs)
-		{
-			// TODO
-		}
-		else
-		{
+			// Note: +1 because due date has no time component -> end of day
 			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45001.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
 			ExpectEQ(nUnits, TDCU_DAYS);
 			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
 			ExpectEQ(nUnits, TDCU_DAYS);
 			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
+			ExpectEQ(nUnits, TDCU_NULL);
+			ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), ((45005.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+		}
+
+		// Earliest (unaffected by reference tasks because its date is later)
+		{
+			InitialiseStyles(bIncludeRefs);
+			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+			m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
+
+			// Note: +1 because due date has no time component -> end of day
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45001.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
+			ExpectEQ(nUnits, TDCU_NULL);
+			ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), ((45005.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+		}
+
+		// Latest
+		if (bIncludeRefs)
+		{
+			InitialiseStyles(bIncludeRefs);
+			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+			m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
+
+			// Note: +1 because due date has no time component -> end of day
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45005.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45005.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
+			ExpectEQ(nUnits, TDCU_NULL);
+			ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), ((45005.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+		}
+		else
+		{
+			InitialiseStyles(bIncludeRefs);
+			m_aStyles[TDCS_CALCREMAININGTIMEBYDUEDATE] = TRUE;
+			m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
+
+			// Note: +1 because due date has no time component -> end of day
+			ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001); // parent
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), ((45002.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001);
+			ExpectEQ(nUnits, TDCU_DAYS);
+			ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((45003.0 + 1.0) - COleDateTime::GetCurrentTime()), 0.0001); // parent
 			ExpectEQ(nUnits, TDCU_DAYS);
 			ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), 0.0); // completed task
 			ExpectEQ(nUnits, TDCU_NULL);
@@ -1198,7 +1250,16 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + 40.0 + (0.0 + (60.0 + 70.0))) - (0.0 + 50.0 + (0.0 + (70.0 + 80.0)))); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + (60.0 + 70.0)) - (0.0 + (70.0 + 80.0))); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 - 80.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 			else
 			{
@@ -1223,7 +1284,16 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (30.0 + 40.0 + (50.0 + (60.0 + 70.0))) - (40.0 + 50.0 + (60.0 + (70.0 + 80.0))));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 - 50.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (50.0 + (60.0 + 70.0)) - (60.0 + (70.0 + 80.0)));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (60.0 - 70.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 - 80.0));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 			else
 			{
@@ -1254,7 +1324,16 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), (0.0 + (40.0 * 0.8) + (0.0 + (0.0 + (70.0 * 0.5))))); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), (0.0 + (0.0 + (70.0 * 0.5)))); // parent
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 * 0.5));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 			else
 			{
@@ -1279,7 +1358,16 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 			if (bIncludeRefs)
 			{
-				// TODO
+				ExpectEQ(calc.GetTaskTimeRemaining(1, nUnits), ((30.0 * 0.9) + (40.0 * 0.8) + ((50.0 * 0.7) + (0.0 + (70.0 * 0.5)))));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(2, nUnits), (40.0 * 0.8));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(3, nUnits), ((50.0 * 0.7) + (0.0 + (70.0 * 0.5))));
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(4, nUnits), (0.0)); // completed task
+				ExpectEQ(nUnits, TDCU_DAYS);
+				ExpectEQ(calc.GetTaskTimeRemaining(5, nUnits), (70.0 * 0.5));
+				ExpectEQ(nUnits, TDCU_DAYS);
 			}
 			else
 			{
