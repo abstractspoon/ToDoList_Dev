@@ -406,7 +406,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskPriority(1, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+					ExpectEQ(calc.GetTaskPriority(3, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+					ExpectEQ(calc.GetTaskPriority(5, FALSE), 9);
 				}
 				else
 				{
@@ -428,7 +432,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskPriority(1, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+					ExpectEQ(calc.GetTaskPriority(3, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+					ExpectEQ(calc.GetTaskPriority(5, FALSE), 9);
 				}
 				else
 				{
@@ -453,7 +461,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskPriority(1, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+					ExpectEQ(calc.GetTaskPriority(3, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+					ExpectEQ(calc.GetTaskPriority(5, FALSE), 9);
 				}
 				else
 				{
@@ -475,7 +487,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskPriority(1, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+					ExpectEQ(calc.GetTaskPriority(3, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+					ExpectEQ(calc.GetTaskPriority(5, FALSE), 9);
 				}
 				else
 				{
@@ -497,7 +513,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskPriority(1, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+					ExpectEQ(calc.GetTaskPriority(3, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(4, FALSE), 0); // completed task
+					ExpectEQ(calc.GetTaskPriority(5, FALSE), 9);
 				}
 				else
 				{
@@ -519,7 +539,11 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 				if (bIncludeRefs)
 				{
-					// TODO
+					ExpectEQ(calc.GetTaskPriority(1, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(2, FALSE), 6);
+					ExpectEQ(calc.GetTaskPriority(3, FALSE), 9);
+					ExpectEQ(calc.GetTaskPriority(4, FALSE), 8); // completed task
+					ExpectEQ(calc.GetTaskPriority(5, FALSE), 9);
 				}
 				else
 				{
