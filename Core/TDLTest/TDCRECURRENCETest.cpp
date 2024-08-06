@@ -43,7 +43,7 @@ TESTRESULT CTDCRECURRENCETest::Run()
 
 void CTDCRECURRENCETest::TestSetRegularity()
 {
-	BeginTest(_T("CTDCRECURRENCETest::SetRegularity"));
+	CTDCScopedTest test(*this, _T("CTDCRECURRENCETest::SetRegularity"));
 	
 	//  nRegularity										dwSpecific1				dwSpecific2
 	
@@ -172,10 +172,6 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 0), 5)); // 'DOW' < 1 
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 8), 5)); // 'DOW' > 7
-		
-	//  ---------------------------------------
-
-	EndTest();
 }
 
 void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
@@ -186,7 +182,7 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 		return;
 	}
 
-	BeginTest(_T("CTDCRECURRENCETest::CalcNextOccurrencesPerformance"));
+	CTDCScopedTest test(*this, _T("CTDCRECURRENCETest::CalcNextOccurrencesPerformance"));
 
 	const TDCRECURRENCE RECURRENCES[] = 
 	{
@@ -263,8 +259,6 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 			_tprintf(_T("Recurrence (%s) took %ld ms to calculate %d recurrences for the range: %s\n"), (LPCTSTR)FormatRecurrenceRegularity(tr), dwDuration, nNumRecur, (LPCTSTR)range.Format());
 		}
 	}
-
-	EndTest();
 }
 
 CString CTDCRECURRENCETest::FormatRecurrenceRegularity(const TDCRECURRENCE& tr)

@@ -201,6 +201,7 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_INCLUDEDONEINAVERAGECALC] = prefs.GetIncludeDoneInAverageCalc();
 	styles[TDCS_INCLUDEDONEINPRIORITYCALC] = prefs.GetIncludeDoneInPriorityRiskCalc();
 	styles[TDCS_INCLUDEDONEINRISKCALC] = prefs.GetIncludeDoneInPriorityRiskCalc();
+	styles[TDCS_INCLUDEREFERENCESINCALCS] = prefs.GetIncludeReferencesInCalcs();
 	styles[TDCS_INCLUDEUSERINCHECKOUT] = prefs.GetIncludeUserNameInCheckout();
 	styles[TDCS_LOGTASKTIMESEPARATELY] = prefs.GetLogTaskTimeSeparately();
 	styles[TDCS_LOGTIMETRACKING] = prefs.GetLogTimeTracking();

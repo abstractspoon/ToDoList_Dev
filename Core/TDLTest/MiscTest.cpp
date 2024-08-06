@@ -49,7 +49,7 @@ TESTRESULT CMiscTest::Run()
 
 void CMiscTest::TestGetFormattedLength()
 {
-	BeginTest(_T("Misc::GetFormattedLength"));
+	CTDCScopedTest test(*this, _T("Misc::GetFormattedLength"));
 
 	{
 		CStringArray aValues;
@@ -115,13 +115,11 @@ void CMiscTest::TestGetFormattedLength()
 		ExpectEQ(Misc::GetFormattedLength(aValues, _T(","), TRUE), 2);
 		ExpectEQ(Misc::GetFormattedLength(aValues, _T("..."), TRUE), 6);
 	}
-
-	EndTest();
 }
 
 void CMiscTest::TestFormatArray()
 {
-	BeginTest(_T("Misc::FormatArray"));
+	CTDCScopedTest test(*this, _T("Misc::FormatArray"));
 
 	{
 		CStringArray aValues;
@@ -239,8 +237,6 @@ void CMiscTest::TestFormatArray()
 			ExpectTrue(ActualLengthMatchesCalculation(aValues, _T("..."), TRUE));
 		}
 	}
-
-	EndTest();
 }
 
 BOOL CMiscTest::ActualLengthMatchesCalculation(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncEmpty)
@@ -251,7 +247,7 @@ BOOL CMiscTest::ActualLengthMatchesCalculation(const CStringArray& aValues, LPCT
 
 void CMiscTest::TestHasPrefix()
 {
-	BeginTest(_T("Misc::HasPrefix"));
+	CTDCScopedTest test(*this, _T("Misc::HasPrefix"));
 
 	// Note: FALSE for last argument is more permissive
 	{
@@ -297,13 +293,11 @@ void CMiscTest::TestHasPrefix()
 		ExpectFalse(Misc::HasPrefix(_T("\tabc"), _T("BC"), FALSE));
 		ExpectFalse(Misc::HasPrefix(_T("\nabc"), _T("ABC"), FALSE));
 	}
-
-	EndTest();
 }
 
 void CMiscTest::TestHasSuffix()
 {
-	BeginTest(_T("Misc::HasSuffix"));
+	CTDCScopedTest test(*this, _T("Misc::HasSuffix"));
 
 	// Note: FALSE for last argument is more permissive
 	{
@@ -349,8 +343,6 @@ void CMiscTest::TestHasSuffix()
 		ExpectFalse(Misc::HasSuffix(_T("abc\t"), _T("BC"), FALSE));
 		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("ABC"), FALSE));
 	}
-
-	EndTest();
 }
 
 void CMiscTest::TestRegionalSettingsRetrievalPerformance()
@@ -361,7 +353,7 @@ void CMiscTest::TestRegionalSettingsRetrievalPerformance()
 		return;
 	}
 
-	BeginTest(_T("RegionalSettingsRetrievalPerformance"));
+	CTDCScopedTest test(*this, _T("RegionalSettingsRetrievalPerformance"));
 
 	CString sSetting;
 	const int NUM_LOOPS = 100000;
@@ -381,6 +373,4 @@ void CMiscTest::TestRegionalSettingsRetrievalPerformance()
 	}
 
 	_tprintf(_T("Test took %ld ms to retrieve 9 settings %d times\n"), (GetTickCount() - dwTickStart), NUM_LOOPS);
-
-	EndTest();
 }

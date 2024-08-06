@@ -1064,12 +1064,6 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 			mapAttribAffected.Add(TDCA_STARTDATE);
 			break;
 
-		case TDCS_CALCREMAININGTIMEBYDUEDATE:
-		case TDCS_CALCREMAININGTIMEBYSPENT:
-		case TDCS_CALCREMAININGTIMEBYPERCENT:
-			// Not supported
-			break;
-
 		case TDCS_DUEHAVEHIGHESTPRIORITY:
 		case TDCS_DONEHAVELOWESTPRIORITY:
 		case TDCS_USEHIGHESTPRIORITY:
@@ -1115,10 +1109,6 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
 		case TDCS_AUTOCALCPERCENTDONE:
 			mapAttribAffected.Add(TDCA_PERCENT);
-			break;
-
-		case TDCS_HIDESTARTDUEFORDONETASKS:
-			//mapAttribAffected.Add(TDCA_);
 			break;
 		}
 	}

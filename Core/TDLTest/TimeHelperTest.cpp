@@ -39,16 +39,15 @@ TESTRESULT CTimeHelperTest::Run()
 
 void CTimeHelperTest::TestGetTime()
 {
-	BeginTest(_T("CTimeHelperTest::GetTime"));
+	CTDCScopedTest test(*this, _T("CTimeHelperTest::GetTime"));
 
 	// -----------------------------------------------------------------------
 
 	{
-		// Use default statically defined internal values
-		const CTimeHelper th;
-
 		const double DAYSINWEEK = 5.0;
 		const double HOURSINDAY = 8.0;
+
+		const CTimeHelper th(CWorkingWeek(DHW_SATURDAY | DHW_SUNDAY, HOURSINDAY));
 
 		// -----------------------------------------------------------------------
 
@@ -133,8 +132,4 @@ void CTimeHelperTest::TestGetTime()
 		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKDAYS),	(1 / (60.0 * HOURSINDAY)));
 		ExpectEQ(th.Convert(1.0, THU_MINS,		THU_WEEKS)	,	(1 / (60.0 * HOURSINDAY * DAYSINWEEK)));
 	}
-		
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }

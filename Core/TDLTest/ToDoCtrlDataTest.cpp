@@ -343,13 +343,11 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& dat
 
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates()
 {
-	BeginTest(_T("CToDoCtrlDataTest::AdjustNewRecurringTasksDates"));
+	CTDCScopedTest test(*this, _T("CToDoCtrlDataTest::AdjustNewRecurringTasksDates"));
 
 	TestAdjustNewRecurringTasksDates(TDIRO_STARTDATE);
 	TestAdjustNewRecurringTasksDates(TDIRO_DUEDATE);
 	TestAdjustNewRecurringTasksDates(TDIRO_DONEDATE);
-
-	EndTest();
 }
 
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRecalcFrom)
