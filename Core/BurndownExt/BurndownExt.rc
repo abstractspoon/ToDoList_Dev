@@ -69,7 +69,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_STATISTICS          ICON    DISCARDABLE     "res\\icon1.ico"
+IDR_STATISTICS          ICON    DISCARDABLE     "res\\burndown.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
