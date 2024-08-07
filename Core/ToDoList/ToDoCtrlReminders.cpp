@@ -206,7 +206,7 @@ BOOL CToDoCtrlReminders::DismissReminder(int nRem)
 	// If we are dismissing a recurring task's reminder,  
 	// we only disable it so that it can later be copied 
 	// when the recurring task is completed
-	if (m_aReminders[nRem].IsTaskRecurring())
+	if (IsRecurringReminder(m_aReminders[nRem]))
 	{
 		TRACE(_T("CToDoCtrlReminders::DismissReminder(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
 
@@ -238,6 +238,98 @@ BOOL CToDoCtrlReminders::GetReminder(int nRem, TDCREMINDER& rem) const
 
 	rem = m_aReminders[nRem];
 	return TRUE;
+}
+
+BOOL CToDoCtrlReminders::UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC)
+{
+	TDCREMINDER rem;
+	int nRem = FindReminder(dwOldTaskID, pTDC);
+
+	BOOL bUpdated = FALSE;
+
+	if (nRem != -1)
+	{
+		// Transfer the original if the task id has changed
+		if (dwNewTaskID != dwOldTaskID)
+		{
+			bUpdated = TransferReminder(dwOldTaskID, dwNewTaskID, pTDC);
+		}
+		else // Update the existing reminder
+		{
+			// get the existing reminder
+			GetReminder(nRem, rem);
+
+			// init for new task
+			rem.bEnabled = TRUE;
+			rem.dDaysSnooze = 0.0;
+
+			// Add
+			SetReminder(rem);
+			bUpdated = TRUE;
+		}
+	}
+
+	// search for any other non-recurring subtask having this task
+	// as its parent and re-enable them
+	for (nRem = 0; nRem < m_aReminders.GetSize(); nRem++)
+	{
+		TDCREMINDER& rem = m_aReminders[nRem];
+
+		if (!rem.bEnabled && NonRecurringReminderHasRecurringParent(rem, dwNewTaskID, pTDC))
+		{
+			rem.bEnabled = TRUE;
+			bUpdated = TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoCtrlReminders::NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const
+{
+	ASSERT(dwParentID != 0);
+	ASSERT(pTDC->IsTaskRecurring(dwParentID));
+	ASSERT(!pTDC->IsTaskDone(dwParentID));
+
+	if (rem.pTDC != pTDC)
+		return FALSE;
+
+	if (rem.dwTaskID == dwParentID)
+		return FALSE;
+
+	if (rem.IsTaskRecurring())
+		return FALSE;
+
+	DWORD dwRemParentID = rem.dwTaskID;
+
+	do
+	{
+		dwRemParentID = pTDC->GetParentTaskID(dwRemParentID);
+
+		if (dwRemParentID == dwParentID)
+			return TRUE;
+	}
+	while (dwRemParentID);
+
+	return FALSE;
+}
+
+BOOL CToDoCtrlReminders::IsRecurringReminder(const TDCREMINDER& rem, BOOL bIncludeParent) const
+{
+	if (rem.IsTaskRecurring())
+		return TRUE;
+
+	// Treat non-recurring subtasks of recurring parents as recurring too
+	if (bIncludeParent)
+	{
+		TDCREMINDER temp = rem;
+		temp.dwTaskID = rem.pTDC->GetParentTaskID(temp.dwTaskID);
+
+		return IsRecurringReminder(temp, TRUE); // RECURSIVE CALL
+	}
+
+	// else
+	return FALSE;
 }
 
 BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib)
@@ -366,7 +458,7 @@ int CToDoCtrlReminders::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
 		if ((pTDC == rem.pTDC) && rem.IsTaskDone())
 		{
 			// Don't remove recurring task reminders just disable them
-			if (rem.IsTaskRecurring())
+			if (IsRecurringReminder(rem))
 			{
 				rem.bEnabled = FALSE;
 				TRACE(_T("CToDoCtrlReminders::RemoveTasks(Disabling recurring reminder '%s', %d)\n"), rem.GetTaskTitle(), rem.dwTaskID);
@@ -547,7 +639,7 @@ void CToDoCtrlReminders::DoCheckReminders()
 				{
 					// This means that Stickies is handling the reminder
 					// so we can now delete it, except for recurring tasks
-					if (rem.IsTaskRecurring())
+					if (IsRecurringReminder(rem))
 						rem.bEnabled = FALSE;
 					else
 						bDelete = TRUE;

@@ -245,12 +245,13 @@ public:
 
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const { return m_formatter.GetTaskPath(dwTaskID, nMaxLen); }
 	CString GetTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(dwTaskID); }
-	CString GetParentTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(m_data.GetTaskParentID(dwTaskID)); }
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
-	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
+	CString GetParentTaskTitle(DWORD dwTaskID) const { return m_data.GetTaskTitle(m_data.GetTaskParentID(dwTaskID)); }
+	DWORD GetParentTaskID(DWORD dwTaskID) const { return m_data.GetTaskParentID(dwTaskID); }
 	BOOL GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERIOD& timeSpent) const;
-	int GetTaskIconIndex(DWORD dwTaskID) const { return m_taskTree.GetTaskIconIndex(dwTaskID); }
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bSelected = FALSE) const;
+	int GetTaskIconIndex(DWORD dwTaskID) const { return m_taskTree.GetTaskIconIndex(dwTaskID); }
+	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
 
 	double CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeEstimate(nUnits); }
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
