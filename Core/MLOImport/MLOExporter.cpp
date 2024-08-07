@@ -250,7 +250,7 @@ CString CMLOExporter::FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 	//      </div>
 	//
 	CString sHtmlComments = pSrcTaskFile->GetTaskAttribute(hTask, TDCA_HTMLCOMMENTS), sHtmlSource;
-	sHtmlComments.Trim();
+	Misc::Trim(sHtmlComments);
 
 	if (!sHtmlComments.IsEmpty())
 	{
@@ -280,7 +280,7 @@ CString CMLOExporter::FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 
 	// Plain text comments
 	CString sPlainText = pSrcTaskFile->GetTaskComments(hTask);
-	sPlainText.Trim();
+	Misc::Trim(sPlainText);
 
 	if (!sPlainText.IsEmpty())
 	{
