@@ -10,6 +10,7 @@
 #include "..\shared\datehelper.h"
 #include "..\shared\timehelper.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 
 #include "..\3rdParty\T64Utils.h"
 
@@ -63,6 +64,31 @@ IIMPORTEXPORT_RESULT CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR
 	// save result
 	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
+
+#ifdef _DEBUG
+	{
+		CXmlFile fileDest(_T("MyLifeOrganized-xml"));
+		fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
+		fileDest.AddItem(_T("ver"), _T("1.2"));
+
+		// export tasks
+		CXmlItem* pXITasks = fileDest.AddItem(_T("TaskTree"));
+
+		if (!ExportTaskHugo(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, TRUE))
+			return IIER_SOMEFAILED;
+
+		// export resource allocations
+		ExportPlaces(pTasks, fileDest.Root());
+
+		// save result
+		CString sDebugPath(szDestFilePath);
+		FileMisc::AddToFileName(sDebugPath, _T("_debug"));
+
+		if (!fileDest.Save(sDebugPath, SFEF_UTF8WITHOUTBOM))
+			return IIER_BADFILE;
+	}
+
+#endif
 
 	return IIER_SUCCESS;
 }
@@ -125,7 +151,10 @@ bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask
 		return false;
 	
 	// Copy across the appropriate attributes
-	pXIDestItem->AddItem(_T("Caption"), pSrcTaskFile->GetTaskTitle(hTask));
+	CString sTitle = pSrcTaskFile->GetTaskTitle(hTask);
+	
+	pXIDestItem->AddItem(_T("Caption"), sTitle);
+	pXIDestItem->AddItem(_T("IDD"), FormatDestID(sTitle, pSrcTaskFile->GetTaskID(hTask)), XIT_ELEMENT);
 	
 	// Priority
 	int nPriority = pSrcTaskFile->GetTaskPriority(hTask, FALSE);
@@ -178,9 +207,9 @@ bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask
 	// Note (Comments and other attributes not natively supported by MLO)
 	CString sNote;
 
-	sNote += FormatFileLinks(pSrcTaskFile, hTask);
-	sNote += FormatDependencies(pSrcTaskFile, hTask, pXIDestItem);
-	sNote += FormatComments(pSrcTaskFile, hTask);
+	AddSpacedContent(FormatFileLinks(pSrcTaskFile, hTask), sNote);
+	AddSpacedContent(FormatDependencies(pSrcTaskFile, hTask, pXIDestItem), sNote);
+	AddSpacedContent(FormatComments(pSrcTaskFile, hTask), sNote);
 
 	// Notes must be added as elements now
 	if (!sNote.IsEmpty())
@@ -219,6 +248,274 @@ bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask
 	return true;
 }
 
+#ifdef _DEBUG
+bool CMLOExporter::ExportTaskHugo(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
+							  CXmlItem* pXIDestParent, BOOL bAndSiblings)
+{
+	if (!hTask)
+		return true;
+
+	// create a new item corresponding to pXITask at the dest
+	CXmlItem* pXIDestItem = pXIDestParent->AddItem(_T("TaskNode"));
+
+	if (!pXIDestItem)
+		return false;
+
+	// copy across the appropriate attributes
+	pXIDestItem->AddItem(_T("Caption"), pSrcTaskFile->GetTaskTitle(hTask));
+
+	// ID
+	CString strIDD;
+	// IDD reference trick (we generate a unique ID based on the task name and ToDoList ID):
+	unsigned long nIDD = pSrcTaskFile->GetTaskID(hTask);
+	CString strTitle = pSrcTaskFile->GetTaskTitle(hTask);
+	unsigned long nTaskNameCode = strTitle.GetLength();
+	if (nTaskNameCode > 1)
+		nTaskNameCode *= int(strTitle[1]);
+	// <IDD>{00000000-0000-0000-0000-000000000000}</IDD>
+	strIDD.Format(_T("{%08lu-0000-1111-0000-%012lu}"), nIDD, nTaskNameCode);
+	pXIDestItem->AddItem(_T("IDD"), strIDD, XIT_ELEMENT);
+
+	// priority
+	int nPriority = pSrcTaskFile->GetTaskPriority(hTask, FALSE);
+	int nImportance = max(nPriority, 0) * 20; // The scale of MyLifeOrganized is over 200, not over 100.
+
+	pXIDestItem->AddItem(_T("Importance"), nImportance, XIT_ELEMENT);
+
+	// dates
+	time64_t tDate = T64Utils::T64_NULL;
+
+	if (pSrcTaskFile->GetTaskCreationDate64(hTask, tDate))
+		pXIDestItem->AddItem(_T("Created"), FormatDate(tDate), XIT_ELEMENT);
+
+	if (pSrcTaskFile->GetTaskDoneDate64(hTask, tDate))
+		pXIDestItem->AddItem(_T("CompletionDateTime"), FormatDate(tDate), XIT_ELEMENT);
+
+	if (pSrcTaskFile->GetTaskDueDate64(hTask, false, tDate))
+		pXIDestItem->AddItem(_T("DueDateTime"), FormatDate(tDate), XIT_ELEMENT);
+
+	// time estimate
+	TDC_UNITS nUnits;
+	double dTimeEst = pSrcTaskFile->GetTaskTimeEstimate(hTask, nUnits, FALSE);
+
+	if (dTimeEst > 0.0)
+	{
+		TH_UNITS nTHUnits = MapUnitsToTHUnits(nUnits);
+		pXIDestItem->AddItem(_T("EstimateMax"), CTimeHelper().Convert(dTimeEst, nTHUnits, THU_DAYS), XIT_ELEMENT);
+	}
+
+	// Flag:
+	bool bTaskFlagged = pSrcTaskFile->IsTaskFlagged(hTask, false);
+	if (bTaskFlagged)
+		pXIDestItem->AddItem(_T("Flag"), _T("Red Flag"), XIT_ELEMENT);
+
+	// CustomFormat
+	CXmlItem* pXIDestCustomFormatItem = pXIDestItem->AddItem(_T("CustomFormat"), _T(""), XIT_ELEMENT);
+	if (!pXIDestCustomFormatItem)
+		return false;
+
+	// Parent Task are in Bold in ToDoList, so we migrate them in bold too:
+	if (pSrcTaskFile->GetTaskParentID(hTask) == 0)
+		pXIDestCustomFormatItem->AddItem(_T("Bold"), _T("1"), XIT_ELEMENT);
+
+	// Task Color:
+	unsigned long unTaskColor = pSrcTaskFile->GetTaskColor(hTask);
+	CString strColor;
+	strColor.Format(_T("%lu"), unTaskColor);
+	pXIDestCustomFormatItem->AddItem(_T("FontColor"), strColor, XIT_ELEMENT);
+	pXIDestCustomFormatItem->AddItem(_T("SideBarColor"), strColor, XIT_ELEMENT);
+
+	// links
+	CString strNote;
+	CString strLink;
+	static const CString urlProtocol = _T("://");
+	static const CString fileProtocol = _T("file://");
+
+	// Include links array in Notes:
+	int nLinks = pSrcTaskFile->GetTaskFileLinkCount(hTask);
+	if (nLinks > 1)
+	{
+		CString strLinkCount;
+		for (int nLinkCount = 0; nLinkCount < nLinks; ++nLinkCount)
+		{
+			strLink = pSrcTaskFile->GetTaskFileLink(hTask, nLinkCount);
+			strLinkCount.Format(_T("%d"), nLinkCount + 1);
+			strNote += _T("ToDoList Link (") + strLinkCount + _T("): <");
+			// Is it a local file link without an URL-protocol? Then add the fileProtocol...
+			if (strLink.Find(urlProtocol) < 0)
+				strNote += fileProtocol;
+			strNote += CString(strLink) + _T(">\r\n\r\n");
+		}
+	}
+	else
+	{
+		strLink = pSrcTaskFile->GetTaskFileLinkPath(hTask);
+		// Include Link in Notes:
+		if (!Misc::IsEmpty(strLink))
+		{
+			strNote += _T("ToDoList Link: <");
+			// Is it a local file link without an URL-protocol? Then add the fileProtocol...
+			if (strLink.Find(urlProtocol) < 0)
+				strNote += fileProtocol;
+			strNote += CString(strLink) + _T(">\r\n\r\n");
+		}
+	}
+
+	// Include Dependencies array in Notes:
+	int nDependencies = pSrcTaskFile->GetTaskDependencyCount(hTask);
+	if (nDependencies > 0)
+	{
+		// Dependency
+		CXmlItem* pXIDestDependenciesItem = pXIDestItem->AddItem(_T("Dependency"), _T(""), XIT_ELEMENT);
+		if (!pXIDestDependenciesItem)
+			return false;
+
+		CString strUID;
+		CString strDependencyCount;
+		for (int nDependency = 0; nDependency < nDependencies; ++nDependency)
+		{
+			LPCWSTR pStrDependency = pSrcTaskFile->GetTaskDependency(hTask, nDependency);
+
+			// Add dependency to notes, as a reference to make sure it worked the IDD reference trick:
+			strDependencyCount.Format(_T("%d"), nDependency + 1);
+			strNote += _T("ToDoList Dependency (") + strDependencyCount + _T("): [ID " + CString(pStrDependency) + _T("] "));
+
+			// Get the hTaskDependency from the pStrDependency
+			unsigned long nID = _wtoi(pStrDependency);
+			HTASKITEM hTaskDependency = pSrcTaskFile->FindTask(nID);
+			if (hTaskDependency)
+			{
+				// IDD reference trick:
+				unsigned long nUID = pSrcTaskFile->GetTaskID(hTaskDependency);
+				CString strDependencyTitle = pSrcTaskFile->GetTaskTitle(hTaskDependency);
+				unsigned long nTaskDependencyNameCode = strDependencyTitle.GetLength();
+				if (nTaskDependencyNameCode > 1)
+					nTaskDependencyNameCode *= int(strDependencyTitle[1]);
+				strUID.Format(_T("{%08lu-0000-1111-0000-%012lu}"), nUID, nTaskDependencyNameCode);
+				pXIDestDependenciesItem->AddItem(_T("UID"), strUID, XIT_ELEMENT);
+
+				// Task title reference in notes:
+				strNote += strDependencyTitle;
+			}
+
+			strNote += _T("\r\n\r\n");
+		}
+	}
+
+
+	// comments
+	LPCTSTR szComments = pSrcTaskFile->GetTaskComments(hTask);
+
+	// Formatted Comments:
+	CString strHtmlComments = pSrcTaskFile->GetTaskAttribute(hTask, TDCA_HTMLCOMMENTS);
+	CString strCommentsType;
+	strHtmlComments.Trim();
+	bool bHasFormattedComments = !strHtmlComments.IsEmpty();
+	if (bHasFormattedComments)
+	{
+		// Remove parts of HTML that MyLifeOrganized cannot process/recognize (when generated from rich text):
+		// Sample of what is actually generated from rich text:
+		//      <div class=WordSection1>
+		//      <p class=MsoNormal style='margin-top:0cm;margin-bottom:.0001pt;line-height:
+		//      normal;text-autospace:none'><span lang=EN-GB style='font-size:8.0pt;font-family:
+		//      "Arial","sans-serif"'>This is a test in bold, <span style='color:red;
+		//      background:yellow'>colored</span>, Underlined.</span></p>
+		//      <p class=MsoNormal style='margin-top:0cm;margin-bottom:.0001pt;line-height:
+		//      normal;text-autospace:none'><span style='font-size:8.0pt;font-family:"Arial","sans-serif"'> </span></p>
+		//      </div>
+		//
+		// TODO: Check COMMENTSTYPE instead to get bIsRTFContent. Doesn't compile: pSrcTaskFile->GetTaskAttribute(hTask, TDL_TASKCOMMENTSTYPE);
+		bool bIsRTFContent = (strHtmlComments.Find(_T("<div class=WordSection1>")) >= 0);
+		if (bIsRTFContent)
+		{
+			strHtmlComments.Replace(_T("<div class=WordSection1>"), _T(""));
+			strHtmlComments.Replace(_T("</div>"), _T(""));
+			strHtmlComments.Replace(_T(" style='font-size:8.0pt;font-family:"), _T(""));
+			strHtmlComments.Replace(_T("\"Arial\",\"sans-serif\"'"), _T(""));
+			strHtmlComments.Replace(_T(" lang=EN-GB"), _T(""));
+			strHtmlComments.Replace(_T(" class=MsoNormal style='margin-top:0cm;margin-bottom:.0001pt;line-height:"), _T(""));
+			strHtmlComments.Replace(_T("normal;text-autospace:none'"), _T(""));
+			strHtmlComments.Replace(_T("<p\r\n>"), _T("<p>"));
+			strHtmlComments.Replace(_T("<p\n>"), _T("<p>"));
+			strHtmlComments.Replace(_T("<span\r\n>"), _T("<span>"));
+			strHtmlComments.Replace(_T("<span\n>"), _T("<span>"));
+
+			strCommentsType = _T("RTF"); // Type of comment in ToDoList
+		}
+		else
+			strCommentsType = _T("HTML"); // Type of comment in ToDoList
+
+										  // Warn about the format issue in MyLifeOrganized:
+		strNote += _T("ToDoList Comments (from ") + strCommentsType + _T("): *** To see format in notes, activate \"Use Markdown format in notes\" in the MyLifeOrganized options ***\r\n\r\n");
+	}
+
+	// Separation line:
+	if ((!Misc::IsEmpty(strNote)) && (!Misc::IsEmpty(szComments)))
+		strNote += _T("\r\n\r\n");
+
+	// Original note:
+	if (!Misc::IsEmpty(szComments))
+	{
+		if (!strHtmlComments.IsEmpty())
+			strNote += _T("----- *** ToDoList Plain Text (HTML below) *** -----\r\n\r\n");
+
+		strNote += szComments;
+	}
+
+	// Note in HTML:
+	if (!strHtmlComments.IsEmpty())
+		strNote += _T("\r\n\r\n\r\n----- *** ToDoList HTML (from ") + strCommentsType + _T(") *** (MyLifeOrganized supports only basic HTML formatting and Markdown) -----\r\n\r\n") + strHtmlComments;
+
+	// Notes must be added as elements now:
+	if (!strNote.IsEmpty())
+		pXIDestItem->AddItem(_T("Note"), strNote, XIT_ELEMENT);
+
+	// Folders and projects: These are not available in ToDoList,
+	// but we set a criteria for setting those in MyLifeOrganized:
+	if (pSrcTaskFile->IsTaskParent(hTask)) // If they have sub-tasks...
+	{
+		// We consider it a folder if it has no notes, otherwise it is a project:
+		if (strNote.IsEmpty())
+			pXIDestItem->AddItem(_T("HideInToDoThisTask"), -1, XIT_ELEMENT); // Folders are marked with: HideInToDoThisTask
+		else
+			pXIDestItem->AddItem(_T("IsProject"), -1, XIT_ELEMENT); // Projects are marked with: IsProject
+	}
+
+
+	// copy across first child
+	if (!ExportTask(pSrcTaskFile, pSrcTaskFile->GetFirstTask(hTask), pXIDestItem, TRUE))
+		return false;
+
+	// handle sibling tasks WITHOUT RECURSION
+	if (bAndSiblings)
+	{
+		HTASKITEM hSibling = pSrcTaskFile->GetNextTask(hTask);
+
+		while (hSibling)
+		{
+			// FALSE == don't recurse on siblings
+			if (!ExportTask(pSrcTaskFile, hSibling, pXIDestParent, FALSE))
+				return false;
+
+			hSibling = pSrcTaskFile->GetNextTask(hSibling);
+		}
+	}
+
+	return true;
+}
+#endif
+
+void CMLOExporter::AddSpacedContent(const CString& sSrc, CString& sDest)
+{
+	if (!sSrc.IsEmpty())
+	{
+		if (!sDest.IsEmpty())
+			sDest += _T("\r\n\r\n");
+
+		sDest += sSrc;
+	}
+}
+
 CString CMLOExporter::FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const
 {
 	CString sComments;
@@ -235,6 +532,7 @@ CString CMLOExporter::FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 	//      </div>
 	//
 	CString sHtmlComments = pSrcTaskFile->GetTaskAttribute(hTask, TDCA_HTMLCOMMENTS), sHtmlSource;
+	sHtmlComments.Trim();
 
 	if (!sHtmlComments.IsEmpty())
 	{
@@ -259,28 +557,26 @@ CString CMLOExporter::FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 		}
 
 		// Warn about the format issue in MyLifeOrganized:
-		sComments += Misc::Format(_T("ToDoList Comments (from %s): *** To see format in notes, activate \"Use Markdown format in notes\" in the MyLifeOrganized options ***\r\n\r\n"), sHtmlSource);
-		sComments += _T("\r\n\r\n");
+		AddSpacedContent(Misc::Format(_T("ToDoList Comments (from %s): *** To see format in notes, activate \"Use Markdown format in notes\" in the MyLifeOrganized options ***\r\n\r\n"), sHtmlSource), sComments);
 	}
 
 	// Plain text comments
 	CString sPlainText = pSrcTaskFile->GetTaskComments(hTask);
+	sPlainText.Trim();
 
 	if (!sPlainText.IsEmpty())
 	{
 		if (!sHtmlComments.IsEmpty())
-			sComments += _T("----- *** ToDoList Plain Text (HTML below) *** -----\r\n\r\n");
+			AddSpacedContent(_T("----- *** ToDoList Plain Text (HTML below) *** -----"), sComments);
 
-		sComments += sPlainText;
-		sComments += _T("\r\n\r\n");
+		AddSpacedContent(sPlainText, sComments);
 	}
 
 	// HTML comments
 	if (!sHtmlComments.IsEmpty())
 	{
-		sComments += Misc::Format(_T("----- *** ToDoList HTML (from %s) *** (MyLifeOrganized supports only basic HTML formatting and Markdown) -----"), sHtmlSource);
-		sComments += _T("\r\n\r\n");
-		sComments += sHtmlComments;
+		AddSpacedContent(Misc::Format(_T("----- *** ToDoList HTML (from %s) *** (MyLifeOrganized supports only basic HTML formatting and Markdown) -----"), sHtmlSource), sComments);
+		AddSpacedContent(sHtmlComments, sComments);
 	}
 
 	return sComments;
@@ -296,28 +592,28 @@ CString CMLOExporter::FormatDependencies(const ITASKLISTBASE* pSrcTaskFile, HTAS
 		// Dependency
 		CXmlItem* pXIDestDepends = pXIDestItem->AddItem(_T("Dependency"), _T(""), XIT_ELEMENT);
 
-		for (int nDependency = 0; nDependency < nNumDepends; ++nDependency)
+		for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
 		{
-			CString sDependency(pSrcTaskFile->GetTaskDependency(hTask, nDependency));
-			sDepends += Misc::Format(_T("ToDoList Dependency (%d): [ID %s] "), (nDependency + 1), sDependency);
+			CString sDepend(pSrcTaskFile->GetTaskDependency(hTask, nDepend));
+			DWORD dwDependsID = _wtoi(sDepend);
 
-			DWORD dwID = _wtoi(sDependency);
+			sDepend = Misc::Format(_T("ToDoList Dependency (%d): [ID %s] "), (nDepend + 1), sDepend);
 
-			if (dwID)
+			if (dwDependsID) // Local dependency
 			{
-				HTASKITEM hTaskDependency = pSrcTaskFile->FindTask(dwID);
+				HTASKITEM hTaskDependency = pSrcTaskFile->FindTask(dwDependsID);
 
 				if (hTaskDependency)
 				{
-					CString sDependsTitle = pSrcTaskFile->GetTaskTitle(hTaskDependency);
-					sDepends += sDependsTitle;
+					CString sDependTitle = pSrcTaskFile->GetTaskTitle(hTaskDependency);
+					sDepend += sDependTitle;
 
-					CString sID = FormatDestID(sDependsTitle, pSrcTaskFile->GetTaskID(hTaskDependency));
+					CString sID = FormatDestID(sDependTitle, pSrcTaskFile->GetTaskID(hTaskDependency));
 					pXIDestDepends->AddItem(_T("UID"), sID, XIT_ELEMENT);
 				}
 			}
 
-			sDepends += _T("\r\n\r\n");
+			AddSpacedContent(sDepend, sDepends);
 		}
 	}
 
@@ -330,33 +626,31 @@ CString CMLOExporter::FormatFileLinks(const ITASKLISTBASE* pSrcTaskFile, HTASKIT
 	static const CString fileProtocol = _T("file://");
 
 	CString sLinks;
-	int nLinks = pSrcTaskFile->GetTaskFileLinkCount(hTask);
+	int nNumLinks = pSrcTaskFile->GetTaskFileLinkCount(hTask);
 
-	if (nLinks == 1)
+	if (nNumLinks == 1)
 	{
 		CString sLink = pSrcTaskFile->GetTaskFileLinkPath(hTask);
-		sLinks += _T("ToDoList Link: <");
 
 		// Is it a local file link without an URL-protocol? Then add the fileProtocol...
-		if (sLink.Find(urlProtocol) < 0)
-			sLinks += fileProtocol;
+		if (sLink.Find(urlProtocol) == -1)
+			sLink = fileProtocol + sLink;
 
-		sLinks += sLink;
-		sLinks += _T(">\r\n\r\n");
+		sLink = Misc::Format(_T("ToDoList Link: <%s>"), sLink);
+		AddSpacedContent(sLink, sLinks);
 	}
-	else if (nLinks > 1)
+	else if (nNumLinks > 1)
 	{
-		for (int nLinkCount = 0; nLinkCount < nLinks; ++nLinkCount)
+		for (int nLink = 0; nLink < nNumLinks; nLink)
 		{
-			CString sLink = pSrcTaskFile->GetTaskFileLink(hTask, nLinkCount);
-			sLinks += Misc::Format(_T("ToDoList Link (%d): <"), (nLinkCount + 1));
+			CString sLink = pSrcTaskFile->GetTaskFileLink(hTask, nLink);
 
 			// Is it a local file link without an URL-protocol? Then add the fileProtocol...
-			if (sLink.Find(urlProtocol) < 0)
-				sLinks += fileProtocol;
-
-			sLinks += sLink;
-			sLinks += _T(">\r\n\r\n");
+			if (sLink.Find(urlProtocol) == -1)
+				sLink = fileProtocol + sLink;
+			
+			sLink = Misc::Format(_T("ToDoList Link (%d): <%s>"), (nLink + 1), sLink);
+			AddSpacedContent(sLink, sLinks);
 		}
 	}
 
