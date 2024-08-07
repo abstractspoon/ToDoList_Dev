@@ -88,6 +88,8 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	aCmdIDs.Add(ID_EXIT);
 	aCmdIDs.Add(ID_FILE_ENCRYPT);
 	aCmdIDs.Add(ID_EDIT_PASTEATTRIBUTES);
+	aCmdIDs.Add(ID_TOOLS_IMPORT);
+	aCmdIDs.Add(ID_TOOLS_EXPORT);
 
 	AddImages(aCmdIDs, IDB_APP_EXTRA_STD, colorMagenta);
 
