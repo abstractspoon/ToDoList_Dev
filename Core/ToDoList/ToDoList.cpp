@@ -105,6 +105,7 @@ CToDoListApp::~CToDoListApp()
 BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	//{{AFX_MSG_MAP(CToDoListApp)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
 	ON_COMMAND(ID_HELP_FORUM, OnHelpForum)
 	ON_COMMAND(ID_HELP_LICENSE, OnHelpLicense)
 	ON_COMMAND(ID_HELP_COMMANDLINE, OnHelpCommandline)
@@ -112,6 +113,13 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_HELP_UNINSTALL, OnHelpUninstall)
 	ON_COMMAND(ID_HELP_RECORDBUGREPORT, OnHelpRecordBugReport)
 	ON_COMMAND(ID_HELP_WIKI, OnHelpWiki)
+	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
+	ON_COMMAND(ID_TOOLS_IMPORTPREFS, OnImportPrefs)
+	ON_COMMAND(ID_TOOLS_TOGGLEDARKMODE, OnToolsToggleDarkMode)
+
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLEDARKMODE, OnUpdateToolsToggleDarkMode)
 
 #ifdef _DEBUG
 	ON_COMMAND(ID_DEBUG_TASKDIALOG_INFO, OnDebugTaskDialogInfo)
@@ -125,12 +133,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUG_SHOWEMBEDDEDURL, OnDebugShowEmbeddedUrl)
 	ON_COMMAND(ID_DEBUG_FORMATGETLASTERROR, OnDebugFormatGetLastError)
 #endif
-
-	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
-	ON_COMMAND(ID_TOOLS_IMPORTPREFS, OnImportPrefs)
-	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1302,6 +1304,16 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
 }
 
+void CToDoListApp::OnToolsToggleDarkMode()
+{
+	CDarkMode::Enable(!CDarkMode::IsEnabled());
+}
+
+void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
+{
+	pCmdUI->SetCheck(CDarkMode::IsEnabled());
+}
+
 void CToDoListApp::OnImportPrefs() 
 {
 	// default location is always app folder
@@ -1313,12 +1325,12 @@ void CToDoListApp::OnImportPrefs()
 	{
 		CPreferences prefs;
 
-		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE, 
-			_T("ini"), 
-			sIniPath, 
-			EOFN_DEFAULTOPEN, 
-			CEnString(IDS_INIFILEFILTER));
-		
+		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE,
+							   _T("ini"),
+							   sIniPath,
+							   EOFN_DEFAULTOPEN,
+							   CEnString(IDS_INIFILEFILTER));
+
 		if (dialog.DoModal(prefs) != IDOK)
 			return;
 

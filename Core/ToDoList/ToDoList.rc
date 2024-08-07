@@ -3606,6 +3606,8 @@ BEGIN
     END
     POPUP "&Tools"
     BEGIN
+        MENUITEM "Toggle Dark Mode",            ID_TOOLS_TOGGLEDARKMODE
+        MENUITEM SEPARATOR
         MENUITEM "I&mport Tasks...",            ID_TOOLS_IMPORT
         MENUITEM "E&xport Tasks...",            ID_TOOLS_EXPORT
         MENUITEM SEPARATOR

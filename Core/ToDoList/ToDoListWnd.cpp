@@ -45,7 +45,6 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\ComboListboxPositioner.h"
-#include "..\shared\DarkMode.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\editshortcutMgr.h"
