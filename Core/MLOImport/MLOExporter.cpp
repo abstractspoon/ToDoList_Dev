@@ -65,31 +65,6 @@ IIMPORTEXPORT_RESULT CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR
 	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
 
-#ifdef _DEBUG
-	{
-		CXmlFile fileDest(_T("MyLifeOrganized-xml"));
-		fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
-		fileDest.AddItem(_T("ver"), _T("1.2"));
-
-		// export tasks
-		CXmlItem* pXITasks = fileDest.AddItem(_T("TaskTree"));
-
-		if (!ExportTaskHugo(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, TRUE))
-			return IIER_SOMEFAILED;
-
-		// export resource allocations
-		ExportPlaces(pTasks, fileDest.Root());
-
-		// save result
-		CString sDebugPath(szDestFilePath);
-		FileMisc::AddToFileName(sDebugPath, _T("_debug"));
-
-		if (!fileDest.Save(sDebugPath, SFEF_UTF8WITHOUTBOM))
-			return IIER_BADFILE;
-	}
-
-#endif
-
 	return IIER_SUCCESS;
 }
 
