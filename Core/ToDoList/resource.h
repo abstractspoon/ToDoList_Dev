@@ -2132,6 +2132,7 @@
 #define IDS_FILTER_SHOWALLSUB           51234
 #define IDS_TASKLISTATTACHED            51235
 #define IDS_ABOUTCONTRIBUTION           51236
+#define IDS_RESTARTTOCHANGEDARKMODE     51236
 #define IDS_FILTER_SELECTED             51237
 #define IDS_OA_BCC                      51240
 #define IDS_OA_BILLINGINFO              51241

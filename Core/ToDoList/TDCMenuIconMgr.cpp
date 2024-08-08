@@ -71,6 +71,7 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	aCmdIDs.Add(ID_SORT);
 	aCmdIDs.Add(ID_DELETETASK);
 	aCmdIDs.Add(ID_TOOLS_TOGGLECHECKIN); // placeholder
+	aCmdIDs.Add(ID_TOOLS_TOGGLEDARKMODE);
 	aCmdIDs.Add(ID_PREFERENCES);
 	aCmdIDs.Add(ID_HELP_WIKI);
 
