@@ -226,9 +226,6 @@ BOOL CToDoListApp::InitInstance()
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
 
-	if (cmdInfo.HasOption(SWITCH_DARKMODE))
-		CDarkMode::Enable();
-
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
 	{
@@ -984,7 +981,27 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		// Save language choice 
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
 		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
+
+		// Dark Mode
+		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
+
+		if (bDarkMode == -1)
+		{
+			if (cmdInfo.HasOption(SWITCH_DARKMODE))
+			{
+				bDarkMode = TRUE;
+				prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
+			}
+			else
+			{
+				bDarkMode = FALSE;
+				// Don't set the 'DarkMode' preferences so we can know when Dark Mode is selected the very first time
+			}
+		}
+
+		CDarkMode::Enable(bDarkMode);
 		
+		// Multi-instance
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 
@@ -1306,7 +1323,46 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 
 void CToDoListApp::OnToolsToggleDarkMode()
 {
-	CDarkMode::Enable(!CDarkMode::IsEnabled());
+	CPreferences prefs;
+
+	// If this is the first time, initialise alternate row colour 
+	if (prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1) == -1) 
+	{
+		// TODO
+	}
+
+	// Prompt to restart the app
+	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
+	{
+	case IDYES:
+		{
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+			
+			// Restart
+			HWND hwndMain = *AfxGetMainWnd();
+			::SendMessage(hwndMain, WM_CLOSE, 0, 1);
+
+			if (::IsWindow(hwndMain))
+			{
+				// user cancelled the restart
+			}
+			else
+			{
+				if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), m_lpCmdLine) < SE_ERR_SUCCESS)
+				{
+					//int breakpoint = 0;
+				}
+			}
+		}
+		break;
+
+	case IDNO:
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+		break;
+
+	case IDCANCEL:
+		return;
+	}
 }
 
 void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
