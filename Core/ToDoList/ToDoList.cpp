@@ -18,6 +18,8 @@
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
 
+#include "PreferencesUITasklistColorsPage.h" // Alternate line colour
+
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\dialoghelper.h"
@@ -983,25 +985,9 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
 
 		// Dark Mode
-		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
-
-		if (bDarkMode == -1)
-		{
-			if (cmdInfo.HasOption(SWITCH_DARKMODE))
-			{
-				bDarkMode = TRUE;
-				prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
-			}
-			else
-			{
-				bDarkMode = FALSE;
-				// Don't set the 'DarkMode' preferences so we can know when Dark Mode is selected the very first time
-			}
-		}
-
-		CDarkMode::Enable(bDarkMode);
+		InitDarkMode(cmdInfo, prefs);
 		
-		// Multi-instance
+		// Multi-instance. Don't overwrite existing value
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 
@@ -1321,17 +1307,36 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
 }
 
-void CToDoListApp::OnToolsToggleDarkMode()
+void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
 {
-	CPreferences prefs;
+	BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
 
-	// If this is the first time, initialise alternate row colour 
-	if (prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1) == -1) 
+	if (bDarkMode == -1)
 	{
-		// TODO
+		bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
 	}
 
+	// Fixup alternate row colour
+	COLORREF crAltLines = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), CLR_NONE);
+
+	if (bDarkMode && (crAltLines == DEF_ALTERNATELINECOLOR))
+	{
+		prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DM_3DFACE);
+	}
+	else if (!bDarkMode && (crAltLines == DM_3DFACE))
+	{
+		prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+	}
+
+	CDarkMode::Enable(bDarkMode);
+}
+
+void CToDoListApp::OnToolsToggleDarkMode()
+{
 	// Prompt to restart the app
+	CPreferences prefs;
+
 	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
 	{
 	case IDYES:

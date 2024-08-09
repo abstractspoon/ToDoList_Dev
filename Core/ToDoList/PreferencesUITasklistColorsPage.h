@@ -25,6 +25,10 @@ const UINT WM_PUITCP_TEXTCOLOROPTION = ::RegisterWindowMessage(_T("WM_PUITCP_TEX
 
 /////////////////////////////////////////////////////////////////////////////
 
+const COLORREF DEF_ALTERNATELINECOLOR = RGB(235, 235, 255); // For Dark Mode
+
+/////////////////////////////////////////////////////////////////////////////
+
 enum { COLOROPT_ATTRIB, COLOROPT_PRIORITY, COLOROPT_DEFAULT, COLOROPT_NONE };
 
 struct ATTRIBCOLOR

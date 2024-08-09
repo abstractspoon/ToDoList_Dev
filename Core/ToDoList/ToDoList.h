@@ -90,6 +90,7 @@ protected:
 	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo);
 	BOOL SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting);
 	BOOL InitTranslation(BOOL bFirstTime, BOOL bQuiet);
+	void InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs);
 	void UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller() const;

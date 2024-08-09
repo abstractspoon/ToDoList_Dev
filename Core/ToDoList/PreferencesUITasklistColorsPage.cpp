@@ -23,19 +23,17 @@ static char THIS_FILE[] = __FILE__;
 // CPreferencesUITasklistColorsPage property page
 
 // default colors
-const COLORREF PRIORITYLOWCOLOR		= RGB(30, 225, 0);
-const COLORREF PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
-const COLORREF CBMASKCOLOR			= RGB(255, 0, 0);
-const COLORREF ALTERNATELINECOLOR	= RGB(235, 235, 255);
-const COLORREF GRIDLINECOLOR		= RGB(192, 192, 192);
-const COLORREF TASKDONECOLOR		= RGB(128, 128, 128);
-const COLORREF TASKDUECOLOR			= RGB(255, 0, 0);
-const COLORREF TASKDUETODAYCOLOR	= RGB(255, 128, 0);
-const COLORREF TASKSTARTCOLOR		= RGB(0, 255, 0);
-const COLORREF FILTEREDCOLOR		= RGB(200, 200, 200);
-const COLORREF FLAGGEDCOLOR			= RGB(128, 64, 0);
-const COLORREF REFERENCECOLOR		= RGB(128, 0, 64);
-const COLORREF GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
+const COLORREF DEF_PRIORITYLOWCOLOR		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
+const COLORREF DEF_CBMASKCOLOR			= RGB(255, 0, 0);
+const COLORREF DEF_GRIDLINECOLOR		= RGB(192, 192, 192);
+const COLORREF DEF_TASKDONECOLOR		= RGB(128, 128, 128);
+const COLORREF DEF_TASKDUECOLOR			= RGB(255, 0, 0);
+const COLORREF DEF_TASKDUETODAYCOLOR	= RGB(255, 128, 0);
+const COLORREF DEF_TASKSTARTCOLOR		= RGB(0, 255, 0);
+const COLORREF DEF_FLAGGEDCOLOR			= RGB(128, 64, 0);
+const COLORREF DEF_REFERENCECOLOR		= RGB(128, 0, 64);
+const COLORREF DEF_GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
 
 const int DEFFONTSIZE = 8;
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
@@ -977,18 +975,18 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 		}
 	}
 
-	m_crLow = pPrefs->GetProfileInt(sColorKey, _T("Low"), PRIORITYLOWCOLOR);
-	m_crHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), PRIORITYHIGHCOLOR);
-	m_crGridlines = pPrefs->GetProfileInt(sColorKey, _T("Gridlines"), GRIDLINECOLOR);
-	m_crDone = pPrefs->GetProfileInt(sColorKey, _T("TaskDone"), TASKDONECOLOR);
-	m_crStart = pPrefs->GetProfileInt(sColorKey, _T("TaskStart"), TASKSTARTCOLOR);
-	m_crStartToday = pPrefs->GetProfileInt(sColorKey, _T("TaskStartToday"), TASKSTARTCOLOR);
-	m_crDue = pPrefs->GetProfileInt(sColorKey, _T("TaskDue"), TASKDUECOLOR);
-	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), TASKDUETODAYCOLOR);
-	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), ALTERNATELINECOLOR);
-	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), FLAGGEDCOLOR);
-	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), REFERENCECOLOR);
-	m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(sColorKey, _T("GroupHeaderBkgnd"), GROUPHEADERBKCOLOR);
+	m_crLow = pPrefs->GetProfileInt(sColorKey, _T("Low"), DEF_PRIORITYLOWCOLOR);
+	m_crHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), DEF_PRIORITYHIGHCOLOR);
+	m_crGridlines = pPrefs->GetProfileInt(sColorKey, _T("Gridlines"), DEF_GRIDLINECOLOR);
+	m_crDone = pPrefs->GetProfileInt(sColorKey, _T("TaskDone"), DEF_TASKDONECOLOR);
+	m_crStart = pPrefs->GetProfileInt(sColorKey, _T("TaskStart"), DEF_TASKSTARTCOLOR);
+	m_crStartToday = pPrefs->GetProfileInt(sColorKey, _T("TaskStartToday"), DEF_TASKSTARTCOLOR);
+	m_crDue = pPrefs->GetProfileInt(sColorKey, _T("TaskDue"), DEF_TASKDUECOLOR);
+	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), DEF_TASKDUETODAYCOLOR);
+	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), DEF_FLAGGEDCOLOR);
+	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), DEF_REFERENCECOLOR);
+	m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(sColorKey, _T("GroupHeaderBkgnd"), DEF_GROUPHEADERBKCOLOR);
 
 	// bkwds compatibility
 	if (pPrefs->GetProfileInt(szKey, _T("ColorByPriority"), FALSE))
