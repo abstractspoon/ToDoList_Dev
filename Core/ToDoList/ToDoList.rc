@@ -5529,7 +5529,7 @@ BEGIN
     IDS_FILTER_SHOWALLSUB   "Show all subtasks"
     IDS_TASKLISTATTACHED    "<Tasklist Attached>"
     IDS_RESTARTTOCHANGEDARKMODE 
-                            "Dark Mode|Dark Mode will be toggled next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
+                            "Dark Mode|Dark Mode will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_FILTER_SELECTED     "Selected Tasks"
     IDS_OA_BCC              "Bcc"
     IDS_OA_BILLINGINFO      "Billing Info"

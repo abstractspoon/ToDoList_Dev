@@ -1309,6 +1309,8 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 
 void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
 {
+	ASSERT(!CDarkMode::IsEnabled());
+
 	BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
 
 	if (bDarkMode == -1)
@@ -1317,16 +1319,26 @@ void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences&
 		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
 	}
 
-	// Fixup alternate row colour
-	COLORREF crAltLines = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), CLR_NONE);
+	// Fixup 'Alternate Line' and 'Completed Task' colours
+	COLORREF crAltLines = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+	COLORREF crDoneTasks = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
 
+	const COLORREF DARKMODE_ALTLINECOLOR = DM_3DFACE;
+	const COLORREF DARKMODE_TASKDONECOLOR = GetSysColor(COLOR_3DFACE);
+	
 	if (bDarkMode && (crAltLines == DEF_ALTERNATELINECOLOR))
 	{
-		prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DM_3DFACE);
+		prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DARKMODE_ALTLINECOLOR);
+
+		if (crDoneTasks == DEF_TASKDONECOLOR)
+			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DARKMODE_TASKDONECOLOR);
 	}
-	else if (!bDarkMode && (crAltLines == DM_3DFACE))
+	else if (!bDarkMode && (crAltLines == DARKMODE_ALTLINECOLOR))
 	{
 		prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+
+		if (crDoneTasks == DARKMODE_TASKDONECOLOR)
+			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
 	}
 
 	CDarkMode::Enable(bDarkMode);
