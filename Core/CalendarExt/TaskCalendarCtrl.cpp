@@ -2460,7 +2460,8 @@ BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& sel
 	switch (nCmd)
 	{
 	case IUI_SELECTFIRSTTASK:
-		nFrom = 0;
+		if (aTasks.GetSize())
+			nFrom = 0;
 		break;
 
 	case IUI_SELECTNEXTTASK:
@@ -2485,15 +2486,24 @@ BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& sel
 		ASSERT(0);
 	}
 
-	if (nFrom < 0)
-		return FALSE;
+	if (nFrom >= 0)
+	{
+		CHoldRedraw hr(*this);
 
-	CHoldRedraw hr(*this);
+		do
+		{
+			if (SelectTask(aTasks, nFrom, select))
+				return TRUE;
 
-	return SelectTask(aTasks, nFrom, select, bForwards);
+			nFrom = Misc::NextIndexT(aTasks, nFrom, bForwards);
+		}
+		while (nFrom != -1);
+	}
+
+	return FALSE;
 }
 
-BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, const IUISELECTTASK& select, BOOL bForwards)
+BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, const IUISELECTTASK& select)
 {
 	if ((nFrom < 0) || (nFrom > Misc::LastIndexT(aTasks)))
 		return FALSE;
@@ -2503,17 +2513,13 @@ BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, c
 
 	if (Misc::Find(select.szWords, sTitle, select.bCaseSensitive, select.bWholeWord) != -1)
 	{
-		DWORD dwTaskID = pTCI->GetTaskID();
-
-		if (SelectTask(dwTaskID, TRUE))
+		if (SelectTask(pTCI->GetTaskID(), TRUE))
 			return TRUE;
 
 		ASSERT(IsHiddenTask(pTCI, TRUE));
 	}
 
-	// Try the next task
-	nFrom = Misc::NextIndexT(aTasks, nFrom, bForwards);
-	return SelectTask(aTasks, nFrom, select, TRUE); // RECURSIVE CALL
+	return FALSE;
 }
 
 // external version
