@@ -1882,6 +1882,9 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 
 DWORD CTaskCalendarCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
+	// Lock screen updates in case we have to scroll to find this task
+
+
 	// TODO
 	return 0L;
 }
