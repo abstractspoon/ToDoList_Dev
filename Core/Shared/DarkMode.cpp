@@ -81,12 +81,20 @@ PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
 
 //////////////////////////////////////////////////////////////////////
 
-void CDarkMode::Enable(BOOL bEnable)
+BOOL CDarkMode::IsSupported()
 {
 	if (Misc::IsHighContrastActive())
-		return;
+		return FALSE;
 
 	if (!CThemed::IsAppThemed())
+		return FALSE;
+
+	return TRUE;
+}
+
+void CDarkMode::Enable(BOOL bEnable)
+{
+	if (!IsSupported())
 		return;
 
 	BOOL bIsEnabled = IsEnabled();

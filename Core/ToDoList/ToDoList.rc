@@ -2883,6 +2883,7 @@ BEGIN
     SEPARATOR
     BUTTON      ID_TOOLS_TOGGLECHECKIN
     SEPARATOR
+    BUTTON      ID_TOOLS_TOGGLEDARKMODE
     BUTTON      ID_PREFERENCES
     SEPARATOR
     BUTTON      ID_HELP_WIKI
@@ -3606,6 +3607,8 @@ BEGIN
     END
     POPUP "&Tools"
     BEGIN
+        MENUITEM "Toggle Dark Mode",            ID_TOOLS_TOGGLEDARKMODE
+        MENUITEM SEPARATOR
         MENUITEM "I&mport Tasks...",            ID_TOOLS_IMPORT
         MENUITEM "E&xport Tasks...",            ID_TOOLS_EXPORT
         MENUITEM SEPARATOR
@@ -5525,6 +5528,8 @@ BEGIN
     IDS_TDC_COLUMN_PATH     "Path"
     IDS_FILTER_SHOWALLSUB   "Show all subtasks"
     IDS_TASKLISTATTACHED    "<Tasklist Attached>"
+    IDS_RESTARTTOCHANGEDARKMODE 
+                            "Dark Mode|Dark Mode will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_FILTER_SELECTED     "Selected Tasks"
     IDS_OA_BCC              "Bcc"
     IDS_OA_BILLINGINFO      "Billing Info"
@@ -6014,6 +6019,11 @@ BEGIN
     IDS_REMINDER_ABSOLUTEAGO "%s ago"
     IDS_REMINDER_STARTSNOW  "Starts Now"
     IDS_REMINDER_DUENOW     "Due Now"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TOOLS_TOGGLEDARKMODE "\nToggle Dark Mode"
 END
 
 #endif    // English (Australia) resources

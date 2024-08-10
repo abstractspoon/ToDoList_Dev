@@ -17,6 +17,7 @@ class CDarkMode
 public:
 	static void Enable(BOOL bEnable = TRUE);
 
+	static BOOL IsSupported();
 	static BOOL IsEnabled()
 	{
 		return ((GetSysColor(COLOR_3DFACE) == DM_3DFACE) && (GetSysColor(COLOR_WINDOW) == DM_WINDOW));

@@ -18,6 +18,8 @@
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
 
+#include "PreferencesUITasklistColorsPage.h" // Alternate line colour
+
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\dialoghelper.h"
@@ -105,6 +107,7 @@ CToDoListApp::~CToDoListApp()
 BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	//{{AFX_MSG_MAP(CToDoListApp)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
 	ON_COMMAND(ID_HELP_FORUM, OnHelpForum)
 	ON_COMMAND(ID_HELP_LICENSE, OnHelpLicense)
 	ON_COMMAND(ID_HELP_COMMANDLINE, OnHelpCommandline)
@@ -112,6 +115,13 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_HELP_UNINSTALL, OnHelpUninstall)
 	ON_COMMAND(ID_HELP_RECORDBUGREPORT, OnHelpRecordBugReport)
 	ON_COMMAND(ID_HELP_WIKI, OnHelpWiki)
+	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
+	ON_COMMAND(ID_TOOLS_IMPORTPREFS, OnImportPrefs)
+	ON_COMMAND(ID_TOOLS_TOGGLEDARKMODE, OnToolsToggleDarkMode)
+
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLEDARKMODE, OnUpdateToolsToggleDarkMode)
 
 #ifdef _DEBUG
 	ON_COMMAND(ID_DEBUG_TASKDIALOG_INFO, OnDebugTaskDialogInfo)
@@ -125,12 +135,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUG_SHOWEMBEDDEDURL, OnDebugShowEmbeddedUrl)
 	ON_COMMAND(ID_DEBUG_FORMATGETLASTERROR, OnDebugFormatGetLastError)
 #endif
-
-	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
-	ON_COMMAND(ID_TOOLS_IMPORTPREFS, OnImportPrefs)
-	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -223,9 +227,6 @@ BOOL CToDoListApp::InitInstance()
 
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
-
-	if (cmdInfo.HasOption(SWITCH_DARKMODE))
-		CDarkMode::Enable();
 
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
@@ -982,7 +983,11 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		// Save language choice 
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
 		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
+
+		// Dark Mode
+		InitDarkMode(cmdInfo, prefs);
 		
+		// Multi-instance. Don't overwrite existing value
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 
@@ -1302,6 +1307,90 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
 }
 
+void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
+{
+	ASSERT(!CDarkMode::IsEnabled());
+
+	if (CDarkMode::IsSupported())
+	{
+		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
+
+		if (bDarkMode == -1)
+		{
+			bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
+		}
+
+		// Fixup 'Alternate Line' and 'Completed Task' colours
+		COLORREF crAltLines = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+		COLORREF crDoneTasks = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
+
+		const COLORREF DARKMODE_ALTLINECOLOR = DM_3DFACE;
+		const COLORREF DARKMODE_TASKDONECOLOR = GetSysColor(COLOR_3DFACE);
+
+		if (bDarkMode && (crAltLines == DEF_ALTERNATELINECOLOR))
+		{
+			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DARKMODE_ALTLINECOLOR);
+
+			if (crDoneTasks == DEF_TASKDONECOLOR)
+				prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DARKMODE_TASKDONECOLOR);
+		}
+		else if (!bDarkMode && (crAltLines == DARKMODE_ALTLINECOLOR))
+		{
+			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+
+			if (crDoneTasks == DARKMODE_TASKDONECOLOR)
+				prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
+		}
+
+		CDarkMode::Enable(bDarkMode);
+	}
+}
+
+void CToDoListApp::OnToolsToggleDarkMode()
+{
+	// Prompt to restart the app
+	CPreferences prefs;
+
+	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
+	{
+	case IDYES:
+		{
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+			
+			// Restart
+			HWND hwndMain = *AfxGetMainWnd();
+			::SendMessage(hwndMain, WM_CLOSE, 0, 1);
+
+			if (::IsWindow(hwndMain))
+			{
+				// user cancelled the restart
+			}
+			else
+			{
+				if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), m_lpCmdLine) < SE_ERR_SUCCESS)
+				{
+					//int breakpoint = 0;
+				}
+			}
+		}
+		break;
+
+	case IDNO:
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+		break;
+
+	case IDCANCEL:
+		return;
+	}
+}
+
+void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(CDarkMode::IsSupported());
+	pCmdUI->SetCheck(CDarkMode::IsEnabled());
+}
+
 void CToDoListApp::OnImportPrefs() 
 {
 	// default location is always app folder
@@ -1313,12 +1402,12 @@ void CToDoListApp::OnImportPrefs()
 	{
 		CPreferences prefs;
 
-		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE, 
-			_T("ini"), 
-			sIniPath, 
-			EOFN_DEFAULTOPEN, 
-			CEnString(IDS_INIFILEFILTER));
-		
+		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE,
+							   _T("ini"),
+							   sIniPath,
+							   EOFN_DEFAULTOPEN,
+							   CEnString(IDS_INIFILEFILTER));
+
 		if (dialog.DoModal(prefs) != IDOK)
 			return;
 
