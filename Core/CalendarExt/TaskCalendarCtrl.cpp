@@ -2429,6 +2429,88 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 	return TRUE;
 }
 
+BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+{
+	// Build a sorted list of visible tasks
+	CTaskCalItemArray aTasks;
+	aTasks.SetSize(m_mapData.GetCount());
+
+	POSITION pos = m_mapData.GetStartPosition();
+	int nTask = 0;
+
+	while (pos)
+	{
+		TASKCALITEM* pTCI = m_mapData.GetNextTask(pos);
+
+		if (!IsHiddenTask(pTCI, TRUE))
+			aTasks[nTask++] = pTCI;
+	}
+	aTasks.SetSize(nTask);
+	aTasks.SortItems(m_nSortBy, m_bSortAscending);
+
+	// Find our initial search pos and direction
+	int nFrom = -1;
+	BOOL bForwards = TRUE;
+
+	switch (nCmd)
+	{
+	case IUI_SELECTFIRSTTASK:
+		nFrom = 0;
+		break;
+
+	case IUI_SELECTNEXTTASK:
+		nFrom = aTasks.FindItem(GetSelectedTaskID());
+
+		if (nFrom >= 0)
+			nFrom++;
+		break;
+
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+		nFrom = aTasks.FindItem(GetSelectedTaskID());
+		break;
+
+	case IUI_SELECTPREVTASK:
+		bForwards = FALSE;
+		nFrom = aTasks.FindItem(GetSelectedTaskID());
+
+		if (nFrom > 0)
+			nFrom--;
+		break;
+
+	case IUI_SELECTLASTTASK:
+		bForwards = FALSE;
+		nFrom = (aTasks.GetSize() - 1);
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	CHoldRedraw hr(*this);
+
+	return SelectTask(aTasks, nFrom, select, bForwards);
+}
+
+BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, const IUISELECTTASK& select, BOOL bForwards)
+{
+	if ((bForwards && (nFrom >= aTasks.GetSize())) || (!bForwards && (nFrom <= 0)))
+		return FALSE;
+
+	const TASKCALITEM* pTCI = aTasks[nFrom];
+	CString sTitle = pTCI->GetName(FALSE);
+
+	if (Misc::Find(select.szWords, sTitle, select.bCaseSensitive, select.bWholeWord) != -1)
+	{
+		if (SelectTask(pTCI->GetTaskID(), TRUE))
+			return TRUE;
+
+		ASSERT(0);
+	}
+
+	nFrom = (bForwards ? (nFrom + 1) : (nFrom - 1));
+	return SelectTask(aTasks, nFrom, select, TRUE); // RECURSIVE CALL
+}
+
 // external version
 BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible)
 {
