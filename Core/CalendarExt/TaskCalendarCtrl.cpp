@@ -2021,6 +2021,7 @@ BOOL CTaskCalendarCtrl::CalcIconRect(const TASKCALITEM* pTCI, const CRect& rTask
 	const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(pTCI->GetTaskID());
 
 	rIcon.OffsetRect(-cdi.nIconOffset, 0);
+	rIcon.right = (rIcon.left + IMAGE_SIZE);
 	rIcon.IntersectRect(rIcon, rTask);
 
 	return TRUE;
