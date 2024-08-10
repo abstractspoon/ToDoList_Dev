@@ -38,7 +38,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoList", "ToDoList\ToDoLi
 	ProjectSection(ProjectDependencies) = postProject
 		{547EC312-67D6-4271-8CC5-C82A94C1A09C} = {547EC312-67D6-4271-8CC5-C82A94C1A09C}
 		{940BE78E-1486-7F9B-02B3-6F0113741A6A} = {940BE78E-1486-7F9B-02B3-6F0113741A6A}
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED} = {CD6043AD-1235-4AB9-B5DA-BF520292B7ED}
 		{9F8F45D4-C492-4653-8456-513D668DEF34} = {9F8F45D4-C492-4653-8456-513D668DEF34}
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D} = {A234E4E0-47DE-4D77-BDBA-EE17C021C95D}
 	EndProjectSection
@@ -62,8 +61,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "ToDoListLib\ToDoListLib.vcxproj", "{940BE78E-1486-7F9B-02B3-6F0113741A6A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConvertRTFToHTML", "ConvertRTFToHTML\ConvertRTFToHTML.vcxproj", "{4A39B7E7-1695-4376-B9FE-615777318C5D}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EasyFtp", "EasyFtp\EasyFtp.vcxproj", "{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -267,16 +264,6 @@ Global
 		{4A39B7E7-1695-4376-B9FE-615777318C5D}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{4A39B7E7-1695-4376-B9FE-615777318C5D}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{4A39B7E7-1695-4376-B9FE-615777318C5D}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Debug|Win32.Build.0 = Unicode Debug|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Release|Win32.ActiveCfg = Uniciode Release|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Release|Win32.Build.0 = Uniciode Release|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.ReleaseGallot|Win32.ActiveCfg = Uniciode Release|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.ReleaseGallot|Win32.Build.0 = Uniciode Release|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Unicode Release|Win32.ActiveCfg = Unicode Debug|Win32
-		{CD6043AD-1235-4AB9-B5DA-BF520292B7ED}.Unicode Release|Win32.Build.0 = Unicode Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
