@@ -1880,6 +1880,17 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
+DWORD CTaskCalendarCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
+{
+	// TODO
+	return 0L;
+}
+
+BOOL CTaskCalendarCtrl::CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
+{
+	return HasTask(dwTaskID, TRUE);
+}
+
 // External method
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
 {

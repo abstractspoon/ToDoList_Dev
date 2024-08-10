@@ -375,6 +375,48 @@ bool CCalendarWnd::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
+bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	switch (nCmd)
+	{
+	case IUI_EXPANDALL:
+	case IUI_COLLAPSEALL:
+	case IUI_EXPANDSELECTED:
+	case IUI_COLLAPSESELECTED:
+	case IUI_RESIZEATTRIBCOLUMNS:
+		// not handled
+		break;
+
+	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
+	case IUI_GETPREVTOPLEVELTASK:
+		if (pData)
+			return (m_BigCalendar.CanGetNextTask(pData->dwTaskID, nCmd) != FALSE);
+		break;
+
+	case IUI_SETFOCUS:
+		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+
+	case IUI_SORT:
+		if (pData)
+			return (CTaskCalendarCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+		break;
+
+	case IUI_SAVETOIMAGE:
+		return (m_BigCalendar.CanSaveToImage() != FALSE);
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_BigCalendar.GetSelectedTaskID() != 0);
+	}
+
+	return false;
+}
+
 bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -386,13 +428,25 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_EXPANDSELECTED:
 	case IUI_COLLAPSESELECTED:
 	case IUI_RESIZEATTRIBCOLUMNS:
+		// not handled
+		break;
+
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		// not handled
+		if (pData)
+		{
+			DWORD dwNextID = m_BigCalendar.GetNextTask(pData->dwTaskID, nCmd);
+
+			if (dwNextID && (dwNextID != pData->dwTaskID))
+			{
+				pData->dwTaskID = dwNextID;
+				return true;
+			}
+		}
 		break;
 
 	case IUI_SORT:
@@ -425,42 +479,6 @@ void CCalendarWnd::SetTaskFont(HFONT hFont)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	m_BigCalendar.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
-}
-
-bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 
-{ 
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	switch (nCmd)
-	{
-	case IUI_EXPANDALL:
-	case IUI_COLLAPSEALL:
-	case IUI_EXPANDSELECTED:
-	case IUI_COLLAPSESELECTED:
-	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_GETNEXTVISIBLETASK:
-	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVVISIBLETASK:
-	case IUI_GETPREVTOPLEVELTASK:
-		// not handled
-		break;
-
-	case IUI_SETFOCUS:
-		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
-
-	case IUI_SORT:
-		if (pData)
-			return (CTaskCalendarCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
-		break;
-
-	case IUI_SAVETOIMAGE:
-		return (m_BigCalendar.CanSaveToImage() != FALSE);
-
-	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_BigCalendar.GetSelectedTaskID() != 0);
-	}
-	
-	return false;
 }
 
 bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)

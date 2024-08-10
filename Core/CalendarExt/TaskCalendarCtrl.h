@@ -49,6 +49,8 @@ public:
 	BOOL EnsureSelectionVisible();
 
 	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
+	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
+	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 
 	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
