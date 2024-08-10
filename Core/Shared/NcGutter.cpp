@@ -166,8 +166,8 @@ BOOL CNcGutter::InsertColumn(int nPos, UINT nColID, LPCTSTR szTitle, UINT nWidth
 		pCD->nWidth = max(nWidth, pCD->nTextWidth + 2 * NCG_COLPADDING);
 
 	// client column is always last
-	if (nPos < 0 || nPos > m_aColumns.GetSize() - 1)
-		nPos = m_aColumns.GetSize() - 1;
+	if ((nPos < 0) || (nPos > Misc::LastIndexT(m_aColumns)))
+		nPos = Misc::LastIndexT(m_aColumns);
 
 	m_aColumns.InsertAt(nPos, pCD);
 
@@ -276,13 +276,9 @@ void CNcGutter::SetHeaderTitle(UINT nColID, LPCTSTR szTitle, LPCTSTR szFont, BOO
 BOOL CNcGutter::IsClientColumn(int nCol) const 
 { 
 	if (Misc::HasFlag(m_dwStyles, NCGS_RIGHTCOLUMNS))
-	{
 		return (nCol == 0);
-	}
-	else
-	{
-		return (nCol == m_aColumns.GetSize() - 1); 
-	}
+
+	return (nCol == Misc::LastIndexT(m_aColumns));
 }
 
 void CNcGutter::SetColumnTextAlignment(UINT nColID, UINT nTextAlign, BOOL bRedraw)
@@ -516,9 +512,9 @@ BOOL CNcGutter::SetMinClientWidth(UINT nMinWidth)
 
 int CNcGutter::GetGutterWidth() const
 {
-	int nWidth = 0;
+	int nWidth = 0, nCol = Misc::LastIndexT(m_aColumns); // exclude client column
 
-	for (int nCol = 0; nCol < m_aColumns.GetSize() - 1; nCol++)
+	while (nCol--)
 		nWidth += m_aColumns[nCol]->nWidth;
 
 	return nWidth;
@@ -1122,7 +1118,7 @@ void CNcGutter::OnHotChange(int nPrevHot, int nHot)
 		GetCursorPos(ptCursor, FALSE);
 
 		// nc portion
-		int nClientCol = m_aColumns.GetSize() - 1;
+		int nClientCol = Misc::LastIndexT(m_aColumns);
 		BOOL bDrawNonClient = FALSE;
 
 		if (nPrevHot >= 0 && nPrevHot < nClientCol)
@@ -1193,7 +1189,7 @@ int CNcGutter::ColumnHitTest(const CPoint& ptScreen) const
 	GetHeaderRect(rHeader, GHR_CLIENT, TRUE);
 
 	if (rHeader.PtInRect(ptScreen))
-		return m_aColumns.GetSize() - 1;  // last column == client
+		return Misc::LastIndexT(m_aColumns);  // last column == client
 
 	// else must be a gutter column
 	GetHeaderRect(rHeader, GHR_NONCLIENT, TRUE);
@@ -1205,7 +1201,7 @@ int CNcGutter::ColumnHitTest(const CPoint& ptScreen) const
 	if (ptGutter.x <= 0)
 		return 0;
 
-	int nCol = m_aColumns.GetSize() - 1;  // omit last column == client
+	int nCol = Misc::LastIndexT(m_aColumns);  // omit last column == client
 	int nGutter = GetGutterWidth();
 
 	while (nCol--)
@@ -1680,7 +1676,7 @@ void CNcGutter::NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, co
 
 	if (nPart == NONCLIENT)
 	{
-		int nNumCols = m_aColumns.GetSize() - 1; // omit last column == client
+		int nNumCols = Misc::LastIndexT(m_aColumns); // omit last column == client
 		rColumn.right = rColumn.left;
 
 		for (int nCol = 0; nCol < nNumCols; nCol++)
@@ -1819,7 +1815,7 @@ void CNcGutter::NcDrawItem(CDC* pDC, DWORD dwItem, DWORD dwParentItem, int nLeve
 			if (!bDrawEntire)
 			{
 				rItem.right = rItem.left;
-				int nNumCols = m_aColumns.GetSize() - 1; // omit last column == client
+				int nNumCols = Misc::LastIndexT(m_aColumns); // omit last column == client
 				
 				for (int nCol = 0; nCol < nNumCols; nCol++)
 				{
@@ -2022,7 +2018,7 @@ int CNcGutter::RecalcGutterWidth()
 	// try hook window then parent
 	UINT nID = GetDlgCtrlID();
 	int nGutter = 0;
-	int nCol = m_aColumns.GetSize() - 1; // omit last column == client
+	int nCol = Misc::LastIndexT(m_aColumns); // omit last column == client
 
 	while (nCol--)
 	{
@@ -2181,7 +2177,7 @@ void CNcGutter::UpdateHeaderHotRects()
 	CRect rItem(rHeader);
 	rItem.right = rItem.left;
 
-	int nNumCols = m_aColumns.GetSize() - 1;  // omit last column == client
+	int nNumCols = Misc::LastIndexT(m_aColumns);  // omit last column == client
 
 	for (int nCol = 0; nCol < nNumCols; nCol++)
 	{

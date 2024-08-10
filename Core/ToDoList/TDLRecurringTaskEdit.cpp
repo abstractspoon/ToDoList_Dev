@@ -838,7 +838,7 @@ void CTDLRecurringTaskMonthlyOptionPage::FixupSpecificWeekCombo(int iWeekday, in
 		CStringArray aSpecificWeek;
 		
 		aSpecificWeek.Add(m_aSpecificWeek[0]);
-		aSpecificWeek.Add(m_aSpecificWeek[m_aSpecificWeek.GetSize() - 1]);
+		aSpecificWeek.Add(m_aSpecificWeek[Misc::LastIndexT(m_aSpecificWeek)]);
 		
 		CDialogHelper::SetComboBoxItems(m_cbSpecificWeek, aSpecificWeek);
 
