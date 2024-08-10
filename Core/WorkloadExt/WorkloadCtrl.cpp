@@ -298,10 +298,10 @@ BOOL CWorkloadCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL 
 	}
 
 	if (bForwards)
-		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE);
+		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE); // RECURSIVE CALL
 
 	// else
-	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE);
+	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE); // RECURSIVE CALL
 }
 
 BOOL CWorkloadCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
