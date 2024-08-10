@@ -941,6 +941,69 @@ int CTaskCalItemArray::FindItem(DWORD dwTaskID) const
 	return -1;
 }
 
+int CTaskCalItemArray::GetNextItem(DWORD dwTaskID, BOOL bForwards) const
+{
+	int nNext = FindItem(dwTaskID);
+
+	if (nNext != -1)
+		nNext =  Misc::NextIndexT(*this, nNext, bForwards);
+
+	return nNext;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CSortedTaskCalItemArray::CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks)
+	:
+	m_mapTasks(mapTasks),
+	m_bNeedsRebuild(TRUE),
+	m_bNeedsResort(TRUE),
+	m_nSortBy(TDCA_NONE),
+	m_bSortAscending(TRUE)
+{
+}
+
+void CSortedTaskCalItemArray::SetNeedsRebuild()
+{
+	m_bNeedsRebuild = TRUE;
+}
+
+void CSortedTaskCalItemArray::SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending)
+{
+	m_nSortBy = nSortBy;
+	m_bSortAscending = bSortAscending;
+	m_bNeedsResort = TRUE;
+}
+
+const CTaskCalItemArray& CSortedTaskCalItemArray::GetTasks()
+{
+	if (m_bNeedsRebuild)
+	{
+		RemoveAll();
+		SetSize(m_mapTasks.GetCount());
+
+		POSITION pos = m_mapTasks.GetStartPosition();
+		int nTask = 0;
+
+		while (pos)
+		{
+			TASKCALITEM* pTCI = m_mapTasks.GetNextTask(pos);
+			SetAt(nTask++, pTCI);
+		}
+
+		SortItems(m_nSortBy, m_bSortAscending);
+	}
+	else if (m_bNeedsResort)
+	{
+		SortItems(m_nSortBy, m_bSortAscending);
+	}
+
+	m_bNeedsRebuild = FALSE;
+	m_bNeedsResort = FALSE;
+
+	return *this;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CHeatMap::CHeatMap(int nMinHeatCutoff) 
@@ -1068,7 +1131,7 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 		nHeat = min(nHeat, m_nMaxHeatCutoff);
 
 		int nColor = ((m_aColorPalette.GetSize() * nHeat) / m_nMaxHeatCutoff);
-		nColor = min(nColor, m_aColorPalette.GetSize() - 1);
+		nColor = min(nColor, Misc::LastIndexT(m_aColorPalette));
 
 		if (nColor >= 0)
 			return m_aColorPalette[nColor];

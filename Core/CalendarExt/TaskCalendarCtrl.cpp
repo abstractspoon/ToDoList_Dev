@@ -61,7 +61,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crToday(255),
 	m_crAltWeek(CLR_NONE),
-	m_sCellDateFormat(_T("%#d"))
+	m_sCellDateFormat(_T("%#d")),
+	m_aSortedTasks(m_mapData)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -322,23 +323,35 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		DeleteData();
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-		bChange = TRUE;
+		{
+			DeleteData();
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+
+			bChange = TRUE;
+		}
 		break;
 
 	case IUI_NEW:
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-		bChange = TRUE;
+		{
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+
+			bChange = TRUE;
+		}
 		break;
 		
 	case IUI_EDIT:
-		bChange |= (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
-					pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
+		{
+			bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
+
+			if (!bChange)
+				bChange = pTasks->IsAttributeAvailable(TDCA_RECURRENCE);
+		}
 		break;
 		
 	case IUI_DELETE:
-		bChange |= RemoveDeletedTasks(pTasks);
+		{
+			bChange |= RemoveDeletedTasks(pTasks);
+		}
 		break;
 		
 	default:
@@ -361,6 +374,11 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 			EnsureSelectionVisible();
 		else
 			Invalidate(FALSE);
+
+		if (nUpdate == IUI_EDIT)
+			m_aSortedTasks.SetNeedsResort(m_nSortBy, m_bSortAscending);
+		else
+			m_aSortedTasks.SetNeedsRebuild();
 	}
 
 	return bChange;
@@ -1503,6 +1521,9 @@ BOOL CTaskCalendarCtrl::SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending)
 	if (!WantSortUpdate(nSortBy))
 		return FALSE;
 
+	if (nSortBy != m_nSortBy || Misc::StateChanged(m_bSortAscending, bAscending))
+		m_aSortedTasks.SetNeedsResort(nSortBy, bAscending);
+
 	m_nSortBy = nSortBy;
 	m_bSortAscending = bAscending;
 
@@ -2431,24 +2452,8 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 
 BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
-	// Build a sorted list of visible tasks
-	CTaskCalItemArray aTasks;
-	aTasks.SetSize(m_mapData.GetCount());
+	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
 
-	POSITION pos = m_mapData.GetStartPosition();
-	int nTask = 0;
-
-	while (pos)
-	{
-		TASKCALITEM* pTCI = m_mapData.GetNextTask(pos);
-
-		if (!IsHiddenTask(pTCI, TRUE))
-			aTasks[nTask++] = pTCI;
-	}
-	aTasks.SetSize(nTask);
-	aTasks.SortItems(m_nSortBy, m_bSortAscending);
-
-	// Find our initial search pos and direction
 	int nFrom = -1;
 	BOOL bForwards = TRUE;
 
@@ -2459,10 +2464,7 @@ BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& sel
 		break;
 
 	case IUI_SELECTNEXTTASK:
-		nFrom = aTasks.FindItem(GetSelectedTaskID());
-
-		if (nFrom >= 0)
-			nFrom++;
+		nFrom = aTasks.GetNextItem(GetSelectedTaskID());
 		break;
 
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -2470,21 +2472,21 @@ BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& sel
 		break;
 
 	case IUI_SELECTPREVTASK:
+		nFrom = aTasks.GetNextItem(GetSelectedTaskID(), FALSE);
 		bForwards = FALSE;
-		nFrom = aTasks.FindItem(GetSelectedTaskID());
-
-		if (nFrom > 0)
-			nFrom--;
 		break;
 
 	case IUI_SELECTLASTTASK:
+		nFrom = Misc::LastIndexT(aTasks);
 		bForwards = FALSE;
-		nFrom = (aTasks.GetSize() - 1);
 		break;
 
 	default:
 		ASSERT(0);
 	}
+
+	if (nFrom < 0)
+		return FALSE;
 
 	CHoldRedraw hr(*this);
 
@@ -2493,7 +2495,7 @@ BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& sel
 
 BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, const IUISELECTTASK& select, BOOL bForwards)
 {
-	if ((bForwards && (nFrom >= aTasks.GetSize())) || (!bForwards && (nFrom <= 0)))
+	if ((nFrom < 0) || (nFrom > Misc::LastIndexT(aTasks)))
 		return FALSE;
 
 	const TASKCALITEM* pTCI = aTasks[nFrom];
@@ -2501,13 +2503,16 @@ BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, c
 
 	if (Misc::Find(select.szWords, sTitle, select.bCaseSensitive, select.bWholeWord) != -1)
 	{
-		if (SelectTask(pTCI->GetTaskID(), TRUE))
+		DWORD dwTaskID = pTCI->GetTaskID();
+
+		if (SelectTask(dwTaskID, TRUE))
 			return TRUE;
 
-		ASSERT(0);
+		ASSERT(IsHiddenTask(pTCI, TRUE));
 	}
 
-	nFrom = (bForwards ? (nFrom + 1) : (nFrom - 1));
+	// Try the next task
+	nFrom = Misc::NextIndexT(aTasks, nFrom, bForwards);
 	return SelectTask(aTasks, nFrom, select, TRUE); // RECURSIVE CALL
 }
 

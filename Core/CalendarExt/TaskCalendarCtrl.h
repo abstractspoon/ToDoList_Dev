@@ -116,6 +116,7 @@ protected:
 	int m_nMaxDayTaskCount;
 
 	mutable CCalContinuousDrawInfo m_ContinuousDrawInfo;
+	mutable CSortedTaskCalItemArray m_aSortedTasks;
 
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
