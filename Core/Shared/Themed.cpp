@@ -780,27 +780,27 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 		break;
 		
 	case DFC_SCROLL:
-		if (!(nState & DFCS_SCROLLCOMBOBOX))
+		if (nState & DFCS_SCROLLCOMBOBOX)
 		{
-			if (nState & DFCS_SCROLLSIZEGRIP)
-			{
-				sThClass = "SCROLLBAR";
-				nThPart = SBP_SIZEBOX;
-				nThState = (nState & DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN;
-			}
-			else if (nState & DFCS_SCROLLDOWN)
-			{
-				sThClass = "SCROLLBAR";
-				nThPart = SBP_LOWERTRACKVERT;
-				nThState = SCRBS_NORMAL;
-			}
-			else
-			{
-				ASSERT(0);
-			}
-			break;
+			VERIFY(GetThemeClassPartState(DFC_COMBO, nState, sThClass, nThPart, nThState)); // RECURSIVE CALL
 		}
-		// else fall through
+		else if (nState & DFCS_SCROLLSIZEGRIP)
+		{
+			sThClass = "SCROLLBAR";
+			nThPart = SBP_SIZEBOX;
+			nThState = (nState & DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN;
+		}
+		else if (nState & DFCS_SCROLLDOWN)
+		{
+			sThClass = "SCROLLBAR";
+			nThPart = SBP_LOWERTRACKVERT;
+			nThState = SCRBS_NORMAL;
+		}
+		else
+		{
+			ASSERT(0);
+		}
+		break;
 
 	case DFC_COMBO:
 	case DFC_COMBONOARROW:
