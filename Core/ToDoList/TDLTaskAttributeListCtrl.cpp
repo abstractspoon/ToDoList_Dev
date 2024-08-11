@@ -704,27 +704,26 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 
 		if (nCol == VALUE_COL)
 		{
-			if (m_data.HasStyle(TDCS_READONLY))
-				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+			BOOL bEditable = CanEditCell(nRow, nCol);
 
-			TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
-			switch (nAttribID)
+			if (!bEditable)
 			{
-			case TDCA_LOCK:
-				ASSERT(CanEditCell(nRow, nCol));
-				break;
+				TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+				CString sAppCursor(_T("NoDrag"));
 
-			default:
-				if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+				switch (nAttribID)
 				{
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				case TDCA_LOCK:
+				case TDCA_REMINDER:
+					break;
+
+				default:
+					if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+						sAppCursor = _T("Locked");
+					break;
 				}
-				else if (!CanEditCell(nRow, nCol))
-				{
-					return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
-				}
-				break;
+				
+				return GraphicsMisc::SetAppCursor(sAppCursor, _T("Resources\\Cursors"));
 			}
 		}
 	}
