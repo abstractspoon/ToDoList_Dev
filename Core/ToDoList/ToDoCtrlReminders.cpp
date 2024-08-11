@@ -102,9 +102,12 @@ void CToDoCtrlReminders::RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC)
 	SaveAndRemoveReminders(pTDC);
 }
 
-void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
+BOOL CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 {
-	ASSERT (m_pWndNotify);
+	if (!rem.IsValid() || rem.IsTaskDone())
+		return FALSE;
+
+	ASSERT(m_pWndNotify);
 
 	int nExist = FindReminder(rem, TRUE);
 	TDCREMINDER temp = rem; // can't add a const reminder to list
@@ -124,6 +127,8 @@ void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 
 	if (bCheckNow)
 		OnTimer(1);
+
+	return TRUE;
 }
 
 void CToDoCtrlReminders::StartTimer()
@@ -322,10 +327,15 @@ BOOL CToDoCtrlReminders::IsRecurringReminder(const TDCREMINDER& rem, BOOL bInclu
 	// Treat non-recurring subtasks of recurring parents as recurring too
 	if (bIncludeParent)
 	{
-		TDCREMINDER temp = rem;
-		temp.dwTaskID = rem.pTDC->GetParentTaskID(temp.dwTaskID);
+		DWORD dwParentID = rem.pTDC->GetParentTaskID(rem.dwTaskID);
 
-		return IsRecurringReminder(temp, TRUE); // RECURSIVE CALL
+		if (dwParentID)
+		{
+			TDCREMINDER temp = rem;
+			temp.dwTaskID = dwParentID;
+
+			return IsRecurringReminder(temp, TRUE); // RECURSIVE CALL
+		}
 	}
 
 	// else

@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "HotTracker.h"
-
 #include "DialogHelper.h"
+#include "Misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -43,7 +43,7 @@ int CHotTracker::AddRect(const CRect& rect)
 {
 	m_aRects.Add((CRect&)rect);
 
-	return m_aRects.GetSize() - 1;
+	return Misc::LastIndexT(m_aRects);
 }
 
 int CHotTracker::AddRect()
@@ -51,7 +51,7 @@ int CHotTracker::AddRect()
 	static CRect rTemp(0, 0, 0, 0);
 	m_aRects.Add(rTemp);
 
-	return m_aRects.GetSize() - 1;
+	return Misc::LastIndexT(m_aRects);
 }
 
 BOOL CHotTracker::UpdateRect(int nRect, const CRect& rect)

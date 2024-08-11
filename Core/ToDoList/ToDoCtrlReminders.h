@@ -35,7 +35,7 @@ public:
 
 	int AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC);
-	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
+	BOOL SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
 	BOOL ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL TransferReminder(DWORD dwTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL GetReminder(int nRem, TDCREMINDER& rem) const;

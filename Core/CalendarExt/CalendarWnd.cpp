@@ -431,6 +431,13 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		// not handled
 		break;
 
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		return true;
+
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -447,6 +454,15 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 				return true;
 			}
 		}
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		if (pData)
+			return (m_BigCalendar.SelectTask(nCmd, pData->select) != FALSE);
 		break;
 
 	case IUI_SORT:

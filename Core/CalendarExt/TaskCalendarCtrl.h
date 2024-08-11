@@ -55,9 +55,11 @@ public:
 	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	BOOL GetSelectedTaskCustomDate(const CString& sCustAttribID, COleDateTime& date) const;
-	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 	DWORD GetSelectedTaskID() const;
+
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
+	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 
 	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
@@ -116,6 +118,7 @@ protected:
 	int m_nMaxDayTaskCount;
 
 	mutable CCalContinuousDrawInfo m_ContinuousDrawInfo;
+	mutable CSortedTaskCalItemArray m_aSortedTasks;
 
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
@@ -206,7 +209,6 @@ protected:
 	BOOL IsDragging() const;
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	double CalcDateDragTolerance() const;
-	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
@@ -214,6 +216,7 @@ protected:
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 	BOOL ClearSelectedCustomDate();
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;

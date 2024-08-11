@@ -704,27 +704,26 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 
 		if (nCol == VALUE_COL)
 		{
-			if (m_data.HasStyle(TDCS_READONLY))
-				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+			BOOL bEditable = CanEditCell(nRow, nCol);
 
-			TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
-			switch (nAttribID)
+			if (!bEditable)
 			{
-			case TDCA_LOCK:
-				ASSERT(CanEditCell(nRow, nCol));
-				break;
+				TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+				CString sAppCursor(_T("NoDrag"));
 
-			default:
-				if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+				switch (nAttribID)
 				{
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				case TDCA_LOCK:
+				case TDCA_REMINDER:
+					break;
+
+				default:
+					if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+						sAppCursor = _T("Locked");
+					break;
 				}
-				else if (!CanEditCell(nRow, nCol))
-				{
-					return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
-				}
-				break;
+				
+				return GraphicsMisc::SetAppCursor(sAppCursor, _T("Resources\\Cursors"));
 			}
 		}
 	}
@@ -902,8 +901,18 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs) && (nAttribID != TDCA_LOCK))
-		return FALSE;
+	if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+	{
+		switch (nAttribID)
+		{
+		case TDCA_LOCK:
+		case TDCA_REMINDER:
+			break;
+
+		default:
+			return FALSE;
+		}
+	}
 
 	// else
 	switch (nAttribID)
@@ -921,6 +930,11 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_PARENTID:
 		// Permanently read-only fields
 		return FALSE;
+
+	case TDCA_REMINDER:
+		if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
+			return FALSE;
+		break;
 
 	case TDCA_PERCENT:
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -1390,7 +1404,7 @@ BOOL CTDLTaskAttributeListCtrl::RowValueVaries(int nRow) const
 
 BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
 {
-	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && RowValueVaries(nRow))
+	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && RowValueVaries(nRow) && GetButtonRect(nRow, nCol, rButton))
 	{
 		DWORD dwState = GetButtonState(nRow, nCol, bSelected);
 		dwState |= (DFCS_BUTTONCHECK | DFCS_MIXED);
