@@ -322,10 +322,15 @@ BOOL CToDoCtrlReminders::IsRecurringReminder(const TDCREMINDER& rem, BOOL bInclu
 	// Treat non-recurring subtasks of recurring parents as recurring too
 	if (bIncludeParent)
 	{
-		TDCREMINDER temp = rem;
-		temp.dwTaskID = rem.pTDC->GetParentTaskID(temp.dwTaskID);
+		DWORD dwParentID = rem.pTDC->GetParentTaskID(rem.dwTaskID);
 
-		return IsRecurringReminder(temp, TRUE); // RECURSIVE CALL
+		if (dwParentID)
+		{
+			TDCREMINDER temp = rem;
+			temp.dwTaskID = dwParentID;
+
+			return IsRecurringReminder(temp, TRUE); // RECURSIVE CALL
+		}
 	}
 
 	// else
