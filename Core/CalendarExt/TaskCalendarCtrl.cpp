@@ -2492,31 +2492,23 @@ BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& sel
 
 		do
 		{
-			if (SelectTask(aTasks, nFrom, select))
-				return TRUE;
+			const TASKCALITEM* pTCI = aTasks[nFrom];
+			ASSERT(pTCI);
+
+			if (!IsHiddenTask(pTCI, TRUE))
+			{
+				BOOL bMatches = (Misc::Find(select.szWords, 
+											pTCI->GetName(FALSE), 
+											select.bCaseSensitive, 
+											select.bWholeWord) != -1);
+
+				if (bMatches && SelectTask(pTCI->GetTaskID(), TRUE))
+					return TRUE;
+			}
 
 			nFrom = Misc::NextIndexT(aTasks, nFrom, bForwards);
 		}
 		while (nFrom != -1);
-	}
-
-	return FALSE;
-}
-
-BOOL CTaskCalendarCtrl::SelectTask(const CTaskCalItemArray& aTasks, int nFrom, const IUISELECTTASK& select)
-{
-	if ((nFrom < 0) || (nFrom > Misc::LastIndexT(aTasks)))
-		return FALSE;
-
-	const TASKCALITEM* pTCI = aTasks[nFrom];
-	CString sTitle = pTCI->GetName(FALSE);
-
-	if (Misc::Find(select.szWords, sTitle, select.bCaseSensitive, select.bWholeWord) != -1)
-	{
-		if (SelectTask(pTCI->GetTaskID(), TRUE))
-			return TRUE;
-
-		ASSERT(IsHiddenTask(pTCI, TRUE));
 	}
 
 	return FALSE;

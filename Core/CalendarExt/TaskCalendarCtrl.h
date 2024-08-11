@@ -215,7 +215,6 @@ protected:
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 	BOOL ClearSelectedCustomDate();
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
-	BOOL SelectTask(const CTaskCalItemArray& aTasks, int nFrom, const IUISELECTTASK& select);
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;

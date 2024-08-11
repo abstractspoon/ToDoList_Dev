@@ -956,7 +956,6 @@ int CTaskCalItemArray::GetNextItem(DWORD dwTaskID, BOOL bForwards) const
 CSortedTaskCalItemArray::CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks)
 	:
 	m_mapTasks(mapTasks),
-	m_bNeedsRebuild(TRUE),
 	m_bNeedsResort(TRUE),
 	m_nSortBy(TDCA_NONE),
 	m_bSortAscending(TRUE)
@@ -965,7 +964,8 @@ CSortedTaskCalItemArray::CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks
 
 void CSortedTaskCalItemArray::SetNeedsRebuild()
 {
-	m_bNeedsRebuild = TRUE;
+	RemoveAll();
+	m_bNeedsResort = TRUE;
 }
 
 void CSortedTaskCalItemArray::SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending)
@@ -977,9 +977,8 @@ void CSortedTaskCalItemArray::SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAs
 
 const CTaskCalItemArray& CSortedTaskCalItemArray::GetTasks()
 {
-	if (m_bNeedsRebuild)
+	if (GetSize() == 0)
 	{
-		RemoveAll();
 		SetSize(m_mapTasks.GetCount());
 
 		POSITION pos = m_mapTasks.GetStartPosition();
@@ -990,17 +989,14 @@ const CTaskCalItemArray& CSortedTaskCalItemArray::GetTasks()
 			TASKCALITEM* pTCI = m_mapTasks.GetNextTask(pos);
 			SetAt(nTask++, pTCI);
 		}
-
-		SortItems(m_nSortBy, m_bSortAscending);
 	}
-	else if (m_bNeedsResort)
+
+	if (m_bNeedsResort)
 	{
 		SortItems(m_nSortBy, m_bSortAscending);
+		m_bNeedsResort = FALSE;
 	}
-
-	m_bNeedsRebuild = FALSE;
-	m_bNeedsResort = FALSE;
-
+	
 	return *this;
 }
 

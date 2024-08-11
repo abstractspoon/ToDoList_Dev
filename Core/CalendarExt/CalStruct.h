@@ -250,8 +250,7 @@ protected:
 	const CTaskCalItemMap& m_mapTasks;
 
 	TDC_ATTRIBUTE m_nSortBy;
-	BOOL m_bSortAscending;
-	BOOL m_bNeedsRebuild, m_bNeedsResort;
+	BOOL m_bNeedsResort, m_bSortAscending;
 };
 
 /////////////////////////////////////////////////////////////////////////////
