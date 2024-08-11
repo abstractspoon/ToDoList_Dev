@@ -1347,9 +1347,9 @@ IDD_PREFTASKCALC_PAGE DIALOG DISCARDABLE  0, 0, 400, 548
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    CONTROL         "Include 'Task References' in calculations",
+    CONTROL         "Include 'Task Reference' values in 'Calculations'",
                     IDC_INCLUDEREFSINCALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,10,143,10
+                    WS_TABSTOP,7,10,393,10
     CONTROL         "Display a task's 'Last Modified' date as the latest of its and all its subtasks' last modified dates",
                     IDC_USELATESTLASTMODIFIED,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,25,392,10
