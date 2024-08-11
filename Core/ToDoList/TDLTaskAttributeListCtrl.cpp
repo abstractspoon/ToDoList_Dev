@@ -922,6 +922,11 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		// Permanently read-only fields
 		return FALSE;
 
+	case TDCA_REMINDER:
+		if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
+			return FALSE;
+		break;
+
 	case TDCA_PERCENT:
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
