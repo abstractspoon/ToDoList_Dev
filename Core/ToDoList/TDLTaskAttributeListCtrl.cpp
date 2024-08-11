@@ -1395,7 +1395,7 @@ BOOL CTDLTaskAttributeListCtrl::RowValueVaries(int nRow) const
 
 BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
 {
-	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && RowValueVaries(nRow))
+	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && RowValueVaries(nRow) && GetButtonRect(nRow, nCol, rButton))
 	{
 		DWORD dwState = GetButtonState(nRow, nCol, bSelected);
 		dwState |= (DFCS_BUTTONCHECK | DFCS_MIXED);
