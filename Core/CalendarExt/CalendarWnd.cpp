@@ -399,6 +399,13 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 			return (m_BigCalendar.CanGetNextTask(pData->dwTaskID, nCmd) != FALSE);
 		break;
 
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		return true;
+
 	case IUI_SETFOCUS:
 		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
 
@@ -430,13 +437,6 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_RESIZEATTRIBCOLUMNS:
 		// not handled
 		break;
-
-	case IUI_SELECTFIRSTTASK:
-	case IUI_SELECTNEXTTASK:
-	case IUI_SELECTNEXTTASKINCLCURRENT:
-	case IUI_SELECTPREVTASK:
-	case IUI_SELECTLASTTASK:
-		return true;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
