@@ -45,6 +45,7 @@ TDCREMINDER::TDCREMINDER()
 
 BOOL TDCREMINDER::Matches(const CFilteredToDoCtrl* pTDCOther, DWORD dwTaskIDOther) const
 {
+	ASSERT(IsValid());
 	ASSERT(pTDCOther && dwTaskIDOther);
 
 	return ((pTDC == pTDCOther) && (dwTaskID == dwTaskIDOther));
@@ -52,31 +53,35 @@ BOOL TDCREMINDER::Matches(const CFilteredToDoCtrl* pTDCOther, DWORD dwTaskIDOthe
 
 CString TDCREMINDER::GetTaskTitle() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
+
 	return (pTDC ? pTDC->GetTaskTitle(dwTaskID) : _T(""));
 }
 
 CString TDCREMINDER::GetParentTitle() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
+
 	return (pTDC ? pTDC->GetParentTaskTitle(dwTaskID) : _T(""));
 }
 
 CString TDCREMINDER::GetTaskPath() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
+
 	return (pTDC ? pTDC->GetTaskPath(dwTaskID) : _T(""));
 }
 
 CString TDCREMINDER::GetTaskListName() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
+
 	return (pTDC ? pTDC->GetFriendlyProjectName() : _T(""));
 }
 
 CString TDCREMINDER::GetTaskComments() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
 
 	if (pTDC)
 	{
@@ -92,22 +97,29 @@ CString TDCREMINDER::GetTaskComments() const
 	return _T("");
 }
 
-int TDCREMINDER::HasIcon() const
+BOOL TDCREMINDER::HasIcon() const
 {
-	return (pTDC->GetTaskIconIndex(dwTaskID) != -1);
+	ASSERT(IsValid());
+
+	return (pTDC && pTDC->GetTaskIconIndex(dwTaskID) != -1);
 }
 
 void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rIcon) const
 {
-	int nImage = pTDC->GetTaskIconIndex(dwTaskID);
+	ASSERT(IsValid());
 
-	if (nImage != -1)
-		pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
+	if (pTDC)
+	{
+		int nImage = pTDC->GetTaskIconIndex(dwTaskID);
+
+		if (nImage != -1)
+			pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
+	}
 }
 
 CString TDCREMINDER::FormatNotification() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
 
 	COleDateTime date;
 
@@ -176,25 +188,30 @@ CString TDCREMINDER::FormatNotification() const
 	return sNotify;
 }
 
+BOOL TDCREMINDER::IsValid() const
+{
+	return (pTDC && TaskExists());
+}
+
 BOOL TDCREMINDER::IsTaskRecurring() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
 
-	return (pTDC->IsTaskRecurring(dwTaskID) && pTDC->CanTaskRecur(dwTaskID));
+	return (pTDC && pTDC->IsTaskRecurring(dwTaskID) && pTDC->CanTaskRecur(dwTaskID));
 }
 
 BOOL TDCREMINDER::IsTaskDone() const
 {
-	ASSERT(pTDC);
+	ASSERT(IsValid());
 
-	return pTDC->IsTaskGoodAsDone(dwTaskID);
+	return (pTDC && pTDC->IsTaskGoodAsDone(dwTaskID));
 }
 
 BOOL TDCREMINDER::TaskExists() const
 {
 	ASSERT(pTDC);
 
-	return pTDC->HasTask(dwTaskID);
+	return (pTDC && pTDC->HasTask(dwTaskID));
 }
 
 void TDCREMINDER::Save(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -238,10 +255,9 @@ void TDCREMINDER::Load(const IPreferences* pPrefs, LPCTSTR szKey)
 
 BOOL TDCREMINDER::GetRelativeToDate(COleDateTime& date) const
 {
-	ASSERT(pTDC);
-	ASSERT(dwTaskID);
+	ASSERT(IsValid());
 
-	if (!bRelative)
+	if (!pTDC || !bRelative)
 		return FALSE;
 
 	date = pTDC->GetTaskDate(dwTaskID, (nRelativeFromWhen == TDCR_DUEDATE) ? TDCD_DUE : TDCD_START);
@@ -250,6 +266,8 @@ BOOL TDCREMINDER::GetRelativeToDate(COleDateTime& date) const
 
 BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 {
+	ASSERT(IsValid());
+
 	date = dtAbsolute;
 	
 	if (bRelative && GetRelativeToDate(date))

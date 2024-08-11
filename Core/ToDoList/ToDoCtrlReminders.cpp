@@ -102,9 +102,12 @@ void CToDoCtrlReminders::RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC)
 	SaveAndRemoveReminders(pTDC);
 }
 
-void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
+BOOL CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 {
-	ASSERT (m_pWndNotify);
+	if (!rem.IsValid() || rem.IsTaskDone())
+		return FALSE;
+
+	ASSERT(m_pWndNotify);
 
 	int nExist = FindReminder(rem, TRUE);
 	TDCREMINDER temp = rem; // can't add a const reminder to list
@@ -124,6 +127,8 @@ void CToDoCtrlReminders::SetReminder(const TDCREMINDER& rem, BOOL bCheckNow)
 
 	if (bCheckNow)
 		OnTimer(1);
+
+	return TRUE;
 }
 
 void CToDoCtrlReminders::StartTimer()

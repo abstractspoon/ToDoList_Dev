@@ -33,6 +33,7 @@ struct TDCREMINDER
 
 	CString FormatNotification() const;
 
+	BOOL IsValid() const;
 	BOOL IsTaskRecurring() const;
 	BOOL IsTaskDone() const;
 	BOOL TaskExists() const;
