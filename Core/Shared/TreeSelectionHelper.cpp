@@ -646,7 +646,7 @@ BOOL CTreeSelectionHelper::ContainsAllItems() const
 
 BOOL CTreeSelectionHelper::HasNextSelection() const
 {
-	return (m_nCurSelection < m_aHistory.GetSize() - 1);
+	return (m_nCurSelection < Misc::LastIndexT(m_aHistory));
 }
 
 int CTreeSelectionHelper::GetNextSelectionIDs(CDWordArray& aIDs) const
