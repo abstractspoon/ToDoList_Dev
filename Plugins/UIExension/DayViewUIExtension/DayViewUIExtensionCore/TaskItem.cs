@@ -30,6 +30,41 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
+	public class SortedTaskItems
+	{
+		private List<TaskItem> m_SortedItemList;
+		private TaskItems m_TaskItems; // read-only
+		private bool m_NeedsResort = true;
+
+		// ------------------
+
+		public SortedTaskItems(TaskItems items)
+		{
+			m_SortedItemList = new List<TaskItem>();
+		}
+
+		public IList<TaskItem> TaskItems
+		{
+			get
+			{
+				// TODO
+
+				return m_SortedItemList;
+			}
+		}
+
+		public void SetNeedsRebuild()
+		{
+			m_SortedItemList.Clear();
+		}
+		public void SetNeedsResort()
+		{
+			m_NeedsResort = true;
+		}
+	}
+
+	// ---------------------------------------------------------------
+
 	public class TDLAppointmentView : Calendar.AppointmentView
 	{
 		public TDLAppointmentView(Calendar.Appointment appt) : base(appt)

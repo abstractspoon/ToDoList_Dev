@@ -49,6 +49,7 @@ namespace DayViewUIExtension
 		private bool m_ShowFutureOcurrences = true;
 
 		private TaskItems m_TaskItems;
+		private SortedTaskItems m_SortedTaskItems;
 		private TimeBlocks m_TimeBlocks;
 
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
@@ -90,6 +91,7 @@ namespace DayViewUIExtension
 			m_TaskRecurrences = taskRecurrences;
 
 			m_TaskItems = new TaskItems();
+			m_SortedTaskItems = new SortedTaskItems(m_TaskItems);
 			m_TimeBlocks = new TimeBlocks();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
