@@ -48,16 +48,18 @@ public:
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
 	BOOL EnsureSelectionVisible();
 
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
+	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
+
 	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
+	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
+	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 
 	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	BOOL GetSelectedTaskCustomDate(const CString& sCustAttribID, COleDateTime& date) const;
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 	DWORD GetSelectedTaskID() const;
-
-	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
-	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 
 	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
