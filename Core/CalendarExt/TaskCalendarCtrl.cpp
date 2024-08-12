@@ -1682,11 +1682,7 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 		TASKCALITEM* pTCI = m_mapData.GetNextTask(pos);
 		ASSERT(pTCI);
 
-		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-			continue;
-
-		// ignore completed tasks as required
-		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+		if (IsHiddenTask(pTCI, FALSE))
 			continue;
 
 		POSITION posDate = pTCI->Dates().Custom().GetStartPosition();
