@@ -1901,20 +1901,6 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-DWORD CTaskCalendarCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
-{
-	// Lock screen updates in case we have to scroll to find this task
-
-
-	// TODO
-	return 0L;
-}
-
-BOOL CTaskCalendarCtrl::CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
-{
-	return HasTask(dwTaskID, TRUE);
-}
-
 // External method
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
 {
@@ -2464,7 +2450,61 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 	return TRUE;
 }
 
-BOOL CTaskCalendarCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+DWORD CTaskCalendarCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
+{
+	BOOL bForwards = TRUE, bWantTopLevel = FALSE;
+
+	switch (nCmd)
+	{
+	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
+		break;
+
+	case IUI_GETNEXTTOPLEVELTASK:
+		bWantTopLevel = TRUE;
+		break;
+
+	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
+		bForwards = FALSE;
+		break;
+
+	case IUI_GETPREVTOPLEVELTASK:
+		bForwards = FALSE;
+		bWantTopLevel = TRUE;
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
+	int nFrom = aTasks.GetNextItem(GetSelectedTaskID(), bForwards);
+
+	while (nFrom != -1)
+	{
+		const TASKCALITEM* pTCI = aTasks[nFrom];
+		ASSERT(pTCI);
+
+		if (!IsHiddenTask(pTCI, TRUE))
+		{
+			if (!bWantTopLevel || pTCI->bTopLevel)
+				return pTCI->GetTaskID();
+		}
+
+		nFrom = Misc::NextIndexT(aTasks, nFrom, bForwards);
+	}
+
+	// else
+	return 0L;
+}
+
+BOOL CTaskCalendarCtrl::CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
+{
+	return HasTask(dwTaskID, TRUE);
+}
+
+BOOL CTaskCalendarCtrl::SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd)
 {
 	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
 

@@ -231,7 +231,6 @@ public:
 
 protected:
 	static int CompareItems(const void* pV1, const void* pV2);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

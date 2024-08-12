@@ -462,7 +462,7 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
 		if (pData)
-			return (m_BigCalendar.SelectTask(nCmd, pData->select) != FALSE);
+			return (m_BigCalendar.SelectTask(pData->select, nCmd) != FALSE);
 		break;
 
 	case IUI_SORT:
