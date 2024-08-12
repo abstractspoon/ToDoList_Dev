@@ -9,7 +9,15 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "taskfile.h"
+
+//////////////////////////////////////////////////////////////////////
+
+class CDWordSet;
+
+//////////////////////////////////////////////////////////////////////
 
 class CTaskClipboard  
 {
@@ -26,8 +34,10 @@ public:
 	static BOOL HasAttributeTask();
 
 	static BOOL GetTasks(const CString& sRefTasklistID, CTaskFile& tasks);
-	static const CDWordArray& SelectedTaskIDs() { return s_aSelTaskIDs; }
+	static BOOL GetTasks(const CString& sRefTasklistID, CTaskFile& tasks, CDWordArray& aSelTaskIDs);
+	
 	static TDC_COLUMN GetColumnTasks(CTaskFile& tasks);
+	static TDC_COLUMN GetColumnID();
 	static HTASKITEM GetAttributeTask(CTaskFile& task);
 
 protected:
@@ -40,7 +50,7 @@ protected:
 
 	static CString GetTasklistID();
 	static HWND GetMainWnd();
-	static void RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings);
+	static void RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings, CDWordSet& mapSelTaskIDs);
 };
 
 #endif // !defined(AFX_TASKCLIPBOARD_H__7724479D_9E23_42B2_816F_40FE2B24B9C2__INCLUDED_)

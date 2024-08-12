@@ -5702,7 +5702,7 @@ BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, 
 
 				// fix up the dependencies of the copied tasks
 				if (bDropRefs)
-					PrepareTaskIDsForPasteAsRef(tasks);
+					PrepareTasksForPasteAsRef(tasks);
 				else
 					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
 
@@ -5778,11 +5778,23 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BO
 	PrepareTasksForPaste(tasks, tasks.GetFirstTask(NULL), bResetCreation, mapID, TRUE);
 }
 
-void CToDoCtrl::PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const
+void CToDoCtrl::PrepareTasksForPasteAsRef(CTaskFile& tasks, const CDWordArray& aSelTaskIDs) const
 {
 	if (tasks.GetTaskCount() == 0)
 		return; // nothing to do
 
+	// remove tasks not originally selected
+	if (aSelTaskIDs.GetSize());
+	{
+		RemoveNonSelectedTasks(aSelTaskIDs, tasks, tasks.GetFirstTask());
+
+		if (tasks.GetTaskCount() == 0)
+			return; // nothing to do
+	}
+
+	// pre-process the tasks to add themselves
+	// as a reference, and then to clear the task ID
+	// so that it gets a newly allocated one
 	CMapID2ID mapID;
 	mapID.InitHashTable(tasks.GetTaskCount());
 
@@ -6438,11 +6450,10 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	CTaskFile tasks;
 
 	nFromColID = CTaskClipboard::GetColumnTasks(tasks);
-
-	if (nFromColID == TDCC_NONE)
-		return FALSE;
-
 	nNumFrom = tasks.GetTaskCount();
+
+	if ((nFromColID == TDCC_NONE) || (nNumFrom == 0))
+		return FALSE;
 
 	// Check column compatibility
 	BOOL bSameTasklist = CTaskClipboard::TasklistIDMatches(GetClipboardID());
@@ -6456,24 +6467,26 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	if (bSelectedTasksOnly)
 		return CanEditSelectedTask(nToAttribID);
 
-	// For 'All' check there is at least one editable task
-	CDWordArray aTaskIDs;
+	// Check we have at least one editable task
+	CDWordArray aToTaskIDs;
 
 	if (nNumFrom == 1)
-		GetColumnTaskIDs(aTaskIDs); // All
+		GetColumnTaskIDs(aToTaskIDs); // All
 	else
-		GetColumnTaskIDs(aTaskIDs, 0, (nNumFrom - 1));
+		GetColumnTaskIDs(aToTaskIDs, 0, (nNumFrom - 1));
 
-	int nID = aTaskIDs.GetSize();
+	int nID = aToTaskIDs.GetSize();
 
 	while (nID--)
 	{
-		if (CanEditTask(aTaskIDs[nID], nToAttribID))
+		if (CanEditTask(aToTaskIDs[nID], nToAttribID))
 			return TRUE;
 	}
 	
 	// else
 	nNumFrom = 0;
+	nFromColID = TDCC_NONE;
+
 	return FALSE;
 }
 
@@ -6500,40 +6513,39 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	// If only a single task was copied then we paste that task's value
 	// to ALL target tasks else we copy each task's value to just one
 	// target task
-	HTASKITEM hTask = tasks.GetFirstTask();
-	int nNumTasks = tasks.GetTaskCount();
-
-	CDWordArray aTaskIDs;
+	int nNumFrom = tasks.GetTaskCount();
+	CDWordArray aToTaskIDs;
 
 	if (bSelectedTasksOnly)
 	{
-		GetSelectedTaskIDs(aTaskIDs, TRUE);
+		GetSelectedTaskIDs(aToTaskIDs, TRUE);
 	}
-	else if (nNumTasks == 1)
+	else if (nNumFrom == 1)
 	{
 		// Get all target task IDs
-		GetColumnTaskIDs(aTaskIDs);
+		GetColumnTaskIDs(aToTaskIDs);
 	}
 	else
 	{
 		// Get only as many target task IDs as there are copied task IDs
-		GetColumnTaskIDs(aTaskIDs, 0, (nNumTasks - 1));
+		GetColumnTaskIDs(aToTaskIDs, 0, (nNumFrom - 1));
 	}
 
 	// Do the merge
 	CDWordArray aModTaskIDs;
 	TODOITEM tdiFrom, tdiTo;
 
-	int nNumIDs = aTaskIDs.GetSize(), nID = 0;
+	int nToNumIDs = aToTaskIDs.GetSize(), nID = 0;
+	HTASKITEM hTask = tasks.GetFirstTask();
 
-	if (nNumTasks == 1)
+	if (nNumFrom == 1)
 	{
 		// Paste calculated attributes
 		if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE))
 		{
-			for (; nID < nNumIDs; nID++)
+			for (; nID < nToNumIDs; nID++)
 			{
-				DWORD dwToTaskID = aTaskIDs[nID];
+				DWORD dwToTaskID = aToTaskIDs[nID];
 
 				if (CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
 				{
@@ -6544,9 +6556,9 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	}
 	else
 	{
-		while (hTask && (nID < nNumIDs))
+		while (hTask && (nID < nToNumIDs))
 		{
-			DWORD dwToTaskID = aTaskIDs[nID];
+			DWORD dwToTaskID = aToTaskIDs[nID];
 
 			// Paste calculated attributes
 			if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
@@ -6699,10 +6711,11 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	}
 
 	// Check we've got valid tasks to copy from
-	CTaskFile tasks;
 	CString sClipID = GetClipboardID();
+	CTaskFile tasks;
+	CDWordArray aSelTaskIDs;
 
-	if (!CTaskClipboard::GetTasks(sClipID, tasks))
+	if (!CTaskClipboard::GetTasks(sClipID, tasks, aSelTaskIDs))
 		return FALSE;
 
 	// Figure out where to paste to
@@ -6731,18 +6744,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	
 	if (bAsRef)
 	{
-		// remove tasks not originally selected
-		ASSERT(CTaskClipboard::SelectedTaskIDs().GetSize());
-
-		CDWordSet mapSelTaskIDs;
-		mapSelTaskIDs.CopyFrom(CTaskClipboard::SelectedTaskIDs());
-
-		RemoveNonSelectedTasks(mapSelTaskIDs, tasks, tasks.GetFirstTask());
-		
-		// pre-process the tasks to add themselves
-		// as a reference, and then to clear the task ID
-		// so that it gets a newly allocated one
-		PrepareTaskIDsForPasteAsRef(tasks);
+		PrepareTasksForPasteAsRef(tasks, aSelTaskIDs);
 	}
 	else
 	{

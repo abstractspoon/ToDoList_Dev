@@ -95,24 +95,30 @@ BOOL CTaskClipboard::HasTasks()
 	return (CClipboard::HasFormat(GetTasksClipFmt()) &&	!HasColumnTasks());
 }
 
+TDC_COLUMN CTaskClipboard::GetColumnID()
+{
+	if (!IsEmpty())
+	{
+		CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
+
+		if (!sColID.IsEmpty())
+			return (TDC_COLUMN)_ttoi(sColID);
+	}
+
+	// All else
+	return TDCC_NONE;
+}
+
 BOOL CTaskClipboard::HasColumnTasks()
 {
-	TDC_COLUMN nUnused;
-	return HasColumnTasks(nUnused);
+	return (GetColumnID() != TDCC_NONE);
 }
 
 BOOL CTaskClipboard::HasColumnTasks(TDC_COLUMN& nColID)
 {
-	if (IsEmpty())
-		return FALSE;
+	nColID = GetColumnID();
 
-	CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
-
-	if (sColID.IsEmpty())
-		return FALSE;
-	
-	nColID = (TDC_COLUMN)_ttoi(sColID);
-	return TRUE;
+	return (nColID != TDCC_NONE);
 }
 
 BOOL CTaskClipboard::HasAttributeTask()
@@ -120,7 +126,12 @@ BOOL CTaskClipboard::HasAttributeTask()
 	return GetAttributeTask(CTaskFile()) != NULL;
 }
 
-BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
+int CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
+{
+	return GetTasks(sRefTasklistID, tasks, CDWordArray());
+}
+
+BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks, CDWordArray& aSelTaskIDs)
 {
 	ASSERT(!sRefTasklistID.IsEmpty());
 
@@ -138,7 +149,21 @@ BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
 
 	// remove task references if the clip IDs do not match
 	if (!TasklistIDMatches(sRefTasklistID))
-		RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE);
+	{
+		CDWordSet mapSelTaskIDs;
+		mapSelTaskIDs.CopyFrom(aSelTaskIDs);
+
+		RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE, mapSelTaskIDs);
+
+		// Sync returned task IDs
+		int nID = aSelTaskIDs.GetSize();
+
+		while (nID--)
+		{
+			if (!mapSelTaskIDs.Has(aSelTaskIDs[nID]))
+				aSelTaskIDs.RemoveAt(nID);
+		}
+	}
 
 	return TRUE;
 }
@@ -168,7 +193,7 @@ HTASKITEM CTaskClipboard::GetAttributeTask(CTaskFile& task)
 	return tasks.GetFirstTask();
 }
 
-void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings)
+void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings, CDWordSet& mapSelTaskIDs)
 {
 	if (!hTask)
 		return;
@@ -185,20 +210,21 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 			HTASKITEM hNextSibling = tasks.GetNextTask(hSibling);
 
 			// FALSE == don't recurse on siblings
-			RemoveTaskReferences(tasks, hSibling, FALSE);
+			RemoveTaskReferences(tasks, hSibling, FALSE, mapSelTaskIDs);
 			
 			hSibling = hNextSibling;
 		}
 	}
 
 	// delete if reference
-	if (tasks.GetTaskReferenceID(hTask))
+	if (tasks.GetTaskReferenceID(hTask) > 0)
 	{
+		mapSelTaskIDs.Remove(tasks.GetTaskID(hTask));
 		tasks.DeleteTask(hTask);
 	}
 	else // process children
 	{
-		RemoveTaskReferences(tasks, tasks.GetFirstTask(hTask), TRUE);
+		RemoveTaskReferences(tasks, tasks.GetFirstTask(hTask), TRUE, mapSelTaskIDs);
 	}
 }
 

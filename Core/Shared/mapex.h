@@ -268,16 +268,30 @@ public:
 class CDWordSet : public CSet<DWORD>
 {
 public:
+	CDWordSet() {}
+	CDWordSet(const CSet& other) : CSet<DWORD>(other) {}
+	CDWordSet(const CDWordArray& other) : CSet<DWORD>() { CopyFrom(other); }
+	CDWordSet(const DWORD* pOther, int nNumOther) : CSet<DWORD>(pOther, nNumOther) {}
+
 	int CopyFrom(const CDWordArray& other) { return CSet<DWORD>::CopyFrom(other); }
 	int CopyTo(CDWordArray& other) const { return CSet<DWORD>::CopyTo(other); }
 };
 
+// ------------------------------------------------------------------
+
 class CUIntSet : public CSet<UINT>
 {
 public:
+	CUIntSet() {}
+	CUIntSet(const CSet& other) : CSet<UINT>(other) {}
+	CUIntSet(const CUIntArray& other) : CSet<UINT>() { CopyFrom(other); }
+	CUIntSet(const UINT* pOther, int nNumOther) : CSet<UINT>(pOther, nNumOther) {}
+
 	int CopyFrom(const CUIntArray& other) {	return CSet<UINT>::CopyFrom(other); }
 	int CopyTo(CUIntArray& other) const { return CSet<UINT>::CopyTo(other); }
 };
+
+// ------------------------------------------------------------------
 
 class CStringSet : public CSetBase<CString, LPCTSTR>
 {

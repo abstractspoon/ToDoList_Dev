@@ -364,9 +364,7 @@ BOOL CConvertRTFToHTMLDlg::FixupLinks(const CString& sTextComments, CString& sHt
 		{
 			// remove duplicates because CString::Replace will
 			// replace duplicates
-			CStringSet mapUrls;
-			mapUrls.CopyFrom(aLinks);
-
+			CStringSet mapUrls(aLinks);
 			POSITION pos = mapUrls.GetStartPosition();
 
 			while (pos)
