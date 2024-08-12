@@ -6423,6 +6423,7 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 
 	return CTaskClipboard::SetTasks(tasks, 
 									GetClipboardID(), 
+									aTaskIDs,
 									Misc::FormatArray(aValues, '\n', TRUE),
 									nColID);
 }
@@ -6585,8 +6586,8 @@ BOOL CToDoCtrl::CopySelectedTasks() const
 	ClearCopiedItem();
 
 	// copy selected tasks to clipboard
-	TDCGETTASKS filter;
 	CTaskFile tasks;
+	TDCGETTASKS filter;
 
 	if (!GetSelectedTasks(tasks, filter))
 		return FALSE;
@@ -6598,9 +6599,10 @@ BOOL CToDoCtrl::CopySelectedTasks() const
 	VERIFY(TSH().CopySelection(selection, FALSE, TRUE));
 	VERIFY(TSH().GetItemTitles(selection, aTitles));
 
-	return CTaskClipboard::SetTasks(tasks, 
-									GetClipboardID(), 
-									Misc::FormatArray(aTitles, '\n'));
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), aSelTaskIDs, Misc::FormatArray(aTitles, '\n'));
 }
 
 BOOL CToDoCtrl::CopySelectedTask() const
@@ -6730,7 +6732,12 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	if (bAsRef)
 	{
 		// remove tasks not originally selected
-		tasks.RemoveNonSelectedTasks();
+		ASSERT(CTaskClipboard::SelectedTaskIDs().GetSize());
+
+		CDWordSet mapSelTaskIDs;
+		mapSelTaskIDs.CopyFrom(CTaskClipboard::SelectedTaskIDs());
+
+		RemoveNonSelectedTasks(mapSelTaskIDs, tasks, tasks.GetFirstTask());
 		
 		// pre-process the tasks to add themselves
 		// as a reference, and then to clear the task ID
@@ -6793,8 +6800,28 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent, HTREEITEM htiDestAfter, 
-							   TDC_RESETIDS nResetIDs, BOOL bSelectAll)
+BOOL CToDoCtrl::RemoveNonSelectedTasks(const CDWordSet& mapSelTaskIDs, CTaskFile& tasks, HTASKITEM hTask)
+{
+	if (hTask)
+	{
+		// siblings first ie. before we might delete it
+		RemoveNonSelectedTasks(mapSelTaskIDs, tasks, tasks.GetNextTask(hTask)); // RECURSIVE CALL
+
+		if (!mapSelTaskIDs.Has(tasks.GetTaskID(hTask)))
+		{
+			tasks.DeleteTask(hTask); // will delete children
+			return TRUE;
+		}
+
+		// check children
+		RemoveNonSelectedTasks(mapSelTaskIDs, tasks, tasks.GetFirstTask(hTask)); // RECURSIVE CALL
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent, HTREEITEM htiDestAfter,
+								 TDC_RESETIDS nResetIDs, BOOL bSelectAll)
 {
 	if (!htiDestParent)
 		htiDestParent = TVI_ROOT;
@@ -6825,7 +6852,7 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	// restore selection
 	CDWordArray aSelTaskIDs;
 
-	if (bSelectAll && tasks.GetSelectedTaskIDs(aSelTaskIDs))
+	if (bSelectAll && tasks.GetTaskIDs(aSelTaskIDs))
 	{
 		m_taskTree.SelectTasks(aSelTaskIDs);
 	}
@@ -7730,12 +7757,10 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	CHTIList selection;
 	TSH().CopySelection(selection, bRemoveDupeSubtasks, TRUE);
 
-	CDWordSet mapSelTaskIDs;
-
 	// Note: this call can fail if, for instance, the filter is asking
 	// for incomplete tasks and the selected tasks have just been 
 	// marked completed
-	if (AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)) // Mark tasks as selected
+	if (AddTasksToTaskFile(selection, filter, tasks)) // Mark tasks as selected
 	{
 		AddSelectedTaskReferencesToTaskFile(filter, tasks);
 		AddSelectedTaskDependentsToTaskFile(filter, tasks);
@@ -7756,7 +7781,7 @@ void CToDoCtrl::AddSelectedTaskReferencesToTaskFile(const TDCGETTASKS& filter, C
 			TDCGETTASKS filterRefs(filter);
 			filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			VERIFY(AddTasksToTaskFile(lstReferences, filterRefs, tasks, NULL)); // Don't add to mapSelTaskIDs
+			VERIFY(AddTasksToTaskFile(lstReferences, filterRefs, tasks));
 		}
 	}
 }
@@ -7773,20 +7798,17 @@ void CToDoCtrl::AddSelectedTaskDependentsToTaskFile(const TDCGETTASKS& filter, C
 			TDCGETTASKS filterDeps(filter);
 			filterDeps.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			VERIFY(AddTasksToTaskFile(lstDependents, filterDeps, tasks, NULL)); // Don't add to mapSelTaskIDs
+			VERIFY(AddTasksToTaskFile(lstDependents, filterDeps, tasks));
 		}
 	}
 }
 
-int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const
+int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks) const
 {
 	BOOL bWantSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
 	BOOL bWantAllParents = filter.HasFlag(TDCGSTF_ALLPARENTS);
 	BOOL bWantImmediateParent = filter.HasFlag(TDCGSTF_IMMEDIATEPARENT);
 	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
-
-	if (pSelTaskIDs)
-		pSelTaskIDs->RemoveAll();
 
 	POSITION pos = listHTI.GetHeadPosition();
 
@@ -7809,15 +7831,10 @@ int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& fi
 		}
 
 		// does the user want this task's parent(s) ?
-		if ((bWantAllParents || bWantImmediateParent) && bHasParent)
+		if (bHasParent && (bWantAllParents || bWantImmediateParent))
 		{
 			if (AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks))
-			{
 				ASSERT(dwTaskID);
-
-				if (pSelTaskIDs)
-					pSelTaskIDs->Add(dwTaskID);
-			}
 		}
 		else
 		{
@@ -7832,35 +7849,15 @@ int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& fi
 			}
 
 			if (AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID))
-			{
 				ASSERT(dwTaskID);
-
-				if (pSelTaskIDs)
-					pSelTaskIDs->Add(dwTaskID);
-			}
 		}
 	}
 
-	// extra processing to identify the originally selected tasks
-	// in case the user wants to paste as references.
-	if (pSelTaskIDs)
-	{
-		pos = pSelTaskIDs->GetStartPosition();
-
-		while (pos)
-		{
-			DWORD dwSelID = pSelTaskIDs->GetNext(pos);
-			ASSERT(!bResolveReferences || !m_data.IsTaskReference(dwSelID));
-
-			tasks.SelectTask(dwSelID);
-		}
-	}
-
-	return (tasks.GetTaskCount());
+	return tasks.GetTaskCount();
 }
 
-BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, 
-												BOOL bAllParents, BOOL bWantSubtasks) const
+BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter,
+											   BOOL bAllParents, BOOL bWantSubtasks) const
 {
 	// add parents first, recursively if necessarily
 	HTREEITEM htiParent = m_taskTree.GetParentItem(hti);

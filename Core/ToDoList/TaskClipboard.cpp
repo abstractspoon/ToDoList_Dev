@@ -25,10 +25,16 @@ const LPCTSTR DEF_CLIPID		= _T("_emptyID_");
 
 //////////////////////////////////////////////////////////////////////
 
+CDWordArray CTaskClipboard::s_aSelTaskIDs;
+
+//////////////////////////////////////////////////////////////////////
+
 void CTaskClipboard::Reset()
 {
 	if (!IsEmpty())
 		::EmptyClipboard();
+
+	s_aSelTaskIDs.RemoveAll();
 }
 
 BOOL CTaskClipboard::IsEmpty()
@@ -36,7 +42,7 @@ BOOL CTaskClipboard::IsEmpty()
 	return !CClipboard::HasFormat(GetTasklistIDClipFmt());
 }
 
-BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sValues, TDC_COLUMN nColID)
+BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CDWordArray& aSelTaskIDs, const CString& sValues, TDC_COLUMN nColID)
 {
 	// Sanity checks
 	if (!tasks.GetTaskCount() || sID.IsEmpty() || (sValues.IsEmpty() && (nColID == TDCC_NONE)))
@@ -55,6 +61,8 @@ BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const 
 			cb.SetText(Misc::ToUpper(sID), GetTasklistIDClipFmt()) &&
 			cb.SetText(sValues))
 		{
+			s_aSelTaskIDs.Copy(aSelTaskIDs);
+
 			// Optional column identifier
 			if (nColID != TDCC_NONE)
 				return cb.SetText(Misc::Format((int)nColID), GetColumnIDClipFmt());
@@ -80,7 +88,6 @@ BOOL CTaskClipboard::TasklistIDMatches(const CString& sRefTasklistID)
 		FileMisc::LogText(_T("CTaskClipboard::ClipIDMatches(%s, %s) = %d"), sClipID, sRefTasklistID, bMatches);
 	
 	return bMatches;
-//	return (!sRefTasklistID.IsEmpty() && (sRefTasklistID.CompareNoCase(GetTasklistID()) == 0));
 }
 
 BOOL CTaskClipboard::HasTasks()

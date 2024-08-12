@@ -412,9 +412,13 @@ BOOL CXmlItem::SetName(const CString& sName)
 	return TRUE;
 }
 
-void CXmlItem::ClearValue()
+BOOL CXmlItem::ClearValue()
 {
+	if (m_sValue.IsEmpty())
+		return FALSE;
+
 	m_sValue.Empty();
+	return TRUE;
 }
 
 void CXmlItem::SetValue(const CString& sValue)

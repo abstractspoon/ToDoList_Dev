@@ -18,7 +18,7 @@ public:
 	static BOOL IsEmpty();
 	static BOOL TasklistIDMatches(const CString& sRefTasklistID);
 
-	static BOOL SetTasks(const CTaskFile& tasks, const CString& sRefTasklistID, const CString& sValues, TDC_COLUMN nColID = TDCC_NONE);
+	static BOOL SetTasks(const CTaskFile& tasks, const CString& sRefTasklistID, const CDWordArray& aSelTaskIDs, const CString& sValues, TDC_COLUMN nColID = TDCC_NONE);
 
 	static BOOL HasTasks();
 	static BOOL HasColumnTasks();
@@ -26,8 +26,12 @@ public:
 	static BOOL HasAttributeTask();
 
 	static BOOL GetTasks(const CString& sRefTasklistID, CTaskFile& tasks);
+	static const CDWordArray& SelectedTaskIDs() { return s_aSelTaskIDs; }
 	static TDC_COLUMN GetColumnTasks(CTaskFile& tasks);
 	static HTASKITEM GetAttributeTask(CTaskFile& task);
+
+protected:
+	static CDWordArray s_aSelTaskIDs;
 
 protected:
 	static UINT GetTasksClipFmt();
