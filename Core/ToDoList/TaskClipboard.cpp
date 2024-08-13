@@ -147,9 +147,9 @@ BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks, C
 	if (!tasks.LoadContent(sXML) || !tasks.GetTaskCount())
 		return FALSE;
 
-	// remove task references if the clip IDs do not match
 	aSelTaskIDs.Copy(s_aSelTaskIDs);
 
+	// remove task references if the clip IDs do not match
 	if (!TasklistIDMatches(sRefTasklistID))
 	{
 		CDWordSet mapSelTaskIDs;
