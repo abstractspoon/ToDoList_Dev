@@ -148,6 +148,8 @@ BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks, C
 		return FALSE;
 
 	// remove task references if the clip IDs do not match
+	aSelTaskIDs.Copy(s_aSelTaskIDs);
+
 	if (!TasklistIDMatches(sRefTasklistID))
 	{
 		CDWordSet mapSelTaskIDs;
@@ -198,8 +200,10 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 	if (!hTask)
 		return;
 
-	// handle next sibling first in case we want to delete hTask
-	// WITHOUT RECURSION
+	// process children first before their parent is potentially removed
+	RemoveTaskReferences(tasks, tasks.GetFirstTask(hTask), TRUE, mapSelTaskIDs);
+
+	// Handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
 	{
 		HTASKITEM hSibling = tasks.GetNextTask(hTask);
@@ -221,10 +225,6 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 	{
 		mapSelTaskIDs.Remove(tasks.GetTaskID(hTask));
 		tasks.DeleteTask(hTask);
-	}
-	else // process children
-	{
-		RemoveTaskReferences(tasks, tasks.GetFirstTask(hTask), TRUE, mapSelTaskIDs);
 	}
 }
 
