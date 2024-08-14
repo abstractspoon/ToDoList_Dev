@@ -5687,6 +5687,11 @@ BOOL CTDLTaskCtrlBase::SelectionHasDone() const
 	SELECTIONHAS_1ARG(AnyTaskHasDate, TDCD_DONE);
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked) const
+{
+	SELECTIONHAS_1ARG(AnyTaskIsUnlocked, bTreatRefsAsUnlocked);
+}
+
 BOOL CTDLTaskCtrlBase::SelectionHasLocked(BOOL bTreatRefsAsUnlocked) const
 {
 	SELECTIONHAS_1ARG(AnyTaskIsLocked, bTreatRefsAsUnlocked);

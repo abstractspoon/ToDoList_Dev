@@ -429,6 +429,7 @@ public:
 	BOOL AnyTaskIsParent(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
 
 	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;

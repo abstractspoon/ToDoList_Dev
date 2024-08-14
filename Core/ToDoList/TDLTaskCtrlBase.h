@@ -147,6 +147,7 @@ public:
 	BOOL SelectionHasRecurring() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
 	BOOL SelectionHasIcon() const;
+	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasParents() const;

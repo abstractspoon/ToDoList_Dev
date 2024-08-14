@@ -718,7 +718,7 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 					break;
 
 				default:
-					if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+					if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
 						sAppCursor = _T("Locked");
 					break;
 				}
@@ -901,7 +901,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+	if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
 	{
 		switch (nAttribID)
 		{
@@ -3013,7 +3013,7 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(TDC_ATTRIBUTE nAtt
 {
 	ASSERT(m_pAttributeList->m_aSelectedTaskIDs.GetSize());
 	ASSERT(!m_pAttributeList->m_data.HasStyle(TDCS_READONLY));
-	ASSERT(!m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs));
+	ASSERT(m_pAttributeList->m_multitasker.AnyTaskIsUnlocked(m_pAttributeList->m_aSelectedTaskIDs));
 
 	switch (nAttribID)
 	{
@@ -3050,7 +3050,7 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& poin
 	if (m_pAttributeList->m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	if (m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs))
+	if (!m_pAttributeList->m_multitasker.AnyTaskIsUnlocked(m_pAttributeList->m_aSelectedTaskIDs))
 		return FALSE;
 
 	nRow = m_pAttributeList->HitTest(point);

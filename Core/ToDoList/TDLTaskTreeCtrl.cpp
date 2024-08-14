@@ -1472,7 +1472,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
 							(htiLastHandledLBtnDown == NULL) &&
-							!SelectionHasLocked(FALSE, FALSE))
+							!SelectionHasLocked(FALSE))
 						{
 							BeginLabelEditTimer();
 						}
