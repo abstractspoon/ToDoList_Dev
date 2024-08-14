@@ -5643,7 +5643,7 @@ BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, 
 			CDWordArray aSelTaskIDs;
 			DWORD dwUnused = 0;
 
-			m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE);
+			m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE, TRUE); // ordered
 
 			if (m_data.MoveTasks(aSelTaskIDs, dwDestParentID, dwDestPrevSiblingID))
 			{
@@ -5988,7 +5988,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 	// because the subtasks will be moved with their parents
 	CDWordArray aSelTaskIDs;
 	DWORD dwUnused;
-	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE);
+	m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, dwUnused, TRUE, TRUE); // ordered
 
 	// Move the associated tree items
 	CLockUpdates lu(*this);
@@ -6304,7 +6304,7 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 	int nNumIDs = 0;
 
 	if (bSelectedTasksOnly)
-		nNumIDs = GetSelectedTaskIDs(aTaskIDs, TRUE);
+		nNumIDs = GetSelectedTaskIDs(aTaskIDs, TRUE, TRUE); // ordered
 	else
 		nNumIDs = GetColumnTaskIDs(aTaskIDs);
 
@@ -6419,7 +6419,7 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 
 	if (bSelectedTasksOnly)
 	{
-		GetSelectedTaskIDs(aTaskIDs, TRUE);
+		GetSelectedTaskIDs(aTaskIDs, TRUE, TRUE); // ordered
 	}
 	else if (nNumTasks == 1)
 	{
@@ -7836,14 +7836,14 @@ BOOL CToDoCtrl::RestoreTreeSelection(const TDCSELECTIONCACHE& cache)
 	return FALSE;
 }
 
-int CToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered) const
 {
-	return m_taskTree.GetSelectedTaskIDs(aTaskIDs, bTrue);
+	return m_taskTree.GetSelectedTaskIDs(aTaskIDs, bTrue, bOrdered);
 }
 
-int CToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
+int CToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered) const
 {
-	return m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
+	return m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes, bOrdered);
 }
 
 int CToDoCtrl::GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const

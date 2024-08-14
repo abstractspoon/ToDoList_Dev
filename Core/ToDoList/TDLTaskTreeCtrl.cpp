@@ -2135,7 +2135,7 @@ BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 
 int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
 {
-	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID, FALSE) > 0)
+	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID, FALSE, TRUE) > 0) // ordered
 	{
 		cache.dwFirstVisibleTaskID = GetTaskID(m_tcTasks.GetFirstVisibleItem());
  
@@ -2222,10 +2222,10 @@ BOOL CTDLTaskTreeCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 	return TSH().HasItem(dwTaskID);
 }
 
-int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered) const
 {
 	DWORD dwFocusID;
-	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID, FALSE);
+	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID, FALSE, bOrdered);
 
 	// extra processing
 	if (nNumIDs && bTrue)
@@ -2234,7 +2234,7 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) cons
 	return nNumIDs;
 }
 
-int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
+int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered) const
 {
 	aTaskIDs.RemoveAll();
 	dwFocusedTaskID = 0;
@@ -2244,7 +2244,7 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 		// get selected tasks ordered with/out duplicate subtasks
 		CHTIList selection;
 
-		TSH().CopySelection(selection, bRemoveChildDupes, TRUE);
+		TSH().CopySelection(selection, bRemoveChildDupes, bOrdered);
 		TSH().GetItemData(selection, aTaskIDs);
 		
 		// focused item

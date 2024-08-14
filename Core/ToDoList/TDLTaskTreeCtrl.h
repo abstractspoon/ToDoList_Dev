@@ -73,8 +73,8 @@ public:
 
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bSingly = FALSE) const;
 	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered = FALSE) const;
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL RestorePreviousSelection(BOOL bRedraw);

@@ -9482,7 +9482,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 	CDWordArray aIDs;
 	DWORD dwUnused;
 	
-	if (tdc.GetSelectedTaskIDs(aIDs, dwUnused, FALSE))
+	if (tdc.GetSelectedTaskIDs(aIDs, dwUnused, FALSE, TRUE)) // ordered
 		args.sTaskIDs = Misc::FormatArray(aIDs, _T("|"));
 	
 	CStringArray aAllocTo;

@@ -111,7 +111,7 @@ public:
 	virtual int GetItemCount() const = 0;
 	virtual int GetVisibleItemCount() const = 0;
 	virtual int GetSelectedCount() const = 0;
- 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const = 0;
+ 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const = 0;
 	virtual DWORD GetSelectedTaskID() const = 0;
 	virtual BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const = 0;
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs) = 0;

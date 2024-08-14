@@ -1961,7 +1961,7 @@ DWORD CTDLTaskListCtrl::GetTrueTaskID(int nItem) const
 	return m_data.GetTrueTaskID(dwTaskID); 
 }
 
-int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL /*bOrdered*/) const
 {
 	DWORD dwFocusID;
 	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID);
