@@ -859,14 +859,13 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				}
 			}
 
-			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			if ((nClickCol != TDCC_NONE) && SelectionHasUnlocked())
 			{
 				// make sure attribute pane is synced
 				SyncColumnSelectionToTasks();
 
 				// forward the click
 				NotifyParentOfColumnEditClick(nClickCol, dwTaskID);
-
 				return TRUE;
 			}
 		}
@@ -1418,12 +1417,12 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					else if (nHitFlags & TVHT_ONITEMICON)
 					{
-						if (!m_bReadOnly && !SelectionHasLocked(FALSE, TRUE))
-						{
+// 						if (!m_bReadOnly && SelectionHasUnlocked(TRUE))
+// 						{
 							// save item handle so we don't re-handle in LButtonUp handler
 							m_htiLastHandledLBtnDown = htiHit;
 							bColClick = TRUE;
-						}
+// 						}
 					}
 					else
 					{
@@ -1472,7 +1471,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
 							(htiLastHandledLBtnDown == NULL) &&
-							!SelectionHasLocked(FALSE))
+							!SelectionHasLocked())
 						{
 							BeginLabelEditTimer();
 						}
@@ -1896,7 +1895,7 @@ BOOL CTDLTaskTreeCtrl::IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const
 	case TDCM_NONDRAG:
 		{
 			// Prevent moving locked tasks unless references
-			if (SelectionHasLocked(FALSE, TRUE))
+			if (SelectionHasLocked(TRUE))
 				return FALSE;
 
 			// Prevent moving subtasks of locked parent unless parent is reference
@@ -1971,50 +1970,6 @@ DD_DROPEFFECT CTDLTaskTreeCtrl::GetSelectedTaskDropEffect(DWORD dwTargetID, BOOL
 		nEffect = DD_DROPEFFECT_NONE;
 	
 	return nEffect;
-}
-
-BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked) const
-{
-	BOOL bLocked = CTDLTaskCtrlBase::SelectionHasLocked(bTreatRefsAsUnlocked);
-
-	if (bLocked || !bCheckChildren)
-		return bLocked;
-
-	// Check children of selection
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		if (TaskHasLockedSubtasks(dwTaskID, bTreatRefsAsUnlocked))
-			return TRUE;
-	}
-
-	return FALSE; // All subtasks were unlocked
-}
-
-BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
-{
-	const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-
-	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
-	{
-		DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
-
-		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
-		{
-			// References can only contain other references
-			// so no need to check children
-			continue;
-		}
-		
-		// Check this task and its children
-		if (m_data.IsTaskLocked(dwSubtaskID) || TaskHasLockedSubtasks(dwSubtaskID, bTreatRefsAsUnlocked))
-			return TRUE;
-	}
-
-	return FALSE; // All subtasks were unlocked
 }
 
 BOOL CTDLTaskTreeCtrl::CanSelectTasksInHistory(BOOL bForward) const 

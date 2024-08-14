@@ -1616,11 +1616,10 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				}
 			}
 
-			if ((nColID != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			if ((nColID != TDCC_NONE) && SelectionHasUnlocked())
 			{
 				// forward the click
 				NotifyParentOfColumnEditClick(nColID, dwTaskID);
-
 				return TRUE;
 			}
 		}

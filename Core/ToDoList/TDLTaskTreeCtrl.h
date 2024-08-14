@@ -84,7 +84,6 @@ public:
 	BOOL SelectTasksInHistory(BOOL bForward);
 	int GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const;
 	BOOL CanSelectTasksInHistory(BOOL bForward) const;
-	BOOL SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	int GetSelectedTaskLocalDependents(BOOL bImmediateOnly, CHTIList& lstDependents) const;
 	int GetReferencesToSelectedTask(CHTIList& listRefs) const;
 
@@ -238,7 +237,6 @@ protected:
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
-	BOOL TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;
 	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend) const;

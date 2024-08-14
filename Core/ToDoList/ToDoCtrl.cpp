@@ -846,7 +846,7 @@ void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
 	{
 		nComboState = nCommentsState = RTCS_DISABLED;
 	}
-	else if ((IsReadOnly() || m_taskTree.SelectionHasLocked(FALSE)))
+	else if ((IsReadOnly() || m_taskTree.SelectionHasLocked()))
 	{
 		nComboState = nCommentsState = RTCS_READONLY;
 	}
@@ -10222,14 +10222,6 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	return FALSE;
 }
 
-BOOL CToDoCtrl::SelectedTaskIsUnlocked(DWORD dwTaskID) const
-{
-	if (dwTaskID)
-		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_calculator.IsTaskLocked(dwTaskID));
-
-	return !m_taskTree.SelectionHasLocked(FALSE);
-}
-
 CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const 
 { 
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
@@ -10256,7 +10248,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 	if (dwTaskID)
 		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
 
-	// else look for first unlocked task
+	// else look for first UNLOCKED task
 	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
