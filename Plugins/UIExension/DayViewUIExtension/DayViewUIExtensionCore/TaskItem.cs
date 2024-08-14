@@ -30,7 +30,7 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class SortedTaskItems
+	public class DateSortedTasks
 	{
 		private List<TaskItem> m_SortedItemList;
 		private TaskItems m_TaskItems; // read-only
@@ -38,25 +38,56 @@ namespace DayViewUIExtension
 
 		// ------------------
 
-		public SortedTaskItems(TaskItems items)
+		public DateSortedTasks(TaskItems items)
 		{
+			m_TaskItems = items;
 			m_SortedItemList = new List<TaskItem>();
+			m_NeedsResort = true;
 		}
 
-		public IList<TaskItem> TaskItems
+		public List<TaskItem> Items
 		{
 			get
 			{
-				// TODO
+				if (m_SortedItemList.Count == 0)
+					m_SortedItemList.AddRange(m_TaskItems.Values);
+
+				if (m_NeedsResort)
+				{
+					m_NeedsResort = false;
+					m_SortedItemList.Sort((a, b) => TaskItem.CompareDates(a, b));
+				}
 
 				return m_SortedItemList;
 			}
 		}
 
+		public int FindItem(uint taskID)
+		{
+			var items = Items; // update the list 
+
+			return items.FindIndex(x => (x.Id == taskID));
+		}
+
+		public int GetNextIndex(int item, bool forwards)
+		{
+			if (item == -1)
+				return -1;
+
+			item = (forwards ? item + 1 : item - 1);
+
+			if ((item < 0) || (item >= m_SortedItemList.Count))
+				return -1;
+
+			return item;
+		}
+
 		public void SetNeedsRebuild()
 		{
 			m_SortedItemList.Clear();
+			m_NeedsResort = true;
 		}
+
 		public void SetNeedsResort()
 		{
 			m_NeedsResort = true;
@@ -104,7 +135,7 @@ namespace DayViewUIExtension
 
 		public override string ToString()
 		{
-			return Title;
+			return string.Format("{0} {1}", Id, Title);
 		}
 
 		private bool IsUsingParentCalcedStartDate;
@@ -120,6 +151,21 @@ namespace DayViewUIExtension
 				Debug.Assert(IsParent);
 				return true;
 			}
+		}
+
+		public static int CompareDates(Calendar.Appointment a, Calendar.Appointment b)
+		{
+			int cmp = a.StartDate.CompareTo(b.StartDate);
+
+			if (cmp != 0)
+				return cmp;
+
+			cmp = a.EndDate.CompareTo(b.EndDate);
+
+			if (cmp != 0)
+				return cmp;
+
+			return a.Id.CompareTo(b.Id); // for stable sort
 		}
 
 		public void UpdateOriginalDates()
