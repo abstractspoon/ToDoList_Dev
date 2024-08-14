@@ -502,7 +502,8 @@ namespace DayViewUIExtension
 				break;
 			}
 
-			int item = m_DateSortedTasks.GetNextIndex(m_DateSortedTasks.FindItem(taskID), forwards);
+			var sortedTasks = m_DateSortedTasks.Items;
+			int item = sortedTasks.NextIndex(taskID, forwards);
 
 			while (item != -1)
 			{
@@ -516,7 +517,7 @@ namespace DayViewUIExtension
 						return true;
 					}
 				}
-				item = m_DateSortedTasks.GetNextIndex(item, forwards);
+				item = sortedTasks.NextIndex(item, forwards);
 			}
 
 			// all else
@@ -528,27 +529,52 @@ namespace DayViewUIExtension
 			if (text == String.Empty)
 				return false;
 
+			var sortedTasks = m_DateSortedTasks.Items;
+			bool forwards = true;
+			int from = -1;
+
 			switch (selectTask)
 			{
 			case UIExtension.SelectTask.SelectFirstTask:
-				// TODO
+				if (sortedTasks.Count > 0)
+					from = 0;
 				break;
 
 			case UIExtension.SelectTask.SelectNextTask:
-				// TODO
+				from = sortedTasks.NextIndex(SelectedAppointmentId, true);
 				break;
 
 			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-				// TODO
+				from = sortedTasks.FindItem(SelectedAppointmentId);
 				break;
 
 			case UIExtension.SelectTask.SelectPrevTask:
-				// TODO
+				from = sortedTasks.NextIndex(SelectedAppointmentId, false);
+				forwards = false;
 				break;
 
 			case UIExtension.SelectTask.SelectLastTask:
-				// TODO
+				from = (sortedTasks.Count - 1);
+				forwards = false;
 				break;
+			}
+
+			if (from >= 0)
+			{
+				do
+				{
+					var taskItem = sortedTasks[from];
+					var words = text.Split(' ');
+
+					if (IsItemDisplayable(taskItem) && taskItem.TitleMatches(words, caseSensitive, wholeWord))
+					{
+						if (SelectTask(taskItem.Id))
+							return true;
+					}
+
+					from = sortedTasks.NextIndex(from, forwards);
+				}
+				while (from != -1);
 			}
 
 			// all else

@@ -32,7 +32,35 @@ namespace DayViewUIExtension
 
 	public class DateSortedTasks
 	{
-		private List<TaskItem> m_SortedItemList;
+		public class TaskList : List<TaskItem>
+		{
+			public int FindItem(uint taskID)
+			{
+				return FindIndex(x => (x.Id == taskID));
+			}
+
+			public int NextIndex(uint taskID, bool forwards)
+			{
+				return NextIndex(FindItem(taskID), forwards);
+			}
+
+			public int NextIndex(int item, bool forwards)
+			{
+				if (item == -1)
+					return -1;
+
+				item = (forwards ? item + 1 : item - 1);
+
+				if ((item < 0) || (item >= Count))
+					return -1;
+
+				return item;
+			}
+		}
+
+		// ------------------
+
+		private TaskList m_SortedTaskList;
 		private TaskItems m_TaskItems; // read-only
 		private bool m_NeedsResort = true;
 
@@ -41,50 +69,30 @@ namespace DayViewUIExtension
 		public DateSortedTasks(TaskItems items)
 		{
 			m_TaskItems = items;
-			m_SortedItemList = new List<TaskItem>();
+			m_SortedTaskList = new TaskList();
 			m_NeedsResort = true;
 		}
 
-		public List<TaskItem> Items
+		public TaskList Items
 		{
 			get
 			{
-				if (m_SortedItemList.Count == 0)
-					m_SortedItemList.AddRange(m_TaskItems.Values);
+				if (m_SortedTaskList.Count == 0)
+					m_SortedTaskList.AddRange(m_TaskItems.Values);
 
 				if (m_NeedsResort)
 				{
 					m_NeedsResort = false;
-					m_SortedItemList.Sort((a, b) => TaskItem.CompareDates(a, b));
+					m_SortedTaskList.Sort((a, b) => TaskItem.CompareDates(a, b));
 				}
 
-				return m_SortedItemList;
+				return m_SortedTaskList;
 			}
-		}
-
-		public int FindItem(uint taskID)
-		{
-			var items = Items; // update the list 
-
-			return items.FindIndex(x => (x.Id == taskID));
-		}
-
-		public int GetNextIndex(int item, bool forwards)
-		{
-			if (item == -1)
-				return -1;
-
-			item = (forwards ? item + 1 : item - 1);
-
-			if ((item < 0) || (item >= m_SortedItemList.Count))
-				return -1;
-
-			return item;
 		}
 
 		public void SetNeedsRebuild()
 		{
-			m_SortedItemList.Clear();
+			m_SortedTaskList.Clear();
 			m_NeedsResort = true;
 		}
 
@@ -136,6 +144,30 @@ namespace DayViewUIExtension
 		public override string ToString()
 		{
 			return string.Format("{0} {1}", Id, Title);
+		}
+
+		public bool TitleMatches(string[] words, bool caseSensitive, bool wholeWord)
+		{
+			var compareCase = (caseSensitive ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase);
+
+			foreach (var word in words)
+			{
+				if (wholeWord)
+				{
+					foreach (var tWord in Title.Split(' '))
+					{
+						if (tWord.Equals(word, compareCase))
+							return true;
+					}
+				}
+				else
+				{
+					if (Title.IndexOf(word, compareCase) >= 0)
+						return true;
+				}
+			}
+
+			return false;
 		}
 
 		private bool IsUsingParentCalcedStartDate;
