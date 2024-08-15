@@ -951,17 +951,20 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_LOCK:
 		return TRUE;
 
-	case TDCA_STARTTIME:	return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE);
+	case TDCA_STARTTIME:
+		if (!m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE))
+			return FALSE;
+		// else fall through
+
+	case TDCA_STARTDATE:
+		return (!m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs));
+
 	case TDCA_DUETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
 	case TDCA_DONETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		{
-			return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) ||
-					!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs));
-		}
-		break;
+		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs));
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -3181,6 +3184,14 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 					if (!color || (color == CLR_NONE))
 						sTooltip.LoadString(IDS_ATTRIBTIP_DEFCOLOR);
+				}
+				break;
+
+			case TDCA_STARTDATE:
+				if (!m_data.HasStyle(TDCS_READONLY) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs) &&
+					m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs))
+				{
+					sTooltip.LoadString(IDS_ATTRIBTIP_DEPENDENTDATE);
 				}
 				break;
 

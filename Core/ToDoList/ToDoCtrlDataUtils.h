@@ -436,6 +436,7 @@ public:
 	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
 
 protected:
 	const CToDoCtrlData& m_data;

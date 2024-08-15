@@ -5954,6 +5954,11 @@ BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
 	return GetTasksParentID(aTaskIDs, dwUnused);
 }
 
+BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const
+{
+	GETALLTASKHAS(TaskHasDependencies);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
