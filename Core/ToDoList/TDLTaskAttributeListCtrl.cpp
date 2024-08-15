@@ -3188,8 +3188,10 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				break;
 
 			case TDCA_STARTDATE:
-				if (!m_data.HasStyle(TDCS_READONLY) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs) &&
-					m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs))
+				if (!m_data.HasStyle(TDCS_READONLY) && 
+					m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && 
+					m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs) &&
+					m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs))
 				{
 					sTooltip.LoadString(IDS_ATTRIBTIP_DEPENDENTDATE);
 				}
