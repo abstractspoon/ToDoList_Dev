@@ -5784,12 +5784,12 @@ void CToDoCtrl::PrepareTasksForPasteAsRef(CTaskFile& tasks, const CDWordArray& a
 		return; // nothing to do
 
 	// remove tasks not originally selected
-	if (aSelTaskIDs.GetSize());
+	if (aSelTaskIDs.GetSize())
 	{
 		RemoveNonSelectedTasks(aSelTaskIDs, tasks, tasks.GetFirstTask());
 
 		if (tasks.GetTaskCount() == 0)
-			return; // nothing to do
+			return; // nothing further to do
 	}
 
 	// pre-process the tasks to add themselves
