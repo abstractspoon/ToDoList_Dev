@@ -5809,33 +5809,27 @@ BOOL CTDCMultiTasker::AnyTaskHasIcon(const CDWordArray& aTaskIDs) const
 	GETANYTASKHAS_STR(GetTaskIcon);
 }
 
-BOOL CTDCMultiTasker::AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
-{
-	if (!aTaskIDs.GetSize())
-		return FALSE;
-
-	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
-	{
-		DWORD dwParentID = m_data.GetTaskParentID(aTaskIDs[nID]);
- 
-		// Root is always unlocked
-		if (dwParentID == 0)
-			continue;
-		
-		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwParentID))
-			continue;
-		
-		if (m_calculator.IsTaskLocked(dwParentID))
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
 BOOL CTDCMultiTasker::AnyTaskHasColor(const CDWordArray& aTaskIDs) const
 {
 	GETANYTASKHAS(GetTaskColor);
 }
+
+BOOL CTDCMultiTasker::AnyTaskIsParent(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(IsTaskParent);
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(IsTaskRecurring);
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(IsTaskFlagged);
+}
+
+// -----------------------------------------------------------------
 
 BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const
 {
@@ -5860,14 +5854,27 @@ BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, 
 
 // -----------------------------------------------------------------
 
-BOOL CTDCMultiTasker::AnyTaskIsParent(const CDWordArray& aTaskIDs) const
+BOOL CTDCMultiTasker::AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
 {
-	GETANYTASKHAS(IsTaskParent);
-}
+	if (!aTaskIDs.GetSize())
+		return FALSE;
 
-BOOL CTDCMultiTasker::AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const
-{
-	GETANYTASKHAS(IsTaskRecurring);
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		DWORD dwParentID = m_data.GetTaskParentID(aTaskIDs[nID]);
+ 
+		// Root is always unlocked
+		if (dwParentID == 0)
+			continue;
+		
+		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwParentID))
+			continue;
+		
+		if (m_calculator.IsTaskLocked(dwParentID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTDCMultiTasker::AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
@@ -5889,9 +5896,23 @@ BOOL CTDCMultiTasker::AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRe
 	return FALSE;
 }
 
-BOOL CTDCMultiTasker::AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const
+BOOL CTDCMultiTasker::AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
 {
-	GETANYTASKHAS(IsTaskFlagged);
+	if (!aTaskIDs.GetSize())
+		return FALSE;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		DWORD dwTaskID = aTaskIDs[nID];
+
+		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
+			return TRUE;
+
+		if (!m_calculator.IsTaskLocked(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 // -----------------------------------------------------------------
@@ -5931,6 +5952,11 @@ BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
 {
 	DWORD dwUnused = 0;
 	return GetTasksParentID(aTaskIDs, dwUnused);
+}
+
+BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const
+{
+	GETALLTASKHAS(TaskHasDependencies);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

@@ -429,12 +429,14 @@ public:
 	BOOL AnyTaskIsParent(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	BOOL AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
 
 	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
 
 protected:
 	const CToDoCtrlData& m_data;

@@ -2644,22 +2644,22 @@ void CTabbedToDoCtrl::SelectAll()
 	}
 }
 
-int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered) const
 {
 	if (InListView())
-		return m_taskList.GetSelectedTaskIDs(aTaskIDs, bTrue);
+		return m_taskList.GetSelectedTaskIDs(aTaskIDs, bTrue, bOrdered);
 
 	// else
-	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, bTrue);
+	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, bTrue, bOrdered);
 }
 
-int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
+int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered) const
 {
 	if (InListView())
-		return m_taskList.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID);
+		return m_taskList.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID); // ordered by design
 
 	// else
-	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
+	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes, bOrdered);
 }
 
 int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -5359,7 +5359,7 @@ BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 
 				// Update the underlying data
 				CDWordArray aSelTaskIDs;
-				m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+				m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, FALSE, TRUE); // ordered
 
 				// Update the tree first because it relies on the current
 				// data structure to validate the move

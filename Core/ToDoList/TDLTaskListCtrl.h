@@ -75,7 +75,7 @@ public:
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetSelectedTaskID() const;
 	DWORD GetTrueTaskID(int nItem) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const; // ordered by design
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const;
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);

@@ -49,6 +49,7 @@ namespace DayViewUIExtension
 		private bool m_ShowFutureOcurrences = true;
 
 		private TaskItems m_TaskItems;
+		private DateSortedTasks m_DateSortedTasks;
 		private TimeBlocks m_TimeBlocks;
 
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
@@ -90,6 +91,7 @@ namespace DayViewUIExtension
 			m_TaskRecurrences = taskRecurrences;
 
 			m_TaskItems = new TaskItems();
+			m_DateSortedTasks = new DateSortedTasks(m_TaskItems);
 			m_TimeBlocks = new TimeBlocks();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
@@ -477,31 +479,45 @@ namespace DayViewUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
 		{
+			bool forwards = true, topLevel = false;
+
 			switch (getTask)
 			{
 			case UIExtension.GetTask.GetNextTask:
-				// TODO
+			case UIExtension.GetTask.GetNextVisibleTask:
 				break;
 
 			case UIExtension.GetTask.GetPrevTask:
-				// TODO
-				break;
-
-			case UIExtension.GetTask.GetNextVisibleTask:
-				// TODO
+			case UIExtension.GetTask.GetPrevVisibleTask:
+				forwards = false;
 				break;
 
 			case UIExtension.GetTask.GetNextTopLevelTask:
-				// TODO
-				break;
-
-			case UIExtension.GetTask.GetPrevVisibleTask:
-				// TODO
+				topLevel = true;
 				break;
 
 			case UIExtension.GetTask.GetPrevTopLevelTask:
-				// TODO
+				forwards = false;
+				topLevel = true;
 				break;
+			}
+
+			var sortedTasks = m_DateSortedTasks.Items;
+			int item = sortedTasks.NextIndex(taskID, forwards);
+
+			while (item != -1)
+			{
+				var task = m_DateSortedTasks.Items[item];
+
+				if (IsItemDisplayable(task))
+				{
+					if (!topLevel || task.IsTopLevel)
+					{
+						taskID = task.Id;
+						return true;
+					}
+				}
+				item = sortedTasks.NextIndex(item, forwards);
 			}
 
 			// all else
@@ -513,27 +529,52 @@ namespace DayViewUIExtension
 			if (text == String.Empty)
 				return false;
 
+			var sortedTasks = m_DateSortedTasks.Items;
+			bool forwards = true;
+			int from = -1;
+
 			switch (selectTask)
 			{
 			case UIExtension.SelectTask.SelectFirstTask:
-				// TODO
+				if (sortedTasks.Count > 0)
+					from = 0;
 				break;
 
 			case UIExtension.SelectTask.SelectNextTask:
-				// TODO
+				from = sortedTasks.NextIndex(SelectedAppointmentId, true);
 				break;
 
 			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-				// TODO
+				from = sortedTasks.FindItem(SelectedAppointmentId);
 				break;
 
 			case UIExtension.SelectTask.SelectPrevTask:
-				// TODO
+				from = sortedTasks.NextIndex(SelectedAppointmentId, false);
+				forwards = false;
 				break;
 
 			case UIExtension.SelectTask.SelectLastTask:
-				// TODO
+				from = (sortedTasks.Count - 1);
+				forwards = false;
 				break;
+			}
+
+			if (from >= 0)
+			{
+				do
+				{
+					var taskItem = sortedTasks[from];
+					var words = text.Split(' ');
+
+					if (IsItemDisplayable(taskItem) && taskItem.TitleMatches(words, caseSensitive, wholeWord))
+					{
+						if (SelectTask(taskItem.Id))
+							return true;
+					}
+
+					from = sortedTasks.NextIndex(from, forwards);
+				}
+				while (from != -1);
 			}
 
 			// all else
@@ -652,7 +693,7 @@ namespace DayViewUIExtension
             StartDate = DateTime.Now;
 
 			// And scroll vertically to first short task
-			var appointments = GetMatchingAppointments(StartDate, EndDate, true);
+			var appointments = GetMatchingAppointments(StartDate, EndDate);
 
 			if (appointments != null)
 			{
@@ -963,12 +1004,18 @@ namespace DayViewUIExtension
 				{
 					// Rebuild
 					m_TaskItems.Clear();
+					m_DateSortedTasks.SetNeedsRebuild();
 					m_MaxTaskID = 0;
+
 					SelectedAppointment = null;
 				}
 				break;
 
 				case UIExtension.UpdateType.New:
+					// In-place update
+					m_DateSortedTasks.SetNeedsRebuild();
+					break;
+
 				case UIExtension.UpdateType.Edit:
 					// In-place update
 					break;
@@ -980,9 +1027,13 @@ namespace DayViewUIExtension
 
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
+			bool datesChanged = false;
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type, metaDataKey, 0))
+			while (ProcessTaskUpdate(task, type, metaDataKey, 0, ref datesChanged))
 				task = task.GetNextTask();
+
+			if (datesChanged)
+				m_DateSortedTasks.SetNeedsResort();
 
 			// Scroll to the selected item if it was modified and was 'visible'
 			if ((selTaskWasVisible || tasksWasEmpty) && tasks.HasTask(m_SelectedTaskID))
@@ -994,7 +1045,7 @@ namespace DayViewUIExtension
             Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth, ref bool datesChanged)
 		{
 			if (!task.IsValid())
 				return false;
@@ -1013,13 +1064,14 @@ namespace DayViewUIExtension
 				task.HasAttribute(Task.Attribute.StartDate) || 
 				task.HasAttribute(Task.Attribute.DueDate))
 			{
+				datesChanged = true;
 				m_TimeBlocks.SynchroniseDates(taskItem);
 			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, metaDataKey, depth + 1))
+			while (ProcessTaskUpdate(subtask, type, metaDataKey, (depth + 1), ref datesChanged))
 				subtask = subtask.GetNextTask();
 
 			return true;
@@ -1323,7 +1375,7 @@ namespace DayViewUIExtension
 			args.Appointments = GetMatchingAppointments(args.StartDate, args.EndDate);
 		}
 
-		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end, bool sorted = false)
+		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
 		{
 			// Extension items are always populated on demand
 			m_ExtensionItems.Clear();
@@ -1402,8 +1454,7 @@ namespace DayViewUIExtension
 				}
 			}
 
-			if (sorted)
-				appts.Sort((a, b) => (int)(b.StartDate.Ticks - a.StartDate.Ticks));
+			appts.Sort((a, b) => TaskItem.CompareDates(a, b));
 
 			return appts;
 		}

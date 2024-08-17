@@ -30,6 +30,80 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
+	public class DateSortedTasks
+	{
+		public class TaskList : List<TaskItem>
+		{
+			public int FindItem(uint taskID)
+			{
+				return FindIndex(x => (x.Id == taskID));
+			}
+
+			public int NextIndex(uint taskID, bool forwards)
+			{
+				return NextIndex(FindItem(taskID), forwards);
+			}
+
+			public int NextIndex(int item, bool forwards)
+			{
+				if (item == -1)
+					return -1;
+
+				item = (forwards ? item + 1 : item - 1);
+
+				if ((item < 0) || (item >= Count))
+					return -1;
+
+				return item;
+			}
+		}
+
+		// ------------------
+
+		private TaskList m_SortedTaskList;
+		private TaskItems m_TaskItems; // read-only
+		private bool m_NeedsResort = true;
+
+		// ------------------
+
+		public DateSortedTasks(TaskItems items)
+		{
+			m_TaskItems = items;
+			m_SortedTaskList = new TaskList();
+			m_NeedsResort = true;
+		}
+
+		public TaskList Items
+		{
+			get
+			{
+				if (m_SortedTaskList.Count == 0)
+					m_SortedTaskList.AddRange(m_TaskItems.Values);
+
+				if (m_NeedsResort)
+				{
+					m_NeedsResort = false;
+					m_SortedTaskList.Sort((a, b) => TaskItem.CompareDates(a, b));
+				}
+
+				return m_SortedTaskList;
+			}
+		}
+
+		public void SetNeedsRebuild()
+		{
+			m_SortedTaskList.Clear();
+			m_NeedsResort = true;
+		}
+
+		public void SetNeedsResort()
+		{
+			m_NeedsResort = true;
+		}
+	}
+
+	// ---------------------------------------------------------------
+
 	public class TDLAppointmentView : Calendar.AppointmentView
 	{
 		public TDLAppointmentView(Calendar.Appointment appt) : base(appt)
@@ -69,7 +143,31 @@ namespace DayViewUIExtension
 
 		public override string ToString()
 		{
-			return Title;
+			return string.Format("{0} {1}", Id, Title);
+		}
+
+		public bool TitleMatches(string[] words, bool caseSensitive, bool wholeWord)
+		{
+			var compareCase = (caseSensitive ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase);
+
+			foreach (var word in words)
+			{
+				if (wholeWord)
+				{
+					foreach (var tWord in Title.Split(' '))
+					{
+						if (tWord.Equals(word, compareCase))
+							return true;
+					}
+				}
+				else
+				{
+					if (Title.IndexOf(word, compareCase) >= 0)
+						return true;
+				}
+			}
+
+			return false;
 		}
 
 		private bool IsUsingParentCalcedStartDate;
@@ -85,6 +183,21 @@ namespace DayViewUIExtension
 				Debug.Assert(IsParent);
 				return true;
 			}
+		}
+
+		public static int CompareDates(Calendar.Appointment a, Calendar.Appointment b)
+		{
+			int cmp = a.StartDate.CompareTo(b.StartDate);
+
+			if (cmp != 0)
+				return cmp;
+
+			cmp = a.EndDate.CompareTo(b.EndDate);
+
+			if (cmp != 0)
+				return cmp;
+
+			return a.Id.CompareTo(b.Id); // for stable sort
 		}
 
 		public void UpdateOriginalDates()
