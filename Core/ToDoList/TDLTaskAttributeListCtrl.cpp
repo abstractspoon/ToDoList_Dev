@@ -2204,8 +2204,12 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			PrepareTimePeriodEdit(nRow);
 
-			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
-			m_eTimePeriod.InsertButton(1, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
+			// Insert before default menu button
+			m_eTimePeriod.InsertButton(0, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
+
+			// Insert before 'Add logged time button'
+			if (!m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
+				m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
 		}
 		break;
 

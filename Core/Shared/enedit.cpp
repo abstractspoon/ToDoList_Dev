@@ -1038,15 +1038,20 @@ LRESULT CEnEdit::OnHotChange(WPARAM wp, LPARAM lp)
 {
 	LRESULT lr = Default();
 
-	// wp has prev hot rect index
-	// lp has new hot rect index
-	ASSERT (((int)wp != -1 || (int)lp != -1) && (int)wp != (int)lp);
+	int nOldHot = (int)wp;
+	int nNewHot = (int)lp;
 
-	if (((int)wp != -1) && m_aButtons[wp].bEnabled)
-		RedrawButtonByIndex(wp);
+	ASSERT ((nOldHot != -1) || (nNewHot != -1) && (nNewHot != nOldHot));
 
-	if (((int)lp != -1) && m_aButtons[lp].bEnabled)
-		RedrawButtonByIndex(lp);
+	// Because this is a posted message we need to 
+	// check that the button indices are still valid
+	int nNumBtns = GetButtonCount();
+
+	if ((nOldHot >= 0) && (nOldHot < nNumBtns) && m_aButtons[nOldHot].bEnabled)
+		RedrawButtonByIndex(nOldHot);
+
+	if ((nNewHot >= 0) && (nNewHot < nNumBtns) && m_aButtons[nNewHot].bEnabled)
+		RedrawButtonByIndex(nNewHot);
 
 	return lr;
 }
