@@ -6448,7 +6448,7 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	CDWordArray aModTaskIDs;
 	TODOITEM tdiFrom, tdiTo;
 
-	int nToNumIDs = aToTaskIDs.GetSize(), nID = 0;
+	int nToNumIDs = aToTaskIDs.GetSize();
 	HTASKITEM hTask = tasks.GetFirstTask();
 
 	if (nNumFrom == 1)
@@ -6456,7 +6456,7 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 		// Paste calculated attributes
 		if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE))
 		{
-			for (; nID < nToNumIDs; nID++)
+			for (int nID = 0; nID < nToNumIDs; nID++)
 			{
 				DWORD dwToTaskID = aToTaskIDs[nID];
 
@@ -6469,6 +6469,8 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	}
 	else
 	{
+		int nID = 0;
+
 		while (hTask && (nID < nToNumIDs))
 		{
 			DWORD dwToTaskID = aToTaskIDs[nID];
