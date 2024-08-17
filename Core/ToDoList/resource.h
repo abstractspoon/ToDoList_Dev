@@ -2542,6 +2542,7 @@
 #define IDS_REMINDER_ABSOLUTEAGO        51665
 #define IDS_REMINDER_STARTSNOW          51666
 #define IDS_REMINDER_DUENOW             51667
+#define IDS_ATTRIBTIP_DEPENDENTDATE     51668
 
 // Next default values for new objects
 // 

@@ -718,7 +718,7 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 					break;
 
 				default:
-					if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+					if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
 						sAppCursor = _T("Locked");
 					break;
 				}
@@ -901,7 +901,7 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
-	if (m_multitasker.AnyTaskIsLocked(m_aSelectedTaskIDs))
+	if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
 	{
 		switch (nAttribID)
 		{
@@ -951,17 +951,20 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_LOCK:
 		return TRUE;
 
-	case TDCA_STARTTIME:	return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE);
+	case TDCA_STARTTIME:
+		if (!m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE))
+			return FALSE;
+		// else fall through
+
+	case TDCA_STARTDATE:
+		return (!m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs));
+
 	case TDCA_DUETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
 	case TDCA_DONETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		{
-			return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) ||
-					!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs));
-		}
-		break;
+		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs));
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -3013,7 +3016,7 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(TDC_ATTRIBUTE nAtt
 {
 	ASSERT(m_pAttributeList->m_aSelectedTaskIDs.GetSize());
 	ASSERT(!m_pAttributeList->m_data.HasStyle(TDCS_READONLY));
-	ASSERT(!m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs));
+	ASSERT(m_pAttributeList->m_multitasker.AnyTaskIsUnlocked(m_pAttributeList->m_aSelectedTaskIDs));
 
 	switch (nAttribID)
 	{
@@ -3050,7 +3053,7 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::CanDropFiles(const CPoint& poin
 	if (m_pAttributeList->m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	if (m_pAttributeList->m_multitasker.AnyTaskIsLocked(m_pAttributeList->m_aSelectedTaskIDs))
+	if (!m_pAttributeList->m_multitasker.AnyTaskIsUnlocked(m_pAttributeList->m_aSelectedTaskIDs))
 		return FALSE;
 
 	nRow = m_pAttributeList->HitTest(point);
@@ -3181,6 +3184,16 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 					if (!color || (color == CLR_NONE))
 						sTooltip.LoadString(IDS_ATTRIBTIP_DEFCOLOR);
+				}
+				break;
+
+			case TDCA_STARTDATE:
+				if (!m_data.HasStyle(TDCS_READONLY) && 
+					m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && 
+					m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs) &&
+					m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs))
+				{
+					sTooltip.LoadString(IDS_ATTRIBTIP_DEPENDENTDATE);
 				}
 				break;
 

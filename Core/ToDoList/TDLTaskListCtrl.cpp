@@ -1616,11 +1616,10 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				}
 			}
 
-			if ((nColID != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			if ((nColID != TDCC_NONE) && SelectionHasUnlocked())
 			{
 				// forward the click
 				NotifyParentOfColumnEditClick(nColID, dwTaskID);
-
 				return TRUE;
 			}
 		}
@@ -1962,7 +1961,7 @@ DWORD CTDLTaskListCtrl::GetTrueTaskID(int nItem) const
 	return m_data.GetTrueTaskID(dwTaskID); 
 }
 
-int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL /*bOrdered*/) const
 {
 	DWORD dwFocusID;
 	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID);

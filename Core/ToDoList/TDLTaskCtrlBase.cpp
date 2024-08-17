@@ -5687,6 +5687,11 @@ BOOL CTDLTaskCtrlBase::SelectionHasDone() const
 	SELECTIONHAS_1ARG(AnyTaskHasDate, TDCD_DONE);
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked) const
+{
+	SELECTIONHAS_1ARG(AnyTaskIsUnlocked, bTreatRefsAsUnlocked);
+}
+
 BOOL CTDLTaskCtrlBase::SelectionHasLocked(BOOL bTreatRefsAsUnlocked) const
 {
 	SELECTIONHAS_1ARG(AnyTaskIsLocked, bTreatRefsAsUnlocked);
@@ -5808,7 +5813,7 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT
 CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const
 {
 	CDWordArray aSelTaskIDs;
-	int nNumIDs = GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+	int nNumIDs = GetSelectedTaskIDs(aSelTaskIDs, FALSE, TRUE); // ordered
 
 	if ((nMaxTasks > 0) && (nMaxTasks < nNumIDs))
 	{
