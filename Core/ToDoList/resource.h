@@ -2509,7 +2509,7 @@
 #define IDS_EDIT_VALUEVARIES            51633
 #define IDS_ATTRIBTIP_TIMEOFDAY         51634
 #define IDS_ATTRIBTIP_DEFCOLOR          51635
-#define IDS_ATTRIBTIP_DATEREQUIRED      51636
+#define IDS_ATTRIBTIP_NODATESET         51636
 #define IDS_ATTRIBUTES                  51637
 #define IDS_ATTRIBCAT_OTHER             51638
 #define IDS_ATTRIBCAT_TEXT              51639
@@ -2543,6 +2543,7 @@
 #define IDS_REMINDER_STARTSNOW          51666
 #define IDS_REMINDER_DUENOW             51667
 #define IDS_ATTRIBTIP_DEPENDENTDATE     51668
+#define IDS_ATTRIBTIP_COMPLETEDTASK     51669
 
 // Next default values for new objects
 // 

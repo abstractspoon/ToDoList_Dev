@@ -931,10 +931,9 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		// Permanently read-only fields
 		return FALSE;
 
+	case TDCA_RECURRENCE:
 	case TDCA_REMINDER:
-		if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
-			return FALSE;
-		break;
+		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs);
 
 	case TDCA_PERCENT:
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -3204,8 +3203,14 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					int nDateRow = GetDateRow(nAttribID);
 
 					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
-						sTooltip.LoadString(IDS_ATTRIBTIP_DATEREQUIRED);
+						sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
 				}
+				break;
+
+			case TDCA_RECURRENCE:
+			case TDCA_REMINDER:
+				if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
+					sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
 				break;
 
 			case TDCA_DEPENDENCY:
@@ -3243,7 +3248,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					int nDateRow = GetDateRow(nAttribID);
 
 					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
-						sTooltip.LoadString(IDS_ATTRIBTIP_DATEREQUIRED);
+						sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
 				}
 				break;
 			}
