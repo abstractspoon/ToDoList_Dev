@@ -289,18 +289,16 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references
 	// Note: references can always be pasted 'as references'
-	CDWordArray aSelTasks;
-	TSH().GetItemData(aSelTasks);
+	CDWordArray aSelTaskIDs;
+	TSH().GetItemData(aSelTaskIDs);
 
-	tasks.SetSelectedTaskIDs(aSelTasks);
-	
 	// and their titles (including child dupes)
 	CStringArray aTitles;
 	
 	VERIFY(TSH().CopySelection(selection, FALSE, TRUE));
 	VERIFY(TSH().GetItemTitles(selection, aTitles));
 	
-	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), Misc::FormatArray(aTitles, '\n'));
+	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), aSelTaskIDs, Misc::FormatArray(aTitles, '\n'));
 }
 
 BOOL CFilteredToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged)

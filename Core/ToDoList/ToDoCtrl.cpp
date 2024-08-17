@@ -5615,7 +5615,7 @@ BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, 
 
 				// fix up the dependencies of the copied tasks
 				if (bDropRefs)
-					PrepareTaskIDsForPasteAsRef(tasks);
+					PrepareTasksForPasteAsRef(tasks);
 				else
 					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
 
@@ -5691,11 +5691,23 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BO
 	PrepareTasksForPaste(tasks, tasks.GetFirstTask(NULL), bResetCreation, mapID, TRUE);
 }
 
-void CToDoCtrl::PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const
+void CToDoCtrl::PrepareTasksForPasteAsRef(CTaskFile& tasks, const CDWordArray& aSelTaskIDs) const
 {
 	if (tasks.GetTaskCount() == 0)
 		return; // nothing to do
 
+	// remove tasks not originally selected
+	if (aSelTaskIDs.GetSize())
+	{
+		RemoveNonSelectedTasks(aSelTaskIDs, tasks, tasks.GetFirstTask());
+
+		if (tasks.GetTaskCount() == 0)
+			return; // nothing further to do
+	}
+
+	// pre-process the tasks to add themselves
+	// as a reference, and then to clear the task ID
+	// so that it gets a newly allocated one
 	CMapID2ID mapID;
 	mapID.InitHashTable(tasks.GetTaskCount());
 
@@ -6336,6 +6348,7 @@ BOOL CToDoCtrl::CopyAttributeColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasks
 
 	return CTaskClipboard::SetTasks(tasks, 
 									GetClipboardID(), 
+									aTaskIDs,
 									Misc::FormatArray(aValues, '\n', TRUE),
 									nColID);
 }
@@ -6350,11 +6363,10 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	CTaskFile tasks;
 
 	nFromColID = CTaskClipboard::GetColumnTasks(tasks);
-
-	if (nFromColID == TDCC_NONE)
-		return FALSE;
-
 	nNumFrom = tasks.GetTaskCount();
+
+	if ((nFromColID == TDCC_NONE) || (nNumFrom == 0))
+		return FALSE;
 
 	// Check column compatibility
 	BOOL bSameTasklist = CTaskClipboard::TasklistIDMatches(GetClipboardID());
@@ -6368,24 +6380,26 @@ BOOL CToDoCtrl::CanPasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelecte
 	if (bSelectedTasksOnly)
 		return CanEditSelectedTask(nToAttribID);
 
-	// For 'All' check there is at least one editable task
-	CDWordArray aTaskIDs;
+	// Check we have at least one editable task
+	CDWordArray aToTaskIDs;
 
 	if (nNumFrom == 1)
-		GetColumnTaskIDs(aTaskIDs); // All
+		GetColumnTaskIDs(aToTaskIDs); // All
 	else
-		GetColumnTaskIDs(aTaskIDs, 0, (nNumFrom - 1));
+		GetColumnTaskIDs(aToTaskIDs, 0, (nNumFrom - 1));
 
-	int nID = aTaskIDs.GetSize();
+	int nID = aToTaskIDs.GetSize();
 
 	while (nID--)
 	{
-		if (CanEditTask(aTaskIDs[nID], nToAttribID))
+		if (CanEditTask(aToTaskIDs[nID], nToAttribID))
 			return TRUE;
 	}
 	
 	// else
 	nNumFrom = 0;
+	nFromColID = TDCC_NONE;
+
 	return FALSE;
 }
 
@@ -6412,40 +6426,39 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	// If only a single task was copied then we paste that task's value
 	// to ALL target tasks else we copy each task's value to just one
 	// target task
-	HTASKITEM hTask = tasks.GetFirstTask();
-	int nNumTasks = tasks.GetTaskCount();
-
-	CDWordArray aTaskIDs;
+	int nNumFrom = tasks.GetTaskCount();
+	CDWordArray aToTaskIDs;
 
 	if (bSelectedTasksOnly)
 	{
-		GetSelectedTaskIDs(aTaskIDs, TRUE, TRUE); // ordered
+		GetSelectedTaskIDs(aToTaskIDs, FALSE, TRUE); // ordered
 	}
-	else if (nNumTasks == 1)
+	else if (nNumFrom == 1)
 	{
 		// Get all target task IDs
-		GetColumnTaskIDs(aTaskIDs);
+		GetColumnTaskIDs(aToTaskIDs);
 	}
 	else
 	{
 		// Get only as many target task IDs as there are copied task IDs
-		GetColumnTaskIDs(aTaskIDs, 0, (nNumTasks - 1));
+		GetColumnTaskIDs(aToTaskIDs, 0, (nNumFrom - 1));
 	}
 
 	// Do the merge
 	CDWordArray aModTaskIDs;
 	TODOITEM tdiFrom, tdiTo;
 
-	int nNumIDs = aTaskIDs.GetSize(), nID = 0;
+	int nToNumIDs = aToTaskIDs.GetSize(), nID = 0;
+	HTASKITEM hTask = tasks.GetFirstTask();
 
-	if (nNumTasks == 1)
+	if (nNumFrom == 1)
 	{
 		// Paste calculated attributes
 		if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE))
 		{
-			for (; nID < nNumIDs; nID++)
+			for (; nID < nToNumIDs; nID++)
 			{
-				DWORD dwToTaskID = aTaskIDs[nID];
+				DWORD dwToTaskID = aToTaskIDs[nID];
 
 				if (CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
 				{
@@ -6456,9 +6469,9 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 	}
 	else
 	{
-		while (hTask && (nID < nNumIDs))
+		while (hTask && (nID < nToNumIDs))
 		{
-			DWORD dwToTaskID = aTaskIDs[nID];
+			DWORD dwToTaskID = aToTaskIDs[nID];
 
 			// Paste calculated attributes
 			if (tasks.GetTaskAttributes(hTask, tdiFrom, TRUE) && CopyColumnValue(tdiFrom, nFromColID, dwToTaskID, nToColID))
@@ -6498,8 +6511,8 @@ BOOL CToDoCtrl::CopySelectedTasks() const
 	ClearCopiedItem();
 
 	// copy selected tasks to clipboard
-	TDCGETTASKS filter;
 	CTaskFile tasks;
+	TDCGETTASKS filter;
 
 	if (!GetSelectedTasks(tasks, filter))
 		return FALSE;
@@ -6511,9 +6524,10 @@ BOOL CToDoCtrl::CopySelectedTasks() const
 	VERIFY(TSH().CopySelection(selection, FALSE, TRUE));
 	VERIFY(TSH().GetItemTitles(selection, aTitles));
 
-	return CTaskClipboard::SetTasks(tasks, 
-									GetClipboardID(), 
-									Misc::FormatArray(aTitles, '\n'));
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
+
+	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), aSelTaskIDs, Misc::FormatArray(aTitles, '\n'));
 }
 
 BOOL CToDoCtrl::CopySelectedTask() const
@@ -6610,10 +6624,11 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	}
 
 	// Check we've got valid tasks to copy from
-	CTaskFile tasks;
 	CString sClipID = GetClipboardID();
+	CTaskFile tasks;
+	CDWordArray aSelTaskIDs;
 
-	if (!CTaskClipboard::GetTasks(sClipID, tasks))
+	if (!CTaskClipboard::GetTasks(sClipID, tasks, aSelTaskIDs))
 		return FALSE;
 
 	// Figure out where to paste to
@@ -6642,13 +6657,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	
 	if (bAsRef)
 	{
-		// remove tasks not originally selected
-		tasks.RemoveNonSelectedTasks();
-		
-		// pre-process the tasks to add themselves
-		// as a reference, and then to clear the task ID
-		// so that it gets a newly allocated one
-		PrepareTaskIDsForPasteAsRef(tasks);
+		PrepareTasksForPasteAsRef(tasks, aSelTaskIDs);
 	}
 	else
 	{
@@ -6706,8 +6715,28 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent, HTREEITEM htiDestAfter, 
-							   TDC_RESETIDS nResetIDs, BOOL bSelectAll)
+BOOL CToDoCtrl::RemoveNonSelectedTasks(const CDWordSet& mapSelTaskIDs, CTaskFile& tasks, HTASKITEM hTask)
+{
+	if (hTask)
+	{
+		// siblings first ie. before we might delete it
+		RemoveNonSelectedTasks(mapSelTaskIDs, tasks, tasks.GetNextTask(hTask)); // RECURSIVE CALL
+
+		if (!mapSelTaskIDs.Has(tasks.GetTaskID(hTask)))
+		{
+			tasks.DeleteTask(hTask); // will delete children
+			return TRUE;
+		}
+
+		// check children
+		RemoveNonSelectedTasks(mapSelTaskIDs, tasks, tasks.GetFirstTask(hTask)); // RECURSIVE CALL
+	}
+
+	return FALSE;
+}
+
+BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent, HTREEITEM htiDestAfter,
+								 TDC_RESETIDS nResetIDs, BOOL bSelectAll)
 {
 	if (!htiDestParent)
 		htiDestParent = TVI_ROOT;
@@ -6738,7 +6767,7 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	// restore selection
 	CDWordArray aSelTaskIDs;
 
-	if (bSelectAll && tasks.GetSelectedTaskIDs(aSelTaskIDs))
+	if (bSelectAll && tasks.GetTaskIDs(aSelTaskIDs))
 	{
 		m_taskTree.SelectTasks(aSelTaskIDs);
 	}
@@ -7643,12 +7672,10 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	CHTIList selection;
 	TSH().CopySelection(selection, bRemoveDupeSubtasks, TRUE);
 
-	CDWordSet mapSelTaskIDs;
-
 	// Note: this call can fail if, for instance, the filter is asking
 	// for incomplete tasks and the selected tasks have just been 
 	// marked completed
-	if (AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)) // Mark tasks as selected
+	if (AddTasksToTaskFile(selection, filter, tasks)) // Mark tasks as selected
 	{
 		AddSelectedTaskReferencesToTaskFile(filter, tasks);
 		AddSelectedTaskDependentsToTaskFile(filter, tasks);
@@ -7669,7 +7696,7 @@ void CToDoCtrl::AddSelectedTaskReferencesToTaskFile(const TDCGETTASKS& filter, C
 			TDCGETTASKS filterRefs(filter);
 			filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			VERIFY(AddTasksToTaskFile(lstReferences, filterRefs, tasks, NULL)); // Don't add to mapSelTaskIDs
+			VERIFY(AddTasksToTaskFile(lstReferences, filterRefs, tasks));
 		}
 	}
 }
@@ -7686,20 +7713,17 @@ void CToDoCtrl::AddSelectedTaskDependentsToTaskFile(const TDCGETTASKS& filter, C
 			TDCGETTASKS filterDeps(filter);
 			filterDeps.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			VERIFY(AddTasksToTaskFile(lstDependents, filterDeps, tasks, NULL)); // Don't add to mapSelTaskIDs
+			VERIFY(AddTasksToTaskFile(lstDependents, filterDeps, tasks));
 		}
 	}
 }
 
-int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const
+int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks) const
 {
 	BOOL bWantSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
 	BOOL bWantAllParents = filter.HasFlag(TDCGSTF_ALLPARENTS);
 	BOOL bWantImmediateParent = filter.HasFlag(TDCGSTF_IMMEDIATEPARENT);
 	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
-
-	if (pSelTaskIDs)
-		pSelTaskIDs->RemoveAll();
 
 	POSITION pos = listHTI.GetHeadPosition();
 
@@ -7722,15 +7746,10 @@ int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& fi
 		}
 
 		// does the user want this task's parent(s) ?
-		if ((bWantAllParents || bWantImmediateParent) && bHasParent)
+		if (bHasParent && (bWantAllParents || bWantImmediateParent))
 		{
 			if (AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks))
-			{
 				ASSERT(dwTaskID);
-
-				if (pSelTaskIDs)
-					pSelTaskIDs->Add(dwTaskID);
-			}
 		}
 		else
 		{
@@ -7745,35 +7764,15 @@ int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& fi
 			}
 
 			if (AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID))
-			{
 				ASSERT(dwTaskID);
-
-				if (pSelTaskIDs)
-					pSelTaskIDs->Add(dwTaskID);
-			}
 		}
 	}
 
-	// extra processing to identify the originally selected tasks
-	// in case the user wants to paste as references.
-	if (pSelTaskIDs)
-	{
-		pos = pSelTaskIDs->GetStartPosition();
-
-		while (pos)
-		{
-			DWORD dwSelID = pSelTaskIDs->GetNext(pos);
-			ASSERT(!bResolveReferences || !m_data.IsTaskReference(dwSelID));
-
-			tasks.SelectTask(dwSelID);
-		}
-	}
-
-	return (tasks.GetTaskCount());
+	return tasks.GetTaskCount();
 }
 
-BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, 
-												BOOL bAllParents, BOOL bWantSubtasks) const
+BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter,
+											   BOOL bAllParents, BOOL bWantSubtasks) const
 {
 	// add parents first, recursively if necessarily
 	HTREEITEM htiParent = m_taskTree.GetParentItem(hti);

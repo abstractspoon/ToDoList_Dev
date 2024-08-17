@@ -25,10 +25,16 @@ const LPCTSTR DEF_CLIPID		= _T("_emptyID_");
 
 //////////////////////////////////////////////////////////////////////
 
+CDWordArray CTaskClipboard::s_aSelTaskIDs;
+
+//////////////////////////////////////////////////////////////////////
+
 void CTaskClipboard::Reset()
 {
 	if (!IsEmpty())
 		::EmptyClipboard();
+
+	s_aSelTaskIDs.RemoveAll();
 }
 
 BOOL CTaskClipboard::IsEmpty()
@@ -36,7 +42,7 @@ BOOL CTaskClipboard::IsEmpty()
 	return !CClipboard::HasFormat(GetTasklistIDClipFmt());
 }
 
-BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CString& sValues, TDC_COLUMN nColID)
+BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const CDWordArray& aSelTaskIDs, const CString& sValues, TDC_COLUMN nColID)
 {
 	// Sanity checks
 	if (!tasks.GetTaskCount() || sID.IsEmpty() || (sValues.IsEmpty() && (nColID == TDCC_NONE)))
@@ -55,6 +61,8 @@ BOOL CTaskClipboard::SetTasks(const CTaskFile& tasks, const CString& sID, const 
 			cb.SetText(Misc::ToUpper(sID), GetTasklistIDClipFmt()) &&
 			cb.SetText(sValues))
 		{
+			s_aSelTaskIDs.Copy(aSelTaskIDs);
+
 			// Optional column identifier
 			if (nColID != TDCC_NONE)
 				return cb.SetText(Misc::Format((int)nColID), GetColumnIDClipFmt());
@@ -80,7 +88,6 @@ BOOL CTaskClipboard::TasklistIDMatches(const CString& sRefTasklistID)
 		FileMisc::LogText(_T("CTaskClipboard::ClipIDMatches(%s, %s) = %d"), sClipID, sRefTasklistID, bMatches);
 	
 	return bMatches;
-//	return (!sRefTasklistID.IsEmpty() && (sRefTasklistID.CompareNoCase(GetTasklistID()) == 0));
 }
 
 BOOL CTaskClipboard::HasTasks()
@@ -88,24 +95,30 @@ BOOL CTaskClipboard::HasTasks()
 	return (CClipboard::HasFormat(GetTasksClipFmt()) &&	!HasColumnTasks());
 }
 
+TDC_COLUMN CTaskClipboard::GetColumnID()
+{
+	if (!IsEmpty())
+	{
+		CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
+
+		if (!sColID.IsEmpty())
+			return (TDC_COLUMN)_ttoi(sColID);
+	}
+
+	// All else
+	return TDCC_NONE;
+}
+
 BOOL CTaskClipboard::HasColumnTasks()
 {
-	TDC_COLUMN nUnused;
-	return HasColumnTasks(nUnused);
+	return (GetColumnID() != TDCC_NONE);
 }
 
 BOOL CTaskClipboard::HasColumnTasks(TDC_COLUMN& nColID)
 {
-	if (IsEmpty())
-		return FALSE;
+	nColID = GetColumnID();
 
-	CString sColID = CClipboard().GetText(GetColumnIDClipFmt());
-
-	if (sColID.IsEmpty())
-		return FALSE;
-	
-	nColID = (TDC_COLUMN)_ttoi(sColID);
-	return TRUE;
+	return (nColID != TDCC_NONE);
 }
 
 BOOL CTaskClipboard::HasAttributeTask()
@@ -113,7 +126,12 @@ BOOL CTaskClipboard::HasAttributeTask()
 	return GetAttributeTask(CTaskFile()) != NULL;
 }
 
-BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
+int CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
+{
+	return GetTasks(sRefTasklistID, tasks, CDWordArray());
+}
+
+BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks, CDWordArray& aSelTaskIDs)
 {
 	ASSERT(!sRefTasklistID.IsEmpty());
 
@@ -129,9 +147,25 @@ BOOL CTaskClipboard::GetTasks(const CString& sRefTasklistID, CTaskFile& tasks)
 	if (!tasks.LoadContent(sXML) || !tasks.GetTaskCount())
 		return FALSE;
 
+	aSelTaskIDs.Copy(s_aSelTaskIDs);
+
 	// remove task references if the clip IDs do not match
 	if (!TasklistIDMatches(sRefTasklistID))
-		RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE);
+	{
+		CDWordSet mapSelTaskIDs;
+		mapSelTaskIDs.CopyFrom(aSelTaskIDs);
+
+		RemoveTaskReferences(tasks, tasks.GetFirstTask(), TRUE, mapSelTaskIDs);
+
+		// Sync returned task IDs
+		int nID = aSelTaskIDs.GetSize();
+
+		while (nID--)
+		{
+			if (!mapSelTaskIDs.Has(aSelTaskIDs[nID]))
+				aSelTaskIDs.RemoveAt(nID);
+		}
+	}
 
 	return TRUE;
 }
@@ -161,13 +195,15 @@ HTASKITEM CTaskClipboard::GetAttributeTask(CTaskFile& task)
 	return tasks.GetFirstTask();
 }
 
-void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings)
+void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings, CDWordSet& mapSelTaskIDs)
 {
 	if (!hTask)
 		return;
 
-	// handle next sibling first in case we want to delete hTask
-	// WITHOUT RECURSION
+	// process children first before their parent is potentially removed
+	RemoveTaskReferences(tasks, tasks.GetFirstTask(hTask), TRUE, mapSelTaskIDs);
+
+	// Handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
 	{
 		HTASKITEM hSibling = tasks.GetNextTask(hTask);
@@ -178,20 +214,17 @@ void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOO
 			HTASKITEM hNextSibling = tasks.GetNextTask(hSibling);
 
 			// FALSE == don't recurse on siblings
-			RemoveTaskReferences(tasks, hSibling, FALSE);
+			RemoveTaskReferences(tasks, hSibling, FALSE, mapSelTaskIDs);
 			
 			hSibling = hNextSibling;
 		}
 	}
 
 	// delete if reference
-	if (tasks.GetTaskReferenceID(hTask))
+	if (tasks.GetTaskReferenceID(hTask) > 0)
 	{
+		mapSelTaskIDs.Remove(tasks.GetTaskID(hTask));
 		tasks.DeleteTask(hTask);
-	}
-	else // process children
-	{
-		RemoveTaskReferences(tasks, tasks.GetFirstTask(hTask), TRUE);
 	}
 }
 

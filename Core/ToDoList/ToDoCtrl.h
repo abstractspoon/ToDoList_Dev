@@ -750,7 +750,7 @@ protected:
 	void ReposProjectName(CRect& rAvailable);
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 
-	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const;
+	int AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks) const;
 	int AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	BOOL AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter, BOOL bWantSubtasks = TRUE, DWORD dwParentID = 0) const;
 	BOOL AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, const TDCGETTASKS& filter, BOOL bAllParents, BOOL bWantSubtasks) const;
@@ -800,7 +800,7 @@ protected:
 	void PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bResetCreation, const CMapID2ID& mapID, BOOL bAndSiblings) const;
 	BOOL PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) const;
 	BOOL PrepareTaskLinkForPaste(TDCDEPENDENCY& depends, const CMapID2ID& mapID) const;
-	void PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const;
+	void PrepareTasksForPasteAsRef(CTaskFile& tasks, const CDWordArray& aSelTaskIDs = CDWordArray()) const;
 
 	void RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
@@ -839,6 +839,7 @@ protected:
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
 	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);
+	static int RemoveNonSelectedTasks(const CDWordSet& mapSelTaskIDs, CTaskFile& tasks, HTASKITEM hTask);
 };
 
 //{{AFX_INSERT_LOCATION}}
