@@ -6431,7 +6431,7 @@ BOOL CToDoCtrl::PasteAttributeColumnValues(TDC_COLUMN nToColID, BOOL bSelectedTa
 
 	if (bSelectedTasksOnly)
 	{
-		GetSelectedTaskIDs(aTaskIDs, TRUE, TRUE); // ordered
+		GetSelectedTaskIDs(aToTaskIDs, FALSE, TRUE); // ordered
 	}
 	else if (nNumFrom == 1)
 	{
