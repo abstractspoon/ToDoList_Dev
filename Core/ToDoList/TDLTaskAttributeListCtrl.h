@@ -218,12 +218,12 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
 	virtual void OnCancelEdit();
-	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
+	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rBtn) const;
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
-	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rBtn);
 	virtual UINT GetTextDrawFlags(int nCol) const;
 
 protected:
@@ -252,7 +252,8 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
-	int HitTestExtraButton(int nRow, int nNumExtraBtns) const;
+	int HitTestButtonID(int nRow) const;
+	int HitTestButtonID(int nRow, const CRect& rBtn) const;
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
@@ -265,6 +266,7 @@ protected:
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static HICON GetIcon(int nIcon);
+	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 
 private:
