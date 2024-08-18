@@ -166,7 +166,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	if (nWidth != DEF_BTNWIDTH)
 		eb.nWidth = GraphicsMisc::ScaleByDPIFactor(nWidth);
 	else
-		eb.nWidth = (GraphicsMisc::ScaleByDPIFactor(16) + 4); // 2 px padding
+		eb.nWidth = ICON_BTNWIDTH;
 
 	if (m_ilBtns.GetSafeHandle())
 	{
@@ -392,7 +392,7 @@ void CEnEdit::OnLButtonUp(UINT nFlags, CPoint point)
 	RedrawButtonByIndex(nBtnDown);
 
 	// process
-	if (nBtnDown == nBtnUp)
+	if ((nBtnDown == nBtnUp) && (nBtnUp < GetButtonCount()))
 	{
 		ClickButton(m_aButtons[nBtnUp].nID);
 		RedrawButtonByIndex(nBtnDown);

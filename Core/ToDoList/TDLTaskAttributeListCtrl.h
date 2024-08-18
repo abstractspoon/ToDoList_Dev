@@ -245,12 +245,14 @@ protected:
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
 	void HandleSingleFileLinkEdit(int nRow, const CString& sFile, BOOL bBtnClick);
+	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
+	int HitTestExtraButton(int nRow, int nNumExtraBtns) const;
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
@@ -263,6 +265,7 @@ protected:
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static HICON GetIcon(int nIcon);
+	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 
 private:
 	// ---------------------------------------------------------------------

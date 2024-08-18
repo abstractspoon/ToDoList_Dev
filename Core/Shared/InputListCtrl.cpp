@@ -596,70 +596,31 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 		return FALSE;
 
 	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
 
 	switch (GetCellType(nRow, nCol))
 	{
 		case ILCT_DATE:
-			if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_WIN7))
-			{
-				// Draw underlying button
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
-
-				// Draw date drop arrow
-				CThemed th;
-				th.Open(this, _T("DATEPICKER"));
-
-				th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, (bEnabled ? DPSCBR_NORMAL : DPSCBR_DISABLED), rButton);
-			}
-			else
-			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
-			}
+			DrawDateButton(pDC, rButton, dwState);
 			break;
 
 		case ILCT_DROPLIST:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
+			DrawDropListButton(pDC, rButton, dwState);
 			break;
 					
 		case ILCT_CUSTOMBTN:
-			CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
+			DrawBlankButton(pDC, rButton, dwState);
 			break;
 					
 		case ILCT_POPUPMENU:
-			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
-
-				// Draw arrow
-				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-
-				UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
-				GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rButton, nFlags, &GraphicsMisc::Marlett());
-			}
+			DrawPopupMenuButton(pDC, rButton, dwState);
 			break;
 
 		case ILCT_BROWSE:
-			{
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBONOARROW, dwState);
-
-				// Draw ellipsis
-				CRect rText(rButton);
-
-				rText.left += (rText.Width() % 2);
-				rText.top += (rText.Height() % 2);
-
-				pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
-				pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
-			}
+			DrawBrowseButton(pDC, rButton, dwState);
 			break;
 			
 		case ILCT_CHECK:
-			{
-				if (!sText.IsEmpty())
-					dwState |= DFCS_CHECKED;
-
-				CThemed::DrawFrameControl(this, pDC, rButton, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
-			}
+			DrawCheckBoxButton(pDC, rButton, dwState | (sText.IsEmpty() ? 0 : DFCS_CHECKED));
 			break;
 
 		default:
@@ -667,6 +628,83 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 	}
 
 	return TRUE;
+}
+
+void CInputListCtrl::DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+{
+	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, dwState);
+}
+
+void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState)
+{
+	DrawBlankButton(pDC, rBtn, dwState);
+
+	const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+
+	CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
+	GraphicsMisc::CentreRect(rIcon, rBtn);
+
+	::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+}
+
+void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+{
+	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
+
+	if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_WIN7))
+	{
+		// Draw underlying button
+		DrawBlankButton(pDC, rBtn, dwState);
+
+		// Draw date drop arrow
+		CThemed th;
+		th.Open(this, _T("DATEPICKER"));
+
+		th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, (bEnabled ? DPSCBR_NORMAL : DPSCBR_DISABLED), rBtn);
+	}
+	else
+	{
+		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
+	}
+}
+
+void CInputListCtrl::DrawPopupMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+{
+	DrawBlankButton(pDC, rBtn, dwState);
+
+	// Draw arrow
+	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
+
+	pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
+
+	UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
+	GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rBtn, nFlags, &GraphicsMisc::Marlett());
+}
+
+void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+{
+	DrawBlankButton(pDC, rBtn, dwState);
+
+	// Draw ellipsis
+	CRect rText(rBtn);
+
+	rText.left += (rText.Width() % 2);
+	rText.top += (rText.Height() % 2);
+
+	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
+
+	pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
+	pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
+}
+
+void CInputListCtrl::DrawDropListButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+{
+	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
+}
+
+void CInputListCtrl::DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+{
+	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
 }
 
 BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
@@ -1267,11 +1305,20 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
 	{
-		if (ctrl.GetDlgItem(1001))
-			ctrl.GetDlgItem(1001)->ShowWindow(SW_SHOW);
+		CEdit* pEdit = (CEdit*)ctrl.GetDlgItem(1001);
 
-		if (bBtnClick || !ctrl.GetDlgItem(1001))
+		if (pEdit)
+		{
+			pEdit->ShowWindow(SW_SHOW);
+			pEdit->SetSel(0, -1);
+		}
+
+		if (bBtnClick || pEdit)
 			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
+	}
+	else if (ctrl.IsKindOf(RUNTIME_CLASS(CEdit)))
+	{
+		((CEdit&)ctrl).SetSel(0, -1);
 	}
 	else if (ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{

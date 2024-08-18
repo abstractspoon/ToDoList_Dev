@@ -177,6 +177,14 @@ protected:
 	BOOL CellHasButton(int nRow, int nCol) const;
 	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
 
+	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState);
+	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawPopupMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawDropListButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+
 private:
 	void RecalcHotButtonRects();
 	BOOL IsButtonHot(int nRow, int nCol) const;

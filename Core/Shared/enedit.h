@@ -11,6 +11,7 @@
 #include "hottracker.h"
 #include "tooltipctrlex.h"
 #include "enimagelist.h"
+#include "GraphicsMisc.h"
 
 #include <afxtempl.h>
 
@@ -18,6 +19,7 @@
 // CEnEdit window
 
 const int DEF_BTNWIDTH = ::GetSystemMetrics(SM_CXHTHUMB);
+const int ICON_BTNWIDTH = (GraphicsMisc::ScaleByDPIFactor(16) + 4);
 const int CALC_BTNWIDTH = -1;
 
 /////////////////////////////////////////////////////////////////////////////
