@@ -329,19 +329,18 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 		
 			lpncsp->rgrc[0].right -= GetButtonsWidth();
 
-			if (!m_bParentIsCombo)
+			if (m_bParentIsCombo)
 			{
-				lpncsp->rgrc[0].right += (GetSystemMetrics(SM_CXEDGE) - m_nBtnPadding);
+				lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
+
+				if (m_nBtnPadding == 0)
+					lpncsp->rgrc[0].right++;
+				else
+					lpncsp->rgrc[0].right -= m_nBtnPadding;
 			}
 			else
 			{
-				lpncsp->rgrc[0].right--;
-
-				if (m_nBtnPadding == 0)
-				{
-					// Compensate for the fact that we will be rendering our buttons into the combo DC
-					lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
-				}
+				lpncsp->rgrc[0].right += (GetSystemMetrics(SM_CXEDGE) - m_nBtnPadding);
 			}
 		}
 	}
@@ -814,18 +813,11 @@ int CEnEdit::GetButtonsWidth() const
 	int nWidth = 0, nNumBtns = GetButtonCount();
 
 	for (int nBtn = 0; nBtn < nNumBtns; nBtn++)
-		nWidth += (GetButtonWidthByIndex(nBtn) + (m_nBtnPadding ? 1 : 0));
-
- 	// trim extra final spacing
+		nWidth += GetButtonWidthByIndex(nBtn);
+	
+	// Add button spacing
 	if (m_nBtnPadding)
-	{
-		nWidth--;
-	}
-	else if (m_bParentIsCombo)
-	{
-		// Compensate for the fact that we will be rendering our buttons into the combo DC
-		nWidth -= GetSystemMetrics(SM_CXEDGE);
-	}
+		nWidth += (nNumBtns - 1);
 	
 	return max(nWidth, 0);
 }
