@@ -67,7 +67,7 @@ enum
 
 	ID_BTN_TIMETRACK = 10,
 	ID_BTN_ADDLOGGEDTIME,
-	ID_BTN_SELECTDEPENDS,
+	ID_BTN_VIEWDEPENDS,
 	ID_BTN_EDITDEPENDS,
 	ID_BTN_BROWSEFILE,
 };
@@ -149,7 +149,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
-	m_eDepends.AddButton(ID_BTN_SELECTDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_TDC_DEPENDSLINK_TIP));
+	m_eDepends.AddButton(ID_BTN_VIEWDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_TDC_DEPENDSLINK_TIP));
 	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
 
 	m_eTimePeriod.EnableButtonPadding(FALSE);
@@ -821,7 +821,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 	case TDCA_ICON:
 	case TDCA_REMINDER:
-		nColType = ILCT_CUSTOMBTN;
+		nColType = ILCT_ICON;
 		break;
 
 	case TDCA_RECURRENCE:
@@ -836,7 +836,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		break;
 
 	case TDCA_FILELINK:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_ICON : ILCT_DROPLIST);
 		break;
 
 	default:
@@ -864,7 +864,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 				case TDCCA_DATE:		nColType = ILCT_DATE;		break;
 				case TDCCA_BOOL:		nColType = ILCT_CHECK;		break;
 				case TDCCA_ICON:		nColType = ILCT_BROWSE;		break;
-				case TDCCA_FILELINK:	nColType = ILCT_CUSTOMBTN;	break;
+				case TDCCA_FILELINK:	nColType = ILCT_ICON;	break;
 
 				default:
 					ASSERT(0);
@@ -1400,7 +1400,8 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 	case TDCA_FILELINK:
 		if (GetItemText(nRow, nCol).IsEmpty())
 		{
-			rBtn.left -= 2; // To compensate for the inflation when drawing
+			// Compensate for drawing into the combo's dc
+			rBtn.left -= GetSystemMetrics(SM_CXEDGE);
 		}
 		else
 		{
@@ -1409,11 +1410,17 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 		}
 		break;
 
+	case TDCA_DEPENDENCY:
+		// 'Select Dependencies' button
+		rBtn.left -= ICON_BTNWIDTH;
+		break;
+
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && 
 			(m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_FILELINK))
 		{
-			rBtn.left -= 2; // To compensate for the inflation when drawing
+			// Compensate for drawing into the combo's dc
+			rBtn.left -= GetSystemMetrics(SM_CXEDGE);
 		}
 		break;
 	}
@@ -1444,6 +1451,21 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 	switch (nAttribID)
 	{
+	case TDCA_DEPENDENCY:
+		{
+			// 'Selected Dependencies' button
+			CRect rCellBtn;
+
+			GetExtraButtonRect(rBtn, 0, rCellBtn);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_SHOWDEPENDS), dwState);
+
+			// Default button
+			rCellBtn.left = rCellBtn.right;
+			rCellBtn.right = rBtn.right;
+			DrawBrowseButton(pDC, rCellBtn, dwState);
+		}
+		return TRUE;
+
 	case TDCA_FILELINK:
 		if (sText.IsEmpty())
 		{
@@ -2596,10 +2618,20 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_DEPENDENCY:
 		if (bBtnClick)
 		{
-			PrepareControl(m_eDepends, nRow, nCol);
+			int nBtnID = HitTestButtonID(nRow);
+			ASSERT(nBtnID != ID_BTN_NONE);
 
-			if (GetParent()->SendMessage(WM_TDCM_EDITTASKATTRIBUTE, nAttribID))
-				RefreshSelectedTasksValue(nRow);
+			if (nBtnID == ID_BTN_VIEWDEPENDS)
+			{
+				OnEnEditButtonClick(0, nBtnID);
+			}
+			else
+			{
+				PrepareControl(m_eDepends, nRow, nCol);
+
+				if (OnEnEditButtonClick(0, ID_BTN_EDITDEPENDS))
+					RefreshSelectedTasksValue(nRow);
+			}
 		}
 		else
 		{
@@ -2612,6 +2644,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		{
 			// Check if one of the sub-buttons was clicked
 			int nBtnID = HitTestButtonID(nRow);
+			ASSERT(nBtnID != ID_BTN_NONE);
 
 			if (nBtnID != ID_BTN_DEFAULT)
 			{
@@ -2624,7 +2657,11 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 		break;
 
 	case TDCA_FILELINK:
-		if (sValue.IsEmpty() || (HitTestButtonID(nRow) == ID_BTN_BROWSEFILE))
+		if (sValue.IsEmpty())
+		{
+			HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
+		}
+		else if (bBtnClick && (HitTestButtonID(nRow) == ID_BTN_BROWSEFILE))
 		{
 			HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
 		}
@@ -2704,6 +2741,11 @@ int CTDLTaskAttributeListCtrl::HitTestButtonID(int nRow, const CRect& rBtn) cons
 		{
 			return ID_BTN_BROWSEFILE;
 		}
+		break;
+
+	case TDCA_DEPENDENCY:
+		if (HitTestExtraButton(nRow, rBtn, ptMouse, 1) == 0)
+			return ID_BTN_VIEWDEPENDS;
 		break;
 	}
 
@@ -3047,7 +3089,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM /*wParam*/, LPARAM
 		ASSERT(nAttribID == TDCA_TIMESPENT);
 		return GetParent()->SendMessage(WM_TDCM_ADDTIMETOLOGFILE);
 
-	case ID_BTN_SELECTDEPENDS:
+	case ID_BTN_VIEWDEPENDS:
 		ASSERT(nAttribID == TDCA_DEPENDENCY);
 		return GetParent()->SendMessage(WM_TDCM_SELECTDEPENDENCIES);
 
@@ -3291,13 +3333,14 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	static CEnString sTooltip;
 	sTooltip.Empty();
 	
+	// Handle 'extra buttons' first
 	CRect rBtn;
 	
 	if (GetButtonRect(nRow, nCol, rBtn) && rBtn.PtInRect(point))
 	{
-		int nHit = HitTestButtonID(nRow, rBtn);
+		int nBtnID = HitTestButtonID(nRow, rBtn);
 
-		switch (nHit)
+		switch (nBtnID)
 		{
 		case ID_BTN_ADDLOGGEDTIME:
 			sTooltip.LoadString(IDS_TDC_ADDLOGGEDTIME);
@@ -3306,10 +3349,14 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		case ID_BTN_TIMETRACK:
 			sTooltip.LoadString(IDS_TDC_STARTSTOPCLOCK);
 			break;
+
+		case ID_BTN_VIEWDEPENDS:
+			sTooltip.LoadString(IDS_TDC_DEPENDSLINK_TIP);
+			break;
 		}
 
 		if (!sTooltip.IsEmpty())
-			return CToolTipCtrlEx::SetToolInfo(*pTI, *this, sTooltip, MAKELONG(nRow, nCol) + nHit);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, *this, sTooltip, MAKELONG(nRow, nCol) + nBtnID);
 	}
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
