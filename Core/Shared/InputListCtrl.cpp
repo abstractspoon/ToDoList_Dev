@@ -30,10 +30,6 @@ IMPLEMENT_DYNAMIC(CInputListCtrl, CEnListCtrl)
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int BTN_WIDTH  = GetSystemMetrics(SM_CXVSCROLL);
-
-/////////////////////////////////////////////////////////////////////////////
-
 static DWORD PROMPT = 0xfefefefe;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -607,7 +603,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 			DrawDropListButton(pDC, rButton, dwState);
 			break;
 					
-		case ILCT_CUSTOMBTN:
+		case ILCT_ICON:
 			DrawBlankButton(pDC, rButton, dwState);
 			break;
 					
@@ -727,22 +723,25 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	{
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
-	case ILCT_CUSTOMBTN:
 	case ILCT_DROPLIST:
-		rButton.left = (rButton.right - BTN_WIDTH);
+		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
+		break;
+
+	case ILCT_ICON:
+		rButton.left = (rButton.right - EE_BTNWIDTH_ICON);
 		break;
 
 	case ILCT_DATE:
-		rButton.left = (rButton.right - BTN_WIDTH);
+		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
 
-		// XP does not support the fancy new date dropdown
+		// Only Win7 and above supports the fancy new date dropdown icon
 		if ((COSVersion() >= OSV_WIN7) && CThemed::AreControlsThemed())
-			rButton.left -= BTN_WIDTH;
+			rButton.left -= EE_BTNWIDTH_DEFAULT;
 		break;
 
 	case ILCT_CHECK:
-		rButton.left += ((rButton.Width() - BTN_WIDTH) / 2);
-		rButton.right = (rButton.left + BTN_WIDTH);
+		rButton.left += ((rButton.Width() - EE_BTNWIDTH_DEFAULT) / 2);
+		rButton.right = (rButton.left + EE_BTNWIDTH_DEFAULT);
 		break;
 
 	case ILCT_TEXT:

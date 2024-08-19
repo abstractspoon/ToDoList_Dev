@@ -95,7 +95,7 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter)
 		if (s_hBrowseImage)
 			AddButton(FEBTN_BROWSE, s_hBrowseImage, sTip);
 		else
-			AddButton(FEBTN_BROWSE, BROWSEBTN, sTip, CALC_BTNWIDTH, _T("Wingdings"));
+			AddButton(FEBTN_BROWSE, BROWSEBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
 	}
 
 	if (m_nStyle & FES_GOBUTTON)
@@ -106,7 +106,7 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter)
 		if (s_hGoImage)
 			AddButton(FEBTN_GO, s_hGoImage, sTip);
 		else
-			AddButton(FEBTN_GO, VIEWBTN, sTip, CALC_BTNWIDTH, _T("Wingdings"));
+			AddButton(FEBTN_GO, VIEWBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
 	}
 
 	// mask

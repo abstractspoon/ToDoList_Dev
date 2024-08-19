@@ -96,7 +96,7 @@ const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_COL_WIDTH		= (4 * ICON_BTNWIDTH);
+const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
 
 const int VALUE_VARIES = 1;
 
@@ -1390,10 +1390,10 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 		{
 			// Track time button
 			if (!m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
-				rBtn.left -= ICON_BTNWIDTH;
+				rBtn.left -= EE_BTNWIDTH_ICON;
 
 			// Add logged time button
-			rBtn.left -= ICON_BTNWIDTH;
+			rBtn.left -= EE_BTNWIDTH_ICON;
 		}
 		break;
 
@@ -1406,13 +1406,13 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 		else
 		{
 			// view file link
-			rBtn.left -= ICON_BTNWIDTH;
+			rBtn.left -= EE_BTNWIDTH_ICON;
 		}
 		break;
 
 	case TDCA_DEPENDENCY:
 		// 'Select Dependencies' button
-		rBtn.left -= ICON_BTNWIDTH;
+		rBtn.left -= EE_BTNWIDTH_ICON;
 		break;
 
 	default:
@@ -2771,8 +2771,8 @@ int CTDLTaskAttributeListCtrl::HitTestExtraButton(int nRow, const CRect& rBtn, c
 BOOL CTDLTaskAttributeListCtrl::GetExtraButtonRect(const CRect& rBtn, int nSubBtn, CRect& rSubBtn)
 {
 	rSubBtn = rBtn;
-	rSubBtn.left += (nSubBtn * ICON_BTNWIDTH);
-	rSubBtn.right = (rSubBtn.left + ICON_BTNWIDTH);
+	rSubBtn.left += (nSubBtn * EE_BTNWIDTH_ICON);
+	rSubBtn.right = (rSubBtn.left + EE_BTNWIDTH_ICON);
 
 	return rSubBtn.IntersectRect(rSubBtn, rBtn);
 }

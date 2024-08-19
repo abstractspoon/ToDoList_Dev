@@ -111,7 +111,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nW
 
 BOOL CEnEdit::InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, LPCTSTR szFont, BOOL bSymbolFont)
 {
-	if (nWidth < CALC_BTNWIDTH || !nID)
+	if (nWidth < EE_BTNWIDTH_CALCULATE || !nID)
 		return FALSE;
 
 	nPos = max(nPos, 0);
@@ -163,10 +163,10 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	eb.nID = nID;
 	eb.sTip = szTip;
 
-	if (nWidth != DEF_BTNWIDTH)
+	if (nWidth != EE_BTNWIDTH_DEFAULT)
 		eb.nWidth = GraphicsMisc::ScaleByDPIFactor(nWidth);
 	else
-		eb.nWidth = ICON_BTNWIDTH;
+		eb.nWidth = EE_BTNWIDTH_ICON;
 
 	if (m_ilBtns.GetSafeHandle())
 	{
@@ -497,7 +497,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 			if (m_nBtnPadding == 0)
 			{
 				GetParent()->GetWindowRect(rBtn);
-				rBtn.right -= DEF_BTNWIDTH;
+				rBtn.right -= EE_BTNWIDTH_DEFAULT;
 			}
 			else
 			{
@@ -547,7 +547,7 @@ void CEnEdit::OnNcPaint()
 			CRect rWindow;
 		
 			GetParent()->GetWindowRect(rWindow);
-			rWindow.right -= DEF_BTNWIDTH;
+			rWindow.right -= EE_BTNWIDTH_DEFAULT;
 		
 			NcPaint(&dc, rWindow);
 		}
@@ -766,7 +766,7 @@ BOOL CEnEdit::SetButtonCaption(UINT nID, LPCTSTR szCaption)
 		eb.sCaption = sCaption;
 
 		// recalc width?
-		if (eb.nWidth == CALC_BTNWIDTH)
+		if (eb.nWidth == EE_BTNWIDTH_CALCULATE)
 			RecalcBtnHotRects();
 
 		if (GetSafeHwnd())

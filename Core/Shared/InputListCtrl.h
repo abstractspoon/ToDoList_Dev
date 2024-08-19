@@ -27,7 +27,7 @@ enum IL_COLUMNTYPE
 	ILCT_DATE,
 	ILCT_CHECK,
 	ILCT_POPUPMENU, 
-	ILCT_CUSTOMBTN,
+	ILCT_ICON,
 }; 
 
 /////////////////////////////////////////////////////////////////////////////
