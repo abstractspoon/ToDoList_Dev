@@ -269,7 +269,7 @@ class CDWordSet : public CSet<DWORD>
 {
 public:
 	CDWordSet() {}
-	CDWordSet(const CSet& other) : CSet<DWORD>(other) {}
+	CDWordSet(const CSet<DWORD>& other) : CSet<DWORD>(other) {}
 	CDWordSet(const CDWordArray& other) : CSet<DWORD>() { CopyFrom(other); }
 	CDWordSet(const DWORD* pOther, int nNumOther) : CSet<DWORD>(pOther, nNumOther) {}
 
@@ -283,7 +283,7 @@ class CUIntSet : public CSet<UINT>
 {
 public:
 	CUIntSet() {}
-	CUIntSet(const CSet& other) : CSet<UINT>(other) {}
+	CUIntSet(const CSet<UINT>& other) : CSet<UINT>(other) {}
 	CUIntSet(const CUIntArray& other) : CSet<UINT>() { CopyFrom(other); }
 	CUIntSet(const UINT* pOther, int nNumOther) : CSet<UINT>(pOther, nNumOther) {}
 
