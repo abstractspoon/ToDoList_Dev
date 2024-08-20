@@ -812,7 +812,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	case TDCA_DONETIME:
 	case TDCA_DUETIME:
 	case TDCA_STARTTIME:
-		nColType = ILCT_DROPLIST;
+		nColType = ILCT_COMBO;
 		break;
 
 	case TDCA_ICON:
@@ -832,7 +832,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		break;
 
 	case TDCA_FILELINK:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_DROPLIST);
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_CUSTOMBTN : ILCT_COMBO);
 		break;
 
 	default:
@@ -843,7 +843,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 
 			if (pDef->IsList())
 			{
-				nColType = ILCT_DROPLIST;
+				nColType = ILCT_COMBO;
 			}
 			else
 			{
@@ -870,7 +870,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		}
 		else if (IsCustomTime(nAttribID))
 		{
-			nColType = ILCT_DROPLIST;
+			nColType = ILCT_COMBO;
 		}
 		else
 		{

@@ -618,7 +618,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 			}
 			break;
 
-		case ILCT_DROPLIST:
+		case ILCT_COMBO:
 			CThemed::DrawFrameControl(this, pDC, rButton, DFC_COMBO, dwState);
 			break;
 					
@@ -690,7 +690,7 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
 	case ILCT_CUSTOMBTN:
-	case ILCT_DROPLIST:
+	case ILCT_COMBO:
 		rButton.left = (rButton.right - BTN_WIDTH);
 		break;
 

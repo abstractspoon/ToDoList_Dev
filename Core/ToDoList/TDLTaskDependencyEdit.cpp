@@ -273,12 +273,12 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	
 	if (m_bShowLeadInTimes)
 	{
-		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_COMBO);
 		AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
 	}
 	else
 	{
-		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_DROPLIST);
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_COMBO);
 	}
 
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
