@@ -145,7 +145,7 @@ void CKanbanFixedColumnListCtrl::InitState()
 	GetClientRect(rClient);
 	
 	AddCol(CEnString(IDS_COLUMNTITLE),	((rClient.Width() * 3) / 10));
-	AddCol(CEnString(IDS_ATTRIBVALUES),	((rClient.Width() * 3) / 10), ILCT_DROPLIST);
+	AddCol(CEnString(IDS_ATTRIBVALUES),	((rClient.Width() * 3) / 10), ILCT_COMBO);
 //	AddCol(CEnString(IDS_MAXTASKCOUNT),	((rClient.Width() * 2) / 10));
 
 	if (!Misc::IsHighContrastActive())

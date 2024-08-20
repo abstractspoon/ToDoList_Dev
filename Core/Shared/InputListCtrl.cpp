@@ -723,12 +723,14 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	{
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
-	case ILCT_DROPLIST:
 		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
 		break;
 
 	case ILCT_ICON:
 		rButton.left = (rButton.right - EE_BTNWIDTH_ICON);
+
+	case ILCT_COMBO:
+		rButton.left = (rButton.right - BTN_WIDTH);
 		break;
 
 	case ILCT_DATE:

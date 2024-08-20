@@ -864,43 +864,28 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 
 	rBtn.OffsetRect(-rWindow.TopLeft());
 
-	if (bThemed)
+	// note: we do not take account of ES_READONLY as the effect of this
+	// is not deterministic at this level so we assume derived classes or 
+	// parents have handled it
+	UINT nFlags = DFCS_ADJUSTRECT;
+	
+	if (!bEnabled)
 	{
-		UINT nFlags = DFCS_ADJUSTRECT;
-		
-		// note: we do not take account of ES_READONLY as the effect of this
-		// is not deterministic at this level so we assume derived classes or 
-		// parents have handled it
-		if (!bEnabled)
-		{
-			nFlags |= DFCS_INACTIVE;
-		}
-		else if (bDown)
-		{
-			nFlags |= DFCS_PUSHED;
-		}
-		else if (bHot)
-		{
-			nFlags |= DFCS_HOT;
-		}
-		
-		// Always draw button using Combo-style theming for consistency
-		// across Windows XP, 7, 10 and 11
-		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, nFlags);
+		nFlags |= DFCS_INACTIVE;
 	}
-	else // unthemed combo style
+	else if (bDown)
 	{
-		if (bEnabled && bDown)
-		{
-			pDC->DrawEdge(rBtn, BDR_RAISEDOUTER, BF_RECT | BF_MIDDLE | BF_FLAT);
-		}
-		else
-		{
-			pDC->DrawEdge(rBtn, BDR_RAISEDOUTER, BF_ADJUST | BF_RECT | BF_MIDDLE);
-			pDC->DrawEdge(rBtn, BDR_RAISEDINNER, BF_RECT | BF_MIDDLE);
-		}
+		nFlags |= DFCS_PUSHED;
 	}
-
+	else if (bHot)
+	{
+		nFlags |= DFCS_HOT;
+	}
+	
+	// Always draw button using Combo-stype theming for consistency
+	// across Windows XP, 7, 10 and 11
+	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, nFlags);
+	
 	// drop menu arrow
 	if (eb.bDropMenu)
 	{

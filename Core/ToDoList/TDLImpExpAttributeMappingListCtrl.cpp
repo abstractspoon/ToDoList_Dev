@@ -115,7 +115,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 
 		SetColumnType(IMPORT_COLUMNNAME, ILCT_TEXT);
 		EnableColumnEditing(IMPORT_COLUMNNAME, FALSE);
-		SetColumnType(IMPORT_COLUMNID, ILCT_DROPLIST);
+		SetColumnType(IMPORT_COLUMNID, ILCT_COMBO);
 	}
 	else // export
 	{

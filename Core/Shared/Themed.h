@@ -157,6 +157,7 @@ protected:
 
 	// helpers
 	static BOOL GetThemeClassPartState(int nType, int nState, CString& sThClass, int& nThPart, int& nThState); 
+	static BOOL DrawUnthemedFrameControl(CDC* pDC, const CRect& rect, UINT nType, UINT nState);
 };
 
 #endif // !defined(AFX_THEMED_H__2FA586FE_B790_4315_93B9_01000725B68A__INCLUDED_)
