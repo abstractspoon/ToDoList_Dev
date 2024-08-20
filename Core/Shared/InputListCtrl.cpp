@@ -580,7 +580,7 @@ DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 	if (!IsButtonEnabled(nRow, nCol))
 		return DFCS_INACTIVE;
 
-	if (bSelected || IsButtonHot(nRow, nCol))
+	if ((bSelected && (::GetFocus() == *this)) || IsButtonHot(nRow, nCol))
 		return DFCS_HOT;
 
 	return 0;
