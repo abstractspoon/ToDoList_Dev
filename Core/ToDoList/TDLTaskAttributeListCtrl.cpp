@@ -149,8 +149,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
-	m_eDepends.AddButton(ID_BTN_VIEWDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_TDC_DEPENDSLINK_TIP));
-	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_OPTIONS));
+	m_eDepends.AddButton(ID_BTN_VIEWDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_VIEW));
+	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_ATTRIBTIP_MODIFY));
 
 	m_eTimePeriod.EnableButtonPadding(FALSE);
 	m_eTimePeriod.SetDefaultButton(0);
@@ -3333,7 +3333,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	static CEnString sTooltip;
 	sTooltip.Empty();
 	
-	// Handle 'extra buttons' first
+	// Button tooltips
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	CRect rBtn;
 	
 	if (GetButtonRect(nRow, nCol, rBtn) && rBtn.PtInRect(point))
@@ -3351,16 +3352,67 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			break;
 
 		case ID_BTN_VIEWDEPENDS:
-			sTooltip.LoadString(IDS_TDC_DEPENDSLINK_TIP);
+			sTooltip.LoadString(IDS_VIEW);
+			break;
+
+		case ID_BTN_EDITDEPENDS:
+			sTooltip.LoadString(IDS_ATTRIBTIP_MODIFY);
+			break;
+
+		case ID_BTN_BROWSEFILE:
+			sTooltip.LoadString(IDS_BROWSE);
+			break;
+
+		case ID_BTN_DEFAULT:
+			switch (nAttribID)
+			{
+			case TDCA_DEPENDENCY:
+			case TDCA_COLOR:
+			case TDCA_ICON:
+			case TDCA_RECURRENCE:
+			case TDCA_REMINDER:
+				sTooltip.LoadString(IDS_ATTRIBTIP_MODIFY);
+				break;
+
+			case TDCA_TIMEESTIMATE:
+			case TDCA_TIMESPENT:
+			case TDCA_TIMEREMAINING:
+				sTooltip.LoadString(IDS_TIMEUNITS);
+				break;
+
+			default:
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULL);
+
+					switch (pDef->GetDataType())
+					{
+					case TDCCA_FILELINK:
+						sTooltip.LoadString(IDS_BROWSE);
+						break;
+
+					case TDCCA_TIMEPERIOD:
+						sTooltip.LoadString(IDS_TIMEUNITS);
+						break;
+
+					case TDCCA_ICON:
+						if (!pDef->IsList())
+							sTooltip.LoadString(IDS_ATTRIBTIP_MODIFY);
+						break;
+					}
+				}
+				break;
+
+			}
 			break;
 		}
 
 		if (!sTooltip.IsEmpty())
 			return CToolTipCtrlEx::SetToolInfo(*pTI, *this, sTooltip, MAKELONG(nRow, nCol) + nBtnID);
 	}
-
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
+	
+	// Value tooltips
 	switch (nCol)
 	{
 	case ATTRIB_COL:
