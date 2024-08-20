@@ -287,6 +287,32 @@ BOOL CThemed::DrawUnthemedFrameControl(CDC* pDC, const CRect& rect, UINT nType, 
 	case DFC_COMBONOARROW:
 		nType = DFC_BUTTON;
 		nState |= DFCS_BUTTONPUSH;
+		// fall through
+
+	case DFC_BUTTON:
+		if (nState & DFCS_BUTTONPUSH)
+		{
+			// We draw push buttons ourselves to be consistent with how 
+			// DrawFrameControl draws the combo/scroll button
+			CRect rFrame(rect);
+
+			if (nState & DFCS_PUSHED)
+			{
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DSHADOW), GetSysColor(COLOR_3DSHADOW));
+			}
+			else
+			{
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DFACE), GetSysColor(COLOR_3DDKSHADOW));
+				rFrame.DeflateRect(1, 1);
+
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DHIGHLIGHT), GetSysColor(COLOR_3DSHADOW));
+			}		
+			
+			rFrame.DeflateRect(1, 1);
+			pDC->FillSolidRect(rFrame, GetSysColor(COLOR_3DFACE));
+
+			return TRUE;
+		}
 		break;
 	}
 
