@@ -2256,9 +2256,17 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 				case TDCCA_ICON:
 					if (pDef->IsMultiList())
+					{
 						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
-					else
+					}
+					else if (pDef->IsList())
+					{
 						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+					}
+					else
+					{
+						// TODO
+					}
 					break;
 
 				case TDCCA_BOOL:
