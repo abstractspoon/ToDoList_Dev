@@ -182,7 +182,7 @@ protected:
 	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawPopupMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawDropListButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 
 private:

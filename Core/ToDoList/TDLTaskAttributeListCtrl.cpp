@@ -836,7 +836,7 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 		break;
 
 	case TDCA_FILELINK:
-		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_ICON : ILCT_DROPLIST);
+		nColType = (GetItemText(nRow, nCol).IsEmpty() ? ILCT_ICON : ILCT_COMBO);
 		break;
 
 	default:
@@ -1482,7 +1482,7 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 			// Default button
 			rCellBtn.left = rCellBtn.right;
 			rCellBtn.right = rBtn.right;
-			DrawDropListButton(pDC, rCellBtn, dwState);
+			DrawComboButton(pDC, rCellBtn, dwState);
 		}
 		return TRUE;
 

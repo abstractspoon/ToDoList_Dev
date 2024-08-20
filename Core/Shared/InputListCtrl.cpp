@@ -599,8 +599,8 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 			DrawDateButton(pDC, rButton, dwState);
 			break;
 
-		case ILCT_DROPLIST:
-			DrawDropListButton(pDC, rButton, dwState);
+		case ILCT_COMBO:
+			DrawComboButton(pDC, rButton, dwState);
 			break;
 					
 		case ILCT_ICON:
@@ -693,7 +693,7 @@ void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState
 	pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
 }
 
-void CInputListCtrl::DrawDropListButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
 {
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
 }
@@ -723,15 +723,12 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
 	{
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
+	case ILCT_COMBO:
 		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
 		break;
 
 	case ILCT_ICON:
 		rButton.left = (rButton.right - EE_BTNWIDTH_ICON);
-
-	case ILCT_COMBO:
-		rButton.left = (rButton.right - BTN_WIDTH);
-		break;
 
 	case ILCT_DATE:
 		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
