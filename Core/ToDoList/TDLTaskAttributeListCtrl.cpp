@@ -863,8 +863,8 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 				case TDCCA_TIMEPERIOD:	nColType = ILCT_POPUPMENU;	break;
 				case TDCCA_DATE:		nColType = ILCT_DATE;		break;
 				case TDCCA_BOOL:		nColType = ILCT_CHECK;		break;
-				case TDCCA_ICON:		nColType = ILCT_BROWSE;		break;
-				case TDCCA_FILELINK:	nColType = ILCT_ICON;	break;
+				case TDCCA_ICON:		nColType = ILCT_ICON;		break;
+				case TDCCA_FILELINK:	nColType = ILCT_ICON;		break;
 
 				default:
 					ASSERT(0);
@@ -1528,7 +1528,10 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 			case TDCCA_ICON:
 				if (!m_aCustomAttribDefs.IsListType(nAttribID))
+				{
+					DrawIconButton(pDC, rBtn, GetIcon(ICON_SELECTICON), dwState);
 					return TRUE;
+				}
 				break;
 			}
 		}
@@ -2364,7 +2367,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_ICON:
 				case TDCCA_FILELINK:
 				case TDCCA_BOOL:
-					break; // Handled by base class
+					break; // Handled by CInputListCtrl
 
 				case TDCCA_CALCULATION:
 					break; // Not editable
