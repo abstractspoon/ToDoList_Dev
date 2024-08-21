@@ -204,6 +204,7 @@ protected:
 	afx_msg LRESULT OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileLinkDisplay(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 

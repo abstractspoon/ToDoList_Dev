@@ -200,6 +200,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileLinkDisplay)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileLinkWantIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileLinkWantTooltip)
+	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnFileLinkNotifyBrowse)
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -1868,6 +1869,24 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	*pResult = 0;
+}
+
+LRESULT CTDLTaskAttributeListCtrl::OnFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam)
+{
+	ASSERT(wParam && lParam);
+
+	LPCTSTR szNewItemText = (LPCTSTR)lParam;
+
+	int nRow = GetCurSel();
+	ASSERT(nRow != CB_ERR);
+
+	if (szNewItemText != GetItemText(nRow, VALUE_COL))
+	{
+		SetItemText(nRow, VALUE_COL, szNewItemText);
+		NotifyParentEdit(nRow);
+	}
+
+	return 0L;
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetTimeEstimate(TDCTIMEPERIOD& timeEst) const
