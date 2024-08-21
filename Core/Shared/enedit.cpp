@@ -328,11 +328,10 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 			m_bFirstShow = FALSE; // in case we get here before OnNcPaint()
 		
 			lpncsp->rgrc[0].right -= GetButtonsWidth();
+			lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
 
 			if (m_bParentIsCombo)
 			{
-				lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
-
 				if (m_nBtnPadding == 0)
 					lpncsp->rgrc[0].right++;
 				else
@@ -340,7 +339,7 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 			}
 			else
 			{
-				lpncsp->rgrc[0].right += (GetSystemMetrics(SM_CXEDGE) - m_nBtnPadding);
+				lpncsp->rgrc[0].right -= m_nBtnPadding;
 			}
 		}
 	}
