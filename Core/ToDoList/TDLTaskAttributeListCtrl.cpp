@@ -1388,40 +1388,20 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 	{
 	case TDCA_TIMESPENT:
 		{
-			// Track time button
 			if (!m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
-				rBtn.left -= EE_BTNWIDTH_ICON;
+				rBtn.left -= EE_BTNWIDTH_ICON; // 'Track time' button
 
-			// Add logged time button
-			rBtn.left -= EE_BTNWIDTH_ICON;
+			rBtn.left -= EE_BTNWIDTH_ICON; // 'Add logged time' button
 		}
 		break;
 
 	case TDCA_FILELINK:
-		if (GetItemText(nRow, nCol).IsEmpty())
-		{
-			// Compensate for drawing into the combo's dc
-			rBtn.left -= GetSystemMetrics(SM_CXEDGE);
-		}
-		else
-		{
-			// view file link
-			rBtn.left -= EE_BTNWIDTH_ICON;
-		}
+		if (!GetItemText(nRow, nCol).IsEmpty())
+			rBtn.left -= EE_BTNWIDTH_ICON; // 'view file' link
 		break;
 
 	case TDCA_DEPENDENCY:
-		// 'Select Dependencies' button
-		rBtn.left -= EE_BTNWIDTH_ICON;
-		break;
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && 
-			(m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_FILELINK))
-		{
-			// Compensate for drawing into the combo's dc
-			rBtn.left -= GetSystemMetrics(SM_CXEDGE);
-		}
+		rBtn.left -= EE_BTNWIDTH_ICON; // 'Select Dependencies' button
 		break;
 	}
 
