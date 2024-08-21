@@ -362,7 +362,7 @@ CString CTimeEdit::FormatTimeHMS() const
 
 void CTimeEdit::OnSetReadOnly(BOOL bReadOnly)
 {
-	EnableButton(1, !bReadOnly && IsWindowEnabled());
+	EnableButton(TEBTN_UNITS, !bReadOnly);
 }
 
 void CTimeEdit::SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevUnits)
