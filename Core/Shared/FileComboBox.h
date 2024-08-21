@@ -19,6 +19,7 @@ public:
 	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
+	CString GetFirstFile() const;
 
 	void SetReadOnly(BOOL bReadOnly = TRUE);
 	void SetDefaultButton(UINT nID) { m_fileEdit.SetDefaultButton(nID); }

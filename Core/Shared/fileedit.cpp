@@ -87,17 +87,6 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter)
 	m_sFilter(szFilter),
 	m_sCurFolder(FileMisc::GetCwd())
 {
-	if (!(m_nStyle & FES_NOBROWSE))
-	{
-		CString sTip(s_sBrowseBtnTip.IsEmpty() ? FILEEDIT_BROWSE : s_sBrowseBtnTip);
-
-		// Default images take precedence
-		if (s_hBrowseImage)
-			AddButton(FEBTN_BROWSE, s_hBrowseImage, sTip);
-		else
-			AddButton(FEBTN_BROWSE, BROWSEBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
-	}
-
 	if (m_nStyle & FES_GOBUTTON)
 	{
 		BOOL bFolders = (m_nStyle & FES_FOLDERS);
@@ -107,6 +96,17 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter)
 			AddButton(FEBTN_GO, s_hGoImage, sTip);
 		else
 			AddButton(FEBTN_GO, VIEWBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
+	}
+
+	if (!(m_nStyle & FES_NOBROWSE))
+	{
+		CString sTip(s_sBrowseBtnTip.IsEmpty() ? FILEEDIT_BROWSE : s_sBrowseBtnTip);
+
+		// Default images take precedence
+		if (s_hBrowseImage)
+			AddButton(FEBTN_BROWSE, s_hBrowseImage, sTip);
+		else
+			AddButton(FEBTN_BROWSE, BROWSEBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
 	}
 
 	// mask
@@ -195,7 +195,7 @@ LRESULT CFileEdit::OnPaste(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CFileEdit::OnSetReadOnly(BOOL bReadOnly)
 {
-	EnableButton(FEBTN_BROWSE, !bReadOnly && IsWindowEnabled());
+	EnableButton(FEBTN_BROWSE, !bReadOnly);
 }
 
 void CFileEdit::OnPaint() 

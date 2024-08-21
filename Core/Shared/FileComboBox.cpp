@@ -192,7 +192,12 @@ BOOL CFileComboBox::DoBrowse()
 { 
 	InitFileEdit();
 
-	return m_fileEdit.DoBrowse(); 
+	return m_fileEdit.DoBrowse(GetFirstFile()); 
+}
+
+CString CFileComboBox::GetFirstFile() const
+{
+	return CDialogHelper::GetItem(*this, 0);
 }
 
 LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
