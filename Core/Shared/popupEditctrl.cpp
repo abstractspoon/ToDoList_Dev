@@ -143,20 +143,20 @@ UINT CPopupEditCtrl::OnGetDlgCode()
 	return DLGC_WANTALLKEYS;
 }
 
-void CPopupEditCtrl::Show(CRect rPos)
+void CPopupEditCtrl::Show(CRect rPos, BOOL bDisableMouseWheel)
 {
 	// move the edit box if req
 	if (!rPos.IsRectNull())
 		MoveWindow(rPos);
 
-	PostMessage(WM_PEC_SHOW);
+	PostMessage(WM_PEC_SHOW, bDisableMouseWheel, 0);
 }
 
-LRESULT CPopupEditCtrl::OnPECShow(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CPopupEditCtrl::OnPECShow(WPARAM wp, LPARAM /*lp*/)
 {
 	Reset();
 
-	if (!ShowSpinBuddy(TRUE))
+	if (wp && !ShowSpinBuddy(TRUE))
 	{
 		// Prevent underlying window moving during edit
 		CDisableMouseWheel::Initialize();

@@ -47,7 +47,7 @@ CInputListCtrl::CColumnData2::CColumnData2()
 
 CInputListCtrl::CInputListCtrl()
 {
-	CInputListCtrl::InitState();
+	InitState();
 }
 
 CInputListCtrl::~CInputListCtrl()
@@ -278,7 +278,7 @@ void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 			if (GetEditControl()->GetStyle() & WS_POPUP)
 				ClientToScreen(rEdit);
 			
-			GetEditControl()->Show(rEdit);
+			GetEditControl()->Show(rEdit, FALSE);
 
 			// this says that we are handling the edit
 			// not a derived class.
