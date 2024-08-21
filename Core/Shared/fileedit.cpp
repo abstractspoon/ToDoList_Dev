@@ -363,8 +363,11 @@ void CFileEdit::ClearImageIcon()
 	}
 }
 
-BOOL CFileEdit::DoBrowse()
+BOOL CFileEdit::DoBrowse(LPCTSTR szFilePath)
 {
+	if (szFilePath)
+		SetWindowText(szFilePath);
+
 	return CEnEdit::ClickButton(FEBTN_BROWSE);
 }
 

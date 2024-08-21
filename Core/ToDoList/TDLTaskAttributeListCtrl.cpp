@@ -200,7 +200,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileLinkDisplay)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileLinkWantIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileLinkWantTooltip)
-	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnFileLinkNotifyBrowse)
+	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnSingleFileLinkNotifyBrowse)
 
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -1871,9 +1871,10 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-LRESULT CTDLTaskAttributeListCtrl::OnFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam)
+LRESULT CTDLTaskAttributeListCtrl::OnSingleFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam)
 {
 	ASSERT(wParam && lParam);
+	ASSERT(wParam == m_eSingleFileLink.GetDlgCtrlID());
 
 	LPCTSTR szNewItemText = (LPCTSTR)lParam;
 
@@ -2661,16 +2662,19 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	case TDCA_FILELINK:
 		if (sValue.IsEmpty())
 		{
-			HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
-		}
-		else if (bBtnClick && (HitTestButtonID(nRow) == ID_BTN_BROWSEFILE))
-		{
-			HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
+			if (bBtnClick)
+				m_eSingleFileLink.DoBrowse(sValue);
+			else
+				ShowControl(m_eSingleFileLink, nRow, VALUE_COL, FALSE);
 		}
 		else
 		{
 			PrepareControl(m_cbMultiFileLink, nRow, nCol);
-			ShowControl(m_cbMultiFileLink, nRow, nCol, bBtnClick);
+
+			if (bBtnClick && (HitTestButtonID(nRow) == ID_BTN_BROWSEFILE))
+				m_cbMultiFileLink.DoBrowse();
+			else
+				ShowControl(m_cbMultiFileLink, nRow, nCol, bBtnClick);
 		}
 		break;
 
@@ -2686,7 +2690,10 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_FILELINK:
-					HandleSingleFileLinkEdit(nRow, sValue, bBtnClick);
+					if (bBtnClick)
+						m_eSingleFileLink.DoBrowse(sValue);
+					else
+						ShowControl(m_eSingleFileLink, nRow, VALUE_COL, bBtnClick);
 					break;
 
 				case TDCCA_ICON:
@@ -2787,30 +2794,6 @@ void CTDLTaskAttributeListCtrl::HandleTimePeriodEdit(int nRow, BOOL bBtnClick)
 	{
 		m_eTimePeriod.ShowUnitsPopupMenu(); // modal loop
 		HideControl(m_eTimePeriod);
-	}
-}
-
-void CTDLTaskAttributeListCtrl::HandleSingleFileLinkEdit(int nRow, const CString& sFile, BOOL bBtnClick)
-{
-	if (bBtnClick)
-	{
-		m_eSingleFileLink.SetWindowText(sFile);
-
-		if (m_eSingleFileLink.DoBrowse())
-		{
-			CString sNewFile;
-			m_eSingleFileLink.GetWindowText(sNewFile);
-
-			if (sNewFile != sFile)
-			{
-				SetItemText(nRow, VALUE_COL, sFile);
-				NotifyParentEdit(nRow);
-			}
-		}
-	}
-	else
-	{
-		ShowControl(m_eSingleFileLink, nRow, VALUE_COL, FALSE);
 	}
 }
 

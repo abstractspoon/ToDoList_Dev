@@ -63,7 +63,7 @@ public:
 	CString GetCurrentFolder() const { return m_sCurFolder; }
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
 
-	BOOL DoBrowse();
+	BOOL DoBrowse(LPCTSTR szFilePath = NULL);
 
 	static void SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo);
 	static void SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders);

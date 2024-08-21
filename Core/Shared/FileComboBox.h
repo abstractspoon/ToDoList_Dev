@@ -24,6 +24,8 @@ public:
 	void SetDefaultButton(UINT nID) { m_fileEdit.SetDefaultButton(nID); }
 	void EnableButtonPadding(BOOL bEnable = TRUE) { m_fileEdit.EnableButtonPadding(bEnable); }
 
+	BOOL DoBrowse();
+
 	int GetFileList(CStringArray& aFiles);
 	int SetFileList(const CStringArray& aFiles);
 	int AddFile(const CString& sFile) { return AddUniqueItem(sFile); }

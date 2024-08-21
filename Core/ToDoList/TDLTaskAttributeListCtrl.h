@@ -204,7 +204,7 @@ protected:
 	afx_msg LRESULT OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileLinkDisplay(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSingleFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -245,7 +245,6 @@ protected:
 	void NotifyParentEdit(int nRow);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
-	void HandleSingleFileLinkEdit(int nRow, const CString& sFile, BOOL bBtnClick);
 	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;

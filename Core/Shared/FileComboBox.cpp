@@ -188,6 +188,13 @@ BOOL CFileComboBox::InitFileEdit()
 	return TRUE;
 }
 
+BOOL CFileComboBox::DoBrowse() 
+{ 
+	InitFileEdit();
+
+	return m_fileEdit.DoBrowse(); 
+}
+
 LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
 {
 	ASSERT(wp == 1001);
