@@ -34,7 +34,6 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 		return Add(sName, hIcon, FALSE);
 	}
 	
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -48,7 +47,6 @@ BOOL CIconCache::Add(const CString& sName, UINT nIconID)
 		return Add(sName, hIcon, FALSE);
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -70,7 +68,6 @@ BOOL CIconCache::Add(const CString& sName, HICON hIcon, BOOL bCopy)
 		return TRUE;
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -84,7 +81,6 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 		return Add(sName, hIcon, FALSE);
 	}
 	
-	ASSERT(0);
 	return FALSE;
 }
 

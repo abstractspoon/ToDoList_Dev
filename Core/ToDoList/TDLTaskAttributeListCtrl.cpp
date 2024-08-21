@@ -1474,16 +1474,12 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 			GetExtraButtonRect(rBtn, 0, rCellBtn);
 			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), dwState);
 
-			if (sText.IsEmpty())
-			{
-				DrawIconButton(pDC, rBtn, GetIcon(ICON_BROWSEFILE), dwState);
-			}
-			else
-			{
-				// 'Browse' button
-				GetExtraButtonRect(rBtn, 1, rCellBtn);
-				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
+			// 'Browse' button
+			GetExtraButtonRect(rBtn, 1, rCellBtn);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
 
+			if (!sText.IsEmpty())
+			{
 				// Default button
 				rCellBtn.left = rCellBtn.right;
 				rCellBtn.right = rBtn.right;
@@ -1801,15 +1797,15 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			switch (pDef->GetDataType())
 			{
 			case TDCCA_FILELINK:
-				if (DrawIcon(pDC, sText, rText, TRUE))
 				{
 					CRect rRest(rText);
-					rRest.left += (ICON_SIZE + 2);
+
+					if (DrawIcon(pDC, sText, rText, TRUE))
+						rRest.left += (ICON_SIZE + 2);
 	
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
-					return;
 				}
-				break;
+				return;
 
 			case TDCCA_ICON:
 				if (pDef->IsMultiList())
@@ -1878,7 +1874,8 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const C
 		{
 			if (m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sIcon))
 			{
-				// TODO
+				VERIFY(s_iconCache.HasIcon(sIcon) || s_iconCache.Add(sIcon, sIcon));
+				return s_iconCache.Draw(pDC, sIcon, ptIcon);
 			}
 			else
 			{
@@ -2266,6 +2263,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 			if (Misc::Split(GetItemText(nRow, nCol), aFiles))
 				m_cbMultiFileLink.SetFileList(aFiles);
+
+			m_cbMultiFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
 		}
 		break;
 
@@ -3457,6 +3456,10 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			case TDCA_TIMESPENT:
 			case TDCA_TIMEREMAINING:
 				sTooltip.LoadString(IDS_TIMEUNITS);
+				break;
+
+			case TDCA_FILELINK:
+				sTooltip.LoadString(IDS_BROWSE);
 				break;
 
 			default:
