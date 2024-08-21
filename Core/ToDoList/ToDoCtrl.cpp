@@ -4384,7 +4384,6 @@ void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 }
 
-
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	if (filter.mapAttribs.HasOnly(TDCA_ALL) ||
@@ -6140,7 +6139,9 @@ void CToDoCtrl::SetFilePath(const CString& sPath)
 	m_ctrlComments.SetPreferencesFilePath(sPath);
 	
 	CString sFolder(FileMisc::GetFolderFromFilePath(sPath));
+
 	m_taskTree.SetTasklistFolder(sFolder);
+	m_ctrlAttributes.SetCurrentFolder(sFolder);
 }
 
 CString CToDoCtrl::GetStylesheetPath() const

@@ -1067,6 +1067,11 @@ void CTDLTaskAttributeListCtrl::SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID,
 	}
 }
 
+void CTDLTaskAttributeListCtrl::SetCurrentFolder(const CString& sFolder)
+{
+	m_sCurrentFolder = sFolder;
+}
+
 BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 {
 	if (Misc::MatchAll(aTaskIDs, m_aSelectedTaskIDs))
@@ -2264,6 +2269,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			if (Misc::Split(GetItemText(nRow, nCol), aFiles))
 				m_cbMultiFileLink.SetFileList(aFiles);
 
+			m_cbMultiFileLink.SetCurrentFolder(m_sCurrentFolder);
 			m_cbMultiFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
 		}
 		break;
@@ -2705,6 +2711,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 				switch (nBtnID)
 				{
 				case ID_BTN_BROWSEFILE:
+					m_eSingleFileLink.SetCurrentFolder(m_sCurrentFolder);
 					m_eSingleFileLink.DoBrowse();
 					return;
 
@@ -2757,6 +2764,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 						switch (nBtnID)
 						{
 						case ID_BTN_DEFAULT:
+							m_eSingleFileLink.SetCurrentFolder(m_sCurrentFolder);
 							m_eSingleFileLink.DoBrowse(sValue);
 							return;
 

@@ -88,6 +88,7 @@ public:
 	void RefreshDateTimeFormatting();
 
 	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
+	void SetCurrentFolder(const CString& sFolder);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
@@ -150,6 +151,7 @@ protected:
 
 	CDWordArray m_aSelectedTaskIDs;
 	CString m_sCompletionStatus;
+	CString m_sCurrentFolder;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
 
