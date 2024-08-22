@@ -1218,7 +1218,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_ALLOCTO:			GETMULTIVALUE_LIST(GetTasksAllocatedTo);	break;
 	case TDCA_CATEGORY:			GETMULTIVALUE_LIST(GetTasksCategories);		break;
 	case TDCA_TAGS:				GETMULTIVALUE_LIST(GetTasksTags);			break;
-	case TDCA_FILELINK:			GETMULTIVALUE_LIST(GetTasksFileLinks);		break;
 
 	case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
 	case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
@@ -1233,6 +1232,17 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 	case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies,		CTDCDependencyArray,	value.Format());			break;
 	case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining,	TDCTIMEPERIOD,			value.Format(2));			break;
 	
+	case TDCA_FILELINK:	
+		{
+			CStringArray aFileLinks;
+			
+			if (m_multitasker.GetTasksFileLinks(m_aSelectedTaskIDs, aFileLinks))
+				sValue = Misc::FormatArray(aFileLinks);
+			else
+				bValueVaries = TRUE;
+		}
+		break;
+
 	case TDCA_PERCENT:			
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE) ||
 			(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
@@ -1763,6 +1773,9 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rFile, sFile, crText, nDrawTextFlags);
 				rFile.left += pDC->GetTextExtent(sFile).cx;
+
+				if (rFile.left >= rText.right)
+					break;
 			}
 		}
 		return;
@@ -2706,11 +2719,11 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			int nBtnID = (bBtnClick ? HitTestButtonID(nRow) : ID_BTN_NONE);
 			ASSERT(!bBtnClick || (nBtnID != ID_BTN_NONE));
 
-			if (sValue.IsEmpty())
+			if (sValue.IsEmpty()) // no combo button
 			{
 				switch (nBtnID)
 				{
-				case ID_BTN_BROWSEFILE:
+				case ID_BTN_DEFAULT:
 					m_eSingleFileLink.SetCurrentFolder(m_sCurrentFolder);
 					m_eSingleFileLink.DoBrowse();
 					return;
@@ -2840,9 +2853,11 @@ int CTDLTaskAttributeListCtrl::HitTestButtonID(int nRow, const CRect& rBtn) cons
 		break;
 
 	case TDCA_DEPENDENCY:
-		switch (HitTestExtraButton(nRow, rBtn, ptMouse, 1))
 		{
-		case 0: return ID_BTN_VIEWDEPENDS;
+			switch (HitTestExtraButton(nRow, rBtn, ptMouse, 1))
+			{
+			case 0: return ID_BTN_VIEWDEPENDS;
+			}
 		}
 		break;
 

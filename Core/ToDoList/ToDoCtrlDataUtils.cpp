@@ -5744,11 +5744,6 @@ int CTDCMultiTasker::GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMa
 	GETTASKSLIST_SPLIT(m_data.GetTaskTags);
 }
 
-int CTDCMultiTasker::GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
-{
-	GETTASKSLIST_SPLIT(m_data.GetTaskFileLinks);
-}
-
 int CTDCMultiTasker::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
 	GETTASKSLIST_SPLIT(m_data.GetTaskAllocTo);
