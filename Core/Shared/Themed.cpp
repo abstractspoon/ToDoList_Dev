@@ -714,7 +714,8 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 	sThClass.Empty();
 	nThPart = 0;
 	nThState = 0;
-	
+
+	// Note: 'Disabled' takes priority
 	switch (nType)
 	{
 	case DFC_BUTTON:
@@ -726,13 +727,13 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			{
 				nThPart = BP_PUSHBUTTON;
 				
-				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-				{
-					nThState = PBS_PRESSED;
-				}
-				else if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+				if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
 				{
 					nThState = PBS_DISABLED;
+				}
+				else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				{
+					nThState = PBS_PRESSED;
 				}
 				else if ((nState & DFCS_HOT) == DFCS_HOT)
 				{
@@ -856,14 +857,18 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			nThPart = (nType == DFC_COMBO ? CP_DROPDOWNBUTTON : CP_READONLY);
 			nThState = CBXS_NORMAL;
 
-			if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-				nThState = CBXS_PRESSED;
-
-			else if (nState & DFCS_INACTIVE)
+			if (nState & DFCS_INACTIVE)
+			{
 				nThState = CBXS_DISABLED;
-
+			}
+			else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+			{
+				nThState = CBXS_PRESSED;
+			}
 			else if (nState & DFCS_HOT)
+			{
 				nThState = CBXS_HOT;
+			}
 		}
 		break;
 	}

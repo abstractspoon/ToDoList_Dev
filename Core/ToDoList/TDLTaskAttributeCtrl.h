@@ -57,6 +57,7 @@ public:
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
+	void SetTimeTrackTaskID(DWORD dwTaskID);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);

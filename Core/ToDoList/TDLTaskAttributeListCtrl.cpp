@@ -146,7 +146,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_aSortedGroupedItems(*this),
 	m_reminders(rems),
 	m_eSingleFileLink(FES_GOBUTTON),
-	m_cbMultiFileLink(FES_GOBUTTON)
+	m_cbMultiFileLink(FES_GOBUTTON),
+	m_dwTimeTrackingTask(0)
 {
 	SetSortColumn(0, FALSE);
 
@@ -383,6 +384,14 @@ void CTDLTaskAttributeListCtrl::SetPercentDoneIncrement(int nAmount)
 	
 	UDACCEL uda = { 0, (UINT)nAmount };
 	m_spinPercent.SetAccel(1, &uda);
+}
+
+void CTDLTaskAttributeListCtrl::SetTimeTrackTaskID(DWORD dwTaskID)
+{
+	m_dwTimeTrackingTask = dwTaskID;
+
+	if (m_multitasker.AnyTaskHasID(m_aSelectedTaskIDs, dwTaskID, FALSE))
+		RedrawValue(TDCA_TIMESPENT);
 }
 
 void CTDLTaskAttributeListCtrl::OnCustomAttributesChange()
@@ -1408,9 +1417,7 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 	{
 	case TDCA_TIMESPENT:
 		{
-			if (!m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
-				rBtn.left -= EE_BTNWIDTH_ICON; // 'Track time' button
-
+			rBtn.left -= EE_BTNWIDTH_ICON; // 'Track time' button
 			rBtn.left -= EE_BTNWIDTH_ICON; // 'Add logged time' button
 		}
 		break;
@@ -1468,11 +1475,11 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 	{
 	case TDCA_DEPENDENCY:
 		{
-			// 'Selected Dependencies' button
 			CRect rCellBtn;
 
+			// 'View' button
 			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_SHOWDEPENDS), dwState);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_SHOWDEPENDS), GetExtraButtonState(ID_BTN_VIEWDEPENDS, sText, dwState));
 
 			// Default button
 			rCellBtn.left = rCellBtn.right;
@@ -1487,14 +1494,21 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 			// 'View' button
 			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), dwState);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetExtraButtonState(ID_BTN_VIEWFILE, sText, dwState));
 
-			// 'Browse' button
-			GetExtraButtonRect(rBtn, 1, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
-
-			if (!sText.IsEmpty())
+			if (sText.IsEmpty())
 			{
+				// Default button
+				rCellBtn.left = rCellBtn.right;
+				rCellBtn.right = rBtn.right;
+				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
+			}
+			else
+			{
+				// 'Browse' button
+				GetExtraButtonRect(rBtn, 1, rCellBtn);
+				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
+
 				// Default button
 				rCellBtn.left = rCellBtn.right;
 				rCellBtn.right = rBtn.right;
@@ -1506,23 +1520,19 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 	case TDCA_TIMESPENT:
 		{
 			CRect rCellBtn;
-			int nExtraBtn = 0;
 
 			// 'Track time' button
-			if (!m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
-			{
-				GetExtraButtonRect(rBtn, nExtraBtn++, rCellBtn);
-				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_TRACKTIME), dwState);
-			}
+			GetExtraButtonRect(rBtn, 0, rCellBtn);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_TRACKTIME), GetExtraButtonState(ID_BTN_TIMETRACK, sText, dwState));
 
 			// 'Add logged time' button
-			GetExtraButtonRect(rBtn, nExtraBtn, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_ADDTIME), dwState);
+			GetExtraButtonRect(rBtn, 1, rCellBtn);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_ADDTIME), GetExtraButtonState(ID_BTN_ADDLOGGEDTIME, sText, dwState));
 
 			// Default button
 			rCellBtn.left = rCellBtn.right;
 			rCellBtn.right = rBtn.right;
-			DrawPopupMenuButton(pDC, rCellBtn, dwState);
+			DrawPopupMenuButton(pDC, rCellBtn, GetDefaultButtonState(nAttribID, sText, dwState));
 		}
 		return TRUE;
 
@@ -1545,7 +1555,7 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 					// 'View' button
 					GetExtraButtonRect(rBtn, 0, rCellBtn);
-					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), dwState);
+					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetExtraButtonState(ID_BTN_VIEWFILE, sText, dwState));
 
 					// Default button
 					rCellBtn.left = rCellBtn.right;
@@ -1892,13 +1902,12 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const C
 		{
 			if (m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sIcon))
 			{
-				VERIFY(s_iconCache.HasIcon(sIcon) || s_iconCache.Add(sIcon, sIcon));
+				VERIFY(s_iconCache.HasIcon(sIcon) || s_iconCache.Add(sIcon, FileMisc::GetFullPath(sIcon, m_sCurrentFolder)));
 				return s_iconCache.Draw(pDC, sIcon, ptIcon);
 			}
-			else
-			{
-				return CFileIcons::Draw(pDC, FileMisc::GetExtension(sIcon), ptIcon);
-			}
+
+			// else
+			return CFileIcons::Draw(pDC, FileMisc::GetExtension(sIcon), ptIcon);
 		}
 
 		// else
@@ -2337,9 +2346,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			// Insert before default menu button
 			m_eTimePeriod.InsertButton(0, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME));
 
-			// Insert after 'Add logged time button'
-			if (!m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
-				m_eTimePeriod.InsertButton(1, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK));
+			// Insert befoe 'Add logged time button'
+			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK));
 		}
 		break;
 
@@ -2830,12 +2838,10 @@ int CTDLTaskAttributeListCtrl::HitTestButtonID(int nRow, const CRect& rBtn) cons
 	case TDCA_TIMESPENT:
 		{
 			// Check if one of the sub-buttons was clicked
-			int nNumBtns = (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs) ? 1 : 2);
-
-			switch (HitTestExtraButton(nRow, rBtn, ptMouse, nNumBtns))
+			switch (HitTestExtraButton(nRow, rBtn, ptMouse, 2))
 			{
-			case 0: return ID_BTN_ADDLOGGEDTIME;
-			case 1: return ID_BTN_TIMETRACK;
+			case 0: return ID_BTN_TIMETRACK;
+			case 1: return ID_BTN_ADDLOGGEDTIME;
 			}
 		}
 		break;
@@ -2875,6 +2881,71 @@ int CTDLTaskAttributeListCtrl::HitTestButtonID(int nRow, const CRect& rBtn) cons
 
 	// all else
 	return ID_BTN_DEFAULT;
+}
+
+DWORD CTDLTaskAttributeListCtrl::GetExtraButtonState(int nBtnID, const CString& sCellText, DWORD dwBaseState) const
+{
+	if (!Misc::HasFlag(dwBaseState, DFCS_INACTIVE))
+	{
+		switch (nBtnID)
+		{
+		case ID_BTN_TIMETRACK:
+			if (m_aSelectedTaskIDs.GetSize() != 1)
+			{
+				return (dwBaseState | DFCS_INACTIVE);
+			}
+			else if ((m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
+			{
+				return (dwBaseState | DFCS_PUSHED);
+			}
+			break;
+
+		case ID_BTN_ADDLOGGEDTIME:
+			if ((m_aSelectedTaskIDs.GetSize() != 1) || 
+				(m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
+			{
+				return (dwBaseState | DFCS_INACTIVE);
+			}
+			break;
+
+		case ID_BTN_VIEWDEPENDS:
+		case ID_BTN_VIEWFILE:
+			if (sCellText.IsEmpty())
+			{
+				return (dwBaseState | DFCS_INACTIVE);
+			}
+			break;
+
+		case ID_BTN_EDITDEPENDS:
+		case ID_BTN_BROWSEFILE:
+			// No change
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return dwBaseState;
+}
+
+DWORD CTDLTaskAttributeListCtrl::GetDefaultButtonState(TDC_ATTRIBUTE nAttribID, const CString& sCellText, DWORD dwBaseState) const
+{
+	if (!Misc::HasFlag(dwBaseState, DFCS_INACTIVE))
+	{
+		switch (nAttribID)
+		{
+		case TDCA_TIMESPENT:
+			if ((m_aSelectedTaskIDs.GetSize() != 1) || 
+				(m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
+			{
+				return (dwBaseState | DFCS_INACTIVE);
+			}
+		}
+	}
+
+	return dwBaseState;
 }
 
 int CTDLTaskAttributeListCtrl::HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns)

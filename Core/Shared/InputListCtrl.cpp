@@ -151,7 +151,9 @@ void CInputListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 			// double clicks on an already selected item. 
 			// ie the WM_LBUTTONDOWN that preceeds WM_LBUTTONDBLCLK will already
 			// have initiated an edit 
-			EditCell(nItem, nCol, FALSE);
+			CRect rBtn;
+
+			EditCell(nItem, nCol, (GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point)));
 		}
 	}
 }

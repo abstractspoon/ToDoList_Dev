@@ -92,6 +92,7 @@ public:
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
+	void SetTimeTrackTaskID(DWORD dwTaskID);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
@@ -158,6 +159,7 @@ protected:
 	BOOL m_bGrouped;
 	BOOL m_bSplitting;
 	float m_fAttribColProportion;
+	DWORD m_dwTimeTrackingTask;
 
 	CEnCheckComboBox m_cbTextAndNumbers;
 	CDateTimeCtrlEx m_datePicker;
@@ -256,6 +258,8 @@ protected:
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
+	DWORD GetExtraButtonState(int nBtnID, const CString& sCellText, DWORD dwBaseState) const;
+	DWORD GetDefaultButtonState(TDC_ATTRIBUTE nAttribID, const CString& sCellText, DWORD dwBaseState) const;
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

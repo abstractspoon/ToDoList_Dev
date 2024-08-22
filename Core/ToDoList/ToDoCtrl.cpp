@@ -7139,6 +7139,7 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 		m_data.SetTaskDate(dwTaskID, TDCD_STARTDATE, COleDateTime::GetCurrentTime());
 
 	m_taskTree.SetTimeTrackTaskID(dwTaskID);
+	m_ctrlAttributes.SetTimeTrackTaskID(dwTaskID);
 
 	SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
 
@@ -7190,6 +7191,7 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 
 	// update tree
 	m_taskTree.SetTimeTrackTaskID(0);
+	m_ctrlAttributes.SetTimeTrackTaskID(0);
 
 	// notify parent
 	if (bNotify)

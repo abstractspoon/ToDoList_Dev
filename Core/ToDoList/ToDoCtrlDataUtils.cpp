@@ -5828,7 +5828,7 @@ BOOL CTDCMultiTasker::AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const
 
 BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const
 {
-	if (!aTaskIDs.GetSize())
+	if (!aTaskIDs.GetSize() || !dwTaskID)
 		return FALSE;
 
 	BOOL bFound = (Misc::FindT(dwTaskID, aTaskIDs) != -1);
