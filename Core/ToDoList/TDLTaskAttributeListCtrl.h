@@ -256,10 +256,13 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
+
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
 	BOOL CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const;
 	DWORD GetButtonState(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText, DWORD dwBaseState) const;
+	HICON GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID) const;
+	BOOL DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const;
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);

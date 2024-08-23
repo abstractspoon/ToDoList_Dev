@@ -600,7 +600,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sTe
 	return DrawButton(pDC, rBtn, nType, dwState);
 }
 
-BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState)
+BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState) const
 {
 	switch (nType)
 	{
@@ -616,12 +616,12 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType
 	return FALSE;
 }
 
-void CInputListCtrl::DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, dwState);
 }
 
-void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState)
+void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState) const
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
@@ -633,7 +633,7 @@ void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DW
 	::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
 }
 
-void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
 	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
 
@@ -654,7 +654,7 @@ void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
 	}
 }
 
-void CInputListCtrl::DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
@@ -667,7 +667,7 @@ void CInputListCtrl::DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
 	GraphicsMisc::DrawAnsiSymbol(pDC, MARLETT_MENUDOWN, rBtn, nFlags, &GraphicsMisc::Marlett());
 }
 
-void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
@@ -683,12 +683,12 @@ void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState
 	pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
 }
 
-void CInputListCtrl::DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
 }
 
-void CInputListCtrl::DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
 }

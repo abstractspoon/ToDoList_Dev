@@ -177,14 +177,14 @@ protected:
 	BOOL CellHasButton(int nRow, int nCol) const;
 	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
 
-	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState);
-	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	BOOL DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState);
+	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState) const;
+	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	BOOL DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState) const;
 
 private:
 	void RecalcHotButtonRects();

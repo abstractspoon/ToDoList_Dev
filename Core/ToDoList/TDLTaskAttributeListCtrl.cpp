@@ -1458,6 +1458,31 @@ BOOL CTDLTaskAttributeListCtrl::RowValueVaries(int nRow) const
 	return (GetItemImage(nRow) == VALUE_VARIES);
 }
 
+BOOL CTDLTaskAttributeListCtrl::DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const
+{
+	HICON hIcon = GetButtonIcon(nAttribID, nBtnID);
+
+	if (!hIcon)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	DWORD dwState = GetButtonState(nAttribID, nBtnID, sText, dwBaseState);
+	CRect rCellBtn(rBtn);
+
+	if (nBtnID != ID_BTN_DEFAULT)
+	{
+		// We always get button zero because we advance the button rect each time
+		GetExtraButtonRect(rBtn, 0, rCellBtn);
+	}
+	CInputListCtrl::DrawIconButton(pDC, rCellBtn, hIcon, dwState);
+
+	// Advance the button rect
+	rBtn.SubtractRect(rBtn, rCellBtn);
+	return TRUE;
+}
+
 BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rBtn)
 {
 	if (!GetButtonRect(nRow, nCol, rBtn))
@@ -1465,107 +1490,79 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 
 	// Some fields have multiple and/or icon buttons
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-	DWORD dwState = CInputListCtrl::GetButtonState(nRow, nCol, bSelected);
+	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
 
+	DWORD dwBaseState = CInputListCtrl::GetButtonState(nRow, nCol, bSelected);
 	CRect rCellBtn(rBtn);
 
 	switch (nAttribID)
 	{
 	case TDCA_DEPENDENCY:
-		{
-			// 'View' button
-			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_SHOWDEPENDS), GetButtonState(nAttribID, ID_BTN_VIEWDEPENDS, sText, dwState));
-
-			// Default button drawn at bottom
-			rCellBtn.SubtractRect(rBtn, rCellBtn);
-		}
-		break;
+		DrawIconButton(pDC, nAttribID, ID_BTN_VIEWDEPENDS, sText, dwBaseState, rCellBtn);
+		break;		// Browse button drawn at bottom
 
 	case TDCA_FILELINK:
 		{
-			// 'View' button
-			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetButtonState(nAttribID, ID_BTN_VIEWFILE, sText, dwState));
+			DrawIconButton(pDC, nAttribID, ID_BTN_VIEWFILE, sText, dwBaseState, rCellBtn);
 
 			if (sText.IsEmpty())
-			{
-				// Default button
-				rCellBtn.SubtractRect(rBtn, rCellBtn);
-				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
-
-				return TRUE;
-			}
+				return DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
 			
-			// 'Browse' button
-			GetExtraButtonRect(rBtn, 1, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
-
-			// Default button drawn at bottom
-			rCellBtn.SubtractRect(rBtn, rCellBtn);
+			// else
+			DrawIconButton(pDC, nAttribID, ID_BTN_BROWSEFILE, sText, dwBaseState, rCellBtn);
 		}
-		break;
+		break; // Combo button drawn at bottom
 
 	case TDCA_TIMESPENT:
 		{
-			// 'Track time' button
-			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_TRACKTIME), GetButtonState(nAttribID, ID_BTN_TIMETRACK, sText, dwState));
+			DrawIconButton(pDC, nAttribID, ID_BTN_TIMETRACK, sText, dwBaseState, rCellBtn);
+			DrawIconButton(pDC, nAttribID, ID_BTN_ADDLOGGEDTIME, sText, dwBaseState, rCellBtn);
 
-			// 'Add logged time' button
-			GetExtraButtonRect(rBtn, 1, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_ADDTIME), GetButtonState(nAttribID, ID_BTN_ADDLOGGEDTIME, sText, dwState));
-
-			// Default button drawn at bottom
-			rCellBtn.left = rCellBtn.right;
-			rCellBtn.right = rBtn.right;
-			dwState = GetButtonState(nAttribID, ID_BTN_DEFAULT, sText, dwState);
+			// Time units button drawn at bottom
+			dwBaseState = GetButtonState(nAttribID, ID_BTN_DEFAULT, sText, dwBaseState);
 		}
 		break;
 
 	case TDCA_ICON:
-		DrawIconButton(pDC, rBtn, GetIcon(ICON_SELECTICON), dwState);
-		return TRUE;
-
 	case TDCA_REMINDER:
-		DrawIconButton(pDC, rBtn, GetIcon(ICON_REMINDER), dwState);
+		DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
 		return TRUE;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			switch (pDef->GetDataType())
 			{
 			case TDCCA_FILELINK:
-				{
-					// 'View' button
-					GetExtraButtonRect(rBtn, 0, rCellBtn);
-					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetButtonState(nAttribID, ID_BTN_VIEWFILE, sText, dwState));
-
-					// Default button
-					rCellBtn.SubtractRect(rBtn, rCellBtn);
-					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
-				}
+				DrawIconButton(pDC, nAttribID, ID_BTN_VIEWFILE, sText, dwBaseState, rCellBtn);
+				DrawIconButton(pDC, nAttribID, ID_BTN_BROWSEFILE, sText, dwBaseState, rCellBtn);
 				return TRUE;
 
 			case TDCCA_ICON:
-				if (!m_aCustomAttribDefs.IsListType(nAttribID))
-				{
-					DrawIconButton(pDC, rBtn, GetIcon(ICON_SELECTICON), dwState);
-					return TRUE;
-				}
+				if (!pDef->IsList())
+					return DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
 				break;
 			}
 		}
+		else if (nType == ILCT_CHECK)
+		{
+			if (RowValueVaries(nRow))
+			{
+				dwBaseState |= DFCS_MIXED;
+			}
+			else if (!sText.IsEmpty())
+			{
+				dwBaseState |= DFCS_CHECKED;
+			}
+		}
+		break;
 	}
 
 	// All else
-	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
-
-	if ((nType == ILCT_CHECK) && RowValueVaries(nRow))
-		dwState |= DFCS_MIXED;
-
-	return CInputListCtrl::DrawButton(pDC, rCellBtn, nType, dwState);
+	return CInputListCtrl::DrawButton(pDC, rCellBtn, nType, dwBaseState);
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const
@@ -2897,6 +2894,44 @@ DWORD CTDLTaskAttributeListCtrl::GetButtonState(TDC_ATTRIBUTE nAttribID, int nBt
 	}
 
 	return dwBaseState;
+}
+
+HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID) const
+{
+	ASSERT(CanEditCell(GetRow(nAttribID), VALUE_COL));
+
+	switch (nBtnID)
+	{
+	case ID_BTN_TIMETRACK:		return GetIcon(ICON_TRACKTIME);
+	case ID_BTN_ADDLOGGEDTIME:	return GetIcon(ICON_ADDTIME);
+	case ID_BTN_VIEWDEPENDS:	return GetIcon(ICON_SHOWDEPENDS);
+	case ID_BTN_VIEWFILE:		return GetIcon(ICON_VIEWFILE);
+	case ID_BTN_BROWSEFILE:		return GetIcon(ICON_BROWSEFILE);
+
+	case ID_BTN_DEFAULT:
+		switch (nAttribID)
+		{
+		case TDCA_ICON:			return GetIcon(ICON_SELECTICON);
+		case TDCA_REMINDER:		return GetIcon(ICON_REMINDER);
+		case TDCA_FILELINK:		return GetIcon(ICON_BROWSEFILE);
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			{
+				switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
+				{
+				case TDCCA_ICON:
+					return GetIcon(ICON_SELECTICON);
+				}
+			}
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return NULL;
 }
 
 BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const
