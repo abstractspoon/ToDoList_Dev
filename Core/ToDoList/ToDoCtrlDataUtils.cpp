@@ -5910,6 +5910,12 @@ BOOL CTDCMultiTasker::AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreat
 	return FALSE;
 }
 
+BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+{
+	DWORD dwUnused = 0;
+	return GetTasksParentID(aTaskIDs, dwUnused);
+}
+
 // -----------------------------------------------------------------
 
 #define GETALLTASKHAS(FUNCTION)                    \
@@ -5943,10 +5949,9 @@ BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
 	GETALLTASKHAS(IsTaskReference);
 }
 
-BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+BOOL CTDCMultiTasker::AllTasksAreParents(const CDWordArray& aTaskIDs) const
 {
-	DWORD dwUnused = 0;
-	return GetTasksParentID(aTaskIDs, dwUnused);
+	GETALLTASKHAS(IsTaskParent);
 }
 
 BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const

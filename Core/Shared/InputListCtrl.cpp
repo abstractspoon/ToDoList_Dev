@@ -187,9 +187,9 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 	// then edit else update clicked pos unless we did not have the focus
 	if (nItem != -1)
 	{
-		CRect rButton;
+		CRect rBtn;
 
-		if (CanEditCell(nItem, nCol) && GetButtonRect(nItem, nCol, rButton) && rButton.PtInRect(point))
+		if (CanEditCell(nItem, nCol) && GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point))
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
@@ -527,30 +527,28 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 	if (CellHasButton(nItem, nCol))
 	{
 		IL_COLUMNTYPE nBtnType = GetCellType(nItem, nCol);
+		CRect rBtn(0, 0, 0, 0);
 
 		if (nBtnType == ILCT_CHECK) // Special case
 		{
 			// Draw checkbox over background
 			CEnListCtrl::DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bFocused);
 
-			CRect rUnused;
-			VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rUnused));
-
+			VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rBtn));
 			return;
 		}
 
 		// all other button types
-		CRect rButton;
-		VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rButton));
+		VERIFY(DrawButton(pDC, nItem, nCol, sText, bSelected, rBtn));
 
 		// Exclude button from text rect
-		if (rButton.left <= rCell.left)
+		if (rBtn.left <= rCell.left)
 		{
-			rText.left = rButton.right;
+			rText.left = rBtn.right;
 		}
-		else if (rButton.right >= rCell.right)
+		else if (rBtn.right >= rCell.right)
 		{
-			rText.right = rButton.left;
+			rText.right = rBtn.left;
 		}
 	}
 			
@@ -588,44 +586,34 @@ DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 	return 0;
 }
 
-BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton)
+BOOL CInputListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rBtn)
 {
-	if (!GetButtonRect(nRow, nCol, rButton))
+	if (rBtn.IsRectEmpty() && !GetButtonRect(nRow, nCol, rBtn))
 		return FALSE;
 
+	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
 	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
 
-	switch (GetCellType(nRow, nCol))
+	if ((nType == ILCT_CHECK) && !sText.IsEmpty())
+		dwState |= DFCS_CHECKED;
+
+	return DrawButton(pDC, rBtn, nType, dwState);
+}
+
+BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState)
+{
+	switch (nType)
 	{
-		case ILCT_DATE:
-			DrawDateButton(pDC, rButton, dwState);
-			break;
-
-		case ILCT_COMBO:
-			DrawComboButton(pDC, rButton, dwState);
-			break;
-					
-		case ILCT_ICON:
-			DrawBlankButton(pDC, rButton, dwState);
-			break;
-					
-		case ILCT_POPUPMENU:
-			DrawPopupMenuButton(pDC, rButton, dwState);
-			break;
-
-		case ILCT_BROWSE:
-			DrawBrowseButton(pDC, rButton, dwState);
-			break;
-			
-		case ILCT_CHECK:
-			DrawCheckBoxButton(pDC, rButton, dwState | (sText.IsEmpty() ? 0 : DFCS_CHECKED));
-			break;
-
-		default:
-			return FALSE;
+	case ILCT_DATE:			DrawDateButton(pDC, rBtn, dwState);		return TRUE;
+	case ILCT_COMBO:		DrawComboButton(pDC, rBtn, dwState);	return TRUE;
+	case ILCT_ICON:			DrawBlankButton(pDC, rBtn, dwState);	return TRUE;
+	case ILCT_POPUPMENU:	DrawMenuButton(pDC, rBtn, dwState);		return TRUE;
+	case ILCT_BROWSE:		DrawBrowseButton(pDC, rBtn, dwState);	return TRUE;
+	case ILCT_CHECK:		DrawCheckBoxButton(pDC, rBtn, dwState);	return TRUE;
 	}
 
-	return TRUE;
+	ASSERT(0);
+	return FALSE;
 }
 
 void CInputListCtrl::DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
@@ -666,7 +654,7 @@ void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
 	}
 }
 
-void CInputListCtrl::DrawPopupMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
+void CInputListCtrl::DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState)
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
@@ -711,39 +699,39 @@ BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
 	return GetButtonRect(nRow, nCol, rUnused);
 }
 
-BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rButton) const
+BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 {
-	rButton.SetRectEmpty();
+	rBtn.SetRectEmpty();
 
 	if (!CanEditCell(nRow, nCol))
 		return FALSE;
 
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
-	GetCellRect(nRow, nCol, rButton);
+	GetCellRect(nRow, nCol, rBtn);
 
 	switch (nType)
 	{
 	case ILCT_BROWSE:
 	case ILCT_POPUPMENU:
 	case ILCT_COMBO:
-		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
+		rBtn.left = (rBtn.right - EE_BTNWIDTH_DEFAULT);
 		break;
 
 	case ILCT_ICON:
-		rButton.left = (rButton.right - EE_BTNWIDTH_ICON);
+		rBtn.left = (rBtn.right - EE_BTNWIDTH_ICON);
 		break;
 
 	case ILCT_DATE:
-		rButton.left = (rButton.right - EE_BTNWIDTH_DEFAULT);
+		rBtn.left = (rBtn.right - EE_BTNWIDTH_DEFAULT);
 
 		// Only Win7 and above supports the fancy new date dropdown icon
 		if ((COSVersion() >= OSV_WIN7) && CThemed::AreControlsThemed())
-			rButton.left -= EE_BTNWIDTH_DEFAULT;
+			rBtn.left -= EE_BTNWIDTH_DEFAULT;
 		break;
 
 	case ILCT_CHECK:
-		rButton.left += ((rButton.Width() - EE_BTNWIDTH_DEFAULT) / 2);
-		rButton.right = (rButton.left + EE_BTNWIDTH_DEFAULT);
+		rBtn.left += ((rBtn.Width() - EE_BTNWIDTH_DEFAULT) / 2);
+		rBtn.right = (rBtn.left + EE_BTNWIDTH_DEFAULT);
 		break;
 
 	case ILCT_TEXT:
@@ -1834,9 +1822,9 @@ void CInputListCtrl::RecalcHotButtonRects()
 
 BOOL CInputListCtrl::IsButtonHot(int nRow, int nCol) const
 {
-	CRect rButton;
+	CRect rBtn;
 
-	if (!GetButtonRect(nRow, nCol, rButton))
+	if (!GetButtonRect(nRow, nCol, rBtn))
 		return FALSE;
 
 	int nButton = ((nRow * GetColumnCount()) + nCol);

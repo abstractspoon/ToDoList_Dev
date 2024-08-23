@@ -972,17 +972,20 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_STARTTIME:
 		if (!m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE))
 			return FALSE;
-		// else fall through
+		// else fall through to TDCA_STARTDATE
 
 	case TDCA_STARTDATE:
 		return (!m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs));
 
-	case TDCA_DUETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
-	case TDCA_DONETIME:		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
+	case TDCA_DUETIME:		
+		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
+
+	case TDCA_DONETIME:		
+		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs));
+		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.AllTasksAreParents(m_aSelectedTaskIDs));
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -1254,7 +1257,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 	case TDCA_PERCENT:			
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE) ||
-			(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
+			(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_multitasker.AllTasksAreParents(m_aSelectedTaskIDs)))
 		{
 			int nPercent = m_calculator.GetTaskPercentDone(m_aSelectedTaskIDs[0]);
 
@@ -1274,7 +1277,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 	case TDCA_TIMEESTIMATE:
 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || 
-			!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
+			!m_multitasker.AllTasksAreParents(m_aSelectedTaskIDs))
 		{
 			GETMULTIVALUE_FMT(GetTasksTimeEstimate, TDCTIMEPERIOD, value.Format(2));
 		}
@@ -1286,7 +1289,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 
 	case TDCA_TIMESPENT:
 		if (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || 
-			!m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
+			!m_multitasker.AllTasksAreParents(m_aSelectedTaskIDs))
 		{
 			GETMULTIVALUE_FMT(GetTasksTimeSpent, TDCTIMEPERIOD, value.Format(2));
 		}
@@ -1460,81 +1463,65 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 	if (!GetButtonRect(nRow, nCol, rBtn))
 		return FALSE;
 
-	DWORD dwState = GetButtonState(nRow, nCol, bSelected);
-
-	if ((GetCellType(nRow, nCol) == ILCT_CHECK) && RowValueVaries(nRow))
-	{
-		DrawCheckBoxButton(pDC, rBtn, dwState | DFCS_MIXED);
-		return TRUE;
-	}
-
-	// Some fields have multiple and/or custom buttons
+	// Some fields have multiple and/or icon buttons
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	DWORD dwState = CInputListCtrl::GetButtonState(nRow, nCol, bSelected);
+
+	CRect rCellBtn(rBtn);
 
 	switch (nAttribID)
 	{
 	case TDCA_DEPENDENCY:
 		{
-			CRect rCellBtn;
-
 			// 'View' button
 			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_SHOWDEPENDS), GetExtraButtonState(ID_BTN_VIEWDEPENDS, sText, dwState));
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_SHOWDEPENDS), GetButtonState(nAttribID, ID_BTN_VIEWDEPENDS, sText, dwState));
 
-			// Default button
-			rCellBtn.left = rCellBtn.right;
-			rCellBtn.right = rBtn.right;
-			DrawBrowseButton(pDC, rCellBtn, dwState);
+			// Default button drawn at bottom
+			rCellBtn.SubtractRect(rBtn, rCellBtn);
 		}
-		return TRUE;
+		break;
 
 	case TDCA_FILELINK:
 		{
-			CRect rCellBtn;
-
 			// 'View' button
 			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetExtraButtonState(ID_BTN_VIEWFILE, sText, dwState));
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetButtonState(nAttribID, ID_BTN_VIEWFILE, sText, dwState));
 
 			if (sText.IsEmpty())
 			{
 				// Default button
-				rCellBtn.left = rCellBtn.right;
-				rCellBtn.right = rBtn.right;
-				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
-			}
-			else
-			{
-				// 'Browse' button
-				GetExtraButtonRect(rBtn, 1, rCellBtn);
+				rCellBtn.SubtractRect(rBtn, rCellBtn);
 				DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
 
-				// Default button
-				rCellBtn.left = rCellBtn.right;
-				rCellBtn.right = rBtn.right;
-				DrawComboButton(pDC, rCellBtn, dwState);
+				return TRUE;
 			}
+			
+			// 'Browse' button
+			GetExtraButtonRect(rBtn, 1, rCellBtn);
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
+
+			// Default button drawn at bottom
+			rCellBtn.SubtractRect(rBtn, rCellBtn);
 		}
-		return TRUE;
+		break;
 
 	case TDCA_TIMESPENT:
 		{
-			CRect rCellBtn;
-
 			// 'Track time' button
 			GetExtraButtonRect(rBtn, 0, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_TRACKTIME), GetExtraButtonState(ID_BTN_TIMETRACK, sText, dwState));
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_TRACKTIME), GetButtonState(nAttribID, ID_BTN_TIMETRACK, sText, dwState));
 
 			// 'Add logged time' button
 			GetExtraButtonRect(rBtn, 1, rCellBtn);
-			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_ADDTIME), GetExtraButtonState(ID_BTN_ADDLOGGEDTIME, sText, dwState));
+			DrawIconButton(pDC, rCellBtn, GetIcon(ICON_ADDTIME), GetButtonState(nAttribID, ID_BTN_ADDLOGGEDTIME, sText, dwState));
 
-			// Default button
+			// Default button drawn at bottom
 			rCellBtn.left = rCellBtn.right;
 			rCellBtn.right = rBtn.right;
-			DrawPopupMenuButton(pDC, rCellBtn, GetDefaultButtonState(nAttribID, sText, dwState));
+			dwState = GetButtonState(nAttribID, ID_BTN_DEFAULT, sText, dwState);
 		}
-		return TRUE;
+		break;
 
 	case TDCA_ICON:
 		DrawIconButton(pDC, rBtn, GetIcon(ICON_SELECTICON), dwState);
@@ -1551,15 +1538,12 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 			{
 			case TDCCA_FILELINK:
 				{
-					CRect rCellBtn;
-
 					// 'View' button
 					GetExtraButtonRect(rBtn, 0, rCellBtn);
-					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetExtraButtonState(ID_BTN_VIEWFILE, sText, dwState));
+					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_VIEWFILE), GetButtonState(nAttribID, ID_BTN_VIEWFILE, sText, dwState));
 
 					// Default button
-					rCellBtn.left = rCellBtn.right;
-					rCellBtn.right = rBtn.right;
+					rCellBtn.SubtractRect(rBtn, rCellBtn);
 					DrawIconButton(pDC, rCellBtn, GetIcon(ICON_BROWSEFILE), dwState);
 				}
 				return TRUE;
@@ -1576,7 +1560,12 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 	}
 
 	// All else
-	return CInputListCtrl::DrawButton(pDC, nRow, nCol, sText, bSelected, rBtn);
+	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
+
+	if ((nType == ILCT_CHECK) && RowValueVaries(nRow))
+		dwState |= DFCS_MIXED;
+
+	return CInputListCtrl::DrawButton(pDC, rCellBtn, nType, dwState);
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const
@@ -2632,8 +2621,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 
 void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 {
-	if (!CanEditCell(nRow, nCol))
-		return;
+	ASSERT(CanEditCell(nRow, nCol));
 
 	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
 
@@ -2686,6 +2674,9 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			int nBtnID = HitTestButtonID(nRow);
 			ASSERT(nBtnID != ID_BTN_NONE);
 
+			if (!CanClickButton(nAttribID, nBtnID, sValue))
+				break;
+
 			if (nBtnID == ID_BTN_VIEWDEPENDS)
 			{
 				OnEnEditButtonClick(0, nBtnID);
@@ -2711,14 +2702,21 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			int nBtnID = HitTestButtonID(nRow);
 			ASSERT(nBtnID != ID_BTN_NONE);
 
+			if (!CanClickButton(nAttribID, nBtnID, sValue))
+				break;
+
 			if (nBtnID != ID_BTN_DEFAULT)
 			{
 				OnEnEditButtonClick(0, nBtnID);
 				break;
 			}
 		}
-		// else
-		HandleTimePeriodEdit(nRow, bBtnClick);
+		else if (CanClickButton(nAttribID, ID_BTN_DEFAULT, sValue))
+		{
+			// If the time units button is disabled then also 
+			// disallow editing of the time value
+			HandleTimePeriodEdit(nRow, bBtnClick);
+		}
 		break;
 
 	case TDCA_FILELINK:
@@ -2727,22 +2725,20 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 			int nBtnID = (bBtnClick ? HitTestButtonID(nRow) : ID_BTN_NONE);
 			ASSERT(!bBtnClick || (nBtnID != ID_BTN_NONE));
 
+			if (bBtnClick && !CanClickButton(nAttribID, nBtnID, sValue))
+				break;
+
 			if (sValue.IsEmpty()) // no combo button
 			{
-				switch (nBtnID)
+				if (nBtnID == ID_BTN_DEFAULT) // Browse
 				{
-				case ID_BTN_DEFAULT:
 					m_eSingleFileLink.SetCurrentFolder(m_sCurrentFolder);
 					m_eSingleFileLink.DoBrowse();
-					return;
-
-				case ID_BTN_VIEWFILE:
-					// No file to display
-					return;
 				}
-
-				// else
-				ShowControl(m_eSingleFileLink, nRow, VALUE_COL, bBtnClick);
+				else
+				{
+					ShowControl(m_eSingleFileLink, nRow, VALUE_COL, bBtnClick);
+				}
 			}
 			else
 			{
@@ -2883,69 +2879,61 @@ int CTDLTaskAttributeListCtrl::HitTestButtonID(int nRow, const CRect& rBtn) cons
 	return ID_BTN_DEFAULT;
 }
 
-DWORD CTDLTaskAttributeListCtrl::GetExtraButtonState(int nBtnID, const CString& sCellText, DWORD dwBaseState) const
+DWORD CTDLTaskAttributeListCtrl::GetButtonState(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText, DWORD dwBaseState) const
 {
-	if (!Misc::HasFlag(dwBaseState, DFCS_INACTIVE))
+	if (Misc::HasFlag(dwBaseState, DFCS_INACTIVE))
+		return dwBaseState;
+
+	if (!CanClickButton(nAttribID, nBtnID, sCellText))
+		return (dwBaseState | DFCS_INACTIVE);
+
+	// else
+	switch (nBtnID)
 	{
-		switch (nBtnID)
-		{
-		case ID_BTN_TIMETRACK:
-			if (m_aSelectedTaskIDs.GetSize() != 1)
-			{
-				return (dwBaseState | DFCS_INACTIVE);
-			}
-			else if ((m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
-			{
-				return (dwBaseState | DFCS_PUSHED);
-			}
-			break;
-
-		case ID_BTN_ADDLOGGEDTIME:
-			if ((m_aSelectedTaskIDs.GetSize() != 1) || 
-				(m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
-			{
-				return (dwBaseState | DFCS_INACTIVE);
-			}
-			break;
-
-		case ID_BTN_VIEWDEPENDS:
-		case ID_BTN_VIEWFILE:
-			if (sCellText.IsEmpty())
-			{
-				return (dwBaseState | DFCS_INACTIVE);
-			}
-			break;
-
-		case ID_BTN_EDITDEPENDS:
-		case ID_BTN_BROWSEFILE:
-			// No change
-			break;
-
-		default:
-			ASSERT(0);
-			break;
-		}
+	case ID_BTN_TIMETRACK:
+		if ((m_aSelectedTaskIDs.GetSize() == 1) && (m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
+			return (dwBaseState | DFCS_PUSHED);
+		break;
 	}
 
 	return dwBaseState;
 }
 
-DWORD CTDLTaskAttributeListCtrl::GetDefaultButtonState(TDC_ATTRIBUTE nAttribID, const CString& sCellText, DWORD dwBaseState) const
+BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const
 {
-	if (!Misc::HasFlag(dwBaseState, DFCS_INACTIVE))
+	ASSERT(CanEditCell(GetRow(nAttribID), VALUE_COL));
+
+	switch (nBtnID)
 	{
+	case ID_BTN_TIMETRACK:
+		return (m_aSelectedTaskIDs.GetSize() == 1);
+
+	case ID_BTN_ADDLOGGEDTIME:
+		return ((m_aSelectedTaskIDs.GetSize() == 1) && (m_aSelectedTaskIDs[0] != m_dwTimeTrackingTask));
+
+	case ID_BTN_VIEWDEPENDS:
+	case ID_BTN_VIEWFILE:
+		return !sCellText.IsEmpty();
+
+	case ID_BTN_EDITDEPENDS:
+	case ID_BTN_BROWSEFILE:
+		return TRUE;
+
+	case ID_BTN_DEFAULT:
 		switch (nAttribID)
 		{
 		case TDCA_TIMESPENT:
-			if ((m_aSelectedTaskIDs.GetSize() != 1) || 
-				(m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
-			{
-				return (dwBaseState | DFCS_INACTIVE);
-			}
+			if ((m_aSelectedTaskIDs.GetSize() == 1) && (m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
+				return FALSE;
+			break;
 		}
+		return TRUE;
+
+	default:
+		ASSERT(0);
 	}
 
-	return dwBaseState;
+	return FALSE;
 }
 
 int CTDLTaskAttributeListCtrl::HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns)
@@ -3248,7 +3236,9 @@ BOOL CTDLTaskAttributeListCtrl::DeleteSelectedCell()
 
 LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM /*wParam*/, LPARAM lParam)
 {
+#ifdef _DEBUG
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel());
+#endif
 
 	switch (lParam)
 	{

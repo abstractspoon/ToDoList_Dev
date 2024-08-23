@@ -472,9 +472,7 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 	}
 
 	CString sTime = FormatTime(dTime, nUnits, 0, '\0');
-#ifdef _DEBUG
-	ASSERT(sTime == FormatTimeHMS((int)dTime, nUnits));
-#endif
+	ASSERT(sTime == FormatTimeHMS(Misc::Round(dTime), nUnits));
 	
 	if (bDecPlaces && (nLeftOverUnits != THU_NULL))
 	{

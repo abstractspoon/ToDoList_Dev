@@ -180,10 +180,11 @@ protected:
 	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState);
 	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
-	void DrawPopupMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	void DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
 	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState);
+	BOOL DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState);
 
 private:
 	void RecalcHotButtonRects();

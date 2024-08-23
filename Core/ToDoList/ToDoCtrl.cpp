@@ -2358,7 +2358,7 @@ BOOL CToDoCtrl::CanSetSelectedTaskPercentDone(BOOL bToToday) const
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			return FALSE;
 
-		if (m_taskTree.SelectionHasSubtasks() && // ie. some are parents
+		if (m_taskTree.SelectionHasParents() && 
 			HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
 		{
 			return FALSE;
