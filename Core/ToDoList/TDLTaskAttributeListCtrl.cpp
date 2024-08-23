@@ -266,14 +266,14 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-HICON CTDLTaskAttributeListCtrl::GetIcon(int nIcon)
+HICON CTDLTaskAttributeListCtrl::GetIcon(int nIcon, BOOL bDisabled)
 {
 	CString sIcon = Misc::Format(nIcon);
 
 	if (!s_iconCache.HasIcon(sIcon))
 		s_iconCache.Add(sIcon, (UINT)nIcon);
 
-	return s_iconCache.GetIcon(sIcon);
+	return s_iconCache.GetIcon(sIcon, bDisabled);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleSortDirection()
@@ -1460,7 +1460,8 @@ BOOL CTDLTaskAttributeListCtrl::RowValueVaries(int nRow) const
 
 BOOL CTDLTaskAttributeListCtrl::DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const
 {
-	HICON hIcon = GetButtonIcon(nAttribID, nBtnID);
+	DWORD dwState = GetButtonState(nAttribID, nBtnID, sText, dwBaseState);
+	HICON hIcon = GetButtonIcon(nAttribID, nBtnID, dwState);
 
 	if (!hIcon)
 	{
@@ -1468,7 +1469,6 @@ BOOL CTDLTaskAttributeListCtrl::DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID
 		return FALSE;
 	}
 
-	DWORD dwState = GetButtonState(nAttribID, nBtnID, sText, dwBaseState);
 	CRect rCellBtn(rBtn);
 
 	if (nBtnID != ID_BTN_DEFAULT)
@@ -2332,7 +2332,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			// Insert before default menu button
 			m_eTimePeriod.InsertButton(0, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME));
 
-			// Insert befoe 'Add logged time button'
+			// Insert before 'Add logged time button'
 			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK));
 		}
 		break;
@@ -2896,24 +2896,26 @@ DWORD CTDLTaskAttributeListCtrl::GetButtonState(TDC_ATTRIBUTE nAttribID, int nBt
 	return dwBaseState;
 }
 
-HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID) const
+HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const
 {
 	ASSERT(CanEditCell(GetRow(nAttribID), VALUE_COL));
 
+	BOOL bDisabled = (dwState & DFCS_INACTIVE);
+
 	switch (nBtnID)
 	{
-	case ID_BTN_TIMETRACK:		return GetIcon(ICON_TRACKTIME);
-	case ID_BTN_ADDLOGGEDTIME:	return GetIcon(ICON_ADDTIME);
-	case ID_BTN_VIEWDEPENDS:	return GetIcon(ICON_SHOWDEPENDS);
-	case ID_BTN_VIEWFILE:		return GetIcon(ICON_VIEWFILE);
-	case ID_BTN_BROWSEFILE:		return GetIcon(ICON_BROWSEFILE);
+	case ID_BTN_TIMETRACK:		return GetIcon(ICON_TRACKTIME, bDisabled);
+	case ID_BTN_ADDLOGGEDTIME:	return GetIcon(ICON_ADDTIME, bDisabled);
+	case ID_BTN_VIEWDEPENDS:	return GetIcon(ICON_SHOWDEPENDS, bDisabled);
+	case ID_BTN_VIEWFILE:		return GetIcon(ICON_VIEWFILE, bDisabled);
+	case ID_BTN_BROWSEFILE:		return GetIcon(ICON_BROWSEFILE, bDisabled);
 
 	case ID_BTN_DEFAULT:
 		switch (nAttribID)
 		{
-		case TDCA_ICON:			return GetIcon(ICON_SELECTICON);
-		case TDCA_REMINDER:		return GetIcon(ICON_REMINDER);
-		case TDCA_FILELINK:		return GetIcon(ICON_BROWSEFILE);
+		case TDCA_ICON:			return GetIcon(ICON_SELECTICON, bDisabled);
+		case TDCA_REMINDER:		return GetIcon(ICON_REMINDER, bDisabled);
+		case TDCA_FILELINK:		return GetIcon(ICON_BROWSEFILE, bDisabled);
 
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -2921,7 +2923,7 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 				switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
 				{
 				case TDCCA_ICON:
-					return GetIcon(ICON_SELECTICON);
+					return GetIcon(ICON_SELECTICON, bDisabled);
 				}
 			}
 		}
