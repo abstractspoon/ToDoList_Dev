@@ -8,6 +8,7 @@
 //
 
 #include "enedit.h"
+#include "icon.h"
 #include "stringres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -79,7 +80,7 @@ protected:
 	int m_nStyle;
 	CString m_sCurFolder;
 	CString m_sBrowseTitle;
-	CImageList m_ilImageIcon;
+	CIcon m_iconFile;
 
 	static CString s_sBrowseBtnTip, s_sGoBtnTip;
 	static CString s_sBrowseFilesTitle, s_sBrowseFoldersTitle;
@@ -89,7 +90,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CFileEdit)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	//}}AFX_VIRTUAL
@@ -121,7 +122,6 @@ protected:
 	CRect GetIconScreenRect() const; 
 	void DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon);
 	CString GetBrowseTitle(BOOL bFolder) const;
-	void ClearImageIcon();
 	HBRUSH GetBackgroundBrush(CDC* pDC) const;
 };
 

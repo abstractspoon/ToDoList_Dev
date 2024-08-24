@@ -118,7 +118,6 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter)
 
 CFileEdit::~CFileEdit()
 {
-	ClearImageIcon();
 }
 
 
@@ -158,7 +157,7 @@ void CFileEdit::EnableStyle(int nStyle, BOOL bEnable)
 
 BOOL CFileEdit::OnChange() 
 {
-	ClearImageIcon();
+	m_iconFile.Destroy();
 
 	EnableButton(FEBTN_GO, GetWindowTextLength());
 	SendMessage(WM_NCPAINT);
@@ -310,14 +309,12 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 		return;
 	}
 
-	int nImage = -1;
-
 	// try parent for override
 	HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath);
 
 	if (hIcon)
 	{
-		ClearImageIcon();
+		m_iconFile.Destroy();
 
 		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, IMAGE_SIZE, IMAGE_SIZE, 0, NULL, DI_NORMAL));
 		return;
@@ -331,36 +328,15 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 
 	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
 	{
-		if (m_ilImageIcon.GetSafeHandle() == NULL)
-			VERIFY(m_ilImageIcon.Create(IMAGE_SIZE, IMAGE_SIZE, (ILC_COLOR32 | ILC_MASK), 1, 1));
+		if (!m_iconFile.IsValid())
+			VERIFY(m_iconFile.SetIcon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE)));
 
-		if (m_ilImageIcon.GetImageCount() == 0)
-		{
-			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE));
-
-			if (icon.IsValid())
-				m_ilImageIcon.Add(icon);
-		}
-
-		if (m_ilImageIcon.GetImageCount() > 0)
-		{
-			VERIFY(m_ilImageIcon.Draw(pDC, 0, rIcon.TopLeft(), ILD_TRANSPARENT));
+		if (m_iconFile.Draw(pDC, rIcon.TopLeft()))
 			return;
-		}
 	}
 
 	// All else
 	CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
-}
-
-void CFileEdit::ClearImageIcon()
-{
-	if (m_ilImageIcon.GetSafeHandle())
-	{
-		ASSERT(m_ilImageIcon.GetImageCount() <= 1);
-
-		while (m_ilImageIcon.Remove(0));
-	}
 }
 
 BOOL CFileEdit::DoBrowse(LPCTSTR szFilePath)
