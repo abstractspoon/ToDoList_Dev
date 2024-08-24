@@ -1893,7 +1893,7 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const C
 			}
 
 			// else
-			return CFileIcons::Draw(pDC, FileMisc::GetExtension(sIcon), ptIcon);
+			return CFileIcons::Draw(pDC, sIcon, ptIcon);
 		}
 
 		// else
