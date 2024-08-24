@@ -2272,13 +2272,22 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	case TDCA_FILELINK:
 		{
-			CStringArray aFiles;
+			CString sValue = GetItemText(nRow, nCol);
 
-			if (Misc::Split(GetItemText(nRow, nCol), aFiles))
-				m_cbMultiFileLink.SetFileList(aFiles);
+			if (sValue.IsEmpty())
+			{
+				PrepareSingleFileEdit(nRow, sValue);
+			}
+			else
+			{
+				CStringArray aFiles;
 
-			m_cbMultiFileLink.SetCurrentFolder(m_sCurrentFolder);
-			m_cbMultiFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+				if (Misc::Split(sValue, aFiles))
+					m_cbMultiFileLink.SetFileList(aFiles);
+
+				m_cbMultiFileLink.SetCurrentFolder(m_sCurrentFolder);
+				m_cbMultiFileLink.EnableEditStyle(FES_DISPLAYIMAGETHUMBNAILS, m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+			}
 		}
 		break;
 
@@ -2413,9 +2422,12 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 				case TDCCA_STRING:
 				case TDCCA_ICON:
-				case TDCCA_FILELINK:
 				case TDCCA_BOOL:
 					break; // Handled by CInputListCtrl
+
+				case TDCCA_FILELINK:
+					PrepareSingleFileEdit(nRow, GetItemText(nRow, nCol));
+					break;
 
 				case TDCCA_CALCULATION:
 					break; // Not editable
@@ -2436,6 +2448,13 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		}
 		break;
 	}
+}
+
+void CTDLTaskAttributeListCtrl::PrepareSingleFileEdit(int nRow, const CString& sValue)
+{
+	m_eSingleFileLink.SetWindowText(sValue);
+	m_eSingleFileLink.SetCurrentFolder(m_sCurrentFolder);
+	m_eSingleFileLink.EnableStyle(FES_DISPLAYIMAGETHUMBNAILS, m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
 }
 
 void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate)

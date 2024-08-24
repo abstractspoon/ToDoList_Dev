@@ -266,6 +266,7 @@ protected:
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
+	void PrepareSingleFileEdit(int nRow, const CString& sValue);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeOfDayCombo(int nRow);
 	void PrepareTimePeriodEdit(int nRow);
