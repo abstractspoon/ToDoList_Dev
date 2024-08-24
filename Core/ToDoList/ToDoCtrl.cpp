@@ -2358,7 +2358,7 @@ BOOL CToDoCtrl::CanSetSelectedTaskPercentDone(BOOL bToToday) const
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 			return FALSE;
 
-		if (m_taskTree.SelectionHasSubtasks() && // ie. some are parents
+		if (m_taskTree.SelectionHasParents() && 
 			HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION))
 		{
 			return FALSE;
@@ -4384,7 +4384,6 @@ void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 }
 
-
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	if (filter.mapAttribs.HasOnly(TDCA_ALL) ||
@@ -6140,7 +6139,9 @@ void CToDoCtrl::SetFilePath(const CString& sPath)
 	m_ctrlComments.SetPreferencesFilePath(sPath);
 	
 	CString sFolder(FileMisc::GetFolderFromFilePath(sPath));
+
 	m_taskTree.SetTasklistFolder(sFolder);
+	m_ctrlAttributes.SetCurrentFolder(sFolder);
 }
 
 CString CToDoCtrl::GetStylesheetPath() const
@@ -7138,6 +7139,7 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 		m_data.SetTaskDate(dwTaskID, TDCD_STARTDATE, COleDateTime::GetCurrentTime());
 
 	m_taskTree.SetTimeTrackTaskID(dwTaskID);
+	m_ctrlAttributes.SetTimeTrackTaskID(dwTaskID);
 
 	SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
 
@@ -7189,6 +7191,7 @@ void CToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 
 	// update tree
 	m_taskTree.SetTimeTrackTaskID(0);
+	m_ctrlAttributes.SetTimeTrackTaskID(0);
 
 	// notify parent
 	if (bNotify)

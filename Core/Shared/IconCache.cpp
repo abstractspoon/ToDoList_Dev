@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "IconCache.h"
 #include "Icon.h"
-#include "enbitmap.h"
+#include "enbitmapex.h"
 #include "GraphicsMisc.h"
 #include "FileMisc.h"
 
@@ -34,7 +34,6 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 		return Add(sName, hIcon, FALSE);
 	}
 	
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -48,7 +47,6 @@ BOOL CIconCache::Add(const CString& sName, UINT nIconID)
 		return Add(sName, hIcon, FALSE);
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -70,7 +68,6 @@ BOOL CIconCache::Add(const CString& sName, HICON hIcon, BOOL bCopy)
 		return TRUE;
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -84,7 +81,6 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 		return Add(sName, hIcon, FALSE);
 	}
 	
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -114,6 +110,25 @@ HICON CIconCache::GetIcon(const CString& sName) const
 	m_mapIcons.Lookup(sName, hIcon);
 
 	return hIcon;
+}
+
+HICON CIconCache::GetIcon(const CString& sName, BOOL bDisabled)
+{
+	HICON hIcon = GetIcon(sName);
+
+	if (!bDisabled || !hIcon)
+		return hIcon;
+
+	CString sDisName = (sName + _T("__disabled__"));
+	HICON hDisIcon = GetIcon(sDisName);
+
+	if (!hDisIcon)
+	{
+		hDisIcon = CEnBitmapEx::CreateDisabledIcon(hIcon);
+		VERIFY(Add(sDisName, hDisIcon, FALSE));
+	}
+
+	return GetIcon(sDisName);
 }
 
 BOOL CIconCache::IsValidName(const CString& sName) const

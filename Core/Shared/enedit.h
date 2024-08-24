@@ -11,14 +11,17 @@
 #include "hottracker.h"
 #include "tooltipctrlex.h"
 #include "enimagelist.h"
+#include "GraphicsMisc.h"
 
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnEdit window
 
-const int DEF_BTNWIDTH = ::GetSystemMetrics(SM_CXHTHUMB);
-const int CALC_BTNWIDTH = -1;
+
+const int EE_BTNWIDTH_DEFAULT	= ::GetSystemMetrics(SM_CXHTHUMB);
+const int EE_BTNWIDTH_ICON		= (GraphicsMisc::ScaleByDPIFactor(16 + 2));
+const int EE_BTNWIDTH_CALCULATE = -1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,12 +46,12 @@ class CEnEdit : public CMaskEdit
 public:
 	CEnEdit(LPCTSTR szMask = NULL, DWORD dwMaskFlags = 0);
 
-	BOOL AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL AddButton(UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH);
-	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH );
+	BOOL AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL AddButton(UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT);
+	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT );
 
 	BOOL DeleteButton(UINT nID);
 	void DeleteAllButtons();

@@ -27,6 +27,7 @@ public:
 	BOOL Remove(const CString& sName);
 	BOOL HasIcon(const CString& sName) const;
 	HICON GetIcon(const CString& sName) const;
+	HICON GetIcon(const CString& sName, BOOL bDisabled);
 	
 	void Clear();
 	BOOL Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle = ILD_TRANSPARENT);
@@ -39,6 +40,7 @@ protected:
 protected:
 	BOOL IsValidName(const CString& sName) const;
 	BOOL Add(const CString& sName, HICON hIcon, BOOL bCopy);
+
 };
 
 //////////////////////////////////////////////////////////////////////

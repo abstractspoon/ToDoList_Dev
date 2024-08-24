@@ -287,6 +287,32 @@ BOOL CThemed::DrawUnthemedFrameControl(CDC* pDC, const CRect& rect, UINT nType, 
 	case DFC_COMBONOARROW:
 		nType = DFC_BUTTON;
 		nState |= DFCS_BUTTONPUSH;
+		// fall through
+
+	case DFC_BUTTON:
+		if (nState & DFCS_BUTTONPUSH)
+		{
+			// We draw push buttons ourselves to be consistent with how 
+			// DrawFrameControl draws the combo/scroll button
+			CRect rFrame(rect);
+
+			if (nState & DFCS_PUSHED)
+			{
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DSHADOW), GetSysColor(COLOR_3DSHADOW));
+			}
+			else
+			{
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DFACE), GetSysColor(COLOR_3DDKSHADOW));
+				rFrame.DeflateRect(1, 1);
+
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DHIGHLIGHT), GetSysColor(COLOR_3DSHADOW));
+			}		
+			
+			rFrame.DeflateRect(1, 1);
+			pDC->FillSolidRect(rFrame, GetSysColor(COLOR_3DFACE));
+
+			return TRUE;
+		}
 		break;
 	}
 
@@ -688,7 +714,8 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 	sThClass.Empty();
 	nThPart = 0;
 	nThState = 0;
-	
+
+	// Note: 'Disabled' takes priority
 	switch (nType)
 	{
 	case DFC_BUTTON:
@@ -700,13 +727,13 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			{
 				nThPart = BP_PUSHBUTTON;
 				
-				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-				{
-					nThState = PBS_PRESSED;
-				}
-				else if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+				if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
 				{
 					nThState = PBS_DISABLED;
+				}
+				else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				{
+					nThState = PBS_PRESSED;
 				}
 				else if ((nState & DFCS_HOT) == DFCS_HOT)
 				{
@@ -830,14 +857,18 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			nThPart = (nType == DFC_COMBO ? CP_DROPDOWNBUTTON : CP_READONLY);
 			nThState = CBXS_NORMAL;
 
-			if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-				nThState = CBXS_PRESSED;
-
-			else if (nState & DFCS_INACTIVE)
+			if (nState & DFCS_INACTIVE)
+			{
 				nThState = CBXS_DISABLED;
-
+			}
+			else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+			{
+				nThState = CBXS_PRESSED;
+			}
 			else if (nState & DFCS_HOT)
+			{
 				nThState = CBXS_HOT;
+			}
 		}
 		break;
 	}

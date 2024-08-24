@@ -5093,7 +5093,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_TDC_FIELD_DEPENDENCY "De&pendency"
     IDS_TDLBC_DEPENDS       "Dependency"
-    IDS_TDC_DEPENDSLINK_TIP "View Dependency"
     IDS_TDC_SELTASKHASDEPENDENCY 
                             "The selected task is dependent on another task that must be completed first.\n\nWould you like to view the dependency?"
     IDS_TDC_SELTASKSHAVEDEPENDENCIES 
@@ -6022,6 +6021,7 @@ BEGIN
     IDS_REMINDER_DUENOW     "Due Now"
     IDS_ATTRIBTIP_DEPENDENTDATE "Dependent date"
     IDS_ATTRIBTIP_COMPLETEDTASK "Completed task"
+    IDS_ATTRIBTIP_MODIFY    "Modify"
 END
 
 STRINGTABLE DISCARDABLE 

@@ -27,7 +27,7 @@ enum IL_COLUMNTYPE
 	ILCT_DATE,
 	ILCT_CHECK,
 	ILCT_POPUPMENU, 
-	ILCT_CUSTOMBTN,
+	ILCT_ICON,
 }; 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -176,6 +176,15 @@ protected:
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
 	BOOL CellHasButton(int nRow, int nCol) const;
 	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
+
+	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState) const;
+	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	BOOL DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState) const;
 
 private:
 	void RecalcHotButtonRects();

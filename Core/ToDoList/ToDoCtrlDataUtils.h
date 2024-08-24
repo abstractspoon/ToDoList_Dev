@@ -413,7 +413,6 @@ public:
 	// These functions return the number of matching values
 	int GetTasksCategories(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
-	int GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 	int GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const;
 
 	// Simple query functions
@@ -435,6 +434,7 @@ public:
 	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+	BOOL AllTasksAreParents(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
 

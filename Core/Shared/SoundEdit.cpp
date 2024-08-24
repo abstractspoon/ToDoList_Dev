@@ -36,7 +36,7 @@ CString CSoundEdit::s_sPlayBtnTip = _T("Play");
 CSoundEdit::CSoundEdit()
 {
 	SetFilter(s_sFilter);
-	AddButton(ID_PLAYSOUNDBTN, MARLETT_MENURIGHT, s_sPlayBtnTip, CALC_BTNWIDTH, _T("Marlett"));
+	AddButton(ID_PLAYSOUNDBTN, MARLETT_MENURIGHT, s_sPlayBtnTip, EE_BTNWIDTH_CALCULATE, _T("Marlett"));
 	SetButtonTip(FEBTN_BROWSE, s_sBrowseBtnTip);
 }
 

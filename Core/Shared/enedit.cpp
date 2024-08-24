@@ -111,7 +111,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nW
 
 BOOL CEnEdit::InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, LPCTSTR szFont, BOOL bSymbolFont)
 {
-	if (nWidth < CALC_BTNWIDTH || !nID)
+	if (nWidth < EE_BTNWIDTH_CALCULATE || !nID)
 		return FALSE;
 
 	nPos = max(nPos, 0);
@@ -163,10 +163,10 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	eb.nID = nID;
 	eb.sTip = szTip;
 
-	if (nWidth != DEF_BTNWIDTH)
+	if (nWidth != EE_BTNWIDTH_DEFAULT)
 		eb.nWidth = GraphicsMisc::ScaleByDPIFactor(nWidth);
 	else
-		eb.nWidth = (GraphicsMisc::ScaleByDPIFactor(16) + 4); // 2 px padding
+		eb.nWidth = EE_BTNWIDTH_ICON;
 
 	if (m_ilBtns.GetSafeHandle())
 	{
@@ -328,20 +328,18 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 			m_bFirstShow = FALSE; // in case we get here before OnNcPaint()
 		
 			lpncsp->rgrc[0].right -= GetButtonsWidth();
+			lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
 
-			if (!m_bParentIsCombo)
+			if (m_bParentIsCombo)
 			{
-				lpncsp->rgrc[0].right += (GetSystemMetrics(SM_CXEDGE) - m_nBtnPadding);
+				if (m_nBtnPadding == 0)
+					lpncsp->rgrc[0].right++;
+				else
+					lpncsp->rgrc[0].right -= m_nBtnPadding;
 			}
 			else
 			{
-				lpncsp->rgrc[0].right--;
-
-				if (m_nBtnPadding == 0)
-				{
-					// Compensate for the fact that we will be rendering our buttons into the combo DC
-					lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
-				}
+				lpncsp->rgrc[0].right -= m_nBtnPadding;
 			}
 		}
 	}
@@ -392,7 +390,7 @@ void CEnEdit::OnLButtonUp(UINT nFlags, CPoint point)
 	RedrawButtonByIndex(nBtnDown);
 
 	// process
-	if (nBtnDown == nBtnUp)
+	if ((nBtnDown == nBtnUp) && (nBtnUp < GetButtonCount()))
 	{
 		ClickButton(m_aButtons[nBtnUp].nID);
 		RedrawButtonByIndex(nBtnDown);
@@ -498,7 +496,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 			if (m_nBtnPadding == 0)
 			{
 				GetParent()->GetWindowRect(rBtn);
-				rBtn.right -= DEF_BTNWIDTH;
+				rBtn.right -= EE_BTNWIDTH_DEFAULT;
 			}
 			else
 			{
@@ -548,7 +546,7 @@ void CEnEdit::OnNcPaint()
 			CRect rWindow;
 		
 			GetParent()->GetWindowRect(rWindow);
-			rWindow.right -= DEF_BTNWIDTH;
+			rWindow.right -= EE_BTNWIDTH_DEFAULT;
 		
 			NcPaint(&dc, rWindow);
 		}
@@ -767,7 +765,7 @@ BOOL CEnEdit::SetButtonCaption(UINT nID, LPCTSTR szCaption)
 		eb.sCaption = sCaption;
 
 		// recalc width?
-		if (eb.nWidth == CALC_BTNWIDTH)
+		if (eb.nWidth == EE_BTNWIDTH_CALCULATE)
 			RecalcBtnHotRects();
 
 		if (GetSafeHwnd())
@@ -814,18 +812,11 @@ int CEnEdit::GetButtonsWidth() const
 	int nWidth = 0, nNumBtns = GetButtonCount();
 
 	for (int nBtn = 0; nBtn < nNumBtns; nBtn++)
-		nWidth += (GetButtonWidthByIndex(nBtn) + (m_nBtnPadding ? 1 : 0));
-
- 	// trim extra final spacing
+		nWidth += GetButtonWidthByIndex(nBtn);
+	
+	// Add button spacing
 	if (m_nBtnPadding)
-	{
-		nWidth--;
-	}
-	else if (m_bParentIsCombo)
-	{
-		// Compensate for the fact that we will be rendering our buttons into the combo DC
-		nWidth -= GetSystemMetrics(SM_CXEDGE);
-	}
+		nWidth += (nNumBtns - 1);
 	
 	return max(nWidth, 0);
 }

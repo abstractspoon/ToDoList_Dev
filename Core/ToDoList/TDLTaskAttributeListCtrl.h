@@ -88,9 +88,11 @@ public:
 	void RefreshDateTimeFormatting();
 
 	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
+	void SetCurrentFolder(const CString& sFolder);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
+	void SetTimeTrackTaskID(DWORD dwTaskID);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
@@ -150,12 +152,14 @@ protected:
 
 	CDWordArray m_aSelectedTaskIDs;
 	CString m_sCompletionStatus;
+	CString m_sCurrentFolder;
 	CDWordArray m_aPriorityColors;
 	CTDCAttributeMap m_mapReadOnlyListData;
 
 	BOOL m_bGrouped;
 	BOOL m_bSplitting;
 	float m_fAttribColProportion;
+	DWORD m_dwTimeTrackingTask;
 
 	CEnCheckComboBox m_cbTextAndNumbers;
 	CDateTimeCtrlEx m_datePicker;
@@ -204,6 +208,7 @@ protected:
 	afx_msg LRESULT OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileLinkDisplay(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSingleFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -218,12 +223,12 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
 	virtual void OnCancelEdit();
-	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
+	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rBtn) const;
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
-	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);
+	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rBtn);
 	virtual UINT GetTextDrawFlags(int nCol) const;
 
 protected:
@@ -244,13 +249,20 @@ protected:
 	void NotifyParentEdit(int nRow);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
-	void HandleSingleFileLinkEdit(int nRow, const CString& sFile, BOOL bBtnClick);
+	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
 	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
+
+	int HitTestButtonID(int nRow) const;
+	int HitTestButtonID(int nRow, const CRect& rBtn) const;
+	BOOL CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const;
+	DWORD GetButtonState(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText, DWORD dwBaseState) const;
+	HICON GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const;
+	BOOL DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const;
 
 	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
 	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
@@ -262,7 +274,9 @@ protected:
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
-	static HICON GetIcon(int nIcon);
+	static HICON GetIcon(int nIcon, BOOL bDisabled = FALSE);
+	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
+	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 
 private:
 	// ---------------------------------------------------------------------

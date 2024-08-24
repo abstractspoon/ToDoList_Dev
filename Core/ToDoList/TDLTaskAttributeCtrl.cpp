@@ -28,7 +28,12 @@ CTDLTaskAttributeCtrl::CTDLTaskAttributeCtrl(const CToDoCtrlData& data,
 											 const CTDCReminderHelper& rems,
 											 const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
-	m_lcAttributes(data, mgrContent, ilIcons, vis, rems, aCustAttribDefs)
+	m_lcAttributes(data, 
+				   mgrContent, 
+				   ilIcons, 
+				   vis, 
+				   rems, 
+				   aCustAttribDefs)
 {
 	m_toolbar.SetBorders(0, 0, 0, 1);
 }
@@ -217,9 +222,11 @@ CONST_FWD_FUNC_RET_0ARG(COleDateTime, GetDoneTime)
 
 FWD_FUNC_VOID_1ARG(RedrawValue,	TDC_ATTRIBUTE)
 FWD_FUNC_VOID_1ARG(SelectValue,	TDC_ATTRIBUTE)
-FWD_FUNC_VOID_1ARG(SetCompletionStatus,	const CString&)
+FWD_FUNC_VOID_1ARG(SetCurrentFolder, const CString&)
+FWD_FUNC_VOID_1ARG(SetCompletionStatus, const CString&)
 FWD_FUNC_VOID_1ARG(SetPriorityColors, const CDWordArray&)
 FWD_FUNC_VOID_1ARG(SetPercentDoneIncrement,	int)
+FWD_FUNC_VOID_1ARG(SetTimeTrackTaskID, DWORD)
 FWD_FUNC_VOID_1ARG(SetDefaultAutoListData, const TDCAUTOLISTDATA&)
 FWD_FUNC_VOID_1ARG(RefreshSelectedTasksValues, const CTDCAttributeMap&)
 FWD_FUNC_VOID_1ARG(RefreshSelectedTasksValue, TDC_ATTRIBUTE)

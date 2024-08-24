@@ -5744,11 +5744,6 @@ int CTDCMultiTasker::GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMa
 	GETTASKSLIST_SPLIT(m_data.GetTaskTags);
 }
 
-int CTDCMultiTasker::GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
-{
-	GETTASKSLIST_SPLIT(m_data.GetTaskFileLinks);
-}
-
 int CTDCMultiTasker::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
 	GETTASKSLIST_SPLIT(m_data.GetTaskAllocTo);
@@ -5833,7 +5828,7 @@ BOOL CTDCMultiTasker::AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const
 
 BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const
 {
-	if (!aTaskIDs.GetSize())
+	if (!aTaskIDs.GetSize() || !dwTaskID)
 		return FALSE;
 
 	BOOL bFound = (Misc::FindT(dwTaskID, aTaskIDs) != -1);
@@ -5915,6 +5910,12 @@ BOOL CTDCMultiTasker::AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreat
 	return FALSE;
 }
 
+BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+{
+	DWORD dwUnused = 0;
+	return GetTasksParentID(aTaskIDs, dwUnused);
+}
+
 // -----------------------------------------------------------------
 
 #define GETALLTASKHAS(FUNCTION)                    \
@@ -5948,10 +5949,9 @@ BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
 	GETALLTASKHAS(IsTaskReference);
 }
 
-BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+BOOL CTDCMultiTasker::AllTasksAreParents(const CDWordArray& aTaskIDs) const
 {
-	DWORD dwUnused = 0;
-	return GetTasksParentID(aTaskIDs, dwUnused);
+	GETALLTASKHAS(IsTaskParent);
 }
 
 BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const
