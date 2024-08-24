@@ -314,29 +314,29 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 
 	if (hIcon)
 	{
-		m_iconFile.Destroy();
-
-		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, IMAGE_SIZE, IMAGE_SIZE, 0, NULL, DI_NORMAL));
-		return;
+		m_iconFile.SetIcon(hIcon, FALSE); // not owned
+		m_iconFile.Draw(pDC, rIcon.TopLeft());
 	}
-
-	// Make fullpath unless it's a URL
-	CString sFullPath(sFilePath);
-
-	if (!WebMisc::IsURL(sFilePath))
-		FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
-
-	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	else
 	{
-		if (!m_iconFile.IsValid())
-			VERIFY(m_iconFile.SetIcon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE)));
+		// Make fullpath unless it's a URL
+		CString sFullPath(sFilePath);
 
-		if (m_iconFile.Draw(pDC, rIcon.TopLeft()))
-			return;
+		if (!WebMisc::IsURL(sFilePath))
+			FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
+
+		if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
+		{
+			if (!m_iconFile.IsValid())
+				VERIFY(m_iconFile.SetIcon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE)));
+
+			if (m_iconFile.Draw(pDC, rIcon.TopLeft()))
+				return;
+		}
+
+		// All else
+		CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
 	}
-
-	// All else
-	CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
 }
 
 BOOL CFileEdit::DoBrowse(LPCTSTR szFilePath)
