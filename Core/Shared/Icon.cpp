@@ -6,7 +6,8 @@
 CIcon::CIcon() 
 	: 
 	m_hIcon(NULL), 
-	m_size(0, 0)
+	m_size(0, 0),
+	m_bOwned(FALSE)
 {
 }
 
