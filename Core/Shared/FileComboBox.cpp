@@ -316,15 +316,13 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 
 	if (bList && !sItem.IsEmpty())
 	{
-		CString sFullPath = FileMisc::GetFullPath(sItem, m_fileEdit.GetCurrentFolder());
-		int nStyle = (m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS) ? FES_DISPLAYIMAGETHUMBNAILS : 0);
-
 		CFileEdit::DrawFileIcon(&dc,
-								this,
-								sFullPath,
+								sItem,
 								rect.TopLeft(),
-								nStyle,
-								m_fileIcons);
+								m_fileIcons,
+								this,
+								m_fileEdit.GetCurrentFolder(),
+								m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS));
 
 		rText.left += m_fileIcons.GetIconSize() + 2;
 	}

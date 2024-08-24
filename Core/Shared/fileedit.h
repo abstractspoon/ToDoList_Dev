@@ -74,11 +74,13 @@ public:
 	static int GotoFile(HWND hWnd, LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError = TRUE);
 
 	static BOOL DrawFileIcon(CDC* pDC, 
-							 CWnd* pRefWnd, // Can be NULL
-							 const CString& sFullPath, 
+							 const CString& sFilePath, 
 							 const CPoint& ptIcon, 
-							 int nStyles, 
-							 CIconCache& fileIcons);
+							 CIconCache& fileIcons,
+							 CWnd* pRefWnd = NULL,
+							 LPCTSTR szCurrentFolder = NULL,
+							 BOOL bImageThumbnails = FALSE,
+							 BOOL bFolders = FALSE);
 
 // Attributes
 protected:

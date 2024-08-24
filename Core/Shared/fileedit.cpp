@@ -305,15 +305,25 @@ HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)
 {
 	DrawFileIcon(pDC, 
-				 this,
-				 FileMisc::GetFullPath(sFilePath, m_sCurFolder), 
+				 sFilePath, 
 				 rIcon.TopLeft(), 
-				 m_nStyle, 
-				 m_fileIcon);
+				 m_fileIcon,
+				 this,
+				 m_sCurFolder,
+				 HasStyle(FES_DISPLAYIMAGETHUMBNAILS),
+				 HasStyle(FES_FOLDERS));
 }
 
-BOOL CFileEdit::DrawFileIcon(CDC* pDC, CWnd* pRefWnd, const CString& sFullPath, const CPoint& ptIcon, int nStyles, CIconCache& fileIcons)
+BOOL CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CPoint& ptIcon, CIconCache& fileIcons,
+							 CWnd* pRefWnd, LPCTSTR szCurrentFolder, BOOL bImageThumbnails, BOOL bFolders)
 {
+	CString sFullPath = Misc::GetUnquoted(sFilePath, 0);
+
+	if (Misc::IsEmpty(szCurrentFolder))
+		FileMisc::MakeFullPath(sFullPath);
+	else
+		FileMisc::MakeFullPath(sFullPath, szCurrentFolder);
+	
 	if (sFullPath.IsEmpty())
 		return FALSE;
 
@@ -326,7 +336,7 @@ BOOL CFileEdit::DrawFileIcon(CDC* pDC, CWnd* pRefWnd, const CString& sFullPath, 
 			return TRUE;
 	}
 
-	if (Misc::HasFlag(nStyles, FES_FOLDERS) && CFileIcons::DrawFolder(pDC, ptIcon))
+	if (bFolders && CFileIcons::DrawFolder(pDC, ptIcon))
 	{
 		return TRUE;
 	}
@@ -337,7 +347,7 @@ BOOL CFileEdit::DrawFileIcon(CDC* pDC, CWnd* pRefWnd, const CString& sFullPath, 
 	}
 
 	// try image content
-	if (Misc::HasFlag(nStyles, FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	if (bImageThumbnails && CEnBitmap::IsSupportedImageFile(sFullPath))
 	{
 		if (!fileIcons.HasIcon(sFullPath))
 		{

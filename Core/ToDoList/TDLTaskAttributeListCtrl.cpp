@@ -1871,15 +1871,13 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const C
 
 	if (bIconIsFile)
 	{
-		CString sFullPath = FileMisc::GetFullPath(sIcon, m_sCurrentFolder);
-		int nStyle = (m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) ? FES_DISPLAYIMAGETHUMBNAILS : 0);
-
 		return CFileEdit::DrawFileIcon(pDC, 
-									   this, 
-									   sFullPath, 
+									   sIcon,
 									   ptIcon, 
-									   nStyle, 
-									   m_iconCache);
+									   m_iconCache,
+									   this,
+									   m_sCurrentFolder,
+									   m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
 	}
 
 	// else

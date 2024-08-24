@@ -3095,15 +3095,13 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 
 void CTDLTaskCtrlBase::DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, const CPoint& ptTopLeft)
 {
-	CString sFullPath = FileMisc::GetFullPath(Misc::GetUnquoted(sFileLink, 0), m_sTasklistFolder);
-	int nStyle = (HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) ? FES_DISPLAYIMAGETHUMBNAILS : 0);
-
 	CFileEdit::DrawFileIcon(pDC, 
+							sFileLink,
+							ptTopLeft,
+							m_imageIcons,
 							this,
-							sFullPath, 
-							ptTopLeft, 
-							nStyle, 
-							m_imageIcons);
+							m_sTasklistFolder,
+							HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
 }
 
 void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bAlternate)
