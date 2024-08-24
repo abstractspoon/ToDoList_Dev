@@ -8,6 +8,7 @@
 #include "enbitmap.h"
 #include "enfiledialog.h"
 #include "DialogHelper.h"
+#include "webmisc.h"
 
 // CFileComboBox::CMultiFileEdit //////////////////////////////////////////////////////////
 
@@ -57,7 +58,7 @@ CFileComboBox::CFileComboBox(int nEditStyle)
 	: 
 	CAutoComboBox(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
 	m_fileEdit(nEditStyle),
-	m_imageIcons(FALSE), // small icons
+	m_fileIcons(FALSE), // small icons
 	m_bReadOnly(FALSE)
 {
 
@@ -195,6 +196,14 @@ BOOL CFileComboBox::DoBrowse()
 	return m_fileEdit.DoBrowse(GetFirstFile()); 
 }
 
+void CFileComboBox::EnableEditStyle(int nStyle, BOOL bEnable) 
+{ 
+	m_fileEdit.EnableStyle(nStyle, bEnable); 
+
+	if (nStyle & FES_DISPLAYIMAGETHUMBNAILS)
+		m_fileIcons.Clear();
+}
+
 CString CFileComboBox::GetFirstFile() const
 {
 	return CDialogHelper::GetItem(*this, 0);
@@ -215,7 +224,6 @@ LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
 	}
 
 	HandleReturnKey();
-
 	return 0L;
 }
 
@@ -308,24 +316,17 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 
 	if (bList && !sItem.IsEmpty())
 	{
-		BOOL bDrawn = FALSE;
+		CString sFullPath = FileMisc::GetFullPath(sItem, m_fileEdit.GetCurrentFolder());
+		int nStyle = (m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS) ? FES_DISPLAYIMAGETHUMBNAILS : 0);
 
-		if (m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sItem))
-		{
-			CString sFullPath(sItem);
-			FileMisc::MakeFullPath(sFullPath, m_fileEdit.GetCurrentFolder());
-			
-			if (m_imageIcons.HasIcon(sFullPath) || m_imageIcons.Add(sFullPath, sFullPath))
-			{
-				bDrawn = m_imageIcons.Draw(&dc, sFullPath, rect.TopLeft());
-			}
-		}
+		CFileEdit::DrawFileIcon(&dc,
+								this,
+								sFullPath,
+								rect.TopLeft(),
+								nStyle,
+								m_fileIcons);
 
-		// Fallback/default
-		if (!bDrawn)
-			m_fileEdit.DrawFileIcon(&dc, sItem, rText);
-
-		rText.left += m_imageIcons.GetIconSize() + 2;
+		rText.left += m_fileIcons.GetIconSize() + 2;
 	}
 
 	CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
@@ -356,8 +357,8 @@ BOOL CFileComboBox::DeleteLBItem(int nItem)
 		}
 
 		// delete any image associated with this item
-		if (m_imageIcons.HasIcon(sFilename))
-			m_imageIcons.Remove(sFilename);
+		if (m_fileIcons.HasIcon(sFilename))
+			m_fileIcons.Remove(sFilename);
 
 		return TRUE;
 	}

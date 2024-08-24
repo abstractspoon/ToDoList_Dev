@@ -85,7 +85,8 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter)
 	m_nStyle(nStyle),
 	m_bTipNeeded(FALSE),
 	m_sFilter(szFilter),
-	m_sCurFolder(FileMisc::GetCwd())
+	m_sCurFolder(FileMisc::GetCwd()),
+	m_fileIcon(FALSE)
 {
 	if (m_nStyle & FES_GOBUTTON)
 	{
@@ -151,13 +152,16 @@ void CFileEdit::EnableStyle(int nStyle, BOOL bEnable)
 	else
 		m_nStyle &= ~nStyle;
 
+	if (nStyle & FES_DISPLAYIMAGETHUMBNAILS)
+		m_fileIcon.Clear();
+
 	if (GetSafeHwnd())
 		SendMessage(WM_NCPAINT);
 }
 
 BOOL CFileEdit::OnChange() 
 {
-	m_iconFile.Destroy();
+	m_fileIcon.Clear();
 
 	EnableButton(FEBTN_GO, GetWindowTextLength());
 	SendMessage(WM_NCPAINT);
@@ -300,43 +304,52 @@ HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
 
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)
 {
-	if (sFilePath.IsEmpty())
-		return;
+	DrawFileIcon(pDC, 
+				 this,
+				 FileMisc::GetFullPath(sFilePath, m_sCurFolder), 
+				 rIcon.TopLeft(), 
+				 m_nStyle, 
+				 m_fileIcon);
+}
 
-	if (HasStyle(FES_FOLDERS))
-	{
-		CFileIcons::DrawFolder(pDC, rIcon.TopLeft());
-		return;
-	}
+BOOL CFileEdit::DrawFileIcon(CDC* pDC, CWnd* pRefWnd, const CString& sFullPath, const CPoint& ptIcon, int nStyles, CIconCache& fileIcons)
+{
+	if (sFullPath.IsEmpty())
+		return FALSE;
 
 	// try parent for override
-	HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath);
-
-	if (hIcon)
+	if (pRefWnd)
 	{
-		m_iconFile.SetIcon(hIcon, FALSE); // not owned
-		m_iconFile.Draw(pDC, rIcon.TopLeft());
+		HICON hIcon = (HICON)pRefWnd->GetParent()->SendMessage(WM_FE_GETFILEICON, pRefWnd->GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFullPath);
+			
+		if (CIcon(hIcon, FALSE).Draw(pDC, ptIcon))
+			return TRUE;
 	}
-	else
+
+	if (Misc::HasFlag(nStyles, FES_FOLDERS) && CFileIcons::DrawFolder(pDC, ptIcon))
 	{
-		// Make fullpath unless it's a URL
-		CString sFullPath(sFilePath);
+		return TRUE;
+	}
 
-		if (!WebMisc::IsURL(sFilePath))
-			FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
+	if (WebMisc::IsURL(sFullPath) && CFileIcons::Draw(pDC, sFullPath, ptIcon))
+	{
+		return TRUE;
+	}
 
-		if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	// try image content
+	if (Misc::HasFlag(nStyles, FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	{
+		if (!fileIcons.HasIcon(sFullPath))
 		{
-			if (!m_iconFile.IsValid())
-				VERIFY(m_iconFile.SetIcon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE)));
-
-			if (m_iconFile.Draw(pDC, rIcon.TopLeft()))
-				return;
+			VERIFY(fileIcons.Add(sFullPath, CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE)));
 		}
 
-		// All else
-		CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
+		if (fileIcons.Draw(pDC, sFullPath, ptIcon))
+			return TRUE;
 	}
+
+	// All else
+	return CFileIcons::Draw(pDC, sFullPath, ptIcon);
 }
 
 BOOL CFileEdit::DoBrowse(LPCTSTR szFilePath)

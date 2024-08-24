@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "filemisc.h"
+#include "webmisc.h"
 #include "fileregister.h"
 #include "misc.h"
 #include "driveinfo.h"
@@ -2443,7 +2444,7 @@ CString FileMisc::PathConcat(LPCTSTR szPath, LPCTSTR szDirOrFName)
 CString FileMisc::GetFullPath(const CString& sFilePath, const CString& sRelativeToFolder)
 {
 	// Check for URLs and already full paths
-	if (sFilePath.Find(':') != -1)
+	if ((sFilePath.Find(':') != -1) || WebMisc::IsURL(sFilePath))
 		return sFilePath;
 
 	CString sFullPath;

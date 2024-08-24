@@ -105,8 +105,6 @@ const TCHAR NEWLINE = '\n';
 
 /////////////////////////////////////////////////////////////////////////////
 
-CIconCache CTDLTaskAttributeListCtrl::s_iconCache(FALSE); // small icons
-
 enum 
 {
 	ICON_REMINDER		= IDI_REMINDER,
@@ -147,6 +145,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_reminders(rems),
 	m_eSingleFileLink(FES_GOBUTTON),
 	m_cbMultiFileLink(FES_GOBUTTON),
+	m_iconCache(FALSE), // small icons
 	m_dwTimeTrackingTask(0)
 {
 	SetSortColumn(0, FALSE);
@@ -154,7 +153,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	// Fixed 'Dependency' buttons
 	m_eDepends.EnableButtonPadding(FALSE);
 	m_eDepends.SetDefaultButton(0);
-	m_eDepends.AddButton(ID_BTN_VIEWDEPENDS, GetIcon(ICON_SHOWDEPENDS), CEnString(IDS_VIEW));
+	m_eDepends.AddButton(ID_BTN_VIEWDEPENDS, GetButtonIcon(ICON_SHOWDEPENDS), CEnString(IDS_VIEW));
 	m_eDepends.AddButton(ID_BTN_EDITDEPENDS, _T("..."), CEnString(IDS_ATTRIBTIP_MODIFY));
 
 	m_eTimePeriod.EnableButtonPadding(FALSE);
@@ -264,16 +263,6 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_tooltip.EnableMultilineTips();
 
 	return 0;
-}
-
-HICON CTDLTaskAttributeListCtrl::GetIcon(int nIcon, BOOL bDisabled)
-{
-	CString sIcon = Misc::Format(nIcon);
-
-	if (!s_iconCache.HasIcon(sIcon))
-		s_iconCache.Add(sIcon, (UINT)nIcon);
-
-	return s_iconCache.GetIcon(sIcon, bDisabled);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleSortDirection()
@@ -1882,22 +1871,15 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const C
 
 	if (bIconIsFile)
 	{
-		HICON hIcon = (HICON)OnFileLinkWantIcon(0, (LPARAM)(LPCTSTR)sIcon);
+		CString sFullPath = FileMisc::GetFullPath(sIcon, m_sCurrentFolder);
+		int nStyle = (m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) ? FES_DISPLAYIMAGETHUMBNAILS : 0);
 
-		if (hIcon == NULL)
-		{
-			if (m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sIcon))
-			{
-				VERIFY(s_iconCache.HasIcon(sIcon) || s_iconCache.Add(sIcon, FileMisc::GetFullPath(sIcon, m_sCurrentFolder)));
-				return s_iconCache.Draw(pDC, sIcon, ptIcon);
-			}
-
-			// else
-			return CFileIcons::Draw(pDC, sIcon, ptIcon);
-		}
-
-		// else
-		return ::DrawIconEx(*pDC, ptIcon.x, ptIcon.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+		return CFileEdit::DrawFileIcon(pDC, 
+									   this, 
+									   sFullPath, 
+									   ptIcon, 
+									   nStyle, 
+									   m_iconCache);
 	}
 
 	// else
@@ -2339,10 +2321,10 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			PrepareTimePeriodEdit(nRow);
 
 			// Insert before default menu button
-			m_eTimePeriod.InsertButton(0, ID_BTN_ADDLOGGEDTIME, GetIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME));
+			m_eTimePeriod.InsertButton(0, ID_BTN_ADDLOGGEDTIME, GetButtonIcon(ICON_ADDTIME), CEnString(IDS_TDC_ADDLOGGEDTIME));
 
 			// Insert before 'Add logged time button'
-			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK));
+			m_eTimePeriod.InsertButton(0, ID_BTN_TIMETRACK, GetButtonIcon(ICON_TRACKTIME), CEnString(IDS_TDC_STARTSTOPCLOCK));
 		}
 		break;
 
@@ -2915,6 +2897,16 @@ DWORD CTDLTaskAttributeListCtrl::GetButtonState(TDC_ATTRIBUTE nAttribID, int nBt
 	return dwBaseState;
 }
 
+HICON CTDLTaskAttributeListCtrl::GetButtonIcon(int nIconID, BOOL bDisabled) const
+{
+	CString sIcon = Misc::Format(nIconID);
+
+	if (!m_iconCache.HasIcon(sIcon))
+		m_iconCache.Add(sIcon, (UINT)nIconID);
+
+	return m_iconCache.GetIcon(sIcon, bDisabled);
+}
+
 HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const
 {
 	ASSERT(CanEditCell(GetRow(nAttribID), VALUE_COL));
@@ -2923,18 +2915,18 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 
 	switch (nBtnID)
 	{
-	case ID_BTN_TIMETRACK:		return GetIcon(ICON_TRACKTIME, bDisabled);
-	case ID_BTN_ADDLOGGEDTIME:	return GetIcon(ICON_ADDTIME, bDisabled);
-	case ID_BTN_VIEWDEPENDS:	return GetIcon(ICON_SHOWDEPENDS, bDisabled);
-	case ID_BTN_VIEWFILE:		return GetIcon(ICON_VIEWFILE, bDisabled);
-	case ID_BTN_BROWSEFILE:		return GetIcon(ICON_BROWSEFILE, bDisabled);
+	case ID_BTN_TIMETRACK:		return GetButtonIcon(ICON_TRACKTIME, bDisabled);
+	case ID_BTN_ADDLOGGEDTIME:	return GetButtonIcon(ICON_ADDTIME, bDisabled);
+	case ID_BTN_VIEWDEPENDS:	return GetButtonIcon(ICON_SHOWDEPENDS, bDisabled);
+	case ID_BTN_VIEWFILE:		return GetButtonIcon(ICON_VIEWFILE, bDisabled);
+	case ID_BTN_BROWSEFILE:		return GetButtonIcon(ICON_BROWSEFILE, bDisabled);
 
 	case ID_BTN_DEFAULT:
 		switch (nAttribID)
 		{
-		case TDCA_ICON:			return GetIcon(ICON_SELECTICON, bDisabled);
-		case TDCA_REMINDER:		return GetIcon(ICON_REMINDER, bDisabled);
-		case TDCA_FILELINK:		return GetIcon(ICON_BROWSEFILE, bDisabled);
+		case TDCA_ICON:			return GetButtonIcon(ICON_SELECTICON, bDisabled);
+		case TDCA_REMINDER:		return GetButtonIcon(ICON_REMINDER, bDisabled);
+		case TDCA_FILELINK:		return GetButtonIcon(ICON_BROWSEFILE, bDisabled);
 
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -2942,7 +2934,7 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 				switch (m_aCustomAttribDefs.GetAttributeDataType(nAttribID))
 				{
 				case TDCCA_ICON:
-					return GetIcon(ICON_SELECTICON, bDisabled);
+					return GetButtonIcon(ICON_SELECTICON, bDisabled);
 				}
 			}
 		}
@@ -3320,10 +3312,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnEnEditButtonClick(WPARAM /*wParam*/, LPARAM
 
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantIcon(WPARAM wParam, LPARAM lParam)
 {
-	if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
-		return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
-
-	return 0L;
+	return GetParent()->SendMessage(WM_FE_GETFILEICON, wParam, lParam);
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnFileLinkWantTooltip(WPARAM wParam, LPARAM lParam)

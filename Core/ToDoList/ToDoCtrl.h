@@ -597,6 +597,7 @@ protected:
 	afx_msg LRESULT OnTDCCopyAttributeValue(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCPasteAttributeValue(WPARAM wParam, LPARAM lParam);
 
+	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
