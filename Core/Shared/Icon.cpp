@@ -41,13 +41,11 @@ BOOL CIcon::IsValid() const
 void CIcon::Destroy()
 {
 	if (m_hIcon && m_bOwned)
-	{
 		VERIFY(::DestroyIcon(m_hIcon));
 
-		m_hIcon = NULL;
-		m_size.cx = m_size.cy = 0;
-		m_bOwned = FALSE;
-	}
+	m_hIcon = NULL;
+	m_size.cx = m_size.cy = 0;
+	m_bOwned = FALSE;
 }
 
 BOOL CIcon::SetIcon(HICON hIcon, BOOL bOwned)
