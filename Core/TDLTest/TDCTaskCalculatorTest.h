@@ -48,9 +48,9 @@ protected:
 	void TestGetTaskTimeRemaining(const CToDoCtrlData& data, BOOL bIncludeRefs);
 	void TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIncludeRefs);
 	void TestGetTaskLock(const CToDoCtrlData& data, BOOL bIncludeRefs);
-	//void Test(const CToDoCtrlData& data, BOOL bIncludeRefs);
+	void TestGetTaskCustomAttributeData(const CToDoCtrlData& data, BOOL bIncludeRefs);
 
-	void PopulateData(CToDoCtrlData& data) const;
+	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles(BOOL bIncludeRefs);
 };
 
