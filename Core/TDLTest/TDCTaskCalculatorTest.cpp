@@ -22,6 +22,11 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+const LPCTSTR ID_DATE = _T("Date");
+const LPCTSTR ID_INTEGER = _T("Integer");
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -29,6 +34,20 @@ CTDCTaskCalculatorTest::CTDCTaskCalculatorTest(const CTestUtils& utils)
 	: 
 	CTDLTestBase(utils)
 {
+	// Simple custom attributes
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+
+	attribDef.sUniqueID = attribDef.sLabel = ID_INTEGER;
+	attribDef.SetAttributeType(TDCCA_INTEGER);
+	attribDef.dwFeatures = TDCCAF_ACCUMULATE;
+
+	m_aCustomAttribDefs.Add(attribDef);
+
+	attribDef.sUniqueID = attribDef.sLabel = ID_DATE;
+	attribDef.SetAttributeType(TDCCA_DATE);
+	attribDef.dwFeatures = TDCCAF_MAXIMIZE;
+
+	m_aCustomAttribDefs.Add(attribDef);
 }
 
 CTDCTaskCalculatorTest::~CTDCTaskCalculatorTest()
@@ -41,7 +60,7 @@ TESTRESULT CTDCTaskCalculatorTest::Run()
 	ClearTotals();
 
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
-	PopulateData(data);
+	PopulateDataModel(data);
 
 	TestCalcs(data, FALSE); // References NOT included
 	TestCalcs(data, TRUE);  // References included
@@ -63,6 +82,7 @@ void CTDCTaskCalculatorTest::TestCalcs(const CToDoCtrlData& data, BOOL bIncludeR
 	TestGetTaskTimeRemaining(data, bIncludeRefs);
 	TestGetTaskFlag(data, bIncludeRefs);
 	TestGetTaskLock(data, bIncludeRefs);
+	TestGetTaskCustomAttributeData(data, bIncludeRefs);
 }
 
 void CTDCTaskCalculatorTest::InitialiseStyles(BOOL bIncludeRefs)
@@ -1444,9 +1464,123 @@ void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIn
 	}
 }
 
+void CTDCTaskCalculatorTest::TestGetTaskCustomAttributeData(const CToDoCtrlData& data, BOOL bIncludeRefs)
+{
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskCustomAttributeData"));
+	CTDCTaskCalculator calc(data);
+
+	InitialiseStyles(bIncludeRefs);
+
+	// Accumulated integer
+	{
+		int nAtt = m_aCustomAttribDefs.Find(ID_INTEGER);
+		ExpectTrue(nAtt == 0);
+
+		if (nAtt == 0)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
+			double dValue = 0.0;
+
+			if (bIncludeRefs)
+			{
+				ExpectTrue(calc.GetTaskCustomAttributeData(1, attribDef, dValue));
+				ExpectEQ(dValue, (-37 + 53.0 + (17.0 + 5.0) - 11.0));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(2, attribDef, dValue));
+				ExpectEQ(dValue, 53.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(3, attribDef, dValue));
+				ExpectEQ(dValue, (17.0 + 5.0 - 11.0));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(4, attribDef, dValue));
+				ExpectEQ(dValue, 5.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(5, attribDef, dValue));
+				ExpectEQ(dValue, -11.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(6, attribDef, dValue)); // Reference
+				ExpectEQ(dValue, -11.0);
+			}
+			else
+			{
+				ExpectTrue(calc.GetTaskCustomAttributeData(1, attribDef, dValue));
+				ExpectEQ(dValue, (-37 + 53.0 + (17.0 + 5.0)));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(2, attribDef, dValue));
+				ExpectEQ(dValue, 53.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(3, attribDef, dValue));
+				ExpectEQ(dValue, (17.0 + 5.0));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(4, attribDef, dValue));
+				ExpectEQ(dValue, 5.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(5, attribDef, dValue));
+				ExpectEQ(dValue, -11.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(6, attribDef, dValue)); // Reference
+				ExpectEQ(dValue, -11.0);
+			}
+		}
+	}
+
+	// Maximised date
+	{
+		int nAtt = m_aCustomAttribDefs.Find(ID_DATE);
+		ExpectTrue(nAtt == 1);
+
+		if (nAtt == 1)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAtt];
+			double dValue = 0.0;
+
+			if (bIncludeRefs)
+			{
+				ExpectTrue(calc.GetTaskCustomAttributeData(1, attribDef, dValue));
+				ExpectEQ(dValue, 45034.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(2, attribDef, dValue));
+				ExpectEQ(dValue, 45023.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(3, attribDef, dValue));
+				ExpectEQ(dValue, 45034.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(4, attribDef, dValue));
+				ExpectEQ(dValue, 45031.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(5, attribDef, dValue));
+				ExpectEQ(dValue, 45034.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(6, attribDef, dValue)); // Reference
+				ExpectEQ(dValue, 45034.0);
+			}
+			else
+			{
+				ExpectTrue(calc.GetTaskCustomAttributeData(1, attribDef, dValue));
+				ExpectEQ(dValue, 45031.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(2, attribDef, dValue));
+				ExpectEQ(dValue, 45023.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(3, attribDef, dValue));
+				ExpectEQ(dValue, 45031.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(4, attribDef, dValue));
+				ExpectEQ(dValue, 45031.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(5, attribDef, dValue));
+				ExpectEQ(dValue, 45034.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(6, attribDef, dValue)); // Reference
+				ExpectEQ(dValue, 45034.0);
+			}
+		}
+	}
+}
+
 // ---------------------------------------------------------------------------------
 
-void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
+void CTDCTaskCalculatorTest::PopulateDataModel(CToDoCtrlData& data) const
 {
 	// Task1
 	//   |
@@ -1461,6 +1595,7 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 	// Task5
 
 	CTaskFile tasks;
+	tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
 
 	HTASKITEM hTask1 = tasks.NewTask(_T("Task1"), NULL, 1, 0);
 	HTASKITEM hTask2 = tasks.NewTask(_T("Task2"), hTask1, 2, 1);
@@ -1485,6 +1620,9 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 
 		tasks.SetTaskFlag(hTask1, FALSE);
 		tasks.SetTaskLock(hTask1, TRUE); // The only locked task
+
+		tasks.SetTaskCustomAttributeData(hTask1, ID_INTEGER, TDCCADATA(-37));
+		tasks.SetTaskCustomAttributeData(hTask1, ID_DATE, TDCCADATA(45020.0));
 	}
 
 	// Task2
@@ -1503,6 +1641,9 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 
 		tasks.SetTaskFlag(hTask2, FALSE);
 		tasks.SetTaskLock(hTask2, FALSE);
+
+		tasks.SetTaskCustomAttributeData(hTask2, ID_INTEGER, TDCCADATA(53));
+		tasks.SetTaskCustomAttributeData(hTask2, ID_DATE, TDCCADATA(45023.0));
 	}
 
 	// Task3
@@ -1521,6 +1662,9 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 
 		tasks.SetTaskFlag(hTask3, FALSE);
 		tasks.SetTaskLock(hTask3, FALSE);
+
+		tasks.SetTaskCustomAttributeData(hTask3, ID_INTEGER, TDCCADATA(17));
+		tasks.SetTaskCustomAttributeData(hTask3, ID_DATE, TDCCADATA(45015.0));
 	}
 
 	// Task4 - The only completed task
@@ -1540,6 +1684,9 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 
 		tasks.SetTaskFlag(hTask4, TRUE); // The only flagged task
 		tasks.SetTaskLock(hTask4, FALSE);
+
+		tasks.SetTaskCustomAttributeData(hTask4, ID_INTEGER, TDCCADATA(5));
+		tasks.SetTaskCustomAttributeData(hTask4, ID_DATE, TDCCADATA(45031.0));
 	}
 
 	// Task5
@@ -1558,6 +1705,9 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 
 		tasks.SetTaskFlag(hTask5, FALSE);
 		tasks.SetTaskLock(hTask5, FALSE);
+
+		tasks.SetTaskCustomAttributeData(hTask5, ID_INTEGER, TDCCADATA(-11));
+		tasks.SetTaskCustomAttributeData(hTask5, ID_DATE, TDCCADATA(45034.0));
 	}
 
 	// Task6
@@ -1566,4 +1716,9 @@ void CTDCTaskCalculatorTest::PopulateData(CToDoCtrlData& data) const
 	}
 
 	data.BuildDataModel(tasks);
+
+#ifdef _DEBUG
+// 	tasks.SetXmlHeader(DEFAULT_UNICODE_HEADER);
+// 	tasks.Save(_T(" CTDCTaskCalculatorTest_PopulateDataModel.txt"), SFEF_UTF16);
+#endif
 }
