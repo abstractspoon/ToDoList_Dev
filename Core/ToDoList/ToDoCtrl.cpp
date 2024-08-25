@@ -7841,10 +7841,10 @@ BOOL CToDoCtrl::RestoreTreeSelection(const TDCSELECTIONCACHE& cache)
 		BOOL bSelChange = !((GetSelectedTaskCount() == 1) && 
 							(cache.aSelTaskIDs.GetSize() == 1) &&
 							(GetSelectedTaskID() == cache.aSelTaskIDs[0]));
-		
 		if (bSelChange)
 			UpdateControls();
 
+		m_ctrlAttributes.RefreshSelectedTasksValues();
 		return TRUE;
 	}
 
