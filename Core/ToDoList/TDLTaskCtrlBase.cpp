@@ -25,6 +25,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\FileEdit.h"
 #include "..\Shared\DateHelper.h"
 
 #include "..\3rdparty\colordef.h"
@@ -653,6 +654,10 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		case TDCS_DONEHAVELOWESTRISK:
 			if (IsSortingBy(TDCC_RISK))
 				bResort = TRUE;
+			break;
+
+		case TDCS_SHOWFILELINKTHUMBNAILS:
+			m_imageIcons.Clear();
 			break;
 
 		case TDCS_RIGHTSIDECOLUMNS:
@@ -3090,35 +3095,13 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 
 void CTDLTaskCtrlBase::DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, const CPoint& ptTopLeft)
 {
-	// first check for a tdl://
-	if (TDCTASKLINK::IsTaskLink(sFileLink, TRUE))
-	{
-		// draw our app icon 
-		if (!m_imageIcons.HasIcon(APP_ICON))
-			m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE));
-
-		VERIFY(m_imageIcons.Draw(pDC, APP_ICON, ptTopLeft));
-	}
-	else
-	{
-		CString sFullPath = FileMisc::GetFullPath(Misc::GetUnquoted(sFileLink, 0), m_sTasklistFolder);
-
-		// Render the associated image if possible
-		if (HasStyle(TDCS_SHOWFILELINKTHUMBNAILS))
-		{
-			if (!m_imageIcons.HasIcon(sFileLink))
-			{
-				if (CEnBitmap::IsSupportedImageFile(sFullPath) && FileMisc::PathExists(sFullPath))
-					m_imageIcons.Add(sFileLink, sFullPath);
-			}
-
-			if (m_imageIcons.Draw(pDC, sFileLink, ptTopLeft))
-				return;
-		}
-
-		// Draw associated file icon
-		CFileIcons::Draw(pDC, sFullPath, ptTopLeft);
-	}
+	CFileEdit::DrawFileIcon(pDC, 
+							sFileLink,
+							ptTopLeft,
+							m_imageIcons,
+							this,
+							m_sTasklistFolder,
+							HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
 }
 
 void CTDLTaskCtrlBase::DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bAlternate)

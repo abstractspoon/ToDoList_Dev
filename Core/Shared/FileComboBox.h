@@ -16,7 +16,7 @@ public:
 	CFileComboBox(int nEditStyle = 0);
 	virtual ~CFileComboBox();
 
-	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }
+	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE);
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
 	CString GetFirstFile() const;
@@ -46,7 +46,7 @@ protected:
 	
 protected:
 	CMultiFileEdit m_fileEdit;
-	CIconCache m_imageIcons;
+	CIconCache m_fileIcons;
 	BOOL m_bReadOnly;
 
 protected:

@@ -174,8 +174,8 @@ protected:
 	CTDLIconComboBox m_cbCustomIcons;
 	CToolTipCtrlEx m_tooltip;
 	CFileDropTarget m_dropFiles;
-
-	static CIconCache s_iconCache;
+	
+	mutable CIconCache m_iconCache;
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -261,6 +261,7 @@ protected:
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
 	BOOL CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const;
 	DWORD GetButtonState(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText, DWORD dwBaseState) const;
+	HICON GetButtonIcon(int nIconID, BOOL bDisabled = FALSE) const;
 	HICON GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const;
 	BOOL DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const;
 
@@ -275,7 +276,6 @@ protected:
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
-	static HICON GetIcon(int nIcon, BOOL bDisabled = FALSE);
 	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 

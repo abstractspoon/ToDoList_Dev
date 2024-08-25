@@ -8,7 +8,7 @@
 //
 
 #include "enedit.h"
-#include "icon.h"
+#include "iconcache.h"
 #include "stringres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -73,6 +73,15 @@ public:
 	static int GotoFile(HWND hWnd, LPCTSTR szPath, BOOL bHandleError = TRUE);
 	static int GotoFile(HWND hWnd, LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError = TRUE);
 
+	static BOOL DrawFileIcon(CDC* pDC, 
+							 const CString& sFilePath, 
+							 const CPoint& ptIcon, 
+							 CIconCache& fileIcons,
+							 CWnd* pRefWnd = NULL,
+							 LPCTSTR szCurrentFolder = NULL,
+							 BOOL bImageThumbnails = FALSE,
+							 BOOL bFolders = FALSE);
+
 // Attributes
 protected:
 	BOOL m_bTipNeeded;
@@ -80,7 +89,7 @@ protected:
 	int m_nStyle;
 	CString m_sCurFolder;
 	CString m_sBrowseTitle;
-	CIcon m_iconFile;
+	CIconCache m_fileIcon;
 
 	static CString s_sBrowseBtnTip, s_sGoBtnTip;
 	static CString s_sBrowseFilesTitle, s_sBrowseFoldersTitle;

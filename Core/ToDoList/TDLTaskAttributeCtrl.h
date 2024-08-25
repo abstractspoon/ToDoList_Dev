@@ -131,6 +131,7 @@ protected:
 	afx_msg LRESULT OnAddTimeToLogFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSelectDependencies(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetLinkTooltip(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDisplayLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
