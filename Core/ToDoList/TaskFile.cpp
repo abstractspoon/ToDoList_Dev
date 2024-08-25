@@ -2328,12 +2328,13 @@ BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCu
 	}
 	ASSERT(pXICustData);
 
+	// Note: overwrite any existing value
 	LPCTSTR szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCVALUE : TDL_TASKCUSTOMATTRIBVALUE);
-	pXICustData->AddItem(szTag, data.AsString());
+	pXICustData->GetAddItem(szTag, XIT_ATTRIB)->SetValue(data.AsString());
 
 	// add human readable format
 	szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING : TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
-	pXICustData->AddItem(szTag, m_aCustomAttribDefs.FormatData(data, sCustAttribID, m_bISODates));
+	pXICustData->GetAddItem(szTag, XIT_ATTRIB)->SetValue(m_aCustomAttribDefs.FormatData(data, sCustAttribID, m_bISODates));
 
 	return TRUE;
 }
