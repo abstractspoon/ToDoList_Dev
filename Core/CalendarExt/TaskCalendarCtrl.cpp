@@ -1238,15 +1238,10 @@ CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
 	if (m_fontAltText.GetSafeHandle())
 		return &m_fontAltText;
 
-	DWORD dwFlags = 0;
-		
-	if (pTCI->IsDone(FALSE) && m_bStrikeThruDone)
-		dwFlags |= GMFS_STRIKETHRU;
-		
-	if (pTCI->bTopLevel)
-		dwFlags |= GMFS_BOLD;
-		
-	return m_fonts.GetFont(dwFlags);
+	return m_fonts.GetFont(pTCI->bTopLevel,								// bold
+						   FALSE,										// italic
+						   FALSE,										// underline
+						   m_bStrikeThruDone && pTCI->IsDone(FALSE));	// strike-through
 }
 
 void CTaskCalendarCtrl::SetStrikeThruDoneTasks(BOOL bStrikeThru)
@@ -1986,10 +1981,7 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 		{
 			const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 
-			// Check for the icon
-			CRect rIcon;
-
-			if (CalcIconRect(pTCI, rTask, rIcon) && rIcon.PtInRect(ptClient))
+			if (HitTestTaskIconRect(pTCI, rTask, ptClient))
 			{
 				nHit = TCCHT_ICON;
 			}
@@ -1999,6 +1991,7 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 				VERIFY(GetDateFromPoint(ptClient, dtHit));
 
 				double dDateTol = CalcDateDragTolerance();
+
 				if (fabs(dtHit.m_dt - pTCI->GetAnyStartDate().m_dt) < dDateTol)
 				{
 					nHit = TCCHT_BEGIN;
@@ -2029,19 +2022,43 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 	return 0;
 }
 
-BOOL CTaskCalendarCtrl::CalcIconRect(const TASKCALITEM* pTCI, const CRect& rTask, CRect& rIcon) const
+BOOL CTaskCalendarCtrl::HitTestTaskIconRect(const TASKCALITEM* pTCI, const CRect& rTask, const CPoint& ptClient) const
 {
 	if (!pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		return FALSE;
 
-	rIcon = rTask;
-	const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(pTCI->GetTaskID());
-
-	rIcon.OffsetRect(-cdi.nIconOffset, 0);
+	CRect rIcon(rTask);
 	rIcon.right = (rIcon.left + IMAGE_SIZE);
-	rIcon.IntersectRect(rIcon, rTask);
 
-	return TRUE;
+	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
+	{
+		rIcon.IntersectRect(rIcon, rTask);
+		return rIcon.PtInRect(ptClient);
+	}
+
+	// When 'Continuous' rendering it's a little trickier because:
+	//
+	// 1. 'rTask' has to be in the vicinity of the beginning of the task
+	// 2. If the task starts late in the day, The icon may bridge a day-boundary
+
+	// We solve this by doing our calculations in 'date units'
+	COleDateTime dt1, dt2;
+	VERIFY(GetDateFromPoint(rIcon.TopLeft(), dt1));
+	VERIFY(GetDateFromPoint(rIcon.BottomRight(), dt2));
+
+	double dIconWidthInDays = (dt2.m_dt - dt1.m_dt);
+
+	COleDateTime dtClient;
+	VERIFY(GetDateFromPoint(ptClient, dtClient));
+
+	// Test for cursor being between the task (start date) and (start date + icon width)
+	COleDateTime dtTaskStart = pTCI->GetAnyStartDate();
+
+	if (dtClient.m_dt <= (dtTaskStart.m_dt + CalcDateDragTolerance()))
+		return FALSE;
+	
+	// else
+	return (dtClient.m_dt < (dtTaskStart.m_dt + dIconWidthInDays));
 }
 
 BOOL CTaskCalendarCtrl::HitTestCellOverflowBtn(const CPoint& ptClient) const
@@ -2475,7 +2492,7 @@ DWORD CTaskCalendarCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	}
 
 	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
-	int nFrom = aTasks.GetNextItem(GetSelectedTaskID(), bForwards);
+	int nFrom = aTasks.GetNextItem(dwTaskID, bForwards);
 
 	while (nFrom != -1)
 	{
@@ -2495,7 +2512,7 @@ DWORD CTaskCalendarCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	return 0L;
 }
 
-BOOL CTaskCalendarCtrl::CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
+BOOL CTaskCalendarCtrl::CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND /*nCmd*/) const
 {
 	return HasTask(dwTaskID, TRUE);
 }
