@@ -3493,6 +3493,12 @@ void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 	BOOL bUnused;
 	DWORD dwTaskID = HitTestTask(point, FALSE, bUnused);
 
+	// If we didn't hit any task, and the currently selected 
+	// task is a custom date, select its 'real' task so that the
+	// app context menu is shown instead as this makes more sense
+	if (dwTaskID == 0 && IsCustomDate(m_dwSelectedTaskID))
+		dwTaskID = GetRealTaskID(m_dwSelectedTaskID);
+
 	SelectTask(dwTaskID, FALSE, TRUE);
 	
 	CCalendarCtrlEx::OnRButtonDown(nFlags, point);
