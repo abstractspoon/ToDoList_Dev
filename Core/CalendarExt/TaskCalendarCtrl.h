@@ -190,7 +190,7 @@ protected:
 	int CalcRequiredTaskFontPointSize() const;
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
-	BOOL CalcIconRect(const TASKCALITEM* pTCI, const CRect& rTask, CRect& rIcon) const;
+	BOOL HitTestTaskIconRect(const TASKCALITEM* pTCI, const CRect& rTask, const CPoint& ptClient) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 	void RecalcCellHeaderDateFormats();
