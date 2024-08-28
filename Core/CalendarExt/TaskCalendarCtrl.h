@@ -17,6 +17,7 @@
 #include "..\shared\fontcache.h"
 #include "..\shared\CalendarCtrlEx.h"
 #include "..\shared\MidnightTimer.h"
+#include "..\Shared\GraphicsMisc.h"
 
 #include "..\Interfaces\IUIExtension.h"
 #include "..\Interfaces\ITaskList.h"
@@ -168,7 +169,7 @@ protected:
 
 	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
-	BOOL WantDrawTaskSelected(const TASKCALITEM* pTCI) const;
+	GM_ITEMSTATE GetTaskSelectedState(const TASKCALITEM* pTCI, BOOL bFocused) const;
 
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;

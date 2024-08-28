@@ -6,7 +6,6 @@
 #include "TaskCalendarCtrl.h"
 #include "CalMsg.h"
 
-#include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\dialoghelper.h"
@@ -1005,7 +1004,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		ASSERT(dwTaskID);
 
 		// draw selection
-		BOOL bSelTask = WantDrawTaskSelected(pTCI);
+		GM_ITEMSTATE nState = GetTaskSelectedState(pTCI, bFocused);
+		BOOL bSelTask = (nState != GMIS_NONE);
 		BOOL bFutureTask = IsFutureOccurrence(pTCI);
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
@@ -1028,17 +1028,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			if (rTask.right >= rAvailCell.right)
 				dwSelFlags |= GMIB_CLIPRIGHT;
-
-			GM_ITEMSTATE nState = GMIS_SELECTED;
-			
-			if (!bFocused)
-			{
-				nState = GMIS_SELECTEDNOTFOCUSED;
-			}
-			else if (bFutureTask)
-			{
-				nState = GMIS_DROPHILITED;
-			}
 
 			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 
@@ -1200,37 +1189,41 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	}
 }
 
-BOOL CTaskCalendarCtrl::WantDrawTaskSelected(const TASKCALITEM* pTCI) const
+GM_ITEMSTATE CTaskCalendarCtrl::GetTaskSelectedState(const TASKCALITEM* pTCI, BOOL bFocused) const
 {
-	if (m_bSavingToImage)
-		return FALSE;
-
-	if (m_dwSelectedTaskID == 0)
-		return FALSE;
+	if (m_bSavingToImage || (m_dwSelectedTaskID == 0))
+		return GMIS_NONE;
 
 	DWORD dwTaskID = pTCI->GetTaskID();
 
 	if (dwTaskID == m_dwSelectedTaskID)
-		return TRUE;
+	{
+		// Can't be a future task because they are not directly selectable
+		ASSERT(!IsFutureOccurrence(pTCI));
 
-	// Show real task as selected when a future item 
-	// is selected and vice versa
-	const TASKCALITEM* pTCISel = GetTaskCalItem(m_dwSelectedTaskID);
+		return (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+	}
 
-	if (!IsCustomDate(pTCISel))
+	// Interrelatedness between types
+	if (bFocused)
 	{
 		DWORD dwRealID = GetRealTaskID(dwTaskID);
 		DWORD dwSelRealID = GetRealTaskID(m_dwSelectedTaskID);
 
-		if (IsFutureOccurrence(pTCI))
-			return (dwSelRealID == dwRealID);
+		if (dwSelRealID == dwRealID)
+		{
+			// If this date's 'real' task is selected show the extension date as 'lightly' selected
+			if (IsExtensionItem(pTCI))
+				return GMIS_DROPHILITED;
 
-		if (IsFutureOccurrence(pTCISel))
-			return (dwSelRealID == dwTaskID);
+			// If this is the real task for a selected custom date, show the real task as 'lightly' selected
+			if (IsCustomDate(m_dwSelectedTaskID))
+				return GMIS_DROPHILITED;
+		}
 	}
 
 	// all else
-	return FALSE;
+	return GMIS_NONE;
 }
 
 CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
@@ -1238,10 +1231,10 @@ CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
 	if (m_fontAltText.GetSafeHandle())
 		return &m_fontAltText;
 
-	return m_fonts.GetFont(pTCI->bTopLevel,								// bold
-						   FALSE,										// italic
-						   FALSE,										// underline
-						   m_bStrikeThruDone && pTCI->IsDone(FALSE));	// strike-through
+	BOOL bBold = pTCI->bTopLevel;
+	BOOL bStrikeThru = (m_bStrikeThruDone && pTCI->IsDone(FALSE));
+
+	return m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru);
 }
 
 void CTaskCalendarCtrl::SetStrikeThruDoneTasks(BOOL bStrikeThru)
@@ -3502,6 +3495,12 @@ void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	BOOL bUnused;
 	DWORD dwTaskID = HitTestTask(point, FALSE, bUnused);
+
+	// If we didn't hit any task, and the currently selected 
+	// task is a custom date, select its 'real' task so that the
+	// app context menu is shown instead as this makes more sense
+	if (dwTaskID == 0 && IsCustomDate(m_dwSelectedTaskID))
+		dwTaskID = GetRealTaskID(m_dwSelectedTaskID);
 
 	SelectTask(dwTaskID, FALSE, TRUE);
 	
