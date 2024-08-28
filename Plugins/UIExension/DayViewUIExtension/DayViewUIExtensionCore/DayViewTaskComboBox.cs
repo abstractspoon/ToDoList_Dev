@@ -63,6 +63,9 @@ namespace DayViewUIExtension
 
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
+			if (e.Index < 0)
+				return;
+
 			var taskItem = (Items[e.Index] as TaskItem);
 
 			if (taskItem != null)
@@ -71,13 +74,21 @@ namespace DayViewUIExtension
 
 				var rect = e.Bounds;
 
-				for (int i = 0; i < taskItem.Depth; i++)
-					rect.X += UIExtension.TaskIcon.IconSize;
+				if (DroppedDown)
+				{
+					for (int i = 0; i < taskItem.Depth; i++)
+						rect.X += UIExtension.TaskIcon.IconSize;
+				}
 
 				if (taskItem.HasIcon && m_TaskIcons.Get(taskItem.Id))
+				{
 					m_TaskIcons.Draw(e.Graphics, rect.X, rect.Y);
-
-				rect.X += UIExtension.TaskIcon.IconSize;
+					rect.X += UIExtension.TaskIcon.IconSize;
+				}
+				else if (DroppedDown)
+				{
+					rect.X += UIExtension.TaskIcon.IconSize;
+				}
 
 				using (var brush = new SolidBrush(e.ForeColor))
 					e.Graphics.DrawString(taskItem.Title, Font, brush, rect);
