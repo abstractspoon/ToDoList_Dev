@@ -1231,10 +1231,10 @@ CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
 	if (m_fontAltText.GetSafeHandle())
 		return &m_fontAltText;
 
-	return m_fonts.GetFont(pTCI->bTopLevel,								// bold
-						   FALSE,										// italic
-						   FALSE,										// underline
-						   m_bStrikeThruDone && pTCI->IsDone(FALSE));	// strike-through
+	BOOL bBold = pTCI->bTopLevel;
+	BOOL bStrikeThru = (m_bStrikeThruDone && pTCI->IsDone(FALSE));
+
+	return m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru);
 }
 
 void CTaskCalendarCtrl::SetStrikeThruDoneTasks(BOOL bStrikeThru)
