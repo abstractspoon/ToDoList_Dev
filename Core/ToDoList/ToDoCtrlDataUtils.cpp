@@ -3878,15 +3878,16 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
-CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date) const
+CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime) const
 {
 	if (!CDateHelper::IsDateSet(date))
 		return EMPTY_STR;
 
-	DWORD dwDateFmt = m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
-
-	if (CDateHelper::DateHasTime(date))
-		dwDateFmt |= DHFD_TIME | DHFD_NOSEC;
+	DWORD dwDateFmt = 0;
+	
+	Misc::SetFlag(dwDateFmt, DHFD_ISO, m_data.HasStyle(TDCS_SHOWDATESINISO));
+	Misc::SetFlag(dwDateFmt, DHFD_DOW, m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES));
+	Misc::SetFlag(dwDateFmt, DHFD_TIME | DHFD_NOSEC, (bAllowTime && CDateHelper::DateHasTime(date)));
 
 	return CDateHelper::FormatDate(date, dwDateFmt);
 }
@@ -4591,8 +4592,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			case TDCCA_DATE:
 				if (bSuccess)
 				{
-					return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO),
-														  m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+					return GetDateTime(dValue, m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
 				}
 				break;
 

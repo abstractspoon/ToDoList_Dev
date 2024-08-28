@@ -10024,10 +10024,10 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 
 LRESULT CToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 {
-	UNREFERENCED_PARAMETER(wp);
 	ASSERT(lp);
 	ASSERT(((HWND)wp == m_taskTree.GetSafeHwnd()) ||
-		   ((HWND)wp == m_ctrlAttributes.GetSafeHwnd()));
+		   ((HWND)wp == m_ctrlAttributes.GetSafeHwnd()) ||
+		   ((HWND)wp == m_infoTip.GetSafeHwnd()));
 
 	return (LRESULT)m_reminders.GetTaskReminder(lp);
 }
