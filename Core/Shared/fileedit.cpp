@@ -319,14 +319,14 @@ BOOL CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CPoint& p
 {
 	CString sFullPath = Misc::GetUnquoted(sFilePath, 0);
 
+	if (sFilePath.IsEmpty())
+		return FALSE;
+
 	if (Misc::IsEmpty(szCurrentFolder))
 		FileMisc::MakeFullPath(sFullPath);
 	else
 		FileMisc::MakeFullPath(sFullPath, szCurrentFolder);
 	
-	if (sFullPath.IsEmpty())
-		return FALSE;
-
 	// try parent for override
 	if (pRefWnd)
 	{
