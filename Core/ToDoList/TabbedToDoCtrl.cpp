@@ -409,9 +409,12 @@ void CTabbedToDoCtrl::OnTaskIconsChanged()
 
 LRESULT CTabbedToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 {
+	ASSERT(lp);
+	ASSERT(((HWND)wp == m_taskTree.GetSafeHwnd()) ||
+		   ((HWND)wp == m_taskList.GetSafeHwnd()) ||
+		   ((HWND)wp == m_ctrlAttributes.GetSafeHwnd()) ||
+		   ((HWND)wp == m_infoTip.GetSafeHwnd()));
 	UNREFERENCED_PARAMETER(wp);
-	ASSERT(lp && (((HWND)wp == m_taskTree.GetSafeHwnd()) || 
-					((HWND)wp == m_taskList.GetSafeHwnd())));
 	
 	// Base class always expects to get this from the Task Tree
 	return CToDoCtrl::OnTDCGetTaskReminder((WPARAM)m_taskTree.GetSafeHwnd(), lp);

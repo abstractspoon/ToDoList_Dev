@@ -24,7 +24,9 @@ class CTDLInfoTipCtrl : public CToolTipCtrlEx
 {
 // Construction
 public:
-	CTDLInfoTipCtrl(const CToDoCtrlData& data, const CTDCCustomAttribDefinitionArray& aCustAttribs, const CContentMgr& mgrContent);
+	CTDLInfoTipCtrl(const CToDoCtrlData& data, 
+					const CTDCCustomAttribDefinitionArray& aCustAttribs, 
+					const CContentMgr& mgrContent);
 	virtual ~CTDLInfoTipCtrl();
 
 	CString FormatTip(DWORD dwTaskID, 

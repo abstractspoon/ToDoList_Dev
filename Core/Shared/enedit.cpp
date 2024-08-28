@@ -866,24 +866,15 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 	// note: we do not take account of ES_READONLY as the effect of this
 	// is not deterministic at this level so we assume derived classes or 
 	// parents have handled it
-	UINT nFlags = DFCS_ADJUSTRECT;
+	DWORD dwFlags = DFCS_ADJUSTRECT;
 	
-	if (!bEnabled)
-	{
-		nFlags |= DFCS_INACTIVE;
-	}
-	else if (bDown)
-	{
-		nFlags |= DFCS_PUSHED;
-	}
-	else if (bHot)
-	{
-		nFlags |= DFCS_HOT;
-	}
+	Misc::SetFlag(dwFlags, DFCS_INACTIVE, !bEnabled);
+	Misc::SetFlag(dwFlags, DFCS_PUSHED, bDown);
+	Misc::SetFlag(dwFlags, DFCS_HOT, bHot);
 	
 	// Always draw button using Combo-stype theming for consistency
 	// across Windows XP, 7, 10 and 11
-	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, nFlags);
+	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, dwFlags);
 	
 	// drop menu arrow
 	if (eb.bDropMenu)
