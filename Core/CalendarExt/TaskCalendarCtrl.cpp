@@ -1205,18 +1205,21 @@ GM_ITEMSTATE CTaskCalendarCtrl::GetTaskSelectedState(const TASKCALITEM* pTCI, BO
 	}
 
 	// Interrelatedness between types
-	DWORD dwRealID = GetRealTaskID(dwTaskID);
-	DWORD dwSelRealID = GetRealTaskID(m_dwSelectedTaskID);
-
-	if (dwSelRealID == dwRealID)
+	if (bFocused)
 	{
-		// If this date's 'real' task is selected show the extension date as 'lightly' selected
-		if (IsExtensionItem(pTCI))
-			return GMIS_DROPHILITED;
+		DWORD dwRealID = GetRealTaskID(dwTaskID);
+		DWORD dwSelRealID = GetRealTaskID(m_dwSelectedTaskID);
 
-		// If this is the real task for a selected custom date, show the real task as 'lightly' selected
-		if (IsCustomDate(m_dwSelectedTaskID))
-			return GMIS_DROPHILITED;
+		if (dwSelRealID == dwRealID)
+		{
+			// If this date's 'real' task is selected show the extension date as 'lightly' selected
+			if (IsExtensionItem(pTCI))
+				return GMIS_DROPHILITED;
+
+			// If this is the real task for a selected custom date, show the real task as 'lightly' selected
+			if (IsCustomDate(m_dwSelectedTaskID))
+				return GMIS_DROPHILITED;
+		}
 	}
 
 	// all else
