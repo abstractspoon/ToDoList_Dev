@@ -403,21 +403,25 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 	
 	GraphicsMisc::VerifyDeleteObject(m_brBack);
 	
-	if (CThemed::IsAppThemed() && pTheme)
+	if (pTheme)
 	{
 		m_theme = *pTheme;
-		m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
-
-		// intentionally set background colours to be same as ours
-		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-
-		// Rescale images because background colour has changed
-		if (GraphicsMisc::WantDPIScaling())
-			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
-
 		m_ctrlGantt.SetUITheme(m_theme);
-		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+
+		if (CThemed::IsAppThemed())
+		{
+			m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
+
+			// intentionally set toolbar background colours to be same as ours
+			m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
+			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			// Rescale images because background colour has changed
+			if (GraphicsMisc::WantDPIScaling())
+				m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+
+			m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+		}
 	}
 }
 
