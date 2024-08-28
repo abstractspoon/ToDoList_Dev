@@ -149,13 +149,13 @@ namespace DayViewUIExtension
 			if (appt is TaskExtensionItem)
 			{
 				// NOTE: - Must match 'Calendar' View in 'Core' project
-				if (appt is FutureTaskOccurrence)
+				if (appt is TaskFutureOccurrence)
 				{
 					tip.Text = m_Trans.Translate("Future Occurrence", Translator.Type.ToolTip);
 				}
-				else if (appt is CustomTaskDateAttribute)
+				else if (appt is TaskCustomDateAttribute)
 				{
-					var apptDate = (appt as CustomTaskDateAttribute);
+					var apptDate = (appt as TaskCustomDateAttribute);
 					var custAttrib = m_CustomDateDefs.Find(x => (x.Id == apptDate.AttributeId));
 
 					tip.Text = string.Format(m_Trans.Translate("{0} (Custom)", Translator.Type.ToolTip), custAttrib.Label);
@@ -229,9 +229,9 @@ namespace DayViewUIExtension
 					TaskItem taskItem = (GetRealAppointment(move.Appointment) as TaskItem);
 					string custAttribId = String.Empty;
 
-					if (args.Appointment is CustomTaskDateAttribute)
+					if (args.Appointment is TaskCustomDateAttribute)
 					{
-						custAttribId = (args.Appointment as CustomTaskDateAttribute).AttributeId;
+						custAttribId = (args.Appointment as TaskCustomDateAttribute).AttributeId;
 						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
 					}
 					else if (args.Appointment is TaskTimeBlock)
@@ -713,7 +713,7 @@ namespace DayViewUIExtension
 
 		public bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
 		{
-			return ((appt != null) && ((appt is TaskItem) || (appt is FutureTaskOccurrence)));
+			return ((appt != null) && ((appt is TaskItem) || (appt is TaskFutureOccurrence)));
 		}
 
 		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
@@ -1344,30 +1344,36 @@ namespace DayViewUIExtension
 			return base.EnsureVisible(appt, partialOK);
 		}
 
-		protected override bool WantDrawAppointmentSelected(Calendar.Appointment appt)
+		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt, bool focused)
 		{
 			if (base.SavingToImage)
-				return false;
+				return UIExtension.SelectionRect.Style.None;
 
 			if (m_SelectedTaskID == appt.Id)
-				return true;
+				return (focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
 
-			// Show real task as selected when a future item 
-			// is selected and vice versa
-			var selAppt = GetAppointment(m_SelectedTaskID);
-
-			if ((selAppt is TaskItem) || (selAppt is FutureTaskOccurrence))
+			// Interrelatedness between types
+			if (focused)
 			{
-				var selRealID = SelectedTaskId;
+				var realAppt = GetRealAppointment(appt);
+				var selAppt = GetAppointment(m_SelectedTaskID);
+				var selRealAppt = GetRealAppointment(selAppt);
 
-				if (appt is FutureTaskOccurrence)
-					return (selRealID == (appt as FutureTaskOccurrence).RealTaskId);
+				if (selRealAppt == realAppt)
+				{
+					// If this date's 'real' task is selected show the extension date as 'lightly' selected
+					if ((appt is TaskExtensionItem))
+						return UIExtension.SelectionRect.Style.DropHighlighted;
 
-				if (selAppt is FutureTaskOccurrence)
-					return (selRealID == appt.Id);
+					// If this is the real task for a selected custom date or time block, 
+					// show the real task as 'lightly' selected
+					if ((selAppt is TaskCustomDateAttribute) || (selAppt is TaskTimeBlock))
+						return UIExtension.SelectionRect.Style.DropHighlighted;
+				}
 			}
 
-			return false;
+			// else
+			return UIExtension.SelectionRect.Style.None;
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
@@ -1403,7 +1409,7 @@ namespace DayViewUIExtension
 						{
 							foreach (var futureItem in futureItems)
 							{
-								var futureAppt = new FutureTaskOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
+								var futureAppt = new TaskFutureOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
 
 								if (IsItemWithinRange(futureAppt, start, end))
 								{
@@ -1423,7 +1429,7 @@ namespace DayViewUIExtension
 
 						if (item.CustomDates.TryGetValue(attrib.Id, out date))
 						{
-							var customDate = new CustomTaskDateAttribute(item, nextExtId, attrib.Id, date);
+							var customDate = new TaskCustomDateAttribute(item, nextExtId, attrib.Id, date);
 
 							if (IsItemDisplayable(customDate) && IsItemWithinRange(customDate, start, end))
 							{
@@ -1464,6 +1470,9 @@ namespace DayViewUIExtension
             if (args.Appointment != null)
 			{
 				m_SelectedTaskID = args.Appointment.Id;
+
+				if (args.Appointment is TaskFutureOccurrence)
+					m_SelectedTaskID = (args.Appointment as TaskFutureOccurrence).RealTaskId;
 
 				// User made this selection so the task must be visible
 				m_VisibleSelectedTaskID = m_SelectedTaskID;
@@ -1544,9 +1553,9 @@ namespace DayViewUIExtension
 				{
 					taskItem.RestoreOriginalDates();
 				}
-				else if (SelectedAppointment is CustomTaskDateAttribute)
+				else if (SelectedAppointment is TaskCustomDateAttribute)
 				{
-					var custDate = (SelectedAppointment as CustomTaskDateAttribute);
+					var custDate = (SelectedAppointment as TaskCustomDateAttribute);
 					custDate.RestoreOriginalDate();
 				}
 				else if (SelectedAppointment is TaskTimeBlock)
@@ -1565,14 +1574,14 @@ namespace DayViewUIExtension
 
 		public bool CanDeleteSelectedCustomDate
 		{
-			get { return (SelectedAppointment is CustomTaskDateAttribute); }
+			get { return (SelectedAppointment is TaskCustomDateAttribute); }
 		}
 		
 		public bool DeleteSelectedCustomDate()
 		{
 			if (CanDeleteSelectedCustomDate)
 			{
-				var custDate = (SelectedAppointment as CustomTaskDateAttribute);
+				var custDate = (SelectedAppointment as TaskCustomDateAttribute);
 				custDate.ClearDate();
 
 				// Notify parent of change
@@ -1694,7 +1703,7 @@ namespace DayViewUIExtension
 
 				// Disable start date editing for tasks with dependencies that are auto-calculated
 				// Disable resizing for custom date attributes
-				bool isCustomDate = (appt is CustomTaskDateAttribute);
+				bool isCustomDate = (appt is TaskCustomDateAttribute);
 				bool isTimeBlock = (appt is TaskTimeBlock);
 				bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
 				bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);

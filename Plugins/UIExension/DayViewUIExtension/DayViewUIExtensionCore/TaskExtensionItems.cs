@@ -30,9 +30,9 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class FutureTaskOccurrence : TaskExtensionItem
+	public class TaskFutureOccurrence : TaskExtensionItem
 	{
-		public FutureTaskOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
+		public TaskFutureOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
 		{
 			Locked = true; // always (for now)
 
@@ -48,9 +48,9 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class CustomTaskDateAttribute : TaskExtensionItem
+	public class TaskCustomDateAttribute : TaskExtensionItem
 	{
-		public CustomTaskDateAttribute(TaskItem item, UInt32 id, string attribId, DateTime date) : base(item, id)
+		public TaskCustomDateAttribute(TaskItem item, UInt32 id, string attribId, DateTime date) : base(item, id)
 		{
 			AttributeId = attribId;
 			StartDate = OriginalDate = date;

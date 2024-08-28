@@ -494,14 +494,6 @@ namespace DayViewUIExtension
 					(taskItem.HasIcon || (ShowParentsAsFolder && taskItem.IsParent)));
 		}
 
-		private UInt32 GetRealTaskId(Calendar.Appointment appt)
-		{
-			if (appt is FutureTaskOccurrence)
-				return (appt as FutureTaskOccurrence).RealTaskId;
-
-			return appt.Id;
-		}
-
 		TaskItem GetTaskItem(Calendar.Appointment appt)
 		{
 			bool isExtItem = (appt is TaskExtensionItem);
@@ -517,7 +509,7 @@ namespace DayViewUIExtension
 		{
 			TaskItem taskItem = GetTaskItem(apptView.Appointment);
 
-			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
+			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
 			bool isLong = apptView.IsLong;
 
@@ -596,7 +588,7 @@ namespace DayViewUIExtension
 		void DrawTaskBackground(Graphics g, 
 								Rectangle rect,
 								Calendar.AppointmentView apptView,
-								bool isSelected,
+								bool isSelected, // ignored
 								Color fillColor, 
 								Color borderColor)
 		{
@@ -604,10 +596,12 @@ namespace DayViewUIExtension
 				return;
 
 			bool isLong = apptView.IsLong;
-			bool isFutureItem = (apptView.Appointment is FutureTaskOccurrence);
+			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
 
-			if (isSelected)
+			var style = GetAppointmentSelectedState(apptView.Appointment, Focused);
+
+			if (style != UIExtension.SelectionRect.Style.None)
 			{
 				if (isLong)
 				{
@@ -615,8 +609,6 @@ namespace DayViewUIExtension
 					rect.Width++;
 				}
 
-				var style = (isFutureItem || isTimeBlock) ? UIExtension.SelectionRect.Style.DropHighlighted :
-															UIExtension.SelectionRect.Style.Selected;
 				UIExtension.SelectionRect.Draw(Handle,
 												g,
 												rect.Left,
@@ -786,7 +778,7 @@ namespace DayViewUIExtension
 					if (taskItem.IsDone && StrikeThruDoneTasks)
 						fontStyle |= FontStyle.Strikeout;
 
-					if (taskItem.IsTopLevel && !(apptView.Appointment is FutureTaskOccurrence))
+					if (taskItem.IsTopLevel && !(apptView.Appointment is TaskFutureOccurrence))
 						fontStyle |= FontStyle.Bold;
 
 					if (fontStyle != FontStyle.Regular)
@@ -821,7 +813,7 @@ namespace DayViewUIExtension
 			gripRect.Inflate(-2, -2);
 
 			// Future tasks are not draggable -> no gripper
-			if (apptView.Appointment is FutureTaskOccurrence)
+			if (apptView.Appointment is TaskFutureOccurrence)
 				gripRect.Width = 0;
 			else
 				gripRect.Width = 5;

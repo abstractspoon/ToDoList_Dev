@@ -404,7 +404,7 @@ namespace DayViewUIExtension
 
 			var menu = new ContextMenuStrip();
 
-			if (appt is CustomTaskDateAttribute)
+			if (appt is TaskCustomDateAttribute)
 			{
 				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
 				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
