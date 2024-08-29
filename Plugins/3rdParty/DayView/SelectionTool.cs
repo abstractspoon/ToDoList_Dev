@@ -475,13 +475,15 @@ namespace Calendar
 
 				if (m_mode != Mode.None)
 				{
-					// Calculate delta time between selection and clicked point
-					DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
-					m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
-
+					m_startDate = m_dayView.SelectedAppointment.StartDate;
 					m_length = TimeSpan.Zero;
 					m_lastMouseMove = e.Location;
 					m_longAppointment = m_dayView.SelectedAppointment.IsLongAppt();
+
+					// Calculate delta time between selection and clicked point
+					DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
+					m_delta = (m_startDate - downPos);
+
 				}
 			}
 		}
