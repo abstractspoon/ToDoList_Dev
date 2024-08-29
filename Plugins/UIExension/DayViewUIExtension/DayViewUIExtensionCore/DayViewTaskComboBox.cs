@@ -73,8 +73,9 @@ namespace DayViewUIExtension
 				e.DrawBackground();
 
 				var rect = e.Bounds;
+				bool listItem = !e.State.HasFlag(DrawItemState.ComboBoxEdit);
 
-				if (DroppedDown)
+				if (listItem)
 				{
 					for (int i = 0; i < taskItem.Depth; i++)
 						rect.X += UIExtension.TaskIcon.IconSize;
@@ -85,7 +86,7 @@ namespace DayViewUIExtension
 					m_TaskIcons.Draw(e.Graphics, rect.X, rect.Y);
 					rect.X += UIExtension.TaskIcon.IconSize;
 				}
-				else if (DroppedDown)
+				else if (listItem)
 				{
 					rect.X += UIExtension.TaskIcon.IconSize;
 				}
@@ -95,7 +96,6 @@ namespace DayViewUIExtension
 
 				e.DrawFocusRectangle();
 			}
-
 		}
 	}
 }
