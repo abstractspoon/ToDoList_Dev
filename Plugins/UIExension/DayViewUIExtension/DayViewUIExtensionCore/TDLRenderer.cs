@@ -588,7 +588,7 @@ namespace DayViewUIExtension
 		void DrawTaskBackground(Graphics g, 
 								Rectangle rect,
 								Calendar.AppointmentView apptView,
-								bool isSelected, // ignored
+								bool isSelected,
 								Color fillColor, 
 								Color borderColor)
 		{
@@ -599,9 +599,8 @@ namespace DayViewUIExtension
 			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
 
-			var style = GetAppointmentSelectedState(apptView.Appointment, Focused);
 
-			if (style != UIExtension.SelectionRect.Style.None)
+			if (isSelected)
 			{
 				if (isLong)
 				{
@@ -615,7 +614,7 @@ namespace DayViewUIExtension
 												rect.Top,
 												rect.Width,
 												rect.Height,
-												style,
+												GetAppointmentSelectedState(apptView.Appointment, Focused),
 												isTimeBlock);
 
 				if (isFutureItem && !borderColor.IsEmpty)

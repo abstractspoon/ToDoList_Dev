@@ -646,12 +646,7 @@ namespace DayViewUIExtension
 
 		public bool CanCreateNewTaskBlockSeries
 		{
-			get
-			{
-				return ((SelectedAppointment == null) || 
-						(SelectedAppointment is TaskItem) || 
-						(SelectedAppointment is TaskTimeBlock));
-			}
+			get { return true; }
 		}
 
 		public bool CreateNewTaskBlockSeries(uint taskId, TimeBlockSeriesAttributes attribs)
@@ -1342,6 +1337,11 @@ namespace DayViewUIExtension
 			}
 
 			return base.EnsureVisible(appt, partialOK);
+		}
+
+		protected override bool WantDrawAppointmentSelected(Calendar.Appointment appt)
+		{
+			return (GetAppointmentSelectedState(appt, false) != UIExtension.SelectionRect.Style.None);
 		}
 
 		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt, bool focused)
