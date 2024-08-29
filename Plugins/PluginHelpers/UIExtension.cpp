@@ -781,6 +781,9 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent)
 {
+	if (style == Style::None)
+		return false;
+
 	// Must retrieve clip rect before getting HDC
 	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
 	HDC hDC = Win32::GetHdc(g->GetHdc());

@@ -288,6 +288,7 @@ namespace Abstractspoon
 				public:
 					enum class Style
 					{
+						None = -1,
 						Selected,
 						SelectedNotFocused,
 						DropHighlighted,
@@ -296,7 +297,6 @@ namespace Abstractspoon
 				public:
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool transparent);
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent);
-
 
 					static Drawing::Color GetTextColor(Style style, Drawing::Color baseColor);
 					static Drawing::Color GetColor(Style style);
