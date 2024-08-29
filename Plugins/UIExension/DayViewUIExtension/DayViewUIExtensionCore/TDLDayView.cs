@@ -1341,19 +1341,19 @@ namespace DayViewUIExtension
 
 		protected override bool WantDrawAppointmentSelected(Calendar.Appointment appt)
 		{
-			return (GetAppointmentSelectedState(appt, false) != UIExtension.SelectionRect.Style.None);
+			return (GetAppointmentSelectedState(appt) != UIExtension.SelectionRect.Style.None);
 		}
 
-		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt, bool focused)
+		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt)
 		{
 			if (base.SavingToImage)
 				return UIExtension.SelectionRect.Style.None;
 
 			if (m_SelectedTaskID == appt.Id)
-				return (focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
+				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
 
-			// Interrelatedness between types
-			if (focused)
+			// Check interrelatedness of types
+			if (Focused)
 			{
 				var realAppt = GetRealAppointment(appt);
 				var selAppt = GetAppointment(m_SelectedTaskID);

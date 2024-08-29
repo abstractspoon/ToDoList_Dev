@@ -599,7 +599,6 @@ namespace DayViewUIExtension
 			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
 
-
 			if (isSelected)
 			{
 				if (isLong)
@@ -614,7 +613,7 @@ namespace DayViewUIExtension
 												rect.Top,
 												rect.Width,
 												rect.Height,
-												GetAppointmentSelectedState(apptView.Appointment, Focused),
+												GetAppointmentSelectedState(apptView.Appointment),
 												isTimeBlock);
 
 				if (isFutureItem && !borderColor.IsEmpty)
