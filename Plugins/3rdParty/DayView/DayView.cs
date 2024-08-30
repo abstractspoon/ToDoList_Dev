@@ -1058,8 +1058,7 @@ namespace Calendar
 							redraw = true;
 
 						selectedAppointment = null;
-						selectionType = SelectionType.Appointment;
-						RaiseSelectionChanged(new AppointmentEventArgs(null));
+						RaiseSelectionChanged(selectedAppointment);
 
 						if (GetTrueRectangle().Contains(e.Location))
 						{
@@ -1078,10 +1077,9 @@ namespace Calendar
 					else if (appt != selectedAppointment)
 					{
 						selectedAppointment = appt;
-						selectionType = SelectionType.Appointment;
-
-						RaiseSelectionChanged(new AppointmentEventArgs(selectedAppointment));
 						redraw = true;
+						RaiseSelectionChanged(selectedAppointment);
+
 					}
 
 					if (redraw)
@@ -1134,7 +1132,7 @@ namespace Calendar
 
             allDayEventsHeaderHeight = 0;
 
-            // cache resolved appointments in hashtable by days.
+            // cache resolved appointments in hash-table by days.
             cachedAppointments.Clear();
 
             if ((selectedAppointmentIsNew) && (selectedAppointment != null))
@@ -1175,25 +1173,24 @@ namespace Calendar
 
 		protected void RaiseSelectionChanged(Appointment appt)
         {
+			selectionType = SelectionType.Appointment;
+
             RaiseSelectionChanged(new AppointmentEventArgs(appt));
         }
 
 		internal void RaiseSelectionChanged(AppointmentEventArgs e)
         {
-            if (SelectionChanged != null)
-                SelectionChanged(this, e);
+            SelectionChanged?.Invoke(this, e);
         }
 
         internal void RaiseAppointmentMove(AppointmentEventArgs e)
         {
-            if (AppointmentMove != null)
-                AppointmentMove(this, e);
+            AppointmentMove?.Invoke(this, e);
         }
 
 		internal void RaiseWeekChange(WeekChangeEventArgs e)
 		{
-			if (WeekChange != null)
-				WeekChange(this, e);
+			WeekChange?.Invoke(this, e);
 		}
 
         protected override void OnKeyPress(KeyPressEventArgs e)
