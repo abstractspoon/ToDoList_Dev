@@ -42,7 +42,7 @@ namespace DayViewUIExtension
 
 		private void OnTaskComboSelChange(object sender, EventArgs e)
 		{
-			m_Attributes.SetDates(m_TaskCombo.SelectedTaskDates);
+			OK.Enabled = (SelectedTaskId != 0);
 		}
 	}
 }
