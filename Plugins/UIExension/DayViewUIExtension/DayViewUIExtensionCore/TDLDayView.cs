@@ -568,7 +568,7 @@ namespace DayViewUIExtension
 
 					if (IsItemDisplayable(taskItem) && taskItem.TitleMatches(words, caseSensitive, wholeWord))
 					{
-						if (SelectTask(taskItem.Id))
+						if (SelectTask(taskItem.Id, true))
 							return true;
 					}
 
@@ -631,10 +631,17 @@ namespace DayViewUIExtension
 			return SelectedAppointment;
 		}
 
+		// External
 		public bool SelectTask(uint dwTaskID)
 		{
+			return SelectTask(dwTaskID, false);
+		}
+
+		// Internal
+		private bool SelectTask(uint dwTaskID, bool allowNotify)
+		{
 			m_SelectedTaskID = dwTaskID;
-			FixupSelection(true, false);
+			FixupSelection(true, allowNotify);
 
 			return (SelectedTaskId != 0);
 		}
@@ -1588,7 +1595,7 @@ namespace DayViewUIExtension
 				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
 
 				// Move selection to 'real' task
-				SelectTask(custDate.RealTaskId);
+				SelectTask(custDate.RealTaskId, true);
 				Invalidate();
 
 				return true;
@@ -1613,7 +1620,7 @@ namespace DayViewUIExtension
 				if (seriesList.DeleteBlock(block.TimeBlock))
 				{
 					// Move selection to 'real' task
-					SelectTask(block.RealTaskId);
+					SelectTask(block.RealTaskId, true);
 					Invalidate();
 
 					return true;
@@ -1639,7 +1646,7 @@ namespace DayViewUIExtension
 				if (seriesList.DeleteSeries(block.TimeBlock))
 				{
 					// Move selection to 'real' task
-					SelectTask(block.RealTaskId);
+					SelectTask(block.RealTaskId, true);
 					Invalidate();
 
 					return true;
