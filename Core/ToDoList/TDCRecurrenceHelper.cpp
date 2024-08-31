@@ -127,39 +127,99 @@ BOOL CTDCRecurrenceHelper::CalcNextOccurrence(COleDateTime& dtNext, BOOL& bDue) 
 	return TRUE;
 }
 
-BOOL CTDCRecurrenceHelper::GetNextOccurrenceFromDate(COleDateTime& dtFrom) const
+int CTDCRecurrenceHelper::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
-	switch (m_tdi.trRecurrence.nRecalcFrom)
+	ASSERT(!m_tdi.IsDone() && !m_tdi.bLocked);
+
+	if (!m_tdi.CanRecur())
+		return FALSE;
+
+	if (!m_tdi.HasStart() || !m_tdi.HasDue() || (m_tdi.dateDue < m_tdi.dateStart))
+		return 0;
+
+	CArray<double, double&> aDates;
+	int nNumOccur = CalcNextOccurrences(dtRange, aDates);
+
+	if (!nNumOccur)
+		return 0;
+
+	// Convert the individual dates into start->due date ranges
+	CDateHelper dh;
+	aOccur.SetSize(nNumOccur);
+
+	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
 	{
-	case TDIRO_STARTDATE:
-		dtFrom = m_tdi.dateStart;
-		break;
-
-	case TDIRO_DUEDATE:
-		dtFrom = m_tdi.dateDue;
-		break;
-
-	case TDIRO_DONEDATE:
-		dtFrom = CDateHelper::GetDate(DHD_TODAY);
-		break;
-
-	default:
-		dtFrom = CDateHelper::NullDate();
-		break;
+		VERIFY(CalcNextOccurrence(aDates[nOccur], aOccur[nOccur]));
 	}
 
-	if (CDateHelper::IsDateSet(dtFrom))
-		return TRUE;
-
-	ASSERT(0);
-	return FALSE;
+	return nNumOccur;
 }
 
-int CTDCRecurrenceHelper::CalcDaysOffsetForNextOccurrence(const COleDateTime& dtNext) const
+int CTDCRecurrenceHelper::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
 {
 	COleDateTime dtFrom;
 
-	if (!GetNextOccurrenceFromDate(dtFrom))
+	if (!GetFromDate(dtFrom))
+		return 0;
+
+	// Expand the range by task duration to ensure full coverage
+	COleDateTimeRange dtExtended(dtRange);
+	dtExtended.Expand((int)(m_tdi.dateDue.m_dt - m_tdi.dateStart.m_dt), DHU_DAYS);
+
+#ifdef _DEBUG
+	CString sRange = dtRange.Format();
+	CString sExtRange = dtExtended.Format();
+#endif
+
+	return m_tdi.trRecurrence.CalcNextOccurrences(dtFrom, dtExtended, aDates);
+}
+
+BOOL CTDCRecurrenceHelper::CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const
+{
+	ASSERT(!m_tdi.IsDone() && !m_tdi.bLocked);
+	ASSERT(m_tdi.CanRecur());
+	ASSERT(m_tdi.HasStart() && m_tdi.HasDue() && (m_tdi.dateDue >= m_tdi.dateStart));
+
+	int nDaysOffset = CalcDaysToNextOccurrence(dtNext);
+
+	switch (m_tdi.trRecurrence.nRecalcFrom)
+	{
+	case TDIRO_STARTDATE:
+		{
+			COleDateTime dtNewDue = m_tdi.dateDue;
+			VERIFY(CDateHelper().OffsetDate(dtNewDue, nDaysOffset, DHU_DAYS));
+
+			ASSERT((dtNext <= dtNewDue) ||
+				(CDateHelper::IsSameDay(dtNext, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
+
+			VERIFY(dtOccur.Set(dtNext, dtNewDue));
+		}
+		break;
+
+	case TDIRO_DUEDATE:
+	case TDIRO_DONEDATE:
+		{
+			COleDateTime dtNewStart = m_tdi.dateStart;
+
+			if (nDaysOffset)
+				VERIFY(CDateHelper().OffsetDate(dtNewStart, nDaysOffset, DHU_DAYS));
+
+			ASSERT((dtNewStart <= dtNext) ||
+				(CDateHelper::IsSameDay(dtNext, dtNewStart) && !CDateHelper::DateHasTime(dtNext)));
+
+			VERIFY(dtOccur.Set(dtNewStart, dtNext));
+		}
+		break;
+	}
+
+	return dtOccur.IsValid();
+}
+
+int CTDCRecurrenceHelper::CalcDaysToNextOccurrence(const COleDateTime& dtNext) const
+{
+	COleDateTime dtFrom;
+
+	if (!GetFromDate(dtFrom))
 		return 0;
 
 #ifdef _DEBUG
@@ -237,92 +297,32 @@ int CTDCRecurrenceHelper::CalcDaysOffsetForNextOccurrence(const COleDateTime& dt
 	return nDaysOffset;
 }
 
-int CTDCRecurrenceHelper::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
+BOOL CTDCRecurrenceHelper::GetFromDate(COleDateTime& dtFrom) const
 {
-	COleDateTime dtFrom;
-
-	if (!GetNextOccurrenceFromDate(dtFrom))
-		return 0;
-
-	// Expand the range by task duration to ensure full coverage
-	COleDateTimeRange dtExtended(dtRange);
-	dtExtended.Expand((int)(m_tdi.dateDue.m_dt - m_tdi.dateStart.m_dt), DHU_DAYS);
-
-#ifdef _DEBUG
-	CString sRange = dtRange.Format();
-	CString sExtRange = dtExtended.Format();
-#endif
-
-	return m_tdi.trRecurrence.CalcNextOccurrences(dtFrom, dtExtended, aDates);
-}
-
-int CTDCRecurrenceHelper::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
-{
-	ASSERT(!m_tdi.IsDone() && !m_tdi.bLocked);
-
-	if (!m_tdi.CanRecur())
-		return FALSE;
-
-	if (!m_tdi.HasStart() || !m_tdi.HasDue() || (m_tdi.dateDue < m_tdi.dateStart))
-		return 0;
-
-	CArray<double, double&> aDates;
-	int nNumOccur = CalcNextOccurrences(dtRange, aDates);
-
-	if (!nNumOccur)
-		return 0;
-
-	// Convert the individual dates into start->due date ranges
-	CDateHelper dh;
-	aOccur.SetSize(nNumOccur);
-	
-	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
-	{
-		VERIFY(CalcNextOccurrence(aDates[nOccur], aOccur[nOccur]));
-	}
-
-	return nNumOccur;
-}
-
-BOOL CTDCRecurrenceHelper::CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const
-{
-	ASSERT(!m_tdi.IsDone() && !m_tdi.bLocked);
-	ASSERT(m_tdi.CanRecur());
-	ASSERT(m_tdi.HasStart() && m_tdi.HasDue() && (m_tdi.dateDue >= m_tdi.dateStart));
-
-	int nDaysOffset = CalcDaysOffsetForNextOccurrence(dtNext);
-
 	switch (m_tdi.trRecurrence.nRecalcFrom)
 	{
 	case TDIRO_STARTDATE:
-		{
-			COleDateTime dtNewDue = m_tdi.dateDue;
-			VERIFY(CDateHelper().OffsetDate(dtNewDue, nDaysOffset, DHU_DAYS));
-
-			ASSERT((dtNext <= dtNewDue) ||
-				(CDateHelper::IsSameDay(dtNext, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
-
-			VERIFY(dtOccur.Set(dtNext, dtNewDue));
-		}
+		dtFrom = m_tdi.dateStart;
 		break;
 
 	case TDIRO_DUEDATE:
+		dtFrom = m_tdi.dateDue;
+		break;
+
 	case TDIRO_DONEDATE:
-		{
-			COleDateTime dtNewStart = m_tdi.dateStart;
+		dtFrom = CDateHelper::GetDate(DHD_TODAY);
+		break;
 
-			if (nDaysOffset)
-				VERIFY(CDateHelper().OffsetDate(dtNewStart, nDaysOffset, DHU_DAYS));
-
-			ASSERT((dtNewStart <= dtNext) ||
-				(CDateHelper::IsSameDay(dtNext, dtNewStart) && !CDateHelper::DateHasTime(dtNext)));
-
-			VERIFY(dtOccur.Set(dtNewStart, dtNext));
-		}
+	default:
+		dtFrom = CDateHelper::NullDate();
 		break;
 	}
 
-	return dtOccur.IsValid();
+	if (CDateHelper::IsDateSet(dtFrom))
+		return TRUE;
+
+	ASSERT(0);
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

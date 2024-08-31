@@ -38,8 +38,10 @@ protected:
 	BOOL CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const;
 
 	int CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
-	BOOL GetNextOccurrenceFromDate(COleDateTime& dtFrom) const;
-	int CalcDaysOffsetForNextOccurrence(const COleDateTime& dtTo) const;
+	BOOL GetFromDate(COleDateTime& dtFrom) const;
+	int CalcDaysToNextOccurrence(const COleDateTime& dtTo) const;
+
+	BOOL CanRecur() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
