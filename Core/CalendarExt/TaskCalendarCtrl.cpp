@@ -904,6 +904,10 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 
 	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%#d"));
 
+#ifdef _DEBUG
+//	sDate += Misc::Format(_T(" (%d)"), (int)date.m_dt);
+#endif
+
 	// Show the week number on the first of the week -> First column
 	sWeekNum.Empty();
 

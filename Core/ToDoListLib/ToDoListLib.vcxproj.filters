@@ -488,6 +488,9 @@
     <ClCompile Include="..\ToDoList\TDCMenuIconMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCRecurrenceHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -986,6 +989,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCMenuIconMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCRecurrenceHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

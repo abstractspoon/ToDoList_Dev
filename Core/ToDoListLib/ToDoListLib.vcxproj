@@ -136,6 +136,7 @@
     <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
     <ClCompile Include="..\ToDoList\TDCMenuIconMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDCRecurrenceHelper.cpp" />
     <ClCompile Include="..\ToDoList\tdcstruct.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp" />
     <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
@@ -297,6 +298,7 @@
     <ClInclude Include="..\ToDoList\TaskListCsvExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvImporter.h" />
     <ClInclude Include="..\ToDoList\TDCMenuIconMgr.h" />
+    <ClInclude Include="..\ToDoList\TDCRecurrenceHelper.h" />
     <ClInclude Include="..\ToDoList\TDCTaskListDropTarget.h" />
     <ClInclude Include="..\ToDoList\TaskListExporterBase.h" />
     <ClInclude Include="..\ToDoList\TaskListHtmlExporter.h" />

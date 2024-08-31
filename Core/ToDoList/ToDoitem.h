@@ -297,13 +297,10 @@ protected:
 	// meta-data for 3rd-party applications only
 	CTDCMetaDataMap mapMetaData; 
 
-protected:
-	BOOL CalcNextOccurrence(COleDateTime& dtNext, BOOL& bDue) const;
-	BOOL CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const;
-
 private:
 	static COleDateTime GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue);
 	
+private:
 	static COleDateTimeSpan dtsRecentModPeriod;
 	static CString sModifierName;
 };
