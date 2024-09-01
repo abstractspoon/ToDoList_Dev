@@ -2334,52 +2334,21 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 
 	// Draw the minimum necessary
 	COLORREF crText = GetTaskCommentsTextColor(pTDI, pTDS, crBack);
+	int nDrawFlags = (DT_LEFT | DT_SINGLELINE);
 
 	if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
 	{
-		int nFind = pTDI->sComments.FindOneOf(_T("\n\r")); 
+		int nDrawLength = -1; // all 
 
 		if (HasStyle(TDCS_SHOWFIRSTCOMMENTLINEINLIST))
-		{
-			if (nFind == 0) 
-				return; // comments start with a newline -> show nothing
+			nDrawLength = pTDI->sComments.FindOneOf(_T("\n\r"));
 
-			// else
-			DrawColumnText(pDC, pTDI->sComments, rComments, DT_LEFT, crText, TRUE, nFind);
-		}
-		else
-		{
-			// Calculate the max length of comments we are likely to show
-			int nShow = ((int)(rComments.Width() / GraphicsMisc::GetAverageCharWidth(pDC)) * 2);
-			nShow = min(nShow, pTDI->sComments.GetLength());
-
-			CString sShow;
-			LPTSTR szBuffer = sShow.GetBuffer(nShow);
-			
-			for (int nChar = 0; nChar < nShow; nChar++)
-			{
-				TCHAR cChar = pTDI->sComments[nChar];
-
-				switch (cChar)
-				{
-				case '\r':
-				case '\n':
-				case '\t':
-					cChar = ' ';
-					break;
-				}
-
-				szBuffer[nChar] = cChar;
-			}
-			sShow.ReleaseBuffer(nShow);
-			sShow.TrimRight();
-
-			DrawColumnText(pDC, sShow, rComments, DT_LEFT, crText, TRUE, nShow);
-		}
+		if (nDrawLength != 0)
+			DrawColumnText(pDC, pTDI->sComments, rComments, nDrawFlags, crText, FALSE, nDrawLength);
 	}
 	else
 	{
-		DrawColumnText(pDC, _T("[...]"), rComments, DT_LEFT, crText, FALSE, 5);
+		DrawColumnText(pDC, _T("[...]"), rComments, nDrawFlags, crText, FALSE, 5);
 	}
 }
 
