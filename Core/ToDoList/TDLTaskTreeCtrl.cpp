@@ -1666,20 +1666,23 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 
 	// basic title rect
 	VERIFY(m_tcTasks.GetItemRect(hti, rect, TRUE));
-	int nHdrWidth = m_hdrTasks.GetItemWidth(0);
 
 	switch (nArea)
 	{
 	case TDCTR_TEXT:
-		if (pDC && szTitle)
 		{
-			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
-			rect.right = min(rect.right, nHdrWidth);
-		}
-		else
-		{
-			ASSERT(!pDC && !szTitle);
-			rect.right = nHdrWidth;
+			int nHdrWidth = m_hdrTasks.GetItemWidth(0);
+
+			if (pDC && szTitle)
+			{
+				rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
+				rect.right = min(rect.right, nHdrWidth);
+			}
+			else
+			{
+				ASSERT(!pDC && !szTitle);
+				rect.right = nHdrWidth;
+			}
 		}
 		return TRUE;
 

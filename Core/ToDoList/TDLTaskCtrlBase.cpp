@@ -2313,13 +2313,14 @@ COLORREF CTDLTaskCtrlBase::GetPriorityColor(int nPriority) const
 	return (COLORREF)m_aPriorityColors[nPriority];
 }
 
+BOOL CTDLTaskCtrlBase::WantDrawCommentsText(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return (!m_bSavingToImage && !pTDI->sComments.IsEmpty() && !IsEditingTask(pTDS->GetTaskID()));
+}
+
 void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack)
 {
-	// Avoid drawing wherever possible
-	if (m_bSavingToImage || IsEditingTask(pTDS->GetTaskID()) || pTDI->sComments.IsEmpty())
-	{
-		return;
-	}
+	ASSERT(WantDrawCommentsText(pTDI, pTDS));
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
@@ -2389,6 +2390,9 @@ CFont* CTDLTaskCtrlBase::PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TOD
 
 	BOOL bStrikeThru = (HasStyle(TDCS_STRIKETHOUGHDONETASKS) && pTDI->IsDone());
 	BOOL bBold = (bTitleLabel && pTDS->ParentIsRoot());
+
+	// Always deselect any selected font first
+	pDC->SelectObject(pDC->GetCurrentFont());
 
 	return pDC->SelectObject(m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru));
 }
@@ -2632,9 +2636,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			}
 
 			// draw text
-			CRect rText;
-			GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
-			DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
+			DrawColumnText(pDC, pTDI->sTitle, rLabel, DT_LEFT, crText, TRUE);
 
 			// draw shortcut for references
 			if (dwTaskID != dwTrueID)
@@ -2648,16 +2650,17 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
-			if (pOldFont)
-				pDC->SelectObject(pOldFont);
-
 			// render comment text
-			pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+			if (WantDrawCommentsText(pTDI, pTDS))
+			{
+				CRect rText;
+				GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
 
-			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS, crBack);
+				pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+				DrawCommentsText(pDC, rRow, rText, pTDI, pTDS, crBack);
+			}
 			
-			if (pOldFont)
-				pDC->SelectObject(pOldFont);
+			pDC->SelectObject(pOldFont);
 		}
 	}
 
