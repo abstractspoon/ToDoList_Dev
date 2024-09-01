@@ -2391,9 +2391,6 @@ CFont* CTDLTaskCtrlBase::PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TOD
 	BOOL bStrikeThru = (HasStyle(TDCS_STRIKETHOUGHDONETASKS) && pTDI->IsDone());
 	BOOL bBold = (bTitleLabel && pTDS->ParentIsRoot());
 
-	// Always deselect any selected font first
-	pDC->SelectObject(pDC->GetCurrentFont());
-
 	return pDC->SelectObject(m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru));
 }
 
