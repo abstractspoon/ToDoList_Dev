@@ -2334,7 +2334,6 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 
 	// Draw the minimum necessary
 	COLORREF crText = GetTaskCommentsTextColor(pTDI, pTDS, crBack);
-	int nDrawFlags = (DT_LEFT | DT_SINGLELINE);
 
 	if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
 	{
@@ -2344,11 +2343,11 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 			nDrawLength = pTDI->sComments.FindOneOf(_T("\n\r"));
 
 		if (nDrawLength != 0)
-			DrawColumnText(pDC, pTDI->sComments, rComments, nDrawFlags, crText, FALSE, nDrawLength);
+			DrawColumnText(pDC, pTDI->sComments, rComments, DT_LEFT, crText, TRUE, nDrawLength); // Ellipsis
 	}
 	else
 	{
-		DrawColumnText(pDC, _T("[...]"), rComments, nDrawFlags, crText, FALSE, 5);
+		DrawColumnText(pDC, _T("[...]"), rComments, DT_LEFT, crText, FALSE, 5); // No ellipsis
 	}
 }
 
@@ -2567,28 +2566,30 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			CDC* pDC = CDC::FromHandle(nmcd.hdc);
 			GM_ITEMSTATE nState = GetItemTitleState(nmcd);
 
+			// Text/Back colours -------------------------------------
 			COLORREF crText = 0, crBack = GetSysColor(COLOR_WINDOW);
 			VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
 
 			if (!HasColor(crBack))
 				crBack = (IsAlternateTitleLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
-			// Set font before getting text rect
-			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
-
-			// draw label background only
-			CRect rLabel;
-			GetItemTitleRect(nmcd, TDCTR_BKGND, rLabel, pDC, pTDI->sTitle);
-
+			// Draw label background ---------------------------------
+			CRect rBack;
+			GetItemTitleRect(nmcd, TDCTR_BKGND, rBack);
+ 
+			// Full width else overwriting with comments produces artifacts
 			rRow.right = (rClient.right + GetSystemMetrics(SM_CXVSCROLL));
-			rLabel.right = rRow.right; // else overwriting with comments produces artifacts
+			rBack.right = rRow.right;
 
-			pDC->FillSolidRect(rLabel, crBack);
+			pDC->FillSolidRect(rBack, crBack);
 
-			// draw horz gridline
+			// Draw horz gridline ------------------------------------
 			DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
-			// Draw selection before text
+			// Draw selection ----------------------------------------
+			CRect rLabel;
+			GetItemTitleRect(nmcd, TDCTR_TEXT, rLabel);
+
 			if (!m_bSavingToImage)
 			{
 				DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
@@ -2601,10 +2602,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags);
 			}
 
-			// draw text
-			DrawColumnText(pDC, pTDI->sTitle, rLabel, DT_LEFT, crText, TRUE);
-
-			// draw shortcut for references
+			// draw shortcut for references --------------------------
 			if (dwTaskID != dwTrueID)
 			{
 				CRect rIcon(rLabel);
@@ -2616,9 +2614,15 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
-			// render comment text
+			// Draw title text ---------------------------------------
+			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
+
+			DrawColumnText(pDC, pTDI->sTitle, rLabel, DT_LEFT, crText, TRUE);
+
+			// Draw comments -----------------------------------------
 			if (WantDrawCommentsText(pTDI, pTDS))
 			{
+				// Get the actual text extent this time
 				CRect rText;
 				GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
 
@@ -2626,6 +2630,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				DrawCommentsText(pDC, rRow, rText, pTDI, pTDS, crBack);
 			}
 			
+			// Cleanup -----------------------------------------------
 			pDC->SelectObject(pOldFont);
 		}
 	}
@@ -3561,7 +3566,6 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 		nTextLen = sText.GetLength();
 	
 	CRect rText(rect);
-	CPoint ptText(0, rText.top);
 	
 	if (!bTaskTitle)
 	{

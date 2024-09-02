@@ -1664,30 +1664,32 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 {
 	ASSERT(hti);
 
-	// basic title rect
-	VERIFY(m_tcTasks.GetItemRect(hti, rect, TRUE));
-
 	switch (nArea)
 	{
 	case TDCTR_TEXT:
 		{
-			int nHdrWidth = m_hdrTasks.GetItemWidth(0);
+			// Basic title rect
+			VERIFY(m_tcTasks.GetItemRect(hti, rect, TRUE));
+
+			// Available width
+			CRect rAvail;
+			m_tcTasks.GetClientRect(rAvail);
 
 			if (pDC && szTitle)
 			{
 				rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
-				rect.right = min(rect.right, nHdrWidth);
+				rect.right = min(rect.right, rAvail.right);
 			}
 			else
 			{
 				ASSERT(!pDC && !szTitle);
-				rect.right = nHdrWidth;
+				rect.right = rAvail.right;
 			}
 		}
 		return TRUE;
 
 	case TDCTR_BKGND:
-		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // recursive call
+		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // RECURSIVE CALL
 		{
 			rect.left -= TITLE_BORDER_OFFSET;
 			return TRUE;
@@ -1695,7 +1697,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 		break;
 
 	case TDCTR_EDIT:
-		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // recursive call
+		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // RECURSIVE CALL
 		{
 			rect.top--;
 			

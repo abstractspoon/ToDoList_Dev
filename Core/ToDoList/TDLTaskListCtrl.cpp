@@ -1677,24 +1677,26 @@ BOOL CTDLTaskListCtrl::GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT 
 
 BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
 {
-	// basic title rect
-	const_cast<CListCtrl*>(&m_lcTasks)->GetItemRect(nItem, rect, LVIR_LABEL);
-	
 	switch (nArea)
 	{
 	case TDCTR_BKGND:
 		{
-			int nHdrWidth = m_hdrTasks.GetItemWidth(0);
+			// Basic title rect
+			VERIFY(const_cast<CListCtrl*>(&m_lcTasks)->GetItemRect(nItem, rect, LVIR_LABEL));
+
+			// Available width
+			CRect rAvail;
+			m_lcTasks.GetClientRect(rAvail);
 
 			if (pDC && szTitle)
 			{
 				rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
-				rect.right = min(rect.right, nHdrWidth);
+				rect.right = min(rect.right, rAvail.right);
 			}
 			else
 			{
 				ASSERT(!pDC && !szTitle);
-				rect.right = nHdrWidth;
+				rect.right = rAvail.right;
 			}
 		}
 		return TRUE;
