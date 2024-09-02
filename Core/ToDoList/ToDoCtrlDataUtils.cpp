@@ -3625,27 +3625,23 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		return (dValue >= 0);
 
 	case TDCA_CREATIONDATE:
-		if (pTDI->HasCreation())
 		{
-			dValue = pTDI->dateCreated;
-			return TRUE;
+			dValue = pTDI->dateCreated.m_dt;
 		}
-		break;
+		return (dValue != 0);
 
 	case TDCA_DONEDATE:
-		if (pTDI->IsDone())
 		{
-			dValue = pTDI->dateDone;
-			return TRUE;
+			dValue = pTDI->dateDone.m_dt;
 		}
-		break;
+		return (dValue != 0);
 
 	case TDCA_DUEDATE:
 		{
 			if (bAggregated)
 				dValue = GetTaskDueDate(pTDI, pTDS);
 			else
-				dValue = pTDI->dateDue;
+				dValue = pTDI->dateDue.m_dt;
 		}
 		return (dValue != 0);
 
@@ -3654,7 +3650,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 			if (bAggregated)
 				dValue = GetTaskLastModifiedDate(pTDI, pTDS);
 			else
-				dValue = pTDI->dateLastMod;
+				dValue = pTDI->dateLastMod.m_dt;
 		}
 		return (dValue != 0);
 
@@ -3663,7 +3659,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 			if (bAggregated)
 				dValue = GetTaskStartDate(pTDI, pTDS);
 			else
-				dValue = pTDI->dateStart;
+				dValue = pTDI->dateStart.m_dt;
 		}
 		return (dValue != 0);
 
