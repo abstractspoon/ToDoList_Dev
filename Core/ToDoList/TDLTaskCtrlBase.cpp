@@ -2564,10 +2564,11 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 		if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
 		{
 			CDC* pDC = CDC::FromHandle(nmcd.hdc);
-			GM_ITEMSTATE nState = GetItemTitleState(nmcd);
 
 			// Text/Back colours -------------------------------------
 			COLORREF crText = 0, crBack = GetSysColor(COLOR_WINDOW);
+			GM_ITEMSTATE nState = GetItemTitleState(nmcd);
+
 			VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
 
 			if (!HasColor(crBack))
