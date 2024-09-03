@@ -223,6 +223,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MySqlStorageBridge", "Taskl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySqlStorageCore", "TasklistStorage\MySqlStorage\MySqlStorageCore\MySqlStorageCore.csproj", "{0B44C900-713B-4B34-9547-5C6456FC6A2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiffView", "XmlDiffView\XmlDiffView.csproj", "{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2071,6 +2073,46 @@ Global
 		{0B44C900-713B-4B34-9547-5C6456FC6A2F}.Unicode Release|x64.Build.0 = Release|Any CPU
 		{0B44C900-713B-4B34-9547-5C6456FC6A2F}.Unicode Release|x86.ActiveCfg = Release|Any CPU
 		{0B44C900-713B-4B34-9547-5C6456FC6A2F}.Unicode Release|x86.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|Win32.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|x64.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|Win32.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|Win32.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|x64.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|x64.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Release|x86.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|Win32.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|Win32.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|x64.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|x64.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|x86.ActiveCfg = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Debug|x86.Build.0 = Debug|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|Any CPU.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|Win32.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|Win32.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|x64.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|x64.Build.0 = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|x86.ActiveCfg = Release|Any CPU
+		{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}.Unicode Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
