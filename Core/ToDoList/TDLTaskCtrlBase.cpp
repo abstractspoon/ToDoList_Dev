@@ -2551,10 +2551,10 @@ DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFill
 DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect)
 {
 	// Check row is visible
-	CRect rClient, rRow(rect);
+	CRect rClient;
 	::GetClientRect(Tasks(), rClient);
 
-	if ((rRow.bottom > 0) && (rRow.top <= rClient.bottom))
+	if ((rect.bottom > 0) && (rect.top <= rClient.bottom))
 	{
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
@@ -2577,19 +2577,15 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			CRect rBack;
 			GetItemTitleRect(nmcd, TDCTR_BKGND, rBack);
  
-			// Full width else overwriting with comments produces artifacts
-			rRow.right = (rClient.right + GetSystemMetrics(SM_CXVSCROLL));
-			rBack.right = rRow.right;
-
 			pDC->FillSolidRect(rBack, crBack);
 
-			// Draw horz gridline ------------------------------------
+			// Draw horizontal grid line ------------------------------------
+			CRect rRow(rect);
+			rRow.right = (rClient.right + GetSystemMetrics(SM_CXVSCROLL));
+
 			DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
 			// Draw selection ----------------------------------------
-			CRect rLabel;
-			GetItemTitleRect(nmcd, TDCTR_TEXT, rLabel);
-
 			if (!m_bSavingToImage)
 			{
 				DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
@@ -2599,35 +2595,36 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
 					dwFlags |= GMIB_CLIPRIGHT;
 
-				GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags);
+				GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rBack, dwFlags);
 			}
+
+			// Draw title text ---------------------------------------
+			CRect rText;
+			GetItemTitleRect(nmcd, TDCTR_TEXT, rText);
+
+			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
+			DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
 
 			// draw shortcut for references --------------------------
 			if (dwTaskID != dwTrueID)
 			{
-				CRect rIcon(rLabel);
+				CRect rIcon(rText);
 
-				// Draw over icon if icon column NOT visible
+				// If icon column is NOT visible Draw over icon else over text
 				if (!IsColumnShowing(TDCC_ICON))
 					rIcon.left -= (ICON_SIZE + 2);
 				
 				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
-			// Draw title text ---------------------------------------
-			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
-
-			DrawColumnText(pDC, pTDI->sTitle, rLabel, DT_LEFT, crText, TRUE);
-
 			// Draw comments -----------------------------------------
 			if (WantDrawCommentsText(pTDI, pTDS))
 			{
 				// Get the actual text extent this time
-				CRect rText;
 				GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
 
 				pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
-				DrawCommentsText(pDC, rRow, rText, pTDI, pTDS, crBack);
+				DrawCommentsText(pDC, rBack, rText, pTDI, pTDS, crBack);
 			}
 			
 			// Cleanup -----------------------------------------------
