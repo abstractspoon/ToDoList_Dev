@@ -7,7 +7,7 @@
     <ProjectGuid>{43CF8388-F6BE-48BD-A0DF-E599F67F72E7}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ApplicationIcon>Resources\Winforms.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\XmlDiffView.ico</ApplicationIcon>
     <AssemblyKeyContainerName />
     <AssemblyName>XmlDiffView</AssemblyName>
     <AssemblyOriginatorKeyFile />
@@ -149,6 +149,7 @@
     <EmbeddedResource Include="Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -156,7 +157,7 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Winforms.ico" />
+    <EmbeddedResource Include="Resources\XmlDiffView.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

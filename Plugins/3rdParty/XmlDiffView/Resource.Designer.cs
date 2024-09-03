@@ -63,9 +63,9 @@ namespace VisualXmlDiff {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon Winforms {
+        internal static System.Drawing.Icon XmlDiffView {
             get {
-                object obj = ResourceManager.GetObject("Winforms", resourceCulture);
+                object obj = ResourceManager.GetObject("XmlDiffView", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

@@ -68,7 +68,7 @@ namespace VisualXmlDiff
 			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(632, 453);
-			this.Icon = Resource.Winforms;
+			this.Icon = Resource.XmlDiffView;
 			this.Name = "Browser";
 			this.Text = "Diff";
 			this.Closed += new System.EventHandler(this.Browser_Closed);
