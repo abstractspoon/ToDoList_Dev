@@ -2579,9 +2579,9 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
  
 			pDC->FillSolidRect(rBack, crBack);
 
-			// Draw horizontal grid line ------------------------------------
+			// Draw horizontal grid line -----------------------------
 			CRect rRow(rect);
-			rRow.right = (rClient.right + GetSystemMetrics(SM_CXVSCROLL));
+			rRow.right += GetSystemMetrics(SM_CXVSCROLL);
 
 			DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
