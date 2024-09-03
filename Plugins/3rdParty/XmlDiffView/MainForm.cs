@@ -333,6 +333,7 @@ namespace VisualXmlDiff
 			this.Controls.Add(this.button3);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
+			this.Icon = Resource.Winforms;
 			this.Menu = this.mainMenu1;
 			this.Name = "VisualXmlDiff";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
