@@ -88,11 +88,11 @@
     </Reference>
     <Reference Include="XmlDiffPatch">
       <Name>xmldiffpatch</Name>
-      <HintPath>xmldiffpatch.dll</HintPath>
+      <HintPath>..\Microsoft\XmlDiffPatch.dll</HintPath>
     </Reference>
     <Reference Include="XmlDiffPatch.View">
       <Name>XmlDiffPatch.View</Name>
-      <HintPath>XmlDiffPatch.View.dll</HintPath>
+      <HintPath>..\Microsoft\XmlDiffPatch.View.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
