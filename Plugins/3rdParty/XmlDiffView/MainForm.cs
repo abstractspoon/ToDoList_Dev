@@ -49,6 +49,7 @@ namespace VisualXmlDiff
 		private Label label1;
 		private Label label2;
 		private Button button4;
+		private MenuItem about1;
 		private System.Windows.Forms.MenuItem algPrecise;
 
 		public VisualXmlDiff()
@@ -138,12 +139,14 @@ namespace VisualXmlDiff
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.button4 = new System.Windows.Forms.Button();
+			this.about1 = new System.Windows.Forms.MenuItem();
 			this.SuspendLayout();
 			// 
 			// mainMenu1
 			// 
 			this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.mnuOptions});
+            this.mnuOptions,
+            this.about1});
 			// 
 			// mnuOptions
 			// 
@@ -334,6 +337,12 @@ namespace VisualXmlDiff
 			this.button4.UseVisualStyleBackColor = true;
 			this.button4.Click += new System.EventHandler(this.button4_Click);
 			// 
+			// about1
+			// 
+			this.about1.Index = 1;
+			this.about1.Text = "About";
+			this.about1.Click += new System.EventHandler(this.about1_Click);
+			// 
 			// VisualXmlDiff
 			// 
 			this.AcceptButton = this.button3;
@@ -418,26 +427,26 @@ namespace VisualXmlDiff
 			//Check if file 1 is safe and valid.
 			if ( textBox1.Text == null || textBox1.Text == string.Empty )
 			{
-				MessageBox.Show("File 1 not selected, please select");
+				MessageBox.Show("File 1 not specified", "Error");
 				return;
 			}
 			
 			if ( !File.Exists ( textBox1.Text ) )
 			{
-				MessageBox.Show("File 1 doesn't exist, please select another file");
+				MessageBox.Show("File 1 doesn't exist", "Error");
 				return;
 			}
 
 			//Check if file 2 is safe and valid.
 			if ( textBox2.Text == null || textBox2.Text == string.Empty )
 			{
-				MessageBox.Show("File 2 not selected, please select");
+				MessageBox.Show("File 2 not specified", "Error");
 				return;
 			}
 
 			if ( !File.Exists ( textBox2.Text ) )
 			{
-				MessageBox.Show("File 2 doesn't exist, please select another file");
+				MessageBox.Show("File 2 doesn't exist", "Error");
 				return;
 			}
 
@@ -477,7 +486,7 @@ namespace VisualXmlDiff
 			}
 			catch ( XmlException xe )
 			{
-				MessageBox.Show( "An exception occurred while comparing\n" + xe.StackTrace );
+				MessageBox.Show( "An exception occurred while comparing\n" + xe.StackTrace, "Error" );
 			}
 			finally
 			{
@@ -487,7 +496,7 @@ namespace VisualXmlDiff
 			if (  isEqual )
 			{
 				//This means the files were identical for given options.
-				MessageBox.Show ( "Files Identical for the given options");
+				MessageBox.Show ( "Files Identical for the given options", "Information");
 				return; //dont need to show the differences.
 			}
 
@@ -600,11 +609,6 @@ namespace VisualXmlDiff
 			diff.Options = diffOptions;
 		}
 
-		private void menuItem2_Click(object sender, System.EventArgs e)
-		{
-			//MessageBox.Show("Microsoft Corp.\n" + "Copyright 2004");
-		}
-
 		//Handler for Diff Options for Ignore Settings.
 		private void diffOptions_Click(object sender, System.EventArgs e)
 		{
@@ -708,6 +712,11 @@ namespace VisualXmlDiff
 				textBox1.Text = filePaths[0];
 				textBox2.Text = filePaths[1];
 			}
+		}
+
+		private void about1_Click(object sender, EventArgs e)
+		{
+			MessageBox.Show("XmlDiffView\n\nMicrosoft Corp. Copyright 2004", "About");
 		}
 	}
 }
