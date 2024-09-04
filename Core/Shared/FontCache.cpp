@@ -141,14 +141,12 @@ HFONT CFontCache::GetBaseFont() const
 void CFontCache::Clear()
 {
 	POSITION pos = m_mapFonts.GetStartPosition();
+	DWORD dwUnused = 0;
+	HFONT hFont = NULL;
 	
 	while (pos)
 	{
-		DWORD dwDummy = 0;
-		HFONT hFont = NULL;
-		
-		m_mapFonts.GetNextAssoc(pos, dwDummy, hFont);
-		
+		m_mapFonts.GetNextAssoc(pos, dwUnused, hFont);
 		GraphicsMisc::VerifyDeleteObject(hFont);
 	}
 	

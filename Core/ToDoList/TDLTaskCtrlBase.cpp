@@ -2313,13 +2313,14 @@ COLORREF CTDLTaskCtrlBase::GetPriorityColor(int nPriority) const
 	return (COLORREF)m_aPriorityColors[nPriority];
 }
 
+BOOL CTDLTaskCtrlBase::WantDrawCommentsText(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return (!m_bSavingToImage && !pTDI->sComments.IsEmpty() && !IsEditingTask(pTDS->GetTaskID()));
+}
+
 void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack)
 {
-	// Avoid drawing wherever possible
-	if (m_bSavingToImage || IsEditingTask(pTDS->GetTaskID()) || pTDI->sComments.IsEmpty())
-	{
-		return;
-	}
+	ASSERT(WantDrawCommentsText(pTDI, pTDS));
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
@@ -2336,49 +2337,17 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 
 	if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
 	{
-		int nFind = pTDI->sComments.FindOneOf(_T("\n\r")); 
+		int nDrawLength = -1; // all 
 
 		if (HasStyle(TDCS_SHOWFIRSTCOMMENTLINEINLIST))
-		{
-			if (nFind == 0) 
-				return; // comments start with a newline -> show nothing
+			nDrawLength = pTDI->sComments.FindOneOf(_T("\n\r"));
 
-			// else
-			DrawColumnText(pDC, pTDI->sComments, rComments, DT_LEFT, crText, TRUE, nFind);
-		}
-		else
-		{
-			// Calculate the max length of comments we are likely to show
-			int nShow = ((int)(rComments.Width() / GraphicsMisc::GetAverageCharWidth(pDC)) * 2);
-			nShow = min(nShow, pTDI->sComments.GetLength());
-
-			CString sShow;
-			LPTSTR szBuffer = sShow.GetBuffer(nShow);
-			
-			for (int nChar = 0; nChar < nShow; nChar++)
-			{
-				TCHAR cChar = pTDI->sComments[nChar];
-
-				switch (cChar)
-				{
-				case '\r':
-				case '\n':
-				case '\t':
-					cChar = ' ';
-					break;
-				}
-
-				szBuffer[nChar] = cChar;
-			}
-			sShow.ReleaseBuffer(nShow);
-			sShow.TrimRight();
-
-			DrawColumnText(pDC, sShow, rComments, DT_LEFT, crText, TRUE, nShow);
-		}
+		if (nDrawLength != 0)
+			DrawColumnText(pDC, pTDI->sComments, rComments, DT_LEFT, crText, TRUE, nDrawLength); // Ellipsis
 	}
 	else
 	{
-		DrawColumnText(pDC, _T("[...]"), rComments, DT_LEFT, crText, FALSE, 5);
+		DrawColumnText(pDC, _T("[...]"), rComments, DT_LEFT, crText, FALSE, 5); // No ellipsis
 	}
 }
 
@@ -2582,10 +2551,10 @@ DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFill
 DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect)
 {
 	// Check row is visible
-	CRect rClient, rRow(rect);
+	CRect rClient;
 	::GetClientRect(Tasks(), rClient);
 
-	if ((rRow.bottom > 0) && (rRow.top <= rClient.bottom))
+	if ((rect.bottom > 0) && (rect.top <= rClient.bottom))
 	{
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
@@ -2595,30 +2564,29 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 		if (m_data.GetTrueTask(dwTrueID, pTDI, pTDS))
 		{
 			CDC* pDC = CDC::FromHandle(nmcd.hdc);
+
+			// Text/Back colours -------------------------------------
+			COLORREF crText = 0, crBack = GetSysColor(COLOR_WINDOW);
 			GM_ITEMSTATE nState = GetItemTitleState(nmcd);
 
-			COLORREF crText = 0, crBack = GetSysColor(COLOR_WINDOW);
 			VERIFY(GetTaskTextColors(pTDI, pTDS, crText, crBack, (dwTaskID != dwTrueID), (nState != GMIS_NONE)));
 
 			if (!HasColor(crBack))
 				crBack = (IsAlternateTitleLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
-			// Set font before getting text rect
-			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
+			// Draw label background ---------------------------------
+			CRect rBack;
+			GetItemTitleRect(nmcd, TDCTR_BKGND, rBack);
+ 
+			pDC->FillSolidRect(rBack, crBack);
 
-			// draw label background only
-			CRect rLabel;
-			GetItemTitleRect(nmcd, TDCTR_BKGND, rLabel, pDC, pTDI->sTitle);
+			// Draw horizontal grid line -----------------------------
+			CRect rRow(rect);
+			rRow.right += GetSystemMetrics(SM_CXVSCROLL);
 
-			rRow.right = (rClient.right + GetSystemMetrics(SM_CXVSCROLL));
-			rLabel.right = rRow.right; // else overwriting with comments produces artifacts
-
-			pDC->FillSolidRect(rLabel, crBack);
-
-			// draw horz gridline
 			DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
-			// Draw selection before text
+			// Draw selection ----------------------------------------
 			if (!m_bSavingToImage)
 			{
 				DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
@@ -2628,36 +2596,40 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
 					dwFlags |= GMIB_CLIPRIGHT;
 
-				GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags);
+				GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rBack, dwFlags);
 			}
 
-			// draw text
+			// Draw title text ---------------------------------------
 			CRect rText;
-			GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
+			GetItemTitleRect(nmcd, TDCTR_TEXT, rText);
+
+			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
 			DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
 
-			// draw shortcut for references
+			// draw shortcut for references --------------------------
 			if (dwTaskID != dwTrueID)
 			{
-				CRect rIcon(rLabel);
+				CRect rIcon(rText);
 
-				// Draw over icon if icon column NOT visible
+				// If icon column is NOT visible Draw over icon else over text
 				if (!IsColumnShowing(TDCC_ICON))
 					rIcon.left -= (ICON_SIZE + 2);
 				
 				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
-			if (pOldFont)
-				pDC->SelectObject(pOldFont);
+			// Draw comments -----------------------------------------
+			if (WantDrawCommentsText(pTDI, pTDS))
+			{
+				// Get the actual text extent this time
+				GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
 
-			// render comment text
-			pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
-
-			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS, crBack);
+				pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+				DrawCommentsText(pDC, rBack, rText, pTDI, pTDS, crBack);
+			}
 			
-			if (pOldFont)
-				pDC->SelectObject(pOldFont);
+			// Cleanup -----------------------------------------------
+			pDC->SelectObject(pOldFont);
 		}
 	}
 
@@ -3592,7 +3564,6 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 		nTextLen = sText.GetLength();
 	
 	CRect rText(rect);
-	CPoint ptText(0, rText.top);
 	
 	if (!bTaskTitle)
 	{
