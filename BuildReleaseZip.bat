@@ -128,6 +128,9 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Ubiety.Dns.Core.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\XmlDiffPatch.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\XmlDiffPatch.View.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\XmlDiffView.exe
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ZstdNet.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
