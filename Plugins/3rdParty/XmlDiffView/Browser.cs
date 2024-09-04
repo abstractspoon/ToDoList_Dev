@@ -65,12 +65,13 @@ namespace VisualXmlDiff
 			// 
 			// Browser
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(632, 453);
-			this.Icon = Resource.XmlDiffView;
+			this.ClientSize = new System.Drawing.Size(533, 390);
+			this.Icon = global::VisualXmlDiff.Resource.XmlDiffView;
+			this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
 			this.Name = "Browser";
-			this.Text = "Diff";
+			this.Text = "Xml File Differences";
 			this.Closed += new System.EventHandler(this.Browser_Closed);
 			this.Load += new System.EventHandler(this.Browser_Load);
 			this.Resize += new System.EventHandler(this.Browser_Resize);

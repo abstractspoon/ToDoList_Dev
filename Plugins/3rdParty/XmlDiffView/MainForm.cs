@@ -17,9 +17,7 @@ namespace VisualXmlDiff
 	public class VisualXmlDiff : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.MainMenu mainMenu1;
-		private System.Windows.Forms.MenuItem mnuFile;
 		private System.Windows.Forms.MenuItem mnuOptions;
-		private System.Windows.Forms.MenuItem menuItem14;
 		private System.Windows.Forms.Button button3;
 		private System.Windows.Forms.Button button2;
 		private System.Windows.Forms.Button button1;
@@ -45,15 +43,17 @@ namespace VisualXmlDiff
 		private System.Windows.Forms.MenuItem inOpt;
 		private System.Windows.Forms.MenuItem ipOpt;
 		private System.Windows.Forms.MenuItem fOpt;
-		private System.Windows.Forms.MenuItem menuItem1;
-		private System.Windows.Forms.MenuItem menuItem2;
 		private System.Windows.Forms.MenuItem algAuto;
 		private System.Windows.Forms.MenuItem algFast;
 		private System.Windows.Forms.MenuItem algOptions;
+		private Label label1;
+		private Label label2;
+		private Button button4;
 		private System.Windows.Forms.MenuItem algPrecise;
 
 		public VisualXmlDiff()
 		{
+			Application.EnableVisualStyles();
 
 			//
 			// Required for Windows Form Designer support
@@ -116,8 +116,6 @@ namespace VisualXmlDiff
 		{
 			this.components = new System.ComponentModel.Container();
 			this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
-			this.mnuFile = new System.Windows.Forms.MenuItem();
-			this.menuItem14 = new System.Windows.Forms.MenuItem();
 			this.mnuOptions = new System.Windows.Forms.MenuItem();
 			this.icoOpt = new System.Windows.Forms.MenuItem();
 			this.ipiOpt = new System.Windows.Forms.MenuItem();
@@ -132,38 +130,24 @@ namespace VisualXmlDiff
 			this.algAuto = new System.Windows.Forms.MenuItem();
 			this.algPrecise = new System.Windows.Forms.MenuItem();
 			this.algFast = new System.Windows.Forms.MenuItem();
-			this.menuItem1 = new System.Windows.Forms.MenuItem();
-			this.menuItem2 = new System.Windows.Forms.MenuItem();
 			this.button3 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
 			this.button1 = new System.Windows.Forms.Button();
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.textBox2 = new System.Windows.Forms.TextBox();
+			this.label1 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
+			this.button4 = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// mainMenu1
 			// 
 			this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.mnuFile,
-            this.mnuOptions,
-            this.menuItem1});
-			// 
-			// mnuFile
-			// 
-			this.mnuFile.Index = 0;
-			this.mnuFile.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItem14});
-			this.mnuFile.Text = "File";
-			// 
-			// menuItem14
-			// 
-			this.menuItem14.Index = 0;
-			this.menuItem14.Text = "Exit";
-			this.menuItem14.Click += new System.EventHandler(this.menuItem14_Click);
+            this.mnuOptions});
 			// 
 			// mnuOptions
 			// 
-			this.mnuOptions.Index = 1;
+			this.mnuOptions.Index = 0;
 			this.mnuOptions.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.icoOpt,
             this.ipiOpt,
@@ -175,7 +159,7 @@ namespace VisualXmlDiff
             this.ipOpt,
             this.fOpt,
             this.algOptions});
-			this.mnuOptions.Text = "Diff Options";
+			this.mnuOptions.Text = "Options";
 			// 
 			// icoOpt
 			// 
@@ -267,78 +251,115 @@ namespace VisualXmlDiff
 			this.algFast.Text = "Fast";
 			this.algFast.Click += new System.EventHandler(this.algOptions_Click);
 			// 
-			// menuItem1
-			// 
-			this.menuItem1.Index = 2;
-			this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItem2});
-			this.menuItem1.Text = "Help";
-			// 
-			// menuItem2
-			// 
-			this.menuItem2.Index = 0;
-			this.menuItem2.Text = "About";
-			this.menuItem2.Click += new System.EventHandler(this.menuItem2_Click);
-			// 
 			// button3
 			// 
 			this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.button3.Location = new System.Drawing.Point(351, 109);
+			this.button3.Location = new System.Drawing.Point(180, 70);
+			this.button3.Margin = new System.Windows.Forms.Padding(2);
 			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(157, 35);
-			this.button3.TabIndex = 6;
+			this.button3.Size = new System.Drawing.Size(74, 23);
+			this.button3.TabIndex = 7;
 			this.button3.Text = "Compare";
 			this.button3.Click += new System.EventHandler(this.Compare_Click);
 			// 
 			// button2
 			// 
-			this.button2.Location = new System.Drawing.Point(13, 58);
+			this.button2.Location = new System.Drawing.Point(307, 33);
+			this.button2.Margin = new System.Windows.Forms.Padding(2);
 			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(166, 36);
-			this.button2.TabIndex = 5;
-			this.button2.Text = "Compare With ...";
+			this.button2.Size = new System.Drawing.Size(27, 23);
+			this.button2.TabIndex = 6;
+			this.button2.Text = "...";
 			this.button2.Click += new System.EventHandler(this.button2_Click);
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(13, 12);
+			this.button1.AutoSize = true;
+			this.button1.Location = new System.Drawing.Point(307, 8);
+			this.button1.Margin = new System.Windows.Forms.Padding(2);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(166, 35);
-			this.button1.TabIndex = 4;
-			this.button1.Text = "Original File  ...";
+			this.button1.Size = new System.Drawing.Size(27, 23);
+			this.button1.TabIndex = 3;
+			this.button1.Text = "...";
 			this.button1.Click += new System.EventHandler(this.button1_Click);
 			// 
 			// textBox1
 			// 
-			this.textBox1.Location = new System.Drawing.Point(192, 15);
+			this.textBox1.AllowDrop = true;
+			this.textBox1.Location = new System.Drawing.Point(44, 10);
+			this.textBox1.Margin = new System.Windows.Forms.Padding(2);
 			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(640, 26);
-			this.textBox1.TabIndex = 8;
+			this.textBox1.Size = new System.Drawing.Size(259, 20);
+			this.textBox1.TabIndex = 2;
+			this.textBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.textBox1_DragDrop);
+			this.textBox1.DragEnter += new System.Windows.Forms.DragEventHandler(this.textBox1_DragEnter);
 			// 
 			// textBox2
 			// 
-			this.textBox2.Location = new System.Drawing.Point(192, 61);
+			this.textBox2.AllowDrop = true;
+			this.textBox2.Location = new System.Drawing.Point(44, 35);
+			this.textBox2.Margin = new System.Windows.Forms.Padding(2);
 			this.textBox2.Name = "textBox2";
-			this.textBox2.Size = new System.Drawing.Size(640, 26);
-			this.textBox2.TabIndex = 9;
+			this.textBox2.Size = new System.Drawing.Size(259, 20);
+			this.textBox2.TabIndex = 5;
+			this.textBox2.DragDrop += new System.Windows.Forms.DragEventHandler(this.textBox2_DragDrop);
+			this.textBox2.DragEnter += new System.Windows.Forms.DragEventHandler(this.textBox2_DragEnter);
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(7, 13);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(32, 13);
+			this.label1.TabIndex = 1;
+			this.label1.Text = "File 1";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(7, 38);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(32, 13);
+			this.label2.TabIndex = 4;
+			this.label2.Text = "File 2";
+			// 
+			// button4
+			// 
+			this.button4.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.button4.Location = new System.Drawing.Point(259, 70);
+			this.button4.Name = "button4";
+			this.button4.Size = new System.Drawing.Size(75, 23);
+			this.button4.TabIndex = 8;
+			this.button4.Text = "Cancel";
+			this.button4.UseVisualStyleBackColor = true;
+			this.button4.Click += new System.EventHandler(this.button4_Click);
 			// 
 			// VisualXmlDiff
 			// 
 			this.AcceptButton = this.button3;
-			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+			this.AllowDrop = true;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(850, 156);
-			this.Controls.Add(this.textBox2);
+			this.AutoSize = true;
+			this.CancelButton = this.button4;
+			this.ClientSize = new System.Drawing.Size(344, 100);
+			this.Controls.Add(this.label1);
 			this.Controls.Add(this.textBox1);
-			this.Controls.Add(this.button3);
-			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
-			this.Icon = Resource.XmlDiffView;
+			this.Controls.Add(this.label2);
+			this.Controls.Add(this.textBox2);
+			this.Controls.Add(this.button2);
+			this.Controls.Add(this.button3);
+			this.Controls.Add(this.button4);
+			this.Icon = global::VisualXmlDiff.Resource.XmlDiffView;
+			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Menu = this.mainMenu1;
 			this.Name = "VisualXmlDiff";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "XmlDiff";
+			this.Text = "Xml File Comparison";
 			this.Load += new System.EventHandler(this.VisualXmlDiff_Load);
+			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
+			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragEnter);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -350,18 +371,39 @@ namespace VisualXmlDiff
 			Application.Exit();
 		}
 
+		string GetInitialBrowseDirectory(string filename, string otherFilename)
+		{
+			if (!string.IsNullOrWhiteSpace(filename))
+				return Path.GetDirectoryName(filename);
+
+			if (!string.IsNullOrWhiteSpace(otherFilename))
+				return Path.GetDirectoryName(otherFilename);
+
+			return string.Empty;
+		}
+
 		private void button1_Click(object sender, System.EventArgs e)
 		{
-			OpenFileDialog ofd1 = new OpenFileDialog();
-			ofd1.ShowDialog();
-			textBox1.Text = ofd1.FileName;
+			OpenFileDialog ofd1 = new OpenFileDialog()
+			{
+				FileName = textBox1.Text,
+				InitialDirectory = GetInitialBrowseDirectory(textBox1.Text, textBox2.Text)
+			};
+
+			if (ofd1.ShowDialog() == DialogResult.OK)
+				textBox1.Text = ofd1.FileName;
 		}
 
 		private void button2_Click(object sender, System.EventArgs e)
 		{
-			OpenFileDialog ofd1 = new OpenFileDialog();
-			ofd1.ShowDialog();
-			textBox2.Text = ofd1.FileName;
+			OpenFileDialog ofd1 = new OpenFileDialog()
+			{
+				FileName = textBox2.Text,
+				InitialDirectory = GetInitialBrowseDirectory(textBox2.Text, textBox1.Text)
+			};
+
+			if (ofd1.ShowDialog() == DialogResult.OK)
+				textBox2.Text = ofd1.FileName;
 		}
 
 		
@@ -403,8 +445,11 @@ namespace VisualXmlDiff
 			//be the place to write that code.
 
 			//Call DoCompare which will compare two files.
-			DoCompare ( textBox1.Text, textBox2.Text );
+			Cursor = Cursors.WaitCursor;
 
+			DoCompare( textBox1.Text, textBox2.Text );
+
+			Cursor = Cursors.Default;
 		}
 
 		public void DoCompare(string file1, string file2)
@@ -463,7 +508,7 @@ namespace VisualXmlDiff
 			StreamWriter sw1 = new StreamWriter( tempFile, false, System.Text.Encoding.Unicode );
 
 
-            sw1.Write("<html><style> table { table-layout: fixed; } </style>");
+            sw1.Write("<html><style> table { table-layout: fixed; font-family:verdana; font-size:12; } </style>");
             sw1.Write("<body><table width='100%'>");
             //Write Legend.
 			sw1.Write("<tr><td colspan='2' align='center'><b>Legend:</b> <font style='background-color: yellow'" + 
@@ -584,6 +629,85 @@ namespace VisualXmlDiff
 
 			if ( filename1 != string.Empty && filename2 != string.Empty )
 				DoCompare( filename1, filename2 );
+		}
+
+		private void textBox1_DragEnter(object sender, DragEventArgs e)
+		{
+			var filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+			if (filePaths.Length <= 2)
+				e.Effect = DragDropEffects.Copy;
+		}
+
+		private void textBox2_DragEnter(object sender, DragEventArgs e)
+		{
+			var filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+			if (filePaths.Length <= 2)
+				e.Effect = DragDropEffects.Copy;
+		}
+
+		private void textBox1_DragDrop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+				if (filePaths.Length == 1)
+				{
+					textBox1.Text = filePaths[0];
+				}
+				else
+				{
+					textBox1.Text = filePaths[0];
+					textBox2.Text = filePaths[1];
+				}
+			}
+		}
+
+		private void textBox2_DragDrop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+				if (filePaths.Length == 1)
+				{
+					textBox2.Text = filePaths[0];
+				}
+				else
+				{
+					textBox1.Text = filePaths[0];
+					textBox2.Text = filePaths[1];
+				}
+			}
+		}
+
+		private void button4_Click(object sender, EventArgs e)
+		{
+			Application.Exit();
+		}
+
+		private void MainForm_DragEnter(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+				if (filePaths.Length == 2)
+					e.Effect = DragDropEffects.Copy;
+			}
+		}
+
+		private void MainForm_DragDrop(object sender, DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop))
+			{
+				var filePaths = (string[])(e.Data.GetData(DataFormats.FileDrop));
+
+				textBox1.Text = filePaths[0];
+				textBox2.Text = filePaths[1];
+			}
 		}
 	}
 }
