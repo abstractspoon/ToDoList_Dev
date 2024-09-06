@@ -844,10 +844,21 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
-	CHMXDataset& ds = m_datasets[nDatasetIndex];
+	const CHMXDataset& ds = m_datasets[nDatasetIndex];
 
-	if (ds.GetDatasetSize() == 0)
-		return false;
+	// Min-max charts are a special case, requiring two datasets of the same size
+	if (ds.GetStyle() == HMX_DATASET_STYLE_MINMAX)
+	{
+		if (!IsValidDatasetIndex(nDatasetIndex + 1))
+			return false;
+
+		CHMXDataset& ds2 = m_datasets[nDatasetIndex + 1];
+
+		if (ds2.GetDatasetSize() != ds.GetDatasetSize())
+			return false;
+
+		return DrawMinMaxChart(dc, ds, m_datasets[nDatasetIndex + 1], CDWordArray(), fillOpacity);
+	}
 
 	return DrawDataset(dc, ds, CDWordArray(), fillOpacity);
 }
@@ -873,10 +884,94 @@ bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& a
 	case HMX_DATASET_STYLE_DONUT:
 	case HMX_DATASET_STYLE_DONUTLINE:
 		return DrawPieChart(dc, ds, aAltItemColors, fillOpacity);
+
+	case HMX_DATASET_STYLE_MINMAX:
+		ASSERT(0);
+		return false; // drawn separately because it requires two datasets
 	}
 
 	ASSERT(0);
 	return false;
+}
+
+bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDataset& dsMax, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)
+{
+	if (dsMin.GetDatasetSize() == 0)
+		return false;
+	
+	if (dsMax.GetDatasetSize() != dsMin.GetDatasetSize())
+		return false;
+
+	CArray<gdix_PointF, gdix_PointF&> points[2];
+
+	int nPoints = GetPoints(dsMin, points[0], FALSE);
+	VERIFY(nPoints == GetPoints(dsMax, points[1], FALSE));
+	
+	gdix_PenStyle nPenStyle = gdix_PenStyleSolid;
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen penMin(dsMin.GetLineColor(), dsMin.GetSize(), nPenStyle);
+	CGdiPlusPen penMax(dsMax.GetLineColor(), dsMax.GetSize(), nPenStyle);
+
+	HMX_DATASET_MARKER nMarker[2] = { dsMin.GetMarker(), dsMax.GetMarker() };
+	int nMarkerSize[2] = { dsMin.GetSize() * 2, dsMax.GetSize() * 2 };
+
+	CArray<gdix_PointF, gdix_PointF&> ptMarker;
+
+	CGdiPlusPen defMarkerPen[2];
+	CGdiPlusBrush defMarkerBrush[2];
+
+	CreateDefaultItemDrawingTools(dsMin, aAltMarkerColors, fillOpacity, defMarkerPen[0], defMarkerBrush[0]);
+	CreateDefaultItemDrawingTools(dsMax, aAltMarkerColors, fillOpacity, defMarkerPen[1], defMarkerBrush[1]);
+
+	for (int f = 0; f < nPoints; f++)
+	{
+		// Draw line from Min to Max
+		if (((int)points[0][f].y == m_rectData.bottom) || ((int)points[1][f].y == m_rectData.bottom))
+			continue;
+
+		if (points[0][f].y < points[1][f].y)
+		{
+			CGdiPlus::DrawLine(graphics, penMin, &points[0][f], &points[1][f]);
+		}
+		else if (points[0][f].y > points[1][f].y)
+		{
+			CGdiPlus::DrawLine(graphics, penMax, &points[0][f], &points[1][f]);
+		}
+		
+		for (int i = 0; i < 2; i++)
+		{
+			if (nMarker[i] != HMX_DATASET_MARKER_NONE)
+			{
+				VERIFY(GetMarker(nMarker[i], points[i][f], nMarkerSize[i], ptMarker));
+
+				CGdiPlusPen markerPen;
+				CGdiPlusBrush markerBrush;
+				CreateItemDrawingTools(f, aAltMarkerColors, fillOpacity, markerPen, markerBrush);
+
+				gdix_Pen* pen = (markerPen.IsValid() ? markerPen : defMarkerPen[i]);
+				gdix_Brush* brush = (markerBrush.IsValid() ? markerBrush : defMarkerBrush[i]);
+
+				switch (nMarker[i])
+				{
+				case HMX_DATASET_MARKER_TRIANGLE:
+				case HMX_DATASET_MARKER_DIAMOND:
+					VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
+					break;
+
+				case HMX_DATASET_MARKER_SQUARE:
+					VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
+					break;
+
+				case HMX_DATASET_MARKER_CIRCLE:
+					VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
+					break;
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)

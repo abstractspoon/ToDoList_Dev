@@ -74,6 +74,11 @@ int CStatsItemCalculator::GetTotalWeekdays() const
 	return m_nTotalWeekdays;
 }
 
+int CStatsItemCalculator::GetTotalItems() const
+{
+	return m_data.GetSize();
+}
+
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
 {
 	nNextItemFrom = 0;
@@ -165,6 +170,21 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(const COleDateTime& date, doubl
 	}
 
 	return (nNumItems > 0);
+}
+
+BOOL CStatsItemCalculator::GetDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const
+{
+	int nNumItems = m_data.GetSize();
+
+	if ((nItem < 0) || (nItem >= nNumItems))
+		return FALSE;
+
+	const STATSITEM* pSI = m_data[nItem];
+
+	dEstDays = GetAttribValue(*pSI, DAYS, ESTIMATE);
+	dSpentDays = GetAttribValue(*pSI, DAYS, SPENT);
+
+	return TRUE;
 }
 
 BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const

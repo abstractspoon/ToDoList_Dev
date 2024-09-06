@@ -1252,10 +1252,6 @@ CMinMaxGraph::~CMinMaxGraph()
 {
 }
 
-void CMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
-{
-}
-
 CString CMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	return _T("");
@@ -1294,4 +1290,41 @@ CString CEstimatedSpentDaysMinMaxGraph::GetTitle() const
 
 void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
+	UpdateDatasetColors(datasets);
+
+	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[ESTIMATED_DAYS].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[ESTIMATED_DAYS].SetMin(0.0);
+
+	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[SPENT_DAYS].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[SPENT_DAYS].SetMin(0.0);
+
+	// build the graph
+	int nNumItems = calculator.GetTotalItems();
+
+	if (nNumItems > 0)
+	{
+		datasets[ESTIMATED_DAYS].SetDatasetSize(nNumItems + 1);
+		datasets[SPENT_DAYS].SetDatasetSize(nNumItems + 1);
+
+		double dDaysEst = 0.0, dDaysSpent = 0, dMaxVal = 0.0;
+
+		for (int nItem = 0; nItem <= nNumItems; nItem++)
+		{
+			if (calculator.GetDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
+			{
+				datasets[ESTIMATED_DAYS].SetData(nItem, dDaysEst);
+				datasets[SPENT_DAYS].SetData(nItem, dDaysSpent);
+
+				dMaxVal = max(dMaxVal, max(dDaysEst, dDaysSpent));
+			}
+		}
+
+		// Set the maximum Y value to be something 'nice'
+		double dMax = HMXUtils::CalcMaxYAxisValue(dMaxVal, 5);
+
+		datasets[ESTIMATED_DAYS].SetMax(dMax);
+		datasets[SPENT_DAYS].SetMax(dMax);
+	}
 }

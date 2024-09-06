@@ -483,6 +483,9 @@ bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, false);
 
+	if (pGraph->GetType() == BCT_MINMAX)
+		return CHMXChartEx::DrawMinMaxChart(dc, m_datasets[nDatasetIndex], m_datasets[nDatasetIndex + 1], pGraph->GetColors(), alpha);
+
 	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], pGraph->GetColors(), alpha);
 }
 

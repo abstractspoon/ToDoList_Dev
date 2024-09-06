@@ -345,6 +345,13 @@ public:
 
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+
+protected:
+	enum
+	{
+		ESTIMATED_DAYS,
+		SPENT_DAYS,
+	};
 };
 
 

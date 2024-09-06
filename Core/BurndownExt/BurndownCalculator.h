@@ -34,6 +34,7 @@ public:
 
 	int GetTotalDays() const;
 	int GetTotalWeekdays() const;
+	int GetTotalItems() const;
 
 	// Time Series ---------------------------------------------------
 	
@@ -66,6 +67,10 @@ public:
 	int GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+
+	// Min Max charts ------------------------------------------------
+
+	BOOL GetDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const;
 
 protected:
 	const CStatsItemArray& m_data;
