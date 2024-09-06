@@ -287,6 +287,11 @@ BEGIN
     ID_BURNDOWN_PREF        "\nGraphs Preferences"
 END
 
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MINMAX              "Min Max"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

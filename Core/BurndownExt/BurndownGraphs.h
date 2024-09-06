@@ -99,10 +99,10 @@ private:
 
 // ---------------------------------------------------------------------------
 
-class CIncompleteTasksGraph : public CTimeSeriesGraph
+class CIncompleteTasksTimeGraph : public CTimeSeriesGraph
 {
 public:
-	CIncompleteTasksGraph();
+	CIncompleteTasksTimeGraph();
 
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
@@ -114,10 +114,10 @@ protected:
 
 // ---------------------------------------------------------------------------
 
-class CRemainingDaysGraph : public CTimeSeriesGraph
+class CRemainingDaysTimeGraph : public CTimeSeriesGraph
 {
 public:
-	CRemainingDaysGraph();
+	CRemainingDaysTimeGraph();
 
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
@@ -136,10 +136,10 @@ protected:
 
 // ---------------------------------------------------------------------------
 
-class CStartedEndedTasksGraph : public CTimeSeriesGraph
+class CStartedEndedTasksTimeGraph : public CTimeSeriesGraph
 {
 public:
-	CStartedEndedTasksGraph();
+	CStartedEndedTasksTimeGraph();
 
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
@@ -158,10 +158,10 @@ protected:
 
 // ---------------------------------------------------------------------------
 
-class CEstimatedSpentDaysGraph : public CTimeSeriesGraph
+class CEstimatedSpentDaysTimeGraph : public CTimeSeriesGraph
 {
 public:
-	CEstimatedSpentDaysGraph();
+	CEstimatedSpentDaysTimeGraph();
 
 	CString GetTitle() const;
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
@@ -202,10 +202,10 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CAttributeFrequencyGraph : public CGraphBase
+class CFrequencyGraph : public CGraphBase
 {
 public:
-	virtual ~CAttributeFrequencyGraph();
+	virtual ~CFrequencyGraph();
 
 	virtual CString GetTitle() const = 0;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
@@ -218,7 +218,7 @@ protected:
 	mutable CStringArray m_aAttribValues;
 
 protected:
-	CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph);
+	CFrequencyGraph(BURNDOWN_GRAPH nGraph);
 
 	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	BOOL UpdateGraphStyles(CHMXDataset& dataset) const;
@@ -226,7 +226,7 @@ protected:
 
 // ---------------------------------------------------------------------------
 
-class CCategoryFrequencyGraph : public CAttributeFrequencyGraph
+class CCategoryFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CCategoryFrequencyGraph();
@@ -237,7 +237,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CStatusFrequencyGraph : public CAttributeFrequencyGraph
+class CStatusFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CStatusFrequencyGraph();
@@ -248,7 +248,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CAllocatedToFrequencyGraph : public CAttributeFrequencyGraph
+class CAllocatedToFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CAllocatedToFrequencyGraph();
@@ -259,7 +259,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CAllocatedByFrequencyGraph : public CAttributeFrequencyGraph
+class CAllocatedByFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CAllocatedByFrequencyGraph();
@@ -270,7 +270,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CVersionFrequencyGraph : public CAttributeFrequencyGraph
+class CVersionFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CVersionFrequencyGraph();
@@ -281,7 +281,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CTagFrequencyGraph : public CAttributeFrequencyGraph
+class CTagFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CTagFrequencyGraph();
@@ -292,7 +292,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CPriorityFrequencyGraph : public CAttributeFrequencyGraph
+class CPriorityFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CPriorityFrequencyGraph();
@@ -303,7 +303,7 @@ public:
 
 // ---------------------------------------------------------------------------
 
-class CRiskFrequencyGraph : public CAttributeFrequencyGraph
+class CRiskFrequencyGraph : public CFrequencyGraph
 {
 public:
 	CRiskFrequencyGraph();
@@ -312,7 +312,41 @@ public:
 	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+class CMinMaxGraph : public CGraphBase
+{
+public:
+	virtual ~CMinMaxGraph();
+
+	virtual CString GetTitle() const = 0;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
+
+	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+	void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
+	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
+
+protected:
+	mutable CStringArray m_aAttribValues;
+
+protected:
+	CMinMaxGraph(BURNDOWN_GRAPH nGraph);
+
+	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	BOOL UpdateGraphStyles(CHMXDataset& dataset) const;
+};
+
 // ---------------------------------------------------------------------------
+
+class CEstimatedSpentDaysMinMaxGraph : public CMinMaxGraph
+{
+public:
+	CEstimatedSpentDaysMinMaxGraph();
+
+	CString GetTitle() const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+};
+
 
 
 /////////////////////////////////////////////////////////////////////////////
