@@ -1303,21 +1303,22 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 	datasets[SPENT_DAYS].SetMin(0.0);
 
 	// build the graph
-	int nNumItems = calculator.GetTotalItems();
+	int nFrom, nTo;
+	calculator.GetItemRange(nFrom, nTo);
 
-	if (nNumItems > 0)
+	if (nTo > nFrom)
 	{
-		datasets[ESTIMATED_DAYS].SetDatasetSize(nNumItems + 1);
-		datasets[SPENT_DAYS].SetDatasetSize(nNumItems + 1);
+		datasets[ESTIMATED_DAYS].SetDatasetSize(nTo - nFrom + 1);
+		datasets[SPENT_DAYS].SetDatasetSize(nTo - nFrom + 1);
 
 		double dDaysEst = 0.0, dDaysSpent = 0, dMaxVal = 0.0;
 
-		for (int nItem = 0; nItem <= nNumItems; nItem++)
+		for (int nItem = nFrom, nData = 0; nItem <= nTo; nItem++, nData++)
 		{
 			if (calculator.GetDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
 			{
-				datasets[ESTIMATED_DAYS].SetData(nItem, dDaysEst);
-				datasets[SPENT_DAYS].SetData(nItem, dDaysSpent);
+				datasets[ESTIMATED_DAYS].SetData(nData, dDaysEst);
+				datasets[SPENT_DAYS].SetData(nData, dDaysSpent);
 
 				dMaxVal = max(dMaxVal, max(dDaysEst, dDaysSpent));
 			}

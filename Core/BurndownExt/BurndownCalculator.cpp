@@ -74,9 +74,30 @@ int CStatsItemCalculator::GetTotalWeekdays() const
 	return m_nTotalWeekdays;
 }
 
-int CStatsItemCalculator::GetTotalItems() const
+void CStatsItemCalculator::GetItemRange(int& nFrom, int& nTo) const
 {
-	return m_data.GetSize();
+	nFrom = 0;
+	nTo = (m_data.GetSize() - 1);
+
+	int nNumItems = m_data.GetSize();
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (pSI->dtStart.m_dt < m_dStartExtents)
+			continue;
+
+		if (nFrom == 0)
+		{
+			nFrom = nItem;
+		}
+		else if (pSI->dtStart.m_dt > m_dEndExtents)
+		{
+			nTo = nItem;
+			break;
+		}
+	}
 }
 
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const

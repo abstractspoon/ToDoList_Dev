@@ -926,22 +926,25 @@ bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDat
 
 	for (int f = 0; f < nPoints; f++)
 	{
-		// Draw line from Min to Max
-		if (((int)points[0][f].y == m_rectData.bottom) || ((int)points[1][f].y == m_rectData.bottom))
-			continue;
+		BOOL bHasVal[2] = { ((int)points[0][f].y < m_rectData.bottom), 
+							((int)points[1][f].y < m_rectData.bottom) };
 
-		if (points[0][f].y < points[1][f].y)
+		// Draw line from Min to Max
+		if (bHasVal[0] && bHasVal[1])
 		{
-			CGdiPlus::DrawLine(graphics, penMin, &points[0][f], &points[1][f]);
-		}
-		else if (points[0][f].y > points[1][f].y)
-		{
-			CGdiPlus::DrawLine(graphics, penMax, &points[0][f], &points[1][f]);
+			if (points[0][f].y < points[1][f].y)
+			{
+				CGdiPlus::DrawLine(graphics, penMin, &points[0][f], &points[1][f]);
+			}
+			else if (points[0][f].y > points[1][f].y)
+			{
+				CGdiPlus::DrawLine(graphics, penMax, &points[0][f], &points[1][f]);
+			}
 		}
 		
 		for (int i = 0; i < 2; i++)
 		{
-			if (nMarker[i] != HMX_DATASET_MARKER_NONE)
+			if (bHasVal[i] && (nMarker[i] != HMX_DATASET_MARKER_NONE))
 			{
 				VERIFY(GetMarker(nMarker[i], points[i][f], nMarkerSize[i], ptMarker));
 

@@ -34,7 +34,7 @@ public:
 
 	int GetTotalDays() const;
 	int GetTotalWeekdays() const;
-	int GetTotalItems() const;
+	void GetItemRange(int& nFrom, int& nTo) const;
 
 	// Time Series ---------------------------------------------------
 	
