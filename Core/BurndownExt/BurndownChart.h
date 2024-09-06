@@ -64,7 +64,6 @@ protected:
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
-	int HitTest(const CPoint& ptClient) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 
 	BOOL HighlightDataPoint(int nIndex);

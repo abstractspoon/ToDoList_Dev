@@ -430,14 +430,6 @@ CString CBurndownChart::GetTooltip(int nHit) const
 	return pGraph->GetTooltip(m_calculator, m_datasets, nHit);
 }
 
-int CBurndownChart::HitTest(const CPoint& ptClient) const
-{
-	if (!m_dtExtents.IsValid())
-		return -1;
-
-	return CHMXChartEx::HitTest(ptClient);
-}
-
 void CBurndownChart::SetTodayColour(COLORREF color)
 {
 	if (color != m_crToday)
