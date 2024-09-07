@@ -18,15 +18,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-const COLORREF COLOR_GREEN		= RGB(122, 204, 0);
-const COLORREF COLOR_RED		= RGB(204, 0, 0);
-const COLORREF COLOR_YELLOW		= RGB(204, 164, 0);
-const COLORREF COLOR_BLUE		= RGB(0, 0, 244);
-const COLORREF COLOR_PINK		= RGB(234, 28, 74);
-const COLORREF COLOR_ORANGE		= RGB(255, 91, 21);
-
-/////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesPage dialog
 
 CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* /*pParent*/ /*=NULL*/)

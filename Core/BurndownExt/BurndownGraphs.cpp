@@ -1246,6 +1246,7 @@ CMinMaxGraph::CMinMaxGraph(BURNDOWN_GRAPH nGraph)
 	:
 	CGraphBase(nGraph, BGO_MINMAX_NONE)
 {
+	InitColorPalette(COLOR_GREEN, COLOR_RED);
 }
 
 CMinMaxGraph::~CMinMaxGraph()
@@ -1264,10 +1265,6 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	return FALSE;
-}
-
-void CMinMaxGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const
-{
 }
 
 BOOL CMinMaxGraph::UpdateGraphStyles(CHMXDataset& dataset) const
@@ -1327,13 +1324,13 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 
 		if (HMXUtils::GetMinMax(datasets, 2, dMin, dMax, true))
 		{
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 1);
-			datasets[0].SetMax(dMax);
-			datasets[1].SetMax(dMax);
-
 			dMin = HMXUtils::CalcMinYAxisValue(dMin, 1);
 			datasets[0].SetMax(dMin);
 			datasets[1].SetMax(dMin);
+
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 1);
+			datasets[0].SetMax(dMax);
+			datasets[1].SetMax(dMax);
 		}
 	}
 }

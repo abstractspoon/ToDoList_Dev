@@ -43,6 +43,8 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 	AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(200)); // Graph titles
 	EnableColumnEditing(0, FALSE);
 
+	GetGrouping().EnableGroupView(*this);
+
 	// Populate items
 	int nSelRow = -1;
 
@@ -73,8 +75,6 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 				nSelRow = nRow;
 		}
 	}
-
-	Sort();
 	RefreshItemHeight();
 
 	if (nSelRow != -1)

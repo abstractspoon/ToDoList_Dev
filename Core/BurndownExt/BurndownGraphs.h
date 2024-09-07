@@ -34,7 +34,7 @@ public:
 	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption) const;
 	BOOL HasOption(BURNDOWN_GRAPHOPTION nOption) const;
 
-	protected:
+protected:
 	CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption = BGO_INVALID);
 	
 	static void SetDatasetColor(CHMXDataset& dataset, COLORREF crBase);
