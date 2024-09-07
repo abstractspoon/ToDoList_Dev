@@ -65,6 +65,7 @@ protected:
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
+	bool SetYZoomFactor(int nZoom);
 
 	BOOL HighlightDataPoint(int nIndex);
 	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);

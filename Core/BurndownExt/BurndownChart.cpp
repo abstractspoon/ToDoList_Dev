@@ -78,15 +78,6 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 
 	if (nGraph != m_nActiveGraph)
 	{
-		// Save the current zoom state
-		if (IsValidGraph(m_nActiveGraph))
-		{
-			CGraphBase* pGraph = NULL;
-			GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
-			pGraph->SetYZoomFactor(GetYZoomFactor());
-		}
-
 		m_nActiveGraph = nGraph;
 		RebuildGraph(m_dtExtents);
 
@@ -94,6 +85,17 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	}
 
 	return FALSE;
+}
+
+bool CBurndownChart::SetYZoomFactor(int nZoom)
+{
+	if (CHMXChartEx::SetYZoomFactor(nZoom))
+	{
+		CGraphBase* pGraph = NULL;
+		GET_GRAPH_RET(m_nActiveGraph, false);
+
+		pGraph->SetYZoomFactor(nZoom);
+	}
 }
 
 int CBurndownChart::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const
