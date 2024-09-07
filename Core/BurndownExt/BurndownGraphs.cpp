@@ -1253,21 +1253,21 @@ CMinMaxGraph::~CMinMaxGraph()
 {
 }
 
-CString CMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CMinMaxGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int /*nHit*/) const
 {
 	return _T("");
 }
 
-void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const
+void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& /*calculator*/, int /*nAvailWidth*/, CStringArray& /*aLabels*/, int& /*nLabelStep*/) const
 {
 }
 
-BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, const CStatsItemCalculator& /*calculator*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET])
 {
 	return FALSE;
 }
 
-BOOL CMinMaxGraph::UpdateGraphStyles(CHMXDataset& dataset) const
+BOOL CMinMaxGraph::UpdateGraphStyles(CHMXDataset& /*dataset*/) const
 {
 	return FALSE;
 }
