@@ -133,7 +133,8 @@ BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption) 
 	: 
 	m_nGraph(nGraph), 
-	m_nOption(nOption)
+	m_nOption(nOption),
+	m_nYZoomFactor(1)
 {
 	ASSERT(IsValidGraph(m_nGraph));
 }
@@ -167,6 +168,12 @@ void CGraphBase::ClearData(CHMXDataset datasets[HMX_MAX_DATASET])
 BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
 {
 	return GetGraphType(m_nGraph);
+}
+
+void CGraphBase::SetYZoomFactor(int nZoom)
+{
+	ASSERT(nZoom > 0);
+	m_nYZoomFactor = max(nZoom, 1);
 }
 
 BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
@@ -967,9 +974,6 @@ void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aF
 	// Save off attrib values for building horizontal labels
 	m_aAttribValues.RemoveAll();
 
-	// Clear all datasets
-	ClearData(datasets);
-			
 	int nNumAttrib = aFrequencies.GetSize();
 
 	if (nNumAttrib)
@@ -978,7 +982,6 @@ void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aF
 		CHMXDataset& dataset = datasets[0];
 
 		dataset.SetMin(0.0);
-		dataset.ClearData();
 		dataset.SetDatasetSize(nNumAttrib);
 
 		for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)

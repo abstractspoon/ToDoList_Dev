@@ -78,6 +78,15 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 
 	if (nGraph != m_nActiveGraph)
 	{
+		// Save the current zoom state
+		if (IsValidGraph(m_nActiveGraph))
+		{
+			CGraphBase* pGraph = NULL;
+			GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
+			pGraph->SetYZoomFactor(GetYZoomFactor());
+		}
+
 		m_nActiveGraph = nGraph;
 		RebuildGraph(m_dtExtents);
 
@@ -346,9 +355,6 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 
 BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
 	if (!m_dtExtents.Set(dtExtents))
 	{
 		ASSERT(0);
@@ -360,18 +366,22 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CWaitCursor cursor;
 	CHoldRedraw hr(*this);
 	
-	ClearData();
+	ResetDatasets();
 	RefreshRenderFlags(FALSE);
 
 	// Which one gets drawn is controlled by the render flags
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
 	SetXText(pGraph->GetTitle());
 	SetYText(pGraph->GetTitle());
 
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
-
 		pGraph->BuildGraph(m_calculator, m_datasets);
 	}
+
+	SetYZoomFactor(pGraph->GetYZoomFactor());
 
 	RebuildXScale();
 	CalcDatas();
