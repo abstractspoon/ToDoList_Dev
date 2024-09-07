@@ -1308,29 +1308,23 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 		datasets[ESTIMATED_DAYS].SetDatasetSize(nTo - nFrom + 1);
 		datasets[SPENT_DAYS].SetDatasetSize(nTo - nFrom + 1);
 
+		double dDaysEst = 0.0, dDaysSpent = 0, dMaxVal = 0.0;
+
 		for (int nItem = nFrom, nData = 0; nItem <= nTo; nItem++, nData++)
 		{
-			double dDaysEst = 0.0, dDaysSpent = 0;
-
 			if (calculator.GetDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
 			{
 				datasets[ESTIMATED_DAYS].SetData(nData, dDaysEst);
 				datasets[SPENT_DAYS].SetData(nData, dDaysSpent);
+
+				dMaxVal = max(dMaxVal, max(dDaysEst, dDaysSpent));
 			}
 		}
 
 		// Set the maximum Y value to be something 'nice'
-		double dMin, dMax;
+		double dMax = HMXUtils::CalcMaxYAxisValue(dMaxVal, 10);
 
-		if (HMXUtils::GetMinMax(datasets, 2, dMin, dMax, true))
-		{
-			dMin = HMXUtils::CalcMinYAxisValue(dMin, 1);
-			datasets[0].SetMax(dMin);
-			datasets[1].SetMax(dMin);
-
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 1);
-			datasets[0].SetMax(dMax);
-			datasets[1].SetMax(dMax);
-		}
+		datasets[ESTIMATED_DAYS].SetMax(dMax);
+		datasets[SPENT_DAYS].SetMax(dMax);
 	}
 }
