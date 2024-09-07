@@ -17,8 +17,9 @@ namespace HMXUtils
 {
 	bool GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly);	// get min & max
 
-	double CalcYAxisInterval(double dDataMax, int nNumTicks);
+	double CalcYAxisInterval(double dDataMinMax, int nNumTicks, BOOL bMax = TRUE);
 	double CalcMaxYAxisValue(double dDataMax, int nNumTicks);
+	double CalcMinYAxisValue(double dDataMin, int nNumTicks);
 };
 
 /////////////////////////////////////////////////////////////////////////////
