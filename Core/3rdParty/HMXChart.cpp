@@ -49,23 +49,23 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
-CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1), m_dwRenderFlags(HMX_RENDER_ALL)
+CHMXChart::CHMXChart() 
+	: 
+	m_strFont(_T("Arial")), 
+	m_nFontPixelSize(-1), 
+	m_dwRenderFlags(HMX_RENDER_ALL),
+	m_clrBkGnd(RGB(200, 255, 255)),
+	m_nNumYTicks(0),
+	m_dRoundY(10),
+	m_nXMax(0),
+	m_dYMin(0),
+	m_dYMax(0),
+	m_nXLabelStep(1),
+	m_clrGrid(GetSysColor(COLOR_3DSHADOW)),
+	m_bXLabelsAreTicks(false),
+	m_nXLabelDegrees(0),
+	m_nCountDataset(0),
 {
-	// set defaul value
-	m_clrBkGnd = RGB(200, 255, 255);
-	m_strTitle = _T("");
-	m_strXText = _T("");
-	m_strYText = _T("");
-	m_nNumYTicks = 0;
-	m_nRoundY = 10;
-	m_nXMax = 0;
-	m_nYMin = 0;
-	m_nYMax = 0;
-	m_nXLabelStep = 1;
-	m_clrGrid = GetSysColor(COLOR_3DSHADOW);
-	m_bXLabelsAreTicks = false;
-	m_nXLabelDegrees = 0;
-	m_nCountDataset = 0;
 }
 
 CHMXChart::~CHMXChart()
@@ -304,7 +304,7 @@ bool CHMXChart::CopyToFile(CString sFile)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -321,7 +321,7 @@ bool CHMXChart::PaintBkGnd(CDC &dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -356,7 +356,7 @@ bool CHMXChart::DrawTitle(CDC & dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -378,7 +378,7 @@ bool CHMXChart::DrawGrid(CDC & dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -415,7 +415,7 @@ bool CHMXChart::DrawAxes(CDC &dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -428,7 +428,7 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 	if(!nTicks)
 		return false;
 
-	double nY = ((m_nYMax - m_nYMin)/(double)nTicks);
+	double dY = ((m_dYMax - m_dYMin)/(double)nTicks);
 
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
@@ -437,10 +437,10 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 
 	for(int f=0; f<=nTicks; f++) 
 	{
-		double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height()/(m_nYMax-m_nYMin);
+		double dTemp = m_rectData.bottom - CalcRelativeYValue(dY*f);
 
-		dc.MoveTo(m_rectData.left , (int)nTemp);
-		dc.LineTo(m_rectData.right, (int)nTemp);
+		dc.MoveTo(m_rectData.left , (int)dTemp);
+		dc.LineTo(m_rectData.right, (int)dTemp);
 	}
 
 	dc.SelectObject(pPenOld);
@@ -454,7 +454,7 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -471,7 +471,7 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
-	double nX = (double)m_rectData.Width()/(double)m_nXMax;
+	double dX = (double)m_rectData.Width()/(double)m_nXMax;
 
 	for(int f=0; f < nCount; f += m_nXLabelStep)
 	{
@@ -497,7 +497,7 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -508,13 +508,13 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	// cannot draw baseline outside the m_rectData
-	if(m_nYMin > 0)
+	if(m_dYMin > 0)
 		return false;
 	
-	double nTemp = (- m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin); // this is the zero baseline
+	double dTemp = CalcRelativeYValue(0); // this is the zero baseline
 
-	dc.MoveTo(m_rectData.left , m_rectData.bottom - (int)nTemp);
-	dc.LineTo(m_rectData.right, m_rectData.bottom - (int)nTemp);
+	dc.MoveTo(m_rectData.left , m_rectData.bottom - (int)dTemp);
+	dc.LineTo(m_rectData.right, m_rectData.bottom - (int)dTemp);
 
 	dc.SelectObject(pPenOld);
 
@@ -666,7 +666,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -692,18 +692,18 @@ bool CHMXChart::DrawYScale(CDC & dc)
 			CFont* pFontOld = dc.SelectObject(&font);
 
 			// nY is the size of a division
-			double nY = (m_nYMax - m_nYMin)/nTicks;
+			double dY = (m_dYMax - m_dYMin)/nTicks;
 			int nFontSize = CalcYScaleFontSize(FALSE);
 
 			// draw text
 			for(int f=0; f<=nTicks; f++) 
 			{
-				CString sTick = GetYTickText(f, (m_nYMin + nY*f));
+				CString sTick = GetYTickText(f, (m_dYMin + dY*f));
 
 				if (!sTick.IsEmpty())
 				{
-					int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f + 1)) * m_rectData.Height() / (m_nYMax - m_nYMin));
-					int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f)) * m_rectData.Height() / (m_nYMax - m_nYMin));
+					int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((dY*(f + 1)) * m_rectData.Height() / (m_dYMax - m_dYMin));
+					int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((dY*(f)) * m_rectData.Height() / (m_dYMax - m_dYMin));
 					ASSERT(nBot > nTop);
 
 					CRect rTick(m_rectYAxis.left, (int)nTop, m_rectYAxis.right - 4, (int)nBot);
@@ -768,7 +768,7 @@ CString CHMXChart::GetYTickText(int /*nTick*/, double dValue) const
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //
 //	return
 //
@@ -789,7 +789,7 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //
 //	arguments
 //
-//		dc = Decive Context
+//		dc = Device Context
 //		ds = Dataset
 //
 //	return
@@ -1093,26 +1093,26 @@ bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 
 	for (int f = 0; f < ds.GetDatasetSize(); f++)
 	{
-		double nSample = 0.0;
-		ds.GetData(f, nSample);
+		double dSample = 0.0;
+		ds.GetData(f, dSample);
 
-		if (nSample == HMX_DATASET_VALUE_INVALID)
+		if (dSample == HMX_DATASET_VALUE_INVALID)
 			break;
 
-		if (nSample == 0.0)
+		if (dSample == 0.0)
 			continue;
 
-		double nTemp = (nSample - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+		double dTemp = CalcRelativeYValue(dSample);
 		CRect rBar;
 
-		if (nSample > 0.0)
+		if (dSample > 0.0)
 		{
 			//  bar is positive
-			double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-			double nTemp1 = (nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+			double dZeroLine = max(m_dYMin, 0);
+			double dTemp1 = CalcRelativeYValue(dZeroLine);
 
-			rBar.top = (int)(m_rectData.bottom - nTemp);
-			rBar.bottom = (int)(m_rectData.bottom - nTemp1);
+			rBar.top = (int)(m_rectData.bottom - dTemp);
+			rBar.bottom = (int)(m_rectData.bottom - dTemp1);
 
 			// Ensure something is visible
 			if (rBar.Height() == 0)
@@ -1121,11 +1121,11 @@ bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 		else // if (nSample < 0.0)
 		{
 			// bar is negative
-			double nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
-			double nTemp1 = (nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+			double dZeroLine = min(m_dYMax, 0);
+			double dTemp1 = CalcRelativeYValue(dZeroLine);
 
-			rBar.top = (int)(m_rectData.bottom - nTemp1);
-			rBar.bottom = (int)(m_rectData.bottom - nTemp);
+			rBar.top = (int)(m_rectData.bottom - dTemp1);
+			rBar.bottom = (int)(m_rectData.bottom - dTemp);
 
 			// Ensure something is visible
 			if (rBar.Height() == 0)
@@ -1435,12 +1435,12 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 {
 	// let's calc real dataset size (excluding invalid data)
 	int nPoints = 0, g;
-	double nSample;
+	double dSample;
 
 	for(g=0; g<ds.GetDatasetSize(); g++) 
 	{
-		ds.GetData(g, nSample);
-		if(nSample != HMX_DATASET_VALUE_INVALID)
+		ds.GetData(g, dSample);
+		if(dSample != HMX_DATASET_VALUE_INVALID)
 			nPoints++;
 	}
 
@@ -1459,8 +1459,10 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 
 	points.SetSize(nPoints);
 	
-	double nBarWidth = (double)m_rectData.Width()/(double)m_nXMax;
-	gdix_Real fZeroLineY = 0.0f; // Saves us having to calculate it twice
+	double dBarWidth = (double)m_rectData.Width()/(double)m_nXMax;
+	
+	// Calculate the zero line where we will close off the area vertically
+	double dZeroLine = max(m_dYMin, min(m_dYMax, 0));
 
 	// First points (area and/or single point)
 	g = 0;
@@ -1469,27 +1471,22 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 		int f = 0;
 		do
 		{
-			ds.GetData(f, nSample);
+			ds.GetData(f, dSample);
 			f++;
 		}
-		while (nSample == HMX_DATASET_VALUE_INVALID);
-
-		// Calculate the zero line where we will close off the area vertically
-		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
-
-		fZeroLineY = (gdix_Real)((nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin));
-		points[0].y = (m_rectData.bottom - fZeroLineY);
+		while (dSample == HMX_DATASET_VALUE_INVALID);
 
 		// Calculate the x pos vertically beneath the first data point
-		points[0].x = (m_rectData.left + (float)(nBarWidth / 2.0) + (int)(nBarWidth*(f - 1.0)));
+		points[0].x = (m_rectData.left + (float)(dBarWidth / 2.0) + (int)(dBarWidth*(f - 1.0)));
+		points[0].y = (m_rectData.bottom - CalcRelativeYValue(dZeroLine));
+
 		g++;
 
 		// If we only have a single point then offset this point
 		// to the left by a quarter of the nominal bar width
 		if (bSinglePoint)
 		{
-			points[0].x -= (gdix_Real)(nBarWidth / 4);
+			points[0].x -= (gdix_Real)(dBarWidth / 4);
 
 			// If we are in also area we just copy this point
 			if (bArea)
@@ -1503,14 +1500,12 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 	// The actual data points
 	for (int f = 0; f < ds.GetDatasetSize(); f++)
 	{
-		ds.GetData(f, nSample);
-		if (nSample == HMX_DATASET_VALUE_INVALID)
+		ds.GetData(f, dSample);
+		if (dSample == HMX_DATASET_VALUE_INVALID)
 			continue;
 
-		points[g].x = m_rectData.left + (float)(nBarWidth / 2.0) + (int)(nBarWidth*f);
-
-		double nTemp = (nSample - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
-		points[g].y = m_rectData.bottom - (float)nTemp;
+		points[g].x = m_rectData.left + (float)(dBarWidth / 2.0) + (int)(dBarWidth*f);
+		points[g].y = m_rectData.bottom - CalcRelativeYValue(dSample);
 
 		g++;
 	}
@@ -1519,13 +1514,13 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 	if (bArea || bSinglePoint)
 	{
 		points[g].x = points[g - 1].x;
-		points[g].y = (m_rectData.bottom - fZeroLineY);
+		points[g].y = (m_rectData.bottom - CalcRelativeYValue(dZeroLine));
 
 		// If we only have a single point then we offset this point
 		// to the right by a quarter of the nominal bar width
 		if (bSinglePoint)
 		{
-			points[g].x += (gdix_Real)(nBarWidth / 4);
+			points[g].x += (gdix_Real)(dBarWidth / 4);
 
 			// If we are in also area we just copy this point
 			if (bArea)
@@ -1538,11 +1533,16 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 	return points.GetSize();
 }
 
-BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth) const
+float CHMXChart::CalcRelativeYValue(double dSample) const
+{
+	return (float)((dSample - m_dYMin) * m_rectData.Height() / (m_dYMax - m_dYMin));
+}
+
+BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double dBarWidth) const
 {
 	gdix_PointF ptTemp;
 
-	if (!GetPointXY(nDatasetIndex, nIndex, ptTemp, nBarWidth))
+	if (!GetPointXY(nDatasetIndex, nIndex, ptTemp, dBarWidth))
 		return FALSE;
 
 	point.x = (int)ptTemp.x;
@@ -1551,23 +1551,21 @@ BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double 
 	return TRUE;
 }
 
-BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth) const
+BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double dBarWidth) const
 {
-	double nSample;
+	double dSample;
 
-	if (!GetData(nDatasetIndex, nIndex, nSample))
+	if (!GetData(nDatasetIndex, nIndex, dSample))
 		return FALSE;
 
-	if (nSample == HMX_DATASET_VALUE_INVALID)
+	if (dSample == HMX_DATASET_VALUE_INVALID)
 		return FALSE;
 
-	if (nBarWidth <= 0)
-		nBarWidth = (double)m_rectData.Width() / (double)m_nXMax;
+	if (dBarWidth <= 0)
+		dBarWidth = (double)m_rectData.Width() / (double)m_nXMax;
 
-	double nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-
-	point.x = m_rectData.left + (float)(nBarWidth/2.0) + (int)(nBarWidth*nIndex);
-	point.y = m_rectData.bottom - (float) nTemp;
+	point.x = m_rectData.left + (float)(dBarWidth/2.0) + (int)(dBarWidth*nIndex);
+	point.y = m_rectData.bottom - CalcRelativeYValue(dSample);
 
 	return TRUE;
 }
@@ -1648,18 +1646,18 @@ bool CHMXChart::CalcDatas()
 		m_nXMax = max(m_nXMax, nTemp3);
 	}
 	
-	m_nYMin = m_nYMax = 0;
-	GetMinMax(m_nYMin, m_nYMax, false);
+	m_dYMin = m_dYMax = 0;
+	GetMinMax(m_dYMin, m_dYMax, false);
 
 	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
 	// they are multiply of m_nRoundY
-	if(m_nRoundY > 0.0) 
+	if(m_dRoundY > 0.0) 
 	{
-		if (fmod(m_nYMin, m_nRoundY) != 0.0)
-			m_nYMin = (((int)m_nYMin-(int)m_nRoundY)/(int)m_nRoundY)*m_nRoundY;
+		if (fmod(m_dYMin, m_dRoundY) != 0.0)
+			m_dYMin = (((int)m_dYMin-(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
 
-		if (fmod(m_nYMax, m_nRoundY) != 0.0)
-			m_nYMax = (((int)m_nYMax+(int)m_nRoundY)/(int)m_nRoundY)*m_nRoundY;
+		if (fmod(m_dYMax, m_dRoundY) != 0.0)
+			m_dYMax = (((int)m_dYMax+(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
 	}
 
 	// now nYMin & nYMax contain absolute min and absolute max
@@ -1668,7 +1666,7 @@ bool CHMXChart::CalcDatas()
 	// calculate the X scale factor
 
 	// prevent divide by zero
-	m_nYMax = max(m_nYMax, m_nYMin + 10);
+	m_dYMax = max(m_dYMax, m_dYMin + 10);
 
 	return true;
 }
@@ -1736,7 +1734,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			CFont* pFontOld = dc.SelectObject(&font);
 
 			CString sBuffer;
-			sBuffer.Format(_T("%g"), m_nYMax);
+			sBuffer.Format(_T("%g"), m_dYMax);
 			nYAxisWidth += dc.GetTextExtent(sBuffer).cy;
 			
 			dc.SelectObject(pFontOld);
@@ -1748,17 +1746,17 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	return nAxisSize;
 }
 
-bool CHMXChart::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
+bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
 {
-	double nTemp1, nTemp2;
+	double dTemp1, dTemp2;
 	int nNumSets = 0;
 	
 	for(int f = 0; f<HMX_MAX_DATASET; f++) 
 	{
-		if (m_datasets[f].GetMinMax(nTemp1, nTemp2, bDataOnly)) 
+		if (m_datasets[f].GetMinMax(dTemp1, dTemp2, bDataOnly)) 
 		{
-			nMin = min(nMin, nTemp1);
-			nMax = max(nMax, nTemp2);
+			dMin = min(dMin, dTemp1);
+			dMax = max(dMax, dTemp2);
 
 			nNumSets++;
 		}
@@ -1804,12 +1802,12 @@ bool CHMXChart::Redraw()
 //
 //		true if ok, else false
 //
-bool CHMXChart::AddData(int nDatasetIndex, double nData)
+bool CHMXChart::AddData(int nDatasetIndex, double dData)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
-	return m_datasets[nDatasetIndex].AddData(nData);
+	return m_datasets[nDatasetIndex].AddData(dData);
 }
 
 bool CHMXChart::ClearData( int nDatasetIndex)
@@ -1856,12 +1854,12 @@ void CHMXChart::ResetDatasets()
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double nData)
+bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double dData)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
-	return m_datasets[nDatasetIndex].SetData(nIndex, nData);
+	return m_datasets[nDatasetIndex].SetData(nIndex, dData);
 }
 
 //
@@ -1878,12 +1876,12 @@ bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double nData)
 //
 //		true if ok, else false
 //
-bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& nData) const
+bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& dData) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
-	return m_datasets[nDatasetIndex].GetData(nIndex,nData);
+	return m_datasets[nDatasetIndex].GetData(nIndex,dData);
 
 }
 
@@ -2199,11 +2197,19 @@ CString CHMXChart::GetTitle() const
 //
 bool CHMXChart::SetNumYTicks(int nTicks)
 {
-	m_nNumYTicks = nTicks;
-	m_nNumYTicks = min(m_nNumYTicks, 100);
-	m_nNumYTicks = max(m_nNumYTicks, 0);
-
+	m_nNumYTicks = min(100, max(0, nTicks));
 	return true;
+}
+
+bool CHMXChart::SetYZoomFactor(int nZoom)
+{
+	m_nYZoomFactor = min(10, max(1, nZoom));
+	return true;
+}
+
+int	CHMXChart::GetYZoomFactor() const
+{
+	return m_nYZoomFactor;
 }
 
 //
@@ -2234,12 +2240,12 @@ int CHMXChart::GetNumYTicks() const
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetRoundY(double nRound)
+bool CHMXChart::SetRoundY(double dRound)
 {
-	if(nRound <= 0)
+	if(dRound <= 0)
 		return false;
 	
-	m_nRoundY = nRound;
+	m_dRoundY = dRound;
 
 	return true;
 }
@@ -2257,7 +2263,7 @@ bool CHMXChart::SetRoundY(double nRound)
 //
 double CHMXChart::GetRoundY() const
 {
-	return m_nRoundY;
+	return m_dRoundY;
 }
 
 //

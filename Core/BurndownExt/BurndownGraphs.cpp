@@ -1267,11 +1267,6 @@ BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, const CStatsItemC
 	return FALSE;
 }
 
-BOOL CMinMaxGraph::UpdateGraphStyles(CHMXDataset& /*dataset*/) const
-{
-	return FALSE;
-}
-
 // ---------------------------------------------------------------------------
 
 CEstimatedSpentDaysMinMaxGraph::CEstimatedSpentDaysMinMaxGraph()

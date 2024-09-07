@@ -214,7 +214,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 		if (HasOverload())
 		{
 			CRect rOverload(m_rectData);
-			rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_nYMax));
+			rOverload.bottom -= (int)(rOverload.Height() * (m_dOverloadValue / m_dYMax));
 
 			if (rOverload.bottom <= m_rectData.bottom)
 			{
@@ -226,7 +226,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 		if (HasUnderload())
 		{
 			CRect rUnderload(m_rectData);
-			rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_nYMax)));
+			rUnderload.top = (rUnderload.bottom - (int)(rUnderload.Height() * (m_dUnderloadValue / m_dYMax)));
 
 			if (rUnderload.top >= m_rectData.top)
 			{

@@ -175,7 +175,7 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 
 bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
-	double dInterval = HMXUtils::CalcYAxisInterval(m_nYMax, 5);
+	double dInterval = HMXUtils::CalcYAxisInterval(m_dYMax, 10);
 	int nNumSubTicks = GetNumYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)
@@ -184,13 +184,13 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 		CPen* pPenOld = dc.SelectObject(&penSubGrid);
 
 		int nTotalTicks = (GetNumYTicks() * nNumSubTicks);
-		double nY = ((m_nYMax - m_nYMin) / nTotalTicks);
+		double nY = ((m_dYMax - m_dYMin) / nTotalTicks);
 
 		for (int f = 0; f <= nTotalTicks; f++)
 		{
 			if (f % nNumSubTicks)
 			{
-				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_nYMax - m_nYMin);
+				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_dYMax - m_dYMin);
 
 				dc.MoveTo(m_rectData.left, (int)nTemp);
 				dc.LineTo(m_rectData.right, (int)nTemp);

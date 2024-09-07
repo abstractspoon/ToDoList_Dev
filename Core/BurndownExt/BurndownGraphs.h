@@ -12,6 +12,11 @@ class CStatsItemCalculator;
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Fixed number of Y ticks
+const int NUM_Y_TICKS = 10;
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CGraphBase
 {
 public:
@@ -327,13 +332,7 @@ public:
 	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
-	mutable CStringArray m_aAttribValues;
-
-protected:
 	CMinMaxGraph(BURNDOWN_GRAPH nGraph);
-
-	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	BOOL UpdateGraphStyles(CHMXDataset& dataset) const;
 };
 
 // ---------------------------------------------------------------------------

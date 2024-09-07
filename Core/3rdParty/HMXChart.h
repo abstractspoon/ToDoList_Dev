@@ -95,7 +95,7 @@ public:
 	virtual CString		GetYText() const;
 
 	// useful Y functions
-	virtual bool		SetRoundY( double nRound );
+	virtual bool		SetRoundY( double dRound );
 	virtual double		GetRoundY() const;
 
 	virtual bool		SetNumYTicks( int nTicks );
@@ -127,9 +127,9 @@ public:
 	virtual bool		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
 	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker ) const;
 	
-	virtual bool		AddData( int nDatasetIndex, double nData );
-	virtual bool		SetData( int nDatasetIndex, int nIndex, double nData );
-	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& nData ) const;
+	virtual bool		AddData( int nDatasetIndex, double dData );
+	virtual bool		SetData( int nDatasetIndex, int nIndex, double dData );
+	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& dData ) const;
 
 	virtual bool		ResetDataset(int nDatasetIndex);
 	virtual void		ResetDatasets();
@@ -140,7 +140,7 @@ public:
 
 	virtual bool		SetDatasetMin(int nDatasetIndex, double dMin);
 	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);
-	virtual bool		GetMinMax(double& nMin, double& nMax, bool bDataOnly) const;	// get min & max
+	virtual bool		GetMinMax(double& dMin, double& dnMax, bool bDataOnly) const;	// get min & max
 
 	// useful global functions
 	virtual bool		CalcDatas();
@@ -174,17 +174,25 @@ protected:
 	virtual int CalcTitleFontSize() const;
 
 	CStringArray	m_strarrScaleXLabel;					// x labels
+
 	int				m_nXLabelStep;							// x label step
-	double			m_nRoundY;								// y scale rounding
 	int				m_nNumYTicks;							// y ticks
 	int				m_nXMax;								// max x value
-	double			m_nYMax;								// max y value
-	double			m_nYMin;								// min y value
-	CHMXDataset		m_datasets[HMX_MAX_DATASET];			// datasets
 	int				m_nCountDataset;						// dataset counter
+	int				m_nXLabelDegrees;
+	int				m_nFontPixelSize;						// -1 -> dynamic sizing
+
+	double			m_dRoundY;								// y scale rounding
+	double			m_dYMax;								// max y value
+	double			m_dYMin;								// min y value
+
+	CHMXDataset		m_datasets[HMX_MAX_DATASET];			// datasets
+
 	CString			m_strTitle;								// main title
 	CString			m_strYText;								// Y text
 	CString			m_strXText;								// X text
+	CString			m_strFont;
+
 	CRect			m_rectUsable;							// usable area
 	CRect			m_rectData;								// data area
 	CRect			m_rectGraph;							// graph area
@@ -192,14 +200,12 @@ protected:
 	CRect			m_rectYAxis;							// y axis area
 	CRect			m_rectTitle;							// main title area
 	CRect			m_rectArea;								// entire control area
+
 	COLORREF		m_clrBkGnd;								// background color
 	COLORREF		m_clrGrid;	
-	bool			m_bXLabelsAreTicks;
-	int				m_nXLabelDegrees;
-	DWORD			m_dwRenderFlags;
 
-	CString			m_strFont;
-	int				m_nFontPixelSize;						// -1 -> dynamic sizing
+	bool			m_bXLabelsAreTicks;
+	DWORD			m_dwRenderFlags;
 
 	CPen			m_penGrid;
 
@@ -239,8 +245,9 @@ protected:
 		return ((nDatasetIndex >= 0) && (nDatasetIndex < HMX_MAX_DATASET));
 	}
 
-	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
-	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
+	float CalcRelativeYValue(double dDataValue) const;
+	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double dBarWidth = -1) const;
+	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double dBarWidth = -1) const;
 
 	static BOOL CreateDefaultItemDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
