@@ -76,28 +76,45 @@ int CStatsItemCalculator::GetTotalWeekdays() const
 
 int CStatsItemCalculator::GetItemRange(int& nFrom, int& nTo) const
 {
-	nFrom = 0;
+	nFrom = -1;
 	nTo = (m_data.GetSize() - 1);
 
 	int nNumItems = m_data.GetSize();
 
+#ifdef _DEBUG
+	CString sStart = CDateHelper::FormatDate(m_dStartExtents);
+	CString sEnd = CDateHelper::FormatDate(m_dEndExtents);
+#endif
+
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
+		COleDateTime dtItem(pSI->dtStart);
 
-		if (pSI->dtStart.m_dt < m_dStartExtents)
+		if (!CDateHelper::IsDateSet(dtItem))
 			continue;
 
-		if (nFrom == 0)
+#ifdef _DEBUG
+		CString sItem = CDateHelper::FormatDate(pSI->dtStart);
+#endif
+		// skip items until the start of the range
+		if (dtItem.m_dt > m_dStartExtents)
 		{
-			nFrom = nItem;
-		}
-		else if (pSI->dtStart.m_dt > m_dEndExtents)
-		{
-			nTo = nItem;
-			break;
+			if (nFrom == -1)
+			{
+				nFrom = nItem;
+			}
+			else if (dtItem.m_dt > m_dEndExtents)
+			{
+				// Stop when we hit the end of the range
+				nTo = nItem - 1;
+				break;
+			}
 		}
 	}
+
+	if (nFrom == -1)
+		return 0;
 
 	return max(0, (nTo - nFrom + 1));
 }
@@ -214,6 +231,20 @@ BOOL CStatsItemCalculator::GetItemEndDate(int nItem, COleDateTime& dtItem) const
 		return FALSE;
 
 	return m_data[nItem]->GetEndDate(dtItem);
+}
+
+BOOL CStatsItemCalculator::GetItemStartDate(int nItem, COleDateTime& dtItem) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	const STATSITEM* pSI = m_data[nItem];
+
+	if (!pSI->HasStart())
+		return FALSE;
+
+	dtItem = pSI->dtStart;
+	return TRUE;
 }
 
 BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const

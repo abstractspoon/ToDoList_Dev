@@ -276,6 +276,20 @@ BOOL CGraphBase::HasOption(BURNDOWN_GRAPHOPTION nOption) const
 	return (nOption == m_nOption);
 }
 
+BURNDOWN_GRAPHSCALE CGraphBase::CalculateRequiredXScale(int nAvailWidth, int nNumDays)
+{
+	// work thru the available scales until we find a suitable one
+	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
+	{
+		int nSpacing = MulDiv(SCALES[nScale], nAvailWidth, nNumDays);
+
+		if (nSpacing > MIN_XSCALE_SPACING)
+			return SCALES[nScale];
+	}
+
+	return BCS_YEAR;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
 CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BGO_TREND_NONE)
@@ -367,8 +381,8 @@ BOOL CTimeSeriesGraph::CalculateMovingAverage(int nWindowSize, const CHMXDataset
 
 void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const
 {
-	// Because we often have an uneven label spacing we need
-	// to specify labels only a day by day granularity
+	// Because months have unequal lengths we need
+	// to specify labels on a day by day basis
 	nLabelStep = 1;
 
 	int nNumDays = calculator.GetTotalDays();
@@ -378,7 +392,7 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 	COleDateTime dtTick = calculator.GetStartDate();
 	CDateHelper dh;
 
-	BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, nNumDays);
+	BURNDOWN_GRAPHSCALE nScale = CalculateRequiredXScale(nAvailWidth, nNumDays);
 
 	for (int nDay = 0; nDay <= nNumDays; )
 	{
@@ -425,20 +439,6 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 
 		dtTick = dtNextTick;
 	}
-}
-
-BURNDOWN_GRAPHSCALE CTimeSeriesGraph::CalculateRequiredScale(int nAvailWidth, int nNumDays)
-{
-	// work thru the available scales until we find a suitable one
-	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
-	{
-		int nSpacing = MulDiv(SCALES[nScale], nAvailWidth, nNumDays);
-
-		if (nSpacing > MIN_XSCALE_SPACING)
-			return SCALES[nScale];
-	}
-
-	return BCS_YEAR;
 }
 
 BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
@@ -1261,7 +1261,7 @@ CString CMinMaxGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, con
 	return _T("");
 }
 
-void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int /*nAvailWidth*/, CStringArray& aLabels, int& nLabelStep) const
+void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const
 {
 	nLabelStep = 1;
 
@@ -1273,16 +1273,82 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int /*n
 	// build ticks
 	if (nNumItems)
 	{
-		COleDateTime dtTick;
+		COleDateTime dtTick = calculator.GetStartDate(), dtItem;
 		CDateHelper dh;
 
+/*
 		int nInterval = max(1, (nNumItems / 10));
 
-		for (int nItem = 0; nItem < nNumItems; nItem += nInterval)
+		for (int nItem = nFrom; nItem < nTo; nItem += nInterval)
 		{
 			if (calculator.GetItemEndDate(nItem, dtTick))
-				aLabels.SetAt(nItem, dh.FormatDate(dtTick));
+				aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtTick));
 		}
+*/
+
+		BURNDOWN_GRAPHSCALE nScale = CalculateRequiredXScale(nAvailWidth, calculator.GetTotalDays());
+		int nLastTick = -1;
+
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+		{
+#ifdef _DEBUG
+			CString sTick = dh.FormatDate(dtTick);
+#endif
+			if (!calculator.GetItemStartDate(nItem, dtItem))
+				continue;
+#ifdef _DEBUG
+			CString sItem = dh.FormatDate(dtItem);
+#endif
+			// Skip items (except the first and the last) until we get to the next Tick date
+			if (/*(nItem > nFrom) && (nItem < nTo) &&*/ (dtItem < dtTick))
+				continue;
+
+			aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtItem));
+			nLastTick = nItem;
+
+			// next Tick date
+			do
+			{
+				switch (nScale)
+				{
+				case BCS_DAY:
+					dtTick.m_dt += 1.0;
+					break;
+
+				case BCS_WEEK:
+					dh.OffsetDate(dtTick, 1, DHU_WEEKS);
+					break;
+
+				case BCS_MONTH:
+					dh.OffsetDate(dtTick, 1, DHU_MONTHS);
+					break;
+
+				case BCS_2MONTH:
+					dh.OffsetDate(dtTick, 2, DHU_MONTHS);
+					break;
+
+				case BCS_QUARTER:
+					dh.OffsetDate(dtTick, 3, DHU_MONTHS);
+					break;
+
+				case BCS_HALFYEAR:
+					dh.OffsetDate(dtTick, 6, DHU_MONTHS);
+					break;
+
+				case BCS_YEAR:
+					dh.OffsetDate(dtTick, 1, DHU_YEARS);
+					break;
+
+				default:
+					ASSERT(0);
+				}
+			}
+			while (dtTick <= dtItem);
+		}
+
+		// Add label for last item further away than 1 item
+		if ((nLastTick < (nTo - 1)) && calculator.GetItemEndDate(nTo, dtItem))
+			aLabels.SetAt(nTo - nFrom, dh.FormatDate(dtItem));
 	}
 }
 

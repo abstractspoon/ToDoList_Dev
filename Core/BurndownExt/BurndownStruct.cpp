@@ -310,17 +310,19 @@ BOOL STATSITEM::GetEndDate(COleDateTime& dtEnd) const
 	if (IsDone())
 	{
 		dtEnd = dtDone;
-	}
-	else if (HasDue())
-	{
-		dtEnd = dtDue;
-	}
-	else
-	{
-		return FALSE;
+		return TRUE;
 	}
 
-	return TRUE;
+	// else
+	if (HasDue())
+	{
+		dtEnd = dtDue;
+		return TRUE;
+	}
+
+	// else
+	dtEnd = dtStart;
+	return CDateHelper::IsDateSet(dtEnd);
 }
 
 void STATSITEM::MinMax(COleDateTimeRange& dtExtents) const
