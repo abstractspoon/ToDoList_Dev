@@ -1261,8 +1261,29 @@ CString CMinMaxGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, con
 	return _T("");
 }
 
-void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& /*calculator*/, int /*nAvailWidth*/, CStringArray& /*aLabels*/, int& /*nLabelStep*/) const
+void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int /*nAvailWidth*/, CStringArray& aLabels, int& nLabelStep) const
 {
+	nLabelStep = 1;
+
+	int nFrom, nTo;
+	int nNumItems = calculator.GetItemRange(nFrom, nTo);
+
+	aLabels.SetSize(nNumItems);
+
+	// build ticks
+	if (nNumItems)
+	{
+		COleDateTime dtTick;
+		CDateHelper dh;
+
+		int nInterval = max(1, (nNumItems / 10));
+
+		for (int nItem = 0; nItem < nNumItems; nItem += nInterval)
+		{
+			if (calculator.GetItemEndDate(nItem, dtTick))
+				aLabels.SetAt(nItem, dh.FormatDate(dtTick));
+		}
+	}
 }
 
 BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, const CStatsItemCalculator& /*calculator*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET])
@@ -1299,18 +1320,18 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 
 	// build the graph
 	int nFrom, nTo;
-	calculator.GetItemRange(nFrom, nTo);
+	int nNumItems = calculator.GetItemRange(nFrom, nTo);
 
-	if (nTo > nFrom)
+	if (nNumItems)
 	{
-		datasets[ESTIMATED_DAYS].SetDatasetSize(nTo - nFrom + 1);
-		datasets[SPENT_DAYS].SetDatasetSize(nTo - nFrom + 1);
+		datasets[ESTIMATED_DAYS].SetDatasetSize(nNumItems);
+		datasets[SPENT_DAYS].SetDatasetSize(nNumItems);
 
 		double dDaysEst = 0.0, dDaysSpent = 0, dMaxVal = 0.0;
 
 		for (int nItem = nFrom, nData = 0; nItem <= nTo; nItem++, nData++)
 		{
-			if (calculator.GetDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
+			if (calculator.GetItemDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
 			{
 				datasets[ESTIMATED_DAYS].SetData(nData, dDaysEst);
 				datasets[SPENT_DAYS].SetData(nData, dDaysSpent);

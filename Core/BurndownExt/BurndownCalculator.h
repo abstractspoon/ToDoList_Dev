@@ -34,7 +34,6 @@ public:
 
 	int GetTotalDays() const;
 	int GetTotalWeekdays() const;
-	void GetItemRange(int& nFrom, int& nTo) const;
 
 	// Time Series ---------------------------------------------------
 	
@@ -70,7 +69,9 @@ public:
 
 	// Min Max charts ------------------------------------------------
 
-	BOOL GetDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const;
+	int GetItemRange(int& nFrom, int& nTo) const;
+	BOOL GetItemDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const;
+	BOOL GetItemEndDate(int nItem, COleDateTime& dtItem) const;
 
 protected:
 	const CStatsItemArray& m_data;

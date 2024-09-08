@@ -74,7 +74,7 @@ int CStatsItemCalculator::GetTotalWeekdays() const
 	return m_nTotalWeekdays;
 }
 
-void CStatsItemCalculator::GetItemRange(int& nFrom, int& nTo) const
+int CStatsItemCalculator::GetItemRange(int& nFrom, int& nTo) const
 {
 	nFrom = 0;
 	nTo = (m_data.GetSize() - 1);
@@ -98,6 +98,8 @@ void CStatsItemCalculator::GetItemRange(int& nFrom, int& nTo) const
 			break;
 		}
 	}
+
+	return max(0, (nTo - nFrom + 1));
 }
 
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
@@ -193,11 +195,9 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(const COleDateTime& date, doubl
 	return (nNumItems > 0);
 }
 
-BOOL CStatsItemCalculator::GetDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const
+BOOL CStatsItemCalculator::GetItemDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const
 {
-	int nNumItems = m_data.GetSize();
-
-	if ((nItem < 0) || (nItem >= nNumItems))
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
 		return FALSE;
 
 	const STATSITEM* pSI = m_data[nItem];
@@ -206,6 +206,14 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(int nItem, double &dEstDays, do
 	dSpentDays = GetAttribValue(*pSI, DAYS, SPENT);
 
 	return TRUE;
+}
+
+BOOL CStatsItemCalculator::GetItemEndDate(int nItem, COleDateTime& dtItem) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	return m_data[nItem]->GetEndDate(dtItem);
 }
 
 BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const
