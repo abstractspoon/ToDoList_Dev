@@ -232,7 +232,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		double dStart = pPrefs->GetProfileDouble(_T("ActiveRange"), _T("Start"), 0);
 		double dEnd = pPrefs->GetProfileDouble(_T("ActiveRange"), _T("End"), -1);
 
-		if (dEnd > dStart)
+		if (dEnd >= dStart)
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
 
 		UpdateData(FALSE);
