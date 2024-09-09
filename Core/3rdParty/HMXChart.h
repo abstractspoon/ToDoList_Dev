@@ -234,7 +234,7 @@ protected:
 	bool DrawAreaGraph(CDC &dc, const CHMXDataset& dataset, BYTE fillOpacity = 255);
 	bool DrawBarChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltBarColors, BYTE fillOpacity = 255);
 	bool DrawPieChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltPieColors, BYTE fillOpacity = 255);
-	bool DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDataset& dsMax, const CDWordArray& aAltItemColors, BYTE fillOpacity = 255);
+	bool DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDataset& dsMax, BYTE fillOpacity = 255);
 
 	struct PIESEGMENT
 	{
