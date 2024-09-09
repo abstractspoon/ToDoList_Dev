@@ -83,11 +83,10 @@ protected:
 	mutable int m_nTotalWeekdays;
 
 protected:
-	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;
-	double GetIntersectionProportion(const STATSITEM& si, BOOL bWeekdays) const;
+	// -------------------------------------------------------------
 
-	enum TIMESERIES_ATTRIB		{ DAYS, COST };
-	enum TIMESERIES_ATTRIBTYPE	{ ESTIMATE, SPENT };
+	enum TIMESERIES_ATTRIB		{ TS_DAYS, TS_COST };
+	enum TIMESERIES_ATTRIBTYPE	{ TS_ESTIMATE, TS_SPENT };
 
 	double GetTotalAttribValue(TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType) const;
 	double GetTotalAttribValue(TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const;
@@ -95,11 +94,25 @@ protected:
 	double GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType) const;
 	double GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const;
 
-	enum FREQUENCY_ATTRIB		{ CATEGORY, STATUS, ALLOCTO, ALLOCBY, PRIORITY, RISK, TAGS, VERSION };
+	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;
+	double GetIntersectionProportion(const STATSITEM& si, BOOL bWeekdays) const;
+
+	// -------------------------------------------------------------
+
+	enum FREQUENCY_ATTRIB		{ F_CATEGORY, F_STATUS, F_ALLOCTO, F_ALLOCBY, F_PRIORITY, F_RISK, F_TAGS, F_VERSION };
 
 	int GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 	void AppendFrequencyAttrib(const CString& sAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 	void AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
+
+	// -------------------------------------------------------------
+
+	enum MINMAX_ATTRIB { MM_DAYS };
+	enum MINMAX_ATTRIBTYPE { MM_ESTIMATE, MM_SPENT };
+
+	double GetAttribValue(const STATSITEM& si, MINMAX_ATTRIB nAttrib, MINMAX_ATTRIBTYPE nType) const;
+
+	// -------------------------------------------------------------
 
 	static double GetTimeInDays(double dTime, TDC_UNITS nUnits);
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
