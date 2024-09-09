@@ -1381,7 +1381,7 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 
 	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
 	datasets[SPENT_DAYS].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[SPENT_DAYS].SetMarker(HMX_DATASET_MARKER_TRIANGLE);
+	datasets[SPENT_DAYS].SetMarker(HMX_DATASET_MARKER_CIRCLE);
 	datasets[SPENT_DAYS].SetMin(0.0);
 
 	// build the graph

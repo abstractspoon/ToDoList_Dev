@@ -939,7 +939,7 @@ bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDat
 	int nNumPoints = GetPoints(dsMin, points[0], FALSE);
 	VERIFY(nNumPoints == GetPoints(dsMax, points[1], FALSE));
 
-	int nSize = dsMin.GetSize(), nMarkerSize = max(nSize, 3);
+	int nSize = dsMin.GetSize(), nMarkerSize = (nSize + 1);
 	HMX_DATASET_MARKER nMarkers[2] = { dsMin.GetMarker(), dsMax.GetMarker() };
 
 	// Create pens and brushes
