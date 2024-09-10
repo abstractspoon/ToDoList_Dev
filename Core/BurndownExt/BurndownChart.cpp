@@ -21,6 +21,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int NUM_Y_TICKS = 10;
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct SORTITEM
 {
 	BURNDOWN_GRAPH nGraph;
@@ -378,6 +382,17 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CalcDatas();
 
 	return TRUE;
+}
+
+bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
+{
+	if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly))
+		return false;
+
+	dMin = 0.0;
+	dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
+
+	return true;
 }
 
 void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)

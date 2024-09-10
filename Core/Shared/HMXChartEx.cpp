@@ -457,4 +457,3 @@ CString CHMXChartEx::GetYTickText(int nTick, double dValue) const
 	// else
 	return CHMXChart::GetYTickText(nTick, dValue);
 }
-

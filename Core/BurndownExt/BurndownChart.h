@@ -62,10 +62,10 @@ protected:
 	void RebuildXScale();
 	void RefreshRenderFlags(BOOL bRedraw = TRUE);
 
-	// virtual overrides
+	// CHMXChart virtual overrides
 	CString GetTooltip(int nHit) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
-	bool SetYZoomFactor(int nZoom);
+	bool GetMinMax(double& dMin, double& dnMax, bool bDataOnly) const;
 
 	BOOL HighlightDataPoint(int nIndex);
 	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);

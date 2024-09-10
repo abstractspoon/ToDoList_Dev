@@ -487,11 +487,6 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 		datasetDest.SetSize(TREND_LINE_THICKNESS);
 		datasetDest.SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
 		datasetDest.SetLineColor(GraphicsMisc::Darker(datasetSrc.GetLineColor(), 0.2, FALSE));
-
-		double dMaxVal = 0.0, dUnused = 0.0;
-
-		if (datasetDest.GetMinMax(dUnused, dMaxVal, TRUE))
-			datasetDest.SetMax(HMXUtils::CalcMaxYAxisValue(dMaxVal, 10));
 	}
 
 	return bSuccess;
@@ -539,19 +534,8 @@ void CIncompleteTasksTimeGraph::BuildGraph(const CStatsItemCalculator& calculato
 			datasets[0].SetData(nDay, nNumNotDone);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMin, dMax;
-
-		if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
-		{
-			ASSERT(dMin == 0.0);
-
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
-			datasets[0].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
-
-	CalculateTrendLines(datasets);
 }
 
 CString CIncompleteTasksTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -616,29 +600,18 @@ void CRemainingDaysTimeGraph::BuildGraph(const CStatsItemCalculator& calculator,
 		{
 			// Time Estimate
 			double dEst = ((nDay * dTotalEst) / nNumDays);
-
 			datasets[REMAINING_ESTIMATE].SetData(nDay, dTotalEst - dEst);
 		
 			// Time Spent
 			double dSpent = calculator.GetDaysSpent(date);
-		
 			datasets[REMAINING_SPENT].SetData(nDay, dTotalEst - dSpent);
 		}
 
 		// Ensure last Time Estimate value is always zero
 		datasets[REMAINING_ESTIMATE].SetData(nNumDays, 0.0);
-	
-		// Set the maximum Y value to be something 'nice'
-		if (dTotalEst > 0)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(dTotalEst, 10);
 
-			datasets[REMAINING_ESTIMATE].SetMax(dMax);
-			datasets[REMAINING_SPENT].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
-
-	CalculateTrendLines(datasets);
 }
 
 CString CRemainingDaysTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -710,20 +683,8 @@ void CStartedEndedTasksTimeGraph::BuildGraph(const CStatsItemCalculator& calcula
 			datasets[ENDED_TASKS].SetData(nDay, nNumDone);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMax = 0.0;
-		
-		// Last started value will always be largest
-		if (datasets[STARTED_TASKS].GetData(nNumDays, dMax))
-		{
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
-
-			datasets[STARTED_TASKS].SetMax(dMax);
-			datasets[ENDED_TASKS].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
-
-	CalculateTrendLines(datasets);
 }
 
 CString CStartedEndedTasksTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -803,23 +764,8 @@ void CEstimatedSpentDaysTimeGraph::BuildGraph(const CStatsItemCalculator& calcul
 			datasets[SPENT_DAYS].SetData(nDay, dDaysSpent);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMaxEst = 0.0, dMaxSpent = 0.0;
-		
-		// Last values will always be largest
-		bool bHasMax = datasets[ESTIMATED_DAYS].GetData(nNumDays, dMaxEst);
-		bHasMax |= datasets[SPENT_DAYS].GetData(nNumDays, dMaxSpent);
-			
-		if (bHasMax)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(max(dMaxEst, dMaxSpent), 10);
-
-			datasets[ESTIMATED_DAYS].SetMax(dMax);
-			datasets[SPENT_DAYS].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
-
-	CalculateTrendLines(datasets);
 }
 
 CString CEstimatedSpentDaysTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -899,23 +845,8 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 			datasets[SPENT_COST].SetData(nDay, dCostSpent);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMaxEst = 0.0, dMaxSpent = 0.0;
-		
-		// Last values will always be largest
-		bool bHasMax = datasets[ESTIMATED_COST].GetData(nNumDays, dMaxEst);
-		bHasMax |= datasets[SPENT_COST].GetData(nNumDays, dMaxSpent);
-			
-		if (bHasMax)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(max(dMaxEst, dMaxSpent), 10);
-
-			datasets[ESTIMATED_COST].SetMax(dMax);
-			datasets[SPENT_COST].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
-
-	CalculateTrendLines(datasets);
 }
 
 CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -976,7 +907,6 @@ void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aF
 
 	if (nNumAttrib)
 	{
-		int nMaxFreq = 0;
 		CHMXDataset& dataset = datasets[0];
 
 		dataset.SetMin(0.0);
@@ -991,15 +921,6 @@ void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aF
 				m_aAttribValues.Add(CEnString(IDS_NONE));
 			else
 				m_aAttribValues.Add(fi.sLabel);
-
-			nMaxFreq = max(nMaxFreq, fi.nCount);
-		}
-
-		// Set the maximum Y value to be something 'nice'
-		if (nMaxFreq)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
-			datasets[0].SetMax(dMax);
 		}
 
 		UpdateGraphStyles(dataset);
@@ -1061,7 +982,6 @@ BOOL CFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 	}
 
 	return TRUE;
-
 }
 
 // ---------------------------------------------------------------------------
@@ -1289,16 +1209,11 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 
 		for (int nItem = nFrom; nItem <= nTo; nItem++)
 		{
-#ifdef _DEBUG
-			CString sTick = dh.FormatDate(dtTick);
-#endif
 			if (!calculator.GetItemStartDate(nItem, dtItem))
 				continue;
-#ifdef _DEBUG
-			CString sItem = dh.FormatDate(dtItem);
-#endif
-			// Skip items (except the first and the last) until we get to the next Tick date
-			if (/*(nItem > nFrom) && (nItem < nTo) &&*/ (dtItem < dtTick))
+			
+			// Skip items until we get to the next Tick date
+			if (dtItem < dtTick)
 				continue;
 
 			aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtItem));
@@ -1391,23 +1306,15 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 		datasets[ESTIMATED_DAYS].SetDatasetSize(nNumItems);
 		datasets[SPENT_DAYS].SetDatasetSize(nNumItems);
 
-		double dDaysEst = 0.0, dDaysSpent = 0, dMaxVal = 0.0;
-
 		for (int nItem = nFrom; nItem <= nTo; nItem++)
 		{
+			double dDaysEst = 0.0, dDaysSpent = 0;
+
 			if (calculator.GetItemDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
 			{
 				datasets[ESTIMATED_DAYS].SetData(nItem - nFrom, dDaysEst);
 				datasets[SPENT_DAYS].SetData(nItem - nFrom, dDaysSpent);
-
-				dMaxVal = max(dMaxVal, max(dDaysEst, dDaysSpent));
 			}
 		}
-
-		// Set the maximum Y value to be something 'nice'
-		double dMax = HMXUtils::CalcMaxYAxisValue(dMaxVal, 10);
-
-		datasets[ESTIMATED_DAYS].SetMax(dMax);
-		datasets[SPENT_DAYS].SetMax(dMax);
 	}
 }
