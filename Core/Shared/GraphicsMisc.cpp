@@ -2263,8 +2263,11 @@ BOOL GraphicsMisc::ScaleByDPIFactor(LPPOINT pPoint)
 	return TRUE;
 }
 
-int GraphicsMisc::ScaleByDPIFactor(int nValue)
+int GraphicsMisc::ScaleByDPIFactor(int nValue, BOOL bRoundUp)
 {
+	if (bRoundUp)
+		return Misc::Round(((double)nValue * GetSystemDPI()) / DEFAULT_DPI);
+
 	return ::MulDiv(nValue, GetSystemDPI(), DEFAULT_DPI);
 }
 
