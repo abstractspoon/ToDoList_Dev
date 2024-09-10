@@ -1009,13 +1009,13 @@ bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray&
 		CGdiPlusBrush defMarkerBrush;
 		CreateDefaultItemDrawingTools(ds, aAltMarkerColors, fillOpacity, defMarkerPen, defMarkerBrush);
 
-		int nSize = ds.GetSize() * 2;
+		float fSize = (ds.GetSize() * 2.0f);
 
 		CArray<gdix_PointF, gdix_PointF&> ptMarker;
 
 		for (int f = 0; f < nPoints; f++)
 		{
-			VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
+			VERIFY(GetMarker(nMarker, points[f], fSize, ptMarker));
 
 			CGdiPlusPen markerPen;
 			CGdiPlusBrush markerBrush;
