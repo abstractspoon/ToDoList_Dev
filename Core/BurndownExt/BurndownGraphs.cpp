@@ -50,9 +50,9 @@ const int NUM_GRAPH_COLORS = (sizeof(GRAPH_COLORS) / sizeof(GRAPH_COLORS[0]));
 
 /////////////////////////////////////////////////////////////////////////////////
 
-const int GRAPH_LINE_THICKNESS = GraphicsMisc::ScaleByDPIFactor(1, TRUE);
-const int TREND_LINE_THICKNESS = GraphicsMisc::ScaleByDPIFactor(2, TRUE);
-const int MIN_XSCALE_SPACING   = GraphicsMisc::ScaleByDPIFactor(50);
+const int		GRAPH_LINE_THICKNESS = 1;
+const int		TREND_LINE_THICKNESS = 2;
+const int		MIN_XSCALE_SPACING	 = 50; // pixels
 
 /////////////////////////////////////////////////////////////////////////////////
 
