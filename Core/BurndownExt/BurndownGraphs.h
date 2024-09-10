@@ -30,9 +30,6 @@ public:
 
 	BURNDOWN_GRAPHTYPE GetType() const;
 
-	void SetYZoomFactor(int nZoom); // 1 -> 10
-	int GetYZoomFactor() const { return m_nYZoomFactor; }
-
 	const CColorArray& GetColors() const;
 	BOOL SetColors(const CColorArray& aColors);
 	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
@@ -59,7 +56,6 @@ private:
 	BURNDOWN_GRAPH m_nGraph;
 	BURNDOWN_GRAPHOPTION m_nOption;
 	CColorArray m_aColors;
-	int m_nYZoomFactor;
 };
 
 /////////////////////////////////////////////////////////////////////////////

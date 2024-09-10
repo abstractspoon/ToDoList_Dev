@@ -87,18 +87,6 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	return FALSE;
 }
 
-bool CBurndownChart::SetYZoomFactor(int nZoom)
-{
-	if (!CHMXChartEx::SetYZoomFactor(nZoom))
-		return false;
-
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, false);
-
-	pGraph->SetYZoomFactor(nZoom);
-	return true;
-}
-
 int CBurndownChart::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const
 {
 	for (int nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
@@ -383,8 +371,6 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 		pGraph->BuildGraph(m_calculator, m_datasets);
 	}
-
-	SetYZoomFactor(pGraph->GetYZoomFactor());
 
 	RebuildXScale();
 	CalcDatas();

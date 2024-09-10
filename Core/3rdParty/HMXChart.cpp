@@ -64,8 +64,7 @@ CHMXChart::CHMXChart()
 	m_clrGrid(GetSysColor(COLOR_3DSHADOW)),
 	m_bXLabelsAreTicks(false),
 	m_nXLabelDegrees(0),
-	m_nCountDataset(0),
-	m_nYZoomFactor(1)
+	m_nCountDataset(0)
 {
 }
 
@@ -81,7 +80,6 @@ BEGIN_MESSAGE_MAP(CHMXChart, CWnd)
 	ON_MESSAGE(WM_PRINT, OnPrintClient)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
-	ON_WM_MOUSEWHEEL()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -208,21 +206,6 @@ void CHMXChart::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 
 	CalcDatas();
-}
-
-BOOL CHMXChart::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint /*point*/)
-{
-	int nZoom = m_nYZoomFactor;
-
-	if (zDelta > 0)
-		nZoom++; // Zoom in
-	else
-		nZoom--; // Zoom out
-
-	if (SetYZoomFactor(nZoom))
-		Invalidate(TRUE);
-
-	return TRUE;
 }
 
 bool CHMXChart::CopyToClipboard()
@@ -719,8 +702,8 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 				if (!sTick.IsEmpty())
 				{
-					int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((dY*(f + 1)) * m_nYZoomFactor * m_rectData.Height() / (m_dYMax - m_dYMin));
-					int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((dY*(f)) * m_nYZoomFactor * m_rectData.Height() / (m_dYMax - m_dYMin));
+					int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((dY*(f + 1)) * m_rectData.Height() / (m_dYMax - m_dYMin));
+					int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((dY*(f)) * m_rectData.Height() / (m_dYMax - m_dYMin));
 					ASSERT(nBot > nTop);
 
 					CRect rTick(m_rectYAxis.left, nTop, m_rectYAxis.right - 4, nBot);
@@ -793,22 +776,10 @@ CString CHMXChart::GetYTickText(int /*nTick*/, double dValue) const
 //
 bool CHMXChart::DrawDatasets(CDC& dc)
 {
-	// Temporarily clip the drawing to the data rect
-	int nSave = -1;
-
-	if (m_nYZoomFactor > 1)
-	{
-		nSave = dc.SaveDC();
-		dc.IntersectClipRect(m_rectData);
-	}
-
 	for (int f = 0; f < HMX_MAX_DATASET; f++)
 	{
 		DrawDataset(dc, f, 128);
 	}
-
-	if (nSave != -1)
-		dc.RestoreDC(nSave);
 	
 	return true;
 }
@@ -1559,7 +1530,7 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 
 float CHMXChart::CalcRelativeYValue(double dSample) const
 {
-	return (float)((dSample - m_dYMin) * m_nYZoomFactor * m_rectData.Height() / (m_dYMax - m_dYMin));
+	return (float)((dSample - m_dYMin) * m_rectData.Height() / (m_dYMax - m_dYMin));
 }
 
 BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double dBarWidth) const
@@ -2223,20 +2194,6 @@ bool CHMXChart::SetNumYTicks(int nTicks)
 {
 	m_nNumYTicks = min(100, max(0, nTicks));
 	return true;
-}
-
-bool CHMXChart::SetYZoomFactor(int nZoom)
-{
-	if (nZoom < 1 || nZoom > 10)
-		return false;
-
-	m_nYZoomFactor = nZoom;
-	return true;
-}
-
-int	CHMXChart::GetYZoomFactor() const
-{
-	return m_nYZoomFactor;
 }
 
 //

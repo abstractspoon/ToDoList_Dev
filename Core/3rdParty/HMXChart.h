@@ -101,9 +101,6 @@ public:
 	virtual bool		SetNumYTicks( int nTicks );
 	virtual int			GetNumYTicks() const;
 
-	virtual bool		SetYZoomFactor(int nZoom); // 1 -> 10
-	virtual int			GetYZoomFactor() const;
-
 	// main title functions
 	virtual	bool		SetTitle( CString strTitle );
 	virtual	CString		GetTitle() const;
@@ -184,7 +181,6 @@ protected:
 	int				m_nCountDataset;						// dataset counter
 	int				m_nXLabelDegrees;
 	int				m_nFontPixelSize;						// -1 -> dynamic sizing
-	int				m_nYZoomFactor;							// 1 -> 10
 
 	double			m_dRoundY;								// y scale rounding
 	double			m_dYMax;								// max y value
@@ -218,7 +214,6 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnPrintClient(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint point);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

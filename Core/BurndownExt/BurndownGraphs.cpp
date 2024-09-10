@@ -133,8 +133,7 @@ BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption) 
 	: 
 	m_nGraph(nGraph), 
-	m_nOption(nOption),
-	m_nYZoomFactor(1)
+	m_nOption(nOption)
 {
 	ASSERT(IsValidGraph(m_nGraph));
 }
@@ -168,12 +167,6 @@ void CGraphBase::ClearData(CHMXDataset datasets[HMX_MAX_DATASET])
 BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
 {
 	return GetGraphType(m_nGraph);
-}
-
-void CGraphBase::SetYZoomFactor(int nZoom)
-{
-	ASSERT(nZoom > 0);
-	m_nYZoomFactor = max(nZoom, 1);
 }
 
 BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
