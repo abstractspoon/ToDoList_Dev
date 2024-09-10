@@ -797,38 +797,38 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //		true if ok, else false
 //
 
-BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const
+BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, float fSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const
 {
 	switch (nMarker) 
 	{
 	case HMX_DATASET_MARKER_TRIANGLE:
 		ptMarker.SetSize(3);
 		ptMarker[ 0 ].x = pt.x;
-		ptMarker[ 0 ].y = pt.y - nSize;
-		ptMarker[ 1 ].x = pt.x + nSize;
-		ptMarker[ 1 ].y = pt.y + nSize;
-		ptMarker[ 2 ].x = pt.x - nSize;
-		ptMarker[ 2 ].y = pt.y + nSize;
+		ptMarker[ 0 ].y = pt.y - fSize;
+		ptMarker[ 1 ].x = pt.x + fSize;
+		ptMarker[ 1 ].y = pt.y + fSize;
+		ptMarker[ 2 ].x = pt.x - fSize;
+		ptMarker[ 2 ].y = pt.y + fSize;
 		break;
 
 	case HMX_DATASET_MARKER_SQUARE:
 	case HMX_DATASET_MARKER_CIRCLE:
 		ptMarker.SetSize(2);
-		ptMarker[ 0 ].x = pt.x - nSize;
-		ptMarker[ 0 ].y = pt.y - nSize;
-		ptMarker[ 1 ].x = pt.x + nSize;
-		ptMarker[ 1 ].y = pt.y + nSize;
+		ptMarker[ 0 ].x = pt.x - fSize;
+		ptMarker[ 0 ].y = pt.y - fSize;
+		ptMarker[ 1 ].x = pt.x + fSize;
+		ptMarker[ 1 ].y = pt.y + fSize;
 		break;
 
 	case HMX_DATASET_MARKER_DIAMOND:
 		ptMarker.SetSize(4);
 		ptMarker[ 0 ].x = pt.x;
-		ptMarker[ 0 ].y = pt.y - nSize;
-		ptMarker[ 1 ].x = pt.x + nSize;
+		ptMarker[ 0 ].y = pt.y - fSize;
+		ptMarker[ 1 ].x = pt.x + fSize;
 		ptMarker[ 1 ].y = pt.y;
 		ptMarker[ 2 ].x = pt.x;
-		ptMarker[ 2 ].y = pt.y + nSize;
-		ptMarker[ 3 ].x = pt.x - nSize;
+		ptMarker[ 2 ].y = pt.y + fSize;
+		ptMarker[ 3 ].x = pt.x - fSize;
 		ptMarker[ 3 ].y = pt.y;
 		break;
 
@@ -910,15 +910,15 @@ bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDat
 	int nNumPoints = GetPoints(dsMin, points[0], FALSE);
 	VERIFY(nNumPoints == GetPoints(dsMax, points[1], FALSE));
 
-	int nSize = dsMin.GetSize(), nMarkerSize = (nSize + 1);
+	float fPenSize = ScaleByDPIFactor(dsMin.GetSize()), fMarkerSize = (fPenSize + 1.0f);
 	HMX_DATASET_MARKER nMarkers[2] = { dsMin.GetMarker(), dsMax.GetMarker() };
 
 	// Create pens and brushes
 	CGdiPlusPen pens[2];
 	CGdiPlusBrush brushes[2];
 
-	pens[0].Create(dsMin.GetLineColor(), nSize, gdix_PenStyleSolid);
-	pens[1].Create(dsMax.GetLineColor(), nSize, gdix_PenStyleSolid);
+	pens[0].Create(dsMin.GetLineColor(), fPenSize, gdix_PenStyleSolid);
+	pens[1].Create(dsMax.GetLineColor(), fPenSize, gdix_PenStyleSolid);
 	
 	if (fillOpacity > 0)
 	{
@@ -948,7 +948,7 @@ bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDat
 			if (bHasVal[i] && (nMarkers[i] != HMX_DATASET_MARKER_NONE))
 			{
 				CArray<gdix_PointF, gdix_PointF&> ptMarker;
-				VERIFY(GetMarker(nMarkers[i], points[i][f], nMarkerSize, ptMarker));
+				VERIFY(GetMarker(nMarkers[i], points[i][f], fMarkerSize, ptMarker));
 
 				switch (nMarkers[i])
 				{
@@ -997,7 +997,7 @@ bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray&
 	}
 
 	CGdiPlusGraphics graphics(dc);
-	CGdiPlusPen linePen(ds.GetLineColor(), ds.GetSize(), nPenStyle);
+	CGdiPlusPen linePen(ds.GetLineColor(), ScaleByDPIFactor(ds.GetSize()), nPenStyle);
 
 	VERIFY(CGdiPlus::DrawLines(graphics, linePen, points.GetData(), points.GetSize()));
 
@@ -1065,7 +1065,7 @@ bool CHMXChart::DrawAreaGraph(CDC &dc, const CHMXDataset& ds, BYTE fillOpacity)
 		{
 			// don't draw the first/last closure points
 			// That's why we need at least 4 points.
-			CGdiPlusPen pen(ds.GetLineColor(), 1);
+			CGdiPlusPen pen(ds.GetLineColor(), ScaleByDPIFactor(1), gdix_PenStyleSolid);
 
 			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
 		}
@@ -1299,6 +1299,22 @@ float CHMXChart::NormaliseAngle(float fDegrees)
 	return fDegrees;
 }
 
+float CHMXChart::ScaleByDPIFactor(int nValue)
+{
+	static float fScaleFactor = 0.0f;
+
+	if (fScaleFactor == 0.0f)
+	{
+		HDC hDC = ::GetDC(NULL);
+		int nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
+		::ReleaseDC(NULL, hDC);
+
+		fScaleFactor = (nPPI / 96.0f);
+	}
+
+	return (nValue * fScaleFactor);
+}
+
 void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIESEGMENT, PIESEGMENT&>& aSegments)
 {
 	int nNumData = aSegments.GetSize();
@@ -1394,10 +1410,11 @@ BOOL CHMXChart::CreateDefaultItemDrawingTools(const CHMXDataset& ds, const CDWor
 		crPen = crBrush = aAltItemColors[0];
 		break;
 	}
-
 	ASSERT((crPen != CLR_NONE) && (crBrush != CLR_NONE));
 
-	return (pen.Create(crPen) && brush.Create(crBrush, fillOpacity));
+	float fThickness = ScaleByDPIFactor(1);
+
+	return (pen.Create(crPen, fThickness, gdix_PenStyleSolid) && brush.Create(crBrush, fillOpacity));
 }
 
 BOOL CHMXChart::CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)
@@ -1406,8 +1423,9 @@ BOOL CHMXChart::CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BY
 		return FALSE;
 
 	COLORREF color = aColors[nItem % aColors.GetSize()];
+	float fThickness = ScaleByDPIFactor(1);
 
-	return (pen.Create(color, 1) && brush.Create(color, fillOpacity));
+	return (pen.Create(color, fThickness, gdix_PenStyleSolid) && brush.Create(color, fillOpacity));
 }
 
 COLORREF CHMXChart::GetLineColor(int nDatasetIndex, double dValue) const
@@ -1429,30 +1447,30 @@ COLORREF CHMXChart::GetFillColor(int nDatasetIndex, double dValue) const
 int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const
 {
 	// let's calc real dataset size (excluding invalid data)
-	int nPoints = 0, g;
+	int nNumPoints = 0, g;
 	double dSample;
 
 	for(g=0; g<ds.GetDatasetSize(); g++) 
 	{
 		ds.GetData(g, dSample);
 		if(dSample != HMX_DATASET_VALUE_INVALID)
-			nPoints++;
+			nNumPoints++;
 	}
 
 	// If we only have a single point then we need
 	// two extra points to forma triangle
-	BOOL bSinglePoint = (nPoints == 1);
+	BOOL bSinglePoint = (nNumPoints == 1);
 
 	if (bSinglePoint)
-		nPoints += 2;
+		nNumPoints += 2;
 
 	// If in area mode then we need a further two
 	// points vertically beneath the existing first
 	// and last points to close off the area
 	if (bArea)
-		nPoints += 2;
+		nNumPoints += 2;
 
-	points.SetSize(nPoints);
+	points.SetSize(nNumPoints);
 	
 	double dBarWidth = (double)m_rectData.Width()/(double)m_nXMax;
 	

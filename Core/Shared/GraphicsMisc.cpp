@@ -439,9 +439,14 @@ int GraphicsMisc::PixelToPoint(int nPixels)
 
 int GraphicsMisc::PixelsPerInch()
 {
-	HDC hDC = ::GetDC(NULL);
-	int nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
-	::ReleaseDC(NULL, hDC);
+	static int nPPI = 0;
+
+	if (nPPI == 0)
+	{
+		HDC hDC = ::GetDC(NULL);
+		nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
+		::ReleaseDC(NULL, hDC);
+	}
 
 	return nPPI;
 }

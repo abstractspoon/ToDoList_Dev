@@ -67,7 +67,7 @@ public:
 	virtual COLORREF	GetFillColor() const;							// get data color
 
 	virtual int			GetSize() const;								// get size
-	virtual bool		SetSize( int nSize );							// set pen size (pixels) OR bar size (1-10)	OR unused if area
+	virtual bool		SetSize( int nSize );							// set logical pen size OR bar size (1-10)	OR unused if area, will be scaled by DPI
 
 	virtual void		Reset();										// clears data and attributes
 	virtual void		ClearData();									// clears data only

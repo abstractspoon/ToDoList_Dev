@@ -60,17 +60,7 @@ public:
 	DWORD ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw = TRUE);
 	BOOL HasRenderFlag(DWORD dwFlag) const { return ((m_dwRenderFlags & dwFlag) == dwFlag); }
 
-// Operations
 public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CHMXChart)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-
 	// export chart
 	virtual bool		CopyToFile( CString sFile );
 	virtual bool		CopyToFile();
@@ -219,7 +209,7 @@ protected:
 
 protected:
 	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
-	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
+	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, float fSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
 	int CalcAxisSize(const CRect& rAvail, CDC& dc) const;
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
@@ -252,7 +242,8 @@ protected:
 	static BOOL CreateDefaultItemDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static float NormaliseAngle(float fDegrees);
-	
+	static float ScaleByDPIFactor(int nValue);
+
 	DECLARE_HANDLE(HDIB);
 
 	HANDLE DDBToDIB( CBitmap& bitmap, DWORD dwCompression, CPalette* pPal );	

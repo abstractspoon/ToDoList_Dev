@@ -206,11 +206,13 @@ class CGdiPlusPen
 public:
 	CGdiPlusPen();
 	CGdiPlusPen(COLORREF color, int nWidth = 1, gdix_PenStyle nStyle = gdix_PenStyleSolid);
+	CGdiPlusPen(COLORREF color, float fWidth, gdix_PenStyle nStyle);
 	virtual ~CGdiPlusPen();
 
 	operator gdix_Pen*() const { return m_pen; }
 
 	BOOL Create(COLORREF color, int nWidth = 1, gdix_PenStyle nStyle = gdix_PenStyleSolid);
+	BOOL Create(COLORREF color, float fWidth, gdix_PenStyle nStyle);
 	BOOL IsValid() const { return (m_pen != NULL); }
 	BOOL SetStyle(gdix_PenStyle nStyle);
 

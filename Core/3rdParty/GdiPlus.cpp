@@ -97,9 +97,19 @@ CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle) : m_p
 	Create(color, nWidth, nStyle);
 }
 
+CGdiPlusPen::CGdiPlusPen(COLORREF color, float fWidth, gdix_PenStyle nStyle) : m_pen(NULL)
+{
+	Create(color, fWidth, nStyle);
+}
+
 BOOL CGdiPlusPen::Create(COLORREF color, int nWidth, gdix_PenStyle nStyle)
 {
-	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen))
+	return Create(color, (float)nWidth, nStyle);
+}
+
+BOOL CGdiPlusPen::Create(COLORREF color, float fWidth, gdix_PenStyle nStyle)
+{
+	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), fWidth, &m_pen))
 	{
 		ASSERT(0);
 		return FALSE;

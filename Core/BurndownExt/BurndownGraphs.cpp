@@ -52,7 +52,7 @@ const int NUM_GRAPH_COLORS = (sizeof(GRAPH_COLORS) / sizeof(GRAPH_COLORS[0]));
 
 const int		GRAPH_LINE_THICKNESS = 1;
 const int		TREND_LINE_THICKNESS = 2;
-const int		MIN_XSCALE_SPACING	 = 50; // pixels
+const int		MIN_XSCALE_SPACING	 = GraphicsMisc::ScaleByDPIFactor(50); // pixels
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -487,6 +487,11 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 		datasetDest.SetSize(TREND_LINE_THICKNESS);
 		datasetDest.SetStyle(HMX_DATASET_STYLE_LINE_DOTTED); 
 		datasetDest.SetLineColor(GraphicsMisc::Darker(datasetSrc.GetLineColor(), 0.2, FALSE));
+
+		double dMaxVal = 0.0, dUnused = 0.0;
+
+		if (datasetDest.GetMinMax(dUnused, dMaxVal, TRUE))
+			datasetDest.SetMax(HMXUtils::CalcMaxYAxisValue(dMaxVal, 10));
 	}
 
 	return bSuccess;
