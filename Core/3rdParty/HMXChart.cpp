@@ -1661,7 +1661,8 @@ bool CHMXChart::CalcDatas()
 	// calculate the X scale factor
 
 	// prevent divide by zero
-	m_dYMax = max(m_dYMax, m_dYMin + 10);
+	if (m_dYMax == 0.0)
+		m_dYMax = (m_dYMin + 10);
 
 	return true;
 }

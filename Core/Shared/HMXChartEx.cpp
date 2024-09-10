@@ -68,7 +68,7 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 {
 	ASSERT(nNumTicks > 0);
 
-	const double INTERVALS[] = { 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
+	const double INTERVALS[] = { 0.01, 0.02, 0.025, 0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000 };
 	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
 
 	// Find the first tick increment that gives us a range
@@ -120,30 +120,20 @@ BOOL CHMXChartEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 
 int CHMXChartEx::GetNumYSubTicks(double dInterval) const
 {
-	if (dInterval != (int)dInterval)
-	{
-		ASSERT(0);
-		return 1;
-	}
-	else if (dInterval == 1.0)
-	{
-		return 1;
-	}
-
 	const int SUB_TICKS[] = { 2, 4, 5 };
 	const int NUM_SUBTICKS = (sizeof(SUB_TICKS) / sizeof(SUB_TICKS[0]));
 
 	int nSubTick = NUM_SUBTICKS;
 	int nNumTicks = GetNumYTicks();
+	int nAvailHeight = m_rectData.Height();
 
 	while (nSubTick--)
 	{
-		double dSubInterval = (dInterval / SUB_TICKS[nSubTick]);
+		double dSubIntervalInPixels = (nAvailHeight / (nNumTicks * SUB_TICKS[nSubTick]));
 
-		if (dSubInterval == (int)dSubInterval)
+		// Must be an exact pixel height
+		if (dSubIntervalInPixels == (int)dSubIntervalInPixels)
 		{
-			double dSubIntervalInPixels = (m_rectData.Height() / (nNumTicks * SUB_TICKS[nSubTick]));
-
 			if (dSubIntervalInPixels >= MIN_SUBINTERVAL_HEIGHT)
 				return SUB_TICKS[nSubTick];
 		}

@@ -45,6 +45,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_calculator(data)
 {
 	EnableFixedLabelFontSize(); // don't scale down as available size decreases
+
+	m_dRoundY = 0.0; // we do our own rounding
 }
 
 CBurndownChart::~CBurndownChart()
