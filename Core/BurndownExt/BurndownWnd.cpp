@@ -133,8 +133,6 @@ BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd,
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	UINT nSize = sizeof(CPlex);
-
 	if (CDialog::Create(IDD_STATISTICS_DLG, pParentWnd))
 	{
 		SetWindowLong(*this, GWL_STYLE, dwStyle);
