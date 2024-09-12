@@ -179,13 +179,9 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	//CString sKey(szKey);
-
 	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_nGraph);
 
 	// Active date range
-	pPrefs->DeleteProfileSection(_T("ActiveRange"));
-
 	COleDateTimeRange dtActiveRange;
 
 	if (m_sliderDateRange.HasRange())
