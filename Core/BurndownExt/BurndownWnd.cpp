@@ -169,6 +169,7 @@ BOOL CBurndownWnd::OnInitDialog()
 
 	VERIFY(m_chart.SubclassDlgItem(IDC_GRAPH, this));
 	VERIFY(m_cbGraphs.Initialise(m_chart));
+	VERIFY(m_wndPrompts.SetComboPrompt(m_cbOptions, IDS_NONE));
 
 	RebuildGraph(FALSE, FALSE, FALSE);
 

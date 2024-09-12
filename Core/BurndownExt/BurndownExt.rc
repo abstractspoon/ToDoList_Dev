@@ -264,7 +264,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TREND_NONE          "<none>"
+    IDS_NONE                "<none>"
     IDS_FREQUENCYDIST       "Frequency Distributions"
     IDS_TIMESERIES          "Time Series"
     IDS_FREQUENCY_CATEGORY  "Category Frequency"

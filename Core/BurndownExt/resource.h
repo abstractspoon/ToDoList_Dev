@@ -51,7 +51,6 @@
 #define IDS_TREND_BESTFIT               57693
 #define IDS_TREND_7DAYAVERAGE           57694
 #define IDS_TREND_30DAYAVERAGE          57695
-#define IDS_TREND_NONE                  57696
 #define IDS_NONE                        57696
 #define IDS_FREQUENCYDIST               57697
 #define IDS_TIMESERIES                  57698
