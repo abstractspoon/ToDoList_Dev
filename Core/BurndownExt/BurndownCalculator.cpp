@@ -247,6 +247,14 @@ BOOL CStatsItemCalculator::GetItemStartDate(int nItem, COleDateTime& dtItem) con
 	return TRUE;
 }
 
+CString CStatsItemCalculator::GetItemTitle(int nItem) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return _T("");
+
+	return m_data[nItem]->sTitle;
+}
+
 BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const
 {
 	dEstCost = dSpentCost = 0;

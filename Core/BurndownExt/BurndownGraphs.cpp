@@ -778,7 +778,7 @@ CString CEstimatedSpentDaysTimeGraph::GetTooltip(const CStatsItemCalculator& cal
 	if (datasets[ESTIMATED_DAYS].GetData(nHit, dDaysEst) &&
 		datasets[SPENT_DAYS].GetData(nHit, dDaysSpent))
 	{
-		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dDaysEst, (int)dDaysSpent);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), dDaysEst, dDaysSpent);
 	}
 
 	return sTooltip;
@@ -859,7 +859,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 	if (datasets[ESTIMATED_COST].GetData(nHit, dCostEst) &&
 		datasets[SPENT_COST].GetData(nHit, dCostSpent))
 	{
-		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dCostEst, (int)dCostSpent);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), dCostEst, dCostSpent);
 	}
 
 	return sTooltip;
@@ -1165,7 +1165,8 @@ void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 
 CMinMaxGraph::CMinMaxGraph(BURNDOWN_GRAPH nGraph) 
 	:
-	CGraphBase(nGraph, BGO_MINMAX_NONE)
+	CGraphBase(nGraph, BGO_MINMAX_NONE),
+	m_nItemOffset(0)
 {
 	InitColorPalette(COLOR_GREEN, COLOR_RED);
 }
@@ -1174,14 +1175,10 @@ CMinMaxGraph::~CMinMaxGraph()
 {
 }
 
-CString CMinMaxGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int /*nHit*/) const
-{
-	return _T("");
-}
-
 void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const
 {
 	nLabelStep = 1;
+	m_nItemOffset = 0;
 
 	int nFrom, nTo;
 	int nNumItems = calculator.GetItemRange(nFrom, nTo);
@@ -1191,6 +1188,8 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 	// build ticks
 	if (nNumItems)
 	{
+		m_nItemOffset = nFrom; // For tooltip handling
+
 		COleDateTime dtTick = calculator.GetStartDate(), dtItem;
 		CDateHelper dh;
 
@@ -1318,3 +1317,20 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 		}
 	}
 }
+
+CString CEstimatedSpentDaysMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int nHit) const
+{
+	int nItem = (nHit + m_nItemOffset);
+	CString sTitle = calculator.GetItemTitle(nItem), sTooltip;
+
+	if (!sTitle.IsEmpty())
+	{
+		double dDaysEst = 0.0, dDaysSpent = 0.0;
+		calculator.GetItemDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent);
+
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), sTitle, dDaysEst, dDaysSpent);
+	}
+
+	return sTooltip;
+}
+

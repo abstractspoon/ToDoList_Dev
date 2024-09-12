@@ -147,6 +147,7 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_ALLOCTO, false, true), aAllocatedTo);
 	Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_TAGS, false, true), aTags);
 
+	sTitle = pTasks->GetTaskTitle(hTask);
 	sStatus = pTasks->GetTaskStatus(hTask);
 	sAllocatedBy = pTasks->GetTaskAllocatedBy(hTask);
 	sVersion = pTasks->GetTaskVersion(hTask);
@@ -161,7 +162,10 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	ASSERT(!pTasks->IsTaskReference(hTask));
 	ASSERT(!pTasks->IsTaskParent(hTask));
 
-	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
+		sTitle = pTasks->GetTaskTitle(hTask);
+
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 		dtDue = GetDueDate(pTasks, hTask);
 
 	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))

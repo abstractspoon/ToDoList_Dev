@@ -90,6 +90,7 @@ struct STATSITEM
 	CStringArray aAllocatedTo;
 	CStringArray aTags;
 
+	CString sTitle;
 	CString sStatus;
 	CString sAllocatedBy;
 	CString sPriority;

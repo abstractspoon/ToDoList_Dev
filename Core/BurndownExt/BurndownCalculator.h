@@ -73,6 +73,7 @@ public:
 	BOOL GetItemDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const;
 	BOOL GetItemEndDate(int nItem, COleDateTime& dtItem) const;
 	BOOL GetItemStartDate(int nItem, COleDateTime& dtItem) const;
+	CString GetItemTitle(int nItem) const;
 
 protected:
 	const CStatsItemArray& m_data;
