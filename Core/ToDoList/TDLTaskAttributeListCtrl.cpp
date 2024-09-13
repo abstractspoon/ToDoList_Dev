@@ -1900,7 +1900,7 @@ void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
 LRESULT CTDLTaskAttributeListCtrl::OnSingleFileLinkNotifyBrowse(WPARAM wParam, LPARAM lParam)
 {
 	ASSERT(wParam && lParam);
-	ASSERT(wParam == m_eSingleFileLink.GetDlgCtrlID());
+	ASSERT(wParam == (WPARAM)m_eSingleFileLink.GetDlgCtrlID());
 
 	LPCTSTR szNewItemText = (LPCTSTR)lParam;
 
