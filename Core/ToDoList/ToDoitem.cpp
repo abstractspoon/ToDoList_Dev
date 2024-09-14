@@ -6,6 +6,7 @@
 #include "ToDoitem.h"
 #include "tdcmapping.h"
 #include "tdcstatic.h"
+#include "tdcrecurrencehelper.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\misc.h"
@@ -20,15 +21,6 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
-
-//////////////////////////////////////////////////////////////////////
-
-COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
-
-CString TODOITEM::sModifierName;
-
-const COleDateTime TODOITEM::dtUseCreationDateOnly    =	CDateHelper::GetDate(-1, COleDateTime::null);
-const COleDateTime TODOITEM::dtUseCreationDateAndTime =	CDateHelper::GetDate(-2, COleDateTime::null);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -786,7 +778,17 @@ CString TDCTASKLINK::Format(DWORD dwTaskID, BOOL bURL, const CString& sFile)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
+COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
+
+CString TODOITEM::sModifierName;
+
+const COleDateTime TODOITEM::dtUseCreationDateOnly = CDateHelper::GetDate(-1, COleDateTime::null);
+const COleDateTime TODOITEM::dtUseCreationDateAndTime = CDateHelper::GetDate(-2, COleDateTime::null);
+
+// ---------------------------------------------------------
+
+TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) 
+	:
 	sTitle(szTitle), 
 	sComments(szComments),
 	color(0), 
@@ -1137,7 +1139,7 @@ BOOL TODOITEM::RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccu
 
 BOOL TODOITEM::GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue)
 {
-	if (!CalcNextOccurrence(dtNext, bDue))
+	if (!CTDCRecurrenceHelper(*this).CalcNextOccurrence(dtNext, bDue))
 		return FALSE;
 
 	VERIFY(trRecurrence.DecrementRemainingOccurrenceCount());
@@ -1146,214 +1148,12 @@ BOOL TODOITEM::GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue)
 
 BOOL TODOITEM::CalcNextOccurrence(COleDateTimeRange& dtOccur) const
 {
-	COleDateTime dtNext;
-	BOOL bDue = FALSE;
-
-	if (!CalcNextOccurrence(dtNext, bDue))
-		return FALSE;
-
-	if (CalcNextOccurrence(dtNext, dtOccur))
-		return TRUE;
-
-	ASSERT(!HasStart() || !HasDue());
-
-	if (bDue)
-		dtOccur.m_dtEnd = dtNext;
-	else
-		dtOccur.m_dtStart = dtNext;
-
-	return TRUE;
-}
-
-BOOL TODOITEM::CalcNextOccurrence(COleDateTime& dtNext, BOOL& bDue) const
-{
-	ASSERT(IsDone());
-
-	if (!trRecurrence.CanRecur() || !IsDone())
-		return FALSE;
-
-	BOOL bHasDue = HasDue();
-	BOOL bHasStart = HasStart();
-
-	switch (trRecurrence.nRecalcFrom)
-	{
-	case TDIRO_STARTDATE:
-		if (bHasStart)
-		{
-			bDue = FALSE;
-			return trRecurrence.CalcNextOccurence(dateStart, dtNext);
-		}
-		// fall thru
-
-	case TDIRO_DUEDATE:
-		if (bHasDue)
-		{
-			bDue = TRUE;
-			return trRecurrence.CalcNextOccurence(dateDue, dtNext);
-		}
-		// fall thru
-
-	case TDIRO_DONEDATE:
-	default:
-		bDue = (bHasDue || !bHasStart);
-		break;
-	}
-
-	COleDateTime dtStartDue = (bDue ? dateDue : dateStart);
-	COleDateTime dtFrom = dateDone;
-
-	if (CDateHelper::IsSameDay(dateDone, dtStartDue) || (dateDone < dtStartDue))
-	{
-		// Nothing to do
-	}
-	else 
-	{
-		// completed date comes after start/due date
-		ASSERT(dateDone > dtStartDue);
-
-		// Special case:
-		//
-		// 1. Weekly occurrence
-		// 2. > 1 week interval
-		// 3. Completion date not in the same week as due date
-		DWORD dwNumWeeks, dwNotUsed;
-		TDC_REGULARITY nReg = trRecurrence.GetRegularity(dwNumWeeks, dwNotUsed);
-
-		if ((nReg == TDIR_WEEK_SPECIFIC_DOWS_NWEEKS) && 
-			(dwNumWeeks > 1) &&
-			!CDateHelper::IsSameWeek(dtStartDue, dateDone))
-		{
-			// Move the date to the end of the week to prevent 
-			// the base class implementation from selecting the
-			// next available day in the current week
-			dtFrom = CDateHelper::GetEndOfWeek(dateDone);
-		}
-	}
-	ASSERT(CDateHelper::IsDateSet(dtFrom));
-
-	if (!trRecurrence.CalcNextOccurence(dtFrom, dtNext))
-		return FALSE;
-
-	// Restore the previous due/start time
-	if (bHasDue || bHasStart)
-		dtNext = CDateHelper::MakeDate(dtNext, dtStartDue);
-	else
-		dtNext = CDateHelper::GetDateOnly(dtNext); // End of day
-
-	return TRUE;
+	return CTDCRecurrenceHelper(*this).CalcNextOccurrence(dtOccur);
 }
 
 int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
 {
-	ASSERT(!IsDone() && !bLocked);
-
-	if (!CanRecur())
-		return FALSE;
-
-	if (!HasStart() || !HasDue() || (dateDue < dateStart))
-		return 0;
-
-	// Expand range by task duration to ensure full coverage
-	COleDateTimeRange dtExtended(dtRange);
-	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
-
-#ifdef _DEBUG
-	CString sRange = dtRange.Format();
-	CString sExtRange = dtExtended.Format();
-#endif
-
-	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
-	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
-
-	CArray<double, double&> aDates;
-	int nNumOccur = trRecurrence.CalcNextOccurrences(dtCur, dtExtended, aDates);
-
-	if (!nNumOccur)
-		return 0;
-
-	CDateHelper dh;
-	aOccur.SetSize(nNumOccur);
-	
-	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
-	{
-		VERIFY(CalcNextOccurrence(aDates[nOccur], aOccur[nOccur]));
-	}
-
-	return nNumOccur;
-}
-
-BOOL TODOITEM::CalcNextOccurrence(const COleDateTime& dtNext, COleDateTimeRange& dtOccur) const
-{
-	ASSERT(!IsDone() && !bLocked);
-
-	if (!CanRecur())
-		return FALSE;
-
-	if (!HasStart() || !HasDue() || (dateDue < dateStart))
-		return FALSE;
-
-	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
-	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
-
-#ifdef _DEBUG
-	CString sNext = dtNext.Format();
-	CString sCur = dtCur.Format();
-#endif
-	int nDaysOffset = (int)Misc::Round(dtNext - dtCur, 4);
-
-	CDateHelper dh;
-	double dDurationInMonths = dh.CalcDuration(dateStart, dateDue, DHU_MONTHS, TRUE);
-
-	if (bDueDate)
-	{
-		// Tasks of one or more exact month's duration need special handling
-		if (dDurationInMonths == (int)dDurationInMonths)
-		{
-			COleDateTime dtNextStart = dtNext;
-			dh.IncrementMonth(dtNextStart, -(int)dDurationInMonths, TRUE);
-#ifdef _DEBUG
-			CString sNextStart = dtNextStart.Format();
-#endif
-			nDaysOffset = (int)Misc::Round(dtNextStart - dateStart, 4);
-
-			if (!dh.DateHasTime(dtNext))
-				nDaysOffset++; // we want the day after
-		}
-
-		COleDateTime dtNextStart = dateStart;
-		VERIFY(dh.OffsetDate(dtNextStart, nDaysOffset, DHU_DAYS));
-
-		ASSERT((dtNextStart <= dtNext) ||
-			(dh.IsSameDay(dtNext, dtNextStart) && !dh.DateHasTime(dtNext)));
-
-		VERIFY(dtOccur.Set(dtNextStart, dtNext));
-	}
-	else // start date
-	{
-		// Task's of one more month's duration need special handling
-		if (dDurationInMonths == (int)dDurationInMonths)
-		{
-			COleDateTime dtNextDue = dtNext;
-			dh.IncrementMonth(dtNextDue, (int)dDurationInMonths, TRUE);
-#ifdef _DEBUG
-			CString sNextDue = dtNextDue.Format();
-#endif 
-			nDaysOffset = (int)Misc::Round(dtNextDue - dateDue, 4);
-
-			if (!dh.DateHasTime(dtNext))
-				nDaysOffset--; // we want the day before
-		}
-
-		COleDateTime dtNextDue = dateDue;
-		VERIFY(dh.OffsetDate(dtNextDue, nDaysOffset, DHU_DAYS));
-
-		ASSERT((dtNext <= dtNextDue) ||
-			(dh.IsSameDay(dtNext, dtNextDue) && !dh.DateHasTime(dtNextDue)));
-
-		VERIFY(dtOccur.Set(dtNext, dtNextDue));
-	}
-
-	return dtOccur.IsValid();
+	return CTDCRecurrenceHelper(*this).CalcNextOccurrences(dtRange, aOccur);
 }
 
 BOOL TODOITEM::IsRecentlyModified() const
