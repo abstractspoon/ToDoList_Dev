@@ -7,3 +7,4 @@
 *.bmp binary
 *.lib binary
 *.dll binary
+*.pdb binary
