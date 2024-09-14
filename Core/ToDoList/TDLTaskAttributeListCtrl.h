@@ -256,6 +256,7 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
+	BOOL SetValueText(int nRow, const CString& sNewText);
 
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
