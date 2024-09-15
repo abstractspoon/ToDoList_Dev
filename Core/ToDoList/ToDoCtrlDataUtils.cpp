@@ -925,7 +925,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 		break;
 		
 	case FOP_NOT_EQUALS:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate != dSearch);
+		bMatch = (dTaskDate != dSearch);
 		break;
 		
 	case FOP_ON_OR_AFTER:
