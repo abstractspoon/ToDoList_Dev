@@ -277,6 +277,10 @@ SOURCE=..\ToDoList\TDCRecurrence.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCRecurrenceHelper.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\tdcreminder.cpp
 # End Source File
 # Begin Source File
@@ -926,6 +930,10 @@ SOURCE=..\ToDoList\TDCOutlookImportHelper.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCRecurrence.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCRecurrenceHelper.h
 # End Source File
 # Begin Source File
 
