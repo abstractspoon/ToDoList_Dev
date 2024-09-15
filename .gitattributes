@@ -8,3 +8,5 @@
 *.lib binary
 *.dll binary
 *.pdb binary
+*.svg binary
+*.zip binary
