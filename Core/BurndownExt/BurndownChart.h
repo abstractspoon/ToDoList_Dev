@@ -66,6 +66,7 @@ protected:
 	CString GetTooltip(int nHit) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	bool GetMinMax(double& dMin, double& dnMax, bool bDataOnly) const;
+	CString GetYTickText(int nTick, double dValue) const;
 
 	BOOL HighlightDataPoint(int nIndex);
 	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);

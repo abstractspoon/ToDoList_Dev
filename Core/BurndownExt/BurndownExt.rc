@@ -290,6 +290,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_MINMAX              "Min Max"
+    IDS_DISPLAY_DUEDONEDATES "Due/Completion Dates"
+    IDS_TOOLTIP_DUEDONEDATES "%s\nDue %s\nCompleted %s"
 END
 
 #endif    // English (Australia) resources

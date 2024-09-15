@@ -225,6 +225,19 @@ BOOL CStatsItemCalculator::GetItemDaysEstimatedSpent(int nItem, double &dEstDays
 	return TRUE;
 }
 
+BOOL CStatsItemCalculator::GetItemDueDoneDates(int nItem, COleDateTime& dtDue, COleDateTime& dtDone) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	const STATSITEM* pSI = m_data[nItem];
+
+	dtDue = pSI->dtDue;
+	dtDone = pSI->dtDone;
+
+	return TRUE;
+}
+
 BOOL CStatsItemCalculator::GetItemEndDate(int nItem, COleDateTime& dtItem) const
 {
 	if ((nItem < 0) || (nItem >= m_data.GetSize()))

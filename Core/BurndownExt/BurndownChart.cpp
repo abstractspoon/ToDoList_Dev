@@ -384,23 +384,73 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	return TRUE;
 }
 
+CString CBurndownChart::GetYTickText(int nTick, double dValue) const
+{
+	switch (m_nActiveGraph)
+	{
+	case BCT_MINMAX_DUEDONEDATES:
+		return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+	}
+
+	// All else
+	return CHMXChartEx::GetYTickText(nTick, dValue);
+}
+
 bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
 {
-	if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly))
-		return false;
+	switch (m_nActiveGraph)
+	{
+	case BCT_MINMAX_DUEDONEDATES:
+		{
+			if (m_data.GetSize() == 0)
+				return false;
 
-	dMin = 0.0;
-	dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
+			dMin = HMX_DATASET_VALUE_INVALID;
+			dMax = -HMX_DATASET_VALUE_INVALID;
+
+			double dVal;
+
+			for (int nDataset = 0; nDataset < 2; nDataset++)
+			{
+				const CHMXDataset& ds = m_datasets[nDataset];
+
+				for (int nVal = 0; nVal < ds.GetDatasetSize(); nVal++)
+				{
+					// Ignore zero values
+					if (ds.GetData(nVal, dVal) && (dVal != 0.0))
+					{
+						dMin = min(dMin, dVal);
+						dMax = max(dMax, dVal);
+					}
+				}
+			}
+			
+			if ((dMin == HMX_DATASET_VALUE_INVALID) || (dMax == -HMX_DATASET_VALUE_INVALID))
+				return false;
+
+			dMin = (int)dMin;
+			dMax = (((int)dMax) + 1);
+			
+			//dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
+		}
+		break;
+
+	default: // All else
+		{
+			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly))				return false;
+			ASSERT(dMin == 0.0);			dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		}
+		break;
+	}
 
 	return true;
 }
 
 void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH(m_nActiveGraph);
-
 	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
+
+	const CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
 
 	switch (pGraph->GetOption())
 	{
@@ -484,7 +534,10 @@ bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	}
 
 	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, false);
+//	GET_GRAPH_RET(m_nActiveGraph, false);
+	pGraph = m_mapGraphs.GetGraph(m_nActiveGraph); 
+	if (pGraph == NULL) 
+		return false;
 
 	if (pGraph->GetType() == BCT_MINMAX)
 		return CHMXChartEx::DrawMinMaxChart(dc, m_datasets[nDatasetIndex], m_datasets[nDatasetIndex + 1], alpha);

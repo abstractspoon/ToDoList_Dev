@@ -73,6 +73,7 @@ CGraphsMap::CGraphsMap()
 	AddGraph(BCT_FREQUENCY_RISK,				new CRiskFrequencyGraph());
 
 	AddGraph(BCT_MINMAX_ESTIMATEDSPENTDAYS,		new CEstimatedSpentDaysMinMaxGraph());
+	AddGraph(BCT_MINMAX_DUEDONEDATES,			new CDueDoneDatesMinMaxGraph());
 }
 
 CGraphsMap::~CGraphsMap()
@@ -1168,7 +1169,6 @@ CMinMaxGraph::CMinMaxGraph(BURNDOWN_GRAPH nGraph)
 	CGraphBase(nGraph, BGO_MINMAX_NONE),
 	m_nItemOffset(0)
 {
-	InitColorPalette(COLOR_GREEN, COLOR_RED);
 }
 
 CMinMaxGraph::~CMinMaxGraph()
@@ -1275,6 +1275,7 @@ CEstimatedSpentDaysMinMaxGraph::CEstimatedSpentDaysMinMaxGraph()
 	:
 	CMinMaxGraph(BCT_MINMAX_ESTIMATEDSPENTDAYS)
 {
+	InitColorPalette(COLOR_GREEN, COLOR_RED);
 }
 
 CString CEstimatedSpentDaysMinMaxGraph::GetTitle() const
@@ -1334,3 +1335,66 @@ CString CEstimatedSpentDaysMinMaxGraph::GetTooltip(const CStatsItemCalculator& c
 	return sTooltip;
 }
 
+// ---------------------------------------------------------------------------
+
+CDueDoneDatesMinMaxGraph::CDueDoneDatesMinMaxGraph()
+	:
+	CMinMaxGraph(BCT_MINMAX_DUEDONEDATES)
+{
+	InitColorPalette(COLOR_ORANGE, COLOR_BLUEGREEN);
+}
+
+CString CDueDoneDatesMinMaxGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_DUEDONEDATES);
+}
+
+void CDueDoneDatesMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	UpdateDatasetColors(datasets);
+
+	datasets[DUE_DATE].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[DUE_DATE].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[DUE_DATE].SetMarker(HMX_DATASET_MARKER_CIRCLE);
+
+	datasets[DONE_DATE].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[DONE_DATE].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[DONE_DATE].SetMarker(HMX_DATASET_MARKER_CIRCLE);
+
+	// build the graph
+	int nFrom, nTo;
+	int nNumItems = calculator.GetItemRange(nFrom, nTo);
+
+	if (nNumItems)
+	{
+		datasets[DUE_DATE].SetDatasetSize(nNumItems);
+		datasets[DONE_DATE].SetDatasetSize(nNumItems);
+
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+		{
+			COleDateTime dtDue, dtDone;
+
+			if (calculator.GetItemDueDoneDates(nItem, dtDue, dtDone))
+			{
+				datasets[DUE_DATE].SetData(nItem - nFrom, dtDue.m_dt);
+				datasets[DONE_DATE].SetData(nItem - nFrom, dtDone.m_dt);
+			}
+		}
+	}
+}
+
+CString CDueDoneDatesMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int nHit) const
+{
+	int nItem = (nHit + m_nItemOffset);
+	CString sTitle = calculator.GetItemTitle(nItem), sTooltip;
+
+	if (!sTitle.IsEmpty())
+	{
+		COleDateTime dtDue, dtDone;
+		calculator.GetItemDueDoneDates(nItem, dtDue, dtDone);
+
+		sTooltip.Format(CEnString(IDS_TOOLTIP_DUEDONEDATES), sTitle, dtDue.Format(VAR_DATEVALUEONLY), dtDone.Format(VAR_DATEVALUEONLY));
+	}
+
+	return sTooltip;
+}

@@ -41,6 +41,7 @@ enum BURNDOWN_GRAPH
 	// new graphs here
 
 	BCT_MINMAX_ESTIMATEDSPENTDAYS		= BCT_MINMAX + 1,
+	BCT_MINMAX_DUEDONEDATES,
 	// new graphs here
 
 	// Always the last
