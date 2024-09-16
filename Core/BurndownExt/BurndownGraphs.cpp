@@ -1341,7 +1341,7 @@ CDueDoneDatesMinMaxGraph::CDueDoneDatesMinMaxGraph()
 	:
 	CMinMaxGraph(BCT_MINMAX_DUEDONEDATES)
 {
-	InitColorPalette(COLOR_ORANGE, COLOR_BLUEGREEN);
+	InitColorPalette(COLOR_BLUEGREEN, COLOR_ORANGE);
 }
 
 CString CDueDoneDatesMinMaxGraph::GetTitle() const
