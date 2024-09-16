@@ -130,7 +130,7 @@ public:
 
 	virtual BOOL		SetDatasetMin(int nDatasetIndex, double dMin);
 	virtual BOOL		SetDatasetMax(int nDatasetIndex, double dMax);
-	virtual BOOL		GetMinMax(double& dMin, double& dnMax, BOOL bDataOnly, double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;
+	virtual BOOL		GetMinMax(double& dMin, double& dnMax, BOOL bDataOnly) const;
 
 	// useful global functions
 	virtual BOOL		CalcDatas();
@@ -210,6 +210,7 @@ protected:
 	int CalcAxisSize(const CRect& rAvail, CDC& dc) const;
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
+	BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const;
 
 	BOOL DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltItemColors, BYTE fillOpacity = 255);
 	BOOL DrawLineGraph(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltMarkerColors, BYTE fillOpacity = 255);

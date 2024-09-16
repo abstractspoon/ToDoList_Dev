@@ -437,7 +437,7 @@ BOOL CHMXChart::DrawHorzGridLines(CDC & dc)
 
 	for(int f=0; f<=nTicks; f++) 
 	{
-		double dTemp = m_rectData.bottom - CalcRelativeYValue(dY*f);
+		double dTemp = m_rectData.bottom - CalcRelativeYValue(m_dYMin + (dY*f));
 
 		dc.MoveTo(m_rectData.left , (int)dTemp);
 		dc.LineTo(m_rectData.right, (int)dTemp);
@@ -1757,6 +1757,11 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	}
 	
 	return nAxisSize;
+}
+
+BOOL CHMXChart::GetMinMax(double& dMin, double& dMax, BOOL bDataOnly) const
+{
+	return GetMinMax(dMin, dMax, bDataOnly, HMX_DATASET_VALUE_NOIGNORE);
 }
 
 BOOL CHMXChart::GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const

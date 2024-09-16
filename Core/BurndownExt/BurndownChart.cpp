@@ -366,7 +366,6 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	ResetDatasets();
 	RefreshRenderFlags(FALSE);
 
-	// Which one gets drawn is controlled by the render flags
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, FALSE);
 
@@ -396,32 +395,43 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 	return CHMXChartEx::GetYTickText(nTick, dValue);
 }
 
-BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const
+int CBurndownChart::GetNumYSubTicks(double dInterval) const
+{
+	int nNumSub = CHMXChartEx::GetNumYSubTicks(dInterval);
+
+	switch (m_nActiveGraph)
+	{
+	case BCT_MINMAX_DUEDONEDATES:
+		// Don't allow less than a day
+		if ((dInterval / nNumSub) < 1.0)
+			nNumSub = (int)dInterval;
+		break;
+	}
+
+	return nNumSub;
+}
+
+BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) const
 {
 	if (m_data.GetSize() == 0)
+		return FALSE;
+
+	const CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
+	if (!pGraph->GetMinMax(dMin, dMax) || (dMin >= dMax))
 		return FALSE;
 
 	switch (m_nActiveGraph)
 	{
 	case BCT_MINMAX_DUEDONEDATES:
 		{
-			// Ignore unset dates
-			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, 0.0))
-				return FALSE;
-
-			dMin = (int)dMin;
-			dMax = ((int)(dMax) + 1);
-			
-			//dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
-		}
+			double dDiff = max(10.0, (dMax - dMin));
+			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);		}
 		break;
 
 	default: // All else
-		{
-			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, dIgnoreVal))				return FALSE;
-
-			ASSERT(dMin == 0.0);			dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		}
-		break;
+		dMin = 0.0;		dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		break;
 	}
 
 	return TRUE;

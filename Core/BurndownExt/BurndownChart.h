@@ -62,11 +62,14 @@ protected:
 	void RebuildXScale();
 	void RefreshRenderFlags(BOOL bRedraw = TRUE);
 
-	// CHMXChart virtual overrides
-	CString GetTooltip(int nHit) const;
-	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
-	BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const;
-	CString GetYTickText(int nTick, double dValue) const;
+	// CHMXChart overrides
+	virtual CString GetTooltip(int nHit) const;
+	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
+	virtual BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly) const;
+	virtual CString GetYTickText(int nTick, double dValue) const;
+
+	// CHMXChartEx overrides
+	virtual int GetNumYSubTicks(double dInterval) const;
 
 	BOOL HighlightDataPoint(int nIndex);
 	BOOL DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);

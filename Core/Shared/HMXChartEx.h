@@ -61,7 +61,7 @@ protected:
 
 protected:
 	BOOL InitTooltip(BOOL bMultiline);
-	int GetNumYSubTicks(double dInterval) const;
+	virtual int GetNumYSubTicks(double dInterval) const;
 
 	void HideLastHighlightedPoint();
 	int CalcXScaleFontSize(BOOL bTitle) const;
