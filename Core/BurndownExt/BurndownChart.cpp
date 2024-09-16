@@ -396,26 +396,21 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 	return CHMXChartEx::GetYTickText(nTick, dValue);
 }
 
-bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
+bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, double dIgnoreVal) const
 {
+	if (m_data.GetSize() == 0)
+		return false;
+
 	switch (m_nActiveGraph)
 	{
 	case BCT_MINMAX_DUEDONEDATES:
 		{
-			if (m_data.GetSize() == 0)
+			// Ignore unset dates
+			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, 0.0))
 				return false;
 
-			double dMin0, dMax0, dMin1, dMax1; 
-			
-			// Ignore zero values (unset dates)
-			if (!m_datasets[0].GetMinMax(dMin0, dMax0, bDataOnly, 0.0) ||
-				!m_datasets[1].GetMinMax(dMin1, dMax1, bDataOnly, 0.0))
-			{
-				return false;
-			}
-
-			dMin = (int)min(dMin0, dMin1);
-			dMax = (int)(max(dMax0, dMax1) + 1);
+			dMin = (int)dMin;
+			dMax = ((int)(dMax) + 1);
 			
 			//dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
 		}
@@ -423,7 +418,7 @@ bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
 
 	default: // All else
 		{
-			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly))				return false;
+			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, dIgnoreVal))				return false;
 
 			ASSERT(dMin == 0.0);			dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		}
 		break;

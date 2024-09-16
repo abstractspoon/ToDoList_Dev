@@ -65,7 +65,7 @@ protected:
 	// CHMXChart virtual overrides
 	CString GetTooltip(int nHit) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
-	bool GetMinMax(double& dMin, double& dnMax, bool bDataOnly) const;
+	bool GetMinMax(double& dMin, double& dnMax, bool bDataOnly, double dIgnoreVal) const;
 	CString GetYTickText(int nTick, double dValue) const;
 
 	BOOL HighlightDataPoint(int nIndex);

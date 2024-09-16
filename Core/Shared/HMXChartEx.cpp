@@ -31,34 +31,6 @@ const int TOOLTIPOFFSET = GraphicsMisc::ScaleByDPIFactor(20);
 
 /////////////////////////////////////////////////////////////////////////////
 
-bool HMXUtils::GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly)
-{
-	bool first = true;
-
-	for (int i = 0; i < nNumSets; i++)
-	{
-		double dMinSet, dMaxSet;
-
-		if (datasets[i].GetMinMax(dMinSet, dMaxSet, bDataOnly))
-		{
-			if (first)
-			{
-				nMin = dMinSet;
-				nMax = dMaxSet;
-
-				first = false;
-			}
-			else
-			{
-				nMin = min(nMin, dMinSet);
-				nMax = min(nMax, dMaxSet);
-			}
-		}
-	}
-
-	return !first;
-}
-
 double HMXUtils::CalcMaxYAxisValue(double dDataMax, int nNumTicks)
 {
 	return (nNumTicks * CalcYAxisInterval(dDataMax, nNumTicks));

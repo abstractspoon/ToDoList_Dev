@@ -1759,29 +1759,25 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	return nAxisSize;
 }
 
-bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
+bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, double dIgnoreVal) const
 {
 	// First dataset
-	if (!m_datasets[0].GetMinMax(dMin, dMax, bDataOnly))
+	if (!m_datasets[0].GetMinMax(dMin, dMax, bDataOnly, dIgnoreVal))
 		return false;
-
-	int nNumSets = 1;
 
 	// Rest of datasets
 	for(int f = 1; f<HMX_MAX_DATASET; f++) 
 	{
 		double dTemp1, dTemp2;
 
-		if (!m_datasets[f].GetMinMax(dTemp1, dTemp2, bDataOnly)) 
+		if (!m_datasets[f].GetMinMax(dTemp1, dTemp2, bDataOnly, dIgnoreVal)) 
 			break;
 
 		dMin = min(dMin, dTemp1);
 		dMax = max(dMax, dTemp2);
-
-		nNumSets++;
 	}
 
-	return (nNumSets > 0);
+	return true;
 }
 
 //

@@ -43,7 +43,6 @@ enum
 	HMX_RENDER_ALL			= 0xffff
 };
 
-
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart window
 
@@ -52,6 +51,7 @@ class CHMXChart : public CWnd
 // Construction
 public:
 	CHMXChart();
+	virtual ~CHMXChart();
 
 // Attributes
 public:
@@ -59,6 +59,8 @@ public:
 	void SetRenderFlags(DWORD dwFlags, BOOL bRedraw = TRUE);
 	DWORD ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw = TRUE);
 	BOOL HasRenderFlag(DWORD dwFlag) const { return ((m_dwRenderFlags & dwFlag) == dwFlag); }
+	CSize GetDataArea() const { return m_rectData.Size(); }
+	bool HasData() const { return m_datasets[0].HasData(); }
 
 public:
 	// export chart
@@ -125,19 +127,14 @@ public:
 	virtual void		ResetDatasets();
 	virtual bool		ClearData( int nDatasetIndex);
 	virtual void		ClearData();
-	CSize				GetDataArea() const { return m_rectData.Size(); }
-	bool				HasData() const { return m_datasets[0].HasData(); }
 
 	virtual bool		SetDatasetMin(int nDatasetIndex, double dMin);
 	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);
-	virtual bool		GetMinMax(double& dMin, double& dnMax, bool bDataOnly) const;	// get min & max
+	virtual bool		GetMinMax(double& dMin, double& dnMax, bool bDataOnly, double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;
 
 	// useful global functions
 	virtual bool		CalcDatas();
 	virtual bool		Redraw();
-																							// the clipboard
-
-	virtual ~CHMXChart();
 
 	// Generated message map functions
 protected:
