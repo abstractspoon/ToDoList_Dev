@@ -111,7 +111,7 @@ void CWorkloadChart::RebuildChart()
 	// Set the maximum Y value to be something 'nice'
 	double dMin, dMax;
 
-	if (GetMinMax(dMin, dMax, true))
+	if (GetMinMax(dMin, dMax, TRUE))
 	{
 		int nNumTicks = 10; // minimum default
 
@@ -201,10 +201,10 @@ COLORREF CWorkloadChart::GetFillColor(double dValue) const
 	return GetFillColor(0, dValue);
 }
 
-bool CWorkloadChart::DrawGrid( CDC& dc)
+BOOL CWorkloadChart::DrawGrid( CDC& dc)
 {
 	if (!CHMXChartEx::DrawGrid(dc))
-		return false;
+		return FALSE;
 
 	if ((HasOverload() || HasUnderload()) && HasData())
 	{
@@ -236,7 +236,7 @@ bool CWorkloadChart::DrawGrid( CDC& dc)
 		}
 	}
 
-	return true;
+	return TRUE;
 }
 
 COLORREF CWorkloadChart::GetBkgndColor(double dValue) const

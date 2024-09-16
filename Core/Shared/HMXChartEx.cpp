@@ -135,7 +135,7 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	return TRUE;
 }
 
-bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
+BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
 	double dInterval = HMXUtils::CalcYAxisInterval(m_dYMax, 10);
 	int nNumSubTicks = GetNumYSubTicks(dInterval);

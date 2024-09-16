@@ -396,10 +396,10 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 	return CHMXChartEx::GetYTickText(nTick, dValue);
 }
 
-bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, double dIgnoreVal) const
+BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const
 {
 	if (m_data.GetSize() == 0)
-		return false;
+		return FALSE;
 
 	switch (m_nActiveGraph)
 	{
@@ -407,7 +407,7 @@ bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, doubl
 		{
 			// Ignore unset dates
 			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, 0.0))
-				return false;
+				return FALSE;
 
 			dMin = (int)dMin;
 			dMax = ((int)(dMax) + 1);
@@ -418,13 +418,13 @@ bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, doubl
 
 	default: // All else
 		{
-			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, dIgnoreVal))				return false;
+			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly, dIgnoreVal))				return FALSE;
 
 			ASSERT(dMin == 0.0);			dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		}
 		break;
 	}
 
-	return true;
+	return TRUE;
 }
 
 void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
@@ -456,7 +456,7 @@ void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 void CBurndownChart::PreSubclassWindow()
 {
 	SetBkGnd(GetSysColor(COLOR_WINDOW));
-	SetXLabelsAreTicks(true);
+	SetXLabelsAreTicks(TRUE);
 	SetXLabelAngle(45);
 	SetNumYTicks(NUM_Y_TICKS);
 
@@ -507,16 +507,16 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	}
 }
 
-bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
+BOOL CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 	{
 		ASSERT(0);
-		return false;
+		return FALSE;
 	}
 
 	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, false);
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
 
 	if (pGraph->GetType() == BCT_MINMAX)
 		return CHMXChartEx::DrawMinMaxChart(dc, m_datasets[nDatasetIndex], m_datasets[nDatasetIndex + 1], alpha);

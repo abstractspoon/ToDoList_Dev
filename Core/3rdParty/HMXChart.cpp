@@ -62,7 +62,7 @@ CHMXChart::CHMXChart()
 	m_dYMax(0),
 	m_nXLabelStep(1),
 	m_clrGrid(GetSysColor(COLOR_3DSHADOW)),
-	m_bXLabelsAreTicks(false),
+	m_bXLabelsAreTicks(FALSE),
 	m_nXLabelDegrees(0),
 	m_nCountDataset(0)
 {
@@ -208,7 +208,7 @@ void CHMXChart::OnSize(UINT nType, int cx, int cy)
 	CalcDatas();
 }
 
-bool CHMXChart::CopyToClipboard()
+BOOL CHMXChart::CopyToClipboard()
 {
 	//
 	// Special thanks to Zafir Anjum for a large part of following code.
@@ -236,20 +236,20 @@ bool CHMXChart::CopyToClipboard()
 
 	EndWaitCursor();
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXChart::CopyToFile()
+BOOL CHMXChart::CopyToFile()
 {
-	CFileDialog dlg(false, _T("BMP"), _T("Chart"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Bitmap |*.bmp|"));
+	CFileDialog dlg(FALSE, _T("BMP"), _T("Chart"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Bitmap |*.bmp|"));
 	if(dlg.DoModal() == IDOK)
 		return CopyToFile(dlg.GetPathName());
 
-	return false;
+	return FALSE;
 
 }
 
-bool CHMXChart::CopyToFile(CString sFile)
+BOOL CHMXChart::CopyToFile(CString sFile)
 {
 
 	CBitmap 	bitmap;
@@ -280,7 +280,7 @@ bool CHMXChart::CopyToFile(CString sFile)
 	HANDLE hDIB = DDBToDIB(bitmap, BI_RGB, &pal);
 
 	if(hDIB == NULL)
-		return false;
+		return FALSE;
 
 	// Write it to file
 	if(!file.Open(sFile, CFile::modeWrite|CFile::modeCreate))
@@ -294,7 +294,7 @@ bool CHMXChart::CopyToFile(CString sFile)
 	bitmap.Detach();
 	memDC.SelectObject(pOldBitmap);
 
-	return true;
+	return TRUE;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -308,12 +308,12 @@ bool CHMXChart::CopyToFile(CString sFile)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::PaintBkGnd(CDC &dc)
+BOOL CHMXChart::PaintBkGnd(CDC &dc)
 {
 	dc.FillSolidRect(m_rectArea, m_clrBkGnd);
-	return true;
+	return TRUE;
 }
 
 //
@@ -325,12 +325,12 @@ bool CHMXChart::PaintBkGnd(CDC &dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawTitle(CDC & dc)
+BOOL CHMXChart::DrawTitle(CDC & dc)
 {
 	if(m_strTitle.IsEmpty())
-		return false;
+		return FALSE;
 
 	int nFontSize = CalcTitleFontSize();
 
@@ -348,7 +348,7 @@ bool CHMXChart::DrawTitle(CDC & dc)
 	dc.SetBkColor(clrBkOld);
 	dc.SelectObject(pFontOld);
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -360,9 +360,9 @@ bool CHMXChart::DrawTitle(CDC & dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawGrid(CDC & dc)
+BOOL CHMXChart::DrawGrid(CDC & dc)
 {
 	if (m_dwRenderFlags & HMX_RENDER_VERTGRID)
 		DrawVertGridLines(dc);
@@ -370,7 +370,7 @@ bool CHMXChart::DrawGrid(CDC & dc)
 	if (m_dwRenderFlags & HMX_RENDER_HORZGRID)
 		DrawHorzGridLines(dc);
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -382,9 +382,9 @@ bool CHMXChart::DrawGrid(CDC & dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawAxes(CDC &dc)
+BOOL CHMXChart::DrawAxes(CDC &dc)
 {
 	// draw Y
 	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
@@ -407,7 +407,7 @@ bool CHMXChart::DrawAxes(CDC &dc)
 	if (m_dwRenderFlags & (HMX_RENDER_XAXISSCALE | HMX_RENDER_XAXISTITLE))
 		DrawXScale(dc);
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -419,14 +419,14 @@ bool CHMXChart::DrawAxes(CDC &dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawHorzGridLines(CDC & dc)
+BOOL CHMXChart::DrawHorzGridLines(CDC & dc)
 {
 	int nTicks = GetNumYTicks();
 	
 	if(!nTicks)
-		return false;
+		return FALSE;
 
 	double dY = ((m_dYMax - m_dYMin)/(double)nTicks);
 
@@ -445,7 +445,7 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 
 	dc.SelectObject(pPenOld);
 
-	return true;
+	return TRUE;
 }
 
 
@@ -458,12 +458,12 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawVertGridLines(CDC & dc)
+BOOL CHMXChart::DrawVertGridLines(CDC & dc)
 {
 	if(!m_nXMax)
-		return false;
+		return FALSE;
 
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
@@ -489,7 +489,7 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 
 	dc.SelectObject(pPenOld);
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -501,15 +501,15 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawBaseline(CDC & dc)
+BOOL CHMXChart::DrawBaseline(CDC & dc)
 {
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	// cannot draw baseline outside the m_rectData
 	if(m_dYMin > 0)
-		return false;
+		return FALSE;
 	
 	double dTemp = CalcRelativeYValue(0); // this is the zero baseline
 
@@ -518,7 +518,7 @@ bool CHMXChart::DrawBaseline(CDC & dc)
 
 	dc.SelectObject(pPenOld);
 
-	return true;
+	return TRUE;
 }
 
 int CHMXChart::CalcTitleFontSize() const
@@ -590,9 +590,9 @@ int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawXScale(CDC & dc)
+BOOL CHMXChart::DrawXScale(CDC & dc)
 {
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 
@@ -601,7 +601,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 		int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
 
 		if (!nCount && m_strXText.IsEmpty())
-			return false;
+			return FALSE;
 	
 		if (nCount)
 		{
@@ -658,7 +658,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 
 	dc.SetBkMode(nBkModeOld);
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -670,9 +670,9 @@ bool CHMXChart::DrawXScale(CDC & dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawYScale(CDC & dc)
+BOOL CHMXChart::DrawYScale(CDC & dc)
 {
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 	CRect rTitle(m_rectYAxis);
@@ -682,7 +682,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 		int nTicks = GetNumYTicks();
 
 		if (!nTicks && m_strYText.IsEmpty())
-			return false;
+			return FALSE;
 
 		if (nTicks && (m_rectData.Height() >= nTicks))
 		{
@@ -752,7 +752,7 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 	dc.SetBkMode(nBkModeOld);
 
-	return true;
+	return TRUE;
 }
 
 CString CHMXChart::GetYTickText(int /*nTick*/, double dValue) const
@@ -772,16 +772,16 @@ CString CHMXChart::GetYTickText(int /*nTick*/, double dValue) const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::DrawDatasets(CDC& dc)
+BOOL CHMXChart::DrawDatasets(CDC& dc)
 {
 	for (int f = 0; f < HMX_MAX_DATASET; f++)
 	{
 		DrawDataset(dc, f, 128);
 	}
 	
-	return true;
+	return TRUE;
 }
 
 //
@@ -794,7 +794,7 @@ bool CHMXChart::DrawDatasets(CDC& dc)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
 
 BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, float fSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const
@@ -839,10 +839,10 @@ BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, flo
 	return TRUE;
 }
 
-bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
+BOOL CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	const CHMXDataset& ds = m_datasets[nDatasetIndex];
 
@@ -850,12 +850,12 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 	if (ds.GetStyle() == HMX_DATASET_STYLE_MINMAX)
 	{
 		if (!IsValidDatasetIndex(nDatasetIndex + 1))
-			return false;
+			return FALSE;
 
 		CHMXDataset& ds2 = m_datasets[nDatasetIndex + 1];
 
 		if (ds2.GetDatasetSize() != ds.GetDatasetSize())
-			return false;
+			return FALSE;
 
 		return DrawMinMaxChart(dc, ds, m_datasets[nDatasetIndex + 1], fillOpacity);
 	}
@@ -863,7 +863,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 	return DrawDataset(dc, ds, CDWordArray(), fillOpacity);
 }
 
-bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity)
+BOOL CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity)
 {
 	switch (ds.GetStyle())
 	{
@@ -887,20 +887,20 @@ bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& a
 
 	case HMX_DATASET_STYLE_MINMAX:
 		ASSERT(0);
-		return false; // drawn separately because it requires two datasets
+		return FALSE; // drawn separately because it requires two datasets
 	}
 
 	ASSERT(0);
-	return false;
+	return FALSE;
 }
 
-bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDataset& dsMax, BYTE fillOpacity)
+BOOL CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDataset& dsMax, BYTE fillOpacity)
 {
 	if (dsMin.GetDatasetSize() == 0)
-		return false;
+		return FALSE;
 	
 	if (dsMax.GetDatasetSize() != dsMin.GetDatasetSize())
-		return false;
+		return FALSE;
 
 	CGdiPlusGraphics graphics(dc);
 
@@ -969,19 +969,19 @@ bool CHMXChart::DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDat
 		}
 	}
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)
+BOOL CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)
 {
 	if (ds.GetDatasetSize() == 0)
-		return false;
+		return FALSE;
 
 	CArray<gdix_PointF, gdix_PointF&> points;
 	int nPoints = GetPoints(ds, points, FALSE);
 
 	if (nPoints < 2)
-		return false;
+		return FALSE;
 
 	gdix_PenStyle nPenStyle = gdix_PenStyleSolid;
 
@@ -1042,13 +1042,13 @@ bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray&
 		}
 	}
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXChart::DrawAreaGraph(CDC &dc, const CHMXDataset& ds, BYTE fillOpacity)
+BOOL CHMXChart::DrawAreaGraph(CDC &dc, const CHMXDataset& ds, BYTE fillOpacity)
 {
 	if (ds.GetDatasetSize() == 0)
-		return false;
+		return FALSE;
 
 	CArray<gdix_PointF, gdix_PointF&> points;
 	int nPoints = GetPoints(ds, points, TRUE);
@@ -1071,13 +1071,13 @@ bool CHMXChart::DrawAreaGraph(CDC &dc, const CHMXDataset& ds, BYTE fillOpacity)
 		}
 	}
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltBarColors, BYTE fillOpacity)
+BOOL CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltBarColors, BYTE fillOpacity)
 {
 	if (ds.GetDatasetSize() == 0)
-		return false;
+		return FALSE;
 
 	CGdiPlusGraphics graphics(dc);
 	CGdiPlusPen defBarPen;
@@ -1145,7 +1145,7 @@ bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 		VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(rBar), brush));
 	}
 
-	return true;
+	return TRUE;
 }
 
 BOOL CHMXChart::CalcPieRects(CRect& rPie, CRect& rDonut) const
@@ -1180,18 +1180,18 @@ BOOL CHMXChart::CalcPieRects(CRect& rPie, CRect& rDonut) const
 	return TRUE;
 }
 
-bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltPieColors, BYTE fillOpacity)
+BOOL CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltPieColors, BYTE fillOpacity)
 {
 	CArray<PIESEGMENT, PIESEGMENT&> aSegments;
 	int nNumSeg = CalcPieSegments(ds, aSegments);
 	
 	if (nNumSeg == 0)
-		return false;
+		return FALSE;
 
 	CRect rPie, rDonut;
 	
 	if (!CalcPieRects(rPie, rDonut))
-		return false;
+		return FALSE;
 	
 	// Create default drawing tools
 	CGdiPlusGraphics graphics(dc);
@@ -1240,7 +1240,7 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 
 	DrawPieLabels(dc, rPie, aSegments);
 
-	return true;
+	return TRUE;
 }
 
 int CHMXChart::CalcPieSegments(const CHMXDataset& dataset, CArray<PIESEGMENT, PIESEGMENT&>& aSegments) const
@@ -1593,9 +1593,9 @@ BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, do
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::CalcDatas()
+BOOL CHMXChart::CalcDatas()
 {
 	int f=0, nTemp3;
 
@@ -1659,7 +1659,7 @@ bool CHMXChart::CalcDatas()
 		m_nXMax = max(m_nXMax, nTemp3);
 	}
 	
-	if (!GetMinMax(m_dYMin, m_dYMax, false))
+	if (!GetMinMax(m_dYMin, m_dYMax, FALSE))
 		m_dYMin = m_dYMax = 0;
 
 	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
@@ -1682,7 +1682,7 @@ bool CHMXChart::CalcDatas()
 	if (m_dYMax == 0.0)
 		m_dYMax = (m_dYMin + 10);
 
-	return true;
+	return TRUE;
 }
 
 int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
@@ -1759,11 +1759,11 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	return nAxisSize;
 }
 
-bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, double dIgnoreVal) const
+BOOL CHMXChart::GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const
 {
 	// First dataset
 	if (!m_datasets[0].GetMinMax(dMin, dMax, bDataOnly, dIgnoreVal))
-		return false;
+		return FALSE;
 
 	// Rest of datasets
 	for(int f = 1; f<HMX_MAX_DATASET; f++) 
@@ -1777,7 +1777,7 @@ bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, double dIg
 		dMax = max(dMax, dTemp2);
 	}
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -1790,14 +1790,14 @@ bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly, double dIg
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::Redraw()
+BOOL CHMXChart::Redraw()
 {
-	Invalidate(true);
+	Invalidate(TRUE);
 	UpdateWindow();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -1811,23 +1811,23 @@ bool CHMXChart::Redraw()
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::AddData(int nDatasetIndex, double dData)
+BOOL CHMXChart::AddData(int nDatasetIndex, double dData)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].AddData(dData);
 }
 
-bool CHMXChart::ClearData( int nDatasetIndex)
+BOOL CHMXChart::ClearData( int nDatasetIndex)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	m_datasets[nDatasetIndex].ClearData();
-	return true;
+	return TRUE;
 }
 
 void CHMXChart::ClearData()
@@ -1836,13 +1836,13 @@ void CHMXChart::ClearData()
 		ClearData(f);
 }
 
-bool CHMXChart::ResetDataset(int nDatasetIndex)
+BOOL CHMXChart::ResetDataset(int nDatasetIndex)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	m_datasets[nDatasetIndex].Reset();
-	return true;
+	return TRUE;
 }
 
 void CHMXChart::ResetDatasets()
@@ -1863,12 +1863,12 @@ void CHMXChart::ResetDatasets()
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double dData)
+BOOL CHMXChart::SetData(int nDatasetIndex, int nIndex, double dData)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].SetData(nIndex, dData);
 }
@@ -1885,12 +1885,12 @@ bool CHMXChart::SetData(int nDatasetIndex, int nIndex, double dData)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& dData) const
+BOOL CHMXChart::GetData(int nDatasetIndex, int nIndex, double& dData) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].GetData(nIndex,dData);
 
@@ -1906,12 +1906,12 @@ bool CHMXChart::GetData(int nDatasetIndex, int nIndex, double& dData) const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
+BOOL CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].SetStyle(nStyle);
 }
@@ -1926,16 +1926,16 @@ bool CHMXChart::SetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE nStyle)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle) const
+BOOL CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	nStyle = m_datasets[nDatasetIndex].GetStyle();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -1948,32 +1948,32 @@ bool CHMXChart::GetDatasetStyle(int nDatasetIndex, HMX_DATASET_STYLE& nStyle) co
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER nMarker)
+BOOL CHMXChart::SetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER nMarker)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].SetMarker(nMarker);
 }
 
-bool CHMXChart::SetDatasetMin(int nDatasetIndex, double dMin)
+BOOL CHMXChart::SetDatasetMin(int nDatasetIndex, double dMin)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	m_datasets[nDatasetIndex].SetMin(dMin);
-	return true;
+	return TRUE;
 }
 
-bool CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
+BOOL CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	m_datasets[nDatasetIndex].SetMax(dMax);
-	return true;
+	return TRUE;
 }
 
 //
@@ -1986,16 +1986,16 @@ bool CHMXChart::SetDatasetMax(int nDatasetIndex, double dMax)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker) const
+BOOL CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	nMarker = m_datasets[nDatasetIndex].GetMarker();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2008,12 +2008,12 @@ bool CHMXChart::GetDatasetMarker(int nDatasetIndex, HMX_DATASET_MARKER& nMarker)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
+BOOL CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].SetSize(nSize);
 }
@@ -2028,16 +2028,16 @@ bool CHMXChart::SetDatasetSizeFactor(int nDatasetIndex, int nSize)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize) const
+BOOL CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	nSize = m_datasets[nDatasetIndex].GetSize();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2050,20 +2050,20 @@ bool CHMXChart::GetDatasetLineThickness(int nDatasetIndex, int& nSize) const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetDatasetLineColor(int nDatasetIndex, COLORREF clr)
+BOOL CHMXChart::SetDatasetLineColor(int nDatasetIndex, COLORREF clr)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	return m_datasets[nDatasetIndex].SetLineColor(clr);
 }
 
-bool CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
+BOOL CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 	
 	return m_datasets[nDatasetIndex].SetFillColor(clr);
 }
@@ -2078,22 +2078,22 @@ bool CHMXChart::SetDatasetFillColor(int nDatasetIndex, COLORREF clr)
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr) const
+BOOL CHMXChart::GetDatasetLineColor(int nDatasetIndex, COLORREF& clr) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 
 	clr = m_datasets[nDatasetIndex].GetLineColor();
 
 	return (clr != CLR_NONE);
 }
 
-bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr) const
+BOOL CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr) const
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
-		return false;
+		return FALSE;
 	
 	clr = m_datasets[nDatasetIndex].GetFillColor();
 	
@@ -2109,17 +2109,17 @@ bool CHMXChart::GetDatasetFillColor(int nDatasetIndex, COLORREF& clr) const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetBkGnd(COLORREF clr)
+BOOL CHMXChart::SetBkGnd(COLORREF clr)
 {
 	m_clrBkGnd = clr;
 	Redraw();
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXChart::SetGridColor(COLORREF clr)
+BOOL CHMXChart::SetGridColor(COLORREF clr)
 {
 	if (clr != m_clrGrid)
 	{
@@ -2129,7 +2129,7 @@ bool CHMXChart::SetGridColor(COLORREF clr)
 		Redraw();
 	}
 
-	return true;
+	return TRUE;
 }
 
 COLORREF CHMXChart::GetGridColor() const
@@ -2162,9 +2162,9 @@ COLORREF CHMXChart::GetBkGnd() const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetTitle(CString strTitle)
+BOOL CHMXChart::SetTitle(CString strTitle)
 {
 	// If switching to/from an empty string we need to recalc data too
 	BOOL bRecalcData = (m_strTitle.IsEmpty() != strTitle.IsEmpty());
@@ -2176,7 +2176,7 @@ bool CHMXChart::SetTitle(CString strTitle)
 	else
 		Redraw();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2204,12 +2204,12 @@ CString CHMXChart::GetTitle() const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetNumYTicks(int nTicks)
+BOOL CHMXChart::SetNumYTicks(int nTicks)
 {
 	m_nNumYTicks = min(100, max(0, nTicks));
-	return true;
+	return TRUE;
 }
 
 //
@@ -2238,16 +2238,16 @@ int CHMXChart::GetNumYTicks() const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetRoundY(double dRound)
+BOOL CHMXChart::SetRoundY(double dRound)
 {
 	if(dRound <= 0)
-		return false;
+		return FALSE;
 	
 	m_dRoundY = dRound;
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2275,14 +2275,14 @@ double CHMXChart::GetRoundY() const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetYText(CString sText)
+BOOL CHMXChart::SetYText(CString sText)
 {
 	m_strYText = sText;
 	Redraw();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2310,14 +2310,14 @@ CString CHMXChart::GetYText() const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetXText(CString sText)
+BOOL CHMXChart::SetXText(CString sText)
 {
 	m_strXText = sText;
 	Redraw();
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2346,9 +2346,9 @@ CString CHMXChart::GetXText() const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetXScaleLabel(int nIndex, CString str)
+BOOL CHMXChart::SetXScaleLabel(int nIndex, CString str)
 {
 	try 
 	{
@@ -2356,10 +2356,10 @@ bool CHMXChart::SetXScaleLabel(int nIndex, CString str)
 	} 
 	catch(...) 
 	{
-		return false;
+		return FALSE;
 	}
 
-	return true;
+	return TRUE;
 }
 
 void CHMXChart::ClearXScaleLabels()
@@ -2377,16 +2377,16 @@ void CHMXChart::ClearXScaleLabels()
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::GetXScaleLabel(int nIndex, CString& str) const
+BOOL CHMXChart::GetXScaleLabel(int nIndex, CString& str) const
 {
 	if(nIndex < 0 || nIndex > m_strarrScaleXLabel.GetUpperBound())
-		return false;
+		return FALSE;
 	
 	str = m_strarrScaleXLabel.GetAt(nIndex);
 
-	return true;
+	return TRUE;
 }
 
 //
@@ -2398,16 +2398,16 @@ bool CHMXChart::GetXScaleLabel(int nIndex, CString& str) const
 //
 //	return
 //
-//		true if ok, else false
+//		TRUE if ok, else FALSE
 //
-bool CHMXChart::SetXLabelStep(int nStep)
+BOOL CHMXChart::SetXLabelStep(int nStep)
 {
 	m_nXLabelStep = max(nStep, 1);
 
-	return true;
+	return TRUE;
 }
 
-void CHMXChart::SetXLabelsAreTicks(bool bTicks)
+void CHMXChart::SetXLabelsAreTicks(BOOL bTicks)
 {
 	m_bXLabelsAreTicks = bTicks;
 }

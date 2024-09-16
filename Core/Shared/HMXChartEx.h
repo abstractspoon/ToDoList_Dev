@@ -44,7 +44,7 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CHMXChartEx)
 	//}}AFX_VIRTUAL
-	virtual bool DrawHorzGridLines(CDC& dc);
+	virtual BOOL DrawHorzGridLines(CDC& dc);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	virtual CString GetTooltip(int nHit) const;
 	virtual int HitTest(const CPoint& ptClient, int nDataset = 0) const;

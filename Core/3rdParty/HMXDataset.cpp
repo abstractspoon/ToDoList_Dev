@@ -36,7 +36,7 @@ void CHMXDataset::Reset()
 	m_crFill = CLR_NONE;
 	m_nMarker = HMX_DATASET_MARKER_NONE;
 
-	m_bSetMinTo = m_bSetMaxTo = false;
+	m_bSetMinTo = m_bSetMaxTo = FALSE;
 	m_dSetMinTo = m_dSetMaxTo = -1;
 }
 
@@ -60,30 +60,30 @@ void CHMXDataset::ClearData()
 {
 	m_data.RemoveAll();
 
-	m_bSetMinTo = m_bSetMaxTo = false;
+	m_bSetMinTo = m_bSetMaxTo = FALSE;
 	m_dSetMinTo = m_dSetMaxTo = -1;
 }
 
-bool CHMXDataset::HasData() const
+BOOL CHMXDataset::HasData() const
 {
 	return (m_data.GetSize() > 0);
 }
 
-bool CHMXDataset::AddData(double nData)
+BOOL CHMXDataset::AddData(double nData)
 {
 	m_data.Add(nData);
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXDataset::SetData(int nIndex, double nData)
+BOOL CHMXDataset::SetData(int nIndex, double nData)
 {
 	if (nIndex < 0 || nIndex >= m_data.GetSize())
-		return false;
+		return FALSE;
 	
 	m_data.SetAt(nIndex, nData);
 
-	return true;
+	return TRUE;
 }
 
 
@@ -97,42 +97,42 @@ void CHMXDataset::SetDatasetSize(int nSize)
 	m_data.SetSize(nSize);
 }
 
-bool CHMXDataset::GetData(int nIndex, double &nSample) const
+BOOL CHMXDataset::GetData(int nIndex, double &nSample) const
 {
 	if (nIndex < 0 || nIndex >= m_data.GetSize())
-		return false;
+		return FALSE;
 	
 	nSample = m_data.GetAt(nIndex);
 	
-	return true;
+	return TRUE;
 }
 
-bool CHMXDataset::SetStyle(HMX_DATASET_STYLE nStyle)
+BOOL CHMXDataset::SetStyle(HMX_DATASET_STYLE nStyle)
 {
 	m_nStyle = nStyle;
 	
-	return true;
+	return TRUE;
 }
 
-bool CHMXDataset::SetLineColor(COLORREF clr)
+BOOL CHMXDataset::SetLineColor(COLORREF clr)
 {
 	m_crLine = clr;
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXDataset::SetFillColor(COLORREF clr)
+BOOL CHMXDataset::SetFillColor(COLORREF clr)
 {
 	m_crFill = clr;
 	
-	return true;
+	return TRUE;
 }
 
-bool CHMXDataset::SetMarker(HMX_DATASET_MARKER nMarker)
+BOOL CHMXDataset::SetMarker(HMX_DATASET_MARKER nMarker)
 {
 	m_nMarker = nMarker;
 
-	return true;
+	return TRUE;
 }
 
 HMX_DATASET_MARKER CHMXDataset::GetMarker() const
@@ -140,23 +140,23 @@ HMX_DATASET_MARKER CHMXDataset::GetMarker() const
 	return m_nMarker;
 }
 
-bool CHMXDataset::SetSize(int nSize)
+BOOL CHMXDataset::SetSize(int nSize)
 {
 	// between 1 an 10	
 	m_nSize = min(nSize, 10);
 	m_nSize = max(m_nSize,  1);
 
-	return true;
+	return TRUE;
 }
 
-bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly, double dIgnoreVal) const
+BOOL CHMXDataset::GetMinMax(double& nMin, double& nMax, BOOL bDataOnly, double dIgnoreVal) const
 {
 	double dMin = HMX_DATASET_VALUE_INVALID, dMax = -HMX_DATASET_VALUE_INVALID;
 
 	if (m_data.GetSize() > 0) 
 	{
 		double temp = 0.0;
-		BOOL bFirst = true;
+		BOOL bFirst = TRUE;
 
 		for (int f=0; f<m_data.GetSize(); f++)
 		{
@@ -189,29 +189,29 @@ bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly, double d
 		nMin = dMin;
 		nMax = dMax;
 
-		return true;
+		return TRUE;
 	} 
 	else if (!bDataOnly && m_bSetMinTo && m_bSetMaxTo)
 	{
 		nMin = m_dSetMinTo;
 		nMax = m_dSetMaxTo;
 
-		return true;
+		return TRUE;
 	}
 
 	// else
-	return false;
+	return FALSE;
 }
 
 void CHMXDataset::SetMin(double dMin)
 {
-	m_bSetMinTo = true;
+	m_bSetMinTo = TRUE;
 	m_dSetMinTo = dMin;
 }
 
 void CHMXDataset::SetMax(double dMax)
 {
-	m_bSetMaxTo = true;
+	m_bSetMaxTo = TRUE;
 	m_dSetMaxTo = dMax;
 }
 

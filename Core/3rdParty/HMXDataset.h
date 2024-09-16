@@ -59,31 +59,31 @@ public:
 
 	void Copy(const CHMXDataset& other);
 
-	virtual bool		SetStyle( HMX_DATASET_STYLE nStyle );			// set data style
+	virtual BOOL		SetStyle( HMX_DATASET_STYLE nStyle );			// set data style
 	virtual HMX_DATASET_STYLE GetStyle() const;							// get data style
 
-	virtual bool		SetLineColor( COLORREF clr );					// set data color
+	virtual BOOL		SetLineColor( COLORREF clr );					// set data color
 	virtual COLORREF	GetLineColor() const;							// get data color
-	virtual bool		SetFillColor( COLORREF clr );					// set data color
+	virtual BOOL		SetFillColor( COLORREF clr );					// set data color
 	virtual COLORREF	GetFillColor() const;							// get data color
 
 	virtual int			GetSize() const;								// get size
-	virtual bool		SetSize( int nSize );							// set logical pen size OR bar size (1-10)	OR unused if area, will be scaled by DPI
+	virtual BOOL		SetSize( int nSize );							// set logical pen size OR bar size (1-10)	OR unused if area, will be scaled by DPI
 
 	virtual void		Reset();										// clears data and attributes
 	virtual void		ClearData();									// clears data only
-	virtual bool		HasData() const;
+	virtual BOOL		HasData() const;
 
-	virtual bool		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
+	virtual BOOL		SetMarker( HMX_DATASET_MARKER nMarker );		// set marker type (see #define section) unused if style is bar or area
 	virtual HMX_DATASET_MARKER GetMarker() const;						// get marker
 
-	virtual bool		AddData( double nData );						// set data adding new point
-	virtual bool		SetData( int nIndex, double nData );			// set data at specified index
-	virtual bool		GetData( int nCount, double &nSample ) const;	// get data
+	virtual BOOL		AddData( double nData );						// set data adding new point
+	virtual BOOL		SetData( int nIndex, double nData );			// set data at specified index
+	virtual BOOL		GetData( int nCount, double &nSample ) const;	// get data
 	virtual void		SetDatasetSize(int nSize);						// set dataset size (how many points in dataset?)
 	virtual int			GetDatasetSize() const;							// get dataset size (how many points in dataset?)
 
-	virtual bool		GetMinMax( double& nMin, double& nMax, bool bDataOnly, double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;	// get min & max
+	virtual BOOL		GetMinMax( double& nMin, double& nMax, BOOL bDataOnly, double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;	// get min & max
 	virtual void		SetMin(double dMin);
 	virtual void		SetMax(double dMax);
 
@@ -96,7 +96,7 @@ protected:
 											// unused if style is area
 	HMX_DATASET_STYLE		m_nStyle;		// data style (see #define section)
 
-	bool					m_bSetMinTo, m_bSetMaxTo;
+	BOOL					m_bSetMinTo, m_bSetMaxTo;
 	double					m_dSetMinTo, m_dSetMaxTo;
 
 };
