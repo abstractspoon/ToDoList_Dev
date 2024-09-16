@@ -1748,7 +1748,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			CFont* pFontOld = dc.SelectObject(&font);
 
 			CString sBuffer = GetYTickText(0, m_dYMax);
-			nYAxisWidth += dc.GetTextExtent(sBuffer).cy;
+			nYAxisWidth += dc.GetTextExtent(sBuffer).cx;
 			
 			dc.SelectObject(pFontOld);
 		}
