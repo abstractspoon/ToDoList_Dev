@@ -405,31 +405,17 @@ bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
 			if (m_data.GetSize() == 0)
 				return false;
 
-			dMin = HMX_DATASET_VALUE_INVALID;
-			dMax = -HMX_DATASET_VALUE_INVALID;
-
-			double dVal;
-
-			for (int nDataset = 0; nDataset < 2; nDataset++)
-			{
-				const CHMXDataset& ds = m_datasets[nDataset];
-
-				for (int nVal = 0; nVal < ds.GetDatasetSize(); nVal++)
-				{
-					// Ignore zero values
-					if (ds.GetData(nVal, dVal) && (dVal != 0.0))
-					{
-						dMin = min(dMin, dVal);
-						dMax = max(dMax, dVal);
-					}
-				}
-			}
+			double dMin0, dMax0, dMin1, dMax1; 
 			
-			if ((dMin == HMX_DATASET_VALUE_INVALID) || (dMax == -HMX_DATASET_VALUE_INVALID))
+			// Ignore zero values (unset dates)
+			if (!m_datasets[0].GetMinMax(dMin0, dMax0, bDataOnly, 0.0) ||
+				!m_datasets[1].GetMinMax(dMin1, dMax1, bDataOnly, 0.0))
+			{
 				return false;
+			}
 
-			dMin = (int)dMin;
-			dMax = (((int)dMax) + 1);
+			dMin = (int)min(dMin0, dMin1);
+			dMax = (int)(max(dMax0, dMax1) + 1);
 			
 			//dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
 		}
@@ -438,6 +424,7 @@ bool CBurndownChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
 	default: // All else
 		{
 			if (!CHMXChartEx::GetMinMax(dMin, dMax, bDataOnly))				return false;
+
 			ASSERT(dMin == 0.0);			dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		}
 		break;
 	}
@@ -534,10 +521,7 @@ bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	}
 
 	CGraphBase* pGraph = NULL;
-//	GET_GRAPH_RET(m_nActiveGraph, false);
-	pGraph = m_mapGraphs.GetGraph(m_nActiveGraph); 
-	if (pGraph == NULL) 
-		return false;
+	GET_GRAPH_RET(m_nActiveGraph, false);
 
 	if (pGraph->GetType() == BCT_MINMAX)
 		return CHMXChartEx::DrawMinMaxChart(dc, m_datasets[nDatasetIndex], m_datasets[nDatasetIndex + 1], alpha);

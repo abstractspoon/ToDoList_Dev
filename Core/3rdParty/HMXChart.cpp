@@ -1659,8 +1659,8 @@ bool CHMXChart::CalcDatas()
 		m_nXMax = max(m_nXMax, nTemp3);
 	}
 	
-	m_dYMin = m_dYMax = 0;
-	GetMinMax(m_dYMin, m_dYMax, false);
+	if (!GetMinMax(m_dYMin, m_dYMax, false))
+		m_dYMin = m_dYMax = 0;
 
 	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
 	// they are multiply of m_nRoundY
@@ -1761,22 +1761,24 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 
 bool CHMXChart::GetMinMax(double& dMin, double& dMax, bool bDataOnly) const
 {
-	double dTemp1, dTemp2;
-	int nNumSets = 0;
-	
-	for(int f = 0; f<HMX_MAX_DATASET; f++) 
-	{
-		if (m_datasets[f].GetMinMax(dTemp1, dTemp2, bDataOnly)) 
-		{
-			dMin = min(dMin, dTemp1);
-			dMax = max(dMax, dTemp2);
+	// First dataset
+	if (!m_datasets[0].GetMinMax(dMin, dMax, bDataOnly))
+		return false;
 
-			nNumSets++;
-		}
-		else
-		{
+	int nNumSets = 1;
+
+	// Rest of datasets
+	for(int f = 1; f<HMX_MAX_DATASET; f++) 
+	{
+		double dTemp1, dTemp2;
+
+		if (!m_datasets[f].GetMinMax(dTemp1, dTemp2, bDataOnly)) 
 			break;
-		}
+
+		dMin = min(dMin, dTemp1);
+		dMax = max(dMax, dTemp2);
+
+		nNumSets++;
 	}
 
 	return (nNumSets > 0);

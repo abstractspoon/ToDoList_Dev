@@ -149,44 +149,45 @@ bool CHMXDataset::SetSize(int nSize)
 	return true;
 }
 
-bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly) const
+bool CHMXDataset::GetMinMax(double& nMin, double& nMax, bool bDataOnly, double dIgnoreVal) const
 {
-	// following lines help me to solve some problems with invalid values
 	double dMin = HMX_DATASET_VALUE_INVALID, dMax = -HMX_DATASET_VALUE_INVALID;
 
 	if (m_data.GetSize() > 0) 
 	{
-		double temp = 0;
-		GetData(0, temp);
-		
-		if (temp != HMX_DATASET_VALUE_INVALID) 
-		{
-			dMin = dMax = temp;
-		}
+		double temp = 0.0;
+		BOOL bFirst = true;
 
-		for (int f=1; f<m_data.GetSize(); f++)
+		for (int f=0; f<m_data.GetSize(); f++)
 		{
-			GetData(f, temp);
+			VERIFY(GetData(f, temp));
 
-			if (temp != HMX_DATASET_VALUE_INVALID) 
+			if (temp == HMX_DATASET_VALUE_INVALID)
+				continue;
+			
+			if (temp == dIgnoreVal)
+				continue;
+
+			if (bFirst)
 			{
-				if (temp < dMin)
-					dMin = temp;
-
-				if (temp > dMax)
-					dMax = temp;
+				bFirst = FALSE;
+				dMin = dMax = temp;
+			}
+			else
+			{
+				dMin = min(dMin, temp);
+				dMax = max(dMax, temp);
 			}
 		}
 
 		if (m_bSetMinTo && !bDataOnly)
-			nMin = min(dMin, m_dSetMinTo);
-		else
-			nMin = dMin;
+			dMin = min(dMin, m_dSetMinTo);
 
 		if (m_bSetMaxTo && !bDataOnly)
-			nMax = max(dMax, m_dSetMaxTo);
-		else
-			nMax = dMax;
+			dMax = max(dMax, m_dSetMaxTo);
+
+		nMin = dMin;
+		nMax = dMax;
 
 		return true;
 	} 

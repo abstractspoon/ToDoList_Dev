@@ -47,6 +47,7 @@ enum HMX_DATASET_MARKER
 //////////////////////////////////////////////////////////////////////
 
 #define HMX_DATASET_VALUE_INVALID	1.7976931348623158e+308
+#define HMX_DATASET_VALUE_NOIGNORE	1.6976931348623158e+308
 
 //////////////////////////////////////////////////////////////////////
 
@@ -82,7 +83,7 @@ public:
 	virtual void		SetDatasetSize(int nSize);						// set dataset size (how many points in dataset?)
 	virtual int			GetDatasetSize() const;							// get dataset size (how many points in dataset?)
 
-	virtual bool		GetMinMax( double& nMin, double& nMax, bool bDataOnly ) const;	// get min & max
+	virtual bool		GetMinMax( double& nMin, double& nMax, bool bDataOnly, double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;	// get min & max
 	virtual void		SetMin(double dMin);
 	virtual void		SetMax(double dMax);
 
