@@ -1885,7 +1885,8 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 					pTasks->Add(pTCI);
 					continue;
 				}
-			}		}
+			}
+		}
 	}
 }
 
