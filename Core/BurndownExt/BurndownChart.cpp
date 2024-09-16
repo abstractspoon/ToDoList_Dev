@@ -427,11 +427,15 @@ BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) c
 	case BCT_MINMAX_DUEDONEDATES:
 		{
 			double dDiff = max(10.0, (dMax - dMin));
-			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);		}
+			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
+			// some comment
+		}
 		break;
 
 	default: // All else
-		dMin = 0.0;		dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);		break;
+		dMin = 0.0;
+		dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
+		break;
 	}
 
 	return TRUE;
