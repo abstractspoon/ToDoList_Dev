@@ -1222,7 +1222,7 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 		COleDateTime dtTick = calculator.GetStartDate(), dtItem;
 		CDateHelper dh;
 
-/*
+#if 0
 		int nInterval = max(1, (nNumItems / 10));
 
 		for (int nItem = nFrom; nItem < nTo; nItem += nInterval)
@@ -1230,8 +1230,7 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 			if (calculator.GetItemEndDate(nItem, dtTick))
 				aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtTick));
 		}
-*/
-
+#else
 		BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, calculator.GetTotalDays(), MIN_XSCALE_SPACING);
 		int nLastTick = -1;
 
@@ -1290,6 +1289,7 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 		// Add label for last item further away than 1 item
 		if ((nLastTick < (nTo - 1)) && calculator.GetItemEndDate(nTo, dtItem))
 			aLabels.SetAt(nTo - nFrom, dh.FormatDate(dtItem));
+#endif
 	}
 }
 
