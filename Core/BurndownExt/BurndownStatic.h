@@ -126,7 +126,24 @@ static BURNDOWN_GRAPHSCALE SCALES[] =
 	BCS_HALFYEAR,
 	BCS_YEAR,
 };
+
 static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
+
+// ---------------------------------------------------------
+
+static BURNDOWN_GRAPHSCALE CalculateRequiredScale(int nAvailSpace, int nNumDays, int nMinSpacing)
+{
+	// work thru the available scales until we find a suitable one
+	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
+	{
+		int nSpacing = MulDiv(SCALES[nScale], nAvailSpace, nNumDays);
+
+		if (nSpacing > nMinSpacing)
+			return SCALES[nScale];
+	}
+
+	return BCS_YEAR;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

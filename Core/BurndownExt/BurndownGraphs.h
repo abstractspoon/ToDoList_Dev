@@ -41,8 +41,6 @@ protected:
 	static void SetDatasetColor(CHMXDataset& dataset, COLORREF crBase);
 	static void ClearData(CHMXDataset datasets[HMX_MAX_DATASET]);
 
-	static BURNDOWN_GRAPHSCALE CalculateRequiredXScale(int nAvailWidth, int nNumDays);
-
 protected:
 	BOOL InitColorPalette(int nNumColors, int nStartColor);
 	BOOL InitColorPalette(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);

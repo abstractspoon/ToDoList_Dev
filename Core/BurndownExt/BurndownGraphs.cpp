@@ -301,20 +301,6 @@ BOOL CGraphBase::HasOption(BURNDOWN_GRAPHOPTION nOption) const
 	return (nOption == m_nOption);
 }
 
-BURNDOWN_GRAPHSCALE CGraphBase::CalculateRequiredXScale(int nAvailWidth, int nNumDays)
-{
-	// work thru the available scales until we find a suitable one
-	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
-	{
-		int nSpacing = MulDiv(SCALES[nScale], nAvailWidth, nNumDays);
-
-		if (nSpacing > MIN_XSCALE_SPACING)
-			return SCALES[nScale];
-	}
-
-	return BCS_YEAR;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 
 CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BGO_TREND_NONE)
@@ -417,7 +403,7 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 	COleDateTime dtTick = calculator.GetStartDate();
 	CDateHelper dh;
 
-	BURNDOWN_GRAPHSCALE nScale = CalculateRequiredXScale(nAvailWidth, nNumDays);
+	BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, nNumDays, MIN_XSCALE_SPACING);
 
 	for (int nDay = 0; nDay <= nNumDays; )
 	{
@@ -1246,7 +1232,7 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 		}
 */
 
-		BURNDOWN_GRAPHSCALE nScale = CalculateRequiredXScale(nAvailWidth, calculator.GetTotalDays());
+		BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, calculator.GetTotalDays(), MIN_XSCALE_SPACING);
 		int nLastTick = -1;
 
 		for (int nItem = nFrom; nItem <= nTo; nItem++)
