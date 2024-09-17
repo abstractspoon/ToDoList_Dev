@@ -133,8 +133,6 @@ BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd,
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	UINT nSize = sizeof(CPlex);
-
 	if (CDialog::Create(IDD_STATISTICS_DLG, pParentWnd))
 	{
 		SetWindowLong(*this, GWL_STYLE, dwStyle);
@@ -169,6 +167,7 @@ BOOL CBurndownWnd::OnInitDialog()
 
 	VERIFY(m_chart.SubclassDlgItem(IDC_GRAPH, this));
 	VERIFY(m_cbGraphs.Initialise(m_chart));
+	VERIFY(m_wndPrompts.SetComboPrompt(m_cbOptions, IDS_NONE));
 
 	RebuildGraph(FALSE, FALSE, FALSE);
 
@@ -180,13 +179,9 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	//CString sKey(szKey);
-
 	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_nGraph);
 
 	// Active date range
-	pPrefs->DeleteProfileSection(_T("ActiveRange"));
-
 	COleDateTimeRange dtActiveRange;
 
 	if (m_sliderDateRange.HasRange())

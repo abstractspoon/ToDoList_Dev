@@ -31,34 +31,6 @@ const int TOOLTIPOFFSET = GraphicsMisc::ScaleByDPIFactor(20);
 
 /////////////////////////////////////////////////////////////////////////////
 
-bool HMXUtils::GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly)
-{
-	bool first = true;
-
-	for (int i = 0; i < nNumSets; i++)
-	{
-		double dMinSet, dMaxSet;
-
-		if (datasets[i].GetMinMax(dMinSet, dMaxSet, bDataOnly))
-		{
-			if (first)
-			{
-				nMin = dMinSet;
-				nMax = dMaxSet;
-
-				first = false;
-			}
-			else
-			{
-				nMin = min(nMin, dMinSet);
-				nMax = min(nMax, dMaxSet);
-			}
-		}
-	}
-
-	return !first;
-}
-
 double HMXUtils::CalcMaxYAxisValue(double dDataMax, int nNumTicks)
 {
 	return (nNumTicks * CalcYAxisInterval(dDataMax, nNumTicks));
@@ -68,7 +40,7 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 {
 	ASSERT(nNumTicks > 0);
 
-	const double INTERVALS[] = { 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
+	const double INTERVALS[] = { 0.01, 0.02, 0.025, 0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000 };
 	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
 
 	// Find the first tick increment that gives us a range
@@ -120,30 +92,20 @@ BOOL CHMXChartEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 
 int CHMXChartEx::GetNumYSubTicks(double dInterval) const
 {
-	if (dInterval != (int)dInterval)
-	{
-		ASSERT(0);
-		return 1;
-	}
-	else if (dInterval == 1.0)
-	{
-		return 1;
-	}
-
 	const int SUB_TICKS[] = { 2, 4, 5 };
 	const int NUM_SUBTICKS = (sizeof(SUB_TICKS) / sizeof(SUB_TICKS[0]));
 
 	int nSubTick = NUM_SUBTICKS;
 	int nNumTicks = GetNumYTicks();
+	int nAvailHeight = m_rectData.Height();
 
 	while (nSubTick--)
 	{
-		double dSubInterval = (dInterval / SUB_TICKS[nSubTick]);
+		double dSubIntervalInPixels = (nAvailHeight / (nNumTicks * SUB_TICKS[nSubTick]));
 
-		if (dSubInterval == (int)dSubInterval)
+		// Must be an exact pixel height
+		if (dSubIntervalInPixels == (int)dSubIntervalInPixels)
 		{
-			double dSubIntervalInPixels = (m_rectData.Height() / (nNumTicks * SUB_TICKS[nSubTick]));
-
 			if (dSubIntervalInPixels >= MIN_SUBINTERVAL_HEIGHT)
 				return SUB_TICKS[nSubTick];
 		}
@@ -173,9 +135,9 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 	return TRUE;
 }
 
-bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
+BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
-	double dInterval = HMXUtils::CalcYAxisInterval(m_nYMax, 10);
+	double dInterval = HMXUtils::CalcYAxisInterval((m_dYMax - m_dYMin), 10);
 	int nNumSubTicks = GetNumYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)
@@ -184,13 +146,13 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 		CPen* pPenOld = dc.SelectObject(&penSubGrid);
 
 		int nTotalTicks = (GetNumYTicks() * nNumSubTicks);
-		double nY = ((m_nYMax - m_nYMin) / nTotalTicks);
+		double nY = ((m_dYMax - m_dYMin) / nTotalTicks);
 
 		for (int f = 0; f <= nTotalTicks; f++)
 		{
 			if (f % nNumSubTicks)
 			{
-				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_nYMax - m_nYMin);
+				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_dYMax - m_dYMin);
 
 				dc.MoveTo(m_rectData.left, (int)nTemp);
 				dc.LineTo(m_rectData.right, (int)nTemp);
@@ -467,4 +429,3 @@ CString CHMXChartEx::GetYTickText(int nTick, double dValue) const
 	// else
 	return CHMXChart::GetYTickText(nTick, dValue);
 }
-

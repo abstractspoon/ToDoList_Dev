@@ -52,17 +52,16 @@ const int NUM_GRAPH_COLORS = (sizeof(GRAPH_COLORS) / sizeof(GRAPH_COLORS[0]));
 
 const int		GRAPH_LINE_THICKNESS = 1;
 const int		TREND_LINE_THICKNESS = 2;
-const int		MIN_XSCALE_SPACING	 = 50; // pixels
+const int		MIN_XSCALE_SPACING	 = GraphicsMisc::ScaleByDPIFactor(50); // pixels
 
 /////////////////////////////////////////////////////////////////////////////////
 
 CGraphsMap::CGraphsMap()
 {
-	AddGraph(BCT_TIMESERIES_INCOMPLETETASKS,	new CIncompleteTasksGraph());
-	AddGraph(BCT_TIMESERIES_REMAININGDAYS,		new CRemainingDaysGraph());
-	AddGraph(BCT_TIMESERIES_STARTEDENDEDTASKS,	new CStartedEndedTasksGraph());
-	AddGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS, new CEstimatedSpentDaysGraph());
-	//AddGraph(BCT_ESTIMATEDSPENTCOST,			new CEstimatedSpentCostGraph());
+	AddGraph(BCT_TIMESERIES_INCOMPLETETASKS,	new CIncompleteTasksTimeGraph());
+	AddGraph(BCT_TIMESERIES_REMAININGDAYS,		new CRemainingDaysTimeGraph());
+	AddGraph(BCT_TIMESERIES_STARTEDENDEDTASKS,	new CStartedEndedTasksTimeGraph());
+	AddGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS, new CEstimatedSpentDaysTimeGraph());
 
 	AddGraph(BCT_FREQUENCY_CATEGORY,			new CCategoryFrequencyGraph());
 	AddGraph(BCT_FREQUENCY_STATUS,				new CStatusFrequencyGraph());
@@ -72,6 +71,9 @@ CGraphsMap::CGraphsMap()
 	AddGraph(BCT_FREQUENCY_TAGS,				new CTagFrequencyGraph());
 	AddGraph(BCT_FREQUENCY_PRIORITY,			new CPriorityFrequencyGraph());
 	AddGraph(BCT_FREQUENCY_RISK,				new CRiskFrequencyGraph());
+
+	AddGraph(BCT_MINMAX_ESTIMATEDSPENTDAYS,		new CEstimatedSpentDaysMinMaxGraph());
+	AddGraph(BCT_MINMAX_DUEDONEDATES,			new CDueDoneDatesMinMaxGraph());
 }
 
 CGraphsMap::~CGraphsMap()
@@ -132,7 +134,9 @@ BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption) 
 	: 
 	m_nGraph(nGraph), 
-	m_nOption(nOption)
+	m_nOption(nOption),
+	m_dDataMin(HMX_DATASET_VALUE_INVALID),
+	m_dDataMax(HMX_DATASET_VALUE_INVALID)
 {
 	ASSERT(IsValidGraph(m_nGraph));
 }
@@ -166,6 +170,14 @@ void CGraphBase::ClearData(CHMXDataset datasets[HMX_MAX_DATASET])
 BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
 {
 	return GetGraphType(m_nGraph);
+}
+
+BOOL CGraphBase::GetMinMax(double& dMin, double& dMax) const
+{
+	dMin = m_dDataMin;
+	dMax = m_dDataMax;
+
+	return ((dMin != HMX_DATASET_VALUE_INVALID) && (dMax != HMX_DATASET_VALUE_INVALID));
 }
 
 BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
@@ -256,6 +268,27 @@ BOOL CGraphBase::SetColors(const CColorArray& aColors)
 const CColorArray& CGraphBase::GetColors() const
 {
 	return m_aColors;
+}
+
+void CGraphBase::RecalcDataMinMax(const CHMXDataset datasets[HMX_MAX_DATASET], double dIgnoreVal)
+{
+	m_dDataMin = m_dDataMax = HMX_DATASET_VALUE_INVALID;
+
+	// First dataset
+	if (!datasets[0].GetMinMax(m_dDataMin, m_dDataMax, TRUE, dIgnoreVal))
+		return;
+
+	// Rest of datasets
+	for (int f = 1; f < HMX_MAX_DATASET; f++)
+	{
+		double dMin, dMax;
+
+		if (!datasets[f].GetMinMax(dMin, dMax, TRUE, dIgnoreVal))
+			break;
+
+		m_dDataMin = min(m_dDataMin, dMin);
+		m_dDataMax = max(m_dDataMax, dMax);
+	}
 }
 
 BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
@@ -359,8 +392,8 @@ BOOL CTimeSeriesGraph::CalculateMovingAverage(int nWindowSize, const CHMXDataset
 
 void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const
 {
-	// Because we often have an uneven label spacing we need
-	// to specify labels only a day by day granularity
+	// Because months have unequal lengths we need
+	// to specify labels on a day by day basis
 	nLabelStep = 1;
 
 	int nNumDays = calculator.GetTotalDays();
@@ -370,7 +403,7 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 	COleDateTime dtTick = calculator.GetStartDate();
 	CDateHelper dh;
 
-	BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, nNumDays);
+	BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, nNumDays, MIN_XSCALE_SPACING);
 
 	for (int nDay = 0; nDay <= nNumDays; )
 	{
@@ -417,20 +450,6 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 
 		dtTick = dtNextTick;
 	}
-}
-
-BURNDOWN_GRAPHSCALE CTimeSeriesGraph::CalculateRequiredScale(int nAvailWidth, int nNumDays)
-{
-	// work thru the available scales until we find a suitable one
-	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
-	{
-		int nSpacing = MulDiv(SCALES[nScale], nAvailWidth, nNumDays);
-
-		if (nSpacing > MIN_XSCALE_SPACING)
-			return SCALES[nScale];
-	}
-
-	return BCS_YEAR;
 }
 
 BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
@@ -493,19 +512,19 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 
 /////////////////////////////////////////////////////////////////////////////
 
-CIncompleteTasksGraph::CIncompleteTasksGraph()
+CIncompleteTasksTimeGraph::CIncompleteTasksTimeGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_INCOMPLETETASKS)
 {
 	InitColorPalette(COLOR_GREEN);
 }
 
-CString CIncompleteTasksGraph::GetTitle() const
+CString CIncompleteTasksTimeGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_INCOMPLETE);
 }
 
-void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CIncompleteTasksTimeGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	UpdateDatasetColors(datasets);
 
@@ -533,22 +552,13 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 			datasets[0].SetData(nDay, nNumNotDone);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMin, dMax;
-
-		if (HMXUtils::GetMinMax(datasets, 1, dMin, dMax, true))
-		{
-			ASSERT(dMin == 0.0);
-
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
-			datasets[0].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
 
-	CalculateTrendLines(datasets);
+	RecalcDataMinMax(datasets);
 }
 
-CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CIncompleteTasksTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -564,26 +574,26 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	return sTooltip;
 }
 
-BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
+BOOL CIncompleteTasksTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	return CalculateTrendLine(GetOption(), datasets[0], datasets[1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-CRemainingDaysGraph::CRemainingDaysGraph()
+CRemainingDaysTimeGraph::CRemainingDaysTimeGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_REMAININGDAYS)
 {
 	InitColorPalette(COLOR_BLUE, COLOR_YELLOW);
 }
 
-CString CRemainingDaysGraph::GetTitle() const
+CString CRemainingDaysTimeGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_REMAINING);
 }
 
-void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CRemainingDaysTimeGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	UpdateDatasetColors(datasets);
 
@@ -610,32 +620,23 @@ void CRemainingDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 		{
 			// Time Estimate
 			double dEst = ((nDay * dTotalEst) / nNumDays);
-
 			datasets[REMAINING_ESTIMATE].SetData(nDay, dTotalEst - dEst);
 		
 			// Time Spent
 			double dSpent = calculator.GetDaysSpent(date);
-		
 			datasets[REMAINING_SPENT].SetData(nDay, dTotalEst - dSpent);
 		}
 
 		// Ensure last Time Estimate value is always zero
 		datasets[REMAINING_ESTIMATE].SetData(nNumDays, 0.0);
-	
-		// Set the maximum Y value to be something 'nice'
-		if (dTotalEst > 0)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(dTotalEst, 10);
 
-			datasets[REMAINING_ESTIMATE].SetMax(dMax);
-			datasets[REMAINING_SPENT].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
 
-	CalculateTrendLines(datasets);
+	RecalcDataMinMax(datasets);
 }
 
-CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CRemainingDaysTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -651,7 +652,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
-BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
+BOOL CRemainingDaysTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	// No need to calculate trend of remaining estimate because it's already a straight line
 	return CalculateTrendLine(GetOption(), datasets[REMAINING_SPENT], datasets[REMAINING_SPENT + 1]);
@@ -659,19 +660,19 @@ BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATAS
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-CStartedEndedTasksGraph::CStartedEndedTasksGraph()
+CStartedEndedTasksTimeGraph::CStartedEndedTasksTimeGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_STARTEDENDEDTASKS)
 {
 	InitColorPalette(COLOR_RED, COLOR_GREEN);
 }
 
-CString CStartedEndedTasksGraph::GetTitle() const
+CString CStartedEndedTasksTimeGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_STARTEDENDED);
 }
 
-void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CStartedEndedTasksTimeGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	UpdateDatasetColors(datasets);
 
@@ -704,23 +705,13 @@ void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator,
 			datasets[ENDED_TASKS].SetData(nDay, nNumDone);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMax = 0.0;
-		
-		// Last started value will always be largest
-		if (datasets[STARTED_TASKS].GetData(nNumDays, dMax))
-		{
-			dMax = HMXUtils::CalcMaxYAxisValue(dMax, 10);
-
-			datasets[STARTED_TASKS].SetMax(dMax);
-			datasets[ENDED_TASKS].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
 
-	CalculateTrendLines(datasets);
+	RecalcDataMinMax(datasets);
 }
 
-CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CStartedEndedTasksTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -736,7 +727,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	return sTooltip;
 }
 
-BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
+BOOL CStartedEndedTasksTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	if (CalculateTrendLine(GetOption(), datasets[STARTED_TASKS], datasets[STARTED_TASKS + 2]) &&
 		CalculateTrendLine(GetOption(), datasets[ENDED_TASKS], datasets[ENDED_TASKS + 2]))
@@ -752,19 +743,19 @@ BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_D
 
 /////////////////////////////////////////////////////////////////////////////
 
-CEstimatedSpentDaysGraph::CEstimatedSpentDaysGraph()
+CEstimatedSpentDaysTimeGraph::CEstimatedSpentDaysTimeGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS)
 {
 	InitColorPalette(COLOR_VIOLET, COLOR_GREEN);
 }
 
-CString CEstimatedSpentDaysGraph::GetTitle() const
+CString CEstimatedSpentDaysTimeGraph::GetTitle() const
 {
 	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTDAYS);
 }
 
-void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CEstimatedSpentDaysTimeGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	UpdateDatasetColors(datasets);
 
@@ -797,26 +788,13 @@ void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator
 			datasets[SPENT_DAYS].SetData(nDay, dDaysSpent);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMaxEst = 0.0, dMaxSpent = 0.0;
-		
-		// Last values will always be largest
-		bool bHasMax = datasets[ESTIMATED_DAYS].GetData(nNumDays, dMaxEst);
-		bHasMax |= datasets[SPENT_DAYS].GetData(nNumDays, dMaxSpent);
-			
-		if (bHasMax)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(max(dMaxEst, dMaxSpent), 10);
-
-			datasets[ESTIMATED_DAYS].SetMax(dMax);
-			datasets[SPENT_DAYS].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
 
-	CalculateTrendLines(datasets);
+	RecalcDataMinMax(datasets);
 }
 
-CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CEstimatedSpentDaysTimeGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -826,13 +804,13 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 	if (datasets[ESTIMATED_DAYS].GetData(nHit, dDaysEst) &&
 		datasets[SPENT_DAYS].GetData(nHit, dDaysSpent))
 	{
-		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dDaysEst, (int)dDaysSpent);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), dDaysEst, dDaysSpent);
 	}
 
 	return sTooltip;
 }
 
-BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
+BOOL CEstimatedSpentDaysTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	if (CalculateTrendLine(GetOption(), datasets[ESTIMATED_DAYS], datasets[ESTIMATED_DAYS + 2]) &&
 		CalculateTrendLine(GetOption(), datasets[SPENT_DAYS], datasets[SPENT_DAYS + 2]))
@@ -860,7 +838,7 @@ CString CEstimatedSpentCostGraph::GetTitle() const
 	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTCOST);
 }
 
-void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	UpdateDatasetColors(datasets);
 
@@ -893,23 +871,10 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 			datasets[SPENT_COST].SetData(nDay, dCostSpent);
 		}
 
-		// Set the maximum Y value to be something 'nice'
-		double dMaxEst = 0.0, dMaxSpent = 0.0;
-		
-		// Last values will always be largest
-		bool bHasMax = datasets[ESTIMATED_COST].GetData(nNumDays, dMaxEst);
-		bHasMax |= datasets[SPENT_COST].GetData(nNumDays, dMaxSpent);
-			
-		if (bHasMax)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(max(dMaxEst, dMaxSpent), 10);
-
-			datasets[ESTIMATED_COST].SetMax(dMax);
-			datasets[SPENT_COST].SetMax(dMax);
-		}
+		CalculateTrendLines(datasets);
 	}
 
-	CalculateTrendLines(datasets);
+	RecalcDataMinMax(datasets);
 }
 
 CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -922,7 +887,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 	if (datasets[ESTIMATED_COST].GetData(nHit, dCostEst) &&
 		datasets[SPENT_COST].GetData(nHit, dCostSpent))
 	{
-		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), (int)dCostEst, (int)dCostSpent);
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), CDateHelper::FormatDate(dDate), dCostEst, dCostSpent);
 	}
 
 	return sTooltip;
@@ -944,40 +909,35 @@ BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 
 /////////////////////////////////////////////////////////////////////////////
 
-CAttributeFrequencyGraph::CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph) 
+CFrequencyGraph::CFrequencyGraph(BURNDOWN_GRAPH nGraph) 
 	: 
 	CGraphBase(nGraph, BGO_FREQUENCY_BAR)
 {
 }
 
-CAttributeFrequencyGraph::~CAttributeFrequencyGraph()
+CFrequencyGraph::~CFrequencyGraph()
 {
 
 }
 
-void CAttributeFrequencyGraph::RebuildXScale(const CStatsItemCalculator& /*calculator*/, int /*nAvailWidth*/, CStringArray& aLabels, int& nLabelStep) const
+void CFrequencyGraph::RebuildXScale(const CStatsItemCalculator& /*calculator*/, int /*nAvailWidth*/, CStringArray& aLabels, int& nLabelStep) const
 {
 	nLabelStep = 1;
 	aLabels.Copy(m_aAttribValues);
 }
 
-void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	// Save off attrib values for building horizontal labels
 	m_aAttribValues.RemoveAll();
 
-	// Clear all datasets
-	ClearData(datasets);
-			
 	int nNumAttrib = aFrequencies.GetSize();
 
 	if (nNumAttrib)
 	{
-		int nMaxFreq = 0;
 		CHMXDataset& dataset = datasets[0];
 
 		dataset.SetMin(0.0);
-		dataset.ClearData();
 		dataset.SetDatasetSize(nNumAttrib);
 
 		for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
@@ -989,22 +949,15 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 				m_aAttribValues.Add(CEnString(IDS_NONE));
 			else
 				m_aAttribValues.Add(fi.sLabel);
-
-			nMaxFreq = max(nMaxFreq, fi.nCount);
-		}
-
-		// Set the maximum Y value to be something 'nice'
-		if (nMaxFreq)
-		{
-			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
-			datasets[0].SetMax(dMax);
 		}
 
 		UpdateGraphStyles(dataset);
 	}
+
+	RecalcDataMinMax(datasets);
 }
 
-CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	CString sTooltip;
 	double dCount = 0.0;
@@ -1018,7 +971,7 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 	return sTooltip;
 }
 
-BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	if (HasOption(nOption))
 		return TRUE;
@@ -1029,7 +982,7 @@ BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CSt
 	return UpdateGraphStyles(datasets[0]);
 }
 
-BOOL CAttributeFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
+BOOL CFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 {
 	switch (GetOption())
 	{
@@ -1059,14 +1012,13 @@ BOOL CAttributeFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 	}
 
 	return TRUE;
-
 }
 
 // ---------------------------------------------------------------------------
 
 CCategoryFrequencyGraph::CCategoryFrequencyGraph() 
 	: 
-	CAttributeFrequencyGraph(BCT_FREQUENCY_CATEGORY)
+	CFrequencyGraph(BCT_FREQUENCY_CATEGORY)
 {
 	InitColorPalette(7, 1);
 }
@@ -1076,19 +1028,19 @@ CString CCategoryFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_CATEGORY);
 }
 
-void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetCategoryFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CStatusFrequencyGraph::CStatusFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_STATUS)
+	CFrequencyGraph(BCT_FREQUENCY_STATUS)
 {
 	InitColorPalette(7, 3);
 }
@@ -1098,19 +1050,19 @@ CString CStatusFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_STATUS);
 }
 
-void CStatusFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CStatusFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetStatusFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CAllocatedToFrequencyGraph::CAllocatedToFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCTO)
+	CFrequencyGraph(BCT_FREQUENCY_ALLOCTO)
 {
 	InitColorPalette(7, 5);
 }
@@ -1120,19 +1072,19 @@ CString CAllocatedToFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_ALLOCTO);
 }
 
-void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetAllocatedToFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CAllocatedByFrequencyGraph::CAllocatedByFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCBY)
+	CFrequencyGraph(BCT_FREQUENCY_ALLOCBY)
 {
 	InitColorPalette(7, 7);
 }
@@ -1142,19 +1094,19 @@ CString CAllocatedByFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_ALLOCBY);
 }
 
-void CAllocatedByFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CAllocatedByFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetAllocatedByFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CVersionFrequencyGraph::CVersionFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_VERSION)
+	CFrequencyGraph(BCT_FREQUENCY_VERSION)
 {
 	InitColorPalette(7, 9);
 }
@@ -1164,19 +1116,19 @@ CString CVersionFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_VERSION);
 }
 
-void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetVersionFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CTagFrequencyGraph::CTagFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_TAGS)
+	CFrequencyGraph(BCT_FREQUENCY_TAGS)
 {
 	InitColorPalette(7, 11);
 }
@@ -1186,19 +1138,19 @@ CString CTagFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_TAGS);
 }
 
-void CTagFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CTagFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetTagFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CPriorityFrequencyGraph::CPriorityFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_PRIORITY)
+	CFrequencyGraph(BCT_FREQUENCY_PRIORITY)
 {
 	InitColorPalette(11, 13);
 }
@@ -1208,19 +1160,19 @@ CString CPriorityFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_PRIORITY);
 }
 
-void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetPriorityFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
 
 CRiskFrequencyGraph::CRiskFrequencyGraph()
 	:
-	CAttributeFrequencyGraph(BCT_FREQUENCY_RISK)
+	CFrequencyGraph(BCT_FREQUENCY_RISK)
 {
 	InitColorPalette(11, 2);
 }
@@ -1230,11 +1182,252 @@ CString CRiskFrequencyGraph::GetTitle() const
 	return CEnString(IDS_FREQUENCY_RISK);
 }
 
-void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetRiskFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+
+CMinMaxGraph::CMinMaxGraph(BURNDOWN_GRAPH nGraph) 
+	:
+	CGraphBase(nGraph, BGO_MINMAX_NONE),
+	m_nItemOffset(0)
+{
+}
+
+CMinMaxGraph::~CMinMaxGraph()
+{
+}
+
+void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const
+{
+	nLabelStep = 1;
+	m_nItemOffset = 0;
+
+	int nFrom, nTo;
+	int nNumItems = calculator.GetItemRange(nFrom, nTo);
+
+	aLabels.SetSize(nNumItems);
+
+	// build ticks
+	if (nNumItems)
+	{
+		m_nItemOffset = nFrom; // For tooltip handling
+
+		COleDateTime dtTick = calculator.GetStartDate(), dtItem;
+		CDateHelper dh;
+
+#if 0
+		int nInterval = max(1, (nNumItems / 10));
+
+		for (int nItem = nFrom; nItem < nTo; nItem += nInterval)
+		{
+			if (calculator.GetItemEndDate(nItem, dtTick))
+				aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtTick));
+		}
+#else
+		BURNDOWN_GRAPHSCALE nScale = CalculateRequiredScale(nAvailWidth, calculator.GetTotalDays(), MIN_XSCALE_SPACING);
+		int nLastTick = -1;
+
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+		{
+			if (!calculator.GetItemStartDate(nItem, dtItem))
+				continue;
+			
+			// Skip items until we get to the next Tick date
+			if (dtItem < dtTick)
+				continue;
+
+			aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtItem));
+			nLastTick = nItem;
+
+			// next Tick date
+			do
+			{
+				switch (nScale)
+				{
+				case BCS_DAY:
+					dtTick.m_dt += 1.0;
+					break;
+
+				case BCS_WEEK:
+					dh.OffsetDate(dtTick, 1, DHU_WEEKS);
+					break;
+
+				case BCS_MONTH:
+					dh.OffsetDate(dtTick, 1, DHU_MONTHS);
+					break;
+
+				case BCS_2MONTH:
+					dh.OffsetDate(dtTick, 2, DHU_MONTHS);
+					break;
+
+				case BCS_QUARTER:
+					dh.OffsetDate(dtTick, 3, DHU_MONTHS);
+					break;
+
+				case BCS_HALFYEAR:
+					dh.OffsetDate(dtTick, 6, DHU_MONTHS);
+					break;
+
+				case BCS_YEAR:
+					dh.OffsetDate(dtTick, 1, DHU_YEARS);
+					break;
+
+				default:
+					ASSERT(0);
+				}
+			}
+			while (dtTick <= dtItem);
+		}
+
+		// Add label for last item further away than 1 item
+		if ((nLastTick < (nTo - 1)) && calculator.GetItemEndDate(nTo, dtItem))
+			aLabels.SetAt(nTo - nFrom, dh.FormatDate(dtItem));
+#endif
+	}
+}
+
+BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, const CStatsItemCalculator& /*calculator*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET])
+{
+	return FALSE;
+}
+
+// ---------------------------------------------------------------------------
+
+CEstimatedSpentDaysMinMaxGraph::CEstimatedSpentDaysMinMaxGraph()
+	:
+	CMinMaxGraph(BCT_MINMAX_ESTIMATEDSPENTDAYS)
+{
+	InitColorPalette(COLOR_GREEN, COLOR_RED);
+}
+
+CString CEstimatedSpentDaysMinMaxGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_ESTIMATEDSPENTDAYS);
+}
+
+void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	UpdateDatasetColors(datasets);
+
+	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[ESTIMATED_DAYS].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[ESTIMATED_DAYS].SetMarker(HMX_DATASET_MARKER_CIRCLE);
+	datasets[ESTIMATED_DAYS].SetMin(0.0);
+
+	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[SPENT_DAYS].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[SPENT_DAYS].SetMarker(HMX_DATASET_MARKER_CIRCLE);
+	datasets[SPENT_DAYS].SetMin(0.0);
+
+	// build the graph
+	int nFrom, nTo;
+	int nNumItems = calculator.GetItemRange(nFrom, nTo);
+
+	if (nNumItems)
+	{
+		datasets[ESTIMATED_DAYS].SetDatasetSize(nNumItems);
+		datasets[SPENT_DAYS].SetDatasetSize(nNumItems);
+
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+		{
+			double dDaysEst = 0.0, dDaysSpent = 0;
+
+			if (calculator.GetItemDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent))
+			{
+				datasets[ESTIMATED_DAYS].SetData(nItem - nFrom, dDaysEst);
+				datasets[SPENT_DAYS].SetData(nItem - nFrom, dDaysSpent);
+			}
+		}
+	}
+
+	RecalcDataMinMax(datasets);
+}
+
+CString CEstimatedSpentDaysMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int nHit) const
+{
+	int nItem = (nHit + m_nItemOffset);
+	CString sTitle = calculator.GetItemTitle(nItem), sTooltip;
+
+	if (!sTitle.IsEmpty())
+	{
+		double dDaysEst = 0.0, dDaysSpent = 0.0;
+		calculator.GetItemDaysEstimatedSpent(nItem, dDaysEst, dDaysSpent);
+
+		sTooltip.Format(CEnString(IDS_TOOLTIP_ESTIMATEDSPENT), sTitle, dDaysEst, dDaysSpent);
+	}
+
+	return sTooltip;
+}
+
+// ---------------------------------------------------------------------------
+
+CDueDoneDatesMinMaxGraph::CDueDoneDatesMinMaxGraph()
+	:
+	CMinMaxGraph(BCT_MINMAX_DUEDONEDATES)
+{
+	InitColorPalette(COLOR_BLUEGREEN, COLOR_ORANGE);
+}
+
+CString CDueDoneDatesMinMaxGraph::GetTitle() const
+{
+	return CEnString(IDS_DISPLAY_DUEDONEDATES);
+}
+
+void CDueDoneDatesMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) 
+{
+	UpdateDatasetColors(datasets);
+
+	datasets[DUE_DATE].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[DUE_DATE].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[DUE_DATE].SetMarker(HMX_DATASET_MARKER_CIRCLE);
+
+	datasets[DONE_DATE].SetStyle(HMX_DATASET_STYLE_MINMAX);
+	datasets[DONE_DATE].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[DONE_DATE].SetMarker(HMX_DATASET_MARKER_CIRCLE);
+
+	// build the graph
+	int nFrom, nTo;
+	int nNumItems = calculator.GetItemRange(nFrom, nTo);
+
+	if (nNumItems)
+	{
+		datasets[DUE_DATE].SetDatasetSize(nNumItems);
+		datasets[DONE_DATE].SetDatasetSize(nNumItems);
+
+		for (int nItem = nFrom; nItem <= nTo; nItem++)
+		{
+			COleDateTime dtDue, dtDone;
+
+			if (calculator.GetItemDueDoneDates(nItem, dtDue, dtDone))
+			{
+				datasets[DUE_DATE].SetData(nItem - nFrom, (int)dtDue.m_dt);
+				datasets[DONE_DATE].SetData(nItem - nFrom, (int)dtDone.m_dt);
+			}
+		}
+	}
+
+	RecalcDataMinMax(datasets, 0.0); // Ignore unset dates
+}
+
+CString CDueDoneDatesMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int nHit) const
+{
+	int nItem = (nHit + m_nItemOffset);
+	CString sTitle = calculator.GetItemTitle(nItem), sTooltip;
+
+	if (!sTitle.IsEmpty())
+	{
+		COleDateTime dtDue, dtDone;
+		calculator.GetItemDueDoneDates(nItem, dtDue, dtDone);
+
+		sTooltip.Format(CEnString(IDS_TOOLTIP_DUEDONEDATES), sTitle, dtDue.Format(VAR_DATEVALUEONLY), dtDone.Format(VAR_DATEVALUEONLY));
+	}
+
+	return sTooltip;
+}

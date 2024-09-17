@@ -245,8 +245,8 @@ BEGIN
     IDS_DISPLAY_INCOMPLETE  "Incomplete Tasks"
     IDS_DISPLAY_REMAINING   "Days Remaining"
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
-    IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
-    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%d Estimated\n%d Spent"
+    IDS_TOOLTIP_REMAINING   "%s\n%.2f Estimated\n%.2f Actual"
+    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%.2f Estimated\n%.2f Spent"
     IDS_TOOLTIP_ATTRIBFREQUENCY "%s\n%d Tasks"
 END
 
@@ -264,7 +264,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TREND_NONE          "<none>"
+    IDS_NONE                "<none>"
     IDS_FREQUENCYDIST       "Frequency Distributions"
     IDS_TIMESERIES          "Time Series"
     IDS_FREQUENCY_CATEGORY  "Category Frequency"
@@ -285,6 +285,13 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_BURNDOWN_PREF        "\nGraphs Preferences"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MINMAX              "Min Max"
+    IDS_DISPLAY_DUEDONEDATES "Due/Completion Dates"
+    IDS_TOOLTIP_DUEDONEDATES "%s\nDue %s\nCompleted %s"
 END
 
 #endif    // English (Australia) resources

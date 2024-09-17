@@ -21,6 +21,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int NUM_Y_TICKS = 10;
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct SORTITEM
 {
 	BURNDOWN_GRAPH nGraph;
@@ -36,11 +40,6 @@ static int SortProc(const void* pV1, const void* pV2)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-// Fixed number of Y ticks
-const int NUM_Y_TICKS = 10;
-
-////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
 CBurndownChart::CBurndownChart(const CStatsItemArray& data)
@@ -50,6 +49,8 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_calculator(data)
 {
 	EnableFixedLabelFontSize(); // don't scale down as available size decreases
+
+	m_dRoundY = 0.0; // we do our own rounding
 }
 
 CBurndownChart::~CBurndownChart()
@@ -351,9 +352,6 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 
 BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
 	if (!m_dtExtents.Set(dtExtents))
 	{
 		ASSERT(0);
@@ -365,16 +363,17 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CWaitCursor cursor;
 	CHoldRedraw hr(*this);
 	
-	ClearData();
+	ResetDatasets();
 	RefreshRenderFlags(FALSE);
 
-	// Which one gets drawn is controlled by the render flags
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
 	SetXText(pGraph->GetTitle());
 	SetYText(pGraph->GetTitle());
 
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
-
 		pGraph->BuildGraph(m_calculator, m_datasets);
 	}
 
@@ -384,12 +383,70 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	return TRUE;
 }
 
+CString CBurndownChart::GetYTickText(int nTick, double dValue) const
+{
+	switch (m_nActiveGraph)
+	{
+	case BCT_MINMAX_DUEDONEDATES:
+		return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+	}
+
+	// All else
+	return CHMXChartEx::GetYTickText(nTick, dValue);
+}
+
+int CBurndownChart::GetNumYSubTicks(double dInterval) const
+{
+	int nNumSub = CHMXChartEx::GetNumYSubTicks(dInterval);
+
+	switch (m_nActiveGraph)
+	{
+	case BCT_MINMAX_DUEDONEDATES:
+		// Don't allow less than a day
+		if ((dInterval / nNumSub) < 1.0)
+			nNumSub = (int)dInterval;
+		break;
+	}
+
+	return nNumSub;
+}
+
+BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) const
+{
+	if (m_data.GetSize() == 0)
+		return FALSE;
+
+	const CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
+	if (!pGraph->GetMinMax(dMin, dMax) || (dMin >= dMax))
+		return FALSE;
+
+	switch (m_nActiveGraph)
+	{
+	case BCT_MINMAX_DUEDONEDATES:
+		{
+			double dDiff = max(10.0, (dMax - dMin));
+			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
+			// some comment
+		}
+		break;
+
+	default: // All else
+		dMin = 0.0;
+		dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
+		break;
+	}
+
+	return TRUE;
+}
+
 void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH(m_nActiveGraph);
-
 	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
+
+	const CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
 
 	switch (pGraph->GetOption())
 	{
@@ -413,7 +470,7 @@ void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 void CBurndownChart::PreSubclassWindow()
 {
 	SetBkGnd(GetSysColor(COLOR_WINDOW));
-	SetXLabelsAreTicks(true);
+	SetXLabelsAreTicks(TRUE);
 	SetXLabelAngle(45);
 	SetNumYTicks(NUM_Y_TICKS);
 
@@ -428,14 +485,6 @@ CString CBurndownChart::GetTooltip(int nHit) const
 	GET_GRAPH_RET(m_nActiveGraph, _T(""));
 
 	return pGraph->GetTooltip(m_calculator, m_datasets, nHit);
-}
-
-int CBurndownChart::HitTest(const CPoint& ptClient) const
-{
-	if (!m_dtExtents.IsValid())
-		return -1;
-
-	return CHMXChartEx::HitTest(ptClient);
 }
 
 void CBurndownChart::SetTodayColour(COLORREF color)
@@ -472,16 +521,19 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	}
 }
 
-bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
+BOOL CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 	{
 		ASSERT(0);
-		return false;
+		return FALSE;
 	}
 
 	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, false);
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
+	if (pGraph->GetType() == BCT_MINMAX)
+		return CHMXChartEx::DrawMinMaxChart(dc, m_datasets[nDatasetIndex], m_datasets[nDatasetIndex + 1], alpha);
 
 	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], pGraph->GetColors(), alpha);
 }

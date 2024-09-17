@@ -15,6 +15,7 @@ static const GRAPHTYPE GRAPHTYPES[] =
 {
 	{ BCT_TIMESERIES, IDS_TIMESERIES },
 	{ BCT_FREQUENCY,  IDS_FREQUENCYDIST },
+	{ BCT_MINMAX,     IDS_MINMAX },
 };
 
 static const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
@@ -52,16 +53,18 @@ static BOOL IsValidGraph(BURNDOWN_GRAPH nGraph)
 
 static const GRAPHOPTION GRAPHOPTIONS[] = 
 {
-	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	}, // default
+	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	},	// default
 	{ BGO_TREND_7DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_30DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_90DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_NONE,			BCT_TIMESERIES	},
 
-	{ BGO_FREQUENCY_BAR,		BCT_FREQUENCY, }, // default
+	{ BGO_FREQUENCY_BAR,		BCT_FREQUENCY, },	// default
 	{ BGO_FREQUENCY_LINE,		BCT_FREQUENCY, },
 	{ BGO_FREQUENCY_PIE,		BCT_FREQUENCY, },
 	{ BGO_FREQUENCY_DONUT,		BCT_FREQUENCY, },
+
+	{ BGO_MINMAX_NONE,			BCT_MINMAX, },		// default
 };
 
 static const int NUM_OPTIONS = sizeof(GRAPHOPTIONS) / sizeof(GRAPHOPTION);
@@ -123,7 +126,24 @@ static BURNDOWN_GRAPHSCALE SCALES[] =
 	BCS_HALFYEAR,
 	BCS_YEAR,
 };
+
 static int NUM_SCALES = sizeof(SCALES) / sizeof(int);
+
+// ---------------------------------------------------------
+
+static BURNDOWN_GRAPHSCALE CalculateRequiredScale(int nAvailSpace, int nNumDays, int nMinSpacing)
+{
+	// work thru the available scales until we find a suitable one
+	for (int nScale = 0; nScale < NUM_SCALES; nScale++)
+	{
+		int nSpacing = MulDiv(SCALES[nScale], nAvailSpace, nNumDays);
+
+		if (nSpacing > nMinSpacing)
+			return SCALES[nScale];
+	}
+
+	return BCS_YEAR;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

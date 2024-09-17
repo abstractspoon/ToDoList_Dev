@@ -19,6 +19,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\RangeSliderCtrl.h"
+#include "..\Shared\WndPrompt.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\ITaskList.h"
@@ -88,7 +89,8 @@ protected:
 	CBurndownGraphComboBox m_cbGraphs;
 	CBurndownOptionsComboBox m_cbOptions;
 	CBurndownPreferencesDlg m_dlgPrefs;
-	
+	CWndPromptManager m_wndPrompts;
+
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BOOL m_bVisible;
