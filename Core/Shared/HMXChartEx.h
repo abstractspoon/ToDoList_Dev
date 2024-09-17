@@ -44,12 +44,11 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CHMXChartEx)
 	//}}AFX_VIRTUAL
-	virtual BOOL DrawHorzGridLines(CDC& dc);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	virtual CString GetTooltip(int nHit) const;
 	virtual int HitTest(const CPoint& ptClient, int nDataset = 0) const;
-	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
 	virtual BOOL HighlightDataPoint(int nIndex);
+	virtual int GetNumYSubTicks(double dInterval) const;
 
 	// Generated message map functions
 	//{{AFX_MSG(CHMXChartEx)
@@ -60,13 +59,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL InitTooltip(BOOL bMultiline);
-	virtual int GetNumYSubTicks(double dInterval) const;
 
+	BOOL InitTooltip(BOOL bMultiline);
 	void HideLastHighlightedPoint();
-	int CalcXScaleFontSize(BOOL bTitle) const;
-	int CalcYScaleFontSize(BOOL bTitle) const;
-	CString GetYTickText(int nTick, double dValue) const;
+
+	// CHMXChart overrides
+	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
+	virtual int CalcXScaleFontSize(BOOL bTitle) const;
+	virtual int CalcYScaleFontSize(BOOL bTitle) const;
+	virtual CString GetYTickText(int nTick, double dValue) const;
+	virtual BOOL DrawHorzGridLines(CDC& dc);
 };
 
 /////////////////////////////////////////////////////////////////////////////
