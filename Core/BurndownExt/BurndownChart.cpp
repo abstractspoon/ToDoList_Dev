@@ -48,33 +48,6 @@ BEGIN_MESSAGE_MAP(CBurndownChart, CHMXChartEx)
 END_MESSAGE_MAP()
 
 ////////////////////////////////////////////////////////////////////////////////
-// CBurndownChart message handlers
-
-// CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nGraph) const
-// {
-// 	CGraphBase* pGraph = NULL;
-// 	GET_GRAPH_RET(nGraph, _T(""));
-// 
-// 	return pGraph->GetTitle();
-// }
-
-// BURNDOWN_GRAPHTYPE CBurndownChart::GetGraphType(BURNDOWN_GRAPH nGraph) const
-// {
-// 	CGraphBase* pGraph = NULL;
-// 	GET_GRAPH_RET(nGraph, BCT_UNKNOWNTYPE);
-// 
-// 	return pGraph->GetType();
-// }
-
-// BURNDOWN_GRAPHOPTION CBurndownChart::GetDefaultOption(BURNDOWN_GRAPH nGraph) const
-// {
-// 	return ::GetDefaultOption(GetGraphType(nGraph));
-// }
-
-// BOOL CBurndownChart::IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph) const
-// {
-// 	return ::IsValidOption(nOption, GetGraphType(nGraph));
-// }
 
 BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
 {
@@ -94,98 +67,6 @@ BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
 
 	return TRUE;
 }
-
-// BOOL CBurndownChart::SetActiveGraphColors(const CColorArray& aColors)
-// {
-// 	CGraphBase* pGraph = NULL;
-// 	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-// 
-// 	if (!pGraph->SetColors(aColors))
-// 		return FALSE;
-// 
-// 	pGraph->UpdateDatasetColors(m_datasets);
-// 	Invalidate();
-// 
-// 	return TRUE;
-// }
-
-// BURNDOWN_GRAPHOPTION CBurndownChart::GetActiveGraphOption() const
-// {
-// 	CGraphBase* pGraph = NULL;
-// 	GET_GRAPH_RET(m_nActiveGraph, BGO_INVALID);
-// 
-// 	return pGraph->GetOption();
-// }
-
-// int CBurndownChart::GetActiveGraphColors(CColorArray& aColors) const
-// {
-// 	CGraphBase* pGraph = NULL;
-// 	GET_GRAPH_RET(m_nActiveGraph, 0);
-// 
-// 	aColors.Copy(pGraph->GetColors());
-// 	return aColors.GetSize();
-// }
-
-/*
-void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
-{
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
-
-		if (!sColors.IsEmpty()) // first time will fail
-		{
-			CColorArray aColors;
-			Misc::Split(sColors, aColors, '|');
-
-			// Only allow the same number of colours as the graph's default palette
-			if (aColors.GetSize() == pGraph->GetColors().GetSize())
-				pGraph->SetColors(aColors);
-		}
-
-		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(nGraph));
-
-		if (nOption != BGO_INVALID)
-			pGraph->SetOption(nOption);
-	}
-}
-
-void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
-{
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
-
-		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
-	}
-}
-*/
-
-// void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
-// {
-// 	if (m_mapGraphs.SetGraphColors(mapColors))
-// 	{
-// 		CGraphBase* pGraph = NULL;
-// 		GET_GRAPH(m_nActiveGraph);
-// 
-// 		pGraph->UpdateDatasetColors(m_datasets);
-// 		Invalidate();
-// 	}
-// }
 
 void CBurndownChart::OnColoursChanged()
 {
