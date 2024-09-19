@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "BurndownWnd.h"
 #include "BurndownStatic.h"
+#include "BurndownEnum.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
@@ -32,6 +33,11 @@ static char THIS_FILE[] = __FILE__;
 
 const UINT WM_REBUILDGRAPH = (WM_APP+1);
 
+////////////////////////////////////////////////////////////////////////////////
+
+#define GET_GRAPH() pGraph = m_mapGraphs.GetGraph(m_nActiveGraph); if (pGraph == NULL) return
+#define GET_GRAPH_RET(ret) pGraph = m_mapGraphs.GetGraph(m_nActiveGraph); if (pGraph == NULL) return ret
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum // m_dwUpdateGraphOnShow
@@ -50,10 +56,12 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_dwUpdateGraphOnShow(0),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_chart(m_data),
-	m_dlgPrefs(m_chart.Graphs(), this),
+	m_dlgPrefs(m_mapGraphs, this),
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
-	m_bVisible(FALSE)
+	m_bVisible(FALSE),
+	m_nActiveGraph(BCG_TIMESERIES_INCOMPLETETASKS),
+	m_nSelOption(BGO_INVALID)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -75,6 +83,9 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
+
+	m_cbGraphs.DDX(pDX, m_nActiveGraph);
+	m_cbOptions.DDX(pDX, m_nSelOption);
 }
 
 
@@ -86,7 +97,7 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_COMMAND(ID_BURNDOWN_PREF, OnPreferences)
 	ON_WM_HELPINFO()
-	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelchangeDisplay)
+	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelchangeGraph)
 	ON_CBN_SELENDOK(IDC_OPTIONS, OnOptionChanged)
 	ON_WM_SHOWWINDOW()
 	ON_WM_ERASEBKGND()
@@ -119,10 +130,13 @@ BOOL CBurndownWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 
 void CBurndownWnd::OnPreferences()
 {
-	if (m_dlgPrefs.DoModal(m_chart.GetActiveGraph()) == IDOK)
+	if (m_dlgPrefs.DoModal(m_nActiveGraph) == IDOK)
 	{
-		m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
+		if (m_mapGraphs.SetColors(m_dlgPrefs.GetGraphColors()))
+			m_chart.OnColoursChanged();
+
 		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
+		Invalidate();
 	}
 }
 
@@ -163,10 +177,10 @@ BOOL CBurndownWnd::OnInitDialog()
 	rFrame.DeflateRect(1, 1);
 
 	VERIFY(m_chart.SubclassDlgItem(IDC_GRAPH, this));
-	VERIFY(m_cbGraphs.Initialise(m_chart.Graphs()));
+	VERIFY(m_cbGraphs.Initialise(m_mapGraphs));
 	VERIFY(m_wndPrompts.SetComboPrompt(m_cbOptions, IDS_NONE));
 
-	RebuildGraph(FALSE, FALSE, FALSE);
+	//RebuildGraph(FALSE, FALSE, FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -176,7 +190,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_chart.GetActiveGraph());
+	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_nActiveGraph);
 
 	// Active date range
 	COleDateTimeRange dtActiveRange;
@@ -193,7 +207,22 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		pPrefs->DeleteProfileSection(_T("ActiveRange"));
 	}
 
-	m_chart.SavePreferences(pPrefs, szKey);
+	// Colours and Options
+	POSITION pos = m_mapGraphs.GetStartPosition();
+
+	while (pos)
+	{
+		BURNDOWN_GRAPH nGraph;
+		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
+
+		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
+		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
+
+		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
+		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
+	}
+
+	//m_chart.SavePreferences(pPrefs, szKey);
 	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 }
 
@@ -204,21 +233,20 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// burn down specific options
 	if (!bAppOnly)
 	{
-		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), BCG_TIMESERIES_INCOMPLETETASKS);
-		
-// 		if (!IsValidGraph(nGraph))
-// 			nGraph = BCG_TIMESERIES_INCOMPLETETASKS;
+		m_nActiveGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), BCG_TIMESERIES_INCOMPLETETASKS);
+	
+		const CGraphBase* pActiveGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
 
-		m_chart.LoadPreferences(pPrefs, szKey);
+		if (!pActiveGraph)
+		{
+			m_nActiveGraph = BCG_TIMESERIES_INCOMPLETETASKS;
+			pActiveGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
+
+			ASSERT(pActiveGraph);
+		}
+		
+		//m_chart.LoadPreferences(pPrefs, szKey);
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
-
-		m_chart.SetActiveGraph(nGraph);
-		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
-		
-		m_cbGraphs.SetSelectedGraph(nGraph);
-
-		m_cbOptions.SetActiveGraphType(m_chart.GetGraphType(nGraph));
-		m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -228,6 +256,40 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		if (dEnd >= dStart)
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
+
+		// Colours and Options
+		POSITION pos = m_mapGraphs.GetStartPosition();
+		BURNDOWN_GRAPH nGraph;
+
+		while (pos)
+		{
+			CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
+
+			CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
+			CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
+
+			if (!sColors.IsEmpty()) // first time will fail
+			{
+				CColorArray aColors;
+				Misc::Split(sColors, aColors, '|');
+
+				// Only allow the same number of colours as the graph's default palette
+				if (aColors.GetSize() == pGraph->GetColors().GetSize())
+					pGraph->SetColors(aColors);
+			}
+
+			sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
+			BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(pGraph->GetType()));
+
+			if (nOption != BGO_INVALID)
+				pGraph->SetOption(nOption);
+		}
+
+		m_chart.SetActiveGraph(pActiveGraph);
+		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
+
+		m_cbOptions.SetActiveGraphType(pActiveGraph->GetType());
+		m_nSelOption = pActiveGraph->GetOption();
 
 		UpdateData(FALSE);
 	}
@@ -702,15 +764,18 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	UpdateActiveRangeLabel(dtActiveRange);
 }
 
-void CBurndownWnd::OnSelchangeDisplay()
+void CBurndownWnd::OnSelchangeGraph()
 {
 	UpdateData();
 
-	BURNDOWN_GRAPH nGraph = m_cbGraphs.GetSelectedGraph();
-	m_chart.SetActiveGraph(nGraph);
+	const CGraphBase* pGraph;
+	GET_GRAPH();
 
-	m_cbOptions.SetActiveGraphType(m_chart.GetGraphType(nGraph));
-	m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
+	m_chart.SetActiveGraph(pGraph);
+	m_cbOptions.SetActiveGraphType(pGraph->GetType());
+
+	m_nSelOption = pGraph->GetOption();
+	UpdateData(FALSE);
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -849,5 +914,16 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 void CBurndownWnd::OnOptionChanged()
 {
-	m_chart.SetActiveGraphOption(m_cbOptions.GetSelectedOption());
+	UpdateData();
+
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH();
+
+	BOOL bHadOption = pGraph->HasOption(m_nSelOption);
+
+	if (pGraph->SetOption(m_nSelOption) &&
+		Misc::StateChanged(bHadOption, pGraph->HasOption(m_nSelOption)))
+	{
+		m_chart.RebuildGraph(m_dtDataRange);
+	}
 }

@@ -167,13 +167,11 @@ int CGraphsMap::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL b
 	CArray<CGraphBase*, CGraphBase*&> aTemp;
 	POSITION pos = GetStartPosition();
 
-	BURNDOWN_GRAPH nGraph;
-
 	while (pos)
 	{
 		CGraphBase* pGraph = GetNext(pos);
 
-		if (pGraph && (pGraph->GetType() == nType))
+		if (pGraph && pGraph->HasType(nType))
 			aTemp.Add(pGraph);
 	}
 
@@ -191,7 +189,7 @@ int CGraphsMap::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL b
 	return aGraphs.GetSize();
 }
 
-int CGraphsMap::GetGraphColors(CGraphColorMap& mapColors) const
+int CGraphsMap::GetColors(CGraphColorMap& mapColors) const
 {
 	mapColors.RemoveAll();
 	POSITION pos = GetStartPosition();
@@ -210,7 +208,7 @@ int CGraphsMap::GetGraphColors(CGraphColorMap& mapColors) const
 	return mapColors.GetCount();
 }
 
-BOOL CGraphsMap::SetGraphColors(const CGraphColorMap& mapColors)
+BOOL CGraphsMap::SetColors(const CGraphColorMap& mapColors)
 {
 	BOOL bChange = FALSE;
 	POSITION pos = mapColors.GetStartPosition();
@@ -555,18 +553,9 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 	}
 }
 
-BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CTimeSeriesGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	if (HasOption(nOption))
-		return TRUE;
-
-	if (!CGraphBase::SetOption(nOption))
-		return FALSE;
-
-	if (!CalculateTrendLines(datasets))
-		VERIFY(CGraphBase::SetOption(BGO_TREND_NONE));
-
-	return TRUE;;
+	return CalculateTrendLines(datasets);
 }
 
 BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
@@ -1074,14 +1063,8 @@ CString CFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, 
 	return sTooltip;
 }
 
-BOOL CFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CFrequencyGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	if (HasOption(nOption))
-		return TRUE;
-
-	if (!CGraphBase::SetOption(nOption))
-		return FALSE;
-
 	return UpdateGraphStyles(datasets[0]);
 }
 
@@ -1396,7 +1379,7 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 	}
 }
 
-BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, const CStatsItemCalculator& /*calculator*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET])
+BOOL CMinMaxGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET]) const
 {
 	return FALSE;
 }

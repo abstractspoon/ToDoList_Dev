@@ -35,7 +35,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDO
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 
-	VERIFY(mapGraphs.GetGraphColors(m_mapColors));
+	VERIFY(mapGraphs.GetColors(m_mapColors));
 
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);

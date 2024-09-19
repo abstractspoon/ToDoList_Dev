@@ -86,18 +86,25 @@ BOOL CBurndownGraphComboBox::Initialise(const CGraphsMap& mapGraphs)
 	return TRUE;
 }
 
-BURNDOWN_GRAPH CBurndownGraphComboBox::GetSelectedGraph() const
+void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 {
-	int nSel = GetCurSel();
-
-	if (IsSelectableItem(nSel))
-		return (BURNDOWN_GRAPH)GetItemData(nSel);
-
-	ASSERT(0);
-	return BCG_UNKNOWNGRAPH;
+	if (pDX->m_bSaveAndValidate)
+	{
+		int nSel = GetCurSel();
+	
+		if (!IsSelectableItem(nSel))
+		{
+			ASSERT(0);
+			nGraph = BCG_UNKNOWNGRAPH;
+		}
+		else
+		{
+			nGraph = (BURNDOWN_GRAPH)GetItemData(nSel);
+		}
+	}
+	else
+	{
+		SetCurSel(CDialogHelper::FindItemByData(*this, nGraph));
+	}
 }
 
-void CBurndownGraphComboBox::SetSelectedGraph(BURNDOWN_GRAPH nGraph)
-{
-	SetCurSel(CDialogHelper::FindItemByData(*this, nGraph));
-}

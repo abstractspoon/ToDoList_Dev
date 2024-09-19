@@ -139,6 +139,14 @@ BOOL CBurndownOptionsComboBox::SetActiveGraphType(BURNDOWN_GRAPHTYPE nType)
 	return TRUE;
 }
 
+void CBurndownOptionsComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPHOPTION& nOption)
+{
+	if (pDX->m_bSaveAndValidate)
+		nOption = GetSelectedOption();
+	else
+		SetSelectedOption(nOption);
+}
+
 BURNDOWN_GRAPHOPTION CBurndownOptionsComboBox::GetSelectedOption() const
 {
 	return (BURNDOWN_GRAPHOPTION)CDialogHelper::GetSelectedItemData(*this, BCT_UNKNOWNTYPE);

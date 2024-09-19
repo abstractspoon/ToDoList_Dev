@@ -20,25 +20,21 @@ public:
 	virtual ~CBurndownOptionsComboBox();
 
 	BOOL SetActiveGraphType(BURNDOWN_GRAPHTYPE nType);
-	BURNDOWN_GRAPHOPTION GetSelectedOption() const;
-	BOOL SetSelectedOption(BURNDOWN_GRAPHOPTION nOption);
+
+	void DDX(CDataExchange* pDX, BURNDOWN_GRAPHOPTION& nOption);
 
 protected:
 	BURNDOWN_GRAPHTYPE m_nGraphType;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CBurndownOptionsComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
 	//{{AFX_MSG(CBurndownOptionsComboBox)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	BURNDOWN_GRAPHOPTION GetSelectedOption() const;
+	BOOL SetSelectedOption(BURNDOWN_GRAPHOPTION nOption);
 };
 
 /////////////////////////////////////////////////////////////////////////////

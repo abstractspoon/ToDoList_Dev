@@ -25,33 +25,36 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
-	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
-	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
-	BOOL SetActiveGraphColors(const CColorArray& aColors);
+	BOOL SetActiveGraph(const CGraphBase* pGraph);
+// 	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
+// 	BOOL SetActiveGraphColors(const CColorArray& aColors);
 	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
 
-	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
-	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;
-	int GetActiveGraphColors(CColorArray& aColors) const;
+// 	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
+// 	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;
+// 	int GetActiveGraphColors(CColorArray& aColors) const;
 	
-	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
-	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
-	BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPH nGraph) const;
-	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph) const;
+// 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
+// 	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
+// 	BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPH nGraph) const;
+// 	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph) const;
 
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
-	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
+// 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
+// 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	void SetGraphColors(const CGraphColorMap& mapColors);
-	const CGraphsMap& Graphs() const { return m_mapGraphs; }
+// 	void SetGraphColors(const CGraphColorMap& mapColors);
+// 	const CGraphsMap& Graphs() const { return m_mapGraphs; }
+
+	void OnColoursChanged();
+	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);
 
 protected:
 	const CStatsItemArray& m_data;
 
-	CGraphsMap m_mapGraphs;
+//	CGraphsMap m_mapGraphs;
 	CStatsItemCalculator m_calculator;
 
-	BURNDOWN_GRAPH m_nActiveGraph;
+	const CGraphBase* m_pGraph;
 	COleDateTimeRange m_dtExtents;
 	COLORREF m_crToday;
 

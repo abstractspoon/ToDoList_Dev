@@ -79,6 +79,7 @@ protected:
 	UITHEME m_theme;
 
 	CStatsItemArray m_data;
+	CGraphsMap m_mapGraphs;
 	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
 
 	CStatic	m_stFrame;
@@ -91,6 +92,8 @@ protected:
 	CBurndownPreferencesDlg m_dlgPrefs;
 	CWndPromptManager m_wndPrompts;
 
+	BURNDOWN_GRAPH m_nActiveGraph;
+	BURNDOWN_GRAPHOPTION m_nSelOption;
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BOOL m_bVisible;
@@ -117,7 +120,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
-	afx_msg void OnSelchangeDisplay();
+	afx_msg void OnSelchangeGraph();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnNcDestroy();
 	afx_msg void OnOptionChanged();

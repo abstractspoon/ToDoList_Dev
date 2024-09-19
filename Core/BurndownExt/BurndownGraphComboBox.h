@@ -27,8 +27,7 @@ public:
 
 	BOOL Initialise(const CGraphsMap& mapGraphs);
 
-	BURNDOWN_GRAPH GetSelectedGraph() const;
-	void SetSelectedGraph(BURNDOWN_GRAPH nGraph);
+	void DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph);
 
 protected:
 // Overrides

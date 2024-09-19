@@ -21,10 +21,11 @@ public:
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
-	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
+	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 
 	BURNDOWN_GRAPH GetGraph() const { return m_nGraph; }
 	BURNDOWN_GRAPHTYPE GetType() const { return m_nType; }
+	BOOL HasType(BURNDOWN_GRAPHTYPE nType) const { return (m_nType == nType); }
 	BOOL GetMinMax(double& dMin, double& dMax) const;
 
 	const CColorArray& GetColors() const;
@@ -76,8 +77,8 @@ public:
 	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 
 	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
-	int GetGraphColors(CGraphColorMap& mapColors) const;
-	BOOL SetGraphColors(const CGraphColorMap& mapColors);
+	int GetColors(CGraphColorMap& mapColors) const;
+	BOOL SetColors(const CGraphColorMap& mapColors);
 
 protected:
 };
@@ -94,7 +95,7 @@ protected:
 
 	// CGraphBase overrides
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
-	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
+	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	
 	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	static BOOL CalculateTrendLine(BURNDOWN_GRAPHOPTION nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
@@ -221,9 +222,9 @@ protected:
 	// CGraphBase overrides
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
-	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
 	virtual void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual BOOL UpdateGraphStyles(CHMXDataset& dataset) const;
+	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
 private:
 	mutable CStringArray m_aAttribValues;
@@ -345,7 +346,7 @@ protected:
 
 	// CGraphBase overrides
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
-	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
+	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
 protected:
 	mutable int m_nItemOffset;
