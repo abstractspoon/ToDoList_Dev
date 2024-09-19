@@ -1534,3 +1534,97 @@ CString CDueDoneDatesMinMaxGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 	return sTooltip;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+CCustomAttributeGraph::CCustomAttributeGraph(const CUSTOMATTRIBDEF& def)
+	:
+	m_custDefinition(def)
+{
+}
+BOOL CCustomAttributeGraph::UpdateDefinition(const CString& sLabel, const CString& sListData)
+{
+	if ((m_custDefinition.sLabel == sLabel) && (m_custDefinition.sListData == sListData))
+		return FALSE;
+
+	m_custDefinition.sLabel = sLabel;
+	m_custDefinition.sListData = sListData;
+
+	return TRUE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+CCustomAttributeTimeSeriesGraph::CCustomAttributeTimeSeriesGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def)
+	:
+	CTimeSeriesGraph(nGraph),
+	CCustomAttributeGraph(def)
+{
+}
+
+CString CCustomAttributeTimeSeriesGraph::GetTitle() const
+{
+	return m_custDefinition.sLabel;
+}
+
+void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	// TODO
+}
+
+CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+{
+	// TODO
+	return _T("");
+}
+
+BOOL CCustomAttributeTimeSeriesGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	// TODO
+	return FALSE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+CCustomAttributeFrequencyGraph::CCustomAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def)
+	:
+	CFrequencyGraph(nGraph),
+	CCustomAttributeGraph(def)
+{
+}
+
+CString CCustomAttributeFrequencyGraph::GetTitle() const
+{
+	return m_custDefinition.sLabel;
+}
+
+void CCustomAttributeFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	// TODO
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+CCustomAttributeMinMaxGraph::CCustomAttributeMinMaxGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def)
+	:
+	CMinMaxGraph(nGraph),
+	CCustomAttributeGraph(def)
+{
+}
+
+CString CCustomAttributeMinMaxGraph::GetTitle() const
+{
+	return m_custDefinition.sLabel;
+}
+
+void CCustomAttributeMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	// TODO
+}
+
+CString CCustomAttributeMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+{
+	// TODO
+	return _T("");
+}
+

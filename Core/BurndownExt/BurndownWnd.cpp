@@ -427,7 +427,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			STATSITEM* pSI = m_data.AddItem(pTasks->GetTaskID(hTask));
 
 			if (pSI) // means it's new
-				pSI->Set(pTasks, hTask);
+				pSI->Set(pTasks, hTask, m_aCustomAttribDefs);
 		}
 		else // Process children
 		{
@@ -471,6 +471,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 		{
 			m_data.RemoveAll();
 
+			UpdateCustomAttributeDefinitions(pTasks);
 			BuildData(pTasks, pTasks->GetFirstTask(), TRUE, FALSE);
 			RebuildGraph(TRUE, TRUE, TRUE);
 		}
@@ -485,6 +486,7 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 		
 	case IUI_EDIT:
 		{
+			UpdateCustomAttributeDefinitions(pTasks);
 			UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
 			RebuildGraph(TRUE, TRUE, TRUE);
 		}
@@ -500,6 +502,110 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	default:
 		ASSERT(0);
 	}
+}
+
+BOOL CBurndownWnd::UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks)
+{
+	if (!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+		return FALSE;
+
+	BOOL bWasEmpty = (m_aCustomAttribDefs.GetSize() == 0);
+
+	// Retrieve new definitions
+	CCustomAttributeDefinitionArray aNewCustAttribDefs;
+
+	int nNumDef = pTasks->GetCustomAttributeCount(), nDef = 0;
+	CUSTOMATTRIBDEF def;
+
+	for (; nDef < nNumDef; nDef++)
+	{
+		if (pTasks->IsCustomAttributeEnabled(nDef))
+		{
+			DWORD dwCustType = pTasks->GetCustomAttributeType(nDef);
+
+			DWORD dwDataType = (dwCustType & TDCCA_DATAMASK);
+			DWORD dwListType = (dwCustType & TDCCA_LISTMASK);
+
+			BURNDOWN_GRAPHTYPE nType = BCT_UNKNOWNTYPE;
+
+			if (dwListType != TDCCA_NOTALIST)
+				nType = BCT_FREQUENCY;
+			// else
+			// TODO
+
+
+			if (nType != BCT_UNKNOWNTYPE)
+			{
+				def.sUniqueID = pTasks->GetCustomAttributeID(nDef);
+				def.sLabel = pTasks->GetCustomAttributeLabel(nDef);
+				def.sListData = pTasks->GetCustomAttributeListData(nDef);
+				def.nType = nType;
+				def.nGraph = BCG_UNKNOWNGRAPH;
+
+				if (bWasEmpty)
+				{
+					def.nGraph = GetFirstUnusedGraph(m_aCustomAttribDefs);
+					m_aCustomAttribDefs.Add(def);
+				}
+				else
+				{
+					aNewCustAttribDefs.Add(def); // Process afterwards
+				}
+			}
+		}
+	}
+
+	if (aNewCustAttribDefs.GetSize() > 0)
+	{
+		// Delete any definitions no longer existing
+		nDef = m_aCustomAttribDefs.GetSize();
+
+		while (nDef--)
+		{
+			if (aNewCustAttribDefs.Find(m_aCustomAttribDefs[nDef].sUniqueID) == -1)
+				m_aCustomAttribDefs.RemoveAt(nDef);
+		}
+
+		// Update rest of definitions preserving as much as possible
+		nDef = aNewCustAttribDefs.GetSize();
+
+		while (nDef--)
+		{
+			CUSTOMATTRIBDEF& defNew = aNewCustAttribDefs[nDef];
+			int nExist = m_aCustomAttribDefs.Find(defNew.sUniqueID);
+
+			if (nExist == -1)
+			{
+				defNew.nGraph = GetFirstUnusedGraph(m_aCustomAttribDefs);
+				m_aCustomAttribDefs.Add(defNew);
+			}
+			else
+			{
+				defNew.nGraph = m_aCustomAttribDefs[nExist].nGraph;
+				m_aCustomAttribDefs[nExist] = defNew;
+			}
+		}
+	}
+
+	return FALSE;//m_chart.SetCustomAttributeDefinitions(m_aCustomAttribDefs);
+}
+
+BURNDOWN_GRAPH CBurndownWnd::GetFirstUnusedGraph(const CCustomAttributeDefinitionArray& aCustAttribDef)
+{
+	CSet<BURNDOWN_GRAPH> mapGraphs;
+
+	int nDef = aCustAttribDef.GetSize();
+
+	while (nDef--)
+		mapGraphs.Add(aCustAttribDef[nDef].nGraph);
+
+	for (int nGraph = BCG_CUSTOMATTRIB_FIRST; nGraph <= BCG_CUSTOMATTRIB_LAST; nGraph++)
+	{
+		if (!mapGraphs.Has((BURNDOWN_GRAPH)nGraph))
+			return (BURNDOWN_GRAPH)nGraph;
+	}
+
+	return BCG_UNKNOWNGRAPH;
 }
 
 void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
@@ -527,12 +633,12 @@ void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_
 		
 		if (pSI)
 		{
-			pSI->Update(pTasks, hTask);
+			pSI->Update(pTasks, hTask, m_aCustomAttribDefs);
 		}
-		else
-		{
-			int breakpoint = 0;
-		}
+// 		else
+// 		{
+// 			int breakpoint = 0;
+// 		}
 	}
 	
 	// children

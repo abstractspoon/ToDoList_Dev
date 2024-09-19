@@ -65,13 +65,39 @@ struct GRAPHOPTION
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct CUSTOMATTRIBDEF
+{
+	BOOL operator==(const CUSTOMATTRIBDEF& other) const;
+
+	CString sUniqueID;
+	CString sLabel;
+	CString sListData;
+
+	BURNDOWN_GRAPH nGraph;
+	BURNDOWN_GRAPHTYPE nType;
+};
+
+// ------------------------------------------------------
+
+class CCustomAttributeDefinitionArray : public CArray<CUSTOMATTRIBDEF, CUSTOMATTRIBDEF&>
+{
+public:
+	BOOL operator==(const CCustomAttributeDefinitionArray& other) const;
+	BOOL operator!=(const CCustomAttributeDefinitionArray& other) const;
+
+	int Find(const CString& sID) const;
+	int Find(BURNDOWN_GRAPH nGraph) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct STATSITEM 
 { 
 	STATSITEM(DWORD dwTaskID = 0);
 	virtual ~STATSITEM();
 
-	void Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	void Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef);
+	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef);
 
 	BOOL HasStart() const;
 	BOOL HasDue() const;
@@ -99,11 +125,14 @@ struct STATSITEM
 	CString sRisk;
 	CString sVersion;
 
+	CMapStringToString mapCustomAttrib; // Maps unique ID to value
+
 protected:
 	void ValidateStartDate();
 
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
 
+	static void GetCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues);
 	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
 	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static COleDateTime GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);

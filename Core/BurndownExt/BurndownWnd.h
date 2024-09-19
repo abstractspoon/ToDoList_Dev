@@ -77,6 +77,7 @@ protected:
 
 	CStatsItemArray m_data;
 	CGraphsMap m_mapGraphs;
+	CCustomAttributeDefinitionArray m_aCustomAttribDefs;
 	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
 
 	CStatic	m_stFrame;
@@ -124,6 +125,7 @@ protected:
 	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
+	BOOL UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
 	void UpdateRangeSlider(const COleDateTimeRange& dtActiveRange);
@@ -132,6 +134,7 @@ protected:
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 	void ResizeSlider(int nParentWidth = -1);
 
+	static BURNDOWN_GRAPH GetFirstUnusedGraph(const CCustomAttributeDefinitionArray& aCustAttribDef);
 };
 
 //{{AFX_INSERT_LOCATION}}

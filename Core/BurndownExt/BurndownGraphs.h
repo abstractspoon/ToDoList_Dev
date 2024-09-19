@@ -400,6 +400,60 @@ protected:
 	};
 };
 
+/////////////////////////////////////////////////////////////////////////////
 
+class CCustomAttributeGraph
+{
+public:
+	BOOL UpdateDefinition(const CString& sLabel, const CString& sListData);
+
+protected:
+	CCustomAttributeGraph(const CUSTOMATTRIBDEF& def);
+
+protected:
+	CUSTOMATTRIBDEF m_custDefinition;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CCustomAttributeTimeSeriesGraph : public CTimeSeriesGraph, public CCustomAttributeGraph
+{
+public:
+	CCustomAttributeTimeSeriesGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def);
+
+protected:
+	// CTimeSeriesGraph overrides
+	virtual CString GetTitle() const;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CCustomAttributeFrequencyGraph : public CFrequencyGraph, public CCustomAttributeGraph
+{
+public:
+	CCustomAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def);
+
+protected:
+	// CFrequencyGraph overrides
+	virtual CString GetTitle() const;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CCustomAttributeMinMaxGraph : public CMinMaxGraph, public CCustomAttributeGraph
+{
+public:
+	CCustomAttributeMinMaxGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def);
+
+protected:
+	// CMinMaxGraph overrides
+	virtual CString GetTitle() const;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+};
 
 /////////////////////////////////////////////////////////////////////////////

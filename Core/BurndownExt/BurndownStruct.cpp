@@ -110,6 +110,54 @@ BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
 
 /////////////////////////////////////////////////////////////////////////////
 
+BOOL CUSTOMATTRIBDEF::operator==(const CUSTOMATTRIBDEF& other) const
+{
+	return ((nType == other.nType) &&
+			(sLabel == other.sLabel) &&
+			(sListData == other.sListData) &&
+			(sUniqueID.CompareNoCase(other.sUniqueID) == 0));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+BOOL CCustomAttributeDefinitionArray::operator==(const CCustomAttributeDefinitionArray& other) const
+{
+	return Misc::MatchAllT(*this, other, FALSE);
+}
+
+BOOL CCustomAttributeDefinitionArray::operator!=(const CCustomAttributeDefinitionArray& other) const
+{
+	return !(*this == other);
+}
+
+int CCustomAttributeDefinitionArray::Find(const CString& sID) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (sID.CompareNoCase(GetAt(nDef).sUniqueID) == 0)
+			return nDef;
+	}
+
+	return -1;
+}
+
+int CCustomAttributeDefinitionArray::Find(BURNDOWN_GRAPH nGraph) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (nGraph == GetAt(nDef).nGraph)
+			return nDef;
+	}
+
+	return -1;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 STATSITEM::STATSITEM(DWORD dwID)
 	: 
 	dwTaskID(dwID), 
@@ -127,7 +175,7 @@ STATSITEM::~STATSITEM()
 {
 }
 
-void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef)
 {
 	// Sanity Checks
 	ASSERT(!pTasks->IsTaskReference(hTask));
@@ -154,9 +202,11 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 
 	sPriority = pTasks->GetTaskAttribute(hTask, TDCA_PRIORITY, false, true);
 	sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
+
+	GetCustomAttributes(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
 }
 
-void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef)
 {
 	// Sanity Checks
 	ASSERT(!pTasks->IsTaskReference(hTask));
@@ -209,6 +259,9 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 
 	if (pTasks->IsAttributeAvailable(TDCA_RISK))
 		sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
+
+	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+		GetCustomAttributes(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
 }
 
 void STATSITEM::ValidateStartDate()
@@ -218,6 +271,19 @@ void STATSITEM::ValidateStartDate()
 		CDateHelper::Min(dtStart, dtDone);
 	else
 		CDateHelper::Min(dtStart, dtDue);
+}
+
+void STATSITEM::GetCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues)
+{
+	mapValues.RemoveAll();
+
+	int nDef = aCustAttribDef.GetSize();
+
+	while (nDef--)
+	{
+		const CString& sID = aCustAttribDef[nDef].sUniqueID;
+		mapValues[sID] = pTasks->GetTaskCustomAttributeData(hTask, sID, false);
+	}
 }
 
 double STATSITEM::GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate)
