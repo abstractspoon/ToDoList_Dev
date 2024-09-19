@@ -176,15 +176,13 @@ int CGraphsMap::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL b
 	}
 
 	if (bSorted)
-	{
 		Misc::SortArrayT<CGraphBase*>(aTemp, SortProc);
 
-		int nItem = aTemp.GetSize();
-		aGraphs.SetSize(nItem);
+	int nItem = aTemp.GetSize();
+	aGraphs.SetSize(nItem);
 
-		while (nItem--)
-			aGraphs[nItem] = aTemp[nItem]->GetGraph();
-	}
+	while (nItem--)
+		aGraphs[nItem] = aTemp[nItem]->GetGraph();
 
 	return aGraphs.GetSize();
 }
