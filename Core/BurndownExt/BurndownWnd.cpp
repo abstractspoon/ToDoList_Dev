@@ -33,11 +33,6 @@ static char THIS_FILE[] = __FILE__;
 
 const UINT WM_REBUILDGRAPH = (WM_APP+1);
 
-////////////////////////////////////////////////////////////////////////////////
-
-#define GET_GRAPH() pGraph = m_mapGraphs.GetGraph(m_nActiveGraph); if (pGraph == NULL) return
-#define GET_GRAPH_RET(ret) pGraph = m_mapGraphs.GetGraph(m_nActiveGraph); if (pGraph == NULL) return ret
-
 /////////////////////////////////////////////////////////////////////////////
 
 enum // m_dwUpdateGraphOnShow
@@ -136,7 +131,6 @@ void CBurndownWnd::OnPreferences()
 			m_chart.OnColoursChanged();
 
 		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
-		Invalidate();
 	}
 }
 
@@ -180,8 +174,6 @@ BOOL CBurndownWnd::OnInitDialog()
 	VERIFY(m_cbGraphs.Initialise(m_mapGraphs));
 	VERIFY(m_wndPrompts.SetComboPrompt(m_cbOptions, IDS_NONE));
 
-	//RebuildGraph(FALSE, FALSE, FALSE);
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -222,7 +214,6 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
 	}
 
-	//m_chart.SavePreferences(pPrefs, szKey);
 	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 }
 
@@ -245,7 +236,6 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 			ASSERT(pActiveGraph);
 		}
 		
-		//m_chart.LoadPreferences(pPrefs, szKey);
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
 		// Active range
@@ -768,14 +758,17 @@ void CBurndownWnd::OnSelChangeGraph()
 {
 	UpdateData();
 
-	const CGraphBase* pGraph;
-	GET_GRAPH();
+	const CGraphBase* pGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
+	ASSERT(pGraph);
 
-	m_chart.SetActiveGraph(pGraph);
-	m_cbOptions.SetActiveGraphType(pGraph->GetType());
+	if (pGraph)
+	{
+		m_chart.SetActiveGraph(pGraph);
+		m_cbOptions.SetActiveGraphType(pGraph->GetType());
 
-	m_nSelOption = pGraph->GetOption();
-	UpdateData(FALSE);
+		m_nSelOption = pGraph->GetOption();
+		UpdateData(FALSE);
+	}
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -799,7 +792,6 @@ LRESULT CBurndownWnd::OnRebuildGraph(WPARAM /*wp*/, LPARAM /*lp*/)
 	BOOL bUpdateExtents = (m_dwUpdateGraphOnShow & UPDATE_EXTENTS);
 
 	m_dwUpdateGraphOnShow = 0;
-
 	RebuildGraph(bSortData, bUpdateExtents, FALSE);
 
 	return 0L;
@@ -916,14 +908,17 @@ void CBurndownWnd::OnSelChangeOption()
 {
 	UpdateData();
 
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH();
+	CGraphBase* pGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
+	ASSERT(pGraph);
 
-	BOOL bHadOption = pGraph->HasOption(m_nSelOption);
-
-	if (pGraph->SetOption(m_nSelOption) &&
-		Misc::StateChanged(bHadOption, pGraph->HasOption(m_nSelOption)))
+	if (pGraph)
 	{
-		m_chart.OnOptionChanged(m_nSelOption);
+		BOOL bHadOption = pGraph->HasOption(m_nSelOption);
+
+		if (pGraph->SetOption(m_nSelOption) &&
+			Misc::StateChanged(bHadOption, pGraph->HasOption(m_nSelOption)))
+		{
+			m_chart.OnOptionChanged(m_nSelOption);
+		}
 	}
 }
