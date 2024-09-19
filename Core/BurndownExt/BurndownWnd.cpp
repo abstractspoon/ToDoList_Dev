@@ -97,8 +97,8 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_COMMAND(ID_BURNDOWN_PREF, OnPreferences)
 	ON_WM_HELPINFO()
-	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelchangeGraph)
-	ON_CBN_SELENDOK(IDC_OPTIONS, OnOptionChanged)
+	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelChangeGraph)
+	ON_CBN_SELENDOK(IDC_OPTIONS, OnSelChangeOption)
 	ON_WM_SHOWWINDOW()
 	ON_WM_ERASEBKGND()
 	ON_WM_NCDESTROY()
@@ -764,7 +764,7 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	UpdateActiveRangeLabel(dtActiveRange);
 }
 
-void CBurndownWnd::OnSelchangeGraph()
+void CBurndownWnd::OnSelChangeGraph()
 {
 	UpdateData();
 
@@ -912,7 +912,7 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
 
-void CBurndownWnd::OnOptionChanged()
+void CBurndownWnd::OnSelChangeOption()
 {
 	UpdateData();
 
@@ -924,6 +924,6 @@ void CBurndownWnd::OnOptionChanged()
 	if (pGraph->SetOption(m_nSelOption) &&
 		Misc::StateChanged(bHadOption, pGraph->HasOption(m_nSelOption)))
 	{
-		m_chart.RebuildGraph(m_dtDataRange);
+		m_chart.OnOptionChanged(m_nSelOption);
 	}
 }
