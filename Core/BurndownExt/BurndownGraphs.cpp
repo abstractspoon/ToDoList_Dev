@@ -11,6 +11,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
+#include "..\shared\misc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -50,30 +51,42 @@ const int NUM_GRAPH_COLORS = (sizeof(GRAPH_COLORS) / sizeof(GRAPH_COLORS[0]));
 
 /////////////////////////////////////////////////////////////////////////////////
 
-const int		GRAPH_LINE_THICKNESS = 1;
-const int		TREND_LINE_THICKNESS = 2;
-const int		MIN_XSCALE_SPACING	 = GraphicsMisc::ScaleByDPIFactor(50); // pixels
+const int GRAPH_LINE_THICKNESS = 1;
+const int TREND_LINE_THICKNESS = 2;
+const int MIN_XSCALE_SPACING   = GraphicsMisc::ScaleByDPIFactor(50); // pixels
 
 /////////////////////////////////////////////////////////////////////////////////
 
+static int SortProc(const void* pV1, const void* pV2)
+{
+	typedef CGraphBase* lpGraphBase;
+
+	const CGraphBase* pGB1 = *(static_cast<const lpGraphBase*>(pV1));
+	const CGraphBase* pGB2 = *(static_cast<const lpGraphBase*>(pV2));
+
+	return Misc::NaturalCompare(pGB1->GetTitle(), pGB2->GetTitle());
+}
+
+// ----------------------------------------------------------
+
 CGraphsMap::CGraphsMap()
 {
-	AddGraph(BCT_TIMESERIES_INCOMPLETETASKS,	new CIncompleteTasksTimeGraph());
-	AddGraph(BCT_TIMESERIES_REMAININGDAYS,		new CRemainingDaysTimeGraph());
-	AddGraph(BCT_TIMESERIES_STARTEDENDEDTASKS,	new CStartedEndedTasksTimeGraph());
-	AddGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS, new CEstimatedSpentDaysTimeGraph());
+	AddGraph(BCG_TIMESERIES_INCOMPLETETASKS,	new CIncompleteTasksTimeGraph());
+	AddGraph(BCG_TIMESERIES_REMAININGDAYS,		new CRemainingDaysTimeGraph());
+	AddGraph(BCG_TIMESERIES_STARTEDENDEDTASKS,	new CStartedEndedTasksTimeGraph());
+	AddGraph(BCG_TIMESERIES_ESTIMATEDSPENTDAYS, new CEstimatedSpentDaysTimeGraph());
 
-	AddGraph(BCT_FREQUENCY_CATEGORY,			new CCategoryFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_STATUS,				new CStatusFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_ALLOCTO,				new CAllocatedToFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_ALLOCBY,				new CAllocatedByFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_VERSION,				new CVersionFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_TAGS,				new CTagFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_PRIORITY,			new CPriorityFrequencyGraph());
-	AddGraph(BCT_FREQUENCY_RISK,				new CRiskFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_CATEGORY,			new CCategoryFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_STATUS,				new CStatusFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_ALLOCTO,				new CAllocatedToFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_ALLOCBY,				new CAllocatedByFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_VERSION,				new CVersionFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_TAGS,				new CTagFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_PRIORITY,			new CPriorityFrequencyGraph());
+	AddGraph(BCG_FREQUENCY_RISK,				new CRiskFrequencyGraph());
 
-	AddGraph(BCT_MINMAX_ESTIMATEDSPENTDAYS,		new CEstimatedSpentDaysMinMaxGraph());
-	AddGraph(BCT_MINMAX_DUEDONEDATES,			new CDueDoneDatesMinMaxGraph());
+	AddGraph(BCG_MINMAX_ESTIMATEDSPENTDAYS,		new CEstimatedSpentDaysMinMaxGraph());
+	AddGraph(BCG_MINMAX_DUEDONEDATES,			new CDueDoneDatesMinMaxGraph());
 }
 
 CGraphsMap::~CGraphsMap()
@@ -129,16 +142,111 @@ BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 	return (GetGraph(nGraph) != NULL);
 }
 
+BURNDOWN_GRAPHTYPE CGraphsMap::GetType(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+
+	if (Lookup(nGraph, pGraph))
+		return pGraph->GetType();
+
+	return BCT_UNKNOWNTYPE;
+}
+
+CString CGraphsMap::GetTitle(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+
+	if (Lookup(nGraph, pGraph))
+		return pGraph->GetTitle();
+
+	return _T("");
+}
+
+int CGraphsMap::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const
+{
+	CArray<CGraphBase*, CGraphBase*&> aTemp;
+	POSITION pos = GetStartPosition();
+
+	BURNDOWN_GRAPH nGraph;
+
+	while (pos)
+	{
+		CGraphBase* pGraph = GetNext(pos);
+
+		if (pGraph && (pGraph->GetType() == nType))
+			aTemp.Add(pGraph);
+	}
+
+	if (bSorted)
+	{
+		Misc::SortArrayT<CGraphBase*>(aTemp, SortProc);
+
+		int nItem = aTemp.GetSize();
+		aGraphs.SetSize(nItem);
+
+		while (nItem--)
+			aGraphs[nItem] = aTemp[nItem]->GetGraph();
+	}
+
+	return aGraphs.GetSize();
+}
+
+int CGraphsMap::GetGraphColors(CGraphColorMap& mapColors) const
+{
+	mapColors.RemoveAll();
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		BURNDOWN_GRAPH nGraph;
+		CGraphBase* pGraph = GetNext(pos, nGraph);
+
+		CColorArray aColors;
+		aColors.Copy(pGraph->GetColors());
+
+		mapColors[nGraph] = aColors;
+	}
+
+	return mapColors.GetCount();
+}
+
+BOOL CGraphsMap::SetGraphColors(const CGraphColorMap& mapColors)
+{
+	BOOL bChange = FALSE;
+	POSITION pos = mapColors.GetStartPosition();
+
+	while (pos)
+	{
+		BURNDOWN_GRAPH nGraph;
+		CColorArray aColors;
+
+		mapColors.GetNextAssoc(pos, nGraph, aColors);
+		ASSERT(aColors.GetSize());
+
+		if (aColors.GetSize())
+		{
+			CGraphBase* pGraph = GetGraph(nGraph);
+			ASSERT(pGraph);
+
+			if (pGraph)
+				bChange |= pGraph->SetColors(aColors);
+		}
+	}
+
+	return bChange;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption) 
+CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHTYPE nType, BURNDOWN_GRAPHOPTION nOption)
 	: 
 	m_nGraph(nGraph), 
+	m_nType(nType),
 	m_nOption(nOption),
 	m_dDataMin(HMX_DATASET_VALUE_INVALID),
 	m_dDataMax(HMX_DATASET_VALUE_INVALID)
 {
-	ASSERT(IsValidGraph(m_nGraph));
+	ASSERT((nGraph != BCG_UNKNOWNGRAPH) && (nType != BCT_UNKNOWNTYPE));
 }
 
 CGraphBase::~CGraphBase()
@@ -165,11 +273,6 @@ void CGraphBase::ClearData(CHMXDataset datasets[HMX_MAX_DATASET])
 
 	while (nDataset--)
 		datasets[nDataset].ClearData();
-}
-
-BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
-{
-	return GetGraphType(m_nGraph);
 }
 
 BOOL CGraphBase::GetMinMax(double& dMin, double& dMax) const
@@ -293,7 +396,7 @@ void CGraphBase::RecalcDataMinMax(const CHMXDataset datasets[HMX_MAX_DATASET], d
 
 BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
 {
-	return ::IsValidOption(nOption, m_nGraph);
+	return ::IsValidOption(nOption, m_nType);
 }
 
 BOOL CGraphBase::HasOption(BURNDOWN_GRAPHOPTION nOption) const
@@ -303,7 +406,7 @@ BOOL CGraphBase::HasOption(BURNDOWN_GRAPHOPTION nOption) const
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BGO_TREND_NONE)
+CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BCT_TIMESERIES, BGO_TREND_NONE)
 {
 }
 
@@ -514,7 +617,7 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 
 CIncompleteTasksTimeGraph::CIncompleteTasksTimeGraph()
 	:
-	CTimeSeriesGraph(BCT_TIMESERIES_INCOMPLETETASKS)
+	CTimeSeriesGraph(BCG_TIMESERIES_INCOMPLETETASKS)
 {
 	InitColorPalette(COLOR_GREEN);
 }
@@ -583,7 +686,7 @@ BOOL CIncompleteTasksTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX
 
 CRemainingDaysTimeGraph::CRemainingDaysTimeGraph()
 	:
-	CTimeSeriesGraph(BCT_TIMESERIES_REMAININGDAYS)
+	CTimeSeriesGraph(BCG_TIMESERIES_REMAININGDAYS)
 {
 	InitColorPalette(COLOR_BLUE, COLOR_YELLOW);
 }
@@ -662,7 +765,7 @@ BOOL CRemainingDaysTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_D
 
 CStartedEndedTasksTimeGraph::CStartedEndedTasksTimeGraph()
 	:
-	CTimeSeriesGraph(BCT_TIMESERIES_STARTEDENDEDTASKS)
+	CTimeSeriesGraph(BCG_TIMESERIES_STARTEDENDEDTASKS)
 {
 	InitColorPalette(COLOR_RED, COLOR_GREEN);
 }
@@ -745,7 +848,7 @@ BOOL CStartedEndedTasksTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_M
 
 CEstimatedSpentDaysTimeGraph::CEstimatedSpentDaysTimeGraph()
 	:
-	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS)
+	CTimeSeriesGraph(BCG_TIMESERIES_ESTIMATEDSPENTDAYS)
 {
 	InitColorPalette(COLOR_VIOLET, COLOR_GREEN);
 }
@@ -828,7 +931,7 @@ BOOL CEstimatedSpentDaysTimeGraph::CalculateTrendLines(CHMXDataset datasets[HMX_
 
 CEstimatedSpentCostGraph::CEstimatedSpentCostGraph()
 	:
-	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTCOST)
+	CTimeSeriesGraph(BCG_TIMESERIES_ESTIMATEDSPENTCOST)
 {
 	InitColorPalette(COLOR_YELLOW, COLOR_VIOLET);
 }
@@ -911,7 +1014,7 @@ BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 
 CFrequencyGraph::CFrequencyGraph(BURNDOWN_GRAPH nGraph) 
 	: 
-	CGraphBase(nGraph, BGO_FREQUENCY_BAR)
+	CGraphBase(nGraph, BCT_FREQUENCY, BGO_FREQUENCY_BAR)
 {
 }
 
@@ -1018,7 +1121,7 @@ BOOL CFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 
 CCategoryFrequencyGraph::CCategoryFrequencyGraph() 
 	: 
-	CFrequencyGraph(BCT_FREQUENCY_CATEGORY)
+	CFrequencyGraph(BCG_FREQUENCY_CATEGORY)
 {
 	InitColorPalette(7, 1);
 }
@@ -1040,7 +1143,7 @@ void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 
 CStatusFrequencyGraph::CStatusFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_STATUS)
+	CFrequencyGraph(BCG_FREQUENCY_STATUS)
 {
 	InitColorPalette(7, 3);
 }
@@ -1062,7 +1165,7 @@ void CStatusFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 
 CAllocatedToFrequencyGraph::CAllocatedToFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_ALLOCTO)
+	CFrequencyGraph(BCG_FREQUENCY_ALLOCTO)
 {
 	InitColorPalette(7, 5);
 }
@@ -1084,7 +1187,7 @@ void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 
 CAllocatedByFrequencyGraph::CAllocatedByFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_ALLOCBY)
+	CFrequencyGraph(BCG_FREQUENCY_ALLOCBY)
 {
 	InitColorPalette(7, 7);
 }
@@ -1106,7 +1209,7 @@ void CAllocatedByFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 
 CVersionFrequencyGraph::CVersionFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_VERSION)
+	CFrequencyGraph(BCG_FREQUENCY_VERSION)
 {
 	InitColorPalette(7, 9);
 }
@@ -1128,7 +1231,7 @@ void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, 
 
 CTagFrequencyGraph::CTagFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_TAGS)
+	CFrequencyGraph(BCG_FREQUENCY_TAGS)
 {
 	InitColorPalette(7, 11);
 }
@@ -1150,7 +1253,7 @@ void CTagFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMX
 
 CPriorityFrequencyGraph::CPriorityFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_PRIORITY)
+	CFrequencyGraph(BCG_FREQUENCY_PRIORITY)
 {
 	InitColorPalette(11, 13);
 }
@@ -1172,7 +1275,7 @@ void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 
 CRiskFrequencyGraph::CRiskFrequencyGraph()
 	:
-	CFrequencyGraph(BCT_FREQUENCY_RISK)
+	CFrequencyGraph(BCG_FREQUENCY_RISK)
 {
 	InitColorPalette(11, 2);
 }
@@ -1195,7 +1298,7 @@ void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 
 CMinMaxGraph::CMinMaxGraph(BURNDOWN_GRAPH nGraph) 
 	:
-	CGraphBase(nGraph, BGO_MINMAX_NONE),
+	CGraphBase(nGraph, BCT_MINMAX, BGO_MINMAX_NONE),
 	m_nItemOffset(0)
 {
 }
@@ -1302,7 +1405,7 @@ BOOL CMinMaxGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, const CStatsItemC
 
 CEstimatedSpentDaysMinMaxGraph::CEstimatedSpentDaysMinMaxGraph()
 	:
-	CMinMaxGraph(BCT_MINMAX_ESTIMATEDSPENTDAYS)
+	CMinMaxGraph(BCG_MINMAX_ESTIMATEDSPENTDAYS)
 {
 	InitColorPalette(COLOR_GREEN, COLOR_RED);
 }
@@ -1370,7 +1473,7 @@ CString CEstimatedSpentDaysMinMaxGraph::GetTooltip(const CStatsItemCalculator& c
 
 CDueDoneDatesMinMaxGraph::CDueDoneDatesMinMaxGraph()
 	:
-	CMinMaxGraph(BCT_MINMAX_DUEDONEDATES)
+	CMinMaxGraph(BCG_MINMAX_DUEDONEDATES)
 {
 	InitColorPalette(COLOR_BLUEGREEN, COLOR_ORANGE);
 }

@@ -22,35 +22,6 @@ static const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
-static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph)
-{
-	if (nGraph == BCT_UNKNOWNGRAPH)
-		return BCT_UNKNOWNTYPE;
-
-	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
-	{
-		int nRangeStart = GRAPHTYPES[nType].nType, nRangeEnd;
-
-		if (nType == (NUM_GRAPHTYPES - 1))
-			nRangeEnd = BCT_NUMGRAPHS;
-		else
-			nRangeEnd = GRAPHTYPES[nType + 1].nType;
-
-		if ((nGraph >= nRangeStart) && (nGraph < nRangeEnd))
-			return GRAPHTYPES[nType].nType;
-	}
-
-	ASSERT(0);
-	return BCT_UNKNOWNTYPE;
-}
-
-static BOOL IsValidGraph(BURNDOWN_GRAPH nGraph)
-{
-	return (GetGraphType(nGraph) != BCT_UNKNOWNTYPE);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
 static const GRAPHOPTION GRAPHOPTIONS[] = 
 {
 	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	},	// default
@@ -92,11 +63,6 @@ static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType
 	return (GetGraphType(nOption) == nType);
 }
 
-static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph)
-{
-	return IsValidOption(nOption, GetGraphType(nGraph));
-}
-
 static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPHTYPE nType)
 {
 	for (int nItem = 0; nItem < NUM_OPTIONS; nItem++)
@@ -107,11 +73,6 @@ static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPHTYPE nType)
 
 	ASSERT(0);
 	return BGO_INVALID;
-}
-
-static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPH nGraph)
-{
-	return GetDefaultOption(GetGraphType(nGraph));
 }
 
 /////////////////////////////////////////////////////////////////////////////

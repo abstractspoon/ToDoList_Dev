@@ -19,7 +19,7 @@ public:
 	CBurndownOptionsComboBox();
 	virtual ~CBurndownOptionsComboBox();
 
-	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
+	BOOL SetActiveGraphType(BURNDOWN_GRAPHTYPE nType);
 	BURNDOWN_GRAPHOPTION GetSelectedOption() const;
 	BOOL SetSelectedOption(BURNDOWN_GRAPHOPTION nOption);
 

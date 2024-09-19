@@ -43,7 +43,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphComboBox message handlers
 
-BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
+BOOL CBurndownGraphComboBox::Initialise(const CGraphsMap& mapGraphs)
 {
 	// Once only
 	if (GetCount())
@@ -70,12 +70,12 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 		// For each type, sort all the related graphs by name
 		// before adding to combo
 		CGraphArray aGraphs;
-		VERIFY(chart.GetGraphs(gt.nType, aGraphs, TRUE));
+		VERIFY(mapGraphs.GetGraphs(gt.nType, aGraphs, TRUE));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
-			CDialogHelper::AddString(*this, chart.GetGraphTitle(nGraph), nGraph);
+			CDialogHelper::AddString(*this, mapGraphs.GetTitle(nGraph), nGraph);
 		}
 	}
 
@@ -86,25 +86,18 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 	return TRUE;
 }
 
-void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
+BURNDOWN_GRAPH CBurndownGraphComboBox::GetSelectedGraph() const
 {
-	if (pDX->m_bSaveAndValidate)
-	{
-		int nSel = GetCurSel();
-	
-		if (!IsSelectableItem(nSel))
-		{
-			ASSERT(0);
-			nGraph = BCT_UNKNOWNGRAPH;
-		}
-		else
-		{
-			nGraph = (BURNDOWN_GRAPH)GetItemData(nSel);
-		}
-	}
-	else
-	{
-		SetCurSel(CDialogHelper::FindItemByData(*this, nGraph));
-	}
+	int nSel = GetCurSel();
+
+	if (IsSelectableItem(nSel))
+		return (BURNDOWN_GRAPH)GetItemData(nSel);
+
+	ASSERT(0);
+	return BCG_UNKNOWNGRAPH;
 }
 
+void CBurndownGraphComboBox::SetSelectedGraph(BURNDOWN_GRAPH nGraph)
+{
+	SetCurSel(CDialogHelper::FindItemByData(*this, nGraph));
+}

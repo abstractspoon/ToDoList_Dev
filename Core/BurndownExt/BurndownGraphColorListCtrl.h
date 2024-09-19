@@ -7,7 +7,7 @@
 // BurndownGraphColorListCtrl.h : header file
 //
 
-#include "BurndownStruct.h"
+#include "BurndownGraphs.h"
 
 #include "..\Shared\InputListCtrl.h"
 
@@ -25,7 +25,7 @@ public:
 	CBurndownGraphColorListCtrl();
 	virtual ~CBurndownGraphColorListCtrl();
 
-	BOOL Initialize(const CBurndownChart& chart);
+	BOOL Initialize(const CGraphsMap& mapGraphs, BURNDOWN_GRAPH nActiveGraph);
 	const CGraphColorMap& GetGraphColors() const { return m_mapColors; }
 
 protected:

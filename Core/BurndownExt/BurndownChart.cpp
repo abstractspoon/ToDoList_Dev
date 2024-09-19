@@ -23,29 +23,13 @@
 
 const int NUM_Y_TICKS = 10;
 
-/////////////////////////////////////////////////////////////////////////////
-
-struct SORTITEM
-{
-	BURNDOWN_GRAPH nGraph;
-	CString sLabel;
-};
-
-static int SortProc(const void* pV1, const void* pV2)
-{
-	const SORTITEM* pSI1 = (const SORTITEM*)pV1;
-	const SORTITEM* pSI2 = (const SORTITEM*)pV2;
-
-	return Misc::NaturalCompare(pSI1->sLabel, pSI2->sLabel);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
 CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	: 
 	m_data(data),
-	m_nActiveGraph(BCT_TIMESERIES_INCOMPLETETASKS),
+	m_nActiveGraph(BCG_TIMESERIES_INCOMPLETETASKS),
 	m_calculator(data)
 {
 	EnableFixedLabelFontSize(); // don't scale down as available size decreases
@@ -74,9 +58,27 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nGraph) const
 	return pGraph->GetTitle();
 }
 
+BURNDOWN_GRAPHTYPE CBurndownChart::GetGraphType(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(nGraph, BCT_UNKNOWNTYPE);
+
+	return pGraph->GetType();
+}
+
+BURNDOWN_GRAPHOPTION CBurndownChart::GetDefaultOption(BURNDOWN_GRAPH nGraph) const
+{
+	return ::GetDefaultOption(GetGraphType(nGraph));
+}
+
+BOOL CBurndownChart::IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph) const
+{
+	return ::IsValidOption(nOption, GetGraphType(nGraph));
+}
+
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 {
-	if (!IsValidGraph(nGraph))
+	if (!m_mapGraphs.HasGraph(nGraph))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -91,44 +93,6 @@ BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	}
 
 	return FALSE;
-}
-
-int CBurndownChart::GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const
-{
-	for (int nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
-	{
-		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)nItem;
-		ASSERT(IsValidGraph(nGraph));
-
-		if (m_mapGraphs.HasGraph(nGraph) && (GetGraphType(nGraph) == nType))
-			aGraphs.Add(nGraph);
-	}
-
-	if (bSorted)
-	{
-		CArray<SORTITEM, SORTITEM&> aSort;
-		SORTITEM st;
-
-		int nItem = aGraphs.GetSize();
-
-		while (nItem--)
-		{
-			st.nGraph = (BURNDOWN_GRAPH)aGraphs[nItem];
-			st.sLabel = GetGraphTitle(st.nGraph);
-
-			aSort.Add(st);
-		}
-
-		Misc::SortArrayT<SORTITEM>(aSort, SortProc);
-
-		nItem = aSort.GetSize();
-		aGraphs.SetSize(nItem);
-
-		while (nItem--)
-			aGraphs[nItem] = aSort[nItem].nGraph;
-	}
-	
-	return aGraphs.GetSize();
 }
 
 BOOL CBurndownChart::SetActiveGraphColors(const CColorArray& aColors)
@@ -211,53 +175,14 @@ void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 
 void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
 {
-	POSITION pos = mapColors.GetStartPosition();
-
-	while (pos)
+	if (m_mapGraphs.SetGraphColors(mapColors))
 	{
-		BURNDOWN_GRAPH nGraph;
-		CColorArray aColors;
-		
-		mapColors.GetNextAssoc(pos, nGraph, aColors);
-		ASSERT(aColors.GetSize());
+		CGraphBase* pGraph = NULL;
+		GET_GRAPH(m_nActiveGraph);
 
-		if (aColors.GetSize())
-		{
-			CGraphBase* pGraph = m_mapGraphs.GetGraph(nGraph);
-			ASSERT(pGraph);
-
-			if (pGraph)
-			{
-				pGraph->SetColors(aColors);
-
-				// Refresh active graph
-				if (nGraph == m_nActiveGraph)
-				{
-					pGraph->UpdateDatasetColors(m_datasets);
-					Invalidate();
-				}
-			}
-		}
+		pGraph->UpdateDatasetColors(m_datasets);
+		Invalidate();
 	}
-}
-
-int CBurndownChart::GetGraphColors(CGraphColorMap& mapColors) const
-{
-	mapColors.RemoveAll();
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CColorArray aColors;
-		aColors.Copy(pGraph->GetColors());
-
-		mapColors[nGraph] = aColors;
-	}
-
-	return mapColors.GetCount();
 }
 
 BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
@@ -280,7 +205,7 @@ BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
 {
 	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) &&
-		(GetGraphType(m_nActiveGraph) == BCT_FREQUENCY))
+		(m_mapGraphs.GetType(m_nActiveGraph) == BCT_FREQUENCY))
 	{
 		RebuildGraph(m_dtExtents);
 	}
@@ -387,7 +312,7 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 {
 	switch (m_nActiveGraph)
 	{
-	case BCT_MINMAX_DUEDONEDATES:
+	case BCG_MINMAX_DUEDONEDATES:
 		return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
 	}
 
@@ -401,7 +326,7 @@ int CBurndownChart::GetNumYSubTicks(double dInterval) const
 
 	switch (m_nActiveGraph)
 	{
-	case BCT_MINMAX_DUEDONEDATES:
+	case BCG_MINMAX_DUEDONEDATES:
 		// Don't allow less than a day
 		if ((dInterval / nNumSub) < 1.0)
 			nNumSub = (int)dInterval;
@@ -424,7 +349,7 @@ BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) c
 
 	switch (m_nActiveGraph)
 	{
-	case BCT_MINMAX_DUEDONEDATES:
+	case BCG_MINMAX_DUEDONEDATES:
 		{
 			double dDiff = max(10.0, (dMax - dMin));
 			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
@@ -502,21 +427,24 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 {
 	CHMXChartEx::DoPaint(dc, bPaintBkgnd);
 
-	if ((m_rectData.Height() > 0) && (m_crToday != CLR_NONE) && (GetGraphType(m_nActiveGraph) == BCT_TIMESERIES))
+	if ((m_rectData.Height() > 0) && (m_crToday != CLR_NONE) && (m_mapGraphs.GetType(m_nActiveGraph) == BCT_TIMESERIES))
 	{
 		CGraphBase* pGraph = NULL;
 		GET_GRAPH(m_nActiveGraph);
 
-		// Find the data point corresponding to today
-		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-		int nPos = m_calculator.HitTest(dtToday);
-
-		if (nPos != -1)
+		if (pGraph->GetType() == BCT_TIMESERIES)
 		{
-			CPoint ptPos;
+			// Find the data point corresponding to today
+			COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+			int nPos = m_calculator.HitTest(dtToday);
 
-			if (GetPointXY(0, nPos, ptPos))
-				GraphicsMisc::DrawVertLine(&dc, m_rectData.bottom, m_rectData.top, ptPos.x, m_crToday);
+			if (nPos != -1)
+			{
+				CPoint ptPos;
+
+				if (GetPointXY(0, nPos, ptPos))
+					GraphicsMisc::DrawVertLine(&dc, m_rectData.bottom, m_rectData.top, ptPos.x, m_crToday);
+			}
 		}
 	}
 }

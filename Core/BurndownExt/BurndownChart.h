@@ -35,16 +35,19 @@ public:
 	int GetActiveGraphColors(CColorArray& aColors) const;
 	
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
-	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
+	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
+	BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPH nGraph) const;
+	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph) const;
 
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 	void SetGraphColors(const CGraphColorMap& mapColors);
-	int GetGraphColors(CGraphColorMap& mapColors) const;
+	const CGraphsMap& Graphs() const { return m_mapGraphs; }
 
 protected:
 	const CStatsItemArray& m_data;
+
 	CGraphsMap m_mapGraphs;
 	CStatsItemCalculator m_calculator;
 

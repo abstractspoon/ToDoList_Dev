@@ -77,10 +77,8 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CCBurndownOptionsComboBox message handlers
 
-BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
+BOOL CBurndownOptionsComboBox::SetActiveGraphType(BURNDOWN_GRAPHTYPE nType)
 {
-	BURNDOWN_GRAPHTYPE nType = GetGraphType(nGraph);
-
 	if (nType == BCT_UNKNOWNTYPE)
 	{
 		ASSERT(0);
@@ -90,6 +88,8 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	{
 		return TRUE;
 	}
+
+	m_nGraphType = nType;
 
 	// We build the combo in a specific order
 	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
@@ -130,11 +130,9 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	CDialogHelper::RefreshMaxDropWidth(*this);
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
 
-	m_nGraphType = nType;
-
 	// restore selection
-	if (!IsValidOption(nSelOpt, nGraph))
-		nSelOpt = GetDefaultOption(m_nGraphType);
+	if (!IsValidOption(nSelOpt, nType))
+		nSelOpt = GetDefaultOption(nType);
 
 	SetSelectedOption(nSelOpt);
 

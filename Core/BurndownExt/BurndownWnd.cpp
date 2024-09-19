@@ -47,11 +47,10 @@ enum // m_dwUpdateGraphOnShow
 CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_STATISTICS_DLG, pParent),
-	m_nGraph(BCT_TIMESERIES_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_chart(m_data),
-	m_dlgPrefs(m_chart, this),
+	m_dlgPrefs(m_chart.Graphs(), this),
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
 	m_bVisible(FALSE)
@@ -76,8 +75,6 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
-
-	m_cbGraphs.DDX(pDX, m_nGraph);
 }
 
 
@@ -122,7 +119,7 @@ BOOL CBurndownWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 
 void CBurndownWnd::OnPreferences()
 {
-	if (m_dlgPrefs.DoModal() == IDOK)
+	if (m_dlgPrefs.DoModal(m_chart.GetActiveGraph()) == IDOK)
 	{
 		m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
 		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
@@ -166,7 +163,7 @@ BOOL CBurndownWnd::OnInitDialog()
 	rFrame.DeflateRect(1, 1);
 
 	VERIFY(m_chart.SubclassDlgItem(IDC_GRAPH, this));
-	VERIFY(m_cbGraphs.Initialise(m_chart));
+	VERIFY(m_cbGraphs.Initialise(m_chart.Graphs()));
 	VERIFY(m_wndPrompts.SetComboPrompt(m_cbOptions, IDS_NONE));
 
 	RebuildGraph(FALSE, FALSE, FALSE);
@@ -179,7 +176,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_nGraph);
+	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_chart.GetActiveGraph());
 
 	// Active date range
 	COleDateTimeRange dtActiveRange;
@@ -207,18 +204,20 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// burn down specific options
 	if (!bAppOnly)
 	{
-		m_nGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), BCT_TIMESERIES_INCOMPLETETASKS);
+		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), BCG_TIMESERIES_INCOMPLETETASKS);
 		
-		if (!IsValidGraph(m_nGraph))
-			m_nGraph = BCT_TIMESERIES_INCOMPLETETASKS;
+// 		if (!IsValidGraph(nGraph))
+// 			nGraph = BCG_TIMESERIES_INCOMPLETETASKS;
 
 		m_chart.LoadPreferences(pPrefs, szKey);
 		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
-		m_chart.SetActiveGraph(m_nGraph);
+		m_chart.SetActiveGraph(nGraph);
 		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
 		
-		m_cbOptions.SetActiveGraph(m_nGraph);
+		m_cbGraphs.SetSelectedGraph(nGraph);
+
+		m_cbOptions.SetActiveGraphType(m_chart.GetGraphType(nGraph));
 		m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 
 		// Active range
@@ -417,25 +416,33 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		m_data.RemoveAll();
+		{
+			m_data.RemoveAll();
 
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE, FALSE);
-		RebuildGraph(TRUE, TRUE, TRUE);
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE, FALSE);
+			RebuildGraph(TRUE, TRUE, TRUE);
+		}
 		break;
 		
 	case IUI_NEW:
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE, TRUE);
-		RebuildGraph(TRUE, TRUE, TRUE);
+		{
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE, TRUE);
+			RebuildGraph(TRUE, TRUE, TRUE);
+		}
 		break;
 		
 	case IUI_EDIT:
-		UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
-		RebuildGraph(TRUE, TRUE, TRUE);
+		{
+			UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
+			RebuildGraph(TRUE, TRUE, TRUE);
+		}
 		break;
 		
 	case IUI_DELETE:
 		if (RemoveDeletedTasks(pTasks))
+		{
 			RebuildGraph(FALSE, TRUE, TRUE);
+		}
 		break;
 		
 	default:
@@ -699,9 +706,10 @@ void CBurndownWnd::OnSelchangeDisplay()
 {
 	UpdateData();
 
-	m_chart.SetActiveGraph(m_nGraph);
+	BURNDOWN_GRAPH nGraph = m_cbGraphs.GetSelectedGraph();
+	m_chart.SetActiveGraph(nGraph);
 
-	m_cbOptions.SetActiveGraph(m_nGraph);
+	m_cbOptions.SetActiveGraphType(m_chart.GetGraphType(nGraph));
 	m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 }
 

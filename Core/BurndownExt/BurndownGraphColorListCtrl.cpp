@@ -31,11 +31,11 @@ CBurndownGraphColorListCtrl::~CBurndownGraphColorListCtrl()
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownGraphColorListCtrl message handlers
 
-BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
+BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDOWN_GRAPH nActiveGraph)
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 
-	VERIFY(chart.GetGraphColors(m_mapColors));
+	VERIFY(mapGraphs.GetGraphColors(m_mapColors));
 
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
@@ -54,12 +54,12 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 		GetGrouping().InsertGroupHeader(nType, gt.nType, CEnString(gt.nLabelID));
 
 		CGraphArray aGraphs;
-		VERIFY(chart.GetGraphs(gt.nType, aGraphs, FALSE));
+		VERIFY(mapGraphs.GetGraphs(gt.nType, aGraphs, FALSE));
 
 		for (int nItem = 0; nItem < aGraphs.GetSize(); nItem++)
 		{
 			BURNDOWN_GRAPH nGraph = aGraphs[nItem];
-			int nRow = AddRow(chart.GetGraphTitle(nGraph));
+			int nRow = AddRow(mapGraphs.GetTitle(nGraph));
 
 			SetItemData(nRow, nGraph);
 			GetGrouping().SetItemGroupId(nRow, gt.nType);
@@ -71,7 +71,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
 
 			// Set selection to the currently active graph
-			if (chart.GetActiveGraph() == nGraph)
+			if (nActiveGraph == nGraph)
 				nSelRow = nRow;
 		}
 	}

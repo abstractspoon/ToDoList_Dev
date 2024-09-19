@@ -23,20 +23,21 @@ public:
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
 	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
 
-	BURNDOWN_GRAPHTYPE GetType() const;
+	BURNDOWN_GRAPH GetGraph() const { return m_nGraph; }
+	BURNDOWN_GRAPHTYPE GetType() const { return m_nType; }
 	BOOL GetMinMax(double& dMin, double& dMax) const;
 
 	const CColorArray& GetColors() const;
 	BOOL SetColors(const CColorArray& aColors);
 	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
-	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
 	BURNDOWN_GRAPHOPTION GetOption() const;
 	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption) const;
 	BOOL HasOption(BURNDOWN_GRAPHOPTION nOption) const;
+	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
 
 protected:
-	CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption = BGO_INVALID);
+	CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHTYPE nType, BURNDOWN_GRAPHOPTION nOption = BGO_INVALID);
 	
 	static void SetDatasetColor(CHMXDataset& dataset, COLORREF crBase);
 	static void ClearData(CHMXDataset datasets[HMX_MAX_DATASET]);
@@ -49,7 +50,9 @@ protected:
 
 private:
 	BURNDOWN_GRAPH m_nGraph;
+	BURNDOWN_GRAPHTYPE m_nType;
 	BURNDOWN_GRAPHOPTION m_nOption;
+
 	CColorArray m_aColors;
 	double m_dDataMin, m_dDataMax;
 };
@@ -62,14 +65,21 @@ public:
 	CGraphsMap();
 	~CGraphsMap();
 
+	BOOL AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph);
+	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
+
+	CString GetTitle(BURNDOWN_GRAPH nGraph) const;
+	BURNDOWN_GRAPHTYPE GetType(BURNDOWN_GRAPH nGraph) const;
+
 	CGraphBase* GetNext(POSITION& pos) const;
 	CGraphBase* GetNext(POSITION& pos, BURNDOWN_GRAPH& nGraph) const;
 	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 
-	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
+	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
+	int GetGraphColors(CGraphColorMap& mapColors) const;
+	BOOL SetGraphColors(const CGraphColorMap& mapColors);
 
 protected:
-	BOOL AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -189,7 +189,6 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
 		Misc::Split(pTasks->GetTaskAttribute(hTask, TDCA_CATEGORY, false, true), aCategory);
 
-
 	if (pTasks->IsAttributeAvailable(TDCA_STATUS))
 		sStatus = pTasks->GetTaskStatus(hTask);
 
