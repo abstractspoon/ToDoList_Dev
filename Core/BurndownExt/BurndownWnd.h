@@ -71,9 +71,6 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CBurndownWnd)
-	enum { IDD = IDD_STATISTICS_DLG };
-	//}}AFX_DATA
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
@@ -100,24 +97,17 @@ protected:
 
 protected:
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CBurndownWnd)
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 	virtual void OnCancel() {}
 	virtual void OnOK() {}
 
 // Implementation
 protected:
-
 	// Generated message map functions
-	//{{AFX_MSG(CBurndownWnd)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelChangeGraph();
