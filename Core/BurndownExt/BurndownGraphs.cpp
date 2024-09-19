@@ -1063,6 +1063,12 @@ CString CFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, 
 	return sTooltip;
 }
 
+BOOL CFrequencyGraph::HasAxes() const 
+{ 
+	return (!HasOption(BGO_FREQUENCY_DONUT) && 
+			!HasOption(BGO_FREQUENCY_PIE)); 
+}
+
 BOOL CFrequencyGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	return UpdateGraphStyles(datasets[0]);

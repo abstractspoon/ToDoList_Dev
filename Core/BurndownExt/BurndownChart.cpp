@@ -244,7 +244,6 @@ BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) c
 		{
 			double dDiff = max(10.0, (dMax - dMin));
 			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
-			// some comment
 		}
 		break;
 
@@ -263,20 +262,17 @@ void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 
 	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
 
-	switch (m_pGraph->GetOption())
+	if (m_pGraph->HasAxes())
 	{
-	case BGO_FREQUENCY_PIE:
-	case BGO_FREQUENCY_DONUT:
-		// Remove then add
-		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
-		dwFlags |= HMX_RENDER_XAXISTITLE;
-		break;
-
-	default:
 		// Add then remove
 		dwFlags |= (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
 		dwFlags &= ~HMX_RENDER_XAXISTITLE;
-		break;
+	}
+	else
+	{
+		// Remove then add
+		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
+		dwFlags |= HMX_RENDER_XAXISTITLE;
 	}
 
 	SetRenderFlags(dwFlags, bRedraw);
