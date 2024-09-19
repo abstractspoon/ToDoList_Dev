@@ -26,6 +26,8 @@ public:
 	BOOL Has(COLORREF color) const;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, CColorArray&>
 {
 public:

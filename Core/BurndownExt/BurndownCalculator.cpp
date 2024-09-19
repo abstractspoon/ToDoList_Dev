@@ -50,8 +50,7 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 
 BOOL CStatsItemCalculator::SetShowEmptyFrequencyValues(BOOL bShowEmpty) 
 { 
-	if ((m_bShowEmptyFrequencyValues && !bShowEmpty) ||
-		(!m_bShowEmptyFrequencyValues && bShowEmpty))
+	if (Misc::StateChanged(m_bShowEmptyFrequencyValues, bShowEmpty))
 	{
 		m_bShowEmptyFrequencyValues = bShowEmpty;
 		return TRUE;
@@ -59,6 +58,11 @@ BOOL CStatsItemCalculator::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
 
 	// else
 	return FALSE;
+}
+
+BOOL CStatsItemCalculator::HasValidDateRange() const
+{
+	return ((m_dStartExtents != 0.0) && (m_dEndExtents != 0.0) && (m_dStartExtents < m_dEndExtents));
 }
 
 int CStatsItemCalculator::GetTotalDays() const

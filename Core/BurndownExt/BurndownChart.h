@@ -10,8 +10,6 @@
 
 class CGraphBase;
 
-class IPreferences;
-
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
@@ -25,30 +23,17 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
-	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
-	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
-	BOOL SetActiveGraphColors(const CColorArray& aColors);
+	BOOL SetActiveGraph(const CGraphBase* pGraph);
 	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
 
-	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
-	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;
-	int GetActiveGraphColors(CColorArray& aColors) const;
-	
-	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
-	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
-
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
-	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-
-	void SetGraphColors(const CGraphColorMap& mapColors);
-	int GetGraphColors(CGraphColorMap& mapColors) const;
+	void OnColoursChanged();
+	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);
 
 protected:
 	const CStatsItemArray& m_data;
-	CGraphsMap m_mapGraphs;
-	CStatsItemCalculator m_calculator;
 
-	BURNDOWN_GRAPH m_nActiveGraph;
+	CStatsItemCalculator m_calculator;
+	const CGraphBase* m_pGraph;
 	COleDateTimeRange m_dtExtents;
 	COLORREF m_crToday;
 
@@ -67,12 +52,10 @@ protected:
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 	virtual BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly) const;
 	virtual CString GetYTickText(int nTick, double dValue) const;
+	virtual BOOL DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
 
 	// CHMXChartEx overrides
 	virtual int GetNumYSubTicks(double dInterval) const;
-
-	BOOL HighlightDataPoint(int nIndex);
-	BOOL DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
-
+	virtual BOOL HighlightDataPoint(int nIndex);
 };
 
