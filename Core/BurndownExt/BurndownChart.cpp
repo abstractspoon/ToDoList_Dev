@@ -235,7 +235,7 @@ BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) c
 
 	CHECK_GRAPH_RET(FALSE);
 
-	if (!m_pGraph->GetMinMax(dMin, dMax) || (dMin >= dMax))
+	if (!m_pGraph->GetMinMax(dMin, dMax) || (dMin > dMax))
 		return FALSE;
 
 	switch (m_pGraph->GetGraph())

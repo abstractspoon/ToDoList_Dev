@@ -1294,7 +1294,6 @@ void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 
 CMinMaxGraph::CMinMaxGraph(BURNDOWN_GRAPH nGraph) 
