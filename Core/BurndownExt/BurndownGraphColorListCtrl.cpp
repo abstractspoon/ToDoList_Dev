@@ -45,7 +45,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDO
 
 	GetGrouping().EnableGroupView(*this);
 
-	// Populate items
+	// Populate rows
 	int nSelRow = -1;
 
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
@@ -64,17 +64,18 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDO
 			SetItemData(nRow, nGraph);
 			GetGrouping().SetItemGroupId(nRow, gt.nType);
 
-			// build colour columns as we go
-			int nColor = m_mapColors.GetColorCount(nGraph);
-
-			while (nColor--)
-				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
-
 			// Set selection to the currently active graph
 			if (nActiveGraph == nGraph)
 				nSelRow = nRow;
 		}
 	}
+
+	// Populate columns
+	int nColor = mapGraphs.GetMaxColorCount();
+
+	while (nColor--)
+		AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
+
 	RefreshItemHeight();
 
 	if (nSelRow != -1)

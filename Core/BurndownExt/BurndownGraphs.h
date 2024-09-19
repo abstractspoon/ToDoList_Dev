@@ -80,6 +80,7 @@ public:
 	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
 	int GetColors(CGraphColorMap& mapColors) const;
 	BOOL SetColors(const CGraphColorMap& mapColors);
+	int GetMaxColorCount() const;
 
 protected:
 };

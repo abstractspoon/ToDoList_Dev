@@ -232,6 +232,20 @@ BOOL CGraphsMap::SetColors(const CGraphColorMap& mapColors)
 	return bChange;
 }
 
+int CGraphsMap::GetMaxColorCount() const
+{
+	int nMax = 0;
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		int nNumGraphColors = GetNext(pos)->GetColors().GetSize();
+		nMax = max(nMax, nNumGraphColors);
+	}
+
+	return nMax;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHTYPE nType, BURNDOWN_GRAPHOPTION nOption)
