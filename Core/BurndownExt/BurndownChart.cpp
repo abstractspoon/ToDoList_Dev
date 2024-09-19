@@ -87,7 +87,9 @@ BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
 	if (pGraph != m_pGraph)
 	{
 		m_pGraph = pGraph;
-		RebuildGraph(m_dtExtents);
+
+		if (m_dtExtents.IsValid())
+			RebuildGraph(m_dtExtents);
 	}
 
 	return TRUE;
@@ -208,7 +210,9 @@ void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
 {
 	CHECK_GRAPH();
 
-	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && m_pGraph->HasType(BCT_FREQUENCY))
+	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && 
+		m_pGraph->HasType(BCT_FREQUENCY) &&
+		m_dtExtents.IsValid())
 	{
 		RebuildGraph(m_dtExtents);
 	}
@@ -258,7 +262,7 @@ void CBurndownChart::RebuildXScale()
 {
 	ClearXScaleLabels();
 
-	if (!m_data.IsEmpty())
+	if (!m_data.IsEmpty() && m_calculator.HasValidDateRange())
 	{
 		CHECK_GRAPH();
 
@@ -278,14 +282,14 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 
 BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 {
-	CHECK_GRAPH_RET(FALSE);
-
-	if (!m_dtExtents.Set(dtExtents))
+	if (!dtExtents.IsValid() || !m_dtExtents.Set(dtExtents))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 	
+	CHECK_GRAPH_RET(FALSE);
+
 	m_calculator.SetDateRange(m_dtExtents);
 
 	CWaitCursor cursor;
@@ -310,12 +314,15 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 
 CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 {
-	CHECK_GRAPH_RET(_T(""));
-
-	switch (m_pGraph->GetGraph())
+	// This is a virtual function which can get legitimately called
+	// by CHMXChart before m_pGraph is set so we don't assert
+	if (m_pGraph)
 	{
-	case BCG_MINMAX_DUEDONEDATES:
-		return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+		switch (m_pGraph->GetGraph())
+		{
+		case BCG_MINMAX_DUEDONEDATES:
+			return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+		}
 	}
 
 	// All else

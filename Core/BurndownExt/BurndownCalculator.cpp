@@ -60,6 +60,11 @@ BOOL CStatsItemCalculator::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
 	return FALSE;
 }
 
+BOOL CStatsItemCalculator::HasValidDateRange() const
+{
+	return ((m_dStartExtents != 0.0) && (m_dEndExtents != 0.0) && (m_dStartExtents < m_dEndExtents));
+}
+
 int CStatsItemCalculator::GetTotalDays() const
 {
 	return (int)(m_dEndExtents - m_dStartExtents);

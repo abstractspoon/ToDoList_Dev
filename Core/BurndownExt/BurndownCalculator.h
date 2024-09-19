@@ -28,6 +28,7 @@ public:
 
 	BOOL SetDateRange(const COleDateTimeRange& dtExtents);
 	BOOL SetShowEmptyFrequencyValues(BOOL bShowEmpty);
+	BOOL HasValidDateRange() const;
 
 	double GetStartDate() const { return m_dStartExtents; }
 	double GetEndDate() const { return m_dEndExtents; }
