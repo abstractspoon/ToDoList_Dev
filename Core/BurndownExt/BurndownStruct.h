@@ -68,6 +68,7 @@ struct GRAPHOPTION
 struct CUSTOMATTRIBDEF
 {
 	BOOL operator==(const CUSTOMATTRIBDEF& other) const;
+	BOOL operator!=(const CUSTOMATTRIBDEF& other) const;
 
 	CString sUniqueID;
 	CString sLabel;
@@ -82,11 +83,14 @@ struct CUSTOMATTRIBDEF
 class CCustomAttributeDefinitionArray : public CArray<CUSTOMATTRIBDEF, CUSTOMATTRIBDEF&>
 {
 public:
-	BOOL operator==(const CCustomAttributeDefinitionArray& other) const;
-	BOOL operator!=(const CCustomAttributeDefinitionArray& other) const;
-
 	int Find(const CString& sID) const;
 	int Find(BURNDOWN_GRAPH nGraph) const;
+
+	BOOL Update(const ITASKLISTBASE* pTasks);
+
+protected:
+	BURNDOWN_GRAPH GetFirstUnusedGraph() const;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

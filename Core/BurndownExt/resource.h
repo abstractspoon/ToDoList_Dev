@@ -70,6 +70,7 @@
 #define IDS_MINMAX                      57712
 #define IDS_DISPLAY_DUEDONEDATES        57713
 #define IDS_TOOLTIP_DUEDONEDATES        57714
+#define IDS_CUSTOMATTRIB_GRAPH          57715
 
 // Next default values for new objects
 // 

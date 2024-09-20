@@ -118,17 +118,12 @@ BOOL CUSTOMATTRIBDEF::operator==(const CUSTOMATTRIBDEF& other) const
 			(sUniqueID.CompareNoCase(other.sUniqueID) == 0));
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-BOOL CCustomAttributeDefinitionArray::operator==(const CCustomAttributeDefinitionArray& other) const
-{
-	return Misc::MatchAllT(*this, other, FALSE);
-}
-
-BOOL CCustomAttributeDefinitionArray::operator!=(const CCustomAttributeDefinitionArray& other) const
+BOOL CUSTOMATTRIBDEF::operator!=(const CUSTOMATTRIBDEF& other) const
 {
 	return !(*this == other);
 }
+
+/////////////////////////////////////////////////////////////////////////////
 
 int CCustomAttributeDefinitionArray::Find(const CString& sID) const
 {
@@ -154,6 +149,119 @@ int CCustomAttributeDefinitionArray::Find(BURNDOWN_GRAPH nGraph) const
 	}
 
 	return -1;
+}
+
+BOOL CCustomAttributeDefinitionArray::Update(const ITASKLISTBASE* pTasks)
+{
+	if (!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+		return FALSE;
+
+	BOOL bChange = FALSE;
+
+	// Retrieve new definitions
+	CCustomAttributeDefinitionArray aNewCustAttribDefs;
+
+	int nNumDef = pTasks->GetCustomAttributeCount(), nDef = 0;
+	CUSTOMATTRIBDEF def;
+
+	for (; nDef < nNumDef; nDef++)
+	{
+		if (pTasks->IsCustomAttributeEnabled(nDef))
+		{
+			DWORD dwCustType = pTasks->GetCustomAttributeType(nDef);
+
+			//DWORD dwDataType = (dwCustType & TDCCA_DATAMASK);
+			DWORD dwListType = (dwCustType & TDCCA_LISTMASK);
+
+			BURNDOWN_GRAPHTYPE nType = BCT_UNKNOWNTYPE;
+
+			if (dwListType != TDCCA_NOTALIST)
+				nType = BCT_FREQUENCY;
+			// else
+			// TODO
+
+
+			if (nType != BCT_UNKNOWNTYPE)
+			{
+				def.sUniqueID = pTasks->GetCustomAttributeID(nDef);
+				def.sLabel = pTasks->GetCustomAttributeLabel(nDef);
+				def.sListData = pTasks->GetCustomAttributeListData(nDef);
+				def.nType = nType;
+				def.nGraph = BCG_UNKNOWNGRAPH;
+
+				aNewCustAttribDefs.Add(def); // Process afterwards
+			}
+		}
+	}
+
+	if (aNewCustAttribDefs.GetSize() > 0)
+	{
+		// Update or add definitions preserving as much as possible
+		nDef = aNewCustAttribDefs.GetSize();
+
+		while (nDef--)
+		{
+			CUSTOMATTRIBDEF& defNew = aNewCustAttribDefs[nDef];
+			int nExist = Find(defNew.sUniqueID);
+
+			if (nExist == -1)
+			{
+				defNew.nGraph = GetFirstUnusedGraph();
+				Add(defNew);
+
+				bChange = TRUE;
+			}
+			else
+			{
+				const CUSTOMATTRIBDEF& defExist = GetAt(nExist);
+
+				defNew.nGraph = defExist.nGraph;
+
+				if (defNew != defExist)
+				{
+					SetAt(nExist, defNew);
+					bChange = TRUE;
+				}
+			}
+		}
+	}
+
+	// Finally delete any definitions no longer existing
+	//
+	// Note: We wait until the end to remove any no longer existing
+	//		 custom attributes so that their 'nGraph' values do not 
+	//		 get reused until the next time. This makes it much easier 
+	//		 to detect when the active graph is invalidated.
+	nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (aNewCustAttribDefs.Find(GetAt(nDef).sUniqueID) == -1)
+		{
+			RemoveAt(nDef);
+			bChange = TRUE;
+		}
+	}
+
+	return bChange;
+}
+
+BURNDOWN_GRAPH CCustomAttributeDefinitionArray::GetFirstUnusedGraph() const
+{
+	CSet<BURNDOWN_GRAPH> mapGraphs;
+
+	int nDef = GetSize();
+
+	while (nDef--)
+		mapGraphs.Add(GetAt(nDef).nGraph);
+
+	for (int nGraph = BCG_CUSTOMATTRIB_FIRST; nGraph <= BCG_CUSTOMATTRIB_LAST; nGraph++)
+	{
+		if (!mapGraphs.Has((BURNDOWN_GRAPH)nGraph))
+			return (BURNDOWN_GRAPH)nGraph;
+	}
+
+	return BCG_UNKNOWNGRAPH;
 }
 
 /////////////////////////////////////////////////////////////////////////////

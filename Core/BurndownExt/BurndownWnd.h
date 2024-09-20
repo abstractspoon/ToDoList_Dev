@@ -133,8 +133,6 @@ protected:
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 	void ResizeSlider(int nParentWidth = -1);
-
-	static BURNDOWN_GRAPH GetFirstUnusedGraph(const CCustomAttributeDefinitionArray& aCustAttribDef);
 };
 
 //{{AFX_INSERT_LOCATION}}

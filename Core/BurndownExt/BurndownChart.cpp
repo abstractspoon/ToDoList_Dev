@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
+BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild)
 {
 	if (!pGraph)
 	{
@@ -61,7 +61,7 @@ BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
 	{
 		m_pGraph = pGraph;
 
-		if (m_dtExtents.IsValid())
+		if (bRebuild && m_dtExtents.IsValid())
 			RebuildGraph(m_dtExtents);
 	}
 
@@ -87,15 +87,14 @@ void CBurndownChart::OnOptionChanged(BURNDOWN_GRAPHOPTION nOption)
 	}
 }
 
-void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
+void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild)
 {
-	CHECK_GRAPH();
-
-	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && 
-		m_pGraph->HasType(BCT_FREQUENCY) &&
-		m_dtExtents.IsValid())
+	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && bRebuild &&	m_dtExtents.IsValid())
 	{
-		RebuildGraph(m_dtExtents);
+		CHECK_GRAPH();
+
+		if (m_pGraph->HasType(BCT_FREQUENCY))
+			RebuildGraph(m_dtExtents);
 	}
 }
 

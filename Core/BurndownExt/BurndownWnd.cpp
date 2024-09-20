@@ -33,6 +33,8 @@ static char THIS_FILE[] = __FILE__;
 
 const UINT WM_REBUILDGRAPH = (WM_APP+1);
 
+const BURNDOWN_GRAPH DEF_GRAPH = BCG_TIMESERIES_INCOMPLETETASKS;
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum // m_dwUpdateGraphOnShow
@@ -55,7 +57,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
 	m_bVisible(FALSE),
-	m_nActiveGraph(BCG_TIMESERIES_INCOMPLETETASKS),
+	m_nActiveGraph(DEF_GRAPH),
 	m_nSelOption(BGO_INVALID)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
@@ -224,13 +226,13 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// burn down specific options
 	if (!bAppOnly)
 	{
-		m_nActiveGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), BCG_TIMESERIES_INCOMPLETETASKS);
+		m_nActiveGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), DEF_GRAPH);
 	
 		const CGraphBase* pActiveGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
 
 		if (!pActiveGraph)
 		{
-			m_nActiveGraph = BCG_TIMESERIES_INCOMPLETETASKS;
+			m_nActiveGraph = DEF_GRAPH;
 			pActiveGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
 
 			ASSERT(pActiveGraph);
@@ -276,7 +278,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		}
 
 		m_chart.SetActiveGraph(pActiveGraph);
-		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
+		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues(), FALSE);
 
 		m_cbOptions.SetActiveGraphType(pActiveGraph->GetType());
 		m_nSelOption = pActiveGraph->GetOption();
@@ -406,6 +408,7 @@ bool CBurndownWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 	case TDCA_RISK:
 	case TDCA_TAGS:
 	case TDCA_VERSION:
+	case TDCA_CUSTOMATTRIB:
 		return true;
 	}
 
@@ -448,6 +451,29 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
+}
+
+BOOL CBurndownWnd::UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks)
+{
+	if (!m_aCustomAttribDefs.Update(pTasks) || !m_mapGraphs.Update(m_aCustomAttribDefs))
+		return FALSE;
+
+	// Update graphs combo
+	m_cbGraphs.ResetContent();
+	m_cbGraphs.Initialise(m_mapGraphs);
+
+	if (!m_mapGraphs.HasGraph(m_nActiveGraph))
+	{
+		ASSERT(IsCustomAttributeGraph(m_nActiveGraph));
+		m_nActiveGraph = DEF_GRAPH;
+
+		m_chart.SetActiveGraph(m_mapGraphs.GetGraph(m_nActiveGraph), FALSE); // No rebuild
+	}
+
+	// Restore selection
+	UpdateData(FALSE);
+
+	return TRUE;
 }
 
 void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
@@ -502,110 +528,6 @@ void CBurndownWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdat
 	default:
 		ASSERT(0);
 	}
-}
-
-BOOL CBurndownWnd::UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks)
-{
-	if (!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
-		return FALSE;
-
-	BOOL bWasEmpty = (m_aCustomAttribDefs.GetSize() == 0);
-
-	// Retrieve new definitions
-	CCustomAttributeDefinitionArray aNewCustAttribDefs;
-
-	int nNumDef = pTasks->GetCustomAttributeCount(), nDef = 0;
-	CUSTOMATTRIBDEF def;
-
-	for (; nDef < nNumDef; nDef++)
-	{
-		if (pTasks->IsCustomAttributeEnabled(nDef))
-		{
-			DWORD dwCustType = pTasks->GetCustomAttributeType(nDef);
-
-			DWORD dwDataType = (dwCustType & TDCCA_DATAMASK);
-			DWORD dwListType = (dwCustType & TDCCA_LISTMASK);
-
-			BURNDOWN_GRAPHTYPE nType = BCT_UNKNOWNTYPE;
-
-			if (dwListType != TDCCA_NOTALIST)
-				nType = BCT_FREQUENCY;
-			// else
-			// TODO
-
-
-			if (nType != BCT_UNKNOWNTYPE)
-			{
-				def.sUniqueID = pTasks->GetCustomAttributeID(nDef);
-				def.sLabel = pTasks->GetCustomAttributeLabel(nDef);
-				def.sListData = pTasks->GetCustomAttributeListData(nDef);
-				def.nType = nType;
-				def.nGraph = BCG_UNKNOWNGRAPH;
-
-				if (bWasEmpty)
-				{
-					def.nGraph = GetFirstUnusedGraph(m_aCustomAttribDefs);
-					m_aCustomAttribDefs.Add(def);
-				}
-				else
-				{
-					aNewCustAttribDefs.Add(def); // Process afterwards
-				}
-			}
-		}
-	}
-
-	if (aNewCustAttribDefs.GetSize() > 0)
-	{
-		// Delete any definitions no longer existing
-		nDef = m_aCustomAttribDefs.GetSize();
-
-		while (nDef--)
-		{
-			if (aNewCustAttribDefs.Find(m_aCustomAttribDefs[nDef].sUniqueID) == -1)
-				m_aCustomAttribDefs.RemoveAt(nDef);
-		}
-
-		// Update rest of definitions preserving as much as possible
-		nDef = aNewCustAttribDefs.GetSize();
-
-		while (nDef--)
-		{
-			CUSTOMATTRIBDEF& defNew = aNewCustAttribDefs[nDef];
-			int nExist = m_aCustomAttribDefs.Find(defNew.sUniqueID);
-
-			if (nExist == -1)
-			{
-				defNew.nGraph = GetFirstUnusedGraph(m_aCustomAttribDefs);
-				m_aCustomAttribDefs.Add(defNew);
-			}
-			else
-			{
-				defNew.nGraph = m_aCustomAttribDefs[nExist].nGraph;
-				m_aCustomAttribDefs[nExist] = defNew;
-			}
-		}
-	}
-
-	return FALSE;//m_chart.SetCustomAttributeDefinitions(m_aCustomAttribDefs);
-}
-
-BURNDOWN_GRAPH CBurndownWnd::GetFirstUnusedGraph(const CCustomAttributeDefinitionArray& aCustAttribDef)
-{
-	CSet<BURNDOWN_GRAPH> mapGraphs;
-
-	int nDef = aCustAttribDef.GetSize();
-
-	while (nDef--)
-		mapGraphs.Add(aCustAttribDef[nDef].nGraph);
-
-	for (int nGraph = BCG_CUSTOMATTRIB_FIRST; nGraph <= BCG_CUSTOMATTRIB_LAST; nGraph++)
-	{
-		if (!mapGraphs.Has((BURNDOWN_GRAPH)nGraph))
-			return (BURNDOWN_GRAPH)nGraph;
-	}
-
-	return BCG_UNKNOWNGRAPH;
 }
 
 void CBurndownWnd::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)

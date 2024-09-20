@@ -23,8 +23,8 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
-	BOOL SetActiveGraph(const CGraphBase* pGraph);
-	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
+	BOOL SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild = TRUE);
+	void SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild = TRUE);
 
 	void OnColoursChanged();
 	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);

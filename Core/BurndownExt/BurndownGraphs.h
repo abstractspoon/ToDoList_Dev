@@ -82,7 +82,7 @@ public:
 	BOOL SetColors(const CGraphColorMap& mapColors);
 	int GetMaxColorCount() const;
 
-protected:
+	BOOL Update(const CCustomAttributeDefinitionArray& aCustAttribDefs);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -419,7 +419,7 @@ protected:
 class CCustomAttributeTimeSeriesGraph : public CTimeSeriesGraph, public CCustomAttributeGraph
 {
 public:
-	CCustomAttributeTimeSeriesGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def);
+	CCustomAttributeTimeSeriesGraph(const CUSTOMATTRIBDEF& def);
 
 protected:
 	// CTimeSeriesGraph overrides
@@ -434,7 +434,7 @@ protected:
 class CCustomAttributeFrequencyGraph : public CFrequencyGraph, public CCustomAttributeGraph
 {
 public:
-	CCustomAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def);
+	CCustomAttributeFrequencyGraph(const CUSTOMATTRIBDEF& def);
 
 protected:
 	// CFrequencyGraph overrides
@@ -447,7 +447,7 @@ protected:
 class CCustomAttributeMinMaxGraph : public CMinMaxGraph, public CCustomAttributeGraph
 {
 public:
-	CCustomAttributeMinMaxGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def);
+	CCustomAttributeMinMaxGraph(const CUSTOMATTRIBDEF& def);
 
 protected:
 	// CMinMaxGraph overrides

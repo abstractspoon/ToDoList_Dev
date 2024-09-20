@@ -246,6 +246,72 @@ int CGraphsMap::GetMaxColorCount() const
 	return nMax;
 }
 
+BOOL CGraphsMap::Update(const CCustomAttributeDefinitionArray& aCustAttribDefs)
+{
+	BOOL bChange = FALSE;
+
+	// Remove any graphs for no longer existing attributes
+	// else Update the rest
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		BURNDOWN_GRAPH nGraph;
+		CGraphBase* pGraph = GetNext(pos, nGraph);
+
+		if (IsCustomAttributeGraph(nGraph))
+		{
+			int nExist = aCustAttribDefs.Find(nGraph);
+			
+			if (nExist == -1)
+			{
+				RemoveKey(nGraph);
+				bChange = TRUE;
+			}
+			else
+			{
+				CCustomAttributeGraph* pCGraph = dynamic_cast<CCustomAttributeGraph*>(pGraph);
+				ASSERT(pCGraph);
+
+				if (pCGraph)
+				{
+					const CUSTOMATTRIBDEF& defExist = aCustAttribDefs[nExist];
+					bChange |= pCGraph->UpdateDefinition(defExist.sLabel, defExist.sListData);
+				}
+			}
+		}
+	}
+
+	// Add any new graphs
+	int nDef = aCustAttribDefs.GetSize();
+
+	while (nDef--)
+	{
+		const CUSTOMATTRIBDEF& def = aCustAttribDefs[nDef];
+
+		if (!HasGraph(def.nGraph))
+		{
+			CGraphBase* pGraph = NULL;
+
+			switch (def.nType)
+			{
+			case BCT_TIMESERIES:	pGraph = new CCustomAttributeTimeSeriesGraph(def);	break;
+			case BCT_FREQUENCY:		pGraph = new CCustomAttributeFrequencyGraph(def);	break;
+			case BCT_MINMAX:		pGraph = new CCustomAttributeMinMaxGraph(def);		break;
+
+			default:
+				ASSERT(0);
+				break;
+			}
+
+			if (pGraph)
+				bChange |= AddGraph(def.nGraph, pGraph);
+		}
+	}
+
+	return bChange;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHTYPE nType, BURNDOWN_GRAPHOPTION nOption)
@@ -1555,16 +1621,16 @@ BOOL CCustomAttributeGraph::UpdateDefinition(const CString& sLabel, const CStrin
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CCustomAttributeTimeSeriesGraph::CCustomAttributeTimeSeriesGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def)
+CCustomAttributeTimeSeriesGraph::CCustomAttributeTimeSeriesGraph(const CUSTOMATTRIBDEF& def)
 	:
-	CTimeSeriesGraph(nGraph),
+	CTimeSeriesGraph(def.nGraph),
 	CCustomAttributeGraph(def)
 {
 }
 
 CString CCustomAttributeTimeSeriesGraph::GetTitle() const
 {
-	return m_custDefinition.sLabel;
+	return CEnString(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
 }
 
 void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -1586,16 +1652,16 @@ BOOL CCustomAttributeTimeSeriesGraph::CalculateTrendLines(CHMXDataset datasets[H
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CCustomAttributeFrequencyGraph::CCustomAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def)
+CCustomAttributeFrequencyGraph::CCustomAttributeFrequencyGraph(const CUSTOMATTRIBDEF& def)
 	:
-	CFrequencyGraph(nGraph),
+	CFrequencyGraph(def.nGraph),
 	CCustomAttributeGraph(def)
 {
 }
 
 CString CCustomAttributeFrequencyGraph::GetTitle() const
 {
-	return m_custDefinition.sLabel;
+	return CEnString(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
 }
 
 void CCustomAttributeFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -1605,16 +1671,16 @@ void CCustomAttributeFrequencyGraph::BuildGraph(const CStatsItemCalculator& calc
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CCustomAttributeMinMaxGraph::CCustomAttributeMinMaxGraph(BURNDOWN_GRAPH nGraph, const CUSTOMATTRIBDEF& def)
+CCustomAttributeMinMaxGraph::CCustomAttributeMinMaxGraph(const CUSTOMATTRIBDEF& def)
 	:
-	CMinMaxGraph(nGraph),
+	CMinMaxGraph(def.nGraph),
 	CCustomAttributeGraph(def)
 {
 }
 
 CString CCustomAttributeMinMaxGraph::GetTitle() const
 {
-	return m_custDefinition.sLabel;
+	return CEnString(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
 }
 
 void CCustomAttributeMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
