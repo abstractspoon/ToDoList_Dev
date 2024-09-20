@@ -1608,6 +1608,7 @@ CCustomAttributeGraph::CCustomAttributeGraph(const CUSTOMATTRIBDEF& def)
 	m_custDefinition(def)
 {
 }
+
 BOOL CCustomAttributeGraph::UpdateDefinition(const CString& sLabel, const CString& sListData)
 {
 	if ((m_custDefinition.sLabel == sLabel) && (m_custDefinition.sListData == sListData))
@@ -1626,6 +1627,7 @@ CCustomAttributeTimeSeriesGraph::CCustomAttributeTimeSeriesGraph(const CUSTOMATT
 	CTimeSeriesGraph(def.nGraph),
 	CCustomAttributeGraph(def)
 {
+	InitColorPalette(1, def.nGraph - BCG_CUSTOMATTRIB_FIRST);
 }
 
 CString CCustomAttributeTimeSeriesGraph::GetTitle() const
@@ -1657,6 +1659,7 @@ CCustomAttributeFrequencyGraph::CCustomAttributeFrequencyGraph(const CUSTOMATTRI
 	CFrequencyGraph(def.nGraph),
 	CCustomAttributeGraph(def)
 {
+	InitColorPalette(NUM_GRAPH_COLORS, (def.nGraph - BCG_CUSTOMATTRIB_FIRST));
 }
 
 CString CCustomAttributeFrequencyGraph::GetTitle() const
@@ -1666,7 +1669,10 @@ CString CCustomAttributeFrequencyGraph::GetTitle() const
 
 void CCustomAttributeFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	// TODO
+	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
+	calculator.GetCustomAttributeFrequencies(m_custDefinition.sUniqueID, aFrequencies);
+
+	CFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1676,6 +1682,7 @@ CCustomAttributeMinMaxGraph::CCustomAttributeMinMaxGraph(const CUSTOMATTRIBDEF& 
 	CMinMaxGraph(def.nGraph),
 	CCustomAttributeGraph(def)
 {
+	InitColorPalette(2, def.nGraph - BCG_CUSTOMATTRIB_FIRST);
 }
 
 CString CCustomAttributeMinMaxGraph::GetTitle() const

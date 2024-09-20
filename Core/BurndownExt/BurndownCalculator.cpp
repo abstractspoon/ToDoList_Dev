@@ -10,6 +10,8 @@
 
 #include <float.h>
 
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -611,8 +613,6 @@ int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CS
 	mapFrequencies.RemoveAll();
 	int nNumItems = m_data.GetSize();
 
-	COleDateTime dtItemEnd;
-
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
@@ -628,6 +628,33 @@ int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CS
 		case F_PRIORITY:	AppendFrequencyAttrib(pSI->sPriority,		mapFrequencies); break;
 		case F_RISK:		AppendFrequencyAttrib(pSI->sRisk,			mapFrequencies); break;
 		case F_VERSION:		AppendFrequencyAttrib(pSI->sVersion,		mapFrequencies); break;
+		}
+	}
+
+	return mapFrequencies.GetCount();
+}
+
+int CStatsItemCalculator::GetAttribFrequencies(const CString& sCustAttribID, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
+{
+	mapFrequencies.RemoveAll();
+
+	int nNumItems = m_data.GetSize();
+	CString sAttrib;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (!pSI->mapCustomAttrib.Lookup(sCustAttribID, sAttrib) || sAttrib.IsEmpty())
+		{
+			AppendFrequencyAttrib(CString(), mapFrequencies);
+		}
+		else
+		{
+			CStringArray aAttrib;
+			Misc::Split(sAttrib, aAttrib);
+
+			AppendFrequencyAttribs(aAttrib, mapFrequencies);
 		}
 	}
 
@@ -729,6 +756,14 @@ int CStatsItemCalculator::GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYI
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
 	GetAttribFrequencies(F_VERSION, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetCustomAttributeFrequencies(const CString sCustAttribID, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(sCustAttribID, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }

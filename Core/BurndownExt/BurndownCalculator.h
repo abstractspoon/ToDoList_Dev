@@ -67,6 +67,7 @@ public:
 	int GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetCustomAttributeFrequencies(const CString sCustAttribID, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 
 	// Min Max charts ------------------------------------------------
 
@@ -105,6 +106,7 @@ protected:
 	enum FREQUENCY_ATTRIB		{ F_CATEGORY, F_STATUS, F_ALLOCTO, F_ALLOCBY, F_PRIORITY, F_RISK, F_TAGS, F_VERSION };
 
 	int GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
+	int GetAttribFrequencies(const CString& sCustAttribID, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 	void AppendFrequencyAttrib(const CString& sAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 	void AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 
