@@ -227,17 +227,21 @@ int CHMXChartEx::HitTest(const CPoint& ptClient, int nDataset) const
 			if (!rPie.PtInRect(ptClient))
 				return -1;
 
-			// Calculate the distance from the pie centre to the cursor
+			// Distance from the pie centre to the cursor
 			CPoint ptDiff = (ptClient - rPie.CenterPoint());
-			double dist = sqrt((double)(ptDiff.x * ptDiff.x) + (ptDiff.y * ptDiff.y));
+			
+			int nDistSquared = ((ptDiff.x * ptDiff.x) + (ptDiff.y * ptDiff.y));
+			int nOuterRadius = (rPie.Width() / 2);
 
-			if (dist > (rPie.Width() / 2))
+			if (nDistSquared > (nOuterRadius * nOuterRadius))
 				return -1; // outside the pie chart
 
 			if (nStyle == HMX_DATASET_STYLE_DONUT || 
 				nStyle == HMX_DATASET_STYLE_DONUTLINE)
 			{
-				if (dist < (rPie.Width() / 4))
+				int nInnerRadius = (nOuterRadius / 2);
+
+				if (nDistSquared < (nInnerRadius * nInnerRadius))
 					return -1; // in the donut hole
 			}
 
