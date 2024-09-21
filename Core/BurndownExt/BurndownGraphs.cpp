@@ -1667,8 +1667,15 @@ void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& cal
 
 CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
-	// TODO
-	return _T("");
+	ASSERT(nHit != -1);
+
+	double dDate = (calculator.GetStartDate() + nHit), dValue;
+	CString sTooltip;
+
+	if (datasets[0].GetData(nHit, dValue))
+		sTooltip.Format(_T("%s\n%s"), m_custDefinition.sLabel, Misc::Format(dValue));
+
+	return sTooltip;
 }
 
 BOOL CCustomAttributeTimeSeriesGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
