@@ -1352,6 +1352,11 @@ unsigned long CTaskFile::GetCustomAttributeType(int nIndex) const
 	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBTYPE));
 }
 
+unsigned long CTaskFile::GetCustomAttributeFeatures(int nIndex) const
+{
+	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBFEATURES));
+}
+
 LPCTSTR CTaskFile::GetCustomAttributeListData(int nIndex) const
 {
 	return GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBLISTDATA);

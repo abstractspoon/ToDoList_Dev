@@ -39,21 +39,15 @@ public:
 	// Time Series ---------------------------------------------------
 	
 	double GetDaysEstimated() const;
-	double GetDaysEstimated(const COleDateTime& date) const;
-
-	double GetDaysSpent() const;
 	double GetDaysSpent(const COleDateTime& date) const;
-
-	double GetCostEstimate() const;
-	double GetCostEstimated(const COleDateTime& date) const;
-
-	double GetCostSpent() const;
-	double GetCostSpent(const COleDateTime& date) const;
 
 	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 	BOOL GetStartedEndedTasks(const COleDateTime& date, int &nNumStarted, int &nNumDone) const;
 	BOOL GetDaysEstimatedSpent(const COleDateTime& date, double &dEstDays, double &dSpentDays) const;
 	BOOL GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const;
+
+	double GetTotalAttribValue(const CString& sCustAttribID) const;
+	double GetTotalAttribValue(const CString& sCustAttribID, const COleDateTime& date) const;
 
 	int HitTest(const COleDateTime& date) const;
 
@@ -67,7 +61,7 @@ public:
 	int GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
-	int GetCustomAttributeFrequencies(const CString sCustAttribID, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetCustomAttributeFrequencies(const CString& sCustAttribID, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 
 	// Min Max charts ------------------------------------------------
 
@@ -97,6 +91,8 @@ protected:
 
 	double GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType) const;
 	double GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const;
+	double GetAttribValue(const STATSITEM& si, const CString& sCustAttribID) const;
+	double GetAttribValue(const STATSITEM& si, const CString& sCustAttribID, const COleDateTime& date) const;
 
 	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;
 	double GetIntersectionProportion(const STATSITEM& si, BOOL bWeekdays) const;

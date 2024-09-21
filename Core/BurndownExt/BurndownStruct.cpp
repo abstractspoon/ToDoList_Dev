@@ -110,6 +110,13 @@ BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
 
 /////////////////////////////////////////////////////////////////////////////
 
+CUSTOMATTRIBDEF::CUSTOMATTRIBDEF()
+	:
+	nGraph(BCG_UNKNOWNGRAPH),
+	nType(BCT_UNKNOWNTYPE)
+{
+}
+
 BOOL CUSTOMATTRIBDEF::operator==(const CUSTOMATTRIBDEF& other) const
 {
 	return ((nType == other.nType) &&
@@ -168,18 +175,23 @@ BOOL CCustomAttributeDefinitionArray::Update(const ITASKLISTBASE* pTasks)
 	{
 		if (pTasks->IsCustomAttributeEnabled(nDef))
 		{
+			BURNDOWN_GRAPHTYPE nType = BCT_UNKNOWNTYPE;
 			DWORD dwCustType = pTasks->GetCustomAttributeType(nDef);
 
-			//DWORD dwDataType = (dwCustType & TDCCA_DATAMASK);
-			DWORD dwListType = (dwCustType & TDCCA_LISTMASK);
-
-			BURNDOWN_GRAPHTYPE nType = BCT_UNKNOWNTYPE;
-
-			if (dwListType != TDCCA_NOTALIST)
+			if (dwCustType & TDCCA_LISTMASK)
+			{
 				nType = BCT_FREQUENCY;
-			// else
-			// TODO
-
+			}
+			else if (pTasks->GetCustomAttributeFeatures(nDef) & TDCCAF_ACCUMULATE)
+			{
+				switch (dwCustType & TDCCA_DATAMASK)
+				{
+				case TDCCA_INTEGER:
+				case TDCCA_DOUBLE:
+					nType = BCT_TIMESERIES;
+					break;
+				}
+			}
 
 			if (nType != BCT_UNKNOWNTYPE)
 			{

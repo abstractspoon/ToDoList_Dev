@@ -67,6 +67,8 @@ struct GRAPHOPTION
 
 struct CUSTOMATTRIBDEF
 {
+	CUSTOMATTRIBDEF();
+
 	BOOL operator==(const CUSTOMATTRIBDEF& other) const;
 	BOOL operator!=(const CUSTOMATTRIBDEF& other) const;
 

@@ -332,8 +332,9 @@ CGraphBase::~CGraphBase()
 void CGraphBase::UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	int nNumColors = m_aColors.GetSize();
+	nNumColors = min(nNumColors, HMX_MAX_DATASET);
 
-	for (int nColor = 0; nColor < min(nNumColors, HMX_MAX_DATASET); nColor++)
+	for (int nColor = 0; nColor < nNumColors; nColor++)
 		SetDatasetColor(datasets[nColor], m_aColors[nColor]);
 }
 
@@ -1637,7 +1638,31 @@ CString CCustomAttributeTimeSeriesGraph::GetTitle() const
 
 void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	// TODO
+	UpdateDatasetColors(datasets);
+
+	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
+	datasets[0].SetSize(GRAPH_LINE_THICKNESS);
+	datasets[0].SetMin(0.0);
+
+	// build the graph
+	int nNumDays = calculator.GetTotalDays();
+
+	if (nNumDays > 0)
+	{
+		datasets[0].SetDatasetSize(nNumDays + 1);
+
+		COleDateTime dtStart = calculator.GetStartDate(), date(dtStart);
+
+		for (int nDay = 0; nDay <= nNumDays; nDay++, date.m_dt++)
+		{
+			double dValue = calculator.GetTotalAttribValue(m_custDefinition.sUniqueID, date);
+			datasets[0].SetData(nDay, dValue);
+		}
+
+		CalculateTrendLines(datasets);
+	}
+
+	RecalcDataMinMax(datasets);
 }
 
 CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
