@@ -198,10 +198,16 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 	// by CHMXChart before m_pGraph is set so we don't assert
 	if (m_pGraph)
 	{
-		switch (m_pGraph->GetGraph())
+		BURNDOWN_GRAPH nGraph = m_pGraph->GetGraph();
+
+		switch (nGraph)
 		{
 		case BCG_MINMAX_DUEDONEDATES:
 			return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+
+		default:
+			if (IsCustomAttributeGraph(nGraph) && m_pGraph->HasType(BCT_TIMESERIES))
+				return Misc::Format(dValue, 0);
 		}
 	}
 

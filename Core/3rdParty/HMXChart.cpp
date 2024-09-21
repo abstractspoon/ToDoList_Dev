@@ -1597,7 +1597,31 @@ BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, do
 //
 BOOL CHMXChart::CalcDatas()
 {
-	int f=0, nTemp3;
+	m_nXMax = 0;
+
+	for(int f=0; f<HMX_MAX_DATASET; f++) 
+	{
+		int nDataSize = m_datasets[f].GetDatasetSize();
+		m_nXMax = max(m_nXMax, nDataSize);
+	}
+	
+	if (!GetMinMax(m_dYMin, m_dYMax, FALSE))
+		m_dYMin = m_dYMax = 0;
+
+	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
+	// they are multiply of m_nRoundY
+	if(m_dRoundY > 0.0) 
+	{
+		if (fmod(m_dYMin, m_dRoundY) != 0.0)
+			m_dYMin = (((int)m_dYMin-(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
+
+		if (fmod(m_dYMax, m_dRoundY) != 0.0)
+			m_dYMax = (((int)m_dYMax+(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
+	}
+
+	// prevent divide by zero
+	if (m_dYMax == 0.0)
+		m_dYMax = (m_dYMin + 10);
 
 	GetClientRect(m_rectArea);
 
@@ -1650,37 +1674,6 @@ BOOL CHMXChart::CalcDatas()
 	m_rectData.bottom  = m_rectXAxis.top;
 	m_rectData.left    = m_rectYAxis.right;
 	m_rectData.right   = m_rectGraph.right;
-
-	m_nXMax = 0;
-
-	for(f=0; f<HMX_MAX_DATASET; f++) 
-	{
-		nTemp3 = m_datasets[f].GetDatasetSize();
-		m_nXMax = max(m_nXMax, nTemp3);
-	}
-	
-	if (!GetMinMax(m_dYMin, m_dYMax, FALSE))
-		m_dYMin = m_dYMax = 0;
-
-	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
-	// they are multiply of m_nRoundY
-	if(m_dRoundY > 0.0) 
-	{
-		if (fmod(m_dYMin, m_dRoundY) != 0.0)
-			m_dYMin = (((int)m_dYMin-(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
-
-		if (fmod(m_dYMax, m_dRoundY) != 0.0)
-			m_dYMax = (((int)m_dYMax+(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
-	}
-
-	// now nYMin & nYMax contain absolute min and absolute max
-	// and these data can be used to calc the graphic's Y scale factor
-	// nXMax contains the maximum number of elements, useful to 
-	// calculate the X scale factor
-
-	// prevent divide by zero
-	if (m_dYMax == 0.0)
-		m_dYMax = (m_dYMin + 10);
 
 	return TRUE;
 }

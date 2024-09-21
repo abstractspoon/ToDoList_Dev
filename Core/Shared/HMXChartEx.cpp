@@ -58,7 +58,6 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 			return dInterval;
 	}
 
-	ASSERT(0);
 	return pow(10, nPower + 1);
 }
 

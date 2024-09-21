@@ -1680,8 +1680,7 @@ CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& 
 
 BOOL CCustomAttributeTimeSeriesGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	// TODO
-	return FALSE;
+	return CalculateTrendLine(GetOption(), datasets[0], datasets[1]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
