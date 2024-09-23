@@ -99,6 +99,11 @@ void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
 	}
 }
 
+void CBurndownChart::OnDisplayISODatesChanged()
+{
+	RebuildXScale();
+}
+
 BOOL CBurndownChart::HighlightDataPoint(int nIndex)
 {
 	CHECK_GRAPH_RET(FALSE);

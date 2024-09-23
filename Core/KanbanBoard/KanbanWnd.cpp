@@ -324,6 +324,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	Misc::SetFlag(dwOptions, KBCF_DONEHAVELOWESTPRIORITYRISK, pPrefs->GetProfileInt(_T("Preferences"), _T("DoneTasksHaveLowestPriority"), FALSE));
 	Misc::SetFlag(dwOptions, KBCF_PARENTSSHOWHIGHESTPRIORITYRISK, pPrefs->GetProfileInt(_T("Preferences"), _T("UseHighestPriority"), FALSE));
 	Misc::SetFlag(dwOptions, KBCF_COLUMNHEADERSORTING, pPrefs->GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE));
+	Misc::SetFlag(dwOptions, KBCF_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), TRUE));
 
 	m_ctrlKanban.SetOptions(dwOptions);
 	

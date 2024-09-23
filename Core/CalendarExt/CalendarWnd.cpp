@@ -232,6 +232,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_PREVENTDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
 	Misc::SetFlag(dwPrefs, TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
 	Misc::SetFlag(dwPrefs, TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
+	Misc::SetFlag(dwPrefs, TCCO_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 
 	m_BigCalendar.SetOptions(dwPrefs);
 
@@ -301,6 +302,7 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
 	Misc::SetFlag(dwOptions, TCCO_SHOWPARENTTASKSASFOLDER,			m_BigCalendar.HasOption(TCCO_SHOWPARENTTASKSASFOLDER));
 	Misc::SetFlag(dwOptions, TCCO_ENABLELABELTIPS,					m_BigCalendar.HasOption(TCCO_ENABLELABELTIPS));
+	Misc::SetFlag(dwOptions, TCCO_SHOWISODATES,						m_BigCalendar.HasOption(TCCO_SHOWISODATES));
 
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);
@@ -866,22 +868,11 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 	
 	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
 	{
-		CString sStart, sDue;
+		DWORD dwFlags = (DHFD_TIME | DHFD_NOSEC);
+		dwFlags |= (m_BigCalendar.HasOption(TCCO_SHOWISODATES) ? DHFD_ISO : 0);
 
-		if (CDateHelper::DateHasTime(dtStart))
-			sStart = CDateHelper::FormatDate(dtStart, DHFD_TIME | DHFD_NOSEC);
-		else
-			sStart = CDateHelper::FormatDate(dtStart);
-
-		if (CDateHelper::DateHasTime(dtDue))
-			sDue = CDateHelper::FormatDate(dtDue, DHFD_TIME | DHFD_NOSEC);
-		else
-			sDue = CDateHelper::FormatDate(dtDue);
-
-		CString sDateRange;
-		sDateRange.Format(_T("%s - %s"), sStart, sDue);
-
-		sSelectedTaskDates.Format(_T("%s: <a href=%s>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), _T(""), sDateRange);
+		CString sDateRange = COleDateTimeRange(dtStart, dtDue).Format(dwFlags);
+		sSelectedTaskDates.Format(_T("%s: <a href=>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), sDateRange);
 	}
 
 	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
@@ -894,7 +885,6 @@ void CCalendarWnd::OnClickSelectedTaskDates()
 
 LRESULT CCalendarWnd::OnBigCalendarNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	//CDialogHelper::SelectItemByData(m_cbSnapModes, wp);
 	UpdateSelectedTaskDates();
 
 	return 0L;

@@ -108,7 +108,9 @@ BOOL CGraphsMap::AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph)
 		return FALSE;
 	}
 
+	pGraph->SetDisplayISODates(m_bISODates);
 	SetAt(nGraph, pGraph);
+
 	return TRUE;
 }
 
@@ -246,6 +248,16 @@ int CGraphsMap::GetMaxColorCount() const
 	return nMax;
 }
 
+void CGraphsMap::SetDisplayISODates(BOOL bISO)
+{
+	m_bISODates = bISO;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+		GetNext(pos)->SetDisplayISODates(bISO);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHTYPE nType, BURNDOWN_GRAPHOPTION nOption)
@@ -296,6 +308,17 @@ BOOL CGraphBase::GetMinMax(double& dMin, double& dMax) const
 BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
 {
 	return m_nOption;
+}
+
+CString CGraphBase::FormatDate(const COleDateTime& date) const
+{
+	if (!CDateHelper::IsDateSet(date))
+		return _T("");
+
+	if (m_bISODates)
+		return date.Format(_T("%F"));
+
+	return date.Format(VAR_DATEVALUEONLY);
 }
 
 COLORREF CGraphBase::GetColor(int nColor) const
@@ -520,7 +543,7 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 
 	for (int nDay = 0; nDay <= nNumDays; )
 	{
-		aLabels.SetAt(nDay, dh.FormatDate(dtTick));
+		aLabels.SetAt(nDay, FormatDate(dtTick));
 
 		// next Tick date
 		COleDateTime dtNextTick(dtTick);
@@ -1346,7 +1369,7 @@ void CMinMaxGraph::RebuildXScale(const CStatsItemCalculator& calculator, int nAv
 			if (dtItem < dtTick)
 				continue;
 
-			aLabels.SetAt(nItem - nFrom, dh.FormatDate(dtItem));
+			aLabels.SetAt(nItem - nFrom, FormatDate(dtItem));
 			nLastTick = nItem;
 
 			// next Tick date

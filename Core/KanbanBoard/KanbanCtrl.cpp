@@ -1183,34 +1183,40 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 					CString sAttribID(pTasks->GetCustomAttributeID(nCust));
 					CString sAttribName(pTasks->GetCustomAttributeLabel(nCust));
 
-					// Hack (values from tdcenum.h)
-					DWORD dwListType = (pTasks->GetCustomAttributeType(nCust) & 0xff00);
-					BOOL bMultiList = ((dwListType == 0x0300) || (dwListType == 0x0400));
-					
-					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
+					DWORD dwCustType = pTasks->GetCustomAttributeType(nCust);
+					DWORD dwDataType = (dwCustType & TDCCA_DATAMASK);
+					DWORD dwListType = (dwCustType & TDCCA_LISTMASK);
 
-					// Add 'default' values to the map
-					CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
-					ASSERT(pDefValues);
+					if ((dwListType != TDCCA_NOTALIST) && (dwDataType != TDCCA_ICON))
+					{
+						BOOL bMultiList = ((dwListType == TDCCA_FIXEDMULTILIST) || 
+											(dwListType == TDCCA_AUTOMULTILIST));
 
-					pDefValues->RemoveAll();
+						int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
 
-					CString sListData = pTasks->GetCustomAttributeListData(nCust);
+						// Add 'default' values to the map
+						CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
+						ASSERT(pDefValues);
 
-					// 'Auto' list values follow 'default' list values
-					//  separated by a TAB
-					CString sDefData(sListData), sAutoData;
-					Misc::Split(sDefData, sAutoData, '\t');
+						pDefValues->RemoveAll();
 
-					CStringArray aDefValues;
-					
-					if (Misc::Split(sDefData, aDefValues, '\n'))
-						pDefValues->SetValues(aDefValues);
+						CString sListData = pTasks->GetCustomAttributeListData(nCust);
 
-					CStringArray aAutoValues;
-					Misc::Split(sAutoData, aAutoValues, '\n');
+						// 'Auto' list values follow 'default' list values
+						//  separated by a TAB
+						CString sDefData(sListData), sAutoData;
+						Misc::Split(sDefData, sAutoData, '\t');
 
-					bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
+						CStringArray aDefValues;
+
+						if (Misc::Split(sDefData, aDefValues, '\n'))
+							pDefValues->SetValues(aDefValues);
+
+						CStringArray aAutoValues;
+						Misc::Split(sAutoData, aAutoValues, '\n');
+
+						bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
+					}
 				}
 			}
 
