@@ -559,6 +559,14 @@ void CTDCTaskMatcherTest::TestSimpleIntegerMatching(const CToDoCtrlData& data, T
 
 }
 
+void CTDCTaskMatcherTest::TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset)
+{
+}
+
+void CTDCTaskMatcherTest::TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset)
+{
+}
+
 void CTDCTaskMatcherTest::TestComplexMatching(const CToDoCtrlData& data)
 {
 }

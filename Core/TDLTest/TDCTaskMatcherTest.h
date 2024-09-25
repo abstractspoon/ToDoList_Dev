@@ -41,6 +41,8 @@ protected:
 	void TestSimpleTextArrayMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
 	
 	void TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nOffset);
+	void TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
+	void TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles();
