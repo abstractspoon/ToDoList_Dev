@@ -42,6 +42,11 @@ protected:
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles();
+
+	static BOOL ContainsAllTaskIDs(const CDWordArray& aTasks);
+	static BOOL ContainsNoTaskIDs(const CDWordArray& aTasks);
+	static BOOL ContainsAllButOneTaskIDs(const CDWordArray& aTasks, DWORD dwTaskID);
+	static BOOL ContainsOnlyOneTaskID(const CDWordArray& aTasks, DWORD dwTaskID);
 };
 
 #endif // !defined(AFX_TDCTASKMATCHERTEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
