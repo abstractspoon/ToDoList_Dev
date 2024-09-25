@@ -79,27 +79,35 @@ void CTDCTaskMatcherTest::TestSimpleMatching(const CToDoCtrlData& data)
 {
 	CTDCScopedTest test(*this, _T("CTDCTaskMatcherTest::SimpleMatching"));
 
-
 	// Simple text
-	TestSimpleTextMatch(data, TDCA_TASKNAME, _T("Task"));
-	TestSimpleTextMatch(data, TDCA_COMMENTS, _T("Comments"));
-	TestSimpleTextMatch(data, TDCA_ALLOCBY, _T("AllocBy"));
-	TestSimpleTextMatch(data, TDCA_STATUS, _T("Stat"));
-	TestSimpleTextMatch(data, TDCA_VERSION, _T("Ver"));
-	TestSimpleTextMatch(data, TDCA_EXTERNALID, _T("ExtID"));
+	TestSimpleTextMatching(data, TDCA_TASKNAME, _T("Task"));
+	TestSimpleTextMatching(data, TDCA_COMMENTS, _T("Comments"));
+	TestSimpleTextMatching(data, TDCA_ALLOCBY, _T("AllocBy"));
+	TestSimpleTextMatching(data, TDCA_STATUS, _T("Stat"));
+	TestSimpleTextMatching(data, TDCA_VERSION, _T("Ver"));
+	TestSimpleTextMatching(data, TDCA_EXTERNALID, _T("ExtID"));
 
 	// Special case
 // 	TestSimpleTextMatch(data, TDCA_TASKNAMEORCOMMENTS, _T("Task"));
 // 	TestSimpleTextMatch(data, TDCA_TASKNAMEORCOMMENTS, _T("Comments"));
 
 	// Array of strings
-	TestSimpleTextArrayMatch(data, TDCA_CATEGORY, _T("Cat"));
-	TestSimpleTextArrayMatch(data, TDCA_ALLOCTO, _T("AllocTo"));
-	TestSimpleTextArrayMatch(data, TDCA_TAGS, _T("Tag"));
-	TestSimpleTextArrayMatch(data, TDCA_FILELINK, _T("File"));
+	TestSimpleTextArrayMatching(data, TDCA_CATEGORY, _T("Cat"));
+	TestSimpleTextArrayMatching(data, TDCA_ALLOCTO, _T("AllocTo"));
+	TestSimpleTextArrayMatching(data, TDCA_TAGS, _T("Tag"));
+	TestSimpleTextArrayMatching(data, TDCA_FILELINK, _T("File"));
+
+	// Integer
+	TestSimpleIntegerMatching(data, TDCA_PERCENT, 10);
+// 	TestSimpleIntegerMatching(data, TDCA_PRIORITY, 3);
+// 	TestSimpleIntegerMatching(data, TDCA_RISK, 4);
+
+// 	TestSimplePriorityRiskMatching(data, TDCA_PRIORITY);
+// 	TestSimplePriorityRiskMatching(data, TDCA_RISK);
+
 }
 
-void CTDCTaskMatcherTest::TestSimpleTextMatch(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
+void CTDCTaskMatcherTest::TestSimpleTextMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
 {
 	CTDCTaskMatcher match(data, reminders, contentMgr);
 	CDWordArray aTaskIDs; // get overwritten by each test
@@ -114,7 +122,7 @@ void CTDCTaskMatcherTest::TestSimpleTextMatch(const CToDoCtrlData& data, TDC_ATT
 			rule.SetValue(sPrefix + _T("2"));
 
 			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsOnlyOneTaskID(aTaskIDs, 2));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 2));
 		}
 
 		{
@@ -133,7 +141,7 @@ void CTDCTaskMatcherTest::TestSimpleTextMatch(const CToDoCtrlData& data, TDC_ATT
 			rule.SetValue(sPrefix + _T("5"));
 
 			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsAllButOneTaskIDs(aTaskIDs, 5));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 5));
 		}
 
 		{
@@ -201,7 +209,7 @@ void CTDCTaskMatcherTest::TestSimpleTextMatch(const CToDoCtrlData& data, TDC_ATT
 	}
 }
 
-void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
+void CTDCTaskMatcherTest::TestSimpleTextArrayMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
 {
 	CTDCTaskMatcher match(data, reminders, contentMgr);
 	CDWordArray aTaskIDs; // get overwritten by each test
@@ -216,7 +224,7 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 			rule.SetValue(Misc::Format(_T("%s2.0, %s2.1, %s2.2"), sPrefix, sPrefix, sPrefix));
 
 			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsOnlyOneTaskID(aTaskIDs, 2));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 2));
 		}
 
 		// Not order-sensitive
@@ -224,7 +232,7 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 			rule.SetValue(Misc::Format(_T("%s3.1, %s3.2, %s3.0"), sPrefix, sPrefix, sPrefix));
 
 			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsOnlyOneTaskID(aTaskIDs, 3));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 3));
 		}
 	}
 
@@ -243,7 +251,7 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 			rule.SetValue(Misc::Format(_T("%s2.0, %s2.1, %s2.2"), sPrefix, sPrefix, sPrefix));
 
 			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsAllButOneTaskIDs(aTaskIDs, 2));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 2));
 		}
 
 		{
@@ -260,7 +268,7 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 				ExpectEQ(5, nNumMatches);
 				ExpectEQ(TDCA_CATEGORY, nAttibID);
 
-				ExpectTrue(ContainsAllButOneTaskIDs(aTaskIDs, 3));
+				ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 3));
 			}
 		}
 	}
@@ -287,14 +295,14 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 			rule.SetValue(sPrefix + _T("3"));
 
 			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsOnlyOneTaskID(aTaskIDs, 3));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 3));
 		}
 
 		{
 			rule.SetValue(_T("5"));
 
 			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsOnlyOneTaskID(aTaskIDs, 5));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 5));
 		}
 
 		{
@@ -320,7 +328,7 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 			rule.SetValue(sPrefix + _T("1"));
 
 			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
-			ExpectTrue(ContainsAllButOneTaskIDs(aTaskIDs, 1));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 1));
 		}
 
 		{
@@ -364,16 +372,203 @@ void CTDCTaskMatcherTest::TestSimpleTextArrayMatch(const CToDoCtrlData& data, TD
 	}
 }
 
+void CTDCTaskMatcherTest::TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nOffset)
+{
+	CTDCTaskMatcher match(data, reminders, contentMgr);
+	CDWordArray aTaskIDs; // get overwritten by each test
+
+	SEARCHPARAM rule(nAttibID);
+
+	// Equals
+	{
+		rule.SetOperator(FOP_EQUALS);
+
+		{
+			rule.SetValue(nOffset + 3);
+
+ 			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
+ 			ExpectTrue(ContainsOneTaskID(aTaskIDs, 3));
+		}
+	}
+
+	// Not equals
+	{
+		rule.SetOperator(FOP_NOT_EQUALS);
+
+		{
+			rule.SetValue(nOffset + 5);
+
+			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 5));
+		}
+
+		{
+			rule.SetValue(nOffset + 10);
+
+			ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+		}
+
+	}
+
+	// Greater Than
+	{
+		rule.SetOperator(FOP_GREATER);
+
+		{
+			rule.SetValue(nOffset);
+
+			ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 1);
+
+			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 1));
+		}
+
+		{
+			rule.SetValue(nOffset + 5);
+
+			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 6));
+		}
+
+	}
+
+	// Greater Than or Equal To
+	{
+		rule.SetOperator(FOP_GREATER_OR_EQUAL);
+
+		{
+			rule.SetValue(nOffset + 6);
+
+			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 6));
+		}
+
+		{
+			rule.SetValue(nOffset + 1);
+
+			ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 2);
+
+			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 1));
+		}
+	}
+
+	// Less Than
+	{
+		rule.SetOperator(FOP_LESS);
+
+		{
+			rule.SetValue(nOffset);
+
+			ExpectEQ(0, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsNoTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 10);
+
+			ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 6);
+
+			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 6));
+		}
+
+		{
+			rule.SetValue(nOffset + 2);
+
+			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 1));
+		}
+
+	}
+
+	// Less Than or Equal To
+	{
+		rule.SetOperator(FOP_LESS_OR_EQUAL);
+
+		{
+			rule.SetValue(nOffset);
+
+			ExpectEQ(0, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsNoTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 10);
+
+			ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 6);
+
+			ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+		}
+
+		{
+			rule.SetValue(nOffset + 5);
+
+			ExpectEQ(5, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsAllTaskIDsButOne(aTaskIDs, 6));
+		}
+
+		{
+			rule.SetValue(nOffset + 1);
+
+			ExpectEQ(1, match.FindTasks(rule, FALSE, aTaskIDs));
+			ExpectTrue(ContainsOneTaskID(aTaskIDs, 1));
+		}
+
+	}
+
+	// Set
+	{
+		rule.SetOperator(FOP_SET);
+		// value ignored
+
+		ExpectEQ(6, match.FindTasks(rule, FALSE, aTaskIDs));
+		ExpectTrue(ContainsAllTaskIDs(aTaskIDs));
+	}
+
+	// Not set
+	{
+		rule.SetOperator(FOP_NOT_SET);
+		// value ignored
+
+		ExpectEQ(0, match.FindTasks(rule, FALSE, aTaskIDs));
+		ExpectTrue(ContainsNoTaskIDs(aTaskIDs));
+	}
+
+}
+
 void CTDCTaskMatcherTest::TestComplexMatching(const CToDoCtrlData& data)
 {
 }
+
+// ---------------------------------------------------------------------------------
 
 void CTDCTaskMatcherTest::InitialiseStyles()
 {
 	m_aStyles.RemoveAll();
 }
-
-// ---------------------------------------------------------------------------------
 
 void CTDCTaskMatcherTest::PopulateDataModel(CToDoCtrlData& data) const
 {
@@ -418,8 +613,8 @@ tasks.func(hTasks[i], aValues); }
 		tasks.SetTaskDueDate(hTasks[i], COleDateTime(45001.0 + v));
 		tasks.SetTaskLastModified(hTasks[i], COleDateTime(45002.0 + i), Misc::Format(_T("User%d"), v));
 
-		tasks.SetTaskPriority(hTasks[i], (5 + v));
-		tasks.SetTaskRisk(hTasks[i], (6 + v));
+		tasks.SetTaskPriority(hTasks[i], (3 + v));
+		tasks.SetTaskRisk(hTasks[i], (4 + v));
 		tasks.SetTaskPercentDone(hTasks[i], (10 + v));
 
 		tasks.SetTaskCost(hTasks[i], (20 + v));
@@ -457,7 +652,7 @@ BOOL CTDCTaskMatcherTest::ContainsAllTaskIDs(const CDWordArray& aTaskIDs)
 	return TRUE;
 }
 
-BOOL CTDCTaskMatcherTest::ContainsAllButOneTaskIDs(const CDWordArray& aTaskIDs, DWORD dwTaskID)
+BOOL CTDCTaskMatcherTest::ContainsAllTaskIDsButOne(const CDWordArray& aTaskIDs, DWORD dwTaskID)
 {
 	ASSERT((dwTaskID >= 1) && (dwTaskID <= 6));
 
@@ -478,7 +673,7 @@ BOOL CTDCTaskMatcherTest::ContainsAllButOneTaskIDs(const CDWordArray& aTaskIDs, 
 	return TRUE;
 }
 
-BOOL CTDCTaskMatcherTest::ContainsOnlyOneTaskID(const CDWordArray& aTaskIDs, DWORD dwTaskID)
+BOOL CTDCTaskMatcherTest::ContainsOneTaskID(const CDWordArray& aTaskIDs, DWORD dwTaskID)
 {
 	ASSERT((dwTaskID >= 1) && (dwTaskID <= 6));
 

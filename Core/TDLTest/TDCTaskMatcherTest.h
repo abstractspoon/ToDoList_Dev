@@ -37,16 +37,18 @@ protected:
 	void TestSimpleMatching(const CToDoCtrlData& data);
 	void TestComplexMatching(const CToDoCtrlData& data);
 
-	void TestSimpleTextMatch(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
-	void TestSimpleTextArrayMatch(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
+	void TestSimpleTextMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
+	void TestSimpleTextArrayMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
+	
+	void TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nOffset);
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles();
 
 	static BOOL ContainsAllTaskIDs(const CDWordArray& aTasks);
 	static BOOL ContainsNoTaskIDs(const CDWordArray& aTasks);
-	static BOOL ContainsAllButOneTaskIDs(const CDWordArray& aTasks, DWORD dwTaskID);
-	static BOOL ContainsOnlyOneTaskID(const CDWordArray& aTasks, DWORD dwTaskID);
+	static BOOL ContainsAllTaskIDsButOne(const CDWordArray& aTasks, DWORD dwTaskID);
+	static BOOL ContainsOneTaskID(const CDWordArray& aTasks, DWORD dwTaskID);
 };
 
 #endif // !defined(AFX_TDCTASKMATCHERTEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
