@@ -146,6 +146,10 @@ SOURCE=.\TDCTaskCalculatorTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCTaskMatcherTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTaskCtrlBaseTest.cpp
 # End Source File
 # Begin Source File
@@ -235,6 +239,10 @@ SOURCE=.\TDCRECURRENCETest.h
 # Begin Source File
 
 SOURCE=.\TDCTaskCalculatorTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskMatcherTest.h
 # End Source File
 # Begin Source File
 

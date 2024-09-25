@@ -181,6 +181,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
     <ClCompile Include="TDCTaskCalculatorTest.cpp" />
+    <ClCompile Include="TDCTaskMatcherTest.cpp" />
     <ClCompile Include="TDLTaskCtrlBaseTest.cpp" />
     <ClCompile Include="TDLTest.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -220,6 +221,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TDCDEPENDENCYTest.h" />
     <ClInclude Include="TDCRECURRENCETest.h" />
     <ClInclude Include="TDCTaskCalculatorTest.h" />
+    <ClInclude Include="TDCTaskMatcherTest.h" />
     <ClInclude Include="TDLTaskCtrlBaseTest.h" />
     <ClInclude Include="TDLTest.h" />
     <ClInclude Include="TDLTestBase.h" />

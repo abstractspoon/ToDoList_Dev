@@ -61,6 +61,9 @@
     <ClCompile Include="TDCTaskCalculatorTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDCTaskMatcherTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">
@@ -127,6 +130,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TDCTaskCalculatorTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDCTaskMatcherTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
