@@ -42,6 +42,7 @@ protected:
 	
 	void TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nOffset);
 	void TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
+	void TestSimpleTimePeriodMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
 	void TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
@@ -51,6 +52,10 @@ protected:
 	static BOOL ContainsNoTaskIDs(const CDWordArray& aTasks);
 	static BOOL ContainsAllTaskIDsButOne(const CDWordArray& aTasks, DWORD dwTaskID);
 	static BOOL ContainsOneTaskID(const CDWordArray& aTasks, DWORD dwTaskID);
+
+	template <class T>
+	void TestSimpleNumberMatching(const CToDoCtrlData& data, SEARCHPARAM& rule, T tOffset) const;
+
 };
 
 #endif // !defined(AFX_TDCTASKMATCHERTEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
