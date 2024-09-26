@@ -137,6 +137,22 @@ CGraphBase* CGraphsMap::GetGraph(BURNDOWN_GRAPH nGraph) const
 	return pGraph;
 }
 
+CGraphBase* CGraphsMap::GetGraph(const CString& sCustomAttribID) const
+{
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		CGraphBase* pGraph = GetNext(pos);
+		CCustomAttributeGraph* pCGraph = dynamic_cast<CCustomAttributeGraph*>(pGraph);
+
+		if (pCGraph && (pCGraph->GetUniqueID() == sCustomAttribID))
+			return pGraph;
+	}
+
+	return NULL;
+}
+
 BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 {
 	return (GetGraph(nGraph) != NULL);
@@ -297,7 +313,7 @@ BOOL CGraphsMap::Update(const CCustomAttributeDefinitionArray& aCustAttribDefs)
 			{
 			case BCT_TIMESERIES:	pGraph = new CCustomAttributeTimeSeriesGraph(def);	break;
 			case BCT_FREQUENCY:		pGraph = new CCustomAttributeFrequencyGraph(def);	break;
-			case BCT_MINMAX:		pGraph = new CCustomAttributeMinMaxGraph(def);		break;
+//			case BCT_MINMAX:		pGraph = new CCustomAttributeMinMaxGraph(def);		break;
 
 			default:
 				ASSERT(0);
@@ -310,6 +326,16 @@ BOOL CGraphsMap::Update(const CCustomAttributeDefinitionArray& aCustAttribDefs)
 	}
 
 	return bChange;
+}
+
+CString CGraphsMap::GetCustomAttributeID(BURNDOWN_GRAPH nGraph) const
+{
+	const CCustomAttributeGraph* pCGraph = dynamic_cast<const CCustomAttributeGraph*>(GetGraph(nGraph));
+
+	if (!pCGraph)
+		return _T("");
+
+	return pCGraph->GetUniqueID();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1669,7 +1695,7 @@ CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& 
 {
 	ASSERT(nHit != -1);
 
-	double dDate = (calculator.GetStartDate() + nHit), dValue;
+	double dValue = 0;
 	CString sTooltip;
 
 	if (datasets[0].GetData(nHit, dValue))
@@ -1708,6 +1734,7 @@ void CCustomAttributeFrequencyGraph::BuildGraph(const CStatsItemCalculator& calc
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/*
 CCustomAttributeMinMaxGraph::CCustomAttributeMinMaxGraph(const CUSTOMATTRIBDEF& def)
 	:
 	CMinMaxGraph(def.nGraph),
@@ -1732,3 +1759,4 @@ CString CCustomAttributeMinMaxGraph::GetTooltip(const CStatsItemCalculator& calc
 	return _T("");
 }
 
+*/

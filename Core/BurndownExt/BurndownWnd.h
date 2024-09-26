@@ -78,7 +78,6 @@ protected:
 	CStatsItemArray m_data;
 	CGraphsMap m_mapGraphs;
 	CCustomAttributeDefinitionArray m_aCustomAttribDefs;
-	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
 
 	CStatic	m_stFrame;
 	CBurndownChart m_chart;
@@ -95,6 +94,8 @@ protected:
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BOOL m_bVisible;
+	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
+	CString m_sPrevCustomGraph;
 
 protected:
 // Overrides
@@ -133,6 +134,7 @@ protected:
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 	void ResizeSlider(int nParentWidth = -1);
+	void SetActiveGraph(CGraphBase* pGraph, BOOL bRebuild);
 };
 
 //{{AFX_INSERT_LOCATION}}

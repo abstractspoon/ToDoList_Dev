@@ -66,23 +66,27 @@ class CGraphsMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CGraphBase*, CGra
 public:
 	CGraphsMap();
 	~CGraphsMap();
-
-	BOOL AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph);
-	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
-
+	
 	CString GetTitle(BURNDOWN_GRAPH nGraph) const;
 	BURNDOWN_GRAPHTYPE GetType(BURNDOWN_GRAPH nGraph) const;
 
 	CGraphBase* GetNext(POSITION& pos) const;
 	CGraphBase* GetNext(POSITION& pos, BURNDOWN_GRAPH& nGraph) const;
+
 	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
+	CGraphBase* GetGraph(const CString& sCustomAttribID) const;
+	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
 
 	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
 	int GetColors(CGraphColorMap& mapColors) const;
 	BOOL SetColors(const CGraphColorMap& mapColors);
 	int GetMaxColorCount() const;
+	CString GetCustomAttributeID(BURNDOWN_GRAPH nGraph) const;
 
 	BOOL Update(const CCustomAttributeDefinitionArray& aCustAttribDefs);
+
+protected:
+	BOOL AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -406,6 +410,7 @@ class CCustomAttributeGraph
 {
 public:
 	BOOL UpdateDefinition(const CString& sLabel, const CString& sListData);
+	CString GetUniqueID() const { return m_custDefinition.sUniqueID; }
 
 protected:
 	CCustomAttributeGraph(const CUSTOMATTRIBDEF& def);
@@ -444,6 +449,7 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+/*
 class CCustomAttributeMinMaxGraph : public CMinMaxGraph, public CCustomAttributeGraph
 {
 public:
@@ -455,5 +461,6 @@ protected:
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 };
+*/
 
 /////////////////////////////////////////////////////////////////////////////
