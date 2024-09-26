@@ -770,15 +770,14 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 void CBurndownWnd::SetActiveGraph(CGraphBase* pGraph, BOOL bRebuild)
 {
 	if (!pGraph)
-	{
-		m_nActiveGraph = DEF_GRAPH;
-		pGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
-	}
+		pGraph = m_mapGraphs.GetGraph(DEF_GRAPH);
 
 	ASSERT(pGraph);
-	m_chart.SetActiveGraph(pGraph, bRebuild);
 
+	m_chart.SetActiveGraph(pGraph, bRebuild);
 	m_cbOptions.SetActiveGraphType(pGraph->GetType());
+
+	m_nActiveGraph = pGraph->GetGraph();
 	m_nSelOption = pGraph->GetOption();
 
 	UpdateData(FALSE);
