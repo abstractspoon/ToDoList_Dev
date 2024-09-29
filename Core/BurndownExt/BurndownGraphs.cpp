@@ -211,12 +211,14 @@ int CGraphsMap::GetColors(CGraphColorMap& mapColors) const
 	while (pos)
 	{
 		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = GetNext(pos, nGraph);
+		const CGraphBase* pGraph = GetNext(pos, nGraph);
 
-		CColorArray aColors;
-		aColors.Copy(pGraph->GetColors());
+		CColorArray& aColors = const_cast<CColorArray&>(pGraph->GetColors());
 
-		mapColors[nGraph] = aColors;
+		if (IsCustomAttributeGraph(nGraph))
+			mapColors[GetCustomAttributeID(pGraph)] = aColors;
+		else
+			mapColors[Misc::Format(nGraph)] = aColors;
 	}
 
 	return mapColors.GetCount();
@@ -226,17 +228,32 @@ void CGraphsMap::SetAttributes(const CGraphAttributes& attrib)
 {
 	POSITION pos = GetStartPosition();
 	BURNDOWN_GRAPH nGraph;
-	CColorArray aColors;
+	BURNDOWN_GRAPHOPTION nOption;
 
 	while (pos)
 	{
 		CGraphBase* pGraph = GetNext(pos, nGraph);
+		CColorArray aColors;
 
-		if (attrib.GetColors(nGraph, aColors))
+		if (IsCustomAttributeGraph(nGraph))
+		{
+			CString sCustAttribID = GetCustomAttributeID(pGraph);
+
+			attrib.GetColors(sCustAttribID, aColors);
+			nOption = attrib.GetOption(sCustAttribID);
+		}
+		else
+		{
+			attrib.GetColors(nGraph, aColors);
+			nOption = attrib.GetOption(nGraph);
+		}
+				
+		if (aColors.GetSize())
+		{
+			ASSERT(nOption != BGO_INVALID);
 			pGraph->SetColors(aColors);
-
-		if (attrib.HasGraph(nGraph))
-			pGraph->SetOption(attrib.GetOption(nGraph));
+			pGraph->SetOption(nOption);
+		}
 	}
 }
 
@@ -322,7 +339,12 @@ BOOL CGraphsMap::Update(const CCustomAttributeDefinitionArray& aCustAttribDefs)
 
 CString CGraphsMap::GetCustomAttributeID(BURNDOWN_GRAPH nGraph) const
 {
-	const CCustomAttributeGraph* pCGraph = dynamic_cast<const CCustomAttributeGraph*>(GetGraph(nGraph));
+	return GetCustomAttributeID(GetGraph(nGraph));
+}
+
+CString CGraphsMap::GetCustomAttributeID(const CGraphBase* pGraph) const
+{
+	const CCustomAttributeGraph* pCGraph = dynamic_cast<const CCustomAttributeGraph*>(pGraph);
 
 	if (!pCGraph)
 		return _T("");

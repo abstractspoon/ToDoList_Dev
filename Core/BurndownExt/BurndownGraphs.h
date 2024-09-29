@@ -83,6 +83,7 @@ public:
 	void SetAttributes(const CGraphAttributes& attrib);
 
 	CString GetCustomAttributeID(BURNDOWN_GRAPH nGraph) const;
+	CString GetCustomAttributeID(const CGraphBase* pGraph) const;
 
 	BOOL Update(const CCustomAttributeDefinitionArray& aCustAttribDefs);
 

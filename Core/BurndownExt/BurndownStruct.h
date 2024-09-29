@@ -38,16 +38,20 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, CColorArray&>
+class CGraphColorMap : public CMap<CString, LPCTSTR, CColorArray, CColorArray&>
 {
 public:
 	BOOL Set(const CGraphColorMap& other);
 
 	int GetColorCount(BURNDOWN_GRAPH nGraph) const;
 	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
-	
 	COLORREF GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const;
-	BOOL SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color);
+	BOOL SetColors(BURNDOWN_GRAPH nGraph, const CColorArray& aColors);
+
+	int GetColorCount(const CString& sCustAttribID) const;
+	int GetColors(const CString& sCustAttribID, CColorArray& aColors) const;
+	COLORREF GetColor(const CString& sCustAttribID, int nIndex) const;
+	BOOL SetColors(const CString& sCustAttribID, const CColorArray& aColors);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -62,7 +66,7 @@ struct GRAPHATTRIBUTES
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, BURNDOWN_GRAPHOPTION, BURNDOWN_GRAPHOPTION&> CGraphOptionsMap;
+typedef CMap<CString, LPCTSTR, BURNDOWN_GRAPHOPTION, BURNDOWN_GRAPHOPTION&> CGraphOptionsMap;
 
 class CGraphAttributes
 {
@@ -71,13 +75,17 @@ public:
 	BOOL Update(const CGraphsMap& mapGraphs);
 
 	BOOL IsEmpty() const { return (m_mapColors.GetCount() == 0); }
-	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
-
 	BOOL SetColors(const CGraphColorMap& mapColors);
-	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
 
+	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
+	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
 	BURNDOWN_GRAPHOPTION GetOption(BURNDOWN_GRAPH nGraph) const;
 	BOOL SetOption(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption);
+
+	BOOL HasGraph(const CString& sCustAttribID) const;
+	int GetColors(const CString& sCustAttribID, CColorArray& aColors) const;
+	BURNDOWN_GRAPHOPTION GetOption(const CString& sCustAttribID) const;
+	BOOL SetOption(const CString& sCustAttribID, BURNDOWN_GRAPHOPTION nOption);
 
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey);

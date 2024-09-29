@@ -754,7 +754,11 @@ void CBurndownWnd::SetActiveGraph(BURNDOWN_GRAPH nGraph, BOOL bRebuild)
 	m_cbOptions.SetActiveGraphType(pGraph->GetType());
 
 	m_nActiveGraph = nGraph;
-	m_nSelOption = m_graphAttrib.GetOption(nGraph);
+
+	if (IsCustomAttributeGraph(nGraph))
+		m_nSelOption = m_graphAttrib.GetOption(m_mapGraphs.GetCustomAttributeID(pGraph));
+	else
+		m_nSelOption = m_graphAttrib.GetOption(nGraph);
 
 	UpdateData(FALSE);
 }
@@ -905,8 +909,6 @@ void CBurndownWnd::OnSelChangeOption()
 {
 	UpdateData();
 
-	m_graphAttrib.SetOption(m_nActiveGraph, m_nSelOption);
-
 	CGraphBase* pGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
 
 	if (!pGraph)
@@ -914,6 +916,11 @@ void CBurndownWnd::OnSelChangeOption()
 		ASSERT(0);
 		return;
 	}
+
+	if (IsCustomAttributeGraph(m_nActiveGraph))
+		m_graphAttrib.SetOption(m_mapGraphs.GetCustomAttributeID(pGraph), m_nSelOption);
+	else
+		m_graphAttrib.SetOption(m_nActiveGraph, m_nSelOption);
 
 	if (pGraph->SetOption(m_nSelOption))
 		m_chart.OnOptionChanged(m_nSelOption);
