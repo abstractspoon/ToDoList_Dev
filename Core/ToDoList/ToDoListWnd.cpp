@@ -3620,7 +3620,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		OnTimerDueItems(nTDC);
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIBDEFS))
+	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIB_DEFS))
 	{
 		// Ignore modification callback if it came from us
 		if (m_bSettingAttribDefs)

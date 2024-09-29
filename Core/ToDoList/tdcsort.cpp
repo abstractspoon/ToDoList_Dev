@@ -180,7 +180,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	case TDCA_METADATA:
 		return FALSE;
 
-	case TDCA_CUSTOMATTRIBDEFS:	// Resort all custom columns
+	case TDCA_CUSTOMATTRIB_DEFS:	// Resort all custom columns
 		ASSERT(nAttribCol == TDCC_NONE);
 		return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nSortBy);
 

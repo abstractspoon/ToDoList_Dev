@@ -1695,8 +1695,12 @@ bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
 		return (nAttribID == TDCA_NONE);
 
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
-		return true;
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) ||
+		 (nAttribID == TDCA_CUSTOMATTRIB_DEFS))
+	{
+		if (m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
+			return true;
+	}
 
 	return (m_mapReadableAttrib.Has(nAttribID) != FALSE);
 }

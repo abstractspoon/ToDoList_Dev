@@ -558,7 +558,7 @@ namespace TDC
 		case TDCA_TIMEESTIMATE:			
 		case TDCA_TIMESPENT:		
 		case TDCA_VERSION:			
-		case TDCA_CUSTOMATTRIBDEFS:
+		case TDCA_CUSTOMATTRIB_DEFS:
 		case TDCA_PROJECTNAME:
 			return IUI_EDIT;
 
