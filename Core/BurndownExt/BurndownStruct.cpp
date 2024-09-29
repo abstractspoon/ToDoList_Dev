@@ -104,7 +104,9 @@ int CGraphColorMap::GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const
 
 int CGraphColorMap::GetColors(const CString& sCustAttribID, CColorArray& aColors) const
 {
-	VERIFY(Lookup(sCustAttribID, aColors));
+	if (!Lookup(sCustAttribID, aColors))
+		aColors.RemoveAll();
+
 	return aColors.GetSize();
 }
 
@@ -186,7 +188,7 @@ BURNDOWN_GRAPHOPTION CGraphAttributes::GetOption(BURNDOWN_GRAPH nGraph) const
 BURNDOWN_GRAPHOPTION CGraphAttributes::GetOption(const CString& sCustAttribID) const
 {
 	BURNDOWN_GRAPHOPTION nOption = BGO_INVALID;
-	VERIFY(m_mapOptions.Lookup(sCustAttribID, nOption));
+	m_mapOptions.Lookup(sCustAttribID, nOption);
 
 	return nOption;
 }
@@ -225,6 +227,8 @@ void CGraphAttributes::Save(IPreferences* pPrefs, LPCTSTR szKey) const
 
 	CString sAttribKey(szKey);
 	sAttribKey += _T("\\GraphAttributes");
+
+	pPrefs->DeleteProfileSection(sAttribKey);
 
 	POSITION pos = m_mapColors.GetStartPosition();
 	CString sGraph;

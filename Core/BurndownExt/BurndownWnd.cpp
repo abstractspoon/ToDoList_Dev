@@ -174,6 +174,8 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
+	pPrefs->DeleteProfileSection(szKey);
+
 	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_nActiveGraph);
 	pPrefs->WriteProfileString(szKey, _T("ActiveCustomGraph"), m_mapGraphs.GetCustomAttributeID(m_nActiveGraph));
 
@@ -398,7 +400,10 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 
 BOOL CBurndownWnd::UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks)
 {
-	if (!m_aCustomAttribDefs.Update(pTasks) || !m_mapGraphs.Update(m_aCustomAttribDefs))
+	if (!m_aCustomAttribDefs.Update(pTasks))
+		return FALSE;
+
+	if (!m_mapGraphs.Update(m_aCustomAttribDefs))
 		return FALSE;
 
 	// Update graphs combo
