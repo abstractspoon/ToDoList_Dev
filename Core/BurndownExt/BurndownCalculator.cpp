@@ -52,14 +52,11 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 
 BOOL CStatsItemCalculator::SetShowEmptyFrequencyValues(BOOL bShowEmpty) 
 { 
-	if (Misc::StateChanged(m_bShowEmptyFrequencyValues, bShowEmpty))
-	{
-		m_bShowEmptyFrequencyValues = bShowEmpty;
-		return TRUE;
-	}
+	if (!Misc::StateChanged(m_bShowEmptyFrequencyValues, bShowEmpty))
+		return FALSE;
 
-	// else
-	return FALSE;
+	m_bShowEmptyFrequencyValues = bShowEmpty;
+	return TRUE;
 }
 
 BOOL CStatsItemCalculator::HasValidDateRange() const

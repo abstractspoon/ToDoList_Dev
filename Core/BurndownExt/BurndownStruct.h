@@ -7,11 +7,15 @@
 
 #include "BurndownEnum.h"
 
-#include "..\shared\datehelper.h"
-
 #include "..\Interfaces\ITasklist.h"
 
 #include <afxtempl.h>
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CGraphsMap;
+class COleDateTimeRange;
+class IPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -20,9 +24,15 @@
 class CColorArray : public CDWordArray
 {
 public:
+	CColorArray() {}
+	
 	CColorArray& operator=(const CColorArray& other);
+	BOOL operator==(const CColorArray& other) const;
 
 	int Set(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
+	BOOL SetAt(int nIndex, COLORREF color);
+
+	COLORREF GetAt(int nIndex) const;
 	BOOL Has(COLORREF color) const;
 };
 
@@ -31,12 +41,50 @@ public:
 class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, CColorArray&>
 {
 public:
-	void Copy(const CGraphColorMap& other);
+	BOOL Set(const CGraphColorMap& other);
 
 	int GetColorCount(BURNDOWN_GRAPH nGraph) const;
+	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
 	
 	COLORREF GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const;
 	BOOL SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GRAPHATTRIBUTES
+{
+	GRAPHATTRIBUTES() : nOption(BGO_INVALID) {}
+
+	BURNDOWN_GRAPHOPTION nOption;
+	CColorArray aColors;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+typedef CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, BURNDOWN_GRAPHOPTION, BURNDOWN_GRAPHOPTION&> CGraphOptionsMap;
+
+class CGraphAttributes
+{
+public:
+	BOOL Initialise(const CGraphsMap& mapGraphs);
+	BOOL Update(const CGraphsMap& mapGraphs);
+
+	BOOL IsEmpty() const { return (m_mapColors.GetCount() == 0); }
+	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
+
+	BOOL SetColors(const CGraphColorMap& mapColors);
+	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
+
+	BURNDOWN_GRAPHOPTION GetOption(BURNDOWN_GRAPH nGraph) const;
+	BOOL SetOption(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption);
+
+	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
+	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey);
+
+protected:
+	CGraphColorMap m_mapColors;
+	CGraphOptionsMap m_mapOptions;
 };
 
 /////////////////////////////////////////////////////////////////////////////

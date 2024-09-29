@@ -546,7 +546,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, keySrc, valueSrc);
 				
-				if (!map2.Lookup(keySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(keySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}

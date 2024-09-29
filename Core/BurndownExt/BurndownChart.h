@@ -5,6 +5,7 @@
 #include "BurndownGraphs.h"
 
 #include "..\Shared\HMXChartEx.h"
+#include "..\shared\datehelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +27,7 @@ public:
 	BOOL SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild = TRUE);
 	void SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild = TRUE);
 
-	void OnColoursChanged();
+	void OnColorsChanged();
 	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);
 
 protected:

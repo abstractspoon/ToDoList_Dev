@@ -3,9 +3,14 @@
 
 #include "stdafx.h"
 #include "BurndownStruct.h"
+#include "BurndownStatic.h"
+#include "BurndownGraphs.h"
 
 #include "..\Shared\mapex.h"
 #include "..\shared\timehelper.h"
+#include "..\shared\datehelper.h"
+
+#include "..\Interfaces\IPreferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,6 +24,11 @@ CColorArray& CColorArray::operator=(const CColorArray& other)
 {
 	Copy(other);
 	return *this;
+}
+
+BOOL CColorArray::operator==(const CColorArray& other) const
+{
+	return Misc::MatchAll(*this, other, TRUE); // order sensitive
 }
 
 int CColorArray::Set(COLORREF color1, COLORREF color2, COLORREF color3)
@@ -48,27 +58,51 @@ BOOL CColorArray::Has(COLORREF color) const
 	return Misc::HasT(color, *this);
 }
 
+COLORREF CColorArray::GetAt(int nIndex) const
+{
+	if (GetSize() > nIndex)
+		return CDWordArray::GetAt(nIndex);
+
+	ASSERT(0);
+	return CLR_NONE;
+}
+
+BOOL CColorArray::SetAt(int nIndex, COLORREF color)
+{
+	if (color == CLR_NONE)
+		return FALSE;
+
+	if (GetSize() > nIndex)
+	{
+		if (GetAt(nIndex) != color)
+			CDWordArray::SetAt(nIndex, color);
+
+		return TRUE;
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
 // --------------------------------------------------------------------------
 
-void CGraphColorMap::Copy(const CGraphColorMap& other)
+BOOL CGraphColorMap::Set(const CGraphColorMap& other)
 {
-	RemoveAll();
+	if (Misc::MatchAllT<BURNDOWN_GRAPH, CColorArray>(other, *this))
+		return FALSE;
 
-	POSITION pos = other.GetStartPosition();
-
-	while (pos)
-	{
-		CColorArray aColors;
-		BURNDOWN_GRAPH nGraph;
-
-		other.GetNextAssoc(pos, nGraph, aColors);
-		SetAt(nGraph, aColors);
-	}
+	Misc::CopyT<BURNDOWN_GRAPH, CColorArray>(other, *this);
+	return TRUE;
 }
 
 int CGraphColorMap::GetColorCount(BURNDOWN_GRAPH nGraph) const
 {
-	CColorArray aColors;
+	CColorArray aUnused;
+	return GetColors(nGraph, aUnused);
+}
+
+int CGraphColorMap::GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const
+{
 	Lookup(nGraph, aColors);
 
 	return aColors.GetSize();
@@ -79,11 +113,7 @@ COLORREF CGraphColorMap::GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const
 	CColorArray aColors;
 	Lookup(nGraph, aColors);
 
-	if (aColors.GetSize() > nIndex)
-		return aColors[nIndex];
-
-	ASSERT(0);
-	return CLR_NONE;
+	return aColors.GetAt(nIndex);
 }
 
 BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
@@ -94,18 +124,176 @@ BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
 	CColorArray aColors;
 	Lookup(nGraph, aColors);
 
-	if (aColors.GetSize() > nIndex)
+	if (!aColors.SetAt(nIndex, color))
+		return FALSE;
+
+	SetAt(nGraph, aColors);
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+BOOL CGraphAttributes::Initialise(const CGraphsMap& mapGraphs)
+{
+	if (m_mapColors.GetCount())
 	{
-		if (aColors[nIndex] != color)
-		{
-			aColors[nIndex] = color;
-			SetAt(nGraph, aColors);
-		}
-		return TRUE;
+		ASSERT(0);
+		return FALSE;
 	}
 
-	ASSERT(0);
-	return FALSE;
+	return Update(mapGraphs);
+}
+
+BOOL CGraphAttributes::Update(const CGraphsMap& mapGraphs)
+{
+	mapGraphs.GetColors(m_mapColors);
+
+	POSITION pos = mapGraphs.GetStartPosition();
+	BURNDOWN_GRAPH nGraph;
+
+	while (pos)
+	{
+		BURNDOWN_GRAPHOPTION nOption = mapGraphs.GetNext(pos, nGraph)->GetOption();
+		ASSERT(nOption != BGO_INVALID);
+		m_mapOptions.SetAt(nGraph, nOption);
+	}
+
+	return (m_mapColors.GetCount() > 0);
+}
+
+BOOL CGraphAttributes::HasGraph(BURNDOWN_GRAPH nGraph) const
+{
+	BURNDOWN_GRAPHOPTION nUnused;
+	return m_mapOptions.Lookup(nGraph, nUnused);
+}
+
+int CGraphAttributes::GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const
+{
+	m_mapColors.Lookup(nGraph, aColors);
+	return aColors.GetSize();
+}
+
+BOOL CGraphAttributes::SetColors(const CGraphColorMap& mapColors)
+{
+	return m_mapColors.Set(mapColors);
+}
+
+BURNDOWN_GRAPHOPTION CGraphAttributes::GetOption(BURNDOWN_GRAPH nGraph) const
+{
+	BURNDOWN_GRAPHOPTION nOption = BGO_INVALID;
+	m_mapOptions.Lookup(nGraph, nOption);
+
+	return nOption;
+}
+
+BOOL CGraphAttributes::SetOption(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption)
+{
+	if (nOption == BGO_INVALID)
+		return FALSE;
+
+	BURNDOWN_GRAPHOPTION nCurOption = BGO_INVALID;
+	m_mapOptions.Lookup(nGraph, nCurOption);
+
+	if (nOption == nCurOption)
+		return FALSE;
+
+	m_mapOptions[nGraph] = nOption;
+	return TRUE;
+}
+
+void CGraphAttributes::Save(IPreferences* pPrefs, LPCTSTR szKey) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CString sAttribKey(szKey);
+	sAttribKey += _T("\\GraphAttributes");
+
+	POSITION pos = m_mapColors.GetStartPosition();
+	BURNDOWN_GRAPH nGraph;
+	CColorArray aColors;
+
+	int nItem = 0;
+
+	while (pos)
+	{
+		m_mapColors.GetNextAssoc(pos, nGraph, aColors);
+		BURNDOWN_GRAPHOPTION nOption = GetOption(nGraph);
+
+		CString sGraphKey = Misc::MakeKey(_T("Graph%d"), nItem);
+		CString sAttrib = Misc::Format(_T("%d:%s:%d"), nGraph, Misc::FormatArray(aColors, '|'), nOption);
+
+		pPrefs->WriteProfileString(sAttribKey, sGraphKey, sAttrib);
+		nItem++;
+	}
+
+	pPrefs->WriteProfileInt(sAttribKey, _T("Count"), nItem);
+}
+
+BOOL CGraphAttributes::Load(const IPreferences* pPrefs, LPCTSTR szKey)
+{
+	CString sAttribKey(szKey);
+	sAttribKey += _T("\\GraphAttributes");
+
+	int nCount = pPrefs->GetProfileInt(sAttribKey, _T("Count"), 0);
+	CColorArray aColors;
+
+	if (nCount == 0)
+	{
+		// backward compatibility
+		for (int nItem = 0; nItem < NUM_GRAPHTYPES; nItem++)
+		{
+			BURNDOWN_GRAPHTYPE nType = GRAPHTYPES[nItem].nType;
+
+			int nFirst = (nType + 1);
+			int nLast = (nFirst + 10);
+
+			for (int nGraph = nFirst; nGraph < nLast; nGraph++)
+			{
+				CString sColorKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
+				CString sColors = pPrefs->GetProfileString(szKey, sColorKey);
+
+				if (!sColors.IsEmpty())
+				{
+					Misc::Split(sColors, aColors, '|');
+					m_mapColors.SetAt((BURNDOWN_GRAPH)nGraph, aColors);
+
+					CString sOptionKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
+					BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sOptionKey, GetDefaultOption(nType));
+
+					m_mapOptions.SetAt((BURNDOWN_GRAPH)nGraph, nOption);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int nItem = 0; nItem < nCount; nItem++)
+		{
+			CString sGraphKey = Misc::MakeKey(_T("Graph%d"), nItem);
+
+			CString sAttrib = pPrefs->GetProfileString(sAttribKey, sGraphKey);
+			ASSERT(!sAttrib.IsEmpty());
+
+			CStringArray aParts;
+			
+			if (Misc::Split(sAttrib, aParts, ':') == 3)
+			{
+				BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)_ttoi(aParts[0]);
+
+				Misc::Split(aParts[1], aColors, '|');
+				m_mapColors.SetAt(nGraph, aColors);
+
+				BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)_ttoi(aParts[2]);
+				m_mapOptions.SetAt(nGraph, nOption);
+			}
+			else
+			{
+				ASSERT(0);
+			}
+		}
+	}
+
+	return (m_mapColors.GetCount() > 0);
 }
 
 /////////////////////////////////////////////////////////////////////////////

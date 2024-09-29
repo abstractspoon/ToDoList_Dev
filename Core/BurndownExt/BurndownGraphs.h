@@ -79,8 +79,9 @@ public:
 
 	int GetGraphs(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs, BOOL bSorted) const;
 	int GetColors(CGraphColorMap& mapColors) const;
-	BOOL SetColors(const CGraphColorMap& mapColors);
 	int GetMaxColorCount() const;
+	void SetAttributes(const CGraphAttributes& attrib);
+
 	CString GetCustomAttributeID(BURNDOWN_GRAPH nGraph) const;
 
 	BOOL Update(const CCustomAttributeDefinitionArray& aCustAttribDefs);

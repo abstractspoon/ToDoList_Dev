@@ -68,7 +68,7 @@ BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild)
 	return TRUE;
 }
 
-void CBurndownChart::OnColoursChanged()
+void CBurndownChart::OnColorsChanged()
 {
 	CHECK_GRAPH();
 

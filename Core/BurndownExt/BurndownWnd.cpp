@@ -64,6 +64,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	m_icon.Load(IDR_STATISTICS);
 	m_sliderDateRange.SetMinMaxRangeWidths(1.0); // min range = 1 month
+	m_graphAttrib.Initialise(m_mapGraphs);
 }
 
 CBurndownWnd::~CBurndownWnd()
@@ -123,17 +124,6 @@ BOOL CBurndownWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
-}
-
-void CBurndownWnd::OnPreferences()
-{
-	if (m_dlgPrefs.DoModal(m_nActiveGraph) == IDOK)
-	{
-		if (m_mapGraphs.SetColors(m_dlgPrefs.GetGraphColors()))
-			m_chart.OnColoursChanged();
-
-		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
-	}
 }
 
 BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
@@ -203,20 +193,9 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	}
 
 	// Colours and Options
-	POSITION pos = m_mapGraphs.GetStartPosition();
+	m_graphAttrib.Save(pPrefs, szKey);
 
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
-
-		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
-	}
-
+	// Other prefs
 	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 }
 
@@ -240,38 +219,14 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
 
 		// Colours and Options
-		POSITION pos = m_mapGraphs.GetStartPosition();
-		BURNDOWN_GRAPH nGraph;
-
-		while (pos)
-		{
-			CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-			CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-			CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
-
-			if (!sColors.IsEmpty()) // first time will fail
-			{
-				CColorArray aColors;
-				Misc::Split(sColors, aColors, '|');
-
-				// Only allow the same number of colours as the graph's default palette
-				if (aColors.GetSize() == pGraph->GetColors().GetSize())
-					pGraph->SetColors(aColors);
-			}
-
-			sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-			BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(pGraph->GetType()));
-
-			if (nOption != BGO_INVALID)
-				pGraph->SetOption(nOption);
-		}
+		if (m_graphAttrib.Load(pPrefs, szKey))
+			m_mapGraphs.SetAttributes(m_graphAttrib);
 
 		// Previously active graph
 		m_nActiveGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), DEF_GRAPH);
 		m_sPrevCustomGraph = pPrefs->GetProfileString(szKey, _T("ActiveCustomGraph"));
 
-		SetActiveGraph(m_mapGraphs.GetGraph(m_nActiveGraph), FALSE); // No rebuild
+		SetActiveGraph(m_nActiveGraph, FALSE); // No rebuild
 	}
 
 	// application preferences
@@ -450,7 +405,11 @@ BOOL CBurndownWnd::UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks)
 	m_cbGraphs.ResetContent();
 	m_cbGraphs.Initialise(m_mapGraphs);
 
-	SetActiveGraph(m_mapGraphs.GetGraph(m_nActiveGraph), FALSE); // No rebuild
+	// All the graphs' attributes
+	m_mapGraphs.SetAttributes(m_graphAttrib);
+	m_graphAttrib.Update(m_mapGraphs);
+
+	SetActiveGraph(m_nActiveGraph, FALSE); // No rebuild
 
 	return TRUE;
 }
@@ -766,7 +725,11 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 
 	if (!m_sPrevCustomGraph.IsEmpty())
 	{
-		SetActiveGraph(m_mapGraphs.GetGraph(m_sPrevCustomGraph), FALSE); // No rebuild
+		CGraphBase* pGraph = m_mapGraphs.GetGraph(m_sPrevCustomGraph);
+
+		if (pGraph)
+			SetActiveGraph(pGraph->GetGraph(), FALSE); // No rebuild
+
 		m_sPrevCustomGraph.Empty(); // always
 	}
 
@@ -776,18 +739,22 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 	UpdateActiveRangeLabel(dtActiveRange);
 }
 
-void CBurndownWnd::SetActiveGraph(CGraphBase* pGraph, BOOL bRebuild)
+void CBurndownWnd::SetActiveGraph(BURNDOWN_GRAPH nGraph, BOOL bRebuild)
 {
+	CGraphBase* pGraph = m_mapGraphs.GetGraph(nGraph);
+	
 	if (!pGraph)
-		pGraph = m_mapGraphs.GetGraph(DEF_GRAPH);
+	{
+		nGraph = DEF_GRAPH;
+		pGraph = m_mapGraphs.GetGraph(nGraph);
 
-	ASSERT(pGraph);
-
+		ASSERT(pGraph);
+	}
 	m_chart.SetActiveGraph(pGraph, bRebuild);
 	m_cbOptions.SetActiveGraphType(pGraph->GetType());
 
-	m_nActiveGraph = pGraph->GetGraph();
-	m_nSelOption = pGraph->GetOption();
+	m_nActiveGraph = nGraph;
+	m_nSelOption = m_graphAttrib.GetOption(nGraph);
 
 	UpdateData(FALSE);
 }
@@ -795,7 +762,7 @@ void CBurndownWnd::SetActiveGraph(CGraphBase* pGraph, BOOL bRebuild)
 void CBurndownWnd::OnSelChangeGraph()
 {
 	UpdateData();
-	SetActiveGraph(m_mapGraphs.GetGraph(m_nActiveGraph), TRUE); // Rebuild
+	SetActiveGraph(m_nActiveGraph, TRUE); // Rebuild
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -938,17 +905,31 @@ void CBurndownWnd::OnSelChangeOption()
 {
 	UpdateData();
 
+	m_graphAttrib.SetOption(m_nActiveGraph, m_nSelOption);
+
 	CGraphBase* pGraph = m_mapGraphs.GetGraph(m_nActiveGraph);
-	ASSERT(pGraph);
 
-	if (pGraph)
+	if (!pGraph)
 	{
-		BOOL bHadOption = pGraph->HasOption(m_nSelOption);
+		ASSERT(0);
+		return;
+	}
 
-		if (pGraph->SetOption(m_nSelOption) &&
-			Misc::StateChanged(bHadOption, pGraph->HasOption(m_nSelOption)))
+	if (pGraph->SetOption(m_nSelOption))
+		m_chart.OnOptionChanged(m_nSelOption);
+}
+
+void CBurndownWnd::OnPreferences()
+{
+	if (m_dlgPrefs.DoModal(m_nActiveGraph) == IDOK)
+	{
+		if (m_graphAttrib.SetColors(m_dlgPrefs.GetGraphColors()))
 		{
-			m_chart.OnOptionChanged(m_nSelOption);
+			m_mapGraphs.SetAttributes(m_graphAttrib);
+			m_chart.OnColorsChanged();
 		}
+
+		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues()); // may rebuild
 	}
 }
+

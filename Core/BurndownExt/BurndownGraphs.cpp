@@ -222,30 +222,22 @@ int CGraphsMap::GetColors(CGraphColorMap& mapColors) const
 	return mapColors.GetCount();
 }
 
-BOOL CGraphsMap::SetColors(const CGraphColorMap& mapColors)
+void CGraphsMap::SetAttributes(const CGraphAttributes& attrib)
 {
-	BOOL bChange = FALSE;
-	POSITION pos = mapColors.GetStartPosition();
+	POSITION pos = GetStartPosition();
+	BURNDOWN_GRAPH nGraph;
+	CColorArray aColors;
 
 	while (pos)
 	{
-		BURNDOWN_GRAPH nGraph;
-		CColorArray aColors;
+		CGraphBase* pGraph = GetNext(pos, nGraph);
 
-		mapColors.GetNextAssoc(pos, nGraph, aColors);
-		ASSERT(aColors.GetSize());
+		if (attrib.GetColors(nGraph, aColors))
+			pGraph->SetColors(aColors);
 
-		if (aColors.GetSize())
-		{
-			CGraphBase* pGraph = GetGraph(nGraph);
-			ASSERT(pGraph);
-
-			if (pGraph)
-				bChange |= pGraph->SetColors(aColors);
-		}
+		if (attrib.HasGraph(nGraph))
+			pGraph->SetOption(attrib.GetOption(nGraph));
 	}
-
-	return bChange;
 }
 
 int CGraphsMap::GetMaxColorCount() const
@@ -416,6 +408,9 @@ BOOL CGraphBase::SetOption(BURNDOWN_GRAPHOPTION nOption)
 		return FALSE;
 	}
 
+	if (nOption == m_nOption)
+		return FALSE;
+
 	m_nOption = nOption;
 	return TRUE;
 }
@@ -467,8 +462,11 @@ BOOL CGraphBase::SetColors(const CColorArray& aColors)
 		return FALSE;
 	}
 
+	if (Misc::MatchAll(m_aColors, aColors, TRUE))
+		return FALSE;
+
 	m_aColors.Copy(aColors);
-	return FALSE;
+	return TRUE;
 }
 
 const CColorArray& CGraphBase::GetColors() const
@@ -1691,7 +1689,7 @@ void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& cal
 	RecalcDataMinMax(datasets);
 }
 
-CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
