@@ -1178,9 +1178,10 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 			for (int nCust = 0; nCust < nNumCust; nCust++)
 			{
 				// Save off each attribute ID
+				CString sAttribID(pTasks->GetCustomAttributeID(nCust));
+
 				if (pTasks->IsCustomAttributeEnabled(nCust))
 				{
-					CString sAttribID(pTasks->GetCustomAttributeID(nCust));
 					CString sAttribName(pTasks->GetCustomAttributeLabel(nCust));
 
 					DWORD dwCustType = pTasks->GetCustomAttributeType(nCust);
@@ -1216,6 +1217,31 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 						Misc::Split(sAutoData, aAutoValues, '\n');
 
 						bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
+					}
+				}
+				else // handle possible deletion
+				{
+					int nExist = m_aCustomAttribDefs.FindDefinition(sAttribID);
+
+					if (nExist != -1)
+					{
+						m_aCustomAttribDefs.RemoveAt(nExist);
+
+						if ((m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) && (m_sTrackAttribID == sAttribID))
+						{
+							m_nTrackedAttributeID = TDCA_STATUS;
+							m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
+
+							bChange = TRUE;
+						}
+
+						if ((m_nGroupBy == TDCA_CUSTOMATTRIB) && (m_sGroupByCustAttribID == sAttribID))
+						{
+							m_nGroupBy = TDCA_NONE;
+							m_sGroupByCustAttribID.Empty();
+
+							bChange = TRUE;
+						}
 					}
 				}
 			}
@@ -1257,7 +1283,6 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringA
 	if (!Misc::MatchAll(mapNewValues, *pValues))
 	{
 		Misc::Copy(mapNewValues, *pValues);
-
 		return IsTracking(szAttribID);
 	}
 
@@ -2067,6 +2092,7 @@ BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 	if (nAttribID != m_nGroupBy)
 	{
 		m_nGroupBy = nAttribID;
+		m_sGroupByCustAttribID = m_aCustomAttribDefs.GetDefinitionID(nAttribID);
 		m_aColumns.GroupBy(nAttribID);
 	}
 	

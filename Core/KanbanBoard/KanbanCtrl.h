@@ -65,6 +65,7 @@ public:
 
  	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 	BOOL GroupBy(TDC_ATTRIBUTE nAttribID);
+	TDC_ATTRIBUTE GetGroupBy() const { return m_nGroupBy; }
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
