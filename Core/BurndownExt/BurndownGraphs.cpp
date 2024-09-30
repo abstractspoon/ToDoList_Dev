@@ -706,7 +706,10 @@ void CTimeSeriesGraph::UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]
 	CGraphBase::UpdateDatasetColors(datasets);
 
 	if (GetOption() != BGO_TREND_NONE)
-		CGraphBase::UpdateDatasetColors(&datasets[GetColors().GetSize()]);
+	{
+		int nNumGraphs = GetColors().GetSize();
+		CGraphBase::UpdateDatasetColors(&datasets[nNumGraphs]);
+	}
 }
 
 BOOL CTimeSeriesGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset datasets[HMX_MAX_DATASET]) const
