@@ -17,7 +17,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -116,11 +115,6 @@ struct LVGROUP
 #define LVM_REMOVEALLGROUPS     (LVM_FIRST + 160)
 
 #endif
-
-/////////////////////////////////////////////////////////////////////////////
-
-const DWORD NOTSET = 0xffffffff;
-DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -232,6 +226,16 @@ void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 		InvalidateRect(m_hwndList, NULL, FALSE);
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////
+
+const DWORD NOTSET = 0xffffffff;
+const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
+const int TIMERID_EDITLABELS = 42;
+
+/////////////////////////////////////////////////////////////////////////////
+
+DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -940,9 +944,9 @@ BOOL CEnListCtrl::SetTooltipCtrlText(CString sText)
 
 void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	int nSel = HitTest(point);
+	int nHit = HitTest(point);
 
-	if (!WantSelChange(nSel))
+	if (!WantSelChange(nHit))
 	{
 		// Make sure we finish editing
 		if (GetEditControl() != NULL)
@@ -951,44 +955,36 @@ void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 
-	BOOL bChangedEditLabels = FALSE;
-
-	// if the list is in report mode AND supports label editing then
-	// clicking anywhere on the item when its already selected will
-	// edit the label of column one which is not what we want. 
-	// so we selectively disable it
-	if ((nSel != -1) && m_nCurView == LVS_REPORT)
-	{
-		if (GetStyle() & LVS_EDITLABELS)
-		{
-			CRect rItem;
-			GetSubItemRect(nSel, 0, LVIR_BOUNDS, rItem);
-
-			if (GetImageList(LVSIL_SMALL))
-				rItem.left += 19;
-
-			if (GetImageList(LVSIL_STATE))
-				rItem.left += 19;
-
-			if ((point.x < rItem.left) || (point.x > rItem.right))
-			{
-				ModifyStyle(LVS_EDITLABELS, 0);
-				bChangedEditLabels = TRUE;
-			}
-		}
-	}
-	
 	CListCtrl::OnLButtonDown(nFlags, point);
 
-	if (nSel != -1) // user clicked on an item
+	if (nHit != -1)
 	{
-		// determine whether a sel change has occured
-		// and tell our parent if it has
-		NotifySelChange();
-	}
+		int nSel = GetCurSel();
 
-	if (bChangedEditLabels)
-		ModifyStyle(0, LVS_EDITLABELS);
+		if (nHit == nSel)
+		{
+			// if the list is in report mode AND supports label editing then
+			// clicking anywhere on the item when its already selected will
+			// edit the label of column one which is not what we want. 
+			// So if we detect that situation we kill the label edit timer.
+			if ((m_nCurView == LVS_REPORT) && (GetStyle() & LVS_EDITLABELS))
+			{
+				CRect rItem;
+				GetSubItemRect(nHit, 0, LVIR_LABEL, rItem);
+
+				if (!rItem.PtInRect(point))
+				{
+					KillTimer(TIMERID_EDITLABELS);
+				}
+			}
+		}
+		else // user clicked on another item
+		{
+			// determine whether a sel change has occurred
+			// and tell our parent if it has
+			NotifySelChange();
+		}
+	}
 }
 
 void CEnListCtrl::SetColumnTextColor(int nCol, COLORREF color)

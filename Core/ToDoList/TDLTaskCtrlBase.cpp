@@ -4844,7 +4844,6 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			break;
 
 		case TDCA_CUSTOMATTRIB_DEFS:
-		case TDCA_CUSTOMATTRIB_ALL:
 			// Handled in OnCustomAttributeChange
 			break;
 

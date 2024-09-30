@@ -584,12 +584,41 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 		m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs);
 
 	// Update UI elements
-	m_dlgPrefs.SetCustomAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
+	const CKanbanCustomAttributeDefinitionArray& aCustAttribs = m_ctrlKanban.GetCustomAttributeDefinitions();
+	m_dlgPrefs.SetCustomAttributeDefinitions(aCustAttribs);
 
-	m_cbAttributes.SetAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
+	// Tracked attribute can change after a custom attribute update
+	TDC_ATTRIBUTE nTrackedAttribID = m_ctrlKanban.GetTrackedAttribute();
+
+	if (nTrackedAttribID != m_nTrackedAttribID)
+	{
+		ASSERT(m_nTrackedAttribID == TDCA_CUSTOMATTRIB);
+
+		m_nTrackedAttribID = nTrackedAttribID;
+		m_sTrackedCustomAttribID.Empty();
+
+		// Update the selected item before updating the custom attributes
+		m_cbAttributes.SetSelectedAttribute(m_nTrackedAttribID, m_sTrackedCustomAttribID);
+	}
+
+	m_cbAttributes.SetAttributeDefinitions(aCustAttribs);
 	m_cbAttributes.SetSelectedAttribute(m_nTrackedAttribID, m_sTrackedCustomAttribID);
 
-	m_cbGroupBy.SetAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
+	// Likewise for the group-by attribute
+	TDC_ATTRIBUTE nGroupBy = m_ctrlKanban.GetGroupBy();
+
+	if (nGroupBy != m_nGroupByAttrib)
+	{
+		ASSERT(m_nGroupByAttrib == TDCA_CUSTOMATTRIB);
+
+		m_nGroupByAttrib = nGroupBy;
+		m_sGroupByCustomAttribID.Empty();
+
+		// Update the selected item before updating the custom attributes
+		m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttrib, m_sGroupByCustomAttribID);
+	}
+
+	m_cbGroupBy.SetAttributeDefinitions(aCustAttribs);
 	m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttrib, m_sGroupByCustomAttribID);
 
 	if (m_nTrackedAttribID == TDCA_FIXEDCOLUMNS)
@@ -598,7 +627,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 		TDC_ATTRIBUTE nTrackAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustomID);
 
 		if (!sCustomID.IsEmpty())
-			nTrackAttrib = m_ctrlKanban.GetCustomAttributeDefinitions().GetDefinitionID(sCustomID);
+			nTrackAttrib = aCustAttribs.GetDefinitionID(sCustomID);
 		
 		if (nTrackAttrib != TDCA_NONE)
 			m_cbGroupBy.ExcludeAttribute(nTrackAttrib);
