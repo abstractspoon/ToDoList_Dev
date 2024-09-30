@@ -127,14 +127,17 @@ void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick
 
 		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nItem);
 
-		if (!IsCustomAttributeGraph(nGraph))
+		if (IsCustomAttributeGraph(nGraph))
+		{
+			CString sCustAttribID;
+			VERIFY(m_mapCustAttribIDs.Lookup(nGraph, sCustAttribID));
+
+			m_mapColors.SetColors(sCustAttribID, aColors);
+		}
+		else
+		{
 			m_mapColors.SetColors(nGraph, aColors);
-
-		// else
-		CString sCustAttribID;
-		VERIFY(m_mapCustAttribIDs.Lookup(nGraph, sCustAttribID));
-
-		m_mapColors.SetColors(sCustAttribID, aColors);
+		}
 	}
 }
 
