@@ -5060,7 +5060,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		// Special case: We replace the definition 
 		// attribute with the value attribute
 		mapAttribIDs.Remove(TDCA_CUSTOMATTRIB_DEFS);
-		mapAttribIDs.Add(TDCA_CUSTOMATTRIB_ALL);
+		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
 		break;
 
 	case TDCA_TIMEESTIMATE: // ----------------------------------------------------
