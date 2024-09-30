@@ -1591,7 +1591,7 @@ void CTDLCustomAttributeDlg::OnClickAttributelist(NMHDR* pNMHDR, LRESULT* pResul
 			TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[pNMIA->iItem];
 			
 			attrib.bEnabled = !attrib.bEnabled;
-			m_lcAttributes.SetItem(pNMIA->iItem, 0, LVIF_IMAGE, NULL, attrib.bEnabled ? 2 : 1, 0, 0, 0);
+			m_lcAttributes.SetItemImage(pNMIA->iItem, (attrib.bEnabled ? 2 : 1));
 		}
 	}
 
@@ -1616,7 +1616,7 @@ BOOL CTDLCustomAttributeDlg::PreTranslateMessage(MSG* pMsg)
 					TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 					
 					attrib.bEnabled = !attrib.bEnabled;
-					m_lcAttributes.SetItem(nSel, 0, LVIF_IMAGE, NULL, attrib.bEnabled ? 2 : 1, 0, 0, 0);
+					m_lcAttributes.SetItemImage(nSel, (attrib.bEnabled ? 2 : 1));
 				}
 				break;
 
