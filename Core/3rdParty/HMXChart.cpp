@@ -398,7 +398,7 @@ BOOL CHMXChart::DrawAxes(CDC &dc)
 
 
 	// draw X
-	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
+	if (m_dwRenderFlags & HMX_RENDER_XAXIS)
 	{
 		dc.MoveTo(m_rectXAxis.left, m_rectXAxis.top);
 		dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
