@@ -404,7 +404,7 @@ void CGraphBase::ClearData(CHMXDataset datasets[HMX_MAX_DATASET])
 		datasets[nDataset].ClearData();
 }
 
-BOOL CGraphBase::GetMinMax(double& dMin, double& dMax) const
+BOOL CGraphBase::GetDataMinMax(double& dMin, double& dMax) const
 {
 	dMin = m_dDataMin;
 	dMax = m_dDataMax;
@@ -1722,7 +1722,7 @@ void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& cal
 
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[0].SetMin(0.0);
+	// Note: we calculate the appropriate baseline after we know the data extents
 
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -1743,6 +1743,20 @@ void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& cal
 	}
 
 	RecalcDataMinMax(datasets);
+
+	double dMin, dMax;
+
+	if (GetDataMinMax(dMin, dMax))
+	{
+		if ((dMin > 0.0) && (dMax > 0.0))
+		{
+			datasets[0].SetMin(0.0);
+		}
+		else if ((dMin < 0.0) && (dMax < 0.0))
+		{
+			datasets[0].SetMax(0.0);
+		}
+	}
 }
 
 CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const

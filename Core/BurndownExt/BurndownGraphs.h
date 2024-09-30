@@ -29,7 +29,7 @@ public:
 	BURNDOWN_GRAPH GetGraph() const { return m_nGraph; }
 	BURNDOWN_GRAPHTYPE GetType() const { return m_nType; }
 	BOOL HasType(BURNDOWN_GRAPHTYPE nType) const { return (m_nType == nType); }
-	BOOL GetMinMax(double& dMin, double& dMax) const;
+	BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 	const CColorArray& GetColors() const;
 	BOOL SetColors(const CColorArray& aColors);
