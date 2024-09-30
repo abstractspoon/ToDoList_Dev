@@ -29,6 +29,7 @@ public:
 
 	void OnColorsChanged();
 	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);
+	void OnDisplayISODatesChanged();
 
 protected:
 	const CStatsItemArray& m_data;

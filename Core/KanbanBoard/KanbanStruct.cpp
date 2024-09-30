@@ -26,6 +26,17 @@ CString KBUtils::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sValue,
 	return GetAttributeLabel(nAttribID, nLabelVis, aCustAttribDefs) + sValue;
 }
 
+CString KBUtils::FormatDate(const COleDateTime& date, BOOL bISODates)
+{
+	if (!CDateHelper::IsDateSet(date))
+		return _T("");
+
+	if (bISODates)
+		return date.Format(_T("%F"));
+
+	return date.Format(VAR_DATEVALUEONLY);
+}
+
 CString KBUtils::GetAttributeLabel(TDC_ATTRIBUTE nAttribID, KBC_ATTRIBLABELS nLabelVis,
 										 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
@@ -570,16 +581,16 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 	return (Misc::Find(select.szWords, sAttrib, select.bCaseSensitive, select.bWholeWord) != -1);
 }
 
-CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const
+CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, BOOL bISODates) const
 {
 	if (KBUtils::IsCustomAttribute(nAttribID))
 		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID, aCustAttribDefs));
 
 	// else
-	return GetAttributeDisplayValue(nAttribID);
+	return GetAttributeDisplayValue(nAttribID, bISODates);
 }
 
-CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const
+CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, BOOL bISODates) const
 {
 	switch (nAttribID)
 	{
@@ -596,37 +607,20 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_RISK:			
 		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID));
 		
-	case TDCA_DONEDATE:		
-		if (CDateHelper::IsDateSet(dtDone))
-			return dtDone.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_DUEDATE:		
-		if (CDateHelper::IsDateSet(dtDue))
-			return dtDue.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_STARTDATE:		
-		if (CDateHelper::IsDateSet(dtStart))
-			return dtStart.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_CREATIONDATE:	
-		if (CDateHelper::IsDateSet(dtCreate))
-			return dtCreate.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_LASTMODDATE:		
-		if (CDateHelper::IsDateSet(dtLastMod))
-			return dtLastMod.Format(VAR_DATEVALUEONLY);
-		break;
+	case TDCA_DONEDATE:			return KBUtils::FormatDate(dtDone, bISODates);
+	case TDCA_DUEDATE:			return KBUtils::FormatDate(dtDue, bISODates);
+	case TDCA_STARTDATE:		return KBUtils::FormatDate(dtStart, bISODates);
+	case TDCA_CREATIONDATE:		return KBUtils::FormatDate(dtCreate, bISODates);
+	case TDCA_LASTMODDATE:		return KBUtils::FormatDate(dtLastMod, bISODates);
 
 	case TDCA_ID:				return Misc::Format(dwTaskID);
 	case TDCA_PERCENT:			return Misc::Format(nPercent, _T("%"));
+	case TDCA_COST:				return Misc::Format(dCost, 2);
+
 	case TDCA_CREATEDBY:		return sCreatedBy;
 	case TDCA_EXTERNALID:		return sExternalID;
-	case TDCA_COST:				return Misc::Format(dCost, 2);
 	case TDCA_RECURRENCE:		return sRecurrence;
+
 	case TDCA_TIMEESTIMATE:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
 	case TDCA_TIMEREMAINING:	return CTimeHelper().FormatTime(dTimeRemaining, MapUnitsToTHUnits(nTimeRemainingUnits), 2);
 	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);

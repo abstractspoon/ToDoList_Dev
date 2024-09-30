@@ -846,6 +846,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	rAttrib.DeflateRect(TEXT_BORDER);
 
 	int nFlags = (DT_LEFT | DT_BOTTOM | DT_END_ELLIPSIS | DT_NOPREFIX);
+	BOOL bISODates = HasOption(KBCF_SHOWISODATES);
 
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
@@ -868,7 +869,10 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 				break; // handled elsewhere
 
 			default:
-				DrawAttribute(pDC, rAttrib, nAttribID, pKI->GetAttributeDisplayValue(nAttribID), nFlags, crText);
+				{
+					CString sValue = pKI->GetAttributeDisplayValue(nAttribID, bISODates);
+					DrawAttribute(pDC, rAttrib, nAttribID, sValue, nFlags, crText);
+				}
 				break;
 			}
 		}

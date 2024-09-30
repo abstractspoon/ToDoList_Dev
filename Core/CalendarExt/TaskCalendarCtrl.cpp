@@ -815,19 +815,16 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 	CRect rCells;
 	GetClientRect(rCells);
 
+	CClientDC dc(this);
 	int nAvailWidth = ((rCells.Width() / CALENDAR_NUM_COLUMNS) - (2 * HEADER_PADDING));
-
+	
 	// Note: We use a bold font and the first day of the month 
 	// for our calculations because experience tells that it 
 	// always produces wider text than double digit non-bold text
-	CClientDC dc(this);
 	CFont *pOldFont = dc.SelectObject(m_fonts.GetFont(GMFS_BOLD));
-	
-	BOOL bMonthBeforeDay = Misc::ShortDateFormatHasMonthBeforeDay();
 	int nMaxDayWidth = dc.GetTextExtent(_T("1 ")).cx;
-	int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, FALSE);
-	int nLongYearWidth = dc.GetTextExtent(_T(" 2020")).cx;
-
+	
+	BOOL bISODates = HasOption(TCCO_SHOWISODATES);
 	int nWeekWidth = 0;
 
 	if (HasOption(TCCO_SHOWWEEKNUMINCELLDATE))
@@ -844,54 +841,80 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 
 	// Note: we include the week number width in the calculation
 	// but leave it out of the format string because we need to
-	// use our corrected week number not Windows'
-	if ((nMaxDayWidth + nMaxLongMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
+	// overwrite Windows' own week number with out correct one
+	if (bISODates)
 	{
-		m_sCellDateFormat = (bMonthBeforeDay ? _T("%B %#d %Y") : _T("%#d %B %Y"));
-	}
-	else
-	{
-		int nMaxShortMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, TRUE);
-
-		if ((nMaxDayWidth + nMaxShortMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
+		if ((dc.GetTextExtent(_T("2020-12-31")).cx + nWeekWidth) <= nAvailWidth)
 		{
-			m_sCellDateFormat = (bMonthBeforeDay ? _T("%b %#d %Y") : _T("%#d %b %Y"));
+			m_sCellDateFormat = _T("%F");
+		}
+		else if ((dc.GetTextExtent(_T("12-31")).cx + nWeekWidth) <= nAvailWidth)
+		{
+			m_sCellDateFormat = _T("%m-%d");
 		}
 		else
 		{
-			CString sDateSep = Misc::GetDateSeparator();
-			CString sDayMonthFormat;
+			m_sCellDateFormat = _T("%d");
 
-			if (bMonthBeforeDay)
-				sDayMonthFormat = _T("%m") + sDateSep + _T("%#d");
+			if ((nMaxDayWidth + nWeekWidth) > nAvailWidth)
+				m_sCellDateWeekNumFormat.Empty();
+		}
+	}
+	else
+	{
+		BOOL bMonthBeforeDay = Misc::ShortDateFormatHasMonthBeforeDay();
+
+		int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, FALSE);
+		int nLongYearWidth = dc.GetTextExtent(_T(" 2020")).cx;
+
+		if ((nMaxDayWidth + nMaxLongMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
+		{
+			m_sCellDateFormat = (bMonthBeforeDay ? _T("%B %#d %Y") : _T("%#d %B %Y"));
+		}
+		else
+		{
+			int nMaxShortMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, TRUE);
+
+			if ((nMaxDayWidth + nMaxShortMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
+			{
+				m_sCellDateFormat = (bMonthBeforeDay ? _T("%b %#d %Y") : _T("%#d %b %Y"));
+			}
 			else
-				sDayMonthFormat = _T("%#d") + sDateSep + _T("%m");
+			{
+				CString sDateSep = Misc::GetDateSeparator();
+				CString sDayMonthFormat;
 
-			if ((dc.GetTextExtent(_T("1/12/2020")).cx + nWeekWidth) <= nAvailWidth)
-			{
-				m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%Y");
-			}
-			else if ((dc.GetTextExtent(_T("1/12/20")).cx + nWeekWidth) <= nAvailWidth)
-			{
-				m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%y");
-			}
-			else if ((dc.GetTextExtent(_T("1/12")).cx + nWeekWidth) <= nAvailWidth)
-			{
-				m_sCellDateFormat = sDayMonthFormat;
-			}
-			else if ((nMaxDayWidth + nWeekWidth) <= nAvailWidth)
-			{
-				// Day Only + week
-			}
-			else if (dc.GetTextExtent(_T("1/12")).cx <= nAvailWidth)
-			{
-				m_sCellDateFormat = sDayMonthFormat;
-				m_sCellDateWeekNumFormat.Empty();
-			}
-			else 
-			{
-				// Day only
-				m_sCellDateWeekNumFormat.Empty();
+				if (bMonthBeforeDay)
+					sDayMonthFormat = _T("%m") + sDateSep + _T("%#d");
+				else
+					sDayMonthFormat = _T("%#d") + sDateSep + _T("%m");
+
+				if ((dc.GetTextExtent(_T("1/12/2020")).cx + nWeekWidth) <= nAvailWidth)
+				{
+					m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%Y");
+				}
+				else if ((dc.GetTextExtent(_T("1/12/20")).cx + nWeekWidth) <= nAvailWidth)
+				{
+					m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%y");
+				}
+				else if ((dc.GetTextExtent(_T("1/12")).cx + nWeekWidth) <= nAvailWidth)
+				{
+					m_sCellDateFormat = sDayMonthFormat;
+				}
+				else if ((nMaxDayWidth + nWeekWidth) <= nAvailWidth)
+				{
+					// Day Only + week
+				}
+				else if (dc.GetTextExtent(_T("1/12")).cx <= nAvailWidth)
+				{
+					m_sCellDateFormat = sDayMonthFormat;
+					m_sCellDateWeekNumFormat.Empty();
+				}
+				else 
+				{
+					// Day only
+					m_sCellDateWeekNumFormat.Empty();
+				}
 			}
 		}
 	}
@@ -902,11 +925,8 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 {
 	ASSERT(m_sCellDateFormat);
 
-	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%#d"));
-
-#ifdef _DEBUG
-//	sDate += Misc::Format(_T(" (%d)"), (int)date.m_dt);
-#endif
+	BOOL bISODates = HasOption(TCCO_SHOWISODATES);
+	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : (bISODates ? _T("%d") : _T("%#d")));
 
 	// Show the week number on the first of the week -> First column
 	sWeekNum.Empty();

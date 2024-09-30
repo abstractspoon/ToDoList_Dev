@@ -32,6 +32,7 @@ public:
 	const CColorArray& GetColors() const;
 	BOOL SetColors(const CColorArray& aColors);
 	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void SetDisplayISODates(BOOL bISO) { m_bISODates = bISO; }
 
 	BURNDOWN_GRAPHOPTION GetOption() const;
 	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption) const;
@@ -49,12 +50,14 @@ protected:
 	BOOL InitColorPalette(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
 	COLORREF GetColor(int nColor) const;
 	void RecalcDataMinMax(const CHMXDataset datasets[HMX_MAX_DATASET], double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;
+	CString FormatDate(const COleDateTime& date) const;
 
 private:
 	BURNDOWN_GRAPH m_nGraph;
 	BURNDOWN_GRAPHTYPE m_nType;
 	BURNDOWN_GRAPHOPTION m_nOption;
 	CColorArray m_aColors;
+	BOOL m_bISODates;
 
 	mutable double m_dDataMin, m_dDataMax;
 };
@@ -86,6 +89,12 @@ public:
 	CString GetCustomAttributeID(const CGraphBase* pGraph) const;
 
 	BOOL Update(const CCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	void SetDisplayISODates(BOOL bISO);
+	BOOL IsDisplayingISODates() const { return m_bISODates; }
+	
+protected:
+	BOOL m_bISODates;
 
 protected:
 	BOOL AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph);

@@ -59,6 +59,7 @@ namespace KBUtils
 {
 	CString FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	CString FormatDate(const COleDateTime& date, BOOL bISODates);
 
 	UINT GetDisplayFormat(TDC_ATTRIBUTE nAttribID, BOOL bLong);
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID, KBC_ATTRIBLABELS nLabelVis,
@@ -115,8 +116,8 @@ struct KANBANITEM
 
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
-	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const;
-	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const;
+	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, BOOL bISODates = FALSE) const;
+	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, BOOL bISODates = FALSE) const;
 	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
