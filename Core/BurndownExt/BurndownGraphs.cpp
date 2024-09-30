@@ -701,6 +701,14 @@ void CTimeSeriesGraph::RebuildXScale(const CStatsItemCalculator& calculator, int
 	}
 }
 
+void CTimeSeriesGraph::UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const
+{
+	CGraphBase::UpdateDatasetColors(datasets);
+
+	if (GetOption() != BGO_TREND_NONE)
+		CGraphBase::UpdateDatasetColors(&datasets[GetColors().GetSize()]);
+}
+
 BOOL CTimeSeriesGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	return CalculateTrendLines(datasets);

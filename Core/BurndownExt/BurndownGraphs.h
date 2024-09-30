@@ -23,6 +23,8 @@ public:
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
 	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual BOOL HasAxes() const = 0;
+	
+	virtual void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
 	BURNDOWN_GRAPH GetGraph() const { return m_nGraph; }
 	BURNDOWN_GRAPHTYPE GetType() const { return m_nType; }
@@ -31,7 +33,6 @@ public:
 
 	const CColorArray& GetColors() const;
 	BOOL SetColors(const CColorArray& aColors);
-	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	void SetDisplayISODates(BOOL bISO) { m_bISODates = bISO; }
 
 	BURNDOWN_GRAPHOPTION GetOption() const;
@@ -114,6 +115,7 @@ protected:
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
 	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual BOOL HasAxes() const { return TRUE; }
+	virtual void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
 protected:
 	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
