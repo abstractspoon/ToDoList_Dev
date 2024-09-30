@@ -4135,7 +4135,7 @@ int CToDoCtrl::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) 
 
 BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttrib)
 {
-	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIBDEFS));
+	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIB_DEFS));
 
 	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, TRUE))
 	{
@@ -4143,7 +4143,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		OnCustomAttributesChanged();
 
 		// update interface
-		SetModified(TDCA_CUSTOMATTRIBDEFS);
+		SetModified(TDCA_CUSTOMATTRIB_DEFS);
 		UpdateControls(FALSE); // don't update comments
 
 		return TRUE;
@@ -10381,7 +10381,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_PASTE:
 	case TDCA_PROJECTNAME:
 	case TDCA_UNDO:
-	case TDCA_CUSTOMATTRIBDEFS:
+	case TDCA_CUSTOMATTRIB_DEFS:
 	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
 		return TRUE;

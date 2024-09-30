@@ -4843,7 +4843,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 			aColIDs.Copy(m_mapVisibleCols);
 			break;
 
-		case TDCA_CUSTOMATTRIBDEFS:
+		case TDCA_CUSTOMATTRIB_DEFS:
 			// Handled in OnCustomAttributeChange
 			break;
 
@@ -5056,10 +5056,10 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCA
 		}
 		break;
 
-	case TDCA_CUSTOMATTRIBDEFS: // ------------------------------------------------
+	case TDCA_CUSTOMATTRIB_DEFS: // ------------------------------------------------
 		// Special case: We replace the definition 
 		// attribute with the value attribute
-		mapAttribIDs.Remove(TDCA_CUSTOMATTRIBDEFS);
+		mapAttribIDs.Remove(TDCA_CUSTOMATTRIB_DEFS);
 		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
 		break;
 
