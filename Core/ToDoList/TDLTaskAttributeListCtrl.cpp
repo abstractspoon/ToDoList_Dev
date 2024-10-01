@@ -1484,70 +1484,73 @@ BOOL CTDLTaskAttributeListCtrl::DrawButton(CDC* pDC, int nRow, int nCol, const C
 	DWORD dwBaseState = CInputListCtrl::GetButtonState(nRow, nCol, bSelected);
 	CRect rCellBtn(rBtn);
 
-	switch (nAttribID)
+	if (nType == ILCT_CHECK)
 	{
-	case TDCA_DEPENDENCY:
-		DrawIconButton(pDC, nAttribID, ID_BTN_VIEWDEPENDS, sText, dwBaseState, rCellBtn);
-		break;		// Browse button drawn at bottom
-
-	case TDCA_FILELINK:
+		if (RowValueVaries(nRow))
 		{
-			DrawIconButton(pDC, nAttribID, ID_BTN_VIEWFILE, sText, dwBaseState, rCellBtn);
-
-			if (sText.IsEmpty())
-				return DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
-			
-			// else
-			DrawIconButton(pDC, nAttribID, ID_BTN_BROWSEFILE, sText, dwBaseState, rCellBtn);
+			dwBaseState |= DFCS_MIXED;
 		}
-		break; // Combo button drawn at bottom
-
-	case TDCA_TIMESPENT:
+		else if (!sText.IsEmpty())
 		{
-			DrawIconButton(pDC, nAttribID, ID_BTN_TIMETRACK, sText, dwBaseState, rCellBtn);
-			DrawIconButton(pDC, nAttribID, ID_BTN_ADDLOGGEDTIME, sText, dwBaseState, rCellBtn);
-
-			// Time units button drawn at bottom
-			dwBaseState = GetButtonState(nAttribID, ID_BTN_DEFAULT, sText, dwBaseState);
+			dwBaseState |= DFCS_CHECKED;
 		}
-		break;
-
-	case TDCA_ICON:
-	case TDCA_REMINDER:
-		DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
-		return TRUE;
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	}
+	else
+	{
+		switch (nAttribID)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+		case TDCA_DEPENDENCY:
+			DrawIconButton(pDC, nAttribID, ID_BTN_VIEWDEPENDS, sText, dwBaseState, rCellBtn);
+			break;		// Browse button drawn at bottom
 
-			switch (pDef->GetDataType())
+		case TDCA_FILELINK:
 			{
-			case TDCCA_FILELINK:
 				DrawIconButton(pDC, nAttribID, ID_BTN_VIEWFILE, sText, dwBaseState, rCellBtn);
-				DrawIconButton(pDC, nAttribID, ID_BTN_BROWSEFILE, sText, dwBaseState, rCellBtn);
-				return TRUE;
 
-			case TDCCA_ICON:
-				if (!pDef->IsList())
+				if (sText.IsEmpty())
 					return DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
-				break;
+			
+				// else
+				DrawIconButton(pDC, nAttribID, ID_BTN_BROWSEFILE, sText, dwBaseState, rCellBtn);
 			}
-		}
-		else if (nType == ILCT_CHECK)
-		{
-			if (RowValueVaries(nRow))
+			break; // Combo button drawn at bottom
+
+		case TDCA_TIMESPENT:
 			{
-				dwBaseState |= DFCS_MIXED;
+				DrawIconButton(pDC, nAttribID, ID_BTN_TIMETRACK, sText, dwBaseState, rCellBtn);
+				DrawIconButton(pDC, nAttribID, ID_BTN_ADDLOGGEDTIME, sText, dwBaseState, rCellBtn);
+
+				// Time units button drawn at bottom
+				dwBaseState = GetButtonState(nAttribID, ID_BTN_DEFAULT, sText, dwBaseState);
 			}
-			else if (!sText.IsEmpty())
+			break;
+
+		case TDCA_ICON:
+		case TDCA_REMINDER:
+			DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
+			return TRUE;
+
+		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
-				dwBaseState |= DFCS_CHECKED;
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+				switch (pDef->GetDataType())
+				{
+				case TDCCA_FILELINK:
+					DrawIconButton(pDC, nAttribID, ID_BTN_VIEWFILE, sText, dwBaseState, rCellBtn);
+					DrawIconButton(pDC, nAttribID, ID_BTN_BROWSEFILE, sText, dwBaseState, rCellBtn);
+					return TRUE;
+
+				case TDCCA_ICON:
+					if (!pDef->IsList())
+						return DrawIconButton(pDC, nAttribID, ID_BTN_DEFAULT, sText, dwBaseState, rCellBtn);
+					break;
+				}
 			}
+			break;
 		}
-		break;
 	}
 
 	// All else
