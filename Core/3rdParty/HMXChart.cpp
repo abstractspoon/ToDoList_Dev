@@ -23,6 +23,7 @@ static char THIS_FILE[] = __FILE__;
 #define HMX_AREA_XAXIS		10		// percentage
 #define HMX_AREA_MINAXIS	50		// pixels
 #define HMX_XSCALE_OFFSET   14		// pixels
+#define HMX_GRAPH_MARGINS	15		// pixels
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -400,8 +401,10 @@ BOOL CHMXChart::DrawAxes(CDC &dc)
 	// draw X
 	if (m_dwRenderFlags & HMX_RENDER_XAXIS)
 	{
-		dc.MoveTo(m_rectXAxis.left, m_rectXAxis.top);
-		dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
+		int nVPos = (m_rectData.bottom - (int)CalcRelativeYValue(0.0));
+
+		dc.MoveTo(m_rectXAxis.left, nVPos);
+		dc.LineTo(m_rectXAxis.right, nVPos);
 	}
 	
 	if (m_dwRenderFlags & (HMX_RENDER_XAXISSCALE | HMX_RENDER_XAXISTITLE))
@@ -428,7 +431,7 @@ BOOL CHMXChart::DrawHorzGridLines(CDC & dc)
 	if(!nTicks)
 		return FALSE;
 
-	double dY = ((m_dYMax - m_dYMin)/(double)nTicks);
+	double dY = ((m_dYMax - m_dYMin) / nTicks);
 
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
@@ -437,7 +440,7 @@ BOOL CHMXChart::DrawHorzGridLines(CDC & dc)
 
 	for(int f=0; f<=nTicks; f++) 
 	{
-		double dTemp = m_rectData.bottom - CalcRelativeYValue(m_dYMin + (dY*f));
+		double dTemp = m_rectData.bottom - (int)CalcRelativeYValue(m_dYMin + (dY*f));
 
 		dc.MoveTo(m_rectData.left , (int)dTemp);
 		dc.LineTo(m_rectData.right, (int)dTemp);
@@ -1620,15 +1623,13 @@ BOOL CHMXChart::CalcDatas()
 	}
 
 	// prevent divide by zero
-	if (m_dYMax == 0.0)
+	if (m_dYMax == m_dYMin)
 		m_dYMax = (m_dYMin + 10);
 
 	GetClientRect(m_rectArea);
 
-	int nMargin = 15/*(max(m_rectArea.Height(), m_rectArea.Width()) / HMX_AREA_MARGINS)*/;
-
 	m_rectUsable = m_rectArea;
-	m_rectUsable.DeflateRect(nMargin, nMargin);
+	m_rectUsable.DeflateRect(HMX_GRAPH_MARGINS, HMX_GRAPH_MARGINS);
 
 	// let's calc everything
 	m_rectGraph = m_rectUsable;
