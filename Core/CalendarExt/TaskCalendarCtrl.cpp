@@ -1706,9 +1706,11 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 
 			pTCI->Dates().Custom().GetNextAssoc(posDate, sCustAttribID, date);
 
-			if ((date.m_dt >= dStart) && (date.m_dt < dEnd))
+			if (HasOption(TCCO_TREATOVERDUEASDUETODAY) || (date.m_dt >= dStart) && (date.m_dt < dEnd))
 			{
 				TASKCALCUSTOMDATE* pTCIDate = new TASKCALCUSTOMDATE(*pTCI, dwNextExtID, sCustAttribID, date);
+				pTCIDate->RecalcDates(m_dwOptions);
+
 				m_mapExtensionItems[dwNextExtID++] = pTCIDate;
 			}
 		}
