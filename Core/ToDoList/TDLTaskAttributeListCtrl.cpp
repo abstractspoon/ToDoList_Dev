@@ -2397,7 +2397,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_FRACTION:
-					m_editBox.SetMask(_T("0123456789/"));
+					m_editBox.SetMask(_T("-0123456789/"));
 					break;
 
 				case TDCCA_INTEGER:
@@ -2407,7 +2407,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 					break;
 
 				case TDCCA_DOUBLE:
-					m_editBox.SetMask(_T("0123456789."), ME_LOCALIZEDECIMAL);
+					m_editBox.SetMask(_T("-0123456789."), ME_LOCALIZEDECIMAL);
 					break;
 
 				case TDCCA_STRING:
