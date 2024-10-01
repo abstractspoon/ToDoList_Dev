@@ -46,7 +46,7 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 
 	// Find the first interval that gives us a range
 	// greater than or equal to dDataMax
-	const double INTERVAL[] = { 1.0, 2.0, 2.5, 5.0 };
+	const double INTERVAL[] = { 0.1, 0.2, 0.25, 0.5, 1.0, 2.0, 2.5, 5.0 };
 	const int NUM_INT = (sizeof(INTERVAL) / sizeof(INTERVAL[0]));
 
 	for (int nInt = 0; nInt < NUM_INT; nInt++)
