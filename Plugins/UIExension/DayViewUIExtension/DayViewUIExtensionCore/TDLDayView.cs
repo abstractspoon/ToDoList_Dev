@@ -47,6 +47,7 @@ namespace DayViewUIExtension
 		private bool m_HideTasksSpanningWeekends = false;
 		private bool m_HideTasksSpanningDays = false;
 		private bool m_ShowFutureOcurrences = true;
+		private bool m_TreatOverdueTasksAsDueToday = false;
 
 		private TaskItems m_TaskItems;
 		private DateSortedTasks m_DateSortedTasks;
@@ -360,6 +361,19 @@ namespace DayViewUIExtension
 				if (value != m_ShowFutureOcurrences)
 				{
 					m_ShowFutureOcurrences = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool TreatOverdueTasksAsDueToday
+		{
+			get { return m_TreatOverdueTasksAsDueToday; }
+			set
+			{
+				if (value != m_TreatOverdueTasksAsDueToday)
+				{
+					m_TreatOverdueTasksAsDueToday = value;
 					Invalidate();
 				}
 			}
