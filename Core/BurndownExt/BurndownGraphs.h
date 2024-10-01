@@ -25,11 +25,11 @@ public:
 	virtual BOOL HasAxes() const = 0;
 	
 	virtual void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	virtual BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 	BURNDOWN_GRAPH GetGraph() const { return m_nGraph; }
 	BURNDOWN_GRAPHTYPE GetType() const { return m_nType; }
 	BOOL HasType(BURNDOWN_GRAPHTYPE nType) const { return (m_nType == nType); }
-	BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 	const CColorArray& GetColors() const;
 	BOOL SetColors(const CColorArray& aColors);
@@ -116,6 +116,7 @@ protected:
 	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual BOOL HasAxes() const { return TRUE; }
 	virtual void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	virtual BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 protected:
 	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
@@ -247,6 +248,7 @@ protected:
 	virtual BOOL UpdateGraphStyles(CHMXDataset& dataset) const;
 	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual BOOL HasAxes() const;
+	virtual BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 private:
 	mutable CStringArray m_aAttribValues;
@@ -370,6 +372,7 @@ protected:
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
 	virtual BOOL OnOptionChanged(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual BOOL HasAxes() const { return TRUE; }
+	virtual BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 protected:
 	mutable int m_nItemOffset;
@@ -408,6 +411,7 @@ protected:
 	virtual CString GetTitle() const;
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
+	virtual BOOL GetDataMinMax(double& dMin, double& dMax) const;
 
 protected:
 	enum
@@ -445,6 +449,7 @@ protected:
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	virtual BOOL GetDataMinMax(double& dMin, double& dMax) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

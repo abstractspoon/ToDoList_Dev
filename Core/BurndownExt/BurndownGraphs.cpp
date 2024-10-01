@@ -712,6 +712,15 @@ void CTimeSeriesGraph::UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]
 	}
 }
 
+BOOL CTimeSeriesGraph::GetDataMinMax(double& dMin, double& dMax) const
+{
+	if (!CGraphBase::GetDataMinMax(dMin, dMax))
+		return FALSE;
+
+	dMin = 0.0;
+	return TRUE;
+}
+
 BOOL CTimeSeriesGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	return CalculateTrendLines(datasets);
@@ -781,7 +790,6 @@ void CIncompleteTasksTimeGraph::BuildGraph(const CStatsItemCalculator& calculato
 
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[0].SetMin(0.0);
 
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -850,11 +858,9 @@ void CRemainingDaysTimeGraph::BuildGraph(const CStatsItemCalculator& calculator,
 
 	datasets[REMAINING_ESTIMATE].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[REMAINING_ESTIMATE].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[REMAINING_ESTIMATE].SetMin(0.0);
 	
 	datasets[REMAINING_SPENT].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[REMAINING_SPENT].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[REMAINING_SPENT].SetMin(0.0);
 	
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -929,11 +935,9 @@ void CStartedEndedTasksTimeGraph::BuildGraph(const CStatsItemCalculator& calcula
 
 	datasets[STARTED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[STARTED_TASKS].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[STARTED_TASKS].SetMin(0.0);
 
 	datasets[ENDED_TASKS].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[ENDED_TASKS].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[ENDED_TASKS].SetMin(0.0);
 
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -1012,11 +1016,9 @@ void CEstimatedSpentDaysTimeGraph::BuildGraph(const CStatsItemCalculator& calcul
 
 	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[ESTIMATED_DAYS].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[ESTIMATED_DAYS].SetMin(0.0);
 
 	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[SPENT_DAYS].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[SPENT_DAYS].SetMin(0.0);
 
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -1095,11 +1097,9 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 
 	datasets[ESTIMATED_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[ESTIMATED_COST].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[ESTIMATED_COST].SetMin(0.0);
 
 	datasets[SPENT_COST].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[SPENT_COST].SetSize(GRAPH_LINE_THICKNESS);
-	datasets[SPENT_COST].SetMin(0.0);
 
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -1186,15 +1186,12 @@ void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aF
 
 	if (nNumAttrib)
 	{
-		CHMXDataset& dataset = datasets[0];
-
-		dataset.SetMin(0.0);
-		dataset.SetDatasetSize(nNumAttrib);
+		datasets[0].SetDatasetSize(nNumAttrib);
 
 		for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 		{
 			const FREQUENCYITEM& fi = aFrequencies[nAtt];
-			dataset.SetData(nAtt, fi.nCount);
+			datasets[0].SetData(nAtt, fi.nCount);
 
 			if (fi.sLabel.IsEmpty())
 				m_aAttribValues.Add(CEnString(IDS_NONE));
@@ -1202,10 +1199,19 @@ void CFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aF
 				m_aAttribValues.Add(fi.sLabel);
 		}
 
-		UpdateGraphStyles(dataset);
+		UpdateGraphStyles(datasets[0]);
 	}
 
 	RecalcDataMinMax(datasets);
+}
+
+BOOL CFrequencyGraph::GetDataMinMax(double& dMin, double& dMax) const
+{
+	if (!CGraphBase::GetDataMinMax(dMin, dMax))
+		return FALSE;
+
+	dMin = 0.0;
+	return TRUE;
 }
 
 CString CFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -1548,6 +1554,15 @@ BOOL CMinMaxGraph::OnOptionChanged(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset
 	return FALSE;
 }
 
+BOOL CMinMaxGraph::GetDataMinMax(double& dMin, double& dMax) const
+{
+	if (!CGraphBase::GetDataMinMax(dMin, dMax))
+		return FALSE;
+
+	dMin = 0.0;
+	return TRUE;
+}
+
 // ---------------------------------------------------------------------------
 
 CEstimatedSpentDaysMinMaxGraph::CEstimatedSpentDaysMinMaxGraph()
@@ -1569,12 +1584,10 @@ void CEstimatedSpentDaysMinMaxGraph::BuildGraph(const CStatsItemCalculator& calc
 	datasets[ESTIMATED_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
 	datasets[ESTIMATED_DAYS].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[ESTIMATED_DAYS].SetMarker(HMX_DATASET_MARKER_CIRCLE);
-	datasets[ESTIMATED_DAYS].SetMin(0.0);
 
 	datasets[SPENT_DAYS].SetStyle(HMX_DATASET_STYLE_MINMAX);
 	datasets[SPENT_DAYS].SetSize(GRAPH_LINE_THICKNESS);
 	datasets[SPENT_DAYS].SetMarker(HMX_DATASET_MARKER_CIRCLE);
-	datasets[SPENT_DAYS].SetMin(0.0);
 
 	// build the graph
 	int nFrom, nTo;
@@ -1666,6 +1679,12 @@ void CDueDoneDatesMinMaxGraph::BuildGraph(const CStatsItemCalculator& calculator
 	RecalcDataMinMax(datasets, 0.0); // Ignore unset dates
 }
 
+BOOL CDueDoneDatesMinMaxGraph::GetDataMinMax(double& dMin, double& dMax) const
+{
+	// Bypass CMinMaxGraph
+	return CGraphBase::GetDataMinMax(dMin, dMax);
+}
+
 CString CDueDoneDatesMinMaxGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset /*datasets*/[HMX_MAX_DATASET], int nHit) const
 {
 	int nItem = (nHit + m_nItemOffset);
@@ -1722,7 +1741,6 @@ void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& cal
 
 	datasets[0].SetStyle(HMX_DATASET_STYLE_AREALINE);
 	datasets[0].SetSize(GRAPH_LINE_THICKNESS);
-	// Note: we calculate the appropriate baseline after we know the data extents
 
 	// build the graph
 	int nNumDays = calculator.GetTotalDays();
@@ -1743,20 +1761,24 @@ void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& cal
 	}
 
 	RecalcDataMinMax(datasets);
+}
 
-	double dMin, dMax;
+BOOL CCustomAttributeTimeSeriesGraph::GetDataMinMax(double& dMin, double& dMax) const
+{
+	// Bypass CMinMaxGraph
+	if (!CGraphBase::GetDataMinMax(dMin, dMax))
+		return FALSE;
 
-	if (GetDataMinMax(dMin, dMax))
+	if ((dMin > 0.0) && (dMax > 0.0))
 	{
-		if ((dMin > 0.0) && (dMax > 0.0))
-		{
-			datasets[0].SetMin(0.0);
-		}
-		else if ((dMin < 0.0) && (dMax < 0.0))
-		{
-			datasets[0].SetMax(0.0);
-		}
+		dMin = 0.0;
 	}
+	else if ((dMin < 0.0) && (dMax < 0.0))
+	{
+		dMax = 0.0;
+	}
+
+	return TRUE;
 }
 
 CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const

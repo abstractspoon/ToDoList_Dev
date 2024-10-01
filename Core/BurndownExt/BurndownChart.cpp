@@ -248,20 +248,8 @@ BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) c
 	if (!m_pGraph->GetDataMinMax(dMin, dMax) || (dMin > dMax))
 		return FALSE;
 
-	switch (m_pGraph->GetGraph())
-	{
-	case BCG_MINMAX_DUEDONEDATES:
-		{
-			double dDiff = max(10.0, (dMax - dMin));
-			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
-		}
-		break;
-
-	default: // All else
-		dMin = 0.0;
-		dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
-		break;
-	}
+	double dDiff = max(1.0, (dMax - dMin));
+	dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
 
 	return TRUE;
 }
