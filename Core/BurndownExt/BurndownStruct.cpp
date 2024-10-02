@@ -536,7 +536,7 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomA
 	sPriority = pTasks->GetTaskAttribute(hTask, TDCA_PRIORITY, false, true);
 	sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
 
-	GetCustomAttributes(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
+	GetCustomAttributeValues(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
 }
 
 void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef)
@@ -594,7 +594,7 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCust
 		sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
 
 	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
-		GetCustomAttributes(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
+		GetCustomAttributeValues(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
 }
 
 void STATSITEM::ValidateStartDate()
@@ -606,7 +606,7 @@ void STATSITEM::ValidateStartDate()
 		CDateHelper::Min(dtStart, dtDue);
 }
 
-void STATSITEM::GetCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues)
+void STATSITEM::GetCustomAttributeValues(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues)
 {
 	mapValues.RemoveAll();
 

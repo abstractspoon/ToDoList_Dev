@@ -188,7 +188,7 @@ protected:
 
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
 
-	static void GetCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues);
+	static void GetCustomAttributeValues(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues);
 	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
 	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static COleDateTime GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
