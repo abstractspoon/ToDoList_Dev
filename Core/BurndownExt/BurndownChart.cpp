@@ -210,10 +210,6 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 		{
 		case BCG_MINMAX_DUEDONEDATES:
 			return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
-
-		default:
-			if (IsCustomAttributeGraph(nGraph) && m_pGraph->HasType(BCT_TIMESERIES))
-				return Misc::Format(dValue, 0);
 		}
 	}
 
@@ -287,7 +283,6 @@ BOOL CBurndownChart::CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) con
 			dMax = HMXUtils::CalcMaxYAxisValue(dMax, nNumYTicks);
 
 			double dTick = (dMax / nNumYTicks);
-			ASSERT(dTick == (int)dTick);
 
 			nOtherTicks = (int)((-dMin / dTick) + 1);
 			dMin = (-nOtherTicks * dTick);
@@ -297,7 +292,6 @@ BOOL CBurndownChart::CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) con
 			dMin = -HMXUtils::CalcMaxYAxisValue(-dMin, nNumYTicks);
 
 			double dTick = (-dMin / DEFAULT_NUMYTICKS); // +ve
-			ASSERT(dTick == (int)dTick);
 
 			nOtherTicks = (int)((dMax / dTick) + 1);
 			dMax = (nOtherTicks * dTick);
