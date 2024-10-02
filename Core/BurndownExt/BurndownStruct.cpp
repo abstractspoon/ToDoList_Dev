@@ -608,8 +608,6 @@ void STATSITEM::ValidateStartDate()
 
 void STATSITEM::GetCustomAttributeValues(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues)
 {
-//	mapValues.RemoveAll();
-
 	int nDef = aCustAttribDef.GetSize();
 
 	while (nDef--)

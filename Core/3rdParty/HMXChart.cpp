@@ -1734,7 +1734,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			}
 		}
 
-		if ((m_nNumYTicks > 0) && HasRenderFlag(HMX_RENDER_YAXISSCALE))
+		if ((GetNumYTicks() > 0) && HasRenderFlag(HMX_RENDER_YAXISSCALE))
 		{
 			CFont font;
 			VERIFY(CreateYAxisFont(FALSE, font));

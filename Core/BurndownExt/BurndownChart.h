@@ -47,7 +47,9 @@ protected:
 
 protected:
 	void RebuildXScale();
+	void RecalcNumYTicks();
 	void RefreshRenderFlags(BOOL bRedraw = TRUE);
+	BOOL CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) const;
 
 	// CHMXChart overrides
 	virtual CString GetTooltip(int nHit) const;
