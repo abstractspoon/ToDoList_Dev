@@ -1861,15 +1861,16 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 		while (posTask)
 		{
 			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
+			CDWordArray aSelModTaskIDs;
 
 			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
 												 nDate,
 												 nAmount,
 												 nUnits,
 												 dwFlags,
-												 aDateModTaskIDs);
+												 aSelModTaskIDs);
 
-			HandleModResult(dwTaskID, nRes, aDateModTaskIDs);
+			aDateModTaskIDs.Append(aSelModTaskIDs);
 		}
 
 		if (aDateModTaskIDs.GetSize())
