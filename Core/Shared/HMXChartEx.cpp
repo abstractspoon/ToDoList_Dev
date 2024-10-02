@@ -8,6 +8,7 @@
 #include "Mapex.h"
 #include "Themed.h"
 #include "OSVersion.h"
+#include "Misc.h"
 
 #include <math.h>
 
@@ -142,7 +143,14 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 
 BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
-	double dInterval = HMXUtils::CalcYAxisInterval((m_dYMax - m_dYMin), 10);
+	double dMin, dMax;
+
+	if (!GetMinMax(dMin, dMax, FALSE))
+		return FALSE;
+
+	double dRange = (dMax - dMin);
+	double dInterval = HMXUtils::CalcYAxisInterval(dRange, 10);
+
 	int nNumSubTicks = GetNumYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)
@@ -151,16 +159,16 @@ BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 		CPen* pPenOld = dc.SelectObject(&penSubGrid);
 
 		int nTotalTicks = (GetNumYTicks() * nNumSubTicks);
-		double nY = ((m_dYMax - m_dYMin) / nTotalTicks);
+		double nY = (dRange / nTotalTicks);
 
 		for (int f = 0; f <= nTotalTicks; f++)
 		{
 			if (f % nNumSubTicks)
 			{
-				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_dYMax - m_dYMin);
+				int nVPos = Misc::Round(m_rectData.bottom - (((nY*f) * m_rectData.Height()) / dRange));
 
-				dc.MoveTo(m_rectData.left, (int)nTemp);
-				dc.LineTo(m_rectData.right, (int)nTemp);
+				dc.MoveTo(m_rectData.left, nVPos);
+				dc.LineTo(m_rectData.right, nVPos);
 			}
 		}
 
