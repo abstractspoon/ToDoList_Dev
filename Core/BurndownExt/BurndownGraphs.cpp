@@ -1781,7 +1781,7 @@ BOOL CCustomAttributeTimeSeriesGraph::GetDataMinMax(double& dMin, double& dMax) 
 	return TRUE;
 }
 
-CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
+CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
 	ASSERT(nHit != -1);
 
@@ -1789,7 +1789,10 @@ CString CCustomAttributeTimeSeriesGraph::GetTooltip(const CStatsItemCalculator& 
 	CString sTooltip;
 
 	if (datasets[0].GetData(nHit, dValue))
-		sTooltip.Format(_T("%s\n%s"), m_custDefinition.sLabel, Misc::Format(dValue));
+	{
+		double dDate = (calculator.GetStartDate() + nHit);
+		sTooltip.Format(_T("%s\n%s"), CDateHelper::FormatDate(dDate), Misc::Format(dValue));
+	}
 
 	return sTooltip;
 }
