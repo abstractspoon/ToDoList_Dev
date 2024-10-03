@@ -5,6 +5,7 @@
 #include "BurndownGraphs.h"
 
 #include "..\Shared\HMXChartEx.h"
+#include "..\shared\datehelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -23,10 +24,10 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
-	BOOL SetActiveGraph(const CGraphBase* pGraph);
-	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
+	BOOL SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild = TRUE);
+	void SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild = TRUE);
 
-	void OnColoursChanged();
+	void OnColorsChanged();
 	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);
 	void OnDisplayISODatesChanged();
 
@@ -46,7 +47,9 @@ protected:
 
 protected:
 	void RebuildXScale();
+	void RecalcNumYTicks();
 	void RefreshRenderFlags(BOOL bRedraw = TRUE);
+	BOOL CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) const;
 
 	// CHMXChart overrides
 	virtual CString GetTooltip(int nHit) const;

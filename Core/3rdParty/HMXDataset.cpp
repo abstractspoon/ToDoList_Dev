@@ -28,16 +28,13 @@ CHMXDataset::~CHMXDataset()
 
 void CHMXDataset::Reset()
 {
-	m_data.RemoveAll();
+	ClearData();
 
 	m_nSize = 2;
 	m_nStyle = HMX_DATASET_STYLE_LINE;
 	m_crLine = RGB(0, 0, 0);
 	m_crFill = CLR_NONE;
 	m_nMarker = HMX_DATASET_MARKER_NONE;
-
-	m_bSetMinTo = m_bSetMaxTo = FALSE;
-	m_dSetMinTo = m_dSetMaxTo = -1;
 }
 
 void CHMXDataset::Copy(const CHMXDataset& other)
