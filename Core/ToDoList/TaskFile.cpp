@@ -1352,6 +1352,11 @@ unsigned long CTaskFile::GetCustomAttributeType(int nIndex) const
 	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBTYPE));
 }
 
+unsigned long CTaskFile::GetCustomAttributeFeatures(int nIndex) const
+{
+	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBFEATURES));
+}
+
 LPCTSTR CTaskFile::GetCustomAttributeListData(int nIndex) const
 {
 	return GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBLISTDATA);
@@ -1690,8 +1695,12 @@ bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
 		return (nAttribID == TDCA_NONE);
 
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
-		return true;
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) ||
+		 (nAttribID == TDCA_CUSTOMATTRIB_DEFS))
+	{
+		if (m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
+			return true;
+	}
 
 	return (m_mapReadableAttrib.Has(nAttribID) != FALSE);
 }

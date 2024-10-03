@@ -1861,15 +1861,16 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 		while (posTask)
 		{
 			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
+			CDWordArray aSelModTaskIDs;
 
 			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
 												 nDate,
 												 nAmount,
 												 nUnits,
 												 dwFlags,
-												 aDateModTaskIDs);
+												 aSelModTaskIDs);
 
-			HandleModResult(dwTaskID, nRes, aDateModTaskIDs);
+			aDateModTaskIDs.Append(aSelModTaskIDs);
 		}
 
 		if (aDateModTaskIDs.GetSize())
@@ -9923,7 +9924,11 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			}
 			
 			// update current selection
+			m_taskTree.CacheSelection(cache);
+
+			m_ctrlAttributes.SetSelectedTaskIDs(cache.aSelTaskIDs);
 			m_ctrlAttributes.RefreshSelectedTasksValues();
+
 			UpdateControls();
 
 			// If the operation just un/redone was an edit then we treat it as such
@@ -10260,10 +10265,14 @@ BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dw
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const 
 { 
+	if (!GetTaskCount())
+		return CanEditTask(0, nAttribID);
+
+	// else
 	if (dwTaskID)
 		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
 
-	// else look for first UNLOCKED task
+	// else look for first editable task
 	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
@@ -10280,7 +10289,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (IsReadOnly())
 		return FALSE;
 
-	BOOL bLockedTask = m_calculator.IsTaskLocked(dwTaskID);
+	BOOL bEditableTask = (dwTaskID && !m_calculator.IsTaskLocked(dwTaskID));
 
 	switch (nAttribID)
 	{
@@ -10288,7 +10297,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return FALSE;
 
 	case TDCA_PERCENT:
-		if (bLockedTask)
+		if (!bEditableTask)
 		{
 			return FALSE;
 		}
@@ -10331,11 +10340,11 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_TASKNAME:		
 	case TDCA_TASKNAMEORCOMMENTS:		
 	case TDCA_VERSION:		
-		return (bLockedTask == FALSE);
+		return bEditableTask;
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		if (bLockedTask)
+		if (!bEditableTask)
 		{
 			return FALSE;
 		}
@@ -10347,7 +10356,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 	case TDCA_STARTDATE:
 	case TDCA_STARTTIME:
-		if (bLockedTask)
+		if (!bEditableTask)
 		{
 			return FALSE;
 		}
@@ -10365,7 +10374,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return TRUE;
 
 	case TDCA_DELETE:
-		if (bLockedTask && !m_data.IsTaskReference(dwTaskID))
+		if (!bEditableTask && !m_data.IsTaskReference(dwTaskID))
 		{
 			// Can't delete locked tasks unless they are references
 			return FALSE;
@@ -10391,7 +10400,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			return !bLockedTask;
+			return bEditableTask;
 		break;
 	}
 

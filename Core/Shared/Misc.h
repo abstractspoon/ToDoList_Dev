@@ -546,7 +546,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, keySrc, valueSrc);
 				
-				if (!map2.Lookup(keySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(keySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}
@@ -570,7 +570,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, sKeySrc, valueSrc);
 
-				if (!map2.Lookup(sKeySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(sKeySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}
