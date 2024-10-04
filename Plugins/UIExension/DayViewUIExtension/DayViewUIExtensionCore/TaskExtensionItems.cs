@@ -58,7 +58,7 @@ namespace DayViewUIExtension
 			Locked = item.Locked;
 
 			if (EndDate == EndDate.Date)
-				EndDate = EndDate.AddSeconds(-1);
+				EndDate = EndDate.AddSeconds(-1); // end of day before
 		}
 
 		public override bool IsLongAppt(DateTime start, DateTime end)

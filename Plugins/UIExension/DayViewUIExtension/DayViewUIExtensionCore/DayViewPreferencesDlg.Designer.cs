@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewPreferencesDlg));
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.m_ShowWorkingHoursOnly = new System.Windows.Forms.CheckBox();
 			this.m_ShowActiveToday = new System.Windows.Forms.CheckBox();
@@ -47,6 +46,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.BtnOK = new System.Windows.Forms.Button();
+			this.m_TreatOverdueTasksAsDueToday = new System.Windows.Forms.CheckBox();
 			this.panel1.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
@@ -59,6 +59,7 @@
 			this.panel1.AutoScroll = true;
 			this.panel1.BackColor = System.Drawing.SystemColors.Window;
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panel1.Controls.Add(this.m_TreatOverdueTasksAsDueToday);
 			this.panel1.Controls.Add(this.m_ShowWorkingHoursOnly);
 			this.panel1.Controls.Add(this.m_ShowActiveToday);
 			this.panel1.Controls.Add(this.m_DisplayDiscontinuous);
@@ -70,14 +71,14 @@
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(501, 344);
+			this.panel1.Size = new System.Drawing.Size(501, 379);
 			this.panel1.TabIndex = 2;
 			// 
-			// ShowWorkingHoursOnly
+			// m_ShowWorkingHoursOnly
 			// 
 			this.m_ShowWorkingHoursOnly.AutoSize = true;
 			this.m_ShowWorkingHoursOnly.Location = new System.Drawing.Point(13, 109);
-			this.m_ShowWorkingHoursOnly.Name = "ShowWorkingHoursOnly";
+			this.m_ShowWorkingHoursOnly.Name = "m_ShowWorkingHoursOnly";
 			this.m_ShowWorkingHoursOnly.Size = new System.Drawing.Size(138, 17);
 			this.m_ShowWorkingHoursOnly.TabIndex = 7;
 			this.m_ShowWorkingHoursOnly.Text = "Hide non-working hours";
@@ -119,7 +120,7 @@
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningWeekends);
 			this.groupBox1.Controls.Add(this.m_HideTasksWithoutTimes);
 			this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.groupBox1.Location = new System.Drawing.Point(13, 141);
+			this.groupBox1.Location = new System.Drawing.Point(13, 161);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(475, 187);
 			this.groupBox1.TabIndex = 5;
@@ -253,7 +254,7 @@
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(435, 366);
+			this.BtnCancel.Location = new System.Drawing.Point(435, 401);
 			this.BtnCancel.Name = "BtnCancel";
 			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 1;
@@ -264,7 +265,7 @@
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(353, 366);
+			this.BtnOK.Location = new System.Drawing.Point(353, 401);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -272,17 +273,27 @@
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
+			// m_TreatOverdueTasksAsDueToday
+			// 
+			this.m_TreatOverdueTasksAsDueToday.AutoSize = true;
+			this.m_TreatOverdueTasksAsDueToday.Location = new System.Drawing.Point(13, 132);
+			this.m_TreatOverdueTasksAsDueToday.Name = "m_TreatOverdueTasksAsDueToday";
+			this.m_TreatOverdueTasksAsDueToday.Size = new System.Drawing.Size(222, 17);
+			this.m_TreatOverdueTasksAsDueToday.TabIndex = 8;
+			this.m_TreatOverdueTasksAsDueToday.Text = "Treat overdue tasks as being due \'Today\'";
+			this.m_TreatOverdueTasksAsDueToday.UseVisualStyleBackColor = true;
+			// 
 			// DayViewPreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(520, 398);
+			this.ClientSize = new System.Drawing.Size(520, 433);
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.dayview;
+			this.Icon = global::DayViewUIExtension.Properties.Resources.dayview;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DayViewPreferencesDlg";
@@ -317,5 +328,6 @@
 		private System.Windows.Forms.CheckBox m_HideParentTasksByTag;
 		private System.Windows.Forms.CheckBox m_ShowActiveToday;
 		private System.Windows.Forms.CheckBox m_ShowWorkingHoursOnly;
+		private System.Windows.Forms.CheckBox m_TreatOverdueTasksAsDueToday;
 	}
 }

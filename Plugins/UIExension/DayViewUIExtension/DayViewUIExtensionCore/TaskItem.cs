@@ -217,7 +217,7 @@ namespace DayViewUIExtension
 
 		public override DateTime EndDate
 		{
-			get { return (TreatAsDueToday ? DateTime.Now.Date.AddDays(1) : base.EndDate); }
+			get { return (TreatAsDueToday ? DateTime.Now.Date.AddDays(1).AddSeconds(-1) : base.EndDate); }
 
 			set
 			{

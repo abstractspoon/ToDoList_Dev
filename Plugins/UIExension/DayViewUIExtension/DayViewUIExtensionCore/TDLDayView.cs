@@ -1107,7 +1107,7 @@ namespace DayViewUIExtension
 				DateTime endDate = SelectedDates.End;
 
 				if (TaskItem.IsStartOfDay(endDate))
-					endDate = endDate.AddSeconds(-1);
+					endDate = endDate.AddSeconds(-1); // end of day before
 
 				task.SetDueDate(endDate);
 			}
