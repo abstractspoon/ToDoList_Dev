@@ -215,9 +215,14 @@ namespace DayViewUIExtension
 			}
 		}
 
+		static DateTime EndOfDay(DateTime date)
+		{
+			return date.Date.AddDays(1).AddSeconds(-1);
+		}
+
 		public override DateTime EndDate
 		{
-			get { return (TreatAsDueToday ? DateTime.Now.Date.AddDays(1).AddSeconds(-1) : base.EndDate); }
+			get { return (TreatAsDueToday ? EndOfDay(DateTime.Now) : base.EndDate); }
 
 			set
 			{
@@ -232,8 +237,7 @@ namespace DayViewUIExtension
 				return;
 
 			// Prevent end date being set to exactly midnight
-			if ((EndDate != NullDate) && (EndDate == EndDate.Date))
-				EndDate = EndDate.AddSeconds(-1);
+			EndDate = CheckGetEndOfDay(EndDate);
 		}
 
 		public static int CompareDates(Calendar.Appointment a, Calendar.Appointment b)
@@ -365,7 +369,7 @@ namespace DayViewUIExtension
 
 		public static bool IsEndOfDay(DateTime date)
 		{
-			return (date == date.Date.AddDays(1).AddSeconds(-1));
+			return (date == EndOfDay(date));
 		}
 
 		public static bool IsStartOfDay(DateTime date)
@@ -539,7 +543,7 @@ namespace DayViewUIExtension
 		static public DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if ((date != NullDate) && (date == date.Date))
-				return date.AddDays(1).AddSeconds(-1);
+				return EndOfDay(date);
 
 			// else
 			return date;

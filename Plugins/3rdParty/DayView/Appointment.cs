@@ -104,10 +104,13 @@ namespace Calendar
             }
             set
             {
-                dates.Start = value;
-                OnStartDateChanged();
-            }
-        }
+				if (dates.Start != value)
+				{
+					dates.Start = value;
+					OnStartDateChanged();
+				}
+			}
+		}
 
         protected virtual void OnStartDateChanged()
         {
@@ -122,10 +125,13 @@ namespace Calendar
             }
             set
             {
-                dates.End = value;
-                OnEndDateChanged();
-            }
-        }
+				if (dates.End != value)
+				{
+					dates.End = value;
+					OnEndDateChanged();
+				}
+			}
+		}
 
 		public bool DatesMatch(AppointmentDates other)
 		{
