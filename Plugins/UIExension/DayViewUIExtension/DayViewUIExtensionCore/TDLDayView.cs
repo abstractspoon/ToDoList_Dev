@@ -374,6 +374,8 @@ namespace DayViewUIExtension
 				if (value != m_TreatOverdueTasksAsDueToday)
 				{
 					m_TreatOverdueTasksAsDueToday = value;
+					m_TaskItems.TreatOverdueTasksAsDueToday = value;
+
 					Invalidate();
 				}
 			}
@@ -1073,7 +1075,9 @@ namespace DayViewUIExtension
 			bool newTask = (m_TaskItems.ContainsKey(taskId) == false);
 
 			TaskItem taskItem = m_TaskItems.GetItem(taskId, newTask);
+
 			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
+			taskItem.TreatOverdueTasksAsDueToday = m_TreatOverdueTasksAsDueToday;
 
 			// Update Time Blocks
 			if (newTask || 
@@ -1719,7 +1723,7 @@ namespace DayViewUIExtension
 				var taskItem = (appt as TaskItem);
 
 				// Disable modification of parents with calculated dates
-				if ((taskItem != null) && taskItem.IsCalculatedParent)
+				if ((taskItem != null) && taskItem.HasCalculatedDates)
 					return false;
 
 				// Disable start date editing for tasks with dependencies that are auto-calculated

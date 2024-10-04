@@ -887,7 +887,7 @@ namespace DayViewUIExtension
 			}
 
 			// Start is discontinuous from end, so now we calculate today's extents
-			// and see if they is continuous with either the start or end
+			// and see if they are continuous with either the start or end
 			if (DisplayActiveTasksToday && IsTodayVisible)
 			{
 				var taskItem = (appt as TaskItem);

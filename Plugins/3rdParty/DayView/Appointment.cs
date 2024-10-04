@@ -79,7 +79,13 @@ namespace Calendar
 		
 		private AppointmentDates dates = new AppointmentDates();
 
-		public AppointmentDates Dates { get { return dates; } }
+		public AppointmentDates Dates
+		{
+			get
+			{
+				return new AppointmentDates(StartDate, EndDate);
+			}
+		}
 
 		public bool IntersectsToday
 		{
