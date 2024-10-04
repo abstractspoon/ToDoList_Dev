@@ -1460,13 +1460,13 @@ void CToDoCtrlMgr::SetAllNeedPreferenceUpdate(BOOL bNeed, int nExcept)
 	}
 }
 
-int CToDoCtrlMgr::FindToDoCtrl(LPCTSTR szFilePath) const
+int CToDoCtrlMgr::FindToDoCtrl(LPCTSTR szFilePath, BOOL bFileNameOnly) const
 {
 	int nCtrl = GetCount();
 	
 	while (nCtrl--)
 	{
-		if (GetFilePath(nCtrl).CompareNoCase(szFilePath) == 0)
+		if (FileMisc::IsSamePath(GetFilePath(nCtrl), szFilePath, bFileNameOnly))
 			return nCtrl;
 	}
 

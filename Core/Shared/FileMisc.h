@@ -280,7 +280,7 @@ namespace FileMisc
 	BOOL AddToFileName(CString& sFilePath, LPCTSTR szExtra, BOOL bSuffix = TRUE);
 	BOOL AddToFileName(CString& sFilePath, int nSuffix);
 	
-	BOOL IsSamePath(const CString& sPath1, const CString& sPath2);
+	BOOL IsSamePath(const CString& sPath1, const CString& sPath2, BOOL bFileNameOnly = FALSE);
 	int CompareContents(const CString& sPath1, const CString& sPath2);
 
 	CString GetFolderFromFilePath(LPCTSTR szFilePath);

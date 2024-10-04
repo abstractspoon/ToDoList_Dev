@@ -2504,8 +2504,12 @@ CString& FileMisc::MakeRelativePath(CString& sFilePath, const CString& sRelative
 	return sFilePath;
 }
 
-BOOL FileMisc::IsSamePath(const CString& sPath1, const CString& sPath2)
+BOOL FileMisc::IsSamePath(const CString& sPath1, const CString& sPath2, BOOL bFileNameOnly)
 {
+	if (bFileNameOnly)
+		return (GetFileNameFromPath(sPath1).CompareNoCase(GetFileNameFromPath(sPath2)) == 0);
+
+	// else
 	CString sFullPath1 = GetFullPath(sPath1);
 	CString sFullPath2 = GetFullPath(sPath2);
 

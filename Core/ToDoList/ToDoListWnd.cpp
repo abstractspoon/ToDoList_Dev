@@ -4453,6 +4453,22 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		if (SelectToDoCtrl(nExist, TRUE))
 			return TDCF_SUCCESS;
 	}
+	else if (nType == TDCPP_FILE)
+	{
+		// Look for an existing tab whose taskfile could not be loaded
+		// and which matches just the file name
+		nExist = m_mgrToDoCtrls.FindToDoCtrl(sFilePath, TRUE);
+
+		if ((nExist != -1) && !m_mgrToDoCtrls.FileExists(nExist))
+		{
+			if (ReloadTaskList(nExist, TRUE, TRUE, sFilePath) &&
+				SelectToDoCtrl(nExist, TRUE))
+			{
+				CheckRemovePristineTasklist();
+				return TDCF_SUCCESS;
+			}
+		}
+	}
 	
 	// create a new todoltrl for this tasklist 
 	const CPreferencesDlg& userPrefs = Prefs();
@@ -6123,10 +6139,10 @@ void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI)
 	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
 }
 
-BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotifyError)
+BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotifyError, LPCTSTR szFilePath)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	CString sFilePath = tdc.GetFilePath();
+	CString sFilePath = (szFilePath ? szFilePath : tdc.GetFilePath());
 
 	TSM_TASKLISTINFO storageInfo;
 

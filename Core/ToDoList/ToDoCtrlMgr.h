@@ -61,7 +61,7 @@ public:
 
 	int FindToDoCtrl(HWND hwndTDC) const;
 	int FindToDoCtrl(const CFilteredToDoCtrl* pTDC) const;
-	int FindToDoCtrl(LPCTSTR szFilePath) const;
+	int FindToDoCtrl(LPCTSTR szFilePath, BOOL bFileNameOnly = FALSE) const;
 	int FindToDoCtrl(const TSM_TASKLISTINFO& info) const;
 	int FindPristineToDoCtrl() const;
 	
