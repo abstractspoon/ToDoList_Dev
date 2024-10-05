@@ -1718,43 +1718,130 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		private bool HasCalculatedStartDate(Calendar.Appointment appt)
+		{
+			if (appt is TaskItem)
+				return (appt as TaskItem).HasCalculatedStartDate;
+
+			return false;
+		}
+
+		private bool HasCalculatedEndDate(Calendar.Appointment appt)
+		{
+			if (appt is TaskItem)
+				return (appt as TaskItem).HasCalculatedEndDate;
+
+			if (appt is TaskCustomDateAttribute)
+				return (appt as TaskCustomDateAttribute).HasCalculatedEndDate;
+
+			return false;
+		}
+
 		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
 		{
-			if ((appt != null) && !appt.Locked)
+			if (appt == null)
+				return false;
+			
+			if (appt.Locked)
+				return false;
+			
+			if (appt is TaskFutureOccurrence)
+				return false;
+
+			bool isTimeBlock = (appt is TaskTimeBlock);
+
+			if (ReadOnly && !isTimeBlock)
+				return false;
+
+			var taskItem = (appt as TaskItem);
+
+			// Disable start date editing for tasks with dependencies that are auto-calculated
+			// Disable resizing for custom date attributes
+			bool isCustomDate = (appt is TaskCustomDateAttribute);
+			bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
+			bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
+
+			switch (mode)
 			{
-				var taskItem = (appt as TaskItem);
-
-				// Disable modification of parents with calculated dates
-				if ((taskItem != null) && taskItem.HasCalculatedDates)
-					return false;
-
-				// Disable start date editing for tasks with dependencies that are auto-calculated
-				// Disable resizing for custom date attributes
-				bool isCustomDate = (appt is TaskCustomDateAttribute);
-				bool isTimeBlock = (appt is TaskTimeBlock);
-				bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
-				bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
-
-				switch (mode)
+			case Calendar.SelectionTool.Mode.Move:
+				if (hasLockedDepends)
 				{
-				case Calendar.SelectionTool.Mode.Move:
-					return (isTimeBlock || (!ReadOnly && !hasLockedDepends));
-
-				case Calendar.SelectionTool.Mode.ResizeTop:
-					return (isTimeBlock || (!ReadOnly && (!isCustomDate && !hasLockedDepends)));
-
-				case Calendar.SelectionTool.Mode.ResizeLeft:
-					return (!isTimeBlock && !isCustomDate && !hasLockedDepends);
-
-				case Calendar.SelectionTool.Mode.ResizeBottom:
-					return (isTimeBlock || !isCustomDate);
-
-				case Calendar.SelectionTool.Mode.ResizeRight:
-					return (!isTimeBlock && !isCustomDate);
+					// can't change the start date if it's dependent
+					// on the end date of another task
+					return false;
 				}
+				else if (HasCalculatedStartDate(appt))
+				{
+					// can't move a task with a calculated start date
+					return false;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeTop:
+				if (isCustomDate)
+				{
+					// custom dates are ALWAYS long tasks
+					return false; 
+				}
+				else if (hasLockedDepends)
+				{
+					// can't change the start date if it's dependent
+					// on the end date of another task
+					return false; 
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeLeft:
+				if (isTimeBlock)
+				{
+					// time blocks are NEVER long tasks
+					return false; 
+				}
+				else if (isCustomDate)
+				{
+					// custom dates are of FIXED length
+					return false;
+				}
+				else if (hasLockedDepends)
+				{
+					// can't change the start date if it's dependent
+					// on the end date of another task
+					return false;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeBottom:
+				if (isCustomDate)
+				{
+					// custom dates are ALWAYS long tasks
+					return false;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeRight:
+				if (isTimeBlock)
+				{
+					// time blocks are NEVER long tasks
+					return false;
+				}
+				else if (isCustomDate)
+				{
+					// custom dates are of FIXED length
+					return false;
+				}
+				else if (HasCalculatedEndDate(appt))
+				{
+					// can't resize a task with a calculated end date
+					return false;
+				}
+				break;
+
+			default:
+				return false;
 			}
-			// catch all
-			return false;
+
+			// all else
+			return true;
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -1819,7 +1906,8 @@ namespace DayViewUIExtension
 					if (realAppt.Locked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+					if (mode == Calendar.SelectionTool.Mode.Move)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 				}
 			}
 

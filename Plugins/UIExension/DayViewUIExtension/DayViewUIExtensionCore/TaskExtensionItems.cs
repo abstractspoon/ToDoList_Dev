@@ -91,13 +91,14 @@ namespace DayViewUIExtension
 
 		public override DateTime EndDate
 		{
-			get { return (TreatAsDueToday ? TaskItem.EndOfDay(DateTime.Now) : base.EndDate); }
-
-			set
+			get
 			{
-				base.EndDate = value;
+				return (TreatAsDueToday ? TaskItem.EndOfDay(DateTime.Now) : base.EndDate);
 			}
+			set	{ base.EndDate = value; }
 		}
+
+		public bool HasCalculatedEndDate { get {  return TreatAsDueToday; } }
 
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }

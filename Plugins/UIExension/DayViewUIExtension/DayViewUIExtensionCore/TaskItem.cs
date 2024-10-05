@@ -181,9 +181,6 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		private bool m_UsingCalculatedParentStartDate = false;
-		private bool m_UsingCalculatedParentEndDate = false;
-
 		public bool TreatOverdueTasksAsDueToday;
 
 		private bool TreatAsDueToday
@@ -194,14 +191,17 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private bool HasCalculatedEndDate
+		private bool m_UsingCalculatedParentStartDate = false;
+		private bool m_UsingCalculatedParentEndDate = false;
+
+		public bool HasCalculatedStartDate
 		{
-			get { return (TreatAsDueToday || m_UsingCalculatedParentStartDate); }
+			get { return m_UsingCalculatedParentStartDate; }
 		}
 
-		public bool HasCalculatedDates
+		public bool HasCalculatedEndDate
 		{
-			get { return (HasCalculatedEndDate || m_UsingCalculatedParentEndDate); }
+			get { return (m_UsingCalculatedParentEndDate || TreatAsDueToday); }
 		}
 
 		public override DateTime StartDate
