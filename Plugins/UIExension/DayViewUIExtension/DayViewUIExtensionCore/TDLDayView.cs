@@ -142,7 +142,6 @@ namespace DayViewUIExtension
 			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
 
 			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, TextOffset);
-			tip.Rect.Inflate(TextPadding, TextPadding);
 
 			var appt = tdlView.Appointment;
 			tip.Id = appt.Id;
@@ -172,8 +171,8 @@ namespace DayViewUIExtension
 
 				var pos = PointToClient(MousePosition);
 				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-				tip.Rect.Location = pos;
 
+				tip.Rect.Location = pos;
 				tip.InitialDelay = 500;
 			}
 			else // 'Real' task
@@ -214,6 +213,9 @@ namespace DayViewUIExtension
 					tip.MultiLine = true; // always
 				}
 			}
+
+			// Inflate the rect now we've done all our calculations
+			tip.Rect.Inflate(TextPadding, TextPadding);
 
 			return tip;
 		}
