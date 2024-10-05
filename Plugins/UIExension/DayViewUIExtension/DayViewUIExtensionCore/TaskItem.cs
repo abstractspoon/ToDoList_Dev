@@ -215,7 +215,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		static DateTime EndOfDay(DateTime date)
+		static public DateTime EndOfDay(DateTime date)
 		{
 			return date.Date.AddDays(1).AddSeconds(-1);
 		}
