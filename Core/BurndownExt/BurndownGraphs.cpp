@@ -423,7 +423,7 @@ CString CGraphBase::FormatDate(const COleDateTime& date) const
 		return _T("");
 
 	if (m_bISODates)
-		return date.Format(_T("%F"));
+		return date.Format(_T("%Y-%m-%d"));
 
 	return date.Format(VAR_DATEVALUEONLY);
 }
