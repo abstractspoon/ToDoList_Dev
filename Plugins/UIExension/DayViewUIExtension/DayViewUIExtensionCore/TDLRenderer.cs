@@ -636,8 +636,8 @@ namespace DayViewUIExtension
 								bool isSelected,
 								Color fillColor, 
 								Color borderColor,
-								bool wantLeftBorder,
-								bool wantRightBorder)
+								bool clipLongLeftBorder,
+								bool clipLongRightBorder)
 		{
 			if (rect.Width <= 0)
 				return;
@@ -645,6 +645,18 @@ namespace DayViewUIExtension
 			bool isLong = apptView.IsLong;
 			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
+
+			if (isLong)
+			{
+				if (clipLongLeftBorder)
+				{
+					rect.X++;
+					rect.Width--;
+				}
+
+				if (clipLongRightBorder)
+					rect.Width--;
+			}
 
 			if (isSelected)
 			{
@@ -661,7 +673,9 @@ namespace DayViewUIExtension
 												rect.Width,
 												rect.Height,
 												GetAppointmentSelectedState(apptView.Appointment),
-												isTimeBlock);
+												isTimeBlock,
+												clipLongLeftBorder,
+												clipLongRightBorder);
 
 				if (isFutureItem && !borderColor.IsEmpty)
 				{
@@ -672,7 +686,7 @@ namespace DayViewUIExtension
 					{
 						pen.DashStyle = DashStyle.Dash;
 
-						DrawTaskBorder(g, rect, pen, wantLeftBorder, wantRightBorder);
+						DrawTaskBorder(g, rect, pen, clipLongLeftBorder, clipLongRightBorder);
 					}
 				}
 			}
@@ -703,24 +717,24 @@ namespace DayViewUIExtension
 						if (isFutureItem)
 							pen.DashStyle = DashStyle.Dash;
 
-						DrawTaskBorder(g, rect, pen, wantLeftBorder, wantRightBorder);
+						DrawTaskBorder(g, rect, pen, clipLongLeftBorder, clipLongRightBorder);
 					}
 				}
 			}
 		}
 
-		void DrawTaskBorder(Graphics g, Rectangle rect, Pen pen, bool wantLeft, bool wantRight)
+		void DrawTaskBorder(Graphics g, Rectangle rect, Pen pen, bool clipLeft, bool clipRight)
 		{
-			if (wantLeft && wantRight)
+			if (!clipLeft && !clipRight)
 			{
 				g.DrawRectangle(pen, rect);
 			}
 			else
 			{
-				if (wantLeft)
+				if (!clipLeft)
 					g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.BottomLeft(rect));
 
-				if (wantRight)
+				if (!clipRight)
 					g.DrawLine(pen, RectUtil.TopRight(rect), RectUtil.BottomRight(rect));
 
 				// top and bottom
@@ -1036,7 +1050,7 @@ namespace DayViewUIExtension
 			if (CalcDiscontinousAppointmentRects(tdlView, daysRect, out startRect, out endRect, out todayRect))
 			{
 				// Start Part ------------------------------------------
-				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor, true, false);
+				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor, false, true);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref startRect);
 				DrawTaskText(g, apptView, startRect, textColor);
 
@@ -1045,19 +1059,19 @@ namespace DayViewUIExtension
 				// Today Part ------------------------------------------
 				if (!todayRect.IsEmpty)
 				{
-					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor, false, false);
+					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor, true, true);
 					DrawTaskText(g, apptView, todayRect, textColor);
 				}
 
 				// End Part --------------------------------------------
-				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor, false, true);
+				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor, true, false);
 				DrawTaskText(g, apptView, endRect, textColor);
 			}
 			else // draw continuous)
 			{
 				var apptRect = apptView.Rectangle;
 
-				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor, true, true);
+				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor, false, false);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
 				DrawTaskText(g, apptView, apptRect, textColor);
 

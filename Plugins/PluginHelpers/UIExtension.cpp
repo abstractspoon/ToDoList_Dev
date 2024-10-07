@@ -781,11 +781,16 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent)
 {
+	return Draw(hwnd, g, x, y, cx, cy, style, transparent, false, false);
+}
+
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent, bool clipLeft, bool clipRight)
+{
 	if (style == Style::None)
 		return false;
 
 	// Must retrieve clip rect before getting HDC
-	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
+	Drawing::Rectangle clipRect = Rectangle::Truncate(g->ClipBounds);
 	HDC hDC = Win32::GetHdc(g->GetHdc());
 
 	if (hDC == NULL)
@@ -793,19 +798,29 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 	GM_ITEMSTATE state = Map(style);
 	int nSaveDC = ::SaveDC(hDC);
-		
-	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
+
+	::IntersectClipRect(hDC, clipRect.Left, clipRect.Top, clipRect.Right, clipRect.Bottom);
 
 	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
+
+	if (clipLeft)
+		flags |= GMIB_CLIPLEFT;
+
+	if (clipRight)
+		flags |= GMIB_CLIPRIGHT;
+
+	CRect rItem(x, y, (x + cx), (y + cy));
+	LPCRECT prcClip = ((clipLeft || clipRight) ? &rItem : NULL);
 
 	BOOL bRes = GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), 
 														Win32::GetHwnd(hwnd), 
 														state, 
-														CRect(x, y, (x + cx), (y + cy)), 
-														flags);
+														rItem, 
+														flags,
+														prcClip);
 	::RestoreDC(hDC, nSaveDC);
 	g->ReleaseHdc();
-	g->SetClip(rClip); // restore clip rect
+	g->SetClip(clipRect); // restore clip rect
 
 	return (bRes != FALSE);
 }
