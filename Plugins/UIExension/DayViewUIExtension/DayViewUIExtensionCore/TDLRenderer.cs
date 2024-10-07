@@ -590,7 +590,9 @@ namespace DayViewUIExtension
 								Calendar.AppointmentView apptView,
 								bool isSelected,
 								Color fillColor, 
-								Color borderColor)
+								Color borderColor,
+								bool wantLeftBorder,
+								bool wantRightBorder)
 		{
 			if (rect.Width <= 0)
 				return;
@@ -624,7 +626,8 @@ namespace DayViewUIExtension
 					using (Pen pen = new Pen(borderColor, 1))
 					{
 						pen.DashStyle = DashStyle.Dash;
-						g.DrawRectangle(pen, rect);
+
+						DrawTaskBorder(g, rect, pen, wantLeftBorder, wantRightBorder);
 					}
 				}
 			}
@@ -655,9 +658,29 @@ namespace DayViewUIExtension
 						if (isFutureItem)
 							pen.DashStyle = DashStyle.Dash;
 
-						g.DrawRectangle(pen, rect);
+						DrawTaskBorder(g, rect, pen, wantLeftBorder, wantRightBorder);
 					}
 				}
+			}
+		}
+
+		void DrawTaskBorder(Graphics g, Rectangle rect, Pen pen, bool wantLeft, bool wantRight)
+		{
+			if (wantLeft && wantRight)
+			{
+				g.DrawRectangle(pen, rect);
+			}
+			else
+			{
+				if (wantLeft)
+					g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.BottomLeft(rect));
+
+				if (wantRight)
+					g.DrawLine(pen, RectUtil.TopRight(rect), RectUtil.BottomRight(rect));
+
+				// top and bottom
+				g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.TopRight(rect));
+				g.DrawLine(pen, RectUtil.BottomLeft(rect), RectUtil.BottomRight(rect));
 			}
 		}
 
@@ -968,7 +991,7 @@ namespace DayViewUIExtension
 			if (CalcDiscontinousAppointmentRects(tdlView, daysRect, out startRect, out endRect, out todayRect))
 			{
 				// Start Part ------------------------------------------
-				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor, true, false);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref startRect);
 				DrawTaskText(g, apptView, startRect, textColor);
 
@@ -977,19 +1000,19 @@ namespace DayViewUIExtension
 				// Today Part ------------------------------------------
 				if (!todayRect.IsEmpty)
 				{
-					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor);
+					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor, false, false);
 					DrawTaskText(g, apptView, todayRect, textColor);
 				}
 
 				// End Part --------------------------------------------
-				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor, false, true);
 				DrawTaskText(g, apptView, endRect, textColor);
 			}
 			else // draw continuous)
 			{
 				var apptRect = apptView.Rectangle;
 
-				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor, true, true);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
 				DrawTaskText(g, apptView, apptRect, textColor);
 
