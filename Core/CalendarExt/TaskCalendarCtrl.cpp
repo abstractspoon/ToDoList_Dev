@@ -846,7 +846,7 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 	{
 		if ((dc.GetTextExtent(_T("2020-12-31")).cx + nWeekWidth) <= nAvailWidth)
 		{
-			m_sCellDateFormat = _T("%F");
+			m_sCellDateFormat = _T("%Y-%m-%d");
 		}
 		else if ((dc.GetTextExtent(_T("12-31")).cx + nWeekWidth) <= nAvailWidth)
 		{

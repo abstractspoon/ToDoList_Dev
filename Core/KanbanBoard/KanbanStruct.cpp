@@ -32,7 +32,7 @@ CString KBUtils::FormatDate(const COleDateTime& date, BOOL bISODates)
 		return _T("");
 
 	if (bISODates)
-		return date.Format(_T("%F"));
+		return date.Format(_T("%Y-%m-%d"));
 
 	return date.Format(VAR_DATEVALUEONLY);
 }

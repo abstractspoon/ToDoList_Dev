@@ -1134,7 +1134,7 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		private bool m_StrikeThruDoneTasks;
+		private bool m_StrikeThruDoneTasks = false;
 
 		public bool StrikeThruDoneTasks
 		{
@@ -1149,7 +1149,13 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private bool m_TaskColorIsBackground;
+		public bool DisplayDatesInISO
+		{
+			get { return (AmPmDisplay == false); }
+			set { AmPmDisplay = (value == false); }
+		}
+
+		private bool m_TaskColorIsBackground = false;
 
 		public bool TaskColorIsBackground
         {
@@ -1164,7 +1170,7 @@ namespace DayViewUIExtension
             }
         }
 
-		private bool m_ShowParentsAsFolder;
+		private bool m_ShowParentsAsFolder = false;
 
 		public bool ShowParentsAsFolder
 		{

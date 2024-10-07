@@ -98,7 +98,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private static string FormatHeaderText(DateTime date, DowNameStyle dowStyle, MonthNameStyle monthStyle, bool firstDay)
+		private static string FormatHeaderText(DateTime date, DowNameStyle dowStyle, MonthNameStyle monthStyle, bool firstDay, bool iso)
 		{
 			// Day of week
 			string format = "";
@@ -114,34 +114,37 @@ namespace DayViewUIExtension
 				break;
 			}
 
+			String day = (iso ? "dd" : "d");
+
 			// Day of month
 			if (firstDay || (date.Day == 1))
 			{
 				var dateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-				bool monthBeforeDay = (dateFormat.IndexOf('M') < dateFormat.IndexOf('d'));
+				bool monthBeforeDay = (iso || (dateFormat.IndexOf('M') < dateFormat.IndexOf('d')));
 
 				switch (monthStyle)
 				{
 				case MonthNameStyle.Long:
-					format += (monthBeforeDay ? "MMMM d" : "d MMMM");
+					format += (monthBeforeDay ? ("MMMM " + day) : (day + " MMMM"));
 					break;
 
 				case MonthNameStyle.Short:
-					format += (monthBeforeDay ? "MMM d" : "d MMM");
+					format += (monthBeforeDay ? ("MMM " + day) : (day + " MMM"));
 					break;
 
 				case MonthNameStyle.Number:
-					format += (monthBeforeDay ? "M/d" : "d/M");
+					format += (iso ? "MM-dd" : (monthBeforeDay ? "M/d" : "d/M"));
+					break;
+
+				case MonthNameStyle.None:
+					format += day;
 					break;
 				}
 			}
 			else
 			{
-				format += "d ";
+				format += day;
 			}
-
-			if (format == "")
-				return date.Day.ToString();
 
 			return date.ToString(format);
 		}
@@ -157,7 +160,7 @@ namespace DayViewUIExtension
 
 			// Basic header string format is '<Day of week> <Day of month> <Month>'
 			int maxDayNum = (int)(g.MeasureString("31", BaseFont()).Width);
-			int maxDayAndMonthNum = (int)(g.MeasureString("31/12", BaseFont()).Width);
+			int maxDayAndMonthNum = (int)(g.MeasureString((DisplayDatesInISO ? "31-12" : "31/12"), BaseFont()).Width);
 
 			int maxLongDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, false);
 			int maxShortDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, true);
@@ -346,10 +349,11 @@ namespace DayViewUIExtension
 
             using (SolidBrush brush = new SolidBrush(TextColor))
             {
-				// Ignore 'am/pm' and format for the current regional settings
-                string amPmTime = "00";
+				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-                if (!String.IsNullOrEmpty(DateTimeFormatInfo.CurrentInfo.AMDesignator))
+				string amPmTime = "00";
+
+				if (ampm && !String.IsNullOrEmpty(DateTimeFormatInfo.CurrentInfo.AMDesignator))
 				{
 					if (hour < 12)
 						amPmTime = DateTimeFormatInfo.CurrentInfo.AMDesignator;
@@ -361,16 +365,14 @@ namespace DayViewUIExtension
 				}
 
 				String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
-                
-				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 				g.DrawString(hourStr, HourFont(), brush, rect);
 
-                rect.X += ((int)g.MeasureString(hourStr, HourFont()).Width + 2);
+				rect.X += ((int)g.MeasureString(hourStr, HourFont()).Width + 2);
+				g.DrawString(amPmTime, MinuteFont(), brush, rect);
 
-                g.DrawString(amPmTime, MinuteFont(), brush, rect);
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
 			}
-        }
+		}
 
         public virtual void DrawMinuteLine(Graphics g, Rectangle rect, int minute)
         {
@@ -490,19 +492,21 @@ namespace DayViewUIExtension
 			// Header text
 			g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-			var fmt = new StringFormat();
-
-			fmt.LineAlignment = StringAlignment.Center;
-			fmt.Alignment = StringAlignment.Near;
-			fmt.FormatFlags |= StringFormatFlags.NoWrap | StringFormatFlags.NoClip;
-
 			// Use bold font for first-day-of-month
-			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay);
 			Font font = ((date.Day == 1) ? BoldFont : BaseFont());
+
+			var fmt = new StringFormat()
+			{
+				LineAlignment = StringAlignment.Center,
+				Alignment = StringAlignment.Near,
+				FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.NoClip
+			};
 
 			Rectangle rText = rect;
 			rText.X += m_HeaderPadding;
 			rText.Width -= m_HeaderPadding;
+
+			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay, DisplayDatesInISO);
 
 			g.DrawString(text, font, SystemBrushes.ControlText, rText, fmt);
 		}
