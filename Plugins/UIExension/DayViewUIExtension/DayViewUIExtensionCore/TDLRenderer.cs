@@ -416,6 +416,22 @@ namespace DayViewUIExtension
 		{
 			using (Brush brush = new SolidBrush(Calendar.AbstractRenderer.InterpolateColors(BackColor(), Color.Black, 0.5f)))
 				g.FillRectangle(brush, rect);
+
+			// Draw the day dividers
+			int dayWidth = (rect.Width / DaysShowing);
+
+			Point lineTop = new Point((rect.X + dayWidth), rect.Top);
+			Point lineBot = new Point((rect.X + dayWidth), rect.Top + allDayEventsHeaderHeight);
+
+			using (var pen = new Pen(Calendar.AbstractRenderer.InterpolateColors(BackColor(), Color.Black, 0.4f)))
+			{
+				for (int day = 0; day < DaysShowing; day++)
+				{
+					g.DrawLine(pen, lineTop, lineBot);
+					lineTop.X += dayWidth;
+					lineBot.X += dayWidth;
+				}
+			}
 		}
 
 		private Color MinuteLineColor
