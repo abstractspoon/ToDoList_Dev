@@ -237,7 +237,8 @@ namespace DayViewUIExtension
 				return;
 
 			// Prevent end date being set to exactly midnight
-			EndDate = CheckGetEndOfDay(EndDate);
+			if ((EndDate != NullDate) && (EndDate == EndDate.Date))
+				EndDate = EndDate.AddSeconds(-1);
 		}
 
 		public static int CompareDates(Calendar.Appointment a, Calendar.Appointment b)
