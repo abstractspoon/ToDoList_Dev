@@ -243,6 +243,7 @@ namespace DayViewUIExtension
 			m_DayView.DependencyDatesAreCalculated = prefs.GetProfileBool("Preferences", "AutoAdjustDependents", false);
             m_DayView.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_DayView.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			m_DayView.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
 
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
@@ -256,7 +257,12 @@ namespace DayViewUIExtension
 
             m_DayView.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
             
-            if (!appOnly)
+            if (appOnly)
+			{
+				UpdateWorkingHourDisplay();
+				UpdatedSelectedTaskDatesText();
+			}
+			else
             {
 				// private settings
 				m_DefaultTimeBlockEditMask = prefs.GetProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
@@ -279,10 +285,6 @@ namespace DayViewUIExtension
 				UpdateDayViewPreferences();
 				SetDaysShowing(prefs.GetProfileInt(key, "DaysShowing", 7));
             }
-			else
-			{
-				UpdateWorkingHourDisplay();
-			}
  		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
@@ -981,9 +983,7 @@ namespace DayViewUIExtension
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
 			{
 				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-
-				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
-				String dateRange = String.Format("{0} - {1}", from.ToString("g"), toDate);
+				String dateRange = DateUtil.FormatRange(from, to, true, m_DayView.DisplayDatesInISO);
 
 				m_SelectedTaskDatesLabel.Text = (label + dateRange);
 				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
