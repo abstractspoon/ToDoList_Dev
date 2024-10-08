@@ -225,7 +225,7 @@ namespace HTMLReportExporter
 			var custAttrib = tasks.GetCustomAttributes();
 
 			foreach (var attrib in custAttrib)
-				attribs.Add(attrib.Id.ToLower(), attrib.Label);
+				attribs.Add(attrib.Id, attrib.Label);
 
 			return attribs;
 		}

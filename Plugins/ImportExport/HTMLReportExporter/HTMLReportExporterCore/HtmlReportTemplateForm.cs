@@ -70,7 +70,7 @@ namespace HTMLReportExporter
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
-			m_CustomAttributes = new HtmlReportUtils.CustomAttributes();
+			m_CustomAttributes = HtmlReportUtils.GetCustomAttributes(tasks);
 			m_EditedSinceLastSave = false;
 
             m_ChangeTimer = new Timer();
@@ -80,12 +80,6 @@ namespace HTMLReportExporter
 			InitializeComponent();
             InitialiseFontAndColors();
 			DoHighDPIFixups();
-
-			// Build list custom attribute IDs for later use
-			var custAttrib = tasks.GetCustomAttributes();
-
-			foreach (var attrib in custAttrib)
-				m_CustomAttributes.Add(attrib.Id.ToLower(), attrib.Label);
 
 			var prevSize = LoadPreferences();
 
