@@ -313,6 +313,35 @@ namespace DayViewUIExtension
             }
         }
 
+		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
+
+			if (SystemInformation.HighContrast)
+			{
+				// Draw selection first because it's opaque
+				DrawDaySelection(e, rect, date);
+
+				DrawDaySlotSeparators(e, rect, date);
+				DrawNonWorkHours(e, rect, date);
+				DrawTodayBackground(e, rect, date);
+				DrawDayAppointments(e, rect, date);
+			}
+			else
+			{
+				DrawDaySlotSeparators(e, rect, date);
+				DrawNonWorkHours(e, rect, date);
+				DrawTodayBackground(e, rect, date);
+				DrawDayAppointments(e, rect, date);
+
+				// Draw selection last because it's translucent
+				DrawDaySelection(e, rect, date);
+			}
+
+			DrawTodayTime(e, rect, date);
+			DrawDayGripper(e, rect);
+		}
+
 		public virtual void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
         {
             if (g == null)
@@ -389,6 +418,22 @@ namespace DayViewUIExtension
 		{
 			using (Brush brush = new SolidBrush(Calendar.AbstractRenderer.InterpolateColors(BackColor(), Color.Black, 0.5f)))
 				g.FillRectangle(brush, rect);
+
+			// Draw the day dividers
+			int dayWidth = (rect.Width / DaysShowing);
+
+			Point lineTop = new Point((rect.X + dayWidth), rect.Top);
+			Point lineBot = new Point((rect.X + dayWidth), rect.Top + allDayEventsHeaderHeight);
+
+			using (var pen = new Pen(Calendar.AbstractRenderer.InterpolateColors(BackColor(), Color.Black, 0.4f)))
+			{
+				for (int day = 0; day < DaysShowing; day++)
+				{
+					g.DrawLine(pen, lineTop, lineBot);
+					lineTop.X += dayWidth;
+					lineBot.X += dayWidth;
+				}
+			}
 		}
 
 		private Color MinuteLineColor
@@ -594,7 +639,9 @@ namespace DayViewUIExtension
 								Calendar.AppointmentView apptView,
 								bool isSelected,
 								Color fillColor, 
-								Color borderColor)
+								Color borderColor,
+								bool clipLongLeftBorder,
+								bool clipLongRightBorder)
 		{
 			if (rect.Width <= 0)
 				return;
@@ -602,6 +649,18 @@ namespace DayViewUIExtension
 			bool isLong = apptView.IsLong;
 			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
+
+			if (isLong)
+			{
+				if (clipLongLeftBorder)
+				{
+					rect.X++;
+					rect.Width--;
+				}
+
+				if (clipLongRightBorder)
+					rect.Width--;
+			}
 
 			if (isSelected)
 			{
@@ -618,7 +677,9 @@ namespace DayViewUIExtension
 												rect.Width,
 												rect.Height,
 												GetAppointmentSelectedState(apptView.Appointment),
-												isTimeBlock);
+												isTimeBlock,
+												clipLongLeftBorder,
+												clipLongRightBorder);
 
 				if (isFutureItem && !borderColor.IsEmpty)
 				{
@@ -628,7 +689,8 @@ namespace DayViewUIExtension
 					using (Pen pen = new Pen(borderColor, 1))
 					{
 						pen.DashStyle = DashStyle.Dash;
-						g.DrawRectangle(pen, rect);
+
+						DrawTaskBorder(g, rect, pen, clipLongLeftBorder, clipLongRightBorder);
 					}
 				}
 			}
@@ -659,9 +721,29 @@ namespace DayViewUIExtension
 						if (isFutureItem)
 							pen.DashStyle = DashStyle.Dash;
 
-						g.DrawRectangle(pen, rect);
+						DrawTaskBorder(g, rect, pen, clipLongLeftBorder, clipLongRightBorder);
 					}
 				}
+			}
+		}
+
+		void DrawTaskBorder(Graphics g, Rectangle rect, Pen pen, bool clipLeft, bool clipRight)
+		{
+			if (!clipLeft && !clipRight)
+			{
+				g.DrawRectangle(pen, rect);
+			}
+			else
+			{
+				if (!clipLeft)
+					g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.BottomLeft(rect));
+
+				if (!clipRight)
+					g.DrawLine(pen, RectUtil.TopRight(rect), RectUtil.BottomRight(rect));
+
+				// top and bottom
+				g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.TopRight(rect));
+				g.DrawLine(pen, RectUtil.BottomLeft(rect), RectUtil.BottomRight(rect));
 			}
 		}
 
@@ -972,7 +1054,7 @@ namespace DayViewUIExtension
 			if (CalcDiscontinousAppointmentRects(tdlView, daysRect, out startRect, out endRect, out todayRect))
 			{
 				// Start Part ------------------------------------------
-				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor, false, true);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref startRect);
 				DrawTaskText(g, apptView, startRect, textColor);
 
@@ -981,24 +1063,155 @@ namespace DayViewUIExtension
 				// Today Part ------------------------------------------
 				if (!todayRect.IsEmpty)
 				{
-					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor);
+					DrawTaskBackground(g, todayRect, apptView, isSelected, fillColor, borderColor, true, true);
 					DrawTaskText(g, apptView, todayRect, textColor);
 				}
 
 				// End Part --------------------------------------------
-				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor, true, false);
 				DrawTaskText(g, apptView, endRect, textColor);
 			}
 			else // draw continuous)
 			{
 				var apptRect = apptView.Rectangle;
 
-				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor, false, false);
 				DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
 				DrawTaskText(g, apptView, apptRect, textColor);
 
 				tdlView.TextHorzOffset = (apptView.Rectangle.X - apptRect.X);
 			}
 		}
+
+		private bool WantDrawToday(DateTime date)
+		{
+			if (!Theme.HasAppColor(UITheme.AppColor.Today))
+				return false;
+
+			return (date.Date == DateTime.Now.Date);
+		}
+
+		protected void DrawTodayBackground(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			if (!WantDrawToday(date))
+				return;
+
+			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+			{
+				e.Graphics.FillRectangle(brush, rect);
+			}
+		}
+
+		protected void DrawTodayTime(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			if (date.Date != DateTime.Now.Date)
+				return;
+
+			int vPos = GetHourScrollPos(DateTime.Now);
+
+			if ((vPos > rect.Top) && (vPos < rect.Bottom))
+			{
+				Color color = Theme.GetAppDrawingColor(UITheme.AppColor.Today);
+
+				using (var pen = new Pen(color, DPIScaling.Scale(2.0f)))
+				{
+					e.Graphics.DrawLine(pen, rect.Left, vPos, rect.Right, vPos);
+
+					// Draw a blob at the end point to draw attention to the line
+					// Note: we avoid the start because that might conflict with a task's 'bar'
+					using (var brush = new SolidBrush(color))
+					{
+						e.Graphics.FillEllipse(brush, RectUtil.CentredRect(new Point(rect.Right, vPos), DPIScaling.Scale(10)));
+					}
+				}
+			}
+		}
+
+		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(date.DayOfWeek))
+			{
+				var weekendColor = Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
+
+				// If this is also 'today' then convert to gray so it doesn't 
+				// impose too much when the today colour is laid on top
+				if (WantDrawToday(date))
+					weekendColor = DrawingColor.ToGray(weekendColor);
+
+				using (var brush = new SolidBrush(weekendColor))
+					e.Graphics.FillRectangle(brush, rect);
+			}
+			else if (Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
+			{
+				var nonWorkColor = Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
+
+				// If this is also 'today' then convert to gray so it doesn't 
+				// impose too much when the today colour is laid on top
+				if (WantDrawToday(date))
+					nonWorkColor = DrawingColor.ToGray(nonWorkColor);
+
+				using (SolidBrush brush = new SolidBrush(nonWorkColor))
+				{
+					DrawNonWorkHours(e, new HourMin(0, 0), WorkStart, rect, brush);
+					DrawNonWorkHours(e, LunchStart, LunchEnd, rect, brush);
+					DrawNonWorkHours(e, WorkEnd, new HourMin(24, 0), rect, brush);
+				}
+			}
+		}
+
+		protected void DrawNonWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect, Brush brush)
+		{
+			if (start < end)
+			{
+				Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
+
+				if (hoursRect.Y < HeaderHeight)
+				{
+					hoursRect.Height -= HeaderHeight - hoursRect.Y;
+					hoursRect.Y = HeaderHeight;
+				}
+
+				e.Graphics.FillRectangle(brush, hoursRect);
+			}
+		}
+
+		protected override bool WantDrawAppointmentSelected(Calendar.Appointment appt)
+		{
+			return (GetAppointmentSelectedState(appt) != UIExtension.SelectionRect.Style.None);
+		}
+
+		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt)
+		{
+			if (base.SavingToImage)
+				return UIExtension.SelectionRect.Style.None;
+
+			if (m_SelectedTaskID == appt.Id)
+				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
+
+			// Check interrelatedness of types
+			if (Focused)
+			{
+				var realAppt = GetRealAppointment(appt);
+				var selAppt = GetAppointment(m_SelectedTaskID);
+				var selRealAppt = GetRealAppointment(selAppt);
+
+				if (selRealAppt == realAppt)
+				{
+					// If this date's 'real' task is selected show the extension date as 'lightly' selected
+					if ((appt is TaskExtensionItem))
+						return UIExtension.SelectionRect.Style.DropHighlighted;
+
+					// If this is the real task for a selected custom date or time block, 
+					// show the real task as 'lightly' selected
+					if ((selAppt is TaskCustomDateAttribute) || (selAppt is TaskTimeBlock))
+						return UIExtension.SelectionRect.Style.DropHighlighted;
+				}
+			}
+
+			// else
+			return UIExtension.SelectionRect.Style.None;
+		}
+
+
 	}
 }

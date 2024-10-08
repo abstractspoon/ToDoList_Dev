@@ -79,6 +79,7 @@ namespace DayViewUIExtension
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningWeekends", HideTasksSpanningWeekends);
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
 			prefs.WriteProfileBool(prefsKey, "ShowFutureOccurrences", ShowFutureOccurrences);
+			prefs.WriteProfileBool(prefsKey, "TreatOverdueTasksAsDueToday", TreatOverdueTasksAsDueToday);
 
 			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
 			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
@@ -99,6 +100,7 @@ namespace DayViewUIExtension
             m_HideTasksSpanningWeekends.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningWeekends", false);
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
 			m_ShowFutureOccurrences.Checked = prefs.GetProfileBool(prefsKey, "ShowFutureOccurrences", true);
+			m_TreatOverdueTasksAsDueToday.Checked = prefs.GetProfileBool(prefsKey, "TreatOverdueTasksAsDueToday", true);
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
@@ -126,6 +128,7 @@ namespace DayViewUIExtension
 			var orgSlotMins = SlotMinutes;
 			var orgSlotHeight = MinSlotHeight;
 			var orgWorkingOnly = ShowWorkingHoursOnly;
+			var orgDueToday = TreatOverdueTasksAsDueToday;
 
 			// Enable states
 			m_HideParentTasksByTag.Enabled = m_HideParentTasks.Checked;
@@ -148,6 +151,7 @@ namespace DayViewUIExtension
 				m_HideTasksSpanningDays.Checked = orgHideSpanDays;
 				m_ShowFutureOccurrences.Checked = orgShowFuture;
 				m_ShowWorkingHoursOnly.Checked = orgWorkingOnly;
+				m_TreatOverdueTasksAsDueToday.Checked = orgDueToday;
 
 				SlotMinutes = orgSlotMins;
 				MinSlotHeight = orgSlotHeight;
@@ -176,6 +180,7 @@ namespace DayViewUIExtension
 		public bool DisplayActiveTasksToday { get { return m_ShowActiveToday.Checked; } }
 		public bool ShowFutureOccurrences { get { return m_ShowFutureOccurrences.Checked; } }
 		public bool ShowWorkingHoursOnly { get { return m_ShowWorkingHoursOnly.Checked; } }
+		public bool TreatOverdueTasksAsDueToday { get { return m_TreatOverdueTasksAsDueToday.Checked; } }
 
 		public int SlotMinutes
 		{
