@@ -24,12 +24,6 @@
 const UINT WM_PUITCP_TEXTCOLOROPTION = ::RegisterWindowMessage(_T("WM_PUITCP_TEXTCOLOROPTION"));
 
 /////////////////////////////////////////////////////////////////////////////
-// For Dark Mode
-
-const COLORREF DEF_ALTERNATELINECOLOR	= RGB(235, 235, 255); 
-const COLORREF DEF_TASKDONECOLOR		= RGB(128, 128, 128);
-
-/////////////////////////////////////////////////////////////////////////////
 
 enum { COLOROPT_ATTRIB, COLOROPT_PRIORITY, COLOROPT_DEFAULT, COLOROPT_NONE };
 

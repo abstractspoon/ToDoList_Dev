@@ -20,12 +20,10 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesUITasklistColorsPage property page
-
 // default colors
-const COLORREF DEF_PRIORITYLOWCOLOR		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
-const COLORREF DEF_CBMASKCOLOR			= RGB(255, 0, 0);
+
+const COLORREF DEF_ALTERNATELINECOLOR	= RGB(235, 235, 255);
+const COLORREF DEF_TASKDONECOLOR		= RGB(128, 128, 128);
 const COLORREF DEF_GRIDLINECOLOR		= RGB(192, 192, 192);
 const COLORREF DEF_TASKDUECOLOR			= RGB(255, 0, 0);
 const COLORREF DEF_TASKDUETODAYCOLOR	= RGB(255, 128, 0);
@@ -34,8 +32,28 @@ const COLORREF DEF_FLAGGEDCOLOR			= RGB(128, 64, 0);
 const COLORREF DEF_REFERENCECOLOR		= RGB(128, 0, 64);
 const COLORREF DEF_GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
 
+const COLORREF DEF_PRIORITYLOWCOLOR		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_0		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_1		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_2		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_3		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_4		= RGB(0, 0, 255);
+const COLORREF DEF_PRIORITYCOLOR_5		= RGB(0, 0, 255);
+const COLORREF DEF_PRIORITYCOLOR_6		= RGB(0, 0, 255);
+const COLORREF DEF_PRIORITYCOLOR_7		= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_8		= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_9		= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_10		= RGB(255, 0, 0);
+
+const COLORREF DEF_LIGHTGRAY			= RGB(240, 240, 240);
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int DEFFONTSIZE = 8;
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum
 {
@@ -384,7 +402,7 @@ int CPreferencesUITasklistColorsPage::GetPriorityColors(CDWordArray& aColors) co
 	}
 	else // grayscale
 	{
-		GraphicsMisc::CalculateColorGradient(RGB(240, 240, 240), 0, 11, aColors, TRUE);
+		GraphicsMisc::CalculateColorGradient(DEF_LIGHTGRAY, 0, 11, aColors, TRUE);
 	}
 	
 	return aColors.GetSize(); 
@@ -951,17 +969,17 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	sColorKey += _T("\\Colors");
 	
 	m_aPriorityColors.RemoveAll();
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P0"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P1"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P2"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P3"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P4"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P5"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P6"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P7"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P8"), RGB(255, 0, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P9"), RGB(255, 0, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P10"), RGB(255, 0, 0)));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P0"),  DEF_PRIORITYCOLOR_0));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P1"),  DEF_PRIORITYCOLOR_1));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P2"),  DEF_PRIORITYCOLOR_2));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P3"),  DEF_PRIORITYCOLOR_3));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P4"),  DEF_PRIORITYCOLOR_4));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P5"),  DEF_PRIORITYCOLOR_5));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P6"),  DEF_PRIORITYCOLOR_6));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P7"),  DEF_PRIORITYCOLOR_7));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P8"),  DEF_PRIORITYCOLOR_8));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P9"),  DEF_PRIORITYCOLOR_9));
+	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P10"), DEF_PRIORITYCOLOR_10));
 
 	m_aPriorityScheme.RemoveAll();
 

@@ -10,6 +10,7 @@
 #include "tasklisthtmlexporter.h"
 #include "tasklisttxtexporter.h"
 #include "TDCAnonymizeTasklist.h"
+#include "TDCDarkMode.h"
 #include "tdcmapping.h"
 #include "tdcmsg.h"
 #include "tdcstatic.h"
@@ -9004,6 +9005,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 
 void CToDoListWnd::OnNcDestroy()
 {
+	CTDCDarkMode::Release();
+
 	if (CPreferences::UsesIni())
 		CPreferences::Save();
 
