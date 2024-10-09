@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "TDCDarkMode.h"
+#include "PreferencesUITasklistColorsPage.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -21,44 +22,60 @@ LPCTSTR PREFSCOLORSECTION	= _T("Preferences\\Colors");
 LPCTSTR DMPREFSCOLORSECTION	= _T("DarkMode\\Colors");
 
 LPCTSTR COLORTASKBKGNDKEY	= _T("ColorTaskBackground");
+LPCTSTR TEXTCOLOROPTION		= _T("PriorityColorOption");
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct DMCOLOR
+struct COLORDEF
 {
 	LPCTSTR szKey;
+	COLORREF crLMDefault;
 	COLORREF crDMDefault;
 };
 
-DMCOLOR COLORS[] = 
+COLORDEF COLORDEFS[] = 
 {
-	{ _T("Gridlines"),			RGB(75, 75, 75) },
-	{ _T("TaskDone"),			RGB(63, 64, 65) },
-	{ _T("TaskStart"),			RGB(0, 100, 0) },
-	{ _T("TaskStartToday"),		RGB(0, 150, 0) },
-	{ _T("TaskDue"),			RGB(100, 0, 0) },
-	{ _T("TaskDueToday"),		RGB(150, 0, 0) },
-	{ _T("AlternateLines"),		RGB(33, 33, 33) },
-	{ _T("Flagged"),			RGB(150, 0, 150) },
-	{ _T("Reference"),			RGB(0, 0, 150) },
-	{ _T("GroupHeaderBkgnd"),	RGB(0, 25, 0) },
+	{ _T("Gridlines"),			DEF_GRIDLINECOLOR,		RGB(75, 75, 75) },
+	{ _T("TaskDone"),			DEF_TASKDONECOLOR,		RGB(63, 64, 65) },
+	{ _T("TaskStart"),			DEF_TASKSTARTCOLOR,		RGB(0, 100, 0) },
+	{ _T("TaskStartToday"),		DEF_TASKSTARTCOLOR,		RGB(0, 150, 0) },
+	{ _T("TaskDue"),			DEF_TASKDUECOLOR,		RGB(100, 0, 0) },
+	{ _T("TaskDueToday"),		DEF_TASKDUETODAYCOLOR,	RGB(150, 0, 0) },
+	{ _T("AlternateLines"),		DEF_ALTERNATELINECOLOR,	RGB(33, 33, 33) },
+	{ _T("Flagged"),			DEF_FLAGGEDCOLOR,		RGB(150, 0, 150) },
+	{ _T("Reference"),			DEF_REFERENCECOLOR,		RGB(0, 0, 150) },
+	{ _T("GroupHeaderBkgnd"),	DEF_GROUPHEADERBKCOLOR,	RGB(0, 25, 0) },
+	
+	// priority specific			
+	{ _T("Low"),				DEF_PRIORITYLOWCOLOR,	DEF_PRIORITYLOWCOLOR },
+	{ _T("High"),				DEF_PRIORITYHIGHCOLOR,	DEF_PRIORITYHIGHCOLOR },
 
-	// priority specific		
-	{ _T("Low"),				RGB(0, 150, 0) },
-	{ _T("High"),				RGB(150, 0, 0) },
-	{ _T("P0"),					RGB(0, 150, 0) },
-	{ _T("P1"),					RGB(0, 150, 0) },
-	{ _T("P2"),					RGB(0, 150, 0) },
-	{ _T("P3"),					RGB(0, 150, 0) },
-	{ _T("P4"),					RGB(0, 0, 150) },
-	{ _T("P5"),					RGB(0, 0, 150) },
-	{ _T("P6"),					RGB(0, 0, 150) },
-	{ _T("P7"),					RGB(150, 0, 0) },
-	{ _T("P8"),					RGB(150, 0, 0) },
-	{ _T("P9"),					RGB(150, 0, 0) },
-	{ _T("P10"),				RGB(150, 0, 0) },
+	{ _T("P0"),					DEF_PRIORITYCOLOR_0,	DEF_PRIORITYCOLOR_0 },
+	{ _T("P1"),					DEF_PRIORITYCOLOR_1,	DEF_PRIORITYCOLOR_1 },
+	{ _T("P2"),					DEF_PRIORITYCOLOR_2,	DEF_PRIORITYCOLOR_2 },
+	{ _T("P3"),					DEF_PRIORITYCOLOR_3,	DEF_PRIORITYCOLOR_3 },
+	{ _T("P4"),					DEF_PRIORITYCOLOR_4,	DEF_PRIORITYCOLOR_4 },
+	{ _T("P5"),					DEF_PRIORITYCOLOR_5,	DEF_PRIORITYCOLOR_5 },
+	{ _T("P6"),					DEF_PRIORITYCOLOR_6,	DEF_PRIORITYCOLOR_6 },
+	{ _T("P7"),					DEF_PRIORITYCOLOR_7,	DEF_PRIORITYCOLOR_7 },
+	{ _T("P8"),					DEF_PRIORITYCOLOR_8,	DEF_PRIORITYCOLOR_8 },
+	{ _T("P9"),					DEF_PRIORITYCOLOR_9,	DEF_PRIORITYCOLOR_9 },
+	{ _T("P10"),				DEF_PRIORITYCOLOR_10,	DEF_PRIORITYCOLOR_1 },
+
+	{ _T("S0"),					CLR_NONE,				CLR_NONE },
+	{ _T("S1"),					CLR_NONE,				CLR_NONE },
+	{ _T("S2"),					CLR_NONE,				CLR_NONE },
+	{ _T("S3"),					CLR_NONE,				CLR_NONE },
+	{ _T("S4"),					CLR_NONE,				CLR_NONE },
+	{ _T("S5"),					CLR_NONE,				CLR_NONE },
+	{ _T("S6"),					CLR_NONE,				CLR_NONE },
+	{ _T("S7"),					CLR_NONE,				CLR_NONE },
+	{ _T("S8"),					CLR_NONE,				CLR_NONE },
+	{ _T("S9"),					CLR_NONE,				CLR_NONE },
+	{ _T("S10"),				CLR_NONE,				CLR_NONE },
+
 };
-const int NUM_COLORS = (sizeof(COLORS) / sizeof(COLORS[0]));
+const int NUM_COLORS = (sizeof(COLORDEFS) / sizeof(COLORDEFS[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -86,13 +103,14 @@ void CTDCDarkMode::SaveColors()
 
 	for (int nKey = 0; nKey < NUM_COLORS; nKey++)
 	{
-		const DMCOLOR& color = COLORS[nKey];
-		COLORREF crColor = prefs.GetProfileInt(PREFSCOLORSECTION, color.szKey);
+		const COLORDEF& color = COLORDEFS[nKey];
+		COLORREF crColor = prefs.GetProfileInt(PREFSCOLORSECTION, color.szKey, color.crLMDefault);
 
 		prefs.WriteProfileInt(DMPREFSCOLORSECTION, (sPrefix + color.szKey), crColor);
 	}
 
 	prefs.WriteProfileInt(DMPREFSCOLORSECTION, (sPrefix + COLORTASKBKGNDKEY), prefs.GetProfileInt(PREFSSECTION, COLORTASKBKGNDKEY));
+	prefs.WriteProfileInt(DMPREFSCOLORSECTION, (sPrefix + TEXTCOLOROPTION), prefs.GetProfileInt(PREFSSECTION, TEXTCOLOROPTION, -1));
 }
 
 void CTDCDarkMode::RestoreColors(CPreferences& prefs)
@@ -104,11 +122,12 @@ void CTDCDarkMode::RestoreColors(CPreferences& prefs)
 
 	for (int nKey = 0; nKey < NUM_COLORS; nKey++)
 	{
-		const DMCOLOR& color = COLORS[nKey];
+		const COLORDEF& color = COLORDEFS[nKey];
 		COLORREF crColor = prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + color.szKey), color.crDMDefault);
 
 		prefs.WriteProfileInt(PREFSCOLORSECTION, color.szKey, crColor);
 	}
 
 	prefs.WriteProfileInt(PREFSSECTION, COLORTASKBKGNDKEY, prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + COLORTASKBKGNDKEY), TRUE));
+	prefs.WriteProfileInt(PREFSSECTION, TEXTCOLOROPTION, prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + TEXTCOLOROPTION), -1));
 }

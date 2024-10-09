@@ -1,11 +1,14 @@
+// PreferencesUITasklistPageColors.h : header file
+//
+
 #if !defined(AFX_PREFERENCESUITASKLISTCOLORSPAGE_H__9612D6FB_2A00_46DA_99A4_1AC6270F060D__INCLUDED_)
 #define AFX_PREFERENCESUITASKLISTCOLORSPAGE_H__9612D6FB_2A00_46DA_99A4_1AC6270F060D__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// PreferencesUITasklistPageColors.h : header file
-//
+
+/////////////////////////////////////////////////////////////////////////////
 
 #include "tdcstruct.h"
 
@@ -24,15 +27,39 @@
 const UINT WM_PUITCP_TEXTCOLOROPTION = ::RegisterWindowMessage(_T("WM_PUITCP_TEXTCOLOROPTION"));
 
 /////////////////////////////////////////////////////////////////////////////
+// default colors
 
-enum { COLOROPT_ATTRIB, COLOROPT_PRIORITY, COLOROPT_DEFAULT, COLOROPT_NONE };
+const COLORREF DEF_ALTERNATELINECOLOR	= RGB(235, 235, 255);
+const COLORREF DEF_TASKDONECOLOR		= RGB(128, 128, 128);
+const COLORREF DEF_GRIDLINECOLOR		= RGB(192, 192, 192);
+const COLORREF DEF_TASKDUECOLOR			= RGB(255, 0, 0);
+const COLORREF DEF_TASKDUETODAYCOLOR	= RGB(255, 128, 0);
+const COLORREF DEF_TASKSTARTCOLOR		= RGB(0, 255, 0);
+const COLORREF DEF_FLAGGEDCOLOR			= RGB(128, 64, 0);
+const COLORREF DEF_REFERENCECOLOR		= RGB(128, 0, 64);
+const COLORREF DEF_GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
 
-struct ATTRIBCOLOR
+const COLORREF DEF_PRIORITYLOWCOLOR		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_0		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_1		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_2		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_3		= RGB(30, 225, 0);
+const COLORREF DEF_PRIORITYCOLOR_4		= RGB(0, 0, 255);
+const COLORREF DEF_PRIORITYCOLOR_5		= RGB(0, 0, 255);
+const COLORREF DEF_PRIORITYCOLOR_6		= RGB(0, 0, 255);
+const COLORREF DEF_PRIORITYCOLOR_7		= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_8		= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_9		= RGB(255, 0, 0);
+const COLORREF DEF_PRIORITYCOLOR_10		= RGB(255, 0, 0);
+
+enum // GetTextColorOption
 {
-	CString sAttrib;
-	COLORREF color;
+	COLOROPT_ATTRIB,
+	COLOROPT_PRIORITY,
+	COLOROPT_DEFAULT,
+	COLOROPT_NONE
 };
-typedef CArray<ATTRIBCOLOR, ATTRIBCOLOR&> CAttribColorArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistColorsPage dialog
@@ -122,7 +149,6 @@ protected:
 	BOOL	m_bShowTimeColumn;
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPriorityScheme;
-	CAttribColorArray m_aAttribColors;
 	COLORREF m_crLow, m_crHigh;
 	CString m_sTreeFont;
 	int		m_nTreeFontSize;
@@ -139,6 +165,14 @@ protected:
 	TDC_ATTRIBUTE m_nColorAttribute;
 
 	TDCAUTOLISTDATA m_defaultListData;
+
+	struct ATTRIBCOLOR
+	{
+		CString sAttrib;
+		COLORREF color;
+	};
+
+	CArray<ATTRIBCOLOR, ATTRIBCOLOR&> m_aAttribColors;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

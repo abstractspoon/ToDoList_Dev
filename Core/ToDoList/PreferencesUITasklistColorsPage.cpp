@@ -20,38 +20,13 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// default colors
-
-const COLORREF DEF_ALTERNATELINECOLOR	= RGB(235, 235, 255);
-const COLORREF DEF_TASKDONECOLOR		= RGB(128, 128, 128);
-const COLORREF DEF_GRIDLINECOLOR		= RGB(192, 192, 192);
-const COLORREF DEF_TASKDUECOLOR			= RGB(255, 0, 0);
-const COLORREF DEF_TASKDUETODAYCOLOR	= RGB(255, 128, 0);
-const COLORREF DEF_TASKSTARTCOLOR		= RGB(0, 255, 0);
-const COLORREF DEF_FLAGGEDCOLOR			= RGB(128, 64, 0);
-const COLORREF DEF_REFERENCECOLOR		= RGB(128, 0, 64);
-const COLORREF DEF_GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
-
-const COLORREF DEF_PRIORITYLOWCOLOR		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_0		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_1		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_2		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_3		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_4		= RGB(0, 0, 255);
-const COLORREF DEF_PRIORITYCOLOR_5		= RGB(0, 0, 255);
-const COLORREF DEF_PRIORITYCOLOR_6		= RGB(0, 0, 255);
-const COLORREF DEF_PRIORITYCOLOR_7		= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_8		= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_9		= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_10		= RGB(255, 0, 0);
-
-const COLORREF DEF_LIGHTGRAY			= RGB(240, 240, 240);
-
-/////////////////////////////////////////////////////////////////////////////
 
 const int DEFFONTSIZE = 8;
+const int NUM_PRIORITY = 11;
+
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
+
+const COLORREF DEF_LIGHTGRAY = RGB(240, 240, 240);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -284,8 +259,8 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	CColorBrewer brewer(CBF_SYNTHESIZE | CBF_TEXTSAFE);
 	CColorBrewerPaletteArray aPalettes;
 
-	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, 11);
-	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, 11, TRUE);
+	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, NUM_PRIORITY);
+	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, NUM_PRIORITY, TRUE);
 
 	m_cbPriorityScheme.Initialize(aPalettes);
 
@@ -392,7 +367,7 @@ int CPreferencesUITasklistColorsPage::GetPriorityColors(CDWordArray& aColors) co
 			break;
 
 		case COLORPRIORITYBY_GRADIENT:	
-			GraphicsMisc::CalculateColorGradient(m_crLow, m_crHigh, 11, aColors, !m_bHLSColorGradient);
+			GraphicsMisc::CalculateColorGradient(m_crLow, m_crHigh, NUM_PRIORITY, aColors, !m_bHLSColorGradient);
 			break;
 
 		case COLORPRIORITYBY_SCHEME:
@@ -402,7 +377,7 @@ int CPreferencesUITasklistColorsPage::GetPriorityColors(CDWordArray& aColors) co
 	}
 	else // grayscale
 	{
-		GraphicsMisc::CalculateColorGradient(DEF_LIGHTGRAY, 0, 11, aColors, TRUE);
+		GraphicsMisc::CalculateColorGradient(DEF_LIGHTGRAY, 0, NUM_PRIORITY, aColors, TRUE);
 	}
 	
 	return aColors.GetSize(); 
@@ -985,7 +960,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 
 	if (pPrefs->GetProfileInt(sColorKey, _T("S0"), -1) != -1)
 	{
-		for (int nColor = 0; nColor < 11; nColor++)
+		for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
 		{
 			CString sKey = Misc::MakeKey(_T("S%d"), nColor);
 			m_aPriorityScheme.Add(pPrefs->GetProfileInt(sColorKey, sKey));
