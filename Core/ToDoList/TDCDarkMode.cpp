@@ -35,8 +35,8 @@ struct COLORDEF
 
 COLORDEF COLORDEFS[] = 
 {
-	{ _T("Gridlines"),			DEF_GRIDLINECOLOR,		RGB(75, 75, 75) },
-	{ _T("TaskDone"),			DEF_TASKDONECOLOR,		RGB(63, 64, 65) },
+	{ _T("Gridlines"),			DEF_GRIDLINECOLOR,		DM_3DFACE },
+	{ _T("TaskDone"),			DEF_TASKDONECOLOR,		DM_WINDOW },
 	{ _T("TaskStart"),			DEF_TASKSTARTCOLOR,		RGB(0, 100, 0) },
 	{ _T("TaskStartToday"),		DEF_TASKSTARTCOLOR,		RGB(0, 150, 0) },
 	{ _T("TaskDue"),			DEF_TASKDUECOLOR,		RGB(100, 0, 0) },
@@ -103,10 +103,10 @@ void CTDCDarkMode::SaveColors()
 
 	for (int nKey = 0; nKey < NUM_COLORS; nKey++)
 	{
-		const COLORDEF& color = COLORDEFS[nKey];
-		COLORREF crColor = prefs.GetProfileInt(PREFSCOLORSECTION, color.szKey, color.crLMDefault);
+		const COLORDEF& def = COLORDEFS[nKey];
+		COLORREF color = prefs.GetProfileInt(PREFSCOLORSECTION, def.szKey, def.crLMDefault);
 
-		prefs.WriteProfileInt(DMPREFSCOLORSECTION, (sPrefix + color.szKey), crColor);
+		prefs.WriteProfileInt(DMPREFSCOLORSECTION, (sPrefix + def.szKey), color);
 	}
 
 	prefs.WriteProfileInt(DMPREFSCOLORSECTION, (sPrefix + COLORTASKBKGNDKEY), prefs.GetProfileInt(PREFSSECTION, COLORTASKBKGNDKEY));
@@ -118,16 +118,17 @@ void CTDCDarkMode::RestoreColors(CPreferences& prefs)
 	if (!IsSupported())
 		return;
 
-	CString sPrefix(IsEnabled() ? _T("DM_") : _T("LM_"));
+	BOOL bDarkMode = IsEnabled();
+	CString sPrefix(bDarkMode ? _T("DM_") : _T("LM_"));
 
 	for (int nKey = 0; nKey < NUM_COLORS; nKey++)
 	{
-		const COLORDEF& color = COLORDEFS[nKey];
-		COLORREF crColor = prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + color.szKey), color.crDMDefault);
+		const COLORDEF& def = COLORDEFS[nKey];
+		COLORREF color = prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + def.szKey), (bDarkMode ? def.crDMDefault : def.crLMDefault));
 
-		prefs.WriteProfileInt(PREFSCOLORSECTION, color.szKey, crColor);
+		prefs.WriteProfileInt(PREFSCOLORSECTION, def.szKey, color);
 	}
 
-	prefs.WriteProfileInt(PREFSSECTION, COLORTASKBKGNDKEY, prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + COLORTASKBKGNDKEY), TRUE));
+	prefs.WriteProfileInt(PREFSSECTION, COLORTASKBKGNDKEY, prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + COLORTASKBKGNDKEY), IsEnabled()));
 	prefs.WriteProfileInt(PREFSSECTION, TEXTCOLOROPTION, prefs.GetProfileInt(DMPREFSCOLORSECTION, (sPrefix + TEXTCOLOROPTION), -1));
 }
