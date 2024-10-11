@@ -75,6 +75,10 @@ namespace HTMLReportExporter
 		private const String PlaceHolderRegex = @"(?<=\$\()(.*?)(?=\))";
 		private const String AtomicAttribute = "ATOMICSELECTION";
 
+		// -----------------------------------------------------------
+
+		public const String TaskColorPlaceholder = "$(textColor)";
+
 		public static bool IsPlaceholder(MSHTML.IHTMLElement element, bool atomic = false)
 		{
 			if (element == null)
@@ -263,7 +267,7 @@ namespace HTMLReportExporter
 
 			foreach (var attrib in customAttribs)
 			{
-				if (content.IndexOf(FormatPlaceholder(attrib.Key, depth)) != -1)
+				if (content.IndexOf(FormatPlaceholder(attrib.Key.ToLower(), depth)) != -1)
 					return true;
 			}
 
@@ -368,12 +372,14 @@ namespace HTMLReportExporter
 				{
 					var attribVal = task.GetCustomAttributeValue(attrib.Key, true);
 
-					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.Key, depth, isLeafTask);
+					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.Key.ToLower(), depth, isLeafTask);
 				}
+
+				content = content.Replace(TaskColorPlaceholder, task.GetTextForeWebColor());
+
 			}
 
 			return content;
 		}
-
 	}
 }

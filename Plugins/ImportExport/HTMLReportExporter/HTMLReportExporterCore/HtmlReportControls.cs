@@ -823,7 +823,7 @@ namespace HTMLReportExporter
 					var menuItem = new ToolStripMenuItem();
 
 					menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)", Translator.Type.Menu), attrib.Value);
-					menuItem.Name = attrib.Key;
+					menuItem.Name = attrib.Key.ToLower();
 					menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
 
 					ToolStripAttributeMenu.DropDownItems.Add(menuItem);
