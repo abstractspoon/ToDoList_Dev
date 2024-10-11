@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Globalization;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -640,8 +640,8 @@ namespace DayViewUIExtension
 								bool isSelected,
 								Color fillColor, 
 								Color borderColor,
-								bool clipLongLeftBorder,
-								bool clipLongRightBorder)
+								bool clipLeftBorder,
+								bool clipRightBorder)
 		{
 			if (rect.Width <= 0)
 				return;
@@ -652,14 +652,18 @@ namespace DayViewUIExtension
 
 			if (isLong)
 			{
-				if (clipLongLeftBorder)
+				if (clipLeftBorder)
 				{
 					rect.X++;
 					rect.Width--;
 				}
 
-				if (clipLongRightBorder)
+				if (clipRightBorder)
 					rect.Width--;
+			}
+			else
+			{
+				Debug.Assert(!clipLeftBorder && !clipRightBorder);
 			}
 
 			if (isSelected)
@@ -678,8 +682,8 @@ namespace DayViewUIExtension
 												rect.Height,
 												GetAppointmentSelectedState(apptView.Appointment),
 												isTimeBlock,
-												clipLongLeftBorder,
-												clipLongRightBorder);
+												clipLeftBorder,
+												clipRightBorder);
 
 				if (isFutureItem && !borderColor.IsEmpty)
 				{
@@ -690,7 +694,7 @@ namespace DayViewUIExtension
 					{
 						pen.DashStyle = DashStyle.Dash;
 
-						DrawTaskBorder(g, rect, pen, clipLongLeftBorder, clipLongRightBorder);
+						DrawTaskBorder(g, rect, pen, clipLeftBorder, clipRightBorder);
 					}
 				}
 			}
@@ -721,7 +725,7 @@ namespace DayViewUIExtension
 						if (isFutureItem)
 							pen.DashStyle = DashStyle.Dash;
 
-						DrawTaskBorder(g, rect, pen, clipLongLeftBorder, clipLongRightBorder);
+						DrawTaskBorder(g, rect, pen, clipLeftBorder, clipRightBorder);
 					}
 				}
 			}
