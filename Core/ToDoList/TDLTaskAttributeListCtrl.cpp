@@ -1653,9 +1653,11 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		{
 			TDCTIMEPERIOD tp;
 			
-			if (tp.Parse(sText) && (tp.dAmount != 0.0))
+			if (tp.Parse(sText))
 			{
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, tp.Format(2), crText, nDrawTextFlags);
+				if (tp.dAmount != 0.0)
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, tp.Format(2), crText, nDrawTextFlags);
+
 				return;
 			}
 		}
