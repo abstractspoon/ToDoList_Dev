@@ -53,12 +53,19 @@ const COLORREF DEF_PRIORITYCOLOR_8		= RGB(255, 0, 0);
 const COLORREF DEF_PRIORITYCOLOR_9		= RGB(255, 0, 0);
 const COLORREF DEF_PRIORITYCOLOR_10		= RGB(255, 0, 0);
 
-enum // GetTextColorOption
+enum PUITCP_TEXTCOLOROPTION
 {
-	COLOROPT_ATTRIB,
-	COLOROPT_PRIORITY,
-	COLOROPT_DEFAULT,
-	COLOROPT_NONE
+	TEXTOPT_ATTRIB,
+	TEXTOPT_PRIORITY,
+	TEXTOPT_DEFAULT,
+	TEXTOPT_NONE
+};
+
+enum PUITCP_PRIORITYCOLOROPTION
+{
+	PRIORITYOPT_INDIVIDUAL,
+	PRIORITYOPT_GRADIENT,
+	PRIORITYOPT_SCHEME,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -76,7 +83,7 @@ public:
 	void SetDefaultListData(const TDCAUTOLISTDATA& defaultListData);
 
 	BOOL GetColorPriority() const { return m_bColorPriority; }
-	int GetTextColorOption() const { return m_nTextColorOption; }
+	PUITCP_TEXTCOLOROPTION GetTextColorOption() const { return (PUITCP_TEXTCOLOROPTION)m_nTextColorOption; }
 	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
 	int GetPriorityColors(CDWordArray& aColors) const;
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const;
@@ -102,67 +109,75 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUITasklistColorsPage)
-	CComboBox	m_cbColorByAttribute;
-	BOOL	m_bColorTaskBackground;
-	BOOL	m_bHLSColorGradient;
-	BOOL	m_bHidePriorityNumber;
-	BOOL	m_bSpecifyAlternateLineColor;
-	int		m_nTextColorOption;
 	//}}AFX_DATA
+
+	CComboBox m_cbColorByAttribute;
+	CComboBox m_cbTreeFontSize, m_cbCommentsFontSize;
 	CColorComboBox m_cbAttributes;
-	CString	m_sSelAttribValue;
 	CColorComboBox m_cbPriorityColors;
-	CColorBrewerComboBox	m_cbPriorityScheme;
-	BOOL	m_bSpecifyDueColor;
-	BOOL	m_bSpecifyDueTodayColor;
-	BOOL	m_bSpecifyStartColor;
-	BOOL	m_bSpecifyStartTodayColor;
-	BOOL	m_bSpecifyGridColor;
-	BOOL	m_bSpecifyDoneColor;
-	BOOL	m_bSpecifyFlaggedColor; 
-	BOOL	m_bSpecifyReferenceColor;
-	BOOL	m_bSpecifyGroupHeaderBkgndColor;
-	BOOL	m_bCommentsUseTreeFont;
-	BOOL	m_bRemindersUseTreeFont;
-	BOOL	m_bFindTasksUseTreeFont;
-	CColourButton	m_btFilteredColor;
-	CColourButton	m_btAttribColor;
-	CColourButton	m_btDoneColor;
-	CColourButton	m_btGridlineColor;
-	CColourButton	m_btDueColor;
-	CColourButton	m_btDueTodayColor;
-	CColourButton	m_btStartColor;
-	CColourButton	m_btStartTodayColor;
-	CColourButton	m_btFlaggedColor;
-	CColourButton	m_btReferenceColor;
-	CColourButton	m_btGroupHeaderBkgndColor;
-	CComboBox	m_cbTreeFontSize, m_cbCommentsFontSize;
-	CFontNameComboBox	m_cbTreeFonts, m_cbCommentsFonts;
-	BOOL	m_bSpecifyTreeFont;
-	BOOL	m_bSpecifyCommentsFont;
-	CColourButton	m_btSetColor;
-	CColourButton	m_btLowColor;
-	CColourButton	m_btHighColor;
-	BOOL	m_bColorPriority;
-	int		m_nPriorityColorOption;
-	int		m_nSelPriorityColor;
-	BOOL	m_bShowTimeColumn;
+	CColorBrewerComboBox m_cbPriorityScheme;
+	CFontNameComboBox m_cbTreeFonts, m_cbCommentsFonts;
+
+	BOOL m_bColorTaskBackground;
+	BOOL m_bHLSColorGradient;
+	BOOL m_bHidePriorityNumber;
+	BOOL m_bSpecifyAlternateLineColor;
+	BOOL m_bSpecifyDueColor;
+	BOOL m_bSpecifyDueTodayColor;
+	BOOL m_bSpecifyStartColor;
+	BOOL m_bSpecifyStartTodayColor;
+	BOOL m_bSpecifyGridColor;
+	BOOL m_bSpecifyDoneColor;
+	BOOL m_bSpecifyFlaggedColor;
+	BOOL m_bSpecifyReferenceColor;
+	BOOL m_bSpecifyGroupHeaderBkgndColor;
+	BOOL m_bCommentsUseTreeFont;
+	BOOL m_bRemindersUseTreeFont;
+	BOOL m_bFindTasksUseTreeFont;
+	BOOL m_bSpecifyTreeFont;
+	BOOL m_bSpecifyCommentsFont;
+	BOOL m_bColorPriority;
+	BOOL m_bShowTimeColumn;
+
+	CColourButton m_btFilteredColor;
+	CColourButton m_btAttribColor;
+	CColourButton m_btDoneColor;
+	CColourButton m_btGridlineColor;
+	CColourButton m_btDueColor;
+	CColourButton m_btDueTodayColor;
+	CColourButton m_btStartColor;
+	CColourButton m_btStartTodayColor;
+	CColourButton m_btFlaggedColor;
+	CColourButton m_btReferenceColor;
+	CColourButton m_btGroupHeaderBkgndColor;
+	CColourButton m_btSetColor;
+	CColourButton m_btLowColor;
+	CColourButton m_btHighColor;
+	CColourButton m_btAltLineColor;
+
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPriorityScheme;
-	COLORREF m_crLow, m_crHigh;
+
+	int m_nSelPriorityColor;
+	int m_nTreeFontSize;
+	int m_nCommentsFontSize;
+
+	CString	m_sSelAttribValue;
 	CString m_sTreeFont;
-	int		m_nTreeFontSize;
 	CString m_sCommentsFont;
-	int		m_nCommentsFontSize;
+
+	COLORREF m_crLow, m_crHigh;
 	COLORREF m_crGridlines, m_crDone;
-	CColourButton	m_btAltLineColor;
 	COLORREF m_crAltLine;
 	COLORREF m_crDue, m_crDueToday;
 	COLORREF m_crStart, m_crStartToday;
 	COLORREF m_crFlagged;
 	COLORREF m_crReference;
 	COLORREF m_crGroupHeaderBkgnd;
+
 	TDC_ATTRIBUTE m_nColorAttribute;
+	PUITCP_TEXTCOLOROPTION m_nTextColorOption;
+	PUITCP_PRIORITYCOLOROPTION m_nPriorityColorOption;
 
 	TDCAUTOLISTDATA m_defaultListData;
 

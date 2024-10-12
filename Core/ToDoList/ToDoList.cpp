@@ -1332,7 +1332,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 	{
 	case IDYES:
 		{
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
 			
 			// Restart
 			HWND hwndMain = *AfxGetMainWnd();
@@ -1353,7 +1353,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 		break;
 
 	case IDNO:
-		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
 		break;
 
 	case IDCANCEL:
@@ -1363,8 +1363,8 @@ void CToDoListApp::OnToolsToggleDarkMode()
 
 void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CDarkMode::IsSupported());
-	pCmdUI->SetCheck(CDarkMode::IsEnabled());
+	pCmdUI->Enable(CTDCDarkMode::IsSupported());
+	pCmdUI->SetCheck(CTDCDarkMode::IsEnabled());
 }
 
 void CToDoListApp::OnImportPrefs() 
@@ -1588,7 +1588,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		}
 	}
 
-	if (CDarkMode::IsEnabled())
+	if (CTDCDarkMode::IsEnabled())
 		params.SetOption(SWITCH_DARKMODE);
 
 	if (CRTLStyleMgr::IsRTL())
@@ -1863,7 +1863,7 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	cmdInfo.SetOption(SWITCH_APPID, TDLAPPID);
 	cmdInfo.SetOption(SWITCH_SHOWUI);
 
-	if (CDarkMode::IsEnabled())
+	if (CTDCDarkMode::IsEnabled())
 		cmdInfo.SetOption(SWITCH_DARKMODE);
 
 	// Pass the centroid of the main wnd so that the
