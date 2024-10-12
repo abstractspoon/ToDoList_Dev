@@ -120,8 +120,8 @@ protected:
 	BOOL	m_bSpecifyTreeFont;
 	BOOL	m_bSpecifyCommentsFont;
 	CColourButton	m_btSetColor;
-	CColourButton	m_btLowColor;
-	CColourButton	m_btHighColor;
+	CColourButton	m_btPriorityLowColor;
+	CColourButton	m_btPriorityHighColor;
 	BOOL	m_bColorPriority;
 	int		m_nPriorityColorOption;
 	int		m_nSelPriorityColor;
@@ -129,7 +129,7 @@ protected:
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPriorityScheme;
 	CAttribColorArray m_aAttribColors;
-	COLORREF m_crLow, m_crHigh;
+	COLORREF m_crPriorityLow, m_crPriorityHigh;
 	CString m_sTreeFont;
 	int		m_nTreeFontSize;
 	CString m_sCommentsFont;
