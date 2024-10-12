@@ -151,8 +151,8 @@ protected:
 	CColourButton m_btReferenceColor;
 	CColourButton m_btGroupHeaderBkgndColor;
 	CColourButton m_btSetColor;
-	CColourButton m_btLowColor;
-	CColourButton m_btHighColor;
+	CColourButton m_btPriorityLowColor;
+	CColourButton m_btPriorityHighColor;
 	CColourButton m_btAltLineColor;
 
 	CDWordArray m_aPriorityColors;
@@ -166,7 +166,7 @@ protected:
 	CString m_sTreeFont;
 	CString m_sCommentsFont;
 
-	COLORREF m_crLow, m_crHigh;
+	COLORREF m_crPriorityLow, m_crPriorityHigh;
 	COLORREF m_crGridlines, m_crDone;
 	COLORREF m_crAltLine;
 	COLORREF m_crDue, m_crDueToday;
