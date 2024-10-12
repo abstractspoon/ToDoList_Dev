@@ -150,7 +150,7 @@ protected:
 	CColourButton m_btFlaggedColor;
 	CColourButton m_btReferenceColor;
 	CColourButton m_btGroupHeaderBkgndColor;
-	CColourButton m_btSetColor;
+	CColourButton m_btPriorityColor;
 	CColourButton m_btPriorityLowColor;
 	CColourButton m_btPriorityHighColor;
 	CColourButton m_btAltLineColor;

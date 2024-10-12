@@ -94,7 +94,7 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SETFLAGGEDCOLOR, m_btFlaggedColor);
 	DDX_Control(pDX, IDC_SETREFERENCECOLOR, m_btReferenceColor);
 	DDX_Control(pDX, IDC_SETALTLINECOLOR, m_btAltLineColor);
-	DDX_Control(pDX, IDC_SETPRIORITYCOLOR, m_btSetColor);
+	DDX_Control(pDX, IDC_SETPRIORITYCOLOR, m_btPriorityColor);
 	DDX_Control(pDX, IDC_LOWPRIORITYCOLOR, m_btPriorityLowColor);
 	DDX_Control(pDX, IDC_HIGHPRIORITYCOLOR, m_btPriorityHighColor);
 	DDX_Check(pDX, IDC_COLORPRIORITY, m_bColorPriority);
@@ -211,7 +211,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	GetDlgItem(IDC_COMMENTSFONTSIZELABEL)->EnableWindow(bEnableCommentsFont);
 	GetDlgItem(IDC_COMMENTSFONTLIST)->EnableWindow(bEnableCommentsFont);
 
-	m_btSetColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL));
+	m_btPriorityColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL));
 	m_btPriorityLowColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 	m_btPriorityHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 	m_btGridlineColor.EnableWindow(m_bSpecifyGridColor);
@@ -229,7 +229,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btGridlineColor.SetColor(m_crGridlines);
 	m_btPriorityLowColor.SetColor(m_crPriorityLow);
 	m_btPriorityHighColor.SetColor(m_crPriorityHigh);
-	m_btSetColor.SetColor(m_aPriorityColors[0]);
+	m_btPriorityColor.SetColor(m_aPriorityColors[0]);
 	m_btDoneColor.SetColor(m_crDone);
 	m_btAltLineColor.SetColor(m_crAltLine);
 	m_btStartColor.SetColor(m_crStart);
@@ -301,8 +301,8 @@ void CPreferencesUITasklistColorsPage::OnSetprioritycolor()
 {
 	VERIFY(m_nSelPriorityColor >= 0);
 
-	m_aPriorityColors.SetAt(m_nSelPriorityColor, m_btSetColor.GetColor());
-	m_cbPriorityColors.SetColor(m_nSelPriorityColor, m_btSetColor.GetColor());
+	m_aPriorityColors.SetAt(m_nSelPriorityColor, m_btPriorityColor.GetColor());
+	m_cbPriorityColors.SetColor(m_nSelPriorityColor, m_btPriorityColor.GetColor());
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -315,7 +315,7 @@ void CPreferencesUITasklistColorsPage::OnChangePriorityColorOption()
 	GetDlgItem(IDC_USEHLSGRADIENT)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 	GetDlgItem(IDC_PRIORITYSCHEMES)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_SCHEME));
 
-	m_btSetColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL) && m_nSelPriorityColor >= 0);
+	m_btPriorityColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL) && m_nSelPriorityColor >= 0);
 	m_btPriorityLowColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 	m_btPriorityHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 
@@ -410,11 +410,11 @@ void CPreferencesUITasklistColorsPage::OnSelchangePrioritycolors()
 	
 	if (m_nSelPriorityColor >= 0)
 	{
-		m_btSetColor.SetColor(m_aPriorityColors[m_nSelPriorityColor]);
-		m_btSetColor.EnableWindow(TRUE);
+		m_btPriorityColor.SetColor(m_aPriorityColors[m_nSelPriorityColor]);
+		m_btPriorityColor.EnableWindow(TRUE);
 	}
 	else
-		m_btSetColor.EnableWindow(FALSE);
+		m_btPriorityColor.EnableWindow(FALSE);
 
 	CPreferencesPageBase::OnControlChange();
 }
