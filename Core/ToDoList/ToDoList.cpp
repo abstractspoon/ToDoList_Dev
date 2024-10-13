@@ -1313,13 +1313,13 @@ void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences&
 	{
 		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
 
-		if (bDarkMode == -1)
+		if (bDarkMode == -1) // First time fallback
 		{
 			bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
 			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
 		}
 
-		CTDCDarkMode::Initialize(bDarkMode, prefs);
+		CTDCDarkMode::Initialize(prefs);
 	}
 }
 

@@ -19,7 +19,7 @@ class CPreferences;
 class CTDCDarkMode : public CDarkMode
 {
 public:
-	static void Initialize(BOOL bEnable, CPreferences& prefs);
+	static void Initialize(CPreferences& prefs);
 	static void Release();
 
 protected:
@@ -28,7 +28,7 @@ protected:
 
 protected:
 	static void RestoreColors(CPreferences& prefs);
-	static void SaveColors();
+	static void SaveColors(CPreferences& prefs);
 
 	static void CopyColors(CPreferences& prefs,
 						   const CString& sFromSection,

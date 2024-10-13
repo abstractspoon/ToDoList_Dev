@@ -17,18 +17,20 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const CString PREFSSECTION				= _T("Preferences");
-const CString PREFSCOLORSECTION			= _T("Preferences\\Colors");
-const CString DMPREFSCOLORSECTION		= _T("DarkMode\\Colors");
+const CString PREFSSECTION			= _T("Preferences");
+const CString PREFSCOLORSECTION		= _T("Preferences\\Colors");
+const CString DARKMODEKEY			= _T("DarkMode");
+const CString DMPREFSSECTION		= _T("DarkMode\\Colors");
+const CString DMPREFSCOLORSECTION	= DMPREFSSECTION;
 
-const CString COLORTASKBKGNDKEY			= _T("ColorTaskBackground");
-const CString PRIORITYCOLOROPTION		= _T("PriorityColorOption");
-const CString TEXTCOLOROPTION			= _T("TextColorOption");
-const CString COLORATTRIBUTE			= _T("ColorAttribute");
+const CString COLORTASKBKGNDKEY		= _T("ColorTaskBackground");
+const CString PRIORITYCOLOROPTION	= _T("PriorityColorOption");
+const CString TEXTCOLOROPTION		= _T("TextColorOption");
+const CString COLORATTRIBUTE		= _T("ColorAttribute");
 
-const CString PRIORITYCOLORS			= _T("PriorityColors");
-const CString PRIORITYSCHEME			= _T("PriorityScheme");
-const CString ATTRIBUTECOLORS			= _T("AttribColors");
+const CString PRIORITYCOLORS		= _T("PriorityColors");
+const CString PRIORITYSCHEME		= _T("PriorityScheme");
+const CString ATTRIBUTECOLORS		= _T("AttribColors");
 
 const CString NO_PREFIX;
 
@@ -65,28 +67,55 @@ const int NUM_COLORS = (sizeof(COLORDEFS) / sizeof(COLORDEFS[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
-void CTDCDarkMode::Initialize(BOOL bEnable, CPreferences& prefs)
-{
-	CDarkMode::Enable(bEnable);
-
-	RestoreColors(prefs);
-}
-
-void CTDCDarkMode::Release()
-{
-	SaveColors();
-
-	CDarkMode::Enable(FALSE);
-}
-
-void CTDCDarkMode::SaveColors()
+void CTDCDarkMode::Initialize(CPreferences& prefs)
 {
 	if (!IsSupported())
 		return;
 
-	CPreferences prefs;
-	BOOL bDarkMode = IsEnabled();
+	BOOL bDarkMode = prefs.GetProfileInt(PREFSSECTION, DARKMODEKEY, FALSE);
 
+	// Cannot use this method for de-initialisation
+	if (IsEnabled() && !bDarkMode)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CDarkMode::Enable(bDarkMode);
+
+	// Only restore colours if something has been previously saved
+	// else we'll overwrite the user's current preferences
+	if (prefs.HasProfileSection(DMPREFSCOLORSECTION))
+		RestoreColors(prefs);
+}
+
+void CTDCDarkMode::Release()
+{
+	// Only save colours if we're:
+	//
+	// 1. Already in Dark Mode OR
+	// 2. We will be in Dark Mode next time OR
+	// 3. We've been in DarkMode at some point in the past
+	//
+	// This reduces the processing for people who will never use Dark Mode
+	CPreferences prefs;
+
+	if (IsEnabled() || 
+		prefs.GetProfileInt(PREFSSECTION, DARKMODEKEY, FALSE) ||
+		prefs.HasProfileSection(DMPREFSCOLORSECTION))
+	{
+		SaveColors(prefs);
+	}
+
+	CDarkMode::Enable(FALSE);
+}
+
+void CTDCDarkMode::SaveColors(CPreferences& prefs)
+{
+	ASSERT(IsSupported());
+
+	BOOL bDarkMode = IsEnabled();
+	
 	CString sToPrefix(bDarkMode ? _T("DM_") : _T("LM_"));
 	int nFromDefault = (bDarkMode ? DM_DEFAULT : LM_DEFAULT);
 
@@ -95,15 +124,14 @@ void CTDCDarkMode::SaveColors()
 			   PREFSCOLORSECTION,
 			   NO_PREFIX,
 			   nFromDefault,
-			   DMPREFSCOLORSECTION,
+			   DMPREFSSECTION,
 			   DMPREFSCOLORSECTION,
 			   sToPrefix);
 }
 
 void CTDCDarkMode::RestoreColors(CPreferences& prefs)
 {
-	if (!IsSupported())
-		return;
+	ASSERT(IsSupported());
 
 	BOOL bDarkMode = IsEnabled();
 
@@ -111,7 +139,7 @@ void CTDCDarkMode::RestoreColors(CPreferences& prefs)
 	int nFromDefault = (bDarkMode ? DM_DEFAULT : LM_DEFAULT);
 
 	CopyColors(prefs,
-			   DMPREFSCOLORSECTION,
+			   DMPREFSSECTION,
 			   DMPREFSCOLORSECTION,
 			   sFromPrefix,
 			   nFromDefault,
