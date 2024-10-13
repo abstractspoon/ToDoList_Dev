@@ -38,20 +38,10 @@ const COLORREF DEF_TASKSTARTCOLOR		= RGB(0, 255, 0);
 const COLORREF DEF_FLAGGEDCOLOR			= RGB(128, 64, 0);
 const COLORREF DEF_REFERENCECOLOR		= RGB(128, 0, 64);
 const COLORREF DEF_GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
-
 const COLORREF DEF_PRIORITYLOWCOLOR		= RGB(30, 225, 0);
 const COLORREF DEF_PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_0		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_1		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_2		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_3		= RGB(30, 225, 0);
-const COLORREF DEF_PRIORITYCOLOR_4		= RGB(0, 0, 255);
-const COLORREF DEF_PRIORITYCOLOR_5		= RGB(0, 0, 255);
-const COLORREF DEF_PRIORITYCOLOR_6		= RGB(0, 0, 255);
-const COLORREF DEF_PRIORITYCOLOR_7		= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_8		= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_9		= RGB(255, 0, 0);
-const COLORREF DEF_PRIORITYCOLOR_10		= RGB(255, 0, 0);
+
+/////////////////////////////////////////////////////////////////////////////
 
 enum PUITCP_TEXTCOLOROPTION
 {
@@ -255,6 +245,7 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
+	static void GetDefaultPriorityColors(CDWordArray& aColors);
 };
 
 //{{AFX_INSERT_LOCATION}}

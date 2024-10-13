@@ -19,17 +19,16 @@ static char THIS_FILE[] = __FILE__;
 
 const CString PREFSSECTION				= _T("Preferences");
 const CString PREFSCOLORSECTION			= _T("Preferences\\Colors");
-const CString PREFSATTRIBCOLORSECTION	= _T("Preferences\\AttribColors");
 const CString DMPREFSCOLORSECTION		= _T("DarkMode\\Colors");
-const CString DMPREFSATTRIBCOLORSECTION	= _T("DarkMode\\AttribColors");
 
 const CString COLORTASKBKGNDKEY			= _T("ColorTaskBackground");
 const CString PRIORITYCOLOROPTION		= _T("PriorityColorOption");
 const CString TEXTCOLOROPTION			= _T("TextColorOption");
-const CString ATTRIBCOLORCOUNT			= _T("Count");
-const CString ATTRIBCOLORATTRIB			= _T("Attribute");
-const CString ATTRIBCOLOR				= _T("Color");
-const CString ATTRIBVALUE				= _T("Attrib");
+const CString COLORATTRIBUTE			= _T("ColorAttribute");
+
+const CString PRIORITYCOLORS			= _T("PriorityColors");
+const CString PRIORITYSCHEME			= _T("PriorityScheme");
+const CString ATTRIBUTECOLORS			= _T("AttribColors");
 
 const CString NO_PREFIX;
 
@@ -59,35 +58,8 @@ COLORDEF COLORDEFS[] =
 	{ _T("Flagged"),			DEF_FLAGGEDCOLOR,		RGB(150, 0, 150) },
 	{ _T("Reference"),			DEF_REFERENCECOLOR,		RGB(0, 0, 150) },
 	{ _T("GroupHeaderBkgnd"),	DEF_GROUPHEADERBKCOLOR,	RGB(0, 25, 0) },
-	
-	// priority specific			
-	{ _T("Low"),				DEF_PRIORITYLOWCOLOR,	DEF_PRIORITYLOWCOLOR },
-	{ _T("High"),				DEF_PRIORITYHIGHCOLOR,	DEF_PRIORITYHIGHCOLOR },
-
-	{ _T("P0"),					DEF_PRIORITYCOLOR_0,	DEF_PRIORITYCOLOR_0 },
-	{ _T("P1"),					DEF_PRIORITYCOLOR_1,	DEF_PRIORITYCOLOR_1 },
-	{ _T("P2"),					DEF_PRIORITYCOLOR_2,	DEF_PRIORITYCOLOR_2 },
-	{ _T("P3"),					DEF_PRIORITYCOLOR_3,	DEF_PRIORITYCOLOR_3 },
-	{ _T("P4"),					DEF_PRIORITYCOLOR_4,	DEF_PRIORITYCOLOR_4 },
-	{ _T("P5"),					DEF_PRIORITYCOLOR_5,	DEF_PRIORITYCOLOR_5 },
-	{ _T("P6"),					DEF_PRIORITYCOLOR_6,	DEF_PRIORITYCOLOR_6 },
-	{ _T("P7"),					DEF_PRIORITYCOLOR_7,	DEF_PRIORITYCOLOR_7 },
-	{ _T("P8"),					DEF_PRIORITYCOLOR_8,	DEF_PRIORITYCOLOR_8 },
-	{ _T("P9"),					DEF_PRIORITYCOLOR_9,	DEF_PRIORITYCOLOR_9 },
-	{ _T("P10"),				DEF_PRIORITYCOLOR_10,	DEF_PRIORITYCOLOR_1 },
-
-	{ _T("S0"),					CLR_NONE,				CLR_NONE },
-	{ _T("S1"),					CLR_NONE,				CLR_NONE },
-	{ _T("S2"),					CLR_NONE,				CLR_NONE },
-	{ _T("S3"),					CLR_NONE,				CLR_NONE },
-	{ _T("S4"),					CLR_NONE,				CLR_NONE },
-	{ _T("S5"),					CLR_NONE,				CLR_NONE },
-	{ _T("S6"),					CLR_NONE,				CLR_NONE },
-	{ _T("S7"),					CLR_NONE,				CLR_NONE },
-	{ _T("S8"),					CLR_NONE,				CLR_NONE },
-	{ _T("S9"),					CLR_NONE,				CLR_NONE },
-	{ _T("S10"),				CLR_NONE,				CLR_NONE },
-
+	{ _T("PriorityLow"),		DEF_PRIORITYLOWCOLOR,	DEF_PRIORITYLOWCOLOR },
+	{ _T("PriorityHigh"),		DEF_PRIORITYHIGHCOLOR,	DEF_PRIORITYHIGHCOLOR },
 };
 const int NUM_COLORS = (sizeof(COLORDEFS) / sizeof(COLORDEFS[0]));
 
@@ -121,12 +93,10 @@ void CTDCDarkMode::SaveColors()
 	CopyColors(prefs,
 			   PREFSSECTION,
 			   PREFSCOLORSECTION,
-			   PREFSATTRIBCOLORSECTION,
 			   NO_PREFIX,
 			   nFromDefault,
 			   DMPREFSCOLORSECTION,
 			   DMPREFSCOLORSECTION,
-			   DMPREFSATTRIBCOLORSECTION, 
 			   sToPrefix);
 }
 
@@ -143,26 +113,25 @@ void CTDCDarkMode::RestoreColors(CPreferences& prefs)
 	CopyColors(prefs,
 			   DMPREFSCOLORSECTION,
 			   DMPREFSCOLORSECTION,
-			   DMPREFSATTRIBCOLORSECTION,
 			   sFromPrefix,
 			   nFromDefault,
 			   PREFSSECTION,
 			   PREFSCOLORSECTION,
-			   PREFSATTRIBCOLORSECTION,
 			   NO_PREFIX);
+
+	prefs.Save();
 }
 
 void CTDCDarkMode::CopyColors(CPreferences& prefs,
 							  const CString& sFromSection,
 							  const CString& sFromColorSection,
-							  const CString& sFromAttribColorSection,
 							  const CString& sFromPrefix,
 							  int nFromDefault,
 							  const CString& sToSection,
 							  const CString& sToColorSection,
-							  const CString& sToAttribColorSection,
 							  const CString& sToPrefix)
 {
+	// Preferences
 	BOOL bColorIsBkgnd = prefs.GetProfileInt(sFromSection, (sFromPrefix + COLORTASKBKGNDKEY), (nFromDefault == DM_DEFAULT));
 	prefs.WriteProfileInt(sToSection, (sToPrefix + COLORTASKBKGNDKEY), bColorIsBkgnd);
 
@@ -172,6 +141,12 @@ void CTDCDarkMode::CopyColors(CPreferences& prefs,
 	int nTextOption = prefs.GetProfileEnum(sFromSection, (sFromPrefix + TEXTCOLOROPTION), TEXTOPT_DEFAULT);
 	prefs.WriteProfileInt(sToSection, (sToPrefix + TEXTCOLOROPTION), nTextOption);
 
+	int nColorAttrib = prefs.GetProfileEnum(sFromSection, (sFromPrefix + COLORATTRIBUTE), TDCA_CATEGORY);
+	prefs.WriteProfileInt(sToSection, (sToPrefix + COLORATTRIBUTE), nTextOption);
+
+	// Colors
+
+	// Individual
 	for (int nKey = 0; nKey < NUM_COLORS; nKey++)
 	{
 		const COLORDEF& def = COLORDEFS[nKey];
@@ -180,31 +155,14 @@ void CTDCDarkMode::CopyColors(CPreferences& prefs,
 		prefs.WriteProfileInt(sToColorSection, (sToPrefix + def.szKey), color);
 	}
 
-	CopyAttributeColors(prefs,
-						sFromAttribColorSection, 
-						sFromPrefix, 
-						sToAttribColorSection, 
-						sToPrefix);
+	// Arrays
+	CString sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + PRIORITYCOLORS));
+	prefs.WriteProfileString(sToColorSection, (sToPrefix + PRIORITYCOLORS), sValues);
+
+	sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + PRIORITYSCHEME));
+	prefs.WriteProfileString(sToColorSection, (sToPrefix + PRIORITYSCHEME), sValues);
+
+	sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + ATTRIBUTECOLORS));
+	prefs.WriteProfileString(sToColorSection, (sToPrefix + ATTRIBUTECOLORS), sValues);
 }
 
-void CTDCDarkMode::CopyAttributeColors(CPreferences& prefs,
-									   const CString& sFromSection,
-									   const CString& sFromPrefix,
-									   const CString& sToSection,
-									   const CString& sToPrefix)
-{
-	int nNumColor = prefs.GetProfileInt(sFromSection, (sFromPrefix + ATTRIBCOLORCOUNT), 0);
-	prefs.WriteProfileInt(sToSection, (sToPrefix + ATTRIBCOLORCOUNT), nNumColor);
-
-	TDC_ATTRIBUTE nAttribID = prefs.GetProfileEnum(sFromSection, (sFromPrefix + ATTRIBCOLORATTRIB), TDCA_CATEGORY);
-	prefs.WriteProfileInt(sToSection, (sToPrefix + ATTRIBCOLORATTRIB), nAttribID);
-
-	for (int nColor = 0; nColor < nNumColor; nColor++)
-	{
-		CString sFromKey = Misc::MakeKey(sFromPrefix + ("P%d"), nColor, sFromSection);
-		CString sToKey = Misc::MakeKey(sToPrefix + _T("P%d"), nColor, sToSection);
-
-		prefs.WriteProfileInt(sToKey, ATTRIBCOLOR, prefs.GetProfileInt(sFromKey, ATTRIBCOLOR, CLR_NONE));
-		prefs.WriteProfileString(sToKey, ATTRIBVALUE, prefs.GetProfileString(sFromKey, ATTRIBVALUE));
-	}
-}

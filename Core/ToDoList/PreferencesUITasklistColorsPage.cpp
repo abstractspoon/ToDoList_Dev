@@ -22,11 +22,26 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int DEFFONTSIZE = 8;
-const int NUM_PRIORITY = 11;
-
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
 
 const COLORREF DEF_LIGHTGRAY = RGB(240, 240, 240);
+/////////////////////////////////////////////////////////////////////////////
+
+const COLORREF DEF_PRIORITYCOLOR[]
+{
+	RGB(30, 225, 0),
+	RGB(30, 225, 0),
+	RGB(30, 225, 0),
+	RGB(30, 225, 0),
+	RGB(0, 0, 255),
+	RGB(0, 0, 255),
+	RGB(0, 0, 255),
+	RGB(255, 0, 0),
+	RGB(255, 0, 0),
+	RGB(255, 0, 0),
+	RGB(255, 0, 0)
+};
+const int NUM_PRIORITY = (sizeof(DEF_PRIORITYCOLOR) / sizeof(DEF_PRIORITYCOLOR[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistColorsPage property page
@@ -946,14 +961,15 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	
 	if (pPrefs->GetProfileInt(sColorKey, _T("Low"), CLR_NONE) == CLR_NONE)
 	{
-		// Range
+		// Priority Range
 		m_crPriorityLow = pPrefs->GetProfileInt(sColorKey, _T("PriorityLow"), DEF_PRIORITYLOWCOLOR);
 		m_crPriorityHigh = pPrefs->GetProfileInt(sColorKey, _T("PriorityHigh"), DEF_PRIORITYHIGHCOLOR);
 
-		// Individual colours
-		Misc::Split(pPrefs->GetProfileString(sColorKey, _T("PriorityColors")), m_aPriorityColors, '|');
+		// Priority Individual colours
+		if (!Misc::Split(pPrefs->GetProfileString(sColorKey, _T("PriorityColors")), m_aPriorityColors, '|'))
+			GetDefaultPriorityColors(m_aPriorityColors);
 
-		// Scheme colours
+		// Priority Scheme
 		Misc::Split(pPrefs->GetProfileString(sColorKey, _T("PriorityScheme")), m_aPriorityScheme, '|');
 
 		// Attribute colours
@@ -973,33 +989,28 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	}
 	else // Backwards compatibility
 	{
-		// Range
+		// Priority Range
 		m_crPriorityLow = pPrefs->GetProfileInt(sColorKey, _T("Low"), DEF_PRIORITYLOWCOLOR);
 		m_crPriorityHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), DEF_PRIORITYHIGHCOLOR);
 
-		// Individual colours
-		m_aPriorityColors.RemoveAll();
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P0"), RGB(30, 225, 0)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P1"), RGB(30, 225, 0)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P2"), RGB(30, 225, 0)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P3"), RGB(30, 225, 0)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P4"), RGB(0, 0, 255)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P5"), RGB(0, 0, 255)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P6"), RGB(0, 0, 255)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P7"), RGB(0, 0, 255)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P8"), RGB(255, 0, 0)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P9"), RGB(255, 0, 0)));
-		m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P10"), RGB(255, 0, 0)));
+		// Priority Individual colours
+		m_aPriorityColors.SetSize(NUM_PRIORITY);
 
-		// Scheme colours
-		m_aPriorityScheme.RemoveAll();
+		for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
+		{
+			CString sKey = Misc::MakeKey(_T("P%d"), nColor);
+			m_aPriorityColors[nColor] = pPrefs->GetProfileInt(sColorKey, sKey, DEF_PRIORITYCOLOR[nColor]);
+		}
+
+		// Priority Scheme
+		m_aPriorityScheme.SetSize(NUM_PRIORITY);
 
 		if (pPrefs->GetProfileInt(sColorKey, _T("S0"), CLR_NONE) != CLR_NONE)
 		{
-			for (int nColor = 0; nColor < 11; nColor++)
+			for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
 			{
 				CString sKey = Misc::MakeKey(_T("S%d"), nColor);
-				m_aPriorityScheme.Add(pPrefs->GetProfileInt(sColorKey, sKey));
+				m_aPriorityScheme.Add(pPrefs->GetProfileInt(sColorKey, sKey, CLR_NONE));
 			}
 		}
 
@@ -1007,7 +1018,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 		m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
 
 		CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
-		int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
+		int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), 0);
 
 		for (int nColor = 0; nColor < nNumColor; nColor++)
 		{
@@ -1154,4 +1165,12 @@ void CPreferencesUITasklistColorsPage::SetDefaultListData(const TDCAUTOLISTDATA&
 void CPreferencesUITasklistColorsPage::OnSelchangeAttributetocolorby() 
 {
 	UpdateData(TRUE);
+}
+
+void CPreferencesUITasklistColorsPage::GetDefaultPriorityColors(CDWordArray& aColors)
+{
+	aColors.SetSize(NUM_PRIORITY);
+
+	for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
+		aColors[nColor] = DEF_PRIORITYCOLOR[nColor];
 }

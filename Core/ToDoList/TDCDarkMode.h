@@ -33,19 +33,11 @@ protected:
 	static void CopyColors(CPreferences& prefs,
 						   const CString& sFromSection,
 						   const CString& sFromColorSection,
-						   const CString& sFromAttribColorSection,
 						   const CString& sFromPrefix,
 						   int nFromDefault,
 						   const CString& sToSection,
 						   const CString& sToColorSection,
-						   const CString& sToAttribColorSection,
 						   const CString& sToPrefix);
-
-	static void CopyAttributeColors(CPreferences& prefs,
-									const CString& sFromSection, 
-									const CString& sFromPrefix, 
-									const CString& sToSection, 
-									const CString& sToPrefix);
 };
 
 /////////////////////////////////////////////////////////////////////////////
