@@ -19,11 +19,12 @@ static char THIS_FILE[] = __FILE__;
 
 const CString PREFSSECTION			= _T("Preferences");
 const CString PREFSCOLORSECTION		= _T("Preferences\\Colors");
-const CString DARKMODEKEY			= _T("DarkMode");
 const CString DMPREFSSECTION		= _T("DarkMode\\Colors");
 const CString DMPREFSCOLORSECTION	= DMPREFSSECTION;
 
-const CString COLORTASKBKGNDKEY		= _T("ColorTaskBackground");
+const CString ISDARKMODE			= _T("DarkMode");
+
+const CString COLORISTASKBKGND		= _T("ColorTaskBackground");
 const CString PRIORITYCOLOROPTION	= _T("PriorityColorOption");
 const CString TEXTCOLOROPTION		= _T("TextColorOption");
 const CString COLORATTRIBUTE		= _T("ColorAttribute");
@@ -32,7 +33,7 @@ const CString PRIORITYCOLORS		= _T("PriorityColors");
 const CString PRIORITYSCHEME		= _T("PriorityScheme");
 const CString ATTRIBUTECOLORS		= _T("AttribColors");
 
-const CString NO_PREFIX;
+const CString NOPREFIX;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -72,7 +73,7 @@ void CTDCDarkMode::Initialize(CPreferences& prefs)
 	if (!IsSupported())
 		return;
 
-	BOOL bDarkMode = prefs.GetProfileInt(PREFSSECTION, DARKMODEKEY, FALSE);
+	BOOL bDarkMode = prefs.GetProfileInt(PREFSSECTION, ISDARKMODE, FALSE);
 
 	// Cannot use this method for de-initialisation
 	if (IsEnabled() && !bDarkMode)
@@ -101,7 +102,7 @@ void CTDCDarkMode::Release()
 	CPreferences prefs;
 
 	if (IsEnabled() || 
-		prefs.GetProfileInt(PREFSSECTION, DARKMODEKEY, FALSE) ||
+		prefs.GetProfileInt(PREFSSECTION, ISDARKMODE, FALSE) ||
 		prefs.HasProfileSection(DMPREFSCOLORSECTION))
 	{
 		SaveColors(prefs);
@@ -122,7 +123,7 @@ void CTDCDarkMode::SaveColors(CPreferences& prefs)
 	CopyColors(prefs,
 			   PREFSSECTION,
 			   PREFSCOLORSECTION,
-			   NO_PREFIX,
+			   NOPREFIX,
 			   nFromDefault,
 			   DMPREFSSECTION,
 			   DMPREFSCOLORSECTION,
@@ -145,7 +146,7 @@ void CTDCDarkMode::RestoreColors(CPreferences& prefs)
 			   nFromDefault,
 			   PREFSSECTION,
 			   PREFSCOLORSECTION,
-			   NO_PREFIX);
+			   NOPREFIX);
 
 	prefs.Save();
 }
@@ -160,8 +161,8 @@ void CTDCDarkMode::CopyColors(CPreferences& prefs,
 							  const CString& sToPrefix)
 {
 	// Preferences
-	BOOL bColorIsBkgnd = prefs.GetProfileInt(sFromSection, (sFromPrefix + COLORTASKBKGNDKEY), (nFromDefault == DM_DEFAULT));
-	prefs.WriteProfileInt(sToSection, (sToPrefix + COLORTASKBKGNDKEY), bColorIsBkgnd);
+	BOOL bColorIsBkgnd = prefs.GetProfileInt(sFromSection, (sFromPrefix + COLORISTASKBKGND), (nFromDefault == DM_DEFAULT));
+	prefs.WriteProfileInt(sToSection, (sToPrefix + COLORISTASKBKGND), bColorIsBkgnd);
 
 	int nPriorityOption = prefs.GetProfileInt(sFromSection, (sFromPrefix + PRIORITYCOLOROPTION), PRIORITYOPT_GRADIENT);
 	prefs.WriteProfileInt(sToSection, (sToPrefix + PRIORITYCOLOROPTION), nPriorityOption);
