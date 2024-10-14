@@ -43,12 +43,11 @@ struct NUMERICPREF
 
 NUMERICPREF NUMERICPREFS[] =
 {
-	{ _T("ColorTaskBackground"),			FALSE,					TRUE },
 	{ _T("PriorityColorOption"),			PRIORITYOPT_GRADIENT,	PRIORITYOPT_GRADIENT },
 	{ _T("TextColorOption"),				TEXTOPT_DEFAULT,		TEXTOPT_DEFAULT},
 	{ _T("ColorAttribute"),					TDCA_CATEGORY,			TDCA_CATEGORY},
 
-	{ _T("HidePriorityNumber"),				FALSE,					FALSE },
+	{ _T("ColorTaskBackground"),			FALSE,					TRUE },
 	{ _T("ColorPriority"),					TRUE,					TRUE },
 	{ _T("SpecifyGridColor"),				TRUE,					TRUE },
 	{ _T("SpecifyDoneColor"),				TRUE,					TRUE },

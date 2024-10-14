@@ -74,7 +74,6 @@ public:
 
 	BOOL GetColorPriority() const { return m_bColorPriority; }
 	PUITCP_TEXTCOLOROPTION GetTextColorOption() const { return (PUITCP_TEXTCOLOROPTION)m_nTextColorOption; }
-	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
 	int GetPriorityColors(CDWordArray& aColors) const;
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const;
 	TDC_ATTRIBUTE GetColorByAttribute() const { return m_nColorAttribute; }
@@ -110,7 +109,6 @@ protected:
 
 	BOOL m_bColorTaskBackground;
 	BOOL m_bHLSColorGradient;
-	BOOL m_bHidePriorityNumber;
 	BOOL m_bSpecifyAlternateLineColor;
 	BOOL m_bSpecifyDueColor;
 	BOOL m_bSpecifyDueTodayColor;
@@ -127,7 +125,6 @@ protected:
 	BOOL m_bSpecifyTreeFont;
 	BOOL m_bSpecifyCommentsFont;
 	BOOL m_bColorPriority;
-	BOOL m_bShowTimeColumn;
 
 	CColourButton m_btFilteredColor;
 	CColourButton m_btAttribColor;

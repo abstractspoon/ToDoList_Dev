@@ -74,7 +74,6 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ATTRIBUTETOCOLORBY, m_cbColorByAttribute);
 	DDX_Check(pDX, IDC_COLORTASKBKGND, m_bColorTaskBackground);
 	DDX_Check(pDX, IDC_USEHLSGRADIENT, m_bHLSColorGradient);
-	DDX_Check(pDX, IDC_HIDEPRIORITYNUMBER, m_bHidePriorityNumber);
 	DDX_Check(pDX, IDC_ALTERNATELINECOLOR, m_bSpecifyAlternateLineColor);
 	DDX_Check(pDX, IDC_SPECIFYGROUPHEADERBKCOLOR, m_bSpecifyGroupHeaderBkgndColor);
 	//}}AFX_DATA_MAP
@@ -934,7 +933,6 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bRemindersUseTreeFont = pPrefs->GetProfileInt(szKey, _T("RemindersUseTreeFont"), FALSE);
 	m_bFindTasksUseTreeFont = pPrefs->GetProfileInt(szKey, _T("FindTasksUseTreeFont"), FALSE);
 	m_bHLSColorGradient = pPrefs->GetProfileInt(szKey, _T("HLSColorGradient"), TRUE);
-	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
 	m_bSpecifyAlternateLineColor = pPrefs->GetProfileInt(szKey, _T("AlternateLineColor"), TRUE);
 	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(szKey, _T("FlaggedColor"), FALSE);
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
@@ -1104,7 +1102,6 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("RemindersUseTreeFont"), m_bRemindersUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("FindTasksUseTreeFont"), m_bFindTasksUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("HLSColorGradient"), m_bHLSColorGradient);
-	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
 	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bSpecifyAlternateLineColor);
 	pPrefs->WriteProfileInt(szKey, _T("FlaggedColor"), m_bSpecifyFlaggedColor);
 	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
