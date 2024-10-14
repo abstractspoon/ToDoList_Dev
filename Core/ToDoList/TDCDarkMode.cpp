@@ -23,16 +23,6 @@ const CString DMPREFSSECTION		= _T("DarkMode\\Colors");
 const CString DMPREFSCOLORSECTION	= DMPREFSSECTION;
 
 const CString ISDARKMODE			= _T("DarkMode");
-
-const CString COLORISTASKBKGND		= _T("ColorTaskBackground");
-const CString PRIORITYCOLOROPTION	= _T("PriorityColorOption");
-const CString TEXTCOLOROPTION		= _T("TextColorOption");
-const CString COLORATTRIBUTE		= _T("ColorAttribute");
-
-const CString PRIORITYCOLORS		= _T("PriorityColors");
-const CString PRIORITYSCHEME		= _T("PriorityScheme");
-const CString ATTRIBUTECOLORS		= _T("AttribColors");
-
 const CString NOPREFIX;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -43,28 +33,74 @@ enum
 	DM_DEFAULT,
 };
 
-struct COLORDEF
+// ------------------------------------------------------
+
+struct NUMERICPREF
+{
+	LPCTSTR szKey;
+	int nDefault[2];
+};
+
+NUMERICPREF NUMERICPREFS[] =
+{
+	{ _T("ColorTaskBackground"),			FALSE,					TRUE },
+	{ _T("PriorityColorOption"),			PRIORITYOPT_GRADIENT,	PRIORITYOPT_GRADIENT },
+	{ _T("TextColorOption"),				TEXTOPT_DEFAULT,		TEXTOPT_DEFAULT},
+	{ _T("ColorAttribute"),					TDCA_CATEGORY,			TDCA_CATEGORY},
+
+	{ _T("HidePriorityNumber"),				FALSE,					FALSE },
+	{ _T("ColorPriority"),					TRUE,					TRUE },
+	{ _T("SpecifyGridColor"),				TRUE,					TRUE },
+	{ _T("SpecifyDoneColor"),				TRUE,					TRUE },
+	{ _T("SpecifyStartColor"),				FALSE,					FALSE },
+	{ _T("SpecifyStartTodayColor"),			FALSE,					FALSE },
+	{ _T("SpecifyDueColor"),				TRUE,					TRUE },
+	{ _T("SpecifyDueTodayColor"),			TRUE,					TRUE },
+	{ _T("HLSColorGradient"),				TRUE,					TRUE },
+	{ _T("AlternateLineColor"),				TRUE,					TRUE },
+	{ _T("FlaggedColor"),					FALSE,					FALSE },
+	{ _T("ReferenceColor"),					FALSE,					FALSE },
+	{ _T("SpecifyGroupHeaderBkgndColor"),	FALSE,					FALSE },
+};
+
+const int NUM_NUMERICS = (sizeof(NUMERICPREFS) / sizeof(NUMERICPREFS[0]));
+
+// -------------------------------------------------------
+
+struct COLORPREF
 {
 	LPCTSTR szKey;
 	COLORREF crDefault[2];
 };
 
-COLORDEF COLORDEFS[] = 
+COLORPREF COLORPREFS[] = 
 {
-	{ _T("Gridlines"),			DEF_GRIDLINECOLOR,		DM_3DFACE },
-	{ _T("TaskDone"),			DEF_TASKDONECOLOR,		DM_WINDOW },
-	{ _T("TaskStart"),			DEF_TASKSTARTCOLOR,		RGB(0, 100, 0) },
-	{ _T("TaskStartToday"),		DEF_TASKSTARTCOLOR,		RGB(0, 150, 0) },
-	{ _T("TaskDue"),			DEF_TASKDUECOLOR,		RGB(100, 0, 0) },
-	{ _T("TaskDueToday"),		DEF_TASKDUETODAYCOLOR,	RGB(150, 0, 0) },
-	{ _T("AlternateLines"),		DEF_ALTERNATELINECOLOR,	RGB(33, 33, 33) },
-	{ _T("Flagged"),			DEF_FLAGGEDCOLOR,		RGB(150, 0, 150) },
-	{ _T("Reference"),			DEF_REFERENCECOLOR,		RGB(0, 0, 150) },
-	{ _T("GroupHeaderBkgnd"),	DEF_GROUPHEADERBKCOLOR,	RGB(0, 25, 0) },
-	{ _T("PriorityLow"),		DEF_PRIORITYLOWCOLOR,	DEF_PRIORITYLOWCOLOR },
-	{ _T("PriorityHigh"),		DEF_PRIORITYHIGHCOLOR,	DEF_PRIORITYHIGHCOLOR },
+	{ _T("Gridlines"),			DEF_GRIDLINECOLOR,			DM_3DFACE },
+	{ _T("TaskDone"),			DEF_TASKDONECOLOR,			DM_WINDOW },
+	{ _T("TaskStart"),			DEF_TASKSTARTCOLOR,			RGB(0, 100, 0) },
+	{ _T("TaskStartToday"),		DEF_TASKSTARTCOLOR,			RGB(0, 150, 0) },
+	{ _T("TaskDue"),			DEF_TASKDUECOLOR,			RGB(100, 0, 0) },
+	{ _T("TaskDueToday"),		DEF_TASKDUETODAYCOLOR,		RGB(150, 0, 0) },
+	{ _T("AlternateLines"),		DEF_ALTERNATELINECOLOR,		RGB(33, 33, 33) },
+	{ _T("Flagged"),			DEF_FLAGGEDCOLOR,			RGB(150, 0, 150) },
+	{ _T("Reference"),			DEF_REFERENCECOLOR,			RGB(0, 0, 150) },
+	{ _T("GroupHeaderBkgnd"),	DEF_GROUPHEADERBKCOLOR,		RGB(0, 25, 0) },
+	{ _T("PriorityLow"),		DEF_PRIORITYLOWCOLOR,		DEF_PRIORITYLOWCOLOR },
+	{ _T("PriorityHigh"),		DEF_PRIORITYHIGHCOLOR,		DEF_PRIORITYHIGHCOLOR },
 };
-const int NUM_COLORS = (sizeof(COLORDEFS) / sizeof(COLORDEFS[0]));
+
+const int NUM_COLORS = (sizeof(COLORPREFS) / sizeof(COLORPREFS[0]));
+
+// -------------------------------------------------------
+
+LPCTSTR ARRAYPREFS[] =
+{
+	{ _T("PriorityColors") },
+	{ _T("PriorityScheme") },
+	{ _T("AttribColors") },
+};
+
+const int NUM_ARRAYS = (sizeof(ARRAYPREFS) / sizeof(ARRAYPREFS[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -161,37 +197,36 @@ void CTDCDarkMode::CopyColors(CPreferences& prefs,
 							  const CString& sToPrefix)
 {
 	// Preferences
-	BOOL bColorIsBkgnd = prefs.GetProfileInt(sFromSection, (sFromPrefix + COLORISTASKBKGND), (nFromDefault == DM_DEFAULT));
-	prefs.WriteProfileInt(sToSection, (sToPrefix + COLORISTASKBKGND), bColorIsBkgnd);
-
-	int nPriorityOption = prefs.GetProfileInt(sFromSection, (sFromPrefix + PRIORITYCOLOROPTION), PRIORITYOPT_GRADIENT);
-	prefs.WriteProfileInt(sToSection, (sToPrefix + PRIORITYCOLOROPTION), nPriorityOption);
-
-	int nTextOption = prefs.GetProfileEnum(sFromSection, (sFromPrefix + TEXTCOLOROPTION), TEXTOPT_DEFAULT);
-	prefs.WriteProfileInt(sToSection, (sToPrefix + TEXTCOLOROPTION), nTextOption);
-
-	int nColorAttrib = prefs.GetProfileEnum(sFromSection, (sFromPrefix + COLORATTRIBUTE), TDCA_CATEGORY);
-	prefs.WriteProfileInt(sToSection, (sToPrefix + COLORATTRIBUTE), nTextOption);
-
-	// Colors
-
-	// Individual
-	for (int nKey = 0; nKey < NUM_COLORS; nKey++)
 	{
-		const COLORDEF& def = COLORDEFS[nKey];
-		COLORREF color = prefs.GetProfileInt(sFromColorSection, (sFromPrefix + def.szKey), def.crDefault[nFromDefault]);
+		for (int nKey = 0; nKey < NUM_NUMERICS; nKey++)
+		{
+			const NUMERICPREF& num = NUMERICPREFS[nKey];
+			int nValue = prefs.GetProfileInt(sFromSection, (sFromPrefix + num.szKey), num.nDefault[nFromDefault]);
 
-		prefs.WriteProfileInt(sToColorSection, (sToPrefix + def.szKey), color);
+			prefs.WriteProfileInt(sToSection, (sToPrefix + num.szKey), nValue);
+		}
 	}
 
-	// Arrays
-	CString sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + PRIORITYCOLORS));
-	prefs.WriteProfileString(sToColorSection, (sToPrefix + PRIORITYCOLORS), sValues);
+	// Individual colours
+	{
+		for (int nKey = 0; nKey < NUM_COLORS; nKey++)
+		{
+			const COLORPREF& color = COLORPREFS[nKey];
+			COLORREF crValue = prefs.GetProfileInt(sFromColorSection, (sFromPrefix + color.szKey), color.crDefault[nFromDefault]);
 
-	sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + PRIORITYSCHEME));
-	prefs.WriteProfileString(sToColorSection, (sToPrefix + PRIORITYSCHEME), sValues);
+			prefs.WriteProfileInt(sToColorSection, (sToPrefix + color.szKey), crValue);
+		}
+	}
 
-	sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + ATTRIBUTECOLORS));
-	prefs.WriteProfileString(sToColorSection, (sToPrefix + ATTRIBUTECOLORS), sValues);
+	// Colour Arrays
+	{
+		for (int nKey = 0; nKey < NUM_ARRAYS; nKey++)
+		{
+			LPCTSTR szKey = ARRAYPREFS[nKey];
+			CString sValues = prefs.GetProfileString(sFromColorSection, (sFromPrefix + szKey));
+
+			prefs.WriteProfileString(sToColorSection, (sToPrefix + szKey), sValues);
+		}
+	}
 }
 
