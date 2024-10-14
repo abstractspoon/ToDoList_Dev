@@ -224,6 +224,7 @@ protected:
 	virtual BOOL DeleteSelectedCell();
 	virtual void OnCancelEdit();
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rBtn) const;
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
@@ -234,8 +235,7 @@ protected:
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
-	TDC_ATTRIBUTE MapCustomDateToTime(TDC_ATTRIBUTE nDateAttribID) const;
-	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
+	TDC_ATTRIBUTE MapTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
 	int GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const;
