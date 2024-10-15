@@ -46,7 +46,7 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF DEF_PRIORITYCOLOR[]
+const COLORREF DEF_PRIORITYCOLOR[] =
 {
 	RGB(30, 225, 0),
 	RGB(30, 225, 0),
@@ -1015,9 +1015,10 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 		m_crPriorityHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), DEF_PRIORITYHIGHCOLOR);
 
 		// Priority Individual colours
+		int nColor;
 		m_aPriorityColors.SetSize(NUM_PRIORITY);
 
-		for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
+		for (nColor = 0; nColor < NUM_PRIORITY; nColor++)
 		{
 			CString sKey = Misc::MakeKey(_T("P%d"), nColor);
 			m_aPriorityColors[nColor] = pPrefs->GetProfileInt(sColorKey, sKey, DEF_PRIORITYCOLOR[nColor]);
@@ -1041,7 +1042,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 		CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
 		int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), 0);
 
-		for (int nColor = 0; nColor < nNumColor; nColor++)
+		for (nColor = 0; nColor < nNumColor; nColor++)
 		{
 			CString sColorKey = Misc::MakeKey(_T("\\P%d"), nColor, sKey);
 
