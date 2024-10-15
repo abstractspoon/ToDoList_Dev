@@ -24,6 +24,7 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 using unvell.Common;
+using UIComponents;
 
 namespace unvell.UIControls
 {
@@ -80,7 +81,6 @@ namespace unvell.UIControls
 		public static string NoColor = ReoGrid.Editor.LangRes.LangResource.NoColor;
 		public static string MoreColors = ReoGrid.Editor.LangRes.LangResource.Menu_More;
 		public static string SolidTab = ReoGrid.Editor.LangRes.LangResource.SolidColor;
-
 
 		// ---------------------------------------------------------------------------------
 
@@ -252,14 +252,13 @@ namespace unvell.UIControls
 
 				if (hoverColorIndex == 41)
 				{
-					using (ColorDialog cd = new ColorDialog())
+					using (var dlg = new ColorDialogEx())
 					{
-						cd.FullOpen = true;
-						cd.Color = currentColor;
-						if (cd.ShowDialog() == DialogResult.OK)
-						{
-							color = GetTranparentedColor(cd.Color);
-						}
+						dlg.FullOpen = true;
+						dlg.Color = currentColor;
+
+						if (dlg.ShowDialog() == DialogResult.OK)
+							color = GetTranparentedColor(dlg.Color);
 						else
 							return;
 					}
@@ -269,14 +268,13 @@ namespace unvell.UIControls
 				else if ((e.Button & MouseButtons.Right) == MouseButtons.Right)
 				{
 					
-					using (ColorDialog cd = new ColorDialog())
+					using (var dlg = new ColorDialogEx())
 					{
-						cd.FullOpen = true;
-						cd.Color = GetColorByIndex(hoverColorIndex);
-						if (cd.ShowDialog() == DialogResult.OK)
-						{
-							color = GetTranparentedColor(cd.Color);
-						}
+						dlg.FullOpen = true;
+						dlg.Color = GetColorByIndex(hoverColorIndex);
+
+						if (dlg.ShowDialog() == DialogResult.OK)
+							color = GetTranparentedColor(dlg.Color);
 						else
 							return;
 					}
@@ -564,16 +562,16 @@ namespace unvell.UIControls
 		public virtual Color GetColorByIndex(int i, bool modify)
 		{
 			Color color = GetColorByIndex(i);
+
 			if (modify && i != 41 /* more color */)
 			{
-				using (ColorDialog cd = new ColorDialog())
+				using (var dlg = new ColorDialogEx())
 				{
-					cd.FullOpen = true;
-					cd.Color = color;
-					if (cd.ShowDialog() == DialogResult.OK)
-					{
-						return GetTranparentedColor(cd.Color);
-					}
+					dlg.FullOpen = true;
+					dlg.Color = color;
+
+					if (dlg.ShowDialog() == DialogResult.OK)
+						return GetTranparentedColor(dlg.Color);
 				}
 			}
 			

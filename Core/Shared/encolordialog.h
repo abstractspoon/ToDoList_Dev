@@ -31,7 +31,11 @@ public:
 protected:
 	//{{AFX_MSG(CEnColorDialog)
 	//}}AFX_MSG
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	BOOL HandleColorGridDblClk(CPoint point, UINT nGridID, int nNumRows);
 };
 
 //{{AFX_INSERT_LOCATION}}
