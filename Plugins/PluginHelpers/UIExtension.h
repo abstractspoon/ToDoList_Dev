@@ -300,6 +300,7 @@ namespace Abstractspoon
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent, bool clipLeft, bool clipRight);
 
 					static Drawing::Color GetTextColor(Style style, Drawing::Color baseColor);
+					static Drawing::Color GetBorderColor(Style style);
 					static Drawing::Color GetColor(Style style);
 					static GM_ITEMSTATE Map(Style style);
 				};

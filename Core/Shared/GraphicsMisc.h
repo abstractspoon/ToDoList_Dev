@@ -245,6 +245,7 @@ namespace GraphicsMisc
 
 	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip = NULL); 
 	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags);
+	COLORREF GetExplorerItemSelectionBorderColor(GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetSolidColor(HBRUSH hBrush);
 
