@@ -2671,10 +2671,10 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		if (rSubItem.left >= rClient.right)
 			continue;
 
-		// vertical gridlines
+		// vertical gridline
 		DrawGridlines(pDC, rSubItem, bSelected, FALSE, TRUE);
 
-		// don't draw min sized columns
+		// don't draw content of min sized columns
 		if (rSubItem.Width() <= MIN_COL_WIDTH)
 			continue;
 		
@@ -2757,7 +2757,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					COLORREF crFill = GetPriorityColor(nPriority);
 					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
 					
-					GraphicsMisc::DrawRect(pDC, rSubItem, crFill, crBorder);//, nCornerRadius);
+					GraphicsMisc::DrawRect(pDC, rSubItem, crFill, crBorder);
 				}
 				
 				// then, if the task is also due, draw a small tag
