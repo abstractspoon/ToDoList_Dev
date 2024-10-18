@@ -17,6 +17,8 @@
 #include "..\shared\themed.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\WorkingWeek.h"
+#include "..\shared\scopedtimer.h"
+#include "..\shared\FileMisc.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -2957,11 +2959,14 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
+
+	ASSERT((GetListDrawColumnWidths().GetSize() == nNumCol) ||
+		   (GetListDrawColumnWidths().GetSize() == (nNumCol + 1))); // can include a buffer column
 	
-	// Rollups for collapsed parents
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
+	// Rollups for collapsed parents
 	HTREEITEM htiRollUp = NULL;
 
 	if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && gi.bParent)
@@ -2973,25 +2978,29 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 			htiRollUp = htiParent;
 	}
 
-	BOOL bContinue = TRUE;
+	// Much quicker to construct the column rects ourselves 
+	// than to call GetSubItemRect for every column
+	CRect rColumn;
+	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
 
-	for (int nCol = 1; ((nCol <= nNumCol) && bContinue); nCol++)
+	// First column is always zero width
+	rColumn.right = rColumn.left;
+
+	for (int nCol = 1; ((nCol <= nNumCol) && (rColumn.left <= rClip.right)); nCol++)
 	{
-		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected, FALSE);
+		rColumn.left = rColumn.right;
+		rColumn.right += GetListDrawColumnWidths()[nCol];
+
+		if (rColumn.right <= rClip.left) // columns before the client rect
+			continue;
+
+		if (rColumn.right == rColumn.left) // zero width columns
+			continue;
+
+		DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, FALSE);
 
 		if (htiRollUp)
-		{
-			CRect rColumn;
-			VERIFY(m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn));
-
-			if (rColumn.right < rClip.left)
-				continue;
-
-			if (rColumn.left > rClip.right)
-				break; // we can stop
-
 			DrawListItemRollup(pDC, htiRollUp, nCol, rColumn, bSelected);
-		}
 	}
 
 	// Trailing text
@@ -3087,6 +3096,7 @@ void CGanttCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, con
 	}
 }
 
+/*
 BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
 											BOOL bSelected, BOOL bRollup)
 {
@@ -3111,6 +3121,7 @@ BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTIT
 
 	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, bRollup);
 }
+*/
 
 BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
 												BOOL bSelected, BOOL bRollup)

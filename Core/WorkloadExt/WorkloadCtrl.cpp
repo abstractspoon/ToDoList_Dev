@@ -2288,11 +2288,30 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
 
-	for (int nCol = 1; nCol < nNumCol; nCol++)
+	ASSERT(GetListDrawColumnWidths().GetSize() == nNumCol);
+
+	CRect rClip;
+	pDC->GetClipBox(rClip);
+
+	// Much quicker to construct the column rects ourselves 
+	// than to call GetSubItemRect for every column
+	CRect rColumn;
+	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
+
+	// First column is always zero width
+	rColumn.right = rColumn.left;
+
+	for (int nCol = 1; ((nCol <= nNumCol) && (rColumn.left <= rClip.right)); nCol++)
 	{
-		CRect rColumn;
-		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
-		
+		rColumn.left = rColumn.right;
+		rColumn.right += GetListDrawColumnWidths()[nCol];
+
+		if (rColumn.right <= rClip.left) // columns before the client rect
+			continue;
+
+		if (rColumn.right == rColumn.left) // zero width columns
+			continue;
+
 		DrawVertItemDivider(pDC, rColumn, bSelected);
 
 		COLORREF crBack = CLR_NONE;
