@@ -172,6 +172,7 @@ private:
 	HWND m_hwndTrackedHeader;
 	int m_nTrackedColumn;
 	HWND m_hwndIgnoreNcCalcSize;
+	CIntArray m_aListDrawColWidths;
 
 protected:
 	inline BOOL CanResync() const { return (m_bResyncEnabled && !m_bResyncing); }
@@ -277,6 +278,7 @@ protected:
 	BOOL WantHoldHScroll(HWND hWnd) const;
 	BOOL IsHeaderTracking(HWND hwndHeader, int nCol = -1) const;
 	HWND HitTestHeader(const CPoint& ptScreen, int& nCol) const;
+	const CIntArray& GetListDrawColumnWidths() const { return m_aListDrawColWidths; }
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HWND hwndList, HWND hwndTree, HTREEITEM hti);
@@ -335,6 +337,7 @@ private:
 	void BuildListListSortMap(HWND hwndPrimary, HWND hwndList, CSortMap& map);
 	BOOL HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp);
 	void FixupListListItemIsDataLinkage(int nFrom = 0);
+	void RefreshListDrawColWidths(HWND hwndList);
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);

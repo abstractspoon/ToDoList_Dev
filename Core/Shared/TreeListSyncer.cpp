@@ -2314,6 +2314,23 @@ BOOL CTreeListSyncer::IsListFullRowSelect(HWND hwnd)
 	return (ListView_GetExtendedListViewStyle(hwnd) & LVS_EX_FULLROWSELECT);
 }
 
+void CTreeListSyncer::RefreshListDrawColWidths(HWND hwndList)
+{
+	ASSERT(IsList(hwndList));
+
+ 	HWND hwndHdr = ListView_GetHeader(hwndList);
+	ASSERT(hwndHdr);
+
+	int nNumCol = Header_GetItemCount(hwndHdr);
+	m_aListDrawColWidths.SetSize(nNumCol);
+
+	for (int nCol = 0; nCol < nNumCol; nCol++)
+	{
+		int nWidth = ListView_GetColumnWidth(hwndList, nCol);
+		m_aListDrawColWidths[nCol] = nWidth;
+	}
+}
+
 LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (hRealWnd != Left() && hRealWnd != Right())
@@ -2384,6 +2401,11 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				break;
 			}
 		}
+		break;
+
+	case WM_PAINT:
+		if (IsList(hRealWnd))
+			RefreshListDrawColWidths(hRealWnd);
 		break;
 
 	case TVM_INSERTITEM:

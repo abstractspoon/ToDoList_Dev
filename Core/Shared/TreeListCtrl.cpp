@@ -1020,7 +1020,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			{
 				FileMisc::EnableLogging(TRUE);
 				CScopedLogTimer timer(_T("CTreeListCtrl(ListDraw)"));
-				m_listHeader.GetItemWidths(m_aListDrawColWidths);
 
 				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 			}

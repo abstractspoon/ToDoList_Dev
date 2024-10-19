@@ -201,9 +201,6 @@ protected:
 
 	const static int IMAGE_SIZE;
 
-private:
-	CIntArray m_aListDrawColWidths;
-
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
@@ -288,7 +285,6 @@ protected:
 	void DrawHorzItemDivider(CDC* pDC, const CRect& rItem) const;
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, BOOL bSelected);
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected);
-	const CIntArray& GetListDrawColumnWidths() const { return m_aListDrawColWidths; }
 
 	void RedrawList(BOOL bErase = FALSE);
 	void InvalidateList(int nFrom, int nTo, BOOL bErase = FALSE);

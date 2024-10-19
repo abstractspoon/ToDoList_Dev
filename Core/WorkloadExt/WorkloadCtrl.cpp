@@ -2286,8 +2286,8 @@ CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTot
 void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-	int nNumCol = GetRequiredListColumnCount();
 
+	int nNumCol = GetRequiredListColumnCount();
 	ASSERT(GetListDrawColumnWidths().GetSize() == nNumCol);
 
 	CRect rClip;
