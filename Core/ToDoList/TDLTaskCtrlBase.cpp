@@ -2435,7 +2435,7 @@ void CTDLTaskCtrlBase::DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected
 	}
 }
 
-LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths)
 {
 	ASSERT(pLVCD->nmcd.hdr.hwndFrom == m_lcColumns);
 
@@ -2512,7 +2512,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					// draw row text and column dividers
 					CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 					
-					DrawColumnsRowText(pDC, nItem, dwTaskID, pTDI, pTDS, crText, bSelected);
+					DrawColumnsRowText(pDC, nItem, aColWidths, dwTaskID, pTDI, pTDS, crText, bSelected);
 
 					pDC->SelectObject(pOldFont);
 				}
@@ -2636,14 +2636,14 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 	return CDRF_SKIPDEFAULT; // always
 }
 
-void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
-										  COLORREF crText, BOOL bSelected)
+void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& aColWidths, DWORD dwTaskID, 
+										  const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crText, BOOL bSelected)
 {
 	DWORD dwTrueID = pTDS->GetTaskID();
 
 	// draw each column separately
 	int nNumCol = m_hdrColumns.GetItemCount();
-	ASSERT(GetListDrawColumnWidths().GetSize() == nNumCol);
+	ASSERT(aColWidths.GetSize() == nNumCol);
 
 	CRect rSubItem, rClient, rClip;
 	m_lcColumns.GetClientRect(rClient);
@@ -2665,7 +2665,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			continue;
 
 		rSubItem.left = rSubItem.right;
-		rSubItem.right += GetListDrawColumnWidths()[nCol];
+		rSubItem.right += aColWidths[nCol];
 
 		// don't draw columns outside of client rect
 		if (rSubItem.Width() == 0)

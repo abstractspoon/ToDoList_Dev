@@ -11,6 +11,9 @@
 #include "copywndcontents.h"
 #include "enbitmap.h"
 
+// #include "scopedtimer.h"
+// #include "FileMisc.h"
+
 #include "..\3rdParty\Detours\detours.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1740,7 +1743,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				}
 				else if (IsList(hwnd))
 				{
-					return OnListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR);
+					return OnListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR, m_aListDrawColWidths);
 				}
 				else if (IsTree(hwnd))
 				{
@@ -2036,7 +2039,7 @@ LRESULT CTreeListSyncer::OnTreeCustomDraw(NMTVCUSTOMDRAW* /*pTVCD*/)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CTreeListSyncer::OnListCustomDraw(NMLVCUSTOMDRAW* /*pLVCD*/)
+LRESULT CTreeListSyncer::OnListCustomDraw(NMLVCUSTOMDRAW* /*pLVCD*/, const CIntArray& /*aColWidths*/)
 {
 	return CDRF_DODEFAULT;
 }
@@ -2405,7 +2408,13 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 
 	case WM_PAINT:
 		if (IsList(hRealWnd))
+		{
+			//FileMisc::EnableLogging(TRUE);
+			//CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
+
 			RefreshListDrawColWidths(hRealWnd);
+			return ScDefault(hRealWnd);
+		}
 		break;
 
 	case TVM_INSERTITEM:

@@ -278,7 +278,6 @@ protected:
 	BOOL WantHoldHScroll(HWND hWnd) const;
 	BOOL IsHeaderTracking(HWND hwndHeader, int nCol = -1) const;
 	HWND HitTestHeader(const CPoint& ptScreen, int& nCol) const;
-	const CIntArray& GetListDrawColumnWidths() const { return m_aListDrawColWidths; }
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HWND hwndList, HWND hwndTree, HTREEITEM hti);
@@ -304,7 +303,7 @@ protected:
 
 	// pseudo message handlers
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
-	virtual LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	virtual LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths);
 	virtual LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);

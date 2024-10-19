@@ -152,7 +152,7 @@ protected:
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	
- 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+ 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths);
 	LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 
 	void OnListSelectionChange(NMLISTVIEW* pNMLV);

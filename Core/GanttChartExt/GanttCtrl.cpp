@@ -1457,7 +1457,7 @@ GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
 	return CTreeListCtrl::GetItemState(hti);
 }
 
-LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -1494,7 +1494,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
+			DrawListItem(pDC, nItem, aColWidths, *pGI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -2955,13 +2955,13 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BO
 	}
 }
 
-void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
+void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const CIntArray& aColWidths, const GANTTITEM& gi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
 
-	ASSERT((GetListDrawColumnWidths().GetSize() == nNumCol) ||
-		   (GetListDrawColumnWidths().GetSize() == (nNumCol + 1))); // can include a buffer column
+	ASSERT((aColWidths.GetSize() == nNumCol) ||
+		   (aColWidths.GetSize() == (nNumCol + 1))); // can include a buffer column
 	
 	CRect rClip;
 	pDC->GetClipBox(rClip);
@@ -2978,8 +2978,7 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 			htiRollUp = htiParent;
 	}
 
-	// Much quicker to construct the column rects ourselves 
-	// than to call GetSubItemRect for every column
+	// Calculate the sub item rects ourselves from 'aColWidths'
 	CRect rColumn;
 	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
 
@@ -2989,7 +2988,7 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 	for (int nCol = 1; ((nCol <= nNumCol) && (rColumn.left <= rClip.right)); nCol++)
 	{
 		rColumn.left = rColumn.right;
-		rColumn.right += GetListDrawColumnWidths()[nCol];
+		rColumn.right += aColWidths[nCol];
 
 		if (rColumn.right <= rClip.left) // columns before the client rect
 			continue;
