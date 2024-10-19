@@ -2659,7 +2659,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 	// First column is always zero width
 	rSubItem.right = rSubItem.left;
 
-	for (int nCol = 1; nCol < nNumCol; nCol++)
+	for (int nCol = 1; ((nCol < nNumCol) && (rSubItem.left <= rClient.right)); nCol++)
 	{
 		if (!m_hdrColumns.IsItemVisible(nCol))
 			continue;
@@ -2667,17 +2667,11 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		rSubItem.left = rSubItem.right;
 		rSubItem.right += GetListDrawColumnWidths()[nCol];
 
-// 		if (!m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rSubItem))
-// 			continue;
-
 		// don't draw columns outside of client rect
-		if (rSubItem.IsRectEmpty())
+		if (rSubItem.Width() == 0)
 			continue;
 
 		if (rSubItem.right <= rClient.left)
-			continue;
-
-		if (rSubItem.left >= rClient.right)
 			continue;
 
 		// vertical gridline
