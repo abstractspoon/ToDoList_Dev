@@ -2643,6 +2643,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 
 	// draw each column separately
 	int nNumCol = m_hdrColumns.GetItemCount();
+	ASSERT(GetListDrawColumnWidths().GetSize() == nNumCol);
 
 	CRect rSubItem, rClient, rClip;
 	m_lcColumns.GetClientRect(rClient);
@@ -2653,13 +2654,21 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 	if (rClient.IsRectEmpty())
 		return;
 
+	VERIFY(m_lcColumns.GetItemRect(nItem, rSubItem, LVIR_BOUNDS));
+
+	// First column is always zero width
+	rSubItem.right = rSubItem.left;
+
 	for (int nCol = 1; nCol < nNumCol; nCol++)
 	{
 		if (!m_hdrColumns.IsItemVisible(nCol))
 			continue;
 
-		if (!m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rSubItem))
-			continue;
+		rSubItem.left = rSubItem.right;
+		rSubItem.right += GetListDrawColumnWidths()[nCol];
+
+// 		if (!m_lcColumns.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rSubItem))
+// 			continue;
 
 		// don't draw columns outside of client rect
 		if (rSubItem.IsRectEmpty())
@@ -2746,7 +2755,8 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_PRIORITY:
 			if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
 			{
-				rSubItem.DeflateRect(2, 1, 3, 2);
+				CRect rPriority(rSubItem);
+				rPriority.DeflateRect(2, 1, 3, 2);
 				
 				// first draw the priority colour
 				int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
@@ -2757,7 +2767,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					COLORREF crFill = GetPriorityColor(nPriority);
 					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
 					
-					GraphicsMisc::DrawRect(pDC, rSubItem, crFill, crBorder);
+					GraphicsMisc::DrawRect(pDC, rPriority, crFill, crBorder);
 				}
 				
 				// then, if the task is also due, draw a small tag
@@ -2778,9 +2788,9 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				{
 					POINT pt[3] = 
 					{ 
-						{ rSubItem.left, rSubItem.top + 7 }, 
-						{ rSubItem.left, rSubItem.top }, 
-						{ rSubItem.left + 7, rSubItem.top } 
+						{ rPriority.left, rPriority.top + 7 }, 
+						{ rPriority.left, rPriority.top }, 
+						{ rPriority.left + 7, rPriority.top } 
 					};
 					
 					HGDIOBJ hOldBr = pDC->SelectObject(brTag);
@@ -2791,15 +2801,15 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					
 					// a black line between the two
 					pDC->SelectStockObject(BLACK_PEN);
-					pDC->MoveTo(rSubItem.left, rSubItem.top + 6);
-					pDC->LineTo(rSubItem.left + 7, rSubItem.top - 1);
+					pDC->MoveTo(rPriority.left, rPriority.top + 6);
+					pDC->LineTo(rPriority.left + 7, rPriority.top - 1);
 				}
 				
 				// draw priority number over the top
 				if (bHasPriority && !HasStyle(TDCS_HIDEPRIORITYNUMBER))
 				{
 					COLORREF crTemp = GraphicsMisc::GetBestTextColor(GetPriorityColor(nPriority));
-					DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crTemp);
+					DrawColumnText(pDC, sTaskColText, rPriority, pCol->nTextAlignment, crTemp);
 				}
 			}
 			break;
@@ -2807,10 +2817,11 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_PERCENT:
 			if (!sTaskColText.IsEmpty())
 			{
-				rSubItem.DeflateRect(2, 1, 3, 2);
+				CRect rPercent;
+				rPercent.DeflateRect(2, 1, 3, 2);
 
 				// draw default text first
-				DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
+				DrawColumnText(pDC, sTaskColText, rPercent, pCol->nTextAlignment, crText);
 
 				if (HasStyle(TDCS_SHOWPERCENTASPROGRESSBAR))
 				{
@@ -2840,7 +2851,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					
 					if (HasColor(crBar))
 					{
-						CRect rProgress(rSubItem);
+						CRect rProgress(rPercent);
 						
 						// draw border
 						COLORREF crBorder = GraphicsMisc::Darker(crBar, 0.5);
@@ -2859,14 +2870,14 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 							
 							// Exclude the 'unfilled' part so that we do not
 							// overwrite the text
-							CRect rUnfilled(rSubItem);
+							CRect rUnfilled(rPercent);
 							rUnfilled.left = rProgress.right;
 
 							pDC->ExcludeClipRect(rUnfilled);
 							
 							// draw text in colour to suit progress bar
 							COLORREF crTemp = GraphicsMisc::GetBestTextColor(crBar);
-							DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crTemp);
+							DrawColumnText(pDC, sTaskColText, rPercent, pCol->nTextAlignment, crTemp);
 						}
 					}
 				}
