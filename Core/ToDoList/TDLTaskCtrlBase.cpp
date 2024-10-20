@@ -2658,6 +2658,9 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& 
 
 	for (int i = 1; i < nNumCol; i++)
 	{
+		if (rColumn.right >= rClip.right)
+			break; // nothing more to draw
+
 		const int nCol = aColOrder[i];
 		const int nColWidth = aColWidths[nCol];
 
@@ -2667,9 +2670,8 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& 
 		rColumn.left = rColumn.right;
 		rColumn.right += nColWidth;
 
-		// don't draw columns outside of client rect
-		if ((rColumn.right <= rClip.left) || (rColumn.left >= rClip.right))
-			continue;
+		if (rColumn.right <= rClip.left)
+			continue; // to left of clip rect
 
 		// vertical gridline
 		DrawGridlines(pDC, rColumn, bSelected, FALSE, TRUE);
