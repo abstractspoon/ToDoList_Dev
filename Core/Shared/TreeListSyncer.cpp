@@ -11,8 +11,8 @@
 #include "copywndcontents.h"
 #include "enbitmap.h"
 
-#include "scopedtimer.h"
-#include "FileMisc.h"
+// #include "scopedtimer.h"
+// #include "FileMisc.h"
 
 #include "..\3rdParty\Detours\detours.h"
 
@@ -2417,8 +2417,8 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_PAINT:
 		if (IsList(hRealWnd))
 		{
-			FileMisc::EnableLogging(TRUE);
-			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
+// 			FileMisc::EnableLogging(TRUE);
+// 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
 
 			RefreshListDrawColAttributes(hRealWnd);
 			return ScDefault(hRealWnd);
