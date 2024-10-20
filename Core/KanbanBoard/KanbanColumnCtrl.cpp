@@ -461,10 +461,16 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 
 		if (GetSafeHwnd())
 		{
+			if (Misc::FlagHasChanged(KBCF_SHOWTASKCOLORASBAR, dwPrevOptions, m_dwOptions) ||
+				Misc::FlagHasChanged(KBCF_COLORBARBYPRIORITY, dwPrevOptions, m_dwOptions))
+			{
+ 				Invalidate(FALSE);
+			}
+
 			if (Misc::FlagHasChanged(KBCF_HIDEEMPTYATTRIBUTES, dwPrevOptions, m_dwOptions))
+			{
 				RefreshItemLineHeights();
-// 			else
-// 				Invalidate(FALSE);
+			}
 
 			if (IsGrouping())
 			{
@@ -478,8 +484,6 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 					if (HasOption(KBCF_SORTGROUPSASCENDING))
 						DoSort();
 				}
-// 				else
-// 					Invalidate(FALSE);
 			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
