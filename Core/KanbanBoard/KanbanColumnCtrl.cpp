@@ -1707,8 +1707,9 @@ HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, H
 	return NULL; // no match
 }
 
-BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
+BOOL CKanbanColumnCtrl::RemoveTask(DWORD dwTaskID)
 {
+	BOOL bWasFull = IsFull();
 	HTREEITEM hti = FindItem(dwTaskID);
 
 	if (hti && CTreeCtrl::DeleteItem(hti))
@@ -1720,7 +1721,7 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 	return FALSE;
 }
 
-BOOL CKanbanColumnCtrl::DeleteAll()
+BOOL CKanbanColumnCtrl::RemoveAll()
 {
 	m_mapHTItems.RemoveAll();
 	m_aSelTaskIDs.RemoveAll();

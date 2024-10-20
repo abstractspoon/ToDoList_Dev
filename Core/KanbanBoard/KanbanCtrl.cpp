@@ -326,7 +326,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 
 				if (pKI)
 				{
-					VERIFY(pCol->DeleteTask(dwTaskID));
+					VERIFY(pCol->RemoveTask(dwTaskID));
 
 					if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
 					{
@@ -1579,7 +1579,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 
 				if (pCurCol)
 				{
-					VERIFY(pCurCol->DeleteTask(pKI->dwTaskID));
+					VERIFY(pCurCol->RemoveTask(pKI->dwTaskID));
 					bRebuild |= (pCurCol->IsEmpty() && HasOption(KBCF_HIDEEMPTYCOLUMNS));
 				}
 
@@ -2186,6 +2186,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 					}
 				}
 	
+				RefreshColumnHeaderText();
 				return TRUE;
 			}
 		}
@@ -2256,7 +2257,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	pCol->GetSelectedTaskIDs(aSelTaskIDs);
 
 	pCol->SetRedraw(FALSE);
-	pCol->DeleteAll();
+	pCol->RemoveAll();
 
 	CStringArray aValueIDs;
 	int nNumVals = pCol->GetAttributeValueIDs(aValueIDs);
@@ -3545,7 +3546,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		// Remove from the source list(s) if moving
 		if (bSrcIsBacklog)
 		{
-			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			bSrcChanged |= pSrcCol->RemoveTask(dwTaskID);
 			ASSERT(bSrcChanged);
 		}
 		else if (!bCopy) // move
@@ -3565,7 +3566,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 			while (nVal--)
 				pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
 
-			bSrcChanged |= pSrcCol->DeleteTask(dwTaskID);
+			bSrcChanged |= pSrcCol->RemoveTask(dwTaskID);
 			ASSERT(bSrcChanged);
 		}
 

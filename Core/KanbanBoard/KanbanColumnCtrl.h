@@ -64,8 +64,8 @@ public:
 	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
 	HTREEITEM AddTask(const KANBANITEM& ki);
-	BOOL DeleteTask(DWORD dwTaskID);
-	BOOL DeleteAll();
+	BOOL RemoveTask(DWORD dwTaskID);
+	BOOL RemoveAll();
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
 	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);

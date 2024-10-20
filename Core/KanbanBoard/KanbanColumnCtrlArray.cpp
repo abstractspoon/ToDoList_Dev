@@ -365,7 +365,7 @@ BOOL CKanbanColumnCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanC
 	ARRAY_FN
 	(
 		if (pCol != pIgnore) 
-			bSomeDeleted |= pCol->DeleteTask(dwTaskID)
+			bSomeDeleted |= pCol->RemoveTask(dwTaskID)
 	);
 
 	return bSomeDeleted;
