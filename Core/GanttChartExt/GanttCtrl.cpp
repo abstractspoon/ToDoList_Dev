@@ -1457,7 +1457,7 @@ GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
 	return CTreeListCtrl::GetItemState(hti);
 }
 
-LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths)
+LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -1494,7 +1494,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawListItem(pDC, nItem, aColWidths, *pGI, (nState != GMIS_NONE));
+			DrawListItem(pDC, nItem, aColOrder, aColWidths, *pGI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -2955,14 +2955,10 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BO
 	}
 }
 
-void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const CIntArray& aColWidths, const GANTTITEM& gi, BOOL bSelected)
+void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const GANTTITEM& gi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-	int nNumCol = GetRequiredListColumnCount();
 
-	ASSERT((aColWidths.GetSize() == nNumCol) ||
-		   (aColWidths.GetSize() == (nNumCol + 1))); // can include a buffer column
-	
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
@@ -2978,22 +2974,29 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const CIntArray& aColWidths, 
 			htiRollUp = htiParent;
 	}
 
-	// Calculate the sub item rects ourselves from 'aColWidths'
+	// Much more efficient to calculate the sub-item rects
+	// ourselves than to call GetSubItemRect for every column
 	CRect rColumn;
 	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
 
 	// First column is always zero width
 	rColumn.right = rColumn.left;
 
-	for (int nCol = 1; ((nCol <= nNumCol) && (rColumn.left <= rClip.right)); nCol++)
-	{
-		rColumn.left = rColumn.right;
-		rColumn.right += aColWidths[nCol];
+	int nNumCol = aColOrder.GetSize();
 
-		if (rColumn.right <= rClip.left) // columns before the client rect
+	for (int i = 1; i < nNumCol; i++)
+	{
+		const int nCol = aColOrder[i];
+		const int nColWidth = aColWidths[nCol];
+
+		if (nColWidth == 0)
 			continue;
 
-		if (rColumn.right == rColumn.left) // zero width columns
+		rColumn.left = rColumn.right;
+		rColumn.right += nColWidth;
+
+		// don't draw columns outside of client rect
+		if ((rColumn.right <= rClip.left) || (rColumn.left >= rClip.right))
 			continue;
 
 		DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, FALSE);

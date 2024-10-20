@@ -292,7 +292,7 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
-LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths)
+LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -338,7 +338,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
-			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColWidths);
+			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
 		}
 
 		switch (pLVCD->nmcd.dwDrawStage)

@@ -1307,11 +1307,11 @@ GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
 	return GMIS_NONE;
 }
 
-LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths)
+LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	ASSERT(pLVCD->nmcd.hdr.idFrom == IDC_ALLOCATIONCOLUMNS);
 
-	return OnAllocationsListCustomDraw(pLVCD, aColWidths);
+	return OnAllocationsListCustomDraw(pLVCD, aColOrder, aColWidths);
 }
 
 void CWorkloadCtrl::OnTotalsListsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
@@ -1441,7 +1441,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths)
+LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
@@ -1477,7 +1477,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const 
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawAllocationListItem(pDC, nItem, aColWidths, *pWI, (nState != GMIS_NONE));
+			DrawAllocationListItem(pDC, nItem, aColOrder, aColWidths, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2283,33 +2283,36 @@ CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTot
 	return _T("");
 }
 
-void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray& aColWidths, const WORKLOADITEM& wi, BOOL bSelected)
+void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-
-	int nNumCol = GetRequiredListColumnCount();
-	ASSERT(aColWidths.GetSize() == nNumCol);
 
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
-	// Much quicker to construct the column rects ourselves 
-	// than to call GetSubItemRect for every column
+	// Much more efficient to calculate the sub-item rects
+	// ourselves than to call GetSubItemRect for every column
 	CRect rColumn;
 	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
 
 	// First column is always zero width
 	rColumn.right = rColumn.left;
 
-	for (int nCol = 1; ((nCol <= nNumCol) && (rColumn.left <= rClip.right)); nCol++)
-	{
-		rColumn.left = rColumn.right;
-		rColumn.right += aColWidths[nCol];
+	int nNumCol = aColOrder.GetSize();
 
-		if (rColumn.right <= rClip.left) // columns before the client rect
+	for (int i = 1; i < nNumCol; i++)
+	{
+		const int nCol = aColOrder[i];
+		const int nColWidth = aColWidths[nCol];
+
+		if (nColWidth == 0)
 			continue;
 
-		if (rColumn.right == rColumn.left) // zero width columns
+		rColumn.left = rColumn.right;
+		rColumn.right += nColWidth;
+
+		// don't draw columns outside of client rect
+		if ((rColumn.right <= rClip.left) || (rColumn.left >= rClip.right))
 			continue;
 
 		DrawVertItemDivider(pDC, rColumn, bSelected);

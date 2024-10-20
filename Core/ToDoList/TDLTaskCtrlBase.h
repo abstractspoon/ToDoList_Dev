@@ -317,7 +317,7 @@ protected:
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	
- 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColWidths);
+ 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
  	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 
 	void OnNotifySplitterChange(int nSplitPos);
@@ -455,8 +455,9 @@ protected:
 	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID, const CPoint* pCursor = NULL) const;
 	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, CSet<TDC_COLUMN>& aColIDs) const;
 
-	void DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& aColWidths, DWORD dwTaskID, 
-							const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crText, BOOL bSelected);
+	void DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, 
+							DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+							COLORREF crText, BOOL bSelected);
 	void DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
 						COLORREF crText, BOOL bTaskTitle = FALSE, int nTextLen = -1);
 	void DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect);
