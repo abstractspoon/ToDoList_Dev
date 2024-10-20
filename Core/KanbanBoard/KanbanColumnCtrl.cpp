@@ -136,6 +136,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_dwOptions(0),
 	m_crItemShadow(CLR_NONE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
+	m_crFullBkgnd(255),
 	m_bReadOnly(FALSE),
 	m_tch(*this)
 {
@@ -289,12 +290,27 @@ LRESULT CKanbanColumnCtrl::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
+BOOL CKanbanColumnCtrl::IsFull() const 
+{ 
+	if (GetMaxCount() > 0)
+		return (GetCount() >= GetMaxCount()); 
+
+	// else
+	return FALSE;
+}
+
 void CKanbanColumnCtrl::RefreshBkgndColor()
 {
 	COLORREF crBack = GetSysColor(COLOR_WINDOW);
 
-	if (m_columnDef.crBackground != CLR_NONE)
+	if ((m_crFullBkgnd != CLR_NONE) && IsFull())
+	{
+		crBack = m_crFullBkgnd;
+	}
+	else if (m_columnDef.crBackground != CLR_NONE)
+	{
 		crBack = m_columnDef.crBackground;
+	}
 
 	if (m_bDropTarget)
 	{
@@ -334,10 +350,16 @@ void CKanbanColumnCtrl::RecalcItemShadowColor()
 	m_crItemShadow = RGB(btShadow, btShadow, btShadow);
 }
 
-void CKanbanColumnCtrl::SetExcessColor(COLORREF /*color*/)
+void CKanbanColumnCtrl::SetFullColor(COLORREF color)
 {
-	// TODO
-	ASSERT(0);
+	if (color == GetSysColor(COLOR_WINDOW))
+		color = CLR_NONE;
+
+	if (m_crFullBkgnd != color)
+	{
+		m_crFullBkgnd = color;
+		RefreshBkgndColor();
+	}
 }
 
 void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
@@ -497,6 +519,7 @@ int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
 
 HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 {
+	BOOL bWasFull = IsFull();
 	HTREEITEM hti = FindItem(ki.dwTaskID);
 
 	if (hti)
@@ -520,6 +543,9 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 	{
 		m_mapHTItems.AddItem(*this, hti);
 		RefreshItemLineHeights(hti);
+
+		if (!bWasFull && IsFull())
+			RefreshBkgndColor();
 	}
 
 	return hti;
@@ -1715,6 +1741,10 @@ BOOL CKanbanColumnCtrl::RemoveTask(DWORD dwTaskID)
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
 		VERIFY(m_mapHTItems.RemoveKey(dwTaskID));
+
+		if (bWasFull && !IsFull())
+			RefreshBkgndColor();
+
 		return TRUE;
 	}
 

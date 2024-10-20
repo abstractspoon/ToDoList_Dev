@@ -57,6 +57,7 @@ public:
 	BOOL IsBacklog() const;
 	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
 	BOOL IsEmpty() const { return (GetCount() == 0); }
+	BOOL IsFull() const;
 	int GetCount() const { return (int)(CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
 	int GetMaxCount() const { return m_columnDef.nMaxTaskCount; }
 
@@ -103,7 +104,7 @@ public:
 
 	void SetDropTarget(BOOL bTarget);
 	void SetBackgroundColor(COLORREF color);
-	void SetExcessColor(COLORREF color);
+	void SetFullColor(COLORREF color);
 	void SetMaximumTaskCount(int nMaxTasks);
 
 	void SetOptions(DWORD dwOptions);
@@ -146,7 +147,7 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
-	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd;
+	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd, m_crFullBkgnd;
 
 	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
 	BOOL m_bSortAscending;
