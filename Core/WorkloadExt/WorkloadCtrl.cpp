@@ -2324,8 +2324,10 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray&
 		
 		if (dDays > 0.0)
 		{
-			rColumn.right--;
-			rColumn.bottom--;
+			CRect rCell(rColumn);
+
+			rCell.right--;
+			rCell.bottom--;
 
 			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
@@ -2337,18 +2339,18 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray&
 					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 				if (crBack != CLR_NONE)
-					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
+					GraphicsMisc::DrawRect(pDC, rCell, CLR_NONE, crBack);
 			}
 			else if (crBack != CLR_NONE)
 			{
-				pDC->FillSolidRect(rColumn, crBack);
+				pDC->FillSolidRect(rCell, crBack);
 				crText = GraphicsMisc::GetBestTextColor(crBack);
 			}
 
-			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+			rCell.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
 			pDC->SetTextColor(crText);
-			pDC->DrawText(Misc::Format(dDays, 2), &rColumn, DT_CENTER);
+			pDC->DrawText(Misc::Format(dDays, 2), &rCell, DT_CENTER);
 		}
 	}
 }
