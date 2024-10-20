@@ -590,7 +590,8 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	// Tracked attribute can change after a custom attribute update
 	TDC_ATTRIBUTE nTrackedAttribID = m_ctrlKanban.GetTrackedAttribute();
 
-	if (nTrackedAttribID != m_nTrackedAttribID)
+	if ((nTrackedAttribID != m_nTrackedAttribID) &&
+		(m_nTrackedAttribID != TDCA_FIXEDCOLUMNS))
 	{
 		ASSERT(m_nTrackedAttribID == TDCA_CUSTOMATTRIB);
 

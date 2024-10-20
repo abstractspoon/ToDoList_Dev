@@ -312,7 +312,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ATTRIBVALUES        "Attribute Values"
-    IDS_MAXTASKCOUNT        "Maximum Tasks"
+    IDS_MAXTASKCOUNT        "Max Count"
     IDS_NEWCOLUMN           "<New Column>"
     IDS_CATEGORYATTRIB      "Category"
     IDS_ALLOCTOATTRIB       "Allocated To"
@@ -408,6 +408,7 @@ BEGIN
     IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
     IDS_OPTIONS_HIDENONEGROUP "Hide <none> group"
     IDS_OPTIONS_SORTNONEGROUPBELOW "Sort <none> group below other groups"
+    IDS_COLUMNFULL          "Full"
 END
 
 #endif    // English (Australia) resources

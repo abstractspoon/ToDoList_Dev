@@ -175,6 +175,7 @@
 #define IDS_OPTIONS_SORTGROUPSASCENDING 57731
 #define IDS_OPTIONS_HIDENONEGROUP       57732
 #define IDS_OPTIONS_SORTNONEGROUPBELOW  57733
+#define IDS_COLUMNFULL                  57734
 
 // Next default values for new objects
 // 

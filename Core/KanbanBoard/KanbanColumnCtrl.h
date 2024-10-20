@@ -55,9 +55,10 @@ public:
 	BOOL HasMultipleValues() const;
 	BOOL HasAnyValues() const;
 	BOOL IsBacklog() const;
-	BOOL IsEmpty() const { return (GetCount() == 0); }
 	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
-	UINT GetCount() const { return (CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
+	BOOL IsEmpty() const { return (GetCount() == 0); }
+	int GetCount() const { return (int)(CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
+	int GetMaxCount() const { return m_columnDef.nMaxTaskCount; }
 
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	

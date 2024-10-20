@@ -1984,7 +1984,19 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 			sTitle.LoadString(IDS_BACKLOG);
 
 		CString sFormat;
-		sFormat.Format(_T("%s (%d)"), sTitle, pCol->GetCount());
+		int nCount = pCol->GetCount(), nMaxCount = pCol->GetMaxCount();
+
+		if (nMaxCount > 0)
+		{
+			if (nCount >= nMaxCount)
+				sFormat.Format(_T("%s (%s)"), sTitle, CEnString(IDS_COLUMNFULL));
+			else
+				sFormat.Format(_T("%s (%d/%d)"), sTitle, nCount, nMaxCount);
+		}
+		else
+		{
+			sFormat.Format(_T("%s (%d)"), sTitle, nCount);
+		}
 
 		m_header.SetItemText(nVis, sFormat);
 		m_header.SetItemData(nVis, (DWORD)pCol);
@@ -2168,7 +2180,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 					{
 						pCol->SetBackgroundColor(colDef.crBackground);
 						//pCol->SetExcessColor(colDef.crExcess);
-						//pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
+						pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
 
 						m_aColumnDefs[nCol] = colDef;
 					}

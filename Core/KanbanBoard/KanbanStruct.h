@@ -228,7 +228,6 @@ struct KANBANCOLUMN
 	CStringArray aAttribValues;
 	int nMaxTaskCount;
 	COLORREF crBackground;
-	COLORREF crExcess;
 };
 
 /////////////////////////////////////////////////////////////////////////////

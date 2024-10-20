@@ -227,7 +227,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 
 		pPrefs->WriteProfileString(sColKey, _T("Title"), colDef.sTitle);
 		pPrefs->WriteProfileString(sColKey, _T("Value"), Misc::FormatArray(colDef.aAttribValues));
-// 		pPrefs->WriteProfileInt(sColKey, _T("MaxItems"), colDef.nMaxTaskCount);
+ 		pPrefs->WriteProfileInt(sColKey, _T("MaxItems"), colDef.nMaxTaskCount);
 		pPrefs->WriteProfileInt(sColKey, _T("BkgndColor"), colDef.crBackground);
 	}
 
@@ -265,7 +265,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 		CString sColKey = Misc::MakeKey(_T("ColumnDef%d"), nDef, szKey);
 			
 		colDef.sTitle = pPrefs->GetProfileString(sColKey, _T("Title"));
-// 		colDef.nMaxTaskCount = pPrefs->GetProfileInt(sColKey, _T("MaxItems"));
+ 		colDef.nMaxTaskCount = pPrefs->GetProfileInt(sColKey, _T("MaxItems"));
 		colDef.crBackground = (COLORREF)pPrefs->GetProfileInt(sColKey, _T("BkgndColor"), CLR_NONE);
 
 		// Validate color
@@ -395,7 +395,7 @@ void CKanbanPreferencesPage::OnPopulateFixedColumns()
 				colDef.sAttribID = sAttribID;
 				colDef.sTitle = aValues[nVal];
 				colDef.aAttribValues.Add(colDef.sTitle);
-				// colDef.nMaxTaskCount = 0;
+				colDef.nMaxTaskCount = 0;
 
 				if (colDef.sTitle.IsEmpty())
 					colDef.sTitle = CEnString(IDS_BACKLOG);

@@ -340,10 +340,9 @@ void CKanbanColumnCtrl::SetExcessColor(COLORREF /*color*/)
 	ASSERT(0);
 }
 
-void CKanbanColumnCtrl::SetMaximumTaskCount(int /*nMaxTasks*/)
+void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 {
-	// TODO
-	ASSERT(0);
+	m_columnDef.nMaxTaskCount = nMaxTasks;
 }
 
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
@@ -3012,9 +3011,21 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 	if (pSrcCol->AttributeValuesMatch(*pDestCol))
 		return FALSE;
 
-	// Can't copy FROM the backlog
+	// Can't COPY from the backlog
 	if (pSrcCol->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
 		return FALSE;
+
+	// Can't exceed max count
+	int nDestMaxCount = pDestCol->GetMaxCount();
+
+	if (nDestMaxCount > 0)
+	{
+		int nDestCount = pDestCol->GetCount();
+		int nSrcCount = pSrcCol->GetSelectedCount();
+		
+		if ((nDestCount + nSrcCount) > nDestMaxCount)
+			return FALSE;
+	}
 
 	return TRUE;
 }
