@@ -56,7 +56,6 @@ public:
 
 	BOOL GetColorPriority() const { return m_bColorPriority; }
 	int GetTextColorOption() const { return m_nTextColorOption; }
-	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
 	int GetPriorityColors(CDWordArray& aColors) const;
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const;
 	TDC_ATTRIBUTE GetColorByAttribute() const { return m_nColorAttribute; }
@@ -84,7 +83,6 @@ protected:
 	CComboBox	m_cbColorByAttribute;
 	BOOL	m_bColorTaskBackground;
 	BOOL	m_bHLSColorGradient;
-	BOOL	m_bHidePriorityNumber;
 	BOOL	m_bSpecifyAlternateLineColor;
 	int		m_nTextColorOption;
 	//}}AFX_DATA

@@ -283,6 +283,7 @@ public:
 	BOOL GetHidePaneSplitBar() const { return m_pageUITasklist.GetHidePaneSplitBar(); }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_pageUITasklist.GetShowRemindersAsDateAndTime(); }
 	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
+	COLORREF GetHidePriorityNumber() const { return m_pageUITasklist.GetHidePriorityNumber(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }
@@ -303,7 +304,6 @@ public:
 	COLORREF GetDoneTaskColor() const { return m_pageUITasklistColors.GetDoneTaskColor(); }
 	COLORREF GetFlaggedTaskColor() const { return m_pageUITasklistColors.GetFlaggedTaskColor(); }
 	COLORREF GetReferenceTaskColor() const { return m_pageUITasklistColors.GetReferenceTaskColor(); }
-	COLORREF GetHidePriorityNumber() const { return m_pageUITasklistColors.GetHidePriorityNumber(); }
 	COLORREF GetAlternateLineColor() const { return m_pageUITasklistColors.GetAlternateLineColor(); }
 	COLORREF GetGroupHeaderBackgroundColor() const { return m_pageUITasklistColors.GetGroupHeaderBackgroundColor(); }
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const { return m_pageUITasklistColors.GetAttributeColors(colors); }

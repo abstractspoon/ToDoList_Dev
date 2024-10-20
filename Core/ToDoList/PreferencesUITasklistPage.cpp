@@ -66,6 +66,7 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ALLOWTREEITEMCHECKBOX, m_bAllowCheckboxAgainstTreeItem);
 	DDX_Check(pDX, IDC_HIDEPANESPLITBAR, m_bHidePaneSplitBar);
 	DDX_Check(pDX, IDC_FILELINKTHUMBNAILS, m_bShowFileLinkThumbnails);
+	DDX_Check(pDX, IDC_HIDEPRIORITYNUMBER, m_bHidePriorityNumber);
 
 	CDialogHelper::DDX_CBValue(pDX, m_cbPercentIncrement, m_nPercentIncrement, 5);
 }
@@ -179,7 +180,8 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bHidePaneSplitBar = pPrefs->GetProfileInt(szKey, _T("HidePaneSplitBar"), TRUE);
 	m_bShowRemindersAsDateAndTime = pPrefs->GetProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), FALSE);
 	m_bShowFileLinkThumbnails = pPrefs->GetProfileInt(szKey, _T("ShowFileLinkThumbnails"), FALSE);
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
+	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
+	//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -215,7 +217,8 @@ void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR s
 	pPrefs->WriteProfileInt(szKey, _T("HidePaneSplitBar"), m_bHidePaneSplitBar);
 	pPrefs->WriteProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), m_bShowRemindersAsDateAndTime);
 	pPrefs->WriteProfileInt(szKey, _T("ShowFileLinkThumbnails"), m_bShowFileLinkThumbnails);
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
+	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
+	//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesUITasklistPage::OnLimitcolwidths() 
