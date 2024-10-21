@@ -97,7 +97,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	TDCCOLEDITFILTERVISIBILITY vis;
 	tdc.GetColumnFieldVisibility(vis);
 
-	vis.ShowColorEditIfAsColumns(prefs.GetTextColorOption() == COLOROPT_DEFAULT);
+	vis.ShowColorEditIfAsColumns(prefs.GetTextColorOption() == TEXTOPT_DEFAULT);
 	tdc.SetColumnFieldVisibility(vis);
 
 	// layout
@@ -180,9 +180,9 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_CALCREMAININGTIMEBYPERCENT] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISPERCENTAGE);
 	styles[TDCS_CALCREMAININGTIMEBYSPENT] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISSPENT);
 	styles[TDCS_CHECKOUTONLOAD] = prefs.GetAutoCheckOut();
-	styles[TDCS_COLORTEXTBYATTRIBUTE] = (prefs.GetTextColorOption() == COLOROPT_ATTRIB);
-	styles[TDCS_COLORTEXTBYNONE] = (prefs.GetTextColorOption() == COLOROPT_NONE);
-	styles[TDCS_COLORTEXTBYPRIORITY] = (prefs.GetTextColorOption() == COLOROPT_PRIORITY);
+	styles[TDCS_COLORTEXTBYATTRIBUTE] = (prefs.GetTextColorOption() == TEXTOPT_ATTRIB);
+	styles[TDCS_COLORTEXTBYNONE] = (prefs.GetTextColorOption() == TEXTOPT_NONE);
+	styles[TDCS_COLORTEXTBYPRIORITY] = (prefs.GetTextColorOption() == TEXTOPT_PRIORITY);
 	styles[TDCS_COLUMNHEADERSORTING] = prefs.GetEnableColumnHeaderSorting();
 	styles[TDCS_COMMENTSUSETREEFONT] = prefs.GetCommentsUseTreeFont();
 	styles[TDCS_CONFIRMDELETE] = prefs.GetConfirmDelete();

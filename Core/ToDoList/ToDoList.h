@@ -12,6 +12,8 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "tdcenum.h"
 
 #include "..\shared\Localizer.h"

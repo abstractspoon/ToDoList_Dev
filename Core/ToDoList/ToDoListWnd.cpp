@@ -10,6 +10,7 @@
 #include "tasklisthtmlexporter.h"
 #include "tasklisttxtexporter.h"
 #include "TDCAnonymizeTasklist.h"
+#include "TDCDarkMode.h"
 #include "tdcmapping.h"
 #include "tdcmsg.h"
 #include "tdcstatic.h"
@@ -2877,7 +2878,7 @@ void CToDoListWnd::OnUpdateEditTasktext(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_COLOR) && (Prefs().GetTextColorOption() == COLOROPT_DEFAULT));	
+	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_COLOR) && (Prefs().GetTextColorOption() == TEXTOPT_DEFAULT));	
 }
 
 void CToDoListWnd::OnUpdateEditToggleTaskDone(CCmdUI* pCmdUI) 
@@ -3080,7 +3081,7 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_SORTBY_COLOR:
-		pCmdUI->Enable(Prefs().GetTextColorOption() == COLOROPT_DEFAULT);
+		pCmdUI->Enable(Prefs().GetTextColorOption() == TEXTOPT_DEFAULT);
 		break;
 		
 	case ID_SORTBY_PATH:
@@ -3169,7 +3170,7 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_COLOR) && 
-					(Prefs().GetTextColorOption() == COLOROPT_DEFAULT) &&
+					(Prefs().GetTextColorOption() == TEXTOPT_DEFAULT) &&
 					tdc.SelectedTasksHaveColor());	
 }
 
@@ -9004,6 +9005,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 
 void CToDoListWnd::OnNcDestroy()
 {
+	CTDCDarkMode::Release();
+
 	if (CPreferences::UsesIni())
 		CPreferences::Save();
 

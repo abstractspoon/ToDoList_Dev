@@ -229,6 +229,10 @@ SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCDarkMode.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCDialogHelper.cpp
 # End Source File
 # Begin Source File
@@ -870,6 +874,10 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCDarkMode.h
 # End Source File
 # Begin Source File
 

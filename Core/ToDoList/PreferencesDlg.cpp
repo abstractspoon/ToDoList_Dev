@@ -830,7 +830,7 @@ LRESULT CPreferencesDlg::OnColorPageTextOption(WPARAM wParam, LPARAM lParam)
 	TDCCOLEDITFILTERVISIBILITY vis;
 	m_pageUIVisibility.GetColumnAttributeVisibility(vis);
 
-	vis.ShowColorEditIfAsColumns(m_pageUITasklistColors.GetTextColorOption() == COLOROPT_DEFAULT);
+	vis.ShowColorEditIfAsColumns(m_pageUITasklistColors.GetTextColorOption() == TEXTOPT_DEFAULT);
 	m_pageUIVisibility.SetColumnAttributeVisibility(vis);
 
 	return 0L;

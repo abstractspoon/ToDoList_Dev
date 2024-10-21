@@ -17,8 +17,7 @@
 #include "tdcstartupoptions.h"
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
-
-#include "PreferencesUITasklistColorsPage.h" // Alternate line colour
+#include "TDCDarkMode.h"
 
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
@@ -37,7 +36,6 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
-#include "..\shared\DarkMode.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -1309,41 +1307,19 @@ int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*
 
 void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
 {
-	ASSERT(!CDarkMode::IsEnabled());
+	ASSERT(!CTDCDarkMode::IsEnabled());
 
-	if (CDarkMode::IsSupported())
+	if (CTDCDarkMode::IsSupported())
 	{
 		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
 
-		if (bDarkMode == -1)
+		if (bDarkMode == -1) // First time fallback
 		{
 			bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
 			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
 		}
 
-		// Fixup 'Alternate Line' and 'Completed Task' colours
-		COLORREF crAltLines = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
-		COLORREF crDoneTasks = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
-
-		const COLORREF DARKMODE_ALTLINECOLOR = DM_3DFACE;
-		const COLORREF DARKMODE_TASKDONECOLOR = GetSysColor(COLOR_3DFACE);
-
-		if (bDarkMode && (crAltLines == DEF_ALTERNATELINECOLOR))
-		{
-			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DARKMODE_ALTLINECOLOR);
-
-			if (crDoneTasks == DEF_TASKDONECOLOR)
-				prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DARKMODE_TASKDONECOLOR);
-		}
-		else if (!bDarkMode && (crAltLines == DARKMODE_ALTLINECOLOR))
-		{
-			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
-
-			if (crDoneTasks == DARKMODE_TASKDONECOLOR)
-				prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
-		}
-
-		CDarkMode::Enable(bDarkMode);
+		CTDCDarkMode::Initialize(prefs);
 	}
 }
 
@@ -1356,7 +1332,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 	{
 	case IDYES:
 		{
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
 			
 			// Restart
 			HWND hwndMain = *AfxGetMainWnd();
@@ -1377,7 +1353,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 		break;
 
 	case IDNO:
-		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
 		break;
 
 	case IDCANCEL:
@@ -1387,8 +1363,8 @@ void CToDoListApp::OnToolsToggleDarkMode()
 
 void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CDarkMode::IsSupported());
-	pCmdUI->SetCheck(CDarkMode::IsEnabled());
+	pCmdUI->Enable(CTDCDarkMode::IsSupported());
+	pCmdUI->SetCheck(CTDCDarkMode::IsEnabled());
 }
 
 void CToDoListApp::OnImportPrefs() 
@@ -1612,7 +1588,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		}
 	}
 
-	if (CDarkMode::IsEnabled())
+	if (CTDCDarkMode::IsEnabled())
 		params.SetOption(SWITCH_DARKMODE);
 
 	if (CRTLStyleMgr::IsRTL())
@@ -1887,7 +1863,7 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	cmdInfo.SetOption(SWITCH_APPID, TDLAPPID);
 	cmdInfo.SetOption(SWITCH_SHOWUI);
 
-	if (CDarkMode::IsEnabled())
+	if (CTDCDarkMode::IsEnabled())
 		cmdInfo.SetOption(SWITCH_DARKMODE);
 
 	// Pass the centroid of the main wnd so that the
