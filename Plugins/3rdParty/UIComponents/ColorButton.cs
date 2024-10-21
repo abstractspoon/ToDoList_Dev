@@ -57,19 +57,17 @@ namespace UIComponents
 		{
 			base.OnClick(e);
 
-			using (ColorDialog colorDialog = new ColorDialog())
+			using (var dlg = new ColorDialogEx())
 			{
-				colorDialog.FullOpen = true;
-				colorDialog.AnyColor = true;
-				colorDialog.SolidColorOnly = true;
-				colorDialog.AllowFullOpen = true;
-				colorDialog.Color = this.Color;
-				//colorDialog.CustomColors = _customColors;
+				dlg.FullOpen = true;
+				dlg.AnyColor = true;
+				dlg.SolidColorOnly = true;
+				dlg.AllowFullOpen = true;
+				dlg.Color = this.Color;
 
-				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
-					//_customColors = colorDialog.CustomColors;
-					this.Color = colorDialog.Color;
+					this.Color = dlg.Color;
 					Invalidate();
 				}
 			}

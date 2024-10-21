@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Web.UI;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using UIComponents;
 
 namespace HTMLReportExporter
 {
@@ -749,19 +750,19 @@ namespace HTMLReportExporter
 
 		private void OnSetBackgroundColor(object sender, EventArgs e)
 		{
-			using (ColorDialog colorDialog = new ColorDialog())
+			using (var dlg = new ColorDialogEx())
 			{
-				colorDialog.FullOpen = true;
-				colorDialog.AnyColor = true;
-				colorDialog.SolidColorOnly = true;
-				colorDialog.AllowFullOpen = true;
-				colorDialog.Color = (m_Template.HasBackColor ? m_Template.BackColor : Color.White);
+				dlg.FullOpen = true;
+				dlg.AnyColor = true;
+				dlg.SolidColorOnly = true;
+				dlg.AllowFullOpen = true;
+				dlg.Color = (m_Template.HasBackColor ? m_Template.BackColor : Color.White);
 				//colorDialog.CustomColors = _customColors;
 
-				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
 					//_customColors = colorDialog.CustomColors;
-					m_Template.BackColor = colorDialog.Color;
+					m_Template.BackColor = dlg.Color;
 					UpdateControls();
 				}
 			}

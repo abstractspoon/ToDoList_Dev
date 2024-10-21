@@ -1307,11 +1307,11 @@ GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
 	return GMIS_NONE;
 }
 
-LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	ASSERT(pLVCD->nmcd.hdr.idFrom == IDC_ALLOCATIONCOLUMNS);
 
-	return OnAllocationsListCustomDraw(pLVCD);
+	return OnAllocationsListCustomDraw(pLVCD, aColOrder, aColWidths);
 }
 
 void CWorkloadCtrl::OnTotalsListsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
@@ -1441,7 +1441,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
@@ -1477,7 +1477,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawAllocationListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
+			DrawAllocationListItem(pDC, nItem, aColOrder, aColWidths, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2283,16 +2283,40 @@ CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTot
 	return _T("");
 }
 
-void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
+void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-	int nNumCol = GetRequiredListColumnCount();
 
-	for (int nCol = 1; nCol < nNumCol; nCol++)
+	CRect rClip;
+	pDC->GetClipBox(rClip);
+
+	// Much more efficient to calculate the sub-item rects
+	// ourselves than to call GetSubItemRect for every column
+	CRect rColumn;
+	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
+
+	// First column is always zero width
+	rColumn.right = rColumn.left;
+
+	int nNumCol = aColOrder.GetSize();
+
+	for (int i = 1; i < nNumCol; i++)
 	{
-		CRect rColumn;
-		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
-		
+		if (rColumn.right >= rClip.right)
+			break; // nothing more to draw
+
+		const int nCol = aColOrder[i];
+		const int nColWidth = aColWidths[nCol];
+
+		if (nColWidth == 0)
+			continue;
+
+		rColumn.left = rColumn.right;
+		rColumn.right += nColWidth;
+
+		if (rColumn.right <= rClip.left)
+			continue; // to left of clip rect
+
 		DrawVertItemDivider(pDC, rColumn, bSelected);
 
 		COLORREF crBack = CLR_NONE;
@@ -2300,8 +2324,10 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		
 		if (dDays > 0.0)
 		{
-			rColumn.right--;
-			rColumn.bottom--;
+			CRect rCell(rColumn);
+
+			rCell.right--;
+			rCell.bottom--;
 
 			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
@@ -2313,18 +2339,18 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 				if (crBack != CLR_NONE)
-					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
+					GraphicsMisc::DrawRect(pDC, rCell, CLR_NONE, crBack);
 			}
 			else if (crBack != CLR_NONE)
 			{
-				pDC->FillSolidRect(rColumn, crBack);
+				pDC->FillSolidRect(rCell, crBack);
 				crText = GraphicsMisc::GetBestTextColor(crBack);
 			}
 
-			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+			rCell.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
 			pDC->SetTextColor(crText);
-			pDC->DrawText(Misc::Format(dDays, 2), &rColumn, DT_CENTER);
+			pDC->DrawText(Misc::Format(dDays, 2), &rCell, DT_CENTER);
 		}
 	}
 }

@@ -94,6 +94,10 @@ const UINT IDS_PRIORITYRISK_SCALE[] =
 
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
+#define CUSTOMTIMEATTRIBID(dateID) ((TDC_ATTRIBUTE)(dateID + CUSTOMTIMEATTRIBOFFSET))
+
+/////////////////////////////////////////////////////////////////////////////
+
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
@@ -273,6 +277,71 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 		Populate();
 	else
 		Sort();
+}
+
+int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
+{
+	TDC_ATTRIBUTE nAttribID1 = (TDC_ATTRIBUTE)dwItemData1;
+	TDC_ATTRIBUTE nAttribID2 = (TDC_ATTRIBUTE)dwItemData2;
+
+	// If one or both values are time fields we need special handling
+	// to ensure that the time fields always remain immediately below
+	// their corresponding date fields
+	TDC_ATTRIBUTE nDateAttribID1 = MapTimeToDate(nAttribID1);
+	TDC_ATTRIBUTE nDateAttribID2 = MapTimeToDate(nAttribID2);
+
+	BOOL bAttrib1IsTime = (nDateAttribID1 != TDCA_NONE);
+	BOOL bAttrib2IsTime = (nDateAttribID2 != TDCA_NONE);
+
+	if (bAttrib1IsTime || bAttrib2IsTime)
+	{
+		// If both values are time fields, they must have different date fields
+		// and we just sort by their date fields
+		if (bAttrib1IsTime && bAttrib2IsTime)
+		{
+			ASSERT(nDateAttribID1 != nDateAttribID2);
+			return CInputListCtrl::CompareItems(nDateAttribID1, nDateAttribID2, nSortColumn);
+		}
+
+		// else if the first item is a time field
+		if (bAttrib1IsTime)
+		{
+			ASSERT(!bAttrib2IsTime);
+
+			// If the second attribute is the first attribute's  
+			// date field we sort the time below the date
+			if (nAttribID2 == nDateAttribID1)
+			{
+				ASSERT(bAttrib1IsTime);
+				ASSERT(nAttribID2 != TDCA_NONE);
+
+				return (m_bSortAscending ? 1 : -1);
+			}
+
+			// else we use the date field for the comparison
+			// to keep the date and time adjacent to one another
+			return CInputListCtrl::CompareItems(nDateAttribID1, dwItemData2, nSortColumn);
+		}
+
+		// else second item must be a time field
+		ASSERT(bAttrib2IsTime);
+
+		// If the first attribute is the second attribute's
+		// date field we sort the time below the date
+		if (nAttribID1 == nDateAttribID2)
+		{
+			ASSERT(bAttrib2IsTime);
+			ASSERT(nAttribID1 != TDCA_NONE);
+
+			return (m_bSortAscending ? -1 : 1);
+		}
+
+		// else we use the date field for the comparison
+		// to keep the date and time adjacent to one another
+		return CInputListCtrl::CompareItems(dwItemData1, nDateAttribID2, nSortColumn);
+	}
+
+	return CInputListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
@@ -473,11 +542,12 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			if (attribDef.bEnabled)
 			{
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
+				CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
-				mapAttrib[nAttribID] = attribDef.sLabel;
+				mapAttrib[nAttribID] = sAttrib;
 
 				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
-					mapAttrib[MapCustomDateToTime(nAttribID)] = attribDef.sLabel;
+					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = sAttrib;
 			}
 		}
 	}
@@ -514,12 +584,13 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 					POSITION pos = mapAttribs.GetStartPosition();
 					TDC_ATTRIBUTE nAttribID = TDCA_NONE;
-					CString sAttribName;
+					CString sAttrib;
 
 					while (pos)
 					{
-						mapAttribs.GetNextAssoc(pos, nAttribID, sAttribName);
-						int nRow = AddRow(sAttribName);
+						mapAttribs.GetNextAssoc(pos, nAttribID, sAttrib);
+
+						int nRow = AddRow(sAttrib);
 						SetItemData(nRow, nAttribID);
 						GetGrouping().SetItemGroupId(nRow, attribCat.nGroup);
 					}
@@ -549,13 +620,15 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 				if (attribDef.bEnabled)
 				{
-					int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-					SetItemData(nItem, attribDef.GetAttributeID());
+					CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+
+					int nRow = AddRow(sAttrib);
+					SetItemData(nRow, attribDef.GetAttributeID());
 
 					if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
 					{
-						int nItem = AddRow(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel));
-						SetItemData(nItem, MapCustomDateToTime(attribDef.GetAttributeID()));
+						nRow = AddRow(sAttrib);
+						SetItemData(nRow, CUSTOMTIMEATTRIBID(attribDef.GetAttributeID()));
 					}
 				}
 			}
@@ -747,7 +820,7 @@ TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveC
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow); 
 
 	if (bResolveCustomTimeFields && IsCustomTime(nAttribID))
-		nAttribID = MapCustomTimeToDate(nAttribID);
+		nAttribID = MapTimeToDate(nAttribID);
 
 	return nAttribID;
 }
@@ -1378,7 +1451,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		else if (IsCustomTime(nAttribID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_ALT(m_aCustomAttribDefs, MapCustomTimeToDate(nAttribID), pDef, break);
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, MapTimeToDate(nAttribID), pDef, break);
 
 			ASSERT(pDef->GetDataType() == TDCCA_DATE);
 			TDCCADATA data;
@@ -2096,7 +2169,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 		{
 			if (pDef->HasFeature(TDCCAF_SHOWTIME))
 			{
-				TDC_ATTRIBUTE nTimeAttribID = MapCustomDateToTime(nAttribID);
+				TDC_ATTRIBUTE nTimeAttribID = CUSTOMTIMEATTRIBID(nAttribID);
 				date.m_dt += (CTimeHelper::DecodeClockTime(GetValueText(nTimeAttribID)) / 24);
 			}
 
@@ -2114,33 +2187,30 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	return !data.IsEmpty();
 }
 
-TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::MapCustomDateToTime(TDC_ATTRIBUTE nDateAttribID) const
+TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::MapTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const
 {
+	switch (nTimeAttribID)
+	{
+	case TDCA_STARTTIME:	return TDCA_STARTDATE;
+	case TDCA_DUETIME:		return TDCA_DUEDATE;
+	case TDCA_DONETIME:		return TDCA_DONEDATE;
+
+	default:
+		if (IsCustomTime(nTimeAttribID))
+		{
+			TDC_ATTRIBUTE nDateAttribID = (TDC_ATTRIBUTE)(nTimeAttribID - CUSTOMTIMEATTRIBOFFSET);
 #ifdef _DEBUG
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nDateAttribID));
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nDateAttribID, pDef, break);
 
-	int nCust = m_aCustomAttribDefs.Find(nDateAttribID);
-	ASSERT(nCust != -1);
-	ASSERT(m_aCustomAttribDefs[nCust].IsDataType(TDCCA_DATE));
+			ASSERT(pDef->IsDataType(TDCCA_DATE) && pDef->HasFeature(TDCCAF_SHOWTIME));
 #endif
+			return nDateAttribID;
+		}
+		break;
+	}
 
-	return (TDC_ATTRIBUTE)(nDateAttribID + CUSTOMTIMEATTRIBOFFSET);
-}
-
-TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const
-{
-	TDC_ATTRIBUTE nDateAttribID = (TDC_ATTRIBUTE)(nTimeAttribID - CUSTOMTIMEATTRIBOFFSET);
-
-#ifdef _DEBUG
-	ASSERT(IsCustomTime(nTimeAttribID));
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nDateAttribID));
-
-	int nCust = m_aCustomAttribDefs.Find(nDateAttribID);
-	ASSERT(nCust != -1);
-	ASSERT(m_aCustomAttribDefs[nCust].IsDataType(TDCCA_DATE));
-#endif
-
-	return nDateAttribID;
+	return TDCA_NONE;
 }
 
 BOOL CTDLTaskAttributeListCtrl::IsCustomTime(TDC_ATTRIBUTE nAttribID)
@@ -2612,7 +2682,7 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 		else if (IsCustomTime(nAttribID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_RET(m_aCustomAttribDefs, MapCustomTimeToDate(nAttribID), pDef, NULL);
+			GET_CUSTDEF_RET(m_aCustomAttribDefs, MapTimeToDate(nAttribID), pDef, NULL);
 
 			if (pDef->HasFeature(TDCCAF_SHOWTIME))
 			{
@@ -3520,7 +3590,7 @@ int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
 
 	default:
 		if (IsCustomTime(nTimeAttribID))
-			return GetRow(MapCustomTimeToDate(nTimeAttribID));
+			return GetRow(MapTimeToDate(nTimeAttribID));
 		break;
 	}
 

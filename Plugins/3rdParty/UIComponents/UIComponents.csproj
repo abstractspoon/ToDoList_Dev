@@ -48,6 +48,9 @@
     <Compile Include="ColorButton.Designer.cs">
       <DependentUpon>ColorButton.cs</DependentUpon>
     </Compile>
+    <Compile Include="ColorDialogEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

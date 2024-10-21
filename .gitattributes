@@ -9,4 +9,6 @@
 *.dll binary
 *.pdb binary
 *.svg binary
+*.dat binary
+*.xlsx binary
 *.zip binary

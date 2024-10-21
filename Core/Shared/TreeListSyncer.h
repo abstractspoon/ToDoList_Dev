@@ -173,6 +173,8 @@ private:
 	int m_nTrackedColumn;
 	HWND m_hwndIgnoreNcCalcSize;
 
+	CIntArray m_aListDrawColWidths, m_aListDrawColOrder;
+
 protected:
 	inline BOOL CanResync() const { return (m_bResyncEnabled && !m_bResyncing); }
 	inline BOOL IsResyncEnabled() const { return m_bResyncEnabled; }
@@ -302,7 +304,7 @@ protected:
 
 	// pseudo message handlers
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
-	virtual LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	virtual LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
 	virtual LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
@@ -335,6 +337,7 @@ private:
 	void BuildListListSortMap(HWND hwndPrimary, HWND hwndList, CSortMap& map);
 	BOOL HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp);
 	void FixupListListItemIsDataLinkage(int nFrom = 0);
+	void RefreshListDrawColAttributes(HWND hwndList);
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);

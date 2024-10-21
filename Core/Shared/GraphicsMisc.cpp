@@ -54,6 +54,23 @@ typedef DWORD ARGB;
 
 //////////////////////////////////////////////////////////////////////
 
+const COLORREF HIGHCONTRAST_SEL_BKCOLOR				= GetSysColor(COLOR_HIGHLIGHT);
+
+const COLORREF THEME_SEL_BKCOLOR					= RGB(160, 215, 255);
+const COLORREF THEME_SEL_BORDERCOLOR				= RGB(90, 180, 255);
+const COLORREF THEME_SELNOFOCUS_BKCOLOR				= RGB(204, 232, 255);
+const COLORREF THEME_SELNOFOCUS_BORDERCOLOR			= THEME_SEL_BKCOLOR;
+
+const COLORREF CLASSICTHEME_SEL_BKCOLOR				= THEME_SEL_BKCOLOR;
+const COLORREF CLASSICTHEME_SEL_BORDERCOLOR			= THEME_SEL_BORDERCOLOR;
+const COLORREF CLASSICTHEME_SELNOFOCUS_BKCOLOR		= RGB(192, 192, 192);
+const COLORREF CLASSICTHEME_SELNOFOCUS_BORDERCOLOR	= RGB(128, 128, 128);
+
+const COLORREF NOTHEME_SEL_BKCOLOR					= GetSysColor(COLOR_HIGHLIGHT);
+const COLORREF NOTHEME_SELNOFOCUS_BKCOLOR			= GetSysColor(COLOR_3DFACE);
+
+//////////////////////////////////////////////////////////////////////
+
 static int PointsPerInch() { return 72; }
 
 const static int DEFAULT_DPI = 96;
@@ -1579,7 +1596,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			case GMIS_SELECTED:
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
+				pDC->FillSolidRect(rDraw, HIGHCONTRAST_SEL_BKCOLOR);
 				break;
 
 			default:
@@ -1636,14 +1653,14 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			{
 			case GMIS_SELECTED:
 				// Similar to windows 10 colours
-				crBorder = RGB(90, 180, 255); 
-				crFill = (bTransparent ? crBorder : RGB(160, 215, 255));
+				crBorder = CLASSICTHEME_SEL_BORDERCOLOR;
+				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SEL_BKCOLOR);
 				break;
 			
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				crBorder = GetSysColor(COLOR_3DSHADOW);
-				crFill = (bTransparent ? crBorder : RGB(192, 192, 192));
+				crBorder = CLASSICTHEME_SEL_BORDERCOLOR;
+				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SELNOFOCUS_BKCOLOR);
 				break;
 			
 			default:
@@ -1662,12 +1679,12 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			switch (nState)
 			{
 			case GMIS_SELECTED:
-				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
+				pDC->FillSolidRect(rDraw, NOTHEME_SEL_BKCOLOR);
 				break;
 			
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_3DFACE));
+				pDC->FillSolidRect(rDraw, NOTHEME_SELNOFOCUS_BKCOLOR);
 				break;
 			
 			default:
@@ -1686,19 +1703,92 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DW
 	ASSERT(nState != GMIS_NONE);
 
 	if (Misc::IsHighContrastActive())
-		return GetSysColor(COLOR_HIGHLIGHT);
-
-	BOOL bThemed = (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
-	bThemed |= (dwFlags & GMIB_THEMECLASSIC);
-
-	switch (nState)
 	{
-	case GMIS_SELECTED:
-		return (bThemed ? RGB(160, 215, 255) : GetSysColor(COLOR_HIGHLIGHT));
+		return HIGHCONTRAST_SEL_BKCOLOR;
+	}
+	else if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA))
+	{
+		switch (nState)
+		{
+		case GMIS_SELECTED:
+			return THEME_SEL_BKCOLOR;
 
-	case GMIS_SELECTEDNOTFOCUSED:
-	case GMIS_DROPHILITED:
-		return (bThemed ? RGB(192, 192, 192) : GetSysColor(COLOR_3DFACE));
+		case GMIS_SELECTEDNOTFOCUSED:
+		case GMIS_DROPHILITED:
+			return THEME_SELNOFOCUS_BKCOLOR;
+		}
+	}
+	else if (dwFlags & GMIB_THEMECLASSIC)
+	{
+		switch (nState)
+		{
+		case GMIS_SELECTED:
+			return CLASSICTHEME_SEL_BKCOLOR;
+
+		case GMIS_SELECTEDNOTFOCUSED:
+		case GMIS_DROPHILITED:
+			return CLASSICTHEME_SELNOFOCUS_BKCOLOR;
+		}
+	}
+	else
+	{
+		switch (nState)
+		{
+		case GMIS_SELECTED:
+			return NOTHEME_SEL_BKCOLOR;
+
+		case GMIS_SELECTEDNOTFOCUSED:
+		case GMIS_DROPHILITED:
+			return NOTHEME_SELNOFOCUS_BKCOLOR;
+		}
+	}
+
+	return GetSysColor(COLOR_WINDOW);
+}
+
+COLORREF GraphicsMisc::GetExplorerItemSelectionBorderColor(GM_ITEMSTATE nState, DWORD dwFlags)
+{
+	ASSERT(nState != GMIS_NONE);
+
+	if (Misc::IsHighContrastActive())
+	{
+		return HIGHCONTRAST_SEL_BKCOLOR;
+	}
+	else if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA))
+	{
+		switch (nState)
+		{
+		case GMIS_SELECTED:
+			return THEME_SEL_BORDERCOLOR;
+
+		case GMIS_SELECTEDNOTFOCUSED:
+		case GMIS_DROPHILITED:
+			return THEME_SELNOFOCUS_BORDERCOLOR;
+		}
+	}
+	else if (dwFlags & GMIB_THEMECLASSIC)
+	{
+		switch (nState)
+		{
+		case GMIS_SELECTED:
+			return CLASSICTHEME_SEL_BORDERCOLOR;
+
+		case GMIS_SELECTEDNOTFOCUSED:
+		case GMIS_DROPHILITED:
+			return CLASSICTHEME_SELNOFOCUS_BORDERCOLOR;
+		}
+	}
+	else
+	{
+		switch (nState)
+		{
+		case GMIS_SELECTED:
+			return NOTHEME_SEL_BKCOLOR;
+
+		case GMIS_SELECTEDNOTFOCUSED:
+		case GMIS_DROPHILITED:
+			return NOTHEME_SELNOFOCUS_BKCOLOR;
+		}
 	}
 
 	return GetSysColor(COLOR_WINDOW);

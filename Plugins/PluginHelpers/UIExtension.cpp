@@ -850,6 +850,14 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 	return ColorUtil::DrawingColor::ToColor(color);
 }
 
+Drawing::Color UIExtension::SelectionRect::GetBorderColor(Style style)
+{
+	GM_ITEMSTATE state = Map(style);
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionBorderColor(state, GMIB_THEMECLASSIC);
+
+	return ColorUtil::DrawingColor::ToColor(color);
+}
+
 Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Color baseColor)
 {
 	GM_ITEMSTATE state = Map(style);

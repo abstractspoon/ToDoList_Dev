@@ -73,7 +73,7 @@ public:
 	void SetDefaultListData(const TDCAUTOLISTDATA& defaultListData);
 
 	BOOL GetColorPriority() const { return m_bColorPriority; }
-	PUITCP_TEXTCOLOROPTION GetTextColorOption() const { return (PUITCP_TEXTCOLOROPTION)m_nTextColorOption; }
+	PUITCP_TEXTCOLOROPTION GetTextColorOption() const { return m_nTextColorOption; }
 	int GetPriorityColors(CDWordArray& aColors) const;
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const;
 	TDC_ATTRIBUTE GetColorByAttribute() const { return m_nColorAttribute; }

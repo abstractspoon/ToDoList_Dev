@@ -1038,7 +1038,7 @@ BOOL CInputListCtrl::GetCurSel(int& nRow, int& nCol) const
 	return ((nRow != -1) && (nCol != -1));
 }
 
-int CInputListCtrl::InsertRow(CString sRowText, int nRow, int nImage)
+int CInputListCtrl::InsertRow(const CString& sRowText, int nRow, int nImage)
 {
 	if (m_bAutoAddRows && nRow == GetItemCount())
 		nRow--; // add before prompt
