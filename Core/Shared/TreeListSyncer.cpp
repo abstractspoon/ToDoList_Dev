@@ -11,6 +11,9 @@
 #include "copywndcontents.h"
 #include "enbitmap.h"
 
+// #include "scopedtimer.h"
+// #include "FileMisc.h"
+
 #include "..\3rdParty\Detours\detours.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1740,7 +1743,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				}
 				else if (IsList(hwnd))
 				{
-					return OnListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR);
+					return OnListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR, m_aListDrawColOrder, m_aListDrawColWidths);
 				}
 				else if (IsTree(hwnd))
 				{
@@ -2036,7 +2039,7 @@ LRESULT CTreeListSyncer::OnTreeCustomDraw(NMTVCUSTOMDRAW* /*pTVCD*/)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CTreeListSyncer::OnListCustomDraw(NMLVCUSTOMDRAW* /*pLVCD*/)
+LRESULT CTreeListSyncer::OnListCustomDraw(NMLVCUSTOMDRAW* /*pLVCD*/, const CIntArray& /*aColOrder*/, const CIntArray& /*aColWidths*/)
 {
 	return CDRF_DODEFAULT;
 }
@@ -2314,6 +2317,31 @@ BOOL CTreeListSyncer::IsListFullRowSelect(HWND hwnd)
 	return (ListView_GetExtendedListViewStyle(hwnd) & LVS_EX_FULLROWSELECT);
 }
 
+void CTreeListSyncer::RefreshListDrawColAttributes(HWND hwndList)
+{
+	ASSERT(IsList(hwndList));
+
+ 	HWND hwndHdr = ListView_GetHeader(hwndList);
+	ASSERT(hwndHdr);
+
+	int nNumCol = Header_GetItemCount(hwndHdr);
+
+	// Order
+	m_aListDrawColOrder.SetSize(nNumCol);
+	VERIFY(Header_GetOrderArray(hwndHdr, nNumCol, m_aListDrawColOrder.GetData()));
+
+	// Widths
+	m_aListDrawColWidths.SetSize(nNumCol);
+
+	HD_ITEM hdi = { HDI_WIDTH, 0 };
+
+	for (int nCol = 0; nCol < nNumCol; nCol++)
+	{
+		VERIFY(Header_GetItem(hwndHdr, nCol, &hdi));
+		m_aListDrawColWidths[nCol] = hdi.cxy;
+	}
+}
+
 LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (hRealWnd != Left() && hRealWnd != Right())
@@ -2383,6 +2411,17 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				}
 				break;
 			}
+		}
+		break;
+
+	case WM_PAINT:
+		if (IsList(hRealWnd))
+		{
+// 			FileMisc::EnableLogging(TRUE);
+// 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
+
+			RefreshListDrawColAttributes(hRealWnd);
+			return ScDefault(hRealWnd);
 		}
 		break;
 

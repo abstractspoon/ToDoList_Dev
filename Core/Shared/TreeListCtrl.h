@@ -185,7 +185,6 @@ protected:
 	CListCtrl m_list;
 	CEnHeaderCtrl m_listHeader, m_treeHeader;
 
-	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 
 	CTreeDragDropHelper m_treeDragDrop;

@@ -17,6 +17,8 @@
 #include "..\shared\themed.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\WorkingWeek.h"
+#include "..\shared\scopedtimer.h"
+#include "..\shared\FileMisc.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -1455,7 +1457,7 @@ GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
 	return CTreeListCtrl::GetItemState(hti);
 }
 
-LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -1492,7 +1494,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
+			DrawListItem(pDC, nItem, aColOrder, aColWidths, *pGI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -2953,15 +2955,14 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BO
 	}
 }
 
-void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
+void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const GANTTITEM& gi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-	int nNumCol = GetRequiredListColumnCount();
-	
-	// Rollups for collapsed parents
+
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
+	// Rollups for collapsed parents
 	HTREEITEM htiRollUp = NULL;
 
 	if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && gi.bParent)
@@ -2973,25 +2974,37 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 			htiRollUp = htiParent;
 	}
 
-	BOOL bContinue = TRUE;
+	// Much more efficient to calculate the sub-item rects
+	// ourselves than to call GetSubItemRect for every column
+	CRect rColumn;
+	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
 
-	for (int nCol = 1; ((nCol <= nNumCol) && bContinue); nCol++)
+	// First column is always zero width
+	rColumn.right = rColumn.left;
+
+	int nNumCol = aColOrder.GetSize();
+
+	for (int i = 1; i < nNumCol; i++)
 	{
-		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected, FALSE);
+		if (rColumn.right >= rClip.right)
+			break; // nothing more to draw
+
+		const int nCol = aColOrder[i];
+		const int nColWidth = aColWidths[nCol];
+
+		if (nColWidth == 0)
+			continue;
+
+		rColumn.left = rColumn.right;
+		rColumn.right += nColWidth;
+
+		if (rColumn.right <= rClip.left)
+			continue; // to left of clip rect
+
+		DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, FALSE);
 
 		if (htiRollUp)
-		{
-			CRect rColumn;
-			VERIFY(m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn));
-
-			if (rColumn.right < rClip.left)
-				continue;
-
-			if (rColumn.left > rClip.right)
-				break; // we can stop
-
 			DrawListItemRollup(pDC, htiRollUp, nCol, rColumn, bSelected);
-		}
 	}
 
 	// Trailing text
@@ -3087,6 +3100,7 @@ void CGanttCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, con
 	}
 }
 
+/*
 BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
 											BOOL bSelected, BOOL bRollup)
 {
@@ -3111,6 +3125,7 @@ BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTIT
 
 	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, bRollup);
 }
+*/
 
 BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
 												BOOL bSelected, BOOL bRollup)
