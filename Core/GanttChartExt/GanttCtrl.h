@@ -119,6 +119,7 @@ protected:
 
 	IGanttDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
+	CIntArray m_aPrevColWidths, m_aPrevTrackedCols;
 
 	COLORREF m_crParent, m_crBarDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHours;
@@ -147,7 +148,7 @@ protected:
 	// virtual overrides
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
-	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 
 	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
@@ -181,8 +182,7 @@ protected:
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureLabelVisible, LPCRECT prcToday = NULL);
 	
-	void DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected);
-	BOOL DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
+	void DrawListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const GANTTITEM& gi, BOOL bSelected);
 	void DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, BOOL bSelected);
 	BOOL DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, BOOL bSelected, BOOL bRollup);
 	void DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected);

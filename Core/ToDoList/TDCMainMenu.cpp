@@ -606,7 +606,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:
-			bDelete = !((prefs.GetTextColorOption() == COLOROPT_DEFAULT) ||
+			bDelete = !((prefs.GetTextColorOption() == TEXTOPT_DEFAULT) ||
 						tdc.IsEditFieldShowing(TDCA_COLOR));
 			break;
 
