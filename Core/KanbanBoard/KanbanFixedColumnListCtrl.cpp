@@ -159,10 +159,11 @@ void CKanbanFixedColumnListCtrl::InitState()
 
 void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
+	PrepareEdit(nItem, nCol);
+
 	switch (nCol)
 	{
 	case KFCL_VALUECOL:
-		PrepareEdit(nItem, nCol);
 		ShowControl(m_cbValues, nItem, nCol); 
 		break;
 
@@ -183,7 +184,6 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 		}
 		break;
 
-	case KFCL_TITLECOL:
 	default:
 		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 		break;
