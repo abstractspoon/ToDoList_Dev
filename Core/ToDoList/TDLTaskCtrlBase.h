@@ -456,8 +456,9 @@ protected:
 	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, CSet<TDC_COLUMN>& aColIDs) const;
 
 	void DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, 
-							DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
-							COLORREF crText, BOOL bSelected);
+							DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crText, BOOL bSelected);
+	void DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+							TDC_COLUMN nColID, const CRect& rColumn, COLORREF crText);
 	void DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
 						COLORREF crText, BOOL bTaskTitle = FALSE, int nTextLen = -1);
 	void DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect);
