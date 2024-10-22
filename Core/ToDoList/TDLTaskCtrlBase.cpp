@@ -2641,8 +2641,6 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& 
 										  DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 										  COLORREF crText, BOOL bSelected)
 {
-	DWORD dwTrueID = pTDS->GetTaskID();
-
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
@@ -2673,363 +2671,366 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& 
 		if (rColumn.right <= rClip.left)
 			continue; // to left of clip rect
 
-		// vertical gridline
+		// vertical grid-line
 		DrawGridlines(pDC, rColumn, bSelected, FALSE, TRUE);
 
 		// don't draw content of min sized columns
 		if (rColumn.Width() <= MIN_COL_WIDTH)
 			continue;
 
-		TDC_COLUMN nColID = GetColumnID(nCol);
+		DrawColumnRowText(pDC, dwTaskID, pTDI, pTDS, GetColumnID(nCol), rColumn, crText);
+	}
+}
 
-		// Note: we pass dwTaskID NOT dwTrueID here so that references 
-		// can be handled correctly
-		CString sTaskColText = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID);
-		
-		const TDCCOLUMN* pCol = GetColumn(nColID);
+void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+										 TDC_COLUMN nColID, const CRect& rColumn, COLORREF crText)
+{
+	CString sTaskColText = GetTaskColumnText(dwTaskID, pTDI, pTDS, nColID);
 
-		switch (nColID)
+	const TDCCOLUMN* pCol = GetColumn(nColID);
+	DWORD dwTrueID = pTDS->GetTaskID();
+
+	switch (nColID)
+	{
+	case TDCC_POSITION:
+	case TDCC_RISK:
+	case TDCC_RECURRENCE:
+	case TDCC_ID:
+	case TDCC_PARENTID:
+	case TDCC_RECENTEDIT:
+	case TDCC_COST:
+	case TDCC_EXTERNALID:
+	case TDCC_VERSION:
+	case TDCC_ALLOCTO:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_CATEGORY:
+	case TDCC_TAGS:
+	case TDCC_CREATEDBY:
+	case TDCC_PATH:
+	case TDCC_TIMEREMAINING:
+	case TDCC_SUBTASKDONE:
+	case TDCC_TIMEESTIMATE:
+	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSFORMAT:
+		DrawColumnText(pDC, sTaskColText, rColumn, pCol->nTextAlignment, crText);
+		break;
+
+	case TDCC_COMMENTSSIZE:
 		{
-		case TDCC_POSITION:
-		case TDCC_RISK:
-		case TDCC_RECURRENCE:
-		case TDCC_ID:
-		case TDCC_PARENTID:
-		case TDCC_RECENTEDIT:
-		case TDCC_COST:
-		case TDCC_EXTERNALID:
-		case TDCC_VERSION:
-		case TDCC_ALLOCTO:
-		case TDCC_ALLOCBY:
-		case TDCC_STATUS:
-		case TDCC_CATEGORY:
-		case TDCC_TAGS:
-		case TDCC_CREATEDBY:
-		case TDCC_PATH:
-		case TDCC_TIMEREMAINING:
-		case TDCC_SUBTASKDONE:
-		case TDCC_TIMEESTIMATE:
-		case TDCC_LASTMODBY:
-		case TDCC_COMMENTSFORMAT:
+			// Highlight large comments
+			float fCommentSize = pTDI->GetCommentsSizeInKB();
+
+			if (fCommentSize >= VERYBIGCOMMENTSSIZE)
+			{
+				crText = colorBlack;
+			}
+			else if (fCommentSize >= BIGCOMMENTSSIZE)
+			{
+				crText = colorRed;
+			}
+
 			DrawColumnText(pDC, sTaskColText, rColumn, pCol->nTextAlignment, crText);
-			break;
-			
-		case TDCC_COMMENTSSIZE:
-			{
-				// Highlight large comments
-				float fCommentSize = pTDI->GetCommentsSizeInKB();
 
-				if (fCommentSize >= VERYBIGCOMMENTSSIZE)
-				{
-					crText = colorBlack;
-				}
-				else if (fCommentSize >= BIGCOMMENTSSIZE)
-				{
-					crText = colorRed;
-				}
-
-				DrawColumnText(pDC, sTaskColText, rColumn, pCol->nTextAlignment, crText);
-
-				if (fCommentSize >= VERYBIGCOMMENTSSIZE)
-					GraphicsMisc::DrawRect(pDC, rColumn, colorRed, CLR_NONE, 0, 0, 128);
-			}
-			break;
-
-		case TDCC_TIMESPENT:
-			if (!sTaskColText.IsEmpty())
-			{
-				// show text in red if we're currently tracking
-				COLORREF crTemp = ((m_dwTimeTrackTaskID == dwTrueID) ? colorRed : crText);
-
-				DrawColumnText(pDC, sTaskColText, rColumn, pCol->nTextAlignment, crTemp);
-			}
-			break;
-			
-		case TDCC_PRIORITY:
-			if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
-			{
-				CRect rPriority(rColumn);
-				rPriority.DeflateRect(2, 1, 3, 2);
-				
-				// first draw the priority colour
-				int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
-				BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
-				
-				if (bHasPriority)
-				{
-					COLORREF crFill = GetPriorityColor(nPriority);
-					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
-					
-					GraphicsMisc::DrawRect(pDC, rPriority, crFill, crBorder);
-				}
-				
-				// then, if the task is also due, draw a small tag
-				// unless it's due today and the user doesn't want today's tasks marked as due
-				// or there's no due color 
-				HBRUSH brTag = NULL;
-				
-				if (HasColor(m_crDue) && m_calculator.IsTaskOverDue(pTDI, pTDS))
-				{
-					brTag = m_brDue;
-				}
-				else if (HasColor(m_crDueToday) && m_calculator.IsTaskDueToday(pTDI, pTDS))
-				{
-					brTag = m_brDueToday;
-				}
-
-				if (brTag != NULL)
-				{
-					POINT pt[3] = 
-					{ 
-						{ rPriority.left, rPriority.top + 7 }, 
-						{ rPriority.left, rPriority.top }, 
-						{ rPriority.left + 7, rPriority.top } 
-					};
-					
-					HGDIOBJ hOldBr = pDC->SelectObject(brTag);
-					pDC->SelectStockObject(NULL_PEN);
-					
-					pDC->Polygon(pt, 3);
-					pDC->SelectObject(hOldBr);
-					
-					// a black line between the two
-					pDC->SelectStockObject(BLACK_PEN);
-					pDC->MoveTo(rPriority.left, rPriority.top + 6);
-					pDC->LineTo(rPriority.left + 7, rPriority.top - 1);
-				}
-				
-				// draw priority number over the top
-				if (bHasPriority && !HasStyle(TDCS_HIDEPRIORITYNUMBER))
-				{
-					COLORREF crTemp = GraphicsMisc::GetBestTextColor(GetPriorityColor(nPriority));
-					DrawColumnText(pDC, sTaskColText, rPriority, pCol->nTextAlignment, crTemp);
-				}
-			}
-			break;
-			
-		case TDCC_PERCENT:
-			if (!sTaskColText.IsEmpty())
-			{
-				CRect rPercent;
-				rPercent.DeflateRect(2, 1, 3, 2);
-
-				// draw default text first
-				DrawColumnText(pDC, sTaskColText, rPercent, pCol->nTextAlignment, crText);
-
-				if (HasStyle(TDCS_SHOWPERCENTASPROGRESSBAR))
-				{
-					// if the task is done then draw in 'done' colour else priority colour
-					BOOL bDone = m_calculator.IsTaskDone(pTDI, pTDS);
-					
-					COLORREF crBar(m_crDone);
-					
-					if (!bDone || !HasStyle(TDCS_DONEHAVELOWESTPRIORITY)) // determine appropriate priority
-					{
-						int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
-						crBar = GetPriorityColor(nPriority);
-						
-						// check for due
-						if (m_calculator.IsTaskOverDue(pTDI, pTDS))
-						{
-							if (HasColor(m_crDueToday) && m_calculator.IsTaskDueToday(pTDI, pTDS))
-							{
-								crBar = m_crDueToday;
-							}
-							else if (HasColor(m_crDue))
-							{
-								crBar = m_crDue;
-							}
-						}
-					}
-					
-					if (HasColor(crBar))
-					{
-						CRect rProgress(rPercent);
-						
-						// draw border
-						COLORREF crBorder = GraphicsMisc::Darker(crBar, 0.5);
-						GraphicsMisc::DrawRect(pDC, rProgress, CLR_NONE, crBorder);
-						
-						// draw fill
-						int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
-						nPercent = min(nPercent, 100);
-
-						rProgress.DeflateRect(1, 1);
-						rProgress.right = rProgress.left + MulDiv(rProgress.Width(), nPercent, 100);
-						
-						if (rProgress.Width() > 0)
-						{
-							pDC->FillSolidRect(rProgress, crBar); 
-							
-							// Exclude the 'unfilled' part so that we do not
-							// overwrite the text
-							CRect rUnfilled(rPercent);
-							rUnfilled.left = rProgress.right;
-
-							pDC->ExcludeClipRect(rUnfilled);
-							
-							// draw text in colour to suit progress bar
-							COLORREF crTemp = GraphicsMisc::GetBestTextColor(crBar);
-							DrawColumnText(pDC, sTaskColText, rPercent, pCol->nTextAlignment, crTemp);
-						}
-					}
-				}
-				
-			}
-			break;
-			
-		case TDCC_TRACKTIME:
-			if (m_dwTimeTrackTaskID == dwTrueID)
-				DrawColumnImage(pDC, nColID, rColumn);
-			break;
-			
-		case TDCC_FLAG:
-			if (pTDI->bFlagged)
-			{
-				DrawColumnImage(pDC, nColID, rColumn);
-			}
-			else if (m_calculator.IsTaskFlagged(pTDI, pTDS))
-			{
-				DrawColumnImage(pDC, nColID, rColumn, TRUE);
-			}
-			break;
-			
-		case TDCC_LOCK:
-			if (pTDI->bLocked)
-			{
-				DrawColumnImage(pDC, nColID, rColumn);
-			}
-			else if (m_calculator.IsTaskLocked(pTDI, pTDS))
-			{
-				DrawColumnImage(pDC, nColID, rColumn, TRUE);
-			}
-			break;
-
-		case TDCC_REMINDER:
-			{
-				time_t tRem = GetTaskReminder(dwTrueID);
-
-				// Reminder must be set and start/due date must be set
-				if (tRem != 0)
-				{
-					BOOL bDateSet = (tRem != -1);
-
-					if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME))
-					{
-						if (bDateSet)
-							DrawColumnDate(pDC, COleDateTime(tRem), TDCD_REMINDER, rColumn, crText);
-						else
-							DrawColumnText(pDC, CEnString(IDS_REMINDER_DATENOTSET), rColumn, DT_LEFT, COMMENTSCOLOR);
-					}
-					else
-					{
-						DrawColumnImage(pDC, nColID, rColumn, !bDateSet);
-					}
-				}
-			}
-			break;
-			
-		case TDCC_STARTDATE:
-			{
-				COleDateTime date;
-				BOOL bDone = m_calculator.IsTaskDone(pTDI, pTDS);
-				BOOL bCalculated = FALSE;
-				
-				if (bDone && !HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
-				{
-					date = pTDI->dateStart;
-				}
-				else if (!bDone)
-				{
-					date = m_calculator.GetTaskStartDate(pTDI, pTDS);
-					bCalculated = (date != pTDI->dateStart);
-				}
-				
-				DrawColumnDate(pDC, date, TDCD_START, rColumn, crText, bCalculated);
-			}
-			break;
-			
-		case TDCC_DUEDATE:
-			{
-				COleDateTime date;
-				BOOL bDone = m_calculator.IsTaskDone(pTDI, pTDS);
-				BOOL bCalculated = FALSE;
-				
-				if (bDone && !HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
-				{
-					date = pTDI->dateDue;
-				}
-				else if (!bDone)
-				{
-					date = m_calculator.GetTaskDueDate(pTDI, pTDS);
-					bCalculated = (date != pTDI->dateDue);
-				}
-				
-				DrawColumnDate(pDC, date, TDCD_DUE, rColumn, crText, bCalculated);
-			}
-			break;
-			
-			
-		case TDCC_DONEDATE:
-			DrawColumnDate(pDC, pTDI->dateDone, TDCD_DONE, rColumn, crText);
-			break;
-			
-		case TDCC_CREATIONDATE:
-			DrawColumnDate(pDC, pTDI->dateCreated, TDCD_CREATE, rColumn, crText);
-			break;
-			
-		case TDCC_LASTMODDATE:
-			DrawColumnDate(pDC, m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), TDCD_LASTMOD, rColumn, crText);
-			break;
-			
-		case TDCC_ICON:
-			{
-				int nIcon = GetTaskIconIndex(pTDI, pTDS);
-												
-				if (nIcon >= 0)
-				{
-					int nImageSize = m_ilTaskIcons.GetImageSize();
-
-					if (rColumn.Width() >= nImageSize)
-					{
-						CPoint pt(CalcColumnIconTopLeft(rColumn, nImageSize));
-						m_ilTaskIcons.Draw(pDC, nIcon, pt);
-					}
-				}
-			}
-			break;
-			
-		case TDCC_DEPENDENCY:
-			if (pTDI->aDependencies.GetSize())
-			{
-				BOOL bAltImage = (pTDI->aDependencies.GetSize() > 1);
-				DrawColumnImage(pDC, nColID, rColumn, bAltImage);
-
-				if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
-					GraphicsMisc::DrawRect(pDC, rColumn, colorRed, CLR_NONE, 0, GMDR_NONE, 128);
-			}
-			break;
-			
-		case TDCC_FILELINK:
-			DrawColumnFileLinks(pDC, pTDI->aFileLinks, rColumn);
-			break;
-			
-		case TDCC_DONE:
-			{
-				TTCB_CHECK nCheck = (pTDI->IsDone() ? TTCBC_CHECKED : TTCNC_UNCHECKED);
-
-				if ((nCheck == TTCNC_UNCHECKED) && m_data.TaskHasCompletedSubtasks(pTDS))
-					nCheck = TTCBC_MIXED;
-
-				DrawColumnCheckBox(pDC, rColumn, nCheck);
-			}
-			break;
-			
-		default:
-			// custom attribute columns
-			VERIFY (DrawItemCustomColumn(pTDI, pTDS, nColID, pDC, rColumn, crText));
-			break;
+			if (fCommentSize >= VERYBIGCOMMENTSSIZE)
+				GraphicsMisc::DrawRect(pDC, rColumn, colorRed, CLR_NONE, 0, 0, 128);
 		}
+		break;
+
+	case TDCC_TIMESPENT:
+		if (!sTaskColText.IsEmpty())
+		{
+			// show text in red if we're currently tracking
+			COLORREF crTemp = ((m_dwTimeTrackTaskID == dwTrueID) ? colorRed : crText);
+
+			DrawColumnText(pDC, sTaskColText, rColumn, pCol->nTextAlignment, crTemp);
+		}
+		break;
+
+	case TDCC_PRIORITY:
+		if (!HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
+		{
+			CRect rPriority(rColumn);
+			rPriority.DeflateRect(2, 1, 3, 2);
+
+			// first draw the priority colour
+			int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
+			BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
+
+			if (bHasPriority)
+			{
+				COLORREF crFill = GetPriorityColor(nPriority);
+				COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.5);
+
+				GraphicsMisc::DrawRect(pDC, rPriority, crFill, crBorder);
+			}
+
+			// then, if the task is also due, draw a small tag
+			// unless it's due today and the user doesn't want today's tasks marked as due
+			// or there's no due color 
+			HBRUSH brTag = NULL;
+
+			if (HasColor(m_crDue) && m_calculator.IsTaskOverDue(pTDI, pTDS))
+			{
+				brTag = m_brDue;
+			}
+			else if (HasColor(m_crDueToday) && m_calculator.IsTaskDueToday(pTDI, pTDS))
+			{
+				brTag = m_brDueToday;
+			}
+
+			if (brTag != NULL)
+			{
+				POINT pt[3] =
+				{
+					{ rPriority.left, rPriority.top + 7 },
+					{ rPriority.left, rPriority.top },
+					{ rPriority.left + 7, rPriority.top }
+				};
+
+				HGDIOBJ hOldBr = pDC->SelectObject(brTag);
+				pDC->SelectStockObject(NULL_PEN);
+
+				pDC->Polygon(pt, 3);
+				pDC->SelectObject(hOldBr);
+
+				// a black line between the two
+				pDC->SelectStockObject(BLACK_PEN);
+				pDC->MoveTo(rPriority.left, rPriority.top + 6);
+				pDC->LineTo(rPriority.left + 7, rPriority.top - 1);
+			}
+
+			// draw priority number over the top
+			if (bHasPriority && !HasStyle(TDCS_HIDEPRIORITYNUMBER))
+			{
+				COLORREF crTemp = GraphicsMisc::GetBestTextColor(GetPriorityColor(nPriority));
+				DrawColumnText(pDC, sTaskColText, rPriority, pCol->nTextAlignment, crTemp);
+			}
+		}
+		break;
+
+	case TDCC_PERCENT:
+		if (!sTaskColText.IsEmpty())
+		{
+			CRect rPercent;
+			rPercent.DeflateRect(2, 1, 3, 2);
+
+			// draw default text first
+			DrawColumnText(pDC, sTaskColText, rPercent, pCol->nTextAlignment, crText);
+
+			if (HasStyle(TDCS_SHOWPERCENTASPROGRESSBAR))
+			{
+				// if the task is done then draw in 'done' colour else priority colour
+				BOOL bDone = m_calculator.IsTaskDone(pTDI, pTDS);
+
+				COLORREF crBar(m_crDone);
+
+				if (!bDone || !HasStyle(TDCS_DONEHAVELOWESTPRIORITY)) // determine appropriate priority
+				{
+					int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
+					crBar = GetPriorityColor(nPriority);
+
+					// check for due
+					if (m_calculator.IsTaskOverDue(pTDI, pTDS))
+					{
+						if (HasColor(m_crDueToday) && m_calculator.IsTaskDueToday(pTDI, pTDS))
+						{
+							crBar = m_crDueToday;
+						}
+						else if (HasColor(m_crDue))
+						{
+							crBar = m_crDue;
+						}
+					}
+				}
+
+				if (HasColor(crBar))
+				{
+					CRect rProgress(rPercent);
+
+					// draw border
+					COLORREF crBorder = GraphicsMisc::Darker(crBar, 0.5);
+					GraphicsMisc::DrawRect(pDC, rProgress, CLR_NONE, crBorder);
+
+					// draw fill
+					int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
+					nPercent = min(nPercent, 100);
+
+					rProgress.DeflateRect(1, 1);
+					rProgress.right = rProgress.left + MulDiv(rProgress.Width(), nPercent, 100);
+
+					if (rProgress.Width() > 0)
+					{
+						pDC->FillSolidRect(rProgress, crBar);
+
+						// Exclude the 'unfilled' part so that we do not
+						// overwrite the text
+						CRect rUnfilled(rPercent);
+						rUnfilled.left = rProgress.right;
+
+						pDC->ExcludeClipRect(rUnfilled);
+
+						// draw text in colour to suit progress bar
+						COLORREF crTemp = GraphicsMisc::GetBestTextColor(crBar);
+						DrawColumnText(pDC, sTaskColText, rPercent, pCol->nTextAlignment, crTemp);
+					}
+				}
+			}
+
+		}
+		break;
+
+	case TDCC_TRACKTIME:
+		if (m_dwTimeTrackTaskID == dwTrueID)
+			DrawColumnImage(pDC, nColID, rColumn);
+		break;
+
+	case TDCC_FLAG:
+		if (pTDI->bFlagged)
+		{
+			DrawColumnImage(pDC, nColID, rColumn);
+		}
+		else if (m_calculator.IsTaskFlagged(pTDI, pTDS))
+		{
+			DrawColumnImage(pDC, nColID, rColumn, TRUE);
+		}
+		break;
+
+	case TDCC_LOCK:
+		if (pTDI->bLocked)
+		{
+			DrawColumnImage(pDC, nColID, rColumn);
+		}
+		else if (m_calculator.IsTaskLocked(pTDI, pTDS))
+		{
+			DrawColumnImage(pDC, nColID, rColumn, TRUE);
+		}
+		break;
+
+	case TDCC_REMINDER:
+		{
+			time_t tRem = GetTaskReminder(dwTrueID);
+
+			// Reminder must be set and start/due date must be set
+			if (tRem != 0)
+			{
+				BOOL bDateSet = (tRem != -1);
+
+				if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME))
+				{
+					if (bDateSet)
+						DrawColumnDate(pDC, COleDateTime(tRem), TDCD_REMINDER, rColumn, crText);
+					else
+						DrawColumnText(pDC, CEnString(IDS_REMINDER_DATENOTSET), rColumn, DT_LEFT, COMMENTSCOLOR);
+				}
+				else
+				{
+					DrawColumnImage(pDC, nColID, rColumn, !bDateSet);
+				}
+			}
+		}
+		break;
+
+	case TDCC_STARTDATE:
+		{
+			COleDateTime date;
+			BOOL bDone = m_calculator.IsTaskDone(pTDI, pTDS);
+			BOOL bCalculated = FALSE;
+
+			if (bDone && !HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
+			{
+				date = pTDI->dateStart;
+			}
+			else if (!bDone)
+			{
+				date = m_calculator.GetTaskStartDate(pTDI, pTDS);
+				bCalculated = (date != pTDI->dateStart);
+			}
+
+			DrawColumnDate(pDC, date, TDCD_START, rColumn, crText, bCalculated);
+		}
+		break;
+
+	case TDCC_DUEDATE:
+		{
+			COleDateTime date;
+			BOOL bDone = m_calculator.IsTaskDone(pTDI, pTDS);
+			BOOL bCalculated = FALSE;
+
+			if (bDone && !HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
+			{
+				date = pTDI->dateDue;
+			}
+			else if (!bDone)
+			{
+				date = m_calculator.GetTaskDueDate(pTDI, pTDS);
+				bCalculated = (date != pTDI->dateDue);
+			}
+
+			DrawColumnDate(pDC, date, TDCD_DUE, rColumn, crText, bCalculated);
+		}
+		break;
+
+
+	case TDCC_DONEDATE:
+		DrawColumnDate(pDC, pTDI->dateDone, TDCD_DONE, rColumn, crText);
+		break;
+
+	case TDCC_CREATIONDATE:
+		DrawColumnDate(pDC, pTDI->dateCreated, TDCD_CREATE, rColumn, crText);
+		break;
+
+	case TDCC_LASTMODDATE:
+		DrawColumnDate(pDC, m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), TDCD_LASTMOD, rColumn, crText);
+		break;
+
+	case TDCC_ICON:
+		{
+			int nIcon = GetTaskIconIndex(pTDI, pTDS);
+
+			if (nIcon >= 0)
+			{
+				int nImageSize = m_ilTaskIcons.GetImageSize();
+
+				if (rColumn.Width() >= nImageSize)
+				{
+					CPoint pt(CalcColumnIconTopLeft(rColumn, nImageSize));
+					m_ilTaskIcons.Draw(pDC, nIcon, pt);
+				}
+			}
+		}
+		break;
+
+	case TDCC_DEPENDENCY:
+		if (pTDI->aDependencies.GetSize())
+		{
+			BOOL bAltImage = (pTDI->aDependencies.GetSize() > 1);
+			DrawColumnImage(pDC, nColID, rColumn, bAltImage);
+
+			if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
+				GraphicsMisc::DrawRect(pDC, rColumn, colorRed, CLR_NONE, 0, GMDR_NONE, 128);
+		}
+		break;
+
+	case TDCC_FILELINK:
+		DrawColumnFileLinks(pDC, pTDI->aFileLinks, rColumn);
+		break;
+
+	case TDCC_DONE:
+		{
+			TTCB_CHECK nCheck = (pTDI->IsDone() ? TTCBC_CHECKED : TTCNC_UNCHECKED);
+
+			if ((nCheck == TTCNC_UNCHECKED) && m_data.TaskHasCompletedSubtasks(pTDS))
+				nCheck = TTCBC_MIXED;
+
+			DrawColumnCheckBox(pDC, rColumn, nCheck);
+		}
+		break;
+
+	default:
+		// custom attribute columns
+		VERIFY(DrawItemCustomColumn(pTDI, pTDS, nColID, pDC, rColumn, crText));
+		break;
 	}
 }
 

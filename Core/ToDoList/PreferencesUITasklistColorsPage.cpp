@@ -1035,7 +1035,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	}
 
 	// Restore customised colour dialog colours
-	CColourButton::LoadPreferences(pPrefs);
+	CColorButton::LoadPreferences(pPrefs);
 }
 
 void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
@@ -1147,7 +1147,7 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileString(sColorKey, _T("AttribColors"), sAttribColors);
 
 	// Save customised colour dialog colours
-	CColourButton::SavePreferences(pPrefs);
+	CColorButton::SavePreferences(pPrefs);
 }
 
 void CPreferencesUITasklistColorsPage::OnPopulateattriblist() 
