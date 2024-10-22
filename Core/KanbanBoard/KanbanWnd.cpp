@@ -864,6 +864,7 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	Misc::SetFlag(dwOptions, KBCF_HIDEEMPTYATTRIBUTES, m_dlgPrefs.GetHideEmptyAttributes());
 
 	m_ctrlKanban.SetOptions(dwOptions);
+	m_ctrlKanban.SetFullColumnColor(m_dlgPrefs.GetFullColumnColor());
 
 	m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 

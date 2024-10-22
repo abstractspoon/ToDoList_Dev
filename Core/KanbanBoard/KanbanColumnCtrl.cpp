@@ -301,6 +301,9 @@ BOOL CKanbanColumnCtrl::IsFull() const
 
 void CKanbanColumnCtrl::RefreshBkgndColor()
 {
+	if (!GetSafeHwnd())
+		return;
+
 	COLORREF crBack = GetSysColor(COLOR_WINDOW);
 
 	if ((m_crFullBkgnd != CLR_NONE) && IsFull())

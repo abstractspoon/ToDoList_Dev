@@ -110,7 +110,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bResizingHeader(FALSE),
 	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE),
-	m_crGroupHeaderBkgnd(CLR_NONE)
+	m_crGroupHeaderBkgnd(CLR_NONE),
+	m_crFullColumn(CLR_NONE)
 {
 }
 
@@ -2229,6 +2230,7 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 	{
 		pCol->SetOptions(m_dwOptions);
 		pCol->SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
+		pCol->SetFullColor(m_crFullColumn);
 		pCol->GroupBy(m_nGroupBy);
 
 		if (pCol->Create(IDC_COLUMNCTRL, this))
@@ -2790,6 +2792,15 @@ void CKanbanCtrl::SetPriorityColors(const CDWordArray& aColors)
 		// Redraw the lists if coloring by priority
 		if (GetSafeHwnd() && HasOption(KBCF_COLORBARBYPRIORITY))
 			m_aColumns.Redraw(FALSE);
+	}
+}
+
+void CKanbanCtrl::SetFullColumnColor(COLORREF crFull)
+{
+	if (crFull != m_crFullColumn)
+	{
+		m_crFullColumn = crFull;
+		m_aColumns.SetFullColumnColor(crFull);
 	}
 }
 
