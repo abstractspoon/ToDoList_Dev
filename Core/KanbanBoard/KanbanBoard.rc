@@ -154,7 +154,7 @@ BEGIN
                     WS_EX_TRANSPARENT
 END
 
-IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 408
+IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 425
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -183,7 +183,7 @@ BEGIN
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,243,94
     GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
-                    330,168,0,WS_EX_TRANSPARENT
+                    330,179,0,WS_EX_TRANSPARENT
     GROUPBOX        "Display the following attributes for each task",
                     IDC_STATIC,7,69,330,124
     CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
@@ -195,6 +195,9 @@ BEGIN
                     IDC_SPECFIFYFULLCOLOUR,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,380,145,10
     PUSHBUTTON      "S&et...   ",IDC_SETFULLCOLOR,207,379,52,13,BS_RIGHT
+    CONTROL         "'Alt' key overrides 'Max Count' when dragging tasks",
+                    IDC_ALTOVERRIDESMAXCOUNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,16,395,321,10
 END
 
 
@@ -219,7 +222,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 337
         TOPMARGIN, 7
-        BOTTOMMARGIN, 401
+        BOTTOMMARGIN, 418
     END
 END
 #endif    // APSTUDIO_INVOKED

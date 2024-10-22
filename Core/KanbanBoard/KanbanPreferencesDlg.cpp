@@ -33,6 +33,7 @@ CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	m_bShowTaskColorAsBar(FALSE),
 	m_bHideEmptyAttributeValues(TRUE),
 	m_bSpecifyFullColor(TRUE),
+	m_bAltKeyOverridesMaxCount(TRUE),
 	m_crFullColumn(255)
 {
 	//{{AFX_DATA_INIT(CKanbanPreferencesPage)
@@ -55,6 +56,7 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_COLORBARBYPRIORITY, m_bColorBarByPriority);
 	DDX_Check(pDX, IDC_INDENTSUBTASKS, m_bIndentSubtasks);
 	DDX_Check(pDX, IDC_SPECFIFYFULLCOLOUR, m_bSpecifyFullColor);
+	DDX_Check(pDX, IDC_ALTOVERRIDESMAXCOUNT, m_bAltKeyOverridesMaxCount);
 	DDX_Control(pDX, IDC_SETFULLCOLOR, m_btFullColor);
 
 	m_cbAttributes.DDX(pDX, m_nFixedAttrib, m_sFixedCustomAttribID);
@@ -237,6 +239,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 	pPrefs->WriteProfileInt(szKey, _T("HideEmptyAttributeValues"), m_bHideEmptyAttributeValues);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyFullColumnColor"), m_bSpecifyFullColor);
 	pPrefs->WriteProfileInt(szKey, _T("FullColumnColor"), m_crFullColumn);
+	pPrefs->WriteProfileInt(szKey, _T("AltKeyOverridesMaxCount"), m_bAltKeyOverridesMaxCount);
 
 	// column defs
 	int nNumDefs = m_aFixedColumnDefs.GetSize();
@@ -278,6 +281,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_bHideEmptyAttributeValues = pPrefs->GetProfileInt(szKey, _T("HideEmptyAttributeValues"), TRUE);
 	m_bSpecifyFullColor = pPrefs->GetProfileInt(szKey, _T("SpecifyFullColumnColor"), TRUE);
 	m_crFullColumn = pPrefs->GetProfileInt(szKey, _T("FullColumnColor"), 255);
+	m_bAltKeyOverridesMaxCount = pPrefs->GetProfileInt(szKey, _T("AltKeyOverridesMaxCount"), TRUE);
 
 	// column defs
 	m_aFixedColumnDefs.RemoveAll();

@@ -862,6 +862,7 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 	Misc::SetFlag(dwOptions, KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dlgPrefs.GetSortSubtasksBelowParents());
 	Misc::SetFlag(dwOptions, KBCF_INDENTSUBTASKS, m_dlgPrefs.GetIndentSubtasks());
 	Misc::SetFlag(dwOptions, KBCF_HIDEEMPTYATTRIBUTES, m_dlgPrefs.GetHideEmptyAttributes());
+	Misc::SetFlag(dwOptions, KBCF_ALTKEYOVERRIDESMAXCOUNT, m_dlgPrefs.GetAltKeyOverridesMaxCount());
 
 	m_ctrlKanban.SetOptions(dwOptions);
 	m_ctrlKanban.SetFullColumnColor(m_dlgPrefs.GetFullColumnColor());

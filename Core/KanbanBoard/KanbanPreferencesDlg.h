@@ -45,6 +45,7 @@ public:
 	BOOL GetColorBarByPriority() const { return m_bColorBarByPriority; }
 	BOOL GetIndentSubtasks() const { return m_bSortSubtaskBelowParent && m_bIndentSubtasks; }
 	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
+	BOOL GetAltKeyOverridesMaxCount() const { return m_bAltKeyOverridesMaxCount; }
 	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
 	COLORREF GetFullColumnColor() const { return (m_bSpecifyFullColor ? m_crFullColumn : CLR_NONE); }
@@ -65,13 +66,15 @@ protected:
 	CCheckListBoxEx	m_lbDisplayAttrib;
 	CColorButton m_btFullColor;
 
-	BOOL	m_bShowTaskColorAsBar;
-	BOOL	m_bHideEmptyAttributeValues;
-	BOOL	m_bSortSubtaskBelowParent;
-	BOOL	m_bColorBarByPriority;
-	BOOL	m_bIndentSubtasks;
-	BOOL	m_bAlwaysShowBacklog;
-	BOOL	m_bSpecifyFullColor;
+	BOOL m_bShowTaskColorAsBar;
+	BOOL m_bHideEmptyAttributeValues;
+	BOOL m_bSortSubtaskBelowParent;
+	BOOL m_bColorBarByPriority;
+	BOOL m_bIndentSubtasks;
+	BOOL m_bAlwaysShowBacklog;
+	BOOL m_bSpecifyFullColor;
+	BOOL m_bAltKeyOverridesMaxCount;
+
 	CString	m_sFixedCustomAttribID;
 	TDC_ATTRIBUTE m_nFixedAttrib;
 	COLORREF m_crFullColumn;
@@ -134,6 +137,7 @@ public:
 	BOOL GetColorBarByPriority() const { return m_page.GetColorBarByPriority(); }
 	BOOL GetIndentSubtasks() const { return m_page.GetIndentSubtasks(); }
 	BOOL GetHideEmptyAttributes() const { return m_page.GetHideEmptyAttributes(); }
+	BOOL GetAltKeyOverridesMaxCount() const { return m_page.GetAltKeyOverridesMaxCount(); }
 	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib, TDC_ATTRIBUTE nExclude) const;
 	COLORREF GetFullColumnColor() const { return m_page.GetFullColumnColor(); }
