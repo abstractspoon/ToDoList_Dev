@@ -47,7 +47,7 @@ protected:
 	BOOL	m_bShowEmptyFrequencyValues;
 	//}}AFX_DATA
 	CBurndownGraphColorListCtrl	m_lcGraphColors;
-	CColourButton m_btnTodayColor;
+	CColorButton m_btnTodayColor;
 
 	const CGraphsMap& m_mapGraphs;
 	BURNDOWN_GRAPH m_nActiveGraph;
