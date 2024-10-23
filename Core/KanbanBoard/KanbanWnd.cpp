@@ -409,11 +409,13 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		{
 			m_sGroupByCustomAttribID = pPrefs->GetProfileString(szKey, _T("GroupByCustomAttrib"));
 
-			if (m_sGroupByCustomAttribID.IsEmpty())
+			if (m_sGroupByCustomAttribID.IsEmpty() || (m_sGroupByCustomAttribID == m_sTrackedCustomAttribID))
 				m_nGroupByAttrib = TDCA_NONE;
 		}
-		
-		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
+		else if (m_nGroupByAttrib == m_nTrackedAttribID)
+		{
+			m_nGroupByAttrib = TDCA_NONE;
+		}
 		
 		if (KBUtils::IsTrackableAttribute(m_nTrackedAttribID)) // Excludes custom attributes
 			m_cbGroupBy.ExcludeAttribute(m_nTrackedAttribID);
@@ -590,7 +592,8 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	// Tracked attribute can change after a custom attribute update
 	TDC_ATTRIBUTE nTrackedAttribID = m_ctrlKanban.GetTrackedAttribute();
 
-	if (nTrackedAttribID != m_nTrackedAttribID)
+	if ((nTrackedAttribID != m_nTrackedAttribID) &&
+		(m_nTrackedAttribID != TDCA_FIXEDCOLUMNS))
 	{
 		ASSERT(m_nTrackedAttribID == TDCA_CUSTOMATTRIB);
 
@@ -609,7 +612,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 
 	if (nGroupBy != m_nGroupByAttrib)
 	{
-		ASSERT(m_nGroupByAttrib == TDCA_CUSTOMATTRIB);
+		ASSERT((m_nGroupByAttrib == TDCA_CUSTOMATTRIB) || (nGroupBy == TDCA_NONE));
 
 		m_nGroupByAttrib = nGroupBy;
 		m_sGroupByCustomAttribID.Empty();
@@ -864,7 +867,15 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 
 	m_ctrlKanban.SetOptions(dwOptions);
 
-	m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
+	if (m_dlgPrefs.HasFixedColumns())
+	{
+		CString sUnused;
+		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.GetFixedAttributeToTrack(sUnused));
+	}
+	else
+	{
+		m_cbAttributes.ShowFixedColumns(TDCA_NONE);
+	}
 
 	// If the user was previously tracking fixed columns
 	// but has now deleted them then we revert to 'status'

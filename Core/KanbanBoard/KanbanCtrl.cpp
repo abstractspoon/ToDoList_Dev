@@ -1180,7 +1180,8 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 			{
 				// Save off each attribute ID
 				CString sAttribID(pTasks->GetCustomAttributeID(nCust));
-
+				int nExist = m_aCustomAttribDefs.FindDefinition(sAttribID);
+				
 				if (pTasks->IsCustomAttributeEnabled(nCust))
 				{
 					CString sAttribName(pTasks->GetCustomAttributeLabel(nCust));
@@ -1194,9 +1195,10 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 						BOOL bMultiList = ((dwListType == TDCCA_FIXEDMULTILIST) || 
 											(dwListType == TDCCA_AUTOMULTILIST));
 
-						int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
+						if (nExist == -1)
+							nExist = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
 
-						// Add 'default' values to the map
+						// Update mapped 'default' values
 						CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
 						ASSERT(pDefValues);
 
@@ -1220,35 +1222,32 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 						bChange |= UpdateGlobalAttributeValues(sAttribID, aAutoValues);
 					}
 				}
-				else // handle possible deletion
+				else if (nExist != -1)
 				{
-					int nExist = m_aCustomAttribDefs.FindDefinition(sAttribID);
-
-					if (nExist != -1)
-					{
-						m_aCustomAttribDefs.RemoveAt(nExist);
-
-						if ((m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) && (m_sTrackAttribID == sAttribID))
-						{
-							m_nTrackedAttributeID = TDCA_STATUS;
-							m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
-
-							bChange = TRUE;
-						}
-
-						if ((m_nGroupBy == TDCA_CUSTOMATTRIB) && (m_sGroupByCustAttribID == sAttribID))
-						{
-							m_nGroupBy = TDCA_NONE;
-							m_sGroupByCustAttribID.Empty();
-
-							bChange = TRUE;
-						}
-					}
+					m_aCustomAttribDefs.RemoveAt(nExist);
 				}
 			}
 
+			// Handle the tracked or grouped attribute having disappeared
 			if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
-				m_nTrackedAttributeID = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
+			{
+				if (m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID) == -1)
+				{
+					m_nTrackedAttributeID = TDCA_STATUS;
+					m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
+
+					bChange = TRUE;
+				}
+
+				if (((m_nGroupBy == TDCA_CUSTOMATTRIB) && (m_sGroupByCustAttribID == m_sTrackAttribID)) ||
+					(m_nGroupBy == m_nTrackedAttributeID))
+				{
+					m_nGroupBy = TDCA_NONE;
+					m_sGroupByCustAttribID.Empty();
+
+					bChange = TRUE;
+				}
+			}
 
 			return bChange;
 		}
