@@ -335,7 +335,7 @@ void CPreferencesTaskDef2Page::UpdateCustomAttributeInfoVisibility()
 
 	if (bShowInfo)
 	{
-		int nCustAttrib = FindItemByData(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
+		int nCustAttrib = FindItemByDataT(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
 		bShowInfo = ((nCustAttrib != -1) && m_lbInheritAttrib.GetCheck(nCustAttrib));
 	}
 

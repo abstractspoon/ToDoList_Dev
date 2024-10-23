@@ -68,15 +68,15 @@ void CMonthComboBox::InitCombo()
 	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)
-		CDialogHelper::AddString(*this, CDateHelper::GetMonthName(nMonth, FALSE), nMonth);
+		CDialogHelper::AddStringT(*this, CDateHelper::GetMonthName(nMonth, FALSE), nMonth);
 }
 
 int CMonthComboBox::GetSelectedMonth() const
 {
-	return CDialogHelper::GetSelectedItemData(*this);
+	return CDialogHelper::GetSelectedItemDataT(*this);
 }
 
 int CMonthComboBox::SetSelectedMonth(int nMonth)
 {
-	return CDialogHelper::SelectItemByData(*this, nMonth);
+	return CDialogHelper::SelectItemByDataT(*this, nMonth);
 }

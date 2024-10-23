@@ -183,7 +183,7 @@ void CTDLToolbarButtonListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			ASSERT (&ctrl == &m_cbMenuItems);
 			
-			CDialogHelper::SelectItemByData(m_cbMenuItems, tb.nMenuID);
+			CDialogHelper::SelectItemByDataT(m_cbMenuItems, tb.nMenuID);
 			CDialogHelper::RefreshMaxDropWidth(m_cbMenuItems);
 		}
 		break;

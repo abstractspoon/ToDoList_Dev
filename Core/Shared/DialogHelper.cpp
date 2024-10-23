@@ -1105,7 +1105,7 @@ int CDialogHelper::GetSelectedItemAsValue(const CComboBox& combo)
 	return _ttoi(Misc::TrimAlpha(sValue));
 }
 
-DWORD CDialogHelper::GetSelectedItemData(const CComboBox& combo)
+DWORD CDialogHelper::GetSelectedItemDataT(const CComboBox& combo)
 {
 	int nSel = combo.GetCurSel();
 

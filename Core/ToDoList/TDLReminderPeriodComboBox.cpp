@@ -121,7 +121,7 @@ void CTDLReminderPeriodComboBox::BuildCombo()
 			if (!(m_dwShow & TDLRPC_SHOWZERO) && (data[nData].nItemData == 0))
 				continue;
 			
-			VERIFY(CDialogHelper::AddString(*this, 
+			VERIFY(CDialogHelper::AddStringT(*this, 
 											data[nData].szItemText, 
 											data[nData].nItemData) != CB_ERR);
 		}
@@ -132,12 +132,12 @@ BOOL CTDLReminderPeriodComboBox::SetSelectedPeriod(UINT nMinutes)
 {
 	ValidateLeadin(nMinutes);
 
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nMinutes));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nMinutes));
 }
 
 int CTDLReminderPeriodComboBox::GetSelectedPeriod() const
 {
-	return CDialogHelper::GetSelectedItemData(*this, 15);
+	return CDialogHelper::GetSelectedItemDataT(*this, 15);
 }
 
 void CTDLReminderPeriodComboBox::ValidateLeadin(UINT& nMinutes)

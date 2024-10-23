@@ -271,13 +271,13 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 		m_cbPriorityScheme.SetCurSel(0);
 	
 	// attribute colors
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_CATEGORY),	TDCA_CATEGORY);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_STATUS),	TDCA_STATUS);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCTO),	TDCA_ALLOCTO);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCBY),	TDCA_ALLOCBY);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_VERSION),	TDCA_VERSION);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_EXTERNALID),TDCA_EXTERNALID);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_TAGS),		TDCA_TAGS);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_CATEGORY),		TDCA_CATEGORY);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_STATUS),		TDCA_STATUS);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCTO),		TDCA_ALLOCTO);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCBY),		TDCA_ALLOCBY);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_VERSION),		TDCA_VERSION);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_EXTERNALID),	TDCA_EXTERNALID);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_TAGS),			TDCA_TAGS);
 
 	int nColor = m_aAttribColors.GetSize();
 	

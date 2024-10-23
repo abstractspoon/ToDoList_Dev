@@ -165,17 +165,17 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 
 void CTDLAnalyseLoggedTimeDlg::BuildTimePeriodCombo()
 {
-	CDialogHelper::AddString(m_cbTimePeriod, _T("Last year"),			TTLP_LASTYEAR);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("Last month"),			TTLP_LASTMONTH);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("Last week"),			TTLP_LASTWEEK);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("Yesterday"),			TTLP_YESTERDAY);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("Today"),				TTLP_TODAY);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("This week"),			TTLP_THISWEEK);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("This month"),			TTLP_THISMONTH);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("This year"),			TTLP_THISYEAR);
-	CDialogHelper::AddString(m_cbTimePeriod, _T("<specific dates>"),	TTLP_FROMTO);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("Last year"),			TTLP_LASTYEAR);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("Last month"),			TTLP_LASTMONTH);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("Last week"),			TTLP_LASTWEEK);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("Yesterday"),			TTLP_YESTERDAY);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("Today"),				TTLP_TODAY);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("This week"),			TTLP_THISWEEK);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("This month"),			TTLP_THISMONTH);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("This year"),			TTLP_THISYEAR);
+	CDialogHelper::AddStringT(m_cbTimePeriod, _T("<specific dates>"),	TTLP_FROMTO);
 
-	CDialogHelper::SelectItemByData(m_cbTimePeriod, m_nTimePeriod);
+	CDialogHelper::SelectItemByDataT(m_cbTimePeriod, m_nTimePeriod);
 	UpdateDateFields();
 }
 
@@ -185,43 +185,43 @@ void CTDLAnalyseLoggedTimeDlg::BuildBreakdownCombo(TDCTTL_PERIOD nPeriod)
 
 	m_cbBreakdown.ResetContent();
 		
-	CDialogHelper::AddString(m_cbBreakdown, _T("By task"),	TTLB_BYTASK); // Always
-	CDialogHelper::AddString(m_cbBreakdown, _T("By day"),	TTLB_BYDAY); // Always
+	CDialogHelper::AddStringT(m_cbBreakdown, _T("By task"),	TTLB_BYTASK); // Always
+	CDialogHelper::AddStringT(m_cbBreakdown, _T("By day"),	TTLB_BYDAY); // Always
 
 	if (nPeriod == TTLP_LASTYEAR || 
 		nPeriod == TTLP_THISYEAR ||
 		nPeriod == TTLP_LASTMONTH ||
 		nPeriod == TTLP_THISMONTH)
 	{
-		CDialogHelper::AddString(m_cbBreakdown, _T("By week"), TTLB_BYWEEK);
-		CDialogHelper::AddString(m_cbBreakdown, _T("By month"), TTLB_BYMONTH);
+		CDialogHelper::AddStringT(m_cbBreakdown, _T("By week"), TTLB_BYWEEK);
+		CDialogHelper::AddStringT(m_cbBreakdown, _T("By month"), TTLB_BYMONTH);
 	}
 	else if (nPeriod == TTLP_LASTWEEK || nPeriod == TTLP_THISWEEK)
 	{
-		CDialogHelper::AddString(m_cbBreakdown, _T("By week"), TTLB_BYWEEK);
+		CDialogHelper::AddStringT(m_cbBreakdown, _T("By week"), TTLB_BYWEEK);
 	}
 
-	if (CDialogHelper::SelectItemByData(m_cbBreakdown, nPrevBreakdown) == -1)
+	if (CDialogHelper::SelectItemByDataT(m_cbBreakdown, nPrevBreakdown) == -1)
 	{
 		m_nBreakdown = TTLB_BYDAY;
 
-		VERIFY(CDialogHelper::SelectItemByData(m_cbBreakdown, m_nBreakdown) != -1);
+		VERIFY(CDialogHelper::SelectItemByDataT(m_cbBreakdown, m_nBreakdown) != -1);
 	}
 }
 
 void CTDLAnalyseLoggedTimeDlg::BuildGroupByCombo()
 {
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCBY,		TDCA_ALLOCBY);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCTO,		TDCA_ALLOCTO);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CATEGORY,		TDCA_CATEGORY);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CREATEDBY,	TDCA_CREATEDBY);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_EXTERNALID,	TDCA_EXTERNALID);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_LASTMODBY,	TDCA_LASTMODBY);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_PRIORITY,		TDCA_PRIORITY);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_RISK,			TDCA_RISK);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_STATUS,		TDCA_STATUS);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_TAGS,			TDCA_TAGS);
-	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_VERSION,		TDCA_VERSION);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_ALLOCBY,		TDCA_ALLOCBY);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_ALLOCTO,		TDCA_ALLOCTO);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_CATEGORY,		TDCA_CATEGORY);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_CREATEDBY,	TDCA_CREATEDBY);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_EXTERNALID,	TDCA_EXTERNALID);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_LASTMODBY,	TDCA_LASTMODBY);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_PRIORITY,		TDCA_PRIORITY);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_RISK,			TDCA_RISK);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_STATUS,		TDCA_STATUS);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_TAGS,			TDCA_TAGS);
+	CDialogHelper::AddStringT(m_cbGroupByAttrib, IDS_TDLBC_VERSION,		TDCA_VERSION);
 
 	// Add custom attributes
 	int nCust = m_aCustomAttribDefs.GetSize();
@@ -233,11 +233,11 @@ void CTDLAnalyseLoggedTimeDlg::BuildGroupByCombo()
 		if (!attribDef.IsList() || !attribDef.IsMultiList())
 		{
 			CEnString sItem(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			CDialogHelper::AddString(m_cbGroupByAttrib, sItem, attribDef.GetAttributeID());
+			CDialogHelper::AddStringT(m_cbGroupByAttrib, sItem, attribDef.GetAttributeID());
 		}
 	}
 
-	CDialogHelper::SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib);
+	CDialogHelper::SelectItemByDataT(m_cbGroupByAttrib, m_nGroupByAttrib);
 }
 
 void CTDLAnalyseLoggedTimeDlg::BuildOutputFormatCombo()
@@ -253,7 +253,7 @@ void CTDLAnalyseLoggedTimeDlg::BuildOutputFormatCombo()
 		m_cbOutputFormat.SetItemData(nIndex, FORMAT_TYPES[nFmt].nFormat);
 	}
 
-	if (CDialogHelper::SelectItemByData(m_cbOutputFormat, m_nOutputFormat) != CB_ERR)
+	if (CDialogHelper::SelectItemByDataT(m_cbOutputFormat, m_nOutputFormat) != CB_ERR)
 		OnSelchangeOutputFormat();
 }
 

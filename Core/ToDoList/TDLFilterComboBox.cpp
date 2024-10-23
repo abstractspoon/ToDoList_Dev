@@ -72,7 +72,7 @@ int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 
 	UINT nFilter = SHOW_FILTERS[nItem][1];
 	
-	return CDialogHelper::AddString(*this, sItem, nFilter);
+	return CDialogHelper::AddStringT(*this, sItem, nFilter);
 }
 
 void CTDLFilterComboBox::FillCombo()
@@ -98,7 +98,7 @@ void CTDLFilterComboBox::FillCombo()
 	for (int nItem = 0; nItem < m_aAdvancedFilterNames.GetSize(); nItem++)
 	{
 		CString sFilter = FormatAdvancedFilterDisplayString(nItem, m_aAdvancedFilterNames[nItem]);	
-		CDialogHelper::AddString(*this, sFilter, (DWORD)FS_ADVANCED);
+		CDialogHelper::AddStringT(*this, sFilter, (DWORD)FS_ADVANCED);
 	}
 
 	// resize to fit widest item
@@ -125,7 +125,7 @@ void CTDLFilterComboBox::RefillCombo(LPCTSTR szAdvancedSel)
 
 FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter() const
 {
-	return CDialogHelper::GetSelectedItemData(*this, FS_ALL);
+	return CDialogHelper::GetSelectedItemDataT(*this, FS_ALL);
 }
 
 FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter(CString& sAdvanced) const
@@ -152,7 +152,7 @@ BOOL CTDLFilterComboBox::HasAdvancedFilter(const CString& sAdvanced) const
 
 BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nFilter));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
 }
 
 BOOL CTDLFilterComboBox::SelectAdvancedFilter(const CString& sAdvFilter)

@@ -53,12 +53,12 @@ int CTDLFileEncodingComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 BOOL CTDLFileEncodingComboBox::SetSelectedEncoding(SFE_FORMAT nFormat)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nFormat));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nFormat));
 }
 
 SFE_FORMAT CTDLFileEncodingComboBox::GetSelectedEncoding() const
 {
-	return (SFE_FORMAT)CDialogHelper::GetSelectedItemData(*this);
+	return (SFE_FORMAT)CDialogHelper::GetSelectedItemDataT(*this);
 }
 
 void CTDLFileEncodingComboBox::BuildCombo()
@@ -66,8 +66,8 @@ void CTDLFileEncodingComboBox::BuildCombo()
 	// Once only
 	if (GetCount() == 0)
 	{
-		CDialogHelper::AddString(*this, IDS_UTF16,		SFEF_UTF16);
-		CDialogHelper::AddString(*this, IDS_UTF8,		SFEF_UTF8WITHOUTBOM);
-		CDialogHelper::AddString(*this, IDS_UTF8WBOM,	SFEF_UTF8);
+		CDialogHelper::AddStringT(*this, IDS_UTF16,		SFEF_UTF16);
+		CDialogHelper::AddStringT(*this, IDS_UTF8,		SFEF_UTF8WITHOUTBOM);
+		CDialogHelper::AddStringT(*this, IDS_UTF8WBOM,	SFEF_UTF8);
 	}
 }

@@ -188,12 +188,12 @@ BOOL CCalendarWnd::OnInitDialog()
 
 void CCalendarWnd::InitSnapCombo()
 {
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR,	TCCSM_NEARESTHOUR);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY,	TCCSM_NEARESTDAY);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTHOUR,	TCCSM_NEARESTHOUR);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTDAY,	TCCSM_NEARESTDAY);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
 
-	CDialogHelper::SelectItemByData(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
+	CDialogHelper::SelectItemByDataT(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
 }
 
 void CCalendarWnd::OnSelChangeNumWeeks()
@@ -207,7 +207,7 @@ void CCalendarWnd::OnSelChangeNumWeeks()
 
 void CCalendarWnd::OnSelChangeSnapMode()
 {
-	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemData(m_cbSnapModes, TCCSM_FREE));
+	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemDataT(m_cbSnapModes, TCCSM_FREE));
 }
 
 void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
@@ -264,7 +264,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		TCC_SNAPMODE nSnap = (TCC_SNAPMODE)pPrefs->GetProfileInt(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
 		m_BigCalendar.SetDefaultSnapMode(nSnap);
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+		CDialogHelper::SelectItemByDataT(m_cbSnapModes, nSnap);
 	
 		// make sure 'today' is visible
 		COleDateTime dtToday = COleDateTime::GetCurrentTime();

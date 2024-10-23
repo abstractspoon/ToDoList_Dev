@@ -90,11 +90,11 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		case TDCA_NONE:
 			// Allow mapping to 'none' when importing
 			if (m_bImporting)
-				CDialogHelper::AddString(m_cbAttributes, _T(""), att.nAttributeID);
+				CDialogHelper::AddStringT(m_cbAttributes, _T(""), att.nAttributeID);
 			break;
 
 		default:
-			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.nAttributeID);
+			CDialogHelper::AddStringT(m_cbAttributes, CEnString(att.nAttribResID), att.nAttributeID);
 			break;
 		}
 	}
@@ -102,8 +102,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	// add custom attribute placeholder if importing
 	if (m_bImporting)
 	{
-		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
-		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
+		CDialogHelper::AddStringT(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
+		CDialogHelper::AddStringT(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
 	}
 
 	m_header.EnableTracking(FALSE);

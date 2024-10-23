@@ -75,7 +75,7 @@ void CTDLTaskListCtrlOptionsComboBox::AddOption(DWORD dwOption, UINT nOptionStrI
 {
 	if (!Misc::HasFlag(m_dwRemovedOptions, dwOption))
 	{
-		CDialogHelper::AddString(*this, nOptionStrID, dwOption);
+		CDialogHelper::AddStringT(*this, nOptionStrID, dwOption);
 	}
 }
 

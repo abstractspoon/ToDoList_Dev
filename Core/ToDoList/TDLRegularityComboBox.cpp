@@ -50,7 +50,7 @@ TDC_REGULARITY CTDLRegularityComboBox::GetSelectedRegularity() const
 
 int CTDLRegularityComboBox::SetSelectedRegularity(TDC_REGULARITY nRegularity)
 {
-	return CDialogHelper::SelectItemByData(*this, nRegularity);
+	return CDialogHelper::SelectItemByDataT(*this, nRegularity);
 }
 
 CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
@@ -78,13 +78,13 @@ int CTDLRegularityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CTDLRegularityComboBox::BuildCombo()
 {
 	if (m_bIncludeAny)
-		CDialogHelper::AddString(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);
+		CDialogHelper::AddStringT(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);
 
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_ONCE), TDIR_ONCE);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_DAILY), TDIR_DAILY);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_WEEKLY), TDIR_WEEKLY);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_MONTHLY), TDIR_MONTHLY);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_YEARLY), TDIR_YEARLY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_ONCE), TDIR_ONCE);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_DAILY), TDIR_DAILY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_WEEKLY), TDIR_WEEKLY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_MONTHLY), TDIR_MONTHLY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_YEARLY), TDIR_YEARLY);
 }
 
 void CTDLRegularityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,

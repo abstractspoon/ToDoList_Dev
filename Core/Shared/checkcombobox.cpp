@@ -252,7 +252,7 @@ int CCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
 
 int CCheckComboBox::SetCheckByItemData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 {
-	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
+	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 
 	return SetCheck(nIndex, nCheck, TRUE);
 }
@@ -307,7 +307,7 @@ CCB_CHECKSTATE CCheckComboBox::GetCheck(int nIndex) const
 
 CCB_CHECKSTATE CCheckComboBox::GetCheckByData(DWORD dwItemData) const
 {
-	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
+	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 	
 	return GetCheck(nIndex);
 }

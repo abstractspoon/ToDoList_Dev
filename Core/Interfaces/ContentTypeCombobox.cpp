@@ -67,7 +67,7 @@ void CContentTypeComboBox::FillCombo()
 		for (int nContent = 0; nContent < m_pContentMgr->GetNumContent(); nContent++)
 		{
 			CString sItem = m_pContentMgr->GetContentDescription(nContent);
-			VERIFY(CDialogHelper::AddString(*this, sItem, nContent) != CB_ERR);
+			VERIFY(CDialogHelper::AddStringT(*this, sItem, nContent) != CB_ERR);
 		}
 	}
 
@@ -100,7 +100,7 @@ int CContentTypeComboBox::SetSelectedFormat(const CONTENTFORMAT& cf)
 	int nContent = (m_pContentMgr ? m_pContentMgr->FindContent(cf) : -1);
 
 	if (nContent != -1)
-		return CDialogHelper::SelectItemByData(*this, nContent);
+		return CDialogHelper::SelectItemByDataT(*this, nContent);
 
 	// else
 	return SetCurSel(CB_ERR);

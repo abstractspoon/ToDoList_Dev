@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 
 BOOL CGanttDisplayComboBox::SelectDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nDisplay));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nDisplay));
 }
 
 // External
@@ -56,7 +56,7 @@ GTLC_MONTH_DISPLAY CGanttDisplayComboBox::GetSelectedDisplay() const
 // Internal
 GTLC_MONTH_DISPLAY CGanttDisplayComboBox::GetSelectedDisplayRaw() const
 {
-	return CDialogHelper::GetSelectedItemData(*this, GTLC_DISPLAY_NONE);
+	return CDialogHelper::GetSelectedItemDataT(*this, GTLC_DISPLAY_NONE);
 }
 
 BOOL CGanttDisplayComboBox::IsEnabledDisplay(GTLC_MONTH_DISPLAY nDisplay) const
@@ -103,7 +103,7 @@ void CGanttDisplayComboBox::UpdateDisplayOptions(const CGanttCtrl& ctrl)
 			aItems[nItem] += aExamples[nItem];
 		}
 
-		CDialogHelper::AddString(*this, aItems[nItem], mode.nDisplay);
+		CDialogHelper::AddStringT(*this, aItems[nItem], mode.nDisplay);
 	}
 
 	CDialogHelper::RefreshMaxDropWidth(*this, NULL, TABSTOPS);

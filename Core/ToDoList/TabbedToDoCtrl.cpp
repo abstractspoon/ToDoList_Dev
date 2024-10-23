@@ -272,12 +272,12 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 {
 	m_cbListGroupBy.ResetContent();
 
-	AddString(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE); // always
+	AddStringT(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE); // always
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
 	{
 		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColumnID, TRUE))
-			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColumnID);
+			AddStringT(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColumnID);
 	}
 	
 	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
@@ -287,15 +287,15 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 		if (m_taskList.CanGroupBy(attribDef.GetColumnID(), TRUE))
 		{
 			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			AddString(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
+			AddStringT(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
 		}
 	}
 	
-	if (SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy) == CB_ERR)
+	if (SelectItemByDataT(m_cbListGroupBy, m_nListViewGroupBy) == CB_ERR)
 	{
 		m_nListViewGroupBy = TDCC_NONE;
 
-		VERIFY(SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy) != CB_ERR);
+		VERIFY(SelectItemByDataT(m_cbListGroupBy, m_nListViewGroupBy) != CB_ERR);
 		m_taskList.SetGroupBy(m_nListViewGroupBy);
 	}
 }
