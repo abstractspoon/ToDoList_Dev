@@ -60,14 +60,14 @@ public:
 
 		if (pDX->m_bSaveAndValidate)
 		{
-			value = (T)GetSelectedItemData(combo);
+			value = (T)GetSelectedItemDataT(combo);
 		}
 		else
 		{
-			if (CB_ERR == SelectItemByData(combo, (DWORD)value))
+			if (CB_ERR == SelectItemByDataT(combo, (DWORD)value))
 			{
 				value = fallbackValue;
-				VERIFY(SelectItemByData(combo, (DWORD)value) != CB_ERR);
+				VERIFY(SelectItemByDataT(combo, (DWORD)value) != CB_ERR);
 			}
 		}
 	}
@@ -121,7 +121,7 @@ public:
 
 	// Comboboxes and Listboxes
 	template <class T, class S>
-	static int BuildItemDataMap(const S& ctrl, T& mapItems)
+	static int BuildItemDataMapT(const S& ctrl, T& mapItems)
 	{
 		mapItems.RemoveAll();
 		int nNumItem = ctrl.GetCount();
@@ -135,7 +135,7 @@ public:
 	}
 	
 	template <class T, class S>
-	static int FindItemByData(const S& ctrl, T itemData)
+	static int FindItemByDataT(const S& ctrl, T itemData)
 	{
 		int nNumItem = ctrl.GetCount();
 
@@ -149,16 +149,16 @@ public:
 	}
 
 	template <class T, class S>
-	static int SelectItemByData(S& ctrl, T itemData)
+	static int SelectItemByDataT(S& ctrl, T itemData)
 	{
-		int nItem = FindItemByData(ctrl, itemData);
+		int nItem = FindItemByDataT(ctrl, itemData);
 		ctrl.SetCurSel(nItem);
 
 		return nItem;
 	}
 
 	template <class T, class S>
-	static T GetSelectedItemData(const S& ctrl, T fallbackValue)
+	static T GetSelectedItemDataT(const S& ctrl, T fallbackValue)
 	{
 		int nSel = ctrl.GetCurSel();
 
@@ -170,7 +170,7 @@ public:
 	}
 
 	template <class T, class S>
-	static int AddString(S& ctrl, LPCTSTR szItem, T itemData)
+	static int AddStringT(S& ctrl, LPCTSTR szItem, T itemData)
 	{
 		int nIndex = ctrl.AddString(szItem);
 
@@ -181,13 +181,13 @@ public:
 	}
 
 	template <class T, class S>
-	static int AddString(S& ctrl, UINT nIDItem, T itemData)
+	static int AddStringT(S& ctrl, UINT nIDItem, T itemData)
 	{
-		return AddString(ctrl, CEnString(nIDItem), itemData);
+		return AddStringT(ctrl, CEnString(nIDItem), itemData);
 	}
 
 	template <class T, class S>
-	static int InsertString(S& ctrl, int nPos, LPCTSTR szItem, T itemData)
+	static int InsertStringT(S& ctrl, int nPos, LPCTSTR szItem, T itemData)
 	{
 		int nIndex = ctrl.InsertString(nPos, szItem);
 
@@ -198,9 +198,9 @@ public:
 	}
 
 	template <class T, class S>
-	static int InsertString(S& ctrl, int nPos, UINT nIDItem, T itemData)
+	static int InsertStringT(S& ctrl, int nPos, UINT nIDItem, T itemData)
 	{
-		return InsertString(ctrl, nPos, CEnString(nIDItem), itemData);
+		return InsertStringT(ctrl, nPos, CEnString(nIDItem), itemData);
 	}
 	
 	// comboboxes
@@ -210,7 +210,7 @@ public:
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
 	static int SelectItemExact(CComboBox& combo, LPCTSTR szItem);
-	static DWORD GetSelectedItemData(const CComboBox& combo);
+	static DWORD GetSelectedItemDataT(const CComboBox& combo);
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);
 	static CString GetItem(const CComboBox& combo, int nItem);

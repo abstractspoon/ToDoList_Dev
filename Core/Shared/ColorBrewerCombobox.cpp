@@ -172,12 +172,12 @@ int CColorBrewerComboBox::SetSelectedPalette(const CColorBrewerPalette& pal)
 
 int CColorBrewerComboBox::GetSelectedPalette() const
 {
-	return ((int)CDialogHelper::GetSelectedItemData(*this) - 1); // zero-based
+	return ((int)CDialogHelper::GetSelectedItemDataT(*this) - 1); // zero-based
 }
 
 int CColorBrewerComboBox::SetSelectedPalette(int nPal)
 {
-	return CDialogHelper::SelectItemByData(*this, (nPal + 1));
+	return CDialogHelper::SelectItemByDataT(*this, (nPal + 1));
 }
 
 int CColorBrewerComboBox::GetSelectedPalette(CDWordArray& aColors) const

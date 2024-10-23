@@ -82,7 +82,7 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	{
 		const WORKLOADCOLUMN& colVis = WORKLOADTREECOLUMNS[nCol];
 		
-		int nItem = CDialogHelper::AddString(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColumnID);
+		int nItem = CDialogHelper::AddStringT(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColumnID);
 		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColumnID]);
 	}
 

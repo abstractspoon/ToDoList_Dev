@@ -197,12 +197,12 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 void CTDLFindTasksDlg::BuildOptionCombos()
 {
-	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
-	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
 	
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
 
 	CLocalizer::EnableTranslation(m_cbInclude, FALSE);
 
@@ -213,7 +213,7 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 {
 	if (m_cbInclude.GetSafeHwnd())
 	{
-		int nItem = FindItemByData(m_cbInclude, nOption);
+		int nItem = FindItemByDataT(m_cbInclude, nOption);
 		
 		if (nItem != CB_ERR)
 			return m_cbInclude.GetCheck(nItem);
@@ -224,7 +224,7 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 
 void CTDLFindTasksDlg::CheckIncludeOption(FIND_INCLUDE nOption, BOOL bCheck)
 {
-	int nItem = FindItemByData(m_cbInclude, nOption);
+	int nItem = FindItemByDataT(m_cbInclude, nOption);
 
 	if (nItem != CB_ERR)
 		m_cbInclude.SetCheck(nItem, (bCheck ? CCBC_CHECKED : CCBC_UNCHECKED));

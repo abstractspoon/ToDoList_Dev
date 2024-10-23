@@ -463,7 +463,7 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 	if ((nLVItem > 1) || m_aDependentTaskIDs.GetSize())
 	{
 		CMap<DWORD, DWORD, int, int&> mapCBItems;
-		CDialogHelper::BuildItemDataMap(m_cbTasks, mapCBItems);
+		CDialogHelper::BuildItemDataMapT(m_cbTasks, mapCBItems);
 
 		while (nLVItem--)
 		{

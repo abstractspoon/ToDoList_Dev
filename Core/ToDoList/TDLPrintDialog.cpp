@@ -59,9 +59,9 @@ void CTDLHtmlStyleComboBox::BuildCombo()
 {
 	if (GetCount() == 0)
 	{
-		CDialogHelper::AddString(*this, _T("Wrapped"), TDLPDS_WRAP);
-		CDialogHelper::AddString(*this, _T("Paragraph"), TDLPDS_PARA);
-		CDialogHelper::AddString(*this, _T("Table"), TDLPDS_TABLE);
+		CDialogHelper::AddStringT(*this, _T("Wrapped"), TDLPDS_WRAP);
+		CDialogHelper::AddStringT(*this, _T("Paragraph"), TDLPDS_PARA);
+		CDialogHelper::AddStringT(*this, _T("Table"), TDLPDS_TABLE);
 	}
 }
 

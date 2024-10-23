@@ -95,10 +95,10 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 
 	// Same order as previous checkboxes
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, ODD_STARTDATE);
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   ODD_DUEDATE);
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  ODD_DONEDATE);
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  ODD_REMINDER);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, ODD_STARTDATE);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   ODD_DUEDATE);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  ODD_DONEDATE);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  ODD_REMINDER);
 
 	m_lbOffsetWhat.SetCheckedByItemData(m_dwOffsetWhat);
 

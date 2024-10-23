@@ -122,7 +122,7 @@ void CTDLFilterDateComboBox::FillCombo()
 			break;
 		}
 
-		VERIFY(CDialogHelper::AddString(*this, sText, nFilter) != CB_ERR);
+		VERIFY(CDialogHelper::AddStringT(*this, sText, nFilter) != CB_ERR);
 	}
 
 	CDialogHelper::RefreshMaxDropWidth(*this);
@@ -141,7 +141,7 @@ FILTER_DATE CTDLFilterDateComboBox::GetSelectedFilter() const
 
 BOOL CTDLFilterDateComboBox::SelectFilter(FILTER_DATE nFilter)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nFilter));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
 }
 
 void CTDLFilterDateComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,

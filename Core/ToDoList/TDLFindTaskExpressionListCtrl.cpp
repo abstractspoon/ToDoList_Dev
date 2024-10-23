@@ -856,7 +856,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				break;
 			}
 	
-			CDialogHelper::SelectItemByData(m_cbOperators, (DWORD)rule.GetOperator());
+			CDialogHelper::SelectItemByDataT(m_cbOperators, (DWORD)rule.GetOperator());
 		}
 		break;
 

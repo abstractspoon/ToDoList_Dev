@@ -167,7 +167,7 @@ void CCustomAttributeListPage::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		CDialogHelper::SelectItemByData(m_cbListType, m_dwListType);
+		CDialogHelper::SelectItemByDataT(m_cbListType, m_dwListType);
 	}
 }
 
@@ -278,7 +278,7 @@ void CCustomAttributeListPage::BuildListCombo()
 	}
 
 	// restore selection
-	if (CDialogHelper::SelectItemByData(m_cbListType, m_dwListType) == CB_ERR)
+	if (CDialogHelper::SelectItemByDataT(m_cbListType, m_dwListType) == CB_ERR)
 		SetListType(TDCCA_NOTALIST);
 }
 
@@ -300,7 +300,7 @@ BOOL CCustomAttributeListPage::SetDataType(DWORD dwDataType)
 
 BOOL CCustomAttributeListPage::SetListType(DWORD dwListType)
 {
-	if (CDialogHelper::SelectItemByData(m_cbListType, dwListType) != CB_ERR)
+	if (CDialogHelper::SelectItemByDataT(m_cbListType, dwListType) != CB_ERR)
 	{
 		m_dwListType = dwListType;
 
@@ -557,9 +557,9 @@ void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 
 	// Update calculation arguments
 	if (pDX->m_bSaveAndValidate)
-		m_calc.nOperator = CDialogHelper::GetSelectedItemData(m_cbOperators, TDCCAC_ADD);
+		m_calc.nOperator = CDialogHelper::GetSelectedItemDataT(m_cbOperators, TDCCAC_ADD);
 	else
-		CDialogHelper::SelectItemByData(m_cbOperators, m_calc.nOperator);
+		CDialogHelper::SelectItemByDataT(m_cbOperators, m_calc.nOperator);
 }
 
 void CCustomAttributeCalcPage::DDX_Operand(CDataExchange* pDX, CTDLAttributeComboBox& cbOperand, TDC_ATTRIBUTE& nAttribID, CString& sCustAttribID)
@@ -748,18 +748,18 @@ void CCustomAttributeCalcPage::BuildOperatorCombo()
 	m_cbOperators.ResetContent();
 
 	// Add/subtract supported by all
-	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (+)"), CEnString(IDS_CAD_CALC_ADD)), TDCCAC_ADD);
-	CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (-)"), CEnString(IDS_CAD_CALC_SUBTRACT)), TDCCAC_SUBTRACT);
+	CDialogHelper::AddStringT(m_cbOperators, Misc::Format(_T("%s (+)"), CEnString(IDS_CAD_CALC_ADD)), TDCCAC_ADD);
+	CDialogHelper::AddStringT(m_cbOperators, Misc::Format(_T("%s (-)"), CEnString(IDS_CAD_CALC_SUBTRACT)), TDCCAC_SUBTRACT);
 
 	// Multiply/divide NOT supported by DATES
 	if (!IsDate(m_calc.opFirst.nAttributeID))
 	{
-		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (*)"), CEnString(IDS_CAD_CALC_MULTIPLY)), TDCCAC_MULTIPLY);
-		CDialogHelper::AddString(m_cbOperators, Misc::Format(_T("%s (/)"), CEnString(IDS_CAD_CALC_DIVIDE)), TDCCAC_DIVIDE);
+		CDialogHelper::AddStringT(m_cbOperators, Misc::Format(_T("%s (*)"), CEnString(IDS_CAD_CALC_MULTIPLY)), TDCCAC_MULTIPLY);
+		CDialogHelper::AddStringT(m_cbOperators, Misc::Format(_T("%s (/)"), CEnString(IDS_CAD_CALC_DIVIDE)), TDCCAC_DIVIDE);
 	}
 
 	// restore selection
-	if (CDialogHelper::SelectItemByData(m_cbOperators, m_calc.nOperator) == CB_ERR)
+	if (CDialogHelper::SelectItemByDataT(m_cbOperators, m_calc.nOperator) == CB_ERR)
 	{
 		m_calc.nOperator = TDCCAC_ADD;
 		UpdateData(FALSE);
@@ -965,7 +965,7 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		SelectItemByData(m_cbDataType, m_dwDataType);
+		SelectItemByDataT(m_cbDataType, m_dwDataType);
 	}
 }
 

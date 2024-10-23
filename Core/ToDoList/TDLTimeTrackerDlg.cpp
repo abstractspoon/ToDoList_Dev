@@ -323,7 +323,7 @@ int CTDLTimeTrackerDlg::GetTasklistCBIndex(const CToDoCtrl* pTDC) const
 {
 	ASSERT(m_cbTasklists.GetSafeHwnd());
 	
-	return CDialogHelper::FindItemByData(m_cbTasklists, (DWORD)pTDC);
+	return CDialogHelper::FindItemByDataT(m_cbTasklists, (DWORD)pTDC);
 }
 
 BOOL CTDLTimeTrackerDlg::HasTasklist(const CToDoCtrl* pTDC) const
@@ -347,7 +347,7 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tas
 	else
 		sTitle = pTDC->GetFriendlyProjectName();
 
-	int nTDC = AddString(m_cbTasklists, sTitle, (DWORD)pTDC);
+	int nTDC = AddStringT(m_cbTasklists, sTitle, (DWORD)pTDC);
 	
 	if (nTDC == CB_ERR)
 	{
@@ -391,7 +391,7 @@ BOOL CTDLTimeTrackerDlg::SetTasks(const CToDoCtrl* pTDC, const CTaskFile& tasks)
 
 void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 {
-	int nTDC = FindItemByData(m_cbTasklists, (DWORD)pTDC);
+	int nTDC = FindItemByDataT(m_cbTasklists, (DWORD)pTDC);
 
 	if (nTDC == CB_ERR)
 	{
@@ -408,7 +408,7 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 
 		m_cbTasklists.DeleteString(nTDC);
 
-		int nTDC = AddString(m_cbTasklists, sNewName, (DWORD)pTDC);
+		int nTDC = AddStringT(m_cbTasklists, sNewName, (DWORD)pTDC);
 		ASSERT(nTDC != CB_ERR);
 
 		// Restore 
@@ -533,7 +533,7 @@ BOOL CTDLTimeTrackerDlg::RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove)
 BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
 {
 	// Select the tasklist
-	if (CB_ERR == SelectItemByData(m_cbTasklists, (DWORD)pTDC))
+	if (CB_ERR == SelectItemByDataT(m_cbTasklists, (DWORD)pTDC))
 		return FALSE;
 
 	// Update UI
@@ -544,7 +544,7 @@ BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
 
 const CToDoCtrl* CTDLTimeTrackerDlg::GetSelectedTasklist() const
 {
-	return (const CToDoCtrl*)GetSelectedItemData(m_cbTasklists);
+	return (const CToDoCtrl*)GetSelectedItemDataT(m_cbTasklists);
 }
 
 BOOL CTDLTimeTrackerDlg::IsSelectedTasklist(const CToDoCtrl* pTDC) const
@@ -573,7 +573,7 @@ BOOL CTDLTimeTrackerDlg::RebuildTasklistCombo()
 		else
 			sTitle = pTTL->pTDC->GetFriendlyProjectName();
 		
-		if (AddString(m_cbTasklists, sTitle, (DWORD)pTTL->pTDC) == CB_ERR)
+		if (AddStringT(m_cbTasklists, sTitle, (DWORD)pTTL->pTDC) == CB_ERR)
 		{
 			ASSERT(0);
 			return FALSE;

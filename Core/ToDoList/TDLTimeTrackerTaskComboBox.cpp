@@ -167,7 +167,7 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 		if (pTTL->aRecentlyTrackedIDs.GetSize())
 		{
 			// Insert 'All tasks' header
-			int nHeading = CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA);
+			int nHeading = CDialogHelper::InsertStringT(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA);
 			SetHeadingItem(nHeading);
 
 			// Insert new recently tracked tasks at head of combo
@@ -188,14 +188,14 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 					continue;
 
 				nItem += nNumAdded;
-				ASSERT(nItem == CDialogHelper::FindItemByData(*this, dwTaskID));
+				ASSERT(nItem == CDialogHelper::FindItemByDataT(*this, dwTaskID));
 
 				VERIFY(InsertTask(0, pTTL->aTasks[nTask].sTask, dwTaskID, FALSE, 0, GetItemImage(nItem)));
 				nNumAdded++;
 			}
 
 			// Insert 'Recently tracked' header
-			nHeading = CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA);
+			nHeading = CDialogHelper::InsertStringT(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA);
 			SetHeadingItem(nHeading);
 		}
 	}
@@ -209,7 +209,7 @@ int CTDLTimeTrackerTaskComboBox::GetRecentlyTrackedTaskIDs(CDWordArray& aRecentl
 
 	if (GetItemData(0) == RECENTLYTRACKED_ITEMDATA)
 	{
-		int nItem = CDialogHelper::FindItemByData(*this, ALLTASKS_ITEMDATA);
+		int nItem = CDialogHelper::FindItemByDataT(*this, ALLTASKS_ITEMDATA);
 
 		// Work backwards inserting at the start
 		while (nItem-- > 1)
@@ -270,7 +270,7 @@ DWORD CTDLTimeTrackerTaskComboBox::GetSelectedTaskID() const
 
 BOOL CTDLTimeTrackerTaskComboBox::SelectTask(DWORD dwTaskID)
 {
-	int nItem = CDialogHelper::FindItemByData(*this, dwTaskID);
+	int nItem = CDialogHelper::FindItemByDataT(*this, dwTaskID);
 	
 	return (SetCurSel(nItem) != CB_ERR);
 }

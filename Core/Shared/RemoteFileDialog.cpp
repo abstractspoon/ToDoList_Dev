@@ -214,7 +214,7 @@ BOOL CRemoteFileDialog::OnInitDialog()
 	ASSERT (nType); // must be at least one
 
 	while (nType--)
-		AddString(m_cbFileTypes, m_aFilters[nType].sName, nType);
+		AddStringT(m_cbFileTypes, m_aFilters[nType].sName, nType);
 
 	m_cbFileTypes.SetCurSel(0);
 	m_sFilterExt = m_aFilters[m_cbFileTypes.GetItemData(0)].sExt;

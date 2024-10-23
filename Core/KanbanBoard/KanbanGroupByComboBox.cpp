@@ -62,14 +62,14 @@ void CKanbanGroupByComboBox::BuildCombo()
 	CKanbanAttributeComboBox::BuildCombo();
 
 	// Remove excluded attribute
-	int nExclude = CDialogHelper::FindItemByData(*this, m_nExcludeAttribID);
+	int nExclude = CDialogHelper::FindItemByDataT(*this, m_nExcludeAttribID);
 	
 	if (nExclude != CB_ERR)
 		DeleteString(nExclude);
 
 	// Add extra items
-	CDialogHelper::AddString(*this, CEnString(IDS_NONE), TDCA_NONE);
-	CDialogHelper::AddString(*this, CEnString(IDS_DISPLAY_RECURRENCE), TDCA_RECURRENCE);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_NONE), TDCA_NONE);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_DISPLAY_RECURRENCE), TDCA_RECURRENCE);
 
 	// Restore selection
 	if (!SetSelectedAttribute(nSelAttrib, sSelCustID))

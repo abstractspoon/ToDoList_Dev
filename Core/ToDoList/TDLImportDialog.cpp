@@ -240,18 +240,18 @@ BOOL CTDLImportDialog::OnInitDialog()
 	// Build active tasklist pos
 	if (m_bTasklistHasSelection)
 	{
-		AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
 	}
 	else
 	{
-		AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
 	}
 
-	SelectItemByData(m_cbTasklistPos, m_nActiveTasklistPos);
+	SelectItemByDataT(m_cbTasklistPos, m_nActiveTasklistPos);
 
 	m_eFilePath.SetFilter(GetCurrentImporterFilter());
 

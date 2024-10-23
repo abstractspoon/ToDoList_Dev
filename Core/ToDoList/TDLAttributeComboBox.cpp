@@ -60,7 +60,7 @@ BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL b
 {
 	DWORD dwItemData = EncodeItemData(nAttribID, bRelative);
 
-	return (CDialogHelper::SelectItemByData(*this, dwItemData) != CB_ERR);
+	return (CDialogHelper::SelectItemByDataT(*this, dwItemData) != CB_ERR);
 }
 
 BOOL CTDLAttributeComboBox::SetSelectedAttribute(const CString& sCustAttribID, BOOL bRelative)
@@ -166,7 +166,7 @@ void CTDLAttributeComboBox::BuildCombo()
 			CEnString sAttrib(ap.nAttribResID);
 			DWORD dwItemData = EncodeItemData(ap.nAttributeID);
 
-			CDialogHelper::AddString(*this, sAttrib, dwItemData); 
+			CDialogHelper::AddStringT(*this, sAttrib, dwItemData); 
 
 			// relative dates
 			if (m_bIncRelativeDates && AttributeIsDate(ap.nAttributeID))
@@ -177,7 +177,7 @@ void CTDLAttributeComboBox::BuildCombo()
 				sAttrib += ' ';
 				sAttrib += CEnString(IDS_TDLBC_RELATIVESUFFIX);
 
-				CDialogHelper::AddString(*this, sAttrib, dwItemData); 
+				CDialogHelper::AddStringT(*this, sAttrib, dwItemData); 
 			}
 		}
 	}
@@ -193,7 +193,7 @@ void CTDLAttributeComboBox::BuildCombo()
 			TDC_ATTRIBUTE attrib = attribDef.GetAttributeID();
 
 			DWORD dwItemData = EncodeItemData(attrib);
-			CDialogHelper::AddString(*this, sAttrib, dwItemData);
+			CDialogHelper::AddStringT(*this, sAttrib, dwItemData);
 
 			// is it a date
 			if (m_bIncRelativeDates && AttributeIsDate(attrib))
@@ -202,17 +202,17 @@ void CTDLAttributeComboBox::BuildCombo()
 				dwItemData = EncodeItemData(attrib, TRUE);
 				sAttrib.Format(IDS_CUSTOMRELDATECOLUMN, attribDef.sLabel);
 
-				CDialogHelper::AddString(*this, sAttrib, dwItemData);
+				CDialogHelper::AddStringT(*this, sAttrib, dwItemData);
 			}
 		}
 	}
 
 	// Misc others
 	if (WantAttribute(TDCA_REMINDER))
-		CDialogHelper::AddString(*this, IDS_TDLBC_REMINDER, EncodeItemData(TDCA_REMINDER));
+		CDialogHelper::AddStringT(*this, IDS_TDLBC_REMINDER, EncodeItemData(TDCA_REMINDER));
 
 	if (WantAttribute(TDCA_TODAY))
-		CDialogHelper::AddString(*this, IDS_TODAY, EncodeItemData(TDCA_TODAY));
+		CDialogHelper::AddStringT(*this, IDS_TODAY, EncodeItemData(TDCA_TODAY));
 
 	// restore selection
 	SetSelectedAttribute(nSelAttrib);

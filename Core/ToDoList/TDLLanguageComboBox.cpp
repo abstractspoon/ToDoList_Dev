@@ -237,7 +237,7 @@ CString CTDLLanguageComboBox::GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTST
 
 LANGID CTDLLanguageComboBox::GetSelectedPrimaryLanguageID() const
 {
-	return (LANGID)CDialogHelper::GetSelectedItemData(*this);
+	return (LANGID)CDialogHelper::GetSelectedItemDataT(*this);
 }
 
 CString CTDLLanguageComboBox::GetSelectedLanguageFile(BOOL bRelative) const
@@ -297,10 +297,10 @@ BOOL CTDLLanguageComboBox::SelectUserLanguage()
 			nLangID = (LANGID)PRIMARYLANGID(Misc::GetUserKeyboardLanguage());
 		}
 
-		if (CDialogHelper::FindItemByData(*this, nLangID) == CB_ERR)
+		if (CDialogHelper::FindItemByDataT(*this, nLangID) == CB_ERR)
 			nLangID = LANG_ENGLISH;
 		
-		return (CB_ERR != CDialogHelper::SelectItemByData(*this, nLangID));
+		return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nLangID));
 	}
 
 	// else

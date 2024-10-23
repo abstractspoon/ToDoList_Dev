@@ -57,14 +57,14 @@ void CKanbanAttributeComboBox::BuildCombo()
 	ResetContent();
 
 	// Default attributes
-	CDialogHelper::AddString(*this, CEnString(IDS_STATUSATTRIB), TDCA_STATUS);
-	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCTOATTRIB), TDCA_ALLOCTO);
-	CDialogHelper::AddString(*this, CEnString(IDS_ALLOCBYATTRIB), TDCA_ALLOCBY);
-	CDialogHelper::AddString(*this, CEnString(IDS_CATEGORYATTRIB), TDCA_CATEGORY);
-	CDialogHelper::AddString(*this, CEnString(IDS_PRIORITYATTRIB), TDCA_PRIORITY);
-	CDialogHelper::AddString(*this, CEnString(IDS_RISKATTRIB), TDCA_RISK);
-	CDialogHelper::AddString(*this, CEnString(IDS_VERSIONATTRIB), TDCA_VERSION);
-	CDialogHelper::AddString(*this, CEnString(IDS_TAGSATTRIB), TDCA_TAGS);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_STATUSATTRIB), TDCA_STATUS);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_ALLOCTOATTRIB), TDCA_ALLOCTO);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_ALLOCBYATTRIB), TDCA_ALLOCBY);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_CATEGORYATTRIB), TDCA_CATEGORY);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_PRIORITYATTRIB), TDCA_PRIORITY);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_RISKATTRIB), TDCA_RISK);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_VERSIONATTRIB), TDCA_VERSION);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_TAGSATTRIB), TDCA_TAGS);
 
 	// Custom attributes
 	for (int nCust = 0; nCust < m_aCustAttribDefs.GetSize(); nCust++)
@@ -79,11 +79,11 @@ void CKanbanAttributeComboBox::BuildCombo()
 #endif
 
 		CLocalizer::IgnoreString(sCustAttrib);
-		CDialogHelper::AddString(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
+		CDialogHelper::AddStringT(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
 	}
 
 	if (m_bShowFixedColumns)
-		CDialogHelper::AddString(*this, CEnString(IDS_FIXEDCOLUMNS), TDCA_FIXEDCOLUMNS);
+		CDialogHelper::AddStringT(*this, CEnString(IDS_FIXEDCOLUMNS), TDCA_FIXEDCOLUMNS);
 
 	// Restore selection
 	if (!SetSelectedAttribute(nSelAttrib, sSelCustID))
@@ -111,12 +111,12 @@ void CKanbanAttributeComboBox::ShowFixedColumns(BOOL bShow)
 
 TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
 {
-	return CDialogHelper::GetSelectedItemData(*this, GetFallbackAttribute());
+	return CDialogHelper::GetSelectedItemDataT(*this, GetFallbackAttribute());
 }
 
 TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAttribID) const
 {
-	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemData(*this, GetFallbackAttribute());
+	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemDataT(*this, GetFallbackAttribute());
 
 	if (KBUtils::IsCustomAttribute(nSelAttrib))
 		sCustomAttribID = m_aCustAttribDefs.GetDefinitionID(nSelAttrib);
@@ -139,7 +139,7 @@ BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, con
 	if (bCustom)
 		nAttribID = m_aCustAttribDefs.GetDefinitionID(sCustomAttribID);
 
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttribID));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nAttribID));
 }
 
 void CKanbanAttributeComboBox::SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs)
