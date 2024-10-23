@@ -147,7 +147,7 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	//}}AFX_MSG
 	afx_msg void OnBeginTrackHeader(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEndDragHeader(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnLayout(WPARAM wp, LPARAM lp);

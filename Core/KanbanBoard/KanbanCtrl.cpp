@@ -130,6 +130,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_HEADER, OnHeaderClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
+	ON_NOTIFY(HDN_ENDTRACK, IDC_HEADER, OnEndTrackHeaderItem)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_COLUMNCTRL, OnBeginDragColumnItem)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_COLUMNCTRL, OnColumnItemSelChange)
 	ON_NOTIFY(NM_SETFOCUS, IDC_COLUMNCTRL, OnColumnSetFocus)
@@ -2701,10 +2702,7 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 	if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, KBCAL_LONG))
 		return KBCAL_LONG;
 
-//	if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, KBCAL_SHORT))
-		return KBCAL_SHORT;
-
-//	return KBCAL_NONE;
+	return KBCAL_SHORT;
 }
 
 // Called externally only
@@ -3131,6 +3129,24 @@ int CKanbanCtrl::MapHeaderItemToColumn(int nItem) const
 	}
 
 	return nCol;
+}
+
+void CKanbanCtrl::OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+{
+	NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
+	ASSERT(pHDN->iItem < (m_header.GetItemCount() - 1));
+
+	// Update label format for 'this' and 'next' columns
+	int nCol = pHDN->iItem;
+	int nWidth = m_header.GetItemWidth(nCol);
+	KBC_ATTRIBLABELS nAttribVis = GetColumnAttributeLabelVisibility(nCol, nWidth);
+	m_aColumns[nCol]->SetAttributeLabelVisibility(nAttribVis);
+	
+	nCol += 1;
+	nWidth = m_header.GetItemWidth(nCol);
+	nAttribVis = GetColumnAttributeLabelVisibility(nCol, nWidth);
+	m_aColumns[nCol]->SetAttributeLabelVisibility(nAttribVis);
 }
 
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)

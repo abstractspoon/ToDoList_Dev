@@ -144,6 +144,7 @@ protected:
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
