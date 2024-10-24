@@ -368,7 +368,7 @@ BEGIN
     IDS_DISPLAY_EXTERNALID  "External ID"
     IDS_DISPLAY_RECURRENCE  "Recurrence"
     IDS_DISPLAY_PARENT      "Parent"
-    IDS_FIXEDCOLUMNS        "- Fixed Columns -"
+    IDS_FIXEDCOLUMNS        "%s (Fixed Columns)"
     IDS_DELETEALLROWS       "Do you want to delete the existing column definitions?"
     IDS_BKGNDCOLOR          "Colour"
     IDS_DISPLAY_TASKID      "ID"

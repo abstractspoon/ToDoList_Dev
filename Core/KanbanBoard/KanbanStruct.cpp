@@ -23,7 +23,12 @@ static char THIS_FILE[]=__FILE__;
 CString KBUtils::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 										const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	return GetAttributeLabel(nAttribID, nLabelVis, aCustAttribDefs) + sValue;
+	CString sLabel = GetAttributeLabel(nAttribID, nLabelVis, aCustAttribDefs);
+	
+	if (!sLabel.IsEmpty())
+		return (sLabel + _T(": ") + sValue);
+	
+	return sValue;
 }
 
 CString KBUtils::FormatDate(const COleDateTime& date, BOOL bISODates)
@@ -38,26 +43,17 @@ CString KBUtils::FormatDate(const COleDateTime& date, BOOL bISODates)
 }
 
 CString KBUtils::GetAttributeLabel(TDC_ATTRIBUTE nAttribID, KBC_ATTRIBLABELS nLabelVis,
-										 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+								   const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	if (nLabelVis == KBCAL_NONE)
 		return _T("");
 
-	CString sLabel;
-
 	if (IsCustomAttribute(nAttribID))
-	{
-		sLabel = aCustAttribDefs.GetDefinitionLabel(nAttribID) + _T(": ");
-	}
-	else
-	{
-		UINT nFormatID = GetDisplayFormat(nAttribID, (nLabelVis == KBCAL_LONG));
+		return aCustAttribDefs.GetDefinitionLabel(nAttribID);
 
-		if (nFormatID != 0)
-			sLabel = CEnString(nFormatID) + _T(": ");
-	}
-
-	return sLabel;
+	// else
+	UINT nFormatID = GetDisplayFormat(nAttribID, (nLabelVis == KBCAL_LONG));
+	return CEnString(nFormatID);
 }
 
 UINT KBUtils::GetDisplayFormat(TDC_ATTRIBUTE nAttribID, BOOL bLong)

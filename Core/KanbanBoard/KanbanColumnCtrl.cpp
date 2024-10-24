@@ -764,9 +764,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 	}
 
 	// Prefix the text by the column name
-	CString sLabel(KBUtils::GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
-	
-	return (sLabel + sGroupBy);
+	return KBUtils::FormatAttribute(m_nGroupBy, sGroupBy, KBCAL_LONG, m_aCustAttribDefs);
 }
 
 void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
@@ -919,7 +917,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KBUtils::GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::FormatAttribute(TDCA_PARENT, _T(""), nLabelVis, m_aCustAttribDefs);
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
@@ -1002,7 +1000,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::FormatAttribute(TDCA_FILELINK, _T(""), nLabelVis, m_aCustAttribDefs);
 
 	if (!sLabel.IsEmpty())
 	{
@@ -2691,7 +2689,7 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 			{
 				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
+					CString sLabel = KBUtils::FormatAttribute(TDCA_FILELINK, _T(""), m_nAttribLabelVisibility, m_aCustAttribDefs);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
