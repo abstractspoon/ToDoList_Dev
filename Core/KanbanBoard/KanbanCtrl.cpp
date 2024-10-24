@@ -1178,7 +1178,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 
 			for (int nCust = 0; nCust < nNumCust; nCust++)
 			{
-				// Save off each attribute ID
+				// Update our list of attributes without changing their positions
 				CString sAttribID(pTasks->GetCustomAttributeID(nCust));
 				int nExist = m_aCustomAttribDefs.FindDefinition(sAttribID);
 				
@@ -1228,25 +1228,32 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 				}
 			}
 
-			// Handle the tracked or grouped attribute having disappeared
-			if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
+			// Handle the tracked attribute having disappeared
+			if ((m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) && 
+				(m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID) == -1))
 			{
-				if (m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID) == -1)
-				{
-					m_nTrackedAttributeID = TDCA_STATUS;
-					m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
+				m_nTrackedAttributeID = TDCA_STATUS;
+				m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
 
-					bChange = TRUE;
-				}
+				bChange = TRUE;
+			}
 
-				if (((m_nGroupBy == TDCA_CUSTOMATTRIB) && (m_sGroupByCustAttribID == m_sTrackAttribID)) ||
-					(m_nGroupBy == m_nTrackedAttributeID))
-				{
-					m_nGroupBy = TDCA_NONE;
-					m_sGroupByCustAttribID.Empty();
+			// Handle the group attribute having disappeared or 
+			// being the same as the tracked attribute
+			if (m_nGroupBy == TDCA_CUSTOMATTRIB &&
+				((m_aCustomAttribDefs.FindDefinition(m_sGroupByCustAttribID) == -1) || (m_sGroupByCustAttribID == m_sTrackAttribID)))
+			{
+				m_nGroupBy = TDCA_NONE;
+				m_sGroupByCustAttribID.Empty();
 
-					bChange = TRUE;
-				}
+				bChange = TRUE;
+			}
+			else if (m_nGroupBy == m_nTrackedAttributeID)
+			{
+				m_nGroupBy = TDCA_NONE;
+				m_sGroupByCustAttribID.Empty();
+
+				bChange = TRUE;
 			}
 
 			return bChange;
