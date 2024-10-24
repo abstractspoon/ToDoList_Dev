@@ -22,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 CKanbanAttributeComboBox::CKanbanAttributeComboBox() 
 	: 
 	m_bShowCustomAttrib(TRUE), 
-	m_bShowFixedColumns(FALSE)
+	m_nFixedColumnsAttribID(TDCA_NONE)
 {
 }
 
@@ -74,16 +74,19 @@ void CKanbanAttributeComboBox::BuildCombo()
 		CEnString sCustAttrib;
 		sCustAttrib.Format(IDS_CUSTOMATTRIB, kcaDef.sAttribName);
 
-#ifdef _DEBUG
-		//sCustAttrib += Misc::Format(_T(" [%ld]"), (TDCA_CUSTOMATTRIB + nCust));
-#endif
-
 		CLocalizer::IgnoreString(sCustAttrib);
 		CDialogHelper::AddStringT(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
 	}
 
-	if (m_bShowFixedColumns)
-		CDialogHelper::AddStringT(*this, CEnString(IDS_FIXEDCOLUMNS), TDCA_FIXEDCOLUMNS);
+	if (m_nFixedColumnsAttribID != TDCA_NONE)
+	{
+		CString sAttrib = KBUtils::GetAttributeLabel(m_nFixedColumnsAttribID, KBCAL_LONG, m_aCustAttribDefs);
+
+		if (sAttrib.IsEmpty())
+			ASSERT(KBUtils::IsCustomAttribute(m_nFixedColumnsAttribID) && !m_aCustAttribDefs.GetSize());
+		else
+			CDialogHelper::AddStringT(*this, CEnString(IDS_FIXEDCOLUMNS, sAttrib), TDCA_FIXEDCOLUMNS);
+	}
 
 	// Restore selection
 	if (!SetSelectedAttribute(nSelAttrib, sSelCustID))
@@ -98,11 +101,11 @@ void CKanbanAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CSt
 		SetSelectedAttribute(value, sCustomAttribID);
 }
 
-void CKanbanAttributeComboBox::ShowFixedColumns(BOOL bShow)
+void CKanbanAttributeComboBox::ShowFixedColumns(TDC_ATTRIBUTE nAttribID)
 {
-	if (!m_bShowFixedColumns != !bShow) // normalise
+	if (nAttribID != m_nFixedColumnsAttribID)
 	{
-		m_bShowFixedColumns = bShow;
+		m_nFixedColumnsAttribID = nAttribID;
 
 		if (GetSafeHwnd())
 			BuildCombo();
@@ -128,6 +131,9 @@ TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAtt
 
 BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID)
 {
+	if (CDialogHelper::FindItemByDataT(*this, nAttribID) == -1)
+		return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, GetFallbackAttribute()));
+
 	BOOL bCustom = KBUtils::IsCustomAttribute(nAttribID);
 
 	if ((bCustom && sCustomAttribID.IsEmpty()) || (!bCustom && !sCustomAttribID.IsEmpty()))
@@ -144,11 +150,11 @@ BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, con
 
 void CKanbanAttributeComboBox::SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs)
 {
-	if (Misc::MatchAllT(m_aCustAttribDefs, aAttribDefs, FALSE))
-		return;
+	if (!Misc::MatchAllT(m_aCustAttribDefs, aAttribDefs, FALSE))
+	{
+		m_aCustAttribDefs.Copy(aAttribDefs);
 
-	m_aCustAttribDefs.Copy(aAttribDefs);
-
-	if (GetSafeHwnd())
-		BuildCombo();
+		if (GetSafeHwnd())
+			BuildCombo();
+	}
 }

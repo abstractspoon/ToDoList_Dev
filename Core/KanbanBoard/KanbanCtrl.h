@@ -201,7 +201,7 @@ protected:
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
 	int MapHeaderItemToColumn(int nItem) const;
 
-	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
+	inline BOOL UsingFixedColumns() const { return ((m_nTrackedAttributeID == TDCA_FIXEDCOLUMNS) && m_aColumnDefs.GetSize()); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;

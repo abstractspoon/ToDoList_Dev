@@ -45,7 +45,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_KANBANTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
 	m_nTrackedAttribID(TDCA_NONE),
-	m_nGroupByAttrib(TDCA_NONE),
+	m_nGroupByAttribID(TDCA_NONE),
 	m_ctrlKanban(),
 	m_dlgPrefs(this)
 {
@@ -66,7 +66,7 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_GROUPBY, m_cbGroupBy);
 
 	m_cbAttributes.DDX(pDX, m_nTrackedAttribID, m_sTrackedCustomAttribID);
-	m_cbGroupBy.DDX(pDX, m_nGroupByAttrib, m_sGroupByCustomAttribID);
+	m_cbGroupBy.DDX(pDX, m_nGroupByAttribID, m_sGroupByCustomAttribID);
 }
 
 BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
@@ -232,14 +232,14 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	}
 
 	// Last 'Group By' attribute
-	if (KBUtils::IsCustomAttribute(m_nGroupByAttrib))
+	if (KBUtils::IsCustomAttribute(m_nGroupByAttribID))
 	{
 		pPrefs->WriteProfileInt(szKey, _T("GroupByAttribute"), TDCA_CUSTOMATTRIB);
 		pPrefs->WriteProfileString(sKey, _T("GroupByCustomAttrib"), m_sGroupByCustomAttribID);
 	}
 	else
 	{
-		pPrefs->WriteProfileInt(szKey, _T("GroupByAttribute"), m_nGroupByAttrib);
+		pPrefs->WriteProfileInt(szKey, _T("GroupByAttribute"), m_nGroupByAttribID);
 		pPrefs->DeleteProfileEntry(sKey, _T("GroupByCustomAttrib"));
 	}
 
@@ -403,17 +403,19 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		}
 
 		// Last 'Group By' attribute
-		m_nGroupByAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("GroupByAttribute"), TDCA_NONE);
+		m_nGroupByAttribID = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("GroupByAttribute"), TDCA_NONE);
 
-		if (KBUtils::IsCustomAttribute(m_nGroupByAttrib))
+		if (KBUtils::IsCustomAttribute(m_nGroupByAttribID))
 		{
 			m_sGroupByCustomAttribID = pPrefs->GetProfileString(szKey, _T("GroupByCustomAttrib"));
 
-			if (m_sGroupByCustomAttribID.IsEmpty())
-				m_nGroupByAttrib = TDCA_NONE;
+			if (m_sGroupByCustomAttribID.IsEmpty() || (m_sGroupByCustomAttribID == m_sTrackedCustomAttribID))
+				m_nGroupByAttribID = TDCA_NONE;
 		}
-		
-		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
+		else if (m_nGroupByAttribID == m_nTrackedAttribID)
+		{
+			m_nGroupByAttribID = TDCA_NONE;
+		}
 		
 		if (KBUtils::IsTrackableAttribute(m_nTrackedAttribID)) // Excludes custom attributes
 			m_cbGroupBy.ExcludeAttribute(m_nTrackedAttribID);
@@ -425,24 +427,24 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 
 void CKanbanWnd::RefreshGrouping()
 {
-	if (KBUtils::IsCustomAttribute(m_nGroupByAttrib))
+	if (KBUtils::IsCustomAttribute(m_nGroupByAttribID))
 	{
 		if (!m_ctrlKanban.GetCustomAttributeDefinitions().GetSize())
 		{
-			ASSERT(m_nGroupByAttrib == TDCA_CUSTOMATTRIB);
+			ASSERT(m_nGroupByAttribID == TDCA_CUSTOMATTRIB);
 			return;
 		}
 
-		m_nGroupByAttrib = m_ctrlKanban.GetCustomAttributeDefinitions().GetDefinitionID(m_sGroupByCustomAttribID);
+		m_nGroupByAttribID = m_ctrlKanban.GetCustomAttributeDefinitions().GetDefinitionID(m_sGroupByCustomAttribID);
 
-		if (m_nGroupByAttrib == TDCA_NONE)
+		if (m_nGroupByAttribID == TDCA_NONE)
 		{
 			m_sGroupByCustomAttribID.Empty();
 			UpdateData(FALSE);
 		}
 	}
 
-	m_ctrlKanban.GroupBy(m_nGroupByAttrib);
+	m_ctrlKanban.GroupBy(m_nGroupByAttribID);
 }
 
 void CKanbanWnd::SetUITheme(const UITHEME* pTheme)
@@ -590,7 +592,8 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	// Tracked attribute can change after a custom attribute update
 	TDC_ATTRIBUTE nTrackedAttribID = m_ctrlKanban.GetTrackedAttribute();
 
-	if (nTrackedAttribID != m_nTrackedAttribID)
+	if ((nTrackedAttribID != m_nTrackedAttribID) &&
+		(m_nTrackedAttribID != TDCA_FIXEDCOLUMNS))
 	{
 		ASSERT(m_nTrackedAttribID == TDCA_CUSTOMATTRIB);
 
@@ -607,30 +610,30 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	// Likewise for the group-by attribute
 	TDC_ATTRIBUTE nGroupBy = m_ctrlKanban.GetGroupBy();
 
-	if (nGroupBy != m_nGroupByAttrib)
+	if (nGroupBy != m_nGroupByAttribID)
 	{
-		ASSERT(m_nGroupByAttrib == TDCA_CUSTOMATTRIB);
+		ASSERT((m_nGroupByAttribID == TDCA_CUSTOMATTRIB) || (nGroupBy == TDCA_NONE));
 
-		m_nGroupByAttrib = nGroupBy;
+		m_nGroupByAttribID = nGroupBy;
 		m_sGroupByCustomAttribID.Empty();
 
 		// Update the selected item before updating the custom attributes
-		m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttrib, m_sGroupByCustomAttribID);
+		m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttribID, m_sGroupByCustomAttribID);
 	}
 
 	m_cbGroupBy.SetAttributeDefinitions(aCustAttribs);
-	m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttrib, m_sGroupByCustomAttribID);
+	m_cbGroupBy.SetSelectedAttribute(m_nGroupByAttribID, m_sGroupByCustomAttribID);
 
 	if (m_nTrackedAttribID == TDCA_FIXEDCOLUMNS)
 	{
-		CString sCustomID;
-		TDC_ATTRIBUTE nTrackAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustomID);
+		CString sFixedCustomAttribID;
+		TDC_ATTRIBUTE nFixedAttribID = m_dlgPrefs.GetFixedAttributeToTrack(sFixedCustomAttribID);
 
-		if (!sCustomID.IsEmpty())
-			nTrackAttrib = aCustAttribs.GetDefinitionID(sCustomID);
+		if (!sFixedCustomAttribID.IsEmpty())
+			nFixedAttribID = aCustAttribs.GetDefinitionID(sFixedCustomAttribID);
 		
-		if (nTrackAttrib != TDCA_NONE)
-			m_cbGroupBy.ExcludeAttribute(nTrackAttrib);
+		if (nFixedAttribID != TDCA_NONE)
+			m_cbGroupBy.ExcludeAttribute(nFixedAttribID);
 	}
 	else
 	{
@@ -864,7 +867,15 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 
 	m_ctrlKanban.SetOptions(dwOptions);
 
-	m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
+	if (m_dlgPrefs.HasFixedColumns())
+	{
+		CString sUnused;
+		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.GetFixedAttributeToTrack(sUnused));
+	}
+	else
+	{
+		m_cbAttributes.ShowFixedColumns(TDCA_NONE);
+	}
 
 	// If the user was previously tracking fixed columns
 	// but has now deleted them then we revert to 'status'
