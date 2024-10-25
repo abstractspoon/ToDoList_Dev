@@ -64,7 +64,7 @@ protected:
 	CKanbanFixedColumnListCtrl	m_lcFixedColumnDefs;
 	CGroupLineManager m_mgrGroupLines;
 	CCheckListBoxEx	m_lbDisplayAttrib;
-	CColorButton m_btFullColor;
+	CColourButton m_btFullColor;
 
 	BOOL m_bShowTaskColorAsBar;
 	BOOL m_bHideEmptyAttributeValues;
