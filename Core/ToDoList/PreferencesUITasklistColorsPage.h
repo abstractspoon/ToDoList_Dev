@@ -126,21 +126,21 @@ protected:
 	BOOL m_bSpecifyCommentsFont;
 	BOOL m_bColorPriority;
 
-	CColorButton m_btFilteredColor;
-	CColorButton m_btAttribColor;
-	CColorButton m_btDoneColor;
-	CColorButton m_btGridlineColor;
-	CColorButton m_btDueColor;
-	CColorButton m_btDueTodayColor;
-	CColorButton m_btStartColor;
-	CColorButton m_btStartTodayColor;
-	CColorButton m_btFlaggedColor;
-	CColorButton m_btReferenceColor;
-	CColorButton m_btGroupHeaderBkgndColor;
-	CColorButton m_btPriorityColor;
-	CColorButton m_btPriorityLowColor;
-	CColorButton m_btPriorityHighColor;
-	CColorButton m_btAltLineColor;
+	CColourButton m_btFilteredColor;
+	CColourButton m_btAttribColor;
+	CColourButton m_btDoneColor;
+	CColourButton m_btGridlineColor;
+	CColourButton m_btDueColor;
+	CColourButton m_btDueTodayColor;
+	CColourButton m_btStartColor;
+	CColourButton m_btStartTodayColor;
+	CColourButton m_btFlaggedColor;
+	CColourButton m_btReferenceColor;
+	CColourButton m_btGroupHeaderBkgndColor;
+	CColourButton m_btPriorityColor;
+	CColourButton m_btPriorityLowColor;
+	CColourButton m_btPriorityHighColor;
+	CColourButton m_btAltLineColor;
 
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPriorityScheme;
