@@ -281,6 +281,11 @@ void CKanbanColumnCtrlArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabel
 	ARRAY_FN(pCol->SetAttributeLabelVisibility(nLabelVis));
 }
 
+void CKanbanColumnCtrlArray::SetFullColumnColor(COLORREF crFull)
+{
+	ARRAY_FN(pCol->SetFullColor(crFull));
+}
+
 void CKanbanColumnCtrlArray::Exclude(CDC* pDC)
 {
 	ARRAY_FN(CDialogHelper::ExcludeChild(pCol, pDC));
@@ -365,7 +370,7 @@ BOOL CKanbanColumnCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanC
 	ARRAY_FN
 	(
 		if (pCol != pIgnore) 
-			bSomeDeleted |= pCol->DeleteTask(dwTaskID)
+			bSomeDeleted |= pCol->RemoveTask(dwTaskID)
 	);
 
 	return bSomeDeleted;

@@ -1173,8 +1173,7 @@ void CKanbanItemArrayMap::RemoveAll()
 KANBANCOLUMN::KANBANCOLUMN() 
 	: 
  	nMaxTaskCount(0), 
-	crBackground(CLR_NONE), 
-	crExcess(255) 
+	crBackground(CLR_NONE) 
 {
 
 }
@@ -1191,7 +1190,6 @@ KANBANCOLUMN& KANBANCOLUMN::operator=(const KANBANCOLUMN& kc)
 	aAttribValues.Copy(kc.aAttribValues);
  	nMaxTaskCount = kc.nMaxTaskCount;
 	crBackground = kc.crBackground;
-	crExcess = kc.crExcess;
 
 	return *this;
 }
@@ -1215,8 +1213,7 @@ BOOL KANBANCOLUMN::Matches(const KANBANCOLUMN& kc, BOOL bIncDisplayAttribs) cons
 	if (bMatches && bIncDisplayAttribs)
 	{
 		bMatches = ((crBackground == kc.crBackground) &&
-					(nMaxTaskCount == kc.nMaxTaskCount) &&
-					(crExcess == kc.crExcess));
+					(nMaxTaskCount == kc.nMaxTaskCount));
 	}
 
 	return bMatches;

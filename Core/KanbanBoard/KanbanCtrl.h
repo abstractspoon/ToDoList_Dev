@@ -76,6 +76,7 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	void SetPriorityColors(const CDWordArray& aColors);
+	void SetFullColumnColor(COLORREF crFull);
 
 	int GetVisibleColumnCount() const;
 	int GetVisibleTaskCount() const { return m_aColumns.GetVisibleTaskCount(); }
@@ -108,6 +109,7 @@ protected:
 	CDWordArray m_aPrevPinnedTasks;
 	CPoint m_ptDragStart;
 	COLORREF m_crGroupHeaderBkgnd;
+	COLORREF m_crFullColumn;
 
 	CKanbanColumnCtrl* m_pSelectedColumn;
 	CKanbanColumnCtrlArray m_aColumns;

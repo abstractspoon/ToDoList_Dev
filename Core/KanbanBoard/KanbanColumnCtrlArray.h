@@ -43,6 +43,7 @@ public:
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void FilterToolTipMessage(MSG* pMsg);
+	void SetFullColumnColor(COLORREF crFull);
 
 	CSize CalcRequiredColumnSizeForImage() const;
 	BOOL CanSaveToImage() const;
