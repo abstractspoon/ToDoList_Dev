@@ -242,7 +242,7 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 		m_sReminderSound = CSoundEdit::GetWindowsSound(_T("tada"));
 	}
 	
-	CColorButton::LoadPreferences(pPrefs);
+	CColourButton::LoadPreferences(pPrefs);
 
 	// comments format
 	m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));
