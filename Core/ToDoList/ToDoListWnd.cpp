@@ -13039,16 +13039,36 @@ void CToDoListWnd::OnViewToggletasksandcomments()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	if (!tdc.TasksHaveFocus())
-		tdc.SetFocusToTasks();
+	BOOL bTasksVisible = (m_nMaxState != TDCMS_MAXCOMMENTS);
+	BOOL bCommentsVisible = ((m_nMaxState != TDCMS_MAXTASKLIST) || Prefs().GetShowCommentsAlways());
+	
+	if (bTasksVisible && bCommentsVisible)
+	{
+		if (!tdc.TasksHaveFocus())
+			tdc.SetFocusToTasks();
+		else
+			tdc.SetFocusToComments();
+	}
+	else if (bTasksVisible)
+	{
+		ASSERT(m_nMaxState == TDCMS_MAXTASKLIST);
+		ASSERT(!Prefs().GetShowCommentsAlways());
+
+		OnMaximizeComments();
+	}
 	else
-		tdc.SetFocusToComments();
+	{
+		ASSERT(bCommentsVisible);
+		ASSERT(m_nMaxState == TDCMS_MAXCOMMENTS);
+
+		OnMaximizeTasklist();
+	}
 }
 
 void CToDoListWnd::OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_nMaxState == TDCMS_NORMAL || 
-					(m_nMaxState == TDCMS_MAXTASKLIST && Prefs().GetShowCommentsAlways()));
+	pCmdUI->Enable(TRUE/*m_nMaxState == TDCMS_NORMAL || 
+					(m_nMaxState == TDCMS_MAXTASKLIST && Prefs().GetShowCommentsAlways())*/);
 }
 
 void CToDoListWnd::OnMove(int x, int y) 
